@@ -1,0 +1,114 @@
+---
+title: Themeing
+description: How the theme rovr
+---
+
+rovr can be themed in two ways, via the `config.toml` file and `styles.tcss` file.
+
+### config.toml
+
+the config has a way to define themes using variables
+
+```toml
+[[custom_theme]]
+name       = "<name>"
+primary    = "<color>"
+secondary  = "<color>"
+warning    = "<color>"
+error      = "<color>"
+success    = "<color>"
+accent     = "<color>"
+foreground = "<color>"
+background = "<color>"
+surface    = "<color>"
+panel      = "<color>"
+is_dark    = true
+variables  = { "<var>" = "<key>" }
+```
+
+you can take a look at the reference in [textual](https://textual.textualize.io/guide/design)
+
+| name       | description                                                                                                              |
+| ---------- | ------------------------------------------------------------------------------------------------------------------------ |
+| name       | the name of the theme                                                                                                    |
+| primary    | the primary color, can be considered the branding color.                                                                 |
+| secondary  | an alternative branding color.                                                                                           |
+| warning    | the default text color, which should be legible on `background`, `surface`, and `panel`.                                 |
+| error      | a color used for the background, where there is no content.                                                              |
+| success    | the default background color of widgets, typically sitting on top of `background`.                                       |
+| accent     | a color used to differentiate a part of the ui form the main content.                                                    |
+| foreground | a color with alpha that can be used to create layers on a background.                                                    |
+| background | indicates a warning. typically used as a background color.                                                               |
+| surface    | indicates an error. typically used as a background color.                                                                |
+| panel      | used to indicate success. typically used as a background color.                                                          |
+| is_dark    | used sparingly to draw attention and contrasts with `primary` and `secondary`                                            |
+| variables  | custom variables that are used by textual. [variables](https://textual.textualize.io/guide/design/#additional-variables) |
+
+### styles.tcss
+styling in textual is handled by `tcss` files, a simplified version of the web's `css`. A reference is available in the [textual docs](https://textual.textualize.io/styles/)
+
+the dom for the app is currently like this
+
+```py
+Vertical(id="root")
+  HeaderArea(id="headerArea") -> HorizontalGroup
+    HeaderClock()
+    Tabline() -> Tabs
+      TablineTab() -> Tab
+    HorizontalGroup(id="newTabRight")
+      NewTabButton() -> Button
+      Static()
+  HorizontalScroll(id="menu")
+    CopyButton() -> Button
+    CutButton() -> Button
+    PasteButton()  -> Button
+    NewItemButton() -> Button
+    RenameItemButton() -> Button
+    DeleteButton() -> Button
+    ZipButton() -> Button
+    UnzipButton() -> Button
+  VerticalGroup(id="below_menu")
+    HorizontalGroup()
+      BackButton() -> Button
+      ForwardButton() -> Button
+      UpButton() -> Button
+      RefreshButton() -> Button
+      PathInput() -> Input
+    PathAutoCompleteInput() -> PathAutoComplete
+  HorizontalGroup(id="main")
+    VerticalGroup(id="pinned_sidebar_container")
+      SearchInput() -> Input
+      PinnedSidebar(id="pinned_sidebar") -> OptionList
+        PinnedSidebarOption() -> Option
+    VerticalGroup(id="file_list_container")
+      SearchInput() -> Input
+      FileList(id="file_list", name="File List", classes="file-list") -> SelectionList
+        FileListSelectionWidget() -> Selection
+    PreviewContainer(id="preview_sidebar") -> Container
+      Image(id="image_preview", classes="inner_preview")
+      CustomTextArea(id="text_preview") -> TextArea
+      Static(id="text_preview", classes="inner_preview")
+      FileList(
+        id="folder_preview",
+        classes="file-list inner_preview"
+      ) -> SelectionList
+      ArchiveFileList(
+        id="archive_preview",
+        classes="file-list inner_preview",
+      ) -> OptionList
+        Option()
+  HorizontalGroup(id="footer")
+    ProcessContainer() -> VerticalScroll
+      ProgressBarContainer() -> VerticalGroup
+        ProgressBar()
+        Label()
+    MetadataContainer(id="metadata") -> VerticalScroll
+    Clipboard(id="clipboard") -> SelectionList
+      ClipboardSelection() -> Selection
+```
+`tcss` works the same as `css`, so, if you want to target the `FileList` inside the `#file_list_container` you can do
+```css
+#file_list_container > FileList {
+  ...
+}
+```

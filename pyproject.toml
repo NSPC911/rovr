@@ -44,6 +44,7 @@ rovr = "rovr.__main__:main"
 [dependency-groups]
 dev = [
   "commitizen>=4.8.3",
+  "json-schema-for-humans>=1.4.1",
   "poethepoet>=0.36.0",
   "ruff>=0.11.12",
   "textual-dev>=1.7.0",
@@ -65,6 +66,7 @@ major_version_zero = false
 dev = "textual run --dev rovr.app:Application"
 run = "rovr.__main__:main"
 log = "textual console -x WORKER -x SYSTEM -x DEBUG -x EVENT"
+"gen-schema" = "src/utils/generate_schema.py"
 
 [tool.ruff.lint]
 select = [

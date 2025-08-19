@@ -1,0 +1,93 @@
+---
+title: Configuration
+description: How to configure rovr
+---
+
+import { FileTree } from '@astrojs/starlight/components'
+
+rovr's configuration is held in a single location. you can find it by running
+```sh
+rovr --config-path
+```
+
+inside it, you can see 3 files if you previously launched rovr
+
+<FileTree>
+
+- rovr
+  - config.toml
+  - styles.tcss
+  - pins.json
+
+</FileTree>
+
+
+### config.toml
+the config is handled in a simple config file.
+
+it also has a schema available, so if you use either [`tombi`](https://github.com/tombi-toml/tombi) or [`taplo`](https://github.com/tamasfe/taplo) to see an autocompletion popup.
+
+for the full schema, please refer to the [`JSON Schema for Humans`](/schema) page
+
+### styles.tcss
+styling in textual is handled by `tcss` files, a simplified version of the web's `css`. A reference is available in the [textual docs](https://textual.textualize.io/styles/)
+
+rovr comes with some variables pre-initialised, that you can overwrite.
+
+```scss
+/* border when a container isn't focused */
+$border-blurred: $primary-darken-3;
+/* border when a container is currently focused */
+$border: $primary-lighten-3;
+/* border style (https://textual.textualize.io/css_types/border) */
+$border-style: round;
+
+/* reference: https://textual.textualize.io/css_types/scalar */
+/* pinned folder sidebar width */
+$pinned_sidebar_width: 20;
+/* the main file list width */
+$file_list_width: 1fr;
+/* the preview sidebar width */
+$preview_sidebar_width: 35vw;
+/* the footer when nothing inside it is focused */
+$footer_unfocus_height: 8;
+/* the footer when something inside it is focused */
+$footer_focus_height: 10;
+```
+
+For more advanced styling, refer to [`configuration/themeing`](/configuration/themeing)
+
+### pins.json
+this file doesn't have a schema, mainly because it is pretty simple
+
+the file follows a schema as such
+```json
+{
+  "default": [
+    ...
+    {
+      "name": "<label>",
+      "path": "<path>"
+    }
+  ],
+  "pins": [
+    ...
+    {
+      "name": "<label>",
+      "path": "<path>"
+    }
+  ]
+}
+```
+the path supports variables to a fixed path
+```scss
+$DOCUMENTS: /* user documents directory */
+$DOWNLOADS: /* user downloads directory */
+$MUSIC:     /* user music directory     */
+$PICTURES:  /* user pictures directory  */
+$DESKTOP:   /* user desktop directory   */
+$HOME:      /* user home directory (~)  */
+$VIDEOS:    /* user videos directory    */
+$CONFIG:    /* user config directory    */
+```
+so, you can have a path as `$home/games` and it will expand to `~/games` or `%USERPROFILE%/games` depending on your os

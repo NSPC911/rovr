@@ -1,0 +1,24 @@
+---
+title: welcome to rovr
+description: overview on rovr
+---
+
+let's use the [5w1h framework](https://en.wikipedia.org/wiki/Five_Ws) to describe rovr
+
+### what is rovr?
+  a modern answer to a terminal file explorer, that can be customized to fit your workflow easily, while being aesthetically pleasing
+
+### why should i use rovr?
+  i can't answer this question, but i can answer why you _shouldnt_ use rovr.<br/>you shouldnt use rovr if
+1. you have an existing workflow with any other file explorers (superfile excluded)
+
+	  other file managers like [yazi](https://github.com/sxyazi/yazi), [ranger](https://github.com/ranger/ranger) or [nnn](https://github.com/jarun/nnn) are amazing file explorers, and rovr cannot compete with their flexibility or extensibility.
+2. when you are allergic to non-compiled apps
+    rovr is made in python, and uses some features that prevents it from being compiled by [pyinstaller](https://github.com/pyinstaller/pyinstaller) or [nuitka](https://github.com/Nuitka/Nuitka). if you are someone who is allergic to such an app, please step away now.
+
+### why did i make it?
+i had quite some issues with [superfile](https://github.com/yorukot/superfile). it is an amazing project, and you should definitely go check it out.
+<br/>however, some issues i had was with its performance. spf does not utilise neither threads nor asyncio, everything runs on a single app process, which can lead to plenty of lag when travelling.
+<br/>i wouldve loved to fix these issues, but i dont have any golang background, and i found [textual](https://github.com/Textualize/Textual) as a framework, and really wanted to put my skills to the test.
+<br/>so i guess we are here now.
+

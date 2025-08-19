@@ -1,0 +1,8 @@
+.expressive-code > figure > figcaption::before {
+  border: none;
+  border-bottom: var(--ec-brdWd) solid var(--ec-frm-edTabBarBrdCol);
+}
+.expressive-code > figure > figcaption > .title {
+  border: var(--ec-brdWd) solid var(--ec-frm-edTabBarBrdCol);
+  border-bottom: none;
+}

@@ -1,0 +1,32 @@
+---
+title: tutorial
+description: a tutorial to using rovr
+---
+import { Code } from '@astrojs/starlight/components';
+
+rovr makes use of the [`textual-image`](https://github.com/lnqs/textual-image) package to show images.
+<br/>this means that it supports the most common types of image previewing.
+
+| Terminal            | TGP support | Sixel support |
+| ------------------- | :---------: | :-----------: |
+| Black Box           |          ❌ |            ✅ |
+| foot                |          ❌ |            ✅ |
+| GNOME Terminal      |          ❌ |            ❌ |
+| iTerm2              |          ❌ |            ✅ |
+| kitty               |          ✅ |            ❌ |
+| konsole             |          ✅ |            ✅ |
+| tmux                |          ❌ |            ✅ |
+| Visual Studio Code  |          ❌ |            ✅ |
+| Warp                |          ❌ |            ❌ |
+| wezterm             |          ✅ |            ✅ |
+| Windows Console     |          ❌ |            ❌ |
+| Windows Terminal    |          ❌ |            ✅ |
+| xterm               |          ❌ |            ✅ |
+
+however, the `item2 inline images` protocol is not supported. [lnqs/textual-image #68](https://github.com/lnqs/textual-image/issues/68) is a relevant issue to this, but for now, you have to use either the default half-block or use a sixel/tgp supported terminal.
+
+if you are using a terminal that doesn't support such a protocol, textual-image defaults to `half-cell`.
+
+if for any reason, an image doesn't show up, you can overwrite the default image protocol to the image protocol that you think should work on your current terminal.
+
+<Code code={`[settings]\nimage_protocol = "Sixel"`} lang="toml" title="config.toml" />

@@ -1,0 +1,38 @@
+---
+title: Installation
+description: How to install rovr
+---
+
+### Requirements
+- a patched font that supports nerd font icons
+    <br/>if you dont have any supported fonts, get one from [nerdfonts.com](https://www.nerdfonts.com/font-downloads) for the best experience.
+    <br/>if you prefer to not use a nerd font, you will need to disable the nerd font in the config
+- a python package installer
+    <br/>you are recommended to use `uv`, as it handles everything for you, like installing the python version, a lot faster than what `pipx`, or `pip` would take
+- an editor with toml lsp
+    <br/>only necessary if you want an autocomplete box while configuring rovr.
+
+currently, `rovr` is only on pypi.
+
+#### uv (test run)
+```sh
+uvx rovr
+```
+#### uv (install)
+```sh
+uv tool install rovr
+```
+#### pipx (install)
+```sh
+pipx install rovr
+```
+#### pip (not recommended)
+```sh
+pip install rovr
+```
+
+if successful, you can run
+```sh
+rovr --version
+```
+to see the current version installed

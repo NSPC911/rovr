@@ -1,0 +1,121 @@
+---
+title: tutorial
+description: a tutorial to using rovr
+---
+### panel navigation
+
+rovr, or textual, supports navigation by tabbing, with cycles the widgets that are on the ui. while you can choose to only use `tab`/`shift+tab` to go between widgets, it is recommended to learn the keystrokes for each action.
+
+rovr displays 8 panels, of which 6 can be focused.
+
+- pinned folder sidebar: `s`
+- preview sidebar: `i`
+- processes list: `f6` (suggest me a better keybind please!)
+- metadata list: `m`
+- clipboard list: `c`
+
+to go back to the main file list, you can press the same keybind, or press `esc`.
+
+### panel visibility
+
+rovr supports toggling visibility of 3 panels.
+- pinned folder sidebar: `S` or `shift+s`
+- preview sidebar: `I` or `shift+i`
+- footer (processes + metadata + clipboard): `F` or `shift+f`
+
+### panel traversal
+rovr uses a background-highlighted option to show your currently selected option, and switches to a different colored text when unfocused.
+#### travelling in lists
+- move cursor right/select option: `l` or `right` arrow key
+- move cursor left: `h` or `left` arrow key
+- move cursor up: `k` or `up`
+- move cursor down: `j` or `down`
+- go to the first item: `g` or `home`
+- go to the last item: `G` or `end`
+#### unique to the main file list
+- go up the file tree: `h` or `left` arrow key
+- go down the file tree: `l`, `right` arrow key, or `enter`
+- go back in history: `backspace` or `u`
+- go forwards in history: `space`
+- pin the currently focused folder: `P` or `shift+p`
+- reload file list: `ctrl+r`
+
+#### visual mode
+the main file list is the only list that can switch between a multi-selection mode and a single selection mode.
+- toggle visual mode: `v`
+- select up: `shift+up`, `K` or `shift+k`
+- select down: `shift+down` or `J` or `shift+j`
+- select page up: `shift+pageup`
+- select page down: `shift+pagedown`
+- select home: `shift+home`
+- select end: `shift+end`
+
+### actions
+rovr supports most of the actions that a file explorer should have.
+- copy to clipboard: `y` or `ctrl+c`
+- cut to clipboard: `x` or `ctrl+x`
+- paste from clipboard: `p` or `ctrl+v`
+- rename item: `r` or `f2`
+- create new item: `o` or `ctrl+n`
+- create new compressed file: `E` or `shift+e`
+- unzip a compressed file: `ctrl+e`
+
+### multi file view
+rovr supports tabs to handle multiple file lists, and does not have a hard capped limit.
+- create a new tab: `n`
+- close the current tab: `w`
+- go to the next tab: `ctrl+j`
+- go to the previous tab: `ctrl+k`
+
+### hotkeys
+a full list of the hotkeys is available in the [default config](https://raw.githubusercontent.com/NSPC911/rovr/refs/heads/master/src/rovr/config/config.toml), but here is a visual list of the hotkeys
+| Action                       | Default Hotkey        | Description                                                                                                                  |
+| ---------------------------- | --------------------- | ---------------------------------------------------------------------------------------------------------------------------- |
+| toggle_pin                   | `P`                   | Toggle the current folder in the Pinned Folder Sidebar.                                                                      |
+| toggle_pinned_sidebar        | `S`                   | Toggle viewing the pinned sidebar.                                                                                           |
+| toggle_preview_sidebar       | `I`                   | Toggle viewing the preview sidebar.                                                                                          |
+| toggle_footer                | `F`                   | Toggle viewing the footer.                                                                                                   |
+| focus_toggle_pinned_sidebar  | `s`                   | Toggle focus between pinned folder sidebar and file list.                                                                    |
+| focus_file_list              | `escape`              | Focus the file list.                                                                                                         |
+| focus_toggle_preview_sidebar | `i`                   | Focus toggle between preview sidebar and file list.                                                                          |
+| focus_toggle_path_switcher   | `ctrl+l`              | Focus toggle between path switcher and file list.                                                                            |
+| focus_search                 | `ctrl+f`, `slash`     | Focus toggle the processes container.                                                                                        |
+| focus_toggle_processes       | `f6`                  | Focus toggle the clipboard container.                                                                                        |
+| focus_toggle_clipboard       | `c`                   | Focus toggle the metadata container.                                                                                         |
+| focus_toggle_metadata        | `m`                   | Focus the search bar.                                                                                                        |
+| copy                         | `y`, `ctrl+c`         | Copy the selected files in the file list to the clipboard.                                                                   |
+| paste                        | `p`, `ctrl+v`         | Paste the selected files in the clipboard into the current directory.                                                        |
+| cut                          | `x`, `ctrl+x`         | Cut the selected files in the file list to the clipboard.                                                                    |
+| delete                       | `d`, `delete`         | Delete the selected files in the file list.                                                                                  |
+| rename                       | `r`, `f2`             | Rename the selected file in the file list to something else.                                                                 |
+| new                          | `ctrl+n`, `o`         | Create a new item in the current directory.                                                                                  |
+| zip                          | `E`                   | Enter into select mode and select/unselect everything.                                                                       |
+| unzip                        | `ctrl+e`              | Create a zip archive from selected files.                                                                                    |
+| up                           | `up`, `k`             | Extract a selected zip archive.                                                                                              |
+| down                         | `down`, `j`           | Go up the file list options.                                                                                                 |
+| up_tree                      | `left`, `h`           | Go down the file list options.                                                                                               |
+| down_tree                    | `right`, `l`, `enter` | Go up the file tree.                                                                                                         |
+| page_up                      | `pageup`, `ctrl+b`    | Go down the file tree, or open the currently selected item.                                                                  |
+| page_down                    | `pagedown`, `ctrl+f`  | Page Up in the file list options.                                                                                            |
+| home                         | `home`, `g`           | Page Down in the file list options.                                                                                          |
+| end                          | `end`, `G`            | Go to the first option in the file list options.                                                                             |
+| hist_previous                | `backspace`, `u`      | Go to the last option in the file list options.                                                                              |
+| hist_next                    | `space`               | Go back in history.                                                                                                          |
+| refresh                      | `ctrl+r`, `f5`        | Go forward in history.                                                                                                       |
+| toggle_visual                | `v`                   | Refresh the file list.                                                                                                       |
+| toggle_all                   | `%`, `ctrl+a`         | Enter or exit select/visual mode.                                                                                            |
+| select_up                    | `shift+up`, `K`       | While in visual mode, extend the selection up.                                                                               |
+| select_down                  | `shift+down`, `J`     | While in visual mode, extend the selection down.                                                                             |
+| select_page_up               | `shift+pageup`        | While in visual mode, extend the selection to the previous page.                                                             |
+| select_page_down             | `shift+pagedown`      | While in visual mode, extend the selection to the next page.                                                                 |
+| select_home                  | `shift+home`          | While in visual mode, extend the selection to the first option.                                                              |
+| select_end                   | `shift+end`           | While in visual mode, extend the selection to the last option.                                                               |
+| tab_next                     | `ctrl+j`              | Go to the next tab, if it is available.                                                                                      |
+| tab_previous                 | `ctrl+k`              | Go to the previous tab, if it is available.                                                                                  |
+| tab_new                      | `n`                   | Create a new tab.                                                                                                            |
+| tab_close                    | `w`                   | Close the current tab.                                                                                                       |
+| preview_scroll_left          | `left`, `h`           | While using `settings.preview_full = true`, and the preview container is focused, scroll left when this keybind is pressed.  |
+| preview_scroll_right         | `right`, `l`          | While using `settings.preview_full = true`, and the preview container is focused, scroll right when this keybind is pressed. |
+| preview_select_left          | `shift+left`, `H`     | While using TextArea for previewing, use this keybind to extend selection to the right.                                      |
+| preview_select_right         | `shift+right`, `L`    | While using TextArea for previewing, use this keybind to extend selection to the left.                                       |
+

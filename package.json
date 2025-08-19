@@ -1,5 +1,5 @@
 {
-	"dependencies": {
-		"prettier": "^3.6.2"
-	}
+  "dependencies": {
+    "prettier": "^3.6.2"
+  }
 }

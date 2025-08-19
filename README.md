@@ -59,8 +59,9 @@ Zoxide integration
 ### FAQ
 
 1. There isn't X theme/Why isn't Y theme available?
-  - Textual's currently available themes are limited. However, extra themes can be added via the config file in the format below
-  - You can take a look at what each color represents in https://textual.textualize.io/guide/design/#base-colors<br>Inheriting themes will **not** be added.
+
+- Textual's currently available themes are limited. However, extra themes can be added via the config file in the format below
+- You can take a look at what each color represents in https://textual.textualize.io/guide/design/#base-colors<br>Inheriting themes will **not** be added.
 
 ```toml
 [[custom_theme]]
@@ -82,24 +83,37 @@ variables = {
 ```
 
 2. Why is it considered post-modern?
-  - Parody to my current editor, [helix](https://helix-editor.com)
-    - If NeoVim is considered modern, then Helix is post-modern
-    - If superfile is considered modern, then rovr is post-modern
+
+- Parody to my current editor, [helix](https://helix-editor.com)
+  - If NeoVim is considered modern, then Helix is post-modern
+  - If superfile is considered modern, then rovr is post-modern
+
 3. Why did you say it cannot be daily driven?
-  - Refer to the road map. There is many features yet to be completed. Pull Requests are appreciated
+
+- Refer to the road map. There is many features yet to be completed. Pull Requests are appreciated
+
 4. What can I contribute?
-  - Themes, and features can be contributed.
-  - Refactors will be frowned on, and may take a longer time before merging.
+
+- Themes, and features can be contributed.
+- Refactors will be frowned on, and may take a longer time before merging.
+
 5. I want to add a feature/theme/etc! How do I do so?
-  - You need [uv](https://docs.astral.sh/uv) at minimum. [pre-commit](https://pre-commit.com/) and [ruff](https://docs.astral.sh/ruff) are recommended to be installed.
-  - Clone the repo, and inside it, run `uv sync` and `pre-commit install`.
-  - Make your changes, ensure that your changes are properly formatted (via the pre-commit hook), before pushing to a **custom** branch on your fork.
+
+- You need [uv](https://docs.astral.sh/uv) at minimum. [pre-commit](https://pre-commit.com/) and [ruff](https://docs.astral.sh/ruff) are recommended to be installed.
+- Clone the repo, and inside it, run `uv sync` and `pre-commit install`.
+- Make your changes, ensure that your changes are properly formatted (via the pre-commit hook), before pushing to a **custom** branch on your fork.
+
 6. How do I make a feature suggestion?
-  - Open an issue using the `feature-request` tag. Issue templates will come soon.
+
+- Open an issue using the `feature-request` tag. Issue templates will come soon.
+
 7. Why not ratatui or bubbletea??? <sub><i>angry noises</i></sub>
-  - I like python.
+
+- I like python.
+
 8. When will it be completed?
-  - When it is completed.
+
+- When it is completed.
 
 ### Road map
 

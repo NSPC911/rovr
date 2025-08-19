@@ -170,7 +170,7 @@ a[rel="next"] span.astro-cmhvllpy:not(.link-title) {
     position: absolute;
     font-size: 1em;
     color: var(--sl-color-gray-2);
-    content: "next"
+    content: "next";
   }
 }
 a[rel="prev"] span.astro-cmhvllpy:not(.link-title) {
@@ -179,6 +179,6 @@ a[rel="prev"] span.astro-cmhvllpy:not(.link-title) {
     position: absolute;
     font-size: 1em;
     color: var(--sl-color-gray-2);
-    content: "prev"
+    content: "prev";
   }
 }

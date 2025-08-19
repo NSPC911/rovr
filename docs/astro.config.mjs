@@ -1,59 +1,65 @@
 // @ts-check
 import { defineConfig } from 'astro/config';
 import starlight from '@astrojs/starlight';
+import sitemap from '@astrojs/sitemap';
 
 export default defineConfig({
-  integrations: [
-    starlight({
-     title: 'rovr docs',
-     social: [
+  site: 'https://nspc911.github.io/rovr',
+  integrations: [starlight({
+    title: 'rovr docs',
+    social: [
       { icon: 'github', label: 'GitHub', href: 'https://github.com/NSPC911/rovr' },
       /* to-do: create a link that always leads to discord, instead of hardcoding it here */
       { icon: 'discord', label: 'Discord', href: 'https://discord.com/invite/smDsD9Pmbz' }
     ],
-     customCss: [
-       "./src/styles/custom.css"
-     ],
-     sidebar: [
-      { label: 'Overview', slug: 'overview' },
+    customCss: [
+      "./src/styles/custom.css"
+    ],
+    sidebar: [
+      { label: 'overview', slug: 'overview' },
       {
-        label: 'Get Started',
+        label: 'get Started',
         items: [
-          { label: 'Installation', slug: 'get-started/installation' },
-          { label: 'Tutorial', slug: 'get-started/tutorial'},
+          { label: 'installation', slug: 'get-started/installation' },
+          { label: 'tutorial', slug: 'get-started/tutorial' },
         ]
       },
       {
-        label: 'Guides',
+        label: 'guides',
         items: [
-          { label: 'User Interface', slug: 'guides/user-interface' },
-          { label: 'File Operations', slug: 'guides/file-operations' },
+          { label: 'user Interface', slug: 'guides/user-interface' },
+          { label: 'file Operations', slug: 'guides/file-operations' },
         ]
       },
       {
-        label: 'Configuration',
+        label: 'configuration',
         items: [
-         { label: 'Configuration', slug: 'configuration/configuration' },
-         { label: 'Themeing', slug: 'configuration/themeing' }
+          { label: 'configuration', slug: 'configuration/configuration' },
+          { label: 'themeing', slug: 'configuration/themeing' }
         ]
       },
       {
-        label: 'Features',
+        label: 'features',
         items: [
-          { label: 'Previewing Files', slug: 'features/previewing-files' },
-          { label: 'Image Previews', slug: 'features/image-previews'},
-          { label: 'Search', slug: 'features/search' },
-          { label: 'Plugins', slug: 'features/plugins' },
+          { label: 'previewing Files', slug: 'features/previewing-files' },
+          { label: 'image Previews', slug: 'features/image-previews' },
+          { label: 'search', slug: 'features/search' },
+          { label: 'plugins', slug: 'features/plugins' },
         ]
       },
       {
-        label: 'Reference',
+        label: 'contributing',
         items: [
-          { label: 'Keybindings', slug: 'reference/keybindings' },
-          { label: 'Config Schema', slug: 'schema' },
+          { label: 'project Structure', slug: 'contributing/project-structure' },
+        ]
+      },
+      {
+        label: 'reference',
+        items: [
+          { label: 'keybindings', slug: 'reference/keybindings' },
+          { label: 'config Schema', slug: 'reference/schema' },
         ]
       }
-     ],
-    }),
-  ],
+    ],
+  }), sitemap()],
 });

@@ -1,18 +1,18 @@
 ---
-title: Plugins
-description: Extending rovr with plugins.
+title: plugins
+description: adding extra features with plugins.
 ---
 
 `rovr` supports several plugins to enhance its functionality. you can enable and configure them in your `config.toml` file.
 
-### zoxide
+## zoxide
 
 [zoxide](https://github.com/ajeetdsouza/zoxide) is a smarter `cd` command that remembers your most used directories. `rovr` integrates with it to provide fast navigation.
 
 - **enable:** `plugins.zoxide.enabled = true`
 - **keybinding:** the default keybinding to open the zoxide dialog is `z`.
 
-### bat
+## bat
 
 [bat](https://github.com/sharkdp/bat) is `cat` with syntax highlighting and git integration. `rovr` can use it for file previews.
 
@@ -20,7 +20,7 @@ description: Extending rovr with plugins.
 - **executable:** you can specify the path to the `bat` executable if it's not in your system's `PATH`.
 - **line numbers:** toggle line numbers with `plugins.bat.show_line_numbers`.
 
-### editor
+## editor
 
 this plugin allows you to open files and folders in your preferred editor.
 
@@ -28,7 +28,7 @@ this plugin allows you to open files and folders in your preferred editor.
 - **executables:** set the command to open files (`file_executable`) and folders (`folder_executable`).
 - **keybinding:** the default keybinding is `e`.
 
-### zen mode
+## zen mode
 
 zen mode provides a distraction-free view by hiding all ui elements except for the file list.
 

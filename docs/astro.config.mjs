@@ -27,8 +27,8 @@ export default defineConfig({
       {
         label: 'guides',
         items: [
-          { label: 'user Interface', slug: 'guides/user-interface' },
-          { label: 'file Operations', slug: 'guides/file-operations' },
+          { label: 'user interface', slug: 'guides/user-interface' },
+          { label: 'file operations', slug: 'guides/file-operations' },
         ]
       },
       {
@@ -41,8 +41,8 @@ export default defineConfig({
       {
         label: 'features',
         items: [
-          { label: 'previewing Files', slug: 'features/previewing-files' },
-          { label: 'image Previews', slug: 'features/image-previews' },
+          { label: 'previewing files', slug: 'features/previewing-files' },
+          { label: 'image previews', slug: 'features/image-previews' },
           { label: 'search', slug: 'features/search' },
           { label: 'plugins', slug: 'features/plugins' },
         ]
@@ -50,14 +50,14 @@ export default defineConfig({
       {
         label: 'contributing',
         items: [
-          { label: 'project Structure', slug: 'contributing/project-structure' },
+          { label: 'project structure', slug: 'contributing/project-structure' },
         ]
       },
       {
         label: 'reference',
         items: [
           { label: 'keybindings', slug: 'reference/keybindings' },
-          { label: 'config Schema', slug: 'reference/schema' },
+          { label: 'config schema', slug: 'reference/schema' },
         ]
       }
     ],

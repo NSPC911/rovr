@@ -164,3 +164,21 @@ header > .header > .title-wrapper + [class*="print:hidden"] {
   > li:first-child:has(> a[aria-current="true"])::before {
   color: var(--sl-color-text-accent);
 }
+a[rel="next"] span.astro-cmhvllpy:not(.link-title) {
+  color: var(--sl-color-black);
+  &::before {
+    position: absolute;
+    font-size: 1em;
+    color: var(--sl-color-gray-2);
+    content: "next"
+  }
+}
+a[rel="prev"] span.astro-cmhvllpy:not(.link-title) {
+  color: var(--sl-color-black);
+  &::before {
+    position: absolute;
+    font-size: 1em;
+    color: var(--sl-color-gray-2);
+    content: "prev"
+  }
+}

@@ -1,3 +1,8 @@
+@font-face {
+  font-family: "CaskaydiaCove NFP";
+  src: url("./caskaydiacovenfp.ttf") format("truetype");
+}
+
 .expressive-code > figure > figcaption::before {
   border: none;
   border-bottom: var(--ec-brdWd) solid var(--ec-frm-edTabBarBrdCol);
@@ -5,4 +10,48 @@
 .expressive-code > figure > figcaption > .title {
   border: var(--ec-brdWd) solid var(--ec-frm-edTabBarBrdCol);
   border-bottom: none;
+}
+* {
+  font-family: "CaskaydiaCove NFP";
+}
+ul:where(.astro-emisptqc)
+  ul:where(.astro-emisptqc)
+  li:where(.astro-emisptqc):has(> [aria-current="page"]) {
+  border-inline-start: 1px solid var(--sl-color-text-accent);
+}
+figure.is-terminal span.title {
+  border: none;
+}
+.expressive-code .frame.is-terminal .header::before {
+  left: unset !important;
+  right: var(--ec-uiPadInl);
+}
+.main-pane > main > .content-panel:first-child {
+  padding-top: 0;
+}
+[aria-current="page"] :is(a, span) {
+  font-weight: 599;
+  font-size: 1rem;
+}
+summary:where(.astro-emisptqc) {
+  justify-content: start;
+  padding: 0.2em 0;
+  > svg {
+    order: -1;
+  }
+}
+.large:where(.astro-emisptqc) {
+  font-weight: 599;
+}
+ul.astro-emisptqc:not(.top-level) {
+  margin-left: 0.05em;
+}
+@media (min-width: 72rem) {
+  .main-pane {
+    margin: auto;
+    width: auto !important;
+  }
+  [class^="right-sidebar"] {
+    width: 25vw;
+  }
 }

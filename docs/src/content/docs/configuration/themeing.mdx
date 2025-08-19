@@ -26,7 +26,7 @@ is_dark    = true
 variables  = { "<var>" = "<key>" }
 ```
 
-you can take a look at the reference in [textual](https://textual.textualize.io/guide/design)
+you can take a look at the reference in [textual](https://textual.textualize.io/guide/design), or the table below
 
 | name       | description                                                                                                              |
 | ---------- | ------------------------------------------------------------------------------------------------------------------------ |
@@ -45,7 +45,8 @@ you can take a look at the reference in [textual](https://textual.textualize.io/
 | variables  | custom variables that are used by textual. [variables](https://textual.textualize.io/guide/design/#additional-variables) |
 
 ### styles.tcss
-styling in textual is handled by `tcss` files, a simplified version of the web's `css`. A reference is available in the [textual docs](https://textual.textualize.io/styles/)
+
+styling in textual is handled by `tcss` files, a simplified version of the web's `css`. a reference is available in the [textual docs](https://textual.textualize.io/styles/)
 
 the dom for the app is currently like this
 
@@ -106,7 +107,9 @@ Vertical(id="root")
     Clipboard(id="clipboard") -> SelectionList
       ClipboardSelection() -> Selection
 ```
+
 `tcss` works the same as `css`, so, if you want to target the `FileList` inside the `#file_list_container` you can do
+
 ```css
 #file_list_container > FileList {
   ...

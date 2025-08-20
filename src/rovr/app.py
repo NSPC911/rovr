@@ -323,8 +323,8 @@ class Application(App, inherit_bindings=False):
     async def action_quit(self) -> None:
         process_container = self.query_one(ProcessContainer)
         if len(process_container.query("ProgressBarContainer")) != len(
-            process_container.query(".done") + len(process_container.query(".error"))
-        ) and not await self.push_screen_wait(
+            process_container.query(".done")
+        ) + len(process_container.query(".error")) and not await self.push_screen_wait(
             YesOrNo(
                 f"{len(process_container.query('ProgressBarContainer')) - len(process_container.query('.done')) - len(process_container.query('.error'))}"
                 + " processes are still running!\nAre you sure you want to quit?",

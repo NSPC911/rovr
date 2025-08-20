@@ -68,6 +68,10 @@ export default defineConfig({
               label: "project structure",
               slug: "contributing/project-structure",
             },
+            {
+              label: "how to contribute",
+              slug: "contributing/how-to-contribute"
+            }
           ],
         },
         {

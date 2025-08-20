@@ -2,3 +2,100 @@
 title: project structure
 description: the structure of the project
 ---
+
+import { FileTree } from "@astrojs/starlight/components";
+
+the current file structure seperates each section in each folder
+
+### root
+<FileTree>
+- src/rovr
+  - app.py houses the main application
+  - exceptions.py custom exceptions that are raised where necessary
+  - maps.py maps to icons and other things
+  - options.py classes for option/selection elements
+  - py.typed
+  - search_container.py search bar in pinned folders and file list
+  - style.tcss default style
+  - themes.py theme loader
+  - utils.py utilities that cannot be split
+  - validators.py validations for input elements
+</FileTree>
+
+### action buttons
+<FileTree>
+- src/rovr/action_buttons
+  - copy_button.py copy selections to clipboard
+  - cut_button.py cut selections to clipboard
+  - delete_button.py delete selections
+  - new_item_button.py create new item
+  - paste_button.py paste from clipboard into cwd
+  - rename_item_button.py rename selected **item**
+  - unzip_button.py unzip selected **item**
+  - zip_button.py zip selected items
+</FileTree>
+
+### config
+<FileTree>
+- src/rovr/config
+  - config.toml default config
+  - pins.json default pins
+  - schema.json schema for reference
+</FileTree>
+
+### core
+handles the middle elements
+<FileTree>
+- src/rovr/core
+  - file_list.py a list that shows files
+  - pinned_sidebar.py a list that shows pinned items
+  - preview_container.py a container that shows the appropriate preview
+</FileTree>
+`PreviewContainer` uses `FileList` as part of its Folder Preview mechanism. it currently doesn't use it for archive previews, so I'm ready to accept prs that fix this issue
+
+### extras
+<FileTree>
+- src/rovr/extras
+  - classes.py
+</FileTree>
+not much extras, might move some uncategorised stuff here
+
+### footer
+handles the bottom row
+<FileTree>
+- src/rovr/footer
+  - clipboard_container.py a list that contains copied/cut items
+  - metadata_container.py shows metadata on the current primary selection
+  - process_container.py shows a list of active processes
+</FileTree>
+I'm currently waiting for textual's next release for a thicker progress bar, so that gradient bars can be added
+
+### header
+handles the top most row
+<FileTree>
+- src/rovr/header
+  - header.py the header container itself
+  - tabs.py the tabs, and new tab button
+</FileTree>
+
+### navigation widgets
+right below the action buttons
+<FileTree>
+- src/rovr/navigation_widgets
+  - buttons.py buttons that replicate explorer.exe
+  - path_input.py path input + auto complete
+</FileTree>
+
+### screens
+handles the modal screens used
+<FileTree>
+- src/rovr/screens
+  - common_file_name_do_what.py when a conflicting file exists
+  - delete_files.py when you want to delete files
+  - dismissable.py dismissable modal, for notices
+  - give_permission.py raise permission when you get permission errored
+  - input.py modal input, also supporting path input
+  - yes_or_no.py simple yes or no prompt
+  - zd_to_directory.py zoxide integration
+  - _tester.py screen tester, not used at all
+</FileTree>

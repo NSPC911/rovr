@@ -66,7 +66,7 @@ major_version_zero = false
 dev = "textual run --dev rovr.app:Application"
 run = "rovr.__main__:main"
 log = "textual console -x WORKER -x SYSTEM -x DEBUG -x EVENT"
-"gen-schema" = "src/utils/generate_schema.py"
+"gen-schema" = "docs/scripts/generate_schema.py"
 
 [tool.ruff.lint]
 select = [

@@ -292,7 +292,7 @@ class Application(App, inherit_bindings=False):
                     )
 
                 def on_response(response: str) -> None:
-                    """Handle the response from the ZToDirectory dialog."""
+                    """Handle the response from the ZDToDirectory dialog."""
                     if response:
                         pathinput = self.query_one(PathInput)
                         pathinput.value = utils.decompress(response).replace(
@@ -323,10 +323,11 @@ class Application(App, inherit_bindings=False):
     async def action_quit(self) -> None:
         process_container = self.query_one(ProcessContainer)
         if len(process_container.query("ProgressBarContainer")) != len(
-            process_container.query(".done")
+            process_container.query(".done") + len(process_container.query(".error"))
         ) and not await self.push_screen_wait(
             YesOrNo(
-                f"{len(process_container.query('ProgressBarContainer')) - len(process_container.query('.done'))} processes are still running!\nAre you sure you want to quit?",
+                f"{len(process_container.query('ProgressBarContainer')) - len(process_container.query('.done')) - len(process_container.query('.error'))}"
+                + " processes are still running!\nAre you sure you want to quit?",
                 border_title="Quit [teal]rovr[/teal]",
             )
         ):
@@ -339,7 +340,6 @@ class Application(App, inherit_bindings=False):
         add_to_history: bool = True,
         focus_on: str | None = None,
     ) -> None:
-        print("cd summoned")
         if path.exists(directory):
             if utils.normalise(getcwd()) == utils.normalise(directory):
                 self.query_one("#file_list").update_file_list(

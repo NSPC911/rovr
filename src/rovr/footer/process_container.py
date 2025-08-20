@@ -661,6 +661,16 @@ class ProcessContainer(VerticalScroll):
                         exist_ok=True,
                     )
                     if path.exists(path.join(dest, item_dict["relative_loc"])):
+                        print(
+                            utils.normalise(path.join(dest, item_dict["relative_loc"])),
+                            utils.normalise(item_dict["path"]),
+                        )
+
+                        if utils.normalise(
+                            path.join(dest, item_dict["relative_loc"])
+                        ) != utils.normalise(item_dict["path"]):
+                            cut_ignore.append(item_dict["path"])
+                            continue
                         if action_on_existance == "ask":
                             response = self.app.call_from_thread(
                                 self.app.push_screen_wait,

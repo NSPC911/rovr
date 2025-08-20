@@ -324,7 +324,7 @@ OptionList {
   }
 }
 
-ZToDirectory {
+ZDToDirectory {
   align: center middle;
 
   #zoxide_input {

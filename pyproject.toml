@@ -64,7 +64,7 @@ major_version_zero = false
 
 [tool.poe.tasks]
 dev = "textual run --dev rovr.app:Application"
-run = "rovr.__main__:main"
+run = "rovr"
 log = "textual console -x WORKER -x SYSTEM -x DEBUG -x EVENT"
 "gen-schema" = "docs/scripts/generate_schema.py"
 

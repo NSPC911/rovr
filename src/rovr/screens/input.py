@@ -108,9 +108,15 @@ class ModalInput(ModalScreen):
                 self.horizontal_group.styles.offset = (0, 0)
                 await sleep(0.1)
             return
-        self.dismiss(
+        return_path = (
             sanitize_filepath(event.input.value) if self.is_path else event.input.value
         )
+        if event.input.value.endswith(("/", "\\")) and not return_path.endswith((
+            "/",
+            "\\",
+        )):
+            return_path += "/"
+        self.dismiss(return_path)
 
     def on_key(self, event: events.Key) -> None:
         """Handle escape key to dismiss the dialog."""

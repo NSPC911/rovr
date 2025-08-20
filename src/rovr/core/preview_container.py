@@ -6,7 +6,7 @@ from typing import ClassVar
 
 import textual_image.widget as timg
 from rich.text import Text
-from textual import events, work
+from textual import events, on, work
 from textual.app import ComposeResult
 from textual.binding import Binding, BindingType
 from textual.containers import Container
@@ -424,11 +424,14 @@ class PreviewContainer(Container):
         Args:
             file_path(str): The file path
         """
-        if any(
-            worker.is_running
-            and worker.node is self
-            and worker.name == "_perform_show_preview"
-            for worker in self.app.workers
+        if (
+            any(
+                worker.is_running
+                and worker.node is self
+                and worker.name == "_perform_show_preview"
+                for worker in self.app.workers
+            )
+            or "hide" in self.classes
         ):
             self._queued_task = self._perform_show_preview
             self._queued_task_args = file_path
@@ -594,6 +597,10 @@ class PreviewContainer(Container):
                 case key if key in config["keybinds"]["preview_scroll_right"]:
                     event.stop()
                     self.scroll_right(animate=False)
+
+    @on(events.Show)
+    def when_become_visible(self, event: events.Show) -> None:
+        self.any_in_queue()
 
 
 class ArchiveFileList(OptionList, inherit_bindings=False):

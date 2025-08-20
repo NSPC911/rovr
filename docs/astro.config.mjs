@@ -25,7 +25,7 @@ export default defineConfig({
       sidebar: [
         { label: "overview", slug: "overview" },
         {
-          label: "get Started",
+          label: "get started",
           items: [
             { label: "installation", slug: "get-started/installation" },
             { label: "tutorial", slug: "get-started/tutorial" },

@@ -5,6 +5,7 @@
 
 :root {
   --sl-sidebar-width: 20vw;
+  --sl-sidebar-item-padding-inline: 0.45rem;
 }
 
 /* Dark mode colors. */
@@ -51,10 +52,6 @@
   );
   --sl-color-text-invert: var(--sl-color-black);
 }
-body > .page:has(> nav) {
-  --sl-content-inline-start: 20vw;
-}
-
 .expressive-code > figure > figcaption::before {
   border: none;
   border-bottom: var(--ec-brdWd) solid var(--ec-frm-edTabBarBrdCol);
@@ -62,6 +59,11 @@ body > .page:has(> nav) {
 .expressive-code > figure > figcaption > .title {
   border: var(--ec-brdWd) solid var(--ec-frm-edTabBarBrdCol);
   border-bottom: none;
+}
+html {
+  overscroll-behavior: none;
+  scrollbar-color: var(--sl-color-bg-accent) var(--sl-color-gray-6);
+  background: var(--sl-color-black);
 }
 * {
   font-family: "CaskaydiaCove NFP";
@@ -106,22 +108,45 @@ ul.astro-emisptqc:not(.top-level) {
   [class^="right-sidebar"] {
     width: 25vw;
   }
+  .main-frame:not(:has(> div > aside[class*="print:hidden"])) {
+    --sl-content-inline-start: 20vw;
+  }
 }
 @media (min-width: 50em) {
   .sidebar-pane:where(.astro-ybwpbh62) {
     width: 20vw;
+    scrollbar-color: var(--sl-color-bg-accent) var(--sl-color-gray-6);
+    min-width: 190px;
+    &:not(:hover) {
+      scrollbar-width: thin;
+      padding-right: 0.375em;
+      scrollbar-gutter: stable;
+    }
   }
   .header:where(.astro-2otbitds) {
     --__sidebar-width: 20vw;
   }
+  .main-frame:not(:has(> div > aside[class*="print:hidden"])) {
+    --sl-content-inline-start: 30vw;
+  }
+  .sidebar-pane:where(.astro-ybwpbh62) {
+    border-inline-end: none;
+  }
+  .main-frame:where(.astro-ybwpbh62) {
+    margin-top: calc(var(--sl-nav-height) + var(--sl-mobile-toc-height));
+    margin-left: max(var(--sl-content-inline-start), 190px);
+    padding-top: 0;
+    padding-inline-start: 0;
+    border-top-left-radius: 8px;
+  }
+}
+.main-frame:where(.astro-ybwpbh62) {
+    background: var(--sl-color-black)
 }
 .title-wrapper:where(.astro-2otbitds) {
   max-width: calc(var(--sl-sidebar-width) - 1rem);
 }
 
-nav.sidebar + .main-frame:where(.astro-ybwpbh62) {
-  padding-inline-start: 20vw;
-}
 select > .astro-bx376mqt:hover,
 select.astro-bx376mqt:focus {
   background: var(--sl-color-gray-6);
@@ -181,4 +206,16 @@ a[rel="prev"] span.astro-cmhvllpy:not(.link-title) {
     color: var(--sl-color-gray-2);
     content: "prev";
   }
+}
+ul:where(.astro-emisptqc) ul:where(.astro-emisptqc) li:where(.astro-emisptqc):has(> [aria-current="page"]) {
+  border-inline-start: 0.25em solid var(--sl-color-text-accent);
+}
+ul:where(.astro-emisptqc) ul:where(.astro-emisptqc) li:where(.astro-emisptqc) {
+  border-inline-start: 0.25em solid var(--sl-color-hairline-light);
+}
+body {
+  background: var(--sl-color-gray-6)
+}
+summary#starlight__on-this-page--mobile {
+  border-bottom: none;
 }

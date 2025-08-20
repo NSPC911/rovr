@@ -2,9 +2,12 @@
 import { defineConfig } from "astro/config";
 import starlight from "@astrojs/starlight";
 import sitemap from "@astrojs/sitemap";
+import { viewTransitions } from "astro-vtbot/starlight-view-transitions";
+import starlightLlmsTxt from "starlight-llms-txt";
 
 export default defineConfig({
-  site: "https://nspc911.github.io/rovr",
+  site: "https://nspc911.github.io",
+  base: "/rovr",
   integrations: [
     starlight({
       title: "rovr docs",
@@ -22,6 +25,10 @@ export default defineConfig({
         },
       ],
       customCss: ["./src/styles/custom.css"],
+      editLink: {
+        baseUrl:
+          "https://github.com/NSPC911/rovr/tree/docs/docs/src/content/docs",
+      },
       sidebar: [
         { label: "overview", slug: "overview" },
         {
@@ -70,6 +77,12 @@ export default defineConfig({
             { label: "config schema", slug: "reference/schema" },
           ],
         },
+      ],
+      plugins: [
+        viewTransitions(),
+        starlightLlmsTxt({
+          projectName: "rovr",
+        }),
       ],
     }),
     sitemap(),

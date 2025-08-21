@@ -271,7 +271,7 @@ Screen.-nopreview {
 
 Content.selected { color: red }
 
-FileList, PinnedSidebar {
+FileList, PinnedSidebar, Clipboard {
   padding: 0 0 0 0;
   .option-list--option-highlighted {
     color: $block-cursor-background;

@@ -40,7 +40,6 @@ from rovr.navigation_widgets import (
     ForwardButton,
     PathAutoCompleteInput,
     PathInput,
-    RefreshButton,
     UpButton,
 )
 from rovr.screens import YesOrNo, ZDToDirectory
@@ -90,7 +89,6 @@ class Application(App, inherit_bindings=False):
                     yield BackButton()
                     yield ForwardButton()
                     yield UpButton()
-                    yield RefreshButton()
                     path_switcher = PathInput()
                     yield path_switcher
                 yield PathAutoCompleteInput(
@@ -153,7 +151,6 @@ class Application(App, inherit_bindings=False):
             self.query_one("#back").tooltip = "Go back in history"
             self.query_one("#forward").tooltip = "Go forward in history"
             self.query_one("#up").tooltip = "Go up the directory tree"
-            self.query_one("#refresh").tooltip = "Refresh the file list"
         self.tabWidget = self.query_one("Tabline")
         # make the file list
         self.query_one("#file_list").update_file_list()

@@ -1,4 +1,4 @@
-from .buttons import BackButton, ForwardButton, RefreshButton, UpButton
+from .buttons import BackButton, ForwardButton, UpButton
 from .path_input import PathAutoCompleteInput, PathInput
 
 __all__ = [
@@ -6,6 +6,5 @@ __all__ = [
     "PathInput",
     "BackButton",
     "ForwardButton",
-    "RefreshButton",
     "UpButton",
 ]

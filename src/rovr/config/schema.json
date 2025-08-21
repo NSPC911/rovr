@@ -452,13 +452,6 @@
           },
           "description": "Go forward in history."
         },
-        "refresh": {
-          "type": "array",
-          "items": {
-            "type": "string"
-          },
-          "description": "Refresh the file list."
-        },
         "toggle_visual": {
           "type": "array",
           "items": {

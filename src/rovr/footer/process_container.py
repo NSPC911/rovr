@@ -108,7 +108,11 @@ class ProcessContainer(VerticalScroll):
         last_update_time = time.monotonic()
         for i, item_dict in enumerate(files_to_delete):
             current_time = time.monotonic()
-            if current_time - last_update_time > 0.25 or i == len(files_to_delete) - 1:
+            if (
+                current_time - last_update_time > 0.25
+                or i == len(files_to_delete) - 1
+                or i == 0
+            ):
                 self.app.call_from_thread(
                     bar.update_label,
                     f"{utils.get_icon('general', 'delete')[0]} {item_dict['relative_loc']}",
@@ -340,7 +344,6 @@ class ProcessContainer(VerticalScroll):
             step=True,
         )
         self.app.call_from_thread(bar.add_class, "done")
-        self.app.call_from_thread(self.app.query_one("#refresh").action_press)
 
     @work(thread=True)
     def unzip_file(self, archive_path: str, destination_path: str) -> None:
@@ -374,6 +377,7 @@ class ProcessContainer(VerticalScroll):
                     if (
                         current_time - last_update_time > 0.25
                         or i == len(file_list) - 1
+                        or i == 0
                     ):
                         self.app.call_from_thread(
                             bar.update_label,
@@ -422,10 +426,6 @@ class ProcessContainer(VerticalScroll):
                                     shutil.copyfileobj(source, target)
                                 continue
                             case "cancel":
-                                self.app.call_from_thread(
-                                    bar.update_label,
-                                    f"{utils.get_icon('general', 'copy')[0]}",
-                                )
                                 self.app.call_from_thread(bar.add_class, "error")
                                 return
                     try:
@@ -484,7 +484,6 @@ class ProcessContainer(VerticalScroll):
             step=True,
         )
         self.app.call_from_thread(bar.add_class, "done")
-        self.app.call_from_thread(self.app.query_one("#refresh").action_press)
 
     @work(thread=True)
     def paste_items(self, copied: list[str], cutted: list[str], dest: str = "") -> None:
@@ -523,7 +522,11 @@ class ProcessContainer(VerticalScroll):
         last_update_time = time.monotonic()
         for i, item_dict in enumerate(files_to_copy):
             current_time = time.monotonic()
-            if current_time - last_update_time > 0.25 or i == len(files_to_copy) - 1:
+            if (
+                current_time - last_update_time > 0.25
+                or i == len(files_to_copy) - 1
+                or i == 0
+            ):
                 self.app.call_from_thread(
                     bar.update_label,
                     f"{utils.get_icon('general', 'copy')[0]} {item_dict['relative_loc']}",
@@ -644,7 +647,11 @@ class ProcessContainer(VerticalScroll):
         last_update_time = time.monotonic()
         for i, item_dict in enumerate(files_to_cut):
             current_time = time.monotonic()
-            if current_time - last_update_time > 0.25 or i == len(files_to_cut) - 1:
+            if (
+                current_time - last_update_time > 0.25
+                or i == len(files_to_cut) - 1
+                or i == 0
+            ):
                 self.app.call_from_thread(
                     bar.update_label,
                     f"{utils.get_icon('general', 'cut')[0]} {item_dict['relative_loc']}",

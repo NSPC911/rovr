@@ -46,14 +46,3 @@ class UpButton(Button):
         self.app.cd(
             path.sep.join(getcwd().split(path.sep)[:-1]) + path.sep, focus_on=parent
         )
-
-
-class RefreshButton(Button):
-    def __init__(self, *args, **kwargs) -> None:
-        super().__init__(
-            get_icon("general", "refresh")[0], id="refresh", *args, **kwargs
-        )
-
-    def on_button_pressed(self, event: Button.Pressed) -> None:
-        """Reload the file list"""
-        self.app.query_one("#file_list").update_file_list(add_to_session=False)

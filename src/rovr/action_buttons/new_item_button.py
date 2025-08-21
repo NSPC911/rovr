@@ -75,5 +75,4 @@ class NewItemButton(Button):
                     title="New Item",
                     severity="error",
                 )
-        self.app.query_one("#refresh", Button).action_press()
         self.app.query_one("#file_list").focus()

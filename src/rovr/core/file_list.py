@@ -601,11 +601,6 @@ class FileList(SelectionList, inherit_bindings=False):
                 ):
                     event.stop()
                     self.app.query_one("UpButton").on_button_pressed(Button.Pressed)
-                case key if key in config["keybinds"]["refresh"]:
-                    event.stop()
-                    self.app.query_one("RefreshButton").on_button_pressed(
-                        Button.Pressed
-                    )
                 # Toggle pin on current directory
                 case key if key in config["keybinds"]["toggle_pin"]:
                     event.stop()

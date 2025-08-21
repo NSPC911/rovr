@@ -70,5 +70,4 @@ class RenameItemButton(Button):
                     title="Rename",
                     severity="error",
                 )
-        self.app.query_one("#refresh").action_press()
         self.app.query_one("#file_list").focus()

@@ -97,7 +97,6 @@ end = ["end", "G"]
 hist_previous = ["backspace", "u"]
 hist_next = ["space"]
 
-refresh = ["ctrl+r", "f5"]
 toggle_visual = ["v"]
 toggle_all = ["%", "ctrl+a"]
 

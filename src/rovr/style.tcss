@@ -218,15 +218,6 @@ Toast {
   scrollbar-size: 0 0 !important;
   & > PinnedSidebar {
     scrollbar-size: 0 0 !important;
-    & > .option-list--option-highlighted {
-      color: $block-cursor-background;
-      background: transparent;
-    }
-    &:focus > .option-list--option-highlighted {
-      color: $block-cursor-foreground;
-      background: $block-cursor-background;
-      text-style: $block-cursor-text-style;
-    }
   }
   & > Input {
     display: none;
@@ -280,7 +271,7 @@ Screen.-nopreview {
 
 Content.selected { color: red }
 
-OptionList {
+FileList, PinnedSidebar {
   padding: 0 0 0 0;
   .option-list--option-highlighted {
     color: $block-cursor-background;
@@ -559,7 +550,11 @@ ModalInput {
       border: $border-style $error;
     }
   }
-  Input { background: transparent !important }
+  Input {
+    background: transparent !important;
+    scrollbar-size: 0 0;
+    overflow-x: scroll;
+  }
   Label {
     height: 1;
   }

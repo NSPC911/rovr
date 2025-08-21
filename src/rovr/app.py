@@ -1,6 +1,7 @@
 import shutil
+from asyncio import sleep as asyncio_sleep
 from contextlib import suppress
-from os import chdir, getcwd, path
+from os import chdir, getcwd, listdir, path
 from types import SimpleNamespace
 
 from textual import events, work
@@ -157,6 +158,8 @@ class Application(App, inherit_bindings=False):
         # make the file list
         self.query_one("#file_list").update_file_list()
         self.query_one("#file_list").focus()
+        # start watcher~
+        self.watch_for_changes_and_update()
 
     def action_focus_next(self) -> None:
         if config["settings"]["allow_tab_nav"]:
@@ -358,6 +361,21 @@ class Application(App, inherit_bindings=False):
             self.query_one("#file_list").update_file_list(
                 add_to_session=add_to_history, focus_on=focus_on
             )
+
+    @work
+    async def watch_for_changes_and_update(self) -> None:
+        self._cwd = getcwd()
+        self._items = listdir(self._cwd)
+        while True:
+            await asyncio_sleep(1)
+            new_cwd = getcwd()
+            new_cwd_items = listdir(new_cwd)
+            if self._cwd != new_cwd:
+                self._cwd = new_cwd
+                self._items = listdir(self._cwd)
+            elif self._items != new_cwd_items:
+                self.cd(self._cwd)
+                self._items = new_cwd_items
 
 
 app = Application(watch_css=True)

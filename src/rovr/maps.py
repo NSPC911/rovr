@@ -259,6 +259,7 @@ FILE_MAP = {
     ".wav": "audio",
     ".flac": "audio",
     ".ogg": "audio",
+    ".m4a": "audio",
     # Video files
     ".mp4": "video",
     ".avi": "video",

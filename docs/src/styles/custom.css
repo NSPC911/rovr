@@ -9,6 +9,13 @@
 :root {
   --sl-sidebar-width: 20vw;
   --sl-sidebar-item-padding-inline: 0.45rem;
+  --sl-transition-duration: 1s;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --sl-transition-duration: 0s;
+  }
 }
 
 /* Dark mode colors. */
@@ -38,10 +45,12 @@
     var(--sl-color-gray-6) 50%
   );
   --sl-color-text-invert: var(--sl-color-black);
+  --sl-color-bg-sidebar: hsl(from var(--sl-color-gray-5) h s l / 50%);
+  --sl-color-bg-nav: hsl(from var(--sl-color-gray-5) h s l / 50%);
 }
 /* Light mode colors. */
 :root[data-theme="light"] {
-  --sl-color-accent: #81a1c1;
+  --sl-color-accent: color-mix(in oklab, #81a1c1 75%, #8fbcbb);
   --sl-color-black: #ffffff;
   --sl-color-gray-7: #e5e9f0;
   --sl-color-gray-6: #c0c8d8;
@@ -51,8 +60,8 @@
   --sl-color-gray-2: #3b4252;
   --sl-color-gray-1: #2e3440;
   --sl-color-white: #181d24;
-  --sl-color-accent-high: var(--sl-color-black);
-  --sl-color-accent-low: var(--sl-color-white);
+  --sl-color-accent-high: var(--sl-color-white);
+  --sl-color-accent-low: var(--sl-color-black);
   --sl-color-text-accent: color-mix(
     in oklab,
     var(--sl-color-accent),
@@ -64,23 +73,49 @@
     var(--sl-color-gray-6) 25%
   );
   --sl-color-text-invert: var(--sl-color-black);
-  --sl-color-bg-sidebar: var(--sl-color-gray-7);
+  --sl-color-bg-sidebar: hsl(from var(--sl-color-gray-6) h s l / 37.5%);
+  --sl-color-bg-nav: hsl(from var(--sl-color-gray-6) h s l / 37.5%);
 }
 html {
-  scrollbar-color: var(--sl-color-bg-accent) var(--sl-color-gray-6);
-  background: var(--sl-color-black);
-  &[data-theme="light"] {
-    scrollbar-color: var(--sl-color-bg-accent) var(--sl-color-gray-7);
-    body {
-      background: var(--sl-color-gray-7);
+  background: var(--sl-color-gray-6);
+  overflow: hidden;
+  body > .page::after,
+  body > .page::before {
+    display: block;
+    content: "";
+    position: fixed;
+    width: max(100vh, 100vw);
+    height: max(100vh, 100vw);
+    transform: scale(0);
+    z-index: -1;
+    border-radius: 50%;
+  }
+  &[data-theme="light"] body {
+    > .page::after {
+      background: var(--sl-color-black);
+      transform: scale(1.5);
+      transition:
+        transform var(--sl-transition-duration) ease-in;
     }
+  }
+  &[data-theme="dark"] body {
+    > .page::before {
+      background: var(--sl-color-black);
+      transform: scale(1.5);
+      transition:
+        transform var(--sl-transition-duration) ease-in;
+    }
+  }
+  &[data-theme="light"] {
+    background: var(--sl-color-gray-7);
   }
 }
 * {
   font-family: "CaskaydiaCove NFP";
-  &:not(select):not(.code) {
-    transition-property: background, color, border-inline-start;
-    transition-duration: 0.25s;
+  &:not(.code) {
+    transition-property:
+      background, color, border-inline-start, scrollbar-color;
+    transition-duration: var(--sl-transition-duration);
     transition-timing-function: cubic-bezier(0.19, 1, 0.22, 1);
   }
 }
@@ -91,6 +126,9 @@ ul:where(.astro-emisptqc)
 }
 figure.is-terminal span.title {
   border: none;
+}
+.expressive-code .frame {
+  --code-background: var(--sl-color-bg-sidebar);
 }
 .expressive-code .frame.is-terminal .header::before {
   left: unset !important;
@@ -130,14 +168,6 @@ summary:where(.astro-emisptqc) {
 .large:where(.astro-emisptqc) {
   font-weight: 599;
 }
-details[open] > ul {
-  max-height: 500px;
-}
-details > ul {
-  max-height: 0;
-  overflow: hidden;
-  transition: max-height 1s linear;
-}
 @media (min-width: 72rem) {
   .main-pane {
     margin: auto;
@@ -155,9 +185,6 @@ details > ul {
   }
 }
 @media (min-width: 50em) {
-  [data-theme="light"] .sidebar-pane:where(.astro-ybwpbh62) {
-    scrollbar-color: var(--sl-color-bg-accent) var(--sl-color-gray-7);
-  }
   .sidebar-pane:where(.astro-ybwpbh62) {
     width: 20vw;
     scrollbar-color: var(--sl-color-bg-accent) var(--sl-color-gray-6);
@@ -183,15 +210,29 @@ details > ul {
     border-inline-end: none;
   }
   .main-frame:where(.astro-ybwpbh62) {
-    cursor: pointer;
     margin-top: calc(var(--sl-nav-height) + var(--sl-mobile-toc-height));
     padding-top: 0;
     cursor: pointer;
     padding-inline-start: 0;
+    max-width: calc(
+      100vw - clamp(220px, var(--sl-content-inline-start), 300px)
+    );
+    max-height: calc(
+      100vh - (var(--sl-nav-height) + var(--sl-mobile-toc-height))
+    );
+    overflow: auto;
+    scrollbar-color: var(--sl-color-bg-accent) var(--sl-color-gray-6);
+  }
+  [data-theme="light"] .sidebar-pane:where(.astro-ybwpbh62),
+  [data-theme="light"] .main-frame:where(.astro-ybwpbh62) {
+    scrollbar-color: var(--sl-color-bg-accent) var(--sl-color-gray-7);
   }
 }
 .main-frame:where(.astro-ybwpbh62) {
-  background: var(--sl-color-black);
+  background: transparent;
+}
+main {
+  background: transparent;
 }
 .title-wrapper:where(.astro-2otbitds) {
   max-width: calc(var(--sl-sidebar-width) - 1rem);
@@ -201,14 +242,17 @@ select > .astro-bx376mqt:hover {
   -moz-appearance: none;
   appearance: none;
 }
-select.astro-bx376mqt:focus {
-  background: var(--sl-color-gray-6) !important;
+[data-theme="dark"] select.astro-bx376mqt:focus {
+  background: hsl(from var(--sl-color-gray-6) h s l / 1%) !important;
+}
+[data-theme="light"] select.astro-bx376mqt:focus {
+  background: hsl(from var(--sl-color-gray-7) h s l / 1%) !important;
 }
 .header:where(.astro-ybwpbh62) {
   border-bottom: none;
 }
 .pagination-links > a {
-  transition: transform 0.5s ease;
+  transition: transform var(--sl-transition-duration) ease;
   box-shadow: unset;
   cursor: pointer;
   &:hover {
@@ -241,7 +285,7 @@ summary#starlight__on-this-page--mobile {
     pointer-events: none;
   }
   & + ul > li:first-child > a {
-    color: var(--sl-color-black);
+    color: transparent;
   }
   & + ul > li:first-child::before {
     position: absolute;
@@ -258,7 +302,7 @@ summary#starlight__on-this-page--mobile {
   }
 }
 a[rel="next"] span.astro-cmhvllpy:not(.link-title) {
-  color: var(--sl-color-black);
+  color: transparent;
   &::before {
     position: absolute;
     font-size: 1em;
@@ -268,7 +312,7 @@ a[rel="next"] span.astro-cmhvllpy:not(.link-title) {
   }
 }
 a[rel="prev"] span.astro-cmhvllpy:not(.link-title) {
-  color: var(--sl-color-black);
+  color: transparent;
   &::before {
     position: absolute;
     font-size: 1em;
@@ -291,7 +335,7 @@ ul:where(.astro-emisptqc) li {
   cursor: pointer;
 }
 body {
-  background: var(--sl-color-gray-6);
+  background: transparent;
 }
 button[aria-label="Search"] > span {
   color: transparent;
@@ -333,7 +377,7 @@ button[aria-label="Search"] > span {
 }
 button:where(.astro-fgrstytv) {
   box-shadow: unset !important;
-  transition: transform 0.5s ease;
+  transition: transform var(--sl-transition-duration) ease;
   &:hover {
     transform: scale(1.125);
   }

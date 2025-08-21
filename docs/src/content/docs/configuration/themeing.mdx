@@ -83,20 +83,17 @@ Vertical(id="root")
         PinnedSidebarOption() -> Option
     VerticalGroup(id="file_list_container")
       SearchInput() -> Input
-      FileList(id="file_list", name="File List", classes="file-list") -> SelectionList
+      FileList(id="file_list", class="file-list") -> SelectionList
         FileListSelectionWidget() -> Selection
     PreviewContainer(id="preview_sidebar") -> Container
-      Image(id="image_preview", classes="inner_preview")
+      Image(id="image_preview", class="inner_preview")
       CustomTextArea(id="text_preview") -> TextArea
-      Static(id="text_preview", classes="inner_preview")
+      Static(id="text_preview", class="inner_preview")
       FileList(
         id="folder_preview",
-        classes="file-list inner_preview"
+        class="file-list inner_preview"
       ) -> SelectionList
-      ArchiveFileList(
-        id="archive_preview",
-        classes="file-list inner_preview",
-      ) -> OptionList
+      ArchiveFileList(id="archive_preview", class="file-list inner_preview") -> OptionList
         Option()
   HorizontalGroup(id="footer")
     ProcessContainer() -> VerticalScroll
@@ -115,3 +112,11 @@ Vertical(id="root")
   ...
 }
 ```
+however, if you took at the dom above, or a truncated dom below
+```py
+  HorizontalGroup(id="main")
+    VerticalGroup(id="file_list_container")
+      FileList(id="file_list", class="file-list") -> SelectionList
+        FileListSelectionWidget() -> Selection
+```
+you can notice the `SelectionList` part. it aims to emphasise that the `FileList` is based off a `SelectionList` (which itself is based off `OptionList`)

@@ -108,6 +108,7 @@ html * {
 }
 code {
   text-transform: none;
+  overflow-wrap: break-word;
 }
 ul:where(.astro-emisptqc)
   ul:where(.astro-emisptqc)
@@ -398,7 +399,7 @@ starlight-file-tree {
 .site-title {
   color: transparent;
   &::before {
-    content: " ___ ___ _ _ ___\A| ;_| . | | | ;_|\A|_| |___|\\_/|_|";
+    content: "  ____ ___  _  __ ____\a  / __// _ \\| |/ // __/\a/_/   \\___/|___//_/";
     line-height: 1.1925;
     white-space: pre;
     display: block;

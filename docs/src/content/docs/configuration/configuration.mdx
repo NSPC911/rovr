@@ -3,8 +3,7 @@ title: configuration
 description: how to configure rovr
 ---
 
-import { FileTree } from "@astrojs/starlight/components";
-import { Aside } from "@astrojs/starlight/components";
+import { FileTree, Aside, Code } from "@astrojs/starlight/components";
 
 rovr's configuration is held in a single location. you can find it by running
 
@@ -41,27 +40,11 @@ styling in textual is handled by `tcss` files, a simplified version of the web's
 
 rovr comes with some variables pre-initialised, that you can overwrite.
 
-```scss
-/* border when a container isn't focused */
-$border-blurred: $primary-darken-3;
-/* border when a container is currently focused */
-$border: $primary-lighten-3;
-/* border style (https://textual.textualize.io/css_types/border) */
-$border-style: round;
-
-/* reference: https://textual.textualize.io/css_types/scalar */
-/* pinned folder sidebar width */
-$pinned_sidebar_width: 20;
-/* the main file list width */
-$file_list_width: 1fr;
-/* the preview sidebar width */
-$preview_sidebar_width: 35vw;
-/* the footer when nothing inside it is focused */
-$footer_unfocus_height: 8;
-/* the footer when something inside it is focused */
-$footer_focus_height: 10;
-```
-
+<Code
+  code={`/* border when a container isn't focused */\n$border-blurred: $primary-darken-3;\n/* border when a container is currently focused */\n$border: $primary-lighten-3;\n/* border style (https://textual.textualize.io/css_types/border) */\n$border-style: round;\n/* reference: https://textual.textualize.io/css_types/scalar */\n/* pinned folder sidebar width */\n$pinned_sidebar_width: 20;\n/* the main file list width */\n$file_list_width: 1fr;\n/* the preview sidebar width */\n$preview_sidebar_width: 35vw;\n/* the footer when nothing inside it is focused */\n$footer_unfocus_height: 8;\n/* the footer when something inside it is focused */\n$footer_focus_height: 10;`}
+  lang="scss"
+  title="styles.tcss"
+/>
 For more advanced styling, refer to [`configuration/themeing`](./themeing)
 
 ## pins.json
@@ -70,25 +53,11 @@ this file doesn't have a schema, mainly because it is pretty simple
 
 the file follows a schema as such
 
-```json
-{
-  "default": [
-    ...
-    {
-      "name": "<label>",
-      "path": "<path>"
-    }
-  ],
-  "pins": [
-    ...
-    {
-      "name": "<label>",
-      "path": "<path>"
-    }
-  ]
-}
-```
-
+<Code
+  code={`{\n  "default": [\n    ...\n    {\n      "name": "<label>",\n      "path": "<path>"\n    }\n  ],\n  "pins": [\n    ...\n    {\n      "name": "<label>",\n      "path": "<path>"\n    }\n  ]\n}`}
+  lang="json"
+  title="pins.json"
+/>
 the path supports variables to a fixed path
 
 ```scss
@@ -102,4 +71,4 @@ $VIDEOS:    /* user videos directory    */
 $CONFIG:    /* user config directory    */
 ```
 
-so, you can have a path as `$home/games` and it will expand to `~/games` or `%USERPROFILE%/games` depending on your os
+so, you can have a path as `$HOME/games` and it will expand to `~/games` or `%USERPROFILE%/games` depending on your os

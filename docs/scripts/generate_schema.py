@@ -19,5 +19,5 @@ with open("docs/src/content/docs/reference/schema.mdx", "r") as schema_file:
 with open("docs/src/content/docs/reference/schema.mdx", "w") as schema_file:
     schema_file.write(
         """---\ntitle: schema for humans\ndescription: config schema humanified\n---"""
-        + content[13:]
+        + content[13:].replace("| - ", "|   ").replace("| + ", "|   ")
     )

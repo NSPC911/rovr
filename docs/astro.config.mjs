@@ -29,8 +29,9 @@ export default defineConfig({
       customCss: ["./src/styles/custom.css"],
       editLink: {
         baseUrl:
-          "https://github.com/NSPC911/rovr/tree/docs/docs/src/content/docs",
+          "https://github.com/NSPC911/rovr/tree/docs/docs",
       },
+      lastUpdated: true,
       sidebar: [
         { label: "overview", slug: "overview" },
         {

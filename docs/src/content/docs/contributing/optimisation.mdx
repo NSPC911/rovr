@@ -12,7 +12,7 @@ used in `MetadataContainer` and `PreviewContainer`
 
 ```mermaid
 flowchart TD
-    a(run thread) --> b{check for active thread}
+    a(receive external thread request) --> b{check for active thread}
     b --> |no thread| c[run thread]
     b --> |thread running| d{queue thread}
     d --> |no threads in queue| e[set thread in queue]
@@ -21,7 +21,8 @@ flowchart TD
     h --> |thread in queue| j[get thread from queue]
     j --> i[clear queue]
     j --> |use thread| c
-    h --> |no thread in queue| s(stop)
+    h --> |no thread in queue|s
+    i --> s(stop)
 ```
 
 this diagram roughly shows how the mechanism works, with the main thing being an intentional debouncer.
@@ -35,17 +36,19 @@ used in `MetadataContainer` and `ProcessBarContainer`
 
 ```mermaid
 flowchart TD
-    a(start heavy process) --> b[time_diff = 0
-    previous_updated_time = current_time]
-    b --> c{do heavy process}
+    b --> bc[previous_updated_time = current_time]
+    bc --> c{do heavy process}
     c --> |process completed|h[force label update]
     h --> s(stop)
-    c --> d{if last_updated + previous_updated_time < current_time}
+    c --> |process running|d{is last_updated + previous_updated_time < current_time?}
     d --> |true|e[update label]
-    e --> g[time_diff += 0.01 if time_diff < 1.00]
-    g --> c
+    e --> i{is time_diff < 1.00?}
+    i --> |true|j[time_diff += 0.01]
+    j --> bc
+    i --> |false|bc
     d --> |false|f[skip updating label]
-    f --> c
+    f --> bc
+    a(start heavy process) --> b[time_diff = 0]
 ```
 
 this diagram shows how it works

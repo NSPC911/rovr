@@ -432,6 +432,7 @@ class PreviewContainer(Container):
                 for worker in self.app.workers
             )
             or "hide" in self.classes
+            or "zen" in self.app.classes
         ):
             self._queued_task = self._perform_show_preview
             self._queued_task_args = file_path

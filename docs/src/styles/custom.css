@@ -85,16 +85,13 @@ html {
     z-index: -1;
     border-radius: 50%;
     background: var(--sl-color-black);
-    opacity: 0;
   }
   &[data-theme="dark"] body > .page::before,
   &[data-theme="light"] body > .page::after {
     background: var(--sl-color-black);
     transform: scale(1.5);
-    opacity: 1;
     transition:
-      transform var(--sl-transition-duration) ease-in-out,
-      opacity var(--sl-transition-duration) ease-in-out;
+      transform var(--sl-transition-duration) ease-in-out;
   }
   &[data-theme="light"] {
     background: var(--sl-color-gray-1);
@@ -450,4 +447,10 @@ starlight-file-tree:where(.astro-2li5qafl) ul:has(> li.file) {
   .main-frame:where(.astro-ybwpbh62) {
     margin-top: 0;
   }
+}
+
+/*mermaid*/
+pre.mermaid[data-processed] {
+  background: transparent !important;
+  transition: all var(--sl-transition-duration) linear;
 }

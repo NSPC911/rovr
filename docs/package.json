@@ -15,6 +15,8 @@
     "@webtui/css": "^0.1.4",
     "@webtui/theme-nord": "^0.0.2",
     "astro": "^5.6.1",
+    "astro-mermaid": "^1.0.4",
+    "mermaid": "^11.10.0",
     "sharp": "^0.34.2",
     "starlight-contributor-list": "^0.3.0",
     "starlight-llms-txt": "^0.6.0"

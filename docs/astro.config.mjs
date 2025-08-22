@@ -4,7 +4,7 @@ import starlight from "@astrojs/starlight";
 import sitemap from "@astrojs/sitemap";
 import { viewTransitions } from "astro-vtbot/starlight-view-transitions";
 import starlightLlmsTxt from "starlight-llms-txt";
-import mermaid from 'astro-mermaid';
+import mermaid from "astro-mermaid";
 
 export default defineConfig({
   site: "https://nspc911.github.io",
@@ -72,12 +72,12 @@ export default defineConfig({
             },
             {
               label: "how to contribute",
-              slug: "contributing/how-to-contribute"
+              slug: "contributing/how-to-contribute",
             },
             {
               label: "optimisations",
-              slug: "contributing/optimisation"
-            }
+              slug: "contributing/optimisation",
+            },
           ],
         },
         {

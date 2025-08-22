@@ -7,6 +7,7 @@ description: ways rovr optimises its performance
 <br/>hence, `rovr` makes use of a couple optimisations to make it perform reasonably well
 
 ### queue of length 1
+
 used in `MetadataContainer` and `PreviewContainer`
 
 ```mermaid
@@ -22,11 +23,14 @@ flowchart TD
     j --> |use thread| c
     h --> |no thread in queue| s(stop)
 ```
+
 this diagram roughly shows how the mechanism works, with the main thing being an intentional debouncer.
+
 - having a normal queue means that it would take a while for each item in the queue to be run, hence a very noticeable lag.
 - however, by having a queue of length 1, and overwriting the queue, it means that the latest added item is considered, and anything in between is ignored, greatly improving performance
 
 ### logarithmic updates
+
 used in `MetadataContainer` and `ProcessBarContainer`
 
 ```mermaid
@@ -43,7 +47,9 @@ flowchart TD
     d --> |false|f[skip updating label]
     f --> c
 ```
+
 this diagram shows how it works
+
 - when doing heavy tasks, like calculating folder size, or deleting folders, the appropriate widgets' labels are update spammed.
 - by using a 'debouncer' that scales based on how many times the update task was called, shorter tasks show a more accurate percentage, while longer tasks focus more on the task than updating the user
 

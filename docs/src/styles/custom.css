@@ -90,8 +90,7 @@ html {
   &[data-theme="light"] body > .page::after {
     background: var(--sl-color-black);
     transform: scale(1.5);
-    transition:
-      transform var(--sl-transition-duration) ease-in-out;
+    transition: transform var(--sl-transition-duration) ease-in-out;
   }
   &[data-theme="light"] {
     background: var(--sl-color-gray-1);
@@ -101,7 +100,7 @@ html * {
   font-family: "CaskaydiaCove NFP";
   & {
     text-transform: lowercase;
-      transition-property:
+    transition-property:
       background, color, border-inline-start, scrollbar-color;
     transition-duration: calc((var(--sl-transition-duration) / 6) * 6);
     transition-timing-function: ease-in-out;

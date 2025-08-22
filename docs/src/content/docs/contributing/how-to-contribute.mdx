@@ -6,9 +6,11 @@ description: how to contribute to rovr
 as `rovr` is currently in its early stages, prs are greatly appreciated. these can be from feature implementations, like a plugin system, to theme additions.
 
 ### theme additions
+
 textual's default assortment of themes is quite small, so any theme that you made for yourself can be contributed here!
 
 ensure that your theme follows the schema for a custom theme
+
 ```toml
 [[custom_theme]]
 name       = "<name>"
@@ -25,6 +27,7 @@ panel      = "<color>"
 is_dark    = true
 variables  = { "<var>" = "<key>" }
 ```
+
 for more information, please refer to [themeing](/rovr/configuration/themeing)
 
 once you are done, make a pull request with screenshots made by textual
@@ -32,26 +35,32 @@ once you are done, make a pull request with screenshots made by textual
 to make screenshots via textual, simply launch rovr, use the command palette keybind `ctrl+p` then press on `Save Screenshot`
 
 in this screenshot, ensure that
+
 1. a completed process, an in-progress process and errored process are all shown
 2. the main file list is in select mode with a selected option, and a highlighted option
 3. the clipboard contains a selected and non-selected option
 
 afterwards, for the extra screenshots, take screenshots of
+
 - modal screens, preferably `DeleteFiles` and `GiveMePermission` modals
 - text preview without bat
 
 after that, simply attach your screenshots to your pr and send it!
 
 ### feature additions
+
 feature additions are allowed as long as it helps the point of having a file explorer. I'm currently looking for contributors that are willing to add support for pdf previews, perhaps by extracting each page as an image, and using the image protocol to render it.
 
 for feature requests, ensure that you have these at minimum
+
 - [uv](https://docs.astral.sh/uv) - uv manages the dependencies of the entire project, and does the building + publishing
 - [git](https://git-scm.com) - git is necessary as it is how you get to suggest your changes in pull requests
 
 #### pr checklist
+
 ```md
 by sumbitting this pull request, i agree that
+
 - [ ] i have run `ruff format` to format the code
 - [ ] i have tested both the dev version and the built version of rovr
 - [ ] cache, logs and others are not accidently added to git's tracking history
@@ -60,20 +69,25 @@ by sumbitting this pull request, i agree that
 ```
 
 after making your necessary changes, you can run
+
 ```sh
 uvx ruff format
 ```
+
 so that your code follows the defined style guide.
 
 if you need help with conventional commits, [commitizen](https://github.com/commitizen-tools/commitizen) should be available as a dev dependency in the virtual environment, so you can run `cz c` to commit with commitizen.
 
 else, you can also run
+
 ```sh
 uvx --from commitizen cz c
 ```
 
 ### bugs
+
 bugs can tend to be common, especially with a relatively new application.
+
 <br/>if you want to create a new bug report, ensure that one doesn't already exist in the [list of issues](https://github.com/NSPC911/rovr/issues?q=sort%3Aupdated-desc+is%3Aissue+is%3Aopen)
 <br/>if it doesn't exist, follow the format below
 ```md
@@ -81,22 +95,28 @@ bugs can tend to be common, especially with a relatively new application.
 {describe what happened}
 
 ### steps to reproduce
+
 {a step by step instruction}
 {or a video with what keys you are pressing visualized}
 
 ### what is the expected result
+
 {expected result}
 
 ### what actually happened
+
 {actual result}
 
 ### (opt) how this could be fixed
+
 {a rough way of how this could be fixed}
 {this can be left out}
 
 ### (opt) additional screenshots
+
 {more screenshots to the issue}
 {this can be left out if you have a video attached}
+
 ```
 
 #### want to fix an issue?
@@ -107,3 +127,4 @@ yeah sure go ahead, the pr format is roughly similar to that of [feature additio
 ### feature request
 feature requests can be done in the [discussions tab](https://github.com/NSPC911/rovr/discussions). a new request can be opened with the `Ideas` template.
 <br/>you may also choose to mention it in the discord server. we might take a look at it either ways.
+```

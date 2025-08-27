@@ -8,7 +8,7 @@ description: config schema humanified
   - [1.2. Property `Rovr Config > interface > nerd_font`](#interface_nerd_font)
   - [1.3. Property `Rovr Config > interface > show_progress_eta`](#interface_show_progress_eta)
   - [1.4. Property `Rovr Config > interface > show_progress_percentage`](#interface_show_progress_percentage)
-  - [1.5. Property `Rovr Config > interface > truncate_progress_file_paths`](#interface_truncate_progress_file_paths)
+  - [1.5. Property `Rovr Config > interface > truncate_progress_file_path`](#interface_truncate_progress_file_path)
   - [1.6. Property `Rovr Config > interface > preview_error`](#interface_preview_error)
   - [1.7. Property `Rovr Config > interface > preview_binary`](#interface_preview_binary)
   - [1.8. Property `Rovr Config > interface > preview_start`](#interface_preview_start)
@@ -185,17 +185,17 @@ description: config schema humanified
 | **Required**              | No          |
 | **Additional properties** | Not allowed |
 
-| Property                                                                   | Type    | Title/Description                                                                                                         |
-| -------------------------------------------------------------------------- | ------- | ------------------------------------------------------------------------------------------------------------------------- |
-|   [tooltips](#interface_tooltips )                                         | boolean | Show tooltips when your mouse is over a tooltip supported button.<br />This is not hot reloaded.                          |
-|   [nerd_font](#interface_nerd_font )                                       | boolean | Use nerd font for rendering icons instead of weird characters and stuff.<br />Not properly hot-reloaded.                  |
-|   [show_progress_eta](#interface_show_progress_eta )                       | boolean | When copying or deleting files, show an ETA for when the action will be completed.                                        |
-|   [show_progress_percentage](#interface_show_progress_percentage )         | boolean | When copying or deleting files, show a percentage of how much had been completed.                                         |
-|   [truncate_progress_file_paths](#interface_truncate_progress_file_paths ) | boolean | When the process container is using file paths, truncate the file path to only view the first and last names of the path. |
-|   [preview_error](#interface_preview_error )                               | string  | If for any reason the file preview refused to show, this appears.                                                         |
-|   [preview_binary](#interface_preview_binary )                             | string  | If the current file cannot be read due to an encoding issue (ie not UTF8), it will display this message.                  |
-|   [preview_start](#interface_preview_start )                               | string  | This is shown when the rovr starts up. You may see it for a split second, but it will never appear afterwards.            |
-|   [clock](#interface_clock )                                               | object  |                                                                                                                           |
+| Property                                                                 | Type    | Title/Description                                                                                                         |
+| ------------------------------------------------------------------------ | ------- | ------------------------------------------------------------------------------------------------------------------------- |
+|   [tooltips](#interface_tooltips )                                       | boolean | Show tooltips when your mouse is over a tooltip supported button.<br />This is not hot reloaded.                          |
+|   [nerd_font](#interface_nerd_font )                                     | boolean | Use nerd font for rendering icons instead of weird characters and stuff.<br />Not properly hot-reloaded.                  |
+|   [show_progress_eta](#interface_show_progress_eta )                     | boolean | When copying or deleting files, show an ETA for when the action will be completed.                                        |
+|   [show_progress_percentage](#interface_show_progress_percentage )       | boolean | When copying or deleting files, show a percentage of how much had been completed.                                         |
+|   [truncate_progress_file_path](#interface_truncate_progress_file_path ) | boolean | When the process container is using file paths, truncate the file path to only view the first and last names of the path. |
+|   [preview_error](#interface_preview_error )                             | string  | If for any reason the file preview refused to show, this appears.                                                         |
+|   [preview_binary](#interface_preview_binary )                           | string  | If the current file cannot be read due to an encoding issue (ie not UTF8), it will display this message.                  |
+|   [preview_start](#interface_preview_start )                             | string  | This is shown when the rovr starts up. You may see it for a split second, but it will never appear afterwards.            |
+|   [clock](#interface_clock )                                             | object  |                                                                                                                           |
 
 ### <a name="interface_tooltips"></a>1.1. Property `Rovr Config > interface > tooltips`
 
@@ -239,7 +239,7 @@ Not properly hot-reloaded.
 
 **Description:** When copying or deleting files, show a percentage of how much had been completed.
 
-### <a name="interface_truncate_progress_file_paths"></a>1.5. Property `Rovr Config > interface > truncate_progress_file_paths`
+### <a name="interface_truncate_progress_file_path"></a>1.5. Property `Rovr Config > interface > truncate_progress_file_path`
 
 |              |           |
 | ------------ | --------- |

@@ -19,8 +19,8 @@ class PathAutoCompleteInput(PathAutoComplete):
     def __init__(self, *args, **kwargs) -> None:
         super().__init__(
             path=getcwd().split(path.sep)[0],
-            folder_prefix=get_icon("folder", "default")[0] + " ",
-            file_prefix=get_icon("file", "default")[0] + " ",
+            folder_prefix=" " + get_icon("folder", "default")[0] + " ",
+            file_prefix=" " + get_icon("file", "default")[0] + " ",
             id="path_autocomplete",
             *args,
             **kwargs,

@@ -60,6 +60,6 @@ def main(
     for feature_path in without_features:
         set_nested_value(config, feature_path, False)
 
-    from .app import Application
+    from rovr.app import Application
 
     Application(watch_css=True).run()

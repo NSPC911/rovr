@@ -650,19 +650,22 @@ def get_mounted_drives() -> list:
     return drives
 
 
-def set_scuffed_subtitle(element: Widget, mode: str, frac: str, hover: bool) -> None:
+def set_scuffed_subtitle(element: Widget, mode: str, frac: str) -> None:
     """The most scuffed way to display a custom subtitle
 
     Args:
         element (Widget): The element containing style information.
         mode (str): The mode of the subtitle.
         frac (str): The fraction to display.
-        hover (bool): Whether the widget is in hover utils.
     """
     border_bottom = BORDER_BOTTOM.get(
         element.styles.border_bottom[0], BORDER_BOTTOM["blank"]
     )
-    element.border_subtitle = f"{mode} [r]{border_bottom}[/] {frac}"
+    element.border_subtitle = (
+        f"{mode} "
+        + (border_bottom if element.app.ansi_color else f"[r]{border_bottom}[/]")
+        + f" {frac}"
+    )
 
 
 # check config folder

@@ -1,6 +1,7 @@
 /* Variables */
-$border-blurred: $primary-darken-3;
+$border-blurred: $primary-background-lighten-3;
 $border: $primary-lighten-3;
+$border-disabled: $primary-background-lighten-1;
 $border-style: round;
 
 $pinned_sidebar_width: 20;
@@ -39,7 +40,22 @@ Toast {
   height: 3;
   margin: 0 1 0 1;
   padding: 0 1;
-  scrollbar-size: 0 0
+  scrollbar-size: 0 0;
+  Button {
+    &:ansi {
+      background: transparent;
+    }
+    &:disabled {
+      opacity: 1 !important;
+      background-tint: transparent !important;
+      text-opacity: 1 !important;
+      color: $panel-lighten-3;
+      tint: transparent !important;
+    }
+    &:ansi:hover {
+      color: $primary
+    }
+  }
 }
 
 #main {
@@ -74,6 +90,14 @@ Toast {
     color: $foreground-lighten-1;
     .input--placeholder {
       color: $foreground-darken-1;
+    }
+    &:ansi .input--cursor {
+      color: $primary;
+      background: $background;
+    }
+    &:ansi .input--selection {
+      color: $background;
+      background: $primary;
     }
   }
   OptionList {
@@ -123,8 +147,16 @@ Toast {
     height: 3;
     width: 1fr;
     margin: 0 1 0 1;
-    padding: 0 2 0 2;
+    padding: 0 1 0 1;
     overflow: hidden hidden;
+    &:ansi .input--cursor {
+      color: $primary;
+      background: $background;
+    }
+    &:ansi .input--selection {
+      background: $primary;
+      color: $background;
+    }
   }
   Input.hide_border_bottom {
     border: $border-style $accent !important;
@@ -137,17 +169,24 @@ Toast {
     max-width: 7;
   }
   PathAutoCompleteInput {
-    padding: 0 2 1 2;
-    margin: -1 1 0 33;
+    padding: 0 1 0 1;
+    margin: -1 1 0 25;
     overlay: screen;
     width: 1fr;
     border: $border-style $accent;
     border-top: none;
     background: $background;
-
+    &:ansi {
+      background: transparent;
+    }
     AutoCompleteList {
       width: 1fr;
-      max-height: 4
+      max-height: 4;
+      .option-list--option-highlighted {
+        color: $block-cursor-foreground;
+        background: $block-cursor-background;
+        text-style: $block-cursor-text-style;
+      }
     }
     Option {
       width: 100%;
@@ -180,6 +219,17 @@ Toast {
   border: $border-style $border-blurred;
   border-subtitle-color: $background;
   border-subtitle-background: $border-blurred;
+  opacity: 1 !important;
+  background-tint: transparent !important;
+  text-opacity: 1 !important;
+  tint: transparent !important;
+  &:disabled {
+    border: $border-style $border-disabled;
+  }
+  &:ansi {
+    border-subtitle-background: transparent;
+    border-subtitle-color: $border-blurred;
+  }
 }
 
 #menu:focus-within,
@@ -192,12 +242,17 @@ Toast {
 #path_switcher:focus-within,
 #zoxide_options:focus,
 #below_menu Button:focus,
+#below_menu Button:hover,
 /* This is when people maximize */
 #file_list.-maximized,
 #pinned_sidebar.-maximized,
 #preview_sidebar .inner_preview.-maximized {
   border: $border-style $border;
   border-subtitle-background: $border;
+  &:ansi {
+    border-subtitle-background: transparent;
+    border-subtitle-color: $border;
+  }
 }
 
 #preview_sidebar,
@@ -276,15 +331,14 @@ FileList, PinnedSidebar, Clipboard {
     color: $block-cursor-background;
     background: transparent;
   }
-  .option-list--option-highlighted:hover {
-    background: $accent
+  .option-list--option-hover {
+    color: $primary;
+    background: transparent
   }
-  &:focus {
-    .option-list--option-highlighted {
-      color: $block-cursor-foreground;
-      background: $block-cursor-background;
-      text-style: $block-cursor-text-style;
-    }
+  &:focus .option-list--option-highlighted {
+    color: $block-cursor-foreground;
+    background: $block-cursor-background;
+    text-style: $block-cursor-text-style;
   }
   .selection-list--button {
     background: transparent;
@@ -559,6 +613,67 @@ ModalInput {
   }
 }
 
+ModalScreen Button:ansi {
+  background: transparent;
+  &:hover {
+    border-top: tall $surface;
+    background: $surface-darken-1;
+  }
+  &.-active {
+    background: $surface;
+    border-bottom: tall $surface-lighten-1;
+    border-top: tall $surface-darken-1;
+    tint: $background 30%;
+  }
+  &.-primary {
+    border: tall $primary-lighten-3;
+    border-bottom: tall $primary-darken-3;
+    &:hover {
+      border: tall $primary;
+      border-bottom: tall $primary-darken-3;
+    }
+    &.-active {
+      border: tall $primary-darken-3;
+      border-bottom: tall $primary-lighten-3;
+    }
+  }
+  &.-success {
+    border: tall $success-lighten-2;
+    border-bottom: tall $success-darken-3;
+    &:hover {
+      border: tall $success;
+      border-bottom: tall $success-darken-3;
+    }
+    &.-active {
+      border: tall $success-darken-2;
+      border-bottom: tall $success-lighten-2;
+    }
+  }
+  &.-warning{
+    border: tall $warning-lighten-2;
+    border-bottom: tall $warning-darken-3;
+    &:hover {
+      border: tall $warning;
+      border-bottom: tall $warning-darken-3;
+    }
+    &.-active {
+      border: tall $warning-darken-2;
+      border-bottom: tall $warning-lighten-2;
+    }
+  }
+  &.-error {
+    border: tall $error-lighten-2;
+    border-bottom: tall $error-darken-3;
+    &:hover {
+      border: tall $error;
+      border-bottom: tall $error-darken-3;
+    }
+    &.-active {
+      border: tall $error-darken-2;
+      border-bottom: tall $error-lighten-2;
+    }
+  }
+}
 
 Tooltip { background: $background-lighten-1 }
 
@@ -615,27 +730,52 @@ ProgressBarContainer {
   }
   Tabline {
     TablineTab {
+      color: auto;
       &:hover {
         background: $boost-lighten-3;
         color: $foreground;
+        &:ansi {
+          background: transparent;
+        }
       }
       &.-active {
         background: $primary;
         color: $background;
+        &:hover {
+          background: $primary;
+          color: $background;
+        }
       }
+    }
+    .underline--bar {
+      background: $background-lighten-1;
+      color: $primary;
+    }
+    &:ansi .underline--bar {
+      background: $background-lighten-3;
     }
   }
   &:focus-within > HeaderClock,
   &:focus-within > #newTabRight {
-    border-bottom: heavy $foreground 30%;
+    border-bottom: heavy $foreground-darken-3;
+    &:ansi {
+      border-bottom: solid $foreground-darken-3;
+    }
   }
   &:focus-within > Tabline .underline--bar {
-    background: $foreground 30%;
+    background: $foreground-darken-3;
   }
   HeaderClock, #newTabRight {
     background: transparent;
-    border-bottom: heavy $foreground 10%;
     dock: none;
+    opacity: 1 !important;
+    background-tint: transparent !important;
+    text-opacity: 1 !important;
+    tint: transparent !important;
+    border-bottom: heavy $background-lighten-1;
+    &:ansi {
+      border-bottom: solid $background-lighten-3;
+    }
   }
 }
 PinnedSidebarOption:disabled {

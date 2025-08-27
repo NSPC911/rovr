@@ -268,11 +268,10 @@ class FileList(SelectionList, inherit_bindings=False):
                 self.parent,
                 "NORMAL",
                 f"{self.highlighted + 1}/{self.option_count}",
-                True,
             )
         else:
             utils.set_scuffed_subtitle(
-                self.parent, "SELECT", f"{len(self.selected)}/{len(self.options)}", True
+                self.parent, "SELECT", f"{len(self.selected)}/{len(self.options)}"
             )
 
     # No clue why I'm using an OptionList method for SelectionList
@@ -290,14 +289,12 @@ class FileList(SelectionList, inherit_bindings=False):
                 self.parent,
                 "SELECT",
                 f"{len(self.selected)}/{len(self.options)}",
-                True,
             )
         elif self.selected is not None:
             utils.set_scuffed_subtitle(
                 self.parent,
                 "NORMAL",
                 f"{self.highlighted + 1}/{self.option_count}",
-                True,
             )
         # Get the highlighted option
         highlighted_option = event.option

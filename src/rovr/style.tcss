@@ -1,5 +1,6 @@
 /* Variables */
 $border-blurred: $primary-background-lighten-3;
+$border-blurred-light: $primary-background;
 $border: $primary-lighten-3;
 $border-disabled: $primary-background-lighten-1;
 $border-style: round;
@@ -52,8 +53,14 @@ Toast {
       color: $panel-lighten-3;
       tint: transparent !important;
     }
+    &:light:disabled {
+      color: $panel-darken-3;
+    }
     &:ansi:hover {
       color: $primary
+    }
+    &:light:ansi:hover {
+      color: $secondary
     }
   }
 }
@@ -149,6 +156,7 @@ Toast {
     margin: 0 1 0 1;
     padding: 0 1 0 1;
     overflow: hidden hidden;
+    color: $foreground;
     &:ansi .input--cursor {
       color: $primary;
       background: $background;
@@ -214,7 +222,8 @@ Toast {
 #preview_sidebar,
 #path_switcher,
 #zoxide_options,
-#below_menu Button {
+#below_menu Button,
+#footer > * {
   background: transparent;
   border: $border-style $border-blurred;
   border-subtitle-color: $background;
@@ -229,6 +238,14 @@ Toast {
   &:ansi {
     border-subtitle-background: transparent;
     border-subtitle-color: $border-blurred;
+    &:light {
+      border-subtitle-background: transparent;
+      border-subtitle-color: $border-blurred-light;
+    }
+  }
+  &:light {
+    border: $border-style $border-blurred-light;
+    border-subtitle-background: $border-blurred-light;
   }
 }
 
@@ -246,12 +263,21 @@ Toast {
 /* This is when people maximize */
 #file_list.-maximized,
 #pinned_sidebar.-maximized,
-#preview_sidebar .inner_preview.-maximized {
+#preview_sidebar .inner_preview.-maximized,
+#footer > *:focus {
   border: $border-style $border;
   border-subtitle-background: $border;
   &:ansi {
     border-subtitle-background: transparent;
     border-subtitle-color: $border;
+    &:light {
+      border-subtitle-background: transparent;
+      border-subtitle-color: $border;
+    }
+  }
+  &:light {
+    border-subtitle-background: $border;
+    border-subtitle-color: $background;
   }
 }
 
@@ -313,10 +339,8 @@ Screen.-nopreview {
   height: $footer_unfocus_height;
   margin: 0 1;
   & > * {
-    border: $border-style $border-blurred;
     height: 1fr;
     background: transparent;
-    &:focus-within { border: $border-style $border }
   }
   &:focus-within { height: $footer_focus_height }
 }
@@ -620,10 +644,11 @@ ModalScreen Button:ansi {
     background: $surface-darken-1;
   }
   &.-active {
-    background: $surface;
     border-bottom: tall $surface-lighten-1;
     border-top: tall $surface-darken-1;
-    tint: $background 30%;
+    tint: transparent;
+    text-style: reverse;
+    color: white;
   }
   &.-primary {
     border: tall $primary-lighten-3;
@@ -676,6 +701,7 @@ ModalScreen Button:ansi {
 }
 
 Tooltip { background: $background-lighten-1 }
+Tooltip:light { background: $background-darken-1; color: black; }
 
 CommandInput { border: blank !important }
 
@@ -751,15 +777,27 @@ ProgressBarContainer {
       background: $background-lighten-1;
       color: $primary;
     }
+    &:light .underline--bar {
+      background: $background-darken-1;
+    }
     &:ansi .underline--bar {
       background: $background-lighten-3;
+    }
+    &:ansi:light .underline--bar {
+      background: $background-darken-3;
     }
   }
   &:focus-within > HeaderClock,
   &:focus-within > #newTabRight {
     border-bottom: heavy $foreground-darken-3;
+    &:light {
+      border-bottom: heavy $foreground-lighten-3;
+    }
     &:ansi {
       border-bottom: solid $foreground-darken-3;
+      &:light {
+        border-bottom: solid $foreground-lighten-3;
+      }
     }
   }
   &:focus-within > Tabline .underline--bar {
@@ -773,8 +811,14 @@ ProgressBarContainer {
     text-opacity: 1 !important;
     tint: transparent !important;
     border-bottom: heavy $background-lighten-1;
+    &:light {
+      border-bottom: heavy $background-darken-1;
+    }
     &:ansi {
       border-bottom: solid $background-lighten-3;
+      &:light {
+      border-bottom: solid $background-darken-3;
+      }
     }
   }
 }

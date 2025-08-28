@@ -21,6 +21,26 @@ $scrollbar-corner-color: $primary-muted;
 
 * {
   scrollbar-size: 1 1;
+  &:ansi {
+    scrollbar-corner-color: transparent;
+    scrollbar-background: transparent;
+    scrollbar-background-hover: transparent;
+    scrollbar-background-active: transparent;
+  }
+}
+
+Input {
+  .input--placeholder {
+    color: $foreground-darken-1;
+  }
+  &:ansi .input--cursor {
+    color: $primary;
+    background: $background;
+  }
+  &:ansi .input--selection {
+    color: $background;
+    background: $primary;
+  }
 }
 
 Toast {
@@ -87,7 +107,6 @@ Toast {
 
 #pinned_sidebar_container,
 #file_list_container {
-  /* saving for when I add search bar */
   Input {
     padding: 0 0 0 1;
     margin: 0;
@@ -95,17 +114,6 @@ Toast {
     border: none;
     background: transparent;
     color: $foreground-lighten-1;
-    .input--placeholder {
-      color: $foreground-darken-1;
-    }
-    &:ansi .input--cursor {
-      color: $primary;
-      background: $background;
-    }
-    &:ansi .input--selection {
-      color: $background;
-      background: $primary;
-    }
   }
   OptionList {
     background: transparent;
@@ -126,6 +134,9 @@ Toast {
     text-overflow: clip;
     text-wrap: nowrap;
     width: auto;
+  }
+  TextArea * {
+    background: transparent;
   }
   &.clip {
     scrollbar-size: 0 0; /* scrollbars are useless, reminder */
@@ -157,14 +168,6 @@ Toast {
     padding: 0 1 0 1;
     overflow: hidden hidden;
     color: $foreground;
-    &:ansi .input--cursor {
-      color: $primary;
-      background: $background;
-    }
-    &:ansi .input--selection {
-      background: $primary;
-      color: $background;
-    }
   }
   Input.hide_border_bottom {
     border: $border-style $accent !important;
@@ -302,7 +305,10 @@ Toast {
   & > Input {
     display: none;
   }
-  &:focus-within > Input {
+  &:focus-within > Input,
+  Input.show,
+  & > Input:hover,
+  &:hover > Input {
      display: block;
   }
 }
@@ -351,6 +357,8 @@ Content.selected { color: red }
 
 FileList, PinnedSidebar, Clipboard {
   padding: 0 0 0 0;
+  .option-list--option-disabled { color: $border-blurred }
+  &:light .option-list--option-disabled { color: $border-blurred-light }
   .option-list--option-highlighted {
     color: $block-cursor-background;
     background: transparent;
@@ -429,9 +437,7 @@ ZDToDirectory {
   overflow-y: auto;
   border-title-align: center;
   border-subtitle-align: center;
-  Label {
-    min-height: 1
-  }
+  Label { min-height: 1 }
 }
 
 Dismissable {
@@ -639,69 +645,70 @@ ModalInput {
 
 ModalScreen Button:ansi {
   background: transparent;
-  &:hover {
-    border-top: tall $surface;
-    background: $surface-darken-1;
+  &:focus {
   }
   &.-active {
-    border-bottom: tall $surface-lighten-1;
-    border-top: tall $surface-darken-1;
+    border: round $surface-lighten-1;
     tint: transparent;
-    text-style: reverse;
-    color: white;
+    color: auto;
+    text-style: none;
   }
   &.-primary {
-    border: tall $primary-lighten-3;
-    border-bottom: tall $primary-darken-3;
+    border: round $primary-lighten-3;
+    color: white;
     &:hover {
-      border: tall $primary;
-      border-bottom: tall $primary-darken-3;
+      border: round $primary;
     }
     &.-active {
-      border: tall $primary-darken-3;
-      border-bottom: tall $primary-lighten-3;
+      border: round $primary-darken-3;
     }
   }
   &.-success {
-    border: tall $success-lighten-2;
-    border-bottom: tall $success-darken-3;
+    border: round $success-lighten-2;
+    color: white;
     &:hover {
-      border: tall $success;
-      border-bottom: tall $success-darken-3;
+      border: round $success;
     }
     &.-active {
-      border: tall $success-darken-2;
-      border-bottom: tall $success-lighten-2;
+      border: round $success-darken-2;
     }
   }
   &.-warning{
-    border: tall $warning-lighten-2;
-    border-bottom: tall $warning-darken-3;
+    border: round $warning-lighten-2;
+    color: white;
     &:hover {
-      border: tall $warning;
-      border-bottom: tall $warning-darken-3;
+      border: round $warning;
     }
     &.-active {
-      border: tall $warning-darken-2;
-      border-bottom: tall $warning-lighten-2;
+      border: round $warning-darken-2;
     }
   }
   &.-error {
-    border: tall $error-lighten-2;
-    border-bottom: tall $error-darken-3;
+    border: round $error-lighten-2;
+    color: white;
     &:hover {
-      border: tall $error;
-      border-bottom: tall $error-darken-3;
+      border: round $error;
     }
     &.-active {
-      border: tall $error-darken-2;
-      border-bottom: tall $error-lighten-2;
+      border: round $error-darken-2;
     }
   }
 }
 
-Tooltip { background: $background-lighten-1 }
-Tooltip:light { background: $background-darken-1; color: black; }
+Tooltip {
+  background: $background-lighten-1;
+  &:light {
+    background: $background-darken-1;
+    color: black;
+  }
+  &:ansi {
+    background: transparent;
+    border: round $border-blurred;
+  }
+  &:light:ansi {
+    border: round $border-blurred-light;
+  }
+}
 
 CommandInput { border: blank !important }
 

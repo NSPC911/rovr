@@ -162,6 +162,11 @@
           "type": "string",
           "default": "nord",
           "description": "The default theme. Can be changed while in rovr, but it is not persistent."
+        },
+        "transparent": {
+          "type": "boolean",
+          "default": false,
+          "description": "Use a transparent background."
         }
       }
     },

@@ -35,6 +35,7 @@ filesize_suffix = "decimal"
 [theme]
 # transparency will not be supported. using transparency scuffes up the entire ui.
 default = "nord"
+transparent = false
 
 [[custom_theme]]
 name = "Solarized Dark"

@@ -42,7 +42,7 @@ from rovr.navigation_widgets import (
     PathInput,
     UpButton,
 )
-from rovr.screens import DummyScreen, YesOrNo, ZDToDirectory
+from rovr.screens import YesOrNo, ZDToDirectory
 from rovr.search_container import SearchInput
 from rovr.themes import get_custom_themes
 from rovr.utils import config
@@ -130,6 +130,7 @@ class Application(App, inherit_bindings=False):
         for theme in get_custom_themes():
             self.register_theme(theme)
         self.theme = config["theme"]["default"]
+        self.ansi_color = config["theme"]["transparent"]
         # tooltips
         if config["interface"]["tooltips"]:
             self.query_one("#back").tooltip = "Go back in history"
@@ -296,15 +297,6 @@ class Application(App, inherit_bindings=False):
                     self.remove_class("zen")
                 else:
                     self.add_class("zen")
-            case "semicolon":
-                self.ansi_color = not self.ansi_color
-                await self.push_screen(DummyScreen())
-                filelist = self.query_one("#file_list")
-                utils.set_scuffed_subtitle(
-                    filelist.parent,
-                    "NORMAL",
-                    f"{filelist.highlighted + 1}/{filelist.option_count}",
-                )
 
     def on_app_blur(self, event: events.AppBlur) -> None:
         self.app_blurred = True

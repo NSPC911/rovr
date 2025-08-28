@@ -1,16 +1,18 @@
-/* Variables */
+/* Border Variables */
+$border-style: round;
 $border-blurred: $primary-background-lighten-3;
 $border-blurred-light: $primary-background;
 $border: $primary-lighten-3;
 $border-disabled: $primary-background-lighten-1;
-$border-style: round;
 
+/* Layout Dimensions */
 $pinned_sidebar_width: 20;
 $file_list_width: 1fr;
 $preview_sidebar_width: 35vw;
 $footer_unfocus_height: 8;
 $footer_focus_height: 10;
 
+/* Scrollbar Colors */
 $scrollbar: $primary;
 $scrollbar-hover: $primary-lighten-3;
 $scrollbar-active: $primary-lighten-3;
@@ -18,6 +20,7 @@ $scrollbar-background: $primary-muted;
 $scrollbar-background-hover: $primary-muted;
 $scrollbar-background-active: $primary-muted;
 $scrollbar-corner-color: $primary-muted;
+
 
 * {
   scrollbar-size: 1 1;
@@ -29,195 +32,7 @@ $scrollbar-corner-color: $primary-muted;
   }
 }
 
-Input {
-  .input--placeholder {
-    color: $foreground-darken-1;
-  }
-  &:ansi .input--cursor {
-    color: $primary;
-    background: $background;
-  }
-  &:ansi .input--selection {
-    color: $background;
-    background: $primary;
-  }
-}
-
-Toast {
-  max-height: 100%;
-  &.-information {
-    border-right: outer $success;
-  }
-  &.-warning {
-    border-right: outer $warning;
-  }
-  &.-error {
-    border-right: outer $error;
-  }
-}
-
-#menu {
-  align: left middle;
-  height: 3;
-  margin: 0 1 0 1;
-  padding: 0 1;
-  scrollbar-size: 0 0;
-  Button {
-    &:ansi {
-      background: transparent;
-    }
-    &:disabled {
-      opacity: 1 !important;
-      background-tint: transparent !important;
-      text-opacity: 1 !important;
-      color: $panel-lighten-3;
-      tint: transparent !important;
-    }
-    &:light:disabled {
-      color: $panel-darken-3;
-    }
-    &:ansi:hover {
-      color: $primary
-    }
-    &:light:ansi:hover {
-      color: $secondary
-    }
-  }
-}
-
-#main {
-  padding: 0 0;
-  height: 1fr;
-  align: center middle;
-  /* I legit have no clue why there is a random right padding and i cant get rid of it, so compensation with a left padding */
-  margin: 0 0 0 1;
-}
-
-#file_list_container {
-  height: 1fr;
-  border: none;
-  width: $file_list_width;
-}
-
-#pinned_sidebar_container {
-  height: 1fr;
-  margin: 0;
-  width: $pinned_sidebar_width;
-}
-
-#pinned_sidebar_container,
-#file_list_container {
-  Input {
-    padding: 0 0 0 1;
-    margin: 0;
-    height: 1;
-    border: none;
-    background: transparent;
-    color: $foreground-lighten-1;
-  }
-  OptionList {
-    background: transparent;
-    border: none;
-    margin: 0 0;
-  }
-}
-
-#preview_sidebar {
-  height: 1fr;
-  margin: 0;
-  width: $preview_sidebar_width;
-  layout: horizontal;
-  padding: 0 1;
-  overflow: auto auto;
-  scrollbar-size: 1 1;
-  & > Static {
-    text-overflow: clip;
-    text-wrap: nowrap;
-    width: auto;
-  }
-  TextArea * {
-    background: transparent;
-  }
-  &.clip {
-    scrollbar-size: 0 0; /* scrollbars are useless, reminder */
-  }
-  &.clip > Static {
-    width: 1fr;
-    overflow-x: hidden !important;
-  }
-  & > * {
-    background: transparent;
-    border: none;
-    padding: 0;
-    margin: 0;
-  }
-  & > FileList {
-    height: 1fr;
-  }
-}
-
-#below_menu {
-  margin: 0 1 0 1;
-  border: $border-style white;
-  max-height: 11;
-
-  Input {
-    height: 3;
-    width: 1fr;
-    margin: 0 1 0 1;
-    padding: 0 1 0 1;
-    overflow: hidden hidden;
-    color: $foreground;
-  }
-  Input.hide_border_bottom {
-    border: $border-style $accent !important;
-    border-bottom: none !important;
-    height: 3;
-  }
-  Button {
-    margin: 0 1;
-    height: 3;
-    max-width: 7;
-  }
-  PathAutoCompleteInput {
-    padding: 0 1 0 1;
-    margin: -1 1 0 25;
-    overlay: screen;
-    width: 1fr;
-    border: $border-style $accent;
-    border-top: none;
-    background: $background;
-    &:ansi {
-      background: transparent;
-    }
-    AutoCompleteList {
-      width: 1fr;
-      max-height: 4;
-      .option-list--option-highlighted {
-        color: $block-cursor-foreground;
-        background: $block-cursor-background;
-        text-style: $block-cursor-text-style;
-      }
-    }
-    Option {
-      width: 100%;
-    }
-  }
-}
-
-.option {
-  border: none;
-  height: 1;
-  max-width: 3;
-  width: 3;
-  padding: 0;
-  margin: 0 1 0 0;
-}
-
-#pinned_sidebar,
-#file_list,
-#file_list_visual { height: 1fr }
-
+/* border styling for main widgets */
 #menu,
 #below_menu,
 #pinned_sidebar_container,
@@ -257,13 +72,11 @@ Toast {
 #pinned_sidebar_container:focus-within,
 #file_list_container:focus-within,
 #preview_sidebar:focus-within,
-/* only while using textual-image */
 #preview_sidebar:focus,
 #path_switcher:focus-within,
 #zoxide_options:focus,
 #below_menu Button:focus,
 #below_menu Button:hover,
-/* This is when people maximize */
 #file_list.-maximized,
 #pinned_sidebar.-maximized,
 #preview_sidebar .inner_preview.-maximized,
@@ -284,32 +97,31 @@ Toast {
   }
 }
 
-#preview_sidebar,
-#pinned_sidebar { padding: 0 }
-
-#image_preview {
-  width: auto;
-  height: auto;
-  align: center bottom;
-}
-
 .hide,
 .hidden { display: none }
 
-#pinned_sidebar_container {
-  min-width: 15;
-  scrollbar-size: 0 0 !important;
-  & > PinnedSidebar {
-    scrollbar-size: 0 0 !important;
+Input {
+  .input--placeholder { color: $foreground-darken-1 }
+  &:ansi .input--cursor {
+    color: $primary;
+    background: $background;
   }
-  & > Input {
-    display: none;
+  &:ansi .input--selection {
+    color: $background;
+    background: $primary;
   }
-  &:focus-within > Input,
-  Input.show,
-  & > Input:hover,
-  &:hover > Input {
-     display: block;
+}
+
+Toast {
+  max-height: 100%;
+  &.-information { border-right: outer $success }
+  &.-warning { border-right: outer $warning }
+  &.-error { border-right: outer $error }
+  &:ansi {
+    background: transparent;
+    &.-information { border: $border-style $success }
+    &.-warning { border: $border-style $warning }
+    &.error { border: $border-style $error }
   }
 }
 
@@ -318,40 +130,296 @@ OptionList {
   text-overflow: ellipsis;
 }
 
-Screen.-filelistonly {
-  #pinned_sidebar_container,
-  #preview_sidebar,
-  #below_menu Button { display: none !important }
-  #below_menu PathAutoCompleteInput { margin: -1 1 0 1 !important }
+Bar { width: 1fr }
+
+Tooltip {
+  background: $background-lighten-1;
+  &:light {
+    background: $background-darken-1;
+    color: black;
+  }
+  &:ansi {
+    background: transparent;
+    border: round $border-blurred;
+  }
+  &:light:ansi { border: round $border-blurred-light }
 }
 
-Screen.-nopreview {
-  #preview_sidebar,
-  #below_menu Button { display: none !important }
-  #below_menu PathAutoCompleteInput { margin: -1 1 0 1 !important }
+CommandInput { border: blank !important }
+
+#headerArea {
+  padding: 0 1 0 1;
+  #newTabRight {
+    width: 1fr;
+    Button {
+      max-width: 3;
+      background: transparent;
+      color: $foreground;
+      &.-primary.-active {
+        color: $foreground;
+        background: $background
+      }
+      &.-active {
+        background: $background;
+        color: $foreground
+      }
+    }
+  }
+  Tabline {
+    TablineTab {
+      color: auto;
+      &:hover {
+        background: $boost-lighten-3;
+        color: $foreground;
+        &:ansi { background: transparent }
+      }
+      &.-active {
+        background: $primary;
+        color: $background;
+        &:hover {
+          background: $primary;
+          color: $background;
+        }
+     }
+    }
+    .underline--bar {
+      background: $background-lighten-1;
+      color: $primary;
+    }
+    &:light .underline--bar { background: $background-darken-1 }
+    &:ansi .underline--bar { background: $background-lighten-3 }
+    &:ansi:light .underline--bar { background: $background-darken-3 }
+  }
+
+  &:focus-within > HeaderClock,
+  &:focus-within > #newTabRight {
+    border-bottom: heavy $foreground-darken-3;
+    &:light { border-bottom: heavy $foreground-lighten-3 }
+    &:ansi {
+      border-bottom: solid $foreground-darken-3;
+      &:light { border-bottom: solid $foreground-lighten-3 }
+    }
+  }
+
+  &:focus-within > Tabline .underline--bar { background: $foreground-darken-3 }
+
+  HeaderClock, #newTabRight {
+    background: transparent;
+    dock: none;
+    opacity: 1 !important;
+    background-tint: transparent !important;
+    text-opacity: 1 !important;
+    tint: transparent !important;
+    border-bottom: heavy $background-lighten-1;
+    &:light { border-bottom: heavy $background-darken-1 }
+    &:ansi {
+      border-bottom: solid $background-lighten-3;
+      &:light { border-bottom: solid $background-darken-3 }
+    }
+  }
 }
 
-.zen {
-  #menu,
-  #below_menu,
-  #below_menu Input,
-  #below_menu Button,
-  #pinned_sidebar_container,
-  #preview_sidebar,
-  #footer { display: none !important }
+#menu {
+  align: left middle;
+  height: 3;
+  margin: 0 1 0 1;
+  padding: 0 1;
+  scrollbar-size: 0 0;
+  Button {
+    &:ansi { background: transparent }
+    &:disabled {
+      opacity: 1 !important;
+      background-tint: transparent !important;
+      text-opacity: 1 !important;
+      color: $panel-lighten-3;
+      tint: transparent !important;
+    }
+    &:light:disabled { color: $panel-darken-3 }
+    &:ansi:hover { color: $primary }
+    &:light:ansi:hover { color: $secondary }
+  }
+}
+
+#below_menu {
+  margin: 0 1 0 1;
+  max-height: 11;
+  Input {
+    height: 3;
+    width: 1fr;
+    margin: 0 1 0 1;
+    padding: 0 1 0 1;
+    overflow: hidden hidden;
+    color: $foreground;
+  }
+  Input.hide_border_bottom {
+    border: $border-style $accent !important;
+    border-bottom: none !important;
+    height: 3;
+  }
+  Button {
+    margin: 0 1;
+    height: 3;
+    max-width: 7;
+  }
+  PathAutoCompleteInput {
+    padding: 0 1 0 1;
+    margin: -1 1 0 25;
+    overlay: screen;
+    width: 1fr;
+    border: $border-style $accent;
+    border-top: none;
+    background: $background;
+    &:ansi { background: transparent }
+    AutoCompleteList {
+      width: 1fr;
+      max-height: 4;
+      .option-list--option-highlighted {
+        color: $block-cursor-foreground;
+        background: $block-cursor-background;
+        text-style: $block-cursor-text-style;
+      }
+    }
+    Option { width: 100% }
+  }
+}
+
+.option {
+  border: none;
+  height: 1;
+  max-width: 3;
+  width: 3;
+  padding: 0;
+  margin: 0 1 0 0;
+}
+
+#main {
+  padding: 0 0;
+  height: 1fr;
+  align: center middle;
+  /* I legit have no clue why there is a random right padding and i cant get rid of it, so compensation with a left padding */
+  margin: 0 0 0 1;
+}
+
+#file_list_container {
+  height: 1fr;
+  width: $file_list_width;
+}
+
+#file_list, #file_list_visual { height: 1fr }
+
+#pinned_sidebar_container,
+#file_list_container {
+  Input {
+    padding: 0 0 0 1;
+    margin: 0;
+    height: 1;
+    border: none;
+    background: transparent;
+    color: $foreground-lighten-1;
+  }
+  OptionList {
+    background: transparent;
+    border: none;
+    margin: 0 0;
+  }
+}
+
+#pinned_sidebar_container {
+  height: 1fr;
+  margin: 0;
+  width: $pinned_sidebar_width;
+  min-width: 15;
+  scrollbar-size: 0 0 !important;
+  & > PinnedSidebar { scrollbar-size: 0 0 !important }
+  & > Input { display: none }
+  &:focus-within > Input,
+  Input.show,
+  & > Input:hover,
+  &:hover > Input { display: block }
+}
+
+#pinned_sidebar { height: 1fr }
+#pinned_sidebar { padding: 0 }
+
+#preview_sidebar {
+  height: 1fr;
+  margin: 0;
+  width: $preview_sidebar_width;
+  layout: horizontal;
+  padding: 0 1;
+  overflow: auto auto;
+  scrollbar-size: 1 1;
+  & > Static {
+    text-overflow: clip;
+    text-wrap: nowrap;
+    width: auto;
+  }
+  TextArea * {
+    background: transparent;
+  }
+ /* scrollbars are useless, reminder */
+  &.clip { scrollbar-size: 0 0 }
+  &.clip > Static {
+    width: 1fr;
+    overflow-x: hidden !important;
+  }
+  & > * {
+    background: transparent;
+    border: none;
+    padding: 0;
+    margin: 0;
+  }
+  & > FileList { height: 1fr }
+}
+
+#preview_sidebar { padding: 0 }
+
+#image_preview {
+  width: auto;
+  height: auto;
+  align: center bottom;
 }
 
 #footer {
   height: $footer_unfocus_height;
   margin: 0 1;
+
   & > * {
     height: 1fr;
     background: transparent;
   }
+
   &:focus-within { height: $footer_focus_height }
 }
 
 #processes { padding: 0 0 0 1 }
+
+#metadata {
+  layout: horizontal;
+  padding-left: 1;
+  padding-right: 1;
+  & > VerticalGroup > Static {
+    text-wrap: nowrap;
+    text-overflow: ellipsis;
+  }
+}
+
+ProcessContainer {
+  scrollbar-gutter: stable;
+  margin: 0
+}
+
+ProgressBarContainer {
+  HorizontalGroup {
+    height: 1;
+    & > #icon { margin-right: 1 }
+  }
+  &.error .bar--bar,
+  &.error .bar--complete { color: $error }
+  &.done .bar--complete { color: $success }
+  .bar--indeterminate { color: $accent }
+  .bar--bar { color: $warning }
+}
 
 Content.selected { color: red }
 
@@ -388,21 +456,87 @@ FileList, PinnedSidebar, Clipboard {
     background: $primary;
     color: $background;
   }
-  &:blur {
-    .selection-list--button-highlighted {
-      background: transparent;
-      color: $primary
-    }
-    .selection-list--button-selected-highlighted {
-      background: transparent;
-      color: $primary
-    }
+  &:blur .selection-list--button-highlighted {
+    background: transparent;
+    color: $primary
+  }
+  &:blur .selection-list--button-selected-highlighted {
+    background: transparent;
+    color: $primary
+  }
+}
+
+/* Screen mode modifiers */
+Screen.-filelistonly {
+  #pinned_sidebar_container,
+  #preview_sidebar,
+  #below_menu Button { display: none !important }
+  #below_menu PathAutoCompleteInput { margin: -1 1 0 1 !important }
+}
+
+Screen.-nopreview {
+  #preview_sidebar,
+  #below_menu Button { display: none !important }
+  #below_menu PathAutoCompleteInput { margin: -1 1 0 1 !important }
+}
+
+.zen {
+  #menu,
+  #below_menu,
+  #below_menu Input,
+  #below_menu Button,
+  #pinned_sidebar_container,
+  #preview_sidebar,
+  #footer { display: none !important }
+}
+
+#dialog {
+  max-width: 57;
+  max-height: 15;
+  height: 75vh;
+  width: 75vw;
+  overflow-y: auto;
+  border-title-align: center;
+  border-subtitle-align: center;
+  Label { min-height: 1 }
+}
+
+ModalScreen Button:ansi {
+  background: transparent;
+  &.-active {
+    border: round $surface-lighten-1;
+    tint: transparent;
+    color: auto;
+    text-style: none;
+  }
+  &.-primary {
+    border: round $primary-lighten-3;
+    color: white;
+    &:hover { border: round $primary }
+    &.-active { border: round $primary-darken-3 }
+  }
+  &.-success {
+    border: round $success-lighten-2;
+    color: white;
+    &:hover { border: round $success }
+    &.-active { border: round $success-darken-2 }
+  }
+  &.-warning{
+    border: round $warning-lighten-2;
+    color: white;
+    &:hover { border: round $warning }
+    &.-active { border: round $warning-darken-2 }
+  }
+  &.-error {
+    border: round $error-lighten-2;
+    color: white;
+    &:hover { border: round $error }
+    &.-active { border: round $error-darken-2 }
   }
 }
 
 ZDToDirectory {
   align: center middle;
-
   #zoxide_input {
     width: 100%;
     max-width: 100%;
@@ -417,7 +551,6 @@ ZDToDirectory {
     background: transparent;
     border: $border-style $border;
     padding: 0;
-
     .option-list--option-highlighted {
       background: $border;
       color: $background;
@@ -427,17 +560,6 @@ ZDToDirectory {
     max-width: 50vw;
     max-height: 50vh;
   }
-}
-
-#dialog {
-  max-width: 57;
-  max-height: 15;
-  height: 75vh;
-  width: 75vw;
-  overflow-y: auto;
-  border-title-align: center;
-  border-subtitle-align: center;
-  Label { min-height: 1 }
 }
 
 Dismissable {
@@ -459,7 +581,6 @@ Dismissable {
   Container { align: center middle }
   Button { width: 50% }
 }
-
 
 YesOrNo {
   align: center middle;
@@ -504,7 +625,6 @@ YesOrNo {
     }
   }
 }
-
 
 CommonFileNameDoWhat {
   align: center middle;
@@ -615,7 +735,6 @@ DeleteFiles {
   }
 }
 
-
 ModalInput {
   align: center middle;
   HorizontalGroup {
@@ -638,197 +757,5 @@ ModalInput {
     scrollbar-size: 0 0;
     overflow-x: scroll;
   }
-  Label {
-    height: 1;
-  }
-}
-
-ModalScreen Button:ansi {
-  background: transparent;
-  &:focus {
-  }
-  &.-active {
-    border: round $surface-lighten-1;
-    tint: transparent;
-    color: auto;
-    text-style: none;
-  }
-  &.-primary {
-    border: round $primary-lighten-3;
-    color: white;
-    &:hover {
-      border: round $primary;
-    }
-    &.-active {
-      border: round $primary-darken-3;
-    }
-  }
-  &.-success {
-    border: round $success-lighten-2;
-    color: white;
-    &:hover {
-      border: round $success;
-    }
-    &.-active {
-      border: round $success-darken-2;
-    }
-  }
-  &.-warning{
-    border: round $warning-lighten-2;
-    color: white;
-    &:hover {
-      border: round $warning;
-    }
-    &.-active {
-      border: round $warning-darken-2;
-    }
-  }
-  &.-error {
-    border: round $error-lighten-2;
-    color: white;
-    &:hover {
-      border: round $error;
-    }
-    &.-active {
-      border: round $error-darken-2;
-    }
-  }
-}
-
-Tooltip {
-  background: $background-lighten-1;
-  &:light {
-    background: $background-darken-1;
-    color: black;
-  }
-  &:ansi {
-    background: transparent;
-    border: round $border-blurred;
-  }
-  &:light:ansi {
-    border: round $border-blurred-light;
-  }
-}
-
-CommandInput { border: blank !important }
-
-#metadata {
-  layout: horizontal;
-  padding-left: 1;
-  padding-right: 1;
-
-  & > VerticalGroup > Static {
-    text-wrap: nowrap;
-    text-overflow: ellipsis;
-  }
-}
-
-Bar { width: 1fr }
-
-ProcessContainer {
-  scrollbar-gutter: stable;
-  margin: 0
-}
-
-ProgressBarContainer {
-  HorizontalGroup {
-    height: 1;
-    & > #icon {
-      margin-right: 1;
-    }
-  }
-  &.error .bar--bar,
-  &.error .bar--complete { color: $error }
-  &.done .bar--complete { color: $success }
-  .bar--indeterminate { color: $accent }
-  .bar--bar { color: $warning }
-}
-#headerArea {
-  padding: 0 1 0 1;
-  #newTabRight {
-    width: 1fr;
-    Button {
-      max-width: 3;
-      background: transparent;
-      color: $foreground;
-      &.-primary.-active {
-        color: $foreground;
-        background: $background
-      }
-      &.-active {
-        background: $background;
-        color: $foreground
-      }
-    }
-  }
-  Tabline {
-    TablineTab {
-      color: auto;
-      &:hover {
-        background: $boost-lighten-3;
-        color: $foreground;
-        &:ansi {
-          background: transparent;
-        }
-      }
-      &.-active {
-        background: $primary;
-        color: $background;
-        &:hover {
-          background: $primary;
-          color: $background;
-        }
-      }
-    }
-    .underline--bar {
-      background: $background-lighten-1;
-      color: $primary;
-    }
-    &:light .underline--bar {
-      background: $background-darken-1;
-    }
-    &:ansi .underline--bar {
-      background: $background-lighten-3;
-    }
-    &:ansi:light .underline--bar {
-      background: $background-darken-3;
-    }
-  }
-  &:focus-within > HeaderClock,
-  &:focus-within > #newTabRight {
-    border-bottom: heavy $foreground-darken-3;
-    &:light {
-      border-bottom: heavy $foreground-lighten-3;
-    }
-    &:ansi {
-      border-bottom: solid $foreground-darken-3;
-      &:light {
-        border-bottom: solid $foreground-lighten-3;
-      }
-    }
-  }
-  &:focus-within > Tabline .underline--bar {
-    background: $foreground-darken-3;
-  }
-  HeaderClock, #newTabRight {
-    background: transparent;
-    dock: none;
-    opacity: 1 !important;
-    background-tint: transparent !important;
-    text-opacity: 1 !important;
-    tint: transparent !important;
-    border-bottom: heavy $background-lighten-1;
-    &:light {
-      border-bottom: heavy $background-darken-1;
-    }
-    &:ansi {
-      border-bottom: solid $background-lighten-3;
-      &:light {
-      border-bottom: solid $background-darken-3;
-      }
-    }
-  }
-}
-PinnedSidebarOption:disabled {
-  display: none !important;
+  Label { height: 1 }
 }

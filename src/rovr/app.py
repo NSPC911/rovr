@@ -1,5 +1,5 @@
+import asyncio
 import shutil
-from asyncio import sleep as asyncio_sleep
 from contextlib import suppress
 from os import chdir, getcwd, listdir, path
 from types import SimpleNamespace
@@ -68,7 +68,6 @@ class Application(App, inherit_bindings=False):
 
     def __init__(self, *args, **kwargs) -> None:
         super().__init__(*args, **kwargs)
-        self.prev_selected_option = None
         self.app_blurred = False
 
     def compose(self) -> ComposeResult:
@@ -120,6 +119,7 @@ class Application(App, inherit_bindings=False):
     def on_mount(self) -> None:
         # border titles
         self.query_one("#menu").border_title = "Options"
+        self.query_one("#menu").can_focus = False
         self.query_one("#below_menu").border_title = "Directory Actions"
         self.query_one("#pinned_sidebar_container").border_title = "Sidebar"
         self.query_one("#file_list_container").border_title = "Files"
@@ -140,20 +140,18 @@ class Application(App, inherit_bindings=False):
         # make the file list
         self.query_one("#file_list").update_file_list()
         self.query_one("#file_list").focus()
-        # start watcher~
+        # start mini watcher
         self.watch_for_changes_and_update()
 
-    def action_focus_next(self) -> None:
+    @work
+    async def action_focus_next(self) -> None:
         if config["settings"]["allow_tab_nav"]:
             super().action_focus_next()
-        else:
-            return
 
-    def action_focus_previous(self) -> None:
+    @work
+    async def action_focus_previous(self) -> None:
         if config["settings"]["allow_tab_nav"]:
             super().action_focus_previous()
-        else:
-            return
 
     async def on_key(self, event: events.Key) -> None:
         # Not really sure why this can happen, but I will still handle this
@@ -355,7 +353,7 @@ class Application(App, inherit_bindings=False):
         self._cwd = getcwd()
         self._items = listdir(self._cwd)
         while True:
-            await asyncio_sleep(1)
+            await asyncio.sleep(1)
             new_cwd = getcwd()
             new_cwd_items = listdir(new_cwd)
             if self._cwd != new_cwd:

@@ -119,9 +119,22 @@ uv run pre-commit run --all-files
    ```
 
 5. **File Preview Testing**:
-   - Navigate to different file types (.py, .md, .json)
-   - Verify previews work correctly
+   - Navigate to different file types (.py, .md, .json, .toml)
+   - Verify previews work correctly in the right panel
    - Test with/without `bat` command available
+   - Test image preview functionality
+
+6. **Screen/Modal Testing**:
+   - Test file deletion modal (`src/rovr/screens/delete_files.py`)
+   - Test permission modal (`src/rovr/screens/give_permission.py`)
+   - Test input dialogs for file operations
+   - Verify keyboard navigation works in modals
+
+7. **Configuration Testing**:
+   - Verify config loads from `~/.config/rovr/` (or platform equivalent)
+   - Test theme switching functionality
+   - Verify keybind customization works
+   - Test plugin system (bat integration, zen mode)
 
 ## Documentation Development
 
@@ -183,9 +196,75 @@ ALWAYS ensure your changes pass:
 uv run pre-commit run --all-files
 ```
 
-## Repository Structure
+## Common Tasks Reference
 
-### Key Directories
+The following are outputs from frequently run commands. Reference them instead of viewing, searching, or running bash commands to save time.
+
+### Repository Root Structure
+```
+/home/runner/work/rovr/rovr
+├── .git/
+├── .github/
+│   ├── ISSUE_TEMPLATE/
+│   ├── workflows/
+│   │   ├── deploy.yml
+│   │   └── formatting.yml
+│   └── copilot-instructions.md
+├── .gitignore
+├── .pre-commit-config.yaml
+├── .python-version (contains: 3.13)
+├── README.md
+├── docs/ (Astro/Starlight documentation)
+├── img/
+├── package.json (legacy file)
+├── pnpm-lock.yaml (legacy file) 
+├── pyproject.toml (main project config)
+├── requirements.txt (frozen dependencies)
+├── src/
+│   └── rovr/ (main Python package)
+├── uv.lock
+```
+
+### Main Source Structure
+```
+src/rovr/
+├── __init__.py
+├── __main__.py (CLI entry point)
+├── app.py (main application)
+├── action_buttons/
+├── config/ (configuration management)
+│   ├── config.toml (default config)
+│   ├── pins.json (pinned directories)
+│   └── schema.json (config schema)
+├── core/ (main TUI components)
+│   ├── file_list.py
+│   ├── pinned_sidebar.py
+│   └── preview_container.py
+├── screens/ (modal dialogs)
+│   ├── delete_files.py
+│   ├── give_permission.py
+│   ├── input.py
+│   └── _tester.py (development helper)
+├── style.tcss (Textual CSS styling)
+├── themes.py (theme system)
+└── utils.py (utility functions)
+```
+
+### Key Configuration Outputs
+
+#### pyproject.toml Summary
+- **Build system**: hatchling
+- **Python requirement**: >=3.13
+- **Main dependencies**: textual, click, pillow, psutil
+- **Dev dependencies**: ruff, commitizen, poethepoet, textual-dev
+- **Scripts**: `rovr = "rovr.__main__:main"`
+
+#### Pre-commit Configuration
+- **Ruff formatting and linting** (auto-fix enabled)
+- **Type checking with ty** (ignores unresolved-import)
+
+
+## Repository Architecture
 - `src/rovr/` - Main Python package
   - `src/rovr/app.py` - Main application entry point
   - `src/rovr/core/` - Core TUI components
@@ -227,6 +306,15 @@ uv run pre-commit run --all-files
 2. Regenerate schema: `uv run poe gen-schema`
 3. Update documentation
 4. Test configuration loading
+
+### Development Helpers
+
+The repository includes a modal testing helper:
+```bash
+# Test specific screens/modals during development
+python src/rovr/screens/_tester.py
+```
+Edit `_tester.py` to test different modal screens by changing the screen name in the `push_screen` call.
 
 ## Troubleshooting
 

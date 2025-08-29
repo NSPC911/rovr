@@ -11,11 +11,8 @@ from textual import events, on, work
 from textual.app import ComposeResult
 from textual.binding import Binding, BindingType
 from textual.containers import Container
-from textual.content import Content
-from textual.widgets import OptionList, Static, TextArea
-from textual.widgets.option_list import Option
+from textual.widgets import Static, TextArea
 
-from rovr import utils
 from rovr.core import FileList
 from rovr.extras.classes import Archive
 from rovr.maps import ARCHIVE_EXTENSIONS, EXT_TO_LANG_MAP, PIL_EXTENSIONS
@@ -401,16 +398,17 @@ class PreviewContainer(Container):
             await self.remove_children()
             self.remove_class("bat", "full", "clip")
 
-            # TODO: use normal FileList instead of ArchiveFileList
+            # Use normal FileList instead of ArchiveFileList
             await self.mount(
-                ArchiveFileList(
+                FileList(
                     id="archive_preview",
                     classes="file-list inner_preview",
+                    dummy=True,
                 )
             )
             self._current_preview_type = "archive"
 
-        self.query_one("#archive_preview", ArchiveFileList).create_list(
+        self.query_one("#archive_preview", FileList).create_archive_list(
             self._current_content
         )
         self.border_title = "Archive Preview"
@@ -606,57 +604,3 @@ class PreviewContainer(Container):
     @on(events.Show)
     def when_become_visible(self, event: events.Show) -> None:
         self.any_in_queue()
-
-
-class ArchiveFileList(OptionList, inherit_bindings=False):
-    BINDINGS: ClassVar[list[BindingType]] = (
-        [
-            Binding(bind, "cursor_down", "Down", show=False)
-            for bind in config["keybinds"]["down"]
-        ]
-        + [
-            Binding(bind, "last", "Last", show=False)
-            for bind in config["keybinds"]["end"]
-        ]
-        + [
-            Binding(bind, "select", "Select", show=False)
-            for bind in config["keybinds"]["down_tree"]
-        ]
-        + [
-            Binding(bind, "first", "First", show=False)
-            for bind in config["keybinds"]["home"]
-        ]
-        + [
-            Binding(bind, "page_down", "Page Down", show=False)
-            for bind in config["keybinds"]["page_down"]
-        ]
-        + [
-            Binding(bind, "page_up", "Page Up", show=False)
-            for bind in config["keybinds"]["page_up"]
-        ]
-        + [
-            Binding(bind, "cursor_up", "Up", show=False)
-            for bind in config["keybinds"]["up"]
-        ]
-    )
-
-    def __init__(self, *args, **kwargs) -> None:
-        super().__init__(*args, **kwargs)
-
-    def create_list(self, file_list: list[str]) -> None:
-        self.clear_options()
-        if not file_list:
-            self.add_option(Option("  --no-files--", id="", disabled=True))
-            return
-        for file_path in file_list:
-            if file_path.endswith("/"):
-                icon = utils.get_icon_for_folder(file_path.strip("/"))
-            else:
-                icon = utils.get_icon_for_file(file_path)
-            self.add_option(
-                Option(
-                    Content.from_markup(
-                        f" [{icon[1]}]{icon[0]}[/{icon[1]}] {file_path}"
-                    ),
-                )
-            )

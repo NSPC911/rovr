@@ -247,6 +247,40 @@ class FileList(SelectionList, inherit_bindings=False):
         # somehow prevents more debouncing, ill take it
         self.refresh(repaint=True, layout=True)
 
+    def create_archive_list(self, file_list: list[str]) -> None:
+        """Create a list display for archive file contents.
+
+        Args:
+            file_list (list[str]): List of file paths from archive contents.
+        """
+        self.clear_options()
+        self.list_of_options = []
+
+        if not file_list:
+            self.list_of_options.append(
+                Selection("  --no-files--", value="", id="", disabled=True)
+            )
+        else:
+            for file_path in file_list:
+                if file_path.endswith("/"):
+                    icon = utils.get_icon_for_folder(file_path.strip("/"))
+                else:
+                    icon = utils.get_icon_for_file(file_path)
+
+                # Create a selection widget similar to FileListSelectionWidget but simpler
+                # since we don't have dir_entry metadata for archive contents
+                self.list_of_options.append(
+                    Selection(
+                        f" [{icon[1]}]{icon[0]}[/{icon[1]}] {file_path}",
+                        value=utils.compress(file_path),
+                        id=utils.compress(file_path),
+                        disabled=True,  # Archive contents are not interactive like regular files
+                    )
+                )
+
+        self.add_options(self.list_of_options)
+        self.refresh(repaint=True, layout=True)
+
     async def on_selection_list_selected_changed(
         self, event: SelectionList.SelectedChanged
     ) -> None:

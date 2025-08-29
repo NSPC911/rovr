@@ -21,6 +21,7 @@
 
 - [Screenshot](#screenshot)
 - [Installation](#installation)
+- [Running from source](#running-from-source)
 - [FAQ](#faq)
 <!--toc:end-->
 
@@ -32,7 +33,7 @@
 
 ```pwsh
 # Test the main branch
-uvx --from git+https://github.com/NSPC911/rovr.git -q rovr --python 3.13
+uvx git+https://github.com/NSPC911/rovr.git
 # Install
 ## uv (my fav)
 uv tool install rovr
@@ -45,17 +46,20 @@ pip install rovr
 ### Running from source
 
 ```pwsh
-cd /path/to/rovr
 uv run poe run
 ```
 
-Running in dev mode to see debug output, logs, and events from rovr
+Running in dev mode to see debug outputs and logs
 ```pwsh
-# Runs a separate console to capture debug output from your TUI app
-uv run poe log
-# Runs your app in development mode and sends debug info to the console
+# Runs it in development mode, allowing a connected console
+# to capture the output of its print statements
 uv run poe dev
+# Runs a separate console to capture print statements
+uv run poe log
+# capture everything
+uv run textual console
 ```
+For more info on Textual's console, refer to https://textual.textualize.io/guide/devtools/#console
 
 ### FAQ
 

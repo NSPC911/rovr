@@ -574,32 +574,40 @@ class PreviewContainer(Container):
 
     async def on_key(self, event: events.Key) -> None:
         """Check for vim keybinds."""
-        if self.border_title == "File Preview (bat)":
+        if (
+            self.border_title == "File Preview (bat)"
+            or self.border_title == "Archive Preview"
+        ):
+            widget = (
+                self
+                if self.border_title.endswith("(bat)")
+                else self.query_one(FileList)
+            )
             match event.key:
                 case key if key in config["keybinds"]["up"]:
                     event.stop()
-                    self.scroll_up(animate=False)
+                    widget.scroll_up(animate=False)
                 case key if key in config["keybinds"]["down"]:
                     event.stop()
-                    self.scroll_down(animate=False)
+                    widget.scroll_down(animate=False)
                 case key if key in config["keybinds"]["page_up"]:
                     event.stop()
-                    self.scroll_page_up(animate=False)
+                    widget.scroll_page_up(animate=False)
                 case key if key in config["keybinds"]["page_down"]:
                     event.stop()
-                    self.scroll_page_down(animate=False)
+                    widget.scroll_page_down(animate=False)
                 case key if key in config["keybinds"]["home"]:
                     event.stop()
-                    self.scroll_home(animate=False)
+                    widget.scroll_home(animate=False)
                 case key if key in config["keybinds"]["end"]:
                     event.stop()
-                    self.scroll_end(animate=False)
+                    widget.scroll_end(animate=False)
                 case key if key in config["keybinds"]["preview_scroll_left"]:
                     event.stop()
-                    self.scroll_left(animate=False)
+                    widget.scroll_left(animate=False)
                 case key if key in config["keybinds"]["preview_scroll_right"]:
                     event.stop()
-                    self.scroll_right(animate=False)
+                    widget.scroll_right(animate=False)
 
     @on(events.Show)
     def when_become_visible(self, event: events.Show) -> None:

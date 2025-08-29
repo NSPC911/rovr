@@ -93,8 +93,8 @@ Vertical(id="root")
         id="folder_preview",
         class="file-list inner_preview"
       ) -> SelectionList
-      ArchiveFileList(id="archive_preview", class="file-list inner_preview") -> OptionList
-        Option()
+      FileList(id="archive_preview", class="file-list inner_preview") -> SelectionList
+        FileListSelectionWidget() -> Selection
   HorizontalGroup(id="footer")
     ProcessContainer() -> VerticalScroll
       ProgressBarContainer() -> VerticalGroup

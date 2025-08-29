@@ -42,6 +42,21 @@ pipx install rovr
 pip install rovr
 ```
 
+### Running from source
+
+```pwsh
+cd /path/to/rovr
+uv run poe run
+```
+
+Running in dev mode to see debug output, logs, and events from rovr
+```pwsh
+# Runs a separate console to capture debug output from your TUI app
+uv run poe log
+# Runs your app in development mode and sends debug info to the console
+uv run poe dev
+```
+
 ### FAQ
 
 1. There isn't X theme/Why isn't Y theme available?

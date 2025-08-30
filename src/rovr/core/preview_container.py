@@ -12,8 +12,7 @@ from textual.app import ComposeResult
 from textual.binding import Binding, BindingType
 from textual.containers import Container
 from textual.widgets import Static, TextArea
-from textual_pdf import PDFViewer
-from textual_pdf.exceptions import NotAPDFError, PDFRuntimeError
+from textual_pdf import NotAPDFError, PDFHasAPasswordError, PDFRuntimeError, PDFViewer
 
 from rovr.core import FileList
 from rovr.extras.classes import Archive
@@ -353,12 +352,17 @@ class PreviewContainer(Container):
                 await self.mount(pdf_widget)
                 pdf_widget.can_focus = True
                 self._current_preview_type = "pdf"
-            except (NotAPDFError, PDFRuntimeError, FileNotFoundError):
+            except (
+                NotAPDFError,
+                PDFRuntimeError,
+                FileNotFoundError,
+                PDFHasAPasswordError,
+            ):
                 await self.mount(
                     CustomTextArea(
                         id="text_preview",
                         show_line_numbers=True,
-                        soft_wrap=False,
+                        soft_wrap=True,
                         read_only=True,
                         text=config["interface"]["preview_error"],
                         language="markdown",
@@ -368,12 +372,18 @@ class PreviewContainer(Container):
         else:
             try:
                 self.query_one("#pdf_preview").path = self._current_file_path
-            except (NotAPDFError, PDFRuntimeError, FileNotFoundError):
+            except (
+                NotAPDFError,
+                PDFRuntimeError,
+                FileNotFoundError,
+                PDFHasAPasswordError,
+            ):
+                await self.remove_children()
                 await self.mount(
                     CustomTextArea(
                         id="text_preview",
                         show_line_numbers=True,
-                        soft_wrap=False,
+                        soft_wrap=True,
                         read_only=True,
                         text=config["interface"]["preview_error"],
                         language="markdown",
@@ -381,6 +391,7 @@ class PreviewContainer(Container):
                     )
                 )
                 self._current_preview_type = "none"
+                self.border_subtitle = ""
         self.border_title = "PDF Preview"
         if self._current_preview_type == "pdf":
             pdf_widget: PDFViewer = self.query_one("#pdf_preview")
@@ -643,6 +654,9 @@ class PreviewContainer(Container):
         """Check for keybinds."""
         if self.border_title == "PDF Preview":
             widget: PDFViewer = self.query_one("*")
+            if not isinstance(widget, PDFViewer):
+                # error rendering it
+                return
             match event.key:
                 case key if (
                     key

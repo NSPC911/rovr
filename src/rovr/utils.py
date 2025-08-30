@@ -679,8 +679,35 @@ def get_mounted_drives() -> list:
                 for p in partitions
                 if p.device and ":" in p.device
             ]
+        elif platform.system() == "Darwin":
+            # For macOS, filter out system volumes and keep only user-relevant drives
+            for p in partitions:
+                # Skip excluded filesystem types
+                if p.fstype in ("autofs", "devfs", "devtmpfs", "tmpfs"):
+                    continue
+
+                # Always include root filesystem
+                if p.mountpoint == "/":
+                    drives.append(p.mountpoint)
+                    continue
+
+                # Always include external volumes under /Volumes/
+                if p.mountpoint.startswith("/Volumes/"):
+                    drives.append(p.mountpoint)
+                    continue
+
+                # Skip system volumes under /System/Volumes/
+                if p.mountpoint.startswith("/System/Volumes/"):
+                    continue
+
+                # Skip other system paths
+                if p.mountpoint.startswith(("/System/", "/dev", "/private")):
+                    continue
+
+                # Include other potentially useful mount points
+                drives.append(p.mountpoint)
         else:
-            # For Unix-like systems, return the mount points
+            # For other Unix-like systems, return the mount points
             drives = [
                 p.mountpoint
                 for p in partitions

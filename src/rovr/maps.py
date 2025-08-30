@@ -499,6 +499,13 @@ ARCHIVE_EXTENSIONS = [
     ".7z",
 ]
 
+PDF_EXTENSIONS = [
+    # I haven't gotten deep into what pymupdf supports
+    # so I'm leaving this as a list
+    # ?TODO: find out the extensions/formats pymupdf + fitz support
+    ".pdf"
+]
+
 PIL_EXTENSIONS = [
     # reminder that stuff can also not work, just remove it if it doesnt work
     ".avif",

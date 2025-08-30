@@ -12,10 +12,17 @@ from textual.app import ComposeResult
 from textual.binding import Binding, BindingType
 from textual.containers import Container
 from textual.widgets import Static, TextArea
+from textual_pdf import PDFViewer
+from textual_pdf.exceptions import NotAPDFError, PDFRuntimeError
 
 from rovr.core import FileList
 from rovr.extras.classes import Archive
-from rovr.maps import ARCHIVE_EXTENSIONS, EXT_TO_LANG_MAP, PIL_EXTENSIONS
+from rovr.maps import (
+    ARCHIVE_EXTENSIONS,
+    EXT_TO_LANG_MAP,
+    PDF_EXTENSIONS,
+    PIL_EXTENSIONS,
+)
 from rovr.utils import config
 
 
@@ -171,16 +178,16 @@ class PreviewContainer(Container):
             self.remove_class("bat", "full", "clip")
 
             try:
-                await self.mount(
-                    timg.__dict__[
-                        config["settings"]["image_protocol"] + "Image"
-                    ](
-                        self._current_file_path,
-                        id="image_preview",
-                        classes="inner_preview",
-                    )
+                img_widget = timg.__dict__[
+                    config["settings"]["image_protocol"] + "Image"
+                ](
+                    self._current_file_path,
+                    id="image_preview",
+                    classes="inner_preview",
                 )
-                self.query_one("#image_preview").can_focus = True
+                await self.mount(img_widget)
+                img_widget.can_focus = True
+                self._current_preview_type = "image"
             except FileNotFoundError:
                 await self.mount(
                     CustomTextArea(
@@ -193,7 +200,6 @@ class PreviewContainer(Container):
                         compact=True,
                     )
                 )
-            self._current_preview_type = "image"
         else:
             try:
                 self.query_one("#image_preview").image = self._current_file_path
@@ -247,6 +253,7 @@ class PreviewContainer(Container):
                     self.add_class("bar")
                     self._current_preview_type = "bat"
                 else:
+                    # TODO: add a try except here
                     self.query_one("#text_preview", Static).update(new_content)
 
                 self.border_title = "File Preview (bat)"
@@ -329,8 +336,66 @@ class PreviewContainer(Container):
 
         self.border_title = "File Preview"
 
+    async def _show_pdf_preview(self) -> None:
+        if self._current_preview_type != "pdf":
+            self._current_preview_type = "none"
+            await self.remove_children()
+            self.remove_class("bat", "full", "clip")
+
+            try:
+                pdf_widget = PDFViewer(
+                    self._current_file_path,
+                    protocol=config["settings"]["image_protocol"],
+                    use_keys=False,
+                    id="pdf_preview",
+                    classes="inner_preview",
+                )
+                await self.mount(pdf_widget)
+                pdf_widget.can_focus = True
+                self._current_preview_type = "pdf"
+            except (NotAPDFError, PDFRuntimeError, FileNotFoundError):
+                await self.mount(
+                    CustomTextArea(
+                        id="text_preview",
+                        show_line_numbers=True,
+                        soft_wrap=False,
+                        read_only=True,
+                        text=config["interface"]["preview_error"],
+                        language="markdown",
+                        compact=True,
+                    )
+                )
+        else:
+            try:
+                self.query_one("#pdf_preview").path = self._current_file_path
+            except (NotAPDFError, PDFRuntimeError, FileNotFoundError):
+                await self.mount(
+                    CustomTextArea(
+                        id="text_preview",
+                        show_line_numbers=True,
+                        soft_wrap=False,
+                        read_only=True,
+                        text=config["interface"]["preview_error"],
+                        language="markdown",
+                        compact=True,
+                    )
+                )
+                self._current_preview_type = "none"
+        self.border_title = "PDF Preview"
+        if self._current_preview_type == "pdf":
+            pdf_widget: PDFViewer = self.query_one("#pdf_preview")
+            self.border_subtitle = (
+                f"Page {pdf_widget.current_page + 1}/{pdf_widget.total_pages}"
+            )
+
     async def _render_preview(self) -> None:
         """Render function dispatcher."""
+        if self._is_pdf:
+            await self._show_pdf_preview()
+            return
+
+        self.border_subtitle = ""
+
         if self._current_file_path is None:
             return
 
@@ -454,6 +519,7 @@ class PreviewContainer(Container):
         else:
             is_image = any(file_path.endswith(ext) for ext in PIL_EXTENSIONS)
             is_archive = any(file_path.endswith(ext) for ext in ARCHIVE_EXTENSIONS)
+            is_pdf = any(file_path.endswith(ext) for ext in PDF_EXTENSIONS)
             content = None
             if is_archive:
                 try:
@@ -512,7 +578,7 @@ class PreviewContainer(Container):
                     FileNotFoundError,
                 ):
                     content = [config["interface"]["preview_error"]]
-            elif not is_image:
+            elif not is_image and not is_pdf:
                 try:
                     with open(file_path, "r", encoding="utf-8") as f:
                         content = f.read()
@@ -530,6 +596,7 @@ class PreviewContainer(Container):
                 is_dir=False,
                 is_image=is_image,
                 is_archive=is_archive,
+                is_pdf=is_pdf,
                 content=content,
             )
 
@@ -544,6 +611,7 @@ class PreviewContainer(Container):
         is_dir: bool,
         is_image: bool = False,
         is_archive: bool = False,
+        is_pdf: bool = False,
         content: str | list[str] | None = None,
     ) -> None:
         """
@@ -557,6 +625,7 @@ class PreviewContainer(Container):
         else:
             self._is_image = is_image
             self._is_archive = is_archive
+            self._is_pdf = is_pdf
             self._current_content = content
             await self._render_preview()
 
@@ -571,16 +640,41 @@ class PreviewContainer(Container):
             self._initial_height = event.size.height
 
     async def on_key(self, event: events.Key) -> None:
-        """Check for vim keybinds."""
-        if (
-            self.border_title == "File Preview (bat)"
-            or self.border_title == "Archive Preview"
-        ):
-            widget = (
-                self
-                if self.border_title.endswith("(bat)")
-                else self.query_one(FileList)
-            )
+        """Check for keybinds."""
+        if self.border_title == "PDF Preview":
+            widget: PDFViewer = self.query_one("*")
+            match event.key:
+                case key if (
+                    key
+                    in config["keybinds"]["up"]
+                    + config["keybinds"]["page_up"]
+                    + config["keybinds"]["preview_scroll_left"]
+                ):
+                    event.stop()
+                    widget.previous_page()
+                case key if (
+                    key
+                    in config["keybinds"]["down"]
+                    + config["keybinds"]["page_down"]
+                    + config["keybinds"]["preview_scroll_right"]
+                ):
+                    event.stop()
+                    widget.next_page()
+                case key if key in config["keybinds"]["home"]:
+                    event.stop()
+                    widget.current_page = 0
+                case key if key in config["keybinds"]["end"]:
+                    event.stop()
+                    widget.current_page = widget.total_pages - 1
+            new_subtitle = f"Page {widget.current_page + 1}/{widget.total_pages}"
+            if new_subtitle != self.border_subtitle:
+                self.border_subtitle = new_subtitle
+            return
+        if self.border_title in ["Archive Preview", "File Preview (bat)"]:
+            if self.border_title.endswith("(bat)"):
+                widget = self
+            else:
+                widget = self.query_one("*")
             match event.key:
                 case key if key in config["keybinds"]["up"]:
                     event.stop()

@@ -27,6 +27,7 @@ dependencies = [
   "send2trash>=1.8.3",
   "textual-autocomplete>=4.0.4",
   "textual-image[textual]>=0.8.2",
+  "textual-pdf>=0.1.1",
   "textual[syntax]>=3.3.0",
   "toml>=0.10.2",
   "tree-sitter>=0.24.0",

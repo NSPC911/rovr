@@ -550,10 +550,21 @@ class ProcessContainer(VerticalScroll):
             if bar.progress_bar.total is None:
                 bar.progress_bar.total = 1
             if isinstance(e, ValueError) and "Password" in e.__str__():
-                self.app.call_from_thread(
-                    self.app.push_screen_wait,
-                    Dismissable("Password-protected ZIP files cannot be unzipped."),
-                )
+                if "ZIP" in e.__str__():
+                    self.app.call_from_thread(
+                        self.app.push_screen_wait,
+                        Dismissable("Password-protected ZIP files cannot be unzipped."),
+                    )
+                elif "RAR" in e.__str__():
+                    self.app.call_from_thread(
+                        self.app.push_screen_wait,
+                        Dismissable("Password-protected RAR files cannot be unzipped."),
+                    )
+                else:
+                    self.app.call_from_thread(
+                        self.app.push_screen_wait,
+                        Dismissable("Password-protected archive files cannot be extracted.")
+                    )
             else:
                 self.app.call_from_thread(
                     self.app.push_screen_wait,
@@ -574,6 +585,8 @@ class ProcessContainer(VerticalScroll):
                 "Error extracting archive.",
             )
             self.app.call_from_thread(bar.add_class, "error")
+            if bar.progress_bar.total is None:
+                bar.progress_bar.total = 1
             self.app.call_from_thread(
                 self.app.push_screen_wait,
                 Dismissable(f"Unzipping failed due to\n{e}\nProcess Aborted."),

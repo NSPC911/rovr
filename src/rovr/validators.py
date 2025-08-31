@@ -44,3 +44,15 @@ class EndsWithAnArchiveExtension(Validator):
             return self.success()
         else:
             return self.failure()
+
+
+class EndsWithRar(Validator):
+    def __init__(self) -> None:
+        super().__init__(failure_description="RAR files cannot be created.")
+        self.strict = True
+
+    def validate(self, value: str) -> ValidationResult:
+        if value.endswith(".rar"):
+            return self.failure()
+        else:
+            return self.success()

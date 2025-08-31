@@ -496,7 +496,7 @@ ARCHIVE_EXTENSIONS = [
     ".gz",
     ".bz2",
     ".xz",
-    ".7z",
+    ".rar",
 ]
 
 PIL_EXTENSIONS = [

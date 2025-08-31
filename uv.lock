@@ -736,6 +736,15 @@ wheels = [
 ]
 
 [[package]]
+name = "rarfile"
+version = "4.2"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/26/3f/3118a797444e7e30e784921c4bfafb6500fb288a0c84cb8c32ed15853c16/rarfile-4.2.tar.gz", hash = "sha256:8e1c8e72d0845ad2b32a47ab11a719bc2e41165ec101fd4d3fe9e92aa3f469ef", size = 153476, upload-time = "2024-04-03T17:10:53.798Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/62/fc/ab37559419ca36dd8dd317c3a98395ed4dcee2beeb28bf6059b972906727/rarfile-4.2-py3-none-any.whl", hash = "sha256:8757e1e3757e32962e229cab2432efc1f15f210823cc96ccba0f6a39d17370c9", size = 29052, upload-time = "2024-04-03T17:10:52.632Z" },
+]
+
+[[package]]
 name = "referencing"
 version = "0.36.2"
 source = { registry = "https://pypi.org/simple" }
@@ -789,6 +798,7 @@ dependencies = [
     { name = "pillow" },
     { name = "platformdirs" },
     { name = "psutil" },
+    { name = "rarfile" },
     { name = "send2trash" },
     { name = "textual", extra = ["syntax"] },
     { name = "textual-autocomplete" },
@@ -817,6 +827,7 @@ requires-dist = [
     { name = "pillow", specifier = ">=11.2.1" },
     { name = "platformdirs", specifier = ">=4.3.8" },
     { name = "psutil", specifier = ">=7.0.0" },
+    { name = "rarfile", specifier = ">=4.2" },
     { name = "send2trash", specifier = ">=1.8.3" },
     { name = "textual", extras = ["syntax"], specifier = ">=3.3.0" },
     { name = "textual-autocomplete", specifier = ">=4.0.4" },

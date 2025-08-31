@@ -5,7 +5,12 @@ from textual.widgets import Button
 
 from rovr.screens import ModalInput
 from rovr.utils import config, get_icon, normalise
-from rovr.validators import EndsWithAnArchiveExtension, IsValidFilePath, PathDoesntExist
+from rovr.validators import (
+    EndsWithAnArchiveExtension,
+    EndsWithRar,
+    IsValidFilePath,
+    PathDoesntExist,
+)
 
 
 class ZipButton(Button):
@@ -44,6 +49,7 @@ class ZipButton(Button):
                 validators=[
                     PathDoesntExist(strict=False),
                     IsValidFilePath(),
+                    EndsWithRar(),
                     EndsWithAnArchiveExtension(),
                 ],
                 is_path=True,

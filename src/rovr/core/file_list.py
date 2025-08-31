@@ -12,6 +12,7 @@ from textual.widgets.option_list import OptionDoesNotExist
 from textual.widgets.selection_list import Selection
 
 from rovr import utils
+from rovr.maps import ARCHIVE_EXTENSIONS
 from rovr.options import FileListSelectionWidget
 from rovr.utils import config
 
@@ -353,15 +354,9 @@ class FileList(SelectionList, inherit_bindings=False):
             utils.normalise(path.join(getcwd(), file_name))
         )
         self.app.query_one("MetadataContainer").update_metadata(event.option.dir_entry)
-        self.app.query_one("#unzip").disabled = not file_name.endswith((
-            ".tar.gz",
-            ".tgz",
-            "tar.bz2",
-            ".tbz2",
-            ".tar.xz",
-            ".zip",
-            ".tar",
-        ))
+        self.app.query_one("#unzip").disabled = not file_name.endswith(
+            tuple(ARCHIVE_EXTENSIONS)
+        )
 
     # Use better versions of the checkbox icons
     def _get_left_gutter_width(

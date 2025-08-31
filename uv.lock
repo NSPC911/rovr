@@ -1048,7 +1048,7 @@ textual = [
 
 [[package]]
 name = "textual-pdf"
-version = "0.1.6"
+version = "0.1.7"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "click" },
@@ -1057,9 +1057,9 @@ dependencies = [
     { name = "textual" },
     { name = "textual-image" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/28/37/6217a66c724571d93c0b441dd73c4ae48f6d4a6209e6884325d2170a940b/textual_pdf-0.1.6.tar.gz", hash = "sha256:83991af1f26d052969c9cc023b2ebd413325d860b27c833e6e65265577c96d99", size = 4096444, upload-time = "2025-08-30T15:04:16.433Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/29/a9/cb0ffaa56891663fb48932999089cd2f6f761be68e0efc3583048c00d3fc/textual_pdf-0.1.7.tar.gz", hash = "sha256:41cca4670d745eb76bc5c2323e9d149e7d1f167bde31230ee7692370d1b1c46e", size = 4096504, upload-time = "2025-08-31T10:04:55.891Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/c6/b1/466a4f7585ff964d2367cebe6c6fb93600d0e0178d8319182245ef2cb693/textual_pdf-0.1.6-py3-none-any.whl", hash = "sha256:74a8a9af74e4c1f544f9c18ee2222e0bc862de44599da81f4547102ff5207cd4", size = 4929, upload-time = "2025-08-30T15:03:23.904Z" },
+    { url = "https://files.pythonhosted.org/packages/98/13/dd2ee268efd99f6489ea860219484b5900c83f5b1a664526a84b5419f47a/textual_pdf-0.1.7-py3-none-any.whl", hash = "sha256:52af2fe17797b8ea99480a06ad05169543cbbd7001b4837197c7df30f456309e", size = 4987, upload-time = "2025-08-31T10:04:22.204Z" },
 ]
 
 [[package]]

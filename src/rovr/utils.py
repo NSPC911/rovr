@@ -660,6 +660,32 @@ def toggle_pin(pin_name: str, pin_path: str) -> None:
         add_pin(pin_name, pin_path_normalized)
 
 
+def _should_include_macos_mount_point(partition: "psutil._common.sdiskpart") -> bool:
+    """
+    Determine if a macOS mount point should be included in the drive list.
+
+    Args:
+        partition: A partition object from psutil.disk_partitions()
+
+    Returns:
+        bool: True if the mount point should be included, False otherwise.
+    """
+    # Skip virtual/system filesystem types:
+    # - autofs: Automounter filesystem for automatic mounting/unmounting
+    # - devfs: Device filesystem providing access to device files
+    # - devtmpfs: Device temporary filesystem (like devfs but in tmpfs)
+    # - tmpfs: Temporary filesystem stored in memory
+    if partition.fstype in ("autofs", "devfs", "devtmpfs", "tmpfs"):
+        return False
+
+    # Skip system volumes under /System/Volumes/ (VM, Preboot, Update, Data, etc.)
+    if partition.mountpoint.startswith("/System/Volumes/"):
+        return False
+
+    # Include everything else unless it's a system path (/System/, /dev, /private)
+    return not partition.mountpoint.startswith(("/System/", "/dev", "/private"))
+
+
 def get_mounted_drives() -> list:
     """
     Get a list of mounted drives on the system.
@@ -681,31 +707,11 @@ def get_mounted_drives() -> list:
             ]
         elif platform.system() == "Darwin":
             # For macOS, filter out system volumes and keep only user-relevant drives
-            for p in partitions:
-                # Skip excluded filesystem types
-                if p.fstype in ("autofs", "devfs", "devtmpfs", "tmpfs"):
-                    continue
-
-                # Always include root filesystem
-                if p.mountpoint == "/":
-                    drives.append(p.mountpoint)
-                    continue
-
-                # Always include external volumes under /Volumes/
-                if p.mountpoint.startswith("/Volumes/"):
-                    drives.append(p.mountpoint)
-                    continue
-
-                # Skip system volumes under /System/Volumes/
-                if p.mountpoint.startswith("/System/Volumes/"):
-                    continue
-
-                # Skip other system paths
-                if p.mountpoint.startswith(("/System/", "/dev", "/private")):
-                    continue
-
-                # Include other potentially useful mount points
-                drives.append(p.mountpoint)
+            drives = [
+                p.mountpoint
+                for p in partitions
+                if _should_include_macos_mount_point(p)
+            ]
         else:
             # For other Unix-like systems, return the mount points
             drives = [

@@ -686,6 +686,48 @@ def _should_include_macos_mount_point(partition: "psutil._common.sdiskpart") -> 
     return not partition.mountpoint.startswith(("/System/", "/dev", "/private"))
 
 
+def _should_include_linux_mount_point(partition: "psutil._common.sdiskpart") -> bool:
+    """
+    Determine if a Linux/WSL mount point should be included in the drive list.
+
+    Args:
+        partition: A partition object from psutil.disk_partitions()
+
+    Returns:
+        bool: True if the mount point should be included, False otherwise.
+    """
+    # Skip virtual/system filesystem types:
+    # - autofs: Automounter filesystem for automatic mounting/unmounting
+    # - devfs: Device filesystem providing access to device files
+    # - devtmpfs: Device temporary filesystem (like devfs but in tmpfs)
+    # - tmpfs: Temporary filesystem stored in memory
+    # - proc: Process information filesystem
+    # - sysfs: System information filesystem
+    # - cgroup2: Control group filesystem for resource management
+    # - debugfs, tracefs, fusectl, configfs: Kernel debugging/configuration filesystems
+    # - securityfs, pstore, bpf: Security and kernel subsystem filesystems
+    # - hugetlbfs, mqueue: Specialized system filesystems
+    # - devpts: Pseudo-terminal filesystem
+    # - binfmt_misc: Binary format support filesystem
+    if partition.fstype in (
+        "autofs", "devfs", "devtmpfs", "tmpfs", "proc", "sysfs", "cgroup2",
+        "debugfs", "tracefs", "fusectl", "configfs", "securityfs", "pstore",
+        "bpf", "hugetlbfs", "mqueue", "devpts", "binfmt_misc"
+    ):
+        return False
+
+    # Skip system paths that users typically don't access:
+    # - /dev, /proc, /sys: System directories
+    # - /run: Runtime data directory
+    # - /boot: Boot partition (typically not accessed by users)
+    # - /mnt/wslg: WSL GUI support directory
+    # - /mnt/wsl: WSL system integration directory
+    # Include everything else (root filesystem, /home, /media, Windows drives in WSL like /mnt/c, etc.)
+    return not partition.mountpoint.startswith((
+        "/dev", "/proc", "/sys", "/run", "/boot", "/mnt/wslg", "/mnt/wsl"
+    ))
+
+
 def get_mounted_drives() -> list:
     """
     Get a list of mounted drives on the system.
@@ -713,11 +755,11 @@ def get_mounted_drives() -> list:
                 if _should_include_macos_mount_point(p)
             ]
         else:
-            # For other Unix-like systems, return the mount points
+            # For other Unix-like systems (Linux, WSL, etc.), filter out system mount points
             drives = [
                 p.mountpoint
                 for p in partitions
-                if p.fstype not in ("autofs", "devfs", "devtmpfs", "tmpfs")
+                if _should_include_linux_mount_point(p)
             ]
     except Exception as e:
         print(f"Error getting mounted drives: {e}")

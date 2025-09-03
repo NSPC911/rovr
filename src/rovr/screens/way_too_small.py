@@ -4,7 +4,7 @@ from textual.containers import Center, HorizontalGroup
 from textual.screen import ModalScreen
 from textual.widgets import Label, Static
 
-from rovr.variables.constants import MaxPossible, mini_logo
+from rovr.variables.constants import MaxPossible, ascii_logo
 
 max_possible = MaxPossible()
 
@@ -16,7 +16,7 @@ class TerminalTooSmall(ModalScreen):
     def compose(self) -> ComposeResult:
         yield Static()
         with Center():
-            yield Label(mini_logo)
+            yield Label(ascii_logo)
         with Center():
             with HorizontalGroup(id="height"):
                 yield Label("Height: ")

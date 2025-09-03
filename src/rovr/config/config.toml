@@ -4,9 +4,12 @@
 [interface]
 tooltips = true
 nerd_font = true
+use_reactive_hider = true
+
 show_progress_eta = false
 show_progress_percentage = true
 truncate_progress_file_path = false
+
 preview_error = "Hmm, I think this file got corrupted (or maybe not?)"
 preview_binary = "This file is not UTF-8 encoded, so I decline to read it."
 preview_start = "print(\"Hello, world!\")"

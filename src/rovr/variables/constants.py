@@ -26,3 +26,12 @@ buttons_that_depend_on_path = [
     "#zip",
     "#copy_path",
 ]
+
+mini_logo = "  ___ ___ _ _ ___\n |  _| . | | |  _|\n |_| |___|\\_/|_|"
+larger_logo = " _ __   ___   __  __   _ __\n/\\`'__\\/ __`\\/\\ \\/\\ \\ /\\`'__\\n\\ \\ \\//\\ \\_\\ \\ \\ \\_/ |\\ \\ \\/\n \\ \\_\\ \\____/\\ \\___/  \\ \\_\\n  \\/_/ \\/___/  \\/__/    \\/_/"
+
+
+@dataclass
+class MaxPossible:
+    height = 13 if config["interface"]["use_reactive_hider"] else 24
+    width = 26 if config["interface"]["use_reactive_hider"] else 70

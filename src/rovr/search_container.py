@@ -26,10 +26,13 @@ class SearchInput(Input):
             highlighted = self.items_list.highlighted_option
             self.items_list.clear_options()
             self.items_list.add_options(self.items_list.list_of_options)
-            with contextlib.suppress(OptionDoesNotExist, SelectionError):
-                self.items_list.highlighted = self.items_list.get_option_index(
-                    highlighted.id
-                )
+            if highlighted is not None:
+                with contextlib.suppress(OptionDoesNotExist, SelectionError):
+                    self.items_list.highlighted = self.items_list.get_option_index(
+                        highlighted.id
+                    )
+            else:
+                self.items_list.highlighted = 0
             return
         elif event.value == "" and self.initial_cwd != os.getcwd():
             self.initial_cwd = os.getcwd()

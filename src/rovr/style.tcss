@@ -6,7 +6,7 @@ $border: $primary-lighten-3;
 $border-disabled: $primary-background-lighten-1;
 
 /* Layout Dimensions */
-$pinned_sidebar_width: 18;
+$pinned_sidebar_width: 17;
 $file_list_width: 1fr;
 $preview_sidebar_width: 35vw;
 $footer_unfocus_height: 8;
@@ -25,10 +25,8 @@ $scrollbar-corner-color: $primary-muted;
 * {
   scrollbar-size: 1 1;
   &:ansi {
-    scrollbar-corner-color: transparent;
-    scrollbar-background: transparent;
-    scrollbar-background-hover: transparent;
-    scrollbar-background-active: transparent;
+    scrollbar-background-hover: $scrollbar-background;
+    scrollbar-background-active: $scrollbar-background;
   }
 }
 
@@ -171,6 +169,10 @@ CommandInput { border: blank !important }
   Tabline {
     TablineTab {
       color: auto;
+      opacity: 1 !important;
+      background-tint: transparent !important;
+      text-opacity: 1 !important;
+      tint: transparent !important;
       &:hover {
         background: $boost-lighten-3;
         color: $foreground;
@@ -183,25 +185,25 @@ CommandInput { border: blank !important }
           background: $primary;
           color: $background;
         }
-     }
+      }
     }
     .underline--bar {
       background: $background-lighten-1;
-      color: $primary;
+      color: $border;
     }
-    &:light .underline--bar { background: $background-darken-1 }
+    /* color may be inaccurate due to terminals *\
+    \* you need to change the underline bar and */
     &:ansi .underline--bar { background: $background-lighten-3 }
+    &:light .underline--bar { background: $background-darken-1 }
     &:ansi:light .underline--bar { background: $background-darken-3 }
   }
 
   &:focus-within > HeaderClock,
   &:focus-within > #newTabRight {
     border-bottom: heavy $foreground-darken-3;
+    &:ansi { border-bottom: solid $foreground-darken-3 }
     &:light { border-bottom: heavy $foreground-lighten-3 }
-    &:ansi {
-      border-bottom: solid $foreground-darken-3;
-      &:light { border-bottom: solid $foreground-lighten-3 }
-    }
+    &:ansi:light { border-bottom: solid $foreground-lighten-3 }
   }
 
   &:focus-within > Tabline .underline--bar { background: $foreground-darken-3 }
@@ -213,12 +215,13 @@ CommandInput { border: blank !important }
     background-tint: transparent !important;
     text-opacity: 1 !important;
     tint: transparent !important;
+    /* border bottom colors, sometimes it can be  *\
+    |* too thin, so switch to heavy and not solid *|
+    \* use lighten-1 instead of lighten-3         */
     border-bottom: heavy $background-lighten-1;
+    &:ansi { border-bottom: solid $background-lighten-3 }
     &:light { border-bottom: heavy $background-darken-1 }
-    &:ansi {
-      border-bottom: solid $background-lighten-3;
-      &:light { border-bottom: solid $background-darken-3 }
-    }
+    &:ansi:light { border-bottom: solid $background-darken-3 }
   }
 }
 
@@ -331,7 +334,6 @@ CommandInput { border: blank !important }
   height: 1fr;
   margin: 0;
   width: $pinned_sidebar_width;
-  min-width: 15;
   scrollbar-size: 0 0 !important;
   & > PinnedSidebar { scrollbar-size: 0 0 !important }
   & > Input { display: none }
@@ -392,7 +394,10 @@ CommandInput { border: blank !important }
     background: transparent;
   }
 
-  &:focus-within { height: $footer_focus_height }
+  &:focus-within {
+    height: $footer_focus_height;
+    max-height: 40vh;
+  }
 }
 
 #processes { padding: 0 0 0 1 }
@@ -400,7 +405,8 @@ CommandInput { border: blank !important }
 #metadata {
   layout: horizontal;
   padding-left: 1;
-  padding-right: 1;
+  padding-right: 0;
+  scrollbar-gutter: stable;
   & > VerticalGroup > Static {
     text-wrap: nowrap;
     text-overflow: ellipsis;
@@ -471,19 +477,38 @@ FileList, PinnedSidebar, Clipboard {
 }
 
 /* Screen mode modifiers */
-Screen.-filelistonly {
-  #pinned_sidebar_container,
-  #preview_sidebar,
-  #below_menu Button { display: none !important }
-  #below_menu PathAutoCompleteInput { margin: -1 1 0 1 !important }
+Screen {
+  &.-filelistonly {
+    #pinned_sidebar_container,
+    #preview_sidebar,
+    #below_menu Button { display: none !important }
+    #below_menu PathAutoCompleteInput { margin: -1 1 0 1 !important }
+  }
+  &.-nopreview {
+    #preview_sidebar,
+    #below_menu Button { display: none !important }
+    #below_menu PathAutoCompleteInput { margin: -1 1 0 1 !important }
+    #pinned_sidebar_container { max-width: 25vw }
+  }
+  &.-all-vertical #footer { max-height: 25vh }
+  &.-nopath {
+    #below_menu { display: none !important }
+    #footer { max-height: 30vh }
+  }
+  &.-nomenu-atall {
+    #menu,
+    #below_menu { display: none !important }
+    #footer { max-height: 30vh }
+  }
+  &.-filelistonly-vertical {
+    #menu { display: none !important }
+  }
+  &.-middle-only {
+    #menu,
+    #below_menu { display: none !important }
+    #footer { max-height: 25vh }
+  }
 }
-
-Screen.-nopreview {
-  #preview_sidebar,
-  #below_menu Button { display: none !important }
-  #below_menu PathAutoCompleteInput { margin: -1 1 0 1 !important }
-}
-
 .zen {
   #menu,
   #below_menu,
@@ -763,4 +788,16 @@ ModalInput {
     overflow-x: scroll;
   }
   Label { height: 1 }
+}
+
+TerminalTooSmall {
+  align: center middle;
+  background: transparent;
+  height: 1fr;
+  HorizontalGroup {
+    width: auto;
+    background: transparent;
+    align: center middle;
+  }
+  & > Static { height: 1fr }
 }

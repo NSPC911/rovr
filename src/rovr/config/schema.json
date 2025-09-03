@@ -18,6 +18,11 @@
           "default": false,
           "description": "Use nerd font for rendering icons instead of weird characters and stuff.\nNot properly hot-reloaded."
         },
+        "use_reactive_hider": {
+          "type": "boolean",
+          "default": true,
+          "description": "Hide certain elements based on the width and height of the terminal."
+        },
         "show_progress_eta": {
           "type": "boolean",
           "default": false,

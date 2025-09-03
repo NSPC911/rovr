@@ -47,9 +47,12 @@ from rovr.navigation_widgets import (
     UpButton,
 )
 from rovr.screens import YesOrNo, ZDToDirectory
+from rovr.screens.way_too_small import TerminalTooSmall
 from rovr.search_container import SearchInput
-from rovr.variables.constants import config
+from rovr.variables.constants import MaxPossible, config
 from rovr.variables.maps import VAR_TO_DIR
+
+max_possible = MaxPossible()
 
 
 class Application(App, inherit_bindings=False):
@@ -67,13 +70,28 @@ class Application(App, inherit_bindings=False):
     # higher index = higher priority
     CSS_PATH = ["style.tcss", path.join(VAR_TO_DIR["CONFIG"], "style.tcss")]
     # reactivity
-    HORIZONTAL_BREAKPOINTS = [(0, "-filelistonly"), (60, "-nopreview"), (90, "-all")]
-    # VERTICAL_BREAKPOINTS = [(0, "-footerless"), ()]
+    HORIZONTAL_BREAKPOINTS = (
+        [(0, "-filelistonly"), (35, "-nopreview"), (70, "-all-horizontal")]
+        if config["interface"]["use_reactive_hider"]
+        else []
+    )
+    VERTICAL_BREAKPOINTS = (
+        [
+            (0, "-middle-only"),
+            (16, "-nomenu-atall"),
+            (19, "-nopath"),
+            (24, "-all-vertical"),
+        ]
+        if config["interface"]["use_reactive_hider"]
+        else []
+    )
 
     def __init__(self, startup_path: str = "", *args, **kwargs) -> None:
         super().__init__(*args, **kwargs)
         self.app_blurred = False
         self.startup_path = startup_path
+        print(self.startup_path)
+        self.has_pushed_screen = False
 
     def compose(self) -> ComposeResult:
         print("Starting Rovr...")
@@ -375,6 +393,16 @@ class Application(App, inherit_bindings=False):
             elif self._items != new_cwd_items:
                 self.cd(self._cwd)
                 self._items = new_cwd_items
+
+    @work
+    async def on_resize(self, event: events.Resize) -> None:
+        if (
+            event.size.height < max_possible.height
+            or event.size.width < max_possible.width
+        ) and not self.has_pushed_screen:
+            self.has_pushed_screen = True
+            await self.push_screen_wait(TerminalTooSmall())
+            self.has_pushed_screen = False
 
 
 app = Application(watch_css=True)

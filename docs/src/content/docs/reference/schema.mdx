@@ -6,15 +6,16 @@ description: config schema humanified
 - [1. Property `Rovr Config > interface`](#interface)
   - [1.1. Property `Rovr Config > interface > tooltips`](#interface_tooltips)
   - [1.2. Property `Rovr Config > interface > nerd_font`](#interface_nerd_font)
-  - [1.3. Property `Rovr Config > interface > show_progress_eta`](#interface_show_progress_eta)
-  - [1.4. Property `Rovr Config > interface > show_progress_percentage`](#interface_show_progress_percentage)
-  - [1.5. Property `Rovr Config > interface > truncate_progress_file_path`](#interface_truncate_progress_file_path)
-  - [1.6. Property `Rovr Config > interface > preview_error`](#interface_preview_error)
-  - [1.7. Property `Rovr Config > interface > preview_binary`](#interface_preview_binary)
-  - [1.8. Property `Rovr Config > interface > preview_start`](#interface_preview_start)
-  - [1.9. Property `Rovr Config > interface > clock`](#interface_clock)
-    - [1.9.1. Property `Rovr Config > interface > clock > enabled`](#interface_clock_enabled)
-    - [1.9.2. Property `Rovr Config > interface > clock > align`](#interface_clock_align)
+  - [1.3. Property `Rovr Config > interface > use_reactive_hider`](#interface_use_reactive_hider)
+  - [1.4. Property `Rovr Config > interface > show_progress_eta`](#interface_show_progress_eta)
+  - [1.5. Property `Rovr Config > interface > show_progress_percentage`](#interface_show_progress_percentage)
+  - [1.6. Property `Rovr Config > interface > truncate_progress_file_path`](#interface_truncate_progress_file_path)
+  - [1.7. Property `Rovr Config > interface > preview_error`](#interface_preview_error)
+  - [1.8. Property `Rovr Config > interface > preview_binary`](#interface_preview_binary)
+  - [1.9. Property `Rovr Config > interface > preview_start`](#interface_preview_start)
+  - [1.10. Property `Rovr Config > interface > clock`](#interface_clock)
+    - [1.10.1. Property `Rovr Config > interface > clock > enabled`](#interface_clock_enabled)
+    - [1.10.2. Property `Rovr Config > interface > clock > align`](#interface_clock_align)
 - [2. Property `Rovr Config > settings`](#settings)
   - [2.1. Property `Rovr Config > settings > use_recycle_bin`](#settings_use_recycle_bin)
   - [2.2. Property `Rovr Config > settings > copy_includes_metadata`](#settings_copy_includes_metadata)
@@ -59,6 +60,8 @@ description: config schema humanified
     - [6.1.10. Property `Rovr Config > custom_theme > custom_theme items > surface`](#custom_theme_items_surface)
     - [6.1.11. Property `Rovr Config > custom_theme > custom_theme items > panel`](#custom_theme_items_panel)
     - [6.1.12. Property `Rovr Config > custom_theme > custom_theme items > bar_gradient`](#custom_theme_items_bar_gradient)
+      - [6.1.12.1. Property `Rovr Config > custom_theme > custom_theme items > bar_gradient > default`](#custom_theme_items_bar_gradient_default)
+      - [6.1.12.2. Property `Rovr Config > custom_theme > custom_theme items > bar_gradient > error`](#custom_theme_items_bar_gradient_error)
     - [6.1.13. Property `Rovr Config > custom_theme > custom_theme items > is_dark`](#custom_theme_items_is_dark)
     - [6.1.14. Property `Rovr Config > custom_theme > custom_theme items > variables`](#custom_theme_items_variables)
 - [7. Property `Rovr Config > keybinds`](#keybinds)
@@ -207,6 +210,7 @@ description: config schema humanified
 | ------------------------------------------------------------------------ | ------- | ------------------------------------------------------------------------------------------------------------------------- |
 |   [tooltips](#interface_tooltips )                                       | boolean | Show tooltips when your mouse is over a tooltip supported button.<br />This is not hot reloaded.                          |
 |   [nerd_font](#interface_nerd_font )                                     | boolean | Use nerd font for rendering icons instead of weird characters and stuff.<br />Not properly hot-reloaded.                  |
+|   [use_reactive_hider](#interface_use_reactive_hider )                   | boolean | Hide certain elements based on the width and height of the terminal.                                                      |
 |   [show_progress_eta](#interface_show_progress_eta )                     | boolean | When copying or deleting files, show an ETA for when the action will be completed.                                        |
 |   [show_progress_percentage](#interface_show_progress_percentage )       | boolean | When copying or deleting files, show a percentage of how much had been completed.                                         |
 |   [truncate_progress_file_path](#interface_truncate_progress_file_path ) | boolean | When the process container is using file paths, truncate the file path to only view the first and last names of the path. |
@@ -237,7 +241,17 @@ This is not hot reloaded.
 **Description:** Use nerd font for rendering icons instead of weird characters and stuff.
 Not properly hot-reloaded.
 
-### <a name="interface_show_progress_eta"></a>1.3. Property `Rovr Config > interface > show_progress_eta`
+### <a name="interface_use_reactive_hider"></a>1.3. Property `Rovr Config > interface > use_reactive_hider`
+
+|              |           |
+| ------------ | --------- |
+| **Type**     | `boolean` |
+| **Required** | No        |
+| **Default**  | `true`    |
+
+**Description:** Hide certain elements based on the width and height of the terminal.
+
+### <a name="interface_show_progress_eta"></a>1.4. Property `Rovr Config > interface > show_progress_eta`
 
 |              |           |
 | ------------ | --------- |
@@ -247,7 +261,7 @@ Not properly hot-reloaded.
 
 **Description:** When copying or deleting files, show an ETA for when the action will be completed.
 
-### <a name="interface_show_progress_percentage"></a>1.4. Property `Rovr Config > interface > show_progress_percentage`
+### <a name="interface_show_progress_percentage"></a>1.5. Property `Rovr Config > interface > show_progress_percentage`
 
 |              |           |
 | ------------ | --------- |
@@ -257,7 +271,7 @@ Not properly hot-reloaded.
 
 **Description:** When copying or deleting files, show a percentage of how much had been completed.
 
-### <a name="interface_truncate_progress_file_path"></a>1.5. Property `Rovr Config > interface > truncate_progress_file_path`
+### <a name="interface_truncate_progress_file_path"></a>1.6. Property `Rovr Config > interface > truncate_progress_file_path`
 
 |              |           |
 | ------------ | --------- |
@@ -267,7 +281,7 @@ Not properly hot-reloaded.
 
 **Description:** When the process container is using file paths, truncate the file path to only view the first and last names of the path.
 
-### <a name="interface_preview_error"></a>1.6. Property `Rovr Config > interface > preview_error`
+### <a name="interface_preview_error"></a>1.7. Property `Rovr Config > interface > preview_error`
 
 |              |                                                          |
 | ------------ | -------------------------------------------------------- |
@@ -277,7 +291,7 @@ Not properly hot-reloaded.
 
 **Description:** If for any reason the file preview refused to show, this appears.
 
-### <a name="interface_preview_binary"></a>1.7. Property `Rovr Config > interface > preview_binary`
+### <a name="interface_preview_binary"></a>1.8. Property `Rovr Config > interface > preview_binary`
 
 |              |                                                              |
 | ------------ | ------------------------------------------------------------ |
@@ -287,7 +301,7 @@ Not properly hot-reloaded.
 
 **Description:** If the current file cannot be read due to an encoding issue (ie not UTF8), it will display this message.
 
-### <a name="interface_preview_start"></a>1.8. Property `Rovr Config > interface > preview_start`
+### <a name="interface_preview_start"></a>1.9. Property `Rovr Config > interface > preview_start`
 
 |              |                              |
 | ------------ | ---------------------------- |
@@ -297,7 +311,7 @@ Not properly hot-reloaded.
 
 **Description:** This is shown when the rovr starts up. You may see it for a split second, but it will never appear afterwards.
 
-### <a name="interface_clock"></a>1.9. Property `Rovr Config > interface > clock`
+### <a name="interface_clock"></a>1.10. Property `Rovr Config > interface > clock`
 
 |                           |             |
 | ------------------------- | ----------- |
@@ -310,7 +324,7 @@ Not properly hot-reloaded.
 |   [enabled](#interface_clock_enabled ) | boolean          | Show a clock in the tabs bar.                                    |
 |   [align](#interface_clock_align )     | enum (of string) | Align the clock to either the 'right' or 'left' of the tabs bar. |
 
-#### <a name="interface_clock_enabled"></a>1.9.1. Property `Rovr Config > interface > clock > enabled`
+#### <a name="interface_clock_enabled"></a>1.10.1. Property `Rovr Config > interface > clock > enabled`
 
 |              |           |
 | ------------ | --------- |
@@ -320,7 +334,7 @@ Not properly hot-reloaded.
 
 **Description:** Show a clock in the tabs bar.
 
-#### <a name="interface_clock_align"></a>1.9.2. Property `Rovr Config > interface > clock > align`
+#### <a name="interface_clock_align"></a>1.10.2. Property `Rovr Config > interface > clock > align`
 
 |              |                    |
 | ------------ | ------------------ |
@@ -756,22 +770,22 @@ Must be one of:
 | **Required**              | No          |
 | **Additional properties** | Not allowed |
 
-| Property                                            | Type    | Title/Description                                                                                                                                                             |
-| --------------------------------------------------- | ------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-|   [name](#custom_theme_items_name )                 | string  | A name for the theme. However, when the theme is available in the theme picker, it shows up as a hiphenated, lowercase version.                                               |
-|   [primary](#custom_theme_items_primary )           | string  | A hex code or named color to use as the primary color. Refer to https://textual.textualize.io/css_types/color/#named-colors for the named colors.                             |
-|   [secondary](#custom_theme_items_secondary )       | string  | A hex code or named color to use as the secondary color. Refer to https://textual.textualize.io/css_types/color/#named-colors for the named colors.                           |
-|   [warning](#custom_theme_items_warning )           | string  | A hex code or named color to use as the warning color. Refer to https://textual.textualize.io/css_types/color/#named-colors for the named colors.                             |
-|   [error](#custom_theme_items_error )               | string  | A hex code or named color to use as the error color. Refer to https://textual.textualize.io/css_types/color/#named-colors for the named colors.                               |
-|   [success](#custom_theme_items_success )           | string  | A hex code or named color to use as the success color. Refer to https://textual.textualize.io/css_types/color/#named-colors for the named colors.                             |
-|   [accent](#custom_theme_items_accent )             | string  | A hex code or named color to use as the accent color. Refer to https://textual.textualize.io/css_types/color/#named-colors for the named colors.                              |
-|   [foreground](#custom_theme_items_foreground )     | string  | A hex code or named color to use as the foreground color. Refer to https://textual.textualize.io/css_types/color/#named-colors for the named colors.                          |
-|   [background](#custom_theme_items_background )     | string  | A hex code or named color to use as the background color. Refer to https://textual.textualize.io/css_types/color/#named-colors for the named colors.                          |
-|   [surface](#custom_theme_items_surface )           | string  | A hex code or named color to use as the surface color. Refer to https://textual.textualize.io/css_types/color/#named-colors for the named colors.                             |
-|   [panel](#custom_theme_items_panel )               | string  | A hex code or named color to use as the panel color. Refer to https://textual.textualize.io/css_types/color/#named-colors for the named colors.                               |
-|   [bar_gradient](#custom_theme_items_bar_gradient ) | array   | A list of hex codes, or named colors to use as the progress bar's gradient colors. Refer to https://textual.textualize.io/css_types/color/#named-colors for the named colors. |
-|   [is_dark](#custom_theme_items_is_dark )           | boolean | Whether or not this theme is a dark type theme.                                                                                                                               |
-|   [variables](#custom_theme_items_variables )       | object  | Extra variables to set unique to the theme.<br />Refer to https://textual.textualize.io/guide/design/#additional-variables for more information.                              |
+| Property                                            | Type    | Title/Description                                                                                                                                    |
+| --------------------------------------------------- | ------- | ---------------------------------------------------------------------------------------------------------------------------------------------------- |
+|   [name](#custom_theme_items_name )                 | string  | A name for the theme. However, when the theme is available in the theme picker, it shows up as a hiphenated, lowercase version.                      |
+|   [primary](#custom_theme_items_primary )           | string  | A hex code or named color to use as the primary color. Refer to https://textual.textualize.io/css_types/color/#named-colors for the named colors.    |
+|   [secondary](#custom_theme_items_secondary )       | string  | A hex code or named color to use as the secondary color. Refer to https://textual.textualize.io/css_types/color/#named-colors for the named colors.  |
+|   [warning](#custom_theme_items_warning )           | string  | A hex code or named color to use as the warning color. Refer to https://textual.textualize.io/css_types/color/#named-colors for the named colors.    |
+|   [error](#custom_theme_items_error )               | string  | A hex code or named color to use as the error color. Refer to https://textual.textualize.io/css_types/color/#named-colors for the named colors.      |
+|   [success](#custom_theme_items_success )           | string  | A hex code or named color to use as the success color. Refer to https://textual.textualize.io/css_types/color/#named-colors for the named colors.    |
+|   [accent](#custom_theme_items_accent )             | string  | A hex code or named color to use as the accent color. Refer to https://textual.textualize.io/css_types/color/#named-colors for the named colors.     |
+|   [foreground](#custom_theme_items_foreground )     | string  | A hex code or named color to use as the foreground color. Refer to https://textual.textualize.io/css_types/color/#named-colors for the named colors. |
+|   [background](#custom_theme_items_background )     | string  | A hex code or named color to use as the background color. Refer to https://textual.textualize.io/css_types/color/#named-colors for the named colors. |
+|   [surface](#custom_theme_items_surface )           | string  | A hex code or named color to use as the surface color. Refer to https://textual.textualize.io/css_types/color/#named-colors for the named colors.    |
+|   [panel](#custom_theme_items_panel )               | string  | A hex code or named color to use as the panel color. Refer to https://textual.textualize.io/css_types/color/#named-colors for the named colors.      |
+|   [bar_gradient](#custom_theme_items_bar_gradient ) | object  | The gradient colors for the progress bar.                                                                                                            |
+|   [is_dark](#custom_theme_items_is_dark )           | boolean | Whether or not this theme is a dark type theme.                                                                                                      |
+|   [variables](#custom_theme_items_variables )       | object  | Extra variables to set unique to the theme.<br />Refer to https://textual.textualize.io/guide/design/#additional-variables for more information.     |
 
 #### <a name="custom_theme_items_name"></a>6.1.1. Property `Rovr Config > custom_theme > custom_theme items > name`
 
@@ -874,13 +888,44 @@ Must be one of:
 
 #### <a name="custom_theme_items_bar_gradient"></a>6.1.12. Property `Rovr Config > custom_theme > custom_theme items > bar_gradient`
 
+|                           |             |
+| ------------------------- | ----------- |
+| **Type**                  | `object`    |
+| **Required**              | No          |
+| **Additional properties** | Not allowed |
+
+**Description:** The gradient colors for the progress bar.
+
+| Property                                               | Type  | Title/Description                                                                                                                                                                                              |
+| ------------------------------------------------------ | ----- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+|   [default](#custom_theme_items_bar_gradient_default ) | array | A list of hex codes, or named colors to use as the progress bar's gradient colors. Refer to https://textual.textualize.io/css_types/color/#named-colors for the named colors.                                  |
+|   [error](#custom_theme_items_bar_gradient_error )     | array | A list of hex codes, or named colors to use as the progress bar's gradient colors **when it encountered an error**. Refer to https://textual.textualize.io/css_types/color/#named-colors for the named colors. |
+
+##### <a name="custom_theme_items_bar_gradient_default"></a>6.1.12.1. Property `Rovr Config > custom_theme > custom_theme items > bar_gradient > default`
+
 |              |         |
 | ------------ | ------- |
 | **Type**     | `array` |
 | **Required** | No      |
-| **Default**  | `[]`    |
 
 **Description:** A list of hex codes, or named colors to use as the progress bar's gradient colors. Refer to https://textual.textualize.io/css_types/color/#named-colors for the named colors.
+
+|                      | Array restrictions |
+| -------------------- | ------------------ |
+| **Min items**        | N/A                |
+| **Max items**        | N/A                |
+| **Items unicity**    | False              |
+| **Additional items** | False              |
+| **Tuple validation** | N/A                |
+
+##### <a name="custom_theme_items_bar_gradient_error"></a>6.1.12.2. Property `Rovr Config > custom_theme > custom_theme items > bar_gradient > error`
+
+|              |         |
+| ------------ | ------- |
+| **Type**     | `array` |
+| **Required** | No      |
+
+**Description:** A list of hex codes, or named colors to use as the progress bar's gradient colors **when it encountered an error**. Refer to https://textual.textualize.io/css_types/color/#named-colors for the named colors.
 
 |                      | Array restrictions |
 | -------------------- | ------------------ |

@@ -39,11 +39,17 @@ try:
         is_flag=True,
         help="Show the current version of rovr.",
     )
+    @click.argument(
+        "path",
+        type=str,
+        required=False
+    )
     def main(
         with_features: list[str],
         without_features: list[str],
         config_path: bool,
         show_version: bool,
+        path: str,
     ) -> None:
         """A post-modern terminal file explorer"""
 
@@ -64,7 +70,10 @@ try:
 
         from rovr.app import Application
 
-        Application(watch_css=True).run()
+        # Need to move this 'path' in the cofig dict, or a new runtime_config dict
+        # Eventually there will be many options coming via args, but we cant keep sending all of 
+        # them via this Application's __init__ function here
+        Application(watch_css=True, startup_path=path).run()
 
 except KeyboardInterrupt:
     pass

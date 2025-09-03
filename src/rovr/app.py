@@ -36,7 +36,7 @@ from rovr.core import (
 )
 from rovr.footer import Clipboard, MetadataContainer, ProcessContainer
 from rovr.functions import icons
-from rovr.functions.path import decompress, normalise
+from rovr.functions.path import decompress, normalise, ensure_existing_directory
 from rovr.functions.themes import get_custom_themes
 from rovr.header import HeaderArea
 from rovr.navigation_widgets import (
@@ -70,9 +70,10 @@ class Application(App, inherit_bindings=False):
     HORIZONTAL_BREAKPOINTS = [(0, "-filelistonly"), (60, "-nopreview"), (90, "-all")]
     # VERTICAL_BREAKPOINTS = [(0, "-footerless"), ()]
 
-    def __init__(self, *args, **kwargs) -> None:
+    def __init__(self, startup_path: str = "", *args, **kwargs) -> None:
         super().__init__(*args, **kwargs)
         self.app_blurred = False
+        self.startup_path = startup_path        
 
     def compose(self) -> ComposeResult:
         print("Starting Rovr...")
@@ -154,8 +155,11 @@ class Application(App, inherit_bindings=False):
             self.query_one("#forward").tooltip = "Go forward in history"
             self.query_one("#up").tooltip = "Go up the directory tree"
         self.tabWidget = self.query_one("Tabline")
-        # make the file list
-        self.query_one("#file_list").update_file_list()
+        
+        # Change to startup directory. This also calls update_file_list()
+        # causing the file_list to get populated
+        self.cd(directory=path.abspath(self.startup_path), 
+                focus_on=path.basename(self.startup_path))
         self.query_one("#file_list").focus()
         # start mini watcher
         self.watch_for_changes_and_update()
@@ -339,24 +343,17 @@ class Application(App, inherit_bindings=False):
         add_to_history: bool = True,
         focus_on: str | None = None,
     ) -> None:
-        if path.exists(directory):
-            if normalise(getcwd()) == normalise(directory):
-                self.query_one("#file_list").update_file_list(
-                    add_to_session=False, focus_on=focus_on
-                )
-                return
-            else:
-                chdir(directory)
-                self.query_one("#file_list").update_file_list(
-                    add_to_session=add_to_history, focus_on=focus_on
-                )
+        # Makes sure `directory` is a directory, or chdir will fail with exception
+        directory = ensure_existing_directory(directory)
+
+        if normalise(getcwd()) == normalise(directory):
+            add_to_history = False
         else:
-            while not path.exists(directory):
-                directory = "/".join(normalise(directory).split("/")[:-1])
             chdir(directory)
-            self.query_one("#file_list").update_file_list(
-                add_to_session=add_to_history, focus_on=focus_on
-            )
+        
+        self.query_one("#file_list").update_file_list(
+            add_to_session=add_to_history, focus_on=focus_on
+        )
 
     @work
     async def watch_for_changes_and_update(self) -> None:

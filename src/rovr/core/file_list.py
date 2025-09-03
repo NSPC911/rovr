@@ -205,6 +205,8 @@ class FileList(SelectionList, inherit_bindings=False):
             session.sessionLastHighlighted[cwd] = (
                 self.app.query_one("#file_list").options[0].value
             )
+        
+        self.scroll_to_highlight()
         self.app.tabWidget.active_tab.label = (
             path.basename(cwd) if path.basename(cwd) != "" else cwd.strip("/")
         )

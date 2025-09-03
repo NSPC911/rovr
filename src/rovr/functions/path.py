@@ -203,6 +203,17 @@ def get_recursive_files(
             return files, folders
         return files
 
+def ensure_existing_directory(directory: str) -> str:
+    while not (path.exists(directory) and path.isdir(directory)) :
+        parent = path.dirname(directory)
+        # If we can't even access the root then there is a bigger problem
+        # and this could result in infinite loop
+        if parent == directory :
+            break
+        
+        directory = parent
+    return directory
+
 
 def _should_include_macos_mount_point(partition: "psutil._common.sdiskpart") -> bool:
     """

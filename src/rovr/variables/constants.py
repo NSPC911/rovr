@@ -33,5 +33,5 @@ larger_logo = " _ __   ___   __  __   _ __\n/\\`'__\\/ __`\\/\\ \\/\\ \\ /\\`'__
 
 @dataclass
 class MaxPossible:
-    height = 13 if config["interface"]["use_reactive_hider"] else 24
-    width = 26 if config["interface"]["use_reactive_hider"] else 70
+    height = 13 if config["interface"]["use_reactive_layout"] else 24
+    width = 26 if config["interface"]["use_reactive_layout"] else 70

@@ -72,7 +72,7 @@ class Application(App, inherit_bindings=False):
     # reactivity
     HORIZONTAL_BREAKPOINTS = (
         [(0, "-filelistonly"), (35, "-nopreview"), (70, "-all-horizontal")]
-        if config["interface"]["use_reactive_hider"]
+        if config["interface"]["use_reactive_layout"]
         else []
     )
     VERTICAL_BREAKPOINTS = (
@@ -82,7 +82,7 @@ class Application(App, inherit_bindings=False):
             (19, "-nopath"),
             (24, "-all-vertical"),
         ]
-        if config["interface"]["use_reactive_hider"]
+        if config["interface"]["use_reactive_layout"]
         else []
     )
 

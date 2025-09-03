@@ -4,7 +4,7 @@
 [interface]
 tooltips = true
 nerd_font = true
-use_reactive_hider = true
+use_reactive_layout = true
 
 show_progress_eta = false
 show_progress_percentage = true

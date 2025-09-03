@@ -33,5 +33,10 @@ larger_logo = " _ __   ___   __  __   _ __\n/\\`'__\\/ __`\\/\\ \\/\\ \\ /\\`'__
 
 @dataclass
 class MaxPossible:
-    height = 13 if config["interface"]["use_reactive_layout"] else 24
-    width = 26 if config["interface"]["use_reactive_layout"] else 70
+    @property
+    def height(self) -> int:
+        return 13 if config["interface"]["use_reactive_layout"] else 24
+
+    @property
+    def width(self) -> int:
+        return 26 if config["interface"]["use_reactive_layout"] else 70

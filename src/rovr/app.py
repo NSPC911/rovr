@@ -90,7 +90,6 @@ class Application(App, inherit_bindings=False):
         super().__init__(*args, **kwargs)
         self.app_blurred = False
         self.startup_path = startup_path
-        print(self.startup_path)
         self.has_pushed_screen = False
 
     def compose(self) -> ComposeResult:

@@ -44,12 +44,7 @@ class TerminalTooSmall(ModalScreen):
         ):
             self.dismiss()
             return
-        self.query_one("#heightThing", Label).update(
-            f"[${'error' if event.size.height < max_possible.height else 'success'}]{event.size.height}[/]"
-        )
-        self.query_one("#widthThing", Label).update(
-            f"[${'error' if event.size.width < max_possible.width else 'success'}]{event.size.width}[/]"
-        )
+        self.on_mount()
 
     def on_key(self, event: events.Key) -> None:
         event.stop()

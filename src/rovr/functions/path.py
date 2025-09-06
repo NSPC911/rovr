@@ -66,11 +66,12 @@ def open_file(filepath: str) -> None:
         print(f"Error opening file: {e}")
 
 
-def get_cwd_object(cwd: str | bytes) -> tuple[list[dict], list[dict]]:
+def get_cwd_object(cwd: str | bytes, show_hidden: bool = False) -> tuple[list[dict], list[dict]]:
     """
     Get the objects (files and folders) in a provided directory
     Args:
         cwd(str): The working directory to check
+        show_hidden(bool): Whether to include hidden files/folders (starting with .)
 
     Returns:
         folders(list[dict]): A list of dictionaries, containing "name" as the item's name and "icon" as the respective icon
@@ -83,6 +84,10 @@ def get_cwd_object(cwd: str | bytes) -> tuple[list[dict], list[dict]]:
         print(f"PermissionError: Unable to access {cwd}")
         return [PermissionError], [PermissionError]
     for item in listed_dir:
+        # Skip hidden files if show_hidden is False
+        if not show_hidden and item.name.startswith('.'):
+            continue
+            
         if item.is_dir():
             folders.append({
                 "name": f"{item.name}",

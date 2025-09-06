@@ -21,6 +21,7 @@ align = "left"
 [settings]
 preview_full = false
 image_protocol = "Auto"
+show_hidden_files = false
 
 copy_includes_metadata = true
 use_recycle_bin = true
@@ -151,6 +152,7 @@ hist_previous = ["backspace", "u"]
 hist_next = ["space"]
 toggle_visual = ["v"]
 toggle_all = ["%", "ctrl+a"]
+toggle_hidden_files = ["ctrl+full_stop"]
 select_up = ["shift+up", "K"]
 select_down = ["shift+down", "J"]
 select_page_up = ["shift+pageup"]

@@ -1,4 +1,3 @@
-import platform
 from os import getcwd, path
 from os import system as cmd
 from time import monotonic
@@ -77,11 +76,7 @@ class FileList(SelectionList, inherit_bindings=False):
         self.dummy = dummy
         self.enter_into = enter_into
         self.select_mode_enabled = select
-        # Only enable hidden files toggle on macOS
-        if platform.system() == "Darwin":
-            self.show_hidden_files = config.get("settings", {}).get("show_hidden_files", False)
-        else:
-            self.show_hidden_files = True  # Always show all files on non-macOS systems
+        self.show_hidden_files = config.get("settings", {}).get("show_hidden_files", False)
 
     def on_mount(self) -> None:
         if not self.dummy:
@@ -484,11 +479,7 @@ class FileList(SelectionList, inherit_bindings=False):
         ])
 
     async def toggle_hidden_files(self) -> None:
-        """Toggle the visibility of hidden files (macOS only)."""
-        if platform.system() != "Darwin":
-            self.app.notify("Hidden files toggle is only available on macOS", severity="warning")
-            return
-
+        """Toggle the visibility of hidden files."""
         self.show_hidden_files = not self.show_hidden_files
         self.update_file_list(add_to_session=False)
         status = "shown" if self.show_hidden_files else "hidden"

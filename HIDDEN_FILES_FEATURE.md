@@ -1,9 +1,7 @@
-# Hidden Files Toggle Feature (macOS Only)
+# Hidden Files Toggle Feature
 
 ## Overview
-This feature allows macOS users to toggle the visibility of hidden files and folders (those starting with a dot `.`) in the Rovr file manager.
-
-**Note: This feature is only available on macOS systems. On Windows and Linux, all files are always shown.**
+This feature allows users to toggle the visibility of hidden files and folders (those starting with a dot `.`) in the Rovr file manager.
 
 ## Key Binding
 - **Ctrl+.** (Control + Period): Toggle hidden files visibility

@@ -1,3 +1,4 @@
+import platform
 from os import getcwd, path
 from os import system as cmd
 from time import monotonic
@@ -76,6 +77,11 @@ class FileList(SelectionList, inherit_bindings=False):
         self.dummy = dummy
         self.enter_into = enter_into
         self.select_mode_enabled = select
+        # Only enable hidden files toggle on macOS
+        if platform.system() == "Darwin":
+            self.show_hidden_files = config.get("settings", {}).get("show_hidden_files", False)
+        else:
+            self.show_hidden_files = True  # Always show all files on non-macOS systems
 
     def on_mount(self) -> None:
         if not self.dummy:
@@ -128,7 +134,7 @@ class FileList(SelectionList, inherit_bindings=False):
             self.clear_options()
             return
         # Separate folders and files
-        folders, files = path_utils.get_cwd_object(cwd)
+        folders, files = path_utils.get_cwd_object(cwd, self.show_hidden_files)
         self.list_of_options = []
         if folders == [PermissionError] or files == [PermissionError]:
             self.list_of_options.append(
@@ -476,6 +482,17 @@ class FileList(SelectionList, inherit_bindings=False):
             Segment(" ", style=underlying_style),
             *line,
         ])
+
+    async def toggle_hidden_files(self) -> None:
+        """Toggle the visibility of hidden files (macOS only)."""
+        if platform.system() != "Darwin":
+            self.app.notify("Hidden files toggle is only available on macOS", severity="warning")
+            return
+
+        self.show_hidden_files = not self.show_hidden_files
+        self.update_file_list(add_to_session=False)
+        status = "shown" if self.show_hidden_files else "hidden"
+        self.app.notify(f"Hidden files are now {status}", severity="information")
 
     async def toggle_mode(self) -> None:
         """Toggle the selection mode between select and normal."""

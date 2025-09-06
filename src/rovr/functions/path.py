@@ -66,7 +66,9 @@ def open_file(filepath: str) -> None:
         print(f"Error opening file: {e}")
 
 
-def get_cwd_object(cwd: str | bytes, show_hidden: bool = False) -> tuple[list[dict], list[dict]]:
+def get_cwd_object(
+    cwd: str | bytes, show_hidden: bool = False
+) -> tuple[list[dict], list[dict]]:
     """
     Get the objects (files and folders) in a provided directory
     Args:
@@ -85,9 +87,9 @@ def get_cwd_object(cwd: str | bytes, show_hidden: bool = False) -> tuple[list[di
         return [PermissionError], [PermissionError]
     for item in listed_dir:
         # Skip hidden files if show_hidden is False
-        if not show_hidden and item.name.startswith('.'):
+        if not show_hidden and item.name.startswith("."):
             continue
-            
+
         if item.is_dir():
             folders.append({
                 "name": f"{item.name}",

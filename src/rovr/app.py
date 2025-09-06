@@ -1,5 +1,4 @@
 import asyncio
-
 import shutil
 from contextlib import suppress
 from os import chdir, getcwd, listdir, path
@@ -333,10 +332,6 @@ class Application(App, inherit_bindings=False):
                     self.remove_class("zen")
                 else:
                     self.add_class("zen")
-            # toggle hidden files
-            case key if key in config["keybinds"]["toggle_hidden_files"]:
-                file_list = self.query_one("#file_list")
-                await file_list.toggle_hidden_files()
 
     def on_app_blur(self, event: events.AppBlur) -> None:
         self.app_blurred = True

@@ -76,7 +76,9 @@ class FileList(SelectionList, inherit_bindings=False):
         self.dummy = dummy
         self.enter_into = enter_into
         self.select_mode_enabled = select
-        self.show_hidden_files = config.get("settings", {}).get("show_hidden_files", False)
+        self.show_hidden_files = config.get("settings", {}).get(
+            "show_hidden_files", False
+        )
 
     def on_mount(self) -> None:
         if not self.dummy:
@@ -727,6 +729,9 @@ class FileList(SelectionList, inherit_bindings=False):
                 case key if key in config["keybinds"]["focus_search"]:
                     event.stop()
                     self.input.focus()
+                # toggle hidden files
+                case key if key in config["keybinds"]["toggle_hidden_files"]:
+                    await self.toggle_hidden_files()
 
     def update_border_subtitle(self) -> None:
         if self.dummy:

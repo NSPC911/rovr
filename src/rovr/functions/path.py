@@ -84,8 +84,8 @@ def get_cwd_object(cwd: str | bytes, show_hidden: bool = False) -> tuple[list[di
         print(f"PermissionError: Unable to access {cwd}")
         return [PermissionError], [PermissionError]
     for item in listed_dir:
-        # Skip hidden files if show_hidden is False
-        if not show_hidden and item.name.startswith('.'):
+        # Skip hidden files if show_hidden is False (macOS only)
+        if not show_hidden and item.name.startswith('.') and platform.system() == "Darwin"('.'):
             continue
             
         if item.is_dir():

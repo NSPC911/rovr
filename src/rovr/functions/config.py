@@ -100,6 +100,12 @@ def load_config() -> dict:
     # image protocol because "AutoImage" doesn't work with Sixel
     if config["settings"]["image_protocol"] == "Auto":
         config["settings"]["image_protocol"] = ""
+    
+    # Load saved state and merge it into config
+    saved_state = load_state()
+    if saved_state:
+        config["state"] = saved_state
+    
     return config
 
 
@@ -114,3 +120,51 @@ def config_setup() -> None:
     if not path.exists(path.join(VAR_TO_DIR["CONFIG"], "style.tcss")):
         with open(path.join(VAR_TO_DIR["CONFIG"], "style.tcss"), "a") as _:
             pass
+
+
+def save_state(state_data: dict) -> None:
+    """
+    Save application state to a separate state file.
+    
+    Args:
+        state_data (dict): Dictionary containing state data to save
+    """
+    state_file_path = path.join(VAR_TO_DIR["CONFIG"], "state.json")
+    
+    # Load existing state if it exists
+    existing_state = {}
+    if path.exists(state_file_path):
+        try:
+            with open(state_file_path, "r") as f:
+                existing_state = ujson.load(f)
+        except (ujson.JSONDecodeError, IOError):
+            existing_state = {}
+    
+    # Merge new state with existing state
+    existing_state.update(state_data)
+    
+    # Save the updated state
+    try:
+        with open(state_file_path, "w") as f:
+            ujson.dump(existing_state, f, indent=2)
+    except IOError as e:
+        pprint(f"[bright_red]Error saving state: {e}")
+
+
+def load_state() -> dict:
+    """
+    Load application state from the state file.
+    
+    Returns:
+        dict: The saved state data, or an empty dict if no state file exists
+    """
+    state_file_path = path.join(VAR_TO_DIR["CONFIG"], "state.json")
+    
+    if path.exists(state_file_path):
+        try:
+            with open(state_file_path, "r") as f:
+                return ujson.load(f)
+        except (ujson.JSONDecodeError, IOError) as e:
+            pprint(f"[yellow]Warning: Could not load state file: {e}")
+            return {}
+    return {}

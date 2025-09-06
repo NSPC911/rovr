@@ -21,6 +21,7 @@ align = "left"
 [settings]
 preview_full = false
 image_protocol = "Auto"
+# Default state for hidden files. The actual state is saved/restored automatically in state.json
 show_hidden_files = false
 
 copy_includes_metadata = true

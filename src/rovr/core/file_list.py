@@ -17,6 +17,7 @@ from rovr.functions import icons as icon_utils
 from rovr.functions import path as path_utils
 from rovr.functions import pins as pin_utils
 from rovr.functions import utils
+from rovr.functions import config as config_utils
 from rovr.variables.constants import buttons_that_depend_on_path, config
 from rovr.variables.maps import ARCHIVE_EXTENSIONS
 
@@ -76,7 +77,9 @@ class FileList(SelectionList, inherit_bindings=False):
         self.dummy = dummy
         self.enter_into = enter_into
         self.select_mode_enabled = select
-        self.show_hidden_files = config.get("settings", {}).get("show_hidden_files", False)
+        # Load the saved state from config, or use the default from settings
+        self.show_hidden_files = config.get("state", {}).get("show_hidden_files", 
+                                config.get("settings", {}).get("show_hidden_files", False))
 
     def on_mount(self) -> None:
         if not self.dummy:
@@ -481,6 +484,10 @@ class FileList(SelectionList, inherit_bindings=False):
     async def toggle_hidden_files(self) -> None:
         """Toggle the visibility of hidden files."""
         self.show_hidden_files = not self.show_hidden_files
+        
+        # Save the state to config
+        config_utils.save_state({"show_hidden_files": self.show_hidden_files})
+        
         self.update_file_list(add_to_session=False)
         status = "shown" if self.show_hidden_files else "hidden"
         self.app.notify(f"Hidden files are now {status}", severity="information")

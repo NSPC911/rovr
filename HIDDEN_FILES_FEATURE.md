@@ -15,6 +15,8 @@ The default visibility state can be configured in the `config.toml` file:
 show_hidden_files = false  # Set to true to show hidden files by default
 ```
 
+The app remembers your last toggle state and restores it when you restart. This state is saved in `~/.config/rovr/state.json` (or the appropriate config directory for your OS).
+
 The keybinding is configured as:
 ```toml
 [keybinds]
@@ -87,7 +89,8 @@ python test_path_function.py
 ```
 
 ## Notes
-- The toggle only affects the current session; it doesn't permanently change the config file
+- The toggle state is automatically saved and restored between sessions
+- The saved state is stored separately from the config file in `state.json`
 - The setting applies to all tabs in the current Rovr session
 - Hidden files are sorted alphabetically along with visible files when shown
 - Textual recognizes the Ctrl+. key combination as `ctrl+full_stop`, not `ctrl+period`

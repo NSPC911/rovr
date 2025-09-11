@@ -76,6 +76,11 @@
       "type": "object",
       "additionalProperties": false,
       "properties": {
+        "show_hidden_files": {
+          "type": "boolean",
+          "default": false,
+          "description": "Show hidden files and folders (those starting with a dot)."
+        },
         "use_recycle_bin": {
           "type": "boolean",
           "default": true,
@@ -570,6 +575,13 @@
             "type": "string"
           },
           "description": "Enter or exit select/visual mode."
+        },
+        "toggle_hidden_files": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Toggle the visibility of hidden files (those starting with a dot)."
         },
         "select_up": {
           "type": "array",

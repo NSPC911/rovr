@@ -130,8 +130,8 @@ class ZDToDirectory(ModalScreen):
                 path, score = self._parse_zoxide_line(line, show_scores)
 
                 if show_scores and score:
-                    # Use :>5 to limit to 5 chars
-                    display_text = f" {score:>5} | {path}"
+                    # Fixed size to make it look good.
+                    display_text = f" {score:>6} | {path}"
                 else:
                     display_text = f" {path}"
 

@@ -691,6 +691,11 @@
                 "type": "string"
               },
               "description": "The keybind to open the zoxide modal."
+            },
+            "show_scores": {
+              "type": "boolean",
+              "default": false,
+              "description": "Display zoxide frequency scores alongside directory paths."
             }
           }
         },

@@ -10,6 +10,7 @@ from textual.widgets import Input, OptionList
 from textual.widgets.option_list import Option
 
 from rovr.functions import path as path_utils
+from rovr.variables.constants import config
 
 
 class ZoxideOptionList(OptionList):
@@ -79,6 +80,24 @@ class ZDToDirectory(ModalScreen):
             return True
         return False
 
+    def _parse_zoxide_line(
+        self, line: str, show_scores: bool
+    ) -> tuple[str, str | None]:
+        line = line.strip()
+        if not show_scores:
+            return line, None
+
+        # Example "  <floating_score> <path_with_spaces>"
+        # Split only on first space to make sure path with spaces work
+        parts = line.split(" ", 1)
+        if len(parts) == 2:
+            score_str, path = parts
+            return path, score_str
+        else:
+            # This should ideally never happen
+            print(f"Problems while parsing zoxide line - '{line}'")
+            return line, None
+
     @work(thread=True)
     def zoxide_updater(self, event: Input.Changed) -> None:
         """Update the list"""
@@ -86,8 +105,15 @@ class ZDToDirectory(ModalScreen):
         # check 1 for queue, to ignore subprocess as a whole
         if self.any_in_queue():
             return
+
+        zoxide_cmd = ["zoxide", "query", "--list"]
+        show_scores = config["plugins"]["zoxide"].get("show_scores", False)
+        if show_scores:
+            zoxide_cmd.append("--score")
+        zoxide_cmd += search_term.split()
+
         zoxide_output = run(
-            ["zoxide", "query", "--list"] + search_term.split(),
+            zoxide_cmd,
             capture_output=True,
             text=True,
         )
@@ -101,8 +127,17 @@ class ZDToDirectory(ModalScreen):
         options = []
         if zoxide_output.stdout:
             for line in zoxide_output.stdout.splitlines():
+                path, score = self._parse_zoxide_line(line, show_scores)
+
+                if show_scores and score:
+                    # Use :>5 to limit to 5 chars
+                    display_text = f" {score:>5} | {path}"
+                else:
+                    display_text = f" {path}"
+
+                # Use original path for ID (not display text)
                 options.append(
-                    Option(Content(f" {line}"), id=path_utils.compress(line))
+                    Option(Content(display_text), id=path_utils.compress(path))
                 )
             if len(options) == len(zoxide_options.options) and all(
                 options[i].id == zoxide_options.options[i].id

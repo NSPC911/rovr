@@ -75,13 +75,16 @@ def get_cwd_object(cwd: str | bytes) -> tuple[list[dict], list[dict]]:
     Returns:
         folders(list[dict]): A list of dictionaries, containing "name" as the item's name and "icon" as the respective icon
         files(list[dict]): A list of dictionaries, containing "name" as the item's name and "icon" as the respective icon
+
+     Raises:
+        PermissionError: If the process does not have permission to access.
     """
     folders, files = [], []
     try:
         listed_dir = os.scandir(cwd)
     except (PermissionError, FileNotFoundError, OSError):
         print(f"PermissionError: Unable to access {cwd}")
-        raise PermissionError # TODO: screen that shows "Unable to access"
+        raise PermissionError  # TODO: screen that shows "Unable to access"
     for item in listed_dir:
         if item.is_dir():
             folders.append({

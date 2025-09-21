@@ -66,7 +66,7 @@ def open_file(filepath: str) -> None:
         print(f"Error opening file: {e}")
 
 
-def get_cwd_object(cwd: str | bytes) -> tuple[list[dict], list[dict]]:
+def get_cwd_object(cwd: str | bytes) -> tuple[list[dict | type[PermissionError]], list[dict | type[PermissionError]]]:
     """
     Get the objects (files and folders) in a provided directory
     Args:

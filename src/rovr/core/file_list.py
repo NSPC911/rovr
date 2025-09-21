@@ -509,13 +509,15 @@ class FileList(SelectionList, inherit_bindings=False):
         self.app.tabWidget.active_tab.session.selectMode = self.select_mode_enabled
         self.update_border_subtitle()
 
-    async def get_selected_objects(self) -> list[str] | None:
+    async def get_selected_objects(self) -> list[str | bytes]:
         """Get the selected objects in the file list.
         Returns:
             list[str]: If there are objects at that given location.
             None: If there are no objects at that given location.
         """
         cwd = path_utils.normalise(getcwd())
+        assert cwd is str
+        assert self.highlighted is not None
         if not self.select_mode_enabled:
             return [
                 path_utils.normalise(
@@ -527,11 +529,10 @@ class FileList(SelectionList, inherit_bindings=False):
                     )
                 )
             ]
-        else:
-            return [
-                path_utils.normalise(path.join(cwd, path_utils.decompress(option)))
-                for option in self.selected
-            ]
+        return [
+            path_utils.normalise(path.join(cwd, path_utils.decompress(option)))
+            for option in self.selected
+        ]
 
     async def on_key(self, event: events.Key) -> None:
         """Handle key events for the file list."""

@@ -66,7 +66,7 @@ def open_file(filepath: str) -> None:
         print(f"Error opening file: {e}")
 
 
-def get_cwd_object(cwd: str | bytes) -> tuple[list[dict | type[PermissionError]], list[dict | type[PermissionError]]]:
+def get_cwd_object(cwd: str | bytes) -> tuple[list[dict], list[dict]]:
     """
     Get the objects (files and folders) in a provided directory
     Args:
@@ -81,7 +81,7 @@ def get_cwd_object(cwd: str | bytes) -> tuple[list[dict | type[PermissionError]]
         listed_dir = os.scandir(cwd)
     except (PermissionError, FileNotFoundError, OSError):
         print(f"PermissionError: Unable to access {cwd}")
-        return [PermissionError], [PermissionError]
+        raise PermissionError # TODO: screen that shows "Unable to access"
     for item in listed_dir:
         if item.is_dir():
             folders.append({

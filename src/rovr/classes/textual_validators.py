@@ -1,4 +1,4 @@
-from os import getcwd, path
+from os import getcwd, listdir
 
 from pathvalidate import sanitize_filepath
 from textual.validation import ValidationResult, Validator
@@ -26,7 +26,7 @@ class PathDoesntExist(Validator):
 
     def validate(self, value: str) -> ValidationResult:
         value = str(normalise(str(getcwd()) + "/" + value))
-        if path.exists(value):
+        if value in listdir():
             return self.failure()
         else:
             return self.success()

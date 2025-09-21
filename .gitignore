@@ -5,4 +5,3 @@ log.txt
 src/carto/mre.py
 *.egg-info/
 dist
-venv

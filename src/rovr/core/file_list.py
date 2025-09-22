@@ -516,7 +516,7 @@ class FileList(SelectionList, inherit_bindings=False):
             None: If there are no objects at that given location.
         """
         cwd = path_utils.normalise(getcwd())
-        assert cwd is str
+        assert isinstance(cwd, str)
         assert self.highlighted is not None
         if not self.select_mode_enabled:
             return [

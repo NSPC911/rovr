@@ -511,9 +511,9 @@ class FileList(SelectionList, inherit_bindings=False):
 
     async def get_selected_objects(self) -> list[str | bytes]:
         """Get the selected objects in the file list.
+
         Returns:
-            list[str]: If there are objects at that given location.
-            None: If there are no objects at that given location.
+            list[str | bytes]: The selected objects in the file list. The list will contain one or more items if objects are selected, or be empty if none are selected.
         """
         cwd = path_utils.normalise(getcwd())
         assert isinstance(cwd, str)

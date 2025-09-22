@@ -77,7 +77,7 @@ def get_cwd_object(cwd: str | bytes) -> tuple[list[dict], list[dict]]:
         files(list[dict]): A list of dictionaries, containing "name" as the item's name and "icon" as the respective icon
 
      Raises:
-        PermissionError: If the process does not have permission to access.
+        PermissionError: If the process does not have permission to access, if the directory does not exist, or if another OS error occurs.
     """
     folders, files = [], []
     try:

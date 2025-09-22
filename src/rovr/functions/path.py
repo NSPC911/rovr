@@ -82,8 +82,8 @@ def get_cwd_object(cwd: str | bytes) -> tuple[list[dict], list[dict]]:
     folders, files = [], []
     try:
         listed_dir = os.scandir(cwd)
-    except (PermissionError, FileNotFoundError, OSError):
-        print(f"PermissionError: Unable to access {cwd}")
+    except (PermissionError, FileNotFoundError, OSError) as e:
+        print(f"{type(e).__name__}: Unable to access {cwd}: {e}")
         raise PermissionError  # TODO: screen that shows "Unable to access"
     for item in listed_dir:
         if item.is_dir():

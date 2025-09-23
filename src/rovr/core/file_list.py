@@ -669,20 +669,32 @@ class FileList(SelectionList, inherit_bindings=False):
                         )
                     ):
                         with self.app.suspend():
-                            subprocess.run(
-                                f'{config["plugins"]["editor"]["folder_executable"]} "{path.join(getcwd(), path_utils.decompress(self.get_option_at_index(self.highlighted).id))}"',
-                                shell=True,
-                                stdout=subprocess.DEVNULL,
-                                stderr=subprocess.DEVNULL
-                            )
+                            try:
+                                subprocess.run(
+                                    f'{config["plugins"]["editor"]["folder_executable"]} "{path.join(getcwd(), path_utils.decompress(self.get_option_at_index(self.highlighted).id))}"',
+                                    shell=True,
+                                    stdout=subprocess.DEVNULL,
+                                    stderr=subprocess.DEVNULL,
+                                    check=True
+                                )
+                            except subprocess.CalledProcessError:
+                                # If the editor fails to start, we could show an error message,
+                                # but for now we silently fail to match existing behavior
+                                pass
                     else:
                         with self.app.suspend():
-                            subprocess.run(
-                                f'{config["plugins"]["editor"]["file_executable"]} "{path.join(getcwd(), path_utils.decompress(self.get_option_at_index(self.highlighted).id))}"',
-                                shell=True,
-                                stdout=subprocess.DEVNULL,
-                                stderr=subprocess.DEVNULL
-                            )
+                            try:
+                                subprocess.run(
+                                    f'{config["plugins"]["editor"]["file_executable"]} "{path.join(getcwd(), path_utils.decompress(self.get_option_at_index(self.highlighted).id))}"',
+                                    shell=True,
+                                    stdout=subprocess.DEVNULL,
+                                    stderr=subprocess.DEVNULL,
+                                    check=True
+                                )
+                            except subprocess.CalledProcessError:
+                                # If the editor fails to start, we could show an error message,
+                                # but for now we silently fail to match existing behavior
+                                pass
                 # hit buttons with keybinds
                 case key if (
                     not self.select_mode_enabled

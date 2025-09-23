@@ -1,5 +1,5 @@
+import subprocess
 from os import getcwd, path
-from os import system as cmd
 from typing import ClassVar
 
 from rich.segment import Segment
@@ -669,13 +669,19 @@ class FileList(SelectionList, inherit_bindings=False):
                         )
                     ):
                         with self.app.suspend():
-                            cmd(
-                                f'{config["plugins"]["editor"]["folder_executable"]} "{path.join(getcwd(), path_utils.decompress(self.get_option_at_index(self.highlighted).id))}"'
+                            subprocess.run(
+                                f'{config["plugins"]["editor"]["folder_executable"]} "{path.join(getcwd(), path_utils.decompress(self.get_option_at_index(self.highlighted).id))}"',
+                                shell=True,
+                                stdout=subprocess.DEVNULL,
+                                stderr=subprocess.DEVNULL
                             )
                     else:
                         with self.app.suspend():
-                            cmd(
-                                f'{config["plugins"]["editor"]["file_executable"]} "{path.join(getcwd(), path_utils.decompress(self.get_option_at_index(self.highlighted).id))}"'
+                            subprocess.run(
+                                f'{config["plugins"]["editor"]["file_executable"]} "{path.join(getcwd(), path_utils.decompress(self.get_option_at_index(self.highlighted).id))}"',
+                                shell=True,
+                                stdout=subprocess.DEVNULL,
+                                stderr=subprocess.DEVNULL
                             )
                 # hit buttons with keybinds
                 case key if (

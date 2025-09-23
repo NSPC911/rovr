@@ -17,6 +17,7 @@ from rovr.functions import icons as icon_utils
 from rovr.functions import path as path_utils
 from rovr.functions import pins as pin_utils
 from rovr.functions import utils
+from rovr.screens import Dismissable
 from rovr.variables.constants import buttons_that_depend_on_path, config
 from rovr.variables.maps import ARCHIVE_EXTENSIONS
 
@@ -677,10 +678,14 @@ class FileList(SelectionList, inherit_bindings=False):
                                     stderr=subprocess.DEVNULL,
                                     check=True
                                 )
-                            except subprocess.CalledProcessError:
-                                # If the editor fails to start, we could show an error message,
-                                # but for now we silently fail to match existing behavior
-                                pass
+                            except subprocess.CalledProcessError as e:
+                                # Show a dismissable modal if the editor fails to launch
+                                self.app.push_screen(
+                                    Dismissable(
+                                        f"Failed to open folder with {config['plugins']['editor']['folder_executable']}.\nReturn code: {e.returncode}",
+                                        border_subtitle="Editor Launch Error"
+                                    )
+                                )
                     else:
                         with self.app.suspend():
                             try:
@@ -691,10 +696,14 @@ class FileList(SelectionList, inherit_bindings=False):
                                     stderr=subprocess.DEVNULL,
                                     check=True
                                 )
-                            except subprocess.CalledProcessError:
-                                # If the editor fails to start, we could show an error message,
-                                # but for now we silently fail to match existing behavior
-                                pass
+                            except subprocess.CalledProcessError as e:
+                                # Show a dismissable modal if the editor fails to launch
+                                self.app.push_screen(
+                                    Dismissable(
+                                        f"Failed to open file with {config['plugins']['editor']['file_executable']}.\nReturn code: {e.returncode}",
+                                        border_subtitle="Editor Launch Error"
+                                    )
+                                )
                 # hit buttons with keybinds
                 case key if (
                     not self.select_mode_enabled

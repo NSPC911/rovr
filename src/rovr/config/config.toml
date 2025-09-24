@@ -180,9 +180,13 @@ show_line_numbers = true
 
 [plugins.editor]
 enabled = false
-file_executable = "nano"
-folder_executable = "code"
 keybinds = ["e"]
+[plugins.editor.file]
+executable = "nano"
+is_cli_editor = true
+[plugins.editor.folder]
+executable = "code"
+is_cli_editor = false
 
 [plugins.zen_mode]
 enabled = true

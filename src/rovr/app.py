@@ -319,6 +319,7 @@ class Application(App, inherit_bindings=False):
                         title="Zoxide",
                         severity="error",
                     )
+                    return
 
                 def on_response(response: str) -> None:
                     """Handle the response from the ZDToDirectory dialog."""

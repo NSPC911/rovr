@@ -1,3 +1,4 @@
+import shutil
 from subprocess import run
 from time import monotonic
 
@@ -113,17 +114,54 @@ class ZDToDirectory(ModalScreen):
         if self.any_in_queue():
             return
 
+        # Check if zoxide is available before trying to use it
+        if shutil.which("zoxide") is None:
+            # Handle missing zoxide gracefully
+            zoxide_options: ZoxideOptionList = self.query_one(
+                "#zoxide_options", ZoxideOptionList
+            )
+            self.app.call_from_thread(zoxide_options.clear_options)
+            self.app.call_from_thread(
+                zoxide_options.add_option,
+                Option("  Zoxide is not installed or not in PATH", disabled=True),
+            )
+            self.app.call_from_thread(
+                self.notify,
+                "Zoxide is not installed or not in PATH.",
+                "Zoxide",
+                "error",
+            )
+            return
+
         zoxide_cmd = ["zoxide", "query", "--list"]
         show_scores = config["plugins"]["zoxide"].get("show_scores", False)
         if show_scores:
             zoxide_cmd.append("--score")
         zoxide_cmd += search_term.split()
 
-        zoxide_output = run(
-            zoxide_cmd,
-            capture_output=True,
-            text=True,
-        )
+        try:
+            zoxide_output = run(
+                zoxide_cmd,
+                capture_output=True,
+                text=True,
+            )
+        except FileNotFoundError:
+            # Handle case where zoxide command fails to execute
+            zoxide_options: ZoxideOptionList = self.query_one(
+                "#zoxide_options", ZoxideOptionList
+            )
+            self.app.call_from_thread(zoxide_options.clear_options)
+            self.app.call_from_thread(
+                zoxide_options.add_option,
+                Option("  Zoxide command failed to execute", disabled=True),
+            )
+            self.app.call_from_thread(
+                self.notify,
+                "Zoxide command failed to execute.",
+                "Zoxide",
+                "error",
+            )
+            return
         # check 2 for queue, to ignore mounting as a whole
         if self.any_in_queue():
             return
@@ -192,11 +230,32 @@ class ZDToDirectory(ModalScreen):
         """Handle option selection."""
         selected_value = event.option.id
         assert selected_value is not None
-        run(
-            ["zoxide", "add", path_utils.decompress(selected_value)],
-            capture_output=True,
-            text=True,
-        )
+
+        # Check if zoxide is available before trying to use it
+        if shutil.which("zoxide") is None:
+            self.notify(
+                "Zoxide is not installed or not in PATH.",
+                title="Zoxide",
+                severity="error",
+            )
+            self.dismiss(None)
+            return
+
+        try:
+            run(
+                ["zoxide", "add", path_utils.decompress(selected_value)],
+                capture_output=True,
+                text=True,
+            )
+        except FileNotFoundError:
+            self.notify(
+                "Zoxide command failed to execute.",
+                title="Zoxide",
+                severity="error",
+            )
+            self.dismiss(None)
+            return
+
         if selected_value:
             self.dismiss(selected_value)
         else:

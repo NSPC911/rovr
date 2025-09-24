@@ -1,4 +1,5 @@
 import shutil
+from dataclasses import dataclass
 from subprocess import run
 from time import monotonic
 
@@ -12,6 +13,14 @@ from textual.widgets.option_list import Option
 
 from rovr.functions import path as path_utils
 from rovr.variables.constants import config
+
+
+@dataclass
+class ZoxideStatus:
+    """Constants for zoxide status"""
+    SUCCESS: str = "success"
+    UNAVAILABLE: str = "unavailable"
+    WRONG_FORMAT: str = "wrong_format"
 
 
 class ZoxideOptionList(OptionList):
@@ -43,6 +52,8 @@ class ZDToDirectory(ModalScreen):
         super().__init__(**kwargs)
         self._queued_task = None
         self._queued_task_args: str | None = None
+        # Check zoxide availability once during initialization
+        self.zoxide_status = ZoxideStatus.SUCCESS if shutil.which("zoxide") is not None else ZoxideStatus.UNAVAILABLE
 
     def compose(self) -> ComposeResult:
         with VerticalGroup(id="zoxide_group", classes="zoxide_group"):
@@ -73,6 +84,23 @@ class ZDToDirectory(ModalScreen):
             self._queued_task_args = event
         else:
             self.zoxide_updater(event=event)
+
+    def _handle_zoxide_unavailable(self) -> None:
+        """Handle the case when zoxide is not available"""
+        zoxide_options: ZoxideOptionList = self.query_one(
+            "#zoxide_options", ZoxideOptionList
+        )
+        self.app.call_from_thread(zoxide_options.clear_options)
+        self.app.call_from_thread(
+            zoxide_options.add_option,
+            Option("  Zoxide is not installed or not in PATH", disabled=True),
+        )
+        self.app.call_from_thread(
+            self.notify,
+            "Zoxide is not installed or not in PATH.",
+            "Zoxide",
+            "error",
+        )
 
     def any_in_queue(self) -> bool:
         if self._queued_task is not None:
@@ -114,23 +142,9 @@ class ZDToDirectory(ModalScreen):
         if self.any_in_queue():
             return
 
-        # Check if zoxide is available before trying to use it
-        if shutil.which("zoxide") is None:
-            # Handle missing zoxide gracefully
-            zoxide_options: ZoxideOptionList = self.query_one(
-                "#zoxide_options", ZoxideOptionList
-            )
-            self.app.call_from_thread(zoxide_options.clear_options)
-            self.app.call_from_thread(
-                zoxide_options.add_option,
-                Option("  Zoxide is not installed or not in PATH", disabled=True),
-            )
-            self.app.call_from_thread(
-                self.notify,
-                "Zoxide is not installed or not in PATH.",
-                "Zoxide",
-                "error",
-            )
+        # Check if zoxide is available using stored status
+        if self.zoxide_status == ZoxideStatus.UNAVAILABLE:
+            self._handle_zoxide_unavailable()
             return
 
         zoxide_cmd = ["zoxide", "query", "--list"]
@@ -231,8 +245,8 @@ class ZDToDirectory(ModalScreen):
         selected_value = event.option.id
         assert selected_value is not None
 
-        # Check if zoxide is available before trying to use it
-        if shutil.which("zoxide") is None:
+        # Check if zoxide is available using stored status
+        if self.zoxide_status == ZoxideStatus.UNAVAILABLE:
             self.notify(
                 "Zoxide is not installed or not in PATH.",
                 title="Zoxide",

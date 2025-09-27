@@ -126,7 +126,7 @@ class ZDToDirectory(ModalScreen):
                 capture_output=True,
                 text=True,
             )
-        except FileNotFoundError:
+        except OSError:
             # zoxide not installed
             if self.any_in_queue():
                 return
@@ -137,7 +137,11 @@ class ZDToDirectory(ModalScreen):
                 self.app.call_from_thread(zoxide_options.clear_options)
                 self.app.call_from_thread(
                     zoxide_options.add_option,
-                    Option("  zoxide is not found on $PATH", disabled=True, id="na"),
+                    Option(
+                        "  zoxide is missing on $PATH or cannot be executed",
+                        disabled=True,
+                        id="na",
+                    ),
                 )
             self.any_in_queue()
             return
@@ -210,7 +214,7 @@ class ZDToDirectory(ModalScreen):
         selected_value = event.option.id
         assert selected_value is not None
         # ignore if zoxide got uninstalled, why are you doing this
-        with contextlib.suppress(FileNotFoundError):
+        with contextlib.suppress(OSError):
             run(
                 ["zoxide", "add", path_utils.decompress(selected_value)],
                 capture_output=True,

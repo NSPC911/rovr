@@ -1,3 +1,4 @@
+import contextlib
 from subprocess import run
 from time import monotonic
 
@@ -119,11 +120,27 @@ class ZDToDirectory(ModalScreen):
             zoxide_cmd.append("--score")
         zoxide_cmd += search_term.split()
 
-        zoxide_output = run(
-            zoxide_cmd,
-            capture_output=True,
-            text=True,
-        )
+        try:
+            zoxide_output = run(
+                zoxide_cmd,
+                capture_output=True,
+                text=True,
+            )
+        except FileNotFoundError:
+            # zoxide not installed
+            if self.any_in_queue():
+                return
+            zoxide_options: ZoxideOptionList = self.query_one(
+                "#zoxide_options", ZoxideOptionList
+            )
+            if zoxide_options.get_option_at_index(0).id != "na":
+                self.app.call_from_thread(zoxide_options.clear_options)
+                self.app.call_from_thread(
+                    zoxide_options.add_option,
+                    Option("  zoxide is not found on $PATH", disabled=True, id="na"),
+                )
+            self.any_in_queue()
+            return
         # check 2 for queue, to ignore mounting as a whole
         if self.any_in_queue():
             return
@@ -142,7 +159,7 @@ class ZDToDirectory(ModalScreen):
                     if first_score_width == 0:
                         first_score_width = len(score)
                     # Fixed size to make it look good.
-                    display_text = f" {score:>{first_score_width}} | {path}"
+                    display_text = f" {score:>{first_score_width}} │ {path}"
                 else:
                     display_text = f" {path}"
 
@@ -192,11 +209,13 @@ class ZDToDirectory(ModalScreen):
         """Handle option selection."""
         selected_value = event.option.id
         assert selected_value is not None
-        run(
-            ["zoxide", "add", path_utils.decompress(selected_value)],
-            capture_output=True,
-            text=True,
-        )
+        # ignore if zoxide got uninstalled, why are you doing this
+        with contextlib.suppress(FileNotFoundError):
+            run(
+                ["zoxide", "add", path_utils.decompress(selected_value)],
+                capture_output=True,
+                text=True,
+            )
         if selected_value:
             self.dismiss(selected_value)
         else:

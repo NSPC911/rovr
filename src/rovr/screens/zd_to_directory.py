@@ -1,5 +1,5 @@
 import contextlib
-from subprocess import run
+from subprocess import CalledProcessError, run
 from time import monotonic
 
 from textual import events, work
@@ -126,7 +126,7 @@ class ZDToDirectory(ModalScreen):
                 capture_output=True,
                 text=True,
             )
-        except OSError:
+        except (FileNotFoundError, CalledProcessError, OSError):
             # zoxide not installed
             if self.any_in_queue():
                 return
@@ -214,7 +214,7 @@ class ZDToDirectory(ModalScreen):
         selected_value = event.option.id
         assert selected_value is not None
         # ignore if zoxide got uninstalled, why are you doing this
-        with contextlib.suppress(OSError):
+        with contextlib.suppress(FileNotFoundError, CalledProcessError, OSError):
             run(
                 ["zoxide", "add", path_utils.decompress(selected_value)],
                 capture_output=True,

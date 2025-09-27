@@ -18,7 +18,7 @@ from rovr.variables.constants import config, vindings
 class Clipboard(SelectionList, inherit_bindings=False):
     """A selection list that displays the clipboard contents."""
 
-    BINDINGS: ClassVar[list[BindingType]] = vindings
+    BINDINGS: ClassVar[list[BindingType]] = list(vindings)
 
     def __init__(self, **kwargs) -> None:
         super().__init__(**kwargs)

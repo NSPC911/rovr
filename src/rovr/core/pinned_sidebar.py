@@ -17,7 +17,7 @@ from rovr.variables.constants import config, vindings
 class PinnedSidebar(OptionList, inherit_bindings=False):
     DRIVE_WATCHER_FREQUENCY: float = config["settings"]["drive_watcher_frequency"]
     # Just so that I can disable space
-    BINDINGS: ClassVar[list[BindingType]] = vindings
+    BINDINGS: ClassVar[list[BindingType]] = list(vindings)
 
     def __init__(self, **kwargs) -> None:
         super().__init__(**kwargs)

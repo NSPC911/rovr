@@ -26,7 +26,7 @@ class FileList(SelectionList, inherit_bindings=False):
     OptionList but can multi-select files and folders.
     """
 
-    BINDINGS: ClassVar[list[BindingType]] = vindings
+    BINDINGS: ClassVar[list[BindingType]] = list(vindings)
 
     def __init__(
         self,

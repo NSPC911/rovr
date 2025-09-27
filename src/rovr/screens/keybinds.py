@@ -14,7 +14,7 @@ from rovr.variables.constants import config, vindings
 
 
 class KeybindList(OptionList, inherit_bindings=False):
-    BINDINGS: ClassVar[list[BindingType]] = vindings
+    BINDINGS: ClassVar[list[BindingType]] = list(vindings)
 
     def __init__(self, **kwargs) -> None:
         keybind_data, primary_keybind_data = self.get_keybind_data()

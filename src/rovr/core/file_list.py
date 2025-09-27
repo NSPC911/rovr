@@ -5,7 +5,7 @@ from typing import ClassVar
 from rich.segment import Segment
 from rich.style import Style
 from textual import events, on, work
-from textual.binding import Binding, BindingType
+from textual.binding import BindingType
 from textual.css.query import NoMatches
 from textual.strip import Strip
 from textual.widgets import Button, Input, OptionList, SelectionList
@@ -17,7 +17,7 @@ from rovr.functions import icons as icon_utils
 from rovr.functions import path as path_utils
 from rovr.functions import pins as pin_utils
 from rovr.functions import utils
-from rovr.variables.constants import buttons_that_depend_on_path, config
+from rovr.variables.constants import buttons_that_depend_on_path, config, vindings
 from rovr.variables.maps import ARCHIVE_EXTENSIONS
 
 
@@ -26,36 +26,7 @@ class FileList(SelectionList, inherit_bindings=False):
     OptionList but can multi-select files and folders.
     """
 
-    BINDINGS: ClassVar[list[BindingType]] = (
-        [
-            Binding(bind, "cursor_down", "Down", show=False)
-            for bind in config["keybinds"]["down"]
-        ]
-        + [
-            Binding(bind, "last", "Last", show=False)
-            for bind in config["keybinds"]["end"]
-        ]
-        + [
-            Binding(bind, "select", "Select", show=False)
-            for bind in config["keybinds"]["down_tree"]
-        ]
-        + [
-            Binding(bind, "first", "First", show=False)
-            for bind in config["keybinds"]["home"]
-        ]
-        + [
-            Binding(bind, "page_down", "Page Down", show=False)
-            for bind in config["keybinds"]["page_down"]
-        ]
-        + [
-            Binding(bind, "page_up", "Page Up", show=False)
-            for bind in config["keybinds"]["page_up"]
-        ]
-        + [
-            Binding(bind, "cursor_up", "Up", show=False)
-            for bind in config["keybinds"]["up"]
-        ]
-    )
+    BINDINGS: ClassVar[list[BindingType]] = vindings
 
     def __init__(
         self,

@@ -3,7 +3,7 @@ from os import path
 from typing import ClassVar
 
 from textual import events, on, work
-from textual.binding import Binding, BindingType
+from textual.binding import BindingType
 from textual.widgets import Input, OptionList
 from textual.widgets.option_list import Option
 
@@ -11,42 +11,13 @@ from rovr.classes import FolderNotFileError, PinnedSidebarOption
 from rovr.functions import icons as icon_utils
 from rovr.functions import path as path_utils
 from rovr.functions import pins as pin_utils
-from rovr.variables.constants import config
+from rovr.variables.constants import config, vindings
 
 
 class PinnedSidebar(OptionList, inherit_bindings=False):
     DRIVE_WATCHER_FREQUENCY: float = config["settings"]["drive_watcher_frequency"]
     # Just so that I can disable space
-    BINDINGS: ClassVar[list[BindingType]] = (
-        [
-            Binding(bind, "cursor_down", "Down", show=False)
-            for bind in config["keybinds"]["down"]
-        ]
-        + [
-            Binding(bind, "last", "Last", show=False)
-            for bind in config["keybinds"]["end"]
-        ]
-        + [
-            Binding(bind, "select", "Select", show=False)
-            for bind in config["keybinds"]["down_tree"]
-        ]
-        + [
-            Binding(bind, "first", "First", show=False)
-            for bind in config["keybinds"]["home"]
-        ]
-        + [
-            Binding(bind, "page_down", "Page Down", show=False)
-            for bind in config["keybinds"]["page_down"]
-        ]
-        + [
-            Binding(bind, "page_up", "Page Up", show=False)
-            for bind in config["keybinds"]["page_up"]
-        ]
-        + [
-            Binding(bind, "cursor_up", "Up", show=False)
-            for bind in config["keybinds"]["up"]
-        ]
-    )
+    BINDINGS: ClassVar[list[BindingType]] = vindings
 
     def __init__(self, **kwargs) -> None:
         super().__init__(**kwargs)

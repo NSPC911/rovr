@@ -2,7 +2,7 @@ from typing import ClassVar, cast
 
 from textual import events
 from textual.app import ComposeResult
-from textual.binding import Binding, BindingType
+from textual.binding import BindingType
 from textual.containers import VerticalGroup
 from textual.screen import ModalScreen
 from textual.widgets import OptionList
@@ -10,40 +10,11 @@ from textual.widgets import OptionList
 from rovr.classes.textual_options import KeybindOption
 from rovr.functions import icons
 from rovr.search_container import SearchInput
-from rovr.variables.constants import config
+from rovr.variables.constants import config, vindings
 
 
 class KeybindList(OptionList, inherit_bindings=False):
-    BINDINGS: ClassVar[list[BindingType]] = (
-        [
-            Binding(bind, "cursor_down", "Down", show=False)
-            for bind in config["keybinds"]["down"]
-        ]
-        + [
-            Binding(bind, "last", "Last", show=False)
-            for bind in config["keybinds"]["end"]
-        ]
-        + [
-            Binding(bind, "select", "Select", show=False)
-            for bind in config["keybinds"]["down_tree"]
-        ]
-        + [
-            Binding(bind, "first", "First", show=False)
-            for bind in config["keybinds"]["home"]
-        ]
-        + [
-            Binding(bind, "page_down", "Page Down", show=False)
-            for bind in config["keybinds"]["page_down"]
-        ]
-        + [
-            Binding(bind, "page_up", "Page Up", show=False)
-            for bind in config["keybinds"]["page_up"]
-        ]
-        + [
-            Binding(bind, "cursor_up", "Up", show=False)
-            for bind in config["keybinds"]["up"]
-        ]
-    )
+    BINDINGS: ClassVar[list[BindingType]] = vindings
 
     def __init__(self, **kwargs) -> None:
         keybind_data, primary_keybind_data = self.get_keybind_data()

@@ -734,16 +734,6 @@
               "default": true,
               "description": "Enable opening a file in your editor."
             },
-            "file_executable": {
-              "type": "string",
-              "default": "nano",
-              "description": "Open files in this app."
-            },
-            "folder_executable": {
-              "type": "string",
-              "default": "code",
-              "description": "Open folders in this app."
-            },
             "keybinds": {
               "type": "array",
               "default": ["e"],
@@ -751,6 +741,38 @@
                 "type": "string"
               },
               "description": "The keybind to launch your editor."
+            },
+            "folder": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "executable": {
+                  "type": "string",
+                  "default": "code",
+                  "description": "Open folders in this app."
+                },
+                "is_cli_editor": {
+                  "type": "boolean",
+                  "default": false,
+                  "description": "Set to true if your executable is a CLI editor (like vim, nano, etc.) that requires terminal access. Set to false for GUI editors (like code, sublime, etc.)."
+                }
+              }
+            },
+            "file": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "executable": {
+                  "type": "string",
+                  "default": "nano",
+                  "description": "Open files in this app."
+                },
+                "is_cli_editor": {
+                  "type": "boolean",
+                  "default": false,
+                  "description": "Set to true if your executable is a CLI editor (like vim, nano, etc.) that requires terminal access. Set to false for GUI editors (like code, sublime, etc.)."
+                }
+              }
             }
           }
         },

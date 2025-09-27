@@ -1,5 +1,5 @@
+import subprocess
 from os import getcwd, path
-from os import system as cmd
 from typing import ClassVar
 
 from rich.segment import Segment
@@ -17,6 +17,7 @@ from rovr.functions import icons as icon_utils
 from rovr.functions import path as path_utils
 from rovr.functions import pins as pin_utils
 from rovr.functions import utils
+from rovr.screens import Dismissable
 from rovr.variables.constants import buttons_that_depend_on_path, config
 from rovr.variables.maps import ARCHIVE_EXTENSIONS
 
@@ -669,14 +670,61 @@ class FileList(SelectionList, inherit_bindings=False):
                         )
                     ):
                         with self.app.suspend():
-                            cmd(
-                                f'{config["plugins"]["editor"]["folder_executable"]} "{path.join(getcwd(), path_utils.decompress(self.get_option_at_index(self.highlighted).id))}"'
-                            )
+                            try:
+                                if config["plugins"]["editor"]["folder"][
+                                    "is_cli_editor"
+                                ]:
+                                    # For CLI editors, don't capture output so the editor UI can display
+                                    subprocess.run(
+                                        f'{config["plugins"]["editor"]["folder"]["executable"]} "{path.join(getcwd(), path_utils.decompress(self.get_option_at_index(self.highlighted).id))}"',
+                                        shell=True,
+                                        check=True,
+                                    )
+                                else:
+                                    # For GUI editors, capture and discard output
+                                    subprocess.run(
+                                        f'{config["plugins"]["editor"]["folder"]["executable"]} "{path.join(getcwd(), path_utils.decompress(self.get_option_at_index(self.highlighted).id))}"',
+                                        shell=True,
+                                        stdout=subprocess.DEVNULL,
+                                        stderr=subprocess.DEVNULL,
+                                        check=True,
+                                    )
+                            except subprocess.CalledProcessError as e:
+                                # Show a dismissable modal if the editor fails to launch
+                                self.app.push_screen(
+                                    Dismissable(
+                                        f"Failed to open folder with {config['plugins']['editor']['folder']['executable']}.\nReturn code: {e.returncode}",
+                                        border_subtitle="Editor Launch Error",
+                                    )
+                                )
                     else:
                         with self.app.suspend():
-                            cmd(
-                                f'{config["plugins"]["editor"]["file_executable"]} "{path.join(getcwd(), path_utils.decompress(self.get_option_at_index(self.highlighted).id))}"'
-                            )
+                            try:
+                                # Check if using a CLI editor that needs terminal access
+                                if config["plugins"]["editor"]["file"]["is_cli_editor"]:
+                                    # For CLI editors, don't capture output so the editor UI can display
+                                    subprocess.run(
+                                        f'{config["plugins"]["editor"]["file"]["executable"]} "{path.join(getcwd(), path_utils.decompress(self.get_option_at_index(self.highlighted).id))}"',
+                                        shell=True,
+                                        check=True,
+                                    )
+                                else:
+                                    # For GUI editors, capture and discard output
+                                    subprocess.run(
+                                        f'{config["plugins"]["editor"]["file"]["executable"]} "{path.join(getcwd(), path_utils.decompress(self.get_option_at_index(self.highlighted).id))}"',
+                                        shell=True,
+                                        stdout=subprocess.DEVNULL,
+                                        stderr=subprocess.DEVNULL,
+                                        check=True,
+                                    )
+                            except subprocess.CalledProcessError as e:
+                                # Show a dismissable modal if the editor fails to launch
+                                self.app.push_screen(
+                                    Dismissable(
+                                        f"Failed to open file with {config['plugins']['editor']['file']['executable']}.\nReturn code: {e.returncode}",
+                                        border_subtitle="Editor Launch Error",
+                                    )
+                                )
                 # hit buttons with keybinds
                 case key if (
                     not self.select_mode_enabled

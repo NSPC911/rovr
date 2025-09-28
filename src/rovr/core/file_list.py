@@ -487,14 +487,10 @@ class FileList(SelectionList, inherit_bindings=False):
             if config["settings"]["show_hidden_files"]
             else "[$error underline]hidden"
         )
-        if not self.dummy:
-            self.app.notify(
-                f"Hidden files are now {status}[/]", severity="information", timeout=2.5
-            )
-        if (
-            isinstance(self.app.query_one("PreviewContainer").children[0], FileList)
-            and not self.dummy
-        ):
+        self.app.notify(
+            f"Hidden files are now {status}[/]", severity="information", timeout=2.5
+        )
+        if self.parent.parent.query("PreviewContainer > FileList") and not self.dummy:
             self.highlighted = self.highlighted
 
     async def toggle_mode(self) -> None:

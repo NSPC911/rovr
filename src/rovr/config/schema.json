@@ -79,7 +79,7 @@
         "show_hidden_files": {
           "type": "boolean",
           "default": false,
-          "description": "Show hidden files and folders (those starting with a dot)."
+          "description": "Show hidden files and folders (those starting with a dot on Unix, or explicitly hidden on Windows/MacOS)."
         },
         "use_recycle_bin": {
           "type": "boolean",

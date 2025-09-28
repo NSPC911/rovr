@@ -36,15 +36,23 @@ def normalise(location: str | bytes) -> str | bytes:
 def is_hidden_file(filepath: str) -> bool:
     if os_type == "Windows":
         try:
-            return bool(
-                ctypes.windll.kernel32.GetFileAttributesW(filepath)
-                & 0x02  # FILE_ATTRIBUTE_HIDDEN
-            )
+            GetFileAttributesW = ctypes.windll.kernel32.GetFileAttributesW
+            GetFileAttributesW.argtypes = [ctypes.c_wchar_p]
+            GetFileAttributesW.restype = ctypes.c_uint32
+            attrs = GetFileAttributesW(filepath)
+            if attrs == 0xFFFFFFFF:  # INVALID_FILE_ATTRIBUTES
+                return False
+            return bool(attrs & 0x02)  # FILE_ATTRIBUTE_HIDDEN
         except (OSError, AttributeError):
-            pass
+            return False
+    elif os_type == "Darwin":
+        try:
+            st = os.stat(filepath, follow_symlinks=False)
+            return bool(getattr(st, "st_flags", 0) & getattr(stat, "UF_HIDDEN", 0))
+        except OSError:
+            return path.basename(filepath).startswith(".")
     else:
         return path.basename(filepath).startswith(".")
-    return False
 
 
 # Okay so the reason why I have wrapper functions is

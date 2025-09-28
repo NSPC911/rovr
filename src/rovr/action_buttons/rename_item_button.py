@@ -42,12 +42,13 @@ class RenameItemButton(Button):
         else:
             selected_file = selected_files[0]
             type_of_file = "Folder" if path.isdir(selected_file) else "File"
+            path_base = path.basename(selected_file)
             response: str = await self.app.push_screen(
                 ModalInput(
                     border_title=f"Rename {type_of_file}",
-                    border_subtitle=f"Current name: {path.basename(selected_file)}",
+                    border_subtitle=f"Current name: {path_base}",
                     initial_value=path.basename(selected_file),
-                    validators=[IsValidFilePath(), PathDoesntExist()],
+                    validators=[IsValidFilePath(), PathDoesntExist(path_base)],
                     is_path=True,
                     is_folder=type_of_file == "Folder",
                 ),
@@ -55,9 +56,8 @@ class RenameItemButton(Button):
             )
             if response in ["", path.basename(selected_file)]:
                 return
-            old_name = normalise(path.realpath(path.join(getcwd(), selected_file)))
-            new_name = normalise(path.realpath(path.join(getcwd(), response)))
-            if not path.exists(old_name):
+            new_name = normalise(path.join(getcwd(), response))
+            if not path.exists(selected_file):
                 self.notify(
                     message=f"'{selected_file}' no longer exists.",
                     title="Rename",
@@ -65,7 +65,7 @@ class RenameItemButton(Button):
                 )
                 return
             try:
-                move(old_name, new_name)
+                move(selected_file, new_name)
             except Exception as e:
                 self.notify(
                     message=Content(

@@ -20,13 +20,14 @@ class IsValidFilePath(Validator):
 
 
 class PathDoesntExist(Validator):
-    def __init__(self, strict: bool = True) -> None:
+    def __init__(self, *exceptions: str, strict: bool = True) -> None:
         super().__init__(failure_description="Path already exists.")
         self.strict = strict
+        self.exceptions = [exception.lower() for exception in exceptions]
 
     def validate(self, value: str) -> ValidationResult:
-        value = str(normalise(str(getcwd()) + "/" + value))
-        if path.exists(value):
+        full_value = str(normalise(str(getcwd()) + "/" + value))
+        if path.exists(full_value) and value.lower() not in self.exceptions:
             return self.failure()
         else:
             return self.success()

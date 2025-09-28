@@ -102,7 +102,7 @@ class ModalInput(ModalScreen):
     async def on_input_submitted(self, event: Input.Submitted) -> None:
         """Handle input submission."""
         if (
-            not self.query_one(Input).is_valid
+            not event.input.is_valid
             and event.validation_result
             and event.validation_result.failures
         ):

@@ -400,9 +400,7 @@ class Application(App, inherit_bindings=False):
             except OSError:
                 # PermissionError falls under this, but we catch everything else
                 continue
-            if new_cwd != file_list.cwd:
-                self.cd(cwd)
-            elif cwd != new_cwd:
+            if cwd != new_cwd:
                 cwd = new_cwd
             elif items != file_list.items_in_cwd:
                 self.cd(cwd)

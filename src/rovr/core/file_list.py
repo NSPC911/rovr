@@ -48,7 +48,7 @@ class FileList(SelectionList, inherit_bindings=False):
         self.enter_into = enter_into
         self.select_mode_enabled = select
         if not self.dummy:
-            self.items_in_cwd: set[str] = {}
+            self.items_in_cwd: set[str] = set()
             self.cwd: str = ""
 
     def on_mount(self) -> None:
@@ -118,7 +118,7 @@ class FileList(SelectionList, inherit_bindings=False):
         # Separate folders and files
         self.list_of_options: list[FileListSelectionWidget | Selection] = []
         names_in_cwd: list[str] = []
-        self.items_in_cwd: set[str] = {}
+        self.items_in_cwd: set[str] = set()
         try:
             folders, files = path_utils.get_cwd_object(self.cwd)
             if folders == [] and files == []:

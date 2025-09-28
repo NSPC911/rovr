@@ -1,5 +1,5 @@
+import ctypes
 import os
-import platform
 import stat
 import subprocess
 from os import path
@@ -9,6 +9,7 @@ from lzstring import LZString
 from rich.console import Console
 
 from rovr.functions.icons import get_icon_for_file, get_icon_for_folder
+from rovr.variables.constants import os_type
 
 lzstring = LZString()
 pprint = Console().print
@@ -32,6 +33,20 @@ def normalise(location: str | bytes) -> str | bytes:
     return path.normpath(location).replace("\\", "/").replace("//", "/")
 
 
+def is_hidden_file(filepath: str) -> bool:
+    if os_type == "Windows":
+        try:
+            return bool(
+                ctypes.windll.kernel32.GetFileAttributesW(filepath)
+                & 0x02  # FILE_ATTRIBUTE_HIDDEN
+            )
+        except (OSError, AttributeError):
+            pass
+    else:
+        return path.basename(filepath).startswith(".")
+    return False
+
+
 # Okay so the reason why I have wrapper functions is
 # I was messing around with different LZString options
 # and Encoded URI Component seems to best option. I've just
@@ -52,7 +67,7 @@ def open_file(filepath: str) -> None:
     Args:
         filepath (str): Path to the file to open
     """
-    system = platform.system().lower()
+    system = os_type.lower()
 
     try:
         match system:
@@ -89,7 +104,7 @@ def get_cwd_object(
         raise PermissionError(f"PermissionError: Unable to access {cwd}")
     for item in listed_dir:
         # Skip hidden files if show_hidden is False
-        if not show_hidden and item.name.startswith("."):
+        if not show_hidden and is_hidden_file(item.path):
             continue
 
         if item.is_dir():
@@ -129,7 +144,7 @@ def file_is_type(file_path: str) -> str:
     elif stat.S_ISDIR(mode):
         return "directory"
     elif (
-        platform.system() == "Windows"
+        os_type == "Windows"
         and hasattr(file_stat, "st_file_attributes")
         and file_stat.st_file_attributes & stat.FILE_ATTRIBUTE_REPARSE_POINT
     ):
@@ -326,14 +341,14 @@ def get_mounted_drives() -> list:
         # get all partitions
         partitions = psutil.disk_partitions(all=False)
 
-        if platform.system() == "Windows":
+        if os_type == "Windows":
             # For Windows, return the drive letters
             drives = [
                 normalise(p.mountpoint)
                 for p in partitions
                 if p.device and ":" in p.device
             ]
-        elif platform.system() == "Darwin":
+        elif os_type == "Darwin":
             # For macOS, filter out system volumes and keep only user-relevant drives
             drives = [
                 p.mountpoint for p in partitions if _should_include_macos_mount_point(p)

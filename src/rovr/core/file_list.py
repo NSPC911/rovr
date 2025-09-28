@@ -479,8 +479,14 @@ class FileList(SelectionList, inherit_bindings=False):
         """Toggle the visibility of hidden files."""
         self.show_hidden_files = not self.show_hidden_files
         self.update_file_list(add_to_session=False)
-        status = "shown" if self.show_hidden_files else "hidden"
-        self.app.notify(f"Hidden files are now {status}", severity="information")
+        status = (
+            "[$success underline]shown"
+            if self.show_hidden_files
+            else "[$error underline]hidden"
+        )
+        self.app.notify(
+            f"Hidden files are now {status}[/]", severity="information", timeout=2.5
+        )
 
     async def toggle_mode(self) -> None:
         """Toggle the selection mode between select and normal."""

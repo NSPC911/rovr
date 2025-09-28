@@ -1,3 +1,4 @@
+import platform
 from dataclasses import dataclass
 
 from textual.binding import Binding, BindingType
@@ -72,3 +73,5 @@ vindings: list[BindingType] = (
         for bind in config["keybinds"]["up"]
     ]
 )
+
+os_type: str = platform.system()

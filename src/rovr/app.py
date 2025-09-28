@@ -389,21 +389,22 @@ class Application(App, inherit_bindings=False):
 
     @work
     async def watch_for_changes_and_update(self) -> None:
-        self._cwd = getcwd()
-        self._items = listdir(self._cwd)
+        cwd = getcwd()
+        items = listdir(cwd)
+        file_list = self.query_one(FileList)
         while True:
             await asyncio.sleep(1)
             new_cwd = getcwd()
             try:
-                new_cwd_items = listdir(new_cwd)
+                items = listdir(cwd)
             except PermissionError:
                 continue
-            if self._cwd != new_cwd:
-                self._cwd = new_cwd
-                self._items = listdir(self._cwd)
-            elif self._items != new_cwd_items:
-                self.cd(self._cwd)
-                self._items = new_cwd_items
+            if cwd != new_cwd:
+                cwd = new_cwd
+                items = listdir(cwd)
+            elif items != file_list.items_in_cwd:
+                self.cd(cwd)
+                items = file_list.items_in_cwd
 
     @work
     async def on_resize(self, event: events.Resize) -> None:

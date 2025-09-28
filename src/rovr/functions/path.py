@@ -87,7 +87,7 @@ def get_cwd_object(cwd: str | bytes) -> tuple[list[dict], list[dict]]:
     for item in listed_dir:
         if item.is_dir():
             folders.append({
-                "name": f"{item.name}",
+                "name": item.name,
                 "icon": get_icon_for_folder(item.name),
                 "dir_entry": item,
             })

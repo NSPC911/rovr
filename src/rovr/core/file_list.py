@@ -114,6 +114,7 @@ class FileList(SelectionList, inherit_bindings=False):
             return
         # Separate folders and files
         self.list_of_options = []
+        self.items_in_cwd = []
         try:
             folders, files = path_utils.get_cwd_object(cwd)
             if folders == [] and files == []:
@@ -135,6 +136,7 @@ class FileList(SelectionList, inherit_bindings=False):
                             id=path_utils.compress(item["name"]),
                         )
                     )
+                    self.items_in_cwd.append(item["name"])
         except PermissionError:
             self.list_of_options.append(
                 Selection(

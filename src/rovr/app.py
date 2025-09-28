@@ -5,7 +5,7 @@ from os import chdir, getcwd, listdir, path
 from types import SimpleNamespace
 from typing import Callable, Iterable
 
-from textual import events, work
+from textual import events, on, work
 from textual.app import App, ComposeResult, SystemCommand
 from textual.binding import Binding
 from textual.color import ColorParseError
@@ -37,6 +37,7 @@ from rovr.core import (
     PinnedSidebar,
     PreviewContainer,
 )
+from rovr.core.file_list import FileListRightClickOptionList
 from rovr.footer import Clipboard, MetadataContainer, ProcessContainer
 from rovr.functions import icons
 from rovr.functions.path import decompress, ensure_existing_directory, normalise
@@ -49,7 +50,7 @@ from rovr.navigation_widgets import (
     PathInput,
     UpButton,
 )
-from rovr.screens import DummyScreen, YesOrNo, ZDToDirectory
+from rovr.screens import DummyScreen, Keybinds, YesOrNo, ZDToDirectory
 from rovr.screens.way_too_small import TerminalTooSmall
 from rovr.search_container import SearchInput
 from rovr.variables.constants import MaxPossible, config
@@ -88,12 +89,13 @@ class Application(App, inherit_bindings=False):
         if config["interface"]["use_reactive_layout"]
         else []
     )
+    CLICK_CHAIN_TIME_THRESHOLD: int = config["settings"]["double_click_delay"]
 
     def __init__(self, startup_path: str = "", *args, **kwargs) -> None:
         super().__init__(*args, **kwargs)
-        self.app_blurred = False
-        self.startup_path = startup_path
-        self.has_pushed_screen = False
+        self.app_blurred: bool = False
+        self.startup_path: str = startup_path
+        self.has_pushed_screen: bool = False
 
     def compose(self) -> ComposeResult:
         print("Starting Rovr...")
@@ -129,11 +131,12 @@ class Application(App, inherit_bindings=False):
                     yield SearchInput(
                         placeholder=f"({icons.get_icon('general', 'search')[0]}) Search something..."
                     )
-                    yield FileList(
+                    filelist = FileList(
                         id="file_list",
                         name="File List",
                         classes="file-list",
                     )
+                    yield filelist
                 yield PreviewContainer(
                     id="preview_sidebar",
                 )
@@ -141,6 +144,7 @@ class Application(App, inherit_bindings=False):
                 yield ProcessContainer()
                 yield MetadataContainer(id="metadata")
                 yield Clipboard(id="clipboard")
+            yield FileListRightClickOptionList(filelist, classes="hidden")
 
     def on_mount(self) -> None:
         # border titles
@@ -186,6 +190,9 @@ class Application(App, inherit_bindings=False):
         self.query_one("#file_list").focus()
         # start mini watcher
         self.watch_for_changes_and_update()
+        # disable scrollbars
+        self.show_horizontal_scrollbar = False
+        self.show_vertical_scrollbar = False
 
     @work
     async def action_focus_next(self) -> None:
@@ -200,6 +207,9 @@ class Application(App, inherit_bindings=False):
     async def on_key(self, event: events.Key) -> None:
         # Not really sure why this can happen, but I will still handle this
         if self.focused is None or not self.focused.id:
+            return
+        # if current screen isn't the app screen
+        if len(self.screen_stack) != 1:
             return
         # Make sure that key binds don't break
         match event.key:
@@ -323,15 +333,9 @@ class Application(App, inherit_bindings=False):
                         )
 
                 self.push_screen(ZDToDirectory(), on_response)
-            # zen mode
-            case key if (
-                config["plugins"]["zen_mode"]["enabled"]
-                and key in config["plugins"]["zen_mode"]["keybinds"]
-            ):
-                if "zen" in self.classes:
-                    self.remove_class("zen")
-                else:
-                    self.add_class("zen")
+            # keybinds
+            case key if key in config["keybinds"]["show_keybinds"]:
+                self.push_screen(Keybinds())
 
     def on_app_blur(self, event: events.AppBlur) -> None:
         self.app_blurred = True
@@ -378,6 +382,8 @@ class Application(App, inherit_bindings=False):
         self.query_one("#file_list").update_file_list(
             add_to_session=add_to_history, focus_on=focus_on
         )
+        if hasattr(self, "tabWidget"):
+            self.tabWidget.active_tab.session.search = ""
         if callback:
             self.call_later(callback)
 
@@ -492,6 +498,16 @@ class Application(App, inherit_bindings=False):
     async def _toggle_transparency(self) -> None:
         self.ansi_color = not self.ansi_color
         await self.push_screen_wait(DummyScreen())
+        self.query_one("#file_list").update_border_subtitle()
+
+    @on(events.Click)
+    @work(thread=True)
+    def when_got_click(self, event: events.Click) -> None:
+        if (
+            not isinstance(event.widget, FileListRightClickOptionList)
+            or event.button != 3
+        ):
+            self.query_one(FileListRightClickOptionList).add_class("hidden")
 
 
 app = Application(watch_css=True)

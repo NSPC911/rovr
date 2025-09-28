@@ -2,15 +2,17 @@
   <h1>rovr</h1>
   <img alt="Python Version" src="https://img.shields.io/pypi/pyversions/rovr?style=for-the-badge&logo=python&logoColor=white&color=yellow">
   <img alt="Made with Textual" src="https://img.shields.io/badge/made_with-textual-0b171d?style=for-the-badge&logoColor=white">
-  <!--python -c "import toml;print(len(toml.load('uv.lock')['package']))"-->
-  <img alt="Dependencies" src="https://img.shields.io/badge/Dependencies-85-purple?style=for-the-badge">
+  <img alt="Static Badge" src="https://img.shields.io/badge/Linter-Ruff_%2B_ty-black?style=for-the-badge&color=24122d">
   <br>
   <a href="https://nspc911.github.io/discord"><img alt="Discord" src="https://img.shields.io/discord/1110189201313513552?style=for-the-badge&logo=discord&logoColor=white&color=%235865f2"></a>
-  <img alt="PyPI - Downloads" src="https://img.shields.io/pypi/dw/rovr?style=for-the-badge&logo=pypi&logoColor=white&color=darkgreen">
+  <a href="https://pypi.org/project/rovr"><img alt="PyPI - Downloads" src="https://img.shields.io/pypi/dw/rovr?style=for-the-badge&logo=pypi&logoColor=white&color=darkgreen"></a>
   <br>
   <img alt="GitHub Actions Docs Build Status" src="https://img.shields.io/github/actions/workflow/status/nspc911/rovr/.github%2Fworkflows%2Fdeploy.yml?style=for-the-badge&label=docs">
   <img alt="GitHub Actions Formatting Status" src="https://img.shields.io/github/actions/workflow/status/nspc911/rovr/.github%2Fworkflows%2Fformatting.yml?style=for-the-badge&label=style">
 </div>
+
+> [!IMPORTANT]
+> I, NSPC911, am currently on a temporary hiatus due to personal reasons.
 
 > [!warning]
 > This project is in its very early stages. While this can be daily driven, expect some issues here and there.

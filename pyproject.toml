@@ -1,6 +1,6 @@
 [project]
 name = "rovr"
-version = "0.2.1.post2"
+version = "0.3.0"
 description = "A post-modern terminal file explorer"
 readme = "README.md"
 requires-python = ">= 3.13"
@@ -61,13 +61,14 @@ tag_format = "$version"
 version_scheme = "pep440"
 version_provider = "uv"
 update_changelog_on_bump = true
-major_version_zero = false
+major_version_zero = true
 
 [tool.poe.tasks]
 dev = "textual run --dev rovr.__main__:main"
 run = "rovr"
 log = "textual console -x WORKER -x SYSTEM -x DEBUG -x EVENT"
 "gen-schema" = "docs/scripts/generate_schema.py"
+"icon-test" = "docs/scripts/icon_test.py"
 
 [tool.ruff.lint]
 select = [

@@ -3,7 +3,7 @@ $border-style: round;
 $border-blurred: $primary-background-lighten-3;
 $border-blurred-light: $primary-background;
 $border: $primary-lighten-3;
-$border-disabled: $primary-background-lighten-1;
+$border-disabled: $panel;
 
 /* Layout Dimensions */
 $pinned_sidebar_width: 17;
@@ -39,7 +39,8 @@ $scrollbar-corner-color: $primary-muted;
 #path_switcher,
 #zoxide_options,
 #below_menu Button,
-#footer > * {
+#footer > *,
+FileListRightClickOptionList {
   background: transparent;
   border: $border-style $border-blurred;
   border-subtitle-color: $background;
@@ -78,7 +79,8 @@ $scrollbar-corner-color: $primary-muted;
 #file_list.-maximized,
 #pinned_sidebar.-maximized,
 #preview_sidebar .inner_preview.-maximized,
-#footer > *:focus {
+#footer > *:focus,
+FileListRightClickOptionList {
   border: $border-style $border;
   border-subtitle-background: $border;
   &:ansi {
@@ -189,8 +191,11 @@ Tooltip {
       }
     }
     .underline--bar {
-      background: $background-lighten-1;
-      color: $border;
+      color: $primary;
+      background: $background-lighten-3;
+    }
+    Underline:ansi {
+      text-style: none !important;
     }
     /* color may be inaccurate due to terminals *\
     \* you need to change the underline bar and */
@@ -201,9 +206,9 @@ Tooltip {
 
   &:focus-within > HeaderClock,
   &:focus-within > #newTabRight {
-    border-bottom: heavy $foreground-darken-3;
+    border-bottom: solid $foreground-darken-3;
     &:ansi { border-bottom: solid $foreground-darken-3 }
-    &:light { border-bottom: heavy $foreground-lighten-3 }
+    &:light { border-bottom: solid $foreground-lighten-3 }
     &:ansi:light { border-bottom: solid $foreground-lighten-3 }
   }
 
@@ -219,9 +224,9 @@ Tooltip {
     /* border bottom colors, sometimes it can be  *\
     |* too thin, so switch to heavy and not solid *|
     \* use lighten-1 instead of lighten-3         */
-    border-bottom: heavy $background-lighten-1;
+    border-bottom: solid $background-lighten-3;
     &:ansi { border-bottom: solid $background-lighten-3 }
-    &:light { border-bottom: heavy $background-darken-1 }
+    &:light { border-bottom: solid $background-darken-1 }
     &:ansi:light { border-bottom: solid $background-darken-3 }
   }
 }
@@ -320,7 +325,8 @@ Tooltip {
 #file_list, #file_list_visual { height: 1fr }
 
 #pinned_sidebar_container,
-#file_list_container {
+#file_list_container,
+#keybinds_group {
   Input {
     padding: 0 0 0 1;
     margin: 0;
@@ -436,7 +442,7 @@ ProgressBarContainer {
 }
 
 Content.selected { color: red }
-FileList, PinnedSidebar, Clipboard, CommandList {
+FileList, PinnedSidebar, Clipboard, CommandList, #zoxide_options, FileListRightClickOptionList {
   padding: 0 0 0 0;
   .option-list--option-disabled { color: $border-blurred }
   &:light .option-list--option-disabled { color: $border-blurred-light }
@@ -449,9 +455,14 @@ FileList, PinnedSidebar, Clipboard, CommandList {
     background: transparent
   }
   &:focus .option-list--option-highlighted,
-  &CommandList:blur .option-list--option-highlighted {
+  &.-popup-shown .option-list--option-highlighted {
     color: $block-cursor-foreground;
     background: $primary;
+  }
+  &:blur .selection-list--button-selected-highlighted,
+  &:blur .selection-list--button-highlighted {
+    background: transparent;
+    color: $primary
   }
   .selection-list--button {
     background: transparent;
@@ -461,66 +472,21 @@ FileList, PinnedSidebar, Clipboard, CommandList {
     background: transparent;
     color: $primary;
   }
-  .selection-list--button-highlighted {
-    background: $border;
+  .selection-list--button-highlighted,
+  &.-popup-shown .selection-list--button-highlighted {
+    background: $primary;
     color: $background;
   }
-  .selection-list--button-selected-highlighted {
-    background: $border;
+  .selection-list--button-selected-highlighted,
+  &.-popup-shown .selection-list--button-selected-highlighted {
+    background: $primary;
     color: $background;
-  }
-  &:blur .selection-list--button-selected-highlighted {
-    background: transparent;
-    color: $primary
   }
 }
 FileList .option-list--option-highlighted {
   color: $block-cursor-background;
   background: transparent;
   text-style: bold;
-}
-
-/* Screen mode modifiers */
-Screen {
-  &.-filelistonly {
-    #pinned_sidebar_container,
-    #preview_sidebar,
-    #below_menu Button { display: none !important }
-    #below_menu PathAutoCompleteInput { margin: -1 1 0 1 !important }
-  }
-  &.-nopreview {
-    #preview_sidebar,
-    #below_menu Button { display: none !important }
-    #below_menu PathAutoCompleteInput { margin: -1 1 0 1 !important }
-    #pinned_sidebar_container { max-width: 25vw }
-  }
-  &.-all-vertical #footer { max-height: 25vh }
-  &.-nopath {
-    #below_menu { display: none !important }
-    #footer { max-height: 30vh }
-  }
-  &.-nomenu-atall {
-    #menu,
-    #below_menu { display: none !important }
-    #footer { max-height: 30vh }
-  }
-  &.-filelistonly-vertical {
-    #menu { display: none !important }
-  }
-  &.-middle-only {
-    #menu,
-    #below_menu { display: none !important }
-    #footer { max-height: 25vh }
-  }
-}
-.zen {
-  #menu,
-  #below_menu,
-  #below_menu Input,
-  #below_menu Button,
-  #pinned_sidebar_container,
-  #preview_sidebar,
-  #footer { display: none !important }
 }
 
 #dialog {
@@ -593,6 +559,26 @@ ZDToDirectory {
   #zoxide_group {
     max-width: 50vw;
     max-height: 50vh;
+  }
+}
+
+Keybinds {
+  align: center middle;
+  #keybinds_data {
+    width: 100%;
+    max-width: 100%;
+    height: 1fr;
+    background: transparent;
+    padding: 0;
+    .option-list--option-highlighted {
+      background: $primary;
+      color: $background;
+    }
+  }
+  #keybinds_group {
+    max-width: 60vw;
+    max-height: 80vh;
+    border: $border-style $border;
   }
 }
 
@@ -794,12 +780,20 @@ TerminalTooSmall {
   align: center middle;
   background: transparent;
   height: 1fr;
+  scrollbar-size: 0 0;
+  #logo { offset: 0 -1 }
   HorizontalGroup {
     width: auto;
     background: transparent;
     align: center middle;
   }
   & > Static { height: 1fr }
+  #logo.hidden {
+    color: $error;
+    display: block;
+    height: 1fr;
+    offset: 0 0;
+  }
 }
 
 
@@ -829,3 +823,56 @@ CommandPalette {
   LoadingIndicator { border-bottom: $border-style $border }
 }
 
+Screen {
+  &.-filelistonly {
+    #pinned_sidebar_container,
+    #preview_sidebar,
+    #below_menu Button { display: none !important }
+    #below_menu PathAutoCompleteInput { margin: -1 1 0 1 !important }
+    #zoxide_group,
+    CommandPalette > Vertical,
+    #dialog,
+    ModalInput {
+      width: 90vw;
+      max-width: 90vw;
+    }
+  }
+  &.-nopreview {
+    #preview_sidebar,
+    #below_menu Button { display: none !important }
+    #below_menu PathAutoCompleteInput { margin: -1 1 0 1 !important }
+    #pinned_sidebar_container { max-width: 25vw }
+    #zoxide_group,
+    CommandPalette > Vertical,
+    #dialog,
+    ModalInput {
+      width: 75vw;
+      max-width: 75vw;
+    }
+  }
+  &.-all-vertical #footer { max-height: 25vh }
+  &.-nopath {
+    #below_menu { display: none !important }
+    #footer { max-height: 30vh }
+  }
+  &.-nomenu-atall {
+    #menu,
+    #below_menu { display: none !important }
+    #footer { max-height: 30vh }
+  }
+  &.-filelistonly-vertical {
+    #menu { display: none !important }
+  }
+  &.-middle-only {
+    #menu,
+    #below_menu { display: none !important }
+    #footer { max-height: 25vh }
+  }
+}
+FileListRightClickOptionList {
+  width: auto;
+  .option-list--option-highlighted {
+    background: $primary;
+    color: $background;
+  }
+}

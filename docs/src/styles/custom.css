@@ -12,12 +12,21 @@
   --sl-transition-duration: 0.375s;
 }
 
-@media (prefers-reduced-motion: reduce) {
-  :root {
-    --sl-transition-duration: 0s
-  }
-}
+/* @media (prefers-reduced-motion: reduce) { */
+  /* :root { */
+    /* --sl-transition-duration: 0s; */
+  /* } */
+/* } */
 
+
+/* @media (prefers { */
+  /* :root { */
+    /* --sl-transition-duration: 0s; */
+    code {
+      background-color: transparent;
+    }
+  /* } */
+/* } */
 /* Dark mode colors. */
 :root {
   --sl-color-accent: #8fbcbb;
@@ -162,7 +171,7 @@ code {
   font-weight: 599;
   font-size: 1rem;
 }
-summary {
+summary:not(#starlight__on-this-page--mobile) {
   justify-content: start;
   padding: 0.2em 0;
   > svg {
@@ -229,6 +238,12 @@ summary {
     scrollbar-color: var(--sl-color-bg-accent) transparent;
   }
 }
+@media (max-width: 50rem) {
+  .sidebar-pane {
+    background: transparent;
+    backdrop-filter: blur(10px);
+  }
+}
 .main-frame {
   background: transparent;
 }
@@ -256,8 +271,14 @@ select > option:hover {
   transition: transform var(--sl-transition-duration) ease;
   box-shadow: unset;
   cursor: pointer;
+  svg {
+    transition: transform var(--sl-transition-duration) ease;
+  }
   &:hover {
     transform: scale(1.01);
+    svg {
+      transform: scale(1.5);
+    }
   }
 }
 .pagination-links:has(> a:hover) > a:not(:hover) {
@@ -299,8 +320,10 @@ body {
 button {
   box-shadow: unset !important;
   transition-property:
+    background, color, scrollbar-color, transform;
+  &:hover:not([aria-label="Search"]) {
+  transition-property:
     background, color, border-inline-start, scrollbar-color, transform;
-  &:hover {
     transform: scale(1.125);
   }
 }
@@ -351,13 +374,13 @@ figure.frame {
   }
   &:not(:has(> figcaption > span)) > pre[data-language] {
     padding-top: 1em;
-    &::before{
+    &::before {
       position: absolute;
       display: block;
       content: attr(data-language);
       left: 1em;
       top: 6px;
-      transition: color var(--sl-transition-duration) linear
+      transition: color var(--sl-transition-duration) linear;
     }
   }
 
@@ -443,22 +466,6 @@ starlight-file-tree {
 starlight-file-tree ul:has(> li.file) {
   border-inline-start: 2px solid var(--sl-color-gray-4);
 }
-.sl-markdown-content a:not([id^=tab]) {
-  color: var(--sl-color-accent-high);
-  margin: 0 -0.25em;
-  padding: 0 0.25em;
-  &:hover {
-    color: var(--sl-color-black);
-    background-color: var(--sl-color-accent-high);
-  }
-}
-
-a[id^=tab] {
-  transition-property: background, color, border-inline-start, scrollbar-color, border-bottom;
-  &:hover[aria-selected="false"] {
-    border-bottom: 2px solid var(--sl-color-text-accent-hover);
-  }
-}
 
 .hero {
   margin-bottom: calc(var(--sl-nav-height) * 2);
@@ -486,4 +493,69 @@ a[id^=tab] {
 pre.mermaid[data-processed] {
   background: transparent !important;
   transition: all var(--sl-transition-duration) linear;
+}
+
+.social-icons a > :is(span, svg),
+.social-wrapper > a > svg,
+.sl-markdown-content + footer > div:not(.pagination-links) > a > svg {
+  transition: rotate calc(var(--sl-transition-duration) * 2)
+    cubic-bezier(0.34, 1.56, 0.64, 1), color calc(var(--sl-transition-duration) * 2)
+    cubic-bezier(0.34, 1.56, 0.64, 1);
+  user-select: none;
+}
+.social-icons a:hover > span:is(:first-child, :nth-child(2)),
+.social-wrapper > a:hover > svg,
+.sl-markdown-content + footer > div:not(.pagination-links) > a:hover > svg {
+  rotate: 360deg;
+}
+.group-label + svg {
+  transition: transform var(--sl-transition-duration)
+    cubic-bezier(0.34, 1.56, 0.64, 1);
+  user-select: none;
+}
+
+/* GitHub Stats styling */
+.github-stats {
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+}
+/* filled variant */
+.github-stat > span:nth-child(2) {
+  position: absolute;
+}
+.github-stat > span:nth-child(2),
+.github-stat:hover > span:first-child {
+  color: transparent;
+}
+.github-stat:hover > span:nth-child(2) {
+  color: var(--sl-color-text);
+}
+.github-stat {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  color: var(--sl-color-text);
+  text-decoration: none;
+  transition: color var(--sl-transition-duration) ease;
+  svg {
+    stroke: currentColor;
+  }
+  span {
+    font-size: 0.875rem;
+    &:hover:last-child {
+      color: var(--sl-color-text);
+    }
+  }
+}
+.actions-group {
+  display: flex;
+  align-items: center;
+}
+kbd {
+  border-radius: 0.25rem;
+  font-size: var(--sl-text-2xs);
+  gap: 0.25em;
+  padding-inline: 0.375rem;
+  background-color: var(--sl-color-gray-6);
 }

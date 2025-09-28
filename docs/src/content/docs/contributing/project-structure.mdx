@@ -22,10 +22,11 @@ the current file structure seperates each section in each folder
 <FileTree>
 - src/rovr/action_buttons
   - copy_button.py copy selections to clipboard
+  - copy_path.py copy path of selected item to real clipboard
   - cut_button.py cut selections to clipboard
   - delete_button.py delete selections
   - new_item_button.py create new item
-  - paste_button.py paste from clipboard into cwd
+  - paste_button.py paste from rovr's clipboard into cwd
   - rename_item_button.py rename selected **item**
   - unzip_button.py unzip selected **item**
   - zip_button.py zip selected items
@@ -62,19 +63,20 @@ handles the middle elements
   - pinned_sidebar.py a list that shows pinned items
   - preview_container.py a container that shows the appropriate preview
 </FileTree>
-`PreviewContainer` uses `FileList` as part of its Folder Preview mechanism. it currently doesn't use it for archive previews, so I'm ready to accept prs that fix this issue
+`PreviewContainer` uses `FileList` as part of its Folder Preview mechanism. it
+currently doesn't use it for archive previews, so I'm ready to accept prs that
+fix this issue
 
 ### footer
 
 handles the bottom row
 
 <FileTree>
-- src/rovr/footer
+  - src/rovr/footer
   - clipboard_container.py a list that contains copied/cut items
   - metadata_container.py shows metadata on the current primary selection
   - process_container.py shows a list of active processes
 </FileTree>
-I'm currently waiting for textual's next release for a thicker progress bar, so that gradient bars can be added
 
 ### functions
 
@@ -95,7 +97,7 @@ handles the top most row
 <FileTree>
 - src/rovr/header
   - header.py the header container itself
-  - tabs.py the tabs, and new tab button
+  - tabs.py the tabs and new tab button
 </FileTree>
 
 ### navigation widgets
@@ -119,6 +121,8 @@ handles the modal screens used
   - dismissable.py dismissable modal, for notices
   - give_permission.py raise permission when you get permission errored
   - input.py modal input, also supporting path input
+  - keybinds.py show all keybindings
+  - way_too_small.py screen shown when window is too small
   - yes_or_no.py simple yes or no prompt
   - zd_to_directory.py zoxide integration
   - _tester.py screen tester, not used at all

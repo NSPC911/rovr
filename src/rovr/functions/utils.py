@@ -33,7 +33,7 @@ def set_nested_value(d: dict, path_str: str, value: bool) -> None:
 
     Args:
         d (dict): The dictionary to modify.
-        path_str (str): The dot-separated path to the key (e.g., "plugins.zen_mode").
+        path_str (str): The dot-separated path to the key (e.g., "plugins.bat").
         value (bool): The value to set. (boolean for now)
     """
     keys = path_str.split(".")

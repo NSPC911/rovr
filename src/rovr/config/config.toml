@@ -33,6 +33,8 @@ cd_on_quit = false
 
 double_click_delay = 0.25
 
+drive_watcher_frequency = 3.0
+
 [metadata]
 fields = ["type", "permissions", "size", "modified", "accessed", "created"]
 datetime_format = "%Y-%m-%d %H:%M"
@@ -42,8 +44,8 @@ filesize_suffix = "decimal"
 [[icons.files]]
 pattern = "yaml"
 match_type = "endswith"
-icon = "\ue8eb"
-color = "#ca121a"
+icon = "\ue60b"
+color = "#F71A10"
 
 [[icons.folders]]
 pattern = "node_modules"
@@ -167,10 +169,12 @@ preview_scroll_left = ["left", "h"]
 preview_scroll_right = ["right", "l"]
 preview_select_left = ["shift+left", "H"]
 preview_select_right = ["shift+right", "L"]
+show_keybinds = ["question_mark"]
 
 [plugins.zoxide]
 enabled = false
 keybinds = ["z"]
+show_scores = false
 
 [plugins.bat]
 enabled = false
@@ -182,7 +186,3 @@ enabled = false
 file_executable = "nano"
 folder_executable = "code"
 keybinds = ["e"]
-
-[plugins.zen_mode]
-enabled = true
-keybinds = ["Z"]

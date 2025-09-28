@@ -1,8 +1,9 @@
+import asyncio
 from os import path
 from typing import ClassVar
 
 from textual import events, on, work
-from textual.binding import Binding, BindingType
+from textual.binding import BindingType
 from textual.widgets import Input, OptionList
 from textual.widgets.option_list import Option
 
@@ -10,46 +11,18 @@ from rovr.classes import FolderNotFileError, PinnedSidebarOption
 from rovr.functions import icons as icon_utils
 from rovr.functions import path as path_utils
 from rovr.functions import pins as pin_utils
-from rovr.variables.constants import config
+from rovr.variables.constants import config, vindings
 
 
 class PinnedSidebar(OptionList, inherit_bindings=False):
+    DRIVE_WATCHER_FREQUENCY: float = config["settings"]["drive_watcher_frequency"]
     # Just so that I can disable space
-    BINDINGS: ClassVar[list[BindingType]] = (
-        [
-            Binding(bind, "cursor_down", "Down", show=False)
-            for bind in config["keybinds"]["down"]
-        ]
-        + [
-            Binding(bind, "last", "Last", show=False)
-            for bind in config["keybinds"]["end"]
-        ]
-        + [
-            Binding(bind, "select", "Select", show=False)
-            for bind in config["keybinds"]["down_tree"]
-        ]
-        + [
-            Binding(bind, "first", "First", show=False)
-            for bind in config["keybinds"]["home"]
-        ]
-        + [
-            Binding(bind, "page_down", "Page Down", show=False)
-            for bind in config["keybinds"]["page_down"]
-        ]
-        + [
-            Binding(bind, "page_up", "Page Up", show=False)
-            for bind in config["keybinds"]["page_up"]
-        ]
-        + [
-            Binding(bind, "cursor_up", "Up", show=False)
-            for bind in config["keybinds"]["up"]
-        ]
-    )
+    BINDINGS: ClassVar[list[BindingType]] = list(vindings)
 
     def __init__(self, **kwargs) -> None:
         super().__init__(**kwargs)
 
-    @work(exclusive=True)
+    @work
     async def reload_pins(self) -> None:
         """Reload pins shown
 
@@ -127,10 +100,27 @@ class PinnedSidebar(OptionList, inherit_bindings=False):
             )
         self.add_options(self.list_of_options)
 
+    @work
+    async def watch_for_drive_changes_and_update(self) -> None:
+        self._drives = path_utils.get_mounted_drives()
+        while True:
+            await asyncio.sleep(self.DRIVE_WATCHER_FREQUENCY)
+            try:
+                new_drives = path_utils.get_mounted_drives()
+                if self._drives != new_drives:
+                    self._drives = new_drives
+                    self.reload_pins()
+            except Exception as e:
+                print(
+                    f"Exception of type {type(e).__name__} while watching drives: {e}"
+                )
+                continue
+
     async def on_mount(self) -> None:
         """Reload the pinned files from the config."""
         self.input: Input = self.parent.query_one(Input)
         self.reload_pins()
+        self.watch_for_drive_changes_and_update()
 
     @on(events.Enter)
     @work

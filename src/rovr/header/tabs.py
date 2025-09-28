@@ -1,12 +1,35 @@
 from os import getcwd, path
 
+from rich.style import Style
 from textual import on
+from textual.app import ComposeResult, RenderResult
+from textual.containers import Container, Horizontal, Vertical
+from textual.renderables.bar import Bar as BarRenderable
 from textual.widgets import Button, Input, SelectionList, Tabs
-from textual.widgets._tabs import Tab
+from textual.widgets._tabs import Tab, Underline
 from textual.widgets.option_list import OptionDoesNotExist
 
 from rovr.classes import SessionManager
 from rovr.functions.path import normalise
+
+
+class BetterBarRenderable(BarRenderable):
+    HALF_BAR_LEFT: str = "╶"
+    BAR: str = "─"
+    HALF_BAR_RIGHT: str = "╴"
+
+
+class BetterUnderline(Underline):
+    def render(self) -> RenderResult:
+        """Render the bar.
+        Returns:
+            RenderResult: the result of the render method"""
+        bar_style = self.get_component_rich_style("underline--bar")
+        return BetterBarRenderable(
+            highlight_range=self._highlight_range,
+            highlight_style=Style.from_color(bar_style.color),
+            background_style=Style.from_color(bar_style.bgcolor),
+        )
 
 
 class TablineTab(Tab):
@@ -37,6 +60,12 @@ class TablineTab(Tab):
 
 
 class Tabline(Tabs):
+    def compose(self) -> ComposeResult:
+        with Container(id="tabs-scroll"), Vertical(id="tabs-list-bar"):
+            with Horizontal(id="tabs-list"):
+                yield from self._tabs
+            yield BetterUnderline()
+
     async def add_tab(
         self, directory: str = "", label: str = "", *args, **kwargs
     ) -> None:

@@ -78,13 +78,15 @@ def get_cwd_object(
     Returns:
         folders(list[dict]): A list of dictionaries, containing "name" as the item's name and "icon" as the respective icon
         files(list[dict]): A list of dictionaries, containing "name" as the item's name and "icon" as the respective icon
+
+    Raises:
+        PermissionError: When access to the directory is denied
     """
     folders, files = [], []
     try:
         listed_dir = os.scandir(cwd)
     except (PermissionError, FileNotFoundError, OSError):
-        print(f"PermissionError: Unable to access {cwd}")
-        return [PermissionError], [PermissionError]
+        raise PermissionError(f"PermissionError: Unable to access {cwd}")
     for item in listed_dir:
         # Skip hidden files if show_hidden is False
         if not show_hidden and item.name.startswith("."):

@@ -14,9 +14,9 @@ class TerminalTooSmall(ModalScreen):
         super().__init__(*args, **kwargs)
 
     def compose(self) -> ComposeResult:
-        yield Static()
+        yield Static(id="fillerup")
         with Center():
-            yield Label(ascii_logo)
+            yield Label(ascii_logo, id="logo")
         with Center():
             with HorizontalGroup(id="height"):
                 yield Label("Height: ")
@@ -26,15 +26,24 @@ class TerminalTooSmall(ModalScreen):
                 yield Label("Width : ")
                 yield Label(f"[$success]{max_possible.width}[/] > ")
                 yield Label("", id="widthThing")
-        yield Static()
+        yield Static(id="fillerdown")
 
     def on_mount(self) -> None:
+        for child in self.query("*"):
+            child.show_horizontal_scrollbar = False
+            child.show_vertical_scrollbar = False
+        self.extra_changes()
+
+    @work
+    async def extra_changes(self) -> None:
         self.query_one("#heightThing", Label).update(
             f"[${'error' if self.size.height < max_possible.height else 'success'}]{self.size.height}[/]"
         )
         self.query_one("#widthThing", Label).update(
             f"[${'error' if self.size.width < max_possible.width else 'success'}]{self.size.width}[/]"
         )
+        for widget in ["#width", "#height", "#fillerup", "#fillerdown", "#logo"]:
+            self.query_one(widget).classes = "" if self.size.height > 6 else "hidden"
 
     @work(exclusive=True)
     async def on_resize(self, event: events.Resize) -> None:
@@ -44,7 +53,7 @@ class TerminalTooSmall(ModalScreen):
         ):
             self.dismiss()
             return
-        self.on_mount()
+        self.extra_changes()
 
     def on_key(self, event: events.Key) -> None:
         event.stop()

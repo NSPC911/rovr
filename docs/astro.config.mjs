@@ -13,6 +13,9 @@ export default defineConfig({
     mermaid({}),
     starlight({
       title: "rovr",
+      components: {
+        SocialIcons: "./src/components/GithubStats.astro",
+      },
       social: [
         {
           icon: "github",
@@ -27,18 +30,25 @@ export default defineConfig({
       ],
       head: [
         {
-          tag: 'meta',
-          attrs: { property: 'og:image', content: "https://github.com/NSPC911/rovr/blob/master/img/0.1.0/rovr_thumb.png?raw=true" },
+          tag: "meta",
+          attrs: {
+            property: "og:image",
+            content:
+              "https://github.com/NSPC911/rovr/blob/master/img/0.1.0/rovr_thumb.png?raw=true",
+          },
         },
         {
-          tag: 'meta',
-          attrs: { property: 'twitter:image', content: "https://github.com/NSPC911/rovr/blob/master/img/0.1.0/rovr_thumb.png?raw=true" },
+          tag: "meta",
+          attrs: {
+            property: "twitter:image",
+            content:
+              "https://github.com/NSPC911/rovr/blob/master/img/0.1.0/rovr_thumb.png?raw=true",
+          },
         },
       ],
       customCss: ["./src/styles/custom.css"],
       editLink: {
-        baseUrl:
-          "https://github.com/NSPC911/rovr/tree/docs/docs",
+        baseUrl: "https://github.com/NSPC911/rovr/tree/docs/docs",
       },
       tableOfContents: { minHeadingLevel: 1, maxHeadingLevel: 4 },
       lastUpdated: true,
@@ -79,12 +89,12 @@ export default defineConfig({
           label: "contributing",
           items: [
             {
-              label: "project structure",
-              slug: "contributing/project-structure",
-            },
-            {
               label: "how to contribute",
               slug: "contributing/how-to-contribute",
+            },
+            {
+              label: "project structure",
+              slug: "contributing/project-structure",
             },
             {
               label: "optimisations",

@@ -58,3 +58,21 @@ class ClipboardSelection(Selection):
         """
         super().__init__(prompt, *args, **kwargs)
         self.initial_prompt = prompt
+
+
+class KeybindOption(Option):
+    def __init__(
+        self,
+        keys: str,
+        description: str,
+        max_key_width: int,
+        primary_key: str,
+        **kwargs,
+    ) -> None:
+        # Should be named 'label' for searching
+        self.label = f" {keys:>{max_key_width}} │ {description} "
+        self.key_press = primary_key
+
+        super().__init__(self.label, **kwargs)
+        if primary_key == "":
+            self.disabled = True

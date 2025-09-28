@@ -12,7 +12,7 @@ try:
         "with_features",
         multiple=True,
         type=str,
-        help="Enable a feature (e.g., 'plugins.zen_mode').",
+        help="Enable a feature (e.g., 'plugins.bat').",
     )
     @click.option(
         "--without",
@@ -55,7 +55,7 @@ try:
             )
             return
         elif show_version:
-            pprint("v0.2.1-post2")
+            pprint("v0.3.0")
             return
 
         for feature_path in with_features:

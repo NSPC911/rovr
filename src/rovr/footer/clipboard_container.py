@@ -3,7 +3,7 @@ from typing import ClassVar
 from rich.segment import Segment
 from rich.style import Style
 from textual import events, work
-from textual.binding import Binding, BindingType
+from textual.binding import BindingType
 from textual.content import Content
 from textual.strip import Strip
 from textual.widgets import Button, SelectionList
@@ -12,42 +12,13 @@ from textual.widgets.option_list import OptionDoesNotExist
 from rovr.classes import ClipboardSelection
 from rovr.functions import icons as icon_utils
 from rovr.functions import path as path_utils
-from rovr.variables.constants import config
+from rovr.variables.constants import config, vindings
 
 
 class Clipboard(SelectionList, inherit_bindings=False):
     """A selection list that displays the clipboard contents."""
 
-    BINDINGS: ClassVar[list[BindingType]] = (
-        [
-            Binding(bind, "cursor_down", "Down", show=False)
-            for bind in config["keybinds"]["down"]
-        ]
-        + [
-            Binding(bind, "last", "Last", show=False)
-            for bind in config["keybinds"]["end"]
-        ]
-        + [
-            Binding(bind, "select", "Select", show=False)
-            for bind in config["keybinds"]["down_tree"]
-        ]
-        + [
-            Binding(bind, "first", "First", show=False)
-            for bind in config["keybinds"]["home"]
-        ]
-        + [
-            Binding(bind, "page_down", "Page Down", show=False)
-            for bind in config["keybinds"]["page_down"]
-        ]
-        + [
-            Binding(bind, "page_up", "Page Up", show=False)
-            for bind in config["keybinds"]["page_up"]
-        ]
-        + [
-            Binding(bind, "cursor_up", "Up", show=False)
-            for bind in config["keybinds"]["up"]
-        ]
-    )
+    BINDINGS: ClassVar[list[BindingType]] = list(vindings)
 
     def __init__(self, **kwargs) -> None:
         super().__init__(**kwargs)

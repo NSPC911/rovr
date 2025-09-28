@@ -12,10 +12,11 @@ from rovr.functions.utils import set_scuffed_subtitle
 
 
 class SearchInput(Input):
-    def __init__(self, *args, **kwargs) -> None:
+    def __init__(self, always_add_disabled: bool = True, *args, **kwargs) -> None:
         super().__init__(
             *args, password=False, compact=True, select_on_focus=False, **kwargs
         )
+        self.always_add_disabled = always_add_disabled
         self.selected = set()
 
     def on_mount(self) -> None:
@@ -75,7 +76,7 @@ class SearchInput(Input):
         assert hasattr(self.items_list, "list_of_options")
         for option in self.items_list.list_of_options:
             assert isinstance(option, Option)
-            if option.disabled:
+            if self.always_add_disabled and option.disabled:
                 matches.append(option)
                 continue
             score = matcher.match(option.label)

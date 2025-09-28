@@ -1,5 +1,7 @@
 from dataclasses import dataclass
 
+from textual.binding import Binding, BindingType
+
 from rovr.functions.config import config_setup, load_config
 
 # Initialize the config once at import time
@@ -28,12 +30,9 @@ buttons_that_depend_on_path = [
 ]
 
 ascii_logo = r"""
- _ ___  ___ __   _ˍ_ ___
-/\`'__\/ __`\ \ /\ \`'__\
-\ \ \_/\ \_\ \ V_/ /\ \_/
- \ \_\\ \____/\___/\ \_\
-  \/_/ \/___/\/__/  \/_/
-  """
+ ___ ___ _ _ ___
+|  _| . | | |  _|
+|_| |___|\_/|_|"""
 
 
 class MaxPossible:
@@ -44,3 +43,32 @@ class MaxPossible:
     @property
     def width(self) -> int:
         return 26 if config["interface"]["use_reactive_layout"] else 70
+
+
+vindings: list[BindingType] = (
+    [
+        Binding(bind, "cursor_down", "Down", show=False)
+        for bind in config["keybinds"]["down"]
+    ]
+    + [Binding(bind, "last", "Last", show=False) for bind in config["keybinds"]["end"]]
+    + [
+        Binding(bind, "select", "Select", show=False)
+        for bind in config["keybinds"]["down_tree"]
+    ]
+    + [
+        Binding(bind, "first", "First", show=False)
+        for bind in config["keybinds"]["home"]
+    ]
+    + [
+        Binding(bind, "page_down", "Page Down", show=False)
+        for bind in config["keybinds"]["page_down"]
+    ]
+    + [
+        Binding(bind, "page_up", "Page Up", show=False)
+        for bind in config["keybinds"]["page_up"]
+    ]
+    + [
+        Binding(bind, "cursor_up", "Up", show=False)
+        for bind in config["keybinds"]["up"]
+    ]
+)

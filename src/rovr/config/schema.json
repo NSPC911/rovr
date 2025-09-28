@@ -121,6 +121,11 @@
           "type": "number",
           "default": 0.25,
           "description": "The delay between two consecutive clicks to enter into a directory, or open a file."
+        },
+        "drive_watcher_frequency": {
+          "type": "number",
+          "default": 3.0,
+          "description": "How often (in seconds) to check for changes in mounted drives in the sidebar."
         }
       }
     },
@@ -680,6 +685,13 @@
             "type": "string"
           },
           "description": "While using TextArea for previewing, use this keybind to extend selection to the left."
+        },
+        "show_keybinds": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Show the keybinds list with all available keybinds."
         }
       }
     },
@@ -703,6 +715,11 @@
                 "type": "string"
               },
               "description": "The keybind to open the zoxide modal."
+            },
+            "show_scores": {
+              "type": "boolean",
+              "default": false,
+              "description": "Display zoxide frequency scores alongside directory paths."
             }
           }
         },
@@ -753,25 +770,6 @@
                 "type": "string"
               },
               "description": "The keybind to launch your editor."
-            }
-          }
-        },
-        "zen_mode": {
-          "type": "object",
-          "additionalProperties": false,
-          "properties": {
-            "enabled": {
-              "type": "boolean",
-              "default": false,
-              "description": "Allow enabling or disabling zen mode. Nothing shows up while in zen mode, except only the file list."
-            },
-            "keybinds": {
-              "type": "array",
-              "default": ["Z"],
-              "items": {
-                "type": "string"
-              },
-              "description": "The keybind to toggle zen mode."
             }
           }
         }

@@ -1,15 +1,15 @@
 from os import getcwd, path
 from os import system as cmd
-from time import monotonic
 from typing import ClassVar
 
 from rich.segment import Segment
 from rich.style import Style
-from textual import events, work
-from textual.binding import Binding, BindingType
+from textual import events, on, work
+from textual.binding import BindingType
+from textual.css.query import NoMatches
 from textual.strip import Strip
 from textual.widgets import Button, Input, OptionList, SelectionList
-from textual.widgets.option_list import OptionDoesNotExist
+from textual.widgets.option_list import Option, OptionDoesNotExist
 from textual.widgets.selection_list import Selection
 
 from rovr.classes import FileListSelectionWidget
@@ -17,7 +17,7 @@ from rovr.functions import icons as icon_utils
 from rovr.functions import path as path_utils
 from rovr.functions import pins as pin_utils
 from rovr.functions import utils
-from rovr.variables.constants import buttons_that_depend_on_path, config
+from rovr.variables.constants import buttons_that_depend_on_path, config, vindings
 from rovr.variables.maps import ARCHIVE_EXTENSIONS
 
 
@@ -26,36 +26,7 @@ class FileList(SelectionList, inherit_bindings=False):
     OptionList but can multi-select files and folders.
     """
 
-    BINDINGS: ClassVar[list[BindingType]] = (
-        [
-            Binding(bind, "cursor_down", "Down", show=False)
-            for bind in config["keybinds"]["down"]
-        ]
-        + [
-            Binding(bind, "last", "Last", show=False)
-            for bind in config["keybinds"]["end"]
-        ]
-        + [
-            Binding(bind, "select", "Select", show=False)
-            for bind in config["keybinds"]["down_tree"]
-        ]
-        + [
-            Binding(bind, "first", "First", show=False)
-            for bind in config["keybinds"]["home"]
-        ]
-        + [
-            Binding(bind, "page_down", "Page Down", show=False)
-            for bind in config["keybinds"]["page_down"]
-        ]
-        + [
-            Binding(bind, "page_up", "Page Up", show=False)
-            for bind in config["keybinds"]["page_up"]
-        ]
-        + [
-            Binding(bind, "cursor_up", "Up", show=False)
-            for bind in config["keybinds"]["up"]
-        ]
-    )
+    BINDINGS: ClassVar[list[BindingType]] = list(vindings)
 
     def __init__(
         self,
@@ -83,7 +54,6 @@ class FileList(SelectionList, inherit_bindings=False):
     def on_mount(self) -> None:
         if not self.dummy:
             self.input: Input = self.parent.query_one(Input)
-        self.last_click = monotonic()
 
     # ignore single clicks
     async def _on_click(self, event: events.Click) -> None:
@@ -99,16 +69,31 @@ class FileList(SelectionList, inherit_bindings=False):
             # in future, if anything was changed, you just need to add the lines below
             if (
                 self.highlighted == clicked_option
-                and monotonic() - self.last_click
-                < config["settings"]["double_click_delay"]
+                and event.chain == 2
+                and event.button != 3
             ):
                 self.action_select()
-            elif self.select_mode_enabled:
+            elif self.select_mode_enabled and event.button != 3:
                 self.highlighted = clicked_option
                 self.action_select()
             else:
                 self.highlighted = clicked_option
-        self.last_click = monotonic()
+        if event.button == 3 and not self.dummy:
+            # Show right click menu
+            try:
+                rightclickoptionlist: FileListRightClickOptionList = self.app.query_one(
+                    FileListRightClickOptionList
+                )
+            except NoMatches:
+                # it happens, but I really cannot be bothered to figure it out
+                rightclickoptionlist = FileListRightClickOptionList(
+                    self, classes="hidden"
+                )
+                await self.app.mount(rightclickoptionlist)
+            rightclickoptionlist.remove_class("hidden")
+            rightclickoptionlist.update_location(event)
+            rightclickoptionlist.focus()
+            event.stop()
 
     @work(exclusive=True)
     async def update_file_list(
@@ -131,9 +116,29 @@ class FileList(SelectionList, inherit_bindings=False):
             self.clear_options()
             return
         # Separate folders and files
-        folders, files = path_utils.get_cwd_object(cwd, self.show_hidden_files)
         self.list_of_options = []
-        if folders == [PermissionError] or files == [PermissionError]:
+        try:
+            folders, files = path_utils.get_cwd_object(cwd, self.show_hidden_files)
+            if folders == [] and files == []:
+                self.list_of_options.append(
+                    Selection("   --no-files--", value="", id="", disabled=True)
+                )
+                preview = self.app.query_one("PreviewContainer")
+                preview.remove_children()
+                preview._current_preview_type = "none"
+            else:
+                file_list_options = folders + files
+                for item in file_list_options:
+                    self.list_of_options.append(
+                        FileListSelectionWidget(
+                            icon=item["icon"],
+                            label=item["name"],
+                            dir_entry=item["dir_entry"],
+                            value=path_utils.compress(item["name"]),
+                            id=path_utils.compress(item["name"]),
+                        )
+                    )
+        except PermissionError:
             self.list_of_options.append(
                 Selection(
                     " Permission Error: Unable to access this directory.",
@@ -142,26 +147,7 @@ class FileList(SelectionList, inherit_bindings=False):
                     disabled=True,
                 ),
             )
-        elif folders == [] and files == []:
-            self.list_of_options.append(
-                Selection("   --no-files--", value="", id="", disabled=True)
-            )
-            preview = self.app.query_one("PreviewContainer")
-            preview.remove_children()
-            preview._current_preview_type = "none"
-            # nothing inside
-        else:
-            file_list_options = folders + files
-            for item in file_list_options:
-                self.list_of_options.append(
-                    FileListSelectionWidget(
-                        icon=item["icon"],
-                        label=item["name"],
-                        dir_entry=item["dir_entry"],
-                        value=path_utils.compress(item["name"]),
-                        id=path_utils.compress(item["name"]),
-                    )
-                )
+
         if len(self.list_of_options) == 1 and self.list_of_options[0].disabled:
             for selector in buttons_that_depend_on_path:
                 self.app.query_one(selector).disabled = True
@@ -222,6 +208,10 @@ class FileList(SelectionList, inherit_bindings=False):
             self.input.clear()
         if not add_to_session:
             self.input.clear_selected()
+        if self.list_of_options[0].disabled:  # special option
+            if self.select_mode_enabled:
+                await self.toggle_mode()
+            self.update_border_subtitle()
 
     @work(exclusive=True)
     async def dummy_update_file_list(
@@ -234,11 +224,28 @@ class FileList(SelectionList, inherit_bindings=False):
             cwd (str): The current working directory.
         """
         self.enter_into = cwd
-        self.clear_options()
         # Separate folders and files
-        folders, files = path_utils.get_cwd_object(cwd)
         self.list_of_options = []
-        if folders == [PermissionError] or files == [PermissionError]:
+
+        try:
+            folders, files = path_utils.get_cwd_object(cwd)
+            if folders == [] and files == []:
+                self.list_of_options.append(
+                    Selection("  --no-files--", value="", id="", disabled=True)
+                )
+            else:
+                file_list_options = folders + files
+                for item in file_list_options:
+                    self.list_of_options.append(
+                        FileListSelectionWidget(
+                            icon=item["icon"],
+                            label=item["name"],
+                            dir_entry=item["dir_entry"],
+                            value=path_utils.compress(item["name"]),
+                            id=path_utils.compress(item["name"]),
+                        )
+                    )
+        except PermissionError:
             self.list_of_options.append(
                 Selection(
                     " Permission Error: Unable to access this directory.",
@@ -247,22 +254,8 @@ class FileList(SelectionList, inherit_bindings=False):
                     disabled=True,
                 )
             )
-        elif folders == [] and files == []:
-            self.list_of_options.append(
-                Selection("  --no-files--", value="", id="", disabled=True)
-            )
-        else:
-            file_list_options = folders + files
-            for item in file_list_options:
-                self.list_of_options.append(
-                    FileListSelectionWidget(
-                        icon=item["icon"],
-                        label=item["name"],
-                        dir_entry=item["dir_entry"],
-                        value=path_utils.compress(item["name"]),
-                        id=path_utils.compress(item["name"]),
-                    )
-                )
+
+        self.clear_options()
         self.add_options(self.list_of_options)
         # somehow prevents more debouncing, ill take it
         self.refresh(repaint=True, layout=True)
@@ -334,6 +327,8 @@ class FileList(SelectionList, inherit_bindings=False):
     async def on_option_list_option_highlighted(
         self, event: OptionList.OptionHighlighted
     ) -> None:
+        if self.dummy:
+            return
         if isinstance(event.option, Selection) and not isinstance(
             event.option, FileListSelectionWidget
         ):
@@ -409,7 +404,7 @@ class FileList(SelectionList, inherit_bindings=False):
                     self.get_visual_style("option-list--option").rich_style,
                 )
 
-            mouse_over = self._mouse_hovering_over == option_index
+            mouse_over: bool = self._mouse_hovering_over == option_index
             component_class = ""
             if selection_style == "selection-list--button-selected":
                 component_class = selection_style
@@ -508,19 +503,23 @@ class FileList(SelectionList, inherit_bindings=False):
         cwd = path_utils.normalise(getcwd())
         if not self.select_mode_enabled:
             return [
-                path_utils.normalise(
-                    path.join(
-                        cwd,
-                        path_utils.decompress(
-                            self.get_option_at_index(self.highlighted).value
-                        ),
+                str(
+                    path_utils.normalise(
+                        path.join(
+                            cwd,
+                            path_utils.decompress(
+                                self.get_option_at_index(self.highlighted).value
+                            ),
+                        )
                     )
                 )
             ]
         else:
             return [
-                path_utils.normalise(path.join(cwd, path_utils.decompress(option)))
-                for option in self.selected
+                str(
+                    path_utils.normalise(path.join(cwd, path_utils.decompress(option)))
+                    for option in self.selected
+                )
             ]
 
     async def on_key(self, event: events.Key) -> None:
@@ -747,3 +746,78 @@ class FileList(SelectionList, inherit_bindings=False):
             utils.set_scuffed_subtitle(
                 self.parent, "SELECT", f"{len(self.selected)}/{len(self.options)}"
             )
+
+
+class FileListRightClickOptionList(OptionList):
+    def __init__(
+        self, file_list: FileList, classes: str | None = None, id: str | None = None
+    ) -> None:
+        # Only show unzip option for archive files
+        super().__init__(
+            Option(f" {icon_utils.get_icon('general', 'copy')[0]} Copy", id="copy"),
+            Option(f" {icon_utils.get_icon('general', 'cut')[0]} Cut", id="cut"),
+            Option(
+                f" {icon_utils.get_icon('general', 'delete')[0]} Delete ", id="delete"
+            ),
+            Option(
+                f" {icon_utils.get_icon('general', 'rename')[0]} Rename ", id="rename"
+            ),
+            Option(f" {icon_utils.get_icon('general', 'zip')[0]} Zip", id="zip"),
+            Option(f" {icon_utils.get_icon('general', 'open')[0]} Unzip", id="unzip"),
+            id=id,
+            classes=classes,
+        )
+        self.file_list = file_list
+
+    async def on_mount(self) -> None:
+        self.styles.layer = "overlay"
+
+    async def on_key(self, event: events.Key) -> None:
+        # Close menu on Escape
+        if event.key == "escape":
+            self.remove()
+            # Return focus to file list
+            self.file_list.focus()
+
+    def update_location(self, event: events.Click) -> None:
+        self.styles.offset = (event.screen_x, event.screen_y)
+
+    async def on_option_list_option_selected(
+        self, event: OptionList.OptionSelected
+    ) -> None:
+        # Handle menu item selection
+        match event.option.id:
+            case "copy":
+                await self.app.query_one("#copy").on_button_pressed(Button.Pressed)
+            case "cut":
+                await self.app.query_one("#cut").on_button_pressed(Button.Pressed)
+            case "delete":
+                await self.app.query_one("#delete").on_button_pressed(Button.Pressed)
+            case "rename":
+                self.app.query_one("#rename").on_button_pressed(Button.Pressed)
+            case "zip":
+                self.app.query_one("#zip").on_button_pressed(Button.Pressed)
+            case "unzip":
+                if not self.app.query_one("#unzip").disabled:
+                    self.app.query_one("#unzip").on_button_pressed(Button.Pressed)
+            case _:
+                return
+        self.add_class("hidden")
+        self.file_list.focus()
+
+    @on(events.MouseMove)
+    @work(exclusive=True)
+    async def highlight_follow_mouse(self, event: events.MouseMove) -> None:
+        hovered_option: int | None = event.style.meta.get("option")
+        if hovered_option is not None and not self._options[hovered_option].disabled:
+            self.highlighted = hovered_option
+
+    @on(events.Show)
+    @work(exclusive=True)
+    async def force_highlight_option(self, event: events.Show) -> None:
+        self.file_list.add_class("-popup-shown")
+
+    @on(events.Hide)
+    @work(exclusive=True)
+    async def unforce_highlight_option(self, event: events.Hide) -> None:
+        self.file_list.remove_class("-popup-shown")

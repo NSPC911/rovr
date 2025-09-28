@@ -46,11 +46,16 @@ def is_hidden_file(filepath: str) -> bool:
         except (OSError, AttributeError):
             return False
     elif os_type == "Darwin":
+        # dotfiles should always be hidden, and so should UF_HIDDEN-flagged files
+        name_hidden = path.basename(filepath).startswith(".")
         try:
             st = os.stat(filepath, follow_symlinks=False)
-            return bool(getattr(st, "st_flags", 0) & getattr(stat, "UF_HIDDEN", 0))
+            flag_hidden = bool(
+                getattr(st, "st_flags", 0) & getattr(stat, "UF_HIDDEN", 0)
+            )
         except OSError:
-            return path.basename(filepath).startswith(".")
+            flag_hidden = False
+        return name_hidden or flag_hidden
     else:
         return path.basename(filepath).startswith(".")
 
@@ -96,8 +101,7 @@ def get_cwd_object(
     Get the objects (files and folders) in a provided directory
     Args:
         cwd(str): The working directory to check
-        show_hidden(bool): Whether to include hidden files/folders (starting with .)
-
+        show_hidden(bool): Whether to include hidden files/folders (dot-prefixed on Unix; flagged hidden on Windows/macOS)
     Returns:
         folders(list[dict]): A list of dictionaries, containing "name" as the item's name and "icon" as the respective icon
         files(list[dict]): A list of dictionaries, containing "name" as the item's name and "icon" as the respective icon

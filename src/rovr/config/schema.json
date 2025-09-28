@@ -586,7 +586,7 @@
           "items": {
             "type": "string"
           },
-          "description": "Toggle the visibility of hidden files (those starting with a dot)."
+          "description": "Toggle the visibility of hidden files (dot-prefixed on Unix, or flagged hidden on Windows/macOS)."
         },
         "select_up": {
           "type": "array",

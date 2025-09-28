@@ -730,8 +730,8 @@ class FileList(SelectionList, inherit_bindings=False):
                     self.input.focus()
                 # toggle hidden files
                 case key if key in config["keybinds"]["toggle_hidden_files"]:
+                    event.stop()
                     await self.toggle_hidden_files()
-
     def update_border_subtitle(self) -> None:
         if self.dummy:
             return

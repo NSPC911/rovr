@@ -66,7 +66,7 @@ class KeybindList(OptionList, inherit_bindings=False):
             "toggle_footer": "Toggle footer",
             "toggle_pin": "Pin folder",
             "show_keybinds": "Show keybinds",
-            # Selection - from core/preview_container.py
+            # FileList - from core/file_list.py
             "toggle_visual": "Visual mode",
             "toggle_all": "Select all",
             "select_up": "Select up",
@@ -75,6 +75,7 @@ class KeybindList(OptionList, inherit_bindings=False):
             "select_page_down": "Select page down",
             "select_home": "Select to top",
             "select_end": "Select to end",
+            "toggle_hidden_files": "Toggle hidden files",
             # Tabs - app-level keybinds
             "tab_new": "New tab",
             "tab_close": "Close tab",

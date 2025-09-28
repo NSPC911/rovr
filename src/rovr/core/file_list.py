@@ -47,9 +47,6 @@ class FileList(SelectionList, inherit_bindings=False):
         self.dummy = dummy
         self.enter_into = enter_into
         self.select_mode_enabled = select
-        self.show_hidden_files = config.get("settings", {}).get(
-            "show_hidden_files", False
-        )
 
     def on_mount(self) -> None:
         if not self.dummy:
@@ -118,7 +115,9 @@ class FileList(SelectionList, inherit_bindings=False):
         # Separate folders and files
         self.list_of_options = []
         try:
-            folders, files = path_utils.get_cwd_object(cwd, self.show_hidden_files)
+            folders, files = path_utils.get_cwd_object(
+                cwd, config["settings"]["show_hidden_files"]
+            )
             if folders == [] and files == []:
                 self.list_of_options.append(
                     Selection("   --no-files--", value="", id="", disabled=True)
@@ -228,7 +227,9 @@ class FileList(SelectionList, inherit_bindings=False):
         self.list_of_options = []
 
         try:
-            folders, files = path_utils.get_cwd_object(cwd)
+            folders, files = path_utils.get_cwd_object(
+                cwd, config["settings"]["show_hidden_files"]
+            )
             if folders == [] and files == []:
                 self.list_of_options.append(
                     Selection("  --no-files--", value="", id="", disabled=True)
@@ -477,16 +478,24 @@ class FileList(SelectionList, inherit_bindings=False):
 
     async def toggle_hidden_files(self) -> None:
         """Toggle the visibility of hidden files."""
-        self.show_hidden_files = not self.show_hidden_files
+        config["settings"]["show_hidden_files"] = not config["settings"][
+            "show_hidden_files"
+        ]
         self.update_file_list(add_to_session=False)
         status = (
             "[$success underline]shown"
-            if self.show_hidden_files
+            if config["settings"]["show_hidden_files"]
             else "[$error underline]hidden"
         )
-        self.app.notify(
-            f"Hidden files are now {status}[/]", severity="information", timeout=2.5
-        )
+        if not self.dummy:
+            self.app.notify(
+                f"Hidden files are now {status}[/]", severity="information", timeout=2.5
+            )
+        if (
+            isinstance(self.app.query_one("PreviewContainer").children[0], FileList)
+            and not self.dummy
+        ):
+            self.highlighted = self.highlighted
 
     async def toggle_mode(self) -> None:
         """Toggle the selection mode between select and normal."""

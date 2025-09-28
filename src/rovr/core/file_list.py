@@ -47,6 +47,9 @@ class FileList(SelectionList, inherit_bindings=False):
         self.dummy = dummy
         self.enter_into = enter_into
         self.select_mode_enabled = select
+        if not self.dummy:
+            self.items_in_cwd: set[str] = {}
+            self.cwd: str = ""
 
     def on_mount(self) -> None:
         if not self.dummy:
@@ -104,7 +107,7 @@ class FileList(SelectionList, inherit_bindings=False):
             add_to_session (bool): Whether to add the current directory to the session history.
             focus_on (str | None): A custom item to set the focus as.
         """
-        cwd = path_utils.normalise(getcwd())
+        self.cwd = path_utils.normalise(getcwd())
         # get sessionstate
         try:
             # only happens when the tabs aren't mounted
@@ -113,10 +116,11 @@ class FileList(SelectionList, inherit_bindings=False):
             self.clear_options()
             return
         # Separate folders and files
-        self.list_of_options = []
-        self.items_in_cwd = []
+        self.list_of_options: list[FileListSelectionWidget | Selection] = []
+        names_in_cwd: list[str] = []
+        self.items_in_cwd: set[str] = {}
         try:
-            folders, files = path_utils.get_cwd_object(cwd)
+            folders, files = path_utils.get_cwd_object(self.cwd)
             if folders == [] and files == []:
                 self.list_of_options.append(
                     Selection("   --no-files--", value="", id="", disabled=True)
@@ -136,7 +140,8 @@ class FileList(SelectionList, inherit_bindings=False):
                             id=path_utils.compress(item["name"]),
                         )
                     )
-                    self.items_in_cwd.append(item["name"])
+                    names_in_cwd.append(item["name"])
+                self.items_in_cwd = set(names_in_cwd)
         except PermissionError:
             self.list_of_options.append(
                 Selection(
@@ -156,8 +161,8 @@ class FileList(SelectionList, inherit_bindings=False):
         self.clear_options()
         self.add_options(self.list_of_options)
         # session handler
-        self.app.query_one("#path_switcher").value = cwd + (
-            "" if cwd.endswith("/") else "/"
+        self.app.query_one("#path_switcher").value = self.cwd + (
+            "" if self.cwd.endswith("/") else "/"
         )
         # I question to myself why directories isn't a list[str]
         # but is a list[dict], so I'm down to take some PRs, because
@@ -167,11 +172,11 @@ class FileList(SelectionList, inherit_bindings=False):
             if session.historyIndex != len(session.directories) - 1:
                 session.directories = session.directories[: session.historyIndex + 1]
             session.directories.append({
-                "path": cwd,
+                "path": self.cwd,
             })
-            if session.lastHighlighted.get(cwd) is None:
+            if session.lastHighlighted.get(self.cwd) is None:
                 # Hard coding is my passion (referring to the id)
-                session.lastHighlighted[cwd] = (
+                session.lastHighlighted[self.cwd] = (
                     self.app.query_one("#file_list").options[0].value
                 )
             session.historyIndex = len(session.directories) - 1
@@ -185,23 +190,27 @@ class FileList(SelectionList, inherit_bindings=False):
             if focus_on:
                 self.highlighted = self.get_option_index(path_utils.compress(focus_on))
             else:
-                self.highlighted = self.get_option_index(session.lastHighlighted[cwd])
+                self.highlighted = self.get_option_index(
+                    session.lastHighlighted[self.cwd]
+                )
         except OptionDoesNotExist:
             self.highlighted = 0
-            session.lastHighlighted[cwd] = (
+            session.lastHighlighted[self.cwd] = (
                 self.app.query_one("#file_list").options[0].value
             )
         except KeyError:
             self.highlighted = 0
-            session.lastHighlighted[cwd] = (
+            session.lastHighlighted[self.cwd] = (
                 self.app.query_one("#file_list").options[0].value
             )
 
         self.scroll_to_highlight()
         self.app.tabWidget.active_tab.label = (
-            path.basename(cwd) if path.basename(cwd) != "" else cwd.strip("/")
+            path.basename(self.cwd)
+            if path.basename(self.cwd) != ""
+            else self.cwd.strip("/")
         )
-        self.app.tabWidget.active_tab.directory = cwd
+        self.app.tabWidget.active_tab.directory = self.cwd
         self.app.tabWidget.parent.on_resize()
         with self.input.prevent(self.input.Changed):
             self.input.clear()

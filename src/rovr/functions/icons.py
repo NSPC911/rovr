@@ -7,6 +7,7 @@ from rovr.variables.maps import (
     ASCII_TOGGLE_BUTTON_ICONS,
     FILE_MAP,
     FILES_MAP,
+    FOLDER_ICONS_WITH_FOLDER_SILHOUETTE,
     FOLDER_MAP,
     ICONS,
     TOGGLE_BUTTON_ICONS,
@@ -94,12 +95,45 @@ def get_icon_for_folder(location: str) -> list:
                 is_match = True
 
             if is_match:
-                return [custom_icon["icon"], custom_icon["color"]]
+                preserve_folder_color = config.get("icons", {}).get(
+                    "preserve_folder_color_for_non_folder_icons", False
+                )
+
+                if preserve_folder_color:
+                    # For custom icons, we need to determine if they represent folder-like silhouettes
+                    # Since we can't know for sure, we'll check if the pattern matches any known folder icons
+                    # that have folder silhouettes
+                    pattern_lower = pattern.lower()
+                    if pattern_lower in FOLDER_ICONS_WITH_FOLDER_SILHOUETTE:
+                        # Keep original custom color
+                        return [custom_icon["icon"], custom_icon["color"]]
+                    else:
+                        # Use default folder color
+                        default_color = ICONS["folder"]["default"][1]
+                        return [custom_icon["icon"], default_color]
+                else:
+                    return [custom_icon["icon"], custom_icon["color"]]
 
     # Check for special folder types
     if folder_name in FOLDER_MAP:
         icon_key = FOLDER_MAP[folder_name]
-        return ICONS["folder"].get(icon_key, ICONS["folder"]["default"])
+        icon_info = ICONS["folder"].get(icon_key, ICONS["folder"]["default"])
+
+        # Check if we should preserve folder color for non-folder-silhouette icons
+        preserve_folder_color = config.get("icons", {}).get(
+            "preserve_folder_color_for_non_folder_icons", False
+        )
+
+        if (
+            preserve_folder_color
+            and icon_key not in FOLDER_ICONS_WITH_FOLDER_SILHOUETTE
+        ):
+            # Use the icon from the themed folder but with default folder color
+            default_color = ICONS["folder"]["default"][1]
+            return [icon_info[0], default_color]
+        else:
+            # Use the original themed icon and color
+            return icon_info
     else:
         return ICONS["folder"]["default"]
 

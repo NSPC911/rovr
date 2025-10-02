@@ -15,6 +15,51 @@ VAR_TO_DIR = {
     "CONFIG": dirs.user_config_dir.replace("\\", "/"),
 }
 
+# Folder icons that contain folder-like silhouettes
+# These will keep their themed colors even when preserve_folder_color_for_non_folder_icons is enabled
+FOLDER_ICONS_WITH_FOLDER_SILHOUETTE = {
+    "default",
+    "open",
+    "empty",
+    "home",
+    "bin",
+    "build",
+    "dist",
+    "cache",
+    "config",
+    "conf",
+    "etc",
+    "lib",
+    "templates",
+    "vendor",
+    "trash",
+    "hidden",
+    "backups",
+    "content",
+    "static",
+    "assets",
+    "include",
+    "favorites",
+    "contacts",
+    "documents",
+    "downloads",
+    "media",
+    "pictures",
+    "videos",
+    "desktop",
+    "onedrive",
+    "tests",
+    "scripts",
+    "src",
+    "styles",
+    "css",
+    "sass",
+    "scss",
+    "doc",
+    "log",
+    ":/drive:",
+}
+
 ASCII_ICONS = {
     "general": {
         "new": ["+", "green"],

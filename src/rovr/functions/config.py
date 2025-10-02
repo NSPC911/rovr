@@ -1,33 +1,18 @@
 import os
 from os import path
 from typing import Optional
-
 import jsonschema
 import toml
 import ujson
 from lzstring import LZString
 from rich.console import Console
-
 from rovr.functions.utils import deep_merge
-from rovr.variables.maps import (
-    VAR_TO_DIR,
-)
+from rovr.variables.maps import VAR_TO_DIR
 
 lzstring = LZString()
 pprint = Console().print
 
-
 def load_config(config_path: Optional[str] = None) -> dict:
-    """
-    Load both the template config and the user config, optionally from a custom path
-
-    Args:
-        config_path (str, optional): Custom config file path. Defaults to None.
-
-    Returns:
-        dict: the config
-    """
-
     if not path.exists(VAR_TO_DIR["CONFIG"]):
         os.makedirs(VAR_TO_DIR["CONFIG"])
     default_user_config_path = path.join(VAR_TO_DIR["CONFIG"], "config.toml")
@@ -44,7 +29,6 @@ def load_config(config_path: Optional[str] = None) -> dict:
             pprint(f"[bright_red]Template Config TOML Syntax Error:\n    {e}")
             exit(1)
 
-    # Use the provided config_path if given, else default
     user_config_path = config_path if config_path else default_user_config_path
     user_config = {}
     if path.exists(user_config_path):
@@ -56,20 +40,18 @@ def load_config(config_path: Optional[str] = None) -> dict:
                 except toml.decoder.TomlDecodeError as e:
                     pprint(f"[bright_red]User Config TOML Syntax Error in {user_config_path}:\n    {e}")
                     exit(1)
-    elif config_path:  # Custom path was provided but doesn't exist
+    elif config_path:
         pprint(f"[yellow]Warning: Custom config file not found: {config_path}[/yellow]")
         pprint("[yellow]Using default configuration.[/yellow]")
+
     config = deep_merge(template_config, user_config)
-    # check with schema
+
     with open(path.join(path.dirname(__file__), "../config/schema.json"), "r") as f:
         schema = ujson.load(f)
 
-    # fix schema with 'required' keys
     def add_required_recursively(node: dict) -> None:
         if isinstance(node, dict):
-            if (
-                node.get("type") == "object" and "properties" in node
-            ) and "required" not in node:
+            if node.get("type") == "object" and "properties" in node and "required" not in node:
                 node["required"] = list(node["properties"].keys())
             for key in node:
                 add_required_recursively(node[key])
@@ -107,21 +89,14 @@ def load_config(config_path: Optional[str] = None) -> dict:
                 pprint(f"[yellow]{exception.message}[/yellow]")
         exit(1)
 
-    # slight config fixes
-    # image protocol because "AutoImage" doesn't work with Sixel
     if config["settings"]["image_protocol"] == "Auto":
         config["settings"]["image_protocol"] = ""
     return config
 
 
 def config_setup() -> None:
-    # check config folder
     if not path.exists(VAR_TO_DIR["CONFIG"]):
         os.makedirs(VAR_TO_DIR["CONFIG"])
-    # Textual doesn't seem to have a way to check whether the
-    # CSS file exists while it is in operation, but textual
-    # only craps itself when it can't find it as the app starts
-    # so no issues
     if not path.exists(path.join(VAR_TO_DIR["CONFIG"], "style.tcss")):
         with open(path.join(VAR_TO_DIR["CONFIG"], "style.tcss"), "a") as _:
             pass

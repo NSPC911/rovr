@@ -2,14 +2,12 @@ from humanize import naturalsize
 from lzstring import LZString
 from rich.console import Console
 from textual.widget import Widget
-
 from rovr.variables.maps import (
     BORDER_BOTTOM,
 )
 
 lzstring = LZString()
 pprint = Console().print
-
 
 def deep_merge(d: dict, u: dict) -> dict:
     """Mini lodash merge

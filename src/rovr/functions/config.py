@@ -16,9 +16,12 @@ lzstring = LZString()
 pprint = Console().print
 
 
-def load_config() -> dict:
+def load_config(config_path: str = None) -> dict:
     """
-    Load both the template config and the user config
+    Load both the template config and the user config, optionally from a custom path
+
+    Args:
+        config_path (str, optional): Custom config file path. Defaults to None.
 
     Returns:
         dict: the config
@@ -26,8 +29,9 @@ def load_config() -> dict:
 
     if not path.exists(VAR_TO_DIR["CONFIG"]):
         os.makedirs(VAR_TO_DIR["CONFIG"])
-    if not path.exists(path.join(VAR_TO_DIR["CONFIG"], "config.toml")):
-        with open(path.join(VAR_TO_DIR["CONFIG"], "config.toml"), "w") as file:
+    default_user_config_path = path.join(VAR_TO_DIR["CONFIG"], "config.toml")
+    if not path.exists(default_user_config_path):
+        with open(default_user_config_path, "w") as file:
             file.write(
                 '#:schema  https://raw.githubusercontent.com/NSPC911/rovr/refs/heads/master/src/rovr/config/schema.json\n[theme]\ndefault = "nord"'
             )
@@ -39,14 +43,14 @@ def load_config() -> dict:
             pprint(f"[bright_red]TOML Syntax Error:\n    {e}")
             exit(1)
 
-    user_config_path = path.join(VAR_TO_DIR["CONFIG"], "config.toml")
+    # Use the provided config_path if given, else default
+    user_config_path = config_path if config_path else default_user_config_path
     user_config = {}
     if path.exists(user_config_path):
         with open(user_config_path, "r") as f:
             user_config_content = f.read()
             if user_config_content:
                 user_config = toml.loads(user_config_content)
-    # Don't really have to consider the else part, because it's created further down
     config = deep_merge(template_config, user_config)
     # check with schema
     with open(path.join(path.dirname(__file__), "../config/schema.json"), "r") as f:
@@ -70,7 +74,6 @@ def load_config() -> dict:
     try:
         jsonschema.validate(config, schema)
     except jsonschema.exceptions.ValidationError as exception:
-        # pprint(exception.__dict__)
         path_str = "root"
         if exception.path:
             path_str = ".".join(str(p) for p in exception.path)
@@ -88,8 +91,8 @@ def load_config() -> dict:
                 pprint(type_error_message)
             case "enum":
                 enum_error_message = (
-                    f"Invalid value [yellow]'{exception.instance}'[/yellow]. "
-                    f"\nAllowed values are: {exception.validator_value}"
+                    f"Invalid value [yellow]'{{exception.instance}}'[/yellow]. "
+                    f"\nAllowed values are: {{exception.validator_value}}"
                 )
                 pprint(enum_error_message)
             case _:

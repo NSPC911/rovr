@@ -39,6 +39,14 @@ try:
         is_flag=True,
         help="Show the current version of rovr.",
     )
+    @click.option(
+        "--config-file",
+        "-c",
+        "config_file",
+        type=str,
+        default=None,
+        help="Specify a custom config file path.",
+    )
     @click.argument("path", type=str, required=False, default="")
     def main(
         with_features: list[str],
@@ -46,6 +54,7 @@ try:
         config_path: bool,
         show_version: bool,
         path: str,
+        config_file: str,
     ) -> None:
         """A post-modern terminal file explorer"""
 
@@ -57,6 +66,12 @@ try:
         elif show_version:
             pprint("v0.3.0")
             return
+            
+        if config_file:
+            from rovr.functions.config import load_config
+            global config
+            config = load_config(config_file)
+
 
         for feature_path in with_features:
             set_nested_value(config, feature_path, True)
@@ -73,3 +88,4 @@ try:
 
 except KeyboardInterrupt:
     pass
+

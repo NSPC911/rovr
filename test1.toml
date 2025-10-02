@@ -1,0 +1,4 @@
+[theme]
+default = "nord"
+[settings]
+image_protocol = "Auto"

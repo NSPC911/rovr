@@ -1,5 +1,6 @@
 import os
 from os import path
+from typing import Optional
 
 import jsonschema
 import toml
@@ -16,7 +17,7 @@ lzstring = LZString()
 pprint = Console().print
 
 
-def load_config(config_path: str = None) -> dict:
+def load_config(config_path: Optional[str] = None) -> dict:
     """
     Load both the template config and the user config, optionally from a custom path
 
@@ -40,7 +41,7 @@ def load_config(config_path: str = None) -> dict:
         try:
             template_config = toml.loads(f.read())
         except toml.decoder.TomlDecodeError as e:
-            pprint(f"[bright_red]TOML Syntax Error:\n    {e}")
+            pprint(f"[bright_red]Template Config TOML Syntax Error:\n    {e}")
             exit(1)
 
     # Use the provided config_path if given, else default
@@ -55,6 +56,9 @@ def load_config(config_path: str = None) -> dict:
                 except toml.decoder.TomlDecodeError as e:
                     pprint(f"[bright_red]User Config TOML Syntax Error in {user_config_path}:\n    {e}")
                     exit(1)
+    elif config_path:  # Custom path was provided but doesn't exist
+        pprint(f"[yellow]Warning: Custom config file not found: {config_path}[/yellow]")
+        pprint("[yellow]Using default configuration.[/yellow]")
     config = deep_merge(template_config, user_config)
     # check with schema
     with open(path.join(path.dirname(__file__), "../config/schema.json"), "r") as f:

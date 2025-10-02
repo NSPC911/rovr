@@ -235,11 +235,6 @@
           },
           "default": [],
           "description": "Custom folder icon mappings. Earlier entries have higher priority."
-        },
-        "preserve_folder_color_for_non_folder_icons": {
-          "type": "boolean",
-          "default": false,
-          "description": "When enabled, folder icons that don't contain a folder silhouette will use the default folder color instead of their themed color. This helps distinguish folders from files when they use similar colorful icons."
         }
       },
       "description": "Custom icon configurations for files and folders"

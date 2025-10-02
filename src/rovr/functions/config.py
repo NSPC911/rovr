@@ -58,31 +58,45 @@ def load_config(config_path: Optional[str] = None) -> dict:
     user_config_path = config_path if config_path else default_user_config_path
     user_config = {}
     
-    if path.exists(user_config_path):
+    if path.isdir(user_config_path):
+        pprint(f"[bright_red]Provided config path is a directory: {user_config_path}[/bright_red]")
+        exit(1)
+    if path.isfile(user_config_path):
         # Load and parse user config file with proper error handling
-        with open(user_config_path, "r") as f:
-            user_config_content = f.read()
-            if user_config_content:
-                try:
-                    user_config = toml.loads(user_config_content)
-                except toml.decoder.TomlDecodeError as e:
-                    pprint(f"[bright_red]User Config TOML Syntax Error in {user_config_path}:\n    {e}")
-                    exit(1)
+        try:
+            with open(user_config_path, "r", encoding="utf-8") as f:
+                user_config_content = f.read()
+        except OSError as e:
+            pprint(f"[bright_red]Unable to read config file {user_config_path}: {e}[/bright_red]")
+            exit(1)
+        if user_config_content:
+            try:
+                user_config = toml.loads(user_config_content)
+            except toml.decoder.TomlDecodeError as e:
+                pprint(f"[bright_red]User Config TOML Syntax Error in {user_config_path}:\n    {e}")
+                exit(1)
     elif config_path:
         # Warn user if they specified a config file that doesn't exist
         pprint(f"[yellow]Warning: Custom config file not found: {config_path}[/yellow]")
         pprint("[yellow]Falling back to your default config.[/yellow]")
         # Load the default user config instead of empty dict
         user_config_path = default_user_config_path
-        if path.exists(user_config_path):
-            with open(user_config_path, "r") as f:
-                user_config_content = f.read()
-                if user_config_content:
-                    try:
-                        user_config = toml.loads(user_config_content)
-                    except toml.decoder.TomlDecodeError as e:
-                        pprint(f"[bright_red]User Config TOML Syntax Error in {user_config_path}:\n    {e}")
-                        exit(1)
+        if path.isdir(user_config_path):
+            pprint(f"[bright_red]Default config path is a directory: {user_config_path}[/bright_red]")
+            exit(1)
+        if path.isfile(user_config_path):
+            try:
+                with open(user_config_path, "r", encoding="utf-8") as f:
+                    user_config_content = f.read()
+            except OSError as e:
+                pprint(f"[bright_red]Unable to read default config file {user_config_path}: {e}[/bright_red]")
+                exit(1)
+            if user_config_content:
+                try:
+                    user_config = toml.loads(user_config_content)
+                except toml.decoder.TomlDecodeError as e:
+                    pprint(f"[bright_red]User Config TOML Syntax Error in {user_config_path}:\n    {e}")
+                    exit(1)
 
     # Merge template config with user config (user settings override template defaults)
     # Don't really have to consider the else part, because it's created further down

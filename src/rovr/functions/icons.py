@@ -95,17 +95,9 @@ def get_icon_for_folder(location: str) -> list:
                 is_match = True
 
             if is_match:
-                # For custom icons, check if they represent folder-like silhouettes
-                # If the pattern matches a known folder icon with folder silhouette, keep the custom color
-                # Otherwise, use the default folder color for better distinction
-                pattern_lower = pattern.lower()
-                if pattern_lower in FOLDER_ICONS_WITH_FOLDER_SILHOUETTE:
-                    # Keep original custom color
-                    return [custom_icon["icon"], custom_icon["color"]]
-                else:
-                    # Use default folder color
-                    default_color = ICONS["folder"]["default"][1]
-                    return [custom_icon["icon"], default_color]
+                # Custom icons always preserve their configured colors
+                # since users explicitly chose them
+                return [custom_icon["icon"], custom_icon["color"]]
 
     # Check for special folder types
     if folder_name in FOLDER_MAP:

@@ -16,7 +16,7 @@ VAR_TO_DIR = {
 }
 
 # Folder icons that contain folder-like silhouettes
-# These will keep their themed colors even when preserve_folder_color_for_non_folder_icons is enabled
+# These will keep their themed colors when folder color preservation is applied
 FOLDER_ICONS_WITH_FOLDER_SILHOUETTE = {
     "default",
     "open",

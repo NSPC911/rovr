@@ -50,7 +50,11 @@ def load_config(config_path: str = None) -> dict:
         with open(user_config_path, "r") as f:
             user_config_content = f.read()
             if user_config_content:
-                user_config = toml.loads(user_config_content)
+                try:
+                    user_config = toml.loads(user_config_content)
+                except toml.decoder.TomlDecodeError as e:
+                    pprint(f"[bright_red]User Config TOML Syntax Error in {user_config_path}:\n    {e}")
+                    exit(1)
     config = deep_merge(template_config, user_config)
     # check with schema
     with open(path.join(path.dirname(__file__), "../config/schema.json"), "r") as f:
@@ -91,8 +95,8 @@ def load_config(config_path: str = None) -> dict:
                 pprint(type_error_message)
             case "enum":
                 enum_error_message = (
-                    f"Invalid value [yellow]'{{exception.instance}}'[/yellow]. "
-                    f"\nAllowed values are: {{exception.validator_value}}"
+                    f"Invalid value [yellow]'{exception.instance}'[/yellow]. "
+                    f"\nAllowed values are: {exception.validator_value}"
                 )
                 pprint(enum_error_message)
             case _:

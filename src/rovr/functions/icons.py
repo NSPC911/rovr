@@ -95,9 +95,19 @@ def get_icon_for_folder(location: str) -> list:
                 is_match = True
 
             if is_match:
-                # Custom icons always preserve their configured colors
-                # since users explicitly chose them
-                return [custom_icon["icon"], custom_icon["color"]]
+                # For custom icons, we can't reliably determine if they have folder-like silhouettes
+                # since they're user-defined. We'll use a simple heuristic: if the folder name
+                # corresponds to a built-in folder type that has a folder silhouette, preserve the custom color.
+                # Otherwise, use the default folder color for better distinction.
+                if folder_name in FOLDER_MAP:
+                    icon_key = FOLDER_MAP[folder_name]
+                    if icon_key in FOLDER_ICONS_WITH_FOLDER_SILHOUETTE:
+                        # Keep original custom color
+                        return [custom_icon["icon"], custom_icon["color"]]
+
+                # Use default folder color for better distinction
+                default_color = ICONS["folder"]["default"][1]
+                return [custom_icon["icon"], default_color]
 
     # Check for special folder types
     if folder_name in FOLDER_MAP:
@@ -128,9 +138,9 @@ def get_icon(outer_key: str, inner_key: str) -> list:
         list[str,str]: The icon and color for the icon
     """
     if not config["interface"]["nerd_font"]:
-        return ASCII_ICONS.get(outer_key, {"empty": None}).get(inner_key, " ")
+        return ASCII_ICONS.get(outer_key, {}).get(inner_key, [" ", "white"])
     else:
-        return ICONS[outer_key][inner_key]
+        return ICONS.get(outer_key, {}).get(inner_key, [" ", "white"])
 
 
 @lru_cache(maxsize=128)

@@ -79,6 +79,10 @@ def set_nested_value(d: dict, path_str: str, value: bool) -> None:
 
 
 def set_scuffed_subtitle(element: Widget, *sections: str) -> None:
+    """
+    Build a subtitle with border separators between sections.
+    This adds visual borders to distinguish parts of the CLI output.
+    """
     border_bottom = BORDER_BOTTOM.get(
         element.styles.border_bottom[0], BORDER_BOTTOM["blank"]
     )
@@ -95,6 +99,20 @@ def set_scuffed_subtitle(element: Widget, *sections: str) -> None:
 
 
 def natural_size(integer: int, suffix: str, filesize_decimals: int) -> str:
+    """
+    Convert an integer byte size into a human-readable string.
+
+    Args:
+        integer (int): The size in bytes.
+        suffix (str): The format type, one of "decimal", "binary", "gnu".
+                      - "decimal": powers of 10 (1000 bytes = 1 KB)
+                      - "binary": powers of 2 (1024 bytes = 1 KiB)
+                      - "gnu": GNU-style human-readable format
+        filesize_decimals (int): Number of decimal places to show.
+
+    Returns:
+        str: Human-readable size string according to the selected suffix.
+    """
     assert suffix in ["decimal", "binary", "gnu"]
     match suffix:
         case "gnu":

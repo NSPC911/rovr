@@ -7,18 +7,19 @@ from rovr.variables.maps import BORDER_BOTTOM
 lzstring = LZString()
 pprint = Console().print
 
+
 def deep_merge(d: dict, u: dict) -> dict:
     """
     Deep merge two dictionaries (user config over template config).
-    
+
     This is used to merge user configuration over template defaults,
     allowing users to override only specific settings while keeping
     all other defaults intact.
-    
+
     Args:
         d: Base dictionary (template config)
         u: Update dictionary (user config)
-        
+
     Returns:
         dict: Merged dictionary with user values taking precedence
     """
@@ -31,13 +32,14 @@ def deep_merge(d: dict, u: dict) -> dict:
             d[k] = v
     return d
 
+
 def set_nested_value(d: dict, path_str: str, value: bool) -> None:
     """
     Set a value in a nested dictionary using dot notation (for CLI --with/--without flags).
-    
+
     This allows users to enable/disable features via command line arguments
     like --with plugins.bat or --without interface.tooltips.
-    
+
     Args:
         d: The config dictionary to modify
         path_str: Dot-separated path to the setting (e.g., "plugins.bat")
@@ -75,6 +77,7 @@ def set_nested_value(d: dict, path_str: str, value: bool) -> None:
                 current[key] = {}
             current = current[key]
 
+
 def set_scuffed_subtitle(element: Widget, *sections: str) -> None:
     border_bottom = BORDER_BOTTOM.get(
         element.styles.border_bottom[0], BORDER_BOTTOM["blank"]
@@ -89,6 +92,7 @@ def set_scuffed_subtitle(element: Widget, *sections: str) -> None:
             )
             subtitle += " "
     element.border_subtitle = subtitle
+
 
 def natural_size(integer: int, suffix: str, filesize_decimals: int) -> str:
     assert suffix in ["decimal", "binary", "gnu"]

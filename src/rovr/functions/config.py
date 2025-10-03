@@ -20,61 +20,67 @@ pprint = Console().print
 def _load_user_config_from_path(config_path: str, is_fallback: bool = False) -> dict:
     """
     Load and parse a user config file from the given path.
-    
+
     Args:
         config_path: Path to the config file
         is_fallback: Whether this is loading the fallback default config (affects error messages)
-    
+
     Returns:
         dict: Parsed config or empty dict if file doesn't exist
     """
     if path.isdir(config_path):
         config_type = "Default config" if is_fallback else "Provided config"
-        pprint(f"[bright_red]{config_type} path is a directory: {config_path}[/bright_red]")
+        pprint(
+            f"[bright_red]{config_type} path is a directory: {config_path}[/bright_red]"
+        )
         exit(1)
-    
+
     if not path.isfile(config_path):
         return {}
-    
+
     try:
         with open(config_path, "r", encoding="utf-8") as f:
             user_config_content = f.read()
     except OSError as e:
         config_type = "default config" if is_fallback else "config"
-        pprint(f"[bright_red]Unable to read {config_type} file {config_path}: {e}[/bright_red]")
+        pprint(
+            f"[bright_red]Unable to read {config_type} file {config_path}: {e}[/bright_red]"
+        )
         exit(1)
-    
+
     if user_config_content:
         try:
             return toml.loads(user_config_content)
         except toml.decoder.TomlDecodeError as e:
-            pprint(f"[bright_red]User Config TOML Syntax Error in {config_path}:\n    {e}")
+            pprint(
+                f"[bright_red]User Config TOML Syntax Error in {config_path}:\n    {e}"
+            )
             exit(1)
-    
+
     return {}
 
 
 def load_config(config_path: Optional[str] = None) -> dict:
     """
     Load and merge template config with user config (default or custom path).
-    
+
     This function implements the core config loading strategy:
     1. Load template config (contains all default values)
     2. Load user config (either default location or custom path via -c flag)
     3. Deep merge user config over template (user settings override defaults)
     4. Validate merged config against JSON schema
-    
+
     Args:
         config_path: Optional path to custom config file. If None, uses default user config.
-        
+
     Returns:
         dict: Merged and validated configuration
     """
-    
+
     # Ensure config directory exists for default user config
     if not path.exists(VAR_TO_DIR["CONFIG"]):
         os.makedirs(VAR_TO_DIR["CONFIG"])
-    
+
     # Create default user config if it doesn't exist (minimal config to get started)
     default_user_config_path = path.join(VAR_TO_DIR["CONFIG"], "config.toml")
     if not path.exists(default_user_config_path):
@@ -93,19 +99,21 @@ def load_config(config_path: Optional[str] = None) -> dict:
 
     # Determine which user config to load: custom path (if provided via -c) or default
     user_config_path = config_path if config_path else default_user_config_path
-    
+
     user_config = _load_user_config_from_path(user_config_path)
-    
+
     if not user_config and config_path:
         # Warn user if they specified a config file that doesn't exist
         pprint(f"[yellow]Warning: Custom config file not found: {config_path}[/yellow]")
         pprint("[yellow]Falling back to your default config.[/yellow]")
-        user_config = _load_user_config_from_path(default_user_config_path, is_fallback=True)
+        user_config = _load_user_config_from_path(
+            default_user_config_path, is_fallback=True
+        )
 
     # Merge template config with user config (user settings override template defaults)
     # Don't really have to consider the else part, because it's created further down
     config = deep_merge(template_config, user_config)
-    
+
     # check with schema
     with open(path.join(path.dirname(__file__), "../config/schema.json"), "r") as f:
         schema = ujson.load(f)

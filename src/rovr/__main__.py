@@ -66,12 +66,12 @@ try:
         elif show_version:
             pprint("v0.3.0")
             return
-            
+
         if config_file:
             from rovr.functions.config import load_config
+
             global config
             config = load_config(config_file)
-
 
         for feature_path in with_features:
             set_nested_value(config, feature_path, True)
@@ -88,4 +88,3 @@ try:
 
 except KeyboardInterrupt:
     pass
-

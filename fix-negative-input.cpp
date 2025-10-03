@@ -4,7 +4,12 @@ using namespace std;
 int main() {
     int n;
     cout << "Enter a number: ";
-    cin >> n;
+
+    // Check for non-integer input
+    if (!(cin >> n)) {
+        cout << "Invalid input. Please enter an integer." << endl;
+        return 1;
+    }
 
     // Check if number is even or odd
     if (n % 2 == 0) {
@@ -26,4 +31,3 @@ int main() {
 
     return 0;
 }
-

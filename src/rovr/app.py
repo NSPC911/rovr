@@ -96,11 +96,21 @@ class Application(App, inherit_bindings=False):
     )
     CLICK_CHAIN_TIME_THRESHOLD: int = config["settings"]["double_click_delay"]
 
-    def __init__(self, startup_path: str = "", *args, **kwargs) -> None:
-        super().__init__(*args, **kwargs)
+    def __init__(
+        self,
+        startup_path: str = "",
+        *,
+        cwd_file: str | None = None,
+        chooser_file: str | None = None,
+        **kwargs,
+    ) -> None:
+        super().__init__(**kwargs)
         self.app_blurred: bool = False
         self.startup_path: str = startup_path
         self.has_pushed_screen: bool = False
+        # Runtime output files from CLI
+        self._cwd_file: str | None = cwd_file
+        self._chooser_file: str | None = chooser_file
 
     def compose(self) -> ComposeResult:
         print("Starting Rovr...")
@@ -361,12 +371,33 @@ class Application(App, inherit_bindings=False):
             )
         ):
             return
-        if config["settings"]["cd_on_quit"]:
-            with open(
-                path.join(VAR_TO_DIR["CONFIG"], "rovr_quit_cd_path"), "w"
-            ) as file:
-                file.write(getcwd())
-                print(getcwd())
+        # 1) Write cwd to explicit --cwd-file if provided
+        if self._cwd_file:
+            try:
+                with open(self._cwd_file, "w", encoding="utf-8") as f:
+                    f.write(getcwd())
+            except OSError:
+                pass
+        # 2) Otherwise, honor legacy cd_on_quit behavior
+        elif config["settings"]["cd_on_quit"]:
+            try:
+                with open(
+                    path.join(VAR_TO_DIR["CONFIG"], "rovr_quit_cd_path"), "w", encoding="utf-8"
+                ) as file:
+                    file.write(getcwd())
+            except OSError:
+                pass
+        # 3) Write selected/active item(s) to --chooser-file, if provided
+        if self._chooser_file:
+            try:
+                file_list = self.query_one("#file_list")
+                selected = await file_list.get_selected_objects()
+                if selected:
+                    with open(self._chooser_file, "w", encoding="utf-8") as f:
+                        f.write("\n".join(selected))
+            except Exception:
+                # Any failure writing chooser file should not block exit
+                pass
         self.exit()
 
     def cd(

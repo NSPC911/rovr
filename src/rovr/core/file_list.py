@@ -40,11 +40,12 @@ class FileList(SelectionList, inherit_bindings=False):
         **kwargs,
     ) -> None:
         """
-        Initialize the FileList widget.
+        Initialize FileList state and mode flags used by the widget.
+
         Args:
-            dummy (bool): Whether this is a dummy file list.
-            enter_into (str): The path to enter into when a folder is selected.
-            select (bool): Whether the selection is select or normal.
+            dummy: If True, configures the widget for dummy (non-interactive) mode.
+            enter_into: Default path to navigate into when a folder is selected.
+            select: If True, enables selection mode (multi-selection behavior).
         """
         super().__init__(*args, **kwargs)
         self.dummy = dummy
@@ -57,6 +58,11 @@ class FileList(SelectionList, inherit_bindings=False):
             self.dummy_update_file_list_worker: Worker | None = None
 
     def on_mount(self) -> None:
+        """
+        Cache a reference to the parent's Input widget when not in dummy mode.
+
+        Sets the instance attribute `self.input` to the parent's first `Input` widget; does nothing if the file list is operating in dummy mode.
+        """
         if not self.dummy:
             self.input: Input = self.parent.query_one(Input)
 
@@ -238,10 +244,11 @@ class FileList(SelectionList, inherit_bindings=False):
         self,
         cwd: str,
     ) -> None:
-        """Update the file list with the current directory contents.
+        """
+        Update the file list in dummy mode with the specified directory contents.
 
         Args:
-            cwd (str): The current working directory.
+            cwd (str): Filesystem path to use as the current working directory for populating the list.
         """
         self.enter_into = cwd
         # Separate folders and files
@@ -289,10 +296,11 @@ class FileList(SelectionList, inherit_bindings=False):
             )
 
     def create_archive_list(self, file_list: list[str]) -> None:
-        """Create a list display for archive file contents.
+        """
+        Render a non-interactive list representing the contents of an archive.
 
         Args:
-            file_list (list[str]): List of file paths from archive contents.
+            file_list (list[str]): Paths of files and folders from the archive; folder paths end with a trailing '/'.
         """
         self.clear_options()
         self.list_of_options = []
@@ -561,7 +569,13 @@ class FileList(SelectionList, inherit_bindings=False):
             ]
 
     async def on_key(self, event: events.Key) -> None:
-        """Handle key events for the file list."""
+        """
+        Handle keyboard shortcuts and selection/navigation commands for the file list.
+        When a keybinding is handled, the event is stopped to prevent further propagation. No keys are handled when the file list is in dummy mode.
+
+        Args:
+            event (events.Key): The key event to process.
+        """
         if not self.dummy:
             match event.key:
                 # toggle select mode
@@ -770,13 +784,20 @@ class FileList(SelectionList, inherit_bindings=False):
                     await self.toggle_hidden_files()
 
     def update_border_subtitle(self) -> None:
+        """
+        Update the file list border subtitle to reflect current mode and selection counts.
+
+        Sets the parent's subtitle to either "NORMAL" or "SELECT" with a count string:
+        - If `dummy` attribute is True: no change.
+        - If the first option is disabled (indicating no items or a permission error): show "0/0" with the appropriate mode.
+        - If selection mode is not enabled or there is no explicit selection: show the highlighted index (1-based) over total options and clear the active tab's selectedItems.
+        - Otherwise (selection mode with selections): show the number of selected items over the total options.
+        """
         if self.dummy:
             return
         elif self.get_option_at_index(0).disabled:  # no items/permission error
             utils.set_scuffed_subtitle(
-                self.parent,
-                "SELECT" if self.select_mode_enabled else "NORMAL",
-                "0/0"
+                self.parent, "SELECT" if self.select_mode_enabled else "NORMAL", "0/0"
             )
         elif (not self.select_mode_enabled) or (self.selected is None):
             utils.set_scuffed_subtitle(

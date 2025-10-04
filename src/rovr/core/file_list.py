@@ -122,7 +122,7 @@ class FileList(SelectionList, inherit_bindings=False):
             folders, files = path_utils.get_cwd_object(
                 cwd, config["settings"]["show_hidden_files"]
             )
-            if folders == [] and files == []:
+            if not folders and not files:
                 self.list_of_options.append(
                     Selection("   --no-files--", value="", id="", disabled=True)
                 )
@@ -236,7 +236,7 @@ class FileList(SelectionList, inherit_bindings=False):
             folders, files = path_utils.get_cwd_object(
                 cwd, config["settings"]["show_hidden_files"]
             )
-            if folders == [] and files == []:
+            if not folders and not files:
                 self.list_of_options.append(
                     Selection("  --no-files--", value="", id="", disabled=True)
                 )

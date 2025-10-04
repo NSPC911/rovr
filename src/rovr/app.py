@@ -327,6 +327,7 @@ class Application(App, inherit_bindings=False):
                         title="Zoxide",
                         severity="error",
                     )
+                    return
 
                 def on_response(response: str) -> None:
                     """Handle the response from the ZDToDirectory dialog."""
@@ -396,7 +397,7 @@ class Application(App, inherit_bindings=False):
     async def watch_for_changes_and_update(self) -> None:
         cwd = getcwd()
         items = get_filtered_dir_names(cwd, config["settings"]["show_hidden_files"])
-        file_list = self.query_one(FileList)
+        file_list: FileList = self.query_one(FileList)
         while True:
             await asyncio.sleep(1)
             new_cwd = getcwd()
@@ -409,7 +410,7 @@ class Application(App, inherit_bindings=False):
                 continue
             if cwd != new_cwd:
                 cwd = new_cwd
-            elif items != file_list.items_in_cwd:
+            elif items != file_list.items_in_cwd and (file_list.update_file_list_worker is None or file_list.update_file_list_worker.is_finished):
                 self.cd(cwd)
 
     @work

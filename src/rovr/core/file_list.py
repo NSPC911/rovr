@@ -1,3 +1,4 @@
+import asyncio
 from os import getcwd, path
 from os import system as cmd
 from typing import ClassVar
@@ -11,8 +12,10 @@ from textual.strip import Strip
 from textual.widgets import Button, Input, OptionList, SelectionList
 from textual.widgets.option_list import Option, OptionDoesNotExist
 from textual.widgets.selection_list import Selection
+from textual.worker import Worker, get_current_worker
 
 from rovr.classes import FileListSelectionWidget
+from rovr.classes.session_manager import SessionManager
 from rovr.functions import icons as icon_utils
 from rovr.functions import path as path_utils
 from rovr.functions import pins as pin_utils
@@ -49,6 +52,9 @@ class FileList(SelectionList, inherit_bindings=False):
         self.select_mode_enabled = select
         if not self.dummy:
             self.items_in_cwd: set[str] = set()
+            self.update_file_list_worker: Worker | None = None
+        else:
+            self.dummy_update_file_list_worker: Worker | None = None
 
     def on_mount(self) -> None:
         if not self.dummy:
@@ -107,10 +113,11 @@ class FileList(SelectionList, inherit_bindings=False):
             focus_on (str | None): A custom item to set the focus as.
         """
         cwd = path_utils.normalise(getcwd())
+        self.update_file_list_worker: Worker = get_current_worker()
         # get sessionstate
         try:
             # only happens when the tabs aren't mounted
-            session = self.app.tabWidget.active_tab.session
+            session: SessionManager = self.app.tabWidget.active_tab.session
         except AttributeError:
             self.clear_options()
             return
@@ -118,21 +125,25 @@ class FileList(SelectionList, inherit_bindings=False):
         self.list_of_options: list[FileListSelectionWidget | Selection] = []
         names_in_cwd: list[str] = []
         self.items_in_cwd: set[str] = set()
+        self.clear_options()
+        preview = self.app.query_one("PreviewContainer")
         try:
             folders, files = path_utils.get_cwd_object(
                 cwd, config["settings"]["show_hidden_files"]
             )
             if folders == [] and files == []:
-                self.list_of_options.append(
+                self.add_option(
                     Selection("   --no-files--", value="", id="", disabled=True)
                 )
-                preview = self.app.query_one("PreviewContainer")
                 preview.remove_children()
                 preview._current_preview_type = "none"
             else:
                 file_list_options = folders + files
-                for item in file_list_options:
-                    self.list_of_options.append(
+                loop_count = 0
+                hundred_options: list[FileListSelectionWidget] = []
+                for index, item in enumerate(file_list_options):
+                    loop_count += 1
+                    hundred_options.append(
                         FileListSelectionWidget(
                             icon=item["icon"],
                             label=item["name"],
@@ -142,9 +153,16 @@ class FileList(SelectionList, inherit_bindings=False):
                         )
                     )
                     names_in_cwd.append(item["name"])
+                    if loop_count >= 100 or index == len(file_list_options) - 1:
+                        loop_count = 0
+                        self.add_options(hundred_options)
+                        self.list_of_options.extend(hundred_options)
+                        hundred_options: list[FileListSelectionWidget] = []
+                        self.update_border_subtitle()
+                        await asyncio.sleep(0.01)
                 self.items_in_cwd = set(names_in_cwd)
         except PermissionError:
-            self.list_of_options.append(
+            self.add_option(
                 Selection(
                     " Permission Error: Unable to access this directory.",
                     value="",
@@ -152,15 +170,12 @@ class FileList(SelectionList, inherit_bindings=False):
                     disabled=True,
                 ),
             )
-
-        if len(self.list_of_options) == 1 and self.list_of_options[0].disabled:
+        if len(self.list_of_options) == 0 and self.get_option_at_index(0).disabled:
             for selector in buttons_that_depend_on_path:
                 self.app.query_one(selector).disabled = True
         else:
             for selector in buttons_that_depend_on_path:
                 self.app.query_one(selector).disabled = False
-        self.clear_options()
-        self.add_options(self.list_of_options)
         # session handler
         self.app.query_one("#path_switcher").value = cwd + (
             "" if cwd.endswith("/") else "/"
@@ -213,7 +228,7 @@ class FileList(SelectionList, inherit_bindings=False):
             self.input.clear()
         if not add_to_session:
             self.input.clear_selected()
-        if self.list_of_options[0].disabled:  # special option
+        if self.get_option_at_index(0).disabled:  # special option
             if self.select_mode_enabled:
                 await self.toggle_mode()
             self.update_border_subtitle()
@@ -231,19 +246,24 @@ class FileList(SelectionList, inherit_bindings=False):
         self.enter_into = cwd
         # Separate folders and files
         self.list_of_options = []
+        self.dummy_update_file_list_worker = get_current_worker()
 
+        self.clear_options()
         try:
             folders, files = path_utils.get_cwd_object(
                 cwd, config["settings"]["show_hidden_files"]
             )
             if folders == [] and files == []:
-                self.list_of_options.append(
+                self.add_option(
                     Selection("  --no-files--", value="", id="", disabled=True)
                 )
             else:
                 file_list_options = folders + files
-                for item in file_list_options:
-                    self.list_of_options.append(
+                loop_count = 0
+                hundred_options: list[FileListSelectionWidget] = []
+                for index, item in enumerate(file_list_options):
+                    loop_count += 1
+                    hundred_options.append(
                         FileListSelectionWidget(
                             icon=item["icon"],
                             label=item["name"],
@@ -252,8 +272,14 @@ class FileList(SelectionList, inherit_bindings=False):
                             id=path_utils.compress(item["name"]),
                         )
                     )
+                    if loop_count >= 100 or index == len(file_list_options) - 1:
+                        loop_count = 0
+                        self.add_options(hundred_options)
+                        self.list_of_options.extend(hundred_options)
+                        hundred_options: list[FileListSelectionWidget] = []
+                        await asyncio.sleep(0.01)
         except PermissionError:
-            self.list_of_options.append(
+            self.add_option(
                 Selection(
                     " Permission Error: Unable to access this directory.",
                     id="",
@@ -261,11 +287,6 @@ class FileList(SelectionList, inherit_bindings=False):
                     disabled=True,
                 )
             )
-
-        self.clear_options()
-        self.add_options(self.list_of_options)
-        # somehow prevents more debouncing, ill take it
-        self.refresh(repaint=True, layout=True)
 
     def create_archive_list(self, file_list: list[str]) -> None:
         """Create a list display for archive file contents.
@@ -681,8 +702,6 @@ class FileList(SelectionList, inherit_bindings=False):
                     and key in config["keybinds"]["hist_previous"]
                 ):
                     event.stop()
-                    if self.get_option_at_index(self.highlighted).disabled:
-                        return
                     if self.app.query_one("#back").disabled:
                         self.app.query_one("UpButton").on_button_pressed(Button.Pressed)
                     else:
@@ -753,11 +772,17 @@ class FileList(SelectionList, inherit_bindings=False):
     def update_border_subtitle(self) -> None:
         if self.dummy:
             return
+        elif self.get_option_at_index(0).disabled:  # no items/permission error
+            utils.set_scuffed_subtitle(
+                self.parent,
+                "SELECT" if self.select_mode_enabled else "NORMAL",
+                "0/0"
+            )
         elif (not self.select_mode_enabled) or (self.selected is None):
             utils.set_scuffed_subtitle(
                 self.parent,
                 "NORMAL",
-                f"{self.highlighted + 1}/{self.option_count}",
+                f"{self.highlighted + 1 if self.highlighted is not None else 0}/{self.option_count}",
             )
             self.app.tabWidget.active_tab.selectedItems = []
         else:

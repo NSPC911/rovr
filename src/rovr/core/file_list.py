@@ -318,15 +318,19 @@ class FileList(SelectionList, inherit_bindings=False):
             self.app.tabWidget.active_tab.selectedItems = []
             self.app.query_one("#file_list").focus()
         elif not self.select_mode_enabled:
-            # Check if it's a folder or a file
-            if path.isdir(path.join(cwd, file_name)):
-                # If it's a folder, navigate into it
-                self.app.cd(path.join(cwd, file_name))
+            # check if chooser file is enabled
+            if self.app._chooser_file:
+                self.app.action_quit()
             else:
-                path_utils.open_file(path.join(cwd, file_name))
-            if self.highlighted is None:
-                self.highlighted = 0
-            self.app.tabWidget.active_tab.selectedItems = []
+                # Check if it's a folder or a file
+                if path.isdir(path.join(cwd, file_name)):
+                    # If it's a folder, navigate into it
+                    self.app.cd(path.join(cwd, file_name))
+                else:
+                    path_utils.open_file(path.join(cwd, file_name))
+                if self.highlighted is None:
+                    self.highlighted = 0
+                self.app.tabWidget.active_tab.selectedItems = []
         else:
             self.app.tabWidget.active_tab.session.selectedItems = self.selected.copy()
 

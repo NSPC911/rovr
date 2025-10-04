@@ -535,10 +535,8 @@ class FileList(SelectionList, inherit_bindings=False):
             ]
         else:
             return [
-                str(
-                    path_utils.normalise(path.join(cwd, path_utils.decompress(option)))
-                    for option in self.selected
-                )
+                str(path_utils.normalise(path.join(cwd, path_utils.decompress(option))))
+                for option in self.selected
             ]
 
     async def on_key(self, event: events.Key) -> None:

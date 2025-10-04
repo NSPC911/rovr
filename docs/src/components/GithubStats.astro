@@ -20,7 +20,11 @@ try {
     if (response.ok) {
       const releases = await response.json()
       release_tag = releases[0].tag_name
+    } else {
+      console.error(response)
     }
+  } else {
+    console.error(response)
   }
 } catch (error) {
   console.error('Failed to fetch GitHub stats:', error);
@@ -38,13 +42,13 @@ try {
     <a href={`https://github.com/${repoOwner}/${repoName}/stargazers`} class="github-stat" title="Stars">
       <span></span>
       <span></span>
-      <span>{stars || 46}</span>
+      <span>{stars || 64}</span>
     </a>
 
     <a href={`https://github.com/${repoOwner}/${repoName}/network/members`} class="github-stat" title="Forks">
       <span></span>
       <span></span>
-      <span>{forks || 6}</span>
+      <span>{forks || 12}</span>
     </a>
   </div>
 

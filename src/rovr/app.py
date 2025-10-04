@@ -212,11 +212,12 @@ class Application(App, inherit_bindings=False):
     async def on_key(self, event: events.Key) -> None:
         # Not really sure why this can happen, but I will still handle this
         """
-        Handle application-level keybindings and focus/navigation shortcuts.
-        
-        Processes a Textual key event when the application has a single active screen and a focused widget with an id, dispatching configured keybinds to focus panes, toggle visibility of sidebars/footer, manage tabs, invoke the zoxide directory picker, and show the keybinds screen. Special cases: Escape in search fields returns focus to the appropriate list/panel and Backspace is ignored when typing in inputs or search fields to avoid interfering with navigation bindings.
-        
-        Parameters:
+        Handle application-level keybindings and focus/navigation shortcuts only if the application has a single active screen and a focused widget with an id.
+        Special cases:
+        - Escape in search fields returns focus to the appropriate list/panel
+        - Backspace is ignored when typing in inputs or search fields to avoid interfering with navigation bindings.
+
+        Args:
             event (events.Key): The key event received from Textual.
         """
         if self.focused is None or not self.focused.id:
@@ -340,17 +341,17 @@ class Application(App, inherit_bindings=False):
                 def on_response(response: str) -> None:
                     """
                     Process the ZDToDirectory dialog response and populate the PathInput.
-                    
-                    If `response` is non-empty, decompresses the returned path, normalizes path separators to forward slashes,
-                    assigns the result to the application's PathInput widget, and triggers the widget's input-submitted handler
-                    with an object exposing the new `value`.
-                    
-                    Parameters:
+
+                    If `response` is non-empty, decompresses the returned path, normalizes path,
+                    assigns the result to the application's PathInput widget, and triggers the
+                    widget's input-submitted handler with an object exposing the new `value`.
+
+                    Args:
                         response (str): Compressed directory string returned by the ZDToDirectory dialog; ignored if empty.
                     """
                     if response:
                         pathinput = self.query_one(PathInput)
-                        pathinput.value = decompress(response).replace(path.sep, "/")
+                        pathinput.value = normalise(decompress(response))
                         pathinput.on_input_submitted(
                             SimpleNamespace(value=pathinput.value)
                         )
@@ -394,6 +395,14 @@ class Application(App, inherit_bindings=False):
         focus_on: str | None = None,
         callback: Callable | None = None,
     ) -> None:
+        """
+        Change the current working directory to `directory`, update the FileList, and optionally focus on a specific item.
+        Args:
+            directory (str): The target directory to change to.
+            add_to_history (bool, optional): Whether to add this directory change to the navigation history. Defaults to True.
+            focus_on (str | None, optional): An optional filename to focus on after changing directories. Defaults to None.
+            callback (Callable | None, optional): An optional callback to execute after updating the FileList. Defaults to None.
+        """
         # Makes sure `directory` is a directory, or chdir will fail with exception
         directory = ensure_existing_directory(directory)
 
@@ -414,7 +423,7 @@ class Application(App, inherit_bindings=False):
     async def watch_for_changes_and_update(self) -> None:
         """
         Periodically watches the current working directory and updates the file list when its contents change.
-        
+
         Checks the directory contents every second (respecting the `show_hidden_files` setting) and calls `self.cd(cwd)` to refresh the UI when the observed names differ from the FileList's current items. Permission and other OSErrors while reading the directory are ignored. Avoids triggering a refresh if the FileList already has an active update worker.
         """
         cwd = getcwd()
@@ -432,7 +441,10 @@ class Application(App, inherit_bindings=False):
                 continue
             if cwd != new_cwd:
                 cwd = new_cwd
-            elif items != file_list.items_in_cwd and (file_list.update_file_list_worker is None or file_list.update_file_list_worker.is_finished):
+            elif items != file_list.items_in_cwd and (
+                file_list.update_file_list_worker is None
+                or file_list.update_file_list_worker.is_finished
+            ):
                 self.cd(cwd)
 
     @work

@@ -79,17 +79,6 @@ class Application(App, inherit_bindings=False):
     # higher index = higher priority
     CSS_PATH = ["style.tcss", path.join(VAR_TO_DIR["CONFIG"], "style.tcss")]
 
-    if config["interface"]["compact_mode"]:
-        CSS = """
-            #menu { display: none; }
-            #below_menu { border: none; }
-            $pinned_sidebar_width: 16;
-            $file_list_width: 1fr;
-            $preview_sidebar_width: 25vw;
-            $footer_unfocus_height: 7;
-            $footer_focus_height: 7;
-        """
-
     # reactivity
     HORIZONTAL_BREAKPOINTS = (
         [(0, "-filelistonly"), (35, "-nopreview"), (70, "-all-horizontal")]
@@ -174,6 +163,12 @@ class Application(App, inherit_bindings=False):
             yield FileListRightClickOptionList(filelist, classes="hidden")
 
     def on_mount(self) -> None:
+        # compact mode
+        if config["interface"]["compact_mode"]:
+            self.add_class('compact')
+        else:
+            self.remove_class('compact')
+
         # border titles
         self.query_one("#menu").border_title = "Options"
         self.query_one("#menu").can_focus = False

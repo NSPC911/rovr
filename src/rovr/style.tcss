@@ -30,6 +30,20 @@ $scrollbar-corner-color: $primary-muted;
   }
 }
 
+/* Compact mode */
+.compact {
+  #menu { display: none; }
+  #below_menu { border: none; }
+  #pinned_sidebar_container { width: 16; }
+  #preview_sidebar { width: 25vw; }
+  #footer {
+    height: 7;
+    &:focus-within {
+      height: 7;
+    }
+  }
+}
+
 /* border styling for main widgets */
 #menu,
 #below_menu,

@@ -56,7 +56,7 @@
         "compact_mode": {
           "type": "boolean",
           "default": false,
-          "description": "Enable compact mode."
+          "description": "Enable compact mode to hide the menu bar and adjust layout for a more streamlined interface."
         },
         "clock": {
           "type": "object",

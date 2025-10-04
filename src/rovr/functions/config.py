@@ -103,12 +103,8 @@ def load_config(config_path: Optional[str] = None) -> dict:
     user_config = _load_user_config_from_path(user_config_path)
 
     if not user_config and config_path:
-        # Warn user if they specified a config file that doesn't exist
-        pprint(f"[yellow]Warning: Custom config file not found: {config_path}[/yellow]")
-        pprint("[yellow]Falling back to your default config.[/yellow]")
-        user_config = _load_user_config_from_path(
-            default_user_config_path, is_fallback=True
-        )
+        pprint(f"[bright_red]Custom config file not found or invalid: {config_path}[/bright_red]")
+        exit(1)
 
     # Merge template config with user config (user settings override template defaults)
     # Don't really have to consider the else part, because it's created further down

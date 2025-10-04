@@ -165,9 +165,9 @@ class Application(App, inherit_bindings=False):
     def on_mount(self) -> None:
         # compact mode
         if config["interface"]["compact_mode"]:
-            self.add_class('compact')
+            self.add_class("compact")
         else:
-            self.remove_class('compact')
+            self.remove_class("compact")
 
         # border titles
         self.query_one("#menu").border_title = "Options"

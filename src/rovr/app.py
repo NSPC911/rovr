@@ -492,20 +492,6 @@ class Application(App, inherit_bindings=False):
             self.action_quit,
         )
 
-        # # the HelpPanel will need some fixes.
-        # if screen.query("HelpPanel"):
-        #     yield SystemCommand(
-        #         "Hide keys and help panel",
-        #         "Hide the keys and widget help panel",
-        #         self.action_hide_help_panel,
-        #     )
-        # else:
-        #     yield SystemCommand(
-        #         "Show keys and help panel",
-        #         "Show help for the focused widget and a summary of available keys",
-        #         self.action_show_help_panel,
-        #     )
-
         if screen.maximized is not None:
             yield SystemCommand(
                 "Minimize",

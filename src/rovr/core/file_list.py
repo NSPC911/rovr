@@ -20,7 +20,12 @@ from rovr.functions import icons as icon_utils
 from rovr.functions import path as path_utils
 from rovr.functions import pins as pin_utils
 from rovr.functions import utils
-from rovr.variables.constants import buttons_that_depend_on_path, config, vindings
+from rovr.variables.constants import (
+    buttons_that_depend_on_path,
+    config,
+    spinner,
+    vindings,
+)
 from rovr.variables.maps import ARCHIVE_EXTENSIONS
 
 
@@ -51,11 +56,10 @@ class FileList(SelectionList, inherit_bindings=False):
         self.dummy = dummy
         self.enter_into = enter_into
         self.select_mode_enabled = select
-        if not self.dummy:
-            self.items_in_cwd: set[str] = set()
-            self.update_file_list_worker: Worker | None = None
-        else:
-            self.dummy_update_file_list_worker: Worker | None = None
+        self.items_in_cwd: set[str] = set()
+        self.update_file_list_worker: Worker | None = None
+        self.dummy_update_file_list_worker: Worker | None = None
+        self.spinner_index: int = 0
 
     def on_mount(self) -> None:
         """
@@ -146,10 +150,10 @@ class FileList(SelectionList, inherit_bindings=False):
             else:
                 file_list_options = folders + files
                 loop_count = 0
-                hundred_options: list[FileListSelectionWidget] = []
+                to_add_options: list[FileListSelectionWidget] = []
                 for index, item in enumerate(file_list_options):
                     loop_count += 1
-                    hundred_options.append(
+                    to_add_options.append(
                         FileListSelectionWidget(
                             icon=item["icon"],
                             label=item["name"],
@@ -159,12 +163,14 @@ class FileList(SelectionList, inherit_bindings=False):
                         )
                     )
                     names_in_cwd.append(item["name"])
-                    if loop_count >= 100 or index == len(file_list_options) - 1:
+                    if loop_count >= 111 or index == len(file_list_options) - 1:
                         loop_count = 0
-                        self.add_options(hundred_options)
-                        self.list_of_options.extend(hundred_options)
-                        hundred_options: list[FileListSelectionWidget] = []
-                        self.update_border_subtitle()
+                        self.add_options(to_add_options)
+                        self.list_of_options.extend(to_add_options)
+                        to_add_options: list[FileListSelectionWidget] = []
+                        self.update_border_subtitle(
+                            do_a_spin=index != len(file_list_options) - 1
+                        )
                         await asyncio.sleep(0.01)
                 self.items_in_cwd = set(names_in_cwd)
         except PermissionError:
@@ -174,7 +180,7 @@ class FileList(SelectionList, inherit_bindings=False):
                     value="",
                     id="",
                     disabled=True,
-                ),
+                )
             )
         if len(self.list_of_options) == 0 and self.get_option_at_index(0).disabled:
             for selector in buttons_that_depend_on_path:
@@ -186,10 +192,6 @@ class FileList(SelectionList, inherit_bindings=False):
         self.app.query_one("#path_switcher").value = cwd + (
             "" if cwd.endswith("/") else "/"
         )
-        # I question to myself why directories isn't a list[str]
-        # but is a list[dict], so I'm down to take some PRs, because
-        # I have other things that are more important.
-        # TODO: use list[str] instead of list[dict] for directories
         if add_to_session:
             if session.historyIndex != len(session.directories) - 1:
                 session.directories = session.directories[: session.historyIndex + 1]
@@ -267,10 +269,10 @@ class FileList(SelectionList, inherit_bindings=False):
             else:
                 file_list_options = folders + files
                 loop_count = 0
-                hundred_options: list[FileListSelectionWidget] = []
+                to_add_options: list[FileListSelectionWidget] = []
                 for index, item in enumerate(file_list_options):
                     loop_count += 1
-                    hundred_options.append(
+                    to_add_options.append(
                         FileListSelectionWidget(
                             icon=item["icon"],
                             label=item["name"],
@@ -279,11 +281,17 @@ class FileList(SelectionList, inherit_bindings=False):
                             id=path_utils.compress(item["name"]),
                         )
                     )
-                    if loop_count >= 100 or index == len(file_list_options) - 1:
+                    if loop_count >= 111 or index == len(file_list_options) - 1:
+                        self.spinner_index = (
+                            self.spinner_index + 1
+                            if self.spinner_index < len(spinner) - 1
+                            else 0
+                        )
                         loop_count = 0
-                        self.add_options(hundred_options)
-                        self.list_of_options.extend(hundred_options)
-                        hundred_options: list[FileListSelectionWidget] = []
+                        self.add_options(to_add_options)
+                        self.list_of_options.extend(to_add_options)
+                        to_add_options: list[FileListSelectionWidget] = []
+                        self.parent.border_subtitle = spinner[self.spinner_index]
                         await asyncio.sleep(0.01)
         except PermissionError:
             self.add_option(
@@ -294,8 +302,10 @@ class FileList(SelectionList, inherit_bindings=False):
                     disabled=True,
                 )
             )
+        self.parent.border_subtitle = ""
 
-    def create_archive_list(self, file_list: list[str]) -> None:
+    @work(exclusive=True)
+    async def create_archive_list(self, file_list: list[str]) -> None:
         """
         Render a non-interactive list representing the contents of an archive.
 
@@ -310,7 +320,11 @@ class FileList(SelectionList, inherit_bindings=False):
                 Selection("  --no-files--", value="", id="", disabled=True)
             )
         else:
-            for file_path in file_list:
+            loop_count = 0
+            to_add_options: list[Selection] = []
+            self.spinner_index = 0
+            for index, file_path in enumerate(file_list):
+                loop_count += 1
                 if file_path.endswith("/"):
                     icon = icon_utils.get_icon_for_folder(file_path.strip("/"))
                 else:
@@ -318,7 +332,7 @@ class FileList(SelectionList, inherit_bindings=False):
 
                 # Create a selection widget similar to FileListSelectionWidget but simpler
                 # since we don't have dir_entry metadata for archive contents
-                self.list_of_options.append(
+                to_add_options.append(
                     Selection(
                         f" [{icon[1]}]{icon[0]}[/{icon[1]}] {file_path}",
                         value=path_utils.compress(file_path),
@@ -326,9 +340,19 @@ class FileList(SelectionList, inherit_bindings=False):
                         disabled=True,  # Archive contents are not interactive like regular files
                     )
                 )
-
-        self.add_options(self.list_of_options)
-        self.refresh(repaint=True, layout=True)
+                if loop_count >= 111 or index == len(file_list):
+                    loop_count = 0
+                    self.add_options(to_add_options)
+                    self.list_of_options.extend(to_add_options)
+                    to_add_options: list[Selection] = []
+                    self.spinner_index = (
+                        self.spinner_index + 1
+                        if self.spinner_index < len(spinner) - 1
+                        else 0
+                    )
+                    self.parent.border_subtitle = spinner[self.spinner_index]
+                    await asyncio.sleep(0.01)
+            self.parent.border_subtitle = ""
 
     async def on_selection_list_selected_changed(
         self, event: SelectionList.SelectedChanged
@@ -359,7 +383,7 @@ class FileList(SelectionList, inherit_bindings=False):
         else:
             self.app.tabWidget.active_tab.session.selectedItems = self.selected.copy()
 
-    # No clue why I'm using an OptionList method for SelectionList
+    # async because of NewItemButton
     async def on_option_list_option_highlighted(
         self, event: OptionList.OptionHighlighted
     ) -> None:
@@ -368,10 +392,15 @@ class FileList(SelectionList, inherit_bindings=False):
         if isinstance(event.option, Selection) and not isinstance(
             event.option, FileListSelectionWidget
         ):
-            self.app.query_one("PreviewContainer").remove_children()
+            preview = self.app.query_one("PreviewContainer")
+            preview.remove_children()
+            preview.border_title = ""
+            preview.border_subtitle = ""
             return
         assert isinstance(event.option, FileListSelectionWidget)
-        self.update_border_subtitle()
+        # prevents double update
+        if not self.update_file_list_worker.is_running:
+            self.update_border_subtitle()
         # Get the highlighted option
         highlighted_option = event.option
         self.app.tabWidget.active_tab.session.lastHighlighted[
@@ -530,7 +559,10 @@ class FileList(SelectionList, inherit_bindings=False):
 
     async def toggle_mode(self) -> None:
         """Toggle the selection mode between select and normal."""
-        if self.get_option_at_index(self.highlighted).disabled:
+        if (
+            self.highlighted is None
+            or self.get_option_at_index(self.highlighted).disabled
+        ) and not self.select_mode_enabled:
             return
         self.select_mode_enabled = not self.select_mode_enabled
         if not self.select_mode_enabled:
@@ -783,7 +815,7 @@ class FileList(SelectionList, inherit_bindings=False):
                     event.stop()
                     await self.toggle_hidden_files()
 
-    def update_border_subtitle(self) -> None:
+    def update_border_subtitle(self, do_a_spin: bool = False) -> None:
         """
         Update the file list border subtitle to reflect current mode and selection counts.
 
@@ -792,23 +824,38 @@ class FileList(SelectionList, inherit_bindings=False):
         - If the first option is disabled (indicating no items or a permission error): show "0/0" with the appropriate mode.
         - If selection mode is not enabled or there is no explicit selection: show the highlighted index (1-based) over total options and clear the active tab's selectedItems.
         - Otherwise (selection mode with selections): show the number of selected items over the total options.
+
+        Args:
+            do_a_spin(bool): add an additional spinner for progress sake
+
         """
+        self.spinner_index = (
+            self.spinner_index + 1 if self.spinner_index < len(spinner) - 1 else 0
+        )
+        spinner_part = spinner[self.spinner_index] if do_a_spin else None
         if self.dummy:
             return
         elif self.get_option_at_index(0).disabled:  # no items/permission error
             utils.set_scuffed_subtitle(
-                self.parent, "SELECT" if self.select_mode_enabled else "NORMAL", "0/0"
+                self.parent,
+                spinner_part,
+                "SELECT" if self.select_mode_enabled else "NORMAL",
+                "0/0",
             )
         elif (not self.select_mode_enabled) or (self.selected is None):
             utils.set_scuffed_subtitle(
                 self.parent,
+                spinner_part,
                 "NORMAL",
                 f"{self.highlighted + 1 if self.highlighted is not None else 0}/{self.option_count}",
             )
             self.app.tabWidget.active_tab.selectedItems = []
         else:
             utils.set_scuffed_subtitle(
-                self.parent, "SELECT", f"{len(self.selected)}/{len(self.options)}"
+                self.parent,
+                spinner_part,
+                "SELECT",
+                f"{len(self.selected)}/{len(self.options)}",
             )
 
 

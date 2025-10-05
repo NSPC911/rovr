@@ -461,52 +461,21 @@ class PreviewContainer(Container):
             if is_archive:
                 try:
                     with Archive(file_path, "r") as archive:
-                        if config["settings"]["preview_full"]:
-                            all_files = []
-                            for member in archive.infolist():
-                                filename = getattr(
-                                    member, "filename", getattr(member, "name", "")
-                                )
-                                is_dir_func = getattr(
-                                    member, "is_dir", getattr(member, "isdir", None)
-                                )
-                                is_dir = (
-                                    is_dir_func()
-                                    if is_dir_func
-                                    else filename.replace("\\", "/").endswith("/")
-                                )
-                                if not is_dir:
-                                    all_files.append(filename)
-                        else:
-                            top_level_files = set()
-                            top_level_dirs = set()
-                            for member in archive.infolist():
-                                filename = getattr(
-                                    member, "filename", getattr(member, "name", "")
-                                )
-                                is_dir_func = getattr(
-                                    member, "is_dir", getattr(member, "isdir", None)
-                                )
-                                is_dir = (
-                                    is_dir_func()
-                                    if is_dir_func
-                                    else filename.replace("\\", "/").endswith("/")
-                                )
-
-                                filename = filename.replace("\\", "/")
-                                if not filename:
-                                    continue
-
-                                parts = filename.strip("/").split("/")
-                                if len(parts) == 1 and not is_dir:
-                                    top_level_files.add(parts[0])
-                                elif parts and parts[0]:
-                                    top_level_dirs.add(parts[0])
-
-                            top_level_files -= top_level_dirs
-                            all_files = sorted([
-                                d + "/" for d in top_level_dirs
-                            ]) + sorted(list(top_level_files))
+                        all_files = []
+                        for member in archive.infolist():
+                            filename = getattr(
+                                member, "filename", getattr(member, "name", "")
+                            )
+                            is_dir_func = getattr(
+                                member, "is_dir", getattr(member, "isdir", None)
+                            )
+                            is_dir = (
+                                is_dir_func()
+                                if is_dir_func
+                                else filename.replace("\\", "/").endswith("/")
+                            )
+                            if not is_dir:
+                                all_files.append(filename)
                     content = all_files
                 except (
                     zipfile.BadZipFile,
@@ -563,6 +532,7 @@ class PreviewContainer(Container):
             self._is_archive = is_archive
             self._current_content = content
             await self._render_preview()
+        self.border_subtitle = ""
 
     async def on_resize(self, event: events.Resize) -> None:
         """Re-render the preview on resize if it's was rendered by batcat and height changed."""

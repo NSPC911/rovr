@@ -63,7 +63,7 @@ def set_nested_value(d: dict, path_str: str, value: bool) -> None:
             current = current[key]
 
 
-def set_scuffed_subtitle(element: Widget, *sections: str) -> None:
+def set_scuffed_subtitle(element: Widget, *sections: str | None) -> None:
     """The most scuffed way to display a custom subtitle
 
     Args:
@@ -75,13 +75,13 @@ def set_scuffed_subtitle(element: Widget, *sections: str) -> None:
     )
     subtitle = ""
     for index, section in enumerate(sections):
+        if section is None:
+            if index == len(sections) - 1 and len(subtitle) > 9:
+                subtitle = subtitle[:-3]
+            continue
         subtitle += section
         if index + 1 != len(sections):
-            subtitle += " "
-            subtitle += (
-                border_bottom if element.app.ansi_color else f"[r]{border_bottom}[/]"
-            )
-            subtitle += " "
+            subtitle += " " + border_bottom + " "
 
     element.border_subtitle = subtitle
 

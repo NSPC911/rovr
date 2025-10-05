@@ -19,6 +19,10 @@ class SessionManager:
     """
 
     def __init__(self) -> None:
+        # I question to myself why directories isn't a list[str]
+        # but is a list[dict], so I'm down to take some PRs, because
+        # I have other things that are more important.
+        # TODO: use list[str] instead of list[dict] for directories
         self.directories: list[dict] = []
         self.historyIndex: int = 0
         self.lastHighlighted: dict[str, int] = {}

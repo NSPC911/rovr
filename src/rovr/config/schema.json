@@ -53,6 +53,11 @@
           "default": "print(\"Hello, world!\")",
           "description": "This is shown when the rovr starts up. You may see it for a split second, but it will never appear afterwards."
         },
+        "compact_mode": {
+          "type": "boolean",
+          "default": false,
+          "description": "Enable compact mode to hide the menu bar and adjust layout for a more streamlined interface."
+        },
         "clock": {
           "type": "object",
           "additionalProperties": false,

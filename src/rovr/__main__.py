@@ -39,12 +39,30 @@ try:
         is_flag=True,
         help="Show the current version of rovr.",
     )
+    @click.option(
+        "--cwd-file",
+        "cwd_file",
+        multiple=False,
+        type=str,
+        default="",
+        help="Write the final working directory to this file on exit.",
+    )
+    @click.option(
+        "--chooser-file",
+        "chooser_file",
+        multiple=False,
+        type=str,
+        default="",
+        help="Write chosen file(s) (newline-separated) to this file on exit.",
+    )
     @click.argument("path", type=str, required=False, default="")
     def main(
         with_features: list[str],
         without_features: list[str],
         config_path: bool,
         show_version: bool,
+        cwd_file: str,
+        chooser_file: str,
         path: str,
     ) -> None:
         """A post-modern terminal file explorer"""
@@ -69,7 +87,12 @@ try:
         # TODO: Need to move this 'path' in the config dict, or a new runtime_config dict
         # Eventually there will be many options coming via arguments, but we cant keep sending all of
         # them via this Application's __init__ function here
-        Application(watch_css=True, startup_path=path).run()
+        Application(
+            watch_css=True,
+            startup_path=path,
+            cwd_file=cwd_file if cwd_file else None,
+            chooser_file=chooser_file if chooser_file else None,
+        ).run()
 
 except KeyboardInterrupt:
     pass

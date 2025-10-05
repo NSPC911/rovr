@@ -141,8 +141,8 @@ class FileList(SelectionList, inherit_bindings=False):
             folders, files = path_utils.get_cwd_object(
                 cwd, config["settings"]["show_hidden_files"]
             )
-            if folders == [] and files == []:
-                self.add_option(
+            if not folders and not files:
+                self.list_of_options.append(
                     Selection("   --no-files--", value="", id="", disabled=True)
                 )
                 preview.remove_children()
@@ -262,8 +262,8 @@ class FileList(SelectionList, inherit_bindings=False):
             folders, files = path_utils.get_cwd_object(
                 cwd, config["settings"]["show_hidden_files"]
             )
-            if folders == [] and files == []:
-                self.add_option(
+            if not folders and not files:
+                self.list_of_options.append(
                     Selection("  --no-files--", value="", id="", disabled=True)
                 )
             else:
@@ -371,12 +371,14 @@ class FileList(SelectionList, inherit_bindings=False):
             self.app.tabWidget.active_tab.selectedItems = []
             self.app.query_one("#file_list").focus()
         elif not self.select_mode_enabled:
-            # Check if it's a folder or a file
-            if path.isdir(path.join(cwd, file_name)):
-                # If it's a folder, navigate into it
-                self.app.cd(path.join(cwd, file_name))
+            full_path = path.join(cwd, file_name)
+            if path.isdir(full_path):
+                self.app.cd(full_path)
             else:
-                path_utils.open_file(path.join(cwd, file_name))
+                if self.app._chooser_file:
+                    self.app.action_quit()
+                else:
+                    path_utils.open_file(full_path)
             if self.highlighted is None:
                 self.highlighted = 0
             self.app.tabWidget.active_tab.selectedItems = []
@@ -593,11 +595,12 @@ class FileList(SelectionList, inherit_bindings=False):
                 )
             ]
         else:
+            if not self.selected:
+                return []
+
             return [
-                str(
-                    path_utils.normalise(path.join(cwd, path_utils.decompress(option)))
-                    for option in self.selected
-                )
+                str(path_utils.normalise(path.join(cwd, path_utils.decompress(value))))
+                for value in self.selected
             ]
 
     async def on_key(self, event: events.Key) -> None:

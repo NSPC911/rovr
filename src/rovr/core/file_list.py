@@ -536,11 +536,11 @@ class FileList(SelectionList, inherit_bindings=False):
         else:
             if not self.selected:
                 return []
-        
+
             return [
                 str(path_utils.normalise(path.join(cwd, path_utils.decompress(value))))
                 for value in self.selected
-        ]
+            ]
 
     async def on_key(self, event: events.Key) -> None:
         """Handle key events for the file list."""

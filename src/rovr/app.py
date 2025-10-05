@@ -382,7 +382,9 @@ class Application(App, inherit_bindings=False):
         elif config["settings"]["cd_on_quit"]:
             try:
                 with open(
-                    path.join(VAR_TO_DIR["CONFIG"], "rovr_quit_cd_path"), "w", encoding="utf-8"
+                    path.join(VAR_TO_DIR["CONFIG"], "rovr_quit_cd_path"),
+                    "w",
+                    encoding="utf-8",
                 ) as file:
                     file.write(getcwd())
             except OSError:

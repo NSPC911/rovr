@@ -79,12 +79,4 @@ class NewItemButton(Button):
                     title="New Item",
                     severity="error",
                 )
-        filelist = self.app.query_one("#file_list")
-        await filelist.on_option_list_option_highlighted(
-            filelist.OptionHighlighted(
-                filelist,
-                filelist.get_option_at_index(filelist.highlighted),
-                filelist.highlighted,
-            )
-        )
-        filelist.focus()
+        self.app.query_one("#file_list").focus()

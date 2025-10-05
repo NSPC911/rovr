@@ -142,7 +142,7 @@ class FileList(SelectionList, inherit_bindings=False):
                 cwd, config["settings"]["show_hidden_files"]
             )
             if not folders and not files:
-                self.list_of_options.append(
+                self.add_option(
                     Selection("   --no-files--", value="", id="", disabled=True)
                 )
                 preview.remove_children()
@@ -182,6 +182,12 @@ class FileList(SelectionList, inherit_bindings=False):
                     disabled=True,
                 )
             )
+        finally:
+            if self.get_option_at_index(0).disabled:
+                preview.border_title = ""
+                preview.border_subtitle = ""
+                preview.remove_children()
+                preview._current_preview_type = "none"
         if len(self.list_of_options) == 0 and self.get_option_at_index(0).disabled:
             for selector in buttons_that_depend_on_path:
                 self.app.query_one(selector).disabled = True
@@ -262,8 +268,8 @@ class FileList(SelectionList, inherit_bindings=False):
             folders, files = path_utils.get_cwd_object(
                 cwd, config["settings"]["show_hidden_files"]
             )
-            if not folders and not files:
-                self.list_of_options.append(
+            if files == [] and folders == []:
+                self.add_option(
                     Selection("  --no-files--", value="", id="", disabled=True)
                 )
             else:
@@ -410,9 +416,6 @@ class FileList(SelectionList, inherit_bindings=False):
         ] = highlighted_option.value
         # Get the filename from the option id
         file_name = path_utils.decompress(highlighted_option.value)
-        # total files as footer
-        if self.highlighted is None:
-            self.highlighted = 0
         # preview
         self.app.query_one("PreviewContainer").show_preview(
             path_utils.normalise(path.join(getcwd(), file_name))

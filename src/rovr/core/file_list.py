@@ -325,7 +325,7 @@ class FileList(SelectionList, inherit_bindings=False):
                 if self.app._chooser_file:
                     self.app.action_quit()
                 else:
-                    path_utils.open_file(full_path)
+                    path_utils.open_file(self.app, full_path)
             if self.highlighted is None:
                 self.highlighted = 0
             self.app.tabWidget.active_tab.selectedItems = []

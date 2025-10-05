@@ -81,6 +81,7 @@ async def open_file(app: App, filepath: str) -> None:
     """Cross-platform function to open files with their default application.
 
     Args:
+        app (App): The Textuall application instance
         filepath (str): Path to the file to open
     """
     system = os_type.lower()
@@ -93,9 +94,11 @@ async def open_file(app: App, filepath: str) -> None:
                 process = await asyncio.create_subprocess_exec("open", filepath, stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE)
             case _:  # Linux and other Unix-like
                 process = await asyncio.create_subprocess_exec("xdg-open", filepath, stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE)
-        stdout, stderr = await process.communicate()
+        _, stderr = await process.communicate()
         if stderr:
             app.notify(str(stderr.decode().strip()), title="Open File", severity="error")
+        elif process.returncode and process.returncode != 0:
+            app.notify(f"Process exited with return code {process.returncode}", title="Open File", severity="error")
     except Exception as e:
         app.notify(str(e), title="Open File", severity="error")
 

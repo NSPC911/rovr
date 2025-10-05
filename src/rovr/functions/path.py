@@ -88,7 +88,7 @@ async def open_file(app: App, filepath: str) -> None:
     try:
         match system:
             case "windows":
-                process = await asyncio.create_subprocess_exec("cmd", "/c", "start", filepath, stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE)
+                process = await asyncio.create_subprocess_exec("cmd", "/c", "start", "", filepath, stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE)
             case "darwin":  # macOS
                 process = await asyncio.create_subprocess_exec("open", filepath, stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE)
             case _:  # Linux and other Unix-like

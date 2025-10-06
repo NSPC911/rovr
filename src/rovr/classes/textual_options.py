@@ -2,7 +2,7 @@ from os import DirEntry
 
 from textual.content import Content, ContentText
 from textual.widgets.option_list import Option
-from textual.widgets.selection_list import Selection
+from textual.widgets.selection_list import Selection, SelectionType
 
 
 class PinnedSidebarOption(Option):
@@ -18,27 +18,38 @@ class PinnedSidebarOption(Option):
 
 
 class FileListSelectionWidget(Selection):
+    # Cache for pre-parsed icon Content objects to avoid repeated markup parsing
+    _icon_content_cache: dict[tuple[str, str], Content] = {}
+
     def __init__(
-        self, icon: list, label: str, dir_entry: DirEntry, value: str = "", disabled: bool = False
+        self,
+        icon: list[str],
+        label: str,
+        dir_entry: DirEntry,
+        value: SelectionType,
+        disabled: bool = False,
     ) -> None:
         """
         Initialise the selection.
 
         Args:
-            icon (list): The icon list from a utils function.
+            icon (list[str]): The icon list from a utils function.
             label (str): The label for the option.
             dir_entry (DirEntry): The nt.DirEntry class
             value (SelectionType): The value for the selection.
             disabled (bool) = False: The initial enabled/disabled state. Enabled by default.
         """
-        super().__init__(
-            prompt=Content.from_markup(
-                f" [{icon[1]}]{icon[0]}[/{icon[1]}] $name", name=label
-            ),
-            value=value,
-            id=value,
-            disabled=disabled
-        )
+        cache_key = (icon[0], icon[1])
+        if cache_key not in FileListSelectionWidget._icon_content_cache:
+            # Parse the icon markup once and cache it as Content
+            FileListSelectionWidget._icon_content_cache[cache_key] = Content.from_markup(
+                f" [{icon[1]}]{icon[0]}[/{icon[1]}] "
+            )
+
+        # Create prompt by combining cached icon content with label
+        prompt = FileListSelectionWidget._icon_content_cache[cache_key] + Content(label)
+
+        super().__init__(prompt=prompt, value=value, id=str(value), disabled=disabled)
         self.dir_entry = dir_entry
         self.label = label
 

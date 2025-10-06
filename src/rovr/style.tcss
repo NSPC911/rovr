@@ -454,6 +454,7 @@ ProcessContainer {
 }
 
 ProgressBarContainer {
+  padding-right: 1;
   HorizontalGroup {
     height: 1;
     & > #icon { margin-right: 1 }

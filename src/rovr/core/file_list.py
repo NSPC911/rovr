@@ -671,9 +671,7 @@ class FileList(SelectionList, inherit_bindings=False):
                     if path.isdir(
                         path.join(
                             getcwd(),
-                            path_utils.decompress(
-                                self.highlighted_option.value
-                            ),
+                            path_utils.decompress(self.highlighted_option.value),
                         )
                     ):
                         with self.app.suspend():

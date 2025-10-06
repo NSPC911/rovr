@@ -89,16 +89,40 @@ async def open_file(app: App, filepath: str) -> None:
     try:
         match system:
             case "windows":
-                process = await asyncio.create_subprocess_exec("cmd", "/c", "start", "", filepath, stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE)
+                process = await asyncio.create_subprocess_exec(
+                    "cmd",
+                    "/c",
+                    "start",
+                    "",
+                    filepath,
+                    stdout=asyncio.subprocess.PIPE,
+                    stderr=asyncio.subprocess.PIPE,
+                )
             case "darwin":  # macOS
-                process = await asyncio.create_subprocess_exec("open", filepath, stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE)
+                process = await asyncio.create_subprocess_exec(
+                    "open",
+                    filepath,
+                    stdout=asyncio.subprocess.PIPE,
+                    stderr=asyncio.subprocess.PIPE,
+                )
             case _:  # Linux and other Unix-like
-                process = await asyncio.create_subprocess_exec("xdg-open", filepath, stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE)
+                process = await asyncio.create_subprocess_exec(
+                    "xdg-open",
+                    filepath,
+                    stdout=asyncio.subprocess.PIPE,
+                    stderr=asyncio.subprocess.PIPE,
+                )
         _, stderr = await process.communicate()
         if stderr:
-            app.notify(str(stderr.decode().strip()), title="Open File", severity="error")
+            app.notify(
+                str(stderr.decode().strip()), title="Open File", severity="error"
+            )
         elif process.returncode and process.returncode != 0:
-            app.notify(f"Process exited with return code {process.returncode}", title="Open File", severity="error")
+            app.notify(
+                f"Process exited with return code {process.returncode}",
+                title="Open File",
+                severity="error",
+            )
     except Exception as e:
         app.notify(str(e), title="Open File", severity="error")
 

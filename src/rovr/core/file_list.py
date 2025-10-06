@@ -141,10 +141,8 @@ class FileList(SelectionList, inherit_bindings=False):
                             value=path_utils.compress(item["name"]),
                         )
                     )
+                    await asyncio.sleep(0)
                     names_in_cwd.append(item["name"])
-                    # TODO: find out why `await asyncio.sleep(0)` doesn't
-                    #       work on large directories, and the threshold
-                    #       before it stops working
                 self.items_in_cwd = set(names_in_cwd)
         except PermissionError:
             self.list_of_options.append(
@@ -255,8 +253,7 @@ class FileList(SelectionList, inherit_bindings=False):
                             value=path_utils.compress(item["name"]),
                         )
                     )
-                    # await so that textual can still be responsive
-                    await asyncio.sleep(0)
+                    await asyncio.sleep(0)  # await so that textual can still be responsive
         except PermissionError:
             self.list_of_options.append(
                 Selection(
@@ -318,12 +315,23 @@ class FileList(SelectionList, inherit_bindings=False):
         selected_option = self.highlighted_option
         file_name = path_utils.decompress(selected_option.value)
         self.update_border_subtitle()
-        if self.dummy and path.isdir(path.join(self.enter_into, file_name)):
-            # if the folder is selected, then cd there,
-            # skipping the middle folder entirely
-            self.app.cd(path.join(self.enter_into, file_name))
-            self.app.tabWidget.active_tab.selectedItems = []
-            self.app.query_one("#file_list").focus()
+        if self.dummy:
+            base_path = self.enter_into or cwd
+            target_path = path.join(base_path, file_name)
+            if path.isdir(target_path):
+                # if the folder is selected, then cd there,
+                # skipping the middle folder entirely
+                self.app.cd(target_path)
+                self.app.tabWidget.active_tab.selectedItems = []
+                self.app.query_one("#file_list").focus()
+            else:
+                if self.app._chooser_file:
+                    self.app.action_quit()
+                else:
+                    path_utils.open_file(self.app, target_path)
+                if self.highlighted is None:
+                    self.highlighted = 0
+                self.app.tabWidget.active_tab.selectedItems = []
         elif not self.select_mode_enabled:
             full_path = path.join(cwd, file_name)
             if path.isdir(full_path):
@@ -671,7 +679,9 @@ class FileList(SelectionList, inherit_bindings=False):
                     if path.isdir(
                         path.join(
                             getcwd(),
-                            path_utils.decompress(self.highlighted_option.value),
+                            path_utils.decompress(
+                                self.highlighted_option.value
+                            ),
                         )
                     ):
                         with self.app.suspend():

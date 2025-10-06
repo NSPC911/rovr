@@ -141,8 +141,10 @@ class FileList(SelectionList, inherit_bindings=False):
                             value=path_utils.compress(item["name"]),
                         )
                     )
-                    await asyncio.sleep(0)
                     names_in_cwd.append(item["name"])
+                    # TODO: find out why `await asyncio.sleep(0)` doesn't
+                    #       work on large directories, and the threshold
+                    #       before it stops working
                 self.items_in_cwd = set(names_in_cwd)
         except PermissionError:
             self.list_of_options.append(
@@ -253,7 +255,8 @@ class FileList(SelectionList, inherit_bindings=False):
                             value=path_utils.compress(item["name"]),
                         )
                     )
-                    await asyncio.sleep(0)  # await so that textual can still be responsive
+                    # await so that textual can still be responsive
+                    await asyncio.sleep(0)
         except PermissionError:
             self.list_of_options.append(
                 Selection(

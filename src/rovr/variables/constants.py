@@ -7,8 +7,8 @@ from rovr.functions.config import config_setup, load_config
 
 # Initialize the config once at import time
 if "config" not in globals():
-    global config
-    config = load_config()
+    global config, schema
+    schema, config = load_config()
     config_setup()
 
 

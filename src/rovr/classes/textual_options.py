@@ -42,8 +42,8 @@ class FileListSelectionWidget(Selection):
         cache_key = (icon[0], icon[1])
         if cache_key not in FileListSelectionWidget._icon_content_cache:
             # Parse the icon markup once and cache it as Content
-            FileListSelectionWidget._icon_content_cache[cache_key] = Content.from_markup(
-                f" [{icon[1]}]{icon[0]}[/{icon[1]}] "
+            FileListSelectionWidget._icon_content_cache[cache_key] = (
+                Content.from_markup(f" [{icon[1]}]{icon[0]}[/{icon[1]}] ")
             )
 
         # Create prompt by combining cached icon content with label

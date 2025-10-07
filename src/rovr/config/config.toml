@@ -189,3 +189,10 @@ enabled = false
 file_executable = "nano"
 folder_executable = "code"
 keybinds = ["e"]
+
+[plugins.finder]
+enabled = true
+keybinds = ["f"]
+fd_executable = "fd"
+fzf_executable = "fzf"
+use_fzf_for_picker = false

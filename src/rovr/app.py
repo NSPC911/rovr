@@ -55,7 +55,7 @@ from rovr.navigation_widgets import (
     PathInput,
     UpButton,
 )
-from rovr.screens import DummyScreen, Keybinds, YesOrNo, ZDToDirectory
+from rovr.screens import DummyScreen, Keybinds, YesOrNo, ZDToDirectory, FileSearch
 from rovr.screens.way_too_small import TerminalTooSmall
 from rovr.search_container import SearchInput
 from rovr.variables.constants import MaxPossible, config
@@ -235,6 +235,48 @@ class Application(App, inherit_bindings=False):
             return
         # Make sure that key binds don't break
         match event.key:
+            # finder: fd/fzf
+            case key if (
+                config["plugins"].get("finder", {}).get("enabled", True)
+                and key in config["plugins"].get("finder", {}).get("keybinds", ["f"])
+            ):
+                use_fzf = config["plugins"].get("finder", {}).get("use_fzf_for_picker", False)
+                fzf_exec = config["plugins"].get("finder", {}).get("fzf_executable", "fzf")
+                if use_fzf and shutil.which(fzf_exec) is not None:
+                    # external fzf picker: feed fd list into fzf
+                    fd_exec = config["plugins"].get("finder", {}).get("fd_executable", "fd")
+                    include_hidden = config["settings"]["show_hidden_files"]
+                    fd_args = [fd_exec, "--type", "f", "--follow", "--color", "never"]
+                    if include_hidden:
+                        fd_args.append("--hidden")
+                    fd_args.extend(["--", getcwd()])
+                    try:
+                        # Build a pipeline fd | fzf -1 -0 -e
+                        import subprocess
+                        fd_proc = subprocess.Popen(fd_args, stdout=subprocess.PIPE, text=True)
+                        fzf_proc = subprocess.run([fzf_exec, "-1", "-0", "-e"], stdin=fd_proc.stdout, capture_output=True, text=True)
+                        if fzf_proc.returncode == 0 and fzf_proc.stdout:
+                            selected = fzf_proc.stdout.strip()
+                            if path.isdir(selected):
+                                self.cd(selected)
+                            else:
+                                from rovr.functions.path import open_file
+                                await open_file(self, selected)
+                    except Exception as exc:
+                        self.notify(str(exc), title="Finder", severity="error")
+                else:
+                    def on_response(selected_compressed: str | None) -> None:
+                        if not selected_compressed:
+                            return
+                        selected = decompress(selected_compressed)
+                        if path.isdir(selected):
+                            self.cd(selected)
+                        else:
+                            from rovr.functions.path import open_file
+                            self.call_from_thread(lambda: None)
+                            self.call_later(lambda: open_file(self, selected))
+
+                    self.push_screen(FileSearch(), on_response)
             # placeholder, not yet existing
             case "escape" if "search" in self.focused.id:
                 match self.focused.id:

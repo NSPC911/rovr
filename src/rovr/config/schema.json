@@ -778,6 +778,39 @@
             }
           }
         }
+        ,
+        "finder": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "enabled": {
+              "type": "boolean",
+              "default": true,
+              "description": "Enable recursive file search using fd/fzf."
+            },
+            "keybinds": {
+              "type": "array",
+              "default": ["f"],
+              "items": { "type": "string" },
+              "description": "The keybind to open the file search picker."
+            },
+            "fd_executable": {
+              "type": "string",
+              "default": "fd",
+              "description": "fd executable name or path."
+            },
+            "fzf_executable": {
+              "type": "string",
+              "default": "fzf",
+              "description": "fzf executable name or path."
+            },
+            "use_fzf_for_picker": {
+              "type": "boolean",
+              "default": false,
+              "description": "If true and fzf is available, use external fzf picker instead of in-app modal."
+            }
+          }
+        }
       }
     }
   }

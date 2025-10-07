@@ -9,6 +9,7 @@ from .keybinds import Keybinds
 from .way_too_small import TerminalTooSmall
 from .yes_or_no import YesOrNo
 from .zd_to_directory import ZDToDirectory
+from .file_search import FileSearch
 
 
 class DummyScreen(Screen[None]):
@@ -23,6 +24,7 @@ __all__ = [
     "ModalInput",
     "YesOrNo",
     "ZDToDirectory",
+    "FileSearch",
     "GiveMePermission",
     "DummyScreen",
     "TerminalTooSmall",

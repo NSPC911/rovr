@@ -263,7 +263,17 @@ class Application(App, inherit_bindings=False):
                         # Build a pipeline fd | fzf -1 -0 -e
                         import subprocess
                         fd_proc = subprocess.Popen(fd_args, stdout=subprocess.PIPE, text=True)
-                        fzf_proc = subprocess.run([fzf_exec, "-1", "-0", "-e"], stdin=fd_proc.stdout, capture_output=True, text=True)
+                        fzf_proc = subprocess.run(
+                            [fzf_exec, "-1", "-0", "-e"],
+                            stdin=fd_proc.stdout,
+                            capture_output=True,
+                            text=True,
+                        )
+                        if fd_proc.stdout is not None:
+                            fd_proc.stdout.close()
+                        # Reap fd process to avoid zombies
+                        with suppress(Exception):
+                            fd_proc.wait(timeout=1)
                         if fzf_proc.returncode == 0 and fzf_proc.stdout:
                             selected = fzf_proc.stdout.strip()
                             if path.isdir(selected):

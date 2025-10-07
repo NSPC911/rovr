@@ -85,6 +85,8 @@ class FileSearch(ModalScreen):
             fd_exec,
             "--type",
             "f",
+            "--type",
+            "d",
             "--follow",
             "--color",
             "never",
@@ -128,10 +130,13 @@ class FileSearch(ModalScreen):
         if fd_output.stdout:
             for line in fd_output.stdout.splitlines():
                 file_path = path_utils.normalise(line.strip())
-                if not file_path:
+                file_path_str = str(file_path)
+                if not file_path_str:
                     continue
-                display_text = f" {file_path}"
-                options.append(Option(Content(display_text), id=path_utils.compress(file_path)))
+                display_text = f" {file_path_str}"
+                options.append(
+                    Option(Content(display_text), id=path_utils.compress(file_path_str))
+                )
 
             self.app.call_from_thread(search_options.clear_options)
             if options:

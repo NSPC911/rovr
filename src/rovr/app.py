@@ -246,7 +246,16 @@ class Application(App, inherit_bindings=False):
                     # external fzf picker: feed fd list into fzf
                     fd_exec = config["plugins"].get("finder", {}).get("fd_executable", "fd")
                     include_hidden = config["settings"]["show_hidden_files"]
-                    fd_args = [fd_exec, "--type", "f", "--follow", "--color", "never"]
+                    fd_args = [
+                        fd_exec,
+                        "--type",
+                        "f",
+                        "--type",
+                        "d",
+                        "--follow",
+                        "--color",
+                        "never",
+                    ]
                     if include_hidden:
                         fd_args.append("--hidden")
                     fd_args.extend(["--", getcwd()])

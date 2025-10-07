@@ -270,7 +270,7 @@ class Application(App, inherit_bindings=False):
                                 self.cd(selected)
                             else:
                                 from rovr.functions.path import open_file
-                                await open_file(self, selected)
+                                self.create_task(open_file(self, selected))
                     except Exception as exc:
                         self.notify(str(exc), title="Finder", severity="error")
                 else:
@@ -282,8 +282,7 @@ class Application(App, inherit_bindings=False):
                             self.cd(selected)
                         else:
                             from rovr.functions.path import open_file
-                            self.call_from_thread(lambda: None)
-                            self.call_later(lambda: open_file(self, selected))
+                            self.create_task(open_file(self, selected))
 
                     self.push_screen(FileSearch(), on_response)
             # placeholder, not yet existing

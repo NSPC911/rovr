@@ -125,7 +125,7 @@ class FileSearch(ModalScreen):
         search_options: FileSearchOptionList = self.query_one(
             "#file_search_options", FileSearchOptionList
         )
-        search_options.add_class("empty")
+        self.app.call_from_thread(search_options.add_class, "empty")
         options: list[Option] = []
         if fd_output.stdout:
             for line in fd_output.stdout.splitlines():
@@ -141,8 +141,8 @@ class FileSearch(ModalScreen):
             self.app.call_from_thread(search_options.clear_options)
             if options:
                 self.app.call_from_thread(search_options.add_options, options)
-                search_options.remove_class("empty")
-                search_options.highlighted = 0
+                self.app.call_from_thread(search_options.remove_class, "empty")
+                self.app.call_from_thread(lambda: setattr(search_options, "highlighted", 0))
             else:
                 self.app.call_from_thread(
                     search_options.add_option, Option("  --No matches found--", disabled=True)

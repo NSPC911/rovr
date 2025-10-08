@@ -53,6 +53,16 @@
           "default": "print(\"Hello, world!\")",
           "description": "This is shown when the rovr starts up. You may see it for a split second, but it will never appear afterwards."
         },
+        "compact_mode": {
+          "type": "boolean",
+          "default": false,
+          "description": "Enable compact mode to hide the menu bar and adjust layout for a more streamlined interface."
+        },
+        "show_line_numbers": {
+          "type": "boolean",
+          "default": false,
+          "description": "Add line numbers to the left gutter if you are viewing a text file."
+        },
         "clock": {
           "type": "object",
           "additionalProperties": false,
@@ -736,11 +746,6 @@
               "type": "string",
               "default": "bat",
               "description": "The executable for bat."
-            },
-            "show_line_numbers": {
-              "type": "boolean",
-              "default": true,
-              "description": "Make batcat show line numbers."
             }
           }
         },

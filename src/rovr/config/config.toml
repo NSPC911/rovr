@@ -14,6 +14,10 @@ preview_error = "Hmm, I think this file got corrupted (or maybe not?)"
 preview_binary = "This file is not UTF-8 encoded, so I decline to read it."
 preview_start = "print(\"Hello, world!\")"
 
+compact_mode = false
+
+show_line_numbers = true
+
 [interface.clock]
 enabled = true
 align = "left"
@@ -179,7 +183,6 @@ show_scores = false
 [plugins.bat]
 enabled = false
 executable = "bat"
-show_line_numbers = true
 
 [plugins.editor]
 enabled = false

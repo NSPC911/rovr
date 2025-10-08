@@ -30,6 +30,20 @@ $scrollbar-corner-color: $primary-muted;
   }
 }
 
+/* Compact mode */
+.compact {
+  #menu { display: none; }
+  #below_menu { border: none; }
+  #pinned_sidebar_container { width: 16; }
+  #preview_sidebar { width: 25vw; }
+  #footer {
+    height: 7;
+    &:focus-within {
+      height: 7;
+    }
+  }
+}
+
 /* border styling for main widgets */
 #menu,
 #below_menu,
@@ -101,14 +115,23 @@ FileListRightClickOptionList {
 .hidden { display: none }
 
 Input, TextArea {
-  .input--placeholder { color: $foreground-darken-1 }
-  &:ansi .input--cursor {
-    color: $primary;
-    background: $background;
+  .input--placeholder,
+  .text-area--placeholder { color: $foreground-darken-1 }
+  .text-area--cursor-gutter {
+      color: $foreground;
+      background: $boost;
+      text-style: bold;
   }
-  &:ansi .input--selection {
-    color: $background;
-    background: $primary;
+  &:ansi {
+    .input--cursor,
+    .text-area--selection { color: $primary }
+    .input--selection,
+    .text-area--selection {
+      background: $secondary-darken-3;
+      text-style: bold;
+    }
+    .text-area--cursor-line,
+    .text-area--cursor-gutter { background: transparent }
   }
 }
 
@@ -371,7 +394,6 @@ Tooltip {
     text-wrap: nowrap;
     width: auto;
   }
-  TextArea * { background: transparent }
  /* scrollbars are useless, reminder */
   &.clip { scrollbar-size: 0 0 }
   &.clip > Static {
@@ -383,6 +405,9 @@ Tooltip {
     border: none;
     padding: 0;
     margin: 0;
+    &TextArea {
+      padding: 0 1;
+    }
   }
   & > FileList { height: 1fr }
 }
@@ -429,6 +454,7 @@ ProcessContainer {
 }
 
 ProgressBarContainer {
+  padding-right: 1;
   HorizontalGroup {
     height: 1;
     & > #icon { margin-right: 1 }
@@ -875,4 +901,7 @@ FileListRightClickOptionList {
     background: $primary;
     color: $background;
   }
+}
+LoadingIndicator {
+  background: transparent;
 }

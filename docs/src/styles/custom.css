@@ -207,10 +207,6 @@ summary:not(#starlight__on-this-page--mobile) {
     scrollbar-color: var(--sl-color-bg-accent) transparent;
     overscroll-behavior: contain;
     scrollbar-gutter: stable;
-    &:not(:hover) {
-      scrollbar-width: thin;
-      padding-right: 0.375em;
-    }
   }
   header.header {
     --__sidebar-width: 20vw;
@@ -361,10 +357,6 @@ body > div:has(> nav) > div {
     scrollbar-color: var(--sl-color-bg-accent) transparent;
     margin-top: calc(var(--sl-nav-height) + var(--sl-mobile-toc-height));
     padding-top: 0;
-    &:not(:hover) {
-      scrollbar-width: thin;
-      padding-right: 0.375em;
-    }
   }
 }
 figure.frame {

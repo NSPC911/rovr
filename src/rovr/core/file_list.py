@@ -1,3 +1,4 @@
+import asyncio
 from os import getcwd, path
 from os import system as cmd
 from typing import ClassVar
@@ -122,9 +123,9 @@ class FileList(SelectionList, inherit_bindings=False):
             folders, files = path_utils.get_cwd_object(
                 cwd, config["settings"]["show_hidden_files"]
             )
-            if folders == [] and files == []:
+            if not folders and not files:
                 self.list_of_options.append(
-                    Selection("   --no-files--", value="", id="", disabled=True)
+                    Selection("   --no-files--", value="", disabled=True)
                 )
                 preview = self.app.query_one("PreviewContainer")
                 preview.remove_children()
@@ -138,10 +139,12 @@ class FileList(SelectionList, inherit_bindings=False):
                             label=item["name"],
                             dir_entry=item["dir_entry"],
                             value=path_utils.compress(item["name"]),
-                            id=path_utils.compress(item["name"]),
                         )
                     )
                     names_in_cwd.append(item["name"])
+                    # TODO: find out why `await asyncio.sleep(0)` doesn't
+                    #       work on large directories, and the threshold
+                    #       before it stops working
                 self.items_in_cwd = set(names_in_cwd)
         except PermissionError:
             self.list_of_options.append(
@@ -232,11 +235,12 @@ class FileList(SelectionList, inherit_bindings=False):
         # Separate folders and files
         self.list_of_options = []
 
+        self.loading = True
         try:
             folders, files = path_utils.get_cwd_object(
                 cwd, config["settings"]["show_hidden_files"]
             )
-            if folders == [] and files == []:
+            if not folders and not files:
                 self.list_of_options.append(
                     Selection("  --no-files--", value="", id="", disabled=True)
                 )
@@ -249,9 +253,10 @@ class FileList(SelectionList, inherit_bindings=False):
                             label=item["name"],
                             dir_entry=item["dir_entry"],
                             value=path_utils.compress(item["name"]),
-                            id=path_utils.compress(item["name"]),
                         )
                     )
+                    # await so that textual can still be responsive
+                    await asyncio.sleep(0)
         except PermissionError:
             self.list_of_options.append(
                 Selection(
@@ -264,10 +269,10 @@ class FileList(SelectionList, inherit_bindings=False):
 
         self.clear_options()
         self.add_options(self.list_of_options)
-        # somehow prevents more debouncing, ill take it
-        self.refresh(repaint=True, layout=True)
+        self.loading = False
 
-    def create_archive_list(self, file_list: list[str]) -> None:
+    @work(exclusive=True)
+    async def create_archive_list(self, file_list: list[str]) -> None:
         """Create a list display for archive file contents.
 
         Args:
@@ -276,6 +281,7 @@ class FileList(SelectionList, inherit_bindings=False):
         self.clear_options()
         self.list_of_options = []
 
+        self.loading = True
         if not file_list:
             self.list_of_options.append(
                 Selection("  --no-files--", value="", id="", disabled=True)
@@ -297,9 +303,10 @@ class FileList(SelectionList, inherit_bindings=False):
                         disabled=True,  # Archive contents are not interactive like regular files
                     )
                 )
+                await asyncio.sleep(0)
 
         self.add_options(self.list_of_options)
-        self.refresh(repaint=True, layout=True)
+        self.loading = False
 
     async def on_selection_list_selected_changed(
         self, event: SelectionList.SelectedChanged
@@ -308,22 +315,35 @@ class FileList(SelectionList, inherit_bindings=False):
         event.prevent_default()
         cwd = path_utils.normalise(getcwd())
         # Get the selected option
-        selected_option = self.get_option_at_index(self.highlighted)
+        selected_option = self.highlighted_option
         file_name = path_utils.decompress(selected_option.value)
         self.update_border_subtitle()
-        if self.dummy and path.isdir(path.join(self.enter_into, file_name)):
-            # if the folder is selected, then cd there,
-            # skipping the middle folder entirely
-            self.app.cd(path.join(self.enter_into, file_name))
-            self.app.tabWidget.active_tab.selectedItems = []
-            self.app.query_one("#file_list").focus()
-        elif not self.select_mode_enabled:
-            # Check if it's a folder or a file
-            if path.isdir(path.join(cwd, file_name)):
-                # If it's a folder, navigate into it
-                self.app.cd(path.join(cwd, file_name))
+        if self.dummy:
+            base_path = self.enter_into or cwd
+            target_path = path.join(base_path, file_name)
+            if path.isdir(target_path):
+                # if the folder is selected, then cd there,
+                # skipping the middle folder entirely
+                self.app.cd(target_path)
+                self.app.tabWidget.active_tab.selectedItems = []
+                self.app.query_one("#file_list").focus()
             else:
-                path_utils.open_file(path.join(cwd, file_name))
+                if self.app._chooser_file:
+                    self.app.action_quit()
+                else:
+                    path_utils.open_file(self.app, target_path)
+                if self.highlighted is None:
+                    self.highlighted = 0
+                self.app.tabWidget.active_tab.selectedItems = []
+        elif not self.select_mode_enabled:
+            full_path = path.join(cwd, file_name)
+            if path.isdir(full_path):
+                self.app.cd(full_path)
+            else:
+                if self.app._chooser_file:
+                    self.app.action_quit()
+                else:
+                    path_utils.open_file(self.app, full_path)
             if self.highlighted is None:
                 self.highlighted = 0
             self.app.tabWidget.active_tab.selectedItems = []
@@ -501,7 +521,7 @@ class FileList(SelectionList, inherit_bindings=False):
 
     async def toggle_mode(self) -> None:
         """Toggle the selection mode between select and normal."""
-        if self.get_option_at_index(self.highlighted).disabled:
+        if self.highlighted_option.disabled and not self.select_mode_enabled:
             return
         self.select_mode_enabled = not self.select_mode_enabled
         if not self.select_mode_enabled:
@@ -532,11 +552,12 @@ class FileList(SelectionList, inherit_bindings=False):
                 )
             ]
         else:
+            if not self.selected:
+                return []
+
             return [
-                str(
-                    path_utils.normalise(path.join(cwd, path_utils.decompress(option)))
-                    for option in self.selected
-                )
+                str(path_utils.normalise(path.join(cwd, path_utils.decompress(value))))
+                for value in self.selected
             ]
 
     async def on_key(self, event: events.Key) -> None:
@@ -656,24 +677,24 @@ class FileList(SelectionList, inherit_bindings=False):
                     and key in config["plugins"]["editor"]["keybinds"]
                 ):
                     event.stop()
-                    if self.get_option_at_index(self.highlighted).disabled:
+                    if self.highlighted_option.disabled:
                         return
                     if path.isdir(
                         path.join(
                             getcwd(),
                             path_utils.decompress(
-                                self.get_option_at_index(self.highlighted).id
+                                self.highlighted_option.value
                             ),
                         )
                     ):
                         with self.app.suspend():
                             cmd(
-                                f'{config["plugins"]["editor"]["folder_executable"]} "{path.join(getcwd(), path_utils.decompress(self.get_option_at_index(self.highlighted).id))}"'
+                                f'{config["plugins"]["editor"]["folder_executable"]} "{path.join(getcwd(), path_utils.decompress(self.highlighted_option.value))}"'
                             )
                     else:
                         with self.app.suspend():
                             cmd(
-                                f'{config["plugins"]["editor"]["file_executable"]} "{path.join(getcwd(), path_utils.decompress(self.get_option_at_index(self.highlighted).id))}"'
+                                f'{config["plugins"]["editor"]["file_executable"]} "{path.join(getcwd(), path_utils.decompress(self.highlighted_option.value))}"'
                             )
                 # hit buttons with keybinds
                 case key if (
@@ -681,7 +702,7 @@ class FileList(SelectionList, inherit_bindings=False):
                     and key in config["keybinds"]["hist_previous"]
                 ):
                     event.stop()
-                    if self.get_option_at_index(self.highlighted).disabled:
+                    if self.highlighted_option.disabled:
                         return
                     if self.app.query_one("#back").disabled:
                         self.app.query_one("UpButton").on_button_pressed(Button.Pressed)

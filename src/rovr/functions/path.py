@@ -1,12 +1,14 @@
+import asyncio
 import ctypes
 import os
 import stat
-import subprocess
 from os import path
 
 import psutil
 from lzstring import LZString
 from rich.console import Console
+from textual import work
+from textual.app import App
 
 from rovr.functions.icons import get_icon_for_file, get_icon_for_folder
 from rovr.variables.constants import os_type
@@ -74,10 +76,12 @@ def decompress(text: str) -> str:
     return lzstring.decompressFromEncodedURIComponent(text)
 
 
-def open_file(filepath: str) -> None:
+@work
+async def open_file(app: App, filepath: str) -> None:
     """Cross-platform function to open files with their default application.
 
     Args:
+        app (App): The Textuall application instance
         filepath (str): Path to the file to open
     """
     system = os_type.lower()
@@ -85,13 +89,42 @@ def open_file(filepath: str) -> None:
     try:
         match system:
             case "windows":
-                os.startfile(filepath)
+                process = await asyncio.create_subprocess_exec(
+                    "cmd",
+                    "/c",
+                    "start",
+                    "",
+                    filepath,
+                    stdout=asyncio.subprocess.PIPE,
+                    stderr=asyncio.subprocess.PIPE,
+                )
             case "darwin":  # macOS
-                subprocess.run(["open", filepath], check=True)
+                process = await asyncio.create_subprocess_exec(
+                    "open",
+                    filepath,
+                    stdout=asyncio.subprocess.PIPE,
+                    stderr=asyncio.subprocess.PIPE,
+                )
             case _:  # Linux and other Unix-like
-                subprocess.run(["xdg-open", filepath], check=True)
+                process = await asyncio.create_subprocess_exec(
+                    "xdg-open",
+                    filepath,
+                    stdout=asyncio.subprocess.PIPE,
+                    stderr=asyncio.subprocess.PIPE,
+                )
+        _, stderr = await process.communicate()
+        if stderr:
+            app.notify(
+                str(stderr.decode().strip()), title="Open File", severity="error"
+            )
+        elif process.returncode and process.returncode != 0:
+            app.notify(
+                f"Process exited with return code {process.returncode}",
+                title="Open File",
+                severity="error",
+            )
     except Exception as e:
-        print(f"Error opening file: {e}")
+        app.notify(str(e), title="Open File", severity="error")
 
 
 def get_filtered_dir_names(cwd: str | bytes, show_hidden: bool = False) -> set[str]:

@@ -282,7 +282,7 @@ class PreviewContainer(Container):
                     lines = lines[:max_lines]
             else:
                 lines = []
-            max_width = self.size.width - 5
+            max_width = self.size.width - 7
             if max_width > 0:
                 processed_lines = []
                 for line in lines:
@@ -313,7 +313,7 @@ class PreviewContainer(Container):
             await self.mount(
                 CustomTextArea(
                     id="text_preview",
-                    show_line_numbers=False,
+                    show_line_numbers=config["interface"]["show_line_numbers"],
                     soft_wrap=False,
                     read_only=True,
                     text=text_to_display,
@@ -332,34 +332,27 @@ class PreviewContainer(Container):
     async def _render_preview(self) -> None:
         """Render function dispatcher."""
         if self._current_file_path is None:
-            return
-
-        if self._is_image:
+            pass
+        elif self._is_image:
             await self._show_image_preview()
-            return
-
-        if self._is_archive:
+        elif self._is_archive:
             await self._show_archive_preview()
-            return
-
-        if self._current_content is None:
-            return
-
-        # you wouldn't want to re-render a failed thing, would you?
-        is_special_content = self._current_content in (
-            config["interface"]["preview_binary"],
-            config["interface"]["preview_error"],
-        )
-
-        if (
-            config["plugins"]["bat"]["enabled"]
-            and not is_special_content
-            and await self._show_bat_file_preview()
-        ):
-            self.log("bat success")
-            return
-
-        await self._show_normal_file_preview()
+        elif self._current_content is None:
+            pass
+        else:
+            # you wouldn't want to re-render a failed thing, would you?
+            is_special_content = self._current_content in (
+                config["interface"]["preview_binary"],
+                config["interface"]["preview_error"],
+            )
+            if (
+                config["plugins"]["bat"]["enabled"]
+                and not is_special_content
+                and await self._show_bat_file_preview()
+            ):
+                self.log("bat success")
+            else:
+                await self._show_normal_file_preview()
 
     async def _show_folder_preview(self, folder_path: str) -> None:
         """

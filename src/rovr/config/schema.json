@@ -786,7 +786,7 @@
             "enabled": {
               "type": "boolean",
               "default": true,
-              "description": "Enable recursive file search using fd/fzf."
+              "description": "Enable recursive file search using fd."
             },
             "keybinds": {
               "type": "array",
@@ -794,20 +794,20 @@
               "items": { "type": "string" },
               "description": "The keybind to open the file search picker."
             },
-            "fd_executable": {
+            "executable": {
               "type": "string",
               "default": "fd",
               "description": "fd executable name or path."
             },
-            "fzf_executable": {
-              "type": "string",
-              "default": "fzf",
-              "description": "fzf executable name or path."
-            },
-            "use_fzf_for_picker": {
+            "relative_paths": {
               "type": "boolean",
               "default": false,
-              "description": "If true and fzf is available, use external fzf picker instead of in-app modal."
+              "description": "Whether to show as relative path or absolute path."
+            },
+            "follow_symlinks": {
+              "type": "boolean",
+              "default": false,
+              "description": "Whether to let fzf include searching in symlinks"
             }
           }
         }

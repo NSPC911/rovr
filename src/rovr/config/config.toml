@@ -191,8 +191,8 @@ folder_executable = "code"
 keybinds = ["e"]
 
 [plugins.finder]
-enabled = true
+enabled = false
 keybinds = ["f"]
-fd_executable = "fd"
-fzf_executable = "fzf"
-use_fzf_for_picker = false
+executable = "fd"
+relative_paths = true
+follow_symlinks = false

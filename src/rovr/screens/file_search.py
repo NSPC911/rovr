@@ -1,22 +1,25 @@
-import contextlib
-import shutil
 from subprocess import TimeoutExpired, run
-from os import getcwd, path
 
 from textual import events, work
 from textual.app import ComposeResult
 from textual.containers import VerticalGroup
-from textual.content import Content
 from textual.screen import ModalScreen
 from textual.widgets import Input, OptionList
 from textual.widgets.option_list import Option
 
+from rovr.classes.textual_options import FinderOption
 from rovr.functions import path as path_utils
+from rovr.functions.icons import get_icon_for_file
 from rovr.variables.constants import config
 
 
 class FileSearchOptionList(OptionList):
     async def _on_click(self, event: events.Click) -> None:
+        """React to the mouse being clicked on an item.
+
+        Args:
+            event: The click event.
+        """
         event.prevent_default()
         clicked_option: int | None = event.style.meta.get("option")
         if clicked_option is not None and not self._options[clicked_option].disabled:
@@ -58,7 +61,9 @@ class FileSearch(ModalScreen):
         self.fd_updater(Input.Changed(search_input, value=""))
 
     def on_input_changed(self, event: Input.Changed) -> None:
-        if any(worker.is_running and worker.node is self for worker in self.app.workers):
+        if any(
+            worker.is_running and worker.node is self for worker in self.app.workers
+        ):
             self._queued_task = self.fd_updater
             self._queued_task_args = event
         else:
@@ -79,7 +84,6 @@ class FileSearch(ModalScreen):
             return
 
         fd_exec = config["plugins"].get("finder", {}).get("fd_executable", "fd")
-        include_hidden = config["settings"]["show_hidden_files"]
 
         fd_cmd = [
             fd_exec,
@@ -87,16 +91,16 @@ class FileSearch(ModalScreen):
             "f",
             "--type",
             "d",
-            "--follow",
-            "--color",
-            "never",
         ]
-        if include_hidden:
+        if config["settings"]["show_hidden_files"]:
             fd_cmd.append("--hidden")
+        if not config["plugins"]["finder"]["relative_paths"]:
+            fd_cmd.append("--absolute-path")
+        if config["plugins"]["finder"]["follow_symlinks"]:
+            fd_cmd.append("--follow")
         if search_term:
+            fd_cmd.append("--")
             fd_cmd.append(search_term)
-        fd_cmd.append("--")
-        fd_cmd.append(getcwd())
 
         try:
             fd_output = run(fd_cmd, capture_output=True, text=True, timeout=3)
@@ -126,7 +130,7 @@ class FileSearch(ModalScreen):
             "#file_search_options", FileSearchOptionList
         )
         self.app.call_from_thread(search_options.add_class, "empty")
-        options: list[Option] = []
+        options: list[FinderOption] = []
         if fd_output.stdout:
             for line in fd_output.stdout.splitlines():
                 file_path = path_utils.normalise(line.strip())
@@ -135,22 +139,30 @@ class FileSearch(ModalScreen):
                     continue
                 display_text = f" {file_path_str}"
                 options.append(
-                    Option(Content(display_text), id=path_utils.compress(file_path_str))
+                    FinderOption(
+                        get_icon_for_file(file_path_str),
+                        display_text,
+                        id=path_utils.compress(file_path_str),
+                    )
                 )
 
             self.app.call_from_thread(search_options.clear_options)
             if options:
                 self.app.call_from_thread(search_options.add_options, options)
                 self.app.call_from_thread(search_options.remove_class, "empty")
-                self.app.call_from_thread(lambda: setattr(search_options, "highlighted", 0))
+                self.app.call_from_thread(
+                    lambda: setattr(search_options, "highlighted", 0)
+                )
             else:
                 self.app.call_from_thread(
-                    search_options.add_option, Option("  --No matches found--", disabled=True)
+                    search_options.add_option,
+                    Option("  --No matches found--", disabled=True),
                 )
         else:
             self.app.call_from_thread(search_options.clear_options)
             self.app.call_from_thread(
-                search_options.add_option, Option("  --No matches found--", disabled=True)
+                search_options.add_option,
+                Option("  --No matches found--", disabled=True),
             )
 
         if self.any_in_queue():
@@ -195,5 +207,3 @@ class FileSearch(ModalScreen):
             case "shift+tab":
                 event.stop()
                 self.focus_previous()
-
-

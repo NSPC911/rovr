@@ -86,3 +86,36 @@ class KeybindOption(Option):
         super().__init__(self.label, **kwargs)
         if primary_key == "":
             self.disabled = True
+
+
+class FinderOption(Option):
+    # icon cache
+    _icon_content_cache: dict[tuple[str, str], Content] = {}
+
+    def __init__(
+        self,
+        icon: list[str],
+        label: str,
+        id: str = "",
+        disabled: bool = False,
+    ) -> None:
+        """
+        Initialise the option
+
+        Args:
+            icon (list[str]): The icon list from a utils function.
+            label (str): The label for the option.
+            id (str): The optional id for the option.
+            disabled (bool) = False: The initial enabled/disabled state.
+        """
+        cache_key = (icon[0], icon[1])
+        if cache_key not in FinderOption._icon_content_cache:
+            # Parse
+            FinderOption._icon_content_cache[cache_key] = Content.from_markup(
+                f" [{icon[1]}]{icon[0]}[/] "
+            )
+
+        # create prompt
+        prompt = FinderOption._icon_content_cache[cache_key] + Content(label)
+        super().__init__(prompt=prompt, disabled=disabled, id=id)
+        self.label = label

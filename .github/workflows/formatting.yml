@@ -9,14 +9,20 @@ on:
       - "**"
   workflow_dispatch:
 
+permissions:
+  contents: write # Needed for push
+  pull-requests: write # Needed for PR comments
+
+env:
+  MAIN_REPO: "NSPC911/rovr"
+
 jobs:
-  format_repo:
+  format_and_push_changes:
     runs-on: ubuntu-22.04
+    if: github.event_name != 'pull_request'
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
-        with:
-          ref: ${{ github.ref }}
 
       - name: Setup uv
         uses: astral-sh/setup-uv@v6
@@ -26,36 +32,45 @@ jobs:
       - name: Install dependencies
         run: uv sync
 
-      # running ty here because it should be run before the split
       - name: Run ty
-        run: uvx ty check
-
-      # If on main repo, allow auto-fix and commit
-      - name: Run ruff check (main repo)
-        if: github.repository == 'NSPC911/rovr'
-        id: ruff_check_main
-        run: |
-          set +e
-          uvx ruff check .
-          echo "exit_code=$?" >> $GITHUB_OUTPUT
-          set -e
+        run: uvx ty check || (echo "::error::Type checking failed! Please fix type errors before committing." && exit 1)
 
       - name: Run ruff format if needed (main repo)
-        if: github.repository == 'NSPC911/rovr' && steps.ruff_check_main.outputs.exit_code != '0'
+        if: github.repository == env.MAIN_REPO && (github.event_name != 'pull_request' || github.event.pull_request.head.repo.fork == false)
         run: uvx ruff format .
 
       - name: Commit and push changes if needed (main repo)
-        if: github.repository == 'NSPC911/rovr' && steps.ruff_check_main.outputs.exit_code != '0'
+        if: github.repository == env.MAIN_REPO && (github.event_name != 'pull_request' || github.event.pull_request.head.repo.fork == false)
         run: |
-          git config --global user.name "NSPBot911"
-          git config --global user.email "176916861+NSPBot911@users.noreply.github.com"
+          git config --global user.name "${GITHUB_ACTOR_NAME:-NSPBot911}"
+          git config --global user.email "${GITHUB_ACTOR_EMAIL:-176916861+NSPBot911@users.noreply.github.com}"
           git add .
           if ! git diff --cached --quiet; then
             git commit -m "style: auto-format with ruff"
             git push
           fi
+        env:
+          GITHUB_ACTOR_NAME: ${{ vars.BOT_NAME || 'NSPBot911' }}
+          GITHUB_ACTOR_EMAIL: ${{ vars.BOT_EMAIL || '176916861+NSPBot911@users.noreply.github.com' }}
+
+  format_and_alert:
+    runs-on: ubuntu-22.04
+    if: github.event_name == 'pull_request'
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup uv
+        uses: astral-sh/setup-uv@v6
+        with:
+          activate-environment: true
+
+      - name: Install dependencies
+        run: uv sync
+
+      - name: Run ty
+        run: uvx ty check || (echo "::error::Type checking failed! Please fix type errors before committing." && exit 1)
 
       # If on a fork, only check and fail if there are issues (no fixes/commits)
-      - name: Run ruff check (forks/PRs)
-        if: github.repository != 'NSPC911/rovr'
-        run: uvx ruff check .
+      - name: Run ruff
+        uses: astral-sh/ruff-action@v3

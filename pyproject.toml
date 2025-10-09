@@ -69,6 +69,7 @@ run = "rovr"
 log = "textual console -x WORKER -x SYSTEM -x DEBUG -x EVENT"
 "gen-schema" = "docs/scripts/generate_schema.py"
 "icon-test" = "docs/scripts/icon_test.py"
+"gen-keys" = "docs/scripts/generate_keybinds.py"
 
 [tool.ruff.lint]
 select = [

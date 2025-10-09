@@ -83,7 +83,7 @@ class FileSearch(ModalScreen):
         if self.any_in_queue():
             return
 
-        fd_exec = config["plugins"].get("finder", {}).get("fd_executable", "fd")
+        fd_exec = config["plugins"]["finder"]["executable"]
 
         fd_cmd = [
             fd_exec,
@@ -171,9 +171,15 @@ class FileSearch(ModalScreen):
             self._queued_task = None
 
     def on_input_submitted(self, event: Input.Submitted) -> None:
+        if any(
+            worker.is_running and worker.node is self for worker in self.app.workers
+        ):
+            return
         search_options = self.query_one("#file_search_options")
         if search_options.highlighted is None:
             search_options.highlighted = 0
+        if search_options.highlighted_option.disabled:
+            return
         search_options.action_select()
 
     @work(exclusive=True)
@@ -181,7 +187,7 @@ class FileSearch(ModalScreen):
         self, event: FileSearchOptionList.OptionSelected
     ) -> None:
         selected_value = event.option.id
-        if selected_value:
+        if selected_value and not event.option.disabled:
             self.dismiss(selected_value)
         else:
             self.dismiss(None)

@@ -807,7 +807,7 @@
             "follow_symlinks": {
               "type": "boolean",
               "default": false,
-              "description": "Whether to let fzf include searching in symlinks"
+              "description": "Whether fd should follow symlinks when searching."
             }
           }
         }

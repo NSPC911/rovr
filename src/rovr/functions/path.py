@@ -21,7 +21,7 @@ config = {}
 pins = {}
 
 
-def normalise(location: str | bytes) -> str | bytes:
+def normalise(location: str | bytes) -> str:
     """'Normalise' the path
     Args:
         location (str): The location to the item
@@ -32,7 +32,7 @@ def normalise(location: str | bytes) -> str | bytes:
     # path.normalise fixes the relative references
     # replace \\ with / on windows
     # by any chance if somehow a \\\\ was to enter, fix that
-    return path.normpath(location).replace("\\", "/").replace("//", "/")
+    return str(path.normpath(location).replace("\\", "/").replace("//", "/"))
 
 
 def is_hidden_file(filepath: str) -> bool:
@@ -157,7 +157,7 @@ def get_filtered_dir_names(cwd: str | bytes, show_hidden: bool = False) -> set[s
 
 
 def get_cwd_object(
-    cwd: str | bytes, show_hidden: bool = False
+    cwd: str, show_hidden: bool = False
 ) -> tuple[list[dict], list[dict]]:
     """
     Get the objects (files and folders) in a provided directory

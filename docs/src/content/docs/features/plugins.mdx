@@ -38,3 +38,11 @@ this plugin allows you to open files and folders in your preferred editor.
 - **executables:** set the command to open files (`file_executable`) and folders (`folder_executable`).
 - **keybinding:** the default keybinding is `e`.
 
+### finder
+
+allows you to use [fd](https://github.com/sharkdp/fd) to search recursively in the current directory
+
+- **enable:** `plugins.finder.enabled = true`
+- **executable:** set the executable used to call `fd`
+- **relative_paths:** whether to see paths as relative or absolute
+- **follow_symlinks:** search inside symlinks as well

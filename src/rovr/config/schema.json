@@ -778,6 +778,39 @@
             }
           }
         }
+        ,
+        "finder": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "enabled": {
+              "type": "boolean",
+              "default": true,
+              "description": "Enable recursive file search using fd."
+            },
+            "keybinds": {
+              "type": "array",
+              "default": ["f"],
+              "items": { "type": "string" },
+              "description": "The keybind to open the file search picker."
+            },
+            "executable": {
+              "type": "string",
+              "default": "fd",
+              "description": "fd executable name or path."
+            },
+            "relative_paths": {
+              "type": "boolean",
+              "default": true,
+              "description": "Whether to show as relative path or absolute path."
+            },
+            "follow_symlinks": {
+              "type": "boolean",
+              "default": false,
+              "description": "Whether fd should follow symlinks when searching."
+            }
+          }
+        }
       }
     }
   }

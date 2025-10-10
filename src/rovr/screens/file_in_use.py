@@ -27,8 +27,8 @@ class FileInUse(ModalScreen):
         # focus the OK button like other modals
         try:
             self.query_one("#ok").focus()
-        except Exception:
-            pass
+        except Exception as _exc:  # noqa: PT001 - safe to ignore focus failures
+            del _exc
 
     def on_key(self, event: events.Key) -> None:
         match event.key.lower():

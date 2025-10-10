@@ -18,7 +18,13 @@ from textual.widgets.option_list import OptionDoesNotExist
 from rovr.classes import Archive
 from rovr.functions import icons as icon_utils
 from rovr.functions import path as path_utils
-from rovr.screens import CommonFileNameDoWhat, Dismissable, GiveMePermission, YesOrNo, FileInUse
+from rovr.screens import (
+    CommonFileNameDoWhat,
+    Dismissable,
+    FileInUse,
+    GiveMePermission,
+    YesOrNo,
+)
 from rovr.variables.constants import config
 
 
@@ -91,8 +97,8 @@ class ProgressBarContainer(VerticalGroup):
 
     def panic(
         self,
-        dismiss_with: dict = {},
-        notify: dict = {},
+        dismiss_with: dict | None = None,
+        notify: dict | None = None,
         bar_text: str = "",
     ) -> None:
         """Do something when an error occurs.
@@ -113,6 +119,9 @@ class ProgressBarContainer(VerticalGroup):
         self.update_icon(
             self.icon_label.content + " " + icon_utils.get_icon("general", "close")[0]
         )
+        dismiss_with = dismiss_with or {}
+        notify = notify or {}
+
         if dismiss_with:
             self.app.call_from_thread(
                 self.app.push_screen_wait,
@@ -281,13 +290,8 @@ class ProcessContainer(VerticalScroll):
                 except FileNotFoundError:
                     # it's deleted, so why care?
                     pass
-                except PermissionError:
+                except PermissionError as e:
                     # Try to detect if file is in use on Windows
-                    e = None
-                    try:
-                        raise
-                    except Exception as exc:
-                        e = exc
                     is_file_in_use = False
                     try:
                         is_file_in_use = getattr(e, "winerror", None) == 32

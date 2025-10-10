@@ -251,4 +251,6 @@ class ZDToDirectory(ModalScreen):
         ):
             self.zoxide_options.border_subtitle = "0/0"
         else:
-            self.zoxide_options.border_subtitle = f"{self.zoxide_options.highlighted}/{self.zoxide_options.option_count}"
+            self.zoxide_options.border_subtitle = (
+                f"{self.zoxide_options.highlighted}/{self.zoxide_options.option_count}"
+            )

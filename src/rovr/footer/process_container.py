@@ -775,7 +775,7 @@ class ProcessContainer(VerticalScroll):
 
                         if path_utils.normalise(
                             path.join(dest, item_dict["relative_loc"])
-                        ) != path_utils.normalise(item_dict["path"]):
+                        ) == path_utils.normalise(item_dict["path"]):
                             cut_ignore.append(item_dict["path"])
                             continue
                         if action_on_existance == "ask":

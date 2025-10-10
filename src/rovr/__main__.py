@@ -1,5 +1,6 @@
 try:
     import click
+    from rich.table import Table
 
     from rovr.functions.path import normalise
     from rovr.functions.utils import pprint, set_nested_value
@@ -23,7 +24,7 @@ try:
     )
     @click.option(
         "--config-path",
-        "config_path",
+        "show_config_path",
         multiple=False,
         type=bool,
         default=False,
@@ -59,7 +60,7 @@ try:
     def main(
         with_features: list[str],
         without_features: list[str],
-        config_path: bool,
+        show_config_path: bool,
         show_version: bool,
         cwd_file: str,
         chooser_file: str,
@@ -67,10 +68,28 @@ try:
     ) -> None:
         """A post-modern terminal file explorer"""
 
-        if config_path:
-            pprint(
-                f"[cyan]Config Path[/cyan]: [pink]{normalise(VAR_TO_DIR['CONFIG'])}[/pink]"
-            )
+        if show_config_path:
+            from pathlib import Path
+
+            table = Table(title="")
+            table.add_column("type")
+            table.add_column("path")
+            path_config = Path(VAR_TO_DIR["CONFIG"])
+            if path_config.is_relative_to(Path.home()):
+                config_path = "~/" + normalise(
+                    str(path_config.relative_to(Path.home()))
+                )
+            else:
+                config_path = path_config
+            table.add_row("[cyan]custom config[/]", f"{config_path}/config.toml")
+            table.add_row("[yellow]pinned folders[/]", f"{config_path}/pins.json")
+            table.add_row("[hot_pink]custom styles[/]", f"{config_path}/style.tcss")
+            if config["settings"]["cd_on_quit"]:
+                table.add_row(
+                    "[green]path saved on quit[/]",
+                    f"{config_path}/rovr_cd_on_quit",
+                )
+            pprint(table)
             return
         elif show_version:
             pprint("v0.3.0")

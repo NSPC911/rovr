@@ -843,7 +843,8 @@
               "type": "array",
               "default": ["f"],
               "items": { "type": "string" },
-              "description": "The keybind to open the file search picker."
+              "description": "The keybind to open the file search picker.",
+              "display_name": "Start search with fd"
             },
             "executable": {
               "type": "string",

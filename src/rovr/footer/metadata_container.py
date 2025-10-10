@@ -11,6 +11,7 @@ from textual.widgets import Static
 from textual.worker import WorkerState
 
 from rovr.functions import utils
+from rovr.functions.path import is_hidden_file
 from rovr.variables.constants import config
 from rovr.variables.maps import SPINNER
 
@@ -116,6 +117,8 @@ class MetadataContainer(VerticalScroll):
         file_info = self.info_of_dir_entry(dir_entry, type_str)
         # got the type, now we follow
         file_stat = dir_entry.stat()
+        is_hidden = is_hidden_file(dir_entry.path)
+
         values_list = []
         for field in config["metadata"]["fields"]:
             match field:
@@ -123,6 +126,8 @@ class MetadataContainer(VerticalScroll):
                     values_list.append(Static(type_str))
                 case "permissions":
                     values_list.append(Static(file_info))
+                case "hidden":
+                    values_list.append(Static("Yes" if is_hidden else "No"))
                 case "size":
                     values_list.append(
                         Static(
@@ -178,6 +183,8 @@ class MetadataContainer(VerticalScroll):
                         keys_list.append(Static("Type"))
                     case "permissions":
                         keys_list.append(Static("Permissions"))
+                    case "hidden":
+                        keys_list.append(Static("Hidden"))
                     case "size":
                         keys_list.append(Static("Size"))
                     case "modified":

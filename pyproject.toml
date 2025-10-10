@@ -101,5 +101,5 @@ preview = true
 
 
 [tool.ty.rules]
-possibly-unbound-import = "ignore"
+possibly-missing-import = "ignore"
 unresolved-attribute = "ignore"

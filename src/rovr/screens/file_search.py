@@ -1,3 +1,4 @@
+from os import path
 from subprocess import TimeoutExpired, run
 
 from textual import events, work
@@ -9,7 +10,7 @@ from textual.widgets.option_list import Option
 
 from rovr.classes.textual_options import FinderOption
 from rovr.functions import path as path_utils
-from rovr.functions.icons import get_icon_for_file
+from rovr.functions.icons import get_icon_for_file, get_icon_for_folder
 from rovr.variables.constants import config
 
 
@@ -52,13 +53,15 @@ class FileSearch(ModalScreen):
             )
 
     def on_mount(self) -> None:
-        search_input = self.query_one("#file_search_input")
-        search_input.border_title = "Find Files"
-        search_input.focus()
-        search_options = self.query_one("#file_search_options")
-        search_options.border_title = "Files"
-        search_options.can_focus = False
-        self.fd_updater(Input.Changed(search_input, value=""))
+        self.search_input: Input = self.query_one("#file_search_input")
+        self.search_input.border_title = "Find Files"
+        self.search_input.focus()
+        self.search_options: FileSearchOptionList = self.query_one(
+            "#file_search_options"
+        )
+        self.search_options.border_title = "Files"
+        self.search_options.can_focus = False
+        self.fd_updater(Input.Changed(self.search_input, value=""))
 
     def on_input_changed(self, event: Input.Changed) -> None:
         if any(
@@ -107,18 +110,14 @@ class FileSearch(ModalScreen):
         except (OSError, TimeoutExpired) as exc:
             if self.any_in_queue():
                 return
-            search_options: FileSearchOptionList = self.query_one(
-                "#file_search_options", FileSearchOptionList
-            )
-            self.app.call_from_thread(search_options.clear_options)
+            self.app.call_from_thread(self.search_options.clear_options)
             msg = (
                 "  fd is missing on $PATH or cannot be executed"
                 if isinstance(exc, OSError)
                 else "  fd took too long to respond"
             )
             self.app.call_from_thread(
-                search_options.add_option,
-                Option(msg, disabled=True),
+                self.search_options.add_option, Option(msg, disabled=True)
             )
             self.any_in_queue()
             return
@@ -126,10 +125,6 @@ class FileSearch(ModalScreen):
         if self.any_in_queue():
             return
 
-        search_options: FileSearchOptionList = self.query_one(
-            "#file_search_options", FileSearchOptionList
-        )
-        self.app.call_from_thread(search_options.add_class, "empty")
         options: list[FinderOption] = []
         if fd_output.stdout:
             for line in fd_output.stdout.splitlines():
@@ -138,49 +133,53 @@ class FileSearch(ModalScreen):
                 if not file_path_str:
                     continue
                 display_text = f" {file_path_str}"
+                icon: list[str] = (
+                    get_icon_for_folder(file_path_str)
+                    if path.isdir(file_path_str)
+                    else get_icon_for_file(file_path_str)
+                )
                 options.append(
                     FinderOption(
-                        get_icon_for_file(file_path_str),
+                        icon,
                         display_text,
                         id=path_utils.compress(file_path_str),
                     )
                 )
 
-            self.app.call_from_thread(search_options.clear_options)
+            self.app.call_from_thread(self.search_options.clear_options)
             if options:
-                self.app.call_from_thread(search_options.add_options, options)
-                self.app.call_from_thread(search_options.remove_class, "empty")
+                self.app.call_from_thread(self.search_options.add_options, options)
+                self.app.call_from_thread(self.search_options.remove_class, "empty")
                 self.app.call_from_thread(
-                    lambda: setattr(search_options, "highlighted", 0)
+                    lambda: setattr(self.search_options, "highlighted", 0)
                 )
             else:
                 self.app.call_from_thread(
-                    search_options.add_option,
+                    self.search_options.add_option,
                     Option("  --No matches found--", disabled=True),
                 )
+                self.app.call_from_thread(self.search_options.add_class, "empty")
         else:
-            self.app.call_from_thread(search_options.clear_options)
+            self.app.call_from_thread(self.search_options.clear_options)
             self.app.call_from_thread(
-                search_options.add_option,
+                self.search_options.add_option,
                 Option("  --No matches found--", disabled=True),
             )
+            self.app.call_from_thread(self.search_options.add_class, "empty")
 
         if self.any_in_queue():
             return
-        else:
-            self._queued_task = None
 
     def on_input_submitted(self, event: Input.Submitted) -> None:
         if any(
             worker.is_running and worker.node is self for worker in self.app.workers
         ):
             return
-        search_options = self.query_one("#file_search_options")
-        if search_options.highlighted is None:
-            search_options.highlighted = 0
-        if search_options.highlighted_option.disabled:
+        if self.search_options.highlighted is None:
+            self.search_options.highlighted = 0
+        if self.search_options.highlighted_option.disabled:
             return
-        search_options.action_select()
+        self.search_options.action_select()
 
     @work(exclusive=True)
     async def on_option_list_option_selected(
@@ -199,17 +198,30 @@ class FileSearch(ModalScreen):
                 self.dismiss(None)
             case "down":
                 event.stop()
-                search_options = self.query_one("#file_search_options")
-                if search_options.options:
-                    search_options.action_cursor_down()
+                if self.search_options.options:
+                    self.search_options.action_cursor_down()
             case "up":
                 event.stop()
-                search_options = self.query_one("#file_search_options")
-                if search_options.options:
-                    search_options.action_cursor_up()
+                if self.search_options.options:
+                    self.search_options.action_cursor_up()
             case "tab":
                 event.stop()
                 self.focus_next()
             case "shift+tab":
                 event.stop()
                 self.focus_previous()
+
+    def on_option_list_option_highlighted(
+        self, event: FileSearchOptionList.OptionHighlighted
+    ) -> None:
+        if (
+            self.search_options.option_count == 0
+            or self.search_options.get_option_at_index(0).disabled
+        ):
+            self.search_options.border_subtitle = "0/0"
+        else:
+            self.search_options.border_subtitle = (
+                str(self.search_options.highlighted)
+                + "/"
+                + str(self.search_options.option_count)
+            )

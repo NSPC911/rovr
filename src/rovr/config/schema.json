@@ -801,7 +801,7 @@
             },
             "relative_paths": {
               "type": "boolean",
-              "default": false,
+              "default": true,
               "description": "Whether to show as relative path or absolute path."
             },
             "follow_symlinks": {

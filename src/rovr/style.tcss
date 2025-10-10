@@ -88,8 +88,8 @@ FileListRightClickOptionList {
 #preview_sidebar:focus-within,
 #preview_sidebar:focus,
 #path_switcher:focus-within,
-#zoxide_options:focus,
-#file_search_options:focus,
+#zoxide_options,
+#file_search_options,
 #below_menu Button:focus,
 #below_menu Button:hover,
 #file_list.-maximized,
@@ -582,6 +582,10 @@ ZDToDirectory, FileSearch {
     .option-list--option-highlighted {
       background: $primary !important;
       color: $background !important;
+    }
+    &.empty {
+      border: $border-style $error !important;
+      border-subtitle-background: $error !important;
     }
   }
   & > VerticalGroup {

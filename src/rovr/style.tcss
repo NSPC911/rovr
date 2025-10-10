@@ -52,6 +52,7 @@ $scrollbar-corner-color: $primary-muted;
 #preview_sidebar,
 #path_switcher,
 #zoxide_options,
+#file_search_options,
 #below_menu Button,
 #footer > *,
 FileListRightClickOptionList {
@@ -87,7 +88,8 @@ FileListRightClickOptionList {
 #preview_sidebar:focus-within,
 #preview_sidebar:focus,
 #path_switcher:focus-within,
-#zoxide_options:focus,
+#zoxide_options,
+#file_search_options,
 #below_menu Button:focus,
 #below_menu Button:hover,
 #file_list.-maximized,
@@ -469,7 +471,7 @@ ProgressBarContainer {
 }
 
 Content.selected { color: red }
-FileList, PinnedSidebar, Clipboard, CommandList, #zoxide_options, FileListRightClickOptionList {
+FileList, PinnedSidebar, Clipboard, CommandList, #zoxide_options, FileListRightClickOptionList, #file_search_options {
   padding: 0 0 0 0;
   .option-list--option-disabled { color: $border-blurred }
   &:light .option-list--option-disabled { color: $border-blurred-light }
@@ -562,16 +564,16 @@ ModalScreen Button:ansi {
   }
 }
 
-ZDToDirectory {
+ZDToDirectory, FileSearch {
   align: center middle;
-  #zoxide_input {
+  Input {
     width: 100%;
     max-width: 100%;
     padding: 0 1;
     background: transparent;
     border: $border-style $border;
   }
-  #zoxide_options {
+  OptionList {
     width: 100%;
     max-width: 100%;
     height: 1fr;
@@ -579,11 +581,15 @@ ZDToDirectory {
     border: $border-style $border;
     padding: 0;
     .option-list--option-highlighted {
-      background: $primary;
-      color: $background;
+      background: $primary !important;
+      color: $background !important;
+    }
+    &.empty {
+      border: $border-style $error !important;
+      border-subtitle-background: $error !important;
     }
   }
-  #zoxide_group {
+  & > VerticalGroup {
     max-width: 50vw;
     max-height: 50vh;
   }

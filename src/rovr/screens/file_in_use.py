@@ -25,10 +25,7 @@ class FileInUse(ModalScreen):
     def on_mount(self) -> None:
         self.query_one("#dialog").border_title = self.border_title
         # focus the Yes button like other modals
-        try:
-            self.query_one("#yes").focus()
-        except Exception as _exc:  # noqa: PT001 - safe to ignore focus failures
-            del _exc
+        self.query_one("#yes").focus()
 
     def on_key(self, event: events.Key) -> None:
         match event.key.lower():

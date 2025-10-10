@@ -189,3 +189,10 @@ enabled = false
 file_executable = "nano"
 folder_executable = "code"
 keybinds = ["e"]
+
+[plugins.finder]
+enabled = false
+keybinds = ["f"]
+executable = "fd"
+relative_paths = true
+follow_symlinks = false

@@ -55,7 +55,7 @@ from rovr.navigation_widgets import (
     PathInput,
     UpButton,
 )
-from rovr.screens import DummyScreen, Keybinds, YesOrNo, ZDToDirectory
+from rovr.screens import DummyScreen, FileSearch, Keybinds, YesOrNo, ZDToDirectory
 from rovr.screens.way_too_small import TerminalTooSmall
 from rovr.search_container import SearchInput
 from rovr.variables.constants import MaxPossible, config
@@ -235,6 +235,7 @@ class Application(App, inherit_bindings=False):
             return
         # Make sure that key binds don't break
         match event.key:
+            # finder: fd/fzf
             # placeholder, not yet existing
             case "escape" if "search" in self.focused.id:
                 match self.focused.id:
@@ -358,6 +359,35 @@ class Application(App, inherit_bindings=False):
             # keybinds
             case key if key in config["keybinds"]["show_keybinds"]:
                 self.push_screen(Keybinds())
+            case key if (
+                config["plugins"]["finder"]["enabled"]
+                and key in config["plugins"]["finder"]["keybinds"]
+            ):
+                fd_exec: str = config["plugins"]["finder"]["executable"]
+                if shutil.which(fd_exec) is not None:
+                    try:
+
+                        def on_response(selected_compressed: str | None) -> None:
+                            if not selected_compressed:
+                                return
+                            selected = decompress(selected_compressed)
+                            if path.isdir(selected):
+                                self.cd(selected)
+                            else:
+                                self.cd(
+                                    "." if selected == "" else path.dirname(selected),
+                                    focus_on=path.basename(selected),
+                                )
+
+                        self.push_screen(FileSearch(), on_response)
+                    except Exception as exc:
+                        self.notify(str(exc), title="Finder", severity="error")
+                else:
+                    self.notify(
+                        f"{config['plugins']['finder']['executable']} cannot be found in PATH.",
+                        title="Plugins: finder",
+                        severity="error",
+                    )
 
     def on_app_blur(self, event: events.AppBlur) -> None:
         self.app_blurred = True
@@ -419,12 +449,12 @@ class Application(App, inherit_bindings=False):
         # Makes sure `directory` is a directory, or chdir will fail with exception
         directory = ensure_existing_directory(directory)
 
-        if normalise(getcwd()) == normalise(directory):
+        if normalise(getcwd()) == normalise(directory) or directory == "":
             add_to_history = False
         else:
             chdir(directory)
 
-        self.query_one("#file_list").update_file_list(
+        self.query_one("#file_list", FileList).update_file_list(
             add_to_session=add_to_history, focus_on=focus_on
         )
         if hasattr(self, "tabWidget"):

@@ -1,6 +1,5 @@
 import contextlib
 from subprocess import TimeoutExpired, run
-from time import monotonic
 
 from textual import events, work
 from textual.app import ComposeResult
@@ -15,9 +14,6 @@ from rovr.variables.constants import config
 
 
 class ZoxideOptionList(OptionList):
-    def on_mount(self) -> None:
-        self.last_click = monotonic()
-
     async def _on_click(self, event: events.Click) -> None:
         """React to the mouse being clicked on an item.
 
@@ -33,7 +29,6 @@ class ZoxideOptionList(OptionList):
                 self.action_select()
             else:
                 self.highlighted = clicked_option
-        self.last_click = monotonic()
 
 
 class ZDToDirectory(ModalScreen):
@@ -57,13 +52,13 @@ class ZDToDirectory(ModalScreen):
             )
 
     def on_mount(self) -> None:
-        zoxide_input = self.query_one("#zoxide_input")
-        zoxide_input.border_title = "zoxide"
-        zoxide_input.focus()
-        zoxide_options = self.query_one("#zoxide_options")
-        zoxide_options.border_title = "Folders"
-        zoxide_options.can_focus = False
-        self.zoxide_updater(Input.Changed(zoxide_input, value=""))
+        self.zoxide_input: Input = self.query_one("#zoxide_input")
+        self.zoxide_input.border_title = "zoxide"
+        self.zoxide_input.focus()
+        self.zoxide_options: ZoxideOptionList = self.query_one("#zoxide_options")
+        self.zoxide_options.border_title = "Folders"
+        self.zoxide_options.can_focus = False
+        self.zoxide_updater(Input.Changed(self.zoxide_input, value=""))
 
     def on_input_changed(self, event: Input.Changed) -> None:
         if any(
@@ -128,12 +123,9 @@ class ZDToDirectory(ModalScreen):
             # zoxide not installed
             if self.any_in_queue():
                 return
-            zoxide_options: ZoxideOptionList = self.query_one(
-                "#zoxide_options", ZoxideOptionList
-            )
-            self.app.call_from_thread(zoxide_options.clear_options)
+            self.app.call_from_thread(self.zoxide_options.clear_options)
             self.app.call_from_thread(
-                zoxide_options.add_option,
+                self.zoxide_options.add_option,
                 Option(
                     "  zoxide is missing on $PATH or cannot be executed"
                     if isinstance(exc, OSError)
@@ -149,7 +141,6 @@ class ZDToDirectory(ModalScreen):
         zoxide_options: ZoxideOptionList = self.query_one(
             "#zoxide_options", ZoxideOptionList
         )
-        zoxide_options.add_class("empty")
         options = []
         if zoxide_output.stdout:
             first_score_width = 0
@@ -182,7 +173,7 @@ class ZDToDirectory(ModalScreen):
                 # reduces the likelihood of an empty option list
                 self.app.call_from_thread(zoxide_options.clear_options)
                 self.app.call_from_thread(zoxide_options.add_options, options)
-                zoxide_options.remove_class("empty")
+                self.app.call_from_thread(zoxide_options.remove_class, "empty")
                 zoxide_options.highlighted = 0
         else:
             # No Matches to the query text
@@ -191,17 +182,21 @@ class ZDToDirectory(ModalScreen):
                 zoxide_options.add_option,
                 Option("  --No matches found--", disabled=True),
             )
+            self.app.call_from_thread(zoxide_options.add_class, "empty")
         # check 3, if somehow there's a new request after the mount
         if self.any_in_queue():
             return  # nothing much to do now
-        else:
-            self._queued_task = None
 
     def on_input_submitted(self, event: Input.Submitted) -> None:
-        zoxide_options = self.query_one("#zoxide_options")
-        if zoxide_options.highlighted is None:
-            zoxide_options.highlighted = 0
-        zoxide_options.action_select()
+        if any(
+            worker.is_running and worker.node is self for worker in self.app.workers
+        ):
+            return
+        if self.zoxide_options.highlighted is None:
+            self.zoxide_options.highlighted = 0
+        if self.zoxide_options.highlighted_option.disabled:
+            return
+        self.zoxide_options.action_select()
 
     # You can't manually tab into the option list, but you can click, so I guess
     @work(exclusive=True)
@@ -219,7 +214,7 @@ class ZDToDirectory(ModalScreen):
                 text=True,
                 timeout=1,
             )
-        if selected_value:
+        if selected_value and not event.option.disabled:
             self.dismiss(selected_value)
         else:
             self.dismiss(None)
@@ -246,3 +241,16 @@ class ZDToDirectory(ModalScreen):
             case "shift+tab":
                 event.stop()
                 self.focus_previous()
+
+    def on_option_list_option_highlighted(
+        self, event: ZoxideOptionList.OptionHighlighted
+    ) -> None:
+        if (
+            self.zoxide_options.option_count == 0
+            or self.zoxide_options.get_option_at_index(0).disabled
+        ):
+            self.zoxide_options.border_subtitle = "0/0"
+        else:
+            self.zoxide_options.border_subtitle = (
+                f"{self.zoxide_options.highlighted}/{self.zoxide_options.option_count}"
+            )

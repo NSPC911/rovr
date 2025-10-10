@@ -16,7 +16,7 @@ lzstring = LZString()
 pprint = Console().print
 
 
-def load_config() -> dict:
+def load_config() -> tuple[dict, dict]:
     """
     Load both the template config and the user config
 
@@ -100,7 +100,7 @@ def load_config() -> dict:
     # image protocol because "AutoImage" doesn't work with Sixel
     if config["settings"]["image_protocol"] == "Auto":
         config["settings"]["image_protocol"] = ""
-    return config
+    return schema, config
 
 
 def config_setup() -> None:

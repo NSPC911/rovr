@@ -10,7 +10,7 @@ from textual.widgets import OptionList
 from rovr.classes.textual_options import KeybindOption
 from rovr.functions import icons
 from rovr.search_container import SearchInput
-from rovr.variables.constants import config, vindings
+from rovr.variables.constants import config, schema, vindings
 
 
 class KeybindList(OptionList, inherit_bindings=False):
@@ -29,97 +29,34 @@ class KeybindList(OptionList, inherit_bindings=False):
         super().__init__(*self.list_of_options, **kwargs)
 
     def get_keybind_data(self) -> tuple[list[tuple[str, str]], list[str]]:
-        # Hardcoded descriptions based on BINDINGS from various files
-        keybind_descriptions = {
-            # Navigation - from core/file_list.py, core/pinned_sidebar.py
-            "up": "Up",
-            "down": "Down",
-            "home": "First",
-            "end": "Last",
-            "page_up": "Page Up",
-            "page_down": "Page Down",
-            "up_tree": "Go up directory",
-            "down_tree": "Enter/Select",
-            "hist_previous": "History back",
-            "hist_next": "History forward",
-            # File operations - from core/preview_container.py
-            "copy": "Copy",
-            "cut": "Cut",
-            "paste": "Paste",
-            "delete": "Delete",
-            "rename": "Rename",
-            "new": "New",
-            "zip": "Zip",
-            "unzip": "Unzip",
-            "copy_path": "Copy path",
-            # Interface - app-level keybinds
-            "focus_file_list": "Focus file list",
-            "focus_toggle_pinned_sidebar": "Focus sidebar",
-            "focus_toggle_preview_sidebar": "Focus preview",
-            "focus_toggle_path_switcher": "Focus path",
-            "focus_search": "Search",
-            "focus_toggle_processes": "Focus processes",
-            "focus_toggle_clipboard": "Focus clipboard",
-            "focus_toggle_metadata": "Focus metadata",
-            "toggle_pinned_sidebar": "Toggle sidebar",
-            "toggle_preview_sidebar": "Toggle preview",
-            "toggle_footer": "Toggle footer",
-            "toggle_pin": "Pin folder",
-            "show_keybinds": "Show keybinds",
-            # FileList - from core/file_list.py
-            "toggle_visual": "Visual mode",
-            "toggle_all": "Select all",
-            "select_up": "Select up",
-            "select_down": "Select down",
-            "select_page_up": "Select page up",
-            "select_page_down": "Select page down",
-            "select_home": "Select to top",
-            "select_end": "Select to end",
-            "toggle_hidden_files": "Toggle hidden files",
-            # Tabs - app-level keybinds
-            "tab_new": "New tab",
-            "tab_close": "Close tab",
-            "tab_next": "Next tab",
-            "tab_previous": "Previous tab",
-            # Preview - from core/preview_container.py
-            "preview_scroll_left": "Scroll left",
-            "preview_scroll_right": "Scroll right",
-            "preview_select_left": "Select left",
-            "preview_select_right": "Select right",
-            # Plugins
-            "zoxide": "Launch zoxide selector",
-            "editor": "Open file with editor",
-        }
-
         # Generate keybind data programmatically
         keybind_data = []
         primary_keys = []
+        keybinds_schema = schema["properties"]["keybinds"]["properties"]
         for action, keys in config["keybinds"].items():
-            if action in keybind_descriptions:
+            if action in keybinds_schema:
+                display_name = keybinds_schema[action].get("display_name", action)
                 if not keys:
                     formatted_keys = "<disabled>"
                     primary_keys.append("")
                 else:
                     formatted_keys = ", ".join(f"<{key}>" for key in keys)
                     primary_keys.append(keys[0])
-                description = keybind_descriptions[action]
-                keybind_data.append((formatted_keys, description))
+                keybind_data.append((formatted_keys, display_name))
 
         # for plugins
+        plugins_schema = schema["properties"]["plugins"]["properties"]
         for key, value in config["plugins"].items():
-            if (
-                "enabled" in value
-                and "keybinds" in value
-                and key in keybind_descriptions
-            ):
+            if "enabled" in value and "keybinds" in value and key in plugins_schema:
                 if not value["keybinds"] or not value["enabled"]:
                     formatted_keys = "<disabled>"
                     primary_keys.append("")
                 else:
                     formatted_keys = ", ".join(f"<{key}>" for key in value["keybinds"])
                     primary_keys.append(value["keybinds"][0])
-                description = keybind_descriptions[key]
-                keybind_data.append((formatted_keys, description))
+                plugins_properties = plugins_schema[key]["properties"]
+                display_name = plugins_properties["keybinds"].get("display_name", key)
+                keybind_data.append((formatted_keys, display_name))
 
         return keybind_data, primary_keys
 

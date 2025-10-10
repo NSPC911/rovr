@@ -10,6 +10,7 @@ from .keybinds import Keybinds
 from .way_too_small import TerminalTooSmall
 from .yes_or_no import YesOrNo
 from .zd_to_directory import ZDToDirectory
+from .file_in_use import FileInUse
 
 
 class DummyScreen(Screen[None]):
@@ -26,6 +27,7 @@ __all__ = [
     "ZDToDirectory",
     "FileSearch",
     "GiveMePermission",
+    "FileInUse",
     "DummyScreen",
     "TerminalTooSmall",
     "Keybinds",

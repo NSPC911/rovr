@@ -18,7 +18,7 @@ from textual.widgets.option_list import OptionDoesNotExist
 from rovr.classes import Archive
 from rovr.functions import icons as icon_utils
 from rovr.functions import path as path_utils
-from rovr.screens import CommonFileNameDoWhat, Dismissable, GiveMePermission, YesOrNo
+from rovr.screens import CommonFileNameDoWhat, Dismissable, GiveMePermission, YesOrNo, FileInUse
 from rovr.variables.constants import config
 
 
@@ -204,13 +204,45 @@ class ProcessContainer(VerticalScroll):
                                 path_to_trash = path_to_trash.replace("/", "\\")
                                 pass
                             send2trash(path_to_trash)
-                        except PermissionError:
+                        except PermissionError as e:
+                            # On Windows, a file being used by another process
+                            # raises a PermissionError/OSError with winerror 32.
+                            is_file_in_use = False
+                            try:
+                                # Some PermissionError instances expose winerror
+                                is_file_in_use = getattr(e, "winerror", None) == 32
+                            except Exception:
+                                is_file_in_use = False
+                            if is_file_in_use and platform.system() == "Windows":
+                                # Ask the user specifically that the file is in use
+                                response = self.app.call_from_thread(
+                                    self.app.push_screen_wait,
+                                    FileInUse(
+                                        f"The file appears to be open in another application and cannot be deleted.\nPath: {item_dict['relative_loc']}",
+                                        border_title=item_dict["relative_loc"],
+                                    ),
+                                )
+                                # response is dict {"value": True/False} or bool
+                                if isinstance(response, dict):
+                                    if not response.get("value"):
+                                        # cancel
+                                        bar.panic()
+                                        return
+                                    else:
+                                        # user pressed OK, try skipping
+                                        continue
+                                elif response is False:
+                                    bar.panic()
+                                    return
+                                else:
+                                    continue
+                            # fallback for regular permission issues
                             if action_on_permission_error == "ask":
                                 do_what = self.app.call_from_thread(
                                     self.app.push_screen_wait,
                                     GiveMePermission(
                                         "Path has no write access to be deleted.\nForcefully obtain and delete it?",
-                                        border_title=item_dict["relative_loc"],
+                                        border_title=item_dict["path"],
                                     ),
                                 )
                                 if do_what["toggle"]:
@@ -250,6 +282,37 @@ class ProcessContainer(VerticalScroll):
                     # it's deleted, so why care?
                     pass
                 except PermissionError:
+                    # Try to detect if file is in use on Windows
+                    e = None
+                    try:
+                        raise
+                    except Exception as exc:
+                        e = exc
+                    is_file_in_use = False
+                    try:
+                        is_file_in_use = getattr(e, "winerror", None) == 32
+                    except Exception:
+                        is_file_in_use = False
+                    if is_file_in_use and platform.system() == "Windows":
+                        response = self.app.call_from_thread(
+                            self.app.push_screen_wait,
+                            FileInUse(
+                                f"The file appears to be open in another application and cannot be deleted.\nPath: {item_dict['relative_loc']}",
+                                border_title=item_dict["relative_loc"],
+                            ),
+                        )
+                        if isinstance(response, dict):
+                            if not response.get("value"):
+                                bar.panic()
+                                return
+                            else:
+                                continue
+                        elif response is False:
+                            bar.panic()
+                            return
+                        else:
+                            continue
+                    # fallback for regular permission issues
                     if action_on_permission_error == "ask":
                         do_what = self.app.call_from_thread(
                             self.app.push_screen_wait,

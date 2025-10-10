@@ -5,6 +5,7 @@ import zipfile
 from os import path
 from typing import ClassVar
 
+from PIL import UnidentifiedImageError
 import textual_image.widget as timg
 from rich.text import Text
 from textual import events, on, work
@@ -181,6 +182,7 @@ class PreviewContainer(Container):
                     )
                 )
                 self.query_one("#image_preview").can_focus = True
+                self._current_preview_type = "image"
             except FileNotFoundError:
                 await self.mount(
                     CustomTextArea(
@@ -193,7 +195,20 @@ class PreviewContainer(Container):
                         compact=True,
                     )
                 )
-            self._current_preview_type = "image"
+                self._current_preview_type = "none"
+            except UnidentifiedImageError:
+                await self.mount(
+                    CustomTextArea(
+                        id="text_preview",
+                        show_line_numbers=False,
+                        soft_wrap=True,
+                        read_only=True,
+                        text="Cannot render image (is the encoding wrong?)",
+                        language="markdown",
+                        compact=True,
+                    )
+                )
+                self._current_preview_type = "none"
         else:
             try:
                 self.query_one("#image_preview").image = self._current_file_path

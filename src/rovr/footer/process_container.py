@@ -231,18 +231,18 @@ class ProcessContainer(VerticalScroll):
                                         border_title=item_dict["relative_loc"],
                                     ),
                                 )
-                                # response is dict {"value": True/False} or bool
-                                if isinstance(response, dict):
-                                    if not response.get("value"):
-                                        # cancel
-                                        bar.panic()
-                                        return
-                                    else:
-                                        # user pressed OK, try skipping
-                                        continue
-                                elif response is False:
+                                # response may be dict {"value": True/False} or bool or string
+                                resp_val = response.get("value") if isinstance(response, dict) else response
+                                # Normalize string responses for comparison
+                                resp_val_lower = resp_val.lower() if isinstance(resp_val, str) else None
+                                # Treat explicit False or "cancel" as cancellation
+                                if resp_val is False or resp_val_lower == "cancel":
                                     bar.panic()
                                     return
+                                # Treat explicit True or "ok" as OK (skip)
+                                elif resp_val is True or resp_val_lower == "ok":
+                                    continue
+                                # Unexpected values: conservatively continue (skip)
                                 else:
                                     continue
                             # fallback for regular permission issues
@@ -305,16 +305,16 @@ class ProcessContainer(VerticalScroll):
                                 border_title=item_dict["relative_loc"],
                             ),
                         )
-                        if isinstance(response, dict):
-                            if not response.get("value"):
-                                bar.panic()
-                                return
-                            else:
-                                continue
-                        elif response is False:
+                        # response may be dict {"value": True/False} or bool or string
+                        resp_val = response.get("value") if isinstance(response, dict) else response
+                        resp_val_lower = resp_val.lower() if isinstance(resp_val, str) else None
+                        if resp_val is False or resp_val_lower == "cancel":
                             bar.panic()
                             return
+                        elif resp_val is True or resp_val_lower == "ok":
+                            continue
                         else:
+                            # Unexpected value: conservatively continue (skip)
                             continue
                     # fallback for regular permission issues
                     if action_on_permission_error == "ask":

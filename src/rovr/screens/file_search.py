@@ -220,4 +220,4 @@ class FileSearch(ModalScreen):
         ):
             self.search_options.border_subtitle = "0/0"
         else:
-            self.search_options.border_subtitle = f"{str(self.search_options.highlighted)}/{self.search_options.option_count}"
+            self.search_options.border_subtitle = f"{str(self.search_options.highlighted + 1)}/{self.search_options.option_count}"

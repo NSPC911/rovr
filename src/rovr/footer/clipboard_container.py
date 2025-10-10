@@ -39,7 +39,7 @@ class Clipboard(SelectionList, inherit_bindings=False):
                         f"{icon_utils.get_icon('general', 'copy')[0]} {item}"
                     ),
                     value=path_utils.compress(f"{item}-copy"),
-                    initial_state=True
+                    initial_state=True,
                 )
             )
         self.refresh(layout=True)
@@ -56,7 +56,7 @@ class Clipboard(SelectionList, inherit_bindings=False):
                             f"{icon_utils.get_icon('general', 'cut')[0]} {item}"
                         ),
                         value=path_utils.compress(f"{item}-cut"),
-                        initial_state=True
+                        initial_state=True,
                     )
                 )
         self.refresh(layout=True)

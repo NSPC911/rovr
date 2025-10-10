@@ -232,9 +232,17 @@ class ProcessContainer(VerticalScroll):
                                     ),
                                 )
                                 # response may be dict {"value": True/False} or bool or string
-                                resp_val = response.get("value") if isinstance(response, dict) else response
+                                resp_val = (
+                                    response.get("value")
+                                    if isinstance(response, dict)
+                                    else response
+                                )
                                 # Normalize string responses for comparison
-                                resp_val_lower = resp_val.lower() if isinstance(resp_val, str) else None
+                                resp_val_lower = (
+                                    resp_val.lower()
+                                    if isinstance(resp_val, str)
+                                    else None
+                                )
                                 # Treat explicit False or "cancel" as cancellation
                                 if resp_val is False or resp_val_lower == "cancel":
                                     bar.panic()
@@ -306,8 +314,14 @@ class ProcessContainer(VerticalScroll):
                             ),
                         )
                         # response may be dict {"value": True/False} or bool or string
-                        resp_val = response.get("value") if isinstance(response, dict) else response
-                        resp_val_lower = resp_val.lower() if isinstance(resp_val, str) else None
+                        resp_val = (
+                            response.get("value")
+                            if isinstance(response, dict)
+                            else response
+                        )
+                        resp_val_lower = (
+                            resp_val.lower() if isinstance(resp_val, str) else None
+                        )
                         if resp_val is False or resp_val_lower == "cancel":
                             bar.panic()
                             return

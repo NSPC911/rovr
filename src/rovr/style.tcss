@@ -765,6 +765,33 @@ GiveMePermission {
   }
 }
 
+FileInUse {
+  align: center middle;
+  #dialog {
+    grid-size: 1;
+    grid-gutter: 1 2;
+    grid-rows: 1fr 3; /* take up all the space available like Dismissable */
+    padding: 1 3;
+    border: $border-style $border;
+    max-height: 16;
+  }
+  #question_container {
+    column-span: 2;
+    height: 1fr;
+    width: 1fr;
+    content-align: center middle;
+    .question {
+      content-align: center middle;
+      width: 1fr;
+      height: 1fr;
+      text-align: center;
+    }
+  }
+  Container { align: center middle }
+  Button { width: 50% }
+  HorizontalGroup { column-span: 2; align: center middle }
+}
+
 DeleteFiles {
   align: center middle;
   #dialog {

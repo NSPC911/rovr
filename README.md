@@ -11,9 +11,6 @@
   <img alt="GitHub Actions Formatting Status" src="https://img.shields.io/github/actions/workflow/status/nspc911/rovr/.github%2Fworkflows%2Fformatting.yml?style=for-the-badge&label=style">
 </div>
 
-> [!IMPORTANT]
-> I, NSPC911, am currently on a temporary hiatus due to personal reasons.
-
 > [!warning]
 > This project is in its very early stages. While this can be daily driven, expect some issues here and there.
 

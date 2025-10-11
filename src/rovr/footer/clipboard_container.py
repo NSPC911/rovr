@@ -25,11 +25,13 @@ class Clipboard(SelectionList, inherit_bindings=False):
         self.clipboard_contents = []
 
     def on_mount(self) -> None:
-        self.mybutton: Button = self.app.query_one("#paste")
-        self.mybutton.disabled = True
+        self.paste_button: Button = self.app.query_one("#paste")
+        self.paste_button.disabled = True
+        self.file_list = self.app.query_one("#file_list")
 
     async def copy_to_clipboard(self, items: list[str]) -> None:
         """Copy the selected files to the clipboard"""
+        self.deselect_all()
         for item in items[::-1]:
             self.insert_selection_at_beginning(
                 ClipboardSelection(
@@ -37,16 +39,14 @@ class Clipboard(SelectionList, inherit_bindings=False):
                         f"{icon_utils.get_icon('general', 'copy')[0]} {item}"
                     ),
                     value=path_utils.compress(f"{item}-copy"),
-                    id=path_utils.compress(item),
+                    initial_state=True,
                 )
             )
         self.refresh(layout=True)
-        self.mybutton.disabled = False
-        self.deselect_all()
-        for item_number in range(len(items)):
-            self.select(self.get_option_at_index(item_number))
+        self.paste_button.disabled = False
 
     async def cut_to_clipboard(self, items: list[str]) -> None:
+        self.deselect_all()
         """Cut the selected files to the clipboard."""
         for item in items[::-1]:
             if isinstance(item, str):
@@ -56,17 +56,15 @@ class Clipboard(SelectionList, inherit_bindings=False):
                             f"{icon_utils.get_icon('general', 'cut')[0]} {item}"
                         ),
                         value=path_utils.compress(f"{item}-cut"),
-                        id=path_utils.compress(item),
+                        initial_state=True,
                     )
                 )
         self.refresh(layout=True)
-        self.mybutton.disabled = False
-        self.deselect_all()
+        self.paste_button.disabled = False
         for item_number in range(len(items)):
             self.select(self.get_option_at_index(item_number))
 
     # Use better versions of the checkbox icons
-
     def _get_left_gutter_width(
         self,
     ) -> int:
@@ -181,7 +179,7 @@ class Clipboard(SelectionList, inherit_bindings=False):
                     )
                     return
                 self.remove_option_at_index(self.highlighted)
-                self.mybutton.disabled = self.add_options
+                self.paste_button.disabled = self.add_options
                 if self.option_count == 0:
                     return
                 event.stop()

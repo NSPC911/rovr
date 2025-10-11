@@ -130,6 +130,7 @@ class FileList(SelectionList, inherit_bindings=False):
                 preview = self.app.query_one("PreviewContainer")
                 preview.remove_children()
                 preview._current_preview_type = "none"
+                preview.border_title = ""
             else:
                 file_list_options = folders + files
                 for item in file_list_options:
@@ -155,6 +156,10 @@ class FileList(SelectionList, inherit_bindings=False):
                     disabled=True,
                 ),
             )
+            preview = self.app.query_one("PreviewContainer")
+            preview.remove_children()
+            preview._current_preview_type = "none"
+            preview.border_title = ""
 
         if len(self.list_of_options) == 1 and self.list_of_options[0].disabled:
             for selector in buttons_that_depend_on_path:

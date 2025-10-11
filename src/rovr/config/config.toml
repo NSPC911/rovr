@@ -5,17 +5,13 @@
 tooltips = true
 nerd_font = true
 use_reactive_layout = true
-
 show_progress_eta = false
 show_progress_percentage = true
 truncate_progress_file_path = false
-
 preview_error = "Hmm, I think this file got corrupted (or maybe not?)"
 preview_binary = "This file is not UTF-8 encoded, so I decline to read it."
 preview_start = "print(\"Hello, world!\")"
-
 compact_mode = false
-
 show_line_numbers = true
 
 [interface.clock]
@@ -26,21 +22,24 @@ align = "left"
 preview_full = false
 image_protocol = "Auto"
 show_hidden_files = false
-
 copy_includes_metadata = true
 use_recycle_bin = true
-
 allow_tab_nav = true
 append_new_tabs = true
-
 cd_on_quit = false
-
 double_click_delay = 0.25
-
 drive_watcher_frequency = 3.0
 
 [metadata]
-fields = ["type", "permissions", "size", "modified", "accessed", "created"]
+fields = [
+  "type",
+  "permissions",
+  "size",
+  "modified",
+  "accessed",
+  "created",
+  "hidden",
+]
 datetime_format = "%Y-%m-%d %H:%M"
 filesize_decimals = 1
 filesize_suffix = "decimal"
@@ -77,7 +76,7 @@ is_dark = true
 
 [custom_theme.bar_gradient]
 default = ["#88c0d0", "#5e81ac"]
-error = ["#bf616a","#d08770"]
+error = ["#bf616a", "#d08770"]
 
 [[custom_theme]]
 name = "Solarized Dark"

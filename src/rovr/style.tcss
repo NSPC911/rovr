@@ -448,6 +448,7 @@ Tooltip {
     text-wrap: nowrap;
     text-overflow: ellipsis;
   }
+  #metadata-keys { margin-right: 1 }
 }
 
 ProcessContainer {

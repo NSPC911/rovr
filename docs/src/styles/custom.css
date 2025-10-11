@@ -1,6 +1,3 @@
-@view-transition {
-  navigation: auto; /* enabled! */
-}
 @font-face {
   font-family: "CaskaydiaCove NFP";
   src: url("./caskaydiacovenfp.ttf") format("truetype");
@@ -12,21 +9,12 @@
   --sl-transition-duration: 0.375s;
 }
 
-/* @media (prefers-reduced-motion: reduce) { */
-  /* :root { */
-    /* --sl-transition-duration: 0s; */
-  /* } */
-/* } */
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --sl-transition-duration: 0s;
+  }
+}
 
-
-/* @media (prefers { */
-  /* :root { */
-    /* --sl-transition-duration: 0s; */
-    code {
-      background-color: transparent;
-    }
-  /* } */
-/* } */
 /* Dark mode colors. */
 :root {
   --sl-color-accent: #8fbcbb;
@@ -115,10 +103,11 @@ html * {
   font-family: "CaskaydiaCove NFP";
   & {
     text-transform: lowercase;
-    transition-property:
-      background, color, border-inline-start, scrollbar-color;
-    transition-duration: var(--sl-transition-duration);
-    transition-timing-function: ease-in-out;
+    transition:
+      var(--sl-transition-duration) background ease-in-out,
+      calc(var(--sl-transition-duration) / 2) color ease-in-out,
+      var(--sl-transition-duration) border-inline-start ease-in-out,
+      var(--sl-transition-duration) scrollbar-color ease-in-out;
   }
 }
 code {

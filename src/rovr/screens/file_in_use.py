@@ -1,8 +1,8 @@
-from textual import events, on
 from textual.app import ComposeResult
 from textual.containers import Grid, VerticalGroup, HorizontalGroup
 from textual.screen import ModalScreen
 from textual.widgets import Button, Label
+from textual import events, on
 
 
 class FileInUse(ModalScreen):

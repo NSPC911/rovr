@@ -12,7 +12,7 @@
   "dependencies": {
     "@astrojs/sitemap": "^3.5.0",
     "@astrojs/starlight": "^0.35.2",
-    "astro": "^5.13.1",
+    "astro": "^5.14.3",
     "astro-mermaid": "^1.0.4",
     "mermaid": "^11.10.0",
     "sharp": "^0.34.2",

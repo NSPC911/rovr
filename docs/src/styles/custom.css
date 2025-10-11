@@ -267,13 +267,28 @@ select > option:hover {
   transition: transform var(--sl-transition-duration) ease;
   box-shadow: unset;
   cursor: pointer;
-  svg {
+  &::before {
+    position: relative;
+    left: 0;
+    right: 0;
+    top: 0;
+    bottom: 0;
+    font-size: medium;
     transition: transform var(--sl-transition-duration) ease;
+  }
+  &[rel="prev"]::before {
+    content: "[[";
+  }
+  &[rel="next"]::before {
+    content: "]]";
+  }
+  svg {
+    display: none;
   }
   &:hover {
     transform: scale(1.01);
-    svg {
-      transform: scale(1.5);
+    &::before {
+      transform: scale(1.25);
     }
   }
 }

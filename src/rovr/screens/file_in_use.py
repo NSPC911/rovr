@@ -1,6 +1,6 @@
-from textual import events
+from textual import events, on
 from textual.app import ComposeResult
-from textual.containers import Grid, HorizontalGroup, VerticalGroup
+from textual.containers import Grid, VerticalGroup, HorizontalGroup
 from textual.screen import ModalScreen
 from textual.widgets import Button, Label
 
@@ -15,26 +15,31 @@ class FileInUse(ModalScreen):
 
     def compose(self) -> ComposeResult:
         with Grid(id="dialog"):
+            # Follow the common modal convention: per-line Labels inside a question_container
             with VerticalGroup(id="question_container"):
                 for message in self.message.splitlines():
                     yield Label(message, classes="question")
             with HorizontalGroup():
-                yield Button("\\[Y]es", id="yes", variant="primary")
-                yield Button("\\[C]ancel", id="cancel", variant="warning")
+                yield Button("\\[Y]es", variant="primary", id="ok")
 
     def on_mount(self) -> None:
         self.query_one("#dialog").border_title = self.border_title
-        # focus the Yes button like other modals
-        self.query_one("#yes").focus()
+        # focus the OK button like other modals
+        self.query_one("#ok").focus()
 
     def on_key(self, event: events.Key) -> None:
+        """Handle key presses: Enter -> OK, Escape -> Cancel."""
         match event.key.lower():
-            case "o" | "enter":
+            case "enter" | "y":
                 event.stop()
-                self.dismiss({"value": "yes"})
-            case "c" | "escape":
+                # treat enter as OK
+                self.dismiss({"value": True})
+            case "escape":
                 event.stop()
+                # treat escape as cancel
                 self.dismiss({"value": "cancel"})
 
+    @on(Button.Pressed, "#ok")
     def on_button_pressed(self, event: Button.Pressed) -> None:
-        self.dismiss({"value": event.button.id == "yes"})
+        """Handle OK button: return True to callers."""
+        self.dismiss({"value": True})

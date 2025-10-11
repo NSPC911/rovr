@@ -5,8 +5,8 @@ import zipfile
 from os import path
 from typing import ClassVar
 
-from PIL import UnidentifiedImageError
 import textual_image.widget as timg
+from PIL import UnidentifiedImageError
 from rich.text import Text
 from textual import events, on, work
 from textual.app import ComposeResult

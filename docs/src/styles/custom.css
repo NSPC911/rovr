@@ -1,3 +1,6 @@
+@view-transition {
+  navigation: none;
+}
 @font-face {
   font-family: "CaskaydiaCove NFP";
   src: url("./caskaydiacovenfp.ttf") format("truetype");

@@ -23,7 +23,7 @@ class FileInUse(ModalScreen):
                 yield Button("\\[Y]es", variant="primary", id="ok")
 
     def on_mount(self) -> None:
-        self.query_one("#dialog").border_title = self.border_title
+        self.query_one("#dialog").border_title = "File in use"
         # focus the OK button like other modals
         self.query_one("#ok").focus()
 

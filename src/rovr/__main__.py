@@ -49,6 +49,13 @@ try:
         help="Write the final working directory to this file on exit.",
     )
     @click.option(
+        "--reset-ui-state",
+        "reset_ui_state",
+        is_flag=True,
+        default=False,
+        help="Remove persisted UI state (ui_state.json) from config dir and exit.",
+    )
+    @click.option(
         "--chooser-file",
         "chooser_file",
         multiple=False,
@@ -63,6 +70,7 @@ try:
         show_config_path: bool,
         show_version: bool,
         cwd_file: str,
+        reset_ui_state: bool,
         chooser_file: str,
         path: str,
     ) -> None:
@@ -90,6 +98,20 @@ try:
                     f"{config_path}/rovr_cd_on_quit",
                 )
             pprint(table)
+            return
+        if reset_ui_state:
+            from rovr.functions import state
+
+            try:
+                import os
+
+                if os.path.exists(state.UI_STATE_FILENAME):
+                    os.remove(state.UI_STATE_FILENAME)
+                    pprint(f"Removed saved UI state: {state.UI_STATE_FILENAME}")
+                else:
+                    pprint("No saved UI state found.")
+            except Exception as e:
+                pprint(f"Failed to remove UI state: {e}")
             return
         elif show_version:
             pprint("v0.3.0")

@@ -59,6 +59,7 @@ from rovr.screens import DummyScreen, FileSearch, Keybinds, YesOrNo, ZDToDirecto
 from rovr.screens.way_too_small import TerminalTooSmall
 from rovr.search_container import SearchInput
 from rovr.variables.constants import MaxPossible, config
+from rovr.functions.state import load_ui_state, save_ui_state, build_state_from_app
 from rovr.variables.maps import VAR_TO_DIR
 
 max_possible = MaxPossible()
@@ -196,6 +197,42 @@ class Application(App, inherit_bindings=False):
             return
         self.theme = config["theme"]["default"]
         self.ansi_color = config["theme"]["transparent"]
+        # Load persisted UI state (best-effort)
+        try:
+            ui_state = load_ui_state()
+            # Apply show_hidden_files if saved (fallback to config otherwise)
+            if ui_state.get("show_hidden_files") is not None:
+                config["settings"]["show_hidden_files"] = bool(
+                    ui_state["show_hidden_files"]
+                )
+            # Apply footer visibility if saved
+            if ui_state.get("footer_visible") is not None:
+                if not ui_state["footer_visible"]:
+                    # start hidden
+                    self.query_one("#footer").add_class("hide")
+                else:
+                    self.query_one("#footer").remove_class("hide")
+            # Apply pinned sidebar visibility
+            if ui_state.get("pinned_sidebar_visible") is not None:
+                if not ui_state["pinned_sidebar_visible"]:
+                    self.query_one("#pinned_sidebar_container").add_class("hide")
+                else:
+                    self.query_one("#pinned_sidebar_container").remove_class("hide")
+            # Apply preview visibility
+            if ui_state.get("preview_visible") is not None:
+                if not ui_state["preview_visible"]:
+                    self.query_one("PreviewContainer").add_class("hide")
+                else:
+                    self.query_one("PreviewContainer").remove_class("hide")
+            # Compact mode
+            if ui_state.get("compact_mode") is not None:
+                if ui_state["compact_mode"]:
+                    self.add_class("compact")
+                else:
+                    self.remove_class("compact")
+        except Exception:
+            # best-effort: do not prevent startup on any failure
+            pass
         # tooltips
         if config["interface"]["tooltips"]:
             self.query_one("#back").tooltip = "Go back in history"
@@ -437,6 +474,13 @@ class Application(App, inherit_bindings=False):
             except Exception:
                 # Any failure writing chooser file should not block exit
                 pass
+        # Persist UI state (best-effort)
+        try:
+            state = build_state_from_app(self, config=config)
+            save_ui_state(state)
+        except Exception:
+            # do not block exit on failure to write
+            pass
         self.exit()
 
     def cd(

@@ -10,21 +10,20 @@ let watchers = 0;
 let release_tag = "";
 
 try {
-  const response = await fetch(`https://api.github.com/repos/${repoOwner}/${repoName}`);
-  if (response.ok) {
-    const repo = await response.json();
+  const repoResponse = await fetch(`https://api.github.com/repos/${repoOwner}/${repoName}`);
+  if (repoResponse.ok) {
+    const repo = await repoResponse.json();
     stars = repo.stargazers_count;
     forks = repo.forks_count;
     watchers = repo.subscribers_count;
-    const response = await fetch(`https://api.github.com/repos/${repoOwner}/${repoName}/releases`);
-    if (response.ok) {
-      const releases = await response.json()
-      release_tag = releases[0].tag_name
-    } else {
-      console.error(response)
+  }
+
+  const releasesResponse = await fetch(`https://api.github.com/repos/${repoOwner}/${repoName}/releases`);
+  if (releasesResponse.ok) {
+    const releases = await releasesResponse.json();
+    if (releases.length > 0) {
+      release_tag = releases[0].tag_name;
     }
-  } else {
-    console.error(response)
   }
 } catch (error) {
   console.error('Failed to fetch GitHub stats:', error);
@@ -42,13 +41,13 @@ try {
     <a href={`https://github.com/${repoOwner}/${repoName}/stargazers`} class="github-stat" title="Stars">
       <span></span>
       <span></span>
-      <span>{stars || 64}</span>
+      <span>{stars || 69}</span>
     </a>
 
     <a href={`https://github.com/${repoOwner}/${repoName}/network/members`} class="github-stat" title="Forks">
       <span></span>
       <span></span>
-      <span>{forks || 12}</span>
+      <span>{forks || 17}</span>
     </a>
   </div>
 

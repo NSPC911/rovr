@@ -1,31 +1,27 @@
 ---
 title: cd on quit
-description: how to make rovr change your shell's directory on quit.
+description: how to make rovr change your shell's directory on quit and export selected files.
 ---
 
 import { Tabs, TabItem, Code, Aside } from "@astrojs/starlight/components";
 
-`rovr` can be configured to change the current directory to the directory you were when you quit it.
+rovr can change the current directory to wherever you were when you quit, and export selected files to specified locations.
 
 ### how it works
 
-when `cd_on_quit` is enabled, `rovr` will write the path of its current directory to a file named `rovr_quit_cd_path` in your config directory right before it exits.
+when `cd_on_quit` is enabled, rovr writes the path of its current directory to a file named `rovr_quit_cd_path` in your config directory before exiting.
 
-a small script or function in your shell's configuration file can then read this file, `cd` into the saved directory, and then delete the file.
+a script or function in your shell config can read this file, `cd` into the saved directory, and delete the file.
 
 ### enabling `cd_on_quit`
 
-to enable this feature, you need to set the `cd_on_quit` option to `true` in your `config.toml` file.
+set the `cd_on_quit` option to `true` in your `config.toml` file.
 
-<Code
-code={`[settings]\ncd_on_quit = true`}
-lang="toml"
-title="config.toml"
-/>
+<Code code={`[settings]\ncd_on_quit = true`} lang="toml" title="config.toml" />
 
 ### shell configuration
 
-After enabling the feature, you need to add a function to your shell's configuration file. This function will wrap the `rovr` command.
+add a function to your shell config that wraps the `rovr` command.
 
 <Tabs>
 <TabItem label="bash / zsh">
@@ -57,4 +53,60 @@ for it to work. For more information on `Set-ExecutionPolicy`, refer to its [doc
 </TabItem>
 </Tabs>
 
-<Aside type="note">the path to the `rovr` executable and the `rovr_quit_cd_path` file might need to be adjusted based on your specific installation and system configuration.</Aside>
+<Aside type="note">
+  rovr uses platform-specific config directories: `~/.config/rovr` on Linux,
+  `~/Library/Application Support/rovr` on macOS, and `%LOCALAPPDATA%\rovr` on
+  Windows. the examples above should work for most setups, but you may need to
+  adjust paths based on your specific installation.
+</Aside>
+
+## CLI options (Yazi-style)
+
+rovr also supports Yazi-style CLI options for direct integration with scripts and other tools:
+
+### `--cwd-file`
+
+Write the current working directory to a specified file when rovr exits:
+
+```sh
+rovr --cwd-file /tmp/rovr_cwd
+```
+
+After quitting rovr, you can read the final directory from the file:
+
+```bash
+# Example usage in bash
+rovr --cwd-file /tmp/rovr_cwd
+cd "$(cat /tmp/rovr_cwd)"
+```
+
+### `--chooser-file`
+
+Write selected files to a specified file when rovr exits:
+
+```sh
+rovr --chooser-file /tmp/rovr_selected
+```
+
+This writes the paths of any files you have selected (using visual mode or other selection methods) to the specified file, one per line.
+
+```bash
+# Example: process selected files
+rovr --chooser-file /tmp/rovr_selected
+while IFS= read -r file; do
+    echo "Selected: $file"
+done < /tmp/rovr_selected
+```
+
+### Combined usage
+
+You can use both options together:
+
+```sh
+rovr --cwd-file /tmp/rovr_cwd --chooser-file /tmp/rovr_selected
+```
+
+<Aside type="tip">
+  these CLI options take priority over the `cd_on_quit` configuration setting,
+  ensuring backward compatibility while providing flexible integration options.
+</Aside>

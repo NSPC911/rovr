@@ -3,6 +3,8 @@ title: optimisations
 description: ways rovr optimises its performance
 ---
 
+import { Aside } from "@astrojs/starlight/components";
+
 `rovr` uses textual, which uses python, which is known for how terrible a performance it gives.
 <br/>hence, `rovr` makes use of a couple optimisations to make it perform reasonably well
 
@@ -29,6 +31,11 @@ this diagram roughly shows how the mechanism works, with the main thing being an
 
 - having a normal queue means that it would take a while for each item in the queue to be run, hence a very noticeable lag.
 - however, by having a queue of length 1, and overwriting the queue, it means that the latest added item is considered, and anything in between is ignored, greatly improving performance
+
+<Aside type="note">
+this has been slated to be removed, mainly due to issues with threads in general.<br/>
+textual isnt able to handle threads as well, hence for heavier previews, it needs to cut into the main process, which leads to too much lag.
+</Aside>
 
 ### debounced updates
 

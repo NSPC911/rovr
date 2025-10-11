@@ -3,12 +3,12 @@ title: plugins
 description: adding extra features with plugins.
 ---
 
-`rovr` supports several plugins to improve its functionality. you can enable and configure them in your `config.toml` file.
+there are a couple plugins to improve rovr's functionality. enable and configure them in your `config.toml` file.
 
 ### zoxide
 
 <img
-  src="https://github.com/NSPC911/rovr/blob/master/img/0.0.0.4/rovr_zoxide.png"
+  src="https://github.com/NSPC911/rovr/blob/master/img/0.1.0/rovr_zoxide.png?raw=true"
   alt="rovr's zoxide integration"
 />
 
@@ -20,19 +20,19 @@ description: adding extra features with plugins.
 ### bat
 
 <img
-  src="https://github.com/NSPC911/rovr/blob/master/img/0.0.0.4/rovr_with_bat.png"
+  src="https://github.com/NSPC911/rovr/blob/master/img/0.1.0/rovr_with_bat.png?raw=true"
   alt="rovr's bat integration"
 />
 
 to allow for more file previews, [bat](https://github.com/sharkdp/bat) can be used for its syntax highlighting capabilities.
 
 - **enable:** `plugins.bat.enabled = true`
-- **executable:** you can specify the path to the `bat` executable if it's not in your system's `PATH`.
+- **executable:** specify the path to the `bat` executable if it's not in your system's `PATH`.
 - **line numbers:** toggle line numbers with `plugins.bat.show_line_numbers`.
 
 ### editor
 
-this plugin allows you to open files and folders in your preferred editor.
+opens files and folders in your preferred editor.
 
 - **enable:** `plugins.editor.enabled = true`
 - **executables:** set the command to open files (`file_executable`) and folders (`folder_executable`).
@@ -40,9 +40,13 @@ this plugin allows you to open files and folders in your preferred editor.
 
 ### finder
 
-allows you to use [fd](https://github.com/sharkdp/fd) to search recursively in the current directory
+uses [fd](https://github.com/sharkdp/fd) to search recursively in the current directory
 
 - **enable:** `plugins.finder.enabled = true`
 - **executable:** set the executable used to call `fd`
 - **relative_paths:** whether to see paths as relative or absolute
 - **follow_symlinks:** search inside symlinks as well
+
+---
+
+a plugin system is also under works, stay tuned!

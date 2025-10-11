@@ -45,6 +45,13 @@ export default defineConfig({
               "https://github.com/NSPC911/rovr/blob/master/img/0.1.0/rovr_thumb.png?raw=true",
           },
         },
+        {
+          tag: "script",
+          attrs: {
+            src: "/rovr/vi-keybinds.js",
+            defer: true,
+          },
+        },
       ],
       customCss: ["./src/styles/custom.css"],
       editLink: {

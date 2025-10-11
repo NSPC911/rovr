@@ -13,17 +13,22 @@ description: config schema humanified
   - [1.7. Property `Rovr Config > interface > preview_error`](#interface_preview_error)
   - [1.8. Property `Rovr Config > interface > preview_binary`](#interface_preview_binary)
   - [1.9. Property `Rovr Config > interface > preview_start`](#interface_preview_start)
-  - [1.10. Property `Rovr Config > interface > clock`](#interface_clock)
-    - [1.10.1. Property `Rovr Config > interface > clock > enabled`](#interface_clock_enabled)
-    - [1.10.2. Property `Rovr Config > interface > clock > align`](#interface_clock_align)
+  - [1.10. Property `Rovr Config > interface > compact_mode`](#interface_compact_mode)
+  - [1.11. Property `Rovr Config > interface > show_line_numbers`](#interface_show_line_numbers)
+  - [1.12. Property `Rovr Config > interface > clock`](#interface_clock)
+    - [1.12.1. Property `Rovr Config > interface > clock > enabled`](#interface_clock_enabled)
+    - [1.12.2. Property `Rovr Config > interface > clock > align`](#interface_clock_align)
 - [2. Property `Rovr Config > settings`](#settings)
-  - [2.1. Property `Rovr Config > settings > use_recycle_bin`](#settings_use_recycle_bin)
-  - [2.2. Property `Rovr Config > settings > copy_includes_metadata`](#settings_copy_includes_metadata)
-  - [2.3. Property `Rovr Config > settings > image_protocol`](#settings_image_protocol)
-  - [2.4. Property `Rovr Config > settings > preview_full`](#settings_preview_full)
-  - [2.5. Property `Rovr Config > settings > allow_tab_nav`](#settings_allow_tab_nav)
-  - [2.6. Property `Rovr Config > settings > append_new_tabs`](#settings_append_new_tabs)
-  - [2.7. Property `Rovr Config > settings > cd_on_quit`](#settings_cd_on_quit)
+  - [2.1. Property `Rovr Config > settings > show_hidden_files`](#settings_show_hidden_files)
+  - [2.2. Property `Rovr Config > settings > use_recycle_bin`](#settings_use_recycle_bin)
+  - [2.3. Property `Rovr Config > settings > copy_includes_metadata`](#settings_copy_includes_metadata)
+  - [2.4. Property `Rovr Config > settings > image_protocol`](#settings_image_protocol)
+  - [2.5. Property `Rovr Config > settings > preview_full`](#settings_preview_full)
+  - [2.6. Property `Rovr Config > settings > allow_tab_nav`](#settings_allow_tab_nav)
+  - [2.7. Property `Rovr Config > settings > append_new_tabs`](#settings_append_new_tabs)
+  - [2.8. Property `Rovr Config > settings > cd_on_quit`](#settings_cd_on_quit)
+  - [2.9. Property `Rovr Config > settings > double_click_delay`](#settings_double_click_delay)
+  - [2.10. Property `Rovr Config > settings > drive_watcher_frequency`](#settings_drive_watcher_frequency)
 - [3. Property `Rovr Config > metadata`](#metadata)
   - [3.1. Property `Rovr Config > metadata > fields`](#metadata_fields)
     - [3.1.1. Rovr Config > metadata > fields > fields items](#metadata_fields_items)
@@ -131,53 +136,60 @@ description: config schema humanified
     - [7.32.1. Rovr Config > keybinds > hist_next > hist_next items](#keybinds_hist_next_items)
   - [7.33. Property `Rovr Config > keybinds > toggle_visual`](#keybinds_toggle_visual)
     - [7.33.1. Rovr Config > keybinds > toggle_visual > toggle_visual items](#keybinds_toggle_visual_items)
-  - [7.34. Property `Rovr Config > keybinds > select_up`](#keybinds_select_up)
-    - [7.34.1. Rovr Config > keybinds > select_up > select_up items](#keybinds_select_up_items)
-  - [7.35. Property `Rovr Config > keybinds > select_down`](#keybinds_select_down)
-    - [7.35.1. Rovr Config > keybinds > select_down > select_down items](#keybinds_select_down_items)
-  - [7.36. Property `Rovr Config > keybinds > select_page_up`](#keybinds_select_page_up)
-    - [7.36.1. Rovr Config > keybinds > select_page_up > select_page_up items](#keybinds_select_page_up_items)
-  - [7.37. Property `Rovr Config > keybinds > select_page_down`](#keybinds_select_page_down)
-    - [7.37.1. Rovr Config > keybinds > select_page_down > select_page_down items](#keybinds_select_page_down_items)
-  - [7.38. Property `Rovr Config > keybinds > select_home`](#keybinds_select_home)
-    - [7.38.1. Rovr Config > keybinds > select_home > select_home items](#keybinds_select_home_items)
-  - [7.39. Property `Rovr Config > keybinds > select_end`](#keybinds_select_end)
-    - [7.39.1. Rovr Config > keybinds > select_end > select_end items](#keybinds_select_end_items)
-  - [7.40. Property `Rovr Config > keybinds > tab_next`](#keybinds_tab_next)
-    - [7.40.1. Rovr Config > keybinds > tab_next > tab_next items](#keybinds_tab_next_items)
-  - [7.41. Property `Rovr Config > keybinds > tab_previous`](#keybinds_tab_previous)
-    - [7.41.1. Rovr Config > keybinds > tab_previous > tab_previous items](#keybinds_tab_previous_items)
-  - [7.42. Property `Rovr Config > keybinds > tab_new`](#keybinds_tab_new)
-    - [7.42.1. Rovr Config > keybinds > tab_new > tab_new items](#keybinds_tab_new_items)
-  - [7.43. Property `Rovr Config > keybinds > tab_close`](#keybinds_tab_close)
-    - [7.43.1. Rovr Config > keybinds > tab_close > tab_close items](#keybinds_tab_close_items)
-  - [7.44. Property `Rovr Config > keybinds > preview_scroll_left`](#keybinds_preview_scroll_left)
-    - [7.44.1. Rovr Config > keybinds > preview_scroll_left > preview_scroll_left items](#keybinds_preview_scroll_left_items)
-  - [7.45. Property `Rovr Config > keybinds > preview_scroll_right`](#keybinds_preview_scroll_right)
-    - [7.45.1. Rovr Config > keybinds > preview_scroll_right > preview_scroll_right items](#keybinds_preview_scroll_right_items)
-  - [7.46. Property `Rovr Config > keybinds > preview_select_right`](#keybinds_preview_select_right)
-    - [7.46.1. Rovr Config > keybinds > preview_select_right > preview_select_right items](#keybinds_preview_select_right_items)
-  - [7.47. Property `Rovr Config > keybinds > preview_select_left`](#keybinds_preview_select_left)
-    - [7.47.1. Rovr Config > keybinds > preview_select_left > preview_select_left items](#keybinds_preview_select_left_items)
+  - [7.34. Property `Rovr Config > keybinds > toggle_hidden_files`](#keybinds_toggle_hidden_files)
+    - [7.34.1. Rovr Config > keybinds > toggle_hidden_files > toggle_hidden_files items](#keybinds_toggle_hidden_files_items)
+  - [7.35. Property `Rovr Config > keybinds > select_up`](#keybinds_select_up)
+    - [7.35.1. Rovr Config > keybinds > select_up > select_up items](#keybinds_select_up_items)
+  - [7.36. Property `Rovr Config > keybinds > select_down`](#keybinds_select_down)
+    - [7.36.1. Rovr Config > keybinds > select_down > select_down items](#keybinds_select_down_items)
+  - [7.37. Property `Rovr Config > keybinds > select_page_up`](#keybinds_select_page_up)
+    - [7.37.1. Rovr Config > keybinds > select_page_up > select_page_up items](#keybinds_select_page_up_items)
+  - [7.38. Property `Rovr Config > keybinds > select_page_down`](#keybinds_select_page_down)
+    - [7.38.1. Rovr Config > keybinds > select_page_down > select_page_down items](#keybinds_select_page_down_items)
+  - [7.39. Property `Rovr Config > keybinds > select_home`](#keybinds_select_home)
+    - [7.39.1. Rovr Config > keybinds > select_home > select_home items](#keybinds_select_home_items)
+  - [7.40. Property `Rovr Config > keybinds > select_end`](#keybinds_select_end)
+    - [7.40.1. Rovr Config > keybinds > select_end > select_end items](#keybinds_select_end_items)
+  - [7.41. Property `Rovr Config > keybinds > tab_next`](#keybinds_tab_next)
+    - [7.41.1. Rovr Config > keybinds > tab_next > tab_next items](#keybinds_tab_next_items)
+  - [7.42. Property `Rovr Config > keybinds > tab_previous`](#keybinds_tab_previous)
+    - [7.42.1. Rovr Config > keybinds > tab_previous > tab_previous items](#keybinds_tab_previous_items)
+  - [7.43. Property `Rovr Config > keybinds > tab_new`](#keybinds_tab_new)
+    - [7.43.1. Rovr Config > keybinds > tab_new > tab_new items](#keybinds_tab_new_items)
+  - [7.44. Property `Rovr Config > keybinds > tab_close`](#keybinds_tab_close)
+    - [7.44.1. Rovr Config > keybinds > tab_close > tab_close items](#keybinds_tab_close_items)
+  - [7.45. Property `Rovr Config > keybinds > preview_scroll_left`](#keybinds_preview_scroll_left)
+    - [7.45.1. Rovr Config > keybinds > preview_scroll_left > preview_scroll_left items](#keybinds_preview_scroll_left_items)
+  - [7.46. Property `Rovr Config > keybinds > preview_scroll_right`](#keybinds_preview_scroll_right)
+    - [7.46.1. Rovr Config > keybinds > preview_scroll_right > preview_scroll_right items](#keybinds_preview_scroll_right_items)
+  - [7.47. Property `Rovr Config > keybinds > preview_select_right`](#keybinds_preview_select_right)
+    - [7.47.1. Rovr Config > keybinds > preview_select_right > preview_select_right items](#keybinds_preview_select_right_items)
+  - [7.48. Property `Rovr Config > keybinds > preview_select_left`](#keybinds_preview_select_left)
+    - [7.48.1. Rovr Config > keybinds > preview_select_left > preview_select_left items](#keybinds_preview_select_left_items)
+  - [7.49. Property `Rovr Config > keybinds > show_keybinds`](#keybinds_show_keybinds)
+    - [7.49.1. Rovr Config > keybinds > show_keybinds > show_keybinds items](#keybinds_show_keybinds_items)
 - [8. Property `Rovr Config > plugins`](#plugins)
   - [8.1. Property `Rovr Config > plugins > zoxide`](#plugins_zoxide)
     - [8.1.1. Property `Rovr Config > plugins > zoxide > enabled`](#plugins_zoxide_enabled)
     - [8.1.2. Property `Rovr Config > plugins > zoxide > keybinds`](#plugins_zoxide_keybinds)
       - [8.1.2.1. Rovr Config > plugins > zoxide > keybinds > keybinds items](#plugins_zoxide_keybinds_items)
+    - [8.1.3. Property `Rovr Config > plugins > zoxide > show_scores`](#plugins_zoxide_show_scores)
   - [8.2. Property `Rovr Config > plugins > bat`](#plugins_bat)
     - [8.2.1. Property `Rovr Config > plugins > bat > enabled`](#plugins_bat_enabled)
     - [8.2.2. Property `Rovr Config > plugins > bat > executable`](#plugins_bat_executable)
-    - [8.2.3. Property `Rovr Config > plugins > bat > show_line_numbers`](#plugins_bat_show_line_numbers)
   - [8.3. Property `Rovr Config > plugins > editor`](#plugins_editor)
     - [8.3.1. Property `Rovr Config > plugins > editor > enabled`](#plugins_editor_enabled)
     - [8.3.2. Property `Rovr Config > plugins > editor > file_executable`](#plugins_editor_file_executable)
     - [8.3.3. Property `Rovr Config > plugins > editor > folder_executable`](#plugins_editor_folder_executable)
     - [8.3.4. Property `Rovr Config > plugins > editor > keybinds`](#plugins_editor_keybinds)
       - [8.3.4.1. Rovr Config > plugins > editor > keybinds > keybinds items](#plugins_editor_keybinds_items)
-  - [8.4. Property `Rovr Config > plugins > zen_mode`](#plugins_zen_mode)
-    - [8.4.1. Property `Rovr Config > plugins > zen_mode > enabled`](#plugins_zen_mode_enabled)
-    - [8.4.2. Property `Rovr Config > plugins > zen_mode > keybinds`](#plugins_zen_mode_keybinds)
-      - [8.4.2.1. Rovr Config > plugins > zen_mode > keybinds > keybinds items](#plugins_zen_mode_keybinds_items)
+  - [8.4. Property `Rovr Config > plugins > finder`](#plugins_finder)
+    - [8.4.1. Property `Rovr Config > plugins > finder > enabled`](#plugins_finder_enabled)
+    - [8.4.2. Property `Rovr Config > plugins > finder > keybinds`](#plugins_finder_keybinds)
+      - [8.4.2.1. Rovr Config > plugins > finder > keybinds > keybinds items](#plugins_finder_keybinds_items)
+    - [8.4.3. Property `Rovr Config > plugins > finder > executable`](#plugins_finder_executable)
+    - [8.4.4. Property `Rovr Config > plugins > finder > relative_paths`](#plugins_finder_relative_paths)
+    - [8.4.5. Property `Rovr Config > plugins > finder > follow_symlinks`](#plugins_finder_follow_symlinks)
 
 **Title:** Rovr Config
 
@@ -210,13 +222,15 @@ description: config schema humanified
 | ------------------------------------------------------------------------ | ------- | ------------------------------------------------------------------------------------------------------------------------- |
 |   [tooltips](#interface_tooltips )                                       | boolean | Show tooltips when your mouse is over a tooltip supported button.<br />This is not hot reloaded.                          |
 |   [nerd_font](#interface_nerd_font )                                     | boolean | Use nerd font for rendering icons instead of weird characters and stuff.<br />Not properly hot-reloaded.                  |
-|   [use_reactive_layout](#interface_use_reactive_layout )                   | boolean | Hide certain elements based on the width and height of the terminal.                                                      |
+|   [use_reactive_layout](#interface_use_reactive_layout )                 | boolean | Hide certain elements based on the width and height of the terminal.                                                      |
 |   [show_progress_eta](#interface_show_progress_eta )                     | boolean | When copying or deleting files, show an ETA for when the action will be completed.                                        |
 |   [show_progress_percentage](#interface_show_progress_percentage )       | boolean | When copying or deleting files, show a percentage of how much had been completed.                                         |
 |   [truncate_progress_file_path](#interface_truncate_progress_file_path ) | boolean | When the process container is using file paths, truncate the file path to only view the first and last names of the path. |
 |   [preview_error](#interface_preview_error )                             | string  | If for any reason the file preview refused to show, this appears.                                                         |
 |   [preview_binary](#interface_preview_binary )                           | string  | If the current file cannot be read due to an encoding issue (ie not UTF8), it will display this message.                  |
 |   [preview_start](#interface_preview_start )                             | string  | This is shown when the rovr starts up. You may see it for a split second, but it will never appear afterwards.            |
+|   [compact_mode](#interface_compact_mode )                               | boolean | Enable compact mode to hide the menu bar and adjust layout for a more streamlined interface.                              |
+|   [show_line_numbers](#interface_show_line_numbers )                     | boolean | Add line numbers to the left gutter if you are viewing a text file.                                                       |
 |   [clock](#interface_clock )                                             | object  |                                                                                                                           |
 
 ### <a name="interface_tooltips"></a>1.1. Property `Rovr Config > interface > tooltips`
@@ -311,7 +325,27 @@ Not properly hot-reloaded.
 
 **Description:** This is shown when the rovr starts up. You may see it for a split second, but it will never appear afterwards.
 
-### <a name="interface_clock"></a>1.10. Property `Rovr Config > interface > clock`
+### <a name="interface_compact_mode"></a>1.10. Property `Rovr Config > interface > compact_mode`
+
+|              |           |
+| ------------ | --------- |
+| **Type**     | `boolean` |
+| **Required** | No        |
+| **Default**  | `false`   |
+
+**Description:** Enable compact mode to hide the menu bar and adjust layout for a more streamlined interface.
+
+### <a name="interface_show_line_numbers"></a>1.11. Property `Rovr Config > interface > show_line_numbers`
+
+|              |           |
+| ------------ | --------- |
+| **Type**     | `boolean` |
+| **Required** | No        |
+| **Default**  | `false`   |
+
+**Description:** Add line numbers to the left gutter if you are viewing a text file.
+
+### <a name="interface_clock"></a>1.12. Property `Rovr Config > interface > clock`
 
 |                           |             |
 | ------------------------- | ----------- |
@@ -324,7 +358,7 @@ Not properly hot-reloaded.
 |   [enabled](#interface_clock_enabled ) | boolean          | Show a clock in the tabs bar.                                    |
 |   [align](#interface_clock_align )     | enum (of string) | Align the clock to either the 'right' or 'left' of the tabs bar. |
 
-#### <a name="interface_clock_enabled"></a>1.10.1. Property `Rovr Config > interface > clock > enabled`
+#### <a name="interface_clock_enabled"></a>1.12.1. Property `Rovr Config > interface > clock > enabled`
 
 |              |           |
 | ------------ | --------- |
@@ -334,7 +368,7 @@ Not properly hot-reloaded.
 
 **Description:** Show a clock in the tabs bar.
 
-#### <a name="interface_clock_align"></a>1.10.2. Property `Rovr Config > interface > clock > align`
+#### <a name="interface_clock_align"></a>1.12.2. Property `Rovr Config > interface > clock > align`
 
 |              |                    |
 | ------------ | ------------------ |
@@ -356,17 +390,30 @@ Must be one of:
 | **Required**              | No          |
 | **Additional properties** | Not allowed |
 
-| Property                                                      | Type             | Title/Description                                                                                                                                                      |
-| ------------------------------------------------------------- | ---------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-|   [use_recycle_bin](#settings_use_recycle_bin )               | boolean          | When deleting a file, allow moving the file to the recycle bin.                                                                                                        |
-|   [copy_includes_metadata](#settings_copy_includes_metadata ) | boolean          | When copying over a file, preserve metadata from the original file, such as creation and modification times.                                                           |
-|   [image_protocol](#settings_image_protocol )                 | enum (of string) | The image protocol to use when displaying an image                                                                                                                     |
-|   [preview_full](#settings_preview_full )                     | boolean          | Whether or not you want to view the full file. It sort of works, not sure why it doesnt properly work, looking into it.                                                |
-|   [allow_tab_nav](#settings_allow_tab_nav )                   | boolean          | Allow navigating the main app screen with \`tab\` and \`shift+tab\`                                                                                                    |
-|   [append_new_tabs](#settings_append_new_tabs )               | boolean          | Choose whether or not to append new tabs instead of inserting them.<br />\`true\` => Append to the end of the tab list.<br />\`false\` => Insert after the active tab. |
-|   [cd_on_quit](#settings_cd_on_quit )                         | boolean          | When quitting rovr, write the current directory to a file, so that you can cd into it.                                                                                 |
+| Property                                                        | Type             | Title/Description                                                                                                                                                      |
+| --------------------------------------------------------------- | ---------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+|   [show_hidden_files](#settings_show_hidden_files )             | boolean          | Show hidden files and folders (those starting with a dot on Unix, or explicitly hidden on Windows/MacOS).                                                              |
+|   [use_recycle_bin](#settings_use_recycle_bin )                 | boolean          | When deleting a file, allow moving the file to the recycle bin.                                                                                                        |
+|   [copy_includes_metadata](#settings_copy_includes_metadata )   | boolean          | When copying over a file, preserve metadata from the original file, such as creation and modification times.                                                           |
+|   [image_protocol](#settings_image_protocol )                   | enum (of string) | The image protocol to use when displaying an image                                                                                                                     |
+|   [preview_full](#settings_preview_full )                       | boolean          | Whether or not you want to view the full file. It sort of works, not sure why it doesnt properly work, looking into it.                                                |
+|   [allow_tab_nav](#settings_allow_tab_nav )                     | boolean          | Allow navigating the main app screen with \`tab\` and \`shift+tab\`                                                                                                    |
+|   [append_new_tabs](#settings_append_new_tabs )                 | boolean          | Choose whether or not to append new tabs instead of inserting them.<br />\`true\` => Append to the end of the tab list.<br />\`false\` => Insert after the active tab. |
+|   [cd_on_quit](#settings_cd_on_quit )                           | boolean          | When quitting rovr, write the current directory to a file, so that you can cd into it.                                                                                 |
+|   [double_click_delay](#settings_double_click_delay )           | number           | The delay between two consecutive clicks to enter into a directory, or open a file.                                                                                    |
+|   [drive_watcher_frequency](#settings_drive_watcher_frequency ) | number           | How often (in seconds) to check for changes in mounted drives in the sidebar.                                                                                          |
 
-### <a name="settings_use_recycle_bin"></a>2.1. Property `Rovr Config > settings > use_recycle_bin`
+### <a name="settings_show_hidden_files"></a>2.1. Property `Rovr Config > settings > show_hidden_files`
+
+|              |           |
+| ------------ | --------- |
+| **Type**     | `boolean` |
+| **Required** | No        |
+| **Default**  | `false`   |
+
+**Description:** Show hidden files and folders (those starting with a dot on Unix, or explicitly hidden on Windows/MacOS).
+
+### <a name="settings_use_recycle_bin"></a>2.2. Property `Rovr Config > settings > use_recycle_bin`
 
 |              |           |
 | ------------ | --------- |
@@ -376,7 +423,7 @@ Must be one of:
 
 **Description:** When deleting a file, allow moving the file to the recycle bin.
 
-### <a name="settings_copy_includes_metadata"></a>2.2. Property `Rovr Config > settings > copy_includes_metadata`
+### <a name="settings_copy_includes_metadata"></a>2.3. Property `Rovr Config > settings > copy_includes_metadata`
 
 |              |           |
 | ------------ | --------- |
@@ -386,7 +433,7 @@ Must be one of:
 
 **Description:** When copying over a file, preserve metadata from the original file, such as creation and modification times.
 
-### <a name="settings_image_protocol"></a>2.3. Property `Rovr Config > settings > image_protocol`
+### <a name="settings_image_protocol"></a>2.4. Property `Rovr Config > settings > image_protocol`
 
 |              |                    |
 | ------------ | ------------------ |
@@ -403,7 +450,7 @@ Must be one of:
 * "Halfcell"
 * "Unicode"
 
-### <a name="settings_preview_full"></a>2.4. Property `Rovr Config > settings > preview_full`
+### <a name="settings_preview_full"></a>2.5. Property `Rovr Config > settings > preview_full`
 
 |              |           |
 | ------------ | --------- |
@@ -413,7 +460,7 @@ Must be one of:
 
 **Description:** Whether or not you want to view the full file. It sort of works, not sure why it doesnt properly work, looking into it.
 
-### <a name="settings_allow_tab_nav"></a>2.5. Property `Rovr Config > settings > allow_tab_nav`
+### <a name="settings_allow_tab_nav"></a>2.6. Property `Rovr Config > settings > allow_tab_nav`
 
 |              |           |
 | ------------ | --------- |
@@ -423,7 +470,7 @@ Must be one of:
 
 **Description:** Allow navigating the main app screen with `tab` and `shift+tab`
 
-### <a name="settings_append_new_tabs"></a>2.6. Property `Rovr Config > settings > append_new_tabs`
+### <a name="settings_append_new_tabs"></a>2.7. Property `Rovr Config > settings > append_new_tabs`
 
 |              |           |
 | ------------ | --------- |
@@ -435,7 +482,7 @@ Must be one of:
 `true` => Append to the end of the tab list.
 `false` => Insert after the active tab.
 
-### <a name="settings_cd_on_quit"></a>2.7. Property `Rovr Config > settings > cd_on_quit`
+### <a name="settings_cd_on_quit"></a>2.8. Property `Rovr Config > settings > cd_on_quit`
 
 |              |           |
 | ------------ | --------- |
@@ -444,6 +491,26 @@ Must be one of:
 | **Default**  | `false`   |
 
 **Description:** When quitting rovr, write the current directory to a file, so that you can cd into it.
+
+### <a name="settings_double_click_delay"></a>2.9. Property `Rovr Config > settings > double_click_delay`
+
+|              |          |
+| ------------ | -------- |
+| **Type**     | `number` |
+| **Required** | No       |
+| **Default**  | `0.25`   |
+
+**Description:** The delay between two consecutive clicks to enter into a directory, or open a file.
+
+### <a name="settings_drive_watcher_frequency"></a>2.10. Property `Rovr Config > settings > drive_watcher_frequency`
+
+|              |          |
+| ------------ | -------- |
+| **Type**     | `number` |
+| **Required** | No       |
+| **Default**  | `3.0`    |
+
+**Description:** How often (in seconds) to check for changes in mounted drives in the sidebar.
 
 ## <a name="metadata"></a>3. Property `Rovr Config > metadata`
 
@@ -462,11 +529,11 @@ Must be one of:
 
 ### <a name="metadata_fields"></a>3.1. Property `Rovr Config > metadata > fields`
 
-|              |                                                                      |
-| ------------ | -------------------------------------------------------------------- |
-| **Type**     | `array of enum (of string)`                                          |
-| **Required** | No                                                                   |
-| **Default**  | `["type", "permissions", "size", "modified", "accessed", "created"]` |
+|              |                                                                                |
+| ------------ | ------------------------------------------------------------------------------ |
+| **Type**     | `array of enum (of string)`                                                    |
+| **Required** | No                                                                             |
+| **Default**  | `["type", "permissions", "size", "modified", "accessed", "created", "hidden"]` |
 
 **Description:** The order of the metadata tags that you want to see in the Metadata section.
 
@@ -496,6 +563,7 @@ Must be one of:
 * "modified"
 * "accessed"
 * "created"
+* "hidden"
 
 ### <a name="metadata_datetime_format"></a>3.2. Property `Rovr Config > metadata > datetime_format`
 
@@ -1002,6 +1070,7 @@ Refer to https://textual.textualize.io/guide/design/#additional-variables for mo
 |   [hist_previous](#keybinds_hist_previous )                               | array of string | Go back in history.                                                                                                            |
 |   [hist_next](#keybinds_hist_next )                                       | array of string | Go forward in history.                                                                                                         |
 |   [toggle_visual](#keybinds_toggle_visual )                               | array of string | Enter or exit select/visual mode.                                                                                              |
+|   [toggle_hidden_files](#keybinds_toggle_hidden_files )                   | array of string | Toggle the visibility of hidden files (dot-prefixed on Unix, or flagged hidden on Windows/macOS).                              |
 |   [select_up](#keybinds_select_up )                                       | array of string | While in visual mode, extend the selection up.                                                                                 |
 |   [select_down](#keybinds_select_down )                                   | array of string | While in visual mode, extend the selection down.                                                                               |
 |   [select_page_up](#keybinds_select_page_up )                             | array of string | While in visual mode, extend the selection to the previous page.                                                               |
@@ -1016,6 +1085,7 @@ Refer to https://textual.textualize.io/guide/design/#additional-variables for mo
 |   [preview_scroll_right](#keybinds_preview_scroll_right )                 | array of string | While using \`settings.preview_full = true\`, and the preview container is focused, scroll right when this keybind is pressed. |
 |   [preview_select_right](#keybinds_preview_select_right )                 | array of string | While using TextArea for previewing, use this keybind to extend selection to the right.                                        |
 |   [preview_select_left](#keybinds_preview_select_left )                   | array of string | While using TextArea for previewing, use this keybind to extend selection to the left.                                         |
+|   [show_keybinds](#keybinds_show_keybinds )                               | array of string | Show the keybinds list with all available keybinds.                                                                            |
 
 ### <a name="keybinds_toggle_pin"></a>7.1. Property `Rovr Config > keybinds > toggle_pin`
 
@@ -1941,7 +2011,35 @@ Refer to https://textual.textualize.io/guide/design/#additional-variables for mo
 | **Type**     | `string` |
 | **Required** | No       |
 
-### <a name="keybinds_select_up"></a>7.34. Property `Rovr Config > keybinds > select_up`
+### <a name="keybinds_toggle_hidden_files"></a>7.34. Property `Rovr Config > keybinds > toggle_hidden_files`
+
+|              |                   |
+| ------------ | ----------------- |
+| **Type**     | `array of string` |
+| **Required** | No                |
+
+**Description:** Toggle the visibility of hidden files (dot-prefixed on Unix, or flagged hidden on Windows/macOS).
+
+|                      | Array restrictions |
+| -------------------- | ------------------ |
+| **Min items**        | N/A                |
+| **Max items**        | N/A                |
+| **Items unicity**    | False              |
+| **Additional items** | False              |
+| **Tuple validation** | See below          |
+
+| Each item of this array must be                                  | Description |
+| ---------------------------------------------------------------- | ----------- |
+| [toggle_hidden_files items](#keybinds_toggle_hidden_files_items) |             |
+
+#### <a name="keybinds_toggle_hidden_files_items"></a>7.34.1. Rovr Config > keybinds > toggle_hidden_files > toggle_hidden_files items
+
+|              |          |
+| ------------ | -------- |
+| **Type**     | `string` |
+| **Required** | No       |
+
+### <a name="keybinds_select_up"></a>7.35. Property `Rovr Config > keybinds > select_up`
 
 |              |                   |
 | ------------ | ----------------- |
@@ -1962,14 +2060,14 @@ Refer to https://textual.textualize.io/guide/design/#additional-variables for mo
 | -------------------------------------------- | ----------- |
 | [select_up items](#keybinds_select_up_items) |             |
 
-#### <a name="keybinds_select_up_items"></a>7.34.1. Rovr Config > keybinds > select_up > select_up items
+#### <a name="keybinds_select_up_items"></a>7.35.1. Rovr Config > keybinds > select_up > select_up items
 
 |              |          |
 | ------------ | -------- |
 | **Type**     | `string` |
 | **Required** | No       |
 
-### <a name="keybinds_select_down"></a>7.35. Property `Rovr Config > keybinds > select_down`
+### <a name="keybinds_select_down"></a>7.36. Property `Rovr Config > keybinds > select_down`
 
 |              |                   |
 | ------------ | ----------------- |
@@ -1990,14 +2088,14 @@ Refer to https://textual.textualize.io/guide/design/#additional-variables for mo
 | ------------------------------------------------ | ----------- |
 | [select_down items](#keybinds_select_down_items) |             |
 
-#### <a name="keybinds_select_down_items"></a>7.35.1. Rovr Config > keybinds > select_down > select_down items
+#### <a name="keybinds_select_down_items"></a>7.36.1. Rovr Config > keybinds > select_down > select_down items
 
 |              |          |
 | ------------ | -------- |
 | **Type**     | `string` |
 | **Required** | No       |
 
-### <a name="keybinds_select_page_up"></a>7.36. Property `Rovr Config > keybinds > select_page_up`
+### <a name="keybinds_select_page_up"></a>7.37. Property `Rovr Config > keybinds > select_page_up`
 
 |              |                   |
 | ------------ | ----------------- |
@@ -2018,14 +2116,14 @@ Refer to https://textual.textualize.io/guide/design/#additional-variables for mo
 | ------------------------------------------------------ | ----------- |
 | [select_page_up items](#keybinds_select_page_up_items) |             |
 
-#### <a name="keybinds_select_page_up_items"></a>7.36.1. Rovr Config > keybinds > select_page_up > select_page_up items
+#### <a name="keybinds_select_page_up_items"></a>7.37.1. Rovr Config > keybinds > select_page_up > select_page_up items
 
 |              |          |
 | ------------ | -------- |
 | **Type**     | `string` |
 | **Required** | No       |
 
-### <a name="keybinds_select_page_down"></a>7.37. Property `Rovr Config > keybinds > select_page_down`
+### <a name="keybinds_select_page_down"></a>7.38. Property `Rovr Config > keybinds > select_page_down`
 
 |              |                   |
 | ------------ | ----------------- |
@@ -2046,14 +2144,14 @@ Refer to https://textual.textualize.io/guide/design/#additional-variables for mo
 | ---------------------------------------------------------- | ----------- |
 | [select_page_down items](#keybinds_select_page_down_items) |             |
 
-#### <a name="keybinds_select_page_down_items"></a>7.37.1. Rovr Config > keybinds > select_page_down > select_page_down items
+#### <a name="keybinds_select_page_down_items"></a>7.38.1. Rovr Config > keybinds > select_page_down > select_page_down items
 
 |              |          |
 | ------------ | -------- |
 | **Type**     | `string` |
 | **Required** | No       |
 
-### <a name="keybinds_select_home"></a>7.38. Property `Rovr Config > keybinds > select_home`
+### <a name="keybinds_select_home"></a>7.39. Property `Rovr Config > keybinds > select_home`
 
 |              |                   |
 | ------------ | ----------------- |
@@ -2074,14 +2172,14 @@ Refer to https://textual.textualize.io/guide/design/#additional-variables for mo
 | ------------------------------------------------ | ----------- |
 | [select_home items](#keybinds_select_home_items) |             |
 
-#### <a name="keybinds_select_home_items"></a>7.38.1. Rovr Config > keybinds > select_home > select_home items
+#### <a name="keybinds_select_home_items"></a>7.39.1. Rovr Config > keybinds > select_home > select_home items
 
 |              |          |
 | ------------ | -------- |
 | **Type**     | `string` |
 | **Required** | No       |
 
-### <a name="keybinds_select_end"></a>7.39. Property `Rovr Config > keybinds > select_end`
+### <a name="keybinds_select_end"></a>7.40. Property `Rovr Config > keybinds > select_end`
 
 |              |                   |
 | ------------ | ----------------- |
@@ -2102,14 +2200,14 @@ Refer to https://textual.textualize.io/guide/design/#additional-variables for mo
 | ---------------------------------------------- | ----------- |
 | [select_end items](#keybinds_select_end_items) |             |
 
-#### <a name="keybinds_select_end_items"></a>7.39.1. Rovr Config > keybinds > select_end > select_end items
+#### <a name="keybinds_select_end_items"></a>7.40.1. Rovr Config > keybinds > select_end > select_end items
 
 |              |          |
 | ------------ | -------- |
 | **Type**     | `string` |
 | **Required** | No       |
 
-### <a name="keybinds_tab_next"></a>7.40. Property `Rovr Config > keybinds > tab_next`
+### <a name="keybinds_tab_next"></a>7.41. Property `Rovr Config > keybinds > tab_next`
 
 |              |                   |
 | ------------ | ----------------- |
@@ -2130,14 +2228,14 @@ Refer to https://textual.textualize.io/guide/design/#additional-variables for mo
 | ------------------------------------------ | ----------- |
 | [tab_next items](#keybinds_tab_next_items) |             |
 
-#### <a name="keybinds_tab_next_items"></a>7.40.1. Rovr Config > keybinds > tab_next > tab_next items
+#### <a name="keybinds_tab_next_items"></a>7.41.1. Rovr Config > keybinds > tab_next > tab_next items
 
 |              |          |
 | ------------ | -------- |
 | **Type**     | `string` |
 | **Required** | No       |
 
-### <a name="keybinds_tab_previous"></a>7.41. Property `Rovr Config > keybinds > tab_previous`
+### <a name="keybinds_tab_previous"></a>7.42. Property `Rovr Config > keybinds > tab_previous`
 
 |              |                   |
 | ------------ | ----------------- |
@@ -2158,14 +2256,14 @@ Refer to https://textual.textualize.io/guide/design/#additional-variables for mo
 | -------------------------------------------------- | ----------- |
 | [tab_previous items](#keybinds_tab_previous_items) |             |
 
-#### <a name="keybinds_tab_previous_items"></a>7.41.1. Rovr Config > keybinds > tab_previous > tab_previous items
+#### <a name="keybinds_tab_previous_items"></a>7.42.1. Rovr Config > keybinds > tab_previous > tab_previous items
 
 |              |          |
 | ------------ | -------- |
 | **Type**     | `string` |
 | **Required** | No       |
 
-### <a name="keybinds_tab_new"></a>7.42. Property `Rovr Config > keybinds > tab_new`
+### <a name="keybinds_tab_new"></a>7.43. Property `Rovr Config > keybinds > tab_new`
 
 |              |                   |
 | ------------ | ----------------- |
@@ -2186,14 +2284,14 @@ Refer to https://textual.textualize.io/guide/design/#additional-variables for mo
 | ---------------------------------------- | ----------- |
 | [tab_new items](#keybinds_tab_new_items) |             |
 
-#### <a name="keybinds_tab_new_items"></a>7.42.1. Rovr Config > keybinds > tab_new > tab_new items
+#### <a name="keybinds_tab_new_items"></a>7.43.1. Rovr Config > keybinds > tab_new > tab_new items
 
 |              |          |
 | ------------ | -------- |
 | **Type**     | `string` |
 | **Required** | No       |
 
-### <a name="keybinds_tab_close"></a>7.43. Property `Rovr Config > keybinds > tab_close`
+### <a name="keybinds_tab_close"></a>7.44. Property `Rovr Config > keybinds > tab_close`
 
 |              |                   |
 | ------------ | ----------------- |
@@ -2214,14 +2312,14 @@ Refer to https://textual.textualize.io/guide/design/#additional-variables for mo
 | -------------------------------------------- | ----------- |
 | [tab_close items](#keybinds_tab_close_items) |             |
 
-#### <a name="keybinds_tab_close_items"></a>7.43.1. Rovr Config > keybinds > tab_close > tab_close items
+#### <a name="keybinds_tab_close_items"></a>7.44.1. Rovr Config > keybinds > tab_close > tab_close items
 
 |              |          |
 | ------------ | -------- |
 | **Type**     | `string` |
 | **Required** | No       |
 
-### <a name="keybinds_preview_scroll_left"></a>7.44. Property `Rovr Config > keybinds > preview_scroll_left`
+### <a name="keybinds_preview_scroll_left"></a>7.45. Property `Rovr Config > keybinds > preview_scroll_left`
 
 |              |                   |
 | ------------ | ----------------- |
@@ -2242,14 +2340,14 @@ Refer to https://textual.textualize.io/guide/design/#additional-variables for mo
 | ---------------------------------------------------------------- | ----------- |
 | [preview_scroll_left items](#keybinds_preview_scroll_left_items) |             |
 
-#### <a name="keybinds_preview_scroll_left_items"></a>7.44.1. Rovr Config > keybinds > preview_scroll_left > preview_scroll_left items
+#### <a name="keybinds_preview_scroll_left_items"></a>7.45.1. Rovr Config > keybinds > preview_scroll_left > preview_scroll_left items
 
 |              |          |
 | ------------ | -------- |
 | **Type**     | `string` |
 | **Required** | No       |
 
-### <a name="keybinds_preview_scroll_right"></a>7.45. Property `Rovr Config > keybinds > preview_scroll_right`
+### <a name="keybinds_preview_scroll_right"></a>7.46. Property `Rovr Config > keybinds > preview_scroll_right`
 
 |              |                   |
 | ------------ | ----------------- |
@@ -2270,14 +2368,14 @@ Refer to https://textual.textualize.io/guide/design/#additional-variables for mo
 | ------------------------------------------------------------------ | ----------- |
 | [preview_scroll_right items](#keybinds_preview_scroll_right_items) |             |
 
-#### <a name="keybinds_preview_scroll_right_items"></a>7.45.1. Rovr Config > keybinds > preview_scroll_right > preview_scroll_right items
+#### <a name="keybinds_preview_scroll_right_items"></a>7.46.1. Rovr Config > keybinds > preview_scroll_right > preview_scroll_right items
 
 |              |          |
 | ------------ | -------- |
 | **Type**     | `string` |
 | **Required** | No       |
 
-### <a name="keybinds_preview_select_right"></a>7.46. Property `Rovr Config > keybinds > preview_select_right`
+### <a name="keybinds_preview_select_right"></a>7.47. Property `Rovr Config > keybinds > preview_select_right`
 
 |              |                   |
 | ------------ | ----------------- |
@@ -2298,14 +2396,14 @@ Refer to https://textual.textualize.io/guide/design/#additional-variables for mo
 | ------------------------------------------------------------------ | ----------- |
 | [preview_select_right items](#keybinds_preview_select_right_items) |             |
 
-#### <a name="keybinds_preview_select_right_items"></a>7.46.1. Rovr Config > keybinds > preview_select_right > preview_select_right items
+#### <a name="keybinds_preview_select_right_items"></a>7.47.1. Rovr Config > keybinds > preview_select_right > preview_select_right items
 
 |              |          |
 | ------------ | -------- |
 | **Type**     | `string` |
 | **Required** | No       |
 
-### <a name="keybinds_preview_select_left"></a>7.47. Property `Rovr Config > keybinds > preview_select_left`
+### <a name="keybinds_preview_select_left"></a>7.48. Property `Rovr Config > keybinds > preview_select_left`
 
 |              |                   |
 | ------------ | ----------------- |
@@ -2326,7 +2424,35 @@ Refer to https://textual.textualize.io/guide/design/#additional-variables for mo
 | ---------------------------------------------------------------- | ----------- |
 | [preview_select_left items](#keybinds_preview_select_left_items) |             |
 
-#### <a name="keybinds_preview_select_left_items"></a>7.47.1. Rovr Config > keybinds > preview_select_left > preview_select_left items
+#### <a name="keybinds_preview_select_left_items"></a>7.48.1. Rovr Config > keybinds > preview_select_left > preview_select_left items
+
+|              |          |
+| ------------ | -------- |
+| **Type**     | `string` |
+| **Required** | No       |
+
+### <a name="keybinds_show_keybinds"></a>7.49. Property `Rovr Config > keybinds > show_keybinds`
+
+|              |                   |
+| ------------ | ----------------- |
+| **Type**     | `array of string` |
+| **Required** | No                |
+
+**Description:** Show the keybinds list with all available keybinds.
+
+|                      | Array restrictions |
+| -------------------- | ------------------ |
+| **Min items**        | N/A                |
+| **Max items**        | N/A                |
+| **Items unicity**    | False              |
+| **Additional items** | False              |
+| **Tuple validation** | See below          |
+
+| Each item of this array must be                      | Description |
+| ---------------------------------------------------- | ----------- |
+| [show_keybinds items](#keybinds_show_keybinds_items) |             |
+
+#### <a name="keybinds_show_keybinds_items"></a>7.49.1. Rovr Config > keybinds > show_keybinds > show_keybinds items
 
 |              |          |
 | ------------ | -------- |
@@ -2341,12 +2467,12 @@ Refer to https://textual.textualize.io/guide/design/#additional-variables for mo
 | **Required**              | No          |
 | **Additional properties** | Not allowed |
 
-| Property                         | Type   | Title/Description |
-| -------------------------------- | ------ | ----------------- |
-|   [zoxide](#plugins_zoxide )     | object |                   |
-|   [bat](#plugins_bat )           | object |                   |
-|   [editor](#plugins_editor )     | object |                   |
-|   [zen_mode](#plugins_zen_mode ) | object |                   |
+| Property                     | Type   | Title/Description |
+| ---------------------------- | ------ | ----------------- |
+|   [zoxide](#plugins_zoxide ) | object |                   |
+|   [bat](#plugins_bat )       | object |                   |
+|   [editor](#plugins_editor ) | object |                   |
+|   [finder](#plugins_finder ) | object |                   |
 
 ### <a name="plugins_zoxide"></a>8.1. Property `Rovr Config > plugins > zoxide`
 
@@ -2356,10 +2482,11 @@ Refer to https://textual.textualize.io/guide/design/#additional-variables for mo
 | **Required**              | No          |
 | **Additional properties** | Not allowed |
 
-| Property                                | Type            | Title/Description                     |
-| --------------------------------------- | --------------- | ------------------------------------- |
-|   [enabled](#plugins_zoxide_enabled )   | boolean         | Enable or disable zoxide travelling.  |
-|   [keybinds](#plugins_zoxide_keybinds ) | array of string | The keybind to open the zoxide modal. |
+| Property                                      | Type            | Title/Description                                          |
+| --------------------------------------------- | --------------- | ---------------------------------------------------------- |
+|   [enabled](#plugins_zoxide_enabled )         | boolean         | Enable or disable zoxide travelling.                       |
+|   [keybinds](#plugins_zoxide_keybinds )       | array of string | The keybind to open the zoxide modal.                      |
+|   [show_scores](#plugins_zoxide_show_scores ) | boolean         | Display zoxide frequency scores alongside directory paths. |
 
 #### <a name="plugins_zoxide_enabled"></a>8.1.1. Property `Rovr Config > plugins > zoxide > enabled`
 
@@ -2400,6 +2527,16 @@ Refer to https://textual.textualize.io/guide/design/#additional-variables for mo
 | **Type**     | `string` |
 | **Required** | No       |
 
+#### <a name="plugins_zoxide_show_scores"></a>8.1.3. Property `Rovr Config > plugins > zoxide > show_scores`
+
+|              |           |
+| ------------ | --------- |
+| **Type**     | `boolean` |
+| **Required** | No        |
+| **Default**  | `false`   |
+
+**Description:** Display zoxide frequency scores alongside directory paths.
+
 ### <a name="plugins_bat"></a>8.2. Property `Rovr Config > plugins > bat`
 
 |                           |             |
@@ -2408,11 +2545,10 @@ Refer to https://textual.textualize.io/guide/design/#additional-variables for mo
 | **Required**              | No          |
 | **Additional properties** | Not allowed |
 
-| Property                                               | Type    | Title/Description                           |
-| ------------------------------------------------------ | ------- | ------------------------------------------- |
-|   [enabled](#plugins_bat_enabled )                     | boolean | Enable or disable bat for previewing files. |
-|   [executable](#plugins_bat_executable )               | string  | The executable for bat.                     |
-|   [show_line_numbers](#plugins_bat_show_line_numbers ) | boolean | Make batcat show line numbers.              |
+| Property                                 | Type    | Title/Description                           |
+| ---------------------------------------- | ------- | ------------------------------------------- |
+|   [enabled](#plugins_bat_enabled )       | boolean | Enable or disable bat for previewing files. |
+|   [executable](#plugins_bat_executable ) | string  | The executable for bat.                     |
 
 #### <a name="plugins_bat_enabled"></a>8.2.1. Property `Rovr Config > plugins > bat > enabled`
 
@@ -2433,16 +2569,6 @@ Refer to https://textual.textualize.io/guide/design/#additional-variables for mo
 | **Default**  | `"bat"`  |
 
 **Description:** The executable for bat.
-
-#### <a name="plugins_bat_show_line_numbers"></a>8.2.3. Property `Rovr Config > plugins > bat > show_line_numbers`
-
-|              |           |
-| ------------ | --------- |
-| **Type**     | `boolean` |
-| **Required** | No        |
-| **Default**  | `true`    |
-
-**Description:** Make batcat show line numbers.
 
 ### <a name="plugins_editor"></a>8.3. Property `Rovr Config > plugins > editor`
 
@@ -2518,7 +2644,7 @@ Refer to https://textual.textualize.io/guide/design/#additional-variables for mo
 | **Type**     | `string` |
 | **Required** | No       |
 
-### <a name="plugins_zen_mode"></a>8.4. Property `Rovr Config > plugins > zen_mode`
+### <a name="plugins_finder"></a>8.4. Property `Rovr Config > plugins > finder`
 
 |                           |             |
 | ------------------------- | ----------- |
@@ -2526,30 +2652,33 @@ Refer to https://textual.textualize.io/guide/design/#additional-variables for mo
 | **Required**              | No          |
 | **Additional properties** | Not allowed |
 
-| Property                                  | Type            | Title/Description                                                                                    |
-| ----------------------------------------- | --------------- | ---------------------------------------------------------------------------------------------------- |
-|   [enabled](#plugins_zen_mode_enabled )   | boolean         | Allow enabling or disabling zen mode. Nothing shows up while in zen mode, except only the file list. |
-|   [keybinds](#plugins_zen_mode_keybinds ) | array of string | The keybind to toggle zen mode.                                                                      |
+| Property                                              | Type            | Title/Description                                  |
+| ----------------------------------------------------- | --------------- | -------------------------------------------------- |
+|   [enabled](#plugins_finder_enabled )                 | boolean         | Enable recursive file search using fd.             |
+|   [keybinds](#plugins_finder_keybinds )               | array of string | The keybind to open the file search picker.        |
+|   [executable](#plugins_finder_executable )           | string          | fd executable name or path.                        |
+|   [relative_paths](#plugins_finder_relative_paths )   | boolean         | Whether to show as relative path or absolute path. |
+|   [follow_symlinks](#plugins_finder_follow_symlinks ) | boolean         | Whether fd should follow symlinks when searching.  |
 
-#### <a name="plugins_zen_mode_enabled"></a>8.4.1. Property `Rovr Config > plugins > zen_mode > enabled`
+#### <a name="plugins_finder_enabled"></a>8.4.1. Property `Rovr Config > plugins > finder > enabled`
 
 |              |           |
 | ------------ | --------- |
 | **Type**     | `boolean` |
 | **Required** | No        |
-| **Default**  | `false`   |
+| **Default**  | `true`    |
 
-**Description:** Allow enabling or disabling zen mode. Nothing shows up while in zen mode, except only the file list.
+**Description:** Enable recursive file search using fd.
 
-#### <a name="plugins_zen_mode_keybinds"></a>8.4.2. Property `Rovr Config > plugins > zen_mode > keybinds`
+#### <a name="plugins_finder_keybinds"></a>8.4.2. Property `Rovr Config > plugins > finder > keybinds`
 
 |              |                   |
 | ------------ | ----------------- |
 | **Type**     | `array of string` |
 | **Required** | No                |
-| **Default**  | `["Z"]`           |
+| **Default**  | `["f"]`           |
 
-**Description:** The keybind to toggle zen mode.
+**Description:** The keybind to open the file search picker.
 
 |                      | Array restrictions |
 | -------------------- | ------------------ |
@@ -2559,15 +2688,45 @@ Refer to https://textual.textualize.io/guide/design/#additional-variables for mo
 | **Additional items** | False              |
 | **Tuple validation** | See below          |
 
-| Each item of this array must be                    | Description |
-| -------------------------------------------------- | ----------- |
-| [keybinds items](#plugins_zen_mode_keybinds_items) |             |
+| Each item of this array must be                  | Description |
+| ------------------------------------------------ | ----------- |
+| [keybinds items](#plugins_finder_keybinds_items) |             |
 
-##### <a name="plugins_zen_mode_keybinds_items"></a>8.4.2.1. Rovr Config > plugins > zen_mode > keybinds > keybinds items
+##### <a name="plugins_finder_keybinds_items"></a>8.4.2.1. Rovr Config > plugins > finder > keybinds > keybinds items
 
 |              |          |
 | ------------ | -------- |
 | **Type**     | `string` |
 | **Required** | No       |
+
+#### <a name="plugins_finder_executable"></a>8.4.3. Property `Rovr Config > plugins > finder > executable`
+
+|              |          |
+| ------------ | -------- |
+| **Type**     | `string` |
+| **Required** | No       |
+| **Default**  | `"fd"`   |
+
+**Description:** fd executable name or path.
+
+#### <a name="plugins_finder_relative_paths"></a>8.4.4. Property `Rovr Config > plugins > finder > relative_paths`
+
+|              |           |
+| ------------ | --------- |
+| **Type**     | `boolean` |
+| **Required** | No        |
+| **Default**  | `true`    |
+
+**Description:** Whether to show as relative path or absolute path.
+
+#### <a name="plugins_finder_follow_symlinks"></a>8.4.5. Property `Rovr Config > plugins > finder > follow_symlinks`
+
+|              |           |
+| ------------ | --------- |
+| **Type**     | `boolean` |
+| **Required** | No        |
+| **Default**  | `false`   |
+
+**Description:** Whether fd should follow symlinks when searching.
 
 ----------------------------------------------------------------------------------------------------------------------------

@@ -20,6 +20,6 @@
     "starlight-llms-txt": "^0.6.0"
   },
   "devDependencies": {
-    "astro-vtbot": "^2.1.7"
+    "astro-vtbot": "^2.1.8"
   }
 }

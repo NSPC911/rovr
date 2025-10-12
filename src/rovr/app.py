@@ -415,7 +415,9 @@ class Application(App, inherit_bindings=False):
                 with open(self._cwd_file, "w", encoding="utf-8") as f:
                     f.write(getcwd())
             except OSError:
-                message += f"Failed to write cwd file `{path.basename(self._cwd_file)}`!\n"
+                message += (
+                    f"Failed to write cwd file `{path.basename(self._cwd_file)}`!\n"
+                )
         # 2) Otherwise, honor legacy cd_on_quit behavior
         elif config["settings"]["cd_on_quit"]:
             try:

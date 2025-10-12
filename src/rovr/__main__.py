@@ -80,7 +80,9 @@ try:
     )
     @click.option_panel("Config", options=["--with", "--without"])
     @click.option_panel("Paths", options=["--chooser-file", "--cwd-file"])
-    @click.option_panel("Miscellaneous", options=["--version", "--config-path", "--help"])
+    @click.option_panel(
+        "Miscellaneous", options=["--version", "--config-path", "--help"]
+    )
     @click.argument("path", type=str, required=False, default="")
     @click.rich_config({"show_arguments": True})
     def main(

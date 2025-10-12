@@ -414,7 +414,7 @@ class Application(App, inherit_bindings=False):
                 with open(self._cwd_file, "w", encoding="utf-8") as f:
                     f.write(getcwd())
             except OSError:
-                pass
+                message += f"Failed to write cwd file `{path.basename(self._cwd_file)}`!\n"
         # 2) Otherwise, honor legacy cd_on_quit behavior
         elif config["settings"]["cd_on_quit"]:
             try:
@@ -425,7 +425,7 @@ class Application(App, inherit_bindings=False):
                 ) as file:
                     file.write(getcwd())
             except OSError:
-                pass
+                message += "Failed to write `rovr_quit_cd_path`!\n"
         # 3) Write selected/active item(s) to --chooser-file, if provided
         if self._chooser_file:
             try:
@@ -434,10 +434,10 @@ class Application(App, inherit_bindings=False):
                 if selected:
                     with open(self._chooser_file, "w", encoding="utf-8") as f:
                         f.write("\n".join(selected))
-            except Exception:
+            except OSError:
                 # Any failure writing chooser file should not block exit
-                pass
-        self.exit()
+                message += f"Failed to write chooser file `{path.basename(self._chooser_file)}`"
+        self.exit(message.strip())
 
     def cd(
         self,

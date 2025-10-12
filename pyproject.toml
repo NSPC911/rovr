@@ -75,6 +75,7 @@ check.sequence = [
   { cmd = "ty check" },
   { cmd = "ruff check" }
 ]
+format = "ruff format --preview"
 
 [tool.ruff.lint]
 select = [

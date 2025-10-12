@@ -237,7 +237,7 @@ class ProcessContainer(VerticalScroll):
                                     continue
                             elif is_file_in_use:
                                 # need to ensure unix users see an
-                                # error so they crrate an issue
+                                # error so they create an issue
                                 self.app.panic()
                             # fallback for regular permission issues
                             if action_on_permission_error == "ask":
@@ -305,7 +305,7 @@ class ProcessContainer(VerticalScroll):
                             continue
                     elif is_file_in_use:
                         # need to ensure unix users see an
-                        # error so they crrate an issue
+                        # error so they create an issue
                         self.app.panic()
                     # fallback for regular permission issues
                     if action_on_permission_error == "ask":

@@ -207,6 +207,10 @@ class Application(App, inherit_bindings=False):
         if not ui_state["preview_sidebar_visible"]:
             self.query_one(PreviewContainer).add_class("hide")
 
+        # Apply hidden files state
+        if ui_state.get("show_hidden_files", False):
+            config["settings"]["show_hidden_files"] = True
+
         # tooltips
         if config["interface"]["tooltips"]:
             self.query_one("#back").tooltip = "Go back in history"
@@ -314,29 +318,32 @@ class Application(App, inherit_bindings=False):
             case key if key in config["keybinds"]["toggle_pinned_sidebar"]:
                 self.query_one("#file_list").focus()
                 pinned_sidebar_hidden = "hide" in self.query_one("#pinned_sidebar_container").classes
-                pinned_sidebar_visible = not pinned_sidebar_hidden
-                if pinned_sidebar_visible:
+                if pinned_sidebar_hidden:
                     self.query_one("#pinned_sidebar_container").remove_class("hide")
+                    pinned_sidebar_visible = True
                 else:
                     self.query_one("#pinned_sidebar_container").add_class("hide")
+                    pinned_sidebar_visible = False
                 update_ui_state("pinned_sidebar_visible", pinned_sidebar_visible)
             case key if key in config["keybinds"]["toggle_preview_sidebar"]:
                 self.query_one("#file_list").focus()
                 preview_sidebar_hidden = "hide" in self.query_one(PreviewContainer).classes
-                preview_sidebar_visible = not preview_sidebar_hidden
-                if preview_sidebar_visible:
+                if preview_sidebar_hidden:
                     self.query_one(PreviewContainer).remove_class("hide")
+                    preview_sidebar_visible = True
                 else:
                     self.query_one(PreviewContainer).add_class("hide")
+                    preview_sidebar_visible = False
                 update_ui_state("preview_sidebar_visible", preview_sidebar_visible)
             case key if key in config["keybinds"]["toggle_footer"]:
                 self.query_one("#file_list").focus()
                 footer_hidden = "hide" in self.query_one("#footer").classes
-                footer_visible = not footer_hidden
-                if footer_visible:
+                if footer_hidden:
                     self.query_one("#footer").remove_class("hide")
+                    footer_visible = True
                 else:
                     self.query_one("#footer").add_class("hide")
+                    footer_visible = False
                 update_ui_state("footer_visible", footer_visible)
             case key if (
                 key in config["keybinds"]["tab_next"]

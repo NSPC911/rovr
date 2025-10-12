@@ -18,6 +18,7 @@ from rovr.functions import icons as icon_utils
 from rovr.functions import path as path_utils
 from rovr.functions import pins as pin_utils
 from rovr.functions import utils
+from rovr.functions.ui_state import get_ui_state, update_ui_state
 from rovr.variables.constants import buttons_that_depend_on_path, config, vindings
 from rovr.variables.maps import ARCHIVE_EXTENSIONS
 
@@ -509,13 +510,18 @@ class FileList(SelectionList, inherit_bindings=False):
 
     async def toggle_hidden_files(self) -> None:
         """Toggle the visibility of hidden files."""
-        config["settings"]["show_hidden_files"] = not config["settings"][
-            "show_hidden_files"
-        ]
+        # Get current state from ui_state
+        current_state = get_ui_state()
+        new_show_hidden = not current_state.get("show_hidden_files", False)
+
+        # Update config and ui_state
+        config["settings"]["show_hidden_files"] = new_show_hidden
+        update_ui_state("show_hidden_files", new_show_hidden)
+
         self.update_file_list(add_to_session=False)
         status = (
             "[$success underline]shown"
-            if config["settings"]["show_hidden_files"]
+            if new_show_hidden
             else "[$error underline]hidden"
         )
         self.app.notify(

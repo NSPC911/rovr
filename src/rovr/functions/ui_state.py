@@ -15,6 +15,7 @@ class UIStateManager:
         "footer_visible": True,
         "pinned_sidebar_visible": True,
         "preview_sidebar_visible": True,
+        "show_hidden_files": False,
     }
 
     def __init__(self) -> None:

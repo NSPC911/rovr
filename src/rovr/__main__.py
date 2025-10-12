@@ -126,7 +126,7 @@ try:
             pprint(table)
             return
         elif show_version:
-            pprint("v0.3.0")
+            pprint("v0.4.1")
             return
 
         from rovr.app import Application

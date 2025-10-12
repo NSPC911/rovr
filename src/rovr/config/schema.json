@@ -133,11 +133,6 @@
           "default": true,
           "description": "Choose whether or not to append new tabs instead of inserting them.\n`true` => Append to the end of the tab list.\n`false` => Insert after the active tab."
         },
-        "cd_on_quit": {
-          "type": "boolean",
-          "default": false,
-          "description": "When quitting rovr, write the current directory to a file, so that you can cd into it."
-        },
         "double_click_delay": {
           "type": "number",
           "default": 0.25,

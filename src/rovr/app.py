@@ -424,7 +424,7 @@ class Application(App, inherit_bindings=False):
             )
         ):
             return
-        # 1) Write cwd to explicit --cwd-file if provided
+        # Write cwd to explicit --cwd-file if provided
         message = ""
         if self._cwd_file:
             try:
@@ -434,18 +434,7 @@ class Application(App, inherit_bindings=False):
                 message += (
                     f"Failed to write cwd file `{path.basename(self._cwd_file)}`!\n"
                 )
-        # 2) Otherwise, honor legacy cd_on_quit behavior
-        elif config["settings"]["cd_on_quit"]:
-            try:
-                with open(
-                    path.join(VAR_TO_DIR["CONFIG"], "rovr_quit_cd_path"),
-                    "w",
-                    encoding="utf-8",
-                ) as file:
-                    file.write(getcwd())
-            except OSError:
-                message += "Failed to write `rovr_quit_cd_path`!\n"
-        # 3) Write selected/active item(s) to --chooser-file, if provided
+        # Write selected/active item(s) to --chooser-file, if provided
         if self._chooser_file:
             try:
                 file_list = self.query_one("#file_list")

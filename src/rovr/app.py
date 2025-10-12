@@ -409,6 +409,7 @@ class Application(App, inherit_bindings=False):
         ):
             return
         # 1) Write cwd to explicit --cwd-file if provided
+        message = ""
         if self._cwd_file:
             try:
                 with open(self._cwd_file, "w", encoding="utf-8") as f:

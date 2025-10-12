@@ -862,11 +862,24 @@ wheels = [
 ]
 
 [[package]]
+name = "rich-click"
+version = "1.9.3"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "click" },
+    { name = "colorama", marker = "sys_platform == 'win32'" },
+    { name = "rich" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/9d/90/95cff624a176de6d00a4ddc4fb0238649bca09c19bd37d5b8d1962f8dcfc/rich_click-1.9.3.tar.gz", hash = "sha256:60839150a935604df1378b159da340d3fff91f912903e935da7cb615b5738c1b", size = 73549, upload-time = "2025-10-09T18:00:40.455Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/5b/76/5679d9eee13b8670084d2fe5d7933931b50fd896391693ba690f63916d66/rich_click-1.9.3-py3-none-any.whl", hash = "sha256:8ef51bc340db4d048a846c15c035d27b88acf720cbbb9b6fecf6c8b1a297b909", size = 70168, upload-time = "2025-10-09T18:00:39.464Z" },
+]
+
+[[package]]
 name = "rovr"
 version = "0.3.0"
 source = { editable = "." }
 dependencies = [
-    { name = "click" },
     { name = "humanize" },
     { name = "jsonschema" },
     { name = "lzstring" },
@@ -875,6 +888,7 @@ dependencies = [
     { name = "platformdirs" },
     { name = "psutil" },
     { name = "rarfile" },
+    { name = "rich-click" },
     { name = "send2trash" },
     { name = "textual", extra = ["syntax"] },
     { name = "textual-autocomplete" },
@@ -896,7 +910,6 @@ dev = [
 
 [package.metadata]
 requires-dist = [
-    { name = "click", specifier = ">=8.2.1" },
     { name = "humanize", specifier = ">=4.12.3" },
     { name = "jsonschema", specifier = ">=4.25.0" },
     { name = "lzstring", specifier = ">=1.0.4" },
@@ -905,6 +918,7 @@ requires-dist = [
     { name = "platformdirs", specifier = ">=4.3.8" },
     { name = "psutil", specifier = ">=7.0.0" },
     { name = "rarfile", specifier = ">=4.2" },
+    { name = "rich-click", specifier = ">=1.9.3" },
     { name = "send2trash", specifier = ">=1.8.3" },
     { name = "textual", extras = ["syntax"], specifier = ">=6.0.0,<7.0.0" },
     { name = "textual-autocomplete", specifier = ">=4.0.4" },

@@ -1,11 +1,33 @@
 try:
-    import click
+    import rich_click as click
+    from rich import box
     from rich.table import Table
 
     from rovr.functions.path import normalise
     from rovr.functions.utils import pprint, set_nested_value
     from rovr.variables.constants import config
     from rovr.variables.maps import VAR_TO_DIR
+
+    click.rich_click.USE_RICH_MARKUP = True
+    click.rich_click.USE_MARKDOWN = False
+    click.rich_click.SHOW_ARGUMENTS = True
+    click.rich_click.GROUP_ARGUMENTS_OPTIONS = False
+    click.rich_click.MAX_WIDTH = 88
+    click.rich_click.STYLE_OPTION = "bold cyan"
+    click.rich_click.STYLE_ARGUMENT = "bold cyan"
+    click.rich_click.STYLE_COMMAND = "bold cyan"
+    click.rich_click.STYLE_SWITCH = "bold cyan"
+    click.rich_click.STYLE_METAVAR = "bold yellow"
+    click.rich_click.STYLE_METAVAR_SEPARATOR = "dim"
+    click.rich_click.STYLE_USAGE = "bold cyan"
+    click.rich_click.STYLE_USAGE_COMMAND = "bold"
+    click.rich_click.STYLE_HELPTEXT_FIRST_LINE = ""
+    click.rich_click.STYLE_HELPTEXT = "dim"
+    click.rich_click.STYLE_OPTION_DEFAULT = "dim magenta"
+    click.rich_click.STYLE_REQUIRED_SHORT = "red"
+    click.rich_click.STYLE_REQUIRED_LONG = "dim red"
+    click.rich_click.STYLE_OPTIONS_PANEL_BORDER = "blue bold"
+    click.rich_click.STYLE_COMMANDS_PANEL_BORDER = "white"
 
     @click.command(help="A post-modern terminal file explorer")
     @click.option(
@@ -56,7 +78,11 @@ try:
         default="",
         help="Write chosen file(s) (newline-separated) to this file on exit.",
     )
+    @click.option_panel("Config", options=["--with", "--without"])
+    @click.option_panel("Paths", options=["--chooser-file", "--cwd-file"])
+    @click.option_panel("Miscellaneous", options=["--version", "--config-path", "--help"])
     @click.argument("path", type=str, required=False, default="")
+    @click.rich_config({"show_arguments": True})
     def main(
         with_features: list[str],
         without_features: list[str],
@@ -71,7 +97,7 @@ try:
         if show_config_path:
             from pathlib import Path
 
-            table = Table(title="")
+            table = Table(title="", border_style="blue", box=box.ROUNDED)
             table.add_column("type")
             table.add_column("path")
             path_config = Path(VAR_TO_DIR["CONFIG"])

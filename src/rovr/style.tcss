@@ -9,8 +9,8 @@ $border-disabled: $panel;
 $pinned_sidebar_width: 17;
 $file_list_width: 1fr;
 $preview_sidebar_width: 35vw;
-$footer_unfocus_height: 8;
-$footer_focus_height: 10;
+$footer_unfocus_height: 7;
+$footer_focus_height: 9;
 
 /* Scrollbar Colors */
 $scrollbar: $primary;
@@ -27,20 +27,6 @@ $scrollbar-corner-color: $primary-muted;
   &:ansi {
     scrollbar-background-hover: $scrollbar-background;
     scrollbar-background-active: $scrollbar-background;
-  }
-}
-
-/* Compact mode */
-.compact {
-  #menu { display: none; }
-  #below_menu { border: none; }
-  #pinned_sidebar_container { width: 16; }
-  #preview_sidebar { width: 25vw; }
-  #footer {
-    height: 7;
-    &:focus-within {
-      height: 7;
-    }
   }
 }
 
@@ -938,4 +924,11 @@ FileListRightClickOptionList {
 }
 LoadingIndicator {
   background: transparent;
+}
+/* Compact mode */
+.compact {
+  #menu { display: none; }
+  #below_menu { border: none; }
+  #pinned_sidebar_container { width: 16; }
+  #preview_sidebar { width: 25vw; }
 }

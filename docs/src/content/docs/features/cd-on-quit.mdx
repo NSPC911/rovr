@@ -31,6 +31,7 @@ add a function to your shell config that wraps the `rovr` command.
           code={`rovr () {\n    command rovr "$@"\n    config_dir="\${XDG_CONFIG_HOME:-$HOME/.config}"\n    cd_path_file="$config_dir/rovr/rovr_quit_cd_path"\n    if [ -f "$cd_path_file" ]; then\n        cd "$(cat \\"$cd_path_file\\")"\n        rm -f "$cd_path_file"\n    fi\n}`}
           lang="bash"
           frame="code"
+          title=".bashrc / .zshrc"
         />
       </TabItem>
       <TabItem label="fish">
@@ -38,6 +39,7 @@ add a function to your shell config that wraps the `rovr` command.
           code={`function rovr\n    command rovr $argv\n    set config_dir "$HOME/.config"\n    if set -q XDG_CONFIG_HOME\n        set config_dir "$XDG_CONFIG_HOME"\n    end\n    set cd_path_file "$config_dir/rovr/rovr_quit_cd_path"\n    if test -f "$cd_path_file"\n        cd (cat "$cd_path_file")\n        rm -f "$cd_path_file"\n    end\nend`}
           lang="fish"
           frame="code"
+          title=".fishrc"
         />
       </TabItem>
       <TabItem label="nushell">
@@ -45,6 +47,7 @@ add a function to your shell config that wraps the `rovr` command.
           code={`def --env --wrapped rovr [...args: string] {\n    ^rovr ...$args\n    let config_dir = ($env.XDG_CONFIG_HOME? | default ($env.HOME | path join ".config"))\n    let cd_path_file = ($config_dir | path join "rovr" "rovr_quit_cd_path")\n    if ($cd_path_file | path exists) {\n        cd ($cd_path_file | open | str trim)\n        rm $cd_path_file\n    }\n}`}
           lang="nu"
           frame="code"
+          title="config.nu"
         />
       </TabItem>
     </Tabs>
@@ -56,6 +59,7 @@ add a function to your shell config that wraps the `rovr` command.
           code={`rovr () {\n    command rovr "$@"\n    cd_path_file="$HOME/Library/Application Support/rovr/rovr_quit_cd_path"\n    if [ -f "$cd_path_file" ]; then\n        cd "$(cat \\"$cd_path_file\\")"\n        rm -f "$cd_path_file"\n    fi\n}`}
           lang="bash"
           frame="code"
+          title=".bashrc / .zshrc"
         />
       </TabItem>
       <TabItem label="fish">
@@ -63,6 +67,7 @@ add a function to your shell config that wraps the `rovr` command.
           code={`function rovr\n    command rovr $argv\n    set cd_path_file "$HOME/Library/Application Support/rovr/rovr_quit_cd_path"\n    if test -f "$cd_path_file"\n        cd (cat "$cd_path_file")\n        rm--env  -f "$cd_path_file"\n    end\nend`}
           lang="fish"
           frame="code"
+          title=".fishrc"
         />
       </TabItem>
       <TabItem label="nushell">
@@ -70,6 +75,7 @@ add a function to your shell config that wraps the `rovr` command.
           code={`def rovr [...args: string] {\n    ^rovr ...$args\n    let cd_path_file = ($env.HOME | path join "Library" "Application Support" "rovr" "rovr_quit_cd_path")\n    if ($cd_path_file | path exists) {\n        cd ($cd_path_file | open | str trim)\n        rm $cd_path_file\n    }\n}`}
           lang="nu"
           frame="code"
+          title="config.nu"
         />
       </TabItem>
     </Tabs>
@@ -81,6 +87,7 @@ add a function to your shell config that wraps the `rovr` command.
           code={`function rovr {\n    param ( [string[]]$Params )\n    & rovr.exe $Params\n    $cd_path_file = "$env:LOCALAPPDATA\\rovr\\rovr_quit_cd_path"\n    if (Test-Path $cd_path_file) {\n        Set-Location -Path (Get-Content $cd_path_file)\n        Remove-Item $cd_path_file\n    }\n}`}
           lang="powershell"
           frame="code"
+          title="$PROFILE"
         />
         Powershell may prevent you from running such functions, so you may have
         to run
@@ -97,6 +104,7 @@ add a function to your shell config that wraps the `rovr` command.
           code={`def rovr [...args: string] {\n    ^rovr.exe ...$args\n    let cd_path_file = ($env.LOCALAPPDATA | path join "rovr" "rovr_quit_cd_path")\n    if ($cd_path_file | path exists) {\n        cd ($cd_path_file | open | str trim)\n        rm $cd_path_file\n    }\n}`}
           lang="nu"
           frame="code"
+          title="config.nu"
         />
       </TabItem>
     </Tabs>

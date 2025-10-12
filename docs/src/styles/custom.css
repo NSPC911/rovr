@@ -132,6 +132,8 @@ code {
   > figure:not(.is-terminal) > figcaption > .title {
     border: var(--ec-brdWd) solid var(--ec-frm-edTabBarBrdCol);
     border-bottom: none;
+    background: var(--code-background);
+    border-radius: 5px 5px 0 0;
   }
   .copy button {
     width: 2rem;
@@ -184,6 +186,7 @@ summary:not(#starlight__on-this-page--mobile) {
   [class^="right-sidebar"] {
     width: 25vw;
     max-width: 300px;
+    pointer-events: none;
     > .sl-container {
       width: calc(25vw - (2 * var(--sidebar-pad-x)));
       max-width: calc(300px - (2 * var(--sidebar-pad-x)));
@@ -402,10 +405,23 @@ figure.frame {
   > figcaption {
     border-top-left-radius: 5px;
     border-top-right-radius: 5px;
+    background: none;
   }
 }
 footer > * {
   margin-top: 0;
+}
+html[data-theme="light"]
+  starlight-file-tree
+  .directory
+  > details
+  > summary:hover,
+html[data-theme="light"] starlight-file-tree .file:hover {
+  background: color-mix(
+    in oklab,
+    var(--sl-color-gray-6),
+    var(--sl-color-gray-5)
+  );
 }
 starlight-file-tree {
   border-radius: 5px;
@@ -414,7 +430,7 @@ starlight-file-tree {
     padding-inline-start: 0.5em;
     border-radius: 5px;
     &:hover {
-      background: var(--sl-color-gray-4);
+      background: var(--sl-color-gray-5);
     }
     .comment {
       max-width: unset;
@@ -438,12 +454,20 @@ starlight-file-tree {
     max-width: unset;
     border-radius: 5px;
     list-style: none;
+    padding-left: 1ch !important;
+    margin-bottom: -2.5px;
+    transition-property: color, background, border-radius, border;
     &::-webkit-details-marker {
       display: none;
     }
     &:hover {
-      background: var(--sl-color-gray-4);
+      background: var(--sl-color-gray-5);
       border-radius: 5px;
+      color: inherit;
+      fill: inherit;
+      svg {
+        fill: var(--sl-color-gray-2);
+      }
     }
     svg {
       transform: translateY(-0.1em);

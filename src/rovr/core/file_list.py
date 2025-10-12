@@ -181,9 +181,11 @@ class FileList(SelectionList, inherit_bindings=False):
         if add_to_session:
             if session.historyIndex != len(session.directories) - 1:
                 session.directories = session.directories[: session.historyIndex + 1]
-            session.directories.append({
-                "path": cwd,
-            })
+            session.directories.append(
+                {
+                    "path": cwd,
+                }
+            )
             if session.lastHighlighted.get(cwd) is None:
                 # Hard coding is my passion (referring to the id)
                 session.lastHighlighted[cwd] = (
@@ -495,18 +497,22 @@ class FileList(SelectionList, inherit_bindings=False):
         side_style += Style(meta={"option": selection_index})
         button_style += Style(meta={"option": selection_index})
 
-        return Strip([
-            Segment(icon_utils.get_toggle_button_icon("left"), style=side_style),
-            Segment(
-                icon_utils.get_toggle_button_icon("inner_filled")
-                if selection.value in self._selected
-                else icon_utils.get_toggle_button_icon("inner"),
-                style=button_style,
-            ),
-            Segment(icon_utils.get_toggle_button_icon("right"), style=side_style),
-            Segment(" ", style=underlying_style),
-            *line,
-        ])
+        return Strip(
+            [
+                Segment(icon_utils.get_toggle_button_icon("left"), style=side_style),
+                Segment(
+                    (
+                        icon_utils.get_toggle_button_icon("inner_filled")
+                        if selection.value in self._selected
+                        else icon_utils.get_toggle_button_icon("inner")
+                    ),
+                    style=button_style,
+                ),
+                Segment(icon_utils.get_toggle_button_icon("right"), style=side_style),
+                Segment(" ", style=underlying_style),
+                *line,
+            ]
+        )
 
     async def toggle_hidden_files(self) -> None:
         """Toggle the visibility of hidden files."""

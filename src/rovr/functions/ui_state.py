@@ -1,4 +1,6 @@
 import os
+import tempfile
+from contextlib import suppress
 from os import path
 from typing import Any, Dict
 
@@ -23,7 +25,11 @@ class UIStateManager:
         self._state = self._load_state()
 
     def _load_state(self) -> Dict[str, Any]:
-        """Load UI state from file, with fallback to defaults."""
+        """Load UI state from file, with fallback to defaults.
+
+        Returns:
+            Dict[str, Any]: The loaded UI state merged with defaults.
+        """
         try:
             if path.exists(self.state_file):
                 with open(self.state_file, "r") as f:
@@ -36,11 +42,17 @@ class UIStateManager:
                     merged_state.update(loaded_state)
                     return merged_state
                 else:
-                    pprint(f"[bright_yellow]Warning:[/] Invalid UI state format, using defaults")
+                    pprint(
+                        "[bright_yellow]Warning:[/] Invalid UI state format, using defaults"
+                    )
             else:
-                pprint(f"[bright_blue]Info:[/] UI state file not found, creating with defaults")
+                pprint(
+                    "[bright_blue]Info:[/] UI state file not found, creating with defaults"
+                )
         except (OSError, ValueError, ujson.JSONDecodeError) as e:
-            pprint(f"[bright_yellow]Warning:[/] Failed to load UI state ({e}), using defaults")
+            pprint(
+                f"[bright_yellow]Warning:[/] Failed to load UI state ({e}), using defaults"
+            )
 
         return self.DEFAULT_STATE.copy()
 
@@ -52,16 +64,32 @@ class UIStateManager:
             if not path.exists(config_dir):
                 os.makedirs(config_dir)
 
-            with open(self.state_file, "w") as f:
-                ujson.dump(self._state, f, indent=2)
+            # Write to a temporary file first, then atomically replace
+            fd, temp_path = tempfile.mkstemp(
+                dir=config_dir, prefix=".ui_state_", suffix=".tmp"
+            )
+            try:
+                with os.fdopen(fd, "w") as f:
+                    ujson.dump(self._state, f, indent=2)
+                # Atomic replace (even on Windows with Python 3.3+)
+                os.replace(temp_path, self.state_file)
+            except Exception:
+                # Clean up temp file if anything goes wrong
+                with suppress(OSError):
+                    os.unlink(temp_path)
+                raise
         except OSError as e:
             pprint(f"[bright_red]Error:[/] Failed to save UI state: {e}")
 
     def get_state(self) -> Dict[str, Any]:
-        """Get current UI state."""
+        """Get current UI state.
+
+        Returns:
+            Dict[str, Any]: A copy of the current UI state.
+        """
         return self._state.copy()
 
-    def update_state(self, key: str, value: Any) -> None:
+    def update_state(self, key: str, value: object) -> None:
         """Update a single state value and save."""
         if key in self.DEFAULT_STATE:
             self._state[key] = value
@@ -80,11 +108,15 @@ ui_state_manager = UIStateManager()
 
 
 def get_ui_state() -> Dict[str, Any]:
-    """Get current UI state."""
+    """Get current UI state.
+
+    Returns:
+        Dict[str, Any]: A copy of the current UI state.
+    """
     return ui_state_manager.get_state()
 
 
-def update_ui_state(key: str, value: Any) -> None:
+def update_ui_state(key: str, value: object) -> None:
     """Update UI state and persist it."""
     ui_state_manager.update_state(key, value)
 

@@ -32,11 +32,7 @@ from rovr.action_buttons import (
     UnzipButton,
     ZipButton,
 )
-from rovr.core import (
-    FileList,
-    PinnedSidebar,
-    PreviewContainer,
-)
+from rovr.core import FileList, PinnedSidebar, PreviewContainer
 from rovr.core.file_list import FileListRightClickOptionList
 from rovr.footer import Clipboard, MetadataContainer, ProcessContainer
 from rovr.functions import icons
@@ -317,7 +313,9 @@ class Application(App, inherit_bindings=False):
             # Toggle hiding panels
             case key if key in config["keybinds"]["toggle_pinned_sidebar"]:
                 self.query_one("#file_list").focus()
-                pinned_sidebar_hidden = "hide" in self.query_one("#pinned_sidebar_container").classes
+                pinned_sidebar_hidden = (
+                    "hide" in self.query_one("#pinned_sidebar_container").classes
+                )
                 if pinned_sidebar_hidden:
                     self.query_one("#pinned_sidebar_container").remove_class("hide")
                     pinned_sidebar_visible = True
@@ -327,7 +325,9 @@ class Application(App, inherit_bindings=False):
                 update_ui_state("pinned_sidebar_visible", pinned_sidebar_visible)
             case key if key in config["keybinds"]["toggle_preview_sidebar"]:
                 self.query_one("#file_list").focus()
-                preview_sidebar_hidden = "hide" in self.query_one(PreviewContainer).classes
+                preview_sidebar_hidden = (
+                    "hide" in self.query_one(PreviewContainer).classes
+                )
                 if preview_sidebar_hidden:
                     self.query_one(PreviewContainer).remove_class("hide")
                     preview_sidebar_visible = True

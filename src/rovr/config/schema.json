@@ -753,6 +753,19 @@
           },
           "description": "Show the keybinds list with all available keybinds.",
           "display_name": "Show keybinds"
+        },
+        "quit_app": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Quit the application",
+          "display_name": "Quit app"
+        },
+        "command_palette": {
+          "type": "string",
+          "description": "Launch Textual's mildly useful command palette (only one keybind is allowed!)",
+          "display_name": "Launch command palette"
         }
       }
     },

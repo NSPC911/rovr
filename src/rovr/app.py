@@ -571,6 +571,55 @@ class Application(App, inherit_bindings=False):
                 lambda: self.set_timer(0.1, self._toggle_transparency),
             )
 
+        if (
+            config["plugins"]["finder"]["enabled"]
+            and config["plugins"]["finder"]["keybinds"]
+        ):
+            yield SystemCommand(
+                "Open finder",
+                "Start searching the current directory using `fd`",
+                lambda: self.on_key(
+                    events.Key(
+                        key=config["plugins"]["finder"]["keybinds"][0],
+                        # character doesn't matter
+                        character=config["plugins"]["finder"]["keybinds"][0],
+                    )
+                ),
+            )
+        if (
+            config["plugins"]["zoxide"]["enabled"]
+            and config["plugins"]["zoxide"]["keybinds"]
+        ):
+            yield SystemCommand(
+                "Open zoxide",
+                "Start searching for a directory to `z` to",
+                lambda: self.on_key(
+                    events.Key(
+                        key=config["plugins"]["zoxide"]["keybinds"][0],
+                        # character doesn't matter
+                        character=config["plugins"]["zoxide"]["keybinds"][0],
+                    )
+                ),
+            )
+        if config["keybinds"]["toggle_hidden_files"]:
+            if config["settings"]["show_hidden_files"]:
+                yield SystemCommand(
+                    "Hide Hidden Files",
+                    "Exclude listing of hidden files and folders",
+                    self.query_one("#file_list").toggle_hidden_files,
+                )
+            else:
+                yield SystemCommand(
+                    "Show Hidden Files",
+                    "Include listing of hidden files and folders",
+                    self.query_one("#file_list").toggle_hidden_files,
+                )
+        yield SystemCommand(
+            "Reload File List",
+            "Send a forceful reload of the file list, in case something goes wrong",
+            lambda: self.cd(getcwd())
+        )
+
     @work
     async def _toggle_transparency(self) -> None:
         self.ansi_color = not self.ansi_color

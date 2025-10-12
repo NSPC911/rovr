@@ -47,6 +47,7 @@ from rovr.functions.path import (
     normalise,
 )
 from rovr.functions.themes import get_custom_themes
+from rovr.functions.ui_state import get_ui_state, update_ui_state
 from rovr.header import HeaderArea
 from rovr.navigation_widgets import (
     BackButton,
@@ -196,6 +197,16 @@ class Application(App, inherit_bindings=False):
             return
         self.theme = config["theme"]["default"]
         self.ansi_color = config["theme"]["transparent"]
+
+        # Load and apply UI state
+        ui_state = get_ui_state()
+        if not ui_state["footer_visible"]:
+            self.query_one("#footer").add_class("hide")
+        if not ui_state["pinned_sidebar_visible"]:
+            self.query_one("#pinned_sidebar_container").add_class("hide")
+        if not ui_state["preview_sidebar_visible"]:
+            self.query_one(PreviewContainer).add_class("hide")
+
         # tooltips
         if config["interface"]["tooltips"]:
             self.query_one("#back").tooltip = "Go back in history"
@@ -302,22 +313,31 @@ class Application(App, inherit_bindings=False):
             # Toggle hiding panels
             case key if key in config["keybinds"]["toggle_pinned_sidebar"]:
                 self.query_one("#file_list").focus()
-                if self.query_one("#pinned_sidebar_container").display:
-                    self.query_one("#pinned_sidebar_container").add_class("hide")
-                else:
+                pinned_sidebar_hidden = "hide" in self.query_one("#pinned_sidebar_container").classes
+                pinned_sidebar_visible = not pinned_sidebar_hidden
+                if pinned_sidebar_visible:
                     self.query_one("#pinned_sidebar_container").remove_class("hide")
+                else:
+                    self.query_one("#pinned_sidebar_container").add_class("hide")
+                update_ui_state("pinned_sidebar_visible", pinned_sidebar_visible)
             case key if key in config["keybinds"]["toggle_preview_sidebar"]:
                 self.query_one("#file_list").focus()
-                if self.query_one(PreviewContainer).display:
-                    self.query_one(PreviewContainer).add_class("hide")
-                else:
+                preview_sidebar_hidden = "hide" in self.query_one(PreviewContainer).classes
+                preview_sidebar_visible = not preview_sidebar_hidden
+                if preview_sidebar_visible:
                     self.query_one(PreviewContainer).remove_class("hide")
+                else:
+                    self.query_one(PreviewContainer).add_class("hide")
+                update_ui_state("preview_sidebar_visible", preview_sidebar_visible)
             case key if key in config["keybinds"]["toggle_footer"]:
                 self.query_one("#file_list").focus()
-                if self.query_one("#footer").display:
-                    self.query_one("#footer").add_class("hide")
-                else:
+                footer_hidden = "hide" in self.query_one("#footer").classes
+                footer_visible = not footer_hidden
+                if footer_visible:
                     self.query_one("#footer").remove_class("hide")
+                else:
+                    self.query_one("#footer").add_class("hide")
+                update_ui_state("footer_visible", footer_visible)
             case key if (
                 key in config["keybinds"]["tab_next"]
                 and self.tabWidget.active_tab is not None

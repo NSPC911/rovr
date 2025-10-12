@@ -18,7 +18,13 @@ from textual.widgets.option_list import OptionDoesNotExist
 from rovr.classes import Archive
 from rovr.functions import icons as icon_utils
 from rovr.functions import path as path_utils
-from rovr.screens import CommonFileNameDoWhat, Dismissable, GiveMePermission, YesOrNo
+from rovr.screens import (
+    CommonFileNameDoWhat,
+    Dismissable,
+    FileInUse,
+    GiveMePermission,
+    YesOrNo,
+)
 from rovr.variables.constants import config
 
 
@@ -91,8 +97,8 @@ class ProgressBarContainer(VerticalGroup):
 
     def panic(
         self,
-        dismiss_with: dict = {},
-        notify: dict = {},
+        dismiss_with: dict | None = None,
+        notify: dict | None = None,
         bar_text: str = "",
     ) -> None:
         """Do something when an error occurs.
@@ -113,6 +119,9 @@ class ProgressBarContainer(VerticalGroup):
         self.update_icon(
             self.icon_label.content + " " + icon_utils.get_icon("general", "close")[0]
         )
+        dismiss_with = dismiss_with or {}
+        notify = notify or {}
+
         if dismiss_with:
             self.app.call_from_thread(
                 self.app.push_screen_wait,
@@ -204,13 +213,39 @@ class ProcessContainer(VerticalScroll):
                                 path_to_trash = path_to_trash.replace("/", "\\")
                                 pass
                             send2trash(path_to_trash)
-                        except PermissionError:
+                        except PermissionError as e:
+                            # On Windows, a file being used by another process
+                            # raises a PermissionError/OSError with winerror 32.
+                            is_file_in_use = False
+                            try:
+                                # Some PermissionError instances expose winerror
+                                is_file_in_use = getattr(e, "winerror", None) == 32
+                            except Exception:
+                                is_file_in_use = False
+                            if is_file_in_use and platform.system() == "Windows":
+                                # Ask the user specifically that the file is in use
+                                response = self.app.call_from_thread(
+                                    self.app.push_screen_wait,
+                                    FileInUse(
+                                        f"The file appears to be open in another application and cannot be deleted.\nPath: {item_dict['relative_loc']}",
+                                    ),
+                                )
+                                if not response["value"]:
+                                    bar.panic()
+                                    return
+                                else:
+                                    continue
+                            elif is_file_in_use:
+                                # need to ensure unix users see an
+                                # error so they create an issue
+                                self.app.panic()
+                            # fallback for regular permission issues
                             if action_on_permission_error == "ask":
                                 do_what = self.app.call_from_thread(
                                     self.app.push_screen_wait,
                                     GiveMePermission(
                                         "Path has no write access to be deleted.\nForcefully obtain and delete it?",
-                                        border_title=item_dict["relative_loc"],
+                                        border_title=item_dict["path"],
                                     ),
                                 )
                                 if do_what["toggle"]:
@@ -249,7 +284,30 @@ class ProcessContainer(VerticalScroll):
                 except FileNotFoundError:
                     # it's deleted, so why care?
                     pass
-                except PermissionError:
+                except PermissionError as e:
+                    # Try to detect if file is in use on Windows
+                    is_file_in_use = False
+                    try:
+                        is_file_in_use = getattr(e, "winerror", None) == 32
+                    except Exception:
+                        is_file_in_use = False
+                    if is_file_in_use and platform.system() == "Windows":
+                        response = self.app.call_from_thread(
+                            self.app.push_screen_wait,
+                            FileInUse(
+                                f"The file appears to be open in another application and cannot be deleted.\nPath: {item_dict['relative_loc']}",
+                            ),
+                        )
+                        if not response["value"]:
+                            bar.panic()
+                            return
+                        else:
+                            continue
+                    elif is_file_in_use:
+                        # need to ensure unix users see an
+                        # error so they create an issue
+                        self.app.panic()
+                    # fallback for regular permission issues
                     if action_on_permission_error == "ask":
                         do_what = self.app.call_from_thread(
                             self.app.push_screen_wait,

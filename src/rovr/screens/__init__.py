@@ -3,6 +3,7 @@ from textual.screen import Screen
 from .common_file_name_do_what import CommonFileNameDoWhat
 from .delete_files import DeleteFiles
 from .dismissable import Dismissable
+from .file_in_use import FileInUse
 from .file_search import FileSearch
 from .give_permission import GiveMePermission
 from .input import ModalInput
@@ -26,6 +27,7 @@ __all__ = [
     "ZDToDirectory",
     "FileSearch",
     "GiveMePermission",
+    "FileInUse",
     "DummyScreen",
     "TerminalTooSmall",
     "Keybinds",

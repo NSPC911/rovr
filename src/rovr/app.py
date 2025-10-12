@@ -615,7 +615,7 @@ class Application(App, inherit_bindings=False):
         yield SystemCommand(
             "Reload File List",
             "Send a forceful reload of the file list, in case something goes wrong",
-            lambda: self.cd(getcwd())
+            lambda: self.cd(getcwd()),
         )
 
     @work

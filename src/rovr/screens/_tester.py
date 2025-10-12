@@ -2,6 +2,8 @@
 from textual.app import App, ComposeResult
 from textual.widgets import Button
 
+from rovr.screens import FileInUse
+
 
 class Test(App):
     CSS_PATH = "../style.tcss"
@@ -10,7 +12,12 @@ class Test(App):
         yield Button("hi")
 
     def on_button_pressed(self, event: Button.Pressed) -> None:
-        self.push_screen("<screen-to-test>", lambda x: self.notify(str(x)))
+        self.push_screen(
+            FileInUse(
+                "The file appears to be open in another application and cannot be deleted.\nPath: file.txt",
+            ),
+            lambda x: self.notify(str(x)),
+        )
 
 
 Test().run()

@@ -228,31 +228,17 @@ class ProcessContainer(VerticalScroll):
                                     self.app.push_screen_wait,
                                     FileInUse(
                                         f"The file appears to be open in another application and cannot be deleted.\nPath: {item_dict['relative_loc']}",
-                                        border_title=item_dict["relative_loc"],
                                     ),
                                 )
-                                # response may be dict {"value": True/False} or bool or string
-                                resp_val = (
-                                    response.get("value")
-                                    if isinstance(response, dict)
-                                    else response
-                                )
-                                # Normalize string responses for comparison
-                                resp_val_lower = (
-                                    resp_val.lower()
-                                    if isinstance(resp_val, str)
-                                    else None
-                                )
-                                # Treat explicit False or "cancel" as cancellation
-                                if resp_val is False or resp_val_lower == "cancel":
+                                if not response["value"]:
                                     bar.panic()
                                     return
-                                # Treat explicit True or "ok" as OK (skip)
-                                elif resp_val is True or resp_val_lower == "ok":
-                                    continue
-                                # Unexpected values: conservatively continue (skip)
                                 else:
                                     continue
+                            elif is_file_in_use:
+                                # need to ensure unix users see an
+                                # error so they crrate an issue
+                                self.app.panic()
                             # fallback for regular permission issues
                             if action_on_permission_error == "ask":
                                 do_what = self.app.call_from_thread(
@@ -310,26 +296,17 @@ class ProcessContainer(VerticalScroll):
                             self.app.push_screen_wait,
                             FileInUse(
                                 f"The file appears to be open in another application and cannot be deleted.\nPath: {item_dict['relative_loc']}",
-                                border_title=item_dict["relative_loc"],
                             ),
                         )
-                        # response may be dict {"value": True/False} or bool or string
-                        resp_val = (
-                            response.get("value")
-                            if isinstance(response, dict)
-                            else response
-                        )
-                        resp_val_lower = (
-                            resp_val.lower() if isinstance(resp_val, str) else None
-                        )
-                        if resp_val is False or resp_val_lower == "cancel":
+                        if not response["value"]:
                             bar.panic()
                             return
-                        elif resp_val is True or resp_val_lower == "ok":
-                            continue
                         else:
-                            # Unexpected value: conservatively continue (skip)
                             continue
+                    elif is_file_in_use:
+                        # need to ensure unix users see an
+                        # error so they crrate an issue
+                        self.app.panic()
                     # fallback for regular permission issues
                     if action_on_permission_error == "ask":
                         do_what = self.app.call_from_thread(

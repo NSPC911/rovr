@@ -94,6 +94,14 @@ def load_config() -> tuple[dict, dict]:
                 pprint(enum_error_message)
             case _:
                 pprint(f"[yellow]{exception.message}[/yellow]")
+
+        # do any backwards incompatibility stuff here
+        if exception.message == "Additional properties are not allowed ('cd_on_quit' was unexpected)":
+            pprint("[u]How to fix?[/]")
+            pprint("[blue]settings.cd_on_quit[/] has been removed in favour of using [blue]--cwd-file[/]")
+            pprint("Remove it from your [cyan]config.toml[/] and update your shell configuration with the functions from the [u][link=https://nspc911.github.io/rovr/features/cd-on-quit/#shell-configuration]docs[/][u]")
+            pprint("Cannot click on the link? https://nspc911.github.io/rovr/features/cd-on-quit/#shell-configuration")
+
         exit(1)
 
     # slight config fixes

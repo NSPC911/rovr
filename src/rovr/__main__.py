@@ -97,6 +97,12 @@ try:
     ) -> None:
         """A post-modern terminal file explorer"""
 
+        for feature_path in with_features:
+            set_nested_value(config, feature_path, True)
+
+        for feature_path in without_features:
+            set_nested_value(config, feature_path, False)
+
         if show_config_path:
             from pathlib import Path
 
@@ -123,12 +129,6 @@ try:
         elif show_version:
             pprint(f"rovr version [cyan]v{get_version()}[/]")
             return
-
-        for feature_path in with_features:
-            set_nested_value(config, feature_path, True)
-
-        for feature_path in without_features:
-            set_nested_value(config, feature_path, False)
 
         from rovr.app import Application
 

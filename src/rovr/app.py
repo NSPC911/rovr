@@ -6,7 +6,7 @@ from types import SimpleNamespace
 from typing import Callable, Iterable
 
 from textual import events, on, work
-from textual.app import App, ComposeResult, SystemCommand
+from textual.app import WINDOWS, App, ComposeResult, SystemCommand
 from textual.binding import Binding
 from textual.color import ColorParseError
 from textual.containers import (
@@ -390,6 +390,13 @@ class Application(App, inherit_bindings=False):
                         title="Plugins: finder",
                         severity="error",
                     )
+            case key if key in config["keybinds"]["suspend_app"]:
+                if WINDOWS:
+                    self.notify(
+                        "rovr cannot be suspended on Windows!", title="Suspend App"
+                    )
+                else:
+                    self.action_suspend_process()
 
     def on_app_blur(self, event: events.AppBlur) -> None:
         self.app_blurred = True

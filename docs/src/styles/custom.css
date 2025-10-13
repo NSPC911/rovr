@@ -184,7 +184,7 @@ summary:not(#starlight__on-this-page--mobile) {
     width: auto !important;
   }
   [class^="right-sidebar"] {
-    width: 25vw;
+    min-width: 20vw;
     max-width: 300px;
     pointer-events: none;
     > .sl-container {
@@ -194,6 +194,10 @@ summary:not(#starlight__on-this-page--mobile) {
   }
   .main-frame:not(:has(> div > aside[class*="print:hidden"])) {
     --sl-content-inline-start: 20vw;
+  }
+  .content-panel > .sl-container {
+    max-width: unset !important;
+    margin-inline: 0 !important;
   }
 }
 @media (min-width: 50rem) {

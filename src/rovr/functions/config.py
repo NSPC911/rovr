@@ -105,7 +105,7 @@ def load_config() -> tuple[dict, dict]:
                 "[blue]settings.cd_on_quit[/] has been removed in favour of using [blue]--cwd-file[/]"
             )
             pprint(
-                "Remove it from your [cyan]config.toml[/] and update your shell configuration with the functions from the [u][link=https://nspc911.github.io/rovr/features/cd-on-quit/#shell-configuration]docs[/][u]"
+                "Remove it from your [cyan]config.toml[/] and update your shell configuration with the functions from the [u][link=https://nspc911.github.io/rovr/features/cd-on-quit/#shell-configuration]docs[/][/]"
             )
             pprint(
                 "Cannot click on the link? https://nspc911.github.io/rovr/features/cd-on-quit/#shell-configuration"

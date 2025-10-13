@@ -37,7 +37,7 @@ You can create wrapper functions in your shell config for convenience:
       code={`function rovr\n    set cwd_file (mktemp -t rovr_cwd.XXXXXX)\n    command rovr --cwd-file "$cwd_file" $argv\n    if test -f "$cwd_file"\n        cd (cat "$cwd_file")\n        rm -f "$cwd_file"\n    end\nend`}
       lang="fish"
       frame="code"
-      title=".fishrc"
+      title="config.fish"
     />
   </TabItem>
   <TabItem label="nushell">
@@ -50,7 +50,7 @@ You can create wrapper functions in your shell config for convenience:
   </TabItem>
   <TabItem label="powershell">
     <Code
-      code={`function rovr {\n    param ( [string[]]$Params )\n    $cwd_file = [System.IO.Path]::GetTempFileName()\n    & rovr --cwd-file $cwd_file $Params\n    if (Test-Path $cwd_file) {\n        Set-Location -Path (Get-Content $cwd_file)\n        Remove-Item $cwd_file\n    }\n}`}
+      code={`function rovr {\n    $cwd_file = [System.IO.Path]::GetTempFileName()\n    & rovr.exe --cwd-file $cwd_file $args\n    if (Test-Path $cwd_file) {\n        Set-Location -Path (Get-Content $cwd_file)\n        Remove-Item $cwd_file\n    }\n}`}
       lang="powershell"
       frame="code"
       title="$PROFILE"

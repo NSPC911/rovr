@@ -27,7 +27,7 @@ def get_version() -> str:
     try:
         return version("rovr")
     except PackageNotFoundError:
-        return "master"  # fallback to master branch
+        return "master"
 
 
 def load_config() -> tuple[dict, dict]:
@@ -42,7 +42,11 @@ def load_config() -> tuple[dict, dict]:
         os.makedirs(VAR_TO_DIR["CONFIG"])
 
     current_version = get_version()
-    schema_url = f"https://raw.githubusercontent.com/NSPC911/rovr/refs/tags/v{current_version}/src/rovr/config/schema.json"
+    if current_version == "master":
+        schema_ref = "refs/heads/master"
+    else:
+        schema_ref = f"refs/tags/v{current_version}"
+    schema_url = f"https://raw.githubusercontent.com/NSPC911/rovr/{schema_ref}/src/rovr/config/schema.json"
     user_config_path = path.join(VAR_TO_DIR["CONFIG"], "config.toml")
 
     # Create config file if it doesn't exist
@@ -57,7 +61,7 @@ def load_config() -> tuple[dict, dict]:
         expected_schema_line = f"#:schema {schema_url}\n"
         if lines and lines[0] != expected_schema_line:
             # check if it is schema in the first place
-            if lines[:8] == "#:schema":
+            if lines[0].startswith("#:schema"):
                 lines[0] = expected_schema_line
             else:
                 lines.insert(0, expected_schema_line)

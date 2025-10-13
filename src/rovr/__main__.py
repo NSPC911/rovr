@@ -1,10 +1,9 @@
 try:
-    from importlib.metadata import version
-
     import rich_click as click
     from rich import box
     from rich.table import Table
 
+    from rovr.functions.config import get_version
     from rovr.functions.path import normalise
     from rovr.functions.utils import pprint, set_nested_value
     from rovr.variables.constants import config
@@ -122,7 +121,7 @@ try:
             pprint(table)
             return
         elif show_version:
-            pprint(f"[cyan]v{version('rovr')}[/]")
+            pprint(f"rovr version [cyan]v{get_version()}[/]")
             return
 
         for feature_path in with_features:

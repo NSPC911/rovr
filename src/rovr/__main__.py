@@ -1,4 +1,6 @@
 try:
+    from importlib.metadata import version
+
     import rich_click as click
     from rich import box
     from rich.table import Table
@@ -120,7 +122,7 @@ try:
             pprint(table)
             return
         elif show_version:
-            pprint("v0.3.0")
+            pprint(f"[cyan]v{version('rovr')}[/]")
             return
 
         for feature_path in with_features:

@@ -1,9 +1,11 @@
 import os
+from importlib.metadata import PackageNotFoundError, version
 from os import path
 
 import jsonschema
 import toml
 import ujson
+from jsonschema import ValidationError
 from lzstring import LZString
 from rich.console import Console
 
@@ -16,6 +18,18 @@ lzstring = LZString()
 pprint = Console().print
 
 
+def get_version() -> str:
+    """Get version from package metadata
+
+    Returns:
+        str: Current version
+    """
+    try:
+        return version("rovr")
+    except PackageNotFoundError:
+        return "master"  # fallback to master branch
+
+
 def load_config() -> tuple[dict, dict]:
     """
     Load both the template config and the user config
@@ -26,20 +40,44 @@ def load_config() -> tuple[dict, dict]:
 
     if not path.exists(VAR_TO_DIR["CONFIG"]):
         os.makedirs(VAR_TO_DIR["CONFIG"])
-    if not path.exists(path.join(VAR_TO_DIR["CONFIG"], "config.toml")):
-        with open(path.join(VAR_TO_DIR["CONFIG"], "config.toml"), "w") as file:
-            file.write(
-                '#:schema  https://raw.githubusercontent.com/NSPC911/rovr/refs/heads/master/src/rovr/config/schema.json\n[theme]\ndefault = "nord"'
-            )
+
+    current_version = get_version()
+    schema_url = f"https://raw.githubusercontent.com/NSPC911/rovr/refs/tags/v{current_version}/src/rovr/config/schema.json"
+    user_config_path = path.join(VAR_TO_DIR["CONFIG"], "config.toml")
+
+    # Create config file if it doesn't exist
+    if not path.exists(user_config_path):
+        with open(user_config_path, "w") as file:
+            file.write(f'#:schema {schema_url}\n[theme]\ndefault = "nord"')
+    else:
+        # Update schema version if needed
+        with open(user_config_path, "r") as f:
+            lines = f.readlines()
+
+        expected_schema_line = f"#:schema {schema_url}\n"
+        if lines and lines[0] != expected_schema_line:
+            # check if it is schema in the first place
+            if lines[:8] == "#:schema":
+                lines[0] = expected_schema_line
+            else:
+                lines.insert(0, expected_schema_line)
+
+            with open(user_config_path, "w") as f:
+                f.writelines(lines)
+
+            pprint(f"[yellow]Updated config schema to v{current_version}[/]")
+        elif not lines:
+            with open(user_config_path, "w") as file:
+                file.write(f'#:schema  {schema_url}\n[theme]\ndefault = "nord"')
 
     with open(path.join(path.dirname(__file__), "../config/config.toml"), "r") as f:
+        # check header
         try:
             template_config = toml.loads(f.read())
         except toml.decoder.TomlDecodeError as e:
             pprint(f"[bright_red]TOML Syntax Error:\n    {e}")
             exit(1)
 
-    user_config_path = path.join(VAR_TO_DIR["CONFIG"], "config.toml")
     user_config = {}
     if path.exists(user_config_path):
         with open(user_config_path, "r") as f:
@@ -69,7 +107,7 @@ def load_config() -> tuple[dict, dict]:
 
     try:
         jsonschema.validate(config, schema)
-    except jsonschema.exceptions.ValidationError as exception:
+    except ValidationError as exception:
         # pprint(exception.__dict__)
         path_str = "root"
         if exception.path:

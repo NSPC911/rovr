@@ -7,6 +7,7 @@ from rovr.variables.maps import (
     ASCII_TOGGLE_BUTTON_ICONS,
     FILE_MAP,
     FILES_MAP,
+    FOLDER_ICONS_WITH_FOLDER_SILHOUETTE,
     FOLDER_MAP,
     ICONS,
     TOGGLE_BUTTON_ICONS,
@@ -94,12 +95,34 @@ def get_icon_for_folder(location: str) -> list:
                 is_match = True
 
             if is_match:
-                return [custom_icon["icon"], custom_icon["color"]]
+                # For custom icons, we can't reliably determine if they have folder-like silhouettes
+                # since they're user-defined. We'll use a simple heuristic: if the folder name
+                # corresponds to a built-in folder type that has a folder silhouette, preserve the custom color.
+                # Otherwise, use the default folder color for better distinction.
+                if folder_name in FOLDER_MAP:
+                    icon_key = FOLDER_MAP[folder_name]
+                    if icon_key in FOLDER_ICONS_WITH_FOLDER_SILHOUETTE:
+                        # Keep original custom color
+                        return [custom_icon["icon"], custom_icon["color"]]
+
+                # Use default folder color for better distinction
+                default_color = ICONS["folder"]["default"][1]
+                return [custom_icon["icon"], default_color]
 
     # Check for special folder types
     if folder_name in FOLDER_MAP:
         icon_key = FOLDER_MAP[folder_name]
-        return ICONS["folder"].get(icon_key, ICONS["folder"]["default"])
+        icon_info = ICONS["folder"].get(icon_key, ICONS["folder"]["default"])
+
+        # Use default folder color for icons that don't have folder-like silhouettes
+        # This helps distinguish folders from files when they use similar colorful icons
+        if icon_key not in FOLDER_ICONS_WITH_FOLDER_SILHOUETTE:
+            # Use the icon from the themed folder but with default folder color
+            default_color = ICONS["folder"]["default"][1]
+            return [icon_info[0], default_color]
+        else:
+            # Use the original themed icon and color
+            return icon_info
     else:
         return ICONS["folder"]["default"]
 
@@ -115,9 +138,9 @@ def get_icon(outer_key: str, inner_key: str) -> list:
         list[str,str]: The icon and color for the icon
     """
     if not config["interface"]["nerd_font"]:
-        return ASCII_ICONS.get(outer_key, {"empty": None}).get(inner_key, " ")
+        return ASCII_ICONS.get(outer_key, {}).get(inner_key, [" ", "white"])
     else:
-        return ICONS[outer_key][inner_key]
+        return ICONS.get(outer_key, {}).get(inner_key, [" ", "white"])
 
 
 @lru_cache(maxsize=128)

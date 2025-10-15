@@ -186,7 +186,6 @@ summary:not(#starlight__on-this-page--mobile) {
   [class^="right-sidebar"] {
     min-width: 20vw;
     max-width: 300px;
-    pointer-events: none;
     > .sl-container {
       width: calc(25vw - (2 * var(--sidebar-pad-x)));
       max-width: calc(300px - (2 * var(--sidebar-pad-x)));
@@ -223,7 +222,7 @@ summary:not(#starlight__on-this-page--mobile) {
     border-inline-end: none;
   }
   .main-frame {
-    cursor: pointer;
+    cursor:default;
     padding-inline-start: 0;
   }
   body > div:has(> nav) > div .main-frame {

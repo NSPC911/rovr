@@ -225,7 +225,8 @@ def load_config() -> tuple[dict, dict]:
         expected_schema_line = f"#:schema {schema_url}\n"
         if lines and lines[0] != expected_schema_line:
             # check if it is schema in the first place
-            if lines[0].startswith("#:schema"):
+            header = lines[0].lstrip("\ufeff").lstrip()
+            if header.startswith("#:schema"):
                 lines[0] = expected_schema_line
             else:
                 lines.insert(0, expected_schema_line)
@@ -233,7 +234,8 @@ def load_config() -> tuple[dict, dict]:
             with open(user_config_path, "w") as f:
                 f.writelines(lines)
 
-            pprint(f"[yellow]Updated config schema to v{current_version}[/]")
+            display_version = f"v{current_version}" if current_version != "master" else "master"
+            pprint(f"[yellow]Updated config schema to {display_version}[/]")
         elif not lines:
             with open(user_config_path, "w") as file:
                 file.write(DEFAULT_CONFIG.format(schema_url=schema_url))

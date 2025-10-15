@@ -229,7 +229,7 @@ class PreviewContainer(Container):
             "--force-colorization",
             "--paging=never",
             "--style=numbers"
-            if config["plugins"]["bat"]["show_line_numbers"]
+            if config["interface"]["show_line_numbers"]
             else "--style=plain",
         ]
         if not preview_full:

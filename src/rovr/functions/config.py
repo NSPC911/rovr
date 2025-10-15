@@ -18,6 +18,7 @@ from rovr.variables.maps import (
 lzstring = LZString()
 pprint = Console().print
 
+DEFAULT_CONFIG = '#:schema {schema_url}\n[theme]\ndefault = "nord"'
 
 def get_version() -> str:
     """Get version from package metadata
@@ -208,7 +209,7 @@ def load_config() -> tuple[dict, dict]:
     # Create config file if it doesn't exist
     if not path.exists(user_config_path):
         with open(user_config_path, "w") as file:
-            file.write(f'#:schema {schema_url}\n[theme]\ndefault = "nord"')
+            file.write(DEFAULT_CONFIG.format(schema_url=schema_url))
     else:
         # Update schema version if needed
         with open(user_config_path, "r") as f:
@@ -228,7 +229,7 @@ def load_config() -> tuple[dict, dict]:
             pprint(f"[yellow]Updated config schema to v{current_version}[/]")
         elif not lines:
             with open(user_config_path, "w") as file:
-                file.write(f'#:schema  {schema_url}\n[theme]\ndefault = "nord"')
+                file.write(DEFAULT_CONFIG.format(schema_url=schema_url))
 
     with open(path.join(path.dirname(__file__), "../config/config.toml"), "r") as f:
         # check header

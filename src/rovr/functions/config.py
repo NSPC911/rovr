@@ -1,3 +1,4 @@
+from collections import deque
 import os
 from importlib.metadata import PackageNotFoundError, version
 from os import path
@@ -65,7 +66,7 @@ def toml_dump(doc_path: str, exception: toml.TomlDecodeError) -> None:
     exit(1)
 
 
-def find_path_line(lines: list[str], path: list) -> int | None:
+def find_path_line(lines: list[str], path: deque) -> int | None:
     """Find the line number for a given JSON path in TOML content
 
     Args:
@@ -141,47 +142,46 @@ def schema_dump(doc_path: str, exception: ValidationError, config_content: str) 
                 pprint(enum_error_message)
             case _:
                 pprint(f"[yellow]{exception.message}[/yellow]")
-        exit(1)
+    else:
+        start: int = max(lineno - 2, 0)
+        end: int = min(len(doc), lineno + 3)
+        rjust: int = len(str(end + 1))
+        has_past = False
 
-    start: int = max(lineno - 2, 0)
-    end: int = min(len(doc), lineno + 3)
-    rjust: int = len(str(end + 1))
-    has_past = False
+        pprint(
+            rjust * " "
+            + f"  [bright_blue]-->[/] [white]{path.realpath(doc_path)}:{lineno + 1}[/]"
+        )
+        for line in range(start, end):
+            if "[" in doc[line]:
+                doc[line] = doc[line].replace("[", "\\[")
+            if line == lineno:
+                startswith = "╭╴"
+                has_past = True
+                pprint(
+                    f"[bright_red]{startswith}{str(line + 1).rjust(rjust)}[/][bright_blue] │[/] {doc[line]}"
+                )
+            else:
+                startswith = "│ " if has_past else "  "
+                pprint(
+                    f"[bright_red]{startswith}[/][bright_blue]{str(line + 1).rjust(rjust)} │[/] {doc[line]}"
+                )
 
-    pprint(
-        rjust * " "
-        + f"  [bright_blue]-->[/] [white]{path.realpath(doc_path)}:{lineno + 1}[/]"
-    )
-    for line in range(start, end):
-        if "[" in doc[line]:
-            doc[line] = doc[line].replace("[", "\\[")
-        if line == lineno:
-            startswith = "╭╴"
-            has_past = True
-            pprint(
-                f"[bright_red]{startswith}{str(line + 1).rjust(rjust)}[/][bright_blue] │[/] {doc[line]}"
-            )
-        else:
-            startswith = "│ " if has_past else "  "
-            pprint(
-                f"[bright_red]{startswith}[/][bright_blue]{str(line + 1).rjust(rjust)} │[/] {doc[line]}"
-            )
+        # Format the error message based on validator type
+        match exception.validator:
+            case "required":
+                error_msg = f"Missing required field: {exception.message}"
+            case "type":
+                error_msg = f"Expected [bright_cyan]{exception.validator_value}[/] type, but got [bright_yellow]{type(exception.instance).__name__}[/] instead"
+            case "enum":
+                error_msg = f"Provided value '{exception.instance}' is not inside allowlist of {exception.validator_value}"
+            case "minimum":
+                error_msg = f"Value for [bright_cyan]{".".join(exception.relative_path)}[/] must be < {exception.validator_value} (cannot be {exception.instance})"
+            case _:
+                print(exception.validator)
+                error_msg = exception.message
 
-    # Format the error message based on validator type
-    match exception.validator:
-        case "required":
-            error_msg = f"Missing required field: {exception.message}"
-        case "type":
-            error_msg = f"Expected [bright_cyan]{exception.validator_value}[/] type, but got [bright_yellow]{type(exception.instance).__name__}[/] instead"
-        case "enum":
-            error_msg = f"Provided value '{exception.instance}' is not inside allowlist of {exception.validator_value}"
-        case "minimum":
-            error_msg = f"Value for [bright_cyan]{".".join(exception.relative_path)}[/] must be < {exception.validator_value} (cannot be {exception.instance})"
-        case _:
-            print(exception.validator)
-            error_msg = exception.message
-
-    pprint(f"[bright_red]╰─{'─' * rjust}─❯[/] {error_msg}")
+        pprint(f"[bright_red]╰─{'─' * rjust}─❯[/] {error_msg}")
     exit(1)
 
 

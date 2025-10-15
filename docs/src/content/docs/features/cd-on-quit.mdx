@@ -39,7 +39,7 @@ add a function to your shell config that wraps the `rovr` command.
           code={`function rovr\n    command rovr $argv\n    set config_dir "$HOME/.config"\n    if set -q XDG_CONFIG_HOME\n        set config_dir "$XDG_CONFIG_HOME"\n    end\n    set cd_path_file "$config_dir/rovr/rovr_quit_cd_path"\n    if test -f "$cd_path_file"\n        cd (cat "$cd_path_file")\n        rm -f "$cd_path_file"\n    end\nend`}
           lang="fish"
           frame="code"
-          title=".fishrc"
+          title="config.fish"
         />
       </TabItem>
       <TabItem label="nushell">
@@ -67,7 +67,7 @@ add a function to your shell config that wraps the `rovr` command.
           code={`function rovr\n    command rovr $argv\n    set cd_path_file "$HOME/Library/Application Support/rovr/rovr_quit_cd_path"\n    if test -f "$cd_path_file"\n        cd (cat "$cd_path_file")\n        rm--env  -f "$cd_path_file"\n    end\nend`}
           lang="fish"
           frame="code"
-          title=".fishrc"
+          title="config.fish"
         />
       </TabItem>
       <TabItem label="nushell">
@@ -97,7 +97,7 @@ add a function to your shell config that wraps the `rovr` command.
         />
         for it to work. For more information on `Set-ExecutionPolicy`, refer to
         its
-        [docs](https://learn.microsoft.com/en-us/powershell/module/microsoft.powershell.security/se--env t-executionpolicy)
+        [docs](https://learn.microsoft.com/en-us/powershell/module/microsoft.powershell.security/set-executionpolicy)
       </TabItem>
       <TabItem label="nushell">
         <Code

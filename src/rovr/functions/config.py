@@ -176,7 +176,7 @@ def schema_dump(doc_path: str, exception: ValidationError, config_content: str) 
             case "enum":
                 error_msg = f"Provided value '{exception.instance}' is not inside allowlist of {exception.validator_value}"
             case "minimum":
-                error_msg = f"Value for [bright_cyan]{".".join(exception.relative_path)}[/] must be < {exception.validator_value} (cannot be {exception.instance})"
+                error_msg = f"Value for [bright_cyan]{'.'.join(exception.relative_path)}[/] must be < {exception.validator_value} (cannot be {exception.instance})"
             case _:
                 print(exception.validator)
                 error_msg = exception.message

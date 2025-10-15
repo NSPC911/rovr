@@ -767,6 +767,14 @@
           "type": "string",
           "description": "Launch Textual's mildly useful command palette (only one keybind is allowed!)",
           "display_name": "Launch command palette"
+        },
+        "suspend_app": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Suspend the app's process, bringing you back to the terminal",
+          "display_name": "Suspend app"
         }
       }
     },

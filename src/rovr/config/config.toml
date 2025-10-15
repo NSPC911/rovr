@@ -175,6 +175,7 @@ preview_select_right = ["shift+right", "L"]
 show_keybinds = ["question_mark"]
 quit_app = ["q", "ctrl+q"]
 command_palette = "ctrl+p"
+suspend_app = ["ctrl+z"]
 
 [plugins.zoxide]
 enabled = false

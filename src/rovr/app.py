@@ -6,7 +6,7 @@ from types import SimpleNamespace
 from typing import Callable, Iterable
 
 from textual import events, on, work
-from textual.app import App, ComposeResult, SystemCommand
+from textual.app import WINDOWS, App, ComposeResult, SystemCommand
 from textual.binding import Binding
 from textual.color import ColorParseError
 from textual.containers import (
@@ -390,6 +390,13 @@ class Application(App, inherit_bindings=False):
                         title="Plugins: finder",
                         severity="error",
                     )
+            case key if key in config["keybinds"]["suspend_app"]:
+                if WINDOWS:
+                    self.notify(
+                        "rovr cannot be suspended on Windows!", title="Suspend App"
+                    )
+                else:
+                    self.action_suspend_process()
 
     def on_app_blur(self, event: events.AppBlur) -> None:
         self.app_blurred = True
@@ -568,6 +575,55 @@ class Application(App, inherit_bindings=False):
                 "Have a transparent background.",
                 lambda: self.set_timer(0.1, self._toggle_transparency),
             )
+
+        if (
+            config["plugins"]["finder"]["enabled"]
+            and config["plugins"]["finder"]["keybinds"]
+        ):
+            yield SystemCommand(
+                "Open finder",
+                "Start searching the current directory using `fd`",
+                lambda: self.on_key(
+                    events.Key(
+                        key=config["plugins"]["finder"]["keybinds"][0],
+                        # character doesn't matter
+                        character=config["plugins"]["finder"]["keybinds"][0],
+                    )
+                ),
+            )
+        if (
+            config["plugins"]["zoxide"]["enabled"]
+            and config["plugins"]["zoxide"]["keybinds"]
+        ):
+            yield SystemCommand(
+                "Open zoxide",
+                "Start searching for a directory to `z` to",
+                lambda: self.on_key(
+                    events.Key(
+                        key=config["plugins"]["zoxide"]["keybinds"][0],
+                        # character doesn't matter
+                        character=config["plugins"]["zoxide"]["keybinds"][0],
+                    )
+                ),
+            )
+        if config["keybinds"]["toggle_hidden_files"]:
+            if config["settings"]["show_hidden_files"]:
+                yield SystemCommand(
+                    "Hide Hidden Files",
+                    "Exclude listing of hidden files and folders",
+                    self.query_one("#file_list").toggle_hidden_files,
+                )
+            else:
+                yield SystemCommand(
+                    "Show Hidden Files",
+                    "Include listing of hidden files and folders",
+                    self.query_one("#file_list").toggle_hidden_files,
+                )
+        yield SystemCommand(
+            "Reload File List",
+            "Send a forceful reload of the file list, in case something goes wrong",
+            lambda: self.cd(getcwd()),
+        )
 
     @work
     async def _toggle_transparency(self) -> None:

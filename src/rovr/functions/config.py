@@ -81,27 +81,33 @@ def find_path_line(lines: list[str], path: deque) -> int | None:
     if not path:
         return 0
 
-    # Track current section and keys
     current_section = []
+
+    # Convert path to list and filter out indices for comparison
+    path_list = list(path)
+    path_without_indices = [p for p in path_list if not isinstance(p, int)]
 
     for i, line in enumerate(lines):
         stripped = line.strip()
         if not stripped or stripped.startswith("#"):
             continue
 
-        # Check for section headers [section] or [section.subsection]
-        if stripped.startswith("[") and not stripped.startswith("[["):
-            section_match = stripped.strip("[]").split(".")
-            current_section = section_match
-            if current_section == list(path):
-                return i
+        # Check for section headers [section] or [[section]] (array-of-tables)
+        if stripped.startswith("["):
+            # Normalize by stripping one or two surrounding brackets
+            if stripped.startswith("[[") and stripped.endswith("]]"):
+                section_name = stripped[2:-2].strip()
+                current_section = section_name.split(".")
+            else:
+                section_name = stripped.strip("[]").strip()
+                current_section = section_name.split(".")
 
-        # Check for key = value
+            if current_section in (path_without_indices, path_list):
+                return i
         elif "=" in stripped:
             key = stripped.split("=")[0].strip().strip('"').strip("'")
             full_path = current_section + [key]
-
-            if full_path == list(path):
+            if full_path in (path_without_indices, path_list):
                 return i
 
     return None

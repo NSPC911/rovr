@@ -234,7 +234,9 @@ def load_config() -> tuple[dict, dict]:
             with open(user_config_path, "w") as f:
                 f.writelines(lines)
 
-            display_version = f"v{current_version}" if current_version != "master" else "master"
+            display_version = (
+                f"v{current_version}" if current_version != "master" else "master"
+            )
             pprint(f"[yellow]Updated config schema to {display_version}[/]")
         elif not lines:
             with open(user_config_path, "w") as file:

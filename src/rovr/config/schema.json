@@ -176,7 +176,8 @@
         "filesize_decimals": {
           "type": "integer",
           "default": 1,
-          "description": "The number of decimals you want to see in the humanized file size"
+          "description": "The number of decimals you want to see in the humanized file size",
+          "minimum": 0
         },
         "filesize_suffix": {
           "type": "string",

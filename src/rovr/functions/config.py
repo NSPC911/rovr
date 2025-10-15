@@ -30,6 +30,161 @@ def get_version() -> str:
         return "master"
 
 
+def toml_dump(doc_path: str, exception: toml.TomlDecodeError) -> None:
+    """
+    Dump an error message for anything related to TOML loading
+
+    Args:
+        file (str): the file content itself
+        exception (toml.TomlDecodeError): the exception that occurred
+    """
+    doc: list = exception.doc.splitlines()
+    start: int = max(exception.lineno - 3, 0)
+    end: int = min(len(doc), exception.lineno + 2)
+    rjust: int = len(str(end + 1))
+    has_past = False
+    pprint(
+        rjust * " "
+        + f"  [bright_blue]-->[/] [white]{path.realpath(doc_path)}:{exception.lineno}:{exception.colno}[/]"
+    )
+    for line in range(start, end):
+        if "[" in doc[line]:
+            doc[line] = doc[line].replace("[", "\\[")
+        if line + 1 == exception.lineno:
+            startswith = "╭╴"
+            has_past = True
+            pprint(
+                f"[bright_red]{startswith}{str(line + 1).rjust(rjust)}[/][bright_blue] │[/] {doc[line]}"
+            )
+        else:
+            startswith = "│ " if has_past else "  "
+            pprint(
+                f"[bright_red]{startswith}[/][bright_blue]{str(line + 1).rjust(rjust)} │[/] {doc[line]}"
+            )
+    pprint(f"[bright_red]╰─{'─' * rjust}─❯[/] {exception.msg}")
+    exit(1)
+
+
+def find_path_line(lines: list[str], path: list) -> int | None:
+    """Find the line number for a given JSON path in TOML content
+
+    Args:
+        lines: list of lines from the TOML file
+        path: the JSON path from the ValidationError
+
+    Returns:
+        int | None: the line number (0-indexed) or None if not found
+    """
+    if not path:
+        return 0
+
+    # Track current section and keys
+    current_section = []
+
+    for i, line in enumerate(lines):
+        stripped = line.strip()
+        if not stripped or stripped.startswith("#"):
+            continue
+
+        # Check for section headers [section] or [section.subsection]
+        if stripped.startswith("[") and not stripped.startswith("[["):
+            section_match = stripped.strip("[]").split(".")
+            current_section = section_match
+            if current_section == list(path):
+                return i
+
+        # Check for key = value
+        elif "=" in stripped:
+            key = stripped.split("=")[0].strip().strip('"').strip("'")
+            full_path = current_section + [key]
+
+            if full_path == list(path):
+                return i
+
+    return None
+
+
+def schema_dump(doc_path: str, exception: ValidationError, config_content: str) -> None:
+    """
+    Dump an error message for schema validation errors
+
+    Args:
+        doc_path: path to the config file
+        exception: the ValidationError that occurred
+        config_content: the raw file content
+    """
+    doc: list = config_content.splitlines()
+
+    # find the line no for the error path
+    path_str = ".".join(str(p) for p in exception.path) if exception.path else "root"
+    lineno = find_path_line(doc, exception.path)
+
+    if lineno is None:
+        # fallback to infoless error display
+        pprint(
+            f"[underline bright_red]Config Error[/] at path [bold cyan]{path_str}[/]:"
+        )
+        match exception.validator:
+            case "required":
+                pprint(f"{exception.message}, but is not provided.")
+            case "type":
+                type_error_message = (
+                    f"Invalid type: expected [yellow]{exception.validator_value}[/yellow], "
+                    f"but got [yellow]{type(exception.instance).__name__}[/yellow]."
+                )
+                pprint(type_error_message)
+            case "enum":
+                enum_error_message = (
+                    f"Invalid value [yellow]'{exception.instance}'[/yellow]. "
+                    f"\nAllowed values are: {exception.validator_value}"
+                )
+                pprint(enum_error_message)
+            case _:
+                pprint(f"[yellow]{exception.message}[/yellow]")
+        exit(1)
+
+    start: int = max(lineno - 2, 0)
+    end: int = min(len(doc), lineno + 3)
+    rjust: int = len(str(end + 1))
+    has_past = False
+
+    pprint(
+        rjust * " "
+        + f"  [bright_blue]-->[/] [white]{path.realpath(doc_path)}:{lineno + 1}[/]"
+    )
+    for line in range(start, end):
+        if "[" in doc[line]:
+            doc[line] = doc[line].replace("[", "\\[")
+        if line == lineno:
+            startswith = "╭╴"
+            has_past = True
+            pprint(
+                f"[bright_red]{startswith}{str(line + 1).rjust(rjust)}[/][bright_blue] │[/] {doc[line]}"
+            )
+        else:
+            startswith = "│ " if has_past else "  "
+            pprint(
+                f"[bright_red]{startswith}[/][bright_blue]{str(line + 1).rjust(rjust)} │[/] {doc[line]}"
+            )
+
+    # Format the error message based on validator type
+    match exception.validator:
+        case "required":
+            error_msg = f"Missing required field: {exception.message}"
+        case "type":
+            error_msg = f"Expected [bright_cyan]{exception.validator_value}[/] type, but got [bright_yellow]{type(exception.instance).__name__}[/] instead"
+        case "enum":
+            error_msg = f"Provided value '{exception.instance}' is not inside allowlist of {exception.validator_value}"
+        case "minimum":
+            error_msg = f"Value for [bright_cyan]{".".join(exception.relative_path)}[/] must be < {exception.validator_value} (cannot be {exception.instance})"
+        case _:
+            print(exception.validator)
+            error_msg = exception.message
+
+    pprint(f"[bright_red]╰─{'─' * rjust}─❯[/] {error_msg}")
+    exit(1)
+
+
 def load_config() -> tuple[dict, dict]:
     """
     Load both the template config and the user config
@@ -77,17 +232,21 @@ def load_config() -> tuple[dict, dict]:
     with open(path.join(path.dirname(__file__), "../config/config.toml"), "r") as f:
         # check header
         try:
-            template_config = toml.loads(f.read())
-        except toml.decoder.TomlDecodeError as e:
-            pprint(f"[bright_red]TOML Syntax Error:\n    {e}")
-            exit(1)
+            content = f.read()
+            template_config = toml.loads(content)
+        except toml.TomlDecodeError as exc:
+            toml_dump(path.join(path.dirname(__file__), "../config/config.toml"), exc)
 
     user_config = {}
+    user_config_content = ""
     if path.exists(user_config_path):
         with open(user_config_path, "r") as f:
             user_config_content = f.read()
             if user_config_content:
-                user_config = toml.loads(user_config_content)
+                try:
+                    user_config = toml.loads(user_config_content)
+                except toml.TomlDecodeError as exc:
+                    toml_dump(user_config_path, exc)
     # Don't really have to consider the else part, because it's created further down
     config = deep_merge(template_config, user_config)
     # check with schema
@@ -112,31 +271,7 @@ def load_config() -> tuple[dict, dict]:
     try:
         jsonschema.validate(config, schema)
     except ValidationError as exception:
-        # pprint(exception.__dict__)
-        path_str = "root"
-        if exception.path:
-            path_str = ".".join(str(p) for p in exception.path)
-        pprint(
-            f"[underline bright_red]Config Error[/] at path [bold cyan]{path_str}[/]:"
-        )
-        match exception.validator:
-            case "required":
-                pprint(f"{exception.message}, but is not provided.")
-            case "type":
-                type_error_message = (
-                    f"Invalid type: expected [yellow]{exception.validator_value}[/yellow], "
-                    f"but got [yellow]{type(exception.instance).__name__}[/yellow]."
-                )
-                pprint(type_error_message)
-            case "enum":
-                enum_error_message = (
-                    f"Invalid value [yellow]'{exception.instance}'[/yellow]. "
-                    f"\nAllowed values are: {exception.validator_value}"
-                )
-                pprint(enum_error_message)
-            case _:
-                pprint(f"[yellow]{exception.message}[/yellow]")
-        exit(1)
+        schema_dump(user_config_path, exception, user_config_content)
 
     # slight config fixes
     # image protocol because "AutoImage" doesn't work with Sixel

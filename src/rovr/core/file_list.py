@@ -1,6 +1,7 @@
 import asyncio
 from os import getcwd, path
 from os import system as cmd
+from time import time
 from typing import ClassVar
 
 from rich.segment import Segment
@@ -239,8 +240,7 @@ class FileList(SelectionList, inherit_bindings=False):
         self.enter_into = cwd
         # Separate folders and files
         self.list_of_options = []
-
-        self.loading = True
+        self.clear_options()
         try:
             folders, files = path_utils.get_cwd_object(
                 cwd, config["settings"]["show_hidden_files"]
@@ -249,10 +249,13 @@ class FileList(SelectionList, inherit_bindings=False):
                 self.list_of_options.append(
                     Selection("  --no-files--", value="", id="", disabled=True)
                 )
+                self.add_options(self.list_of_options)
             else:
                 file_list_options = folders + files
+                options_to_add: list[FileListSelectionWidget] = []
+                initial_time = time()
                 for item in file_list_options:
-                    self.list_of_options.append(
+                    options_to_add.append(
                         FileListSelectionWidget(
                             icon=item["icon"],
                             label=item["name"],
@@ -260,8 +263,13 @@ class FileList(SelectionList, inherit_bindings=False):
                             value=path_utils.compress(item["name"]),
                         )
                     )
-                    # await so that textual can still be responsive
                     await asyncio.sleep(0)
+                    if time() - initial_time > 0.10:
+                        self.add_options(options_to_add)
+                        self.list_of_options.extend(options_to_add)
+                        options_to_add: list[FileListSelectionWidget] = []
+                self.add_options(options_to_add)
+                self.list_of_options.extend(options_to_add)
         except PermissionError:
             self.list_of_options.append(
                 Selection(
@@ -271,10 +279,7 @@ class FileList(SelectionList, inherit_bindings=False):
                     disabled=True,
                 )
             )
-
-        self.clear_options()
-        self.add_options(self.list_of_options)
-        self.loading = False
+            self.add_options(self.list_of_options)
 
     @work(exclusive=True)
     async def create_archive_list(self, file_list: list[str]) -> None:
@@ -286,7 +291,6 @@ class FileList(SelectionList, inherit_bindings=False):
         self.clear_options()
         self.list_of_options = []
 
-        self.loading = True
         if not file_list:
             self.list_of_options.append(
                 Selection("  --no-files--", value="", id="", disabled=True)
@@ -311,7 +315,6 @@ class FileList(SelectionList, inherit_bindings=False):
                 await asyncio.sleep(0)
 
         self.add_options(self.list_of_options)
-        self.loading = False
 
     async def on_selection_list_selected_changed(
         self, event: SelectionList.SelectedChanged

@@ -180,9 +180,9 @@ class ProcessContainer(VerticalScroll):
                 file = path_utils.decompress(file)
             if path.isdir(file):
                 folders_to_delete.append(file)
-            files_to_add, folders_to_add = path_utils.get_recursive_files(
+            files_to_add, folders_to_add = self.app.call_from_thread(lambda: path_utils.get_recursive_files(
                 file, with_folders=True
-            )
+            ))
             files_to_delete.extend(files_to_add)
             folders_to_delete.extend(folders_to_add)
         self.app.call_from_thread(bar.update_progress, total=len(files_to_delete) + 1)
@@ -653,11 +653,11 @@ class ProcessContainer(VerticalScroll):
         files_to_cut = []
         cut_files__folders = []
         for file in copied:
-            files_to_copy.extend(path_utils.get_recursive_files(file))
+            files_to_copy.extend(self.app.call_from_thread(lambda: path_utils.get_recursive_files(file)))
         for file in cutted:
             if path.isdir(file):
                 cut_files__folders.append(path_utils.normalise(file))
-            files, folders = path_utils.get_recursive_files(file, with_folders=True)
+            files, folders = self.app.call_from_thread(lambda: path_utils.get_recursive_files(file, with_folders=True))
             files_to_cut.extend(files)
             cut_files__folders.extend(folders)
         self.app.call_from_thread(

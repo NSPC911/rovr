@@ -2,9 +2,9 @@ import asyncio
 import ctypes
 import os
 import stat
-from os import path
 
 import psutil
+from aiofiles import os as aios
 from lzstring import LZString
 from rich.console import Console
 from textual import work
@@ -32,7 +32,7 @@ def normalise(location: str | bytes) -> str:
     # path.normalise fixes the relative references
     # replace \\ with / on windows
     # by any chance if somehow a \\\\ was to enter, fix that
-    return str(path.normpath(location).replace("\\", "/").replace("//", "/"))
+    return str(os.path.normpath(location).replace("\\", "/").replace("//", "/"))
 
 
 def is_hidden_file(filepath: str) -> bool:
@@ -49,7 +49,7 @@ def is_hidden_file(filepath: str) -> bool:
             return False
     elif os_type == "Darwin":
         # dotfiles should always be hidden, and so should UF_HIDDEN-flagged files
-        name_hidden = path.basename(filepath).startswith(".")
+        name_hidden = os.path.basename(filepath).startswith(".")
         try:
             st = os.stat(filepath, follow_symlinks=False)
             flag_hidden = bool(
@@ -59,7 +59,7 @@ def is_hidden_file(filepath: str) -> bool:
             flag_hidden = False
         return name_hidden or flag_hidden
     else:
-        return path.basename(filepath).startswith(".")
+        return os.path.basename(filepath).startswith(".")
 
 
 # Okay so the reason why I have wrapper functions is
@@ -237,7 +237,7 @@ def force_obtain_write_permission(item_path: str) -> bool:
     Returns:
         bool: True if permission was granted successfully, False otherwise.
     """
-    if not path.exists(item_path):
+    if not os.path.exists(item_path):
         return False
     try:
         current_permissions = stat.S_IMODE(os.lstat(item_path).st_mode)
@@ -250,13 +250,13 @@ def force_obtain_write_permission(item_path: str) -> bool:
         return False
 
 
-def get_recursive_files(
+async def get_recursive_files(
     object_path: str, with_folders: bool = False
 ) -> list[dict] | tuple[list[dict], list[dict]]:
     """Get the files available at a directory recursively, regardless of whether it is a directory or not
     Args:
-        object_path (str): The object's path
-        with_folders (bool): Return a list of folders as well
+        object_path (str): The object's path.
+        with_folders (bool): Return a list of folders as well.
 
     Returns:
         list: A list of dictionaries, with a "path" key and "relative_loc" key
@@ -264,20 +264,21 @@ def get_recursive_files(
         list: A list of dictionaries, with a "path" key and "relative_loc" key for files
         list: A list of path strings that were involved in the file list.
     """
-    if path.isfile(path.realpath(object_path)) or path.islink(
-        path.realpath(object_path)
+
+    if await aios.path.isfile(os.path.realpath(object_path)) or await aios.path.islink(
+        os.path.realpath(object_path)
     ):
         if with_folders:
             return [
                 {
                     "path": normalise(object_path),
-                    "relative_loc": path.basename(object_path),
+                    "relative_loc": os.path.basename(object_path),
                 }
             ], []
         return [
             {
                 "path": normalise(object_path),
-                "relative_loc": path.basename(object_path),
+                "relative_loc": os.path.basename(object_path),
             }
         ]
     else:
@@ -286,15 +287,15 @@ def get_recursive_files(
         for folder, folders_in_folder, files_in_folder in os.walk(object_path):
             if with_folders:
                 for folder_in_folder in folders_in_folder:
-                    full_path = normalise(path.join(folder, folder_in_folder))
+                    full_path = normalise(os.path.join(folder, folder_in_folder))
                     if full_path not in folder:
                         folders.append(full_path)
             for file in files_in_folder:
-                full_path = normalise(path.join(folder, file))  # normalise the path
+                full_path = normalise(os.path.join(folder, file))  # normalise the path
                 files.append({
                     "path": full_path,
                     "relative_loc": normalise(
-                        path.relpath(full_path, object_path + "/..")
+                        os.path.relpath(full_path, object_path + "/..")
                     ),
                 })
         if with_folders:
@@ -303,8 +304,8 @@ def get_recursive_files(
 
 
 def ensure_existing_directory(directory: str) -> str:
-    while not (path.exists(directory) and path.isdir(directory)):
-        parent = path.dirname(directory)
+    while not (os.path.exists(directory) and os.path.isdir(directory)):
+        parent = os.path.dirname(directory)
         # If we can't even access the root then there is a bigger problem
         # and this could result in infinite loop
         if parent == directory:
@@ -435,5 +436,5 @@ def get_mounted_drives() -> list:
     except Exception as e:
         print(f"Error getting mounted drives: {e}")
         print("Using fallback method")
-        drives = [path.expanduser("~")]
+        drives = [os.path.expanduser("~")]
     return drives

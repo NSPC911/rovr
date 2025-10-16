@@ -9,7 +9,7 @@ on:
 
 jobs:
   spam-detection:
-    if: github.actor != 'coderabbit-ai' && github.actor != 'copilot-swe-agent'
+    if: github.actor != 'coderabbitAi' && github.actor != 'copilot-swe-agent'
     runs-on: ubuntu-latest
     permissions:
       issues: write

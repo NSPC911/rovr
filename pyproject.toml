@@ -42,6 +42,11 @@ Documentation = "https://nspc911.github.io/rovr"
 [project.scripts]
 rovr = "rovr.__main__:main"
 
+[project.optional-dependencies]
+pdf = [
+    "textual-pdf",
+]
+
 [dependency-groups]
 dev = [
   "commitizen>=4.8.3",
@@ -108,3 +113,6 @@ preview = true
 [tool.ty.rules]
 possibly-missing-import = "ignore"
 unresolved-attribute = "ignore"
+
+[tool.uv.sources]
+textual-pdf = { git = "https://github.com/nspc911/textual-pdf" }

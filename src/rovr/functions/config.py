@@ -64,6 +64,11 @@ def toml_dump(doc_path: str, exception: toml.TomlDecodeError) -> None:
             pprint(
                 f"[bright_red]{startswith}[/][bright_blue]{str(line + 1).rjust(rjust)} │[/] {doc[line]}"
             )
+    # check if it is an interesting error message
+    if exception.msg.startswith("What? "):
+        # What? <key> already exists?<dict>
+        msg_split = exception.msg.split()
+        exception.msg = f"Redefinition of [bright_cyan]{msg_split[1]}[/] is not allowed. Keep to a table, or not use one at all"
     pprint(f"[bright_red]╰─{'─' * rjust}─❯[/] {exception.msg}")
     exit(1)
 

@@ -1,3 +1,4 @@
+import asyncio
 from typing import ClassVar
 
 from rich.segment import Segment
@@ -11,7 +12,6 @@ from textual.widgets.option_list import OptionDoesNotExist
 
 from rovr.classes import ClipboardSelection
 from rovr.functions import icons as icon_utils
-from rovr.functions import path as path_utils
 from rovr.variables.constants import config, vindings
 
 
@@ -29,24 +29,29 @@ class Clipboard(SelectionList, inherit_bindings=False):
         self.paste_button.disabled = True
         self.file_list = self.app.query_one("#file_list")
 
+    @work
     async def copy_to_clipboard(self, items: list[str]) -> None:
         """Copy the selected files to the clipboard"""
         self.deselect_all()
+        await asyncio.sleep(0)
         for item in items[::-1]:
             self.insert_selection_at_beginning(
                 ClipboardSelection(
                     prompt=Content(
                         f"{icon_utils.get_icon('general', 'copy')[0]} {item}"
                     ),
-                    value=path_utils.compress(f"{item}-copy"),
-                    initial_state=True,
+                    text=item,
+                    type_of_selection="copy",
                 )
             )
-        self.refresh(layout=True)
         self.paste_button.disabled = False
+        for item_number in range(len(items)):
+            self.select(self.get_option_at_index(item_number))
 
+    @work
     async def cut_to_clipboard(self, items: list[str]) -> None:
         self.deselect_all()
+        await asyncio.sleep(0)
         """Cut the selected files to the clipboard."""
         for item in items[::-1]:
             if isinstance(item, str):
@@ -55,11 +60,10 @@ class Clipboard(SelectionList, inherit_bindings=False):
                         prompt=Content(
                             f"{icon_utils.get_icon('general', 'cut')[0]} {item}"
                         ),
-                        value=path_utils.compress(f"{item}-cut"),
-                        initial_state=True,
+                        text=item,
+                        type_of_selection="cut",
                     )
                 )
-        self.refresh(layout=True)
         self.paste_button.disabled = False
         for item_number in range(len(items)):
             self.select(self.get_option_at_index(item_number))

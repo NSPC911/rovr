@@ -1,8 +1,11 @@
 from os import DirEntry
+from typing import Literal
 
 from textual.content import Content, ContentText
 from textual.widgets.option_list import Option
 from textual.widgets.selection_list import Selection, SelectionType
+
+from rovr.functions.path import compress
 
 
 class PinnedSidebarOption(Option):
@@ -55,18 +58,33 @@ class FileListSelectionWidget(Selection):
 
 
 class ClipboardSelection(Selection):
-    def __init__(self, prompt: ContentText, *args, **kwargs) -> None:
+    def __init__(
+        self,
+        prompt: ContentText,
+        text: str,
+        type_of_selection: Literal["copy", "cut"],
+    ) -> None:
         """
         Initialise the selection.
 
         Args:
             prompt: The prompt for the selection.
-            value: The value for the selection.
-            initial_state: The initial selected state of the selection.
-            id: The optional ID for the selection.
-            disabled: The initial enabled/disabled state. Enabled by default.
+            text: The value for the selection.
+            type_of_selection: The type of selection ("cut" or "copy")
+
+        Raises:
+            ValueError:
         """
-        super().__init__(prompt, *args, **kwargs)
+
+        if type_of_selection not in ["copy", "cut"]:
+            raise ValueError(
+                f"type_of_selection must be either 'copy' or 'cut' and not {type_of_selection}"
+            )
+        super().__init__(
+            prompt=prompt,
+            value=compress(f"{text}-{type_of_selection}"),
+            id=compress(text),
+        )
         self.initial_prompt = prompt
 
 

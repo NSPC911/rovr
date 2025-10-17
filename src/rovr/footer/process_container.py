@@ -25,7 +25,7 @@ from rovr.screens import (
     GiveMePermission,
     YesOrNo,
 )
-from rovr.variables.constants import config
+from rovr.variables.constants import config, up_down_vindings
 
 
 class ThickBar(BarRenderable):
@@ -34,7 +34,9 @@ class ThickBar(BarRenderable):
     HALF_BAR_RIGHT = "▌"
 
 
-class ProgressBarContainer(VerticalGroup):
+class ProgressBarContainer(VerticalGroup, inherit_bindings=False):
+    BIDNINGS = up_down_vindings
+
     def __init__(
         self,
         total: int | None = None,

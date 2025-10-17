@@ -127,7 +127,9 @@ async def open_file(app: App, filepath: str) -> None:
         app.notify(str(e), title="Open File", severity="error")
 
 
-async def get_filtered_dir_names(cwd: str | bytes, show_hidden: bool = False) -> set[str]:
+async def get_filtered_dir_names(
+    cwd: str | bytes, show_hidden: bool = False
+) -> set[str]:
     """
     Get the names of all items in a directory, respecting the show_hidden setting.
     This function is used for comparison in file watchers to avoid refresh loops.

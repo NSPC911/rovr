@@ -70,9 +70,12 @@ def set_scuffed_subtitle(element: Widget, *sections: str) -> None:
         element (Widget): The element containing style information.
         *sections (str): The sections to display
     """
-    border_bottom = BORDER_BOTTOM.get(
-        element.styles.border_bottom[0], BORDER_BOTTOM["blank"]
-    )
+    try:
+        border_bottom = BORDER_BOTTOM.get(
+            element.styles.border_bottom[0], BORDER_BOTTOM["blank"]
+        )
+    except AttributeError:
+        border_bottom = BORDER_BOTTOM["blank"]
     subtitle = ""
     for index, section in enumerate(sections):
         subtitle += section

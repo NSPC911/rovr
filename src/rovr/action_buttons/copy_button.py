@@ -22,6 +22,8 @@ class CopyButton(Button):
             return
         selected_files = await self.app.query_one("#file_list").get_selected_objects()
         if selected_files:
-            await self.app.query_one("#clipboard").copy_to_clipboard(selected_files)
+            self.app.query_one("#clipboard").copy_to_clipboard(selected_files)
         else:
-            self.notify("No files selected to copy.", title="Copy Files")
+            self.notify(
+                "No files selected to copy.", title="Copy Files", severity="warn"
+            )

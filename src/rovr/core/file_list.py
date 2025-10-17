@@ -121,7 +121,7 @@ class FileList(SelectionList, inherit_bindings=False):
         names_in_cwd: list[str] = []
         self.items_in_cwd: set[str] = set()
         try:
-            folders, files = path_utils.get_cwd_object(
+            folders, files = await path_utils.get_cwd_object(
                 cwd, config["settings"]["show_hidden_files"]
             )
             if not folders and not files:
@@ -242,7 +242,7 @@ class FileList(SelectionList, inherit_bindings=False):
         self.list_of_options = []
         self.clear_options()
         try:
-            folders, files = path_utils.get_cwd_object(
+            folders, files = await path_utils.get_cwd_object(
                 cwd, config["settings"]["show_hidden_files"]
             )
             if not folders and not files:
@@ -263,11 +263,12 @@ class FileList(SelectionList, inherit_bindings=False):
                             value=path_utils.compress(item["name"]),
                         )
                     )
-                    await asyncio.sleep(0)
-                    if time() - initial_time > 0.10:
+                    if time() - initial_time > 0.1:
                         self.add_options(options_to_add)
                         self.list_of_options.extend(options_to_add)
                         options_to_add: list[FileListSelectionWidget] = []
+                        await asyncio.sleep(0.1)
+                        initial_time = time()
                 self.add_options(options_to_add)
                 self.list_of_options.extend(options_to_add)
         except PermissionError:

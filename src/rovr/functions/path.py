@@ -127,7 +127,7 @@ async def open_file(app: App, filepath: str) -> None:
         app.notify(str(e), title="Open File", severity="error")
 
 
-def get_filtered_dir_names(cwd: str | bytes, show_hidden: bool = False) -> set[str]:
+async def get_filtered_dir_names(cwd: str | bytes, show_hidden: bool = False) -> set[str]:
     """
     Get the names of all items in a directory, respecting the show_hidden setting.
     This function is used for comparison in file watchers to avoid refresh loops.
@@ -143,7 +143,7 @@ def get_filtered_dir_names(cwd: str | bytes, show_hidden: bool = False) -> set[s
         PermissionError: When access to the directory is denied
     """
     try:
-        listed_dir = os.scandir(cwd)
+        listed_dir = await aios.scandir(cwd)
     except (PermissionError, FileNotFoundError, OSError):
         raise PermissionError(f"PermissionError: Unable to access {cwd}")
 
@@ -156,24 +156,24 @@ def get_filtered_dir_names(cwd: str | bytes, show_hidden: bool = False) -> set[s
     return names
 
 
-def get_cwd_object(
+async def get_cwd_object(
     cwd: str, show_hidden: bool = False
 ) -> tuple[list[dict], list[dict]]:
     """
-    Get the objects (files and folders) in a provided directory
+    Get the objects (files and folders) in a provided directory.
     Args:
-        cwd(str): The working directory to check
-        show_hidden(bool): Whether to include hidden files/folders (dot-prefixed on Unix; flagged hidden on Windows/macOS)
+        cwd(str): The working directory to check.
+        show_hidden(bool): Whether to include hidden files/folders (dot-prefixed on Unix; flagged hidden on Windows/macOS).
     Returns:
-        folders(list[dict]): A list of dictionaries, containing "name" as the item's name and "icon" as the respective icon
-        files(list[dict]): A list of dictionaries, containing "name" as the item's name and "icon" as the respective icon
-
+        folders(list[dict]): A list of dictionaries, containing "name" as the item's name and "icon" as the respective icon.
+        files(list[dict]): A list of dictionaries, containing "name" as the item's name and "icon" as the respective icon.
     Raises:
         PermissionError: When access to the directory is denied
     """
+
     folders, files = [], []
     try:
-        listed_dir = os.scandir(cwd)
+        listed_dir = await aios.scandir(cwd)
     except (PermissionError, FileNotFoundError, OSError):
         raise PermissionError(f"PermissionError: Unable to access {cwd}")
     for item in listed_dir:

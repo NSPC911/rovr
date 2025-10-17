@@ -35,7 +35,7 @@ class ThickBar(BarRenderable):
 
 
 class ProgressBarContainer(VerticalGroup, inherit_bindings=False):
-    BIDNINGS = up_down_vindings
+    BINDINGS = up_down_vindings
 
     def __init__(
         self,

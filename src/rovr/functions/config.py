@@ -38,7 +38,7 @@ def toml_dump(doc_path: str, exception: toml.TomlDecodeError) -> None:
     Dump an error message for anything related to TOML loading
 
     Args:
-        file (str): the file content itself
+        doc_path (str): the path to the document
         exception (toml.TomlDecodeError): the exception that occurred
     """
     doc: list = exception.doc.splitlines()

@@ -121,26 +121,27 @@ class Application(App, inherit_bindings=False):
         print("Starting Rovr...")
         with Vertical(id="root"):
             yield HeaderArea(id="headerArea")
-            with HorizontalScroll(id="menu"):
-                yield CopyButton()
-                yield CutButton()
-                yield PasteButton()
-                yield NewItemButton()
-                yield RenameItemButton()
-                yield DeleteButton()
-                yield ZipButton()
-                yield UnzipButton()
-                yield PathCopyButton()
-            with VerticalGroup(id="below_menu"):
-                with HorizontalGroup():
-                    yield BackButton()
-                    yield ForwardButton()
-                    yield UpButton()
-                    path_switcher = PathInput()
-                    yield path_switcher
-                yield PathAutoCompleteInput(
-                    target=path_switcher,
-                )
+            with VerticalGroup(id="menuwrapper"):
+                with HorizontalScroll(id="menu"):
+                    yield CopyButton()
+                    yield CutButton()
+                    yield PasteButton()
+                    yield NewItemButton()
+                    yield RenameItemButton()
+                    yield DeleteButton()
+                    yield ZipButton()
+                    yield UnzipButton()
+                    yield PathCopyButton()
+                with VerticalGroup(id="below_menu"):
+                    with HorizontalGroup():
+                        yield BackButton()
+                        yield ForwardButton()
+                        yield UpButton()
+                        path_switcher = PathInput()
+                        yield path_switcher
+                    yield PathAutoCompleteInput(
+                        target=path_switcher,
+                    )
             with HorizontalGroup(id="main"):
                 with VerticalGroup(id="pinned_sidebar_container"):
                     yield SearchInput(
@@ -172,9 +173,8 @@ class Application(App, inherit_bindings=False):
             self.add_class("compact")
 
         # border titles
-        self.query_one("#menu").border_title = "Options"
-        self.query_one("#menu").can_focus = False
-        self.query_one("#below_menu").border_title = "Directory Actions"
+        self.query_one("#menuwrapper").border_title = "Options"
+        self.query_one("#below_menu").border_title = " Navigation "
         self.query_one("#pinned_sidebar_container").border_title = "Sidebar"
         self.query_one("#file_list_container").border_title = "Files"
         self.query_one("#processes").border_title = "Processes"

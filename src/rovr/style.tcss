@@ -31,8 +31,7 @@ $scrollbar-corner-color: $primary-muted;
 }
 
 /* border styling for main widgets */
-#menu,
-#below_menu,
+#menuwrapper,
 #pinned_sidebar_container,
 #file_list_container,
 #preview_sidebar,
@@ -67,8 +66,7 @@ FileListRightClickOptionList {
   }
 }
 
-#menu:focus-within,
-#below_menu:focus-within,
+#menuwrapper:focus-within,
 #pinned_sidebar_container:focus-within,
 #file_list_container:focus-within,
 #preview_sidebar:focus-within,
@@ -242,10 +240,19 @@ Tooltip {
   }
 }
 
+#menuwrapper {
+  margin: 0 1;
+  #below_menu {
+    border-top: $border-style $border-blurred
+  }
+  &:focus-within #below_menu {
+    border-top: $border-style $border
+  }
+}
+
 #menu {
   align: left middle;
-  height: 3;
-  margin: 0 1 0 1;
+  height: 1;
   padding: 0 1;
   scrollbar-size: 0 0;
   Button {
@@ -264,7 +271,7 @@ Tooltip {
 }
 
 #below_menu {
-  margin: 0 1 0 1;
+  margin: 0;
   max-height: 11;
   Input {
     height: 3;
@@ -902,16 +909,14 @@ Screen {
     #footer { max-height: 30vh }
   }
   &.-nomenu-atall {
-    #menu,
-    #below_menu { display: none !important }
+    #menuwrapper { display: none !important }
     #footer { max-height: 30vh }
   }
   &.-filelistonly-vertical {
     #menu { display: none !important }
   }
   &.-middle-only {
-    #menu,
-    #below_menu { display: none !important }
+    #menuwrapper { display: none !important }
     #footer { max-height: 25vh }
   }
 }

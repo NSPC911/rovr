@@ -25,7 +25,7 @@ from rovr.screens import (
     GiveMePermission,
     YesOrNo,
 )
-from rovr.variables.constants import config, up_down_vindings
+from rovr.variables.constants import config, scroll_vindings
 
 
 class ThickBar(BarRenderable):
@@ -35,7 +35,7 @@ class ThickBar(BarRenderable):
 
 
 class ProgressBarContainer(VerticalGroup, inherit_bindings=False):
-    BINDINGS = up_down_vindings
+    BINDINGS = scroll_vindings
 
     def __init__(
         self,

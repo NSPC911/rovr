@@ -44,18 +44,6 @@ datetime_format = "%Y-%m-%d %H:%M"
 filesize_decimals = 1
 filesize_suffix = "decimal"
 
-[[icons.files]]
-pattern = "yaml"
-match_type = "endswith"
-icon = "\ue60b"
-color = "#F71A10"
-
-[[icons.folders]]
-pattern = "node_modules"
-match_type = "exact"
-icon = "\ue5fa"
-color = "green"
-
 [theme]
 default = "nord"
 transparent = false

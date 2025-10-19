@@ -271,21 +271,6 @@ def load_config() -> tuple[dict, dict]:
     with open(path.join(path.dirname(__file__), "../config/schema.json"), "r") as f:
         schema = ujson.load(f)
 
-    # fix schema with 'required' keys
-    def add_required_recursively(node: dict) -> None:
-        if isinstance(node, dict):
-            if (
-                node.get("type") == "object" and "properties" in node
-            ) and "required" not in node:
-                node["required"] = list(node["properties"].keys())
-            for key in node:
-                add_required_recursively(node[key])
-        elif isinstance(node, list):
-            for item in node:
-                add_required_recursively(item)
-
-    add_required_recursively(schema)
-
     try:
         jsonschema.validate(config, schema)
     except ValidationError as exception:

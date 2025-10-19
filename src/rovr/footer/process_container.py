@@ -142,6 +142,7 @@ class ProgressBarContainer(VerticalGroup, inherit_bindings=False):
 class ProcessContainer(VerticalScroll):
     def __init__(self, *args, **kwargs) -> None:
         super().__init__(id="processes", *args, **kwargs)
+        self.has_perm_error: bool = False
 
     async def new_process_bar(
         self, max: int | None = None, id: str | None = None, classes: str | None = None
@@ -348,13 +349,11 @@ class ProcessContainer(VerticalScroll):
                     return
         # The reason for an extra +1 in the total is for this
         # handling folders
-        has_perm_error = False
+        self.has_perm_error = False
         for folder in folders_to_delete:
-            try:
-                shutil.rmtree(folder, onexc=self.rmtree_fixer)
-            except PermissionError:
-                has_perm_error = True
-        if has_perm_error:
+            shutil.rmtree(folder, onexc=self.rmtree_fixer)
+            self.has_perm_error = True
+        if self.has_perm_error:
             bar.panic(
                 notify={
                     "message": f"Certain files in {folder} could not be deleted due to PermissionError.",
@@ -399,6 +398,8 @@ class ProcessContainer(VerticalScroll):
             path_utils.force_obtain_write_permission(item_path)
         ):
             os.remove(item_path)
+        elif isinstance(exc, PermissionError):
+            self.has_perm_error = True
         else:
             raise
 
@@ -946,19 +947,16 @@ class ProcessContainer(VerticalScroll):
                     )
                     return
         # delete the folders
-        has_perm_error = False
+        self.has_perm_error = False
         for folder in cut_files__folders:
-            try:
-                skip = False
-                for file in cut_ignore:
-                    if folder in file:
-                        skip = True
-                        break
-                if not skip:
-                    shutil.rmtree(folder, onexc=self.rmtree_fixer)
-            except PermissionError:
-                has_perm_error = True
-        if has_perm_error:
+            skip = False
+            for file in cut_ignore:
+                if folder in file:
+                    skip = True
+                    break
+            if not skip:
+                shutil.rmtree(folder, onexc=self.rmtree_fixer)
+        if self.has_perm_error:
             bar.panic(
                 notify={
                     "message": f"Certain files in {folder} could not be deleted due to PermissionError.",

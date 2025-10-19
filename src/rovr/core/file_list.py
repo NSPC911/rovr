@@ -384,7 +384,7 @@ class FileList(SelectionList, inherit_bindings=False):
         )
         self.app.query_one("MetadataContainer").update_metadata(event.option.dir_entry)
         self.app.query_one("#unzip").disabled = not file_name.endswith(
-            tuple(ARCHIVE_EXTENSIONS)
+            ARCHIVE_EXTENSIONS
         )
 
     # Use better versions of the checkbox icons

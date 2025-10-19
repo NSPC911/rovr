@@ -1007,17 +1007,10 @@ FILES_MAP = {
     "jenkinsfile": "jenkinsfile",
 }
 
-ARCHIVE_EXTENSIONS = [
-    ".zip",
-    ".tar",
-    ".gz",
-    ".bz2",
-    ".xz",
-    ".rar",
-]
+ARCHIVE_EXTENSIONS = (".zip", ".tar", ".gz", ".bz2", ".xz", ".rar", ".deb")
 
-PIL_EXTENSIONS = [
-    # reminder that stuff can also not work, just remove it if it doesnt work
+PIL_EXTENSIONS = (
+    # reminder that stuff can also not work, just remove it if it doesn't work
     ".avif",
     ".bmp",
     ".dds",
@@ -1067,7 +1060,7 @@ PIL_EXTENSIONS = [
     ".pxr",
     ".qoi",
     ".tim",
-]
+)
 
 
 TOGGLE_BUTTON_ICONS = {

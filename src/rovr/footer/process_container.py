@@ -352,7 +352,6 @@ class ProcessContainer(VerticalScroll):
         self.has_perm_error = False
         for folder in folders_to_delete:
             shutil.rmtree(folder, onexc=self.rmtree_fixer)
-            self.has_perm_error = True
         if self.has_perm_error:
             bar.panic(
                 notify={

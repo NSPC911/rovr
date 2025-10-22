@@ -269,7 +269,8 @@ def load_config() -> tuple[dict, dict]:
     config = deep_merge(template_config, user_config)
     # check with schema
     with open(path.join(path.dirname(__file__), "../config/schema.json"), "r") as f:
-        schema = ujson.load(f)
+        content = f.read()
+        schema = ujson.loads(content)
 
     try:
         jsonschema.validate(config, schema)

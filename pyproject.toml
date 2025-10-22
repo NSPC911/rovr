@@ -74,7 +74,7 @@ log = "textual console -x WORKER -x SYSTEM -x DEBUG -x EVENT"
 "gen-keys" = "docs/scripts/generate_keybinds.py"
 check.sequence = [
   { cmd = "ty check" },
-  { cmd = "ruff check" }
+  { cmd = "ruff check --unsafe-fixes" }
 ]
 format = "ruff format --preview"
 

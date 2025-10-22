@@ -230,7 +230,7 @@ class Application(App, inherit_bindings=False):
 
     async def on_key(self, event: events.Key) -> None:
         # Not really sure why this can happen, but I will still handle this
-        if self.focused is None or not self.focused.id:
+        if self.focused is None:
             return
         # if current screen isn't the app screen
         if len(self.screen_stack) != 1:
@@ -239,7 +239,7 @@ class Application(App, inherit_bindings=False):
         match event.key:
             # finder: fd/fzf
             # placeholder, not yet existing
-            case "escape" if "search" in self.focused.id:
+            case "escape" if self.focused.id and "search" in self.focused.id:
                 match self.focused.id:
                     case "search_file_list":
                         self.query_one("#file_list").focus()
@@ -248,8 +248,8 @@ class Application(App, inherit_bindings=False):
                 return
             # backspace is used by default bindings to head up in history
             # so just avoid it
-            case "backspace" if (
-                type(self.focused) is Input or "search" in self.focused.id
+            case "backspace" if type(self.focused) is Input or (
+                self.focused.id and "search" in self.focused.id
             ):
                 return
             # focus toggle pinned sidebar

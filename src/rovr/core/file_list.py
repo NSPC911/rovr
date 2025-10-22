@@ -240,7 +240,6 @@ class FileList(SelectionList, inherit_bindings=False):
         # Separate folders and files
         self.list_of_options = []
 
-        self.loading = True
         try:
             folders, files = await path_utils.get_cwd_object(
                 cwd, config["settings"]["show_hidden_files"]
@@ -274,7 +273,6 @@ class FileList(SelectionList, inherit_bindings=False):
 
         self.clear_options()
         self.add_options(self.list_of_options)
-        self.loading = False
 
     @work(exclusive=True)
     async def create_archive_list(self, file_list: list[str]) -> None:
@@ -286,7 +284,6 @@ class FileList(SelectionList, inherit_bindings=False):
         self.clear_options()
         self.list_of_options = []
 
-        self.loading = True
         if not file_list:
             self.list_of_options.append(
                 Selection("  --no-files--", value="", id="", disabled=True)
@@ -311,7 +308,6 @@ class FileList(SelectionList, inherit_bindings=False):
                 await asyncio.sleep(0)
 
         self.add_options(self.list_of_options)
-        self.loading = False
 
     async def on_selection_list_selected_changed(
         self, event: SelectionList.SelectedChanged

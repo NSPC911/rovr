@@ -2,6 +2,7 @@ import asyncio
 import asyncio.subprocess
 import tarfile
 import zipfile
+from dataclasses import dataclass
 from os import path
 from typing import ClassVar
 
@@ -12,6 +13,8 @@ from textual import events, on, work
 from textual.app import ComposeResult
 from textual.binding import Binding, BindingType
 from textual.containers import Container
+from textual.css.query import NoMatches
+from textual.message import Message
 from textual.widgets import Static, TextArea
 
 from rovr.classes import Archive
@@ -141,6 +144,15 @@ class CustomTextArea(TextArea, inherit_bindings=False):
 
 
 class PreviewContainer(Container):
+    @dataclass
+    class SetLoading(Message):
+        """
+        Message sent to turn this widget into the loading state
+        """
+
+        to: bool
+        """What to set the `loading` attribute to"""
+
     def __init__(self, *args, **kwargs) -> None:
         super().__init__(*args, **kwargs)
         self._queued_task = None
@@ -150,7 +162,6 @@ class PreviewContainer(Container):
         self._is_image = False
         self._is_archive = False
         self._initial_height = self.size.height
-        self._current_preview_type = "none"
 
     def compose(self) -> ComposeResult:
         # for some unknown reason, it started causing KeyErrors
@@ -166,10 +177,27 @@ class PreviewContainer(Container):
         # )
         yield Static(config["interface"]["preview_start"])
 
+    def on_preview_container_set_loading(self, event: SetLoading) -> None:
+        self.loading = event.to
+
+    def has_child(self, selector: str) -> bool:
+        """
+        Check for whether this element contains this selector or not
+        Args:
+            selector(str): the selector to test
+
+        Returns:
+            bool: whether the selector is valid
+        """
+        try:
+            self.query_one(selector)
+            return True
+        except NoMatches:
+            return False
+
     async def _show_image_preview(self) -> None:
         """Ensure image preview widget exists and is updated."""
-        if self._current_preview_type != "image":
-            self._current_preview_type = "none"
+        if not self.has_child("#image_preview"):
             await self.remove_children()
             self.remove_class("bat", "full", "clip")
 
@@ -182,7 +210,6 @@ class PreviewContainer(Container):
                     )
                 )
                 self.query_one("#image_preview").can_focus = True
-                self._current_preview_type = "image"
             except FileNotFoundError:
                 await self.mount(
                     CustomTextArea(
@@ -195,7 +222,6 @@ class PreviewContainer(Container):
                         compact=True,
                     )
                 )
-                self._current_preview_type = "none"
             except UnidentifiedImageError:
                 await self.mount(
                     CustomTextArea(
@@ -208,12 +234,11 @@ class PreviewContainer(Container):
                         compact=True,
                     )
                 )
-                self._current_preview_type = "none"
         else:
             try:
                 self.query_one("#image_preview").image = self._current_file_path
             except Exception:
-                self._current_preview_type = "none"
+                await self.remove_children()
                 # re-make the widget itself
                 await self._show_image_preview()
         self.border_title = titles.image
@@ -250,8 +275,7 @@ class PreviewContainer(Container):
                 bat_output = stdout.decode("utf-8", errors="ignore")
                 new_content = Text.from_ansi(bat_output)
 
-                if self._current_preview_type != "bat":
-                    self._current_preview_type = "none"
+                if not self.has_child("Static"):
                     await self.remove_children()
                     self.remove_class("full", "clip")
 
@@ -260,7 +284,6 @@ class PreviewContainer(Container):
                     )
                     self.query_one(Static).can_focus = True
                     self.add_class("bar")
-                    self._current_preview_type = "bat"
                 else:
                     self.query_one("#text_preview", Static).update(new_content)
 
@@ -273,7 +296,6 @@ class PreviewContainer(Container):
                 return True
             else:
                 error_message = stderr.decode("utf-8", errors="ignore")
-                self._current_preview_type = "none"
                 await self.remove_children()
                 self.notify(
                     error_message,
@@ -320,8 +342,7 @@ class PreviewContainer(Container):
             )
         )
 
-        if self._current_preview_type != "normal_text":
-            self._current_preview_type = "none"
+        if not self.has_child("CustomTextArea"):
             await self.remove_children()
             self.remove_class("bat", "full", "clip")
 
@@ -336,7 +357,6 @@ class PreviewContainer(Container):
                     classes="inner_preview",
                 )
             )
-            self._current_preview_type = "normal_text"
         else:
             text_area = self.query_one("#text_preview", CustomTextArea)
             text_area.text = text_to_display
@@ -375,23 +395,20 @@ class PreviewContainer(Container):
         Args:
             folder_path(str): The folder path
         """
-        if self._current_preview_type != "folder":
-            self._current_preview_type = "none"
+        if not self.has_child("FileList"):
             await self.remove_children()
             self.remove_class("bat", "full", "clip")
 
             await self.mount(
                 FileList(
-                    id="folder_preview",
                     name=folder_path,
                     classes="file-list inner_preview",
                     dummy=True,
                     enter_into=folder_path,
                 )
             )
-            self._current_preview_type = "folder"
 
-        folder_preview = self.query_one("#folder_preview")
+        folder_preview = self.query_one(FileList)
         folder_preview.dummy_update_file_list(
             cwd=folder_path,
         )
@@ -399,24 +416,19 @@ class PreviewContainer(Container):
 
     async def _show_archive_preview(self) -> None:
         """Render archive preview, updating in place if possible."""
-        if self._current_preview_type != "archive":
-            self._current_preview_type = "none"
+        if not self.has_child("FileList"):
             await self.remove_children()
             self.remove_class("bat", "full", "clip")
 
             # Use normal FileList instead of ArchiveFileList
             await self.mount(
                 FileList(
-                    id="archive_preview",
                     classes="file-list inner_preview",
                     dummy=True,
                 )
             )
-            self._current_preview_type = "archive"
 
-        self.query_one("#archive_preview", FileList).create_archive_list(
-            self._current_content
-        )
+        self.query_one(FileList).create_archive_list(self._current_content)
         self.border_title = titles.archive
 
     def any_in_queue(self) -> bool:
@@ -459,6 +471,7 @@ class PreviewContainer(Container):
         """
         if self.any_in_queue():
             return
+        self.post_message(self.SetLoading(True))
 
         if path.isdir(file_path):
             self.app.call_from_thread(self._update_ui, file_path, is_dir=True)
@@ -469,52 +482,21 @@ class PreviewContainer(Container):
             if is_archive:
                 try:
                     with Archive(file_path, "r") as archive:
-                        if config["settings"]["preview_full"]:
-                            all_files = []
-                            for member in archive.infolist():
-                                filename = getattr(
-                                    member, "filename", getattr(member, "name", "")
-                                )
-                                is_dir_func = getattr(
-                                    member, "is_dir", getattr(member, "isdir", None)
-                                )
-                                is_dir = (
-                                    is_dir_func()
-                                    if is_dir_func
-                                    else filename.replace("\\", "/").endswith("/")
-                                )
-                                if not is_dir:
-                                    all_files.append(filename)
-                        else:
-                            top_level_files = set()
-                            top_level_dirs = set()
-                            for member in archive.infolist():
-                                filename = getattr(
-                                    member, "filename", getattr(member, "name", "")
-                                )
-                                is_dir_func = getattr(
-                                    member, "is_dir", getattr(member, "isdir", None)
-                                )
-                                is_dir = (
-                                    is_dir_func()
-                                    if is_dir_func
-                                    else filename.replace("\\", "/").endswith("/")
-                                )
-
-                                filename = filename.replace("\\", "/")
-                                if not filename:
-                                    continue
-
-                                parts = filename.strip("/").split("/")
-                                if len(parts) == 1 and not is_dir:
-                                    top_level_files.add(parts[0])
-                                elif parts and parts[0]:
-                                    top_level_dirs.add(parts[0])
-
-                            top_level_files -= top_level_dirs
-                            all_files = sorted([
-                                d + "/" for d in top_level_dirs
-                            ]) + sorted(list(top_level_files))
+                        all_files = []
+                        for member in archive.infolist():
+                            filename = getattr(
+                                member, "filename", getattr(member, "name", "")
+                            )
+                            is_dir_func = getattr(
+                                member, "is_dir", getattr(member, "isdir", None)
+                            )
+                            is_dir = (
+                                is_dir_func()
+                                if is_dir_func
+                                else filename.replace("\\", "/").endswith("/")
+                            )
+                            if not is_dir:
+                                all_files.append(filename)
                     content = all_files
                 except (
                     zipfile.BadZipFile,
@@ -548,6 +530,8 @@ class PreviewContainer(Container):
         if self.any_in_queue():
             return
         else:
+            # success!
+            self.post_message(self.SetLoading(False))
             self._queued_task = None
 
     async def _update_ui(
@@ -575,10 +559,10 @@ class PreviewContainer(Container):
     async def on_resize(self, event: events.Resize) -> None:
         """Re-render the preview on resize if it's was rendered by batcat and height changed."""
         if (
-            self._current_preview_type == "bat"
+            self.has_child("Static")
             and "clip" in self.classes
             and event.size.height != self._initial_height
-        ) or self._current_preview_type == "normal_text":
+        ) or self.has_child("CustomTextArea"):
             await self._render_preview()
             self._initial_height = event.size.height
 

@@ -120,7 +120,7 @@ class FileList(SelectionList, inherit_bindings=False):
         names_in_cwd: list[str] = []
         self.items_in_cwd: set[str] = set()
         try:
-            folders, files = path_utils.get_cwd_object(
+            folders, files = await path_utils.get_cwd_object(
                 cwd, config["settings"]["show_hidden_files"]
             )
             if not folders and not files:
@@ -242,7 +242,7 @@ class FileList(SelectionList, inherit_bindings=False):
 
         self.loading = True
         try:
-            folders, files = path_utils.get_cwd_object(
+            folders, files = await path_utils.get_cwd_object(
                 cwd, config["settings"]["show_hidden_files"]
             )
             if not folders and not files:

@@ -477,13 +477,15 @@ class Application(App, inherit_bindings=False):
     @work
     async def watch_for_changes_and_update(self) -> None:
         cwd = getcwd()
-        items = get_filtered_dir_names(cwd, config["settings"]["show_hidden_files"])
+        items = await get_filtered_dir_names(
+            cwd, config["settings"]["show_hidden_files"]
+        )
         file_list = self.query_one(FileList)
         while True:
             await asyncio.sleep(1)
             new_cwd = getcwd()
             try:
-                items = get_filtered_dir_names(
+                items = await get_filtered_dir_names(
                     cwd, config["settings"]["show_hidden_files"]
                 )
             except OSError:

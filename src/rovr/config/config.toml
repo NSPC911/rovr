@@ -13,7 +13,7 @@ show_line_numbers = true
 
 [interface.preview_text]
 error = "couldn't read this file! (\u00AC_\u00AC)" # ¬_¬
-binary = "the file doesn't use UTF-8 which isn't supported yet"
+binary = "the file doesn't use UTF-8, which isn't supported yet"
 start = """ ___ ___
 |  _| . |
 |_| |___|

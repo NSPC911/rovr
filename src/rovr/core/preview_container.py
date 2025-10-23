@@ -16,10 +16,11 @@ from textual.containers import Container
 from textual.css.query import NoMatches
 from textual.message import Message
 from textual.widgets import Static, TextArea
-from textual.worker import NoActiveWorker, Worker, WorkerCancelled, get_current_worker
+from textual.worker import Worker, WorkerCancelled
 
 from rovr.classes import Archive
 from rovr.core import FileList
+from rovr.functions.utils import should_cancel
 from rovr.variables.constants import PreviewContainerTitles, config
 from rovr.variables.maps import ARCHIVE_EXTENSIONS_FULL, EXT_TO_LANG_MAP, PIL_EXTENSIONS
 
@@ -161,6 +162,7 @@ class PreviewContainer(Container):
         self._current_file_path = None
         self._initial_height = self.size.height
         self._file_type: str = "none"
+        self._preview_texts: list[str] = config["interface"]["preview_text"].values()
 
     def compose(self) -> ComposeResult:
         yield Static(config["interface"]["preview_text"]["start"], classes="wrap")
@@ -184,31 +186,28 @@ class PreviewContainer(Container):
             return False
 
     async def show_image_preview(self) -> None:
-        try:
-            worker = get_current_worker()
-        except RuntimeError:
-            worker = None
-        if worker and not worker.is_running:
+        if should_cancel():
             return
 
         if not self.has_child("#image_preview"):
             await self.remove_children()
             self.remove_class("bat", "full", "clip")
 
-            if worker and not worker.is_running:
+            if should_cancel():
                 return
 
             try:
-                await self.mount(
-                    timg.__dict__[config["settings"]["image_protocol"] + "Image"](
-                        self._current_file_path,
-                        id="image_preview",
-                        classes="inner_preview",
-                    )
+                image_widget = timg.__dict__[
+                    config["settings"]["image_protocol"] + "Image"
+                ](
+                    self._current_file_path,
+                    id="image_preview",
+                    classes="inner_preview",
                 )
                 self.query_one("#image_preview").can_focus = True
+                await self.mount(image_widget)
             except FileNotFoundError:
-                if worker and not worker.is_running:
+                if should_cancel():
                     return
                 await self.mount(
                     CustomTextArea(
@@ -222,7 +221,7 @@ class PreviewContainer(Container):
                     )
                 )
             except UnidentifiedImageError:
-                if worker and not worker.is_running:
+                if should_cancel():
                     return
                 await self.mount(
                     CustomTextArea(
@@ -237,24 +236,22 @@ class PreviewContainer(Container):
                 )
         else:
             try:
-                if worker and not worker.is_running:
+                if should_cancel():
                     return
-                self.query_one("#image_preview").image = self._current_file_path
+                image_widget = self.query_one("#image_preview")
+                if image_widget.image != self._current_file_path:
+                    image_widget.image = self._current_file_path
             except Exception:
-                if worker and not worker.is_running:
+                if should_cancel():
                     return
                 await self.remove_children()
                 await self.show_image_preview()
 
-        if worker and not worker.is_running:
+        if should_cancel():
             return
         self.border_title = titles.image
 
     async def show_bat_file_preview(self) -> bool:
-        try:
-            worker = get_current_worker()
-        except RuntimeError:
-            worker = None
         bat_executable = config["plugins"]["bat"]["executable"]
         command = [
             bat_executable,
@@ -269,7 +266,7 @@ class PreviewContainer(Container):
             command.append(f"--line-range=:{max_lines}")
         command.append(self._current_file_path)
 
-        if worker and not worker.is_running:
+        if should_cancel():
             return False
 
         try:
@@ -280,40 +277,42 @@ class PreviewContainer(Container):
             )
             stdout, stderr = await process.communicate()
 
-            if worker and not worker.is_running:
+            if should_cancel():
                 return False
 
             if process.returncode == 0:
                 bat_output = stdout.decode("utf-8", errors="ignore")
                 new_content = Text.from_ansi(bat_output)
 
-                if worker and not worker.is_running:
+                if should_cancel():
                     return False
 
                 if not self.has_child("Static"):
                     await self.remove_children()
 
-                    if worker and not worker.is_running:
+                    if should_cancel():
                         return False
 
-                    await self.mount(
-                        Static(new_content, id="text_preview", classes="inner_preview")
+                    static_widget = Static(
+                        new_content, id="text_preview", classes="inner_preview"
                     )
-                    if worker and not worker.is_running:
+                    await self.mount(static_widget)
+                    if should_cancel():
                         return False
-                    self.query_one(Static).can_focus = True
+                    static_widget.can_focus = True
                 else:
-                    self.query_one(Static).update(new_content)
-                self.query_one(Static).classes = ""
+                    static_widget: Static = self.query_one(Static)
+                    static_widget.update(new_content)
+                static_widget.classes = ""
 
-                if worker and not worker.is_running:
+                if should_cancel():
                     return False
 
                 self.border_title = titles.bat
                 return True
             else:
                 error_message = stderr.decode("utf-8", errors="ignore")
-                if worker and not worker.is_running:
+                if should_cancel():
                     return False
                 await self.remove_children()
                 self.notify(
@@ -323,17 +322,13 @@ class PreviewContainer(Container):
                 )
                 return False
         except Exception as e:
-            if worker and not worker.is_running:
+            if should_cancel():
                 return False
             self.notify(str(e), title="Plugins: Bat", severity="warning")
             return False
 
     async def show_normal_file_preview(self) -> None:
-        try:
-            worker = get_current_worker()
-        except RuntimeError:
-            worker = None
-        if worker and not worker.is_running:
+        if should_cancel():
             return
 
         text_to_display = self._current_content
@@ -355,7 +350,7 @@ class PreviewContainer(Container):
             lines = processed_lines
         text_to_display = "\n".join(lines)
 
-        if worker and not worker.is_running:
+        if should_cancel():
             return
 
         is_special_content = self._current_content in (
@@ -370,13 +365,13 @@ class PreviewContainer(Container):
             )
         )
 
-        if worker and not worker.is_running:
+        if should_cancel():
             return
 
         if not self.has_child("CustomTextArea"):
             await self.remove_children()
 
-            if worker and not worker.is_running:
+            if should_cancel():
                 return
 
             await self.mount(
@@ -391,27 +386,23 @@ class PreviewContainer(Container):
                 )
             )
         else:
-            text_area = self.query_one("#text_preview", CustomTextArea)
+            text_area: CustomTextArea = self.query_one(CustomTextArea)
             text_area.text = text_to_display
             text_area.language = language
 
-        if worker and not worker.is_running:
+        if should_cancel():
             return
 
         self.border_title = titles.file
 
     async def show_folder_preview(self, folder_path: str) -> None:
-        try:
-            worker = get_current_worker()
-        except (RuntimeError, NoActiveWorker):
-            worker = None
-        if worker and not worker.is_running:
+        if should_cancel():
             return
 
         if not self.has_child("FileList"):
             await self.remove_children()
 
-            if worker and not worker.is_running:
+            if should_cancel():
                 return
 
             await self.mount(
@@ -423,11 +414,10 @@ class PreviewContainer(Container):
                 )
             )
 
-        if worker and not worker.is_running:
+        if should_cancel():
             return
 
-        folder_preview = self.query_one(FileList)
-        updater_worker = folder_preview.dummy_update_file_list(
+        updater_worker: Worker = self.query_one(FileList).dummy_update_file_list(
             cwd=folder_path,
         )
 
@@ -436,23 +426,19 @@ class PreviewContainer(Container):
         except WorkerCancelled:
             return
 
-        if worker and not worker.is_running:
+        if should_cancel():
             return
 
         self.border_title = titles.folder
 
     async def show_archive_preview(self) -> None:
-        try:
-            worker = get_current_worker()
-        except RuntimeError:
-            worker = None
-        if worker and not worker.is_running:
+        if should_cancel():
             return
 
         if not self.has_child("FileList"):
             await self.remove_children()
 
-            if worker and not worker.is_running:
+            if should_cancel():
                 return
 
             await self.mount(
@@ -462,7 +448,7 @@ class PreviewContainer(Container):
                 )
             )
 
-        if worker and not worker.is_running:
+        if should_cancel():
             return
 
         updater_worker: Worker = self.query_one(FileList).create_archive_list(
@@ -474,7 +460,7 @@ class PreviewContainer(Container):
         except WorkerCancelled:
             return
 
-        if worker and not worker.is_running:
+        if should_cancel():
             return
 
         self.border_title = titles.archive
@@ -492,8 +478,7 @@ class PreviewContainer(Container):
 
     @work(exclusive=True, thread=True)
     def perform_show_preview(self, file_path: str) -> None:
-        worker = get_current_worker()
-        if worker and not worker.is_running:
+        if should_cancel():
             return
         self.post_message(self.SetLoading(True))
 
@@ -511,7 +496,7 @@ class PreviewContainer(Container):
 
             content = None
 
-            if worker and not worker.is_running:
+            if should_cancel():
                 return
 
             match file_type:
@@ -520,7 +505,7 @@ class PreviewContainer(Container):
                         with Archive(file_path, "r") as archive:
                             all_files = []
                             for member in archive.infolist():
-                                if worker and not worker.is_running:
+                                if should_cancel():
                                     return
 
                                 filename = getattr(
@@ -547,7 +532,7 @@ class PreviewContainer(Container):
                 case "image":
                     pass
                 case _:
-                    if worker and not worker.is_running:
+                    if should_cancel():
                         return
                     # prevent files > 1mb from being
                     # read because are you stupid, why
@@ -571,7 +556,7 @@ class PreviewContainer(Container):
                         ):
                             content = config["interface"]["preview_text"]["error"]
 
-            if worker and not worker.is_running:
+            if should_cancel():
                 return
 
             self.app.call_from_thread(
@@ -581,7 +566,7 @@ class PreviewContainer(Container):
                 content=content,
             )
 
-        if worker and not worker.is_running:
+        if should_cancel():
             return
         self.call_later(lambda: self.post_message(self.SetLoading(False)))
 
@@ -618,22 +603,20 @@ class PreviewContainer(Container):
                     await self.show_normal_file_preview()
 
     async def mount_special_messages(self) -> None:
-        try:
-            worker = get_current_worker()
-        except RuntimeError:
-            worker = None
-        if worker and not worker.is_running:
+        if should_cancel():
             return
         if self.has_child("Static"):
-            self.query_one(Static).update(self._current_content)
+            static_widget: Static = self.query_one(Static)
+            static_widget.update(self._current_content)
         else:
             await self.remove_children()
-            if worker and not worker.is_running:
+            if should_cancel():
                 return
-            await self.mount(Static(self._current_content))
-        self.query_one(Static).can_focus = True
-        self.query_one(Static).classes = "special"
-        if worker and not worker.is_running:
+            static_widget = Static(self._current_content)
+            await self.mount(static_widget)
+        static_widget.can_focus = True
+        static_widget.classes = "special"
+        if should_cancel():
             return
         self.border_title = ""
 
@@ -643,10 +626,7 @@ class PreviewContainer(Container):
             self.has_child("Static") and event.size.height != self._initial_height
         ) or self.has_child("CustomTextArea"):
             if self._current_content is not None:
-                is_special_content = (
-                    self._current_content
-                    in config["interface"]["preview_text"].values()
-                )
+                is_special_content = self._current_content in self._preview_texts
                 if (
                     config["plugins"]["bat"]["enabled"]
                     and not is_special_content

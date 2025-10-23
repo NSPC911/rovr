@@ -137,8 +137,11 @@ def schema_dump(doc_path: str, exception: ValidationError, config_content: str) 
     if exception.message.startswith("Additional properties are not allowed"):
         # `Additional properties are not allowed ('<key>' was unexpected)`
         # grabs only the key
-        cause = exception.message.split("'")[1]
-        exception.path.append(cause)
+        cause = exception.message.split("'")
+        if len(cause) == 3:
+            exception.path.append(cause[1])
+        else:
+            pass
     # find the line no for the error path
     path_str = ".".join(str(p) for p in exception.path) if exception.path else "root"
     lineno = find_path_line(doc, exception.path)
@@ -191,7 +194,7 @@ def schema_dump(doc_path: str, exception: ValidationError, config_content: str) 
                 )
             pprint(
                 Syntax(
-                    doc[line].strip(),
+                    doc[line],
                     "toml",
                     background_color="default",
                     theme="ansi_dark",
@@ -223,12 +226,17 @@ def schema_dump(doc_path: str, exception: ValidationError, config_content: str) 
         migration_docs = ujson.load(f)
     for item in migration_docs:
         if ".".join(exception.path) in item["keys"]:
-            message = ""
-            for part in item["message"]:
-                message += part
-                message += "\n"
+            message = "\n".join(item["message"])
             message = message[:-1]
-            to_print = Table(message, box=box.ROUNDED, border_style="bright_blue")
+            to_print = Table(
+                box=box.ROUNDED,
+                border_style="bright_blue",
+                show_header=False,
+                expand=True,
+                show_lines=True,
+            )
+            to_print.add_column()
+            to_print.add_row(message)
             to_print.add_row(f"[dim]> {item['extra']}[/]")
             pprint(Padding(to_print, (0, rjust + 4, 0, rjust + 3)))
             break

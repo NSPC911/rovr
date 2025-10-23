@@ -381,7 +381,7 @@ Tooltip {
   width: $preview_sidebar_width;
   layout: horizontal;
   & > Static {
-    text-overflow: clip;
+    text-overflow: ellipsis;
     text-wrap: nowrap;
     width: 1fr;
     overflow-x: hidden;
@@ -403,9 +403,9 @@ Tooltip {
   }
   & > FileList { height: 1fr }
   Image {
-      width: auto;
-      height: auto;
-      align: center bottom;
+    width: auto;
+    height: auto;
+    align: center bottom;
   }
 }
 

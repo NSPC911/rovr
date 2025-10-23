@@ -2,6 +2,7 @@ from humanize import naturalsize
 from lzstring import LZString
 from rich.console import Console
 from textual.widget import Widget
+from textual.worker import get_current_worker
 
 from rovr.variables.maps import (
     BORDER_BOTTOM,
@@ -106,3 +107,17 @@ def natural_size(integer: int, suffix: str, filesize_decimals: int) -> str:
             )
         case _:
             return naturalsize(value=integer, format=f"%.{filesize_decimals}f")
+
+
+def should_cancel() -> bool:
+    """
+    Whether to cancel the provided worker or not
+
+    Returns:
+        bool: whether to cancel this worker or not
+    """
+    try:
+        worker = get_current_worker()
+    except RuntimeError:
+        return False
+    return bool(worker and not worker.is_running)

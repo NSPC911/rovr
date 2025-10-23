@@ -76,7 +76,7 @@
             },
             "binary": {
               "type": "string",
-              "default": "the file uses UTF-8, which isn't supported [u]yet[/]",
+              "default": "the file does not use UTF-8, which isn't supported yet",
               "description": "If the current file cannot be read due to an encoding issue (ie not UTF8), it will display this message."
             },
             "start": {

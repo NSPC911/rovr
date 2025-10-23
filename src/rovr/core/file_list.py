@@ -18,6 +18,7 @@ from rovr.functions import icons as icon_utils
 from rovr.functions import path as path_utils
 from rovr.functions import pins as pin_utils
 from rovr.functions import utils
+from rovr.functions.ui_state import get_ui_state, update_ui_state
 from rovr.variables.constants import buttons_that_depend_on_path, config, vindings
 from rovr.variables.maps import ARCHIVE_EXTENSIONS
 
@@ -180,9 +181,11 @@ class FileList(SelectionList, inherit_bindings=False):
         if add_to_session:
             if session.historyIndex != len(session.directories) - 1:
                 session.directories = session.directories[: session.historyIndex + 1]
-            session.directories.append({
-                "path": cwd,
-            })
+            session.directories.append(
+                {
+                    "path": cwd,
+                }
+            )
             if session.lastHighlighted.get(cwd) is None:
                 # Hard coding is my passion (referring to the id)
                 session.lastHighlighted[cwd] = (
@@ -494,28 +497,37 @@ class FileList(SelectionList, inherit_bindings=False):
         side_style += Style(meta={"option": selection_index})
         button_style += Style(meta={"option": selection_index})
 
-        return Strip([
-            Segment(icon_utils.get_toggle_button_icon("left"), style=side_style),
-            Segment(
-                icon_utils.get_toggle_button_icon("inner_filled")
-                if selection.value in self._selected
-                else icon_utils.get_toggle_button_icon("inner"),
-                style=button_style,
-            ),
-            Segment(icon_utils.get_toggle_button_icon("right"), style=side_style),
-            Segment(" ", style=underlying_style),
-            *line,
-        ])
+        return Strip(
+            [
+                Segment(icon_utils.get_toggle_button_icon("left"), style=side_style),
+                Segment(
+                    (
+                        icon_utils.get_toggle_button_icon("inner_filled")
+                        if selection.value in self._selected
+                        else icon_utils.get_toggle_button_icon("inner")
+                    ),
+                    style=button_style,
+                ),
+                Segment(icon_utils.get_toggle_button_icon("right"), style=side_style),
+                Segment(" ", style=underlying_style),
+                *line,
+            ]
+        )
 
     async def toggle_hidden_files(self) -> None:
         """Toggle the visibility of hidden files."""
-        config["settings"]["show_hidden_files"] = not config["settings"][
-            "show_hidden_files"
-        ]
+        # Get current state from ui_state
+        current_state = get_ui_state()
+        new_show_hidden = not current_state.get("show_hidden_files", False)
+
+        # Update config and ui_state
+        config["settings"]["show_hidden_files"] = new_show_hidden
+        update_ui_state("show_hidden_files", new_show_hidden)
+
         self.update_file_list(add_to_session=False)
         status = (
             "[$success underline]shown"
-            if config["settings"]["show_hidden_files"]
+            if new_show_hidden
             else "[$error underline]hidden"
         )
         self.app.notify(

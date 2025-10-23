@@ -500,7 +500,9 @@ class PreviewContainer(Container):
         self.post_message(self.SetLoading(True))
 
         if path.isdir(file_path):
-            self.app.call_from_thread(self.update_ui, file_path=file_path, file_type="folder")
+            self.app.call_from_thread(
+                self.update_ui, file_path=file_path, file_type="folder"
+            )
         else:
             if any(file_path.endswith(ext) for ext in PIL_EXTENSIONS):
                 file_type = "image"
@@ -553,7 +555,7 @@ class PreviewContainer(Container):
                     # read because are you stupid, why
                     # would you use rovr for that anyways
                     size = path.getsize(file_path)
-                    if size > 1024 ** 2:
+                    if size > 1024**2:
                         content = config["interface"]["preview_text"]["too_large"]
                     elif size == 0:
                         content = config["interface"]["preview_text"]["empty"]
@@ -563,7 +565,12 @@ class PreviewContainer(Container):
                                 content = f.read()
                         except UnicodeDecodeError:
                             content = config["interface"]["preview_text"]["binary"]
-                        except (FileNotFoundError, PermissionError, OSError, MemoryError):
+                        except (
+                            FileNotFoundError,
+                            PermissionError,
+                            OSError,
+                            MemoryError,
+                        ):
                             content = config["interface"]["preview_text"]["error"]
 
             if worker and not worker.is_running:
@@ -635,11 +642,13 @@ class PreviewContainer(Container):
     async def on_resize(self, event: events.Resize) -> None:
         """Re-render the preview on resize if it's was rendered by batcat and height changed."""
         if (
-            self.has_child("Static")
-            and event.size.height != self._initial_height
+            self.has_child("Static") and event.size.height != self._initial_height
         ) or self.has_child("CustomTextArea"):
             if self._current_content is not None:
-                is_special_content = self._current_content in config["interface"]["preview_text"].values()
+                is_special_content = (
+                    self._current_content
+                    in config["interface"]["preview_text"].values()
+                )
                 if (
                     config["plugins"]["bat"]["enabled"]
                     and not is_special_content

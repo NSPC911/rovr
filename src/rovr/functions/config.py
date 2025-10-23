@@ -247,7 +247,11 @@ def load_config() -> tuple[dict, dict]:
             with open(user_config_path, "w", encoding="utf-8") as file:
                 file.write(DEFAULT_CONFIG.format(schema_url=schema_url))
 
-    with open(path.join(path.dirname(__file__), "../config/config.toml"), "r", encoding="utf-8") as f:
+    with open(
+        path.join(path.dirname(__file__), "../config/config.toml"),
+        "r",
+        encoding="utf-8",
+    ) as f:
         # check header
         try:
             content = f.read()
@@ -268,7 +272,11 @@ def load_config() -> tuple[dict, dict]:
     # Don't really have to consider the else part, because it's created further down
     config = deep_merge(template_config, user_config)
     # check with schema
-    with open(path.join(path.dirname(__file__), "../config/schema.json"), "r", encoding="utf-8") as f:
+    with open(
+        path.join(path.dirname(__file__), "../config/schema.json"),
+        "r",
+        encoding="utf-8",
+    ) as f:
         content = f.read()
         schema = ujson.loads(content)
 

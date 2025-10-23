@@ -1,0 +1,19 @@
+# yaml-language-server: $schema=https://coderabbit.ai/integrations/schema.v2.json
+# Minimal configuration for getting started
+language: "en-US"
+reviews:
+  profile: "chill"
+  high_level_summary: true
+  auto_review:
+    enabled: true
+    drafts: false
+    ignore_title_keywords: ["WIP", "wip"]
+    base_brances: ["master", "dev"]
+  finishing_touches:
+    unit_tests:
+      enabled: false
+    doc_strings:
+      enabled: false
+  tools:
+    ruff:
+      enabled: true

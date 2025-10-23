@@ -123,11 +123,6 @@
           "description": "The image protocol to use when displaying an image",
           "enum": ["Auto", "TGP", "Sixel", "Halfcell", "Unicode"]
         },
-        "preview_full": {
-          "type": "boolean",
-          "default": false,
-          "description": "Whether or not you want to view the full file. It sort of works, not sure why it doesnt properly work, looking into it."
-        },
         "allow_tab_nav": {
           "type": "boolean",
           "default": false,
@@ -646,13 +641,13 @@
         "preview_scroll_left": {
           "type": "array",
           "items": { "type": "string" },
-          "description": "While using `settings.preview_full = true`, and the preview container is focused, scroll left when this keybind is pressed.",
+          "description": "Temporarily unused.",
           "display_name": "Scroll left"
         },
         "preview_scroll_right": {
           "type": "array",
           "items": { "type": "string" },
-          "description": "While using `settings.preview_full = true`, and the preview container is focused, scroll right when this keybind is pressed.",
+          "description": "Temporarily unused.",
           "display_name": "Scroll right"
         },
         "preview_select_right": {

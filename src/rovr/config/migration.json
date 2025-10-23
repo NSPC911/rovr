@@ -15,5 +15,16 @@
       "- [bright_green]interface.preview_text.too_large[/] (when the file is too large, which is [gray]>1MB[/])"
     ],
     "extra": "Removed in v0.5.0"
+  },
+  {
+    "keys": [
+      "settings.preview_full"
+    ],
+    "message": [
+      "[bright_blue]settings.preview_full[/] has been removed for now.",
+      "- when previewing archives, the full contents of it are listed.",
+      "- when previewing files, with or without [bright_cyan]bat[/], the height will always be enough to fill the container."
+    ],
+    "extra": "Removed in v0.5.0"
   }
 ]

@@ -100,11 +100,6 @@ FileListRightClickOptionList {
 .hide,
 .hidden { display: none }
 
-.wrap {
-  text-wrap: wrap;
-  text-overflow: fold;
-}
-
 Input, TextArea {
   .input--placeholder,
   .text-area--placeholder { color: $foreground-darken-1 }
@@ -382,19 +377,19 @@ Tooltip {
 #pinned_sidebar { padding: 0 }
 
 #preview_sidebar {
-  height: 1fr;
   margin: 0;
   width: $preview_sidebar_width;
   layout: horizontal;
-  padding: 0 1;
-  overflow: auto auto;
-  scrollbar-size: 0 0;
   & > Static {
     text-overflow: clip;
     text-wrap: nowrap;
-    width: auto;
     width: 1fr;
     overflow-x: hidden;
+  }
+  & > Static.special {
+    text-wrap: wrap;
+    text-overflow: fold;
+    padding: 0 1;
   }
  /* scrollbars are useless, reminder */
   & > * {
@@ -407,6 +402,11 @@ Tooltip {
     }
   }
   & > FileList { height: 1fr }
+  Image {
+      width: auto;
+      height: auto;
+      align: center bottom;
+  }
 }
 
 #preview_sidebar { padding: 0 }

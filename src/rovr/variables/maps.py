@@ -1012,14 +1012,11 @@ FILES_MAP = {
 archive_exts: NamedTuple = namedtuple("ArchiveExtensions", ["zip", "tar", "rar"])
 
 ARCHIVE_EXTENSIONS = archive_exts((".zip"), (".tar", ".gz", ".bz2", ".xz"), (".rar"))
-ARCHIVE_EXTENSIONS_FULL = []
-for value in ARCHIVE_EXTENSIONS:
-    if type(value) is tuple:
-        for exts in value:
-            ARCHIVE_EXTENSIONS_FULL.append(exts)
-    else:
-        ARCHIVE_EXTENSIONS_FULL.append(value)
-ARCHIVE_EXTENSIONS_FULL = tuple(ARCHIVE_EXTENSIONS_FULL)
+ARCHIVE_EXTENSIONS_FULL = tuple(
+    ext
+    for value in ARCHIVE_EXTENSIONS
+    for ext in (value if isinstance(value, tuple) else (value,))
+)
 
 PIL_EXTENSIONS = (
     # reminder that stuff can also not work, just remove it if it doesn't work

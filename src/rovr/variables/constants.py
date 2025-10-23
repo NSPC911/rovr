@@ -1,7 +1,6 @@
 import platform
 from dataclasses import dataclass
 
-from rich._spinners import SPINNERS
 from textual.binding import Binding, BindingType
 
 from rovr.functions.config import config_setup, load_config
@@ -105,5 +104,3 @@ vindings: list[BindingType] = (
 )
 
 os_type: str = platform.system()
-
-spinner = SPINNERS["dots12"]["frames"]

@@ -632,7 +632,7 @@ class PreviewContainer(Container):
                 return
             await self.mount(Static(self._current_content))
         self.query_one(Static).can_focus = True
-        self.query_one(Static).classes = "wrap"
+        self.query_one(Static).classes = "special"
         if worker and not worker.is_running:
             return
         self.border_title = ""

@@ -215,7 +215,11 @@ def schema_dump(doc_path: str, exception: ValidationError, config_content: str) 
 
         pprint(f"[bright_red]╰─{'─' * rjust}─❯[/] {error_msg}")
     # check path for custom message from migration.json
-    with open(path.join(path.dirname(__file__), "../config/migration.json"), "r") as f:
+    with open(
+        path.join(path.dirname(__file__), "../config/migration.json"),
+        "r",
+        encoding="utf-8",
+    ) as f:
         migration_docs = ujson.load(f)
     for item in migration_docs:
         if ".".join(exception.path) in item["keys"]:

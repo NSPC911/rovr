@@ -131,6 +131,7 @@ def schema_dump(doc_path: str, exception: ValidationError, config_content: str) 
     from rich.padding import Padding
     from rich.syntax import Syntax
     from rich.table import Table
+
     doc: list = config_content.splitlines()
 
     if exception.message.startswith("Additional properties are not allowed"):
@@ -179,14 +180,23 @@ def schema_dump(doc_path: str, exception: ValidationError, config_content: str) 
                 startswith = "╭╴"
                 has_past = True
                 pprint(
-                    f"[bright_red]{startswith}{str(line + 1).rjust(rjust)}[/][bright_blue] │[/]", end=" "
+                    f"[bright_red]{startswith}{str(line + 1).rjust(rjust)}[/][bright_blue] │[/]",
+                    end=" ",
                 )
             else:
                 startswith = "│ " if has_past else "  "
                 pprint(
-                    f"[bright_red]{startswith}[/][bright_blue]{str(line + 1).rjust(rjust)} │[/]", end=" "
+                    f"[bright_red]{startswith}[/][bright_blue]{str(line + 1).rjust(rjust)} │[/]",
+                    end=" ",
                 )
-            pprint(Syntax(doc[line].strip(), "toml", background_color="default", theme="ansi_dark"))
+            pprint(
+                Syntax(
+                    doc[line].strip(),
+                    "toml",
+                    background_color="default",
+                    theme="ansi_dark",
+                )
+            )
 
         # Format the error message based on validator type
         match exception.validator:
@@ -215,7 +225,7 @@ def schema_dump(doc_path: str, exception: ValidationError, config_content: str) 
                 message += "\n"
             message = message[:-1]
             to_print = Table(message, box=box.ROUNDED, border_style="bright_blue")
-            to_print.add_row(f"[dim]> {item["extra"]}[/]")
+            to_print.add_row(f"[dim]> {item['extra']}[/]")
             pprint(Padding(to_print, (0, rjust + 4, 0, rjust + 3)))
             break
     exit(1)
@@ -269,7 +279,11 @@ def load_config() -> tuple[dict, dict]:
             with open(user_config_path, "w", encoding="utf-8") as file:
                 file.write(DEFAULT_CONFIG.format(schema_url=schema_url))
 
-    with open(path.join(path.dirname(__file__), "../config/config.toml"), "r", encoding="utf-8") as f:
+    with open(
+        path.join(path.dirname(__file__), "../config/config.toml"),
+        "r",
+        encoding="utf-8",
+    ) as f:
         # check header
         try:
             content = f.read()
@@ -290,7 +304,11 @@ def load_config() -> tuple[dict, dict]:
     # Don't really have to consider the else part, because it's created further down
     config = deep_merge(template_config, user_config)
     # check with schema
-    with open(path.join(path.dirname(__file__), "../config/schema.json"), "r", encoding="utf-8") as f:
+    with open(
+        path.join(path.dirname(__file__), "../config/schema.json"),
+        "r",
+        encoding="utf-8",
+    ) as f:
         content = f.read()
         schema = ujson.loads(content)
 

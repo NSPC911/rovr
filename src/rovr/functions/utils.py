@@ -111,7 +111,7 @@ def natural_size(integer: int, suffix: str, filesize_decimals: int) -> str:
 
 def should_cancel() -> bool:
     """
-    Whether to cancel the provided worker or not
+    Whether the current worker should cancel execution
 
     Returns:
         bool: whether to cancel this worker or not

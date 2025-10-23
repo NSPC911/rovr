@@ -591,7 +591,7 @@ class PreviewContainer(Container):
         elif file_type == "archive":
             await self.show_archive_preview()
         elif content is not None:
-            if content in config["interface"]["preview_text"].values():
+            if content in self._preview_texts:
                 await self.mount_special_messages()
             else:
                 if (

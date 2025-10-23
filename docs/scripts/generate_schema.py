@@ -60,5 +60,5 @@ try:
         f"[green]Generated it in {naturaldelta(perf_counter() - start_time, minimum_unit='microseconds')}"
     )
 except FileNotFoundError:
-    pprint("[red]Do not run manually with python! Run [blue]poe gen-keys[/][/]")
+    pprint("[red]Do not run manually with python! Run [blue]poe gen-schema[/][/]")
     exit(1)

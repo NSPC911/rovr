@@ -227,7 +227,6 @@ def schema_dump(doc_path: str, exception: ValidationError, config_content: str) 
     for item in migration_docs:
         if ".".join(exception.path) in item["keys"]:
             message = "\n".join(item["message"])
-            message = message[:-1]
             to_print = Table(
                 box=box.ROUNDED,
                 border_style="bright_blue",
@@ -238,6 +237,10 @@ def schema_dump(doc_path: str, exception: ValidationError, config_content: str) 
             to_print.add_column()
             to_print.add_row(message)
             to_print.add_row(f"[dim]> {item['extra']}[/]")
+            try:
+                rjust
+            except NameError:
+                rjust = 0
             pprint(Padding(to_print, (0, rjust + 4, 0, rjust + 3)))
             break
     exit(1)

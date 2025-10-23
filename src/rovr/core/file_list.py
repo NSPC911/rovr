@@ -379,7 +379,7 @@ class FileList(SelectionList, inherit_bindings=False):
             path_utils.normalise(path.join(getcwd(), file_name))
         )
         self.app.query_one("MetadataContainer").update_metadata(event.option.dir_entry)
-        self.app.query_one("#unzip").disabled = not file_name.endswith(
+        self.app.query_one("#unzip").disabled = not file_name.lower().endswith(
             ARCHIVE_EXTENSIONS_FULL
         )
 
@@ -844,18 +844,15 @@ class FileListRightClickOptionList(OptionList):
         self.file_list.focus()
 
     @on(events.MouseMove)
-    @work(exclusive=True)
-    async def highlight_follow_mouse(self, event: events.MouseMove) -> None:
+    def highlight_follow_mouse(self, event: events.MouseMove) -> None:
         hovered_option: int | None = event.style.meta.get("option")
         if hovered_option is not None and not self._options[hovered_option].disabled:
             self.highlighted = hovered_option
 
     @on(events.Show)
-    @work(exclusive=True)
-    async def force_highlight_option(self, event: events.Show) -> None:
+    def force_highlight_option(self, event: events.Show) -> None:
         self.file_list.add_class("-popup-shown")
 
     @on(events.Hide)
-    @work(exclusive=True)
-    async def unforce_highlight_option(self, event: events.Hide) -> None:
+    def unforce_highlight_option(self, event: events.Hide) -> None:
         self.file_list.remove_class("-popup-shown")

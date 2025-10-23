@@ -1009,8 +1009,6 @@ FILES_MAP = {
     "jenkinsfile": "jenkinsfile",
 }
 
-archive_exts: NamedTuple = namedtuple("ArchiveExtensions", ["zip", "tar", "rar"])
-
 
 class ArchiveExtensions(NamedTuple):
     zip: tuple[str, ...]

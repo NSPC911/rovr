@@ -216,7 +216,7 @@ def schema_dump(doc_path: str, exception: ValidationError, config_content: str) 
                 message += "\n"
             message = message[:-1]
             to_print = Table(message, box=box.ROUNDED, border_style="bright_blue")
-            to_print.add_row(f"[dim]> Caused by: {item['caused_by']}[/]")
+            to_print.add_row(f"[dim]> {item["extra"]}[/]")
             pprint(Padding(to_print, (0, rjust + 4, 0, rjust + 3)))
             break
     exit(1)

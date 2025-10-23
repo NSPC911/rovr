@@ -130,6 +130,7 @@ def schema_dump(doc_path: str, exception: ValidationError, config_content: str) 
     """
     from rich.padding import Padding
     from rich.table import Table
+
     doc: list = config_content.splitlines()
 
     if exception.message.startswith("Additional properties are not allowed"):
@@ -215,7 +216,7 @@ def schema_dump(doc_path: str, exception: ValidationError, config_content: str) 
                 message += "\n"
             message = message[:-1]
             to_print = Table(message, box=box.ROUNDED, border_style="bright_blue")
-            to_print.add_row(f"[dim]> Caused by: {item["caused_by"]}[/]")
+            to_print.add_row(f"[dim]> Caused by: {item['caused_by']}[/]")
             pprint(Padding(to_print, (0, rjust + 4, 0, rjust + 3)))
             break
     exit(1)
@@ -269,7 +270,11 @@ def load_config() -> tuple[dict, dict]:
             with open(user_config_path, "w", encoding="utf-8") as file:
                 file.write(DEFAULT_CONFIG.format(schema_url=schema_url))
 
-    with open(path.join(path.dirname(__file__), "../config/config.toml"), "r", encoding="utf-8") as f:
+    with open(
+        path.join(path.dirname(__file__), "../config/config.toml"),
+        "r",
+        encoding="utf-8",
+    ) as f:
         # check header
         try:
             content = f.read()
@@ -290,7 +295,11 @@ def load_config() -> tuple[dict, dict]:
     # Don't really have to consider the else part, because it's created further down
     config = deep_merge(template_config, user_config)
     # check with schema
-    with open(path.join(path.dirname(__file__), "../config/schema.json"), "r", encoding="utf-8") as f:
+    with open(
+        path.join(path.dirname(__file__), "../config/schema.json"),
+        "r",
+        encoding="utf-8",
+    ) as f:
         content = f.read()
         schema = ujson.loads(content)
 

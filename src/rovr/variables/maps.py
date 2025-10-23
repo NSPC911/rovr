@@ -1,6 +1,7 @@
 from os import path
 
 from platformdirs import PlatformDirs
+from rich._spinners import SPINNERS
 
 dirs = PlatformDirs("rovr", ".")  # Ah yes, my name is "."
 
@@ -1097,4 +1098,5 @@ BORDER_BOTTOM = {
     "wide": "▔",
 }
 
-SPINNER = ["\\", "|", "/", "-"]
+SPINNER = SPINNERS["dots2"]["frames"]
+SPINNER_LENGTH = len(SPINNER)

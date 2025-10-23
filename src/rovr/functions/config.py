@@ -8,6 +8,7 @@ import toml
 import ujson
 from jsonschema import ValidationError
 from lzstring import LZString
+from rich import box
 from rich.console import Console
 
 from rovr.functions.utils import deep_merge
@@ -127,8 +128,15 @@ def schema_dump(doc_path: str, exception: ValidationError, config_content: str) 
         exception: the ValidationError that occurred
         config_content: the raw file content
     """
+    from rich.padding import Padding
+    from rich.table import Table
     doc: list = config_content.splitlines()
 
+    if exception.message.startswith("Additional properties are not allowed"):
+        # `Additional properties are not allowed ('<key>' was unexpected)`
+        # grabs only the key
+        cause = exception.message.split("'")[1]
+        exception.path.append(cause)
     # find the line no for the error path
     path_str = ".".join(str(p) for p in exception.path) if exception.path else "root"
     lineno = find_path_line(doc, exception.path)
@@ -196,6 +204,20 @@ def schema_dump(doc_path: str, exception: ValidationError, config_content: str) 
                 error_msg = exception.message
 
         pprint(f"[bright_red]╰─{'─' * rjust}─❯[/] {error_msg}")
+    # check path for custom message from migration.json
+    with open(path.join(path.dirname(__file__), "../config/migration.json"), "r") as f:
+        migration_docs = ujson.load(f)
+    for item in migration_docs:
+        if ".".join(exception.path) in item["keys"]:
+            message = ""
+            for part in item["message"]:
+                message += part
+                message += "\n"
+            message = message[:-1]
+            to_print = Table(message, box=box.ROUNDED, border_style="bright_blue")
+            to_print.add_row(f"[dim]> Caused by: {item["caused_by"]}[/]")
+            pprint(Padding(to_print, (0, rjust + 4, 0, rjust + 3)))
+            break
     exit(1)
 
 
@@ -247,11 +269,7 @@ def load_config() -> tuple[dict, dict]:
             with open(user_config_path, "w", encoding="utf-8") as file:
                 file.write(DEFAULT_CONFIG.format(schema_url=schema_url))
 
-    with open(
-        path.join(path.dirname(__file__), "../config/config.toml"),
-        "r",
-        encoding="utf-8",
-    ) as f:
+    with open(path.join(path.dirname(__file__), "../config/config.toml"), "r", encoding="utf-8") as f:
         # check header
         try:
             content = f.read()
@@ -272,11 +290,7 @@ def load_config() -> tuple[dict, dict]:
     # Don't really have to consider the else part, because it's created further down
     config = deep_merge(template_config, user_config)
     # check with schema
-    with open(
-        path.join(path.dirname(__file__), "../config/schema.json"),
-        "r",
-        encoding="utf-8",
-    ) as f:
+    with open(path.join(path.dirname(__file__), "../config/schema.json"), "r", encoding="utf-8") as f:
         content = f.read()
         schema = ujson.loads(content)
 

@@ -337,25 +337,23 @@ class PreviewContainer(Container):
             return
 
         text_to_display = self._current_content
-        preview_full = config["settings"]["preview_full"]
-        if not preview_full:
-            lines = text_to_display.splitlines()
-            max_lines = self.size.height
-            if max_lines > 0:
-                if len(lines) > max_lines:
-                    lines = lines[:max_lines]
-            else:
-                lines = []
-            max_width = self.size.width - 7
-            if max_width > 0:
-                processed_lines = []
-                for line in lines:
-                    if len(line) > max_width:
-                        processed_lines.append(line[:max_width])
-                    else:
-                        processed_lines.append(line)
-                lines = processed_lines
-            text_to_display = "\n".join(lines)
+        lines = text_to_display.splitlines()
+        max_lines = self.size.height
+        if max_lines > 0:
+            if len(lines) > max_lines:
+                lines = lines[:max_lines]
+        else:
+            lines = []
+        max_width = self.size.width - 7
+        if max_width > 0:
+            processed_lines = []
+            for line in lines:
+                if len(line) > max_width:
+                    processed_lines.append(line[:max_width])
+                else:
+                    processed_lines.append(line)
+            lines = processed_lines
+        text_to_display = "\n".join(lines)
 
         if worker and not worker.is_running:
             return

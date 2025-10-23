@@ -30,7 +30,6 @@ enabled = true
 align = "left"
 
 [settings]
-preview_full = false
 image_protocol = "Auto"
 show_hidden_files = false
 copy_includes_metadata = true

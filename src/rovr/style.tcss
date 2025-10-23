@@ -100,6 +100,11 @@ FileListRightClickOptionList {
 .hide,
 .hidden { display: none }
 
+.wrap {
+  text-wrap: wrap;
+  text-overflow: fold;
+}
+
 Input, TextArea {
   .input--placeholder,
   .text-area--placeholder { color: $foreground-darken-1 }
@@ -383,18 +388,15 @@ Tooltip {
   layout: horizontal;
   padding: 0 1;
   overflow: auto auto;
-  scrollbar-size: 1 1;
+  scrollbar-size: 0 0;
   & > Static {
     text-overflow: clip;
     text-wrap: nowrap;
     width: auto;
+    width: 1fr;
+    overflow-x: hidden;
   }
  /* scrollbars are useless, reminder */
-  &.clip { scrollbar-size: 0 0 }
-  &.clip > Static {
-    width: 1fr;
-    overflow-x: hidden !important;
-  }
   & > * {
     background: transparent;
     border: none;

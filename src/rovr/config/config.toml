@@ -12,9 +12,18 @@ compact_mode = false
 show_line_numbers = true
 
 [interface.preview_text]
-error = "Couldn't read this file! (\u00AC_\u00AC)"
-binary = "The file doesn't use UTF-8\n which isn't supported yet"
-start = " ___ ___\n|  _| . |\n|_| |___|\n _ _ ___\n| | |  _|\n \\_/|_|\n"
+error = "couldn't read this file! (\u00AC_\u00AC)" # ¬_¬
+binary = "the file doesn't use UTF-8 which isn't supported yet"
+start = """ ___ ___
+|  _| . |
+|_| |___|
+ _ _ ___
+| | |  _|
+ \\_/|_|
+"""
+empty = "bytes be gone (\u2310\u25A0_\u25A0)" # (⌐■_■)
+# how do you even respond to this
+too_large = "this file is larger (but not larger than your mother)"
 
 [interface.clock]
 enabled = true

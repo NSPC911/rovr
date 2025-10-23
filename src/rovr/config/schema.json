@@ -71,12 +71,12 @@
           "properties": {
             "error": {
               "type": "string",
-              "default": "Couldn't read this file! (\u00AC_\u00AC )",
+              "default": "couldn't read this file! (\u00AC_\u00AC )",
               "description": "If for any reason the file preview refused to show, this appears."
             },
             "binary": {
               "type": "string",
-              "default": "The file uses UTF-8, which isn't supported [u]yet[/]",
+              "default": "the file uses UTF-8, which isn't supported [u]yet[/]",
               "description": "If the current file cannot be read due to an encoding issue (ie not UTF8), it will display this message."
             },
             "start": {
@@ -86,7 +86,13 @@
             },
             "empty": {
               "type": "string",
-              "default": "bytes be gone (\u2310\u25A0_\u25A0)"
+              "default": "bytes be gone (\u2310\u25A0_\u25A0)",
+              "description": "If the current file has no content, this is shown"
+            },
+            "too_large": {
+              "type": "string",
+              "default": "this file is larger (but not larger than your mother)",
+              "description": "If the file is too large (hard capped at < 1MB), the preview will refuse to render this file regardless of your memory size"
             }
           }
         }

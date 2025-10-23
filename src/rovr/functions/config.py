@@ -220,11 +220,11 @@ def load_config() -> tuple[dict, dict]:
 
     # Create config file if it doesn't exist
     if not path.exists(user_config_path):
-        with open(user_config_path, "w") as file:
+        with open(user_config_path, "w", encoding="utf-8") as file:
             file.write(DEFAULT_CONFIG.format(schema_url=schema_url))
     else:
         # Update schema version if needed
-        with open(user_config_path, "r") as f:
+        with open(user_config_path, "r", encoding="utf-8") as f:
             lines = f.readlines()
 
         expected_schema_line = f"#:schema {schema_url}\n"
@@ -236,7 +236,7 @@ def load_config() -> tuple[dict, dict]:
             else:
                 lines.insert(0, expected_schema_line)
 
-            with open(user_config_path, "w") as f:
+            with open(user_config_path, "w", encoding="utf-8") as f:
                 f.writelines(lines)
 
             display_version = (
@@ -244,10 +244,10 @@ def load_config() -> tuple[dict, dict]:
             )
             pprint(f"[yellow]Updated config schema to {display_version}[/]")
         elif not lines:
-            with open(user_config_path, "w") as file:
+            with open(user_config_path, "w", encoding="utf-8") as file:
                 file.write(DEFAULT_CONFIG.format(schema_url=schema_url))
 
-    with open(path.join(path.dirname(__file__), "../config/config.toml"), "r") as f:
+    with open(path.join(path.dirname(__file__), "../config/config.toml"), "r", encoding="utf-8") as f:
         # check header
         try:
             content = f.read()
@@ -258,7 +258,7 @@ def load_config() -> tuple[dict, dict]:
     user_config = {}
     user_config_content = ""
     if path.exists(user_config_path):
-        with open(user_config_path, "r") as f:
+        with open(user_config_path, "r", encoding="utf-8") as f:
             user_config_content = f.read()
             if user_config_content:
                 try:
@@ -268,7 +268,7 @@ def load_config() -> tuple[dict, dict]:
     # Don't really have to consider the else part, because it's created further down
     config = deep_merge(template_config, user_config)
     # check with schema
-    with open(path.join(path.dirname(__file__), "../config/schema.json"), "r") as f:
+    with open(path.join(path.dirname(__file__), "../config/schema.json"), "r", encoding="utf-8") as f:
         content = f.read()
         schema = ujson.loads(content)
 

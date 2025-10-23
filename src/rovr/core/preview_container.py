@@ -16,12 +16,12 @@ from textual.containers import Container
 from textual.css.query import NoMatches
 from textual.message import Message
 from textual.widgets import Static, TextArea
-from textual.worker import Worker, WorkerCancelled, get_current_worker
+from textual.worker import NoActiveWorker, Worker, WorkerCancelled, get_current_worker
 
 from rovr.classes import Archive
 from rovr.core import FileList
 from rovr.variables.constants import PreviewContainerTitles, config
-from rovr.variables.maps import ARCHIVE_EXTENSIONS, EXT_TO_LANG_MAP, PIL_EXTENSIONS
+from rovr.variables.maps import ARCHIVE_EXTENSIONS_FULL, EXT_TO_LANG_MAP, PIL_EXTENSIONS
 
 titles = PreviewContainerTitles()
 
@@ -159,12 +159,11 @@ class PreviewContainer(Container):
         self._pending_preview_path: str | None = None
         self._current_content: str | list[str] | None = None
         self._current_file_path = None
-        self._is_image = False
-        self._is_archive = False
         self._initial_height = self.size.height
+        self._file_type: str = "none"
 
     def compose(self) -> ComposeResult:
-        yield Static(config["interface"]["preview_text"]["start"])
+        yield Static(config["interface"]["preview_text"]["start"], classes="wrap")
 
     def on_preview_container_set_loading(self, event: SetLoading) -> None:
         self.loading = event.to
@@ -257,7 +256,6 @@ class PreviewContainer(Container):
         except RuntimeError:
             worker = None
         bat_executable = config["plugins"]["bat"]["executable"]
-        preview_full = config["settings"]["preview_full"]
         command = [
             bat_executable,
             "--force-colorization",
@@ -266,10 +264,9 @@ class PreviewContainer(Container):
             if config["interface"]["show_line_numbers"]
             else "--style=plain",
         ]
-        if not preview_full:
-            max_lines = self.size.height
-            if max_lines > 0:
-                command.append(f"--line-range=:{max_lines}")
+        max_lines = self.size.height
+        if max_lines > 0:
+            command.append(f"--line-range=:{max_lines}")
         command.append(self._current_file_path)
 
         if worker and not worker.is_running:
@@ -295,7 +292,6 @@ class PreviewContainer(Container):
 
                 if not self.has_child("Static"):
                     await self.remove_children()
-                    self.remove_class("full", "clip")
 
                     if worker and not worker.is_running:
                         return False
@@ -306,19 +302,14 @@ class PreviewContainer(Container):
                     if worker and not worker.is_running:
                         return False
                     self.query_one(Static).can_focus = True
-                    self.add_class("bar")
                 else:
-                    self.query_one("#text_preview", Static).update(new_content)
+                    self.query_one(Static).update(new_content)
+                self.query_one(Static).classes = ""
 
                 if worker and not worker.is_running:
                     return False
 
                 self.border_title = titles.bat
-                self.remove_class("full", "clip")
-                if preview_full:
-                    self.add_class("full")
-                else:
-                    self.add_class("clip")
                 return True
             else:
                 error_message = stderr.decode("utf-8", errors="ignore")
@@ -386,7 +377,6 @@ class PreviewContainer(Container):
 
         if not self.has_child("CustomTextArea"):
             await self.remove_children()
-            self.remove_class("bat", "full", "clip")
 
             if worker and not worker.is_running:
                 return
@@ -415,14 +405,13 @@ class PreviewContainer(Container):
     async def show_folder_preview(self, folder_path: str) -> None:
         try:
             worker = get_current_worker()
-        except RuntimeError:
+        except (RuntimeError, NoActiveWorker):
             worker = None
         if worker and not worker.is_running:
             return
 
         if not self.has_child("FileList"):
             await self.remove_children()
-            self.remove_class("bat", "full", "clip")
 
             if worker and not worker.is_running:
                 return
@@ -464,7 +453,6 @@ class PreviewContainer(Container):
 
         if not self.has_child("FileList"):
             await self.remove_children()
-            self.remove_class("bat", "full", "clip")
 
             if worker and not worker.is_running:
                 return
@@ -512,55 +500,71 @@ class PreviewContainer(Container):
         self.post_message(self.SetLoading(True))
 
         if path.isdir(file_path):
-            self.app.call_from_thread(self.update_ui, file_path, is_dir=True)
+            self.app.call_from_thread(self.update_ui, file_path=file_path, file_type="folder")
         else:
-            is_image = any(file_path.endswith(ext) for ext in PIL_EXTENSIONS)
-            is_archive = any(file_path.endswith(ext) for ext in ARCHIVE_EXTENSIONS)
+            if any(file_path.endswith(ext) for ext in PIL_EXTENSIONS):
+                file_type = "image"
+            elif any(file_path.endswith(ext) for ext in ARCHIVE_EXTENSIONS_FULL):
+                file_type = "archive"
+            else:
+                file_type = "file"
+
             content = None
 
             if worker and not worker.is_running:
                 return
 
-            if is_archive:
-                try:
-                    with Archive(file_path, "r") as archive:
-                        all_files = []
-                        for member in archive.infolist():
-                            if worker and not worker.is_running:
-                                return
+            match file_type:
+                case "archive":
+                    try:
+                        with Archive(file_path, "r") as archive:
+                            all_files = []
+                            for member in archive.infolist():
+                                if worker and not worker.is_running:
+                                    return
 
-                            filename = getattr(
-                                member, "filename", getattr(member, "name", "")
-                            )
-                            is_dir_func = getattr(
-                                member, "is_dir", getattr(member, "isdir", None)
-                            )
-                            is_dir = (
-                                is_dir_func()
-                                if is_dir_func
-                                else filename.replace("\\", "/").endswith("/")
-                            )
-                            if not is_dir:
-                                all_files.append(filename)
-                    content = all_files
-                except (
-                    zipfile.BadZipFile,
-                    tarfile.TarError,
-                    ValueError,
-                    FileNotFoundError,
-                ):
-                    content = [config["interface"]["preview_text"]["error"]]
-            elif not is_image:
-                if worker and not worker.is_running:
-                    return
-
-                try:
-                    with open(file_path, "r", encoding="utf-8") as f:
-                        content = f.read()
-                except UnicodeDecodeError:
-                    content = config["interface"]["preview_text"]["binary"]
-                except (FileNotFoundError, PermissionError, OSError, MemoryError):
-                    content = config["interface"]["preview_text"]["error"]
+                                filename = getattr(
+                                    member, "filename", getattr(member, "name", "")
+                                )
+                                is_dir_func = getattr(
+                                    member, "is_dir", getattr(member, "isdir", None)
+                                )
+                                is_dir = (
+                                    is_dir_func()
+                                    if is_dir_func
+                                    else filename.replace("\\", "/").endswith("/")
+                                )
+                                if not is_dir:
+                                    all_files.append(filename)
+                        content = all_files
+                    except (
+                        zipfile.BadZipFile,
+                        tarfile.TarError,
+                        ValueError,
+                        FileNotFoundError,
+                    ):
+                        content = [config["interface"]["preview_text"]["error"]]
+                case "image":
+                    pass
+                case _:
+                    if worker and not worker.is_running:
+                        return
+                    # prevent files > 1mb from being
+                    # read because are you stupid, why
+                    # would you use rovr for that anyways
+                    size = path.getsize(file_path)
+                    if size > 1024 ** 2:
+                        content = config["interface"]["preview_text"]["too_large"]
+                    elif size == 0:
+                        content = config["interface"]["preview_text"]["empty"]
+                    else:
+                        try:
+                            with open(file_path, "r", encoding="utf-8") as f:
+                                content = f.read()
+                        except UnicodeDecodeError:
+                            content = config["interface"]["preview_text"]["binary"]
+                        except (FileNotFoundError, PermissionError, OSError, MemoryError):
+                            content = config["interface"]["preview_text"]["error"]
 
             if worker and not worker.is_running:
                 return
@@ -568,22 +572,18 @@ class PreviewContainer(Container):
             self.app.call_from_thread(
                 self.update_ui,
                 file_path,
-                is_dir=False,
-                is_image=is_image,
-                is_archive=is_archive,
+                file_type=file_type,
                 content=content,
             )
 
         if worker and not worker.is_running:
             return
-        self.post_message(self.SetLoading(False))
+        self.call_later(lambda: self.post_message(self.SetLoading(False)))
 
     async def update_ui(
         self,
         file_path: str,
-        is_dir: bool,
-        is_image: bool = False,
-        is_archive: bool = False,
+        file_type: str,
         content: str | list[str] | None = None,
     ) -> None:
         """
@@ -592,51 +592,54 @@ class PreviewContainer(Container):
         self._current_file_path = file_path
         self._current_content = content
 
-        if is_dir:
-            self._is_image = False
-            self._is_archive = False
+        self._file_type = file_type
+
+        if file_type == "folder":
             await self.show_folder_preview(file_path)
-        elif is_image:
-            self._is_image = True
-            self._is_archive = False
+        elif file_type == "image":
             await self.show_image_preview()
-        elif is_archive:
-            self._is_image = False
-            self._is_archive = True
+        elif file_type == "archive":
             await self.show_archive_preview()
         elif content is not None:
-            self._is_image = False
-            self._is_archive = False
-
-            is_special_content = content in (
-                config["interface"]["preview_text"]["binary"],
-                config["interface"]["preview_text"]["error"],
-            )
-            if (
-                config["plugins"]["bat"]["enabled"]
-                and not is_special_content
-                and await self.show_bat_file_preview()
-            ):
-                self.log("bat success")
+            if content in config["interface"]["preview_text"].values():
+                await self.mount_special_messages()
             else:
-                await self.show_normal_file_preview()
+                if (
+                    config["plugins"]["bat"]["enabled"]
+                    and await self.show_bat_file_preview()
+                ):
+                    self.log("bat success")
+                else:
+                    await self.show_normal_file_preview()
+
+    async def mount_special_messages(self) -> None:
+        try:
+            worker = get_current_worker()
+        except RuntimeError:
+            worker = None
+        if worker and not worker.is_running:
+            return
+        if self.has_child("Static"):
+            self.query_one(Static).update(self._current_content)
+        else:
+            await self.remove_children()
+            if worker and not worker.is_running:
+                return
+            await self.mount(Static(self._current_content))
+        self.query_one(Static).can_focus = True
+        self.query_one(Static).classes = "wrap"
+        if worker and not worker.is_running:
+            return
+        self.border_title = ""
 
     async def on_resize(self, event: events.Resize) -> None:
         """Re-render the preview on resize if it's was rendered by batcat and height changed."""
         if (
             self.has_child("Static")
-            and "clip" in self.classes
             and event.size.height != self._initial_height
         ) or self.has_child("CustomTextArea"):
-            if self._is_image:
-                await self.show_image_preview()
-            elif self._is_archive:
-                await self.show_archive_preview()
-            elif self._current_content is not None:
-                is_special_content = self._current_content in (
-                    config["interface"]["preview_text"]["binary"],
-                    config["interface"]["preview_text"]["error"],
-                )
+            if self._current_content is not None:
+                is_special_content = self._current_content in config["interface"]["preview_text"].values()
                 if (
                     config["plugins"]["bat"]["enabled"]
                     and not is_special_content
@@ -684,4 +687,4 @@ class PreviewContainer(Container):
         if self._pending_preview_path is not None:
             pending = self._pending_preview_path
             self._pending_preview_path = None
-            self._perform_show_preview(pending)
+            self.perform_show_preview(pending)

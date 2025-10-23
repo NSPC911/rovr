@@ -19,7 +19,7 @@ from rovr.functions import path as path_utils
 from rovr.functions import pins as pin_utils
 from rovr.functions import utils
 from rovr.variables.constants import buttons_that_depend_on_path, config, vindings
-from rovr.variables.maps import ARCHIVE_EXTENSIONS
+from rovr.variables.maps import ARCHIVE_EXTENSIONS_FULL
 
 
 class FileList(SelectionList, inherit_bindings=False):
@@ -380,7 +380,7 @@ class FileList(SelectionList, inherit_bindings=False):
         )
         self.app.query_one("MetadataContainer").update_metadata(event.option.dir_entry)
         self.app.query_one("#unzip").disabled = not file_name.endswith(
-            ARCHIVE_EXTENSIONS
+            ARCHIVE_EXTENSIONS_FULL
         )
 
     # Use better versions of the checkbox icons

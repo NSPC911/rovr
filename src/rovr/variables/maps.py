@@ -1,4 +1,6 @@
+from collections import namedtuple
 from os import path
+from typing import NamedTuple
 
 from platformdirs import PlatformDirs
 
@@ -1007,7 +1009,17 @@ FILES_MAP = {
     "jenkinsfile": "jenkinsfile",
 }
 
-ARCHIVE_EXTENSIONS = (".zip", ".tar", ".gz", ".bz2", ".xz", ".rar", ".deb")
+archive_exts: NamedTuple = namedtuple("ArchiveExtensions", ["zip", "tar", "rar"])
+
+ARCHIVE_EXTENSIONS = archive_exts((".zip"), (".tar", ".gz", ".bz2", ".xz"), (".rar"))
+ARCHIVE_EXTENSIONS_FULL = []
+for value in ARCHIVE_EXTENSIONS:
+    if type(value) is tuple:
+        for exts in value:
+            ARCHIVE_EXTENSIONS_FULL.append(exts)
+    else:
+        ARCHIVE_EXTENSIONS_FULL.append(value)
+ARCHIVE_EXTENSIONS_FULL = tuple(ARCHIVE_EXTENSIONS_FULL)
 
 PIL_EXTENSIONS = (
     # reminder that stuff can also not work, just remove it if it doesn't work

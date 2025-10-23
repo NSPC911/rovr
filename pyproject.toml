@@ -105,7 +105,7 @@ indent-style = "space"
 line-ending = "auto"
 preview = true
 
-
 [tool.ty.rules]
 possibly-missing-import = "ignore"
+unresolved-reference = "ignore" # handled by ruff
 unresolved-attribute = "ignore"

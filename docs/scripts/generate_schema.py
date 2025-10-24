@@ -1,3 +1,4 @@
+from os import getcwd
 from shutil import which
 from subprocess import run
 from time import perf_counter
@@ -36,29 +37,28 @@ try:
             """---\ntitle: schema for humans\ndescription: config schema humanified\n---"""
             + content[13:].replace("| - ", "|   ").replace("| + ", "|   ")
         )
+    invoker = []
     if which("prettier"):
-        run(
-            ["prettier", "--write", "docs/src/content/docs/reference/schema.mdx"],
-            shell=True,
-        )
+        invoker = ["prettier"]
+    elif which("npx"):
+        invoker = [which("npx"), "prettier"]
     elif which("npm"):
-        run(
-            [
-                "npx",
-                "prettier",
-                "--write",
-                "docs/src/content/docs/reference/schema.mdx",
-            ],
-            shell=True,
-        )
+        invoker = [which("npm"), "exec", "prettier"]
     else:
         pprint(
             "[red][blue]prettier[/] and [blue]npx[/] are not available on PATH, and hence the generated files cannot be formatted."
         )
         exit(1)
+    # attempt to format it
+    run(
+        invoker + [
+            "--write",
+            "docs/src/content/docs/reference/schema.mdx",
+        ],
+    )
     pprint(
-        f"[green]Generated it in {naturaldelta(perf_counter() - start_time, minimum_unit='microseconds')}"
+        f"[green]Generated [bright_blue]schema.mdx[/] in {naturaldelta(perf_counter() - start_time, minimum_unit='microseconds')}[/]"
     )
 except FileNotFoundError:
     pprint("[red]Do not run manually with python! Run [blue]poe gen-schema[/][/]")
-    exit(1)
+    raise

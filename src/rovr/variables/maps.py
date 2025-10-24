@@ -1112,5 +1112,5 @@ BORDER_BOTTOM = {
 }
 
 SPINNER = SPINNERS["dots2"]["frames"]
-assert isinstance(SPINNER, list)
+assert isinstance(SPINNER, (str, list))
 SPINNER_LENGTH = len(SPINNER)

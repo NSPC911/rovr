@@ -35,9 +35,7 @@ class BetterUnderline(Underline):
 class TablineTab(Tab):
     ALLOW_SELECT = False
 
-    def __init__(
-        self, directory: str | bytes = "", label: str = ""
-    ) -> None:
+    def __init__(self, directory: str | bytes = "", label: str = "") -> None:
         """Initialise a Tab.
 
         Args:

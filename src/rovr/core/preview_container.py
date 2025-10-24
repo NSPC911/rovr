@@ -364,7 +364,8 @@ class PreviewContainer(Container):
             else EXT_TO_LANG_MAP.get(
                 # forced an ignore, there really is no other way to handle this
                 # it is a valid overload, but ty doesn't know it yet I suppose
-                path.splitext(self._current_file_path)[1], "markdown"  # ty: ignore[no-matching-overload]
+                path.splitext(self._current_file_path)[1],  # ty: ignore[no-matching-overload]
+                "markdown",  # ty: ignore[no-matching-overload]
             )
         )
 

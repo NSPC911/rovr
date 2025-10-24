@@ -194,7 +194,10 @@ class ZDToDirectory(ModalScreen):
             return
         if self.zoxide_options.highlighted is None:
             self.zoxide_options.highlighted = 0
-        if self.zoxide_options.highlighted_option and self.zoxide_options.highlighted_option.disabled:
+        if (
+            self.zoxide_options.highlighted_option
+            and self.zoxide_options.highlighted_option.disabled
+        ):
             return
         self.zoxide_options.action_select()
 

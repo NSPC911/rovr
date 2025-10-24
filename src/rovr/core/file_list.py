@@ -523,7 +523,11 @@ class FileList(SelectionList, inherit_bindings=False):
 
     async def toggle_mode(self) -> None:
         """Toggle the selection mode between select and normal."""
-        if self.highlighted_option and self.highlighted_option.disabled and not self.select_mode_enabled:
+        if (
+            self.highlighted_option
+            and self.highlighted_option.disabled
+            and not self.select_mode_enabled
+        ):
             return
         self.select_mode_enabled = not self.select_mode_enabled
         if not self.select_mode_enabled:
@@ -547,9 +551,7 @@ class FileList(SelectionList, inherit_bindings=False):
                     path_utils.normalise(
                         path.join(
                             cwd,
-                            path_utils.decompress(
-                                self.highlighted_option.value
-                            ),
+                            path_utils.decompress(self.highlighted_option.value),
                         )
                     )
                 )

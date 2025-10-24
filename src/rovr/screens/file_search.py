@@ -177,7 +177,10 @@ class FileSearch(ModalScreen):
             return
         if self.search_options.highlighted is None:
             self.search_options.highlighted = 0
-        if self.search_options.highlighted_option and self.search_options.highlighted_option.disabled:
+        if (
+            self.search_options.highlighted_option
+            and self.search_options.highlighted_option.disabled
+        ):
             return
         self.search_options.action_select()
 

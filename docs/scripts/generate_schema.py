@@ -50,7 +50,8 @@ try:
         exit(1)
     # attempt to format it
     run(
-        invoker + [
+        invoker
+        + [
             "--write",
             "docs/src/content/docs/reference/schema.mdx",
         ],

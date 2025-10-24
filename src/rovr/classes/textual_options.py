@@ -21,7 +21,7 @@ class PinnedSidebarOption(Option):
             prompt=Content.from_markup(
                 f" [{icon[1]}]{icon[0]}[/{icon[1]}] $name", name=label
             ),
-            id=id
+            id=id,
         )
         self.label = label
 

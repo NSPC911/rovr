@@ -204,7 +204,7 @@ class PreviewContainer(Container):
                     id="image_preview",
                     classes="inner_preview",
                 )
-                self.query_one("#image_preview").can_focus = True
+                image_widget.can_focus = True
                 await self.mount(image_widget)
             except FileNotFoundError:
                 if should_cancel():
@@ -487,9 +487,10 @@ class PreviewContainer(Container):
                 self.update_ui, file_path=file_path, file_type="folder"
             )
         else:
-            if any(file_path.endswith(ext) for ext in PIL_EXTENSIONS):
+            lower_file_path = file_path.lower()
+            if any(lower_file_path.endswith(ext) for ext in PIL_EXTENSIONS):
                 file_type = "image"
-            elif any(file_path.endswith(ext) for ext in ARCHIVE_EXTENSIONS_FULL):
+            elif any(lower_file_path.endswith(ext) for ext in ARCHIVE_EXTENSIONS_FULL):
                 file_type = "archive"
             else:
                 file_type = "file"

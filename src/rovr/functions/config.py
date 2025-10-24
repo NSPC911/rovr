@@ -146,6 +146,8 @@ def schema_dump(doc_path: str, exception: ValidationError, config_content: str) 
     path_str = ".".join(str(p) for p in exception.path) if exception.path else "root"
     lineno = find_path_line(doc, exception.path)
 
+    rjust: int = 0
+
     if lineno is None:
         # fallback to infoless error display
         pprint(
@@ -171,7 +173,7 @@ def schema_dump(doc_path: str, exception: ValidationError, config_content: str) 
     else:
         start: int = max(lineno - 2, 0)
         end: int = min(len(doc), lineno + 3)
-        rjust: int = len(str(end + 1))
+        rjust = len(str(end + 1))
         has_past = False
 
         pprint(
@@ -225,7 +227,7 @@ def schema_dump(doc_path: str, exception: ValidationError, config_content: str) 
     ) as f:
         migration_docs = ujson.load(f)
     for item in migration_docs:
-        if ".".join(exception.path) in item["keys"]:
+        if path_str in item["keys"]:
             message = "\n".join(item["message"])
             to_print = Table(
                 box=box.ROUNDED,
@@ -237,10 +239,6 @@ def schema_dump(doc_path: str, exception: ValidationError, config_content: str) 
             to_print.add_column()
             to_print.add_row(message)
             to_print.add_row(f"[dim]> {item['extra']}[/]")
-            try:
-                rjust
-            except NameError:
-                rjust = 0
             pprint(Padding(to_print, (0, rjust + 4, 0, rjust + 3)))
             break
     exit(1)

@@ -1,4 +1,3 @@
-from collections import namedtuple
 from os import path
 from typing import NamedTuple
 
@@ -1018,7 +1017,7 @@ class ArchiveExtensions(NamedTuple):
 
 ARCHIVE_EXTENSIONS = ArchiveExtensions(
     (".zip",),
-    (".tar", ".gz", ".bz2", ".xz"),
+    (".tar", ".tgz", ".tbz", ".tbz2", ".tar.gz", ".tar.bz2", ".tar.xz"),
     (".rar",),
 )
 ARCHIVE_EXTENSIONS_FULL = tuple(ext for exts in ARCHIVE_EXTENSIONS for ext in exts)

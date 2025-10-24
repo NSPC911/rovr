@@ -366,15 +366,10 @@ Tooltip {
   width: $pinned_sidebar_width;
   scrollbar-size: 0 0 !important;
   & > PinnedSidebar { scrollbar-size: 0 0 !important }
-  & > Input { display: none }
-  &:focus-within > Input,
-  Input.show,
-  & > Input:hover,
-  &:hover > Input { display: block }
+  & > Input { display: block }
 }
 
-#pinned_sidebar { height: 1fr }
-#pinned_sidebar { padding: 0 }
+#pinned_sidebar { height: 1fr; padding: 0 }
 
 #preview_sidebar {
   margin: 0;

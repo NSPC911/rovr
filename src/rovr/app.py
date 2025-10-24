@@ -466,7 +466,10 @@ class Application(App, inherit_bindings=False):
         if normalise(getcwd()) == normalise(directory) or directory == "":
             add_to_history = False
         else:
-            chdir(directory)
+            try:
+                chdir(directory)
+            except PermissionError as exc:
+                self.notify(f"You cannot enter into {directory}!\n{exc.strerror}", title="App: cd", severity="error")
 
         self.query_one("#file_list", FileList).update_file_list(
             add_to_session=add_to_history, focus_on=focus_on

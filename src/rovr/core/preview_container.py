@@ -542,25 +542,29 @@ class PreviewContainer(Container):
                     # prevent files > 1mb from being
                     # read because are you stupid, why
                     # would you use rovr for that anyways
-                    size = path.getsize(file_path)
-                    if size > 1024**2:
-                        content = config["interface"]["preview_text"]["too_large"]
-                    elif size == 0:
-                        content = config["interface"]["preview_text"]["empty"]
-                    else:
-                        try:
-                            with open(file_path, "r", encoding="utf-8") as f:
-                                content = f.read()
-                        except UnicodeDecodeError:
-                            content = config["interface"]["preview_text"]["binary"]
-                        except (
-                            FileNotFoundError,
-                            PermissionError,
-                            OSError,
-                            MemoryError,
-                        ):
-                            content = config["interface"]["preview_text"]["error"]
-
+                    try:
+                        size = path.getsize(file_path)
+                        if size > 1024**2:
+                            content = config["interface"]["preview_text"]["too_large"]
+                        elif size == 0:
+                            content = config["interface"]["preview_text"]["empty"]
+                        else:
+                            try:
+                                with open(file_path, "r", encoding="utf-8") as f:
+                                    content = f.read()
+                            except UnicodeDecodeError:
+                                content = config["interface"]["preview_text"]["binary"]
+                            except (
+                                FileNotFoundError,
+                                PermissionError,
+                                OSError,
+                                MemoryError,
+                            ):
+                                content = config["interface"]["preview_text"]["error"]
+                    except FileNotFoundError:
+                        content = config["interface"]["preview_text"]["error"]
+                        if path.exists(file_path):
+                            raise Exception from None
             if should_cancel():
                 return
 

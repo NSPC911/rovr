@@ -331,8 +331,9 @@ class PreviewContainer(Container):
         if should_cancel():
             return
 
-        text_to_display = self._current_content
-        lines = text_to_display.splitlines()
+        assert isinstance(self._current_content, str)
+
+        lines = self._current_content.splitlines()
         max_lines = self.size.height
         if max_lines > 0:
             if len(lines) > max_lines:
@@ -361,7 +362,9 @@ class PreviewContainer(Container):
             "markdown"
             if is_special_content
             else EXT_TO_LANG_MAP.get(
-                path.splitext(self._current_file_path)[1], "markdown"
+                # forced an ignore, there really is no other way to handle this
+                # it is a valid overload, but ty doesn't know it yet I suppose
+                path.splitext(self._current_file_path)[1], "markdown"  # ty: ignore[no-matching-overload]
             )
         )
 

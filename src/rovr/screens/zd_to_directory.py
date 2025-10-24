@@ -37,7 +37,7 @@ class ZDToDirectory(ModalScreen):
     def __init__(self, **kwargs) -> None:
         super().__init__(**kwargs)
         self._queued_task = None
-        self._queued_task_args: str | None = None
+        self._queued_task_args: Input.Changed | None = None
 
     def compose(self) -> ComposeResult:
         with VerticalGroup(id="zoxide_group", classes="zoxide_group"):
@@ -194,7 +194,7 @@ class ZDToDirectory(ModalScreen):
             return
         if self.zoxide_options.highlighted is None:
             self.zoxide_options.highlighted = 0
-        if self.zoxide_options.highlighted_option.disabled:
+        if self.zoxide_options.highlighted_option and self.zoxide_options.highlighted_option.disabled:
             return
         self.zoxide_options.action_select()
 
@@ -250,5 +250,5 @@ class ZDToDirectory(ModalScreen):
             or self.zoxide_options.get_option_at_index(0).disabled
         ):
             self.zoxide_options.border_subtitle = "0/0"
-        else:
+        elif self.zoxide_options.highlighted:
             self.zoxide_options.border_subtitle = f"{self.zoxide_options.highlighted + 1}/{self.zoxide_options.option_count}"

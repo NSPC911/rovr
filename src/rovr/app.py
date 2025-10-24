@@ -18,6 +18,7 @@ from textual.containers import (
 from textual.content import Content
 from textual.css.errors import StyleValueError
 from textual.css.query import NoMatches
+from textual.dom import DOMNode
 from textual.screen import Screen
 from textual.widgets import Input
 
@@ -48,6 +49,7 @@ from rovr.functions.path import (
 )
 from rovr.functions.themes import get_custom_themes
 from rovr.header import HeaderArea
+from rovr.header.tabs import Tabline
 from rovr.navigation_widgets import (
     BackButton,
     ForwardButton,
@@ -203,7 +205,7 @@ class Application(App, inherit_bindings=False):
             self.query_one("#back").tooltip = "Go back in history"
             self.query_one("#forward").tooltip = "Go forward in history"
             self.query_one("#up").tooltip = "Go up the directory tree"
-        self.tabWidget = self.query_one("Tabline")
+        self.tabWidget: Tabline = self.query_one(Tabline)
 
         # Change to startup directory. This also calls update_file_list()
         # causing the file_list to get populated
@@ -232,6 +234,7 @@ class Application(App, inherit_bindings=False):
         # Not really sure why this can happen, but I will still handle this
         if self.focused is None:
             return
+        assert isinstance(self.focused.parent, DOMNode)
         # if current screen isn't the app screen
         if len(self.screen_stack) != 1:
             return

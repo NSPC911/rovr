@@ -48,9 +48,9 @@ dev = [
   "commitizen>=4.8.3",
   "json-schema-for-humans>=1.4.1",
   "poethepoet>=0.36.0",
-  "ruff>=0.11.12",
+  "ruff>=0.14.2",
   "textual-dev>=1.7.0",
-  "ty>=0.0.1a21",
+  "ty>=0.0.1a24",
 ]
 
 [build-system]

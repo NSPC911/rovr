@@ -52,7 +52,7 @@ class FileList(SelectionList, inherit_bindings=False):
             self.items_in_cwd: set[str] = set()
 
     def on_mount(self) -> None:
-        if not self.dummy:
+        if not self.dummy and self.parent:
             self.input: Input = self.parent.query_one(Input)
 
     # ignore single clicks
@@ -517,12 +517,13 @@ class FileList(SelectionList, inherit_bindings=False):
         self.app.notify(
             f"Hidden files are now {status}[/]", severity="information", timeout=2.5
         )
+        assert self.parent and self.parent.parent
         if self.parent.parent.query("PreviewContainer > FileList") and not self.dummy:
             self.highlighted = self.highlighted
 
     async def toggle_mode(self) -> None:
         """Toggle the selection mode between select and normal."""
-        if self.highlighted_option.disabled and not self.select_mode_enabled:
+        if self.highlighted_option and self.highlighted_option.disabled and not self.select_mode_enabled:
             return
         self.select_mode_enabled = not self.select_mode_enabled
         if not self.select_mode_enabled:
@@ -531,6 +532,7 @@ class FileList(SelectionList, inherit_bindings=False):
         self.refresh(layout=True, repaint=True)
         self.app.tabWidget.active_tab.session.selectMode = self.select_mode_enabled
         self.update_border_subtitle()
+        self.deselect_all()
 
     async def get_selected_objects(self) -> list[str] | None:
         """Get the selected objects in the file list.
@@ -546,7 +548,7 @@ class FileList(SelectionList, inherit_bindings=False):
                         path.join(
                             cwd,
                             path_utils.decompress(
-                                self.get_option_at_index(self.highlighted).value
+                                self.highlighted_option.value
                             ),
                         )
                     )
@@ -587,9 +589,9 @@ class FileList(SelectionList, inherit_bindings=False):
                     if self.highlighted == 0:
                         self.select(self.get_option_at_index(0))
                     else:
-                        self.select(self.get_option_at_index(self.highlighted))
+                        self.select(self.highlighted_option)
                         self.action_cursor_up()
-                        self.select(self.get_option_at_index(self.highlighted))
+                        self.select(self.highlighted_option)
                     return
                 case key if (
                     self.select_mode_enabled
@@ -602,9 +604,9 @@ class FileList(SelectionList, inherit_bindings=False):
                     if self.highlighted == len(self.options) - 1:
                         self.select(self.get_option_at_index(self.option_count - 1))
                     else:
-                        self.select(self.get_option_at_index(self.highlighted))
+                        self.select(self.highlighted_option)
                         self.action_cursor_down()
-                        self.select(self.get_option_at_index(self.highlighted))
+                        self.select(self.highlighted_option)
                     return
                 case key if (
                     self.select_mode_enabled
@@ -621,6 +623,7 @@ class FileList(SelectionList, inherit_bindings=False):
                         old = 0
                     if new is None:
                         new = 0
+                    assert isinstance(old, int) and isinstance(new, int)
                     for index in range(new, old + 1):
                         self.select(self.get_option_at_index(index))
                     return
@@ -639,6 +642,7 @@ class FileList(SelectionList, inherit_bindings=False):
                         old = 0
                     if new is None:
                         new = 0
+                    assert isinstance(old, int) and isinstance(new, int)
                     for index in range(old, new + 1):
                         self.select(self.get_option_at_index(index))
                     return
@@ -655,6 +659,7 @@ class FileList(SelectionList, inherit_bindings=False):
                     new = self.highlighted
                     if old is None:
                         old = 0
+                    assert isinstance(old, int) and isinstance(new, int)
                     for index in range(new, old + 1):
                         self.select(self.get_option_at_index(index))
                     return
@@ -666,10 +671,11 @@ class FileList(SelectionList, inherit_bindings=False):
                         return
                     """Select the options between the current and the last option"""
                     old = self.highlighted
-                    self.action_last()
-                    new = self.highlighted
                     if old is None:
                         old = 0
+                    self.action_last()
+                    new = self.highlighted
+                    assert isinstance(old, int) and isinstance(new, int)
                     for index in range(old, new + 1):
                         self.select(self.get_option_at_index(index))
                     return
@@ -678,7 +684,7 @@ class FileList(SelectionList, inherit_bindings=False):
                     and key in config["plugins"]["editor"]["keybinds"]
                 ):
                     event.stop()
-                    if self.highlighted_option.disabled:
+                    if self.highlighted_option and self.highlighted_option.disabled:
                         return
                     if path.isdir(
                         path.join(
@@ -701,7 +707,7 @@ class FileList(SelectionList, inherit_bindings=False):
                     and key in config["keybinds"]["hist_previous"]
                 ):
                     event.stop()
-                    if self.highlighted_option.disabled:
+                    if self.highlighted_option and self.highlighted_option.disabled:
                         return
                     if self.app.query_one("#back").disabled:
                         self.app.query_one("UpButton").on_button_pressed(Button.Pressed)
@@ -771,6 +777,9 @@ class FileList(SelectionList, inherit_bindings=False):
                     await self.toggle_hidden_files()
 
     def update_border_subtitle(self) -> None:
+        assert self.parent
+        if self.highlighted is not int:
+            return
         if self.dummy:
             return
         elif (not self.select_mode_enabled) or (self.selected is None):

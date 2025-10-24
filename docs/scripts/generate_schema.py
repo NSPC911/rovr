@@ -1,4 +1,3 @@
-from os import getcwd
 from shutil import which
 from subprocess import run
 from time import perf_counter

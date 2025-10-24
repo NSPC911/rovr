@@ -118,6 +118,7 @@ class PinnedSidebar(OptionList, inherit_bindings=False):
 
     async def on_mount(self) -> None:
         """Reload the pinned files from the config."""
+        assert self.parent
         self.input: Input = self.parent.query_one(Input)
         self.reload_pins()
         self.watch_for_drive_changes_and_update()

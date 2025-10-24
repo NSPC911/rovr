@@ -1,7 +1,7 @@
 from humanize import naturalsize
 from lzstring import LZString
 from rich.console import Console
-from textual.widget import Widget
+from textual.dom import DOMNode
 from textual.worker import get_current_worker
 
 from rovr.variables.maps import (
@@ -64,7 +64,7 @@ def set_nested_value(d: dict, path_str: str, value: bool) -> None:
             current = current[key]
 
 
-def set_scuffed_subtitle(element: Widget, *sections: str) -> None:
+def set_scuffed_subtitle(element: DOMNode, *sections: str) -> None:
     """The most scuffed way to display a custom subtitle
 
     Args:

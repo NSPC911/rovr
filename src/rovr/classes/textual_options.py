@@ -9,13 +9,19 @@ from rovr.functions.path import compress
 
 
 class PinnedSidebarOption(Option):
-    def __init__(self, icon: list, label: str, *args, **kwargs) -> None:
+    def __init__(self, icon: list, label: str, id: str | None = None) -> None:
+        """Initialise the option.
+
+        Args:
+            icon: The icon for the option
+            label: The text for the option
+            id: An option ID for the option.
+        """
         super().__init__(
             prompt=Content.from_markup(
                 f" [{icon[1]}]{icon[0]}[/{icon[1]}] $name", name=label
             ),
-            *args,
-            **kwargs,
+            id=id
         )
         self.label = label
 

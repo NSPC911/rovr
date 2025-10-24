@@ -230,16 +230,15 @@ class Application(App, inherit_bindings=False):
 
     async def on_key(self, event: events.Key) -> None:
         # Not really sure why this can happen, but I will still handle this
-        if self.focused is None or not self.focused.id:
+        if self.focused is None:
             return
         # if current screen isn't the app screen
         if len(self.screen_stack) != 1:
             return
         # Make sure that key binds don't break
         match event.key:
-            # finder: fd/fzf
             # placeholder, not yet existing
-            case "escape" if "search" in self.focused.id:
+            case "escape" if self.focused.id and "search" in self.focused.id:
                 match self.focused.id:
                     case "search_file_list":
                         self.query_one("#file_list").focus()
@@ -248,8 +247,8 @@ class Application(App, inherit_bindings=False):
                 return
             # backspace is used by default bindings to head up in history
             # so just avoid it
-            case "backspace" if (
-                type(self.focused) is Input or "search" in self.focused.id
+            case "backspace" if isinstance(self.focused, Input) or (
+                self.focused.id and "search" in self.focused.id
             ):
                 return
             # focus toggle pinned sidebar
@@ -477,21 +476,21 @@ class Application(App, inherit_bindings=False):
     @work
     async def watch_for_changes_and_update(self) -> None:
         cwd = getcwd()
-        items = get_filtered_dir_names(cwd, config["settings"]["show_hidden_files"])
         file_list = self.query_one(FileList)
         while True:
             await asyncio.sleep(1)
             new_cwd = getcwd()
+            if cwd != new_cwd:
+                cwd = new_cwd
+                continue
             try:
-                items = get_filtered_dir_names(
+                items = await get_filtered_dir_names(
                     cwd, config["settings"]["show_hidden_files"]
                 )
             except OSError:
                 # PermissionError falls under this, but we catch everything else
                 continue
-            if cwd != new_cwd:
-                cwd = new_cwd
-            elif items != file_list.items_in_cwd:
+            if items != file_list.items_in_cwd:
                 self.cd(cwd)
 
     @work

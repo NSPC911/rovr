@@ -19,7 +19,7 @@ from rovr.functions import path as path_utils
 from rovr.functions import pins as pin_utils
 from rovr.functions import utils
 from rovr.variables.constants import buttons_that_depend_on_path, config, vindings
-from rovr.variables.maps import ARCHIVE_EXTENSIONS
+from rovr.variables.maps import ARCHIVE_EXTENSIONS_FULL
 
 
 class FileList(SelectionList, inherit_bindings=False):
@@ -120,7 +120,7 @@ class FileList(SelectionList, inherit_bindings=False):
         names_in_cwd: list[str] = []
         self.items_in_cwd: set[str] = set()
         try:
-            folders, files = path_utils.get_cwd_object(
+            folders, files = await path_utils.get_cwd_object(
                 cwd, config["settings"]["show_hidden_files"]
             )
             if not folders and not files:
@@ -240,9 +240,8 @@ class FileList(SelectionList, inherit_bindings=False):
         # Separate folders and files
         self.list_of_options = []
 
-        self.loading = True
         try:
-            folders, files = path_utils.get_cwd_object(
+            folders, files = await path_utils.get_cwd_object(
                 cwd, config["settings"]["show_hidden_files"]
             )
             if not folders and not files:
@@ -274,7 +273,6 @@ class FileList(SelectionList, inherit_bindings=False):
 
         self.clear_options()
         self.add_options(self.list_of_options)
-        self.loading = False
 
     @work(exclusive=True)
     async def create_archive_list(self, file_list: list[str]) -> None:
@@ -286,7 +284,6 @@ class FileList(SelectionList, inherit_bindings=False):
         self.clear_options()
         self.list_of_options = []
 
-        self.loading = True
         if not file_list:
             self.list_of_options.append(
                 Selection("  --no-files--", value="", id="", disabled=True)
@@ -311,7 +308,6 @@ class FileList(SelectionList, inherit_bindings=False):
                 await asyncio.sleep(0)
 
         self.add_options(self.list_of_options)
-        self.loading = False
 
     async def on_selection_list_selected_changed(
         self, event: SelectionList.SelectedChanged
@@ -383,8 +379,8 @@ class FileList(SelectionList, inherit_bindings=False):
             path_utils.normalise(path.join(getcwd(), file_name))
         )
         self.app.query_one("MetadataContainer").update_metadata(event.option.dir_entry)
-        self.app.query_one("#unzip").disabled = not file_name.endswith(
-            ARCHIVE_EXTENSIONS
+        self.app.query_one("#unzip").disabled = not file_name.lower().endswith(
+            ARCHIVE_EXTENSIONS_FULL
         )
 
     # Use better versions of the checkbox icons
@@ -848,18 +844,15 @@ class FileListRightClickOptionList(OptionList):
         self.file_list.focus()
 
     @on(events.MouseMove)
-    @work(exclusive=True)
-    async def highlight_follow_mouse(self, event: events.MouseMove) -> None:
+    def highlight_follow_mouse(self, event: events.MouseMove) -> None:
         hovered_option: int | None = event.style.meta.get("option")
         if hovered_option is not None and not self._options[hovered_option].disabled:
             self.highlighted = hovered_option
 
     @on(events.Show)
-    @work(exclusive=True)
-    async def force_highlight_option(self, event: events.Show) -> None:
+    def force_highlight_option(self, event: events.Show) -> None:
         self.file_list.add_class("-popup-shown")
 
     @on(events.Hide)
-    @work(exclusive=True)
-    async def unforce_highlight_option(self, event: events.Hide) -> None:
+    def unforce_highlight_option(self, event: events.Hide) -> None:
         self.file_list.remove_class("-popup-shown")

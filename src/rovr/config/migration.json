@@ -1,0 +1,28 @@
+[
+  {
+    "keys": [
+      "interface.preview_error",
+      "interface.preview_binary",
+      "interface.preview_start"
+    ],
+    "message": [
+      "[bright_blue]interface.preview_error[/], [bright_blue]interface.preview_binary[/] and [bright_blue]interface.preview_start[/] have been moved over to their own section, and two extra texts have been added",
+      "The new location is now at [bright_blue]interface.preview_text[/], which can contain",
+      "- [bright_green]interface.preview_text.error[/] (for errors in rendering)",
+      "- [bright_green]interface.preview_text.binary[/] (for binary files)",
+      "- [bright_green]interface.preview_text.start[/] (shown for a split second when starting up)",
+      "- [bright_green]interface.preview_text.empty[/] (when the file is empty)",
+      "- [bright_green]interface.preview_text.too_large[/] (when the file is too large, which is [gray]>1MB[/])"
+    ],
+    "extra": "Removed in v0.5.0"
+  },
+  {
+    "keys": ["settings.preview_full"],
+    "message": [
+      "[bright_blue]settings.preview_full[/] has been removed for now.",
+      "- when previewing archives, the full contents of it are listed.",
+      "- when previewing files, with or without [bright_cyan]bat[/], the height will always be enough to fill the container."
+    ],
+    "extra": "Removed in v0.5.0"
+  }
+]

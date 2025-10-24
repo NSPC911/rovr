@@ -8,18 +8,28 @@ use_reactive_layout = true
 show_progress_eta = false
 show_progress_percentage = true
 truncate_progress_file_path = false
-preview_error = "Hmm, I think this file got corrupted (or maybe not?)"
-preview_binary = "This file is not UTF-8 encoded, so I decline to read it."
-preview_start = "print(\"Hello, world!\")"
 compact_mode = false
 show_line_numbers = true
+
+[interface.preview_text]
+error = "couldn't read this file! (\u00AC_\u00AC)" # ¬_¬
+binary = "the file doesn't use UTF-8, which isn't supported yet"
+start = """ ___ ___
+|  _| . |
+|_| |___|
+ _ _ ___
+| | |  _|
+ \\_/|_|
+"""
+empty = "bytes be gone (\u2310\u25A0_\u25A0)" # (⌐■_■)
+# how do you even respond to this
+too_large = "this file is larger (but not larger than your mother)"
 
 [interface.clock]
 enabled = true
 align = "left"
 
 [settings]
-preview_full = false
 image_protocol = "Auto"
 show_hidden_files = false
 copy_includes_metadata = true

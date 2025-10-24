@@ -377,24 +377,21 @@ Tooltip {
 #pinned_sidebar { padding: 0 }
 
 #preview_sidebar {
-  height: 1fr;
   margin: 0;
   width: $preview_sidebar_width;
   layout: horizontal;
-  padding: 0 1;
-  overflow: auto auto;
-  scrollbar-size: 1 1;
   & > Static {
-    text-overflow: clip;
+    text-overflow: ellipsis;
     text-wrap: nowrap;
-    width: auto;
+    width: 1fr;
+    overflow-x: hidden;
+  }
+  & > Static.special {
+    text-wrap: wrap;
+    text-overflow: fold;
+    padding: 0 1;
   }
  /* scrollbars are useless, reminder */
-  &.clip { scrollbar-size: 0 0 }
-  &.clip > Static {
-    width: 1fr;
-    overflow-x: hidden !important;
-  }
   & > * {
     background: transparent;
     border: none;
@@ -405,6 +402,11 @@ Tooltip {
     }
   }
   & > FileList { height: 1fr }
+  Image {
+    width: auto;
+    height: auto;
+    align: center bottom;
+  }
 }
 
 #preview_sidebar { padding: 0 }

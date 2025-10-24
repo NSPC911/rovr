@@ -9,6 +9,8 @@ from typing import IO, List, Literal, Optional, Union
 
 import rarfile
 
+from rovr.variables.maps import ARCHIVE_EXTENSIONS
+
 
 class Archive:
     """Unified handler for ZIP, TAR and RAR files with context manager support."""
@@ -83,7 +85,7 @@ class Archive:
         """  # noqa: DOC502
         filename_lower = self.filename.lower()
 
-        if filename_lower.endswith(".zip"):
+        if filename_lower.endswith(ARCHIVE_EXTENSIONS.zip):
             self._is_zip = True
             self._is_rar = False
             if self.compression_level is not None:
@@ -100,7 +102,7 @@ class Archive:
                 if any(zinfo.flag_bits & 0x1 for zinfo in self._archive.infolist()):
                     self._archive.close()
                     raise ValueError("Password-protected ZIP files are not supported")
-        elif filename_lower.endswith(".rar"):
+        elif filename_lower.endswith(ARCHIVE_EXTENSIONS.rar):
             self._is_zip = False
             self._is_rar = True
             if self.mode != "r":

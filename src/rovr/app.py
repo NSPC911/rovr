@@ -469,7 +469,11 @@ class Application(App, inherit_bindings=False):
             try:
                 chdir(directory)
             except PermissionError as exc:
-                self.notify(f"You cannot enter into {directory}!\n{exc.strerror}", title="App: cd", severity="error")
+                self.notify(
+                    f"You cannot enter into {directory}!\n{exc.strerror}",
+                    title="App: cd",
+                    severity="error",
+                )
 
         self.query_one("#file_list", FileList).update_file_list(
             add_to_session=add_to_history, focus_on=focus_on

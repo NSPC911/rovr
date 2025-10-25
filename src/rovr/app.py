@@ -2,6 +2,7 @@ import asyncio
 import shutil
 from contextlib import suppress
 from os import chdir, getcwd, path
+from time import perf_counter
 from types import SimpleNamespace
 from typing import Callable, Iterable
 
@@ -16,7 +17,7 @@ from textual.containers import (
     VerticalGroup,
 )
 from textual.content import Content
-from textual.css.errors import StyleValueError
+from textual.css.errors import StylesheetError
 from textual.css.query import NoMatches
 from textual.dom import DOMNode
 from textual.screen import Screen
@@ -514,26 +515,41 @@ class Application(App, inherit_bindings=False):
             self.has_pushed_screen = False
 
     async def _on_css_change(self) -> None:
-        try:
-            await super()._on_css_change()
-            if self._css_has_errors:
+        if self.css_monitor is not None:
+            css_paths = self.css_monitor._paths
+        else:
+            css_paths = self.css_path
+        if css_paths:
+            try:
+                time = perf_counter()
+                stylesheet = self.stylesheet.copy()
+                try:
+                    # textual issue, i don't want to fix the typing
+                    stylesheet.read_all(css_paths)  # ty: ignore[invalid-argument-type]
+                except StylesheetError as error:
+                    # If one of the CSS paths is no longer available (or perhaps temporarily unavailable),
+                    #  we'll end up with partial CSS, which is probably confusing more than anything. We opt to do
+                    #  nothing here, knowing that we'll retry again very soon, on the next file monitor invocation.
+                    #  Related issue: https://github.com/Textualize/textual/issues/3996
+                    self._css_has_errors = True
+                    self.notify(str(error), title=f"CSS: {type(error).__name__}", severity="error")
+                    return
+                stylesheet.parse()
+                elapsed = (perf_counter() - time) * 1000
                 self.notify(
-                    "Errors were found in the TCSS!",
-                    title="Stylesheet Watcher",
-                    severity="error",
+                    f"Reloaded {len(css_paths)} CSS files in {elapsed:.0f} ms", title="CSS"
                 )
+            except Exception as error:
+                # TODO: Catch specific exceptions
+                self._css_has_errors = True
+                self.bell()
+                self.notify(str(error), title=f"CSS: {type(error).__name__}", severity="error")
             else:
-                self.notify(
-                    "TCSS reloaded successfully!",
-                    title="Stylesheet Watcher",
-                    severity="information",
-                )
-        except StyleValueError as exc:
-            self.notify(
-                f"Errors were found in the TCSS!\n{exc}",
-                title="Stylesheet Watcher",
-                severity="error",
-            )
+                self._css_has_errors = False
+                self.stylesheet = stylesheet
+                self.stylesheet.update(self)
+                for screen in self.screen_stack:
+                    self.stylesheet.update(screen)
 
     def get_system_commands(self, screen: Screen) -> Iterable[SystemCommand]:
         if not self.ansi_color:

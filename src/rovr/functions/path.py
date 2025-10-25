@@ -196,6 +196,7 @@ async def get_cwd_object(
                 "icon": get_icon_for_file(item.name),
                 "dir_entry": item,
             })
+        await asyncio.sleep(0)
     # Sort folders and files properly
     folders.sort(key=lambda x: x["name"].lower())
     files.sort(key=lambda x: x["name"].lower())

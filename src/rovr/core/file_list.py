@@ -263,7 +263,9 @@ class FileList(SelectionList, inherit_bindings=False):
                         )
                     )
                     if start_time + 0.25 < time():
-                        self.parent.border_subtitle = f"{index + 1} / {file_list_option_length}"
+                        self.parent.border_subtitle = (
+                            f"{index + 1} / {file_list_option_length}"
+                        )
                         start_time = time()
                     # await so that textual can still be responsive
                     await asyncio.sleep(0)

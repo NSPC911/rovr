@@ -532,18 +532,25 @@ class Application(App, inherit_bindings=False):
                     #  nothing here, knowing that we'll retry again very soon, on the next file monitor invocation.
                     #  Related issue: https://github.com/Textualize/textual/issues/3996
                     self._css_has_errors = True
-                    self.notify(str(error), title=f"CSS: {type(error).__name__}", severity="error")
+                    self.notify(
+                        str(error),
+                        title=f"CSS: {type(error).__name__}",
+                        severity="error",
+                    )
                     return
                 stylesheet.parse()
                 elapsed = (perf_counter() - time) * 1000
                 self.notify(
-                    f"Reloaded {len(css_paths)} CSS files in {elapsed:.0f} ms", title="CSS"
+                    f"Reloaded {len(css_paths)} CSS files in {elapsed:.0f} ms",
+                    title="CSS",
                 )
             except Exception as error:
                 # TODO: Catch specific exceptions
                 self._css_has_errors = True
                 self.bell()
-                self.notify(str(error), title=f"CSS: {type(error).__name__}", severity="error")
+                self.notify(
+                    str(error), title=f"CSS: {type(error).__name__}", severity="error"
+                )
             else:
                 self._css_has_errors = False
                 self.stylesheet = stylesheet

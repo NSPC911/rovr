@@ -26,6 +26,32 @@ class PinnedSidebarOption(Option):
         self.label = label
 
 
+class ArchiveFileListSelection(Selection):
+    # Cache for pre-parsed icon Content objects to avoid repeated markup parsing
+    _icon_content_cache: dict[tuple[str, str], Content] = {}
+
+    def __init__(self, icon: list, label: str, id: str | None = None) -> None:
+        """Initialise the option.
+
+        Args:
+            icon: The icon for the option
+            label: The text for the option
+            id: An option ID for the option.
+        """
+        cache_key = (icon[0], icon[1])
+        if cache_key not in ArchiveFileListSelection._icon_content_cache:
+            # Parse the icon markup once and cache it as Content
+            ArchiveFileListSelection._icon_content_cache[cache_key] = Content.from_markup(
+                f" [{icon[1]}]{icon[0]}[/{icon[1]}] "
+            )
+
+        # Create prompt by combining cached icon content with label
+        prompt = ArchiveFileListSelection._icon_content_cache[cache_key] + Content(label)
+
+        super().__init__(prompt=prompt, value="", disabled=True)
+        self.label = label
+
+
 class FileListSelectionWidget(Selection):
     # Cache for pre-parsed icon Content objects to avoid repeated markup parsing
     _icon_content_cache: dict[tuple[str, str], Content] = {}

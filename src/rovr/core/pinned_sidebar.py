@@ -2,7 +2,7 @@ import asyncio
 from os import path
 from typing import ClassVar
 
-from textual import events, on, work
+from textual import events, work
 from textual.binding import BindingType
 from textual.widgets import Input, OptionList
 from textual.widgets.option_list import Option

@@ -14,7 +14,7 @@ from textual.widgets import Button, Input, OptionList, SelectionList
 from textual.widgets.option_list import Option, OptionDoesNotExist
 from textual.widgets.selection_list import Selection
 
-from rovr.classes import FileListSelectionWidget
+from rovr.classes import ArchiveFileListSelection, FileListSelectionWidget
 from rovr.functions import icons as icon_utils
 from rovr.functions import path as path_utils
 from rovr.functions import pins as pin_utils
@@ -307,13 +307,10 @@ class FileList(SelectionList, inherit_bindings=False):
 
                 # Create a selection widget similar to FileListSelectionWidget but simpler
                 # since we don't have dir_entry metadata for archive contents
-                compressed = path_utils.compress(file_path)
                 self.list_of_options.append(
-                    Selection(
-                        f" [{icon[1]}]{icon[0]}[/{icon[1]}] {file_path}",
-                        value=compressed,
-                        id=compressed,
-                        disabled=True,  # Archive contents are not interactive like regular files
+                    ArchiveFileListSelection(
+                        icon,
+                        file_path,
                     )
                 )
                 if start_time + 0.25 < time():

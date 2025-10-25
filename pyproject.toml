@@ -52,6 +52,9 @@ dev = [
   "textual-dev>=1.7.0",
   "ty>=0.0.1a24",
 ]
+pdf = [
+    "pymupdf>=1.26.5",
+]
 
 [build-system]
 requires = ["uv_build>=0.9.0,<0.10.0"]

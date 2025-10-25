@@ -186,6 +186,7 @@ class PreviewContainer(Container):
             return False
 
     async def show_image_preview(self) -> None:
+        self.border_title = titles.image
         if should_cancel():
             return
 
@@ -249,9 +250,9 @@ class PreviewContainer(Container):
 
         if should_cancel():
             return
-        self.border_title = titles.image
 
     async def show_bat_file_preview(self) -> bool:
+        self.border_title = titles.bat
         bat_executable = config["plugins"]["bat"]["executable"]
         command = [
             bat_executable,
@@ -305,11 +306,7 @@ class PreviewContainer(Container):
                     static_widget.update(new_content)
                 static_widget.classes = ""
 
-                if should_cancel():
-                    return False
-
-                self.border_title = titles.bat
-                return True
+                return not should_cancel()
             else:
                 error_message = stderr.decode("utf-8", errors="ignore")
                 if should_cancel():
@@ -328,6 +325,7 @@ class PreviewContainer(Container):
             return False
 
     async def show_normal_file_preview(self) -> None:
+        self.border_title = titles.file
         if should_cancel():
             return
 
@@ -397,9 +395,8 @@ class PreviewContainer(Container):
         if should_cancel():
             return
 
-        self.border_title = titles.file
-
     async def show_folder_preview(self, folder_path: str) -> None:
+        self.border_title = titles.folder
         if should_cancel():
             return
 
@@ -433,9 +430,8 @@ class PreviewContainer(Container):
         if should_cancel():
             return
 
-        self.border_title = titles.folder
-
     async def show_archive_preview(self) -> None:
+        self.border_title = titles.archive
         if should_cancel():
             return
 
@@ -467,8 +463,6 @@ class PreviewContainer(Container):
         if should_cancel():
             return
 
-        self.border_title = titles.archive
-
     def show_preview(self, file_path: str) -> None:
         if (
             "hide" in self.classes
@@ -482,6 +476,7 @@ class PreviewContainer(Container):
 
     @work(exclusive=True, thread=True)
     def perform_show_preview(self, file_path: str) -> None:
+        self.border_subtitle = ""
         if should_cancel():
             return
         self.post_message(self.SetLoading(True))
@@ -612,6 +607,7 @@ class PreviewContainer(Container):
                     await self.show_normal_file_preview()
 
     async def mount_special_messages(self) -> None:
+        self.border_title = ""
         if should_cancel():
             return
         if self.has_child("Static"):
@@ -627,7 +623,6 @@ class PreviewContainer(Container):
         static_widget.classes = "special"
         if should_cancel():
             return
-        self.border_title = ""
 
     async def on_resize(self, event: events.Resize) -> None:
         """Re-render the preview on resize if it's was rendered by batcat and height changed."""

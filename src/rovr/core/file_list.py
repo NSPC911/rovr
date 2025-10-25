@@ -1,6 +1,7 @@
 import asyncio
 from os import getcwd, path
 from os import system as cmd
+from time import time
 from typing import ClassVar
 
 from rich.segment import Segment
@@ -250,7 +251,9 @@ class FileList(SelectionList, inherit_bindings=False):
                 )
             else:
                 file_list_options = folders + files
-                for item in file_list_options:
+                file_list_option_length = len(file_list_options)
+                start_time = time()
+                for index, item in enumerate(file_list_options):
                     self.list_of_options.append(
                         FileListSelectionWidget(
                             icon=item["icon"],
@@ -259,6 +262,9 @@ class FileList(SelectionList, inherit_bindings=False):
                             value=path_utils.compress(item["name"]),
                         )
                     )
+                    if start_time + 0.25 < time():
+                        self.parent.border_subtitle = f"{index + 1} / {file_list_option_length}"
+                        start_time = time()
                     # await so that textual can still be responsive
                     await asyncio.sleep(0)
         except PermissionError:
@@ -270,9 +276,9 @@ class FileList(SelectionList, inherit_bindings=False):
                     disabled=True,
                 )
             )
-
         self.clear_options()
         self.add_options(self.list_of_options)
+        self.parent.border_subtitle = ""
 
     @work(exclusive=True)
     async def create_archive_list(self, file_list: list[str]) -> None:
@@ -289,7 +295,9 @@ class FileList(SelectionList, inherit_bindings=False):
                 Selection("  --no-files--", value="", id="", disabled=True)
             )
         else:
-            for file_path in file_list:
+            file_list_length = len(file_list)
+            start_time = time()
+            for index, file_path in enumerate(file_list):
                 if file_path.endswith("/"):
                     icon = icon_utils.get_icon_for_folder(file_path.strip("/"))
                 else:
@@ -297,17 +305,22 @@ class FileList(SelectionList, inherit_bindings=False):
 
                 # Create a selection widget similar to FileListSelectionWidget but simpler
                 # since we don't have dir_entry metadata for archive contents
+                compressed = path_utils.compress(file_path)
                 self.list_of_options.append(
                     Selection(
                         f" [{icon[1]}]{icon[0]}[/{icon[1]}] {file_path}",
-                        value=path_utils.compress(file_path),
-                        id=path_utils.compress(file_path),
+                        value=compressed,
+                        id=compressed,
                         disabled=True,  # Archive contents are not interactive like regular files
                     )
                 )
+                if start_time + 0.25 < time():
+                    self.parent.border_subtitle = f"{index + 1} / {file_list_length}"
+                    start_time = time()
                 await asyncio.sleep(0)
 
         self.add_options(self.list_of_options)
+        self.parent.border_subtitle = ""
 
     async def on_selection_list_selected_changed(
         self, event: SelectionList.SelectedChanged

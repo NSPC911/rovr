@@ -2,7 +2,7 @@ from humanize import naturalsize
 from lzstring import LZString
 from rich.console import Console
 from textual.dom import DOMNode
-from textual.worker import get_current_worker
+from textual.worker import NoActiveWorker, WorkerCancelled, get_current_worker
 
 from rovr.variables.maps import (
     BORDER_BOTTOM,
@@ -119,5 +119,9 @@ def should_cancel() -> bool:
     try:
         worker = get_current_worker()
     except RuntimeError:
+        return False
+    except WorkerCancelled:
+        return True
+    except NoActiveWorker:
         return False
     return bool(worker and not worker.is_running)

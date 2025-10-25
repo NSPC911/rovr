@@ -28,7 +28,7 @@ dependencies = [
   "rich-click>=1.9.3",
   "send2trash>=1.8.3",
   "textual-autocomplete>=4.0.4",
-  "textual-image[textual]>=0.8.2",
+  "textual-image @ git+https://github.com/NSPC911-forks/textual-image.git@fixed",
   "textual[syntax]>=6.0.0,<7.0.0",
   "toml>=0.10.2",
   "tree-sitter>=0.24.0",

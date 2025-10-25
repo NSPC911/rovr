@@ -41,12 +41,14 @@ class ArchiveFileListSelection(Selection):
         cache_key = (icon[0], icon[1])
         if cache_key not in ArchiveFileListSelection._icon_content_cache:
             # Parse the icon markup once and cache it as Content
-            ArchiveFileListSelection._icon_content_cache[cache_key] = Content.from_markup(
-                f" [{icon[1]}]{icon[0]}[/{icon[1]}] "
+            ArchiveFileListSelection._icon_content_cache[cache_key] = (
+                Content.from_markup(f" [{icon[1]}]{icon[0]}[/{icon[1]}] ")
             )
 
         # Create prompt by combining cached icon content with label
-        prompt = ArchiveFileListSelection._icon_content_cache[cache_key] + Content(label)
+        prompt = ArchiveFileListSelection._icon_content_cache[cache_key] + Content(
+            label
+        )
 
         super().__init__(prompt=prompt, value="", disabled=True)
         self.label = label

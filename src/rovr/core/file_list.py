@@ -717,8 +717,6 @@ class FileList(SelectionList, inherit_bindings=False):
                     and key in config["keybinds"]["hist_previous"]
                 ):
                     event.stop()
-                    if self.highlighted_option and self.highlighted_option.disabled:
-                        return
                     if self.app.query_one("#back").disabled:
                         self.app.query_one("UpButton").on_button_pressed(Button.Pressed)
                     else:

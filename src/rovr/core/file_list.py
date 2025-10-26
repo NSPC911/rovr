@@ -633,10 +633,8 @@ class FileList(SelectionList, inherit_bindings=False):
                     old = self.highlighted
                     self.action_page_up()
                     new = self.highlighted
-                    if old is None:
-                        old = 0
-                    if new is None:
-                        new = 0
+                    old = 0 if old is None else old
+                    new = 0 if new is None else new
                     assert isinstance(old, int) and isinstance(new, int)
                     for index in range(new, old + 1):
                         self.select(self.get_option_at_index(index))
@@ -652,10 +650,8 @@ class FileList(SelectionList, inherit_bindings=False):
                     old = self.highlighted
                     self.action_page_down()
                     new = self.highlighted
-                    if old is None:
-                        old = 0
-                    if new is None:
-                        new = 0
+                    old = 0 if old is None else old
+                    new = 0 if new is None else new
                     assert isinstance(old, int) and isinstance(new, int)
                     for index in range(old, new + 1):
                         self.select(self.get_option_at_index(index))
@@ -671,8 +667,8 @@ class FileList(SelectionList, inherit_bindings=False):
                     old = self.highlighted
                     self.action_first()
                     new = self.highlighted
-                    if old is None:
-                        old = 0
+                    old = 0 if old is None else old
+                    new = 0 if new is None else new
                     assert isinstance(old, int) and isinstance(new, int)
                     for index in range(new, old + 1):
                         self.select(self.get_option_at_index(index))
@@ -685,10 +681,10 @@ class FileList(SelectionList, inherit_bindings=False):
                         return
                     """Select the options between the current and the last option"""
                     old = self.highlighted
-                    if old is None:
-                        old = 0
                     self.action_last()
                     new = self.highlighted
+                    old = 0 if old is None else old
+                    new = 0 if new is None else new
                     assert isinstance(old, int) and isinstance(new, int)
                     for index in range(old, new + 1):
                         self.select(self.get_option_at_index(index))

@@ -831,7 +831,10 @@ TerminalTooSmall {
   background: transparent;
   height: 1fr;
   scrollbar-size: 0 0;
-  #logo { offset: 0 -1 }
+  #logo {
+    offset: 1 -1;
+    color: $primary
+  }
   HorizontalGroup {
     width: auto;
     background: transparent;

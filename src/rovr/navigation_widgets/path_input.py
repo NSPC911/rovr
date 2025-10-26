@@ -126,7 +126,9 @@ class PathAutoCompleteInput(PathAutoComplete):
             # nothing there
             self.action_hide()
             assert isinstance(self._target, Input)
-            self._target.post_message(Input.Submitted(self._target, self._target.value, None))
+            self._target.post_message(
+                Input.Submitted(self._target, self._target.value, None)
+            )
             return
         with self.prevent(Input.Changed):
             self.apply_completion(highlighted_value, self._get_target_state())

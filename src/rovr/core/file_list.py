@@ -791,10 +791,7 @@ class FileList(SelectionList, inherit_bindings=False):
                     await self.toggle_hidden_files()
 
     def update_border_subtitle(self) -> None:
-        assert self.parent
-        if self.highlighted is not int:
-            return
-        if self.dummy:
+        if self.dummy or type(self.highlighted) is not int or not self.parent:
             return
         elif (not self.select_mode_enabled) or (self.selected is None):
             utils.set_scuffed_subtitle(

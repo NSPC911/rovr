@@ -6,6 +6,7 @@ from time import perf_counter
 from types import SimpleNamespace
 from typing import Callable, Iterable
 
+from rich.console import Console
 from textual import events, on, work
 from textual.app import WINDOWS, App, ComposeResult, SystemCommand
 from textual.binding import Binding
@@ -19,6 +20,7 @@ from textual.containers import (
 from textual.content import Content
 from textual.css.errors import StylesheetError
 from textual.css.query import NoMatches
+from textual.css.stylesheet import StylesheetParseError
 from textual.dom import DOMNode
 from textual.screen import Screen
 from textual.widgets import Input
@@ -65,6 +67,8 @@ from rovr.variables.constants import MaxPossible, config
 from rovr.variables.maps import VAR_TO_DIR
 
 max_possible = MaxPossible()
+
+console = Console()
 
 
 class Application(App, inherit_bindings=False):
@@ -544,6 +548,14 @@ class Application(App, inherit_bindings=False):
                     f"Reloaded {len(css_paths)} CSS files in {elapsed:.0f} ms",
                     title="CSS",
                 )
+            except StylesheetParseError as exc:
+                self._css_has_errors = True
+                with self.suspend():
+                    console.print(exc.errors)
+                    try:
+                        console.input(" [bright_blue]Continue? [/]")
+                    except EOFError:
+                        self.exit(return_code=1)
             except Exception as error:
                 # TODO: Catch specific exceptions
                 self._css_has_errors = True

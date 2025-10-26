@@ -1,5 +1,6 @@
 import os
 from collections import deque
+from importlib import resources
 from importlib.metadata import PackageNotFoundError, version
 from os import path
 
@@ -220,11 +221,11 @@ def schema_dump(doc_path: str, exception: ValidationError, config_content: str) 
 
         pprint(f"[bright_red]╰─{'─' * rjust}─❯[/] {error_msg}")
     # check path for custom message from migration.json
-    with open(
-        path.join(path.dirname(__file__), "../config/migration.json"),
-        "r",
-        encoding="utf-8",
-    ) as f:
+    with (
+        resources.files("rovr.config")
+        .joinpath("migration.json")
+        .open("r", encoding="utf-8") as f
+    ):
         migration_docs = ujson.load(f)
     for item in migration_docs:
         if path_str in item["keys"]:
@@ -292,11 +293,11 @@ def load_config() -> tuple[dict, dict]:
             with open(user_config_path, "w", encoding="utf-8") as file:
                 file.write(DEFAULT_CONFIG.format(schema_url=schema_url))
 
-    with open(
-        path.join(path.dirname(__file__), "../config/config.toml"),
-        "r",
-        encoding="utf-8",
-    ) as f:
+    with (
+        resources.files("rovr.config")
+        .joinpath("config.toml")
+        .open("r", encoding="utf-8") as f
+    ):
         # check header
         try:
             content = f.read()
@@ -317,11 +318,11 @@ def load_config() -> tuple[dict, dict]:
     # Don't really have to consider the else part, because it's created further down
     config = deep_merge(template_config, user_config)
     # check with schema
-    with open(
-        path.join(path.dirname(__file__), "../config/schema.json"),
-        "r",
-        encoding="utf-8",
-    ) as f:
+    with (
+        resources.files("rovr.config")
+        .joinpath("schema.json")
+        .open("r", encoding="utf-8") as f
+    ):
         content = f.read()
         schema = ujson.loads(content)
 

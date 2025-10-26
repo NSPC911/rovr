@@ -2,12 +2,12 @@ import contextlib
 
 from textual import events, work
 from textual.css.query import NoMatches
-from textual.fuzzy import Matcher
 from textual.types import OptionDoesNotExist
 from textual.widgets import Input, OptionList, SelectionList
 from textual.widgets.option_list import Option
 from textual.widgets.selection_list import Selection, SelectionError
 
+from rovr.functions.scorer import scorer
 from rovr.functions.utils import set_scuffed_subtitle
 
 
@@ -70,19 +70,21 @@ class SearchInput(Input):
                             )
             return
         self.items_list.clear_options()
-        matches = []
-        matcher = Matcher(
-            event.value,
-        )
+        matches: list[Selection | Option] = []
+        matches_scores: list[int | float] = []
         assert hasattr(self.items_list, "list_of_options")
         for option in self.items_list.list_of_options:
             assert isinstance(option, Option)
             if self.always_add_disabled and option.disabled:
                 matches.append(option)
                 continue
-            score = matcher.match(option.label)
-            if score > 0:
+            if (score := scorer(event.value, option.label)):
+                print(score, event.value, option.label)
                 matches.append(option)
+                matches_scores.append(score)
+        # do sort now ig
+        matches = [option for _, option in sorted(zip(matches_scores, matches), key=lambda x: x[0])]
+        matches = matches[::-1]
         if matches:
             self.items_list.add_options(matches)
         else:

@@ -936,4 +936,6 @@ LoadingIndicator {
   #below_menu { border: none; }
   #pinned_sidebar_container { width: 16; }
   #preview_sidebar { width: 25vw; }
+  HeaderArea { height: 1 }
+  HeaderClock { border-bottom: none !important }
 }

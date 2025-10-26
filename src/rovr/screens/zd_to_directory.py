@@ -1,5 +1,5 @@
+import asyncio
 import contextlib
-from subprocess import TimeoutExpired, run
 
 from textual import events, work
 from textual.app import ComposeResult
@@ -61,20 +61,7 @@ class ZDToDirectory(ModalScreen):
         self.zoxide_updater(Input.Changed(self.zoxide_input, value=""))
 
     def on_input_changed(self, event: Input.Changed) -> None:
-        if any(
-            worker.is_running and worker.node is self for worker in self.app.workers
-        ):
-            self._queued_task = self.zoxide_updater
-            self._queued_task_args = event
-        else:
-            self.zoxide_updater(event=event)
-
-    def any_in_queue(self) -> bool:
-        if self._queued_task is not None:
-            self._queued_task(self._queued_task_args)
-            self._queued_task, self._queued_task_args = None, None
-            return True
-        return False
+        self.zoxide_updater(event=event)
 
     def _parse_zoxide_line(
         self, line: str, show_scores: bool
@@ -101,13 +88,11 @@ class ZDToDirectory(ModalScreen):
             print(f"Problems while parsing zoxide line - '{line}'")
             return line, None
 
-    @work(thread=True)
-    def zoxide_updater(self, event: Input.Changed) -> None:
+    @work(exclusive=True)
+    async def zoxide_updater(self, event: Input.Changed) -> None:
         """Update the list"""
         search_term = event.value.strip()
         # check 1 for queue, to ignore subprocess as a whole
-        if self.any_in_queue():
-            return
 
         zoxide_cmd = ["zoxide", "query", "--list"]
         show_scores = config["plugins"]["zoxide"].get("show_scores", False)
@@ -118,33 +103,37 @@ class ZDToDirectory(ModalScreen):
         zoxide_cmd += search_term.split()
 
         try:
-            zoxide_output = run(zoxide_cmd, capture_output=True, text=True, timeout=3)
-        except (OSError, TimeoutExpired) as exc:
+            zoxide_process = await asyncio.create_subprocess_exec(
+                *zoxide_cmd,
+                stdout=asyncio.subprocess.PIPE,
+                stderr=asyncio.subprocess.PIPE,
+            )
+            stdout, _ = await asyncio.wait_for(
+                zoxide_process.communicate(), timeout=3
+            )
+        except (OSError, asyncio.exceptions.TimeoutError) as exc:
+            if isinstance(exc, asyncio.exceptions.TimeoutError):
+                zoxide_process.terminate()
             # zoxide not installed
-            if self.any_in_queue():
-                return
-            self.app.call_from_thread(self.zoxide_options.clear_options)
-            self.app.call_from_thread(
-                self.zoxide_options.add_option,
+            self.zoxide_options.clear_options()
+            self.zoxide_options.add_option(
                 Option(
                     "  zoxide is missing on $PATH or cannot be executed"
                     if isinstance(exc, OSError)
                     else "  zoxide took too long to respond",
                     disabled=True,
-                ),
+                )
             )
-            self.any_in_queue()
             return
         # check 2 for queue, to ignore mounting as a whole
-        if self.any_in_queue():
-            return
         zoxide_options: ZoxideOptionList = self.query_one(
             "#zoxide_options", ZoxideOptionList
         )
         options = []
-        if zoxide_output.stdout:
+        if stdout:
+            stdout = stdout.decode()
             first_score_width = 0
-            for line in zoxide_output.stdout.splitlines():
+            for line in stdout.splitlines():
                 path, score = self._parse_zoxide_line(line, show_scores)
                 if show_scores and score:
                     # This ensures that we only add necessary padding
@@ -171,21 +160,18 @@ class ZDToDirectory(ModalScreen):
                 # raised, or just nothing showing up. By having the clear
                 # options and add options functions nearby, it hopefully
                 # reduces the likelihood of an empty option list
-                self.app.call_from_thread(zoxide_options.clear_options)
-                self.app.call_from_thread(zoxide_options.add_options, options)
-                self.app.call_from_thread(zoxide_options.remove_class, "empty")
+                zoxide_options.clear_options()
+                zoxide_options.add_options(options)
+                zoxide_options.remove_class("empty")
                 zoxide_options.highlighted = 0
         else:
             # No Matches to the query text
-            self.app.call_from_thread(zoxide_options.clear_options)
-            self.app.call_from_thread(
-                zoxide_options.add_option,
+            zoxide_options.clear_options()
+            zoxide_options.add_option(
                 Option("  --No matches found--", disabled=True),
             )
-            self.app.call_from_thread(zoxide_options.add_class, "empty")
+            zoxide_options.add_class("empty")
         # check 3, if somehow there's a new request after the mount
-        if self.any_in_queue():
-            return  # nothing much to do now
 
     def on_input_submitted(self, event: Input.Submitted) -> None:
         if any(
@@ -210,13 +196,15 @@ class ZDToDirectory(ModalScreen):
         selected_value = event.option.id
         assert selected_value is not None
         # ignore if zoxide got uninstalled, why are you doing this
-        with contextlib.suppress(TimeoutExpired, OSError):
-            run(
-                ["zoxide", "add", path_utils.decompress(selected_value)],
-                capture_output=True,
-                text=True,
-                timeout=1,
+        with contextlib.suppress(asyncio.exceptions.TimeoutError, OSError):
+            zoxide_process = await asyncio.create_subprocess_exec(
+                "zoxide",
+                "add",
+                path_utils.decompress(selected_value),
+                stdout=asyncio.subprocess.PIPE,
+                stderr=asyncio.subprocess.PIPE,
             )
+            _, _ = await asyncio.wait_for(zoxide_process.communicate(), timeout=3)
         if selected_value and not event.option.disabled:
             self.dismiss(selected_value)
         else:

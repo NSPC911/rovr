@@ -1,5 +1,6 @@
 from os import getcwd, path, scandir
 from pathlib import Path
+from typing import cast
 
 from textual import events
 from textual.validation import Function
@@ -108,6 +109,28 @@ class PathAutoCompleteInput(PathAutoComplete):
         super()._on_hide(event)
         assert isinstance(self._target, Input)
         self._target.remove_class("hide_border_bottom", update=True)
+
+    def _complete(self, option_index: int) -> None:
+        """Do the completion (i.e. insert the selected item into the target input).
+
+        This is when the user highlights an option in the dropdown and presses tab or enter.
+        """
+        if not self.display or self.option_list.option_count == 0:
+            return
+
+        option_list = self.option_list
+        highlighted = option_index
+        option = cast(DropdownItem, option_list.get_option_at_index(highlighted))
+        highlighted_value = option.value
+        if highlighted_value == "":
+            # nothing there
+            self.action_hide()
+            assert isinstance(self._target, Input)
+            self._target.post_message(Input.Submitted(self._target, self._target.value, None))
+            return
+        with self.prevent(Input.Changed):
+            self.apply_completion(highlighted_value, self._get_target_state())
+        self.post_completion()
 
 
 class PathInput(Input):

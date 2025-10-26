@@ -108,9 +108,7 @@ class ZDToDirectory(ModalScreen):
                 stdout=asyncio.subprocess.PIPE,
                 stderr=asyncio.subprocess.PIPE,
             )
-            stdout, _ = await asyncio.wait_for(
-                zoxide_process.communicate(), timeout=3
-            )
+            stdout, _ = await asyncio.wait_for(zoxide_process.communicate(), timeout=3)
         except (OSError, asyncio.exceptions.TimeoutError) as exc:
             if isinstance(exc, asyncio.exceptions.TimeoutError):
                 zoxide_process.terminate()

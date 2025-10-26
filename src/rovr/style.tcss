@@ -35,10 +35,8 @@ $scrollbar-corner-color: $primary-muted;
 #pinned_sidebar_container,
 #file_list_container,
 #preview_sidebar,
-#path_switcher,
 #zoxide_options,
 #file_search_options,
-#below_menu Button,
 #footer > *,
 FileListRightClickOptionList {
   background: transparent;
@@ -71,11 +69,8 @@ FileListRightClickOptionList {
 #file_list_container:focus-within,
 #preview_sidebar:focus-within,
 #preview_sidebar:focus,
-#path_switcher:focus-within,
 #zoxide_options,
 #file_search_options,
-#below_menu Button:focus,
-#below_menu Button:hover,
 #file_list.-maximized,
 #pinned_sidebar.-maximized,
 #preview_sidebar .inner_preview.-maximized,
@@ -243,7 +238,7 @@ Tooltip {
 #menuwrapper {
   margin: 0 1;
   #below_menu {
-    border-top: $border-style $border-blurred
+    border-top: $border-style $border-blurred;
   }
   &:focus-within #below_menu {
     border-top: $border-style $border
@@ -255,51 +250,35 @@ Tooltip {
   height: 1;
   padding: 0 1;
   scrollbar-size: 0 0;
-  Button {
-    &:ansi { background: transparent }
-    &:disabled {
-      opacity: 1 !important;
-      background-tint: transparent !important;
-      text-opacity: 1 !important;
-      color: $panel-lighten-3;
-      tint: transparent !important;
-    }
-    &:light:disabled { color: $panel-darken-3 }
-    &:ansi:hover { color: $primary }
-    &:light:ansi:hover { color: $secondary }
-  }
 }
 
 #below_menu {
   margin: 0;
   max-height: 11;
   Input {
-    height: 3;
+    height: 1;
     width: 1fr;
     margin: 0 1 0 1;
     padding: 0 1 0 1;
     overflow: hidden hidden;
     color: $foreground;
+    border: none;
+    background: transparent;
   }
   Input.hide_border_bottom {
-    border: $border-style $accent !important;
-    border-bottom: none !important;
-    height: 3;
+    height: 1;
   }
   Button {
     margin: 0 1;
-    height: 3;
-    max-width: 7;
   }
   PathAutoCompleteInput {
     padding: 0 1 0 1;
-    margin: -1 1 0 25;
+    margin: -1 -1 0 13;
     overlay: screen;
     width: 1fr;
+    background: transparent;
     border: $border-style $accent;
     border-top: none;
-    background: $background;
-    &:ansi { background: transparent }
     AutoCompleteList {
       width: 1fr;
       max-height: 4;
@@ -325,6 +304,18 @@ Tooltip {
   width: 3;
   padding: 0;
   margin: 0 1 0 0;
+  opacity: 1 !important;
+  background-tint: transparent !important;
+  text-opacity: 1 !important;
+  tint: transparent !important;
+  background: transparent;
+  &:disabled {
+    color: $panel-lighten-3;
+  }
+  &:light:disabled { color: $panel-darken-3 }
+  &:ansi:hover { color: $primary }
+  &:light:ansi:hover { color: $secondary }
+  &:disabled:hover { color: $panel-lighten-3 }
 }
 
 #main {
@@ -900,7 +891,7 @@ Screen {
     #pinned_sidebar_container,
     #preview_sidebar,
     #below_menu Button { display: none !important }
-    #below_menu PathAutoCompleteInput { margin: -1 1 0 1 !important }
+    #below_menu PathAutoCompleteInput { margin: -1 -1 0 -1 !important }
     #zoxide_group,
     CommandPalette > Vertical,
     #dialog,
@@ -912,7 +903,7 @@ Screen {
   &.-nopreview {
     #preview_sidebar,
     #below_menu Button { display: none !important }
-    #below_menu PathAutoCompleteInput { margin: -1 1 0 1 !important }
+    #below_menu PathAutoCompleteInput { margin: -1 -1 0 -1 !important }
     #pinned_sidebar_container { max-width: 25vw }
     #zoxide_group,
     CommandPalette > Vertical,
@@ -920,6 +911,17 @@ Screen {
     ModalInput {
       width: 75vw;
       max-width: 75vw;
+    }
+  }
+  &.-all-horizontal {
+    #menuwrapper #below_menu Input {
+      border-left: $border-style $border-blurred
+    }
+    #menuwrapper:focus-within #below_menu Input {
+      border-left: $border-style $border
+    }
+    #menuwrapper:focus-within #below_menu Input.hide_border_bottom {
+      border-left: $border-style $accent
     }
   }
   &.-all-vertical #footer { max-height: 25vh }
@@ -951,10 +953,8 @@ LoadingIndicator {
 }
 /* Compact mode */
 .compact {
-  #menu { display: none; }
-  #below_menu { border: none; }
-  #pinned_sidebar_container { width: 16; }
-  #preview_sidebar { width: 25vw; }
+  #pinned_sidebar_container { width: 16 }
+  #preview_sidebar { width: 25vw }
   HeaderArea { height: 1 }
   HeaderClock { border-bottom: none !important }
 }

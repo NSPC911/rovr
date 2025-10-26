@@ -78,12 +78,15 @@ class SearchInput(Input):
             if self.always_add_disabled and option.disabled:
                 matches.append(option)
                 continue
-            if (score := scorer(event.value, option.label)):
+            if score := scorer(event.value, option.label):
                 print(score, event.value, option.label)
                 matches.append(option)
                 matches_scores.append(score)
         # do sort now ig
-        matches = [option for _, option in sorted(zip(matches_scores, matches), key=lambda x: x[0])]
+        matches = [
+            option
+            for _, option in sorted(zip(matches_scores, matches), key=lambda x: x[0])
+        ]
         matches = matches[::-1]
         if matches:
             self.items_list.add_options(matches)

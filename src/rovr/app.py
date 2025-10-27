@@ -676,13 +676,13 @@ class Application(App, inherit_bindings=False):
         self.query_one("#file_list").update_border_subtitle()
 
     @on(events.Click)
-    @work(thread=True)
     def when_got_click(self, event: events.Click) -> None:
         if (
             not isinstance(event.widget, FileListRightClickOptionList)
-            or event.button != 3
+            or event.button == 1
         ):
-            self.query_one(FileListRightClickOptionList).add_class("hidden")
+            with suppress(NoMatches):
+                self.query_one(FileListRightClickOptionList).add_class("hidden")
 
 
 app = Application(watch_css=True)

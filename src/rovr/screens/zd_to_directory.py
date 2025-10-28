@@ -169,7 +169,7 @@ class ZDToDirectory(ModalScreen):
                 Option("  --No matches found--", disabled=True),
             )
             zoxide_options.add_class("empty")
-        # check 3, if somehow there's a new request after the mount
+            zoxide_options.border_subtitle = "0/0"
 
     def on_input_submitted(self, event: Input.Submitted) -> None:
         if any(
@@ -239,5 +239,5 @@ class ZDToDirectory(ModalScreen):
             or self.zoxide_options.get_option_at_index(0).disabled
         ):
             self.zoxide_options.border_subtitle = "0/0"
-        elif self.zoxide_options.highlighted:
+        elif self.zoxide_options.highlighted is not None:
             self.zoxide_options.border_subtitle = f"{self.zoxide_options.highlighted + 1}/{self.zoxide_options.option_count}"

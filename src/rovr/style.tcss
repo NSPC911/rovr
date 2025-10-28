@@ -576,7 +576,7 @@ ZDToDirectory, FileSearch {
     }
     &.empty {
       border: $border-style $error !important;
-      border-subtitle-background: $error !important;
+      border-subtitle-color: $error !important;
     }
   }
   & > VerticalGroup {

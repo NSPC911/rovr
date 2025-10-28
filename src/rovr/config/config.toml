@@ -36,7 +36,6 @@ copy_includes_metadata = true
 use_recycle_bin = true
 allow_tab_nav = true
 append_new_tabs = true
-cd_on_quit = false
 double_click_delay = 0.25
 drive_watcher_frequency = 3.0
 

@@ -24,5 +24,14 @@
       "- when previewing files, with or without [bright_cyan]bat[/], the height will always be enough to fill the container."
     ],
     "extra": "Removed in v0.5.0"
+  },
+  {
+    "keys": ["settings.cd_on_quit"],
+    "message": [
+      "[bright_blue]settings.cd_on_quit[/] has been removed in favour of using [bright_blue]--cwd-file[/]",
+      "Remove it from your [cyan]config.toml[/] and update your shell configuration with the functions from the [u][link=https://nspc911.github.io/rovr/features/cd-on-quit/#shell-configuration]docs[/][/]",
+      "Cannot click on the link? https://nspc911.github.io/rovr/features/cd-on-quit/#shell-configuration"
+    ],
+    "extra": "Removed in v0.5.0"
   }
 ]

@@ -226,17 +226,28 @@ class ProcessContainer(VerticalScroll):
                                 is_file_in_use = False
                             if is_file_in_use and platform.system() == "Windows":
                                 # Ask the user specifically that the file is in use
-                                response = self.app.call_from_thread(
-                                    self.app.push_screen_wait,
-                                    FileInUse(
-                                        f"The file appears to be open in another application and cannot be deleted.\nPath: {item_dict['relative_loc']}",
-                                    ),
-                                )
-                                if not response["value"]:
-                                    bar.panic()
-                                    return
-                                else:
-                                    continue
+                                while True:
+                                    response = self.app.call_from_thread(
+                                        self.app.push_screen_wait,
+                                        FileInUse(
+                                            f"The file appears to be open in another application and cannot be deleted.\nPath: {item_dict['relative_loc']}",
+                                        ),
+                                    )
+                                    if response["value"] == "cancel":
+                                        bar.panic()
+                                        return
+                                    # Try again: check if file is still in use
+                                    try:
+                                        send2trash(path_to_trash)
+                                        break  # Success, move on
+                                    except PermissionError as e:
+                                        is_file_in_use = getattr(e, "winerror", None) == 32
+                                        if not is_file_in_use:
+                                            raise  # Not a file-in-use error, re-raise
+                                        # Otherwise, loop again for another try/cancel
+                                    except Exception:
+                                        raise
+                                continue
                             elif is_file_in_use:
                                 # need to ensure unix users see an
                                 # error so they create an issue
@@ -294,17 +305,28 @@ class ProcessContainer(VerticalScroll):
                     except Exception:
                         is_file_in_use = False
                     if is_file_in_use and platform.system() == "Windows":
-                        response = self.app.call_from_thread(
-                            self.app.push_screen_wait,
-                            FileInUse(
-                                f"The file appears to be open in another application and cannot be deleted.\nPath: {item_dict['relative_loc']}",
-                            ),
-                        )
-                        if not response["value"]:
-                            bar.panic()
-                            return
-                        else:
-                            continue
+                        while True:
+                            response = self.app.call_from_thread(
+                                self.app.push_screen_wait,
+                                FileInUse(
+                                    f"The file appears to be open in another application and cannot be deleted.\nPath: {item_dict['relative_loc']}",
+                                ),
+                            )
+                            if response["value"] == "cancel":
+                                bar.panic()
+                                return
+                            # Try again: check if file is still in use
+                            try:
+                                remove(item_dict["path"])
+                                break  # Success, move on
+                            except PermissionError as e:
+                                is_file_in_use = getattr(e, "winerror", None) == 32
+                                if not is_file_in_use:
+                                    raise  # Not a file-in-use error, re-raise
+                                # Otherwise, loop again for another try/cancel
+                            except Exception:
+                                raise
+                        continue
                     elif is_file_in_use:
                         # need to ensure unix users see an
                         # error so they create an issue

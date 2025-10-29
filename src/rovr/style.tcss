@@ -775,7 +775,15 @@ FileInUse {
   }
   Container { align: center middle }
   Button { width: 50% }
-  HorizontalGroup { column-span: 2; align: center middle }
+  HorizontalGroup {
+    column-span: 2;
+    align: center middle;
+    padding-left: 2;
+    padding-right: 2;
+  }
+  HorizontalGroup Button:first-child {
+    margin-right: 2;
+  }
 }
 
 DeleteFiles {

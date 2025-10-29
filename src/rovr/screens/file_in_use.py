@@ -1,6 +1,6 @@
 from textual import events, on
 from textual.app import ComposeResult
-from textual.containers import Grid, HorizontalGroup, VerticalGroup
+from textual.containers import Grid, HorizontalGroup, VerticalGroup, Container
 from textual.screen import ModalScreen
 from textual.widgets import Button, Label
 
@@ -18,28 +18,33 @@ class FileInUse(ModalScreen):
                 for message in self.message.splitlines():
                     yield Label(message, classes="question")
             with HorizontalGroup():
-                # TODO: three buttons + toggle like delete screen
-                # one to eetry, another to skip, another to cancel
-                yield Button("Ok", variant="primary", id="ok")
+                yield Button("Try Again", variant="primary", id="try_again")
+                yield Button("Cancel", variant="error", id="cancel")
 
     def on_mount(self) -> None:
         self.query_one("#dialog").border_title = "File in Use"
-        # focus the OK button like other modals
-        self.query_one("#ok").focus()
+        # focus the Try Again button like other modals
+        self.query_one("#try_again").focus()
+        # Optionally add padding or styling here if needed for consistency
 
     def on_key(self, event: events.Key) -> None:
-        """Handle key presses: Enter -> OK, Escape -> Cancel."""
+        """Handle key presses: Enter -> Try Again, Escape/C -> Cancel."""
         match event.key.lower():
-            case "enter" | "y":
+            case "enter" | "t":
                 event.stop()
-                # treat enter as OK
-                self.dismiss({"value": True})
-            case "escape":
+                # treat enter as Try Again
+                self.dismiss({"value": "try_again"})
+            case "escape" | "c":
                 event.stop()
-                # treat escape as cancel
-                self.dismiss({"value": False})
+                # treat escape/c as cancel
+                self.dismiss({"value": "cancel"})
 
-    @on(Button.Pressed, "#ok")
-    def on_button_pressed(self, event: Button.Pressed) -> None:
-        """Handle OK button: return True to callers."""
-        self.dismiss({"value": True})
+    @on(Button.Pressed, "#try_again")
+    def on_try_again(self, event: Button.Pressed) -> None:
+        """Handle Try Again button: return 'try_again' to callers."""
+        self.dismiss({"value": "try_again"})
+
+    @on(Button.Pressed, "#cancel")
+    def on_cancel(self, event: Button.Pressed) -> None:
+        """Handle Cancel button: return 'cancel' to callers."""
+        self.dismiss({"value": "cancel"})

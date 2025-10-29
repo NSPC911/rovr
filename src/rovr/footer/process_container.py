@@ -161,6 +161,10 @@ class ProcessContainer(VerticalScroll):
             files (list[str]): List of file paths to remove.
             compressed (bool): Whether the file paths are compressed. Defaults to True.
             ignore_trash (bool): If True, files will be permanently deleted instead of sent to the recycle bin. Defaults to False.
+
+        Raises:
+            OSError: re-raises if the file usage handler fails
+            PermissionError: re-raises if the file usage handler fails
         """
         # Create progress/process bar (why have I set names as such...)
         bar: ProgressBarContainer = self.app.call_from_thread(
@@ -215,7 +219,7 @@ class ProcessContainer(VerticalScroll):
                                 path_to_trash = path_to_trash.replace("/", "\\")
                                 pass
                             send2trash(path_to_trash)
-                        except PermissionError as e:
+                        except (PermissionError, OSError) as e:
                             # On Windows, a file being used by another process
                             # raises a PermissionError/OSError with winerror 32.
                             is_file_in_use = False
@@ -321,7 +325,7 @@ class ProcessContainer(VerticalScroll):
                             try:
                                 remove(item_dict["path"])
                                 break  # Success, move on
-                            except PermissionError as e:
+                            except (PermissionError, OSError) as e:
                                 is_file_in_use = getattr(e, "winerror", None) == 32
                                 if not is_file_in_use:
                                     raise  # Not a file-in-use error, re-raise

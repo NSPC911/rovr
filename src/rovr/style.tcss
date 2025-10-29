@@ -31,8 +31,7 @@ $scrollbar-corner-color: $primary-muted;
 }
 
 /* border styling for main widgets */
-#menu,
-#below_menu,
+#menuwrapper,
 #pinned_sidebar_container,
 #file_list_container,
 #preview_sidebar,
@@ -67,8 +66,7 @@ FileListRightClickOptionList {
   }
 }
 
-#menu:focus-within,
-#below_menu:focus-within,
+#menuwrapper:focus-within,
 #pinned_sidebar_container:focus-within,
 #file_list_container:focus-within,
 #preview_sidebar:focus-within,
@@ -242,10 +240,19 @@ Tooltip {
   }
 }
 
+#menuwrapper {
+  margin: 0 1;
+  #below_menu {
+    border-top: $border-style $border-blurred
+  }
+  &:focus-within #below_menu {
+    border-top: $border-style $border
+  }
+}
+
 #menu {
   align: left middle;
-  height: 3;
-  margin: 0 1 0 1;
+  height: 1;
   padding: 0 1;
   scrollbar-size: 0 0;
   Button {
@@ -264,7 +271,7 @@ Tooltip {
 }
 
 #below_menu {
-  margin: 0 1 0 1;
+  margin: 0;
   max-height: 11;
   Input {
     height: 3;
@@ -359,35 +366,27 @@ Tooltip {
   width: $pinned_sidebar_width;
   scrollbar-size: 0 0 !important;
   & > PinnedSidebar { scrollbar-size: 0 0 !important }
-  & > Input { display: none }
-  &:focus-within > Input,
-  Input.show,
-  & > Input:hover,
-  &:hover > Input { display: block }
+  & > Input { display: block }
 }
 
-#pinned_sidebar { height: 1fr }
-#pinned_sidebar { padding: 0 }
+#pinned_sidebar { height: 1fr; padding: 0 }
 
 #preview_sidebar {
-  height: 1fr;
   margin: 0;
   width: $preview_sidebar_width;
   layout: horizontal;
-  padding: 0 1;
-  overflow: auto auto;
-  scrollbar-size: 1 1;
   & > Static {
-    text-overflow: clip;
+    text-overflow: ellipsis;
     text-wrap: nowrap;
-    width: auto;
+    width: 1fr;
+    overflow-x: hidden;
+  }
+  & > Static.special {
+    text-wrap: wrap;
+    text-overflow: fold;
+    padding: 0 1;
   }
  /* scrollbars are useless, reminder */
-  &.clip { scrollbar-size: 0 0 }
-  &.clip > Static {
-    width: 1fr;
-    overflow-x: hidden !important;
-  }
   & > * {
     background: transparent;
     border: none;
@@ -398,6 +397,11 @@ Tooltip {
     }
   }
   & > FileList { height: 1fr }
+  Image {
+    width: auto;
+    height: auto;
+    align: center bottom;
+  }
 }
 
 #preview_sidebar { padding: 0 }
@@ -572,7 +576,7 @@ ZDToDirectory, FileSearch {
     }
     &.empty {
       border: $border-style $error !important;
-      border-subtitle-background: $error !important;
+      border-subtitle-color: $error !important;
     }
   }
   & > VerticalGroup {
@@ -832,7 +836,10 @@ TerminalTooSmall {
   background: transparent;
   height: 1fr;
   scrollbar-size: 0 0;
-  #logo { offset: 0 -1 }
+  #logo {
+    offset: 1 -1;
+    color: $primary
+  }
   HorizontalGroup {
     width: auto;
     background: transparent;
@@ -907,16 +914,14 @@ Screen {
     #footer { max-height: 30vh }
   }
   &.-nomenu-atall {
-    #menu,
-    #below_menu { display: none !important }
+    #menuwrapper { display: none !important }
     #footer { max-height: 30vh }
   }
   &.-filelistonly-vertical {
     #menu { display: none !important }
   }
   &.-middle-only {
-    #menu,
-    #below_menu { display: none !important }
+    #menuwrapper { display: none !important }
     #footer { max-height: 25vh }
   }
 }
@@ -936,4 +941,6 @@ LoadingIndicator {
   #below_menu { border: none; }
   #pinned_sidebar_container { width: 16; }
   #preview_sidebar { width: 25vw; }
+  HeaderArea { height: 1 }
+  HeaderClock { border-bottom: none !important }
 }

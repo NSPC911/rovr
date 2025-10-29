@@ -2,9 +2,11 @@ import asyncio
 import shutil
 from contextlib import suppress
 from os import chdir, getcwd, path
+from time import perf_counter
 from types import SimpleNamespace
 from typing import Callable, Iterable
 
+from rich.console import Console
 from textual import events, on, work
 from textual.app import WINDOWS, App, ComposeResult, SystemCommand
 from textual.binding import Binding
@@ -16,8 +18,10 @@ from textual.containers import (
     VerticalGroup,
 )
 from textual.content import Content
-from textual.css.errors import StyleValueError
+from textual.css.errors import StylesheetError
 from textual.css.query import NoMatches
+from textual.css.stylesheet import StylesheetParseError
+from textual.dom import DOMNode
 from textual.screen import Screen
 from textual.widgets import Input
 
@@ -48,6 +52,7 @@ from rovr.functions.path import (
 )
 from rovr.functions.themes import get_custom_themes
 from rovr.header import HeaderArea
+from rovr.header.tabs import Tabline
 from rovr.navigation_widgets import (
     BackButton,
     ForwardButton,
@@ -62,6 +67,8 @@ from rovr.variables.constants import MaxPossible, config
 from rovr.variables.maps import VAR_TO_DIR
 
 max_possible = MaxPossible()
+
+console = Console()
 
 
 class Application(App, inherit_bindings=False):
@@ -121,26 +128,27 @@ class Application(App, inherit_bindings=False):
         print("Starting Rovr...")
         with Vertical(id="root"):
             yield HeaderArea(id="headerArea")
-            with HorizontalScroll(id="menu"):
-                yield CopyButton()
-                yield CutButton()
-                yield PasteButton()
-                yield NewItemButton()
-                yield RenameItemButton()
-                yield DeleteButton()
-                yield ZipButton()
-                yield UnzipButton()
-                yield PathCopyButton()
-            with VerticalGroup(id="below_menu"):
-                with HorizontalGroup():
-                    yield BackButton()
-                    yield ForwardButton()
-                    yield UpButton()
-                    path_switcher = PathInput()
-                    yield path_switcher
-                yield PathAutoCompleteInput(
-                    target=path_switcher,
-                )
+            with VerticalGroup(id="menuwrapper"):
+                with HorizontalScroll(id="menu"):
+                    yield CopyButton()
+                    yield CutButton()
+                    yield PasteButton()
+                    yield NewItemButton()
+                    yield RenameItemButton()
+                    yield DeleteButton()
+                    yield ZipButton()
+                    yield UnzipButton()
+                    yield PathCopyButton()
+                with VerticalGroup(id="below_menu"):
+                    with HorizontalGroup():
+                        yield BackButton()
+                        yield ForwardButton()
+                        yield UpButton()
+                        path_switcher = PathInput()
+                        yield path_switcher
+                    yield PathAutoCompleteInput(
+                        target=path_switcher,
+                    )
             with HorizontalGroup(id="main"):
                 with VerticalGroup(id="pinned_sidebar_container"):
                     yield SearchInput(
@@ -172,9 +180,8 @@ class Application(App, inherit_bindings=False):
             self.add_class("compact")
 
         # border titles
-        self.query_one("#menu").border_title = "Options"
-        self.query_one("#menu").can_focus = False
-        self.query_one("#below_menu").border_title = "Directory Actions"
+        self.query_one("#menuwrapper").border_title = "Options"
+        self.query_one("#below_menu").border_title = " Navigation "
         self.query_one("#pinned_sidebar_container").border_title = "Sidebar"
         self.query_one("#file_list_container").border_title = "Files"
         self.query_one("#processes").border_title = "Processes"
@@ -203,7 +210,7 @@ class Application(App, inherit_bindings=False):
             self.query_one("#back").tooltip = "Go back in history"
             self.query_one("#forward").tooltip = "Go forward in history"
             self.query_one("#up").tooltip = "Go up the directory tree"
-        self.tabWidget = self.query_one("Tabline")
+        self.tabWidget: Tabline = self.query_one(Tabline)
 
         # Change to startup directory. This also calls update_file_list()
         # causing the file_list to get populated
@@ -230,16 +237,16 @@ class Application(App, inherit_bindings=False):
 
     async def on_key(self, event: events.Key) -> None:
         # Not really sure why this can happen, but I will still handle this
-        if self.focused is None or not self.focused.id:
+        if self.focused is None:
             return
+        assert isinstance(self.focused.parent, DOMNode)
         # if current screen isn't the app screen
         if len(self.screen_stack) != 1:
             return
         # Make sure that key binds don't break
         match event.key:
-            # finder: fd/fzf
             # placeholder, not yet existing
-            case "escape" if "search" in self.focused.id:
+            case "escape" if self.focused.id and "search" in self.focused.id:
                 match self.focused.id:
                     case "search_file_list":
                         self.query_one("#file_list").focus()
@@ -248,8 +255,8 @@ class Application(App, inherit_bindings=False):
                 return
             # backspace is used by default bindings to head up in history
             # so just avoid it
-            case "backspace" if (
-                type(self.focused) is Input or "search" in self.focused.id
+            case "backspace" if isinstance(self.focused, Input) or (
+                self.focused.id and "search" in self.focused.id
             ):
                 return
             # focus toggle pinned sidebar
@@ -417,7 +424,7 @@ class Application(App, inherit_bindings=False):
             )
         ):
             return
-        # 1) Write cwd to explicit --cwd-file if provided
+        # Write cwd to explicit --cwd-file if provided
         message = ""
         if self._cwd_file:
             try:
@@ -427,18 +434,7 @@ class Application(App, inherit_bindings=False):
                 message += (
                     f"Failed to write cwd file `{path.basename(self._cwd_file)}`!\n"
                 )
-        # 2) Otherwise, honor legacy cd_on_quit behavior
-        elif config["settings"]["cd_on_quit"]:
-            try:
-                with open(
-                    path.join(VAR_TO_DIR["CONFIG"], "rovr_quit_cd_path"),
-                    "w",
-                    encoding="utf-8",
-                ) as file:
-                    file.write(getcwd())
-            except OSError:
-                message += "Failed to write `rovr_quit_cd_path`!\n"
-        # 3) Write selected/active item(s) to --chooser-file, if provided
+        # Write selected/active item(s) to --chooser-file, if provided
         if self._chooser_file:
             try:
                 file_list = self.query_one("#file_list")
@@ -464,7 +460,14 @@ class Application(App, inherit_bindings=False):
         if normalise(getcwd()) == normalise(directory) or directory == "":
             add_to_history = False
         else:
-            chdir(directory)
+            try:
+                chdir(directory)
+            except PermissionError as exc:
+                self.notify(
+                    f"You cannot enter into {directory}!\n{exc.strerror}",
+                    title="App: cd",
+                    severity="error",
+                )
 
         self.query_one("#file_list", FileList).update_file_list(
             add_to_session=add_to_history, focus_on=focus_on
@@ -477,21 +480,21 @@ class Application(App, inherit_bindings=False):
     @work
     async def watch_for_changes_and_update(self) -> None:
         cwd = getcwd()
-        items = get_filtered_dir_names(cwd, config["settings"]["show_hidden_files"])
         file_list = self.query_one(FileList)
         while True:
             await asyncio.sleep(1)
             new_cwd = getcwd()
+            if cwd != new_cwd:
+                cwd = new_cwd
+                continue
             try:
-                items = get_filtered_dir_names(
+                items = await get_filtered_dir_names(
                     cwd, config["settings"]["show_hidden_files"]
                 )
             except OSError:
                 # PermissionError falls under this, but we catch everything else
                 continue
-            if cwd != new_cwd:
-                cwd = new_cwd
-            elif items != file_list.items_in_cwd:
+            if items != file_list.items_in_cwd:
                 self.cd(cwd)
 
     @work
@@ -505,26 +508,56 @@ class Application(App, inherit_bindings=False):
             self.has_pushed_screen = False
 
     async def _on_css_change(self) -> None:
-        try:
-            await super()._on_css_change()
-            if self._css_has_errors:
+        if self.css_monitor is not None:
+            css_paths = self.css_monitor._paths
+        else:
+            css_paths = self.css_path
+        if css_paths:
+            try:
+                time = perf_counter()
+                stylesheet = self.stylesheet.copy()
+                try:
+                    # textual issue, i don't want to fix the typing
+                    stylesheet.read_all(css_paths)  # ty: ignore[invalid-argument-type]
+                except StylesheetError as error:
+                    # If one of the CSS paths is no longer available (or perhaps temporarily unavailable),
+                    #  we'll end up with partial CSS, which is probably confusing more than anything. We opt to do
+                    #  nothing here, knowing that we'll retry again very soon, on the next file monitor invocation.
+                    #  Related issue: https://github.com/Textualize/textual/issues/3996
+                    self._css_has_errors = True
+                    self.notify(
+                        str(error),
+                        title=f"CSS: {type(error).__name__}",
+                        severity="error",
+                    )
+                    return
+                stylesheet.parse()
+                elapsed = (perf_counter() - time) * 1000
                 self.notify(
-                    "Errors were found in the TCSS!",
-                    title="Stylesheet Watcher",
-                    severity="error",
+                    f"Reloaded {len(css_paths)} CSS files in {elapsed:.0f} ms",
+                    title="CSS",
+                )
+            except StylesheetParseError as exc:
+                self._css_has_errors = True
+                with self.suspend():
+                    console.print(exc.errors)
+                    try:
+                        console.input(" [bright_blue]Continue? [/]")
+                    except EOFError:
+                        self.exit(return_code=1)
+            except Exception as error:
+                # TODO: Catch specific exceptions
+                self._css_has_errors = True
+                self.bell()
+                self.notify(
+                    str(error), title=f"CSS: {type(error).__name__}", severity="error"
                 )
             else:
-                self.notify(
-                    "TCSS reloaded successfully!",
-                    title="Stylesheet Watcher",
-                    severity="information",
-                )
-        except StyleValueError as exc:
-            self.notify(
-                f"Errors were found in the TCSS!\n{exc}",
-                title="Stylesheet Watcher",
-                severity="error",
-            )
+                self._css_has_errors = False
+                self.stylesheet = stylesheet
+                self.stylesheet.update(self)
+                for screen in self.screen_stack:
+                    self.stylesheet.update(screen)
 
     def get_system_commands(self, screen: Screen) -> Iterable[SystemCommand]:
         if not self.ansi_color:
@@ -632,13 +665,13 @@ class Application(App, inherit_bindings=False):
         self.query_one("#file_list").update_border_subtitle()
 
     @on(events.Click)
-    @work(thread=True)
     def when_got_click(self, event: events.Click) -> None:
         if (
             not isinstance(event.widget, FileListRightClickOptionList)
-            or event.button != 3
+            or event.button == 1
         ):
-            self.query_one(FileListRightClickOptionList).add_class("hidden")
+            with suppress(NoMatches):
+                self.query_one(FileListRightClickOptionList).add_class("hidden")
 
 
 app = Application(watch_css=True)

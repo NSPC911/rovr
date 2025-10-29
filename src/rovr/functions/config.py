@@ -1,5 +1,6 @@
 import os
 from collections import deque
+from importlib import resources
 from importlib.metadata import PackageNotFoundError, version
 from os import path
 
@@ -8,6 +9,7 @@ import toml
 import ujson
 from jsonschema import ValidationError
 from lzstring import LZString
+from rich import box
 from rich.console import Console
 
 from rovr.functions.utils import deep_merge
@@ -127,11 +129,25 @@ def schema_dump(doc_path: str, exception: ValidationError, config_content: str) 
         exception: the ValidationError that occurred
         config_content: the raw file content
     """
+    from rich.padding import Padding
+    from rich.syntax import Syntax
+    from rich.table import Table
+
     doc: list = config_content.splitlines()
 
+    if exception.message.startswith("Additional properties are not allowed"):
+        # `Additional properties are not allowed ('<key>' was unexpected)`
+        # grabs only the key
+        cause = exception.message.split("'")
+        if len(cause) == 3:
+            exception.path.append(cause[1])
+        else:
+            pass
     # find the line no for the error path
     path_str = ".".join(str(p) for p in exception.path) if exception.path else "root"
     lineno = find_path_line(doc, exception.path)
+
+    rjust: int = 0
 
     if lineno is None:
         # fallback to infoless error display
@@ -158,7 +174,7 @@ def schema_dump(doc_path: str, exception: ValidationError, config_content: str) 
     else:
         start: int = max(lineno - 2, 0)
         end: int = min(len(doc), lineno + 3)
-        rjust: int = len(str(end + 1))
+        rjust = len(str(end + 1))
         has_past = False
 
         pprint(
@@ -166,19 +182,27 @@ def schema_dump(doc_path: str, exception: ValidationError, config_content: str) 
             + f"  [bright_blue]-->[/] [white]{path.realpath(doc_path)}:{lineno + 1}[/]"
         )
         for line in range(start, end):
-            if "[" in doc[line]:
-                doc[line] = doc[line].replace("[", "\\[")
             if line == lineno:
                 startswith = "╭╴"
                 has_past = True
                 pprint(
-                    f"[bright_red]{startswith}{str(line + 1).rjust(rjust)}[/][bright_blue] │[/] {doc[line]}"
+                    f"[bright_red]{startswith}{str(line + 1).rjust(rjust)}[/][bright_blue] │[/]",
+                    end=" ",
                 )
             else:
                 startswith = "│ " if has_past else "  "
                 pprint(
-                    f"[bright_red]{startswith}[/][bright_blue]{str(line + 1).rjust(rjust)} │[/] {doc[line]}"
+                    f"[bright_red]{startswith}[/][bright_blue]{str(line + 1).rjust(rjust)} │[/]",
+                    end=" ",
                 )
+            pprint(
+                Syntax(
+                    doc[line],
+                    "toml",
+                    background_color="default",
+                    theme="ansi_dark",
+                )
+            )
 
         # Format the error message based on validator type
         match exception.validator:
@@ -196,6 +220,28 @@ def schema_dump(doc_path: str, exception: ValidationError, config_content: str) 
                 error_msg = exception.message
 
         pprint(f"[bright_red]╰─{'─' * rjust}─❯[/] {error_msg}")
+    # check path for custom message from migration.json
+    with (
+        resources.files("rovr.config")
+        .joinpath("migration.json")
+        .open("r", encoding="utf-8") as f
+    ):
+        migration_docs = ujson.load(f)
+    for item in migration_docs:
+        if path_str in item["keys"]:
+            message = "\n".join(item["message"])
+            to_print = Table(
+                box=box.ROUNDED,
+                border_style="bright_blue",
+                show_header=False,
+                expand=True,
+                show_lines=True,
+            )
+            to_print.add_column()
+            to_print.add_row(message)
+            to_print.add_row(f"[dim]> {item['extra']}[/]")
+            pprint(Padding(to_print, (0, rjust + 4, 0, rjust + 3)))
+            break
     exit(1)
 
 
@@ -220,11 +266,11 @@ def load_config() -> tuple[dict, dict]:
 
     # Create config file if it doesn't exist
     if not path.exists(user_config_path):
-        with open(user_config_path, "w") as file:
+        with open(user_config_path, "w", encoding="utf-8") as file:
             file.write(DEFAULT_CONFIG.format(schema_url=schema_url))
     else:
         # Update schema version if needed
-        with open(user_config_path, "r") as f:
+        with open(user_config_path, "r", encoding="utf-8") as f:
             lines = f.readlines()
 
         expected_schema_line = f"#:schema {schema_url}\n"
@@ -236,7 +282,7 @@ def load_config() -> tuple[dict, dict]:
             else:
                 lines.insert(0, expected_schema_line)
 
-            with open(user_config_path, "w") as f:
+            with open(user_config_path, "w", encoding="utf-8") as f:
                 f.writelines(lines)
 
             display_version = (
@@ -244,10 +290,14 @@ def load_config() -> tuple[dict, dict]:
             )
             pprint(f"[yellow]Updated config schema to {display_version}[/]")
         elif not lines:
-            with open(user_config_path, "w") as file:
+            with open(user_config_path, "w", encoding="utf-8") as file:
                 file.write(DEFAULT_CONFIG.format(schema_url=schema_url))
 
-    with open(path.join(path.dirname(__file__), "../config/config.toml"), "r") as f:
+    with (
+        resources.files("rovr.config")
+        .joinpath("config.toml")
+        .open("r", encoding="utf-8") as f
+    ):
         # check header
         try:
             content = f.read()
@@ -258,7 +308,7 @@ def load_config() -> tuple[dict, dict]:
     user_config = {}
     user_config_content = ""
     if path.exists(user_config_path):
-        with open(user_config_path, "r") as f:
+        with open(user_config_path, "r", encoding="utf-8") as f:
             user_config_content = f.read()
             if user_config_content:
                 try:
@@ -268,23 +318,13 @@ def load_config() -> tuple[dict, dict]:
     # Don't really have to consider the else part, because it's created further down
     config = deep_merge(template_config, user_config)
     # check with schema
-    with open(path.join(path.dirname(__file__), "../config/schema.json"), "r") as f:
-        schema = ujson.load(f)
-
-    # fix schema with 'required' keys
-    def add_required_recursively(node: dict) -> None:
-        if isinstance(node, dict):
-            if (
-                node.get("type") == "object" and "properties" in node
-            ) and "required" not in node:
-                node["required"] = list(node["properties"].keys())
-            for key in node:
-                add_required_recursively(node[key])
-        elif isinstance(node, list):
-            for item in node:
-                add_required_recursively(item)
-
-    add_required_recursively(schema)
+    with (
+        resources.files("rovr.config")
+        .joinpath("schema.json")
+        .open("r", encoding="utf-8") as f
+    ):
+        content = f.read()
+        schema = ujson.loads(content)
 
     try:
         jsonschema.validate(config, schema)

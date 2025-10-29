@@ -48,62 +48,7 @@ you can take a look at the reference in [textual](https://textual.textualize.io/
 
 styling in textual is handled by `tcss` files, a simplified version of the web's `css`. a reference is available in the [textual docs](https://textual.textualize.io/styles/)
 
-the dom for the app is currently like this
-
-```py
-Vertical(id="root")
-  HeaderArea(id="headerArea") -> HorizontalGroup
-    HeaderClock()
-    Tabline() -> Tabs
-      TablineTab() -> Tab
-    HorizontalGroup(id="newTabRight")
-      NewTabButton() -> Button
-      Static()
-  HorizontalScroll(id="menu")
-    CopyButton() -> Button
-    CutButton() -> Button
-    PasteButton()  -> Button
-    NewItemButton() -> Button
-    RenameItemButton() -> Button
-    DeleteButton() -> Button
-    ZipButton() -> Button
-    UnzipButton() -> Button
-  VerticalGroup(id="below_menu")
-    HorizontalGroup()
-      BackButton() -> Button
-      ForwardButton() -> Button
-      UpButton() -> Button
-      RefreshButton() -> Button
-      PathInput() -> Input
-    PathAutoCompleteInput() -> PathAutoComplete
-  HorizontalGroup(id="main")
-    VerticalGroup(id="pinned_sidebar_container")
-      SearchInput() -> Input
-      PinnedSidebar(id="pinned_sidebar") -> OptionList
-        PinnedSidebarOption() -> Option
-    VerticalGroup(id="file_list_container")
-      SearchInput() -> Input
-      FileList(id="file_list", class="file-list") -> SelectionList
-        FileListSelectionWidget() -> Selection
-    PreviewContainer(id="preview_sidebar") -> Container
-      Image(id="image_preview", class="inner_preview")
-      CustomTextArea(id="text_preview") -> TextArea
-      Static(id="text_preview", class="inner_preview")
-      FileList(
-        id="folder_preview",
-        class="file-list inner_preview"
-      ) -> SelectionList
-      FileList(id="archive_preview", class="file-list inner_preview") -> SelectionList
-        FileListSelectionWidget() -> Selection
-  HorizontalGroup(id="footer")
-    ProcessContainer() -> VerticalScroll
-      ProgressBarContainer() -> VerticalGroup
-        ProgressBar()
-        Label()
-    MetadataContainer(id="metadata") -> VerticalScroll
-    Clipboard(id="clipboard") -> SelectionList
-      ClipboardSelection() -> Selection
-```
+the app's general dom is available in [`src/rovr/app.py`](https://github.com/NSPC911/rovr/blob/master/src/rovr/app.py)
 
 `tcss` works the same as `css`, so, if you want to target the `FileList` inside the `#file_list_container` you can do
 

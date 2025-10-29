@@ -1,6 +1,6 @@
 from textual import events, on
 from textual.app import ComposeResult
-from textual.containers import Grid, HorizontalGroup, VerticalGroup
+from textual.containers import Grid, VerticalGroup
 from textual.screen import ModalScreen
 from textual.widgets import Button, Label
 

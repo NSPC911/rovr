@@ -33,17 +33,14 @@ class BetterUnderline(Underline):
 
 
 class TablineTab(Tab):
-    def __init__(
-        self, directory: str | bytes = "", label: str = "", *args, **kwargs
-    ) -> None:
+    ALLOW_SELECT = False
+
+    def __init__(self, directory: str | bytes = "", label: str = "") -> None:
         """Initialise a Tab.
 
         Args:
             directory (str): The directory to set the tab as.
             label (ContentText): The label to use in the tab.
-            id (str | None): Optional ID for the widget.
-            classes (str | None): Space separated list of class names.
-            disabled (bool): Whether the tab is disabled or not.
         """
         if directory == "":
             directory = getcwd()
@@ -54,7 +51,7 @@ class TablineTab(Tab):
                 if path.basename(directory) != ""
                 else directory.strip("/")
             )
-        super().__init__(label=label, *args, **kwargs)
+        super().__init__(label=label)
         self.directory = directory
         self.session = SessionManager()
 
@@ -136,8 +133,9 @@ class Tabline(Tabs):
 
 
 class NewTabButton(Button):
-    def __init__(self, *args, **kwargs) -> None:
-        super().__init__(label="+", variant="primary", compact=True, *args, **kwargs)
+    def __init__(self) -> None:
+        super().__init__(label="+", variant="primary", compact=True)
 
     async def on_button_pressed(self, event: Button.Pressed) -> None:
+        assert self.parent and self.parent.parent
         await self.parent.parent.query_one(Tabline).add_tab(getcwd())

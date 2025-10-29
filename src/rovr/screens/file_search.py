@@ -38,7 +38,7 @@ class FileSearch(ModalScreen):
     def __init__(self, **kwargs) -> None:
         super().__init__(**kwargs)
         self._queued_task = None
-        self._queued_task_args: str | None = None
+        self._queued_task_args: Input.Changed | None = None
 
     def compose(self) -> ComposeResult:
         with VerticalGroup(id="file_search_group", classes="file_search_group"):
@@ -177,7 +177,10 @@ class FileSearch(ModalScreen):
             return
         if self.search_options.highlighted is None:
             self.search_options.highlighted = 0
-        if self.search_options.highlighted_option.disabled:
+        if (
+            self.search_options.highlighted_option
+            and self.search_options.highlighted_option.disabled
+        ):
             return
         self.search_options.action_select()
 
@@ -219,5 +222,5 @@ class FileSearch(ModalScreen):
             or self.search_options.get_option_at_index(0).disabled
         ):
             self.search_options.border_subtitle = "0/0"
-        else:
+        elif self.search_options.highlighted:
             self.search_options.border_subtitle = f"{str(self.search_options.highlighted + 1)}/{self.search_options.option_count}"

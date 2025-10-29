@@ -20,9 +20,9 @@ this page provides a comprehensive list of the default keybindings in `rovr`. yo
 | action | default hotkey | description |
 | ------ | -------------- | ----------- |"""
 try:
-    with open("src/rovr/config/config.toml", "r") as file:
+    with open("src/rovr/config/config.toml", "r", encoding="utf-8") as file:
         binds: dict = toml.load(file)["keybinds"]
-    with open("src/rovr/config/schema.json", "r") as file:
+    with open("src/rovr/config/schema.json", "r", encoding="utf-8") as file:
         schema: dict = ujson.load(file)["properties"]["keybinds"]["properties"]
     for key, values in schema.items():
         to_add = "\n| "
@@ -34,25 +34,32 @@ try:
         to_add += values["display_name"]
         to_add += " |"
         page += to_add
-    with open("docs/src/content/docs/reference/keybindings.mdx", "w") as file:
+    with open(
+        "docs/src/content/docs/reference/keybindings.mdx", "w", encoding="utf-8"
+    ) as file:
         file.write(page)
-    # attempt to format it
+    invoker = []
     if which("prettier"):
-        run(["prettier", "--write", "docs/src/content/docs/reference/keybindings.mdx"])
+        invoker = ["prettier"]
     elif which("npx"):
-        run([
-            "npx",
-            "prettier",
-            "--write",
-            "docs/src/content/docs/reference/keybindings.mdx",
-        ])
+        invoker = [which("npx"), "prettier"]
+    elif which("npm"):
+        invoker = [which("npm"), "exec", "prettier"]
     else:
         pprint(
             "[red][blue]prettier[/] and [blue]npx[/] are not available on PATH, and hence the generated files cannot be formatted."
         )
         exit(1)
+    # attempt to format it
+    run(
+        invoker
+        + [
+            "--write",
+            "docs/src/content/docs/reference/keybindings.mdx",
+        ],
+    )
     pprint(
-        f"[green]Generated it in {naturaldelta(perf_counter() - start_time, minimum_unit='microseconds')}"
+        f"[green]Generated [bright_blue]keybinds.mdx[/] in {naturaldelta(perf_counter() - start_time, minimum_unit='microseconds')}[/]"
     )
 except FileNotFoundError:
     pprint("[red]Do not run manually with python! Run [blue]poe gen-keys[/][/]")

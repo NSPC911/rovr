@@ -2,7 +2,7 @@ import asyncio
 from os import path
 from typing import ClassVar
 
-from textual import events, on, work
+from textual import events, work
 from textual.binding import BindingType
 from textual.widgets import Input, OptionList
 from textual.widgets.option_list import Option
@@ -118,24 +118,10 @@ class PinnedSidebar(OptionList, inherit_bindings=False):
 
     async def on_mount(self) -> None:
         """Reload the pinned files from the config."""
+        assert self.parent
         self.input: Input = self.parent.query_one(Input)
         self.reload_pins()
         self.watch_for_drive_changes_and_update()
-
-    @on(events.Enter)
-    @work
-    async def show_input_when_hover(self, event: events.Focus) -> None:
-        self.input.add_class("show")
-
-    @on(events.Leave)
-    @work
-    async def hide_input_when_leave(self, event: events.Leave) -> None:
-        self.input.remove_class("show")
-
-    @on(events.Focus)
-    def focus_this_thing(self, event: events.Focus) -> None:
-        if self.highlighted is None:
-            self.action_cursor_down()
 
     async def on_option_list_option_selected(
         self, event: OptionList.OptionSelected

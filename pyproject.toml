@@ -16,6 +16,7 @@ classifiers = [
   "Topic :: Utilities",
 ]
 dependencies = [
+  "aiofiles>=25.1.0",
   "humanize>=4.12.3",
   "jsonschema>=4.25.0",
   "lzstring>=1.0.4",
@@ -47,9 +48,9 @@ dev = [
   "commitizen>=4.8.3",
   "json-schema-for-humans>=1.4.1",
   "poethepoet>=0.36.0",
-  "ruff>=0.11.12",
+  "ruff>=0.14.2",
   "textual-dev>=1.7.0",
-  "ty>=0.0.1a21",
+  "ty>=0.0.1a24",
 ]
 
 [build-system]
@@ -75,7 +76,7 @@ check.sequence = [
   { cmd = "ty check" },
   { cmd = "ruff check" }
 ]
-format = "ruff format --preview"
+format = "ruff check --unsafe-fixes --fix"
 
 [tool.ruff.lint]
 select = [
@@ -104,7 +105,7 @@ indent-style = "space"
 line-ending = "auto"
 preview = true
 
-
 [tool.ty.rules]
 possibly-missing-import = "ignore"
+unresolved-reference = "ignore" # handled by ruff
 unresolved-attribute = "ignore"

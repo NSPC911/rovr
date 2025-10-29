@@ -1,5 +1,6 @@
 from os import getcwd, path, scandir
 from pathlib import Path
+from typing import cast
 
 from textual import events
 from textual.validation import Function
@@ -16,14 +17,18 @@ class PathDropdownItem(DropdownItem):
 
 
 class PathAutoCompleteInput(PathAutoComplete):
-    def __init__(self, *args, **kwargs) -> None:
+    def __init__(self, target: Input | str) -> None:
+        """An autocomplete widget for filesystem paths.
+
+        Args:
+            target: The target input widget to autocomplete.
+        """
         super().__init__(
+            target=target,
             path=getcwd().split(path.sep)[0],
             folder_prefix=" " + get_icon("folder", "default")[0] + " ",
             file_prefix=" " + get_icon("file", "default")[0] + " ",
             id="path_autocomplete",
-            *args,
-            **kwargs,
         )
 
     def should_show_dropdown(self, search_string: str) -> bool:
@@ -81,7 +86,7 @@ class PathAutoCompleteInput(PathAutoComplete):
         else:
             self._empty_directory = False
 
-        results.sort(key=self.sort_key)
+        results.sort(key=self.sort_key)  # ty: ignore[no-matching-overload]
         folder_prefix = self.folder_prefix
         return [
             DropdownItem(
@@ -97,11 +102,37 @@ class PathAutoCompleteInput(PathAutoComplete):
 
     def _on_show(self, event: events.Show) -> None:
         super()._on_show(event)
+        assert isinstance(self._target, Input)
         self._target.add_class("hide_border_bottom", update=True)
 
     async def _on_hide(self, event: events.Hide) -> None:
         super()._on_hide(event)
+        assert isinstance(self._target, Input)
         self._target.remove_class("hide_border_bottom", update=True)
+
+    def _complete(self, option_index: int) -> None:
+        """Do the completion (i.e. insert the selected item into the target input).
+
+        This is when the user highlights an option in the dropdown and presses tab or enter.
+        """
+        if not self.display or self.option_list.option_count == 0:
+            return
+
+        option_list = self.option_list
+        highlighted = option_index
+        option = cast(DropdownItem, option_list.get_option_at_index(highlighted))
+        highlighted_value = option.value
+        if highlighted_value == "":
+            # nothing there
+            self.action_hide()
+            assert isinstance(self._target, Input)
+            self._target.post_message(
+                Input.Submitted(self._target, self._target.value, None)
+            )
+            return
+        with self.prevent(Input.Changed):
+            self.apply_completion(highlighted_value, self._get_target_state())
+        self.post_completion()
 
 
 class PathInput(Input):

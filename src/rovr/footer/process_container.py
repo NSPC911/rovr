@@ -1,10 +1,12 @@
+import os
 import platform
 import shutil
 import tarfile
 import time
 import zipfile
 from contextlib import suppress
-from os import getcwd, listdir, makedirs, path, remove, walk
+from os import path
+from typing import Callable
 
 from send2trash import send2trash
 from textual import events, work
@@ -76,7 +78,7 @@ class ProgressBarContainer(VerticalGroup, inherit_bindings=False):
         if is_path and config["interface"]["truncate_progress_file_path"]:
             new_label = label.split("/")
             new_path = new_label[0]
-            for path_item in new_label[1:-1]:
+            for _ in new_label[1:-1]:
                 new_path += "/\u2026"
             new_path += f"/{new_label[-1]}"
             label = new_path
@@ -141,6 +143,7 @@ class ProgressBarContainer(VerticalGroup, inherit_bindings=False):
 class ProcessContainer(VerticalScroll):
     def __init__(self, *args, **kwargs) -> None:
         super().__init__(id="processes", *args, **kwargs)
+        self.has_perm_error: bool = False
 
     async def new_process_bar(
         self, max: int | None = None, id: str | None = None, classes: str | None = None
@@ -269,7 +272,7 @@ class ProcessContainer(VerticalScroll):
                                     if path_utils.force_obtain_write_permission(
                                         item_dict["path"]
                                     ):
-                                        remove(item_dict["path"])
+                                        os.remove(item_dict["path"])
                                 case "skip":
                                     continue
                                 case "cancel":
@@ -287,11 +290,11 @@ class ProcessContainer(VerticalScroll):
                             if do_what["toggle"]:
                                 ignore_trash = do_what["value"]
                             if do_what["value"]:
-                                remove(item_dict["path"])
+                                os.remove(item_dict["path"])
                             else:
                                 continue
                     else:
-                        remove(item_dict["path"])
+                        os.remove(item_dict["path"])
                 except FileNotFoundError:
                     # it's deleted, so why care?
                     pass
@@ -310,7 +313,7 @@ class ProcessContainer(VerticalScroll):
                                 return
                             # Try again: check if file is still in use
                             try:
-                                remove(item_dict["path"])
+                                os.remove(item_dict["path"])
                                 break  # Success, move on
                             except (PermissionError, OSError) as e:
                                 if (is_file_in_use := is_being_used(e)):
@@ -342,7 +345,7 @@ class ProcessContainer(VerticalScroll):
                             if path_utils.force_obtain_write_permission(
                                 item_dict["path"]
                             ):
-                                remove(item_dict["path"])
+                                os.remove(item_dict["path"])
                         case "skip":
                             continue
                         case "cancel":
@@ -360,16 +363,10 @@ class ProcessContainer(VerticalScroll):
                     return
         # The reason for an extra +1 in the total is for this
         # handling folders
-        has_perm_error = False
+        self.has_perm_error = False
         for folder in folders_to_delete:
-            try:
-                shutil.rmtree(folder)
-            except PermissionError:
-                has_perm_error = True
-            except FileNotFoundError:
-                # ig it got removed?
-                pass
-        if has_perm_error:
+            shutil.rmtree(folder, onexc=self.rmtree_fixer)
+        if self.has_perm_error:
             bar.panic(
                 notify={
                     "message": f"Certain files in {folder} could not be deleted due to PermissionError.",
@@ -397,6 +394,28 @@ class ProcessContainer(VerticalScroll):
         self.app.call_from_thread(bar.progress_bar.advance)
         self.app.call_from_thread(bar.add_class, "done")
 
+    def rmtree_fixer(
+        self, function: Callable[[str], None], item_path: str, exc: BaseException
+    ) -> None:
+        """
+        Ran when shutil.rmtree faces an issue
+        Args:
+            function(Callable): the function that caused the issue
+            item_path(str): the path that caused the issue
+            exc(BaseException): the exact exception that caused the error
+        """
+        if isinstance(exc, FileNotFoundError):
+            # ig it got removed?
+            return
+        elif (isinstance(exc, OSError) and "symbolic" in exc.__str__()) or (
+            path_utils.force_obtain_write_permission(item_path)
+        ):
+            os.remove(item_path)
+        elif isinstance(exc, PermissionError):
+            self.has_perm_error = True
+        else:
+            raise
+
     @work(thread=True)
     def create_archive(self, files: list[str], archive_name: str) -> None:
         """
@@ -418,10 +437,10 @@ class ProcessContainer(VerticalScroll):
         files_to_archive = []
         for p in files:
             if path.isdir(p):
-                if not listdir(p):  # empty directory
+                if not os.listdir(p):  # empty directory
                     files_to_archive.append(p)
                 else:
-                    for dirpath, _, filenames in walk(p):
+                    for dirpath, _, filenames in os.walk(p):
                         for f in filenames:
                             files_to_archive.append(path.join(dirpath, f))
             else:
@@ -462,7 +481,7 @@ class ProcessContainer(VerticalScroll):
                             assert isinstance(_archive, tarfile.TarFile)
                             _archive.add(file_path, arcname=arcname)
                 for p in files:
-                    if path.isdir(p) and not listdir(p):
+                    if path.isdir(p) and not os.listdir(p):
                         arcname = path.relpath(p, base_path)
                         _archive = archive._archive
                         if _archive:
@@ -514,7 +533,7 @@ class ProcessContainer(VerticalScroll):
         action_on_permission_error = "ask"
         try:
             if not path.exists(destination_path):
-                makedirs(destination_path)
+                os.makedirs(destination_path)
 
             with Archive(archive_path, "r") as archive:
                 file_list = archive.infolist()
@@ -653,7 +672,7 @@ class ProcessContainer(VerticalScroll):
             dest (str) = getcwd(): The directory to copy to.
         """
         if dest == "":
-            dest = getcwd()
+            dest = os.getcwd()
         bar: ProgressBarContainer = self.app.call_from_thread(
             self.new_process_bar, classes="active"
         )
@@ -703,7 +722,7 @@ class ProcessContainer(VerticalScroll):
             if path.exists(item_dict["path"]):
                 # again checks just in case something goes wrong
                 try:
-                    makedirs(
+                    os.makedirs(
                         path_utils.normalise(
                             path.join(dest, item_dict["relative_loc"], "..")
                         ),
@@ -833,7 +852,7 @@ class ProcessContainer(VerticalScroll):
             if path.exists(item_dict["path"]):
                 # again checks just in case something goes wrong
                 try:
-                    makedirs(
+                    os.makedirs(
                         path_utils.normalise(
                             path.join(dest, item_dict["relative_loc"], "..")
                         ),
@@ -941,22 +960,16 @@ class ProcessContainer(VerticalScroll):
                     )
                     return
         # delete the folders
-        has_perm_error = False
+        self.has_perm_error = False
         for folder in cut_files__folders:
-            try:
-                skip = False
-                for file in cut_ignore:
-                    if folder in file:
-                        skip = True
-                        break
-                if not skip:
-                    shutil.rmtree(folder)
-            except PermissionError:
-                has_perm_error = True
-            except FileNotFoundError:
-                # ig it got removed?
-                continue
-        if has_perm_error:
+            skip = False
+            for file in cut_ignore:
+                if folder in file:
+                    skip = True
+                    break
+            if not skip:
+                shutil.rmtree(folder, onexc=self.rmtree_fixer)
+        if self.has_perm_error:
             bar.panic(
                 notify={
                     "message": f"Certain files in {folder} could not be deleted due to PermissionError.",

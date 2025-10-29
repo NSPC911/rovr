@@ -5,6 +5,7 @@ import stat
 from os import path
 
 import psutil
+from aiofiles import os as aios
 from lzstring import LZString
 from rich.console import Console
 from textual import work
@@ -127,7 +128,9 @@ async def open_file(app: App, filepath: str) -> None:
         app.notify(str(e), title="Open File", severity="error")
 
 
-def get_filtered_dir_names(cwd: str | bytes, show_hidden: bool = False) -> set[str]:
+async def get_filtered_dir_names(
+    cwd: str | bytes, show_hidden: bool = False
+) -> set[str]:
     """
     Get the names of all items in a directory, respecting the show_hidden setting.
     This function is used for comparison in file watchers to avoid refresh loops.
@@ -143,7 +146,7 @@ def get_filtered_dir_names(cwd: str | bytes, show_hidden: bool = False) -> set[s
         PermissionError: When access to the directory is denied
     """
     try:
-        listed_dir = os.scandir(cwd)
+        listed_dir = await aios.scandir(cwd)
     except (PermissionError, FileNotFoundError, OSError):
         raise PermissionError(f"PermissionError: Unable to access {cwd}")
 
@@ -156,7 +159,7 @@ def get_filtered_dir_names(cwd: str | bytes, show_hidden: bool = False) -> set[s
     return names
 
 
-def get_cwd_object(
+async def get_cwd_object(
     cwd: str, show_hidden: bool = False
 ) -> tuple[list[dict], list[dict]]:
     """
@@ -173,7 +176,7 @@ def get_cwd_object(
     """
     folders, files = [], []
     try:
-        listed_dir = os.scandir(cwd)
+        listed_dir = await aios.scandir(cwd)
     except (PermissionError, FileNotFoundError, OSError):
         raise PermissionError(f"PermissionError: Unable to access {cwd}")
     for item in listed_dir:
@@ -193,6 +196,7 @@ def get_cwd_object(
                 "icon": get_icon_for_file(item.name),
                 "dir_entry": item,
             })
+        await asyncio.sleep(0)
     # Sort folders and files properly
     folders.sort(key=lambda x: x["name"].lower())
     files.sort(key=lambda x: x["name"].lower())

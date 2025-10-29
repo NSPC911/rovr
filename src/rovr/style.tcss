@@ -754,12 +754,12 @@ GiveMePermission {
 FileInUse {
   align: center middle;
   #dialog {
-    grid-size: 1;
+    grid-size: 2;
     grid-gutter: 1 2;
-    grid-rows: 1fr 3; /* take up all the space available like Dismissable */
     padding: 1 3;
     border: $border-style $border;
     max-height: 16;
+    grid-rows: 1fr 3; /* take up all the space available like Dismissable */
   }
   #question_container {
     column-span: 2;
@@ -774,15 +774,12 @@ FileInUse {
     }
   }
   Container { align: center middle }
-  Button { width: 50% }
+  Button { width: 100% }
   HorizontalGroup {
     column-span: 2;
     align: center middle;
     padding-left: 2;
     padding-right: 2;
-  }
-  HorizontalGroup Button:first-child {
-    margin-right: 2;
   }
 }
 

@@ -17,9 +17,8 @@ class FileInUse(ModalScreen):
             with VerticalGroup(id="question_container"):
                 for message in self.message.splitlines():
                     yield Label(message, classes="question")
-            with HorizontalGroup():
-                yield Button("Try Again", variant="primary", id="try_again")
-                yield Button("Cancel", variant="error", id="cancel")
+            yield Button("Try Again", variant="primary", id="try_again")
+            yield Button("Cancel", variant="error", id="cancel")
 
     def on_mount(self) -> None:
         self.query_one("#dialog").border_title = "File in Use"

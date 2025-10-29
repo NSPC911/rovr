@@ -241,7 +241,9 @@ class ProcessContainer(VerticalScroll):
                                         send2trash(path_to_trash)
                                         break  # Success, move on
                                     except PermissionError as e:
-                                        is_file_in_use = getattr(e, "winerror", None) == 32
+                                        is_file_in_use = (
+                                            getattr(e, "winerror", None) == 32
+                                        )
                                         if not is_file_in_use:
                                             raise  # Not a file-in-use error, re-raise
                                         # Otherwise, loop again for another try/cancel

@@ -109,6 +109,20 @@ def natural_size(integer: int, suffix: str, filesize_decimals: int) -> str:
             return naturalsize(value=integer, format=f"%.{filesize_decimals}f")
 
 
+def is_being_used(exc: OSError) -> bool:
+    """
+    On Windows, a file being used by another process raises a PermissionError/OSError with winerror 32.
+    Args:
+        exc(OSError): the OSError object
+
+    Returns:
+        bool: whether it is due to the file being used
+    """
+    # 32: Used by another process
+    # 145: Access is denied
+    return getattr(exc, "winerror", None) in (32, 145)
+
+
 def should_cancel() -> bool:
     """
     Whether the current worker should cancel execution

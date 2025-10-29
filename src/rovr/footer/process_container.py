@@ -144,6 +144,7 @@ class ProcessContainer(VerticalScroll):
     def __init__(self, *args, **kwargs) -> None:
         super().__init__(id="processes", *args, **kwargs)
         self.has_perm_error: bool = False
+        self.has_in_use_error: bool = False
 
     async def new_process_bar(
         self, max: int | None = None, id: str | None = None, classes: str | None = None
@@ -222,7 +223,6 @@ class ProcessContainer(VerticalScroll):
                             if platform.system() == "Windows":
                                 # An inherent issue with long paths on windows
                                 path_to_trash = path_to_trash.replace("/", "\\")
-                                pass
                             send2trash(path_to_trash)
                         except (PermissionError, OSError) as e:
                             # On Windows, a file being used by another process
@@ -269,7 +269,7 @@ class ProcessContainer(VerticalScroll):
                             elif is_file_in_use:
                                 # need to ensure unix users see an
                                 # error so they create an issue
-                                self.app.panic()
+                                raise
                             # fallback for regular permission issues
                             if action_on_permission_error == "ask":
                                 do_what = self.app.call_from_thread(
@@ -396,8 +396,17 @@ class ProcessContainer(VerticalScroll):
         # The reason for an extra +1 in the total is for this
         # handling folders
         self.has_perm_error = False
+        self.has_in_use_error = False
         for folder in folders_to_delete:
             shutil.rmtree(folder, onexc=self.rmtree_fixer)
+        if self.has_in_use_error:
+            bar.panic(
+                notify={
+                    "message": f"Certain files in {folder} could not be deleted as they are currently being used",
+                    "title": "Delete Files"
+                },
+            )
+            return
         if self.has_perm_error:
             bar.panic(
                 notify={
@@ -441,7 +450,7 @@ class ProcessContainer(VerticalScroll):
             return
         elif isinstance(exc, (OSError, PermissionError)) and is_being_used(exc):
             # cannot do anything
-            pass
+            self.has_in_use_error = True
         elif (isinstance(exc, OSError) and "symbolic" in exc.__str__()) or (
             path_utils.force_obtain_write_permission(item_path)
         ):
@@ -996,6 +1005,7 @@ class ProcessContainer(VerticalScroll):
                     return
         # delete the folders
         self.has_perm_error = False
+        self.has_in_use_error = False
         for folder in cut_files__folders:
             skip = False
             for file in cut_ignore:
@@ -1004,6 +1014,15 @@ class ProcessContainer(VerticalScroll):
                     break
             if not skip:
                 shutil.rmtree(folder, onexc=self.rmtree_fixer)
+        if self.has_in_use_error:
+            bar.panic(
+                notify={
+                    "message": f"Certain files in {folder} could not be deleted as they are currently being used",
+                    "title": "Delete Files"
+                },
+                bar_text=path.basename(cutted[-1])
+            )
+            return
         if self.has_perm_error:
             bar.panic(
                 notify={

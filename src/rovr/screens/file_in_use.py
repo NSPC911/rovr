@@ -32,9 +32,9 @@ class FileInUse(ModalScreen):
         # Optionally add padding or styling here if needed for consistency
 
     def on_key(self, event: events.Key) -> None:
-        """Handle key presses: Enter -> Try Again, Escape/C -> Cancel, S -> Skip, A -> Toggle."""
+        """Handle key presses: R -> Try Again, Escape/C -> Cancel, S -> Skip, A -> Toggle."""
         match event.key.lower():
-            case "t":
+            case "r":
                 event.stop()
                 # treat enter as Try Again
                 self.dismiss({

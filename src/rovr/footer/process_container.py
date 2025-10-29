@@ -18,6 +18,7 @@ from textual.widgets.option_list import OptionDoesNotExist
 from rovr.classes import Archive
 from rovr.functions import icons as icon_utils
 from rovr.functions import path as path_utils
+from rovr.functions.utils import is_being_used
 from rovr.screens import (
     CommonFileNameDoWhat,
     Dismissable,
@@ -222,13 +223,7 @@ class ProcessContainer(VerticalScroll):
                         except (PermissionError, OSError) as e:
                             # On Windows, a file being used by another process
                             # raises a PermissionError/OSError with winerror 32.
-                            is_file_in_use = False
-                            try:
-                                # Some PermissionError instances expose winerror
-                                is_file_in_use = getattr(e, "winerror", None) == 32
-                            except Exception:
-                                is_file_in_use = False
-                            if is_file_in_use and platform.system() == "Windows":
+                            if (is_file_in_use := is_being_used(e)) and platform.system() == "Windows":
                                 # Ask the user specifically that the file is in use
                                 while True:
                                     response = self.app.call_from_thread(
@@ -244,11 +239,8 @@ class ProcessContainer(VerticalScroll):
                                     try:
                                         send2trash(path_to_trash)
                                         break  # Success, move on
-                                    except PermissionError as e:
-                                        is_file_in_use = (
-                                            getattr(e, "winerror", None) == 32
-                                        )
-                                        if not is_file_in_use:
+                                    except (PermissionError, OSError) as e:
+                                        if not (is_file_in_use := is_being_used(e)):
                                             raise  # Not a file-in-use error, re-raise
                                         # Otherwise, loop again for another try/cancel
                                     except Exception:
@@ -303,14 +295,9 @@ class ProcessContainer(VerticalScroll):
                 except FileNotFoundError:
                     # it's deleted, so why care?
                     pass
-                except PermissionError as e:
+                except (PermissionError, OSError) as e:
                     # Try to detect if file is in use on Windows
-                    is_file_in_use = False
-                    try:
-                        is_file_in_use = getattr(e, "winerror", None) == 32
-                    except Exception:
-                        is_file_in_use = False
-                    if is_file_in_use and platform.system() == "Windows":
+                    if (is_file_in_use := is_being_used(e)) and platform.system() == "Windows":
                         while True:
                             response = self.app.call_from_thread(
                                 self.app.push_screen_wait,
@@ -326,8 +313,7 @@ class ProcessContainer(VerticalScroll):
                                 remove(item_dict["path"])
                                 break  # Success, move on
                             except (PermissionError, OSError) as e:
-                                is_file_in_use = getattr(e, "winerror", None) == 32
-                                if not is_file_in_use:
+                                if (is_file_in_use := is_being_used(e)):
                                     raise  # Not a file-in-use error, re-raise
                                 # Otherwise, loop again for another try/cancel
                             except Exception:

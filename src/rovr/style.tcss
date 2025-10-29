@@ -38,7 +38,9 @@ $scrollbar-corner-color: $primary-muted;
 #zoxide_options,
 #file_search_options,
 #footer > *,
-FileListRightClickOptionList {
+FileListRightClickOptionList,
+.comfy #path_switcher,
+.comfy #below_menu Button {
   background: transparent;
   border: $border-style $border-blurred;
   border-subtitle-color: $background;
@@ -75,7 +77,10 @@ FileListRightClickOptionList {
 #pinned_sidebar.-maximized,
 #preview_sidebar .inner_preview.-maximized,
 #footer > *:focus,
-FileListRightClickOptionList {
+FileListRightClickOptionList,
+.comfy #path_switcher:focus-within,
+.comfy #below_menu Button:focus,
+.comfy #below_menu Button:hover {
   border: $border-style $border;
   border-subtitle-background: $border;
   &:ansi {
@@ -237,12 +242,18 @@ Tooltip {
 
 #menuwrapper {
   margin: 0 1;
-  #below_menu {
-    border-top: $border-style $border-blurred;
-  }
-  &:focus-within #below_menu {
-    border-top: $border-style $border
-  }
+  #below_menu { border-top: $border-style $border-blurred }
+  &:focus-within #below_menu { border-top: $border-style $border }
+}
+
+#menuwrapper #below_menu #path_switcher {
+  border-left: $border-style $border-blurred
+}
+#menuwrapper:focus-within #below_menu #path_switcher {
+  border-left: $border-style $border
+}
+#menuwrapper:focus-within #below_menu #path_switcher.hide_border_bottom {
+  border-left: $border-style $accent
 }
 
 #menu {
@@ -251,37 +262,43 @@ Tooltip {
   padding: 0 1;
   scrollbar-size: 0 0;
 }
+.comfy #menu Button {
+  &:ansi { background: transparent }
+  &:disabled {
+    opacity: 1 !important;
+    background-tint: transparent !important;
+    text-opacity: 1 !important;
+    color: $panel-lighten-3;
+    tint: transparent !important;
+  }
+  &:light:disabled { color: $panel-darken-3 }
+  &:ansi:hover { color: $primary }
+  &:light:ansi:hover { color: $secondary }
+}
 
 #below_menu {
   margin: 0;
   max-height: 11;
   Input {
-    height: 1;
     width: 1fr;
-    margin: 0 1 0 1;
-    padding: 0 1 0 1;
+    margin: 0 1;
+    padding: 0 1;
     overflow: hidden hidden;
     color: $foreground;
     border: none;
-    background: transparent;
-  }
-  Input.hide_border_bottom {
-    height: 1;
   }
   Button {
     margin: 0 1;
   }
   PathAutoCompleteInput {
-    padding: 0 1 0 1;
-    margin: -1 -1 0 13;
+    padding: 0 1;
     overlay: screen;
     width: 1fr;
-    background: transparent;
     border: $border-style $accent;
     border-top: none;
     AutoCompleteList {
       width: 1fr;
-      max-height: 4;
+      max-height: 10vh;
       scrollbar-color: $accent;
       scrollbar-background: $accent-muted;
       scrollbar-color-hover: $accent-lighten-3;
@@ -299,23 +316,8 @@ Tooltip {
 
 .option {
   border: none;
-  height: 1;
-  max-width: 3;
-  width: 3;
   padding: 0;
   margin: 0 1 0 0;
-  opacity: 1 !important;
-  background-tint: transparent !important;
-  text-opacity: 1 !important;
-  tint: transparent !important;
-  background: transparent;
-  &:disabled {
-    color: $panel-lighten-3;
-  }
-  &:light:disabled { color: $panel-darken-3 }
-  &:ansi:hover { color: $primary }
-  &:light:ansi:hover { color: $secondary }
-  &:disabled:hover { color: $panel-lighten-3 }
 }
 
 #main {
@@ -357,7 +359,6 @@ Tooltip {
   width: $pinned_sidebar_width;
   scrollbar-size: 0 0 !important;
   & > PinnedSidebar { scrollbar-size: 0 0 !important }
-  & > Input { display: block }
 }
 
 #pinned_sidebar { height: 1fr; padding: 0 }
@@ -886,12 +887,86 @@ CommandPalette {
   LoadingIndicator { border-bottom: $border-style $border }
 }
 
+FileListRightClickOptionList {
+  width: auto;
+  .option-list--option-highlighted {
+    background: $primary;
+    color: $background;
+  }
+}
+LoadingIndicator {
+  background: transparent;
+}
+/* Compact mode */
+.compact {
+  #pinned_sidebar_container { width: 16 }
+  #preview_sidebar { width: 25vw }
+  HeaderArea { height: 1 }
+  HeaderClock { border-bottom: none !important }
+  #below_menu {
+    height: 2;
+    Input {
+      background: transparent;
+      padding-left: 1;
+      &.hide_border_bottom {
+        height: 1;
+      }
+    }
+    PathAutoCompleteInput {
+      margin: -1 -1 0 13;
+      background: transparent;
+    }
+  }
+  .option {
+    opacity: 1 !important;
+    background-tint: transparent !important;
+    text-opacity: 1 !important;
+    tint: transparent !important;
+    background: transparent;
+    width: 3;
+    max-width: 3;
+    height: 1;
+    &:disabled {
+      color: $panel-lighten-3;
+    }
+    &:light:disabled { color: $panel-darken-3 }
+    &:ansi:hover { color: $primary }
+    &:light:ansi:hover { color: $secondary }
+    &:disabled:hover { color: $panel-lighten-3 }
+  }
+}
+.comfy {
+  #below_menu {
+    Input {
+      &.hide_border_bottom {
+        border: $border-style $accent !important;
+        border-bottom: none !important;
+        height: 3;
+      }
+    }
+    PathAutoCompleteInput {
+      background: $background;
+      margin: -1 1 0 25;
+      &:ansi { background: transparent }
+    }
+    .option {
+      width: 7;
+      max-width: 7;
+      height: 3;
+    }
+  }
+  .option {
+    width: 3;
+    max-width: 3;
+  }
+}
 Screen {
   &.-filelistonly {
     #pinned_sidebar_container,
     #preview_sidebar,
     #below_menu Button { display: none !important }
-    #below_menu PathAutoCompleteInput { margin: -1 -1 0 -1 !important }
+    &.comfy #below_menu PathAutoCompleteInput { margin: -1 1 0 1 !important }
+    &.compact #below_menu PathAutoCompleteInput { margin: -1 -1 0 -1 !important }
     #zoxide_group,
     CommandPalette > Vertical,
     #dialog,
@@ -903,7 +978,8 @@ Screen {
   &.-nopreview {
     #preview_sidebar,
     #below_menu Button { display: none !important }
-    #below_menu PathAutoCompleteInput { margin: -1 -1 0 -1 !important }
+    &.comfy #below_menu PathAutoCompleteInput { margin: -1 1 0 1 !important }
+    &.compact #below_menu PathAutoCompleteInput { margin: -1 -1 0 -1 !important }
     #pinned_sidebar_container { max-width: 25vw }
     #zoxide_group,
     CommandPalette > Vertical,
@@ -911,17 +987,6 @@ Screen {
     ModalInput {
       width: 75vw;
       max-width: 75vw;
-    }
-  }
-  &.-all-horizontal {
-    #menuwrapper #below_menu Input {
-      border-left: $border-style $border-blurred
-    }
-    #menuwrapper:focus-within #below_menu Input {
-      border-left: $border-style $border
-    }
-    #menuwrapper:focus-within #below_menu Input.hide_border_bottom {
-      border-left: $border-style $accent
     }
   }
   &.-all-vertical #footer { max-height: 25vh }
@@ -940,21 +1005,4 @@ Screen {
     #menuwrapper { display: none !important }
     #footer { max-height: 25vh }
   }
-}
-FileListRightClickOptionList {
-  width: auto;
-  .option-list--option-highlighted {
-    background: $primary;
-    color: $background;
-  }
-}
-LoadingIndicator {
-  background: transparent;
-}
-/* Compact mode */
-.compact {
-  #pinned_sidebar_container { width: 16 }
-  #preview_sidebar { width: 25vw }
-  HeaderArea { height: 1 }
-  HeaderClock { border-bottom: none !important }
 }

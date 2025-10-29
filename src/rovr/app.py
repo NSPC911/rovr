@@ -178,6 +178,8 @@ class Application(App, inherit_bindings=False):
         # compact mode
         if config["interface"]["compact_mode"]:
             self.add_class("compact")
+        else:
+            self.add_class("comfy")
 
         # border titles
         self.query_one("#menuwrapper").border_title = "Options"

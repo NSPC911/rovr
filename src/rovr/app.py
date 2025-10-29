@@ -178,10 +178,11 @@ class Application(App, inherit_bindings=False):
         # compact mode
         if config["interface"]["compact_mode"]:
             self.add_class("compact")
+        else:
+            self.add_class("comfy")
 
         # border titles
         self.query_one("#menuwrapper").border_title = "Options"
-        self.query_one("#below_menu").border_title = " Navigation "
         self.query_one("#pinned_sidebar_container").border_title = "Sidebar"
         self.query_one("#file_list_container").border_title = "Files"
         self.query_one("#processes").border_title = "Processes"

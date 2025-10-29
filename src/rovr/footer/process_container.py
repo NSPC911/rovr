@@ -230,41 +230,18 @@ class ProcessContainer(VerticalScroll):
                             if (
                                 is_file_in_use := is_being_used(e)
                             ) and platform.system() == "Windows":
-                                # Check if user has already decided what to do with file-in-use errors
-                                if action_on_file_in_use == "ask":
-                                    # Ask the user specifically that the file is in use
-                                    while True:
-                                        response = self.app.call_from_thread(
-                                            self.app.push_screen_wait,
-                                            FileInUse(
-                                                f"The file appears to be open in another application and cannot be deleted.\nPath: {item_dict['relative_loc']}",
-                                            ),
-                                        )
-                                        # Handle toggle: remember the action for future file-in-use scenarios
-                                        if response["toggle"]:
-                                            action_on_file_in_use = response["value"]
-                                        if response["value"] == "cancel":
-                                            bar.panic()
-                                            return
-                                        elif response["value"] == "skip":
-                                            break
-                                        # Try again: check if file is still in use
-                                        try:
-                                            send2trash(path_to_trash)
-                                            break  # Success, move on
-                                        except (PermissionError, OSError) as e:
-                                            if not (is_file_in_use := is_being_used(e)):
-                                                raise  # Not a file-in-use error, re-raise
-                                            # Otherwise, loop again for another try/cancel
-                                        except Exception:
-                                            raise
-                                else:
-                                    # Auto-handle based on previous decision
-                                    if action_on_file_in_use == "cancel":
-                                        bar.panic()
-                                        return
-                                    elif action_on_file_in_use == "skip":
-                                        pass  # Skip this file, continue to next
+                                current_action, action_on_file_in_use = (
+                                    self._handle_file_in_use_error(
+                                        action_on_file_in_use,
+                                        item_dict["relative_loc"],
+                                        lambda: send2trash(path_to_trash),
+                                    )
+                                )
+                                if current_action == "cancel":
+                                    bar.panic()
+                                    return
+                                elif current_action == "skip":
+                                    pass  # Skip this file, continue to next
                                 continue
                             elif is_file_in_use:
                                 # need to ensure unix users see an
@@ -320,39 +297,18 @@ class ProcessContainer(VerticalScroll):
                     if (
                         is_file_in_use := is_being_used(e)
                     ) and platform.system() == "Windows":
-                        # Check if user has already decided what to do with file-in-use errors
-                        if action_on_file_in_use == "ask":
-                            while True:
-                                response = self.app.call_from_thread(
-                                    self.app.push_screen_wait,
-                                    FileInUse(
-                                        f"The file appears to be open in another application and cannot be deleted.\nPath: {item_dict['relative_loc']}",
-                                    ),
-                                )
-                                # Handle toggle: remember the action for future file-in-use scenarios
-                                if response["toggle"]:
-                                    action_on_file_in_use = response["value"]
-                                if response["value"] == "cancel":
-                                    bar.panic()
-                                    return
-                                elif response["value"] == "skip":
-                                    break
-                                # Try again: check if file is still in use
-                                try:
-                                    os.remove(item_dict["path"])
-                                    break  # Success, move on
-                                except (PermissionError, OSError) as e:
-                                    if not (is_file_in_use := is_being_used(e)):
-                                        raise  # Not a file-in-use error, re-raise
-                                    # Otherwise, loop again for another try/cancel
-                                    continue
-                        else:
-                            # Auto-handle based on previous decision
-                            if action_on_file_in_use == "cancel":
-                                bar.panic()
-                                return
-                            elif action_on_file_in_use == "skip":
-                                pass  # Skip this file, continue to next
+                        current_action, action_on_file_in_use = (
+                            self._handle_file_in_use_error(
+                                action_on_file_in_use,
+                                item_dict["relative_loc"],
+                                lambda: os.remove(item_dict["path"]),
+                            )
+                        )
+                        if current_action == "cancel":
+                            bar.panic()
+                            return
+                        elif current_action == "skip":
+                            pass  # Skip this file, continue to next
                         continue
                     elif is_file_in_use:
                         # need to ensure unix users see an
@@ -402,15 +358,15 @@ class ProcessContainer(VerticalScroll):
         if self.has_in_use_error:
             bar.panic(
                 notify={
-                    "message": f"Certain files in {folder} could not be deleted as they are currently being used",
-                    "title": "Delete Files"
+                    "message": "Certain files could not be deleted as they are currently being used",
+                    "title": "Delete Files",
                 },
             )
             return
         if self.has_perm_error:
             bar.panic(
                 notify={
-                    "message": f"Certain files in {folder} could not be deleted due to PermissionError.",
+                    "message": "Certain files could not be deleted due to PermissionError.",
                     "title": "Delete Files",
                 },
             )
@@ -434,6 +390,57 @@ class ProcessContainer(VerticalScroll):
         )
         self.app.call_from_thread(bar.progress_bar.advance)
         self.app.call_from_thread(bar.add_class, "done")
+
+    def _handle_file_in_use_error(
+        self,
+        action_on_file_in_use: str,
+        item_display_name: str,
+        retry_func: Callable[[], None],
+    ) -> tuple[str, str]:
+        """
+        Handle file-in-use errors with user prompts and automatic retries.
+
+        Args:
+            action_on_file_in_use (str): Current action ("ask", "cancel", "skip")
+            item_display_name (str): Display name for the file
+            retry_func (Callable): Function to call to retry the operation
+
+        Returns:
+            tuple[str, str]: (current_action, updated_default_action)
+                - current_action: What to do with this file ("skip", "try_again", or raises)
+                - updated_default_action: Updated default for future errors
+
+        Raises:
+            PermissionError: If it still fails
+            OSError: If it still fails
+        """
+        if action_on_file_in_use != "ask":
+            return action_on_file_in_use, action_on_file_in_use
+
+        while True:
+            response = self.app.call_from_thread(
+                self.app.push_screen_wait,
+                FileInUse(
+                    f"The file appears to be open in another application and cannot be operated on.\nPath: {item_display_name}",
+                ),
+            )
+            # Handle toggle: remember the action for future file-in-use scenarios
+            updated_action = action_on_file_in_use
+            if response["toggle"]:
+                updated_action = response["value"]
+
+            if response["value"] == "cancel":
+                return "cancel", updated_action
+            elif response["value"] == "skip":
+                return "skip", updated_action
+            # Try again: check if file is still in use
+            try:
+                retry_func()
+                return "try_again", updated_action  # Success, return updated action
+            except (PermissionError, OSError) as e:
+                if not is_being_used(e):
+                    raise  # Not a file-in-use error, re-raise
+                # Otherwise, loop again for another try/cancel
 
     def rmtree_fixer(
         self, function: Callable[[str], None], item_path: str, exc: BaseException
@@ -1017,16 +1024,16 @@ class ProcessContainer(VerticalScroll):
         if self.has_in_use_error:
             bar.panic(
                 notify={
-                    "message": f"Certain files in {folder} could not be deleted as they are currently being used",
-                    "title": "Delete Files"
+                    "message": "Certain files could not be deleted as they are currently being used",
+                    "title": "Delete Files",
                 },
-                bar_text=path.basename(cutted[-1])
+                bar_text=path.basename(cutted[-1]),
             )
             return
         if self.has_perm_error:
             bar.panic(
                 notify={
-                    "message": f"Certain files in {folder} could not be deleted due to PermissionError.",
+                    "message": "Certain files could not be deleted due to PermissionError.",
                     "title": "Delete Files",
                 },
                 bar_text=path.basename(cutted[-1]),

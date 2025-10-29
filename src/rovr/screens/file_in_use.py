@@ -17,7 +17,7 @@ class FileInUse(ModalScreen):
             with VerticalGroup(id="question_container"):
                 for message in self.message.splitlines():
                     yield Label(message, classes="question")
-            yield Button("\\[R]Try Again", variant="primary", id="try_again")
+            yield Button("\\[R]etry", variant="primary", id="try_again")
             yield Button("\\[S]kip", variant="warning", id="skip")
             with Container():
                 yield Button("\\[C]ancel", variant="error", id="cancel")
@@ -36,7 +36,6 @@ class FileInUse(ModalScreen):
         match event.key.lower():
             case "r":
                 event.stop()
-                # treat enter as Try Again
                 self.dismiss({
                     "value": "try_again",
                     "toggle": self.query_one(Switch).value,

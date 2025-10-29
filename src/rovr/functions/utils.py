@@ -118,7 +118,9 @@ def is_being_used(exc: OSError) -> bool:
     Returns:
         bool: whether it is due to the file being used
     """
-    return getattr(exc, "winerror", None) == 32
+    # 5: Access is denied
+    # 32: Used by another process
+    return getattr(exc, "winerror", None) in (145, 32)
 
 
 def should_cancel() -> bool:

@@ -48,6 +48,12 @@
           "default": false,
           "description": "Add line numbers to the left gutter if you are viewing a text file."
         },
+        "scrolloff": {
+          "type": "integer",
+          "minimum": 0,
+          "default": 5,
+          "description": "The number of files to keep above and below the cursor when moving through the file list."
+        },
         "clock": {
           "type": "object",
           "additionalProperties": false,

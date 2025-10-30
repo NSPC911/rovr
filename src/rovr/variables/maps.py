@@ -1,12 +1,24 @@
 from os import path
-from typing import NamedTuple
+from typing import NamedTuple, TypedDict
 
 from platformdirs import PlatformDirs
 from rich._spinners import SPINNERS
 
 dirs = PlatformDirs("rovr", ".")  # Ah yes, my name is "."
 
-VAR_TO_DIR = {
+
+class PlatformDirsVars(TypedDict):
+    DOCUMENTS: str
+    DOWNLOADS: str
+    MUSIC: str
+    PICTURES: str
+    DESKTOP: str
+    HOME: str
+    VIDEOS: str
+    CONFIG: str
+
+
+VAR_TO_DIR: PlatformDirsVars = {
     "DOCUMENTS": dirs.user_documents_dir.replace("\\", "/"),
     "DOWNLOADS": dirs.user_downloads_dir.replace("\\", "/"),
     "MUSIC": dirs.user_music_dir.replace("\\", "/"),

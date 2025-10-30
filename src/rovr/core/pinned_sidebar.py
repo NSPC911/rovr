@@ -148,8 +148,6 @@ class PinnedSidebar(OptionList, inherit_bindings=False):
         self.app.query_one("#file_list").focus()
         with self.input.prevent(Input.Changed):
             self.input.clear()
-        self.clear_options()
-        self.add_options(self.list_of_options)
 
     def on_key(self, event: events.Key) -> None:
         if event.key in config["keybinds"]["focus_search"]:

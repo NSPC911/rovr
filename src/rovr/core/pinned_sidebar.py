@@ -1,9 +1,12 @@
 import asyncio
 from os import path
+from pathlib import Path
 from typing import ClassVar
 
 from textual import events, work
 from textual.binding import BindingType
+from textual.file_monitor import FileMonitor
+from textual.types import DuplicateID
 from textual.widgets import Input, OptionList
 from textual.widgets.option_list import Option
 
@@ -12,6 +15,7 @@ from rovr.functions import icons as icon_utils
 from rovr.functions import path as path_utils
 from rovr.functions import pins as pin_utils
 from rovr.variables.constants import config, vindings
+from rovr.variables.maps import VAR_TO_DIR
 
 
 class PinnedSidebar(OptionList, inherit_bindings=False):
@@ -22,7 +26,13 @@ class PinnedSidebar(OptionList, inherit_bindings=False):
     def __init__(self, **kwargs) -> None:
         super().__init__(**kwargs)
 
-    @work
+        def reload_pins_sync() -> None:
+            asyncio.create_task(self.reload_pins())
+
+        self.pin_monitor = FileMonitor(
+            [Path(VAR_TO_DIR["CONFIG"]) / "pins.json"], reload_pins_sync
+        )
+
     async def reload_pins(self) -> None:
         """Reload pins shown
 
@@ -36,7 +46,6 @@ class PinnedSidebar(OptionList, inherit_bindings=False):
         self.list_of_options = []
         print(f"Reloading pins: {available_pins}")
         print(f"Reloading default folders: {default}")
-        self.clear_options()
         for default_folder in default:
             if not path.isdir(default_folder["path"]):
                 if path.exists(default_folder["path"]):
@@ -98,7 +107,13 @@ class PinnedSidebar(OptionList, inherit_bindings=False):
                     id=f"{path_utils.compress(drive)}-drives",
                 )
             )
-        self.add_options(self.list_of_options)
+        self.clear_options()
+        try:
+            self.add_options(self.list_of_options)
+        except DuplicateID:
+            self.app.panic(
+                "[bright_blue]pins.json[/] seems to not be properly set up.\n - There definitely are paths that are defined multiple times in it.\n - Can you take a look at it?\nIf you are unsure on how to fix it, you may choose to just [red][i]obliterate[/][/] the file."
+            )
 
     @work
     async def watch_for_drive_changes_and_update(self) -> None:
@@ -116,12 +131,21 @@ class PinnedSidebar(OptionList, inherit_bindings=False):
                 )
                 continue
 
+    @work
+    async def watch_for_pin_changes(self) -> None:
+        while True:
+            # for some reason, this value doesn't matter,
+            # only the set_interval matters on the delay
+            await asyncio.sleep(5)
+            self.set_interval(1, self.pin_monitor, name="pin monitor")
+
     async def on_mount(self) -> None:
         """Reload the pinned files from the config."""
         assert self.parent
         self.input: Input = self.parent.query_one(Input)
-        self.reload_pins()
         self.watch_for_drive_changes_and_update()
+        self.watch_for_pin_changes()
+        await self.reload_pins()
 
     async def on_option_list_option_selected(
         self, event: OptionList.OptionSelected

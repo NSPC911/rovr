@@ -429,12 +429,16 @@ def get_mounted_drives() -> list:
         elif os_type == "Darwin":
             # For macOS, filter out system volumes and keep only user-relevant drives
             drives = [
-                p.mountpoint for p in partitions if path.isdir(p.device) and _should_include_macos_mount_point(p)
+                p.mountpoint
+                for p in partitions
+                if path.isdir(p.device) and _should_include_macos_mount_point(p)
             ]
         else:
             # For other Unix-like systems (Linux, WSL, etc.), filter out system mount points
             drives = [
-                p.mountpoint for p in partitions if path.isdir(p.device) and _should_include_linux_mount_point(p)
+                p.mountpoint
+                for p in partitions
+                if path.isdir(p.device) and _should_include_linux_mount_point(p)
             ]
     except Exception as e:
         print(f"Error getting mounted drives: {e}")

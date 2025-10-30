@@ -11,7 +11,8 @@ truncate_progress_file_path = false
 compact_mode = false
 show_line_numbers = true
 # yazi style is 5
-scrolloff = 5
+# but it has more space
+scrolloff = 3
 
 [interface.preview_text]
 error = "couldn't read this file! (\u00AC_\u00AC)" # ¬_¬

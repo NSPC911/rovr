@@ -36,11 +36,7 @@ from rovr.action_buttons import (
     UnzipButton,
     ZipButton,
 )
-from rovr.core import (
-    FileList,
-    PinnedSidebar,
-    PreviewContainer,
-)
+from rovr.core import FileList, FileListContainer, PinnedSidebar, PreviewContainer
 from rovr.core.file_list import FileListRightClickOptionList
 from rovr.footer import Clipboard, MetadataContainer, ProcessContainer
 from rovr.functions import icons
@@ -72,7 +68,7 @@ console = Console()
 
 
 class Application(App, inherit_bindings=False):
-    # dont need ctrl+c
+    # don't need ctrl+c
     BINDINGS = [
         Binding(
             key,
@@ -155,16 +151,7 @@ class Application(App, inherit_bindings=False):
                         placeholder=f"({icons.get_icon('general', 'search')[0]}) Search"
                     )
                     yield PinnedSidebar(id="pinned_sidebar")
-                with VerticalGroup(id="file_list_container"):
-                    yield SearchInput(
-                        placeholder=f"({icons.get_icon('general', 'search')[0]}) Search something..."
-                    )
-                    filelist = FileList(
-                        id="file_list",
-                        name="File List",
-                        classes="file-list",
-                    )
-                    yield filelist
+                yield FileListContainer()
                 yield PreviewContainer(
                     id="preview_sidebar",
                 )
@@ -172,7 +159,6 @@ class Application(App, inherit_bindings=False):
                 yield ProcessContainer()
                 yield MetadataContainer(id="metadata")
                 yield Clipboard(id="clipboard")
-            yield FileListRightClickOptionList(filelist, classes="hidden")
 
     def on_mount(self) -> None:
         # compact mode

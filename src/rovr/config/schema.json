@@ -51,7 +51,7 @@
         "scrolloff": {
           "type": "integer",
           "minimum": 0,
-          "default": 5,
+          "default": 3,
           "description": "The number of files to keep above and below the cursor when moving through the file list."
         },
         "clock": {

@@ -367,6 +367,7 @@ Tooltip {
   margin: 0;
   width: $preview_sidebar_width;
   layout: horizontal;
+  height: 1fr;
   & > Static {
     text-overflow: ellipsis;
     text-wrap: nowrap;
@@ -392,7 +393,8 @@ Tooltip {
   Image {
     width: auto;
     height: auto;
-    align: center bottom;
+    align: center middle;
+    margin: 0 1
   }
 }
 

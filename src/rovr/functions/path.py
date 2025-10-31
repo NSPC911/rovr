@@ -86,6 +86,9 @@ async def open_file(app: App, filepath: str) -> None:
         filepath (str): Path to the file to open
     """
     system = os_type.lower()
+    # check if it is available first
+    if not path.exists(filepath):
+        return
 
     try:
         match system:

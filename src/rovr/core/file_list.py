@@ -548,8 +548,9 @@ class FileList(SelectionList, inherit_bindings=False):
             self._option_render_cache.clear()
         self.refresh(layout=True, repaint=True)
         self.app.tabWidget.active_tab.session.selectMode = self.select_mode_enabled
+        with self.prevent(SelectionList.SelectedChanged):
+            self.deselect_all()
         self.update_border_subtitle()
-        self.deselect_all()
 
     async def get_selected_objects(self) -> list[str] | None:
         """Get the selected objects in the file list.
@@ -788,6 +789,12 @@ class FileList(SelectionList, inherit_bindings=False):
     def update_border_subtitle(self) -> None:
         if self.dummy or type(self.highlighted) is not int or not self.parent:
             return
+        elif self.get_option_at_index(0).disabled:
+            utils.set_scuffed_subtitle(
+                self.parent, "NORMAL", "0/0"
+            )
+            # tell metadata to die
+            self.app.query_one("MetadataContainer").remove_children()
         elif (not self.select_mode_enabled) or (self.selected is None):
             utils.set_scuffed_subtitle(
                 self.parent,

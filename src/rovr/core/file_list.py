@@ -790,9 +790,7 @@ class FileList(SelectionList, inherit_bindings=False):
         if self.dummy or type(self.highlighted) is not int or not self.parent:
             return
         elif self.get_option_at_index(0).disabled:
-            utils.set_scuffed_subtitle(
-                self.parent, "NORMAL", "0/0"
-            )
+            utils.set_scuffed_subtitle(self.parent, "NORMAL", "0/0")
             # tell metadata to die
             self.app.query_one("MetadataContainer").remove_children()
         elif (not self.select_mode_enabled) or (self.selected is None):

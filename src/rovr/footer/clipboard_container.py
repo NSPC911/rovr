@@ -170,7 +170,6 @@ class Clipboard(SelectionList, inherit_bindings=False):
         # redraw
         # self.refresh(layout=True)
 
-    @work
     async def on_key(self, event: events.Key) -> None:
         if self.has_focus:
             if event.key in config["keybinds"]["delete"]:
@@ -183,7 +182,7 @@ class Clipboard(SelectionList, inherit_bindings=False):
                     )
                     return
                 self.remove_option_at_index(self.highlighted)
-                self.paste_button.disabled = self.add_options
+                self.paste_button.disabled = len(self.selected) == 0
                 if self.option_count == 0:
                     return
                 event.stop()

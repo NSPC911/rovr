@@ -5,7 +5,7 @@ from textual.containers import VerticalGroup
 from rovr.functions import icons
 from rovr.search_container import SearchInput
 
-from .file_list import FileList, FileListRightClickOptionList
+from .file_list import FileList
 
 
 class FileListContainer(VerticalGroup):
@@ -14,18 +14,17 @@ class FileListContainer(VerticalGroup):
         super().__init__(
             id="file_list_container",
         )
-
-    def compose(self) -> ComposeResult:
-        yield SearchInput(
-            placeholder=f"({icons.get_icon('general', 'search')[0]}) Search something..."
-        )
         self.filelist = FileList(
             id="file_list",
             name="File List",
             classes="file-list",
         )
+
+    def compose(self) -> ComposeResult:
+        yield SearchInput(
+            placeholder=f"({icons.get_icon('general', 'search')[0]}) Search something..."
+        )
         yield self.filelist
-        yield FileListRightClickOptionList(self.filelist, classes="hidden")
 
     def on_resize(self, event: events.Resize) -> None:
         self.filelist.scroll_to_highlight()

@@ -148,13 +148,17 @@ class Application(App, inherit_bindings=False):
             with HorizontalGroup(id="main"):
                 with VerticalGroup(id="pinned_sidebar_container"):
                     yield SearchInput(
-                        placeholder=f"({icons.get_icon('general', 'search')[0]}) Search"
+                        placeholder=f"{icons.get_icon('general', 'search')[0]} Search"
                     )
                     yield PinnedSidebar(id="pinned_sidebar")
-                yield FileListContainer()
+                filelistcontainer = FileListContainer()
+                yield filelistcontainer
                 yield PreviewContainer(
                     id="preview_sidebar",
                 )
+            yield FileListRightClickOptionList(
+                filelistcontainer.filelist, classes="hidden"
+            )
             with HorizontalGroup(id="footer"):
                 yield ProcessContainer()
                 yield MetadataContainer(id="metadata")

@@ -47,7 +47,9 @@ class NewItemButton(Button):
                 makedirs(location)
             except Exception as e:
                 self.notify(
-                    message=Content(f"Error creating directory '{response}': {e}"),
+                    message=Content(
+                        f"Error creating directory '{response}'\n{type(e).__name__}: {e}"
+                    ),
                     title="New Item",
                     severity="error",
                 )
@@ -64,7 +66,9 @@ class NewItemButton(Button):
                     f.write("")
             except Exception as e:
                 self.notify(
-                    message=Content(f"Error creating file '{location}': {e}"),
+                    message=Content(
+                        f"Error creating directory '{response}'\n{type(e).__name__}: {e}"
+                    ),
                     title="New Item",
                     severity="error",
                 )
@@ -75,7 +79,9 @@ class NewItemButton(Button):
                     f.write("")  # Create an empty file
             except Exception as e:
                 self.notify(
-                    message=Content(f"Error creating file '{location}': {e}"),
+                    message=Content(
+                        f"Error creating directory '{response}'\n{type(e).__name__}: {e}"
+                    ),
                     title="New Item",
                     severity="error",
                 )
@@ -83,7 +89,7 @@ class NewItemButton(Button):
         await filelist.on_option_list_option_highlighted(
             filelist.OptionHighlighted(
                 filelist,
-                filelist.get_option_at_index(filelist.highlighted),
+                filelist.highlighted_option,
                 filelist.highlighted,
             )
         )

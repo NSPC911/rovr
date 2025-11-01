@@ -131,9 +131,7 @@ async def open_file(app: App, filepath: str) -> None:
         app.notify(str(e), title="Open File", severity="error")
 
 
-async def get_filtered_dir_names(
-    cwd: str | bytes, show_hidden: bool = False
-) -> set[str]:
+def get_filtered_dir_names(cwd: str | bytes, show_hidden: bool = False) -> set[str]:
     """
     Get the names of all items in a directory, respecting the show_hidden setting.
     This function is used for comparison in file watchers to avoid refresh loops.
@@ -149,7 +147,7 @@ async def get_filtered_dir_names(
         PermissionError: When access to the directory is denied
     """
     try:
-        listed_dir = await aios.scandir(cwd)
+        listed_dir = os.scandir(cwd)
     except (PermissionError, FileNotFoundError, OSError):
         raise PermissionError(f"PermissionError: Unable to access {cwd}")
 

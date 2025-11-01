@@ -1,8 +1,7 @@
-import asyncio
 import shutil
 from contextlib import suppress
 from os import chdir, getcwd, path
-from time import perf_counter
+from time import perf_counter, sleep
 from types import SimpleNamespace
 from typing import Callable, Iterable
 
@@ -44,6 +43,7 @@ from rovr.functions.path import (
     decompress,
     ensure_existing_directory,
     get_filtered_dir_names,
+    get_mounted_drives,
     normalise,
 )
 from rovr.functions.themes import get_custom_themes
@@ -455,6 +455,12 @@ class Application(App, inherit_bindings=False):
                     title="App: cd",
                     severity="error",
                 )
+                return
+            except FileNotFoundError:
+                self.notify(
+                    f"{directory}\nno longer exists!", title="App: cd", severity="error"
+                )
+                return
 
         self.query_one("#file_list", FileList).update_file_list(
             add_to_session=add_to_history, focus_on=focus_on
@@ -464,25 +470,64 @@ class Application(App, inherit_bindings=False):
         if callback:
             self.call_later(callback)
 
-    @work
-    async def watch_for_changes_and_update(self) -> None:
+    @work(thread=True)
+    def watch_for_changes_and_update(self) -> None:
         cwd = getcwd()
         file_list = self.query_one(FileList)
+        pins_path = path.join(VAR_TO_DIR["CONFIG"], "pins.json")
+        pins_mtime = None
+        with suppress(OSError):
+            pins_mtime = path.getmtime(pins_path)
+        drives = get_mounted_drives()
+        drive_update_every = int(config["settings"]["drive_watcher_frequency"])
+        count: int = -1
         while True:
-            await asyncio.sleep(1)
+            sleep(1)
+            count += 1
+            if count >= drive_update_every:
+                count = 0
             new_cwd = getcwd()
-            if cwd != new_cwd:
+            if not path.exists(new_cwd):
+                file_list.update_file_list(add_to_session=False)
+            elif cwd != new_cwd:
                 cwd = new_cwd
                 continue
-            try:
-                items = await get_filtered_dir_names(
-                    cwd, config["settings"]["show_hidden_files"]
-                )
-            except OSError:
-                # PermissionError falls under this, but we catch everything else
-                continue
-            if items != file_list.items_in_cwd:
-                self.cd(cwd)
+            else:
+                with suppress(OSError):
+                    items = self.app.call_from_thread(
+                        get_filtered_dir_names,
+                        cwd,
+                        config["settings"]["show_hidden_files"],
+                    )
+                if items != file_list.items_in_cwd:
+                    self.cd(cwd)
+            # check pins.json
+            new_mtime = None
+            reload_called: bool = False
+            with suppress(OSError):
+                new_mtime = path.getmtime(pins_path)
+            if new_mtime != pins_mtime:
+                pins_mtime = new_mtime
+                if new_mtime is not None:
+                    self.app.call_from_thread(
+                        self.query_one("#pinned_sidebar").reload_pins
+                    )
+                    reload_called = True
+            # check drives
+            if count == 0 and not reload_called:
+                try:
+                    new_drives = get_mounted_drives()
+                    if new_drives != drives:
+                        drives = new_drives
+                        self.app.call_from_thread(
+                            self.query_one("#pinned_sidebar").reload_pins
+                        )
+                except Exception as exc:
+                    self.notify(
+                        f"{type(exc).__name__}: {exc}",
+                        title="Change Watcher",
+                        severity="warning",
+                    )
 
     @work
     async def on_resize(self, event: events.Resize) -> None:

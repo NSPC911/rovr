@@ -1,8 +1,7 @@
-import asyncio
 from os import path
 from typing import ClassVar
 
-from textual import events, work
+from textual import events
 from textual.binding import BindingType
 from textual.widgets import Input, OptionList
 from textual.widgets.option_list import Option
@@ -15,14 +14,12 @@ from rovr.variables.constants import config, vindings
 
 
 class PinnedSidebar(OptionList, inherit_bindings=False):
-    DRIVE_WATCHER_FREQUENCY: float = config["settings"]["drive_watcher_frequency"]
     # Just so that I can disable space
     BINDINGS: ClassVar[list[BindingType]] = list(vindings)
 
     def __init__(self, **kwargs) -> None:
         super().__init__(**kwargs)
 
-    @work
     async def reload_pins(self) -> None:
         """Reload pins shown
 
@@ -100,28 +97,11 @@ class PinnedSidebar(OptionList, inherit_bindings=False):
             )
         self.add_options(self.list_of_options)
 
-    @work
-    async def watch_for_drive_changes_and_update(self) -> None:
-        self._drives = path_utils.get_mounted_drives()
-        while True:
-            await asyncio.sleep(self.DRIVE_WATCHER_FREQUENCY)
-            try:
-                new_drives = path_utils.get_mounted_drives()
-                if self._drives != new_drives:
-                    self._drives = new_drives
-                    self.reload_pins()
-            except Exception as e:
-                print(
-                    f"Exception of type {type(e).__name__} while watching drives: {e}"
-                )
-                continue
-
     async def on_mount(self) -> None:
         """Reload the pinned files from the config."""
         assert self.parent
         self.input: Input = self.parent.query_one(Input)
-        self.reload_pins()
-        self.watch_for_drive_changes_and_update()
+        await self.reload_pins()
 
     async def on_option_list_option_selected(
         self, event: OptionList.OptionSelected

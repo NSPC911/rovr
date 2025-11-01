@@ -154,7 +154,7 @@ class FileList(SelectionList, inherit_bindings=False):
                 Selection(
                     " Permission Error: Unable to access this directory.",
                     value="",
-                    id="",
+                    id="perm",
                     disabled=True,
                 ),
             )
@@ -169,6 +169,7 @@ class FileList(SelectionList, inherit_bindings=False):
         else:
             for selector in buttons_that_depend_on_path:
                 self.app.query_one(selector).disabled = False
+        self.app.query_one("#new").disabled = self.list_of_options[0].id == "perm"
         self.clear_options()
         self.add_options(self.list_of_options)
         # session handler

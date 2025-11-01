@@ -31,9 +31,10 @@ class PinnedSidebar(OptionList, inherit_bindings=False):
         pins = available_pins["pins"]
         default = available_pins["default"]
         self.list_of_options = []
+        # get current highlight
+        prev_highlighted: int = self.highlighted if self.highlighted else 0
         print(f"Reloading pins: {available_pins}")
         print(f"Reloading default folders: {default}")
-        self.clear_options()
         for default_folder in default:
             if not path.isdir(default_folder["path"]):
                 if path.exists(default_folder["path"]):
@@ -95,7 +96,9 @@ class PinnedSidebar(OptionList, inherit_bindings=False):
                     id=f"{path_utils.compress(drive)}-drives",
                 )
             )
+        self.clear_options()
         self.add_options(self.list_of_options)
+        self.highlighted = prev_highlighted
 
     async def on_mount(self) -> None:
         """Reload the pinned files from the config."""

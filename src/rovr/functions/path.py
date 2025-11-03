@@ -3,6 +3,7 @@ import ctypes
 import os
 import stat
 from os import path
+from typing import Literal, overload
 
 import psutil
 from aiofiles import os as aios
@@ -253,6 +254,18 @@ def force_obtain_write_permission(item_path: str) -> bool:
             f"[bright_red]Permission Error:[/] Failed to change permission for {item_path}: {e}"
         )
         return False
+
+
+@overload
+def get_recursive_files(
+    object_path: str, with_folders: Literal[False] = False
+) -> list[dict]: ...
+
+
+@overload
+def get_recursive_files(
+    object_path: str, with_folders: Literal[True] = True
+) -> tuple[list[dict], list[dict]]: ...
 
 
 def get_recursive_files(

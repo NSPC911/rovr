@@ -189,7 +189,7 @@ class ProcessContainer(VerticalScroll):
         for file in files:
             if compressed:
                 file = path_utils.decompress(file)
-            if path.isdir(file):
+            if path_utils.file_is_type(file) == "folder":
                 folders_to_delete.append(file)
             files_to_add, folders_to_add = path_utils.get_recursive_files(
                 file, with_folders=True

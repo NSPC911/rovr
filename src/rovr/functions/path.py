@@ -269,9 +269,7 @@ def get_recursive_files(
         list: A list of dictionaries, with a "path" key and "relative_loc" key for files
         list: A list of path strings that were involved in the file list.
     """
-    if path.isfile(path.realpath(object_path)) or path.islink(
-        path.realpath(object_path)
-    ):
+    if file_is_type(object_path) != "folder":
         if with_folders:
             return [
                 {

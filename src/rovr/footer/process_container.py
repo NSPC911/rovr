@@ -855,13 +855,7 @@ class ProcessContainer(VerticalScroll):
                         case "skip":
                             continue
                         case "cancel":
-                            self.app.call_from_thread(bar.add_class, "error")
-                            self.app.call_from_thread(
-                                bar.update_icon,
-                                icon_utils.get_icon("general", "copy")[0]
-                                + " "
-                                + icon_utils.get_icon("general", "close")[0],
-                            )
+                            bar.panic()
                             return
                 except FileNotFoundError:
                     # the only way this can happen is if the file is deleted
@@ -993,7 +987,7 @@ class ProcessContainer(VerticalScroll):
                         case "skip":
                             continue
                         case "cancel":
-                            bar.panic(bar_text="Process cancelled.")
+                            bar.panic()
                             return
                 except FileNotFoundError:
                     # the only way this can happen is if the file is deleted

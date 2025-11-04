@@ -44,7 +44,6 @@ class Clipboard(SelectionList, inherit_bindings=False):
                     type_of_selection="copy",
                 )
             )
-        self.paste_button.disabled = False
         for item_number in range(len(items)):
             self.select(self.get_option_at_index(item_number))
 
@@ -64,7 +63,6 @@ class Clipboard(SelectionList, inherit_bindings=False):
                         type_of_selection="cut",
                     )
                 )
-        self.paste_button.disabled = False
         for item_number in range(len(items)):
             self.select(self.get_option_at_index(item_number))
 
@@ -193,3 +191,8 @@ class Clipboard(SelectionList, inherit_bindings=False):
                 else:
                     self.select_all()
                 event.stop()
+
+    async def on_selection_list_selected_changed(
+        self, event: SelectionList.SelectedChanged
+    ) -> None:
+        self.paste_button.disabled = len(self.selected) == 0

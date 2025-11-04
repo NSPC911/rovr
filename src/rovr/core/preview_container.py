@@ -21,6 +21,7 @@ from textual.worker import Worker, WorkerCancelled
 from rovr.classes import Archive
 from rovr.core import FileList
 from rovr.functions.utils import should_cancel
+from rovr.pdf.pdf_viewer import PDFViewer
 from rovr.variables.constants import PreviewContainerTitles, config
 from rovr.variables.maps import ARCHIVE_EXTENSIONS_FULL, EXT_TO_LANG_MAP, PIL_EXTENSIONS
 
@@ -159,7 +160,7 @@ class PreviewContainer(Container):
         super().__init__(*args, **kwargs)
         self._pending_preview_path: str | None = None
         self._current_content: str | list[str] | None = None
-        self._current_file_path = None
+        self._current_file_path: str = ""
         self._initial_height = self.size.height
         self._file_type: str = "none"
         self._preview_texts: list[str] = config["interface"]["preview_text"].values()
@@ -362,7 +363,9 @@ class PreviewContainer(Container):
             else EXT_TO_LANG_MAP.get(
                 # forced an ignore, there really is no other way to handle this
                 # it is a valid overload, but ty doesn't know it yet I suppose
-                path.splitext(self._current_file_path)[1],  # ty: ignore[no-matching-overload]
+                path.splitext(self._current_file_path)[
+                    1
+                ],  # ty: ignore[no-matching-overload]
                 "markdown",  # ty: ignore[no-matching-overload]
             )
         )
@@ -460,8 +463,30 @@ class PreviewContainer(Container):
         except WorkerCancelled:
             return
 
+    async def show_pdf_preview(self) -> None:
+        self.border_title = titles.pdf
         if should_cancel():
             return
+        try:
+            if not self.has_child("PDFViewer"):
+                await self.remove_children()
+                if should_cancel():
+                    return
+                await self.mount(
+                    PDFViewer(
+                        self._current_file_path,
+                        protocol=config["settings"]["image_protocol"],
+                        use_keys=True,
+                    )
+                )
+                self.query_one(PDFViewer).can_focus = True
+            else:
+                self.query_one(PDFViewer).path = self._current_file_path
+        except NoMatches:
+            pass
+        finally:
+            if should_cancel():
+                return
 
     def show_preview(self, file_path: str) -> None:
         if (
@@ -491,6 +516,8 @@ class PreviewContainer(Container):
                 file_type = "image"
             elif any(lower_file_path.endswith(ext) for ext in ARCHIVE_EXTENSIONS_FULL):
                 file_type = "archive"
+            elif lower_file_path.endswith(".pdf"):
+                file_type = "pdf"
             else:
                 file_type = "file"
 
@@ -529,7 +556,7 @@ class PreviewContainer(Container):
                         FileNotFoundError,
                     ):
                         content = [config["interface"]["preview_text"]["error"]]
-                case "image":
+                case "image" | "pdf":
                     pass
                 case _:
                     if should_cancel():
@@ -559,7 +586,7 @@ class PreviewContainer(Container):
                     except FileNotFoundError:
                         content = config["interface"]["preview_text"]["error"]
                         if path.exists(file_path):
-                            raise Exception from None
+                            raise
             if should_cancel():
                 return
 
@@ -588,23 +615,26 @@ class PreviewContainer(Container):
 
         self._file_type = file_type
 
-        if file_type == "folder":
-            await self.show_folder_preview(file_path)
-        elif file_type == "image":
-            await self.show_image_preview()
-        elif file_type == "archive":
-            await self.show_archive_preview()
-        elif content is not None:
-            if content in self._preview_texts:
-                await self.mount_special_messages()
-            else:
-                if (
-                    config["plugins"]["bat"]["enabled"]
-                    and await self.show_bat_file_preview()
-                ):
-                    self.log("bat success")
+        match file_type:
+            case "folder":
+                await self.show_folder_preview(file_path)
+            case "image":
+                await self.show_image_preview()
+            case "archive":
+                await self.show_archive_preview()
+            case "pdf":
+                await self.show_pdf_preview()
+            case _ if content is not None:
+                if content in self._preview_texts:
+                    await self.mount_special_messages()
                 else:
-                    await self.show_normal_file_preview()
+                    if (
+                        config["plugins"]["bat"]["enabled"]
+                        and await self.show_bat_file_preview()
+                    ):
+                        self.log("bat success")
+                    else:
+                        await self.show_normal_file_preview()
 
     async def mount_special_messages(self) -> None:
         self.border_title = ""

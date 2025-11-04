@@ -6,14 +6,15 @@ from PIL import Image as PILImage
 from pymupdf import EmptyFileError, FileDataError
 from textual import events
 from textual.app import ComposeResult
-from textual.containers import Container
+from textual.containers import ScrollableContainer
 from textual.reactive import reactive
+from textual.types import AnimationLevel, CallbackType, EasingFunction
 from textual_image.widget import Image
 
-from .exceptions import NotAPDFError, PDFHasAPasswordError
+from .exceptions import NotAPDFError, PDFHasAPasswordError, PDFRuntimeError
 
 
-class PDFViewer(Container):
+class PDFViewer(ScrollableContainer):
     """A PDF viewer widget."""
 
     DEFAULT_CSS = """
@@ -32,9 +33,6 @@ class PDFViewer(Container):
     """The current page in the PDF file. Starts from `0` until `total_pages - 1`"""
     protocol: reactive[str] = reactive("Auto")
     """Protocol to use ["Auto", "TGP", "Sixel", "Halfcell", "Unicode"]"""
-    path: reactive[str | Path] = reactive("")  # ty: ignore[invalid-assignment]
-    """Path to a pdf file"""
-    # the type issue isnt really my fault, that was due to textual
 
     def __init__(
         self,
@@ -58,13 +56,13 @@ class PDFViewer(Container):
         Raises:
             PDFHasAPasswordError: When the PDF file is password protected
             NotAPDFError: When the file is not a valid PDF
-        """  # noqa: DOC502
-        super().__init__(name=name, id=id, classes=classes, disabled=False, markup=True)
+        """  # noqa: DOC502 (explicitly raises them while checking)
+        super().__init__(name=name, id=id, classes=classes, disabled=False)
         assert protocol in ["Auto", "TGP", "Sixel", "Halfcell", "Unicode", ""]
         self._doc: fitz.Document | None = None
         self._total_pages: int = 0
         self.protocol = protocol
-        self.path = path
+        self._path = path
         self.use_keys = use_keys
 
         # Pre-check if the PDF is valid and not password protected
@@ -79,7 +77,7 @@ class PDFViewer(Container):
         Raises:
             NotAPDFError: When the file is not a valid PDF
             PDFHasAPasswordError: When the PDF file is password protected
-        """  # noqa: DOC502
+        """  # noqa: DOC502 (explicitly raises them)
         try:
             # Try to open the document
             doc = fitz.open(path)
@@ -97,19 +95,32 @@ class PDFViewer(Container):
             # Not a valid PDF
             raise NotAPDFError(f"{path} does not point to a valid PDF file")
 
+    def _open_document(self) -> None:
+        """Open the PDF document and store it for reuse.
+
+        Raises:
+            NotAPDFError: When the pdf is not accurate at all
+        """  # noqa: DOC502
+        # Close existing document if any
+        if self._doc:
+            self._doc.close()
+            self._doc = None
+
+        try:
+            self._doc = fitz.open(self.path)
+            self._total_pages = self._doc.page_count
+        except (FileDataError, EmptyFileError):
+            raise NotAPDFError(f"{self.path} does not point to a valid PDF file")
+
     def on_mount(self) -> None:
         """Load the PDF when the widget is mounted.
         Raises:
             NotAPDFError: When the pdf is not accurate at all
-        """  # noqa: DOC502
-        try:
-            doc = fitz.open(self.path)
-            self._total_pages = doc.page_count
-            doc.close()
-        except (FileDataError, EmptyFileError):
-            raise NotAPDFError(f"{self.path} does not point to a valid PDF file")
+        """  # noqa: DOC502 (implicitly raises due to render_page)
+        self._open_document()
         self.render_page()
         self.can_focus = True
+        self.vertical_scrollbar
 
     @property
     def total_pages(self) -> int:
@@ -117,7 +128,6 @@ class PDFViewer(Container):
         return self._total_pages
 
     def compose(self) -> ComposeResult:
-        """Compose the widget"""  # noqa: DOC402
         yield timg.__dict__[
             self.protocol + "Image" if self.protocol != "Auto" else "Image"
         ](PILImage.new("RGB", (self.size.width, self.size.height)), id="pdf-image")
@@ -130,14 +140,15 @@ class PDFViewer(Container):
         Raises:
             PDFRuntimeError: when a document isn't opened before this function was called, by any means
             PDFHasAPasswordError: when the document has a password
-        """  # noqa: DOC502
+        """  # noqa: DOC502 (explicitly raises them, not sure why it's annoyed)
+        if not self._doc:
+            raise PDFRuntimeError("Document not opened. Call _open_document() first.")
+
         try:
-            doc = fitz.open(self.path)
-            page = doc.load_page(self.current_page)
+            page = self._doc.load_page(self.current_page)
             pix = page.get_pixmap()
             mode = "RGBA" if pix.alpha else "RGB"
             image = PILImage.frombytes(mode, (pix.width, pix.height), pix.samples)
-            doc.close()
             return image
         except ValueError:
             # Preserve the original exception traceback to make it catchable
@@ -149,8 +160,8 @@ class PDFViewer(Container):
         """Renders the current page and updates the image widget.
         Raises:
             PDFRuntimeError: when a document isn't opened before this function was called, by any means
-        """  # noqa: DOC502
-        image_widget: Image = self.query_one("#pdf-image")  # ty: ignore[invalid-type-form]
+        """  # noqa: DOC502 (implicitly raises PDF Runtime Error from self._render_current_page)
+        image_widget: Image = self.query_one("#pdf-image")  # type: ignore
         image_widget.image = self._render_current_page_pil()
 
     def watch_current_page(self, new_page: int) -> None:
@@ -171,48 +182,22 @@ class PDFViewer(Container):
             self.refresh(recompose=True)
             self.render_page()
 
-    def watch_path(self, path: str | Path) -> None:
-        """Reload the document when it changes
-        Args:
-            path(str|Path): The path to the document
+    @property
+    def path(self) -> str:
+        return self._path
 
-        Raises:
-            NotPDFError: if the file is not a valid PDF.
-        """  # noqa: DOC502
+    @path.setter
+    def path(self, file_path: str) -> None:
         if not self.is_mounted:
             return
 
-        self._check_pdf_file(path)
+        self._check_pdf_file(file_path)
 
-        try:
-            doc = fitz.open(path)
-            self._total_pages = doc.page_count
-            doc.close()
-            self.current_page = 0
-        except (FileDataError, EmptyFileError):
-            raise NotAPDFError(f"{path} does not point to a valid PDF file")
-
+        # Reopen the document with the new path
+        self._open_document()
+        self.current_page = 0
         self.render_page()
-
-    def on_key(self, event: events.Key) -> None:
-        """Handle key presses.
-        Args:
-            event(events.Key): The key event"""
-        if not self.use_keys:
-            return
-        match event.key:
-            case "down" | "page_down" | "right":
-                event.stop()
-                self.next_page()
-            case "up" | "page_up" | "left":
-                event.stop()
-                self.previous_page()
-            case "home":
-                event.stop()
-                self.go_to_start()
-            case "end":
-                event.stop()
-                self.go_to_end()
+        self._path = file_path
 
     def next_page(self) -> None:
         """Go to the next page."""
@@ -237,3 +222,38 @@ class PDFViewer(Container):
         if self._doc:
             self._doc.close()
             self._doc = None
+
+    def on_mouse_scroll_up(self, event: events.MouseScrollUp) -> None:
+        self.previous_page()
+
+    def on_mouse_scroll_down(self, event: events.MouseScrollDown) -> None:
+        self.next_page()
+
+    def scroll_to(
+        self,
+        x: float | None = None,
+        y: float | None = None,
+        *,
+        animate: bool = True,
+        speed: float | None = None,
+        duration: float | None = None,
+        easing: EasingFunction | str | None = None,
+        force: bool = False,
+        on_complete: CallbackType | None = None,
+        level: AnimationLevel = "basic",
+        immediate: bool = False,
+        release_anchor: bool = True,
+    ) -> None:
+        return super().scroll_to(
+            x,
+            y,
+            animate=animate,
+            speed=speed,
+            duration=duration,
+            easing=easing,
+            force=force,
+            on_complete=on_complete,
+            level=level,
+            immediate=immediate,
+            release_anchor=release_anchor,
+        )

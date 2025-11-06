@@ -1,7 +1,8 @@
 from humanize import naturalsize
 from lzstring import LZString
 from rich.console import Console
-from textual.widget import Widget
+from textual.dom import DOMNode
+from textual.worker import NoActiveWorker, WorkerCancelled, get_current_worker
 
 from rovr.variables.maps import (
     BORDER_BOTTOM,
@@ -63,7 +64,7 @@ def set_nested_value(d: dict, path_str: str, value: bool) -> None:
             current = current[key]
 
 
-def set_scuffed_subtitle(element: Widget, *sections: str) -> None:
+def set_scuffed_subtitle(element: DOMNode, *sections: str) -> None:
     """The most scuffed way to display a custom subtitle
 
     Args:
@@ -106,3 +107,35 @@ def natural_size(integer: int, suffix: str, filesize_decimals: int) -> str:
             )
         case _:
             return naturalsize(value=integer, format=f"%.{filesize_decimals}f")
+
+
+def is_being_used(exc: OSError) -> bool:
+    """
+    On Windows, a file being used by another process raises a PermissionError/OSError with winerror 32.
+    Args:
+        exc(OSError): the OSError object
+
+    Returns:
+        bool: whether it is due to the file being used
+    """
+    # 32: Used by another process
+    # 145: Access is denied
+    return getattr(exc, "winerror", None) in (32, 145)
+
+
+def should_cancel() -> bool:
+    """
+    Whether the current worker should cancel execution
+
+    Returns:
+        bool: whether to cancel this worker or not
+    """
+    try:
+        worker = get_current_worker()
+    except RuntimeError:
+        return False
+    except WorkerCancelled:
+        return True
+    except NoActiveWorker:
+        return False
+    return bool(worker and not worker.is_running)

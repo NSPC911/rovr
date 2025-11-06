@@ -1,10 +1,24 @@
 from os import path
+from typing import NamedTuple, TypedDict
 
 from platformdirs import PlatformDirs
+from rich._spinners import SPINNERS
 
 dirs = PlatformDirs("rovr", ".")  # Ah yes, my name is "."
 
-VAR_TO_DIR = {
+
+class PlatformDirsVars(TypedDict):
+    DOCUMENTS: str
+    DOWNLOADS: str
+    MUSIC: str
+    PICTURES: str
+    DESKTOP: str
+    HOME: str
+    VIDEOS: str
+    CONFIG: str
+
+
+VAR_TO_DIR: PlatformDirsVars = {
     "DOCUMENTS": dirs.user_documents_dir.replace("\\", "/"),
     "DOWNLOADS": dirs.user_downloads_dir.replace("\\", "/"),
     "MUSIC": dirs.user_music_dir.replace("\\", "/"),
@@ -1007,17 +1021,22 @@ FILES_MAP = {
     "jenkinsfile": "jenkinsfile",
 }
 
-ARCHIVE_EXTENSIONS = [
-    ".zip",
-    ".tar",
-    ".gz",
-    ".bz2",
-    ".xz",
-    ".rar",
-]
 
-PIL_EXTENSIONS = [
-    # reminder that stuff can also not work, just remove it if it doesnt work
+class ArchiveExtensions(NamedTuple):
+    zip: tuple[str, ...]
+    tar: tuple[str, ...]
+    rar: tuple[str, ...]
+
+
+ARCHIVE_EXTENSIONS = ArchiveExtensions(
+    (".zip",),
+    (".tar", ".tgz", ".tbz", ".tbz2", ".tar.gz", ".tar.bz2", ".tar.xz"),
+    (".rar",),
+)
+ARCHIVE_EXTENSIONS_FULL = tuple(ext for exts in ARCHIVE_EXTENSIONS for ext in exts)
+
+PIL_EXTENSIONS = (
+    # reminder that stuff can also not work, just remove it if it doesn't work
     ".avif",
     ".bmp",
     ".dds",
@@ -1067,7 +1086,7 @@ PIL_EXTENSIONS = [
     ".pxr",
     ".qoi",
     ".tim",
-]
+)
 
 
 TOGGLE_BUTTON_ICONS = {
@@ -1104,4 +1123,6 @@ BORDER_BOTTOM = {
     "wide": "▔",
 }
 
-SPINNER = ["\\", "|", "/", "-"]
+SPINNER = SPINNERS["dots2"]["frames"]
+assert isinstance(SPINNER, (str, list))
+SPINNER_LENGTH = len(SPINNER)

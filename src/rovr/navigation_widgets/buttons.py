@@ -6,8 +6,8 @@ from rovr.functions.icons import get_icon
 
 
 class BackButton(Button):
-    def __init__(self, *args, **kwargs) -> None:
-        super().__init__(get_icon("general", "left")[0], id="back", *args, **kwargs)
+    def __init__(self) -> None:
+        super().__init__(get_icon("general", "left")[0], id="back", classes="option")
 
     def on_button_pressed(self, event: Button.Pressed) -> None:
         """Go back in the sesison's history"""
@@ -24,8 +24,10 @@ class BackButton(Button):
 
 
 class ForwardButton(Button):
-    def __init__(self, *args, **kwargs) -> None:
-        super().__init__(get_icon("general", "right")[0], id="forward", *args, **kwargs)
+    def __init__(self) -> None:
+        super().__init__(
+            get_icon("general", "right")[0], id="forward", classes="option"
+        )
 
     def on_button_pressed(self, event: Button.Pressed) -> None:
         """Go forward in the session's history"""
@@ -41,8 +43,8 @@ class ForwardButton(Button):
 
 
 class UpButton(Button):
-    def __init__(self, *args, **kwargs) -> None:
-        super().__init__(get_icon("general", "up")[0], id="up", *args, **kwargs)
+    def __init__(self) -> None:
+        super().__init__(get_icon("general", "up")[0], id="up", classes="option")
 
     def on_button_pressed(self, event: Button.Pressed) -> None:
         """Go up the current location's directory"""

@@ -77,11 +77,7 @@ def load_pins() -> dict:
 
     for section_key in ["default", "pins"]:
         for item in pins[section_key]:
-            if (
-                isinstance(item, dict)
-                and "path" in item
-                and isinstance(item["path"], str)
-            ):
+            if type(item) is dict and "path" in item and type(item["path"]) is str:
                 # Expand variables
                 for var, dir_path_val in VAR_TO_DIR.items():
                     item["path"] = item["path"].replace(f"${var}", dir_path_val)

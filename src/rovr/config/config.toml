@@ -8,25 +8,38 @@ use_reactive_layout = true
 show_progress_eta = false
 show_progress_percentage = true
 truncate_progress_file_path = false
-preview_error = "Hmm, I think this file got corrupted (or maybe not?)"
-preview_binary = "This file is not UTF-8 encoded, so I decline to read it."
-preview_start = "print(\"Hello, world!\")"
 compact_mode = false
 show_line_numbers = true
+# yazi style is 5
+# but it has more space
+scrolloff = 3
+
+[interface.preview_text]
+error = "couldn't read this file! (\u00AC_\u00AC)" # ¬_¬
+binary = "the file doesn't use UTF-8, which isn't supported yet"
+start = """
+  ___ ___
+ |  _| . |
+ |_| |___|
+  _ _ ___
+ | | |  _|
+  \\_/|_|
+"""
+empty = "bytes be gone (\u2310\u25A0_\u25A0)" # (⌐■_■)
+# how do you even respond to this
+too_large = "this file is larger (but not larger than your mother)"
 
 [interface.clock]
 enabled = true
 align = "left"
 
 [settings]
-preview_full = false
 image_protocol = "Auto"
 show_hidden_files = false
 copy_includes_metadata = true
 use_recycle_bin = true
 allow_tab_nav = true
 append_new_tabs = true
-cd_on_quit = false
 double_click_delay = 0.25
 drive_watcher_frequency = 3.0
 
@@ -43,18 +56,6 @@ fields = [
 datetime_format = "%Y-%m-%d %H:%M"
 filesize_decimals = 1
 filesize_suffix = "decimal"
-
-[[icons.files]]
-pattern = "yaml"
-match_type = "endswith"
-icon = "\ue60b"
-color = "#F71A10"
-
-[[icons.folders]]
-pattern = "node_modules"
-match_type = "exact"
-icon = "\ue5fa"
-color = "green"
 
 [theme]
 default = "nord"

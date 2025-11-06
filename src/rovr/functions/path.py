@@ -3,8 +3,10 @@ import ctypes
 import os
 import stat
 from os import path
+from typing import Literal, overload
 
 import psutil
+from aiofiles import os as aios
 from lzstring import LZString
 from rich.console import Console
 from textual import work
@@ -85,6 +87,9 @@ async def open_file(app: App, filepath: str) -> None:
         filepath (str): Path to the file to open
     """
     system = os_type.lower()
+    # check if it is available first
+    if not path.exists(filepath):
+        return
 
     try:
         match system:
@@ -168,9 +173,6 @@ async def get_cwd_object(
     Returns:
         folders(list[dict]): A list of dictionaries, containing "name" as the item's name and "icon" as the respective icon
         files(list[dict]): A list of dictionaries, containing "name" as the item's name and "icon" as the respective icon
-
-    Raises:
-        PermissionError: When access to the directory is denied
     """
 
     # Offload the blocking os.scandir call to a thread pool
@@ -200,7 +202,6 @@ async def get_cwd_object(
                 "icon": get_icon_for_file(item.name),
                 "dir_entry": item,
             })
-
     folders.sort(key=lambda x: x["name"].lower())
     files.sort(key=lambda x: x["name"].lower())
     print(f"Found {len(folders)} folders and {len(files)} files in {cwd}")
@@ -257,6 +258,18 @@ def force_obtain_write_permission(item_path: str) -> bool:
         return False
 
 
+@overload
+def get_recursive_files(
+    object_path: str, with_folders: Literal[False] = False
+) -> list[dict]: ...
+
+
+@overload
+def get_recursive_files(
+    object_path: str, with_folders: Literal[True] = True
+) -> tuple[list[dict], list[dict]]: ...
+
+
 def get_recursive_files(
     object_path: str, with_folders: bool = False
 ) -> list[dict] | tuple[list[dict], list[dict]]:
@@ -271,9 +284,7 @@ def get_recursive_files(
         list: A list of dictionaries, with a "path" key and "relative_loc" key for files
         list: A list of path strings that were involved in the file list.
     """
-    if path.isfile(path.realpath(object_path)) or path.islink(
-        path.realpath(object_path)
-    ):
+    if file_is_type(object_path) != "folder":
         if with_folders:
             return [
                 {
@@ -427,17 +438,21 @@ def get_mounted_drives() -> list:
             drives = [
                 normalise(p.mountpoint)
                 for p in partitions
-                if p.device and ":" in p.device
+                if p.device and ":" in p.device and path.isdir(p.device)
             ]
         elif os_type == "Darwin":
             # For macOS, filter out system volumes and keep only user-relevant drives
             drives = [
-                p.mountpoint for p in partitions if _should_include_macos_mount_point(p)
+                p.mountpoint
+                for p in partitions
+                if path.isdir(p.device) and _should_include_macos_mount_point(p)
             ]
         else:
             # For other Unix-like systems (Linux, WSL, etc.), filter out system mount points
             drives = [
-                p.mountpoint for p in partitions if _should_include_linux_mount_point(p)
+                p.mountpoint
+                for p in partitions
+                if path.isdir(p.device) and _should_include_linux_mount_point(p)
             ]
     except Exception as e:
         print(f"Error getting mounted drives: {e}")

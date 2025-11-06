@@ -30,7 +30,7 @@ class ModalInput(ModalScreen):
         self.validators = [
             Length(minimum=1, failure_description="A value is required.")
         ] + validators
-        self.validators[0].strict = True
+        setattr(self.validators[0], "strict", True)
         self.is_path = is_path
         self.is_folder = is_folder
         if self.is_path:

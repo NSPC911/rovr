@@ -79,7 +79,7 @@ class SearchInput(Input):
                 matches.append(option)
                 continue
             if score := scorer(event.value, option.label):
-                print(score, event.value, option.label)
+                self.log(score, event.value, option.label)
                 matches.append(option)
                 matches_scores.append(score)
         # do sort now ig

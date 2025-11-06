@@ -85,7 +85,7 @@ class ZDToDirectory(ModalScreen):
                 title="Zoxide Plugin",
                 severity="error",
             )
-            print(f"Problems while parsing zoxide line - '{line}'")
+            self.log(f"Problems while parsing zoxide line - '{line}'")
             return line, None
 
     @work(exclusive=True)

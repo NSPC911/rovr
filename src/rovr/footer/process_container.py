@@ -904,7 +904,7 @@ class ProcessContainer(VerticalScroll):
                         exist_ok=True,
                     )
                     if path.exists(path.join(dest, item_dict["relative_loc"])):
-                        print(
+                        self.log(
                             path_utils.normalise(
                                 path.join(dest, item_dict["relative_loc"])
                             ),

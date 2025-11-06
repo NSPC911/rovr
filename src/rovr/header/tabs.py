@@ -123,9 +123,9 @@ class Tabline(Tabs):
                 for option in event.tab.session.selectedItems:
                     try:
                         file_list.select(file_list.get_option(option))
-                        print(f"Successfully selected option: {option}")
+                        self.log(f"Successfully selected option: {option}")
                     except (OptionDoesNotExist, AttributeError) as e:
-                        print(f"Failed to select option {option}: {e}")
+                        self.log(f"Failed to select option {option}: {e}")
             if event.tab.session.search != "":
                 file_list.input.value = event.tab.session.search
 

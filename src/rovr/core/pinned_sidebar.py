@@ -33,8 +33,8 @@ class PinnedSidebar(OptionList, inherit_bindings=False):
         self.list_of_options = []
         # get current highlight
         prev_highlighted: int = self.highlighted if self.highlighted else 0
-        print(f"Reloading pins: {available_pins}")
-        print(f"Reloading default folders: {default}")
+        self.log(f"Reloading pins: {available_pins}")
+        self.log(f"Reloading default folders: {default}")
         for default_folder in default:
             if not path.isdir(default_folder["path"]):
                 if path.exists(default_folder["path"]):

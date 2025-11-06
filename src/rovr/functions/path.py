@@ -6,7 +6,6 @@ from os import path
 from typing import Literal, overload
 
 import psutil
-from aiofiles import os as aios
 from lzstring import LZString
 from rich.console import Console
 from textual import work

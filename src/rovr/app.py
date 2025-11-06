@@ -121,7 +121,7 @@ class Application(App, inherit_bindings=False):
         self._chooser_file: str | None = chooser_file
 
     def compose(self) -> ComposeResult:
-        print("Starting Rovr...")
+        self.log("Starting Rovr...")
         with Vertical(id="root"):
             yield HeaderArea(id="headerArea")
             with VerticalGroup(id="menuwrapper"):

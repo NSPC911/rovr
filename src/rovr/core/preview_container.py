@@ -9,6 +9,7 @@ from typing import ClassVar
 import textual_image.widget as timg
 from PIL import UnidentifiedImageError
 from rich.text import Text
+from rich.traceback import Traceback
 from textual import events, on, work
 from textual.app import ComposeResult
 from textual.binding import Binding, BindingType
@@ -21,6 +22,7 @@ from textual.worker import Worker, WorkerCancelled
 from rovr.classes import Archive
 from rovr.core import FileList
 from rovr.functions.utils import should_cancel
+from rovr.pdf.exceptions import PDFRuntimeError
 from rovr.variables.constants import PreviewContainerTitles, config
 from rovr.variables.maps import ARCHIVE_EXTENSIONS_FULL, EXT_TO_LANG_MAP, PIL_EXTENSIONS
 
@@ -481,12 +483,14 @@ class PreviewContainer(Container):
                         PDFViewer(
                             self._current_file_path,
                             protocol=config["settings"]["image_protocol"],
-                            use_keys=True,
                         )
                     )
-                    self.query_one(PDFViewer).can_focus = True
+                    hello = True
                 else:
-                    self.query_one(PDFViewer).path = self._current_file_path
+                    hello = False
+                self.query_one(PDFViewer).path = self._current_file_path
+            except PDFRuntimeError:
+                self.log(Traceback(show_locals=True))
             except NoMatches:
                 pass
         else:

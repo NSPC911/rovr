@@ -8,10 +8,10 @@ from textual import events
 from textual.app import ComposeResult
 from textual.containers import ScrollableContainer
 from textual.reactive import reactive
-from textual.types import AnimationLevel, CallbackType, EasingFunction
 from textual_image.widget import Image
 
-from .exceptions import NotAPDFError, PDFHasAPasswordError, PDFRuntimeError
+from rovr.pdf.exceptions import NotAPDFError, PDFHasAPasswordError, PDFRuntimeError
+from rovr.variables.constants import config
 
 
 class PDFViewer(ScrollableContainer):
@@ -29,8 +29,6 @@ class PDFViewer(ScrollableContainer):
     }
     """
 
-    current_page: reactive[int] = reactive(0)
-    """The current page in the PDF file. Starts from `0` until `total_pages - 1`"""
     protocol: reactive[str] = reactive("Auto")
     """Protocol to use ["Auto", "TGP", "Sixel", "Halfcell", "Unicode"]"""
 
@@ -38,7 +36,6 @@ class PDFViewer(ScrollableContainer):
         self,
         path: str | Path,
         protocol: str = "",
-        use_keys: bool = True,
         name: str | None = None,
         id: str | None = None,
         classes: str | None = None,
@@ -48,7 +45,6 @@ class PDFViewer(ScrollableContainer):
         Args:
             path(str): Path to a PDF file.
             protocol(str): The protocol to use (leave empty or 'Auto' to use auto protocol)
-            use_keys(bool): Whether to use the default key assignments
             name(str): The name of this widget.
             id(str): The ID of the widget in the DOM.
             classes(str): The CSS classes for this widget.
@@ -63,10 +59,14 @@ class PDFViewer(ScrollableContainer):
         self._total_pages: int = 0
         self.protocol = protocol
         self._path = path
-        self.use_keys = use_keys
+        self._current_page = 0
 
         # Pre-check if the PDF is valid and not password protected
         self._check_pdf_file(path)
+
+        # bindings
+        self.up_page = config["keybinds"]["up"] + config["keybinds"]["page_up"]
+        self.down_page = config["keybinds"]["down"] + config["keybinds"]["page_down"]
 
     def _check_pdf_file(self, path: str | Path) -> None:
         """Check if the PDF file is valid and not password protected
@@ -113,14 +113,8 @@ class PDFViewer(ScrollableContainer):
             raise NotAPDFError(f"{self.path} does not point to a valid PDF file")
 
     def on_mount(self) -> None:
-        """Load the PDF when the widget is mounted.
-        Raises:
-            NotAPDFError: When the pdf is not accurate at all
-        """  # noqa: DOC502 (implicitly raises due to render_page)
-        self._open_document()
-        self.render_page()
+        """Load the PDF when the widget is mounted."""
         self.can_focus = True
-        self.vertical_scrollbar
 
     @property
     def total_pages(self) -> int:
@@ -164,13 +158,6 @@ class PDFViewer(ScrollableContainer):
         image_widget: Image = self.query_one("#pdf-image")  # type: ignore
         image_widget.image = self._render_current_page_pil()
 
-    def watch_current_page(self, new_page: int) -> None:
-        """Change the current page to a different page based on the value provided
-        Args:
-            new_page(int): The page to switch to.
-        """
-        self.render_page()
-
     def watch_protocol(self, protocol: str) -> None:
         """Change the rendering protocol
         Args:
@@ -195,9 +182,21 @@ class PDFViewer(ScrollableContainer):
 
         # Reopen the document with the new path
         self._open_document()
-        self.current_page = 0
+        self._current_page = 0
         self.render_page()
         self._path = file_path
+
+    @property
+    def current_page(self) -> int:
+        return self._current_page
+
+    @current_page.setter
+    def current_page(self, new_page: int) -> None:
+        """Change the current page to a different page based on the value provided
+        Args:
+            new_page(int): The page to switch to.
+        """
+        self.render_page()
 
     def next_page(self) -> None:
         """Go to the next page."""
@@ -229,31 +228,12 @@ class PDFViewer(ScrollableContainer):
     def on_mouse_scroll_down(self, event: events.MouseScrollDown) -> None:
         self.next_page()
 
-    def scroll_to(
-        self,
-        x: float | None = None,
-        y: float | None = None,
-        *,
-        animate: bool = True,
-        speed: float | None = None,
-        duration: float | None = None,
-        easing: EasingFunction | str | None = None,
-        force: bool = False,
-        on_complete: CallbackType | None = None,
-        level: AnimationLevel = "basic",
-        immediate: bool = False,
-        release_anchor: bool = True,
-    ) -> None:
-        return super().scroll_to(
-            x,
-            y,
-            animate=animate,
-            speed=speed,
-            duration=duration,
-            easing=easing,
-            force=force,
-            on_complete=on_complete,
-            level=level,
-            immediate=immediate,
-            release_anchor=release_anchor,
-        )
+    def on_key(self, event: events.Key) -> None:
+        if event.key in self.up_page:
+            self.previous_page()
+        if event.key in self.down_page:
+            self.next_page()
+        if event.key in config["keybinds"]["home"]:
+            self.go_to_start()
+        if event.key in config["keybinds"]["end"]:
+            self.go_to_end

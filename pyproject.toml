@@ -18,7 +18,6 @@ classifiers = [
 dependencies = [
   "humanize>=4.12.3",
   "jsonschema>=4.25.0",
-  "lzstring>=1.0.4",
   "pathvalidate>=3.3.1",
   "pillow>=11.2.1",
   "platformdirs>=4.3.8",

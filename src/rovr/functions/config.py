@@ -8,7 +8,6 @@ import jsonschema
 import toml
 import ujson
 from jsonschema import ValidationError
-from lzstring import LZString
 from rich import box
 from rich.console import Console
 
@@ -17,7 +16,6 @@ from rovr.variables.maps import (
     VAR_TO_DIR,
 )
 
-lzstring = LZString()
 pprint = Console().print
 
 DEFAULT_CONFIG = '#:schema {schema_url}\n[theme]\ndefault = "nord"'

@@ -1,4 +1,5 @@
 import asyncio
+import base64
 import ctypes
 import os
 import stat
@@ -6,7 +7,6 @@ from os import path
 from typing import Literal, overload
 
 import psutil
-from lzstring import LZString
 from rich.console import Console
 from textual import work
 from textual.app import App
@@ -14,7 +14,6 @@ from textual.app import App
 from rovr.functions.icons import get_icon_for_file, get_icon_for_folder
 from rovr.variables.constants import os_type
 
-lzstring = LZString()
 pprint = Console().print
 
 
@@ -63,18 +62,20 @@ def is_hidden_file(filepath: str) -> bool:
         return path.basename(filepath).startswith(".")
 
 
-# Okay so the reason why I have wrapper functions is
-# I was messing around with different LZString options
-# and Encoded URI Component seems to best option. I've just
-# left it here, in case we can switch to something like
-# base 64 because Encoded URI Component can get quite long
-# very fast, which isn't really the purpose of LZString
+# insanely scuffed implementation, but it's required due
+# to Textual's strict limitation for ids to consist of
+# letters, numbers, underscores, or hyphens, and must
+# not begin with a number
 def compress(text: str) -> str:
-    return lzstring.compressToEncodedURIComponent(text)
+    b64_str = base64.b64encode(text.encode("utf-8")).decode("ascii")
+    safe_str = b64_str.replace("+", "_").replace("/", "-")
+    return "u_" + safe_str
 
 
 def decompress(text: str) -> str:
-    return lzstring.decompressFromEncodedURIComponent(text)
+    encoded_part = text[2:]  # Remove 'u_'
+    b64_str = encoded_part.replace("_", "+").replace("-", "/")
+    return base64.b64decode(b64_str.encode("ascii")).decode("utf-8")
 
 
 @work

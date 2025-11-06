@@ -1,5 +1,4 @@
 from humanize import naturalsize
-from lzstring import LZString
 from rich.console import Console
 from textual.dom import DOMNode
 from textual.worker import NoActiveWorker, WorkerCancelled, get_current_worker
@@ -8,7 +7,6 @@ from rovr.variables.maps import (
     BORDER_BOTTOM,
 )
 
-lzstring = LZString()
 pprint = Console().print
 
 

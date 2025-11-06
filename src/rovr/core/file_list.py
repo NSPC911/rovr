@@ -165,7 +165,11 @@ class FileList(SelectionList, inherit_bindings=False):
         buttons = [
             self.app.query_one(selector) for selector in buttons_that_depend_on_path
         ]
-        should_disable = len(self.list_of_options) == 1 and self.list_of_options[0].disabled if self.list_of_options else False
+        should_disable = (
+            len(self.list_of_options) == 1 and self.list_of_options[0].disabled
+            if self.list_of_options
+            else False
+        )
         for button in buttons:
             button.disabled = should_disable
 

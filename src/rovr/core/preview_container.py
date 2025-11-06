@@ -21,11 +21,17 @@ from textual.worker import Worker, WorkerCancelled
 from rovr.classes import Archive
 from rovr.core import FileList
 from rovr.functions.utils import should_cancel
-from rovr.pdf.pdf_viewer import PDFViewer
 from rovr.variables.constants import PreviewContainerTitles, config
 from rovr.variables.maps import ARCHIVE_EXTENSIONS_FULL, EXT_TO_LANG_MAP, PIL_EXTENSIONS
 
 titles = PreviewContainerTitles()
+
+try:
+    from rovr.pdf.pdf_viewer import PDFViewer
+
+    PDF_AVAILABLE = True
+except ModuleNotFoundError:
+    PDF_AVAILABLE = False
 
 
 class CustomTextArea(TextArea, inherit_bindings=False):
@@ -363,7 +369,9 @@ class PreviewContainer(Container):
             else EXT_TO_LANG_MAP.get(
                 # forced an ignore, there really is no other way to handle this
                 # it is a valid overload, but ty doesn't know it yet I suppose
-                path.splitext(self._current_file_path)[1],  # ty: ignore[no-matching-overload]
+                path.splitext(self._current_file_path)[
+                    1
+                ],  # ty: ignore[no-matching-overload]
                 "markdown",  # ty: ignore[no-matching-overload]
             )
         )
@@ -465,26 +473,31 @@ class PreviewContainer(Container):
         self.border_title = titles.pdf
         if should_cancel():
             return
-        try:
-            if not self.has_child("PDFViewer"):
-                await self.remove_children()
-                if should_cancel():
-                    return
-                await self.mount(
-                    PDFViewer(
-                        self._current_file_path,
-                        protocol=config["settings"]["image_protocol"],
-                        use_keys=True,
+        if PDF_AVAILABLE:
+            try:
+                if not self.has_child("PDFViewer"):
+                    await self.remove_children()
+                    if should_cancel():
+                        return
+                    await self.mount(
+                        PDFViewer(
+                            self._current_file_path,
+                            protocol=config["settings"]["image_protocol"],
+                            use_keys=True,
+                        )
                     )
-                )
-                self.query_one(PDFViewer).can_focus = True
-            else:
-                self.query_one(PDFViewer).path = self._current_file_path
-        except NoMatches:
-            pass
-        finally:
-            if should_cancel():
-                return
+                    self.query_one(PDFViewer).can_focus = True
+                else:
+                    self.query_one(PDFViewer).path = self._current_file_path
+            except NoMatches:
+                pass
+        else:
+            self._current_content = (
+                "rovr was not installed with the [$accent]\\[pdf][/] extra!"
+            )
+            await self.mount_special_messages()
+        if should_cancel():
+            return
 
     def show_preview(self, file_path: str) -> None:
         if (

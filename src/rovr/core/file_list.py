@@ -187,9 +187,7 @@ class FileList(SelectionList, inherit_bindings=False):
             })
             if session.lastHighlighted.get(cwd) is None:
                 # Hard coding is my passion (referring to the id)
-                session.lastHighlighted[cwd] = (
-                    self.app.query_one("#file_list").options[0].value
-                )
+                session.lastHighlighted[cwd] = self.options[0].value
             session.historyIndex = len(session.directories) - 1
         elif session.directories == []:
             session.directories = [{"path": path_utils.normalise(getcwd())}]
@@ -204,14 +202,10 @@ class FileList(SelectionList, inherit_bindings=False):
                 self.highlighted = self.get_option_index(session.lastHighlighted[cwd])
         except OptionDoesNotExist:
             self.highlighted = 0
-            session.lastHighlighted[cwd] = (
-                self.app.query_one("#file_list").options[0].value
-            )
+            session.lastHighlighted[cwd] = self.options[0].value
         except KeyError:
             self.highlighted = 0
-            session.lastHighlighted[cwd] = (
-                self.app.query_one("#file_list").options[0].value
-            )
+            session.lastHighlighted[cwd] = self.options[0].value
 
         self.scroll_to_highlight()
         self.app.tabWidget.active_tab.label = (

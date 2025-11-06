@@ -161,19 +161,13 @@ class FileList(SelectionList, inherit_bindings=False):
             preview._current_preview_type = "none"
             preview.border_title = ""
 
-        if len(self.list_of_options) == 1 and self.list_of_options[0].disabled:
-            # Query buttons once and update disabled state
-            buttons = [
-                self.app.query_one(selector) for selector in buttons_that_depend_on_path
-            ]
-            for button in buttons:
-                button.disabled = True
-        else:
-            buttons = [
-                self.app.query_one(selector) for selector in buttons_that_depend_on_path
-            ]
-            for button in buttons:
-                button.disabled = False
+        # Query buttons once and update disabled state based on file list status
+        buttons = [
+            self.app.query_one(selector) for selector in buttons_that_depend_on_path
+        ]
+        should_disable = len(self.list_of_options) == 1 and self.list_of_options[0].disabled
+        for button in buttons:
+            button.disabled = should_disable
 
         self.clear_options()
         self.add_options(self.list_of_options)

@@ -115,38 +115,39 @@ class FileList(SelectionList, inherit_bindings=False):
         except AttributeError:
             self.clear_options()
             return
+        preview = self.app.query_one("PreviewContainer")
+
         # Separate folders and files
         self.list_of_options: list[FileListSelectionWidget | Selection] = []
-        names_in_cwd: list[str] = []
         self.items_in_cwd: set[str] = set()
+
         try:
-            folders, files = path_utils.get_cwd_object(
+            folders, files = await path_utils.get_cwd_object(
                 cwd, config["settings"]["show_hidden_files"]
             )
+
             if not folders and not files:
                 self.list_of_options.append(
                     Selection("   --no-files--", value="", disabled=True)
                 )
-                preview = self.app.query_one("PreviewContainer")
                 preview.remove_children()
                 preview._current_preview_type = "none"
                 preview.border_title = ""
             else:
                 file_list_options = folders + files
-                for item in file_list_options:
-                    self.list_of_options.append(
-                        FileListSelectionWidget(
-                            icon=item["icon"],
-                            label=item["name"],
-                            dir_entry=item["dir_entry"],
-                            value=path_utils.compress(item["name"]),
-                        )
+
+                self.list_of_options = [
+                    FileListSelectionWidget(
+                        icon=item["icon"],
+                        label=item["name"],
+                        dir_entry=item["dir_entry"],
+                        value=path_utils.compress(item["name"]),
                     )
-                    names_in_cwd.append(item["name"])
-                    # TODO: find out why `await asyncio.sleep(0)` doesn't
-                    #       work on large directories, and the threshold
-                    #       before it stops working
-                self.items_in_cwd = set(names_in_cwd)
+                    for item in file_list_options
+                ]
+
+                self.items_in_cwd = {item["name"] for item in file_list_options}
+
         except PermissionError:
             self.list_of_options.append(
                 Selection(
@@ -156,17 +157,24 @@ class FileList(SelectionList, inherit_bindings=False):
                     disabled=True,
                 ),
             )
-            preview = self.app.query_one("PreviewContainer")
             preview.remove_children()
             preview._current_preview_type = "none"
             preview.border_title = ""
 
         if len(self.list_of_options) == 1 and self.list_of_options[0].disabled:
-            for selector in buttons_that_depend_on_path:
-                self.app.query_one(selector).disabled = True
+            # Query buttons once and update disabled state
+            buttons = [
+                self.app.query_one(selector) for selector in buttons_that_depend_on_path
+            ]
+            for button in buttons:
+                button.disabled = True
         else:
-            for selector in buttons_that_depend_on_path:
-                self.app.query_one(selector).disabled = False
+            buttons = [
+                self.app.query_one(selector) for selector in buttons_that_depend_on_path
+            ]
+            for button in buttons:
+                button.disabled = False
+
         self.clear_options()
         self.add_options(self.list_of_options)
         # session handler
@@ -242,7 +250,7 @@ class FileList(SelectionList, inherit_bindings=False):
 
         self.loading = True
         try:
-            folders, files = path_utils.get_cwd_object(
+            folders, files = await path_utils.get_cwd_object(
                 cwd, config["settings"]["show_hidden_files"]
             )
             if not folders and not files:

@@ -156,7 +156,7 @@ def get_filtered_dir_names(cwd: str | bytes, show_hidden: bool = False) -> set[s
     return names
 
 
-def get_cwd_object(
+async def get_cwd_object(
     cwd: str, show_hidden: bool = False
 ) -> tuple[list[dict], list[dict]]:
     """
@@ -164,6 +164,7 @@ def get_cwd_object(
     Args:
         cwd(str): The working directory to check
         show_hidden(bool): Whether to include hidden files/folders (dot-prefixed on Unix; flagged hidden on Windows/macOS)
+
     Returns:
         folders(list[dict]): A list of dictionaries, containing "name" as the item's name and "icon" as the respective icon
         files(list[dict]): A list of dictionaries, containing "name" as the item's name and "icon" as the respective icon
@@ -171,13 +172,19 @@ def get_cwd_object(
     Raises:
         PermissionError: When access to the directory is denied
     """
+
+    # Offload the blocking os.scandir call to a thread pool
+    def _scandir() -> list:
+        try:
+            return list(os.scandir(cwd))
+        except (PermissionError, FileNotFoundError, OSError):
+            raise PermissionError(f"PermissionError: Unable to access {cwd}")
+
+    entries = await asyncio.to_thread(_scandir)
+
     folders, files = [], []
-    try:
-        listed_dir = os.scandir(cwd)
-    except (PermissionError, FileNotFoundError, OSError):
-        raise PermissionError(f"PermissionError: Unable to access {cwd}")
-    for item in listed_dir:
-        # Skip hidden files if show_hidden is False
+
+    for item in entries:
         if not show_hidden and is_hidden_file(item.path):
             continue
 
@@ -193,7 +200,7 @@ def get_cwd_object(
                 "icon": get_icon_for_file(item.name),
                 "dir_entry": item,
             })
-    # Sort folders and files properly
+
     folders.sort(key=lambda x: x["name"].lower())
     files.sort(key=lambda x: x["name"].lower())
     print(f"Found {len(folders)} folders and {len(files)} files in {cwd}")

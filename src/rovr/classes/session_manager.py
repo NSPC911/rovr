@@ -3,7 +3,7 @@ class SessionManager:
     """Manages session-related variables.
 
     Attributes:
-        directories (list[dict]): A list of dictionaries that contain a
+        directories (list[str]): A list of dictionaries that contain a
             directory's name within. The closer it is to index 0, the
             older it is.
         historyIndex (int): The index of the session in the directories.
@@ -19,7 +19,7 @@ class SessionManager:
     """
 
     def __init__(self) -> None:
-        self.directories: list[dict] = []
+        self.directories: list[str] = []
         self.historyIndex: int = 0
         self.lastHighlighted: dict[str, int] = {}
         self.selectMode: bool = False

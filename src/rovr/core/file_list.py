@@ -185,19 +185,16 @@ class FileList(SelectionList, inherit_bindings=False):
         # I question to myself why directories isn't a list[str]
         # but is a list[dict], so I'm down to take some PRs, because
         # I have other things that are more important.
-        # TODO: use list[str] instead of list[dict] for directories
         if add_to_session:
             if session.historyIndex != len(session.directories) - 1:
                 session.directories = session.directories[: session.historyIndex + 1]
-            session.directories.append({
-                "path": cwd,
-            })
+            session.directories.append(cwd)
             if session.lastHighlighted.get(cwd) is None:
                 # Hard coding is my passion (referring to the id)
                 session.lastHighlighted[cwd] = self.options[0].value
             session.historyIndex = len(session.directories) - 1
         elif session.directories == []:
-            session.directories = [{"path": path_utils.normalise(getcwd())}]
+            session.directories = [path_utils.normalise(getcwd())]
         self.app.query_one("Button#back").disabled = session.historyIndex <= 0
         self.app.query_one("Button#forward").disabled = (
             session.historyIndex == len(session.directories) - 1

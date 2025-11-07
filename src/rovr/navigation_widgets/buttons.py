@@ -18,7 +18,7 @@ class BackButton(Button):
             state.historyIndex -= 1
         # ! reminder to add a check for path!
         self.app.cd(
-            state.directories[state.historyIndex]["path"],
+            state.directories[state.historyIndex],
             add_to_history=False,
         )
 
@@ -37,7 +37,7 @@ class ForwardButton(Button):
         state.historyIndex += 1
         # ! reminder to add a check for path!
         self.app.cd(
-            state.directories[state.historyIndex]["path"],
+            state.directories[state.historyIndex],
             add_to_history=False,
         )
 

@@ -457,11 +457,14 @@ ProgressBarContainer {
 Content.selected { color: red }
 FileList, PinnedSidebar, Clipboard, CommandList, #zoxide_options, FileListRightClickOptionList, #file_search_options {
   padding: 0 0 0 0;
+  background-tint: ansi_default !important;
+  .option-list--separator { color: $foreground }
   .option-list--option-disabled { color: $border-blurred }
   &:light .option-list--option-disabled { color: $border-blurred-light }
   .option-list--option-highlighted {
     color: $foreground;
     background: transparent;
+    text-style: none;
   }
   .option-list--option-hover {
     color: $primary;

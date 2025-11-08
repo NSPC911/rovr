@@ -73,7 +73,6 @@ class FileListSelectionWidget(Selection):
             dir_entry (DirEntry): The nt.DirEntry class
             disabled (bool) = False: The initial enabled/disabled state. Enabled by default.
         """
-        FileListSelectionWidget._option_count += 1
         cache_key = (icon[0], icon[1])
         if cache_key not in FileListSelectionWidget._icon_content_cache:
             # Parse the icon markup once and cache it as Content

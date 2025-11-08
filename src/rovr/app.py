@@ -489,7 +489,6 @@ class Application(App, inherit_bindings=False):
                 count = 0
             new_cwd = getcwd()
             if not path.exists(new_cwd):
-                self.notify("path no exist")
                 file_list.update_file_list(add_to_session=False)
             elif cwd != new_cwd:
                 cwd = new_cwd

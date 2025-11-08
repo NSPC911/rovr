@@ -579,14 +579,15 @@ class FileList(SelectionList, inherit_bindings=False):
         if not self.select_mode_enabled:
             return [str(path_utils.normalise(self.highlighted_option.dir_entry.path))]
         else:
-            options = self._selected.values()
-            if not options:
+            values = self.selected
+            if not values:
                 return []
+            options = [self.get_option(value) for value in values]
 
             return [
-                str(path_utils.normalise(option))
+                str(path_utils.normalise(option.dir_entry.path))
                 for option in options
-                if option is FileListSelectionWidget
+                if isinstance(option, FileListSelectionWidget)
             ]
 
     async def on_key(self, event: events.Key) -> None:

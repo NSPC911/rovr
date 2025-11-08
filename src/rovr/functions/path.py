@@ -455,7 +455,6 @@ def get_mounted_drives() -> list:
                 if path.isdir(p.device) and _should_include_linux_mount_point(p)
             ]
     except Exception as e:
-        print(f"Error getting mounted drives: {e}")
-        print("Using fallback method")
+        print(f"Error getting mounted drives: {e}\nUsing fallback method...")
         drives = [path.expanduser("~")]
     return drives

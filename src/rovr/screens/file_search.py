@@ -188,6 +188,9 @@ class FileSearch(ModalScreen):
     async def on_option_list_option_selected(
         self, event: OptionList.OptionSelected
     ) -> None:
+        if not isinstance(event.option, ModalSearcherOption):
+            self.dismiss(None)
+            return
         selected_value = event.option.file_path
         if selected_value and not event.option.disabled:
             self.dismiss(selected_value)
@@ -215,7 +218,7 @@ class FileSearch(ModalScreen):
                 self.focus_previous()
 
     def on_option_list_option_highlighted(
-        self, event: FileSearchOptionList.OptionHighlighted
+        self, event: OptionList.OptionHighlighted
     ) -> None:
         if (
             self.search_options.option_count == 0

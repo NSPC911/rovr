@@ -118,7 +118,6 @@ class ZDToDirectory(ModalScreen):
                     "  zoxide is missing on $PATH or cannot be executed"
                     if isinstance(exc, OSError)
                     else "  zoxide took too long to respond",
-                    "",
                     disabled=True,
                 )
             )

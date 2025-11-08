@@ -89,6 +89,7 @@ class FileListSelectionWidget(Selection):
         super().__init__(
             prompt=prompt,
             value=str(FileListSelectionWidget._option_count),
+            id=str(FileListSelectionWidget._option_count),
             disabled=disabled,
         )
         self.label = label

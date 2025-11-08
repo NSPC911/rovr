@@ -1,4 +1,6 @@
-from textual.widgets import Button
+from typing import cast
+
+from textual.widgets import Button, SelectionList
 
 from rovr.functions.icons import get_icon
 from rovr.functions.path import decompress
@@ -26,12 +28,14 @@ class PasteButton(Button):
         if self.disabled:
             return
         """Paste files from clipboard"""
-        selected_items = self.app.query_one(
-            "Clipboard"
-        ).selected  # dont include highlighted
+        selected_items = cast(
+            SelectionList, self.app.query_one("Clipboard")
+        )._selected.values()  # dont include highlighted
         if selected_items:
             # decompress items
-            selected_items = [decompress(item) for item in selected_items]
+            selected_items = [
+                decompress(item) for item in selected_items if item is not None
+            ]
             # split into two items, those ending with `-cut` and those ending with `-copy`
             to_copy, to_cut = (
                 [item[:-5] for item in selected_items if item.endswith("-copy")],

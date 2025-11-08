@@ -16,6 +16,7 @@ from textual.widgets.option_list import Option, OptionDoesNotExist
 from textual.widgets.selection_list import Selection
 
 from rovr.classes import ArchiveFileListSelection, FileListSelectionWidget
+from rovr.classes.session_manager import SessionManager
 from rovr.functions import icons as icon_utils
 from rovr.functions import path as path_utils
 from rovr.functions import pins as pin_utils
@@ -56,6 +57,18 @@ class FileList(SelectionList, inherit_bindings=False):
     def on_mount(self) -> None:
         if not self.dummy and self.parent:
             self.input: Input = self.parent.query_one(Input)
+
+    @property
+    def highlighted_option(self) -> FileListSelectionWidget | None:
+        """The currently highlighted option, or `None` if no option is highlighted.
+
+        Returns:
+            An Option, or `None`.
+        """
+        if self.highlighted is not None:
+            return self.options[self.highlighted]
+        else:
+            return None
 
     # ignore single clicks
     async def _on_click(self, event: events.Click) -> None:
@@ -113,7 +126,7 @@ class FileList(SelectionList, inherit_bindings=False):
         # get sessionstate
         try:
             # only happens when the tabs aren't mounted
-            session = self.app.tabWidget.active_tab.session
+            session: SessionManager = self.app.tabWidget.active_tab.session
         except AttributeError:
             self.clear_options()
             return
@@ -123,6 +136,9 @@ class FileList(SelectionList, inherit_bindings=False):
         self.list_of_options: list[FileListSelectionWidget | Selection] = []
         self.items_in_cwd: set[str] = set()
 
+        to_highlight_index: int = 0
+        if not focus_on and cwd in session.lastHighlighted:
+            focus_on = session.lastHighlighted[cwd]
         try:
             folders, files = await path_utils.get_cwd_object(
                 cwd, config["settings"]["show_hidden_files"]
@@ -138,17 +154,21 @@ class FileList(SelectionList, inherit_bindings=False):
             else:
                 file_list_options = folders + files
 
+                # create generator objects
                 self.list_of_options = [
                     FileListSelectionWidget(
                         icon=item["icon"],
                         label=item["name"],
                         dir_entry=item["dir_entry"],
-                        value=path_utils.compress(item["name"]),
                     )
                     for item in file_list_options
                 ]
-
-                self.items_in_cwd = {item["name"] for item in file_list_options}
+                self.items_in_cwd: list[str] = [
+                    *[item["name"] for item in file_list_options]
+                ]
+                if focus_on in self.items_in_cwd:
+                    to_highlight_index = self.items_in_cwd.index(focus_on)
+                self.items_in_cwd = set(self.items_in_cwd)
 
         except PermissionError:
             self.list_of_options.append(
@@ -191,7 +211,7 @@ class FileList(SelectionList, inherit_bindings=False):
             session.directories.append(cwd)
             if session.lastHighlighted.get(cwd) is None:
                 # Hard coding is my passion (referring to the id)
-                session.lastHighlighted[cwd] = self.options[0].value
+                session.lastHighlighted[cwd] = self.list_of_options[0].dir_entry.name
             session.historyIndex = len(session.directories) - 1
         elif session.directories == []:
             session.directories = [path_utils.normalise(getcwd())]
@@ -200,16 +220,11 @@ class FileList(SelectionList, inherit_bindings=False):
             session.historyIndex == len(session.directories) - 1
         )
         try:
-            if focus_on:
-                self.highlighted = self.get_option_index(path_utils.compress(focus_on))
-            else:
-                self.highlighted = self.get_option_index(session.lastHighlighted[cwd])
-        except OptionDoesNotExist:
+            self.highlighted = to_highlight_index
+        except (OptionDoesNotExist, KeyError):
             self.highlighted = 0
-            session.lastHighlighted[cwd] = self.options[0].value
-        except KeyError:
-            self.highlighted = 0
-            session.lastHighlighted[cwd] = self.options[0].value
+        if self.highlighted_option:
+            session.lastHighlighted[cwd] = self.highlighted_option.dir_entry.name
 
         self.scroll_to_highlight()
         self.app.tabWidget.active_tab.label = (
@@ -258,7 +273,6 @@ class FileList(SelectionList, inherit_bindings=False):
                             icon=item["icon"],
                             label=item["name"],
                             dir_entry=item["dir_entry"],
-                            value=path_utils.compress(item["name"]),
                         )
                     )
                     if start_time + 0.25 < time():
@@ -328,7 +342,9 @@ class FileList(SelectionList, inherit_bindings=False):
         cwd = path_utils.normalise(getcwd())
         # Get the selected option
         selected_option = self.highlighted_option
-        file_name = path_utils.decompress(selected_option.value)
+        if selected_option is None:
+            return
+        file_name = selected_option.dir_entry.name
         self.update_border_subtitle()
         if self.dummy:
             base_path = self.enter_into or cwd
@@ -373,24 +389,26 @@ class FileList(SelectionList, inherit_bindings=False):
         ):
             self.app.query_one("PreviewContainer").remove_children()
             return
-        assert isinstance(event.option, FileListSelectionWidget)
+        if not isinstance(event.option, FileListSelectionWidget):
+            return
         self.update_border_subtitle()
         # Get the highlighted option
         highlighted_option = event.option
         self.app.tabWidget.active_tab.session.lastHighlighted[
             path_utils.normalise(getcwd())
-        ] = highlighted_option.value
+        ] = highlighted_option.dir_entry.name
         # Get the filename from the option id
-        file_name = path_utils.decompress(highlighted_option.value)
         # total files as footer
         if self.highlighted is None:
             self.highlighted = 0
         # preview
         self.app.query_one("PreviewContainer").show_preview(
-            path_utils.normalise(path.join(getcwd(), file_name))
+            highlighted_option.dir_entry.path
         )
         self.app.query_one("MetadataContainer").update_metadata(event.option.dir_entry)
-        self.app.query_one("#unzip").disabled = not file_name.lower().endswith(
+        self.app.query_one(
+            "#unzip"
+        ).disabled = not highlighted_option.dir_entry.name.lower().endswith(
             ARCHIVE_EXTENSIONS_FULL
         )
 
@@ -556,30 +574,24 @@ class FileList(SelectionList, inherit_bindings=False):
             list[str]: If there are objects at that given location.
             None: If there are no objects at that given location.
         """
-        cwd = path_utils.normalise(getcwd())
+        if self.highlighted_option is None:
+            return
         if not self.select_mode_enabled:
-            return [
-                str(
-                    path_utils.normalise(
-                        path.join(
-                            cwd,
-                            path_utils.decompress(self.highlighted_option.value),
-                        )
-                    )
-                )
-            ]
+            return [str(path_utils.normalise(self.highlighted_option.dir_entry.path))]
         else:
-            if not self.selected:
+            options = self._selected.values()
+            if not options:
                 return []
 
             return [
-                str(path_utils.normalise(path.join(cwd, path_utils.decompress(value))))
-                for value in self.selected
+                str(path_utils.normalise(option))
+                for option in options
+                if option is FileListSelectionWidget
             ]
 
     async def on_key(self, event: events.Key) -> None:
         """Handle key events for the file list."""
-        if not self.dummy:
+        if not self.dummy and self.highlighted_option:
             match event.key:
                 # toggle select mode
                 case key if key in config["keybinds"]["toggle_visual"]:
@@ -696,20 +708,15 @@ class FileList(SelectionList, inherit_bindings=False):
                     event.stop()
                     if self.highlighted_option and self.highlighted_option.disabled:
                         return
-                    if path.isdir(
-                        path.join(
-                            getcwd(),
-                            path_utils.decompress(self.highlighted_option.value),
-                        )
-                    ):
+                    if path.isdir(self.highlighted_option.dir_entry.path):
                         with self.app.suspend():
                             cmd(
-                                f'{config["plugins"]["editor"]["folder_executable"]} "{path.join(getcwd(), path_utils.decompress(self.highlighted_option.value))}"'
+                                f'{config["plugins"]["editor"]["folder_executable"]} "{self.highlighted_option.dir_entry.path}"'
                             )
                     else:
                         with self.app.suspend():
                             cmd(
-                                f'{config["plugins"]["editor"]["file_executable"]} "{path.join(getcwd(), path_utils.decompress(self.highlighted_option.value))}"'
+                                f'{config["plugins"]["editor"]["file_executable"]} "{self.highlighted_option.dir_entry.path}"'
                             )
                 # hit buttons with keybinds
                 case key if (

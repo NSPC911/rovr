@@ -8,7 +8,7 @@ from textual.screen import ModalScreen
 from textual.widgets import Input, OptionList
 from textual.widgets.option_list import Option
 
-from rovr.classes.textual_options import FinderOption
+from rovr.classes.textual_options import ModalSearcherOption
 from rovr.functions import path as path_utils
 from rovr.functions.icons import get_icon_for_file, get_icon_for_folder
 from rovr.variables.constants import config
@@ -125,7 +125,7 @@ class FileSearch(ModalScreen):
         if self.any_in_queue():
             return
 
-        options: list[FinderOption] = []
+        options: list[ModalSearcherOption] = []
         if fd_output.stdout:
             for line in fd_output.stdout.splitlines():
                 file_path = path_utils.normalise(line.strip())
@@ -139,10 +139,10 @@ class FileSearch(ModalScreen):
                     else get_icon_for_file(file_path_str)
                 )
                 options.append(
-                    FinderOption(
+                    ModalSearcherOption(
                         icon,
                         display_text,
-                        id=path_utils.compress(file_path_str),
+                        file_path_str,
                     )
                 )
 
@@ -186,9 +186,9 @@ class FileSearch(ModalScreen):
 
     @work(exclusive=True)
     async def on_option_list_option_selected(
-        self, event: FileSearchOptionList.OptionSelected
+        self, event: OptionList.OptionSelected
     ) -> None:
-        selected_value = event.option.id
+        selected_value = event.option.file_path
         if selected_value and not event.option.disabled:
             self.dismiss(selected_value)
         else:

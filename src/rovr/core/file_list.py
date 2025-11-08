@@ -143,7 +143,6 @@ class FileList(SelectionList, inherit_bindings=False):
             folders, files = await path_utils.get_cwd_object(
                 cwd, config["settings"]["show_hidden_files"]
             )
-
             if not folders and not files:
                 self.list_of_options.append(
                     Selection("   --no-files--", value="", disabled=True)
@@ -154,7 +153,6 @@ class FileList(SelectionList, inherit_bindings=False):
             else:
                 file_list_options = folders + files
 
-                # create generator objects
                 self.list_of_options = [
                     FileListSelectionWidget(
                         icon=item["icon"],
@@ -163,12 +161,10 @@ class FileList(SelectionList, inherit_bindings=False):
                     )
                     for item in file_list_options
                 ]
-                self.items_in_cwd: list[str] = [
-                    *[item["name"] for item in file_list_options]
-                ]
-                if focus_on in self.items_in_cwd:
-                    to_highlight_index = self.items_in_cwd.index(focus_on)
-                self.items_in_cwd = set(self.items_in_cwd)
+                items_in_cwd: list[str] = [item["name"] for item in file_list_options]
+                if focus_on in items_in_cwd:
+                    to_highlight_index = items_in_cwd.index(focus_on)
+                self.items_in_cwd = set(items_in_cwd)
 
         except PermissionError:
             self.list_of_options.append(
@@ -209,7 +205,9 @@ class FileList(SelectionList, inherit_bindings=False):
             if session.historyIndex != len(session.directories) - 1:
                 session.directories = session.directories[: session.historyIndex + 1]
             session.directories.append(cwd)
-            if session.lastHighlighted.get(cwd) is None:
+            if session.lastHighlighted.get(cwd) is None and isinstance(
+                self.list_of_options[0], FileListSelectionWidget
+            ):
                 # Hard coding is my passion (referring to the id)
                 session.lastHighlighted[cwd] = self.list_of_options[0].dir_entry.name
             session.historyIndex = len(session.directories) - 1
@@ -619,7 +617,6 @@ class FileList(SelectionList, inherit_bindings=False):
                         self.select(self.highlighted_option)
                         self.action_cursor_up()
                         self.select(self.highlighted_option)
-                    return
                 case key if (
                     self.select_mode_enabled
                     and key in config["keybinds"]["select_down"]
@@ -634,7 +631,6 @@ class FileList(SelectionList, inherit_bindings=False):
                         self.select(self.highlighted_option)
                         self.action_cursor_down()
                         self.select(self.highlighted_option)
-                    return
                 case key if (
                     self.select_mode_enabled
                     and key in config["keybinds"]["select_page_up"]
@@ -651,7 +647,6 @@ class FileList(SelectionList, inherit_bindings=False):
                     assert isinstance(old, int) and isinstance(new, int)
                     for index in range(new, old + 1):
                         self.select(self.get_option_at_index(index))
-                    return
                 case key if (
                     self.select_mode_enabled
                     and key in config["keybinds"]["select_page_down"]
@@ -668,7 +663,6 @@ class FileList(SelectionList, inherit_bindings=False):
                     assert isinstance(old, int) and isinstance(new, int)
                     for index in range(old, new + 1):
                         self.select(self.get_option_at_index(index))
-                    return
                 case key if (
                     self.select_mode_enabled
                     and key in config["keybinds"]["select_home"]
@@ -685,7 +679,6 @@ class FileList(SelectionList, inherit_bindings=False):
                     assert isinstance(old, int) and isinstance(new, int)
                     for index in range(new, old + 1):
                         self.select(self.get_option_at_index(index))
-                    return
                 case key if (
                     self.select_mode_enabled and key in config["keybinds"]["select_end"]
                 ):
@@ -701,7 +694,6 @@ class FileList(SelectionList, inherit_bindings=False):
                     assert isinstance(old, int) and isinstance(new, int)
                     for index in range(old, new + 1):
                         self.select(self.get_option_at_index(index))
-                    return
                 case key if (
                     config["plugins"]["editor"]["enabled"]
                     and key in config["plugins"]["editor"]["keybinds"]

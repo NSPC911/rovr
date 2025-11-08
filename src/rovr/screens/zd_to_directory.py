@@ -145,7 +145,9 @@ class ZDToDirectory(ModalScreen):
                 # Use original path for ID (not display text)
                 options.append(ModalSearcherOption(None, display_text, path))
             if len(options) == len(zoxide_options.options) and all(
-                options[i].id == zoxide_options.options[i].id
+                isinstance(options[i], ModalSearcherOption)
+                and isinstance(zoxide_options.options[i], ModalSearcherOption)
+                and options[i].file_path == zoxide_options.options[i].file_path
                 for i in range(len(options))
             ):  # ie same~ish query, resulting in same result
                 pass
@@ -189,7 +191,9 @@ class ZDToDirectory(ModalScreen):
     ) -> None:
         assert isinstance(event.option, ModalSearcherOption)
         selected_value = event.option.file_path
-        assert selected_value is not None
+        if selected_value is None:
+            self.dismiss(None)
+            return None
         # ignore if zoxide got uninstalled, why are you doing this
         with contextlib.suppress(asyncio.exceptions.TimeoutError, OSError):
             zoxide_process = await asyncio.create_subprocess_exec(

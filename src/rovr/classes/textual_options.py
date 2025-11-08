@@ -56,7 +56,6 @@ class ArchiveFileListSelection(Selection):
 class FileListSelectionWidget(Selection):
     # Cache for pre-parsed icon Content objects to avoid repeated markup parsing
     _icon_content_cache: dict[tuple[str, str], Content] = {}
-    _option_count: int = 0
 
     def __init__(
         self,
@@ -85,11 +84,12 @@ class FileListSelectionWidget(Selection):
         # Create prompt by combining cached icon content with label
         prompt = FileListSelectionWidget._icon_content_cache[cache_key] + Content(label)
         self.dir_entry = dir_entry
+        this_id = str(id(self))
 
         super().__init__(
             prompt=prompt,
-            value=str(FileListSelectionWidget._option_count),
-            id=str(FileListSelectionWidget._option_count),
+            value=str(this_id),
+            id=str(this_id),
             disabled=disabled,
         )
         self.label = label

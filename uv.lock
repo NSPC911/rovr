@@ -880,7 +880,7 @@ wheels = [
 
 [[package]]
 name = "rovr"
-version = "0.4.3.post2"
+version = "0.5.0rc1"
 source = { editable = "." }
 dependencies = [
     { name = "humanize" },

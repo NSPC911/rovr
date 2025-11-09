@@ -138,7 +138,8 @@ class FileList(SelectionList, inherit_bindings=False):
 
         to_highlight_index: int = 0
         if not focus_on and cwd in session.lastHighlighted:
-            focus_on = session.lastHighlighted[cwd]
+            last_highlight = session.lastHighlighted[cwd]
+            focus_on = last_highlight["name"]
         try:
             folders, files = await path_utils.get_cwd_object(
                 cwd, config["settings"]["show_hidden_files"]
@@ -180,10 +181,10 @@ class FileList(SelectionList, inherit_bindings=False):
             preview.border_title = ""
 
         # Query buttons once and update disabled state based on file list status
-        buttons = [
+        buttons: list[Button] = [
             self.app.query_one(selector) for selector in buttons_that_depend_on_path
         ]
-        should_disable = (
+        should_disable: bool = (
             len(self.list_of_options) == 1 and self.list_of_options[0].disabled
             if self.list_of_options
             else False
@@ -209,7 +210,10 @@ class FileList(SelectionList, inherit_bindings=False):
                 self.list_of_options[0], FileListSelectionWidget
             ):
                 # Hard coding is my passion (referring to the id)
-                session.lastHighlighted[cwd] = self.list_of_options[0].dir_entry.name
+                session.lastHighlighted[cwd] = {
+                    "name": self.list_of_options[0].dir_entry.name,
+                    "index": 0,
+                }
             session.historyIndex = len(session.directories) - 1
         elif session.directories == []:
             session.directories = [path_utils.normalise(getcwd())]
@@ -217,12 +221,19 @@ class FileList(SelectionList, inherit_bindings=False):
         self.app.query_one("Button#forward").disabled = (
             session.historyIndex == len(session.directories) - 1
         )
+        if to_highlight_index == 0 and cwd in session.lastHighlighted and session.lastHighlighted[cwd]["index"]:
+            to_highlight_index = min(
+                len(self.list_of_options), session.lastHighlighted[cwd]["index"]
+            )
         try:
             self.highlighted = to_highlight_index
         except (OptionDoesNotExist, KeyError):
             self.highlighted = 0
-        if self.highlighted_option:
-            session.lastHighlighted[cwd] = self.highlighted_option.dir_entry.name
+        if self.highlighted_option and isinstance(self.highlighted, FileListSelectionWidget):
+            session.lastHighlighted[cwd] = {
+                "name": self.highlighted_option.dir_entry.name,
+                "index": self.highlighted,
+            }
 
         self.scroll_to_highlight()
         self.app.tabWidget.active_tab.label = (
@@ -394,7 +405,7 @@ class FileList(SelectionList, inherit_bindings=False):
         highlighted_option = event.option
         self.app.tabWidget.active_tab.session.lastHighlighted[
             path_utils.normalise(getcwd())
-        ] = highlighted_option.dir_entry.name
+        ] = {"name": highlighted_option.dir_entry.name, "index": self.highlighted}
         # Get the filename from the option id
         # total files as footer
         if self.highlighted is None:

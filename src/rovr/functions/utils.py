@@ -1,3 +1,5 @@
+from typing import Any, Callable
+
 from humanize import naturalsize
 from rich.console import Console
 from textual.dom import DOMNode
@@ -137,3 +139,11 @@ def should_cancel() -> bool:
     except NoActiveWorker:
         return False
     return bool(worker and not worker.is_running)
+
+
+class classproperty:  # noqa: N801
+    def __init__(self, func: Callable) -> None:
+        self.func = func
+
+    def __get__(self, instance: Any, owner: Any) -> Any:  # noqa: ANN401
+        return self.func(owner)

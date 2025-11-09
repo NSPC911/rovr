@@ -61,8 +61,6 @@ from rovr.search_container import SearchInput
 from rovr.variables.constants import MaxPossible, config
 from rovr.variables.maps import VAR_TO_DIR
 
-max_possible = MaxPossible()
-
 console = Console()
 
 
@@ -533,8 +531,8 @@ class Application(App, inherit_bindings=False):
     @work
     async def on_resize(self, event: events.Resize) -> None:
         if (
-            event.size.height < max_possible.height
-            or event.size.width < max_possible.width
+            event.size.height < MaxPossible.height
+            or event.size.width < MaxPossible.width
         ) and not self.has_pushed_screen:
             self.has_pushed_screen = True
             await self.push_screen_wait(TerminalTooSmall())

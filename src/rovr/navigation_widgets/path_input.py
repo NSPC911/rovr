@@ -118,6 +118,9 @@ class PathAutoCompleteInput(PathAutoComplete):
         """Do the completion (i.e. insert the selected item into the target input).
 
         This is when the user highlights an option in the dropdown and presses tab or enter.
+
+        Raises:
+            TypeError: If the wrong element is considered as target.
         """
         if not self.display or self.option_list.option_count == 0:
             return
@@ -129,7 +132,8 @@ class PathAutoCompleteInput(PathAutoComplete):
         if highlighted_value == "":
             # nothing there
             self.action_hide()
-            assert isinstance(self._target, Input)
+            if not isinstance(self._target, Input):
+                raise TypeError(f"Expected Input target, got {type(self._target)}")
             self._target.post_message(
                 Input.Submitted(self._target, self._target.value, None)
             )

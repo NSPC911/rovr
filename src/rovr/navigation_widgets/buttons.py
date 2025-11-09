@@ -34,11 +34,12 @@ class ForwardButton(Button):
         if self.disabled:
             return
         state: SessionManager = self.app.tabWidget.active_tab.session
-        state.historyIndex += 1
-        self.app.cd(
-            state.directories[state.historyIndex],
-            add_to_history=False,
-        )
+        if state.historyIndex < len(state.directories) - 1:
+            state.historyIndex += 1
+            self.app.cd(
+                state.directories[state.historyIndex],
+                add_to_history=False,
+            )
 
 
 class UpButton(Button):

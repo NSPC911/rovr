@@ -6,8 +6,10 @@ from textual.app import ComposeResult
 from textual.containers import VerticalGroup
 from textual.screen import ModalScreen
 from textual.widgets import Input, OptionList
+from textual.worker import WorkerCancelled
 
 from rovr.classes.textual_options import ModalSearcherOption
+from rovr.functions.utils import should_cancel
 from rovr.variables.constants import config
 
 
@@ -89,6 +91,8 @@ class ZDToDirectory(ModalScreen):
         """Update the list"""
         search_term = event.value.strip()
         # check 1 for queue, to ignore subprocess as a whole
+        if should_cancel():
+            return
 
         zoxide_cmd = ["zoxide", "query", "--list"]
         show_scores = config["plugins"]["zoxide"].get("show_scores", False)
@@ -121,27 +125,18 @@ class ZDToDirectory(ModalScreen):
             )
             return
         # check 2 for queue, to ignore mounting as a whole
+        if should_cancel():
+            return
         zoxide_options: ZoxideOptionList = self.query_one(
             "#zoxide_options", ZoxideOptionList
         )
-        options = []
         if stdout:
             stdout = stdout.decode()
-            first_score_width = 0
-            for line in stdout.splitlines():
-                path, score = self._parse_zoxide_line(line, show_scores)
-                if show_scores and score:
-                    # This ensures that we only add necessary padding
-                    # first score is going to be the largest, so we take its width
-                    if first_score_width == 0:
-                        first_score_width = len(score)
-                    # Fixed size to make it look good.
-                    display_text = f" {score:>{first_score_width}} │ {path}"
-                else:
-                    display_text = f" {path}"
-
-                # Use original path for ID (not display text)
-                options.append(ModalSearcherOption(None, display_text, path))
+            worker = self.create_options(show_scores, stdout)
+            try:
+                options: list[ModalSearcherOption] = await worker.wait()
+            except WorkerCancelled:
+                return  # anyways
             if len(options) == len(zoxide_options.options) and all(
                 isinstance(options[i], ModalSearcherOption)
                 and isinstance(zoxide_options.options[i], ModalSearcherOption)
@@ -159,6 +154,8 @@ class ZDToDirectory(ModalScreen):
                 zoxide_options.add_options(options)
                 zoxide_options.remove_class("empty")
                 zoxide_options.highlighted = 0
+                if should_cancel():
+                    return
         else:
             # No Matches to the query text
             zoxide_options.clear_options()
@@ -205,7 +202,7 @@ class ZDToDirectory(ModalScreen):
                 stderr=asyncio.subprocess.PIPE,
             )
             _, _ = await asyncio.wait_for(zoxide_process.communicate(), timeout=3)
-        if event.option.disabled:
+        if not event.option.disabled:
             self.dismiss(selected_value)
         else:
             self.dismiss(None)
@@ -242,5 +239,25 @@ class ZDToDirectory(ModalScreen):
             or self.zoxide_options.get_option_at_index(0).disabled
         ):
             self.zoxide_options.border_subtitle = "0/0"
-        elif self.zoxide_options.highlighted is not None:
+        else:
             self.zoxide_options.border_subtitle = f"{self.zoxide_options.highlighted + 1}/{self.zoxide_options.option_count}"
+
+    @work(thread=True)
+    def create_options(self, show_scores: int, stdout: str) -> list[ModalSearcherOption]:
+        first_score_width = 0
+        options: list[ModalSearcherOption] = []
+        for line in stdout.splitlines():
+            path, score = self._parse_zoxide_line(line, show_scores)
+            if show_scores and score:
+                # This ensures that we only add necessary padding
+                # first score is going to be the largest, so we take its width
+                if first_score_width == 0:
+                    first_score_width = len(score)
+                # Fixed size to make it look good.
+                display_text = f" {score:>{first_score_width}} │ {path}"
+            else:
+                display_text = f" {path}"
+
+            # Use original path for ID (not display text)
+            options.append(ModalSearcherOption(None, display_text, path))
+        return options

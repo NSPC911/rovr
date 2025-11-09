@@ -180,7 +180,7 @@ class FileSearch(ModalScreen):
             return
         if self.search_options.highlighted is None:
             self.search_options.highlighted = 0
-        if (
+        if self.search_options.option_count == 0 or (
             self.search_options.highlighted_option
             and self.search_options.highlighted_option.disabled
         ):
@@ -226,7 +226,8 @@ class FileSearch(ModalScreen):
         if (
             self.search_options.option_count == 0
             or self.search_options.get_option_at_index(0).disabled
+            or self.search_options.highlighted is None
         ):
             self.search_options.border_subtitle = "0/0"
-        elif self.search_options.highlighted:
+        else:
             self.search_options.border_subtitle = f"{str(self.search_options.highlighted + 1)}/{self.search_options.option_count}"

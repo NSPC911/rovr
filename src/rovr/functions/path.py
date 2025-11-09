@@ -67,15 +67,11 @@ def is_hidden_file(filepath: str) -> bool:
 # letters, numbers, underscores, or hyphens, and must
 # not begin with a number
 def compress(text: str) -> str:
-    b64_str = base64.b64encode(text.encode("utf-8")).decode("ascii")
-    safe_str = b64_str.replace("+", "_").replace("/", "-")
-    return "u_" + safe_str
+    return base64.urlsafe_b64encode(text.encode("utf-8")).decode("ascii")
 
 
 def decompress(text: str) -> str:
-    encoded_part = text[2:]  # Remove 'u_'
-    b64_str = encoded_part.replace("_", "+").replace("-", "/")
-    return base64.b64decode(b64_str.encode("ascii")).decode("utf-8")
+    return base64.urlsafe_b64decode(text.encode("ascii")).decode("utf-8")
 
 
 @work
@@ -434,7 +430,7 @@ def get_mounted_drives() -> list:
     drives = []
     try:
         # get all partitions
-        partitions = psutil.disk_partitions(all=False)
+        partitions = psutil.disk_partitions(all=True)
 
         if os_type == "Windows":
             # For Windows, return the drive letters
@@ -448,14 +444,14 @@ def get_mounted_drives() -> list:
             drives = [
                 p.mountpoint
                 for p in partitions
-                if path.isdir(p.device) and _should_include_macos_mount_point(p)
+                if path.isdir(p.mountpoint) and _should_include_macos_mount_point(p)
             ]
         else:
             # For other Unix-like systems (Linux, WSL, etc.), filter out system mount points
             drives = [
                 p.mountpoint
                 for p in partitions
-                if path.isdir(p.device) and _should_include_linux_mount_point(p)
+                if path.isdir(p.mountpoint) and _should_include_linux_mount_point(p)
             ]
     except Exception as e:
         print(f"Error getting mounted drives: {e}\nUsing fallback method...")

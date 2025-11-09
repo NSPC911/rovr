@@ -10,7 +10,7 @@ The format is _sort of_ based on [Keep a Changelog](https://keepachangelog.com/e
 
 #### crash fixes
 * **app:** fix right click crash that i got ([fbfa96c](https://github.com/NSPC911/rovr/commit/fbfa96ca673c57a2f129aea0e98d919069bffbc5))
-* **utils-func:** handle noactiveworker and workercancelled ([3147fc8](https://github.com/NSPC911/rovr/commit/3147fc8d2b317bb20c844712270d7566c5d2935f))
+* **utils-func:** handle NoActiveWorker and WorkerCancelled ([3147fc8](https://github.com/NSPC911/rovr/commit/3147fc8d2b317bb20c844712270d7566c5d2935f))
 * **core+app:** fix crashes that i experienced ([e8161ef](https://github.com/NSPC911/rovr/commit/e8161efd725fa6433208306aed602590b592d552))
 * **path_utils:** fix opening of non-existent files ([695b63b](https://github.com/NSPC911/rovr/commit/695b63b8d301d71eefde5923ae4d6438b95a665b))
 
@@ -21,10 +21,10 @@ The format is _sort of_ based on [Keep a Changelog](https://keepachangelog.com/e
 #### ui fixes
 * **clipboard:** auto handle paste button disables ([3f1124f](https://github.com/NSPC911/rovr/commit/3f1124f837b4a3fb869704fec73b1ab426b5c2ba))
 * **config:** fix startup icon ([f6da8f0](https://github.com/NSPC911/rovr/commit/f6da8f0e595cfd8b0f47bfdaf13441b5c6d81ad7))
-* **file_list:** disable new item button when permissionless ([fd1f061](https://github.com/NSPC911/rovr/commit/fd1f061a581a3e731c5d5c1f49cb850362191863))
+* **file_list:** disable new item button when without permission ([fd1f061](https://github.com/NSPC911/rovr/commit/fd1f061a581a3e731c5d5c1f49cb850362191863))
 * **filelist:** fix hist prev not working in empty dirs ([2dca5e6](https://github.com/NSPC911/rovr/commit/2dca5e668f1a41ca86959883624d9865b6639113))
 * **filelist:** fix selection on exit select mode ([b2c7a16](https://github.com/NSPC911/rovr/commit/b2c7a16bea27a0e12266475fe9b397c668bcdbc3))
-* **path_utils:** prevent drives from being added if it cannot be entered ito ([a834331](https://github.com/NSPC911/rovr/commit/a8343313e9b8c35521182ee51bd104a4785171de))
+* **path_utils:** prevent drives from being added if it cannot be entered into ([a834331](https://github.com/NSPC911/rovr/commit/a8343313e9b8c35521182ee51bd104a4785171de))
 * **new_item_button:** improve toast message ([58fb410](https://github.com/NSPC911/rovr/commit/58fb4101ec1f929fba5b91630a56703716e56adb))
 * **pinned-sidebar:** always show search bar ([d8047ed](https://github.com/NSPC911/rovr/commit/d8047ed52c44ce91579c5f6a076606c5d7046299))
 * **process:** uses proper panic ([642169d](https://github.com/NSPC911/rovr/commit/642169de6e54e5253937c5c1182d6b086970dc78))
@@ -42,13 +42,13 @@ The format is _sort of_ based on [Keep a Changelog](https://keepachangelog.com/e
 ### Added
 
 #### new config options
-* **app:** add scrolloff behaviour to filelist ([#139](https://github.com/NSPC911/rovr/issues/139)) ([c2a38fb](https://github.com/NSPC911/rovr/commit/c2a38fb27e11f080518152519ae01927eb75d544))
+* **app:** add scroll-off behaviour to filelist ([#139](https://github.com/NSPC911/rovr/issues/139)) ([c2a38fb](https://github.com/NSPC911/rovr/commit/c2a38fb27e11f080518152519ae01927eb75d544))
 
 #### style improvements
 * **app:** improve borders and stuff ([ee181e5](https://github.com/NSPC911/rovr/commit/ee181e5629eb4652873e92b373674392c983a693))
 * **app:** improve compact mode ([#138](https://github.com/NSPC911/rovr/issues/138)) ([c45832e](https://github.com/NSPC911/rovr/commit/c45832e0ca3e1baf1019c223e550d5d7e24259a2))
 * change ascii logo ([1a15b7f](https://github.com/NSPC911/rovr/commit/1a15b7fa1907b7fde6babd7d8793d390ee86ed48))
-* **compactmode:** make header 1 char height ([e66a408](https://github.com/NSPC911/rovr/commit/e66a408e552c7127232098ba583f5742084e3012))
+* **compact-mode:** make header 1 char height ([e66a408](https://github.com/NSPC911/rovr/commit/e66a408e552c7127232098ba583f5742084e3012))
 
 #### error toasts
 * **app:** improve css change handling ([756bb38](https://github.com/NSPC911/rovr/commit/756bb3812af10e7d1b6f280d874864e3cde65a1d))

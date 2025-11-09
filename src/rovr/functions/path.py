@@ -89,11 +89,7 @@ async def open_file(app: App, filepath: str) -> None:
     system = os_type.lower()
     # check if it is available first
     if not path.exists(filepath):
-        app.notify(
-            f"File not found: {filepath}",
-            title="Open File",
-            severity="error"
-        )
+        app.notify(f"File not found: {filepath}", title="Open File", severity="error")
         return
 
     try:
@@ -213,7 +209,9 @@ async def get_cwd_object(
     return folders, files
 
 
-def file_is_type(file_path: str) -> Literal["unknown", "symlink", "directory", "junction", "file"]:
+def file_is_type(
+    file_path: str,
+) -> Literal["unknown", "symlink", "directory", "junction", "file"]:
     """Get a given path's type
     Args:
         file_path(str): The file path to check

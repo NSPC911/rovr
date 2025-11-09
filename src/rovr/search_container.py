@@ -74,24 +74,23 @@ class SearchInput(Input):
             event.value,
         )
         assert hasattr(self.items_list, "list_of_options")
-        # Build ordered list where disabled options act as separators.
         output: list[Option] = []
-        segment: list[tuple[Option, int, int]] = []  # (option, score, original_index)
+        segment: list[
+            tuple[Option, int | float, int]
+        ] = []  # (option, score, original_index)
         for idx, option in enumerate(self.items_list.list_of_options):
             assert isinstance(option, Option)
             if self.always_add_disabled and option.disabled:
-                # Flush current segment sorted by score (desc) then original order
                 if segment:
                     segment.sort(key=lambda tup: (-tup[1], tup[2]))
                     output.extend(o for o, _, _ in segment)
                     segment = []
-                # Disabled option keeps original relative position and acts as separator
                 output.append(option)
                 continue
             score = matcher.match(option.label)
             if score > 0:
+                assert isinstance(option, Option)
                 segment.append((option, score, idx))
-        # Flush final segment
         if segment:
             segment.sort(key=lambda tup: (-tup[1], tup[2]))
             output.extend(o for o, _, _ in segment)

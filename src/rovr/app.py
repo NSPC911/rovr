@@ -40,7 +40,6 @@ from rovr.core.file_list import FileListRightClickOptionList
 from rovr.footer import Clipboard, MetadataContainer, ProcessContainer
 from rovr.functions import icons
 from rovr.functions.path import (
-    decompress,
     ensure_existing_directory,
     get_filtered_dir_names,
     get_mounted_drives,
@@ -204,7 +203,6 @@ class Application(App, inherit_bindings=False):
         self.tabWidget: Tabline = self.query_one(Tabline)
 
         # Change to startup directory. This also calls update_file_list()
-        # causing the file_list to get populated
         self.cd(
             directory=path.abspath(self.startup_path),
             focus_on=path.basename(self.startup_path),
@@ -349,8 +347,8 @@ class Application(App, inherit_bindings=False):
                 def on_response(response: str) -> None:
                     """Handle the response from the ZDToDirectory dialog."""
                     if response:
-                        pathinput = self.query_one(PathInput)
-                        pathinput.value = decompress(response).replace(path.sep, "/")
+                        pathinput: PathInput = self.query_one(PathInput)
+                        pathinput.value = response
                         pathinput.on_input_submitted(
                             SimpleNamespace(value=pathinput.value)
                         )
@@ -367,10 +365,9 @@ class Application(App, inherit_bindings=False):
                 if shutil.which(fd_exec) is not None:
                     try:
 
-                        def on_response(selected_compressed: str | None) -> None:
-                            if not selected_compressed:
+                        def on_response(selected: str | None) -> None:
+                            if selected is None:
                                 return
-                            selected = decompress(selected_compressed)
                             if path.isdir(selected):
                                 self.cd(selected)
                             else:

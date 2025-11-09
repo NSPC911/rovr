@@ -4,12 +4,10 @@ import contextlib
 from textual import events, work
 from textual.app import ComposeResult
 from textual.containers import VerticalGroup
-from textual.content import Content
 from textual.screen import ModalScreen
 from textual.widgets import Input, OptionList
-from textual.widgets.option_list import Option
 
-from rovr.functions import path as path_utils
+from rovr.classes.textual_options import ModalSearcherOption
 from rovr.variables.constants import config
 
 
@@ -46,7 +44,7 @@ class ZDToDirectory(ModalScreen):
                 placeholder="Enter directory name or pattern",
             )
             yield ZoxideOptionList(
-                Option("  No input provided", disabled=True),
+                ModalSearcherOption(None, "  No input provided", disabled=True),
                 id="zoxide_options",
                 classes="empty",
             )
@@ -115,7 +113,8 @@ class ZDToDirectory(ModalScreen):
             # zoxide not installed
             self.zoxide_options.clear_options()
             self.zoxide_options.add_option(
-                Option(
+                ModalSearcherOption(
+                    None,
                     "  zoxide is missing on $PATH or cannot be executed"
                     if isinstance(exc, OSError)
                     else "  zoxide took too long to respond",
@@ -144,11 +143,11 @@ class ZDToDirectory(ModalScreen):
                     display_text = f" {path}"
 
                 # Use original path for ID (not display text)
-                options.append(
-                    Option(Content(display_text), id=path_utils.compress(path))
-                )
+                options.append(ModalSearcherOption(None, display_text, path))
             if len(options) == len(zoxide_options.options) and all(
-                options[i].id == zoxide_options.options[i].id
+                isinstance(options[i], ModalSearcherOption)
+                and isinstance(zoxide_options.options[i], ModalSearcherOption)
+                and options[i].file_path == zoxide_options.options[i].file_path
                 for i in range(len(options))
             ):  # ie same~ish query, resulting in same result
                 pass
@@ -166,7 +165,7 @@ class ZDToDirectory(ModalScreen):
             # No Matches to the query text
             zoxide_options.clear_options()
             zoxide_options.add_option(
-                Option("  --No matches found--", disabled=True),
+                ModalSearcherOption(None, "  --No matches found--", disabled=True),
             )
             zoxide_options.add_class("empty")
             zoxide_options.border_subtitle = "0/0"
@@ -188,17 +187,19 @@ class ZDToDirectory(ModalScreen):
     # You can't manually tab into the option list, but you can click, so I guess
     @work(exclusive=True)
     async def on_option_list_option_selected(
-        self, event: ZoxideOptionList.OptionSelected
+        self, event: OptionList.OptionSelected
     ) -> None:
-        """Handle option selection."""
-        selected_value = event.option.id
-        assert selected_value is not None
+        assert isinstance(event.option, ModalSearcherOption)
+        selected_value = event.option.file_path
+        if selected_value is None:
+            self.dismiss(None)
+            return None
         # ignore if zoxide got uninstalled, why are you doing this
         with contextlib.suppress(asyncio.exceptions.TimeoutError, OSError):
             zoxide_process = await asyncio.create_subprocess_exec(
                 "zoxide",
                 "add",
-                path_utils.decompress(selected_value),
+                selected_value,
                 stdout=asyncio.subprocess.PIPE,
                 stderr=asyncio.subprocess.PIPE,
             )
@@ -232,7 +233,7 @@ class ZDToDirectory(ModalScreen):
                 self.focus_previous()
 
     def on_option_list_option_highlighted(
-        self, event: ZoxideOptionList.OptionHighlighted
+        self, event: OptionList.OptionHighlighted
     ) -> None:
         if (
             self.zoxide_options.option_count == 0

@@ -221,7 +221,11 @@ class FileList(SelectionList, inherit_bindings=False):
         self.app.query_one("Button#forward").disabled = (
             session.historyIndex == len(session.directories) - 1
         )
-        if to_highlight_index == 0 and cwd in session.lastHighlighted and session.lastHighlighted[cwd]["index"]:
+        if (
+            to_highlight_index == 0
+            and cwd in session.lastHighlighted
+            and session.lastHighlighted[cwd]["index"]
+        ):
             to_highlight_index = min(
                 len(self.list_of_options), session.lastHighlighted[cwd]["index"]
             )
@@ -229,7 +233,9 @@ class FileList(SelectionList, inherit_bindings=False):
             self.highlighted = to_highlight_index
         except (OptionDoesNotExist, KeyError):
             self.highlighted = 0
-        if self.highlighted_option and isinstance(self.highlighted, FileListSelectionWidget):
+        if self.highlighted_option and isinstance(
+            self.highlighted, FileListSelectionWidget
+        ):
             session.lastHighlighted[cwd] = {
                 "name": self.highlighted_option.dir_entry.name,
                 "index": self.highlighted,

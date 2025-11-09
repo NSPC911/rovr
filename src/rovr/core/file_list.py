@@ -227,14 +227,14 @@ class FileList(SelectionList, inherit_bindings=False):
             and session.lastHighlighted[cwd]["index"]
         ):
             to_highlight_index = min(
-                len(self.list_of_options), session.lastHighlighted[cwd]["index"]
+                len(self.list_of_options) - 1, session.lastHighlighted[cwd]["index"]
             )
         try:
             self.highlighted = to_highlight_index
         except (OptionDoesNotExist, KeyError):
             self.highlighted = 0
         if self.highlighted_option and isinstance(
-            self.highlighted, FileListSelectionWidget
+            self.highlighted_option, FileListSelectionWidget
         ):
             session.lastHighlighted[cwd] = {
                 "name": self.highlighted_option.dir_entry.name,

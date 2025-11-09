@@ -86,6 +86,8 @@ class PathAutoCompleteInput(PathAutoComplete):
         else:
             self._empty_directory = False
 
+        # this kinda is required, for some reason, ty doesn't
+        # know yet that you can sort while providing a key
         results.sort(key=self.sort_key)  # ty: ignore[no-matching-overload]
         folder_prefix = self.folder_prefix
         return [
@@ -102,12 +104,14 @@ class PathAutoCompleteInput(PathAutoComplete):
 
     def _on_show(self, event: events.Show) -> None:
         super()._on_show(event)
-        assert isinstance(self._target, Input)
+        if not isinstance(self._target, Input):
+            raise TypeError(f"Expected Input target, got {type(self._target)}")
         self._target.add_class("hide_border_bottom", update=True)
 
     async def _on_hide(self, event: events.Hide) -> None:
         super()._on_hide(event)
-        assert isinstance(self._target, Input)
+        if not isinstance(self._target, Input):
+            raise TypeError(f"Expected Input target, got {type(self._target)}")
         self._target.remove_class("hide_border_bottom", update=True)
 
     def _complete(self, option_index: int) -> None:

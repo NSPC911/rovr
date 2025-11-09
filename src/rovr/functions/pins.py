@@ -1,5 +1,6 @@
 import os
 from os import path
+from typing import TypedDict
 
 import ujson
 
@@ -12,20 +13,26 @@ from .path import normalise
 pins = {}
 
 
+class PinsDict(TypedDict):
+    default: list[dict[str, str]]
+    "The files to show in the default location"
+    pins: list[dict[str, str]]
+    "Other added folders"
+
+
 def load_pins() -> dict:
     """
     Load the pinned files from a JSON file in the user's config directory.
     Returns:
         dict: A dictionary with the default values, and the custom added pins.
     """
-    global pins
     user_pins_file_path = path.join(VAR_TO_DIR["CONFIG"], "pins.json")
 
     # Ensure the user's config directory exists
     if not path.exists(VAR_TO_DIR["CONFIG"]):
         os.makedirs(VAR_TO_DIR["CONFIG"])
     if not path.exists(user_pins_file_path):
-        pins = {
+        pins: PinsDict = {
             "default": [
                 {"name": "Home", "path": "$HOME"},
                 {"name": "Downloads", "path": "$DOWNLOADS"},
@@ -48,7 +55,7 @@ def load_pins() -> dict:
             pins = ujson.load(f)
     except (IOError, ValueError):
         # Reset pins on corrupt or something else happened
-        pins = {
+        pins: PinsDict = {
             "default": [
                 {"name": "Home", "path": "$HOME"},
                 {"name": "Downloads", "path": "$DOWNLOADS"},
@@ -76,7 +83,11 @@ def load_pins() -> dict:
         pins["pins"] = []
 
     for section_key in ["default", "pins"]:
-        for item in pins[section_key]:
+        # again, screw you ty, `section_key` can never be unknown
+        # but i dont know how to assert that to you
+        for item in pins[section_key]:  # ty: ignore[invalid-key]
+            # no i will not use isinstance, ty screams at me
+            # because of the replace code a few lines below
             if type(item) is dict and "path" in item and type(item["path"]) is str:
                 # Expand variables
                 for var, dir_path_val in VAR_TO_DIR.items():

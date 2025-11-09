@@ -6,6 +6,7 @@ from humanize import naturaldelta
 from json_schema_for_humans.generate import generate_from_filename
 from json_schema_for_humans.generation_configuration import GenerationConfiguration
 from rich.console import Console
+from rich.traceback import Traceback
 
 start_time = perf_counter()
 pprint = Console().print
@@ -20,11 +21,19 @@ try:
         ]
     config.template_name = "md"
     config.with_footer = False
+    # do some temporary fixes to the schema
+    with open("src/rovr/config/schema.json", "r", encoding="utf-8") as f:
+        schema_content = f.read()
+    with open("src/rovr/config/schema.json", "w", encoding="utf-8") as f:
+        f.write(schema_content.replace("|", "&#124;"))
     generate_from_filename(
         "src/rovr/config/schema.json",
         "docs/src/content/docs/reference/schema.mdx",
         config=config,
     )
+    # rewrite schema file
+    with open("src/rovr/config/schema.json", "w", encoding="utf-8") as f:
+        f.write(schema_content)
     with open(
         "docs/src/content/docs/reference/schema.mdx", "r", encoding="utf-8"
     ) as schema_file:
@@ -38,7 +47,7 @@ try:
         )
     invoker = []
     if which("prettier"):
-        invoker = ["prettier"]
+        invoker = [which("prettier")]
     elif which("npx"):
         invoker = [which("npx"), "prettier"]
     elif which("npm"):
@@ -61,4 +70,4 @@ try:
     )
 except FileNotFoundError:
     pprint("[red]Do not run manually with python! Run [blue]poe gen-schema[/][/]")
-    raise
+    pprint(Traceback(show_locals=True))

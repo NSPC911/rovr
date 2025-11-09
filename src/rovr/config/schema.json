@@ -88,7 +88,7 @@
             "start": {
               "type": "string",
               "default": " ___ ___\n|  _| . |\n|_| |___|\n _ _ ___\n| | |  _|\n \\_/|_|\n",
-              "description": "This is shown when the rovr starts up. You may see it for a split second, but it will never appear afterwards."
+              "description": "This is shown when the rovr starts up. You may see it for a split second, but it will never appear afterwards. You cannot view this properly in this docs."
             },
             "empty": {
               "type": "string",

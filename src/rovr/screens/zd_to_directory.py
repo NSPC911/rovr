@@ -34,8 +34,6 @@ class ZDToDirectory(ModalScreen):
 
     def __init__(self, **kwargs) -> None:
         super().__init__(**kwargs)
-        self._queued_task = None
-        self._queued_task_args: Input.Changed | None = None
 
     def compose(self) -> ComposeResult:
         with VerticalGroup(id="zoxide_group", classes="zoxide_group"):
@@ -189,7 +187,10 @@ class ZDToDirectory(ModalScreen):
     async def on_option_list_option_selected(
         self, event: OptionList.OptionSelected
     ) -> None:
-        assert isinstance(event.option, ModalSearcherOption)
+        if not isinstance(event.option, ModalSearcherOption):
+            # theoretically this shouldnt happen, but precautions
+            self.dismiss(None)
+            return
         selected_value = event.option.file_path
         if selected_value is None:
             self.dismiss(None)
@@ -204,7 +205,7 @@ class ZDToDirectory(ModalScreen):
                 stderr=asyncio.subprocess.PIPE,
             )
             _, _ = await asyncio.wait_for(zoxide_process.communicate(), timeout=3)
-        if selected_value and not event.option.disabled:
+        if event.option.disabled:
             self.dismiss(selected_value)
         else:
             self.dismiss(None)
@@ -236,7 +237,8 @@ class ZDToDirectory(ModalScreen):
         self, event: OptionList.OptionHighlighted
     ) -> None:
         if (
-            self.zoxide_options.option_count == 0
+            self.zoxide_options.highlighted is None
+            or self.zoxide_options.option_count == 0
             or self.zoxide_options.get_option_at_index(0).disabled
         ):
             self.zoxide_options.border_subtitle = "0/0"

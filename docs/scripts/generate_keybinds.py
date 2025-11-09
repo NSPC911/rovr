@@ -40,7 +40,7 @@ try:
         file.write(page)
     invoker = []
     if which("prettier"):
-        invoker = ["prettier"]
+        invoker = [which("prettier")]
     elif which("npx"):
         invoker = [which("npx"), "prettier"]
     elif which("npm"):

@@ -224,11 +224,7 @@ class MetadataContainer(VerticalScroll, inherit_bindings=False):
                         with suppress(OSError, FileNotFoundError):
                             total_size += lstat(fp).st_size
                 if time.monotonic() - last_update_time > 0.25:
-                    spinner_index = (
-                        spinner_index + 1
-                        if spinner_index // (SPINNER_LENGTH - 1) == 0
-                        else 0
-                    )
+                    spinner_index = (spinner_index + 1) % SPINNER_LENGTH
                     self.app.call_from_thread(
                         size_widget.update,
                         f"{SPINNER[spinner_index]} {utils.natural_size(total_size, config['metadata']['filesize_suffix'], config['metadata']['filesize_decimals'])}",

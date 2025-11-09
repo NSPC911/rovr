@@ -67,7 +67,7 @@ class NewItemButton(Button):
             except Exception as e:
                 self.notify(
                     message=Content(
-                        f"Error creating directory '{response}'\n{type(e).__name__}: {e}"
+                        f"Error creating file '{response}'\n{type(e).__name__}: {e}"
                     ),
                     title="New Item",
                     severity="error",
@@ -80,7 +80,7 @@ class NewItemButton(Button):
             except Exception as e:
                 self.notify(
                     message=Content(
-                        f"Error creating directory '{response}'\n{type(e).__name__}: {e}"
+                        f"Error creating file '{response}'\n{type(e).__name__}: {e}"
                     ),
                     title="New Item",
                     severity="error",

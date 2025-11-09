@@ -12,7 +12,7 @@ The format is _sort of_ based on [Keep a Changelog](https://keepachangelog.com/e
 * **app:** fix right click crash that i got ([fbfa96c](https://github.com/NSPC911/rovr/commit/fbfa96ca673c57a2f129aea0e98d919069bffbc5))
 * **utils-func:** handle noactiveworker and workercancelled ([3147fc8](https://github.com/NSPC911/rovr/commit/3147fc8d2b317bb20c844712270d7566c5d2935f))
 * **core+app:** fix crashes that i experienced ([e8161ef](https://github.com/NSPC911/rovr/commit/e8161efd725fa6433208306aed602590b592d552))
-* **path_utils:** fix opening of non-existant files ([695b63b](https://github.com/NSPC911/rovr/commit/695b63b8d301d71eefde5923ae4d6438b95a665b))
+* **path_utils:** fix opening of non-existent files ([695b63b](https://github.com/NSPC911/rovr/commit/695b63b8d301d71eefde5923ae4d6438b95a665b))
 
 #### lint fixes
 * **config:** resolve DOC102 error ([240a937](https://github.com/NSPC911/rovr/commit/240a937860dd3f10965e86879f61bd82f9838db5))

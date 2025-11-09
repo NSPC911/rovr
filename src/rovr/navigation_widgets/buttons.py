@@ -2,6 +2,7 @@ from os import getcwd, path
 
 from textual.widgets import Button
 
+from rovr.classes.session_manager import SessionManager
 from rovr.functions.icons import get_icon
 
 
@@ -13,10 +14,9 @@ class BackButton(Button):
         """Go back in the sesison's history"""
         if self.disabled:
             return
-        state = self.app.tabWidget.active_tab.session
+        state: SessionManager = self.app.tabWidget.active_tab.session
         if state.historyIndex != 0:
             state.historyIndex -= 1
-        # ! reminder to add a check for path!
         self.app.cd(
             state.directories[state.historyIndex],
             add_to_history=False,
@@ -33,9 +33,8 @@ class ForwardButton(Button):
         """Go forward in the session's history"""
         if self.disabled:
             return
-        state = self.app.tabWidget.active_tab.session
+        state: SessionManager = self.app.tabWidget.active_tab.session
         state.historyIndex += 1
-        # ! reminder to add a check for path!
         self.app.cd(
             state.directories[state.historyIndex],
             add_to_history=False,

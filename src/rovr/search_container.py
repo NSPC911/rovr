@@ -2,12 +2,12 @@ import contextlib
 
 from textual import events, work
 from textual.css.query import NoMatches
+from textual.fuzzy import Matcher
 from textual.types import OptionDoesNotExist
 from textual.widgets import Input, OptionList, SelectionList
 from textual.widgets.option_list import Option
 from textual.widgets.selection_list import Selection, SelectionError
 
-from rovr.functions.scorer import scorer
 from rovr.functions.utils import set_scuffed_subtitle
 
 
@@ -70,24 +70,32 @@ class SearchInput(Input):
                             )
             return
         self.items_list.clear_options()
-        matches: list[Selection | Option] = []
-        matches_scores: list[int | float] = []
+        matcher = Matcher(
+            event.value,
+        )
         assert hasattr(self.items_list, "list_of_options")
-        for option in self.items_list.list_of_options:
+        # Build ordered list where disabled options act as separators.
+        output: list[Option] = []
+        segment: list[tuple[Option, int, int]] = []  # (option, score, original_index)
+        for idx, option in enumerate(self.items_list.list_of_options):
             assert isinstance(option, Option)
             if self.always_add_disabled and option.disabled:
-                matches.append(option)
+                # Flush current segment sorted by score (desc) then original order
+                if segment:
+                    segment.sort(key=lambda tup: (-tup[1], tup[2]))
+                    output.extend(o for o, _, _ in segment)
+                    segment = []
+                # Disabled option keeps original relative position and acts as separator
+                output.append(option)
                 continue
-            if score := scorer(event.value, option.label):
-                self.log(score, event.value, option.label)
-                matches.append(option)
-                matches_scores.append(score)
-        # do sort now ig
-        matches = [
-            option
-            for _, option in sorted(zip(matches_scores, matches), key=lambda x: x[0])
-        ]
-        matches = matches[::-1]
+            score = matcher.match(option.label)
+            if score > 0:
+                segment.append((option, score, idx))
+        # Flush final segment
+        if segment:
+            segment.sort(key=lambda tup: (-tup[1], tup[2]))
+            output.extend(o for o, _, _ in segment)
+        matches = output
         if matches:
             self.items_list.add_options(matches)
         else:

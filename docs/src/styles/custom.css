@@ -239,6 +239,9 @@ summary:not(#starlight__on-this-page--mobile) {
   :root {
     --sl-content-width: none;
   }
+  .sidebar-content {
+    padding-left: 1ch
+  }
 }
 @media (max-width: 50rem) {
   .sidebar-pane {

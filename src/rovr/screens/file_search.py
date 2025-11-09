@@ -104,7 +104,10 @@ class FileSearch(ModalScreen):
         if search_term:
             fd_cmd.append("--")
             fd_cmd.append(search_term)
-
+        else:
+            self.app.call_from_thread(self.search_options.add_class, "empty")
+            self.app.call_from_thread(self.search_options.clear_options)
+            return
         try:
             fd_output = run(fd_cmd, capture_output=True, text=True, timeout=3)
         except (OSError, TimeoutExpired) as exc:

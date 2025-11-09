@@ -27,10 +27,11 @@ class ModalInput(ModalScreen):
         self.border_title = border_title
         self.border_subtitle = border_subtitle
         self.initial_value = initial_value
+        length_checker = Length(minimum=1, failure_description="A value is required.")
+        length_checker.strict = True
         self.validators = [
-            Length(minimum=1, failure_description="A value is required.")
+            length_checker
         ] + validators
-        setattr(self.validators[0], "strict", True)
         self.is_path = is_path
         self.is_folder = is_folder
         if self.is_path:

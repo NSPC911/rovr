@@ -10,14 +10,13 @@ from .file_list import FileList
 
 class FileListContainer(VerticalGroup):
     def __init__(self) -> None:
-        self.filelist: FileList
-        super().__init__(
-            id="file_list_container",
-        )
         self.filelist = FileList(
             id="file_list",
             name="File List",
             classes="file-list",
+        )
+        super().__init__(
+            id="file_list_container",
         )
 
     def compose(self) -> ComposeResult:

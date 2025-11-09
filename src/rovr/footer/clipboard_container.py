@@ -49,9 +49,9 @@ class Clipboard(SelectionList, inherit_bindings=False):
 
     @work
     async def cut_to_clipboard(self, items: list[str]) -> None:
+        """Cut the selected files to the clipboard."""
         self.deselect_all()
         await asyncio.sleep(0)
-        """Cut the selected files to the clipboard."""
         for item in items[::-1]:
             if isinstance(item, str):
                 self.insert_selection_at_beginning(
@@ -180,7 +180,6 @@ class Clipboard(SelectionList, inherit_bindings=False):
                     )
                     return
                 self.remove_option_at_index(self.highlighted)
-                self.paste_button.disabled = len(self.selected) == 0
                 if self.option_count == 0:
                     return
                 event.stop()

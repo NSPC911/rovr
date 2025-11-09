@@ -12,15 +12,16 @@ description: config schema humanified
   - [1.6. Property `Rovr Config > interface > truncate_progress_file_path`](#interface_truncate_progress_file_path)
   - [1.7. Property `Rovr Config > interface > compact_mode`](#interface_compact_mode)
   - [1.8. Property `Rovr Config > interface > show_line_numbers`](#interface_show_line_numbers)
-  - [1.9. Property `Rovr Config > interface > clock`](#interface_clock)
-    - [1.9.1. Property `Rovr Config > interface > clock > enabled`](#interface_clock_enabled)
-    - [1.9.2. Property `Rovr Config > interface > clock > align`](#interface_clock_align)
-  - [1.10. Property `Rovr Config > interface > preview_text`](#interface_preview_text)
-    - [1.10.1. Property `Rovr Config > interface > preview_text > error`](#interface_preview_text_error)
-    - [1.10.2. Property `Rovr Config > interface > preview_text > binary`](#interface_preview_text_binary)
-    - [1.10.3. Property `Rovr Config > interface > preview_text > start`](#interface_preview_text_start)
-    - [1.10.4. Property `Rovr Config > interface > preview_text > empty`](#interface_preview_text_empty)
-    - [1.10.5. Property `Rovr Config > interface > preview_text > too_large`](#interface_preview_text_too_large)
+  - [1.9. Property `Rovr Config > interface > scrolloff`](#interface_scrolloff)
+  - [1.10. Property `Rovr Config > interface > clock`](#interface_clock)
+    - [1.10.1. Property `Rovr Config > interface > clock > enabled`](#interface_clock_enabled)
+    - [1.10.2. Property `Rovr Config > interface > clock > align`](#interface_clock_align)
+  - [1.11. Property `Rovr Config > interface > preview_text`](#interface_preview_text)
+    - [1.11.1. Property `Rovr Config > interface > preview_text > error`](#interface_preview_text_error)
+    - [1.11.2. Property `Rovr Config > interface > preview_text > binary`](#interface_preview_text_binary)
+    - [1.11.3. Property `Rovr Config > interface > preview_text > start`](#interface_preview_text_start)
+    - [1.11.4. Property `Rovr Config > interface > preview_text > empty`](#interface_preview_text_empty)
+    - [1.11.5. Property `Rovr Config > interface > preview_text > too_large`](#interface_preview_text_too_large)
 - [2. Property `Rovr Config > settings`](#settings)
   - [2.1. Property `Rovr Config > settings > show_hidden_files`](#settings_show_hidden_files)
   - [2.2. Property `Rovr Config > settings > use_recycle_bin`](#settings_use_recycle_bin)
@@ -28,9 +29,8 @@ description: config schema humanified
   - [2.4. Property `Rovr Config > settings > image_protocol`](#settings_image_protocol)
   - [2.5. Property `Rovr Config > settings > allow_tab_nav`](#settings_allow_tab_nav)
   - [2.6. Property `Rovr Config > settings > append_new_tabs`](#settings_append_new_tabs)
-  - [2.7. Property `Rovr Config > settings > cd_on_quit`](#settings_cd_on_quit)
-  - [2.8. Property `Rovr Config > settings > double_click_delay`](#settings_double_click_delay)
-  - [2.9. Property `Rovr Config > settings > drive_watcher_frequency`](#settings_drive_watcher_frequency)
+  - [2.7. Property `Rovr Config > settings > double_click_delay`](#settings_double_click_delay)
+  - [2.8. Property `Rovr Config > settings > drive_watcher_frequency`](#settings_drive_watcher_frequency)
 - [3. Property `Rovr Config > metadata`](#metadata)
   - [3.1. Property `Rovr Config > metadata > fields`](#metadata_fields)
     - [3.1.1. Rovr Config > metadata > fields > fields items](#metadata_fields_items)
@@ -235,6 +235,7 @@ description: config schema humanified
 | [truncate_progress_file_path](#interface_truncate_progress_file_path) | boolean | When the process container is using file paths, truncate the file path to only view the first and last names of the path. |
 | [compact_mode](#interface_compact_mode)                               | boolean | Enable compact mode to hide the menu bar and adjust layout for a more streamlined interface.                              |
 | [show_line_numbers](#interface_show_line_numbers)                     | boolean | Add line numbers to the left gutter if you are viewing a text file.                                                       |
+| [scrolloff](#interface_scrolloff)                                     | integer | The number of files to keep above and below the cursor when moving through the file list.                                 |
 | [clock](#interface_clock)                                             | object  |                                                                                                                           |
 | [preview_text](#interface_preview_text)                               | object  |                                                                                                                           |
 
@@ -320,7 +321,21 @@ Not properly hot-reloaded.
 
 **Description:** Add line numbers to the left gutter if you are viewing a text file.
 
-### <a name="interface_clock"></a>1.9. Property `Rovr Config > interface > clock`
+### <a name="interface_scrolloff"></a>1.9. Property `Rovr Config > interface > scrolloff`
+
+|              |           |
+| ------------ | --------- |
+| **Type**     | `integer` |
+| **Required** | No        |
+| **Default**  | `3`       |
+
+**Description:** The number of files to keep above and below the cursor when moving through the file list.
+
+| Restrictions |        |
+| ------------ | ------ |
+| **Minimum**  | &ge; 0 |
+
+### <a name="interface_clock"></a>1.10. Property `Rovr Config > interface > clock`
 
 |                           |             |
 | ------------------------- | ----------- |
@@ -333,7 +348,7 @@ Not properly hot-reloaded.
 | [enabled](#interface_clock_enabled) | boolean          | Show a clock in the tabs bar.                                    |
 | [align](#interface_clock_align)     | enum (of string) | Align the clock to either the 'right' or 'left' of the tabs bar. |
 
-#### <a name="interface_clock_enabled"></a>1.9.1. Property `Rovr Config > interface > clock > enabled`
+#### <a name="interface_clock_enabled"></a>1.10.1. Property `Rovr Config > interface > clock > enabled`
 
 |              |           |
 | ------------ | --------- |
@@ -343,7 +358,7 @@ Not properly hot-reloaded.
 
 **Description:** Show a clock in the tabs bar.
 
-#### <a name="interface_clock_align"></a>1.9.2. Property `Rovr Config > interface > clock > align`
+#### <a name="interface_clock_align"></a>1.10.2. Property `Rovr Config > interface > clock > align`
 
 |              |                    |
 | ------------ | ------------------ |
@@ -358,7 +373,7 @@ Must be one of:
 - "left"
 - "right"
 
-### <a name="interface_preview_text"></a>1.10. Property `Rovr Config > interface > preview_text`
+### <a name="interface_preview_text"></a>1.11. Property `Rovr Config > interface > preview_text`
 
 |                           |             |
 | ------------------------- | ----------- |
@@ -366,15 +381,15 @@ Must be one of:
 | **Required**              | No          |
 | **Additional properties** | Not allowed |
 
-| Property                                       | Type   | Title/Description                                                                                                           |
-| ---------------------------------------------- | ------ | --------------------------------------------------------------------------------------------------------------------------- |
-| [error](#interface_preview_text_error)         | string | If for any reason the file preview refused to show, this appears.                                                           |
-| [binary](#interface_preview_text_binary)       | string | If the current file cannot be read due to an encoding issue (ie not UTF8), it will display this message.                    |
-| [start](#interface_preview_text_start)         | string | This is shown when the rovr starts up. You may see it for a split second, but it will never appear afterwards.              |
-| [empty](#interface_preview_text_empty)         | string | If the current file has no content, this is shown                                                                           |
-| [too_large](#interface_preview_text_too_large) | string | If the file is too large (hard capped at < 1MB), the preview will refuse to render this file regardless of your memory size |
+| Property                                       | Type   | Title/Description                                                                                                                                          |
+| ---------------------------------------------- | ------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| [error](#interface_preview_text_error)         | string | If for any reason the file preview refused to show, this appears.                                                                                          |
+| [binary](#interface_preview_text_binary)       | string | If the current file cannot be read due to an encoding issue (ie not UTF8), it will display this message.                                                   |
+| [start](#interface_preview_text_start)         | string | This is shown when the rovr starts up. You may see it for a split second, but it will never appear afterwards. You cannot view this properly in this docs. |
+| [empty](#interface_preview_text_empty)         | string | If the current file has no content, this is shown                                                                                                          |
+| [too_large](#interface_preview_text_too_large) | string | If the file is too large (hard capped at < 1MB), the preview will refuse to render this file regardless of your memory size                                |
 
-#### <a name="interface_preview_text_error"></a>1.10.1. Property `Rovr Config > interface > preview_text > error`
+#### <a name="interface_preview_text_error"></a>1.11.1. Property `Rovr Config > interface > preview_text > error`
 
 |              |                                     |
 | ------------ | ----------------------------------- |
@@ -384,7 +399,7 @@ Must be one of:
 
 **Description:** If for any reason the file preview refused to show, this appears.
 
-#### <a name="interface_preview_text_binary"></a>1.10.2. Property `Rovr Config > interface > preview_text > binary`
+#### <a name="interface_preview_text_binary"></a>1.11.2. Property `Rovr Config > interface > preview_text > binary`
 
 |              |                                                            |
 | ------------ | ---------------------------------------------------------- |
@@ -394,17 +409,17 @@ Must be one of:
 
 **Description:** If the current file cannot be read due to an encoding issue (ie not UTF8), it will display this message.
 
-#### <a name="interface_preview_text_start"></a>1.10.3. Property `Rovr Config > interface > preview_text > start`
+#### <a name="interface_preview_text_start"></a>1.11.3. Property `Rovr Config > interface > preview_text > start`
 
-|              |                |
-| ------------ | -------------- | --- | --- | --- | --- | --- | ------ | ----------------- | --- | --- | --- | -------- | --- | ---- |
-| **Type**     | `string`       |
-| **Required** | No             |
-| **Default**  | `" **\_ \_**\n | \_  | .   | \n  | \_  |     | \_\_\_ | \n \_ \_ \_\_\_\n |     |     | \_  | \n \\\_/ | \_  | \n"` |
+|              |                                                                                                                                      |
+| ------------ | ------------------------------------------------------------------------------------------------------------------------------------ |
+| **Type**     | `string`                                                                                                                             |
+| **Required** | No                                                                                                                                   |
+| **Default**  | `" ___ ___\n&#124;  _&#124; . &#124;\n&#124;_&#124; &#124;___&#124;\n _ _ ___\n&#124; &#124; &#124;  _&#124;\n \\_/&#124;_&#124;\n"` |
 
-**Description:** This is shown when the rovr starts up. You may see it for a split second, but it will never appear afterwards.
+**Description:** This is shown when the rovr starts up. You may see it for a split second, but it will never appear afterwards. You cannot view this properly in this docs.
 
-#### <a name="interface_preview_text_empty"></a>1.10.4. Property `Rovr Config > interface > preview_text > empty`
+#### <a name="interface_preview_text_empty"></a>1.11.4. Property `Rovr Config > interface > preview_text > empty`
 
 |              |                          |
 | ------------ | ------------------------ |
@@ -414,7 +429,7 @@ Must be one of:
 
 **Description:** If the current file has no content, this is shown
 
-#### <a name="interface_preview_text_too_large"></a>1.10.5. Property `Rovr Config > interface > preview_text > too_large`
+#### <a name="interface_preview_text_too_large"></a>1.11.5. Property `Rovr Config > interface > preview_text > too_large`
 
 |              |                                                           |
 | ------------ | --------------------------------------------------------- |
@@ -440,7 +455,6 @@ Must be one of:
 | [image_protocol](#settings_image_protocol)                   | enum (of string) | The image protocol to use when displaying an image                                                                                                                     |
 | [allow_tab_nav](#settings_allow_tab_nav)                     | boolean          | Allow navigating the main app screen with \`tab\` and \`shift+tab\`                                                                                                    |
 | [append_new_tabs](#settings_append_new_tabs)                 | boolean          | Choose whether or not to append new tabs instead of inserting them.<br />\`true\` => Append to the end of the tab list.<br />\`false\` => Insert after the active tab. |
-| [cd_on_quit](#settings_cd_on_quit)                           | boolean          | When quitting rovr, write the current directory to a file, so that you can cd into it.                                                                                 |
 | [double_click_delay](#settings_double_click_delay)           | number           | The delay between two consecutive clicks to enter into a directory, or open a file.                                                                                    |
 | [drive_watcher_frequency](#settings_drive_watcher_frequency) | number           | How often (in seconds) to check for changes in mounted drives in the sidebar.                                                                                          |
 
@@ -514,17 +528,7 @@ Must be one of:
 `true` => Append to the end of the tab list.
 `false` => Insert after the active tab.
 
-### <a name="settings_cd_on_quit"></a>2.7. Property `Rovr Config > settings > cd_on_quit`
-
-|              |           |
-| ------------ | --------- |
-| **Type**     | `boolean` |
-| **Required** | No        |
-| **Default**  | `false`   |
-
-**Description:** When quitting rovr, write the current directory to a file, so that you can cd into it.
-
-### <a name="settings_double_click_delay"></a>2.8. Property `Rovr Config > settings > double_click_delay`
+### <a name="settings_double_click_delay"></a>2.7. Property `Rovr Config > settings > double_click_delay`
 
 |              |          |
 | ------------ | -------- |
@@ -534,7 +538,7 @@ Must be one of:
 
 **Description:** The delay between two consecutive clicks to enter into a directory, or open a file.
 
-### <a name="settings_drive_watcher_frequency"></a>2.9. Property `Rovr Config > settings > drive_watcher_frequency`
+### <a name="settings_drive_watcher_frequency"></a>2.8. Property `Rovr Config > settings > drive_watcher_frequency`
 
 |              |          |
 | ------------ | -------- |

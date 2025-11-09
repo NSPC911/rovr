@@ -189,7 +189,7 @@ class ProcessContainer(VerticalScroll):
         for file in files:
             if compressed:
                 file = path_utils.decompress(file)
-            if path_utils.file_is_type(file) == "folder":
+            if path_utils.file_is_type(file) == "directory":
                 folders_to_delete.append(file)
             files_to_add, folders_to_add = path_utils.get_recursive_files(
                 file, with_folders=True
@@ -401,7 +401,7 @@ class ProcessContainer(VerticalScroll):
         Handle file-in-use errors with user prompts and automatic retries.
 
         Args:
-            action_on_file_in_use (str): Current action ("ask", "cancel", "skip")
+            action_on_file_in_use (str): Current action ("ask", "try_again", "skip", "cancel")
             item_display_name (str): Display name for the file
             retry_func (Callable): Function to call to retry the operation
 
@@ -414,8 +414,22 @@ class ProcessContainer(VerticalScroll):
             PermissionError: If it still fails
             OSError: If it still fails
         """
-        if action_on_file_in_use != "ask":
+        persisted_default = action_on_file_in_use
+        if action_on_file_in_use in ("skip", "cancel"):
+            # Persisted skip/cancel: short-circuit without retry
             return action_on_file_in_use, action_on_file_in_use
+        if action_on_file_in_use == "try_again":
+            # Persisted try_again: attempt retry once just like interactive success path
+            prev_action = action_on_file_in_use
+            try:
+                retry_func()
+                return "try_again", prev_action
+            except (PermissionError, OSError) as e:
+                if not is_being_used(e):
+                    # Different error type; propagate upwards
+                    raise
+                # Still in use; fall back to interactive prompt loop below
+                action_on_file_in_use = "ask"
 
         while True:
             response = self.app.call_from_thread(
@@ -425,9 +439,10 @@ class ProcessContainer(VerticalScroll):
                 ),
             )
             # Handle toggle: remember the action for future file-in-use scenarios
-            updated_action = action_on_file_in_use
+            updated_action = persisted_default
             if response["toggle"]:
                 updated_action = response["value"]
+                persisted_default = updated_action
 
             if response["value"] == "cancel":
                 return "cancel", updated_action

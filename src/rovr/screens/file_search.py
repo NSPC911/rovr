@@ -1,5 +1,5 @@
+import asyncio
 from os import path
-from subprocess import TimeoutExpired, run
 
 from textual import events, work
 from textual.app import ComposeResult
@@ -7,10 +7,12 @@ from textual.containers import VerticalGroup
 from textual.screen import ModalScreen
 from textual.widgets import Input, OptionList
 from textual.widgets.option_list import Option
+from textual.worker import WorkerCancelled
 
 from rovr.classes.textual_options import ModalSearcherOption
 from rovr.functions import path as path_utils
 from rovr.functions.icons import get_icon_for_file, get_icon_for_folder
+from rovr.functions.utils import should_cancel
 from rovr.variables.constants import config
 
 
@@ -64,28 +66,12 @@ class FileSearch(ModalScreen):
         self.fd_updater(Input.Changed(self.search_input, value=""))
 
     def on_input_changed(self, event: Input.Changed) -> None:
-        if any(
-            worker.is_running and worker.node is self for worker in self.app.workers
-        ):
-            self._queued_task = self.fd_updater
-            self._queued_task_args = event
-        else:
-            self.fd_updater(event=event)
+        self.fd_updater(event=event)
 
-    def any_in_queue(self) -> bool:
-        if self._queued_task is not None:
-            self._queued_task(self._queued_task_args)
-            self._queued_task, self._queued_task_args = None, None
-            return True
-        return False
-
-    @work(thread=True)
-    def fd_updater(self, event: Input.Changed) -> None:
+    @work(exclusive=True)
+    async def fd_updater(self, event: Input.Changed) -> None:
         """Update the list using fd based on the search term."""
         search_term = event.value.strip()
-        if self.any_in_queue():
-            return
-
         fd_exec = config["plugins"]["finder"]["executable"]
 
         fd_cmd = [
@@ -105,73 +91,49 @@ class FileSearch(ModalScreen):
             fd_cmd.append("--")
             fd_cmd.append(search_term)
         else:
-            self.app.call_from_thread(self.search_options.add_class, "empty")
-            self.app.call_from_thread(self.search_options.clear_options)
+            self.search_options.add_class("empty")
+            self.search_options.clear_options()
+            self.search_options.border_subtitle = ""
             return
         try:
-            fd_output = run(fd_cmd, capture_output=True, text=True, timeout=3)
-        except (OSError, TimeoutExpired) as exc:
-            if self.any_in_queue():
-                return
-            self.app.call_from_thread(self.search_options.clear_options)
+            fd_process = await asyncio.create_subprocess_exec(
+                *fd_cmd, stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE
+            )
+            stdout, _ = await asyncio.wait_for(fd_process.communicate(), timeout=3)
+        except (OSError, asyncio.exceptions.TimeoutError) as exc:
+            self.search_options.clear_options()
             msg = (
                 "  fd is missing on $PATH or cannot be executed"
                 if isinstance(exc, OSError)
                 else "  fd took too long to respond"
             )
-            self.app.call_from_thread(
-                self.search_options.add_option, Option(msg, disabled=True)
-            )
-            self.any_in_queue()
-            return
-
-        if self.any_in_queue():
+            self.search_options.add_option(Option(msg, disabled=True))
             return
 
         options: list[ModalSearcherOption] = []
-        if fd_output.stdout:
-            for line in fd_output.stdout.splitlines():
-                file_path = path_utils.normalise(line.strip())
-                file_path_str = str(file_path)
-                if not file_path_str:
-                    continue
-                display_text = f" {file_path_str}"
-                icon: list[str] = (
-                    get_icon_for_folder(file_path_str)
-                    if path.isdir(file_path_str)
-                    else get_icon_for_file(file_path_str)
-                )
-                options.append(
-                    ModalSearcherOption(
-                        icon,
-                        display_text,
-                        file_path_str,
-                    )
-                )
-
-            self.app.call_from_thread(self.search_options.clear_options)
+        if stdout:
+            stdout = stdout.decode()
+            worker = self.create_options(stdout)
+            try:
+                options: list[ModalSearcherOption] = await worker.wait()
+            except WorkerCancelled:
+                return  # anyways
+            self.search_options.clear_options()
             if options:
-                self.app.call_from_thread(self.search_options.add_options, options)
-                self.app.call_from_thread(self.search_options.remove_class, "empty")
-                self.app.call_from_thread(
-                    lambda: setattr(self.search_options, "highlighted", 0)
-                )
+                self.search_options.add_options(options)
+                self.search_options.remove_class("empty")
+                self.search_options.highlighted = 0
             else:
-                self.app.call_from_thread(
-                    self.search_options.add_option,
+                self.search_options.add_option(
                     Option("  --No matches found--", disabled=True),
                 )
-                self.app.call_from_thread(self.search_options.add_class, "empty")
+                self.search_options.add_class("empty")
         else:
-            self.app.call_from_thread(self.search_options.clear_options)
-            self.app.call_from_thread(
-                self.search_options.add_option,
+            self.search_options.clear_options()
+            self.search_options.add_option(
                 Option("  --No matches found--", disabled=True),
             )
-            self.app.call_from_thread(self.search_options.add_class, "empty")
-
-        if self.any_in_queue():
-            return
+            self.search_options.add_class("empty")
 
     def on_input_submitted(self, event: Input.Submitted) -> None:
         if any(
@@ -231,3 +193,28 @@ class FileSearch(ModalScreen):
             self.search_options.border_subtitle = "0/0"
         else:
             self.search_options.border_subtitle = f"{str(self.search_options.highlighted + 1)}/{self.search_options.option_count}"
+
+    @work(thread=True)
+    def create_options(self, stdout: str) -> list[ModalSearcherOption] | None:
+        options: list[ModalSearcherOption] = []
+        for line in stdout.splitlines():
+            file_path = path_utils.normalise(line.strip())
+            file_path_str = str(file_path)
+            if not file_path_str:
+                continue
+            display_text = f" {file_path_str}"
+            icon: list[str] = (
+                get_icon_for_folder(file_path_str)
+                if path.isdir(file_path_str)
+                else get_icon_for_file(file_path_str)
+            )
+            options.append(
+                ModalSearcherOption(
+                    icon,
+                    display_text,
+                    file_path_str,
+                )
+            )
+            if should_cancel():
+                return
+        return options

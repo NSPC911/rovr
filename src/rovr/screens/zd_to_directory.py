@@ -243,7 +243,7 @@ class ZDToDirectory(ModalScreen):
             self.zoxide_options.border_subtitle = f"{self.zoxide_options.highlighted + 1}/{self.zoxide_options.option_count}"
 
     @work(thread=True)
-    def create_options(self, show_scores: int, stdout: str) -> list[ModalSearcherOption]:
+    def create_options(self, show_scores: int, stdout: str) -> list[ModalSearcherOption] | None:
         first_score_width = 0
         options: list[ModalSearcherOption] = []
         for line in stdout.splitlines():
@@ -260,4 +260,6 @@ class ZDToDirectory(ModalScreen):
 
             # Use original path for ID (not display text)
             options.append(ModalSearcherOption(None, display_text, path))
+            if should_cancel():
+                return
         return options

@@ -52,6 +52,4 @@ class UpButton(Button):
             return
         cwd = getcwd()
         parent = path.basename(cwd)
-        self.app.cd(
-            path.dirname(cwd) + path.sep, focus_on=parent
-        )
+        self.app.cd(path.dirname(cwd) + path.sep, focus_on=parent)

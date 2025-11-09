@@ -112,7 +112,9 @@ class ZDToDirectory(ModalScreen):
         except (OSError, asyncio.exceptions.TimeoutError) as exc:
             if isinstance(exc, asyncio.exceptions.TimeoutError):
                 zoxide_process.terminate()
-                with contextlib.suppress(asyncio.exceptions.TimeoutError, ProcessLookupError):
+                with contextlib.suppress(
+                    asyncio.exceptions.TimeoutError, ProcessLookupError
+                ):
                     await asyncio.wait_for(zoxide_process.wait(), timeout=1)
             # zoxide not installed
             self.zoxide_options.clear_options()

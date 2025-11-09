@@ -1,4 +1,5 @@
 import asyncio
+import contextlib
 from os import path
 
 from textual import events, work
@@ -101,6 +102,10 @@ class FileSearch(ModalScreen):
             )
             stdout, _ = await asyncio.wait_for(fd_process.communicate(), timeout=3)
         except (OSError, asyncio.exceptions.TimeoutError) as exc:
+            if isinstance(exc, asyncio.exceptions.TimeoutError):
+                fd_process.terminate()
+                with contextlib.suppress(asyncio.exceptions.TimeoutError, ProcessLookupError):
+                    await asyncio.wait_for(fd_process.wait(), timeout=1)
             self.search_options.clear_options()
             msg = (
                 "  fd is missing on $PATH or cannot be executed"
@@ -118,6 +123,8 @@ class FileSearch(ModalScreen):
                 options: list[ModalSearcherOption] = await worker.wait()
             except WorkerCancelled:
                 return  # anyways
+            if options is None:
+                return
             self.search_options.clear_options()
             if options:
                 self.search_options.add_options(options)

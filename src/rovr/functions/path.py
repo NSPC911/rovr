@@ -67,11 +67,11 @@ def is_hidden_file(filepath: str) -> bool:
 # letters, numbers, underscores, or hyphens, and must
 # not begin with a number
 def compress(text: str) -> str:
-    return base64.urlsafe_b64encode(text.encode("utf-8")).decode("ascii")
+    return "u_" + base64.urlsafe_b64encode(text.encode("utf-8")).decode("ascii")
 
 
 def decompress(text: str) -> str:
-    return base64.urlsafe_b64decode(text.encode("ascii")).decode("utf-8")
+    return base64.urlsafe_b64decode(text[2:].encode("ascii")).decode("utf-8")
 
 
 @work

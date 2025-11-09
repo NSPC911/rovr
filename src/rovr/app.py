@@ -224,9 +224,8 @@ class Application(App, inherit_bindings=False):
 
     async def on_key(self, event: events.Key) -> None:
         # Not really sure why this can happen, but I will still handle this
-        if self.focused is None:
+        if self.focused is None or not isinstance(self.focused.parent, DOMNode):
             return
-        assert isinstance(self.focused.parent, DOMNode)
         # if current screen isn't the app screen
         if len(self.screen_stack) != 1:
             return
@@ -493,8 +492,7 @@ class Application(App, inherit_bindings=False):
                 continue
             else:
                 with suppress(OSError):
-                    items = self.app.call_from_thread(
-                        get_filtered_dir_names,
+                    items = get_filtered_dir_names(
                         cwd,
                         config["settings"]["show_hidden_files"],
                     )

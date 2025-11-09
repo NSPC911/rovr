@@ -17,7 +17,7 @@ class PathDropdownItem(DropdownItem):
 
 
 class PathAutoCompleteInput(PathAutoComplete):
-    def __init__(self, target: Input | str) -> None:
+    def __init__(self, target: Input) -> None:
         """An autocomplete widget for filesystem paths.
 
         Args:
@@ -30,6 +30,8 @@ class PathAutoCompleteInput(PathAutoComplete):
             file_prefix=" " + get_icon("file", "default")[0] + " ",
             id="path_autocomplete",
         )
+        self._target: Input = target
+        assert isinstance(self._target, Input)
 
     def should_show_dropdown(self, search_string: str) -> bool:
         default_behavior = super().should_show_dropdown(search_string)
@@ -104,23 +106,16 @@ class PathAutoCompleteInput(PathAutoComplete):
 
     def _on_show(self, event: events.Show) -> None:
         super()._on_show(event)
-        if not isinstance(self._target, Input):
-            raise TypeError(f"Expected Input target, got {type(self._target)}")
         self._target.add_class("hide_border_bottom", update=True)
 
     async def _on_hide(self, event: events.Hide) -> None:
         super()._on_hide(event)
-        if not isinstance(self._target, Input):
-            raise TypeError(f"Expected Input target, got {type(self._target)}")
         self._target.remove_class("hide_border_bottom", update=True)
 
     def _complete(self, option_index: int) -> None:
         """Do the completion (i.e. insert the selected item into the target input).
 
         This is when the user highlights an option in the dropdown and presses tab or enter.
-
-        Raises:
-            TypeError: If the wrong element is considered as target.
         """
         if not self.display or self.option_list.option_count == 0:
             return
@@ -132,8 +127,6 @@ class PathAutoCompleteInput(PathAutoComplete):
         if highlighted_value == "":
             # nothing there
             self.action_hide()
-            if not isinstance(self._target, Input):
-                raise TypeError(f"Expected Input target, got {type(self._target)}")
             self._target.post_message(
                 Input.Submitted(self._target, self._target.value, None)
             )
@@ -146,7 +139,7 @@ class PathAutoCompleteInput(PathAutoComplete):
 class PathInput(Input):
     ALLOW_MAXIMIZE = False
 
-    def __init__(self, *args, **kwargs) -> None:
+    def __init__(self) -> None:
         super().__init__(
             id="path_switcher",
             validators=[Function(lambda x: path.exists(x), "Path does not exist")],

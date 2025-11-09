@@ -50,7 +50,8 @@ class UpButton(Button):
         """Go up the current location's directory"""
         if self.disabled:
             return
-        parent = getcwd().split(path.sep)[-1]
+        cwd = getcwd()
+        parent = path.basename(cwd)
         self.app.cd(
-            path.sep.join(getcwd().split(path.sep)[:-1]) + path.sep, focus_on=parent
+            path.dirname(cwd) + path.sep, focus_on=parent
         )

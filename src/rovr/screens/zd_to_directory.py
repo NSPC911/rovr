@@ -112,6 +112,8 @@ class ZDToDirectory(ModalScreen):
         except (OSError, asyncio.exceptions.TimeoutError) as exc:
             if isinstance(exc, asyncio.exceptions.TimeoutError):
                 zoxide_process.terminate()
+                with contextlib.suppress(asyncio.exceptions.TimeoutError, ProcessLookupError):
+                    await asyncio.wait_for(zoxide_process.wait(), timeout=1)
             # zoxide not installed
             self.zoxide_options.clear_options()
             self.zoxide_options.add_option(
@@ -137,6 +139,8 @@ class ZDToDirectory(ModalScreen):
                 options: list[ModalSearcherOption] = await worker.wait()
             except WorkerCancelled:
                 return  # anyways
+            if options is None:
+                return
             if len(options) == len(zoxide_options.options) and all(
                 isinstance(options[i], ModalSearcherOption)
                 and isinstance(zoxide_options.options[i], ModalSearcherOption)

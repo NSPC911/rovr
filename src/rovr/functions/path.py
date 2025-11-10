@@ -167,7 +167,12 @@ class CWDObjectReturnDict(TypedDict):
 
 
 async def get_cwd_object(
-    cwd: str, show_hidden: bool = False, sort_by: Literal["name", "size", "modified", "created", "extension", "natural"] = "name", reverse: bool = False
+    cwd: str,
+    show_hidden: bool = False,
+    sort_by: Literal[
+        "name", "size", "modified", "created", "extension", "natural"
+    ] = "name",
+    reverse: bool = False,
 ) -> tuple[list[dict], list[dict]]:
     """
     Get the objects (files and folders) in a provided directory
@@ -230,7 +235,9 @@ async def get_cwd_object(
             folders.sort(key=lambda x: x["name"].lower())  # too lazy
             files.sort(key=lambda x: x["dir_entry"].stat().st_size)
         case "extension":
-            folders.sort(key=lambda x: x["name"].lower())  # folders dont have extensions btw
+            folders.sort(
+                key=lambda x: x["name"].lower()
+            )  # folders dont have extensions btw
             files.sort(key=lambda x: x["name"].split(".")[-1])
     if reverse:
         files.reverse()

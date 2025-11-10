@@ -90,7 +90,7 @@ ICONS = {
     },
     "sorting": {
         "alpha_asc": ["\uf15d", "white"],
-        "alpha_desc":  ["\uf15e", "white"],
+        "alpha_desc": ["\uf15e", "white"],
         "numeric_asc": ["\uf162", "white"],
         "numeric_desc": ["\uf163", "white"],
         "time_asc": ["\U000f1549", "white"],
@@ -102,7 +102,7 @@ ICONS = {
         "numeric_alt_asc": ["\U000f090d", "white"],
         "numeric_alt_desc": ["\U000f0ad2", "white"],
         "generic_asc": ["\U000f04bc", "white"],
-        "generic_desc": ["\U000f033c", "white"]
+        "generic_desc": ["\U000f033c", "white"],
     },
     "folder": {
         "default": ["\uf07b", "#DAA520"],

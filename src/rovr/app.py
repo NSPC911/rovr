@@ -549,10 +549,8 @@ class Application(App, inherit_bindings=False):
             self.has_pushed_screen = True
             await self.push_screen_wait(TerminalTooSmall())
             self.has_pushed_screen = False
-        try:
+        with suppress(NoMatches):
             self.query_one(SortOrderPopup).on_resize()
-        except NoMatches:
-            self.notify("no matches")
 
     async def _on_css_change(self) -> None:
         if self.css_monitor is not None:

@@ -58,9 +58,23 @@ class FileList(SelectionList, inherit_bindings=False):
         if not self.dummy:
             self.items_in_cwd: set[str] = set()
 
-    def watch_sort_by(self, new_value: Literal["name", "size", "modified", "created", "extension", "natural"]) -> None:
-        if new_value not in ["name", "size", "modified", "created", "extension", "natural"]:
-            raise ValueError(f"Expected new `sort_by` value to be one of `name`, `size`, `modified`, `created`, `extension` or `natural`, but got `{new_value}`")
+    def watch_sort_by(
+        self,
+        new_value: Literal[
+            "name", "size", "modified", "created", "extension", "natural"
+        ],
+    ) -> None:
+        if new_value not in [
+            "name",
+            "size",
+            "modified",
+            "created",
+            "extension",
+            "natural",
+        ]:
+            raise ValueError(
+                f"Expected new `sort_by` value to be one of `name`, `size`, `modified`, `created`, `extension` or `natural`, but got `{new_value}`"
+            )
         if not self.dummy:
             self.update_file_list(add_to_session=False)
 
@@ -156,7 +170,10 @@ class FileList(SelectionList, inherit_bindings=False):
             focus_on = last_highlight["name"]
         try:
             folders, files = await path_utils.get_cwd_object(
-                cwd, config["settings"]["show_hidden_files"], sort_by=self.sort_by, reverse=self.sort_descending
+                cwd,
+                config["settings"]["show_hidden_files"],
+                sort_by=self.sort_by,
+                reverse=self.sort_descending,
             )
             if not folders and not files:
                 self.list_of_options.append(

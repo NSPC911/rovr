@@ -204,7 +204,9 @@ async def get_cwd_object(
 
     for item in entries:
         if not isinstance(item, (nt.DirEntry, os.DirEntry)):
-            raise TypeError(f"Expected {type(nt.DirEntry)} or {type(os.DirEntry)} but got {type(item)}")
+            raise TypeError(
+                f"Expected {type(nt.DirEntry)} or {type(os.DirEntry)} but got {type(item)}"
+            )
         if not show_hidden and is_hidden_file(item.path):
             continue
 
@@ -227,8 +229,12 @@ async def get_cwd_object(
             files.sort(key=lambda x: x["name"].lower())
         case "natural":
             # no we will not be using `natsort`'s os_sorted
-            folders: list[CWDObjectReturnDict] = natsorted(folders, key=lambda x: x["name"].lower())
-            files: list[CWDObjectReturnDict] = natsorted(files, key=lambda x: x["name"].lower())
+            folders: list[CWDObjectReturnDict] = natsorted(
+                folders, key=lambda x: x["name"].lower()
+            )
+            files: list[CWDObjectReturnDict] = natsorted(
+                files, key=lambda x: x["name"].lower()
+            )
         case "created":
             folders.sort(key=lambda x: x["dir_entry"].stat().st_ctime_ns)
             files.sort(key=lambda x: x["dir_entry"].stat().st_ctime_ns)

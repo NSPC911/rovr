@@ -156,8 +156,7 @@ class ZDToDirectory(ModalScreen):
                 # raised, or just nothing showing up. By having the clear
                 # options and add options functions nearby, it hopefully
                 # reduces the likelihood of an empty option list
-                zoxide_options.clear_options()
-                zoxide_options.add_options(options)
+                zoxide_options.set_options(options)
                 zoxide_options.remove_class("empty")
                 zoxide_options.highlighted = 0
                 if should_cancel():

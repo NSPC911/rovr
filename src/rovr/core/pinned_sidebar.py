@@ -96,8 +96,7 @@ class PinnedSidebar(OptionList, inherit_bindings=False):
                     id=f"{path_utils.compress(drive)}-drives",
                 )
             )
-        self.clear_options()
-        self.add_options(self.list_of_options)
+        self.set_options(self.list_of_options)
         self.highlighted = prev_highlighted
 
     async def on_mount(self) -> None:

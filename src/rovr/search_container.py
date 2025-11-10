@@ -45,8 +45,7 @@ class SearchInput(Input):
             highlighted = None
         self.app.tabWidget.active_tab.session.search = event.value
         if event.value == "":
-            self.items_list.clear_options()
-            self.items_list.add_options(self.items_list.list_of_options)
+            self.items_list.set_options(self.items_list.list_of_options)
             if highlighted is not None:
                 with contextlib.suppress(OptionDoesNotExist, SelectionError):
                     self.items_list.highlighted = self.items_list.get_option_index(

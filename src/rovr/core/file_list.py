@@ -195,8 +195,7 @@ class FileList(SelectionList, inherit_bindings=False):
         # special check for up tree
         self.app.query_one("#up").disabled = cwd == path.dirname(cwd)
 
-        self.clear_options()
-        self.add_options(self.list_of_options)
+        self.set_options(self.list_of_options)
         # session handler
         self.app.query_one("#path_switcher").value = cwd + (
             "" if cwd.endswith("/") else "/"
@@ -308,8 +307,7 @@ class FileList(SelectionList, inherit_bindings=False):
                     disabled=True,
                 )
             )
-        self.clear_options()
-        self.add_options(self.list_of_options)
+        self.set_options(self.list_of_options)
         self.parent.border_subtitle = ""
 
     @work(exclusive=True)
@@ -319,7 +317,6 @@ class FileList(SelectionList, inherit_bindings=False):
         Args:
             file_list (list[str]): List of file paths from archive contents.
         """
-        self.clear_options()
         self.list_of_options = []
 
         if not file_list:
@@ -348,7 +345,7 @@ class FileList(SelectionList, inherit_bindings=False):
                     start_time = time()
                 await asyncio.sleep(0)
 
-        self.add_options(self.list_of_options)
+        self.set_options(self.list_of_options)
         self.parent.border_subtitle = ""
 
     async def on_selection_list_selected_changed(
@@ -898,7 +895,7 @@ class FileListRightClickOptionList(OptionList):
     async def on_key(self, event: events.Key) -> None:
         # Close menu on Escape
         if event.key == "escape":
-            self.remove()
+            self.add_class("hidden")
             # Return focus to file list
             self.file_list.focus()
 

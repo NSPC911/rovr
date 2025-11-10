@@ -892,9 +892,7 @@ SortOrderPopup {
     color: $background;
   }
 }
-SortOrderPopup {
-  offset: 50vw 50vh
-}
+
 LoadingIndicator {
   background: transparent;
 }

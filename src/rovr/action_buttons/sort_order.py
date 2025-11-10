@@ -36,7 +36,8 @@ class SortOrderButton(Button):
         popup_widget.remove_class("hidden")
         popup_widget.focus()
         if cause == "click":
-            assert isinstance(event, events.Click)
+            if not isinstance(event, events.Click):
+                return
             popup_widget.styles.offset = (event.screen_x, event.screen_y)
         else:
             popup_widget.styles.offset = (
@@ -53,12 +54,12 @@ class SortOrderButton(Button):
 class SortOrderPopup(OptionList):
     def __init__(self) -> None:
         super().__init__()
-        self.file_list: SelectionList = self.app.query_one("#file_list", SelectionList)
-        self.button: Button = self.app.query_one(SortOrderButton)
         self.spawned_by: Literal["key", "click"] | None = None
 
     def on_mount(self) -> None:
         self.styles.layer = "overlay"
+        self.file_list: SelectionList = self.app.query_one("#file_list", SelectionList)
+        self.button: Button = self.app.query_one(SortOrderButton)
 
     @on(events.Show)
     def on_show(self, event: events.Show) -> None:
@@ -143,7 +144,7 @@ class SortOrderPopup(OptionList):
             case "e":
                 self.highlighted = self.get_option_index("extension")
             case "n":
-                self.higlighted = self.get_option_index("natural")
+                self.highlighted = self.get_option_index("natural")
             case "s":
                 self.highlighted = self.get_option_index("size")
             case "c":
@@ -156,7 +157,6 @@ class SortOrderPopup(OptionList):
                 return
         event.stop()
         self.action_select()
-        self.app.force_ignore = True
 
     def on_resize(self) -> None:
         if self.spawned_by == "key":

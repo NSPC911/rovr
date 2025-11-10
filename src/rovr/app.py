@@ -117,8 +117,6 @@ class Application(App, inherit_bindings=False):
         # Runtime output files from CLI
         self._cwd_file: str | None = cwd_file
         self._chooser_file: str | None = chooser_file
-        # force ignore key events
-        self.force_ignore: bool = False
 
     def compose(self) -> ComposeResult:
         self.log("Starting Rovr...")
@@ -229,9 +227,6 @@ class Application(App, inherit_bindings=False):
     async def on_key(self, event: events.Key) -> None:
         # Not really sure why this can happen, but I will still handle this
         if self.focused is None or not isinstance(self.focused.parent, DOMNode):
-            return
-        if self.force_ignore:
-            self.force_ignore = False
             return
         # if current screen isn't the app screen
         if len(self.screen_stack) != 1:

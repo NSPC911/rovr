@@ -163,7 +163,7 @@ def get_filtered_dir_names(cwd: str | bytes, show_hidden: bool = False) -> set[s
 class CWDObjectReturnDict(TypedDict):
     name: str
     icon: list[str]
-    dir_entry: nt.DirEntry
+    dir_entry: nt.DirEntry | os.DirEntry
 
 
 async def get_cwd_object(
@@ -185,6 +185,9 @@ async def get_cwd_object(
     Returns:
         folders(list[dict]): A list of dictionaries, containing "name" as the item's name and "icon" as the respective icon
         files(list[dict]): A list of dictionaries, containing "name" as the item's name and "icon" as the respective icon
+
+    Raises:
+        TypeError: if the wrong type is received
     """
 
     # Offload the blocking os.scandir call to a thread pool
@@ -200,7 +203,8 @@ async def get_cwd_object(
     files: list[CWDObjectReturnDict] = []
 
     for item in entries:
-        assert isinstance(item, nt.DirEntry)
+        if not isinstance(item, (nt.DirEntry, os.DirEntry)):
+            raise TypeError(f"Expected {type(nt.DirEntry)} or {type(os.DirEntry)} but got {type(item)}")
         if not show_hidden and is_hidden_file(item.path):
             continue
 
@@ -223,11 +227,11 @@ async def get_cwd_object(
             files.sort(key=lambda x: x["name"].lower())
         case "natural":
             # no we will not be using `natsort`'s os_sorted
-            folders = natsorted(folders, key=lambda x: x["name"].lower())
-            files = natsorted(files, key=lambda x: x["name"].lower())
+            folders: list[CWDObjectReturnDict] = natsorted(folders, key=lambda x: x["name"].lower())
+            files: list[CWDObjectReturnDict] = natsorted(files, key=lambda x: x["name"].lower())
         case "created":
-            folders.sort(key=lambda x: x["dir_entry"].stat().st_birthtime_ns)
-            files.sort(key=lambda x: x["dir_entry"].stat().st_birthtime_ns)
+            folders.sort(key=lambda x: x["dir_entry"].stat().st_ctime_ns)
+            files.sort(key=lambda x: x["dir_entry"].stat().st_ctime_ns)
         case "modified":
             folders.sort(key=lambda x: x["dir_entry"].stat().st_mtime_ns)
             files.sort(key=lambda x: x["dir_entry"].stat().st_mtime_ns)

@@ -34,16 +34,12 @@ def get_icon_for_file(location: str) -> list:
             pattern = custom_icon["pattern"].lower()
             match_type = custom_icon.get("match_type", "exact")
 
-            is_match = False
             if (
                 match_type == "exact"
                 and file_name == pattern
                 or match_type == "endswith"
                 and file_name.endswith(pattern)
             ):
-                is_match = True
-
-            if is_match:
                 return [custom_icon["icon"], custom_icon["color"]]
 
     # 1. Check for full filename match
@@ -84,16 +80,12 @@ def get_icon_for_folder(location: str) -> list:
             pattern = custom_icon["pattern"].lower()
             match_type = custom_icon.get("match_type", "exact")
 
-            is_match = False
             if (
                 match_type == "exact"
                 and folder_name == pattern
                 or match_type == "endswith"
                 and folder_name.endswith(pattern)
             ):
-                is_match = True
-
-            if is_match:
                 return [custom_icon["icon"], custom_icon["color"]]
 
     # Check for special folder types

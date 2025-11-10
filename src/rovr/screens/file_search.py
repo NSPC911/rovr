@@ -103,7 +103,7 @@ class FileSearch(ModalScreen):
             stdout, _ = await asyncio.wait_for(fd_process.communicate(), timeout=3)
         except (OSError, asyncio.exceptions.TimeoutError) as exc:
             if isinstance(exc, asyncio.exceptions.TimeoutError):
-                fd_process.terminate()
+                fd_process.kill()
                 with contextlib.suppress(
                     asyncio.exceptions.TimeoutError, ProcessLookupError
                 ):

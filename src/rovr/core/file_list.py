@@ -191,8 +191,10 @@ class FileList(SelectionList, inherit_bindings=False):
         )
         for button in buttons:
             button.disabled = should_disable
-
         self.app.query_one("#new").disabled = self.list_of_options[0].id == "perm"
+        # special check for up tree
+        self.app.query_one("#up").disabled = cwd == path.dirname(cwd)
+
         self.clear_options()
         self.add_options(self.list_of_options)
         # session handler

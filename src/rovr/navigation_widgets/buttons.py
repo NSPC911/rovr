@@ -15,12 +15,12 @@ class BackButton(Button):
         if self.disabled:
             return
         state: SessionManager = self.app.tabWidget.active_tab.session
-        if state.historyIndex != 0:
+        if state.historyIndex > 0:
             state.historyIndex -= 1
-        self.app.cd(
-            state.directories[state.historyIndex],
-            add_to_history=False,
-        )
+            self.app.cd(
+                state.directories[state.historyIndex],
+                add_to_history=False,
+            )
 
 
 class ForwardButton(Button):
@@ -51,5 +51,5 @@ class UpButton(Button):
         if self.disabled:
             return
         cwd = getcwd()
-        parent = path.basename(cwd)
-        self.app.cd(path.dirname(cwd) + path.sep, focus_on=parent)
+        to_focus = path.basename(cwd)
+        self.app.cd(path.dirname(cwd), focus_on=to_focus)

@@ -35,6 +35,7 @@ from rovr.action_buttons import (
     UnzipButton,
     ZipButton,
 )
+from rovr.action_buttons.sort_order import SortOrderButton, SortOrderPopup
 from rovr.core import FileList, FileListContainer, PinnedSidebar, PreviewContainer
 from rovr.core.file_list import FileListRightClickOptionList
 from rovr.footer import Clipboard, MetadataContainer, ProcessContainer
@@ -116,6 +117,8 @@ class Application(App, inherit_bindings=False):
         # Runtime output files from CLI
         self._cwd_file: str | None = cwd_file
         self._chooser_file: str | None = chooser_file
+        # force ignore key events
+        self.force_ignore: bool = False
 
     def compose(self) -> ComposeResult:
         self.log("Starting Rovr...")
@@ -132,6 +135,7 @@ class Application(App, inherit_bindings=False):
                     yield ZipButton()
                     yield UnzipButton()
                     yield PathCopyButton()
+                    yield SortOrderButton()
                 with VerticalGroup(id="below_menu"):
                     with HorizontalGroup():
                         yield BackButton()
@@ -225,6 +229,9 @@ class Application(App, inherit_bindings=False):
     async def on_key(self, event: events.Key) -> None:
         # Not really sure why this can happen, but I will still handle this
         if self.focused is None or not isinstance(self.focused.parent, DOMNode):
+            return
+        if self.force_ignore:
+            self.force_ignore = False
             return
         # if current screen isn't the app screen
         if len(self.screen_stack) != 1:
@@ -389,6 +396,8 @@ class Application(App, inherit_bindings=False):
                     )
                 else:
                     self.action_suspend_process()
+            case key if key in config["keybinds"]["change_sort_order"]:
+                await self.query_one(SortOrderButton).open_popup("key", event)
 
     def on_app_blur(self, event: events.AppBlur) -> None:
         self.app_blurred = True
@@ -540,6 +549,10 @@ class Application(App, inherit_bindings=False):
             self.has_pushed_screen = True
             await self.push_screen_wait(TerminalTooSmall())
             self.has_pushed_screen = False
+        try:
+            self.query_one(SortOrderPopup).on_resize()
+        except NoMatches:
+            self.notify("no matches")
 
     async def _on_css_change(self) -> None:
         if self.css_monitor is not None:
@@ -701,11 +714,13 @@ class Application(App, inherit_bindings=False):
     @on(events.Click)
     def when_got_click(self, event: events.Click) -> None:
         if (
-            not isinstance(event.widget, FileListRightClickOptionList)
+            not isinstance(event.widget, (FileListRightClickOptionList, SortOrderPopup))
             or event.button == 1
         ):
             with suppress(NoMatches):
                 self.query_one(FileListRightClickOptionList).add_class("hidden")
+            with suppress(NoMatches):
+                self.query_one(SortOrderPopup).add_class("hidden")
 
 
 app = Application(watch_css=True)

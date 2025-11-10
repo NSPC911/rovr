@@ -669,6 +669,12 @@
           "description": "Show the keybinds list with all available keybinds.",
           "display_name": "Show keybinds"
         },
+        "change_sort_order": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Show a chooser to change the sort order.",
+          "display_name": "Change sort order"
+        },
         "quit_app": {
           "type": "array",
           "items": { "type": "string" },

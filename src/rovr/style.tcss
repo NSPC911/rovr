@@ -39,6 +39,7 @@ $scrollbar-corner-color: $primary-muted;
 #file_search_options,
 #footer > *,
 FileListRightClickOptionList,
+SortOrderPopup,
 .comfy #path_switcher,
 .comfy #below_menu Button {
   background: transparent;
@@ -78,6 +79,7 @@ FileListRightClickOptionList,
 #preview_sidebar .inner_preview.-maximized,
 #footer > *:focus,
 FileListRightClickOptionList,
+SortOrderPopup,
 .comfy #path_switcher:focus-within,
 .comfy #below_menu Button:focus,
 .comfy #below_menu Button:hover {
@@ -244,16 +246,6 @@ Tooltip {
   margin: 0 1;
   #below_menu { border-top: $border-style $border-blurred }
   &:focus-within #below_menu { border-top: $border-style $border }
-}
-
-#menuwrapper #below_menu #path_switcher {
-  border-left: $border-style $border-blurred
-}
-#menuwrapper:focus-within #below_menu #path_switcher {
-  border-left: $border-style $border
-}
-#menuwrapper:focus-within #below_menu #path_switcher.hide_border_bottom {
-  border-left: $border-style $accent
 }
 
 #menu {
@@ -455,7 +447,7 @@ ProgressBarContainer {
 }
 
 Content.selected { color: red }
-FileList, PinnedSidebar, Clipboard, CommandList, #zoxide_options, FileListRightClickOptionList, #file_search_options {
+FileList, PinnedSidebar, Clipboard, CommandList, #zoxide_options, FileListRightClickOptionList, SortOrderPopup, #file_search_options {
   padding: 0 0 0 0;
   background-tint: ansi_default !important;
   .option-list--separator { color: $foreground }
@@ -892,12 +884,16 @@ CommandPalette {
   LoadingIndicator { border-bottom: $border-style $border }
 }
 
-FileListRightClickOptionList {
+FileListRightClickOptionList,
+SortOrderPopup {
   width: auto;
   .option-list--option-highlighted {
     background: $primary;
     color: $background;
   }
+}
+SortOrderPopup {
+  offset: 50vw 50vh
 }
 LoadingIndicator {
   background: transparent;
@@ -938,6 +934,15 @@ LoadingIndicator {
     &:ansi:hover { color: $primary }
     &:light:ansi:hover { color: $secondary }
     &:disabled:hover { color: $panel-lighten-3 }
+  }
+  #menuwrapper #below_menu #path_switcher {
+    border-left: $border-style $border-blurred
+  }
+  #menuwrapper:focus-within #below_menu #path_switcher {
+    border-left: $border-style $border
+  }
+  #menuwrapper:focus-within #below_menu #path_switcher.hide_border_bottom {
+    border-left: $border-style $accent
   }
 }
 .comfy {

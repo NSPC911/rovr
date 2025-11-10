@@ -88,6 +88,22 @@ ICONS = {
         "symlink": ["\uf481", "cyan"],
         "special": ["\uf2dc", "magenta"],
     },
+    "sorting": {
+        "alpha_asc": ["\uf15d", "white"],
+        "alpha_desc":  ["\uf15e", "white"],
+        "numeric_asc": ["\uf162", "white"],
+        "numeric_desc": ["\uf163", "white"],
+        "time_asc": ["\U000f1549", "white"],
+        "time_desc": ["\U000f154b", "white"],
+        "alpha_alt_asc": ["\U000f05bd", "white"],
+        "alpha_alt_desc": ["\U000f05bf", "white"],
+        "time_alt_asc": ["\U000f154a", "white"],
+        "time_alt_desc": ["\U000f154c", "white"],
+        "numeric_alt_asc": ["\U000f090d", "white"],
+        "numeric_alt_desc": ["\U000f0ad2", "white"],
+        "generic_asc": ["\U000f04bc", "white"],
+        "generic_desc": ["\U000f033c", "white"]
+    },
     "folder": {
         "default": ["\uf07b", "#DAA520"],
         "api": ["\U000f048d", "#4CAF50"],

@@ -1,12 +1,14 @@
 import asyncio
 import base64
 import ctypes
+import nt
 import os
 import stat
 from os import path
-from typing import Literal, overload
+from typing import Literal, TypedDict, overload
 
 import psutil
+from natsort import natsorted
 from rich.console import Console
 from textual import work
 from textual.app import App
@@ -158,14 +160,22 @@ def get_filtered_dir_names(cwd: str | bytes, show_hidden: bool = False) -> set[s
     return names
 
 
+class CWDObjectReturnDict(TypedDict):
+    name: str
+    icon: list[str]
+    dir_entry: nt.DirEntry
+
+
 async def get_cwd_object(
-    cwd: str, show_hidden: bool = False
+    cwd: str, show_hidden: bool = False, sort_by: Literal["name", "size", "modified", "created", "extension", "natural"] = "name", reverse: bool = False
 ) -> tuple[list[dict], list[dict]]:
     """
     Get the objects (files and folders) in a provided directory
     Args:
         cwd(str): The working directory to check
         show_hidden(bool): Whether to include hidden files/folders (dot-prefixed on Unix; flagged hidden on Windows/macOS)
+        sort_by(str): What to sort by
+        reverse(bool): Whether to reverse the sorting
 
     Returns:
         folders(list[dict]): A list of dictionaries, containing "name" as the item's name and "icon" as the respective icon
@@ -181,9 +191,11 @@ async def get_cwd_object(
 
     entries = await asyncio.to_thread(_scandir)
 
-    folders, files = [], []
+    folders: list[CWDObjectReturnDict] = []
+    files: list[CWDObjectReturnDict] = []
 
     for item in entries:
+        assert isinstance(item, nt.DirEntry)
         if not show_hidden and is_hidden_file(item.path):
             continue
 
@@ -199,8 +211,31 @@ async def get_cwd_object(
                 "icon": get_icon_for_file(item.name),
                 "dir_entry": item,
             })
-    folders.sort(key=lambda x: x["name"].lower())
-    files.sort(key=lambda x: x["name"].lower())
+    # sort order
+    match sort_by:
+        case "name":
+            folders.sort(key=lambda x: x["name"].lower())
+            files.sort(key=lambda x: x["name"].lower())
+        case "natural":
+            # no we will not be using `natsort`'s os_sorted
+            folders = natsorted(folders, key=lambda x: x["name"].lower())
+            files = natsorted(files, key=lambda x: x["name"].lower())
+        case "created":
+            folders.sort(key=lambda x: x["dir_entry"].stat().st_birthtime_ns)
+            files.sort(key=lambda x: x["dir_entry"].stat().st_birthtime_ns)
+        case "modified":
+            folders.sort(key=lambda x: x["dir_entry"].stat().st_mtime_ns)
+            files.sort(key=lambda x: x["dir_entry"].stat().st_mtime_ns)
+        case "size":
+            folders.sort(key=lambda x: x["name"].lower())  # too lazy
+            files.sort(key=lambda x: x["dir_entry"].stat().st_size)
+        case "extension":
+            folders.sort(key=lambda x: x["name"].lower())  # folders dont have extensions btw
+            files.sort(key=lambda x: x["name"].split(".")[-1])
+    if reverse:
+        files.reverse()
+        folders.reverse()
+
     print(f"Found {len(folders)} folders and {len(files)} files in {cwd}")
     return folders, files
 

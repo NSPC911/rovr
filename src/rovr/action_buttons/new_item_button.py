@@ -15,9 +15,7 @@ class NewItemButton(Button):
     ALLOW_MAXIMIZE = False
 
     def __init__(self) -> None:
-        super().__init__(
-            get_icon("general", "new")[0], classes="option", id="new"
-        )
+        super().__init__(get_icon("general", "new")[0], classes="option", id="new")
 
     def on_mount(self) -> None:
         if config["interface"]["tooltips"]:

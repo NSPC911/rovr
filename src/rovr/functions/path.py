@@ -20,11 +20,12 @@ from rovr.variables.constants import os_type
 # windows. weird, yes, but I can't do anything
 if os_type == "Windows":
     import nt
+
     DirEntryType = os.DirEntry | nt.DirEntry
     DirEntryTypes = (os.DirEntry, nt.DirEntry)
 else:
     DirEntryType = os.DirEntry
-    DirEntryTypes = (os.DirEntry)
+    DirEntryTypes = os.DirEntry
 
 pprint = Console().print
 

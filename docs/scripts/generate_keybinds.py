@@ -4,7 +4,7 @@ from time import perf_counter
 
 import toml
 import ujson
-from humanize import naturaldelta
+from humanize import precisedelta
 from rich.console import Console
 
 start_time = perf_counter()
@@ -59,7 +59,7 @@ try:
         ],
     )
     pprint(
-        f"[green]Generated [bright_blue]keybinds.mdx[/] in {naturaldelta(perf_counter() - start_time, minimum_unit='microseconds')}[/]"
+        f"[green]Generated [bright_blue]keybinds.mdx[/] in {precisedelta(perf_counter() - start_time, minimum_unit='milliseconds')}[/]"
     )
 except FileNotFoundError:
     pprint("[red]Do not run manually with python! Run [blue]poe gen-keys[/][/]")

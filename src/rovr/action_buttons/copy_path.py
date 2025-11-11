@@ -25,7 +25,7 @@ class PathCopyButton(Button):
         """Copy selected files to the clipboard"""
         if self.disabled:
             return
-        highlighted: FileListSelectionWidget | None = await self.app.query_one(
+        highlighted: FileListSelectionWidget | None = self.app.query_one(
             "#file_list", SelectionList
         ).highlighted_option
         if highlighted is None or not hasattr(highlighted, "dir_entry"):

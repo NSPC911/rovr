@@ -102,7 +102,7 @@ class SortOrderPopup(OptionList):
             self.do_adjust = False
             self.styles.offset = (
                 (self.app.size.width - 16) // 2,
-                (self.app.size.height - 9) // 2
+                (self.app.size.height - 9) // 2,
             )
 
     @on(events.MouseMove)

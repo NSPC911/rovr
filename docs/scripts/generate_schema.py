@@ -72,6 +72,7 @@ try:
 except FileNotFoundError:
     pprint("[red]Do not run manually with python! Run [blue]poe gen-schema[/][/]")
     pprint(Traceback(show_locals=True))
+    exit(1)
 finally:
     # rewrite schema file
     with open("src/rovr/config/schema.json", "w", encoding="utf-8") as f:

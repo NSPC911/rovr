@@ -6,6 +6,7 @@ import toml
 import ujson
 from humanize import precisedelta
 from rich.console import Console
+from rich.traceback import Traceback
 
 start_time = perf_counter()
 pprint = Console().print
@@ -68,4 +69,5 @@ try:
     )
 except FileNotFoundError:
     pprint("[red]Do not run manually with python! Run [blue]poe gen-keys[/][/]")
+    pprint(Traceback(show_locals=True))
     exit(1)

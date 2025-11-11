@@ -2,7 +2,7 @@ from shutil import which
 from subprocess import run
 from time import perf_counter
 
-from humanize import naturaldelta
+from humanize import precisedelta
 from json_schema_for_humans.generate import generate_from_filename
 from json_schema_for_humans.generation_configuration import GenerationConfiguration
 from rich.console import Console
@@ -66,7 +66,7 @@ try:
         ],
     )
     pprint(
-        f"[green]Generated [bright_blue]schema.mdx[/] in {naturaldelta(perf_counter() - start_time, minimum_unit='microseconds')}[/]"
+        f"[green]Generated [bright_blue]schema.mdx[/] in {precisedelta(perf_counter() - start_time, minimum_unit='milliseconds')}[/]"
     )
 except FileNotFoundError:
     pprint("[red]Do not run manually with python! Run [blue]poe gen-schema[/][/]")

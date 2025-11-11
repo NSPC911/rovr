@@ -23,7 +23,7 @@ class SortOrderButton(Button):
 
     def on_mount(self) -> None:
         if config["interface"]["tooltips"]:
-            self.tooltip = "Copy selected files"
+            self.tooltip = "Change Sort Order"
 
     async def on_button_pressed(self, event: Button.Pressed) -> None:
         await self.open_popup(event)

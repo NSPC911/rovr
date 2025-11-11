@@ -36,11 +36,13 @@ class StateManager(Widget):
         self.state_file: str = path.join(VAR_TO_DIR["CONFIG"], "state.toml")
         self.current_version: str = get_version()
         self.previous_version: str | None = None
-        self._is_loading = True
-        self._load_state()
+        self._skip_save = True
         self._is_loading = False
+        self._load_state()
+        self._skip_save = False
 
     def _load_state(self) -> None:
+        self._is_loading = True
         if path.exists(self.state_file):
             try:
                 with open(self.state_file, "r", encoding="utf-8") as f:
@@ -68,15 +70,18 @@ class StateManager(Widget):
                 self._create_default_state()
         else:
             self._create_default_state()
+        self._is_loading = False
 
     def _create_default_state(self) -> None:
-        self.set_reactive(StateManager.pinned_sidebar_visible, True)
-        self.set_reactive(StateManager.preview_sidebar_visible, True)
-        self.set_reactive(StateManager.footer_visible, True)
-        self.set_reactive(StateManager.menuwrapper_visible, True)
-        self._save_state()
+        self.pinned_sidebar_visible = True
+        self.preview_sidebar_visible = True
+        self.footer_visible = True
+        self.menuwrapper_visible = True
+        self._save_state(force=True)
 
-    def _save_state(self) -> None:
+    def _save_state(self, force: bool = False) -> None:
+        if self._skip_save and not force:
+            return
         try:
             with open(self.state_file, "w", encoding="utf-8") as f:
                 state: StateDict = {
@@ -87,8 +92,11 @@ class StateManager(Widget):
                     "menuwrapper_visible": self.menuwrapper_visible,
                 }
                 toml.dump(state, f)
-        except OSError:
-            pass
+        except (OSError, PermissionError) as exc:
+            self.notify(
+                f"Attempted to write state file, but {type(exc).__name__} occurred\n{exc}",
+                severity="error",
+            )
 
     def watch_pinned_sidebar_visible(self, visible: bool) -> None:
         if self._is_loading:
@@ -148,7 +156,9 @@ class StateManager(Widget):
 
     def restore_state(self) -> None:
         self._is_loading = False
+        self._skip_save = True
         self.watch_pinned_sidebar_visible(self.pinned_sidebar_visible)
         self.watch_preview_sidebar_visible(self.preview_sidebar_visible)
         self.watch_footer_visible(self.footer_visible)
         self.watch_menuwrapper_visible(self.menuwrapper_visible)
+        self._skip_save = False

@@ -1,5 +1,5 @@
 from shutil import which
-from subprocess import run
+from subprocess import CalledProcessError, run
 from time import perf_counter
 
 from humanize import precisedelta
@@ -56,13 +56,16 @@ try:
         )
         exit(1)
     # attempt to format it
-    run(
-        invoker
-        + [
-            "--write",
-            "docs/src/content/docs/reference/schema.mdx",
-        ],
-    )
+    try:
+        run(
+            invoker
+            + [
+                "--write",
+                "docs/src/content/docs/reference/schema.mdx",
+            ],
+        )
+    except CalledProcessError:
+        pprint(f"[red]Failed to generate [bright_blue]schema.mdx[/] after {precisedelta(perf_counter() - start_time, minimum_unit='milliseconds')}[/]")
     pprint(
         f"[green]Generated [bright_blue]schema.mdx[/] in {precisedelta(perf_counter() - start_time, minimum_unit='milliseconds')}[/]"
     )

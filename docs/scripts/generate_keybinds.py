@@ -1,5 +1,5 @@
 from shutil import which
-from subprocess import run
+from subprocess import CalledProcessError, run
 from time import perf_counter
 
 import toml
@@ -52,13 +52,17 @@ try:
         )
         exit(1)
     # attempt to format it
-    run(
-        invoker
-        + [
-            "--write",
-            "docs/src/content/docs/reference/keybindings.mdx",
-        ],
-    )
+    try:
+        run(
+            invoker
+            + [
+                "--write",
+                "docs/src/content/docs/reference/keybindings.mdx",
+            ],
+            check=True
+        )
+    except CalledProcessError:
+        pprint(f"[red]Failed to generate [bright_blue]schema.mdx[/] after {precisedelta(perf_counter() - start_time, minimum_unit='milliseconds')}[/]")
     pprint(
         f"[green]Generated [bright_blue]keybinds.mdx[/] in {precisedelta(perf_counter() - start_time, minimum_unit='milliseconds')}[/]"
     )

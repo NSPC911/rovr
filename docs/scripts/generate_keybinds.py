@@ -64,10 +64,10 @@ try:
         )
     except CalledProcessError:
         pprint(
-            f"[red]Failed to generate [bright_blue]schema.mdx[/] after {precisedelta(perf_counter() - start_time, minimum_unit='milliseconds')}[/]"
+            f"[red]Failed to generate [bright_blue]keybindings.mdx[/] after {precisedelta(perf_counter() - start_time, minimum_unit='milliseconds')}[/]"
         )
     pprint(
-        f"[green]Generated [bright_blue]keybinds.mdx[/] in {precisedelta(perf_counter() - start_time, minimum_unit='milliseconds')}[/]"
+        f"[green]Generated [bright_blue]keybindings.mdx[/] in {precisedelta(perf_counter() - start_time, minimum_unit='milliseconds')}[/]"
     )
 except FileNotFoundError:
     pprint("[red]Do not run manually with python! Run [blue]poe gen-keys[/][/]")

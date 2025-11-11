@@ -399,6 +399,12 @@
           "description": "Toggle viewing the footer.",
           "display_name": "Toggle footer"
         },
+        "toggle_menuwrapper": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Toggle viewing the menu wrapper.",
+          "display_name": "Toggle menu wrapper"
+        },
         "focus_toggle_pinned_sidebar": {
           "type": "array",
           "items": { "type": "string" },

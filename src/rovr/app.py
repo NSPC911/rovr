@@ -58,6 +58,7 @@ from rovr.navigation_widgets import (
 from rovr.screens import DummyScreen, FileSearch, Keybinds, YesOrNo, ZDToDirectory
 from rovr.screens.way_too_small import TerminalTooSmall
 from rovr.search_container import SearchInput
+from rovr.state_manager import StateManager
 from rovr.variables.constants import MaxPossible, config
 from rovr.variables.maps import VAR_TO_DIR
 
@@ -160,6 +161,7 @@ class Application(App, inherit_bindings=False):
                 yield ProcessContainer()
                 yield MetadataContainer(id="metadata")
                 yield Clipboard(id="clipboard")
+            yield StateManager(id="state_manager")
 
     def on_mount(self) -> None:
         # compact mode
@@ -206,6 +208,8 @@ class Application(App, inherit_bindings=False):
             focus_on=path.basename(self.startup_path),
         )
         self.query_one("#file_list").focus()
+        # restore UI state from saved state file
+        self.query_one(StateManager).restore_state()
         # start mini watcher
         self.watch_for_changes_and_update()
         # disable scrollbars
@@ -297,22 +301,16 @@ class Application(App, inherit_bindings=False):
             # Toggle hiding panels
             case key if key in config["keybinds"]["toggle_pinned_sidebar"]:
                 self.query_one("#file_list").focus()
-                if self.query_one("#pinned_sidebar_container").display:
-                    self.query_one("#pinned_sidebar_container").add_class("hide")
-                else:
-                    self.query_one("#pinned_sidebar_container").remove_class("hide")
+                self.query_one(StateManager).toggle_pinned_sidebar()
             case key if key in config["keybinds"]["toggle_preview_sidebar"]:
                 self.query_one("#file_list").focus()
-                if self.query_one(PreviewContainer).display:
-                    self.query_one(PreviewContainer).add_class("hide")
-                else:
-                    self.query_one(PreviewContainer).remove_class("hide")
+                self.query_one(StateManager).toggle_preview_sidebar()
             case key if key in config["keybinds"]["toggle_footer"]:
                 self.query_one("#file_list").focus()
-                if self.query_one("#footer").display:
-                    self.query_one("#footer").add_class("hide")
-                else:
-                    self.query_one("#footer").remove_class("hide")
+                self.query_one(StateManager).toggle_footer()
+            case key if key in config["keybinds"]["toggle_menuwrapper"]:
+                self.query_one("#file_list").focus()
+                self.query_one(StateManager).toggle_menuwrapper()
             case key if (
                 key in config["keybinds"]["tab_next"]
                 and self.tabWidget.active_tab is not None
@@ -476,6 +474,10 @@ class Application(App, inherit_bindings=False):
         pins_mtime = None
         with suppress(OSError):
             pins_mtime = path.getmtime(pins_path)
+        state_path = path.join(VAR_TO_DIR["CONFIG"], "state.toml")
+        state_mtime = None
+        with suppress(OSError):
+            state_mtime = path.getmtime(state_path)
         drives = get_mounted_drives()
         drive_update_every = int(config["settings"]["drive_watcher_frequency"])
         count: int = -1
@@ -515,6 +517,16 @@ class Application(App, inherit_bindings=False):
                         self.query_one("#pinned_sidebar").reload_pins
                     )
                     reload_called = True
+            # check state.toml
+            new_state_mtime = None
+            with suppress(OSError):
+                new_state_mtime = path.getmtime(state_path)
+            if new_state_mtime != state_mtime:
+                state_mtime = new_state_mtime
+                if new_state_mtime is not None:
+                    state_manager: StateManager = self.query_one(StateManager)
+                    self.app.call_from_thread(state_manager._load_state)
+                    self.app.call_from_thread(state_manager.restore_state)
             # check drives
             if count == 0 and not reload_called:
                 try:

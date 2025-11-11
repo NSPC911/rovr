@@ -41,11 +41,11 @@ try:
         file.write(page)
     invoker = []
     executor = ""
-    if (executor := which("prettier")):
+    if executor := which("prettier"):
         invoker = [executor]
-    elif (executor := which("npx")):
+    elif executor := which("npx"):
         invoker = [executor, "prettier"]
-    elif (executor := which("npm")):
+    elif executor := which("npm"):
         invoker = [executor, "exec", "prettier"]
     else:
         pprint(
@@ -60,10 +60,12 @@ try:
                 "--write",
                 "docs/src/content/docs/reference/keybindings.mdx",
             ],
-            check=True
+            check=True,
         )
     except CalledProcessError:
-        pprint(f"[red]Failed to generate [bright_blue]schema.mdx[/] after {precisedelta(perf_counter() - start_time, minimum_unit='milliseconds')}[/]")
+        pprint(
+            f"[red]Failed to generate [bright_blue]schema.mdx[/] after {precisedelta(perf_counter() - start_time, minimum_unit='milliseconds')}[/]"
+        )
     pprint(
         f"[green]Generated [bright_blue]keybinds.mdx[/] in {precisedelta(perf_counter() - start_time, minimum_unit='milliseconds')}[/]"
     )

@@ -1,0 +1,145 @@
+---
+title: background processes
+description: how rovr handles file operations and background tasks.
+---
+
+{/* <add image> */}
+
+rovr performs file operations asynchronously, allowing you to continue browsing while tasks like copying, deleting, or moving files run in the background.
+
+## the process panel
+
+{/* <add image> */}
+
+the process panel is located in the footer area (bottom of the screen) and displays all active and completed file operations.
+
+### showing and hiding the panel
+
+- **toggle footer visibility**: `shift+f` (hides all footer panels)
+- **focus processes panel**: `f6`
+- **return to file list**: `esc`
+
+## process states
+
+{/* <add image> */}
+
+rovr displays processes with different visual indicators based on their state:
+
+### in-progress processes
+
+{/* <add image> */}
+
+active operations show:
+- a progress bar indicating completion percentage
+- the current file being processed (if enabled in config)
+- estimated time remaining (if enabled in config)
+- real-time progress updates
+
+### completed processes
+
+{/* <add image> */}
+
+successfully completed operations show:
+- a checkmark or success indicator
+- total items processed
+- time taken to complete
+
+### error processes
+
+{/* <add image> */}
+
+failed operations display:
+- an error indicator
+- error message describing what went wrong
+- which file caused the error (if applicable)
+
+## supported operations
+
+rovr can run the following operations in the background:
+
+### copy operations
+
+{/* <add image> */}
+
+copying files and folders runs asynchronously:
+- supports copying single or multiple files
+- preserves metadata (if enabled in config)
+- shows progress for each file
+- handles duplicate files with conflict resolution
+
+### move/cut operations
+
+{/* <add image> */}
+
+moving files works similarly to copying but removes the source after transfer.
+
+### delete operations
+
+{/* <add image> */}
+
+deleting files can be done with or without the recycle bin:
+- supports batch deletion
+- can use system recycle bin (if enabled)
+- shows confirmation dialogs
+- reports errors if files cannot be deleted
+
+### archive operations
+
+{/* <add image> */}
+
+creating and extracting archives runs in the background:
+- compression progress tracking
+- extraction progress tracking
+- supports multiple archive formats
+
+### folder size calculation
+
+{/* <add image> */}
+
+when viewing folder metadata, rovr calculates the total size asynchronously:
+- recursive size calculation
+- updates in real-time
+- doesn't block the main interface
+
+## configuration options
+
+you can customize how processes are displayed in your `config.toml`:
+
+```toml
+[interface]
+# show estimated time for completion
+show_progress_eta = false
+
+# show percentage completed
+show_progress_percentage = true
+
+# show full file paths or truncate them
+truncate_progress_file_path = false
+```
+
+## compact mode
+
+{/* <add image> */}
+
+in compact mode, the process panel automatically hides when not focused, giving you more space for file browsing. it reappears when:
+- a new process starts
+- you focus the panel with `f6`
+
+to enable compact mode:
+
+```toml
+[interface]
+compact_mode = true
+```
+
+## performance optimization
+
+{/* <add image> */}
+
+rovr uses several techniques to keep the interface responsive during heavy operations:
+
+- **debounced updates**: progress indicators update at most every 250ms to avoid overwhelming the UI
+- **async execution**: file operations run on separate threads
+- **queue management**: multiple operations are queued and executed efficiently
+
+for more details on these optimizations, see the [optimisation guide](/rovr/contributing/optimisation).

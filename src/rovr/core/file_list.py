@@ -800,7 +800,7 @@ class FileList(SelectionList, inherit_bindings=False):
                 case key if key in config["keybinds"]["toggle_pin"]:
                     event.stop()
                     pin_utils.toggle_pin(path.basename(getcwd()), getcwd())
-                    self.app.query_one("PinnedSidebar").reload_pins()
+                    await self.app.query_one("PinnedSidebar").reload_pins()
                 case key if key in config["keybinds"]["copy"]:
                     event.stop()
                     await self.app.query_one("#copy").on_button_pressed(Button.Pressed)

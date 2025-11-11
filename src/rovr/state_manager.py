@@ -40,7 +40,9 @@ class StateManager(Widget):
         self._is_loading = False
         self._load_state()
         self._skip_save = False
-        self._locked_by: Literal["PinnedSidebar", "PreviewSidebar", "Footer", "menuwrapper", None] = None
+        self._locked_by: Literal[
+            "PinnedSidebar", "PreviewSidebar", "Footer", "menuwrapper", None
+        ] = None
 
     def _load_state(self) -> None:
         self._is_loading = True

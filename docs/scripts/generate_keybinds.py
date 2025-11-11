@@ -39,12 +39,13 @@ try:
     ) as file:
         file.write(page)
     invoker = []
-    if which("prettier"):
-        invoker = [which("prettier")]
-    elif which("npx"):
-        invoker = [which("npx"), "prettier"]
-    elif which("npm"):
-        invoker = [which("npm"), "exec", "prettier"]
+    executor = ""
+    if (executor := which("prettier")):
+        invoker = [executor]
+    elif (executor := which("npx")):
+        invoker = [executor, "prettier"]
+    elif (executor := which("npm")):
+        invoker = [executor, "exec", "prettier"]
     else:
         pprint(
             "[red][blue]prettier[/] and [blue]npx[/] are not available on PATH, and hence the generated files cannot be formatted."

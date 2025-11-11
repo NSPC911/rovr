@@ -31,9 +31,6 @@ try:
         "docs/src/content/docs/reference/schema.mdx",
         config=config,
     )
-    # rewrite schema file
-    with open("src/rovr/config/schema.json", "w", encoding="utf-8") as f:
-        f.write(schema_content)
     with open(
         "docs/src/content/docs/reference/schema.mdx", "r", encoding="utf-8"
     ) as schema_file:
@@ -46,12 +43,13 @@ try:
             + content[13:].replace("| - ", "|   ").replace("| + ", "|   ")
         )
     invoker = []
-    if which("prettier"):
-        invoker = [which("prettier")]
-    elif which("npx"):
-        invoker = [which("npx"), "prettier"]
-    elif which("npm"):
-        invoker = [which("npm"), "exec", "prettier"]
+    executor = ""
+    if (executor := which("prettier")):
+        invoker = [executor]
+    elif (executor := which("npx")):
+        invoker = [executor, "prettier"]
+    elif (executor := which("npm")):
+        invoker = [executor, "exec", "prettier"]
     else:
         pprint(
             "[red][blue]prettier[/] and [blue]npx[/] are not available on PATH, and hence the generated files cannot be formatted."
@@ -71,3 +69,7 @@ try:
 except FileNotFoundError:
     pprint("[red]Do not run manually with python! Run [blue]poe gen-schema[/][/]")
     pprint(Traceback(show_locals=True))
+finally:
+    # rewrite schema file
+    with open("src/rovr/config/schema.json", "w", encoding="utf-8") as f:
+        f.write(schema_content)

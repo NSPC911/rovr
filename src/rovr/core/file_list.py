@@ -2,7 +2,7 @@ import asyncio
 from os import getcwd, path
 from os import system as cmd
 from time import time
-from typing import ClassVar
+from typing import ClassVar, Literal
 
 from rich.segment import Segment
 from rich.style import Style
@@ -10,6 +10,7 @@ from textual import events, on, work
 from textual.binding import BindingType
 from textual.css.query import NoMatches
 from textual.geometry import Region
+from textual.reactive import reactive
 from textual.strip import Strip
 from textual.widgets import Button, Input, OptionList, SelectionList
 from textual.widgets.option_list import Option, OptionDoesNotExist
@@ -32,6 +33,9 @@ class FileList(SelectionList, inherit_bindings=False):
 
     BINDINGS: ClassVar[list[BindingType]] = list(vindings)
 
+    sort_by: reactive[str] = reactive("name")
+    sort_descending: reactive[bool] = reactive(False)
+
     def __init__(
         self,
         dummy: bool = False,
@@ -53,6 +57,30 @@ class FileList(SelectionList, inherit_bindings=False):
         self.select_mode_enabled = select
         if not self.dummy:
             self.items_in_cwd: set[str] = set()
+
+    def watch_sort_by(
+        self,
+        new_value: Literal[
+            "name", "size", "modified", "created", "extension", "natural"
+        ],
+    ) -> None:
+        if new_value not in [
+            "name",
+            "size",
+            "modified",
+            "created",
+            "extension",
+            "natural",
+        ]:
+            raise ValueError(
+                f"Expected new `sort_by` value to be one of `name`, `size`, `modified`, `created`, `extension` or `natural`, but got `{new_value}`"
+            )
+        if not self.dummy:
+            self.update_file_list(add_to_session=False)
+
+    def watch_sort_descending(self, new_value: bool) -> None:
+        if not self.dummy:
+            self.update_file_list(add_to_session=False)
 
     def on_mount(self) -> None:
         if not self.dummy and self.parent:
@@ -142,7 +170,10 @@ class FileList(SelectionList, inherit_bindings=False):
             focus_on = last_highlight["name"]
         try:
             folders, files = await path_utils.get_cwd_object(
-                cwd, config["settings"]["show_hidden_files"]
+                cwd,
+                config["settings"]["show_hidden_files"],
+                sort_by=self.sort_by,
+                reverse=self.sort_descending,
             )
             if not folders and not files:
                 self.list_of_options.append(
@@ -273,7 +304,10 @@ class FileList(SelectionList, inherit_bindings=False):
 
         try:
             folders, files = await path_utils.get_cwd_object(
-                cwd, config["settings"]["show_hidden_files"]
+                cwd,
+                config["settings"]["show_hidden_files"],
+                sort_by=self.sort_by,
+                reverse=self.sort_descending,
             )
             if not folders and not files:
                 self.list_of_options.append(
@@ -895,9 +929,7 @@ class FileListRightClickOptionList(OptionList):
     async def on_key(self, event: events.Key) -> None:
         # Close menu on Escape
         if event.key == "escape":
-            self.add_class("hidden")
-            # Return focus to file list
-            self.file_list.focus()
+            self.go_hide()
 
     def update_location(self, event: events.Click) -> None:
         self.styles.offset = (event.screen_x, event.screen_y)
@@ -922,8 +954,7 @@ class FileListRightClickOptionList(OptionList):
                     self.app.query_one("#unzip").on_button_pressed(Button.Pressed)
             case _:
                 return
-        self.add_class("hidden")
-        self.file_list.focus()
+        self.go_hide()
 
     @on(events.MouseMove)
     def highlight_follow_mouse(self, event: events.MouseMove) -> None:
@@ -938,3 +969,11 @@ class FileListRightClickOptionList(OptionList):
     @on(events.Hide)
     def unforce_highlight_option(self, event: events.Hide) -> None:
         self.file_list.remove_class("-popup-shown")
+
+    @on(events.Blur)
+    def on_blur(self, event: events.Blur) -> None:
+        self.go_hide()
+
+    def go_hide(self) -> None:
+        self.add_class("hidden")
+        self.file_list.focus()

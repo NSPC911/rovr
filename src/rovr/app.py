@@ -35,6 +35,7 @@ from rovr.action_buttons import (
     UnzipButton,
     ZipButton,
 )
+from rovr.action_buttons.sort_order import SortOrderButton, SortOrderPopup
 from rovr.core import FileList, FileListContainer, PinnedSidebar, PreviewContainer
 from rovr.core.file_list import FileListRightClickOptionList
 from rovr.footer import Clipboard, MetadataContainer, ProcessContainer
@@ -132,6 +133,7 @@ class Application(App, inherit_bindings=False):
                     yield ZipButton()
                     yield UnzipButton()
                     yield PathCopyButton()
+                    yield SortOrderButton()
                 with VerticalGroup(id="below_menu"):
                     with HorizontalGroup():
                         yield BackButton()
@@ -389,6 +391,8 @@ class Application(App, inherit_bindings=False):
                     )
                 else:
                     self.action_suspend_process()
+            case key if key in config["keybinds"]["change_sort_order"]:
+                await self.query_one(SortOrderButton).open_popup(event)
 
     def on_app_blur(self, event: events.AppBlur) -> None:
         self.app_blurred = True
@@ -531,7 +535,7 @@ class Application(App, inherit_bindings=False):
                         severity="warning",
                     )
 
-    @work
+    @work(exclusive=True)
     async def on_resize(self, event: events.Resize) -> None:
         if (
             event.size.height < MaxPossible.height
@@ -540,6 +544,7 @@ class Application(App, inherit_bindings=False):
             self.has_pushed_screen = True
             await self.push_screen_wait(TerminalTooSmall())
             self.has_pushed_screen = False
+        self.hide_popups()
 
     async def _on_css_change(self) -> None:
         if self.css_monitor is not None:
@@ -701,11 +706,16 @@ class Application(App, inherit_bindings=False):
     @on(events.Click)
     def when_got_click(self, event: events.Click) -> None:
         if (
-            not isinstance(event.widget, FileListRightClickOptionList)
+            not isinstance(event.widget, (FileListRightClickOptionList, SortOrderPopup))
             or event.button == 1
         ):
-            with suppress(NoMatches):
-                self.query_one(FileListRightClickOptionList).add_class("hidden")
+            self.hide_popups()
+
+    async def hide_popups(self) -> None:
+        with suppress(NoMatches):
+            self.query_one(FileListRightClickOptionList).add_class("hidden")
+        with suppress(NoMatches):
+            self.query_one(SortOrderPopup).add_class("hidden")
 
 
 app = Application(watch_css=True)

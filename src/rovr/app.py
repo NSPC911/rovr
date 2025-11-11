@@ -392,7 +392,7 @@ class Application(App, inherit_bindings=False):
                 else:
                     self.action_suspend_process()
             case key if key in config["keybinds"]["change_sort_order"]:
-                await self.query_one(SortOrderButton).open_popup("key", event)
+                await self.query_one(SortOrderButton).open_popup(event)
 
     def on_app_blur(self, event: events.AppBlur) -> None:
         self.app_blurred = True

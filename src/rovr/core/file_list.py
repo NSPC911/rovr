@@ -304,7 +304,7 @@ class FileList(SelectionList, inherit_bindings=False):
 
         try:
             folders, files = await path_utils.get_cwd_object(
-                cwd, config["settings"]["show_hidden_files"]
+                cwd, config["settings"]["show_hidden_files"], sort_by=self.sort_by, reverse=self.sort_descending
             )
             if not folders and not files:
                 self.list_of_options.append(
@@ -926,9 +926,7 @@ class FileListRightClickOptionList(OptionList):
     async def on_key(self, event: events.Key) -> None:
         # Close menu on Escape
         if event.key == "escape":
-            self.add_class("hidden")
-            # Return focus to file list
-            self.file_list.focus()
+            self.go_hide()
 
     def update_location(self, event: events.Click) -> None:
         self.styles.offset = (event.screen_x, event.screen_y)
@@ -953,8 +951,7 @@ class FileListRightClickOptionList(OptionList):
                     self.app.query_one("#unzip").on_button_pressed(Button.Pressed)
             case _:
                 return
-        self.add_class("hidden")
-        self.file_list.focus()
+        self.go_hide()
 
     @on(events.MouseMove)
     def highlight_follow_mouse(self, event: events.MouseMove) -> None:
@@ -969,3 +966,11 @@ class FileListRightClickOptionList(OptionList):
     @on(events.Hide)
     def unforce_highlight_option(self, event: events.Hide) -> None:
         self.file_list.remove_class("-popup-shown")
+
+    @on(events.Blur)
+    def on_blur(self, event: events.Blur) -> None:
+        self.go_hide()
+
+    def go_hide(self) -> None:
+        self.add_class("hidden")
+        self.file_list.focus()

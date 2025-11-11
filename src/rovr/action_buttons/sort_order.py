@@ -1,15 +1,15 @@
-from typing import Literal
-
 from textual import events, on
 from textual.css.query import NoMatches
 from textual.widgets import Button, OptionList, SelectionList
 from textual.widgets.option_list import Option
 
 from rovr.functions.icons import get_icon, get_toggle_button_icon
+from rovr.variables.constants import config
 
 
 class SortOrderPopupOptions(Option):
     def __init__(self, icon: list[str], prompt: str, id: str | None = None) -> None:
+        self.label = prompt
         super().__init__(" " + icon[0] + " " + prompt + " ", id=id)
 
 
@@ -21,50 +21,50 @@ class SortOrderButton(Button):
             id="sort_order",
         )
 
-    @on(events.Click)
-    async def when_button_pressed(self, event: events.Click) -> None:
-        await self.open_popup("click", event)
+    def on_mount(self) -> None:
+        if config["interface"]["tooltips"]:
+            self.tooltip = "Copy selected files"
+
+    async def on_button_pressed(self, event: Button.Pressed) -> None:
+        await self.open_popup(event)
 
     async def open_popup(
-        self, cause: Literal["key", "click"], event: events.Click | events.Key
+        self,
+        event: events.Click | events.Key | Button.Pressed,
     ) -> None:
         try:
             popup_widget = self.app.query_one(SortOrderPopup)
         except NoMatches:
             popup_widget = SortOrderPopup()
             await self.app.mount(popup_widget)
+        if isinstance(event, events.Click):
+            popup_widget.styles.offset = (event.screen_x, event.screen_y)
+        elif isinstance(event, Button.Pressed):
+            popup_widget.styles.offset = (
+                self.app.mouse_position.x,
+                self.app.mouse_position.y,
+            )
+        elif isinstance(event, events.Key):
+            popup_widget.do_adjust = True
         popup_widget.remove_class("hidden")
         popup_widget.focus()
-        if cause == "click":
-            if not isinstance(event, events.Click):
-                return
-            popup_widget.styles.offset = (event.screen_x, event.screen_y)
-        else:
-            popup_widget.styles.offset = (
-                # hard coding is my passion
-                # anyways, i cant force to use popup_widget.size
-                # because it becomes 0 when showing up, which messes
-                # up the position of it, so _anyways_
-                (self.app.size.width - 16) // 2,
-                (self.app.size.height - 9) // 2,
-            )
-        popup_widget.spawned_by = cause
 
 
 class SortOrderPopup(OptionList):
     def __init__(self) -> None:
         super().__init__()
-        self.spawned_by: Literal["key", "click"] | None = None
+        self.do_adjust: bool = False
 
     def on_mount(self) -> None:
         self.styles.layer = "overlay"
         self.file_list: SelectionList = self.app.query_one("#file_list", SelectionList)
         self.button: Button = self.app.query_one(SortOrderButton)
+        self.styles.scrollbar_size_vertical = 0
 
     @on(events.Show)
     def on_show(self, event: events.Show) -> None:
         order = "desc" if self.file_list.sort_descending else "asc"
-        self.add_options([
+        self.set_options([
             SortOrderPopupOptions(
                 get_icon("sorting", "alpha_" + order), "N[u]a[/]me", id="name"
             ),
@@ -98,10 +98,12 @@ class SortOrderPopup(OptionList):
             ),
         ])
         self.highlighted = self.get_option_index(self.file_list.sort_by)
-
-    @on(events.Hide)
-    def on_hide(self, event: events.Hide) -> None:
-        self.clear_options()
+        if self.do_adjust:
+            self.do_adjust = False
+            self.styles.offset = (
+                (self.app.size.width - 16) // 2,
+                (self.app.size.height - 9) // 2
+            )
 
     @on(events.MouseMove)
     def highlight_follow_mouse(self, event: events.MouseMove) -> None:
@@ -114,8 +116,7 @@ class SortOrderPopup(OptionList):
             self.file_list.sort_descending = not self.file_list.sort_descending
         else:
             self.file_list.sort_by = event.option.id
-        self.add_class("hidden")
-        self.file_list.focus()
+        self.go_hide()
         order = "desc" if self.file_list.sort_descending else "asc"
         match self.file_list.sort_by:
             case "name":
@@ -135,9 +136,7 @@ class SortOrderPopup(OptionList):
         # Close menu on Escape
         match event.key.lower():
             case "escape":
-                self.add_class("hidden")
-                # Return focus to file list
-                self.file_list.focus()
+                self.go_hide()
                 return
             case "a":
                 self.highlighted = self.get_option_index("name")
@@ -158,13 +157,10 @@ class SortOrderPopup(OptionList):
         event.stop()
         self.action_select()
 
-    def on_resize(self) -> None:
-        if self.spawned_by == "key":
-            self.styles.offset = (
-                # hard coding is my passion
-                # anyways, i cant force to use popup_widget.size
-                # because it becomes 0 when showing up, which messes
-                # up the position of it, so _anyways_
-                (self.app.size.width - 16) // 2,
-                (self.app.size.height - 9) // 2,
-            )
+    @on(events.Blur)
+    def on_blur(self, event: events.Blur) -> None:
+        self.go_hide()
+
+    def go_hide(self) -> None:
+        self.add_class("hidden")
+        self.file_list.focus()

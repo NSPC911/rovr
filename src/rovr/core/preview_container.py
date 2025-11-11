@@ -418,7 +418,12 @@ class PreviewContainer(Container):
         if should_cancel():
             return
 
-        updater_worker: Worker = self.query_one(FileList).dummy_update_file_list(
+        this_list: FileList = self.query_one(FileList)
+        main_list: FileList = self.app.query_one("#file_list", FileList)
+        this_list.sort_by = main_list.sort_by
+        this_list.sort_descending = main_list.sort_descending
+
+        updater_worker: Worker = this_list.dummy_update_file_list(
             cwd=folder_path,
         )
 

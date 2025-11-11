@@ -535,7 +535,7 @@ class Application(App, inherit_bindings=False):
                         severity="warning",
                     )
 
-    @work
+    @work(exclusive=True)
     async def on_resize(self, event: events.Resize) -> None:
         if (
             event.size.height < MaxPossible.height
@@ -544,8 +544,7 @@ class Application(App, inherit_bindings=False):
             self.has_pushed_screen = True
             await self.push_screen_wait(TerminalTooSmall())
             self.has_pushed_screen = False
-        with suppress(NoMatches):
-            self.query_one(SortOrderPopup).on_resize()
+        self.hide_popups()
 
     async def _on_css_change(self) -> None:
         if self.css_monitor is not None:
@@ -710,10 +709,13 @@ class Application(App, inherit_bindings=False):
             not isinstance(event.widget, (FileListRightClickOptionList, SortOrderPopup))
             or event.button == 1
         ):
-            with suppress(NoMatches):
-                self.query_one(FileListRightClickOptionList).add_class("hidden")
-            with suppress(NoMatches):
-                self.query_one(SortOrderPopup).add_class("hidden")
+            self.hide_popups()
+
+    async def hide_popups(self) -> None:
+        with suppress(NoMatches):
+            self.query_one(FileListRightClickOptionList).add_class("hidden")
+        with suppress(NoMatches):
+            self.query_one(SortOrderPopup).add_class("hidden")
 
 
 app = Application(watch_css=True)

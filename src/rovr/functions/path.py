@@ -1,7 +1,7 @@
 import asyncio
 import base64
+import contextlib
 import ctypes
-import nt
 import os
 import stat
 from os import path
@@ -15,6 +15,12 @@ from textual.app import App
 
 from rovr.functions.icons import get_icon_for_file, get_icon_for_folder
 from rovr.variables.constants import os_type
+
+# windows needs nt, because scandir returns
+# nt.DirEntry instead of os.DirEntry on
+# windows. weird, yes, but I can't do anything
+with contextlib.suppress(ModuleNotFoundError):
+    import nt
 
 pprint = Console().print
 

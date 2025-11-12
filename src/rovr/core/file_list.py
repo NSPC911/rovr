@@ -1,4 +1,5 @@
 import asyncio
+import contextlib
 from os import getcwd, path
 from os import system as cmd
 from time import time
@@ -60,7 +61,10 @@ class FileList(SelectionList, inherit_bindings=False):
 
     @property
     def sort_by(self) -> str:
-        return self.app.query_one("StateManager").sort_by
+        try:
+            return self.app.query_one("StateManager").sort_by
+        except (NoMatches, AttributeError):
+            return "name"
 
     @sort_by.setter
     def sort_by(self, value: str) -> None:
@@ -68,15 +72,20 @@ class FileList(SelectionList, inherit_bindings=False):
             raise ValueError(
                 f"Expected sort_by value to be one of 'name', 'size', 'modified', 'created', 'extension' or 'natural', but got '{value}'"
             )
-        self.app.query_one("StateManager").sort_by = value
+        with contextlib.suppress(NoMatches):
+            self.app.query_one("StateManager").sort_by = value
 
     @property
     def sort_descending(self) -> bool:
-        return self.app.query_one("StateManager").sort_descending
+        try:
+            return self.app.query_one("StateManager").sort_descending
+        except (NoMatches, AttributeError):
+            return False
 
     @sort_descending.setter
     def sort_descending(self, value: bool) -> None:
-        self.app.query_one("StateManager").sort_descending = value
+        with contextlib.suppress(NoMatches):
+            self.app.query_one("StateManager").sort_descending = value
 
     @property
     def highlighted_option(self) -> FileListSelectionWidget | None:

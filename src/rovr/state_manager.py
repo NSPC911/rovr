@@ -241,4 +241,6 @@ class StateManager(Widget):
         self.watch_preview_sidebar_visible(self.preview_sidebar_visible)
         self.watch_footer_visible(self.footer_visible)
         self.watch_menuwrapper_visible(self.menuwrapper_visible)
+        self.watch_sort_by(self.sort_by)
+        self.watch_sort_descending(self.sort_descending)
         self._skip_save = False

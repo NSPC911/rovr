@@ -94,7 +94,7 @@ class FileList(SelectionList, inherit_bindings=False):
             An Option, or `None`.
         """
         if self.highlighted is not None:
-            return self.options[self.highlighted]
+            return self.options[self.highlighted]  # ty: ignore[invalid-argument-type]
         else:
             return None
 
@@ -172,7 +172,7 @@ class FileList(SelectionList, inherit_bindings=False):
             folders, files = await path_utils.get_cwd_object(
                 cwd,
                 config["settings"]["show_hidden_files"],
-                sort_by=self.sort_by,
+                sort_by=self.sort_by,  # ty: ignore[invalid-argument-type]
                 reverse=self.sort_descending,
             )
             if not folders and not files:
@@ -299,6 +299,7 @@ class FileList(SelectionList, inherit_bindings=False):
         Args:
             cwd (str): The current working directory.
         """
+        assert self.parent is not None
         self.enter_into = cwd
         # Separate folders and files
         self.list_of_options = []
@@ -307,7 +308,7 @@ class FileList(SelectionList, inherit_bindings=False):
             folders, files = await path_utils.get_cwd_object(
                 cwd,
                 config["settings"]["show_hidden_files"],
-                sort_by=self.sort_by,
+                sort_by=self.sort_by,  # ty: ignore[invalid-argument-type]
                 reverse=self.sort_descending,
             )
             if not folders and not files:
@@ -353,6 +354,7 @@ class FileList(SelectionList, inherit_bindings=False):
         Args:
             file_list (list[str]): List of file paths from archive contents.
         """
+        assert self.parent is not None
         self.clear_options()
         self.list_of_options = []
 

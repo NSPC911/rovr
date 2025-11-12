@@ -23,7 +23,23 @@ class SortOrderButton(Button):
 
     def on_mount(self) -> None:
         if config["interface"]["tooltips"]:
-            self.tooltip = "Copy selected files"
+            self.tooltip = "Change sort order"
+        # Set initial icon based on current sort state
+        state_manager = self.app.query_one("StateManager")
+        order = "desc" if state_manager.sort_descending else "asc"
+        match state_manager.sort_by:
+            case "name":
+                self.label = get_icon("sorting", "alpha_" + order)[0]
+            case "extension":
+                self.label = get_icon("sorting", "alpha_alt_" + order)[0]
+            case "natural":
+                self.label = get_icon("sorting", "numeric_alt_" + order)[0]
+            case "size":
+                self.label = get_icon("sorting", "numeric_" + order)[0]
+            case "created":
+                self.label = get_icon("sorting", "time_" + order)[0]
+            case "modified":
+                self.label = get_icon("sorting", "time_alt_" + order)[0]
 
     async def on_button_pressed(self, event: Button.Pressed) -> None:
         await self.open_popup(event)

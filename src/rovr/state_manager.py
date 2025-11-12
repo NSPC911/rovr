@@ -8,6 +8,7 @@ from textual.reactive import reactive
 from textual.widget import Widget
 
 from rovr.functions.config import get_version
+from rovr.functions.icons import get_icon
 from rovr.variables.maps import VAR_TO_DIR
 
 
@@ -17,6 +18,8 @@ class StateDict(TypedDict):
     preview_sidebar_visible: bool
     footer_visible: bool
     menuwrapper_visible: bool
+    sort_by: str
+    sort_descending: bool
 
 
 class StateManager(Widget):
@@ -30,6 +33,8 @@ class StateManager(Widget):
     preview_sidebar_visible: reactive[bool] = reactive(True, init=False)
     footer_visible: reactive[bool] = reactive(True, init=False)
     menuwrapper_visible: reactive[bool] = reactive(True, init=False)
+    sort_by: reactive[str] = reactive("name", init=False)
+    sort_descending: reactive[bool] = reactive(False, init=False)
 
     def __init__(self, *args, **kwargs) -> None:
         super().__init__(*args, **kwargs)
@@ -69,6 +74,8 @@ class StateManager(Widget):
                     self.menuwrapper_visible = loaded_state.get(
                         "menuwrapper_visible", True
                     )
+                    self.sort_by = loaded_state.get("sort_by", "name")
+                    self.sort_descending = loaded_state.get("sort_descending", False)
             except (toml.TomlDecodeError, OSError, KeyError):
                 self._create_default_state()
         else:
@@ -80,6 +87,8 @@ class StateManager(Widget):
         self.preview_sidebar_visible = True
         self.footer_visible = True
         self.menuwrapper_visible = True
+        self.sort_by = "name"
+        self.sort_descending = False
         self._save_state(force=True)
 
     def _save_state(self, force: bool = False) -> None:
@@ -93,6 +102,8 @@ class StateManager(Widget):
                     "preview_sidebar_visible": self.preview_sidebar_visible,
                     "footer_visible": self.footer_visible,
                     "menuwrapper_visible": self.menuwrapper_visible,
+                    "sort_by": self.sort_by,
+                    "sort_descending": self.sort_descending,
                 }
                 toml.dump(state, f)
         except (OSError, PermissionError) as exc:
@@ -152,6 +163,64 @@ class StateManager(Widget):
                 menuwrapper.add_class("hide")
         if self._locked_by == "menuwrapper":
             self._save_state()
+
+    def watch_sort_by(self, value: str) -> None:
+        if self._is_loading:
+            return
+        self._save_state()
+        try:
+            file_list = self.app.query_one("#file_list")
+            file_list.update_file_list(add_to_session=False)
+        except NoMatches:
+            pass
+        # Update sort button icon
+        try:
+            button = self.app.query_one("#sort_order")
+            order = "desc" if self.sort_descending else "asc"
+            match value:
+                case "name":
+                    button.label = get_icon("sorting", "alpha_" + order)[0]
+                case "extension":
+                    button.label = get_icon("sorting", "alpha_alt_" + order)[0]
+                case "natural":
+                    button.label = get_icon("sorting", "numeric_alt_" + order)[0]
+                case "size":
+                    button.label = get_icon("sorting", "numeric_" + order)[0]
+                case "created":
+                    button.label = get_icon("sorting", "time_" + order)[0]
+                case "modified":
+                    button.label = get_icon("sorting", "time_alt_" + order)[0]
+        except NoMatches:
+            pass
+
+    def watch_sort_descending(self, value: bool) -> None:
+        if self._is_loading:
+            return
+        self._save_state()
+        try:
+            file_list = self.app.query_one("#file_list")
+            file_list.update_file_list(add_to_session=False)
+        except NoMatches:
+            pass
+        # Update sort button icon
+        try:
+            button = self.app.query_one("#sort_order")
+            order = "desc" if value else "asc"
+            match self.sort_by:
+                case "name":
+                    button.label = get_icon("sorting", "alpha_" + order)[0]
+                case "extension":
+                    button.label = get_icon("sorting", "alpha_alt_" + order)[0]
+                case "natural":
+                    button.label = get_icon("sorting", "numeric_alt_" + order)[0]
+                case "size":
+                    button.label = get_icon("sorting", "numeric_" + order)[0]
+                case "created":
+                    button.label = get_icon("sorting", "time_" + order)[0]
+                case "modified":
+                    button.label = get_icon("sorting", "time_alt_" + order)[0]
+        except NoMatches:
+            pass
 
     def toggle_pinned_sidebar(self) -> None:
         self.pinned_sidebar_visible = not self.pinned_sidebar_visible

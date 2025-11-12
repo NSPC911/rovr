@@ -1,7 +1,6 @@
 import asyncio
 import base64
 import ctypes
-import nt
 import os
 import stat
 from os import path
@@ -15,6 +14,18 @@ from textual.app import App
 
 from rovr.functions.icons import get_icon_for_file, get_icon_for_folder
 from rovr.variables.constants import os_type
+
+# windows needs nt, because scandir returns
+# nt.DirEntry instead of os.DirEntry on
+# windows. weird, yes, but I can't do anything
+if os_type == "Windows":
+    import nt
+
+    DirEntryType = os.DirEntry | nt.DirEntry
+    DirEntryTypes = (os.DirEntry, nt.DirEntry)
+else:
+    DirEntryType = os.DirEntry
+    DirEntryTypes = os.DirEntry
 
 pprint = Console().print
 
@@ -163,7 +174,7 @@ def get_filtered_dir_names(cwd: str | bytes, show_hidden: bool = False) -> set[s
 class CWDObjectReturnDict(TypedDict):
     name: str
     icon: list[str]
-    dir_entry: nt.DirEntry | os.DirEntry
+    dir_entry: DirEntryType
 
 
 async def get_cwd_object(
@@ -203,7 +214,7 @@ async def get_cwd_object(
     files: list[CWDObjectReturnDict] = []
 
     for item in entries:
-        if not isinstance(item, (nt.DirEntry, os.DirEntry)):
+        if not isinstance(item, DirEntryTypes):
             raise TypeError(
                 f"Expected {type(nt.DirEntry)} or {type(os.DirEntry)} but got {type(item)}"
             )

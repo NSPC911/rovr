@@ -95,7 +95,7 @@ class FileList(SelectionList, inherit_bindings=False):
             An Option, or `None`.
         """
         if self.highlighted is not None:
-            return self.options[self.highlighted]
+            return self.options[self.highlighted]  # ty: ignore[invalid-argument-type]
         else:
             return None
 
@@ -173,7 +173,7 @@ class FileList(SelectionList, inherit_bindings=False):
             folders, files = await path_utils.get_cwd_object(
                 cwd,
                 config["settings"]["show_hidden_files"],
-                sort_by=self.sort_by,
+                sort_by=self.sort_by,  # ty: ignore[invalid-argument-type]
                 reverse=self.sort_descending,
             )
             if not folders and not files:
@@ -227,7 +227,8 @@ class FileList(SelectionList, inherit_bindings=False):
         # special check for up tree
         self.app.query_one("#up").disabled = cwd == path.dirname(cwd)
 
-        self.set_options(self.list_of_options)
+        self.clear_options()
+        self.add_options(self.list_of_options)
         # session handler
         self.app.query_one("#path_switcher").value = cwd + (
             "" if cwd.endswith("/") else "/"
@@ -299,6 +300,7 @@ class FileList(SelectionList, inherit_bindings=False):
         Args:
             cwd (str): The current working directory.
         """
+        assert self.parent is not None
         self.enter_into = cwd
         # Separate folders and files
         self.list_of_options = []
@@ -307,7 +309,7 @@ class FileList(SelectionList, inherit_bindings=False):
             folders, files = await path_utils.get_cwd_object(
                 cwd,
                 config["settings"]["show_hidden_files"],
-                sort_by=self.sort_by,
+                sort_by=self.sort_by,  # ty: ignore[invalid-argument-type]
                 reverse=self.sort_descending,
             )
             if not folders and not files:
@@ -342,7 +344,8 @@ class FileList(SelectionList, inherit_bindings=False):
                     disabled=True,
                 )
             )
-        self.set_options(self.list_of_options)
+        self.clear_options()
+        self.add_options(self.list_of_options)
         self.parent.border_subtitle = ""
 
     @work(exclusive=True)
@@ -352,6 +355,8 @@ class FileList(SelectionList, inherit_bindings=False):
         Args:
             file_list (list[str]): List of file paths from archive contents.
         """
+        assert self.parent is not None
+        self.clear_options()
         self.list_of_options = []
 
         if not file_list:
@@ -380,7 +385,7 @@ class FileList(SelectionList, inherit_bindings=False):
                     start_time = time()
                 await asyncio.sleep(0)
 
-        self.set_options(self.list_of_options)
+        self.add_options(self.list_of_options)
         self.parent.border_subtitle = ""
 
     async def on_selection_list_selected_changed(
@@ -798,7 +803,7 @@ class FileList(SelectionList, inherit_bindings=False):
                 case key if key in config["keybinds"]["toggle_pin"]:
                     event.stop()
                     pin_utils.toggle_pin(path.basename(getcwd()), getcwd())
-                    self.app.query_one("PinnedSidebar").reload_pins()
+                    await self.app.query_one("PinnedSidebar").reload_pins()
                 case key if key in config["keybinds"]["copy"]:
                     event.stop()
                     await self.app.query_one("#copy").on_button_pressed(Button.Pressed)

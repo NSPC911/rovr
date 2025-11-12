@@ -55,6 +55,15 @@ Sorts files by their size, useful for finding large or small files quickly.
 - **keybinding**: `s` (when sort menu is open)
 - **order**: can be ascending (smallest first) or descending (largest first)
 
+### sort by created time
+
+{/* <add image> */}
+
+Sorts files by their creation time.
+
+- **keybinding**: `c` (when sort menu is open)
+- **order**: can be ascending (oldest first) or descending (newest first)
+
 ### sort by modified time
 
 {/* <add image> */}
@@ -64,38 +73,22 @@ Sorts files by their last modification time.
 - **keybinding**: `m` (when sort menu is open)
 - **order**: can be ascending (oldest first) or descending (newest first)
 
-### sort by accessed time
-
-{/* <add image> */}
-
-Sorts files by when they were last accessed.
-
-- **keybinding**: `c` (when sort menu is open)
-- **order**: can be ascending or descending
-
-### sort by created time
-
-{/* <add image> */}
-
-Sorts files by their creation time.
-
-- **keybinding**: `t` (when sort menu is open)
-- **order**: can be ascending or descending
-
 ## toggling sort direction
 
 {/* <add image> */}
 
 You can toggle between ascending and descending order:
-- **keybinding**: `r` (when sort menu is open)
-- this reverses the current sort order
+- **keybinding**: `d` (when sort menu is open)
+- this switches the current sort order between ascending and descending
 
-## folder positioning
-
-rovr allows you to control whether folders appear before or after files:
-- **keybinding**: `f` (when sort menu is open)
-- options: folders first, folders last, or mixed (folders and files sorted together)
+The sort menu dynamically updates to show the current direction for each sort option.
 
 ## persistence
 
-Your sort preferences are maintained during your session and apply to all tabs.
+{/* <add image> */}
+
+Your sort preferences are automatically saved and persist between sessions. When you close and reopen rovr, it will remember:
+- your selected sort criteria (name, size, extension, etc.)
+- your sort direction (ascending or descending)
+
+These preferences apply to all tabs and are stored in the `state.toml` file in your rovr configuration directory.

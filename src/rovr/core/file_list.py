@@ -1,8 +1,9 @@
 import asyncio
+import contextlib
 from os import getcwd, path
 from os import system as cmd
 from time import time
-from typing import ClassVar, Literal
+from typing import ClassVar
 
 from rich.segment import Segment
 from rich.style import Style
@@ -10,7 +11,6 @@ from textual import events, on, work
 from textual.binding import BindingType
 from textual.css.query import NoMatches
 from textual.geometry import Region
-from textual.reactive import reactive
 from textual.strip import Strip
 from textual.widgets import Button, Input, OptionList, SelectionList
 from textual.widgets.option_list import Option, OptionDoesNotExist
@@ -32,9 +32,6 @@ class FileList(SelectionList, inherit_bindings=False):
     """
 
     BINDINGS: ClassVar[list[BindingType]] = list(vindings)
-
-    sort_by: reactive[str] = reactive("name")
-    sort_descending: reactive[bool] = reactive(False)
 
     def __init__(
         self,
@@ -58,33 +55,37 @@ class FileList(SelectionList, inherit_bindings=False):
         if not self.dummy:
             self.items_in_cwd: set[str] = set()
 
-    def watch_sort_by(
-        self,
-        new_value: Literal[
-            "name", "size", "modified", "created", "extension", "natural"
-        ],
-    ) -> None:
-        if new_value not in [
-            "name",
-            "size",
-            "modified",
-            "created",
-            "extension",
-            "natural",
-        ]:
-            raise ValueError(
-                f"Expected new `sort_by` value to be one of `name`, `size`, `modified`, `created`, `extension` or `natural`, but got `{new_value}`"
-            )
-        if not self.dummy:
-            self.update_file_list(add_to_session=False)
-
-    def watch_sort_descending(self, new_value: bool) -> None:
-        if not self.dummy:
-            self.update_file_list(add_to_session=False)
-
     def on_mount(self) -> None:
         if not self.dummy and self.parent:
             self.input: Input = self.parent.query_one(Input)
+
+    @property
+    def sort_by(self) -> str:
+        try:
+            return self.app.query_one("StateManager").sort_by
+        except (NoMatches, AttributeError):
+            return "name"
+
+    @sort_by.setter
+    def sort_by(self, value: str) -> None:
+        if value not in ["name", "size", "modified", "created", "extension", "natural"]:
+            raise ValueError(
+                f"Expected sort_by value to be one of 'name', 'size', 'modified', 'created', 'extension' or 'natural', but got '{value}'"
+            )
+        with contextlib.suppress(NoMatches):
+            self.app.query_one("StateManager").sort_by = value
+
+    @property
+    def sort_descending(self) -> bool:
+        try:
+            return self.app.query_one("StateManager").sort_descending
+        except (NoMatches, AttributeError):
+            return False
+
+    @sort_descending.setter
+    def sort_descending(self, value: bool) -> None:
+        with contextlib.suppress(NoMatches):
+            self.app.query_one("StateManager").sort_descending = value
 
     @property
     def highlighted_option(self) -> FileListSelectionWidget | None:

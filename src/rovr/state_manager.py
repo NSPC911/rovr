@@ -182,24 +182,8 @@ class StateManager(Widget):
         except NoMatches:
             pass
         # Update sort button icon
-        try:
-            button = self.app.query_one("#sort_order")
-            order = "desc" if self.sort_descending else "asc"
-            match value:
-                case "name":
-                    button.label = get_icon("sorting", "alpha_" + order)[0]
-                case "extension":
-                    button.label = get_icon("sorting", "alpha_alt_" + order)[0]
-                case "natural":
-                    button.label = get_icon("sorting", "numeric_alt_" + order)[0]
-                case "size":
-                    button.label = get_icon("sorting", "numeric_" + order)[0]
-                case "created":
-                    button.label = get_icon("sorting", "time_" + order)[0]
-                case "modified":
-                    button.label = get_icon("sorting", "time_alt_" + order)[0]
-        except NoMatches:
-            pass
+        with suppress(NoMatches):
+            self.app.query_one("#sort_order").update_icon()
 
     def watch_sort_descending(self, value: bool) -> None:
         if self._is_loading:
@@ -243,6 +227,7 @@ class StateManager(Widget):
         self.menuwrapper_visible = not self.menuwrapper_visible
 
     def restore_state(self) -> None:
+        # just for safe measure, set it to false
         self._is_loading = False
         self._skip_save = True
         self.watch_pinned_sidebar_visible(self.pinned_sidebar_visible)

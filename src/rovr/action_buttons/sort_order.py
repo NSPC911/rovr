@@ -21,10 +21,7 @@ class SortOrderButton(Button):
             id="sort_order",
         )
 
-    def on_mount(self) -> None:
-        if config["interface"]["tooltips"]:
-            self.tooltip = "Change sort order"
-        # Set initial icon based on current sort state
+    def update_icon(self) -> None:
         state_manager = self.app.query_one("StateManager")
         order = "desc" if state_manager.sort_descending else "asc"
         match state_manager.sort_by:
@@ -40,6 +37,12 @@ class SortOrderButton(Button):
                 self.label = get_icon("sorting", "time_" + order)[0]
             case "modified":
                 self.label = get_icon("sorting", "time_alt_" + order)[0]
+
+    def on_mount(self) -> None:
+        if config["interface"]["tooltips"]:
+            self.tooltip = "Change sort order"
+        # Set initial icon based on current sort state
+        self.update_icon()
 
     async def on_button_pressed(self, event: Button.Pressed) -> None:
         await self.open_popup(event)
@@ -74,7 +77,7 @@ class SortOrderPopup(OptionList):
     def on_mount(self) -> None:
         self.styles.layer = "overlay"
         self.file_list: SelectionList = self.app.query_one("#file_list", SelectionList)
-        self.button: Button = self.app.query_one(SortOrderButton)
+        self.button: SortOrderButton = self.app.query_one(SortOrderButton)
         self.styles.scrollbar_size_vertical = 0
 
     @on(events.Show)
@@ -133,20 +136,7 @@ class SortOrderPopup(OptionList):
         else:
             self.file_list.sort_by = event.option.id
         self.go_hide()
-        order = "desc" if self.file_list.sort_descending else "asc"
-        match self.file_list.sort_by:
-            case "name":
-                self.button.label = get_icon("sorting", "alpha_" + order)[0]
-            case "extension":
-                self.button.label = get_icon("sorting", "alpha_alt_" + order)[0]
-            case "natural":
-                self.button.label = get_icon("sorting", "numeric_alt_" + order)[0]
-            case "size":
-                self.button.label = get_icon("sorting", "numeric_" + order)[0]
-            case "created":
-                self.button.label = get_icon("sorting", "time_" + order)[0]
-            case "modified":
-                self.button.label = get_icon("sorting", "time_alt_" + order)[0]
+        self.button.update_icon()
 
     async def on_key(self, event: events.Key) -> None:
         # Close menu on Escape

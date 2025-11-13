@@ -111,6 +111,11 @@ class StateManager(Widget):
                 f"Attempted to write state file, but {type(exc).__name__} occurred\n{exc}",
                 severity="error",
             )
+        # do a minor fix for padding
+        if not (self.footer_visible or self.menuwrapper_visible):
+            self.app.query_one("#main").add_class("-fix-pad")
+        else:
+            self.app.query_one("#main").remove_class("-fix-pad")
 
     def watch_pinned_sidebar_visible(self, visible: bool) -> None:
         if self._is_loading:

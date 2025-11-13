@@ -42,7 +42,7 @@ class ModalInput(ModalScreen):
             self.icon_widget = Label("> ", id="icon", shrink=True)
 
     def compose(self) -> ComposeResult:
-        with HorizontalGroup():
+        with HorizontalGroup(id="modalInput_group"):
             yield self.icon_widget
             yield Input(
                 id="input",

@@ -108,6 +108,10 @@ SortOrderPopup,
 .hide,
 .hidden { display: none }
 
+#main.-fix-pad {
+  margin: 0 1
+}
+
 Input, TextArea {
   .input--placeholder,
   .text-area--placeholder { color: $foreground-darken-1 }
@@ -823,7 +827,7 @@ ModalInput {
   align: center middle;
   HorizontalGroup {
     border: $border-style $border;
-    width: 50vw;
+    width: 90vw;
     max-height: 3;
     padding: 0 1;
     background: transparent !important;
@@ -879,7 +883,7 @@ CommandPalette {
     margin-left: 2;
     margin-top: 1;
   }
-  & > Vertical {
+  #--container {
     background: transparent;
     width: 50vw;
     height: 50vh;
@@ -988,9 +992,9 @@ Screen {
     &.comfy-buttons #below_menu PathAutoCompleteInput { margin: -1 1 0 1 !important }
     &.compact-buttons #below_menu PathAutoCompleteInput { margin: -1 -1 0 -1 !important }
     #zoxide_group,
-    CommandPalette > Vertical,
+    .--textual-command-palette #--container,
     #dialog,
-    ModalInput {
+    #modalInput_group {
       width: 90vw;
       max-width: 90vw;
     }
@@ -1002,9 +1006,9 @@ Screen {
     &.compact-buttons #below_menu PathAutoCompleteInput { margin: -1 -1 0 -1 !important }
     #pinned_sidebar_container { max-width: 25vw }
     #zoxide_group,
-    CommandPalette > Vertical,
+    .--textual-command-palette #--container,
     #dialog,
-    ModalInput {
+    #modalInput_group {
       width: 75vw;
       max-width: 75vw;
     }

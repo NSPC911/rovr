@@ -33,7 +33,8 @@ try:
     click.rich_click.STYLE_COMMANDS_PANEL_BORDER = "white"
 
     global is_dev
-    is_dev = "debug,devtools" in environ.get("TEXTUAL", "")
+    textual_flags = set(environ.get("TEXTUAL", "").split(","))
+    is_dev = {"debug", "devtools"}.issubset(textual_flags)
 
     @click.command(help="A post-modern terminal file explorer")
     @click.option(

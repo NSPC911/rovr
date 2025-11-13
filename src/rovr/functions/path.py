@@ -187,11 +187,7 @@ def get_extension_sort_key(file_dict: dict) -> tuple[int, str]:
         return (2, name[1:].lower())
     else:
         # files with extensions
-        parts = name.rsplit(".", 1)
-        if len(parts) == 2:
-            return (3, parts[1].lower() + parts[0].lower())
-        else:
-            return (1, name.lower())
+        return (3, name.split(".")[-1])
 
 
 async def get_cwd_object(

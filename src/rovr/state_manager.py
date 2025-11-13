@@ -75,8 +75,10 @@ class StateManager(Widget):
                         "menuwrapper_visible", True
                     )
                     self.sort_by = loaded_state.get("sort_by", "name")
+                    if self.sort_by not in ["name", "size", "modified", "created", "extension", "natural"]:
+                        self.sort_by = "name"
                     self.sort_descending = loaded_state.get("sort_descending", False)
-            except (toml.TomlDecodeError, OSError, KeyError):
+            except (toml.TomlDecodeError, OSError):
                 self._create_default_state()
         else:
             self._create_default_state()
@@ -195,24 +197,8 @@ class StateManager(Widget):
         except NoMatches:
             pass
         # Update sort button icon
-        try:
-            button = self.app.query_one("#sort_order")
-            order = "desc" if value else "asc"
-            match self.sort_by:
-                case "name":
-                    button.label = get_icon("sorting", "alpha_" + order)[0]
-                case "extension":
-                    button.label = get_icon("sorting", "alpha_alt_" + order)[0]
-                case "natural":
-                    button.label = get_icon("sorting", "numeric_alt_" + order)[0]
-                case "size":
-                    button.label = get_icon("sorting", "numeric_" + order)[0]
-                case "created":
-                    button.label = get_icon("sorting", "time_" + order)[0]
-                case "modified":
-                    button.label = get_icon("sorting", "time_alt_" + order)[0]
-        except NoMatches:
-            pass
+        with suppress(NoMatches):
+            self.app.query_one("#sort_order").update_icon()
 
     def toggle_pinned_sidebar(self) -> None:
         self.pinned_sidebar_visible = not self.pinned_sidebar_visible

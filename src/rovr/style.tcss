@@ -476,6 +476,7 @@ FileList, PinnedSidebar, Clipboard, CommandList, #zoxide_options, FileListRightC
   &.-popup-shown .option-list--option-highlighted {
     color: $block-cursor-foreground;
     background: $primary;
+    text-style: none;
   }
   &:blur .selection-list--button-selected-highlighted,
   &:blur .selection-list--button-highlighted {

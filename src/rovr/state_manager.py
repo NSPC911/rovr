@@ -82,6 +82,13 @@ class StateManager(Widget):
             self._create_default_state()
         self._is_loading = False
 
+    def pad_fix(self) -> None:
+        # do a minor fix for padding
+        if not (self.footer_visible or self.menuwrapper_visible):
+            self.app.query_one("#main").add_class("-fix-pad")
+        else:
+            self.app.query_one("#main").remove_class("-fix-pad")
+
     def _create_default_state(self) -> None:
         self.pinned_sidebar_visible = True
         self.preview_sidebar_visible = True
@@ -111,11 +118,7 @@ class StateManager(Widget):
                 f"Attempted to write state file, but {type(exc).__name__} occurred\n{exc}",
                 severity="error",
             )
-        # do a minor fix for padding
-        if not (self.footer_visible or self.menuwrapper_visible):
-            self.app.query_one("#main").add_class("-fix-pad")
-        else:
-            self.app.query_one("#main").remove_class("-fix-pad")
+        self.pad_fix()
 
     def watch_pinned_sidebar_visible(self, visible: bool) -> None:
         if self._is_loading:

@@ -281,7 +281,8 @@ async def get_cwd_object(
         files.reverse()
         folders.reverse()
 
-    print(f"Found {len(folders)} folders and {len(files)} files in {cwd}")
+    if globals().get("is_dev", False):
+        print(f"Found {len(folders)} folders and {len(files)} files in {cwd}")
     return folders, files
 
 
@@ -534,6 +535,7 @@ def get_mounted_drives() -> list:
                 if path.isdir(p.mountpoint) and _should_include_linux_mount_point(p)
             ]
     except Exception as e:
-        print(f"Error getting mounted drives: {e}\nUsing fallback method...")
+        if globals().get("is_dev", False):
+            print(f"Error getting mounted drives: {e}\nUsing fallback method...")
         drives = [path.expanduser("~")]
     return drives

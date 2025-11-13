@@ -1,4 +1,6 @@
 try:
+    from os import environ
+
     import rich_click as click
     from rich import box
     from rich.table import Table
@@ -29,6 +31,9 @@ try:
     click.rich_click.STYLE_REQUIRED_LONG = "dim red"
     click.rich_click.STYLE_OPTIONS_PANEL_BORDER = "blue bold"
     click.rich_click.STYLE_COMMANDS_PANEL_BORDER = "white"
+
+    global is_dev
+    is_dev = "debug,devtools" in environ.get("TEXTUAL", "")
 
     @click.command(help="A post-modern terminal file explorer")
     @click.option(

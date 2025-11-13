@@ -14,7 +14,7 @@
       "- [bright_green]interface.preview_text.empty[/] (when the file is empty)",
       "- [bright_green]interface.preview_text.too_large[/] (when the file is too large, which is [gray]>1MB[/])"
     ],
-    "extra": "Expaned in v0.5.0"
+    "extra": "Expanded in v0.5.0"
   },
   {
     "keys": ["settings.preview_full"],
@@ -38,9 +38,9 @@
     "keys": ["interface.compact_mode"],
     "message": [
       "[bright_blue]interface.compact_mode[/] has been expanded into two extra options",
-      "- [bright_cyan]interface.compact_mode.buttons[/] makes the header buttons smaller (you can toggle the header with the defualt key of `M`)",
+      "- [bright_cyan]interface.compact_mode.buttons[/] makes the header buttons smaller (you can toggle the header with the default key of `M`)",
       "- [bright_cyan]interface.compact_mode.panels[/] makes the panels smaller so that there is more space for the actual file list."
     ],
-    "extra": "Expaned in v0.5.0"
+    "extra": "Expanded in v0.5.0"
   }
 ]

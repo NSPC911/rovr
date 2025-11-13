@@ -5,6 +5,10 @@
   font-family: "CaskaydiaCove NFP";
   src: url("./caskaydiacovenfp.ttf") format("truetype");
 }
+@font-face {
+  font-family: "CaskaydiaCoveNFM";
+  src: url("./caskaydiacovenfm.ttf") format("truetype");
+}
 
 :root {
   --sl-sidebar-width: 20vw;

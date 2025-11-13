@@ -233,7 +233,7 @@ async def get_cwd_object(
     for item in entries:
         if not isinstance(item, DirEntryTypes):
             raise TypeError(
-                f"Expected {type(nt.DirEntry)} or {type(os.DirEntry)} but got {type(item)}"
+                f"Expected a DirEntry object but got {type(item)}"
             )
         if not show_hidden and is_hidden_file(item.path):
             continue

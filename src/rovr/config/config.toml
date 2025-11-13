@@ -8,7 +8,6 @@ use_reactive_layout = true
 show_progress_eta = false
 show_progress_percentage = true
 truncate_progress_file_path = false
-compact_mode = false
 show_line_numbers = true
 # yazi style is 5
 # but it has more space
@@ -32,6 +31,10 @@ too_large = "this file is larger (but not larger than your mother)"
 [interface.clock]
 enabled = true
 align = "left"
+
+[interface.compact_mode]
+buttons = false
+panels = false
 
 [settings]
 image_protocol = "Auto"

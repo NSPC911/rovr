@@ -4,7 +4,7 @@ import ctypes
 import os
 import stat
 from os import path
-from typing import Literal, TypedDict, overload
+from typing import Literal, TypeAlias, TypedDict, overload
 
 import psutil
 from natsort import natsorted
@@ -21,10 +21,10 @@ from rovr.variables.constants import os_type
 if os_type == "Windows":
     import nt
 
-    DirEntryType = os.DirEntry | nt.DirEntry
+    DirEntryType: TypeAlias = os.DirEntry | nt.DirEntry
     DirEntryTypes = (os.DirEntry, nt.DirEntry)
 else:
-    DirEntryType = os.DirEntry
+    DirEntryType: TypeAlias = os.DirEntry
     DirEntryTypes = os.DirEntry
 
 pprint = Console().print

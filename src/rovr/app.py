@@ -167,10 +167,14 @@ class Application(App, inherit_bindings=False):
 
     def on_mount(self) -> None:
         # compact mode
-        if config["interface"]["compact_mode"]:
-            self.add_class("compact")
+        if config["interface"]["compact_mode"]["buttons"]:
+            self.add_class("compact-buttons")
         else:
-            self.add_class("comfy")
+            self.add_class("comfy-buttons")
+        if config["interface"]["compact_mode"]["panels"]:
+            self.add_class("compact-panels")
+        else:
+            self.add_class("comfy-panels")
 
         # border titles
         self.query_one("#menuwrapper").border_title = "Options"

@@ -14,7 +14,7 @@
       "- [bright_green]interface.preview_text.empty[/] (when the file is empty)",
       "- [bright_green]interface.preview_text.too_large[/] (when the file is too large, which is [gray]>1MB[/])"
     ],
-    "extra": "Removed in v0.5.0"
+    "extra": "Expaned in v0.5.0"
   },
   {
     "keys": ["settings.preview_full"],
@@ -33,5 +33,14 @@
       "Cannot click on the link? https://nspc911.github.io/rovr/features/cd-on-quit/#shell-configuration"
     ],
     "extra": "Removed in v0.5.0"
+  },
+  {
+    "keys": ["interface.compact_mode"],
+    "message": [
+      "[bright_blue]interface.compact_mode[/] has been expanded into two extra options",
+      "- [bright_cyan]interface.compact_mode.buttons[/] makes the header buttons smaller (you can toggle the header with the defualt key of `M`)",
+      "- [bright_cyan]interface.compact_mode.panels[/] makes the panels smaller so that there is more space for the actual file list."
+    ],
+    "extra": "Expaned in v0.5.0"
   }
 ]

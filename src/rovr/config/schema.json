@@ -38,11 +38,6 @@
           "default": false,
           "description": "When the process container is using file paths, truncate the file path to only view the first and last names of the path."
         },
-        "compact_mode": {
-          "type": "boolean",
-          "default": false,
-          "description": "Enable compact mode to hide the menu bar and adjust layout for a more streamlined interface."
-        },
         "show_line_numbers": {
           "type": "boolean",
           "default": false,
@@ -99,6 +94,22 @@
               "type": "string",
               "default": "this file is larger (but not larger than your mother)",
               "description": "If the file is too large (hard capped at < 1MB), the preview will refuse to render this file regardless of your memory size"
+            }
+          }
+        },
+        "compact_mode": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "buttons": {
+              "type": "boolean",
+              "default": false,
+              "description": "Whether to compact the buttons and path input to one line instead of three."
+            },
+            "panels": {
+              "type": "boolean",
+              "default": false,
+              "description": "Whether to make the panels smaller to add more room for the file list itself"
             }
           }
         }

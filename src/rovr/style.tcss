@@ -12,6 +12,12 @@ $preview_sidebar_width: 35vw;
 $footer_unfocus_height: 7;
 $footer_focus_height: 9;
 
+/* for compact mode */
+$compact_pinned_sidebar_width: 16;
+$compact_preview_sidebar_width: 25vw;
+$compact_footer_unfocus_height: 5;
+$compact_footer_focus_height: 7;
+
 /* Scrollbar Colors */
 $scrollbar: $primary;
 $scrollbar-hover: $primary-lighten-3;
@@ -40,8 +46,8 @@ $scrollbar-corner-color: $primary-muted;
 #footer > *,
 FileListRightClickOptionList,
 SortOrderPopup,
-.comfy #path_switcher,
-.comfy #below_menu Button {
+.comfy-buttons #path_switcher,
+.comfy-buttons #below_menu Button {
   background: transparent;
   border: $border-style $border-blurred;
   border-subtitle-color: $background;
@@ -80,9 +86,9 @@ SortOrderPopup,
 #footer > *:focus,
 FileListRightClickOptionList,
 SortOrderPopup,
-.comfy #path_switcher:focus-within,
-.comfy #below_menu Button:focus,
-.comfy #below_menu Button:hover {
+.comfy-buttons #path_switcher:focus-within,
+.comfy-buttons #below_menu Button:focus,
+.comfy-buttons #below_menu Button:hover {
   border: $border-style $border;
   border-subtitle-background: $border;
   &:ansi {
@@ -254,7 +260,7 @@ Tooltip {
   padding: 0 1;
   scrollbar-size: 0 0;
 }
-.comfy #menu Button {
+.comfy-buttons #menu Button {
   &:ansi { background: transparent }
   &:disabled {
     opacity: 1 !important;
@@ -897,11 +903,17 @@ LoadingIndicator {
   background: transparent;
 }
 /* Compact mode */
-.compact {
-  #pinned_sidebar_container { width: 16 }
-  #preview_sidebar { width: 25vw }
+.compact-panels {
+  #pinned_sidebar_container { width: $compact_pinned_sidebar_width }
+  #preview_sidebar { width: $compact_preview_sidebar_width }
   HeaderArea { height: 1 }
   HeaderClock { border-bottom: none !important }
+  #footer {
+    height: $compact_footer_unfocus_height;
+    &:focus-within { height: $compact_footer_focus_height }
+  }
+}
+.compact-buttons {
   #below_menu {
     height: 2;
     Input {
@@ -943,7 +955,7 @@ LoadingIndicator {
     border-left: $border-style $accent
   }
 }
-.comfy {
+.comfy-buttons {
   #below_menu {
     Input {
       &.hide_border_bottom {
@@ -973,8 +985,8 @@ Screen {
     #pinned_sidebar_container,
     #preview_sidebar,
     #below_menu Button { display: none !important }
-    &.comfy #below_menu PathAutoCompleteInput { margin: -1 1 0 1 !important }
-    &.compact #below_menu PathAutoCompleteInput { margin: -1 -1 0 -1 !important }
+    &.comfy-buttons #below_menu PathAutoCompleteInput { margin: -1 1 0 1 !important }
+    &.compact-buttons #below_menu PathAutoCompleteInput { margin: -1 -1 0 -1 !important }
     #zoxide_group,
     CommandPalette > Vertical,
     #dialog,
@@ -986,8 +998,8 @@ Screen {
   &.-nopreview {
     #preview_sidebar,
     #below_menu Button { display: none !important }
-    &.comfy #below_menu PathAutoCompleteInput { margin: -1 1 0 1 !important }
-    &.compact #below_menu PathAutoCompleteInput { margin: -1 -1 0 -1 !important }
+    &.comfy-buttons #below_menu PathAutoCompleteInput { margin: -1 1 0 1 !important }
+    &.compact-buttons #below_menu PathAutoCompleteInput { margin: -1 -1 0 -1 !important }
     #pinned_sidebar_container { max-width: 25vw }
     #zoxide_group,
     CommandPalette > Vertical,

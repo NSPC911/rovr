@@ -9,8 +9,6 @@ rovr's user interface has several panels that you can navigate between using the
 
 ### panels
 
-{/* <add image> */}
-
 the main panels are:
 
 - pinned folder sidebar: a list of your favorite or frequently accessed folders. (focus with `s`)
@@ -33,14 +31,22 @@ you can show or hide panels to customize your view:
 
 ### compact mode
 
-rovr supports a compact mode for smaller terminal windows or when you want to maximize the file list space. in compact mode, the footer panels automatically hide when they're not in use, giving you more space for file browsing.
+rovr supports compact mode options for smaller terminal windows or when you want to maximize the file list space. compact mode has two separate options that can be enabled independently:
 
-To enable compact mode, set the following in your `config.toml`:
+- **buttons**: compacts the action buttons and path input to one line instead of three
+- **panels**: makes the footer panels smaller to give more room for the file list
+
+To enable compact mode options, set the following in your `config.toml`:
 
 ```toml
-[interface]
-compact_mode = true
+[interface.compact_mode]
+buttons = true  # compact buttons and path input
+panels = true   # make panels smaller
 ```
+
+{/* <add image> */}
+
+You can enable either or both options depending on your preferences and terminal size.
 
 ### tabs
 

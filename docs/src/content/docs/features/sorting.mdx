@@ -13,7 +13,8 @@ rovr provides multiple ways to sort files and folders in the file list, allowing
 
 You can access the sort menu by:
 - clicking the sort button in the action button menu
-- the sort button displays the current sort order icon
+- the sort button displays the current sort order icon and direction
+- use the sort order switcher to quickly cycle through different sort orders
 
 ## sort criteria
 
@@ -83,12 +84,22 @@ You can toggle between ascending and descending order:
 
 The sort menu dynamically updates to show the current direction for each sort option.
 
+## sort order switcher
+
+{/* <add image> */}
+
+The sort order switcher provides a quick way to cycle through different sort orders without opening the sort menu:
+
+- **location**: displayed in the action button area
+- **functionality**: click to cycle through available sort orders
+- **visual feedback**: shows the current sort type and direction with appropriate icons
+
 ## persistence
 
 {/* <add image> */}
 
-Your sort preferences are automatically saved and persist between sessions. When you close and reopen rovr, it will remember:
+Your sort preferences are automatically saved and persist between sessions using the **state manager**. When you close and reopen rovr, it will remember:
 - your selected sort criteria (name, size, extension, etc.)
 - your sort direction (ascending or descending)
 
-These preferences apply to all tabs and are stored in the `state.toml` file in your rovr configuration directory.
+These preferences apply to all tabs and are managed by the state manager, which stores application state in the `state.toml` file in your rovr configuration directory.

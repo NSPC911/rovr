@@ -650,10 +650,8 @@ class FileList(SelectionList, inherit_bindings=False):
             match event.key:
                 # toggle select mode
                 case key if key in config["keybinds"]["toggle_visual"]:
-                    event.stop()
                     await self.toggle_mode()
                 case key if key in config["keybinds"]["toggle_all"]:
-                    event.stop()
                     if not self.select_mode_enabled:
                         await self.toggle_mode()
                     if len(self.selected) == len(self.options):
@@ -663,7 +661,6 @@ class FileList(SelectionList, inherit_bindings=False):
                 case key if (
                     self.select_mode_enabled and key in config["keybinds"]["select_up"]
                 ):
-                    event.stop()
                     if self.get_option_at_index(0).disabled:
                         return
                     """Select the current and previous file."""
@@ -677,7 +674,6 @@ class FileList(SelectionList, inherit_bindings=False):
                     self.select_mode_enabled
                     and key in config["keybinds"]["select_down"]
                 ):
-                    event.stop()
                     if self.get_option_at_index(0).disabled:
                         return
                     """Select the current and next file."""
@@ -691,7 +687,6 @@ class FileList(SelectionList, inherit_bindings=False):
                     self.select_mode_enabled
                     and key in config["keybinds"]["select_page_up"]
                 ):
-                    event.stop()
                     if self.get_option_at_index(0).disabled:
                         return
                     """Select the options between the current and the previous 'page'."""
@@ -707,7 +702,6 @@ class FileList(SelectionList, inherit_bindings=False):
                     self.select_mode_enabled
                     and key in config["keybinds"]["select_page_down"]
                 ):
-                    event.stop()
                     if self.get_option_at_index(0).disabled:
                         return
                     """Select the options between the current and the next 'page'."""
@@ -723,7 +717,6 @@ class FileList(SelectionList, inherit_bindings=False):
                     self.select_mode_enabled
                     and key in config["keybinds"]["select_home"]
                 ):
-                    event.stop()
                     if self.get_option_at_index(0).disabled:
                         return
                     """Select the options between the current and the first option"""
@@ -738,7 +731,6 @@ class FileList(SelectionList, inherit_bindings=False):
                 case key if (
                     self.select_mode_enabled and key in config["keybinds"]["select_end"]
                 ):
-                    event.stop()
                     if self.get_option_at_index(0).disabled:
                         return
                     """Select the options between the current and the last option"""
@@ -754,7 +746,6 @@ class FileList(SelectionList, inherit_bindings=False):
                     config["plugins"]["editor"]["enabled"]
                     and key in config["plugins"]["editor"]["keybinds"]
                 ):
-                    event.stop()
                     if self.highlighted_option and self.highlighted_option.disabled:
                         return
                     if path.isdir(self.highlighted_option.dir_entry.path):
@@ -772,7 +763,6 @@ class FileList(SelectionList, inherit_bindings=False):
                     not self.select_mode_enabled
                     and key in config["keybinds"]["hist_previous"]
                 ):
-                    event.stop()
                     if self.app.query_one("#back").disabled:
                         self.app.query_one("UpButton").on_button_pressed(Button.Pressed)
                     else:
@@ -784,7 +774,6 @@ class FileList(SelectionList, inherit_bindings=False):
                     and event.key in config["keybinds"]["hist_next"]
                     and not self.app.query_one("#forward").disabled
                 ):
-                    event.stop()
                     self.app.query_one("ForwardButton").on_button_pressed(
                         Button.Pressed
                     )
@@ -792,52 +781,39 @@ class FileList(SelectionList, inherit_bindings=False):
                     not self.select_mode_enabled
                     and event.key in config["keybinds"]["up_tree"]
                 ):
-                    event.stop()
                     self.app.query_one("UpButton").on_button_pressed(Button.Pressed)
                 case key if event.key in config["keybinds"]["copy_path"]:
-                    event.stop()
                     await self.app.query_one("PathCopyButton").on_button_pressed(
                         Button.Pressed
                     )
                 # Toggle pin on current directory
                 case key if key in config["keybinds"]["toggle_pin"]:
-                    event.stop()
                     pin_utils.toggle_pin(path.basename(getcwd()), getcwd())
                     await self.app.query_one("PinnedSidebar").reload_pins()
                 case key if key in config["keybinds"]["copy"]:
-                    event.stop()
                     await self.app.query_one("#copy").on_button_pressed(Button.Pressed)
                 case key if key in config["keybinds"]["cut"]:
-                    event.stop()
                     await self.app.query_one("#cut").on_button_pressed(Button.Pressed)
                 case key if key in config["keybinds"]["paste"]:
-                    event.stop()
                     await self.app.query_one("#paste").on_button_pressed(Button.Pressed)
                 case key if key in config["keybinds"]["new"]:
-                    event.stop()
                     self.app.query_one("#new").on_button_pressed(Button.Pressed)
                 case key if key in config["keybinds"]["rename"]:
-                    event.stop()
                     self.app.query_one("#rename").on_button_pressed(Button.Pressed)
                 case key if key in config["keybinds"]["delete"]:
-                    event.stop()
                     await self.app.query_one("#delete").on_button_pressed(
                         Button.Pressed
                     )
                 case key if key in config["keybinds"]["zip"]:
-                    event.stop()
                     self.app.query_one("#zip").on_button_pressed(Button.Pressed)
                 case key if key in config["keybinds"]["unzip"]:
-                    event.stop()
                     if not self.app.query_one("#unzip").disabled:
                         self.app.query_one("#unzip").on_button_pressed(Button.Pressed)
                 # search
                 case key if key in config["keybinds"]["focus_search"]:
-                    event.stop()
                     self.input.focus()
                 # toggle hidden files
                 case key if key in config["keybinds"]["toggle_hidden_files"]:
-                    event.stop()
                     await self.toggle_hidden_files()
 
     def update_border_subtitle(self) -> None:

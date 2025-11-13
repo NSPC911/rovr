@@ -22,7 +22,7 @@ from textual.css.query import NoMatches
 from textual.css.stylesheet import StylesheetParseError
 from textual.dom import DOMNode
 from textual.screen import Screen
-from textual.widgets import Input
+from textual.widgets import Input, Label
 
 from rovr.action_buttons import (
     CopyButton,
@@ -109,15 +109,16 @@ class Application(App, inherit_bindings=False):
         *,
         cwd_file: str | None = None,
         chooser_file: str | None = None,
-        **kwargs,
+        show_keys: bool = False,
     ) -> None:
-        super().__init__(**kwargs)
+        super().__init__(watch_css=True)
         self.app_blurred: bool = False
         self.startup_path: str = startup_path
         self.has_pushed_screen: bool = False
         # Runtime output files from CLI
         self._cwd_file: str | None = cwd_file
         self._chooser_file: str | None = chooser_file
+        self._show_keys: bool = show_keys
 
     def compose(self) -> ComposeResult:
         self.log("Starting Rovr...")
@@ -223,6 +224,11 @@ class Application(App, inherit_bindings=False):
         self.show_vertical_scrollbar = False
         # update ui
         self.query_one(StateManager).pad_fix()
+        # for show keys
+        self.notify(str(self._show_keys))
+        if self._show_keys:
+            label = Label("", id="showKeys")
+            self.query_one("#below_menu > HorizontalGroup").mount(label, after="PathInput")
 
     @work
     async def action_focus_next(self) -> None:
@@ -235,6 +241,10 @@ class Application(App, inherit_bindings=False):
             super().action_focus_previous()
 
     async def on_key(self, event: events.Key) -> None:
+        # show key
+        if self._show_keys:
+            with suppress(NoMatches):
+                self.query_one("#showKeys").update(event.key)
         # Not really sure why this can happen, but I will still handle this
         if self.focused is None or not isinstance(self.focused.parent, DOMNode):
             return
@@ -738,4 +748,4 @@ class Application(App, inherit_bindings=False):
             self.query_one(SortOrderPopup).add_class("hidden")
 
 
-app = Application(watch_css=True)
+app = Application()

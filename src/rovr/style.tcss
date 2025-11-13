@@ -931,6 +931,10 @@ LoadingIndicator {
       margin: -1 -1 0 13;
       background: transparent;
     }
+    #showKeys {
+      height: 1;
+      border-left: $border-style $border-blurred
+    }
   }
   .option {
     opacity: 1 !important;
@@ -977,6 +981,10 @@ LoadingIndicator {
       width: 7;
       max-width: 7;
       height: 3;
+    }
+    #showKeys {
+      height: 3;
+      border: $border-style $border-blurred
     }
   }
   .option {
@@ -1029,4 +1037,13 @@ Screen {
     #menuwrapper { display: none !important }
     #footer { max-height: 25vh }
   }
+}
+
+#showKeys {
+  align: right middle;
+  width: auto;
+  max-width: 25vw;
+  margin-right: 1;
+  min-width: 5;
+  padding: 0 1;
 }

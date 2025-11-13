@@ -85,11 +85,21 @@ try:
         default="",
         help="Write chosen file(s) (newline-separated) to this file on exit.",
     )
+    @click.option(
+        "--show-keys",
+        "show_keys",
+        multiple=False,
+        type=bool,
+        default=False,
+        is_flag=True,
+        help="Display Keys that are being pressed"
+    )
     @click.option_panel("Config", options=["--with", "--without"])
     @click.option_panel("Paths", options=["--chooser-file", "--cwd-file"])
     @click.option_panel(
         "Miscellaneous", options=["--version", "--config-path", "--help"]
     )
+    @click.option_panel("Dev", options=["--show-keys"])
     @click.argument("path", type=str, required=False, default="")
     @click.rich_config({"show_arguments": True})
     def main(
@@ -99,6 +109,7 @@ try:
         show_version: bool,
         cwd_file: str,
         chooser_file: str,
+        show_keys: bool,
         path: str,
     ) -> None:
         """A post-modern terminal file explorer"""
@@ -137,10 +148,10 @@ try:
         # Eventually there will be many options coming via arguments, but we cant keep sending all of
         # them via this Application's __init__ function here
         Application(
-            watch_css=True,
             startup_path=path,
             cwd_file=cwd_file if cwd_file else None,
             chooser_file=chooser_file if chooser_file else None,
+            show_keys=show_keys
         ).run()
 
 except KeyboardInterrupt:

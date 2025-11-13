@@ -94,7 +94,7 @@ class Keybinds(ModalScreen):
             case key if key in config["keybinds"]["focus_search"]:
                 event.stop()
                 self.input.focus()
-            case key if key in config["keybinds"]["show_keybinds"] or key == "escape":
+            case key if key in config["keybinds"]["show_keybinds"] | "escape":
                 event.stop()
                 self.dismiss()
 

@@ -396,7 +396,10 @@ class FileList(SelectionList, inherit_bindings=False):
         cwd = path_utils.normalise(getcwd())
         # Get the selected option
         selected_option = self.highlighted_option
-        if selected_option is None:
+        if selected_option is None or (
+            len(self.options) == 1
+            and not hasattr(self.get_option_at_index(0), "dir_entry")
+        ):
             return
         file_name = selected_option.dir_entry.name
         self.update_border_subtitle()
@@ -628,7 +631,10 @@ class FileList(SelectionList, inherit_bindings=False):
             list[str]: If there are objects at that given location.
             None: If there are no objects at that given location.
         """
-        if self.highlighted_option is None:
+        if self.highlighted_option is None or (
+            len(self.options) == 1
+            and not hasattr(self.get_option_at_index(0), "dir_entry")
+        ):
             return
         if not self.select_mode_enabled:
             return [str(path_utils.normalise(self.highlighted_option.dir_entry.path))]

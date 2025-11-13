@@ -390,8 +390,8 @@ Tooltip {
     &TextArea {
       padding: 0 1;
     }
+    &FileList { height: 1fr }
   }
-  & > FileList { height: 1fr }
   Image {
     width: auto;
     height: auto;
@@ -827,7 +827,7 @@ ModalInput {
   align: center middle;
   HorizontalGroup {
     border: $border-style $border;
-    width: 90vw;
+    width: 50vw;
     max-height: 3;
     padding: 0 1;
     background: transparent !important;

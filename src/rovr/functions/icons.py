@@ -14,7 +14,7 @@ from rovr.variables.maps import (
 
 
 @lru_cache(maxsize=1024)
-def get_icon_for_file(location: str) -> list:
+def get_icon_for_file(location: str) -> list[str]:
     """
     Get the icon and color for a file based on its name or extension.
 
@@ -60,7 +60,7 @@ def get_icon_for_file(location: str) -> list:
 
 
 @lru_cache(maxsize=1024)
-def get_icon_for_folder(location: str) -> list:
+def get_icon_for_folder(location: str) -> list[str]:
     """Get the icon and color for a folder based on its name.
 
     Args:

@@ -225,10 +225,11 @@ class Application(App, inherit_bindings=False):
         # update ui
         self.query_one(StateManager).pad_fix()
         # for show keys
-        self.notify(str(self._show_keys))
         if self._show_keys:
             label = Label("", id="showKeys")
-            self.query_one("#below_menu > HorizontalGroup").mount(label, after="PathInput")
+            self.query_one("#below_menu > HorizontalGroup").mount(
+                label, after="PathInput"
+            )
 
     @work
     async def action_focus_next(self) -> None:
@@ -741,7 +742,7 @@ class Application(App, inherit_bindings=False):
         ):
             self.hide_popups()
 
-    async def hide_popups(self) -> None:
+    def hide_popups(self) -> None:
         with suppress(NoMatches):
             self.query_one(FileListRightClickOptionList).add_class("hidden")
         with suppress(NoMatches):

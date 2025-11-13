@@ -1,6 +1,6 @@
 import os
 from os import path
-from typing import TypedDict
+from typing import TypedDict, cast
 
 import ujson
 
@@ -14,17 +14,19 @@ pins = {}
 
 
 class PinsDict(TypedDict):
-    default: list[dict[str, str]]
+    default: list[dict[str, str | list[str]]]
     "The files to show in the default location"
-    pins: list[dict[str, str]]
+    pins: list[dict[str, str | list[str]]]
     "Other added folders"
 
 
-def load_pins() -> dict:
+def load_pins() -> PinsDict:
     """
     Load the pinned files from a JSON file in the user's config directory.
     Returns:
         dict: A dictionary with the default values, and the custom added pins.
+    Raises:
+        ValueError: If the config is of the wrong type
     """
     # I'm not entirely sure why the pins break when
     # pins isn't set global, I can't be bothered for now
@@ -57,8 +59,11 @@ def load_pins() -> dict:
 
     try:
         with open(user_pins_file_path, "r") as f:
-            tempins: PinsDict = ujson.load(f)
-    except (IOError, ValueError):
+            loaded = ujson.load(f)
+        if not isinstance(loaded, dict):
+            raise ValueError()
+        tempins = cast(PinsDict, loaded)
+    except (IOError, ValueError, ujson.JSONDecodeError):
         # Reset pins on corrupt or something else happened
         tempins = {
             "default": [

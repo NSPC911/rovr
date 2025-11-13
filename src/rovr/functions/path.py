@@ -187,7 +187,7 @@ def get_extension_sort_key(file_dict: dict) -> tuple[int, str]:
         return (2, name[1:].lower())
     else:
         # files with extensions
-        return (3, name.split(".")[-1])
+        return (3, name.split(".")[-1].lower())
 
 
 async def get_cwd_object(
@@ -335,14 +335,18 @@ def force_obtain_write_permission(item_path: str) -> bool:
 
 
 @overload
+def get_recursive_files(object_path: str) -> list[dict]: ...
+
+
+@overload
 def get_recursive_files(
-    object_path: str, with_folders: Literal[False] = False
+    object_path: str, with_folders: Literal[False]
 ) -> list[dict]: ...
 
 
 @overload
 def get_recursive_files(
-    object_path: str, with_folders: Literal[True] = True
+    object_path: str, with_folders: Literal[True]
 ) -> tuple[list[dict], list[dict]]: ...
 
 

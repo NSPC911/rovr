@@ -92,7 +92,7 @@ try:
         type=bool,
         default=False,
         is_flag=True,
-        help="Display Keys that are being pressed"
+        help="Display Keys that are being pressed",
     )
     @click.option_panel("Config", options=["--with", "--without"])
     @click.option_panel("Paths", options=["--chooser-file", "--cwd-file"])
@@ -151,7 +151,7 @@ try:
             startup_path=path,
             cwd_file=cwd_file if cwd_file else None,
             chooser_file=chooser_file if chooser_file else None,
-            show_keys=show_keys
+            show_keys=show_keys,
         ).run()
 
 except KeyboardInterrupt:

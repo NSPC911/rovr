@@ -36,19 +36,29 @@ class PinnedSidebar(OptionList, inherit_bindings=False):
         self.log(f"Reloading pins: {available_pins}")
         self.log(f"Reloading default folders: {default}")
         for default_folder in default:
-            if not path.isdir(default_folder["path"]):
-                if path.exists(default_folder["path"]):
-                    raise FolderNotFileError(
-                        f"Expected a folder but got a file: {default_folder['path']}"
-                    )
-                else:
-                    pass
-            if "icon" in default_folder:
-                icon = default_folder["icon"]
+            if not path.isdir(default_folder["path"]) and path.exists(
+                default_folder["path"]
+            ):
+                raise FolderNotFileError(
+                    f"Expected a folder but got a file: {default_folder['path']}"
+                )
+            # we already ensured it, so just ignore ty errors
+            if (
+                "icon" in default_folder
+                and isinstance(default_folder["icon"], list)
+                and len(default_folder["icon"]) == 2
+            ):
+                icon: list[str] = default_folder["icon"]
             elif path.isdir(default_folder["path"]):
-                icon = icon_utils.get_icon_for_folder(default_folder["name"])
+                icon: list[str] = icon_utils.get_icon_for_folder(default_folder["name"])
             else:
-                icon = icon_utils.get_icon_for_file(default_folder["name"])
+                icon: list[str] = icon_utils.get_icon_for_file(default_folder["name"])
+            if not (
+                isinstance(default_folder["path"], str)
+                and isinstance(default_folder["name"], str)
+            ):
+                # just ignore, shouldn't happen
+                continue
             self.list_of_options.append(
                 PinnedSidebarOption(
                     icon=icon,
@@ -71,12 +81,19 @@ class PinnedSidebar(OptionList, inherit_bindings=False):
                     )
                 else:
                     pass
-            if "icon" in pin:
+            if (
+                "icon" in pin
+                and isinstance(pin["icon"], list)
+                and len(pin["icon"]) == 2
+            ):
                 icon = pin["icon"]
             elif path.isdir(pin["path"]):
-                icon = icon_utils.get_icon_for_folder(pin["name"])
+                icon: list[str] = icon_utils.get_icon_for_folder(pin["name"])
             else:
-                icon = icon_utils.get_icon_for_file(pin["name"])
+                icon: list[str] = icon_utils.get_icon_for_file(pin["name"])
+            if not (isinstance(pin["path"], str) and isinstance(pin["name"], str)):
+                # just ignore, shouldn't happen
+                continue
             self.list_of_options.append(
                 PinnedSidebarOption(
                     icon=icon,

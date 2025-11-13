@@ -1,3 +1,4 @@
+import contextlib
 from contextlib import suppress
 from os import path
 from typing import Literal, TypedDict
@@ -8,7 +9,6 @@ from textual.reactive import reactive
 from textual.widget import Widget
 
 from rovr.functions.config import get_version
-from rovr.functions.icons import get_icon
 from rovr.variables.maps import VAR_TO_DIR
 
 
@@ -75,7 +75,14 @@ class StateManager(Widget):
                         "menuwrapper_visible", True
                     )
                     self.sort_by = loaded_state.get("sort_by", "name")
-                    if self.sort_by not in ["name", "size", "modified", "created", "extension", "natural"]:
+                    if self.sort_by not in [
+                        "name",
+                        "size",
+                        "modified",
+                        "created",
+                        "extension",
+                        "natural",
+                    ]:
                         self.sort_by = "name"
                     self.sort_descending = loaded_state.get("sort_descending", False)
             except (toml.TomlDecodeError, OSError):
@@ -86,10 +93,11 @@ class StateManager(Widget):
 
     def pad_fix(self) -> None:
         # do a minor fix for padding
-        if not (self.footer_visible or self.menuwrapper_visible):
-            self.app.query_one("#main").add_class("-fix-pad")
-        else:
-            self.app.query_one("#main").remove_class("-fix-pad")
+        with contextlib.suppress(NoMatches):
+            if not (self.footer_visible or self.menuwrapper_visible):
+                self.app.query_one("#main").add_class("-fix-pad")
+            else:
+                self.app.query_one("#main").remove_class("-fix-pad")
 
     def _create_default_state(self) -> None:
         self.pinned_sidebar_visible = True

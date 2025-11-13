@@ -40,6 +40,8 @@ class KeybindList(OptionList, inherit_bindings=False):
                     formatted_keys = "<disabled>"
                     primary_keys.append("")
                 else:
+                    if isinstance(keys, str):
+                        keys = [keys]
                     formatted_keys = ", ".join(f"<{key}>" for key in keys)
                     primary_keys.append(keys[0])
                 keybind_data.append((formatted_keys, display_name))

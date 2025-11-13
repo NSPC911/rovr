@@ -177,6 +177,23 @@ class CWDObjectReturnDict(TypedDict):
     dir_entry: DirEntryType
 
 
+def get_extension_sort_key(file_dict: dict) -> tuple[int, str]:
+    name = file_dict["name"]
+    if "." not in name:
+        # extensionless files
+        return (1, name.lower())
+    elif name.startswith(".") and name.count(".") == 1:
+        # dotfiles
+        return (2, name[1:].lower())
+    else:
+        # files with extensions
+        parts = name.rsplit(".", 1)
+        if len(parts) == 2:
+            return (3, parts[1].lower() + parts[0].lower())
+        else:
+            return (1, name.lower())
+
+
 async def get_cwd_object(
     cwd: str,
     show_hidden: bool = False,
@@ -253,13 +270,17 @@ async def get_cwd_object(
             folders.sort(key=lambda x: x["dir_entry"].stat().st_mtime_ns)
             files.sort(key=lambda x: x["dir_entry"].stat().st_mtime_ns)
         case "size":
-            folders.sort(key=lambda x: x["name"].lower())  # too lazy
+            # no we will not be calculating the folder size
+            folders.sort(key=lambda x: x["name"].lower())
             files.sort(key=lambda x: x["dir_entry"].stat().st_size)
         case "extension":
+            # folders dont have extensions btw
+            # and i will not count dot prepended folders
             folders.sort(
                 key=lambda x: x["name"].lower()
-            )  # folders dont have extensions btw
-            files.sort(key=lambda x: x["name"].split(".")[-1])
+            )
+
+            files.sort(key=get_extension_sort_key)
     if reverse:
         files.reverse()
         folders.reverse()

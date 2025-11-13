@@ -276,9 +276,7 @@ async def get_cwd_object(
         case "extension":
             # folders dont have extensions btw
             # and i will not count dot prepended folders
-            folders.sort(
-                key=lambda x: x["name"].lower()
-            )
+            folders.sort(key=lambda x: x["name"].lower())
 
             files.sort(key=get_extension_sort_key)
     if reverse:

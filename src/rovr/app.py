@@ -389,7 +389,9 @@ class Application(App, inherit_bindings=False):
             case key if key in config["keybinds"]["suspend_app"]:
                 if WINDOWS:
                     self.notify(
-                        "rovr cannot be suspended on Windows!", title="Suspend App", severity="warning"
+                        "rovr cannot be suspended on Windows!",
+                        title="Suspend App",
+                        severity="warning",
                     )
                 else:
                     self.action_suspend_process()

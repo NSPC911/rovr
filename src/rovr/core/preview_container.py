@@ -603,12 +603,10 @@ class PreviewContainer(Container):
             if content in self._preview_texts:
                 await self.mount_special_messages()
             else:
-                if (
+                if not (
                     config["plugins"]["bat"]["enabled"]
                     and await self.show_bat_file_preview()
                 ):
-                    self.log("bat success")
-                else:
                     await self.show_normal_file_preview()
 
     async def mount_special_messages(self) -> None:

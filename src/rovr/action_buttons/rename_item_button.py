@@ -76,5 +76,7 @@ class RenameItemButton(Button):
                 )
         self.app.file_list_pause_check = True
         self.app.query_one("#file_list").focus()
-        self.app.query_one("#file_list").update_file_list(add_to_session=False, focus_on=path.basename(new_name))
+        self.app.query_one("#file_list").update_file_list(
+            add_to_session=False, focus_on=path.basename(new_name)
+        )
         self.app.file_list_pause_check = False

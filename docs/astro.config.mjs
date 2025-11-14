@@ -34,7 +34,7 @@ export default defineConfig({
           attrs: {
             property: "og:image",
             content:
-              "https://github.com/NSPC911/rovr/blob/master/img/0.1.0/rovr_thumb.png?raw=true",
+              "https://github.com/NSPC911/rovr/blob/master/docs/public/rovr_thumb.png?raw=true",
           },
         },
         {
@@ -42,7 +42,7 @@ export default defineConfig({
           attrs: {
             property: "twitter:image",
             content:
-              "https://github.com/NSPC911/rovr/blob/master/img/0.1.0/rovr_thumb.png?raw=true",
+              "https://github.com/NSPC911/rovr/blob/master/docs/public/rovr_thumb.png?raw=true",
           },
         },
         {

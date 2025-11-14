@@ -23,7 +23,7 @@
 
 ### Screenshot
 
-![image](https://github.com/NSPC911/rovr/blob/master/img%2F0.1.0%2Frovr_main.png?raw=true)
+![image](https://github.com/NSPC911/rovr/blob/master/docs%2Fpublic%2Fscreenshots%2Fmain.png?raw=true)
 
 ### Installation
 

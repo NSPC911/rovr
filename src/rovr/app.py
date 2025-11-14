@@ -6,6 +6,7 @@ from types import SimpleNamespace
 from typing import Callable, Iterable
 
 from rich.console import Console
+from rich.tree import Tree
 from textual import events, on, work
 from textual.app import WINDOWS, App, ComposeResult, SystemCommand
 from textual.binding import Binding
@@ -110,6 +111,7 @@ class Application(App, inherit_bindings=False):
         cwd_file: str | None = None,
         chooser_file: str | None = None,
         show_keys: bool = False,
+        tree_dom: bool = False,
     ) -> None:
         super().__init__(watch_css=True)
         self.app_blurred: bool = False
@@ -119,6 +121,7 @@ class Application(App, inherit_bindings=False):
         self._cwd_file: str | None = cwd_file
         self._chooser_file: str | None = chooser_file
         self._show_keys: bool = show_keys
+        self._exit_with_tree: bool = tree_dom
 
     def compose(self) -> ComposeResult:
         self.log("Starting Rovr...")
@@ -167,6 +170,27 @@ class Application(App, inherit_bindings=False):
             yield StateManager(id="state_manager")
 
     def on_mount(self) -> None:
+        # exit for tree print
+        if self._exit_with_tree:
+
+            def build_tree(node: DOMNode) -> Tree:
+                node_type = type(node).__name__
+                label = f"[bold]{node_type}[/bold]"
+                if node.id:
+                    label += f' [cyan]id="{node.id}"[/cyan]'
+                if node.classes:
+                    label += f' [green]class="{" ".join(node.classes)}"[/green]'
+                children = list(node.query_children("*"))
+                tree = Tree(label) if len(children) != 0 else Tree(label, style="bold")
+                for child in children:
+                    tree.add(build_tree(child))
+                return tree
+
+            with self.suspend():
+                tree = build_tree(self)
+                console.print(tree)
+                self.exit()
+            return
         # compact mode
         if config["interface"]["compact_mode"]["buttons"]:
             self.add_class("compact-buttons")
@@ -230,6 +254,8 @@ class Application(App, inherit_bindings=False):
             self.query_one("#below_menu > HorizontalGroup").mount(
                 label, after="PathInput"
             )
+        # title for screenshots
+        self.title = ""
 
     @work
     async def action_focus_next(self) -> None:

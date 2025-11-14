@@ -94,12 +94,21 @@ try:
         is_flag=True,
         help="Display Keys that are being pressed",
     )
+    @click.option(
+        "--tree-dom",
+        "tree_dom",
+        multiple=False,
+        type=bool,
+        default=False,
+        is_flag=True,
+        help="Print the DOM of the app as a tree"
+    )
     @click.option_panel("Config", options=["--with", "--without"])
     @click.option_panel("Paths", options=["--chooser-file", "--cwd-file"])
     @click.option_panel(
         "Miscellaneous", options=["--version", "--config-path", "--help"]
     )
-    @click.option_panel("Dev", options=["--show-keys"])
+    @click.option_panel("Dev", options=["--show-keys", "--tree-dom"])
     @click.argument("path", type=str, required=False, default="")
     @click.rich_config({"show_arguments": True})
     def main(
@@ -111,6 +120,7 @@ try:
         chooser_file: str,
         show_keys: bool,
         path: str,
+        tree_dom: bool
     ) -> None:
         """A post-modern terminal file explorer"""
 
@@ -152,6 +162,7 @@ try:
             cwd_file=cwd_file if cwd_file else None,
             chooser_file=chooser_file if chooser_file else None,
             show_keys=show_keys,
+            tree_dom=tree_dom
         ).run()
 
 except KeyboardInterrupt:

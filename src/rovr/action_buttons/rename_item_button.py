@@ -1,9 +1,11 @@
+import contextlib
 from os import getcwd, path
 from shutil import move
 
 from textual import work
 from textual.content import Content
 from textual.widgets import Button
+from textual.worker import Worker, WorkerError
 
 from rovr.classes import IsValidFilePath, PathDoesntExist
 from rovr.functions.icons import get_icon
@@ -47,7 +49,10 @@ class RenameItemButton(Button):
                     border_title=f"Rename {type_of_file}",
                     border_subtitle=f"Current name: {path.basename(selected_file)}",
                     initial_value=path.basename(selected_file),
-                    validators=[IsValidFilePath(), PathDoesntExist()],
+                    validators=[
+                        IsValidFilePath(),
+                        PathDoesntExist(accept=[path.basename(selected_file)]),
+                    ],
                     is_path=True,
                     is_folder=type_of_file == "Folder",
                 ),
@@ -55,14 +60,16 @@ class RenameItemButton(Button):
             )
             if response in ["", path.basename(selected_file)]:
                 return
-            old_name = normalise(path.realpath(path.join(getcwd(), selected_file)))
-            new_name = normalise(path.realpath(path.join(getcwd(), response)))
+            old_name = normalise(path.abspath(path.join(getcwd(), selected_file)))
+            new_name = normalise(path.abspath(path.join(getcwd(), response)))
             if not path.exists(old_name):
                 self.notify(
                     message=f"'{selected_file}' no longer exists.",
                     title="Rename",
                     severity="error",
                 )
+                return
+            elif old_name == new_name:
                 return
             try:
                 move(old_name, new_name)
@@ -75,8 +82,11 @@ class RenameItemButton(Button):
                     severity="error",
                 )
         self.app.file_list_pause_check = True
-        self.app.query_one("#file_list").focus()
-        self.app.query_one("#file_list").update_file_list(
+        file_list = self.app.query_one("#file_list")
+        file_list.focus()
+        worker: Worker = file_list.update_file_list(
             add_to_session=False, focus_on=path.basename(new_name)
         )
+        with contextlib.suppress(WorkerError):
+            await worker.wait()
         self.app.file_list_pause_check = False

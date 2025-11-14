@@ -3,6 +3,7 @@ from os import getcwd, makedirs, path
 from textual import work
 from textual.content import Content
 from textual.widgets import Button
+from textual.worker import Worker, WorkerError
 
 from rovr.classes import IsValidFilePath, PathDoesntExist
 from rovr.functions.icons import get_icon
@@ -91,4 +92,6 @@ class NewItemButton(Button):
                 filelist.highlighted,
             )
         )
-        filelist.focus()
+        with contextlib.suppress(WorkerError):
+            await worker.wait()
+        self.app.file_list_pause_check = False

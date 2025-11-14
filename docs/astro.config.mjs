@@ -73,6 +73,7 @@ export default defineConfig({
           items: [
             { label: "user interface", slug: "guides/user-interface" },
             { label: "file operations", slug: "guides/file-operations" },
+            { label: "tips and tricks", slug: "guides/tips-and-tricks"}
           ],
         },
         {

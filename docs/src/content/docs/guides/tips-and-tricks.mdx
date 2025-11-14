@@ -1,0 +1,130 @@
+---
+title: Tips and Tricks
+description: just some more tips and tricks
+---
+
+insane yap session incoming
+
+## efficient file management
+
+### batch operations
+select multiple files and perform operations on all at once:
+- use `ctrl+a`/`%` to select all files in the current directory
+- copy/cut/delete operations work on all selected files
+- you can search while in select mode
+
+### clipboard operations
+rovr provides an interesting clipboard management:
+- yanking/copying will push it to the clipboard, and select them for pasting
+- clipboard shows current selection and operations
+- access clipboard panel by focusing it with `c`
+- you can delete items, or unselect them from being pasted
+
+### keyboard-only workflow
+everything can be done without touching the mouse:
+- use vim-style navigation (`hjkl`) for movement
+- `enter` to open files/folders, `backspace` to go back
+- all file operations have keyboard shortcuts
+- press `?` to see the complete keybinding reference
+
+## navigation stuff
+
+### path history navigation
+- **backspace** or **u**: go back to previous location
+- **space**: go forward in history (after going back)
+
+### pinned folders
+pin frequently accessed directories for quick access:
+- **shift+p**: pin the current folder
+- pinned folders appear in the sidebar
+- pins are saved and restored, and automatically updated across sessions
+
+### quick jumping
+- **ctrl+l**: focus path switcher, similarly to `explorer.exe`
+- **f**: if `plugins.finder` is enabled, search for something in the current directory recursively using `fd`
+- **z**: if `plugins.zoxide` is enabled, use `zoxide` to go to another directory
+
+## advanced file operations
+
+### archive management
+rovr provides seamless archive handling:
+- **ctrl+e**: extract archives
+- **E**: compress selected files/folders into an archive
+- browse inside archives without extracting them
+- supports most common archive formats (`.zip`, `*.tar`, `.rar`)
+
+### external integration
+- **enter** on files: open with system default application
+- external editor plugin available (disabled by default)
+- configure with `file_executable` and `folder_executable` in config
+
+## customization tips
+
+### themes and appearance
+- themes can be configured in `config.toml` under `[theme]` section
+- built-in themes include "nord", "solarized-dark", "dark-pink" (more soon + overhaul)
+- create custom themes with `[[custom_theme]]` sections
+- transparency can also be enabled (at runtime as well using command palette)
+
+### command palette
+access the command palette for advanced operations:
+- **ctrl+p**: open command palette
+- search and execute any available command
+
+### search and filtering
+make finding files easier:
+- **ctrl+f** or **/**: search in current directory
+- search is fuzzy and matches partial names
+- search results are navigable with arrow keys
+
+## troubleshooting
+
+### performance issues
+if rovr feels slow:
+- use yazi. thats it, this isnt meant to be fast, although i try my best, but this is python
+
+### file operation problems
+when files won't open or operations fail:
+- **permission errors**: ensure you have appropriate file permissions
+- **file associations**: check your system's default applications
+- **network drives**: some operations may be slower on network locations
+- **special characters**: be aware of filename encoding issues
+
+### display issues
+if the interface looks incorrect:
+- try different themes with settings or f12
+- ensure your terminal supports unicode and colors
+- adjust terminal size if panels seem cramped
+- check if your terminal font supports the icons being used
+
+### getting help
+when stuck:
+- **?**: show the built-in help with all keybindings
+- **ctrl+p**: use command palette to discover available actions
+- check the error messages in the footer panel
+- consult the [keybindings reference](/rovr/reference/keybindings) for complete shortcuts
+
+## workflow examples
+
+### photo organization workflow
+1. navigate to photo directory with `ctrl+g`
+2. toggle preview with `I` to see image thumbnails
+3. select multiple photos with `ctrl+space` or `shift+click`
+4. create new folder with `ctrl+n` for organization
+5. move selected photos with `x` (cut) and `p` (paste)
+
+### development project workflow
+1. pin your project directories with `shift+p`
+2. open multiple tabs with `n` for different project areas
+3. use search (`ctrl+f`) to quickly find specific files
+4. preview code files with syntax highlighting
+5. open files in external editor with `ctrl+o`
+
+### archive management workflow
+1. select files/folders to compress with `ctrl+space`
+2. create archive with `E` and choose format
+3. navigate to archive and browse contents without extracting
+4. extract specific files by selecting and using `ctrl+e`
+5. clean up temporary files with `d` (delete)
+
+thanks for coming to my ted talk

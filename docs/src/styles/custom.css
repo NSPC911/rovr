@@ -182,6 +182,10 @@ summary:not(#starlight__on-this-page--mobile) {
 .large {
   font-weight: 599;
 }
+img {
+  border: 2.5px solid var(--sl-color-accent);
+  border-radius: 5px;
+}
 @media (min-width: 72rem) {
   .main-pane {
     margin: auto;
@@ -393,11 +397,11 @@ body > div:has(> nav) > div {
   }
 }
 figure.frame {
-  &:has(> figcaption > span) > pre[data-language] {
+  &:has(> figcaption > span) > pre[data-language]:not([data-language="plaintext"]) {
     border-top-left-radius: 0;
     border-top-right-radius: 0;
   }
-  &:not(:has(> figcaption > span)) > pre[data-language] {
+  &:not(:has(> figcaption > span)) > pre[data-language]:not([data-language="plaintext"]) {
     padding-top: 1em;
     &::before {
       position: absolute;
@@ -409,7 +413,7 @@ figure.frame {
     }
   }
 
-  > pre[data-language] {
+  > pre[data-language]:not([data-language="plaintext"]) {
     border-radius: 5px;
   }
   > figcaption {

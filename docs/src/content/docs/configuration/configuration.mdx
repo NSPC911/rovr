@@ -29,7 +29,7 @@ inside it, you can see 3 files if you previously launched rovr
 the config is handled in a simple config file.
 
 <Aside type="tip">
-  it also has a schema available, so if you use either
+  it also has a schema available, so if you can use either
   [`tombi`](https://github.com/tombi-toml/tombi) or
   [`taplo`](https://github.com/tamasfe/taplo) to see an autocompletion popup.
 </Aside>
@@ -56,8 +56,8 @@ this file doesn't have a schema, mainly because it is pretty simple
 the file follows a schema as such
 
 <Code
-  code={`{\n  "default": [\n    ...\n    {\n      "name": "<label>",\n      "path": "<path>"\n    }\n  ],\n  "pins": [\n    ...\n    {\n      "name": "<label>",\n      "path": "<path>"\n    }\n  ]\n}`}
-  lang="json"
+  code={`{\n  "default": [\n    ...\n    {\n      "name": "<label>",\n      "path": "<path>",\n      "icon": ["<icon>", "<color>"] # optional icon specification\n    }\n  ],\n  "pins": [\n    ...\n    {\n      "name": "<label>",\n      "path": "<path>",\n      "icon": ["<icon>", "<color>"] # optional icon specification\n    }\n  ]\n}`}
+  lang="jsonc"
   title="pins.json"
 />
 the path supports variables to a fixed path

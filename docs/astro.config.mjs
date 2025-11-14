@@ -90,6 +90,7 @@ export default defineConfig({
             { label: "image previews", slug: "features/image-previews" },
             { label: "cd on quit", slug: "features/cd-on-quit" },
             { label: "search", slug: "features/search" },
+            { label: "sorting", slug: "features/sorting" },
             { label: "plugins", slug: "features/plugins" },
           ],
         },

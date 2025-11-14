@@ -3,19 +3,13 @@ title: persistent state
 description: how rovr saves and restores your preferences between sessions.
 ---
 
-{/* <add image> */}
-
 rovr includes a state manager that automatically saves your preferences and restores them when you restart the application. this ensures a consistent experience across sessions without needing to reconfigure settings each time.
 
 ## what gets saved
 
-{/* <add image> */}
-
 the state manager automatically tracks and persists the following preferences:
 
 ### panel visibility
-
-{/* <add image> */}
 
 rovr remembers which panels you had visible or hidden:
 - **pinned sidebar**: whether the sidebar is shown or hidden
@@ -27,8 +21,6 @@ when you toggle these panels using their keyboard shortcuts, the state is automa
 
 ### sort preferences
 
-{/* <add image> */}
-
 your file sorting configuration persists between sessions:
 - **sort criteria**: whether you're sorting by name, size, extension, natural order, created time, modified time, or accessed time
 - **sort direction**: ascending or descending order
@@ -37,8 +29,6 @@ your file sorting configuration persists between sessions:
 for more details on sorting, see the [sorting files](/rovr/features/sorting) guide.
 
 ## state file location
-
-{/* <add image> */}
 
 the state is stored in a `state.toml` file in your rovr configuration directory. you can find this location by running:
 
@@ -49,8 +39,6 @@ rovr --config-path
 the state file will be in the same directory as your `config.toml` and `pins.json` files.
 
 ## state file structure
-
-{/* <add image> */}
 
 the state file uses toml format and looks like this:
 
@@ -76,29 +64,14 @@ sort_descending = false
 
 ## automatic saving
 
-{/* <add image> */}
-
 the state manager saves changes automatically:
 - whenever you toggle a panel's visibility
 - whenever you change sort criteria or direction
 - when rovr exits normally
 
-you don't need to manually save your preferences - everything happens automatically in the background.
-
-## version tracking
-
-{/* <add image> */}
-
-rovr tracks the version that last saved the state file. this allows the application to:
-- detect when you've upgraded to a new version
-- potentially handle breaking changes in future versions
-- ensure compatibility between different rovr versions
-
-if rovr detects a version mismatch, it will still load your saved preferences but may notify you if there are any compatibility concerns.
+you don't need to manually save your preferences, everything happens automatically in the background.
 
 ## resetting state
-
-{/* <add image> */}
 
 if you want to reset to default preferences, you can:
 
@@ -107,29 +80,4 @@ if you want to reset to default preferences, you can:
 
 rovr will automatically create a new state file with default values:
 - all panels visible
-- sort by name in ascending order
-- folders positioned first
-
-## compact mode interaction
-
-{/* <add image> */}
-
-when using compact mode, the state manager works seamlessly:
-- it remembers which panels were manually hidden vs auto-hidden by compact mode
-- your manual visibility preferences are preserved even in compact mode
-- when you disable compact mode, panels return to their saved visibility state
-
-for more information on compact mode, see the [user interface](/rovr/guides/user-interface#compact-mode) guide.
-
-## troubleshooting
-
-{/* <add image> */}
-
-if your preferences aren't being saved:
-
-1. **check file permissions**: ensure rovr can write to the configuration directory
-2. **check disk space**: verify you have available disk space
-3. **check for errors**: any errors during state saving are shown as notifications in rovr
-4. **manually verify**: check if the `state.toml` file exists and was recently modified
-
-if problems persist, you can safely delete the `state.toml` file and let rovr recreate it with defaults.
+- sort by name in ascending order by name

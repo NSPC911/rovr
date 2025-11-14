@@ -86,12 +86,10 @@ export default defineConfig({
         {
           label: "features",
           items: [
-            { label: "search", slug: "features/search" },
             { label: "sorting", slug: "features/sorting" },
             { label: "previewing files", slug: "features/previewing-files" },
             { label: "image previews", slug: "features/image-previews" },
             { label: "cd on quit", slug: "features/cd-on-quit" },
-            { label: "pinned folders", slug: "features/pinned-folders" },
             { label: "context menu", slug: "features/context-menu" },
             { label: "plugins", slug: "features/plugins" },
           ],

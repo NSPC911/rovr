@@ -5,12 +5,40 @@ description: how to configure rovr
 
 import { FileTree, Aside, Code } from "@astrojs/starlight/components";
 
-{/* <add image> */}
-
 rovr's configuration is held in a single location. you can find it by running
 
 ```sh
 rovr --config-path
+```
+
+```
+# on windows
+╭──────────────────┬──────────────────────────────────╮
+│ type             │ path                             │
+├──────────────────┼──────────────────────────────────┤
+│ custom config    │ ~/AppData/Local/rovr/config.toml │
+│ pinned folders   │ ~/AppData/Local/rovr/pins.json   │
+│ custom styles    │ ~/AppData/Local/rovr/style.tcss  │
+│ persistent state │ ~/AppData/Local/rovr/state.toml  │
+╰──────────────────┴──────────────────────────────────╯
+# on macos
+╭──────────────────┬────────────────────────────────────────────────╮
+│ type             │ path                                           │
+├──────────────────┼────────────────────────────────────────────────┤
+│ custom config    │ ~/Library/Application Support/rovr/config.toml │
+│ pinned folders   │ ~/Library/Application Support/rovr/pins.json   │
+│ custom styles    │ ~/Library/Application Support/rovr/style.tcss  │
+│ persistent state │ ~/Library/Application Support/rovr/state.toml  │
+╰──────────────────┴────────────────────────────────────────────────╯
+# on linux
+╭──────────────────┬────────────────────────────╮
+│ type             │ path                       │
+├──────────────────┼────────────────────────────┤
+│ custom config    │ ~/.config/rovr/config.toml │
+│ pinned folders   │ ~/.config/rovr/pins.json   │
+│ custom styles    │ ~/.config/rovr/style.tcss  │
+│ persistent state │ ~/.config/rovr/state.toml  │
+╰──────────────────┴────────────────────────────╯
 ```
 
 inside it, you can see 3 files if you previously launched rovr

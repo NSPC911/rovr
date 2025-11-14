@@ -46,3 +46,8 @@ if images do not appear correctly, you can manually override the image protocol 
 />
 
 available `image_protocol` values are: `"Auto"`, `"TGP"`, `"Sixel"`, `"Halfcell"`, and `"Unicode"`.
+
+### known issues
+
+- some low resolution images will look horrible, I'm not really sure why that happens, but it might be due to an unnecessary up-scaling attempt by `textual-image`
+- opaque images do not get shown with a transparent background. this _used_ to work, but textual-image is just really scuffed (beggars cant be choosers). I may take a look some day, but the internals is too advanced.

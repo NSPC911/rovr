@@ -117,6 +117,7 @@ class Application(App, inherit_bindings=False):
         self.app_blurred: bool = False
         self.startup_path: str = startup_path
         self.has_pushed_screen: bool = False
+        self.file_list_pause_check: bool = False
         # Runtime output files from CLI
         self._cwd_file: str | None = cwd_file
         self._chooser_file: str | None = chooser_file
@@ -541,7 +542,7 @@ class Application(App, inherit_bindings=False):
             elif cwd != new_cwd:
                 cwd = new_cwd
                 continue
-            else:
+            elif not self.file_list_pause_check:
                 with suppress(OSError):
                     # this is weird, so `get_filtered_dir_names` is a sync
                     # function, so `call_from_thread` shouldn't be required

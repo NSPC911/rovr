@@ -1,3 +1,4 @@
+import contextlib
 from os import getcwd, makedirs, path
 
 from textual import work
@@ -84,13 +85,11 @@ class NewItemButton(Button):
                     title="New Item",
                     severity="error",
                 )
-        filelist = self.app.query_one("#file_list")
-        await filelist.on_option_list_option_highlighted(
-            filelist.OptionHighlighted(
-                filelist,
-                filelist.highlighted_option,
-                filelist.highlighted,
-            )
+        self.app.file_list_pause_check = True
+        file_list = self.app.query_one("#file_list")
+        file_list.focus()
+        worker: Worker = file_list.update_file_list(
+            add_to_session=False, focus_on=path.basename(location)
         )
         with contextlib.suppress(WorkerError):
             await worker.wait()

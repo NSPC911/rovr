@@ -3,19 +3,15 @@ title: pinned folders
 description: how to use and manage pinned folders in rovr.
 ---
 
-{/* <add image> */}
-
 rovr's pinned folders feature allows you to quickly access your favorite or frequently visited directories through a dedicated sidebar.
 
 ## the pinned sidebar
-
-{/* <add image> */}
 
 the pinned sidebar appears on the left side of rovr's interface and displays a list of your saved folder shortcuts. it provides quick navigation to locations you access often.
 
 ### showing and hiding the sidebar
 
-{/* <add image> */}
+![no preview](/rovr/screenshots/sidebarless.svg)
 
 - **toggle visibility**: `shift+s`
 - **focus sidebar**: `s`
@@ -24,8 +20,6 @@ the pinned sidebar appears on the left side of rovr's interface and displays a l
 ## managing pins
 
 ### pinning a folder
-
-{/* <add image> */}
 
 to pin the currently focused folder:
 - **keybinding**: `shift+p`
@@ -41,26 +35,26 @@ rovr --config-path
 
 the file structure is:
 
-```json
+```jsonc
 {
   "default": [
     {
       "name": "label",
-      "path": "path/to/folder"
+      "path": "path/to/folder",
+      "icon": ["<icon>", "<color>"] # optional
     }
   ],
   "pins": [
     {
       "name": "label",
-      "path": "path/to/folder"
+      "path": "path/to/folder",
+      "icon": ["<icon>", "<color>"] # optional
     }
   ]
 }
 ```
 
 ### using path variables
-
-{/* <add image> */}
 
 rovr supports special path variables that work across different operating systems:
 

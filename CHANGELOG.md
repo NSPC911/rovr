@@ -11,6 +11,7 @@
 - feat(app): add scrolloff behaviour to filelist (##139) c2a38fb
 - feat(app): add show key option + slight refactor 75a5780
 - feat(app): add tree view command 4fc1a80
+- feat(app): add a state manager (##146) 5ad938f
 
 ## enhancements
 - feat(app): show any stylesheet errors as is a1aae91
@@ -33,7 +34,6 @@
 - docs: rephrase more 5ec52c3
 
 - feat: change ascii logo 1a15b7f
-- feat(app): add a state manager (##146) 5ad938f
 - feat(app): improve borders and stuff ee181e5
 - feat(app): improve compact mode (##138) c45832e
 - feat(app): improve css change handling 756bb38

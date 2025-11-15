@@ -15,7 +15,9 @@ class HorizontalResizeBar(Static):
     }
     """
 
-    def __init__(self, parent: Widget, id: str | None = None, classes: str | None = None) -> None:
+    def __init__(
+        self, parent: Widget, id: str | None = None, classes: str | None = None
+    ) -> None:
         super().__init__(id=id, classes=classes)
         self.connected_container = parent
         self.min_width = 20
@@ -27,14 +29,16 @@ class HorizontalResizeBar(Static):
         if self.app.mouse_captured == self:
             total_delta = event.screen_offset - self.position_on_down
             new_size = self.size_on_down - total_delta
-            self.connected_container.styles.width = clamp(new_size.width, self.min_width, self.max_width)
+            self.connected_container.styles.width = clamp(
+                new_size.width, self.min_width, self.max_width
+            )
 
     def on_mouse_down(self, event: events.MouseDown) -> None:
         self.max_width = self.app.screen.size.width - 10
         self.position_on_down = event.screen_offset
         self.size_on_down = self.connected_container.size
 
-        self.add_class("pressed")    # this requires a "pressed" class to exist
+        self.add_class("pressed")  # this requires a "pressed" class to exist
         self.capture_mouse()
 
     def on_mouse_up(self) -> None:
@@ -56,7 +60,9 @@ class VerticalResizeBar(Static):
     }
     """
 
-    def __init__(self, parent: Widget, id: str | None = None, classes: str | None = None) -> None:
+    def __init__(
+        self, parent: Widget, id: str | None = None, classes: str | None = None
+    ) -> None:
         super().__init__(id=id, classes=classes)
         self.connected_container = parent
         self.min_height = 5
@@ -68,14 +74,16 @@ class VerticalResizeBar(Static):
         if self.app.mouse_captured == self:
             total_delta = event.screen_offset - self.position_on_down
             new_size = self.size_on_down - total_delta
-            self.connected_container.styles.height = clamp(new_size.height, self.min_height, self.max_height)
+            self.connected_container.styles.height = clamp(
+                new_size.height, self.min_height, self.max_height
+            )
 
     def on_mouse_down(self, event: events.MouseDown) -> None:
         self.max_height = self.app.screen.size.height - 10
         self.position_on_down = event.screen_offset
         self.size_on_down = self.connected_container.size
 
-        self.add_class("pressed")    # this requires a "pressed" class to exist
+        self.add_class("pressed")  # this requires a "pressed" class to exist
         self.capture_mouse()
 
     def on_mouse_up(self) -> None:

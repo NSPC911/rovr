@@ -190,28 +190,63 @@ class Inspector(HorizontalGroup):
             to_mount = []
             for rule, value in rules.items():
                 if isinstance(value, str):
-                    to_mount.append(HorizontalGroup(Static(rule), Input(value, classes="str"), id=rule))
+                    to_mount.append(
+                        HorizontalGroup(
+                            Static(rule), Input(value, classes="str"), id=rule
+                        )
+                    )
                 elif isinstance(value, Color):
-                    to_mount.append(HorizontalGroup(Static(rule), Input(value.hex, classes="color", validators=[ColorValidator()]), id=rule))
+                    to_mount.append(
+                        HorizontalGroup(
+                            Static(rule),
+                            Input(
+                                value.hex,
+                                classes="color",
+                                validators=[ColorValidator()],
+                            ),
+                            id=rule,
+                        )
+                    )
                 elif isinstance(value, (VerticalLayout, HorizontalLayout, GridLayout)):
                     to_mount.append(
                         HorizontalGroup(
                             Static(rule),
-                            Input(type(value).__name__.replace("Layout", ""), classes="layout", validators=[LayoutValidator()]), id=rule
+                            Input(
+                                type(value).__name__.replace("Layout", ""),
+                                classes="layout",
+                                validators=[LayoutValidator()],
+                            ),
+                            id=rule,
                         )
                     )
                 elif isinstance(value, Style):
-                    to_mount.append(HorizontalGroup(Static(rule), Input(str(value), classes="str", validators=[StyleValidator()]), id=rule))
+                    to_mount.append(
+                        HorizontalGroup(
+                            Static(rule),
+                            Input(
+                                str(value), classes="str", validators=[StyleValidator()]
+                            ),
+                            id=rule,
+                        )
+                    )
                 elif isinstance(value, bool) and rule.startswith("auto"):
                     pass
                 elif isinstance(value, int):
-                    to_mount.append(HorizontalGroup(Static(rule), Input(str(value), classes="int", validators=[Number()]), id=rule))
+                    to_mount.append(
+                        HorizontalGroup(
+                            Static(rule),
+                            Input(str(value), classes="int", validators=[Number()]),
+                            id=rule,
+                        )
+                    )
                 else:
                     print(rule, value, type(value))
             async with self.batch():
                 try:
                     for rule_widget in to_mount:
-                        if (input_widget := self.query_one(f"#css #{rule_widget.id} Input")):
+                        if input_widget := self.query_one(
+                            f"#css #{rule_widget.id} Input"
+                        ):
                             input_widget.value = rule_widget.query_one(Input).value
                 except NoMatches:
                     await css.remove_children()

@@ -1,10 +1,12 @@
-import asyncio
 import shutil
 from contextlib import suppress
 from os import chdir, getcwd, path
+from time import perf_counter, sleep
 from types import SimpleNamespace
 from typing import Callable, Iterable
 
+from rich.console import Console
+from rich.tree import Tree
 from textual import events, on, work
 from textual.app import WINDOWS, App, ComposeResult, SystemCommand
 from textual.binding import Binding
@@ -16,10 +18,12 @@ from textual.containers import (
     VerticalGroup,
 )
 from textual.content import Content
-from textual.css.errors import StyleValueError
+from textual.css.errors import StylesheetError
 from textual.css.query import NoMatches
+from textual.css.stylesheet import StylesheetParseError
+from textual.dom import DOMNode
 from textual.screen import Screen
-from textual.widgets import Input
+from textual.widgets import Input, Label
 
 from rovr.action_buttons import (
     CopyButton,
@@ -32,22 +36,20 @@ from rovr.action_buttons import (
     UnzipButton,
     ZipButton,
 )
-from rovr.core import (
-    FileList,
-    PinnedSidebar,
-    PreviewContainer,
-)
+from rovr.action_buttons.sort_order import SortOrderButton, SortOrderPopup
+from rovr.core import FileList, FileListContainer, PinnedSidebar, PreviewContainer
 from rovr.core.file_list import FileListRightClickOptionList
 from rovr.footer import Clipboard, MetadataContainer, ProcessContainer
 from rovr.functions import icons
 from rovr.functions.path import (
-    decompress,
     ensure_existing_directory,
     get_filtered_dir_names,
+    get_mounted_drives,
     normalise,
 )
 from rovr.functions.themes import get_custom_themes
 from rovr.header import HeaderArea
+from rovr.header.tabs import Tabline
 from rovr.navigation_widgets import (
     BackButton,
     ForwardButton,
@@ -58,14 +60,15 @@ from rovr.navigation_widgets import (
 from rovr.screens import DummyScreen, FileSearch, Keybinds, YesOrNo, ZDToDirectory
 from rovr.screens.way_too_small import TerminalTooSmall
 from rovr.search_container import SearchInput
+from rovr.state_manager import StateManager
 from rovr.variables.constants import MaxPossible, config
 from rovr.variables.maps import VAR_TO_DIR
 
-max_possible = MaxPossible()
+console = Console()
 
 
 class Application(App, inherit_bindings=False):
-    # dont need ctrl+c
+    # don't need ctrl+c
     BINDINGS = [
         Binding(
             key,
@@ -107,74 +110,100 @@ class Application(App, inherit_bindings=False):
         *,
         cwd_file: str | None = None,
         chooser_file: str | None = None,
-        **kwargs,
+        show_keys: bool = False,
+        tree_dom: bool = False,
     ) -> None:
-        super().__init__(**kwargs)
+        super().__init__(watch_css=True)
         self.app_blurred: bool = False
         self.startup_path: str = startup_path
         self.has_pushed_screen: bool = False
+        self.file_list_pause_check: bool = False
         # Runtime output files from CLI
         self._cwd_file: str | None = cwd_file
         self._chooser_file: str | None = chooser_file
+        self._show_keys: bool = show_keys
+        self._exit_with_tree: bool = tree_dom
 
     def compose(self) -> ComposeResult:
-        print("Starting Rovr...")
+        self.log("Starting Rovr...")
         with Vertical(id="root"):
             yield HeaderArea(id="headerArea")
-            with HorizontalScroll(id="menu"):
-                yield CopyButton()
-                yield CutButton()
-                yield PasteButton()
-                yield NewItemButton()
-                yield RenameItemButton()
-                yield DeleteButton()
-                yield ZipButton()
-                yield UnzipButton()
-                yield PathCopyButton()
-            with VerticalGroup(id="below_menu"):
-                with HorizontalGroup():
-                    yield BackButton()
-                    yield ForwardButton()
-                    yield UpButton()
-                    path_switcher = PathInput()
-                    yield path_switcher
-                yield PathAutoCompleteInput(
-                    target=path_switcher,
-                )
+            with VerticalGroup(id="menuwrapper"):
+                with HorizontalScroll(id="menu"):
+                    yield CopyButton()
+                    yield CutButton()
+                    yield PasteButton()
+                    yield NewItemButton()
+                    yield RenameItemButton()
+                    yield DeleteButton()
+                    yield ZipButton()
+                    yield UnzipButton()
+                    yield PathCopyButton()
+                    yield SortOrderButton()
+                with VerticalGroup(id="below_menu"):
+                    with HorizontalGroup():
+                        yield BackButton()
+                        yield ForwardButton()
+                        yield UpButton()
+                        path_switcher = PathInput()
+                        yield path_switcher
+                    yield PathAutoCompleteInput(
+                        target=path_switcher,
+                    )
             with HorizontalGroup(id="main"):
                 with VerticalGroup(id="pinned_sidebar_container"):
                     yield SearchInput(
-                        placeholder=f"({icons.get_icon('general', 'search')[0]}) Search"
+                        placeholder=f"{icons.get_icon('general', 'search')[0]} Search"
                     )
                     yield PinnedSidebar(id="pinned_sidebar")
-                with VerticalGroup(id="file_list_container"):
-                    yield SearchInput(
-                        placeholder=f"({icons.get_icon('general', 'search')[0]}) Search something..."
-                    )
-                    filelist = FileList(
-                        id="file_list",
-                        name="File List",
-                        classes="file-list",
-                    )
-                    yield filelist
+                filelistcontainer = FileListContainer()
+                yield filelistcontainer
                 yield PreviewContainer(
                     id="preview_sidebar",
                 )
+            yield FileListRightClickOptionList(
+                filelistcontainer.filelist, classes="hidden"
+            )
             with HorizontalGroup(id="footer"):
                 yield ProcessContainer()
                 yield MetadataContainer(id="metadata")
                 yield Clipboard(id="clipboard")
-            yield FileListRightClickOptionList(filelist, classes="hidden")
+            yield StateManager(id="state_manager")
 
     def on_mount(self) -> None:
+        # exit for tree print
+        if self._exit_with_tree:
+
+            def build_tree(node: DOMNode) -> Tree:
+                node_type = type(node).__name__
+                label = f"[bold]{node_type}[/bold]"
+                if node.id:
+                    label += f' [cyan]id="{node.id}"[/cyan]'
+                if node.classes:
+                    label += f' [green]class="{" ".join(node.classes)}"[/green]'
+                children = list(node.query_children("*"))
+                tree = Tree(label) if len(children) != 0 else Tree(label, style="bold")
+                for child in children:
+                    tree.add(build_tree(child))
+                return tree
+
+            with self.suspend():
+                tree = build_tree(self)
+                console.print(tree)
+                self.exit()
+            return
         # compact mode
-        if config["interface"]["compact_mode"]:
-            self.add_class("compact")
+        if config["interface"]["compact_mode"]["buttons"]:
+            self.add_class("compact-buttons")
+        else:
+            self.add_class("comfy-buttons")
+        if config["interface"]["compact_mode"]["panels"]:
+            self.add_class("compact-panels")
+        else:
+            self.add_class("comfy-panels")
 
         # border titles
-        self.query_one("#menu").border_title = "Options"
-        self.query_one("#menu").can_focus = False
-        self.query_one("#below_menu").border_title = "Directory Actions"
+        self.query_one("#menuwrapper").border_title = "Options"
         self.query_one("#pinned_sidebar_container").border_title = "Sidebar"
         self.query_one("#file_list_container").border_title = "Files"
         self.query_one("#processes").border_title = "Processes"
@@ -203,20 +232,31 @@ class Application(App, inherit_bindings=False):
             self.query_one("#back").tooltip = "Go back in history"
             self.query_one("#forward").tooltip = "Go forward in history"
             self.query_one("#up").tooltip = "Go up the directory tree"
-        self.tabWidget = self.query_one("Tabline")
+        self.tabWidget: Tabline = self.query_one(Tabline)
 
         # Change to startup directory. This also calls update_file_list()
-        # causing the file_list to get populated
         self.cd(
             directory=path.abspath(self.startup_path),
             focus_on=path.basename(self.startup_path),
         )
         self.query_one("#file_list").focus()
+        # restore UI state from saved state file
+        self.query_one(StateManager).restore_state()
         # start mini watcher
         self.watch_for_changes_and_update()
         # disable scrollbars
         self.show_horizontal_scrollbar = False
         self.show_vertical_scrollbar = False
+        # update ui
+        self.query_one(StateManager).pad_fix()
+        # for show keys
+        if self._show_keys:
+            label = Label("", id="showKeys")
+            self.query_one("#below_menu > HorizontalGroup").mount(
+                label, after="PathInput"
+            )
+        # title for screenshots
+        self.title = ""
 
     @work
     async def action_focus_next(self) -> None:
@@ -229,17 +269,20 @@ class Application(App, inherit_bindings=False):
             super().action_focus_previous()
 
     async def on_key(self, event: events.Key) -> None:
+        # show key
+        if self._show_keys:
+            with suppress(NoMatches):
+                self.query_one("#showKeys").update(event.key)
         # Not really sure why this can happen, but I will still handle this
-        if self.focused is None or not self.focused.id:
+        if self.focused is None or not isinstance(self.focused.parent, DOMNode):
             return
         # if current screen isn't the app screen
         if len(self.screen_stack) != 1:
             return
         # Make sure that key binds don't break
         match event.key:
-            # finder: fd/fzf
             # placeholder, not yet existing
-            case "escape" if "search" in self.focused.id:
+            case "escape" if self.focused.id and "search" in self.focused.id:
                 match self.focused.id:
                     case "search_file_list":
                         self.query_one("#file_list").focus()
@@ -248,8 +291,8 @@ class Application(App, inherit_bindings=False):
                 return
             # backspace is used by default bindings to head up in history
             # so just avoid it
-            case "backspace" if (
-                type(self.focused) is Input or "search" in self.focused.id
+            case "backspace" if isinstance(self.focused, Input) or (
+                self.focused.id and "search" in self.focused.id
             ):
                 return
             # focus toggle pinned sidebar
@@ -304,22 +347,16 @@ class Application(App, inherit_bindings=False):
             # Toggle hiding panels
             case key if key in config["keybinds"]["toggle_pinned_sidebar"]:
                 self.query_one("#file_list").focus()
-                if self.query_one("#pinned_sidebar_container").display:
-                    self.query_one("#pinned_sidebar_container").add_class("hide")
-                else:
-                    self.query_one("#pinned_sidebar_container").remove_class("hide")
+                self.query_one(StateManager).toggle_pinned_sidebar()
             case key if key in config["keybinds"]["toggle_preview_sidebar"]:
                 self.query_one("#file_list").focus()
-                if self.query_one(PreviewContainer).display:
-                    self.query_one(PreviewContainer).add_class("hide")
-                else:
-                    self.query_one(PreviewContainer).remove_class("hide")
+                self.query_one(StateManager).toggle_preview_sidebar()
             case key if key in config["keybinds"]["toggle_footer"]:
                 self.query_one("#file_list").focus()
-                if self.query_one("#footer").display:
-                    self.query_one("#footer").add_class("hide")
-                else:
-                    self.query_one("#footer").remove_class("hide")
+                self.query_one(StateManager).toggle_footer()
+            case key if key in config["keybinds"]["toggle_menuwrapper"]:
+                self.query_one("#file_list").focus()
+                self.query_one(StateManager).toggle_menuwrapper()
             case key if (
                 key in config["keybinds"]["tab_next"]
                 and self.tabWidget.active_tab is not None
@@ -351,8 +388,8 @@ class Application(App, inherit_bindings=False):
                 def on_response(response: str) -> None:
                     """Handle the response from the ZDToDirectory dialog."""
                     if response:
-                        pathinput = self.query_one(PathInput)
-                        pathinput.value = decompress(response).replace(path.sep, "/")
+                        pathinput: PathInput = self.query_one(PathInput)
+                        pathinput.value = response
                         pathinput.on_input_submitted(
                             SimpleNamespace(value=pathinput.value)
                         )
@@ -369,10 +406,9 @@ class Application(App, inherit_bindings=False):
                 if shutil.which(fd_exec) is not None:
                     try:
 
-                        def on_response(selected_compressed: str | None) -> None:
-                            if not selected_compressed:
+                        def on_response(selected: str | None) -> None:
+                            if selected is None:
                                 return
-                            selected = decompress(selected_compressed)
                             if path.isdir(selected):
                                 self.cd(selected)
                             else:
@@ -393,10 +429,14 @@ class Application(App, inherit_bindings=False):
             case key if key in config["keybinds"]["suspend_app"]:
                 if WINDOWS:
                     self.notify(
-                        "rovr cannot be suspended on Windows!", title="Suspend App"
+                        "rovr cannot be suspended on Windows!",
+                        title="Suspend App",
+                        severity="warning",
                     )
                 else:
                     self.action_suspend_process()
+            case key if key in config["keybinds"]["change_sort_order"]:
+                await self.query_one(SortOrderButton).open_popup(event)
 
     def on_app_blur(self, event: events.AppBlur) -> None:
         self.app_blurred = True
@@ -417,7 +457,7 @@ class Application(App, inherit_bindings=False):
             )
         ):
             return
-        # 1) Write cwd to explicit --cwd-file if provided
+        # Write cwd to explicit --cwd-file if provided
         message = ""
         if self._cwd_file:
             try:
@@ -427,18 +467,7 @@ class Application(App, inherit_bindings=False):
                 message += (
                     f"Failed to write cwd file `{path.basename(self._cwd_file)}`!\n"
                 )
-        # 2) Otherwise, honor legacy cd_on_quit behavior
-        elif config["settings"]["cd_on_quit"]:
-            try:
-                with open(
-                    path.join(VAR_TO_DIR["CONFIG"], "rovr_quit_cd_path"),
-                    "w",
-                    encoding="utf-8",
-                ) as file:
-                    file.write(getcwd())
-            except OSError:
-                message += "Failed to write `rovr_quit_cd_path`!\n"
-        # 3) Write selected/active item(s) to --chooser-file, if provided
+        # Write selected/active item(s) to --chooser-file, if provided
         if self._chooser_file:
             try:
                 file_list = self.query_one("#file_list")
@@ -464,7 +493,20 @@ class Application(App, inherit_bindings=False):
         if normalise(getcwd()) == normalise(directory) or directory == "":
             add_to_history = False
         else:
-            chdir(directory)
+            try:
+                chdir(directory)
+            except PermissionError as exc:
+                self.notify(
+                    f"You cannot enter into {directory}!\n{exc.strerror}",
+                    title="App: cd",
+                    severity="error",
+                )
+                return
+            except FileNotFoundError:
+                self.notify(
+                    f"{directory}\nno longer exists!", title="App: cd", severity="error"
+                )
+                return
 
         self.query_one("#file_list", FileList).update_file_list(
             add_to_session=add_to_history, focus_on=focus_on
@@ -474,57 +516,145 @@ class Application(App, inherit_bindings=False):
         if callback:
             self.call_later(callback)
 
-    @work
-    async def watch_for_changes_and_update(self) -> None:
+    @work(thread=True)
+    def watch_for_changes_and_update(self) -> None:
         cwd = getcwd()
-        items = get_filtered_dir_names(cwd, config["settings"]["show_hidden_files"])
         file_list = self.query_one(FileList)
+        pins_path = path.join(VAR_TO_DIR["CONFIG"], "pins.json")
+        pins_mtime = None
+        with suppress(OSError):
+            pins_mtime = path.getmtime(pins_path)
+        state_path = path.join(VAR_TO_DIR["CONFIG"], "state.toml")
+        state_mtime = None
+        with suppress(OSError):
+            state_mtime = path.getmtime(state_path)
+        drives = get_mounted_drives()
+        drive_update_every = int(config["settings"]["drive_watcher_frequency"])
+        count: int = -1
         while True:
-            await asyncio.sleep(1)
+            sleep(1)
+            count += 1
+            if count >= drive_update_every:
+                count = 0
             new_cwd = getcwd()
-            try:
-                items = get_filtered_dir_names(
-                    cwd, config["settings"]["show_hidden_files"]
-                )
-            except OSError:
-                # PermissionError falls under this, but we catch everything else
-                continue
-            if cwd != new_cwd:
+            if not path.exists(new_cwd):
+                file_list.update_file_list(add_to_session=False)
+            elif cwd != new_cwd:
                 cwd = new_cwd
-            elif items != file_list.items_in_cwd:
-                self.cd(cwd)
+                continue
+            elif not self.file_list_pause_check:
+                with suppress(OSError):
+                    # this is weird, so `get_filtered_dir_names` is a sync
+                    # function, so `call_from_thread` shouldn't be required
+                    # but without it, this thread goes in a limbo state where
+                    # after quiting, it still runs this, so the app never quits
+                    items = self.call_from_thread(
+                        get_filtered_dir_names,
+                        cwd,
+                        config["settings"]["show_hidden_files"],
+                    )
+                if items != file_list.items_in_cwd:
+                    self.cd(cwd)
+            # check pins.json
+            new_mtime = None
+            reload_called: bool = False
+            with suppress(OSError):
+                new_mtime = path.getmtime(pins_path)
+            if new_mtime != pins_mtime:
+                pins_mtime = new_mtime
+                if new_mtime is not None:
+                    self.app.call_from_thread(
+                        self.query_one("#pinned_sidebar").reload_pins
+                    )
+                    reload_called = True
+            # check state.toml
+            new_state_mtime = None
+            with suppress(OSError):
+                new_state_mtime = path.getmtime(state_path)
+            if new_state_mtime != state_mtime:
+                state_mtime = new_state_mtime
+                if new_state_mtime is not None:
+                    state_manager: StateManager = self.query_one(StateManager)
+                    self.app.call_from_thread(state_manager._load_state)
+                    self.app.call_from_thread(state_manager.restore_state)
+            # check drives
+            if count == 0 and not reload_called:
+                try:
+                    new_drives = get_mounted_drives()
+                    if new_drives != drives:
+                        drives = new_drives
+                        self.app.call_from_thread(
+                            self.query_one("#pinned_sidebar").reload_pins
+                        )
+                except Exception as exc:
+                    self.notify(
+                        f"{type(exc).__name__}: {exc}",
+                        title="Change Watcher",
+                        severity="warning",
+                    )
 
-    @work
+    @work(exclusive=True)
     async def on_resize(self, event: events.Resize) -> None:
         if (
-            event.size.height < max_possible.height
-            or event.size.width < max_possible.width
+            event.size.height < MaxPossible.height
+            or event.size.width < MaxPossible.width
         ) and not self.has_pushed_screen:
             self.has_pushed_screen = True
             await self.push_screen_wait(TerminalTooSmall())
             self.has_pushed_screen = False
+        self.hide_popups()
 
     async def _on_css_change(self) -> None:
-        try:
-            await super()._on_css_change()
-            if self._css_has_errors:
+        if self.css_monitor is not None:
+            css_paths = self.css_monitor._paths
+        else:
+            css_paths = self.css_path
+        if css_paths:
+            try:
+                time = perf_counter()
+                stylesheet = self.stylesheet.copy()
+                try:
+                    # textual issue, i don't want to fix the typing
+                    stylesheet.read_all(css_paths)  # ty: ignore[invalid-argument-type]
+                except StylesheetError as error:
+                    # If one of the CSS paths is no longer available (or perhaps temporarily unavailable),
+                    #  we'll end up with partial CSS, which is probably confusing more than anything. We opt to do
+                    #  nothing here, knowing that we'll retry again very soon, on the next file monitor invocation.
+                    #  Related issue: https://github.com/Textualize/textual/issues/3996
+                    self._css_has_errors = True
+                    self.notify(
+                        str(error),
+                        title=f"CSS: {type(error).__name__}",
+                        severity="error",
+                    )
+                    return
+                stylesheet.parse()
+                elapsed = (perf_counter() - time) * 1000
                 self.notify(
-                    "Errors were found in the TCSS!",
-                    title="Stylesheet Watcher",
-                    severity="error",
+                    f"Reloaded {len(css_paths)} CSS files in {elapsed:.0f} ms",
+                    title="CSS",
+                )
+            except StylesheetParseError as exc:
+                self._css_has_errors = True
+                with self.suspend():
+                    console.print(exc.errors)
+                    try:
+                        console.input(" [bright_blue]Continue? [/]")
+                    except EOFError:
+                        self.exit(return_code=1)
+            except Exception as error:
+                # TODO: Catch specific exceptions
+                self._css_has_errors = True
+                self.bell()
+                self.notify(
+                    str(error), title=f"CSS: {type(error).__name__}", severity="error"
                 )
             else:
-                self.notify(
-                    "TCSS reloaded successfully!",
-                    title="Stylesheet Watcher",
-                    severity="information",
-                )
-        except StyleValueError as exc:
-            self.notify(
-                f"Errors were found in the TCSS!\n{exc}",
-                title="Stylesheet Watcher",
-                severity="error",
-            )
+                self._css_has_errors = False
+                self.stylesheet = stylesheet
+                self.stylesheet.update(self)
+                for screen in self.screen_stack:
+                    self.stylesheet.update(screen)
 
     def get_system_commands(self, screen: Screen) -> Iterable[SystemCommand]:
         if not self.ansi_color:
@@ -632,13 +762,18 @@ class Application(App, inherit_bindings=False):
         self.query_one("#file_list").update_border_subtitle()
 
     @on(events.Click)
-    @work(thread=True)
     def when_got_click(self, event: events.Click) -> None:
         if (
-            not isinstance(event.widget, FileListRightClickOptionList)
-            or event.button != 3
+            not isinstance(event.widget, (FileListRightClickOptionList, SortOrderPopup))
+            or event.button == 1
         ):
+            self.hide_popups()
+
+    def hide_popups(self) -> None:
+        with suppress(NoMatches):
             self.query_one(FileListRightClickOptionList).add_class("hidden")
+        with suppress(NoMatches):
+            self.query_one(SortOrderPopup).add_class("hidden")
 
 
-app = Application(watch_css=True)
+app = Application()

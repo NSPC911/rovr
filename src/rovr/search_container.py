@@ -12,14 +12,15 @@ from rovr.functions.utils import set_scuffed_subtitle
 
 
 class SearchInput(Input):
-    def __init__(self, always_add_disabled: bool = True, *args, **kwargs) -> None:
+    def __init__(self, always_add_disabled: bool = True, placeholder: str = "") -> None:
         super().__init__(
-            *args, password=False, compact=True, select_on_focus=False, **kwargs
+            password=False, compact=True, select_on_focus=False, placeholder=placeholder
         )
         self.always_add_disabled = always_add_disabled
         self.selected = set()
 
     def on_mount(self) -> None:
+        assert self.parent
         self.items_list = self.parent.query_one(OptionList)
         if isinstance(self.items_list, SelectionList):
             self.item_list_type = "Selection"
@@ -44,8 +45,7 @@ class SearchInput(Input):
             highlighted = None
         self.app.tabWidget.active_tab.session.search = event.value
         if event.value == "":
-            self.items_list.clear_options()
-            self.items_list.add_options(self.items_list.list_of_options)
+            self.items_list.set_options(self.items_list.list_of_options)
             if highlighted is not None:
                 with contextlib.suppress(OptionDoesNotExist, SelectionError):
                     self.items_list.highlighted = self.items_list.get_option_index(
@@ -69,19 +69,31 @@ class SearchInput(Input):
                             )
             return
         self.items_list.clear_options()
-        matches = []
         matcher = Matcher(
             event.value,
         )
         assert hasattr(self.items_list, "list_of_options")
-        for option in self.items_list.list_of_options:
+        output: list[Option] = []
+        segment: list[
+            tuple[Option, int | float, int]
+        ] = []  # (option, score, original_index)
+        for idx, option in enumerate(self.items_list.list_of_options):
             assert isinstance(option, Option)
             if self.always_add_disabled and option.disabled:
-                matches.append(option)
+                if segment:
+                    segment.sort(key=lambda tup: (-tup[1], tup[2]))
+                    output.extend(o for o, _, _ in segment)
+                    segment = []
+                output.append(option)
                 continue
             score = matcher.match(option.label)
             if score > 0:
-                matches.append(option)
+                assert isinstance(option, Option)
+                segment.append((option, score, idx))
+        if segment:
+            segment.sort(key=lambda tup: (-tup[1], tup[2]))
+            output.extend(o for o, _, _ in segment)
+        matches = output
         if matches:
             self.items_list.add_options(matches)
         else:

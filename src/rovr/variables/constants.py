@@ -1,9 +1,11 @@
 import platform
 from dataclasses import dataclass
+from typing import Literal
 
 from textual.binding import Binding, BindingType
 
 from rovr.functions.config import config_setup, load_config
+from rovr.functions.utils import classproperty
 
 # Initialize the config once at import time
 if "config" not in globals():
@@ -31,18 +33,19 @@ buttons_that_depend_on_path = [
 ]
 
 ascii_logo = r"""
- ___ ___ _ _ ___
-|  _| . | | |  _|
-|_| |___|\_/|_|"""
+╭───╮╭───╮╭╮  ╭╮╭───╮
+│ ╭─╯│ ╷ ││╰╮╭╯││ ╭─╯
+│ │  │ ╵ │╰╮╰╯╭╯│ │
+╰─╯  ╰───╯ ╰──╯ ╰─╯"""
 
 
 class MaxPossible:
-    @property
-    def height(self) -> int:
+    @classproperty
+    def height(self) -> Literal[13, 24]:
         return 13 if config["interface"]["use_reactive_layout"] else 24
 
-    @property
-    def width(self) -> int:
+    @classproperty
+    def width(self) -> Literal[26, 70]:
         return 26 if config["interface"]["use_reactive_layout"] else 70
 
 

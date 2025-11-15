@@ -40,6 +40,8 @@ class KeybindList(OptionList, inherit_bindings=False):
                     formatted_keys = "<disabled>"
                     primary_keys.append("")
                 else:
+                    if isinstance(keys, str):
+                        keys = [keys]
                     formatted_keys = ", ".join(f"<{key}>" for key in keys)
                     primary_keys.append(keys[0])
                 keybind_data.append((formatted_keys, display_name))
@@ -92,7 +94,7 @@ class Keybinds(ModalScreen):
             case key if key in config["keybinds"]["focus_search"]:
                 event.stop()
                 self.input.focus()
-            case key if key in config["keybinds"]["show_keybinds"] or key == "escape":
+            case key if key in config["keybinds"]["show_keybinds"] | "escape":
                 event.stop()
                 self.dismiss()
 

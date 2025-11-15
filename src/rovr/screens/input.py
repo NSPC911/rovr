@@ -27,10 +27,9 @@ class ModalInput(ModalScreen):
         self.border_title = border_title
         self.border_subtitle = border_subtitle
         self.initial_value = initial_value
-        self.validators = [
-            Length(minimum=1, failure_description="A value is required.")
-        ] + validators
-        self.validators[0].strict = True
+        length_checker = Length(minimum=1, failure_description="A value is required.")
+        length_checker.strict = True
+        self.validators = [length_checker] + validators
         self.is_path = is_path
         self.is_folder = is_folder
         if self.is_path:
@@ -43,7 +42,7 @@ class ModalInput(ModalScreen):
             self.icon_widget = Label("> ", id="icon", shrink=True)
 
     def compose(self) -> ComposeResult:
-        with HorizontalGroup():
+        with HorizontalGroup(id="modalInput_group"):
             yield self.icon_widget
             yield Input(
                 id="input",

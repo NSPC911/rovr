@@ -1,11 +1,13 @@
 import asyncio
+import base64
 import ctypes
 import os
 import stat
 from os import path
+from typing import Literal, TypeAlias, TypedDict, overload
 
 import psutil
-from lzstring import LZString
+from natsort import natsorted
 from rich.console import Console
 from textual import work
 from textual.app import App
@@ -13,7 +15,18 @@ from textual.app import App
 from rovr.functions.icons import get_icon_for_file, get_icon_for_folder
 from rovr.variables.constants import os_type
 
-lzstring = LZString()
+# windows needs nt, because scandir returns
+# nt.DirEntry instead of os.DirEntry on
+# windows. weird, yes, but I can't do anything
+if os_type == "Windows":
+    import nt
+
+    DirEntryType: TypeAlias = os.DirEntry | nt.DirEntry
+    DirEntryTypes = (os.DirEntry, nt.DirEntry)
+else:
+    DirEntryType: TypeAlias = os.DirEntry
+    DirEntryTypes = os.DirEntry
+
 pprint = Console().print
 
 
@@ -62,18 +75,16 @@ def is_hidden_file(filepath: str) -> bool:
         return path.basename(filepath).startswith(".")
 
 
-# Okay so the reason why I have wrapper functions is
-# I was messing around with different LZString options
-# and Encoded URI Component seems to best option. I've just
-# left it here, in case we can switch to something like
-# base 64 because Encoded URI Component can get quite long
-# very fast, which isn't really the purpose of LZString
+# insanely scuffed implementation, but it's required due
+# to Textual's strict limitation for ids to consist of
+# letters, numbers, underscores, or hyphens, and must
+# not begin with a number
 def compress(text: str) -> str:
-    return lzstring.compressToEncodedURIComponent(text)
+    return "u_" + base64.urlsafe_b64encode(text.encode("utf-8")).decode("ascii")
 
 
 def decompress(text: str) -> str:
-    return lzstring.decompressFromEncodedURIComponent(text)
+    return base64.urlsafe_b64decode(text[2:].encode("ascii")).decode("utf-8")
 
 
 @work
@@ -85,6 +96,10 @@ async def open_file(app: App, filepath: str) -> None:
         filepath (str): Path to the file to open
     """
     system = os_type.lower()
+    # check if it is available first
+    if not path.exists(filepath):
+        app.notify(f"File not found: {filepath}", title="Open File", severity="error")
+        return
 
     try:
         match system:
@@ -156,28 +171,64 @@ def get_filtered_dir_names(cwd: str | bytes, show_hidden: bool = False) -> set[s
     return names
 
 
-def get_cwd_object(
-    cwd: str, show_hidden: bool = False
+class CWDObjectReturnDict(TypedDict):
+    name: str
+    icon: list[str]
+    dir_entry: DirEntryType
+
+
+def get_extension_sort_key(file_dict: dict) -> tuple[int, str]:
+    name = file_dict["name"]
+    if "." not in name:
+        # extensionless files
+        return (1, name.lower())
+    elif name.startswith(".") and name.count(".") == 1:
+        # dotfiles
+        return (2, name[1:].lower())
+    else:
+        # files with extensions
+        return (3, name.split(".")[-1].lower())
+
+
+async def get_cwd_object(
+    cwd: str,
+    show_hidden: bool = False,
+    sort_by: Literal[
+        "name", "size", "modified", "created", "extension", "natural"
+    ] = "name",
+    reverse: bool = False,
 ) -> tuple[list[dict], list[dict]]:
     """
     Get the objects (files and folders) in a provided directory
     Args:
         cwd(str): The working directory to check
         show_hidden(bool): Whether to include hidden files/folders (dot-prefixed on Unix; flagged hidden on Windows/macOS)
+        sort_by(str): What to sort by
+        reverse(bool): Whether to reverse the sorting
+
     Returns:
         folders(list[dict]): A list of dictionaries, containing "name" as the item's name and "icon" as the respective icon
         files(list[dict]): A list of dictionaries, containing "name" as the item's name and "icon" as the respective icon
 
     Raises:
-        PermissionError: When access to the directory is denied
+        TypeError: if the wrong type is received
     """
-    folders, files = [], []
-    try:
-        listed_dir = os.scandir(cwd)
-    except (PermissionError, FileNotFoundError, OSError):
-        raise PermissionError(f"PermissionError: Unable to access {cwd}")
-    for item in listed_dir:
-        # Skip hidden files if show_hidden is False
+
+    # Offload the blocking os.scandir call to a thread pool
+    def _scandir() -> list:
+        try:
+            return list(os.scandir(cwd))
+        except (PermissionError, FileNotFoundError, OSError):
+            raise PermissionError(f"PermissionError: Unable to access {cwd}")
+
+    entries = await asyncio.to_thread(_scandir)
+
+    folders: list[CWDObjectReturnDict] = []
+    files: list[CWDObjectReturnDict] = []
+
+    for item in entries:
+        if not isinstance(item, DirEntryTypes):
+            raise TypeError(f"Expected a DirEntry object but got {type(item)}")
         if not show_hidden and is_hidden_file(item.path):
             continue
 
@@ -193,14 +244,47 @@ def get_cwd_object(
                 "icon": get_icon_for_file(item.name),
                 "dir_entry": item,
             })
-    # Sort folders and files properly
-    folders.sort(key=lambda x: x["name"].lower())
-    files.sort(key=lambda x: x["name"].lower())
-    print(f"Found {len(folders)} folders and {len(files)} files in {cwd}")
+    # sort order
+    match sort_by:
+        case "name":
+            folders.sort(key=lambda x: x["name"].lower())
+            files.sort(key=lambda x: x["name"].lower())
+        case "natural":
+            # no we will not be using `natsort`'s os_sorted
+            folders: list[CWDObjectReturnDict] = natsorted(
+                folders, key=lambda x: x["name"].lower()
+            )
+            files: list[CWDObjectReturnDict] = natsorted(
+                files, key=lambda x: x["name"].lower()
+            )
+        case "created":
+            folders.sort(key=lambda x: x["dir_entry"].stat().st_ctime_ns)
+            files.sort(key=lambda x: x["dir_entry"].stat().st_ctime_ns)
+        case "modified":
+            folders.sort(key=lambda x: x["dir_entry"].stat().st_mtime_ns)
+            files.sort(key=lambda x: x["dir_entry"].stat().st_mtime_ns)
+        case "size":
+            # no we will not be calculating the folder size
+            folders.sort(key=lambda x: x["name"].lower())
+            files.sort(key=lambda x: x["dir_entry"].stat().st_size)
+        case "extension":
+            # folders dont have extensions btw
+            # and i will not count dot prepended folders
+            folders.sort(key=lambda x: x["name"].lower())
+
+            files.sort(key=get_extension_sort_key)
+    if reverse:
+        files.reverse()
+        folders.reverse()
+
+    if globals().get("is_dev", False):
+        print(f"Found {len(folders)} folders and {len(files)} files in {cwd}")
     return folders, files
 
 
-def file_is_type(file_path: str) -> str:
+def file_is_type(
+    file_path: str,
+) -> Literal["unknown", "symlink", "directory", "junction", "file"]:
     """Get a given path's type
     Args:
         file_path(str): The file path to check
@@ -250,6 +334,22 @@ def force_obtain_write_permission(item_path: str) -> bool:
         return False
 
 
+@overload
+def get_recursive_files(object_path: str) -> list[dict]: ...
+
+
+@overload
+def get_recursive_files(
+    object_path: str, with_folders: Literal[False]
+) -> list[dict]: ...
+
+
+@overload
+def get_recursive_files(
+    object_path: str, with_folders: Literal[True]
+) -> tuple[list[dict], list[dict]]: ...
+
+
 def get_recursive_files(
     object_path: str, with_folders: bool = False
 ) -> list[dict] | tuple[list[dict], list[dict]]:
@@ -264,9 +364,7 @@ def get_recursive_files(
         list: A list of dictionaries, with a "path" key and "relative_loc" key for files
         list: A list of path strings that were involved in the file list.
     """
-    if path.isfile(path.realpath(object_path)) or path.islink(
-        path.realpath(object_path)
-    ):
+    if file_is_type(object_path) != "directory":
         if with_folders:
             return [
                 {
@@ -413,27 +511,31 @@ def get_mounted_drives() -> list:
     drives = []
     try:
         # get all partitions
-        partitions = psutil.disk_partitions(all=False)
+        partitions = psutil.disk_partitions(all=True)
 
         if os_type == "Windows":
             # For Windows, return the drive letters
             drives = [
                 normalise(p.mountpoint)
                 for p in partitions
-                if p.device and ":" in p.device
+                if p.device and ":" in p.device and path.isdir(p.device)
             ]
         elif os_type == "Darwin":
             # For macOS, filter out system volumes and keep only user-relevant drives
             drives = [
-                p.mountpoint for p in partitions if _should_include_macos_mount_point(p)
+                p.mountpoint
+                for p in partitions
+                if path.isdir(p.mountpoint) and _should_include_macos_mount_point(p)
             ]
         else:
             # For other Unix-like systems (Linux, WSL, etc.), filter out system mount points
             drives = [
-                p.mountpoint for p in partitions if _should_include_linux_mount_point(p)
+                p.mountpoint
+                for p in partitions
+                if path.isdir(p.mountpoint) and _should_include_linux_mount_point(p)
             ]
     except Exception as e:
-        print(f"Error getting mounted drives: {e}")
-        print("Using fallback method")
+        if globals().get("is_dev", False):
+            print(f"Error getting mounted drives: {e}\nUsing fallback method...")
         drives = [path.expanduser("~")]
     return drives

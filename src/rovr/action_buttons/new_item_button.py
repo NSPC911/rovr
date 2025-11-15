@@ -1,8 +1,10 @@
+import contextlib
 from os import getcwd, makedirs, path
 
 from textual import work
 from textual.content import Content
 from textual.widgets import Button
+from textual.worker import Worker, WorkerError
 
 from rovr.classes import IsValidFilePath, PathDoesntExist
 from rovr.functions.icons import get_icon
@@ -14,10 +16,8 @@ from rovr.variables.constants import config
 class NewItemButton(Button):
     ALLOW_MAXIMIZE = False
 
-    def __init__(self, *args, **kwargs) -> None:
-        super().__init__(
-            get_icon("general", "new")[0], classes="option", id="new", *args, **kwargs
-        )
+    def __init__(self) -> None:
+        super().__init__(get_icon("general", "new")[0], classes="option", id="new")
 
     def on_mount(self) -> None:
         if config["interface"]["tooltips"]:
@@ -47,7 +47,9 @@ class NewItemButton(Button):
                 makedirs(location)
             except Exception as e:
                 self.notify(
-                    message=Content(f"Error creating directory '{response}': {e}"),
+                    message=Content(
+                        f"Error creating directory '{response}'\n{type(e).__name__}: {e}"
+                    ),
                     title="New Item",
                     severity="error",
                 )
@@ -64,7 +66,9 @@ class NewItemButton(Button):
                     f.write("")
             except Exception as e:
                 self.notify(
-                    message=Content(f"Error creating file '{location}': {e}"),
+                    message=Content(
+                        f"Error creating file '{response}'\n{type(e).__name__}: {e}"
+                    ),
                     title="New Item",
                     severity="error",
                 )
@@ -75,16 +79,18 @@ class NewItemButton(Button):
                     f.write("")  # Create an empty file
             except Exception as e:
                 self.notify(
-                    message=Content(f"Error creating file '{location}': {e}"),
+                    message=Content(
+                        f"Error creating file '{response}'\n{type(e).__name__}: {e}"
+                    ),
                     title="New Item",
                     severity="error",
                 )
-        filelist = self.app.query_one("#file_list")
-        await filelist.on_option_list_option_highlighted(
-            filelist.OptionHighlighted(
-                filelist,
-                filelist.get_option_at_index(filelist.highlighted),
-                filelist.highlighted,
-            )
+        self.app.file_list_pause_check = True
+        file_list = self.app.query_one("#file_list")
+        file_list.focus()
+        worker: Worker = file_list.update_file_list(
+            add_to_session=False, focus_on=path.basename(location)
         )
-        filelist.focus()
+        with contextlib.suppress(WorkerError):
+            await worker.wait()
+        self.app.file_list_pause_check = False

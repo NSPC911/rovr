@@ -33,11 +33,11 @@ jobs:
         run: uv sync
 
       - name: Run ty
-        run: uvx ty check || (echo "::error::Type checking failed! Please fix type errors before committing." && exit 1)
+        run: uv run ty check || (echo "::error::Type checking failed! Please fix type errors before committing." && exit 1)
 
       - name: Run ruff format if needed (main repo)
         if: github.repository == env.MAIN_REPO && (github.event_name != 'pull_request' || github.event.pull_request.head.repo.fork == false)
-        run: uvx ruff format .
+        run: uv run ruff format .
 
       - name: Commit and push changes if needed (main repo)
         if: github.repository == env.MAIN_REPO && (github.event_name != 'pull_request' || github.event.pull_request.head.repo.fork == false)
@@ -69,7 +69,7 @@ jobs:
         run: uv sync
 
       - name: Run ty
-        run: uvx ty check || (echo "::error::Type checking failed! Please fix type errors before committing." && exit 1)
+        run: uv run ty check || (echo "::error::Type checking failed! Please fix type errors before committing." && exit 1)
 
       # If on a fork, only check and fail if there are issues (no fixes/commits)
       - name: Run ruff

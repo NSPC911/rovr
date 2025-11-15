@@ -3,20 +3,53 @@ from typing import Literal
 
 from textual.content import Content, ContentText
 from textual.widgets.option_list import Option
-from textual.widgets.selection_list import Selection, SelectionType
+from textual.widgets.selection_list import Selection
 
 from rovr.functions.path import compress
 
 
 class PinnedSidebarOption(Option):
-    def __init__(self, icon: list, label: str, *args, **kwargs) -> None:
+    def __init__(self, icon: list, label: str, id: str | None = None) -> None:
+        """Initialise the option.
+
+        Args:
+            icon: The icon for the option
+            label: The text for the option
+            id: An option ID for the option.
+        """
         super().__init__(
             prompt=Content.from_markup(
                 f" [{icon[1]}]{icon[0]}[/{icon[1]}] $name", name=label
             ),
-            *args,
-            **kwargs,
+            id=id,
         )
+        self.label = label
+
+
+class ArchiveFileListSelection(Selection):
+    # Cache for pre-parsed icon Content objects to avoid repeated markup parsing
+    _icon_content_cache: dict[tuple[str, str], Content] = {}
+
+    def __init__(self, icon: list, label: str) -> None:
+        """Initialise the option.
+
+        Args:
+            icon: The icon for the option
+            label: The text for the option
+        """
+        cache_key = (icon[0], icon[1])
+        if cache_key not in ArchiveFileListSelection._icon_content_cache:
+            # Parse the icon markup once and cache it as Content
+            ArchiveFileListSelection._icon_content_cache[cache_key] = (
+                Content.from_markup(f" [{icon[1]}]{icon[0]}[/{icon[1]}] ")
+            )
+
+        # Create prompt by combining cached icon content with label
+        prompt = ArchiveFileListSelection._icon_content_cache[cache_key] + Content(
+            label
+        )
+
+        super().__init__(prompt=prompt, value="", disabled=True)
         self.label = label
 
 
@@ -29,7 +62,6 @@ class FileListSelectionWidget(Selection):
         icon: list[str],
         label: str,
         dir_entry: DirEntry,
-        value: SelectionType,
         disabled: bool = False,
     ) -> None:
         """
@@ -39,7 +71,6 @@ class FileListSelectionWidget(Selection):
             icon (list[str]): The icon list from a utils function.
             label (str): The label for the option.
             dir_entry (DirEntry): The nt.DirEntry class
-            value (SelectionType): The value for the selection.
             disabled (bool) = False: The initial enabled/disabled state. Enabled by default.
         """
         cache_key = (icon[0], icon[1])
@@ -51,9 +82,15 @@ class FileListSelectionWidget(Selection):
 
         # Create prompt by combining cached icon content with label
         prompt = FileListSelectionWidget._icon_content_cache[cache_key] + Content(label)
-
-        super().__init__(prompt=prompt, value=value, id=str(value), disabled=disabled)
         self.dir_entry = dir_entry
+        this_id = str(id(self))
+
+        super().__init__(
+            prompt=prompt,
+            value=str(this_id),
+            id=str(this_id),
+            disabled=disabled,
+        )
         self.label = label
 
 
@@ -106,34 +143,38 @@ class KeybindOption(Option):
             self.disabled = True
 
 
-class FinderOption(Option):
+class ModalSearcherOption(Option):
     # icon cache
     _icon_content_cache: dict[tuple[str, str], Content] = {}
 
     def __init__(
         self,
-        icon: list[str],
+        icon: list[str] | None,
         label: str,
-        id: str = "",
+        file_path: str | None = None,
         disabled: bool = False,
     ) -> None:
         """
         Initialise the option
 
         Args:
-            icon (list[str]): The icon list from a utils function.
+            icon (list[str] | None): The icon list from a utils function.
             label (str): The label for the option.
-            id (str): The optional id for the option.
+            file_path (str | None): The file path
             disabled (bool) = False: The initial enabled/disabled state.
         """
-        cache_key = (icon[0], icon[1])
-        if cache_key not in FinderOption._icon_content_cache:
-            # Parse
-            FinderOption._icon_content_cache[cache_key] = Content.from_markup(
-                f" [{icon[1]}]{icon[0]}[/] "
-            )
+        if icon:
+            cache_key = (icon[0], icon[1])
+            if cache_key not in ModalSearcherOption._icon_content_cache:
+                # Parse
+                ModalSearcherOption._icon_content_cache[cache_key] = (
+                    Content.from_markup(f" [{icon[1]}]{icon[0]}[/] ")
+                )
 
-        # create prompt
-        prompt = FinderOption._icon_content_cache[cache_key] + Content(label)
-        super().__init__(prompt=prompt, disabled=disabled, id=id)
+            # create prompt
+            prompt = ModalSearcherOption._icon_content_cache[cache_key] + Content(label)
+        else:
+            prompt = Content(label)
+        super().__init__(prompt=prompt, disabled=disabled)
         self.label = label
+        self.file_path = file_path

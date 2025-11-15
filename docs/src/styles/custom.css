@@ -5,6 +5,10 @@
   font-family: "CaskaydiaCove NFP";
   src: url("./caskaydiacovenfp.ttf") format("truetype");
 }
+@font-face {
+  font-family: "CaskaydiaCoveNFM";
+  src: url("./caskaydiacovenfm.ttf") format("truetype");
+}
 
 :root {
   --sl-sidebar-width: 20vw;
@@ -178,6 +182,10 @@ summary:not(#starlight__on-this-page--mobile) {
 .large {
   font-weight: 599;
 }
+img {
+  border: 2.5px solid var(--sl-color-accent);
+  border-radius: 5px;
+}
 @media (min-width: 72rem) {
   .main-pane {
     margin: auto;
@@ -222,7 +230,7 @@ summary:not(#starlight__on-this-page--mobile) {
     border-inline-end: none;
   }
   .main-frame {
-    cursor:default;
+    cursor: default;
     padding-inline-start: 0;
   }
   body > div:has(> nav) > div .main-frame {
@@ -238,6 +246,9 @@ summary:not(#starlight__on-this-page--mobile) {
 @media (max-width: 72rem) {
   :root {
     --sl-content-width: none;
+  }
+  .sidebar-content {
+    padding-left: 1ch;
   }
 }
 @media (max-width: 50rem) {
@@ -386,11 +397,13 @@ body > div:has(> nav) > div {
   }
 }
 figure.frame {
-  &:has(> figcaption > span) > pre[data-language] {
+  &:has(> figcaption > span)
+    > pre[data-language]:not([data-language="plaintext"]) {
     border-top-left-radius: 0;
     border-top-right-radius: 0;
   }
-  &:not(:has(> figcaption > span)) > pre[data-language] {
+  &:not(:has(> figcaption > span))
+    > pre[data-language]:not([data-language="plaintext"]) {
     padding-top: 1em;
     &::before {
       position: absolute;
@@ -402,7 +415,7 @@ figure.frame {
     }
   }
 
-  > pre[data-language] {
+  > pre[data-language]:not([data-language="plaintext"]) {
     border-radius: 5px;
   }
   > figcaption {

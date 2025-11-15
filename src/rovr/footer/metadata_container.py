@@ -13,7 +13,7 @@ from textual.worker import WorkerState
 from rovr.functions import utils
 from rovr.functions.path import is_hidden_file
 from rovr.variables.constants import config, scroll_vindings
-from rovr.variables.maps import SPINNER
+from rovr.variables.maps import SPINNER, SPINNER_LENGTH
 
 
 class MetadataContainer(VerticalScroll, inherit_bindings=False):
@@ -224,10 +224,10 @@ class MetadataContainer(VerticalScroll, inherit_bindings=False):
                         with suppress(OSError, FileNotFoundError):
                             total_size += lstat(fp).st_size
                 if time.monotonic() - last_update_time > 0.25:
-                    spinner_index = spinner_index + 1 if spinner_index // 3 == 0 else 0
+                    spinner_index = (spinner_index + 1) % SPINNER_LENGTH
                     self.app.call_from_thread(
                         size_widget.update,
-                        f"{utils.natural_size(total_size, config['metadata']['filesize_suffix'], config['metadata']['filesize_decimals'])} {SPINNER[spinner_index]}",
+                        f"{SPINNER[spinner_index]} {utils.natural_size(total_size, config['metadata']['filesize_suffix'], config['metadata']['filesize_decimals'])}",
                     )
                     last_update_time = time.monotonic()
         except (OSError, FileNotFoundError):

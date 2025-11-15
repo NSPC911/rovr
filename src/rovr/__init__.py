@@ -2,7 +2,7 @@ try:
     from .app import Application
 
     def main() -> None:
-        Application(watch_css=True).run()
+        Application().run()
 
 except KeyboardInterrupt:
     pass

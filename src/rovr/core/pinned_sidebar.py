@@ -1,8 +1,7 @@
-import asyncio
 from os import path
 from typing import ClassVar
 
-from textual import events, on, work
+from textual import events
 from textual.binding import BindingType
 from textual.widgets import Input, OptionList
 from textual.widgets.option_list import Option
@@ -15,14 +14,12 @@ from rovr.variables.constants import config, vindings
 
 
 class PinnedSidebar(OptionList, inherit_bindings=False):
-    DRIVE_WATCHER_FREQUENCY: float = config["settings"]["drive_watcher_frequency"]
     # Just so that I can disable space
     BINDINGS: ClassVar[list[BindingType]] = list(vindings)
 
     def __init__(self, **kwargs) -> None:
         super().__init__(**kwargs)
 
-    @work
     async def reload_pins(self) -> None:
         """Reload pins shown
 
@@ -34,23 +31,34 @@ class PinnedSidebar(OptionList, inherit_bindings=False):
         pins = available_pins["pins"]
         default = available_pins["default"]
         self.list_of_options = []
-        print(f"Reloading pins: {available_pins}")
-        print(f"Reloading default folders: {default}")
-        self.clear_options()
+        # get current highlight
+        prev_highlighted: int = self.highlighted if self.highlighted else 0
+        self.log(f"Reloading pins: {available_pins}")
+        self.log(f"Reloading default folders: {default}")
         for default_folder in default:
-            if not path.isdir(default_folder["path"]):
-                if path.exists(default_folder["path"]):
-                    raise FolderNotFileError(
-                        f"Expected a folder but got a file: {default_folder['path']}"
-                    )
-                else:
-                    pass
-            if "icon" in default_folder:
-                icon = default_folder["icon"]
+            if not path.isdir(default_folder["path"]) and path.exists(
+                default_folder["path"]
+            ):
+                raise FolderNotFileError(
+                    f"Expected a folder but got a file: {default_folder['path']}"
+                )
+            # we already ensured it, so just ignore ty errors
+            if (
+                "icon" in default_folder
+                and isinstance(default_folder["icon"], list)
+                and len(default_folder["icon"]) == 2
+            ):
+                icon: list[str] = default_folder["icon"]
             elif path.isdir(default_folder["path"]):
-                icon = icon_utils.get_icon_for_folder(default_folder["name"])
+                icon: list[str] = icon_utils.get_icon_for_folder(default_folder["name"])
             else:
-                icon = icon_utils.get_icon_for_file(default_folder["name"])
+                icon: list[str] = icon_utils.get_icon_for_file(default_folder["name"])
+            if not (
+                isinstance(default_folder["path"], str)
+                and isinstance(default_folder["name"], str)
+            ):
+                # just ignore, shouldn't happen
+                continue
             self.list_of_options.append(
                 PinnedSidebarOption(
                     icon=icon,
@@ -73,12 +81,19 @@ class PinnedSidebar(OptionList, inherit_bindings=False):
                     )
                 else:
                     pass
-            if "icon" in pin:
+            if (
+                "icon" in pin
+                and isinstance(pin["icon"], list)
+                and len(pin["icon"]) == 2
+            ):
                 icon = pin["icon"]
             elif path.isdir(pin["path"]):
-                icon = icon_utils.get_icon_for_folder(pin["name"])
+                icon: list[str] = icon_utils.get_icon_for_folder(pin["name"])
             else:
-                icon = icon_utils.get_icon_for_file(pin["name"])
+                icon: list[str] = icon_utils.get_icon_for_file(pin["name"])
+            if not (isinstance(pin["path"], str) and isinstance(pin["name"], str)):
+                # just ignore, shouldn't happen
+                continue
             self.list_of_options.append(
                 PinnedSidebarOption(
                     icon=icon,
@@ -98,44 +113,14 @@ class PinnedSidebar(OptionList, inherit_bindings=False):
                     id=f"{path_utils.compress(drive)}-drives",
                 )
             )
-        self.add_options(self.list_of_options)
-
-    @work
-    async def watch_for_drive_changes_and_update(self) -> None:
-        self._drives = path_utils.get_mounted_drives()
-        while True:
-            await asyncio.sleep(self.DRIVE_WATCHER_FREQUENCY)
-            try:
-                new_drives = path_utils.get_mounted_drives()
-                if self._drives != new_drives:
-                    self._drives = new_drives
-                    self.reload_pins()
-            except Exception as e:
-                print(
-                    f"Exception of type {type(e).__name__} while watching drives: {e}"
-                )
-                continue
+        self.set_options(self.list_of_options)
+        self.highlighted = prev_highlighted
 
     async def on_mount(self) -> None:
         """Reload the pinned files from the config."""
+        assert self.parent
         self.input: Input = self.parent.query_one(Input)
-        self.reload_pins()
-        self.watch_for_drive_changes_and_update()
-
-    @on(events.Enter)
-    @work
-    async def show_input_when_hover(self, event: events.Focus) -> None:
-        self.input.add_class("show")
-
-    @on(events.Leave)
-    @work
-    async def hide_input_when_leave(self, event: events.Leave) -> None:
-        self.input.remove_class("show")
-
-    @on(events.Focus)
-    def focus_this_thing(self, event: events.Focus) -> None:
-        if self.highlighted is None:
-            self.action_cursor_down()
+        await self.reload_pins()
 
     async def on_option_list_option_selected(
         self, event: OptionList.OptionSelected
@@ -162,8 +147,6 @@ class PinnedSidebar(OptionList, inherit_bindings=False):
         self.app.query_one("#file_list").focus()
         with self.input.prevent(Input.Changed):
             self.input.clear()
-        self.clear_options()
-        self.add_options(self.list_of_options)
 
     def on_key(self, event: events.Key) -> None:
         if event.key in config["keybinds"]["focus_search"]:

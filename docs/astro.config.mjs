@@ -80,7 +80,7 @@ export default defineConfig({
           label: "configuration",
           items: [
             { label: "configuration", slug: "configuration/configuration" },
-            { label: "themeing", slug: "configuration/themeing" },
+            { label: "theming", slug: "configuration/theming" },
           ],
         },
         {

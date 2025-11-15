@@ -34,6 +34,7 @@ try:
 
     global is_dev
     textual_flags = set(environ.get("TEXTUAL", "").split(","))
+    # both flags exist if ran with `textual run --dev`
     is_dev = {"debug", "devtools"}.issubset(textual_flags)
 
     @click.command(help="A post-modern terminal file explorer")

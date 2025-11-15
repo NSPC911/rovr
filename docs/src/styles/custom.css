@@ -230,7 +230,7 @@ img {
     border-inline-end: none;
   }
   .main-frame {
-    cursor:default;
+    cursor: default;
     padding-inline-start: 0;
   }
   body > div:has(> nav) > div .main-frame {
@@ -248,7 +248,7 @@ img {
     --sl-content-width: none;
   }
   .sidebar-content {
-    padding-left: 1ch
+    padding-left: 1ch;
   }
 }
 @media (max-width: 50rem) {
@@ -397,11 +397,13 @@ body > div:has(> nav) > div {
   }
 }
 figure.frame {
-  &:has(> figcaption > span) > pre[data-language]:not([data-language="plaintext"]) {
+  &:has(> figcaption > span)
+    > pre[data-language]:not([data-language="plaintext"]) {
     border-top-left-radius: 0;
     border-top-right-radius: 0;
   }
-  &:not(:has(> figcaption > span)) > pre[data-language]:not([data-language="plaintext"]) {
+  &:not(:has(> figcaption > span))
+    > pre[data-language]:not([data-language="plaintext"]) {
     padding-top: 1em;
     &::before {
       position: absolute;

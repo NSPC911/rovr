@@ -48,7 +48,7 @@ inside it, you can see 4 files if you previously launched rovr
 - rovr
   - config.toml
   - pins.json
-  - styles.tcss
+  - style.tcss
   - state.toml
 
 </FileTree>
@@ -58,14 +58,14 @@ inside it, you can see 4 files if you previously launched rovr
 the config is handled in a simple config file.
 
 <Aside type="tip">
-  it also has a schema available, so if you can use either
+  it also has a schema available, so if you use either
   [`tombi`](https://github.com/tombi-toml/tombi) or
-  [`taplo`](https://github.com/tamasfe/taplo) to see an autocompletion popup.
+  [`taplo`](https://github.com/tamasfe/taplo), you can see an autocompletion popup.
 </Aside>
 
 for the full schema, please refer to the [`JSON Schema for Humans`](/rovr/reference/schema) page
 
-### styles.tcss
+### style.tcss
 
 styling in textual is handled by `tcss` files, a simplified version of the web's `css`. A reference is available in the [textual docs](https://textual.textualize.io/styles/)
 
@@ -74,7 +74,7 @@ rovr comes with some variables pre-initialised, that you can overwrite.
 <Code
   code={`/* border when a container isn't focused */\n$border-blurred: $primary-darken-3;\n/* border when a container is currently focused */\n$border: $primary-lighten-3;\n/* border style (https://textual.textualize.io/css_types/border) */\n$border-style: round;\n/* reference: https://textual.textualize.io/css_types/scalar */\n/* pinned folder sidebar width */\n$pinned_sidebar_width: 20;\n/* the main file list width */\n$file_list_width: 1fr;\n/* the preview sidebar width */\n$preview_sidebar_width: 35vw;\n/* the footer when nothing inside it is focused */\n$footer_unfocus_height: 8;\n/* the footer when something inside it is focused */\n$footer_focus_height: 10;`}
   lang="scss"
-  title="styles.tcss"
+  title="style.tcss"
 />
 For more advanced styling, refer to [`configuration/themeing`](/rovr/configuration/themeing)
 

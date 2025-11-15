@@ -7,14 +7,14 @@ $border-disabled: $panel;
 
 /* Layout Dimensions */
 $pinned_sidebar_width: 17;
-$file_list_width: 1fr;
-$preview_sidebar_width: 35vw;
+$file_list_width: 1.25fr;
+$preview_sidebar_width: 0.75fr;
 $footer_unfocus_height: 7;
 $footer_focus_height: 9;
 
 /* for compact mode */
 $compact_pinned_sidebar_width: 16;
-$compact_preview_sidebar_width: 25vw;
+$compact_preview_sidebar_width: 0.5fr;
 $compact_footer_unfocus_height: 5;
 $compact_footer_focus_height: 7;
 
@@ -168,6 +168,7 @@ Tooltip {
   &:ansi {
     background: transparent;
     border: $border-style $border-blurred;
+    padding: 0 1;
   }
   &:light:ansi { border: $border-style $border-blurred-light }
 }
@@ -359,11 +360,9 @@ Tooltip {
   height: 1fr;
   margin: 0;
   width: $pinned_sidebar_width;
-  scrollbar-size: 0 0 !important;
-  & > PinnedSidebar { scrollbar-size: 0 0 !important }
 }
 
-#pinned_sidebar { height: 1fr; padding: 0 }
+#pinned_sidebar { height: 1fr; padding: 0; }
 
 #preview_sidebar {
   margin: 0;

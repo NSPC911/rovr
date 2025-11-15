@@ -1,9 +1,25 @@
 ---
 title: tutorial
-description: a tutorial to using rovr
+description: a comprehensive tutorial to using rovr
 ---
 
-this tutorial covers the basic usage of rovr.
+![main page](/rovr/screenshots/main.svg)
+
+this tutorial covers the complete usage of rovr, from basic navigation to advanced file operations.
+
+## getting started
+
+when you first launch rovr, you'll see the main interface with three panels:
+- **file list** (center): displays files and folders in the current directory
+- **sidebar** (left): shows directory tree and pinned folders
+- **preview** (right): displays file content or metadata
+
+### your first keys
+
+1. use the arrow keys or vim-style keys (`hjkl`) to navigate
+2. press `enter` or `l` to enter a folder
+3. press `h` or `backspace` to go back up
+4. press `?` to see the help screen with all keybindings
 
 ## panel traversal
 
@@ -28,6 +44,133 @@ rovr uses a background-highlighted option to show your currently selected item, 
 - toggle hidden files visibility: `.` (period key)
 - reload file list: `ctrl+r`
 
-for more details on the user interface, see the [user interface guide](/rovr/guides/user-interface).
+## file selection and operations
 
-for a full list of actions and their keybindings, refer to the [file operations guide](/rovr/guides/file-operations) and the [keybindings reference](/rovr/reference/keybindings).
+### selecting files
+
+rovr supports multiple selection modes for efficient file operations:
+
+![select mode](/rovr/screenshots/select-mode.svg)
+
+- **select range**: use `shift` with arrow keys (only in visual mode)
+- **select all**: `%` or `ctrl+a`
+- **visual mode**: `v` for extended selection
+
+### basic file operations
+
+once you have files selected, you may choose to use these operations or use the buttons available:
+
+- **copy**: `y` or `ctrl+c`
+![copy button](/rovr/screenshots/copy-button.svg)
+- **cut**: `x` or `ctrl+x`
+![cut button](/rovr/screenshots/cut-button.svg)
+- **paste**: `p` or `ctrl+v`
+![paste button](/rovr/screenshots/paste-button.svg)
+- **delete**: `d` or `delete` key
+![delete button](/rovr/screenshots/delete-button.svg)
+- **rename**: `r` or `f2`
+![rename button](/rovr/screenshots/rename-button.svg)
+- **create new entries**: `ctrl+n` or `o`
+![new entry button](/rovr/screenshots/new-entry-button.svg)
+- **compress to archive**: `E` (uppercase E)
+![compress button](/rovr/screenshots/compress-button.svg)
+- **extract archive**: `ctrl+e`
+![extract button](/rovr/screenshots/extract-button.svg)
+- **copy path**: `Y` (uppercase Y)
+![copy button](/rovr/screenshots/copy-path-button.svg)
+
+## navigation features
+
+### quick navigation
+
+- **search in current folder**: `ctrl+f` or `/`
+![search bar](/rovr/screenshots/search-files.svg)
+- **pin current folder**: `P` (uppercase P)
+<br/><sub>no images again lol</sub>
+- **command palette**: `ctrl+p`
+![command palette](/rovr/screenshots/command-palette.svg)
+
+### tabs and workspaces
+
+- **open new tab**: `n`
+- **close current tab**: `w`
+- **next tab**: `ctrl+j`
+- **previous tab**: `ctrl+k`
+
+### sidebar and panels
+
+- **toggle sidebar**: `S`
+![sidebarless](/rovr/screenshots/sidebarless.svg)
+- **toggle preview**: `I`
+![previewless](/rovr/screenshots/previewless.svg)
+- **toggle footer**
+![footerless](/rovr/screenshots/footerless.svg)
+- **toggle header**
+![headerless](/rovr/screenshots/headerless.svg)
+<br/><sub>looks very similar to another file explorer...</sub>
+- **focus sidebar**: `s`
+- **focus file list**: `esc`
+- **focus preview**: `i`
+- **focus metadata**: `m`
+- **focus processes**: `#`
+- **focus clipboard**: `c`
+
+## file preview
+
+the preview panel shows different content based on file type:
+
+- **text files**: syntax-highlighted content (optionally `bat` is available as a plugin)
+- **images**: the image itself, using proper protocols (refer to [image-previews](/rovr/features/image-previews/#supported-terminals))
+- **archives**: list of contained files
+- **folders**: file count and size information (if metadata panel is focused)
+
+## customization
+
+### configuration
+
+rovr stores its configuration in your system's standard config directory:
+- **windows**: `%APPDATA%\rovr\config.toml`
+- **macos**: `~/Library/Application Support/rovr/config.toml`
+- **linux**: `~/.config/rovr/config.toml`
+
+rovr is designed similarly to ghostty where it should work with minimal configuration, but has a quite comprehensive customisability options.
+
+here are some common changes
+```toml
+[interface]
+# hide hidden files (toggleable with `.`)
+show_hidden = true
+# hide tooltips when hovering over buttons
+tooltips = false
+# make ui not change based on width/height
+use_reactive_layout = false
+# yazi uses scrolloff 5, but nnn is 3, mc is 0, vifm is 4
+# so it really is up to you, default is 3
+scrolloff = 5
+
+[interface.clock]
+# disable the clock
+enabled = false
+
+[interface.compact_mode]
+# fit the big buttons into a single line
+buttons = true
+
+[settings]
+# show hidden files (toggleable by `.`)
+show_hidden_files = true
+```
+
+
+
+## next steps
+
+now that you know the basics, explore these other topics:
+
+- [user interface guide](/rovr/guides/user-interface) - detailed interface explanation
+- [file operations guide](/rovr/guides/file-operations) - comprehensive operations reference
+- [keybindings reference](/rovr/reference/keybindings) - complete keyboard shortcuts
+- [configuration guide](/rovr/guides/configuration) - customize rovr to your needs
+- [tips and tricks](/rovr/guides/tips-and-tricks) - efficiency tips and power user features
+
+for more help, press `?` in rovr to see all available keyboard shortcuts or visit the [documentation](/rovr/).

@@ -3,7 +3,7 @@ title: themeing
 description: how the theme rovr
 ---
 
-rovr can be themed in two ways, via the `config.toml` file and `styles.tcss` file.
+rovr can be themed in two ways, via the `config.toml` file and `style.tcss` file.
 
 ### config.toml
 
@@ -44,11 +44,15 @@ you can take a look at the reference in [textual](https://textual.textualize.io/
 | is_dark    | used sparingly to draw attention and contrasts with `primary` and `secondary`                                            |
 | variables  | custom variables that are used by textual. [variables](https://textual.textualize.io/guide/design/#additional-variables) |
 
-### styles.tcss
+### style.tcss
 
 styling in textual is handled by `tcss` files, a simplified version of the web's `css`. a reference is available in the [textual docs](https://textual.textualize.io/styles/)
 
-the app's general dom is available in [`src/rovr/app.py`](https://github.com/NSPC911/rovr/blob/master/src/rovr/app.py)
+you can get the full DOM list by running
+
+```shell
+rovr --tree-dom
+```
 
 `tcss` works the same as `css`, so, if you want to target the `FileList` inside the `#file_list_container` you can do
 
@@ -58,13 +62,14 @@ the app's general dom is available in [`src/rovr/app.py`](https://github.com/NSP
 }
 ```
 
-however, if you took at the dom above, or a truncated dom below
+however, if you took a look at the dom, or a truncated dom below
 
-```py
-  HorizontalGroup(id="main")
-    VerticalGroup(id="file_list_container")
-      FileList(id="file_list", class="file-list") -> SelectionList
-        FileListSelectionWidget() -> Selection
+```
+Application class="-dark-mode"
+└── Vertical id="root"
+    └── HorizontalGroup id="main"
+        └── FileListContainer id="file_list_container"
+            └── FileList id="file_list" class="file-list"
 ```
 
-you can notice the `SelectionList` part. it aims to emphasise that the `FileList` is based off a `SelectionList` (which itself is based off `OptionList`)
+you may notice that inheriting of classes is not shown, `FileListContainer` inherits `VerticalGroup` while `FileList` inherits `SelectionList`. I will soon add support, but not just yet.

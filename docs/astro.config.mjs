@@ -34,7 +34,7 @@ export default defineConfig({
           attrs: {
             property: "og:image",
             content:
-              "https://github.com/NSPC911/rovr/blob/master/img/0.1.0/rovr_thumb.png?raw=true",
+              "https://github.com/NSPC911/rovr/blob/master/docs/public/rovr_thumb.png?raw=true",
           },
         },
         {
@@ -42,7 +42,7 @@ export default defineConfig({
           attrs: {
             property: "twitter:image",
             content:
-              "https://github.com/NSPC911/rovr/blob/master/img/0.1.0/rovr_thumb.png?raw=true",
+              "https://github.com/NSPC911/rovr/blob/master/docs/public/rovr_thumb.png?raw=true",
           },
         },
         {
@@ -73,6 +73,7 @@ export default defineConfig({
           items: [
             { label: "user interface", slug: "guides/user-interface" },
             { label: "file operations", slug: "guides/file-operations" },
+            { label: "tips and tricks", slug: "guides/tips-and-tricks"}
           ],
         },
         {
@@ -85,10 +86,11 @@ export default defineConfig({
         {
           label: "features",
           items: [
+            { label: "sorting", slug: "features/sorting" },
             { label: "previewing files", slug: "features/previewing-files" },
             { label: "image previews", slug: "features/image-previews" },
             { label: "cd on quit", slug: "features/cd-on-quit" },
-            { label: "search", slug: "features/search" },
+            { label: "context menu", slug: "features/context-menu" },
             { label: "plugins", slug: "features/plugins" },
           ],
         },

@@ -1,81 +1,124 @@
-# Changelog
+# [v0.5.0]
 
-All notable changes to this project will be documented in this file.
+## breaking changes
+- feat!: improve preview container and config functions (##135) 530c507
+- feat(app)!: expand compact mode into two options b2afee6
+- feat(app)!: remove cd on quit in favour of `--cwd-file` (##126) 9b4c6b7
+- feat(schema): decline some keycodes ac0b736
 
-The format is _sort of_ based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and this project _sort of_ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+## new features
+- feat: add sort order switcher (##145) f458a54
+- feat(app): add scrolloff behaviour to filelist (##139) c2a38fb
+- feat(app): add show key option + slight refactor 75a5780
+- feat(app): add tree view command 4fc1a80
 
-## [Unreleased]
+## enhancements
+- feat(app): show any stylesheet errors as is a1aae91
+- fix(file_list): disable new item button when permissionless fd1f061
+- fix(filelist): check up tree as well 8b7ed21
+- fix(process + path_utils): fix deletion inside symlinks/junctions 3291017
 
-### Fixes
+## other changes
+- build(deps): bump astro from 5.15.2 to 5.15.6 in /docs (##148) e2661a9
+- build(deps): bump starlight from 0.35.2 to 0.36.1 ffc71fd
+- build(deps): bump vite from 6.3.6 to 6.4.1 in /docs (##133) f6a60f5
 
-#### crash fixes
-* **app:** fix right click crash that i got ([fbfa96c](https://github.com/NSPC911/rovr/commit/fbfa96ca673c57a2f129aea0e98d919069bffbc5))
-* **utils-func:** handle NoActiveWorker and WorkerCancelled ([3147fc8](https://github.com/NSPC911/rovr/commit/3147fc8d2b317bb20c844712270d7566c5d2935f))
-* **core+app:** fix crashes that i experienced ([e8161ef](https://github.com/NSPC911/rovr/commit/e8161efd725fa6433208306aed602590b592d552))
-* **path_utils:** fix opening of non-existent files ([695b63b](https://github.com/NSPC911/rovr/commit/695b63b8d301d71eefde5923ae4d6438b95a665b))
+- ci(formatting): use locked version from now on 47dce0b
+- ci(ty): fix literally every issue with ty b0e7763
+- ci: add .coderabbit.yaml 809f059
+- ci: bump to 0.5.0rc1 d124a46
+- ci: update docs 854a81b
 
-#### lint fixes
-* **config:** resolve DOC102 error ([240a937](https://github.com/NSPC911/rovr/commit/240a937860dd3f10965e86879f61bd82f9838db5))
-* **pins:** fix ty ([2f728e1](https://github.com/NSPC911/rovr/commit/2f728e129e16551c59881602707cc31b72a6200c))
+- docs: document undocumented features + more images (##147) 8fc3ed7
+- docs: rephrase more 5ec52c3
 
-#### ui fixes
-* **clipboard:** auto handle paste button disables ([3f1124f](https://github.com/NSPC911/rovr/commit/3f1124f837b4a3fb869704fec73b1ab426b5c2ba))
-* **config:** fix startup icon ([f6da8f0](https://github.com/NSPC911/rovr/commit/f6da8f0e595cfd8b0f47bfdaf13441b5c6d81ad7))
-* **file_list:** disable new item button when without permission ([fd1f061](https://github.com/NSPC911/rovr/commit/fd1f061a581a3e731c5d5c1f49cb850362191863))
-* **filelist:** fix hist prev not working in empty dirs ([2dca5e6](https://github.com/NSPC911/rovr/commit/2dca5e668f1a41ca86959883624d9865b6639113))
-* **filelist:** fix selection on exit select mode ([b2c7a16](https://github.com/NSPC911/rovr/commit/b2c7a16bea27a0e12266475fe9b397c668bcdbc3))
-* **path_utils:** prevent drives from being added if it cannot be entered into ([a834331](https://github.com/NSPC911/rovr/commit/a8343313e9b8c35521182ee51bd104a4785171de))
-* **new_item_button:** improve toast message ([58fb410](https://github.com/NSPC911/rovr/commit/58fb4101ec1f929fba5b91630a56703716e56adb))
-* **pinned-sidebar:** always show search bar ([d8047ed](https://github.com/NSPC911/rovr/commit/d8047ed52c44ce91579c5f6a076606c5d7046299))
-* **process:** uses proper panic ([642169d](https://github.com/NSPC911/rovr/commit/642169de6e54e5253937c5c1182d6b086970dc78))
-* **style:** fix Images to be one char from sides ([6a1489a](https://github.com/NSPC911/rovr/commit/6a1489aff00c37080fded9c32536b82388dc1860))
-* **tabs:** prevent selecting text of tabs ([4f7a9e2](https://github.com/NSPC911/rovr/commit/4f7a9e2bc1c7edd9a4f6227af716775f0a9cdceb))
-* **zoxide:** some minor fixes ([85feecb](https://github.com/NSPC911/rovr/commit/85feecb226a86fc110ec661beb92f6dcca3422d3))
+- feat: change ascii logo 1a15b7f
+- feat(app): add a state manager (##146) 5ad938f
+- feat(app): improve borders and stuff ee181e5
+- feat(app): improve compact mode (##138) c45832e
+- feat(app): improve css change handling 756bb38
+- feat(compactmode): make header 1 char height e66a408
+- feat(config): remove recursive required adder 9c708d8
+- feat(config): use importlib.resources 0561446
+- feat(constants): switch to tuple 799ff19
+- feat(fileinuse): add skip + retry buttons and toggle (##137) 40c2abf
+- feat(filelist): improve archive preview performance 52f2e68
+- feat(maps): add typed dict for VAR_TO_DIR cb56f94
+- feat(maps): switch to a dot spinner 7eaaf67
+- feat(path_input): improve ux a bit ce7f339
+- feat(preview): add progress showcase c332da1
+- feat(processes): improve permission error handling 4246b72
+- feat(readme): improve badges a96440c
+- feat(zoxide): switch to proper worker 137a35a
 
-#### behavior fixes
-* **clipboard:** fix scuffed disable paste button implementation ([9a28b4e](https://github.com/NSPC911/rovr/commit/9a28b4ef944c4444099a0d10fb8dbe069d734132))
-* **pinned_sidebar:** fix highlighted not saving ([f6aa4fe](https://github.com/NSPC911/rovr/commit/f6aa4fe63c5b558fcf9c32e52f97b6ecbe7a5b73))
-* **pinned_sidebar:** prevent option refresh ([32f72b1](https://github.com/NSPC911/rovr/commit/32f72b16b51b4c2f52423497f7fb6209cc38c30c))
-* **process:** fix forced perm error ([a0ed7a4](https://github.com/NSPC911/rovr/commit/a0ed7a49bc643a598680a57472406a6678676e9a))
-* **process+path_utils:** fix deletion inside symlinks/junctions ([3291017](https://github.com/NSPC911/rovr/commit/3291017e8d4e9ac398764e2a7d364c4d369c9af4))
+- fix(app): fix right click crash that i got fbfa96c
+- fix(app): warn for attempts to suspend on windows 35ec22c
+- fix(app+state): do pad fixing 0926808
+- fix(clipboard): auto handle paste button disables 3f1124f
+- fix(clipboard): fix scuffed disable paste button implementation 9a28b4e
+- fix(config): fix startup icon f6da8f0
+- fix(copy_path): make use of dir entry 09de59c
+- fix(copy_path): remove await 800cd46
+- fix(core+app): fix crashes that i experienced e8161ef
+- fix(doc-gens): call shutil.which once 310ef05
+- fix(doc-gens): check exit code e12ffcb
+- fix(doc-gens): show proper tracebacks b3872e9
+- fix(doc-gens): use precise delta 574e4f9
+- fix(filelist): await reload pins b0b1290
+- fix(filelist): fix hist prev not working in empty dirs 2dca5e6
+- fix(filelist): fix selection on exit select mode b2c7a16
+- fix(filelist): temporary fix for subtitle, ty shall cry 14df8f3
+- fix(keybinds): check list before adding it 6c2effb
+- fix(keybinds): set default to focus processes to ## symbol b713a5c
+- fix(migration): fix typos 7ee9f95
+- fix(new_item_button): use update_file_list eb7258a
+- fix(new_item_button): improve toast message 58fb410
+- fix(path): check if dev then print 3328764
+- fix(path): fix name error possibility 7c41fcb
+- fix(path_utils): catch nt not found 7e102d0
+- fix(path_utils): fix opening of non-existant files 695b63b
+- fix(path_utils): prevent drives from being added if it cannot be entered ito a834331
+- fix(path_utils): properly handle nt stuff 6f8451c
+- fix(path_utils): use improved algo for extension sorting 6db0835
+- fix(pinned-sidebar): always show search bar d8047ed
+- fix(pinned-sidebar): fix highlighted not saving f6aa4fe
+- fix(pinned-sidebar): prevent option refresh 32f72b1
+- fix(pins): fix ty 2f728e1
+- fix(pins): make pins global again 3e0a3c5
+- fix(preview): stop log 0d44fe3
+- fix(process): uses proper panic 642169d
+- fix(processes): fix forced perm error a0ed7a4
+- fix(rename-button): auto focus the item after renaming 5fb7d13
+- fix(rename-button): fix renaming to different case 5c069a7
+- fix(screens): go straight for the kill b08478e
+- fix(sort_order): move icon setter to function 44da946
+- fix(sort_order): use proper tooltip string 934efe2
+- fix(state_manager): fix nitpicks and stuff 08d0ecd
+- fix(state_manager): use icon helper function 9c27bc7
+- fix(style): fix Images to be one char from sides 6a1489a
+- fix(style): fix option styling 51cab0d 7dd4263
+- fix(tabs): prevent selecting text of tabs 4f7a9e2
+- fix(ui): fix padding and input not caring about width 4c34778
+- fix(utils-func): handle noactiveworker and workercancelled 3147fc8
+- fix(zoxide): some minor fixes 85feecb
 
-### Added
+- perf + refactor: reduce usage of string compression (##143) ca3e898
+- perf(path_utils): move path_utils.get_cwd_object to a thread pool and await it (##141) f6813b1
+- perf(path_utils): add await because perf improved db61508
+- perf: switch from lzstring to scuffed base64 1baa849
+- perf: switch to using self.log instead of print 30452be
+- perf(finder): use asyncio faecb1a
+- perf(zoxide): switch to asyncio (this commit has more than that) 92da08c
 
-#### new config options
-* **app:** add scroll-off behaviour to filelist ([#139](https://github.com/NSPC911/rovr/issues/139)) ([c2a38fb](https://github.com/NSPC911/rovr/commit/c2a38fb27e11f080518152519ae01927eb75d544))
+- refactor(app+pinned_sidebar): move watchers to app f15061c
+- refactor(filelist): move over to file_list_container 7eb3c4b 0d9ac1f
+- refactor(icons_utils): remove is_match var 9838637
+- refactor(process): improve error handling 2b4eb13
+- refactor: address code review feedback from copilot and coderabit aff9acb
+- refactor: use list[str] for session directories 92bdb07
+- refactor: use set_options instead of clear + add 00eab09 68caa7f
 
-#### style improvements
-* **app:** improve borders and stuff ([ee181e5](https://github.com/NSPC911/rovr/commit/ee181e5629eb4652873e92b373674392c983a693))
-* **app:** improve compact mode ([#138](https://github.com/NSPC911/rovr/issues/138)) ([c45832e](https://github.com/NSPC911/rovr/commit/c45832e0ca3e1baf1019c223e550d5d7e24259a2))
-* change ascii logo ([1a15b7f](https://github.com/NSPC911/rovr/commit/1a15b7fa1907b7fde6babd7d8793d390ee86ed48))
-* **compact-mode:** make header 1 char height ([e66a408](https://github.com/NSPC911/rovr/commit/e66a408e552c7127232098ba583f5742084e3012))
+- style(filelist): use inline ifelse e77d01a
+- style(path_utils): add overload for hinting 7823dd7
+- style: fix ty errors c63be19
 
-#### error toasts
-* **app:** improve css change handling ([756bb38](https://github.com/NSPC911/rovr/commit/756bb3812af10e7d1b6f280d874864e3cde65a1d))
-* **app:** show any stylesheet errors as is ([a1aae91](https://github.com/NSPC911/rovr/commit/a1aae911a254d143a757f00e5fa08e58e929e475))
-
-#### modal screens
-* **fileinuse:** add skip + retry buttons and toggle ([#137](https://github.com/NSPC911/rovr/issues/137)) ([40c2abf](https://github.com/NSPC911/rovr/commit/40c2abfe4ad2b06d642aba2d7a663c6e82004e3e)), closes [#123](https://github.com/NSPC911/rovr/issues/123)
-
-
-#### housekeeping
-* **config:** remove recursive required adder ([9c708d8](https://github.com/NSPC911/rovr/commit/9c708d8e6b5b240ec51714c54ebdedd27f113e5a))
-* **config:** use importlib.resources ([0561446](https://github.com/NSPC911/rovr/commit/0561446f46184bf7246bf5fa1e52953dc9906ff4))
-* **constants:** switch to tuple ([799ff19](https://github.com/NSPC911/rovr/commit/799ff19f4c31045ae4984923d2d2ecabfedfc914))
-* **maps:** add typed dict for VAR_TO_DIR ([cb56f94](https://github.com/NSPC911/rovr/commit/cb56f94fdf827f302851259a1b1058fc8ac9f51e))
-
-#### user experience
-* **path_input:** improve ux a bit ([ce7f339](https://github.com/NSPC911/rovr/commit/ce7f33971a7a8d649e10ff5bacf69f2dbb21ecb8))
-* **preview:** add progress showcase ([c332da1](https://github.com/NSPC911/rovr/commit/c332da1fc1a8d71cabe68bf33886cea6f2204f07))
-* **processes:** improve permission error handling ([4246b72](https://github.com/NSPC911/rovr/commit/4246b721447b5875c3a8a83bf3b0c7b38c0dff3c))
-* **search:** add custom scorer because yes ([92108ae](https://github.com/NSPC911/rovr/commit/92108ae0c62fe988edde6c1bb5661e6f425fa5c2))
-
-### Removed
-* **config**: removed `interface.preview_*` in favour of `interface.preview_text.*` ([530c507](https://github.com/NSPC911/rovr/commit/530c50771fdee3e5e0456bce94088c4cd0b338d8))
-* **config**: removed `settings.cd_on_quit` in favour of `--cwd-file` ([9b4c6b7](https://github.com/NSPC911/rovr/commit/9b4c6b7c580c1f2945a969448082f1a78ee22fb8))
-
-### Performance Improvements
-
-* **path-func:** add await because perf improved ([db61508](https://github.com/NSPC911/rovr/commit/db61508e214d40087fc18f642ed8ff7eb6e96010))
-* **filelist:** improve archive preview performance ([52f2e68](https://github.com/NSPC911/rovr/commit/52f2e6863caa92501b00331dddd109faaf2174eb))
-* **zoxide:** switch to proper worker ([137a35a](https://github.com/NSPC911/rovr/commit/137a35a4af62d5d366e3bfc8300285580ab8cc0a))

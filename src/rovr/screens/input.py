@@ -58,7 +58,7 @@ class ModalInput(ModalScreen):
         if self.is_path:
             if (
                 event.value == self.initial_value and event.value != ""
-            ) or self.query_one(Input).is_valid:
+            ) or event.input.is_valid:
                 self.icon_widget.classes = "valid"
                 self.horizontal_group.classes = "valid"
                 self.horizontal_group.border_subtitle = self.border_subtitle

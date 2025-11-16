@@ -1,13 +1,14 @@
 from rich.style import Style
 from rich.text import TextType
-from rovr.validators import ColorValidator, LayoutValidator, StyleValidator
 from textual import events, on, work
 from textual.app import ComposeResult
 from textual.color import Color
 from textual.containers import HorizontalGroup, VerticalGroup, VerticalScroll
 from textual.css.query import NoMatches
+from textual.css.scalar import Scalar
 from textual.css.styles import RulesMap
 from textual.dom import DOMNode
+from textual.geometry import Spacing
 from textual.layouts.grid import GridLayout
 from textual.layouts.horizontal import HorizontalLayout
 from textual.layouts.vertical import VerticalLayout
@@ -16,6 +17,13 @@ from textual.widgets import Input, Label, Static, TabbedContent, Tree
 from textual.widgets.tree import TreeDataType, TreeNode
 
 from rovr.resizebar import HorizontalResizeBar, VerticalResizeBar
+from rovr.validators import (
+    CheckID,
+    ColorValidator,
+    LayoutValidator,
+    ScalarValidator,
+    StyleValidator,
+)
 
 
 class DOMTree(Tree):
@@ -120,7 +128,7 @@ class Inspector(HorizontalGroup):
                     with VerticalScroll(id="idandclasses"):
                         with HorizontalGroup(id="id"):
                             yield Label("ID")
-                            yield Input(placeholder="No IDs")
+                            yield Input(placeholder="No IDs", validators=[CheckID()])
                         with HorizontalGroup(id="classes"):
                             yield Label("Classes")
                             yield Input(placeholder="No Classes")
@@ -144,8 +152,6 @@ class Inspector(HorizontalGroup):
 
         def build_textual_tree(parent_node: TreeNode, dom_node: DOMNode) -> None:
             for child in dom_node.query_children("*"):
-                if child is self:
-                    continue
                 node_type = type(child).__name__
                 label = f"[bold]{node_type}[/bold]"
                 if child.id:
@@ -190,31 +196,96 @@ class Inspector(HorizontalGroup):
             to_mount = []
             for rule, value in rules.items():
                 if isinstance(value, str):
-                    to_mount.append(HorizontalGroup(Static(rule), Input(value, classes="str"), id=rule))
+                    to_mount.append(
+                        HorizontalGroup(
+                            Static(rule), Input(value, classes="str"), id=rule
+                        )
+                    )
                 elif isinstance(value, Color):
-                    to_mount.append(HorizontalGroup(Static(rule), Input(value.hex, classes="color", validators=[ColorValidator()]), id=rule))
+                    to_mount.append(
+                        HorizontalGroup(
+                            Static(rule),
+                            Input(
+                                value.hex,
+                                classes="color",
+                                validators=[ColorValidator()],
+                            ),
+                            id=rule,
+                        )
+                    )
                 elif isinstance(value, (VerticalLayout, HorizontalLayout, GridLayout)):
                     to_mount.append(
                         HorizontalGroup(
                             Static(rule),
-                            Input(type(value).__name__.replace("Layout", ""), classes="layout", validators=[LayoutValidator()]), id=rule
+                            Input(
+                                type(value).__name__.replace("Layout", ""),
+                                classes="layout",
+                                validators=[LayoutValidator()],
+                            ),
+                            id=rule,
                         )
                     )
                 elif isinstance(value, Style):
-                    to_mount.append(HorizontalGroup(Static(rule), Input(str(value), classes="str", validators=[StyleValidator()]), id=rule))
+                    to_mount.append(
+                        HorizontalGroup(
+                            Static(rule),
+                            Input(
+                                str(value), classes="str", validators=[StyleValidator()]
+                            ),
+                            id=rule,
+                        )
+                    )
                 elif isinstance(value, bool) and rule.startswith("auto"):
                     pass
                 elif isinstance(value, int):
-                    to_mount.append(HorizontalGroup(Static(rule), Input(str(value), classes="int", validators=[Number()]), id=rule))
+                    to_mount.append(
+                        HorizontalGroup(
+                            Static(rule),
+                            Input(str(value), classes="int", validators=[Number(failure_description="Must be a number!")]),
+                            id=rule,
+                        )
+                    )
+                elif isinstance(value, Scalar):
+                    to_mount.append(
+                        HorizontalGroup(
+                            Static(rule),
+                            Input(str(value), classes="scalar", validators=[ScalarValidator()]),
+                            id=rule,
+                        )
+                    )
+                # elif isinstance(value, Spacing):
+                #     to_mount.append(
+                #         HorizontalGroup(
+                #             Static(rule),
+                #             Input()
+                #         )
+                #     )
                 else:
-                    print(rule, value, type(value))
+                    self.notify(str((rule, value, type(value))))
             async with self.batch():
                 try:
                     for rule_widget in to_mount:
-                        if (input_widget := self.query_one(f"#css #{rule_widget.id} Input")):
+                        if input_widget := self.query_one(
+                            f"#css #{rule_widget.id} Input"
+                        ):
                             input_widget.value = rule_widget.query_one(Input).value
                 except NoMatches:
                     await css.remove_children()
                     await css.mount_all(to_mount)
         else:
             css.remove_children()
+
+    @on(Input.Changed, "#id > Input")
+    @on(Input.Changed, "#classes > Input")
+    def update_class_or_id(self, event: Input.Changed) -> None:
+        assert event.input.parent is not None
+        domtree: DOMTree = self.query_one(DOMTree)
+        if domtree.cursor_node is None or not event.input.is_valid:
+            return
+        if not isinstance(domtree.cursor_node.data, DOMNode):
+            return
+        if event.input.parent.id == "id":
+            domtree.cursor_node.data._nodes.updated()
+            domtree.cursor_node.data._id = event.value
+        elif event.input.parent.id == "classes":
+            domtree.cursor_node.data.classes = frozenset(event.value.split())

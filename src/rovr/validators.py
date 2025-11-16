@@ -1,6 +1,8 @@
 from rich.errors import StyleSyntaxError
 from rich.style import Style
 from textual.color import Color, ColorParseError
+from textual.css.scalar import Scalar, ScalarParseError
+from textual.dom import BadIdentifier, check_identifiers
 from textual.validation import ValidationResult, Validator
 
 
@@ -13,8 +15,7 @@ class ColorValidator(Validator):
             Color.parse(value)
             return self.success()
         except ColorParseError as exc:
-            self.failure_description = exc.__str__()
-            return self.failure()
+            return self.failure(str(exc))
 
 
 class LayoutValidator(Validator):
@@ -27,6 +28,7 @@ class LayoutValidator(Validator):
         else:
             return self.failure()
 
+
 class StyleValidator(Validator):
     def __init__(self) -> None:
         super().__init__()
@@ -36,5 +38,28 @@ class StyleValidator(Validator):
             Style.parse(value)
             return self.success()
         except StyleSyntaxError as exc:
-            self.failure_description = exc.__str__()
-            return self.failure()
+            return self.failure(str(exc))
+
+
+class ScalarValidator(Validator):
+    def __init__(self) -> None:
+        super().__init__()
+
+    def validate(self, value: str) -> ValidationResult:
+        try:
+            Scalar.parse(value)
+            return self.success()
+        except ScalarParseError as exc:
+            return self.failure(str(exc))
+
+
+class CheckID(Validator):
+    def __init__(self) -> None:
+        super().__init__()
+
+    def validate(self, value: str) -> ValidationResult:
+        try:
+            check_identifiers("id", value)
+            return self.success()
+        except BadIdentifier as exc:
+            return self.failure(str(exc))

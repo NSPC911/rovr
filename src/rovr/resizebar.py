@@ -22,7 +22,6 @@ class HorizontalResizeBar(Static):
         self.connected_container = parent
         self.min_width = 20
         self.max_width = 100
-        self.tooltip = "<── Drag to resize ──>"
 
     def on_mouse_move(self, event: events.MouseMove) -> None:
         # App.mouse_captured refers to the widget that is currently capturing mouse events.
@@ -67,7 +66,6 @@ class VerticalResizeBar(Static):
         self.connected_container = parent
         self.min_height = 5
         self.max_height = 50
-        self.tooltip = "Drag to resize"
 
     def on_mouse_move(self, event: events.MouseMove) -> None:
         # App.mouse_captured refers to the widget that is currently capturing mouse events.

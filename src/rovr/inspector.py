@@ -1,6 +1,8 @@
+import contextlib
+
 from rich.style import Style
 from rich.text import TextType
-from textual import events, on, work
+from textual import events, on
 from textual.app import ComposeResult
 from textual.color import Color
 from textual.containers import HorizontalGroup, VerticalGroup, VerticalScroll
@@ -18,10 +20,13 @@ from textual.widgets.tree import TreeDataType, TreeNode
 
 from rovr.resizebar import HorizontalResizeBar, VerticalResizeBar
 from rovr.validators import (
+    BorderValidator,
     CheckID,
     ColorValidator,
+    FloatValidator,
     LayoutValidator,
     ScalarValidator,
+    SpacingValidator,
     StyleValidator,
 )
 
@@ -47,6 +52,7 @@ class DOMTree(Tree):
         super().__init__(
             label, data, name=name, id=id, classes=classes, disabled=disabled
         )
+        self.prev_hovered_index = -1
 
 
 class Inspector(HorizontalGroup):
@@ -67,13 +73,17 @@ class Inspector(HorizontalGroup):
                 padding: 0;
                 scrollbar-size: 0 0 !important;
                 overflow: hidden hidden;
-                width: 0.875fr;
+                width: 1fr;
+                background: transparent !important
             }
             Static {
-                border-right: solid $foreground !important;
-                width: 1.125fr;
+                width: auto;
                 text-wrap: nowrap;
-                text-overflow: ellipsis
+                text-overflow: ellipsis;
+            }
+            Static#filler {
+                width: 2;
+                text-overflow: clip;
             }
         }
         #id, #classes {
@@ -128,10 +138,17 @@ class Inspector(HorizontalGroup):
                     with VerticalScroll(id="idandclasses"):
                         with HorizontalGroup(id="id"):
                             yield Label("ID")
-                            yield Input(placeholder="No IDs", validators=[CheckID()])
+                            yield Input(
+                                placeholder="No IDs",
+                                validators=[CheckID()],
+                                validate_on=["changed"],
+                                valid_empty=True
+                            )
                         with HorizontalGroup(id="classes"):
                             yield Label("Classes")
-                            yield Input(placeholder="No Classes")
+                            yield Input(
+                                placeholder="No Classes", validate_on=["changed"], valid_empty=True
+                            )
 
     def action__toggle_devtools_inspector(self) -> None:
         self.display = not self.display
@@ -178,9 +195,9 @@ class Inspector(HorizontalGroup):
         self.styles.width = self.forced_width
 
     @on(DOMTree.NodeHighlighted)
-    @work(exclusive=True)
     async def on_tree_node_highlighted(self, event: DOMTree.NodeHighlighted) -> None:
         css: VerticalScroll = self.query_one("#css", VerticalScroll)
+        await css.remove_children()
         if isinstance(event.node.data, DOMNode):
             if event.node.data.id is None:
                 self.query_one("#id > Input", Input).value = ""
@@ -192,98 +209,75 @@ class Inspector(HorizontalGroup):
                 self.query_one("#classes > Input", Input).value = " ".join(
                     event.node.data.classes
                 )
-            rules: RulesMap = event.node.data.styles._base_styles._rules
+            rules: RulesMap = event.node.data.styles.base._rules | event.node.data.styles.inline._rules
             to_mount = []
             for rule, value in rules.items():
+                input_widget: Input | None = None
                 if isinstance(value, str):
-                    to_mount.append(
-                        HorizontalGroup(
-                            Static(rule), Input(value, classes="str"), id=rule
-                        )
-                    )
+                    input_widget = Input(value, classes="str")
                 elif isinstance(value, Color):
-                    to_mount.append(
-                        HorizontalGroup(
-                            Static(rule),
-                            Input(
-                                value.hex,
-                                classes="color",
-                                validators=[ColorValidator()],
-                            ),
-                            id=rule,
-                        )
+                    input_widget = Input(
+                        value.hex,
+                        classes="color",
+                        validators=[ColorValidator()],
                     )
                 elif isinstance(value, (VerticalLayout, HorizontalLayout, GridLayout)):
-                    to_mount.append(
-                        HorizontalGroup(
-                            Static(rule),
-                            Input(
-                                type(value).__name__.replace("Layout", ""),
-                                classes="layout",
-                                validators=[LayoutValidator()],
-                            ),
-                            id=rule,
-                        )
+                    input_widget = Input(
+                        type(value).__name__.replace("Layout", "").lower(),
+                        classes="layout",
+                        validators=[LayoutValidator()],
                     )
                 elif isinstance(value, Style):
-                    to_mount.append(
-                        HorizontalGroup(
-                            Static(rule),
-                            Input(
-                                str(value), classes="str", validators=[StyleValidator()]
-                            ),
-                            id=rule,
-                        )
+                    input_widget = Input(
+                        str(value),
+                        classes="style",
+                        validators=[StyleValidator()],
                     )
                 elif isinstance(value, bool) and rule.startswith("auto"):
                     pass
                 elif isinstance(value, int):
-                    to_mount.append(
-                        HorizontalGroup(
-                            Static(rule),
-                            Input(
-                                str(value),
-                                classes="int",
-                                validators=[
-                                    Number(failure_description="Must be a number!")
-                                ],
-                            ),
-                            id=rule,
-                        )
+                    input_widget = Input(
+                        str(value),
+                        classes="int",
+                        validators=[Number(failure_description="Must be a number!")],
+                    )
+                elif isinstance(value, float):
+                    input_widget = Input(
+                        str(value),
+                        classes="float",
+                        validators=[FloatValidator()],
                     )
                 elif isinstance(value, Scalar):
+                    input_widget = Input(
+                        str(value),
+                        classes="scalar",
+                        validators=[ScalarValidator()],
+                    )
+                elif isinstance(value, Spacing):
+                    input_widget = Input(
+                        value.css,
+                        classes="spacing",
+                        validators=[SpacingValidator()],
+                    )
+                elif isinstance(value, tuple):
+                    if rule.startswith("border"):
+                        input_widget = Input(
+                            f"{value[0]} {value[1].hex}",
+                            classes="tuple-border",
+                            validators=[BorderValidator("border")]
+                        )
+                    else:
+                        self.notify(str((rule, value, type(value))), timeout=3)
+                else:
+                    self.notify(str((rule, value, type(value))), timeout=3)
+                if input_widget is not None:
+                    input_widget.validate_on = {"changed"}
                     to_mount.append(
                         HorizontalGroup(
-                            Static(rule),
-                            Input(
-                                str(value),
-                                classes="scalar",
-                                validators=[ScalarValidator()],
-                            ),
-                            id=rule,
+                            Static(rule), Static(": ", classes="filler"), input_widget, id=rule
                         )
                     )
-                # elif isinstance(value, Spacing):
-                #     to_mount.append(
-                #         HorizontalGroup(
-                #             Static(rule),
-                #             Input()
-                #         )
-                #     )
-                else:
-                    self.notify(str((rule, value, type(value))))
-            async with self.batch():
-                try:
-                    for rule_widget in to_mount:
-                        if input_widget := self.query_one(
-                            f"#css #{rule_widget.id} Input"
-                        ):
-                            input_widget.value = rule_widget.query_one(Input).value
-                except NoMatches:
-                    await css.remove_children()
-                    await css.mount_all(to_mount)
-        else:
-            css.remove_children()
+            await css.mount_all(to_mount)
 
     @on(Input.Changed, "#id > Input")
     @on(Input.Changed, "#classes > Input")
@@ -299,3 +293,67 @@ class Inspector(HorizontalGroup):
             domtree.cursor_node.data._id = event.value
         elif event.input.parent.id == "classes":
             domtree.cursor_node.data.classes = frozenset(event.value.split())
+
+    @on(Input.Changed, "#css Input")
+    def update_style(self, event: Input.Changed) -> None:
+        assert isinstance(event.input.parent, HorizontalGroup)
+        domtree: DOMTree = self.query_one(DOMTree)
+        if domtree.cursor_node is None:
+            return
+        if val := event.input.validate(event.value):  # noqa: SIM102
+            if val is not None and val.failures:
+                return
+        if not isinstance(domtree.cursor_node.data, DOMNode):
+            return
+        with contextlib.suppress(KeyError):
+            to_set_value = None
+            if event.input.has_class("int"):
+                to_set_value = int(event.value)
+            elif event.input.has_class("float"):
+                to_set_value = float(event.value)
+            elif event.input.has_class("color"):
+                to_set_value = Color.parse(event.value)
+            elif event.input.has_class("layout"):
+                if event.value == "vertical":
+                    to_set_value = VerticalLayout()
+                elif event.value == "horizontal":
+                    to_set_value = HorizontalLayout()
+                elif event.value == "grid":
+                    to_set_value = GridLayout()
+                else:
+                    return
+            elif event.input.has_class("style"):
+                to_set_value = Style.parse(event.value)
+            elif event.input.has_class("scalar"):
+                to_set_value = Scalar.parse(event.value)
+            elif event.input.has_class("spacing"):
+                to_set_value = Spacing.unpack(list(map(lambda x: int(float(x)), event.value.split())))
+            elif event.input.has_class("tuple-border"):
+                splitted = event.value.split()
+                to_set_value = (splitted[0], Color.parse(splitted[1]))
+            domtree.cursor_node.data.styles.__dict__[event.input.parent.id] = to_set_value
+
+    @on(events.MouseMove)
+    async def on_mouse_move(self, event: events.MouseMove) -> None:
+        if isinstance(event.widget, DOMTree) and event.widget.hover_line != -1:
+            node = event.widget.get_node_at_line(event.widget.hover_line)
+            if node is not None and isinstance(node.data, DOMNode):
+                async with self.batch():
+                    if event.widget.prev_hovered_index != -1:
+                        prev_hovered_node = event.widget.get_node_at_line(
+                            event.widget.prev_hovered_index
+                        )
+                        if prev_hovered_node is not None and isinstance(
+                            prev_hovered_node.data, DOMNode
+                        ):
+                            if prev_hovered_node.data is node.data:
+                                return
+                            prev_hovered_node.data.remove_class("-highlight")
+                    node.data.add_class("-highlight")
+                    event.widget.prev_hovered_index = event.widget.hover_line
+
+    @on(events.Leave)
+    def on_mouse_leave(self, event: events.Leave) -> None:
+        domtree: DOMTree = self.query_one(DOMTree)
+        if domtree.prev_hovered_index != -1 and hasattr(node := domtree.get_node_at_line(domtree.prev_hovered_index), "data"):
+            node.data.remove_class("-highlight")

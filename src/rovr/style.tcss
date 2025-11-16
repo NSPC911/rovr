@@ -1047,3 +1047,8 @@ Screen {
   min-width: 5;
   padding: 0 1;
 }
+/* .-highlight *, */
+.-highlight {
+  /* hatch: "╲" skyblue !important; */
+  background: $accent 50% !important;
+}

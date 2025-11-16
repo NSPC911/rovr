@@ -80,9 +80,7 @@ class Application(App, inherit_bindings=False):
             priority=True,
         )
         for key in config["keybinds"]["quit_app"]
-    ] + [
-            Binding("ctrl+i", "_toggle_devtools_inspector")
-        ]
+    ] + [Binding("ctrl+i", "_toggle_devtools_inspector")]
     # higher index = higher priority
     CSS_PATH = ["style.tcss", path.join(VAR_TO_DIR["CONFIG"], "style.tcss")]
 

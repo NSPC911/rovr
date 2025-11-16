@@ -20,7 +20,9 @@ class ColorValidator(Validator):
 
 class LayoutValidator(Validator):
     def __init__(self) -> None:
-        super().__init__(failure_description="Needs to be one of `vertical`, `horizontal` or `grid`")
+        super().__init__(
+            failure_description="Needs to be one of `vertical`, `horizontal` or `grid`"
+        )
 
     def validate(self, value: str) -> ValidationResult:
         if value in ["vertical", "horizontal", "grid"]:

@@ -241,7 +241,13 @@ class Inspector(HorizontalGroup):
                     to_mount.append(
                         HorizontalGroup(
                             Static(rule),
-                            Input(str(value), classes="int", validators=[Number(failure_description="Must be a number!")]),
+                            Input(
+                                str(value),
+                                classes="int",
+                                validators=[
+                                    Number(failure_description="Must be a number!")
+                                ],
+                            ),
                             id=rule,
                         )
                     )
@@ -249,7 +255,11 @@ class Inspector(HorizontalGroup):
                     to_mount.append(
                         HorizontalGroup(
                             Static(rule),
-                            Input(str(value), classes="scalar", validators=[ScalarValidator()]),
+                            Input(
+                                str(value),
+                                classes="scalar",
+                                validators=[ScalarValidator()],
+                            ),
                             id=rule,
                         )
                     )

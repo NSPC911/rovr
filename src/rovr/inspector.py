@@ -142,12 +142,14 @@ class Inspector(HorizontalGroup):
                                 placeholder="No IDs",
                                 validators=[CheckID()],
                                 validate_on=["changed"],
-                                valid_empty=True
+                                valid_empty=True,
                             )
                         with HorizontalGroup(id="classes"):
                             yield Label("Classes")
                             yield Input(
-                                placeholder="No Classes", validate_on=["changed"], valid_empty=True
+                                placeholder="No Classes",
+                                validate_on=["changed"],
+                                valid_empty=True,
                             )
 
     def action__toggle_devtools_inspector(self) -> None:
@@ -209,7 +211,10 @@ class Inspector(HorizontalGroup):
                 self.query_one("#classes > Input", Input).value = " ".join(
                     event.node.data.classes
                 )
-            rules: RulesMap = event.node.data.styles.base._rules | event.node.data.styles.inline._rules
+            rules: RulesMap = (
+                event.node.data.styles.base._rules
+                | event.node.data.styles.inline._rules
+            )
             to_mount = []
             for rule, value in rules.items():
                 input_widget: Input | None = None
@@ -264,7 +269,7 @@ class Inspector(HorizontalGroup):
                         input_widget = Input(
                             f"{value[0]} {value[1].hex}",
                             classes="tuple-border",
-                            validators=[BorderValidator("border")]
+                            validators=[BorderValidator("border")],
                         )
                     else:
                         self.notify(str((rule, value, type(value))), timeout=3)
@@ -274,7 +279,10 @@ class Inspector(HorizontalGroup):
                     input_widget.validate_on = {"changed"}
                     to_mount.append(
                         HorizontalGroup(
-                            Static(rule), Static(": ", classes="filler"), input_widget, id=rule
+                            Static(rule),
+                            Static(": ", classes="filler"),
+                            input_widget,
+                            id=rule,
                         )
                     )
             await css.mount_all(to_mount)
@@ -327,11 +335,15 @@ class Inspector(HorizontalGroup):
             elif event.input.has_class("scalar"):
                 to_set_value = Scalar.parse(event.value)
             elif event.input.has_class("spacing"):
-                to_set_value = Spacing.unpack(list(map(lambda x: int(float(x)), event.value.split())))
+                to_set_value = Spacing.unpack(
+                    list(map(lambda x: int(float(x)), event.value.split()))
+                )
             elif event.input.has_class("tuple-border"):
                 splitted = event.value.split()
                 to_set_value = (splitted[0], Color.parse(splitted[1]))
-            domtree.cursor_node.data.styles.__dict__[event.input.parent.id] = to_set_value
+            domtree.cursor_node.data.styles.__dict__[event.input.parent.id] = (
+                to_set_value
+            )
 
     @on(events.MouseMove)
     async def on_mouse_move(self, event: events.MouseMove) -> None:
@@ -355,5 +367,7 @@ class Inspector(HorizontalGroup):
     @on(events.Leave)
     def on_mouse_leave(self, event: events.Leave) -> None:
         domtree: DOMTree = self.query_one(DOMTree)
-        if domtree.prev_hovered_index != -1 and hasattr(node := domtree.get_node_at_line(domtree.prev_hovered_index), "data"):
+        if domtree.prev_hovered_index != -1 and hasattr(
+            node := domtree.get_node_at_line(domtree.prev_hovered_index), "data"
+        ):
             node.data.remove_class("-highlight")

@@ -23,7 +23,9 @@ class ColorValidator(Validator):
 
 class LayoutValidator(Validator):
     def __init__(self) -> None:
-        super().__init__(failure_description="Needs to be one of `vertical`, `horizontal` or `grid`")
+        super().__init__(
+            failure_description="Needs to be one of `vertical`, `horizontal` or `grid`"
+        )
 
     def validate(self, value: str) -> ValidationResult:
         if value in ["vertical", "horizontal", "grid"]:
@@ -103,9 +105,32 @@ class BorderValidator(Validator):
         splitted = value.split()
         if len(splitted) == 2:
             # check border condition
-            if self.type in ["border", "outline"] and splitted[0] not in ["ascii", "blank", "dashed", "double", "heavy", "hidden", "none", "hkey", "inner", "outer", "panel", "round", "solid", "tall", "thick", "vkey", "wide"]:
+            if self.type in ["border", "outline"] and splitted[0] not in [
+                "ascii",
+                "blank",
+                "dashed",
+                "double",
+                "heavy",
+                "hidden",
+                "none",
+                "hkey",
+                "inner",
+                "outer",
+                "panel",
+                "round",
+                "solid",
+                "tall",
+                "thick",
+                "vkey",
+                "wide",
+            ]:
                 return self.failure(description=f"{self.type} type is not right.")
-            elif self.type == "keyline" and splitted[0] not in ["none", "thin", "heavy", "double"]:
+            elif self.type == "keyline" and splitted[0] not in [
+                "none",
+                "thin",
+                "heavy",
+                "double",
+            ]:
                 return self.failure("keyline type is not right.")
             # check color
             try:
@@ -114,4 +139,6 @@ class BorderValidator(Validator):
             except ColorParseError:
                 return self.failure("Color could not be parsed. Must be hex code!")
         else:
-            return self.failure(f"Must have 2 parameters, but {len(splitted)} was provided")
+            return self.failure(
+                f"Must have 2 parameters, but {len(splitted)} was provided"
+            )

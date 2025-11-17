@@ -7,7 +7,8 @@ from os import path
 from typing import ClassVar
 
 import textual_image.widget as timg
-from PIL import UnidentifiedImageError
+from PIL import Image, UnidentifiedImageError
+from PIL.Image import Image as PILImage
 from rich.text import Text
 from textual import events, on, work
 from textual.app import ComposeResult
@@ -16,7 +17,7 @@ from textual.containers import Container
 from textual.css.query import NoMatches
 from textual.message import Message
 from textual.widgets import Static, TextArea
-from textual.worker import Worker, WorkerCancelled
+from textual.worker import Worker, WorkerCancelled, WorkerError
 
 from rovr.classes import Archive
 from rovr.core import FileList
@@ -185,10 +186,48 @@ class PreviewContainer(Container):
         except NoMatches:
             return False
 
+    @work(thread=True)
+    def make_pil_object(self, item_path: str) -> PILImage:
+        return Image.open(item_path)
+
     async def show_image_preview(self) -> None:
         self.border_title = titles.image
         if should_cancel():
             return
+
+        worker: Worker = self.make_pil_object(self._current_file_path)
+        try:
+            pil_object: PILImage = await worker.wait()
+        except WorkerError:
+            return
+        except UnidentifiedImageError:
+            if should_cancel():
+                return
+            await self.mount(
+                CustomTextArea(
+                    id="text_preview",
+                    show_line_numbers=False,
+                    soft_wrap=True,
+                    read_only=True,
+                    text="Cannot render image (is the encoding wrong?)",
+                    language="markdown",
+                    compact=True,
+                )
+            )
+        except FileNotFoundError:
+            if should_cancel():
+                return
+            await self.mount(
+                CustomTextArea(
+                    id="text_preview",
+                    show_line_numbers=False,
+                    soft_wrap=True,
+                    read_only=True,
+                    text=config["interface"]["preview_text"]["error"],
+                    language="markdown",
+                    compact=True,
+                )
+            )
 
         if not self.has_child("#image_preview"):
             await self.remove_children()
@@ -197,51 +236,21 @@ class PreviewContainer(Container):
             if should_cancel():
                 return
 
-            try:
-                image_widget = timg.__dict__[
-                    config["settings"]["image_protocol"] + "Image"
-                ](
-                    self._current_file_path,
-                    id="image_preview",
-                    classes="inner_preview",
-                )
-                image_widget.can_focus = True
-                await self.mount(image_widget)
-            except FileNotFoundError:
-                if should_cancel():
-                    return
-                await self.mount(
-                    CustomTextArea(
-                        id="text_preview",
-                        show_line_numbers=False,
-                        soft_wrap=True,
-                        read_only=True,
-                        text=config["interface"]["preview_text"]["error"],
-                        language="markdown",
-                        compact=True,
-                    )
-                )
-            except UnidentifiedImageError:
-                if should_cancel():
-                    return
-                await self.mount(
-                    CustomTextArea(
-                        id="text_preview",
-                        show_line_numbers=False,
-                        soft_wrap=True,
-                        read_only=True,
-                        text="Cannot render image (is the encoding wrong?)",
-                        language="markdown",
-                        compact=True,
-                    )
-                )
+            image_widget = timg.__dict__[
+                config["settings"]["image_protocol"] + "Image"
+            ](
+                pil_object,
+                id="image_preview",
+                classes="inner_preview",
+            )
+            image_widget.can_focus = True
+            await self.mount(image_widget)
         else:
             try:
                 if should_cancel():
                     return
                 image_widget = self.query_one("#image_preview")
-                if image_widget.image != self._current_file_path:
-                    image_widget.image = self._current_file_path
+                image_widget.image = pil_object
             except Exception:
                 if should_cancel():
                     return

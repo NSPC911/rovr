@@ -388,6 +388,8 @@ Tooltip {
     margin: 0;
     &TextArea {
       padding: 0 1;
+      scrollbar-size: 0 0;
+      overflow: hidden;
     }
     &FileList { height: 1fr }
   }

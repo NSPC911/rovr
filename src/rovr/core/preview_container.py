@@ -192,7 +192,9 @@ class PreviewContainer(Container):
             return
 
         try:
-            worker: Worker = self.run_worker(lambda: Image.open(self._current_file_path), thread=True)
+            worker: Worker = self.run_worker(
+                lambda: Image.open(self._current_file_path), thread=True
+            )
             pil_object: PILImage = await worker.wait()
         except WorkerError:
             return

@@ -21,6 +21,7 @@ class PreviewContainerTitles:
     file = "File Preview"
     folder = "Folder Preview"
     archive = "Archive Preview"
+    pdf = "PDF Preview"
 
 
 buttons_that_depend_on_path = [

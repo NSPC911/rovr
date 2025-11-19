@@ -7,6 +7,7 @@ from os import path
 from typing import ClassVar
 
 import textual_image.widget as timg
+from pdf2image import convert_from_path
 from PIL import Image, UnidentifiedImageError
 from PIL.Image import Image as PILImage
 from rich.text import Text
@@ -23,7 +24,11 @@ from rovr.classes import Archive
 from rovr.core import FileList
 from rovr.functions.utils import should_cancel
 from rovr.variables.constants import PreviewContainerTitles, config
-from rovr.variables.maps import ARCHIVE_EXTENSIONS_FULL, EXT_TO_LANG_MAP, PIL_EXTENSIONS
+from rovr.variables.maps import (
+    ARCHIVE_EXTENSIONS_FULL,
+    EXT_TO_LANG_MAP,
+    PIL_EXTENSIONS,
+)
 
 titles = PreviewContainerTitles()
 
@@ -164,6 +169,9 @@ class PreviewContainer(Container):
         self._initial_height = self.size.height
         self._file_type: str = "none"
         self._preview_texts: list[str] = config["interface"]["preview_text"].values()
+        self._pdf_current_page: int = 0
+        self._pdf_total_pages: int = 0
+        self._pdf_images: list[PILImage] | None = None
 
     def compose(self) -> ComposeResult:
         yield Static(config["interface"]["preview_text"]["start"], classes="wrap")
@@ -265,6 +273,110 @@ class PreviewContainer(Container):
 
         if should_cancel():
             return
+
+    async def show_pdf_preview(self) -> None:
+        self.border_title = titles.pdf
+
+        if should_cancel():
+            return
+
+        # Convert PDF to images if not already done
+        if self._pdf_images is None:
+            try:
+                worker: Worker = self.run_worker(lambda: convert_from_path(str(self._current_file_path), transparent=False, fmt="png", single_file=False), thread=True)
+                result = await worker.wait()
+            except Exception as exc:
+                if should_cancel():
+                    return
+                await self.remove_children()
+                await self.mount(
+                    CustomTextArea(
+                        id="text_preview",
+                        show_line_numbers=False,
+                        soft_wrap=True,
+                        read_only=True,
+                        text=f"{type(exc).__name__}: {str(exc)}",
+                        language="markdown",
+                        compact=True,
+                    )
+                )
+                return
+
+            self._pdf_images = result
+            self._pdf_total_pages = len(self._pdf_images)
+            self._pdf_current_page = 0
+
+        if should_cancel():
+            return
+
+        current_image = self._pdf_images[self._pdf_current_page]
+
+        self.border_subtitle = (
+            f"Page {self._pdf_current_page + 1}/{self._pdf_total_pages}"
+        )
+
+        if not self.has_child("#image_preview"):
+            await self.remove_children()
+            self.remove_class("bat", "full", "clip")
+
+            if should_cancel():
+                return
+
+            image_widget = timg.__dict__[
+                config["settings"]["image_protocol"] + "Image"
+            ](
+                current_image,
+                id="image_preview",
+                classes="inner_preview",
+            )
+            image_widget.can_focus = True
+            await self.mount(image_widget)
+        else:
+            try:
+                if should_cancel():
+                    return
+                image_widget = self.query_one("#image_preview")
+                image_widget.image = current_image
+            except Exception:
+                if should_cancel():
+                    return
+                await self.remove_children()
+                await self.show_pdf_preview()
+
+        if should_cancel():
+            return
+
+    async def pdf_next_page(self) -> None:
+        """Navigate to next PDF page"""
+        if (
+            self._file_type == "pdf"
+            and self._pdf_images is not None
+            and self._pdf_current_page < self._pdf_total_pages - 1
+        ):
+            self._pdf_current_page += 1
+            await self.show_pdf_preview()
+
+    async def pdf_previous_page(self) -> None:
+        """Navigate to previous PDF page"""
+        if (
+            self._file_type == "pdf"
+            and self._pdf_images is not None
+            and self._pdf_current_page > 0
+        ):
+            self._pdf_current_page -= 1
+            await self.show_pdf_preview()
+
+    async def pdf_first_page(self) -> None:
+        """Navigate to first PDF page"""
+        if self._file_type == "pdf" and self._pdf_images is not None:
+            self._pdf_current_page = 0
+            await self.show_pdf_preview()
+
+    async def pdf_last_page(self) -> None:
+        """Navigate to last PDF page"""
+        if self._file_type == "pdf" and self._pdf_images is not None:
+            self._pdf_current_page = self._pdf_total_pages - 1
+            await self.show_pdf_preview()
 
     async def show_bat_file_preview(self) -> bool:
         self.border_title = titles.bat
@@ -501,13 +613,21 @@ class PreviewContainer(Container):
             return
         self.post_message(self.SetLoading(True))
 
+        # Reset PDF state when changing files
+        if file_path != self._current_file_path:
+            self._pdf_images = None
+            self._pdf_current_page = 0
+            self._pdf_total_pages = 0
+
         if path.isdir(file_path):
             self.app.call_from_thread(
                 self.update_ui, file_path=file_path, file_type="folder"
             )
         else:
             lower_file_path = file_path.lower()
-            if any(lower_file_path.endswith(ext) for ext in PIL_EXTENSIONS):
+            if lower_file_path.endswith(".pdf"):
+                file_type = "pdf"
+            elif any(lower_file_path.endswith(ext) for ext in PIL_EXTENSIONS):
                 file_type = "image"
             elif any(lower_file_path.endswith(ext) for ext in ARCHIVE_EXTENSIONS_FULL):
                 file_type = "archive"
@@ -549,7 +669,7 @@ class PreviewContainer(Container):
                         FileNotFoundError,
                     ):
                         content = [config["interface"]["preview_text"]["error"]]
-                case "image":
+                case "image" | "pdf":
                     pass
                 case _:
                     if should_cancel():
@@ -610,6 +730,8 @@ class PreviewContainer(Container):
 
         if file_type == "folder":
             await self.show_folder_preview(file_path)
+        elif file_type == "pdf":
+            await self.show_pdf_preview()
         elif file_type == "image":
             await self.show_image_preview()
         elif file_type == "archive":
@@ -661,7 +783,22 @@ class PreviewContainer(Container):
 
     async def on_key(self, event: events.Key) -> None:
         """Check for vim keybinds."""
-        if self.border_title == titles.bat or self.border_title == titles.archive:
+        # Handle PDF page navigation
+        if self.border_title == titles.pdf:
+            match event.key:
+                case key if key in config["keybinds"]["down"] + config["keybinds"]["page_down"]:
+                    event.stop()
+                    await self.pdf_next_page()
+                case key if key in config["keybinds"]["up"] + config["keybinds"]["page_up"]:
+                    event.stop()
+                    await self.pdf_previous_page()
+                case key if key in config["keybinds"]["home"]:
+                    event.stop()
+                    await self.pdf_first_page()
+                case key if key in config["keybinds"]["end"]:
+                    event.stop()
+                    await self.pdf_last_page()
+        elif self.border_title == titles.bat or self.border_title == titles.archive:
             widget = (
                 self if self.border_title == titles.bat else self.query_one(FileList)
             )

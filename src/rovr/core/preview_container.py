@@ -186,17 +186,13 @@ class PreviewContainer(Container):
         except NoMatches:
             return False
 
-    @work(thread=True)
-    def make_pil_object(self, item_path: str) -> PILImage:
-        return Image.open(item_path)
-
     async def show_image_preview(self) -> None:
         self.border_title = titles.image
         if should_cancel():
             return
 
-        worker: Worker = self.make_pil_object(self._current_file_path)
         try:
+            worker: Worker = self.run_worker(lambda: Image.open(self._current_file_path), thread=True)
             pil_object: PILImage = await worker.wait()
         except WorkerError:
             return

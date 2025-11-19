@@ -283,7 +283,15 @@ class PreviewContainer(Container):
         # Convert PDF to images if not already done
         if self._pdf_images is None:
             try:
-                worker: Worker = self.run_worker(lambda: convert_from_path(str(self._current_file_path), transparent=False, fmt="png", single_file=False), thread=True)
+                worker: Worker = self.run_worker(
+                    lambda: convert_from_path(
+                        str(self._current_file_path),
+                        transparent=False,
+                        fmt="png",
+                        single_file=False,
+                    ),
+                    thread=True,
+                )
                 result = await worker.wait()
             except Exception as exc:
                 if should_cancel():
@@ -786,10 +794,14 @@ class PreviewContainer(Container):
         # Handle PDF page navigation
         if self.border_title == titles.pdf:
             match event.key:
-                case key if key in config["keybinds"]["down"] + config["keybinds"]["page_down"]:
+                case key if (
+                    key in config["keybinds"]["down"] + config["keybinds"]["page_down"]
+                ):
                     event.stop()
                     await self.pdf_next_page()
-                case key if key in config["keybinds"]["up"] + config["keybinds"]["page_up"]:
+                case key if (
+                    key in config["keybinds"]["up"] + config["keybinds"]["page_up"]
+                ):
                     event.stop()
                     await self.pdf_previous_page()
                 case key if key in config["keybinds"]["home"]:

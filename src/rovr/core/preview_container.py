@@ -703,15 +703,17 @@ class PreviewContainer(Container):
         self._current_content = content
 
         self._file_type = file_type
+        self.remove_class("pdf")
 
         if file_type == "folder":
             await self.show_folder_preview(file_path)
-        elif file_type == "pdf":
-            await self.show_pdf_preview()
         elif file_type == "image":
             await self.show_image_preview()
         elif file_type == "archive":
             await self.show_archive_preview()
+        elif file_type == "pdf":
+            self.add_class("pdf")
+            await self.show_pdf_preview()
         elif content is not None:
             if content in self._preview_texts:
                 await self.mount_special_messages()

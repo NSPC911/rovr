@@ -398,6 +398,9 @@ Tooltip {
     align: center middle;
     margin: 0 1
   }
+  &.pdf Image {
+    margin: 0 1 1 1;
+  }
 }
 
 #preview_sidebar { padding: 0 }
@@ -420,11 +423,6 @@ Tooltip {
   &:focus-within {
     height: $footer_focus_height;
     max-height: 40vh;
-  }
-
-  &.hide {
-    display: block !important;
-    height: 1 !important;
   }
 }
 

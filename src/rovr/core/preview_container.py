@@ -742,6 +742,22 @@ class PreviewContainer(Container):
         if should_cancel():
             return
 
+    async def on_mouse_scroll_up(self, event: events.MouseScrollUp) -> None:
+        # pdf for now, text later on
+        if self.border_title == titles.pdf and self._file_type == "pdf":
+            event.stop()
+            if self._pdf_current_page > 0:
+                self._pdf_current_page -= 1
+                await self.show_pdf_preview()
+
+    async def on_mouse_scroll_down(self, event: events.MouseScrollDown) -> None:
+        # pdf for now, text later on
+        if self.border_title == titles.pdf and self._file_type == "pdf":
+            event.stop()
+            if self._pdf_current_page < self._pdf_total_pages - 1:
+                self._pdf_current_page += 1
+                await self.show_pdf_preview()
+
     async def on_resize(self, event: events.Resize) -> None:
         """Re-render the preview on resize if it's was rendered by batcat and height changed."""
         if (

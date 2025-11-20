@@ -354,38 +354,6 @@ class PreviewContainer(Container):
         if should_cancel():
             return
 
-    async def pdf_next_page(self) -> None:
-        """Navigate to next PDF page"""
-        if (
-            self._file_type == "pdf"
-            and self._pdf_images is not None
-            and self._pdf_current_page < self._pdf_total_pages - 1
-        ):
-            self._pdf_current_page += 1
-            await self.show_pdf_preview()
-
-    async def pdf_previous_page(self) -> None:
-        """Navigate to previous PDF page"""
-        if (
-            self._file_type == "pdf"
-            and self._pdf_images is not None
-            and self._pdf_current_page > 0
-        ):
-            self._pdf_current_page -= 1
-            await self.show_pdf_preview()
-
-    async def pdf_first_page(self) -> None:
-        """Navigate to first PDF page"""
-        if self._file_type == "pdf" and self._pdf_images is not None:
-            self._pdf_current_page = 0
-            await self.show_pdf_preview()
-
-    async def pdf_last_page(self) -> None:
-        """Navigate to last PDF page"""
-        if self._file_type == "pdf" and self._pdf_images is not None:
-            self._pdf_current_page = self._pdf_total_pages - 1
-            await self.show_pdf_preview()
-
     async def show_bat_file_preview(self) -> bool:
         self.border_title = titles.bat
         bat_executable = config["plugins"]["bat"]["executable"]
@@ -792,24 +760,33 @@ class PreviewContainer(Container):
     async def on_key(self, event: events.Key) -> None:
         """Check for vim keybinds."""
         # Handle PDF page navigation
-        if self.border_title == titles.pdf:
+        if (
+            self.border_title == titles.pdf
+            and self._file_type == "pdf"
+            and self._pdf_images is not None
+        ):
             match event.key:
                 case key if (
                     key in config["keybinds"]["down"] + config["keybinds"]["page_down"]
+                    and self._pdf_current_page < self._pdf_total_pages - 1
                 ):
                     event.stop()
-                    await self.pdf_next_page()
+                    self._pdf_current_page += 1
                 case key if (
                     key in config["keybinds"]["up"] + config["keybinds"]["page_up"]
+                    and self._pdf_current_page > 0
                 ):
                     event.stop()
-                    await self.pdf_previous_page()
+                    self._pdf_current_page -= 1
                 case key if key in config["keybinds"]["home"]:
                     event.stop()
-                    await self.pdf_first_page()
+                    self._pdf_current_page = 0
                 case key if key in config["keybinds"]["end"]:
                     event.stop()
-                    await self.pdf_last_page()
+                    self._pdf_current_page = self._pdf_total_pages - 1
+                case _:
+                    return
+            await self.show_pdf_preview()
         elif self.border_title == titles.bat or self.border_title == titles.archive:
             widget = (
                 self if self.border_title == titles.bat else self.query_one(FileList)

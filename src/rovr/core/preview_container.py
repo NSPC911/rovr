@@ -221,31 +221,36 @@ class PreviewContainer(Container):
         except UnidentifiedImageError:
             if should_cancel():
                 return
-            await self.mount(
-                CustomTextArea(
-                    id="text_preview",
-                    show_line_numbers=False,
-                    soft_wrap=True,
-                    read_only=True,
-                    text="Cannot render image (is the encoding wrong?)",
-                    language="markdown",
-                    compact=True,
+            async with self.batch():
+                await self.remove_children()
+                await self.mount(
+                    CustomTextArea(
+                        id="text_preview",
+                        show_line_numbers=False,
+                        soft_wrap=True,
+                        read_only=True,
+                        text="Cannot render image (is the encoding wrong?)",
+                        language="markdown",
+                        compact=True,
+                    )
                 )
-            )
+            return
         except FileNotFoundError:
             if should_cancel():
                 return
-            await self.mount(
-                CustomTextArea(
-                    id="text_preview",
-                    show_line_numbers=False,
-                    soft_wrap=True,
-                    read_only=True,
-                    text=config["interface"]["preview_text"]["error"],
-                    language="markdown",
-                    compact=True,
+            async with self.batch():
+                await self.remove_children()
+                await self.mount(
+                    CustomTextArea(
+                        id="text_preview",
+                        show_line_numbers=False,
+                        soft_wrap=True,
+                        read_only=True,
+                        text=config["interface"]["preview_text"]["error"],
+                        language="markdown",
+                        compact=True,
+                    )
                 )
-            )
 
         if not self.has_child("#image_preview"):
             await self.remove_children()
@@ -272,8 +277,9 @@ class PreviewContainer(Container):
             except Exception:
                 if should_cancel():
                     return
-                await self.remove_children()
-                await self.show_image_preview()
+                async with self.batch():
+                    await self.remove_children()
+                    await self.show_image_preview()
 
         if should_cancel():
             return

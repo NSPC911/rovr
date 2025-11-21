@@ -1,3 +1,7 @@
+# Unreleased
+
+- feat: add pdf preview support with poppler
+
 # [v0.5.0]
 
 ## breaking changes

@@ -13,7 +13,7 @@ from jsonschema import ValidationError
 from rich import box
 from rich.console import Console
 
-from rovr.functions.utils import deep_merge
+from rovr.functions.utils import deep_merge, set_nested_value
 from rovr.variables.maps import (
     VAR_TO_DIR,
 )
@@ -375,8 +375,6 @@ def apply_mode(config: dict, mode_name: str) -> None:
     Note:
         Exits the program if the specified mode doesn't exist in the config.
     """
-    from rovr.functions.utils import set_nested_value
-
     if "mode" not in config:
         pprint("[bright_red]Error:[/] No modes defined in config")
         pprint("[yellow]Hint:[/] Define modes in config.toml like:")

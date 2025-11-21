@@ -55,7 +55,7 @@ def set_nested_value(d: dict, path_str: str, value: Union[bool, str, int, float,
                     # Special case: For boolean values targeting plugin dicts,
                     # set the 'enabled' field rather than replacing the whole dict
                     current[key]["enabled"] = value
-                elif type(current[key]) is type(value):
+                elif isinstance(current[key], type(value)):
                     current[key] = value
                 else:
                     pprint("[bright_red underline]Config Error:[/]")

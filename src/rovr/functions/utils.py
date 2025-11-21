@@ -32,10 +32,19 @@ def deep_merge(d: dict, u: dict) -> dict:
 def set_nested_value(d: dict, path_str: str, value: Union[bool, str, int, float, list, dict]) -> None:
     """Sets a value in a nested dictionary using a dot-separated path string.
 
+    Special handling for plugins:
+    - For boolean values pointing to a dict with an 'enabled' field, the boolean
+      is applied to the 'enabled' field instead of replacing the entire dict.
+      Example: set_nested_value(config, "plugins.bat", True) sets
+      config["plugins"]["bat"]["enabled"] = True
+
     Args:
         d (dict): The dictionary to modify.
         path_str (str): The dot-separated path to the key (e.g., "plugins.bat").
         value (Union[bool, str, int, float, list, dict]): The value to set.
+
+    Note:
+        Exits the program if the path doesn't exist or a type mismatch occurs.
     """
     keys = path_str.split(".")
     current = d
@@ -43,7 +52,8 @@ def set_nested_value(d: dict, path_str: str, value: Union[bool, str, int, float,
         if i == len(keys) - 1:
             try:
                 if isinstance(value, bool) and isinstance(current[key], dict) and "enabled" in current[key]:
-                    # For boolean values, set the 'enabled' field if it exists
+                    # Special case: For boolean values targeting plugin dicts,
+                    # set the 'enabled' field rather than replacing the whole dict
                     current[key]["enabled"] = value
                 elif type(current[key]) is type(value):
                     current[key] = value

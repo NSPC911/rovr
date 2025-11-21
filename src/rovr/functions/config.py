@@ -364,14 +364,30 @@ def apply_mode(config: dict, mode_name: str) -> None:
     """
     Apply mode-specific config overrides to the config dictionary.
 
+    This function modifies the config dictionary in-place by:
+    1. Applying all overrides from the specified mode section
+    2. Removing the 'mode' section from config after applying overrides
+
     Args:
-        config (dict): The config dictionary to modify
+        config (dict): The config dictionary to modify (modified in-place)
         mode_name (str): The name of the mode to apply
+
+    Note:
+        Exits the program if the specified mode doesn't exist in the config.
     """
     from rovr.functions.utils import set_nested_value
 
-    if "mode" not in config or mode_name not in config["mode"]:
+    if "mode" not in config:
+        pprint("[bright_red]Error:[/] No modes defined in config")
+        pprint("[yellow]Hint:[/] Define modes in config.toml like:")
+        pprint("  [mode.gui]")
+        pprint('  "plugins.editor.file_executable" = "vscode"')
+        exit(1)
+
+    if mode_name not in config["mode"]:
+        available_modes = ", ".join(f"'{m}'" for m in config["mode"])
         pprint(f"[bright_red]Error:[/] Mode '{mode_name}' not found in config")
+        pprint(f"[yellow]Available modes:[/] {available_modes}")
         exit(1)
 
     mode_config = config["mode"][mode_name]
@@ -379,7 +395,8 @@ def apply_mode(config: dict, mode_name: str) -> None:
     for path_str, value in mode_config.items():
         set_nested_value(config, path_str, value)
 
-    # Remove the mode section from config to avoid confusion
+    # Remove the mode section from config after applying overrides
+    # This prevents mode sections from interfering with normal config usage
     if "mode" in config:
         del config["mode"]
 

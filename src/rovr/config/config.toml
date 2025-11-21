@@ -184,7 +184,7 @@ command_palette = "ctrl+p"
 suspend_app = ["ctrl+z"]
 
 [plugins.zoxide]
-enabled = false
+enabled = true
 keybinds = ["z"]
 show_scores = false
 
@@ -193,13 +193,13 @@ enabled = false
 executable = "bat"
 
 [plugins.editor]
-enabled = false
-file_executable = "nano"
-folder_executable = "code"
+enabled = true
+file_executable = ""
+folder_executable = ""
 keybinds = ["e"]
 
 [plugins.finder]
-enabled = false
+enabled = true
 keybinds = ["f"]
 executable = "fd"
 relative_paths = true

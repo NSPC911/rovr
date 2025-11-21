@@ -736,7 +736,7 @@
           "properties": {
             "enabled": {
               "type": "boolean",
-              "default": false,
+              "default": true,
               "description": "Enable or disable zoxide travelling."
             },
             "keybinds": {

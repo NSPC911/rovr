@@ -2,7 +2,8 @@ import os
 from collections import deque
 from importlib import resources
 from importlib.metadata import PackageNotFoundError, version
-from os import path
+from os import environ, path
+from platform import system
 
 import jsonschema
 import toml
@@ -333,6 +334,15 @@ def load_config() -> tuple[dict, dict]:
     # image protocol because "AutoImage" doesn't work with Sixel
     if config["settings"]["image_protocol"] == "Auto":
         config["settings"]["image_protocol"] = ""
+    # editor empty use $EDITOR
+    if config["plugins"]["editor"]["file_executable"] == "":
+        config["plugins"]["editor"]["file_executable"] = environ.get(
+            "EDITOR", "nano" if system() != "Windows" else "notepad"
+        )
+    if config["plugins"]["editor"]["folder_executable"] == "":
+        config["plugins"]["editor"]["folder_executable"] = environ.get(
+            "EDITOR", "vim" if system() != "Windows" else "code"
+        )
     return schema, config
 
 

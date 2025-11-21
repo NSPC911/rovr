@@ -360,6 +360,30 @@ def load_config() -> tuple[dict, dict]:
     return schema, config
 
 
+def apply_mode(config: dict, mode_name: str) -> None:
+    """
+    Apply mode-specific config overrides to the config dictionary.
+
+    Args:
+        config (dict): The config dictionary to modify
+        mode_name (str): The name of the mode to apply
+    """
+    from rovr.functions.utils import set_nested_value
+
+    if "mode" not in config or mode_name not in config["mode"]:
+        pprint(f"[bright_red]Error:[/] Mode '{mode_name}' not found in config")
+        exit(1)
+
+    mode_config = config["mode"][mode_name]
+
+    for path_str, value in mode_config.items():
+        set_nested_value(config, path_str, value)
+
+    # Remove the mode section from config to avoid confusion
+    if "mode" in config:
+        del config["mode"]
+
+
 def config_setup() -> None:
     # check config folder
     if not path.exists(VAR_TO_DIR["CONFIG"]):

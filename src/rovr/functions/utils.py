@@ -1,4 +1,4 @@
-from typing import Any, Callable
+from typing import Any, Callable, Union
 
 from humanize import naturalsize
 from rich.console import Console
@@ -29,20 +29,21 @@ def deep_merge(d: dict, u: dict) -> dict:
     return d
 
 
-def set_nested_value(d: dict, path_str: str, value: bool) -> None:
+def set_nested_value(d: dict, path_str: str, value: Union[bool, str, int, float, list, dict]) -> None:
     """Sets a value in a nested dictionary using a dot-separated path string.
 
     Args:
         d (dict): The dictionary to modify.
         path_str (str): The dot-separated path to the key (e.g., "plugins.bat").
-        value (bool): The value to set. (boolean for now)
+        value (Union[bool, str, int, float, list, dict]): The value to set.
     """
     keys = path_str.split(".")
     current = d
     for i, key in enumerate(keys):
         if i == len(keys) - 1:
             try:
-                if isinstance(current[key], dict) and "enabled" in current[key]:
+                if isinstance(value, bool) and isinstance(current[key], dict) and "enabled" in current[key]:
+                    # For boolean values, set the 'enabled' field if it exists
                     current[key]["enabled"] = value
                 elif type(current[key]) is type(value):
                     current[key] = value

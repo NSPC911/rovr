@@ -77,7 +77,10 @@
               "type": "string",
               "default": "right",
               "description": "Align the clock to either the 'right' or 'left' of the tabs bar.",
-              "enum": ["left", "right"]
+              "enum": [
+                "left",
+                "right"
+              ]
             }
           }
         },
@@ -87,7 +90,7 @@
           "properties": {
             "error": {
               "type": "string",
-              "default": "couldn't read this file! (\u00AC_\u00AC )",
+              "default": "couldn't read this file! (\u00ac_\u00ac )",
               "description": "If for any reason the file preview refused to show, this appears."
             },
             "binary": {
@@ -102,7 +105,7 @@
             },
             "empty": {
               "type": "string",
-              "default": "bytes be gone (\u2310\u25A0_\u25A0)",
+              "default": "bytes be gone (\u2310\u25a0_\u25a0)",
               "description": "If the current file has no content, this is shown"
             },
             "too_large": {
@@ -153,7 +156,13 @@
           "type": "string",
           "default": "Auto",
           "description": "The image protocol to use when displaying an image",
-          "enum": ["Auto", "TGP", "Sixel", "Halfcell", "Unicode"]
+          "enum": [
+            "Auto",
+            "TGP",
+            "Sixel",
+            "Halfcell",
+            "Unicode"
+          ]
         },
         "allow_tab_nav": {
           "type": "boolean",
@@ -221,7 +230,11 @@
           "type": "string",
           "default": "decimal",
           "description": "The filesize suffix to follow.\n`decimal`: 1024 -> 1.024kB\n`binary`: 1024 -> 1KiB\n`gnu`: 1024 -> 1K",
-          "enum": ["decimal", "binary", "gnu"]
+          "enum": [
+            "decimal",
+            "binary",
+            "gnu"
+          ]
         }
       }
     },
@@ -240,7 +253,10 @@
               },
               "match_type": {
                 "type": "string",
-                "enum": ["exact", "endswith"],
+                "enum": [
+                  "exact",
+                  "endswith"
+                ],
                 "default": "exact",
                 "description": "Type of matching:\n`exact`   : for exact file name matching\n`endswith`: for file name ends with matching"
               },
@@ -253,7 +269,12 @@
                 "description": "The color for the icon. Can be a named color or hex code."
               }
             },
-            "required": ["pattern", "icon", "color", "match_type"]
+            "required": [
+              "pattern",
+              "icon",
+              "color",
+              "match_type"
+            ]
           },
           "default": [],
           "description": "Custom file icon mappings. Earlier entries have higher priority."
@@ -269,7 +290,10 @@
               },
               "match_type": {
                 "type": "string",
-                "enum": ["exact", "endswith"],
+                "enum": [
+                  "exact",
+                  "endswith"
+                ],
                 "default": "exact",
                 "description": "Type of matching:\n`exact`   : for exact file name matching\n`endswith`: for file name ends with matching"
               },
@@ -282,7 +306,12 @@
                 "description": "The color for the icon. Can be a named color or hex code"
               }
             },
-            "required": ["pattern", "icon", "color", "match_type"]
+            "required": [
+              "pattern",
+              "icon",
+              "color",
+              "match_type"
+            ]
           },
           "default": [],
           "description": "Custom folder icon mappings. Earlier entries have higher priority."
@@ -403,313 +432,417 @@
       "properties": {
         "toggle_pin": {
           "type": "array",
-          "items": { "$ref": "#/definitions/keybind" },
+          "items": {
+            "$ref": "#/definitions/keybind"
+          },
           "description": "Toggle the current folder in the Pinned Folder Sidebar.",
           "display_name": "Pin folder"
         },
         "toggle_pinned_sidebar": {
           "type": "array",
-          "items": { "$ref": "#/definitions/keybind" },
+          "items": {
+            "$ref": "#/definitions/keybind"
+          },
           "description": "Toggle viewing the pinned sidebar.",
           "display_name": "Toggle sidebar"
         },
         "toggle_preview_sidebar": {
           "type": "array",
-          "items": { "$ref": "#/definitions/keybind" },
+          "items": {
+            "$ref": "#/definitions/keybind"
+          },
           "description": "Toggle viewing the preview sidebar.",
           "display_name": "Toggle preview"
         },
         "toggle_footer": {
           "type": "array",
-          "items": { "$ref": "#/definitions/keybind" },
+          "items": {
+            "$ref": "#/definitions/keybind"
+          },
           "description": "Toggle viewing the footer.",
           "display_name": "Toggle footer"
         },
         "toggle_menuwrapper": {
           "type": "array",
-          "items": { "$ref": "#/definitions/keybind" },
+          "items": {
+            "$ref": "#/definitions/keybind"
+          },
           "description": "Toggle viewing the menu wrapper.",
           "display_name": "Toggle menu wrapper"
         },
         "focus_toggle_pinned_sidebar": {
           "type": "array",
-          "items": { "$ref": "#/definitions/keybind" },
+          "items": {
+            "$ref": "#/definitions/keybind"
+          },
           "description": "Toggle focus between pinned folder sidebar and file list.",
           "display_name": "Focus sidebar"
         },
         "focus_file_list": {
           "type": "array",
-          "items": { "$ref": "#/definitions/keybind" },
+          "items": {
+            "$ref": "#/definitions/keybind"
+          },
           "description": "Focus the file list.",
           "display_name": "Focus file list"
         },
         "focus_toggle_preview_sidebar": {
           "type": "array",
-          "items": { "$ref": "#/definitions/keybind" },
+          "items": {
+            "$ref": "#/definitions/keybind"
+          },
           "description": "Focus toggle between preview sidebar and file list.",
           "display_name": "Focus preview"
         },
         "focus_toggle_path_switcher": {
           "type": "array",
-          "items": { "$ref": "#/definitions/keybind" },
+          "items": {
+            "$ref": "#/definitions/keybind"
+          },
           "description": "Focus toggle between path switcher and file list.",
           "display_name": "Focus path"
         },
         "focus_toggle_processes": {
           "type": "array",
-          "items": { "$ref": "#/definitions/keybind" },
+          "items": {
+            "$ref": "#/definitions/keybind"
+          },
           "description": "Focus toggle the processes container.",
           "display_name": "Focus processes"
         },
         "focus_toggle_clipboard": {
           "type": "array",
-          "items": { "$ref": "#/definitions/keybind" },
+          "items": {
+            "$ref": "#/definitions/keybind"
+          },
           "description": "Focus toggle the clipboard container.",
           "display_name": "Focus clipboard"
         },
         "focus_toggle_metadata": {
           "type": "array",
-          "items": { "$ref": "#/definitions/keybind" },
+          "items": {
+            "$ref": "#/definitions/keybind"
+          },
           "description": "Focus toggle the metadata container.",
           "display_name": "Focus metadata"
         },
         "focus_search": {
           "type": "array",
-          "items": { "$ref": "#/definitions/keybind" },
+          "items": {
+            "$ref": "#/definitions/keybind"
+          },
           "description": "Focus the search bar.",
           "display_name": "Search"
         },
         "copy": {
           "type": "array",
-          "items": { "$ref": "#/definitions/keybind" },
+          "items": {
+            "$ref": "#/definitions/keybind"
+          },
           "description": "Copy the selected files in the file list to the clipboard.",
           "display_name": "Copy"
         },
         "paste": {
           "type": "array",
-          "items": { "$ref": "#/definitions/keybind" },
+          "items": {
+            "$ref": "#/definitions/keybind"
+          },
           "description": "Paste the selected files in the clipboard into the current directory.",
           "display_name": "Paste"
         },
         "cut": {
           "type": "array",
-          "items": { "$ref": "#/definitions/keybind" },
+          "items": {
+            "$ref": "#/definitions/keybind"
+          },
           "description": "Cut the selected files in the file list to the clipboard.",
           "display_name": "Cut"
         },
         "delete": {
           "type": "array",
-          "items": { "$ref": "#/definitions/keybind" },
+          "items": {
+            "$ref": "#/definitions/keybind"
+          },
           "description": "Delete the selected files in the file list.",
           "display_name": "Delete"
         },
         "rename": {
           "type": "array",
-          "items": { "$ref": "#/definitions/keybind" },
+          "items": {
+            "$ref": "#/definitions/keybind"
+          },
           "description": "Rename the selected file in the file list to something else.",
           "display_name": "Rename"
         },
         "new": {
           "type": "array",
-          "items": { "$ref": "#/definitions/keybind" },
+          "items": {
+            "$ref": "#/definitions/keybind"
+          },
           "description": "Create a new item in the current directory.",
           "display_name": "New"
         },
         "toggle_all": {
           "type": "array",
-          "items": { "$ref": "#/definitions/keybind" },
+          "items": {
+            "$ref": "#/definitions/keybind"
+          },
           "description": "Enter into select mode and select/unselect everything.",
           "display_name": "Select all"
         },
         "zip": {
           "type": "array",
-          "items": { "$ref": "#/definitions/keybind" },
+          "items": {
+            "$ref": "#/definitions/keybind"
+          },
           "description": "Create a zip archive from selected files.",
           "display_name": "Zip"
         },
         "unzip": {
           "type": "array",
-          "items": { "$ref": "#/definitions/keybind" },
+          "items": {
+            "$ref": "#/definitions/keybind"
+          },
           "description": "Extract a selected zip archive.",
           "display_name": "Unzip"
         },
         "copy_path": {
           "type": "array",
-          "items": { "$ref": "#/definitions/keybind" },
+          "items": {
+            "$ref": "#/definitions/keybind"
+          },
           "description": "Copy the path of the item to the system clipboard.",
           "display_name": "Copy path"
         },
         "up": {
           "type": "array",
-          "items": { "$ref": "#/definitions/keybind" },
+          "items": {
+            "$ref": "#/definitions/keybind"
+          },
           "description": "Go up the file list options.",
           "display_name": "Up"
         },
         "down": {
           "type": "array",
-          "items": { "$ref": "#/definitions/keybind" },
+          "items": {
+            "$ref": "#/definitions/keybind"
+          },
           "description": "Go down the file list options.",
           "display_name": "Down"
         },
         "up_tree": {
           "type": "array",
-          "items": { "$ref": "#/definitions/keybind" },
+          "items": {
+            "$ref": "#/definitions/keybind"
+          },
           "description": "Go up the file tree.",
           "display_name": "Go up directory"
         },
         "down_tree": {
           "type": "array",
-          "items": { "$ref": "#/definitions/keybind" },
+          "items": {
+            "$ref": "#/definitions/keybind"
+          },
           "description": "Go down the file tree, or open the currently selected item.",
           "display_name": "Enter/Select"
         },
         "page_up": {
           "type": "array",
-          "items": { "$ref": "#/definitions/keybind" },
+          "items": {
+            "$ref": "#/definitions/keybind"
+          },
           "description": "Page Up in the file list options.",
           "display_name": "Page Up"
         },
         "page_down": {
           "type": "array",
-          "items": { "$ref": "#/definitions/keybind" },
+          "items": {
+            "$ref": "#/definitions/keybind"
+          },
           "description": "Page Down in the file list options.",
           "display_name": "Page Down"
         },
         "home": {
           "type": "array",
-          "items": { "$ref": "#/definitions/keybind" },
+          "items": {
+            "$ref": "#/definitions/keybind"
+          },
           "description": "Go to the first option in the file list options.",
           "display_name": "First"
         },
         "end": {
           "type": "array",
-          "items": { "$ref": "#/definitions/keybind" },
+          "items": {
+            "$ref": "#/definitions/keybind"
+          },
           "description": "Go to the last option in the file list options.",
           "display_name": "Last"
         },
         "hist_previous": {
           "type": "array",
-          "items": { "$ref": "#/definitions/keybind" },
+          "items": {
+            "$ref": "#/definitions/keybind"
+          },
           "description": "Go back in history.",
           "display_name": "History back"
         },
         "hist_next": {
           "type": "array",
-          "items": { "$ref": "#/definitions/keybind" },
+          "items": {
+            "$ref": "#/definitions/keybind"
+          },
           "description": "Go forward in history.",
           "display_name": "History forward"
         },
         "toggle_visual": {
           "type": "array",
-          "items": { "$ref": "#/definitions/keybind" },
+          "items": {
+            "$ref": "#/definitions/keybind"
+          },
           "description": "Enter or exit select/visual mode.",
           "display_name": "Visual mode"
         },
         "toggle_hidden_files": {
           "type": "array",
-          "items": { "$ref": "#/definitions/keybind" },
+          "items": {
+            "$ref": "#/definitions/keybind"
+          },
           "description": "Toggle the visibility of hidden files (dot-prefixed on Unix, or flagged hidden on Windows/macOS).",
           "display_name": "Toggle hidden files"
         },
         "select_up": {
           "type": "array",
-          "items": { "$ref": "#/definitions/keybind" },
+          "items": {
+            "$ref": "#/definitions/keybind"
+          },
           "description": "While in visual mode, extend the selection up.",
           "display_name": "Select up"
         },
         "select_down": {
           "type": "array",
-          "items": { "$ref": "#/definitions/keybind" },
+          "items": {
+            "$ref": "#/definitions/keybind"
+          },
           "description": "While in visual mode, extend the selection down.",
           "display_name": "Select down"
         },
         "select_page_up": {
           "type": "array",
-          "items": { "$ref": "#/definitions/keybind" },
+          "items": {
+            "$ref": "#/definitions/keybind"
+          },
           "description": "While in visual mode, extend the selection to the previous page.",
           "display_name": "Select page up"
         },
         "select_page_down": {
           "type": "array",
-          "items": { "$ref": "#/definitions/keybind" },
+          "items": {
+            "$ref": "#/definitions/keybind"
+          },
           "description": "While in visual mode, extend the selection to the next page.",
           "display_name": "Select page down"
         },
         "select_home": {
           "type": "array",
-          "items": { "$ref": "#/definitions/keybind" },
+          "items": {
+            "$ref": "#/definitions/keybind"
+          },
           "description": "While in visual mode, extend the selection to the first option.",
           "display_name": "Select to top"
         },
         "select_end": {
           "type": "array",
-          "items": { "$ref": "#/definitions/keybind" },
+          "items": {
+            "$ref": "#/definitions/keybind"
+          },
           "description": "While in visual mode, extend the selection to the last option.",
           "display_name": "Select to end"
         },
         "tab_next": {
           "type": "array",
-          "items": { "$ref": "#/definitions/keybind" },
+          "items": {
+            "$ref": "#/definitions/keybind"
+          },
           "description": "Go to the next tab, if it is available.",
           "display_name": "Next tab"
         },
         "tab_previous": {
           "type": "array",
-          "items": { "$ref": "#/definitions/keybind" },
+          "items": {
+            "$ref": "#/definitions/keybind"
+          },
           "description": "Go to the previous tab, if it is available.",
           "display_name": "Previous tab"
         },
         "tab_new": {
           "type": "array",
-          "items": { "$ref": "#/definitions/keybind" },
+          "items": {
+            "$ref": "#/definitions/keybind"
+          },
           "description": "Create a new tab.",
           "display_name": "New tab"
         },
         "tab_close": {
           "type": "array",
-          "items": { "$ref": "#/definitions/keybind" },
+          "items": {
+            "$ref": "#/definitions/keybind"
+          },
           "description": "Close the current tab.",
           "display_name": "Close tab"
         },
         "preview_scroll_left": {
           "type": "array",
-          "items": { "$ref": "#/definitions/keybind" },
+          "items": {
+            "$ref": "#/definitions/keybind"
+          },
           "description": "Temporarily unused.",
           "display_name": "Scroll left"
         },
         "preview_scroll_right": {
           "type": "array",
-          "items": { "$ref": "#/definitions/keybind" },
+          "items": {
+            "$ref": "#/definitions/keybind"
+          },
           "description": "Temporarily unused.",
           "display_name": "Scroll right"
         },
         "preview_select_right": {
           "type": "array",
-          "items": { "$ref": "#/definitions/keybind" },
+          "items": {
+            "$ref": "#/definitions/keybind"
+          },
           "description": "While using TextArea for previewing, use this keybind to extend selection to the right.",
           "display_name": "Select right"
         },
         "preview_select_left": {
           "type": "array",
-          "items": { "$ref": "#/definitions/keybind" },
+          "items": {
+            "$ref": "#/definitions/keybind"
+          },
           "description": "While using TextArea for previewing, use this keybind to extend selection to the left.",
           "display_name": "Select left"
         },
         "show_keybinds": {
           "type": "array",
-          "items": { "$ref": "#/definitions/keybind" },
+          "items": {
+            "$ref": "#/definitions/keybind"
+          },
           "description": "Show the keybinds list with all available keybinds.",
           "display_name": "Show keybinds"
         },
         "change_sort_order": {
           "type": "array",
-          "items": { "$ref": "#/definitions/keybind" },
+          "items": {
+            "$ref": "#/definitions/keybind"
+          },
           "description": "Show a chooser to change the sort order.",
           "display_name": "Change sort order"
         },
         "quit_app": {
           "type": "array",
-          "items": { "$ref": "#/definitions/keybind" },
+          "items": {
+            "$ref": "#/definitions/keybind"
+          },
           "description": "Quit the application",
           "display_name": "Quit app"
         },
@@ -720,7 +853,9 @@
         },
         "suspend_app": {
           "type": "array",
-          "items": { "$ref": "#/definitions/keybind" },
+          "items": {
+            "$ref": "#/definitions/keybind"
+          },
           "description": "Suspend the app's process, bringing you back to the terminal",
           "display_name": "Suspend app"
         }
@@ -741,8 +876,12 @@
             },
             "keybinds": {
               "type": "array",
-              "default": ["z"],
-              "items": { "$ref": "#/definitions/keybind" },
+              "default": [
+                "z"
+              ],
+              "items": {
+                "$ref": "#/definitions/keybind"
+              },
               "description": "The keybind to open the zoxide modal.",
               "display_name": "Launch zoxide selector"
             },
@@ -800,8 +939,12 @@
             },
             "keybinds": {
               "type": "array",
-              "default": ["e"],
-              "items": { "$ref": "#/definitions/keybind" },
+              "default": [
+                "e"
+              ],
+              "items": {
+                "$ref": "#/definitions/keybind"
+              },
               "description": "The keybind to launch your editor.",
               "display_name": "Open file with editor"
             }
@@ -818,8 +961,12 @@
             },
             "keybinds": {
               "type": "array",
-              "default": ["f"],
-              "items": { "$ref": "#/definitions/keybind" },
+              "default": [
+                "f"
+              ],
+              "items": {
+                "$ref": "#/definitions/keybind"
+              },
               "description": "The keybind to open the file search picker.",
               "display_name": "Start search with fd"
             },
@@ -868,6 +1015,15 @@
           }
         }
       }
+    },
+    "mode": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "object",
+        "additionalProperties": true,
+        "description": "Config overrides for this mode using dot-notation paths as keys."
+      },
+      "description": "Define preset modes with config overrides. Use --mode <name> to activate."
     }
   }
 }

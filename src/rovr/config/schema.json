@@ -839,6 +839,33 @@
               "description": "Whether fd should follow symlinks when searching."
             }
           }
+        },
+        "poppler": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "enabled": {
+              "type": "boolean",
+              "default": true,
+              "description": "Enable poppler for PDF previews."
+            },
+            "threads": {
+              "type": "integer",
+              "default": 1,
+              "description": "How many threads should poppler use?",
+              "minimum": 1
+            },
+            "use_pdftocairo": {
+              "type": "boolean",
+              "default": false,
+              "description": "Use pdftocairo instead of pdftoppm, may help performance"
+            },
+            "poppler_folder": {
+              "type": "string",
+              "default": "",
+              "description": "Path to the folder where Poppler-related binaries are located. Leave empty to use the system PATH."
+            }
+          }
         }
       }
     }

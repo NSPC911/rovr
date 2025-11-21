@@ -151,6 +151,13 @@ class CustomTextArea(TextArea, inherit_bindings=False):
     )
 
 
+@dataclass
+class PDFHandler:
+    current_page: int = 0
+    total_pages: int = 0
+    images: list[PILImage] | None = None
+
+
 class PreviewContainer(Container):
     @dataclass
     class SetLoading(Message):
@@ -169,9 +176,7 @@ class PreviewContainer(Container):
         self._initial_height = self.size.height
         self._file_type: str = "none"
         self._preview_texts: list[str] = config["interface"]["preview_text"].values()
-        self._pdf_current_page: int = 0
-        self._pdf_total_pages: int = 0
-        self._pdf_images: list[PILImage] | None = None
+        self.pdf = PDFHandler()
 
     def compose(self) -> ComposeResult:
         yield Static(config["interface"]["preview_text"]["start"], classes="wrap")
@@ -281,18 +286,21 @@ class PreviewContainer(Container):
             return
 
         # Convert PDF to images if not already done
-        if self._pdf_images is None:
+        if self.pdf.images is None:
             try:
-                worker: Worker = self.run_worker(
-                    lambda: convert_from_path(
-                        str(self._current_file_path),
-                        transparent=False,
-                        fmt="png",
-                        single_file=False,
-                    ),
-                    thread=True,
+                worker: Worker = self.run_in_thread(
+                    convert_from_path,
+                    str(self._current_file_path),
+                    transparent=False,
+                    fmt="png",
+                    single_file=False,
+                    use_pdftocairo=config["plugins"]["poppler"]["use_pdftocairo"],
+                    thread_count=config["plugins"]["poppler"]["threads"],
+                    poppler_path=config["plugins"]["poppler"]["poppler_folder"]
                 )
                 result = await worker.wait()
+                if isinstance(result, Exception):
+                    raise result
             except Exception as exc:
                 if should_cancel():
                     return
@@ -310,17 +318,17 @@ class PreviewContainer(Container):
                 )
                 return
 
-            self._pdf_images = result
-            self._pdf_total_pages = len(self._pdf_images)
-            self._pdf_current_page = 0
+            self.pdf.images = result
+            self.pdf.total_pages = len(self.pdf.images)
+            self.pdf.current_page = 0
 
         if should_cancel():
             return
 
-        current_image = self._pdf_images[self._pdf_current_page]
+        current_image = self.pdf.images[self.pdf.current_page]
 
         self.border_subtitle = (
-            f"Page {self._pdf_current_page + 1}/{self._pdf_total_pages}"
+            f"Page {self.pdf.current_page + 1}/{self.pdf.total_pages}"
         )
 
         if not self.has_child("#image_preview"):
@@ -591,9 +599,9 @@ class PreviewContainer(Container):
 
         # Reset PDF state when changing files
         if file_path != self._current_file_path:
-            self._pdf_images = None
-            self._pdf_current_page = 0
-            self._pdf_total_pages = 0
+            self.pdf.images = None
+            self.pdf.current_page = 0
+            self.pdf.total_pages = 0
 
         if path.isdir(file_path):
             self.app.call_from_thread(
@@ -601,7 +609,7 @@ class PreviewContainer(Container):
             )
         else:
             lower_file_path = file_path.lower()
-            if lower_file_path.endswith(".pdf"):
+            if lower_file_path.endswith(".pdf") and config["plugins"]["poppler"]["enabled"]:
                 file_type = "pdf"
             elif any(lower_file_path.endswith(ext) for ext in PIL_EXTENSIONS):
                 file_type = "image"
@@ -746,16 +754,16 @@ class PreviewContainer(Container):
         # pdf for now, text later on
         if self.border_title == titles.pdf and self._file_type == "pdf":
             event.stop()
-            if self._pdf_current_page > 0:
-                self._pdf_current_page -= 1
+            if self.pdf.current_page > 0:
+                self.pdf.current_page -= 1
                 await self.show_pdf_preview()
 
     async def on_mouse_scroll_down(self, event: events.MouseScrollDown) -> None:
         # pdf for now, text later on
         if self.border_title == titles.pdf and self._file_type == "pdf":
             event.stop()
-            if self._pdf_current_page < self._pdf_total_pages - 1:
-                self._pdf_current_page += 1
+            if self.pdf.current_page < self.pdf.total_pages - 1:
+                self.pdf.current_page += 1
                 await self.show_pdf_preview()
 
     async def on_resize(self, event: events.Resize) -> None:
@@ -781,27 +789,27 @@ class PreviewContainer(Container):
         if (
             self.border_title == titles.pdf
             and self._file_type == "pdf"
-            and self._pdf_images is not None
+            and self.pdf.images is not None
         ):
             match event.key:
                 case key if (
                     key in config["keybinds"]["down"] + config["keybinds"]["page_down"]
-                    and self._pdf_current_page < self._pdf_total_pages - 1
+                    and self.pdf.current_page < self.pdf.total_pages - 1
                 ):
                     event.stop()
-                    self._pdf_current_page += 1
+                    self.pdf.current_page += 1
                 case key if (
                     key in config["keybinds"]["up"] + config["keybinds"]["page_up"]
-                    and self._pdf_current_page > 0
+                    and self.pdf.current_page > 0
                 ):
                     event.stop()
-                    self._pdf_current_page -= 1
+                    self.pdf.current_page -= 1
                 case key if key in config["keybinds"]["home"]:
                     event.stop()
-                    self._pdf_current_page = 0
+                    self.pdf.current_page = 0
                 case key if key in config["keybinds"]["end"]:
                     event.stop()
-                    self._pdf_current_page = self._pdf_total_pages - 1
+                    self.pdf.current_page = self.pdf.total_pages - 1
                 case _:
                     return
             await self.show_pdf_preview()

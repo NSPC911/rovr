@@ -4,6 +4,7 @@ from importlib import resources
 from importlib.metadata import PackageNotFoundError, version
 from os import environ, path
 from platform import system
+from shutil import which
 
 import jsonschema
 import toml
@@ -343,6 +344,9 @@ def load_config() -> tuple[dict, dict]:
         config["plugins"]["editor"]["folder_executable"] = environ.get(
             "EDITOR", "vim" if system() != "Windows" else "code"
         )
+    # pdf fixer
+    if config["plugins"]["poppler"]["enabled"] and config["plugins"]["poppler"]["poppler_folder"] == "":
+        path.dirname(which("pdfinfo"))  # ty: ignore[no-matching-overload]
     return schema, config
 
 

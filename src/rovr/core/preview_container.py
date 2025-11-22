@@ -296,7 +296,7 @@ class PreviewContainer(Container):
                     single_file=False,
                     use_pdftocairo=config["plugins"]["poppler"]["use_pdftocairo"],
                     thread_count=config["plugins"]["poppler"]["threads"],
-                    poppler_path=config["plugins"]["poppler"]["poppler_folder"] or None
+                    poppler_path=config["plugins"]["poppler"]["poppler_folder"] or None,
                 )
                 result = await worker.wait()
                 if isinstance(result, Exception):
@@ -609,7 +609,10 @@ class PreviewContainer(Container):
             )
         else:
             lower_file_path = file_path.lower()
-            if lower_file_path.endswith(".pdf") and config["plugins"]["poppler"]["enabled"]:
+            if (
+                lower_file_path.endswith(".pdf")
+                and config["plugins"]["poppler"]["enabled"]
+            ):
                 file_type = "pdf"
             elif any(lower_file_path.endswith(ext) for ext in PIL_EXTENSIONS):
                 file_type = "image"

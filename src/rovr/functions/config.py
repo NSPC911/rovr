@@ -345,13 +345,16 @@ def load_config() -> tuple[dict, dict]:
             "EDITOR", "vim" if system() != "Windows" else "code"
         )
     # pdf fixer
-    if config["plugins"]["poppler"]["enabled"] and config["plugins"]["poppler"]["poppler_folder"] == "":
+    if (
+        config["plugins"]["poppler"]["enabled"]
+        and config["plugins"]["poppler"]["poppler_folder"] == ""
+    ):
         pdfinfo_path = path.dirname(which("pdfinfo"))  # type: ignore[no-matching-overload]
         if pdfinfo_path is None:
             pprint(
                 "[WARN] Poppler is enabled, but no poppler folder was specified, and it was not found in PATH. "
                 "[WARN] Please install Poppler and set the poppler_folder in rovr config.",
-                style="yellow"
+                style="yellow",
             )
         config["plugins"]["poppler"]["poppler_folder"] = pdfinfo_path
     return schema, config

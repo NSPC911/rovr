@@ -296,7 +296,7 @@ class PreviewContainer(Container):
                     single_file=False,
                     use_pdftocairo=config["plugins"]["poppler"]["use_pdftocairo"],
                     thread_count=config["plugins"]["poppler"]["threads"],
-                    poppler_path=config["plugins"]["poppler"]["poppler_folder"]
+                    poppler_path=config["plugins"]["poppler"]["poppler_folder"] or None
                 )
                 result = await worker.wait()
                 if isinstance(result, Exception):

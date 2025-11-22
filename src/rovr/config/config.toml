@@ -211,4 +211,4 @@ follow_symlinks = false
 enabled = true
 threads = 1
 use_pdftocairo = false
-poppler_folder = "hello"
+poppler_folder = ""

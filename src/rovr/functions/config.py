@@ -346,7 +346,14 @@ def load_config() -> tuple[dict, dict]:
         )
     # pdf fixer
     if config["plugins"]["poppler"]["enabled"] and config["plugins"]["poppler"]["poppler_folder"] == "":
-        path.dirname(which("pdfinfo"))  # ty: ignore[no-matching-overload]
+        pdfinfo_path = path.dirname(which("pdfinfo"))  # type: ignore[no-matching-overload]
+        if pdfinfo_path is None:
+            pprint(
+                "[WARN] Poppler is enabled, but no poppler folder was specified, and it was not found in PATH. "
+                "[WARN] Please install Poppler and set the poppler_folder in rovr config.",
+                style="yellow"
+            )
+        config["plugins"]["poppler"]["poppler_folder"] = pdfinfo_path
     return schema, config
 
 

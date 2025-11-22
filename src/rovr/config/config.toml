@@ -206,3 +206,9 @@ keybinds = ["f"]
 executable = "fd"
 relative_paths = true
 follow_symlinks = false
+
+[plugins.poppler]
+enabled = true
+threads = 1
+use_pdftocairo = false
+poppler_folder = ""

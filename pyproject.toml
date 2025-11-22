@@ -20,6 +20,7 @@ dependencies = [
   "jsonschema>=4.25.0",
   "natsort>=8.4.0",
   "pathvalidate>=3.3.1",
+  "pdf2image>=1.17.0",
   "pillow>=11.2.1",
   "platformdirs>=4.3.8",
   "psutil>=7.0.0",

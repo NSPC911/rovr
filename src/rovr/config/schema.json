@@ -77,10 +77,7 @@
               "type": "string",
               "default": "right",
               "description": "Align the clock to either the 'right' or 'left' of the tabs bar.",
-              "enum": [
-                "left",
-                "right"
-              ]
+              "enum": ["left", "right"]
             }
           }
         },
@@ -156,13 +153,7 @@
           "type": "string",
           "default": "Auto",
           "description": "The image protocol to use when displaying an image",
-          "enum": [
-            "Auto",
-            "TGP",
-            "Sixel",
-            "Halfcell",
-            "Unicode"
-          ]
+          "enum": ["Auto", "TGP", "Sixel", "Halfcell", "Unicode"]
         },
         "allow_tab_nav": {
           "type": "boolean",
@@ -230,11 +221,7 @@
           "type": "string",
           "default": "decimal",
           "description": "The filesize suffix to follow.\n`decimal`: 1024 -> 1.024kB\n`binary`: 1024 -> 1KiB\n`gnu`: 1024 -> 1K",
-          "enum": [
-            "decimal",
-            "binary",
-            "gnu"
-          ]
+          "enum": ["decimal", "binary", "gnu"]
         }
       }
     },
@@ -253,10 +240,7 @@
               },
               "match_type": {
                 "type": "string",
-                "enum": [
-                  "exact",
-                  "endswith"
-                ],
+                "enum": ["exact", "endswith"],
                 "default": "exact",
                 "description": "Type of matching:\n`exact`   : for exact file name matching\n`endswith`: for file name ends with matching"
               },
@@ -269,12 +253,7 @@
                 "description": "The color for the icon. Can be a named color or hex code."
               }
             },
-            "required": [
-              "pattern",
-              "icon",
-              "color",
-              "match_type"
-            ]
+            "required": ["pattern", "icon", "color", "match_type"]
           },
           "default": [],
           "description": "Custom file icon mappings. Earlier entries have higher priority."
@@ -290,10 +269,7 @@
               },
               "match_type": {
                 "type": "string",
-                "enum": [
-                  "exact",
-                  "endswith"
-                ],
+                "enum": ["exact", "endswith"],
                 "default": "exact",
                 "description": "Type of matching:\n`exact`   : for exact file name matching\n`endswith`: for file name ends with matching"
               },
@@ -306,12 +282,7 @@
                 "description": "The color for the icon. Can be a named color or hex code"
               }
             },
-            "required": [
-              "pattern",
-              "icon",
-              "color",
-              "match_type"
-            ]
+            "required": ["pattern", "icon", "color", "match_type"]
           },
           "default": [],
           "description": "Custom folder icon mappings. Earlier entries have higher priority."
@@ -876,9 +847,7 @@
             },
             "keybinds": {
               "type": "array",
-              "default": [
-                "z"
-              ],
+              "default": ["z"],
               "items": {
                 "$ref": "#/definitions/keybind"
               },
@@ -939,9 +908,7 @@
             },
             "keybinds": {
               "type": "array",
-              "default": [
-                "e"
-              ],
+              "default": ["e"],
               "items": {
                 "$ref": "#/definitions/keybind"
               },
@@ -961,9 +928,7 @@
             },
             "keybinds": {
               "type": "array",
-              "default": [
-                "f"
-              ],
+              "default": ["f"],
               "items": {
                 "$ref": "#/definitions/keybind"
               },

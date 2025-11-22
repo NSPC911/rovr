@@ -27,7 +27,6 @@ $scrollbar-background-hover: $primary-muted;
 $scrollbar-background-active: $primary-muted;
 $scrollbar-corner-color: $primary-muted;
 
-
 * {
   scrollbar-size: 1 1;
   &:ansi {
@@ -1008,6 +1007,9 @@ Screen {
       width: 90vw;
       max-width: 90vw;
     }
+    Toast {
+      width: 100vw
+    }
   }
   &.-nopreview {
     #preview_sidebar,
@@ -1021,6 +1023,9 @@ Screen {
     #modalInput_group {
       width: 75vw;
       max-width: 75vw;
+    }
+    Toast {
+      width: 50vw
     }
   }
   &.-all-vertical #footer { max-height: 25vh }
@@ -1040,7 +1045,6 @@ Screen {
     #footer { max-height: 25vh }
   }
 }
-
 #showKeys {
   align: right middle;
   width: auto;

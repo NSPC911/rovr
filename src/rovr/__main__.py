@@ -177,6 +177,7 @@ try:
             chooser_file=chooser_file if chooser_file else None,
             show_keys=show_keys,
             tree_dom=tree_dom,
+            mode=mode
         ).run()
 
 except KeyboardInterrupt:

@@ -1,6 +1,6 @@
 # Unreleased
 
-- feat: add pdf preview support with poppler
+- feat: add pdf preview support with poppler #153
 
 # [v0.5.0]
 

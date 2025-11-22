@@ -301,6 +301,8 @@ class PreviewContainer(Container):
                 result = await worker.wait()
                 if isinstance(result, Exception):
                     raise result
+                elif len(result) == 0:
+                    raise ValueError("Obtained 0 pages from Poppler. Something may have gone wrong...")
             except Exception as exc:
                 if should_cancel():
                     return

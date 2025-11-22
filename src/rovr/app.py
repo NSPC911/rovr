@@ -112,7 +112,7 @@ class Application(App, inherit_bindings=False):
         chooser_file: str | None = None,
         show_keys: bool = False,
         tree_dom: bool = False,
-        mode: str = ""
+        mode: str = "",
     ) -> None:
         super().__init__(watch_css=True)
         if mode:

@@ -1,6 +1,10 @@
 # Unreleased
 
-- feat: add pdf preview support with poppler #153
+- feat(app): use textual's tree instead of a custom tree a1d7449
+- feat(config): auto detect editor to use 5f1d7f8
+- feat(editor): add config to suspend when opening editor ed605da
+- feat(preview): add pdf preview support with poppler #153
+- perf(preview): open image in thread 7b0e2cd
 
 # [v0.5.0]
 

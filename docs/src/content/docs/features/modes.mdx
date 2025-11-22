@@ -15,7 +15,7 @@ modes let you override any config value using dot-notation paths. when you launc
 
 - **different editors**: use helix in the terminal but vscode when in a GUI environment
 - **minimal mode**: disable tooltips and previews for a cleaner interface
-- **wezterm integration**: specialized settings for terminal multiplexer integration
+- **multiplexer integration**: specialized settings for terminal multiplexer integration
 - **work vs personal**: different theming and plugins for different contexts
 
 ## basic usage
@@ -41,12 +41,11 @@ show_line_numbers = false
 [mode.minimal]
 "interface.tooltips" = false
 "interface.show_line_numbers" = false
-"plugins.bat.enabled" = false
 ```
 
 ### 2. launch rovr with a mode
 
-```bash
+```shell
 # normal launch - uses base config (helix)
 rovr
 
@@ -56,8 +55,6 @@ rovr --mode gui
 # launch with minimal mode
 rovr --mode minimal
 ```
-
-## advanced examples
 
 ### multiple overrides in one mode
 
@@ -70,34 +67,6 @@ you can override as many config values as needed in a single mode:
 "interface.tooltips" = false
 "interface.show_line_numbers" = true
 "settings.show_hidden_files" = true
-```
-
-### wezterm integration
-
-the original use case – integrate rovr with helix via wezterm:
-
-```toml
-[plugins.editor]
-file_executable = "hx"
-
-[mode.wezterm]
-"plugins.editor.file_executable" = "hx"
-"interface.use_reactive_layout" = true
-"settings.show_hidden_files" = true
-"interface.tooltips" = false
-```
-
-then in your wezterm config:
-
-```lua
--- wezterm.lua
-{
-  key = "f",
-  mods = "CTRL",
-  action = wezterm.action.SpawnCommandInNewWindow {
-    args = { "rovr", "--mode", "wezterm" }
-  }
-}
 ```
 
 ### different themes per mode

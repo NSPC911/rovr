@@ -376,10 +376,28 @@ def apply_mode(config: dict, mode_name: str) -> None:
         Exits the program if the specified mode doesn't exist in the config.
     """
     if "mode" not in config:
+        from rich.syntax import Syntax
+
         pprint("[bright_red]Error:[/] No modes defined in config")
         pprint("[yellow]Hint:[/] Define modes in config.toml like:")
-        pprint("  [mode.gui]")
-        pprint('  "plugins.editor.file_executable" = "vscode"')
+        print()
+        pprint(
+            Syntax(
+                "[mode.gui]",
+                lexer="toml",
+                background_color="default",
+                theme="ansi_dark",
+            )
+        )
+        pprint(
+            Syntax(
+                '"plugins.editor.file_executable" = "vscode"',
+                lexer="toml",
+                background_color="default",
+                theme="ansi_dark",
+            )
+        )
+        print()
         exit(1)
 
     if mode_name not in config["mode"]:

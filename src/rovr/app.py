@@ -775,5 +775,23 @@ class Application(App, inherit_bindings=False):
         with suppress(NoMatches):
             self.query_one(SortOrderPopup).add_class("hidden")
 
+    @work(thread=True)
+    def run_in_thread(self, function: Callable, *args, **kwargs) -> Worker | Exception:
+        """
+        Run a function in a thread and return a worker for it.
+        Args:
+            function(callable): the function to run
+            *args: positional arguments for the function
+            **kwargs: keyword arguments for the function
+
+        Returns:
+            Worker: the worker for the function
+            Exception: if something fails
+        """
+        try:
+            return function(*args, **kwargs)
+        except Exception as exc:
+            return exc
+
 
 app = Application()

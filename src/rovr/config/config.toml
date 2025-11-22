@@ -196,6 +196,8 @@ executable = "bat"
 enabled = true
 file_executable = ""
 folder_executable = ""
+file_suspend = true
+folder_suspend = true
 keybinds = ["e"]
 
 [plugins.finder]

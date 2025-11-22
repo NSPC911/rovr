@@ -755,14 +755,26 @@ class FileList(SelectionList, inherit_bindings=False):
                     if self.highlighted_option and self.highlighted_option.disabled:
                         return
                     if path.isdir(self.highlighted_option.dir_entry.path):
-                        with self.app.suspend():
-                            cmd(
-                                f'{config["plugins"]["editor"]["folder_executable"]} "{self.highlighted_option.dir_entry.path}"'
+                        if config["plugins"]["editor"]["file_suspend"]:
+                            with self.app.suspend():
+                                cmd(
+                                    f'{config["plugins"]["editor"]["folder_executable"]} "{self.highlighted_option.dir_entry.path}"'
+                                )
+                        else:
+                            self.app.run_in_thread(
+                                cmd,
+                                    f'{config["plugins"]["editor"]["folder_executable"]} "{self.highlighted_option.dir_entry.path}"'  # ty: ignore[possibly-missing-attribute]
                             )
+
                     else:
-                        with self.app.suspend():
-                            cmd(
-                                f'{config["plugins"]["editor"]["file_executable"]} "{self.highlighted_option.dir_entry.path}"'
+                        if config["plugins"]["editor"]["file_suspend"]:
+                            with self.app.suspend():
+                                cmd(
+                                    f'{config["plugins"]["editor"]["file_executable"]} "{self.highlighted_option.dir_entry.path}"'
+                                )
+                        else:
+                            self.app.run_in_thread(
+                                cmd, f'{config["plugins"]["editor"]["file_executable"]} "{self.highlighted_option.dir_entry.path}"'
                             )
                 # hit buttons with keybinds
                 case key if (

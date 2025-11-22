@@ -783,10 +783,20 @@
               "default": "nano",
               "description": "Open files in this app."
             },
+            "file_suspend": {
+              "type": "boolean",
+              "default": true,
+              "description": "Suspend the app when editing a file. Useful for TUI editors, but not for something like VSCode or Notepad++."
+            },
             "folder_executable": {
               "type": "string",
               "default": "code",
               "description": "Open folders in this app."
+            },
+            "folder_suspend": {
+              "type": "boolean",
+              "default": true,
+              "description": "Suspend the app when editing a folder. Useful for TUI editors, but not for something like VSCode or Notepad++."
             },
             "keybinds": {
               "type": "array",

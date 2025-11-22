@@ -4,7 +4,7 @@ import tarfile
 import zipfile
 from dataclasses import dataclass
 from os import path
-from typing import Callable, ClassVar
+from typing import ClassVar
 
 import textual_image.widget as timg
 from PIL import Image, UnidentifiedImageError
@@ -186,31 +186,13 @@ class PreviewContainer(Container):
         except NoMatches:
             return False
 
-    @work(thread=True)
-    def run_in_thread(self, function: Callable, *args, **kwargs) -> Worker | Exception:
-        """
-        Run a function in a thread and return a worker for it.
-        Args:
-            function(callable): the function to run
-            *args: positional arguments for the function
-            **kwargs: keyword arguments for the function
-
-        Returns:
-            Worker: the worker for the function
-            Exception: if something fails
-        """
-        try:
-            return function(*args, **kwargs)
-        except Exception as exc:
-            return exc
-
     async def show_image_preview(self) -> None:
         self.border_title = titles.image
         if should_cancel():
             return
 
         try:
-            worker: Worker = self.run_in_thread(Image.open, self._current_file_path)
+            worker: Worker = self.app.run_in_thread(Image.open, self._current_file_path)
             result: PILImage | Exception = await worker.wait()
             if isinstance(result, Exception):
                 raise result

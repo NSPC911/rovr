@@ -6,7 +6,6 @@ from types import SimpleNamespace
 from typing import Callable, Iterable
 
 from rich.console import Console
-from rich.tree import Tree
 from textual import events, on, work
 from textual.app import WINDOWS, App, ComposeResult, SystemCommand
 from textual.binding import Binding
@@ -24,6 +23,7 @@ from textual.css.stylesheet import StylesheetParseError
 from textual.dom import DOMNode
 from textual.screen import Screen
 from textual.widgets import Input, Label
+from textual.worker import Worker
 
 from rovr.action_buttons import (
     CopyButton,
@@ -173,23 +173,8 @@ class Application(App, inherit_bindings=False):
     def on_mount(self) -> None:
         # exit for tree print
         if self._exit_with_tree:
-
-            def build_tree(node: DOMNode) -> Tree:
-                node_type = type(node).__name__
-                label = f"[bold]{node_type}[/bold]"
-                if node.id:
-                    label += f' [cyan]id="{node.id}"[/cyan]'
-                if node.classes:
-                    label += f' [green]class="{" ".join(node.classes)}"[/green]'
-                children = list(node.query_children("*"))
-                tree = Tree(label) if len(children) != 0 else Tree(label, style="bold")
-                for child in children:
-                    tree.add(build_tree(child))
-                return tree
-
             with self.suspend():
-                tree = build_tree(self)
-                console.print(tree)
+                console.print(self.tree)
                 self.exit()
             return
         # compact mode

@@ -29,39 +29,63 @@ def deep_merge(d: dict, u: dict) -> dict:
     return d
 
 
-def set_nested_value(d: dict, path_str: str, value: bool) -> None:
-    """Sets a value in a nested dictionary using a dot-separated path string.
+def set_nested_value(
+    d: dict, path_str: str, value: bool | str | int | float | list | dict
+) -> None:
+    """
+    Sets a value in a nested dictionary using a dot-separated path string.
 
     Args:
         d (dict): The dictionary to modify.
         path_str (str): The dot-separated path to the key (e.g., "plugins.bat").
-        value (bool): The value to set. (boolean for now)
+        value (Union[bool, str, int, float, list, dict]): The value to set.
     """
+    from rich import box
+    from rich.panel import Panel
+
     keys = path_str.split(".")
     current = d
+    passed_keys = ""
     for i, key in enumerate(keys):
         if i == len(keys) - 1:
             try:
-                if isinstance(current[key], dict) and "enabled" in current[key]:
+                if (
+                    isinstance(value, bool)
+                    and isinstance(current[key], dict)
+                    and "enabled" in current[key]
+                ):
+                    # Special case: For boolean values targeting plugin dicts,
+                    # set the 'enabled' field rather than replacing the whole dict
                     current[key]["enabled"] = value
-                elif type(current[key]) is type(value):
+                elif isinstance(current[key], type(value)):
                     current[key] = value
                 else:
-                    pprint("[bright_red underline]Config Error:[/]")
                     pprint(
-                        f"[cyan bold]{path_str}[/]'s new value of type [cyan b]{type(value).__name__}[/] is not a [bold cyan]{type(current[key]).__name__}[/] type, and cannot be modified."
+                        Panel(
+                            f"[cyan bold]{path_str}[/]'s new value of type [cyan b]{type(value).__name__}[/] is not a [bold cyan]{type(current[key]).__name__}[/] type, and cannot be modified.",
+                            box=box.ROUNDED,
+                            title="[bright_red underline]Config Error:[/]",
+                            title_align="left",
+                            expand=False,
+                        )
                     )
                     exit(1)
             except KeyError:
-                pprint("[bright_red underline]Config Error:[/]")
                 pprint(
-                    f"[cyan b]{path_str}[/] is not a valid path to an existing value and hence cannot be set."
+                    Panel(
+                        f"[cyan b]{path_str}[/] is not a valid path to an existing value and hence cannot be set.\n  [red]ValueError[/]: Key named [red b]{key}[/] was not found in [cyan b]{passed_keys[:-1]}[/]",
+                        box=box.ROUNDED,
+                        title="[bright_red underline]Config Error:[/]",
+                        title_align="left",
+                        expand=False,
+                    )
                 )
                 exit(1)
         else:
             if not isinstance(current.get(key), dict):
                 current[key] = {}
             current = current[key]
+            passed_keys += f"{key}."
 
 
 def set_scuffed_subtitle(element: DOMNode, *sections: str) -> None:

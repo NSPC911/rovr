@@ -5,7 +5,7 @@ try:
     from rich import box
     from rich.table import Table
 
-    from rovr.functions.config import get_version
+    from rovr.functions.config import apply_mode, get_version
     from rovr.functions.path import normalise
     from rovr.functions.utils import pprint, set_nested_value
     from rovr.variables.constants import config
@@ -38,6 +38,14 @@ try:
     is_dev = {"debug", "devtools"}.issubset(textual_flags)
 
     @click.command(help="A post-modern terminal file explorer")
+    @click.option(
+        "--mode",
+        "mode",
+        multiple=False,
+        type=str,
+        default="",
+        help="Activate a preset mode defined in config (e.g., 'gui').",
+    )
     @click.option(
         "--with",
         "with_features",
@@ -104,7 +112,7 @@ try:
         is_flag=True,
         help="Print the DOM of the app as a tree",
     )
-    @click.option_panel("Config", options=["--with", "--without"])
+    @click.option_panel("Config", options=["--mode", "--with", "--without"])
     @click.option_panel("Paths", options=["--chooser-file", "--cwd-file"])
     @click.option_panel(
         "Miscellaneous", options=["--version", "--config-path", "--help"]
@@ -113,6 +121,7 @@ try:
     @click.argument("path", type=str, required=False, default="")
     @click.rich_config({"show_arguments": True})
     def main(
+        mode: str,
         with_features: list[str],
         without_features: list[str],
         show_config_path: bool,
@@ -124,6 +133,9 @@ try:
         tree_dom: bool,
     ) -> None:
         """A post-modern terminal file explorer"""
+
+        if mode:
+            apply_mode(config, mode)
 
         for feature_path in with_features:
             set_nested_value(config, feature_path, True)
@@ -165,6 +177,7 @@ try:
             chooser_file=chooser_file if chooser_file else None,
             show_keys=show_keys,
             tree_dom=tree_dom,
+            mode=mode,
         ).run()
 
 except KeyboardInterrupt:

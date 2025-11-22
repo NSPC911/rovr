@@ -1,0 +1,205 @@
+---
+title: multiple modes
+description: switch between preset configurations using the --mode flag
+---
+
+import { Tabs, TabItem, Code, Aside } from "@astrojs/starlight/components";
+
+rovr supports **multiple modes** – preset configurations that can be activated via the `--mode` CLI flag. this allows you to define different configuration profiles for different use cases and switch between them effortlessly.
+
+## what are modes?
+
+modes let you override any config value using dot-notation paths. when you launch rovr with a specific mode, the overrides defined in that mode are applied on top of your base configuration.
+
+### use cases
+
+- **different editors**: use helix in the terminal but vscode when in a GUI environment
+- **minimal mode**: disable tooltips and previews for a cleaner interface
+- **multiplexer integration**: specialized settings for terminal multiplexer integration
+- **work vs personal**: different theming and plugins for different contexts
+
+## basic usage
+
+### 1. define modes in your config.toml
+
+modes are defined in `[mode.<name>]` sections using dot-notation paths to specify which config values to override:
+
+```toml
+# base configuration
+[plugins.editor]
+file_executable = "hx"
+
+[interface]
+tooltips = true
+show_line_numbers = false
+
+# gui mode: use vscode instead of helix
+[mode.gui]
+"plugins.editor.file_executable" = "vscode"
+
+# minimal mode: disable UI elements for a cleaner look
+[mode.minimal]
+"interface.tooltips" = false
+"interface.show_line_numbers" = false
+```
+
+### 2. launch rovr with a mode
+
+```shell
+# normal launch - uses base config (helix)
+rovr
+
+# launch with gui mode - uses vscode
+rovr --mode gui
+
+# launch with minimal mode
+rovr --mode minimal
+```
+
+### multiple overrides in one mode
+
+you can override as many config values as needed in a single mode:
+
+```toml
+[mode.advanced]
+"plugins.editor.file_executable" = "nvim"
+"plugins.bat.enabled" = true
+"interface.tooltips" = false
+"interface.show_line_numbers" = true
+"settings.show_hidden_files" = true
+```
+
+### different themes per mode
+
+```toml
+[theme]
+default = "nord"
+
+[mode.light]
+"theme.default" = "Solarized Light"
+
+[mode.dark]
+"theme.default" = "nord"
+```
+
+## combining with other flags
+
+modes are applied **before** `--with` and `--without` flags, so you can further customize:
+
+```bash
+# use gui mode but also enable bat
+rovr --mode gui --with plugins.bat
+
+# use minimal mode but keep tooltips
+rovr --mode minimal --with interface.tooltips
+```
+
+## error handling
+
+if you specify a mode that doesn't exist, rovr will show available modes:
+
+```bash
+$ rovr --mode nonexistent
+Error: Mode 'nonexistent' not found in config
+Available modes: 'gui', 'minimal', 'wezterm'
+```
+
+if no modes are defined in your config:
+
+```bash
+$ rovr --mode gui
+Error: No modes defined in config
+Hint: Define modes in config.toml like:
+  [mode.gui]
+  "plugins.editor.file_executable" = "vscode"
+```
+
+## supported value types
+
+modes support overriding values of any type that exists in the config:
+
+- **strings**: `"plugins.editor.file_executable" = "nvim"`
+- **booleans**: `"interface.tooltips" = false`
+- **integers**: `"interface.scrolloff" = 5`
+- **floats**: `"settings.double_click_delay" = 0.3`
+- **arrays**: `"metadata.fields" = ["type", "size"]`
+
+## type safety
+
+rovr validates that override values match the type of the original config value:
+
+```toml
+# this will cause an error - can't override string with boolean
+[mode.invalid]
+"plugins.editor.file_executable" = true  # ❌ error!
+
+# correct - string overrides string
+[mode.valid]
+"plugins.editor.file_executable" = "vim"  # ✓ works!
+```
+
+## tips and tricks
+
+### create a modes alias
+
+add to your shell config for quick mode switching:
+
+<Tabs>
+  <TabItem label="bash/zsh">
+    <Code
+      code={`alias rovr-gui='rovr --mode gui'\nalias rovr-minimal='rovr --mode minimal'`}
+      lang="bash"
+      frame="code"
+      title=".bashrc / .zshrc"
+    />
+  </TabItem>
+  <TabItem label="fish">
+    <Code
+      code={`alias rovr-gui='rovr --mode gui'\nalias rovr-minimal='rovr --mode minimal'`}
+      lang="fish"
+      frame="code"
+      title="config.fish"
+    />
+  </TabItem>
+</Tabs>
+
+### environment-based modes
+
+use environment variables to automatically select modes:
+
+```bash
+# in your shell config
+if [ -n "$DISPLAY" ]; then
+    alias rovr='rovr --mode gui'
+else
+    alias rovr='rovr --mode terminal'
+fi
+```
+
+<Aside type="tip">
+  modes are perfect for creating different "profiles" for rovr. think of them like firefox profiles or vim modes – different setups for different workflows.
+</Aside>
+
+## mode precedence
+
+the configuration is applied in this order:
+
+1. **base config** from `config.toml`
+2. **mode overrides** from `[mode.<name>]` sections
+3. **CLI flags** like `--with` and `--without`
+
+this means CLI flags have the final say, allowing you to customize modes on the fly.
+
+## viewing available modes
+
+to see which modes are available in your config, try using an invalid mode name – the error message will list all available modes:
+
+```bash
+rovr --mode help  # lists all your modes in the error message
+```
+
+## related features
+
+- [configuration](/rovr/configuration/configuration/) – learn about rovr's config system
+- [plugins](/rovr/features/plugins/) – extend rovr with plugins
+- [cd on quit](/rovr/features/cd-on-quit/) – integrate rovr with your shell

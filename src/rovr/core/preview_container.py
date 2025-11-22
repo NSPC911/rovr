@@ -288,7 +288,7 @@ class PreviewContainer(Container):
         # Convert PDF to images if not already done
         if self.pdf.images is None:
             try:
-                worker: Worker = self.run_in_thread(
+                worker: Worker = self.app.run_in_thread(
                     convert_from_path,
                     str(self._current_file_path),
                     transparent=False,

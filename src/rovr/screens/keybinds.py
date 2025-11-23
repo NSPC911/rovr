@@ -9,6 +9,7 @@ from textual.widgets import OptionList
 
 from rovr.classes.textual_options import KeybindOption
 from rovr.functions import icons
+from rovr.functions.utils import check_key
 from rovr.search_container import SearchInput
 from rovr.variables.constants import config, schema, vindings
 
@@ -90,13 +91,12 @@ class Keybinds(ModalScreen):
         self.container.border_subtitle = f"Press Esc {additional_key_string}to close"
 
     def on_key(self, event: events.Key) -> None:
-        match event.key:
-            case key if key in config["keybinds"]["focus_search"]:
-                event.stop()
-                self.input.focus()
-            case key if key in config["keybinds"]["show_keybinds"] | "escape":
-                event.stop()
-                self.dismiss()
+        if check_key(event, config["keybinds"]["focus_search"]):
+            event.stop()
+            self.input.focus()
+        elif check_key(event, config["keybinds"]["show_keybinds"]) or event.key == "escape":
+            event.stop()
+            self.dismiss()
 
     def on_option_list_option_selected(self, event: OptionList.OptionSelected) -> None:
         if hasattr(event.option, "key_press"):

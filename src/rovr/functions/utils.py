@@ -2,6 +2,7 @@ from typing import Any, Callable
 
 from humanize import naturalsize
 from rich.console import Console
+from textual import events
 from textual.dom import DOMNode
 from textual.worker import NoActiveWorker, WorkerCancelled, get_current_worker
 
@@ -163,6 +164,20 @@ def should_cancel() -> bool:
     except NoActiveWorker:
         return False
     return bool(worker and not worker.is_running)
+
+
+def check_key(event: events.Key, key_list: list[str] | str) -> bool:
+    if isinstance(key_list, str):
+        key_list = [key_list]
+    return bool(
+        # check key
+        event.key in key_list
+        # check aliases
+        or any(key in key_list for key in event.aliases)
+        # check character
+        or event.is_printable
+        and event.character in key_list
+    )
 
 
 class classproperty:  # noqa: N801

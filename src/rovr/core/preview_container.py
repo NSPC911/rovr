@@ -794,63 +794,67 @@ class PreviewContainer(Container):
 
     async def on_key(self, event: events.Key) -> None:
         """Check for vim keybinds."""
+        from rovr.functions.utils import check_key
+
         # Handle PDF page navigation
         if (
             self.border_title == titles.pdf
             and self._file_type == "pdf"
             and self.pdf.images is not None
         ):
-            match event.key:
-                case key if (
-                    key in config["keybinds"]["down"] + config["keybinds"]["page_down"]
-                    and self.pdf.current_page < self.pdf.total_pages - 1
-                ):
-                    event.stop()
-                    self.pdf.current_page += 1
-                case key if (
-                    key in config["keybinds"]["up"] + config["keybinds"]["page_up"]
-                    and self.pdf.current_page > 0
-                ):
-                    event.stop()
-                    self.pdf.current_page -= 1
-                case key if key in config["keybinds"]["home"]:
-                    event.stop()
-                    self.pdf.current_page = 0
-                case key if key in config["keybinds"]["end"]:
-                    event.stop()
-                    self.pdf.current_page = self.pdf.total_pages - 1
-                case _:
-                    return
+            if (
+                check_key(
+                    event, config["keybinds"]["down"] + config["keybinds"]["page_down"]
+                )
+                and self.pdf.current_page < self.pdf.total_pages - 1
+            ):
+                event.stop()
+                self.pdf.current_page += 1
+            elif (
+                check_key(
+                    event, config["keybinds"]["up"] + config["keybinds"]["page_up"]
+                )
+                and self.pdf.current_page > 0
+            ):
+                event.stop()
+                self.pdf.current_page -= 1
+            elif check_key(event, config["keybinds"]["home"]):
+                event.stop()
+                self.pdf.current_page = 0
+            elif check_key(event, config["keybinds"]["end"]):
+                event.stop()
+                self.pdf.current_page = self.pdf.total_pages - 1
+            else:
+                return
             await self.show_pdf_preview()
         elif self.border_title == titles.bat or self.border_title == titles.archive:
             widget = (
                 self if self.border_title == titles.bat else self.query_one(FileList)
             )
-            match event.key:
-                case key if key in config["keybinds"]["up"]:
-                    event.stop()
-                    widget.scroll_up(animate=False)
-                case key if key in config["keybinds"]["down"]:
-                    event.stop()
-                    widget.scroll_down(animate=False)
-                case key if key in config["keybinds"]["page_up"]:
-                    event.stop()
-                    widget.scroll_page_up(animate=False)
-                case key if key in config["keybinds"]["page_down"]:
-                    event.stop()
-                    widget.scroll_page_down(animate=False)
-                case key if key in config["keybinds"]["home"]:
-                    event.stop()
-                    widget.scroll_home(animate=False)
-                case key if key in config["keybinds"]["end"]:
-                    event.stop()
-                    widget.scroll_end(animate=False)
-                case key if key in config["keybinds"]["preview_scroll_left"]:
-                    event.stop()
-                    widget.scroll_left(animate=False)
-                case key if key in config["keybinds"]["preview_scroll_right"]:
-                    event.stop()
-                    widget.scroll_right(animate=False)
+            if check_key(event, config["keybinds"]["up"]):
+                event.stop()
+                widget.scroll_up(animate=False)
+            elif check_key(event, config["keybinds"]["down"]):
+                event.stop()
+                widget.scroll_down(animate=False)
+            elif check_key(event, config["keybinds"]["page_up"]):
+                event.stop()
+                widget.scroll_page_up(animate=False)
+            elif check_key(event, config["keybinds"]["page_down"]):
+                event.stop()
+                widget.scroll_page_down(animate=False)
+            elif check_key(event, config["keybinds"]["home"]):
+                event.stop()
+                widget.scroll_home(animate=False)
+            elif check_key(event, config["keybinds"]["end"]):
+                event.stop()
+                widget.scroll_end(animate=False)
+            elif check_key(event, config["keybinds"]["preview_scroll_left"]):
+                event.stop()
+                widget.scroll_left(animate=False)
+            elif check_key(event, config["keybinds"]["preview_scroll_right"]):
+                event.stop()
+                widget.scroll_right(animate=False)
 
     @on(events.Show)
     def when_become_visible(self, event: events.Show) -> None:

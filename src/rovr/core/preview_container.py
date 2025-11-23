@@ -596,7 +596,7 @@ class PreviewContainer(Container):
         self._pending_preview_path = None
         self.perform_show_preview(file_path)
 
-    @work(exclusive=True, thread=True)
+    @work(exclusive=True, thread=True, exit_on_error=False)
     def perform_show_preview(self, file_path: str) -> None:
         self.border_subtitle = ""
         if should_cancel():

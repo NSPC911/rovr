@@ -1,5 +1,9 @@
 # Unreleased
 
+# [v0.6.0.dev1]
+
+## new features
+
 - feat(app): use textual's tree instead of a custom tree a1d7449
 - feat(app+config): add support for modes #154
 - feat(config): auto detect editor to use 5f1d7f8

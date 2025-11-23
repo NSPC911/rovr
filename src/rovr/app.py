@@ -263,7 +263,15 @@ class Application(App, inherit_bindings=False):
         if self._show_keys:
             with suppress(NoMatches):
                 self.query_one("#showKeys").update(event.key)
-                self.query_one("#showKeys").tooltip = f"Key = '{event.key}'" + (f"\nCharacter = '{event.character}'" if event.is_printable else "") + f"\nAliases = {event.aliases}"
+                self.query_one("#showKeys").tooltip = (
+                    f"Key = '{event.key}'"
+                    + (
+                        f"\nCharacter = '{event.character}'"
+                        if event.is_printable
+                        else ""
+                    )
+                    + f"\nAliases = {event.aliases}"
+                )
 
         # Not really sure why this can happen, but I will still handle this
         if self.focused is None or not isinstance(self.focused.parent, DOMNode):

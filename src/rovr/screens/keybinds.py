@@ -94,7 +94,10 @@ class Keybinds(ModalScreen):
         if check_key(event, config["keybinds"]["focus_search"]):
             event.stop()
             self.input.focus()
-        elif check_key(event, config["keybinds"]["show_keybinds"]) or event.key == "escape":
+        elif (
+            check_key(event, config["keybinds"]["show_keybinds"])
+            or event.key == "escape"
+        ):
             event.stop()
             self.dismiss()
 

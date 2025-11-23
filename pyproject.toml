@@ -109,3 +109,4 @@ preview = true
 possibly-missing-import = "ignore"
 unresolved-reference = "ignore" # handled by ruff
 unresolved-attribute = "ignore"
+no-matching-overload = "ignore" # not that accurate

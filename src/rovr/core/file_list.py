@@ -759,7 +759,7 @@ class FileList(SelectionList, inherit_bindings=False):
                     else:
                         self.app.run_in_thread(
                             cmd,
-                            f'{config["plugins"]["editor"]["folder_executable"]} "{self.highlighted_option.dir_entry.path}"',  # ty: ignore[possibly-missing-attribute]
+                            f'{config["plugins"]["editor"]["folder_executable"]} "{self.highlighted_option.dir_entry.path}"',
                         )
 
                 else:

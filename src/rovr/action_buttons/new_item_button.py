@@ -1,5 +1,6 @@
 import contextlib
 from os import getcwd, makedirs, path
+from typing import cast
 
 from textual import work
 from textual.content import Content
@@ -47,7 +48,9 @@ class NewItemButton(Button):
                 makedirs(location)
             except Exception as e:
                 self.notify(
-                    message=Content(
+                    # string or not, doesn't really matter much
+                    # it can still take in a Content object
+                    message=Content(  # ty: ignore[invalid-argument-type]
                         f"Error creating directory '{response}'\n{type(e).__name__}: {e}"
                     ),
                     title="New Item",
@@ -65,9 +68,15 @@ class NewItemButton(Button):
                 with open(location, "w") as f:
                     f.write("")
             except Exception as e:
+                # i had to force a cast, i didn't have any other choice
+                # notify supports non-string objects, but ty wasn't taking
+                # any of it, so i had to cast it
                 self.notify(
-                    message=Content(
-                        f"Error creating file '{response}'\n{type(e).__name__}: {e}"
+                    message=cast(
+                        str,
+                        Content(
+                            f"Error creating file '{response}'\n{type(e).__name__}: {e}"
+                        ),
                     ),
                     title="New Item",
                     severity="error",
@@ -79,8 +88,11 @@ class NewItemButton(Button):
                     f.write("")  # Create an empty file
             except Exception as e:
                 self.notify(
-                    message=Content(
-                        f"Error creating file '{response}'\n{type(e).__name__}: {e}"
+                    message=cast(
+                        str,
+                        Content(
+                            f"Error creating file '{response}'\n{type(e).__name__}: {e}"
+                        ),
                     ),
                     title="New Item",
                     severity="error",

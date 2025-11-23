@@ -1,6 +1,7 @@
 import contextlib
 from os import getcwd, path
 from shutil import move
+from typing import cast
 
 from textual import work
 from textual.content import Content
@@ -74,9 +75,15 @@ class RenameItemButton(Button):
             try:
                 move(old_name, new_name)
             except Exception as e:
+                # i had to force a cast, i didn't have any other choice
+                # notify supports non-string objects, but ty wasn't taking
+                # any of it, so i had to cast it
                 self.notify(
-                    message=Content(
-                        f"Error renaming '{selected_file}' to '{response}': {e}"
+                    message=cast(
+                        str,
+                        Content(
+                            f"Error renaming '{selected_file}' to '{response}': {e}"
+                        ),
                     ),
                     title="Rename",
                     severity="error",

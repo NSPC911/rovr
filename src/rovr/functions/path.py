@@ -197,7 +197,7 @@ async def get_cwd_object(
         "name", "size", "modified", "created", "extension", "natural"
     ] = "name",
     reverse: bool = False,
-) -> tuple[list[dict], list[dict]]:
+) -> tuple[list[CWDObjectReturnDict], list[CWDObjectReturnDict]]:
     """
     Get the objects (files and folders) in a provided directory
     Args:

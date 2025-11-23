@@ -249,7 +249,7 @@ class ZDToDirectory(ModalScreen):
 
     @work(thread=True)
     def create_options(
-        self, show_scores: int, stdout: str
+        self, show_scores: bool, stdout: str
     ) -> list[ModalSearcherOption] | None:
         first_score_width = 0
         options: list[ModalSearcherOption] = []

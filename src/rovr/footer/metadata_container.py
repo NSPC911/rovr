@@ -234,7 +234,7 @@ class MetadataContainer(VerticalScroll, inherit_bindings=False):
             self.app.call_from_thread(size_widget.update, "Error")
             return
 
-        if not self._size_worker.is_cancelled:
+        if self._size_worker and self._size_worker.is_running:
             self.app.call_from_thread(
                 size_widget.update,
                 utils.natural_size(

@@ -1007,15 +1007,15 @@ Screen {
     &.comfy-buttons #below_menu PathAutoCompleteInput { margin: -1 1 0 1 !important }
     &.compact-buttons #below_menu PathAutoCompleteInput { margin: -1 -1 0 -1 !important }
     #zoxide_group,
+    #file_search_group,
     .--textual-command-palette #--container,
     #dialog,
     #modalInput_group {
       width: 90vw;
       max-width: 90vw;
     }
-    Toast {
-      width: 100vw
-    }
+    Toast { width: 100vw }
+    #path_switcher { padding: 0 }
   }
   &.-nopreview {
     #preview_sidebar,
@@ -1024,15 +1024,15 @@ Screen {
     &.compact-buttons #below_menu PathAutoCompleteInput { margin: -1 -1 0 -1 !important }
     #pinned_sidebar_container { max-width: 25vw }
     #zoxide_group,
+    #file_search_group,
     .--textual-command-palette #--container,
     #dialog,
     #modalInput_group {
       width: 75vw;
       max-width: 75vw;
     }
-    Toast {
-      width: 50vw
-    }
+    Toast { width: 50vw }
+    #path_switcher { padding: 0 }
   }
   &.-all-vertical #footer { max-height: 25vh }
   &.-nopath {

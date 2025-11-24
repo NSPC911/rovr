@@ -7,7 +7,7 @@ from typing import Callable, Iterable
 
 from rich.console import Console
 from textual import events, on, work
-from textual.app import WINDOWS, App, ComposeResult, SystemCommand
+from textual.app import WINDOWS, App, ComposeResult, ScreenStackError, SystemCommand
 from textual.binding import Binding
 from textual.color import ColorParseError
 from textual.containers import (
@@ -594,8 +594,11 @@ class Application(App, inherit_bindings=False):
             or event.size.width < MaxPossible.width
         ) and not self.has_pushed_screen:
             self.has_pushed_screen = True
-            await self.push_screen_wait(TerminalTooSmall())
+            await self.push_screen(TerminalTooSmall())
             self.has_pushed_screen = False
+        else:
+            with suppress(ScreenStackError):
+                self.pop_screen()
         self.hide_popups()
 
     async def _on_css_change(self) -> None:

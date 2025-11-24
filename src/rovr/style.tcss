@@ -147,6 +147,8 @@ Input, TextArea {
 Toast {
   max-height: 100%;
   width: 33vw;
+  max-width: 100vw;
+  layer: toastLayer;
   .toast--title {
     text-style: underline;
   }
@@ -373,7 +375,7 @@ Tooltip {
   width: $pinned_sidebar_width;
 }
 
-#pinned_sidebar { height: 1fr; padding: 0; }
+#pinned_sidebar { height: 1fr; padding: 0 }
 
 #preview_sidebar {
   margin: 0;
@@ -999,13 +1001,27 @@ LoadingIndicator {
     max-width: 3;
   }
 }
+App.comfy-buttons Screen.-nopreview #below_menu PathAutoCompleteInput,
+App.comfy-buttons Screen.-filelistonly #below_menu PathAutoCompleteInput {
+  margin: -1 1 0 1
+}
+App.compact-buttons Screen.-nopreview #below_menu PathAutoCompleteInput,
+App.compact-buttons Screen.-filelistonly #below_menu PathAutoCompleteInput {
+  margin: -1 -1 0 -1
+}
+Screen.-filelistonly,
+Screen.-nopreview {
+  #preview_sidebar,
+  #below_menu Button { display: none !important }
+  #path_switcher { padding: 0 }
+}
+Screen.-nomenu-atall #menuwrapper,
+Screen.-middle-only #menuwrapper {
+  display: none;
+}
 Screen {
   &.-filelistonly {
-    #pinned_sidebar_container,
-    #preview_sidebar,
-    #below_menu Button { display: none !important }
-    &.comfy-buttons #below_menu PathAutoCompleteInput { margin: -1 1 0 1 !important }
-    &.compact-buttons #below_menu PathAutoCompleteInput { margin: -1 -1 0 -1 !important }
+    #pinned_sidebar_container { display: none !important }
     #zoxide_group,
     #file_search_group,
     .--textual-command-palette #--container,
@@ -1014,14 +1030,9 @@ Screen {
       width: 90vw;
       max-width: 90vw;
     }
-    Toast { width: 100vw }
-    #path_switcher { padding: 0 }
+    Toast { width: 90vw }
   }
   &.-nopreview {
-    #preview_sidebar,
-    #below_menu Button { display: none !important }
-    &.comfy-buttons #below_menu PathAutoCompleteInput { margin: -1 1 0 1 !important }
-    &.compact-buttons #below_menu PathAutoCompleteInput { margin: -1 -1 0 -1 !important }
     #pinned_sidebar_container { max-width: 25vw }
     #zoxide_group,
     #file_search_group,
@@ -1032,7 +1043,6 @@ Screen {
       max-width: 75vw;
     }
     Toast { width: 50vw }
-    #path_switcher { padding: 0 }
   }
   &.-all-vertical #footer { max-height: 25vh }
   &.-nopath {
@@ -1040,14 +1050,12 @@ Screen {
     #footer { max-height: 30vh }
   }
   &.-nomenu-atall {
-    #menuwrapper { display: none !important }
     #footer { max-height: 30vh }
   }
   &.-filelistonly-vertical {
     #menu { display: none !important }
   }
   &.-middle-only {
-    #menuwrapper { display: none !important }
     #footer { max-height: 25vh }
   }
 }

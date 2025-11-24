@@ -153,14 +153,21 @@ code {
         display: flex;
         flex-direction: row;
         &::before {
-          content: "❯ ";
+          content: " ";
           position: relative;
           display: block;
+        }
+        &:has(> span)::before {
+          content: "❯ ";
         }
       }
       .header::before {
         left: unset !important;
-        right: var(--ec-uiPadInl);
+        right: calc(var(--ec-uiPadInl) + -1px);
+        background-color: unset;
+        background: linear-gradient(90deg, green 33%, yellow 0%, yellow 66%, red 0%, red 100%) !important;
+        width: 2rem;
+        height: 0.625rem;
       }
     }
   }
@@ -205,6 +212,9 @@ img {
   .content-panel > .sl-container {
     max-width: unset !important;
     margin-inline: 0 !important;
+  }
+  .content-panel {
+    max-width: calc(100vw - 525px)
   }
 }
 @media (min-width: 50rem) {
@@ -620,4 +630,12 @@ ul.isMobile li:hover > a {
     var(--sl-color-gray-6),
     var(--sl-color-gray-5)
   );
+}
+@keyframes showCopyThing {
+  from {
+    transform: translateX(-0.5ch)
+  }
+}
+.feedback {
+  animation: showCopyThing 0.125s ease-out;
 }

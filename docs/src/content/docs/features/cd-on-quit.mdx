@@ -26,7 +26,7 @@ You can create wrapper functions in your shell config for convenience:
 <Tabs>
   <TabItem label="bash/zsh">
     <Code
-      code={`rovr () {\n    local cwd_file=$(mktemp -t rovr_cwd.XXXXXX)\n    command rovr --cwd-file "$cwd_file" "$@"\n    if [ -f "$cwd_file" ]; then\n        cd "$(cat "$cwd_file")"\n        rm -f "$cwd_file"\n    fi\n}`}
+      code={`rovr () {\n    local cwd_file=$(mktemp -t rovr_cwd.XXXXXX)\n    command rovr --cwd-file "$cwd_file" "$@"\n    if [ -f "$cwd_file" ]; then\n        local new_loc=$(cat "$cwd_file")\n        if [ -n "$new_loc" ] && [ "$new_loc" != "$PWD" ]; then\n            cd "$new_loc"\n        fi\n        rm -f "$cwd_file"\n    fi\n}`}
       lang="bash"
       frame="code"
       title=".bashrc / .zshrc"
@@ -34,7 +34,7 @@ You can create wrapper functions in your shell config for convenience:
   </TabItem>
   <TabItem label="fish">
     <Code
-      code={`function rovr\n    set cwd_file (mktemp -t rovr_cwd.XXXXXX)\n    command rovr --cwd-file "$cwd_file" $argv\n    if test -f "$cwd_file"\n        cd (cat "$cwd_file")\n        rm -f "$cwd_file"\n    end\nend`}
+      code={`function rovr\n    set cwd_file (mktemp -t rovr_cwd.XXXXXX)\n    command rovr --cwd-file "$cwd_file" $argv\n    if test -f "$cwd_file"\n        set new_loc (cat "$cwd_file")\n        if test -n "$new_loc" -a "$new_loc" != "$PWD"\n            cd "$new_loc"\n        end\n        rm -f "$cwd_file"\n    end\nend`}
       lang="fish"
       frame="code"
       title="config.fish"
@@ -42,7 +42,7 @@ You can create wrapper functions in your shell config for convenience:
   </TabItem>
   <TabItem label="nushell">
     <Code
-      code={`def --env --wrapped rovr [...args: string] {\n    let cwd_file = (mktemp -t rovr_cwd.XXXXXX)\n    ^rovr --cwd-file $cwd_file ...$args\n    if ($cwd_file | path exists) {\n        cd ($cwd_file | open | str trim)\n        rm $cwd_file\n    }\n}`}
+      code={`def --env --wrapped rovr [...args: string] {\n    let cwd_file = (mktemp -t rovr_cwd.XXXXXX)\n    ^rovr --cwd-file $cwd_file ...$args\n    if ($cwd_file | path exists) {\n        let new_path = ($cwd_file | open | str trim)\n        if ($new_path != "" and $new_path != $env.PWD) {\n            cd $new_path\n        }\n        rm -fp $cwd_file\n    }\n}`}
       lang="nu"
       frame="code"
       title="config.nu"
@@ -50,7 +50,7 @@ You can create wrapper functions in your shell config for convenience:
   </TabItem>
   <TabItem label="powershell">
     <Code
-      code={`function rovr {\n    $cwd_file = [System.IO.Path]::GetTempFileName()\n    & rovr.exe --cwd-file $cwd_file $args\n    if (Test-Path $cwd_file) {\n        Set-Location -Path (Get-Content $cwd_file)\n        Remove-Item $cwd_file\n    }\n}`}
+      code={`function rovr {\n    $cwd_file = New-TemporaryFile\n    & rovr.exe --cwd-file $cwd_file $args\n    if (Test-Path $cwd_file) {\n        $new_loc = Get-Content $cwd_file\n        if (-not [String]::IsNullOrEmpty($new_loc) -and $new_loc -ne (Get-Location).Path) {\n            Set-Location $new_loc -ErrorAction SilentlyContinue\n        }\n        Remove-Item $cwd_file\n    }\n}`}
       lang="powershell"
       frame="code"
       title="$PROFILE"
@@ -67,7 +67,8 @@ You can create wrapper functions in your shell config for convenience:
 </Tabs>
 
 <Aside type="note">
-  The shell functions above use temporary files for better security while avoiding conflicts.
+  The shell functions above use temporary files for better security while
+  avoiding conflicts.
 </Aside>
 
 ### Additional CLI options
@@ -109,8 +110,10 @@ rm -f "$cwd_file" "$chooser_file"
 ```
 
 ### integrations
+
 as much as it might be tempting, this will not work. i use helix <sub>btw</sub> and just like superfile, it just cannot launch the app. i'm not sure why, but it might be a conflict between terminal buffer areas.
 so something like yazi's
+
 ```toml
 [keys.normal]
 C-y = [
@@ -121,4 +124,5 @@ C-y = [
   ':redraw',
 ]
 ```
+
 will not work

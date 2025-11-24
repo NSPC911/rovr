@@ -746,6 +746,11 @@
               "default": true,
               "description": "Suspend the app when editing a folder. Useful for TUI editors, but not for something like VSCode or Notepad++."
             },
+            "open_all_in_editor": {
+              "type": "boolean",
+              "default": false,
+              "description": "Open all files in the configured editor, regardless of file encoding or type. When disabled, files that cannot be opened due to encoding issues will use the system's default application instead."
+            },
             "keybinds": {
               "type": "array",
               "default": ["e"],

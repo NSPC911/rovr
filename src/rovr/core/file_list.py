@@ -388,6 +388,23 @@ class FileList(SelectionList, inherit_bindings=False):
         self.add_options(self.list_of_options)
         self.parent.border_subtitle = ""
 
+    async def file_selected_handler(self, target_path: str) -> None:
+        if self.app._chooser_file:
+            self.app.action_quit()
+        elif config["plugins"]["editor"]["open_all_in_editor"]:
+            if config["plugins"]["editor"]["file_suspend"]:
+                with self.app.suspend():
+                    cmd(
+                        f'{config["plugins"]["editor"]["file_executable"]} "{target_path}"'
+                    )
+            else:
+                self.app.run_in_thread(
+                    cmd,
+                    f'{config["plugins"]["editor"]["file_executable"]} "{target_path}"',
+                )
+        else:
+            path_utils.open_file(self.app, target_path)
+
     async def on_selection_list_selected_changed(
         self, event: SelectionList.SelectedChanged
     ) -> None:
@@ -413,10 +430,7 @@ class FileList(SelectionList, inherit_bindings=False):
                 self.app.tabWidget.active_tab.selectedItems = []
                 self.app.query_one("#file_list").focus()
             else:
-                if self.app._chooser_file:
-                    self.app.action_quit()
-                else:
-                    path_utils.open_file(self.app, target_path)
+                await self.file_selected_handler(target_path)
                 if self.highlighted is None:
                     self.highlighted = 0
                 self.app.tabWidget.active_tab.selectedItems = []
@@ -425,10 +439,7 @@ class FileList(SelectionList, inherit_bindings=False):
             if path.isdir(full_path):
                 self.app.cd(full_path)
             else:
-                if self.app._chooser_file:
-                    self.app.action_quit()
-                else:
-                    path_utils.open_file(self.app, full_path)
+                await self.file_selected_handler(full_path)
             if self.highlighted is None:
                 self.highlighted = 0
             self.app.tabWidget.active_tab.selectedItems = []

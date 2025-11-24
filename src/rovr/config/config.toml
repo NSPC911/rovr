@@ -198,6 +198,7 @@ file_executable = ""
 folder_executable = ""
 file_suspend = true
 folder_suspend = true
+open_all_in_editor = false
 keybinds = ["e"]
 
 [plugins.finder]

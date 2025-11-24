@@ -33,13 +33,13 @@ opens files and folders in your preferred editor.
 - **executables:** set the command to open files (`file_executable`) and folders (`folder_executable`).
 - **keybinding:** the default keybinding is `e`.
 - **suspending:** whether to suspend rovr when opening a file in an editor (recommended for TUI editors, disable for GUI editors for seamless workflow)
+  - `file_suspend`: suspend when opening files (default: `true`)
+  - `folder_suspend`: suspend when opening folders (default: `true`)
+- **open all in editor:** set `plugins.editor.open_all_in_editor = true` to force all files to open in your configured editor, regardless of encoding or file type. when disabled (default), files that cannot be read due to encoding issues will open with the system's default application instead.
 
 ### finder
 
-<img
-  src="/rovr/screenshots/plugin-finder.svg"
-  alt="rovr's fd integration"
-/>
+<img src="/rovr/screenshots/plugin-finder.svg" alt="rovr's fd integration" />
 
 uses [fd](https://github.com/sharkdp/fd) to search recursively in the current directory
 
@@ -50,12 +50,10 @@ uses [fd](https://github.com/sharkdp/fd) to search recursively in the current di
 
 ### poppler
 
-<img
-  src="/rovr/screenshots/preview-pdf.png"
-  alt="rovr's poppler integration"
-/>
+<img src="/rovr/screenshots/preview-pdf.png" alt="rovr's poppler integration" />
 
 uses [poppler](https://poppler.freedesktop.org) to preview PDF files
+
 - **enable:** `plugins.poppler.enabled = true`
 - **poppler_folder:** set the location where the poppler tools are installed (e.g., `/usr/bin` or `C:\Program Files\poppler\bin`).
 - **use_pdftocairo:** whether to use pdftocairo instead of pdftoppm (may help performance)

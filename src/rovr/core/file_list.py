@@ -659,6 +659,8 @@ class FileList(SelectionList, inherit_bindings=False):
             if check_key(event, config["keybinds"]["toggle_visual"]):
                 await self.toggle_mode()
             elif check_key(event, config["keybinds"]["toggle_all"]):
+                if self.get_option_at_index(0).disabled:
+                    return
                 if not self.select_mode_enabled:
                     await self.toggle_mode()
                 if len(self.selected) == len(self.options):
@@ -751,7 +753,7 @@ class FileList(SelectionList, inherit_bindings=False):
                 if self.highlighted_option and self.highlighted_option.disabled:
                     return
                 if path.isdir(self.highlighted_option.dir_entry.path):
-                    if config["plugins"]["editor"]["file_suspend"]:
+                    if config["plugins"]["editor"]["folder_suspend"]:
                         with self.app.suspend():
                             cmd(
                                 f'{config["plugins"]["editor"]["folder_executable"]} "{self.highlighted_option.dir_entry.path}"'

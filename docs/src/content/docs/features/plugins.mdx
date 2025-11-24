@@ -32,7 +32,7 @@ opens files and folders in your preferred editor.
 - **enable:** `plugins.editor.enabled = true`
 - **executables:** set the command to open files (`file_executable`) and folders (`folder_executable`).
 - **keybinding:** the default keybinding is `e`.
-- **suspending:** whether to suspend rovr when editing a file. suspend when using a TUI editor, and not when using a gui editor for seamlessness
+- **suspending:** whether to suspend rovr when opening a file in an editor (recommended for TUI editors, disable for GUI editors for seamless workflow)
 
 ### finder
 
@@ -56,7 +56,7 @@ uses [fd](https://github.com/sharkdp/fd) to search recursively in the current di
 />
 
 uses [poppler](https://poppler.freedesktop.org) to preview PDF files
-- **enable:** `plugins.finder.enabled = true`
+- **enable:** `plugins.poppler.enabled = true`
 - **poppler_folder:** set the location where the poppler tools are installed (e.g., `/usr/bin` or `C:\Program Files\poppler\bin`).
 - **use_pdftocairo:** whether to use pdftocairo instead of pdftoppm (may help performance)
 - **threads:** number of threads to use for processing PDF files (default is 1)

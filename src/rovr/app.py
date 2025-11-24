@@ -770,7 +770,7 @@ class Application(App, inherit_bindings=False):
             self.query_one(SortOrderPopup).add_class("hidden")
 
     @work(thread=True)
-    def run_in_thread(self, function: Callable, *args, **kwargs) -> Worker | Exception:
+    def run_in_thread(self, function: Callable, *args, **kwargs) -> Worker:
         """
         Run a function in a thread and return a worker for it.
         Args:
@@ -785,7 +785,7 @@ class Application(App, inherit_bindings=False):
         try:
             return function(*args, **kwargs)
         except Exception as exc:
-            return exc
+            return exc  # ty: ignore[invalid-return-type]
 
 
 app = Application()

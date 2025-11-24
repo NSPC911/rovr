@@ -6,7 +6,7 @@
 
 - feat(app): use textual's tree instead of a custom tree a1d7449
 - feat(app+config): add support for modes #154
-- feat(config): auto detect editor to use 5f1d7f8
+- feat(config): auto-detect editor to use 5f1d7f8
 - feat(config): add support for more keys 294d9bb
 - feat(editor): add config to suspend when opening editor ed605da
 - feat(preview): add pdf preview support with poppler #153

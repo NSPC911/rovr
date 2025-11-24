@@ -270,7 +270,7 @@ class PreviewContainer(Container):
                     return
                 image_widget = self.query_one("#image_preview")
                 image_widget.image = pil_object
-            except Exception:
+            except NoMatches:
                 if should_cancel():
                     return
                 async with self.batch():
@@ -848,12 +848,12 @@ class PreviewContainer(Container):
             elif check_key(event, config["keybinds"]["end"]):
                 event.stop()
                 widget.scroll_end(animate=False)
-            elif check_key(event, config["keybinds"]["preview_scroll_left"]):
-                event.stop()
-                widget.scroll_left(animate=False)
-            elif check_key(event, config["keybinds"]["preview_scroll_right"]):
-                event.stop()
-                widget.scroll_right(animate=False)
+            # elif check_key(event, config["keybinds"]["preview_scroll_left"]):
+            #     event.stop()
+            #     widget.scroll_left(animate=False)
+            # elif check_key(event, config["keybinds"]["preview_scroll_right"]):
+            #     event.stop()
+            #     widget.scroll_right(animate=False)
 
     @on(events.Show)
     def when_become_visible(self, event: events.Show) -> None:

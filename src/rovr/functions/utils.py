@@ -13,21 +13,27 @@ from rovr.variables.maps import (
 pprint = Console().print
 
 
-def deep_merge(d: dict, u: dict) -> dict:
+def deep_merge(old: dict, new: dict) -> dict:
     """Mini lodash merge
     Args:
-        d (dict): old dictionary
-        u (dict): new dictionary, to merge on top of d
+        old (dict): old dictionary
+        new (dict): new dictionary, to merge on top of old
 
     Returns:
         dict: Merged dictionary
     """
-    for k, v in u.items():
-        if isinstance(v, dict):
-            d[k] = deep_merge(d.get(k, {}), v)
-        else:
-            d[k] = v
-    return d
+    try:
+        for key, value in new.items():
+            if isinstance(value, dict):
+                old[key] = deep_merge(old.get(key, {}), value)
+            else:
+                old[key] = value
+    except Exception as exc:
+        pprint(
+            f"While deep merging the default config with the userconfig, {type(exc).__name__} was raised.\n    {exc}\nSince the conflict cannot be resolved, rovr will not be launching."
+        )
+        exit(1)
+    return old
 
 
 def set_nested_value(

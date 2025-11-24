@@ -277,7 +277,6 @@ class PreviewContainer(Container):
                     await self.remove_children()
                     await self.show_image_preview()
                 return
-        pil_object.close()
 
         if should_cancel():
             return

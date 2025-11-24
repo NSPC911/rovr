@@ -246,6 +246,7 @@ class PreviewContainer(Container):
                         compact=True,
                     )
                 )
+            return
 
         if not self.has_child("#image_preview"):
             await self.remove_children()

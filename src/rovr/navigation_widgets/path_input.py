@@ -143,7 +143,10 @@ class PathInput(Input):
         super().__init__(
             id="path_switcher",
             validators=[Function(lambda x: path.exists(x), "Path does not exist")],
-            validate_on=["changed"],
+            # ty ignore because a list is iterable,
+            # but it is crashing out, because it thinks
+            # lists aren't iterable, weird
+            validate_on=["changed"],  # ty: ignore[invalid-argument-type]
         )
 
     def on_input_submitted(self, event: Input.Submitted) -> None:

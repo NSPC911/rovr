@@ -1,6 +1,6 @@
 [project]
 name = "rovr"
-version = "0.5.0"
+version = "0.6.0.dev1"
 description = "A post-modern terminal file explorer"
 readme = "README.md"
 requires-python = ">=3.12, <3.14"
@@ -16,22 +16,23 @@ classifiers = [
   "Topic :: Utilities",
 ]
 dependencies = [
-  "humanize>=4.12.3",
+  "humanize>=4.14.0",
   "jsonschema>=4.25.0",
   "natsort>=8.4.0",
   "pathvalidate>=3.3.1",
-  "pillow>=11.2.1",
-  "platformdirs>=4.3.8",
-  "psutil>=7.0.0",
+  "pdf2image>=1.17.0",
+  "pillow>=12.0.0",
+  "platformdirs>=4.5.0",
+  "psutil>=7.1.0",
   "rarfile>=4.2",
   "rich-click>=1.9.3",
   "send2trash>=1.8.3",
-  "textual-autocomplete>=4.0.4",
-  "textual-image[textual]>=0.8.2",
-  "textual[syntax]>=6.0.0,<7.0.0",
+  "textual[syntax]>=6.6.0,<7.0.0",
+  "textual-autocomplete>=4.0.6",
+  "textual-image[textual]>=0.8.4",
   "toml>=0.10.2",
-  "tree-sitter>=0.24.0",
-  "ujson>=5.10.0",
+  "tree-sitter>=0.25.0",
+  "ujson>=5.11.0",
 ]
 
 [project.urls]
@@ -44,12 +45,12 @@ rovr = "rovr.__main__:main"
 
 [dependency-groups]
 dev = [
-  "commitizen>=4.8.3",
-  "json-schema-for-humans>=1.4.1",
-  "poethepoet>=0.36.0",
-  "ruff>=0.14.2",
+  "commitizen>=4.10.0",
+  "json-schema-for-humans>=1.5.1",
+  "poethepoet>=0.38.0",
+  "ruff>=0.14.6",
   "textual-dev>=1.7.0",
-  "ty>=0.0.1a24",
+  "ty>=0.0.1a27",
 ]
 
 [build-system]
@@ -108,3 +109,4 @@ preview = true
 possibly-missing-import = "ignore"
 unresolved-reference = "ignore" # handled by ruff
 unresolved-attribute = "ignore"
+no-matching-overload = "ignore" # not that accurate

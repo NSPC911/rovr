@@ -188,7 +188,7 @@ class Archive:
 
     def infolist(
         self,
-    ) -> List[Union[zipfile.ZipInfo, tarfile.TarInfo, rarfile.RarInfo]]:
+    ) -> list[zipfile.ZipInfo] | list[tarfile.TarInfo] | list[rarfile.RarInfo]:
         """Return list of archive members (similar to zipfile.infolist()).
 
         Returns:
@@ -202,13 +202,13 @@ class Archive:
 
         if self._is_zip:
             assert isinstance(self._archive, zipfile.ZipFile)
-            return self._archive.infolist()  # type: ignore[return-value]
+            return self._archive.infolist()
         elif self._is_rar:
             assert isinstance(self._archive, rarfile.RarFile)
-            return self._archive.infolist()  # type: ignore[return-value]
+            return self._archive.infolist()
         else:
             assert isinstance(self._archive, tarfile.TarFile)
-            return self._archive.getmembers()  # type: ignore[return-value]
+            return self._archive.getmembers()
 
     def namelist(self) -> List[str]:
         """Return list of member names.
@@ -257,7 +257,7 @@ class Archive:
             member_filename = (
                 member.filename if isinstance(member, rarfile.RarInfo) else member
             )
-            self._archive.extract(member, path)  # type: ignore[arg-type]
+            self._archive.extract(member, path)
             return str(Path(path or ".") / member_filename)
 
         if self._is_zip:

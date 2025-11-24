@@ -7,7 +7,9 @@ from os import path
 from typing import ClassVar
 
 import textual_image.widget as timg
-from PIL import UnidentifiedImageError
+from pdf2image import convert_from_path
+from PIL import Image, UnidentifiedImageError
+from PIL.Image import Image as PILImage
 from rich.text import Text
 from textual import events, on, work
 from textual.app import ComposeResult
@@ -16,13 +18,17 @@ from textual.containers import Container
 from textual.css.query import NoMatches
 from textual.message import Message
 from textual.widgets import Static, TextArea
-from textual.worker import Worker, WorkerCancelled
+from textual.worker import Worker, WorkerCancelled, WorkerError
 
 from rovr.classes import Archive
 from rovr.core import FileList
 from rovr.functions.utils import should_cancel
 from rovr.variables.constants import PreviewContainerTitles, config
-from rovr.variables.maps import ARCHIVE_EXTENSIONS_FULL, EXT_TO_LANG_MAP, PIL_EXTENSIONS
+from rovr.variables.maps import (
+    ARCHIVE_EXTENSIONS_FULL,
+    EXT_TO_LANG_MAP,
+    PIL_EXTENSIONS,
+)
 
 titles = PreviewContainerTitles()
 
@@ -145,6 +151,13 @@ class CustomTextArea(TextArea, inherit_bindings=False):
     )
 
 
+@dataclass
+class PDFHandler:
+    current_page: int = 0
+    total_pages: int = 0
+    images: list[PILImage] | None = None
+
+
 class PreviewContainer(Container):
     @dataclass
     class SetLoading(Message):
@@ -163,6 +176,7 @@ class PreviewContainer(Container):
         self._initial_height = self.size.height
         self._file_type: str = "none"
         self._preview_texts: list[str] = config["interface"]["preview_text"].values()
+        self.pdf = PDFHandler()
 
     def compose(self) -> ComposeResult:
         yield Static(config["interface"]["preview_text"]["start"], classes="wrap")
@@ -190,40 +204,20 @@ class PreviewContainer(Container):
         if should_cancel():
             return
 
-        if not self.has_child("#image_preview"):
-            await self.remove_children()
-            self.remove_class("bat", "full", "clip")
-
+        try:
+            worker: Worker = self.app.run_in_thread(Image.open, self._current_file_path)
+            result: PILImage | Exception = await worker.wait()
+            if isinstance(result, Exception):
+                raise result
+            else:
+                pil_object: PILImage = result
+        except WorkerError:
+            return
+        except UnidentifiedImageError:
             if should_cancel():
                 return
-
-            try:
-                image_widget = timg.__dict__[
-                    config["settings"]["image_protocol"] + "Image"
-                ](
-                    self._current_file_path,
-                    id="image_preview",
-                    classes="inner_preview",
-                )
-                image_widget.can_focus = True
-                await self.mount(image_widget)
-            except FileNotFoundError:
-                if should_cancel():
-                    return
-                await self.mount(
-                    CustomTextArea(
-                        id="text_preview",
-                        show_line_numbers=False,
-                        soft_wrap=True,
-                        read_only=True,
-                        text=config["interface"]["preview_text"]["error"],
-                        language="markdown",
-                        compact=True,
-                    )
-                )
-            except UnidentifiedImageError:
-                if should_cancel():
-                    return
+            async with self.batch():
+                await self.remove_children()
                 await self.mount(
                     CustomTextArea(
                         id="text_preview",
@@ -235,18 +229,142 @@ class PreviewContainer(Container):
                         compact=True,
                     )
                 )
+            return
+        except FileNotFoundError:
+            if should_cancel():
+                return
+            async with self.batch():
+                await self.remove_children()
+                await self.mount(
+                    CustomTextArea(
+                        id="text_preview",
+                        show_line_numbers=False,
+                        soft_wrap=True,
+                        read_only=True,
+                        text=config["interface"]["preview_text"]["error"],
+                        language="markdown",
+                        compact=True,
+                    )
+                )
+            return
+
+        if not self.has_child("#image_preview"):
+            await self.remove_children()
+            self.remove_class("bat", "full", "clip")
+
+            if should_cancel():
+                return
+
+            image_widget = timg.__dict__[
+                config["settings"]["image_protocol"] + "Image"
+            ](
+                pil_object,
+                id="image_preview",
+                classes="inner_preview",
+            )
+            image_widget.can_focus = True
+            await self.mount(image_widget)
         else:
             try:
                 if should_cancel():
                     return
                 image_widget = self.query_one("#image_preview")
-                if image_widget.image != self._current_file_path:
-                    image_widget.image = self._current_file_path
+                image_widget.image = pil_object
+            except NoMatches:
+                if should_cancel():
+                    return
+                async with self.batch():
+                    await self.remove_children()
+                    await self.show_image_preview()
+                return
+        pil_object.close()
+
+        if should_cancel():
+            return
+
+    async def show_pdf_preview(self) -> None:
+        self.border_title = titles.pdf
+
+        if should_cancel():
+            return
+
+        # Convert PDF to images if not already done
+        if self.pdf.images is None:
+            try:
+                worker: Worker = self.app.run_in_thread(
+                    convert_from_path,
+                    str(self._current_file_path),
+                    transparent=False,
+                    fmt="png",
+                    single_file=False,
+                    use_pdftocairo=config["plugins"]["poppler"]["use_pdftocairo"],
+                    thread_count=config["plugins"]["poppler"]["threads"],
+                    poppler_path=config["plugins"]["poppler"]["poppler_folder"] or None,
+                )
+                result = await worker.wait()
+                if isinstance(result, Exception):
+                    raise result
+                elif len(result) == 0:
+                    raise ValueError(
+                        "Obtained 0 pages from Poppler. Something may have gone wrong..."
+                    )
+            except Exception as exc:
+                if should_cancel():
+                    return
+                await self.remove_children()
+                await self.mount(
+                    CustomTextArea(
+                        id="text_preview",
+                        show_line_numbers=False,
+                        soft_wrap=True,
+                        read_only=True,
+                        text=f"{type(exc).__name__}: {str(exc)}",
+                        language="markdown",
+                        compact=True,
+                    )
+                )
+                return
+
+            self.pdf.images = result
+            self.pdf.total_pages = len(self.pdf.images)
+            self.pdf.current_page = 0
+
+        if should_cancel():
+            return
+
+        current_image = self.pdf.images[self.pdf.current_page]
+
+        self.border_subtitle = (
+            f"Page {self.pdf.current_page + 1}/{self.pdf.total_pages}"
+        )
+
+        if not self.has_child("#image_preview"):
+            await self.remove_children()
+            self.remove_class("bat", "full", "clip")
+
+            if should_cancel():
+                return
+
+            image_widget = timg.__dict__[
+                config["settings"]["image_protocol"] + "Image"
+            ](
+                current_image,
+                id="image_preview",
+                classes="inner_preview",
+            )
+            image_widget.can_focus = True
+            await self.mount(image_widget)
+        else:
+            try:
+                if should_cancel():
+                    return
+                image_widget = self.query_one("#image_preview")
+                image_widget.image = current_image
             except Exception:
                 if should_cancel():
                     return
                 await self.remove_children()
-                await self.show_image_preview()
+                await self.show_pdf_preview()
 
         if should_cancel():
             return
@@ -360,10 +478,8 @@ class PreviewContainer(Container):
             "markdown"
             if is_special_content
             else EXT_TO_LANG_MAP.get(
-                # forced an ignore, there really is no other way to handle this
-                # it is a valid overload, but ty doesn't know it yet I suppose
-                path.splitext(self._current_file_path)[1],  # ty: ignore[no-matching-overload]
-                "markdown",  # ty: ignore[no-matching-overload]
+                path.splitext(self._current_file_path)[1],
+                "markdown",
             )
         )
 
@@ -479,12 +595,18 @@ class PreviewContainer(Container):
         self._pending_preview_path = None
         self.perform_show_preview(file_path)
 
-    @work(exclusive=True, thread=True)
+    @work(exclusive=True, thread=True, exit_on_error=False)
     def perform_show_preview(self, file_path: str) -> None:
         self.border_subtitle = ""
         if should_cancel():
             return
         self.post_message(self.SetLoading(True))
+
+        # Reset PDF state when changing files
+        if file_path != self._current_file_path:
+            self.pdf.images = None
+            self.pdf.current_page = 0
+            self.pdf.total_pages = 0
 
         if path.isdir(file_path):
             self.app.call_from_thread(
@@ -492,7 +614,12 @@ class PreviewContainer(Container):
             )
         else:
             lower_file_path = file_path.lower()
-            if any(lower_file_path.endswith(ext) for ext in PIL_EXTENSIONS):
+            if (
+                lower_file_path.endswith(".pdf")
+                and config["plugins"]["poppler"]["enabled"]
+            ):
+                file_type = "pdf"
+            elif any(lower_file_path.endswith(ext) for ext in PIL_EXTENSIONS):
                 file_type = "image"
             elif any(lower_file_path.endswith(ext) for ext in ARCHIVE_EXTENSIONS_FULL):
                 file_type = "archive"
@@ -534,7 +661,7 @@ class PreviewContainer(Container):
                         FileNotFoundError,
                     ):
                         content = [config["interface"]["preview_text"]["error"]]
-                case "image":
+                case "image" | "pdf":
                     pass
                 case _:
                     if should_cancel():
@@ -592,6 +719,7 @@ class PreviewContainer(Container):
         self._current_content = content
 
         self._file_type = file_type
+        self.remove_class("pdf")
 
         if file_type == "folder":
             await self.show_folder_preview(file_path)
@@ -599,6 +727,9 @@ class PreviewContainer(Container):
             await self.show_image_preview()
         elif file_type == "archive":
             await self.show_archive_preview()
+        elif file_type == "pdf":
+            self.add_class("pdf")
+            await self.show_pdf_preview()
         elif content is not None:
             if content in self._preview_texts:
                 await self.mount_special_messages()
@@ -627,6 +758,22 @@ class PreviewContainer(Container):
         if should_cancel():
             return
 
+    async def on_mouse_scroll_up(self, event: events.MouseScrollUp) -> None:
+        # pdf for now, text later on
+        if self.border_title == titles.pdf and self._file_type == "pdf":
+            event.stop()
+            if self.pdf.current_page > 0:
+                self.pdf.current_page -= 1
+                await self.show_pdf_preview()
+
+    async def on_mouse_scroll_down(self, event: events.MouseScrollDown) -> None:
+        # pdf for now, text later on
+        if self.border_title == titles.pdf and self._file_type == "pdf":
+            event.stop()
+            if self.pdf.current_page < self.pdf.total_pages - 1:
+                self.pdf.current_page += 1
+                await self.show_pdf_preview()
+
     async def on_resize(self, event: events.Resize) -> None:
         """Re-render the preview on resize if it's was rendered by batcat and height changed."""
         if (
@@ -646,35 +793,67 @@ class PreviewContainer(Container):
 
     async def on_key(self, event: events.Key) -> None:
         """Check for vim keybinds."""
-        if self.border_title == titles.bat or self.border_title == titles.archive:
+        from rovr.functions.utils import check_key
+
+        # Handle PDF page navigation
+        if (
+            self.border_title == titles.pdf
+            and self._file_type == "pdf"
+            and self.pdf.images is not None
+        ):
+            if (
+                check_key(
+                    event, config["keybinds"]["down"] + config["keybinds"]["page_down"]
+                )
+                and self.pdf.current_page < self.pdf.total_pages - 1
+            ):
+                event.stop()
+                self.pdf.current_page += 1
+            elif (
+                check_key(
+                    event, config["keybinds"]["up"] + config["keybinds"]["page_up"]
+                )
+                and self.pdf.current_page > 0
+            ):
+                event.stop()
+                self.pdf.current_page -= 1
+            elif check_key(event, config["keybinds"]["home"]):
+                event.stop()
+                self.pdf.current_page = 0
+            elif check_key(event, config["keybinds"]["end"]):
+                event.stop()
+                self.pdf.current_page = self.pdf.total_pages - 1
+            else:
+                return
+            await self.show_pdf_preview()
+        elif self.border_title == titles.bat or self.border_title == titles.archive:
             widget = (
                 self if self.border_title == titles.bat else self.query_one(FileList)
             )
-            match event.key:
-                case key if key in config["keybinds"]["up"]:
-                    event.stop()
-                    widget.scroll_up(animate=False)
-                case key if key in config["keybinds"]["down"]:
-                    event.stop()
-                    widget.scroll_down(animate=False)
-                case key if key in config["keybinds"]["page_up"]:
-                    event.stop()
-                    widget.scroll_page_up(animate=False)
-                case key if key in config["keybinds"]["page_down"]:
-                    event.stop()
-                    widget.scroll_page_down(animate=False)
-                case key if key in config["keybinds"]["home"]:
-                    event.stop()
-                    widget.scroll_home(animate=False)
-                case key if key in config["keybinds"]["end"]:
-                    event.stop()
-                    widget.scroll_end(animate=False)
-                case key if key in config["keybinds"]["preview_scroll_left"]:
-                    event.stop()
-                    widget.scroll_left(animate=False)
-                case key if key in config["keybinds"]["preview_scroll_right"]:
-                    event.stop()
-                    widget.scroll_right(animate=False)
+            if check_key(event, config["keybinds"]["up"]):
+                event.stop()
+                widget.scroll_up(animate=False)
+            elif check_key(event, config["keybinds"]["down"]):
+                event.stop()
+                widget.scroll_down(animate=False)
+            elif check_key(event, config["keybinds"]["page_up"]):
+                event.stop()
+                widget.scroll_page_up(animate=False)
+            elif check_key(event, config["keybinds"]["page_down"]):
+                event.stop()
+                widget.scroll_page_down(animate=False)
+            elif check_key(event, config["keybinds"]["home"]):
+                event.stop()
+                widget.scroll_home(animate=False)
+            elif check_key(event, config["keybinds"]["end"]):
+                event.stop()
+                widget.scroll_end(animate=False)
+            # elif check_key(event, config["keybinds"]["preview_scroll_left"]):
+            #     event.stop()
+            #     widget.scroll_left(animate=False)
+            # elif check_key(event, config["keybinds"]["preview_scroll_right"]):
+            #     event.stop()
+            #     widget.scroll_right(animate=False)
 
     @on(events.Show)
     def when_become_visible(self, event: events.Show) -> None:

@@ -6,7 +6,6 @@ from types import SimpleNamespace
 from typing import Callable, Iterable
 
 from rich.console import Console
-from rich.tree import Tree
 from textual import events, on, work
 from textual.app import WINDOWS, App, ComposeResult, SystemCommand
 from textual.binding import Binding
@@ -24,6 +23,7 @@ from textual.css.stylesheet import StylesheetParseError
 from textual.dom import DOMNode
 from textual.screen import Screen
 from textual.widgets import Input, Label
+from textual.worker import Worker
 
 from rovr.action_buttons import (
     CopyButton,
@@ -112,8 +112,11 @@ class Application(App, inherit_bindings=False):
         chooser_file: str | None = None,
         show_keys: bool = False,
         tree_dom: bool = False,
+        mode: str = "",
     ) -> None:
         super().__init__(watch_css=True)
+        if mode:
+            self.add_class(mode)
         self.app_blurred: bool = False
         self.startup_path: str = startup_path
         self.has_pushed_screen: bool = False
@@ -173,23 +176,8 @@ class Application(App, inherit_bindings=False):
     def on_mount(self) -> None:
         # exit for tree print
         if self._exit_with_tree:
-
-            def build_tree(node: DOMNode) -> Tree:
-                node_type = type(node).__name__
-                label = f"[bold]{node_type}[/bold]"
-                if node.id:
-                    label += f' [cyan]id="{node.id}"[/cyan]'
-                if node.classes:
-                    label += f' [green]class="{" ".join(node.classes)}"[/green]'
-                children = list(node.query_children("*"))
-                tree = Tree(label) if len(children) != 0 else Tree(label, style="bold")
-                for child in children:
-                    tree.add(build_tree(child))
-                return tree
-
             with self.suspend():
-                tree = build_tree(self)
-                console.print(tree)
+                console.print(self.tree)
                 self.exit()
             return
         # compact mode
@@ -269,10 +257,22 @@ class Application(App, inherit_bindings=False):
             super().action_focus_previous()
 
     async def on_key(self, event: events.Key) -> None:
+        from rovr.functions.utils import check_key
+
         # show key
         if self._show_keys:
             with suppress(NoMatches):
                 self.query_one("#showKeys").update(event.key)
+                self.query_one("#showKeys").tooltip = (
+                    f"Key = '{event.key}'"
+                    + (
+                        f"\nCharacter = '{event.character}'"
+                        if event.is_printable
+                        else ""
+                    )
+                    + f"\nAliases = {event.aliases}"
+                )
+
         # Not really sure why this can happen, but I will still handle this
         if self.focused is None or not isinstance(self.focused.parent, DOMNode):
             return
@@ -280,163 +280,157 @@ class Application(App, inherit_bindings=False):
         if len(self.screen_stack) != 1:
             return
         # Make sure that key binds don't break
-        match event.key:
-            # placeholder, not yet existing
-            case "escape" if self.focused.id and "search" in self.focused.id:
-                match self.focused.id:
-                    case "search_file_list":
-                        self.query_one("#file_list").focus()
-                    case "search_pinned_sidebar":
-                        self.query_one("#pinned_sidebar").focus()
-                return
-            # backspace is used by default bindings to head up in history
-            # so just avoid it
-            case "backspace" if isinstance(self.focused, Input) or (
-                self.focused.id and "search" in self.focused.id
-            ):
-                return
-            # focus toggle pinned sidebar
-            case key if key in config["keybinds"]["focus_toggle_pinned_sidebar"]:
-                if (
-                    self.focused.id == "pinned_sidebar"
-                    or "hide" in self.query_one("#pinned_sidebar_container").classes
-                ):
-                    self.query_one("#file_list").focus()
-                elif self.query_one("#pinned_sidebar_container").display:
-                    self.query_one("#pinned_sidebar").focus()
-            # Focus file list from anywhere except input
-            case key if key in config["keybinds"]["focus_file_list"]:
+        # placeholder, not yet existing
+        if event.key == "escape" and self.focused.id and "search" in self.focused.id:
+            if self.focused.id == "search_file_list":
                 self.query_one("#file_list").focus()
-            # Focus toggle preview sidebar
-            case key if key in config["keybinds"]["focus_toggle_preview_sidebar"]:
-                if (
-                    self.focused.id == "preview_sidebar"
-                    or self.focused.parent.id == "preview_sidebar"
-                    or "hide" in self.query_one("#preview_sidebar").classes
-                ):
-                    self.query_one("#file_list").focus()
-                elif self.query_one(PreviewContainer).display:
-                    with suppress(NoMatches):
-                        self.query_one("PreviewContainer > *").focus()
-                else:
-                    self.query_one("#file_list").focus()
-            # Focus path switcher
-            case key if key in config["keybinds"]["focus_toggle_path_switcher"]:
-                self.query_one("#path_switcher").focus()
-            # Focus processes
-            case key if key in config["keybinds"]["focus_toggle_processes"]:
-                if (
-                    self.focused.id == "processes"
-                    or "hide" in self.query_one("#processes").classes
-                ):
-                    self.query_one("#file_list").focus()
-                elif self.query_one("#footer").display:
-                    self.query_one("#processes").focus()
-            # Focus metadata
-            case key if key in config["keybinds"]["focus_toggle_metadata"]:
-                if self.focused.id == "metadata":
-                    self.query_one("#file_list").focus()
-                elif self.query_one("#footer").display:
-                    self.query_one("#metadata").focus()
-            # Focus clipboard
-            case key if key in config["keybinds"]["focus_toggle_clipboard"]:
-                if self.focused.id == "clipboard":
-                    self.query_one("#file_list").focus()
-                elif self.query_one("#footer").display:
-                    self.query_one("#clipboard").focus()
-            # Toggle hiding panels
-            case key if key in config["keybinds"]["toggle_pinned_sidebar"]:
-                self.query_one("#file_list").focus()
-                self.query_one(StateManager).toggle_pinned_sidebar()
-            case key if key in config["keybinds"]["toggle_preview_sidebar"]:
-                self.query_one("#file_list").focus()
-                self.query_one(StateManager).toggle_preview_sidebar()
-            case key if key in config["keybinds"]["toggle_footer"]:
-                self.query_one("#file_list").focus()
-                self.query_one(StateManager).toggle_footer()
-            case key if key in config["keybinds"]["toggle_menuwrapper"]:
-                self.query_one("#file_list").focus()
-                self.query_one(StateManager).toggle_menuwrapper()
-            case key if (
-                key in config["keybinds"]["tab_next"]
-                and self.tabWidget.active_tab is not None
+            elif self.focused.id == "search_pinned_sidebar":
+                self.query_one("#pinned_sidebar").focus()
+            return
+        # backspace is used by default bindings to head up in history
+        # so just avoid it
+        elif event.key == "backspace" and (
+            isinstance(self.focused, Input)
+            or (self.focused.id and "search" in self.focused.id)
+        ):
+            return
+        # focus toggle pinned sidebar
+        elif check_key(event, config["keybinds"]["focus_toggle_pinned_sidebar"]):
+            if (
+                self.focused.id == "pinned_sidebar"
+                or "hide" in self.query_one("#pinned_sidebar_container").classes
             ):
-                self.tabWidget.action_next_tab()
-            case key if (
-                self.tabWidget.active_tab is not None
-                and key in config["keybinds"]["tab_previous"]
+                self.query_one("#file_list").focus()
+            elif self.query_one("#pinned_sidebar_container").display:
+                self.query_one("#pinned_sidebar").focus()
+        # Focus file list from anywhere except input
+        elif check_key(event, config["keybinds"]["focus_file_list"]):
+            self.query_one("#file_list").focus()
+        # Focus toggle preview sidebar
+        elif check_key(event, config["keybinds"]["focus_toggle_preview_sidebar"]):
+            if (
+                self.focused.id == "preview_sidebar"
+                or self.focused.parent.id == "preview_sidebar"
+                or "hide" in self.query_one("#preview_sidebar").classes
             ):
-                self.tabWidget.action_previous_tab()
-            case key if key in config["keybinds"]["tab_new"]:
-                await self.tabWidget.add_tab(after=self.tabWidget.active_tab)
-            case key if (
-                self.tabWidget.tab_count > 1 and key in config["keybinds"]["tab_close"]
+                self.query_one("#file_list").focus()
+            elif self.query_one(PreviewContainer).display:
+                with suppress(NoMatches):
+                    self.query_one("PreviewContainer > *").focus()
+            else:
+                self.query_one("#file_list").focus()
+        # Focus path switcher
+        elif check_key(event, config["keybinds"]["focus_toggle_path_switcher"]):
+            self.query_one("#path_switcher").focus()
+        # Focus processes
+        elif check_key(event, config["keybinds"]["focus_toggle_processes"]):
+            if (
+                self.focused.id == "processes"
+                or "hide" in self.query_one("#processes").classes
             ):
-                await self.tabWidget.remove_tab(self.tabWidget.active_tab)
-            # zoxide
-            case key if (
-                config["plugins"]["zoxide"]["enabled"]
-                and event.key in config["plugins"]["zoxide"]["keybinds"]
-            ):
-                if shutil.which("zoxide") is None:
-                    self.notify(
-                        "Zoxide is not installed or not in PATH.",
-                        title="Zoxide",
-                        severity="error",
-                    )
+                self.query_one("#file_list").focus()
+            elif self.query_one("#footer").display:
+                self.query_one("#processes").focus()
+        # Focus metadata
+        elif check_key(event, config["keybinds"]["focus_toggle_metadata"]):
+            if self.focused.id == "metadata":
+                self.query_one("#file_list").focus()
+            elif self.query_one("#footer").display:
+                self.query_one("#metadata").focus()
+        # Focus clipboard
+        elif check_key(event, config["keybinds"]["focus_toggle_clipboard"]):
+            if self.focused.id == "clipboard":
+                self.query_one("#file_list").focus()
+            elif self.query_one("#footer").display:
+                self.query_one("#clipboard").focus()
+        # Toggle hiding panels
+        elif check_key(event, config["keybinds"]["toggle_pinned_sidebar"]):
+            self.query_one("#file_list").focus()
+            self.query_one(StateManager).toggle_pinned_sidebar()
+        elif check_key(event, config["keybinds"]["toggle_preview_sidebar"]):
+            self.query_one("#file_list").focus()
+            self.query_one(StateManager).toggle_preview_sidebar()
+        elif check_key(event, config["keybinds"]["toggle_footer"]):
+            self.query_one("#file_list").focus()
+            self.query_one(StateManager).toggle_footer()
+        elif check_key(event, config["keybinds"]["toggle_menuwrapper"]):
+            self.query_one("#file_list").focus()
+            self.query_one(StateManager).toggle_menuwrapper()
+        elif (
+            check_key(event, config["keybinds"]["tab_next"])
+            and self.tabWidget.active_tab is not None
+        ):
+            self.tabWidget.action_next_tab()
+        elif self.tabWidget.active_tab is not None and check_key(
+            event, config["keybinds"]["tab_previous"]
+        ):
+            self.tabWidget.action_previous_tab()
+        elif check_key(event, config["keybinds"]["tab_new"]):
+            await self.tabWidget.add_tab(after=self.tabWidget.active_tab)
+        elif self.tabWidget.tab_count > 1 and check_key(
+            event, config["keybinds"]["tab_close"]
+        ):
+            await self.tabWidget.remove_tab(self.tabWidget.active_tab)
+        # zoxide
+        elif config["plugins"]["zoxide"]["enabled"] and check_key(
+            event, config["plugins"]["zoxide"]["keybinds"]
+        ):
+            if shutil.which("zoxide") is None:
+                self.notify(
+                    "Zoxide is not installed or not in PATH.",
+                    title="Zoxide",
+                    severity="error",
+                )
 
-                def on_response(response: str) -> None:
-                    """Handle the response from the ZDToDirectory dialog."""
-                    if response:
-                        pathinput: PathInput = self.query_one(PathInput)
-                        pathinput.value = response
-                        pathinput.on_input_submitted(
-                            SimpleNamespace(value=pathinput.value)
-                        )
+            def on_response(response: str) -> None:
+                """Handle the response from the ZDToDirectory dialog."""
+                if response:
+                    pathinput: PathInput = self.query_one(PathInput)
+                    pathinput.value = response
+                    pathinput.on_input_submitted(SimpleNamespace(value=pathinput.value))
 
-                self.push_screen(ZDToDirectory(), on_response)
-            # keybinds
-            case key if key in config["keybinds"]["show_keybinds"]:
-                self.push_screen(Keybinds())
-            case key if (
-                config["plugins"]["finder"]["enabled"]
-                and key in config["plugins"]["finder"]["keybinds"]
-            ):
-                fd_exec: str = config["plugins"]["finder"]["executable"]
-                if shutil.which(fd_exec) is not None:
-                    try:
+            self.push_screen(ZDToDirectory(), on_response)
+        # keybinds
+        elif check_key(event, config["keybinds"]["show_keybinds"]):
+            self.push_screen(Keybinds())
+        elif config["plugins"]["finder"]["enabled"] and check_key(
+            event, config["plugins"]["finder"]["keybinds"]
+        ):
+            fd_exec: str = config["plugins"]["finder"]["executable"]
+            if shutil.which(fd_exec) is not None:
+                try:
 
-                        def on_response(selected: str | None) -> None:
-                            if selected is None:
-                                return
-                            if path.isdir(selected):
-                                self.cd(selected)
-                            else:
-                                self.cd(
-                                    "." if selected == "" else path.dirname(selected),
-                                    focus_on=path.basename(selected),
-                                )
+                    def on_response(selected: str | None) -> None:
+                        if selected is None:
+                            return
+                        if path.isdir(selected):
+                            self.cd(selected)
+                        else:
+                            self.cd(
+                                "." if selected == "" else path.dirname(selected),
+                                focus_on=path.basename(selected),
+                            )
 
-                        self.push_screen(FileSearch(), on_response)
-                    except Exception as exc:
-                        self.notify(str(exc), title="Finder", severity="error")
-                else:
-                    self.notify(
-                        f"{config['plugins']['finder']['executable']} cannot be found in PATH.",
-                        title="Plugins: finder",
-                        severity="error",
-                    )
-            case key if key in config["keybinds"]["suspend_app"]:
-                if WINDOWS:
-                    self.notify(
-                        "rovr cannot be suspended on Windows!",
-                        title="Suspend App",
-                        severity="warning",
-                    )
-                else:
-                    self.action_suspend_process()
-            case key if key in config["keybinds"]["change_sort_order"]:
-                await self.query_one(SortOrderButton).open_popup(event)
+                    self.push_screen(FileSearch(), on_response)
+                except Exception as exc:
+                    self.notify(str(exc), title="Finder", severity="error")
+            else:
+                self.notify(
+                    f"{config['plugins']['finder']['executable']} cannot be found in PATH.",
+                    title="Plugins: finder",
+                    severity="error",
+                )
+        elif check_key(event, config["keybinds"]["suspend_app"]):
+            if WINDOWS:
+                self.notify(
+                    "rovr cannot be suspended on Windows!",
+                    title="Suspend App",
+                    severity="warning",
+                )
+            else:
+                self.action_suspend_process()
+        elif check_key(event, config["keybinds"]["change_sort_order"]):
+            await self.query_one(SortOrderButton).open_popup(event)
 
     def on_app_blur(self, event: events.AppBlur) -> None:
         self.app_blurred = True
@@ -774,6 +768,24 @@ class Application(App, inherit_bindings=False):
             self.query_one(FileListRightClickOptionList).add_class("hidden")
         with suppress(NoMatches):
             self.query_one(SortOrderPopup).add_class("hidden")
+
+    @work(thread=True)
+    def run_in_thread(self, function: Callable, *args, **kwargs) -> Worker:
+        """
+        Run a function in a thread and return a worker for it.
+        Args:
+            function(callable): the function to run
+            *args: positional arguments for the function
+            **kwargs: keyword arguments for the function
+
+        Returns:
+            Worker: the worker for the function
+            Exception: if something fails
+        """
+        try:
+            return function(*args, **kwargs)
+        except Exception as exc:
+            return exc  # ty: ignore[invalid-return-type]
 
 
 app = Application()

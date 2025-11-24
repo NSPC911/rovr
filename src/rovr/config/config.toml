@@ -136,7 +136,7 @@ focus_file_list = ["escape"]
 focus_toggle_preview_sidebar = ["i"]
 focus_toggle_path_switcher = ["ctrl+l"]
 focus_search = ["ctrl+f", "slash"]
-focus_toggle_processes = ["number_sign"]
+focus_toggle_processes = ["#"]
 focus_toggle_clipboard = ["c"]
 focus_toggle_metadata = ["m"]
 copy = ["y", "ctrl+c"]
@@ -184,7 +184,7 @@ command_palette = "ctrl+p"
 suspend_app = ["ctrl+z"]
 
 [plugins.zoxide]
-enabled = false
+enabled = true
 keybinds = ["z"]
 show_scores = false
 
@@ -193,14 +193,23 @@ enabled = false
 executable = "bat"
 
 [plugins.editor]
-enabled = false
-file_executable = "nano"
-folder_executable = "code"
+enabled = true
+file_executable = ""
+folder_executable = ""
+file_suspend = true
+folder_suspend = true
+open_all_in_editor = false
 keybinds = ["e"]
 
 [plugins.finder]
-enabled = false
+enabled = true
 keybinds = ["f"]
 executable = "fd"
 relative_paths = true
 follow_symlinks = false
+
+[plugins.poppler]
+enabled = true
+threads = 1
+use_pdftocairo = false
+poppler_folder = ""

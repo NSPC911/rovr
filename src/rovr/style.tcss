@@ -27,7 +27,6 @@ $scrollbar-background-hover: $primary-muted;
 $scrollbar-background-active: $primary-muted;
 $scrollbar-corner-color: $primary-muted;
 
-
 * {
   scrollbar-size: 1 1;
   &:ansi {
@@ -388,6 +387,8 @@ Tooltip {
     margin: 0;
     &TextArea {
       padding: 0 1;
+      scrollbar-size: 0 0;
+      overflow: hidden;
     }
     &FileList { height: 1fr }
   }
@@ -396,6 +397,9 @@ Tooltip {
     height: auto;
     align: center middle;
     margin: 0 1
+  }
+  &.pdf Image {
+    margin: 0 1 1 1;
   }
 }
 
@@ -1006,6 +1010,9 @@ Screen {
       width: 90vw;
       max-width: 90vw;
     }
+    Toast {
+      width: 100vw
+    }
   }
   &.-nopreview {
     #preview_sidebar,
@@ -1019,6 +1026,9 @@ Screen {
     #modalInput_group {
       width: 75vw;
       max-width: 75vw;
+    }
+    Toast {
+      width: 50vw
     }
   }
   &.-all-vertical #footer { max-height: 25vh }
@@ -1038,7 +1048,6 @@ Screen {
     #footer { max-height: 25vh }
   }
 }
-
 #showKeys {
   align: right middle;
   width: auto;

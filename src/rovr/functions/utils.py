@@ -2,6 +2,7 @@ from typing import Any, Callable
 
 from humanize import naturalsize
 from rich.console import Console
+from textual import events
 from textual.dom import DOMNode
 from textual.worker import NoActiveWorker, WorkerCancelled, get_current_worker
 
@@ -12,56 +13,86 @@ from rovr.variables.maps import (
 pprint = Console().print
 
 
-def deep_merge(d: dict, u: dict) -> dict:
+def deep_merge(old: dict, new: dict) -> dict:
     """Mini lodash merge
     Args:
-        d (dict): old dictionary
-        u (dict): new dictionary, to merge on top of d
+        old (dict): old dictionary
+        new (dict): new dictionary, to merge on top of old
 
     Returns:
         dict: Merged dictionary
     """
-    for k, v in u.items():
-        if isinstance(v, dict):
-            d[k] = deep_merge(d.get(k, {}), v)
-        else:
-            d[k] = v
-    return d
+    try:
+        for key, value in new.items():
+            if isinstance(value, dict):
+                old[key] = deep_merge(old.get(key, {}), value)
+            else:
+                old[key] = value
+    except Exception as exc:
+        pprint(
+            f"While deep merging the default config with the userconfig, {type(exc).__name__} was raised.\n    {exc}\nSince the conflict cannot be resolved, rovr will not be launching."
+        )
+        exit(1)
+    return old
 
 
-def set_nested_value(d: dict, path_str: str, value: bool) -> None:
-    """Sets a value in a nested dictionary using a dot-separated path string.
+def set_nested_value(
+    d: dict, path_str: str, value: bool | str | int | float | list | dict
+) -> None:
+    """
+    Sets a value in a nested dictionary using a dot-separated path string.
 
     Args:
         d (dict): The dictionary to modify.
         path_str (str): The dot-separated path to the key (e.g., "plugins.bat").
-        value (bool): The value to set. (boolean for now)
+        value (Union[bool, str, int, float, list, dict]): The value to set.
     """
+    from rich import box
+    from rich.panel import Panel
+
     keys = path_str.split(".")
     current = d
+    passed_keys = ""
     for i, key in enumerate(keys):
         if i == len(keys) - 1:
             try:
-                if isinstance(current[key], dict) and "enabled" in current[key]:
+                if (
+                    isinstance(value, bool)
+                    and isinstance(current[key], dict)
+                    and "enabled" in current[key]
+                ):
+                    # Special case: For boolean values targeting plugin dicts,
+                    # set the 'enabled' field rather than replacing the whole dict
                     current[key]["enabled"] = value
-                elif type(current[key]) is type(value):
+                elif isinstance(current[key], type(value)):
                     current[key] = value
                 else:
-                    pprint("[bright_red underline]Config Error:[/]")
                     pprint(
-                        f"[cyan bold]{path_str}[/]'s new value of type [cyan b]{type(value).__name__}[/] is not a [bold cyan]{type(current[key]).__name__}[/] type, and cannot be modified."
+                        Panel(
+                            f"[cyan bold]{path_str}[/]'s new value of type [cyan b]{type(value).__name__}[/] is not a [bold cyan]{type(current[key]).__name__}[/] type, and cannot be modified.",
+                            box=box.ROUNDED,
+                            title="[bright_red underline]Config Error:[/]",
+                            title_align="left",
+                            expand=False,
+                        )
                     )
                     exit(1)
             except KeyError:
-                pprint("[bright_red underline]Config Error:[/]")
                 pprint(
-                    f"[cyan b]{path_str}[/] is not a valid path to an existing value and hence cannot be set."
+                    Panel(
+                        f"[cyan b]{path_str}[/] is not a valid path to an existing value and hence cannot be set.\n  [red]ValueError[/]: Key named [red b]{key}[/] was not found in [cyan b]{passed_keys[:-1]}[/]",
+                        box=box.ROUNDED,
+                        title="[bright_red underline]Config Error:[/]",
+                        title_align="left",
+                        expand=False,
+                    )
                 )
                 exit(1)
         else:
             if not isinstance(current.get(key), dict):
                 current[key] = {}
             current = current[key]
+            passed_keys += f"{key}."
 
 
 def set_scuffed_subtitle(element: DOMNode, *sections: str) -> None:
@@ -139,6 +170,20 @@ def should_cancel() -> bool:
     except NoActiveWorker:
         return False
     return bool(worker and not worker.is_running)
+
+
+def check_key(event: events.Key, key_list: list[str] | str) -> bool:
+    if isinstance(key_list, str):
+        key_list = [key_list]
+    return bool(
+        # check key
+        event.key in key_list
+        # check aliases
+        or any(key in key_list for key in event.aliases)
+        # check character
+        or event.is_printable
+        and event.character in key_list
+    )
 
 
 class classproperty:  # noqa: N801

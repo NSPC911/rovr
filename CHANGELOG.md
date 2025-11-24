@@ -11,7 +11,7 @@
 - feat(editor): add config to suspend when opening editor ed605da
 - feat(editor): add config to open all files in the editor 8189699
 - feat(preview): add pdf preview support with poppler #153
-- perf(preview): open image in thread 7b0e2cd
+- perf(preview): open image in thread db617a0
 
 # [v0.5.0]
 

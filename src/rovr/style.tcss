@@ -35,6 +35,18 @@ $scrollbar-corner-color: $primary-muted;
   }
 }
 
+Screen.-all-horizontal.compact-buttons {
+  #menuwrapper #below_menu #path_switcher {
+    border-left: $border-style $border-blurred
+  }
+  #menuwrapper:focus-within #below_menu #path_switcher {
+    border-left: $border-style $border
+  }
+  #menuwrapper:focus-within #below_menu #path_switcher.hide_border_bottom {
+    border-left: $border-style $accent
+  }
+}
+
 /* border styling for main widgets */
 #menuwrapper,
 #pinned_sidebar_container,
@@ -956,15 +968,6 @@ LoadingIndicator {
     &:ansi:hover { color: $primary }
     &:light:ansi:hover { color: $secondary }
     &:disabled:hover { color: $panel-lighten-3 }
-  }
-  #menuwrapper #below_menu #path_switcher {
-    border-left: $border-style $border-blurred
-  }
-  #menuwrapper:focus-within #below_menu #path_switcher {
-    border-left: $border-style $border
-  }
-  #menuwrapper:focus-within #below_menu #path_switcher.hide_border_bottom {
-    border-left: $border-style $accent
   }
 }
 .comfy-buttons {

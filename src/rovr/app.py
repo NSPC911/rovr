@@ -235,8 +235,6 @@ class Application(App, inherit_bindings=False):
         # disable scrollbars
         self.show_horizontal_scrollbar = False
         self.show_vertical_scrollbar = False
-        # update ui
-        self.query_one(StateManager).pad_fix()
         # for show keys
         if self._show_keys:
             label = Label("", id="showKeys")

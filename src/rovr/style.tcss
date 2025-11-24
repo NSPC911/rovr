@@ -107,10 +107,6 @@ SortOrderPopup,
 .hide,
 .hidden { display: none }
 
-#main.-fix-pad {
-  margin: 0 1
-}
-
 Input, TextArea {
   .input--placeholder,
   .text-area--placeholder { color: $foreground-darken-1 }
@@ -173,7 +169,6 @@ Tooltip {
 }
 
 #headerArea {
-  padding: 0 1 0 1;
   #newTabRight {
     width: 1fr;
     Button {
@@ -253,7 +248,6 @@ Tooltip {
 }
 
 #menuwrapper {
-  margin: 0 1;
   #below_menu { border-top: $border-style $border-blurred }
   &:focus-within #below_menu { border-top: $border-style $border }
 }
@@ -326,8 +320,6 @@ Tooltip {
   padding: 0 0;
   height: 1fr;
   align: center middle;
-  /* I legit have no clue why there is a random right padding and i cant get rid of it, so compensation with a left padding */
-  margin: 0 0 0 1;
 }
 
 #file_list_container {
@@ -413,7 +405,6 @@ Tooltip {
 
 #footer {
   height: $footer_unfocus_height;
-  margin: 0 1;
 
   & > * {
     height: 1fr;

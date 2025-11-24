@@ -25,7 +25,11 @@ try:
     with open("src/rovr/config/schema.json", "r", encoding="utf-8") as f:
         schema_content = f.read()
     with open("src/rovr/config/schema.json", "w", encoding="utf-8") as f:
-        f.write(schema_content.replace("|", "&#124;"))
+        f.write(
+            schema_content.replace("|", "&#124;")
+            .replace(">", "&gt;")
+            .replace("<", "&lt;")
+        )
     generate_from_filename(
         "src/rovr/config/schema.json",
         "docs/src/content/docs/reference/schema.mdx",

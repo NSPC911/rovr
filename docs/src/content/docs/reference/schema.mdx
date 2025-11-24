@@ -144,8 +144,9 @@ description: config schema humanified
     - [8.3.3. Property `Rovr Config > plugins > editor > file_suspend`](#plugins_editor_file_suspend)
     - [8.3.4. Property `Rovr Config > plugins > editor > folder_executable`](#plugins_editor_folder_executable)
     - [8.3.5. Property `Rovr Config > plugins > editor > folder_suspend`](#plugins_editor_folder_suspend)
-    - [8.3.6. Property `Rovr Config > plugins > editor > keybinds`](#plugins_editor_keybinds)
-      - [8.3.6.1. Rovr Config > plugins > editor > keybinds > keybind](#plugins_editor_keybinds_items)
+    - [8.3.6. Property `Rovr Config > plugins > editor > open_all_in_editor`](#plugins_editor_open_all_in_editor)
+    - [8.3.7. Property `Rovr Config > plugins > editor > keybinds`](#plugins_editor_keybinds)
+      - [8.3.7.1. Rovr Config > plugins > editor > keybinds > keybind](#plugins_editor_keybinds_items)
   - [8.4. Property `Rovr Config > plugins > finder`](#plugins_finder)
     - [8.4.1. Property `Rovr Config > plugins > finder > enabled`](#plugins_finder_enabled)
     - [8.4.2. Property `Rovr Config > plugins > finder > keybinds`](#plugins_finder_keybinds)
@@ -169,17 +170,17 @@ description: config schema humanified
 | **Required**              | No          |
 | **Additional properties** | Not allowed |
 
-| Property                      | Type            | Title/Description                                                         |
-| ----------------------------- | --------------- | ------------------------------------------------------------------------- |
-| [interface](#interface)       | object          |                                                                           |
-| [settings](#settings)         | object          |                                                                           |
-| [metadata](#metadata)         | object          |                                                                           |
-| [icons](#icons)               | object          | Custom icon configurations for files and folders                          |
-| [theme](#theme)               | object          |                                                                           |
-| [custom_theme](#custom_theme) | array of object |                                                                           |
-| [keybinds](#keybinds)         | object          |                                                                           |
-| [plugins](#plugins)           | object          |                                                                           |
-| [mode](#mode)                 | object          | Define preset modes with config overrides. Use --mode <name> to activate. |
+| Property                      | Type            | Title/Description                                                               |
+| ----------------------------- | --------------- | ------------------------------------------------------------------------------- |
+| [interface](#interface)       | object          |                                                                                 |
+| [settings](#settings)         | object          |                                                                                 |
+| [metadata](#metadata)         | object          |                                                                                 |
+| [icons](#icons)               | object          | Custom icon configurations for files and folders                                |
+| [theme](#theme)               | object          |                                                                                 |
+| [custom_theme](#custom_theme) | array of object |                                                                                 |
+| [keybinds](#keybinds)         | object          |                                                                                 |
+| [plugins](#plugins)           | object          |                                                                                 |
+| [mode](#mode)                 | object          | Define preset modes with config overrides. Use --mode &lt;name&gt; to activate. |
 
 ## <a name="interface"></a>1. Property `Rovr Config > interface`
 
@@ -341,7 +342,7 @@ Must be one of:
 | [binary](#interface_preview_text_binary)       | string | If the current file cannot be read due to an encoding issue (ie not UTF8), it will display this message.                                                   |
 | [start](#interface_preview_text_start)         | string | This is shown when the rovr starts up. You may see it for a split second, but it will never appear afterwards. You cannot view this properly in this docs. |
 | [empty](#interface_preview_text_empty)         | string | If the current file has no content, this is shown                                                                                                          |
-| [too_large](#interface_preview_text_too_large) | string | If the file is too large (hard capped at < 1MB), the preview will refuse to render this file regardless of your memory size                                |
+| [too_large](#interface_preview_text_too_large) | string | If the file is too large (hard capped at &lt; 1MB), the preview will refuse to render this file regardless of your memory size                             |
 
 #### <a name="interface_preview_text_error"></a>1.10.1. Property `Rovr Config > interface > preview_text > error`
 
@@ -391,7 +392,7 @@ Must be one of:
 | **Required** | No                                                        |
 | **Default**  | `"this file is larger (but not larger than your mother)"` |
 
-**Description:** If the file is too large (hard capped at < 1MB), the preview will refuse to render this file regardless of your memory size
+**Description:** If the file is too large (hard capped at &lt; 1MB), the preview will refuse to render this file regardless of your memory size
 
 ### <a name="interface_compact_mode"></a>1.11. Property `Rovr Config > interface > compact_mode`
 
@@ -434,16 +435,16 @@ Must be one of:
 | **Required**              | No          |
 | **Additional properties** | Not allowed |
 
-| Property                                                     | Type             | Title/Description                                                                                                                                                      |
-| ------------------------------------------------------------ | ---------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| [show_hidden_files](#settings_show_hidden_files)             | boolean          | Show hidden files and folders (those starting with a dot on Unix, or explicitly hidden on Windows/MacOS).                                                              |
-| [use_recycle_bin](#settings_use_recycle_bin)                 | boolean          | When deleting a file, allow moving the file to the recycle bin.                                                                                                        |
-| [copy_includes_metadata](#settings_copy_includes_metadata)   | boolean          | When copying over a file, preserve metadata from the original file, such as creation and modification times.                                                           |
-| [image_protocol](#settings_image_protocol)                   | enum (of string) | The image protocol to use when displaying an image                                                                                                                     |
-| [allow_tab_nav](#settings_allow_tab_nav)                     | boolean          | Allow navigating the main app screen with \`tab\` and \`shift+tab\`                                                                                                    |
-| [append_new_tabs](#settings_append_new_tabs)                 | boolean          | Choose whether or not to append new tabs instead of inserting them.<br />\`true\` => Append to the end of the tab list.<br />\`false\` => Insert after the active tab. |
-| [double_click_delay](#settings_double_click_delay)           | number           | The delay between two consecutive clicks to enter into a directory, or open a file.                                                                                    |
-| [drive_watcher_frequency](#settings_drive_watcher_frequency) | number           | How often (in seconds) to check for changes in mounted drives in the sidebar.                                                                                          |
+| Property                                                     | Type             | Title/Description                                                                                                                                                            |
+| ------------------------------------------------------------ | ---------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| [show_hidden_files](#settings_show_hidden_files)             | boolean          | Show hidden files and folders (those starting with a dot on Unix, or explicitly hidden on Windows/MacOS).                                                                    |
+| [use_recycle_bin](#settings_use_recycle_bin)                 | boolean          | When deleting a file, allow moving the file to the recycle bin.                                                                                                              |
+| [copy_includes_metadata](#settings_copy_includes_metadata)   | boolean          | When copying over a file, preserve metadata from the original file, such as creation and modification times.                                                                 |
+| [image_protocol](#settings_image_protocol)                   | enum (of string) | The image protocol to use when displaying an image                                                                                                                           |
+| [allow_tab_nav](#settings_allow_tab_nav)                     | boolean          | Allow navigating the main app screen with \`tab\` and \`shift+tab\`                                                                                                          |
+| [append_new_tabs](#settings_append_new_tabs)                 | boolean          | Choose whether or not to append new tabs instead of inserting them.<br />\`true\` =&gt; Append to the end of the tab list.<br />\`false\` =&gt; Insert after the active tab. |
+| [double_click_delay](#settings_double_click_delay)           | number           | The delay between two consecutive clicks to enter into a directory, or open a file.                                                                                          |
+| [drive_watcher_frequency](#settings_drive_watcher_frequency) | number           | How often (in seconds) to check for changes in mounted drives in the sidebar.                                                                                                |
 
 ### <a name="settings_show_hidden_files"></a>2.1. Property `Rovr Config > settings > show_hidden_files`
 
@@ -512,8 +513,8 @@ Must be one of:
 | **Default**  | `true`    |
 
 **Description:** Choose whether or not to append new tabs instead of inserting them.
-`true` => Append to the end of the tab list.
-`false` => Insert after the active tab.
+`true` =&gt; Append to the end of the tab list.
+`false` =&gt; Insert after the active tab.
 
 ### <a name="settings_double_click_delay"></a>2.7. Property `Rovr Config > settings > double_click_delay`
 
@@ -543,12 +544,12 @@ Must be one of:
 | **Required**              | No          |
 | **Additional properties** | Not allowed |
 
-| Property                                         | Type                      | Title/Description                                                                                                             |
-| ------------------------------------------------ | ------------------------- | ----------------------------------------------------------------------------------------------------------------------------- |
-| [fields](#metadata_fields)                       | array of enum (of string) | The order of the metadata tags that you want to see in the Metadata section.                                                  |
-| [datetime_format](#metadata_datetime_format)     | string                    | The datetime format for Metadata. Refer to https://docs.python.org/3/library/datetime.html#format-codes for more information. |
-| [filesize_decimals](#metadata_filesize_decimals) | integer                   | The number of decimals you want to see in the humanized file size                                                             |
-| [filesize_suffix](#metadata_filesize_suffix)     | enum (of string)          | The filesize suffix to follow.<br />\`decimal\`: 1024 -> 1.024kB<br />\`binary\`: 1024 -> 1KiB<br />\`gnu\`: 1024 -> 1K       |
+| Property                                         | Type                      | Title/Description                                                                                                                |
+| ------------------------------------------------ | ------------------------- | -------------------------------------------------------------------------------------------------------------------------------- |
+| [fields](#metadata_fields)                       | array of enum (of string) | The order of the metadata tags that you want to see in the Metadata section.                                                     |
+| [datetime_format](#metadata_datetime_format)     | string                    | The datetime format for Metadata. Refer to https://docs.python.org/3/library/datetime.html#format-codes for more information.    |
+| [filesize_decimals](#metadata_filesize_decimals) | integer                   | The number of decimals you want to see in the humanized file size                                                                |
+| [filesize_suffix](#metadata_filesize_suffix)     | enum (of string)          | The filesize suffix to follow.<br />\`decimal\`: 1024 -&gt; 1.024kB<br />\`binary\`: 1024 -&gt; 1KiB<br />\`gnu\`: 1024 -&gt; 1K |
 
 ### <a name="metadata_fields"></a>3.1. Property `Rovr Config > metadata > fields`
 
@@ -622,9 +623,9 @@ Must be one of:
 | **Default**  | `"decimal"`        |
 
 **Description:** The filesize suffix to follow.
-`decimal`: 1024 -> 1.024kB
-`binary`: 1024 -> 1KiB
-`gnu`: 1024 -> 1K
+`decimal`: 1024 -&gt; 1.024kB
+`binary`: 1024 -&gt; 1KiB
+`gnu`: 1024 -&gt; 1K
 
 Must be one of:
 
@@ -2171,14 +2172,15 @@ Must be one of:
 | **Required**              | No          |
 | **Additional properties** | Not allowed |
 
-| Property                                               | Type    | Title/Description                                                                                              |
-| ------------------------------------------------------ | ------- | -------------------------------------------------------------------------------------------------------------- |
-| [enabled](#plugins_editor_enabled)                     | boolean | Enable opening a file in your editor.                                                                          |
-| [file_executable](#plugins_editor_file_executable)     | string  | Open files in this app.                                                                                        |
-| [file_suspend](#plugins_editor_file_suspend)           | boolean | Suspend the app when editing a file. Useful for TUI editors, but not for something like VSCode or Notepad++.   |
-| [folder_executable](#plugins_editor_folder_executable) | string  | Open folders in this app.                                                                                      |
-| [folder_suspend](#plugins_editor_folder_suspend)       | boolean | Suspend the app when editing a folder. Useful for TUI editors, but not for something like VSCode or Notepad++. |
-| [keybinds](#plugins_editor_keybinds)                   | array   | The keybind to launch your editor.                                                                             |
+| Property                                                 | Type    | Title/Description                                                                                                                                                                                  |
+| -------------------------------------------------------- | ------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| [enabled](#plugins_editor_enabled)                       | boolean | Enable opening a file in your editor.                                                                                                                                                              |
+| [file_executable](#plugins_editor_file_executable)       | string  | Open files in this app.                                                                                                                                                                            |
+| [file_suspend](#plugins_editor_file_suspend)             | boolean | Suspend the app when editing a file. Useful for TUI editors, but not for something like VSCode or Notepad++.                                                                                       |
+| [folder_executable](#plugins_editor_folder_executable)   | string  | Open folders in this app.                                                                                                                                                                          |
+| [folder_suspend](#plugins_editor_folder_suspend)         | boolean | Suspend the app when editing a folder. Useful for TUI editors, but not for something like VSCode or Notepad++.                                                                                     |
+| [open_all_in_editor](#plugins_editor_open_all_in_editor) | boolean | Open all files in the configured editor, regardless of file encoding or type. When disabled, files that cannot be opened due to encoding issues will use the system's default application instead. |
+| [keybinds](#plugins_editor_keybinds)                     | array   | The keybind to launch your editor.                                                                                                                                                                 |
 
 #### <a name="plugins_editor_enabled"></a>8.3.1. Property `Rovr Config > plugins > editor > enabled`
 
@@ -2230,7 +2232,17 @@ Must be one of:
 
 **Description:** Suspend the app when editing a folder. Useful for TUI editors, but not for something like VSCode or Notepad++.
 
-#### <a name="plugins_editor_keybinds"></a>8.3.6. Property `Rovr Config > plugins > editor > keybinds`
+#### <a name="plugins_editor_open_all_in_editor"></a>8.3.6. Property `Rovr Config > plugins > editor > open_all_in_editor`
+
+|              |           |
+| ------------ | --------- |
+| **Type**     | `boolean` |
+| **Required** | No        |
+| **Default**  | `false`   |
+
+**Description:** Open all files in the configured editor, regardless of file encoding or type. When disabled, files that cannot be opened due to encoding issues will use the system's default application instead.
+
+#### <a name="plugins_editor_keybinds"></a>8.3.7. Property `Rovr Config > plugins > editor > keybinds`
 
 |              |         |
 | ------------ | ------- |
@@ -2252,7 +2264,7 @@ Must be one of:
 | ----------------------------------------- | ----------- |
 | [keybind](#plugins_editor_keybinds_items) |             |
 
-##### <a name="plugins_editor_keybinds_items"></a>8.3.6.1. Rovr Config > plugins > editor > keybinds > keybind
+##### <a name="plugins_editor_keybinds_items"></a>8.3.7.1. Rovr Config > plugins > editor > keybinds > keybind
 
 |                        |                                                                 |
 | ---------------------- | --------------------------------------------------------------- |
@@ -2413,7 +2425,7 @@ Must be one of:
 | **Required**              | No                                                                                |
 | **Additional properties** | [Each additional property must conform to the schema](#mode_additionalProperties) |
 
-**Description:** Define preset modes with config overrides. Use --mode <name> to activate.
+**Description:** Define preset modes with config overrides. Use --mode &lt;name&gt; to activate.
 
 | Property                       | Type   | Title/Description                                                |
 | ------------------------------ | ------ | ---------------------------------------------------------------- |

@@ -13,7 +13,6 @@ from textual.worker import WorkerCancelled
 from rovr.classes.textual_options import ModalSearcherOption
 from rovr.functions import path as path_utils
 from rovr.functions.icons import get_icon_for_file, get_icon_for_folder
-from rovr.functions.utils import should_cancel
 from rovr.variables.constants import config
 
 
@@ -203,8 +202,8 @@ class FileSearch(ModalScreen):
         else:
             self.search_options.border_subtitle = f"{str(self.search_options.highlighted + 1)}/{self.search_options.option_count}"
 
-    @work(thread=True)
-    def create_options(self, stdout: str) -> list[ModalSearcherOption] | None:
+    @work(exclusive=True)
+    async def create_options(self, stdout: str) -> list[ModalSearcherOption] | None:
         options: list[ModalSearcherOption] = []
         for line in stdout.splitlines():
             file_path = path_utils.normalise(line.strip())
@@ -224,6 +223,5 @@ class FileSearch(ModalScreen):
                     file_path_str,
                 )
             )
-            if should_cancel():
-                return
+            await asyncio.sleep(0)
         return options

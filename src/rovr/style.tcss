@@ -123,6 +123,12 @@ SortOrderPopup,
   margin: 0 1
 }
 
+Input {
+  scrollbar-size: 0 0;
+  scrollbar-visibility: hidden;
+  overflow: hidden hidden;
+}
+
 Input, TextArea {
   .input--placeholder,
   .text-area--placeholder { color: $foreground-darken-1 }
@@ -299,7 +305,6 @@ Tooltip {
     width: 1fr;
     margin: 0 1;
     padding: 0 1;
-    overflow: hidden hidden;
     color: $foreground;
     border: none;
   }
@@ -856,7 +861,6 @@ ModalInput {
   }
   Input {
     background: transparent !important;
-    scrollbar-size: 0 0;
     overflow-x: scroll;
   }
   Label { height: 1 }

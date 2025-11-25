@@ -159,6 +159,7 @@ class FileList(SelectionList, inherit_bindings=False):
         except AttributeError:
             self.clear_options()
             return
+        self.file_list_pause_check = True
         preview = self.app.query_one("PreviewContainer")
 
         # Separate folders and files
@@ -289,6 +290,7 @@ class FileList(SelectionList, inherit_bindings=False):
             if self.select_mode_enabled:
                 await self.toggle_mode()
             self.update_border_subtitle()
+        self.file_list_pause_check = False
 
     @work(exclusive=True)
     async def dummy_update_file_list(

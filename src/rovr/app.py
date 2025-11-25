@@ -513,7 +513,7 @@ class Application(App, inherit_bindings=False):
     @work(thread=True)
     def watch_for_changes_and_update(self) -> None:
         cwd = getcwd()
-        file_list = self.query_one(FileList)
+        file_list: FileList = self.query_one(FileList)
         pins_path = path.join(VAR_TO_DIR["CONFIG"], "pins.json")
         pins_mtime = None
         with suppress(OSError):
@@ -531,24 +531,26 @@ class Application(App, inherit_bindings=False):
             if count >= drive_update_every:
                 count = 0
             new_cwd = getcwd()
-            if not path.exists(new_cwd):
-                file_list.update_file_list(add_to_session=False)
-            elif cwd != new_cwd:
-                cwd = new_cwd
-                continue
-            elif not self.file_list_pause_check:
-                with suppress(OSError):
-                    # this is weird, so `get_filtered_dir_names` is a sync
-                    # function, so `call_from_thread` shouldn't be required
-                    # but without it, this thread goes in a limbo state where
-                    # after quiting, it still runs this, so the app never quits
-                    items = self.call_from_thread(
-                        get_filtered_dir_names,
-                        cwd,
-                        config["settings"]["show_hidden_files"],
-                    )
-                if items != file_list.items_in_cwd:
-                    self.cd(cwd)
+            if not self.file_list_pause_check:
+                if not path.exists(new_cwd):
+                    file_list.update_file_list(add_to_session=False)
+                elif cwd != new_cwd:
+                    cwd = new_cwd
+                    continue
+                else:
+                    with suppress(OSError):
+                        # this is weird, so `get_filtered_dir_names` is a sync
+                        # function, so `call_from_thread` shouldn't be required
+                        # but without it, this thread goes in a limbo state where
+                        # after quiting, it still runs this, so the app never quits
+                        items = self.call_from_thread(
+                            get_filtered_dir_names,
+                            cwd,
+                            config["settings"]["show_hidden_files"],
+                        )
+                    if items != file_list.items_in_cwd:
+                        self.notify("nope")
+                        self.cd(cwd)
             # check pins.json
             new_mtime = None
             reload_called: bool = False

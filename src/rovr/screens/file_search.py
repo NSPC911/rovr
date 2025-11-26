@@ -202,8 +202,8 @@ class FileSearch(ModalScreen):
         else:
             self.search_options.border_subtitle = f"{str(self.search_options.highlighted + 1)}/{self.search_options.option_count}"
 
-    @work(exclusive=True)
-    async def create_options(self, stdout: str) -> list[ModalSearcherOption] | None:
+    @work(thread=True, exit_on_error=False)
+    def create_options(self, stdout: str) -> list[ModalSearcherOption] | None:
         options: list[ModalSearcherOption] = []
         for line in stdout.splitlines():
             file_path = path_utils.normalise(line.strip())
@@ -223,5 +223,4 @@ class FileSearch(ModalScreen):
                     file_path_str,
                 )
             )
-            await asyncio.sleep(0)
         return options

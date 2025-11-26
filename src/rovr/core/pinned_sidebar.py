@@ -1,4 +1,3 @@
-import asyncio
 from os import path
 from typing import ClassVar
 
@@ -123,7 +122,7 @@ class PinnedSidebar(OptionList, inherit_bindings=False):
         """Reload the pinned files from the config."""
         assert self.parent
         self.input: Input = self.parent.query_one(Input)
-        asyncio.run(self.reload_pins())
+        self.run_worker(self.reload_pins)
 
     async def on_option_list_option_selected(
         self, event: OptionList.OptionSelected

@@ -549,7 +549,6 @@ class Application(App, inherit_bindings=False):
                             config["settings"]["show_hidden_files"],
                         )
                     if items != file_list.items_in_cwd:
-                        self.notify("nope")
                         self.cd(cwd)
             # check pins.json
             new_mtime = None

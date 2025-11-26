@@ -1,3 +1,4 @@
+import asyncio
 from os import path
 from typing import ClassVar
 
@@ -36,6 +37,7 @@ class PinnedSidebar(OptionList, inherit_bindings=False):
         self.log(f"Reloading pins: {available_pins}")
         self.log(f"Reloading default folders: {default}")
         for default_folder in default:
+            assert isinstance(default_folder["path"], str)
             if not path.isdir(default_folder["path"]) and path.exists(
                 default_folder["path"]
             ):
@@ -74,6 +76,7 @@ class PinnedSidebar(OptionList, inherit_bindings=False):
                 pin["path"]
             except KeyError:
                 break
+            assert isinstance(pin["path"], str)
             if not path.isdir(pin["path"]):
                 if path.exists(pin["path"]):
                     raise FolderNotFileError(
@@ -116,11 +119,11 @@ class PinnedSidebar(OptionList, inherit_bindings=False):
         self.set_options(self.list_of_options)
         self.highlighted = prev_highlighted
 
-    async def on_mount(self) -> None:
+    def on_mount(self) -> None:
         """Reload the pinned files from the config."""
         assert self.parent
         self.input: Input = self.parent.query_one(Input)
-        await self.reload_pins()
+        asyncio.run(self.reload_pins())
 
     async def on_option_list_option_selected(
         self, event: OptionList.OptionSelected

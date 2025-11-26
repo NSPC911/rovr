@@ -27,7 +27,7 @@ dependencies = [
   "rarfile>=4.2",
   "rich-click>=1.9.3",
   "send2trash>=1.8.3",
-  "textual[syntax]>=6.6.0,<7.0.0",
+  "textual[syntax]~=6.6.0",
   "textual-autocomplete>=4.0.6",
   "textual-image[textual]>=0.8.4",
   "toml>=0.10.2",
@@ -104,6 +104,11 @@ quote-style = "double"
 indent-style = "space"
 line-ending = "auto"
 preview = true
+
+[tool.ty.src]
+exclude = [
+  "src/rovr/classes/archive.py"
+] # i dont want to add type indicators
 
 [tool.ty.rules]
 possibly-missing-import = "ignore"

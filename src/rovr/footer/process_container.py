@@ -121,6 +121,7 @@ class ProgressBarContainer(VerticalGroup, inherit_bindings=False):
             self.progress_bar.gradient = Gradient.from_colors(
                 *self.app.get_theme(self.app.theme).bar_gradient["error"]
             )
+        assert isinstance(self.icon_label.content, str)
         self.update_icon(
             self.icon_label.content + " " + icon_utils.get_icon("general", "close")[0]
         )

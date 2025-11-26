@@ -88,9 +88,7 @@ class PathAutoCompleteInput(PathAutoComplete):
         else:
             self._empty_directory = False
 
-        # this kinda is required, for some reason, ty doesn't
-        # know yet that you can sort while providing a key
-        results.sort(key=self.sort_key)  # ty: ignore[no-matching-overload]
+        results.sort(key=self.sort_key)
         folder_prefix = self.folder_prefix
         return [
             DropdownItem(
@@ -108,7 +106,7 @@ class PathAutoCompleteInput(PathAutoComplete):
         super()._on_show(event)
         self._target.add_class("hide_border_bottom", update=True)
 
-    async def _on_hide(self, event: events.Hide) -> None:
+    def _on_hide(self, event: events.Hide) -> None:
         super()._on_hide(event)
         self._target.remove_class("hide_border_bottom", update=True)
 

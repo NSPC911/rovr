@@ -927,7 +927,7 @@ class FileListRightClickOptionList(OptionList):
         )
         self.file_list = file_list
 
-    async def on_mount(self) -> None:
+    def on_mount(self) -> None:
         self.styles.layer = "overlay"
 
     async def on_key(self, event: events.Key) -> None:

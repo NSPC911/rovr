@@ -751,6 +751,7 @@ class PreviewContainer(Container):
             await self.remove_children()
             if should_cancel():
                 return
+            assert isinstance(self._current_content, str)
             static_widget = Static(self._current_content)
             await self.mount(static_widget)
         static_widget.can_focus = True

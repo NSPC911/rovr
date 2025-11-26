@@ -45,7 +45,7 @@ def normalise(location: str | bytes) -> str:
     # path.normalise fixes the relative references
     # replace \\ with / on windows
     # by any chance if somehow a \\\\ was to enter, fix that
-    return str(path.normpath(location).replace("\\", "/").replace("//", "/"))
+    return str(path.normpath(location)).replace("\\", "/").replace("//", "/")
 
 
 def is_hidden_file(filepath: str) -> bool:

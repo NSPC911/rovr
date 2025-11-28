@@ -59,6 +59,42 @@ uses [poppler](https://poppler.freedesktop.org) to preview PDF files
 - **use_pdftocairo:** whether to use pdftocairo instead of pdftoppm (may help performance)
 - **threads:** number of threads to use for processing PDF files (default is 1)
 
+### file(1)
+
+uses the [`file`](https://darwinsys.com/file/) command to detect file types by their content (MIME type) instead of relying solely on file extensions. this is useful for files without extensions or with incorrect extensions.
+
+rovr automatically detects `file` in your `PATH`, or you can set the `YAZI_FILE_ONE` or `ROVR_FILE_ONE` (higher priority) environment variables to specify a custom path.
+
+- **enable:** `plugins.file_one.enabled = true`
+- **mime_rules:** map MIME type patterns to preview types. supports glob patterns (e.g., `text/*` matches `text/plain`, `text/html`, etc.)
+
+the default mime rules are:
+
+```toml
+[plugins.file_one.mime_rules]
+"text/*" = "text"
+"image/*" = "image"
+"application/pdf" = "pdf"
+"application/zip" = "archive"
+"application/x-tar" = "archive"
+"application/gzip" = "archive"
+"application/x-bzip2" = "archive"
+"application/x-xz" = "archive"
+"application/x-rar" = "archive"
+"application/x-7z-compressed" = "archive"
+"inode/directory" = "folder"
+```
+
+valid preview types are: `text`, `image`, `pdf`, `archive`, `folder` (for now)
+
+when enabled, rovr will:
+
+1. try to detect the file's MIME type using `file`
+2. match against your configured `mime_rules`
+3. fall back to extension-based detection if no rule matches
+
+for binary files that can't be previewed, the MIME type will be displayed alongside the "not UTF-8" message.
+
 ---
 
 a plugin system is also under works, stay tuned!

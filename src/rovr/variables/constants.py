@@ -1,5 +1,7 @@
 import platform
 from dataclasses import dataclass
+from os import environ
+from shutil import which
 from typing import Literal
 
 from textual.binding import Binding, BindingType
@@ -12,6 +14,18 @@ if "config" not in globals():
     global config, schema
     schema, config = load_config()
     config_setup()
+
+if "file" not in globals():
+    global file
+    # check for `file` existence
+    if which("file") is not None:
+        file = which("file")
+    # check for $YAZI_FILE_ONE
+    if "YAZI_FILE_ONE" in environ and which(environ["YAZI_FILE_ONE"]):
+        file = which(environ["YAZI_FILE_ONE"])
+    # check for $ROVR_FILE_ONE
+    if "ROVR_FILE_ONE" in environ and which(environ["ROVR_FILE_ONE"]):
+        file = which(environ["ROVR_FILE_ONE"])
 
 
 @dataclass

@@ -571,6 +571,8 @@ async def get_mime_type(file_path: str) -> str | None:
         if process.returncode == 0:
             return stdout.decode("utf-8", errors="ignore").strip()
     except (OSError, FileNotFoundError):
+        # filenotfounderror if exe goes missing after init
+        # os error for any general errors
         pass
 
     return None

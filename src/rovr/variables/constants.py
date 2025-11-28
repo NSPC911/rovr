@@ -17,15 +17,23 @@ if "config" not in globals():
 
 if "file" not in globals():
     global file
-    # check for `file` existence
-    if which("file") is not None:
-        file = which("file")
-    # check for $YAZI_FILE_ONE
-    if "YAZI_FILE_ONE" in environ and which(environ["YAZI_FILE_ONE"]):
-        file = which(environ["YAZI_FILE_ONE"])
     # check for $ROVR_FILE_ONE
-    if "ROVR_FILE_ONE" in environ and which(environ["ROVR_FILE_ONE"]):
-        file = which(environ["ROVR_FILE_ONE"])
+    if (  # noqa: SIM114
+        "ROVR_FILE_ONE" in environ
+        and (found := which(environ["ROVR_FILE_ONE"])) is not None
+    ):
+        file = found
+    # check for $YAZI_FILE_ONE
+    elif (  # noqa: SIM114
+        "YAZI_FILE_ONE" in environ
+        and (found := which(environ["YAZI_FILE_ONE"])) is not None
+    ):
+        file = found
+    # check for `file` existence
+    elif (found := which("file")) is not None:
+        file = found
+    else:
+        file = None
 
 
 @dataclass

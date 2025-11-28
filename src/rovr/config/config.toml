@@ -215,7 +215,7 @@ use_pdftocairo = false
 poppler_folder = ""
 
 [plugins.file_one]
-enabled = true
+enabled = false
 
 [plugins.file_one.mime_rules]
 "text/*" = "text"

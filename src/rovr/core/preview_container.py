@@ -618,26 +618,21 @@ class PreviewContainer(Container):
         else:
             file_type: str | None = None
 
-            # Try MIME-based detection first if file_one plugin is enabled
             if config["plugins"]["file_one"]["enabled"] and file is not None:
                 if should_cancel():
                     return
-                # Run async get_mime_type from thread
-                mime_type = asyncio.run(get_mime_type(file_path))
+                mime_type = self.app.call_from_thread(get_mime_type, file_path)
                 if mime_type is not None:
                     file_type = match_mime_to_preview_type(
                         mime_type,
                         config["plugins"]["file_one"]["mime_rules"],
                     )
-                    # Handle special cases for MIME-detected types
                     if (
                         file_type == "pdf"
                         and not config["plugins"]["poppler"]["enabled"]
                     ):
-                        # PDF detected but poppler disabled, fall back to text
                         file_type = "file"
 
-            # Fall back to extension-based detection if MIME detection didn't work
             if file_type is None:
                 lower_file_path = file_path.lower()
                 if (
@@ -779,30 +774,6 @@ class PreviewContainer(Container):
         assert isinstance(self._current_content, str)
 
         display_content: str = self._current_content
-        if (
-            self._current_content == config["interface"]["preview_text"]["binary"]
-            and self._mime_type is not None
-        ):
-            display_content = (
-                f"{self._current_content}\n\n[dim]MIME type: {self._mime_type}[/]"
-            )
-
-        if self.has_child("Static"):
-            static_widget: Static = self.query_one(Static)
-            static_widget.update(display_content)
-        else:
-            await self.remove_children()
-            if should_cancel():
-                return
-            static_widget = Static(display_content)
-            await self.mount(static_widget)
-        static_widget.can_focus = True
-        static_widget.classes = "special"
-        if should_cancel():
-            return
-
-        # Build display content - include MIME type if available for binary files
-        display_content = self._current_content
         if (
             self._current_content == config["interface"]["preview_text"]["binary"]
             and self._mime_type is not None

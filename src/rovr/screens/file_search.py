@@ -8,7 +8,7 @@ from textual.containers import VerticalGroup
 from textual.screen import ModalScreen
 from textual.widgets import Input, OptionList
 from textual.widgets.option_list import Option
-from textual.worker import WorkerCancelled
+from textual.worker import Worker, WorkerCancelled, get_current_worker
 
 from rovr.classes.textual_options import ModalSearcherOption
 from rovr.functions import path as path_utils
@@ -39,8 +39,7 @@ class FileSearch(ModalScreen):
 
     def __init__(self, **kwargs) -> None:
         super().__init__(**kwargs)
-        self._queued_task = None
-        self._queued_task_args: Input.Changed | None = None
+        self._active_worker: Worker | None = None
 
     def compose(self) -> ComposeResult:
         with VerticalGroup(id="file_search_group", classes="file_search_group"):
@@ -68,9 +67,10 @@ class FileSearch(ModalScreen):
     def on_input_changed(self, event: Input.Changed) -> None:
         self.fd_updater(event=event)
 
-    @work(exclusive=True)
+    @work
     async def fd_updater(self, event: Input.Changed) -> None:
         """Update the list using fd based on the search term."""
+        self._active_worker = get_current_worker()
         search_term = event.value.strip()
         fd_exec = config["plugins"]["finder"]["executable"]
 
@@ -124,6 +124,8 @@ class FileSearch(ModalScreen):
                 options: list[ModalSearcherOption] = await worker.wait()
             except WorkerCancelled:
                 return  # anyways
+            if self._active_worker is not get_current_worker():
+                return  # another worker has taken over
             if options is None:
                 return
             self.search_options.clear_options()

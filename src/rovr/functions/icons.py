@@ -1,6 +1,6 @@
+import fnmatch
 from functools import lru_cache
 from os import path
-import fnmatch
 
 from rovr.variables.constants import config
 from rovr.variables.maps import (

@@ -1,6 +1,7 @@
 import asyncio
 import base64
 import ctypes
+import fnmatch
 import os
 import stat
 from os import path
@@ -13,6 +14,7 @@ from textual import work
 from textual.app import App
 
 from rovr.functions.icons import get_icon_for_file, get_icon_for_folder
+from rovr.variables.constants import file as file_executable
 from rovr.variables.constants import os_type
 
 # windows needs nt, because scandir returns
@@ -539,3 +541,59 @@ def get_mounted_drives() -> list:
             print(f"Error getting mounted drives: {e}\nUsing fallback method...")
         drives = [path.expanduser("~")]
     return drives
+
+
+async def get_mime_type(file_path: str) -> str | None:
+    """
+    Get the MIME type of a file using the file(1) command.
+
+    Args:
+        file_path: Path to the file to check
+
+    Returns:
+        str : The MIME type string (e.g., "text/plain", "image/png")
+        None: If file(1) is not available or failed
+    """
+    if file_executable is None:
+        return None
+
+    try:
+        process = await asyncio.create_subprocess_exec(
+            file_executable,
+            "--mime-type",
+            "-b",
+            file_path,
+            stdout=asyncio.subprocess.PIPE,
+            stderr=asyncio.subprocess.PIPE,
+        )
+        stdout, _ = await process.communicate()
+
+        if process.returncode == 0:
+            return stdout.decode("utf-8", errors="ignore").strip()
+    except (OSError, FileNotFoundError):
+        # filenotfounderror if exe goes missing after init
+        # os error for any general errors
+        pass
+
+    return None
+
+
+def match_mime_to_preview_type(
+    mime_type: str, mime_rules: dict[str, str]
+) -> str | None:
+    """
+    Match a MIME type against configured rules to determine preview type.
+
+    Args:
+        mime_type: The MIME type to match (e.g., "text/plain", "image/png")
+        mime_rules: Dictionary mapping MIME patterns to preview types
+                   (e.g., {"text/*": "text", "image/*": "image"})
+
+    Returns:
+        str : The preview type ("text", "image", "pdf", "archive", "folder")
+        None: None if no rule matches
+    """
+    for pattern, preview_type in mime_rules.items():
+        if fnmatch.fnmatch(mime_type, pattern):
+            return preview_type
+    return None

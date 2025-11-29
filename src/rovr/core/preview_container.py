@@ -22,8 +22,9 @@ from textual.worker import Worker, WorkerCancelled, WorkerError
 
 from rovr.classes import Archive
 from rovr.core import FileList
+from rovr.functions.path import get_mime_type, match_mime_to_preview_type
 from rovr.functions.utils import should_cancel
-from rovr.variables.constants import PreviewContainerTitles, config
+from rovr.variables.constants import PreviewContainerTitles, config, file
 from rovr.variables.maps import (
     ARCHIVE_EXTENSIONS_FULL,
     EXT_TO_LANG_MAP,
@@ -175,6 +176,7 @@ class PreviewContainer(Container):
         self._current_file_path = None
         self._initial_height = self.size.height
         self._file_type: str = "none"
+        self._mime_type: str | None = None
         self._preview_texts: list[str] = config["interface"]["preview_text"].values()
         self.pdf = PDFHandler()
 
@@ -276,6 +278,7 @@ class PreviewContainer(Container):
                 async with self.batch():
                     await self.remove_children()
                     await self.show_image_preview()
+                return
 
         if should_cancel():
             return
@@ -606,23 +609,45 @@ class PreviewContainer(Container):
             self.pdf.current_page = 0
             self.pdf.total_pages = 0
 
+        mime_type: str | None = None
+
         if path.isdir(file_path):
             self.app.call_from_thread(
                 self.update_ui, file_path=file_path, file_type="folder"
             )
         else:
-            lower_file_path = file_path.lower()
-            if (
-                lower_file_path.endswith(".pdf")
-                and config["plugins"]["poppler"]["enabled"]
-            ):
-                file_type = "pdf"
-            elif any(lower_file_path.endswith(ext) for ext in PIL_EXTENSIONS):
-                file_type = "image"
-            elif any(lower_file_path.endswith(ext) for ext in ARCHIVE_EXTENSIONS_FULL):
-                file_type = "archive"
-            else:
-                file_type = "file"
+            file_type: str | None = None
+
+            if config["plugins"]["file_one"]["enabled"] and file is not None:
+                if should_cancel():
+                    return
+                mime_type = self.app.call_from_thread(get_mime_type, file_path)
+                if mime_type is not None:
+                    file_type = match_mime_to_preview_type(
+                        mime_type,
+                        config["plugins"]["file_one"]["mime_rules"],
+                    )
+                    if (
+                        file_type == "pdf"
+                        and not config["plugins"]["poppler"]["enabled"]
+                    ):
+                        file_type = "file"
+
+            if file_type is None:
+                lower_file_path = file_path.lower()
+                if (
+                    lower_file_path.endswith(".pdf")
+                    and config["plugins"]["poppler"]["enabled"]
+                ):
+                    file_type = "pdf"
+                elif any(lower_file_path.endswith(ext) for ext in PIL_EXTENSIONS):
+                    file_type = "image"
+                elif any(
+                    lower_file_path.endswith(ext) for ext in ARCHIVE_EXTENSIONS_FULL
+                ):
+                    file_type = "archive"
+                else:
+                    file_type = "file"
 
             content = None
 
@@ -698,6 +723,7 @@ class PreviewContainer(Container):
                 file_path,
                 file_type=file_type,
                 content=content,
+                mime_type=mime_type,
             )
 
         if should_cancel():
@@ -709,12 +735,14 @@ class PreviewContainer(Container):
         file_path: str,
         file_type: str,
         content: str | list[str] | None = None,
+        mime_type: str | None = None,
     ) -> None:
         """
         Update the preview UI. This runs on the main thread.
         """
         self._current_file_path = file_path
         self._current_content = content
+        self._mime_type = mime_type
 
         self._file_type = file_type
         self.remove_class("pdf")
@@ -742,15 +770,26 @@ class PreviewContainer(Container):
         self.border_title = ""
         if should_cancel():
             return
+
+        assert isinstance(self._current_content, str)
+
+        display_content: str = self._current_content
+        if (
+            self._current_content == config["interface"]["preview_text"]["binary"]
+            and self._mime_type is not None
+        ):
+            display_content = (
+                f"{self._current_content}\n\n[dim]MIME type: {self._mime_type}[/]"
+            )
+
         if self.has_child("Static"):
             static_widget: Static = self.query_one(Static)
-            static_widget.update(self._current_content)
+            static_widget.update(display_content)
         else:
             await self.remove_children()
             if should_cancel():
                 return
-            assert isinstance(self._current_content, str)
-            static_widget = Static(self._current_content)
+            static_widget = Static(display_content)
             await self.mount(static_widget)
         static_widget.can_focus = True
         static_widget.classes = "special"

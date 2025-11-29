@@ -1,5 +1,8 @@
 # Unreleased
 
+## new features
+- feat(preview): add support for usjng file(1) #157
+
 # [v0.6.0.dev1]
 
 ## new features

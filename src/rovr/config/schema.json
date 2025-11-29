@@ -236,7 +236,7 @@
             "properties": {
               "pattern": {
                 "type": "string",
-                "description": "The glob pattern to match against the file name (e.g., '*.py', 'LICENSE')."
+                "description": "The glob pattern to match against the file name (e.g., '*.py', 'LICENSE').\nBoth the filename and glob will be forced to lowercase!"
               },
               "icon": {
                 "type": "string",
@@ -259,7 +259,7 @@
             "properties": {
               "pattern": {
                 "type": "string",
-                "description": "The glob pattern to match against the folder name (e.g., 'src', '.*')."
+                "description": "The glob pattern to match against the folder name (e.g., 'src', '.*').\nBoth the folder name and glob will be forced to lowercase!"
               },
               "icon": {
                 "type": "string",

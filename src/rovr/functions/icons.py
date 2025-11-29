@@ -1,5 +1,6 @@
 from functools import lru_cache
 from os import path
+import fnmatch
 
 from rovr.variables.constants import config
 from rovr.variables.maps import (
@@ -32,14 +33,7 @@ def get_icon_for_file(location: str) -> list[str]:
     if "icons" in config and "files" in config["icons"]:
         for custom_icon in config["icons"]["files"]:
             pattern = custom_icon["pattern"].lower()
-            match_type = custom_icon.get("match_type", "exact")
-
-            if (
-                match_type == "exact"
-                and file_name == pattern
-                or match_type == "endswith"
-                and file_name.endswith(pattern)
-            ):
+            if fnmatch.fnmatch(file_name, pattern):
                 return [custom_icon["icon"], custom_icon["color"]]
 
     # 1. Check for full filename match
@@ -78,14 +72,7 @@ def get_icon_for_folder(location: str) -> list[str]:
     if "icons" in config and "folders" in config["icons"]:
         for custom_icon in config["icons"]["folders"]:
             pattern = custom_icon["pattern"].lower()
-            match_type = custom_icon.get("match_type", "exact")
-
-            if (
-                match_type == "exact"
-                and folder_name == pattern
-                or match_type == "endswith"
-                and folder_name.endswith(pattern)
-            ):
+            if fnmatch.fnmatch(folder_name, pattern):
                 return [custom_icon["icon"], custom_icon["color"]]
 
     # Check for special folder types

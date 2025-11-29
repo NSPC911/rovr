@@ -236,13 +236,7 @@
             "properties": {
               "pattern": {
                 "type": "string",
-                "description": "The file name pattern to match"
-              },
-              "match_type": {
-                "type": "string",
-                "enum": ["exact", "endswith"],
-                "default": "exact",
-                "description": "Type of matching:\n`exact`   : for exact file name matching\n`endswith`: for file name ends with matching"
+                "description": "The glob pattern to match against the file name (e.g., '*.py', 'LICENSE')."
               },
               "icon": {
                 "type": "string",
@@ -253,7 +247,7 @@
                 "description": "The color for the icon. Can be a named color or hex code."
               }
             },
-            "required": ["pattern", "icon", "color", "match_type"]
+            "required": ["pattern", "icon", "color"]
           },
           "default": [],
           "description": "Custom file icon mappings. Earlier entries have higher priority."
@@ -265,13 +259,7 @@
             "properties": {
               "pattern": {
                 "type": "string",
-                "description": "The folder name pattern to match"
-              },
-              "match_type": {
-                "type": "string",
-                "enum": ["exact", "endswith"],
-                "default": "exact",
-                "description": "Type of matching:\n`exact`   : for exact file name matching\n`endswith`: for file name ends with matching"
+                "description": "The glob pattern to match against the folder name (e.g., 'src', '.*')."
               },
               "icon": {
                 "type": "string",
@@ -282,7 +270,7 @@
                 "description": "The color for the icon. Can be a named color or hex code"
               }
             },
-            "required": ["pattern", "icon", "color", "match_type"]
+            "required": ["pattern", "icon", "color"]
           },
           "default": [],
           "description": "Custom folder icon mappings. Earlier entries have higher priority."

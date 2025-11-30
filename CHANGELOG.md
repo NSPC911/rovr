@@ -1,7 +1,25 @@
 # Unreleased
 
+## breaking changes
+- cd-on-quit: remove match type key 32a389f
+
 ## new features
-- feat(preview): add support for usjng file(1) #157
+- preview: add support for using file(1) #157
+
+## fixes
+- screens: add click to exit modal screen d84e9a8
+- finder: use pseudo exclusive worker to prevent error spam c9a7741
+- archive: just gamble which archive type it is 7fe26f6
+- cli: don't load everything when using certain functions 18558b9
+
+## perf
+- icons: use fnmatch instead of using scuffed methods 4c848a1
+
+## style
+- fix errors related to ty alpha 28 ce59c07
+
+## docs
+- cd-on-quit: use more robust functions 32a389f
 
 # [v0.6.0.dev1]
 

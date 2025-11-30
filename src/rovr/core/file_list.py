@@ -23,7 +23,6 @@ from rovr.functions import path as path_utils
 from rovr.functions import pins as pin_utils
 from rovr.functions import utils
 from rovr.variables.constants import buttons_that_depend_on_path, config, vindings
-from rovr.variables.maps import ARCHIVE_EXTENSIONS_FULL
 
 
 class FileList(SelectionList, inherit_bindings=False):
@@ -476,10 +475,8 @@ class FileList(SelectionList, inherit_bindings=False):
             highlighted_option.dir_entry.path
         )
         self.app.query_one("MetadataContainer").update_metadata(event.option.dir_entry)
-        self.app.query_one(
-            "#unzip"
-        ).disabled = not highlighted_option.dir_entry.name.lower().endswith(
-            ARCHIVE_EXTENSIONS_FULL
+        self.app.query_one("#unzip").disabled = not utils.is_archive(
+            highlighted_option.dir_entry.name
         )
 
     # Use better versions of the checkbox icons
@@ -829,8 +826,7 @@ class FileList(SelectionList, inherit_bindings=False):
             elif check_key(event, config["keybinds"]["zip"]):
                 self.app.query_one("#zip").on_button_pressed(Button.Pressed)
             elif check_key(event, config["keybinds"]["unzip"]):
-                if not self.app.query_one("#unzip").disabled:
-                    self.app.query_one("#unzip").on_button_pressed(Button.Pressed)
+                self.app.query_one("#unzip").on_button_pressed(Button.Pressed)
             # search
             elif check_key(event, config["keybinds"]["focus_search"]):
                 self.input.focus()

@@ -18,6 +18,7 @@ from textual.widgets.selection_list import Selection
 
 from rovr.classes import ArchiveFileListSelection, FileListSelectionWidget
 from rovr.classes.session_manager import SessionManager
+from rovr.components import PopupOptionList
 from rovr.functions import icons as icon_utils
 from rovr.functions import path as path_utils
 from rovr.functions import pins as pin_utils
@@ -129,9 +130,7 @@ class FileList(SelectionList, inherit_bindings=False):
                 )
             except NoMatches:
                 # it happens, but I really cannot be bothered to figure it out
-                rightclickoptionlist = FileListRightClickOptionList(
-                    self, classes="hidden"
-                )
+                rightclickoptionlist = FileListRightClickOptionList(classes="hidden")
                 await self.app.mount(rightclickoptionlist)
             rightclickoptionlist.remove_class("hidden")
             rightclickoptionlist.update_location(event)
@@ -902,12 +901,17 @@ class FileList(SelectionList, inherit_bindings=False):
             )
 
 
-class FileListRightClickOptionList(OptionList):
-    def __init__(
-        self, file_list: FileList, classes: str | None = None, id: str | None = None
-    ) -> None:
+class FileListRightClickOptionList(PopupOptionList):
+    def __init__(self, classes: str | None = None, id: str | None = None) -> None:
         # Only show unzip option for archive files
         super().__init__(
+            id=id,
+            classes=classes,
+        )
+
+    @on(events.Show)
+    def on_show(self, event: events.Show) -> None:
+        self.set_options([
             Option(f" {icon_utils.get_icon('general', 'copy')[0]} Copy", id="copy"),
             Option(f" {icon_utils.get_icon('general', 'cut')[0]} Cut", id="cut"),
             Option(
@@ -917,22 +921,14 @@ class FileListRightClickOptionList(OptionList):
                 f" {icon_utils.get_icon('general', 'rename')[0]} Rename ", id="rename"
             ),
             Option(f" {icon_utils.get_icon('general', 'zip')[0]} Zip", id="zip"),
-            Option(f" {icon_utils.get_icon('general', 'open')[0]} Unzip", id="unzip"),
-            id=id,
-            classes=classes,
-        )
-        self.file_list = file_list
-
-    def on_mount(self) -> None:
-        self.styles.layer = "overlay"
-
-    async def on_key(self, event: events.Key) -> None:
-        # Close menu on Escape
-        if event.key == "escape":
-            self.go_hide()
-
-    def update_location(self, event: events.Click) -> None:
-        self.styles.offset = (event.screen_x, event.screen_y)
+        ])
+        if utils.is_archive(self.file_list.highlighted_option.dir_entry.name):
+            self.add_option(
+                Option(
+                    f" {icon_utils.get_icon('general', 'open')[0]} Unzip", id="unzip"
+                )
+            )
+        self.call_next(self.refresh)
 
     async def on_option_list_option_selected(
         self, event: OptionList.OptionSelected
@@ -955,25 +951,3 @@ class FileListRightClickOptionList(OptionList):
             case _:
                 return
         self.go_hide()
-
-    @on(events.MouseMove)
-    def highlight_follow_mouse(self, event: events.MouseMove) -> None:
-        hovered_option: int | None = event.style.meta.get("option")
-        if hovered_option is not None and not self._options[hovered_option].disabled:
-            self.highlighted = hovered_option
-
-    @on(events.Show)
-    def force_highlight_option(self, event: events.Show) -> None:
-        self.file_list.add_class("-popup-shown")
-
-    @on(events.Hide)
-    def unforce_highlight_option(self, event: events.Hide) -> None:
-        self.file_list.remove_class("-popup-shown")
-
-    @on(events.Blur)
-    def on_blur(self, event: events.Blur) -> None:
-        self.go_hide()
-
-    def go_hide(self) -> None:
-        self.add_class("hidden")
-        self.file_list.focus()

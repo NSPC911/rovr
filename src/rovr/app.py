@@ -37,6 +37,7 @@ from rovr.action_buttons import (
     ZipButton,
 )
 from rovr.action_buttons.sort_order import SortOrderButton, SortOrderPopup
+from rovr.components import SearchInput
 from rovr.core import FileList, FileListContainer, PinnedSidebar, PreviewContainer
 from rovr.core.file_list import FileListRightClickOptionList
 from rovr.footer import Clipboard, MetadataContainer, ProcessContainer
@@ -59,7 +60,6 @@ from rovr.navigation_widgets import (
 )
 from rovr.screens import DummyScreen, FileSearch, Keybinds, YesOrNo, ZDToDirectory
 from rovr.screens.way_too_small import TerminalTooSmall
-from rovr.search_container import SearchInput
 from rovr.state_manager import StateManager
 from rovr.variables.constants import MaxPossible, config
 from rovr.variables.maps import VAR_TO_DIR
@@ -159,14 +159,10 @@ class Application(App, inherit_bindings=False):
                         placeholder=f"{icons.get_icon('general', 'search')[0]} Search"
                     )
                     yield PinnedSidebar(id="pinned_sidebar")
-                filelistcontainer = FileListContainer()
-                yield filelistcontainer
+                yield FileListContainer()
                 yield PreviewContainer(
                     id="preview_sidebar",
                 )
-            yield FileListRightClickOptionList(
-                filelistcontainer.filelist, classes="hidden"
-            )
             with HorizontalGroup(id="footer"):
                 yield ProcessContainer()
                 yield MetadataContainer(id="metadata")

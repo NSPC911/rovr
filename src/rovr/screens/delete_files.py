@@ -42,3 +42,9 @@ class DeleteFiles(ModalScreen):
             case "d" if config["settings"]["use_recycle_bin"]:
                 event.stop()
                 self.dismiss("trash")
+
+    def on_click(self, event: events.Click) -> None:
+        if event.widget is self:
+            # ie click outside
+            event.stop()
+            self.dismiss("cancel")

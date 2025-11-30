@@ -8,9 +8,9 @@ from textual.screen import ModalScreen
 from textual.widgets import OptionList
 
 from rovr.classes.textual_options import KeybindOption
+from rovr.components import SearchInput
 from rovr.functions import icons
 from rovr.functions.utils import check_key
-from rovr.search_container import SearchInput
 from rovr.variables.constants import config, schema, vindings
 
 
@@ -110,3 +110,9 @@ class Keybinds(ModalScreen):
             raise RuntimeError(
                 f"Expected a <KeybindOption> but received <{type(event.option).__name__}>"
             )
+
+    def on_click(self, event: events.Click) -> None:
+        if event.widget is self:
+            # ie click outside
+            event.stop()
+            self.dismiss("")

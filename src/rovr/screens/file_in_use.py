@@ -1,4 +1,4 @@
-from textual import events, on
+from textual import events
 from textual.app import ComposeResult
 from textual.containers import Container, Grid, HorizontalGroup, VerticalGroup
 from textual.screen import ModalScreen
@@ -54,17 +54,14 @@ class FileInUse(ModalScreen):
                 event.stop()
                 self.query_one(Switch).action_toggle_switch()
 
-    @on(Button.Pressed, "#try_again")
-    def on_try_again(self, event: Button.Pressed) -> None:
-        """Handle Try Again button: return 'try_again' to callers."""
-        self.dismiss({"value": "try_again", "toggle": self.query_one(Switch).value})
+    def on_button_pressed(self, event: Button.Pressed) -> None:
+        self.dismisss({
+            "value": event.button.id,
+            "toggle": self.query_one(Switch).value,
+        })
 
-    @on(Button.Pressed, "#skip")
-    def on_skip(self, event: Button.Pressed) -> None:
-        """Handle Skip button: return 'skip' to callers."""
-        self.dismiss({"value": "skip", "toggle": self.query_one(Switch).value})
-
-    @on(Button.Pressed, "#cancel")
-    def on_cancel(self, event: Button.Pressed) -> None:
-        """Handle Cancel button: return 'cancel' to callers."""
-        self.dismiss({"value": "cancel", "toggle": self.query_one(Switch).value})
+    def on_click(self, event: events.Click) -> None:
+        if event.widget is self:
+            # ie click outside
+            event.stop()
+            self.dismiss({"value": "cancel", "toggle": self.query_one(Switch).value})

@@ -51,3 +51,9 @@ class GiveMePermission(ModalScreen):
             case "a":
                 event.stop()
                 self.query_one(Switch).action_toggle_switch()
+
+    def on_click(self, event: events.Click) -> None:
+        if event.widget is self:
+            # ie click outside
+            event.stop()
+            self.dismiss("")

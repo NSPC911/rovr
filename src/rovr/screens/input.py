@@ -53,7 +53,10 @@ class ModalInput(ModalScreen):
                 # ty ignore because a list is iterable,
                 # but it is crashing out, because it thinks
                 # lists aren't iterable, weird
-                validate_on=["changed", "submitted"],  # ty: ignore[invalid-argument-type]
+                validate_on=[
+                    "changed",
+                    "submitted",
+                ],  # ty: ignore[invalid-argument-type]
             )
 
     @work(exclusive=True)
@@ -128,5 +131,11 @@ class ModalInput(ModalScreen):
     def on_key(self, event: events.Key) -> None:
         """Handle escape key to dismiss the dialog."""
         if event.key == "escape":
+            event.stop()
+            self.dismiss("")
+
+    def on_click(self, event: events.Click) -> None:
+        if event.widget is self:
+            # ie click outside
             event.stop()
             self.dismiss("")

@@ -157,7 +157,7 @@ class FileList(SelectionList, inherit_bindings=False):
         except AttributeError:
             self.clear_options()
             return
-        self.file_list_pause_check = True
+        self.app.file_list_pause_check = True
         preview = self.app.query_one("PreviewContainer")
 
         # Separate folders and files
@@ -288,7 +288,7 @@ class FileList(SelectionList, inherit_bindings=False):
             if self.select_mode_enabled:
                 await self.toggle_mode()
             self.update_border_subtitle()
-        self.file_list_pause_check = False
+        self.app.file_list_pause_check = False
 
     @work(exclusive=True)
     async def dummy_update_file_list(
@@ -474,7 +474,7 @@ class FileList(SelectionList, inherit_bindings=False):
             highlighted_option.dir_entry.path
         )
         self.app.query_one("MetadataContainer").update_metadata(event.option.dir_entry)
-        self.app.query_one("#unzip").disabled = not utils.is_archive(
+        self.app.query_one("#unzip").disabled = not await utils.is_archive(
             highlighted_option.dir_entry.name
         )
 
@@ -910,7 +910,7 @@ class FileListRightClickOptionList(PopupOptionList):
         )
 
     @on(events.Show)
-    def on_show(self, event: events.Show) -> None:
+    async def on_show(self, event: events.Show) -> None:
         self.set_options([
             Option(f" {icon_utils.get_icon('general', 'copy')[0]} Copy", id="copy"),
             Option(f" {icon_utils.get_icon('general', 'cut')[0]} Cut", id="cut"),
@@ -922,7 +922,7 @@ class FileListRightClickOptionList(PopupOptionList):
             ),
             Option(f" {icon_utils.get_icon('general', 'zip')[0]} Zip", id="zip"),
         ])
-        if utils.is_archive(self.file_list.highlighted_option.dir_entry.name):
+        if await utils.is_archive(self.file_list.highlighted_option.dir_entry.name):
             self.add_option(
                 Option(
                     f" {icon_utils.get_icon('general', 'open')[0]} Unzip", id="unzip"

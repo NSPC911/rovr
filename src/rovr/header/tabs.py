@@ -83,22 +83,17 @@ class Tabline(Tabs):
         Note:
             Only one of `before` or `after` can be provided. If both are
             provided a `Tabs.TabError` will be raised.
-
-        Raises:
-            Tabs.TabError: If there is a problem with the addition request.
         """
         """
         Returns:
             An optionally awaitable object that waits for the tab to be mounted and
                 internal state to be fully updated to reflect the new tab.
-
+        Raises:
+            Tabs.TabError: If there is a problem with the addition request.
         """
 
         tab = TablineTab(directory=directory, label=label)
-        try:
-            await super().add_tab(tab, before=before, after=after)
-        except Tabs.TabError:
-            raise
+        await super().add_tab(tab, before=before, after=after)
         self._activate_tab(tab)
         # redo max-width
         self.parent.on_resize()

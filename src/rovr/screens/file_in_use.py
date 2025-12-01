@@ -55,7 +55,7 @@ class FileInUse(ModalScreen):
                 self.query_one(Switch).action_toggle_switch()
 
     def on_button_pressed(self, event: Button.Pressed) -> None:
-        self.dismisss({
+        self.dismiss({
             "value": event.button.id,
             "toggle": self.query_one(Switch).value,
         })

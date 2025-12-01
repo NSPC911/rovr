@@ -24,7 +24,7 @@ from rovr.classes import Archive
 from rovr.core import FileList
 from rovr.functions.path import get_mime_type, match_mime_to_preview_type
 from rovr.functions.utils import should_cancel
-from rovr.variables.constants import PreviewContainerTitles, config, file
+from rovr.variables.constants import PreviewContainerTitles, config, file_executable
 from rovr.variables.maps import (
     ARCHIVE_EXTENSIONS_FULL,
     EXT_TO_LANG_MAP,
@@ -618,7 +618,7 @@ class PreviewContainer(Container):
         else:
             file_type: str | None = None
 
-            if config["plugins"]["file_one"]["enabled"] and file is not None:
+            if config["plugins"]["file_one"]["enabled"] and file_executable is not None:
                 if should_cancel():
                     return
                 mime_type = self.app.call_from_thread(get_mime_type, file_path)

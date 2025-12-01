@@ -164,7 +164,6 @@ code {
       .header::before {
         left: unset !important;
         right: calc(var(--ec-uiPadInl) + -1px);
-        background-color: unset;
         background: linear-gradient(90deg, green 33%, yellow 0%, yellow 66%, red 0%, red 100%) !important;
         width: 2rem;
         height: 0.625rem;

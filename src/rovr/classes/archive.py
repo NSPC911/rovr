@@ -41,6 +41,7 @@ class Archive:
         ] = None
         self._is_zip: Optional[bool] = None
         self._is_rar: Optional[bool] = None
+        self._compress_file_obj: Optional[IO[bytes]] = None
 
     def __enter__(self) -> "Archive":
         """Context manager entry - opens the archive.
@@ -70,9 +71,10 @@ class Archive:
             exc_val: Exception value if an exception occurred
             exc_tb: Traceback if an exception occurred
         """
-        """Context manager exit - closes the archive."""
         if self._archive:
             self._archive.close()
+        if self._compress_file_obj:
+            self._compress_file_obj.close()
 
     def _detect_and_open(self) -> None:
         """Detect file type and open appropriate handler.
@@ -211,18 +213,18 @@ class Archive:
         if ":gz" in tar_mode:
             if not (0 <= self.compression_level <= 9):
                 raise ValueError("Gzip compression level must be between 0-9")
-            gz_file = gzip.open(  # noqa: SIM115
+            self._compress_file_obj = gzip.open(  # noqa: SIM115
                 self.filename, self.mode + "b", compresslevel=self.compression_level
             )
-            return tarfile.open(fileobj=gz_file, mode="w")
+            return tarfile.open(fileobj=self._compress_file_obj, mode="w")
 
         elif ":bz2" in tar_mode:
             if not (1 <= self.compression_level <= 9):
                 raise ValueError("Bzip2 compression level must be between 1-9")
-            bz2_file = bz2.open(  # noqa: SIM115
+            self._compress_file_obj = bz2.open(  # noqa: SIM115
                 self.filename, self.mode + "b", compresslevel=self.compression_level
             )
-            return tarfile.open(fileobj=bz2_file, mode="w")
+            return tarfile.open(fileobj=self._compress_file_obj, mode="w")
 
         elif ":xz" in tar_mode:
             if not (0 <= self.compression_level <= 9):

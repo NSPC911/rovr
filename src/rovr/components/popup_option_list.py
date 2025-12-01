@@ -27,7 +27,11 @@ class PopupOptionList(OptionList):
     @on(events.MouseMove)
     def highlight_follow_mouse(self, event: events.MouseMove) -> None:
         hovered_option: int | None = event.style.meta.get("option")
-        if hovered_option is not None and not self._options[hovered_option].disabled:
+        if (
+            hovered_option is not None
+            and 0 <= hovered_option < len(self._options)
+            and not self._options[hovered_option].disabled
+        ):
             self.highlighted = hovered_option
 
     @on(events.Blur)
@@ -53,4 +57,5 @@ class PopupOptionList(OptionList):
 
     @on(events.Hide)
     def unforce_highlight_option(self, event: events.Hide) -> None:
-        self.file_list.remove_class("-popup-shown")
+        if self.file_list.has_class("-popup-shown"):
+            self.file_list.remove_class("-popup-shown")

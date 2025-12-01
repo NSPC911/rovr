@@ -275,4 +275,4 @@ class ZDToDirectory(ModalScreen):
         if event.widget is self:
             # ie click outside
             event.stop()
-            self.dismiss("")
+            self.dismiss(None)

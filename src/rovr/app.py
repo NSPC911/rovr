@@ -534,17 +534,18 @@ class Application(App, inherit_bindings=False):
                     cwd = new_cwd
                     continue
                 else:
+                    items = None
                     with suppress(OSError):
                         # this is weird, so `get_filtered_dir_names` is a sync
                         # function, so `call_from_thread` shouldn't be required
                         # but without it, this thread goes in a limbo state where
                         # after quiting, it still runs this, so the app never quits
-                        items = self.call_from_thread(
+                        items: set[str] = self.call_from_thread(
                             get_filtered_dir_names,
                             cwd,
                             config["settings"]["show_hidden_files"],
                         )
-                    if items != file_list.items_in_cwd:
+                    if items is not None and items != file_list.items_in_cwd:
                         self.cd(cwd)
             # check pins.json
             new_mtime = None
@@ -595,7 +596,10 @@ class Application(App, inherit_bindings=False):
             self.has_pushed_screen = False
         else:
             with suppress(ScreenStackError):
-                self.pop_screen()
+                if len(self.screen_stack) > 1 and isinstance(
+                    self.screen_stack[-1], TerminalTooSmall
+                ):
+                    self.pop_screen()
         self.hide_popups()
 
     async def _on_css_change(self) -> None:

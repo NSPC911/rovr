@@ -196,10 +196,10 @@ class classproperty:  # noqa: N801
 
 async def is_archive(path_str: str) -> bool:
     from rovr.functions.path import get_mime_type, match_mime_to_preview_type
-    from rovr.variables.constants import config, file  # noqa: F401
+    from rovr.variables.constants import config, file_executable
     from rovr.variables.maps import ARCHIVE_EXTENSIONS_FULL
 
-    if config["plugins"]["file_one"]["enabled"] and file is not None:
+    if config["plugins"]["file_one"]["enabled"] and file_executable is not None:
         mime_type = await get_mime_type(path_str)
         if mime_type is None:
             return path_str.lower().endswith(ARCHIVE_EXTENSIONS_FULL)

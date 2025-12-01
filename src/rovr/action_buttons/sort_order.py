@@ -78,6 +78,8 @@ class SortOrderPopup(PopupOptionList):
     def on_mount(self) -> None:
         self.button: SortOrderButton = self.app.query_one(SortOrderButton)
         self.styles.scrollbar_size_vertical = 0
+        # calling super()._on_mount is useless, and super().mount()
+        # doesnt do anything significant
 
     @on(events.Show)
     def on_show(self, event: events.Show) -> None:
@@ -132,7 +134,6 @@ class SortOrderPopup(PopupOptionList):
         self.button.update_icon()
 
     async def on_key(self, event: events.Key) -> None:
-        # Close menu on Escape
         match event.key.lower():
             case "a":
                 self.highlighted = self.get_option_index("name")

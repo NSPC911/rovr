@@ -15,25 +15,25 @@ if "config" not in globals():
     schema, config = load_config()
     config_setup()
 
-if "file" not in globals():
-    global file
+if "file_executable" not in globals():
+    global file_executable
     # check for $ROVR_FILE_ONE
     if (  # noqa: SIM114
         "ROVR_FILE_ONE" in environ
         and (found := which(environ["ROVR_FILE_ONE"])) is not None
     ):
-        file = found
+        file_executable = found
     # check for $YAZI_FILE_ONE
     elif (  # noqa: SIM114
         "YAZI_FILE_ONE" in environ
         and (found := which(environ["YAZI_FILE_ONE"])) is not None
     ):
-        file = found
+        file_executable = found
     # check for `file` existence
     elif (found := which("file")) is not None:
-        file = found
+        file_executable = found
     else:
-        file = None
+        file_executable = None
 
 
 @dataclass

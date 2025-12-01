@@ -36,7 +36,8 @@ class PinnedSidebar(OptionList, inherit_bindings=False):
         self.log(f"Reloading pins: {available_pins}")
         self.log(f"Reloading default folders: {default}")
         for default_folder in default:
-            assert isinstance(default_folder["path"], str)
+            if not isinstance(default_folder["path"], str):
+                continue
             if not path.isdir(default_folder["path"]) and path.exists(
                 default_folder["path"]
             ):
@@ -75,7 +76,8 @@ class PinnedSidebar(OptionList, inherit_bindings=False):
                 pin["path"]
             except KeyError:
                 break
-            assert isinstance(pin["path"], str)
+            if not isinstance(pin["path"], str):
+                continue
             if not path.isdir(pin["path"]):
                 if path.exists(pin["path"]):
                     raise FolderNotFileError(

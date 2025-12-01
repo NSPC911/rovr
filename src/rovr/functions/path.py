@@ -14,8 +14,7 @@ from textual import work
 from textual.app import App
 
 from rovr.functions.icons import get_icon_for_file, get_icon_for_folder
-from rovr.variables.constants import file as file_executable
-from rovr.variables.constants import os_type
+from rovr.variables.constants import file_executable, os_type
 
 # windows needs nt, because scandir returns
 # nt.DirEntry instead of os.DirEntry on

@@ -79,4 +79,8 @@ class YesOrNo(ModalScreen):
         if event.widget is self:
             # ie click outside
             event.stop()
-            self.dismiss("")
+            self.dismiss(
+                {"value": False, "toggle": self.query_one(Switch).value}
+                if self.with_toggle
+                else False
+            )

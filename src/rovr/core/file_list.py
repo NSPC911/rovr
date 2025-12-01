@@ -180,7 +180,7 @@ class FileList(SelectionList, inherit_bindings=False):
                     self.list_of_options.append(
                         Selection("   --no-files--", value="", disabled=True)
                     )
-                    preview.remove_children()
+                    await preview.remove_children()
                     preview._current_preview_type = "none"
                     preview.border_title = ""
                 else:
@@ -210,7 +210,7 @@ class FileList(SelectionList, inherit_bindings=False):
                         disabled=True,
                     ),
                 )
-                preview.remove_children()
+                await preview.remove_children()
                 preview._current_preview_type = "none"
                 preview.border_title = ""
 
@@ -481,7 +481,7 @@ class FileList(SelectionList, inherit_bindings=False):
         )
         self.app.query_one("MetadataContainer").update_metadata(event.option.dir_entry)
         self.app.query_one("#unzip").disabled = not await utils.is_archive(
-            highlighted_option.dir_entry.name
+            highlighted_option.dir_entry.path
         )
 
     # Use better versions of the checkbox icons
@@ -917,6 +917,11 @@ class FileListRightClickOptionList(PopupOptionList):
 
     @on(events.Show)
     async def on_show(self, event: events.Show) -> None:
+        if hasattr(self, "file_list"):
+            file_list = self.file_list
+        else:
+            file_list = self.app.query_one("#file_list", FileList)
+            self.file_list = file_list
         self.set_options([
             Option(f" {icon_utils.get_icon('general', 'copy')[0]} Copy", id="copy"),
             Option(f" {icon_utils.get_icon('general', 'cut')[0]} Cut", id="cut"),
@@ -927,17 +932,14 @@ class FileListRightClickOptionList(PopupOptionList):
                 f" {icon_utils.get_icon('general', 'rename')[0]} Rename ", id="rename"
             ),
             Option(f" {icon_utils.get_icon('general', 'zip')[0]} Zip", id="zip"),
+            Option(
+                f" {icon_utils.get_icon('general', 'open')[0]} Unzip",
+                id="unzip",
+                disabled=not await utils.is_archive(
+                    file_list.highlighted_option.dir_entry.name
+                ),
+            ),
         ])
-        if hasattr(self, "file_list"):
-            file_list = self.file_list
-        else:
-            file_list = self.app.query_one("#file_list", FileList)
-        if await utils.is_archive(file_list.highlighted_option.dir_entry.name):
-            self.add_option(
-                Option(
-                    f" {icon_utils.get_icon('general', 'open')[0]} Unzip", id="unzip"
-                )
-            )
         self.call_next(self.refresh)
 
     async def on_option_list_option_selected(

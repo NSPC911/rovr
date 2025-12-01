@@ -1,14 +1,52 @@
-### issue descripton
-{describe what happened that resulted in the crash}
+name: bug/crash report
+description: Create a bug or crash report for rovr
+labels: [bug]
+title: "<title>"
 
-### how do you reproduce it?
-{a step by step instruction on recreating the error, or a video with what keys you are pressing visualized}
+body:
+  - type: textarea
+    id: bug-description
+    attributes:
+      label: Issue descripton
+      description: Describe what happened that resulted in the crash
+      placeholder: The issue happened when I do ..., but it never happens consistently unless I do ...
+    validations:
+      required: true
 
-### what is the expected result of the steps?
-{what should have been the expected results?}
+  - type: textarea
+    id: reproduce-steps
+    attributes:
+      label: How do you reproduce it?
+      description: A step by step instruction on recreating the error, or a video with what keys you are pressing visualized
+      placeholder: |
+        1. Do ...
+        2. Then ...
+        3. Do this ..., ... and then ...
+        4. Observe "the bug" or "the crash"
+    validations:
+      required: true
 
-### what actually happened after doing the steps?
-{show what actually happened after doing the steps. preferrably, paste the exception if the app had crashed.}
+  - type: textarea
+    id: expected
+    attributes:
+      label: What is the expected result of the steps?
+      description: What should have been the expected results?
+      placeholder: I expect ... to happen
+    validations:
+      required: true
 
-### how can this be fixed?
-{how do you think this bug can be fixed?}
+  - type: textarea
+    id: reality
+    attributes:
+      label: What actually happened after doing the steps?
+      description: Show what actually happened after doing the steps. Preferrably, paste the exception if the app had crashed.
+    validations:
+      required: true
+
+  - type: textarea
+    id: how-to-fix
+    attributes:
+      label: How can this be fixed?
+      description: How do you think this bug can be fixed?
+    validations:
+      required: false

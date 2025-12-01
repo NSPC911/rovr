@@ -664,7 +664,7 @@ class PreviewContainer(Container):
                 await self.show_pdf_preview()
 
     async def on_resize(self, event: events.Resize) -> None:
-        """Re-render the preview on resize if it's was rendered by batcat and height changed."""
+        """Re-render the preview on resize"""
         if self.has_child("Static") and event.size.height != self._initial_height:
             if self._current_content is not None:
                 is_special_content = self._current_content in self._preview_texts

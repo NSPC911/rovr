@@ -127,9 +127,6 @@ Input {
   scrollbar-size: 0 0;
   scrollbar-visibility: hidden;
   overflow: hidden hidden;
-}
-
-Input {
   .input--placeholder,
   .text-area--placeholder { color: $foreground-darken-1 }
   .text-area--cursor-gutter {

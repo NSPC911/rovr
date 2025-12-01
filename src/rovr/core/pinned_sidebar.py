@@ -1,4 +1,4 @@
-from os import path
+from os import path, access, R_OK
 from typing import ClassVar
 
 from textual import events
@@ -30,6 +30,7 @@ class PinnedSidebar(OptionList, inherit_bindings=False):
         available_pins = pin_utils.load_pins()
         pins = available_pins["pins"]
         default = available_pins["default"]
+        id_list = []
         self.list_of_options = []
         # get current highlight
         prev_highlighted: int = self.highlighted if self.highlighted else 0
@@ -61,13 +62,16 @@ class PinnedSidebar(OptionList, inherit_bindings=False):
             ):
                 # just ignore, shouldn't happen
                 continue
-            self.list_of_options.append(
-                PinnedSidebarOption(
-                    icon=icon,
-                    label=default_folder["name"],
-                    id=f"{path_utils.compress(default_folder['path'])}-default",
+            new_id = f"{path_utils.compress(default_folder['path'])}-default"
+            if new_id not in id_list:
+                self.list_of_options.append(
+                    PinnedSidebarOption(
+                        icon=icon,
+                        label=default_folder["name"],
+                        id=new_id,
+                    )
                 )
-            )
+                id_list.append(new_id)
         self.list_of_options.append(
             Option(" Pinned", id="pinned-header", disabled=True)
         )
@@ -98,25 +102,32 @@ class PinnedSidebar(OptionList, inherit_bindings=False):
             if not (isinstance(pin["path"], str) and isinstance(pin["name"], str)):
                 # just ignore, shouldn't happen
                 continue
-            self.list_of_options.append(
-                PinnedSidebarOption(
-                    icon=icon,
-                    label=pin["name"],
-                    id=f"{path_utils.compress(pin['path'])}-pinned",
+            new_id = f"{path_utils.compress(pin['path'])}-pinned"
+            if new_id not in id_list:
+                self.list_of_options.append(
+                    PinnedSidebarOption(
+                        icon=icon,
+                        label=pin["name"],
+                        id=new_id,
+                    )
                 )
-            )
+                id_list.append(new_id)
         self.list_of_options.append(
             Option(" Drives", id="drives-header", disabled=True)
         )
         drives = path_utils.get_mounted_drives()
         for drive in drives:
-            self.list_of_options.append(
-                PinnedSidebarOption(
-                    icon=icon_utils.get_icon("folder", ":/drive:"),
-                    label=drive,
-                    id=f"{path_utils.compress(drive)}-drives",
-                )
-            )
+            if access(drive, R_OK):
+                new_id = f"{path_utils.compress(drive)}-drives"
+                if new_id not in id_list:
+                    self.list_of_options.append(
+                        PinnedSidebarOption(
+                            icon=icon_utils.get_icon("folder", ":/drive:"),
+                            label=drive,
+                            id=new_id,
+                        )
+                    )
+                    id_list.append(new_id)
         self.set_options(self.list_of_options)
         self.highlighted = prev_highlighted
 

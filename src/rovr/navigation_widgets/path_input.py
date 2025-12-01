@@ -16,6 +16,24 @@ class PathDropdownItem(DropdownItem):
         self.path = path
 
 
+def path_input_sort_key(item: PathDropdownItem) -> tuple[bool, bool, str]:
+    """Sort key function for results within the dropdown.
+
+    Args:
+        item: The PathDropdownItem to get a sort key for.
+
+    Returns:
+        A tuple of (is_file, is_dotfile, lowercase_name) for sorting.
+    """
+    name = item.path.name
+    is_dotfile = name.startswith(".")
+    try:
+        return (not item.path.is_dir(), not is_dotfile, name.lower())
+    except OSError:
+        # assume it is a file
+        return (True, not is_dotfile, name.lower())
+
+
 class PathAutoCompleteInput(PathAutoComplete):
     def __init__(self, target: Input) -> None:
         """An autocomplete widget for filesystem paths.
@@ -29,6 +47,7 @@ class PathAutoCompleteInput(PathAutoComplete):
             folder_prefix=" " + get_icon("folder", "default")[0] + " ",
             file_prefix=" " + get_icon("file", "default")[0] + " ",
             id="path_autocomplete",
+            sort_key=path_input_sort_key
         )
         self._target: Input = target
         assert isinstance(self._target, Input)

@@ -49,7 +49,7 @@ dev = [
   "poethepoet>=0.38.0",
   "ruff>=0.14.6",
   "textual-dev>=1.7.0",
-  "ty>=0.0.1a27",
+  "ty==0.0.1a28",
 ]
 
 [build-system]

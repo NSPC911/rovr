@@ -960,7 +960,7 @@ dev = [
     { name = "poethepoet", specifier = ">=0.38.0" },
     { name = "ruff", specifier = ">=0.14.6" },
     { name = "textual-dev", specifier = ">=1.7.0" },
-    { name = "ty", specifier = ">=0.0.1a27" },
+    { name = "ty", specifier = "==0.0.1a28" },
 ]
 
 [[package]]

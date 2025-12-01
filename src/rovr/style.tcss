@@ -129,7 +129,7 @@ Input {
   overflow: hidden hidden;
 }
 
-Input, TextArea {
+Input {
   .input--placeholder,
   .text-area--placeholder { color: $foreground-darken-1 }
   .text-area--cursor-gutter {
@@ -404,7 +404,7 @@ Tooltip {
     border: none;
     padding: 0;
     margin: 0;
-    &TextArea {
+    &Static {
       padding: 0 1;
       scrollbar-size: 0 0;
       overflow: hidden;

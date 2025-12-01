@@ -626,12 +626,12 @@
         },
         "preview_select_right": {
           "type": "array",
-          "description": "While using TextArea for previewing, use this keybind to extend selection to the right.",
+          "description": "Temporarily unused.",
           "display_name": "Select right"
         },
         "preview_select_left": {
           "type": "array",
-          "description": "While using TextArea for previewing, use this keybind to extend selection to the left.",
+          "description": "Temporarily unused.",
           "display_name": "Select left"
         },
         "show_keybinds": {

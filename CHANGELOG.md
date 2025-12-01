@@ -1,4 +1,4 @@
-# Unreleased
+# [v0.6.0.dev2]
 
 ## breaking changes
 - cd-on-quit: remove match type key 32a389f

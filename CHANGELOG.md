@@ -14,6 +14,7 @@
 
 ## perf
 - icons: use fnmatch instead of using scuffed methods 4c848a1
+- preview: use pygments instead of tree-sitter e95350f
 
 ## style
 - fix errors related to ty alpha 28 ce59c07

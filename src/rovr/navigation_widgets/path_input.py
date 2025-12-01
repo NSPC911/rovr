@@ -48,7 +48,7 @@ class PathAutoCompleteInput(PathAutoComplete):
             folder_prefix=" " + get_icon("folder", "default")[0] + " ",
             file_prefix=" " + get_icon("file", "default")[0] + " ",
             id="path_autocomplete",
-            sort_key=path_input_sort_key
+            sort_key=path_input_sort_key,  # ty: ignore[invalid-argument-type]
         )
         self._target: Input = target
         assert isinstance(self._target, Input)

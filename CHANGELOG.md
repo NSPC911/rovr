@@ -22,6 +22,9 @@
 ## docs
 - cd-on-quit: use more robust functions 32a389f
 
+## removed features
+- process + screens: remove permission asker modal 8caa4f9
+
 # [v0.6.0.dev1]
 
 ## new features

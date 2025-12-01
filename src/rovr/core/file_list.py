@@ -194,7 +194,9 @@ class FileList(SelectionList, inherit_bindings=False):
                         )
                         for item in file_list_options
                     ]
-                    items_in_cwd: list[str] = [item["name"] for item in file_list_options]
+                    items_in_cwd: list[str] = [
+                        item["name"] for item in file_list_options
+                    ]
                     if focus_on in items_in_cwd:
                         to_highlight_index = items_in_cwd.index(focus_on)
                     self.items_in_cwd = set(items_in_cwd)
@@ -238,7 +240,9 @@ class FileList(SelectionList, inherit_bindings=False):
             # I have other things that are more important.
             if add_to_session:
                 if session.historyIndex != len(session.directories) - 1:
-                    session.directories = session.directories[: session.historyIndex + 1]
+                    session.directories = session.directories[
+                        : session.historyIndex + 1
+                    ]
                 session.directories.append(cwd)
                 if session.lastHighlighted.get(cwd) is None and isinstance(
                     self.list_of_options[0], FileListSelectionWidget
@@ -924,7 +928,11 @@ class FileListRightClickOptionList(PopupOptionList):
             ),
             Option(f" {icon_utils.get_icon('general', 'zip')[0]} Zip", id="zip"),
         ])
-        if await utils.is_archive(self.file_list.highlighted_option.dir_entry.name):
+        if hasattr(self, "file_list"):
+            file_list = self.file_list
+        else:
+            file_list = self.app.query_one("#file_list", FileList)
+        if await utils.is_archive(file_list.highlighted_option.dir_entry.name):
             self.add_option(
                 Option(
                     f" {icon_utils.get_icon('general', 'open')[0]} Unzip", id="unzip"

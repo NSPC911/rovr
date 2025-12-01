@@ -936,7 +936,7 @@ class FileListRightClickOptionList(PopupOptionList):
                 f" {icon_utils.get_icon('general', 'open')[0]} Unzip",
                 id="unzip",
                 disabled=not await utils.is_archive(
-                    file_list.highlighted_option.dir_entry.name
+                    file_list.highlighted_option.dir_entry.path
                 ),
             ),
         ])
@@ -958,8 +958,7 @@ class FileListRightClickOptionList(PopupOptionList):
             case "zip":
                 self.app.query_one("#zip").on_button_pressed(Button.Pressed)
             case "unzip":
-                if not self.app.query_one("#unzip").disabled:
-                    self.app.query_one("#unzip").on_button_pressed(Button.Pressed)
+                self.app.query_one("#unzip").on_button_pressed(Button.Pressed)
             case _:
                 return
         self.go_hide()

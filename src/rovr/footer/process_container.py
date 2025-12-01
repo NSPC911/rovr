@@ -1,5 +1,4 @@
 import os
-import platform
 import shutil
 import tarfile
 import time
@@ -28,7 +27,7 @@ from rovr.screens import (
     GiveMePermission,
     YesOrNo,
 )
-from rovr.variables.constants import config, scroll_vindings
+from rovr.variables.constants import config, os_type, scroll_vindings
 
 
 class ThickBar(BarRenderable):
@@ -221,7 +220,7 @@ class ProcessContainer(VerticalScroll):
                     if config["settings"]["use_recycle_bin"] and not ignore_trash:
                         try:
                             path_to_trash = item_dict["path"]
-                            if platform.system() == "Windows":
+                            if os_type == "Windows":
                                 # An inherent issue with long paths on windows
                                 path_to_trash = path_to_trash.replace("/", "\\")
                             send2trash(path_to_trash)
@@ -230,7 +229,7 @@ class ProcessContainer(VerticalScroll):
                             # raises a PermissionError/OSError with winerror 32.
                             if (
                                 is_file_in_use := is_being_used(e)
-                            ) and platform.system() == "Windows":
+                            ) and os_type == "Windows":
                                 current_action, action_on_file_in_use = (
                                     self._handle_file_in_use_error(
                                         action_on_file_in_use,
@@ -295,9 +294,7 @@ class ProcessContainer(VerticalScroll):
                     pass
                 except (PermissionError, OSError) as e:
                     # Try to detect if file is in use on Windows
-                    if (
-                        is_file_in_use := is_being_used(e)
-                    ) and platform.system() == "Windows":
+                    if (is_file_in_use := is_being_used(e)) and os_type == "Windows":
                         current_action, action_on_file_in_use = (
                             self._handle_file_in_use_error(
                                 action_on_file_in_use,

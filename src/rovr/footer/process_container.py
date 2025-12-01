@@ -24,7 +24,6 @@ from rovr.screens import (
     CommonFileNameDoWhat,
     Dismissable,
     FileInUse,
-    GiveMePermission,
     YesOrNo,
 )
 from rovr.variables.constants import config, os_type, scroll_vindings
@@ -197,7 +196,6 @@ class ProcessContainer(VerticalScroll):
             files_to_delete.extend(files_to_add)
             folders_to_delete.extend(folders_to_add)
         self.app.call_from_thread(bar.update_progress, total=len(files_to_delete) + 1)
-        action_on_permission_error = "ask"
         action_on_file_in_use = "ask"
         last_update_time = time.monotonic()
         for i, item_dict in enumerate(files_to_delete):
@@ -248,30 +246,10 @@ class ProcessContainer(VerticalScroll):
                                 # error so they create an issue
                                 raise
                             # fallback for regular permission issues
-                            if action_on_permission_error == "ask":
-                                do_what = self.app.call_from_thread(
-                                    self.app.push_screen_wait,
-                                    GiveMePermission(
-                                        "Path has no write access to be deleted.\nForcefully obtain and delete it?",
-                                        border_title=item_dict["path"],
-                                    ),
-                                )
-                                if do_what["toggle"]:
-                                    action_on_permission_error = do_what["value"]
-                                action = do_what["value"]
-                            else:
-                                action = action_on_permission_error
-                            match action:
-                                case "force":
-                                    if path_utils.force_obtain_write_permission(
-                                        item_dict["path"]
-                                    ):
-                                        os.remove(item_dict["path"])
-                                case "skip":
-                                    continue
-                                case "cancel":
-                                    bar.panic()
-                                    return
+                            if path_utils.force_obtain_write_permission(
+                                item_dict["path"]
+                            ):
+                                os.remove(item_dict["path"])
                         except Exception as e:
                             do_what = self.app.call_from_thread(
                                 self.app.push_screen_wait,
@@ -313,30 +291,8 @@ class ProcessContainer(VerticalScroll):
                         # error so they create an issue
                         self.app.panic()
                     # fallback for regular permission issues
-                    if action_on_permission_error == "ask":
-                        do_what = self.app.call_from_thread(
-                            self.app.push_screen_wait,
-                            GiveMePermission(
-                                "Path has no write access to be deleted.\nForcefully obtain and delete it?",
-                                border_title=item_dict["path"],
-                            ),
-                        )
-                        if do_what["toggle"]:
-                            action_on_permission_error = do_what["value"]
-                        action = do_what["value"]
-                    else:
-                        action = action_on_permission_error
-                    match action:
-                        case "force":
-                            if path_utils.force_obtain_write_permission(
-                                item_dict["path"]
-                            ):
-                                os.remove(item_dict["path"])
-                        case "skip":
-                            continue
-                        case "cancel":
-                            bar.panic()
-                            return
+                    if path_utils.force_obtain_write_permission(item_dict["path"]):
+                        os.remove(item_dict["path"])
                 except Exception as e:
                     # TODO: should probably let it continue, then have a summary
                     bar.panic(
@@ -594,7 +550,6 @@ class ProcessContainer(VerticalScroll):
         )
 
         do_what_on_existance = "ask"
-        action_on_permission_error = "ask"
         try:
             if not path.exists(destination_path):
                 os.makedirs(destination_path)
@@ -663,30 +618,10 @@ class ProcessContainer(VerticalScroll):
                     try:
                         archive.extract(file, path=destination_path)
                     except PermissionError:
-                        if action_on_permission_error == "ask":
-                            do_what = self.app.call_from_thread(
-                                self.app.push_screen_wait,
-                                GiveMePermission(
-                                    "Path has no write access to be overwritten.\nForcefully obtain and overwrite?",
-                                    border_title=filename,
-                                ),
-                            )
-                            if do_what["toggle"]:
-                                action_on_permission_error = do_what["value"]
-                            action = do_what["value"]
-                        else:
-                            action = action_on_permission_error
-                        match action:
-                            case "force":
-                                if path_utils.force_obtain_write_permission(
-                                    path.join(destination_path, filename)
-                                ):
-                                    archive.extract(file, path=destination_path)
-                            case "skip":
-                                continue
-                            case "cancel":
-                                bar.panic()
-                                return
+                        if path_utils.force_obtain_write_permission(
+                            path.join(destination_path, filename)
+                        ):
+                            archive.extract(file, path=destination_path)
         except (zipfile.BadZipFile, tarfile.TarError, ValueError) as e:
             dismiss_with = {"subtitle": ""}
             if isinstance(e, ValueError) and "Password" in e.__str__():
@@ -763,7 +698,6 @@ class ProcessContainer(VerticalScroll):
             bar.update_progress, total=int(len(files_to_copy) + len(files_to_cut)) + 1
         )
         action_on_existance = "ask"
-        action_on_permission_error = "ask"
         last_update_time = time.monotonic()
         if files_to_copy:
             self.app.call_from_thread(
@@ -843,33 +777,13 @@ class ProcessContainer(VerticalScroll):
                     # OSError from shutil: The destination location must be writable;
                     # otherwise, an OSError exception will be raised
                     # Permission Error just in case
-                    if action_on_permission_error == "ask":
-                        do_what = self.app.call_from_thread(
-                            self.app.push_screen_wait,
-                            GiveMePermission(
-                                "Path has no write access to be overwritten.\nForefully obtain and overwrite?",
-                                border_title=item_dict["relative_loc"],
-                            ),
+                    if path_utils.force_obtain_write_permission(
+                        path.join(dest, item_dict["relative_loc"])
+                    ):
+                        shutil.copy(
+                            item_dict["path"],
+                            path.join(dest, item_dict["relative_loc"]),
                         )
-                        if do_what["toggle"]:
-                            action_on_permission_error = do_what["value"]
-                        action = do_what["value"]
-                    else:
-                        action = action_on_permission_error
-                    match action:
-                        case "force":
-                            if path_utils.force_obtain_write_permission(
-                                path.join(dest, item_dict["relative_loc"])
-                            ):
-                                shutil.copy(
-                                    item_dict["path"],
-                                    path.join(dest, item_dict["relative_loc"]),
-                                )
-                        case "skip":
-                            continue
-                        case "cancel":
-                            bar.panic()
-                            return
                 except FileNotFoundError:
                     # the only way this can happen is if the file is deleted
                     # midway through the process, which means the user is
@@ -887,7 +801,6 @@ class ProcessContainer(VerticalScroll):
                     return
 
         cut_ignore = []
-        action_on_permission_error = "ask"
         last_update_time = time.monotonic()
         if files_to_cut:
             self.app.call_from_thread(
@@ -973,35 +886,13 @@ class ProcessContainer(VerticalScroll):
                     # OSError from shutil: The destination location must be writable;
                     # otherwise, an OSError exception will be raised
                     # Permission Error just in case
-                    if action_on_permission_error == "ask":
-                        do_what = self.app.call_from_thread(
-                            self.app.push_screen_wait,
-                            GiveMePermission(
-                                "Path has no write access to be overwritten.\nForcefully obtain and overwrite?",
-                                border_title=item_dict["relative_loc"],
-                            ),
+                    if path_utils.force_obtain_write_permission(
+                        path.join(dest, item_dict["relative_loc"])
+                    ) and path_utils.force_obtain_write_permission(item_dict["path"]):
+                        shutil.move(
+                            item_dict["path"],
+                            path.join(dest, item_dict["relative_loc"]),
                         )
-                        if do_what["toggle"]:
-                            action_on_permission_error = do_what["value"]
-                        action = do_what["value"]
-                    else:
-                        action = action_on_permission_error
-                    match action:
-                        case "force":
-                            if path_utils.force_obtain_write_permission(
-                                path.join(dest, item_dict["relative_loc"])
-                            ) and path_utils.force_obtain_write_permission(
-                                item_dict["path"]
-                            ):
-                                shutil.move(
-                                    item_dict["path"],
-                                    path.join(dest, item_dict["relative_loc"]),
-                                )
-                        case "skip":
-                            continue
-                        case "cancel":
-                            bar.panic()
-                            return
                 except FileNotFoundError:
                     # the only way this can happen is if the file is deleted
                     # midway through the process, which means the user is

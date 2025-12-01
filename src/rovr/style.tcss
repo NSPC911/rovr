@@ -719,52 +719,6 @@ CommonFileNameDoWhat {
   }
 }
 
-GiveMePermission {
-  align: center middle;
-  #dialog {
-    grid-size: 2;
-    grid-gutter: 1 2;
-    grid-rows: 2 3 3 1; /* need the two lines for the label */
-    padding: 1 3;
-    border: $border-style $border;
-    max-height: 16;
-  }
-  #question_container {
-    column-span: 2;
-    height: 1fr;
-    width: 1fr;
-    content-align: center middle;
-    .question {
-      content-align: center middle;
-      width: 1fr;
-      height: 1fr;
-      text-align: center;
-    }
-  }
-  Button { width: 100% }
-  HorizontalGroup {
-    column-span: 2;
-    align: center middle;
-    Button#cancel { width: 50% }
-  }
-  #dontAskAgain {
-    column-span: 2;
-    content-align: center middle;
-    align: center middle;
-    Switch {
-      border: none;
-      padding: 0;
-      background: transparent;
-      margin: 0 2 0 0;
-      &:focus {
-        border: none;
-        & > .switch--slider { color: $panel-lighten-1 }
-        &.-on > .switch--slider { color: $success-lighten-1 }
-      }
-    }
-  }
-}
-
 FileInUse {
    align: center middle;
    #dialog {

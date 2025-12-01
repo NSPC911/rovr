@@ -336,6 +336,7 @@ class PreviewContainer(Container):
         text_to_display = highlight(
             text_to_display,
             language=guess_language(text_to_display, path=self._current_file_path),
+            tab_size=4,
         )
 
         if should_cancel():

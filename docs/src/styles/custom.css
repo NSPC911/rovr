@@ -213,7 +213,7 @@ img {
     margin-inline: 0 !important;
   }
   .content-panel {
-    max-width: calc(100vw - 525px)
+    max-width: calc(100vw - 525px);
   }
 }
 @media (min-width: 50rem) {

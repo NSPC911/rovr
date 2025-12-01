@@ -1,4 +1,4 @@
-from os import path, access, R_OK
+from os import R_OK, access, path
 from typing import ClassVar
 
 from textual import events
@@ -79,7 +79,7 @@ class PinnedSidebar(OptionList, inherit_bindings=False):
             try:
                 pin["path"]
             except KeyError:
-                break
+                continue
             if not isinstance(pin["path"], str):
                 continue
             if not path.isdir(pin["path"]):

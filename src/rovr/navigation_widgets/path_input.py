@@ -23,7 +23,8 @@ def path_input_sort_key(item: PathDropdownItem) -> tuple[bool, bool, str]:
         item: The PathDropdownItem to get a sort key for.
 
     Returns:
-        A tuple of (is_file, is_dotfile, lowercase_name) for sorting.
+        A tuple of (is_file, is_non_dotfile, lowercase_name) for sorting.
+        Directories sort before files, non-dotfiles before dotfiles, then alphabetically.
     """
     name = item.path.name
     is_dotfile = name.startswith(".")

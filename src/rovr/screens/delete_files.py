@@ -4,6 +4,7 @@ from textual.containers import Container, Grid
 from textual.screen import ModalScreen
 from textual.widgets import Button, Label
 
+from rovr.functions.utils import check_key
 from rovr.variables.constants import config
 
 
@@ -32,16 +33,18 @@ class DeleteFiles(ModalScreen):
 
     def on_key(self, event: events.Key) -> None:
         """Handle key presses."""
-        match event.key.lower():
-            case "x":
-                event.stop()
-                self.dismiss("delete")
-            case "c" | "escape":
-                event.stop()
-                self.dismiss("cancel")
-            case "d" if config["settings"]["use_recycle_bin"]:
-                event.stop()
-                self.dismiss("trash")
+        if check_key(event, config["keybinds"]["delete_files"]["delete"]):
+            event.stop()
+            self.dismiss("delete")
+        elif check_key(event, config["keybinds"]["delete_files"]["cancel"]):
+            event.stop()
+            self.dismiss("cancel")
+        elif (
+            check_key(event, config["keybinds"]["delete_files"]["trash"])
+            and config["settings"]["use_recycle_bin"]
+        ):
+            event.stop()
+            self.dismiss("trash")
 
     def on_click(self, event: events.Click) -> None:
         if event.widget is self:

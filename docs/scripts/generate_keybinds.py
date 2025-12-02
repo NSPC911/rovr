@@ -25,7 +25,11 @@ try:
         binds: dict = toml.load(file)["keybinds"]
     with open("src/rovr/config/schema.json", "r", encoding="utf-8") as file:
         schema: dict = ujson.load(file)["properties"]["keybinds"]["properties"]
+    sub_keys: dict[str, dict] = {}
     for key, values in schema.items():
+        if isinstance(binds[key], dict):
+            sub_keys[key] = values
+            continue
         to_add = "\n| "
         to_add += key
         to_add += " |"
@@ -35,6 +39,7 @@ try:
         to_add += values["display_name"]
         to_add += " |"
         page += to_add
+    # handle subkeys now thanks
     with open(
         "docs/src/content/docs/reference/keybindings.mdx", "w", encoding="utf-8"
     ) as file:

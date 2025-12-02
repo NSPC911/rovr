@@ -192,3 +192,23 @@ class classproperty:  # noqa: N801
 
     def __get__(self, instance: Any, owner: Any) -> Any:  # noqa: ANN401
         return self.func(owner)
+
+
+async def is_archive(path_str: str) -> bool:
+    from rovr.functions.path import get_mime_type, match_mime_to_preview_type
+    from rovr.variables.constants import config, file_executable
+    from rovr.variables.maps import ARCHIVE_EXTENSIONS_FULL
+
+    if config["plugins"]["file_one"]["enabled"] and file_executable is not None:
+        mime_type = await get_mime_type(path_str)
+        if mime_type is None:
+            return path_str.lower().endswith(ARCHIVE_EXTENSIONS_FULL)
+        if (
+            match_mime_to_preview_type(
+                mime_type, config["plugins"]["file_one"]["mime_rules"]
+            )
+            == "archive"
+        ):
+            return True
+
+    return path_str.lower().endswith(ARCHIVE_EXTENSIONS_FULL)

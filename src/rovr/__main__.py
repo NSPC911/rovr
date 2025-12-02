@@ -3,13 +3,10 @@ try:
 
     import rich_click as click
     from rich import box
+    from rich.console import Console
     from rich.table import Table
 
-    from rovr.functions.config import apply_mode, get_version
-    from rovr.functions.path import normalise
-    from rovr.functions.utils import pprint, set_nested_value
-    from rovr.variables.constants import config
-    from rovr.variables.maps import VAR_TO_DIR
+    pprint = Console().print
 
     click.rich_click.USE_RICH_MARKUP = True
     click.rich_click.USE_MARKDOWN = False
@@ -133,25 +130,24 @@ try:
         tree_dom: bool,
     ) -> None:
         """A post-modern terminal file explorer"""
-
-        if mode:
-            apply_mode(config, mode)
-
-        for feature_path in with_features:
-            set_nested_value(config, feature_path, True)
-
-        for feature_path in without_features:
-            set_nested_value(config, feature_path, False)
+        from rovr.variables.maps import VAR_TO_DIR
 
         if show_config_path:
             from pathlib import Path
+
+            def _normalise(location: str | bytes) -> str:
+                from os import path
+
+                return (
+                    str(path.normpath(location)).replace("\\", "/").replace("//", "/")
+                )
 
             table = Table(title="", border_style="blue", box=box.ROUNDED)
             table.add_column("type")
             table.add_column("path")
             path_config = Path(VAR_TO_DIR["CONFIG"])
             if path_config.is_relative_to(Path.home()):
-                config_path = "~/" + normalise(
+                config_path = "~/" + _normalise(
                     str(path_config.relative_to(Path.home()))
                 )
             else:
@@ -163,8 +159,35 @@ try:
             pprint(table)
             return
         elif show_version:
-            pprint(f"rovr version [cyan]v{get_version()}[/]")
+
+            def _get_version() -> str:
+                """Get version from package metadata
+
+                Returns:
+                    str: Current version
+                """
+                from importlib.metadata import PackageNotFoundError, version
+
+                try:
+                    return version("rovr")
+                except PackageNotFoundError:
+                    return "master"
+
+            pprint(f"rovr version [cyan]v{_get_version()}[/]")
             return
+
+        from rovr.functions.config import apply_mode
+        from rovr.functions.utils import set_nested_value
+        from rovr.variables.constants import config
+
+        if mode:
+            apply_mode(config, mode)
+
+        for feature_path in with_features:
+            set_nested_value(config, feature_path, True)
+
+        for feature_path in without_features:
+            set_nested_value(config, feature_path, False)
 
         from rovr.app import Application
 

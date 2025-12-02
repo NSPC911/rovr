@@ -8,12 +8,11 @@ from textual.containers import VerticalGroup
 from textual.screen import ModalScreen
 from textual.widgets import Input, OptionList
 from textual.widgets.option_list import Option
-from textual.worker import WorkerCancelled
+from textual.worker import Worker, WorkerCancelled, get_current_worker
 
 from rovr.classes.textual_options import ModalSearcherOption
 from rovr.functions import path as path_utils
 from rovr.functions.icons import get_icon_for_file, get_icon_for_folder
-from rovr.functions.utils import should_cancel
 from rovr.variables.constants import config
 
 
@@ -40,8 +39,7 @@ class FileSearch(ModalScreen):
 
     def __init__(self, **kwargs) -> None:
         super().__init__(**kwargs)
-        self._queued_task = None
-        self._queued_task_args: Input.Changed | None = None
+        self._active_worker: Worker | None = None
 
     def compose(self) -> ComposeResult:
         with VerticalGroup(id="file_search_group", classes="file_search_group"):
@@ -69,9 +67,10 @@ class FileSearch(ModalScreen):
     def on_input_changed(self, event: Input.Changed) -> None:
         self.fd_updater(event=event)
 
-    @work(exclusive=True)
+    @work
     async def fd_updater(self, event: Input.Changed) -> None:
         """Update the list using fd based on the search term."""
+        self._active_worker = get_current_worker()
         search_term = event.value.strip()
         fd_exec = config["plugins"]["finder"]["executable"]
 
@@ -125,6 +124,8 @@ class FileSearch(ModalScreen):
                 options: list[ModalSearcherOption] = await worker.wait()
             except WorkerCancelled:
                 return  # anyways
+            if self._active_worker is not get_current_worker():
+                return  # another worker has taken over
             if options is None:
                 return
             self.search_options.clear_options()
@@ -203,7 +204,7 @@ class FileSearch(ModalScreen):
         else:
             self.search_options.border_subtitle = f"{str(self.search_options.highlighted + 1)}/{self.search_options.option_count}"
 
-    @work(thread=True)
+    @work(thread=True, exit_on_error=False)
     def create_options(self, stdout: str) -> list[ModalSearcherOption] | None:
         options: list[ModalSearcherOption] = []
         for line in stdout.splitlines():
@@ -224,6 +225,10 @@ class FileSearch(ModalScreen):
                     file_path_str,
                 )
             )
-            if should_cancel():
-                return
         return options
+
+    def on_click(self, event: events.Click) -> None:
+        if event.widget is self:
+            # ie click outside
+            event.stop()
+            self.dismiss("")

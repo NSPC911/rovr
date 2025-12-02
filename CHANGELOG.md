@@ -1,4 +1,29 @@
-# Unreleased
+# [v0.6.0.dev2]
+
+## breaking changes
+- cd-on-quit: remove match type key 32a389f
+
+## new features
+- preview: add support for using file(1) #157
+
+## fixes
+- screens: add click to exit modal screen d84e9a8
+- finder: use pseudo exclusive worker to prevent error spam c9a7741
+- archive: just gamble which archive type it is 7fe26f6
+- cli: don't load everything when using certain functions 18558b9
+
+## perf
+- icons: use fnmatch instead of using scuffed methods 4c848a1
+- preview: use pygments instead of tree-sitter e95350f
+
+## style
+- fix errors related to ty alpha 28 ce59c07
+
+## docs
+- cd-on-quit: use more robust functions 32a389f
+
+## removed features
+- process + screens: remove permission asker modal 8caa4f9
 
 # [v0.6.0.dev1]
 
@@ -11,7 +36,7 @@
 - feat(editor): add config to suspend when opening editor ed605da
 - feat(editor): add config to open all files in the editor 8189699
 - feat(preview): add pdf preview support with poppler #153
-- perf(preview): open image in thread 7b0e2cd
+- perf(preview): open image in thread db617a0
 
 # [v0.5.0]
 

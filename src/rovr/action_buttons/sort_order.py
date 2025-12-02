@@ -1,8 +1,9 @@
 from textual import events, on
 from textual.css.query import NoMatches
-from textual.widgets import Button, OptionList, SelectionList
+from textual.widgets import Button, OptionList
 from textual.widgets.option_list import Option
 
+from rovr.components import PopupOptionList
 from rovr.functions.icons import get_icon, get_toggle_button_icon
 from rovr.variables.constants import config
 
@@ -69,16 +70,16 @@ class SortOrderButton(Button):
         popup_widget.focus()
 
 
-class SortOrderPopup(OptionList):
+class SortOrderPopup(PopupOptionList):
     def __init__(self) -> None:
         super().__init__()
         self.do_adjust: bool = False
 
     def on_mount(self) -> None:
-        self.styles.layer = "overlay"
-        self.file_list: SelectionList = self.app.query_one("#file_list", SelectionList)
         self.button: SortOrderButton = self.app.query_one(SortOrderButton)
         self.styles.scrollbar_size_vertical = 0
+        # calling super()._on_mount is useless, and super().mount()
+        # doesnt do anything significant
 
     @on(events.Show)
     def on_show(self, event: events.Show) -> None:
@@ -124,12 +125,6 @@ class SortOrderPopup(OptionList):
                 (self.app.size.height - 9) // 2,
             )
 
-    @on(events.MouseMove)
-    def highlight_follow_mouse(self, event: events.MouseMove) -> None:
-        hovered_option: int | None = event.style.meta.get("option")
-        if hovered_option is not None and not self._options[hovered_option].disabled:
-            self.highlighted = hovered_option
-
     def on_option_list_option_selected(self, event: OptionList.OptionSelected) -> None:
         if event.option.id == "descending":
             self.file_list.sort_descending = not self.file_list.sort_descending
@@ -139,11 +134,7 @@ class SortOrderPopup(OptionList):
         self.button.update_icon()
 
     async def on_key(self, event: events.Key) -> None:
-        # Close menu on Escape
         match event.key.lower():
-            case "escape":
-                self.go_hide()
-                return
             case "a":
                 self.highlighted = self.get_option_index("name")
             case "e":
@@ -162,11 +153,3 @@ class SortOrderPopup(OptionList):
                 return
         event.stop()
         self.action_select()
-
-    @on(events.Blur)
-    def on_blur(self, event: events.Blur) -> None:
-        self.go_hide()
-
-    def go_hide(self) -> None:
-        self.add_class("hidden")
-        self.file_list.focus()

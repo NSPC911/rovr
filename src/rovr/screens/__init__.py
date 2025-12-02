@@ -5,7 +5,6 @@ from .delete_files import DeleteFiles
 from .dismissable import Dismissable
 from .file_in_use import FileInUse
 from .file_search import FileSearch
-from .give_permission import GiveMePermission
 from .input import ModalInput
 from .keybinds import Keybinds
 from .way_too_small import TerminalTooSmall
@@ -26,7 +25,6 @@ __all__ = [
     "YesOrNo",
     "ZDToDirectory",
     "FileSearch",
-    "GiveMePermission",
     "FileInUse",
     "DummyScreen",
     "TerminalTooSmall",

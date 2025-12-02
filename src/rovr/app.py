@@ -7,7 +7,7 @@ from typing import Callable, Iterable
 
 from rich.console import Console
 from textual import events, on, work
-from textual.app import WINDOWS, App, ComposeResult, SystemCommand
+from textual.app import WINDOWS, App, ComposeResult, ScreenStackError, SystemCommand
 from textual.binding import Binding
 from textual.color import ColorParseError
 from textual.containers import (
@@ -37,6 +37,7 @@ from rovr.action_buttons import (
     ZipButton,
 )
 from rovr.action_buttons.sort_order import SortOrderButton, SortOrderPopup
+from rovr.components import SearchInput
 from rovr.core import FileList, FileListContainer, PinnedSidebar, PreviewContainer
 from rovr.core.file_list import FileListRightClickOptionList
 from rovr.footer import Clipboard, MetadataContainer, ProcessContainer
@@ -59,7 +60,6 @@ from rovr.navigation_widgets import (
 )
 from rovr.screens import DummyScreen, FileSearch, Keybinds, YesOrNo, ZDToDirectory
 from rovr.screens.way_too_small import TerminalTooSmall
-from rovr.search_container import SearchInput
 from rovr.state_manager import StateManager
 from rovr.variables.constants import MaxPossible, config
 from rovr.variables.maps import VAR_TO_DIR
@@ -159,14 +159,10 @@ class Application(App, inherit_bindings=False):
                         placeholder=f"{icons.get_icon('general', 'search')[0]} Search"
                     )
                     yield PinnedSidebar(id="pinned_sidebar")
-                filelistcontainer = FileListContainer()
-                yield filelistcontainer
+                yield FileListContainer()
                 yield PreviewContainer(
                     id="preview_sidebar",
                 )
-            yield FileListRightClickOptionList(
-                filelistcontainer.filelist, classes="hidden"
-            )
             with HorizontalGroup(id="footer"):
                 yield ProcessContainer()
                 yield MetadataContainer(id="metadata")
@@ -511,7 +507,7 @@ class Application(App, inherit_bindings=False):
     @work(thread=True)
     def watch_for_changes_and_update(self) -> None:
         cwd = getcwd()
-        file_list = self.query_one(FileList)
+        file_list: FileList = self.query_one(FileList)
         pins_path = path.join(VAR_TO_DIR["CONFIG"], "pins.json")
         pins_mtime = None
         with suppress(OSError):
@@ -529,24 +525,26 @@ class Application(App, inherit_bindings=False):
             if count >= drive_update_every:
                 count = 0
             new_cwd = getcwd()
-            if not path.exists(new_cwd):
-                file_list.update_file_list(add_to_session=False)
-            elif cwd != new_cwd:
-                cwd = new_cwd
-                continue
-            elif not self.file_list_pause_check:
-                with suppress(OSError):
-                    # this is weird, so `get_filtered_dir_names` is a sync
-                    # function, so `call_from_thread` shouldn't be required
-                    # but without it, this thread goes in a limbo state where
-                    # after quiting, it still runs this, so the app never quits
-                    items = self.call_from_thread(
-                        get_filtered_dir_names,
-                        cwd,
-                        config["settings"]["show_hidden_files"],
-                    )
-                if items != file_list.items_in_cwd:
-                    self.cd(cwd)
+            if not self.file_list_pause_check:
+                if not path.exists(new_cwd):
+                    file_list.update_file_list(add_to_session=False)
+                elif cwd != new_cwd:
+                    cwd = new_cwd
+                    continue
+                else:
+                    items = None
+                    with suppress(OSError):
+                        # this is weird, so `get_filtered_dir_names` is a sync
+                        # function, so `call_from_thread` shouldn't be required
+                        # but without it, this thread goes in a limbo state where
+                        # after quiting, it still runs this, so the app never quits
+                        items: set[str] = self.call_from_thread(
+                            get_filtered_dir_names,
+                            cwd,
+                            config["settings"]["show_hidden_files"],
+                        )
+                    if items is not None and items != file_list.items_in_cwd:
+                        self.cd(cwd)
             # check pins.json
             new_mtime = None
             reload_called: bool = False
@@ -592,8 +590,14 @@ class Application(App, inherit_bindings=False):
             or event.size.width < MaxPossible.width
         ) and not self.has_pushed_screen:
             self.has_pushed_screen = True
-            await self.push_screen_wait(TerminalTooSmall())
+            await self.push_screen(TerminalTooSmall())
             self.has_pushed_screen = False
+        else:
+            with suppress(ScreenStackError):
+                if len(self.screen_stack) > 1 and isinstance(
+                    self.screen_stack[-1], TerminalTooSmall
+                ):
+                    self.pop_screen()
         self.hide_popups()
 
     async def _on_css_change(self) -> None:

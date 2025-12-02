@@ -55,3 +55,6 @@ class TerminalTooSmall(ModalScreen):
 
     def on_key(self, event: events.Key) -> None:
         event.stop()
+
+    def on_click(self, event: events.Click) -> None:
+        event.stop()

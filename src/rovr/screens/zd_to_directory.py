@@ -270,3 +270,9 @@ class ZDToDirectory(ModalScreen):
             if should_cancel():
                 return
         return options
+
+    def on_click(self, event: events.Click) -> None:
+        if event.widget is self:
+            # ie click outside
+            event.stop()
+            self.dismiss(None)

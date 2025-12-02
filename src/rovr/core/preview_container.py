@@ -4,7 +4,6 @@ import tarfile
 import zipfile
 from dataclasses import dataclass
 from os import path
-from typing import ClassVar
 
 import textual_image.widget as timg
 from pdf2image import convert_from_path
@@ -13,142 +12,24 @@ from PIL.Image import Image as PILImage
 from rich.text import Text
 from textual import events, on, work
 from textual.app import ComposeResult
-from textual.binding import Binding, BindingType
 from textual.containers import Container
 from textual.css.query import NoMatches
+from textual.highlight import guess_language, highlight
 from textual.message import Message
-from textual.widgets import Static, TextArea
+from textual.widgets import Static
 from textual.worker import Worker, WorkerCancelled, WorkerError
 
 from rovr.classes import Archive
 from rovr.core import FileList
+from rovr.functions.path import get_mime_type, match_mime_to_preview_type
 from rovr.functions.utils import should_cancel
-from rovr.variables.constants import PreviewContainerTitles, config
+from rovr.variables.constants import PreviewContainerTitles, config, file_executable
 from rovr.variables.maps import (
     ARCHIVE_EXTENSIONS_FULL,
-    EXT_TO_LANG_MAP,
     PIL_EXTENSIONS,
 )
 
 titles = PreviewContainerTitles()
-
-
-class CustomTextArea(TextArea, inherit_bindings=False):
-    BINDINGS: ClassVar[list[BindingType]] = (
-        # Bindings from config
-        [
-            Binding(bind, "cursor_up", "Cursor up", show=False)
-            for bind in config["keybinds"]["up"]
-        ]
-        + [
-            Binding(bind, "cursor_down", "Cursor down", show=False)
-            for bind in config["keybinds"]["down"]
-        ]
-        + [
-            Binding(bind, "cursor_left", "Cursor left", show=False)
-            for bind in config["keybinds"]["preview_scroll_left"]
-        ]
-        + [
-            Binding(bind, "cursor_right", "Cursor right", show=False)
-            for bind in config["keybinds"]["preview_scroll_right"]
-        ]
-        + [
-            Binding(bind, "cursor_line_start", "Cursor line start", show=False)
-            for bind in config["keybinds"]["home"]
-        ]
-        + [
-            Binding(bind, "cursor_line_end", "Cursor line end", show=False)
-            for bind in config["keybinds"]["end"]
-        ]
-        + [
-            Binding(bind, "cursor_page_up", "Cursor page up", show=False)
-            for bind in config["keybinds"]["page_up"]
-        ]
-        + [
-            Binding(bind, "cursor_page_down", "Cursor page down", show=False)
-            for bind in config["keybinds"]["page_down"]
-        ]
-        + [
-            Binding(bind, "cursor_up(True)", "Cursor up select", show=False)
-            for bind in config["keybinds"]["select_up"]
-        ]
-        + [
-            Binding(bind, "cursor_down(True)", "Cursor down select", show=False)
-            for bind in config["keybinds"]["select_down"]
-        ]
-        + [
-            Binding(
-                bind, "cursor_line_start(True)", "Cursor line start select", show=False
-            )
-            for bind in config["keybinds"]["select_home"]
-        ]
-        + [
-            Binding(bind, "cursor_line_end(True)", "Cursor line end select", show=False)
-            for bind in config["keybinds"]["select_end"]
-        ]
-        + [
-            Binding(bind, "cursor_page_up(True)", "Cursor page up select", show=False)
-            for bind in config["keybinds"]["select_page_up"]
-        ]
-        + [
-            Binding(
-                bind, "cursor_page_down(True)", "Cursor page down select", show=False
-            )
-            for bind in config["keybinds"]["select_page_down"]
-        ]
-        + [
-            Binding(bind, "select_all", "Select all", show=False)
-            for bind in config["keybinds"]["toggle_all"]
-        ]
-        + [
-            Binding(bind, "delete_right", "Delete character right", show=False)
-            for bind in config["keybinds"]["delete"]
-        ]
-        + [
-            Binding(bind, "cut", "Cut", show=False)
-            for bind in config["keybinds"]["cut"]
-        ]
-        + [
-            Binding(bind, "copy", "Copy", show=False)
-            for bind in config["keybinds"]["copy"]
-        ]
-        + [
-            Binding(bind, "paste", "Paste", show=False)
-            for bind in config["keybinds"]["paste"]
-        ]
-        + [
-            Binding(bind, "cursor_right(True)", "Select right", show=False)
-            for bind in config["keybinds"]["preview_select_right"]
-        ]
-        + [
-            Binding(bind, "cursor_left(True)", "Select left", show=False)
-            for bind in config["keybinds"]["preview_select_left"]
-        ]
-        # Hardcoded bindings
-        + [
-            Binding("ctrl+left", "cursor_word_left", "Cursor word left", show=False),
-            Binding("ctrl+right", "cursor_word_right", "Cursor word right", show=False),
-            Binding(
-                "shift+left", "cursor_left(True)", "Cursor left select", show=False
-            ),
-            Binding(
-                "shift+right", "cursor_right(True)", "Cursor right select", show=False
-            ),
-            Binding(
-                "ctrl+shift+left",
-                "cursor_word_left(True)",
-                "Cursor left word select",
-                show=False,
-            ),
-            Binding(
-                "ctrl+shift+right",
-                "cursor_word_right(True)",
-                "Cursor right word select",
-                show=False,
-            ),
-            Binding("f6", "select_line", "Select line", show=False),
-        ]
-    )
 
 
 @dataclass
@@ -175,6 +56,7 @@ class PreviewContainer(Container):
         self._current_file_path = None
         self._initial_height = self.size.height
         self._file_type: str = "none"
+        self._mime_type: str | None = None
         self._preview_texts: list[str] = config["interface"]["preview_text"].values()
         self.pdf = PDFHandler()
 
@@ -219,14 +101,9 @@ class PreviewContainer(Container):
             async with self.batch():
                 await self.remove_children()
                 await self.mount(
-                    CustomTextArea(
+                    Static(
+                        "Cannot render image (is the encoding wrong?)",
                         id="text_preview",
-                        show_line_numbers=False,
-                        soft_wrap=True,
-                        read_only=True,
-                        text="Cannot render image (is the encoding wrong?)",
-                        language="markdown",
-                        compact=True,
                     )
                 )
             return
@@ -236,14 +113,9 @@ class PreviewContainer(Container):
             async with self.batch():
                 await self.remove_children()
                 await self.mount(
-                    CustomTextArea(
+                    Static(
+                        config["interface"]["preview_text"]["error"],
                         id="text_preview",
-                        show_line_numbers=False,
-                        soft_wrap=True,
-                        read_only=True,
-                        text=config["interface"]["preview_text"]["error"],
-                        language="markdown",
-                        compact=True,
                     )
                 )
             return
@@ -312,14 +184,9 @@ class PreviewContainer(Container):
                     return
                 await self.remove_children()
                 await self.mount(
-                    CustomTextArea(
+                    Static(
+                        f"{type(exc).__name__}: {str(exc)}",
                         id="text_preview",
-                        show_line_numbers=False,
-                        soft_wrap=True,
-                        read_only=True,
-                        text=f"{type(exc).__name__}: {str(exc)}",
-                        language="markdown",
-                        compact=True,
                     )
                 )
                 return
@@ -455,7 +322,7 @@ class PreviewContainer(Container):
                 lines = lines[:max_lines]
         else:
             lines = []
-        max_width = self.size.width - 7
+        max_width = self.size.width * 2
         if max_width > 0:
             processed_lines = []
             for line in lines:
@@ -465,47 +332,33 @@ class PreviewContainer(Container):
                     processed_lines.append(line)
             lines = processed_lines
         text_to_display = "\n".join(lines)
-
-        if should_cancel():
-            return
-
-        is_special_content = self._current_content in (
-            config["interface"]["preview_text"]["binary"],
-            config["interface"]["preview_text"]["error"],
-        )
-        language = (
-            "markdown"
-            if is_special_content
-            else EXT_TO_LANG_MAP.get(
-                path.splitext(self._current_file_path)[1],
-                "markdown",
-            )
+        # add syntax highlighting
+        text_to_display = highlight(
+            text_to_display,
+            language=guess_language(text_to_display, path=self._current_file_path),
+            tab_size=4,
         )
 
         if should_cancel():
             return
 
-        if not self.has_child("CustomTextArea"):
+        if should_cancel():
+            return
+
+        if not self.has_child("Static"):
             await self.remove_children()
 
             if should_cancel():
                 return
 
             await self.mount(
-                CustomTextArea(
+                Static(
+                    text_to_display,
                     id="text_preview",
-                    show_line_numbers=config["interface"]["show_line_numbers"],
-                    soft_wrap=False,
-                    read_only=True,
-                    text=text_to_display,
-                    language=language,
-                    classes="inner_preview",
                 )
             )
         else:
-            text_area: CustomTextArea = self.query_one(CustomTextArea)
-            text_area.text = text_to_display
-            text_area.language = language
+            self.query_one(Static).update(text_to_display)
 
         if should_cancel():
             return
@@ -607,23 +460,45 @@ class PreviewContainer(Container):
             self.pdf.current_page = 0
             self.pdf.total_pages = 0
 
+        mime_type: str | None = None
+
         if path.isdir(file_path):
             self.app.call_from_thread(
                 self.update_ui, file_path=file_path, file_type="folder"
             )
         else:
-            lower_file_path = file_path.lower()
-            if (
-                lower_file_path.endswith(".pdf")
-                and config["plugins"]["poppler"]["enabled"]
-            ):
-                file_type = "pdf"
-            elif any(lower_file_path.endswith(ext) for ext in PIL_EXTENSIONS):
-                file_type = "image"
-            elif any(lower_file_path.endswith(ext) for ext in ARCHIVE_EXTENSIONS_FULL):
-                file_type = "archive"
-            else:
-                file_type = "file"
+            file_type: str | None = None
+
+            if config["plugins"]["file_one"]["enabled"] and file_executable is not None:
+                if should_cancel():
+                    return
+                mime_type = self.app.call_from_thread(get_mime_type, file_path)
+                if mime_type is not None:
+                    file_type = match_mime_to_preview_type(
+                        mime_type,
+                        config["plugins"]["file_one"]["mime_rules"],
+                    )
+                    if (
+                        file_type == "pdf"
+                        and not config["plugins"]["poppler"]["enabled"]
+                    ):
+                        file_type = "file"
+
+            if file_type is None:
+                lower_file_path = file_path.lower()
+                if (
+                    lower_file_path.endswith(".pdf")
+                    and config["plugins"]["poppler"]["enabled"]
+                ):
+                    file_type = "pdf"
+                elif any(lower_file_path.endswith(ext) for ext in PIL_EXTENSIONS):
+                    file_type = "image"
+                elif any(
+                    lower_file_path.endswith(ext) for ext in ARCHIVE_EXTENSIONS_FULL
+                ):
+                    file_type = "archive"
+                else:
+                    file_type = "file"
 
             content = None
 
@@ -699,6 +574,7 @@ class PreviewContainer(Container):
                 file_path,
                 file_type=file_type,
                 content=content,
+                mime_type=mime_type,
             )
 
         if should_cancel():
@@ -710,12 +586,14 @@ class PreviewContainer(Container):
         file_path: str,
         file_type: str,
         content: str | list[str] | None = None,
+        mime_type: str | None = None,
     ) -> None:
         """
         Update the preview UI. This runs on the main thread.
         """
         self._current_file_path = file_path
         self._current_content = content
+        self._mime_type = mime_type
 
         self._file_type = file_type
         self.remove_class("pdf")
@@ -743,14 +621,26 @@ class PreviewContainer(Container):
         self.border_title = ""
         if should_cancel():
             return
+
+        assert isinstance(self._current_content, str)
+
+        display_content: str = self._current_content
+        if (
+            self._current_content == config["interface"]["preview_text"]["binary"]
+            and self._mime_type is not None
+        ):
+            display_content = (
+                f"{self._current_content}\n\n[dim]MIME type: {self._mime_type}[/]"
+            )
+
         if self.has_child("Static"):
             static_widget: Static = self.query_one(Static)
-            static_widget.update(self._current_content)
+            static_widget.update(display_content)
         else:
             await self.remove_children()
             if should_cancel():
                 return
-            static_widget = Static(self._current_content)
+            static_widget = Static(display_content)
             await self.mount(static_widget)
         static_widget.can_focus = True
         static_widget.classes = "special"
@@ -774,10 +664,8 @@ class PreviewContainer(Container):
                 await self.show_pdf_preview()
 
     async def on_resize(self, event: events.Resize) -> None:
-        """Re-render the preview on resize if it's was rendered by batcat and height changed."""
-        if (
-            self.has_child("Static") and event.size.height != self._initial_height
-        ) or self.has_child("CustomTextArea"):
+        """Re-render the preview on resize"""
+        if self.has_child("Static") and event.size.height != self._initial_height:
             if self._current_content is not None:
                 is_special_content = self._current_content in self._preview_texts
                 if (

@@ -59,7 +59,7 @@ class KeybindList(OptionList, inherit_bindings=False):
         # Generate keybind data programmatically
         keybind_data: list[tuple[str, str]] = []
         primary_keys: list[str] = []
-        subkeys: list[tuple[str, dict[str, str]]] = []
+        subkeys: list[tuple[str, dict[str, list[str] | str]]] = []
         keybinds_schema = schema["properties"]["keybinds"]["properties"]
         for action, keys in config["keybinds"].items():
             if isinstance(keys, dict):

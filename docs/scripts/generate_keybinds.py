@@ -2,7 +2,7 @@ from shutil import which
 from subprocess import CalledProcessError, run
 from time import perf_counter
 
-import toml
+import tomli
 import ujson
 from humanize import precisedelta
 from rich.console import Console
@@ -23,8 +23,8 @@ this page provides a comprehensive list of the default keybindings in `rovr`. yo
 | action | default hotkey | description |
 | ------ | -------------- | ----------- |"""
 try:
-    with open("src/rovr/config/config.toml", "r", encoding="utf-8") as file:
-        binds: dict = toml.load(file)["keybinds"]
+    with open("src/rovr/config/config.toml", "rb", encoding="utf-8") as file:
+        binds: dict = tomli.load(file)["keybinds"]
     with open("src/rovr/config/schema.json", "r", encoding="utf-8") as file:
         sub_schema: dict = ujson.load(file)["properties"]["keybinds"]["properties"]
     sub_schemas: dict[str, dict] = {}

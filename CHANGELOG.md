@@ -1,3 +1,8 @@
+# Unreleased
+
+## new features
+- config: allow changing bindings for screen layers #161
+
 # [v0.6.0.dev2]
 
 ## breaking changes

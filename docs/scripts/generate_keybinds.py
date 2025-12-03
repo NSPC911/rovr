@@ -18,23 +18,48 @@ description: A reference for all default keybindings in rovr.
 
 this page provides a comprehensive list of the default keybindings in `rovr`. you can customize these keybindings in your `config.toml` file.
 
+## main bindings
+
 | action | default hotkey | description |
 | ------ | -------------- | ----------- |"""
 try:
     with open("src/rovr/config/config.toml", "r", encoding="utf-8") as file:
         binds: dict = toml.load(file)["keybinds"]
     with open("src/rovr/config/schema.json", "r", encoding="utf-8") as file:
-        schema: dict = ujson.load(file)["properties"]["keybinds"]["properties"]
-    for key, values in schema.items():
-        to_add = "\n| "
-        to_add += key
-        to_add += " |"
+        sub_schema: dict = ujson.load(file)["properties"]["keybinds"]["properties"]
+    sub_schemas: dict[str, dict] = {}
+    sub_keys: dict[str, dict] = {}
+    for key, values in sub_schema.items():
+        if isinstance(binds[key], dict):
+            sub_schemas[key] = values
+            sub_keys[key] = binds[key]
+            continue
+        elif isinstance(binds[key], str):
+            binds[key] = [binds[key]]
+        to_add = f"\n| {key} |"
         for bind in binds[key]:
             to_add += f" <kbd>{bind}</kbd>"
-        to_add += " | "
-        to_add += values["display_name"]
-        to_add += " |"
+        to_add += f" | {values['display_name']} |"
         page += to_add
+    page += """
+## alternate layers
+"""
+    for layer, sub_schema in sub_schemas.items():
+        page += f"""
+### `{layer}`
+{sub_schema["description"]}
+
+| action | default hotkey | description |
+| ------ | -------------- | ----------- |"""
+        for key, values in sub_schema["properties"].items():
+            to_add = f"\n| {key} |"
+            if isinstance(sub_keys[layer][key], str):
+                sub_keys[layer][key] = [sub_keys[layer][key]]
+            for bind in sub_keys[layer][key]:
+                to_add += f" <kbd>{bind}</kbd>"
+            to_add += f" | {values['display_name']} |"
+            page += to_add
+    # handle subkeys now thanks
     with open(
         "docs/src/content/docs/reference/keybindings.mdx", "w", encoding="utf-8"
     ) as file:

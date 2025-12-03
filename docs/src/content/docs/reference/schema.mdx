@@ -126,6 +126,29 @@ description: config schema humanified
   - [7.52. Property `Rovr Config > keybinds > quit_app`](#keybinds_quit_app)
   - [7.53. Property `Rovr Config > keybinds > command_palette`](#keybinds_command_palette)
   - [7.54. Property `Rovr Config > keybinds > suspend_app`](#keybinds_suspend_app)
+  - [7.55. Property `Rovr Config > keybinds > delete_files`](#keybinds_delete_files)
+    - [7.55.1. Property `Rovr Config > keybinds > delete_files > trash`](#keybinds_delete_files_trash)
+    - [7.55.2. Property `Rovr Config > keybinds > delete_files > delete`](#keybinds_delete_files_delete)
+    - [7.55.3. Property `Rovr Config > keybinds > delete_files > cancel`](#keybinds_delete_files_cancel)
+  - [7.56. Property `Rovr Config > keybinds > filename_conflict`](#keybinds_filename_conflict)
+    - [7.56.1. Property `Rovr Config > keybinds > filename_conflict > overwrite`](#keybinds_filename_conflict_overwrite)
+    - [7.56.2. Property `Rovr Config > keybinds > filename_conflict > skip`](#keybinds_filename_conflict_skip)
+    - [7.56.3. Property `Rovr Config > keybinds > filename_conflict > rename`](#keybinds_filename_conflict_rename)
+    - [7.56.4. Property `Rovr Config > keybinds > filename_conflict > cancel`](#keybinds_filename_conflict_cancel)
+    - [7.56.5. Property `Rovr Config > keybinds > filename_conflict > dont_ask_again`](#keybinds_filename_conflict_dont_ask_again)
+  - [7.57. Property `Rovr Config > keybinds > file_in_use`](#keybinds_file_in_use)
+    - [7.57.1. Property `Rovr Config > keybinds > file_in_use > retry`](#keybinds_file_in_use_retry)
+    - [7.57.2. Property `Rovr Config > keybinds > file_in_use > skip`](#keybinds_file_in_use_skip)
+    - [7.57.3. Property `Rovr Config > keybinds > file_in_use > cancel`](#keybinds_file_in_use_cancel)
+    - [7.57.4. Property `Rovr Config > keybinds > file_in_use > dont_ask_again`](#keybinds_file_in_use_dont_ask_again)
+  - [7.58. Property `Rovr Config > keybinds > filter_modal`](#keybinds_filter_modal)
+    - [7.58.1. Property `Rovr Config > keybinds > filter_modal > exit`](#keybinds_filter_modal_exit)
+    - [7.58.2. Property `Rovr Config > keybinds > filter_modal > down`](#keybinds_filter_modal_down)
+    - [7.58.3. Property `Rovr Config > keybinds > filter_modal > up`](#keybinds_filter_modal_up)
+  - [7.59. Property `Rovr Config > keybinds > yes_or_no`](#keybinds_yes_or_no)
+    - [7.59.1. Property `Rovr Config > keybinds > yes_or_no > yes`](#keybinds_yes_or_no_yes)
+    - [7.59.2. Property `Rovr Config > keybinds > yes_or_no > no`](#keybinds_yes_or_no_no)
+    - [7.59.3. Property `Rovr Config > keybinds > yes_or_no > dont_ask_again`](#keybinds_yes_or_no_dont_ask_again)
 - [8. Property `Rovr Config > plugins`](#plugins)
   - [8.1. Property `Rovr Config > plugins > zoxide`](#plugins_zoxide)
     - [8.1.1. Property `Rovr Config > plugins > zoxide > enabled`](#plugins_zoxide_enabled)
@@ -1091,6 +1114,11 @@ Refer to https://textual.textualize.io/guide/design/#additional-variables for mo
 | [quit_app](#keybinds_quit_app)                                         | array  | Quit the application                                                                              |
 | [command_palette](#keybinds_command_palette)                           | object | Launch Textual's mildly useful command palette (only one keybind is allowed!)                     |
 | [suspend_app](#keybinds_suspend_app)                                   | array  | Suspend the app's process, bringing you back to the terminal                                      |
+| [delete_files](#keybinds_delete_files)                                 | object | Keybinds related to the delete confirmation screen                                                |
+| [filename_conflict](#keybinds_filename_conflict)                       | object | Keybinds related to handling a conflict with two files of the same name                           |
+| [file_in_use](#keybinds_file_in_use)                                   | object | Keybinds related to handling a file that is in use by another process                             |
+| [filter_modal](#keybinds_filter_modal)                                 | object | Keybinds related to selecting options in a modal screen (like FileSearch or ZDToDirectory)        |
+| [yes_or_no](#keybinds_yes_or_no)                                       | object | Keybinds related to yes/no confirmation modals                                                    |
 
 ### <a name="keybinds_toggle_pin"></a>7.1. Property `Rovr Config > keybinds > toggle_pin`
 
@@ -1994,6 +2022,395 @@ Refer to https://textual.textualize.io/guide/design/#additional-variables for mo
 | **Required** | No      |
 
 **Description:** Suspend the app's process, bringing you back to the terminal
+
+|                      | Array restrictions |
+| -------------------- | ------------------ |
+| **Min items**        | N/A                |
+| **Max items**        | N/A                |
+| **Items unicity**    | False              |
+| **Additional items** | False              |
+| **Tuple validation** | N/A                |
+
+### <a name="keybinds_delete_files"></a>7.55. Property `Rovr Config > keybinds > delete_files`
+
+|                           |                  |
+| ------------------------- | ---------------- |
+| **Type**                  | `object`         |
+| **Required**              | No               |
+| **Additional properties** | Any type allowed |
+
+**Description:** Keybinds related to the delete confirmation screen
+
+| Property                                | Type  | Title/Description                                   |
+| --------------------------------------- | ----- | --------------------------------------------------- |
+| [trash](#keybinds_delete_files_trash)   | array | Confirm deletion and move files to the recycle bin. |
+| [delete](#keybinds_delete_files_delete) | array | Confirm deletion and permanently delete files.      |
+| [cancel](#keybinds_delete_files_cancel) | array | Cancel deletion and go back to the main screen.     |
+
+#### <a name="keybinds_delete_files_trash"></a>7.55.1. Property `Rovr Config > keybinds > delete_files > trash`
+
+|              |         |
+| ------------ | ------- |
+| **Type**     | `array` |
+| **Required** | No      |
+
+**Description:** Confirm deletion and move files to the recycle bin.
+
+|                      | Array restrictions |
+| -------------------- | ------------------ |
+| **Min items**        | N/A                |
+| **Max items**        | N/A                |
+| **Items unicity**    | False              |
+| **Additional items** | False              |
+| **Tuple validation** | N/A                |
+
+#### <a name="keybinds_delete_files_delete"></a>7.55.2. Property `Rovr Config > keybinds > delete_files > delete`
+
+|              |         |
+| ------------ | ------- |
+| **Type**     | `array` |
+| **Required** | No      |
+
+**Description:** Confirm deletion and permanently delete files.
+
+|                      | Array restrictions |
+| -------------------- | ------------------ |
+| **Min items**        | N/A                |
+| **Max items**        | N/A                |
+| **Items unicity**    | False              |
+| **Additional items** | False              |
+| **Tuple validation** | N/A                |
+
+#### <a name="keybinds_delete_files_cancel"></a>7.55.3. Property `Rovr Config > keybinds > delete_files > cancel`
+
+|              |         |
+| ------------ | ------- |
+| **Type**     | `array` |
+| **Required** | No      |
+
+**Description:** Cancel deletion and go back to the main screen.
+
+|                      | Array restrictions |
+| -------------------- | ------------------ |
+| **Min items**        | N/A                |
+| **Max items**        | N/A                |
+| **Items unicity**    | False              |
+| **Additional items** | False              |
+| **Tuple validation** | N/A                |
+
+### <a name="keybinds_filename_conflict"></a>7.56. Property `Rovr Config > keybinds > filename_conflict`
+
+|                           |                  |
+| ------------------------- | ---------------- |
+| **Type**                  | `object`         |
+| **Required**              | No               |
+| **Additional properties** | Any type allowed |
+
+**Description:** Keybinds related to handling a conflict with two files of the same name
+
+| Property                                                     | Type  | Title/Description                                                       |
+| ------------------------------------------------------------ | ----- | ----------------------------------------------------------------------- |
+| [overwrite](#keybinds_filename_conflict_overwrite)           | array | Overwrite the existing file with the new file.                          |
+| [skip](#keybinds_filename_conflict_skip)                     | array | Skip this file and do not copy/move it.                                 |
+| [rename](#keybinds_filename_conflict_rename)                 | array | Rename the new file being copied/moved.                                 |
+| [cancel](#keybinds_filename_conflict_cancel)                 | array | Cancel the entire copy/move operation.                                  |
+| [dont_ask_again](#keybinds_filename_conflict_dont_ask_again) | array | Apply the selected action to all future conflicts without asking again. |
+
+#### <a name="keybinds_filename_conflict_overwrite"></a>7.56.1. Property `Rovr Config > keybinds > filename_conflict > overwrite`
+
+|              |         |
+| ------------ | ------- |
+| **Type**     | `array` |
+| **Required** | No      |
+
+**Description:** Overwrite the existing file with the new file.
+
+|                      | Array restrictions |
+| -------------------- | ------------------ |
+| **Min items**        | N/A                |
+| **Max items**        | N/A                |
+| **Items unicity**    | False              |
+| **Additional items** | False              |
+| **Tuple validation** | N/A                |
+
+#### <a name="keybinds_filename_conflict_skip"></a>7.56.2. Property `Rovr Config > keybinds > filename_conflict > skip`
+
+|              |         |
+| ------------ | ------- |
+| **Type**     | `array` |
+| **Required** | No      |
+
+**Description:** Skip this file and do not copy/move it.
+
+|                      | Array restrictions |
+| -------------------- | ------------------ |
+| **Min items**        | N/A                |
+| **Max items**        | N/A                |
+| **Items unicity**    | False              |
+| **Additional items** | False              |
+| **Tuple validation** | N/A                |
+
+#### <a name="keybinds_filename_conflict_rename"></a>7.56.3. Property `Rovr Config > keybinds > filename_conflict > rename`
+
+|              |         |
+| ------------ | ------- |
+| **Type**     | `array` |
+| **Required** | No      |
+
+**Description:** Rename the new file being copied/moved.
+
+|                      | Array restrictions |
+| -------------------- | ------------------ |
+| **Min items**        | N/A                |
+| **Max items**        | N/A                |
+| **Items unicity**    | False              |
+| **Additional items** | False              |
+| **Tuple validation** | N/A                |
+
+#### <a name="keybinds_filename_conflict_cancel"></a>7.56.4. Property `Rovr Config > keybinds > filename_conflict > cancel`
+
+|              |         |
+| ------------ | ------- |
+| **Type**     | `array` |
+| **Required** | No      |
+
+**Description:** Cancel the entire copy/move operation.
+
+|                      | Array restrictions |
+| -------------------- | ------------------ |
+| **Min items**        | N/A                |
+| **Max items**        | N/A                |
+| **Items unicity**    | False              |
+| **Additional items** | False              |
+| **Tuple validation** | N/A                |
+
+#### <a name="keybinds_filename_conflict_dont_ask_again"></a>7.56.5. Property `Rovr Config > keybinds > filename_conflict > dont_ask_again`
+
+|              |         |
+| ------------ | ------- |
+| **Type**     | `array` |
+| **Required** | No      |
+
+**Description:** Apply the selected action to all future conflicts without asking again.
+
+|                      | Array restrictions |
+| -------------------- | ------------------ |
+| **Min items**        | N/A                |
+| **Max items**        | N/A                |
+| **Items unicity**    | False              |
+| **Additional items** | False              |
+| **Tuple validation** | N/A                |
+
+### <a name="keybinds_file_in_use"></a>7.57. Property `Rovr Config > keybinds > file_in_use`
+
+|                           |                  |
+| ------------------------- | ---------------- |
+| **Type**                  | `object`         |
+| **Required**              | No               |
+| **Additional properties** | Any type allowed |
+
+**Description:** Keybinds related to handling a file that is in use by another process
+
+| Property                                               | Type  | Title/Description                                                                  |
+| ------------------------------------------------------ | ----- | ---------------------------------------------------------------------------------- |
+| [retry](#keybinds_file_in_use_retry)                   | array | Retry the operation on the file.                                                   |
+| [skip](#keybinds_file_in_use_skip)                     | array | Skip this file and do not copy/move it.                                            |
+| [cancel](#keybinds_file_in_use_cancel)                 | array | Cancel the entire copy/move operation.                                             |
+| [dont_ask_again](#keybinds_file_in_use_dont_ask_again) | array | Apply the selected action to all future 'file in use' errors without asking again. |
+
+#### <a name="keybinds_file_in_use_retry"></a>7.57.1. Property `Rovr Config > keybinds > file_in_use > retry`
+
+|              |         |
+| ------------ | ------- |
+| **Type**     | `array` |
+| **Required** | No      |
+
+**Description:** Retry the operation on the file.
+
+|                      | Array restrictions |
+| -------------------- | ------------------ |
+| **Min items**        | N/A                |
+| **Max items**        | N/A                |
+| **Items unicity**    | False              |
+| **Additional items** | False              |
+| **Tuple validation** | N/A                |
+
+#### <a name="keybinds_file_in_use_skip"></a>7.57.2. Property `Rovr Config > keybinds > file_in_use > skip`
+
+|              |         |
+| ------------ | ------- |
+| **Type**     | `array` |
+| **Required** | No      |
+
+**Description:** Skip this file and do not copy/move it.
+
+|                      | Array restrictions |
+| -------------------- | ------------------ |
+| **Min items**        | N/A                |
+| **Max items**        | N/A                |
+| **Items unicity**    | False              |
+| **Additional items** | False              |
+| **Tuple validation** | N/A                |
+
+#### <a name="keybinds_file_in_use_cancel"></a>7.57.3. Property `Rovr Config > keybinds > file_in_use > cancel`
+
+|              |         |
+| ------------ | ------- |
+| **Type**     | `array` |
+| **Required** | No      |
+
+**Description:** Cancel the entire copy/move operation.
+
+|                      | Array restrictions |
+| -------------------- | ------------------ |
+| **Min items**        | N/A                |
+| **Max items**        | N/A                |
+| **Items unicity**    | False              |
+| **Additional items** | False              |
+| **Tuple validation** | N/A                |
+
+#### <a name="keybinds_file_in_use_dont_ask_again"></a>7.57.4. Property `Rovr Config > keybinds > file_in_use > dont_ask_again`
+
+|              |         |
+| ------------ | ------- |
+| **Type**     | `array` |
+| **Required** | No      |
+
+**Description:** Apply the selected action to all future 'file in use' errors without asking again.
+
+|                      | Array restrictions |
+| -------------------- | ------------------ |
+| **Min items**        | N/A                |
+| **Max items**        | N/A                |
+| **Items unicity**    | False              |
+| **Additional items** | False              |
+| **Tuple validation** | N/A                |
+
+### <a name="keybinds_filter_modal"></a>7.58. Property `Rovr Config > keybinds > filter_modal`
+
+|                           |                  |
+| ------------------------- | ---------------- |
+| **Type**                  | `object`         |
+| **Required**              | No               |
+| **Additional properties** | Any type allowed |
+
+**Description:** Keybinds related to selecting options in a modal screen (like FileSearch or ZDToDirectory)
+
+| Property                            | Type  | Title/Description                          |
+| ----------------------------------- | ----- | ------------------------------------------ |
+| [exit](#keybinds_filter_modal_exit) | array | Exit the modal without making a selection. |
+| [down](#keybinds_filter_modal_down) | array | Move the selection down in the modal list. |
+| [up](#keybinds_filter_modal_up)     | array | Move the selection up in the modal list.   |
+
+#### <a name="keybinds_filter_modal_exit"></a>7.58.1. Property `Rovr Config > keybinds > filter_modal > exit`
+
+|              |         |
+| ------------ | ------- |
+| **Type**     | `array` |
+| **Required** | No      |
+
+**Description:** Exit the modal without making a selection.
+
+|                      | Array restrictions |
+| -------------------- | ------------------ |
+| **Min items**        | N/A                |
+| **Max items**        | N/A                |
+| **Items unicity**    | False              |
+| **Additional items** | False              |
+| **Tuple validation** | N/A                |
+
+#### <a name="keybinds_filter_modal_down"></a>7.58.2. Property `Rovr Config > keybinds > filter_modal > down`
+
+|              |         |
+| ------------ | ------- |
+| **Type**     | `array` |
+| **Required** | No      |
+
+**Description:** Move the selection down in the modal list.
+
+|                      | Array restrictions |
+| -------------------- | ------------------ |
+| **Min items**        | N/A                |
+| **Max items**        | N/A                |
+| **Items unicity**    | False              |
+| **Additional items** | False              |
+| **Tuple validation** | N/A                |
+
+#### <a name="keybinds_filter_modal_up"></a>7.58.3. Property `Rovr Config > keybinds > filter_modal > up`
+
+|              |         |
+| ------------ | ------- |
+| **Type**     | `array` |
+| **Required** | No      |
+
+**Description:** Move the selection up in the modal list.
+
+|                      | Array restrictions |
+| -------------------- | ------------------ |
+| **Min items**        | N/A                |
+| **Max items**        | N/A                |
+| **Items unicity**    | False              |
+| **Additional items** | False              |
+| **Tuple validation** | N/A                |
+
+### <a name="keybinds_yes_or_no"></a>7.59. Property `Rovr Config > keybinds > yes_or_no`
+
+|                           |                  |
+| ------------------------- | ---------------- |
+| **Type**                  | `object`         |
+| **Required**              | No               |
+| **Additional properties** | Any type allowed |
+
+**Description:** Keybinds related to yes/no confirmation modals
+
+| Property                                             | Type  | Title/Description                                                           |
+| ---------------------------------------------------- | ----- | --------------------------------------------------------------------------- |
+| [yes](#keybinds_yes_or_no_yes)                       | array | Confirm with 'yes'.                                                         |
+| [no](#keybinds_yes_or_no_no)                         | array | Decline with 'no'.                                                          |
+| [dont_ask_again](#keybinds_yes_or_no_dont_ask_again) | array | Apply the selected action to all future confirmations without asking again. |
+
+#### <a name="keybinds_yes_or_no_yes"></a>7.59.1. Property `Rovr Config > keybinds > yes_or_no > yes`
+
+|              |         |
+| ------------ | ------- |
+| **Type**     | `array` |
+| **Required** | No      |
+
+**Description:** Confirm with 'yes'.
+
+|                      | Array restrictions |
+| -------------------- | ------------------ |
+| **Min items**        | N/A                |
+| **Max items**        | N/A                |
+| **Items unicity**    | False              |
+| **Additional items** | False              |
+| **Tuple validation** | N/A                |
+
+#### <a name="keybinds_yes_or_no_no"></a>7.59.2. Property `Rovr Config > keybinds > yes_or_no > no`
+
+|              |         |
+| ------------ | ------- |
+| **Type**     | `array` |
+| **Required** | No      |
+
+**Description:** Decline with 'no'.
+
+|                      | Array restrictions |
+| -------------------- | ------------------ |
+| **Min items**        | N/A                |
+| **Max items**        | N/A                |
+| **Items unicity**    | False              |
+| **Additional items** | False              |
+| **Tuple validation** | N/A                |
+
+#### <a name="keybinds_yes_or_no_dont_ask_again"></a>7.59.3. Property `Rovr Config > keybinds > yes_or_no > dont_ask_again`
+
+|              |         |
+| ------------ | ------- |
+| **Type**     | `array` |
+| **Required** | No      |
+
+**Description:** Apply the selected action to all future confirmations without asking again.
 
 |                      | Array restrictions |
 | -------------------- | ------------------ |

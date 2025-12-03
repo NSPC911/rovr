@@ -689,18 +689,19 @@ class Application(App, inherit_bindings=False):
             lambda: self.set_timer(0.1, self.deliver_screenshot),
         )
 
-        if self.ansi_color:
-            yield SystemCommand(
-                "Disable Transparent Theme",
-                "Go back to an opaque background.",
-                lambda: self.set_timer(0.1, self._toggle_transparency),
-            )
-        else:
-            yield SystemCommand(
-                "Enable Transparent Theme",
-                "Have a transparent background.",
-                lambda: self.set_timer(0.1, self._toggle_transparency),
-            )
+        if len(self.screen_stack) <= 2:
+            if self.ansi_color:
+                yield SystemCommand(
+                    "Disable Transparent Theme",
+                    "Go back to an opaque background.",
+                    lambda: self.set_timer(0.1, self._toggle_transparency),
+                )
+            else:
+                yield SystemCommand(
+                    "Enable Transparent Theme",
+                    "Have a transparent background.",
+                    lambda: self.set_timer(0.1, self._toggle_transparency),
+                )
 
         if (
             config["plugins"]["finder"]["enabled"]

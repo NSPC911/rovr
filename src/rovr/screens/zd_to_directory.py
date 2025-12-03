@@ -9,7 +9,7 @@ from textual.widgets import Input, OptionList
 from textual.worker import WorkerCancelled
 
 from rovr.classes.textual_options import ModalSearcherOption
-from rovr.functions.utils import should_cancel
+from rovr.functions.utils import check_key, should_cancel
 from rovr.variables.constants import config
 
 
@@ -131,9 +131,6 @@ class ZDToDirectory(ModalScreen):
         # check 2 for queue, to ignore mounting as a whole
         if should_cancel():
             return
-        zoxide_options: ZoxideOptionList = self.query_one(
-            "#zoxide_options", ZoxideOptionList
-        )
         if stdout:
             stdout = stdout.decode()
             worker = self.create_options(show_scores, stdout)
@@ -143,10 +140,10 @@ class ZDToDirectory(ModalScreen):
                 return  # anyways
             if options is None:
                 return
-            if len(options) == len(zoxide_options.options) and all(
+            if len(options) == len(self.zoxide_options.options) and all(
                 isinstance(options[i], ModalSearcherOption)
-                and isinstance(zoxide_options.options[i], ModalSearcherOption)
-                and options[i].file_path == zoxide_options.options[i].file_path
+                and isinstance(self.zoxide_options.options[i], ModalSearcherOption)
+                and options[i].file_path == self.zoxide_options.options[i].file_path
                 for i in range(len(options))
             ):  # ie same~ish query, resulting in same result
                 pass
@@ -156,19 +153,19 @@ class ZDToDirectory(ModalScreen):
                 # raised, or just nothing showing up. By having the clear
                 # options and add options functions nearby, it hopefully
                 # reduces the likelihood of an empty option list
-                zoxide_options.set_options(options)
-                zoxide_options.remove_class("empty")
-                zoxide_options.highlighted = 0
+                self.zoxide_options.set_options(options)
+                self.zoxide_options.remove_class("empty")
+                self.zoxide_options.highlighted = 0
                 if should_cancel():
                     return
         else:
             # No Matches to the query text
-            zoxide_options.clear_options()
-            zoxide_options.add_option(
+            self.zoxide_options.clear_options()
+            self.zoxide_options.add_option(
                 ModalSearcherOption(None, "  --No matches found--", disabled=True),
             )
-            zoxide_options.add_class("empty")
-            zoxide_options.border_subtitle = "0/0"
+            self.zoxide_options.add_class("empty")
+            self.zoxide_options.border_subtitle = "0/0"
 
     def on_input_submitted(self, event: Input.Submitted) -> None:
         if any(
@@ -213,27 +210,23 @@ class ZDToDirectory(ModalScreen):
             self.dismiss(None)
 
     def on_key(self, event: events.Key) -> None:
-        """Handle key presses."""
-        match event.key:
-            case "escape":
-                event.stop()
-                self.dismiss(None)
-            case "down":
-                event.stop()
-                zoxide_options = self.query_one("#zoxide_options")
-                if zoxide_options.options:
-                    zoxide_options.action_cursor_down()
-            case "up":
-                event.stop()
-                zoxide_options = self.query_one("#zoxide_options")
-                if zoxide_options.options:
-                    zoxide_options.action_cursor_up()
-            case "tab":
-                event.stop()
-                self.focus_next()
-            case "shift+tab":
-                event.stop()
-                self.focus_previous()
+        if check_key(event, config["keybinds"]["filter_modal"]["exit"]):
+            event.stop()
+            self.dismiss(None)
+        elif check_key(event, config["keybinds"]["filter_modal"]["down"]):
+            event.stop()
+            if self.zoxide_options.options:
+                self.zoxide_options.action_cursor_down()
+        elif check_key(event, config["keybinds"]["filter_modal"]["up"]):
+            event.stop()
+            if self.zoxide_options.options:
+                self.zoxide_options.action_cursor_up()
+        elif event.key == "tab":
+            event.stop()
+            self.focus_next()
+        elif event.key == "shift+tab":
+            event.stop()
+            self.focus_previous()
 
     def on_option_list_option_highlighted(
         self, event: OptionList.OptionHighlighted

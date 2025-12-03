@@ -657,6 +657,126 @@
           "type": "array",
           "description": "Suspend the app's process, bringing you back to the terminal",
           "display_name": "Suspend app"
+        },
+        "delete_files": {
+          "type": "object",
+          "description": "Keybinds related to the delete confirmation screen",
+          "properties": {
+            "trash": {
+              "type": "array",
+              "description": "Confirm deletion and move files to the recycle bin.",
+              "display_name": "Delete to recycle bin"
+            },
+            "delete": {
+              "type": "array",
+              "description": "Confirm deletion and permanently delete files.",
+              "display_name": "Permanently delete"
+            },
+            "cancel": {
+              "type": "array",
+              "description": "Cancel deletion and go back to the main screen.",
+              "display_name": "Cancel deletion"
+            }
+          }
+        },
+        "filename_conflict": {
+          "type": "object",
+          "description": "Keybinds related to handling a conflict with two files of the same name",
+          "properties": {
+            "overwrite": {
+              "type": "array",
+              "description": "Overwrite the existing file with the new file.",
+              "display_name": "Overwrite file"
+            },
+            "skip": {
+              "type": "array",
+              "description": "Skip this file and do not copy/move it.",
+              "display_name": "Skip file"
+            },
+            "rename": {
+              "type": "array",
+              "description": "Rename the new file being copied/moved.",
+              "display_name": "Rename file"
+            },
+            "cancel": {
+              "type": "array",
+              "description": "Cancel the entire copy/move operation.",
+              "display_name": "Cancel operation"
+            },
+            "dont_ask_again": {
+              "type": "array",
+              "description": "Apply the selected action to all future conflicts without asking again.",
+              "display_name": "Don't ask me again"
+            }
+          }
+        },
+        "file_in_use": {
+          "type": "object",
+          "description": "Keybinds related to handling a file that is in use by another process",
+          "properties": {
+            "retry": {
+              "type": "array",
+              "description": "Retry the operation on the file.",
+              "display_name": "Retry operation"
+            },
+            "skip": {
+              "type": "array",
+              "description": "Skip this file and do not copy/move it.",
+              "display_name": "Skip file"
+            },
+            "cancel": {
+              "type": "array",
+              "description": "Cancel the entire copy/move operation.",
+              "display_name": "Cancel operation"
+            },
+            "dont_ask_again": {
+              "type": "array",
+              "description": "Apply the selected action to all future 'file in use' errors without asking again.",
+              "display_name": "Don't ask me again"
+            }
+          }
+        },
+        "filter_modal": {
+          "type": "object",
+          "description": "Keybinds related to selecting options in a modal screen (like FileSearch or ZDToDirectory)",
+          "properties": {
+            "exit": {
+              "type": "array",
+              "description": "Exit the modal without making a selection.",
+              "display_name": "Exit modal"
+            },
+            "down": {
+              "type": "array",
+              "description": "Move the selection down in the modal list.",
+              "display_name": "Select down"
+            },
+            "up": {
+              "type": "array",
+              "description": "Move the selection up in the modal list.",
+              "display_name": "Select up"
+            }
+          }
+        },
+        "yes_or_no": {
+          "type": "object",
+          "description": "Keybinds related to yes/no confirmation modals",
+          "properties": {
+            "yes": {
+              "type": "array",
+              "description": "Confirm with 'yes'.",
+              "display_name": "Yes"
+            },
+            "no": {
+              "type": "array",
+              "description": "Decline with 'no'.",
+              "display_name": "No"
+            },
+            "dont_ask_again": {
+              "type": "array",
+              "description": "Apply the selected action to all future confirmations without asking again.",
+              "display_name": "Don't ask me again"
+            }
+          }
         }
       }
     },

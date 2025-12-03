@@ -4,6 +4,9 @@ from textual.containers import Grid, HorizontalGroup, VerticalGroup
 from textual.screen import ModalScreen
 from textual.widgets import Button, Label, Switch
 
+from rovr.functions.utils import check_key
+from rovr.variables.constants import config
+
 
 class YesOrNo(ModalScreen):
     """Screen with a dialog that asks whether you accept or deny"""
@@ -49,24 +52,26 @@ class YesOrNo(ModalScreen):
 
     def on_key(self, event: events.Key) -> None:
         """Handle key presses."""
-        match event.key.lower():
-            case "y":
-                event.stop()
-                self.dismiss(
-                    {"value": True, "toggle": self.query_one(Switch).value}
-                    if self.with_toggle
-                    else True
-                )
-            case "n" | "escape":
-                event.stop()
-                self.dismiss(
-                    {"value": False, "toggle": self.query_one(Switch).value}
-                    if self.with_toggle
-                    else False
-                )
-            case "a":
-                event.stop()
-                self.query_one(Switch).action_toggle_switch()
+        if check_key(event, config["keybinds"]["yes_or_no"]["yes"]):
+            event.stop()
+            self.dismiss(
+                {"value": True, "toggle": self.query_one(Switch).value}
+                if self.with_toggle
+                else True
+            )
+        elif check_key(event, config["keybinds"]["yes_or_no"]["no"]):
+            event.stop()
+            self.dismiss(
+                {"value": False, "toggle": self.query_one(Switch).value}
+                if self.with_toggle
+                else False
+            )
+        elif (
+            check_key(event, config["keybinds"]["yes_or_no"]["dont_ask_again"])
+            and self.with_toggle
+        ):
+            event.stop()
+            self.query_one(Switch).action_toggle_switch()
 
     def on_button_pressed(self, event: Button.Pressed) -> None:
         self.dismiss(

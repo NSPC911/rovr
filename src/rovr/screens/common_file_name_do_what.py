@@ -4,6 +4,9 @@ from textual.containers import Grid, HorizontalGroup, VerticalGroup
 from textual.screen import ModalScreen
 from textual.widgets import Button, Label, Switch
 
+from rovr.functions.utils import check_key
+from rovr.variables.constants import config
+
 
 class CommonFileNameDoWhat(ModalScreen):
     """Screen with a dialog to confirm whether to overwrite, rename, skip or cancel."""
@@ -41,34 +44,35 @@ class CommonFileNameDoWhat(ModalScreen):
 
     def on_key(self, event: events.Key) -> None:
         """Handle key presses."""
-        match event.key.lower():
-            case "o":
-                event.stop()
-                self.dismiss({
-                    "value": "overwrite",
-                    "same_for_next": self.query_one(Switch).value,
-                })
-            case "r":
-                event.stop()
-                self.dismiss({
-                    "value": "rename",
-                    "same_for_next": self.query_one(Switch).value,
-                })
-            case "s":
-                event.stop()
-                self.dismiss({
-                    "value": "skip",
-                    "same_for_next": self.query_one(Switch).value,
-                })
-            case "c" | "escape":
-                event.stop()
-                self.dismiss({
-                    "value": "cancel",
-                    "same_for_next": self.query_one(Switch).value,
-                })
-            case "a":
-                event.stop()
-                self.query_one(Switch).action_toggle_switch()
+        if check_key(event, config["keybinds"]["filename_conflict"]["overwrite"]):
+            event.stop()
+            self.dismiss({
+                "value": "overwrite",
+                "same_for_next": self.query_one(Switch).value,
+            })
+        elif check_key(event, config["keybinds"]["filename_conflict"]["rename"]):
+            event.stop()
+            self.dismiss({
+                "value": "rename",
+                "same_for_next": self.query_one(Switch).value,
+            })
+        elif check_key(event, config["keybinds"]["filename_conflict"]["skip"]):
+            event.stop()
+            self.dismiss({
+                "value": "skip",
+                "same_for_next": self.query_one(Switch).value,
+            })
+        elif check_key(event, config["keybinds"]["filename_conflict"]["cancel"]):
+            event.stop()
+            self.dismiss({
+                "value": "cancel",
+                "same_for_next": self.query_one(Switch).value,
+            })
+        elif check_key(
+            event, config["keybinds"]["filename_conflict"]["dont_ask_again"]
+        ):
+            event.stop()
+            self.query_one(Switch).action_toggle_switch()
 
     def on_click(self, event: events.Click) -> None:
         if event.widget is self:

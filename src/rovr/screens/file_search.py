@@ -13,6 +13,7 @@ from textual.worker import Worker, WorkerCancelled, get_current_worker
 from rovr.classes.textual_options import ModalSearcherOption
 from rovr.functions import path as path_utils
 from rovr.functions.icons import get_icon_for_file, get_icon_for_folder
+from rovr.functions.utils import check_key
 from rovr.variables.constants import config
 
 
@@ -173,24 +174,23 @@ class FileSearch(ModalScreen):
             self.dismiss(None)
 
     def on_key(self, event: events.Key) -> None:
-        match event.key:
-            case "escape":
-                event.stop()
-                self.dismiss(None)
-            case "down":
-                event.stop()
-                if self.search_options.options:
-                    self.search_options.action_cursor_down()
-            case "up":
-                event.stop()
-                if self.search_options.options:
-                    self.search_options.action_cursor_up()
-            case "tab":
-                event.stop()
-                self.focus_next()
-            case "shift+tab":
-                event.stop()
-                self.focus_previous()
+        if check_key(event, config["keybinds"]["filter_modal"]["exit"]):
+            event.stop()
+            self.dismiss(None)
+        elif check_key(event, config["keybinds"]["filter_modal"]["down"]):
+            event.stop()
+            if self.search_options.options:
+                self.search_options.action_cursor_down()
+        elif check_key(event, config["keybinds"]["filter_modal"]["up"]):
+            event.stop()
+            if self.search_options.options:
+                self.search_options.action_cursor_up()
+        elif event.key == "tab":
+            event.stop()
+            self.focus_next()
+        elif event.key == "shift+tab":
+            event.stop()
+            self.focus_previous()
 
     def on_option_list_option_highlighted(
         self, event: OptionList.OptionHighlighted

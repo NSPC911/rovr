@@ -27,11 +27,11 @@ try:
         binds: dict = toml.load(file)["keybinds"]
     with open("src/rovr/config/schema.json", "r", encoding="utf-8") as file:
         sub_schema: dict = ujson.load(file)["properties"]["keybinds"]["properties"]
-    sub_keys_schema: dict[str, dict] = {}
+    sub_schemas: dict[str, dict] = {}
     sub_keys: dict[str, dict] = {}
     for key, values in sub_schema.items():
         if isinstance(binds[key], dict):
-            sub_keys_schema[key] = values
+            sub_schemas[key] = values
             sub_keys[key] = binds[key]
             continue
         elif isinstance(binds[key], str):
@@ -44,7 +44,7 @@ try:
     page += """
 ## alternate layers
 """
-    for layer, sub_schema in sub_keys_schema.items():
+    for layer, sub_schema in sub_schemas.items():
         page += f"""
 ### `{layer}`
 {sub_schema["description"]}
@@ -53,6 +53,8 @@ try:
 | ------ | -------------- | ----------- |"""
         for key, values in sub_schema["properties"].items():
             to_add = f"\n| {key} |"
+            if isinstance(sub_keys[layer][key], str):
+                sub_keys[layer][key] = [sub_keys[layer][key]]
             for bind in sub_keys[layer][key]:
                 to_add += f" <kbd>{bind}</kbd>"
             to_add += f" | {values['display_name']} |"

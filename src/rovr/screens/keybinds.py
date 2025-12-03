@@ -1,4 +1,4 @@
-from typing import ClassVar, cast
+from typing import ClassVar
 
 from textual import events
 from textual.app import ComposeResult
@@ -79,6 +79,7 @@ class KeybindList(OptionList, inherit_bindings=False):
                 keybind_data.append((formatted_keys, display_name))
 
         keybind_data.append(("plugins", "--section--"))
+        primary_keys.append("")
         # for plugins
         plugins_schema = schema["properties"]["plugins"]["properties"]
         for key, value in config["plugins"].items():
@@ -95,6 +96,7 @@ class KeybindList(OptionList, inherit_bindings=False):
 
         # for alternate screens
         keybind_data.append(("alternate layers", "--section--"))
+        primary_keys.append("")
         for key, subdict in subkeys:
             keybinds_schema = schema["properties"]["keybinds"]["properties"][key][
                 "properties"
@@ -161,15 +163,12 @@ class Keybinds(ModalScreen):
                 self.keybinds_list.action_cursor_up()
 
     def on_option_list_option_selected(self, event: OptionList.OptionSelected) -> None:
-        if (
-            hasattr(event.option, "key_press")
-            and hasattr(event.option, "is_layer_bind")
-            and not event.option.is_layer_bind
-        ):
-            event.stop()
-            self.dismiss()
-            self.app.simulate_key(cast(KeybindOption, event.option).key_press)
-        elif not isinstance(event.option, KeybindOption):
+        if isinstance(event.option, KeybindOption):
+            if not event.option.is_layer_bind:
+                event.stop()
+                self.dismiss()
+                self.app.simulate_key(event.option.key_press)
+        else:
             raise RuntimeError(
                 f"Expected a <KeybindOption> but received <{type(event.option).__name__}>"
             )

@@ -139,6 +139,9 @@ class KeybindOption(Option):
         if description == "--section--":
             self.label = f" {' ' * max_key_width} ├ {keys}"
             label = f"[$primary]{self.label}[/]"
+        elif keys == "<disabled>":
+            self.label = f" {keys:>{max_key_width}} │ {description} "
+            label = f"[$background-lighten-3]{self.label}[/]"
         else:
             self.label = f" {keys:>{max_key_width}} │ {description} "
             label = self.label

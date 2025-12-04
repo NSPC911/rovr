@@ -2,6 +2,7 @@ from textual.widgets import Button, SelectionList
 
 from rovr.classes.textual_options import FileListSelectionWidget
 from rovr.functions.icons import get_icon
+from rovr.functions.path import normalise
 from rovr.variables.constants import config
 
 
@@ -33,5 +34,5 @@ class PathCopyButton(Button):
                 "No items were selected.", title="Copy Path", severity="information"
             )
         else:
-            self.app.copy_to_clipboard(highlighted.dir_entry.path)
+            self.app.copy_to_clipboard(normalise(highlighted.dir_entry.path))
             self.notify("Copied!", title="Copy Path", severity="information")

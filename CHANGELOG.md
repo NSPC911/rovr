@@ -2,9 +2,14 @@
 
 ## new features
 - config: allow changing bindings for screen layers #161
+- clipboard: constantly check clipboard added files 81df523
 
 ## build
 - pip: switch to tomli for toml parsing #162
+
+## fixes
+- filelist: fix issue with empty directories preventing navigation 985a509
+- input: fix overscroll issue a8b5307
 
 # [v0.6.0.dev2]
 

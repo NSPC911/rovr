@@ -667,9 +667,55 @@ class FileList(SelectionList, inherit_bindings=False):
 
     async def on_key(self, event: events.Key) -> None:
         """Handle key events for the file list."""
+        if self.dummy:
+            return
         from rovr.functions.utils import check_key
 
-        if not self.dummy and self.highlighted_option:
+        # hit buttons with keybinds
+        if not self.select_mode_enabled and check_key(
+            event, config["keybinds"]["hist_previous"]
+        ):
+            if self.app.query_one("#back").disabled:
+                self.app.query_one("UpButton").on_button_pressed(Button.Pressed)
+            else:
+                self.app.query_one("BackButton").on_button_pressed(Button.Pressed)
+        elif (
+            not self.select_mode_enabled
+            and check_key(event, config["keybinds"]["hist_next"])
+            and not self.app.query_one("#forward").disabled
+        ):
+            self.app.query_one("ForwardButton").on_button_pressed(Button.Pressed)
+        elif not self.select_mode_enabled and check_key(
+            event, config["keybinds"]["up_tree"]
+        ):
+            self.app.query_one("UpButton").on_button_pressed(Button.Pressed)
+        # Toggle pin on current directory
+        elif check_key(event, config["keybinds"]["toggle_pin"]):
+            pin_utils.toggle_pin(path.basename(getcwd()), getcwd())
+            await self.app.query_one("PinnedSidebar").reload_pins()
+        elif check_key(event, config["keybinds"]["copy"]):
+            await self.app.query_one("#copy").on_button_pressed(Button.Pressed)
+        elif check_key(event, config["keybinds"]["cut"]):
+            await self.app.query_one("#cut").on_button_pressed(Button.Pressed)
+        elif check_key(event, config["keybinds"]["paste"]):
+            await self.app.query_one("#paste").on_button_pressed(Button.Pressed)
+        elif check_key(event, config["keybinds"]["new"]):
+            self.app.query_one("#new").on_button_pressed(Button.Pressed)
+        elif check_key(event, config["keybinds"]["rename"]):
+            self.app.query_one("#rename").on_button_pressed(Button.Pressed)
+        elif check_key(event, config["keybinds"]["delete"]):
+            await self.app.query_one("#delete").on_button_pressed(Button.Pressed)
+        elif check_key(event, config["keybinds"]["zip"]):
+            self.app.query_one("#zip").on_button_pressed(Button.Pressed)
+        elif check_key(event, config["keybinds"]["unzip"]):
+            self.app.query_one("#unzip").on_button_pressed(Button.Pressed)
+        # search
+        elif check_key(event, config["keybinds"]["focus_search"]):
+            self.input.focus()
+        # toggle hidden files
+        elif check_key(event, config["keybinds"]["toggle_hidden_files"]):
+            await self.toggle_hidden_files()
+        elif self.highlighted_option:
             # toggle select mode
             if check_key(event, config["keybinds"]["toggle_visual"]):
                 await self.toggle_mode()
@@ -790,54 +836,10 @@ class FileList(SelectionList, inherit_bindings=False):
                             cmd,
                             f'{config["plugins"]["editor"]["file_executable"]} "{self.highlighted_option.dir_entry.path}"',
                         )
-            # hit buttons with keybinds
-            elif not self.select_mode_enabled and check_key(
-                event, config["keybinds"]["hist_previous"]
-            ):
-                if self.app.query_one("#back").disabled:
-                    self.app.query_one("UpButton").on_button_pressed(Button.Pressed)
-                else:
-                    self.app.query_one("BackButton").on_button_pressed(Button.Pressed)
-            elif (
-                not self.select_mode_enabled
-                and check_key(event, config["keybinds"]["hist_next"])
-                and not self.app.query_one("#forward").disabled
-            ):
-                self.app.query_one("ForwardButton").on_button_pressed(Button.Pressed)
-            elif not self.select_mode_enabled and check_key(
-                event, config["keybinds"]["up_tree"]
-            ):
-                self.app.query_one("UpButton").on_button_pressed(Button.Pressed)
             elif check_key(event, config["keybinds"]["copy_path"]):
                 await self.app.query_one("PathCopyButton").on_button_pressed(
                     Button.Pressed
                 )
-            # Toggle pin on current directory
-            elif check_key(event, config["keybinds"]["toggle_pin"]):
-                pin_utils.toggle_pin(path.basename(getcwd()), getcwd())
-                await self.app.query_one("PinnedSidebar").reload_pins()
-            elif check_key(event, config["keybinds"]["copy"]):
-                await self.app.query_one("#copy").on_button_pressed(Button.Pressed)
-            elif check_key(event, config["keybinds"]["cut"]):
-                await self.app.query_one("#cut").on_button_pressed(Button.Pressed)
-            elif check_key(event, config["keybinds"]["paste"]):
-                await self.app.query_one("#paste").on_button_pressed(Button.Pressed)
-            elif check_key(event, config["keybinds"]["new"]):
-                self.app.query_one("#new").on_button_pressed(Button.Pressed)
-            elif check_key(event, config["keybinds"]["rename"]):
-                self.app.query_one("#rename").on_button_pressed(Button.Pressed)
-            elif check_key(event, config["keybinds"]["delete"]):
-                await self.app.query_one("#delete").on_button_pressed(Button.Pressed)
-            elif check_key(event, config["keybinds"]["zip"]):
-                self.app.query_one("#zip").on_button_pressed(Button.Pressed)
-            elif check_key(event, config["keybinds"]["unzip"]):
-                self.app.query_one("#unzip").on_button_pressed(Button.Pressed)
-            # search
-            elif check_key(event, config["keybinds"]["focus_search"]):
-                self.input.focus()
-            # toggle hidden files
-            elif check_key(event, config["keybinds"]["toggle_hidden_files"]):
-                await self.toggle_hidden_files()
 
     def update_border_subtitle(self) -> None:
         if self.dummy or type(self.highlighted) is not int or not self.parent:

@@ -52,8 +52,9 @@ Screen.-all-horizontal.compact-buttons {
 #pinned_sidebar_container,
 #file_list_container,
 #preview_sidebar,
-#zoxide_options,
-#file_search_options,
+ZoxideOptionList,
+FileSearchOptionList,
+FileSearchToggles,
 #footer > *,
 FileListRightClickOptionList,
 SortOrderPopup,
@@ -89,8 +90,9 @@ SortOrderPopup,
 #file_list_container:focus-within,
 #preview_sidebar:focus-within,
 #preview_sidebar:focus,
-#zoxide_options,
-#file_search_options,
+ZoxideOptionList,
+FileSearchOptionList,
+FileSearchToggles:focus,
 #file_list.-maximized,
 #pinned_sidebar.-maximized,
 #preview_sidebar .inner_preview.-maximized,
@@ -470,14 +472,15 @@ ProgressBarContainer {
 }
 
 Content.selected { color: red }
+CommandList,
 FileList,
 PinnedSidebar,
 Clipboard,
-CommandList,
-#zoxide_options,
 FileListRightClickOptionList,
 SortOrderPopup,
-#file_search_options {
+ZoxideOptionList,
+FileSearchToggles,
+FileSearchOptionList {
   padding: 0 0 0 0;
   background-tint: ansi_default !important;
   .option-list--separator { color: $foreground }
@@ -577,32 +580,51 @@ ModalScreen Button:ansi {
 ZDToDirectory,
 FileSearch {
   align: center middle;
-  Input {
-    width: 100%;
-    max-width: 100%;
-    padding: 0 1;
-    background: transparent;
-    border: $border-style $border;
-  }
-  OptionList {
-    width: 100%;
-    max-width: 100%;
-    height: 1fr;
-    background: transparent;
-    border: $border-style $border;
-    padding: 0;
-    .option-list--option-highlighted {
-      background: $primary !important;
-      color: $background !important;
-    }
-    &.empty {
-      border: $border-style $error !important;
-      border-subtitle-color: $error !important;
-    }
-  }
+  layout: horizontal;
   & > VerticalGroup {
     max-width: 50vw;
     max-height: 50vh;
+    OptionList {
+      width: 100%;
+      max-width: 100%;
+      height: 1fr;
+      background: transparent;
+      padding: 0;
+      &.empty {
+        border: $border-style $error-darken-3 !important;
+        border-subtitle-color: $error-darken-3 !important;
+      }
+    }
+    Input {
+      width: 100%;
+      max-width: 100%;
+      padding: 0 1;
+      background: transparent;
+      border: $border-style $border-blurred;
+    }
+    &:focus-within {
+      OptionList {
+        border: $border-style $border;
+        .option-list--option-highlighted {
+          background: $primary !important;
+          color: $background !important;
+        }
+        &.empty {
+          border: $border-style $error !important;
+          border-subtitle-color: $error !important;
+        }
+      }
+      Input {
+        border: $border-style $border;
+      }
+    }
+  }
+}
+
+FileSearch {
+  FileSearchToggles {
+    width: 24;
+    height: auto;
   }
 }
 
@@ -988,6 +1010,7 @@ Screen {
       max-width: 90vw;
     }
     Toast { width: 90vw }
+    #file_search_toggles { display: none }
   }
   &.-nopreview {
     #pinned_sidebar_container { max-width: 25vw }
@@ -1000,6 +1023,7 @@ Screen {
       max-width: 75vw;
     }
     Toast { width: 50vw }
+    #file_search_toggles { display: none }
   }
   &.-all-vertical #footer { max-height: 25vh }
   &.-nopath {

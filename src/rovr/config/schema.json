@@ -902,6 +902,11 @@
               "type": "boolean",
               "default": false,
               "description": "Whether fd should follow symlinks when searching."
+            },
+            "no_ignore_parent": {
+              "type": "boolean",
+              "default": true,
+              "description": "Don't use *ignore files from parent folders when searching."
             }
           }
         },

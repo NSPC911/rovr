@@ -123,6 +123,7 @@ class ClipboardSelection(Selection):
             id=compress(text),
         )
         self.initial_prompt = prompt
+        self.path = text
 
 
 class KeybindOption(Option):

@@ -805,7 +805,6 @@ ModalInput {
     border: $border-style $border;
     width: 50vw;
     max-height: 3;
-    padding: 0 1;
     background: transparent !important;
     border-title-align: left;
     border-subtitle-align: right;

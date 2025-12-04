@@ -7,7 +7,7 @@ from platform import system
 from shutil import which
 
 import jsonschema
-import toml
+import tomli
 import ujson
 from jsonschema import ValidationError
 from rich import box
@@ -35,13 +35,13 @@ def get_version() -> str:
         return "master"
 
 
-def toml_dump(doc_path: str, exception: toml.TomlDecodeError) -> None:
+def toml_dump(doc_path: str, exception: tomli.TOMLDecodeError) -> None:
     """
     Dump an error message for anything related to TOML loading
 
     Args:
         doc_path (str): the path to the document
-        exception (toml.TomlDecodeError): the exception that occurred
+        exception (toml.TOMLDecodeError): the exception that occurred
     """
     doc: list = exception.doc.splitlines()
     start: int = max(exception.lineno - 3, 0)
@@ -301,8 +301,8 @@ def load_config() -> tuple[dict, dict]:
         # check header
         try:
             content = f.read()
-            template_config = toml.loads(content)
-        except toml.TomlDecodeError as exc:
+            template_config = tomli.loads(content)
+        except tomli.TOMLDecodeError as exc:
             toml_dump(path.join(path.dirname(__file__), "../config/config.toml"), exc)
 
     user_config = {}
@@ -312,8 +312,8 @@ def load_config() -> tuple[dict, dict]:
             user_config_content = f.read()
             if user_config_content:
                 try:
-                    user_config = toml.loads(user_config_content)
-                except toml.TomlDecodeError as exc:
+                    user_config = tomli.loads(user_config_content)
+                except tomli.TOMLDecodeError as exc:
                     toml_dump(user_config_path, exc)
     # Don't really have to consider the else part, because it's created further down
     config = deep_merge(template_config, user_config)

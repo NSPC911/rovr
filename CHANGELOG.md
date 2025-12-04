@@ -3,6 +3,9 @@
 ## new features
 - config: allow changing bindings for screen layers #161
 
+## build
+- pip: switch to tomli for toml parsing #162
+
 # [v0.6.0.dev2]
 
 ## breaking changes

@@ -803,7 +803,8 @@ ModalInput {
   }
   Input {
     background: transparent !important;
-    overflow-x: scroll;
+    overflow-x: hidden;
+    width: 1fr;
   }
   Label { height: 1 }
 }

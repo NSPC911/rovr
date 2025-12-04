@@ -116,8 +116,7 @@ SortOrderPopup,
   }
 }
 
-.hide,
-.hidden { display: none }
+.hide, .hidden { display: none }
 
 Input {
   scrollbar-size: 0 0;
@@ -126,9 +125,9 @@ Input {
   .input--placeholder,
   .text-area--placeholder { color: $foreground-darken-1 }
   .text-area--cursor-gutter {
-      color: $foreground;
-      background: $boost;
-      text-style: bold;
+    color: $foreground;
+    background: $boost;
+    text-style: bold;
   }
   &:ansi {
     .input--cursor,
@@ -247,7 +246,8 @@ Tooltip {
 
   &:focus-within > Tabline .underline--bar { background: $foreground-darken-3 }
 
-  HeaderClock, #newTabRight {
+  HeaderClock,
+  #newTabRight {
     background: transparent;
     dock: none;
     opacity: 1 !important;
@@ -369,7 +369,10 @@ Tooltip {
   width: $pinned_sidebar_width;
 }
 
-#pinned_sidebar { height: 1fr; padding: 0 }
+#pinned_sidebar {
+  height: 1fr;
+  padding: 0
+}
 
 #preview_sidebar {
   margin: 0;
@@ -387,8 +390,8 @@ Tooltip {
     text-overflow: fold;
     padding: 0 1;
   }
- /* scrollbars are useless, reminder */
   & > * {
+  /* scrollbars are useless, reminder */
     background: transparent;
     border: none;
     padding: 0;
@@ -467,7 +470,14 @@ ProgressBarContainer {
 }
 
 Content.selected { color: red }
-FileList, PinnedSidebar, Clipboard, CommandList, #zoxide_options, FileListRightClickOptionList, SortOrderPopup, #file_search_options {
+FileList,
+PinnedSidebar,
+Clipboard,
+CommandList,
+#zoxide_options,
+FileListRightClickOptionList,
+SortOrderPopup,
+#file_search_options {
   padding: 0 0 0 0;
   background-tint: ansi_default !important;
   .option-list--separator { color: $foreground }
@@ -564,7 +574,8 @@ ModalScreen Button:ansi {
   }
 }
 
-ZDToDirectory, FileSearch {
+ZDToDirectory,
+FileSearch {
   align: center middle;
   Input {
     width: 100%;

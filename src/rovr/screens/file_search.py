@@ -22,6 +22,7 @@ from rovr.functions import path as path_utils
 from rovr.functions.icons import get_icon_for_file, get_icon_for_folder
 from rovr.functions.utils import check_key
 from rovr.variables.constants import config, vindings
+from rovr.variables.maps import FD_TYPE_TO_ALIAS
 
 
 class FileSearchOptionList(OptionList):
@@ -40,6 +41,8 @@ class FileSearchOptionList(OptionList):
                 self.action_select()
             else:
                 self.highlighted = clicked_option
+        if self.screen.focused is not self.screen.search_input:
+            self.screen.search_input.focus()
 
 
 class FileSearchToggles(SelectionList):
@@ -62,6 +65,16 @@ class FileSearchToggles(SelectionList):
                 "no_ignore_parent",
                 config["plugins"]["finder"]["no_ignore_parent"],
             ),
+            Selection("Filter Type", "", False, disabled=True),
+            Selection("Files", "file", True),
+            Selection("Folders", "directory", True),
+            Selection("Symlinks", "symlink", False),
+            Selection("Executables", "executable", False),
+            Selection("Empty", "empty", False),
+            Selection("Socket", "socket", False),
+            Selection("Pipe", "pipe", False),
+            Selection("Char-Device", "char-device", False),
+            Selection("Block-Device", "block-device", False),
             id="file_search_toggles",
         )
 
@@ -81,7 +94,6 @@ class FileSearchToggles(SelectionList):
         return len(
             icon_utils.get_toggle_button_icon("left")
             + icon_utils.get_toggle_button_icon("inner")
-            + icon_utils.get_toggle_button_icon("right")
             + " "
         )
 
@@ -173,7 +185,6 @@ class FileSearchToggles(SelectionList):
                 else icon_utils.get_toggle_button_icon("inner"),
                 style=button_style,
             ),
-            Segment(icon_utils.get_toggle_button_icon("right"), style=side_style),
             Segment(" ", style=underlying_style),
             *line,
         ])
@@ -185,7 +196,17 @@ class FileSearch(ModalScreen):
     def __init__(self, **kwargs) -> None:
         super().__init__(**kwargs)
         self._active_worker: Worker | None = None
-        self._ignore_parent: bool = False
+        self._filter_types: dict[str, bool] = {
+            "file": True,
+            "directory": True,
+            "symlink": False,
+            "executable": False,
+            "empty": False,
+            "socket": False,
+            "pipe": False,
+            "char-device": False,
+            "block-device": False,
+        }
 
     def compose(self) -> ComposeResult:
         with VerticalGroup(id="file_search_group", classes="file_search_group"):
@@ -221,13 +242,7 @@ class FileSearch(ModalScreen):
         search_term = event.value.strip()
         fd_exec = config["plugins"]["finder"]["executable"]
 
-        fd_cmd = [
-            fd_exec,
-            "--type",
-            "f",
-            "--type",
-            "d",
-        ]
+        fd_cmd = [fd_exec]
         if config["settings"]["show_hidden_files"]:
             fd_cmd.append("--hidden")
         if not config["plugins"]["finder"]["relative_paths"]:
@@ -236,6 +251,9 @@ class FileSearch(ModalScreen):
             fd_cmd.append("--follow")
         if config["plugins"]["finder"]["no_ignore_parent"]:
             fd_cmd.append("--no-ignore-parent")
+        for filter, should_use in self._filter_types.items():
+            if should_use:
+                fd_cmd.extend(["--type", FD_TYPE_TO_ALIAS[filter]])
         if search_term:
             fd_cmd.append("--")
             fd_cmd.append(search_term)
@@ -244,6 +262,7 @@ class FileSearch(ModalScreen):
             self.search_options.clear_options()
             self.search_options.border_subtitle = ""
             return
+        self.search_options.set_options([Option("  Searching...", disabled=True)])
         try:
             fd_process = await asyncio.create_subprocess_exec(
                 *fd_cmd, stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE
@@ -256,13 +275,15 @@ class FileSearch(ModalScreen):
                     asyncio.exceptions.TimeoutError, ProcessLookupError
                 ):
                     await asyncio.wait_for(fd_process.wait(), timeout=1)
-            self.search_options.clear_options()
             msg = (
                 "  fd is missing on $PATH or cannot be executed"
                 if isinstance(exc, OSError)
                 else "  fd took too long to respond"
             )
-            self.search_options.add_option(Option(msg, disabled=True))
+            self.search_options.set_options([
+                Option(msg, disabled=True),
+                Option(f"{type(exc).__name__}: {exc}", disabled=True),
+            ])
             return
 
         options: list[ModalSearcherOption] = []
@@ -339,9 +360,14 @@ class FileSearch(ModalScreen):
 
     @on(SelectionList.SelectionToggled)
     def toggles_toggled(self, event: SelectionList.SelectionToggled) -> None:
-        config["plugins"]["finder"][event.selection.value] = (
-            event.selection.value in event.selection_list._selected
-        )
+        if event.selection.value in self._filter_types:
+            self._filter_types[event.selection.value] = (
+                event.selection.value in event.selection_list._selected
+            )
+        elif event.selection.value in (config["plugins"]["finder"]):
+            config["plugins"]["finder"][event.selection.value] = (
+                event.selection.value in event.selection_list._selected
+            )
         self.post_message(
             Input.Changed(self.search_input, value=self.search_input.value)
         )

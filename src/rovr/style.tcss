@@ -90,8 +90,8 @@ SortOrderPopup,
 #file_list_container:focus-within,
 #preview_sidebar:focus-within,
 #preview_sidebar:focus,
-ZoxideOptionList,
-FileSearchOptionList,
+ZDToDirectory > VerticalGroup:focus-within > ZoxideOptionList,
+FileSearch > VerticalGroup:focus-within > FileSearchOptionList,
 FileSearchToggles:focus,
 #file_list.-maximized,
 #pinned_sidebar.-maximized,
@@ -588,7 +588,6 @@ FileSearch {
       width: 100%;
       max-width: 100%;
       height: 1fr;
-      background: transparent;
       padding: 0;
       &.empty {
         border: $border-style $error-darken-3 !important;
@@ -625,6 +624,7 @@ FileSearch {
   FileSearchToggles {
     width: 24;
     height: auto;
+    max-height: 50vh
   }
 }
 
@@ -992,7 +992,6 @@ Screen.-filelistonly,
 Screen.-nopreview {
   #preview_sidebar,
   #below_menu Button { display: none !important }
-  #path_switcher { padding: 0 }
 }
 Screen.-nomenu-atall #menuwrapper,
 Screen.-middle-only #menuwrapper {
@@ -1029,15 +1028,24 @@ Screen {
   &.-nopath {
     #below_menu { display: none !important }
     #footer { max-height: 30vh }
+    #zoxide_group, #file_search_group {
+      max-height: 75vh
+    }
   }
   &.-nomenu-atall {
     #footer { max-height: 30vh }
+    #zoxide_group, #file_search_group {
+      max-height: 90vh
+    }
   }
   &.-filelistonly-vertical {
     #menu { display: none !important }
   }
   &.-middle-only {
     #footer { max-height: 25vh }
+    #zoxide_group, #file_search_group {
+      max-height: 100vh !important
+    }
   }
 }
 #showKeys {

@@ -11,14 +11,45 @@ rovr's configuration is held in a single location. you can find it by running
 rovr --config-path
 ```
 
-inside it, you can see 3 files if you previously launched rovr
+```
+# on windows
+╭──────────────────┬──────────────────────────────────╮
+│ type             │ path                             │
+├──────────────────┼──────────────────────────────────┤
+│ custom config    │ ~/AppData/Local/rovr/config.toml │
+│ pinned folders   │ ~/AppData/Local/rovr/pins.json   │
+│ custom styles    │ ~/AppData/Local/rovr/style.tcss  │
+│ persistent state │ ~/AppData/Local/rovr/state.toml  │
+╰──────────────────┴──────────────────────────────────╯
+# on macos
+╭──────────────────┬────────────────────────────────────────────────╮
+│ type             │ path                                           │
+├──────────────────┼────────────────────────────────────────────────┤
+│ custom config    │ ~/Library/Application Support/rovr/config.toml │
+│ pinned folders   │ ~/Library/Application Support/rovr/pins.json   │
+│ custom styles    │ ~/Library/Application Support/rovr/style.tcss  │
+│ persistent state │ ~/Library/Application Support/rovr/state.toml  │
+╰──────────────────┴────────────────────────────────────────────────╯
+# on linux
+╭──────────────────┬────────────────────────────╮
+│ type             │ path                       │
+├──────────────────┼────────────────────────────┤
+│ custom config    │ ~/.config/rovr/config.toml │
+│ pinned folders   │ ~/.config/rovr/pins.json   │
+│ custom styles    │ ~/.config/rovr/style.tcss  │
+│ persistent state │ ~/.config/rovr/state.toml  │
+╰──────────────────┴────────────────────────────╯
+```
+
+inside it, you can see 4 files if you previously launched rovr
 
 <FileTree>
 
 - rovr
   - config.toml
-  - styles.tcss
   - pins.json
+  - style.tcss
+  - state.toml
 
 </FileTree>
 
@@ -29,12 +60,12 @@ the config is handled in a simple config file.
 <Aside type="tip">
   it also has a schema available, so if you use either
   [`tombi`](https://github.com/tombi-toml/tombi) or
-  [`taplo`](https://github.com/tamasfe/taplo) to see an autocompletion popup.
+  [`taplo`](https://github.com/tamasfe/taplo), you can see an autocompletion popup.
 </Aside>
 
 for the full schema, please refer to the [`JSON Schema for Humans`](/rovr/reference/schema) page
 
-### styles.tcss
+### style.tcss
 
 styling in textual is handled by `tcss` files, a simplified version of the web's `css`. A reference is available in the [textual docs](https://textual.textualize.io/styles/)
 
@@ -43,9 +74,9 @@ rovr comes with some variables pre-initialised, that you can overwrite.
 <Code
   code={`/* border when a container isn't focused */\n$border-blurred: $primary-darken-3;\n/* border when a container is currently focused */\n$border: $primary-lighten-3;\n/* border style (https://textual.textualize.io/css_types/border) */\n$border-style: round;\n/* reference: https://textual.textualize.io/css_types/scalar */\n/* pinned folder sidebar width */\n$pinned_sidebar_width: 20;\n/* the main file list width */\n$file_list_width: 1fr;\n/* the preview sidebar width */\n$preview_sidebar_width: 35vw;\n/* the footer when nothing inside it is focused */\n$footer_unfocus_height: 8;\n/* the footer when something inside it is focused */\n$footer_focus_height: 10;`}
   lang="scss"
-  title="styles.tcss"
+  title="style.tcss"
 />
-For more advanced styling, refer to [`configuration/themeing`](/rovr/configuration/themeing)
+For more advanced styling, refer to [`configuration/theming`](/rovr/configuration/theming)
 
 ### pins.json
 
@@ -54,8 +85,8 @@ this file doesn't have a schema, mainly because it is pretty simple
 the file follows a schema as such
 
 <Code
-  code={`{\n  "default": [\n    ...\n    {\n      "name": "<label>",\n      "path": "<path>"\n    }\n  ],\n  "pins": [\n    ...\n    {\n      "name": "<label>",\n      "path": "<path>"\n    }\n  ]\n}`}
-  lang="json"
+  code={`{\n  "default": [\n    ...\n    {\n      "name": "<label>",\n      "path": "<path>",\n      "icon": ["<icon>", "<color>"] # optional icon specification\n    }\n  ],\n  "pins": [\n    ...\n    {\n      "name": "<label>",\n      "path": "<path>",\n      "icon": ["<icon>", "<color>"] # optional icon specification\n    }\n  ]\n}`}
+  lang="jsonc"
   title="pins.json"
 />
 the path supports variables to a fixed path

@@ -28,7 +28,7 @@ is_dark    = true
 variables  = { "<var>" = "<key>" }
 ```
 
-for more information, please refer to [themeing](/rovr/configuration/themeing)
+for more information, please refer to [theming](/rovr/configuration/theming)
 
 once you are done, make a pull request with screenshots made by textual
 
@@ -59,20 +59,23 @@ for feature requests, ensure that you have these at minimum
 #### pr checklist
 
 ```md
+<!--describe your pull request-->
+
+---
+
 by sumbitting this pull request, i agree that
 
-- [ ] i have run `ruff format` to format the code
-- [ ] i have tested both the dev version and the built version of rovr
-- [ ] cache, logs and others are not accidently added to git's tracking history
-- [ ] my commits follow the conventional commits format
-- [ ] the documentation has been updated if necessary
+- [ ] i have run `poe check` to check for any style issues
+- [ ] i have tested both the dev version (in venv) and the built version (uv build then install) of rovr
+- [ ] cache, logs and others were not accidentally added to git's tracking history
+- [ ] my commits follow the conventional commits format as much as possible
+- [ ] the documentation has been updated wherever necessary
 ```
 
 after making your necessary changes, you can run
 
 ```sh
-uvx ruff format
-uvx ty check . --ignore unresolved-import
+$ uv run poe check
 ```
 
 so that your code follows the defined style guide and is typed properly.
@@ -82,7 +85,7 @@ if you need help with conventional commits, [commitizen](https://github.com/comm
 else, you can also run
 
 ```sh
-uvx --from commitizen cz c
+$ uvx --from commitizen cz c
 ```
 
 ### bugs
@@ -92,32 +95,20 @@ bugs can tend to be common, especially with a relatively new application.
 <br/>if you want to create a new bug report, ensure that one doesn't already exist in the [list of issues](https://github.com/NSPC911/rovr/issues?q=sort%3Aupdated-desc+is%3Aissue+is%3Aopen)
 <br/>if it doesn't exist, follow the format below
 ```md
-### issue description
-{describe what happened}
+### issue descripton
+{describe what happened that resulted in the crash}
 
-### steps to reproduce
+### how do you reproduce it?
+{a step by step instruction on recreating the error, or a video with what keys you are pressing visualized}
 
-{a step by step instruction}
-{or a video with what keys you are pressing visualized}
+### what is the expected result of the steps?
+{what should have been the expected results?}
 
-### what is the expected result
+### what actually happened after doing the steps?
+{show what actually happened after doing the steps. preferrably, paste the exception if the app had crashed.}
 
-{expected result}
-
-### what actually happened
-
-{actual result}
-
-### (opt) how this could be fixed
-
-{a rough way of how this could be fixed}
-{this can be left out}
-
-### (opt) additional screenshots
-
-{more screenshots to the issue}
-{this can be left out if you have a video attached}
-
+### how can this be fixed?
+{how do you think this bug can be fixed?}
 ```
 
 #### want to fix an issue?
@@ -128,4 +119,3 @@ yeah sure go ahead, the pr format is roughly similar to that of [feature additio
 ### feature request
 feature requests can be done in the [discussions tab](https://github.com/NSPC911/rovr/discussions). a new request can be opened with the `Ideas` template.
 <br/>you may also choose to mention it in the discord server. we might take a look at it either ways.
-```

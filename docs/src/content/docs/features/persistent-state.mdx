@@ -1,0 +1,82 @@
+---
+title: persistent state
+description: how rovr saves and restores your preferences between sessions.
+---
+
+rovr includes a state manager that automatically saves your preferences and restores them when you restart the application. this ensures a consistent experience across sessions without needing to reconfigure settings each time.
+
+## what gets saved
+
+the state manager automatically tracks and persists the following preferences:
+
+### panel visibility
+
+rovr remembers which panels you had visible or hidden:
+- **pinned sidebar**: whether the sidebar is shown or hidden
+- **preview sidebar**: whether the preview panel is displayed
+- **footer**: whether the footer (processes, metadata, clipboard) is visible
+- **menu wrapper**: whether the action button menu is shown
+
+when you toggle these panels using their keyboard shortcuts, the state is automatically saved.
+
+### sort preferences
+
+your file sorting configuration persists between sessions:
+- **sort criteria**: whether you're sorting by name, size, extension, natural order, created time, or modified time
+- **sort direction**: ascending or descending order
+
+for more details on sorting, see the [sorting files](/rovr/features/sorting) guide.
+
+## state file location
+
+the state is stored in a `state.toml` file in your rovr configuration directory. you can find this location by running:
+
+```sh
+rovr --config-path
+```
+
+the state file will be in the same directory as your `config.toml` and `pins.json` files.
+
+## state file structure
+
+the state file uses toml format and looks like this:
+
+```toml
+current_version = "0.5.0"
+pinned_sidebar_visible = true
+preview_sidebar_visible = true
+footer_visible = true
+menuwrapper_visible = true
+sort_by = "name"
+sort_descending = false
+```
+
+### fields
+
+- **current_version**: the version of rovr that last saved the state (used for detecting version changes)
+- **pinned_sidebar_visible**: whether the pinned sidebar is visible
+- **preview_sidebar_visible**: whether the preview sidebar is visible
+- **footer_visible**: whether the footer is visible
+- **menuwrapper_visible**: whether the menu wrapper (action buttons) is visible
+- **sort_by**: the current sort criteria ("name", "size", "extension", "natural", "created", "modified", or "accessed")
+- **sort_descending**: whether files are sorted in descending order
+
+## automatic saving
+
+the state manager saves changes automatically:
+- whenever you toggle a panel's visibility
+- whenever you change sort criteria or direction
+- when rovr exits normally
+
+you don't need to manually save your preferences, everything happens automatically in the background.
+
+## resetting state
+
+if you want to reset to default preferences, you can:
+
+1. delete the `state.toml` file from your configuration directory
+2. restart rovr
+
+rovr will automatically create a new state file with default values:
+- all panels visible
+- sort by name in ascending order

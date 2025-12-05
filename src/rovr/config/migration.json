@@ -1,0 +1,46 @@
+[
+  {
+    "keys": [
+      "interface.preview_error",
+      "interface.preview_binary",
+      "interface.preview_start"
+    ],
+    "message": [
+      "[bright_blue]interface.preview_error[/], [bright_blue]interface.preview_binary[/] and [bright_blue]interface.preview_start[/] have been moved over to their own section, and two extra texts have been added",
+      "The new location is now at [bright_blue]interface.preview_text[/], which can contain",
+      "- [bright_green]interface.preview_text.error[/] (for errors in rendering)",
+      "- [bright_green]interface.preview_text.binary[/] (for binary files)",
+      "- [bright_green]interface.preview_text.start[/] (shown for a split second when starting up)",
+      "- [bright_green]interface.preview_text.empty[/] (when the file is empty)",
+      "- [bright_green]interface.preview_text.too_large[/] (when the file is too large, which is [gray]>1MB[/])"
+    ],
+    "extra": "Expanded in v0.5.0"
+  },
+  {
+    "keys": ["settings.preview_full"],
+    "message": [
+      "[bright_blue]settings.preview_full[/] has been removed for now.",
+      "- when previewing archives, the full contents of it are listed.",
+      "- when previewing files, with or without [bright_cyan]bat[/], the height will always be enough to fill the container."
+    ],
+    "extra": "Removed in v0.5.0"
+  },
+  {
+    "keys": ["settings.cd_on_quit"],
+    "message": [
+      "[bright_blue]settings.cd_on_quit[/] has been removed in favour of using [bright_blue]--cwd-file[/]",
+      "Remove it from your [cyan]config.toml[/] and update your shell configuration with the functions from the [u][link=https://nspc911.github.io/rovr/features/cd-on-quit/#shell-configuration]docs[/][/]",
+      "Cannot click on the link? https://nspc911.github.io/rovr/features/cd-on-quit/#shell-configuration"
+    ],
+    "extra": "Removed in v0.5.0"
+  },
+  {
+    "keys": ["interface.compact_mode"],
+    "message": [
+      "[bright_blue]interface.compact_mode[/] has been expanded into two extra options",
+      "- [bright_cyan]interface.compact_mode.buttons[/] makes the header buttons smaller (you can toggle the header with the default key of `M`)",
+      "- [bright_cyan]interface.compact_mode.panels[/] makes the panels smaller so that there is more space for the actual file list."
+    ],
+    "extra": "Expanded in v0.5.0"
+  }
+]

@@ -2,6 +2,7 @@ from .archive import Archive
 from .exceptions import FolderNotFileError
 from .session_manager import SessionManager
 from .textual_options import (
+    ArchiveFileListSelection,
     ClipboardSelection,
     FileListSelectionWidget,
     PinnedSidebarOption,
@@ -21,9 +22,10 @@ __all__ = [
     "SessionManager",
     "ClipboardSelection",
     "FileListSelectionWidget",
-    "PinnedSidebarOption",
     "EndsWithAnArchiveExtension",
     "EndsWithRar",
     "IsValidFilePath",
     "PathDoesntExist",
+    "ArchiveFileListSelection",
+    "PinnedSidebarOption",
 ]

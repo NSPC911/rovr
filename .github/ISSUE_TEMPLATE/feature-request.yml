@@ -4,9 +4,6 @@ labels: [feature-request]
 title: "<title>"
 
 body:
-  - type: markdown
-    attributes:
-      value: "Make sure you have checked issue #4 before requesting!"
   - type: textarea
     id: due-to-bug
     attributes:

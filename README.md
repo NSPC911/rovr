@@ -1,14 +1,12 @@
 <div align="center">
   <h1>rovr</h1>
-  <img alt="Python Version" src="https://img.shields.io/pypi/pyversions/rovr?style=for-the-badge&logo=python&logoColor=white&color=yellow">
-  <img alt="Made with Textual" src="https://img.shields.io/badge/made_with-textual-0b171d?style=for-the-badge&logoColor=white">
-  <img alt="Static Badge" src="https://img.shields.io/badge/Linter-Ruff_%2B_ty-black?style=for-the-badge&color=24122d">
+  <img alt="Python Version" src="https://img.shields.io/pypi/pyversions/rovr?style=for-the-badge&logo=python&logoColor=white&color=yellow&label=for" height="24px" width="auto">
+  <img alt="Lines of Code" src="https://tokei.rs/b1/github/NSPC911/rovr?category=code&style=for-the-badge&label=loc" height="24px" width="auto">
+  <a href="https://nspc911.github.io/discord"><img alt="Discord" src="https://img.shields.io/discord/1110189201313513552?style=for-the-badge&logoColor=white&color=%235865f2&logo=discord" height="24px" width="auto"></a>
+  <a href="https://pypi.org/project/rovr"><img alt="PyPI - Downloads" src="https://img.shields.io/pypi/dw/rovr?style=for-the-badge&logoColor=white&color=darkgreen&label=pip&logo=pypi" height="24px" width="auto"></a>
   <br>
-  <a href="https://nspc911.github.io/discord"><img alt="Discord" src="https://img.shields.io/discord/1110189201313513552?style=for-the-badge&logo=discord&logoColor=white&color=%235865f2"></a>
-  <a href="https://pypi.org/project/rovr"><img alt="PyPI - Downloads" src="https://img.shields.io/pypi/dw/rovr?style=for-the-badge&logo=pypi&logoColor=white&color=darkgreen"></a>
-  <br>
-  <img alt="GitHub Actions Docs Build Status" src="https://img.shields.io/github/actions/workflow/status/nspc911/rovr/.github%2Fworkflows%2Fdeploy.yml?style=for-the-badge&label=docs">
-  <img alt="GitHub Actions Formatting Status" src="https://img.shields.io/github/actions/workflow/status/nspc911/rovr/.github%2Fworkflows%2Fformatting.yml?style=for-the-badge&label=style">
+  <img alt="GitHub Actions Docs Build Status" src="https://img.shields.io/github/actions/workflow/status/nspc911/rovr/.github%2Fworkflows%2Fdeploy.yml?style=for-the-badge&label=docs&logo=opencontainersinitiative" height="24px" width="auto">
+  <img alt="GitHub Actions Formatting Status" src="https://img.shields.io/github/actions/workflow/status/nspc911/rovr/.github%2Fworkflows%2Fformatting.yml?style=for-the-badge&label=style&logo=opencontainersinitiative" height="24px" width="auto">
 </div>
 
 > [!warning]
@@ -25,7 +23,7 @@
 
 ### Screenshot
 
-![image](https://github.com/NSPC911/rovr/blob/master/img%2F0.1.0%2Frovr_main.png?raw=true)
+![image](https://github.com/NSPC911/rovr/blob/master/docs%2Fpublic%2Fscreenshots%2Fmain.png?raw=true)
 
 ### Installation
 

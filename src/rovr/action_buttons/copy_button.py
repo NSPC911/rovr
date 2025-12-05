@@ -25,5 +25,5 @@ class CopyButton(Button):
             self.app.query_one("#clipboard").copy_to_clipboard(selected_files)
         else:
             self.notify(
-                "No files selected to copy.", title="Copy Files", severity="warn"
+                "No files selected to copy.", title="Copy Files", severity="warning"
             )

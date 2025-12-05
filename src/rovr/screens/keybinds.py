@@ -8,8 +8,9 @@ from textual.screen import ModalScreen
 from textual.widgets import OptionList
 
 from rovr.classes.textual_options import KeybindOption
+from rovr.components import SearchInput
 from rovr.functions import icons
-from rovr.search_container import SearchInput
+from rovr.functions.utils import check_key
 from rovr.variables.constants import config, schema, vindings
 
 
@@ -40,6 +41,8 @@ class KeybindList(OptionList, inherit_bindings=False):
                     formatted_keys = "<disabled>"
                     primary_keys.append("")
                 else:
+                    if isinstance(keys, str):
+                        keys = [keys]
                     formatted_keys = ", ".join(f"<{key}>" for key in keys)
                     primary_keys.append(keys[0])
                 keybind_data.append((formatted_keys, display_name))
@@ -88,13 +91,15 @@ class Keybinds(ModalScreen):
         self.container.border_subtitle = f"Press Esc {additional_key_string}to close"
 
     def on_key(self, event: events.Key) -> None:
-        match event.key:
-            case key if key in config["keybinds"]["focus_search"]:
-                event.stop()
-                self.input.focus()
-            case key if key in config["keybinds"]["show_keybinds"] or key == "escape":
-                event.stop()
-                self.dismiss()
+        if check_key(event, config["keybinds"]["focus_search"]):
+            event.stop()
+            self.input.focus()
+        elif (
+            check_key(event, config["keybinds"]["show_keybinds"])
+            or event.key == "escape"
+        ):
+            event.stop()
+            self.dismiss()
 
     def on_option_list_option_selected(self, event: OptionList.OptionSelected) -> None:
         if hasattr(event.option, "key_press"):
@@ -105,3 +110,9 @@ class Keybinds(ModalScreen):
             raise RuntimeError(
                 f"Expected a <KeybindOption> but received <{type(event.option).__name__}>"
             )
+
+    def on_click(self, event: events.Click) -> None:
+        if event.widget is self:
+            # ie click outside
+            event.stop()
+            self.dismiss()

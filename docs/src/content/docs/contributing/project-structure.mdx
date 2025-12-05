@@ -13,7 +13,6 @@ the current file structure seperates each section in each folder
 - src/rovr
   - app.py houses the main application
   - py.typed
-  - search_container.py search bar in pinned folders and file list
   - style.tcss default style
 </FileTree>
 
@@ -28,6 +27,7 @@ the current file structure seperates each section in each folder
   - new_item_button.py create new item
   - paste_button.py paste from rovr's clipboard into cwd
   - rename_item_button.py rename selected **item**
+  - sort_order.py changes sort order
   - unzip_button.py unzip selected **item**
   - zip_button.py zip selected items
 </FileTree>
@@ -44,11 +44,20 @@ the current file structure seperates each section in each folder
   - theme.py a class for themes
 </FileTree>
 
+### components
+
+<FileTree>
+- src/rovr/components
+  - popup_option_list.py for popup selectors
+  - search_container.py used for fuzzy searching
+</FileTree>
+
 ### config
 
 <FileTree>
 - src/rovr/config
   - config.toml default config
+  - migration.json shows appropriate messages for removed features
   - pins.json default pins
   - schema.json schema for reference
 </FileTree>
@@ -60,6 +69,7 @@ handles the middle elements
 <FileTree>
 - src/rovr/core
   - file_list.py a list that shows files
+  - file_list_container.py the container for the main file list
   - pinned_sidebar.py a list that shows pinned items
   - preview_container.py a container that shows the appropriate preview
 </FileTree>
@@ -116,16 +126,17 @@ handles the modal screens used
 
 <FileTree>
 - src/rovr/screens
+  - _tester.py screen tester, not used at all
   - common_file_name_do_what.py when a conflicting file exists
   - delete_files.py when you want to delete files
   - dismissable.py dismissable modal, for notices
-  - give_permission.py raise permission when you get permission errored
+  - file_in_use.py shown when trying to delete a file that is being used
+  - file_search.py used for integration with fd
   - input.py modal input, also supporting path input
   - keybinds.py show all keybindings
   - way_too_small.py screen shown when window is too small
   - yes_or_no.py simple yes or no prompt
   - zd_to_directory.py zoxide integration
-  - _tester.py screen tester, not used at all
 </FileTree>
 
 ### variables

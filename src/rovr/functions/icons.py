@@ -1,3 +1,4 @@
+import fnmatch
 from functools import lru_cache
 from os import path
 
@@ -13,8 +14,8 @@ from rovr.variables.maps import (
 )
 
 
-@lru_cache(maxsize=128)
-def get_icon_for_file(location: str) -> list:
+@lru_cache(maxsize=1024)
+def get_icon_for_file(location: str) -> list[str]:
     """
     Get the icon and color for a file based on its name or extension.
 
@@ -32,18 +33,7 @@ def get_icon_for_file(location: str) -> list:
     if "icons" in config and "files" in config["icons"]:
         for custom_icon in config["icons"]["files"]:
             pattern = custom_icon["pattern"].lower()
-            match_type = custom_icon.get("match_type", "exact")
-
-            is_match = False
-            if (
-                match_type == "exact"
-                and file_name == pattern
-                or match_type == "endswith"
-                and file_name.endswith(pattern)
-            ):
-                is_match = True
-
-            if is_match:
+            if fnmatch.fnmatch(file_name, pattern):
                 return [custom_icon["icon"], custom_icon["color"]]
 
     # 1. Check for full filename match
@@ -63,8 +53,8 @@ def get_icon_for_file(location: str) -> list:
     return ICONS["file"]["default"]
 
 
-@lru_cache(maxsize=128)
-def get_icon_for_folder(location: str) -> list:
+@lru_cache(maxsize=1024)
+def get_icon_for_folder(location: str) -> list[str]:
     """Get the icon and color for a folder based on its name.
 
     Args:
@@ -82,18 +72,7 @@ def get_icon_for_folder(location: str) -> list:
     if "icons" in config and "folders" in config["icons"]:
         for custom_icon in config["icons"]["folders"]:
             pattern = custom_icon["pattern"].lower()
-            match_type = custom_icon.get("match_type", "exact")
-
-            is_match = False
-            if (
-                match_type == "exact"
-                and folder_name == pattern
-                or match_type == "endswith"
-                and folder_name.endswith(pattern)
-            ):
-                is_match = True
-
-            if is_match:
+            if fnmatch.fnmatch(folder_name, pattern):
                 return [custom_icon["icon"], custom_icon["color"]]
 
     # Check for special folder types
@@ -104,7 +83,7 @@ def get_icon_for_folder(location: str) -> list:
         return ICONS["folder"]["default"]
 
 
-@lru_cache(maxsize=128)
+@lru_cache(maxsize=1024)
 def get_icon(outer_key: str, inner_key: str) -> list:
     """Get an icon from double keys.
     Args:
@@ -120,7 +99,7 @@ def get_icon(outer_key: str, inner_key: str) -> list:
         return ICONS[outer_key][inner_key]
 
 
-@lru_cache(maxsize=128)
+@lru_cache(maxsize=1024)
 def get_toggle_button_icon(key: str) -> str:
     if not config["interface"]["nerd_font"]:
         return ASCII_TOGGLE_BUTTON_ICONS[key]

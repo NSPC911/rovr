@@ -1,5 +1,6 @@
 import os
 from os import path
+from typing import TypedDict, cast
 
 import ujson
 
@@ -12,20 +13,33 @@ from .path import normalise
 pins = {}
 
 
-def load_pins() -> dict:
+class PinsDict(TypedDict):
+    default: list[dict[str, str | list[str]]]
+    "The files to show in the default location"
+    pins: list[dict[str, str | list[str]]]
+    "Other added folders"
+
+
+def load_pins() -> PinsDict:
     """
     Load the pinned files from a JSON file in the user's config directory.
     Returns:
         dict: A dictionary with the default values, and the custom added pins.
+    Raises:
+        ValueError: If the config is of the wrong type
     """
+    # I'm not entirely sure why the pins break when
+    # pins isn't set global, I can't be bothered for now
+    # until an issue gets raised in the future
     global pins
+    tempins: PinsDict
     user_pins_file_path = path.join(VAR_TO_DIR["CONFIG"], "pins.json")
 
     # Ensure the user's config directory exists
     if not path.exists(VAR_TO_DIR["CONFIG"]):
         os.makedirs(VAR_TO_DIR["CONFIG"])
     if not path.exists(user_pins_file_path):
-        pins = {
+        tempins = {
             "default": [
                 {"name": "Home", "path": "$HOME"},
                 {"name": "Downloads", "path": "$DOWNLOADS"},
@@ -39,16 +53,19 @@ def load_pins() -> dict:
         }
         try:
             with open(user_pins_file_path, "w") as f:
-                ujson.dump(pins, f, escape_forward_slashes=False, indent=2)
+                ujson.dump(tempins, f, escape_forward_slashes=False, indent=2)
         except IOError:
             pass
 
     try:
         with open(user_pins_file_path, "r") as f:
-            pins = ujson.load(f)
-    except (IOError, ValueError):
+            loaded = ujson.load(f)
+        if not isinstance(loaded, dict):
+            raise ValueError()
+        tempins = cast(PinsDict, loaded)
+    except (IOError, ValueError, ujson.JSONDecodeError):
         # Reset pins on corrupt or something else happened
-        pins = {
+        tempins = {
             "default": [
                 {"name": "Home", "path": "$HOME"},
                 {"name": "Downloads", "path": "$DOWNLOADS"},
@@ -62,8 +79,8 @@ def load_pins() -> dict:
         }
 
     # If list died
-    if "default" not in pins or not isinstance(pins["default"], list):
-        pins["default"] = [
+    if "default" not in tempins or not isinstance(tempins["default"], list):
+        tempins["default"] = [
             {"name": "Home", "path": "$HOME"},
             {"name": "Downloads", "path": "$DOWNLOADS"},
             {"name": "Documents", "path": "$DOCUMENTS"},
@@ -72,22 +89,23 @@ def load_pins() -> dict:
             {"name": "Videos", "path": "$VIDEOS"},
             {"name": "Music", "path": "$MUSIC"},
         ]
-    if "pins" not in pins or not isinstance(pins["pins"], list):
-        pins["pins"] = []
+    if "pins" not in tempins or not isinstance(tempins["pins"], list):
+        tempins["pins"] = []
 
     for section_key in ["default", "pins"]:
-        for item in pins[section_key]:
-            if (
-                isinstance(item, dict)
-                and "path" in item
-                and isinstance(item["path"], str)
-            ):
+        # again, screw you ty, `section_key` can never be unknown
+        # but i dont know how to assert that to you
+        for item in tempins[section_key]:  # ty: ignore[invalid-key]
+            # no i will not use isinstance, ty screams at me
+            # because of the replace code a few lines below
+            if type(item) is dict and "path" in item and type(item["path"]) is str:
                 # Expand variables
                 for var, dir_path_val in VAR_TO_DIR.items():
                     item["path"] = item["path"].replace(f"${var}", dir_path_val)
                 # Normalize to forward slashes
                 item["path"] = normalise(item["path"])
-    return pins
+    pins = tempins
+    return tempins
 
 
 def add_pin(pin_name: str, pin_path: str | bytes) -> None:

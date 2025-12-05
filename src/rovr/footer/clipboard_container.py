@@ -44,15 +44,14 @@ class Clipboard(SelectionList, inherit_bindings=False):
                     type_of_selection="copy",
                 )
             )
-        self.paste_button.disabled = False
         for item_number in range(len(items)):
             self.select(self.get_option_at_index(item_number))
 
     @work
     async def cut_to_clipboard(self, items: list[str]) -> None:
+        """Cut the selected files to the clipboard."""
         self.deselect_all()
         await asyncio.sleep(0)
-        """Cut the selected files to the clipboard."""
         for item in items[::-1]:
             if isinstance(item, str):
                 self.insert_selection_at_beginning(
@@ -64,7 +63,6 @@ class Clipboard(SelectionList, inherit_bindings=False):
                         type_of_selection="cut",
                     )
                 )
-        self.paste_button.disabled = False
         for item_number in range(len(items)):
             self.select(self.get_option_at_index(item_number))
 
@@ -170,7 +168,6 @@ class Clipboard(SelectionList, inherit_bindings=False):
         # redraw
         # self.refresh(layout=True)
 
-    @work
     async def on_key(self, event: events.Key) -> None:
         if self.has_focus:
             if event.key in config["keybinds"]["delete"]:
@@ -183,7 +180,6 @@ class Clipboard(SelectionList, inherit_bindings=False):
                     )
                     return
                 self.remove_option_at_index(self.highlighted)
-                self.paste_button.disabled = self.add_options
                 if self.option_count == 0:
                     return
                 event.stop()
@@ -194,3 +190,8 @@ class Clipboard(SelectionList, inherit_bindings=False):
                 else:
                     self.select_all()
                 event.stop()
+
+    async def on_selection_list_selected_changed(
+        self, event: SelectionList.SelectedChanged
+    ) -> None:
+        self.paste_button.disabled = len(self.selected) == 0

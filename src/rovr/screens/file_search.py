@@ -192,6 +192,7 @@ class FileSearchToggles(SelectionList):
 
 class FileSearch(ModalScreen):
     """Search for files recursively using fd."""
+
     FILTER_TYPES: dict[str, bool] = {
         "file": True,
         "directory": True,

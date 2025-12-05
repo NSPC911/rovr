@@ -905,7 +905,7 @@
             },
             "no_ignore_parent": {
               "type": "boolean",
-              "default": true,
+              "default": false,
               "description": "Don't use *ignore files from parent folders when searching."
             }
           }

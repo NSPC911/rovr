@@ -624,7 +624,7 @@ FileSearch {
   FileSearchToggles {
     width: 24;
     height: auto;
-    max-height: 50vh
+    max-height: 50vh;
   }
 }
 
@@ -1029,13 +1029,13 @@ Screen {
     #below_menu { display: none !important }
     #footer { max-height: 30vh }
     #zoxide_group, #file_search_group {
-      max-height: 75vh
+      max-height: 75vh;
     }
   }
   &.-nomenu-atall {
     #footer { max-height: 30vh }
     #zoxide_group, #file_search_group {
-      max-height: 90vh
+      max-height: 90vh;
     }
   }
   &.-filelistonly-vertical {
@@ -1044,7 +1044,7 @@ Screen {
   &.-middle-only {
     #footer { max-height: 25vh }
     #zoxide_group, #file_search_group {
-      max-height: 100vh !important
+      max-height: 100vh !important;
     }
   }
 }

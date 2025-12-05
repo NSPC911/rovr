@@ -192,21 +192,21 @@ class FileSearchToggles(SelectionList):
 
 class FileSearch(ModalScreen):
     """Search for files recursively using fd."""
+    FILTER_TYPES: dict[str, bool] = {
+        "file": True,
+        "directory": True,
+        "symlink": False,
+        "executable": False,
+        "empty": False,
+        "socket": False,
+        "pipe": False,
+        "char-device": False,
+        "block-device": False,
+    }
 
     def __init__(self, **kwargs) -> None:
         super().__init__(**kwargs)
         self._active_worker: Worker | None = None
-        self._filter_types: dict[str, bool] = {
-            "file": True,
-            "directory": True,
-            "symlink": False,
-            "executable": False,
-            "empty": False,
-            "socket": False,
-            "pipe": False,
-            "char-device": False,
-            "block-device": False,
-        }
 
     def compose(self) -> ComposeResult:
         with VerticalGroup(id="file_search_group", classes="file_search_group"):
@@ -251,9 +251,9 @@ class FileSearch(ModalScreen):
             fd_cmd.append("--follow")
         if config["plugins"]["finder"]["no_ignore_parent"]:
             fd_cmd.append("--no-ignore-parent")
-        for filter, should_use in self._filter_types.items():
+        for filter_type, should_use in self.FILTER_TYPES.items():
             if should_use:
-                fd_cmd.extend(["--type", FD_TYPE_TO_ALIAS[filter]])
+                fd_cmd.extend(["--type", FD_TYPE_TO_ALIAS[filter_type]])
         if search_term:
             fd_cmd.append("--")
             fd_cmd.append(search_term)
@@ -360,9 +360,9 @@ class FileSearch(ModalScreen):
 
     @on(SelectionList.SelectionToggled)
     def toggles_toggled(self, event: SelectionList.SelectionToggled) -> None:
-        if event.selection.value in self._filter_types:
-            self._filter_types[event.selection.value] = (
-                event.selection.value in event.selection_list._selected
+        if event.selection.value in self.FILTER_TYPES:
+            self.FILTER_TYPES[event.selection.value] = (
+                event.selection.value in event.selection_list.selected
             )
         elif event.selection.value in (config["plugins"]["finder"]):
             config["plugins"]["finder"][event.selection.value] = (
@@ -417,9 +417,6 @@ class FileSearch(ModalScreen):
         elif event.key == "shift+tab":
             event.stop()
             self.focus_previous()
-        elif event.key == "ctrl+y":
-            event.stop()
-            self._ignore_parent = not self._ignore_parent
 
     def on_click(self, event: events.Click) -> None:
         if event.widget is self:

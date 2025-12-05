@@ -230,6 +230,7 @@ keybinds = ["f"]
 executable = "fd"
 relative_paths = true
 follow_symlinks = false
+no_ignore_parent = false
 
 [plugins.poppler]
 enabled = true

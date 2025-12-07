@@ -50,7 +50,9 @@ class CommonFileNameDoWhat(ModalScreen):
             with VerticalGroup(id="question_container"):
                 for message in self.message.splitlines():
                     yield Label(message, classes="question")
-            yield Button(f"\\[{overwrite_bind}] overwrite", variant="error", id="overwrite")
+            yield Button(
+                f"\\[{overwrite_bind}] overwrite", variant="error", id="overwrite"
+            )
             yield Button(f"\\[{rename_bind}] rename", variant="warning", id="rename")
             yield Button(f"\\[{skip_bind}] skip", variant="default", id="skip")
             yield Button(f"\\[{cancel_bind}] cancel", variant="primary", id="cancel")

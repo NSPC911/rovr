@@ -54,7 +54,9 @@ class YesOrNo(ModalScreen):
                 id="yes",
             )
             yield Button(
-                f"\\[{no_bind}] No", variant="primary" if self.reverse_color else "error", id="no"
+                f"\\[{no_bind}] No",
+                variant="primary" if self.reverse_color else "error",
+                id="no",
             )
             if self.with_toggle:
                 with HorizontalGroup(id="dontAskAgain"):

@@ -7,6 +7,22 @@ from textual.widgets import Button, Label, Switch
 from rovr.functions.utils import check_key
 from rovr.variables.constants import config
 
+least_len: tuple[int | None, str] = (None, "")
+for bind in config["keybinds"]["yes_or_no"]["yes"]:
+    if least_len[0] is None or least_len[0] > len(bind):
+        least_len = (len(bind), bind)
+yes_bind = least_len[1]
+least_len: tuple[int | None, str] = (None, "")
+for bind in config["keybinds"]["yes_or_no"]["no"]:
+    if least_len[0] is None or least_len[0] > len(bind):
+        least_len = (len(bind), bind)
+no_bind = least_len[1]
+least_len: tuple[int | None, str] = (None, "")
+for bind in config["keybinds"]["yes_or_no"]["dont_ask_again"]:
+    if least_len[0] is None or least_len[0] > len(bind):
+        least_len = (len(bind), bind)
+dont_ask_bind = least_len[1]
+
 
 class YesOrNo(ModalScreen):
     """Screen with a dialog that asks whether you accept or deny"""
@@ -33,17 +49,17 @@ class YesOrNo(ModalScreen):
                 for message in self.message.splitlines():
                     yield Label(message, classes="question")
             yield Button(
-                "\\[Y]es",
+                f"\\[{yes_bind}] Yes",
                 variant="error" if self.reverse_color else "primary",
                 id="yes",
             )
             yield Button(
-                "\\[N]o", variant="primary" if self.reverse_color else "error", id="no"
+                f"\\[{no_bind}] No", variant="primary" if self.reverse_color else "error", id="no"
             )
             if self.with_toggle:
                 with HorizontalGroup(id="dontAskAgain"):
                     yield Switch()
-                    yield Label("Don't \\[a]sk again")
+                    yield Label(f"\\[{dont_ask_bind}] Don't ask again")
 
     def on_mount(self) -> None:
         self.query_one("#dialog").classes = "with_toggle" if self.with_toggle else ""

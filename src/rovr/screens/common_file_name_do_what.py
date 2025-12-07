@@ -7,6 +7,32 @@ from textual.widgets import Button, Label, Switch
 from rovr.functions.utils import check_key
 from rovr.variables.constants import config
 
+least_len: tuple[int | None, str] = (None, "")
+for bind in config["keybinds"]["filename_conflict"]["overwrite"]:
+    if least_len[0] is None or least_len[0] > len(bind):
+        least_len = (len(bind), bind)
+overwrite_bind = least_len[1]
+least_len: tuple[int | None, str] = (None, "")
+for bind in config["keybinds"]["filename_conflict"]["rename"]:
+    if least_len[0] is None or least_len[0] > len(bind):
+        least_len = (len(bind), bind)
+rename_bind = least_len[1]
+least_len: tuple[int | None, str] = (None, "")
+for bind in config["keybinds"]["filename_conflict"]["skip"]:
+    if least_len[0] is None or least_len[0] > len(bind):
+        least_len = (len(bind), bind)
+skip_bind = least_len[1]
+least_len: tuple[int | None, str] = (None, "")
+for bind in config["keybinds"]["filename_conflict"]["cancel"]:
+    if least_len[0] is None or least_len[0] > len(bind):
+        least_len = (len(bind), bind)
+cancel_bind = least_len[1]
+least_len: tuple[int | None, str] = (None, "")
+for bind in config["keybinds"]["filename_conflict"]["dont_ask_again"]:
+    if least_len[0] is None or least_len[0] > len(bind):
+        least_len = (len(bind), bind)
+dont_ask_bind = least_len[1]
+
 
 class CommonFileNameDoWhat(ModalScreen):
     """Screen with a dialog to confirm whether to overwrite, rename, skip or cancel."""
@@ -24,13 +50,13 @@ class CommonFileNameDoWhat(ModalScreen):
             with VerticalGroup(id="question_container"):
                 for message in self.message.splitlines():
                     yield Label(message, classes="question")
-            yield Button("\\[O]verwrite", variant="error", id="overwrite")
-            yield Button("\\[R]ename", variant="warning", id="rename")
-            yield Button("\\[S]kip", variant="default", id="skip")
-            yield Button("\\[C]ancel", variant="primary", id="cancel")
+            yield Button(f"\\[{overwrite_bind}] overwrite", variant="error", id="overwrite")
+            yield Button(f"\\[{rename_bind}] rename", variant="warning", id="rename")
+            yield Button(f"\\[{skip_bind}] skip", variant="default", id="skip")
+            yield Button(f"\\[{cancel_bind}] cancel", variant="primary", id="cancel")
             with HorizontalGroup(id="dontAskAgain"):
                 yield Switch()
-                yield Label("Don't \\[a]sk again")
+                yield Label(f"\\[{dont_ask_bind}] Don't ask again")
 
     def on_mount(self) -> None:
         self.query_one("#dialog").border_title = self.border_title

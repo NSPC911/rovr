@@ -7,6 +7,27 @@ from textual.widgets import Button, Label, Switch
 from rovr.functions.utils import check_key
 from rovr.variables.constants import config
 
+least_len: tuple[int | None, str] = (None, "")
+for bind in config["keybinds"]["file_in_use"]["retry"]:
+    if least_len[0] is None or least_len[0] > len(bind):
+        least_len = (len(bind), bind)
+retry_bind = least_len[1]
+least_len: tuple[int | None, str] = (None, "")
+for bind in config["keybinds"]["file_in_use"]["cancel"]:
+    if least_len[0] is None or least_len[0] > len(bind):
+        least_len = (len(bind), bind)
+cancel_bind = least_len[1]
+least_len: tuple[int | None, str] = (None, "")
+for bind in config["keybinds"]["file_in_use"]["skip"]:
+    if least_len[0] is None or least_len[0] > len(bind):
+        least_len = (len(bind), bind)
+skip_bind = least_len[1]
+least_len: tuple[int | None, str] = (None, "")
+for bind in config["keybinds"]["file_in_use"]["dont_ask_again"]:
+    if least_len[0] is None or least_len[0] > len(bind):
+        least_len = (len(bind), bind)
+dont_ask_bind = least_len[1]
+
 
 class FileInUse(ModalScreen):
     """Screen to show when a file is in use by another process on Windows."""
@@ -20,13 +41,13 @@ class FileInUse(ModalScreen):
             with VerticalGroup(id="question_container"):
                 for message in self.message.splitlines():
                     yield Label(message, classes="question")
-            yield Button("\\[R]etry", variant="primary", id="try_again")
-            yield Button("\\[S]kip", variant="warning", id="skip")
+            yield Button(f"\\[{retry_bind}] Retry", variant="primary", id="try_again")
+            yield Button(f"\\[{skip_bind}] Skip", variant="warning", id="skip")
             with Container():
-                yield Button("\\[C]ancel", variant="error", id="cancel")
+                yield Button(f"\\[{cancel_bind}] Cancel", variant="error", id="cancel")
             with HorizontalGroup(id="dontAskAgain"):
                 yield Switch()
-                yield Label("Apply to \\[a]ll")
+                yield Label(f"[{dont_ask_bind}] Don't ask again")
 
     def on_mount(self) -> None:
         self.query_one("#dialog").border_title = "File in Use"
@@ -43,7 +64,6 @@ class FileInUse(ModalScreen):
             })
         elif check_key(event, config["keybinds"]["file_in_use"]["cancel"]):
             event.stop()
-            # treat escape/c as cancel
             self.dismiss({
                 "value": "cancel",
                 "toggle": self.query_one(Switch).value,

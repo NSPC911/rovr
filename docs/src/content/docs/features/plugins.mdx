@@ -37,13 +37,13 @@ opens files and folders in your preferred editor.
   - `folder_suspend`: suspend when opening folders (default: `true`)
 - **open all in editor:** set `plugins.editor.open_all_in_editor = true` to force all files to open in your configured editor, regardless of encoding or file type. when disabled (default), files that cannot be read due to encoding issues will open with the system's default application instead.
 
-### finder
+### fd
 
-<img src="/rovr/screenshots/plugin-finder.svg" alt="rovr's fd integration" />
+<img src="/rovr/screenshots/plugin-fd.svg" alt="rovr's fd integration" />
 
 uses [fd](https://github.com/sharkdp/fd) to search recursively in the current directory
 
-- **enable:** `plugins.finder.enabled = true`
+- **enable:** `plugins.fd.enabled = true`
 - **executable:** set the executable used to call `fd`
 - **relative_paths:** whether to see paths as relative or absolute
 - **follow_symlinks:** search inside symlinks as well

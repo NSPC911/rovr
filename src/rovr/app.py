@@ -387,10 +387,10 @@ class Application(App, inherit_bindings=False):
         # keybinds
         elif check_key(event, config["keybinds"]["show_keybinds"]):
             self.push_screen(Keybinds())
-        elif config["plugins"]["finder"]["enabled"] and check_key(
-            event, config["plugins"]["finder"]["keybinds"]
+        elif config["plugins"]["fd"]["enabled"] and check_key(
+            event, config["plugins"]["fd"]["keybinds"]
         ):
-            fd_exec: str = config["plugins"]["finder"]["executable"]
+            fd_exec: str = config["plugins"]["fd"]["executable"]
             if shutil.which(fd_exec) is not None:
                 try:
 
@@ -410,8 +410,8 @@ class Application(App, inherit_bindings=False):
                     self.notify(str(exc), title="Finder", severity="error")
             else:
                 self.notify(
-                    f"{config['plugins']['finder']['executable']} cannot be found in PATH.",
-                    title="Plugins: finder",
+                    f"{config['plugins']['fd']['executable']} cannot be found in PATH.",
+                    title="Plugins: fd",
                     severity="error",
                 )
         elif check_key(event, config["keybinds"]["suspend_app"]):
@@ -703,18 +703,15 @@ class Application(App, inherit_bindings=False):
                     lambda: self.set_timer(0.1, self._toggle_transparency),
                 )
 
-        if (
-            config["plugins"]["finder"]["enabled"]
-            and config["plugins"]["finder"]["keybinds"]
-        ):
+        if config["plugins"]["fd"]["enabled"] and config["plugins"]["fd"]["keybinds"]:
             yield SystemCommand(
-                "Open finder",
+                "Open fd",
                 "Start searching the current directory using `fd`",
                 lambda: self.on_key(
                     events.Key(
-                        key=config["plugins"]["finder"]["keybinds"][0],
+                        key=config["plugins"]["fd"]["keybinds"][0],
                         # character doesn't matter
-                        character=config["plugins"]["finder"]["keybinds"][0],
+                        character=config["plugins"]["fd"]["keybinds"][0],
                     )
                 ),
             )

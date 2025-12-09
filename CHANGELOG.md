@@ -3,6 +3,8 @@
 ## new features
 - config: allow changing bindings for screen layers #161
 - clipboard: constantly check clipboard added files 81df523
+- fd!: rename from 'finder' to 'fd' #163
+- fd: add additional toggleable options #163
 
 ## build
 - pip: switch to tomli for toml parsing #162

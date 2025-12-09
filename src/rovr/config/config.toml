@@ -224,12 +224,14 @@ folder_suspend = true
 open_all_in_editor = false
 keybinds = ["e"]
 
-[plugins.finder]
+[plugins.fd]
 enabled = true
 keybinds = ["f"]
 executable = "fd"
 relative_paths = true
 follow_symlinks = false
+no_ignore_parent = false
+default_filter_types = ["file", "directory"]
 
 [plugins.poppler]
 enabled = true

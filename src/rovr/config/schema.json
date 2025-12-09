@@ -870,7 +870,7 @@
             }
           }
         },
-        "finder": {
+        "fd": {
           "type": "object",
           "additionalProperties": false,
           "properties": {
@@ -902,6 +902,30 @@
               "type": "boolean",
               "default": false,
               "description": "Whether fd should follow symlinks when searching."
+            },
+            "no_ignore_parent": {
+              "type": "boolean",
+              "default": false,
+              "description": "Don't use *ignore files from parent folders when searching."
+            },
+            "default_filter_types": {
+              "type": "array",
+              "default": ["file", "directory"],
+              "description": "The default file types to show when using fd.",
+              "items": {
+                "type": "string",
+                "enum": [
+                  "file",
+                  "directory",
+                  "symlink",
+                  "executable",
+                  "empty",
+                  "socket",
+                  "pipe",
+                  "char-device",
+                  "block-device"
+                ]
+              }
             }
           }
         },

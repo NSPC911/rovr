@@ -25,7 +25,8 @@ from rovr.variables.constants import config, vindings
 from rovr.variables.maps import FD_TYPE_TO_ALIAS
 
 INITIAL_FILTER_TYPES: dict[str, bool] = {
-    ft: (ft in config["plugins"]["fd"]["default_filter_types"]) for ft in FD_TYPE_TO_ALIAS
+    ft: (ft in config["plugins"]["fd"]["default_filter_types"])
+    for ft in FD_TYPE_TO_ALIAS
 }
 
 

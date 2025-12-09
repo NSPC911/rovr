@@ -870,7 +870,7 @@
             }
           }
         },
-        "finder": {
+        "fd": {
           "type": "object",
           "additionalProperties": false,
           "properties": {

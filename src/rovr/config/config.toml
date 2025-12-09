@@ -224,7 +224,7 @@ folder_suspend = true
 open_all_in_editor = false
 keybinds = ["e"]
 
-[plugins.finder]
+[plugins.fd]
 enabled = true
 keybinds = ["f"]
 executable = "fd"

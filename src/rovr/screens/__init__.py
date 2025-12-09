@@ -3,8 +3,8 @@ from textual.screen import Screen
 from .common_file_name_do_what import CommonFileNameDoWhat
 from .delete_files import DeleteFiles
 from .dismissable import Dismissable
+from .fd_search import FileSearch
 from .file_in_use import FileInUse
-from .file_search import FileSearch
 from .input import ModalInput
 from .keybinds import Keybinds
 from .way_too_small import TerminalTooSmall

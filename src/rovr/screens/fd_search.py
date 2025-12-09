@@ -53,17 +53,17 @@ class FileSearchToggles(SelectionList):
             Selection(
                 "Relative Paths",
                 "relative_paths",
-                config["plugins"]["finder"]["relative_paths"],
+                config["plugins"]["fd"]["relative_paths"],
             ),
             Selection(
                 "Follow Symlinks",
                 "follow_symlinks",
-                config["plugins"]["finder"]["follow_symlinks"],
+                config["plugins"]["fd"]["follow_symlinks"],
             ),
             Selection(
                 "No Ignore Parents",
                 "no_ignore_parent",
-                config["plugins"]["finder"]["no_ignore_parent"],
+                config["plugins"]["fd"]["no_ignore_parent"],
             ),
             Selection("Filter Type", "", False, disabled=True),
             Selection("Files", "file", True),
@@ -241,16 +241,16 @@ class FileSearch(ModalScreen):
         """Update the list using fd based on the search term."""
         self._active_worker = get_current_worker()
         search_term = event.value.strip()
-        fd_exec = config["plugins"]["finder"]["executable"]
+        fd_exec = config["plugins"]["fd"]["executable"]
 
         fd_cmd = [fd_exec]
         if config["settings"]["show_hidden_files"]:
             fd_cmd.append("--hidden")
-        if not config["plugins"]["finder"]["relative_paths"]:
+        if not config["plugins"]["fd"]["relative_paths"]:
             fd_cmd.append("--absolute-path")
-        if config["plugins"]["finder"]["follow_symlinks"]:
+        if config["plugins"]["fd"]["follow_symlinks"]:
             fd_cmd.append("--follow")
-        if config["plugins"]["finder"]["no_ignore_parent"]:
+        if config["plugins"]["fd"]["no_ignore_parent"]:
             fd_cmd.append("--no-ignore-parent")
         for filter_type, should_use in self.FILTER_TYPES.items():
             if should_use:
@@ -365,8 +365,8 @@ class FileSearch(ModalScreen):
             self.FILTER_TYPES[event.selection.value] = (
                 event.selection.value in event.selection_list.selected
             )
-        elif event.selection.value in (config["plugins"]["finder"]):
-            config["plugins"]["finder"][event.selection.value] = (
+        elif event.selection.value in (config["plugins"]["fd"]):
+            config["plugins"]["fd"][event.selection.value] = (
                 event.selection.value in event.selection_list._selected
             )
         self.post_message(

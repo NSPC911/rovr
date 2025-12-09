@@ -168,13 +168,16 @@ description: config schema humanified
     - [8.3.6. Property `Rovr Config > plugins > editor > open_all_in_editor`](#plugins_editor_open_all_in_editor)
     - [8.3.7. Property `Rovr Config > plugins > editor > keybinds`](#plugins_editor_keybinds)
       - [8.3.7.1. Rovr Config > plugins > editor > keybinds > keybind](#plugins_editor_keybinds_items)
-  - [8.4. Property `Rovr Config > plugins > finder`](#plugins_finder)
-    - [8.4.1. Property `Rovr Config > plugins > finder > enabled`](#plugins_finder_enabled)
-    - [8.4.2. Property `Rovr Config > plugins > finder > keybinds`](#plugins_finder_keybinds)
-      - [8.4.2.1. Rovr Config > plugins > finder > keybinds > keybind](#plugins_finder_keybinds_items)
-    - [8.4.3. Property `Rovr Config > plugins > finder > executable`](#plugins_finder_executable)
-    - [8.4.4. Property `Rovr Config > plugins > finder > relative_paths`](#plugins_finder_relative_paths)
-    - [8.4.5. Property `Rovr Config > plugins > finder > follow_symlinks`](#plugins_finder_follow_symlinks)
+  - [8.4. Property `Rovr Config > plugins > fd`](#plugins_fd)
+    - [8.4.1. Property `Rovr Config > plugins > fd > enabled`](#plugins_fd_enabled)
+    - [8.4.2. Property `Rovr Config > plugins > fd > keybinds`](#plugins_fd_keybinds)
+      - [8.4.2.1. Rovr Config > plugins > fd > keybinds > keybind](#plugins_fd_keybinds_items)
+    - [8.4.3. Property `Rovr Config > plugins > fd > executable`](#plugins_fd_executable)
+    - [8.4.4. Property `Rovr Config > plugins > fd > relative_paths`](#plugins_fd_relative_paths)
+    - [8.4.5. Property `Rovr Config > plugins > fd > follow_symlinks`](#plugins_fd_follow_symlinks)
+    - [8.4.6. Property `Rovr Config > plugins > fd > no_ignore_parent`](#plugins_fd_no_ignore_parent)
+    - [8.4.7. Property `Rovr Config > plugins > fd > default_filter_types`](#plugins_fd_default_filter_types)
+      - [8.4.7.1. Rovr Config > plugins > fd > default_filter_types > default_filter_types items](#plugins_fd_default_filter_types_items)
   - [8.5. Property `Rovr Config > plugins > poppler`](#plugins_poppler)
     - [8.5.1. Property `Rovr Config > plugins > poppler > enabled`](#plugins_poppler_enabled)
     - [8.5.2. Property `Rovr Config > plugins > poppler > threads`](#plugins_poppler_threads)
@@ -2433,7 +2436,7 @@ Refer to https://textual.textualize.io/guide/design/#additional-variables for mo
 | [zoxide](#plugins_zoxide)     | object |                   |
 | [bat](#plugins_bat)           | object |                   |
 | [editor](#plugins_editor)     | object |                   |
-| [finder](#plugins_finder)     | object |                   |
+| [fd](#plugins_fd)             | object |                   |
 | [poppler](#plugins_poppler)   | object |                   |
 | [file_one](#plugins_file_one) | object |                   |
 
@@ -2658,7 +2661,7 @@ Must be one of:
 | **Required**           | No                                                              |
 | **Same definition as** | [plugins_zoxide_keybinds_items](#plugins_zoxide_keybinds_items) |
 
-### <a name="plugins_finder"></a>8.4. Property `Rovr Config > plugins > finder`
+### <a name="plugins_fd"></a>8.4. Property `Rovr Config > plugins > fd`
 
 |                           |             |
 | ------------------------- | ----------- |
@@ -2666,15 +2669,17 @@ Must be one of:
 | **Required**              | No          |
 | **Additional properties** | Not allowed |
 
-| Property                                           | Type    | Title/Description                                  |
-| -------------------------------------------------- | ------- | -------------------------------------------------- |
-| [enabled](#plugins_finder_enabled)                 | boolean | Enable recursive file search using fd.             |
-| [keybinds](#plugins_finder_keybinds)               | array   | The keybind to open the file search picker.        |
-| [executable](#plugins_finder_executable)           | string  | fd executable name or path.                        |
-| [relative_paths](#plugins_finder_relative_paths)   | boolean | Whether to show as relative path or absolute path. |
-| [follow_symlinks](#plugins_finder_follow_symlinks) | boolean | Whether fd should follow symlinks when searching.  |
+| Property                                                 | Type                      | Title/Description                                            |
+| -------------------------------------------------------- | ------------------------- | ------------------------------------------------------------ |
+| [enabled](#plugins_fd_enabled)                           | boolean                   | Enable recursive file search using fd.                       |
+| [keybinds](#plugins_fd_keybinds)                         | array                     | The keybind to open the file search picker.                  |
+| [executable](#plugins_fd_executable)                     | string                    | fd executable name or path.                                  |
+| [relative_paths](#plugins_fd_relative_paths)             | boolean                   | Whether to show as relative path or absolute path.           |
+| [follow_symlinks](#plugins_fd_follow_symlinks)           | boolean                   | Whether fd should follow symlinks when searching.            |
+| [no_ignore_parent](#plugins_fd_no_ignore_parent)         | boolean                   | Don't use \*ignore files from parent folders when searching. |
+| [default_filter_types](#plugins_fd_default_filter_types) | array of enum (of string) | The default file types to show when using fd.                |
 
-#### <a name="plugins_finder_enabled"></a>8.4.1. Property `Rovr Config > plugins > finder > enabled`
+#### <a name="plugins_fd_enabled"></a>8.4.1. Property `Rovr Config > plugins > fd > enabled`
 
 |              |           |
 | ------------ | --------- |
@@ -2684,7 +2689,7 @@ Must be one of:
 
 **Description:** Enable recursive file search using fd.
 
-#### <a name="plugins_finder_keybinds"></a>8.4.2. Property `Rovr Config > plugins > finder > keybinds`
+#### <a name="plugins_fd_keybinds"></a>8.4.2. Property `Rovr Config > plugins > fd > keybinds`
 
 |              |         |
 | ------------ | ------- |
@@ -2702,11 +2707,11 @@ Must be one of:
 | **Additional items** | False              |
 | **Tuple validation** | See below          |
 
-| Each item of this array must be           | Description |
-| ----------------------------------------- | ----------- |
-| [keybind](#plugins_finder_keybinds_items) |             |
+| Each item of this array must be       | Description |
+| ------------------------------------- | ----------- |
+| [keybind](#plugins_fd_keybinds_items) |             |
 
-##### <a name="plugins_finder_keybinds_items"></a>8.4.2.1. Rovr Config > plugins > finder > keybinds > keybind
+##### <a name="plugins_fd_keybinds_items"></a>8.4.2.1. Rovr Config > plugins > fd > keybinds > keybind
 
 |                        |                                                                 |
 | ---------------------- | --------------------------------------------------------------- |
@@ -2714,7 +2719,7 @@ Must be one of:
 | **Required**           | No                                                              |
 | **Same definition as** | [plugins_zoxide_keybinds_items](#plugins_zoxide_keybinds_items) |
 
-#### <a name="plugins_finder_executable"></a>8.4.3. Property `Rovr Config > plugins > finder > executable`
+#### <a name="plugins_fd_executable"></a>8.4.3. Property `Rovr Config > plugins > fd > executable`
 
 |              |          |
 | ------------ | -------- |
@@ -2724,7 +2729,7 @@ Must be one of:
 
 **Description:** fd executable name or path.
 
-#### <a name="plugins_finder_relative_paths"></a>8.4.4. Property `Rovr Config > plugins > finder > relative_paths`
+#### <a name="plugins_fd_relative_paths"></a>8.4.4. Property `Rovr Config > plugins > fd > relative_paths`
 
 |              |           |
 | ------------ | --------- |
@@ -2734,7 +2739,7 @@ Must be one of:
 
 **Description:** Whether to show as relative path or absolute path.
 
-#### <a name="plugins_finder_follow_symlinks"></a>8.4.5. Property `Rovr Config > plugins > finder > follow_symlinks`
+#### <a name="plugins_fd_follow_symlinks"></a>8.4.5. Property `Rovr Config > plugins > fd > follow_symlinks`
 
 |              |           |
 | ------------ | --------- |
@@ -2743,6 +2748,57 @@ Must be one of:
 | **Default**  | `false`   |
 
 **Description:** Whether fd should follow symlinks when searching.
+
+#### <a name="plugins_fd_no_ignore_parent"></a>8.4.6. Property `Rovr Config > plugins > fd > no_ignore_parent`
+
+|              |           |
+| ------------ | --------- |
+| **Type**     | `boolean` |
+| **Required** | No        |
+| **Default**  | `false`   |
+
+**Description:** Don't use \*ignore files from parent folders when searching.
+
+#### <a name="plugins_fd_default_filter_types"></a>8.4.7. Property `Rovr Config > plugins > fd > default_filter_types`
+
+|              |                             |
+| ------------ | --------------------------- |
+| **Type**     | `array of enum (of string)` |
+| **Required** | No                          |
+| **Default**  | `["file", "directory"]`     |
+
+**Description:** The default file types to show when using fd.
+
+|                      | Array restrictions |
+| -------------------- | ------------------ |
+| **Min items**        | N/A                |
+| **Max items**        | N/A                |
+| **Items unicity**    | False              |
+| **Additional items** | False              |
+| **Tuple validation** | See below          |
+
+| Each item of this array must be                                      | Description |
+| -------------------------------------------------------------------- | ----------- |
+| [default_filter_types items](#plugins_fd_default_filter_types_items) |             |
+
+##### <a name="plugins_fd_default_filter_types_items"></a>8.4.7.1. Rovr Config > plugins > fd > default_filter_types > default_filter_types items
+
+|              |                    |
+| ------------ | ------------------ |
+| **Type**     | `enum (of string)` |
+| **Required** | No                 |
+
+Must be one of:
+
+- "file"
+- "directory"
+- "symlink"
+- "executable"
+- "empty"
+- "socket"
+- "pipe"
+- "char-device"
+- "block-device"
 
 ### <a name="plugins_poppler"></a>8.5. Property `Rovr Config > plugins > poppler`
 

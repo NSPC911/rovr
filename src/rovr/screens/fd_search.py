@@ -24,6 +24,10 @@ from rovr.functions.utils import check_key
 from rovr.variables.constants import config, vindings
 from rovr.variables.maps import FD_TYPE_TO_ALIAS
 
+INITIAL_FILTER_TYPES: dict[str, bool] = {
+    ft: (ft in config["plugins"]["fd"]["default_filter_types"]) for ft in FD_TYPE_TO_ALIAS
+}
+
 
 class FileSearchOptionList(OptionList):
     async def _on_click(self, event: events.Click) -> None:
@@ -66,15 +70,19 @@ class FileSearchToggles(SelectionList):
                 config["plugins"]["fd"]["no_ignore_parent"],
             ),
             Selection("Filter Type", "", False, disabled=True),
-            Selection("Files", "file", True),
-            Selection("Folders", "directory", True),
-            Selection("Symlinks", "symlink", False),
-            Selection("Executables", "executable", False),
-            Selection("Empty", "empty", False),
-            Selection("Socket", "socket", False),
-            Selection("Pipe", "pipe", False),
-            Selection("Char-Device", "char-device", False),
-            Selection("Block-Device", "block-device", False),
+            Selection("Files", "file", INITIAL_FILTER_TYPES["file"]),
+            Selection("Folders", "directory", INITIAL_FILTER_TYPES["directory"]),
+            Selection("Symlinks", "symlink", INITIAL_FILTER_TYPES["symlink"]),
+            Selection("Executables", "executable", INITIAL_FILTER_TYPES["executable"]),
+            Selection("Empty", "empty", INITIAL_FILTER_TYPES["empty"]),
+            Selection("Socket", "socket", INITIAL_FILTER_TYPES["socket"]),
+            Selection("Pipe", "pipe", INITIAL_FILTER_TYPES["pipe"]),
+            Selection(
+                "Char-Device", "char-device", INITIAL_FILTER_TYPES["char-device"]
+            ),
+            Selection(
+                "Block-Device", "block-device", INITIAL_FILTER_TYPES["block-device"]
+            ),
             id="file_search_toggles",
         )
 
@@ -193,17 +201,7 @@ class FileSearchToggles(SelectionList):
 class FileSearch(ModalScreen):
     """Search for files recursively using fd."""
 
-    FILTER_TYPES: dict[str, bool] = {
-        "file": True,
-        "directory": True,
-        "symlink": False,
-        "executable": False,
-        "empty": False,
-        "socket": False,
-        "pipe": False,
-        "char-device": False,
-        "block-device": False,
-    }
+    FILTER_TYPES: dict[str, bool] = INITIAL_FILTER_TYPES.copy()
 
     def __init__(self, **kwargs) -> None:
         super().__init__(**kwargs)

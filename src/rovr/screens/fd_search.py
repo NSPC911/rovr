@@ -366,7 +366,7 @@ class FileSearch(ModalScreen):
             )
         elif event.selection.value in (config["plugins"]["fd"]):
             config["plugins"]["fd"][event.selection.value] = (
-                event.selection.value in event.selection_list._selected
+                event.selection.value in event.selection_list.selected
             )
         self.post_message(
             Input.Changed(self.search_input, value=self.search_input.value)

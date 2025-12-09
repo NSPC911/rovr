@@ -407,7 +407,7 @@ class Application(App, inherit_bindings=False):
 
                     self.push_screen(FileSearch(), on_response)
                 except Exception as exc:
-                    self.notify(str(exc), title="Finder", severity="error")
+                    self.notify(str(exc), title="Plugins: fd", severity="error")
             else:
                 self.notify(
                     f"{config['plugins']['fd']['executable']} cannot be found in PATH.",

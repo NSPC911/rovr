@@ -27,21 +27,26 @@ def get_icon_for_file(location: str) -> list[str]:
     """
     if not config["interface"]["nerd_font"]:
         return ASCII_ICONS["file"]["default"]
+
+    # 0. check junction/symlink
+    if path.islink(location):
+        return ICONS["general"]["symlink"]
+
     file_name = path.basename(location).lower()
 
-    # 0. Check for custom icons if configured
+    # 1. Check for custom icons if configured
     if "icons" in config and "files" in config["icons"]:
         for custom_icon in config["icons"]["files"]:
             pattern = custom_icon["pattern"].lower()
             if fnmatch.fnmatch(file_name, pattern):
                 return [custom_icon["icon"], custom_icon["color"]]
 
-    # 1. Check for full filename match
+    # 2. Check for full filename match
     if file_name in FILES_MAP:
         icon_key = FILES_MAP[file_name]
         return ICONS["file"].get(icon_key, ICONS["file"]["default"])
 
-    # 2. Check for extension match
+    # 3. Check for extension match
     if "." in file_name:
         # This is for hidden files like `.gitignore`
         extension = "." + file_name.split(".")[-1]
@@ -49,7 +54,7 @@ def get_icon_for_file(location: str) -> list[str]:
             icon_key = FILE_MAP[extension]
             return ICONS["file"].get(icon_key, ICONS["file"]["default"])
 
-    # 3. Default icon
+    # 4. Default icon
     return ICONS["file"]["default"]
 
 
@@ -63,24 +68,29 @@ def get_icon_for_folder(location: str) -> list[str]:
     Returns:
         list: The icon and color for the folder.
     """
+    if not config["interface"]["nerd_font"]:
+        return ASCII_ICONS["folder"]["default"]
+
+    # 0. check junction/symlink
+    if path.islink(location) or path.isjunction(location):
+        return ICONS["general"]["symlink"]
+
     folder_name = path.basename(location).lower()
 
-    if not config["interface"]["nerd_font"]:
-        return ASCII_ICONS["folder"].get(folder_name, ASCII_ICONS["folder"]["default"])
-
-    # 0. Check for custom icons if configured
+    # 1. Check for custom icons if configured
     if "icons" in config and "folders" in config["icons"]:
         for custom_icon in config["icons"]["folders"]:
             pattern = custom_icon["pattern"].lower()
             if fnmatch.fnmatch(folder_name, pattern):
                 return [custom_icon["icon"], custom_icon["color"]]
 
-    # Check for special folder types
+    # 2. Check for special folder types
     if folder_name in FOLDER_MAP:
         icon_key = FOLDER_MAP[folder_name]
         return ICONS["folder"].get(icon_key, ICONS["folder"]["default"])
-    else:
-        return ICONS["folder"]["default"]
+
+    # 3. Default icon
+    return ICONS["folder"]["default"]
 
 
 @lru_cache(maxsize=1024)

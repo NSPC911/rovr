@@ -3,7 +3,7 @@
   <style>
     @font-face {
       font-family: "CaskaydiaCoveNFM";
-      src: url("https://nspc911.github.io/rovr/caskaydiacovenfm.ttf") format("truetype");
+      src: url("/rovr/caskaydiacovenfm.ttf") format("truetype");
     }
 
     [class^="terminal"][class$="title"],

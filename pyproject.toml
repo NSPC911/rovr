@@ -79,6 +79,7 @@ check.sequence = [
   { cmd = "ruff check" }
 ]
 format = "ruff check --unsafe-fixes --fix"
+"screenshot-format" = "pnpx prettier --write docs/public/screenshots/*.svg --parser html --bracket-same-line --print-width 160"
 
 [tool.ruff.lint]
 select = [

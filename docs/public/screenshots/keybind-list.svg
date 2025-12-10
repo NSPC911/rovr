@@ -1,6 +1,11 @@
 <svg class="rich-terminal" viewBox="0 0 1543 855.1999999999999" xmlns="http://www.w3.org/2000/svg">
   <!-- Generated with Rich https://www.textualize.io -->
   <style>
+    @font-face {
+      font-family: "CaskaydiaCoveNFM";
+      src: url("https://nspc911.github.io/rovr/caskaydiacovenfm.ttf") format("truetype");
+    }
+
     [class^=terminal][class$=title],
     [class^=terminal][class$=matrix] {
       font-family: "CaskaydiaCoveNFM" !important;

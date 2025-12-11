@@ -1,4 +1,5 @@
 import asyncio
+from os import path
 from typing import ClassVar
 
 from rich.segment import Segment
@@ -9,6 +10,7 @@ from textual.content import Content
 from textual.strip import Strip
 from textual.widgets import Button, SelectionList
 from textual.widgets.option_list import OptionDoesNotExist
+from textual.worker import Worker
 
 from rovr.classes import ClipboardSelection
 from rovr.functions import icons as icon_utils
@@ -23,18 +25,22 @@ class Clipboard(SelectionList, inherit_bindings=False):
     def __init__(self, **kwargs) -> None:
         super().__init__(**kwargs)
         self.clipboard_contents = []
+        self._checker_worker: Worker | None = None
 
     def on_mount(self) -> None:
         self.paste_button: Button = self.app.query_one("#paste")
         self.paste_button.disabled = True
         self.file_list = self.app.query_one("#file_list")
+        self.set_interval(
+            5, self.checker_wrapper, name="Check existence of clipboard items"
+        )
 
     @work
     async def copy_to_clipboard(self, items: list[str]) -> None:
         """Copy the selected files to the clipboard"""
         self.deselect_all()
-        await asyncio.sleep(0)
         for item in items[::-1]:
+            await asyncio.sleep(0)
             self.insert_selection_at_beginning(
                 ClipboardSelection(
                     prompt=Content(
@@ -51,8 +57,8 @@ class Clipboard(SelectionList, inherit_bindings=False):
     async def cut_to_clipboard(self, items: list[str]) -> None:
         """Cut the selected files to the clipboard."""
         self.deselect_all()
-        await asyncio.sleep(0)
         for item in items[::-1]:
+            await asyncio.sleep(0)
             if isinstance(item, str):
                 self.insert_selection_at_beginning(
                     ClipboardSelection(
@@ -195,3 +201,15 @@ class Clipboard(SelectionList, inherit_bindings=False):
         self, event: SelectionList.SelectedChanged
     ) -> None:
         self.paste_button.disabled = len(self.selected) == 0
+
+    @work(thread=True)
+    def check_clipboard_existence(self) -> None:
+        """Check if the files in the clipboard still exist."""
+        for option in self.options:
+            if not path.exists(option.path):
+                assert isinstance(option.id, str)
+                self.app.call_from_thread(self.remove_option, option.id)
+
+    def checker_wrapper(self) -> None:
+        if self._checker_worker is None or not self._checker_worker.is_running:
+            self._checker_worker: Worker = self.check_clipboard_existence()

@@ -4,6 +4,14 @@ from textual.containers import Container, Grid, HorizontalGroup, VerticalGroup
 from textual.screen import ModalScreen
 from textual.widgets import Button, Label, Switch
 
+from rovr.functions.utils import check_key, get_shortest_bind
+from rovr.variables.constants import config
+
+retry_bind = get_shortest_bind(config["keybinds"]["file_in_use"]["retry"])
+cancel_bind = get_shortest_bind(config["keybinds"]["file_in_use"]["cancel"])
+skip_bind = get_shortest_bind(config["keybinds"]["file_in_use"]["skip"])
+dont_ask_bind = get_shortest_bind(config["keybinds"]["file_in_use"]["dont_ask_again"])
+
 
 class FileInUse(ModalScreen):
     """Screen to show when a file is in use by another process on Windows."""
@@ -17,13 +25,13 @@ class FileInUse(ModalScreen):
             with VerticalGroup(id="question_container"):
                 for message in self.message.splitlines():
                     yield Label(message, classes="question")
-            yield Button("\\[R]etry", variant="primary", id="try_again")
-            yield Button("\\[S]kip", variant="warning", id="skip")
+            yield Button(f"\\[{retry_bind}] Retry", variant="primary", id="try_again")
+            yield Button(f"\\[{skip_bind}] Skip", variant="warning", id="skip")
             with Container():
-                yield Button("\\[C]ancel", variant="error", id="cancel")
+                yield Button(f"\\[{cancel_bind}] Cancel", variant="error", id="cancel")
             with HorizontalGroup(id="dontAskAgain"):
                 yield Switch()
-                yield Label("Apply to \\[a]ll")
+                yield Label(f"[{dont_ask_bind}] Don't ask again")
 
     def on_mount(self) -> None:
         self.query_one("#dialog").border_title = "File in Use"
@@ -32,27 +40,24 @@ class FileInUse(ModalScreen):
         # Optionally add padding or styling here if needed for consistency
 
     def on_key(self, event: events.Key) -> None:
-        """Handle key presses: R -> Try Again, Escape/C -> Cancel, S -> Skip, A -> Toggle."""
-        match event.key.lower():
-            case "r":
-                event.stop()
-                self.dismiss({
-                    "value": "try_again",
-                    "toggle": self.query_one(Switch).value,
-                })
-            case "escape" | "c":
-                event.stop()
-                # treat escape/c as cancel
-                self.dismiss({
-                    "value": "cancel",
-                    "toggle": self.query_one(Switch).value,
-                })
-            case "s":
-                event.stop()
-                self.dismiss({"value": "skip", "toggle": self.query_one(Switch).value})
-            case "a":
-                event.stop()
-                self.query_one(Switch).action_toggle_switch()
+        if check_key(event, config["keybinds"]["file_in_use"]["retry"]):
+            event.stop()
+            self.dismiss({
+                "value": "try_again",
+                "toggle": self.query_one(Switch).value,
+            })
+        elif check_key(event, config["keybinds"]["file_in_use"]["cancel"]):
+            event.stop()
+            self.dismiss({
+                "value": "cancel",
+                "toggle": self.query_one(Switch).value,
+            })
+        elif check_key(event, config["keybinds"]["file_in_use"]["skip"]):
+            event.stop()
+            self.dismiss({"value": "skip", "toggle": self.query_one(Switch).value})
+        elif check_key(event, config["keybinds"]["file_in_use"]["dont_ask_again"]):
+            event.stop()
+            self.query_one(Switch).action_toggle_switch()
 
     def on_button_pressed(self, event: Button.Pressed) -> None:
         self.dismiss({

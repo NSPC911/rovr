@@ -3,7 +3,6 @@ import shutil
 import tarfile
 import time
 import zipfile
-from contextlib import suppress
 from os import path
 from typing import Callable
 
@@ -14,7 +13,6 @@ from textual.containers import HorizontalGroup, VerticalGroup, VerticalScroll
 from textual.renderables.bar import Bar as BarRenderable
 from textual.types import UnusedParameter
 from textual.widgets import Label, ProgressBar
-from textual.widgets.option_list import OptionDoesNotExist
 
 from rovr.classes import Archive
 from rovr.functions import icons as icon_utils
@@ -137,6 +135,7 @@ class ProgressBarContainer(VerticalGroup, inherit_bindings=False):
             self.notify(
                 message=notify["message"], severity="error", title=notify["title"]
             )
+        self.app.query_one("Clipboard").checker_wrapper()
 
 
 class ProcessContainer(VerticalScroll):
@@ -344,6 +343,7 @@ class ProcessContainer(VerticalScroll):
         )
         self.app.call_from_thread(bar.progress_bar.advance)
         self.app.call_from_thread(bar.add_class, "done")
+        self.app.query_one("Clipboard").checker_wrapper()
 
     def _handle_file_in_use_error(
         self,
@@ -937,15 +937,7 @@ class ProcessContainer(VerticalScroll):
                 bar_text=path.basename(cutted[-1]),
             )
             return
-        # remove from clipboard
-        for item in cutted:
-            # cant bother to figure out how this happens,
-            # just catch it
-            with suppress(OptionDoesNotExist):
-                self.app.call_from_thread(
-                    self.app.query_one("Clipboard").remove_option,
-                    path_utils.compress(item),
-                )
+        self.app.query_one("Clipboard").checker_wrapper()
         self.app.call_from_thread(
             bar.update_icon,
             icon_utils.get_icon("general", "cut" if len(cutted) else "copy")[0],

@@ -1,8 +1,8 @@
 from contextlib import suppress
 from os import path
-from typing import Literal, TypedDict
+from typing import Literal, TypedDict, cast
 
-import toml
+import tomli
 from textual.css.query import NoMatches
 from textual.reactive import reactive
 from textual.widget import Widget
@@ -52,8 +52,8 @@ class StateManager(Widget):
         self._is_loading = True
         if path.exists(self.state_file):
             try:
-                with open(self.state_file, "r", encoding="utf-8") as f:
-                    loaded_state: StateDict = toml.load(f)
+                with open(self.state_file, "rb") as f:
+                    loaded_state: StateDict = cast(StateDict, tomli.load(f))
                     # Check for version change
                     # TODO: do something with this later, maybe for messages
                     # or breaking changes <- need to refactor config because
@@ -84,7 +84,7 @@ class StateManager(Widget):
                     ]:
                         self.sort_by = "name"
                     self.sort_descending = loaded_state.get("sort_descending", False)
-            except (toml.TomlDecodeError, OSError):
+            except (tomli.TOMLDecodeError, OSError):
                 self._create_default_state()
         else:
             self._create_default_state()
@@ -104,16 +104,14 @@ class StateManager(Widget):
             return
         try:
             with open(self.state_file, "w", encoding="utf-8") as f:
-                state: StateDict = {
-                    "current_version": self.current_version,
-                    "pinned_sidebar_visible": self.pinned_sidebar_visible,
-                    "preview_sidebar_visible": self.preview_sidebar_visible,
-                    "footer_visible": self.footer_visible,
-                    "menuwrapper_visible": self.menuwrapper_visible,
-                    "sort_by": self.sort_by,
-                    "sort_descending": self.sort_descending,
-                }
-                toml.dump(state, f)
+                f.write(f"""current_version = "{self.current_version}"
+pinned_sidebar_visible = {str(self.pinned_sidebar_visible).lower()}
+preview_sidebar_visible = {str(self.preview_sidebar_visible).lower()}
+footer_visible = {str(self.footer_visible).lower()}
+menuwrapper_visible = {str(self.menuwrapper_visible).lower()}
+sort_by = "{self.sort_by}"
+sort_descending = {str(self.sort_descending).lower()}
+""")
         except (OSError, PermissionError) as exc:
             self.notify(
                 f"Attempted to write state file, but {type(exc).__name__} occurred\n{exc}",

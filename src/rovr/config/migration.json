@@ -42,5 +42,19 @@
       "- [bright_cyan]interface.compact_mode.panels[/] makes the panels smaller so that there is more space for the actual file list."
     ],
     "extra": "Expanded in v0.5.0"
+  },
+  {
+    "keys": [
+      "plugins.finder.enabled",
+      "plugins.finder.keybinds",
+      "plugins.finder.executable",
+      "plugins.finder.relative_paths",
+      "plugins.finder.follow_symlinks",
+      "plugins.finder.no_ignore_parent"
+    ],
+    "message": [
+      "[bright_blue]plugins.finder.*[/] has been moved to [bright_cyan]plugins.fd.*[/] to keep it consistent with what it is interfacing with."
+    ],
+    "extra": "Expanded in v0.6.0"
   }
 ]

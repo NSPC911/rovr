@@ -81,7 +81,7 @@ class ModalInput(ModalScreen):
                         # be properly printed, so I'm leaving this here
                         # in case someone else gets the same issue
                         # so that they can create a new issue ^_^
-                        raise IndexError(event.validation_result) from None
+                        raise IndexError(f"Empty failure description.\nIf you see this, create an issue, thanks!\n{event.validation_result=}, {event.value=}") from None
                 else:
                     # valid_empty = False
                     self.horizontal_group.border_subtitle = (

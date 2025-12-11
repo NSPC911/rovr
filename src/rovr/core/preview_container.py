@@ -80,7 +80,7 @@ class PreviewContainer(Container):
         if loading and all(
             not worker.is_running
             and worker.node is self
-            and worker.name == "_perform_update"
+            and worker.name == "perform_show_preview"
             for worker in self.app.workers
         ):
             return
@@ -732,9 +732,7 @@ class PreviewContainer(Container):
                 return
             await self.show_pdf_preview()
         elif self.border_title == titles.archive:
-            widget = (
-                self if self.border_title == titles.bat else self.query_one(FileList)
-            )
+            widget: FileList = self.query_one(FileList)
             if check_key(event, config["keybinds"]["up"]):
                 event.stop()
                 widget.scroll_up(animate=False)

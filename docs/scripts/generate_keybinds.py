@@ -23,7 +23,7 @@ this page provides a comprehensive list of the default keybindings in `rovr`. yo
 | action | default hotkey | description |
 | ------ | -------------- | ----------- |"""
 try:
-    with open("src/rovr/config/config.toml", "rb", encoding="utf-8") as file:
+    with open("src/rovr/config/config.toml", "rb") as file:
         binds: dict = tomli.load(file)["keybinds"]
     with open("src/rovr/config/schema.json", "r", encoding="utf-8") as file:
         sub_schema: dict = ujson.load(file)["properties"]["keybinds"]["properties"]

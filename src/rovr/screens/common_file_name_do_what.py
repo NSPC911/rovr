@@ -4,34 +4,14 @@ from textual.containers import Grid, HorizontalGroup, VerticalGroup
 from textual.screen import ModalScreen
 from textual.widgets import Button, Label, Switch
 
-from rovr.functions.utils import check_key
+from rovr.functions.utils import check_key, get_shortest_bind
 from rovr.variables.constants import config
 
-least_len: tuple[int | None, str] = (None, "")
-for bind in config["keybinds"]["filename_conflict"]["overwrite"]:
-    if least_len[0] is None or least_len[0] > len(bind):
-        least_len = (len(bind), bind)
-overwrite_bind = least_len[1]
-least_len: tuple[int | None, str] = (None, "")
-for bind in config["keybinds"]["filename_conflict"]["rename"]:
-    if least_len[0] is None or least_len[0] > len(bind):
-        least_len = (len(bind), bind)
-rename_bind = least_len[1]
-least_len: tuple[int | None, str] = (None, "")
-for bind in config["keybinds"]["filename_conflict"]["skip"]:
-    if least_len[0] is None or least_len[0] > len(bind):
-        least_len = (len(bind), bind)
-skip_bind = least_len[1]
-least_len: tuple[int | None, str] = (None, "")
-for bind in config["keybinds"]["filename_conflict"]["cancel"]:
-    if least_len[0] is None or least_len[0] > len(bind):
-        least_len = (len(bind), bind)
-cancel_bind = least_len[1]
-least_len: tuple[int | None, str] = (None, "")
-for bind in config["keybinds"]["filename_conflict"]["dont_ask_again"]:
-    if least_len[0] is None or least_len[0] > len(bind):
-        least_len = (len(bind), bind)
-dont_ask_bind = least_len[1]
+overwrite_bind = get_shortest_bind(config["keybinds"]["filename_conflict"]["overwrite"])
+rename_bind = get_shortest_bind(config["keybinds"]["filename_conflict"]["rename"])
+skip_bind = get_shortest_bind(config["keybinds"]["filename_conflict"]["skip"])
+cancel_bind = get_shortest_bind(config["keybinds"]["filename_conflict"]["cancel"])
+dont_ask_bind = get_shortest_bind(config["keybinds"]["filename_conflict"]["dont_ask_again"])
 
 
 class CommonFileNameDoWhat(ModalScreen):

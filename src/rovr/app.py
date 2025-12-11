@@ -395,7 +395,7 @@ class Application(App, inherit_bindings=False):
                 try:
 
                     def on_response(selected: str | None) -> None:
-                        if selected is None:
+                        if selected is None or selected == "":
                             return
                         if path.isdir(selected):
                             self.cd(selected)
@@ -703,7 +703,7 @@ class Application(App, inherit_bindings=False):
                     lambda: self.set_timer(0.1, self._toggle_transparency),
                 )
 
-        if config["plugins"]["fd"]["enabled"] and config["plugins"]["fd"]["keybinds"]:
+        if config["plugins"]["fd"]["enabled"] and len(config["plugins"]["fd"]["keybinds"]) > 0:
             yield SystemCommand(
                 "Open fd",
                 "Start searching the current directory using `fd`",

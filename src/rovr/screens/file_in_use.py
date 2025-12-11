@@ -4,29 +4,13 @@ from textual.containers import Container, Grid, HorizontalGroup, VerticalGroup
 from textual.screen import ModalScreen
 from textual.widgets import Button, Label, Switch
 
-from rovr.functions.utils import check_key
+from rovr.functions.utils import check_key, get_shortest_bind
 from rovr.variables.constants import config
 
-least_len: tuple[int | None, str] = (None, "")
-for bind in config["keybinds"]["file_in_use"]["retry"]:
-    if least_len[0] is None or least_len[0] > len(bind):
-        least_len = (len(bind), bind)
-retry_bind = least_len[1]
-least_len: tuple[int | None, str] = (None, "")
-for bind in config["keybinds"]["file_in_use"]["cancel"]:
-    if least_len[0] is None or least_len[0] > len(bind):
-        least_len = (len(bind), bind)
-cancel_bind = least_len[1]
-least_len: tuple[int | None, str] = (None, "")
-for bind in config["keybinds"]["file_in_use"]["skip"]:
-    if least_len[0] is None or least_len[0] > len(bind):
-        least_len = (len(bind), bind)
-skip_bind = least_len[1]
-least_len: tuple[int | None, str] = (None, "")
-for bind in config["keybinds"]["file_in_use"]["dont_ask_again"]:
-    if least_len[0] is None or least_len[0] > len(bind):
-        least_len = (len(bind), bind)
-dont_ask_bind = least_len[1]
+retry_bind = get_shortest_bind(config["keybinds"]["file_in_use"]["retry"])
+cancel_bind = get_shortest_bind(config["keybinds"]["file_in_use"]["cancel"])
+skip_bind = get_shortest_bind(config["keybinds"]["file_in_use"]["skip"])
+dont_ask_bind = get_shortest_bind(config["keybinds"]["file_in_use"]["dont_ask_again"])
 
 
 class FileInUse(ModalScreen):

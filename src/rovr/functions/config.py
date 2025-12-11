@@ -41,7 +41,7 @@ def toml_dump(doc_path: str, exception: tomli.TOMLDecodeError) -> None:
 
     Args:
         doc_path (str): the path to the document
-        exception (toml.TOMLDecodeError): the exception that occurred
+        exception (tomli.TOMLDecodeError): the exception that occurred
     """
     doc: list = exception.doc.splitlines()
     start: int = max(exception.lineno - 3, 0)

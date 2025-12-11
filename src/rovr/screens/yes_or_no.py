@@ -4,24 +4,12 @@ from textual.containers import Grid, HorizontalGroup, VerticalGroup
 from textual.screen import ModalScreen
 from textual.widgets import Button, Label, Switch
 
-from rovr.functions.utils import check_key
+from rovr.functions.utils import check_key, get_shortest_bind
 from rovr.variables.constants import config
 
-least_len: tuple[int | None, str] = (None, "")
-for bind in config["keybinds"]["yes_or_no"]["yes"]:
-    if least_len[0] is None or least_len[0] > len(bind):
-        least_len = (len(bind), bind)
-yes_bind = least_len[1]
-least_len: tuple[int | None, str] = (None, "")
-for bind in config["keybinds"]["yes_or_no"]["no"]:
-    if least_len[0] is None or least_len[0] > len(bind):
-        least_len = (len(bind), bind)
-no_bind = least_len[1]
-least_len: tuple[int | None, str] = (None, "")
-for bind in config["keybinds"]["yes_or_no"]["dont_ask_again"]:
-    if least_len[0] is None or least_len[0] > len(bind):
-        least_len = (len(bind), bind)
-dont_ask_bind = least_len[1]
+yes_bind = get_shortest_bind(config["keybinds"]["yes_or_no"]["yes"])
+no_bind = get_shortest_bind(config["keybinds"]["yes_or_no"]["no"])
+dont_ask_bind = get_shortest_bind(config["keybinds"]["yes_or_no"]["dont_ask_again"])
 
 
 class YesOrNo(ModalScreen):

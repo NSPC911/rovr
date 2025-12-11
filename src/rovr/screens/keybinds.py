@@ -88,7 +88,7 @@ class KeybindList(OptionList, inherit_bindings=False):
                     formatted_keys = "<disabled>"
                     primary_keys.append("")
                 else:
-                    formatted_keys = " ".join(f"<{key}>" for key in value["keybinds"])
+                    formatted_keys = " ".join(f"<{k}>" for k in value["keybinds"])
                     primary_keys.append(value["keybinds"][0])
                 plugins_properties = plugins_schema[key]["properties"]
                 display_name = plugins_properties["keybinds"].get("display_name", key)

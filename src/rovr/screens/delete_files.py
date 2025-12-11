@@ -4,8 +4,12 @@ from textual.containers import Container, Grid
 from textual.screen import ModalScreen
 from textual.widgets import Button, Label
 
-from rovr.functions.utils import check_key
+from rovr.functions.utils import check_key, get_shortest_bind
 from rovr.variables.constants import config
+
+delete_bind = get_shortest_bind(config["keybinds"]["delete_files"]["delete"])
+trash_bind = get_shortest_bind(config["keybinds"]["delete_files"]["trash"])
+cancel_bind = get_shortest_bind(config["keybinds"]["delete_files"]["cancel"])
 
 
 class DeleteFiles(ModalScreen):
@@ -19,13 +23,13 @@ class DeleteFiles(ModalScreen):
         with Grid(id="dialog"):
             yield Label(self.message, id="question")
             if config["settings"]["use_recycle_bin"]:
-                yield Button("\\[D] Trash", variant="warning", id="trash")
-                yield Button("\\[X] Delete", variant="error", id="delete")
+                yield Button(f"\\[{trash_bind}] Trash", variant="warning", id="trash")
+                yield Button(f"\\[{delete_bind}] Delete", variant="error", id="delete")
                 with Container():
-                    yield Button("\\[C]ancel", variant="primary", id="cancel")
+                    yield Button(f"\\[{cancel_bind}] Cancel", variant="primary", id="cancel")
             else:
-                yield Button("\\[X] Delete", variant="error", id="delete")
-                yield Button("\\[C]ancel", variant="primary", id="cancel")
+                yield Button(f"\\[{delete_bind}] Delete", variant="error", id="delete")
+                yield Button(f"\\[{cancel_bind}] Cancel", variant="primary", id="cancel")
 
     def on_button_pressed(self, event: Button.Pressed) -> None:
         """Handle button presses."""

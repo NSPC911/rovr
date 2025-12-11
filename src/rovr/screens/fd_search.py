@@ -88,7 +88,7 @@ class FileSearchToggles(SelectionList):
         )
 
     def on_mount(self) -> None:
-        self.border_title = "Finder Options"
+        self.border_title = "fd options"
 
     # Use better versions of the checkbox icons
     def _get_left_gutter_width(

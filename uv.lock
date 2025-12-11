@@ -949,7 +949,7 @@ requires-dist = [
     { name = "rarfile", specifier = ">=4.2" },
     { name = "rich-click", specifier = ">=1.9.3" },
     { name = "send2trash", specifier = ">=1.8.3" },
-    { name = "textual", specifier = "~=6.6.0" },
+    { name = "textual", specifier = "~=6.8.0" },
     { name = "textual-autocomplete", specifier = ">=4.0.6" },
     { name = "textual-image", extras = ["textual"], specifier = ">=0.8.4" },
     { name = "tomli", specifier = ">=2.3.0" },
@@ -1065,7 +1065,7 @@ wheels = [
 
 [[package]]
 name = "textual"
-version = "6.6.0"
+version = "6.8.0"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "markdown-it-py", extra = ["linkify"] },
@@ -1075,9 +1075,9 @@ dependencies = [
     { name = "rich" },
     { name = "typing-extensions" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/f6/2f/f0b408f227edca21d1996c1cd0b65309f0cbff44264aa40aded3ff9ce2e1/textual-6.6.0.tar.gz", hash = "sha256:53345166d6b0f9fd028ed0217d73b8f47c3a26679a18ba3b67616dcacb470eec", size = 1579327, upload-time = "2025-11-10T17:50:00.038Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/c8/8f/aeccf7459e3d71cbca912a27a97f1fcb00735326f90714d22fa540d3848e/textual-6.8.0.tar.gz", hash = "sha256:7efe618ec9197466b8fe536aefabb678edf30658b9dc58a763365d7daed12b62", size = 1581639, upload-time = "2025-12-07T17:53:46.681Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/53/b3/95ab646b0c908823d71e49ab8b5949ec9f33346cee3897d1af6be28a8d91/textual-6.6.0-py3-none-any.whl", hash = "sha256:5a9484bd15ee8a6fd8ac4ed4849fb25ee56bed2cecc7b8a83c4cd7d5f19515e5", size = 712606, upload-time = "2025-11-10T17:49:58.391Z" },
+    { url = "https://files.pythonhosted.org/packages/47/34/4f1bad936ac3ad94c8576b15660d4ce434f7dbd372baa53566a490bcdce3/textual-6.8.0-py3-none-any.whl", hash = "sha256:074d389ba8c6c98c74e2a4fe1493ea3a38f3ee5008697e98f71daa2cf8ab8fda", size = 714378, upload-time = "2025-12-07T17:53:44.501Z" },
 ]
 
 [[package]]

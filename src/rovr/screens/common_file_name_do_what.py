@@ -11,7 +11,9 @@ overwrite_bind = get_shortest_bind(config["keybinds"]["filename_conflict"]["over
 rename_bind = get_shortest_bind(config["keybinds"]["filename_conflict"]["rename"])
 skip_bind = get_shortest_bind(config["keybinds"]["filename_conflict"]["skip"])
 cancel_bind = get_shortest_bind(config["keybinds"]["filename_conflict"]["cancel"])
-dont_ask_bind = get_shortest_bind(config["keybinds"]["filename_conflict"]["dont_ask_again"])
+dont_ask_bind = get_shortest_bind(
+    config["keybinds"]["filename_conflict"]["dont_ask_again"]
+)
 
 
 class CommonFileNameDoWhat(ModalScreen):

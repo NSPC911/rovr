@@ -26,10 +26,14 @@ class DeleteFiles(ModalScreen):
                 yield Button(f"\\[{trash_bind}] Trash", variant="warning", id="trash")
                 yield Button(f"\\[{delete_bind}] Delete", variant="error", id="delete")
                 with Container():
-                    yield Button(f"\\[{cancel_bind}] Cancel", variant="primary", id="cancel")
+                    yield Button(
+                        f"\\[{cancel_bind}] Cancel", variant="primary", id="cancel"
+                    )
             else:
                 yield Button(f"\\[{delete_bind}] Delete", variant="error", id="delete")
-                yield Button(f"\\[{cancel_bind}] Cancel", variant="primary", id="cancel")
+                yield Button(
+                    f"\\[{cancel_bind}] Cancel", variant="primary", id="cancel"
+                )
 
     def on_button_pressed(self, event: Button.Pressed) -> None:
         """Handle button presses."""

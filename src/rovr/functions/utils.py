@@ -213,6 +213,7 @@ async def is_archive(path_str: str) -> bool:
 
     return path_str.lower().endswith(ARCHIVE_EXTENSIONS_FULL)
 
+
 def get_shortest_bind(binds: list[str]) -> str:
     least_len: tuple[int | None, str] = (None, "")
     for bind in binds:

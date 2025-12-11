@@ -35,9 +35,9 @@ class CommonFileNameDoWhat(ModalScreen):
             yield Button(
                 f"\\[{overwrite_bind}] overwrite", variant="error", id="overwrite"
             )
-            yield Button(f"\\[{rename_bind}] rename", variant="warning", id="rename")
-            yield Button(f"\\[{skip_bind}] skip", variant="default", id="skip")
-            yield Button(f"\\[{cancel_bind}] cancel", variant="primary", id="cancel")
+            yield Button(f"\\[{rename_bind}] Rename", variant="warning", id="rename")
+            yield Button(f"\\[{skip_bind}] Skip", variant="default", id="skip")
+            yield Button(f"\\[{cancel_bind}] Cancel", variant="primary", id="cancel")
             with HorizontalGroup(id="dontAskAgain"):
                 yield Switch()
                 yield Label(f"\\[{dont_ask_bind}] Don't ask again")

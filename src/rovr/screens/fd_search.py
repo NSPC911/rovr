@@ -203,9 +203,20 @@ class FileSearch(ModalScreen):
     """Search for files recursively using fd."""
 
     FILTER_TYPES: dict[str, bool] = INITIAL_FILTER_TYPES.copy()
+    """Class Var for filter types, intentional so that it is
+    carried over in that session"""
 
     def __init__(self, **kwargs) -> None:
         super().__init__(**kwargs)
+        # Okay, so I will need to explain myself for this design choice.
+        # fd, even though it is built in rust, the fastest and safest language
+        # it still takes time in large directories,
+        #   and even more time when creating a lot of options
+        # so when the options are passed to the create_options method (thread)
+        #   but if the fd_updater method is triggered again, the thread will
+        #   be confused or something and spam warnings, which I don't think
+        #   looks nice. I still haven't done the same for zoxide, but I haven't
+        #   experienced this issue, so zoxide will be staying like that for now
         self._active_worker: Worker | None = None
 
     def compose(self) -> ComposeResult:
@@ -364,7 +375,7 @@ class FileSearch(ModalScreen):
             self.FILTER_TYPES[event.selection.value] = (
                 event.selection.value in event.selection_list.selected
             )
-        elif event.selection.value in (config["plugins"]["fd"]):
+        elif event.selection.value in config["plugins"]["fd"]:
             config["plugins"]["fd"][event.selection.value] = (
                 event.selection.value in event.selection_list.selected
             )
@@ -422,4 +433,4 @@ class FileSearch(ModalScreen):
         if event.widget is self:
             # ie click outside
             event.stop()
-            self.dismiss("")
+            self.dismiss(None)

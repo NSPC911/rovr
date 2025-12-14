@@ -105,6 +105,7 @@ class StateManager(Widget):
             return
         try:
             with open(self.state_file, "w", encoding="utf-8") as f:
+                # peak hardcoding
                 f.write(f"""current_version = "{self.current_version}"
 pinned_sidebar_visible = {str(self.pinned_sidebar_visible).lower()}
 preview_sidebar_visible = {str(self.preview_sidebar_visible).lower()}

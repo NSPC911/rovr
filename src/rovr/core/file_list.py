@@ -938,6 +938,9 @@ class FileList(SelectionList, inherit_bindings=False):
         # Okay, lemme make myself clear here.
         # A PR for this is already open at
         # https://github.com/Textualize/textual/pull/6224
+        # essentially, the issue is that there isnt a set_options
+        # method for SelectionList, only for OptionList, but using
+        # OptionList's set_options doesnt clear selected or values
         # but nothing was done, so I added it myself.
         self._selected.clear()
         self._values.clear()

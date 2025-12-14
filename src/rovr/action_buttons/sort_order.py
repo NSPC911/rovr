@@ -96,7 +96,9 @@ class SortOrderPopup(PopupOptionList):
         super().__init__()
         self.do_adjust: bool = False
 
-    def on_mount(self, event: events.Mount) -> None:  # ty: ignore[invalid-method-override]
+    def on_mount(
+        self, event: events.Mount
+    ) -> None:  # ty: ignore[invalid-method-override]
         self.button: SortOrderButton = self.app.query_one(SortOrderButton)
         self.styles.scrollbar_size_vertical = 0
         # calling super()._on_mount is useless, and super().mount()
@@ -187,6 +189,7 @@ class SortOrderPopup(PopupOptionList):
         self.button.update_icon()
 
     async def on_key(self, event: events.Key) -> None:
+        # no i will not refactor this, or accept PRs to refactor this.
         if check_key(event, config["keybinds"]["change_sort_order"]["name"]):
             self.highlighted = self.get_option_index("name")
             event.stop()

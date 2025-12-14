@@ -43,6 +43,8 @@ try:
         page += to_add
     page += """
 ## alternate layers
+
+keybinds related to the alternate screens and popups in rovr.
 """
     for layer, sub_schema in sub_schemas.items():
         page += f"""

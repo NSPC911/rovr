@@ -179,7 +179,7 @@ class FileList(SelectionList, inherit_bindings=False):
                 folders, files = await path_utils.get_cwd_object(
                     cwd,
                     config["settings"]["show_hidden_files"],
-                    sort_by=self.sort_by,  # ty: ignore[invalid-argument-type]
+                    sort_by=self.sort_by,
                     reverse=self.sort_descending,
                 )
                 if not folders and not files:

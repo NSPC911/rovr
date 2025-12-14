@@ -633,9 +633,50 @@
           "display_name": "Show keybinds"
         },
         "change_sort_order": {
-          "$ref": "#/definitions/keybind",
-          "description": "Show a chooser to change the sort order.",
-          "display_name": "Change sort order"
+          "type": "object",
+          "description": "Keybinds related to changing the sort order",
+          "properties": {
+            "open_popup": {
+              "$ref": "#/definitions/keybind",
+              "description": "Open the change sort order popup.",
+              "display_name": "Open sort order popup"
+            },
+            "name": {
+              "$ref": "#/definitions/keybind",
+              "description": "Sort by name.",
+              "display_name": "Sort by name"
+            },
+            "extension": {
+              "$ref": "#/definitions/keybind",
+              "description": "Sort by extension.",
+              "display_name": "Sort by extension"
+            },
+            "natural": {
+              "$ref": "#/definitions/keybind",
+              "description": "Sort naturally (numbers first).",
+              "display_name": "Sort naturally"
+            },
+            "size": {
+              "$ref": "#/definitions/keybind",
+              "description": "Sort by size.",
+              "display_name": "Sort by size"
+            },
+            "created": {
+              "$ref": "#/definitions/keybind",
+              "description": "Sort by creation time.",
+              "display_name": "Sort by created"
+            },
+            "modified": {
+              "$ref": "#/definitions/keybind",
+              "description": "Sort by modification time.",
+              "display_name": "Sort by modified"
+            },
+            "descending": {
+              "$ref": "#/definitions/keybind",
+              "description": "Toggle descending sort order.",
+              "display_name": "Toggle descending"
+            }
+          }
         },
         "quit_app": {
           "$ref": "#/definitions/keybind",

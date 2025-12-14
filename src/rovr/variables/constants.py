@@ -2,7 +2,7 @@ import platform
 from dataclasses import dataclass
 from os import environ
 from shutil import which
-from typing import Literal
+from typing import Literal, TypeAlias
 
 from textual.binding import Binding, BindingType
 
@@ -130,3 +130,7 @@ vindings: list[BindingType] = (
 )
 
 os_type: str = platform.system()
+
+SortByOptions: TypeAlias = Literal[
+    "name", "size", "modified", "created", "extension", "natural"
+]

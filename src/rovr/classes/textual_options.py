@@ -123,6 +123,7 @@ class ClipboardSelection(Selection):
             id=compress(text),
         )
         self.initial_prompt = prompt
+        self.path = text
 
 
 class KeybindOption(Option):
@@ -132,15 +133,29 @@ class KeybindOption(Option):
         description: str,
         max_key_width: int,
         primary_key: str,
+        is_layer: bool,
         **kwargs,
     ) -> None:
         # Should be named 'label' for searching
-        self.label = f" {keys:>{max_key_width}} │ {description} "
+        if keys == "--section--":
+            self.label = f" {' ' * max_key_width} ├ {description}"
+            label = f"[$accent]{self.label}[/]"
+        elif description == "--section--":
+            self.label = f" {keys:>{max_key_width}} ┤"
+            label = f"[$primary]{self.label}[/]"
+        elif keys == "<disabled>":
+            self.label = f" {keys:>{max_key_width}} │ {description} "
+            label = f"[$background-lighten-3]{self.label}[/]"
+        else:
+            self.label = f" {keys:>{max_key_width}} │ {description} "
+            label = self.label
         self.key_press = primary_key
 
-        super().__init__(self.label, **kwargs)
-        if primary_key == "":
+        super().__init__(label, **kwargs)
+        if description == "--section--":
             self.disabled = True
+
+        self.is_layer_bind = is_layer
 
 
 class ModalSearcherOption(Option):

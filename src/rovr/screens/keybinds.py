@@ -1,4 +1,4 @@
-from typing import ClassVar, cast
+from typing import ClassVar
 
 from textual import events
 from textual.app import ComposeResult
@@ -23,18 +23,49 @@ class KeybindList(OptionList, inherit_bindings=False):
         max_key_width = max(len(keys) for keys, _ in keybind_data)
 
         self.list_of_options = []
+        passed_alt_layer = False
         for (keys, description), primary_key in zip(keybind_data, primary_keybind_data):
+            if keys == "alternate layers":
+                passed_alt_layer = True
             self.list_of_options.append(
-                KeybindOption(keys, description, max_key_width, primary_key)
+                KeybindOption(
+                    keys, description, max_key_width, primary_key, passed_alt_layer
+                )
             )
         super().__init__(*self.list_of_options, **kwargs)
 
+    # ignore single clicks
+    async def _on_click(self, event: events.Click) -> None:
+        """
+        React to the mouse being clicked on an item.
+
+        Args:
+            event: The click event.
+        """
+        event.prevent_default()
+        clicked_option: int | None = event.style.meta.get("option")
+        if clicked_option is not None and not self._options[clicked_option].disabled:
+            # in future, if anything was changed, you just need to add the lines below
+            if (
+                self.highlighted == clicked_option
+                and event.chain == 2
+                and event.button != 3
+            ):
+                self.action_select()
+            else:
+                self.highlighted = clicked_option
+
     def get_keybind_data(self) -> tuple[list[tuple[str, str]], list[str]]:
         # Generate keybind data programmatically
-        keybind_data = []
-        primary_keys = []
+        keybind_data: list[tuple[str, str]] = []
+        primary_keys: list[str] = []
+        subkeys: list[tuple[str, dict[str, list[str] | str]]] = []
         keybinds_schema = schema["properties"]["keybinds"]["properties"]
         for action, keys in config["keybinds"].items():
+            if isinstance(keys, dict):
+                # it is a subdict, for other modals
+                subkeys.append((action, keys))
+                continue
             if action in keybinds_schema:
                 display_name = keybinds_schema[action].get("display_name", action)
                 if not keys:
@@ -43,10 +74,12 @@ class KeybindList(OptionList, inherit_bindings=False):
                 else:
                     if isinstance(keys, str):
                         keys = [keys]
-                    formatted_keys = ", ".join(f"<{key}>" for key in keys)
+                    formatted_keys = " ".join(f"<{key}>" for key in keys)
                     primary_keys.append(keys[0])
                 keybind_data.append((formatted_keys, display_name))
 
+        keybind_data.append(("plugins", "--section--"))
+        primary_keys.append("")
         # for plugins
         plugins_schema = schema["properties"]["plugins"]["properties"]
         for key, value in config["plugins"].items():
@@ -55,11 +88,33 @@ class KeybindList(OptionList, inherit_bindings=False):
                     formatted_keys = "<disabled>"
                     primary_keys.append("")
                 else:
-                    formatted_keys = ", ".join(f"<{key}>" for key in value["keybinds"])
+                    formatted_keys = " ".join(f"<{k}>" for k in value["keybinds"])
                     primary_keys.append(value["keybinds"][0])
                 plugins_properties = plugins_schema[key]["properties"]
                 display_name = plugins_properties["keybinds"].get("display_name", key)
                 keybind_data.append((formatted_keys, display_name))
+
+        # for alternate screens
+        keybind_data.append(("alternate layers", "--section--"))
+        primary_keys.append("")
+        for key, subdict in subkeys:
+            keybind_data.append(("--section--", key))
+            primary_keys.append("")
+            keybinds_schema = schema["properties"]["keybinds"]["properties"][key][
+                "properties"
+            ]
+            for action, keys in subdict.items():
+                if action in keybinds_schema:
+                    display_name = keybinds_schema[action].get("display_name", action)
+                    if not keys:
+                        formatted_keys = "<disabled>"
+                        primary_keys.append("")
+                    else:
+                        if isinstance(keys, str):
+                            keys = [keys]
+                        formatted_keys = " ".join(f"<{key}>" for key in keys)
+                        primary_keys.append(keys[0])
+                    keybind_data.append((formatted_keys, display_name))
 
         return keybind_data, primary_keys
 
@@ -68,18 +123,17 @@ class Keybinds(ModalScreen):
     def compose(self) -> ComposeResult:
         with VerticalGroup(id="keybinds_group"):
             yield SearchInput(
-                always_add_disabled=False,
+                always_add_disabled=True,
                 placeholder=f"{icons.get_icon('general', 'search')[0]} Search keybinds...",
             )
             yield KeybindList(id="keybinds_data")
 
     def on_mount(self) -> None:
-        self.input = self.query_one(SearchInput)
-        self.container = self.query_one("#keybinds_group")
-        self.keybinds_list = self.query_one("#keybinds_data")
+        self.input: SearchInput = self.query_one(SearchInput)
+        self.container: VerticalGroup = self.query_one("#keybinds_group")
+        self.keybinds_list: KeybindList = self.query_one("#keybinds_data")
 
-        # Prevent the first focus to go to search bar
-        self.keybinds_list.focus()
+        self.input.focus()
 
         self.container.border_title = "Keybinds"
 
@@ -94,18 +148,28 @@ class Keybinds(ModalScreen):
         if check_key(event, config["keybinds"]["focus_search"]):
             event.stop()
             self.input.focus()
-        elif (
-            check_key(event, config["keybinds"]["show_keybinds"])
-            or event.key == "escape"
+        elif check_key(
+            event,
+            config["keybinds"]["show_keybinds"]
+            + config["keybinds"]["filter_modal"]["exit"],
         ):
             event.stop()
             self.dismiss()
+        elif check_key(event, config["keybinds"]["filter_modal"]["down"]):
+            event.stop()
+            if self.keybinds_list.options:
+                self.keybinds_list.action_cursor_down()
+        elif check_key(event, config["keybinds"]["filter_modal"]["up"]):
+            event.stop()
+            if self.keybinds_list.options:
+                self.keybinds_list.action_cursor_up()
 
     def on_option_list_option_selected(self, event: OptionList.OptionSelected) -> None:
-        if hasattr(event.option, "key_press"):
-            event.stop()
-            self.dismiss()
-            self.app.simulate_key(cast(KeybindOption, event.option).key_press)
+        if isinstance(event.option, KeybindOption):
+            if not event.option.is_layer_bind:
+                event.stop()
+                self.dismiss()
+                self.app.simulate_key(event.option.key_press)
         else:
             raise RuntimeError(
                 f"Expected a <KeybindOption> but received <{type(event.option).__name__}>"

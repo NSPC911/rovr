@@ -713,10 +713,8 @@ class PreviewContainer(Container):
             else:
                 return
             await self.show_pdf_preview()
-        elif self.border_title == titles.bat or self.border_title == titles.archive:
-            widget = (
-                self if self.border_title == titles.bat else self.query_one(FileList)
-            )
+        elif self.border_title == titles.archive:
+            widget: FileList = self.query_one(FileList)
             if check_key(event, config["keybinds"]["up"]):
                 event.stop()
                 widget.scroll_up(animate=False)

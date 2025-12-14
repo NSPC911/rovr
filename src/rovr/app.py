@@ -387,31 +387,31 @@ class Application(App, inherit_bindings=False):
         # keybinds
         elif check_key(event, config["keybinds"]["show_keybinds"]):
             self.push_screen(Keybinds())
-        elif config["plugins"]["finder"]["enabled"] and check_key(
-            event, config["plugins"]["finder"]["keybinds"]
+        elif config["plugins"]["fd"]["enabled"] and check_key(
+            event, config["plugins"]["fd"]["keybinds"]
         ):
-            fd_exec: str = config["plugins"]["finder"]["executable"]
+            fd_exec: str = config["plugins"]["fd"]["executable"]
             if shutil.which(fd_exec) is not None:
                 try:
 
                     def on_response(selected: str | None) -> None:
-                        if selected is None:
+                        if selected is None or selected == "":
                             return
                         if path.isdir(selected):
                             self.cd(selected)
                         else:
                             self.cd(
-                                "." if selected == "" else path.dirname(selected),
+                                path.dirname(selected),
                                 focus_on=path.basename(selected),
                             )
 
                     self.push_screen(FileSearch(), on_response)
                 except Exception as exc:
-                    self.notify(str(exc), title="Finder", severity="error")
+                    self.notify(str(exc), title="Plugins: fd", severity="error")
             else:
                 self.notify(
-                    f"{config['plugins']['finder']['executable']} cannot be found in PATH.",
-                    title="Plugins: finder",
+                    f"{config['plugins']['fd']['executable']} cannot be found in PATH.",
+                    title="Plugins: fd",
                     severity="error",
                 )
         elif check_key(event, config["keybinds"]["suspend_app"]):
@@ -423,7 +423,7 @@ class Application(App, inherit_bindings=False):
                 )
             else:
                 self.action_suspend_process()
-        elif check_key(event, config["keybinds"]["change_sort_order"]):
+        elif check_key(event, config["keybinds"]["change_sort_order"]["open_popup"]):
             await self.query_one(SortOrderButton).open_popup(event)
 
     def on_app_blur(self, event: events.AppBlur) -> None:
@@ -689,31 +689,32 @@ class Application(App, inherit_bindings=False):
             lambda: self.set_timer(0.1, self.deliver_screenshot),
         )
 
-        if self.ansi_color:
-            yield SystemCommand(
-                "Disable Transparent Theme",
-                "Go back to an opaque background.",
-                lambda: self.set_timer(0.1, self._toggle_transparency),
-            )
-        else:
-            yield SystemCommand(
-                "Enable Transparent Theme",
-                "Have a transparent background.",
-                lambda: self.set_timer(0.1, self._toggle_transparency),
-            )
+        if len(self.screen_stack) <= 2:
+            if self.ansi_color:
+                yield SystemCommand(
+                    "Disable Transparent Theme",
+                    "Go back to an opaque background.",
+                    lambda: self.set_timer(0.1, self._toggle_transparency),
+                )
+            else:
+                yield SystemCommand(
+                    "Enable Transparent Theme",
+                    "Have a transparent background.",
+                    lambda: self.set_timer(0.1, self._toggle_transparency),
+                )
 
         if (
-            config["plugins"]["finder"]["enabled"]
-            and config["plugins"]["finder"]["keybinds"]
+            config["plugins"]["fd"]["enabled"]
+            and len(config["plugins"]["fd"]["keybinds"]) > 0
         ):
             yield SystemCommand(
-                "Open finder",
+                "Open fd",
                 "Start searching the current directory using `fd`",
                 lambda: self.on_key(
                     events.Key(
-                        key=config["plugins"]["finder"]["keybinds"][0],
+                        key=config["plugins"]["fd"]["keybinds"][0],
                         # character doesn't matter
-                        character=config["plugins"]["finder"]["keybinds"][0],
+                        character=config["plugins"]["fd"]["keybinds"][0],
                     )
                 ),
             )

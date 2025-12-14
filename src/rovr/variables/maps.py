@@ -1142,3 +1142,15 @@ BORDER_BOTTOM = {
 SPINNER = SPINNERS["dots2"]["frames"]
 assert isinstance(SPINNER, (str, list))
 SPINNER_LENGTH = len(SPINNER)
+
+FD_TYPE_TO_ALIAS = {
+    "file": "f",
+    "directory": "d",
+    "symlink": "l",
+    "executable": "x",
+    "empty": "e",
+    "socket": "s",
+    "pipe": "p",
+    "char-device": "c",
+    "block-device": "b",
+}

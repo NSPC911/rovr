@@ -1,4 +1,4 @@
-# Unreleased
+# [v0.6.0rc1]
 
 ## new features
 - clipboard: constantly check clipboard added files 81df523
@@ -7,6 +7,8 @@
 - fd: add additional toggleable options #163
 - icons: show icon for symlink/junctions e6a354a
 - preview: make loading more seamless 243637
+- sort_order!: add custom keybind support #168
+- icons: show separate symlink/junction icon fbf2a08
 
 ## build
 - pip: switch to tomli for toml parsing #162
@@ -17,6 +19,9 @@
 
 ## perf
 - filelist: use custom set_options method e6a354a
+
+## docs
+- screenshots: perhaps fix the broken fonts #166
 
 # [v0.6.0.dev2]
 

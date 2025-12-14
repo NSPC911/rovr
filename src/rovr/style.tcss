@@ -480,7 +480,8 @@ FileListRightClickOptionList,
 SortOrderPopup,
 ZoxideOptionList,
 FileSearchToggles,
-FileSearchOptionList {
+FileSearchOptionList,
+KeybindList {
   padding: 0 0 0 0;
   background-tint: ansi_default !important;
   .option-list--separator { color: $foreground }

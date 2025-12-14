@@ -137,8 +137,11 @@ class KeybindOption(Option):
         **kwargs,
     ) -> None:
         # Should be named 'label' for searching
-        if description == "--section--":
-            self.label = f" {' ' * max_key_width} ├ {keys}"
+        if keys == "--section--":
+            self.label = f" {' ' * max_key_width} ├ {description}"
+            label = f"[$accent]{self.label}[/]"
+        elif description == "--section--":
+            self.label = f" {keys:>{max_key_width}} ┤"
             label = f"[$primary]{self.label}[/]"
         elif keys == "<disabled>":
             self.label = f" {keys:>{max_key_width}} │ {description} "

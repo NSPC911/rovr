@@ -98,6 +98,8 @@ class KeybindList(OptionList, inherit_bindings=False):
         keybind_data.append(("alternate layers", "--section--"))
         primary_keys.append("")
         for key, subdict in subkeys:
+            keybind_data.append(("--section--", key))
+            primary_keys.append("")
             keybinds_schema = schema["properties"]["keybinds"]["properties"][key][
                 "properties"
             ]

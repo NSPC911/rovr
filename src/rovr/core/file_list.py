@@ -3,7 +3,7 @@ import contextlib
 from os import getcwd, path
 from os import system as cmd
 from time import time
-from typing import ClassVar, Iterable, Self
+from typing import ClassVar, Iterable, Literal, Self
 
 from rich.segment import Segment
 from rich.style import Style
@@ -61,14 +61,19 @@ class FileList(SelectionList, inherit_bindings=False):
             self.input: Input = self.parent.query_one(Input)
 
     @property
-    def sort_by(self) -> str:
+    def sort_by(
+        self,
+    ) -> Literal["name", "size", "modified", "created", "extension", "natural"]:
         try:
             return self.app.query_one("StateManager").sort_by
         except (NoMatches, AttributeError):
             return "name"
 
     @sort_by.setter
-    def sort_by(self, value: str) -> None:
+    def sort_by(
+        self,
+        value: Literal["name", "size", "modified", "created", "extension", "natural"],
+    ) -> None:
         if value not in ["name", "size", "modified", "created", "extension", "natural"]:
             raise ValueError(
                 f"Expected sort_by value to be one of 'name', 'size', 'modified', 'created', 'extension' or 'natural', but got '{value}'"

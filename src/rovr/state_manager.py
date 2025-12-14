@@ -17,7 +17,7 @@ class StateDict(TypedDict):
     preview_sidebar_visible: bool
     footer_visible: bool
     menuwrapper_visible: bool
-    sort_by: str
+    sort_by: Literal["name", "size", "modified", "created", "extension", "natural"]
     sort_descending: bool
 
 

@@ -16,7 +16,6 @@ from textual.containers import Container
 from textual.css.query import NoMatches
 from textual.highlight import guess_language, highlight
 from textual.message import Message
-from textual.timer import Timer
 from textual.widgets import Static
 from textual.worker import Worker, WorkerCancelled, WorkerError
 
@@ -60,31 +59,12 @@ class PreviewContainer(Container):
         self._mime_type: str | None = None
         self._preview_texts: list[str] = config["interface"]["preview_text"].values()
         self.pdf = PDFHandler()
-        self.set_loading_timer: Timer | None = None
 
     def compose(self) -> ComposeResult:
         yield Static(config["interface"]["preview_text"]["start"], classes="wrap")
 
     def on_preview_container_set_loading(self, event: SetLoading) -> None:
-        if not event.to:
-            if self.set_loading_timer is not None:
-                self.set_loading_timer.stop()
-            self.set_loading(False)
-        else:
-            if not self.loading:
-                self.set_loading_timer = self.set_timer(
-                    0.15, lambda: self.set_loading(event.to)
-                )
-
-    def set_loading(self, loading: bool) -> None:
-        if loading and all(
-            not worker.is_running
-            and worker.node is self
-            and worker.name == "perform_show_preview"
-            for worker in self.app.workers
-        ):
-            return
-        return super().set_loading(loading)
+        self.loading = event.to
 
     def has_child(self, selector: str) -> bool:
         """
@@ -329,9 +309,9 @@ class PreviewContainer(Container):
             return False
 
     async def show_normal_file_preview(self) -> None:
+        self.border_title = titles.file
         if should_cancel():
             return
-        self.border_title = titles.file
 
         assert isinstance(self._current_content, str)
 
@@ -597,7 +577,9 @@ class PreviewContainer(Container):
                 mime_type=mime_type,
             )
 
-        self.call_after_refresh(lambda: self.post_message(self.SetLoading(False)))
+        if should_cancel():
+            return
+        self.call_later(lambda: self.post_message(self.SetLoading(False)))
 
     async def update_ui(
         self,

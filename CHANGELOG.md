@@ -6,7 +6,6 @@
 - fd!: rename from 'finder' to 'fd' #163
 - fd: add additional toggleable options #163
 - icons: show icon for symlink/junctions e6a354a
-- preview: make loading more seamless 243637
 - sort_order!: add custom keybind support #168
 - icons: show separate symlink/junction icon fbf2a08
 

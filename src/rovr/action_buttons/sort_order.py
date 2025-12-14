@@ -173,7 +173,7 @@ class SortOrderPopup(PopupOptionList):
                 (self.app.size.width - width) // 2,
                 (self.app.size.height - height) // 2,
             )
-        self.get_option("separator")._set_prompt("[$secondary]" + ("-" * 16) + "[/]")
+        self.get_option("separator")._set_prompt("[$secondary]" + ("-" * self.width) + "[/]")
 
     def on_option_list_option_selected(self, event: OptionList.OptionSelected) -> None:
         if event.option.id == "descending":

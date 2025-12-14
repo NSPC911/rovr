@@ -63,7 +63,7 @@
     ],
     "message": [
       "[bright_blue]keybinds.change_sort_order[/] has had a minor change.",
-      "It is now expanded to support changing keybinds for the different modes.",
+      "It is now expanded to support changing keybinds for the different sort options.",
       "A simple fix to this error is to rename [bright_blue]keybinds.change_sort_order[/] to [bright_cyan]keybinds.change_sort_order.open_popup[/]."
     ],
     "extra": "Expanded in v0.6.0"

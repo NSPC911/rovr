@@ -9,5 +9,5 @@ repos:
     hooks:
       - id: ty
         name: ty check
-        entry: uvx ty check . --ignore unresolved-import
-        language: python
+        entry: uvx ty==0.0.1a28 check . --ignore unresolved-import
+        language: unsupported

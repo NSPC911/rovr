@@ -3,7 +3,7 @@ import contextlib
 from os import getcwd, path
 from os import system as cmd
 from time import time
-from typing import ClassVar, Iterable, Literal, Self
+from typing import ClassVar, Iterable, Self
 
 from rich.segment import Segment
 from rich.style import Style
@@ -24,7 +24,12 @@ from rovr.functions import icons as icon_utils
 from rovr.functions import path as path_utils
 from rovr.functions import pins as pin_utils
 from rovr.functions import utils
-from rovr.variables.constants import buttons_that_depend_on_path, config, vindings
+from rovr.variables.constants import (
+    SortByOptions,
+    buttons_that_depend_on_path,
+    config,
+    vindings,
+)
 
 
 class FileList(SelectionList, inherit_bindings=False):
@@ -63,7 +68,7 @@ class FileList(SelectionList, inherit_bindings=False):
     @property
     def sort_by(
         self,
-    ) -> Literal["name", "size", "modified", "created", "extension", "natural"]:
+    ) -> SortByOptions:
         try:
             return self.app.query_one("StateManager").sort_by
         except (NoMatches, AttributeError):
@@ -72,7 +77,7 @@ class FileList(SelectionList, inherit_bindings=False):
     @sort_by.setter
     def sort_by(
         self,
-        value: Literal["name", "size", "modified", "created", "extension", "natural"],
+        value: SortByOptions,
     ) -> None:
         if value not in ["name", "size", "modified", "created", "extension", "natural"]:
             raise ValueError(
@@ -158,9 +163,13 @@ class FileList(SelectionList, inherit_bindings=False):
         cwd = path_utils.normalise(getcwd())
         # get sessionstate
         try:
-            # only happens when the tabs aren't mounted
             session: SessionManager = self.app.tabWidget.active_tab.session
         except AttributeError:
+            # only happens when the tabs aren't mounted
+            # this means that some stupid thing happened
+            # and i dont want filelist to die as well
+            # because it will be called later on (because of
+            # the watcher function)
             self.clear_options()
             return
         self.app.file_list_pause_check = True
@@ -231,7 +240,14 @@ class FileList(SelectionList, inherit_bindings=False):
             )
             for button in buttons:
                 button.disabled = should_disable
-            self.app.query_one("#new").disabled = self.list_of_options[0].id == "perm"
+            if len(self.list_of_options) > 0:
+                self.app.query_one("#new").disabled = (
+                    self.list_of_options[0].id == "perm"
+                )
+            else:
+                # this shouldnt happen, but just in case
+                self.app.query_one("#new").disabled = True
+
             # special check for up tree
             self.app.query_one("#up").disabled = cwd == path.dirname(cwd)
 
@@ -919,8 +935,16 @@ class FileList(SelectionList, inherit_bindings=False):
             | tuple[ContentText, SelectionType, bool]
         ],
     ) -> Self:  # ty: ignore[invalid-method-override]
+        # Okay, lemme make myself clear here.
+        # A PR for this is already open at
+        # https://github.com/Textualize/textual/pull/6224
+        # but nothing was done, so I added it myself.
         self._selected.clear()
         self._values.clear()
+        # the ty ignore is important here, because options
+        # should be a Iterable["Option | VisualType | None"]
+        # but that isnt the case (based on the signature)
+        # so ty is crashing out.
         super().set_options(options)  # ty: ignore[invalid-argument-type]
         return self
 

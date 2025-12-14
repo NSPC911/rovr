@@ -96,7 +96,9 @@ class SortOrderPopup(PopupOptionList):
         super().__init__()
         self.do_adjust: bool = False
 
-    def on_mount(self, event: events.Mount) -> None:  # ty: ignore[invalid-method-override]
+    def on_mount(
+        self, event: events.Mount
+    ) -> None:  # ty: ignore[invalid-method-override]
         self.button: SortOrderButton = self.app.query_one(SortOrderButton)
         self.styles.scrollbar_size_vertical = 0
         # calling super()._on_mount is useless, and super().mount()
@@ -158,6 +160,7 @@ class SortOrderPopup(PopupOptionList):
             width += 1
         if self.styles.border_right[0] != "":
             width += 1
+        width -= 7  # for textual markup fix
         self.width = width
         # for future when more options
         height = (

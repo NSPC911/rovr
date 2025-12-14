@@ -401,7 +401,7 @@ class Application(App, inherit_bindings=False):
                             self.cd(selected)
                         else:
                             self.cd(
-                                "." if selected == "" else path.dirname(selected),
+                                path.dirname(selected),
                                 focus_on=path.basename(selected),
                             )
 

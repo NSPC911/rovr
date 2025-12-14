@@ -8,6 +8,7 @@ from textual.reactive import reactive
 from textual.widget import Widget
 
 from rovr.functions.config import get_version
+from rovr.variables.constants import SortByOptions
 from rovr.variables.maps import VAR_TO_DIR
 
 
@@ -17,7 +18,7 @@ class StateDict(TypedDict):
     preview_sidebar_visible: bool
     footer_visible: bool
     menuwrapper_visible: bool
-    sort_by: Literal["name", "size", "modified", "created", "extension", "natural"]
+    sort_by: SortByOptions
     sort_descending: bool
 
 

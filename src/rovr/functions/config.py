@@ -43,6 +43,8 @@ def toml_dump(doc_path: str, exception: tomli.TOMLDecodeError) -> None:
         doc_path (str): the path to the document
         exception (tomli.TOMLDecodeError): the exception that occurred
     """
+    from rich.syntax import Syntax
+
     doc: list = exception.doc.splitlines()
     start: int = max(exception.lineno - 3, 0)
     end: int = min(len(doc), exception.lineno + 2)
@@ -53,19 +55,27 @@ def toml_dump(doc_path: str, exception: tomli.TOMLDecodeError) -> None:
         + f"  [bright_blue]-->[/] [white]{path.realpath(doc_path)}:{exception.lineno}:{exception.colno}[/]"
     )
     for line in range(start, end):
-        if "[" in doc[line]:
-            doc[line] = doc[line].replace("[", "\\[")
         if line + 1 == exception.lineno:
             startswith = "╭╴"
             has_past = True
             pprint(
-                f"[bright_red]{startswith}{str(line + 1).rjust(rjust)}[/][bright_blue] │[/] {doc[line]}"
+                f"[bright_red]{startswith}{str(line + 1).rjust(rjust)}[/][bright_blue] │[/]",
+                end=" ",
             )
         else:
             startswith = "│ " if has_past else "  "
             pprint(
-                f"[bright_red]{startswith}[/][bright_blue]{str(line + 1).rjust(rjust)} │[/] {doc[line]}"
+                f"[bright_red]{startswith}[/][bright_blue]{str(line + 1).rjust(rjust)} │[/]",
+                end=" ",
             )
+        pprint(
+            Syntax(
+                doc[line],
+                "toml",
+                background_color="default",
+                theme="ansi_dark",
+            )
+        )
     # check if it is an interesting error message
     if exception.msg.startswith("What? "):
         # What? <key> already exists?<dict>
@@ -133,6 +143,24 @@ def schema_dump(doc_path: str, exception: ValidationError, config_content: str) 
     from rich.syntax import Syntax
     from rich.table import Table
 
+    def get_message(exception: ValidationError) -> tuple[str, bool]:
+        failed = False
+        match exception.validator:
+            case "required":
+                error_msg = f"Missing required field: {exception.message}"
+            case "type":
+                error_msg = f"Expected [bright_cyan]{exception.validator_value}[/] type, but got [bright_yellow]{type(exception.instance).__name__}[/] instead"
+            case "enum":
+                error_msg = f"Provided value '{exception.instance}' is not inside allowlist of {exception.validator_value}"
+            case "minimum":
+                error_msg = f"Value for [bright_cyan]{'.'.join(map(str, exception.relative_path))}[/] must be >= {exception.validator_value} (cannot be {exception.instance})"
+            case "maximum":
+                error_msg = f"Value for [bright_cyan]{'.'.join(map(str, exception.relative_path))}[/] must be <= {exception.validator_value} (cannot be {exception.instance})"
+            case _:
+                error_msg = exception.message
+                failed = True
+        return (f"schema\\[{exception.validator}]: {error_msg}", failed)
+
     doc: list = config_content.splitlines()
 
     if exception.message.startswith("Additional properties are not allowed"):
@@ -154,23 +182,11 @@ def schema_dump(doc_path: str, exception: ValidationError, config_content: str) 
         pprint(
             f"[underline bright_red]Config Error[/] at path [bold cyan]{path_str}[/]:"
         )
-        match exception.validator:
-            case "required":
-                pprint(f"{exception.message}, but is not provided.")
-            case "type":
-                type_error_message = (
-                    f"Invalid type: expected [yellow]{exception.validator_value}[/yellow], "
-                    f"but got [yellow]{type(exception.instance).__name__}[/yellow]."
-                )
-                pprint(type_error_message)
-            case "enum":
-                enum_error_message = (
-                    f"Invalid value [yellow]'{exception.instance}'[/yellow]. "
-                    f"\nAllowed values are: {exception.validator_value}"
-                )
-                pprint(enum_error_message)
-            case _:
-                pprint(f"[yellow]{exception.message}[/yellow]")
+        msg, failed = get_message(exception)
+        if failed:
+            pprint(f"[yellow]{msg}[/]")
+        else:
+            pprint(msg)
     else:
         start: int = max(lineno - 2, 0)
         end: int = min(len(doc), lineno + 3)
@@ -205,19 +221,7 @@ def schema_dump(doc_path: str, exception: ValidationError, config_content: str) 
             )
 
         # Format the error message based on validator type
-        match exception.validator:
-            case "required":
-                error_msg = f"Missing required field: {exception.message}"
-            case "type":
-                error_msg = f"Expected [bright_cyan]{exception.validator_value}[/] type, but got [bright_yellow]{type(exception.instance).__name__}[/] instead"
-            case "enum":
-                error_msg = f"Provided value '{exception.instance}' is not inside allowlist of {exception.validator_value}"
-            case "minimum":
-                error_msg = f"Value for [bright_cyan]{'.'.join(map(str, exception.relative_path))}[/] must be >= {exception.validator_value} (cannot be {exception.instance})"
-            case "maximum":
-                error_msg = f"Value for [bright_cyan]{'.'.join(map(str, exception.relative_path))}[/] must be <= {exception.validator_value} (cannot be {exception.instance})"
-            case _:
-                error_msg = exception.message
+        error_msg, _ = get_message(exception)
 
         pprint(f"[bright_red]╰─{'─' * rjust}─❯[/] {error_msg}")
     # check path for custom message from migration.json

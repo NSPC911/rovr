@@ -4,18 +4,19 @@ description: how rovr's file preview panel works.
 ---
 
 import { Aside } from "@astrojs/starlight/components";
+import InlineSVG from "@/components/InlineSVG.astro";
 
 `rovr` includes a powerful preview sidebar that can display the contents of various filetypes.
 
 ### text files
 
-![file preview](/rovr/screenshots/preview-file.svg)
+<InlineSVG src="/rovr/screenshots/preview-file.svg" alt="file preview" />
 
 plain text files are displayed in a text area with syntax highlighting. the language is determined by the file extension. `rovr` supports a wide range of languages.
 
 ### bat plugin
 
-![file preview with bat](/rovr/screenshots/preview-file-bat.svg)
+<InlineSVG src="/rovr/screenshots/preview-file-bat.svg" alt="file preview with bat" />
 
 if you have [`bat`](/rovr/features/plugins#bat) installed and enabled in the `rovr` config, it will be used to display text files with syntax highlighting for much more languages and theming.
 
@@ -27,7 +28,7 @@ if you have [`bat`](/rovr/features/plugins#bat) installed and enabled in the `ro
 
 ### folders
 
-![folder preview](/rovr/screenshots/preview-folder.svg)
+<InlineSVG src="/rovr/screenshots/preview-folder.svg" alt="folder preview" />
 
 when a folder is selected, the preview panel will show a list of the files and folders inside it, allowing you to see the contents without navigating into it.
 
@@ -37,7 +38,7 @@ when a folder is selected, the preview panel will show a list of the files and f
 
 ### archives
 
-![archive preview](/rovr/screenshots/preview-archive.svg)
+<InlineSVG src="/rovr/screenshots/preview-archive.svg" alt="archive preview" />
 
 for archive files (like `.zip`, `.tar.gz`, `.rar`), rovr will display a list of the files and folders contained within the archive.
 

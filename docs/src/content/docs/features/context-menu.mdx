@@ -3,13 +3,16 @@ title: context menu
 description: using the right-click context menu in rovr.
 ---
 
+import InlineSVG from "@/components/InlineSVG.astro";
+
 rovr provides a convenient right-click context menu that gives you quick access to common file operations.
 
 ## accessing the context menu
 
-![context menu](/rovr/screenshots/right-click.svg)
+<InlineSVG src="/rovr/screenshots/right-click.svg" alt="context menu" />
 
 you can open the context menu by:
+
 - **right-clicking** on any file or folder in the file list
 - the menu appears at your cursor position with relevant actions
 
@@ -20,36 +23,42 @@ the context menu includes the following operations:
 ### copy
 
 copy the selected file(s) to rovr's clipboard.
+
 - equivalent to pressing `y` or `ctrl+c`
 - works with multiple selections
 
 ### cut
 
 cut the selected file(s) to rovr's clipboard for moving.
+
 - equivalent to pressing `x` or `ctrl+x`
 - works with multiple selections
 
 ### paste
 
 paste files from rovr's clipboard to the current directory.
+
 - equivalent to pressing `p` or `ctrl+v`
 - handles conflicts with duplicate file names
 
 ### rename
 
 rename the selected item.
+
 - equivalent to pressing `r` or `f2`
 - only available for single file/folder selection
 
 ### delete
 
 delete the selected file(s).
+
 - equivalent to pressing `d` or `delete`
 - works with multiple selections
 
 ### zip
 
 compress the selected file(s) into an archive.
+
 - equivalent to pressing `shift+e`
 - supports multiple archive formats
 - works with multiple selections
@@ -57,18 +66,21 @@ compress the selected file(s) into an archive.
 ### extract archive
 
 extract the contents of a compressed file.
+
 - equivalent to pressing `ctrl+e`
 - only available when an archive file is selected
 
 ### copy path
 
 copy the full path of the selected item to your system clipboard.
+
 - equivalent to the copy path button action
 - copies the absolute path as text
 
 ## navigation with the context menu
 
 when the context menu is open:
+
 - **move up/down**: arrow keys or `k`/`j`
 - **select action**: `enter` or click
 - **close menu**: `esc` or click outside the menu
@@ -76,6 +88,7 @@ when the context menu is open:
 ## double-click behavior
 
 in addition to the context menu, rovr supports double-clicking:
+
 - **on folders**: opens the folder (same as pressing `enter`)
 - **on files**: attempts to open the file with the default application
 

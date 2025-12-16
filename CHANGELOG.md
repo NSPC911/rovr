@@ -1,6 +1,58 @@
-# [v0.6.0rc1]
+<details>
+<summary><h1>[v0.6.0]</h1></summary>
+<p>
+
+## breaking changes
+
+- cd-on-quit: remove match type key
+- fd: rename from 'finder' to 'fd'
+- sort_order: add custom keybind support
 
 ## new features
+
+- app: use textual's tree instead of a custom tree
+- app+config: add support for modes
+- clipboard: constantly check clipboard added files
+- config: allow changing bindings for screen layers
+- config: auto-detect editor to use, add support for more keys
+- editor: add config to suspend when opening editor, open all files in editor
+- fd: add additional toggleable options
+- icons: show icon for symlink/junctions with separate icons
+- preview: add pdf preview support with poppler, add support for using file(1)
+- cli: output fix for certain commands 1251ca8
+
+## fixes
+
+- archive: improved archive type detection
+- cli: don't load everything when using certain functions
+- filelist: fix issue with empty directories preventing navigation
+- finder: use pseudo exclusive worker to prevent error spam
+- input: fix overscroll issue
+- rename_button: properly stop execution after error fee8bd0
+- screens: add click to exit modal screen
+
+## perf
+
+- filelist: use custom set_options method
+- icons: use fnmatch instead of using scuffed methods
+- preview: use pygments instead of tree-sitter, open image in thread
+
+## build
+
+- pip: switch to tomli for toml parsing
+
+## removed features
+
+- process + screens: remove permission asker modal
+
+</p>
+</details>
+<details>
+<summary><h1>[v0.6.0rc1]</h1></summary>
+<p>
+
+## new features
+
 - clipboard: constantly check clipboard added files 81df523
 - config: allow changing bindings for screen layers #161
 - fd!: rename from 'finder' to 'fd' #163
@@ -10,46 +62,65 @@
 - icons: show separate symlink/junction icon fbf2a08
 
 ## build
+
 - pip: switch to tomli for toml parsing #162
 
 ## fixes
+
 - filelist: fix issue with empty directories preventing navigation 985a509
 - input: fix overscroll issue a8b5307
 
 ## perf
+
 - filelist: use custom set_options method e6a354a
 
 ## docs
+
 - screenshots: perhaps fix the broken fonts #166
 
-# [v0.6.0.dev2]
+</p>
+</details>
+<details>
+<summary><h1>[v0.6.0.dev2]</h1></summary>
+<p>
 
 ## breaking changes
+
 - cd-on-quit: remove match type key 32a389f
 
 ## new features
+
 - preview: add support for using file(1) #157
 
 ## fixes
+
 - screens: add click to exit modal screen d84e9a8
 - finder: use pseudo exclusive worker to prevent error spam c9a7741
 - archive: just gamble which archive type it is 7fe26f6
 - cli: don't load everything when using certain functions 18558b9
 
 ## perf
+
 - icons: use fnmatch instead of using scuffed methods 4c848a1
 - preview: use pygments instead of tree-sitter e95350f
 
 ## style
+
 - fix errors related to ty alpha 28 ce59c07
 
 ## docs
+
 - cd-on-quit: use more robust functions 32a389f
 
 ## removed features
+
 - process + screens: remove permission asker modal 8caa4f9
 
-# [v0.6.0.dev1]
+</p>
+</details>
+<details>
+<summary><h1>[v0.6.0.dev1]</h1></summary>
+<p>
 
 ## new features
 
@@ -62,15 +133,21 @@
 - feat(preview): add pdf preview support with poppler #153
 - perf(preview): open image in thread db617a0
 
-# [v0.5.0]
+</p>
+</details>
+<details>
+<summary><h1>[v0.5.0]</h1></summary>
+<p>
 
 ## breaking changes
+
 - feat!: improve preview container and config functions (##135) 530c507
 - feat(app)!: expand compact mode into two options b2afee6
 - feat(app)!: remove cd on quit in favour of `--cwd-file` (##126) 9b4c6b7
 - feat(schema): decline some keycodes ac0b736
 
 ## new features
+
 - feat: add sort order switcher (##145) f458a54
 - feat(app): add scrolloff behaviour to filelist (##139) c2a38fb
 - feat(app): add show key option + slight refactor 75a5780
@@ -78,12 +155,14 @@
 - feat(app): add a state manager (##146) 5ad938f
 
 ## enhancements
+
 - feat(app): show any stylesheet errors as is a1aae91
 - fix(file_list): disable new item button when permissionless fd1f061
 - fix(filelist): check up tree as well 8b7ed21
 - fix(process + path_utils): fix deletion inside symlinks/junctions 3291017
 
 ## other changes
+
 - build(deps): bump astro from 5.15.2 to 5.15.6 in /docs (##148) e2661a9
 - build(deps): bump starlight from 0.35.2 to 0.36.1 ffc71fd
 - build(deps): bump vite from 6.3.6 to 6.4.1 in /docs (##133) f6a60f5
@@ -186,3 +265,5 @@
 - style(path_utils): add overload for hinting 7823dd7
 - style: fix ty errors c63be19
 
+</p>
+</details>

@@ -1,5 +1,6 @@
 try:
     from os import environ
+    from sys import stdout
 
     import rich_click as click
     from rich import box
@@ -142,9 +143,6 @@ try:
                     str(path.normpath(location)).replace("\\", "/").replace("//", "/")
                 )
 
-            table = Table(title="", border_style="blue", box=box.ROUNDED)
-            table.add_column("type")
-            table.add_column("path")
             path_config = Path(VAR_TO_DIR["CONFIG"])
             if path_config.is_relative_to(Path.home()):
                 config_path = "~/" + _normalise(
@@ -152,11 +150,26 @@ try:
                 )
             else:
                 config_path = path_config
-            table.add_row("[cyan]custom config[/]", f"{config_path}/config.toml")
-            table.add_row("[yellow]pinned folders[/]", f"{config_path}/pins.json")
-            table.add_row("[hot_pink]custom styles[/]", f"{config_path}/style.tcss")
-            table.add_row("[grey69]persistent state[/]", f"{config_path}/state.toml")
-            pprint(table)
+
+            if stdout.isatty():
+                table = Table(title="", border_style="blue", box=box.ROUNDED)
+                table.add_column("type")
+                table.add_column("path")
+                table.add_row("[cyan]custom config[/]", f"{config_path}/config.toml")
+                table.add_row("[yellow]pinned folders[/]", f"{config_path}/pins.json")
+                table.add_row("[hot_pink]custom styles[/]", f"{config_path}/style.tcss")
+                table.add_row(
+                    "[grey69]persistent state[/]", f"{config_path}/state.toml"
+                )
+                pprint(table)
+            else:
+                # print as json for user to parse (jq, nu, pwsh, idk)
+                print(f"""\u007b
+    "custom_config": "{config_path}/config.toml",
+    "pinned_folders": "{config_path}/pins.json",
+    "custom_styles": "{config_path}/style.tcss",
+    "persistent_state": "{config_path}/state.toml"
+\u007d""")
             return
         elif show_version:
 
@@ -173,7 +186,10 @@ try:
                 except PackageNotFoundError:
                     return "master"
 
-            pprint(f"rovr version [cyan]v{_get_version()}[/]")
+            if stdout.isatty():
+                pprint(f"rovr version [cyan]v{_get_version()}[/]")
+            else:
+                print(_get_version())
             return
 
         from rovr.functions.config import apply_mode
@@ -194,14 +210,20 @@ try:
         # TODO: Need to move this 'path' in the config dict, or a new runtime_config dict
         # Eventually there will be many options coming via arguments, but we cant keep sending all of
         # them via this Application's __init__ function here
-        Application(
-            startup_path=path,
-            cwd_file=cwd_file if cwd_file else None,
-            chooser_file=chooser_file if chooser_file else None,
-            show_keys=show_keys,
-            tree_dom=tree_dom,
-            mode=mode,
-        ).run()
+        if stdout.isatty():
+            Application(
+                startup_path=path,
+                cwd_file=cwd_file if cwd_file else None,
+                chooser_file=chooser_file if chooser_file else None,
+                show_keys=show_keys,
+                tree_dom=tree_dom,
+                mode=mode,
+            ).run()
+        else:
+            pprint(
+                "Error: rovr needs to be run in a terminal.\n"
+                "Please run it directly from your terminal emulator."
+            )
 
 except KeyboardInterrupt:
     pass

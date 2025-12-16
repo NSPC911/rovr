@@ -42,6 +42,7 @@ class RenameItemButton(Button):
                 title="Rename File",
                 severity="warning",
             )
+            return
         else:
             selected_file = selected_files[0]
             type_of_file = "Folder" if path.isdir(selected_file) else "File"

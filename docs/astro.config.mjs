@@ -3,7 +3,6 @@ import { defineConfig } from "astro/config";
 import starlight from "@astrojs/starlight";
 import sitemap from "@astrojs/sitemap";
 import { viewTransitions } from "astro-vtbot/starlight-view-transitions";
-import starlightLlmsTxt from "starlight-llms-txt";
 import mermaid from "astro-mermaid";
 
 export default defineConfig({
@@ -121,9 +120,6 @@ export default defineConfig({
       ],
       plugins: [
         viewTransitions(),
-        starlightLlmsTxt({
-          projectName: "rovr",
-        }),
       ],
     }),
     sitemap(),

@@ -3,13 +3,16 @@ title: tutorial
 description: a comprehensive tutorial to using rovr
 ---
 
-![main page](/rovr/screenshots/main.svg)
+import InlineSVG from "@/components/InlineSVG.astro";
+
+<InlineSVG src="/rovr/screenshots/main.svg" alt="main page" />
 
 this tutorial covers the complete usage of rovr, from basic navigation to advanced file operations.
 
 ## getting started
 
 when you first launch rovr, you'll see the main interface with three panels:
+
 - **file list** (center): displays files and folders in the current directory
 - **sidebar** (left): shows directory tree and pinned folders
 - **preview** (right): displays file content or metadata
@@ -50,7 +53,7 @@ rovr uses a background-highlighted option to show your currently selected item, 
 
 rovr supports multiple selection modes for efficient file operations:
 
-![select mode](/rovr/screenshots/select-mode.svg)
+<InlineSVG src="/rovr/screenshots/select-mode.svg" alt="select mode" />
 
 - **select range**: use `shift` with arrow keys (only in visual mode)
 - **select all**: `%` or `ctrl+a`
@@ -61,34 +64,35 @@ rovr supports multiple selection modes for efficient file operations:
 once you have files selected, you may choose to use these operations or use the buttons available:
 
 - **copy**: `y` or `ctrl+c`
-![copy button](/rovr/screenshots/copy-button.svg)
+  <InlineSVG src="/rovr/screenshots/copy-button.svg" alt="copy button" />
 - **cut**: `x` or `ctrl+x`
-![cut button](/rovr/screenshots/cut-button.svg)
+  <InlineSVG src="/rovr/screenshots/cut-button.svg" alt="cut button" />
 - **paste**: `p` or `ctrl+v`
-![paste button](/rovr/screenshots/paste-button.svg)
+  <InlineSVG src="/rovr/screenshots/paste-button.svg" alt="paste button" />
 - **delete**: `d` or `delete` key
-![delete button](/rovr/screenshots/delete-button.svg)
+  <InlineSVG src="/rovr/screenshots/delete-button.svg" alt="delete button" />
 - **rename**: `r` or `f2`
-![rename button](/rovr/screenshots/rename-button.svg)
+  <InlineSVG src="/rovr/screenshots/rename-button.svg" alt="rename button" />
 - **create new entries**: `ctrl+n` or `o`
-![new entry button](/rovr/screenshots/new-entry-button.svg)
+  <InlineSVG src="/rovr/screenshots/new-entry-button.svg" alt="new entry button" />
 - **compress to archive**: `E` (uppercase E)
-![compress button](/rovr/screenshots/compress-button.svg)
+  <InlineSVG src="/rovr/screenshots/compress-button.svg" alt="compress button" />
 - **extract archive**: `ctrl+e`
-![extract button](/rovr/screenshots/extract-button.svg)
+  <InlineSVG src="/rovr/screenshots/extract-button.svg" alt="extract button" />
 - **copy path**: `Y` (uppercase Y)
-![copy button](/rovr/screenshots/copy-path-button.svg)
+  <InlineSVG src="/rovr/screenshots/copy-path-button.svg" alt="copy button" />
 
 ## navigation features
 
 ### quick navigation
 
 - **search in current folder**: `ctrl+f` or `/`
-![search bar](/rovr/screenshots/search-files.svg)
+  <InlineSVG src="/rovr/screenshots/search-files.svg" alt="search bar" />
 - **pin current folder**: `P` (uppercase P)
-<br/><sub>no images again lol</sub>
+  <br />
+  <sub>no images again lol</sub>
 - **command palette**: `ctrl+p`
-![command palette](/rovr/screenshots/command-palette.svg)
+  <InlineSVG src="/rovr/screenshots/command-palette.svg" alt="command palette" />
 
 ### tabs and workspaces
 
@@ -100,14 +104,15 @@ once you have files selected, you may choose to use these operations or use the 
 ### sidebar and panels
 
 - **toggle sidebar**: `S`
-![sidebarless](/rovr/screenshots/sidebarless.svg)
+  <InlineSVG src="/rovr/screenshots/sidebarless.svg" alt="sidebarless" />
 - **toggle preview**: `I`
-![previewless](/rovr/screenshots/previewless.svg)
+  <InlineSVG src="/rovr/screenshots/previewless.svg" alt="previewless" />
 - **toggle footer**
-![footerless](/rovr/screenshots/footerless.svg)
+  <InlineSVG src="/rovr/screenshots/footerless.svg" alt="footerless" />
 - **toggle header**
-![headerless](/rovr/screenshots/headerless.svg)
-<br/><sub>looks very similar to another file explorer...</sub>
+  <InlineSVG src="/rovr/screenshots/headerless.svg" alt="headerless" />
+  <br />
+  <sub>looks very similar to another file explorer...</sub>
 - **focus sidebar**: `s`
 - **focus file list**: `esc`
 - **focus preview**: `i`
@@ -129,6 +134,7 @@ the preview panel shows different content based on file type:
 ### configuration
 
 rovr stores its configuration in your system's standard config directory:
+
 - **windows**: `%APPDATA%\rovr\config.toml`
 - **macos**: `~/Library/Application Support/rovr/config.toml`
 - **linux**: `~/.config/rovr/config.toml`
@@ -136,6 +142,7 @@ rovr stores its configuration in your system's standard config directory:
 rovr is designed similarly to ghostty where it should work with minimal configuration, but has a lot of customisable options.
 
 here are some common changes
+
 ```toml
 [interface]
 # hide tooltips when hovering over buttons
@@ -158,8 +165,6 @@ buttons = true
 # show hidden files (toggleable by `.`)
 show_hidden_files = true
 ```
-
-
 
 ## next steps
 

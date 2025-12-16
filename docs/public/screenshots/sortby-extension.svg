@@ -6,8 +6,8 @@
       src: url("/rovr/caskaydiacovenfm.ttf") format("truetype");
     }
 
-    [class^="terminal"][class$="title"],
-    [class^="terminal"][class$="matrix"] {
+    svg [class^="terminal"][class$="title"],
+    svg [class^="terminal"][class$="matrix"] {
       font-family: "CaskaydiaCoveNFM" !important;
     }
 

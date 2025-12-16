@@ -120,6 +120,9 @@ html * {
       var(--sl-transition-duration) scrollbar-color ease-in-out;
   }
 }
+svg.rich-terminal * {
+  font-family: "CaskaydiaCoveNFM" !important;
+}
 code {
   text-transform: none;
   overflow-wrap: break-word;

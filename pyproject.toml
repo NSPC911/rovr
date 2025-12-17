@@ -49,7 +49,7 @@ dev = [
   "poethepoet>=0.38.0",
   "ruff>=0.14.6",
   "textual-dev>=1.7.0",
-  "ty==0.0.1a28",
+  "ty~=0.0.2",
 ]
 speedups = [
     "textual-speedups>=0.2.1",
@@ -118,3 +118,5 @@ possibly-missing-import = "ignore"
 unresolved-reference = "ignore" # handled by ruff
 unresolved-attribute = "ignore"
 no-matching-overload = "ignore" # not that accurate
+possibly-missing-attribute = "ignore" # no it is not missing
+invalid-assignment = "ignore" # probably already handled

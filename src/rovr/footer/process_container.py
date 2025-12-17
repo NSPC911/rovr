@@ -250,7 +250,7 @@ class ProcessContainer(VerticalScroll):
                             ):
                                 os.remove(item_dict["path"])
                         except Exception as e:
-                            do_what = self.app.call_from_thread(
+                            do_what: dict = self.app.call_from_thread(
                                 self.app.push_screen_wait,
                                 YesOrNo(
                                     f"Trashing failed due to\n{e}\nDo Permenant Deletion?",
@@ -339,7 +339,9 @@ class ProcessContainer(VerticalScroll):
         # finished successfully
         self.app.call_from_thread(
             bar.update_icon,
-            bar.icon_label.content + " " + icon_utils.get_icon("general", "check")[0],
+            str(bar.icon_label.content)
+            + " "
+            + icon_utils.get_icon("general", "check")[0],  # type: ignore[unsupported-operator]
         )
         self.app.call_from_thread(bar.progress_bar.advance)
         self.app.call_from_thread(bar.add_class, "done")
@@ -386,7 +388,7 @@ class ProcessContainer(VerticalScroll):
                 action_on_file_in_use = "ask"
 
         while True:
-            response = self.app.call_from_thread(
+            response: dict = self.app.call_from_thread(
                 self.app.push_screen_wait,
                 FileInUse(
                     f"The file appears to be open in another application and cannot be operated on.\nPath: {item_display_name}",
@@ -523,7 +525,9 @@ class ProcessContainer(VerticalScroll):
 
         self.app.call_from_thread(
             bar.update_icon,
-            bar.icon_label.content + " " + icon_utils.get_icon("general", "check")[0],
+            str(bar.icon_label.content)
+            + " "
+            + icon_utils.get_icon("general", "check")[0],
         )
         self.app.call_from_thread(bar.progress_bar.advance)
         self.app.call_from_thread(bar.add_class, "done")
@@ -575,7 +579,7 @@ class ProcessContainer(VerticalScroll):
                         last_update_time = current_time
                     if path.exists(path.join(destination_path, filename)):
                         if do_what_on_existance == "ask":
-                            response = self.app.call_from_thread(
+                            response: dict = self.app.call_from_thread(
                                 self.app.push_screen_wait,
                                 CommonFileNameDoWhat(
                                     "Path already exists in destination\nWhat do you want to do now?",
@@ -729,7 +733,7 @@ class ProcessContainer(VerticalScroll):
                     if path.exists(path.join(dest, item_dict["relative_loc"])):
                         # check if overwrite
                         if action_on_existance == "ask":
-                            response = self.app.call_from_thread(
+                            response: dict = self.app.call_from_thread(
                                 self.app.push_screen_wait,
                                 CommonFileNameDoWhat(
                                     "The destination already has file of that name.\nWhat do you want to do now?",
@@ -843,7 +847,7 @@ class ProcessContainer(VerticalScroll):
                             cut_ignore.append(item_dict["path"])
                             continue
                         if action_on_existance == "ask":
-                            response = self.app.call_from_thread(
+                            response: dict = self.app.call_from_thread(
                                 self.app.push_screen_wait,
                                 CommonFileNameDoWhat(
                                     "The destination already has file of that name.\nWhat do you want to do now?",

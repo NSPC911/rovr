@@ -2,7 +2,6 @@ import shutil
 from contextlib import suppress
 from os import chdir, getcwd, path
 from time import perf_counter, sleep
-from types import SimpleNamespace
 from typing import Callable, Iterable
 
 from rich.console import Console
@@ -381,7 +380,9 @@ class Application(App, inherit_bindings=False):
                 if response:
                     pathinput: PathInput = self.query_one(PathInput)
                     pathinput.value = response
-                    pathinput.on_input_submitted(SimpleNamespace(value=pathinput.value))
+                    pathinput.on_input_submitted(
+                        PathInput.Submitted(pathinput, pathinput.value)
+                    )
 
             self.push_screen(ZDToDirectory(), on_response)
         # keybinds

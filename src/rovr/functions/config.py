@@ -6,13 +6,13 @@ from os import environ, path
 from platform import system
 from shutil import which
 
-import jsonschema
 import tomli
 import ujson
-from jsonschema import ValidationError
+from pydantic import ValidationError
 from rich import box
 from rich.console import Console
 
+from rovr.config.models import RovrConfig
 from rovr.functions.utils import deep_merge, set_nested_value
 from rovr.variables.maps import (
     VAR_TO_DIR,
@@ -130,122 +130,124 @@ def find_path_line(lines: list[str], path: deque) -> int | None:
     return None
 
 
-def schema_dump(doc_path: str, exception: ValidationError, config_content: str) -> None:
+def schema_dump(
+    doc_path: str, exception: ValidationError, config_content: str
+) -> None:
     """
-    Dump an error message for schema validation errors
+    Dump an error message for schema validation errors (Pydantic)
 
     Args:
         doc_path: path to the config file
-        exception: the ValidationError that occurred
+        exception: the Pydantic ValidationError that occurred
         config_content: the raw file content
     """
     from rich.padding import Padding
     from rich.syntax import Syntax
     from rich.table import Table
 
-    def get_message(exception: ValidationError) -> tuple[str, bool]:
-        failed = False
-        match exception.validator:
-            case "required":
-                error_msg = f"Missing required field: {exception.message}"
-            case "type":
-                error_msg = f"Expected [bright_cyan]{exception.validator_value}[/] type, but got [bright_yellow]{type(exception.instance).__name__}[/] instead"
-            case "enum":
-                error_msg = f"Provided value '{exception.instance}' is not inside allowlist of {exception.validator_value}"
-            case "minimum":
-                error_msg = f"Value for [bright_cyan]{'.'.join(map(str, exception.relative_path))}[/] must be >= {exception.validator_value} (cannot be {exception.instance})"
-            case "maximum":
-                error_msg = f"Value for [bright_cyan]{'.'.join(map(str, exception.relative_path))}[/] must be <= {exception.validator_value} (cannot be {exception.instance})"
-            case _:
-                error_msg = exception.message
-                failed = True
-        return (f"schema\\[{exception.validator}]: {error_msg}", failed)
-
     doc: list = config_content.splitlines()
 
-    if exception.message.startswith("Additional properties are not allowed"):
-        # `Additional properties are not allowed ('<key>' was unexpected)`
-        # grabs only the key
-        cause = exception.message.split("'")
-        if len(cause) == 3:
-            exception.path.append(cause[1])
-        else:
-            pass
-    # find the line no for the error path
-    path_str = ".".join(str(p) for p in exception.path) if exception.path else "root"
-    lineno = find_path_line(doc, exception.path)
+    for error in exception.errors():
+        error_loc = error["loc"]
+        error_type = error["type"]
+        error_msg_raw = error["msg"]
 
-    rjust: int = 0
+        # Convert error location to path string
+        path_list = list(error_loc)
+        path_str = ".".join(str(p) for p in path_list) if path_list else "root"
 
-    if lineno is None:
-        # fallback to infoless error display
-        pprint(
-            f"[underline bright_red]Config Error[/] at path [bold cyan]{path_str}[/]:"
-        )
-        msg, failed = get_message(exception)
-        if failed:
-            pprint(f"[yellow]{msg}[/]")
-        else:
-            pprint(msg)
-    else:
-        start: int = max(lineno - 2, 0)
-        end: int = min(len(doc), lineno + 3)
-        rjust = len(str(end + 1))
-        has_past = False
+        # Create a deque for find_path_line
+        error_path = deque(path_list)
 
-        pprint(
-            rjust * " "
-            + f"  [bright_blue]-->[/] [white]{path.realpath(doc_path)}:{lineno + 1}[/]"
-        )
-        for line in range(start, end):
-            if line == lineno:
-                startswith = "╭╴"
-                has_past = True
-                pprint(
-                    f"[bright_red]{startswith}{str(line + 1).rjust(rjust)}[/][bright_blue] │[/]",
-                    end=" ",
-                )
-            else:
-                startswith = "│ " if has_past else "  "
-                pprint(
-                    f"[bright_red]{startswith}[/][bright_blue]{str(line + 1).rjust(rjust)} │[/]",
-                    end=" ",
-                )
+        # Find line number for the error
+        lineno = find_path_line(doc, error_path)
+
+        rjust: int = 0
+
+        # Format error message based on error type
+        def get_pydantic_message() -> str:
+            match error_type:
+                case "missing":
+                    return f"Missing required field: [bright_cyan]{path_str}[/]"
+                case error_type if error_type.startswith("type_error"):
+                    return f"Type error at [bright_cyan]{path_str}[/]: {error_msg_raw}"
+                case "value_error":
+                    return f"Value error at [bright_cyan]{path_str}[/]: {error_msg_raw}"
+                case "literal_error":
+                    return f"Invalid value at [bright_cyan]{path_str}[/]: {error_msg_raw}"
+                case error_type if "greater_than" in error_type:
+                    return f"Value at [bright_cyan]{path_str}[/] {error_msg_raw}"
+                case error_type if "less_than" in error_type:
+                    return f"Value at [bright_cyan]{path_str}[/] {error_msg_raw}"
+                case "extra_forbidden":
+                    return f"Extra field not allowed: [bright_cyan]{path_str}[/]"
+                case _:
+                    return f"schema[{error_type}]: {error_msg_raw}"
+
+        if lineno is None:
+            # fallback to infoless error display
             pprint(
-                Syntax(
-                    doc[line],
-                    "toml",
-                    background_color="default",
-                    theme="ansi_dark",
+                f"[underline bright_red]Config Error[/] at path [bold cyan]{path_str}[/]:"
+            )
+            pprint(get_pydantic_message())
+        else:
+            start: int = max(lineno - 2, 0)
+            end: int = min(len(doc), lineno + 3)
+            rjust = len(str(end + 1))
+            has_past = False
+
+            pprint(
+                rjust * " "
+                + f"  [bright_blue]-->[/] [white]{path.realpath(doc_path)}:{lineno + 1}[/]"
+            )
+            for line in range(start, end):
+                if line == lineno:
+                    startswith = "╭╴"
+                    has_past = True
+                    pprint(
+                        f"[bright_red]{startswith}{str(line + 1).rjust(rjust)}[/][bright_blue] │[/]",
+                        end=" ",
+                    )
+                else:
+                    startswith = "│ " if has_past else "  "
+                    pprint(
+                        f"[bright_red]{startswith}[/][bright_blue]{str(line + 1).rjust(rjust)} │[/]",
+                        end=" ",
+                    )
+                pprint(
+                    Syntax(
+                        doc[line],
+                        "toml",
+                        background_color="default",
+                        theme="ansi_dark",
+                    )
                 )
-            )
 
-        # Format the error message based on validator type
-        error_msg, _ = get_message(exception)
+            pprint(f"[bright_red]╰─{'─' * rjust}─❯[/] {get_pydantic_message()}")
 
-        pprint(f"[bright_red]╰─{'─' * rjust}─❯[/] {error_msg}")
-    # check path for custom message from migration.json
-    with (
-        resources.files("rovr.config")
-        .joinpath("migration.json")
-        .open("r", encoding="utf-8") as f
-    ):
-        migration_docs = ujson.load(f)
-    for item in migration_docs:
-        if path_str in item["keys"]:
-            message = "\n".join(item["message"])
-            to_print = Table(
-                box=box.ROUNDED,
-                border_style="bright_blue",
-                show_header=False,
-                expand=True,
-                show_lines=True,
-            )
-            to_print.add_column()
-            to_print.add_row(message)
-            to_print.add_row(f"[dim]> {item['extra']}[/]")
-            pprint(Padding(to_print, (0, rjust + 4, 0, rjust + 3)))
-            break
+        # check path for custom message from migration.json
+        with (
+            resources.files("rovr.config")
+            .joinpath("migration.json")
+            .open("r", encoding="utf-8") as f
+        ):
+            migration_docs = ujson.load(f)
+        for item in migration_docs:
+            if path_str in item["keys"]:
+                message = "\n".join(item["message"])
+                to_print = Table(
+                    box=box.ROUNDED,
+                    border_style="bright_blue",
+                    show_header=False,
+                    expand=True,
+                    show_lines=True,
+                )
+                to_print.add_column()
+                to_print.add_row(message)
+                to_print.add_row(f"[dim]> {item['extra']}[/]")
+                pprint(Padding(to_print, (0, rjust + 4, 0, rjust + 3)))
+                break
+
     exit(1)
 
 
@@ -321,19 +323,14 @@ def load_config() -> tuple[dict, dict]:
                     toml_dump(user_config_path, exc)
     # Don't really have to consider the else part, because it's created further down
     config = deep_merge(template_config, user_config)
-    # check with schema
-    with (
-        resources.files("rovr.config")
-        .joinpath("schema.json")
-        .open("r", encoding="utf-8") as f
-    ):
-        content = f.read()
-        schema = ujson.loads(content)
-
+    # validate with Pydantic
     try:
-        jsonschema.validate(config, schema)
+        RovrConfig.model_validate(config)
     except ValidationError as exception:
         schema_dump(user_config_path, exception, user_config_content)
+
+    # Generate schema from Pydantic model
+    schema = RovrConfig.model_json_schema()
 
     # slight config fixes
     # image protocol because "AutoImage" doesn't work with Sixel

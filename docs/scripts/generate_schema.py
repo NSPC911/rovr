@@ -1,3 +1,4 @@
+import json
 from shutil import which
 from subprocess import CalledProcessError, run
 from time import perf_counter
@@ -8,10 +9,26 @@ from json_schema_for_humans.generation_configuration import GenerationConfigurat
 from rich.console import Console
 from rich.traceback import Traceback
 
+from rovr.config.models import RovrConfig
+
 start_time = perf_counter()
 pprint = Console().print
 
 try:
+    # Generate JSON schema from Pydantic model
+    schema = RovrConfig.model_json_schema()
+    # Add JSON Schema metadata
+    schema["$schema"] = "https://json-schema.org/draft-07/schema"
+    schema["title"] = "Rovr Config"
+
+    # Write the generated schema to schema.json
+    with open("src/rovr/config/schema.json", "w", encoding="utf-8") as f:
+        json.dump(schema, f, indent=2)
+
+    pprint(
+        f"[green]Generated [bright_blue]schema.json[/] from Pydantic models in {precisedelta(perf_counter() - start_time, minimum_unit='milliseconds')}[/]"
+    )
+
     config = GenerationConfiguration()
     if config.template_md_options is not None:
         config.template_md_options["properties_table_columns"] = [
@@ -21,20 +38,26 @@ try:
         ]
     config.template_name = "md"
     config.with_footer = False
-    # do some temporary fixes to the schema
+    # Store the original schema content for restoration
     with open("src/rovr/config/schema.json", "r", encoding="utf-8") as f:
-        schema_content = f.read()
+        original_schema_content = f.read()
+    # Do some temporary fixes to the schema for markdown generation
     with open("src/rovr/config/schema.json", "w", encoding="utf-8") as f:
         f.write(
-            schema_content.replace("|", "&#124;")
+            original_schema_content.replace("|", "&#124;")
             .replace(">", "&gt;")
             .replace("<", "&lt;")
         )
-    generate_from_filename(
-        "src/rovr/config/schema.json",
-        "docs/src/content/docs/reference/schema.mdx",
-        config=config,
-    )
+    try:
+        generate_from_filename(
+            "src/rovr/config/schema.json",
+            "docs/src/content/docs/reference/schema.mdx",
+            config=config,
+        )
+    finally:
+        # Restore original schema file
+        with open("src/rovr/config/schema.json", "w", encoding="utf-8") as f:
+            f.write(original_schema_content)
     with open(
         "docs/src/content/docs/reference/schema.mdx", "r", encoding="utf-8"
     ) as schema_file:
@@ -79,7 +102,3 @@ except FileNotFoundError:
     pprint("[red]Do not run manually with python! Run [blue]poe gen-schema[/][/]")
     pprint(Traceback(show_locals=True))
     exit(1)
-finally:
-    # rewrite schema file
-    with open("src/rovr/config/schema.json", "w", encoding="utf-8") as f:
-        f.write(schema_content)

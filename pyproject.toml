@@ -17,13 +17,13 @@ classifiers = [
 ]
 dependencies = [
   "humanize>=4.14.0",
-  "jsonschema>=4.25.0",
   "natsort>=8.4.0",
   "pathvalidate>=3.3.1",
   "pdf2image>=1.17.0",
   "pillow>=12.0.0",
   "platformdirs>=4.5.0",
   "psutil>=7.1.0",
+  "pydantic>=2.11.0",
   "rarfile>=4.2",
   "rich-click>=1.9.3",
   "send2trash>=1.8.3",

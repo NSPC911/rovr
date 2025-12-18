@@ -1,193 +1,1855 @@
 {
-  "$schema": "https://json-schema.org/draft-04/schema",
-  "title": "Rovr Config",
-  "type": "object",
-  "additionalProperties": false,
-  "definitions": {
-    "keybind": {
-      "type": "array",
-      "items": {
-        "type": "string"
-      }
-    }
-  },
-  "properties": {
-    "interface": {
-      "type": "object",
+  "$defs": {
+    "BarGradient": {
       "additionalProperties": false,
+      "description": "Bar gradient colors.",
+      "properties": {
+        "default": {
+          "anyOf": [
+            {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "A list of hex codes, or named colors to use as the progress bar's gradient colors.",
+          "title": "Default"
+        },
+        "error": {
+          "anyOf": [
+            {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "A list of hex codes, or named colors to use as the progress bar's gradient colors **when it encountered an error**.",
+          "title": "Error"
+        }
+      },
+      "title": "BarGradient",
+      "type": "object"
+    },
+    "BatPlugin": {
+      "additionalProperties": false,
+      "description": "Bat plugin configuration.",
+      "properties": {
+        "enabled": {
+          "default": false,
+          "description": "Enable or disable bat for previewing files.",
+          "title": "Enabled",
+          "type": "boolean"
+        },
+        "executable": {
+          "default": "bat",
+          "description": "The executable for bat.",
+          "title": "Executable",
+          "type": "string"
+        }
+      },
+      "title": "BatPlugin",
+      "type": "object"
+    },
+    "ChangeSortOrderKeybinds": {
+      "additionalProperties": false,
+      "description": "Keybinds for changing sort order.",
+      "properties": {
+        "open_popup": {
+          "anyOf": [
+            {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Open the change sort order popup.",
+          "title": "Open Popup"
+        },
+        "name": {
+          "anyOf": [
+            {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Sort by name.",
+          "title": "Name"
+        },
+        "extension": {
+          "anyOf": [
+            {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Sort by extension.",
+          "title": "Extension"
+        },
+        "natural": {
+          "anyOf": [
+            {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Sort naturally (numbers first).",
+          "title": "Natural"
+        },
+        "size": {
+          "anyOf": [
+            {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Sort by size.",
+          "title": "Size"
+        },
+        "created": {
+          "anyOf": [
+            {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Sort by creation time.",
+          "title": "Created"
+        },
+        "modified": {
+          "anyOf": [
+            {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Sort by modification time.",
+          "title": "Modified"
+        },
+        "descending": {
+          "anyOf": [
+            {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Toggle descending sort order.",
+          "title": "Descending"
+        }
+      },
+      "title": "ChangeSortOrderKeybinds",
+      "type": "object"
+    },
+    "ClockConfig": {
+      "additionalProperties": false,
+      "description": "Clock configuration in the interface.",
+      "properties": {
+        "enabled": {
+          "default": true,
+          "description": "Show a clock in the tabs bar.",
+          "title": "Enabled",
+          "type": "boolean"
+        },
+        "align": {
+          "default": "right",
+          "description": "Align the clock to either the 'right' or 'left' of the tabs bar.",
+          "enum": [
+            "left",
+            "right"
+          ],
+          "title": "Align",
+          "type": "string"
+        }
+      },
+      "title": "ClockConfig",
+      "type": "object"
+    },
+    "CompactModeConfig": {
+      "additionalProperties": false,
+      "description": "Compact mode configuration.",
+      "properties": {
+        "buttons": {
+          "default": false,
+          "description": "Whether to compact the buttons and path input to one line instead of three.",
+          "title": "Buttons",
+          "type": "boolean"
+        },
+        "panels": {
+          "default": false,
+          "description": "Whether to make the panels smaller to add more room for the file list itself",
+          "title": "Panels",
+          "type": "boolean"
+        }
+      },
+      "title": "CompactModeConfig",
+      "type": "object"
+    },
+    "CustomTheme": {
+      "additionalProperties": false,
+      "description": "Custom theme definition.",
+      "properties": {
+        "name": {
+          "description": "A name for the theme. However, when the theme is available in the theme picker, it shows up as a hiphenated, lowercase version.",
+          "title": "Name",
+          "type": "string"
+        },
+        "primary": {
+          "description": "A hex code or named color to use as the primary color.",
+          "title": "Primary",
+          "type": "string"
+        },
+        "secondary": {
+          "description": "A hex code or named color to use as the secondary color.",
+          "title": "Secondary",
+          "type": "string"
+        },
+        "warning": {
+          "description": "A hex code or named color to use as the warning color.",
+          "title": "Warning",
+          "type": "string"
+        },
+        "error": {
+          "description": "A hex code or named color to use as the error color.",
+          "title": "Error",
+          "type": "string"
+        },
+        "success": {
+          "description": "A hex code or named color to use as the success color.",
+          "title": "Success",
+          "type": "string"
+        },
+        "accent": {
+          "description": "A hex code or named color to use as the accent color.",
+          "title": "Accent",
+          "type": "string"
+        },
+        "foreground": {
+          "description": "A hex code or named color to use as the foreground color.",
+          "title": "Foreground",
+          "type": "string"
+        },
+        "background": {
+          "description": "A hex code or named color to use as the background color.",
+          "title": "Background",
+          "type": "string"
+        },
+        "surface": {
+          "description": "A hex code or named color to use as the surface color.",
+          "title": "Surface",
+          "type": "string"
+        },
+        "panel": {
+          "description": "A hex code or named color to use as the panel color.",
+          "title": "Panel",
+          "type": "string"
+        },
+        "is_dark": {
+          "description": "Whether or not this theme is a dark type theme.",
+          "title": "Is Dark",
+          "type": "boolean"
+        },
+        "bar_gradient": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/BarGradient"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The gradient colors for the progress bar."
+        },
+        "variables": {
+          "anyOf": [
+            {
+              "additionalProperties": {
+                "type": "string"
+              },
+              "type": "object"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Extra variables to set unique to the theme.\nRefer to https://textual.textualize.io/guide/design/#additional-variables for more information.",
+          "title": "Variables"
+        }
+      },
+      "required": [
+        "name",
+        "primary",
+        "secondary",
+        "warning",
+        "error",
+        "success",
+        "accent",
+        "foreground",
+        "background",
+        "surface",
+        "panel",
+        "is_dark"
+      ],
+      "title": "CustomTheme",
+      "type": "object"
+    },
+    "DeleteFilesKeybinds": {
+      "additionalProperties": false,
+      "description": "Keybinds for delete confirmation screen.",
+      "properties": {
+        "trash": {
+          "anyOf": [
+            {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Confirm deletion and move files to the recycle bin.",
+          "title": "Trash"
+        },
+        "delete": {
+          "anyOf": [
+            {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Confirm deletion and permanently delete files.",
+          "title": "Delete"
+        },
+        "cancel": {
+          "anyOf": [
+            {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Cancel deletion and go back to the main screen.",
+          "title": "Cancel"
+        }
+      },
+      "title": "DeleteFilesKeybinds",
+      "type": "object"
+    },
+    "EditorPlugin": {
+      "additionalProperties": false,
+      "description": "Editor plugin configuration.",
+      "properties": {
+        "enabled": {
+          "default": true,
+          "description": "Enable opening a file in your editor.",
+          "title": "Enabled",
+          "type": "boolean"
+        },
+        "file_executable": {
+          "default": "nano",
+          "description": "Open files in this app.",
+          "title": "File Executable",
+          "type": "string"
+        },
+        "file_suspend": {
+          "default": true,
+          "description": "Suspend the app when editing a file. Useful for TUI editors, but not for something like VSCode or Notepad++.",
+          "title": "File Suspend",
+          "type": "boolean"
+        },
+        "folder_executable": {
+          "default": "code",
+          "description": "Open folders in this app.",
+          "title": "Folder Executable",
+          "type": "string"
+        },
+        "folder_suspend": {
+          "default": true,
+          "description": "Suspend the app when editing a folder. Useful for TUI editors, but not for something like VSCode or Notepad++.",
+          "title": "Folder Suspend",
+          "type": "boolean"
+        },
+        "open_all_in_editor": {
+          "default": false,
+          "description": "Open all files in the configured editor, regardless of file encoding or type. When disabled, files that cannot be opened due to encoding issues will use the system's default application instead.",
+          "title": "Open All In Editor",
+          "type": "boolean"
+        },
+        "keybinds": {
+          "anyOf": [
+            {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The keybind to launch your editor.",
+          "title": "Keybinds"
+        }
+      },
+      "title": "EditorPlugin",
+      "type": "object"
+    },
+    "FdPlugin": {
+      "additionalProperties": false,
+      "description": "Fd plugin configuration.",
+      "properties": {
+        "enabled": {
+          "default": true,
+          "description": "Enable recursive file search using fd.",
+          "title": "Enabled",
+          "type": "boolean"
+        },
+        "keybinds": {
+          "anyOf": [
+            {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The keybind to open the file search picker.",
+          "title": "Keybinds"
+        },
+        "executable": {
+          "default": "fd",
+          "description": "fd executable name or path.",
+          "title": "Executable",
+          "type": "string"
+        },
+        "relative_paths": {
+          "default": true,
+          "description": "Whether to show as relative path or absolute path.",
+          "title": "Relative Paths",
+          "type": "boolean"
+        },
+        "follow_symlinks": {
+          "default": false,
+          "description": "Whether fd should follow symlinks when searching.",
+          "title": "Follow Symlinks",
+          "type": "boolean"
+        },
+        "no_ignore_parent": {
+          "default": false,
+          "description": "Don't use *ignore files from parent folders when searching.",
+          "title": "No Ignore Parent",
+          "type": "boolean"
+        },
+        "default_filter_types": {
+          "default": [
+            "file",
+            "directory"
+          ],
+          "description": "The default file types to show when using fd.",
+          "items": {
+            "enum": [
+              "file",
+              "directory",
+              "symlink",
+              "executable",
+              "empty",
+              "socket",
+              "pipe",
+              "char-device",
+              "block-device"
+            ],
+            "type": "string"
+          },
+          "title": "Default Filter Types",
+          "type": "array"
+        }
+      },
+      "title": "FdPlugin",
+      "type": "object"
+    },
+    "FileInUseKeybinds": {
+      "additionalProperties": false,
+      "description": "Keybinds for handling file in use errors.",
+      "properties": {
+        "retry": {
+          "anyOf": [
+            {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Retry the operation on the file.",
+          "title": "Retry"
+        },
+        "skip": {
+          "anyOf": [
+            {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Skip this file and do not copy/move it.",
+          "title": "Skip"
+        },
+        "cancel": {
+          "anyOf": [
+            {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Cancel the entire copy/move operation.",
+          "title": "Cancel"
+        },
+        "dont_ask_again": {
+          "anyOf": [
+            {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Apply the selected action to all future 'file in use' errors without asking again.",
+          "title": "Dont Ask Again"
+        }
+      },
+      "title": "FileInUseKeybinds",
+      "type": "object"
+    },
+    "FileOnePlugin": {
+      "additionalProperties": false,
+      "description": "File(1) plugin configuration.",
+      "properties": {
+        "enabled": {
+          "default": false,
+          "description": "Enable file(1) MIME type detection for preview selection. When enabled, rovr uses the `file` command to detect file types instead of relying solely on file extensions.",
+          "title": "Enabled",
+          "type": "boolean"
+        },
+        "mime_rules": {
+          "additionalProperties": {
+            "enum": [
+              "text",
+              "image",
+              "pdf",
+              "archive",
+              "folder"
+            ],
+            "type": "string"
+          },
+          "default": {
+            "text/*": "text",
+            "image/*": "image",
+            "application/pdf": "pdf",
+            "application/zip": "archive",
+            "application/x-tar": "archive",
+            "application/gzip": "archive",
+            "application/x-bzip2": "archive",
+            "application/x-xz": "archive",
+            "application/x-rar": "archive",
+            "application/x-7z-compressed": "archive",
+            "inode/directory": "folder"
+          },
+          "description": "Map MIME type patterns to preview types. Supports glob patterns (e.g., 'text/*' matches 'text/plain', 'text/html', etc.). Valid preview types: text, image, pdf, archive, folder.",
+          "title": "Mime Rules",
+          "type": "object"
+        }
+      },
+      "title": "FileOnePlugin",
+      "type": "object"
+    },
+    "FilenameConflictKeybinds": {
+      "additionalProperties": false,
+      "description": "Keybinds for handling filename conflicts.",
+      "properties": {
+        "overwrite": {
+          "anyOf": [
+            {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Overwrite the existing file with the new file.",
+          "title": "Overwrite"
+        },
+        "skip": {
+          "anyOf": [
+            {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Skip this file and do not copy/move it.",
+          "title": "Skip"
+        },
+        "rename": {
+          "anyOf": [
+            {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Rename the new file being copied/moved.",
+          "title": "Rename"
+        },
+        "cancel": {
+          "anyOf": [
+            {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Cancel the entire copy/move operation.",
+          "title": "Cancel"
+        },
+        "dont_ask_again": {
+          "anyOf": [
+            {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Apply the selected action to all future conflicts without asking again.",
+          "title": "Dont Ask Again"
+        }
+      },
+      "title": "FilenameConflictKeybinds",
+      "type": "object"
+    },
+    "FilterModalKeybinds": {
+      "additionalProperties": false,
+      "description": "Keybinds for filter modals.",
+      "properties": {
+        "exit": {
+          "anyOf": [
+            {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Exit the modal without making a selection.",
+          "title": "Exit"
+        },
+        "down": {
+          "anyOf": [
+            {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Move the selection down in the modal list.",
+          "title": "Down"
+        },
+        "up": {
+          "anyOf": [
+            {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Move the selection up in the modal list.",
+          "title": "Up"
+        }
+      },
+      "title": "FilterModalKeybinds",
+      "type": "object"
+    },
+    "IconMapping": {
+      "description": "Icon mapping for files or folders.",
+      "properties": {
+        "pattern": {
+          "description": "The glob pattern to match against the file name (e.g., '*.py', 'LICENSE').\nBoth the filename and glob will be forced to lowercase!",
+          "title": "Pattern",
+          "type": "string"
+        },
+        "icon": {
+          "description": "The icon character to use.",
+          "title": "Icon",
+          "type": "string"
+        },
+        "color": {
+          "description": "The color for the icon. Can be a named color or hex code.",
+          "title": "Color",
+          "type": "string"
+        }
+      },
+      "required": [
+        "pattern",
+        "icon",
+        "color"
+      ],
+      "title": "IconMapping",
+      "type": "object"
+    },
+    "IconsConfig": {
+      "additionalProperties": false,
+      "description": "Icons configuration.",
+      "properties": {
+        "files": {
+          "default": [],
+          "description": "Custom file icon mappings. Earlier entries have higher priority.",
+          "items": {
+            "$ref": "#/$defs/IconMapping"
+          },
+          "title": "Files",
+          "type": "array"
+        },
+        "folders": {
+          "default": [],
+          "description": "Custom folder icon mappings. Earlier entries have higher priority.",
+          "items": {
+            "$ref": "#/$defs/IconMapping"
+          },
+          "title": "Folders",
+          "type": "array"
+        }
+      },
+      "title": "IconsConfig",
+      "type": "object"
+    },
+    "InterfaceConfig": {
+      "additionalProperties": false,
+      "description": "Interface configuration.",
       "properties": {
         "tooltips": {
-          "type": "boolean",
           "default": true,
-          "description": "Show tooltips when your mouse is over a tooltip supported button.\nThis is not hot reloaded."
+          "description": "Show tooltips when your mouse is over a tooltip supported button.\nThis is not hot reloaded.",
+          "title": "Tooltips",
+          "type": "boolean"
         },
         "nerd_font": {
-          "type": "boolean",
           "default": false,
-          "description": "Use nerd font for rendering icons instead of weird characters and stuff.\nNot properly hot-reloaded."
+          "description": "Use nerd font for rendering icons instead of weird characters and stuff.\nNot properly hot-reloaded.",
+          "title": "Nerd Font",
+          "type": "boolean"
         },
         "use_reactive_layout": {
-          "type": "boolean",
           "default": true,
-          "description": "Hide certain elements based on the width and height of the terminal."
+          "description": "Hide certain elements based on the width and height of the terminal.",
+          "title": "Use Reactive Layout",
+          "type": "boolean"
         },
         "show_progress_eta": {
-          "type": "boolean",
           "default": false,
-          "description": "When copying or deleting files, show an ETA for when the action will be completed."
+          "description": "When copying or deleting files, show an ETA for when the action will be completed.",
+          "title": "Show Progress Eta",
+          "type": "boolean"
         },
         "show_progress_percentage": {
-          "type": "boolean",
           "default": false,
-          "description": "When copying or deleting files, show a percentage of how much had been completed."
+          "description": "When copying or deleting files, show a percentage of how much had been completed.",
+          "title": "Show Progress Percentage",
+          "type": "boolean"
         },
         "truncate_progress_file_path": {
-          "type": "boolean",
           "default": false,
-          "description": "When the process container is using file paths, truncate the file path to only view the first and last names of the path."
+          "description": "When the process container is using file paths, truncate the file path to only view the first and last names of the path.",
+          "title": "Truncate Progress File Path",
+          "type": "boolean"
         },
         "show_line_numbers": {
-          "type": "boolean",
           "default": false,
-          "description": "Add line numbers to the left gutter if you are viewing a text file."
+          "description": "Add line numbers to the left gutter if you are viewing a text file.",
+          "title": "Show Line Numbers",
+          "type": "boolean"
         },
         "scrolloff": {
-          "type": "integer",
-          "minimum": 0,
           "default": 3,
-          "description": "The number of files to keep above and below the cursor when moving through the file list."
+          "description": "The number of files to keep above and below the cursor when moving through the file list.",
+          "minimum": 0,
+          "title": "Scrolloff",
+          "type": "integer"
         },
         "clock": {
-          "type": "object",
-          "additionalProperties": false,
-          "properties": {
-            "enabled": {
-              "type": "boolean",
-              "default": true,
-              "description": "Show a clock in the tabs bar."
-            },
-            "align": {
-              "type": "string",
-              "default": "right",
-              "description": "Align the clock to either the 'right' or 'left' of the tabs bar.",
-              "enum": ["left", "right"]
-            }
-          }
+          "$ref": "#/$defs/ClockConfig"
         },
         "preview_text": {
-          "type": "object",
-          "additionalProperties": false,
-          "properties": {
-            "error": {
-              "type": "string",
-              "default": "couldn't read this file! (\u00ac_\u00ac )",
-              "description": "If for any reason the file preview refused to show, this appears."
-            },
-            "binary": {
-              "type": "string",
-              "default": "the file does not use UTF-8, which isn't supported yet",
-              "description": "If the current file cannot be read due to an encoding issue (ie not UTF8), it will display this message."
-            },
-            "start": {
-              "type": "string",
-              "default": " ___ ___\n|  _| . |\n|_| |___|\n _ _ ___\n| | |  _|\n \\_/|_|\n",
-              "description": "This is shown when the rovr starts up. You may see it for a split second, but it will never appear afterwards. You cannot view this properly in this docs."
-            },
-            "empty": {
-              "type": "string",
-              "default": "bytes be gone (\u2310\u25a0_\u25a0)",
-              "description": "If the current file has no content, this is shown"
-            },
-            "too_large": {
-              "type": "string",
-              "default": "this file is larger (but not larger than your mother)",
-              "description": "If the file is too large (hard capped at < 1MB), the preview will refuse to render this file regardless of your memory size"
-            }
-          }
+          "$ref": "#/$defs/PreviewTextConfig"
         },
         "compact_mode": {
-          "type": "object",
-          "additionalProperties": false,
-          "properties": {
-            "buttons": {
-              "type": "boolean",
-              "default": false,
-              "description": "Whether to compact the buttons and path input to one line instead of three."
-            },
-            "panels": {
-              "type": "boolean",
-              "default": false,
-              "description": "Whether to make the panels smaller to add more room for the file list itself"
-            }
-          }
+          "$ref": "#/$defs/CompactModeConfig"
         }
-      }
+      },
+      "title": "InterfaceConfig",
+      "type": "object"
     },
-    "settings": {
-      "type": "object",
+    "KeybindsConfig": {
       "additionalProperties": false,
+      "description": "Keybinds configuration.",
       "properties": {
-        "show_hidden_files": {
-          "type": "boolean",
-          "default": false,
-          "description": "Show hidden files and folders (those starting with a dot on Unix, or explicitly hidden on Windows/MacOS)."
+        "toggle_pin": {
+          "anyOf": [
+            {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Toggle the current folder in the Pinned Folder Sidebar.",
+          "title": "Toggle Pin"
         },
-        "use_recycle_bin": {
-          "type": "boolean",
-          "default": true,
-          "description": "When deleting a file, allow moving the file to the recycle bin."
+        "toggle_pinned_sidebar": {
+          "anyOf": [
+            {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Toggle viewing the pinned sidebar.",
+          "title": "Toggle Pinned Sidebar"
         },
-        "copy_includes_metadata": {
-          "type": "boolean",
-          "default": true,
-          "description": "When copying over a file, preserve metadata from the original file, such as creation and modification times."
+        "toggle_preview_sidebar": {
+          "anyOf": [
+            {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Toggle viewing the preview sidebar.",
+          "title": "Toggle Preview Sidebar"
         },
-        "image_protocol": {
-          "type": "string",
-          "default": "Auto",
-          "description": "The image protocol to use when displaying an image",
-          "enum": ["Auto", "TGP", "Sixel", "Halfcell", "Unicode"]
+        "toggle_footer": {
+          "anyOf": [
+            {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Toggle viewing the footer.",
+          "title": "Toggle Footer"
         },
-        "allow_tab_nav": {
-          "type": "boolean",
-          "default": false,
-          "description": "Allow navigating the main app screen with `tab` and `shift+tab`"
+        "toggle_menuwrapper": {
+          "anyOf": [
+            {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Toggle viewing the menu wrapper.",
+          "title": "Toggle Menuwrapper"
         },
-        "append_new_tabs": {
-          "type": "boolean",
-          "default": true,
-          "description": "Choose whether or not to append new tabs instead of inserting them.\n`true` => Append to the end of the tab list.\n`false` => Insert after the active tab."
+        "focus_toggle_pinned_sidebar": {
+          "anyOf": [
+            {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Toggle focus between pinned folder sidebar and file list.",
+          "title": "Focus Toggle Pinned Sidebar"
         },
-        "double_click_delay": {
-          "type": "number",
-          "default": 0.25,
-          "description": "The delay between two consecutive clicks to enter into a directory, or open a file."
+        "focus_file_list": {
+          "anyOf": [
+            {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Focus the file list.",
+          "title": "Focus File List"
         },
-        "drive_watcher_frequency": {
-          "type": "number",
-          "default": 3.0,
-          "description": "How often (in seconds) to check for changes in mounted drives in the sidebar."
+        "focus_toggle_preview_sidebar": {
+          "anyOf": [
+            {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Focus toggle between preview sidebar and file list.",
+          "title": "Focus Toggle Preview Sidebar"
+        },
+        "focus_toggle_path_switcher": {
+          "anyOf": [
+            {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Focus toggle between path switcher and file list.",
+          "title": "Focus Toggle Path Switcher"
+        },
+        "focus_toggle_processes": {
+          "anyOf": [
+            {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Focus toggle the processes container.",
+          "title": "Focus Toggle Processes"
+        },
+        "focus_toggle_clipboard": {
+          "anyOf": [
+            {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Focus toggle the clipboard container.",
+          "title": "Focus Toggle Clipboard"
+        },
+        "focus_toggle_metadata": {
+          "anyOf": [
+            {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Focus toggle the metadata container.",
+          "title": "Focus Toggle Metadata"
+        },
+        "focus_search": {
+          "anyOf": [
+            {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Focus the search bar.",
+          "title": "Focus Search"
+        },
+        "copy": {
+          "anyOf": [
+            {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Copy the selected files in the file list to the clipboard.",
+          "title": "Copy"
+        },
+        "paste": {
+          "anyOf": [
+            {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Paste the selected files in the clipboard into the current directory.",
+          "title": "Paste"
+        },
+        "cut": {
+          "anyOf": [
+            {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Cut the selected files in the file list to the clipboard.",
+          "title": "Cut"
+        },
+        "delete": {
+          "anyOf": [
+            {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Delete the selected files in the file list.",
+          "title": "Delete"
+        },
+        "rename": {
+          "anyOf": [
+            {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Rename the selected file in the file list to something else.",
+          "title": "Rename"
+        },
+        "new": {
+          "anyOf": [
+            {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Create a new item in the current directory.",
+          "title": "New"
+        },
+        "toggle_all": {
+          "anyOf": [
+            {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Enter into select mode and select/unselect everything.",
+          "title": "Toggle All"
+        },
+        "zip": {
+          "anyOf": [
+            {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Create a zip archive from selected files.",
+          "title": "Zip"
+        },
+        "unzip": {
+          "anyOf": [
+            {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Extract a selected zip archive.",
+          "title": "Unzip"
+        },
+        "copy_path": {
+          "anyOf": [
+            {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Copy the path of the item to the system clipboard.",
+          "title": "Copy Path"
+        },
+        "up": {
+          "anyOf": [
+            {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Go up the file list options.",
+          "title": "Up"
+        },
+        "down": {
+          "anyOf": [
+            {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Go down the file list options.",
+          "title": "Down"
+        },
+        "up_tree": {
+          "anyOf": [
+            {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Go up the file tree.",
+          "title": "Up Tree"
+        },
+        "down_tree": {
+          "anyOf": [
+            {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Go down the file tree, or open the currently selected item.",
+          "title": "Down Tree"
+        },
+        "page_up": {
+          "anyOf": [
+            {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Go to the previous page of the file list.",
+          "title": "Page Up"
+        },
+        "page_down": {
+          "anyOf": [
+            {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Go to the next page of the file list.",
+          "title": "Page Down"
+        },
+        "home": {
+          "anyOf": [
+            {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Jump to the top of the file list.",
+          "title": "Home"
+        },
+        "end": {
+          "anyOf": [
+            {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Jump to the bottom of the file list.",
+          "title": "End"
+        },
+        "hist_previous": {
+          "anyOf": [
+            {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Go back in history.",
+          "title": "Hist Previous"
+        },
+        "hist_next": {
+          "anyOf": [
+            {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Go forward in history.",
+          "title": "Hist Next"
+        },
+        "toggle_visual": {
+          "anyOf": [
+            {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Enter or exit select/visual mode.",
+          "title": "Toggle Visual"
+        },
+        "toggle_hidden_files": {
+          "anyOf": [
+            {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Toggle the visibility of hidden files (dot-prefixed on Unix, or flagged hidden on Windows/macOS).",
+          "title": "Toggle Hidden Files"
+        },
+        "select_up": {
+          "anyOf": [
+            {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "While in visual mode, extend the selection up.",
+          "title": "Select Up"
+        },
+        "select_down": {
+          "anyOf": [
+            {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "While in visual mode, extend the selection down.",
+          "title": "Select Down"
+        },
+        "select_page_up": {
+          "anyOf": [
+            {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "While in visual mode, extend the selection to the previous page.",
+          "title": "Select Page Up"
+        },
+        "select_page_down": {
+          "anyOf": [
+            {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "While in visual mode, extend the selection to the next page.",
+          "title": "Select Page Down"
+        },
+        "select_home": {
+          "anyOf": [
+            {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "While in visual mode, extend the selection to the first option.",
+          "title": "Select Home"
+        },
+        "select_end": {
+          "anyOf": [
+            {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "While in visual mode, extend the selection to the last option.",
+          "title": "Select End"
+        },
+        "tab_next": {
+          "anyOf": [
+            {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Go to the next tab, if it is available.",
+          "title": "Tab Next"
+        },
+        "tab_previous": {
+          "anyOf": [
+            {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Go to the previous tab, if it is available.",
+          "title": "Tab Previous"
+        },
+        "tab_new": {
+          "anyOf": [
+            {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Create a new tab.",
+          "title": "Tab New"
+        },
+        "tab_close": {
+          "anyOf": [
+            {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Close the current tab.",
+          "title": "Tab Close"
+        },
+        "preview_scroll_left": {
+          "anyOf": [
+            {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Temporarily unused.",
+          "title": "Preview Scroll Left"
+        },
+        "preview_scroll_right": {
+          "anyOf": [
+            {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Temporarily unused.",
+          "title": "Preview Scroll Right"
+        },
+        "preview_select_left": {
+          "anyOf": [
+            {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Temporarily unused.",
+          "title": "Preview Select Left"
+        },
+        "preview_select_right": {
+          "anyOf": [
+            {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Temporarily unused.",
+          "title": "Preview Select Right"
+        },
+        "show_keybinds": {
+          "anyOf": [
+            {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Show the keybinds list with all available keybinds.",
+          "title": "Show Keybinds"
+        },
+        "quit_app": {
+          "anyOf": [
+            {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Quit the application",
+          "title": "Quit App"
+        },
+        "command_palette": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Launch Textual's mildly useful command palette (only one keybind is allowed!)",
+          "title": "Command Palette"
+        },
+        "suspend_app": {
+          "anyOf": [
+            {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Suspend the app's process, bringing you back to the terminal",
+          "title": "Suspend App"
+        },
+        "change_sort_order": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/ChangeSortOrderKeybinds"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Keybinds related to changing the sort order"
+        },
+        "delete_files": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/DeleteFilesKeybinds"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Keybinds related to the delete confirmation screen"
+        },
+        "filename_conflict": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/FilenameConflictKeybinds"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Keybinds related to handling a conflict with two files of the same name"
+        },
+        "file_in_use": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/FileInUseKeybinds"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Keybinds related to handling a file that is in use by another process"
+        },
+        "filter_modal": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/FilterModalKeybinds"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Keybinds related to selecting options in a modal screen (like FileSearch or ZDToDirectory)"
+        },
+        "yes_or_no": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/YesOrNoKeybinds"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Keybinds related to yes/no confirmation modals"
         }
-      }
+      },
+      "title": "KeybindsConfig",
+      "type": "object"
     },
-    "metadata": {
-      "type": "object",
+    "MetadataConfig": {
       "additionalProperties": false,
+      "description": "Metadata configuration.",
       "properties": {
         "fields": {
-          "type": "array",
-          "items": {
-            "type": "string",
-            "enum": [
-              "type",
-              "permissions",
-              "size",
-              "modified",
-              "accessed",
-              "created",
-              "hidden"
-            ]
-          },
           "default": [
             "type",
             "permissions",
@@ -197,833 +1859,374 @@
             "created",
             "hidden"
           ],
-          "description": "The order of the metadata tags that you want to see in the Metadata section."
+          "description": "The order of the metadata tags that you want to see in the Metadata section.",
+          "items": {
+            "enum": [
+              "type",
+              "permissions",
+              "size",
+              "modified",
+              "accessed",
+              "created",
+              "hidden"
+            ],
+            "type": "string"
+          },
+          "title": "Fields",
+          "type": "array"
         },
         "datetime_format": {
-          "type": "string",
           "default": "%Y-%m-%d %H:%M",
-          "description": "The datetime format for Metadata. Refer to https://docs.python.org/3/library/datetime.html#format-codes for more information."
+          "description": "The datetime format for Metadata. Refer to https://docs.python.org/3/library/datetime.html#format-codes for more information.",
+          "title": "Datetime Format",
+          "type": "string"
         },
         "filesize_decimals": {
-          "type": "integer",
           "default": 1,
           "description": "The number of decimals you want to see in the humanized file size",
-          "minimum": 0
+          "minimum": 0,
+          "title": "Filesize Decimals",
+          "type": "integer"
         },
         "filesize_suffix": {
-          "type": "string",
           "default": "decimal",
           "description": "The filesize suffix to follow.\n`decimal`: 1024 -> 1.024kB\n`binary`: 1024 -> 1KiB\n`gnu`: 1024 -> 1K",
-          "enum": ["decimal", "binary", "gnu"]
-        }
-      }
-    },
-    "icons": {
-      "type": "object",
-      "additionalProperties": false,
-      "properties": {
-        "files": {
-          "type": "array",
-          "items": {
-            "type": "object",
-            "properties": {
-              "pattern": {
-                "type": "string",
-                "description": "The glob pattern to match against the file name (e.g., '*.py', 'LICENSE').\nBoth the filename and glob will be forced to lowercase!"
-              },
-              "icon": {
-                "type": "string",
-                "description": "The icon character to use."
-              },
-              "color": {
-                "type": "string",
-                "description": "The color for the icon. Can be a named color or hex code."
-              }
-            },
-            "required": ["pattern", "icon", "color"]
-          },
-          "default": [],
-          "description": "Custom file icon mappings. Earlier entries have higher priority."
-        },
-        "folders": {
-          "type": "array",
-          "items": {
-            "type": "object",
-            "properties": {
-              "pattern": {
-                "type": "string",
-                "description": "The glob pattern to match against the folder name (e.g., 'src', '.*').\nBoth the folder name and glob will be forced to lowercase!"
-              },
-              "icon": {
-                "type": "string",
-                "description": "The icon character to use (should be a nerd font character)"
-              },
-              "color": {
-                "type": "string",
-                "description": "The color for the icon. Can be a named color or hex code"
-              }
-            },
-            "required": ["pattern", "icon", "color"]
-          },
-          "default": [],
-          "description": "Custom folder icon mappings. Earlier entries have higher priority."
+          "enum": [
+            "decimal",
+            "binary",
+            "gnu"
+          ],
+          "title": "Filesize Suffix",
+          "type": "string"
         }
       },
-      "description": "Custom icon configurations for files and folders"
+      "title": "MetadataConfig",
+      "type": "object"
     },
-    "theme": {
-      "type": "object",
+    "PluginsConfig": {
       "additionalProperties": false,
+      "description": "Plugins configuration.",
+      "properties": {
+        "zoxide": {
+          "$ref": "#/$defs/ZoxidePlugin"
+        },
+        "bat": {
+          "$ref": "#/$defs/BatPlugin"
+        },
+        "editor": {
+          "$ref": "#/$defs/EditorPlugin"
+        },
+        "fd": {
+          "$ref": "#/$defs/FdPlugin"
+        },
+        "poppler": {
+          "$ref": "#/$defs/PopplerPlugin"
+        },
+        "file_one": {
+          "$ref": "#/$defs/FileOnePlugin"
+        }
+      },
+      "title": "PluginsConfig",
+      "type": "object"
+    },
+    "PopplerPlugin": {
+      "additionalProperties": false,
+      "description": "Poppler plugin configuration.",
+      "properties": {
+        "enabled": {
+          "default": true,
+          "description": "Enable poppler for PDF previews.",
+          "title": "Enabled",
+          "type": "boolean"
+        },
+        "threads": {
+          "default": 1,
+          "description": "How many threads should poppler use?",
+          "minimum": 1,
+          "title": "Threads",
+          "type": "integer"
+        },
+        "use_pdftocairo": {
+          "default": false,
+          "description": "Use pdftocairo instead of pdftoppm, may help performance",
+          "title": "Use Pdftocairo",
+          "type": "boolean"
+        },
+        "poppler_folder": {
+          "default": "",
+          "description": "Path to the folder where Poppler-related binaries are located. Leave empty to use the system PATH.",
+          "title": "Poppler Folder",
+          "type": "string"
+        }
+      },
+      "title": "PopplerPlugin",
+      "type": "object"
+    },
+    "PreviewTextConfig": {
+      "additionalProperties": false,
+      "description": "Preview text configuration.",
+      "properties": {
+        "error": {
+          "default": "couldn't read this file! (\u00ac_\u00ac )",
+          "description": "If for any reason the file preview refused to show, this appears.",
+          "title": "Error",
+          "type": "string"
+        },
+        "binary": {
+          "default": "the file does not use UTF-8, which isn't supported yet",
+          "description": "If the current file cannot be read due to an encoding issue (ie not UTF8), it will display this message.",
+          "title": "Binary",
+          "type": "string"
+        },
+        "start": {
+          "default": " ___ ___\n|  _| . |\n|_| |___|\n _ _ ___\n| | |  _|\n \\_/|_|\n",
+          "description": "This is shown when the rovr starts up. You may see it for a split second, but it will never appear afterwards.",
+          "title": "Start",
+          "type": "string"
+        },
+        "empty": {
+          "default": "bytes be gone (\u2310\u25a0_\u25a0)",
+          "description": "If the current file has no content, this is shown",
+          "title": "Empty",
+          "type": "string"
+        },
+        "too_large": {
+          "default": "this file is larger (but not larger than your mother)",
+          "description": "If the file is too large (hard capped at < 1MB), the preview will refuse to render this file regardless of your memory size",
+          "title": "Too Large",
+          "type": "string"
+        }
+      },
+      "title": "PreviewTextConfig",
+      "type": "object"
+    },
+    "SettingsConfig": {
+      "additionalProperties": false,
+      "description": "Settings configuration.",
+      "properties": {
+        "show_hidden_files": {
+          "default": false,
+          "description": "Show hidden files and folders (those starting with a dot on Unix, or explicitly hidden on Windows/MacOS).",
+          "title": "Show Hidden Files",
+          "type": "boolean"
+        },
+        "use_recycle_bin": {
+          "default": true,
+          "description": "When deleting a file, allow moving the file to the recycle bin.",
+          "title": "Use Recycle Bin",
+          "type": "boolean"
+        },
+        "copy_includes_metadata": {
+          "default": true,
+          "description": "When copying over a file, preserve metadata from the original file, such as creation and modification times.",
+          "title": "Copy Includes Metadata",
+          "type": "boolean"
+        },
+        "image_protocol": {
+          "default": "Auto",
+          "description": "The image protocol to use when displaying an image",
+          "enum": [
+            "Auto",
+            "TGP",
+            "Sixel",
+            "Halfcell",
+            "Unicode"
+          ],
+          "title": "Image Protocol",
+          "type": "string"
+        },
+        "allow_tab_nav": {
+          "default": false,
+          "description": "Allow navigating the main app screen with `tab` and `shift+tab`",
+          "title": "Allow Tab Nav",
+          "type": "boolean"
+        },
+        "append_new_tabs": {
+          "default": true,
+          "description": "Choose whether or not to append new tabs instead of inserting them.\n`true` => Append to the end of the tab list.\n`false` => Insert after the active tab.",
+          "title": "Append New Tabs",
+          "type": "boolean"
+        },
+        "double_click_delay": {
+          "default": 0.25,
+          "description": "The delay between two consecutive clicks to enter into a directory, or open a file.",
+          "title": "Double Click Delay",
+          "type": "number"
+        },
+        "drive_watcher_frequency": {
+          "default": 3.0,
+          "description": "How often (in seconds) to check for changes in mounted drives in the sidebar.",
+          "title": "Drive Watcher Frequency",
+          "type": "number"
+        }
+      },
+      "title": "SettingsConfig",
+      "type": "object"
+    },
+    "ThemeConfig": {
+      "additionalProperties": false,
+      "description": "Theme configuration.",
       "properties": {
         "default": {
           "type": "string",
           "default": "nord",
-          "description": "The default theme. Can be changed while in rovr, but it is not persistent."
+          "description": "The default theme. Can be changed while in rovr, but it is not persistent.",
+          "title": "Default"
         },
         "transparent": {
-          "type": "boolean",
           "default": false,
-          "description": "Use a transparent background."
+          "description": "Use a transparent background.",
+          "title": "Transparent",
+          "type": "boolean"
         }
-      }
+      },
+      "title": "ThemeConfig",
+      "type": "object"
+    },
+    "YesOrNoKeybinds": {
+      "additionalProperties": false,
+      "description": "Keybinds for yes/no confirmation modals.",
+      "properties": {
+        "yes": {
+          "anyOf": [
+            {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Confirm with 'yes'.",
+          "title": "Yes"
+        },
+        "no": {
+          "anyOf": [
+            {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Decline with 'no'.",
+          "title": "No"
+        },
+        "dont_ask_again": {
+          "anyOf": [
+            {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Apply the selected action to all future confirmations without asking again.",
+          "title": "Dont Ask Again"
+        }
+      },
+      "title": "YesOrNoKeybinds",
+      "type": "object"
+    },
+    "ZoxidePlugin": {
+      "additionalProperties": false,
+      "description": "Zoxide plugin configuration.",
+      "properties": {
+        "enabled": {
+          "default": true,
+          "description": "Enable or disable zoxide travelling.",
+          "title": "Enabled",
+          "type": "boolean"
+        },
+        "keybinds": {
+          "anyOf": [
+            {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The keybind to open the zoxide modal.",
+          "title": "Keybinds"
+        },
+        "show_scores": {
+          "default": false,
+          "description": "Display zoxide frequency scores alongside directory paths.",
+          "title": "Show Scores",
+          "type": "boolean"
+        }
+      },
+      "title": "ZoxidePlugin",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "description": "Main Rovr configuration model.",
+  "properties": {
+    "interface": {
+      "$ref": "#/$defs/InterfaceConfig"
+    },
+    "settings": {
+      "$ref": "#/$defs/SettingsConfig"
+    },
+    "metadata": {
+      "$ref": "#/$defs/MetadataConfig"
+    },
+    "icons": {
+      "$ref": "#/$defs/IconsConfig"
+    },
+    "theme": {
+      "$ref": "#/$defs/ThemeConfig"
     },
     "custom_theme": {
-      "type": "array",
+      "default": [],
       "items": {
-        "type": "object",
-        "additionalProperties": false,
-        "properties": {
-          "name": {
-            "type": "string",
-            "description": "A name for the theme. However, when the theme is available in the theme picker, it shows up as a hiphenated, lowercase version."
-          },
-          "primary": {
-            "type": "string",
-            "description": "A hex code or named color to use as the primary color. Refer to https://textual.textualize.io/css_types/color/#named-colors for the named colors."
-          },
-          "secondary": {
-            "type": "string",
-            "description": "A hex code or named color to use as the secondary color. Refer to https://textual.textualize.io/css_types/color/#named-colors for the named colors."
-          },
-          "warning": {
-            "type": "string",
-            "description": "A hex code or named color to use as the warning color. Refer to https://textual.textualize.io/css_types/color/#named-colors for the named colors."
-          },
-          "error": {
-            "type": "string",
-            "description": "A hex code or named color to use as the error color. Refer to https://textual.textualize.io/css_types/color/#named-colors for the named colors."
-          },
-          "success": {
-            "type": "string",
-            "description": "A hex code or named color to use as the success color. Refer to https://textual.textualize.io/css_types/color/#named-colors for the named colors."
-          },
-          "accent": {
-            "type": "string",
-            "description": "A hex code or named color to use as the accent color. Refer to https://textual.textualize.io/css_types/color/#named-colors for the named colors."
-          },
-          "foreground": {
-            "type": "string",
-            "description": "A hex code or named color to use as the foreground color. Refer to https://textual.textualize.io/css_types/color/#named-colors for the named colors."
-          },
-          "background": {
-            "type": "string",
-            "description": "A hex code or named color to use as the background color. Refer to https://textual.textualize.io/css_types/color/#named-colors for the named colors."
-          },
-          "surface": {
-            "type": "string",
-            "description": "A hex code or named color to use as the surface color. Refer to https://textual.textualize.io/css_types/color/#named-colors for the named colors."
-          },
-          "panel": {
-            "type": "string",
-            "description": "A hex code or named color to use as the panel color. Refer to https://textual.textualize.io/css_types/color/#named-colors for the named colors."
-          },
-          "bar_gradient": {
-            "type": "object",
-            "description": "The gradient colors for the progress bar.",
-            "additionalProperties": false,
-            "properties": {
-              "default": {
-                "type": "array",
-                "description": "A list of hex codes, or named colors to use as the progress bar's gradient colors. Refer to https://textual.textualize.io/css_types/color/#named-colors for the named colors."
-              },
-              "error": {
-                "type": "array",
-                "description": "A list of hex codes, or named colors to use as the progress bar's gradient colors **when it encountered an error**. Refer to https://textual.textualize.io/css_types/color/#named-colors for the named colors."
-              }
-            }
-          },
-          "is_dark": {
-            "type": "boolean",
-            "description": "Whether or not this theme is a dark type theme."
-          },
-          "variables": {
-            "type": "object",
-            "description": "Extra variables to set unique to the theme.\nRefer to https://textual.textualize.io/guide/design/#additional-variables for more information.",
-            "additionalProperties": true
-          }
-        },
-        "required": [
-          "name",
-          "primary",
-          "secondary",
-          "warning",
-          "error",
-          "success",
-          "accent",
-          "foreground",
-          "background",
-          "surface",
-          "panel",
-          "is_dark"
-        ]
-      }
+        "$ref": "#/$defs/CustomTheme"
+      },
+      "title": "Custom Theme",
+      "type": "array"
     },
     "keybinds": {
-      "type": "object",
-      "additionalProperties": false,
-      "properties": {
-        "toggle_pin": {
-          "$ref": "#/definitions/keybind",
-          "description": "Toggle the current folder in the Pinned Folder Sidebar.",
-          "display_name": "Pin folder"
-        },
-        "toggle_pinned_sidebar": {
-          "$ref": "#/definitions/keybind",
-          "description": "Toggle viewing the pinned sidebar.",
-          "display_name": "Toggle sidebar"
-        },
-        "toggle_preview_sidebar": {
-          "$ref": "#/definitions/keybind",
-          "description": "Toggle viewing the preview sidebar.",
-          "display_name": "Toggle preview"
-        },
-        "toggle_footer": {
-          "$ref": "#/definitions/keybind",
-          "description": "Toggle viewing the footer.",
-          "display_name": "Toggle footer"
-        },
-        "toggle_menuwrapper": {
-          "$ref": "#/definitions/keybind",
-          "description": "Toggle viewing the menu wrapper.",
-          "display_name": "Toggle menu wrapper"
-        },
-        "focus_toggle_pinned_sidebar": {
-          "$ref": "#/definitions/keybind",
-          "description": "Toggle focus between pinned folder sidebar and file list.",
-          "display_name": "Focus sidebar"
-        },
-        "focus_file_list": {
-          "$ref": "#/definitions/keybind",
-          "description": "Focus the file list.",
-          "display_name": "Focus file list"
-        },
-        "focus_toggle_preview_sidebar": {
-          "$ref": "#/definitions/keybind",
-          "description": "Focus toggle between preview sidebar and file list.",
-          "display_name": "Focus preview"
-        },
-        "focus_toggle_path_switcher": {
-          "$ref": "#/definitions/keybind",
-          "description": "Focus toggle between path switcher and file list.",
-          "display_name": "Focus path"
-        },
-        "focus_toggle_processes": {
-          "$ref": "#/definitions/keybind",
-          "description": "Focus toggle the processes container.",
-          "display_name": "Focus processes"
-        },
-        "focus_toggle_clipboard": {
-          "$ref": "#/definitions/keybind",
-          "description": "Focus toggle the clipboard container.",
-          "display_name": "Focus clipboard"
-        },
-        "focus_toggle_metadata": {
-          "$ref": "#/definitions/keybind",
-          "description": "Focus toggle the metadata container.",
-          "display_name": "Focus metadata"
-        },
-        "focus_search": {
-          "$ref": "#/definitions/keybind",
-          "description": "Focus the search bar.",
-          "display_name": "Search"
-        },
-        "copy": {
-          "$ref": "#/definitions/keybind",
-          "description": "Copy the selected files in the file list to the clipboard.",
-          "display_name": "Copy"
-        },
-        "paste": {
-          "$ref": "#/definitions/keybind",
-          "description": "Paste the selected files in the clipboard into the current directory.",
-          "display_name": "Paste"
-        },
-        "cut": {
-          "$ref": "#/definitions/keybind",
-          "description": "Cut the selected files in the file list to the clipboard.",
-          "display_name": "Cut"
-        },
-        "delete": {
-          "$ref": "#/definitions/keybind",
-          "description": "Delete the selected files in the file list.",
-          "display_name": "Delete"
-        },
-        "rename": {
-          "$ref": "#/definitions/keybind",
-          "description": "Rename the selected file in the file list to something else.",
-          "display_name": "Rename"
-        },
-        "new": {
-          "$ref": "#/definitions/keybind",
-          "description": "Create a new item in the current directory.",
-          "display_name": "New"
-        },
-        "toggle_all": {
-          "$ref": "#/definitions/keybind",
-          "description": "Enter into select mode and select/unselect everything.",
-          "display_name": "Select all"
-        },
-        "zip": {
-          "$ref": "#/definitions/keybind",
-          "description": "Create a zip archive from selected files.",
-          "display_name": "Zip"
-        },
-        "unzip": {
-          "$ref": "#/definitions/keybind",
-          "description": "Extract a selected zip archive.",
-          "display_name": "Unzip"
-        },
-        "copy_path": {
-          "$ref": "#/definitions/keybind",
-          "description": "Copy the path of the item to the system clipboard.",
-          "display_name": "Copy path"
-        },
-        "up": {
-          "$ref": "#/definitions/keybind",
-          "description": "Go up the file list options.",
-          "display_name": "Up"
-        },
-        "down": {
-          "$ref": "#/definitions/keybind",
-          "description": "Go down the file list options.",
-          "display_name": "Down"
-        },
-        "up_tree": {
-          "$ref": "#/definitions/keybind",
-          "description": "Go up the file tree.",
-          "display_name": "Go up directory"
-        },
-        "down_tree": {
-          "$ref": "#/definitions/keybind",
-          "description": "Go down the file tree, or open the currently selected item.",
-          "display_name": "Enter/Select"
-        },
-        "page_up": {
-          "$ref": "#/definitions/keybind",
-          "description": "Page Up in the file list options.",
-          "display_name": "Page Up"
-        },
-        "page_down": {
-          "$ref": "#/definitions/keybind",
-          "description": "Page Down in the file list options.",
-          "display_name": "Page Down"
-        },
-        "home": {
-          "$ref": "#/definitions/keybind",
-          "description": "Go to the first option in the file list options.",
-          "display_name": "First"
-        },
-        "end": {
-          "$ref": "#/definitions/keybind",
-          "description": "Go to the last option in the file list options.",
-          "display_name": "Last"
-        },
-        "hist_previous": {
-          "$ref": "#/definitions/keybind",
-          "description": "Go back in history.",
-          "display_name": "History back"
-        },
-        "hist_next": {
-          "$ref": "#/definitions/keybind",
-          "description": "Go forward in history.",
-          "display_name": "History forward"
-        },
-        "toggle_visual": {
-          "$ref": "#/definitions/keybind",
-          "description": "Enter or exit select/visual mode.",
-          "display_name": "Visual mode"
-        },
-        "toggle_hidden_files": {
-          "$ref": "#/definitions/keybind",
-          "description": "Toggle the visibility of hidden files (dot-prefixed on Unix, or flagged hidden on Windows/macOS).",
-          "display_name": "Toggle hidden files"
-        },
-        "select_up": {
-          "$ref": "#/definitions/keybind",
-          "description": "While in visual mode, extend the selection up.",
-          "display_name": "Select up"
-        },
-        "select_down": {
-          "$ref": "#/definitions/keybind",
-          "description": "While in visual mode, extend the selection down.",
-          "display_name": "Select down"
-        },
-        "select_page_up": {
-          "$ref": "#/definitions/keybind",
-          "description": "While in visual mode, extend the selection to the previous page.",
-          "display_name": "Select page up"
-        },
-        "select_page_down": {
-          "$ref": "#/definitions/keybind",
-          "description": "While in visual mode, extend the selection to the next page.",
-          "display_name": "Select page down"
-        },
-        "select_home": {
-          "$ref": "#/definitions/keybind",
-          "description": "While in visual mode, extend the selection to the first option.",
-          "display_name": "Select to top"
-        },
-        "select_end": {
-          "$ref": "#/definitions/keybind",
-          "description": "While in visual mode, extend the selection to the last option.",
-          "display_name": "Select to end"
-        },
-        "tab_next": {
-          "$ref": "#/definitions/keybind",
-          "description": "Go to the next tab, if it is available.",
-          "display_name": "Next tab"
-        },
-        "tab_previous": {
-          "$ref": "#/definitions/keybind",
-          "description": "Go to the previous tab, if it is available.",
-          "display_name": "Previous tab"
-        },
-        "tab_new": {
-          "$ref": "#/definitions/keybind",
-          "description": "Create a new tab.",
-          "display_name": "New tab"
-        },
-        "tab_close": {
-          "$ref": "#/definitions/keybind",
-          "description": "Close the current tab.",
-          "display_name": "Close tab"
-        },
-        "preview_scroll_left": {
-          "$ref": "#/definitions/keybind",
-          "description": "Temporarily unused.",
-          "display_name": "Scroll left"
-        },
-        "preview_scroll_right": {
-          "$ref": "#/definitions/keybind",
-          "description": "Temporarily unused.",
-          "display_name": "Scroll right"
-        },
-        "preview_select_right": {
-          "$ref": "#/definitions/keybind",
-          "description": "Temporarily unused.",
-          "display_name": "Select right"
-        },
-        "preview_select_left": {
-          "$ref": "#/definitions/keybind",
-          "description": "Temporarily unused.",
-          "display_name": "Select left"
-        },
-        "show_keybinds": {
-          "$ref": "#/definitions/keybind",
-          "description": "Show the keybinds list with all available keybinds.",
-          "display_name": "Show keybinds"
-        },
-        "change_sort_order": {
-          "type": "object",
-          "description": "Keybinds related to changing the sort order",
-          "properties": {
-            "open_popup": {
-              "$ref": "#/definitions/keybind",
-              "description": "Open the change sort order popup.",
-              "display_name": "Open sort order popup"
-            },
-            "name": {
-              "$ref": "#/definitions/keybind",
-              "description": "Sort by name.",
-              "display_name": "Sort by name"
-            },
-            "extension": {
-              "$ref": "#/definitions/keybind",
-              "description": "Sort by extension.",
-              "display_name": "Sort by extension"
-            },
-            "natural": {
-              "$ref": "#/definitions/keybind",
-              "description": "Sort naturally (numbers first).",
-              "display_name": "Sort naturally"
-            },
-            "size": {
-              "$ref": "#/definitions/keybind",
-              "description": "Sort by size.",
-              "display_name": "Sort by size"
-            },
-            "created": {
-              "$ref": "#/definitions/keybind",
-              "description": "Sort by creation time.",
-              "display_name": "Sort by created"
-            },
-            "modified": {
-              "$ref": "#/definitions/keybind",
-              "description": "Sort by modification time.",
-              "display_name": "Sort by modified"
-            },
-            "descending": {
-              "$ref": "#/definitions/keybind",
-              "description": "Toggle descending sort order.",
-              "display_name": "Toggle descending"
-            }
-          }
-        },
-        "quit_app": {
-          "$ref": "#/definitions/keybind",
-          "description": "Quit the application",
-          "display_name": "Quit app"
-        },
-        "command_palette": {
-          "description": "Launch Textual's mildly useful command palette (only one keybind is allowed!)",
-          "display_name": "Launch command palette",
-          "type": "string"
-        },
-        "suspend_app": {
-          "$ref": "#/definitions/keybind",
-          "description": "Suspend the app's process, bringing you back to the terminal",
-          "display_name": "Suspend app"
-        },
-        "delete_files": {
-          "type": "object",
-          "description": "Keybinds related to the delete confirmation screen",
-          "properties": {
-            "trash": {
-              "$ref": "#/definitions/keybind",
-              "description": "Confirm deletion and move files to the recycle bin.",
-              "display_name": "Delete to recycle bin"
-            },
-            "delete": {
-              "$ref": "#/definitions/keybind",
-              "description": "Confirm deletion and permanently delete files.",
-              "display_name": "Permanently delete"
-            },
-            "cancel": {
-              "$ref": "#/definitions/keybind",
-              "description": "Cancel deletion and go back to the main screen.",
-              "display_name": "Cancel deletion"
-            }
-          }
-        },
-        "filename_conflict": {
-          "type": "object",
-          "description": "Keybinds related to handling a conflict with two files of the same name",
-          "properties": {
-            "overwrite": {
-              "$ref": "#/definitions/keybind",
-              "description": "Overwrite the existing file with the new file.",
-              "display_name": "Overwrite file"
-            },
-            "skip": {
-              "$ref": "#/definitions/keybind",
-              "description": "Skip this file and do not copy/move it.",
-              "display_name": "Skip file"
-            },
-            "rename": {
-              "$ref": "#/definitions/keybind",
-              "description": "Rename the new file being copied/moved.",
-              "display_name": "Rename file"
-            },
-            "cancel": {
-              "$ref": "#/definitions/keybind",
-              "description": "Cancel the entire copy/move operation.",
-              "display_name": "Cancel operation"
-            },
-            "dont_ask_again": {
-              "$ref": "#/definitions/keybind",
-              "description": "Apply the selected action to all future conflicts without asking again.",
-              "display_name": "Don't ask me again"
-            }
-          }
-        },
-        "file_in_use": {
-          "type": "object",
-          "description": "Keybinds related to handling a file that is in use by another process",
-          "properties": {
-            "retry": {
-              "$ref": "#/definitions/keybind",
-              "description": "Retry the operation on the file.",
-              "display_name": "Retry operation"
-            },
-            "skip": {
-              "$ref": "#/definitions/keybind",
-              "description": "Skip this file and do not copy/move it.",
-              "display_name": "Skip file"
-            },
-            "cancel": {
-              "$ref": "#/definitions/keybind",
-              "description": "Cancel the entire copy/move operation.",
-              "display_name": "Cancel operation"
-            },
-            "dont_ask_again": {
-              "$ref": "#/definitions/keybind",
-              "description": "Apply the selected action to all future 'file in use' errors without asking again.",
-              "display_name": "Don't ask me again"
-            }
-          }
-        },
-        "filter_modal": {
-          "type": "object",
-          "description": "Keybinds related to selecting options in a modal screen (like FileSearch or ZDToDirectory)",
-          "properties": {
-            "exit": {
-              "$ref": "#/definitions/keybind",
-              "description": "Exit the modal without making a selection.",
-              "display_name": "Exit modal"
-            },
-            "down": {
-              "$ref": "#/definitions/keybind",
-              "description": "Move the selection down in the modal list.",
-              "display_name": "Select down"
-            },
-            "up": {
-              "$ref": "#/definitions/keybind",
-              "description": "Move the selection up in the modal list.",
-              "display_name": "Select up"
-            }
-          }
-        },
-        "yes_or_no": {
-          "type": "object",
-          "description": "Keybinds related to yes/no confirmation modals",
-          "properties": {
-            "yes": {
-              "$ref": "#/definitions/keybind",
-              "description": "Confirm with 'yes'.",
-              "display_name": "Yes"
-            },
-            "no": {
-              "$ref": "#/definitions/keybind",
-              "description": "Decline with 'no'.",
-              "display_name": "No"
-            },
-            "dont_ask_again": {
-              "$ref": "#/definitions/keybind",
-              "description": "Apply the selected action to all future confirmations without asking again.",
-              "display_name": "Don't ask me again"
-            }
-          }
-        }
-      }
+      "$ref": "#/$defs/KeybindsConfig"
     },
     "plugins": {
-      "type": "object",
-      "additionalProperties": false,
-      "properties": {
-        "zoxide": {
-          "type": "object",
-          "additionalProperties": false,
-          "properties": {
-            "enabled": {
-              "type": "boolean",
-              "default": true,
-              "description": "Enable or disable zoxide travelling."
-            },
-            "keybinds": {
-              "$ref": "#/definitions/keybind",
-              "default": ["z"],
-              "description": "The keybind to open the zoxide modal.",
-              "display_name": "Launch zoxide selector"
-            },
-            "show_scores": {
-              "type": "boolean",
-              "default": false,
-              "description": "Display zoxide frequency scores alongside directory paths."
-            }
-          }
-        },
-        "bat": {
-          "type": "object",
-          "additionalProperties": false,
-          "properties": {
-            "enabled": {
-              "type": "boolean",
-              "default": false,
-              "description": "Enable or disable bat for previewing files."
-            },
-            "executable": {
-              "type": "string",
-              "default": "bat",
-              "description": "The executable for bat."
-            }
-          }
-        },
-        "editor": {
-          "type": "object",
-          "additionalProperties": false,
-          "properties": {
-            "enabled": {
-              "type": "boolean",
-              "default": true,
-              "description": "Enable opening a file in your editor."
-            },
-            "file_executable": {
-              "type": "string",
-              "default": "nano",
-              "description": "Open files in this app."
-            },
-            "file_suspend": {
-              "type": "boolean",
-              "default": true,
-              "description": "Suspend the app when editing a file. Useful for TUI editors, but not for something like VSCode or Notepad++."
-            },
-            "folder_executable": {
-              "type": "string",
-              "default": "code",
-              "description": "Open folders in this app."
-            },
-            "folder_suspend": {
-              "type": "boolean",
-              "default": true,
-              "description": "Suspend the app when editing a folder. Useful for TUI editors, but not for something like VSCode or Notepad++."
-            },
-            "open_all_in_editor": {
-              "type": "boolean",
-              "default": false,
-              "description": "Open all files in the configured editor, regardless of file encoding or type. When disabled, files that cannot be opened due to encoding issues will use the system's default application instead."
-            },
-            "keybinds": {
-              "$ref": "#/definitions/keybind",
-              "default": ["e"],
-              "description": "The keybind to launch your editor.",
-              "display_name": "Open file with editor"
-            }
-          }
-        },
-        "fd": {
-          "type": "object",
-          "additionalProperties": false,
-          "properties": {
-            "enabled": {
-              "type": "boolean",
-              "default": true,
-              "description": "Enable recursive file search using fd."
-            },
-            "keybinds": {
-              "$ref": "#/definitions/keybind",
-              "default": ["f"],
-              "description": "The keybind to open the file search picker.",
-              "display_name": "Start search with fd"
-            },
-            "executable": {
-              "type": "string",
-              "default": "fd",
-              "description": "fd executable name or path."
-            },
-            "relative_paths": {
-              "type": "boolean",
-              "default": true,
-              "description": "Whether to show as relative path or absolute path."
-            },
-            "follow_symlinks": {
-              "type": "boolean",
-              "default": false,
-              "description": "Whether fd should follow symlinks when searching."
-            },
-            "no_ignore_parent": {
-              "type": "boolean",
-              "default": false,
-              "description": "Don't use *ignore files from parent folders when searching."
-            },
-            "default_filter_types": {
-              "type": "array",
-              "default": ["file", "directory"],
-              "description": "The default file types to show when using fd.",
-              "items": {
-                "type": "string",
-                "enum": [
-                  "file",
-                  "directory",
-                  "symlink",
-                  "executable",
-                  "empty",
-                  "socket",
-                  "pipe",
-                  "char-device",
-                  "block-device"
-                ]
-              }
-            }
-          }
-        },
-        "poppler": {
-          "type": "object",
-          "additionalProperties": false,
-          "properties": {
-            "enabled": {
-              "type": "boolean",
-              "default": true,
-              "description": "Enable poppler for PDF previews."
-            },
-            "threads": {
-              "type": "integer",
-              "default": 1,
-              "description": "How many threads should poppler use?",
-              "minimum": 1
-            },
-            "use_pdftocairo": {
-              "type": "boolean",
-              "default": false,
-              "description": "Use pdftocairo instead of pdftoppm, may help performance"
-            },
-            "poppler_folder": {
-              "type": "string",
-              "default": "",
-              "description": "Path to the folder where Poppler-related binaries are located. Leave empty to use the system PATH."
-            }
-          }
-        },
-        "file_one": {
-          "type": "object",
-          "additionalProperties": false,
-          "properties": {
-            "enabled": {
-              "type": "boolean",
-              "default": false,
-              "description": "Enable file(1) MIME type detection for preview selection. When enabled, rovr uses the `file` command to detect file types instead of relying solely on file extensions."
-            },
-            "mime_rules": {
-              "type": "object",
-              "additionalProperties": {
-                "type": "string",
-                "enum": ["text", "image", "pdf", "archive", "folder"]
-              },
-              "default": {
-                "text/*": "text",
-                "image/*": "image",
-                "application/pdf": "pdf",
-                "application/zip": "archive",
-                "application/x-tar": "archive",
-                "application/gzip": "archive",
-                "application/x-bzip2": "archive",
-                "application/x-xz": "archive",
-                "application/x-rar": "archive",
-                "application/x-7z-compressed": "archive",
-                "inode/directory": "folder"
-              },
-              "description": "Map MIME type patterns to preview types. Supports glob patterns (e.g., 'text/*' matches 'text/plain', 'text/html', etc.). Valid preview types: text, image, pdf, archive, folder."
-            }
-          }
-        }
-      }
+      "$ref": "#/$defs/PluginsConfig"
     },
     "mode": {
-      "type": "object",
-      "additionalProperties": {
-        "type": "object",
-        "additionalProperties": true,
-        "description": "Config overrides for this mode using dot-notation paths as keys."
-      },
-      "description": "Define preset modes with config overrides. Use --mode <name> to activate."
+      "anyOf": [
+        {
+          "additionalProperties": {
+            "additionalProperties": true,
+            "type": "object"
+          },
+          "type": "object"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "description": "Define preset modes with config overrides. Use --mode <name> to activate.",
+      "title": "Mode"
     }
-  }
+  },
+  "title": "Rovr Config",
+  "type": "object",
+  "$schema": "https://json-schema.org/draft-07/schema"
 }

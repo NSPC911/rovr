@@ -6,7 +6,7 @@ import os
 import stat
 import subprocess
 from os import path
-from typing import Iterable, Literal, NamedTuple, TypeAlias, TypedDict, overload
+from typing import Literal, NamedTuple, TypeAlias, TypedDict, overload
 
 import psutil
 from natsort import natsorted
@@ -545,7 +545,7 @@ def get_mounted_drives() -> list:
 
 
 def match_mime_to_preview_type(
-    mime_type: str
+    mime_type: str,
 ) -> Literal["text", "image", "pdf", "archive", "folder", "remime"] | None:
     """
     Match a MIME type against configured rules to determine preview type.
@@ -570,8 +570,7 @@ class MimeResult(NamedTuple):
 
 
 def get_mime_type(
-    file_path: str,
-    ignore: list[Literal["basic", "puremagic", "file1"]] = []
+    file_path: str, ignore: list[Literal["basic", "puremagic", "file1"]] = []
 ) -> MimeResult | None:
     """
     Synchronous/Threaded wrapper to get the MIME type of a file.
@@ -589,7 +588,9 @@ def get_mime_type(
         try:
             with open(file_path, "r", encoding="utf-8") as f:
                 content = f.read(1024)
-                return MimeResult("basic", f"text/{guess_language(content, file_path)}", content)
+                return MimeResult(
+                    "basic", f"text/{guess_language(content, file_path)}", content
+                )
         except (UnicodeDecodeError, OSError):
             # not a text file or cannot be opened
             pass
@@ -614,7 +615,7 @@ def get_mime_type(
                 capture_output=True,
                 text=True,
                 check=True,
-                timeout=1
+                timeout=1,
             )
             return MimeResult("file1", process.stdout.strip())
         except (OSError, subprocess.CalledProcessError, subprocess.TimeoutExpired):

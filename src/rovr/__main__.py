@@ -118,13 +118,22 @@ try:
         is_flag=True,
         help="Run rovr in development mode (lets you use the Textual Console).",
     )
-    @click.option("--list-preview-themes", multiple=False, type=bool, default=False, is_flag=True, help="List available preview themes.")
+    @click.option(
+        "--list-preview-themes",
+        multiple=False,
+        type=bool,
+        default=False,
+        is_flag=True,
+        help="List available preview themes.",
+    )
     @click.option_panel("Config", options=["--mode", "--with", "--without"])
     @click.option_panel("Paths", options=["--chooser-file", "--cwd-file"])
     @click.option_panel(
         "Miscellaneous", options=["--version", "--config-path", "--help"]
     )
-    @click.option_panel("Dev", options=["--show-keys", "--tree-dom", "--dev", "--list-preview-themes"])
+    @click.option_panel(
+        "Dev", options=["--show-keys", "--tree-dom", "--dev", "--list-preview-themes"]
+    )
     @click.argument("path", type=str, required=False, default="")
     @click.rich_config({"show_arguments": True})
     def main(
@@ -167,8 +176,17 @@ try:
         return param2
     example_function(10)"""
                 for style in styles:
-                    syntax = Syntax(test_python, "python", theme=style, line_numbers=True, background_color="default")
-                    pprint(f"\n[bold underline]Preview of style: [cyan]{style}[/][/]", syntax)
+                    syntax = Syntax(
+                        test_python,
+                        "python",
+                        theme=style,
+                        line_numbers=True,
+                        background_color="default",
+                    )
+                    pprint(
+                        f"\n[bold underline]Preview of style: [cyan]{style}[/][/]",
+                        syntax,
+                    )
             else:
                 print("\n".join(styles))
             return
@@ -266,5 +284,6 @@ try:
                 "Error: rovr needs to be run in a terminal.\n"
                 "Please run it directly from your terminal emulator."
             )
+
 except KeyboardInterrupt:
     pass

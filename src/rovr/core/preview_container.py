@@ -337,7 +337,7 @@ class PreviewContainer(Container):
             line_numbers=config["interface"]["show_line_numbers"],
             word_wrap=False,
             tab_size=4,
-            theme=config["theme"]["preview"]
+            theme=config["theme"]["preview"],
         )
 
         if should_cancel():
@@ -511,7 +511,9 @@ class PreviewContainer(Container):
                             mime_type=mime_result.mime_type,
                             content=config["interface"]["preview_text"]["error"],
                         )
-                        self.call_later(lambda: self.post_message(self.SetLoading(False)))
+                        self.call_later(
+                            lambda: self.post_message(self.SetLoading(False))
+                        )
                         return
                 self.log(f"Previewing as {file_type} (MIME: {mime_result.mime_type})")
 

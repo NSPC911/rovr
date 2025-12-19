@@ -62,6 +62,7 @@ filesize_suffix = "decimal"
 
 [theme]
 default = "nord"
+preview = "nord"
 transparent = false
 
 [[custom_theme]]

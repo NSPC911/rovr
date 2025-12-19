@@ -118,12 +118,13 @@ try:
         is_flag=True,
         help="Run rovr in development mode (lets you use the Textual Console).",
     )
+    @click.option("--list-preview-themes", multiple=False, type=bool, default=False, is_flag=True, help="List available preview themes.")
     @click.option_panel("Config", options=["--mode", "--with", "--without"])
     @click.option_panel("Paths", options=["--chooser-file", "--cwd-file"])
     @click.option_panel(
         "Miscellaneous", options=["--version", "--config-path", "--help"]
     )
-    @click.option_panel("Dev", options=["--show-keys", "--tree-dom", "--dev"])
+    @click.option_panel("Dev", options=["--show-keys", "--tree-dom", "--dev", "--list-preview-themes"])
     @click.argument("path", type=str, required=False, default="")
     @click.rich_config({"show_arguments": True})
     def main(
@@ -138,6 +139,7 @@ try:
         path: str,
         tree_dom: bool,
         dev: bool,
+        list_preview_themes: bool,
     ) -> None:
         """A post-modern terminal file explorer"""
         if dev:
@@ -151,6 +153,25 @@ try:
             pprint(
                 "  [dim]  - Keep in mind that the console needs to be running [i]before[/] you start the app![/]"
             )
+        if list_preview_themes:
+            from pygments.styles import get_all_styles
+            from rich.syntax import Syntax
+
+            styles = list(get_all_styles())
+            if stdout.isatty():
+                test_python = """# test of all syntax features
+    def example_function(param1, param2="default"):
+        \"\"\"This is an example function.\"\"\"
+        if param1 > 0:
+            print(f"Param1 is positive: {param1}")
+        return param2
+    example_function(10)"""
+                for style in styles:
+                    syntax = Syntax(test_python, "python", theme=style, line_numbers=True, background_color="default")
+                    pprint(f"\n[bold underline]Preview of style: [cyan]{style}[/][/]", syntax)
+            else:
+                print("\n".join(styles))
+            return
 
         from rovr.variables.maps import VAR_TO_DIR
 

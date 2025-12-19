@@ -7,12 +7,13 @@ import textual_image.widget as timg
 from pdf2image import convert_from_path
 from PIL import Image, UnidentifiedImageError
 from PIL.Image import Image as PILImage
+from rich.syntax import Syntax
 from rich.text import Text
 from textual import events, on, work
 from textual.app import ComposeResult
 from textual.containers import Container
 from textual.css.query import NoMatches
-from textual.highlight import guess_language, highlight
+from textual.highlight import guess_language
 from textual.message import Message
 from textual.widgets import Static
 from textual.worker import Worker, WorkerCancelled, WorkerError
@@ -327,10 +328,16 @@ class PreviewContainer(Container):
             lines = processed_lines
         text_to_display = "\n".join(lines)
         # add syntax highlighting
-        text_to_display = highlight(
+        language = (
+            guess_language(text_to_display, path=self._current_file_path) or "text"
+        )
+        syntax = Syntax(
             text_to_display,
-            language=guess_language(text_to_display, path=self._current_file_path),
+            lexer=language,
+            line_numbers=config["interface"]["show_line_numbers"],
+            word_wrap=False,
             tab_size=4,
+            theme=config["theme"]["preview"]
         )
 
         if should_cancel():
@@ -347,12 +354,12 @@ class PreviewContainer(Container):
 
             await self.mount(
                 Static(
-                    text_to_display,
+                    syntax,
                     id="text_preview",
                 )
             )
         else:
-            self.query_one(Static).update(text_to_display)
+            self.query_one(Static).update(syntax)
 
         if should_cancel():
             return
@@ -441,93 +448,118 @@ class PreviewContainer(Container):
         self._pending_preview_path = None
         self.perform_show_preview(file_path)
 
-    @work(exclusive=True, thread=True, exit_on_error=False)
+    @work(exclusive=True, thread=True)
     def perform_show_preview(self, file_path: str) -> None:
-        self.border_subtitle = ""
-        if should_cancel():
-            return
-        self.post_message(self.SetLoading(True))
+        try:
+            self.border_subtitle = ""
+            if should_cancel():
+                return
+            self.post_message(self.SetLoading(True))
 
-        # Reset PDF state when changing files
-        if file_path != self._current_file_path:
-            self.pdf.images = None
-            self.pdf.current_page = 0
-            self.pdf.total_pages = 0
+            # Reset PDF state when changing files
+            if file_path != self._current_file_path:
+                self.pdf.images = None
+                self.pdf.current_page = 0
+                self.pdf.total_pages = 0
 
-        mime_type: str | None = None
+            mime_type: str | None = None
 
-        if path.isdir(file_path):
-            self.app.call_from_thread(
-                self.update_ui,
-                file_path=file_path,
-                mime_type="inode/directory",
-                file_type="folder",
-            )
-        else:
-            content = None  # for now
-            mime_result = get_mime_type(file_path)
-            if mime_result is None:
-                self.notify("Could not determine MIME type")
+            if path.isdir(file_path):
                 self.app.call_from_thread(
                     self.update_ui,
                     file_path=file_path,
-                    file_type="file",
-                    content=config["interface"]["preview_text"]["error"],
+                    mime_type="inode/directory",
+                    file_type="folder",
                 )
-                return
-            content = mime_result.content
+            else:
+                content = None  # for now
+                mime_result = get_mime_type(file_path)
+                self.log(mime_result)
+                if mime_result is None:
+                    self.log(f"Could not get MIME type for {file_path}")
+                    self.app.call_from_thread(
+                        self.update_ui,
+                        file_path=file_path,
+                        file_type="file",
+                        content=config["interface"]["preview_text"]["error"],
+                    )
+                    self.call_later(lambda: self.post_message(self.SetLoading(False)))
+                    return
+                content = mime_result.content
 
-            file_type = match_mime_to_preview_type(mime_result.mime_type)
-            self.notify(mime_result.mime_type)
-            if file_type is None:
+                file_type = match_mime_to_preview_type(mime_result.mime_type)
+                if file_type is None:
+                    self.log("Could not match MIME type to preview type")
+                    self.app.call_from_thread(
+                        self.update_ui,
+                        file_path=file_path,
+                        file_type="file",
+                        mime_type=mime_result.mime_type,
+                        content=config["interface"]["preview_text"]["error"],
+                    )
+                    self.call_later(lambda: self.post_message(self.SetLoading(False)))
+                    return
+                elif file_type == "remime":
+                    mime_result = get_mime_type(file_path, ["basic", "puremagic"])
+                    file_type = match_mime_to_preview_type(mime_result.mime_type)
+                    if file_type is None:
+                        self.log("Could not match MIME type to preview type")
+                        self.app.call_from_thread(
+                            self.update_ui,
+                            file_path=file_path,
+                            file_type="file",
+                            mime_type=mime_result.mime_type,
+                            content=config["interface"]["preview_text"]["error"],
+                        )
+                        self.call_later(lambda: self.post_message(self.SetLoading(False)))
+                        return
+                self.log(f"Previewing as {file_type} (MIME: {mime_result.mime_type})")
+
+                if file_type == "archive":
+                    try:
+                        with Archive(file_path, "r") as archive:
+                            all_files = []
+                            for member in archive.infolist():
+                                if should_cancel():
+                                    return
+
+                                filename = getattr(
+                                    member, "filename", getattr(member, "name", "")
+                                )
+                                is_dir_func = getattr(
+                                    member, "is_dir", getattr(member, "isdir", None)
+                                )
+                                is_dir = (
+                                    is_dir_func()
+                                    if is_dir_func
+                                    else filename.replace("\\", "/").endswith("/")
+                                )
+                                if not is_dir:
+                                    all_files.append(filename)
+                        content = all_files
+                    except (
+                        BadArchiveError,
+                        ValueError,
+                        FileNotFoundError,
+                    ):
+                        content = [config["interface"]["preview_text"]["error"]]
+
                 self.app.call_from_thread(
                     self.update_ui,
-                    file_path=file_path,
-                    file_type="file",
-                    content=config["interface"]["preview_text"]["error"],
+                    file_path,
+                    file_type=file_type,
+                    content=content,
+                    mime_type=mime_type,
                 )
+
+            if should_cancel():
                 return
+            self.call_later(lambda: self.post_message(self.SetLoading(False)))
+        except Exception as exc:
+            from rich.traceback import Traceback
 
-            if file_type == "archive":
-                try:
-                    with Archive(file_path, "r") as archive:
-                        all_files = []
-                        for member in archive.infolist():
-                            if should_cancel():
-                                return
-
-                            filename = getattr(
-                                member, "filename", getattr(member, "name", "")
-                            )
-                            is_dir_func = getattr(
-                                member, "is_dir", getattr(member, "isdir", None)
-                            )
-                            is_dir = (
-                                is_dir_func()
-                                if is_dir_func
-                                else filename.replace("\\", "/").endswith("/")
-                            )
-                            if not is_dir:
-                                all_files.append(filename)
-                    content = all_files
-                except (
-                    BadArchiveError,
-                    ValueError,
-                    FileNotFoundError,
-                ):
-                    content = [config["interface"]["preview_text"]["error"]]
-
-            self.app.call_from_thread(
-                self.update_ui,
-                file_path,
-                file_type=file_type,
-                content=content,
-                mime_type=mime_type,
-            )
-
-        if should_cancel():
-            return
-        self.call_later(lambda: self.post_message(self.SetLoading(False)))
+            self.log(Traceback.from_exception(type(exc), exc, exc.__traceback__))
+            self.notify(f"{type(exc).__name__} was raised while generating the preview")
 
     async def update_ui(
         self,
@@ -546,35 +578,37 @@ class PreviewContainer(Container):
         self._file_type = file_type
         self.remove_class("pdf")
         if file_type == "folder":
+            self.log("Showing folder preview")
             await self.show_folder_preview(file_path)
         elif file_type == "image":
+            self.log("Showing image preview")
             await self.show_image_preview()
         elif file_type == "archive":
+            self.log("Showing archive preview")
             await self.show_archive_preview()
         elif file_type == "pdf":
+            self.log("Showing pdf preview")
             self.add_class("pdf")
             await self.show_pdf_preview()
         else:
             if content in self._preview_texts:
+                self.log("Showing special preview")
                 await self.mount_special_messages()
             else:
-                if not (
-                    config["plugins"]["bat"]["enabled"]
-                    and await self.show_bat_file_preview()
-                ):
-                    await self.show_normal_file_preview()
+                if config["plugins"]["bat"]["enabled"]:
+                    self.log("Showing bat preview")
+                    if await self.show_bat_file_preview():
+                        return
+                await self.show_normal_file_preview()
 
     async def mount_special_messages(self) -> None:
         if should_cancel():
             return
-
+        self.log(self._mime_type)
         assert isinstance(self._current_content, str)
 
         display_content: str = self._current_content
-        if (
-            self._current_content == config["interface"]["preview_text"]["binary"]
-            and self._mime_type is not None
-        ):
+        if self._mime_type:
             display_content = (
                 f"{self._current_content}\n\n[dim]MIME type: {self._mime_type}[/]"
             )

@@ -50,7 +50,7 @@ dev = [
   "poethepoet>=0.38.0",
   "ruff>=0.14.6",
   "textual-dev>=1.7.0",
-  "ty~=0.0.2",
+  "ty~=0.0.3",
 ]
 speedups = [
     "textual-speedups>=0.2.1",

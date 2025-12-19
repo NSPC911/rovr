@@ -571,7 +571,7 @@ class MimeResult(NamedTuple):
 
 def get_mime_type(
     file_path: str,
-    ignore: Iterable[Literal["basic", "puremagic", "file1"]] = []
+    ignore: list[Literal["basic", "puremagic", "file1"]] = []
 ) -> MimeResult | None:
     """
     Synchronous/Threaded wrapper to get the MIME type of a file.
@@ -599,9 +599,9 @@ def get_mime_type(
             with open(file_path, "rb") as f:
                 file_bytes = f.read(1024)  # Read first 1KiB for magic detection
                 puremagic_result: list[puremagic.PureMagicWithConfidence] = (
-                    puremagic.magic_stream(file_bytes)
+                    puremagic.magic_string(file_bytes)
                 )
-                if puremagic_result:
+                if puremagic_result and puremagic_result[0].mime_type:
                     return MimeResult("puremagic", puremagic_result[0].mime_type)
         except OSError:
             # cannot open file

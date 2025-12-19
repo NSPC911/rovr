@@ -225,5 +225,7 @@ try:
                 "Please run it directly from your terminal emulator."
             )
 
+    main()
+
 except KeyboardInterrupt:
     pass

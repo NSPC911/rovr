@@ -110,12 +110,20 @@ try:
         is_flag=True,
         help="Print the DOM of the app as a tree",
     )
+    @click.option(
+        "--dev",
+        multiple=False,
+        type=bool,
+        default=False,
+        is_flag=True,
+        help="Run rovr in development mode (lets you use the Textual Console).",
+    )
     @click.option_panel("Config", options=["--mode", "--with", "--without"])
     @click.option_panel("Paths", options=["--chooser-file", "--cwd-file"])
     @click.option_panel(
         "Miscellaneous", options=["--version", "--config-path", "--help"]
     )
-    @click.option_panel("Dev", options=["--show-keys", "--tree-dom"])
+    @click.option_panel("Dev", options=["--show-keys", "--tree-dom", "--dev"])
     @click.argument("path", type=str, required=False, default="")
     @click.rich_config({"show_arguments": True})
     def main(
@@ -129,8 +137,21 @@ try:
         show_keys: bool,
         path: str,
         tree_dom: bool,
+        dev: bool,
     ) -> None:
         """A post-modern terminal file explorer"""
+        if dev:
+            environ["TEXTUAL"] = "devtools,debug"
+            global is_dev
+            is_dev = True
+            pprint("  [bold bright_cyan]Development mode activated![/]")
+            pprint(
+                "  [dim]Make sure to have [grey50]`textual console`[/] (or [grey50]`uvx --from textual-dev textual console`[/]) running![/]"
+            )
+            pprint(
+                "  [dim]  - Keep in mind that the console needs to be running [i]before[/] you start the app![/]"
+            )
+
         from rovr.variables.maps import VAR_TO_DIR
 
         if show_config_path:

@@ -1,0 +1,42 @@
+name: Build with Nuitka
+
+on:
+  push:
+    branches: "*"
+  pull_request:
+    branches: "*"
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: windows-latest
+
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Setup uv
+      uses: astral-sh/setup-uv@v6
+      with:
+        activate-environment: true
+        python-version: "3.12"
+
+    - name: Install dependencies
+      run: |
+        uv sync --dev
+      shell: pwsh
+
+    - name: Build with Nuitka
+      run: |
+        uv run nuitka --mode=onefile ./src/rovr --assume-yes-for-downloads --output-filename=rovr --show-scons --enable-plugins=anti-bloat --enable-plugins=no-qt --include-data-dir=src/rovr/config=rovr/config --output-folder-name="rovr.dist"
+      shell: pwsh
+
+    - name: List dist items
+      run: Get-ChildItem -Recurse .\rovr.dist
+      shell: pwsh
+
+    - name: Upload Executable
+      uses: actions/upload-artifact@v4
+      with:
+        name: rovr_windows_build
+        path: rovr.dist
+        retention-days: 90

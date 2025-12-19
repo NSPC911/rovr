@@ -200,15 +200,10 @@ async def is_archive(path_str: str) -> bool:
     from rovr.variables.maps import ARCHIVE_EXTENSIONS_FULL
 
     if config["plugins"]["file_one"]["enabled"] and file_executable is not None:
-        mime_type = await get_mime_type(path_str)
-        if mime_type is None:
+        mime_result = get_mime_type(path_str)
+        if mime_result is None:
             return path_str.lower().endswith(ARCHIVE_EXTENSIONS_FULL)
-        if (
-            match_mime_to_preview_type(
-                mime_type, config["plugins"]["file_one"]["mime_rules"]
-            )
-            == "archive"
-        ):
+        if match_mime_to_preview_type(mime_result.mime_type) == "archive":
             return True
 
     return path_str.lower().endswith(ARCHIVE_EXTENSIONS_FULL)

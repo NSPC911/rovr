@@ -778,6 +778,15 @@ wheels = [
 ]
 
 [[package]]
+name = "puremagic"
+version = "1.30"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/dd/7f/9998706bc516bdd664ccf929a1da6c6e5ee06e48f723ce45aae7cf3ff36e/puremagic-1.30.tar.gz", hash = "sha256:f9ff7ac157d54e9cf3bff1addfd97233548e75e685282d84ae11e7ffee1614c9", size = 314785, upload-time = "2025-07-04T18:48:36.061Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/91/ed/1e347d85d05b37a8b9a039ca832e5747e1e5248d0bd66042783ef48b4a37/puremagic-1.30-py3-none-any.whl", hash = "sha256:5eeeb2dd86f335b9cfe8e205346612197af3500c6872dffebf26929f56e9d3c1", size = 43304, upload-time = "2025-07-04T18:48:34.801Z" },
+]
+
+[[package]]
 name = "pygments"
 version = "2.19.2"
 source = { registry = "https://pypi.org/simple" }
@@ -913,6 +922,7 @@ dependencies = [
     { name = "pillow" },
     { name = "platformdirs" },
     { name = "psutil" },
+    { name = "puremagic" },
     { name = "rarfile" },
     { name = "rich-click" },
     { name = "send2trash" },
@@ -946,6 +956,7 @@ requires-dist = [
     { name = "pillow", specifier = ">=12.0.0" },
     { name = "platformdirs", specifier = ">=4.5.0" },
     { name = "psutil", specifier = ">=7.1.0" },
+    { name = "puremagic", specifier = ">=1.30" },
     { name = "rarfile", specifier = ">=4.2" },
     { name = "rich-click", specifier = ">=1.9.3" },
     { name = "send2trash", specifier = ">=1.8.3" },

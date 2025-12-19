@@ -245,6 +245,5 @@ try:
                 "Error: rovr needs to be run in a terminal.\n"
                 "Please run it directly from your terminal emulator."
             )
-
 except KeyboardInterrupt:
     pass

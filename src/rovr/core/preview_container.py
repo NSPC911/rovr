@@ -1,7 +1,5 @@
 import asyncio
 import asyncio.subprocess
-import tarfile
-import zipfile
 from dataclasses import dataclass
 from os import path
 
@@ -19,15 +17,11 @@ from textual.message import Message
 from textual.widgets import Static
 from textual.worker import Worker, WorkerCancelled, WorkerError
 
-from rovr.classes import Archive
+from rovr.classes.archive import Archive, BadArchiveError
 from rovr.core import FileList
 from rovr.functions.path import get_mime_type, match_mime_to_preview_type
 from rovr.functions.utils import should_cancel
-from rovr.variables.constants import PreviewContainerTitles, config, file_executable
-from rovr.variables.maps import (
-    ARCHIVE_EXTENSIONS_FULL,
-    PIL_EXTENSIONS,
-)
+from rovr.variables.constants import PreviewContainerTitles, config
 
 titles = PreviewContainerTitles()
 
@@ -464,110 +458,64 @@ class PreviewContainer(Container):
 
         if path.isdir(file_path):
             self.app.call_from_thread(
-                self.update_ui, file_path=file_path, file_type="folder"
+                self.update_ui,
+                file_path=file_path,
+                mime_type="inode/directory",
+                file_type="folder",
             )
         else:
-            file_type: str | None = None
+            content = None  # for now
+            mime_result = get_mime_type(file_path)
+            if mime_result is None:
+                self.notify("Could not determine MIME type")
+                self.app.call_from_thread(
+                    self.update_ui,
+                    file_path=file_path,
+                    file_type="file",
+                    content=config["interface"]["preview_text"]["error"],
+                )
+                return
+            content = mime_result.content
 
-            if config["plugins"]["file_one"]["enabled"] and file_executable is not None:
-                if should_cancel():
-                    return
-                mime_type = self.app.call_from_thread(get_mime_type, file_path)
-                if mime_type is not None:
-                    file_type = match_mime_to_preview_type(
-                        mime_type,
-                        config["plugins"]["file_one"]["mime_rules"],
-                    )
-                    if (
-                        file_type == "pdf"
-                        and not config["plugins"]["poppler"]["enabled"]
-                    ):
-                        file_type = "file"
-
+            file_type = match_mime_to_preview_type(mime_result.mime_type)
+            self.notify(mime_result.mime_type)
             if file_type is None:
-                lower_file_path = file_path.lower()
-                if (
-                    lower_file_path.endswith(".pdf")
-                    and config["plugins"]["poppler"]["enabled"]
-                ):
-                    file_type = "pdf"
-                elif any(lower_file_path.endswith(ext) for ext in PIL_EXTENSIONS):
-                    file_type = "image"
-                elif any(
-                    lower_file_path.endswith(ext) for ext in ARCHIVE_EXTENSIONS_FULL
-                ):
-                    file_type = "archive"
-                else:
-                    file_type = "file"
-
-            content = None
-
-            if should_cancel():
+                self.app.call_from_thread(
+                    self.update_ui,
+                    file_path=file_path,
+                    file_type="file",
+                    content=config["interface"]["preview_text"]["error"],
+                )
                 return
 
-            match file_type:
-                case "archive":
-                    try:
-                        with Archive(file_path, "r") as archive:
-                            all_files = []
-                            for member in archive.infolist():
-                                if should_cancel():
-                                    return
+            if file_type == "archive":
+                try:
+                    with Archive(file_path, "r") as archive:
+                        all_files = []
+                        for member in archive.infolist():
+                            if should_cancel():
+                                return
 
-                                filename = getattr(
-                                    member, "filename", getattr(member, "name", "")
-                                )
-                                is_dir_func = getattr(
-                                    member, "is_dir", getattr(member, "isdir", None)
-                                )
-                                is_dir = (
-                                    is_dir_func()
-                                    if is_dir_func
-                                    else filename.replace("\\", "/").endswith("/")
-                                )
-                                if not is_dir:
-                                    all_files.append(filename)
-                        content = all_files
-                    except (
-                        zipfile.BadZipFile,
-                        tarfile.TarError,
-                        ValueError,
-                        FileNotFoundError,
-                    ):
-                        content = [config["interface"]["preview_text"]["error"]]
-                case "image" | "pdf":
-                    pass
-                case _:
-                    if should_cancel():
-                        return
-                    # prevent files > 1mb from being
-                    # read because are you stupid, why
-                    # would you use rovr for that anyways
-                    try:
-                        size = path.getsize(file_path)
-                        if size > 1024**2:
-                            content = config["interface"]["preview_text"]["too_large"]
-                        elif size == 0:
-                            content = config["interface"]["preview_text"]["empty"]
-                        else:
-                            try:
-                                with open(file_path, "r", encoding="utf-8") as f:
-                                    content = f.read()
-                            except UnicodeDecodeError:
-                                content = config["interface"]["preview_text"]["binary"]
-                            except (
-                                FileNotFoundError,
-                                PermissionError,
-                                OSError,
-                                MemoryError,
-                            ):
-                                content = config["interface"]["preview_text"]["error"]
-                    except FileNotFoundError:
-                        content = config["interface"]["preview_text"]["error"]
-                        if path.exists(file_path):
-                            raise Exception from None
-            if should_cancel():
-                return
+                            filename = getattr(
+                                member, "filename", getattr(member, "name", "")
+                            )
+                            is_dir_func = getattr(
+                                member, "is_dir", getattr(member, "isdir", None)
+                            )
+                            is_dir = (
+                                is_dir_func()
+                                if is_dir_func
+                                else filename.replace("\\", "/").endswith("/")
+                            )
+                            if not is_dir:
+                                all_files.append(filename)
+                    content = all_files
+                except (
+                    BadArchiveError,
+                    ValueError,
+                    FileNotFoundError,
+                ):
+                    content = [config["interface"]["preview_text"]["error"]]
 
             self.app.call_from_thread(
                 self.update_ui,
@@ -597,7 +545,6 @@ class PreviewContainer(Container):
 
         self._file_type = file_type
         self.remove_class("pdf")
-
         if file_type == "folder":
             await self.show_folder_preview(file_path)
         elif file_type == "image":

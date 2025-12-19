@@ -4,17 +4,20 @@ import ctypes
 import fnmatch
 import os
 import stat
+import subprocess
 from os import path
-from typing import Literal, TypeAlias, TypedDict, overload
+from typing import Iterable, Literal, NamedTuple, TypeAlias, TypedDict, overload
 
 import psutil
 from natsort import natsorted
 from rich.console import Console
 from textual import work
 from textual.app import App
+from textual.highlight import guess_language
 
 from rovr.functions.icons import get_icon_for_file, get_icon_for_folder
-from rovr.variables.constants import file_executable, os_type
+from rovr.monkey_patches.puremagic import puremagic
+from rovr.variables.constants import config, file_executable, os_type
 
 # windows needs nt, because scandir returns
 # nt.DirEntry instead of os.DirEntry on
@@ -31,7 +34,6 @@ else:
 pprint = Console().print
 
 
-config = {}
 pins = {}
 
 
@@ -542,57 +544,78 @@ def get_mounted_drives() -> list:
     return drives
 
 
-async def get_mime_type(file_path: str) -> str | None:
-    """
-    Get the MIME type of a file using the file(1) command.
-
-    Args:
-        file_path: Path to the file to check
-
-    Returns:
-        str : The MIME type string (e.g., "text/plain", "image/png")
-        None: If file(1) is not available or failed
-    """
-    if file_executable is None:
-        return None
-
-    try:
-        process = await asyncio.create_subprocess_exec(
-            file_executable,
-            "--mime-type",
-            "-b",
-            file_path,
-            stdout=asyncio.subprocess.PIPE,
-            stderr=asyncio.subprocess.PIPE,
-        )
-        stdout, _ = await process.communicate()
-
-        if process.returncode == 0:
-            return stdout.decode("utf-8", errors="ignore").strip()
-    except (OSError, FileNotFoundError):
-        # filenotfounderror if exe goes missing after init
-        # os error for any general errors
-        pass
-
-    return None
-
-
 def match_mime_to_preview_type(
-    mime_type: str, mime_rules: dict[str, str]
-) -> str | None:
+    mime_type: str
+) -> Literal["text", "image", "pdf", "archive", "folder", "remime"] | None:
     """
     Match a MIME type against configured rules to determine preview type.
 
     Args:
         mime_type: The MIME type to match (e.g., "text/plain", "image/png")
-        mime_rules: Dictionary mapping MIME patterns to preview types
-                   (e.g., {"text/*": "text", "image/*": "image"})
 
     Returns:
         str : The preview type ("text", "image", "pdf", "archive", "folder")
         None: None if no rule matches
     """
-    for pattern, preview_type in mime_rules.items():
+    for pattern, preview_type in config["plugins"]["file_one"]["mime_rules"].items():
         if fnmatch.fnmatch(mime_type, pattern):
             return preview_type
     return None
+
+
+class MimeResult(NamedTuple):
+    method: Literal["basic", "puremagic", "file1"]
+    mime_type: str
+    content: str | None = None
+
+
+def get_mime_type(
+    file_path: str,
+    ignore: Iterable[Literal["basic", "puremagic", "file1"]] = []
+) -> MimeResult | None:
+    """
+    Synchronous/Threaded wrapper to get the MIME type of a file.
+
+    Args:
+        file_path: Path to the file to check
+
+    Returns:
+        MimeResult: The method used and the detected MIME type
+        None: If the method is not available or failed
+    """
+    # Steps to determine type:
+    # 0: open file and read as str (then it is text)
+    if "basic" not in ignore:
+        try:
+            with open(file_path, "r", encoding="utf-8") as f:
+                content = f.read(1024)
+                return MimeResult("basic", f"text/{guess_language(content, file_path)}", content)
+        except (UnicodeDecodeError, OSError):
+            # not a text file or cannot be opened
+            pass
+    # 1: pass to puremagic as bytes
+    if "puremagic" not in ignore:
+        try:
+            with open(file_path, "rb") as f:
+                file_bytes = f.read(1024)  # Read first 1KiB for magic detection
+                puremagic_result: list[puremagic.PureMagicWithConfidence] = (
+                    puremagic.magic_stream(file_bytes)
+                )
+                if puremagic_result:
+                    return MimeResult("puremagic", puremagic_result[0].mime_type)
+        except OSError:
+            # cannot open file
+            pass
+    if "file1" not in ignore:
+        # 2 (if fileone available): pass to file(1) and get mime type
+        try:
+            process = subprocess.run(
+                [file_executable, "--mime-type", "-b", file_path],
+                capture_output=True,
+                text=True,
+                check=True,
+                timeout=1
+            )
+            return MimeResult("file1", process.stdout.strip())
+        except (OSError, subprocess.CalledProcessError, subprocess.TimeoutExpired):
+            return None

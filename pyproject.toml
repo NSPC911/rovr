@@ -24,6 +24,7 @@ dependencies = [
   "pillow>=12.0.0",
   "platformdirs>=4.5.0",
   "psutil>=7.1.0",
+  "puremagic>=1.30",
   "rarfile>=4.2",
   "rich-click>=1.9.3",
   "send2trash>=1.8.3",

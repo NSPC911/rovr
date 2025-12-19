@@ -13,6 +13,10 @@ import rarfile
 from rovr.variables.maps import ARCHIVE_EXTENSIONS
 
 
+class BadArchiveError(Exception):
+    """Custom exception for handling bad or unsupported archive files."""
+
+
 class Archive:
     """Unified handler for ZIP, TAR and RAR files with context manager support."""
 
@@ -48,13 +52,7 @@ class Archive:
 
         Returns:
             Self for method chaining in with statement
-
-        Raises:
-            FileNotFoundError: If the archive file doesn't exist (for read mode)
-            zipfile.BadZipFile: If ZIP file is corrupted
-            tarfile.TarError: If TAR file is corrupted or unreadable
-            rarfile.BadRarFile: If RAR file is corrupted
-        """  # noqa: DOC502
+        """
         self._detect_and_open()
         return self
 
@@ -85,15 +83,18 @@ class Archive:
 
         Raises:
             FileNotFoundError: If the archive file doesn't exist (for read mode)
-            zipfile.BadZipFile: If ZIP file is corrupted
-            tarfile.TarError: If TAR file is corrupted or format not supported
-            rarfile.BadRarFile: If RAR file is corrupted
             ValueError: If file extension is not recognized or compression_level is invalid
-        """  # noqa: DOC502
-        if self.mode == "r":
-            self._detect_and_open_read()
-        else:
-            self._detect_and_open_write()
+            BadArchiveError: If the archive cannot be opened due to format errors
+        """
+        try:
+            if self.mode == "r":
+                self._detect_and_open_read()
+            else:
+                self._detect_and_open_write()
+        except (zipfile.BadZipFile, tarfile.TarError, rarfile.BadRarFile) as exc:
+            raise BadArchiveError(f"Failed to open archive. {exc}") from exc
+        except (FileNotFoundError, ValueError):
+            raise
 
     def _detect_and_open_read(self) -> None:
         """Attempt to open archive for reading by trying each format.

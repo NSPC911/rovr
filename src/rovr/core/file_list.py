@@ -495,7 +495,7 @@ class FileList(SelectionList, inherit_bindings=False):
         if self.highlighted is None:
             self.highlighted = 0
         # preview
-        self.app.query_one("PreviewContainer").show_preview(
+        await self.app.query_one("PreviewContainer").show_preview(
             highlighted_option.dir_entry.path
         )
         self.app.query_one("MetadataContainer").update_metadata(event.option.dir_entry)

@@ -387,7 +387,7 @@ Tooltip {
     width: 1fr;
     overflow-x: hidden;
   }
-  & > Static.special {
+  & > Static#special {
     text-wrap: wrap;
     text-overflow: fold;
     padding: 0 1;
@@ -402,6 +402,9 @@ Tooltip {
       padding: 0 1;
       scrollbar-size: 0 0;
       overflow: hidden;
+      &#bat_preview {
+        padding: 0
+      }
     }
     &FileList { height: 1fr }
   }

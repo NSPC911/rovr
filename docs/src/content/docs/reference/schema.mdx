@@ -12,27 +12,27 @@ description: config schema humanified
   - [1.6. Property `Rovr Config > interface > truncate_progress_file_path`](#interface_truncate_progress_file_path)
   - [1.7. Property `Rovr Config > interface > show_line_numbers`](#interface_show_line_numbers)
   - [1.8. Property `Rovr Config > interface > scrolloff`](#interface_scrolloff)
-  - [1.9. Property `Rovr Config > interface > clock`](#interface_clock)
-    - [1.9.1. Property `Rovr Config > interface > clock > enabled`](#interface_clock_enabled)
-    - [1.9.2. Property `Rovr Config > interface > clock > align`](#interface_clock_align)
-  - [1.10. Property `Rovr Config > interface > preview_text`](#interface_preview_text)
-    - [1.10.1. Property `Rovr Config > interface > preview_text > error`](#interface_preview_text_error)
-    - [1.10.2. Property `Rovr Config > interface > preview_text > binary`](#interface_preview_text_binary)
-    - [1.10.3. Property `Rovr Config > interface > preview_text > start`](#interface_preview_text_start)
-    - [1.10.4. Property `Rovr Config > interface > preview_text > empty`](#interface_preview_text_empty)
-    - [1.10.5. Property `Rovr Config > interface > preview_text > too_large`](#interface_preview_text_too_large)
-  - [1.11. Property `Rovr Config > interface > compact_mode`](#interface_compact_mode)
-    - [1.11.1. Property `Rovr Config > interface > compact_mode > buttons`](#interface_compact_mode_buttons)
-    - [1.11.2. Property `Rovr Config > interface > compact_mode > panels`](#interface_compact_mode_panels)
+  - [1.9. Property `Rovr Config > interface > show_hidden_files`](#interface_show_hidden_files)
+  - [1.10. Property `Rovr Config > interface > image_protocol`](#interface_image_protocol)
+  - [1.11. Property `Rovr Config > interface > allow_tab_nav`](#interface_allow_tab_nav)
+  - [1.12. Property `Rovr Config > interface > append_new_tabs`](#interface_append_new_tabs)
+  - [1.13. Property `Rovr Config > interface > double_click_delay`](#interface_double_click_delay)
+  - [1.14. Property `Rovr Config > interface > drive_watcher_frequency`](#interface_drive_watcher_frequency)
+  - [1.15. Property `Rovr Config > interface > clock`](#interface_clock)
+    - [1.15.1. Property `Rovr Config > interface > clock > enabled`](#interface_clock_enabled)
+    - [1.15.2. Property `Rovr Config > interface > clock > align`](#interface_clock_align)
+  - [1.16. Property `Rovr Config > interface > preview_text`](#interface_preview_text)
+    - [1.16.1. Property `Rovr Config > interface > preview_text > error`](#interface_preview_text_error)
+    - [1.16.2. Property `Rovr Config > interface > preview_text > binary`](#interface_preview_text_binary)
+    - [1.16.3. Property `Rovr Config > interface > preview_text > start`](#interface_preview_text_start)
+    - [1.16.4. Property `Rovr Config > interface > preview_text > empty`](#interface_preview_text_empty)
+    - [1.16.5. Property `Rovr Config > interface > preview_text > too_large`](#interface_preview_text_too_large)
+  - [1.17. Property `Rovr Config > interface > compact_mode`](#interface_compact_mode)
+    - [1.17.1. Property `Rovr Config > interface > compact_mode > buttons`](#interface_compact_mode_buttons)
+    - [1.17.2. Property `Rovr Config > interface > compact_mode > panels`](#interface_compact_mode_panels)
 - [2. Property `Rovr Config > settings`](#settings)
-  - [2.1. Property `Rovr Config > settings > show_hidden_files`](#settings_show_hidden_files)
-  - [2.2. Property `Rovr Config > settings > use_recycle_bin`](#settings_use_recycle_bin)
-  - [2.3. Property `Rovr Config > settings > copy_includes_metadata`](#settings_copy_includes_metadata)
-  - [2.4. Property `Rovr Config > settings > image_protocol`](#settings_image_protocol)
-  - [2.5. Property `Rovr Config > settings > allow_tab_nav`](#settings_allow_tab_nav)
-  - [2.6. Property `Rovr Config > settings > append_new_tabs`](#settings_append_new_tabs)
-  - [2.7. Property `Rovr Config > settings > double_click_delay`](#settings_double_click_delay)
-  - [2.8. Property `Rovr Config > settings > drive_watcher_frequency`](#settings_drive_watcher_frequency)
+  - [2.1. Property `Rovr Config > settings > use_recycle_bin`](#settings_use_recycle_bin)
+  - [2.2. Property `Rovr Config > settings > copy_includes_metadata`](#settings_copy_includes_metadata)
 - [3. Property `Rovr Config > metadata`](#metadata)
   - [3.1. Property `Rovr Config > metadata > fields`](#metadata_fields)
     - [3.1.1. Rovr Config > metadata > fields > fields items](#metadata_fields_items)
@@ -285,8 +285,8 @@ description: config schema humanified
 
 | Property                      | Type            | Title/Description                                                               |
 | ----------------------------- | --------------- | ------------------------------------------------------------------------------- |
-| [interface](#interface)       | object          |                                                                                 |
-| [settings](#settings)         | object          |                                                                                 |
+| [interface](#interface)       | object          | Settings related to the user interface and experience                           |
+| [settings](#settings)         | object          | Settings related to behavior of file operations                                 |
 | [metadata](#metadata)         | object          |                                                                                 |
 | [icons](#icons)               | object          | Custom icon configurations for files and folders                                |
 | [theme](#theme)               | object          |                                                                                 |
@@ -303,19 +303,27 @@ description: config schema humanified
 | **Required**              | No          |
 | **Additional properties** | Not allowed |
 
-| Property                                                              | Type    | Title/Description                                                                                                         |
-| --------------------------------------------------------------------- | ------- | ------------------------------------------------------------------------------------------------------------------------- |
-| [tooltips](#interface_tooltips)                                       | boolean | Show tooltips when your mouse is over a tooltip supported button.<br />This is not hot reloaded.                          |
-| [nerd_font](#interface_nerd_font)                                     | boolean | Use nerd font for rendering icons instead of weird characters and stuff.<br />Not properly hot-reloaded.                  |
-| [use_reactive_layout](#interface_use_reactive_layout)                 | boolean | Hide certain elements based on the width and height of the terminal.                                                      |
-| [show_progress_eta](#interface_show_progress_eta)                     | boolean | When copying or deleting files, show an ETA for when the action will be completed.                                        |
-| [show_progress_percentage](#interface_show_progress_percentage)       | boolean | When copying or deleting files, show a percentage of how much had been completed.                                         |
-| [truncate_progress_file_path](#interface_truncate_progress_file_path) | boolean | When the process container is using file paths, truncate the file path to only view the first and last names of the path. |
-| [show_line_numbers](#interface_show_line_numbers)                     | boolean | Add line numbers to the left gutter if you are viewing a text file.                                                       |
-| [scrolloff](#interface_scrolloff)                                     | integer | The number of files to keep above and below the cursor when moving through the file list.                                 |
-| [clock](#interface_clock)                                             | object  |                                                                                                                           |
-| [preview_text](#interface_preview_text)                               | object  |                                                                                                                           |
-| [compact_mode](#interface_compact_mode)                               | object  |                                                                                                                           |
+**Description:** Settings related to the user interface and experience
+
+| Property                                                              | Type             | Title/Description                                                                                                                                                            |
+| --------------------------------------------------------------------- | ---------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| [tooltips](#interface_tooltips)                                       | boolean          | Show tooltips when your mouse is over a tooltip supported button.<br />This is not hot reloaded.                                                                             |
+| [nerd_font](#interface_nerd_font)                                     | boolean          | Use nerd font for rendering icons instead of weird characters and stuff.<br />Not properly hot-reloaded.                                                                     |
+| [use_reactive_layout](#interface_use_reactive_layout)                 | boolean          | Hide certain elements based on the width and height of the terminal.                                                                                                         |
+| [show_progress_eta](#interface_show_progress_eta)                     | boolean          | When copying or deleting files, show an ETA for when the action will be completed.                                                                                           |
+| [show_progress_percentage](#interface_show_progress_percentage)       | boolean          | When copying or deleting files, show a percentage of how much had been completed.                                                                                            |
+| [truncate_progress_file_path](#interface_truncate_progress_file_path) | boolean          | When the process container is using file paths, truncate the file path to only view the first and last names of the path.                                                    |
+| [show_line_numbers](#interface_show_line_numbers)                     | boolean          | Add line numbers to the left gutter if you are viewing a text file.                                                                                                          |
+| [scrolloff](#interface_scrolloff)                                     | integer          | The number of files to keep above and below the cursor when moving through the file list.                                                                                    |
+| [show_hidden_files](#interface_show_hidden_files)                     | boolean          | Show hidden files and folders (those starting with a dot on Unix, or explicitly hidden on Windows/MacOS).                                                                    |
+| [image_protocol](#interface_image_protocol)                           | enum (of string) | The image protocol to use when displaying an image                                                                                                                           |
+| [allow_tab_nav](#interface_allow_tab_nav)                             | boolean          | Allow navigating the main app screen with \`tab\` and \`shift+tab\`                                                                                                          |
+| [append_new_tabs](#interface_append_new_tabs)                         | boolean          | Choose whether or not to append new tabs instead of inserting them.<br />\`true\` =&gt; Append to the end of the tab list.<br />\`false\` =&gt; Insert after the active tab. |
+| [double_click_delay](#interface_double_click_delay)                   | number           | The delay between two consecutive clicks to enter into a directory, or open a file.                                                                                          |
+| [drive_watcher_frequency](#interface_drive_watcher_frequency)         | number           | How often (in seconds) to check for changes in mounted drives in the sidebar.                                                                                                |
+| [clock](#interface_clock)                                             | object           |                                                                                                                                                                              |
+| [preview_text](#interface_preview_text)                               | object           |                                                                                                                                                                              |
+| [compact_mode](#interface_compact_mode)                               | object           |                                                                                                                                                                              |
 
 ### <a name="interface_tooltips"></a>1.1. Property `Rovr Config > interface > tooltips`
 
@@ -403,163 +411,7 @@ Not properly hot-reloaded.
 | ------------ | ------ |
 | **Minimum**  | &ge; 0 |
 
-### <a name="interface_clock"></a>1.9. Property `Rovr Config > interface > clock`
-
-|                           |             |
-| ------------------------- | ----------- |
-| **Type**                  | `object`    |
-| **Required**              | No          |
-| **Additional properties** | Not allowed |
-
-| Property                            | Type             | Title/Description                                                |
-| ----------------------------------- | ---------------- | ---------------------------------------------------------------- |
-| [enabled](#interface_clock_enabled) | boolean          | Show a clock in the tabs bar.                                    |
-| [align](#interface_clock_align)     | enum (of string) | Align the clock to either the 'right' or 'left' of the tabs bar. |
-
-#### <a name="interface_clock_enabled"></a>1.9.1. Property `Rovr Config > interface > clock > enabled`
-
-|              |           |
-| ------------ | --------- |
-| **Type**     | `boolean` |
-| **Required** | No        |
-| **Default**  | `true`    |
-
-**Description:** Show a clock in the tabs bar.
-
-#### <a name="interface_clock_align"></a>1.9.2. Property `Rovr Config > interface > clock > align`
-
-|              |                    |
-| ------------ | ------------------ |
-| **Type**     | `enum (of string)` |
-| **Required** | No                 |
-| **Default**  | `"right"`          |
-
-**Description:** Align the clock to either the 'right' or 'left' of the tabs bar.
-
-Must be one of:
-
-- "left"
-- "right"
-
-### <a name="interface_preview_text"></a>1.10. Property `Rovr Config > interface > preview_text`
-
-|                           |             |
-| ------------------------- | ----------- |
-| **Type**                  | `object`    |
-| **Required**              | No          |
-| **Additional properties** | Not allowed |
-
-| Property                                       | Type   | Title/Description                                                                                                                                          |
-| ---------------------------------------------- | ------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| [error](#interface_preview_text_error)         | string | If for any reason the file preview refused to show, this appears.                                                                                          |
-| [binary](#interface_preview_text_binary)       | string | If the current file cannot be read due to an encoding issue (ie not UTF8), it will display this message.                                                   |
-| [start](#interface_preview_text_start)         | string | This is shown when the rovr starts up. You may see it for a split second, but it will never appear afterwards. You cannot view this properly in this docs. |
-| [empty](#interface_preview_text_empty)         | string | If the current file has no content, this is shown                                                                                                          |
-| [too_large](#interface_preview_text_too_large) | string | If the file is too large (hard capped at &lt; 1MB), the preview will refuse to render this file regardless of your memory size                             |
-
-#### <a name="interface_preview_text_error"></a>1.10.1. Property `Rovr Config > interface > preview_text > error`
-
-|              |                                     |
-| ------------ | ----------------------------------- |
-| **Type**     | `string`                            |
-| **Required** | No                                  |
-| **Default**  | `"couldn't read this file! (¬_¬ )"` |
-
-**Description:** If for any reason the file preview refused to show, this appears.
-
-#### <a name="interface_preview_text_binary"></a>1.10.2. Property `Rovr Config > interface > preview_text > binary`
-
-|              |                                                            |
-| ------------ | ---------------------------------------------------------- |
-| **Type**     | `string`                                                   |
-| **Required** | No                                                         |
-| **Default**  | `"the file does not use UTF-8, which isn't supported yet"` |
-
-**Description:** If the current file cannot be read due to an encoding issue (ie not UTF8), it will display this message.
-
-#### <a name="interface_preview_text_start"></a>1.10.3. Property `Rovr Config > interface > preview_text > start`
-
-|              |                                                                                                                                      |
-| ------------ | ------------------------------------------------------------------------------------------------------------------------------------ |
-| **Type**     | `string`                                                                                                                             |
-| **Required** | No                                                                                                                                   |
-| **Default**  | `" ___ ___\n&#124;  _&#124; . &#124;\n&#124;_&#124; &#124;___&#124;\n _ _ ___\n&#124; &#124; &#124;  _&#124;\n \\_/&#124;_&#124;\n"` |
-
-**Description:** This is shown when the rovr starts up. You may see it for a split second, but it will never appear afterwards. You cannot view this properly in this docs.
-
-#### <a name="interface_preview_text_empty"></a>1.10.4. Property `Rovr Config > interface > preview_text > empty`
-
-|              |                          |
-| ------------ | ------------------------ |
-| **Type**     | `string`                 |
-| **Required** | No                       |
-| **Default**  | `"bytes be gone (⌐■_■)"` |
-
-**Description:** If the current file has no content, this is shown
-
-#### <a name="interface_preview_text_too_large"></a>1.10.5. Property `Rovr Config > interface > preview_text > too_large`
-
-|              |                                                           |
-| ------------ | --------------------------------------------------------- |
-| **Type**     | `string`                                                  |
-| **Required** | No                                                        |
-| **Default**  | `"this file is larger (but not larger than your mother)"` |
-
-**Description:** If the file is too large (hard capped at &lt; 1MB), the preview will refuse to render this file regardless of your memory size
-
-### <a name="interface_compact_mode"></a>1.11. Property `Rovr Config > interface > compact_mode`
-
-|                           |             |
-| ------------------------- | ----------- |
-| **Type**                  | `object`    |
-| **Required**              | No          |
-| **Additional properties** | Not allowed |
-
-| Property                                   | Type    | Title/Description                                                            |
-| ------------------------------------------ | ------- | ---------------------------------------------------------------------------- |
-| [buttons](#interface_compact_mode_buttons) | boolean | Whether to compact the buttons and path input to one line instead of three.  |
-| [panels](#interface_compact_mode_panels)   | boolean | Whether to make the panels smaller to add more room for the file list itself |
-
-#### <a name="interface_compact_mode_buttons"></a>1.11.1. Property `Rovr Config > interface > compact_mode > buttons`
-
-|              |           |
-| ------------ | --------- |
-| **Type**     | `boolean` |
-| **Required** | No        |
-| **Default**  | `false`   |
-
-**Description:** Whether to compact the buttons and path input to one line instead of three.
-
-#### <a name="interface_compact_mode_panels"></a>1.11.2. Property `Rovr Config > interface > compact_mode > panels`
-
-|              |           |
-| ------------ | --------- |
-| **Type**     | `boolean` |
-| **Required** | No        |
-| **Default**  | `false`   |
-
-**Description:** Whether to make the panels smaller to add more room for the file list itself
-
-## <a name="settings"></a>2. Property `Rovr Config > settings`
-
-|                           |             |
-| ------------------------- | ----------- |
-| **Type**                  | `object`    |
-| **Required**              | No          |
-| **Additional properties** | Not allowed |
-
-| Property                                                     | Type             | Title/Description                                                                                                                                                            |
-| ------------------------------------------------------------ | ---------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| [show_hidden_files](#settings_show_hidden_files)             | boolean          | Show hidden files and folders (those starting with a dot on Unix, or explicitly hidden on Windows/MacOS).                                                                    |
-| [use_recycle_bin](#settings_use_recycle_bin)                 | boolean          | When deleting a file, allow moving the file to the recycle bin.                                                                                                              |
-| [copy_includes_metadata](#settings_copy_includes_metadata)   | boolean          | When copying over a file, preserve metadata from the original file, such as creation and modification times.                                                                 |
-| [image_protocol](#settings_image_protocol)                   | enum (of string) | The image protocol to use when displaying an image                                                                                                                           |
-| [allow_tab_nav](#settings_allow_tab_nav)                     | boolean          | Allow navigating the main app screen with \`tab\` and \`shift+tab\`                                                                                                          |
-| [append_new_tabs](#settings_append_new_tabs)                 | boolean          | Choose whether or not to append new tabs instead of inserting them.<br />\`true\` =&gt; Append to the end of the tab list.<br />\`false\` =&gt; Insert after the active tab. |
-| [double_click_delay](#settings_double_click_delay)           | number           | The delay between two consecutive clicks to enter into a directory, or open a file.                                                                                          |
-| [drive_watcher_frequency](#settings_drive_watcher_frequency) | number           | How often (in seconds) to check for changes in mounted drives in the sidebar.                                                                                                |
-
-### <a name="settings_show_hidden_files"></a>2.1. Property `Rovr Config > settings > show_hidden_files`
+### <a name="interface_show_hidden_files"></a>1.9. Property `Rovr Config > interface > show_hidden_files`
 
 |              |           |
 | ------------ | --------- |
@@ -569,27 +421,7 @@ Must be one of:
 
 **Description:** Show hidden files and folders (those starting with a dot on Unix, or explicitly hidden on Windows/MacOS).
 
-### <a name="settings_use_recycle_bin"></a>2.2. Property `Rovr Config > settings > use_recycle_bin`
-
-|              |           |
-| ------------ | --------- |
-| **Type**     | `boolean` |
-| **Required** | No        |
-| **Default**  | `true`    |
-
-**Description:** When deleting a file, allow moving the file to the recycle bin.
-
-### <a name="settings_copy_includes_metadata"></a>2.3. Property `Rovr Config > settings > copy_includes_metadata`
-
-|              |           |
-| ------------ | --------- |
-| **Type**     | `boolean` |
-| **Required** | No        |
-| **Default**  | `true`    |
-
-**Description:** When copying over a file, preserve metadata from the original file, such as creation and modification times.
-
-### <a name="settings_image_protocol"></a>2.4. Property `Rovr Config > settings > image_protocol`
+### <a name="interface_image_protocol"></a>1.10. Property `Rovr Config > interface > image_protocol`
 
 |              |                    |
 | ------------ | ------------------ |
@@ -607,7 +439,7 @@ Must be one of:
 - "Halfcell"
 - "Unicode"
 
-### <a name="settings_allow_tab_nav"></a>2.5. Property `Rovr Config > settings > allow_tab_nav`
+### <a name="interface_allow_tab_nav"></a>1.11. Property `Rovr Config > interface > allow_tab_nav`
 
 |              |           |
 | ------------ | --------- |
@@ -617,7 +449,7 @@ Must be one of:
 
 **Description:** Allow navigating the main app screen with `tab` and `shift+tab`
 
-### <a name="settings_append_new_tabs"></a>2.6. Property `Rovr Config > settings > append_new_tabs`
+### <a name="interface_append_new_tabs"></a>1.12. Property `Rovr Config > interface > append_new_tabs`
 
 |              |           |
 | ------------ | --------- |
@@ -629,7 +461,7 @@ Must be one of:
 `true` =&gt; Append to the end of the tab list.
 `false` =&gt; Insert after the active tab.
 
-### <a name="settings_double_click_delay"></a>2.7. Property `Rovr Config > settings > double_click_delay`
+### <a name="interface_double_click_delay"></a>1.13. Property `Rovr Config > interface > double_click_delay`
 
 |              |          |
 | ------------ | -------- |
@@ -639,7 +471,7 @@ Must be one of:
 
 **Description:** The delay between two consecutive clicks to enter into a directory, or open a file.
 
-### <a name="settings_drive_watcher_frequency"></a>2.8. Property `Rovr Config > settings > drive_watcher_frequency`
+### <a name="interface_drive_watcher_frequency"></a>1.14. Property `Rovr Config > interface > drive_watcher_frequency`
 
 |              |          |
 | ------------ | -------- |
@@ -648,6 +480,178 @@ Must be one of:
 | **Default**  | `3.0`    |
 
 **Description:** How often (in seconds) to check for changes in mounted drives in the sidebar.
+
+### <a name="interface_clock"></a>1.15. Property `Rovr Config > interface > clock`
+
+|                           |             |
+| ------------------------- | ----------- |
+| **Type**                  | `object`    |
+| **Required**              | No          |
+| **Additional properties** | Not allowed |
+
+| Property                            | Type             | Title/Description                                                |
+| ----------------------------------- | ---------------- | ---------------------------------------------------------------- |
+| [enabled](#interface_clock_enabled) | boolean          | Show a clock in the tabs bar.                                    |
+| [align](#interface_clock_align)     | enum (of string) | Align the clock to either the 'right' or 'left' of the tabs bar. |
+
+#### <a name="interface_clock_enabled"></a>1.15.1. Property `Rovr Config > interface > clock > enabled`
+
+|              |           |
+| ------------ | --------- |
+| **Type**     | `boolean` |
+| **Required** | No        |
+| **Default**  | `true`    |
+
+**Description:** Show a clock in the tabs bar.
+
+#### <a name="interface_clock_align"></a>1.15.2. Property `Rovr Config > interface > clock > align`
+
+|              |                    |
+| ------------ | ------------------ |
+| **Type**     | `enum (of string)` |
+| **Required** | No                 |
+| **Default**  | `"right"`          |
+
+**Description:** Align the clock to either the 'right' or 'left' of the tabs bar.
+
+Must be one of:
+
+- "left"
+- "right"
+
+### <a name="interface_preview_text"></a>1.16. Property `Rovr Config > interface > preview_text`
+
+|                           |             |
+| ------------------------- | ----------- |
+| **Type**                  | `object`    |
+| **Required**              | No          |
+| **Additional properties** | Not allowed |
+
+| Property                                       | Type   | Title/Description                                                                                                                                          |
+| ---------------------------------------------- | ------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| [error](#interface_preview_text_error)         | string | If for any reason the file preview refused to show, this appears.                                                                                          |
+| [binary](#interface_preview_text_binary)       | string | If the current file cannot be read due to an encoding issue (ie not UTF8), it will display this message.                                                   |
+| [start](#interface_preview_text_start)         | string | This is shown when the rovr starts up. You may see it for a split second, but it will never appear afterwards. You cannot view this properly in this docs. |
+| [empty](#interface_preview_text_empty)         | string | If the current file has no content, this is shown                                                                                                          |
+| [too_large](#interface_preview_text_too_large) | string | If the file is too large (hard capped at &lt; 1MB), the preview will refuse to render this file regardless of your memory size                             |
+
+#### <a name="interface_preview_text_error"></a>1.16.1. Property `Rovr Config > interface > preview_text > error`
+
+|              |                                     |
+| ------------ | ----------------------------------- |
+| **Type**     | `string`                            |
+| **Required** | No                                  |
+| **Default**  | `"couldn't read this file! (¬_¬ )"` |
+
+**Description:** If for any reason the file preview refused to show, this appears.
+
+#### <a name="interface_preview_text_binary"></a>1.16.2. Property `Rovr Config > interface > preview_text > binary`
+
+|              |                                                            |
+| ------------ | ---------------------------------------------------------- |
+| **Type**     | `string`                                                   |
+| **Required** | No                                                         |
+| **Default**  | `"the file does not use UTF-8, which isn't supported yet"` |
+
+**Description:** If the current file cannot be read due to an encoding issue (ie not UTF8), it will display this message.
+
+#### <a name="interface_preview_text_start"></a>1.16.3. Property `Rovr Config > interface > preview_text > start`
+
+|              |                                                                                                                                      |
+| ------------ | ------------------------------------------------------------------------------------------------------------------------------------ |
+| **Type**     | `string`                                                                                                                             |
+| **Required** | No                                                                                                                                   |
+| **Default**  | `" ___ ___\n&#124;  _&#124; . &#124;\n&#124;_&#124; &#124;___&#124;\n _ _ ___\n&#124; &#124; &#124;  _&#124;\n \\_/&#124;_&#124;\n"` |
+
+**Description:** This is shown when the rovr starts up. You may see it for a split second, but it will never appear afterwards. You cannot view this properly in this docs.
+
+#### <a name="interface_preview_text_empty"></a>1.16.4. Property `Rovr Config > interface > preview_text > empty`
+
+|              |                          |
+| ------------ | ------------------------ |
+| **Type**     | `string`                 |
+| **Required** | No                       |
+| **Default**  | `"bytes be gone (⌐■_■)"` |
+
+**Description:** If the current file has no content, this is shown
+
+#### <a name="interface_preview_text_too_large"></a>1.16.5. Property `Rovr Config > interface > preview_text > too_large`
+
+|              |                                                           |
+| ------------ | --------------------------------------------------------- |
+| **Type**     | `string`                                                  |
+| **Required** | No                                                        |
+| **Default**  | `"this file is larger (but not larger than your mother)"` |
+
+**Description:** If the file is too large (hard capped at &lt; 1MB), the preview will refuse to render this file regardless of your memory size
+
+### <a name="interface_compact_mode"></a>1.17. Property `Rovr Config > interface > compact_mode`
+
+|                           |             |
+| ------------------------- | ----------- |
+| **Type**                  | `object`    |
+| **Required**              | No          |
+| **Additional properties** | Not allowed |
+
+| Property                                   | Type    | Title/Description                                                            |
+| ------------------------------------------ | ------- | ---------------------------------------------------------------------------- |
+| [buttons](#interface_compact_mode_buttons) | boolean | Whether to compact the buttons and path input to one line instead of three.  |
+| [panels](#interface_compact_mode_panels)   | boolean | Whether to make the panels smaller to add more room for the file list itself |
+
+#### <a name="interface_compact_mode_buttons"></a>1.17.1. Property `Rovr Config > interface > compact_mode > buttons`
+
+|              |           |
+| ------------ | --------- |
+| **Type**     | `boolean` |
+| **Required** | No        |
+| **Default**  | `false`   |
+
+**Description:** Whether to compact the buttons and path input to one line instead of three.
+
+#### <a name="interface_compact_mode_panels"></a>1.17.2. Property `Rovr Config > interface > compact_mode > panels`
+
+|              |           |
+| ------------ | --------- |
+| **Type**     | `boolean` |
+| **Required** | No        |
+| **Default**  | `false`   |
+
+**Description:** Whether to make the panels smaller to add more room for the file list itself
+
+## <a name="settings"></a>2. Property `Rovr Config > settings`
+
+|                           |             |
+| ------------------------- | ----------- |
+| **Type**                  | `object`    |
+| **Required**              | No          |
+| **Additional properties** | Not allowed |
+
+**Description:** Settings related to behavior of file operations
+
+| Property                                                   | Type    | Title/Description                                                                                            |
+| ---------------------------------------------------------- | ------- | ------------------------------------------------------------------------------------------------------------ |
+| [use_recycle_bin](#settings_use_recycle_bin)               | boolean | When deleting a file, allow moving the file to the recycle bin.                                              |
+| [copy_includes_metadata](#settings_copy_includes_metadata) | boolean | When copying over a file, preserve metadata from the original file, such as creation and modification times. |
+
+### <a name="settings_use_recycle_bin"></a>2.1. Property `Rovr Config > settings > use_recycle_bin`
+
+|              |           |
+| ------------ | --------- |
+| **Type**     | `boolean` |
+| **Required** | No        |
+| **Default**  | `true`    |
+
+**Description:** When deleting a file, allow moving the file to the recycle bin.
+
+### <a name="settings_copy_includes_metadata"></a>2.2. Property `Rovr Config > settings > copy_includes_metadata`
+
+|              |           |
+| ------------ | --------- |
+| **Type**     | `boolean` |
+| **Required** | No        |
+| **Default**  | `true`    |
+
+**Description:** When copying over a file, preserve metadata from the original file, such as creation and modification times.
 
 ## <a name="metadata"></a>3. Property `Rovr Config > metadata`
 

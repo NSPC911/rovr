@@ -67,5 +67,19 @@
       "A simple fix to this error is to rename [bright_blue]keybinds.change_sort_order[/] to [bright_cyan]keybinds.change_sort_order.open_popup[/]."
     ],
     "extra": "Expanded in v0.6.0"
+  },
+  {
+    "keys": [
+      "settings.show_hidden_files",
+      "settings.allow_tab_nav",
+      "settings.append_new_tabs",
+      "settings.double_click_delay",
+      "settings.drive_watcher_frequency",
+      "settings.image_protocol"
+    ],
+    "message": [
+      "[bright_blue]settings.show_hidden_files[/], [bright_blue]settings.allow_tab_nav[/], [bright_blue]settings.append_new_tabs[/], [bright_blue]settings.double_click_delay[/], [bright_blue]settings.drive_watcher_frequency[/] and [bright_blue]settings.image_protocol[/] have been moved to [bright_cyan]interface.*[/] to be more consistent with what they do."
+    ],
+    "extra": "Moved in v0.7.0"
   }
 ]

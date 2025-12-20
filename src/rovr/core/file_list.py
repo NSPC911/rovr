@@ -187,7 +187,7 @@ class FileList(SelectionList, inherit_bindings=False):
             try:
                 folders, files = await path_utils.get_cwd_object(
                     cwd,
-                    config["settings"]["show_hidden_files"],
+                    config["interface"]["show_hidden_files"],
                     sort_by=self.sort_by,
                     reverse=self.sort_descending,
                 )
@@ -335,7 +335,7 @@ class FileList(SelectionList, inherit_bindings=False):
         try:
             folders, files = await path_utils.get_cwd_object(
                 cwd,
-                config["settings"]["show_hidden_files"],
+                config["interface"]["show_hidden_files"],
                 sort_by=self.sort_by,  # ty: ignore[invalid-argument-type]
                 reverse=self.sort_descending,
             )
@@ -625,13 +625,13 @@ class FileList(SelectionList, inherit_bindings=False):
 
     async def toggle_hidden_files(self) -> None:
         """Toggle the visibility of hidden files."""
-        config["settings"]["show_hidden_files"] = not config["settings"][
+        config["interface"]["show_hidden_files"] = not config["interface"][
             "show_hidden_files"
         ]
         self.update_file_list(add_to_session=False)
         status = (
             "[$success underline]shown"
-            if config["settings"]["show_hidden_files"]
+            if config["interface"]["show_hidden_files"]
             else "[$error underline]hidden"
         )
         self.app.notify(

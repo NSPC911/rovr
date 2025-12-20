@@ -15,6 +15,7 @@
     "interface": {
       "type": "object",
       "additionalProperties": false,
+      "description": "Settings related to the user interface and experience",
       "properties": {
         "tooltips": {
           "type": "boolean",
@@ -56,6 +57,37 @@
           "minimum": 0,
           "default": 3,
           "description": "The number of files to keep above and below the cursor when moving through the file list."
+        },
+        "show_hidden_files": {
+          "type": "boolean",
+          "default": false,
+          "description": "Show hidden files and folders (those starting with a dot on Unix, or explicitly hidden on Windows/MacOS)."
+        },
+        "image_protocol": {
+          "type": "string",
+          "default": "Auto",
+          "description": "The image protocol to use when displaying an image",
+          "enum": ["Auto", "TGP", "Sixel", "Halfcell", "Unicode"]
+        },
+        "allow_tab_nav": {
+          "type": "boolean",
+          "default": false,
+          "description": "Allow navigating the main app screen with `tab` and `shift+tab`"
+        },
+        "append_new_tabs": {
+          "type": "boolean",
+          "default": true,
+          "description": "Choose whether or not to append new tabs instead of inserting them.\n`true` => Append to the end of the tab list.\n`false` => Insert after the active tab."
+        },
+        "double_click_delay": {
+          "type": "number",
+          "default": 0.25,
+          "description": "The delay between two consecutive clicks to enter into a directory, or open a file."
+        },
+        "drive_watcher_frequency": {
+          "type": "number",
+          "default": 3.0,
+          "description": "How often (in seconds) to check for changes in mounted drives in the sidebar."
         },
         "clock": {
           "type": "object",
@@ -126,12 +158,8 @@
     "settings": {
       "type": "object",
       "additionalProperties": false,
+      "description": "Settings related to behavior of file operations",
       "properties": {
-        "show_hidden_files": {
-          "type": "boolean",
-          "default": false,
-          "description": "Show hidden files and folders (those starting with a dot on Unix, or explicitly hidden on Windows/MacOS)."
-        },
         "use_recycle_bin": {
           "type": "boolean",
           "default": true,
@@ -141,32 +169,6 @@
           "type": "boolean",
           "default": true,
           "description": "When copying over a file, preserve metadata from the original file, such as creation and modification times."
-        },
-        "image_protocol": {
-          "type": "string",
-          "default": "Auto",
-          "description": "The image protocol to use when displaying an image",
-          "enum": ["Auto", "TGP", "Sixel", "Halfcell", "Unicode"]
-        },
-        "allow_tab_nav": {
-          "type": "boolean",
-          "default": false,
-          "description": "Allow navigating the main app screen with `tab` and `shift+tab`"
-        },
-        "append_new_tabs": {
-          "type": "boolean",
-          "default": true,
-          "description": "Choose whether or not to append new tabs instead of inserting them.\n`true` => Append to the end of the tab list.\n`false` => Insert after the active tab."
-        },
-        "double_click_delay": {
-          "type": "number",
-          "default": 0.25,
-          "description": "The delay between two consecutive clicks to enter into a directory, or open a file."
-        },
-        "drive_watcher_frequency": {
-          "type": "number",
-          "default": 3.0,
-          "description": "How often (in seconds) to check for changes in mounted drives in the sidebar."
         }
       }
     },

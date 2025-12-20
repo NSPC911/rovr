@@ -337,8 +337,8 @@ def load_config() -> tuple[dict, dict]:
 
     # slight config fixes
     # image protocol because "AutoImage" doesn't work with Sixel
-    if config["settings"]["image_protocol"] == "Auto":
-        config["settings"]["image_protocol"] = ""
+    if config["interface"]["image_protocol"] == "Auto":
+        config["interface"]["image_protocol"] = ""
     # editor empty use $EDITOR
     if config["plugins"]["editor"]["file_executable"] == "":
         config["plugins"]["editor"]["file_executable"] = environ.get(

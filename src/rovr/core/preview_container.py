@@ -128,7 +128,7 @@ class PreviewContainer(Container):
                 return
 
             image_widget = timg.__dict__[
-                config["settings"]["image_protocol"] + "Image"
+                config["interface"]["image_protocol"] + "Image"
             ](
                 pil_object,
                 id="image_preview",
@@ -212,7 +212,7 @@ class PreviewContainer(Container):
                 return
 
             image_widget = timg.__dict__[
-                config["settings"]["image_protocol"] + "Image"
+                config["interface"]["image_protocol"] + "Image"
             ](
                 current_image,
                 id="image_preview",
@@ -236,7 +236,6 @@ class PreviewContainer(Container):
             return
 
     async def show_bat_file_preview(self) -> bool:
-        self.border_title = titles.bat
         bat_executable = config["plugins"]["bat"]["executable"]
         command = [
             bat_executable,
@@ -253,6 +252,7 @@ class PreviewContainer(Container):
 
         if should_cancel():
             return False
+        self.border_title = titles.bat
 
         try:
             process = await asyncio.create_subprocess_exec(
@@ -309,9 +309,9 @@ class PreviewContainer(Container):
             return False
 
     async def show_normal_file_preview(self) -> None:
-        self.border_title = titles.file
         if should_cancel():
             return
+        self.border_title = titles.file
 
         assert isinstance(self._current_content, str)
 
@@ -364,9 +364,9 @@ class PreviewContainer(Container):
             return
 
     async def show_folder_preview(self, folder_path: str) -> None:
-        self.border_title = titles.folder
         if should_cancel():
             return
+        self.border_title = titles.folder
 
         if not self.has_child("FileList"):
             await self.remove_children()
@@ -404,9 +404,9 @@ class PreviewContainer(Container):
             return
 
     async def show_archive_preview(self) -> None:
-        self.border_title = titles.archive
         if should_cancel():
             return
+        self.border_title = titles.archive
 
         if not self.has_child("FileList"):
             await self.remove_children()
@@ -607,7 +607,7 @@ class PreviewContainer(Container):
         elif file_type == "pdf":
             self.add_class("pdf")
             await self.show_pdf_preview()
-        elif content is not None:
+        else:
             if content in self._preview_texts:
                 await self.mount_special_messages()
             else:
@@ -618,7 +618,6 @@ class PreviewContainer(Container):
                     await self.show_normal_file_preview()
 
     async def mount_special_messages(self) -> None:
-        self.border_title = ""
         if should_cancel():
             return
 

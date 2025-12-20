@@ -101,7 +101,7 @@ class Application(App, inherit_bindings=False):
         if config["interface"]["use_reactive_layout"]
         else []
     )
-    CLICK_CHAIN_TIME_THRESHOLD: int = config["settings"]["double_click_delay"]
+    CLICK_CHAIN_TIME_THRESHOLD: int = config["interface"]["double_click_delay"]
 
     def __init__(
         self,
@@ -241,12 +241,12 @@ class Application(App, inherit_bindings=False):
 
     @work
     async def action_focus_next(self) -> None:
-        if config["settings"]["allow_tab_nav"]:
+        if config["interface"]["allow_tab_nav"]:
             super().action_focus_next()
 
     @work
     async def action_focus_previous(self) -> None:
-        if config["settings"]["allow_tab_nav"]:
+        if config["interface"]["allow_tab_nav"]:
             super().action_focus_previous()
 
     async def on_key(self, event: events.Key) -> None:
@@ -518,7 +518,7 @@ class Application(App, inherit_bindings=False):
         with suppress(OSError):
             state_mtime = path.getmtime(state_path)
         drives = get_mounted_drives()
-        drive_update_every = int(config["settings"]["drive_watcher_frequency"])
+        drive_update_every = int(config["interface"]["drive_watcher_frequency"])
         count: int = -1
         while True:
             sleep(1)
@@ -542,7 +542,7 @@ class Application(App, inherit_bindings=False):
                         items: set[str] = self.call_from_thread(
                             get_filtered_dir_names,
                             cwd,
-                            config["settings"]["show_hidden_files"],
+                            config["interface"]["show_hidden_files"],
                         )
                     if items is not None and items != file_list.items_in_cwd:
                         self.cd(cwd)
@@ -735,7 +735,7 @@ class Application(App, inherit_bindings=False):
                 ),
             )
         if config["keybinds"]["toggle_hidden_files"]:
-            if config["settings"]["show_hidden_files"]:
+            if config["interface"]["show_hidden_files"]:
                 yield SystemCommand(
                     "Hide Hidden Files",
                     "Exclude listing of hidden files and folders",

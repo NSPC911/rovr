@@ -9,9 +9,15 @@ show_progress_eta = false
 show_progress_percentage = true
 truncate_progress_file_path = false
 show_line_numbers = true
+show_hidden_files = false
+allow_tab_nav = true
+append_new_tabs = true
+double_click_delay = 0.25
+drive_watcher_frequency = 3.0
 # yazi style is 5
 # but it has more space
 scrolloff = 3
+image_protocol = "Auto"
 
 [interface.preview_text]
 error = "couldn't read this file! (\u00AC_\u00AC)" # ¬_¬
@@ -37,14 +43,8 @@ buttons = false
 panels = false
 
 [settings]
-image_protocol = "Auto"
-show_hidden_files = false
 copy_includes_metadata = true
 use_recycle_bin = true
-allow_tab_nav = true
-append_new_tabs = true
-double_click_delay = 0.25
-drive_watcher_frequency = 3.0
 
 [metadata]
 fields = [

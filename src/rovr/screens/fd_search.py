@@ -254,7 +254,7 @@ class FileSearch(ModalScreen):
         fd_exec = config["plugins"]["fd"]["executable"]
 
         fd_cmd = [fd_exec]
-        if config["settings"]["show_hidden_files"]:
+        if config["interface"]["show_hidden_files"]:
             fd_cmd.append("--hidden")
         if not config["plugins"]["fd"]["relative_paths"]:
             fd_cmd.append("--absolute-path")

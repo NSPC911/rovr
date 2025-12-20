@@ -358,20 +358,28 @@ class Archive:
             case "zip":
                 assert isinstance(self._archive, zipfile.ZipFile)
                 member_arg = (
-                    member if isinstance(member, (str, zipfile.ZipInfo)) else str(member)
+                    member
+                    if isinstance(member, (str, zipfile.ZipInfo))
+                    else str(member)
                 )
                 return self._archive.open(member_arg, mode)
             case "rar":
                 assert isinstance(self._archive, rarfile.RarFile)
                 if mode != "r":
-                    raise ValueError("RAR members can only be opened in read mode ('r')")
+                    raise ValueError(
+                        "RAR members can only be opened in read mode ('r')"
+                    )
                 member_arg = (
-                    member if isinstance(member, (str, rarfile.RarInfo)) else str(member)
+                    member
+                    if isinstance(member, (str, rarfile.RarInfo))
+                    else str(member)
                 )
                 return self._archive.open(member_arg, mode)
             case _:
                 assert isinstance(self._archive, tarfile.TarFile)
                 member_arg = (
-                    member if isinstance(member, (str, tarfile.TarInfo)) else str(member)
+                    member
+                    if isinstance(member, (str, tarfile.TarInfo))
+                    else str(member)
                 )
                 return self._archive.extractfile(member_arg)

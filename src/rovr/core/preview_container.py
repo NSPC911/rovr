@@ -341,7 +341,29 @@ class PreviewContainer(Container):
             return
         self.app.call_from_thread(setattr, self, "border_title", titles.file)
 
-        assert isinstance(self._current_content, str)
+        if not isinstance(self._current_content, str):
+            # force read by bruteforcing encoding methods
+            encodings_to_try = [
+                "utf8",
+                "utf16",
+                "utf32",
+                "latin1",
+                "iso8859-1",
+                "mbcs",
+                "ascii",
+                "us-ascii",
+            ]
+            for encoding in encodings_to_try:
+                try:
+                    with open(self._current_file_path, "r", encoding=encoding) as f:
+                        self._current_content = f.read(1024)
+                    break
+                except (UnicodeDecodeError, FileNotFoundError):
+                    continue
+            if self._current_content is None:
+                self._current_content = config["interface"]["preview_text"]["error"]
+                self.mount_special_messages()
+                return
 
         lines = self._current_content.splitlines()
         max_lines = self.size.height

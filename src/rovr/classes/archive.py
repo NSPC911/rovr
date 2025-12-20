@@ -6,7 +6,7 @@ import tarfile
 import zipfile
 from pathlib import Path
 from types import TracebackType
-from typing import IO, List, Literal, Optional, Union
+from typing import IO, List, Literal
 
 import rarfile
 
@@ -22,9 +22,9 @@ class Archive:
 
     def __init__(
         self,
-        filename: Union[str, Path],
+        filename: str | Path,
         mode: str = "r",
-        compression_level: Optional[int] = None,
+        compression_level: int | None = None,
     ) -> None:
         """Initialize the archive handler.
 
@@ -40,12 +40,9 @@ class Archive:
         self.filename = str(filename)
         self.mode = mode
         self.compression_level = compression_level
-        self._archive: Optional[
-            Union[zipfile.ZipFile, tarfile.TarFile, rarfile.RarFile]
-        ] = None
-        self._is_zip: Optional[bool] = None
-        self._is_rar: Optional[bool] = None
-        self._compress_file_obj: Optional[IO[bytes]] = None
+        self._archive: zipfile.ZipFile | tarfile.TarFile | rarfile.RarFile | None = None
+        self._archive_type: Literal["zip", "rar", "tar"] | None = None
+        self._compress_file_obj: IO[bytes] | None = None
 
     def __enter__(self) -> "Archive":
         """Context manager entry - opens the archive.
@@ -58,9 +55,9 @@ class Archive:
 
     def __exit__(
         self,
-        exc_type: Optional[type],
-        exc_val: Optional[Exception],
-        exc_tb: Optional[TracebackType],
+        exc_type: type | None,
+        exc_val: Exception | None,
+        exc_tb: TracebackType | None,
     ) -> None:
         """Context manager exit - closes the archive.
 
@@ -115,8 +112,7 @@ class Archive:
                 archive.close()
                 raise ValueError("Password-protected ZIP files are not supported")
             self._archive = archive
-            self._is_zip = True
-            self._is_rar = False
+            self._archive_type = "zip"
             return
         except zipfile.BadZipFile:
             pass
@@ -129,8 +125,7 @@ class Archive:
                 archive.close()
                 raise ValueError("Password-protected RAR files are not supported")
             self._archive = archive
-            self._is_zip = False
-            self._is_rar = True
+            self._archive_type = "rar"
             return
         except rarfile.NotRarFile:
             pass
@@ -138,8 +133,7 @@ class Archive:
         # Try TAR (with auto-detection for compression)
         try:
             self._archive = tarfile.open(self.filename, "r:*")  # noqa: SIM115
-            self._is_zip = False
-            self._is_rar = False
+            self._archive_type = "tar"
             return
         except tarfile.TarError:
             pass
@@ -157,8 +151,7 @@ class Archive:
         filename_lower = self.filename.lower()
 
         if filename_lower.endswith(ARCHIVE_EXTENSIONS.zip):
-            self._is_zip = True
-            self._is_rar = False
+            self._archive_type = "zip"
             if self.compression_level is not None:
                 if not (0 <= self.compression_level <= 9):
                     raise ValueError("ZIP compression level must be between 0-9")
@@ -171,8 +164,7 @@ class Archive:
             raise ValueError("RAR files can only be opened in read mode ('r')")
         else:
             # Assume it's a tar file
-            self._is_zip = False
-            self._is_rar = False
+            self._archive_type = "tar"
             tar_mode = self._get_tar_write_mode()
             if self.compression_level is not None:
                 self._archive = self._open_tar_with_compression(tar_mode)
@@ -248,19 +240,27 @@ class Archive:
 
         Raises:
             RuntimeError: If archive is not opened
+            BadArchiveError: If the archive cannot be listed due to any archive related errors
+            FileNotFoundError: If the file is no longer available
         """
         if not self._archive:
             raise RuntimeError("Archive not opened")
 
-        if self._is_zip:
-            assert isinstance(self._archive, zipfile.ZipFile)
-            return self._archive.infolist()
-        elif self._is_rar:
-            assert isinstance(self._archive, rarfile.RarFile)
-            return self._archive.infolist()
-        else:
-            assert isinstance(self._archive, tarfile.TarFile)
-            return self._archive.getmembers()
+        try:
+            match self._archive_type:
+                case "rar":
+                    assert isinstance(self._archive, rarfile.RarFile)
+                    return self._archive.infolist()
+                case "zip":
+                    assert isinstance(self._archive, zipfile.ZipFile)
+                    return self._archive.infolist()
+                case _:
+                    assert isinstance(self._archive, tarfile.TarFile)
+                    return self._archive.getmembers()
+        except (zipfile.BadZipFile, tarfile.TarError, rarfile.BadRarFile) as exc:
+            raise BadArchiveError(f"Failed to open archive. {exc}") from exc
+        except FileNotFoundError:
+            raise
 
     def namelist(self) -> List[str]:
         """Return list of member names.
@@ -274,19 +274,20 @@ class Archive:
         if not self._archive:
             raise RuntimeError("Archive not opened")
 
-        if self._is_zip:
-            assert isinstance(self._archive, zipfile.ZipFile)
-            return self._archive.namelist()
-        elif self._is_rar:
-            assert isinstance(self._archive, rarfile.RarFile)
-            return self._archive.namelist()
-        else:
-            assert isinstance(self._archive, tarfile.TarFile)
-            return self._archive.getnames()
+        match self._archive_type:
+            case "zip":
+                assert isinstance(self._archive, zipfile.ZipFile)
+                return self._archive.namelist()
+            case "rar":
+                assert isinstance(self._archive, rarfile.RarFile)
+                return self._archive.namelist()
+            case _:
+                assert isinstance(self._archive, tarfile.TarFile)
+                return self._archive.getnames()
 
     def extract(
         self,
-        member: Union[str, zipfile.ZipInfo, tarfile.TarInfo, rarfile.RarInfo],
+        member: str | zipfile.ZipInfo | tarfile.TarInfo | rarfile.RarInfo,
         path: str | Path = "",
     ) -> str:
         """Extract a single member to the specified path.
@@ -304,33 +305,39 @@ class Archive:
         if not self._archive:
             raise RuntimeError("Archive not opened")
 
-        if self._is_rar:
-            assert isinstance(self._archive, rarfile.RarFile)
-            member_filename = (
-                member.filename if isinstance(member, rarfile.RarInfo) else member
-            )
-            self._archive.extract(member, path)
-            return str(Path(path or ".") / member_filename)
-
-        if self._is_zip:
-            assert isinstance(self._archive, zipfile.ZipFile)
-            member_arg = (
-                member if isinstance(member, (str, zipfile.ZipInfo)) else str(member)
-            )
-            return self._archive.extract(member_arg, path)
-
-        assert isinstance(self._archive, tarfile.TarFile)
-        member_arg = (
-            member if isinstance(member, (str, tarfile.TarInfo)) else str(member)
-        )
-        result = self._archive.extract(member_arg, path)
-        return str(result) if result else str(Path(path or ".") / str(member_arg))
+        match self._archive_type:
+            case "rar":
+                assert isinstance(self._archive, rarfile.RarFile)
+                member_filename = (
+                    member.filename if isinstance(member, rarfile.RarInfo) else member
+                )
+                self._archive.extract(member, path)
+                return str(Path(path or ".") / member_filename)
+            case "zip":
+                assert isinstance(self._archive, zipfile.ZipFile)
+                member_arg = (
+                    member
+                    if isinstance(member, (str, zipfile.ZipInfo))
+                    else str(member)
+                )
+                return self._archive.extract(member_arg, path)
+            case _:
+                assert isinstance(self._archive, tarfile.TarFile)
+                member_arg = (
+                    member
+                    if isinstance(member, (str, tarfile.TarInfo))
+                    else str(member)
+                )
+                result = self._archive.extract(member_arg, path)
+                return (
+                    str(result) if result else str(Path(path or ".") / str(member_arg))
+                )
 
     def open(
         self,
-        member: Union[str, zipfile.ZipInfo, tarfile.TarInfo, rarfile.RarInfo],
+        member: str | zipfile.ZipInfo | tarfile.TarInfo | rarfile.RarInfo,
         mode: Literal["r", "w"] = "r",
-    ) -> Optional[IO[bytes]]:
+    ) -> IO[bytes] | None:
         """Open a member file for reading.
 
         Args:
@@ -347,24 +354,24 @@ class Archive:
         """
         if not self._archive:
             raise RuntimeError("Archive not opened")
-
-        if self._is_zip:
-            assert isinstance(self._archive, zipfile.ZipFile)
-            member_arg = (
-                member if isinstance(member, (str, zipfile.ZipInfo)) else str(member)
-            )
-            return self._archive.open(member_arg, mode)
-        elif self._is_rar:
-            assert isinstance(self._archive, rarfile.RarFile)
-            if mode != "r":
-                raise ValueError("RAR members can only be opened in read mode ('r')")
-            member_arg = (
-                member if isinstance(member, (str, rarfile.RarInfo)) else str(member)
-            )
-            return self._archive.open(member_arg, mode)
-        else:
-            assert isinstance(self._archive, tarfile.TarFile)
-            member_arg = (
-                member if isinstance(member, (str, tarfile.TarInfo)) else str(member)
-            )
-            return self._archive.extractfile(member_arg)
+        match self._archive_type:
+            case "zip":
+                assert isinstance(self._archive, zipfile.ZipFile)
+                member_arg = (
+                    member if isinstance(member, (str, zipfile.ZipInfo)) else str(member)
+                )
+                return self._archive.open(member_arg, mode)
+            case "rar":
+                assert isinstance(self._archive, rarfile.RarFile)
+                if mode != "r":
+                    raise ValueError("RAR members can only be opened in read mode ('r')")
+                member_arg = (
+                    member if isinstance(member, (str, rarfile.RarInfo)) else str(member)
+                )
+                return self._archive.open(member_arg, mode)
+            case _:
+                assert isinstance(self._archive, tarfile.TarFile)
+                member_arg = (
+                    member if isinstance(member, (str, tarfile.TarInfo)) else str(member)
+                )
+                return self._archive.extractfile(member_arg)

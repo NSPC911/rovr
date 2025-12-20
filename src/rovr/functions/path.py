@@ -15,6 +15,7 @@ from textual import work
 from textual.app import App
 from textual.highlight import guess_language
 
+from rovr.classes.archive import Archive, BadArchiveError
 from rovr.functions.icons import get_icon_for_file, get_icon_for_folder
 from rovr.monkey_patches.puremagic import puremagic
 from rovr.variables.constants import config, file_executable, os_type
@@ -577,11 +578,14 @@ def get_mime_type(
 
     Args:
         file_path: Path to the file to check
+        ignore: List of detection methods to skip
 
     Returns:
         MimeResult: The method used and the detected MIME type
         None: If the method is not available or failed
     """
+    file_extension = path.splitext(file_path)[1].lower()
+
     # Steps to determine type:
     # 0: open file and read as str (then it is text)
     if "basic" not in ignore:
@@ -602,8 +606,18 @@ def get_mime_type(
                 puremagic_result: list[puremagic.PureMagicWithConfidence] = (
                     puremagic.magic_string(file_bytes)
                 )
-                if puremagic_result and puremagic_result[0].mime_type:
-                    return MimeResult("puremagic", puremagic_result[0].mime_type)
+                if puremagic_result:
+                    # If multiple matches exist, prefer one matching the file extension
+                    for match in puremagic_result:
+                        if (
+                            match.extension.lower() == file_extension
+                            and match.mime_type
+                        ):
+                            return MimeResult("puremagic", match.mime_type)
+                    # Otherwise, return first result with a mime type
+                    for match in puremagic_result:
+                        if match.mime_type:
+                            return MimeResult("puremagic", match.mime_type)
         except OSError:
             # cannot open file
             pass

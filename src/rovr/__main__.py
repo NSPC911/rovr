@@ -151,9 +151,9 @@ try:
         list_preview_themes: bool,
     ) -> None:
         """A post-modern terminal file explorer"""
-        if dev:
+        global is_dev
+        if dev or is_dev:
             environ["TEXTUAL"] = "devtools,debug"
-            global is_dev
             is_dev = True
             pprint("  [bold bright_cyan]Development mode activated![/]")
             pprint(

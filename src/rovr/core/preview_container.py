@@ -19,9 +19,9 @@ from textual.widgets import Static
 
 from rovr.classes.archive import Archive, BadArchiveError
 from rovr.core import FileList
-from rovr.functions.path import get_mime_type, match_mime_to_preview_type
+from rovr.functions.path import MimeResult, get_mime_type, match_mime_to_preview_type
 from rovr.functions.utils import should_cancel
-from rovr.variables.constants import PreviewContainerTitles, config
+from rovr.variables.constants import PreviewContainerTitles, config, file_executable
 
 titles = PreviewContainerTitles()
 
@@ -50,7 +50,7 @@ class PreviewContainer(Container):
         self._current_file_path = None
         self._initial_height = self.size.height
         self._file_type: str = "none"
-        self._mime_type: str | None = None
+        self._mime_result: MimeResult | None = None
         self._preview_texts: list[str] = config["interface"]["preview_text"].values()
         self.pdf = PDFHandler()
         # Debouncing mechanism
@@ -534,7 +534,7 @@ class PreviewContainer(Container):
             if path.isdir(file_path):
                 self.update_ui(
                     file_path=file_path,
-                    mime_type="inode/directory",
+                    mime_type=MimeResult("basic", "inode/directory"),
                     file_type="folder",
                 )
             else:
@@ -558,7 +558,7 @@ class PreviewContainer(Container):
                     self.update_ui(
                         file_path=file_path,
                         file_type="file",
-                        mime_type=mime_result.mime_type,
+                        mime_type=mime_result,
                         content=config["interface"]["preview_text"]["error"],
                     )
                     self.call_later(lambda: self.post_message(self.SetLoading(False)))
@@ -582,7 +582,7 @@ class PreviewContainer(Container):
                         self.update_ui(
                             file_path=file_path,
                             file_type="file",
-                            mime_type=mime_result.mime_type,
+                            mime_type=mime_result,
                             content=config["interface"]["preview_text"]["error"],
                         )
                         self.call_later(
@@ -649,7 +649,7 @@ class PreviewContainer(Container):
         file_path: str,
         file_type: str,
         content: str | list[str] | None = None,
-        mime_type: str | None = None,
+        mime_type: MimeResult | None = None,
     ) -> None:
         """
         Update the preview UI. Runs in a thread, uses call_from_thread for UI ops.
@@ -693,9 +693,19 @@ class PreviewContainer(Container):
 
         display_content: str = self._current_content
         if self._mime_type:
-            display_content = (
-                f"{self._current_content}\n\n[dim]MIME type: {self._mime_type}[/]"
-            )
+            display_content = f"MIME Type: {self._mime_type.mime_type}"
+            if config["plugins"]["file_one"]["get_description"]:
+                try:
+                    process = subprocess.run(
+                        [file_executable, "--brief", "--", self._current_file_path],
+                        capture_output=True,
+                        text=True,
+                        check=True,
+                        timeout=1,
+                    )
+                    display_content += f"\n{process.stdout.strip()}"
+                except (subprocess.SubprocessError, FileNotFoundError):
+                    pass
 
         if self.has_child("Static"):
             static_widget: Static = self.query_one(Static)

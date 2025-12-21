@@ -1,5 +1,6 @@
 import asyncio
 import base64
+import contextlib
 import ctypes
 import fnmatch
 import os
@@ -557,7 +558,7 @@ def match_mime_to_preview_type(
         str : The preview type ("text", "image", "pdf", "archive", "folder")
         None: None if no rule matches
     """
-    for pattern, preview_type in config["plugins"]["file_one"]["mime_rules"].items():
+    for pattern, preview_type in config["interface"]["mime_rules"].items():
         if fnmatch.fnmatch(mime_type, pattern):
             return preview_type
     return None
@@ -586,6 +587,18 @@ def get_mime_type(
     file_extension = path.splitext(file_path)[1].lower()
 
     # Steps to determine type:
+    # 2 (if fileone available): pass to file(1) and get mime type
+    if "file1" not in ignore:
+        # 2 (if fileone available): pass to file(1) and get mime type
+        with contextlib.suppress(
+            OSError, subprocess.CalledProcessError, subprocess.TimeoutExpired
+        ):
+            process = subprocess.Popen(
+                [file_executable, "--mime-type", "-b", "--", file_path],
+                stderr=subprocess.PIPE,
+                stdout=subprocess.PIPE,
+                text=True,
+            )
     # 0: open file and read as str (then it is text)
     if "basic" not in ignore:
         try:
@@ -622,14 +635,11 @@ def get_mime_type(
             pass
     if "file1" not in ignore:
         # 2 (if fileone available): pass to file(1) and get mime type
-        try:
-            process = subprocess.run(
-                [file_executable, "--mime-type", "-b", file_path],
-                capture_output=True,
-                text=True,
-                check=True,
-                timeout=1,
-            )
-            return MimeResult("file1", process.stdout.strip())
-        except (OSError, subprocess.CalledProcessError, subprocess.TimeoutExpired):
-            return None
+        with contextlib.suppress(
+            OSError, subprocess.CalledProcessError, subprocess.TimeoutExpired
+        ):
+            stdout, _ = process.communicate(timeout=1)
+            if process.returncode == 0:
+                mime_type = stdout.strip()
+                if mime_type:
+                    return MimeResult("file1", mime_type)

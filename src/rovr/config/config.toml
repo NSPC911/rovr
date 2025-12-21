@@ -42,6 +42,19 @@ align = "left"
 buttons = false
 panels = false
 
+[interface.mime_rules]
+"text/*" = "text"
+"image/*" = "image"
+"application/pdf" = "pdf"
+"application/zip" = "archive"
+"application/x-tar" = "archive"
+"application/gzip" = "archive"
+"application/x-bzip2" = "archive"
+"application/x-xz" = "archive"
+"application/x-rar" = "archive"
+"application/x-7z-compressed" = "archive"
+"inode/directory" = "folder"
+
 [settings]
 copy_includes_metadata = true
 use_recycle_bin = true
@@ -250,16 +263,4 @@ poppler_folder = ""
 
 [plugins.file_one]
 enabled = false
-
-[plugins.file_one.mime_rules]
-"text/*" = "text"
-"image/*" = "image"
-"application/pdf" = "pdf"
-"application/zip" = "archive"
-"application/x-tar" = "archive"
-"application/gzip" = "archive"
-"application/x-bzip2" = "archive"
-"application/x-xz" = "archive"
-"application/x-rar" = "archive"
-"application/x-7z-compressed" = "archive"
-"inode/directory" = "folder"
+get_description = true

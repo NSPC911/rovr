@@ -690,6 +690,7 @@ class PreviewContainer(Container):
             return
         self.log(self._mime_type)
         assert isinstance(self._current_content, str)
+        self.app.call_from_thread(setattr, self, "border_title", "")
 
         display_content: str = self._current_content
         if self._mime_type:

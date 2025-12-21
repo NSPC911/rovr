@@ -1,6 +1,5 @@
 import asyncio
 import base64
-import contextlib
 import ctypes
 import fnmatch
 import os
@@ -18,7 +17,7 @@ from textual.highlight import guess_language
 
 from rovr.functions.icons import get_icon_for_file, get_icon_for_folder
 from rovr.monkey_patches.puremagic import puremagic
-from rovr.variables.constants import config, file_executable, os_type
+from rovr.variables.constants import config, os_type
 
 # windows needs nt, because scandir returns
 # nt.DirEntry instead of os.DirEntry on
@@ -587,18 +586,6 @@ def get_mime_type(
     file_extension = path.splitext(file_path)[1].lower()
 
     # Steps to determine type:
-    # 2 (if fileone available): pass to file(1) and get mime type
-    if "file1" not in ignore:
-        # 2 (if fileone available): pass to file(1) and get mime type
-        with contextlib.suppress(
-            OSError, subprocess.CalledProcessError, subprocess.TimeoutExpired
-        ):
-            process = subprocess.Popen(
-                [file_executable, "--mime-type", "-b", "--", file_path],
-                stderr=subprocess.PIPE,
-                stdout=subprocess.PIPE,
-                text=True,
-            )
     # 0: open file and read as str (then it is text)
     if "basic" not in ignore:
         try:
@@ -635,11 +622,16 @@ def get_mime_type(
             pass
     if "file1" not in ignore:
         # 2 (if fileone available): pass to file(1) and get mime type
-        with contextlib.suppress(
-            OSError, subprocess.CalledProcessError, subprocess.TimeoutExpired
-        ):
-            stdout, _ = process.communicate(timeout=1)
-            if process.returncode == 0:
-                mime_type = stdout.strip()
-                if mime_type:
-                    return MimeResult("file1", mime_type)
+        try:
+            process = subprocess.run(
+                ["file", "--mime-type", "-b", file_path],
+                capture_output=True,
+                text=True,
+                check=True,
+            )
+            mime_type = process.stdout.strip()
+            if mime_type:
+                return MimeResult("file1", mime_type)
+        except (subprocess.CalledProcessError, FileNotFoundError):
+            # file(1) command failed or is not available
+            pass

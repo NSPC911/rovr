@@ -317,8 +317,8 @@ class FileList(SelectionList, inherit_bindings=False):
         finally:
             self.app.file_list_pause_check = False
 
-    @work(exclusive=True)
-    async def dummy_update_file_list(
+    @work(thread=True)
+    def dummy_update_file_list(
         self,
         cwd: str,
     ) -> None:
@@ -333,12 +333,15 @@ class FileList(SelectionList, inherit_bindings=False):
         self.list_of_options = []
 
         try:
-            folders, files = await path_utils.get_cwd_object(
+            folders, files = self.app.call_from_thread(  # ty: ignore[not-iterable]
+                path_utils.get_cwd_object,
                 cwd,
                 config["interface"]["show_hidden_files"],
                 sort_by=self.sort_by,  # ty: ignore[invalid-argument-type]
                 reverse=self.sort_descending,
             )
+            folders: list[path_utils.CWDObjectReturnDict]
+            files: list[path_utils.CWDObjectReturnDict]
             if not folders and not files:
                 self.list_of_options.append(
                     Selection("  --no-files--", value="", id="", disabled=True)
@@ -356,12 +359,12 @@ class FileList(SelectionList, inherit_bindings=False):
                         )
                     )
                     if start_time + 0.25 < time():
-                        self.parent.border_subtitle = (
-                            f"{index + 1} / {file_list_option_length}"
+                        setattr(
+                            self.parent,
+                            "border_subtitle",
+                            f"{index + 1} / {file_list_option_length}",
                         )
                         start_time = time()
-                    # await so that textual can still be responsive
-                    await asyncio.sleep(0)
         except PermissionError:
             self.list_of_options.append(
                 Selection(
@@ -371,8 +374,8 @@ class FileList(SelectionList, inherit_bindings=False):
                     disabled=True,
                 )
             )
-        self.set_options(self.list_of_options)
-        self.parent.border_subtitle = ""
+        self.app.call_from_thread(self.set_options, self.list_of_options)
+        setattr(self.parent, "border_subtitle", "")
 
     @work(exclusive=True)
     async def create_archive_list(self, file_list: list[str]) -> None:

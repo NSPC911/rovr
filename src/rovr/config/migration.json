@@ -81,5 +81,15 @@
       "[bright_blue]settings.show_hidden_files[/], [bright_blue]settings.allow_tab_nav[/], [bright_blue]settings.append_new_tabs[/], [bright_blue]settings.double_click_delay[/], [bright_blue]settings.drive_watcher_frequency[/] and [bright_blue]settings.image_protocol[/] have been moved to [bright_cyan]interface.*[/] to be more consistent with what they do."
     ],
     "extra": "Moved in v0.7.0"
+  },
+  {
+    "keys": [
+      "plugins.file_one.mime_rules.*",
+      "plugins.file_one.mime_rules"
+    ],
+    "message": [
+      "[bright_blue]plugins.file_one.mime_rules.*[/] has been renamed to [bright_cyan]interface.mime_rules.*[/] because file(1) is no longer a requirement to make use of mime types."
+    ],
+    "extra": "Moved in v0.7.0"
   }
 ]

@@ -231,8 +231,11 @@ def schema_dump(doc_path: str, exception: ValidationError, config_content: str) 
         .open("r", encoding="utf-8") as f
     ):
         migration_docs = ujson.load(f)
+
+    import fnmatch
+
     for item in migration_docs:
-        if path_str in item["keys"]:
+        if any(fnmatch.fnmatch(path_str, path) for path in item["keys"]):
             message = "\n".join(item["message"])
             to_print = Table(
                 box=box.ROUNDED,

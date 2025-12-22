@@ -16,7 +16,7 @@ from textual.app import App
 from textual.highlight import guess_language
 
 from rovr.functions.icons import get_icon_for_file, get_icon_for_folder
-from rovr.monkey_patches.puremagic import puremagic
+from rovr.monkey_patches.puremagic_patch import puremagic
 from rovr.variables.constants import config, os_type
 
 # windows needs nt, because scandir returns

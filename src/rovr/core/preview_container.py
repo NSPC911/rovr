@@ -9,6 +9,7 @@ from PIL import Image, UnidentifiedImageError
 from PIL.Image import Image as PILImage
 from rich.syntax import Syntax
 from rich.text import Text
+from rich.traceback import Traceback
 from textual import events, on, work
 from textual.app import ComposeResult
 from textual.containers import Container
@@ -108,7 +109,7 @@ class PreviewContainer(Container):
                 self.mount,
                 Static(
                     "Cannot render image (is the encoding wrong?)",
-                    id="special",
+                    classes="special",
                 ),
             )
             return
@@ -120,7 +121,7 @@ class PreviewContainer(Container):
                 self.mount,
                 Static(
                     config["interface"]["preview_text"]["error"],
-                    id="special",
+                    classes="special",
                 ),
             )
             return
@@ -195,10 +196,7 @@ class PreviewContainer(Container):
                 self.app.call_from_thread(self.remove_children)
                 self.app.call_from_thread(
                     self.mount,
-                    Static(
-                        f"{type(exc).__name__}: {str(exc)}",
-                        id="special",
-                    ),
+                    Static(f"{type(exc).__name__}: {str(exc)}", classes="special"),
                 )
                 return
 
@@ -297,9 +295,7 @@ class PreviewContainer(Container):
                     if should_cancel():
                         return False
 
-                    static_widget = Static(
-                        new_content, id="bat_preview", classes="inner_preview"
-                    )
+                    static_widget = Static(new_content, classes="bat_preview")
                     self.app.call_from_thread(self.mount, static_widget)
                     if should_cancel():
                         return False
@@ -307,12 +303,7 @@ class PreviewContainer(Container):
                 else:
                     static_widget: Static = self.query_one(Static)
                     self.app.call_from_thread(static_widget.update, new_content)
-                    self.app.call_from_thread(
-                        setattr, static_widget, "_id", "bat_preview"
-                    )
-                self.app.call_from_thread(
-                    setattr, static_widget, "classes", "inner_preview"
-                )
+                    static_widget.set_classes("bat_preview")
 
                 return True
             else:
@@ -331,8 +322,9 @@ class PreviewContainer(Container):
             if should_cancel():
                 return False
             self.app.call_from_thread(
-                self.notify, str(e), title="Plugins: Bat", severity="warning"
+                self.notify, str(e), title="Plugins: Bat", severity="error"
             )
+            self.log(Traceback())
             return False
 
     def show_normal_file_preview(self) -> None:
@@ -406,17 +398,10 @@ class PreviewContainer(Container):
             if should_cancel():
                 return
 
-            self.app.call_from_thread(
-                self.mount,
-                Static(
-                    syntax,
-                    id="text_preview",
-                ),
-            )
+            self.app.call_from_thread(self.mount, Static(syntax))
         else:
             static_widget = self.query_one(Static)
             self.app.call_from_thread(static_widget.update, syntax)
-            self.app.call_from_thread(setattr, static_widget, "_id", "text_preview")
 
         if should_cancel():
             return
@@ -711,14 +696,11 @@ class PreviewContainer(Container):
         if self.has_child("Static"):
             static_widget: Static = self.query_one(Static)
             self.app.call_from_thread(static_widget.update, display_content)
-            self.app.call_from_thread(setattr, static_widget, "_id", "special")
         else:
             self.app.call_from_thread(self.remove_children)
             if should_cancel():
                 return
-            static_widget = Static(
-                display_content, id="special", classes="inner_preview"
-            )
+            static_widget = Static(display_content, classes="special")
             self.app.call_from_thread(self.mount, static_widget)
         static_widget.can_focus = True
         if should_cancel():

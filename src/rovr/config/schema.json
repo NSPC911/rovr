@@ -157,7 +157,7 @@
           "type": "object",
           "additionalProperties": {
             "type": "string",
-            "enum": ["text", "image", "pdf", "archive", "folder"]
+            "enum": ["text", "image", "pdf", "archive", "folder", "remime"]
           },
           "default": {
             "text/*": "text",
@@ -170,7 +170,8 @@
             "application/x-xz": "archive",
             "application/x-rar": "archive",
             "application/x-7z-compressed": "archive",
-            "inode/directory": "folder"
+            "inode/directory": "folder",
+            "application/octet-stream": "remime"
           },
           "description": "Map MIME type patterns to preview types. Supports glob patterns (e.g., 'text/*' matches 'text/plain', 'text/html', etc.). Valid preview types: text, image, pdf, archive, folder, remime.\n-> Use 'remime' if you want a more accurate description from file(1)"
         }
@@ -305,7 +306,7 @@
         },
         "preview": {
           "type": "string",
-          "defaut": "nord",
+          "default": "nord",
           "description":"The theme to use when previewing files in the preview sidebar.",
           "enum": [
             "abap", "algol", "algol_nu", "arduino", "autumn",

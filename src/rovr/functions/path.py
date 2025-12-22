@@ -585,53 +585,64 @@ def get_mime_type(
     """
     file_extension = path.splitext(file_path)[1].lower()
 
-    # Steps to determine type:
-    # 0: open file and read as str (then it is text)
-    if "basic" not in ignore:
-        try:
-            with open(file_path, "r", encoding="utf-8") as f:
-                content = f.read(1024)
-                return MimeResult(
-                    "basic", f"text/{guess_language(content, file_path)}", content
-                )
-        except (UnicodeDecodeError, OSError):
-            # not a text file or cannot be opened
-            pass
-    # 1: pass to puremagic as bytes
+    # Read file bytes once, reuse for both puremagic and basic detection
+    try:
+        with open(file_path, "rb") as f:
+            file_bytes = f.read(1024)  # Read first 1KiB
+    except OSError:
+        # Cannot open file at all
+        return None
+
+    # Step 1: Try puremagic (magic byte detection) first
     if "puremagic" not in ignore:
         try:
-            with open(file_path, "rb") as f:
-                file_bytes = f.read(1024)  # Read first 1KiB for magic detection
-                puremagic_result: list[puremagic.PureMagicWithConfidence] = (
-                    puremagic.magic_string(file_bytes)
-                )
-                if puremagic_result:
-                    # If multiple matches exist, prefer one matching the file extension
-                    for match in puremagic_result:
-                        if (
-                            match.extension.lower() == file_extension
-                            and match.mime_type
-                        ):
-                            return MimeResult("puremagic", match.mime_type)
-                    # Otherwise, return first result with a mime type
-                    for match in puremagic_result:
-                        if match.mime_type:
-                            return MimeResult("puremagic", match.mime_type)
-        except OSError:
-            # cannot open file
+            puremagic_result: list[puremagic.PureMagicWithConfidence] = (
+                puremagic.magic_string(file_bytes)
+            )
+            if puremagic_result:
+                # If multiple matches exist, prefer one matching the file extension
+                for match in puremagic_result:
+                    if match.extension.lower() == file_extension and match.mime_type:
+                        return MimeResult("puremagic", match.mime_type)
+                # Otherwise, return first result with a mime type
+                for match in puremagic_result:
+                    if match.mime_type:
+                        return MimeResult("puremagic", match.mime_type)
+        except Exception:
+            # puremagic failed, continue to next method
             pass
+
+    # Step 2: Try decoding as UTF-8 text
+    # If puremagic didn't recognise it, it might perhaps be a plain text file
+    if "basic" not in ignore:
+        try:
+            content = file_bytes.decode("utf-8")
+            return MimeResult(
+                "basic", f"text/{guess_language(content, file_path)}", content
+            )
+        except UnicodeDecodeError:
+            # Not valid UTF-8 text
+            pass
+
+    # Step 3: Fall back to file(1) command if available
     if "file1" not in ignore:
-        # 2 (if fileone available): pass to file(1) and get mime type
         try:
             process = subprocess.run(
                 ["file", "--mime-type", "-b", file_path],
                 capture_output=True,
                 text=True,
                 check=True,
+                timeout=1,
             )
             mime_type = process.stdout.strip()
             if mime_type:
                 return MimeResult("file1", mime_type)
-        except (subprocess.CalledProcessError, FileNotFoundError):
+        except (
+            subprocess.CalledProcessError,
+            subprocess.TimeoutExpired,
+            FileNotFoundError,
+        ):
             # file(1) command failed or is not available
             pass
+
+    return None

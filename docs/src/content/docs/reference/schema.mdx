@@ -623,12 +623,12 @@ Must be one of:
 
 ### <a name="interface_mime_rules"></a>1.18. Property `Rovr Config > interface > mime_rules`
 
-|                           |                                                                                                                                                                                                                                                                                                                                         |
-| ------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Type**                  | `object`                                                                                                                                                                                                                                                                                                                                |
-| **Required**              | No                                                                                                                                                                                                                                                                                                                                      |
-| **Additional properties** | [Each additional property must conform to the schema](#interface_mime_rules_additionalProperties)                                                                                                                                                                                                                                       |
-| **Default**               | `{"text/*": "text", "image/*": "image", "application/pdf": "pdf", "application/zip": "archive", "application/x-tar": "archive", "application/gzip": "archive", "application/x-bzip2": "archive", "application/x-xz": "archive", "application/x-rar": "archive", "application/x-7z-compressed": "archive", "inode/directory": "folder"}` |
+|                           |                                                                                                                                                                                                                                                                                                                                                                               |
+| ------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Type**                  | `object`                                                                                                                                                                                                                                                                                                                                                                      |
+| **Required**              | No                                                                                                                                                                                                                                                                                                                                                                            |
+| **Additional properties** | [Each additional property must conform to the schema](#interface_mime_rules_additionalProperties)                                                                                                                                                                                                                                                                             |
+| **Default**               | `{"text/*": "text", "image/*": "image", "application/pdf": "pdf", "application/zip": "archive", "application/x-tar": "archive", "application/gzip": "archive", "application/x-bzip2": "archive", "application/x-xz": "archive", "application/x-rar": "archive", "application/x-7z-compressed": "archive", "inode/directory": "folder", "application/octet-stream": "remime"}` |
 
 **Description:** Map MIME type patterns to preview types. Supports glob patterns (e.g., 'text/\*' matches 'text/plain', 'text/html', etc.). Valid preview types: text, image, pdf, archive, folder, remime.
 -&gt; Use 'remime' if you want a more accurate description from file(1)
@@ -651,6 +651,7 @@ Must be one of:
 - "pdf"
 - "archive"
 - "folder"
+- "remime"
 
 ## <a name="settings"></a>2. Property `Rovr Config > settings`
 

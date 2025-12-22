@@ -195,18 +195,13 @@ class classproperty:  # noqa: N801
 
 
 async def is_archive(path_str: str) -> bool:
-    from rovr.functions.path import get_mime_type, match_mime_to_preview_type
-    from rovr.variables.constants import config, file_executable
-    from rovr.variables.maps import ARCHIVE_EXTENSIONS_FULL
+    from rovr.classes.archive import Archive
 
-    if config["plugins"]["file_one"]["enabled"] and file_executable is not None:
-        mime_result = get_mime_type(path_str)
-        if mime_result is None:
-            return path_str.lower().endswith(ARCHIVE_EXTENSIONS_FULL)
-        if match_mime_to_preview_type(mime_result.mime_type) == "archive":
+    try:
+        with Archive(path_str) as _:
             return True
-
-    return path_str.lower().endswith(ARCHIVE_EXTENSIONS_FULL)
+    except Exception:
+        return False
 
 
 def get_shortest_bind(binds: list[str]) -> str:

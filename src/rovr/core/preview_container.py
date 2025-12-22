@@ -51,7 +51,7 @@ class PreviewContainer(Container):
         self._current_file_path = None
         self._initial_height = self.size.height
         self._file_type: str = "none"
-        self._mime_result: MimeResult | None = None
+        self._mime_type: MimeResult | None = None
         self._preview_texts: list[str] = config["interface"]["preview_text"].values()
         self.pdf = PDFHandler()
         # Debouncing mechanism
@@ -59,7 +59,7 @@ class PreviewContainer(Container):
         self._queued_task_args: str | None = None
 
     def compose(self) -> ComposeResult:
-        yield Static(config["interface"]["preview_text"]["start"], classes="wrap")
+        yield Static(config["interface"]["preview_text"]["start"], classes="special")
 
     def on_preview_container_set_loading(self, event: SetLoading) -> None:
         self.loading = event.to
@@ -93,7 +93,7 @@ class PreviewContainer(Container):
             return True
         return False
 
-    def show_image_preview(self) -> None:
+    def show_image_preview(self, depth: int = 0) -> None:
         """Show image preview. Runs in a thread."""
         self.app.call_from_thread(setattr, self, "border_title", titles.image)
         if should_cancel() or self._current_file_path is None:
@@ -126,7 +126,7 @@ class PreviewContainer(Container):
             )
             return
 
-        if not self.has_child("#image_preview"):
+        if not self.has_child(".image_preview"):
             self.app.call_from_thread(self.remove_children)
             self.app.call_from_thread(self.remove_class, "bat", "full", "clip")
 
@@ -137,8 +137,7 @@ class PreviewContainer(Container):
                 config["interface"]["image_protocol"] + "Image"
             ](
                 pil_object,
-                id="image_preview",
-                classes="inner_preview",
+                classes="image_preview",
             )
             image_widget.can_focus = True
             self.app.call_from_thread(self.mount, image_widget)
@@ -146,13 +145,13 @@ class PreviewContainer(Container):
             try:
                 if should_cancel():
                     return
-                image_widget = self.query_one("#image_preview")
+                image_widget = self.query_one(".image_preview")
                 self.app.call_from_thread(setattr, image_widget, "image", pil_object)
             except NoMatches:
-                if should_cancel():
+                if should_cancel() or depth == 1:
                     return
                 self.app.call_from_thread(self.remove_children)
-                self.show_image_preview()
+                self.show_image_preview(depth=depth + 1)
                 return
 
         if should_cancel():
@@ -227,8 +226,7 @@ class PreviewContainer(Container):
                 config["interface"]["image_protocol"] + "Image"
             ](
                 current_image,
-                id="image_preview",
-                classes="inner_preview",
+                classes="image_preview",
             )
             image_widget.can_focus = True
             self.app.call_from_thread(self.mount, image_widget)
@@ -422,7 +420,7 @@ class PreviewContainer(Container):
                 self.mount,
                 FileList(
                     name=folder_path,
-                    classes="file-list inner_preview",
+                    classes="file-list",
                     dummy=True,
                     enter_into=folder_path,
                 ),
@@ -457,7 +455,7 @@ class PreviewContainer(Container):
             self.app.call_from_thread(
                 self.mount,
                 FileList(
-                    classes="file-list inner_preview",
+                    classes="file-list",
                     dummy=True,
                 ),
             )
@@ -514,8 +512,6 @@ class PreviewContainer(Container):
                 self.pdf.current_page = 0
                 self.pdf.total_pages = 0
 
-            mime_type: str | None = None
-
             if path.isdir(file_path):
                 self.update_ui(
                     file_path=file_path,
@@ -556,6 +552,7 @@ class PreviewContainer(Container):
                             file_path=file_path,
                             file_type="file",
                             content=config["interface"]["preview_text"]["error"],
+                            mime_type=mime_result,
                         )
                         self.call_later(
                             lambda: self.post_message(self.SetLoading(False))
@@ -609,7 +606,7 @@ class PreviewContainer(Container):
                     file_path,
                     file_type=file_type,
                     content=content,
-                    mime_type=mime_type,
+                    mime_type=mime_result,
                 )
 
             if should_cancel():

@@ -375,7 +375,7 @@ class FileList(SelectionList, inherit_bindings=False):
                 )
             )
         self.app.call_from_thread(self.set_options, self.list_of_options)
-        setattr(self.parent, "border_subtitle", "")
+        self.app.call_from_thread(setattr, self.parent, "border_subtitle", "")
 
     @work(exclusive=True)
     async def create_archive_list(self, file_list: list[str]) -> None:

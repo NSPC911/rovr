@@ -1,4 +1,13 @@
 <details>
+<summary><h1>[v0.7.0.dev1]</h1></summary>
+<p>
+
+## breaking changes
+- preview: add support for mime types using puremagic #172
+
+</p>
+</details>
+<details>
 <summary><h1>[v0.6.0]</h1></summary>
 <p>
 

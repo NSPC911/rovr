@@ -14,6 +14,10 @@ except RuntimeError:
 
     Console().print_exception()
     raise SystemExit(1)
+    # this is kind of a stupid thing to do
+    # but essentially I want a rich render of the traceback
+    # but normal console printing is so simple
+    # and non-rich traceback is too hard to read
 
 
 def _magic_data() -> tuple[

@@ -958,6 +958,7 @@ Both the folder name and glob will be forced to lowercase!
 | ------------ | ------------------ |
 | **Type**     | `enum (of string)` |
 | **Required** | No                 |
+| **Default**  | `"nord"`           |
 
 **Description:** The theme to use when previewing files in the preview sidebar.
 
@@ -4112,10 +4113,10 @@ Must be one of:
 | **Required**              | No          |
 | **Additional properties** | Not allowed |
 
-| Property                                             | Type    | Title/Description                                                                                                                                                         |
-| ---------------------------------------------------- | ------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| [enabled](#plugins_file_one_enabled)                 | boolean | Enable file(1) MIME type detection for preview selection. When enabled, rovr uses the \`file\` command to detect file types instead of relying solely on file extensions. |
-| [get_description](#plugins_file_one_get_description) | boolean | Use file(1) to get additional information of the file type.                                                                                                               |
+| Property                                             | Type    | Title/Description                                                                        |
+| ---------------------------------------------------- | ------- | ---------------------------------------------------------------------------------------- |
+| [enabled](#plugins_file_one_enabled)                 | boolean | Enable secondary file(1) type detection if both puremagic and plaintext detection fails. |
+| [get_description](#plugins_file_one_get_description) | boolean | Use file(1) to get additional information of the file type.                              |
 
 #### <a name="plugins_file_one_enabled"></a>8.6.1. Property `Rovr Config > plugins > file_one > enabled`
 
@@ -4125,7 +4126,7 @@ Must be one of:
 | **Required** | No        |
 | **Default**  | `false`   |
 
-**Description:** Enable file(1) MIME type detection for preview selection. When enabled, rovr uses the `file` command to detect file types instead of relying solely on file extensions.
+**Description:** Enable secondary file(1) type detection if both puremagic and plaintext detection fails.
 
 #### <a name="plugins_file_one_get_description"></a>8.6.2. Property `Rovr Config > plugins > file_one > get_description`
 

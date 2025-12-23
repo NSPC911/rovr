@@ -40,7 +40,7 @@ ARCHIVE_EXTENSIONS = ArchiveExtensions(
     (".tgz", ".tar.gz"),
     (".tbz", ".tbz2", ".tar.bz2"),
     (".tar.xz", ".tar.lzma"),
-    (".zst", ".tar.zst"),
+    (".tzst", ".tar.zst"),
 )
 
 
@@ -259,10 +259,10 @@ class Archive:
             if not (1 <= self.compression_level <= 22):
                 raise ValueError("Zstandard compression level must be between 1-22")
             return tarfile.open(
-                self.filename, tar_mode, compresslevel=self.compression_level
+                self.filename, tar_mode, level=self.compression_level
             )
         else:
-            return tarfile.open(self.filename, tar_mode)
+            return tarfile.open(self.filename, compresslevel=self.compression_level)
 
     def infolist(
         self,

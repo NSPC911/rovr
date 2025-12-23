@@ -1038,7 +1038,7 @@
             "enabled": {
               "type": "boolean",
               "default": false,
-              "description": "Enable secondary file(1) type detection if both puremime and plaintext detection fails."
+              "description": "Enable secondary file(1) type detection if both puremagic and plaintext detection fails."
             },
             "get_description": {
               "type": "boolean",

@@ -148,7 +148,7 @@ class PreviewContainer(Container):
                 image_widget = self.query_one(".image_preview")
                 self.app.call_from_thread(setattr, image_widget, "image", pil_object)
             except NoMatches:
-                if should_cancel() or depth == 1:
+                if should_cancel() or depth >= 1:
                     return
                 self.app.call_from_thread(self.remove_children)
                 self.show_image_preview(depth=depth + 1)
@@ -157,7 +157,7 @@ class PreviewContainer(Container):
         if should_cancel():
             return
 
-    def show_pdf_preview(self) -> None:
+    def show_pdf_preview(self, depth: int = 0) -> None:
         """Show PDF preview. Runs in a thread.
 
         Raises:
@@ -237,10 +237,10 @@ class PreviewContainer(Container):
                 image_widget = self.query_one(".image_preview")
                 self.app.call_from_thread(setattr, image_widget, "image", current_image)
             except Exception:
-                if should_cancel():
+                if should_cancel() or depth >= 1:
                     return
                 self.app.call_from_thread(self.remove_children)
-                self.show_pdf_preview()
+                self.show_pdf_preview(depth=depth + 1)
 
         if should_cancel():
             return

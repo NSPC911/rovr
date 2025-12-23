@@ -215,7 +215,7 @@ class PreviewContainer(Container):
             f"Page {self.pdf.current_page + 1}/{self.pdf.total_pages}",
         )
 
-        if not self.has_child("#image_preview"):
+        if not self.has_child(".image_preview"):
             self.app.call_from_thread(self.remove_children)
             self.app.call_from_thread(self.remove_class, "bat", "full", "clip")
 
@@ -234,7 +234,7 @@ class PreviewContainer(Container):
             try:
                 if should_cancel():
                     return
-                image_widget = self.query_one("#image_preview")
+                image_widget = self.query_one(".image_preview")
                 self.app.call_from_thread(setattr, image_widget, "image", current_image)
             except Exception:
                 if should_cancel():
@@ -301,7 +301,7 @@ class PreviewContainer(Container):
                 else:
                     static_widget: Static = self.query_one(Static)
                     self.app.call_from_thread(static_widget.update, new_content)
-                    static_widget.set_classes("bat_preview")
+                    self.app.call_from_thread(static_widget.set_classes, "bat_preview")
 
                 return True
             else:
@@ -434,8 +434,10 @@ class PreviewContainer(Container):
         this_list.sort_by = main_list.sort_by
         this_list.sort_descending = main_list.sort_descending
 
-        # Schedule the async update on the main thread
+        # Schedule the update as a separate thread
         this_list.dummy_update_file_list(cwd=folder_path)
+
+        self.app.call_from_thread(this_list.set_classes, "file-list")
 
         if should_cancel():
             return
@@ -455,7 +457,7 @@ class PreviewContainer(Container):
             self.app.call_from_thread(
                 self.mount,
                 FileList(
-                    classes="file-list",
+                    classes="archive-list",
                     dummy=True,
                 ),
             )
@@ -465,6 +467,8 @@ class PreviewContainer(Container):
 
         # Schedule the async update on the main thread
         self.query_one(FileList).create_archive_list(self._current_content)
+
+        self.app.call_from_thread(self.query_one(FileList).set_classes, "archive-list")
 
         if should_cancel():
             return
@@ -688,11 +692,14 @@ class PreviewContainer(Container):
                     )
                     display_content += f"\n{process.stdout.strip()}"
                 except (subprocess.SubprocessError, FileNotFoundError):
-                    pass
+                    from rich.traceback import Traceback
+
+                    self.log(Traceback())
 
         if self.has_child("Static"):
             static_widget: Static = self.query_one(Static)
             self.app.call_from_thread(static_widget.update, display_content)
+            self.app.call_from_thread(static_widget.set_classes, "special")
         else:
             self.app.call_from_thread(self.remove_children)
             if should_cancel():

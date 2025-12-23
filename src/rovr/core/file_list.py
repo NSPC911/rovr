@@ -334,10 +334,10 @@ class FileList(SelectionList, inherit_bindings=False):
 
         try:
             folders, files = self.app.call_from_thread(  # ty: ignore[not-iterable]
-                path_utils.get_cwd_object,
+                path_utils.get_cwd_object,  # yes, call_from_thread supports Awaitables, don't yell at me
                 cwd,
                 config["interface"]["show_hidden_files"],
-                sort_by=self.sort_by,  # ty: ignore[invalid-argument-type]
+                sort_by=self.sort_by,
                 reverse=self.sort_descending,
             )
             folders: list[path_utils.CWDObjectReturnDict]
@@ -359,7 +359,8 @@ class FileList(SelectionList, inherit_bindings=False):
                         )
                     )
                     if start_time + 0.25 < time():
-                        setattr(
+                        self.app.call_from_thread(
+                            setattr,
                             self.parent,
                             "border_subtitle",
                             f"{index + 1} / {file_list_option_length}",

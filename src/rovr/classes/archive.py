@@ -198,7 +198,7 @@ class Archive:
             else:
                 self._archive = tarfile.open(self.filename, tar_mode)  # noqa: SIM115
 
-    def _get_tar_write_mode(self) -> Literal["w:gz", "w:bz2", "w:xz", "w"]:
+    def _get_tar_write_mode(self) -> Literal["w:gz", "w:bz2", "w:xz", "w:zst", "w"]:
         """Determine tar write mode based on file extension.
 
         Returns:
@@ -211,11 +211,13 @@ class Archive:
             return "w:bz2"
         elif filename_lower.endswith(ARCHIVE_EXTENSIONS.xz):
             return "w:xz"
+        elif filename_lower.endswith(ARCHIVE_EXTENSIONS.zst):
+            return "w:zst"
         else:
             return "w"
 
     def _open_tar_with_compression(
-        self, tar_mode: Literal["w:gz", "w:bz2", "w:xz", "w"]
+        self, tar_mode: Literal["w:gz", "w:bz2", "w:xz", "w:zst", "w"]
     ) -> tarfile.TarFile:
         """Open TAR file with specified compression level.
 
@@ -256,10 +258,7 @@ class Archive:
         elif ":zst" in tar_mode:
             if not (1 <= self.compression_level <= 22):
                 raise ValueError("Zstandard compression level must be between 1-22")
-            self._compress_file_obj = lzma.open(  # noqa: SIM115
-                self.filename, self.mode + "b", preset=self.compression_level
-            )
-            return tarfile.open(fileobj=self._compress_file_obj, mode="w")
+            return tarfile.open(self.filename, tar_mode, compresslevel=self.compression_level)
         else:
             return tarfile.open(self.filename, tar_mode)
 

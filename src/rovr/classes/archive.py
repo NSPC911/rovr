@@ -258,7 +258,9 @@ class Archive:
         elif ":zst" in tar_mode:
             if not (1 <= self.compression_level <= 22):
                 raise ValueError("Zstandard compression level must be between 1-22")
-            return tarfile.open(self.filename, tar_mode, compresslevel=self.compression_level)
+            return tarfile.open(
+                self.filename, tar_mode, compresslevel=self.compression_level
+            )
         else:
             return tarfile.open(self.filename, tar_mode)
 

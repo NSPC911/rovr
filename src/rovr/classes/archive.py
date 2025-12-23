@@ -1,14 +1,22 @@
 # this is the only file in the entire repository that is written fully by AI
-import bz2
+import bz2 as bzip2
 import gzip
 import lzma
-import tarfile
+import sys
 import zipfile
 from pathlib import Path
 from types import TracebackType
 from typing import IO, List, Literal, NamedTuple
 
 import rarfile
+
+if sys.version_info <= (3, 13):
+    try:
+        from backports.zstd import tarfile
+    except ModuleNotFoundError:
+        import tarfile
+else:
+    import tarfile
 
 
 class BadArchiveError(Exception):
@@ -17,14 +25,22 @@ class BadArchiveError(Exception):
 
 class ArchiveExtensions(NamedTuple):
     zip: tuple[str, ...]
-    tar: tuple[str, ...]
     rar: tuple[str, ...]
+    tar: tuple[str, ...]
+    gz: tuple[str, ...]
+    bz2: tuple[str, ...]
+    xz: tuple[str, ...]
+    zst: tuple[str, ...]
 
 
 ARCHIVE_EXTENSIONS = ArchiveExtensions(
     (".zip",),
-    (".tar", ".tgz", ".tbz", ".tbz2", ".tar.gz", ".tar.bz2", ".tar.xz"),
     (".rar",),
+    (".tar",),
+    (".tgz", ".tar.gz"),
+    (".tbz", ".tbz2", ".tar.bz2"),
+    (".tar.xz", ".tar.lzma"),
+    (".zst", ".tar.zst"),
 )
 
 
@@ -189,11 +205,11 @@ class Archive:
             Appropriate tarfile mode string for writing
         """
         filename_lower = self.filename.lower()
-        if filename_lower.endswith((".tar.gz", ".tgz")):
+        if filename_lower.endswith(ARCHIVE_EXTENSIONS.gz):
             return "w:gz"
-        elif filename_lower.endswith((".tar.bz2", ".tbz2")):
+        elif filename_lower.endswith(ARCHIVE_EXTENSIONS.bz2):
             return "w:bz2"
-        elif filename_lower.endswith(".tar.xz"):
+        elif filename_lower.endswith(ARCHIVE_EXTENSIONS.xz):
             return "w:xz"
         else:
             return "w"
@@ -225,7 +241,7 @@ class Archive:
         elif ":bz2" in tar_mode:
             if not (1 <= self.compression_level <= 9):
                 raise ValueError("Bzip2 compression level must be between 1-9")
-            self._compress_file_obj = bz2.open(  # noqa: SIM115
+            self._compress_file_obj = bzip2.open(  # noqa: SIM115
                 self.filename, self.mode + "b", compresslevel=self.compression_level
             )
             return tarfile.open(fileobj=self._compress_file_obj, mode="w")
@@ -237,7 +253,13 @@ class Archive:
                 self.filename, self.mode + "b", preset=self.compression_level
             )
             return tarfile.open(fileobj=xz_file, mode="w")
-
+        elif ":zst" in tar_mode:
+            if not (1 <= self.compression_level <= 22):
+                raise ValueError("Zstandard compression level must be between 1-22")
+            self._compress_file_obj = lzma.open(  # noqa: SIM115
+                self.filename, self.mode + "b", preset=self.compression_level
+            )
+            return tarfile.open(fileobj=self._compress_file_obj, mode="w")
         else:
             return tarfile.open(self.filename, tar_mode)
 

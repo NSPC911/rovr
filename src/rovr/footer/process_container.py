@@ -496,7 +496,7 @@ class ProcessContainer(VerticalScroll):
                         last_update_time = current_time
                     _archive = archive._archive
                     if _archive:
-                        if archive._is_zip:
+                        if archive._archive_type == "zip":
                             assert isinstance(_archive, zipfile.ZipFile)
                             _archive.write(file_path, arcname=arcname)
                         else:

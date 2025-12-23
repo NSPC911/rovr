@@ -5,6 +5,9 @@
 ## breaking changes
 - preview: add support for mime types using puremagic #172
 
+## new features
+- archive: add support for zstd archives #172
+
 </p>
 </details>
 <details>

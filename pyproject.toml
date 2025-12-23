@@ -16,6 +16,7 @@ classifiers = [
   "Topic :: Utilities",
 ]
 dependencies = [
+  "backports-zstd>=1.2.0; python_version < '3.14'",
   "humanize>=4.14.0",
   "jsonschema>=4.25.0",
   "natsort>=8.4.0",

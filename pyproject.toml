@@ -116,7 +116,7 @@ exclude = [
 ] # i dont want to add type indicators
 
 [tool.ty.rules]
-possibly-missing-import = "ignore"
+# possibly-missing-import = "ignore"
 unresolved-reference = "ignore" # handled by ruff
 unresolved-attribute = "ignore"
 no-matching-overload = "ignore" # not that accurate

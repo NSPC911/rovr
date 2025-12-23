@@ -14,6 +14,10 @@ if "config" not in globals():
     global config, schema
     schema, config = load_config()
     config_setup()
+else:
+    config = globals()["config"]
+    schema = globals()["schema"]
+
 
 if "file_executable" not in globals():
     global file_executable
@@ -34,6 +38,8 @@ if "file_executable" not in globals():
         file_executable = found
     else:
         file_executable = None
+else:
+    file_executable = globals()["file_executable"]
 
 
 @dataclass

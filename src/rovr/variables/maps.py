@@ -1,5 +1,5 @@
 from os import path
-from typing import NamedTuple, TypedDict
+from typing import TypedDict
 
 from platformdirs import PlatformDirs
 from rich._spinners import SPINNERS
@@ -1037,19 +1037,6 @@ FILES_MAP = {
     "jenkinsfile": "jenkinsfile",
 }
 
-
-class ArchiveExtensions(NamedTuple):
-    zip: tuple[str, ...]
-    tar: tuple[str, ...]
-    rar: tuple[str, ...]
-
-
-ARCHIVE_EXTENSIONS = ArchiveExtensions(
-    (".zip",),
-    (".tar", ".tgz", ".tbz", ".tbz2", ".tar.gz", ".tar.bz2", ".tar.xz"),
-    (".rar",),
-)
-ARCHIVE_EXTENSIONS_FULL = tuple(ext for exts in ARCHIVE_EXTENSIONS for ext in exts)
 
 PIL_EXTENSIONS = (
     # reminder that stuff can also not work, just remove it if it doesn't work

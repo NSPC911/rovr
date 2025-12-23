@@ -30,6 +30,8 @@ description: config schema humanified
   - [1.17. Property `Rovr Config > interface > compact_mode`](#interface_compact_mode)
     - [1.17.1. Property `Rovr Config > interface > compact_mode > buttons`](#interface_compact_mode_buttons)
     - [1.17.2. Property `Rovr Config > interface > compact_mode > panels`](#interface_compact_mode_panels)
+  - [1.18. Property `Rovr Config > interface > mime_rules`](#interface_mime_rules)
+    - [1.18.1. Property `Rovr Config > interface > mime_rules > additionalProperties`](#interface_mime_rules_additionalProperties)
 - [2. Property `Rovr Config > settings`](#settings)
   - [2.1. Property `Rovr Config > settings > use_recycle_bin`](#settings_use_recycle_bin)
   - [2.2. Property `Rovr Config > settings > copy_includes_metadata`](#settings_copy_includes_metadata)
@@ -52,7 +54,8 @@ description: config schema humanified
       - [4.2.1.3. Property `Rovr Config > icons > folders > folders items > color`](#icons_folders_items_color)
 - [5. Property `Rovr Config > theme`](#theme)
   - [5.1. Property `Rovr Config > theme > default`](#theme_default)
-  - [5.2. Property `Rovr Config > theme > transparent`](#theme_transparent)
+  - [5.2. Property `Rovr Config > theme > preview`](#theme_preview)
+  - [5.3. Property `Rovr Config > theme > transparent`](#theme_transparent)
 - [6. Property `Rovr Config > custom_theme`](#custom_theme)
   - [6.1. Rovr Config > custom_theme > custom_theme items](#custom_theme_items)
     - [6.1.1. Property `Rovr Config > custom_theme > custom_theme items > name`](#custom_theme_items_name)
@@ -270,8 +273,7 @@ description: config schema humanified
     - [8.5.4. Property `Rovr Config > plugins > poppler > poppler_folder`](#plugins_poppler_poppler_folder)
   - [8.6. Property `Rovr Config > plugins > file_one`](#plugins_file_one)
     - [8.6.1. Property `Rovr Config > plugins > file_one > enabled`](#plugins_file_one_enabled)
-    - [8.6.2. Property `Rovr Config > plugins > file_one > mime_rules`](#plugins_file_one_mime_rules)
-      - [8.6.2.1. Property `Rovr Config > plugins > file_one > mime_rules > additionalProperties`](#plugins_file_one_mime_rules_additionalProperties)
+    - [8.6.2. Property `Rovr Config > plugins > file_one > get_description`](#plugins_file_one_get_description)
 - [9. Property `Rovr Config > mode`](#mode)
   - [9.1. Property `Rovr Config > mode > additionalProperties`](#mode_additionalProperties)
 
@@ -305,25 +307,26 @@ description: config schema humanified
 
 **Description:** Settings related to the user interface and experience
 
-| Property                                                              | Type             | Title/Description                                                                                                                                                            |
-| --------------------------------------------------------------------- | ---------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| [tooltips](#interface_tooltips)                                       | boolean          | Show tooltips when your mouse is over a tooltip supported button.<br />This is not hot reloaded.                                                                             |
-| [nerd_font](#interface_nerd_font)                                     | boolean          | Use nerd font for rendering icons instead of weird characters and stuff.<br />Not properly hot-reloaded.                                                                     |
-| [use_reactive_layout](#interface_use_reactive_layout)                 | boolean          | Hide certain elements based on the width and height of the terminal.                                                                                                         |
-| [show_progress_eta](#interface_show_progress_eta)                     | boolean          | When copying or deleting files, show an ETA for when the action will be completed.                                                                                           |
-| [show_progress_percentage](#interface_show_progress_percentage)       | boolean          | When copying or deleting files, show a percentage of how much had been completed.                                                                                            |
-| [truncate_progress_file_path](#interface_truncate_progress_file_path) | boolean          | When the process container is using file paths, truncate the file path to only view the first and last names of the path.                                                    |
-| [show_line_numbers](#interface_show_line_numbers)                     | boolean          | Add line numbers to the left gutter if you are viewing a text file.                                                                                                          |
-| [scrolloff](#interface_scrolloff)                                     | integer          | The number of files to keep above and below the cursor when moving through the file list.                                                                                    |
-| [show_hidden_files](#interface_show_hidden_files)                     | boolean          | Show hidden files and folders (those starting with a dot on Unix, or explicitly hidden on Windows/MacOS).                                                                    |
-| [image_protocol](#interface_image_protocol)                           | enum (of string) | The image protocol to use when displaying an image                                                                                                                           |
-| [allow_tab_nav](#interface_allow_tab_nav)                             | boolean          | Allow navigating the main app screen with \`tab\` and \`shift+tab\`                                                                                                          |
-| [append_new_tabs](#interface_append_new_tabs)                         | boolean          | Choose whether or not to append new tabs instead of inserting them.<br />\`true\` =&gt; Append to the end of the tab list.<br />\`false\` =&gt; Insert after the active tab. |
-| [double_click_delay](#interface_double_click_delay)                   | number           | The delay between two consecutive clicks to enter into a directory, or open a file.                                                                                          |
-| [drive_watcher_frequency](#interface_drive_watcher_frequency)         | number           | How often (in seconds) to check for changes in mounted drives in the sidebar.                                                                                                |
-| [clock](#interface_clock)                                             | object           |                                                                                                                                                                              |
-| [preview_text](#interface_preview_text)                               | object           |                                                                                                                                                                              |
-| [compact_mode](#interface_compact_mode)                               | object           |                                                                                                                                                                              |
+| Property                                                              | Type             | Title/Description                                                                                                                                                                                                                                                       |
+| --------------------------------------------------------------------- | ---------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| [tooltips](#interface_tooltips)                                       | boolean          | Show tooltips when your mouse is over a tooltip supported button.<br />This is not hot reloaded.                                                                                                                                                                        |
+| [nerd_font](#interface_nerd_font)                                     | boolean          | Use nerd font for rendering icons instead of weird characters and stuff.<br />Not properly hot-reloaded.                                                                                                                                                                |
+| [use_reactive_layout](#interface_use_reactive_layout)                 | boolean          | Hide certain elements based on the width and height of the terminal.                                                                                                                                                                                                    |
+| [show_progress_eta](#interface_show_progress_eta)                     | boolean          | When copying or deleting files, show an ETA for when the action will be completed.                                                                                                                                                                                      |
+| [show_progress_percentage](#interface_show_progress_percentage)       | boolean          | When copying or deleting files, show a percentage of how much had been completed.                                                                                                                                                                                       |
+| [truncate_progress_file_path](#interface_truncate_progress_file_path) | boolean          | When the process container is using file paths, truncate the file path to only view the first and last names of the path.                                                                                                                                               |
+| [show_line_numbers](#interface_show_line_numbers)                     | boolean          | Add line numbers to the left gutter if you are viewing a text file.                                                                                                                                                                                                     |
+| [scrolloff](#interface_scrolloff)                                     | integer          | The number of files to keep above and below the cursor when moving through the file list.                                                                                                                                                                               |
+| [show_hidden_files](#interface_show_hidden_files)                     | boolean          | Show hidden files and folders (those starting with a dot on Unix, or explicitly hidden on Windows/MacOS).                                                                                                                                                               |
+| [image_protocol](#interface_image_protocol)                           | enum (of string) | The image protocol to use when displaying an image                                                                                                                                                                                                                      |
+| [allow_tab_nav](#interface_allow_tab_nav)                             | boolean          | Allow navigating the main app screen with \`tab\` and \`shift+tab\`                                                                                                                                                                                                     |
+| [append_new_tabs](#interface_append_new_tabs)                         | boolean          | Choose whether or not to append new tabs instead of inserting them.<br />\`true\` =&gt; Append to the end of the tab list.<br />\`false\` =&gt; Insert after the active tab.                                                                                            |
+| [double_click_delay](#interface_double_click_delay)                   | number           | The delay between two consecutive clicks to enter into a directory, or open a file.                                                                                                                                                                                     |
+| [drive_watcher_frequency](#interface_drive_watcher_frequency)         | number           | How often (in seconds) to check for changes in mounted drives in the sidebar.                                                                                                                                                                                           |
+| [clock](#interface_clock)                                             | object           |                                                                                                                                                                                                                                                                         |
+| [preview_text](#interface_preview_text)                               | object           |                                                                                                                                                                                                                                                                         |
+| [compact_mode](#interface_compact_mode)                               | object           |                                                                                                                                                                                                                                                                         |
+| [mime_rules](#interface_mime_rules)                                   | object           | Map MIME type patterns to preview types. Supports glob patterns (e.g., 'text/\*' matches 'text/plain', 'text/html', etc.). Valid preview types: text, image, pdf, archive, folder, remime.<br />-&gt; Use 'remime' if you want a more accurate description from file(1) |
 
 ### <a name="interface_tooltips"></a>1.1. Property `Rovr Config > interface > tooltips`
 
@@ -618,6 +621,38 @@ Must be one of:
 
 **Description:** Whether to make the panels smaller to add more room for the file list itself
 
+### <a name="interface_mime_rules"></a>1.18. Property `Rovr Config > interface > mime_rules`
+
+|                           |                                                                                                                                                                                                                                                                                                                                                                               |
+| ------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Type**                  | `object`                                                                                                                                                                                                                                                                                                                                                                      |
+| **Required**              | No                                                                                                                                                                                                                                                                                                                                                                            |
+| **Additional properties** | [Each additional property must conform to the schema](#interface_mime_rules_additionalProperties)                                                                                                                                                                                                                                                                             |
+| **Default**               | `{"text/*": "text", "image/*": "image", "application/pdf": "pdf", "application/zip": "archive", "application/x-tar": "archive", "application/gzip": "archive", "application/x-bzip2": "archive", "application/x-xz": "archive", "application/x-rar": "archive", "application/x-7z-compressed": "archive", "inode/directory": "folder", "application/octet-stream": "remime"}` |
+
+**Description:** Map MIME type patterns to preview types. Supports glob patterns (e.g., 'text/\*' matches 'text/plain', 'text/html', etc.). Valid preview types: text, image, pdf, archive, folder, remime.
+-&gt; Use 'remime' if you want a more accurate description from file(1)
+
+| Property                                       | Type             | Title/Description |
+| ---------------------------------------------- | ---------------- | ----------------- |
+| [](#interface_mime_rules_additionalProperties) | enum (of string) |                   |
+
+#### <a name="interface_mime_rules_additionalProperties"></a>1.18.1. Property `Rovr Config > interface > mime_rules > additionalProperties`
+
+|              |                    |
+| ------------ | ------------------ |
+| **Type**     | `enum (of string)` |
+| **Required** | No                 |
+
+Must be one of:
+
+- "text"
+- "image"
+- "pdf"
+- "archive"
+- "folder"
+- "remime"
+
 ## <a name="settings"></a>2. Property `Rovr Config > settings`
 
 |                           |             |
@@ -901,10 +936,11 @@ Both the folder name and glob will be forced to lowercase!
 | **Required**              | No          |
 | **Additional properties** | Not allowed |
 
-| Property                          | Type    | Title/Description                                                          |
-| --------------------------------- | ------- | -------------------------------------------------------------------------- |
-| [default](#theme_default)         | string  | The default theme. Can be changed while in rovr, but it is not persistent. |
-| [transparent](#theme_transparent) | boolean | Use a transparent background.                                              |
+| Property                          | Type             | Title/Description                                                          |
+| --------------------------------- | ---------------- | -------------------------------------------------------------------------- |
+| [default](#theme_default)         | string           | The default theme. Can be changed while in rovr, but it is not persistent. |
+| [preview](#theme_preview)         | enum (of string) | The theme to use when previewing files in the preview sidebar.             |
+| [transparent](#theme_transparent) | boolean          | Use a transparent background.                                              |
 
 ### <a name="theme_default"></a>5.1. Property `Rovr Config > theme > default`
 
@@ -916,7 +952,69 @@ Both the folder name and glob will be forced to lowercase!
 
 **Description:** The default theme. Can be changed while in rovr, but it is not persistent.
 
-### <a name="theme_transparent"></a>5.2. Property `Rovr Config > theme > transparent`
+### <a name="theme_preview"></a>5.2. Property `Rovr Config > theme > preview`
+
+|              |                    |
+| ------------ | ------------------ |
+| **Type**     | `enum (of string)` |
+| **Required** | No                 |
+| **Default**  | `"nord"`           |
+
+**Description:** The theme to use when previewing files in the preview sidebar.
+
+Must be one of:
+
+- "abap"
+- "algol"
+- "algol_nu"
+- "arduino"
+- "autumn"
+- "bw"
+- "borland"
+- "coffee"
+- "colorful"
+- "default"
+- "dracula"
+- "emacs"
+- "friendly_grayscale"
+- "friendly"
+- "fruity"
+- "github-dark"
+- "gruvbox-dark"
+- "gruvbox-light"
+- "igor"
+- "inkpot"
+- "lightbulb"
+- "lilypond"
+- "lovelace"
+- "manni"
+- "material"
+- "monokai"
+- "murphy"
+- "native"
+- "nord-darker"
+- "nord"
+- "one-dark"
+- "paraiso-dark"
+- "paraiso-light"
+- "pastie"
+- "perldoc"
+- "rainbow_dash"
+- "rrt"
+- "sas"
+- "solarized-dark"
+- "solarized-light"
+- "staroffice"
+- "stata-dark"
+- "stata-light"
+- "tango"
+- "trac"
+- "vim"
+- "vs"
+- "xcode"
+- "zenburn"
+
+### <a name="theme_transparent"></a>5.3. Property `Rovr Config > theme > transparent`
 
 |              |           |
 | ------------ | --------- |
@@ -4015,10 +4113,10 @@ Must be one of:
 | **Required**              | No          |
 | **Additional properties** | Not allowed |
 
-| Property                                   | Type    | Title/Description                                                                                                                                                                  |
-| ------------------------------------------ | ------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| [enabled](#plugins_file_one_enabled)       | boolean | Enable file(1) MIME type detection for preview selection. When enabled, rovr uses the \`file\` command to detect file types instead of relying solely on file extensions.          |
-| [mime_rules](#plugins_file_one_mime_rules) | object  | Map MIME type patterns to preview types. Supports glob patterns (e.g., 'text/\*' matches 'text/plain', 'text/html', etc.). Valid preview types: text, image, pdf, archive, folder. |
+| Property                                             | Type    | Title/Description                                                                        |
+| ---------------------------------------------------- | ------- | ---------------------------------------------------------------------------------------- |
+| [enabled](#plugins_file_one_enabled)                 | boolean | Enable secondary file(1) type detection if both puremagic and plaintext detection fails. |
+| [get_description](#plugins_file_one_get_description) | boolean | Use file(1) to get additional information of the file type.                              |
 
 #### <a name="plugins_file_one_enabled"></a>8.6.1. Property `Rovr Config > plugins > file_one > enabled`
 
@@ -4028,37 +4126,17 @@ Must be one of:
 | **Required** | No        |
 | **Default**  | `false`   |
 
-**Description:** Enable file(1) MIME type detection for preview selection. When enabled, rovr uses the `file` command to detect file types instead of relying solely on file extensions.
+**Description:** Enable secondary file(1) type detection if both puremagic and plaintext detection fails.
 
-#### <a name="plugins_file_one_mime_rules"></a>8.6.2. Property `Rovr Config > plugins > file_one > mime_rules`
+#### <a name="plugins_file_one_get_description"></a>8.6.2. Property `Rovr Config > plugins > file_one > get_description`
 
-|                           |                                                                                                                                                                                                                                                                                                                                         |
-| ------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Type**                  | `object`                                                                                                                                                                                                                                                                                                                                |
-| **Required**              | No                                                                                                                                                                                                                                                                                                                                      |
-| **Additional properties** | [Each additional property must conform to the schema](#plugins_file_one_mime_rules_additionalProperties)                                                                                                                                                                                                                                |
-| **Default**               | `{"text/*": "text", "image/*": "image", "application/pdf": "pdf", "application/zip": "archive", "application/x-tar": "archive", "application/gzip": "archive", "application/x-bzip2": "archive", "application/x-xz": "archive", "application/x-rar": "archive", "application/x-7z-compressed": "archive", "inode/directory": "folder"}` |
+|              |           |
+| ------------ | --------- |
+| **Type**     | `boolean` |
+| **Required** | No        |
+| **Default**  | `true`    |
 
-**Description:** Map MIME type patterns to preview types. Supports glob patterns (e.g., 'text/\*' matches 'text/plain', 'text/html', etc.). Valid preview types: text, image, pdf, archive, folder.
-
-| Property                                              | Type             | Title/Description |
-| ----------------------------------------------------- | ---------------- | ----------------- |
-| [](#plugins_file_one_mime_rules_additionalProperties) | enum (of string) |                   |
-
-##### <a name="plugins_file_one_mime_rules_additionalProperties"></a>8.6.2.1. Property `Rovr Config > plugins > file_one > mime_rules > additionalProperties`
-
-|              |                    |
-| ------------ | ------------------ |
-| **Type**     | `enum (of string)` |
-| **Required** | No                 |
-
-Must be one of:
-
-- "text"
-- "image"
-- "pdf"
-- "archive"
-- "folder"
+**Description:** Use file(1) to get additional information of the file type.
 
 ## <a name="mode"></a>9. Property `Rovr Config > mode`
 

@@ -9,5 +9,6 @@ repos:
     hooks:
       - id: ty
         name: ty check
-        entry: uvx ty==0.0.1a28 check . --ignore unresolved-import
-        language: unsupported
+        entry: uvx ty==0.0.3 check . --ignore unresolved-import
+        language: python
+        types_or: [python, pyi, jupyter]

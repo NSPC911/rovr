@@ -387,11 +387,6 @@ Tooltip {
     width: 1fr;
     overflow-x: hidden;
   }
-  & > Static.special {
-    text-wrap: wrap;
-    text-overflow: fold;
-    padding: 0 1;
-  }
   & > * {
   /* scrollbars are useless, reminder */
     background: transparent;
@@ -402,6 +397,14 @@ Tooltip {
       padding: 0 1;
       scrollbar-size: 0 0;
       overflow: hidden;
+      &#bat_preview {
+        padding: 0
+      }
+      &#special {
+        text-wrap: wrap;
+        text-overflow: fold;
+        padding: 0 1;
+      }
     }
     &FileList { height: 1fr }
   }

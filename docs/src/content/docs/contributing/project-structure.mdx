@@ -12,6 +12,7 @@ the current file structure seperates each section in each folder
 <FileTree>
 - src/rovr
   - app.py houses the main application
+  - state_manager.py manages persistent state
   - py.typed
   - style.tcss default style
 </FileTree>
@@ -73,16 +74,13 @@ handles the middle elements
   - pinned_sidebar.py a list that shows pinned items
   - preview_container.py a container that shows the appropriate preview
 </FileTree>
-`PreviewContainer` uses `FileList` as part of its Folder Preview mechanism. it
-currently doesn't use it for archive previews, so I'm ready to accept prs that
-fix this issue
 
 ### footer
 
 handles the bottom row
 
 <FileTree>
-  - src/rovr/footer
+- src/rovr/footer
   - clipboard_container.py a list that contains copied/cut items
   - metadata_container.py shows metadata on the current primary selection
   - process_container.py shows a list of active processes
@@ -145,4 +143,13 @@ handles the modal screens used
 - src/rovr/variables
   - constants.py global constants, including the loaded config
   - maps.py maps to icons and other things
+</FileTree>
+
+### monkey patches
+
+anything that needs to be modified at runtime due to reasons
+<FileTree>
+- src/rovr/monkey_patches
+  - puremagic_patch.py patches for puremagic
+  - magic_data.json slightly modified puremagic data file
 </FileTree>

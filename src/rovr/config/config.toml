@@ -52,6 +52,7 @@ panels = false
 "application/x-bzip2" = "archive"
 "application/x-xz" = "archive"
 "application/x-rar" = "archive"
+"application/vnd.rar" = "archive"
 "application/x-7z-compressed" = "archive"
 "inode/directory" = "folder"
 

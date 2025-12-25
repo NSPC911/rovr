@@ -817,7 +817,9 @@ class Application(App, inherit_bindings=False):
             # Use default exception rendering
             self._fatal_error()
         console.print(f"[red]An error log has been saved to: {dump_path}[/]")
-        console.print("[red]Please consider reporting this issue along with the log file on [link=https://github.com/NSPC911/rovr/issues/new/choose]GitHub[/link]:[/]")
+        console.print(
+            "[red]Please consider reporting this issue along with the log file on [link=https://github.com/NSPC911/rovr/issues/new/choose]GitHub[/link]:[/]"
+        )
 
 
 app = Application()

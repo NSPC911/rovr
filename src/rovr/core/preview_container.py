@@ -440,13 +440,17 @@ class PreviewContainer(Container):
         this_list.sort_descending = main_list.sort_descending
         options = []
         try:
-            loading_timer = self.app.call_from_thread(self.set_timer, 0.25, lambda: setattr(self, "border_subtitle", "Getting list\u2026"))
+            loading_timer = self.app.call_from_thread(
+                self.set_timer,
+                0.25,
+                lambda: setattr(self, "border_subtitle", "Getting list\u2026"),
+            )
             folders, files = path_utils.sync_get_cwd_object(
                 folder_path,
                 config["interface"]["show_hidden_files"],
                 sort_by=this_list.sort_by,
                 reverse=this_list.sort_descending,
-                return_nothing_if_this_returns_true=self.any_in_queue
+                return_nothing_if_this_returns_true=self.any_in_queue,
             )
             loading_timer.stop()  # if timer did not fire, stop it
             if files is None or folders is None:
@@ -761,7 +765,10 @@ class PreviewContainer(Container):
         display_content: str = self._current_content
         if self._mime_type:
             display_content = f"MIME Type: {self._mime_type.mime_type}"
-            if config["plugins"]["file_one"]["enabled"] and config["plugins"]["file_one"]["get_description"]:
+            if (
+                config["plugins"]["file_one"]["enabled"]
+                and config["plugins"]["file_one"]["get_description"]
+            ):
                 try:
                     process = subprocess.run(
                         [file_executable, "--brief", "--", self._current_file_path],

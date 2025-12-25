@@ -294,7 +294,7 @@ def sync_get_cwd_object(
         "name", "size", "modified", "created", "extension", "natural"
     ] = "name",
     reverse: bool = False,
-    return_nothing_if_this_returns_true: Callable[[], bool] | None = None
+    return_nothing_if_this_returns_true: Callable[[], bool] | None = None,
 ) -> tuple[list[CWDObjectReturnDict], list[CWDObjectReturnDict]] | tuple[None, None]:
     """
     Get the objects (files and folders) in a provided directory
@@ -320,7 +320,10 @@ def sync_get_cwd_object(
     except (PermissionError, FileNotFoundError, OSError):
         raise PermissionError(f"PermissionError: Unable to access {cwd}")
 
-    if return_nothing_if_this_returns_true is not None and return_nothing_if_this_returns_true():
+    if (
+        return_nothing_if_this_returns_true is not None
+        and return_nothing_if_this_returns_true()
+    ):
         if globals().get("is_dev", False):
             print("Cut off early after scandir")
         return None, None
@@ -346,7 +349,10 @@ def sync_get_cwd_object(
                 "icon": get_icon_for_file(item.name),
                 "dir_entry": item,
             })
-        if return_nothing_if_this_returns_true is not None and return_nothing_if_this_returns_true():
+        if (
+            return_nothing_if_this_returns_true is not None
+            and return_nothing_if_this_returns_true()
+        ):
             if globals().get("is_dev", False):
                 print("Cut off early during dictionary building")
             return None, None
@@ -379,7 +385,10 @@ def sync_get_cwd_object(
             folders.sort(key=lambda x: x["name"].lower())
 
             files.sort(key=get_extension_sort_key)
-    if return_nothing_if_this_returns_true is not None and return_nothing_if_this_returns_true():
+    if (
+        return_nothing_if_this_returns_true is not None
+        and return_nothing_if_this_returns_true()
+    ):
         if globals().get("is_dev", False):
             print("Cut off early before reversing results")
         return None, None
@@ -771,10 +780,15 @@ def dump_exc(widget: DOMNode, exc: Exception) -> str:
 
     from rovr.variables.maps import VAR_TO_DIR
 
-    rich_traceback = Traceback.from_exception(type(exc), exc, exc.__traceback__, width=None, code_width=None, show_locals=True)
+    rich_traceback = Traceback.from_exception(
+        type(exc), exc, exc.__traceback__, width=None, code_width=None, show_locals=True
+    )
     widget.log(rich_traceback)
 
-    dump_path = path.join(path.realpath(VAR_TO_DIR["CONFIG"]), f"{str(datetime.now()).replace(" ", "_").replace(":", "")}.log")
+    dump_path = path.join(
+        path.realpath(VAR_TO_DIR["CONFIG"]),
+        f"{str(datetime.now()).replace(' ', '_').replace(':', '')}.log",
+    )
     with open(dump_path, "w") as file_log:
         error_log = Console(file=file_log, legacy_windows=True)
         error_log.print(rich_traceback)

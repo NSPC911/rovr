@@ -7,6 +7,7 @@
 
 ## new features
 - archive: add support for zstd archives #172
+- app: add log dump when errors occur a5f38ca
 
 </p>
 </details>

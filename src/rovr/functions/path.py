@@ -13,6 +13,7 @@ from natsort import natsorted
 from rich.console import Console
 from textual import work
 from textual.app import App
+from textual.dom import DOMNode
 from textual.highlight import guess_language
 
 from rovr.functions.icons import get_icon_for_file, get_icon_for_folder
@@ -646,3 +647,29 @@ def get_mime_type(
             pass
 
     return None
+
+
+def dump_exc(widget: DOMNode, exc: Exception) -> str:
+    """Dump an exception to the console for debugging purposes.
+
+    Args:
+        widget (DOMNode): The widget where the exception occurred.
+        exc (Exception): The exception to dump.
+
+    Returns:
+        str: The path to the log file where the exception was dumped.
+    """
+    from datetime import datetime
+
+    from rich.traceback import Traceback
+
+    from rovr.variables.maps import VAR_TO_DIR
+
+    rich_traceback = Traceback.from_exception(type(exc), exc, exc.__traceback__, width=None, code_width=None, show_locals=True)
+    widget.log(rich_traceback)
+
+    dump_path = path.join(path.realpath(VAR_TO_DIR["CONFIG"]), f"{str(datetime.now()).replace(" ", "_").replace(":", "")}.log")
+    with open(dump_path, "w") as file_log:
+        error_log = Console(file=file_log, legacy_windows=True)
+        error_log.print(rich_traceback)
+    return dump_path

@@ -9,7 +9,6 @@ from PIL import Image, UnidentifiedImageError
 from PIL.Image import Image as PILImage
 from rich.syntax import Syntax
 from rich.text import Text
-from rich.traceback import Traceback
 from textual import events, on, work
 from textual.app import ComposeResult
 from textual.containers import Container
@@ -20,7 +19,7 @@ from textual.widgets import Static
 
 from rovr.classes.archive import Archive, BadArchiveError
 from rovr.core import FileList
-from rovr.functions.path import MimeResult, get_mime_type, match_mime_to_preview_type
+from rovr.functions import path as path_utils
 from rovr.functions.utils import should_cancel
 from rovr.variables.constants import PreviewContainerTitles, config, file_executable
 
@@ -51,7 +50,7 @@ class PreviewContainer(Container):
         self._current_file_path = None
         self._initial_height = self.size.height
         self._file_type: str = "none"
-        self._mime_type: MimeResult | None = None
+        self._mime_type: path_utils.MimeResult | None = None
         self._preview_texts: list[str] = config["interface"]["preview_text"].values()
         self.pdf = PDFHandler()
         # Debouncing mechanism
@@ -316,13 +315,13 @@ class PreviewContainer(Container):
                     severity="warning",
                 )
                 return False
-        except Exception as e:
             if should_cancel():
+        except Exception as exc:
                 return False
             self.app.call_from_thread(
-                self.notify, str(e), title="Plugins: Bat", severity="error"
+                self.notify, str(exc), title="Plugins: Bat", severity="error"
             )
-            self.log(Traceback())
+            path_utils.dump_exc(self, exc)
             return False
 
     def show_normal_file_preview(self) -> None:
@@ -405,8 +404,8 @@ class PreviewContainer(Container):
             return
 
     def show_folder_preview(self, folder_path: str) -> None:
-        """Show folder preview. Runs in a thread."""
         if should_cancel():
+        """Show folder preview."""
             return
         self.app.call_from_thread(setattr, self, "border_title", titles.folder)
 
@@ -443,8 +442,8 @@ class PreviewContainer(Container):
             return
 
     def show_archive_preview(self) -> None:
-        """Show archive preview. Runs in a thread."""
         if should_cancel():
+        """Show archive preview."""
             return
         self.app.call_from_thread(setattr, self, "border_title", titles.archive)
 
@@ -519,12 +518,12 @@ class PreviewContainer(Container):
             if path.isdir(file_path):
                 self.update_ui(
                     file_path=file_path,
-                    mime_type=MimeResult("basic", "inode/directory"),
+                    mime_type=path_utils.MimeResult("basic", "inode/directory"),
                     file_type="folder",
                 )
             else:
                 content = None  # for now
-                mime_result = get_mime_type(file_path)
+                mime_result = path_utils.get_mime_type(file_path)
                 self.log(mime_result)
                 if mime_result is None:
                     self.log(f"Could not get MIME type for {file_path}")
@@ -537,7 +536,7 @@ class PreviewContainer(Container):
                     return
                 content = mime_result.content
 
-                file_type = match_mime_to_preview_type(mime_result.mime_type)
+                file_type = path_utils.match_mime_to_preview_type(mime_result.mime_type)
                 if file_type is None:
                     self.log("Could not match MIME type to preview type")
                     self.update_ui(
@@ -549,7 +548,9 @@ class PreviewContainer(Container):
                     self.call_later(lambda: self.post_message(self.SetLoading(False)))
                     return
                 elif file_type == "remime":
-                    mime_result = get_mime_type(file_path, ["basic", "puremagic"])
+                    mime_result = path_utils.get_mime_type(
+                        file_path, ["basic", "puremagic"]
+                    )
                     if mime_result is None:
                         self.log("Could not get MIME type for remime")
                         self.update_ui(
@@ -562,7 +563,9 @@ class PreviewContainer(Container):
                             lambda: self.post_message(self.SetLoading(False))
                         )
                         return
-                    file_type = match_mime_to_preview_type(mime_result.mime_type)
+                    file_type = path_utils.match_mime_to_preview_type(
+                        mime_result.mime_type
+                    )
                     if file_type is None:
                         self.log("Could not match MIME type to preview type")
                         self.update_ui(
@@ -622,20 +625,18 @@ class PreviewContainer(Container):
             else:
                 self._queued_task = None
         except Exception as exc:
-            from rich.traceback import Traceback
-
-            self.log(Traceback.from_exception(type(exc), exc, exc.__traceback__))
             self.app.call_from_thread(
                 self.notify,
                 f"{type(exc).__name__} was raised while generating the preview",
             )
+            path_utils.dump_exc(self, exc)
 
     def update_ui(
         self,
         file_path: str,
         file_type: str,
         content: str | list[str] | None = None,
-        mime_type: MimeResult | None = None,
+        mime_type: path_utils.MimeResult | None = None,
     ) -> None:
         """
         Update the preview UI. Runs in a thread, uses call_from_thread for UI ops.
@@ -691,10 +692,8 @@ class PreviewContainer(Container):
                         timeout=1,
                     )
                     display_content += f"\n{process.stdout.strip()}"
-                except (subprocess.SubprocessError, FileNotFoundError):
-                    from rich.traceback import Traceback
-
-                    self.log(Traceback())
+                except (subprocess.SubprocessError, FileNotFoundError) as exc:
+                    path_utils.dump_exc(self, exc)
 
         if self.has_child("Static"):
             static_widget: Static = self.query_one(Static)

@@ -42,6 +42,7 @@ from rovr.core.file_list import FileListRightClickOptionList
 from rovr.footer import Clipboard, MetadataContainer, ProcessContainer
 from rovr.functions import icons
 from rovr.functions.path import (
+    dump_exc,
     ensure_existing_directory,
     get_filtered_dir_names,
     get_mounted_drives,
@@ -521,6 +522,7 @@ class Application(App, inherit_bindings=False):
         drive_update_every = int(config["interface"]["drive_watcher_frequency"])
         count: int = -1
         while True:
+            0 / 0
             sleep(1)
             count += 1
             if count >= drive_update_every:
@@ -790,6 +792,32 @@ class Application(App, inherit_bindings=False):
             return function(*args, **kwargs)
         except Exception as exc:
             return exc  # ty: ignore[invalid-return-type]
+
+    def _handle_exception(self, error: Exception) -> None:
+        """Called with an unhandled exception.
+
+        Always results in the app exiting.
+
+        Args:
+            error: An exception instance.
+        """
+        self._return_code = 1
+        # If we're running via pilot and this is the first exception encountered,
+        # take note of it so that we can re-raise for test frameworks later.
+        if self._exception is None:
+            self._exception = error
+            self._exception_event.set()
+
+        dump_path = dump_exc(self, error)
+
+        if hasattr(error, "__rich__"):
+            # Exception has a rich method, so we can defer to that for the rendering
+            self.panic(error)  # ty: ignore[invalid-argument-type]
+        else:
+            # Use default exception rendering
+            self._fatal_error()
+        console.print(f"[red]An error log has been saved to: {dump_path}[/]")
+        console.print("[red]Please consider reporting this issue along with the log file on [link=https://github.com/NSPC911/rovr/issues/new/choose]GitHub[/link]:[/]")
 
 
 app = Application()

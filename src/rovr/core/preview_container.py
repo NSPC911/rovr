@@ -1,6 +1,7 @@
 import subprocess
 from dataclasses import dataclass
 from os import path
+from time import time
 from typing import cast
 
 import textual_image.widget as timg
@@ -16,9 +17,12 @@ from textual.css.query import NoMatches
 from textual.highlight import guess_language
 from textual.message import Message
 from textual.widgets import Static
+from textual.widgets.selection_list import Selection
 
+from rovr.classes import ArchiveFileListSelection, FileListSelectionWidget
 from rovr.classes.archive import Archive, BadArchiveError
 from rovr.core import FileList
+from rovr.functions import icons as icon_utils
 from rovr.functions import path as path_utils
 from rovr.functions.utils import should_cancel
 from rovr.variables.constants import PreviewContainerTitles, config, file_executable
@@ -429,17 +433,61 @@ class PreviewContainer(Container):
             return
 
         this_list: FileList = self.query_one(FileList)
+        self.app.call_from_thread(this_list.set_classes, "file-list")
+
         main_list: FileList = self.app.query_one("#file_list", FileList)
         this_list.sort_by = main_list.sort_by
         this_list.sort_descending = main_list.sort_descending
-
-        # Schedule the update as a separate thread
-        this_list.dummy_update_file_list(cwd=folder_path)
-
-        self.app.call_from_thread(this_list.set_classes, "file-list")
-
-        if should_cancel():
+        options = []
+        try:
+            loading_timer = self.app.call_from_thread(self.set_timer, 0.25, lambda: setattr(self, "border_subtitle", "Getting list\u2026"))
+            folders, files = path_utils.sync_get_cwd_object(
+                folder_path,
+                config["interface"]["show_hidden_files"],
+                sort_by=this_list.sort_by,
+                reverse=this_list.sort_descending,
+                return_nothing_if_this_returns_true=self.any_in_queue
+            )
+            loading_timer.stop()  # if timer did not fire, stop it
+            if files is None or folders is None:
+                return
+            if not (folders or files):
+                options = [Selection("  --no-files--", value="", id="", disabled=True)]
+            else:
+                file_list_options = folders + files
+                file_list_option_length = len(file_list_options)
+                start_time = time()
+                for index, item in enumerate(file_list_options):
+                    options.append(
+                        FileListSelectionWidget(
+                            icon=item["icon"],
+                            label=item["name"],
+                            dir_entry=item["dir_entry"],
+                        )
+                    )
+                    if start_time + 0.25 < time():
+                        self.app.call_from_thread(
+                            setattr,
+                            self,
+                            "border_subtitle",
+                            f"{index + 1} / {file_list_option_length}",
+                        )
+                        start_time = time()
+                        if self.any_in_queue():
+                            return
+        except PermissionError:
+            options = [
+                Selection(
+                    " Permission Error: Unable to access this directory.",
+                    id="",
+                    value="",
+                    disabled=True,
+                )
+            ]
+        if self.any_in_queue():
             return
+        self.app.call_from_thread(this_list.set_options, options)
+        self.app.call_from_thread(setattr, self, "border_subtitle", "")
 
     def show_archive_preview(self) -> None:
         """Show archive preview."""
@@ -464,13 +512,44 @@ class PreviewContainer(Container):
         if self.any_in_queue():
             return
 
-        # Schedule the async update on the main thread
-        self.query_one(FileList).create_archive_list(self._current_content)
+        file_list = self.query_one(FileList)
 
-        self.app.call_from_thread(self.query_one(FileList).set_classes, "archive-list")
+        self.app.call_from_thread(file_list.set_classes, "archive-list")
+        options = []
+        if not self._current_content:
+            options = [Selection("  --no-files--", value="", id="", disabled=True)]
+        else:
+            file_list_length = len(self._current_content)
+            start_time = time()
+            for index, file_path in enumerate(self._current_content):
+                if file_path.endswith("/"):
+                    icon = icon_utils.get_icon_for_folder(file_path.strip("/"))
+                else:
+                    icon = icon_utils.get_icon_for_file(file_path)
+
+                # Create a selection widget similar to FileListSelectionWidget but simpler
+                # since we don't have dir_entry metadata for archive contents
+                options.append(
+                    ArchiveFileListSelection(
+                        icon,
+                        file_path,
+                    )
+                )
+                if start_time + 0.25 < time():
+                    self.app.call_from_thread(
+                        setattr,
+                        self,
+                        "border_subtitle",
+                        f"{index + 1} / {file_list_length}",
+                    )
+                    start_time = time()
+                    if self.any_in_queue():
+                        return
 
         if self.any_in_queue():
             return
+        file_list.set_options(options)
+        self.app.call_from_thread(setattr, self, "border_subtitle", "")
 
     async def show_preview(self, file_path: str) -> None:
         """

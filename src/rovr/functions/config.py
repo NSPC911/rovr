@@ -359,11 +359,6 @@ def load_config() -> tuple[dict, dict]:
         pdfinfo_executable = which("pdfinfo")
         pdfinfo_path: str | None = None
         if pdfinfo_executable is None:
-            pprint(
-                "[WARN] Poppler is enabled, but no poppler folder was specified, and it was not found in PATH.\n"
-                "[WARN] Please install Poppler and set the poppler_folder in rovr config.",
-                style="yellow",
-            )
             config["plugins"]["poppler"]["enabled"] = False
         else:
             pdfinfo_path = path.dirname(pdfinfo_executable)

@@ -522,7 +522,6 @@ class Application(App, inherit_bindings=False):
         drive_update_every = int(config["interface"]["drive_watcher_frequency"])
         count: int = -1
         while True:
-            0 / 0
             sleep(1)
             count += 1
             if count >= drive_update_every:

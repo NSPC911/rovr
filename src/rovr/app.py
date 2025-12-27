@@ -58,7 +58,14 @@ from rovr.navigation_widgets import (
     PathInput,
     UpButton,
 )
-from rovr.screens import DummyScreen, FileSearch, Keybinds, YesOrNo, ZDToDirectory
+from rovr.screens import (
+    ContentSearch,
+    DummyScreen,
+    FileSearch,
+    Keybinds,
+    YesOrNo,
+    ZDToDirectory,
+)
 from rovr.screens.way_too_small import TerminalTooSmall
 from rovr.state_manager import StateManager
 from rovr.variables.constants import MaxPossible, config
@@ -416,6 +423,25 @@ class Application(App, inherit_bindings=False):
                     title="Plugins: fd",
                     severity="error",
                 )
+        elif config["plugins"]["rg"]["enabled"] and check_key(
+            event, config["plugins"]["rg"]["keybinds"]
+        ):
+            rg_exec: str = config["plugins"]["rg"]["executable"]
+            if shutil.which(rg_exec) is not None:
+                try:
+
+                    def on_response(selected: str | None) -> None:
+                        if selected is None or selected == "":
+                            return
+                        else:
+                            self.cd(
+                                path.dirname(selected),
+                                focus_on=path.basename(selected),
+                            )
+
+                    self.push_screen(ContentSearch(), on_response)
+                except:
+                    raise
         elif check_key(event, config["keybinds"]["suspend_app"]):
             if WINDOWS:
                 self.notify(

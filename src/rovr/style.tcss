@@ -53,8 +53,8 @@ Screen.-all-horizontal.compact-buttons {
 #file_list_container,
 #preview_sidebar,
 ZoxideOptionList,
-FileSearchOptionList,
-FileSearchToggles,
+FileSearchOptionList, FileSearchToggles,
+ContentSearchOptionList, ContentSearchToggles,
 #footer > *,
 FileListRightClickOptionList,
 SortOrderPopup,
@@ -93,6 +93,8 @@ SortOrderPopup,
 ZDToDirectory > VerticalGroup:focus-within > ZoxideOptionList,
 FileSearch > VerticalGroup:focus-within > FileSearchOptionList,
 FileSearchToggles:focus,
+ContentSearch > VerticalGroup:focus-within > ContentSearchOptionList,
+ContentSearchToggles:focus,
 #file_list.-maximized,
 #pinned_sidebar.-maximized,
 #preview_sidebar .inner_preview.-maximized,
@@ -476,14 +478,11 @@ ProgressBarContainer {
 
 Content.selected { color: red }
 CommandList,
-FileList,
-PinnedSidebar,
-Clipboard,
-FileListRightClickOptionList,
-SortOrderPopup,
+FileList, PinnedSidebar, Clipboard,
+FileListRightClickOptionList, SortOrderPopup,
 ZoxideOptionList,
-FileSearchToggles,
-FileSearchOptionList,
+FileSearchToggles, FileSearchOptionList,
+ContentSearchToggles, ContentSearchOptionList,
 KeybindList {
   padding: 0 0 0 0;
   background-tint: ansi_default !important;
@@ -582,7 +581,8 @@ ModalScreen Button:ansi {
 }
 
 ZDToDirectory,
-FileSearch {
+FileSearch,
+ContentSearch {
   align: center middle;
   layout: horizontal;
   & > VerticalGroup {
@@ -624,12 +624,11 @@ FileSearch {
   }
 }
 
-FileSearch {
-  FileSearchToggles {
-    width: 24;
-    height: auto;
-    max-height: 50vh;
-  }
+FileSearch FileSearchToggles,
+ContentSearch ContentSearchToggles {
+  width: 24;
+  height: auto;
+  max-height: 50vh;
 }
 
 Keybinds {

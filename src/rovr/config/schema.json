@@ -961,7 +961,7 @@
               "$ref": "#/definitions/keybind",
               "default": ["f"],
               "description": "The keybind to open the file search picker.",
-              "display_name": "Start search with fd"
+              "display_name": "Start file search with fd"
             },
             "executable": {
               "type": "string",
@@ -971,7 +971,7 @@
             "relative_paths": {
               "type": "boolean",
               "default": true,
-              "description": "Whether to show as relative path or absolute path."
+              "description": "Whether to show fd results as relative path or absolute path."
             },
             "follow_symlinks": {
               "type": "boolean",
@@ -1001,6 +1001,43 @@
                   "block-device"
                 ]
               }
+            }
+          }
+        },
+        "rg": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "enabled": {
+              "type": "boolean",
+              "default": true,
+              "description": "Enable content searching using rg."
+            },
+            "keybinds": {
+              "$ref": "#/definitions/keybind",
+              "default": ["/"],
+              "description": "The keybind to open the content search picker.",
+              "display_name": "Start content search with rg"
+            },
+            "executable": {
+              "type": "string",
+              "default": "rg",
+              "description": "rg executable name or path."
+            },
+            "case_sensitive": {
+              "type": "boolean",
+              "default": false,
+              "description": "Whether the search should be case sensitive by default."
+            },
+            "follow_symlinks": {
+              "type": "boolean",
+              "default": false,
+              "description": "Whether rg should follow symlinks when searching."
+            },
+            "no_ignore_parent": {
+              "type": "boolean",
+              "default": false,
+              "description": "Don't use *ignore files from parent folders when searching."
             }
           }
         },

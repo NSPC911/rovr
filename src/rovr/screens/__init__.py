@@ -7,6 +7,7 @@ from .fd_search import FileSearch
 from .file_in_use import FileInUse
 from .input import ModalInput
 from .keybinds import Keybinds
+from .rg_search import ContentSearch
 from .way_too_small import TerminalTooSmall
 from .yes_or_no import YesOrNo
 from .zd_to_directory import ZDToDirectory
@@ -29,4 +30,5 @@ __all__ = [
     "DummyScreen",
     "TerminalTooSmall",
     "Keybinds",
+    "ContentSearch",
 ]

@@ -259,6 +259,14 @@ follow_symlinks = false
 no_ignore_parent = false
 default_filter_types = ["file", "directory"]
 
+[plugins.rg]
+enabled = true
+keybinds = ["R"]
+executable = "rg"
+case_sensitive = true
+no_ignore_parent = false
+follow_symlinks = false
+
 [plugins.poppler]
 enabled = true
 threads = 1

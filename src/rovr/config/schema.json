@@ -1015,7 +1015,7 @@
             },
             "keybinds": {
               "$ref": "#/definitions/keybind",
-              "default": ["/"],
+              "default": ["R"],
               "description": "The keybind to open the content search picker.",
               "display_name": "Start content search with rg"
             },
@@ -1026,7 +1026,7 @@
             },
             "case_sensitive": {
               "type": "boolean",
-              "default": false,
+              "default": true,
               "description": "Whether the search should be case sensitive by default."
             },
             "follow_symlinks": {

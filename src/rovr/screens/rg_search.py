@@ -64,7 +64,7 @@ class ContentSearchToggles(SelectionList):
                 "case_sensitive",
                 config["plugins"]["rg"]["case_sensitive"],
             ),
-            id="file_search_toggles",
+            id="content_search_toggles",
         )
 
     def on_mount(self) -> None:
@@ -180,7 +180,7 @@ class ContentSearchToggles(SelectionList):
 
 
 class ContentSearch(ModalScreen):
-    """Search for files recursively using rg."""
+    """Search file contents recursively using rg."""
 
     def __init__(self, **kwargs) -> None:
         super().__init__(**kwargs)
@@ -188,26 +188,26 @@ class ContentSearch(ModalScreen):
         self._active_worker: Worker | None = None
 
     def compose(self) -> ComposeResult:
-        with VerticalGroup(id="file_search_group", classes="file_search_group"):
+        with VerticalGroup(id="content_search_group"):
             yield Input(
-                id="file_search_input",
+                id="content_search_input",
                 placeholder="Type to search files (rg)",
             )
             yield ContentSearchOptionList(
                 Option("  No input provided", disabled=True),
-                id="file_search_options",
+                id="content_search_options",
                 classes="empty",
             )
         yield ContentSearchToggles()
 
     def on_mount(self) -> None:
-        self.search_input: Input = self.query_one("#file_search_input")
-        self.search_input.border_title = "Find Files"
+        self.search_input: Input = self.query_one("#content_search_input")
+        self.search_input.border_title = "Find in files"
         self.search_input.focus()
         self.search_options: ContentSearchOptionList = self.query_one(
-            "#file_search_options"
+            "#content_search_options"
         )
-        self.search_options.border_title = "Files"
+        self.search_options.border_title = "Results"
         self.search_options.can_focus = False
         self.rg_updater(Input.Changed(self.search_input, value=""))
 
@@ -329,7 +329,7 @@ class ContentSearch(ModalScreen):
 
     @work(exclusive=True)
     @on(OptionList.OptionSelected, "ContentSearchOptionList")
-    async def file_search_option_selected(
+    async def content_search_option_selected(
         self, event: OptionList.OptionSelected
     ) -> None:
         if not isinstance(event.option, ModalSearcherOption):
@@ -342,7 +342,9 @@ class ContentSearch(ModalScreen):
             self.dismiss(None)
 
     @on(OptionList.OptionHighlighted, "ContentSearchOptionList")
-    def file_search_change_highlighted(self, _: OptionList.OptionHighlighted) -> None:
+    def content_search_change_highlighted(
+        self, _: OptionList.OptionHighlighted
+    ) -> None:
         if (
             self.search_options.option_count == 0
             or self.search_options.get_option_at_index(0).disabled

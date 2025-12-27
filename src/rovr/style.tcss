@@ -1005,6 +1005,7 @@ Screen {
     #pinned_sidebar_container { display: none !important }
     #zoxide_group,
     #file_search_group,
+    #content_search_group,
     .--textual-command-palette #--container,
     #dialog,
     #modalInput_group {
@@ -1012,12 +1013,14 @@ Screen {
       max-width: 90vw;
     }
     Toast { width: 90vw }
-    #file_search_toggles { display: none }
+    #file_search_toggles,
+    #content_search_toggles { display: none }
   }
   &.-nopreview {
     #pinned_sidebar_container { max-width: 25vw }
     #zoxide_group,
     #file_search_group,
+    #content_search_group,
     .--textual-command-palette #--container,
     #dialog,
     #modalInput_group {
@@ -1025,19 +1028,20 @@ Screen {
       max-width: 75vw;
     }
     Toast { width: 50vw }
-    #file_search_toggles { display: none }
+    #file_search_toggles,
+    #content_search_toggles { display: none }
   }
   &.-all-vertical #footer { max-height: 25vh }
   &.-nopath {
     #below_menu { display: none !important }
     #footer { max-height: 30vh }
-    #zoxide_group, #file_search_group {
+    #zoxide_group, #file_search_group, #content_search_group {
       max-height: 75vh;
     }
   }
   &.-nomenu-atall {
     #footer { max-height: 30vh }
-    #zoxide_group, #file_search_group {
+    #zoxide_group, #file_search_group, #content_search_group {
       max-height: 90vh;
     }
   }
@@ -1046,7 +1050,7 @@ Screen {
   }
   &.-middle-only {
     #footer { max-height: 25vh }
-    #zoxide_group, #file_search_group {
+    #zoxide_group, #file_search_group, #content_search_group {
       max-height: 100vh !important;
     }
   }

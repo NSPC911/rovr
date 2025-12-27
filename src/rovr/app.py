@@ -416,6 +416,7 @@ class Application(App, inherit_bindings=False):
 
                     self.push_screen(FileSearch(), on_response)
                 except Exception as exc:
+                    dump_exc(self, exc)
                     self.notify(str(exc), title="Plugins: fd", severity="error")
             else:
                 self.notify(
@@ -440,8 +441,9 @@ class Application(App, inherit_bindings=False):
                             )
 
                     self.push_screen(ContentSearch(), on_response)
-                except:
-                    raise
+                except Exception as exc:
+                    dump_exc(self, exc)
+                    self.notify(str(exc), title="Plugins: rg", severity="error")
         elif check_key(event, config["keybinds"]["suspend_app"]):
             if WINDOWS:
                 self.notify(

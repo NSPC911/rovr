@@ -274,7 +274,6 @@ description: config schema humanified
     - [8.5.4. Property `Rovr Config > plugins > rg > case_sensitive`](#plugins_rg_case_sensitive)
     - [8.5.5. Property `Rovr Config > plugins > rg > follow_symlinks`](#plugins_rg_follow_symlinks)
     - [8.5.6. Property `Rovr Config > plugins > rg > no_ignore_parent`](#plugins_rg_no_ignore_parent)
-    - [8.5.7. Property `Rovr Config > plugins > rg > sort_output`](#plugins_rg_sort_output)
   - [8.6. Property `Rovr Config > plugins > poppler`](#plugins_poppler)
     - [8.6.1. Property `Rovr Config > plugins > poppler > enabled`](#plugins_poppler_enabled)
     - [8.6.2. Property `Rovr Config > plugins > poppler > threads`](#plugins_poppler_threads)
@@ -4072,7 +4071,6 @@ Must be one of:
 | [case_sensitive](#plugins_rg_case_sensitive)     | boolean         | Whether the search should be case sensitive by default.      |
 | [follow_symlinks](#plugins_rg_follow_symlinks)   | boolean         | Whether rg should follow symlinks when searching.            |
 | [no_ignore_parent](#plugins_rg_no_ignore_parent) | boolean         | Don't use \*ignore files from parent folders when searching. |
-| [sort_output](#plugins_rg_sort_output)           | boolean         | Sort the output results by count                             |
 
 #### <a name="plugins_rg_enabled"></a>8.5.1. Property `Rovr Config > plugins > rg > enabled`
 
@@ -4090,7 +4088,7 @@ Must be one of:
 | -------------- | --------------------- |
 | **Type**       | `array of string`     |
 | **Required**   | No                    |
-| **Default**    | `["/"]`               |
+| **Default**    | `["R"]`               |
 | **Defined in** | #/definitions/keybind |
 
 **Description:** The keybind to open the content search picker.
@@ -4153,16 +4151,6 @@ Must be one of:
 | **Default**  | `false`   |
 
 **Description:** Don't use \*ignore files from parent folders when searching.
-
-#### <a name="plugins_rg_sort_output"></a>8.5.7. Property `Rovr Config > plugins > rg > sort_output`
-
-|              |           |
-| ------------ | --------- |
-| **Type**     | `boolean` |
-| **Required** | No        |
-| **Default**  | `true`    |
-
-**Description:** Sort the output results by count
 
 ### <a name="plugins_poppler"></a>8.6. Property `Rovr Config > plugins > poppler`
 

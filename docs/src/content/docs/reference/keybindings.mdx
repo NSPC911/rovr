@@ -30,9 +30,11 @@ you can find this profile at `src/rovr/config/keybinds/vim.toml` in the reposito
 
 ### using a profile
 
-to use a keybind profile, copy the `[keybinds]` section from your preferred profile into your user `config.toml` file, which is located at:
+to use a keybind profile, copy the `[keybinds]` section and the `[plugins.*]` keybind sections from your preferred profile into your user `config.toml` file, which is located at:
 - linux/macos: `~/.config/rovr/config.toml`
 - windows: `%APPDATA%\rovr\config.toml`
+
+note: the profile files contain both main keybinds under `[keybinds]` and plugin-specific keybinds under `[plugins.zoxide]`, `[plugins.editor]`, and `[plugins.fd]`. copy all relevant sections for a complete profile setup.
 
 ## default bindings
 

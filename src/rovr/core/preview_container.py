@@ -552,7 +552,7 @@ class PreviewContainer(Container):
 
         if self.any_in_queue():
             return
-        file_list.set_options(options)
+        self.app.call_from_thread(file_list.set_options, options)
         self.app.call_from_thread(setattr, self, "border_subtitle", "")
 
     async def show_preview(self, file_path: str) -> None:

@@ -1,7 +1,7 @@
 import subprocess
 from dataclasses import dataclass
 from os import path
-from time import time
+from time import sleep, time
 from typing import cast
 
 import textual_image.widget as timg
@@ -96,6 +96,36 @@ class PreviewContainer(Container):
             return True
         return False
 
+    @work(thread=True, exit_on_error=False)
+    def load_image(self) -> PILImage | None:
+        """Load image in a thread.
+        Returns:
+            PILImage | None: The loaded image or None if cancelled.
+        """
+        assert self._current_file_path is not None
+        pil_object: PILImage = Image.open(self._current_file_path)
+        max_width = config["interface"]["max_preview_image_width"]
+        max_height = config["interface"]["max_preview_image_height"]
+
+        reduce_factor = 1
+        if max_width > 0 and max_height > 0:
+            # Calculate reduction factor needed for each dimension
+            width_factor = pil_object.width / max_width
+            height_factor = pil_object.height / max_height
+            # Use the larger factor, rounded up to nearest integer (minimum 1)
+            reduce_factor = max(1, int(max(width_factor, height_factor)))
+
+        if reduce_factor > 1:
+            self.log(
+                f"Image will be reduced by factor {reduce_factor}: "
+                f"{pil_object.width}x{pil_object.height} -> "
+                f"{pil_object.width // reduce_factor}x{pil_object.height // reduce_factor}"
+            )
+            pil_object = pil_object.reduce(reduce_factor)
+        else:
+            pil_object.load()
+        return pil_object
+
     def show_image_preview(self, depth: int = 0) -> None:
         """Show image preview. Runs in a thread."""
         self.app.call_from_thread(setattr, self, "border_title", titles.image)
@@ -103,8 +133,19 @@ class PreviewContainer(Container):
             return
 
         try:
-            pil_object: PILImage = Image.open(self._current_file_path)
-        except UnidentifiedImageError:
+            pil_creator = self.load_image()
+            while pil_creator.is_running:
+                if self.any_in_queue():
+                    pil_creator.cancel()
+                    return
+                sleep(0.25)
+            if self.any_in_queue():
+                return
+            if pil_creator.error:
+                raise pil_creator.error
+            pil_object: PILImage = pil_creator.result
+
+        except (UnidentifiedImageError, NotImplementedError):
             if self.any_in_queue():
                 return
             self.app.call_from_thread(self.remove_children)

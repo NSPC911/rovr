@@ -45,6 +45,18 @@ if images do not appear correctly, you can manually override the image protocol 
 
 available `image_protocol` values are: `"Auto"`, `"TGP"`, `"Sixel"`, `"Halfcell"`, and `"Unicode"`.
 
+### configuring the image size
+
+lets you configure the maximum width and height of image previews in pixels. by default, `rovr` sets these values to `1920` (width) and `1080` (height).
+
+<Code
+  code={`[interface]\nmax_preview_image_width = 1920\nmax_preview_image_height = 1080`}
+  lang="toml"
+  title="config.toml"
+/>
+
+don't worry, you don't need to look at scales and pixels to figure out how big the image will be in your terminal. `textual-image` automatically scales the image to fit within your terminal window while maintaining the aspect ratio.
+
 ### known issues
 
 - some low-resolution images will look horrible, I'm not really sure why that happens, but it might be due to an unnecessary up-scaling attempt by `textual-image`

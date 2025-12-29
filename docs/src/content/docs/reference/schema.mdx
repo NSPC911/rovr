@@ -14,24 +14,26 @@ description: config schema humanified
   - [1.8. Property `Rovr Config > interface > scrolloff`](#interface_scrolloff)
   - [1.9. Property `Rovr Config > interface > show_hidden_files`](#interface_show_hidden_files)
   - [1.10. Property `Rovr Config > interface > image_protocol`](#interface_image_protocol)
-  - [1.11. Property `Rovr Config > interface > allow_tab_nav`](#interface_allow_tab_nav)
-  - [1.12. Property `Rovr Config > interface > append_new_tabs`](#interface_append_new_tabs)
-  - [1.13. Property `Rovr Config > interface > double_click_delay`](#interface_double_click_delay)
-  - [1.14. Property `Rovr Config > interface > drive_watcher_frequency`](#interface_drive_watcher_frequency)
-  - [1.15. Property `Rovr Config > interface > clock`](#interface_clock)
-    - [1.15.1. Property `Rovr Config > interface > clock > enabled`](#interface_clock_enabled)
-    - [1.15.2. Property `Rovr Config > interface > clock > align`](#interface_clock_align)
-  - [1.16. Property `Rovr Config > interface > preview_text`](#interface_preview_text)
-    - [1.16.1. Property `Rovr Config > interface > preview_text > error`](#interface_preview_text_error)
-    - [1.16.2. Property `Rovr Config > interface > preview_text > binary`](#interface_preview_text_binary)
-    - [1.16.3. Property `Rovr Config > interface > preview_text > start`](#interface_preview_text_start)
-    - [1.16.4. Property `Rovr Config > interface > preview_text > empty`](#interface_preview_text_empty)
-    - [1.16.5. Property `Rovr Config > interface > preview_text > too_large`](#interface_preview_text_too_large)
-  - [1.17. Property `Rovr Config > interface > compact_mode`](#interface_compact_mode)
-    - [1.17.1. Property `Rovr Config > interface > compact_mode > buttons`](#interface_compact_mode_buttons)
-    - [1.17.2. Property `Rovr Config > interface > compact_mode > panels`](#interface_compact_mode_panels)
-  - [1.18. Property `Rovr Config > interface > mime_rules`](#interface_mime_rules)
-    - [1.18.1. Property `Rovr Config > interface > mime_rules > additionalProperties`](#interface_mime_rules_additionalProperties)
+  - [1.11. Property `Rovr Config > interface > max_preview_image_width`](#interface_max_preview_image_width)
+  - [1.12. Property `Rovr Config > interface > max_preview_image_height`](#interface_max_preview_image_height)
+  - [1.13. Property `Rovr Config > interface > allow_tab_nav`](#interface_allow_tab_nav)
+  - [1.14. Property `Rovr Config > interface > append_new_tabs`](#interface_append_new_tabs)
+  - [1.15. Property `Rovr Config > interface > double_click_delay`](#interface_double_click_delay)
+  - [1.16. Property `Rovr Config > interface > drive_watcher_frequency`](#interface_drive_watcher_frequency)
+  - [1.17. Property `Rovr Config > interface > clock`](#interface_clock)
+    - [1.17.1. Property `Rovr Config > interface > clock > enabled`](#interface_clock_enabled)
+    - [1.17.2. Property `Rovr Config > interface > clock > align`](#interface_clock_align)
+  - [1.18. Property `Rovr Config > interface > preview_text`](#interface_preview_text)
+    - [1.18.1. Property `Rovr Config > interface > preview_text > error`](#interface_preview_text_error)
+    - [1.18.2. Property `Rovr Config > interface > preview_text > binary`](#interface_preview_text_binary)
+    - [1.18.3. Property `Rovr Config > interface > preview_text > start`](#interface_preview_text_start)
+    - [1.18.4. Property `Rovr Config > interface > preview_text > empty`](#interface_preview_text_empty)
+    - [1.18.5. Property `Rovr Config > interface > preview_text > too_large`](#interface_preview_text_too_large)
+  - [1.19. Property `Rovr Config > interface > compact_mode`](#interface_compact_mode)
+    - [1.19.1. Property `Rovr Config > interface > compact_mode > buttons`](#interface_compact_mode_buttons)
+    - [1.19.2. Property `Rovr Config > interface > compact_mode > panels`](#interface_compact_mode_panels)
+  - [1.20. Property `Rovr Config > interface > mime_rules`](#interface_mime_rules)
+    - [1.20.1. Property `Rovr Config > interface > mime_rules > additionalProperties`](#interface_mime_rules_additionalProperties)
 - [2. Property `Rovr Config > settings`](#settings)
   - [2.1. Property `Rovr Config > settings > use_recycle_bin`](#settings_use_recycle_bin)
   - [2.2. Property `Rovr Config > settings > copy_includes_metadata`](#settings_copy_includes_metadata)
@@ -319,6 +321,8 @@ description: config schema humanified
 | [scrolloff](#interface_scrolloff)                                     | integer          | The number of files to keep above and below the cursor when moving through the file list.                                                                                                                                                                               |
 | [show_hidden_files](#interface_show_hidden_files)                     | boolean          | Show hidden files and folders (those starting with a dot on Unix, or explicitly hidden on Windows/MacOS).                                                                                                                                                               |
 | [image_protocol](#interface_image_protocol)                           | enum (of string) | The image protocol to use when displaying an image                                                                                                                                                                                                                      |
+| [max_preview_image_width](#interface_max_preview_image_width)         | integer          | Maximum width for preview images in pixels. Images wider than this will be downscaled using integer reduction. Set to 0 to disable resizing.                                                                                                                            |
+| [max_preview_image_height](#interface_max_preview_image_height)       | integer          | Maximum height for preview images in pixels. Images taller than this will be downscaled using integer reduction. Set to 0 to disable resizing.                                                                                                                          |
 | [allow_tab_nav](#interface_allow_tab_nav)                             | boolean          | Allow navigating the main app screen with \`tab\` and \`shift+tab\`                                                                                                                                                                                                     |
 | [append_new_tabs](#interface_append_new_tabs)                         | boolean          | Choose whether or not to append new tabs instead of inserting them.<br />\`true\` =&gt; Append to the end of the tab list.<br />\`false\` =&gt; Insert after the active tab.                                                                                            |
 | [double_click_delay](#interface_double_click_delay)                   | number           | The delay between two consecutive clicks to enter into a directory, or open a file.                                                                                                                                                                                     |
@@ -442,7 +446,35 @@ Must be one of:
 - "Halfcell"
 - "Unicode"
 
-### <a name="interface_allow_tab_nav"></a>1.11. Property `Rovr Config > interface > allow_tab_nav`
+### <a name="interface_max_preview_image_width"></a>1.11. Property `Rovr Config > interface > max_preview_image_width`
+
+|              |           |
+| ------------ | --------- |
+| **Type**     | `integer` |
+| **Required** | No        |
+| **Default**  | `1920`    |
+
+**Description:** Maximum width for preview images in pixels. Images wider than this will be downscaled using integer reduction. Set to 0 to disable resizing.
+
+| Restrictions |        |
+| ------------ | ------ |
+| **Minimum**  | &ge; 0 |
+
+### <a name="interface_max_preview_image_height"></a>1.12. Property `Rovr Config > interface > max_preview_image_height`
+
+|              |           |
+| ------------ | --------- |
+| **Type**     | `integer` |
+| **Required** | No        |
+| **Default**  | `1080`    |
+
+**Description:** Maximum height for preview images in pixels. Images taller than this will be downscaled using integer reduction. Set to 0 to disable resizing.
+
+| Restrictions |        |
+| ------------ | ------ |
+| **Minimum**  | &ge; 0 |
+
+### <a name="interface_allow_tab_nav"></a>1.13. Property `Rovr Config > interface > allow_tab_nav`
 
 |              |           |
 | ------------ | --------- |
@@ -452,7 +484,7 @@ Must be one of:
 
 **Description:** Allow navigating the main app screen with `tab` and `shift+tab`
 
-### <a name="interface_append_new_tabs"></a>1.12. Property `Rovr Config > interface > append_new_tabs`
+### <a name="interface_append_new_tabs"></a>1.14. Property `Rovr Config > interface > append_new_tabs`
 
 |              |           |
 | ------------ | --------- |
@@ -464,7 +496,7 @@ Must be one of:
 `true` =&gt; Append to the end of the tab list.
 `false` =&gt; Insert after the active tab.
 
-### <a name="interface_double_click_delay"></a>1.13. Property `Rovr Config > interface > double_click_delay`
+### <a name="interface_double_click_delay"></a>1.15. Property `Rovr Config > interface > double_click_delay`
 
 |              |          |
 | ------------ | -------- |
@@ -474,7 +506,7 @@ Must be one of:
 
 **Description:** The delay between two consecutive clicks to enter into a directory, or open a file.
 
-### <a name="interface_drive_watcher_frequency"></a>1.14. Property `Rovr Config > interface > drive_watcher_frequency`
+### <a name="interface_drive_watcher_frequency"></a>1.16. Property `Rovr Config > interface > drive_watcher_frequency`
 
 |              |          |
 | ------------ | -------- |
@@ -484,7 +516,7 @@ Must be one of:
 
 **Description:** How often (in seconds) to check for changes in mounted drives in the sidebar.
 
-### <a name="interface_clock"></a>1.15. Property `Rovr Config > interface > clock`
+### <a name="interface_clock"></a>1.17. Property `Rovr Config > interface > clock`
 
 |                           |             |
 | ------------------------- | ----------- |
@@ -497,7 +529,7 @@ Must be one of:
 | [enabled](#interface_clock_enabled) | boolean          | Show a clock in the tabs bar.                                    |
 | [align](#interface_clock_align)     | enum (of string) | Align the clock to either the 'right' or 'left' of the tabs bar. |
 
-#### <a name="interface_clock_enabled"></a>1.15.1. Property `Rovr Config > interface > clock > enabled`
+#### <a name="interface_clock_enabled"></a>1.17.1. Property `Rovr Config > interface > clock > enabled`
 
 |              |           |
 | ------------ | --------- |
@@ -507,7 +539,7 @@ Must be one of:
 
 **Description:** Show a clock in the tabs bar.
 
-#### <a name="interface_clock_align"></a>1.15.2. Property `Rovr Config > interface > clock > align`
+#### <a name="interface_clock_align"></a>1.17.2. Property `Rovr Config > interface > clock > align`
 
 |              |                    |
 | ------------ | ------------------ |
@@ -522,7 +554,7 @@ Must be one of:
 - "left"
 - "right"
 
-### <a name="interface_preview_text"></a>1.16. Property `Rovr Config > interface > preview_text`
+### <a name="interface_preview_text"></a>1.18. Property `Rovr Config > interface > preview_text`
 
 |                           |             |
 | ------------------------- | ----------- |
@@ -538,7 +570,7 @@ Must be one of:
 | [empty](#interface_preview_text_empty)         | string | If the current file has no content, this is shown                                                                                                          |
 | [too_large](#interface_preview_text_too_large) | string | If the file is too large (hard capped at &lt; 1MB), the preview will refuse to render this file regardless of your memory size                             |
 
-#### <a name="interface_preview_text_error"></a>1.16.1. Property `Rovr Config > interface > preview_text > error`
+#### <a name="interface_preview_text_error"></a>1.18.1. Property `Rovr Config > interface > preview_text > error`
 
 |              |                                     |
 | ------------ | ----------------------------------- |
@@ -548,7 +580,7 @@ Must be one of:
 
 **Description:** If for any reason the file preview refused to show, this appears.
 
-#### <a name="interface_preview_text_binary"></a>1.16.2. Property `Rovr Config > interface > preview_text > binary`
+#### <a name="interface_preview_text_binary"></a>1.18.2. Property `Rovr Config > interface > preview_text > binary`
 
 |              |                                                            |
 | ------------ | ---------------------------------------------------------- |
@@ -558,7 +590,7 @@ Must be one of:
 
 **Description:** If the current file cannot be read due to an encoding issue (ie not UTF8), it will display this message.
 
-#### <a name="interface_preview_text_start"></a>1.16.3. Property `Rovr Config > interface > preview_text > start`
+#### <a name="interface_preview_text_start"></a>1.18.3. Property `Rovr Config > interface > preview_text > start`
 
 |              |                                                                                                                                      |
 | ------------ | ------------------------------------------------------------------------------------------------------------------------------------ |
@@ -568,7 +600,7 @@ Must be one of:
 
 **Description:** This is shown when the rovr starts up. You may see it for a split second, but it will never appear afterwards. You cannot view this properly in this docs.
 
-#### <a name="interface_preview_text_empty"></a>1.16.4. Property `Rovr Config > interface > preview_text > empty`
+#### <a name="interface_preview_text_empty"></a>1.18.4. Property `Rovr Config > interface > preview_text > empty`
 
 |              |                          |
 | ------------ | ------------------------ |
@@ -578,7 +610,7 @@ Must be one of:
 
 **Description:** If the current file has no content, this is shown
 
-#### <a name="interface_preview_text_too_large"></a>1.16.5. Property `Rovr Config > interface > preview_text > too_large`
+#### <a name="interface_preview_text_too_large"></a>1.18.5. Property `Rovr Config > interface > preview_text > too_large`
 
 |              |                                                           |
 | ------------ | --------------------------------------------------------- |
@@ -588,7 +620,7 @@ Must be one of:
 
 **Description:** If the file is too large (hard capped at &lt; 1MB), the preview will refuse to render this file regardless of your memory size
 
-### <a name="interface_compact_mode"></a>1.17. Property `Rovr Config > interface > compact_mode`
+### <a name="interface_compact_mode"></a>1.19. Property `Rovr Config > interface > compact_mode`
 
 |                           |             |
 | ------------------------- | ----------- |
@@ -601,7 +633,7 @@ Must be one of:
 | [buttons](#interface_compact_mode_buttons) | boolean | Whether to compact the buttons and path input to one line instead of three.  |
 | [panels](#interface_compact_mode_panels)   | boolean | Whether to make the panels smaller to add more room for the file list itself |
 
-#### <a name="interface_compact_mode_buttons"></a>1.17.1. Property `Rovr Config > interface > compact_mode > buttons`
+#### <a name="interface_compact_mode_buttons"></a>1.19.1. Property `Rovr Config > interface > compact_mode > buttons`
 
 |              |           |
 | ------------ | --------- |
@@ -611,7 +643,7 @@ Must be one of:
 
 **Description:** Whether to compact the buttons and path input to one line instead of three.
 
-#### <a name="interface_compact_mode_panels"></a>1.17.2. Property `Rovr Config > interface > compact_mode > panels`
+#### <a name="interface_compact_mode_panels"></a>1.19.2. Property `Rovr Config > interface > compact_mode > panels`
 
 |              |           |
 | ------------ | --------- |
@@ -621,7 +653,7 @@ Must be one of:
 
 **Description:** Whether to make the panels smaller to add more room for the file list itself
 
-### <a name="interface_mime_rules"></a>1.18. Property `Rovr Config > interface > mime_rules`
+### <a name="interface_mime_rules"></a>1.20. Property `Rovr Config > interface > mime_rules`
 
 |                           |                                                                                                                                                                                                                                                                                                                                                                               |
 | ------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -637,7 +669,7 @@ Must be one of:
 | ---------------------------------------------- | ---------------- | ----------------- |
 | [](#interface_mime_rules_additionalProperties) | enum (of string) |                   |
 
-#### <a name="interface_mime_rules_additionalProperties"></a>1.18.1. Property `Rovr Config > interface > mime_rules > additionalProperties`
+#### <a name="interface_mime_rules_additionalProperties"></a>1.20.1. Property `Rovr Config > interface > mime_rules > additionalProperties`
 
 |              |                    |
 | ------------ | ------------------ |

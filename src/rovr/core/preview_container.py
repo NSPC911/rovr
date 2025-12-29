@@ -74,15 +74,16 @@ class PreviewContainer(Container):
         self._current_file_path = None
         self._initial_height = self.size.height
         self._file_type: str = "none"
+        self._file_mtime: float | None = None
         self._mime_type: path_utils.MimeResult | None = None
-        self._preview_texts: list[str] = config["interface"]["preview_text"].values()
+        self._preview_texts: dict[str, str] = config["interface"]["preview_text"]
         self.pdf = PDFHandler()
         # Debouncing mechanism
         self._queued_task = None
         self._queued_task_args: str | None = None
 
     def compose(self) -> ComposeResult:
-        yield Static(config["interface"]["preview_text"]["start"], classes="special")
+        yield Static(self._preview_texts["start"], classes="special")
 
     def get_loading_widget(self) -> Widget:
         """Get a widget to display a loading indicator.
@@ -93,7 +94,7 @@ class PreviewContainer(Container):
         return LoadingPreview()
 
     def on_preview_container_set_loading(self, event: SetLoading) -> None:
-        self.loading = event.to
+        self.set_loading(event.to)
 
     def has_child(self, selector: str) -> bool:
         """
@@ -196,7 +197,7 @@ class PreviewContainer(Container):
             self.app.call_from_thread(
                 self.mount,
                 Static(
-                    config["interface"]["preview_text"]["error"],
+                    self._preview_texts["error"],
                     classes="special",
                 ),
             )
@@ -204,7 +205,6 @@ class PreviewContainer(Container):
 
         if not self.has_child(".image_preview"):
             self.app.call_from_thread(self.remove_children)
-            self.app.call_from_thread(self.remove_class, "bat", "full", "clip")
 
             if self.any_in_queue():
                 return
@@ -364,6 +364,7 @@ class PreviewContainer(Container):
                     return False
 
                 if not self.has_child("Static"):
+                    self.log("Mounting new Static")
                     self.app.call_from_thread(self.remove_children)
 
                     if self.any_in_queue():
@@ -375,6 +376,7 @@ class PreviewContainer(Container):
                         return False
                     static_widget.can_focus = True
                 else:
+                    self.log("Using existing Static")
                     static_widget: Static = self.query_one(Static)
                     self.app.call_from_thread(static_widget.update, new_content)
                     self.app.call_from_thread(static_widget.set_classes, "bat_preview")
@@ -427,7 +429,7 @@ class PreviewContainer(Container):
                 except (UnicodeDecodeError, FileNotFoundError):
                     continue
             if self._current_content is None:
-                self._current_content = config["interface"]["preview_text"]["error"]
+                self._current_content = self._preview_texts["error"]
                 self.mount_special_messages()
                 return
 
@@ -660,6 +662,12 @@ class PreviewContainer(Container):
             if self.any_in_queue():
                 return
 
+            if file_path == self._current_file_path:
+                # check mtime as well
+                new_mtime = path.getmtime(file_path)
+                if self._file_mtime == new_mtime:
+                    return
+
             self.app.call_from_thread(setattr, self, "border_subtitle", "")
             if self.any_in_queue():
                 return
@@ -686,7 +694,7 @@ class PreviewContainer(Container):
                     self.update_ui(
                         file_path=file_path,
                         file_type="file",
-                        content=config["interface"]["preview_text"]["error"],
+                        content=self._preview_texts["error"],
                     )
                     self.call_later(lambda: self.post_message(self.SetLoading(False)))
                     return
@@ -699,7 +707,7 @@ class PreviewContainer(Container):
                         file_path=file_path,
                         file_type="file",
                         mime_type=mime_result,
-                        content=config["interface"]["preview_text"]["error"],
+                        content=self._preview_texts["error"],
                     )
                     self.call_later(lambda: self.post_message(self.SetLoading(False)))
                     return
@@ -712,7 +720,7 @@ class PreviewContainer(Container):
                         self.update_ui(
                             file_path=file_path,
                             file_type="file",
-                            content=config["interface"]["preview_text"]["error"],
+                            content=self._preview_texts["error"],
                             mime_type=mime_result,
                         )
                         self.call_later(
@@ -728,7 +736,7 @@ class PreviewContainer(Container):
                             file_path=file_path,
                             file_type="file",
                             mime_type=mime_result,
-                            content=config["interface"]["preview_text"]["error"],
+                            content=self._preview_texts["error"],
                         )
                         self.call_later(
                             lambda: self.post_message(self.SetLoading(False))
@@ -742,6 +750,11 @@ class PreviewContainer(Container):
                             all_files = []
                             for member in archive.infolist():
                                 if self.any_in_queue():
+                                    self.call_later(
+                                        lambda: self.post_message(
+                                            self.SetLoading(False)
+                                        )
+                                    )
                                     return
 
                                 filename = getattr(
@@ -763,7 +776,7 @@ class PreviewContainer(Container):
                         ValueError,
                         FileNotFoundError,
                     ):
-                        content = [config["interface"]["preview_text"]["error"]]
+                        content = [self._preview_texts["error"]]
 
                 self.update_ui(
                     file_path,
@@ -800,6 +813,7 @@ class PreviewContainer(Container):
         self._current_file_path = file_path
         self._current_content = content
         self._mime_type = mime_type
+        self._file_mtime = path.getmtime(file_path)
 
         self._file_type = file_type
         self.app.call_from_thread(self.remove_class, "pdf")
@@ -817,7 +831,7 @@ class PreviewContainer(Container):
             self.app.call_from_thread(self.add_class, "pdf")
             self.show_pdf_preview()
         else:
-            if content in self._preview_texts:
+            if content in self._preview_texts.values():
                 self.log("Showing special preview")
                 self.mount_special_messages()
             else:
@@ -887,14 +901,14 @@ class PreviewContainer(Container):
         """Trigger PDF preview update from a thread."""
         self.show_pdf_preview()
 
-    def on_resize(self, event: events.Resize) -> None:
-        """Re-render the preview on resize"""
-        if self.has_child("Static") and event.size.height != self._initial_height:
-            if self._current_content is not None:
-                is_special_content = self._current_content in self._preview_texts
-                if not is_special_content:
-                    self._trigger_resize_update()
-            self._initial_height = event.size.height
+    # def on_resize(self, event: events.Resize) -> None:
+    #     """Re-render the preview on resize"""
+    #     if self.has_child("Static") and event.size.height != self._initial_height:
+    #         if self._current_content is not None:
+    #             is_special_content = self._current_content in self._preview_texts.values()
+    #             if not is_special_content:
+    #                 self._trigger_resize_update()
+    #         self._initial_height = event.size.height
 
     @work(thread=True)
     def _trigger_resize_update(self) -> None:

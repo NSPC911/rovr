@@ -527,6 +527,7 @@ FILE_MAP = {
     ".log": "log",
     ".markdown": "markdown",
     ".md": "markdown",
+    ".mdx": "markdown",
     ".rdoc": "markdown",
     ".rst": "rst",
     ".text": "text",
@@ -840,6 +841,7 @@ FILE_MAP = {
 EXT_TO_LANG_MAP = {
     ".py": "python",
     ".md": "markdown",
+    ".mdx": "markdown",
     ".json": "json",
     ".toml": "toml",
     ".yaml": "yaml",

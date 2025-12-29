@@ -23,7 +23,6 @@ max_preview_image_height = 1080
 
 [interface.preview_text]
 error = "couldn't read this file! (\u00AC_\u00AC)" # ¬_¬
-binary = "the file doesn't use UTF-8, which isn't supported yet"
 start = """
   ___ ___
  |  _| . |
@@ -32,9 +31,6 @@ start = """
  | | |  _|
   \\_/|_|
 """
-empty = "bytes be gone (\u2310\u25A0_\u25A0)" # (⌐■_■)
-# how do you even respond to this
-too_large = "this file is larger (but not larger than your mother)"
 
 [interface.clock]
 enabled = true

@@ -127,25 +127,10 @@
               "default": "couldn't read this file! (\u00ac_\u00ac )",
               "description": "If for any reason the file preview refused to show, this appears."
             },
-            "binary": {
-              "type": "string",
-              "default": "the file does not use UTF-8, which isn't supported yet",
-              "description": "If the current file cannot be read due to an encoding issue (ie not UTF8), it will display this message."
-            },
             "start": {
               "type": "string",
               "default": " ___ ___\n|  _| . |\n|_| |___|\n _ _ ___\n| | |  _|\n \\_/|_|\n",
               "description": "This is shown when the rovr starts up. You may see it for a split second, but it will never appear afterwards. You cannot view this properly in this docs."
-            },
-            "empty": {
-              "type": "string",
-              "default": "bytes be gone (\u2310\u25a0_\u25a0)",
-              "description": "If the current file has no content, this is shown"
-            },
-            "too_large": {
-              "type": "string",
-              "default": "this file is larger (but not larger than your mother)",
-              "description": "If the file is too large (hard capped at < 1MB), the preview will refuse to render this file regardless of your memory size"
             }
           }
         },

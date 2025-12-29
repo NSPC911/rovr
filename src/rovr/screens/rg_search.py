@@ -50,19 +50,24 @@ class ContentSearchToggles(SelectionList):
     def __init__(self) -> None:
         super().__init__(
             Selection(
+                "Case Sensitive",
+                "case_sensitive",
+                config["plugins"]["rg"]["case_sensitive"],
+            ),
+            Selection(
                 "Follow Symlinks",
                 "follow_symlinks",
                 config["plugins"]["rg"]["follow_symlinks"],
             ),
             Selection(
+                "Search Hidden Files",
+                "search_hidden",
+                config["plugins"]["rg"]["search_hidden"],
+            ),
+            Selection(
                 "No Ignore Parents",
                 "no_ignore_parent",
                 config["plugins"]["rg"]["no_ignore_parent"],
-            ),
-            Selection(
-                "Case Sensitive",
-                "case_sensitive",
-                config["plugins"]["rg"]["case_sensitive"],
             ),
             id="content_search_toggles",
         )
@@ -218,11 +223,12 @@ class ContentSearch(ModalScreen):
     async def rg_updater(self, event: Input.Changed) -> None:
         """Update the list using rg based on the search term."""
         self._active_worker = get_current_worker()
+        self.search_options.border_subtitle = ""
         search_term = event.value.strip()
         rg_exec = config["plugins"]["rg"]["executable"]
 
         rg_cmd = [rg_exec, "--count", "--color=never"]
-        if config["interface"]["show_hidden_files"]:
+        if config["plugins"]["rg"]["search_hidden"]:
             rg_cmd.append("--hidden")
         if config["plugins"]["rg"]["follow_symlinks"]:
             rg_cmd.append("--follow")
@@ -277,6 +283,8 @@ class ContentSearch(ModalScreen):
                         stdout_lines.append((path, int(count)))
                     except ValueError:
                         continue  # skip lines with invalid count
+
+            stdout_lines.sort(key=lambda x: x[1], reverse=True)
             worker = self.create_options(stdout_lines)
             try:
                 options: list[ModalSearcherOption] = await worker.wait()
@@ -365,7 +373,7 @@ class ContentSearch(ModalScreen):
             file_path = path_utils.normalise(line[0].strip())
             if not file_path:
                 continue
-            display_text = f" {file_path}:[$accent]{line[1]}[/]"
+            display_text = f" {file_path}:[dim]{line[1]}[/]"
             icon: list[str] = (
                 get_icon_for_folder(file_path)
                 if path.isdir(file_path)

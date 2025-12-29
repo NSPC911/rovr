@@ -631,6 +631,11 @@ ContentSearch ContentSearchToggles {
   max-height: 50vh;
 }
 
+ContentSearch ContentSearchToggles {
+  /* size fix */
+  width: 25
+}
+
 Keybinds {
   align: center middle;
   #keybinds_data {

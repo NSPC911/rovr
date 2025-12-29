@@ -266,6 +266,7 @@ executable = "rg"
 case_sensitive = true
 no_ignore_parent = false
 follow_symlinks = false
+search_hidden = false
 
 [plugins.poppler]
 enabled = true

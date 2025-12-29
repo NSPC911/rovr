@@ -1038,6 +1038,11 @@
               "type": "boolean",
               "default": false,
               "description": "Don't use *ignore files from parent folders when searching."
+            },
+            "search_hidden": {
+              "type": "boolean",
+              "default": false,
+              "description": "Whether to search hidden files by default."
             }
           }
         },

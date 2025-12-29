@@ -4,6 +4,7 @@
 
 ## breaking changes
 - preview: add support for mime types using puremagic #172
+- config: remove unused preview texts 1b8deb6
 
 ## new features
 - archive: add support for zstd archives #172
@@ -11,8 +12,12 @@
 - rg: add support for rg as plugin #175
 - preview: configurable max preview image size #178
 
+## build
+- deps: bump textual to ~=6.9 09d1d23
+
 ## perf
 - preview: load images, and resize them in a separate thread #178
+- preview: check mtime before loading preview again 9d7c6cf
 
 </p>
 </details>

@@ -53,8 +53,8 @@ Screen.-all-horizontal.compact-buttons {
 #file_list_container,
 #preview_sidebar,
 ZoxideOptionList,
-FileSearchOptionList,
-FileSearchToggles,
+FileSearchOptionList, FileSearchToggles,
+ContentSearchOptionList, ContentSearchToggles,
 #footer > *,
 FileListRightClickOptionList,
 SortOrderPopup,
@@ -93,6 +93,8 @@ SortOrderPopup,
 ZDToDirectory > VerticalGroup:focus-within > ZoxideOptionList,
 FileSearch > VerticalGroup:focus-within > FileSearchOptionList,
 FileSearchToggles:focus,
+ContentSearch > VerticalGroup:focus-within > ContentSearchOptionList,
+ContentSearchToggles:focus,
 #file_list.-maximized,
 #pinned_sidebar.-maximized,
 #preview_sidebar .inner_preview.-maximized,
@@ -476,14 +478,11 @@ ProgressBarContainer {
 
 Content.selected { color: red }
 CommandList,
-FileList,
-PinnedSidebar,
-Clipboard,
-FileListRightClickOptionList,
-SortOrderPopup,
+FileList, PinnedSidebar, Clipboard,
+FileListRightClickOptionList, SortOrderPopup,
 ZoxideOptionList,
-FileSearchToggles,
-FileSearchOptionList,
+FileSearchToggles, FileSearchOptionList,
+ContentSearchToggles, ContentSearchOptionList,
 KeybindList {
   padding: 0 0 0 0;
   background-tint: ansi_default !important;
@@ -582,7 +581,8 @@ ModalScreen Button:ansi {
 }
 
 ZDToDirectory,
-FileSearch {
+FileSearch,
+ContentSearch {
   align: center middle;
   layout: horizontal;
   & > VerticalGroup {
@@ -624,12 +624,16 @@ FileSearch {
   }
 }
 
-FileSearch {
-  FileSearchToggles {
-    width: 24;
-    height: auto;
-    max-height: 50vh;
-  }
+FileSearch FileSearchToggles,
+ContentSearch ContentSearchToggles {
+  width: 24;
+  height: auto;
+  max-height: 50vh;
+}
+
+ContentSearch ContentSearchToggles {
+  /* size fix */
+  width: 25
 }
 
 Keybinds {
@@ -1006,6 +1010,7 @@ Screen {
     #pinned_sidebar_container { display: none !important }
     #zoxide_group,
     #file_search_group,
+    #content_search_group,
     .--textual-command-palette #--container,
     #dialog,
     #modalInput_group {
@@ -1013,12 +1018,14 @@ Screen {
       max-width: 90vw;
     }
     Toast { width: 90vw }
-    #file_search_toggles { display: none }
+    #file_search_toggles,
+    #content_search_toggles { display: none }
   }
   &.-nopreview {
     #pinned_sidebar_container { max-width: 25vw }
     #zoxide_group,
     #file_search_group,
+    #content_search_group,
     .--textual-command-palette #--container,
     #dialog,
     #modalInput_group {
@@ -1026,19 +1033,20 @@ Screen {
       max-width: 75vw;
     }
     Toast { width: 50vw }
-    #file_search_toggles { display: none }
+    #file_search_toggles,
+    #content_search_toggles { display: none }
   }
   &.-all-vertical #footer { max-height: 25vh }
   &.-nopath {
     #below_menu { display: none !important }
     #footer { max-height: 30vh }
-    #zoxide_group, #file_search_group {
+    #zoxide_group, #file_search_group, #content_search_group {
       max-height: 75vh;
     }
   }
   &.-nomenu-atall {
     #footer { max-height: 30vh }
-    #zoxide_group, #file_search_group {
+    #zoxide_group, #file_search_group, #content_search_group {
       max-height: 90vh;
     }
   }
@@ -1047,7 +1055,7 @@ Screen {
   }
   &.-middle-only {
     #footer { max-height: 25vh }
-    #zoxide_group, #file_search_group {
+    #zoxide_group, #file_search_group, #content_search_group {
       max-height: 100vh !important;
     }
   }

@@ -46,6 +46,21 @@ uses [fd](https://github.com/sharkdp/fd) to search recursively in the current di
 - **executable:** set the executable used to call `fd`
 - **relative_paths:** whether to see paths as relative or absolute
 - **follow_symlinks:** search inside symlinks as well
+- **no_ignore_parent:** do not respect ignore files from parent directories (e.g., `.gitignore`)
+- **default_filter_types:** set default item filters (like `file`, `directory`, etc.)
+
+### rg
+
+<InlineSVG src="/rovr/screenshots/plugins-rg.svg" alt="rovr's rg integration" />
+
+uses [ripgrep](https://github.com/BurntSushi/ripgrep) to search inside files
+
+- **enable:** `plugins.rg.enabled = true`
+- **executable:** set the executable used to call `rg`
+- **case_sensitive:** whether the search is case sensitive
+- **follow_symlinks:** search inside symlinks as well
+- **no_ignore_parent:** do not respect ignore files from parent directories (e.g., `.gitignore`)
+- **search_hidden:** whether to search hidden files and directories
 
 ### poppler
 

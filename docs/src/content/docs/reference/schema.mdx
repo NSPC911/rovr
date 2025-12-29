@@ -268,14 +268,22 @@ description: config schema humanified
     - [8.4.6. Property `Rovr Config > plugins > fd > no_ignore_parent`](#plugins_fd_no_ignore_parent)
     - [8.4.7. Property `Rovr Config > plugins > fd > default_filter_types`](#plugins_fd_default_filter_types)
       - [8.4.7.1. Rovr Config > plugins > fd > default_filter_types > default_filter_types items](#plugins_fd_default_filter_types_items)
-  - [8.5. Property `Rovr Config > plugins > poppler`](#plugins_poppler)
-    - [8.5.1. Property `Rovr Config > plugins > poppler > enabled`](#plugins_poppler_enabled)
-    - [8.5.2. Property `Rovr Config > plugins > poppler > threads`](#plugins_poppler_threads)
-    - [8.5.3. Property `Rovr Config > plugins > poppler > use_pdftocairo`](#plugins_poppler_use_pdftocairo)
-    - [8.5.4. Property `Rovr Config > plugins > poppler > poppler_folder`](#plugins_poppler_poppler_folder)
-  - [8.6. Property `Rovr Config > plugins > file_one`](#plugins_file_one)
-    - [8.6.1. Property `Rovr Config > plugins > file_one > enabled`](#plugins_file_one_enabled)
-    - [8.6.2. Property `Rovr Config > plugins > file_one > get_description`](#plugins_file_one_get_description)
+  - [8.5. Property `Rovr Config > plugins > rg`](#plugins_rg)
+    - [8.5.1. Property `Rovr Config > plugins > rg > enabled`](#plugins_rg_enabled)
+    - [8.5.2. Property `Rovr Config > plugins > rg > keybinds`](#plugins_rg_keybinds)
+      - [8.5.2.1. Rovr Config > keybinds > toggle_pin > toggle_pin items](#keybinds_toggle_pin_items)
+    - [8.5.3. Property `Rovr Config > plugins > rg > executable`](#plugins_rg_executable)
+    - [8.5.4. Property `Rovr Config > plugins > rg > case_sensitive`](#plugins_rg_case_sensitive)
+    - [8.5.5. Property `Rovr Config > plugins > rg > follow_symlinks`](#plugins_rg_follow_symlinks)
+    - [8.5.6. Property `Rovr Config > plugins > rg > no_ignore_parent`](#plugins_rg_no_ignore_parent)
+  - [8.6. Property `Rovr Config > plugins > poppler`](#plugins_poppler)
+    - [8.6.1. Property `Rovr Config > plugins > poppler > enabled`](#plugins_poppler_enabled)
+    - [8.6.2. Property `Rovr Config > plugins > poppler > threads`](#plugins_poppler_threads)
+    - [8.6.3. Property `Rovr Config > plugins > poppler > use_pdftocairo`](#plugins_poppler_use_pdftocairo)
+    - [8.6.4. Property `Rovr Config > plugins > poppler > poppler_folder`](#plugins_poppler_poppler_folder)
+  - [8.7. Property `Rovr Config > plugins > file_one`](#plugins_file_one)
+    - [8.7.1. Property `Rovr Config > plugins > file_one > enabled`](#plugins_file_one_enabled)
+    - [8.7.2. Property `Rovr Config > plugins > file_one > get_description`](#plugins_file_one_get_description)
 - [9. Property `Rovr Config > mode`](#mode)
   - [9.1. Property `Rovr Config > mode > additionalProperties`](#mode_additionalProperties)
 
@@ -3731,6 +3739,7 @@ Refer to https://textual.textualize.io/guide/design/#additional-variables for mo
 | [bat](#plugins_bat)           | object |                   |
 | [editor](#plugins_editor)     | object |                   |
 | [fd](#plugins_fd)             | object |                   |
+| [rg](#plugins_rg)             | object |                   |
 | [poppler](#plugins_poppler)   | object |                   |
 | [file_one](#plugins_file_one) | object |                   |
 
@@ -3947,15 +3956,15 @@ Refer to https://textual.textualize.io/guide/design/#additional-variables for mo
 | **Required**              | No          |
 | **Additional properties** | Not allowed |
 
-| Property                                                 | Type                      | Title/Description                                            |
-| -------------------------------------------------------- | ------------------------- | ------------------------------------------------------------ |
-| [enabled](#plugins_fd_enabled)                           | boolean                   | Enable recursive file search using fd.                       |
-| [keybinds](#plugins_fd_keybinds)                         | array of string           | The keybind to open the file search picker.                  |
-| [executable](#plugins_fd_executable)                     | string                    | fd executable name or path.                                  |
-| [relative_paths](#plugins_fd_relative_paths)             | boolean                   | Whether to show as relative path or absolute path.           |
-| [follow_symlinks](#plugins_fd_follow_symlinks)           | boolean                   | Whether fd should follow symlinks when searching.            |
-| [no_ignore_parent](#plugins_fd_no_ignore_parent)         | boolean                   | Don't use \*ignore files from parent folders when searching. |
-| [default_filter_types](#plugins_fd_default_filter_types) | array of enum (of string) | The default file types to show when using fd.                |
+| Property                                                 | Type                      | Title/Description                                             |
+| -------------------------------------------------------- | ------------------------- | ------------------------------------------------------------- |
+| [enabled](#plugins_fd_enabled)                           | boolean                   | Enable recursive file search using fd.                        |
+| [keybinds](#plugins_fd_keybinds)                         | array of string           | The keybind to open the file search picker.                   |
+| [executable](#plugins_fd_executable)                     | string                    | fd executable name or path.                                   |
+| [relative_paths](#plugins_fd_relative_paths)             | boolean                   | Whether to show fd results as relative path or absolute path. |
+| [follow_symlinks](#plugins_fd_follow_symlinks)           | boolean                   | Whether fd should follow symlinks when searching.             |
+| [no_ignore_parent](#plugins_fd_no_ignore_parent)         | boolean                   | Don't use \*ignore files from parent folders when searching.  |
+| [default_filter_types](#plugins_fd_default_filter_types) | array of enum (of string) | The default file types to show when using fd.                 |
 
 #### <a name="plugins_fd_enabled"></a>8.4.1. Property `Rovr Config > plugins > fd > enabled`
 
@@ -4015,7 +4024,7 @@ Refer to https://textual.textualize.io/guide/design/#additional-variables for mo
 | **Required** | No        |
 | **Default**  | `true`    |
 
-**Description:** Whether to show as relative path or absolute path.
+**Description:** Whether to show fd results as relative path or absolute path.
 
 #### <a name="plugins_fd_follow_symlinks"></a>8.4.5. Property `Rovr Config > plugins > fd > follow_symlinks`
 
@@ -4078,7 +4087,104 @@ Must be one of:
 - "char-device"
 - "block-device"
 
-### <a name="plugins_poppler"></a>8.5. Property `Rovr Config > plugins > poppler`
+### <a name="plugins_rg"></a>8.5. Property `Rovr Config > plugins > rg`
+
+|                           |             |
+| ------------------------- | ----------- |
+| **Type**                  | `object`    |
+| **Required**              | No          |
+| **Additional properties** | Not allowed |
+
+| Property                                         | Type            | Title/Description                                            |
+| ------------------------------------------------ | --------------- | ------------------------------------------------------------ |
+| [enabled](#plugins_rg_enabled)                   | boolean         | Enable content searching using rg.                           |
+| [keybinds](#plugins_rg_keybinds)                 | array of string | The keybind to open the content search picker.               |
+| [executable](#plugins_rg_executable)             | string          | rg executable name or path.                                  |
+| [case_sensitive](#plugins_rg_case_sensitive)     | boolean         | Whether the search should be case sensitive by default.      |
+| [follow_symlinks](#plugins_rg_follow_symlinks)   | boolean         | Whether rg should follow symlinks when searching.            |
+| [no_ignore_parent](#plugins_rg_no_ignore_parent) | boolean         | Don't use \*ignore files from parent folders when searching. |
+
+#### <a name="plugins_rg_enabled"></a>8.5.1. Property `Rovr Config > plugins > rg > enabled`
+
+|              |           |
+| ------------ | --------- |
+| **Type**     | `boolean` |
+| **Required** | No        |
+| **Default**  | `true`    |
+
+**Description:** Enable content searching using rg.
+
+#### <a name="plugins_rg_keybinds"></a>8.5.2. Property `Rovr Config > plugins > rg > keybinds`
+
+|                |                       |
+| -------------- | --------------------- |
+| **Type**       | `array of string`     |
+| **Required**   | No                    |
+| **Default**    | `["R"]`               |
+| **Defined in** | #/definitions/keybind |
+
+**Description:** The keybind to open the content search picker.
+
+|                      | Array restrictions |
+| -------------------- | ------------------ |
+| **Min items**        | N/A                |
+| **Max items**        | N/A                |
+| **Items unicity**    | False              |
+| **Additional items** | False              |
+| **Tuple validation** | See below          |
+
+| Each item of this array must be                | Description |
+| ---------------------------------------------- | ----------- |
+| [toggle_pin items](#keybinds_toggle_pin_items) |             |
+
+##### <a name="keybinds_toggle_pin_items"></a>8.5.2.1. Rovr Config > keybinds > toggle_pin > toggle_pin items
+
+|              |          |
+| ------------ | -------- |
+| **Type**     | `string` |
+| **Required** | No       |
+
+#### <a name="plugins_rg_executable"></a>8.5.3. Property `Rovr Config > plugins > rg > executable`
+
+|              |          |
+| ------------ | -------- |
+| **Type**     | `string` |
+| **Required** | No       |
+| **Default**  | `"rg"`   |
+
+**Description:** rg executable name or path.
+
+#### <a name="plugins_rg_case_sensitive"></a>8.5.4. Property `Rovr Config > plugins > rg > case_sensitive`
+
+|              |           |
+| ------------ | --------- |
+| **Type**     | `boolean` |
+| **Required** | No        |
+| **Default**  | `false`   |
+
+**Description:** Whether the search should be case sensitive by default.
+
+#### <a name="plugins_rg_follow_symlinks"></a>8.5.5. Property `Rovr Config > plugins > rg > follow_symlinks`
+
+|              |           |
+| ------------ | --------- |
+| **Type**     | `boolean` |
+| **Required** | No        |
+| **Default**  | `false`   |
+
+**Description:** Whether rg should follow symlinks when searching.
+
+#### <a name="plugins_rg_no_ignore_parent"></a>8.5.6. Property `Rovr Config > plugins > rg > no_ignore_parent`
+
+|              |           |
+| ------------ | --------- |
+| **Type**     | `boolean` |
+| **Required** | No        |
+| **Default**  | `false`   |
+
+**Description:** Don't use \*ignore files from parent folders when searching.
+
+### <a name="plugins_poppler"></a>8.6. Property `Rovr Config > plugins > poppler`
 
 |                           |             |
 | ------------------------- | ----------- |
@@ -4093,7 +4199,7 @@ Must be one of:
 | [use_pdftocairo](#plugins_poppler_use_pdftocairo) | boolean | Use pdftocairo instead of pdftoppm, may help performance                                           |
 | [poppler_folder](#plugins_poppler_poppler_folder) | string  | Path to the folder where Poppler-related binaries are located. Leave empty to use the system PATH. |
 
-#### <a name="plugins_poppler_enabled"></a>8.5.1. Property `Rovr Config > plugins > poppler > enabled`
+#### <a name="plugins_poppler_enabled"></a>8.6.1. Property `Rovr Config > plugins > poppler > enabled`
 
 |              |           |
 | ------------ | --------- |
@@ -4103,7 +4209,7 @@ Must be one of:
 
 **Description:** Enable poppler for PDF previews.
 
-#### <a name="plugins_poppler_threads"></a>8.5.2. Property `Rovr Config > plugins > poppler > threads`
+#### <a name="plugins_poppler_threads"></a>8.6.2. Property `Rovr Config > plugins > poppler > threads`
 
 |              |           |
 | ------------ | --------- |
@@ -4117,7 +4223,7 @@ Must be one of:
 | ------------ | ------ |
 | **Minimum**  | &ge; 1 |
 
-#### <a name="plugins_poppler_use_pdftocairo"></a>8.5.3. Property `Rovr Config > plugins > poppler > use_pdftocairo`
+#### <a name="plugins_poppler_use_pdftocairo"></a>8.6.3. Property `Rovr Config > plugins > poppler > use_pdftocairo`
 
 |              |           |
 | ------------ | --------- |
@@ -4127,7 +4233,7 @@ Must be one of:
 
 **Description:** Use pdftocairo instead of pdftoppm, may help performance
 
-#### <a name="plugins_poppler_poppler_folder"></a>8.5.4. Property `Rovr Config > plugins > poppler > poppler_folder`
+#### <a name="plugins_poppler_poppler_folder"></a>8.6.4. Property `Rovr Config > plugins > poppler > poppler_folder`
 
 |              |          |
 | ------------ | -------- |
@@ -4137,7 +4243,7 @@ Must be one of:
 
 **Description:** Path to the folder where Poppler-related binaries are located. Leave empty to use the system PATH.
 
-### <a name="plugins_file_one"></a>8.6. Property `Rovr Config > plugins > file_one`
+### <a name="plugins_file_one"></a>8.7. Property `Rovr Config > plugins > file_one`
 
 |                           |             |
 | ------------------------- | ----------- |
@@ -4150,7 +4256,7 @@ Must be one of:
 | [enabled](#plugins_file_one_enabled)                 | boolean | Enable secondary file(1) type detection if both puremagic and plaintext detection fails. |
 | [get_description](#plugins_file_one_get_description) | boolean | Use file(1) to get additional information of the file type.                              |
 
-#### <a name="plugins_file_one_enabled"></a>8.6.1. Property `Rovr Config > plugins > file_one > enabled`
+#### <a name="plugins_file_one_enabled"></a>8.7.1. Property `Rovr Config > plugins > file_one > enabled`
 
 |              |           |
 | ------------ | --------- |
@@ -4160,7 +4266,7 @@ Must be one of:
 
 **Description:** Enable secondary file(1) type detection if both puremagic and plaintext detection fails.
 
-#### <a name="plugins_file_one_get_description"></a>8.6.2. Property `Rovr Config > plugins > file_one > get_description`
+#### <a name="plugins_file_one_get_description"></a>8.7.2. Property `Rovr Config > plugins > file_one > get_description`
 
 |              |           |
 | ------------ | --------- |

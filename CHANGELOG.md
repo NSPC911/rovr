@@ -9,6 +9,10 @@
 - archive: add support for zstd archives #172
 - app: add log dump when errors occur a5f38ca
 - rg: add support for rg as plugin #175
+- preview: configurable max preview image size #178
+
+## perf
+- preview: load images, and resize them in a separate thread #178
 
 </p>
 </details>

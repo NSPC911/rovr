@@ -243,7 +243,8 @@ class ContentSearch(ModalScreen):
             rg_process = await asyncio.create_subprocess_exec(
                 *rg_cmd, stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE
             )
-            stdout, _ = await asyncio.wait_for(rg_process.communicate(), timeout=3)
+            # 30 seconds is quite generous for rg to respond
+            stdout, _ = await asyncio.wait_for(rg_process.communicate(), timeout=30)
         except (OSError, asyncio.exceptions.TimeoutError) as exc:
             if isinstance(exc, asyncio.exceptions.TimeoutError):
                 rg_process.kill()
@@ -252,9 +253,9 @@ class ContentSearch(ModalScreen):
                 ):
                     await asyncio.wait_for(rg_process.wait(), timeout=1)
             msg = (
-                "  rg is missing on $PATH or cannot be executed"
-                if isinstance(exc, OSError)
-                else "  rg took too long to respond"
+                "  rg took too long to respond"
+                if isinstance(exc, asyncio.exceptions.TimeoutError)
+                else "  rg is missing on $PATH or cannot be executed"
             )
             self.search_options.set_options([
                 Option(msg, disabled=True),
@@ -265,23 +266,17 @@ class ContentSearch(ModalScreen):
         options: list[ModalSearcherOption] = []
         if stdout:
             stdout = stdout.decode()
-            count_map: dict[str, int] = {}
             # fix output from --count
             # arranged as <path>:<count>
-            # convert to just path for stdout, and separate var for count sorting
-            stdout_lines: list[str] = []
+            # convert to (path, count) list
+            stdout_lines: list[tuple[str, int]] = []
             for line in stdout.splitlines():
                 if ":" in line:
-                    file_path, count_str = line.rsplit(":", 1)
+                    path, count = line.rsplit(":", 1)
                     try:
-                        count = int(count_str)
+                        stdout_lines.append((path, int(count)))
                     except ValueError:
-                        count = 0
-                    stdout_lines.append(file_path)
-                    count_map[file_path] = count
-                else:
-                    stdout_lines.append(line)
-                    count_map[line] = 0
+                        continue  # skip lines with invalid count
             worker = self.create_options(stdout_lines)
             try:
                 options: list[ModalSearcherOption] = await worker.wait()
@@ -291,9 +286,6 @@ class ContentSearch(ModalScreen):
                 return  # another worker has taken over
             if options is None:
                 return
-            options.sort(
-                key=lambda opt: (-count_map.get(opt.file_path, 0), opt.file_path)
-            )
             self.search_options.clear_options()
             if options:
                 self.search_options.add_options(options)
@@ -365,24 +357,25 @@ class ContentSearch(ModalScreen):
         )
 
     @work(thread=True, exit_on_error=False)
-    def create_options(self, stdout: list[str]) -> list[ModalSearcherOption] | None:
+    def create_options(
+        self, stdout: list[tuple[str, int]]
+    ) -> list[ModalSearcherOption] | None:
         options: list[ModalSearcherOption] = []
         for line in stdout:
-            file_path = path_utils.normalise(line.strip())
-            file_path_str = str(file_path)
-            if not file_path_str:
+            file_path = path_utils.normalise(line[0].strip())
+            if not file_path:
                 continue
-            display_text = f" {file_path_str}"
+            display_text = f" {file_path}:[$accent]{line[1]}[/]"
             icon: list[str] = (
-                get_icon_for_folder(file_path_str)
-                if path.isdir(file_path_str)
-                else get_icon_for_file(file_path_str)
+                get_icon_for_folder(file_path)
+                if path.isdir(file_path)
+                else get_icon_for_file(file_path)
             )
             options.append(
                 ModalSearcherOption(
                     icon,
                     display_text,
-                    file_path_str,
+                    file_path,
                 )
             )
         return options

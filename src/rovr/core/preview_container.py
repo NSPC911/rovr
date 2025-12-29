@@ -108,12 +108,16 @@ class PreviewContainer(Container):
         max_height = config["interface"]["max_preview_image_height"]
 
         reduce_factor = 1
-        if max_width > 0 and max_height > 0:
-            # Calculate reduction factor needed for each dimension
-            width_factor = pil_object.width / max_width
-            height_factor = pil_object.height / max_height
-            # Use the larger factor, rounded up to nearest integer (minimum 1)
-            reduce_factor = max(1, int(max(width_factor, height_factor)))
+        # Calculate reduction factor based on each active dimension independently.
+        # A value of 0 disables limiting for that dimension.
+        factors: list[float] = []
+        if max_width > 0:
+            factors.append(pil_object.width / max_width)
+        if max_height > 0:
+            factors.append(pil_object.height / max_height)
+        if factors:
+            # Use the larger factor, rounded down to an integer and clamped to at least 1.
+            reduce_factor = max(1, int(max(factors)))
 
         if reduce_factor > 1:
             self.log(

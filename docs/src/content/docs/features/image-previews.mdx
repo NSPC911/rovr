@@ -47,7 +47,7 @@ available `image_protocol` values are: `"Auto"`, `"TGP"`, `"Sixel"`, `"Halfcell"
 
 ### configuring the image size
 
-lets you configure the maximum width and height of image previews in pixels. by default, `rovr` sets these values to `1920` (width) and `1080` (height).
+this lets you configure the maximum width and height of image previews in pixels. by default, `rovr` sets these values to `1920` (width) and `1080` (height).
 
 <Code
   code={`[interface]\nmax_preview_image_width = 1920\nmax_preview_image_height = 1080`}
@@ -55,7 +55,7 @@ lets you configure the maximum width and height of image previews in pixels. by 
   title="config.toml"
 />
 
-don't worry, you don't need to look at scales and pixels to figure out how big the image will be in your terminal. `textual-image` automatically scales the image to fit within your terminal window while maintaining the aspect ratio.
+you can choose to disable this by setting either value to `0`, which means the image preview will use the image as-is.
 
 ### known issues
 

@@ -299,12 +299,7 @@ class ContentSearch(ModalScreen):
                 self.search_options.add_options(options)
                 self.search_options.remove_class("empty")
                 self.search_options.highlighted = 0
-            else:
-                self.search_options.add_option(
-                    Option("  --No matches found--", disabled=True),
-                )
-                self.search_options.add_class("empty")
-                self.search_options.border_subtitle = ""
+                return
         else:
             self.search_options.clear_options()
             self.search_options.add_option(

@@ -16,6 +16,7 @@ from textual.containers import Container
 from textual.css.query import NoMatches
 from textual.highlight import guess_language
 from textual.message import Message
+from textual.widget import Widget
 from textual.widgets import Static
 from textual.widgets.selection_list import Selection
 
@@ -35,6 +36,25 @@ class PDFHandler:
     current_page: int = 0
     total_pages: int = 0
     images: list[PILImage] | None = None
+
+
+class LoadingPreview(Static):
+    """Make the preview look empty"""
+
+    def __init__(self) -> None:
+        super().__init__("Loading...")
+
+    def on_mount(self) -> None:
+        assert isinstance(self.parent, PreviewContainer)
+        # sad thing is that you can just rawdog `self.styles` = `self.parent.styles`
+        self.border_title = self.parent.border_title
+        self.border_subtitle = self.parent.border_subtitle
+        self.styles.border = self.parent.styles.border
+        self.styles.background = self.parent.styles.background
+        self.can_focus = True
+
+    async def on_event(self, event: events.Event) -> None:
+        self.on_mount()
 
 
 class PreviewContainer(Container):
@@ -63,6 +83,14 @@ class PreviewContainer(Container):
 
     def compose(self) -> ComposeResult:
         yield Static(config["interface"]["preview_text"]["start"], classes="special")
+
+    def get_loading_widget(self) -> Widget:
+        """Get a widget to display a loading indicator.
+
+        Returns:
+            A widget in place of this widget to indicate a loading.
+        """
+        return LoadingPreview()
 
     def on_preview_container_set_loading(self, event: SetLoading) -> None:
         self.loading = event.to

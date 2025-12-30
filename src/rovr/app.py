@@ -1,5 +1,6 @@
 import shutil
 from contextlib import suppress
+from io import TextIOWrapper
 from os import chdir, getcwd, path
 from time import perf_counter, sleep
 from typing import Callable, Iterable
@@ -115,8 +116,8 @@ class Application(App, inherit_bindings=False):
         self,
         startup_path: str = "",
         *,
-        cwd_file: str | None = None,
-        chooser_file: str | None = None,
+        cwd_file: str | TextIOWrapper | None = None,
+        chooser_file: str | TextIOWrapper | None = None,
         show_keys: bool = False,
         tree_dom: bool = False,
         mode: str = "",
@@ -129,8 +130,8 @@ class Application(App, inherit_bindings=False):
         self.has_pushed_screen: bool = False
         self.file_list_pause_check: bool = False
         # Runtime output files from CLI
-        self._cwd_file: str | None = cwd_file
-        self._chooser_file: str | None = chooser_file
+        self._cwd_file: str | TextIOWrapper | None = cwd_file
+        self._chooser_file: str | TextIOWrapper | None = chooser_file
         self._show_keys: bool = show_keys
         self._exit_with_tree: bool = tree_dom
 
@@ -478,24 +479,38 @@ class Application(App, inherit_bindings=False):
         # Write cwd to explicit --cwd-file if provided
         message = ""
         if self._cwd_file:
-            try:
-                with open(self._cwd_file, "w", encoding="utf-8") as f:
-                    f.write(getcwd())
-            except OSError:
-                message += (
-                    f"Failed to write cwd file `{path.basename(self._cwd_file)}`!\n"
-                )
+            if isinstance(self._cwd_file, TextIOWrapper):
+                try:
+                    self._cwd_file.write(getcwd())
+                    self._cwd_file.flush()
+                except OSError:
+                    message += "Failed to write cwd to stdout!\n"
+            else:
+                try:
+                    with open(self._cwd_file, "w", encoding="utf-8") as f:
+                        f.write(getcwd())
+                except OSError:
+                    message += (
+                        f"Failed to write cwd file `{path.basename(self._cwd_file)}`!\n"
+                    )
         # Write selected/active item(s) to --chooser-file, if provided
         if self._chooser_file:
-            try:
-                file_list = self.query_one("#file_list")
-                selected = await file_list.get_selected_objects()
-                if selected:
-                    with open(self._chooser_file, "w", encoding="utf-8") as f:
-                        f.write("\n".join(selected))
-            except OSError:
-                # Any failure writing chooser file should not block exit
-                message += f"Failed to write chooser file `{path.basename(self._chooser_file)}`"
+            file_list = self.query_one("#file_list", FileList)
+            selected = await file_list.get_selected_objects()
+            if selected:
+                if isinstance(self._chooser_file, TextIOWrapper):
+                    try:
+                        self._chooser_file.write("\n".join(selected))
+                        self._chooser_file.flush()
+                    except OSError:
+                        message += "Failed to write chooser to stdout!\n"
+                else:
+                    try:
+                        with open(self._chooser_file, "w", encoding="utf-8") as f:
+                            f.write("\n".join(selected))
+                    except OSError:
+                        # Any failure writing chooser file should not block exit
+                        message += f"Failed to write chooser file `{path.basename(self._chooser_file)}`"
         self.exit(message.strip())
 
     def cd(

@@ -18,7 +18,7 @@ from textual.highlight import guess_language
 
 from rovr.functions.icons import get_icon_for_file, get_icon_for_folder
 from rovr.monkey_patches.puremagic_patch import puremagic
-from rovr.variables.constants import config, os_type
+from rovr.variables.constants import config, log_name, os_type
 
 # windows needs nt, because scandir returns
 # nt.DirEntry instead of os.DirEntry on
@@ -255,7 +255,7 @@ def sync_get_cwd_object(
         show_hidden(bool): Whether to include hidden files/folders (dot-prefixed on Unix; flagged hidden on Windows/macOS)
         sort_by(str): What to sort by
         reverse(bool): Whether to reverse the sorting
-        return_nothing_if_this_returns_true(Callable[[], bool] | None): A callable that returns a bool. If it returns True, the function returns empty lists.
+        return_nothing_if_this_returns_true(Callable[[], bool] | None): A callable that returns a bool. If it returns True, the function returns None.
 
     Returns:
         folders(list[dict]): A list of dictionaries, containing "name" as the item's name and "icon" as the respective icon
@@ -638,7 +638,7 @@ class MimeResult(NamedTuple):
 
 
 def get_mime_type(
-    file_path: str, ignore: list[Literal["basic", "puremagic", "file1"]] = []
+    file_path: str, ignore: list[Literal["basic", "puremagic", "file1"]] | None = None
 ) -> MimeResult | None:
     """
     Synchronous/Threaded wrapper to get the MIME type of a file.
@@ -651,6 +651,9 @@ def get_mime_type(
         MimeResult: The method used and the detected MIME type
         None: If the method is not available or failed
     """
+    if ignore is None:
+        ignore = []
+
     file_extension = path.splitext(file_path)[1].lower()
 
     # Read file bytes once, reuse for both puremagic and basic detection
@@ -716,7 +719,7 @@ def get_mime_type(
     return None
 
 
-def dump_exc(widget: DOMNode, exc: Exception) -> str:
+def dump_exc(widget: DOMNode, exc: Exception) -> str | None:
     """Dump an exception to the console for debugging purposes.
 
     Args:
@@ -726,22 +729,28 @@ def dump_exc(widget: DOMNode, exc: Exception) -> str:
     Returns:
         str: The path to the log file where the exception was dumped.
     """
-    from datetime import datetime
-
     from rich.traceback import Traceback
 
     from rovr.variables.maps import VAR_TO_DIR
 
     rich_traceback = Traceback.from_exception(
-        type(exc), exc, exc.__traceback__, width=None, code_width=None, show_locals=True
+        type(exc),
+        exc,
+        exc.__traceback__,
+        width=None,
+        code_width=None,
+        show_locals=True,
+        max_frames=5,
     )
     widget.log(rich_traceback)
 
     dump_path = path.join(
         path.realpath(VAR_TO_DIR["CONFIG"]),
-        f"{str(datetime.now()).replace(' ', '_').replace(':', '')}.log",
+        "logs",
+        f"{log_name}.log",
     )
     with open(dump_path, "w") as file_log:
+        # don't need to handle OS Error, Textual automatically chains errors
         error_log = Console(file=file_log, legacy_windows=True)
         error_log.print(rich_traceback)
     return dump_path

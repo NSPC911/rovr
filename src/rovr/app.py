@@ -69,14 +69,14 @@ from rovr.screens import (
 )
 from rovr.screens.way_too_small import TerminalTooSmall
 from rovr.state_manager import StateManager
-from rovr.variables.constants import MaxPossible, config
+from rovr.variables.constants import MaxPossible, config, log_name
 from rovr.variables.maps import VAR_TO_DIR
 
 console = Console()
 
 
 class Application(App, inherit_bindings=False):
-    # don't need ctrl+c
+    # dont need ctrl+c
     BINDINGS = [
         Binding(
             key,
@@ -247,6 +247,7 @@ class Application(App, inherit_bindings=False):
             )
         # title for screenshots
         self.title = ""
+        self.set_timer(5, lambda: 0 / 0)
 
     @work
     async def action_focus_next(self) -> None:
@@ -835,33 +836,31 @@ class Application(App, inherit_bindings=False):
         except Exception as exc:
             return exc  # ty: ignore[invalid-return-type]
 
-    def _handle_exception(self, error: Exception) -> None:
-        """Called with an unhandled exception.
+    def _print_error_renderables(self) -> None:
+        """Print and clear exit renderables."""
+        from rich.panel import Panel
 
-        Always results in the app exiting.
-
-        Args:
-            error: An exception instance.
-        """
-        self._return_code = 1
-        # If we're running via pilot and this is the first exception encountered,
-        # take note of it so that we can re-raise for test frameworks later.
-        if self._exception is None:
-            self._exception = error
-            self._exception_event.set()
-
-        dump_path = dump_exc(self, error)
-
-        if hasattr(error, "__rich__"):
-            # Exception has a rich method, so we can defer to that for the rendering
-            self.panic(error)  # ty: ignore[invalid-argument-type]
-        else:
-            # Use default exception rendering
-            self._fatal_error()
-        console.print(f"[red]An error log has been saved to: {dump_path}[/]")
-        console.print(
-            "[red]Please consider reporting this issue along with the log file on [link=https://github.com/NSPC911/rovr/issues/new/choose]GitHub[/link]:[/]"
-        )
+        error_count = len(self._exit_renderaeles)
+        for renderable in self._exit_renderables:
+            self.error_console.print(renderable)
+        if error_count > 1:
+            self.error_console.print(
+                f"\n[b]NOTE:[/b] {error_count} errors shown above.", markup=True
+            )
+        if error_count != 0:
+            dump_path = path.join(
+                path.realpath(VAR_TO_DIR["CONFIG"]), "logs", f"{log_name}.log"
+            )
+            self.error_console.print(
+                Panel(
+                    f"The error has been dumped to {dump_path}",
+                    expand=False,
+                    border_style="red",
+                    padding=(0, 2),
+                ),
+                style="bold red",
+            )
+            self._exit_renderables.clear()
 
 
 app = Application()

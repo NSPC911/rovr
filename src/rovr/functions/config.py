@@ -139,6 +139,8 @@ def schema_dump(doc_path: str, exception: ValidationError, config_content: str) 
         exception: the ValidationError that occurred
         config_content: the raw file content
     """
+    import fnmatch
+
     from rich.padding import Padding
     from rich.syntax import Syntax
     from rich.table import Table
@@ -225,15 +227,10 @@ def schema_dump(doc_path: str, exception: ValidationError, config_content: str) 
 
         pprint(f"[bright_red]╰─{'─' * rjust}─❯[/] {error_msg}")
     # check path for custom message from migration.json
-    with (
-        resources
-        .files("rovr.config")
-        .joinpath("migration.json")
-        .open("r", encoding="utf-8") as f
-    ):
+    with open(
+        resources.files("rovr.config") / "migration.json", "r", encoding="utf-8"
+    ) as f:
         migration_docs = ujson.load(f)
-
-    import fnmatch
 
     for item in migration_docs:
         if any(fnmatch.fnmatch(path_str, path) for path in item["keys"]):
@@ -300,19 +297,12 @@ def load_config() -> tuple[dict, dict]:
         elif not lines:
             with open(user_config_path, "w", encoding="utf-8") as file:
                 file.write(DEFAULT_CONFIG.format(schema_url=schema_url))
-
-    with (
-        resources
-        .files("rovr.config")
-        .joinpath("config.toml")
-        .open("r", encoding="utf-8") as f
-    ):
-        # check header
-        try:
-            content = f.read()
-            template_config = tomli.loads(content)
-        except tomli.TOMLDecodeError as exc:
-            toml_dump(path.join(path.dirname(__file__), "../config/config.toml"), exc)
+    try:
+        template_config = tomli.loads(
+            resources.files("rovr.config").joinpath("config.toml").read_text("utf-8")
+        )
+    except tomli.TOMLDecodeError as exc:
+        toml_dump(path.join(path.dirname(__file__), "../config/config.toml"), exc)
 
     user_config = {}
     user_config_content = ""
@@ -327,14 +317,8 @@ def load_config() -> tuple[dict, dict]:
     # Don't really have to consider the else part, because it's created further down
     config = deep_merge(template_config, user_config)
     # check with schema
-    with (
-        resources
-        .files("rovr.config")
-        .joinpath("schema.json")
-        .open("r", encoding="utf-8") as f
-    ):
-        content = f.read()
-        schema = ujson.loads(content)
+    content = resources.files("rovr.config").joinpath("schema.json").read_text("utf-8")
+    schema = ujson.loads(content)
 
     try:
         jsonschema.validate(config, schema)

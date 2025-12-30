@@ -50,9 +50,9 @@ dev = [
   "commitizen>=4.10.0",
   "json-schema-for-humans>=1.5.1",
   "poethepoet>=0.38.0",
-  "ruff>=0.14.6",
+  "ruff>=0.14.10",
   "textual-dev>=1.7.0",
-  "ty==0.0.3",
+  "ty==0.0.8",
 ]
 speedups = [
     "textual-speedups>=0.2.1",
@@ -81,7 +81,8 @@ check.sequence = [
   { cmd = "ty check" },
   { cmd = "ruff check" }
 ]
-format = "ruff check --unsafe-fixes --fix"
+format.sequence = [{ cmd = "ruff check --unsafe-fixes --fix"}, { cmd = "ruff format"}]
+fmt = ["format"]
 "screenshot-format" = "pnpx prettier --write docs/public/screenshots/*.svg --parser html --bracket-same-line --print-width 160"
 
 [tool.ruff.lint]

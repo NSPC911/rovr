@@ -50,6 +50,7 @@ dev = [
   "commitizen>=4.10.0",
   "json-schema-for-humans>=1.5.1",
   "poethepoet>=0.38.0",
+  "prek>=0.2.25",
   "ruff>=0.14.10",
   "textual-dev>=1.7.0",
   "ty==0.0.8",

@@ -1,0 +1,30 @@
+name: Label OS-specific issues
+
+on:
+  issues:
+    types: [opened]
+
+jobs:
+  label:
+    runs-on: windows-latest
+    steps:
+      - name: Add OS labels
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: pwsh
+        run: |
+          $body = @'
+          ${{ github.event.issue.body }}
+          '@
+
+          $os = @('Windows', 'macOS', 'Linux')
+
+          $labels = @()
+          $os | ForEach-Object {
+            if ($body -match "- \[X\] $_") { $labels += "os:$($_.ToLower())" }
+          }
+
+          if (($labels.Count -gt 0) -and ($labels.Count -lt 3)) {
+            $labelsStr = $labels -join ','
+            gh issue edit ${{ github.event.issue.number }} --add-label $labelsStr
+          }

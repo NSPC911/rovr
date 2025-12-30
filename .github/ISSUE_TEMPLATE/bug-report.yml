@@ -43,6 +43,18 @@ body:
     validations:
       required: true
 
+  - type: checkboxes
+    id: os-affected
+    attributes:
+      label: Affected Operating System(s)
+      description: Which OS(es) does this bug occur on?
+      options:
+        - label: Windows
+        - label: macOS
+        - label: Linux
+    validations:
+      required: true
+
   - type: textarea
     id: how-to-fix
     attributes:

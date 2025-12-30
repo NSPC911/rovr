@@ -226,7 +226,8 @@ def schema_dump(doc_path: str, exception: ValidationError, config_content: str) 
         pprint(f"[bright_red]╰─{'─' * rjust}─❯[/] {error_msg}")
     # check path for custom message from migration.json
     with (
-        resources.files("rovr.config")
+        resources
+        .files("rovr.config")
         .joinpath("migration.json")
         .open("r", encoding="utf-8") as f
     ):
@@ -301,7 +302,8 @@ def load_config() -> tuple[dict, dict]:
                 file.write(DEFAULT_CONFIG.format(schema_url=schema_url))
 
     with (
-        resources.files("rovr.config")
+        resources
+        .files("rovr.config")
         .joinpath("config.toml")
         .open("r", encoding="utf-8") as f
     ):
@@ -326,7 +328,8 @@ def load_config() -> tuple[dict, dict]:
     config = deep_merge(template_config, user_config)
     # check with schema
     with (
-        resources.files("rovr.config")
+        resources
+        .files("rovr.config")
         .joinpath("schema.json")
         .open("r", encoding="utf-8") as f
     ):

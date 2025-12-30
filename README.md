@@ -1,7 +1,6 @@
 <div align="center">
   <h1>rovr</h1>
   <img alt="Python Version" src="https://img.shields.io/pypi/pyversions/rovr?style=for-the-badge&logo=python&logoColor=white&color=yellow&label=for" height="24px" width="auto">
-  <img alt="Lines of Code" src="https://tokei.rs/b1/github/NSPC911/rovr?category=code&style=for-the-badge&label=loc" height="24px" width="auto">
   <a href="https://nspc911.github.io/discord"><img alt="Discord" src="https://img.shields.io/discord/1110189201313513552?style=for-the-badge&logoColor=white&color=%235865f2&logo=discord" height="24px" width="auto"></a>
   <a href="https://pypi.org/project/rovr"><img alt="PyPI - Downloads" src="https://img.shields.io/pypi/dw/rovr?style=for-the-badge&logoColor=white&color=darkgreen&label=pip&logo=pypi" height="24px" width="auto"></a>
   <br>

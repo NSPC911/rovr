@@ -1,6 +1,7 @@
 import subprocess
 from dataclasses import dataclass
 from os import path
+from pathlib import PurePath
 from time import sleep, time
 from typing import cast
 
@@ -46,7 +47,7 @@ class LoadingPreview(Static):
 
     def on_mount(self) -> None:
         assert isinstance(self.parent, PreviewContainer)
-        # sad thing is that you can just rawdog `self.styles` = `self.parent.styles`
+        # sad thing is that you cant just rawdog `self.styles` = `self.parent.styles`
         self.border_title = self.parent.border_title
         self.border_subtitle = self.parent.border_subtitle
         self.styles.border = self.parent.styles.border
@@ -176,7 +177,8 @@ class PreviewContainer(Container):
                 return
             if pil_creator.error:
                 raise pil_creator.error
-            pil_object: PILImage = pil_creator.result
+            pil_object = pil_creator.result
+            assert isinstance(pil_object, PILImage)
 
         except (UnidentifiedImageError, NotImplementedError):
             if self.any_in_queue():
@@ -246,9 +248,7 @@ class PreviewContainer(Container):
 
         # Convert PDF to images if not already done
         if self.pdf.images is None:
-            poppler_folder: str | None = cast(
-                str | None, config["plugins"]["poppler"]["poppler_folder"]
-            )
+            poppler_folder: str | None = config["plugins"]["poppler"]["poppler_folder"]
             if poppler_folder == "":
                 poppler_folder = None
             try:
@@ -259,7 +259,7 @@ class PreviewContainer(Container):
                     single_file=False,
                     use_pdftocairo=config["plugins"]["poppler"]["use_pdftocairo"],
                     thread_count=config["plugins"]["poppler"]["threads"],
-                    poppler_path=poppler_folder,  # type: ignore[arg-type]
+                    poppler_path=cast(str | PurePath, poppler_folder),
                 )
                 if len(result) == 0:
                     raise ValueError(
@@ -974,8 +974,8 @@ class PreviewContainer(Container):
                 widget.scroll_end(animate=False)
 
     @on(events.Show)
-    def when_become_visible(self, event: events.Show) -> None:
-        if self._pending_preview_path is not None:
+    async def when_become_visible(self, event: events.Show) -> None:
+        if isinstance(self._pending_preview_path, str):
             pending = self._pending_preview_path
             self._pending_preview_path = None
-            self.perform_show_preview(pending)
+            await self.show_preview(pending)

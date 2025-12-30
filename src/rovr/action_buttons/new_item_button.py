@@ -101,7 +101,7 @@ class NewItemButton(Button):
                     title="New Item",
                     severity="error",
                 )
-        self.app.file_list_pause_check = True
+        self.app.file_list_pause_check = True  # ty: ignore[invalid-assignment]
         file_list = self.app.query_one("#file_list")
         file_list.focus()
         worker: Worker = file_list.update_file_list(
@@ -109,4 +109,4 @@ class NewItemButton(Button):
         )
         with contextlib.suppress(WorkerError):
             await worker.wait()
-        self.app.file_list_pause_check = False
+        self.app.file_list_pause_check = False  # ty: ignore[invalid-assignment]

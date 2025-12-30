@@ -23,6 +23,7 @@ from rovr.screens import (
     Dismissable,
     FileInUse,
     YesOrNo,
+    typed,
 )
 from rovr.variables.constants import config, os_type, scroll_vindings
 
@@ -153,6 +154,15 @@ class ProcessContainer(VerticalScroll):
         await self.mount(new_bar, before=0)
         return new_bar
 
+    def threaded_new_process_bar(
+        self, max: int | None = None, id: str | None = None, classes: str | None = None
+    ) -> ProgressBarContainer:
+        bar = self.app.call_from_thread(
+            self.new_process_bar, max=max, id=id, classes=classes
+        )
+        assert isinstance(bar, ProgressBarContainer)
+        return bar
+
     @work(thread=True)
     def delete_files(
         self, files: list[str], compressed: bool = True, ignore_trash: bool = False
@@ -170,9 +180,7 @@ class ProcessContainer(VerticalScroll):
             PermissionError: re-raises if the file usage handler fails
         """
         # Create progress/process bar (why have I set names as such...)
-        bar: ProgressBarContainer = self.app.call_from_thread(
-            self.new_process_bar, classes="active"
-        )
+        bar = self.threaded_new_process_bar(classes="active")
         self.app.call_from_thread(
             bar.update_icon,
             icon_utils.get_icon("general", "delete")[0],
@@ -250,7 +258,7 @@ class ProcessContainer(VerticalScroll):
                             ):
                                 os.remove(item_dict["path"])
                         except Exception as e:
-                            do_what: dict = self.app.call_from_thread(
+                            do_what = self.app.call_from_thread(
                                 self.app.push_screen_wait,
                                 YesOrNo(
                                     f"Trashing failed due to\n{e}\nDo Permenant Deletion?",
@@ -258,6 +266,7 @@ class ProcessContainer(VerticalScroll):
                                     border_subtitle="If this is a bug, please file an issue!",
                                 ),
                             )
+                            assert isinstance(do_what, typed.YesOrNo)
                             if do_what["toggle"]:
                                 ignore_trash = do_what["value"]
                             if do_what["value"]:
@@ -388,12 +397,13 @@ class ProcessContainer(VerticalScroll):
                 action_on_file_in_use = "ask"
 
         while True:
-            response: dict = self.app.call_from_thread(
+            response = self.app.call_from_thread(
                 self.app.push_screen_wait,
                 FileInUse(
                     f"The file appears to be open in another application and cannot be operated on.\nPath: {item_display_name}",
                 ),
             )
+            assert isinstance(response, typed.FileInUse)
             # Handle toggle: remember the action for future file-in-use scenarios
             updated_action = persisted_default
             if response["toggle"]:
@@ -447,9 +457,7 @@ class ProcessContainer(VerticalScroll):
             files (list[str]): List of file paths to compress.
             archive_name (str): Path for the output archive.
         """
-        bar: ProgressBarContainer = self.app.call_from_thread(
-            self.new_process_bar, classes="active"
-        )
+        bar = self.threaded_new_process_bar(classes="active")
         self.app.call_from_thread(
             bar.update_icon,
             icon_utils.get_icon("general", "zip")[0],
@@ -507,7 +515,7 @@ class ProcessContainer(VerticalScroll):
                         arcname = path.relpath(p, base_path)
                         _archive = archive._archive
                         if _archive:
-                            if archive._is_zip:
+                            if archive._archive_type == "zip":
                                 assert isinstance(_archive, zipfile.ZipFile)
                                 _archive.write(p, arcname=arcname)
                             else:
@@ -541,9 +549,7 @@ class ProcessContainer(VerticalScroll):
             archive_path (str): Path to the zip archive.
             destination_path (str): Path to the destination folder.
         """
-        bar: ProgressBarContainer = self.app.call_from_thread(
-            self.new_process_bar, classes="active"
-        )
+        bar = self.threaded_new_process_bar(classes="active")
         self.app.call_from_thread(
             bar.update_icon,
             icon_utils.get_icon("general", "open")[0],
@@ -579,14 +585,17 @@ class ProcessContainer(VerticalScroll):
                         last_update_time = current_time
                     if path.exists(path.join(destination_path, filename)):
                         if do_what_on_existance == "ask":
-                            response: dict = self.app.call_from_thread(
-                                self.app.push_screen_wait,
-                                CommonFileNameDoWhat(
-                                    "Path already exists in destination\nWhat do you want to do now?",
-                                    border_title=filename,
-                                    border_subtitle=f"Extracting to {destination_path}",
+                            response = (
+                                self.app.call_from_thread(
+                                    self.app.push_screen_wait,
+                                    CommonFileNameDoWhat(
+                                        "Path already exists in destination\nWhat do you want to do now?",
+                                        border_title=filename,
+                                        border_subtitle=f"Extracting to {destination_path}",
+                                    ),
                                 ),
                             )
+                            assert isinstance(response, typed.CommonFileNameDoWhat)
                             if response["same_for_next"]:
                                 do_what_on_existance = response["value"]
                             val = response["value"]
@@ -676,9 +685,7 @@ class ProcessContainer(VerticalScroll):
         """
         if dest == "":
             dest = os.getcwd()
-        bar: ProgressBarContainer = self.app.call_from_thread(
-            self.new_process_bar, classes="active"
-        )
+        bar = self.threaded_new_process_bar(classes="active")
         self.app.call_from_thread(
             bar.update_icon,
             icon_utils.get_icon("general", "paste")[0],
@@ -733,7 +740,7 @@ class ProcessContainer(VerticalScroll):
                     if path.exists(path.join(dest, item_dict["relative_loc"])):
                         # check if overwrite
                         if action_on_existance == "ask":
-                            response: dict = self.app.call_from_thread(
+                            response = self.app.call_from_thread(
                                 self.app.push_screen_wait,
                                 CommonFileNameDoWhat(
                                     "The destination already has file of that name.\nWhat do you want to do now?",
@@ -741,6 +748,7 @@ class ProcessContainer(VerticalScroll):
                                     border_subtitle=f"Copying to {dest}",
                                 ),
                             )
+                            assert isinstance(response, typed.CommonFileNameDoWhat)
                             if response["same_for_next"]:
                                 action_on_existance = response["value"]
                             val = response["value"]
@@ -847,7 +855,7 @@ class ProcessContainer(VerticalScroll):
                             cut_ignore.append(item_dict["path"])
                             continue
                         if action_on_existance == "ask":
-                            response: dict = self.app.call_from_thread(
+                            response = self.app.call_from_thread(
                                 self.app.push_screen_wait,
                                 CommonFileNameDoWhat(
                                     "The destination already has file of that name.\nWhat do you want to do now?",
@@ -855,6 +863,7 @@ class ProcessContainer(VerticalScroll):
                                     border_subtitle=f"Moving to {dest}",
                                 ),
                             )
+                            assert isinstance(response, typed.CommonFileNameDoWhat)
                             if response["same_for_next"]:
                                 action_on_existance = response["value"]
                             val = response["value"]

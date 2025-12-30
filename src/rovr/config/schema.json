@@ -372,7 +372,7 @@
         "properties": {
           "name": {
             "type": "string",
-            "description": "A name for the theme. However, when the theme is available in the theme picker, it shows up as a hiphenated, lowercase version."
+            "description": "A name for the theme. However, when the theme is available in the theme picker, it shows up as a hyphenated, lowercase version."
           },
           "primary": {
             "type": "string",

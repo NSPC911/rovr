@@ -122,4 +122,4 @@ unresolved-reference = "ignore" # handled by ruff
 unresolved-attribute = "ignore"
 no-matching-overload = "ignore" # not that accurate
 possibly-missing-attribute = "ignore" # no it is not missing
-invalid-assignment = "ignore" # probably already handled
+invalid-assignment = "warn" # probably already but warn for future

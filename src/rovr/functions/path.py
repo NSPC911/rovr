@@ -194,97 +194,49 @@ def get_extension_sort_key(file_dict: dict) -> tuple[int, str]:
         return (3, name.split(".")[-1].lower())
 
 
-# soon this wont be needed, and the sync version will always be used
-async def get_cwd_object(
+@work(thread=True)
+def threaded_get_cwd_object(
+    node: DOMNode,
     cwd: str,
     show_hidden: bool = False,
     sort_by: Literal[
         "name", "size", "modified", "created", "extension", "natural"
     ] = "name",
     reverse: bool = False,
-) -> tuple[list[CWDObjectReturnDict], list[CWDObjectReturnDict]]:
-    """
-    Get the objects (files and folders) in a provided directory
-    Args:
-        cwd(str): The working directory to check
-        show_hidden(bool): Whether to include hidden files/folders (dot-prefixed on Unix; flagged hidden on Windows/macOS)
-        sort_by(str): What to sort by
-        reverse(bool): Whether to reverse the sorting
+    return_nothing_if_this_returns_true: Callable[[], bool] | None = None,
+) -> tuple[list[CWDObjectReturnDict], list[CWDObjectReturnDict]] | tuple[None, None]:
+    return sync_get_cwd_object(
+        cwd,
+        show_hidden,
+        sort_by,
+        reverse,
+        return_nothing_if_this_returns_true,
+    )
 
-    Returns:
-        folders(list[dict]): A list of dictionaries, containing "name" as the item's name and "icon" as the respective icon
-        files(list[dict]): A list of dictionaries, containing "name" as the item's name and "icon" as the respective icon
 
-    Raises:
-        TypeError: if the wrong type is received
-    """
+@overload
+def sync_get_cwd_object(
+    cwd: str,
+    show_hidden: bool = False,
+    sort_by: Literal[
+        "name", "size", "modified", "created", "extension", "natural"
+    ] = "name",
+    reverse: bool = False,
+) -> tuple[list[CWDObjectReturnDict], list[CWDObjectReturnDict]]: ...
 
-    # Offload the blocking os.scandir call to a thread pool
-    def _scandir() -> list:
-        try:
-            return list(os.scandir(cwd))
-        except (PermissionError, FileNotFoundError, OSError):
-            raise PermissionError(f"PermissionError: Unable to access {cwd}")
 
-    entries = await asyncio.to_thread(_scandir)
-
-    folders: list[CWDObjectReturnDict] = []
-    files: list[CWDObjectReturnDict] = []
-
-    for item in entries:
-        if not isinstance(item, DirEntryTypes):
-            raise TypeError(f"Expected a DirEntry object but got {type(item)}")
-        if not show_hidden and is_hidden_file(item.path):
-            continue
-
-        if item.is_dir():
-            folders.append({
-                "name": item.name,
-                "icon": get_icon_for_folder(item.name),
-                "dir_entry": item,
-            })
-        else:
-            files.append({
-                "name": item.name,
-                "icon": get_icon_for_file(item.name),
-                "dir_entry": item,
-            })
-    # sort order
-    match sort_by:
-        case "name":
-            folders.sort(key=lambda x: x["name"].lower())
-            files.sort(key=lambda x: x["name"].lower())
-        case "natural":
-            # no we will not be using `natsort`'s os_sorted
-            folders: list[CWDObjectReturnDict] = natsorted(
-                folders, key=lambda x: x["name"].lower()
-            )
-            files: list[CWDObjectReturnDict] = natsorted(
-                files, key=lambda x: x["name"].lower()
-            )
-        case "created":
-            folders.sort(key=lambda x: x["dir_entry"].stat().st_ctime_ns)
-            files.sort(key=lambda x: x["dir_entry"].stat().st_ctime_ns)
-        case "modified":
-            folders.sort(key=lambda x: x["dir_entry"].stat().st_mtime_ns)
-            files.sort(key=lambda x: x["dir_entry"].stat().st_mtime_ns)
-        case "size":
-            # no we will not be calculating the folder size
-            folders.sort(key=lambda x: x["name"].lower())
-            files.sort(key=lambda x: x["dir_entry"].stat().st_size)
-        case "extension":
-            # folders dont have extensions btw
-            # and i will not count dot prepended folders
-            folders.sort(key=lambda x: x["name"].lower())
-
-            files.sort(key=get_extension_sort_key)
-    if reverse:
-        files.reverse()
-        folders.reverse()
-
-    if globals().get("is_dev", False):
-        print(f"Found {len(folders)} folders and {len(files)} files in {cwd}")
-    return folders, files
+@overload
+def sync_get_cwd_object(
+    cwd: str,
+    show_hidden: bool = False,
+    sort_by: Literal[
+        "name", "size", "modified", "created", "extension", "natural"
+    ] = "name",
+    reverse: bool = False,
+    return_nothing_if_this_returns_true: Callable[[], bool] | None = None,
+) -> (
+    tuple[list[CWDObjectReturnDict], list[CWDObjectReturnDict]] | tuple[None, None]
+): ...
 
 
 def sync_get_cwd_object(

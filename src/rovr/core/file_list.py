@@ -1,7 +1,7 @@
 import contextlib
 from os import getcwd, path
 from os import system as cmd
-from typing import ClassVar, Iterable, Self
+from typing import ClassVar, Iterable, Self, cast
 
 from rich.segment import Segment
 from rich.style import Style
@@ -14,6 +14,7 @@ from textual.strip import Strip
 from textual.widgets import Button, Input, OptionList, SelectionList
 from textual.widgets.option_list import Option, OptionDoesNotExist
 from textual.widgets.selection_list import Selection, SelectionType
+from textual.worker import WorkerError
 
 from rovr.classes import FileListSelectionWidget
 from rovr.classes.session_manager import SessionManager
@@ -22,6 +23,8 @@ from rovr.functions import icons as icon_utils
 from rovr.functions import path as path_utils
 from rovr.functions import pins as pin_utils
 from rovr.functions import utils
+from rovr.navigation_widgets import PathInput
+from rovr.state_manager import StateManager
 from rovr.variables.constants import (
     SortByOptions,
     buttons_that_depend_on_path,
@@ -82,7 +85,7 @@ class FileList(SelectionList, inherit_bindings=False):
                 f"Expected sort_by value to be one of 'name', 'size', 'modified', 'created', 'extension' or 'natural', but got '{value}'"
             )
         with contextlib.suppress(NoMatches):
-            self.app.query_one("StateManager").sort_by = value
+            self.app.query_one("StateManager", StateManager).sort_by = value
 
     @property
     def sort_descending(self) -> bool:
@@ -94,7 +97,7 @@ class FileList(SelectionList, inherit_bindings=False):
     @sort_descending.setter
     def sort_descending(self, value: bool) -> None:
         with contextlib.suppress(NoMatches):
-            self.app.query_one("StateManager").sort_descending = value
+            self.app.query_one("StateManager", StateManager).sort_descending = value
 
     @property
     def highlighted_option(self) -> FileListSelectionWidget | None:
@@ -170,7 +173,7 @@ class FileList(SelectionList, inherit_bindings=False):
             # the watcher function)
             self.clear_options()
             return
-        self.app.file_list_pause_check = True
+        self.app.file_list_pause_check = True  # ty: ignore[invalid-assignment]
         try:
             preview = self.app.query_one("PreviewContainer")
 
@@ -183,18 +186,29 @@ class FileList(SelectionList, inherit_bindings=False):
                 last_highlight = session.lastHighlighted[cwd]
                 focus_on = last_highlight["name"]
             try:
-                folders, files = await path_utils.get_cwd_object(
+                worker = path_utils.threaded_get_cwd_object(
+                    self,
                     cwd,
                     config["interface"]["show_hidden_files"],
                     sort_by=self.sort_by,
                     reverse=self.sort_descending,
+                )
+                try:
+                    await worker.wait()
+                except WorkerError:
+                    return
+                folders, files = cast(
+                    tuple[
+                        list[path_utils.CWDObjectReturnDict],
+                        list[path_utils.CWDObjectReturnDict],
+                    ],
+                    worker.result,
                 )
                 if not folders and not files:
                     self.list_of_options.append(
                         Selection("   --no-files--", value="", disabled=True)
                     )
                     await preview.remove_children()
-                    preview._current_preview_type = "none"
                     preview.border_title = ""
                 else:
                     file_list_options = folders + files
@@ -224,12 +238,12 @@ class FileList(SelectionList, inherit_bindings=False):
                     ),
                 )
                 await preview.remove_children()
-                preview._current_preview_type = "none"
                 preview.border_title = ""
 
             # Query buttons once and update disabled state based on file list status
             buttons: list[Button] = [
-                self.app.query_one(selector) for selector in buttons_that_depend_on_path
+                self.app.query_one(selector, Button)
+                for selector in buttons_that_depend_on_path
             ]
             should_disable: bool = (
                 len(self.list_of_options) == 1 and self.list_of_options[0].disabled
@@ -251,7 +265,7 @@ class FileList(SelectionList, inherit_bindings=False):
 
             self.set_options(self.list_of_options)
             # session handler
-            self.app.query_one("#path_switcher").value = cwd + (
+            self.app.query_one("#path_switcher", PathInput).value = cwd + (
                 "" if cwd.endswith("/") else "/"
             )
             # I question to myself why directories isn't a list[str]
@@ -313,7 +327,7 @@ class FileList(SelectionList, inherit_bindings=False):
                     await self.toggle_mode()
                 self.update_border_subtitle()
         finally:
-            self.app.file_list_pause_check = False
+            self.app.file_list_pause_check = False  # ty: ignore[invalid-assignment]
 
     async def file_selected_handler(self, target_path: str) -> None:
         if self.app._chooser_file:

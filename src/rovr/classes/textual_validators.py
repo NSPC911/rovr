@@ -50,7 +50,7 @@ class EndsWithAnArchiveExtension(Validator):
     def __init__(self) -> None:
         super().__init__(failure_description="Extension is not a valid archive type.")
         self.strict = True
-        self.allowed_extensions: tuple[str]
+        self.allowed_extensions: tuple[str, ...]
         allowed: list[str] = []
         from rovr.classes.archive import ARCHIVE_EXTENSIONS
 

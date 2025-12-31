@@ -86,6 +86,12 @@ format.sequence = [{ cmd = "ruff check --unsafe-fixes --fix"}, { cmd = "ruff for
 fmt = ["format"]
 "screenshot-format" = "pnpx prettier --write docs/public/screenshots/*.svg --parser html --bracket-same-line --print-width 160"
 
+[tool.ruff]
+force-exclude = true
+exclude = [
+  "src/rovr/monkey_patches/sys_stdout.py"
+]
+
 [tool.ruff.lint]
 select = [
   "ASYNC251",

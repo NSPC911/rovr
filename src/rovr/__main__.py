@@ -1,7 +1,6 @@
 import sys
 from io import TextIOWrapper
 from os import environ
-from typing import Literal
 
 import rich_click as click
 from rich import box
@@ -94,20 +93,6 @@ click.rich_click.STYLE_COMMANDS_PANEL_BORDER = "white"
     help="Write chosen file(s) (`\\n`-separated) to this file on exit.",
 )
 @click.option(
-    "--force-stdout",
-    "std",
-    flag_value="out",
-    type=str,
-    help="Force rovr to use std[bold cyan]out[/] for the app",
-)
-@click.option(
-    "--force-stderr",
-    "std",
-    flag_value="err",
-    type=str,
-    help="Force rovr to use std[bold cyan]err[/] for the app (useful~ish).",
-)
-@click.option(
     "--show-keys",
     "show_keys",
     multiple=False,
@@ -154,7 +139,7 @@ click.rich_click.STYLE_COMMANDS_PANEL_BORDER = "white"
 @click.option_panel(
     "Paths",
     options=["--chooser-file", "--cwd-file"],
-    help='Set to "__stdout__" to write to standard output',
+    help="Set to __stdout__ to write to stdout (__stderr__ for stderr)",
     inline_help_in_title=True,
     help_style="not dim italic",
 )
@@ -164,8 +149,6 @@ click.rich_click.STYLE_COMMANDS_PANEL_BORDER = "white"
         "--version",
         "--config-path",
         "--help",
-        "--force-stdout",
-        "--force-stderr",
     ],
 )
 @click.option_panel(
@@ -175,8 +158,8 @@ click.rich_click.STYLE_COMMANDS_PANEL_BORDER = "white"
         "--tree-dom",
         "--dev",
         "--list-preview-themes",
-        "--force-crash-in" if is_dev else None,
-    ],  # ty: ignore[invalid-argument-type]
+        "--force-crash-in" if is_dev else "",
+    ],
 )
 @click.argument("path", type=str, required=False, default="")
 @click.rich_config({"show_arguments": True})
@@ -193,18 +176,11 @@ def cli(
     tree_dom: bool,
     dev: bool,
     list_preview_themes: bool,
-    std: Literal["out", "err", None],
     force_crash_in: float,
 ) -> None:
     """A post-modern terminal file explorer"""
+
     global is_dev
-    sys.backup__stdout__ = sys.__stdout__
-
-    if chooser_file == cwd_file == "__stdout__":
-        raise NotImplementedError(
-            "Writing both cwd and chosen files to standard output is not supported."
-        )
-
     if dev or is_dev:
         environ["TEXTUAL"] = "devtools,debug"
         is_dev = True
@@ -314,16 +290,30 @@ example_function(10)"""
 
     from rovr.app import Application
 
-    if std == "err":
-        sys.__stdout__ = sys.__stderr__
-
+    # __backup__std***__ for future
     if chooser_file == "__stdout__":
-        chooser_file = sys.backup__stdout__
+        if hasattr(sys, "__backup__stdout__"):
+            chooser_file = sys.__backup__stdout__
+        else:
+            chooser_file = sys.__stdout__
+    elif chooser_file == "__stderr__":
+        if hasattr(sys, "__backup__stderr__"):
+            chooser_file = sys.__backup__stderr__
+        else:
+            chooser_file = sys.__stderr__
 
     if cwd_file == "__stdout__":
-        cwd_file = sys.backup__stdout__
+        if hasattr(sys, "__backup__stdout__"):
+            cwd_file = sys.__backup__stdout__
+        else:
+            cwd_file = sys.__stdout__
+    elif cwd_file == "__stderr__":
+        if hasattr(sys, "__backup__stderr__"):
+            cwd_file = sys.__backup__stderr__
+        else:
+            cwd_file = sys.__stderr__
 
-    if sys.stdout.isatty() or std == "err":
+    if sys.stdout.isatty():
         Application(
             startup_path=path,
             cwd_file=cwd_file if cwd_file else None,
@@ -335,7 +325,7 @@ example_function(10)"""
         ).run()
     else:
         pprint(
-            "Error: rovr needs a TTY to run the application. If you want to write to standard output, please use the [bold cyan]--force-stdout[/] or [bold cyan]--force-stderr[/] options.",
+            "Error: rovr needs a TTY to run the application. If you want to write to standard output, please use the [bold cyan]--force-tty[/] options.",
         )
 
 

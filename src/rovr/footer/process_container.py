@@ -585,14 +585,12 @@ class ProcessContainer(VerticalScroll):
                         last_update_time = current_time
                     if path.exists(path.join(destination_path, filename)):
                         if do_what_on_existance == "ask":
-                            response = (
-                                self.app.call_from_thread(
-                                    self.app.push_screen_wait,
-                                    CommonFileNameDoWhat(
-                                        "Path already exists in destination\nWhat do you want to do now?",
-                                        border_title=filename,
-                                        border_subtitle=f"Extracting to {destination_path}",
-                                    ),
+                            response = self.app.call_from_thread(
+                                self.app.push_screen_wait,
+                                CommonFileNameDoWhat(
+                                    "Path already exists in destination\nWhat do you want to do now?",
+                                    border_title=filename,
+                                    border_subtitle=f"Extracting to {destination_path}",
                                 ),
                             )
                             response = cast(typed.CommonFileNameDoWhat, response)

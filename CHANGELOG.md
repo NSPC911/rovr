@@ -8,9 +8,11 @@
 
 ## new features
 - archive: add support for zstd archives #172
-- app: add log dump when errors occur a5f38ca
+- app: add log dump when errors occur a5f38ca e046f8d ac9f129
 - rg: add support for rg as plugin #175
 - preview: configurable max preview image size #178
+- cli: add support for writing app to stderr ff63787
+- cli: add dev crash ac9f129
 
 ## build
 - deps: bump textual to ~=6.9 09d1d23

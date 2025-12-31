@@ -220,6 +220,14 @@ class Application(App, inherit_bindings=False):
             )
             return
         self.theme = config["theme"]["default"]
+        if self.theme == "dark-pink":
+            from rovr.functions.config import get_version
+
+            self.notify(
+                f"The 'dark-pink' theme will be removed in v0.8.0 (Current version is {get_version}). Switch to 'rose_pine' instead.",
+                title="Deprecation",
+                severity="warning",
+            )
         self.ansi_color = config["theme"]["transparent"]
         # tooltips
         if config["interface"]["tooltips"]:

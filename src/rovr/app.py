@@ -224,7 +224,7 @@ class Application(App, inherit_bindings=False):
             from rovr.functions.config import get_version
 
             self.notify(
-                f"The 'dark-pink' theme will be removed in v0.8.0 (Current version is {get_version}). Switch to 'rose_pine' instead.",
+                f"The 'dark-pink' theme will be removed in v0.8.0 (Current version is {get_version()}). Switch to 'rose_pine' instead.",
                 title="Deprecation",
                 severity="warning",
             )

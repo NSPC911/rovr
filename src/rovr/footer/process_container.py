@@ -4,7 +4,7 @@ import tarfile
 import time
 import zipfile
 from os import path
-from typing import Callable
+from typing import Callable, cast
 
 from send2trash import send2trash
 from textual import events, work
@@ -266,7 +266,7 @@ class ProcessContainer(VerticalScroll):
                                     border_subtitle="If this is a bug, please file an issue!",
                                 ),
                             )
-                            assert isinstance(do_what, typed.YesOrNo)
+                            do_what = cast(typed.YesOrNo, do_what)
                             if do_what["toggle"]:
                                 ignore_trash = do_what["value"]
                             if do_what["value"]:
@@ -403,7 +403,7 @@ class ProcessContainer(VerticalScroll):
                     f"The file appears to be open in another application and cannot be operated on.\nPath: {item_display_name}",
                 ),
             )
-            assert isinstance(response, typed.FileInUse)
+            response = cast(typed.FileInUse, response)
             # Handle toggle: remember the action for future file-in-use scenarios
             updated_action = persisted_default
             if response["toggle"]:
@@ -595,7 +595,7 @@ class ProcessContainer(VerticalScroll):
                                     ),
                                 ),
                             )
-                            assert isinstance(response, typed.CommonFileNameDoWhat)
+                            response = cast(typed.CommonFileNameDoWhat, response)
                             if response["same_for_next"]:
                                 do_what_on_existance = response["value"]
                             val = response["value"]
@@ -748,7 +748,7 @@ class ProcessContainer(VerticalScroll):
                                     border_subtitle=f"Copying to {dest}",
                                 ),
                             )
-                            assert isinstance(response, typed.CommonFileNameDoWhat)
+                            response = cast(typed.CommonFileNameDoWhat, response)
                             if response["same_for_next"]:
                                 action_on_existance = response["value"]
                             val = response["value"]
@@ -863,7 +863,7 @@ class ProcessContainer(VerticalScroll):
                                     border_subtitle=f"Moving to {dest}",
                                 ),
                             )
-                            assert isinstance(response, typed.CommonFileNameDoWhat)
+                            response = cast(typed.CommonFileNameDoWhat, response)
                             if response["same_for_next"]:
                                 action_on_existance = response["value"]
                             val = response["value"]

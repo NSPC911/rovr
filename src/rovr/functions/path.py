@@ -258,8 +258,8 @@ def sync_get_cwd_object(
         return_nothing_if_this_returns_true(Callable[[], bool] | None): A callable that returns a bool. If it returns True, the function returns None.
 
     Returns:
-        folders(list[dict]): A list of dictionaries, containing "name" as the item's name and "icon" as the respective icon
-        files(list[dict]): A list of dictionaries, containing "name" as the item's name and "icon" as the respective icon
+        tuple[list[dict], list[dict]]: (folders, files) on success
+        tuple[None, None]: When early termination is triggered
 
     Raises:
         TypeError: if the wrong type is received

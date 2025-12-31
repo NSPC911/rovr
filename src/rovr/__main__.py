@@ -10,11 +10,15 @@ from rich.table import Table
 
 pprint = Console().print
 
+textual_flags = set(environ.get("TEXTUAL", "").split(","))
+# both flags exist if ran with `textual run --dev`
+is_dev = {"debug", "devtools"}.issubset(textual_flags)
+
 click.rich_click.USE_RICH_MARKUP = True
 click.rich_click.USE_MARKDOWN = False
 click.rich_click.SHOW_ARGUMENTS = True
 click.rich_click.GROUP_ARGUMENTS_OPTIONS = False
-click.rich_click.MAX_WIDTH = 90
+click.rich_click.MAX_WIDTH = 92 if is_dev else 85
 click.rich_click.STYLE_OPTION = "bold cyan"
 click.rich_click.STYLE_ARGUMENT = "bold cyan"
 click.rich_click.STYLE_COMMAND = "bold cyan"
@@ -30,10 +34,6 @@ click.rich_click.STYLE_REQUIRED_SHORT = "red"
 click.rich_click.STYLE_REQUIRED_LONG = "dim red"
 click.rich_click.STYLE_OPTIONS_PANEL_BORDER = "blue bold"
 click.rich_click.STYLE_COMMANDS_PANEL_BORDER = "white"
-
-textual_flags = set(environ.get("TEXTUAL", "").split(","))
-# both flags exist if ran with `textual run --dev`
-is_dev = {"debug", "devtools"}.issubset(textual_flags)
 
 
 @click.command(help="A post-modern terminal file explorer")
@@ -131,7 +131,7 @@ is_dev = {"debug", "devtools"}.issubset(textual_flags)
     type=bool,
     default=False,
     is_flag=True,
-    help="Run rovr in development mode (lets you use the Textual Console)",
+    help="Run rovr in development mode (lets you tail the [link=https://textual.textualize.io/guide/devtools/#console][u]console[/][/link])",
 )
 @click.option(
     "--list-preview-themes",
@@ -140,6 +140,15 @@ is_dev = {"debug", "devtools"}.issubset(textual_flags)
     default=False,
     is_flag=True,
     help="List available preview themes.",
+)
+@click.option(
+    "--force-crash-in",
+    multiple=False,
+    type=float,
+    default=0,
+    is_flag=False,
+    help="Force a crash after N seconds (for testing crash recovery)",
+    hidden=not is_dev,
 )
 @click.option_panel("Config", options=["--mode", "--with", "--without"])
 @click.option_panel(
@@ -160,7 +169,14 @@ is_dev = {"debug", "devtools"}.issubset(textual_flags)
     ],
 )
 @click.option_panel(
-    "Dev", options=["--show-keys", "--tree-dom", "--dev", "--list-preview-themes"]
+    "Dev",
+    options=[
+        "--show-keys",
+        "--tree-dom",
+        "--dev",
+        "--list-preview-themes",
+        "--force-crash-in" if is_dev else None,
+    ],  # ty: ignore[invalid-argument-type]
 )
 @click.argument("path", type=str, required=False, default="")
 @click.rich_config({"show_arguments": True})
@@ -178,6 +194,7 @@ def cli(
     dev: bool,
     list_preview_themes: bool,
     std: Literal["out", "err", None],
+    force_crash_in: float,
 ) -> None:
     """A post-modern terminal file explorer"""
     global is_dev
@@ -314,6 +331,7 @@ example_function(10)"""
             show_keys=show_keys,
             tree_dom=tree_dom,
             mode=mode,
+            force_crash_in=force_crash_in,
         ).run()
     else:
         pprint(

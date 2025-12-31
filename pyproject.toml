@@ -72,7 +72,7 @@ update_changelog_on_bump = true
 major_version_zero = true
 
 [tool.poe.tasks]
-dev = "textual run --dev rovr.__main__:cli"
+dev = "textual run --dev rovr.__main__:cli --"
 run = "rovr"
 log = "textual console -x WORKER -x SYSTEM -x DEBUG -x EVENT"
 "gen-schema" = "docs/scripts/generate_schema.py"

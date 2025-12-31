@@ -6,16 +6,15 @@ on:
 
 jobs:
   label:
-    runs-on: windows-latest
+    runs-on: ubuntu-slim
     steps:
       - name: Add OS labels
         env:
           GH_TOKEN: ${{ github.token }}
+          ISSUE_BODY: ${{ github.event.issue.body }}
         shell: pwsh
         run: |
-          $body = @'
-          ${{ github.event.issue.body }}
-          '@
+          $body = $env:ISSUE_BODY
 
           $os = @('Windows', 'macOS', 'Linux')
 

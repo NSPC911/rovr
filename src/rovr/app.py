@@ -121,6 +121,7 @@ class Application(App, inherit_bindings=False):
         show_keys: bool = False,
         tree_dom: bool = False,
         mode: str = "",
+        force_crash_in: float = 0,
     ) -> None:
         super().__init__(watch_css=True)
         if mode:
@@ -134,6 +135,7 @@ class Application(App, inherit_bindings=False):
         self._chooser_file: str | TextIOWrapper | None = chooser_file
         self._show_keys: bool = show_keys
         self._exit_with_tree: bool = tree_dom
+        self._force_crash_in: float = force_crash_in
 
     def compose(self) -> ComposeResult:
         self.log("Starting Rovr...")
@@ -247,7 +249,8 @@ class Application(App, inherit_bindings=False):
             )
         # title for screenshots
         self.title = ""
-        self.set_timer(5, lambda: 0 / 0)
+        if self._force_crash_in > 0:
+            self.set_timer(self._force_crash_in, lambda: 1 / 0)
 
     @work
     async def action_focus_next(self) -> None:
@@ -839,28 +842,33 @@ class Application(App, inherit_bindings=False):
     def _print_error_renderables(self) -> None:
         """Print and clear exit renderables."""
         from rich.panel import Panel
+        from rich.traceback import Traceback
 
-        error_count = len(self._exit_renderaeles)
+        error_count = len(self._exit_renderables)
+        traceback_involved = False
         for renderable in self._exit_renderables:
             self.error_console.print(renderable)
-        if error_count > 1:
-            self.error_console.print(
-                f"\n[b]NOTE:[/b] {error_count} errors shown above.", markup=True
-            )
-        if error_count != 0:
-            dump_path = path.join(
-                path.realpath(VAR_TO_DIR["CONFIG"]), "logs", f"{log_name}.log"
-            )
-            self.error_console.print(
-                Panel(
-                    f"The error has been dumped to {dump_path}",
-                    expand=False,
-                    border_style="red",
-                    padding=(0, 2),
-                ),
-                style="bold red",
-            )
-            self._exit_renderables.clear()
+            if isinstance(renderable, Traceback):
+                traceback_involved = True
+        if traceback_involved:
+            if error_count > 1:
+                self.error_console.print(
+                    f"\n[b]NOTE:[/b] {error_count} errors shown above.", markup=True
+                )
+            if error_count != 0:
+                dump_path = path.join(
+                    path.realpath(VAR_TO_DIR["CONFIG"]), "logs", f"{log_name}.log"
+                )
+                self.error_console.print(
+                    Panel(
+                        f"The error has been dumped to {dump_path}",
+                        expand=False,
+                        border_style="red",
+                        padding=(0, 2),
+                    ),
+                    style="bold red",
+                )
+        self._exit_renderables.clear()
 
 
 app = Application()

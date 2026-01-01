@@ -5,6 +5,7 @@
 ## breaking changes
 - preview: add support for mime types using puremagic #172
 - config: remove unused preview texts 1b8deb6
+- preview: use threads as far as possible #172 #183
 
 ## new features
 - archive: add support for zstd archives #172

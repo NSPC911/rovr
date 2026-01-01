@@ -79,9 +79,6 @@ class PreviewContainer(Container):
         self._mime_type: path_utils.MimeResult | None = None
         self._preview_texts: dict[str, str] = config["interface"]["preview_text"]
         self.pdf = PDFHandler()
-        # Debouncing mechanism
-        self._queued_task = None
-        self._queued_task_args: str | None = None
 
     def compose(self) -> ComposeResult:
         yield Static(self._preview_texts["start"], classes="special")
@@ -606,9 +603,7 @@ class PreviewContainer(Container):
         self.app.call_from_thread(setattr, self, "border_subtitle", "")
 
     async def show_preview(self, file_path: str) -> None:
-        """
-        Public method to show preview. Uses debouncing pattern.
-        """
+        """Public method to show preview."""
         if (
             "hide" in self.classes
             or "-nopreview" in self.screen.classes
@@ -860,11 +855,16 @@ class PreviewContainer(Container):
                 self.pdf.current_page += 1
                 self._trigger_pdf_update()
 
-    @work(thread=True)
+    # not sure if exclusive does anything, but whatever
+    @work(thread=True, exclusive=True)
     def _trigger_pdf_update(self) -> None:
         """Trigger PDF preview update from a thread."""
         self.show_pdf_preview()
 
+    # commented out until further notice
+    # felt like there was an issue with the way file list
+    # updates on resize, so this remains as is, until i
+    # resolve that
     # def on_resize(self, event: events.Resize) -> None:
     #     """Re-render the preview on resize"""
     #     if self.has_child("Static") and event.size.height != self._initial_height:

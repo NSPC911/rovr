@@ -158,7 +158,7 @@ click.rich_click.STYLE_COMMANDS_PANEL_BORDER = "white"
         "--tree-dom",
         "--dev",
         "--list-preview-themes",
-        "--force-crash-in" if is_dev else "",
+        "--force-crash-in" if is_dev else "",  # click has no issues with this
     ],
 )
 @click.argument("path", type=str, required=False, default="")

@@ -99,24 +99,6 @@ default = ["#88c0d0", "#5e81ac"]
 error = ["#bf616a", "#d08770"]
 
 [[custom_theme]]
-name = "Solarized Dark"
-primary = "#93A1A1"
-secondary = "#839496"
-warning = "#B58900"
-error = "#DC322F"
-success = "#859900"
-accent = "#D33682"
-foreground = "#EEE8D5"
-background = "#073642"
-surface = "#284149"
-panel = "#657B83"
-is_dark = true
-
-[custom_theme.bar_gradient]
-default = ["#93A1A1", "#D33682"]
-error = ["#dc322f", "#b58900"]
-
-[[custom_theme]]
 name = "Dark Pink"
 primary = "#FD7AFF"
 secondary = "#000F85"

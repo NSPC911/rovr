@@ -169,8 +169,12 @@ def cli(
     without_features: list[str],
     show_config_path: bool,
     show_version: bool,
-    cwd_file: str | TextIOWrapper | None,  # necessary because later on, replaced by stdout/stderr file
-    chooser_file: str | TextIOWrapper | None,  # necessary because later on, replaced by stdout/stderr file
+    cwd_file: str
+    | TextIOWrapper
+    | None,  # necessary because later on, replaced by stdout/stderr file
+    chooser_file: str
+    | TextIOWrapper
+    | None,  # necessary because later on, replaced by stdout/stderr file
     show_keys: bool,
     path: str,
     tree_dom: bool,

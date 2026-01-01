@@ -15,6 +15,7 @@
     "interface": {
       "type": "object",
       "additionalProperties": false,
+      "description": "Settings related to the user interface and experience",
       "properties": {
         "tooltips": {
           "type": "boolean",
@@ -57,6 +58,49 @@
           "default": 3,
           "description": "The number of files to keep above and below the cursor when moving through the file list."
         },
+        "show_hidden_files": {
+          "type": "boolean",
+          "default": false,
+          "description": "Show hidden files and folders (those starting with a dot on Unix, or explicitly hidden on Windows/MacOS)."
+        },
+        "image_protocol": {
+          "type": "string",
+          "default": "Auto",
+          "description": "The image protocol to use when displaying an image",
+          "enum": ["Auto", "TGP", "Sixel", "Halfcell", "Unicode"]
+        },
+        "max_preview_image_width": {
+          "type": "integer",
+          "minimum": 0,
+          "default": 1920,
+          "description": "Maximum width for preview images in pixels. Images wider than this will be downscaled using integer reduction. Set to 0 to disable resizing."
+        },
+        "max_preview_image_height": {
+          "type": "integer",
+          "minimum": 0,
+          "default": 1080,
+          "description": "Maximum height for preview images in pixels. Images taller than this will be downscaled using integer reduction. Set to 0 to disable resizing."
+        },
+        "allow_tab_nav": {
+          "type": "boolean",
+          "default": false,
+          "description": "Allow navigating the main app screen with `tab` and `shift+tab`"
+        },
+        "append_new_tabs": {
+          "type": "boolean",
+          "default": true,
+          "description": "Choose whether or not to append new tabs instead of inserting them.\n`true` => Append to the end of the tab list.\n`false` => Insert after the active tab."
+        },
+        "double_click_delay": {
+          "type": "number",
+          "default": 0.25,
+          "description": "The delay between two consecutive clicks to enter into a directory, or open a file."
+        },
+        "drive_watcher_frequency": {
+          "type": "number",
+          "default": 3.0,
+          "description": "How often (in seconds) to check for changes in mounted drives in the sidebar."
+        },
         "clock": {
           "type": "object",
           "additionalProperties": false,
@@ -83,25 +127,10 @@
               "default": "couldn't read this file! (\u00ac_\u00ac )",
               "description": "If for any reason the file preview refused to show, this appears."
             },
-            "binary": {
-              "type": "string",
-              "default": "the file does not use UTF-8, which isn't supported yet",
-              "description": "If the current file cannot be read due to an encoding issue (ie not UTF8), it will display this message."
-            },
             "start": {
               "type": "string",
               "default": " ___ ___\n|  _| . |\n|_| |___|\n _ _ ___\n| | |  _|\n \\_/|_|\n",
               "description": "This is shown when the rovr starts up. You may see it for a split second, but it will never appear afterwards. You cannot view this properly in this docs."
-            },
-            "empty": {
-              "type": "string",
-              "default": "bytes be gone (\u2310\u25a0_\u25a0)",
-              "description": "If the current file has no content, this is shown"
-            },
-            "too_large": {
-              "type": "string",
-              "default": "this file is larger (but not larger than your mother)",
-              "description": "If the file is too large (hard capped at < 1MB), the preview will refuse to render this file regardless of your memory size"
             }
           }
         },
@@ -120,18 +149,36 @@
               "description": "Whether to make the panels smaller to add more room for the file list itself"
             }
           }
+        },
+        "mime_rules": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "string",
+            "enum": ["text", "image", "pdf", "archive", "folder", "remime"]
+          },
+          "default": {
+            "text/*": "text",
+            "image/*": "image",
+            "application/pdf": "pdf",
+            "application/zip": "archive",
+            "application/x-tar": "archive",
+            "application/gzip": "archive",
+            "application/x-bzip2": "archive",
+            "application/x-xz": "archive",
+            "application/x-rar": "archive",
+            "application/x-7z-compressed": "archive",
+            "inode/directory": "folder",
+            "application/octet-stream": "remime"
+          },
+          "description": "Map MIME type patterns to preview types. Supports glob patterns (e.g., 'text/*' matches 'text/plain', 'text/html', etc.). Valid preview types: text, image, pdf, archive, folder, remime.\n-> Use 'remime' if you want a more accurate description from file(1)"
         }
       }
     },
     "settings": {
       "type": "object",
       "additionalProperties": false,
+      "description": "Settings related to behavior of file operations",
       "properties": {
-        "show_hidden_files": {
-          "type": "boolean",
-          "default": false,
-          "description": "Show hidden files and folders (those starting with a dot on Unix, or explicitly hidden on Windows/MacOS)."
-        },
         "use_recycle_bin": {
           "type": "boolean",
           "default": true,
@@ -141,32 +188,6 @@
           "type": "boolean",
           "default": true,
           "description": "When copying over a file, preserve metadata from the original file, such as creation and modification times."
-        },
-        "image_protocol": {
-          "type": "string",
-          "default": "Auto",
-          "description": "The image protocol to use when displaying an image",
-          "enum": ["Auto", "TGP", "Sixel", "Halfcell", "Unicode"]
-        },
-        "allow_tab_nav": {
-          "type": "boolean",
-          "default": false,
-          "description": "Allow navigating the main app screen with `tab` and `shift+tab`"
-        },
-        "append_new_tabs": {
-          "type": "boolean",
-          "default": true,
-          "description": "Choose whether or not to append new tabs instead of inserting them.\n`true` => Append to the end of the tab list.\n`false` => Insert after the active tab."
-        },
-        "double_click_delay": {
-          "type": "number",
-          "default": 0.25,
-          "description": "The delay between two consecutive clicks to enter into a directory, or open a file."
-        },
-        "drive_watcher_frequency": {
-          "type": "number",
-          "default": 3.0,
-          "description": "How often (in seconds) to check for changes in mounted drives in the sidebar."
         }
       }
     },
@@ -280,6 +301,62 @@
           "default": "nord",
           "description": "The default theme. Can be changed while in rovr, but it is not persistent."
         },
+        "preview": {
+          "type": "string",
+          "default": "nord",
+          "description": "The theme to use when previewing files in the preview sidebar.",
+          "enum": [
+            "abap",
+            "algol",
+            "algol_nu",
+            "arduino",
+            "autumn",
+            "bw",
+            "borland",
+            "coffee",
+            "colorful",
+            "default",
+            "dracula",
+            "emacs",
+            "friendly_grayscale",
+            "friendly",
+            "fruity",
+            "github-dark",
+            "gruvbox-dark",
+            "gruvbox-light",
+            "igor",
+            "inkpot",
+            "lightbulb",
+            "lilypond",
+            "lovelace",
+            "manni",
+            "material",
+            "monokai",
+            "murphy",
+            "native",
+            "nord-darker",
+            "nord",
+            "one-dark",
+            "paraiso-dark",
+            "paraiso-light",
+            "pastie",
+            "perldoc",
+            "rainbow_dash",
+            "rrt",
+            "sas",
+            "solarized-dark",
+            "solarized-light",
+            "staroffice",
+            "stata-dark",
+            "stata-light",
+            "tango",
+            "trac",
+            "vim",
+            "vs",
+            "xcode",
+            "zenburn"
+          ]
+        },
         "transparent": {
           "type": "boolean",
           "default": false,
@@ -295,7 +372,7 @@
         "properties": {
           "name": {
             "type": "string",
-            "description": "A name for the theme. However, when the theme is available in the theme picker, it shows up as a hiphenated, lowercase version."
+            "description": "A name for the theme. However, when the theme is available in the theme picker, it shows up as a hyphenated, lowercase version."
           },
           "primary": {
             "type": "string",
@@ -912,7 +989,7 @@
               "$ref": "#/definitions/keybind",
               "default": ["f"],
               "description": "The keybind to open the file search picker.",
-              "display_name": "Start search with fd"
+              "display_name": "Start file search with fd"
             },
             "executable": {
               "type": "string",
@@ -922,7 +999,7 @@
             "relative_paths": {
               "type": "boolean",
               "default": true,
-              "description": "Whether to show as relative path or absolute path."
+              "description": "Whether to show fd results as relative path or absolute path."
             },
             "follow_symlinks": {
               "type": "boolean",
@@ -952,6 +1029,48 @@
                   "block-device"
                 ]
               }
+            }
+          }
+        },
+        "rg": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "enabled": {
+              "type": "boolean",
+              "default": true,
+              "description": "Enable content searching using rg."
+            },
+            "keybinds": {
+              "$ref": "#/definitions/keybind",
+              "default": ["R"],
+              "description": "The keybind to open the content search picker.",
+              "display_name": "Start content search with rg"
+            },
+            "executable": {
+              "type": "string",
+              "default": "rg",
+              "description": "rg executable name or path."
+            },
+            "case_sensitive": {
+              "type": "boolean",
+              "default": true,
+              "description": "Whether the search should be case sensitive by default."
+            },
+            "follow_symlinks": {
+              "type": "boolean",
+              "default": false,
+              "description": "Whether rg should follow symlinks when searching."
+            },
+            "no_ignore_parent": {
+              "type": "boolean",
+              "default": false,
+              "description": "Don't use *ignore files from parent folders when searching."
+            },
+            "search_hidden": {
+              "type": "boolean",
+              "default": false,
+              "description": "Whether to search hidden files by default."
             }
           }
         },
@@ -989,28 +1108,12 @@
             "enabled": {
               "type": "boolean",
               "default": false,
-              "description": "Enable file(1) MIME type detection for preview selection. When enabled, rovr uses the `file` command to detect file types instead of relying solely on file extensions."
+              "description": "Enable secondary file(1) type detection if both puremagic and plaintext detection fails."
             },
-            "mime_rules": {
-              "type": "object",
-              "additionalProperties": {
-                "type": "string",
-                "enum": ["text", "image", "pdf", "archive", "folder"]
-              },
-              "default": {
-                "text/*": "text",
-                "image/*": "image",
-                "application/pdf": "pdf",
-                "application/zip": "archive",
-                "application/x-tar": "archive",
-                "application/gzip": "archive",
-                "application/x-bzip2": "archive",
-                "application/x-xz": "archive",
-                "application/x-rar": "archive",
-                "application/x-7z-compressed": "archive",
-                "inode/directory": "folder"
-              },
-              "description": "Map MIME type patterns to preview types. Supports glob patterns (e.g., 'text/*' matches 'text/plain', 'text/html', etc.). Valid preview types: text, image, pdf, archive, folder."
+            "get_description": {
+              "type": "boolean",
+              "default": true,
+              "description": "Use file(1) to get additional information of the file type."
             }
           }
         }

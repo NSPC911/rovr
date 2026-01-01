@@ -1,5 +1,6 @@
 import platform
 from dataclasses import dataclass
+from datetime import datetime
 from os import environ
 from shutil import which
 from typing import Literal, TypeAlias
@@ -14,6 +15,10 @@ if "config" not in globals():
     global config, schema
     schema, config = load_config()
     config_setup()
+else:
+    config = globals()["config"]
+    schema = globals()["schema"]
+
 
 if "file_executable" not in globals():
     global file_executable
@@ -34,6 +39,14 @@ if "file_executable" not in globals():
         file_executable = found
     else:
         file_executable = None
+else:
+    file_executable = globals()["file_executable"]
+
+if "log_name" not in globals():
+    global log_name
+    log_name = str(datetime.now()).replace(" ", "_").replace(":", "")
+else:
+    log_name = globals()["log_name"]
 
 
 @dataclass

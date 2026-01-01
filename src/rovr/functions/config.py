@@ -139,6 +139,8 @@ def schema_dump(doc_path: str, exception: ValidationError, config_content: str) 
         exception: the ValidationError that occurred
         config_content: the raw file content
     """
+    import fnmatch
+
     from rich.padding import Padding
     from rich.syntax import Syntax
     from rich.table import Table
@@ -153,9 +155,9 @@ def schema_dump(doc_path: str, exception: ValidationError, config_content: str) 
             case "enum":
                 error_msg = f"Provided value '{exception.instance}' is not inside allowlist of {exception.validator_value}"
             case "minimum":
-                error_msg = f"Value for [bright_cyan]{'.'.join(map(str, exception.relative_path))}[/] must be >= {exception.validator_value} (cannot be {exception.instance})"
+                error_msg = f"Value for [bright_cyan]{'.'.join(str(p) for p in exception.relative_path)}[/] must be >= {exception.validator_value} (cannot be {exception.instance})"
             case "maximum":
-                error_msg = f"Value for [bright_cyan]{'.'.join(map(str, exception.relative_path))}[/] must be <= {exception.validator_value} (cannot be {exception.instance})"
+                error_msg = f"Value for [bright_cyan]{'.'.join(str(p) for p in exception.relative_path)}[/] must be <= {exception.validator_value} (cannot be {exception.instance})"
             case _:
                 error_msg = exception.message
                 failed = True
@@ -225,14 +227,13 @@ def schema_dump(doc_path: str, exception: ValidationError, config_content: str) 
 
         pprint(f"[bright_red]╰─{'─' * rjust}─❯[/] {error_msg}")
     # check path for custom message from migration.json
-    with (
-        resources.files("rovr.config")
-        .joinpath("migration.json")
-        .open("r", encoding="utf-8") as f
-    ):
+    with open(
+        resources.files("rovr.config") / "migration.json", "r", encoding="utf-8"
+    ) as f:
         migration_docs = ujson.load(f)
+
     for item in migration_docs:
-        if path_str in item["keys"]:
+        if any(fnmatch.fnmatch(path_str, path) for path in item["keys"]):
             message = "\n".join(item["message"])
             to_print = Table(
                 box=box.ROUNDED,
@@ -296,18 +297,12 @@ def load_config() -> tuple[dict, dict]:
         elif not lines:
             with open(user_config_path, "w", encoding="utf-8") as file:
                 file.write(DEFAULT_CONFIG.format(schema_url=schema_url))
-
-    with (
-        resources.files("rovr.config")
-        .joinpath("config.toml")
-        .open("r", encoding="utf-8") as f
-    ):
-        # check header
-        try:
-            content = f.read()
-            template_config = tomli.loads(content)
-        except tomli.TOMLDecodeError as exc:
-            toml_dump(path.join(path.dirname(__file__), "../config/config.toml"), exc)
+    try:
+        template_config = tomli.loads(
+            resources.files("rovr.config").joinpath("config.toml").read_text("utf-8")
+        )
+    except tomli.TOMLDecodeError as exc:
+        toml_dump(path.join(path.dirname(__file__), "../config/config.toml"), exc)
 
     user_config = {}
     user_config_content = ""
@@ -322,13 +317,8 @@ def load_config() -> tuple[dict, dict]:
     # Don't really have to consider the else part, because it's created further down
     config = deep_merge(template_config, user_config)
     # check with schema
-    with (
-        resources.files("rovr.config")
-        .joinpath("schema.json")
-        .open("r", encoding="utf-8") as f
-    ):
-        content = f.read()
-        schema = ujson.loads(content)
+    content = resources.files("rovr.config").joinpath("schema.json").read_text("utf-8")
+    schema = ujson.loads(content)
 
     try:
         jsonschema.validate(config, schema)
@@ -337,8 +327,8 @@ def load_config() -> tuple[dict, dict]:
 
     # slight config fixes
     # image protocol because "AutoImage" doesn't work with Sixel
-    if config["settings"]["image_protocol"] == "Auto":
-        config["settings"]["image_protocol"] = ""
+    if config["interface"]["image_protocol"] == "Auto":
+        config["interface"]["image_protocol"] = ""
     # editor empty use $EDITOR
     if config["plugins"]["editor"]["file_executable"] == "":
         config["plugins"]["editor"]["file_executable"] = environ.get(
@@ -356,11 +346,6 @@ def load_config() -> tuple[dict, dict]:
         pdfinfo_executable = which("pdfinfo")
         pdfinfo_path: str | None = None
         if pdfinfo_executable is None:
-            pprint(
-                "[WARN] Poppler is enabled, but no poppler folder was specified, and it was not found in PATH.\n"
-                "[WARN] Please install Poppler and set the poppler_folder in rovr config.",
-                style="yellow",
-            )
             config["plugins"]["poppler"]["enabled"] = False
         else:
             pdfinfo_path = path.dirname(pdfinfo_executable)

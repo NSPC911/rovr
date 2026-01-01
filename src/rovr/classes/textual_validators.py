@@ -48,13 +48,19 @@ class PathDoesntExist(Validator):
 
 class EndsWithAnArchiveExtension(Validator):
     def __init__(self) -> None:
-        super().__init__(
-            failure_description="Path does not end with a valid extension."
-        )
+        super().__init__(failure_description="Extension is not a valid archive type.")
         self.strict = True
+        self.allowed_extensions: tuple[str, ...]
+        allowed: list[str] = []
+        from rovr.classes.archive import ARCHIVE_EXTENSIONS
+
+        for exts in ARCHIVE_EXTENSIONS:
+            for ext in exts:
+                allowed.append(str(ext))
+        self.allowed_extensions = tuple(allowed)
 
     def validate(self, value: str) -> ValidationResult:
-        if value.endswith((".tar.gz", ".tgz", ".tar.bz2", ".tbz2", ".tar.xz", ".zip")):
+        if value.endswith(self.allowed_extensions):
             return self.success()
         else:
             return self.failure()

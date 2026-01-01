@@ -1,9 +1,7 @@
-import asyncio
 import contextlib
 from os import getcwd, path
 from os import system as cmd
-from time import time
-from typing import ClassVar, Iterable, Self
+from typing import ClassVar, Iterable, Self, cast
 
 from rich.segment import Segment
 from rich.style import Style
@@ -16,14 +14,17 @@ from textual.strip import Strip
 from textual.widgets import Button, Input, OptionList, SelectionList
 from textual.widgets.option_list import Option, OptionDoesNotExist
 from textual.widgets.selection_list import Selection, SelectionType
+from textual.worker import WorkerError
 
-from rovr.classes import ArchiveFileListSelection, FileListSelectionWidget
+from rovr.classes import FileListSelectionWidget
 from rovr.classes.session_manager import SessionManager
 from rovr.components import PopupOptionList
 from rovr.functions import icons as icon_utils
 from rovr.functions import path as path_utils
 from rovr.functions import pins as pin_utils
 from rovr.functions import utils
+from rovr.navigation_widgets import PathInput
+from rovr.state_manager import StateManager
 from rovr.variables.constants import (
     SortByOptions,
     buttons_that_depend_on_path,
@@ -84,7 +85,7 @@ class FileList(SelectionList, inherit_bindings=False):
                 f"Expected sort_by value to be one of 'name', 'size', 'modified', 'created', 'extension' or 'natural', but got '{value}'"
             )
         with contextlib.suppress(NoMatches):
-            self.app.query_one("StateManager").sort_by = value
+            self.app.query_one("StateManager", StateManager).sort_by = value
 
     @property
     def sort_descending(self) -> bool:
@@ -96,7 +97,7 @@ class FileList(SelectionList, inherit_bindings=False):
     @sort_descending.setter
     def sort_descending(self, value: bool) -> None:
         with contextlib.suppress(NoMatches):
-            self.app.query_one("StateManager").sort_descending = value
+            self.app.query_one("StateManager", StateManager).sort_descending = value
 
     @property
     def highlighted_option(self) -> FileListSelectionWidget | None:
@@ -172,7 +173,7 @@ class FileList(SelectionList, inherit_bindings=False):
             # the watcher function)
             self.clear_options()
             return
-        self.app.file_list_pause_check = True
+        self.app.file_list_pause_check = True  # ty: ignore[invalid-assignment]
         try:
             preview = self.app.query_one("PreviewContainer")
 
@@ -185,18 +186,29 @@ class FileList(SelectionList, inherit_bindings=False):
                 last_highlight = session.lastHighlighted[cwd]
                 focus_on = last_highlight["name"]
             try:
-                folders, files = await path_utils.get_cwd_object(
+                worker = path_utils.threaded_get_cwd_object(
+                    self,
                     cwd,
-                    config["settings"]["show_hidden_files"],
+                    config["interface"]["show_hidden_files"],
                     sort_by=self.sort_by,
                     reverse=self.sort_descending,
+                )
+                try:
+                    await worker.wait()
+                except WorkerError:
+                    return
+                folders, files = cast(
+                    tuple[
+                        list[path_utils.CWDObjectReturnDict],
+                        list[path_utils.CWDObjectReturnDict],
+                    ],
+                    worker.result,
                 )
                 if not folders and not files:
                     self.list_of_options.append(
                         Selection("   --no-files--", value="", disabled=True)
                     )
                     await preview.remove_children()
-                    preview._current_preview_type = "none"
                     preview.border_title = ""
                 else:
                     file_list_options = folders + files
@@ -226,12 +238,12 @@ class FileList(SelectionList, inherit_bindings=False):
                     ),
                 )
                 await preview.remove_children()
-                preview._current_preview_type = "none"
                 preview.border_title = ""
 
             # Query buttons once and update disabled state based on file list status
             buttons: list[Button] = [
-                self.app.query_one(selector) for selector in buttons_that_depend_on_path
+                self.app.query_one(selector, Button)
+                for selector in buttons_that_depend_on_path
             ]
             should_disable: bool = (
                 len(self.list_of_options) == 1 and self.list_of_options[0].disabled
@@ -253,7 +265,7 @@ class FileList(SelectionList, inherit_bindings=False):
 
             self.set_options(self.list_of_options)
             # session handler
-            self.app.query_one("#path_switcher").value = cwd + (
+            self.app.query_one("#path_switcher", PathInput).value = cwd + (
                 "" if cwd.endswith("/") else "/"
             )
             # I question to myself why directories isn't a list[str]
@@ -315,103 +327,7 @@ class FileList(SelectionList, inherit_bindings=False):
                     await self.toggle_mode()
                 self.update_border_subtitle()
         finally:
-            self.app.file_list_pause_check = False
-
-    @work(exclusive=True)
-    async def dummy_update_file_list(
-        self,
-        cwd: str,
-    ) -> None:
-        """Update the file list with the current directory contents.
-
-        Args:
-            cwd (str): The current working directory.
-        """
-        assert self.parent is not None
-        self.enter_into = cwd
-        # Separate folders and files
-        self.list_of_options = []
-
-        try:
-            folders, files = await path_utils.get_cwd_object(
-                cwd,
-                config["settings"]["show_hidden_files"],
-                sort_by=self.sort_by,  # ty: ignore[invalid-argument-type]
-                reverse=self.sort_descending,
-            )
-            if not folders and not files:
-                self.list_of_options.append(
-                    Selection("  --no-files--", value="", id="", disabled=True)
-                )
-            else:
-                file_list_options = folders + files
-                file_list_option_length = len(file_list_options)
-                start_time = time()
-                for index, item in enumerate(file_list_options):
-                    self.list_of_options.append(
-                        FileListSelectionWidget(
-                            icon=item["icon"],
-                            label=item["name"],
-                            dir_entry=item["dir_entry"],
-                        )
-                    )
-                    if start_time + 0.25 < time():
-                        self.parent.border_subtitle = (
-                            f"{index + 1} / {file_list_option_length}"
-                        )
-                        start_time = time()
-                    # await so that textual can still be responsive
-                    await asyncio.sleep(0)
-        except PermissionError:
-            self.list_of_options.append(
-                Selection(
-                    " Permission Error: Unable to access this directory.",
-                    id="",
-                    value="",
-                    disabled=True,
-                )
-            )
-        self.set_options(self.list_of_options)
-        self.parent.border_subtitle = ""
-
-    @work(exclusive=True)
-    async def create_archive_list(self, file_list: list[str]) -> None:
-        """Create a list display for archive file contents.
-
-        Args:
-            file_list (list[str]): List of file paths from archive contents.
-        """
-        assert self.parent is not None
-        self.list_of_options = []
-
-        if not file_list:
-            self.list_of_options.append(
-                Selection("  --no-files--", value="", id="", disabled=True)
-            )
-        else:
-            file_list_length = len(file_list)
-            start_time = time()
-            for index, file_path in enumerate(file_list):
-                if file_path.endswith("/"):
-                    icon = icon_utils.get_icon_for_folder(file_path.strip("/"))
-                else:
-                    icon = icon_utils.get_icon_for_file(file_path)
-
-                # Create a selection widget similar to FileListSelectionWidget but simpler
-                # since we don't have dir_entry metadata for archive contents
-                self.list_of_options.append(
-                    ArchiveFileListSelection(
-                        icon,
-                        file_path,
-                    )
-                )
-                if start_time + 0.25 < time():
-                    self.parent.border_subtitle = f"{index + 1} / {file_list_length}"
-                    start_time = time()
-                await asyncio.sleep(0)
-
-        self.set_options(self.list_of_options)
-        self.parent.border_subtitle = ""
+            self.app.file_list_pause_check = False  # ty: ignore[invalid-assignment]
 
     async def file_selected_handler(self, target_path: str) -> None:
         if self.app._chooser_file:
@@ -495,7 +411,7 @@ class FileList(SelectionList, inherit_bindings=False):
         if self.highlighted is None:
             self.highlighted = 0
         # preview
-        self.app.query_one("PreviewContainer").show_preview(
+        await self.app.query_one("PreviewContainer").show_preview(
             highlighted_option.dir_entry.path
         )
         self.app.query_one("MetadataContainer").update_metadata(event.option.dir_entry)
@@ -625,13 +541,13 @@ class FileList(SelectionList, inherit_bindings=False):
 
     async def toggle_hidden_files(self) -> None:
         """Toggle the visibility of hidden files."""
-        config["settings"]["show_hidden_files"] = not config["settings"][
+        config["interface"]["show_hidden_files"] = not config["interface"][
             "show_hidden_files"
         ]
         self.update_file_list(add_to_session=False)
         status = (
             "[$success underline]shown"
-            if config["settings"]["show_hidden_files"]
+            if config["interface"]["show_hidden_files"]
             else "[$error underline]hidden"
         )
         self.app.notify(

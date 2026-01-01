@@ -4,17 +4,21 @@ import ctypes
 import fnmatch
 import os
 import stat
+import subprocess
 from os import path
-from typing import Literal, TypeAlias, TypedDict, overload
+from typing import Callable, Literal, NamedTuple, TypeAlias, TypedDict, overload
 
 import psutil
 from natsort import natsorted
 from rich.console import Console
 from textual import work
 from textual.app import App
+from textual.dom import DOMNode
+from textual.highlight import guess_language
 
 from rovr.functions.icons import get_icon_for_file, get_icon_for_folder
-from rovr.variables.constants import file_executable, os_type
+from rovr.monkey_patches.puremagic_patch import puremagic
+from rovr.variables.constants import config, log_name, os_type
 
 # windows needs nt, because scandir returns
 # nt.DirEntry instead of os.DirEntry on
@@ -31,7 +35,6 @@ else:
 pprint = Console().print
 
 
-config = {}
 pins = {}
 
 
@@ -191,14 +194,60 @@ def get_extension_sort_key(file_dict: dict) -> tuple[int, str]:
         return (3, name.split(".")[-1].lower())
 
 
-async def get_cwd_object(
+@work(thread=True)
+def threaded_get_cwd_object(
+    node: DOMNode,
     cwd: str,
     show_hidden: bool = False,
     sort_by: Literal[
         "name", "size", "modified", "created", "extension", "natural"
     ] = "name",
     reverse: bool = False,
-) -> tuple[list[CWDObjectReturnDict], list[CWDObjectReturnDict]]:
+    return_nothing_if_this_returns_true: Callable[[], bool] | None = None,
+) -> tuple[list[CWDObjectReturnDict], list[CWDObjectReturnDict]] | tuple[None, None]:
+    return sync_get_cwd_object(
+        cwd,
+        show_hidden,
+        sort_by,
+        reverse,
+        return_nothing_if_this_returns_true,
+    )
+
+
+@overload
+def sync_get_cwd_object(
+    cwd: str,
+    show_hidden: bool = False,
+    sort_by: Literal[
+        "name", "size", "modified", "created", "extension", "natural"
+    ] = "name",
+    reverse: bool = False,
+) -> tuple[list[CWDObjectReturnDict], list[CWDObjectReturnDict]]: ...
+
+
+@overload
+def sync_get_cwd_object(
+    cwd: str,
+    show_hidden: bool = False,
+    sort_by: Literal[
+        "name", "size", "modified", "created", "extension", "natural"
+    ] = "name",
+    reverse: bool = False,
+    return_nothing_if_this_returns_true: Callable[[], bool] | None = None,
+) -> (
+    tuple[list[CWDObjectReturnDict], list[CWDObjectReturnDict]] | tuple[None, None]
+): ...
+
+
+def sync_get_cwd_object(
+    cwd: str,
+    show_hidden: bool = False,
+    sort_by: Literal[
+        "name", "size", "modified", "created", "extension", "natural"
+    ] = "name",
+    reverse: bool = False,
+    return_nothing_if_this_returns_true: Callable[[], bool] | None = None,
+) -> tuple[list[CWDObjectReturnDict], list[CWDObjectReturnDict]] | tuple[None, None]:
     """
     Get the objects (files and folders) in a provided directory
     Args:
@@ -206,23 +255,30 @@ async def get_cwd_object(
         show_hidden(bool): Whether to include hidden files/folders (dot-prefixed on Unix; flagged hidden on Windows/macOS)
         sort_by(str): What to sort by
         reverse(bool): Whether to reverse the sorting
+        return_nothing_if_this_returns_true(Callable[[], bool] | None): A callable that returns a bool. If it returns True, the function returns None.
 
     Returns:
-        folders(list[dict]): A list of dictionaries, containing "name" as the item's name and "icon" as the respective icon
-        files(list[dict]): A list of dictionaries, containing "name" as the item's name and "icon" as the respective icon
+        tuple[list[dict], list[dict]]: (folders, files) on success
+        tuple[None, None]: When early termination is triggered
 
     Raises:
         TypeError: if the wrong type is received
+        PermissionError: When access to the directory is denied
     """
 
     # Offload the blocking os.scandir call to a thread pool
-    def _scandir() -> list:
-        try:
-            return list(os.scandir(cwd))
-        except (PermissionError, FileNotFoundError, OSError):
-            raise PermissionError(f"PermissionError: Unable to access {cwd}")
+    try:
+        entries = list(os.scandir(cwd))
+    except (PermissionError, FileNotFoundError, OSError):
+        raise PermissionError(f"PermissionError: Unable to access {cwd}")
 
-    entries = await asyncio.to_thread(_scandir)
+    if (
+        return_nothing_if_this_returns_true is not None
+        and return_nothing_if_this_returns_true()
+    ):
+        if globals().get("is_dev", False):
+            print("Cut off early after scandir")
+        return None, None
 
     folders: list[CWDObjectReturnDict] = []
     files: list[CWDObjectReturnDict] = []
@@ -245,6 +301,13 @@ async def get_cwd_object(
                 "icon": get_icon_for_file(item.name),
                 "dir_entry": item,
             })
+        if (
+            return_nothing_if_this_returns_true is not None
+            and return_nothing_if_this_returns_true()
+        ):
+            if globals().get("is_dev", False):
+                print("Cut off early during dictionary building")
+            return None, None
     # sort order
     match sort_by:
         case "name":
@@ -274,6 +337,13 @@ async def get_cwd_object(
             folders.sort(key=lambda x: x["name"].lower())
 
             files.sort(key=get_extension_sort_key)
+    if (
+        return_nothing_if_this_returns_true is not None
+        and return_nothing_if_this_returns_true()
+    ):
+        if globals().get("is_dev", False):
+            print("Cut off early before reversing results")
+        return None, None
     if reverse:
         files.reverse()
         folders.reverse()
@@ -542,57 +612,146 @@ def get_mounted_drives() -> list:
     return drives
 
 
-async def get_mime_type(file_path: str) -> str | None:
-    """
-    Get the MIME type of a file using the file(1) command.
-
-    Args:
-        file_path: Path to the file to check
-
-    Returns:
-        str : The MIME type string (e.g., "text/plain", "image/png")
-        None: If file(1) is not available or failed
-    """
-    if file_executable is None:
-        return None
-
-    try:
-        process = await asyncio.create_subprocess_exec(
-            file_executable,
-            "--mime-type",
-            "-b",
-            file_path,
-            stdout=asyncio.subprocess.PIPE,
-            stderr=asyncio.subprocess.PIPE,
-        )
-        stdout, _ = await process.communicate()
-
-        if process.returncode == 0:
-            return stdout.decode("utf-8", errors="ignore").strip()
-    except (OSError, FileNotFoundError):
-        # filenotfounderror if exe goes missing after init
-        # os error for any general errors
-        pass
-
-    return None
-
-
 def match_mime_to_preview_type(
-    mime_type: str, mime_rules: dict[str, str]
-) -> str | None:
+    mime_type: str,
+) -> Literal["text", "image", "pdf", "archive", "folder", "remime"] | None:
     """
     Match a MIME type against configured rules to determine preview type.
 
     Args:
         mime_type: The MIME type to match (e.g., "text/plain", "image/png")
-        mime_rules: Dictionary mapping MIME patterns to preview types
-                   (e.g., {"text/*": "text", "image/*": "image"})
 
     Returns:
         str : The preview type ("text", "image", "pdf", "archive", "folder")
         None: None if no rule matches
     """
-    for pattern, preview_type in mime_rules.items():
+    for pattern, preview_type in config["interface"]["mime_rules"].items():
         if fnmatch.fnmatch(mime_type, pattern):
             return preview_type
     return None
+
+
+class MimeResult(NamedTuple):
+    method: Literal["basic", "puremagic", "file1"]
+    mime_type: str
+    content: str | None = None
+
+
+def get_mime_type(
+    file_path: str, ignore: list[Literal["basic", "puremagic", "file1"]] | None = None
+) -> MimeResult | None:
+    """
+    Synchronous/Threaded wrapper to get the MIME type of a file.
+
+    Args:
+        file_path: Path to the file to check
+        ignore: List of detection methods to skip
+
+    Returns:
+        MimeResult: The method used and the detected MIME type
+        None: If the method is not available or failed
+    """
+    if ignore is None:
+        ignore = []
+
+    file_extension = path.splitext(file_path)[1].lower()
+
+    # Read file bytes once, reuse for both puremagic and basic detection
+    try:
+        with open(file_path, "rb") as f:
+            file_bytes = f.read(1024)  # Read first 1KiB
+    except OSError:
+        # Cannot open file at all
+        return None
+
+    # Step 1: Try puremagic (magic byte detection) first
+    if "puremagic" not in ignore:
+        try:
+            puremagic_result: list[puremagic.PureMagicWithConfidence] = (
+                puremagic.magic_string(file_bytes)
+            )
+            if puremagic_result:
+                # If multiple matches exist, prefer one matching the file extension
+                for match in puremagic_result:
+                    if match.extension.lower() == file_extension and match.mime_type:
+                        return MimeResult("puremagic", match.mime_type)
+                # Otherwise, return first result with a mime type
+                for match in puremagic_result:
+                    if match.mime_type:
+                        return MimeResult("puremagic", match.mime_type)
+        except Exception:
+            # puremagic failed, continue to next method
+            pass
+
+    # Step 2: Try decoding as UTF-8 text
+    # If puremagic didn't recognise it, it might perhaps be a plain text file
+    if "basic" not in ignore:
+        try:
+            content = file_bytes.decode("utf-8")
+            return MimeResult(
+                "basic", f"text/{guess_language(content, file_path)}", content
+            )
+        except UnicodeDecodeError:
+            # Not valid UTF-8 text
+            pass
+
+    # Step 3: Fall back to file(1) command if available
+    if "file1" not in ignore:
+        try:
+            process = subprocess.run(
+                ["file", "--mime-type", "-b", file_path],
+                capture_output=True,
+                text=True,
+                check=True,
+                timeout=1,
+            )
+            mime_type = process.stdout.strip()
+            if mime_type:
+                return MimeResult("file1", mime_type)
+        except (
+            subprocess.CalledProcessError,
+            subprocess.TimeoutExpired,
+            FileNotFoundError,
+        ):
+            # file(1) command failed or is not available
+            pass
+
+    return None
+
+
+def dump_exc(widget: DOMNode, exc: Exception) -> str | None:
+    """Dump an exception to the console for debugging purposes.
+
+    Args:
+        widget (DOMNode): The widget where the exception occurred.
+        exc (Exception): The exception to dump.
+
+    Returns:
+        str: The path to the log file where the exception was dumped.
+    """
+    from rich.traceback import Traceback
+
+    from rovr.variables.maps import VAR_TO_DIR
+
+    rich_traceback = Traceback.from_exception(
+        type(exc),
+        exc,
+        exc.__traceback__,
+        width=None,
+        code_width=None,
+        show_locals=True,
+        max_frames=5,
+    )
+    widget.log(rich_traceback)
+
+    dump_path = path.join(
+        path.realpath(VAR_TO_DIR["CONFIG"]),
+        "logs",
+        f"{log_name}.log",
+    )
+    os.makedirs(path.dirname(dump_path), exist_ok=True)
+    with open(dump_path, "w") as file_log:
+        # don't need to handle OS Error, Textual automatically chains errors
+        error_log = Console(file=file_log, legacy_windows=True)
+        error_log.print(rich_traceback)
+    return dump_path

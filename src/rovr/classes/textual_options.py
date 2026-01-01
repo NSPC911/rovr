@@ -187,7 +187,9 @@ class ModalSearcherOption(Option):
                 )
 
             # create prompt
-            prompt = ModalSearcherOption._icon_content_cache[cache_key] + Content(label)
+            prompt = ModalSearcherOption._icon_content_cache[
+                cache_key
+            ] + Content.from_markup(label)
         else:
             prompt = Content(label)
         super().__init__(prompt=prompt, disabled=disabled)

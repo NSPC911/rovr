@@ -68,6 +68,8 @@ class MetadataContainer(VerticalScroll, inherit_bindings=False):
         return permission_string
 
     def any_in_queue(self) -> bool:
+        if utils.should_cancel():
+            return True
         if self._queued_task is not None:
             self._queued_task(self._queued_task_args)
             self._queued_task, self._queued_task_args = None, None
@@ -177,6 +179,8 @@ class MetadataContainer(VerticalScroll, inherit_bindings=False):
                     child_widget.update, values_list[index].content
                 )
         except NoMatches:
+            if self.any_in_queue():
+                return
             self.app.call_from_thread(self.remove_children)
             keys_list = []
             for field in config["metadata"]["fields"]:

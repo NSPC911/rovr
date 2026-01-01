@@ -1,33 +1,33 @@
-import asyncio
-import asyncio.subprocess
-import tarfile
-import zipfile
+import subprocess
 from dataclasses import dataclass
 from os import path
+from pathlib import PurePath
+from time import sleep, time
+from typing import cast
 
 import textual_image.widget as timg
 from pdf2image import convert_from_path
 from PIL import Image, UnidentifiedImageError
 from PIL.Image import Image as PILImage
+from rich.syntax import Syntax
 from rich.text import Text
 from textual import events, on, work
 from textual.app import ComposeResult
 from textual.containers import Container
 from textual.css.query import NoMatches
-from textual.highlight import guess_language, highlight
+from textual.highlight import guess_language
 from textual.message import Message
+from textual.widget import Widget
 from textual.widgets import Static
-from textual.worker import Worker, WorkerCancelled, WorkerError
+from textual.widgets.selection_list import Selection
 
-from rovr.classes import Archive
+from rovr.classes import ArchiveFileListSelection, FileListSelectionWidget
+from rovr.classes.archive import Archive, BadArchiveError
 from rovr.core import FileList
-from rovr.functions.path import get_mime_type, match_mime_to_preview_type
+from rovr.functions import icons as icon_utils
+from rovr.functions import path as path_utils
 from rovr.functions.utils import should_cancel
 from rovr.variables.constants import PreviewContainerTitles, config, file_executable
-from rovr.variables.maps import (
-    ARCHIVE_EXTENSIONS_FULL,
-    PIL_EXTENSIONS,
-)
 
 titles = PreviewContainerTitles()
 
@@ -37,6 +37,25 @@ class PDFHandler:
     current_page: int = 0
     total_pages: int = 0
     images: list[PILImage] | None = None
+
+
+class LoadingPreview(Static):
+    """Make the preview look empty"""
+
+    def __init__(self) -> None:
+        super().__init__("Loading...")
+
+    def on_mount(self) -> None:
+        assert isinstance(self.parent, PreviewContainer)
+        # sad thing is that you cant just rawdog `self.styles` = `self.parent.styles`
+        self.border_title = self.parent.border_title
+        self.border_subtitle = self.parent.border_subtitle
+        self.styles.border = self.parent.styles.border
+        self.styles.background = self.parent.styles.background
+        self.can_focus = True
+
+    async def on_event(self, event: events.Event) -> None:
+        self.on_mount()
 
 
 class PreviewContainer(Container):
@@ -56,15 +75,27 @@ class PreviewContainer(Container):
         self._current_file_path = None
         self._initial_height = self.size.height
         self._file_type: str = "none"
-        self._mime_type: str | None = None
-        self._preview_texts: list[str] = config["interface"]["preview_text"].values()
+        self._file_mtime: float | None = None
+        self._mime_type: path_utils.MimeResult | None = None
+        self._preview_texts: dict[str, str] = config["interface"]["preview_text"]
         self.pdf = PDFHandler()
+        # Debouncing mechanism
+        self._queued_task = None
+        self._queued_task_args: str | None = None
 
     def compose(self) -> ComposeResult:
-        yield Static(config["interface"]["preview_text"]["start"], classes="wrap")
+        yield Static(self._preview_texts["start"], classes="special")
+
+    def get_loading_widget(self) -> Widget:
+        """Get a widget to display a loading indicator.
+
+        Returns:
+            A widget in place of this widget to indicate a loading.
+        """
+        return LoadingPreview()
 
     def on_preview_container_set_loading(self, event: SetLoading) -> None:
-        self.loading = event.to
+        self.set_loading(event.to)
 
     def has_child(self, selector: str) -> bool:
         """
@@ -81,113 +112,166 @@ class PreviewContainer(Container):
         except NoMatches:
             return False
 
-    async def show_image_preview(self) -> None:
-        self.border_title = titles.image
+    def any_in_queue(self) -> bool:
+        """Check if there's a queued task and run it if so.
+
+        Returns:
+            bool: True if queue was processed or cancelled, False otherwise.
+        """
         if should_cancel():
+            return True
+        if self._queued_task is not None:
+            self._queued_task(self._queued_task_args)
+            self._queued_task, self._queued_task_args = None, None
+            return True
+        return False
+
+    @work(thread=True, exit_on_error=False)
+    def load_image(self) -> PILImage | None:
+        """Load image in a thread.
+        Returns:
+            PILImage | None: The loaded image or None if cancelled.
+        """
+        assert self._current_file_path is not None
+        pil_object: PILImage = Image.open(self._current_file_path)
+        max_width = config["interface"]["max_preview_image_width"]
+        max_height = config["interface"]["max_preview_image_height"]
+
+        reduce_factor = 1
+        # Calculate reduction factor based on each active dimension independently.
+        # A value of 0 disables limiting for that dimension.
+        factors: list[float] = []
+        if max_width > 0:
+            factors.append(pil_object.width / max_width)
+        if max_height > 0:
+            factors.append(pil_object.height / max_height)
+        if factors:
+            # Use the larger factor, rounded down to an integer and clamped to at least 1.
+            reduce_factor = max(1, int(max(factors)))
+
+        if reduce_factor > 1:
+            self.log(
+                f"Image will be reduced by factor {reduce_factor}: "
+                f"{pil_object.width}x{pil_object.height} -> "
+                f"{pil_object.width // reduce_factor}x{pil_object.height // reduce_factor}"
+            )
+            pil_object = pil_object.reduce(reduce_factor)
+        else:
+            pil_object.load()
+        return pil_object
+
+    def show_image_preview(self, depth: int = 0) -> None:
+        """Show image preview. Runs in a thread."""
+        self.app.call_from_thread(setattr, self, "border_title", titles.image)
+        if self.any_in_queue() or self._current_file_path is None:
             return
 
         try:
-            worker: Worker = self.app.run_in_thread(Image.open, self._current_file_path)
-            result: PILImage | Exception = await worker.wait()
-            if isinstance(result, Exception):
-                raise result
-            else:
-                pil_object: PILImage = result
-        except WorkerError:
-            return
-        except UnidentifiedImageError:
-            if should_cancel():
+            pil_creator = self.load_image()
+            while pil_creator.is_running:
+                if self.any_in_queue():
+                    pil_creator.cancel()
+                    return
+                sleep(0.25)
+            if self.any_in_queue():
                 return
-            async with self.batch():
-                await self.remove_children()
-                await self.mount(
-                    Static(
-                        "Cannot render image (is the encoding wrong?)",
-                        id="text_preview",
-                    )
-                )
+            if pil_creator.error:
+                raise pil_creator.error
+            pil_object = pil_creator.result
+            assert isinstance(pil_object, PILImage)
+
+        except (UnidentifiedImageError, NotImplementedError):
+            if self.any_in_queue():
+                return
+            self.app.call_from_thread(self.remove_children)
+            self.app.call_from_thread(
+                self.mount,
+                Static(
+                    "Cannot render image (is the encoding wrong?)",
+                    classes="special",
+                ),
+            )
             return
         except FileNotFoundError:
-            if should_cancel():
+            if self.any_in_queue():
                 return
-            async with self.batch():
-                await self.remove_children()
-                await self.mount(
-                    Static(
-                        config["interface"]["preview_text"]["error"],
-                        id="text_preview",
-                    )
-                )
+            self.app.call_from_thread(self.remove_children)
+            self.app.call_from_thread(
+                self.mount,
+                Static(
+                    self._preview_texts["error"],
+                    classes="special",
+                ),
+            )
             return
 
-        if not self.has_child("#image_preview"):
-            await self.remove_children()
-            self.remove_class("bat", "full", "clip")
+        if not self.has_child(".image_preview"):
+            self.app.call_from_thread(self.remove_children)
 
-            if should_cancel():
+            if self.any_in_queue():
                 return
 
             image_widget = timg.__dict__[
-                config["settings"]["image_protocol"] + "Image"
+                config["interface"]["image_protocol"] + "Image"
             ](
                 pil_object,
-                id="image_preview",
-                classes="inner_preview",
+                classes="image_preview",
             )
             image_widget.can_focus = True
-            await self.mount(image_widget)
+            self.app.call_from_thread(self.mount, image_widget)
         else:
             try:
-                if should_cancel():
+                if self.any_in_queue():
                     return
-                image_widget = self.query_one("#image_preview")
-                image_widget.image = pil_object
+                image_widget = self.query_one(".image_preview")
+                self.app.call_from_thread(setattr, image_widget, "image", pil_object)
             except NoMatches:
-                if should_cancel():
+                if self.any_in_queue() or depth >= 1:
                     return
-                async with self.batch():
-                    await self.remove_children()
-                    await self.show_image_preview()
+                self.app.call_from_thread(self.remove_children)
+                self.show_image_preview(depth=depth + 1)
                 return
 
-        if should_cancel():
+        if self.any_in_queue():
             return
 
-    async def show_pdf_preview(self) -> None:
-        self.border_title = titles.pdf
+    def show_pdf_preview(self, depth: int = 0) -> None:
+        """Show PDF preview. Runs in a thread.
 
-        if should_cancel():
+        Raises:
+            ValueError: If PDF conversion returns 0 pages.
+        """
+        self.app.call_from_thread(setattr, self, "border_title", titles.pdf)
+
+        if self.any_in_queue() or self._current_file_path is None:
             return
 
         # Convert PDF to images if not already done
         if self.pdf.images is None:
+            poppler_folder: str | None = config["plugins"]["poppler"]["poppler_folder"]
+            if poppler_folder == "":
+                poppler_folder = None
             try:
-                worker: Worker = self.app.run_in_thread(
-                    convert_from_path,
-                    str(self._current_file_path),
+                result = convert_from_path(
+                    self._current_file_path,
                     transparent=False,
                     fmt="png",
                     single_file=False,
                     use_pdftocairo=config["plugins"]["poppler"]["use_pdftocairo"],
                     thread_count=config["plugins"]["poppler"]["threads"],
-                    poppler_path=config["plugins"]["poppler"]["poppler_folder"] or None,
+                    poppler_path=cast(str | PurePath, poppler_folder),
                 )
-                result = await worker.wait()
-                if isinstance(result, Exception):
-                    raise result
-                elif len(result) == 0:
+                if len(result) == 0:
                     raise ValueError(
-                        "Obtained 0 pages from Poppler. Something may have gone wrong..."
+                        "Obtained 0 pages from Poppler. Something may have gone wrong\u2026"
                     )
             except Exception as exc:
-                if should_cancel():
+                if self.any_in_queue():
                     return
-                await self.remove_children()
-                await self.mount(
-                    Static(
-                        f"{type(exc).__name__}: {str(exc)}",
-                        id="text_preview",
-                    )
+                self.app.call_from_thread(self.remove_children)
+                self.app.call_from_thread(
+                    self.mount,
+                    Static(f"{type(exc).__name__}: {str(exc)}", classes="special"),
                 )
                 return
 
@@ -195,48 +279,54 @@ class PreviewContainer(Container):
             self.pdf.total_pages = len(self.pdf.images)
             self.pdf.current_page = 0
 
-        if should_cancel():
+        if self.any_in_queue():
             return
 
         current_image = self.pdf.images[self.pdf.current_page]
 
-        self.border_subtitle = (
-            f"Page {self.pdf.current_page + 1}/{self.pdf.total_pages}"
+        self.app.call_from_thread(
+            setattr,
+            self,
+            "border_subtitle",
+            f"Page {self.pdf.current_page + 1}/{self.pdf.total_pages}",
         )
 
-        if not self.has_child("#image_preview"):
-            await self.remove_children()
-            self.remove_class("bat", "full", "clip")
+        if not self.has_child(".image_preview"):
+            self.app.call_from_thread(self.remove_children)
+            self.app.call_from_thread(self.remove_class, "bat", "full", "clip")
 
-            if should_cancel():
+            if self.any_in_queue():
                 return
 
             image_widget = timg.__dict__[
-                config["settings"]["image_protocol"] + "Image"
+                config["interface"]["image_protocol"] + "Image"
             ](
                 current_image,
-                id="image_preview",
-                classes="inner_preview",
+                classes="image_preview",
             )
             image_widget.can_focus = True
-            await self.mount(image_widget)
+            self.app.call_from_thread(self.mount, image_widget)
         else:
             try:
-                if should_cancel():
+                if self.any_in_queue():
                     return
-                image_widget = self.query_one("#image_preview")
-                image_widget.image = current_image
+                image_widget = self.query_one(".image_preview")
+                self.app.call_from_thread(setattr, image_widget, "image", current_image)
             except Exception:
-                if should_cancel():
+                if self.any_in_queue() or depth >= 1:
                     return
-                await self.remove_children()
-                await self.show_pdf_preview()
+                self.app.call_from_thread(self.remove_children)
+                self.show_pdf_preview(depth=depth + 1)
 
-        if should_cancel():
+        if self.any_in_queue():
             return
 
-    async def show_bat_file_preview(self) -> bool:
-        self.border_title = titles.bat
+    def show_bat_file_preview(self) -> bool:
+        """Show bat file preview. Runs in a thread.
+
+        Returns:
+            bool: True if successful, False otherwise.
+        """
         bat_executable = config["plugins"]["bat"]["executable"]
         command = [
             bat_executable,
@@ -249,71 +339,99 @@ class PreviewContainer(Container):
         max_lines = self.size.height
         if max_lines > 0:
             command.append(f"--line-range=:{max_lines}")
-        command.append(self._current_file_path)
+        command.extend(["--", self._current_file_path])
 
-        if should_cancel():
+        if self.any_in_queue():
             return False
+        self.app.call_from_thread(setattr, self, "border_title", titles.bat)
 
         try:
-            process = await asyncio.create_subprocess_exec(
-                *command,
-                stdout=asyncio.subprocess.PIPE,
-                stderr=asyncio.subprocess.PIPE,
+            # Use synchronous subprocess since we're already in a thread
+            result = subprocess.run(
+                command,
+                capture_output=True,
+                text=False,
             )
-            stdout, stderr = await process.communicate()
 
-            if should_cancel():
+            if self.any_in_queue():
                 return False
 
-            if process.returncode == 0:
-                bat_output = stdout.decode("utf-8", errors="ignore")
+            if result.returncode == 0:
+                bat_output = result.stdout.decode("utf-8", errors="ignore")
                 new_content = Text.from_ansi(bat_output)
 
-                if should_cancel():
+                if self.any_in_queue():
                     return False
 
                 if not self.has_child("Static"):
-                    await self.remove_children()
+                    self.log("Mounting new Static")
+                    self.app.call_from_thread(self.remove_children)
 
-                    if should_cancel():
+                    if self.any_in_queue():
                         return False
 
-                    static_widget = Static(
-                        new_content, id="text_preview", classes="inner_preview"
-                    )
-                    await self.mount(static_widget)
-                    if should_cancel():
+                    static_widget = Static(new_content, classes="bat_preview")
+                    self.app.call_from_thread(self.mount, static_widget)
+                    if self.any_in_queue():
                         return False
                     static_widget.can_focus = True
                 else:
+                    self.log("Using existing Static")
                     static_widget: Static = self.query_one(Static)
-                    static_widget.update(new_content)
-                static_widget.classes = ""
+                    self.app.call_from_thread(static_widget.update, new_content)
+                    self.app.call_from_thread(static_widget.set_classes, "bat_preview")
 
-                return not should_cancel()
+                return True
             else:
-                error_message = stderr.decode("utf-8", errors="ignore")
-                if should_cancel():
+                error_message = result.stderr.decode("utf-8", errors="ignore")
+                if self.any_in_queue():
                     return False
-                await self.remove_children()
-                self.notify(
+                self.app.call_from_thread(self.remove_children)
+                self.app.call_from_thread(
+                    self.notify,
                     error_message,
                     title="Plugins: Bat",
                     severity="warning",
                 )
                 return False
-        except Exception as e:
-            if should_cancel():
+        except Exception as exc:
+            if self.any_in_queue():
                 return False
-            self.notify(str(e), title="Plugins: Bat", severity="warning")
+            self.app.call_from_thread(
+                self.notify, str(exc), title="Plugins: Bat", severity="error"
+            )
+            path_utils.dump_exc(self, exc)
             return False
 
-    async def show_normal_file_preview(self) -> None:
-        self.border_title = titles.file
-        if should_cancel():
+    def show_normal_file_preview(self) -> None:
+        """Show normal file preview with syntax highlighting. Runs in a thread."""
+        if self.any_in_queue():
             return
+        self.app.call_from_thread(setattr, self, "border_title", titles.file)
 
-        assert isinstance(self._current_content, str)
+        if not isinstance(self._current_content, str):
+            # force read by bruteforcing encoding methods
+            encodings_to_try = [
+                "utf8",
+                "utf16",
+                "utf32",
+                "latin1",
+                "iso8859-1",
+                "mbcs",
+                "ascii",
+                "us-ascii",
+            ]
+            for encoding in encodings_to_try:
+                try:
+                    with open(self._current_file_path, "r", encoding=encoding) as f:
+                        self._current_content = f.read(1024)
+                    break
+                except (UnicodeDecodeError, FileNotFoundError):
+                    continue
+            if self._current_content is None:
+                self._current_content = self._preview_texts["error"]
+                self.mount_special_messages()
+                return
 
         lines = self._current_content.splitlines()
         max_lines = self.size.height
@@ -333,110 +451,189 @@ class PreviewContainer(Container):
             lines = processed_lines
         text_to_display = "\n".join(lines)
         # add syntax highlighting
-        text_to_display = highlight(
+        language = (
+            guess_language(text_to_display, path=self._current_file_path) or "text"
+        )
+        syntax = Syntax(
             text_to_display,
-            language=guess_language(text_to_display, path=self._current_file_path),
+            lexer=language,
+            line_numbers=config["interface"]["show_line_numbers"],
+            word_wrap=False,
             tab_size=4,
+            theme=config["theme"]["preview"],
+            background_color="default",
+            code_width=max_width,
         )
 
-        if should_cancel():
-            return
-
-        if should_cancel():
+        if self.any_in_queue():
             return
 
         if not self.has_child("Static"):
-            await self.remove_children()
+            self.app.call_from_thread(self.remove_children)
 
-            if should_cancel():
+            if self.any_in_queue():
                 return
 
-            await self.mount(
-                Static(
-                    text_to_display,
-                    id="text_preview",
-                )
-            )
+            self.app.call_from_thread(self.mount, Static(syntax))
         else:
-            self.query_one(Static).update(text_to_display)
+            static_widget = self.query_one(Static)
+            self.app.call_from_thread(static_widget.update, syntax)
 
-        if should_cancel():
+        if self.any_in_queue():
             return
 
-    async def show_folder_preview(self, folder_path: str) -> None:
-        self.border_title = titles.folder
-        if should_cancel():
+    def show_folder_preview(self, folder_path: str) -> None:
+        """Show folder preview."""
+        if self.any_in_queue():
             return
+        self.app.call_from_thread(setattr, self, "border_title", titles.folder)
 
         if not self.has_child("FileList"):
-            await self.remove_children()
+            self.app.call_from_thread(self.remove_children)
 
-            if should_cancel():
+            if self.any_in_queue():
                 return
 
-            await self.mount(
+            self.app.call_from_thread(
+                self.mount,
                 FileList(
                     name=folder_path,
-                    classes="file-list inner_preview",
+                    classes="file-list",
                     dummy=True,
                     enter_into=folder_path,
-                )
+                ),
             )
 
-        if should_cancel():
+        if self.any_in_queue():
             return
 
         this_list: FileList = self.query_one(FileList)
+        self.app.call_from_thread(this_list.set_classes, "file-list")
+
         main_list: FileList = self.app.query_one("#file_list", FileList)
         this_list.sort_by = main_list.sort_by
         this_list.sort_descending = main_list.sort_descending
-
-        updater_worker: Worker = this_list.dummy_update_file_list(
-            cwd=folder_path,
-        )
-
+        options = []
         try:
-            await updater_worker.wait()
-        except WorkerCancelled:
+            loading_timer = self.app.call_from_thread(
+                self.set_timer,
+                0.25,
+                lambda: setattr(self, "border_subtitle", "Getting list\u2026"),
+            )
+            folders, files = path_utils.sync_get_cwd_object(
+                folder_path,
+                config["interface"]["show_hidden_files"],
+                sort_by=this_list.sort_by,
+                reverse=this_list.sort_descending,
+                return_nothing_if_this_returns_true=self.any_in_queue,
+            )
+            loading_timer.stop()  # if timer did not fire, stop it
+            if files is None or folders is None:
+                return
+            if not (folders or files):
+                options = [Selection("  --no-files--", value="", id="", disabled=True)]
+            else:
+                file_list_options = folders + files
+                file_list_option_length = len(file_list_options)
+                start_time = time()
+                for index, item in enumerate(file_list_options):
+                    options.append(
+                        FileListSelectionWidget(
+                            icon=item["icon"],
+                            label=item["name"],
+                            dir_entry=item["dir_entry"],
+                        )
+                    )
+                    if start_time + 0.25 < time():
+                        self.app.call_from_thread(
+                            setattr,
+                            self,
+                            "border_subtitle",
+                            f"{index + 1} / {file_list_option_length}",
+                        )
+                        start_time = time()
+                        if self.any_in_queue():
+                            return
+        except PermissionError:
+            options = [
+                Selection(
+                    " Permission Error: Unable to access this directory.",
+                    id="",
+                    value="",
+                    disabled=True,
+                )
+            ]
+        if self.any_in_queue():
             return
+        self.app.call_from_thread(this_list.set_options, options)
+        self.app.call_from_thread(setattr, self, "border_subtitle", "")
 
-        if should_cancel():
+    def show_archive_preview(self) -> None:
+        """Show archive preview."""
+        if self.any_in_queue():
             return
-
-    async def show_archive_preview(self) -> None:
-        self.border_title = titles.archive
-        if should_cancel():
-            return
+        self.app.call_from_thread(setattr, self, "border_title", titles.archive)
 
         if not self.has_child("FileList"):
-            await self.remove_children()
+            self.app.call_from_thread(self.remove_children)
 
-            if should_cancel():
+            if self.any_in_queue():
                 return
 
-            await self.mount(
+            self.app.call_from_thread(
+                self.mount,
                 FileList(
-                    classes="file-list inner_preview",
+                    classes="archive-list",
                     dummy=True,
-                )
+                ),
             )
 
-        if should_cancel():
+        if self.any_in_queue():
             return
 
-        updater_worker: Worker = self.query_one(FileList).create_archive_list(
-            self._current_content
-        )
+        file_list = self.query_one(FileList)
 
-        try:
-            await updater_worker.wait()
-        except WorkerCancelled:
+        self.app.call_from_thread(file_list.set_classes, "archive-list")
+        options = []
+        if not self._current_content:
+            options = [Selection("  --no-files--", value="", id="", disabled=True)]
+        else:
+            file_list_length = len(self._current_content)
+            start_time = time()
+            for index, file_path in enumerate(self._current_content):
+                if file_path.endswith("/"):
+                    icon = icon_utils.get_icon_for_folder(file_path.strip("/"))
+                else:
+                    icon = icon_utils.get_icon_for_file(file_path)
+
+                # Create a selection widget similar to FileListSelectionWidget but simpler
+                # since we don't have dir_entry metadata for archive contents
+                options.append(
+                    ArchiveFileListSelection(
+                        icon,
+                        file_path,
+                    )
+                )
+                if start_time + 0.25 < time():
+                    self.app.call_from_thread(
+                        setattr,
+                        self,
+                        "border_subtitle",
+                        f"{index + 1} / {file_list_length}",
+                    )
+                    start_time = time()
+                    if self.any_in_queue():
+                        return
+
+        if self.any_in_queue():
             return
+        self.app.call_from_thread(file_list.set_options, options)
+        self.app.call_from_thread(setattr, self, "border_subtitle", "")
 
-        if should_cancel():
-            return
-
-    def show_preview(self, file_path: str) -> None:
+    async def show_preview(self, file_path: str) -> None:
+        """
+        Public method to show preview. Uses debouncing pattern.
+        """
         if (
             "hide" in self.classes
             or "-nopreview" in self.screen.classes
@@ -445,73 +642,119 @@ class PreviewContainer(Container):
             self._pending_preview_path = file_path
             return
         self._pending_preview_path = None
-        self.perform_show_preview(file_path)
 
-    @work(exclusive=True, thread=True, exit_on_error=False)
-    def perform_show_preview(self, file_path: str) -> None:
-        self.border_subtitle = ""
-        if should_cancel():
-            return
-        self.post_message(self.SetLoading(True))
-
-        # Reset PDF state when changing files
-        if file_path != self._current_file_path:
-            self.pdf.images = None
-            self.pdf.current_page = 0
-            self.pdf.total_pages = 0
-
-        mime_type: str | None = None
-
-        if path.isdir(file_path):
-            self.app.call_from_thread(
-                self.update_ui, file_path=file_path, file_type="folder"
-            )
+        # Debounce: check if worker is running
+        if any(
+            worker.is_running
+            and worker.node is self
+            and worker.name == "perform_show_preview"
+            for worker in self.app.workers
+        ):
+            self._queued_task = self.perform_show_preview
+            self._queued_task_args = file_path
         else:
-            file_type: str | None = None
+            self.perform_show_preview(file_path)
 
-            if config["plugins"]["file_one"]["enabled"] and file_executable is not None:
-                if should_cancel():
-                    return
-                mime_type = self.app.call_from_thread(get_mime_type, file_path)
-                if mime_type is not None:
-                    file_type = match_mime_to_preview_type(
-                        mime_type,
-                        config["plugins"]["file_one"]["mime_rules"],
-                    )
-                    if (
-                        file_type == "pdf"
-                        and not config["plugins"]["poppler"]["enabled"]
-                    ):
-                        file_type = "file"
-
-            if file_type is None:
-                lower_file_path = file_path.lower()
-                if (
-                    lower_file_path.endswith(".pdf")
-                    and config["plugins"]["poppler"]["enabled"]
-                ):
-                    file_type = "pdf"
-                elif any(lower_file_path.endswith(ext) for ext in PIL_EXTENSIONS):
-                    file_type = "image"
-                elif any(
-                    lower_file_path.endswith(ext) for ext in ARCHIVE_EXTENSIONS_FULL
-                ):
-                    file_type = "archive"
-                else:
-                    file_type = "file"
-
-            content = None
-
-            if should_cancel():
+    @work(exclusive=True, thread=True)
+    def perform_show_preview(self, file_path: str) -> None:
+        """Main preview worker. Runs in a thread."""
+        try:
+            if self.any_in_queue():
                 return
 
-            match file_type:
-                case "archive":
+            if file_path == self._current_file_path:
+                # check mtime as well
+                new_mtime = path.getmtime(file_path)
+                if self._file_mtime == new_mtime:
+                    return
+
+            self.app.call_from_thread(setattr, self, "border_subtitle", "")
+            if self.any_in_queue():
+                return
+            self.post_message(self.SetLoading(True))
+
+            # Reset PDF state when changing files
+            if file_path != self._current_file_path:
+                self.pdf.images = None
+                self.pdf.current_page = 0
+                self.pdf.total_pages = 0
+
+            if path.isdir(file_path):
+                self.update_ui(
+                    file_path=file_path,
+                    mime_type=path_utils.MimeResult("basic", "inode/directory"),
+                    file_type="folder",
+                )
+            else:
+                content = None  # for now
+                mime_result = path_utils.get_mime_type(file_path)
+                self.log(mime_result)
+                if mime_result is None:
+                    self.log(f"Could not get MIME type for {file_path}")
+                    self.update_ui(
+                        file_path=file_path,
+                        file_type="file",
+                        content=self._preview_texts["error"],
+                    )
+                    self.call_later(lambda: self.post_message(self.SetLoading(False)))
+                    return
+                content = mime_result.content
+
+                file_type = path_utils.match_mime_to_preview_type(mime_result.mime_type)
+                if file_type is None:
+                    self.log("Could not match MIME type to preview type")
+                    self.update_ui(
+                        file_path=file_path,
+                        file_type="file",
+                        mime_type=mime_result,
+                        content=self._preview_texts["error"],
+                    )
+                    self.call_later(lambda: self.post_message(self.SetLoading(False)))
+                    return
+                elif file_type == "remime":
+                    mime_result = path_utils.get_mime_type(
+                        file_path, ["basic", "puremagic"]
+                    )
+                    if mime_result is None:
+                        self.log("Could not get MIME type for remime")
+                        self.update_ui(
+                            file_path=file_path,
+                            file_type="file",
+                            content=self._preview_texts["error"],
+                            mime_type=mime_result,
+                        )
+                        self.call_later(
+                            lambda: self.post_message(self.SetLoading(False))
+                        )
+                        return
+                    file_type = path_utils.match_mime_to_preview_type(
+                        mime_result.mime_type
+                    )
+                    if file_type is None:
+                        self.log("Could not match MIME type to preview type")
+                        self.update_ui(
+                            file_path=file_path,
+                            file_type="file",
+                            mime_type=mime_result,
+                            content=self._preview_texts["error"],
+                        )
+                        self.call_later(
+                            lambda: self.post_message(self.SetLoading(False))
+                        )
+                        return
+                self.log(f"Previewing as {file_type} (MIME: {mime_result.mime_type})")
+
+                if file_type == "archive":
                     try:
                         with Archive(file_path, "r") as archive:
                             all_files = []
                             for member in archive.infolist():
-                                if should_cancel():
+                                if self.any_in_queue():
+                                    self.call_later(
+                                        lambda: self.post_message(
+                                            self.SetLoading(False)
+                                        )
+                                    )
                                     return
 
                                 filename = getattr(
@@ -529,156 +772,152 @@ class PreviewContainer(Container):
                                     all_files.append(filename)
                         content = all_files
                     except (
-                        zipfile.BadZipFile,
-                        tarfile.TarError,
+                        BadArchiveError,
                         ValueError,
                         FileNotFoundError,
                     ):
-                        content = [config["interface"]["preview_text"]["error"]]
-                case "image" | "pdf":
-                    pass
-                case _:
-                    if should_cancel():
-                        return
-                    # prevent files > 1mb from being
-                    # read because are you stupid, why
-                    # would you use rovr for that anyways
-                    try:
-                        size = path.getsize(file_path)
-                        if size > 1024**2:
-                            content = config["interface"]["preview_text"]["too_large"]
-                        elif size == 0:
-                            content = config["interface"]["preview_text"]["empty"]
-                        else:
-                            try:
-                                with open(file_path, "r", encoding="utf-8") as f:
-                                    content = f.read()
-                            except UnicodeDecodeError:
-                                content = config["interface"]["preview_text"]["binary"]
-                            except (
-                                FileNotFoundError,
-                                PermissionError,
-                                OSError,
-                                MemoryError,
-                            ):
-                                content = config["interface"]["preview_text"]["error"]
-                    except FileNotFoundError:
-                        content = config["interface"]["preview_text"]["error"]
-                        if path.exists(file_path):
-                            raise Exception from None
-            if should_cancel():
+                        content = [self._preview_texts["error"]]
+
+                self.update_ui(
+                    file_path,
+                    file_type=file_type,
+                    content=content,
+                    mime_type=mime_result,
+                )
+
+            if self.any_in_queue():
                 return
+            self.call_later(lambda: self.post_message(self.SetLoading(False)))
 
+            if self.any_in_queue():
+                return
+            else:
+                self._queued_task = None
+        except Exception as exc:
             self.app.call_from_thread(
-                self.update_ui,
-                file_path,
-                file_type=file_type,
-                content=content,
-                mime_type=mime_type,
+                self.notify,
+                f"{type(exc).__name__} was raised while generating the preview",
             )
+            path_utils.dump_exc(self, exc)
 
-        if should_cancel():
-            return
-        self.call_later(lambda: self.post_message(self.SetLoading(False)))
-
-    async def update_ui(
+    def update_ui(
         self,
         file_path: str,
         file_type: str,
         content: str | list[str] | None = None,
-        mime_type: str | None = None,
+        mime_type: path_utils.MimeResult | None = None,
     ) -> None:
         """
-        Update the preview UI. This runs on the main thread.
+        Update the preview UI. Runs in a thread, uses call_from_thread for UI ops.
         """
         self._current_file_path = file_path
         self._current_content = content
         self._mime_type = mime_type
+        self._file_mtime = path.getmtime(file_path)
 
         self._file_type = file_type
-        self.remove_class("pdf")
-
+        self.app.call_from_thread(self.remove_class, "pdf")
         if file_type == "folder":
-            await self.show_folder_preview(file_path)
+            self.log("Showing folder preview")
+            self.show_folder_preview(file_path)
         elif file_type == "image":
-            await self.show_image_preview()
+            self.log("Showing image preview")
+            self.show_image_preview()
         elif file_type == "archive":
-            await self.show_archive_preview()
+            self.log("Showing archive preview")
+            self.show_archive_preview()
         elif file_type == "pdf":
-            self.add_class("pdf")
-            await self.show_pdf_preview()
-        elif content is not None:
-            if content in self._preview_texts:
-                await self.mount_special_messages()
+            self.log("Showing pdf preview")
+            self.app.call_from_thread(self.add_class, "pdf")
+            self.show_pdf_preview()
+        else:
+            if content in self._preview_texts.values():
+                self.log("Showing special preview")
+                self.mount_special_messages()
             else:
-                if not (
-                    config["plugins"]["bat"]["enabled"]
-                    and await self.show_bat_file_preview()
-                ):
-                    await self.show_normal_file_preview()
+                if config["plugins"]["bat"]["enabled"]:
+                    self.log("Showing bat preview")
+                    if self.show_bat_file_preview():
+                        return
+                self.show_normal_file_preview()
 
-    async def mount_special_messages(self) -> None:
-        self.border_title = ""
-        if should_cancel():
+    def mount_special_messages(self) -> None:
+        """Mount special messages. Runs in a thread."""
+        if self.any_in_queue():
             return
-
+        self.log(self._mime_type)
         assert isinstance(self._current_content, str)
+        self.app.call_from_thread(setattr, self, "border_title", "")
 
         display_content: str = self._current_content
-        if (
-            self._current_content == config["interface"]["preview_text"]["binary"]
-            and self._mime_type is not None
-        ):
-            display_content = (
-                f"{self._current_content}\n\n[dim]MIME type: {self._mime_type}[/]"
-            )
+        if self._mime_type:
+            display_content = f"MIME Type: {self._mime_type.mime_type}"
+            if (
+                config["plugins"]["file_one"]["enabled"]
+                and config["plugins"]["file_one"]["get_description"]
+            ):
+                try:
+                    process = subprocess.run(
+                        [file_executable, "--brief", "--", self._current_file_path],
+                        capture_output=True,
+                        text=True,
+                        check=True,
+                        timeout=1,
+                    )
+                    display_content += f"\n{process.stdout.strip()}"
+                except (subprocess.SubprocessError, FileNotFoundError) as exc:
+                    path_utils.dump_exc(self, exc)
 
         if self.has_child("Static"):
             static_widget: Static = self.query_one(Static)
-            static_widget.update(display_content)
+            self.app.call_from_thread(static_widget.update, display_content)
+            self.app.call_from_thread(static_widget.set_classes, "special")
         else:
-            await self.remove_children()
-            if should_cancel():
+            self.app.call_from_thread(self.remove_children)
+            if self.any_in_queue():
                 return
-            static_widget = Static(display_content)
-            await self.mount(static_widget)
+            static_widget = Static(display_content, classes="special")
+            self.app.call_from_thread(self.mount, static_widget)
         static_widget.can_focus = True
-        static_widget.classes = "special"
-        if should_cancel():
-            return
 
-    async def on_mouse_scroll_up(self, event: events.MouseScrollUp) -> None:
-        # pdf for now, text later on
+    def on_mouse_scroll_up(self, event: events.MouseScrollUp) -> None:
+        """Handle mouse scroll up for PDF navigation."""
         if self.border_title == titles.pdf and self._file_type == "pdf":
             event.stop()
             if self.pdf.current_page > 0:
                 self.pdf.current_page -= 1
-                await self.show_pdf_preview()
+                self._trigger_pdf_update()
 
-    async def on_mouse_scroll_down(self, event: events.MouseScrollDown) -> None:
-        # pdf for now, text later on
+    def on_mouse_scroll_down(self, event: events.MouseScrollDown) -> None:
+        """Handle mouse scroll down for PDF navigation."""
         if self.border_title == titles.pdf and self._file_type == "pdf":
             event.stop()
             if self.pdf.current_page < self.pdf.total_pages - 1:
                 self.pdf.current_page += 1
-                await self.show_pdf_preview()
+                self._trigger_pdf_update()
 
-    async def on_resize(self, event: events.Resize) -> None:
-        """Re-render the preview on resize"""
-        if self.has_child("Static") and event.size.height != self._initial_height:
-            if self._current_content is not None:
-                is_special_content = self._current_content in self._preview_texts
-                if (
-                    config["plugins"]["bat"]["enabled"]
-                    and not is_special_content
-                    and await self.show_bat_file_preview()
-                ):
-                    pass
-                else:
-                    await self.show_normal_file_preview()
-            self._initial_height = event.size.height
+    @work(thread=True)
+    def _trigger_pdf_update(self) -> None:
+        """Trigger PDF preview update from a thread."""
+        self.show_pdf_preview()
 
-    async def on_key(self, event: events.Key) -> None:
+    # def on_resize(self, event: events.Resize) -> None:
+    #     """Re-render the preview on resize"""
+    #     if self.has_child("Static") and event.size.height != self._initial_height:
+    #         if self._current_content is not None:
+    #             is_special_content = self._current_content in self._preview_texts.values()
+    #             if not is_special_content:
+    #                 self._trigger_resize_update()
+    #         self._initial_height = event.size.height
+
+    @work(thread=True)
+    def _trigger_resize_update(self) -> None:
+        """Trigger resize update from a thread."""
+        if config["plugins"]["bat"]["enabled"] and self.show_bat_file_preview():
+            return
+        self.show_normal_file_preview()
+
+    def on_key(self, event: events.Key) -> None:
         """Check for vim keybinds."""
         from rovr.functions.utils import check_key
 
@@ -712,7 +951,7 @@ class PreviewContainer(Container):
                 self.pdf.current_page = self.pdf.total_pages - 1
             else:
                 return
-            await self.show_pdf_preview()
+            self._trigger_pdf_update()
         elif self.border_title == titles.archive:
             widget: FileList = self.query_one(FileList)
             if check_key(event, config["keybinds"]["up"]):
@@ -733,16 +972,10 @@ class PreviewContainer(Container):
             elif check_key(event, config["keybinds"]["end"]):
                 event.stop()
                 widget.scroll_end(animate=False)
-            # elif check_key(event, config["keybinds"]["preview_scroll_left"]):
-            #     event.stop()
-            #     widget.scroll_left(animate=False)
-            # elif check_key(event, config["keybinds"]["preview_scroll_right"]):
-            #     event.stop()
-            #     widget.scroll_right(animate=False)
 
     @on(events.Show)
-    def when_become_visible(self, event: events.Show) -> None:
-        if self._pending_preview_path is not None:
+    async def when_become_visible(self, event: events.Show) -> None:
+        if isinstance(self._pending_preview_path, str):
             pending = self._pending_preview_path
             self._pending_preview_path = None
-            self.perform_show_preview(pending)
+            await self.show_preview(pending)

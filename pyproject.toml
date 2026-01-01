@@ -1,14 +1,15 @@
 [project]
 name = "rovr"
-version = "0.6.0"
+version = "0.7.0.dev1"
 description = "A post-modern terminal file explorer"
 readme = "README.md"
 requires-python = ">=3.12, <3.14"
-license = { text = "MIT" }
+license = "MIT"
+license-files = [ "LICENSE" ]
 authors = [{ name = "NSPC911" }]
 keywords = ["filemanager", "fs", "python", "textual", "tui"]
 classifiers = [
-  "Development Status :: 2 - Pre-Alpha",
+  "Development Status :: 4 - Beta",
   "License :: OSI Approved :: MIT License",
   "Programming Language :: Python :: 3.13",
   # "Framework :: Textual", # I highly believe textual deserves its own category
@@ -16,6 +17,7 @@ classifiers = [
   "Topic :: Utilities",
 ]
 dependencies = [
+  "backports-zstd>=1.2.0; python_version < '3.14'",
   "humanize>=4.14.0",
   "jsonschema>=4.25.0",
   "natsort>=8.4.0",
@@ -24,10 +26,11 @@ dependencies = [
   "pillow>=12.0.0",
   "platformdirs>=4.5.0",
   "psutil>=7.1.0",
+  "puremagic==1.30", # I will use an exact pin, and you can't make me change it
   "rarfile>=4.2",
   "rich-click>=1.9.3",
   "send2trash>=1.8.3",
-  "textual~=6.6.0",
+  "textual~=6.9",
   "textual-autocomplete>=4.0.6",
   "textual-image[textual]>=0.8.4",
   "tomli>=2.3.0",
@@ -40,16 +43,17 @@ Source = "https://github.com/NSPC911/rovr"
 Documentation = "https://nspc911.github.io/rovr"
 
 [project.scripts]
-rovr = "rovr.__main__:main"
+rovr = "rovr:main"
 
 [dependency-groups]
 dev = [
   "commitizen>=4.10.0",
   "json-schema-for-humans>=1.5.1",
   "poethepoet>=0.38.0",
-  "ruff>=0.14.6",
+  "prek>=0.2.25",
+  "ruff>=0.14.10",
   "textual-dev>=1.7.0",
-  "ty==0.0.1a28",
+  "ty==0.0.8",
 ]
 speedups = [
     "textual-speedups>=0.2.1",
@@ -68,7 +72,7 @@ update_changelog_on_bump = true
 major_version_zero = true
 
 [tool.poe.tasks]
-dev = "textual run --dev rovr.__main__:main"
+dev = "textual run --dev rovr.__main__:cli --"
 run = "rovr"
 log = "textual console -x WORKER -x SYSTEM -x DEBUG -x EVENT"
 "gen-schema" = "docs/scripts/generate_schema.py"
@@ -78,8 +82,15 @@ check.sequence = [
   { cmd = "ty check" },
   { cmd = "ruff check" }
 ]
-format = "ruff check --unsafe-fixes --fix"
+format.sequence = [{ cmd = "ruff check --unsafe-fixes --fix"}, { cmd = "ruff format"}]
+fmt = ["format"]
 "screenshot-format" = "pnpx prettier --write docs/public/screenshots/*.svg --parser html --bracket-same-line --print-width 160"
+
+[tool.ruff]
+force-exclude = true
+exclude = [
+  "src/rovr/monkey_patches/sys_stdout.py"
+]
 
 [tool.ruff.lint]
 select = [
@@ -99,7 +110,7 @@ select = [
   "TD",
   "W",
 ]
-ignore = ["W505", "E501", "ANN002", "ANN003", "TD002", "TD003"]
+ignore = ["W505", "E501", "ANN002", "ANN003", "TD002", "TD003", "ANN401"]
 preview = true
 
 [tool.ruff.format]
@@ -114,7 +125,9 @@ exclude = [
 ] # i dont want to add type indicators
 
 [tool.ty.rules]
-possibly-missing-import = "ignore"
+# possibly-missing-import = "ignore"
 unresolved-reference = "ignore" # handled by ruff
 unresolved-attribute = "ignore"
 no-matching-overload = "ignore" # not that accurate
+possibly-missing-attribute = "ignore" # no it is not missing
+invalid-assignment = "warn" # probably already but warn for future

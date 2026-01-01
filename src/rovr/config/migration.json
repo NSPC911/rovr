@@ -1,20 +1,77 @@
 [
   {
     "keys": [
-      "interface.preview_error",
+      "settings.show_hidden_files",
+      "settings.allow_tab_nav",
+      "settings.append_new_tabs",
+      "settings.double_click_delay",
+      "settings.drive_watcher_frequency",
+      "settings.image_protocol"
+    ],
+    "message": [
+      "[bright_blue]settings.show_hidden_files[/], [bright_blue]settings.allow_tab_nav[/], [bright_blue]settings.append_new_tabs[/], [bright_blue]settings.double_click_delay[/], [bright_blue]settings.drive_watcher_frequency[/] and [bright_blue]settings.image_protocol[/] have been moved to [bright_cyan]interface.*[/] to be more consistent with what they do."
+    ],
+    "extra": "Moved in v0.7.0"
+  },
+  {
+    "keys": [
+      "plugins.file_one.mime_rules.*",
+      "plugins.file_one.mime_rules"
+    ],
+    "message": [
+      "[bright_blue]plugins.file_one.mime_rules.*[/] has been renamed to [bright_cyan]interface.mime_rules.*[/] because file(1) is no longer a requirement to make use of mime types."
+    ],
+    "extra": "Moved in v0.7.0"
+  },
+  {
+    "keys": [
       "interface.preview_binary",
+      "interface.preview_text.binary",
+      "interface.preview_text.empty",
+      "interface.preview_text.too_large"
+    ],
+    "message": [
+      "[bright_blue]interface.preview_binary[/], [bright_blue]interface.preview_text.binary[/], [bright_blue]interface.preview_text.empty[/] and [bright_blue]interface.preview_text.too_large[/] have been removed after being made useless by puremagic and file(1)."
+    ],
+    "extra": "Removed in v0.7.0"
+  },
+  {
+    "keys": [
+      "plugins.finder.enabled",
+      "plugins.finder.keybinds",
+      "plugins.finder.executable",
+      "plugins.finder.relative_paths",
+      "plugins.finder.follow_symlinks",
+      "plugins.finder.no_ignore_parent"
+    ],
+    "message": [
+      "[bright_blue]plugins.finder.*[/] has been moved to [bright_cyan]plugins.fd.*[/] to keep it consistent with what it is interfacing with."
+    ],
+    "extra": "Expanded in v0.6.0"
+  },
+  {
+    "keys": [
+      "keybinds.change_sort_order"
+    ],
+    "message": [
+      "[bright_blue]keybinds.change_sort_order[/] has had a minor change.",
+      "It is now expanded to support changing keybinds for the different sort options.",
+      "A simple fix to this error is to rename [bright_blue]keybinds.change_sort_order[/] to [bright_cyan]keybinds.change_sort_order.open_popup[/]."
+    ],
+    "extra": "Expanded in v0.6.0"
+  },
+  {
+    "keys": [
+      "interface.preview_error",
       "interface.preview_start"
     ],
     "message": [
-      "[bright_blue]interface.preview_error[/], [bright_blue]interface.preview_binary[/] and [bright_blue]interface.preview_start[/] have been moved over to their own section, and two extra texts have been added",
+      "[bright_blue]interface.preview_error[/] and [bright_blue]interface.preview_start[/] have been moved over to their own section.",
       "The new location is now at [bright_blue]interface.preview_text[/], which can contain",
       "- [bright_green]interface.preview_text.error[/] (for errors in rendering)",
-      "- [bright_green]interface.preview_text.binary[/] (for binary files)",
-      "- [bright_green]interface.preview_text.start[/] (shown for a split second when starting up)",
-      "- [bright_green]interface.preview_text.empty[/] (when the file is empty)",
-      "- [bright_green]interface.preview_text.too_large[/] (when the file is too large, which is [gray]>1MB[/])"
+      "- [bright_green]interface.preview_text.start[/] (shown for a split second when starting up)"
     ],
-    "extra": "Expanded in v0.5.0"
+    "extra": "Moved in v0.5.0"
   },
   {
     "keys": ["settings.preview_full"],
@@ -42,30 +99,5 @@
       "- [bright_cyan]interface.compact_mode.panels[/] makes the panels smaller so that there is more space for the actual file list."
     ],
     "extra": "Expanded in v0.5.0"
-  },
-  {
-    "keys": [
-      "plugins.finder.enabled",
-      "plugins.finder.keybinds",
-      "plugins.finder.executable",
-      "plugins.finder.relative_paths",
-      "plugins.finder.follow_symlinks",
-      "plugins.finder.no_ignore_parent"
-    ],
-    "message": [
-      "[bright_blue]plugins.finder.*[/] has been moved to [bright_cyan]plugins.fd.*[/] to keep it consistent with what it is interfacing with."
-    ],
-    "extra": "Expanded in v0.6.0"
-  },
-  {
-    "keys": [
-      "keybinds.change_sort_order"
-    ],
-    "message": [
-      "[bright_blue]keybinds.change_sort_order[/] has had a minor change.",
-      "It is now expanded to support changing keybinds for the different sort options.",
-      "A simple fix to this error is to rename [bright_blue]keybinds.change_sort_order[/] to [bright_cyan]keybinds.change_sort_order.open_popup[/]."
-    ],
-    "extra": "Expanded in v0.6.0"
   }
 ]

@@ -12,27 +12,28 @@ description: config schema humanified
   - [1.6. Property `Rovr Config > interface > truncate_progress_file_path`](#interface_truncate_progress_file_path)
   - [1.7. Property `Rovr Config > interface > show_line_numbers`](#interface_show_line_numbers)
   - [1.8. Property `Rovr Config > interface > scrolloff`](#interface_scrolloff)
-  - [1.9. Property `Rovr Config > interface > clock`](#interface_clock)
-    - [1.9.1. Property `Rovr Config > interface > clock > enabled`](#interface_clock_enabled)
-    - [1.9.2. Property `Rovr Config > interface > clock > align`](#interface_clock_align)
-  - [1.10. Property `Rovr Config > interface > preview_text`](#interface_preview_text)
-    - [1.10.1. Property `Rovr Config > interface > preview_text > error`](#interface_preview_text_error)
-    - [1.10.2. Property `Rovr Config > interface > preview_text > binary`](#interface_preview_text_binary)
-    - [1.10.3. Property `Rovr Config > interface > preview_text > start`](#interface_preview_text_start)
-    - [1.10.4. Property `Rovr Config > interface > preview_text > empty`](#interface_preview_text_empty)
-    - [1.10.5. Property `Rovr Config > interface > preview_text > too_large`](#interface_preview_text_too_large)
-  - [1.11. Property `Rovr Config > interface > compact_mode`](#interface_compact_mode)
-    - [1.11.1. Property `Rovr Config > interface > compact_mode > buttons`](#interface_compact_mode_buttons)
-    - [1.11.2. Property `Rovr Config > interface > compact_mode > panels`](#interface_compact_mode_panels)
+  - [1.9. Property `Rovr Config > interface > show_hidden_files`](#interface_show_hidden_files)
+  - [1.10. Property `Rovr Config > interface > image_protocol`](#interface_image_protocol)
+  - [1.11. Property `Rovr Config > interface > max_preview_image_width`](#interface_max_preview_image_width)
+  - [1.12. Property `Rovr Config > interface > max_preview_image_height`](#interface_max_preview_image_height)
+  - [1.13. Property `Rovr Config > interface > allow_tab_nav`](#interface_allow_tab_nav)
+  - [1.14. Property `Rovr Config > interface > append_new_tabs`](#interface_append_new_tabs)
+  - [1.15. Property `Rovr Config > interface > double_click_delay`](#interface_double_click_delay)
+  - [1.16. Property `Rovr Config > interface > drive_watcher_frequency`](#interface_drive_watcher_frequency)
+  - [1.17. Property `Rovr Config > interface > clock`](#interface_clock)
+    - [1.17.1. Property `Rovr Config > interface > clock > enabled`](#interface_clock_enabled)
+    - [1.17.2. Property `Rovr Config > interface > clock > align`](#interface_clock_align)
+  - [1.18. Property `Rovr Config > interface > preview_text`](#interface_preview_text)
+    - [1.18.1. Property `Rovr Config > interface > preview_text > error`](#interface_preview_text_error)
+    - [1.18.2. Property `Rovr Config > interface > preview_text > start`](#interface_preview_text_start)
+  - [1.19. Property `Rovr Config > interface > compact_mode`](#interface_compact_mode)
+    - [1.19.1. Property `Rovr Config > interface > compact_mode > buttons`](#interface_compact_mode_buttons)
+    - [1.19.2. Property `Rovr Config > interface > compact_mode > panels`](#interface_compact_mode_panels)
+  - [1.20. Property `Rovr Config > interface > mime_rules`](#interface_mime_rules)
+    - [1.20.1. Property `Rovr Config > interface > mime_rules > additionalProperties`](#interface_mime_rules_additionalProperties)
 - [2. Property `Rovr Config > settings`](#settings)
-  - [2.1. Property `Rovr Config > settings > show_hidden_files`](#settings_show_hidden_files)
-  - [2.2. Property `Rovr Config > settings > use_recycle_bin`](#settings_use_recycle_bin)
-  - [2.3. Property `Rovr Config > settings > copy_includes_metadata`](#settings_copy_includes_metadata)
-  - [2.4. Property `Rovr Config > settings > image_protocol`](#settings_image_protocol)
-  - [2.5. Property `Rovr Config > settings > allow_tab_nav`](#settings_allow_tab_nav)
-  - [2.6. Property `Rovr Config > settings > append_new_tabs`](#settings_append_new_tabs)
-  - [2.7. Property `Rovr Config > settings > double_click_delay`](#settings_double_click_delay)
-  - [2.8. Property `Rovr Config > settings > drive_watcher_frequency`](#settings_drive_watcher_frequency)
+  - [2.1. Property `Rovr Config > settings > use_recycle_bin`](#settings_use_recycle_bin)
+  - [2.2. Property `Rovr Config > settings > copy_includes_metadata`](#settings_copy_includes_metadata)
 - [3. Property `Rovr Config > metadata`](#metadata)
   - [3.1. Property `Rovr Config > metadata > fields`](#metadata_fields)
     - [3.1.1. Rovr Config > metadata > fields > fields items](#metadata_fields_items)
@@ -52,7 +53,8 @@ description: config schema humanified
       - [4.2.1.3. Property `Rovr Config > icons > folders > folders items > color`](#icons_folders_items_color)
 - [5. Property `Rovr Config > theme`](#theme)
   - [5.1. Property `Rovr Config > theme > default`](#theme_default)
-  - [5.2. Property `Rovr Config > theme > transparent`](#theme_transparent)
+  - [5.2. Property `Rovr Config > theme > preview`](#theme_preview)
+  - [5.3. Property `Rovr Config > theme > transparent`](#theme_transparent)
 - [6. Property `Rovr Config > custom_theme`](#custom_theme)
   - [6.1. Rovr Config > custom_theme > custom_theme items](#custom_theme_items)
     - [6.1.1. Property `Rovr Config > custom_theme > custom_theme items > name`](#custom_theme_items_name)
@@ -263,15 +265,23 @@ description: config schema humanified
     - [8.4.6. Property `Rovr Config > plugins > fd > no_ignore_parent`](#plugins_fd_no_ignore_parent)
     - [8.4.7. Property `Rovr Config > plugins > fd > default_filter_types`](#plugins_fd_default_filter_types)
       - [8.4.7.1. Rovr Config > plugins > fd > default_filter_types > default_filter_types items](#plugins_fd_default_filter_types_items)
-  - [8.5. Property `Rovr Config > plugins > poppler`](#plugins_poppler)
-    - [8.5.1. Property `Rovr Config > plugins > poppler > enabled`](#plugins_poppler_enabled)
-    - [8.5.2. Property `Rovr Config > plugins > poppler > threads`](#plugins_poppler_threads)
-    - [8.5.3. Property `Rovr Config > plugins > poppler > use_pdftocairo`](#plugins_poppler_use_pdftocairo)
-    - [8.5.4. Property `Rovr Config > plugins > poppler > poppler_folder`](#plugins_poppler_poppler_folder)
-  - [8.6. Property `Rovr Config > plugins > file_one`](#plugins_file_one)
-    - [8.6.1. Property `Rovr Config > plugins > file_one > enabled`](#plugins_file_one_enabled)
-    - [8.6.2. Property `Rovr Config > plugins > file_one > mime_rules`](#plugins_file_one_mime_rules)
-      - [8.6.2.1. Property `Rovr Config > plugins > file_one > mime_rules > additionalProperties`](#plugins_file_one_mime_rules_additionalProperties)
+  - [8.5. Property `Rovr Config > plugins > rg`](#plugins_rg)
+    - [8.5.1. Property `Rovr Config > plugins > rg > enabled`](#plugins_rg_enabled)
+    - [8.5.2. Property `Rovr Config > plugins > rg > keybinds`](#plugins_rg_keybinds)
+      - [8.5.2.1. Rovr Config > keybinds > toggle_pin > toggle_pin items](#keybinds_toggle_pin_items)
+    - [8.5.3. Property `Rovr Config > plugins > rg > executable`](#plugins_rg_executable)
+    - [8.5.4. Property `Rovr Config > plugins > rg > case_sensitive`](#plugins_rg_case_sensitive)
+    - [8.5.5. Property `Rovr Config > plugins > rg > follow_symlinks`](#plugins_rg_follow_symlinks)
+    - [8.5.6. Property `Rovr Config > plugins > rg > no_ignore_parent`](#plugins_rg_no_ignore_parent)
+    - [8.5.7. Property `Rovr Config > plugins > rg > search_hidden`](#plugins_rg_search_hidden)
+  - [8.6. Property `Rovr Config > plugins > poppler`](#plugins_poppler)
+    - [8.6.1. Property `Rovr Config > plugins > poppler > enabled`](#plugins_poppler_enabled)
+    - [8.6.2. Property `Rovr Config > plugins > poppler > threads`](#plugins_poppler_threads)
+    - [8.6.3. Property `Rovr Config > plugins > poppler > use_pdftocairo`](#plugins_poppler_use_pdftocairo)
+    - [8.6.4. Property `Rovr Config > plugins > poppler > poppler_folder`](#plugins_poppler_poppler_folder)
+  - [8.7. Property `Rovr Config > plugins > file_one`](#plugins_file_one)
+    - [8.7.1. Property `Rovr Config > plugins > file_one > enabled`](#plugins_file_one_enabled)
+    - [8.7.2. Property `Rovr Config > plugins > file_one > get_description`](#plugins_file_one_get_description)
 - [9. Property `Rovr Config > mode`](#mode)
   - [9.1. Property `Rovr Config > mode > additionalProperties`](#mode_additionalProperties)
 
@@ -285,8 +295,8 @@ description: config schema humanified
 
 | Property                      | Type            | Title/Description                                                               |
 | ----------------------------- | --------------- | ------------------------------------------------------------------------------- |
-| [interface](#interface)       | object          |                                                                                 |
-| [settings](#settings)         | object          |                                                                                 |
+| [interface](#interface)       | object          | Settings related to the user interface and experience                           |
+| [settings](#settings)         | object          | Settings related to behavior of file operations                                 |
 | [metadata](#metadata)         | object          |                                                                                 |
 | [icons](#icons)               | object          | Custom icon configurations for files and folders                                |
 | [theme](#theme)               | object          |                                                                                 |
@@ -303,19 +313,30 @@ description: config schema humanified
 | **Required**              | No          |
 | **Additional properties** | Not allowed |
 
-| Property                                                              | Type    | Title/Description                                                                                                         |
-| --------------------------------------------------------------------- | ------- | ------------------------------------------------------------------------------------------------------------------------- |
-| [tooltips](#interface_tooltips)                                       | boolean | Show tooltips when your mouse is over a tooltip supported button.<br />This is not hot reloaded.                          |
-| [nerd_font](#interface_nerd_font)                                     | boolean | Use nerd font for rendering icons instead of weird characters and stuff.<br />Not properly hot-reloaded.                  |
-| [use_reactive_layout](#interface_use_reactive_layout)                 | boolean | Hide certain elements based on the width and height of the terminal.                                                      |
-| [show_progress_eta](#interface_show_progress_eta)                     | boolean | When copying or deleting files, show an ETA for when the action will be completed.                                        |
-| [show_progress_percentage](#interface_show_progress_percentage)       | boolean | When copying or deleting files, show a percentage of how much had been completed.                                         |
-| [truncate_progress_file_path](#interface_truncate_progress_file_path) | boolean | When the process container is using file paths, truncate the file path to only view the first and last names of the path. |
-| [show_line_numbers](#interface_show_line_numbers)                     | boolean | Add line numbers to the left gutter if you are viewing a text file.                                                       |
-| [scrolloff](#interface_scrolloff)                                     | integer | The number of files to keep above and below the cursor when moving through the file list.                                 |
-| [clock](#interface_clock)                                             | object  |                                                                                                                           |
-| [preview_text](#interface_preview_text)                               | object  |                                                                                                                           |
-| [compact_mode](#interface_compact_mode)                               | object  |                                                                                                                           |
+**Description:** Settings related to the user interface and experience
+
+| Property                                                              | Type             | Title/Description                                                                                                                                                                                                                                                       |
+| --------------------------------------------------------------------- | ---------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| [tooltips](#interface_tooltips)                                       | boolean          | Show tooltips when your mouse is over a tooltip supported button.<br />This is not hot reloaded.                                                                                                                                                                        |
+| [nerd_font](#interface_nerd_font)                                     | boolean          | Use nerd font for rendering icons instead of weird characters and stuff.<br />Not properly hot-reloaded.                                                                                                                                                                |
+| [use_reactive_layout](#interface_use_reactive_layout)                 | boolean          | Hide certain elements based on the width and height of the terminal.                                                                                                                                                                                                    |
+| [show_progress_eta](#interface_show_progress_eta)                     | boolean          | When copying or deleting files, show an ETA for when the action will be completed.                                                                                                                                                                                      |
+| [show_progress_percentage](#interface_show_progress_percentage)       | boolean          | When copying or deleting files, show a percentage of how much had been completed.                                                                                                                                                                                       |
+| [truncate_progress_file_path](#interface_truncate_progress_file_path) | boolean          | When the process container is using file paths, truncate the file path to only view the first and last names of the path.                                                                                                                                               |
+| [show_line_numbers](#interface_show_line_numbers)                     | boolean          | Add line numbers to the left gutter if you are viewing a text file.                                                                                                                                                                                                     |
+| [scrolloff](#interface_scrolloff)                                     | integer          | The number of files to keep above and below the cursor when moving through the file list.                                                                                                                                                                               |
+| [show_hidden_files](#interface_show_hidden_files)                     | boolean          | Show hidden files and folders (those starting with a dot on Unix, or explicitly hidden on Windows/MacOS).                                                                                                                                                               |
+| [image_protocol](#interface_image_protocol)                           | enum (of string) | The image protocol to use when displaying an image                                                                                                                                                                                                                      |
+| [max_preview_image_width](#interface_max_preview_image_width)         | integer          | Maximum width for preview images in pixels. Images wider than this will be downscaled using integer reduction. Set to 0 to disable resizing.                                                                                                                            |
+| [max_preview_image_height](#interface_max_preview_image_height)       | integer          | Maximum height for preview images in pixels. Images taller than this will be downscaled using integer reduction. Set to 0 to disable resizing.                                                                                                                          |
+| [allow_tab_nav](#interface_allow_tab_nav)                             | boolean          | Allow navigating the main app screen with \`tab\` and \`shift+tab\`                                                                                                                                                                                                     |
+| [append_new_tabs](#interface_append_new_tabs)                         | boolean          | Choose whether or not to append new tabs instead of inserting them.<br />\`true\` =&gt; Append to the end of the tab list.<br />\`false\` =&gt; Insert after the active tab.                                                                                            |
+| [double_click_delay](#interface_double_click_delay)                   | number           | The delay between two consecutive clicks to enter into a directory, or open a file.                                                                                                                                                                                     |
+| [drive_watcher_frequency](#interface_drive_watcher_frequency)         | number           | How often (in seconds) to check for changes in mounted drives in the sidebar.                                                                                                                                                                                           |
+| [clock](#interface_clock)                                             | object           |                                                                                                                                                                                                                                                                         |
+| [preview_text](#interface_preview_text)                               | object           |                                                                                                                                                                                                                                                                         |
+| [compact_mode](#interface_compact_mode)                               | object           |                                                                                                                                                                                                                                                                         |
+| [mime_rules](#interface_mime_rules)                                   | object           | Map MIME type patterns to preview types. Supports glob patterns (e.g., 'text/\*' matches 'text/plain', 'text/html', etc.). Valid preview types: text, image, pdf, archive, folder, remime.<br />-&gt; Use 'remime' if you want a more accurate description from file(1) |
 
 ### <a name="interface_tooltips"></a>1.1. Property `Rovr Config > interface > tooltips`
 
@@ -403,163 +424,7 @@ Not properly hot-reloaded.
 | ------------ | ------ |
 | **Minimum**  | &ge; 0 |
 
-### <a name="interface_clock"></a>1.9. Property `Rovr Config > interface > clock`
-
-|                           |             |
-| ------------------------- | ----------- |
-| **Type**                  | `object`    |
-| **Required**              | No          |
-| **Additional properties** | Not allowed |
-
-| Property                            | Type             | Title/Description                                                |
-| ----------------------------------- | ---------------- | ---------------------------------------------------------------- |
-| [enabled](#interface_clock_enabled) | boolean          | Show a clock in the tabs bar.                                    |
-| [align](#interface_clock_align)     | enum (of string) | Align the clock to either the 'right' or 'left' of the tabs bar. |
-
-#### <a name="interface_clock_enabled"></a>1.9.1. Property `Rovr Config > interface > clock > enabled`
-
-|              |           |
-| ------------ | --------- |
-| **Type**     | `boolean` |
-| **Required** | No        |
-| **Default**  | `true`    |
-
-**Description:** Show a clock in the tabs bar.
-
-#### <a name="interface_clock_align"></a>1.9.2. Property `Rovr Config > interface > clock > align`
-
-|              |                    |
-| ------------ | ------------------ |
-| **Type**     | `enum (of string)` |
-| **Required** | No                 |
-| **Default**  | `"right"`          |
-
-**Description:** Align the clock to either the 'right' or 'left' of the tabs bar.
-
-Must be one of:
-
-- "left"
-- "right"
-
-### <a name="interface_preview_text"></a>1.10. Property `Rovr Config > interface > preview_text`
-
-|                           |             |
-| ------------------------- | ----------- |
-| **Type**                  | `object`    |
-| **Required**              | No          |
-| **Additional properties** | Not allowed |
-
-| Property                                       | Type   | Title/Description                                                                                                                                          |
-| ---------------------------------------------- | ------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| [error](#interface_preview_text_error)         | string | If for any reason the file preview refused to show, this appears.                                                                                          |
-| [binary](#interface_preview_text_binary)       | string | If the current file cannot be read due to an encoding issue (ie not UTF8), it will display this message.                                                   |
-| [start](#interface_preview_text_start)         | string | This is shown when the rovr starts up. You may see it for a split second, but it will never appear afterwards. You cannot view this properly in this docs. |
-| [empty](#interface_preview_text_empty)         | string | If the current file has no content, this is shown                                                                                                          |
-| [too_large](#interface_preview_text_too_large) | string | If the file is too large (hard capped at &lt; 1MB), the preview will refuse to render this file regardless of your memory size                             |
-
-#### <a name="interface_preview_text_error"></a>1.10.1. Property `Rovr Config > interface > preview_text > error`
-
-|              |                                     |
-| ------------ | ----------------------------------- |
-| **Type**     | `string`                            |
-| **Required** | No                                  |
-| **Default**  | `"couldn't read this file! (¬_¬ )"` |
-
-**Description:** If for any reason the file preview refused to show, this appears.
-
-#### <a name="interface_preview_text_binary"></a>1.10.2. Property `Rovr Config > interface > preview_text > binary`
-
-|              |                                                            |
-| ------------ | ---------------------------------------------------------- |
-| **Type**     | `string`                                                   |
-| **Required** | No                                                         |
-| **Default**  | `"the file does not use UTF-8, which isn't supported yet"` |
-
-**Description:** If the current file cannot be read due to an encoding issue (ie not UTF8), it will display this message.
-
-#### <a name="interface_preview_text_start"></a>1.10.3. Property `Rovr Config > interface > preview_text > start`
-
-|              |                                                                                                                                      |
-| ------------ | ------------------------------------------------------------------------------------------------------------------------------------ |
-| **Type**     | `string`                                                                                                                             |
-| **Required** | No                                                                                                                                   |
-| **Default**  | `" ___ ___\n&#124;  _&#124; . &#124;\n&#124;_&#124; &#124;___&#124;\n _ _ ___\n&#124; &#124; &#124;  _&#124;\n \\_/&#124;_&#124;\n"` |
-
-**Description:** This is shown when the rovr starts up. You may see it for a split second, but it will never appear afterwards. You cannot view this properly in this docs.
-
-#### <a name="interface_preview_text_empty"></a>1.10.4. Property `Rovr Config > interface > preview_text > empty`
-
-|              |                          |
-| ------------ | ------------------------ |
-| **Type**     | `string`                 |
-| **Required** | No                       |
-| **Default**  | `"bytes be gone (⌐■_■)"` |
-
-**Description:** If the current file has no content, this is shown
-
-#### <a name="interface_preview_text_too_large"></a>1.10.5. Property `Rovr Config > interface > preview_text > too_large`
-
-|              |                                                           |
-| ------------ | --------------------------------------------------------- |
-| **Type**     | `string`                                                  |
-| **Required** | No                                                        |
-| **Default**  | `"this file is larger (but not larger than your mother)"` |
-
-**Description:** If the file is too large (hard capped at &lt; 1MB), the preview will refuse to render this file regardless of your memory size
-
-### <a name="interface_compact_mode"></a>1.11. Property `Rovr Config > interface > compact_mode`
-
-|                           |             |
-| ------------------------- | ----------- |
-| **Type**                  | `object`    |
-| **Required**              | No          |
-| **Additional properties** | Not allowed |
-
-| Property                                   | Type    | Title/Description                                                            |
-| ------------------------------------------ | ------- | ---------------------------------------------------------------------------- |
-| [buttons](#interface_compact_mode_buttons) | boolean | Whether to compact the buttons and path input to one line instead of three.  |
-| [panels](#interface_compact_mode_panels)   | boolean | Whether to make the panels smaller to add more room for the file list itself |
-
-#### <a name="interface_compact_mode_buttons"></a>1.11.1. Property `Rovr Config > interface > compact_mode > buttons`
-
-|              |           |
-| ------------ | --------- |
-| **Type**     | `boolean` |
-| **Required** | No        |
-| **Default**  | `false`   |
-
-**Description:** Whether to compact the buttons and path input to one line instead of three.
-
-#### <a name="interface_compact_mode_panels"></a>1.11.2. Property `Rovr Config > interface > compact_mode > panels`
-
-|              |           |
-| ------------ | --------- |
-| **Type**     | `boolean` |
-| **Required** | No        |
-| **Default**  | `false`   |
-
-**Description:** Whether to make the panels smaller to add more room for the file list itself
-
-## <a name="settings"></a>2. Property `Rovr Config > settings`
-
-|                           |             |
-| ------------------------- | ----------- |
-| **Type**                  | `object`    |
-| **Required**              | No          |
-| **Additional properties** | Not allowed |
-
-| Property                                                     | Type             | Title/Description                                                                                                                                                            |
-| ------------------------------------------------------------ | ---------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| [show_hidden_files](#settings_show_hidden_files)             | boolean          | Show hidden files and folders (those starting with a dot on Unix, or explicitly hidden on Windows/MacOS).                                                                    |
-| [use_recycle_bin](#settings_use_recycle_bin)                 | boolean          | When deleting a file, allow moving the file to the recycle bin.                                                                                                              |
-| [copy_includes_metadata](#settings_copy_includes_metadata)   | boolean          | When copying over a file, preserve metadata from the original file, such as creation and modification times.                                                                 |
-| [image_protocol](#settings_image_protocol)                   | enum (of string) | The image protocol to use when displaying an image                                                                                                                           |
-| [allow_tab_nav](#settings_allow_tab_nav)                     | boolean          | Allow navigating the main app screen with \`tab\` and \`shift+tab\`                                                                                                          |
-| [append_new_tabs](#settings_append_new_tabs)                 | boolean          | Choose whether or not to append new tabs instead of inserting them.<br />\`true\` =&gt; Append to the end of the tab list.<br />\`false\` =&gt; Insert after the active tab. |
-| [double_click_delay](#settings_double_click_delay)           | number           | The delay between two consecutive clicks to enter into a directory, or open a file.                                                                                          |
-| [drive_watcher_frequency](#settings_drive_watcher_frequency) | number           | How often (in seconds) to check for changes in mounted drives in the sidebar.                                                                                                |
-
-### <a name="settings_show_hidden_files"></a>2.1. Property `Rovr Config > settings > show_hidden_files`
+### <a name="interface_show_hidden_files"></a>1.9. Property `Rovr Config > interface > show_hidden_files`
 
 |              |           |
 | ------------ | --------- |
@@ -569,27 +434,7 @@ Must be one of:
 
 **Description:** Show hidden files and folders (those starting with a dot on Unix, or explicitly hidden on Windows/MacOS).
 
-### <a name="settings_use_recycle_bin"></a>2.2. Property `Rovr Config > settings > use_recycle_bin`
-
-|              |           |
-| ------------ | --------- |
-| **Type**     | `boolean` |
-| **Required** | No        |
-| **Default**  | `true`    |
-
-**Description:** When deleting a file, allow moving the file to the recycle bin.
-
-### <a name="settings_copy_includes_metadata"></a>2.3. Property `Rovr Config > settings > copy_includes_metadata`
-
-|              |           |
-| ------------ | --------- |
-| **Type**     | `boolean` |
-| **Required** | No        |
-| **Default**  | `true`    |
-
-**Description:** When copying over a file, preserve metadata from the original file, such as creation and modification times.
-
-### <a name="settings_image_protocol"></a>2.4. Property `Rovr Config > settings > image_protocol`
+### <a name="interface_image_protocol"></a>1.10. Property `Rovr Config > interface > image_protocol`
 
 |              |                    |
 | ------------ | ------------------ |
@@ -607,7 +452,35 @@ Must be one of:
 - "Halfcell"
 - "Unicode"
 
-### <a name="settings_allow_tab_nav"></a>2.5. Property `Rovr Config > settings > allow_tab_nav`
+### <a name="interface_max_preview_image_width"></a>1.11. Property `Rovr Config > interface > max_preview_image_width`
+
+|              |           |
+| ------------ | --------- |
+| **Type**     | `integer` |
+| **Required** | No        |
+| **Default**  | `1920`    |
+
+**Description:** Maximum width for preview images in pixels. Images wider than this will be downscaled using integer reduction. Set to 0 to disable resizing.
+
+| Restrictions |        |
+| ------------ | ------ |
+| **Minimum**  | &ge; 0 |
+
+### <a name="interface_max_preview_image_height"></a>1.12. Property `Rovr Config > interface > max_preview_image_height`
+
+|              |           |
+| ------------ | --------- |
+| **Type**     | `integer` |
+| **Required** | No        |
+| **Default**  | `1080`    |
+
+**Description:** Maximum height for preview images in pixels. Images taller than this will be downscaled using integer reduction. Set to 0 to disable resizing.
+
+| Restrictions |        |
+| ------------ | ------ |
+| **Minimum**  | &ge; 0 |
+
+### <a name="interface_allow_tab_nav"></a>1.13. Property `Rovr Config > interface > allow_tab_nav`
 
 |              |           |
 | ------------ | --------- |
@@ -617,7 +490,7 @@ Must be one of:
 
 **Description:** Allow navigating the main app screen with `tab` and `shift+tab`
 
-### <a name="settings_append_new_tabs"></a>2.6. Property `Rovr Config > settings > append_new_tabs`
+### <a name="interface_append_new_tabs"></a>1.14. Property `Rovr Config > interface > append_new_tabs`
 
 |              |           |
 | ------------ | --------- |
@@ -629,7 +502,7 @@ Must be one of:
 `true` =&gt; Append to the end of the tab list.
 `false` =&gt; Insert after the active tab.
 
-### <a name="settings_double_click_delay"></a>2.7. Property `Rovr Config > settings > double_click_delay`
+### <a name="interface_double_click_delay"></a>1.15. Property `Rovr Config > interface > double_click_delay`
 
 |              |          |
 | ------------ | -------- |
@@ -639,7 +512,7 @@ Must be one of:
 
 **Description:** The delay between two consecutive clicks to enter into a directory, or open a file.
 
-### <a name="settings_drive_watcher_frequency"></a>2.8. Property `Rovr Config > settings > drive_watcher_frequency`
+### <a name="interface_drive_watcher_frequency"></a>1.16. Property `Rovr Config > interface > drive_watcher_frequency`
 
 |              |          |
 | ------------ | -------- |
@@ -648,6 +521,177 @@ Must be one of:
 | **Default**  | `3.0`    |
 
 **Description:** How often (in seconds) to check for changes in mounted drives in the sidebar.
+
+### <a name="interface_clock"></a>1.17. Property `Rovr Config > interface > clock`
+
+|                           |             |
+| ------------------------- | ----------- |
+| **Type**                  | `object`    |
+| **Required**              | No          |
+| **Additional properties** | Not allowed |
+
+| Property                            | Type             | Title/Description                                                |
+| ----------------------------------- | ---------------- | ---------------------------------------------------------------- |
+| [enabled](#interface_clock_enabled) | boolean          | Show a clock in the tabs bar.                                    |
+| [align](#interface_clock_align)     | enum (of string) | Align the clock to either the 'right' or 'left' of the tabs bar. |
+
+#### <a name="interface_clock_enabled"></a>1.17.1. Property `Rovr Config > interface > clock > enabled`
+
+|              |           |
+| ------------ | --------- |
+| **Type**     | `boolean` |
+| **Required** | No        |
+| **Default**  | `true`    |
+
+**Description:** Show a clock in the tabs bar.
+
+#### <a name="interface_clock_align"></a>1.17.2. Property `Rovr Config > interface > clock > align`
+
+|              |                    |
+| ------------ | ------------------ |
+| **Type**     | `enum (of string)` |
+| **Required** | No                 |
+| **Default**  | `"right"`          |
+
+**Description:** Align the clock to either the 'right' or 'left' of the tabs bar.
+
+Must be one of:
+
+- "left"
+- "right"
+
+### <a name="interface_preview_text"></a>1.18. Property `Rovr Config > interface > preview_text`
+
+|                           |             |
+| ------------------------- | ----------- |
+| **Type**                  | `object`    |
+| **Required**              | No          |
+| **Additional properties** | Not allowed |
+
+| Property                               | Type   | Title/Description                                                                                                                                          |
+| -------------------------------------- | ------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| [error](#interface_preview_text_error) | string | If for any reason the file preview refused to show, this appears.                                                                                          |
+| [start](#interface_preview_text_start) | string | This is shown when the rovr starts up. You may see it for a split second, but it will never appear afterwards. You cannot view this properly in this docs. |
+
+#### <a name="interface_preview_text_error"></a>1.18.1. Property `Rovr Config > interface > preview_text > error`
+
+|              |                                     |
+| ------------ | ----------------------------------- |
+| **Type**     | `string`                            |
+| **Required** | No                                  |
+| **Default**  | `"couldn't read this file! (¬_¬ )"` |
+
+**Description:** If for any reason the file preview refused to show, this appears.
+
+#### <a name="interface_preview_text_start"></a>1.18.2. Property `Rovr Config > interface > preview_text > start`
+
+|              |                                                                                                                                      |
+| ------------ | ------------------------------------------------------------------------------------------------------------------------------------ |
+| **Type**     | `string`                                                                                                                             |
+| **Required** | No                                                                                                                                   |
+| **Default**  | `" ___ ___\n&#124;  _&#124; . &#124;\n&#124;_&#124; &#124;___&#124;\n _ _ ___\n&#124; &#124; &#124;  _&#124;\n \\_/&#124;_&#124;\n"` |
+
+**Description:** This is shown when the rovr starts up. You may see it for a split second, but it will never appear afterwards. You cannot view this properly in this docs.
+
+### <a name="interface_compact_mode"></a>1.19. Property `Rovr Config > interface > compact_mode`
+
+|                           |             |
+| ------------------------- | ----------- |
+| **Type**                  | `object`    |
+| **Required**              | No          |
+| **Additional properties** | Not allowed |
+
+| Property                                   | Type    | Title/Description                                                            |
+| ------------------------------------------ | ------- | ---------------------------------------------------------------------------- |
+| [buttons](#interface_compact_mode_buttons) | boolean | Whether to compact the buttons and path input to one line instead of three.  |
+| [panels](#interface_compact_mode_panels)   | boolean | Whether to make the panels smaller to add more room for the file list itself |
+
+#### <a name="interface_compact_mode_buttons"></a>1.19.1. Property `Rovr Config > interface > compact_mode > buttons`
+
+|              |           |
+| ------------ | --------- |
+| **Type**     | `boolean` |
+| **Required** | No        |
+| **Default**  | `false`   |
+
+**Description:** Whether to compact the buttons and path input to one line instead of three.
+
+#### <a name="interface_compact_mode_panels"></a>1.19.2. Property `Rovr Config > interface > compact_mode > panels`
+
+|              |           |
+| ------------ | --------- |
+| **Type**     | `boolean` |
+| **Required** | No        |
+| **Default**  | `false`   |
+
+**Description:** Whether to make the panels smaller to add more room for the file list itself
+
+### <a name="interface_mime_rules"></a>1.20. Property `Rovr Config > interface > mime_rules`
+
+|                           |                                                                                                                                                                                                                                                                                                                                                                               |
+| ------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Type**                  | `object`                                                                                                                                                                                                                                                                                                                                                                      |
+| **Required**              | No                                                                                                                                                                                                                                                                                                                                                                            |
+| **Additional properties** | [Each additional property must conform to the schema](#interface_mime_rules_additionalProperties)                                                                                                                                                                                                                                                                             |
+| **Default**               | `{"text/*": "text", "image/*": "image", "application/pdf": "pdf", "application/zip": "archive", "application/x-tar": "archive", "application/gzip": "archive", "application/x-bzip2": "archive", "application/x-xz": "archive", "application/x-rar": "archive", "application/x-7z-compressed": "archive", "inode/directory": "folder", "application/octet-stream": "remime"}` |
+
+**Description:** Map MIME type patterns to preview types. Supports glob patterns (e.g., 'text/\*' matches 'text/plain', 'text/html', etc.). Valid preview types: text, image, pdf, archive, folder, remime.
+-&gt; Use 'remime' if you want a more accurate description from file(1)
+
+| Property                                       | Type             | Title/Description |
+| ---------------------------------------------- | ---------------- | ----------------- |
+| [](#interface_mime_rules_additionalProperties) | enum (of string) |                   |
+
+#### <a name="interface_mime_rules_additionalProperties"></a>1.20.1. Property `Rovr Config > interface > mime_rules > additionalProperties`
+
+|              |                    |
+| ------------ | ------------------ |
+| **Type**     | `enum (of string)` |
+| **Required** | No                 |
+
+Must be one of:
+
+- "text"
+- "image"
+- "pdf"
+- "archive"
+- "folder"
+- "remime"
+
+## <a name="settings"></a>2. Property `Rovr Config > settings`
+
+|                           |             |
+| ------------------------- | ----------- |
+| **Type**                  | `object`    |
+| **Required**              | No          |
+| **Additional properties** | Not allowed |
+
+**Description:** Settings related to behavior of file operations
+
+| Property                                                   | Type    | Title/Description                                                                                            |
+| ---------------------------------------------------------- | ------- | ------------------------------------------------------------------------------------------------------------ |
+| [use_recycle_bin](#settings_use_recycle_bin)               | boolean | When deleting a file, allow moving the file to the recycle bin.                                              |
+| [copy_includes_metadata](#settings_copy_includes_metadata) | boolean | When copying over a file, preserve metadata from the original file, such as creation and modification times. |
+
+### <a name="settings_use_recycle_bin"></a>2.1. Property `Rovr Config > settings > use_recycle_bin`
+
+|              |           |
+| ------------ | --------- |
+| **Type**     | `boolean` |
+| **Required** | No        |
+| **Default**  | `true`    |
+
+**Description:** When deleting a file, allow moving the file to the recycle bin.
+
+### <a name="settings_copy_includes_metadata"></a>2.2. Property `Rovr Config > settings > copy_includes_metadata`
+
+|              |           |
+| ------------ | --------- |
+| **Type**     | `boolean` |
+| **Required** | No        |
+| **Default**  | `true`    |
+
+**Description:** When copying over a file, preserve metadata from the original file, such as creation and modification times.
 
 ## <a name="metadata"></a>3. Property `Rovr Config > metadata`
 
@@ -897,10 +941,11 @@ Both the folder name and glob will be forced to lowercase!
 | **Required**              | No          |
 | **Additional properties** | Not allowed |
 
-| Property                          | Type    | Title/Description                                                          |
-| --------------------------------- | ------- | -------------------------------------------------------------------------- |
-| [default](#theme_default)         | string  | The default theme. Can be changed while in rovr, but it is not persistent. |
-| [transparent](#theme_transparent) | boolean | Use a transparent background.                                              |
+| Property                          | Type             | Title/Description                                                          |
+| --------------------------------- | ---------------- | -------------------------------------------------------------------------- |
+| [default](#theme_default)         | string           | The default theme. Can be changed while in rovr, but it is not persistent. |
+| [preview](#theme_preview)         | enum (of string) | The theme to use when previewing files in the preview sidebar.             |
+| [transparent](#theme_transparent) | boolean          | Use a transparent background.                                              |
 
 ### <a name="theme_default"></a>5.1. Property `Rovr Config > theme > default`
 
@@ -912,7 +957,69 @@ Both the folder name and glob will be forced to lowercase!
 
 **Description:** The default theme. Can be changed while in rovr, but it is not persistent.
 
-### <a name="theme_transparent"></a>5.2. Property `Rovr Config > theme > transparent`
+### <a name="theme_preview"></a>5.2. Property `Rovr Config > theme > preview`
+
+|              |                    |
+| ------------ | ------------------ |
+| **Type**     | `enum (of string)` |
+| **Required** | No                 |
+| **Default**  | `"nord"`           |
+
+**Description:** The theme to use when previewing files in the preview sidebar.
+
+Must be one of:
+
+- "abap"
+- "algol"
+- "algol_nu"
+- "arduino"
+- "autumn"
+- "bw"
+- "borland"
+- "coffee"
+- "colorful"
+- "default"
+- "dracula"
+- "emacs"
+- "friendly_grayscale"
+- "friendly"
+- "fruity"
+- "github-dark"
+- "gruvbox-dark"
+- "gruvbox-light"
+- "igor"
+- "inkpot"
+- "lightbulb"
+- "lilypond"
+- "lovelace"
+- "manni"
+- "material"
+- "monokai"
+- "murphy"
+- "native"
+- "nord-darker"
+- "nord"
+- "one-dark"
+- "paraiso-dark"
+- "paraiso-light"
+- "pastie"
+- "perldoc"
+- "rainbow_dash"
+- "rrt"
+- "sas"
+- "solarized-dark"
+- "solarized-light"
+- "staroffice"
+- "stata-dark"
+- "stata-light"
+- "tango"
+- "trac"
+- "vim"
+- "vs"
+- "xcode"
+- "zenburn"
+
+### <a name="theme_transparent"></a>5.3. Property `Rovr Config > theme > transparent`
 
 |              |           |
 | ------------ | --------- |
@@ -951,7 +1058,7 @@ Both the folder name and glob will be forced to lowercase!
 
 | Property                                         | Type    | Title/Description                                                                                                                                    |
 | ------------------------------------------------ | ------- | ---------------------------------------------------------------------------------------------------------------------------------------------------- |
-| [name](#custom_theme_items_name)                 | string  | A name for the theme. However, when the theme is available in the theme picker, it shows up as a hiphenated, lowercase version.                      |
+| [name](#custom_theme_items_name)                 | string  | A name for the theme. However, when the theme is available in the theme picker, it shows up as a hyphenated, lowercase version.                      |
 | [primary](#custom_theme_items_primary)           | string  | A hex code or named color to use as the primary color. Refer to https://textual.textualize.io/css_types/color/#named-colors for the named colors.    |
 | [secondary](#custom_theme_items_secondary)       | string  | A hex code or named color to use as the secondary color. Refer to https://textual.textualize.io/css_types/color/#named-colors for the named colors.  |
 | [warning](#custom_theme_items_warning)           | string  | A hex code or named color to use as the warning color. Refer to https://textual.textualize.io/css_types/color/#named-colors for the named colors.    |
@@ -973,7 +1080,7 @@ Both the folder name and glob will be forced to lowercase!
 | **Type**     | `string` |
 | **Required** | Yes      |
 
-**Description:** A name for the theme. However, when the theme is available in the theme picker, it shows up as a hiphenated, lowercase version.
+**Description:** A name for the theme. However, when the theme is available in the theme picker, it shows up as a hyphenated, lowercase version.
 
 #### <a name="custom_theme_items_primary"></a>6.1.2. Property `Rovr Config > custom_theme > custom_theme items > primary`
 
@@ -3597,6 +3704,7 @@ Refer to https://textual.textualize.io/guide/design/#additional-variables for mo
 | [bat](#plugins_bat)           | object |                   |
 | [editor](#plugins_editor)     | object |                   |
 | [fd](#plugins_fd)             | object |                   |
+| [rg](#plugins_rg)             | object |                   |
 | [poppler](#plugins_poppler)   | object |                   |
 | [file_one](#plugins_file_one) | object |                   |
 
@@ -3813,15 +3921,15 @@ Refer to https://textual.textualize.io/guide/design/#additional-variables for mo
 | **Required**              | No          |
 | **Additional properties** | Not allowed |
 
-| Property                                                 | Type                      | Title/Description                                            |
-| -------------------------------------------------------- | ------------------------- | ------------------------------------------------------------ |
-| [enabled](#plugins_fd_enabled)                           | boolean                   | Enable recursive file search using fd.                       |
-| [keybinds](#plugins_fd_keybinds)                         | array of string           | The keybind to open the file search picker.                  |
-| [executable](#plugins_fd_executable)                     | string                    | fd executable name or path.                                  |
-| [relative_paths](#plugins_fd_relative_paths)             | boolean                   | Whether to show as relative path or absolute path.           |
-| [follow_symlinks](#plugins_fd_follow_symlinks)           | boolean                   | Whether fd should follow symlinks when searching.            |
-| [no_ignore_parent](#plugins_fd_no_ignore_parent)         | boolean                   | Don't use \*ignore files from parent folders when searching. |
-| [default_filter_types](#plugins_fd_default_filter_types) | array of enum (of string) | The default file types to show when using fd.                |
+| Property                                                 | Type                      | Title/Description                                             |
+| -------------------------------------------------------- | ------------------------- | ------------------------------------------------------------- |
+| [enabled](#plugins_fd_enabled)                           | boolean                   | Enable recursive file search using fd.                        |
+| [keybinds](#plugins_fd_keybinds)                         | array of string           | The keybind to open the file search picker.                   |
+| [executable](#plugins_fd_executable)                     | string                    | fd executable name or path.                                   |
+| [relative_paths](#plugins_fd_relative_paths)             | boolean                   | Whether to show fd results as relative path or absolute path. |
+| [follow_symlinks](#plugins_fd_follow_symlinks)           | boolean                   | Whether fd should follow symlinks when searching.             |
+| [no_ignore_parent](#plugins_fd_no_ignore_parent)         | boolean                   | Don't use \*ignore files from parent folders when searching.  |
+| [default_filter_types](#plugins_fd_default_filter_types) | array of enum (of string) | The default file types to show when using fd.                 |
 
 #### <a name="plugins_fd_enabled"></a>8.4.1. Property `Rovr Config > plugins > fd > enabled`
 
@@ -3881,7 +3989,7 @@ Refer to https://textual.textualize.io/guide/design/#additional-variables for mo
 | **Required** | No        |
 | **Default**  | `true`    |
 
-**Description:** Whether to show as relative path or absolute path.
+**Description:** Whether to show fd results as relative path or absolute path.
 
 #### <a name="plugins_fd_follow_symlinks"></a>8.4.5. Property `Rovr Config > plugins > fd > follow_symlinks`
 
@@ -3944,7 +4052,115 @@ Must be one of:
 - "char-device"
 - "block-device"
 
-### <a name="plugins_poppler"></a>8.5. Property `Rovr Config > plugins > poppler`
+### <a name="plugins_rg"></a>8.5. Property `Rovr Config > plugins > rg`
+
+|                           |             |
+| ------------------------- | ----------- |
+| **Type**                  | `object`    |
+| **Required**              | No          |
+| **Additional properties** | Not allowed |
+
+| Property                                         | Type            | Title/Description                                            |
+| ------------------------------------------------ | --------------- | ------------------------------------------------------------ |
+| [enabled](#plugins_rg_enabled)                   | boolean         | Enable content searching using rg.                           |
+| [keybinds](#plugins_rg_keybinds)                 | array of string | The keybind to open the content search picker.               |
+| [executable](#plugins_rg_executable)             | string          | rg executable name or path.                                  |
+| [case_sensitive](#plugins_rg_case_sensitive)     | boolean         | Whether the search should be case sensitive by default.      |
+| [follow_symlinks](#plugins_rg_follow_symlinks)   | boolean         | Whether rg should follow symlinks when searching.            |
+| [no_ignore_parent](#plugins_rg_no_ignore_parent) | boolean         | Don't use \*ignore files from parent folders when searching. |
+| [search_hidden](#plugins_rg_search_hidden)       | boolean         | Whether to search hidden files by default.                   |
+
+#### <a name="plugins_rg_enabled"></a>8.5.1. Property `Rovr Config > plugins > rg > enabled`
+
+|              |           |
+| ------------ | --------- |
+| **Type**     | `boolean` |
+| **Required** | No        |
+| **Default**  | `true`    |
+
+**Description:** Enable content searching using rg.
+
+#### <a name="plugins_rg_keybinds"></a>8.5.2. Property `Rovr Config > plugins > rg > keybinds`
+
+|                |                       |
+| -------------- | --------------------- |
+| **Type**       | `array of string`     |
+| **Required**   | No                    |
+| **Default**    | `["R"]`               |
+| **Defined in** | #/definitions/keybind |
+
+**Description:** The keybind to open the content search picker.
+
+|                      | Array restrictions |
+| -------------------- | ------------------ |
+| **Min items**        | N/A                |
+| **Max items**        | N/A                |
+| **Items unicity**    | False              |
+| **Additional items** | False              |
+| **Tuple validation** | See below          |
+
+| Each item of this array must be                | Description |
+| ---------------------------------------------- | ----------- |
+| [toggle_pin items](#keybinds_toggle_pin_items) |             |
+
+##### <a name="keybinds_toggle_pin_items"></a>8.5.2.1. Rovr Config > keybinds > toggle_pin > toggle_pin items
+
+|              |          |
+| ------------ | -------- |
+| **Type**     | `string` |
+| **Required** | No       |
+
+#### <a name="plugins_rg_executable"></a>8.5.3. Property `Rovr Config > plugins > rg > executable`
+
+|              |          |
+| ------------ | -------- |
+| **Type**     | `string` |
+| **Required** | No       |
+| **Default**  | `"rg"`   |
+
+**Description:** rg executable name or path.
+
+#### <a name="plugins_rg_case_sensitive"></a>8.5.4. Property `Rovr Config > plugins > rg > case_sensitive`
+
+|              |           |
+| ------------ | --------- |
+| **Type**     | `boolean` |
+| **Required** | No        |
+| **Default**  | `true`    |
+
+**Description:** Whether the search should be case sensitive by default.
+
+#### <a name="plugins_rg_follow_symlinks"></a>8.5.5. Property `Rovr Config > plugins > rg > follow_symlinks`
+
+|              |           |
+| ------------ | --------- |
+| **Type**     | `boolean` |
+| **Required** | No        |
+| **Default**  | `false`   |
+
+**Description:** Whether rg should follow symlinks when searching.
+
+#### <a name="plugins_rg_no_ignore_parent"></a>8.5.6. Property `Rovr Config > plugins > rg > no_ignore_parent`
+
+|              |           |
+| ------------ | --------- |
+| **Type**     | `boolean` |
+| **Required** | No        |
+| **Default**  | `false`   |
+
+**Description:** Don't use \*ignore files from parent folders when searching.
+
+#### <a name="plugins_rg_search_hidden"></a>8.5.7. Property `Rovr Config > plugins > rg > search_hidden`
+
+|              |           |
+| ------------ | --------- |
+| **Type**     | `boolean` |
+| **Required** | No        |
+| **Default**  | `false`   |
+
+**Description:** Whether to search hidden files by default.
+
+### <a name="plugins_poppler"></a>8.6. Property `Rovr Config > plugins > poppler`
 
 |                           |             |
 | ------------------------- | ----------- |
@@ -3959,7 +4175,7 @@ Must be one of:
 | [use_pdftocairo](#plugins_poppler_use_pdftocairo) | boolean | Use pdftocairo instead of pdftoppm, may help performance                                           |
 | [poppler_folder](#plugins_poppler_poppler_folder) | string  | Path to the folder where Poppler-related binaries are located. Leave empty to use the system PATH. |
 
-#### <a name="plugins_poppler_enabled"></a>8.5.1. Property `Rovr Config > plugins > poppler > enabled`
+#### <a name="plugins_poppler_enabled"></a>8.6.1. Property `Rovr Config > plugins > poppler > enabled`
 
 |              |           |
 | ------------ | --------- |
@@ -3969,7 +4185,7 @@ Must be one of:
 
 **Description:** Enable poppler for PDF previews.
 
-#### <a name="plugins_poppler_threads"></a>8.5.2. Property `Rovr Config > plugins > poppler > threads`
+#### <a name="plugins_poppler_threads"></a>8.6.2. Property `Rovr Config > plugins > poppler > threads`
 
 |              |           |
 | ------------ | --------- |
@@ -3983,7 +4199,7 @@ Must be one of:
 | ------------ | ------ |
 | **Minimum**  | &ge; 1 |
 
-#### <a name="plugins_poppler_use_pdftocairo"></a>8.5.3. Property `Rovr Config > plugins > poppler > use_pdftocairo`
+#### <a name="plugins_poppler_use_pdftocairo"></a>8.6.3. Property `Rovr Config > plugins > poppler > use_pdftocairo`
 
 |              |           |
 | ------------ | --------- |
@@ -3993,7 +4209,7 @@ Must be one of:
 
 **Description:** Use pdftocairo instead of pdftoppm, may help performance
 
-#### <a name="plugins_poppler_poppler_folder"></a>8.5.4. Property `Rovr Config > plugins > poppler > poppler_folder`
+#### <a name="plugins_poppler_poppler_folder"></a>8.6.4. Property `Rovr Config > plugins > poppler > poppler_folder`
 
 |              |          |
 | ------------ | -------- |
@@ -4003,7 +4219,7 @@ Must be one of:
 
 **Description:** Path to the folder where Poppler-related binaries are located. Leave empty to use the system PATH.
 
-### <a name="plugins_file_one"></a>8.6. Property `Rovr Config > plugins > file_one`
+### <a name="plugins_file_one"></a>8.7. Property `Rovr Config > plugins > file_one`
 
 |                           |             |
 | ------------------------- | ----------- |
@@ -4011,12 +4227,12 @@ Must be one of:
 | **Required**              | No          |
 | **Additional properties** | Not allowed |
 
-| Property                                   | Type    | Title/Description                                                                                                                                                                  |
-| ------------------------------------------ | ------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| [enabled](#plugins_file_one_enabled)       | boolean | Enable file(1) MIME type detection for preview selection. When enabled, rovr uses the \`file\` command to detect file types instead of relying solely on file extensions.          |
-| [mime_rules](#plugins_file_one_mime_rules) | object  | Map MIME type patterns to preview types. Supports glob patterns (e.g., 'text/\*' matches 'text/plain', 'text/html', etc.). Valid preview types: text, image, pdf, archive, folder. |
+| Property                                             | Type    | Title/Description                                                                        |
+| ---------------------------------------------------- | ------- | ---------------------------------------------------------------------------------------- |
+| [enabled](#plugins_file_one_enabled)                 | boolean | Enable secondary file(1) type detection if both puremagic and plaintext detection fails. |
+| [get_description](#plugins_file_one_get_description) | boolean | Use file(1) to get additional information of the file type.                              |
 
-#### <a name="plugins_file_one_enabled"></a>8.6.1. Property `Rovr Config > plugins > file_one > enabled`
+#### <a name="plugins_file_one_enabled"></a>8.7.1. Property `Rovr Config > plugins > file_one > enabled`
 
 |              |           |
 | ------------ | --------- |
@@ -4024,37 +4240,17 @@ Must be one of:
 | **Required** | No        |
 | **Default**  | `false`   |
 
-**Description:** Enable file(1) MIME type detection for preview selection. When enabled, rovr uses the `file` command to detect file types instead of relying solely on file extensions.
+**Description:** Enable secondary file(1) type detection if both puremagic and plaintext detection fails.
 
-#### <a name="plugins_file_one_mime_rules"></a>8.6.2. Property `Rovr Config > plugins > file_one > mime_rules`
+#### <a name="plugins_file_one_get_description"></a>8.7.2. Property `Rovr Config > plugins > file_one > get_description`
 
-|                           |                                                                                                                                                                                                                                                                                                                                         |
-| ------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Type**                  | `object`                                                                                                                                                                                                                                                                                                                                |
-| **Required**              | No                                                                                                                                                                                                                                                                                                                                      |
-| **Additional properties** | [Each additional property must conform to the schema](#plugins_file_one_mime_rules_additionalProperties)                                                                                                                                                                                                                                |
-| **Default**               | `{"text/*": "text", "image/*": "image", "application/pdf": "pdf", "application/zip": "archive", "application/x-tar": "archive", "application/gzip": "archive", "application/x-bzip2": "archive", "application/x-xz": "archive", "application/x-rar": "archive", "application/x-7z-compressed": "archive", "inode/directory": "folder"}` |
+|              |           |
+| ------------ | --------- |
+| **Type**     | `boolean` |
+| **Required** | No        |
+| **Default**  | `true`    |
 
-**Description:** Map MIME type patterns to preview types. Supports glob patterns (e.g., 'text/\*' matches 'text/plain', 'text/html', etc.). Valid preview types: text, image, pdf, archive, folder.
-
-| Property                                              | Type             | Title/Description |
-| ----------------------------------------------------- | ---------------- | ----------------- |
-| [](#plugins_file_one_mime_rules_additionalProperties) | enum (of string) |                   |
-
-##### <a name="plugins_file_one_mime_rules_additionalProperties"></a>8.6.2.1. Property `Rovr Config > plugins > file_one > mime_rules > additionalProperties`
-
-|              |                    |
-| ------------ | ------------------ |
-| **Type**     | `enum (of string)` |
-| **Required** | No                 |
-
-Must be one of:
-
-- "text"
-- "image"
-- "pdf"
-- "archive"
-- "folder"
+**Description:** Use file(1) to get additional information of the file type.
 
 ## <a name="mode"></a>9. Property `Rovr Config > mode`
 

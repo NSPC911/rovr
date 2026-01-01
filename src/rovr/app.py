@@ -1,8 +1,8 @@
 import shutil
 from contextlib import suppress
+from io import TextIOWrapper
 from os import chdir, getcwd, path
 from time import perf_counter, sleep
-from types import SimpleNamespace
 from typing import Callable, Iterable
 
 from rich.console import Console
@@ -43,6 +43,7 @@ from rovr.core.file_list import FileListRightClickOptionList
 from rovr.footer import Clipboard, MetadataContainer, ProcessContainer
 from rovr.functions import icons
 from rovr.functions.path import (
+    dump_exc,
     ensure_existing_directory,
     get_filtered_dir_names,
     get_mounted_drives,
@@ -58,17 +59,24 @@ from rovr.navigation_widgets import (
     PathInput,
     UpButton,
 )
-from rovr.screens import DummyScreen, FileSearch, Keybinds, YesOrNo, ZDToDirectory
+from rovr.screens import (
+    ContentSearch,
+    DummyScreen,
+    FileSearch,
+    Keybinds,
+    YesOrNo,
+    ZDToDirectory,
+)
 from rovr.screens.way_too_small import TerminalTooSmall
 from rovr.state_manager import StateManager
-from rovr.variables.constants import MaxPossible, config
+from rovr.variables.constants import MaxPossible, config, log_name
 from rovr.variables.maps import VAR_TO_DIR
 
 console = Console()
 
 
 class Application(App, inherit_bindings=False):
-    # don't need ctrl+c
+    # dont need ctrl+c
     BINDINGS = [
         Binding(
             key,
@@ -102,17 +110,18 @@ class Application(App, inherit_bindings=False):
         if config["interface"]["use_reactive_layout"]
         else []
     )
-    CLICK_CHAIN_TIME_THRESHOLD: int = config["settings"]["double_click_delay"]
+    CLICK_CHAIN_TIME_THRESHOLD: int = config["interface"]["double_click_delay"]
 
     def __init__(
         self,
         startup_path: str = "",
         *,
-        cwd_file: str | None = None,
-        chooser_file: str | None = None,
+        cwd_file: str | TextIOWrapper | None = None,
+        chooser_file: str | TextIOWrapper | None = None,
         show_keys: bool = False,
         tree_dom: bool = False,
         mode: str = "",
+        force_crash_in: float = 0,
     ) -> None:
         super().__init__(watch_css=True)
         if mode:
@@ -122,10 +131,11 @@ class Application(App, inherit_bindings=False):
         self.has_pushed_screen: bool = False
         self.file_list_pause_check: bool = False
         # Runtime output files from CLI
-        self._cwd_file: str | None = cwd_file
-        self._chooser_file: str | None = chooser_file
+        self._cwd_file: str | TextIOWrapper | None = cwd_file
+        self._chooser_file: str | TextIOWrapper | None = chooser_file
         self._show_keys: bool = show_keys
         self._exit_with_tree: bool = tree_dom
+        self._force_crash_in: float = force_crash_in
 
     def compose(self) -> ComposeResult:
         self.log("Starting Rovr...")
@@ -210,6 +220,14 @@ class Application(App, inherit_bindings=False):
             )
             return
         self.theme = config["theme"]["default"]
+        if self.theme == "dark-pink":
+            from rovr.functions.config import get_version
+
+            self.notify(
+                f"The 'dark-pink' theme will be removed in v0.8.0 (Current version is {get_version()}). Switch to 'rose_pine' instead.",
+                title="Deprecation",
+                severity="warning",
+            )
         self.ansi_color = config["theme"]["transparent"]
         # tooltips
         if config["interface"]["tooltips"]:
@@ -239,15 +257,17 @@ class Application(App, inherit_bindings=False):
             )
         # title for screenshots
         self.title = ""
+        if self._force_crash_in > 0:
+            self.set_timer(self._force_crash_in, lambda: 1 / 0)
 
     @work
     async def action_focus_next(self) -> None:
-        if config["settings"]["allow_tab_nav"]:
+        if config["interface"]["allow_tab_nav"]:
             super().action_focus_next()
 
     @work
     async def action_focus_previous(self) -> None:
-        if config["settings"]["allow_tab_nav"]:
+        if config["interface"]["allow_tab_nav"]:
             super().action_focus_previous()
 
     async def on_key(self, event: events.Key) -> None:
@@ -381,7 +401,9 @@ class Application(App, inherit_bindings=False):
                 if response:
                     pathinput: PathInput = self.query_one(PathInput)
                     pathinput.value = response
-                    pathinput.on_input_submitted(SimpleNamespace(value=pathinput.value))
+                    pathinput.on_input_submitted(
+                        PathInput.Submitted(pathinput, pathinput.value)
+                    )
 
             self.push_screen(ZDToDirectory(), on_response)
         # keybinds
@@ -407,6 +429,7 @@ class Application(App, inherit_bindings=False):
 
                     self.push_screen(FileSearch(), on_response)
                 except Exception as exc:
+                    dump_exc(self, exc)
                     self.notify(str(exc), title="Plugins: fd", severity="error")
             else:
                 self.notify(
@@ -414,6 +437,26 @@ class Application(App, inherit_bindings=False):
                     title="Plugins: fd",
                     severity="error",
                 )
+        elif config["plugins"]["rg"]["enabled"] and check_key(
+            event, config["plugins"]["rg"]["keybinds"]
+        ):
+            rg_exec: str = config["plugins"]["rg"]["executable"]
+            if shutil.which(rg_exec) is not None:
+                try:
+
+                    def on_response(selected: str | None) -> None:
+                        if selected is None or selected == "":
+                            return
+                        else:
+                            self.cd(
+                                path.dirname(selected),
+                                focus_on=path.basename(selected),
+                            )
+
+                    self.push_screen(ContentSearch(), on_response)
+                except Exception as exc:
+                    dump_exc(self, exc)
+                    self.notify(str(exc), title="Plugins: rg", severity="error")
         elif check_key(event, config["keybinds"]["suspend_app"]):
             if WINDOWS:
                 self.notify(
@@ -448,24 +491,38 @@ class Application(App, inherit_bindings=False):
         # Write cwd to explicit --cwd-file if provided
         message = ""
         if self._cwd_file:
-            try:
-                with open(self._cwd_file, "w", encoding="utf-8") as f:
-                    f.write(getcwd())
-            except OSError:
-                message += (
-                    f"Failed to write cwd file `{path.basename(self._cwd_file)}`!\n"
-                )
+            if isinstance(self._cwd_file, TextIOWrapper):
+                try:
+                    self._cwd_file.write(getcwd())
+                    self._cwd_file.flush()
+                except OSError:
+                    message += "Failed to write cwd to stdout!\n"
+            else:
+                try:
+                    with open(self._cwd_file, "w", encoding="utf-8") as f:
+                        f.write(getcwd())
+                except OSError:
+                    message += (
+                        f"Failed to write cwd file `{path.basename(self._cwd_file)}`!\n"
+                    )
         # Write selected/active item(s) to --chooser-file, if provided
         if self._chooser_file:
-            try:
-                file_list = self.query_one("#file_list")
-                selected = await file_list.get_selected_objects()
-                if selected:
-                    with open(self._chooser_file, "w", encoding="utf-8") as f:
-                        f.write("\n".join(selected))
-            except OSError:
-                # Any failure writing chooser file should not block exit
-                message += f"Failed to write chooser file `{path.basename(self._chooser_file)}`"
+            file_list = self.query_one("#file_list", FileList)
+            selected = await file_list.get_selected_objects()
+            if selected:
+                if isinstance(self._chooser_file, TextIOWrapper):
+                    try:
+                        self._chooser_file.write("\n".join(selected))
+                        self._chooser_file.flush()
+                    except OSError:
+                        message += "Failed to write chooser to stdout!\n"
+                else:
+                    try:
+                        with open(self._chooser_file, "w", encoding="utf-8") as f:
+                            f.write("\n".join(selected))
+                    except OSError:
+                        # Any failure writing chooser file should not block exit
+                        message += f"Failed to write chooser file `{path.basename(self._chooser_file)}`"
         self.exit(message.strip())
 
     def cd(
@@ -517,7 +574,7 @@ class Application(App, inherit_bindings=False):
         with suppress(OSError):
             state_mtime = path.getmtime(state_path)
         drives = get_mounted_drives()
-        drive_update_every = int(config["settings"]["drive_watcher_frequency"])
+        drive_update_every = int(config["interface"]["drive_watcher_frequency"])
         count: int = -1
         while True:
             sleep(1)
@@ -541,7 +598,7 @@ class Application(App, inherit_bindings=False):
                         items: set[str] = self.call_from_thread(
                             get_filtered_dir_names,
                             cwd,
-                            config["settings"]["show_hidden_files"],
+                            config["interface"]["show_hidden_files"],
                         )
                     if items is not None and items != file_list.items_in_cwd:
                         self.cd(cwd)
@@ -734,7 +791,7 @@ class Application(App, inherit_bindings=False):
                 ),
             )
         if config["keybinds"]["toggle_hidden_files"]:
-            if config["settings"]["show_hidden_files"]:
+            if config["interface"]["show_hidden_files"]:
                 yield SystemCommand(
                     "Hide Hidden Files",
                     "Exclude listing of hidden files and folders",
@@ -789,6 +846,37 @@ class Application(App, inherit_bindings=False):
             return function(*args, **kwargs)
         except Exception as exc:
             return exc  # ty: ignore[invalid-return-type]
+
+    def _print_error_renderables(self) -> None:
+        """Print and clear exit renderables."""
+        from rich.panel import Panel
+        from rich.traceback import Traceback
+
+        error_count = len(self._exit_renderables)
+        traceback_involved = False
+        for renderable in self._exit_renderables:
+            self.error_console.print(renderable)
+            if isinstance(renderable, Traceback):
+                traceback_involved = True
+        if traceback_involved:
+            if error_count > 1:
+                self.error_console.print(
+                    f"\n[b]NOTE:[/b] {error_count} errors shown above.", markup=True
+                )
+            if error_count != 0:
+                dump_path = path.join(
+                    path.realpath(VAR_TO_DIR["CONFIG"]), "logs", f"{log_name}.log"
+                )
+                self.error_console.print(
+                    Panel(
+                        f"The error has been dumped to {dump_path}",
+                        expand=False,
+                        border_style="red",
+                        padding=(0, 2),
+                    ),
+                    style="bold red",
+                )
+        self._exit_renderables.clear()
 
 
 app = Application()

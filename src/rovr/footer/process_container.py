@@ -4,7 +4,7 @@ import tarfile
 import time
 import zipfile
 from os import path
-from typing import Callable
+from typing import Callable, cast
 
 from send2trash import send2trash
 from textual import events, work
@@ -23,6 +23,7 @@ from rovr.screens import (
     Dismissable,
     FileInUse,
     YesOrNo,
+    typed,
 )
 from rovr.variables.constants import config, os_type, scroll_vindings
 
@@ -153,6 +154,15 @@ class ProcessContainer(VerticalScroll):
         await self.mount(new_bar, before=0)
         return new_bar
 
+    def threaded_new_process_bar(
+        self, max: int | None = None, id: str | None = None, classes: str | None = None
+    ) -> ProgressBarContainer:
+        bar = self.app.call_from_thread(
+            self.new_process_bar, max=max, id=id, classes=classes
+        )
+        assert isinstance(bar, ProgressBarContainer)
+        return bar
+
     @work(thread=True)
     def delete_files(
         self, files: list[str], compressed: bool = True, ignore_trash: bool = False
@@ -170,9 +180,7 @@ class ProcessContainer(VerticalScroll):
             PermissionError: re-raises if the file usage handler fails
         """
         # Create progress/process bar (why have I set names as such...)
-        bar: ProgressBarContainer = self.app.call_from_thread(
-            self.new_process_bar, classes="active"
-        )
+        bar = self.threaded_new_process_bar(classes="active")
         self.app.call_from_thread(
             bar.update_icon,
             icon_utils.get_icon("general", "delete")[0],
@@ -258,6 +266,7 @@ class ProcessContainer(VerticalScroll):
                                     border_subtitle="If this is a bug, please file an issue!",
                                 ),
                             )
+                            do_what = cast(typed.YesOrNo, do_what)
                             if do_what["toggle"]:
                                 ignore_trash = do_what["value"]
                             if do_what["value"]:
@@ -339,7 +348,9 @@ class ProcessContainer(VerticalScroll):
         # finished successfully
         self.app.call_from_thread(
             bar.update_icon,
-            bar.icon_label.content + " " + icon_utils.get_icon("general", "check")[0],
+            str(bar.icon_label.content)
+            + " "
+            + icon_utils.get_icon("general", "check")[0],
         )
         self.app.call_from_thread(bar.progress_bar.advance)
         self.app.call_from_thread(bar.add_class, "done")
@@ -392,6 +403,7 @@ class ProcessContainer(VerticalScroll):
                     f"The file appears to be open in another application and cannot be operated on.\nPath: {item_display_name}",
                 ),
             )
+            response = cast(typed.FileInUse, response)
             # Handle toggle: remember the action for future file-in-use scenarios
             updated_action = persisted_default
             if response["toggle"]:
@@ -445,9 +457,7 @@ class ProcessContainer(VerticalScroll):
             files (list[str]): List of file paths to compress.
             archive_name (str): Path for the output archive.
         """
-        bar: ProgressBarContainer = self.app.call_from_thread(
-            self.new_process_bar, classes="active"
-        )
+        bar = self.threaded_new_process_bar(classes="active")
         self.app.call_from_thread(
             bar.update_icon,
             icon_utils.get_icon("general", "zip")[0],
@@ -494,7 +504,7 @@ class ProcessContainer(VerticalScroll):
                         last_update_time = current_time
                     _archive = archive._archive
                     if _archive:
-                        if archive._is_zip:
+                        if archive._archive_type == "zip":
                             assert isinstance(_archive, zipfile.ZipFile)
                             _archive.write(file_path, arcname=arcname)
                         else:
@@ -505,7 +515,7 @@ class ProcessContainer(VerticalScroll):
                         arcname = path.relpath(p, base_path)
                         _archive = archive._archive
                         if _archive:
-                            if archive._is_zip:
+                            if archive._archive_type == "zip":
                                 assert isinstance(_archive, zipfile.ZipFile)
                                 _archive.write(p, arcname=arcname)
                             else:
@@ -523,7 +533,9 @@ class ProcessContainer(VerticalScroll):
 
         self.app.call_from_thread(
             bar.update_icon,
-            bar.icon_label.content + " " + icon_utils.get_icon("general", "check")[0],
+            str(bar.icon_label.content)
+            + " "
+            + icon_utils.get_icon("general", "check")[0],
         )
         self.app.call_from_thread(bar.progress_bar.advance)
         self.app.call_from_thread(bar.add_class, "done")
@@ -537,9 +549,7 @@ class ProcessContainer(VerticalScroll):
             archive_path (str): Path to the zip archive.
             destination_path (str): Path to the destination folder.
         """
-        bar: ProgressBarContainer = self.app.call_from_thread(
-            self.new_process_bar, classes="active"
-        )
+        bar = self.threaded_new_process_bar(classes="active")
         self.app.call_from_thread(
             bar.update_icon,
             icon_utils.get_icon("general", "open")[0],
@@ -583,6 +593,7 @@ class ProcessContainer(VerticalScroll):
                                     border_subtitle=f"Extracting to {destination_path}",
                                 ),
                             )
+                            response = cast(typed.CommonFileNameDoWhat, response)
                             if response["same_for_next"]:
                                 do_what_on_existance = response["value"]
                             val = response["value"]
@@ -672,9 +683,7 @@ class ProcessContainer(VerticalScroll):
         """
         if dest == "":
             dest = os.getcwd()
-        bar: ProgressBarContainer = self.app.call_from_thread(
-            self.new_process_bar, classes="active"
-        )
+        bar = self.threaded_new_process_bar(classes="active")
         self.app.call_from_thread(
             bar.update_icon,
             icon_utils.get_icon("general", "paste")[0],
@@ -737,6 +746,7 @@ class ProcessContainer(VerticalScroll):
                                     border_subtitle=f"Copying to {dest}",
                                 ),
                             )
+                            response = cast(typed.CommonFileNameDoWhat, response)
                             if response["same_for_next"]:
                                 action_on_existance = response["value"]
                             val = response["value"]
@@ -851,6 +861,7 @@ class ProcessContainer(VerticalScroll):
                                     border_subtitle=f"Moving to {dest}",
                                 ),
                             )
+                            response = cast(typed.CommonFileNameDoWhat, response)
                             if response["same_for_next"]:
                                 action_on_existance = response["value"]
                             val = response["value"]

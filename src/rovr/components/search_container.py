@@ -73,11 +73,12 @@ class SearchInput(Input):
             event.value,
         )
         assert hasattr(self.items_list, "list_of_options")
+        assert isinstance(self.items_list.list_of_options, list)
         output: list[Option] = []
         segment: list[
             tuple[Option, int | float, int]
         ] = []  # (option, score, original_index)
-        for idx, option in enumerate(self.items_list.list_of_options):
+        for idx, option in enumerate(self.items_list.list_of_options):  # type: ignore[invalid-argument-type]
             assert isinstance(option, Option)
             if self.always_add_disabled and option.disabled:
                 if segment:
@@ -105,8 +106,9 @@ class SearchInput(Input):
                 self.items_list.add_option(
                     Selection("   --no-matches--", value="", id="", disabled=True)
                 )
+                assert self.items_list.parent is not None
                 set_scuffed_subtitle(
-                    self.items_list.parent,
+                    self.items_list.parent,  # type: ignore[invalid-argument-type]
                     "SELECT" if self.items_list.select_mode_enabled else "NORMAL",
                     "0/0",
                 )

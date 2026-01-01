@@ -22,15 +22,9 @@ from rovr.functions import path as path_utils
 from rovr.functions.icons import get_icon_for_file, get_icon_for_folder
 from rovr.functions.utils import check_key
 from rovr.variables.constants import config, vindings
-from rovr.variables.maps import FD_TYPE_TO_ALIAS
-
-INITIAL_FILTER_TYPES: dict[str, bool] = {
-    ft: (ft in config["plugins"]["fd"]["default_filter_types"])
-    for ft in FD_TYPE_TO_ALIAS
-}
 
 
-class FileSearchOptionList(OptionList):
+class ContentSearchOptionList(OptionList):
     async def _on_click(self, event: events.Click) -> None:
         """React to the mouse being clicked on an item.
 
@@ -50,45 +44,36 @@ class FileSearchOptionList(OptionList):
             self.screen.search_input.focus()
 
 
-class FileSearchToggles(SelectionList):
+class ContentSearchToggles(SelectionList):
     BINDINGS: ClassVar[list[BindingType]] = list(vindings)
 
     def __init__(self) -> None:
         super().__init__(
             Selection(
-                "Relative Paths",
-                "relative_paths",
-                config["plugins"]["fd"]["relative_paths"],
+                "Case Sensitive",
+                "case_sensitive",
+                config["plugins"]["rg"]["case_sensitive"],
             ),
             Selection(
                 "Follow Symlinks",
                 "follow_symlinks",
-                config["plugins"]["fd"]["follow_symlinks"],
+                config["plugins"]["rg"]["follow_symlinks"],
+            ),
+            Selection(
+                "Search Hidden Files",
+                "search_hidden",
+                config["plugins"]["rg"]["search_hidden"],
             ),
             Selection(
                 "No Ignore Parents",
                 "no_ignore_parent",
-                config["plugins"]["fd"]["no_ignore_parent"],
+                config["plugins"]["rg"]["no_ignore_parent"],
             ),
-            Selection("Filter Type", "", False, disabled=True),
-            Selection("Files", "file", INITIAL_FILTER_TYPES["file"]),
-            Selection("Folders", "directory", INITIAL_FILTER_TYPES["directory"]),
-            Selection("Symlinks", "symlink", INITIAL_FILTER_TYPES["symlink"]),
-            Selection("Executables", "executable", INITIAL_FILTER_TYPES["executable"]),
-            Selection("Empty", "empty", INITIAL_FILTER_TYPES["empty"]),
-            Selection("Socket", "socket", INITIAL_FILTER_TYPES["socket"]),
-            Selection("Pipe", "pipe", INITIAL_FILTER_TYPES["pipe"]),
-            Selection(
-                "Char-Device", "char-device", INITIAL_FILTER_TYPES["char-device"]
-            ),
-            Selection(
-                "Block-Device", "block-device", INITIAL_FILTER_TYPES["block-device"]
-            ),
-            id="file_search_toggles",
+            id="content_search_toggles",
         )
 
     def on_mount(self) -> None:
-        self.border_title = "fd options"
+        self.border_title = "rg options"
 
     # Use better versions of the checkbox icons
     def _get_left_gutter_width(
@@ -199,75 +184,61 @@ class FileSearchToggles(SelectionList):
         ])
 
 
-class FileSearch(ModalScreen):
-    """Search for files recursively using fd."""
-
-    FILTER_TYPES: dict[str, bool] = INITIAL_FILTER_TYPES.copy()
-    """Class Var for filter types, intentional so that it is
-    carried over in that session"""
+class ContentSearch(ModalScreen):
+    """Search file contents recursively using rg."""
 
     def __init__(self, **kwargs) -> None:
         super().__init__(**kwargs)
-        # Okay, so I will need to explain myself for this design choice.
-        # fd, even though it is built in rust, the fastest and safest language
-        # it still takes time in large directories,
-        #   and even more time when creating a lot of options
-        # so when the options are passed to the create_options method (thread)
-        #   but if the fd_updater method is triggered again, the thread will
-        #   be confused or something and spam warnings, which I don't think
-        #   looks nice. I still haven't done the same for zoxide, but I haven't
-        #   experienced this issue, so zoxide will be staying like that for now
+        # same thing as fd
         self._active_worker: Worker | None = None
 
     def compose(self) -> ComposeResult:
-        with VerticalGroup(id="file_search_group", classes="file_search_group"):
+        with VerticalGroup(id="content_search_group"):
             yield Input(
-                id="file_search_input",
-                placeholder="Type to search files (fd)",
+                id="content_search_input",
+                placeholder="Type to search files (rg)",
             )
-            yield FileSearchOptionList(
+            yield ContentSearchOptionList(
                 Option("  No input provided", disabled=True),
-                id="file_search_options",
+                id="content_search_options",
                 classes="empty",
             )
-        yield FileSearchToggles()
+        yield ContentSearchToggles()
 
     def on_mount(self) -> None:
-        self.search_input: Input = self.query_one("#file_search_input")
-        self.search_input.border_title = "Find Files"
+        self.search_input: Input = self.query_one("#content_search_input")
+        self.search_input.border_title = "Find in files"
         self.search_input.focus()
-        self.search_options: FileSearchOptionList = self.query_one(
-            "#file_search_options"
+        self.search_options: ContentSearchOptionList = self.query_one(
+            "#content_search_options"
         )
-        self.search_options.border_title = "Files"
+        self.search_options.border_title = "Results"
         self.search_options.can_focus = False
-        self.fd_updater(Input.Changed(self.search_input, value=""))
+        self.rg_updater(Input.Changed(self.search_input, value=""))
 
     def on_input_changed(self, event: Input.Changed) -> None:
-        self.fd_updater(event=event)
+        self.rg_updater(event=event)
 
     @work
-    async def fd_updater(self, event: Input.Changed) -> None:
-        """Update the list using fd based on the search term."""
+    async def rg_updater(self, event: Input.Changed) -> None:
+        """Update the list using rg based on the search term."""
         self._active_worker = get_current_worker()
+        self.search_options.border_subtitle = ""
         search_term = event.value.strip()
-        fd_exec = config["plugins"]["fd"]["executable"]
+        rg_exec = config["plugins"]["rg"]["executable"]
 
-        fd_cmd = [fd_exec]
-        if config["interface"]["show_hidden_files"]:
-            fd_cmd.append("--hidden")
-        if not config["plugins"]["fd"]["relative_paths"]:
-            fd_cmd.append("--absolute-path")
-        if config["plugins"]["fd"]["follow_symlinks"]:
-            fd_cmd.append("--follow")
-        if config["plugins"]["fd"]["no_ignore_parent"]:
-            fd_cmd.append("--no-ignore-parent")
-        for filter_type, should_use in self.FILTER_TYPES.items():
-            if should_use:
-                fd_cmd.extend(["--type", FD_TYPE_TO_ALIAS[filter_type]])
+        rg_cmd = [rg_exec, "--count", "--color=never"]
+        if config["plugins"]["rg"]["search_hidden"]:
+            rg_cmd.append("--hidden")
+        if config["plugins"]["rg"]["follow_symlinks"]:
+            rg_cmd.append("--follow")
+        if config["plugins"]["rg"]["no_ignore_parent"]:
+            rg_cmd.append("--no-ignore-parent")
+        if not config["plugins"]["rg"]["case_sensitive"]:
+            rg_cmd.append("--ignore-case")
         if search_term:
-            fd_cmd.append("--")
-            fd_cmd.append(search_term)
+            rg_cmd.append("--")
+            rg_cmd.append(search_term)
         else:
             self.search_options.add_class("empty")
             self.search_options.clear_options()
@@ -275,21 +246,22 @@ class FileSearch(ModalScreen):
             return
         self.search_options.set_options([Option("  Searching...", disabled=True)])
         try:
-            fd_process = await asyncio.create_subprocess_exec(
-                *fd_cmd, stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE
+            rg_process = await asyncio.create_subprocess_exec(
+                *rg_cmd, stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE
             )
-            stdout, _ = await asyncio.wait_for(fd_process.communicate(), timeout=3)
+            # 30 seconds is quite generous for rg to respond
+            stdout, _ = await asyncio.wait_for(rg_process.communicate(), timeout=30)
         except (OSError, asyncio.exceptions.TimeoutError) as exc:
             if isinstance(exc, asyncio.exceptions.TimeoutError):
-                fd_process.kill()
+                rg_process.kill()
                 with contextlib.suppress(
                     asyncio.exceptions.TimeoutError, ProcessLookupError
                 ):
-                    await asyncio.wait_for(fd_process.wait(), timeout=1)
+                    await asyncio.wait_for(rg_process.wait(), timeout=1)
             msg = (
-                "  fd is missing on $PATH or cannot be executed"
-                if isinstance(exc, OSError)
-                else "  fd took too long to respond"
+                "  rg took too long to respond"
+                if isinstance(exc, asyncio.exceptions.TimeoutError)
+                else "  rg is missing on $PATH or cannot be executed"
             )
             self.search_options.set_options([
                 Option(msg, disabled=True),
@@ -300,7 +272,20 @@ class FileSearch(ModalScreen):
         options: list[ModalSearcherOption] = []
         if stdout:
             stdout = stdout.decode()
-            worker = self.create_options(stdout)
+            # fix output from --count
+            # arranged as <path>:<count>
+            # convert to (path, count) list
+            stdout_lines: list[tuple[str, int]] = []
+            for line in stdout.splitlines():
+                if ":" in line:
+                    path, count = line.rsplit(":", 1)
+                    try:
+                        stdout_lines.append((path, int(count)))
+                    except ValueError:
+                        continue  # skip lines with invalid count
+
+            stdout_lines.sort(key=lambda x: x[1], reverse=True)
+            worker = self.create_options(stdout_lines)
             try:
                 options: list[ModalSearcherOption] = await worker.wait()
             except WorkerCancelled:
@@ -314,12 +299,7 @@ class FileSearch(ModalScreen):
                 self.search_options.add_options(options)
                 self.search_options.remove_class("empty")
                 self.search_options.highlighted = 0
-            else:
-                self.search_options.add_option(
-                    Option("  --No matches found--", disabled=True),
-                )
-                self.search_options.add_class("empty")
-                self.search_options.border_subtitle = ""
+                return
         else:
             self.search_options.clear_options()
             self.search_options.add_option(
@@ -343,8 +323,8 @@ class FileSearch(ModalScreen):
         self.search_options.action_select()
 
     @work(exclusive=True)
-    @on(OptionList.OptionSelected, "FileSearchOptionList")
-    async def file_search_option_selected(
+    @on(OptionList.OptionSelected, "ContentSearchOptionList")
+    async def content_search_option_selected(
         self, event: OptionList.OptionSelected
     ) -> None:
         if not isinstance(event.option, ModalSearcherOption):
@@ -356,9 +336,9 @@ class FileSearch(ModalScreen):
         else:
             self.dismiss(None)
 
-    @on(OptionList.OptionHighlighted, "FileSearchOptionList")
-    def file_search_change_highlighted(
-        self, event: OptionList.OptionHighlighted
+    @on(OptionList.OptionHighlighted, "ContentSearchOptionList")
+    def content_search_change_highlighted(
+        self, _: OptionList.OptionHighlighted
     ) -> None:
         if (
             self.search_options.option_count == 0
@@ -371,12 +351,8 @@ class FileSearch(ModalScreen):
 
     @on(SelectionList.SelectionToggled)
     def toggles_toggled(self, event: SelectionList.SelectionToggled) -> None:
-        if event.selection.value in self.FILTER_TYPES:
-            self.FILTER_TYPES[event.selection.value] = (
-                event.selection.value in event.selection_list.selected
-            )
-        elif event.selection.value in config["plugins"]["fd"]:
-            config["plugins"]["fd"][event.selection.value] = (
+        if event.selection.value in config["plugins"]["rg"]:
+            config["plugins"]["rg"][event.selection.value] = (
                 event.selection.value in event.selection_list.selected
             )
         self.post_message(
@@ -384,24 +360,25 @@ class FileSearch(ModalScreen):
         )
 
     @work(thread=True, exit_on_error=False)
-    def create_options(self, stdout: str) -> list[ModalSearcherOption] | None:
+    def create_options(
+        self, stdout: list[tuple[str, int]]
+    ) -> list[ModalSearcherOption] | None:
         options: list[ModalSearcherOption] = []
-        for line in stdout.splitlines():
-            file_path = path_utils.normalise(line.strip())
-            file_path_str = str(file_path)
-            if not file_path_str:
+        for line in stdout:
+            file_path = path_utils.normalise(line[0].strip())
+            if not file_path:
                 continue
-            display_text = f" {file_path_str}"
+            display_text = f" {file_path}:[dim]{line[1]}[/]"
             icon: list[str] = (
-                get_icon_for_folder(file_path_str)
-                if path.isdir(file_path_str)
-                else get_icon_for_file(file_path_str)
+                get_icon_for_folder(file_path)
+                if path.isdir(file_path)
+                else get_icon_for_file(file_path)
             )
             options.append(
                 ModalSearcherOption(
                     icon,
                     display_text,
-                    file_path_str,
+                    file_path,
                 )
             )
         return options

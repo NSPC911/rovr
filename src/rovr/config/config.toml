@@ -9,13 +9,20 @@ show_progress_eta = false
 show_progress_percentage = true
 truncate_progress_file_path = false
 show_line_numbers = true
+show_hidden_files = false
+allow_tab_nav = true
+append_new_tabs = true
+double_click_delay = 0.25
+drive_watcher_frequency = 3.0
 # yazi style is 5
 # but it has more space
 scrolloff = 3
+image_protocol = "Auto"
+max_preview_image_width = 1920
+max_preview_image_height = 1080
 
 [interface.preview_text]
 error = "couldn't read this file! (\u00AC_\u00AC)" # ¬_¬
-binary = "the file doesn't use UTF-8, which isn't supported yet"
 start = """
   ___ ___
  |  _| . |
@@ -24,9 +31,6 @@ start = """
  | | |  _|
   \\_/|_|
 """
-empty = "bytes be gone (\u2310\u25A0_\u25A0)" # (⌐■_■)
-# how do you even respond to this
-too_large = "this file is larger (but not larger than your mother)"
 
 [interface.clock]
 enabled = true
@@ -36,15 +40,26 @@ align = "left"
 buttons = false
 panels = false
 
+[interface.mime_rules]
+"text/*" = "text"
+"image/*" = "image"
+"application/pdf" = "pdf"
+"application/zip" = "archive"
+"application/gzip" = "archive"
+"application/bzip2" = "archive"
+"application/xz" = "archive"
+"application/x-tar" = "archive"
+"application/x-gzip" = "archive"
+"application/x-bzip2" = "archive"
+"application/x-xz" = "archive"
+"application/x-rar" = "archive"
+"application/vnd.rar" = "archive"
+"application/x-7z-compressed" = "archive"
+"inode/directory" = "folder"
+
 [settings]
-image_protocol = "Auto"
-show_hidden_files = false
 copy_includes_metadata = true
 use_recycle_bin = true
-allow_tab_nav = true
-append_new_tabs = true
-double_click_delay = 0.25
-drive_watcher_frequency = 3.0
 
 [metadata]
 fields = [
@@ -62,6 +77,7 @@ filesize_suffix = "decimal"
 
 [theme]
 default = "nord"
+preview = "nord"
 transparent = false
 
 [[custom_theme]]
@@ -241,6 +257,15 @@ follow_symlinks = false
 no_ignore_parent = false
 default_filter_types = ["file", "directory"]
 
+[plugins.rg]
+enabled = true
+keybinds = ["R"]
+executable = "rg"
+case_sensitive = true
+no_ignore_parent = false
+follow_symlinks = false
+search_hidden = false
+
 [plugins.poppler]
 enabled = true
 threads = 1
@@ -249,16 +274,4 @@ poppler_folder = ""
 
 [plugins.file_one]
 enabled = false
-
-[plugins.file_one.mime_rules]
-"text/*" = "text"
-"image/*" = "image"
-"application/pdf" = "pdf"
-"application/zip" = "archive"
-"application/x-tar" = "archive"
-"application/gzip" = "archive"
-"application/x-bzip2" = "archive"
-"application/x-xz" = "archive"
-"application/x-rar" = "archive"
-"application/x-7z-compressed" = "archive"
-"inode/directory" = "folder"
+get_description = true

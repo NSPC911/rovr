@@ -23,5 +23,6 @@
   },
   "overrides": {
     "@anthropic-ai/claude-code": "./__EXCLUDE"
-  }
+  },
+  "packageManager": "pnpm"
 }

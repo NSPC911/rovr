@@ -169,8 +169,8 @@ def cli(
     without_features: list[str],
     show_config_path: bool,
     show_version: bool,
-    cwd_file: str | TextIOWrapper | None,
-    chooser_file: str | TextIOWrapper | None,
+    cwd_file: str | TextIOWrapper | None,  # necessary because later on, replaced by stdout/stderr file
+    chooser_file: str | TextIOWrapper | None,  # necessary because later on, replaced by stdout/stderr file
     show_keys: bool,
     path: str,
     tree_dom: bool,
@@ -325,7 +325,7 @@ example_function(10)"""
         ).run()
     else:
         pprint(
-            "Error: rovr needs a TTY to run the application. If you want to write to standard output, please use the [bold cyan]--force-tty[/] options.",
+            "Error: rovr needs a TTY to run the application.",
         )
 
 

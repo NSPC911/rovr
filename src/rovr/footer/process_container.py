@@ -350,7 +350,7 @@ class ProcessContainer(VerticalScroll):
             bar.update_icon,
             str(bar.icon_label.content)
             + " "
-            + icon_utils.get_icon("general", "check")[0],  # type: ignore[unsupported-operator]
+            + icon_utils.get_icon("general", "check")[0],
         )
         self.app.call_from_thread(bar.progress_bar.advance)
         self.app.call_from_thread(bar.add_class, "done")

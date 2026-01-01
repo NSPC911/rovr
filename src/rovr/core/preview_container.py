@@ -131,6 +131,11 @@ class PreviewContainer(Container):
             # Use the larger factor, rounded down to an integer and clamped to at least 1.
             reduce_factor = max(1, int(max(factors)))
 
+        if should_cancel():
+            # the actually intensive part is
+            # the reduction and nothing else
+            return
+
         if reduce_factor > 1:
             self.log(
                 f"Image will be reduced by factor {reduce_factor}: "
@@ -750,8 +755,6 @@ class PreviewContainer(Container):
 
             if should_cancel():
                 return
-            else:
-                self._queued_task = None
         except Exception as exc:
             self.app.call_from_thread(
                 self.notify,

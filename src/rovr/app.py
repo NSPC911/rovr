@@ -135,7 +135,8 @@ class Application(App, inherit_bindings=False):
         self._show_keys: bool = show_keys
         self._exit_with_tree: bool = tree_dom
         self._force_crash_in: float = force_crash_in
-        self.file_list: FileList
+        self._file_list_container = FileListContainer()
+        self.file_list = self._file_list_container.filelist
 
     def compose(self) -> ComposeResult:
         self.log("Starting Rovr...")
@@ -169,7 +170,7 @@ class Application(App, inherit_bindings=False):
                         placeholder=f"{icons.get_icon('general', 'search')[0]} Search"
                     )
                     yield PinnedSidebar(id="pinned_sidebar")
-                yield FileListContainer()
+                yield self._file_list_container
                 yield PreviewContainer(
                     id="preview_sidebar",
                 )

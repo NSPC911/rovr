@@ -129,13 +129,13 @@ class Application(App, inherit_bindings=False):
         self.app_blurred: bool = False
         self.startup_path: str = startup_path
         self.has_pushed_screen: bool = False
-        self.file_list_pause_check: bool = False
         # Runtime output files from CLI
         self._cwd_file: str | TextIOWrapper | None = cwd_file
         self._chooser_file: str | TextIOWrapper | None = chooser_file
         self._show_keys: bool = show_keys
         self._exit_with_tree: bool = tree_dom
         self._force_crash_in: float = force_crash_in
+        self.file_list: FileList
 
     def compose(self) -> ComposeResult:
         self.log("Starting Rovr...")
@@ -241,7 +241,8 @@ class Application(App, inherit_bindings=False):
             directory=path.abspath(self.startup_path),
             focus_on=path.basename(self.startup_path),
         )
-        self.query_one("#file_list").focus()
+        self.file_list = self.query_one("#file_list", FileList)
+        self.file_list.focus()
         # restore UI state from saved state file
         self.query_one(StateManager).restore_state()
         # start mini watcher
@@ -259,6 +260,7 @@ class Application(App, inherit_bindings=False):
         self.title = ""
         if self._force_crash_in > 0:
             self.set_timer(self._force_crash_in, lambda: 1 / 0)
+        # file_list because im using this guy basically everywhere
 
     @work
     async def action_focus_next(self) -> None:
@@ -297,7 +299,7 @@ class Application(App, inherit_bindings=False):
         # placeholder, not yet existing
         if event.key == "escape" and self.focused.id and "search" in self.focused.id:
             if self.focused.id == "search_file_list":
-                self.query_one("#file_list").focus()
+                self.file_list.focus()
             elif self.focused.id == "search_pinned_sidebar":
                 self.query_one("#pinned_sidebar").focus()
             return
@@ -314,12 +316,12 @@ class Application(App, inherit_bindings=False):
                 self.focused.id == "pinned_sidebar"
                 or "hide" in self.query_one("#pinned_sidebar_container").classes
             ):
-                self.query_one("#file_list").focus()
+                self.file_list.focus()
             elif self.query_one("#pinned_sidebar_container").display:
                 self.query_one("#pinned_sidebar").focus()
         # Focus file list from anywhere except input
         elif check_key(event, config["keybinds"]["focus_file_list"]):
-            self.query_one("#file_list").focus()
+            self.file_list.focus()
         # Focus toggle preview sidebar
         elif check_key(event, config["keybinds"]["focus_toggle_preview_sidebar"]):
             if (
@@ -327,12 +329,12 @@ class Application(App, inherit_bindings=False):
                 or self.focused.parent.id == "preview_sidebar"
                 or "hide" in self.query_one("#preview_sidebar").classes
             ):
-                self.query_one("#file_list").focus()
+                self.file_list.focus()
             elif self.query_one(PreviewContainer).display:
                 with suppress(NoMatches):
                     self.query_one("PreviewContainer > *").focus()
             else:
-                self.query_one("#file_list").focus()
+                self.file_list.focus()
         # Focus path switcher
         elif check_key(event, config["keybinds"]["focus_toggle_path_switcher"]):
             self.query_one("#path_switcher").focus()
@@ -342,33 +344,33 @@ class Application(App, inherit_bindings=False):
                 self.focused.id == "processes"
                 or "hide" in self.query_one("#processes").classes
             ):
-                self.query_one("#file_list").focus()
+                self.file_list.focus()
             elif self.query_one("#footer").display:
                 self.query_one("#processes").focus()
         # Focus metadata
         elif check_key(event, config["keybinds"]["focus_toggle_metadata"]):
             if self.focused.id == "metadata":
-                self.query_one("#file_list").focus()
+                self.file_list.focus()
             elif self.query_one("#footer").display:
                 self.query_one("#metadata").focus()
         # Focus clipboard
         elif check_key(event, config["keybinds"]["focus_toggle_clipboard"]):
             if self.focused.id == "clipboard":
-                self.query_one("#file_list").focus()
+                self.file_list.focus()
             elif self.query_one("#footer").display:
                 self.query_one("#clipboard").focus()
         # Toggle hiding panels
         elif check_key(event, config["keybinds"]["toggle_pinned_sidebar"]):
-            self.query_one("#file_list").focus()
+            self.file_list.focus()
             self.query_one(StateManager).toggle_pinned_sidebar()
         elif check_key(event, config["keybinds"]["toggle_preview_sidebar"]):
-            self.query_one("#file_list").focus()
+            self.file_list.focus()
             self.query_one(StateManager).toggle_preview_sidebar()
         elif check_key(event, config["keybinds"]["toggle_footer"]):
-            self.query_one("#file_list").focus()
+            self.file_list.focus()
             self.query_one(StateManager).toggle_footer()
         elif check_key(event, config["keybinds"]["toggle_menuwrapper"]):
-            self.query_one("#file_list").focus()
+            self.file_list.focus()
             self.query_one(StateManager).toggle_menuwrapper()
         elif (
             check_key(event, config["keybinds"]["tab_next"])
@@ -507,8 +509,7 @@ class Application(App, inherit_bindings=False):
                     )
         # Write selected/active item(s) to --chooser-file, if provided
         if self._chooser_file:
-            file_list = self.query_one("#file_list", FileList)
-            selected = await file_list.get_selected_objects()
+            selected = await self.file_list.get_selected_objects()
             if selected:
                 if isinstance(self._chooser_file, TextIOWrapper):
                     try:
@@ -553,7 +554,7 @@ class Application(App, inherit_bindings=False):
                 )
                 return
 
-        self.query_one("#file_list", FileList).update_file_list(
+        self.file_list.update_file_list(
             add_to_session=add_to_history, focus_on=focus_on
         )
         if hasattr(self, "tabWidget"):
@@ -582,7 +583,7 @@ class Application(App, inherit_bindings=False):
             if count >= drive_update_every:
                 count = 0
             new_cwd = getcwd()
-            if not self.file_list_pause_check:
+            if not self.file_list.file_list_pause_check:
                 if not path.exists(new_cwd):
                     file_list.update_file_list(add_to_session=False)
                 elif cwd != new_cwd:
@@ -795,13 +796,13 @@ class Application(App, inherit_bindings=False):
                 yield SystemCommand(
                     "Hide Hidden Files",
                     "Exclude listing of hidden files and folders",
-                    self.query_one("#file_list").toggle_hidden_files,
+                    self.file_list.toggle_hidden_files,
                 )
             else:
                 yield SystemCommand(
                     "Show Hidden Files",
                     "Include listing of hidden files and folders",
-                    self.query_one("#file_list").toggle_hidden_files,
+                    self.file_list.toggle_hidden_files,
                 )
         yield SystemCommand(
             "Reload File List",
@@ -813,7 +814,7 @@ class Application(App, inherit_bindings=False):
     async def _toggle_transparency(self) -> None:
         self.ansi_color = not self.ansi_color
         await self.push_screen_wait(DummyScreen())
-        self.query_one("#file_list").update_border_subtitle()
+        self.file_list.update_border_subtitle()
 
     @on(events.Click)
     def when_got_click(self, event: events.Click) -> None:

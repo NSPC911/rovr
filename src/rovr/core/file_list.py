@@ -61,6 +61,7 @@ class FileList(SelectionList, inherit_bindings=False):
         self.select_mode_enabled = select
         if not self.dummy:
             self.items_in_cwd: set[str] = set()
+        self.file_list_pause_check = False
 
     def on_mount(self) -> None:
         if not self.dummy and self.parent:
@@ -173,7 +174,7 @@ class FileList(SelectionList, inherit_bindings=False):
             # the watcher function)
             self.clear_options()
             return
-        self.app.file_list_pause_check = True  # ty: ignore[invalid-assignment]
+        self.file_list_pause_check = True  # ty: ignore[invalid-assignment]
         try:
             preview = self.app.query_one("PreviewContainer")
 
@@ -268,9 +269,6 @@ class FileList(SelectionList, inherit_bindings=False):
             self.app.query_one("#path_switcher", PathInput).value = cwd + (
                 "" if cwd.endswith("/") else "/"
             )
-            # I question to myself why directories isn't a list[str]
-            # but is a list[dict], so I'm down to take some PRs, because
-            # I have other things that are more important.
             if add_to_session:
                 if session.historyIndex != len(session.directories) - 1:
                     session.directories = session.directories[
@@ -369,7 +367,7 @@ class FileList(SelectionList, inherit_bindings=False):
                 # skipping the middle folder entirely
                 self.app.cd(target_path)
                 self.app.tabWidget.active_tab.selectedItems = []
-                self.app.query_one("#file_list").focus()
+                self.app.file_list.focus()
             else:
                 await self.file_selected_handler(target_path)
                 if self.highlighted is None:
@@ -878,11 +876,6 @@ class FileListRightClickOptionList(PopupOptionList):
 
     @on(events.Show)
     async def on_show(self, event: events.Show) -> None:
-        if hasattr(self, "file_list"):
-            file_list = self.file_list
-        else:
-            file_list = self.app.query_one("#file_list", FileList)
-            self.file_list = file_list
         self.set_options([
             Option(f" {icon_utils.get_icon('general', 'copy')[0]} Copy", id="copy"),
             Option(f" {icon_utils.get_icon('general', 'cut')[0]} Cut", id="cut"),
@@ -897,7 +890,7 @@ class FileListRightClickOptionList(PopupOptionList):
                 f" {icon_utils.get_icon('general', 'open')[0]} Unzip",
                 id="unzip",
                 disabled=not await utils.is_archive(
-                    file_list.highlighted_option.dir_entry.path
+                    self.app.file_list.highlighted_option.dir_entry.path
                 ),
             ),
         ])

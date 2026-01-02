@@ -96,7 +96,9 @@ class SortOrderPopup(PopupOptionList):
         super().__init__()
         self.do_adjust: bool = False
 
-    def on_mount(self, event: events.Mount) -> None:  # ty: ignore[invalid-method-override]
+    def on_mount(
+        self, event: events.Mount
+    ) -> None:  # ty: ignore[invalid-method-override]
         self.button: SortOrderButton = self.app.query_one(SortOrderButton)
         self.styles.scrollbar_size_vertical = 0
         # calling super()._on_mount is useless, and super().mount()
@@ -108,44 +110,44 @@ class SortOrderPopup(PopupOptionList):
             SortOrderPopupOptions(
                 name_bind,
                 "Name",
-                self.file_list.sort_by == "name",
+                self.app.file_list.sort_by == "name",
                 id="name",
             ),
             SortOrderPopupOptions(
                 extension_bind,
                 "Extension",
-                self.file_list.sort_by == "extension",
+                self.app.file_list.sort_by == "extension",
                 id="extension",
             ),
             SortOrderPopupOptions(
                 natural_bind,
                 "Natural",
-                self.file_list.sort_by == "natural",
+                self.app.file_list.sort_by == "natural",
                 id="natural",
             ),
             SortOrderPopupOptions(
                 size_bind,
                 "Size",
-                self.file_list.sort_by == "size",
+                self.app.file_list.sort_by == "size",
                 id="size",
             ),
             SortOrderPopupOptions(
                 created_bind,
                 "Created",
-                self.file_list.sort_by == "created",
+                self.app.file_list.sort_by == "created",
                 id="created",
             ),
             SortOrderPopupOptions(
                 modified_bind,
                 "Modified",
-                self.file_list.sort_by == "modified",
+                self.app.file_list.sort_by == "modified",
                 id="modified",
             ),
             Option("", id="separator", disabled=True),
             SortOrderPopupOptions(
                 descending_bind,
                 "Descending",
-                self.file_list.sort_descending,
+                self.app.file_list.sort_descending,
                 id="descending",
             ),
         ])
@@ -167,7 +169,7 @@ class SortOrderPopup(PopupOptionList):
             + (1 if self.styles.border_bottom[0] != "" else 0)
         )
         self.height = height
-        self.highlighted = self.get_option_index(self.file_list.sort_by)
+        self.highlighted = self.get_option_index(self.app.file_list.sort_by)
         if self.do_adjust:
             self.do_adjust = False
             self.styles.offset = (
@@ -180,9 +182,9 @@ class SortOrderPopup(PopupOptionList):
 
     def on_option_list_option_selected(self, event: OptionList.OptionSelected) -> None:
         if event.option.id == "descending":
-            self.file_list.sort_descending = not self.file_list.sort_descending
+            self.app.file_list.sort_descending = not self.app.file_list.sort_descending
         else:
-            self.file_list.sort_by = event.option.id
+            self.app.file_list.sort_by = event.option.id
         self.go_hide()
         self.button.update_icon()
 

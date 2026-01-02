@@ -272,6 +272,8 @@ def sync_get_cwd_object(
     except (PermissionError, FileNotFoundError, OSError):
         raise PermissionError(f"PermissionError: Unable to access {cwd}")
 
+    print(f"Scanned {len(entries)} entries in {cwd}")
+
     if (
         return_nothing_if_this_returns_true is not None
         and return_nothing_if_this_returns_true()
@@ -308,6 +310,9 @@ def sync_get_cwd_object(
             if globals().get("is_dev", False):
                 print("Cut off early during dictionary building")
             return None, None
+
+    print(f"Collected {len(folders)} folders and {len(files)} files in {cwd}")
+
     # sort order
     match sort_by:
         case "name":

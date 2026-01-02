@@ -487,9 +487,8 @@ class PreviewContainer(Container):
         this_list: FileList = self.query_one(FileList)
         self.app.call_from_thread(this_list.set_classes, "file-list")
 
-        main_list: FileList = self.app.query_one("#file_list", FileList)
-        this_list.sort_by = main_list.sort_by
-        this_list.sort_descending = main_list.sort_descending
+        this_list.sort_by = self.app.file_list.sort_by
+        this_list.sort_descending = self.app.file_list.sort_descending
         options = []
         try:
             loading_timer = self.app.call_from_thread(

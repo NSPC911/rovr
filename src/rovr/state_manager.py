@@ -176,11 +176,8 @@ sort_descending = {str(self.sort_descending).lower()}
         if self._is_loading:
             return
         self._save_state()
-        try:
-            file_list = self.app.query_one("#file_list")
-            file_list.update_file_list(add_to_session=False)
-        except NoMatches:
-            pass
+        with suppress(NoMatches):
+            self.app.file_list.update_file_list(add_to_session=False)
         # Update sort button icon
         with suppress(NoMatches):
             self.app.query_one("#sort_order").update_icon()
@@ -189,11 +186,8 @@ sort_descending = {str(self.sort_descending).lower()}
         if self._is_loading:
             return
         self._save_state()
-        try:
-            file_list = self.app.query_one("#file_list")
-            file_list.update_file_list(add_to_session=False)
-        except NoMatches:
-            pass
+        with suppress(NoMatches):
+            self.app.file_list.update_file_list(add_to_session=False)
         # Update sort button icon
         with suppress(NoMatches):
             self.app.query_one("#sort_order").update_icon()

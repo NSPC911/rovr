@@ -35,7 +35,7 @@ class RenameItemButton(Button):
     async def on_button_pressed(self, event: Button.Pressed) -> None:
         if self.disabled:
             return
-        selected_files = await self.app.query_one("#file_list").get_selected_objects()
+        selected_files = await self.app.file_list.get_selected_objects()
         if selected_files is None or len(selected_files) != 1:
             self.notify(
                 "Please select exactly one file to rename.",
@@ -91,9 +91,8 @@ class RenameItemButton(Button):
                 )
         try:
             self.app.file_list_pause_check = True  # ty: ignore[invalid-assignment]
-            file_list = self.app.query_one("#file_list")
-            file_list.focus()
-            worker: Worker = file_list.update_file_list(
+            self.app.file_list.focus()
+            worker: Worker = self.app.file_list.update_file_list(
                 add_to_session=False, focus_on=path.basename(new_name)
             )
             with contextlib.suppress(WorkerError):

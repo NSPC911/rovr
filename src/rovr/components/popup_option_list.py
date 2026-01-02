@@ -1,5 +1,5 @@
 from textual import events, on
-from textual.widgets import OptionList, SelectionList
+from textual.widgets import OptionList
 
 
 class PopupOptionList(OptionList):
@@ -17,7 +17,6 @@ class PopupOptionList(OptionList):
 
     def _on_mount(self, event: events.Mount) -> None:
         super()._on_mount(event)
-        self.file_list: SelectionList = self.app.query_one("#file_list", SelectionList)
         self.styles.layer = "overlay"
         self.go_hide()
 
@@ -40,7 +39,7 @@ class PopupOptionList(OptionList):
 
     def go_hide(self) -> None:
         self.add_class("hidden")
-        self.file_list.focus()
+        self.app.file_list.focus()
 
     @on(events.Key)
     def check_escape(self, event: events.Key) -> None:
@@ -53,9 +52,9 @@ class PopupOptionList(OptionList):
     @on(events.Show)
     def force_highlight_option(self, event: events.Show) -> None:
         if self.force_highlight_option_list:
-            self.file_list.add_class("-popup-shown")
+            self.app.file_list.add_class("-popup-shown")
 
     @on(events.Hide)
     def unforce_highlight_option(self, event: events.Hide) -> None:
-        if self.file_list.has_class("-popup-shown"):
-            self.file_list.remove_class("-popup-shown")
+        if self.app.file_list.has_class("-popup-shown"):
+            self.app.file_list.remove_class("-popup-shown")

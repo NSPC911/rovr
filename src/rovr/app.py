@@ -5,7 +5,9 @@ from os import chdir, getcwd, path
 from time import perf_counter, sleep
 from typing import Callable, Iterable
 
-from rich.console import Console
+from rich.console import Console, RenderableType
+from rich.protocol import is_renderable
+from rich.segment import Segments
 from textual import events, on, work
 from textual.app import WINDOWS, App, ComposeResult, ScreenStackError, SystemCommand
 from textual.binding import Binding
@@ -849,6 +851,26 @@ class Application(App, inherit_bindings=False):
         except Exception as exc:
             return exc  # ty: ignore[invalid-return-type]
 
+    def panic(self, *renderables: RenderableType) -> None:
+        if not all(is_renderable(renderable) for renderable in renderables):
+            raise TypeError("Can only call panic with strings or Rich renderables")
+        # hardcode to not pre-render please
+        self._exit_renderables.extend(renderables)
+        self._close_messages_no_wait()
+
+    def _fatal_error(self) -> None:
+        """Exits the app after an unhandled exception."""
+        import rich
+        from rich.traceback import Traceback
+
+        self.bell()
+        traceback = Traceback(
+            show_locals=True, width=None, locals_max_length=5, suppress=[rich]
+        )
+        # hardcode to not pre-render please
+        self._exit_renderables.append(traceback)
+        self._close_messages_no_wait()
+
     def _print_error_renderables(self) -> None:
         """Print and clear exit renderables."""
         from rich.panel import Panel
@@ -858,6 +880,8 @@ class Application(App, inherit_bindings=False):
         traceback_involved = False
         for renderable in self._exit_renderables:
             self.error_console.print(renderable)
+            if isinstance(renderable, Segments):
+                print(renderable.segments)
             if isinstance(renderable, Traceback):
                 traceback_involved = True
         if traceback_involved:
@@ -879,6 +903,7 @@ class Application(App, inherit_bindings=False):
                     style="bold red",
                 )
         self._exit_renderables.clear()
+        self.workers.cancel_all()
 
 
 app = Application()

@@ -58,6 +58,7 @@ class PDFHandler:
         )
         return min(last_page, self.total_pages)
 
+    @staticmethod
     def get_poppler_folder() -> str | None:
         poppler_folder: str | None = cast(
             str | None, config["plugins"]["poppler"]["poppler_folder"]
@@ -282,7 +283,7 @@ class PreviewContainer(Container):
                     poppler_path=cast(str, PDFHandler.get_poppler_folder()),
                 )["Pages"]
                 result = self.load_pdf_pages(
-                    first_page=0, last_page=self.pdf.get_last_page_to_load()
+                    first_page=1, last_page=self.pdf.get_last_page_to_load()
                 )
             except Exception as exc:
                 if should_cancel():

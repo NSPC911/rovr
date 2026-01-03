@@ -52,6 +52,7 @@ from rovr.functions.path import (
     normalise,
 )
 from rovr.functions.themes import get_custom_themes
+from rovr.functions.utils import should_cancel
 from rovr.header import HeaderArea
 from rovr.header.tabs import Tabline
 from rovr.navigation_widgets import (
@@ -581,7 +582,12 @@ class Application(App, inherit_bindings=False):
         drive_update_every = int(config["interface"]["drive_watcher_frequency"])
         count: int = -1
         while True:
-            sleep(1)
+            for _ in range(4):
+                # essentially sleep 1 second, but with extra steps
+                sleep(0.25)
+                if should_cancel():
+                    # failsafe if for any reason, the thread continues running after exit
+                    return
             count += 1
             if count >= drive_update_every:
                 count = 0

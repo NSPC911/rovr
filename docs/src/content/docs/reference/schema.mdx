@@ -4175,7 +4175,7 @@ Must be one of:
 | [threads](#plugins_poppler_threads)               | integer | How many threads should poppler use?                                                               |
 | [use_pdftocairo](#plugins_poppler_use_pdftocairo) | boolean | Use pdftocairo instead of pdftoppm, may help performance                                           |
 | [poppler_folder](#plugins_poppler_poppler_folder) | string  | Path to the folder where Poppler-related binaries are located. Leave empty to use the system PATH. |
-| [pdf_batch_size](#plugins_poppler_pdf_batch_size) | integer | How many pages of pdf file to load in one go                                                       |
+| [pdf_batch_size](#plugins_poppler_pdf_batch_size) | integer | Number of PDF pages to load in each batch for efficient streaming of large PDFs.                   |
 
 #### <a name="plugins_poppler_enabled"></a>8.6.1. Property `Rovr Config > plugins > poppler > enabled`
 
@@ -4229,7 +4229,7 @@ Must be one of:
 | **Required** | Yes      |
 | **Default**  | `2`     |
 
-**Description:** How many pages of pdf file to load in one go
+**Description:** Number of PDF pages to load in each batch for efficient streaming of large PDFs.
 
 ### <a name="plugins_file_one"></a>8.7. Property `Rovr Config > plugins > file_one`
 

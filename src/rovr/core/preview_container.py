@@ -354,7 +354,6 @@ class PreviewContainer(Container):
                 return
 
             self.pdf.images += result
-            
 
         if should_cancel():
             self.log.info(f"[{id}] kicked via should_cancel")

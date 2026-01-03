@@ -253,6 +253,7 @@ enabled = true
 threads = 1
 use_pdftocairo = false
 poppler_folder = ""
+pdf_batch_size = 2
 
 [plugins.file_one]
 enabled = false

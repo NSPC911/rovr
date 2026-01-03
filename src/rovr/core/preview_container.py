@@ -41,7 +41,6 @@ class PDFHandler:
     images: list[PILImage] | None = None
 
     def count_loaded(self) -> int:
-        # `self.pdf.count_loaded()` is more clear and abstracted then len(self.pdf.pages)
         return 0 if self.images is None else len(self.images)
 
     def should_load_next_batch(self) -> bool:

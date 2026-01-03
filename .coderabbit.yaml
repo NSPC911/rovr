@@ -8,7 +8,9 @@ reviews:
     enabled: true
     drafts: false
     ignore_title_keywords: ["WIP", "wip"]
-    base_brances: ["master", "dev"]
+    base_brances:
+      - "master"
+      - "dev"
   finishing_touches:
     unit_tests:
       enabled: false

@@ -54,7 +54,8 @@ class PDFHandler:
         # We should load till current page, if user scrolls too fast and reaches
         # beyond the batch before our load. This can happen on slow loads, and smaller batch sizes
         last_page = max(
-            self.current_page + 1, self.count_loaded() + PreviewContainer.PDF_BATCH_SIZE
+            self.current_page + 1,
+            self.count_loaded() + config["plugins"]["poppler"]["pdf_batch_size"],
         )
         return min(last_page, self.total_pages)
 
@@ -88,8 +89,6 @@ class LoadingPreview(Static):
 
 
 class PreviewContainer(Container):
-    PDF_BATCH_SIZE = 1
-
     @dataclass
     class SetLoading(Message):
         """

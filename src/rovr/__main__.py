@@ -35,7 +35,33 @@ click.rich_click.STYLE_OPTIONS_PANEL_BORDER = "blue bold"
 click.rich_click.STYLE_COMMANDS_PANEL_BORDER = "white"
 
 
+def eager_set_folder(ctx: click.Context, param: click.Parameter, value: str) -> str:
+    """Eager callback to set config folder before other options are processed.
+
+    Returns:
+        str: The config folder path (passthrough)
+    """
+    if value:
+        from os import path
+
+        from rovr.variables.maps import VAR_TO_DIR
+
+        VAR_TO_DIR["CONFIG"] = path.realpath(value.replace("\\", "/"))
+    return value
+
+
 @click.command(help="A post-modern terminal file explorer")
+@click.option(
+    "--config-folder",
+    "config_folder",
+    multiple=False,
+    type=click.Path(exists=True, file_okay=False, dir_okay=True, resolve_path=True),
+    default=None,
+    is_eager=True,
+    expose_value=False,
+    callback=eager_set_folder,
+    help="Change the config folder location.",
+)
 @click.option(
     "--mode",
     "mode",
@@ -135,7 +161,9 @@ click.rich_click.STYLE_COMMANDS_PANEL_BORDER = "white"
     help="Force a crash after N seconds (for testing crash recovery)",
     hidden=not is_dev,
 )
-@click.option_panel("Config", options=["--mode", "--with", "--without"])
+@click.option_panel(
+    "Config", options=["--mode", "--with", "--without", "--config-folder"]
+)
 @click.option_panel(
     "Paths",
     options=["--chooser-file", "--cwd-file"],

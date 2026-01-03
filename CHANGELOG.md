@@ -1,4 +1,11 @@
 <details>
+<summary><h1>[v0.7.0.dev2]</h1></summary>
+<p>
+
+## new features
+- cli: add `--config-folder` option to specify custom config folder #185
+
+<details>
 <summary><h1>[v0.7.0.dev1]</h1></summary>
 <p>
 

@@ -42,9 +42,11 @@ def eager_set_folder(ctx: click.Context, param: click.Parameter, value: str) -> 
         str: The config folder path (passthrough)
     """
     if value:
+        from os import path
+
         from rovr.variables.maps import VAR_TO_DIR
 
-        VAR_TO_DIR["CONFIG"] = value.replace("\\", "/")
+        VAR_TO_DIR["CONFIG"] = path.realpath(value.replace("\\", "/"))
     return value
 
 

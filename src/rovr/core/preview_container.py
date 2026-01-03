@@ -348,13 +348,13 @@ class PreviewContainer(Container):
                 f"[{id}] Fetched {len(result)} new pages,"
                 + f" we already had {self.pdf.count_loaded()} pages loaded, current_page = {self.pdf.current_page}"
             )
-
+            self.call_later(lambda: self.post_message(self.SetLoading(False)))
             if should_cancel():
                 self.log.info(f"[{id}] kicked via first should_cancel")
                 return
 
             self.pdf.images += result
-            self.call_later(lambda: self.post_message(self.SetLoading(False)))
+            
 
         if should_cancel():
             self.log.info(f"[{id}] kicked via should_cancel")

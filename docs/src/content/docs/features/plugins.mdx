@@ -70,6 +70,7 @@ uses [poppler](https://poppler.freedesktop.org) to preview PDF files
 
 - **enable:** `plugins.poppler.enabled = true`
 - **poppler_folder:** set the location where the poppler tools are installed (e.g., `/usr/bin` or `C:\Program Files\poppler\bin`).
+- **pdf_batch_size:** how many pages of pdf file to load in one go (prevent preview getting stuck in loading all pages of a big pdf).
 - **use_pdftocairo:** whether to use pdftocairo instead of pdftoppm (may help performance)
 - **threads:** number of threads to use for processing PDF files (default is 1)
 

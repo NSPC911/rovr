@@ -53,7 +53,7 @@ def eager_set_folder(ctx: click.Context, param: click.Parameter, value: str) -> 
     "--config-folder",
     "config_folder",
     multiple=False,
-    type=str,
+    type=click.Path(exists=True, file_okay=False, dir_okay=True, resolve_path=True),
     default="",
     is_eager=True,
     expose_value=True,
@@ -193,7 +193,7 @@ def cli(
     mode: str,
     with_features: list[str],
     without_features: list[str],
-    config_folder: str,
+    config_folder: str,  # I'm not exactly sure how click works under the hood, so I'm not feeling safe renaming config_folder to an underscore
     show_config_path: bool,
     show_version: bool,
     cwd_file: str

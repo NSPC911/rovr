@@ -323,7 +323,6 @@ class PreviewContainer(Container):
             self.pdf.current_page = 0
 
         elif self.pdf.should_load_next_batch():
-
             self.post_message(self.SetLoading(True))
             self.log.info(
                 f"[{id}] Requesting a fetch, last_page = {self.pdf.get_last_page_to_load()}"

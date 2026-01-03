@@ -323,9 +323,7 @@ class PreviewContainer(Container):
             self.pdf.current_page = 0
 
         elif self.pdf.should_load_next_batch():
-            if should_cancel():
-                self.log.info(f"[{id}] kicked via first should_cancel")
-                return
+
             self.post_message(self.SetLoading(True))
             self.log.info(
                 f"[{id}] Requesting a fetch, last_page = {self.pdf.get_last_page_to_load()}"
@@ -351,6 +349,10 @@ class PreviewContainer(Container):
                 f"[{id}] Fetched {len(result)} new pages,"
                 + f" we already had {self.pdf.count_loaded()} pages loaded, current_page = {self.pdf.current_page}"
             )
+
+            if should_cancel():
+                self.log.info(f"[{id}] kicked via first should_cancel")
+                return
 
             self.pdf.images += result
             self.call_later(lambda: self.post_message(self.SetLoading(False)))

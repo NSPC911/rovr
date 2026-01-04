@@ -6,17 +6,17 @@ const repoName = 'rovr';
 ---
 
 <div class="social-wrapper">
-  <div class="github-stats">
+  <div class="github-stats" hidden>
     <a href={`https://github.com/${repoOwner}/${repoName}/network/members`} class="github-stat" title="Release">
       <span>󰓼</span>
       <span>󰓹</span>
-      <span id="gh-release">v0.6.0</span>
+      <span id="gh-release">v0.7.0.dev1</span>
     </a>
 
     <a href={`https://github.com/${repoOwner}/${repoName}/stargazers`} class="github-stat" title="Stars">
       <span></span>
       <span></span>
-      <span id="gh-stars">94</span>
+      <span id="gh-stars">104</span>
     </a>
 
     <a href={`https://github.com/${repoOwner}/${repoName}/network/members`} class="github-stat" title="Forks">
@@ -67,6 +67,8 @@ const repoName = 'rovr';
     if (starsEl) starsEl.textContent = String(stars);
     if (forksEl) forksEl.textContent = String(forks);
     if (releaseEl) releaseEl.textContent = release_tag;
+
+    document.querySelector('.github-stats')?.removeAttribute('hidden');
   }
 
   async function fetchGitHubStats(): Promise<Omit<CachedStats, 'timestamp'> | null> {
@@ -84,7 +86,7 @@ const repoName = 'rovr';
       return {
         stars: repo.stargazers_count,
         forks: repo.forks_count,
-        release_tag: releases.length > 0 ? releases[0].tag_name : 'v0.5.0'
+        release_tag: releases.length > 0 ? releases[0].tag_name : 'v0.7.0.dev1'
       };
     } catch {
       return null;
@@ -137,5 +139,8 @@ const repoName = 'rovr';
     gap: 0.25rem;
     color: var(--sl-color-text);
     text-decoration: none;
+  }
+  [hidden] {
+    display: none !important
   }
 </style>

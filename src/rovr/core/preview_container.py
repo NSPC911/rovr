@@ -250,7 +250,7 @@ class PreviewContainer(Container):
         """Updates the current pages and ensure to spawn a worker that will eventually load them"""
         if current_page < 0 or current_page >= self.pdf.total_pages:
             return
-        
+
         self.pdf.current_page = current_page
         setattr(
             self,
@@ -258,6 +258,7 @@ class PreviewContainer(Container):
             f"Page {self.pdf.current_page + 1}/{self.pdf.total_pages}",
         )
         self._trigger_pdf_update()
+
     def load_pdf_pages(self, first_page: int, last_page: int) -> list[Image.Image]:
         """
         Returns:
@@ -344,7 +345,7 @@ class PreviewContainer(Container):
             self.call_later(lambda: self.post_message(self.SetLoading(False)))
             # Note - This should_cancel must be kept here, not before the `load_pdf_pages` call
             # That, somehow doesn't prevents multiple threads executing the load
-            # Even though, we do succesfully prevent multiple threads appending the results 
+            # Even though, we do succesfully prevent multiple threads appending the results
             # via this one
             if should_cancel():
                 return

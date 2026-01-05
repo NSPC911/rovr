@@ -165,14 +165,6 @@ def schema_dump(doc_path: str, exception: ValidationError, config_content: str) 
 
     doc: list = config_content.splitlines()
 
-    if exception.message.startswith("Additional properties are not allowed"):
-        # `Additional properties are not allowed ('<key>' was unexpected)`
-        # grabs only the key
-        cause = exception.message.split("'")
-        if len(cause) == 3:
-            exception.path.append(cause[1])
-        else:
-            pass
     # find the line no for the error path
     path_str = ".".join(str(p) for p in exception.path) if exception.path else "root"
     lineno = find_path_line(doc, exception.path)

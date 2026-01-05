@@ -49,11 +49,10 @@ class PDFHandler:
 
     def should_load_next_batch(self) -> bool:
         # If going further down half the batch will cross currently loaded pages
-        
 
         if self.count_loaded() >= self.total_pages:
             return False
-        
+
         return (
             self.current_page + PDFHandler.pdf_batch_size() // 2
         ) >= self.count_loaded()
@@ -284,8 +283,10 @@ class PreviewContainer(Container):
             ValueError: If PDF conversion returns 0 pages.
         """
         if first_page > last_page:
-            raise ValueError(f"Invaid args, first_page={first_page} > last_page={last_page}")
-        
+            raise ValueError(
+                f"Invaid args, first_page={first_page} > last_page={last_page}"
+            )
+
         result = convert_from_path(
             str(self._current_file_path),
             transparent=False,

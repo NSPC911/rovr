@@ -69,7 +69,7 @@ class PDFHandler:
 
     @staticmethod
     def pdf_batch_size() -> int:
-        # Lesser typing, more readable calcuations
+        # Lesser typing, more readable calculations
         return config["plugins"]["poppler"]["pdf_batch_size"]
 
     @staticmethod
@@ -263,6 +263,8 @@ class PreviewContainer(Container):
     def update_current_pdf_page(self, current_page: int) -> None:
         """Updates the current pages and ensure to spawn a worker that will eventually load them"""
         if current_page < 0 or current_page >= self.pdf.total_pages:
+            return
+        if current_page == self.pdf.current_page:
             return
 
         self.pdf.current_page = current_page

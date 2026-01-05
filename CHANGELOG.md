@@ -4,6 +4,7 @@
 
 ## new features
 - cli: add `--config-folder` option to specify custom config folder #185
+- preview: batched pdf loading #184
 
 <details>
 <summary><h1>[v0.7.0.dev1]</h1></summary>

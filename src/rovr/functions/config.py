@@ -323,7 +323,13 @@ def load_config() -> tuple[dict, dict]:
     try:
         jsonschema.validate(config, schema)
     except ValidationError as exception:
-        schema_dump(user_config_path, exception, user_config_content)
+        if exception.validator == "additionalProperties":
+            # message: "Additional properties are not allowed ('flag' was unexpected)"
+            # can be was or were, depends on flags count
+            flags = exception.message.split('(')[1].split(' was')[0].split(' were')[0].replace("'", '')
+            pprint(f'[yellow]Warning:[/] Ignoring additional config key [bright_cyan]{flags}[/] (not in schema)')
+        else:
+            schema_dump(user_config_path, exception, user_config_content)
 
     # slight config fixes
     # image protocol because "AutoImage" doesn't work with Sixel

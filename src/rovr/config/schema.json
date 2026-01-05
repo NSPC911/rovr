@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft-04/schema",
   "title": "Rovr Config",
   "type": "object",
-  "additionalProperties": true,
+  "additionalProperties": false,
   "definitions": {
     "keybind": {
       "type": "array",
@@ -14,7 +14,7 @@
   "properties": {
     "interface": {
       "type": "object",
-      "additionalProperties": true,
+      "additionalProperties": false,
       "description": "Settings related to the user interface and experience",
       "properties": {
         "tooltips": {
@@ -103,7 +103,7 @@
         },
         "clock": {
           "type": "object",
-          "additionalProperties": true,
+          "additionalProperties": false,
           "properties": {
             "enabled": {
               "type": "boolean",
@@ -120,7 +120,7 @@
         },
         "preview_text": {
           "type": "object",
-          "additionalProperties": true,
+          "additionalProperties": false,
           "properties": {
             "error": {
               "type": "string",
@@ -136,7 +136,7 @@
         },
         "compact_mode": {
           "type": "object",
-          "additionalProperties": true,
+          "additionalProperties": false,
           "properties": {
             "buttons": {
               "type": "boolean",
@@ -176,7 +176,7 @@
     },
     "settings": {
       "type": "object",
-      "additionalProperties": true,
+      "additionalProperties": false,
       "description": "Settings related to behavior of file operations",
       "properties": {
         "use_recycle_bin": {
@@ -193,7 +193,7 @@
     },
     "metadata": {
       "type": "object",
-      "additionalProperties": true,
+      "additionalProperties": false,
       "properties": {
         "fields": {
           "type": "array",
@@ -241,7 +241,7 @@
     },
     "icons": {
       "type": "object",
-      "additionalProperties": true,
+      "additionalProperties": false,
       "properties": {
         "files": {
           "type": "array",
@@ -294,7 +294,7 @@
     },
     "theme": {
       "type": "object",
-      "additionalProperties": true,
+      "additionalProperties": false,
       "properties": {
         "default": {
           "type": "string",
@@ -368,7 +368,7 @@
       "type": "array",
       "items": {
         "type": "object",
-        "additionalProperties": true,
+        "additionalProperties": false,
         "properties": {
           "name": {
             "type": "string",
@@ -417,7 +417,7 @@
           "bar_gradient": {
             "type": "object",
             "description": "The gradient colors for the progress bar.",
-            "additionalProperties": true,
+            "additionalProperties": false,
             "properties": {
               "default": {
                 "type": "array",
@@ -436,7 +436,7 @@
           "variables": {
             "type": "object",
             "description": "Extra variables to set unique to the theme.\nRefer to https://textual.textualize.io/guide/design/#additional-variables for more information.",
-            "additionalProperties": true
+            "additionalProperties": false
           }
         },
         "required": [
@@ -457,7 +457,7 @@
     },
     "keybinds": {
       "type": "object",
-      "additionalProperties": true,
+      "additionalProperties": false,
       "properties": {
         "toggle_pin": {
           "$ref": "#/definitions/keybind",
@@ -894,11 +894,11 @@
     },
     "plugins": {
       "type": "object",
-      "additionalProperties": true,
+      "additionalProperties": false,
       "properties": {
         "zoxide": {
           "type": "object",
-          "additionalProperties": true,
+          "additionalProperties": false,
           "properties": {
             "enabled": {
               "type": "boolean",
@@ -920,7 +920,7 @@
         },
         "bat": {
           "type": "object",
-          "additionalProperties": true,
+          "additionalProperties": false,
           "properties": {
             "enabled": {
               "type": "boolean",
@@ -936,7 +936,7 @@
         },
         "editor": {
           "type": "object",
-          "additionalProperties": true,
+          "additionalProperties": false,
           "properties": {
             "enabled": {
               "type": "boolean",
@@ -978,7 +978,7 @@
         },
         "fd": {
           "type": "object",
-          "additionalProperties": true,
+          "additionalProperties": false,
           "properties": {
             "enabled": {
               "type": "boolean",
@@ -1034,7 +1034,7 @@
         },
         "rg": {
           "type": "object",
-          "additionalProperties": true,
+          "additionalProperties": false,
           "properties": {
             "enabled": {
               "type": "boolean",
@@ -1076,7 +1076,7 @@
         },
         "poppler": {
           "type": "object",
-          "additionalProperties": true,
+          "additionalProperties": false,
           "properties": {
             "enabled": {
               "type": "boolean",
@@ -1103,7 +1103,7 @@
         },
         "file_one": {
           "type": "object",
-          "additionalProperties": true,
+          "additionalProperties": false,
           "properties": {
             "enabled": {
               "type": "boolean",
@@ -1123,7 +1123,7 @@
       "type": "object",
       "additionalProperties": {
         "type": "object",
-        "additionalProperties": true,
+        "additionalProperties": false,
         "description": "Config overrides for this mode using dot-notation paths as keys."
       },
       "description": "Define preset modes with config overrides. Use --mode <name> to activate."

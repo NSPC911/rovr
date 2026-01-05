@@ -34,12 +34,12 @@ class PasteButton(Button):
             # split into two items, those ending with `-cut` and those ending with `-copy`
             to_copy, to_cut = (
                 [
-                    item.text
+                    item.path
                     for item in selected_items
                     if item.type_of_selection == "copy"
                 ],
                 [
-                    item.text
+                    item.path
                     for item in selected_items
                     if item.type_of_selection == "cut"
                 ],

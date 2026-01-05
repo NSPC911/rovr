@@ -85,9 +85,8 @@ class FileListSelectionWidget(Selection):
         # Create prompt by combining cached icon content with label
         prompt = FileListSelectionWidget._icon_content_cache[cache_key] + Content(label)
         dir_entry_path = normalise(dir_entry.path)
-        clipboard.log(clipboard.selected)
         if any(
-            dir_entry_path == clipboard_val.text for clipboard_val in clipboard.selected
+            dir_entry_path == clipboard_val.path for clipboard_val in clipboard.selected
         ):
             prompt = prompt.stylize("dim")
         self.dir_entry = dir_entry
@@ -95,15 +94,24 @@ class FileListSelectionWidget(Selection):
 
         super().__init__(
             prompt=prompt,
+            # this is kinda required for FileList.get_selected_object's select mode
+            # because it gets selected (which is dictionary of values)
+            # which it then queries for `id` (because there's no way to query for
+            # values directly)
             value=str(this_id),
             id=str(this_id),
             disabled=disabled,
         )
+        self._prompt: Content
         self.label = label
+
+    @property
+    def prompt(self) -> Content:
+        return self._prompt
 
 
 class ClipboardSelectionValue(NamedTuple):
-    text: str
+    path: str
     type_of_selection: Literal["copy", "cut"]
 
 
@@ -138,6 +146,11 @@ class ClipboardSelection(Selection):
             id=str(id(self)),
         )
         self.initial_prompt = prompt
+
+    @property
+    def value(self) -> ClipboardSelectionValue:
+        """The value for this selection."""
+        return self._value
 
 
 class KeybindOption(Option):

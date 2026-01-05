@@ -1,7 +1,7 @@
 import contextlib
 from os import getcwd, path
 from os import system as cmd
-from typing import ClassVar, Iterable, Self, cast
+from typing import ClassVar, Iterable, Self, Sequence, cast, overload
 
 from rich.segment import Segment
 from rich.style import Style
@@ -56,6 +56,7 @@ class FileList(SelectionList, inherit_bindings=False):
             select (bool): Whether the selection is select or normal.
         """
         super().__init__(*args, **kwargs)
+        self._options: list[FileListSelectionWidget] = []
         self.dummy = dummy
         self.enter_into = enter_into
         self.select_mode_enabled = select
@@ -418,6 +419,10 @@ class FileList(SelectionList, inherit_bindings=False):
             highlighted_option.dir_entry.path
         )
 
+    @property
+    def options(self) -> Sequence[FileListSelectionWidget]:
+        return self._options
+
     # Use better versions of the checkbox icons
     def _get_left_gutter_width(
         self,
@@ -574,11 +579,22 @@ class FileList(SelectionList, inherit_bindings=False):
             self.deselect_all()
         self.update_border_subtitle()
 
-    async def get_selected_objects(self) -> list[str] | None:
+    @overload
+    async def get_selected_objects(self, return_as: type[str]) -> list[str] | None: ...
+
+    @overload
+    async def get_selected_objects(
+        self, return_as: type[FileListSelectionWidget]
+    ) -> list[FileListSelectionWidget] | None: ...
+
+    async def get_selected_objects(
+        self, return_as: type[str] | type[FileListSelectionWidget] = str
+    ) -> list[str] | list[FileListSelectionWidget] | None:
         """Get the selected objects in the file list.
+        Args:
+            return_as (type): The type to return the selected objects as. Defaults to str.
         Returns:
-            list[str]: If there are objects at that given location.
-            None: If there are no objects at that given location.
+            A list of selected objects as the specified type, or None if no objects are selected.
         """
         if self.highlighted_option is None or (
             len(self.options) == 1
@@ -586,7 +602,12 @@ class FileList(SelectionList, inherit_bindings=False):
         ):
             return
         if not self.select_mode_enabled:
-            return [str(path_utils.normalise(self.highlighted_option.dir_entry.path))]
+            if return_as == FileListSelectionWidget:
+                return [self.highlighted_option]
+            else:
+                return [
+                    str(path_utils.normalise(self.highlighted_option.dir_entry.path))
+                ]
         else:
             values = self.selected
             if not values:
@@ -598,6 +619,21 @@ class FileList(SelectionList, inherit_bindings=False):
                 for option in options
                 if isinstance(option, FileListSelectionWidget)
             ]
+
+    def update_dimmed_items(self, paths: list[str]) -> None:
+        """Update the dimmed items in the file list based on the cut items.
+
+        Args:
+            paths (list[str]): The list of paths to dim.
+        """
+        for option in self.options:
+            if path_utils.normalise(option.dir_entry.path) in paths:
+                option._set_prompt(option.prompt.stylize("dim"))
+            else:
+                option._set_prompt(option.prompt.stylize("not dim"))
+        self._clear_caches()
+        self._update_lines()
+        self.refresh()
 
     async def on_key(self, event: events.Key) -> None:
         """Handle key events for the file list."""

@@ -878,6 +878,7 @@ class Application(App, inherit_bindings=False):
                 print(renderable.segments)
             if isinstance(renderable, Traceback):
                 traceback_involved = True
+                dump_exc(self, renderable)
         if traceback_involved:
             if error_count > 1:
                 self.error_console.print(

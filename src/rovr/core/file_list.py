@@ -4,7 +4,7 @@ from os import system as cmd
 from typing import ClassVar, Iterable, Self, cast
 
 from rich.segment import Segment
-from rich.style import Style
+from rich.style import Style as RichStyle
 from textual import events, on, work
 from textual.binding import BindingType
 from textual.content import ContentText
@@ -519,10 +519,12 @@ class FileList(SelectionList, inherit_bindings=False):
 
         button_style = self.get_component_rich_style(component_style)
 
-        side_style = Style.from_color(button_style.bgcolor, underlying_style.bgcolor)
+        side_style = RichStyle.from_color(
+            button_style.bgcolor, underlying_style.bgcolor
+        )
 
-        side_style += Style(meta={"option": selection_index})
-        button_style += Style(meta={"option": selection_index})
+        side_style += RichStyle(meta={"option": selection_index})
+        button_style += RichStyle(meta={"option": selection_index})
 
         return Strip([
             Segment(icon_utils.get_toggle_button_icon("left"), style=side_style),

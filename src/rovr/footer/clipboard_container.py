@@ -14,6 +14,7 @@ from textual.worker import Worker
 
 from rovr.classes import ClipboardSelection
 from rovr.functions import icons as icon_utils
+from rovr.functions.path import dump_exc
 from rovr.variables.constants import config, vindings
 
 
@@ -184,7 +185,10 @@ class Clipboard(SelectionList, inherit_bindings=False):
                         severity="warning",
                     )
                     return
-                self.remove_option_at_index(self.highlighted)
+                try:
+                    self.remove_option_at_index(self.highlighted)
+                except KeyError as exc:
+                    dump_exc(self, exc)
                 if self.option_count == 0:
                     return
                 event.stop()

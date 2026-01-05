@@ -44,15 +44,14 @@ class PDFHandler:
         return 0 if self.images is None else len(self.images)
 
     def must_load_next_batch(self) -> bool:
-        # Water is already gone above head
         return self.current_page >= self.count_loaded()
 
     def should_load_next_batch(self) -> bool:
-        # If going further down half the batch will cross currently loaded pages
-
         if self.count_loaded() >= self.total_pages:
             return False
 
+        # If going further down half the batch will cross currently loaded pages
+        # then its better to preload in advance
         return (
             self.current_page + PDFHandler.pdf_batch_size() // 2
         ) >= self.count_loaded()

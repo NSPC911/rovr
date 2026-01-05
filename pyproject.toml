@@ -49,7 +49,6 @@ rovr = "rovr:main"
 dev = [
   "commitizen>=4.10.0",
   "json-schema-for-humans>=1.5.1",
-  "poethepoet>=0.38.0",
   "prek>=0.2.25",
   "ruff>=0.14.10",
   "textual-dev>=1.7.0",
@@ -57,6 +56,13 @@ dev = [
 ]
 speedups = [
     "textual-speedups>=0.2.1",
+]
+test = [
+  "pytest>=8.0",
+  "pytest-asyncio>=0.24",
+  "pytest-cov>=5.0",
+  "pytest-xdist>=3.5",
+  "pytest-timeout>=2.3",
 ]
 
 [build-system]
@@ -71,20 +77,12 @@ version_provider = "uv"
 update_changelog_on_bump = true
 major_version_zero = true
 
-[tool.poe.tasks]
-dev = "textual run --dev rovr.__main__:cli --"
-run = "rovr"
-log = "textual console -x WORKER -x SYSTEM -x DEBUG -x EVENT"
-"gen-schema" = "docs/scripts/generate_schema.py"
-"icon-test" = "docs/scripts/icon_test.py"
-"gen-keys" = "docs/scripts/generate_keybinds.py"
-check.sequence = [
-  { cmd = "ty check" },
-  { cmd = "ruff check" }
-]
-format.sequence = [{ cmd = "ruff check --unsafe-fixes --fix"}, { cmd = "ruff format"}]
-fmt = ["format"]
-"screenshot-format" = "pnpx prettier --write docs/public/screenshots/*.svg --parser html --bracket-same-line --print-width 160"
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+asyncio_default_fixture_loop_scope = "function"
+testpaths = ["tests"]
+addopts = "-v --tb=short"
+timeout = 30
 
 [tool.ruff]
 force-exclude = true

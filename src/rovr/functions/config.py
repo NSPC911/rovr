@@ -331,7 +331,7 @@ def load_config() -> tuple[dict, dict]:
                 flag_path = ".".join(str(p) for p in exception.path) if exception.path else ""
                 pprint(f"[yellow]Warning:[/] Ignoring additional config key(-s) [bright_cyan]{flags}[/] in [cyan]{flag_path}[/] (not in schema)")
             except (IndexError, AttributeError):
-                pprint(f"[yellow]Warning:[/] Ignoring additional config key(-s) (not in schema)")
+                pprint("[yellow]Warning:[/] Ignoring additional config key(-s) (not in schema)")
         else:
             schema_dump(user_config_path, exception, user_config_content)
 

@@ -326,8 +326,12 @@ def load_config() -> tuple[dict, dict]:
         if exception.validator == "additionalProperties":
             # message: "Additional properties are not allowed ('flag' was unexpected)"
             # can be was or were, depends on flags count
-            flags = exception.message.split("(")[1].split(" was")[0].split(" were")[0].replace("'", "")
-            pprint(f"[yellow]Warning:[/] Ignoring additional config key [bright_cyan]{flags}[/] (not in schema)")
+            try:
+                flags = exception.message.split("(")[1].split(" was")[0].split(" were")[0].replace("'", "")
+                flag_path = ".".join(str(p) for p in exception.path) if exception.path else ""
+                pprint(f"[yellow]Warning:[/] Ignoring additional config key(-s) [bright_cyan]{flags}[/] in [cyan]{flag_path}[/] (not in schema)")
+            except (IndexError, AttributeError):
+                pprint(f"[yellow]Warning:[/] Ignoring additional config key(-s) (not in schema)")
         else:
             schema_dump(user_config_path, exception, user_config_content)
 

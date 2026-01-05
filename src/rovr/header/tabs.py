@@ -8,7 +8,7 @@ from textual.containers import Container, Horizontal, Vertical
 from textual.css.query import NoMatches
 from textual.renderables.bar import Bar as BarRenderable
 from textual.widget import Widget
-from textual.widgets import Button, Input, SelectionList, Tabs
+from textual.widgets import Button, Input, Tabs
 from textual.widgets._tabs import Tab, Underline
 from textual.widgets.option_list import OptionDoesNotExist
 

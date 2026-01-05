@@ -1011,21 +1011,14 @@ class PreviewContainer(Container):
             and self._file_type == "pdf"
             and self.pdf.images is not None
         ):
-            if (
-                check_key(
-                    event, config["keybinds"]["down"] + config["keybinds"]["page_down"]
-                )
-                and self.pdf.current_page < self.pdf.total_pages - 1
+            if check_key(
+                event, config["keybinds"]["down"] + config["keybinds"]["page_down"]
             ):
                 event.stop()
                 self.update_current_pdf_page_by_diff(1)
-            elif (
-                check_key(
-                    event, config["keybinds"]["up"] + config["keybinds"]["page_up"]
-                )
-                and self.pdf.current_page > 0
+            elif check_key(
+                event, config["keybinds"]["up"] + config["keybinds"]["page_up"]
             ):
-                event.stop()
                 self.update_current_pdf_page_by_diff(-1)
             elif check_key(event, config["keybinds"]["home"]):
                 event.stop()

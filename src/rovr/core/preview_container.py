@@ -241,6 +241,23 @@ class PreviewContainer(Container):
         if should_cancel():
             return
 
+    def update_current_pdf_page_by_diff(self, diff: int) -> None:
+        """Updates the current pages by a diff"""
+        self.update_current_pdf_page(self.pdf.current_page + diff)
+
+    # Note : We must ensure that any update to current_page happens via this
+    def update_current_pdf_page(self, current_page: int) -> None:
+        """Updates the current pages and ensure to spawn a worker that will eventually load them"""
+        if current_page < 0 or current_page >= self.pdf.total_pages:
+            return
+        
+        self.pdf.current_page = current_page
+        setattr(
+            self,
+            "border_subtitle",
+            f"Page {self.pdf.current_page + 1}/{self.pdf.total_pages}",
+        )
+        self._trigger_pdf_update()
     def load_pdf_pages(self, first_page: int, last_page: int) -> list[Image.Image]:
         """
         Returns:
@@ -267,7 +284,11 @@ class PreviewContainer(Container):
         return result
 
     def show_pdf_preview(self, depth: int = 0) -> None:
-        """Show PDF preview. Runs in a thread."""
+        """
+        Show PDF preview. Runs in a thread.
+        The job of this function is to load the pdf file for the first time.
+        Or ensure the batchwise loading
+        """
         self.app.call_from_thread(setattr, self, "border_title", titles.pdf)
 
         if should_cancel() or self._current_file_path is None:
@@ -293,7 +314,15 @@ class PreviewContainer(Container):
                 )
                 return
             self.pdf.images = result
+
+            # Only one case when current page should be manually adjusted
             self.pdf.current_page = 0
+            self.app.call_from_thread(
+                setattr,
+                self,
+                "border_subtitle",
+                f"Page {self.pdf.current_page + 1}/{self.pdf.total_pages}",
+            )
 
         elif self.pdf.should_load_next_batch():
             self.post_message(self.SetLoading(True))
@@ -313,6 +342,10 @@ class PreviewContainer(Container):
                 return
 
             self.call_later(lambda: self.post_message(self.SetLoading(False)))
+            # Note - This should_cancel must be kept here, not before the `load_pdf_pages` call
+            # That, somehow doesn't prevents multiple threads executing the load
+            # Even though, we do succesfully prevent multiple threads appending the results 
+            # via this one
             if should_cancel():
                 return
 
@@ -322,13 +355,6 @@ class PreviewContainer(Container):
             return
 
         current_image = self.pdf.images[self.pdf.current_page]
-
-        self.app.call_from_thread(
-            setattr,
-            self,
-            "border_subtitle",
-            f"Page {self.pdf.current_page + 1}/{self.pdf.total_pages}",
-        )
 
         if not self.has_child(".image_preview"):
             self.app.call_from_thread(self.remove_children)
@@ -962,7 +988,7 @@ class PreviewContainer(Container):
                 and self.pdf.current_page < self.pdf.total_pages - 1
             ):
                 event.stop()
-                self.pdf.current_page += 1
+                self.update_current_pdf_page_by_diff(1)
             elif (
                 check_key(
                     event, config["keybinds"]["up"] + config["keybinds"]["page_up"]
@@ -979,7 +1005,6 @@ class PreviewContainer(Container):
                 self.pdf.current_page = self.pdf.total_pages - 1
             else:
                 return
-            self._trigger_pdf_update()
         elif self.border_title == titles.archive:
             widget: FileList = self.query_one(FileList)
             if check_key(event, config["keybinds"]["up"]):

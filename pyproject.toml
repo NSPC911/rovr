@@ -63,6 +63,9 @@ speedups = [
 requires = ["uv_build>=0.9.0,<0.10.0"]
 build-backend = "uv_build"
 
+[tool.uv]
+compile-bytecode = true
+
 [tool.commitizen]
 name = "cz_conventional_commits"
 tag_format = "$version"

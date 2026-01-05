@@ -119,8 +119,9 @@ preview = true
 
 [tool.ty.src]
 exclude = [
-  "src/rovr/classes/archive.py"
-] # i dont want to add type indicators
+  "src/rovr/classes/archive.py",
+  "tests/**/*"
+] # i dont want to add type indicators; exclude tests since pytest may not be installed
 
 [tool.ty.rules]
 # possibly-missing-import = "ignore"

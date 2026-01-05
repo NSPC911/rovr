@@ -414,7 +414,8 @@ class FileList(SelectionList, inherit_bindings=False):
         await self.app.query_one("PreviewContainer").show_preview(
             highlighted_option.dir_entry.path
         )
-        self.app.query_one("MetadataContainer").update_metadata(event.option.dir_entry)
+        with contextlib.suppress(NoMatches):
+            self.app.query_one("MetadataContainer").update_metadata(event.option.dir_entry)
         self.app.query_one("#unzip").disabled = not await utils.is_archive(
             highlighted_option.dir_entry.path
         )
@@ -782,7 +783,8 @@ class FileList(SelectionList, inherit_bindings=False):
         elif self.get_option_at_index(0).disabled:
             utils.set_scuffed_subtitle(self.parent, "NORMAL", "0/0")
             # tell metadata to die
-            self.app.query_one("MetadataContainer").remove_children()
+            with contextlib.suppress(NoMatches):
+                self.app.query_one("MetadataContainer").remove_children()
         elif (not self.select_mode_enabled) or (self.selected is None):
             utils.set_scuffed_subtitle(
                 self.parent,

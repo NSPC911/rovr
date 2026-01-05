@@ -1,16 +1,17 @@
 import contextlib
 from os import getcwd, path
 from os import system as cmd
-from typing import ClassVar, Iterable, Self, Sequence, cast, overload
+from typing import ClassVar, Iterable, Self, Sequence, cast
 
 from rich.segment import Segment
-from rich.style import Style
+from rich.style import Style as RichStyle
 from textual import events, on, work
 from textual.binding import BindingType
 from textual.content import ContentText
 from textual.css.query import NoMatches
 from textual.geometry import Region
 from textual.strip import Strip
+from textual.style import Style as TextualStyle
 from textual.widgets import Button, Input, OptionList, SelectionList
 from textual.widgets.option_list import Option, OptionDoesNotExist
 from textual.widgets.selection_list import Selection, SelectionType
@@ -525,10 +526,10 @@ class FileList(SelectionList, inherit_bindings=False):
 
         button_style = self.get_component_rich_style(component_style)
 
-        side_style = Style.from_color(button_style.bgcolor, underlying_style.bgcolor)
+        side_style = RichStyle.from_color(button_style.bgcolor, underlying_style.bgcolor)
 
-        side_style += Style(meta={"option": selection_index})
-        button_style += Style(meta={"option": selection_index})
+        side_style += RichStyle(meta={"option": selection_index})
+        button_style += RichStyle(meta={"option": selection_index})
 
         return Strip([
             Segment(icon_utils.get_toggle_button_icon("left"), style=side_style),
@@ -579,22 +580,11 @@ class FileList(SelectionList, inherit_bindings=False):
             self.deselect_all()
         self.update_border_subtitle()
 
-    @overload
-    async def get_selected_objects(self, return_as: type[str]) -> list[str] | None: ...
-
-    @overload
-    async def get_selected_objects(
-        self, return_as: type[FileListSelectionWidget]
-    ) -> list[FileListSelectionWidget] | None: ...
-
-    async def get_selected_objects(
-        self, return_as: type[str] | type[FileListSelectionWidget] = str
-    ) -> list[str] | list[FileListSelectionWidget] | None:
+    async def get_selected_objects(self) -> list[str] | None:
         """Get the selected objects in the file list.
-        Args:
-            return_as (type): The type to return the selected objects as. Defaults to str.
         Returns:
-            A list of selected objects as the specified type, or None if no objects are selected.
+            list[str]: If there are objects at that given location.
+            None: If there are no objects at that given location.
         """
         if self.highlighted_option is None or (
             len(self.options) == 1
@@ -602,12 +592,7 @@ class FileList(SelectionList, inherit_bindings=False):
         ):
             return
         if not self.select_mode_enabled:
-            if return_as == FileListSelectionWidget:
-                return [self.highlighted_option]
-            else:
-                return [
-                    str(path_utils.normalise(self.highlighted_option.dir_entry.path))
-                ]
+            return [str(path_utils.normalise(self.highlighted_option.dir_entry.path))]
         else:
             values = self.selected
             if not values:
@@ -630,7 +615,7 @@ class FileList(SelectionList, inherit_bindings=False):
             if path_utils.normalise(option.dir_entry.path) in paths:
                 option._set_prompt(option.prompt.stylize("dim"))
             else:
-                option._set_prompt(option.prompt.stylize("not dim"))
+                option._set_prompt(option.prompt.stylize(TextualStyle(dim=False)))
         self._clear_caches()
         self._update_lines()
         self.refresh()

@@ -140,6 +140,7 @@ class Application(App, inherit_bindings=False):
         self._force_crash_in: float = force_crash_in
         self._file_list_container = FileListContainer()
         self.file_list = self._file_list_container.filelist
+        # cannot use self.clipboard, reserved for textual's clipboard
         self.Clipboard = Clipboard(id="clipboard")
 
     def compose(self) -> ComposeResult:

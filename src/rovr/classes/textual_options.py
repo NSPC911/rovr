@@ -141,8 +141,8 @@ class ClipboardSelection(Selection):
         super().__init__(
             prompt=prompt,
             value=ClipboardSelectionValue(text, type_of_selection),
-            # in the future, if we want persistent keyboard, we will have
-            # to switch to use path.compress
+            # in the future, if we want persistent clipboard,
+            # we will have to switch to use path.compress
             id=str(id(self)),
         )
         self.initial_prompt = prompt

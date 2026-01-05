@@ -43,20 +43,27 @@ class PDFHandler:
     def count_loaded(self) -> int:
         return 0 if self.images is None else len(self.images)
 
+    def must_load_next_batch(self) -> bool:
+        # Water is already gone above head
+        return self.current_page >= self.count_loaded()
+
     def should_load_next_batch(self) -> bool:
-        return (
-            self.count_loaded() < self.total_pages
-            and self.current_page >= self.count_loaded()
-        )
+        # Going further down half the batch size will tread us into unknown terriority
+        return (self.current_page + PDFHandler.pdf_batch_size() // 2) >= self.count_loaded()
 
     def get_last_page_to_load(self) -> int:
         # We should load till current page, if user scrolls too fast and reaches
         # beyond the batch before our load. This can happen on slow loads, and smaller batch sizes
         last_page = max(
             self.current_page + 1,
-            self.count_loaded() + config["plugins"]["poppler"]["pdf_batch_size"],
+            self.count_loaded() + PDFHandler.pdf_batch_size(),
         )
         return min(last_page, self.total_pages)
+
+    @staticmethod
+    def pdf_batch_size() -> int:
+        # Lesser typing, more readable calcuations
+        return config["plugins"]["poppler"]["pdf_batch_size"]
 
     @staticmethod
     def get_poppler_folder() -> str | None:
@@ -316,7 +323,8 @@ class PreviewContainer(Container):
                 return
             self.pdf.images = result
 
-            # Only one case when current page should be manually adjusted
+            # The only one case when current page and border subtites 
+            # should be manually adjusted. Not the best design though. 
             self.pdf.current_page = 0
             self.app.call_from_thread(
                 setattr,
@@ -326,7 +334,14 @@ class PreviewContainer(Container):
             )
 
         elif self.pdf.should_load_next_batch():
-            self.post_message(self.SetLoading(True))
+
+            # Saving the value per thread instead of recalculating after the load
+            # Even if something changes in between, we want the threads that set the status to 
+            # loading, to always unset it
+            toggle_loading = self.pdf.must_load_next_batch()
+    
+            if toggle_loading:
+                self.post_message(self.SetLoading(True))
             try:
                 result = self.load_pdf_pages(
                     first_page=self.pdf.count_loaded() + 1,
@@ -341,12 +356,14 @@ class PreviewContainer(Container):
                     Static(f"{type(exc).__name__}: {str(exc)}", classes="special"),
                 )
                 return
-
-            self.call_later(lambda: self.post_message(self.SetLoading(False)))
+            if toggle_loading:
+                self.call_later(lambda: self.post_message(self.SetLoading(False)))
             # Note - This should_cancel must be kept here, not before the `load_pdf_pages` call
             # That, somehow doesn't prevents multiple threads executing the load
             # Even though, we do succesfully prevent multiple threads appending the results
             # via this one
+            # Also we must ensure to cancel only after you reset the SetLoading(false)
+            # We don't want threads to Set the screen in Loading state, and never turn it back
             if should_cancel():
                 return
 
@@ -934,17 +951,13 @@ class PreviewContainer(Container):
         """Handle mouse scroll up for PDF navigation."""
         if self.border_title == titles.pdf and self._file_type == "pdf":
             event.stop()
-            if self.pdf.current_page > 0:
-                self.pdf.current_page -= 1
-                self._trigger_pdf_update()
+            self.update_current_pdf_page_by_diff(-1)
 
     def on_mouse_scroll_down(self, event: events.MouseScrollDown) -> None:
         """Handle mouse scroll down for PDF navigation."""
         if self.border_title == titles.pdf and self._file_type == "pdf":
             event.stop()
-            if self.pdf.current_page < self.pdf.total_pages - 1:
-                self.pdf.current_page += 1
-                self._trigger_pdf_update()
+            self.update_current_pdf_page_by_diff(+1)
 
     # not sure if exclusive does anything, but whatever
     @work(thread=True, exclusive=True)
@@ -997,13 +1010,14 @@ class PreviewContainer(Container):
                 and self.pdf.current_page > 0
             ):
                 event.stop()
-                self.pdf.current_page -= 1
+                self.update_current_pdf_page_by_diff(-1)
             elif check_key(event, config["keybinds"]["home"]):
                 event.stop()
-                self.pdf.current_page = 0
+                self.update_current_pdf_page(0)
+
             elif check_key(event, config["keybinds"]["end"]):
                 event.stop()
-                self.pdf.current_page = self.pdf.total_pages - 1
+                self.update_current_pdf_page(self.pdf.total_pages - 1)
             else:
                 return
         elif self.border_title == titles.archive:

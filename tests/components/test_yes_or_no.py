@@ -1,8 +1,9 @@
 """Tests for the YesOrNo modal screen."""
 
-import pytest
+from typing import Any
 
-from textual.app import App, ComposeResult
+import pytest
+from textual.app import App
 from textual.widgets import Button
 
 from rovr.screens import YesOrNo
@@ -11,14 +12,14 @@ from rovr.screens import YesOrNo
 class YesOrNoTestApp(App):
     """Test harness app for YesOrNo screen."""
 
-    def __init__(self, message: str = "Test?", **screen_kwargs):
+    def __init__(self, message: str = "Test?", **screen_kwargs) -> None:
         super().__init__()
         self.message = message
         self.screen_kwargs = screen_kwargs
         self.result = None
 
     def on_mount(self) -> None:
-        def capture_result(result):
+        def capture_result(result: Any) -> None:
             self.result = result
             self.exit()
 
@@ -32,7 +33,7 @@ class TestYesOrNoScreen:
     """Tests for YesOrNo modal dialog."""
 
     @pytest.mark.asyncio
-    async def test_yes_button_returns_true(self):
+    async def test_yes_button_returns_true(self) -> None:
         """Clicking Yes button returns True."""
         app = YesOrNoTestApp(message="Confirm action?")
         async with app.run_test() as pilot:
@@ -40,7 +41,7 @@ class TestYesOrNoScreen:
         assert app.result is True
 
     @pytest.mark.asyncio
-    async def test_no_button_returns_false(self):
+    async def test_no_button_returns_false(self) -> None:
         """Clicking No button returns False."""
         app = YesOrNoTestApp(message="Confirm action?")
         async with app.run_test() as pilot:
@@ -48,10 +49,10 @@ class TestYesOrNoScreen:
         assert app.result is False
 
     @pytest.mark.asyncio
-    async def test_screen_displays_message(self):
+    async def test_screen_displays_message(self) -> None:
         """Screen displays the provided message."""
         from textual.widgets import Label
-        
+
         app = YesOrNoTestApp(message="Delete all files?")
         async with app.run_test() as pilot:
             await pilot.pause()  # Wait for screen to mount
@@ -62,10 +63,9 @@ class TestYesOrNoScreen:
             await pilot.click("#no")
 
     @pytest.mark.asyncio
-    async def test_multiline_message(self):
+    async def test_multiline_message(self) -> None:
         """Multiline messages create multiple labels."""
-        from textual.widgets import Label
-        
+
         app = YesOrNoTestApp(message="Line 1\nLine 2\nLine 3")
         async with app.run_test() as pilot:
             await pilot.pause()
@@ -75,7 +75,7 @@ class TestYesOrNoScreen:
             await pilot.click("#no")
 
     @pytest.mark.asyncio
-    async def test_with_toggle_returns_dict(self):
+    async def test_with_toggle_returns_dict(self) -> None:
         """With toggle enabled, returns dict with value and toggle state."""
         app = YesOrNoTestApp(message="Delete?", with_toggle=True)
         async with app.run_test() as pilot:
@@ -86,7 +86,7 @@ class TestYesOrNoScreen:
         assert app.result["value"] is True
 
     @pytest.mark.asyncio
-    async def test_click_no_dismisses_with_false(self):
+    async def test_click_no_dismisses_with_false(self) -> None:
         """Clicking No dismisses with False."""
         app = YesOrNoTestApp(message="Confirm?")
         async with app.run_test() as pilot:
@@ -94,7 +94,7 @@ class TestYesOrNoScreen:
         assert app.result is False
 
     @pytest.mark.asyncio
-    async def test_reverse_color_option(self):
+    async def test_reverse_color_option(self) -> None:
         """reverse_color swaps button variants."""
         app = YesOrNoTestApp(message="Dangerous action?", reverse_color=True)
         async with app.run_test() as pilot:

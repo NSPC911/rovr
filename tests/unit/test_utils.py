@@ -1,54 +1,53 @@
 """Unit tests for rovr.functions.utils module."""
 
-import pytest
 
 from rovr.functions.utils import (
-    deep_merge,
-    natural_size,
     check_key,
+    deep_merge,
     get_shortest_bind,
+    natural_size,
 )
 
 
 class TestDeepMerge:
     """Tests for the deep_merge function."""
 
-    def test_simple_merge(self):
+    def test_simple_merge(self) -> None:
         """Merging flat dictionaries."""
         old = {"a": 1, "b": 2}
         new = {"b": 3, "c": 4}
         result = deep_merge(old, new)
         assert result == {"a": 1, "b": 3, "c": 4}
 
-    def test_nested_merge(self):
+    def test_nested_merge(self) -> None:
         """Merging nested dictionaries."""
         old = {"outer": {"a": 1, "b": 2}}
         new = {"outer": {"b": 3, "c": 4}}
         result = deep_merge(old, new)
         assert result == {"outer": {"a": 1, "b": 3, "c": 4}}
 
-    def test_deep_nested_merge(self):
+    def test_deep_nested_merge(self) -> None:
         """Merging deeply nested structures."""
         old = {"l1": {"l2": {"l3": {"a": 1}}}}
         new = {"l1": {"l2": {"l3": {"b": 2}}}}
         result = deep_merge(old, new)
         assert result == {"l1": {"l2": {"l3": {"a": 1, "b": 2}}}}
 
-    def test_new_overwrites_value_same_type(self):
+    def test_new_overwrites_value_same_type(self) -> None:
         """New value of same type replaces old value."""
         old = {"key": "old_string"}
         new = {"key": "new_string"}
         result = deep_merge(old, new)
         assert result == {"key": "new_string"}
 
-    def test_list_values_replaced(self):
+    def test_list_values_replaced(self) -> None:
         """List values are replaced, not merged."""
         old = {"items": [1, 2, 3]}
         new = {"items": [4, 5]}
         result = deep_merge(old, new)
         assert result == {"items": [4, 5]}
 
-    def test_empty_dicts(self):
+    def test_empty_dicts(self) -> None:
         """Merging with empty dictionaries."""
         assert deep_merge({}, {"a": 1}) == {"a": 1}
         assert deep_merge({"a": 1}, {}) == {"a": 1}
@@ -57,22 +56,22 @@ class TestDeepMerge:
 class TestNaturalSize:
     """Tests for the natural_size function."""
 
-    def test_decimal_format(self):
+    def test_decimal_format(self) -> None:
         """Test decimal (SI) size formatting."""
         result = natural_size(1000, "decimal", 1)
         assert "1" in result and "k" in result.lower()
 
-    def test_binary_format(self):
+    def test_binary_format(self) -> None:
         """Test binary (IEC) size formatting."""
         result = natural_size(1024, "binary", 1)
         assert "1" in result
 
-    def test_gnu_format(self):
+    def test_gnu_format(self) -> None:
         """Test GNU-style size formatting."""
         result = natural_size(1024, "gnu", 0)
         assert "1" in result
 
-    def test_zero_bytes(self):
+    def test_zero_bytes(self) -> None:
         """Zero bytes should format correctly."""
         result = natural_size(0, "decimal", 0)
         assert "0" in result
@@ -81,75 +80,79 @@ class TestNaturalSize:
 class TestCheckKey:
     """Tests for the check_key function."""
 
-    def test_key_in_list(self):
+    def test_key_in_list(self) -> None:
         """Key matches when in the list."""
         from typing import cast
+
         from textual import events
-        
+
         class MockEvent:
             key = "a"
             aliases: list[str] = []
             is_printable = True
             character = "a"
-        
+
         assert check_key(cast(events.Key, MockEvent()), ["a", "b", "c"]) is True
 
-    def test_key_not_in_list(self):
+    def test_key_not_in_list(self) -> None:
         """Key doesn't match when not in list."""
         from typing import cast
+
         from textual import events
-        
+
         class MockEvent:
             key = "x"
             aliases: list[str] = []
             is_printable = True
             character = "x"
-        
+
         assert check_key(cast(events.Key, MockEvent()), ["a", "b", "c"]) is False
 
-    def test_alias_matches(self):
+    def test_alias_matches(self) -> None:
         """Key matches via alias."""
         from typing import cast
+
         from textual import events
-        
+
         class MockEvent:
             key = "enter"
             aliases = ["return", "ctrl+m"]
             is_printable = False
             character: str | None = None
-        
+
         assert check_key(cast(events.Key, MockEvent()), ["return"]) is True
 
-    def test_string_key_list(self):
+    def test_string_key_list(self) -> None:
         """Single string is treated as list."""
         from typing import cast
+
         from textual import events
-        
+
         class MockEvent:
             key = "q"
             aliases: list[str] = []
             is_printable = True
             character = "q"
-        
+
         assert check_key(cast(events.Key, MockEvent()), "q") is True
 
 
 class TestGetShortestBind:
     """Tests for the get_shortest_bind function."""
 
-    def test_returns_shortest(self):
+    def test_returns_shortest(self) -> None:
         """Returns the shortest keybind."""
         assert get_shortest_bind(["ctrl+shift+a", "ctrl+a", "a"]) == "a"
 
-    def test_single_item(self):
+    def test_single_item(self) -> None:
         """Single item list returns that item."""
         assert get_shortest_bind(["escape"]) == "escape"
 
-    def test_empty_list(self):
+    def test_empty_list(self) -> None:
         """Empty list returns empty string."""
         assert get_shortest_bind([]) == ""
 
-    def test_equal_length(self):
+    def test_equal_length(self) -> None:
         """Equal length returns one of them."""
         result = get_shortest_bind(["ab", "cd", "ef"])
         assert result in ["ab", "cd", "ef"]

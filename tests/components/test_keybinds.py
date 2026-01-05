@@ -1,9 +1,9 @@
 """Tests for the Keybinds screen."""
 
-import pytest
+from typing import Any
 
+import pytest
 from textual.app import App
-from textual.widgets import OptionList
 
 from rovr.screens import Keybinds
 from rovr.screens.keybinds import KeybindList
@@ -12,12 +12,12 @@ from rovr.screens.keybinds import KeybindList
 class KeybindsTestApp(App):
     """Test harness for Keybinds screen."""
 
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__()
         self.screen_dismissed = False
 
     def on_mount(self) -> None:
-        def on_dismiss(result):
+        def on_dismiss(result: Any) -> None:
             self.screen_dismissed = True
             self.exit()
 
@@ -28,7 +28,7 @@ class TestKeybindsScreen:
     """Tests for Keybinds modal screen."""
 
     @pytest.mark.asyncio
-    async def test_screen_mounts(self):
+    async def test_screen_mounts(self) -> None:
         """Keybinds screen mounts without errors."""
         app = KeybindsTestApp()
         async with app.run_test() as pilot:
@@ -37,7 +37,7 @@ class TestKeybindsScreen:
             await pilot.press("escape")  # Clean exit
 
     @pytest.mark.asyncio
-    async def test_contains_keybind_list(self):
+    async def test_contains_keybind_list(self) -> None:
         """Keybinds screen contains a KeybindList."""
         app = KeybindsTestApp()
         async with app.run_test() as pilot:
@@ -47,7 +47,7 @@ class TestKeybindsScreen:
             await pilot.press("escape")
 
     @pytest.mark.asyncio
-    async def test_escape_dismisses(self):
+    async def test_escape_dismisses(self) -> None:
         """Pressing Escape dismisses the screen."""
         app = KeybindsTestApp()
         async with app.run_test() as pilot:
@@ -58,10 +58,10 @@ class TestKeybindsScreen:
         assert app.screen_dismissed is True or not app.is_running
 
     @pytest.mark.asyncio
-    async def test_has_search_input(self):
+    async def test_has_search_input(self) -> None:
         """Keybinds screen has a search input for filtering."""
         from rovr.components import SearchInput
-        
+
         app = KeybindsTestApp()
         async with app.run_test() as pilot:
             await pilot.pause()
@@ -70,7 +70,7 @@ class TestKeybindsScreen:
             await pilot.press("escape")
 
     @pytest.mark.asyncio
-    async def test_keybind_list_has_items(self):
+    async def test_keybind_list_has_items(self) -> None:
         """Keybind list is populated with keybindings."""
         app = KeybindsTestApp()
         async with app.run_test() as pilot:

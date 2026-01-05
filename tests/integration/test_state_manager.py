@@ -7,24 +7,24 @@ class TestStateManager:
     """Tests for StateManager component."""
 
     @pytest.mark.asyncio
-    async def test_state_manager_exists(self):
+    async def test_state_manager_exists(self) -> None:
         """Application has a StateManager."""
         from rovr.app import Application
         from rovr.state_manager import StateManager
-        
+
         app = Application()
-        async with app.run_test() as pilot:
+        async with app.run_test():
             state_managers = app.query(StateManager)
             assert len(state_managers) > 0
 
     @pytest.mark.asyncio
-    async def test_state_manager_has_sort_by(self):
+    async def test_state_manager_has_sort_by(self) -> None:
         """StateManager has sort_by property."""
         from rovr.app import Application
         from rovr.state_manager import StateManager
-        
+
         app = Application()
-        async with app.run_test() as pilot:
+        async with app.run_test():
             state_manager = app.query_one(StateManager)
             assert hasattr(state_manager, "sort_by")
             # sort_by should be a valid option

@@ -328,10 +328,10 @@ def load_config() -> tuple[dict, dict]:
             # can be was or were, depends on flags count
             try:
                 flags = exception.message.split("(")[1].split(" was")[0].split(" were")[0].replace("'", "")
-                flag_path = ".".join(str(p) for p in exception.path) if exception.path else ""
-                pprint(f"[yellow]Warning:[/] Ignoring additional config key(-s) [bright_cyan]{flags}[/] in [cyan]{flag_path}[/] (not in schema)")
+                flag_path = ".".join(str(p) for p in exception.path) if exception.path else "root level"
+                pprint(f"[yellow]Warning:[/] Ignoring additional config key(s) [bright_cyan]{flags}[/] at [cyan]{flag_path}[/] (not in schema)")
             except (IndexError, AttributeError):
-                pprint("[yellow]Warning:[/] Ignoring additional config key(-s) (not in schema)")
+                pprint("[yellow]Warning:[/] Ignoring additional config key(s) (not in schema)")
         else:
             schema_dump(user_config_path, exception, user_config_content)
 

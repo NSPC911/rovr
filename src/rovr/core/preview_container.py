@@ -283,7 +283,7 @@ class PreviewContainer(Container):
         """
         if first_page > last_page:
             raise ValueError(
-                f"Invaid args, first_page={first_page} > last_page={last_page}"
+                f"Invalid args, first_page={first_page} > last_page={last_page}"
             )
 
         result = convert_from_path(

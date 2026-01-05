@@ -526,7 +526,9 @@ class FileList(SelectionList, inherit_bindings=False):
 
         button_style = self.get_component_rich_style(component_style)
 
-        side_style = RichStyle.from_color(button_style.bgcolor, underlying_style.bgcolor)
+        side_style = RichStyle.from_color(
+            button_style.bgcolor, underlying_style.bgcolor
+        )
 
         side_style += RichStyle(meta={"option": selection_index})
         button_style += RichStyle(meta={"option": selection_index})

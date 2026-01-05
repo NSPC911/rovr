@@ -49,7 +49,9 @@ class PDFHandler:
 
     def should_load_next_batch(self) -> bool:
         # Going further down half the batch size will tread us into unknown terriority
-        return (self.current_page + PDFHandler.pdf_batch_size() // 2) >= self.count_loaded()
+        return (
+            self.current_page + PDFHandler.pdf_batch_size() // 2
+        ) >= self.count_loaded()
 
     def get_last_page_to_load(self) -> int:
         # We should load till current page, if user scrolls too fast and reaches
@@ -323,8 +325,8 @@ class PreviewContainer(Container):
                 return
             self.pdf.images = result
 
-            # The only one case when current page and border subtites 
-            # should be manually adjusted. Not the best design though. 
+            # The only one case when current page and border subtites
+            # should be manually adjusted. Not the best design though.
             self.pdf.current_page = 0
             self.app.call_from_thread(
                 setattr,
@@ -334,12 +336,11 @@ class PreviewContainer(Container):
             )
 
         elif self.pdf.should_load_next_batch():
-
             # Saving the value per thread instead of recalculating after the load
-            # Even if something changes in between, we want the threads that set the status to 
+            # Even if something changes in between, we want the threads that set the status to
             # loading, to always unset it
             toggle_loading = self.pdf.must_load_next_batch()
-    
+
             if toggle_loading:
                 self.post_message(self.SetLoading(True))
             try:

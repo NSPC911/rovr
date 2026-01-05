@@ -1103,7 +1103,7 @@
               "type": "integer",
               "default": 2,
               "minimum": 1,
-              "description": "Number of PDF pages to load in each batch for efficient streaming of large PDFs."
+              "description": "Number of PDF pages to load in each batch."
             }
           }
         },

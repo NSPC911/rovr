@@ -1,11 +1,12 @@
 from os import DirEntry
-from typing import Literal
+from typing import Literal, NamedTuple
 
 from textual.content import Content, ContentText
+from textual.widgets import SelectionList
 from textual.widgets.option_list import Option
 from textual.widgets.selection_list import Selection
 
-from rovr.functions.path import compress
+from rovr.functions.path import normalise
 
 
 class PinnedSidebarOption(Option):
@@ -62,6 +63,7 @@ class FileListSelectionWidget(Selection):
         icon: list[str],
         label: str,
         dir_entry: DirEntry,
+        clipboard: SelectionList,
         disabled: bool = False,
     ) -> None:
         """
@@ -82,6 +84,12 @@ class FileListSelectionWidget(Selection):
 
         # Create prompt by combining cached icon content with label
         prompt = FileListSelectionWidget._icon_content_cache[cache_key] + Content(label)
+        dir_entry_path = normalise(dir_entry.path)
+        clipboard.log(clipboard.selected)
+        if any(
+            dir_entry_path == clipboard_val.text for clipboard_val in clipboard.selected
+        ):
+            prompt = prompt.stylize("dim")
         self.dir_entry = dir_entry
         this_id = str(id(self))
 
@@ -92,6 +100,11 @@ class FileListSelectionWidget(Selection):
             disabled=disabled,
         )
         self.label = label
+
+
+class ClipboardSelectionValue(NamedTuple):
+    text: str
+    type_of_selection: Literal["copy", "cut"]
 
 
 class ClipboardSelection(Selection):
@@ -119,11 +132,12 @@ class ClipboardSelection(Selection):
             )
         super().__init__(
             prompt=prompt,
-            value=compress(f"{text}-{type_of_selection}"),
-            id=compress(text),
+            value=ClipboardSelectionValue(text, type_of_selection),
+            # in the future, if we want persistent keyboard, we will have
+            # to switch to use path.compress
+            id=str(id(self)),
         )
         self.initial_prompt = prompt
-        self.path = text
 
 
 class KeybindOption(Option):

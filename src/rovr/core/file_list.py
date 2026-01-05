@@ -219,6 +219,7 @@ class FileList(SelectionList, inherit_bindings=False):
                             icon=item["icon"],
                             label=item["name"],
                             dir_entry=item["dir_entry"],
+                            clipboard=self.app.Clipboard,
                         )
                         for item in file_list_options
                     ]

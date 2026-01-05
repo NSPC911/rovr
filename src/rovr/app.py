@@ -140,6 +140,7 @@ class Application(App, inherit_bindings=False):
         self._force_crash_in: float = force_crash_in
         self._file_list_container = FileListContainer()
         self.file_list = self._file_list_container.filelist
+        self.Clipboard = Clipboard(id="clipboard")
 
     def compose(self) -> ComposeResult:
         self.log("Starting Rovr...")
@@ -180,7 +181,7 @@ class Application(App, inherit_bindings=False):
             with HorizontalGroup(id="footer"):
                 yield ProcessContainer()
                 yield MetadataContainer(id="metadata")
-                yield Clipboard(id="clipboard")
+                yield self.Clipboard
             yield StateManager(id="state_manager")
 
     def on_mount(self) -> None:

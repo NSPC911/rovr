@@ -1,6 +1,6 @@
 import asyncio
 from os import path
-from typing import ClassVar
+from typing import ClassVar, Sequence
 
 from rich.segment import Segment
 from rich.style import Style
@@ -26,6 +26,7 @@ class Clipboard(SelectionList, inherit_bindings=False):
         super().__init__(**kwargs)
         self.clipboard_contents = []
         self._checker_worker: Worker | None = None
+        self._options: list[ClipboardSelection] = []
 
     def on_mount(self) -> None:
         self.paste_button: Button = self.app.query_one("#paste")
@@ -196,6 +197,15 @@ class Clipboard(SelectionList, inherit_bindings=False):
                     self.select_all()
                 event.stop()
 
+    @property
+    def options(self) -> Sequence[ClipboardSelection]:
+        """Sequence of options in the OptionList.
+
+        !!! note "This is read-only"
+
+        """
+        return self._options
+
     async def on_selection_list_selected_changed(
         self, event: SelectionList.SelectedChanged
     ) -> None:
@@ -205,7 +215,7 @@ class Clipboard(SelectionList, inherit_bindings=False):
     def check_clipboard_existence(self) -> None:
         """Check if the files in the clipboard still exist."""
         for option in self.options:
-            if not path.exists(option.path):
+            if not path.exists(option.value.text):
                 assert isinstance(option.id, str)
                 self.app.call_from_thread(self.remove_option, option.id)
 

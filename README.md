@@ -48,12 +48,16 @@ uv run rovr
 Running in dev mode to see debug outputs and logs
 ```pwsh
 uv run rovr --dev
+# or with poethepoet
+poe dev
 ```
 the Textual console must also be active to see debug outputs
 ```pwsh
 uv run textual console
 # or uvx if not running from source
 uvx --from textual-dev textual console
+# or just capture print statements
+poe log
 ```
 For more info on Textual's console, refer to https://textual.textualize.io/guide/devtools/#console
 
@@ -65,9 +69,11 @@ uv sync --group test
 
 # Run all tests
 uv run pytest
+# or with poethepoet
+poe test
 
 # Run with coverage report
-uv run pytest --cov=src/rovr
+poe test-cov
 
 # Run specific test categories
 uv run pytest tests/unit/        # Fast unit tests

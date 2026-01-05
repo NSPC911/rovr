@@ -66,15 +66,16 @@ class TestDirectoryNavigation:
         from rovr.app import Application
 
         app = Application()
-        async with app.run_test():
+        async with app.run_test() as pilot:
+            await pilot.pause()  # Wait for initial load
             # Find the path input
             inputs = app.query(Input)
-            # At least one input should contain the path
-            any(
-                str(sample_file_structure) in str(inp.value) or
+            # At least one input should contain the path (normalize for cross-platform)
+            sample_path_str = str(sample_file_structure).replace("\\", "/")
+            assert any(
+                sample_path_str in str(inp.value).replace("\\", "/") or
                 sample_file_structure.name in str(inp.value)
                 for inp in inputs
-            )
-            # This might not always work due to path normalization
-            # Just check we have inputs
+            ), "No input contains the current working directory path"
+            # Secondary check: we have inputs at all
             assert len(inputs) > 0

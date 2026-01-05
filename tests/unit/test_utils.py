@@ -83,43 +83,55 @@ class TestCheckKey:
 
     def test_key_in_list(self):
         """Key matches when in the list."""
+        from typing import cast
+        from textual import events
+        
         class MockEvent:
             key = "a"
-            aliases = []
+            aliases: list[str] = []
             is_printable = True
             character = "a"
         
-        assert check_key(MockEvent(), ["a", "b", "c"]) is True
+        assert check_key(cast(events.Key, MockEvent()), ["a", "b", "c"]) is True
 
     def test_key_not_in_list(self):
         """Key doesn't match when not in list."""
+        from typing import cast
+        from textual import events
+        
         class MockEvent:
             key = "x"
-            aliases = []
+            aliases: list[str] = []
             is_printable = True
             character = "x"
         
-        assert check_key(MockEvent(), ["a", "b", "c"]) is False
+        assert check_key(cast(events.Key, MockEvent()), ["a", "b", "c"]) is False
 
     def test_alias_matches(self):
         """Key matches via alias."""
+        from typing import cast
+        from textual import events
+        
         class MockEvent:
             key = "enter"
             aliases = ["return", "ctrl+m"]
             is_printable = False
-            character = None
+            character: str | None = None
         
-        assert check_key(MockEvent(), ["return"]) is True
+        assert check_key(cast(events.Key, MockEvent()), ["return"]) is True
 
     def test_string_key_list(self):
         """Single string is treated as list."""
+        from typing import cast
+        from textual import events
+        
         class MockEvent:
             key = "q"
-            aliases = []
+            aliases: list[str] = []
             is_printable = True
             character = "q"
         
-        assert check_key(MockEvent(), "q") is True
+        assert check_key(cast(events.Key, MockEvent()), "q") is True
 
 
 class TestGetShortestBind:

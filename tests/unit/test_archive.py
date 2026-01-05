@@ -108,8 +108,10 @@ class TestArchiveRead:
         from rovr.classes.archive import Archive
         
         with Archive(str(sample_zip)) as archive:
-            with archive.open("file1.txt") as f:
-                content = f.read()
+            f = archive.open("file1.txt")
+            assert f is not None
+            content = f.read()
+            f.close()
             assert content == b"Hello, World!"
 
     def test_open_nonexistent_member_raises(self, sample_zip):
@@ -118,8 +120,7 @@ class TestArchiveRead:
         
         with Archive(str(sample_zip)) as archive:
             with pytest.raises(KeyError):
-                with archive.open("nonexistent.txt") as f:
-                    pass
+                archive.open("nonexistent.txt")
 
 
 class TestArchiveExtract:

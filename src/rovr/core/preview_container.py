@@ -973,7 +973,7 @@ class PreviewContainer(Container):
         """Handle mouse scroll down for PDF navigation."""
         if self.border_title == titles.pdf and self._file_type == "pdf":
             event.stop()
-            self.update_current_pdf_page_by_diff(+1)
+            self.update_current_pdf_page_by_diff(1)
 
     # not sure if exclusive does anything, but whatever
     @work(thread=True, exclusive=True)

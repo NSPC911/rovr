@@ -52,7 +52,6 @@ from rovr.functions.path import (
     normalise,
 )
 from rovr.functions.themes import get_custom_themes
-from rovr.functions.utils import should_cancel
 from rovr.header import HeaderArea
 from rovr.header.tabs import Tabline
 from rovr.navigation_widgets import (
@@ -264,7 +263,6 @@ class Application(App, inherit_bindings=False):
         self.title = ""
         if self._force_crash_in > 0:
             self.set_timer(self._force_crash_in, lambda: 1 / 0)
-        # file_list because im using this guy basically everywhere
 
     @work
     async def action_focus_next(self) -> None:
@@ -585,7 +583,7 @@ class Application(App, inherit_bindings=False):
             for _ in range(4):
                 # essentially sleep 1 second, but with extra steps
                 sleep(0.25)
-                if should_cancel():
+                if self.return_code is not None:
                     # failsafe if for any reason, the thread continues running after exit
                     return
             count += 1

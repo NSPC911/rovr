@@ -325,7 +325,7 @@ class FileList(SelectionList, inherit_bindings=False):
                     await self.toggle_mode()
                 self.update_border_subtitle()
         finally:
-            self.app.file_list_pause_check = False  # ty: ignore[invalid-assignment]
+            self.file_list_pause_check = False  # ty: ignore[invalid-assignment]
 
     async def file_selected_handler(self, target_path: str) -> None:
         if self.app._chooser_file:

@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft-04/schema",
   "title": "Rovr Config",
   "type": "object",
-  "additionalProperties": false,
+  "additionalProperties": true,
   "definitions": {
     "keybind": {
       "type": "array",
@@ -14,7 +14,7 @@
   "properties": {
     "interface": {
       "type": "object",
-      "additionalProperties": false,
+      "additionalProperties": true,
       "description": "Settings related to the user interface and experience",
       "properties": {
         "tooltips": {
@@ -103,7 +103,7 @@
         },
         "clock": {
           "type": "object",
-          "additionalProperties": false,
+          "additionalProperties": true,
           "properties": {
             "enabled": {
               "type": "boolean",
@@ -120,7 +120,7 @@
         },
         "preview_text": {
           "type": "object",
-          "additionalProperties": false,
+          "additionalProperties": true,
           "properties": {
             "error": {
               "type": "string",
@@ -136,7 +136,7 @@
         },
         "compact_mode": {
           "type": "object",
-          "additionalProperties": false,
+          "additionalProperties": true,
           "properties": {
             "buttons": {
               "type": "boolean",
@@ -176,7 +176,7 @@
     },
     "settings": {
       "type": "object",
-      "additionalProperties": false,
+      "additionalProperties": true,
       "description": "Settings related to behavior of file operations",
       "properties": {
         "use_recycle_bin": {
@@ -193,7 +193,7 @@
     },
     "metadata": {
       "type": "object",
-      "additionalProperties": false,
+      "additionalProperties": true,
       "properties": {
         "fields": {
           "type": "array",
@@ -241,7 +241,7 @@
     },
     "icons": {
       "type": "object",
-      "additionalProperties": false,
+      "additionalProperties": true,
       "properties": {
         "files": {
           "type": "array",
@@ -294,7 +294,7 @@
     },
     "theme": {
       "type": "object",
-      "additionalProperties": false,
+      "additionalProperties": true,
       "properties": {
         "default": {
           "type": "string",
@@ -368,7 +368,7 @@
       "type": "array",
       "items": {
         "type": "object",
-        "additionalProperties": false,
+        "additionalProperties": true,
         "properties": {
           "name": {
             "type": "string",
@@ -417,7 +417,7 @@
           "bar_gradient": {
             "type": "object",
             "description": "The gradient colors for the progress bar.",
-            "additionalProperties": false,
+            "additionalProperties": true,
             "properties": {
               "default": {
                 "type": "array",
@@ -457,7 +457,7 @@
     },
     "keybinds": {
       "type": "object",
-      "additionalProperties": false,
+      "additionalProperties": true,
       "properties": {
         "toggle_pin": {
           "$ref": "#/definitions/keybind",
@@ -894,11 +894,11 @@
     },
     "plugins": {
       "type": "object",
-      "additionalProperties": false,
+      "additionalProperties": true,
       "properties": {
         "zoxide": {
           "type": "object",
-          "additionalProperties": false,
+          "additionalProperties": true,
           "properties": {
             "enabled": {
               "type": "boolean",
@@ -920,7 +920,7 @@
         },
         "bat": {
           "type": "object",
-          "additionalProperties": false,
+          "additionalProperties": true,
           "properties": {
             "enabled": {
               "type": "boolean",
@@ -936,7 +936,7 @@
         },
         "editor": {
           "type": "object",
-          "additionalProperties": false,
+          "additionalProperties": true,
           "properties": {
             "enabled": {
               "type": "boolean",
@@ -978,7 +978,7 @@
         },
         "fd": {
           "type": "object",
-          "additionalProperties": false,
+          "additionalProperties": true,
           "properties": {
             "enabled": {
               "type": "boolean",
@@ -1034,7 +1034,7 @@
         },
         "rg": {
           "type": "object",
-          "additionalProperties": false,
+          "additionalProperties": true,
           "properties": {
             "enabled": {
               "type": "boolean",
@@ -1076,7 +1076,7 @@
         },
         "poppler": {
           "type": "object",
-          "additionalProperties": false,
+          "additionalProperties": true,
           "properties": {
             "enabled": {
               "type": "boolean",
@@ -1103,7 +1103,7 @@
         },
         "file_one": {
           "type": "object",
-          "additionalProperties": false,
+          "additionalProperties": true,
           "properties": {
             "enabled": {
               "type": "boolean",

@@ -378,6 +378,11 @@ class PreviewContainer(Container):
             if should_cancel():
                 return
 
+            # This mutation on the `images` object should be done by one one thread
+            # and the entire flow of checking `should_load_next_batch` to loading
+            # to appending the pages should be atomic.
+            # At this point, we are using `should_cancel` to allow only one thread
+            # to reach here
             self.pdf.images += result
 
         if should_cancel():

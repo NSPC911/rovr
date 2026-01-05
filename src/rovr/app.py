@@ -239,11 +239,6 @@ class Application(App, inherit_bindings=False):
             self.query_one("#up").tooltip = "Go up the directory tree"
         self.tabWidget: Tabline = self.query_one(Tabline)
 
-        # Change to startup directory. This also calls update_file_list()
-        self.cd(
-            directory=path.abspath(self.startup_path),
-            focus_on=path.basename(self.startup_path),
-        )
         self.file_list = self.query_one("#file_list", FileList)
         self.file_list.focus()
         # restore UI state from saved state file
@@ -599,12 +594,7 @@ class Application(App, inherit_bindings=False):
                 else:
                     items = None
                     with suppress(OSError):
-                        # this is weird, so `get_filtered_dir_names` is a sync
-                        # function, so `call_from_thread` shouldn't be required
-                        # but without it, this thread goes in a limbo state where
-                        # after quiting, it still runs this, so the app never quits
-                        items: set[str] = self.call_from_thread(
-                            get_filtered_dir_names,
+                        items = get_filtered_dir_names(
                             cwd,
                             config["interface"]["show_hidden_files"],
                         )

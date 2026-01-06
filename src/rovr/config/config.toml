@@ -242,7 +242,7 @@ default_filter_types = ["file", "directory"]
 
 [plugins.rg]
 enabled = true
-keybinds = ["R"]
+keybinds = ["\\"]
 executable = "rg"
 case_sensitive = true
 no_ignore_parent = false

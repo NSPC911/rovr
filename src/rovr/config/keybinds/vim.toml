@@ -87,8 +87,8 @@ dont_ask_again = ["a"]
 
 [keybinds.filter_modal]
 exit = ["escape"]
-down = ["j", "ctrl+j", "down"]
-up = ["k", "ctrl+k", "up"]
+down = ["ctrl+j", "down"]
+up = ["ctrl+k", "up"]
 
 [keybinds.yes_or_no]
 yes = ["y"]
@@ -103,3 +103,6 @@ keybinds = ["e"]
 
 [plugins.fd]
 keybinds = ["f"]
+
+[plugins.rg]
+keybinds = ["\\"]

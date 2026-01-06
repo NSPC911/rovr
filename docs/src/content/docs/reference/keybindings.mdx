@@ -3,7 +3,16 @@ title: Keybindings
 description: A reference for all default keybindings in rovr.
 ---
 
+<!-- do not directly modify this file, modify the template in docs/scripts/generate_keybinds.py -->
+
+import { Aside } from "@astrojs/starlight/components";
+
 this page provides a comprehensive list of the default keybindings in `rovr`. you can customize these keybindings in your `config.toml` file.
+
+<Aside type="tip">
+  you can make use of the cli arg `--show-keys` to view the key that you just
+  pressed to help you in configuring your keybinds!
+</Aside>
 
 ## keybind profiles
 
@@ -11,34 +20,20 @@ rovr provides two pre-configured keybind profiles that you can use as a starting
 
 ### sane profile
 
-the **sane** profile is designed for users who prefer standard keyboard shortcuts familiar to most applications. it uses:
-- arrow keys for navigation
-- standard `Ctrl` modifiers for common actions (`Ctrl+C`, `Ctrl+V`, `Ctrl+X`)
-- function keys for special actions (`F1` for help, `F2` for rename)
-
-you can find this profile at `src/rovr/config/keybinds/sane.toml` in the repository.
+find this profile at `src/rovr/config/keybinds/sane.toml` in the repository.<br>the **sane** profile is designed for users who prefer more traditional keybindings
 
 ### vim profile
 
-the **vim** profile is designed for vim users who prefer vim-style navigation and commands:
-- `h`/`j`/`k`/`l` for navigation
-- `y`/`p`/`x`/`d` for copy/paste/cut/delete
-- `/` for search
-- `?` for help
-
-you can find this profile at `src/rovr/config/keybinds/vim.toml` in the repository.
+find this profile at `src/rovr/config/keybinds/vim.toml` in the repository.<br>the **vim** profile is tailored for users familiar with vim-style keybindings
 
 ### using a profile
 
-to use a keybind profile, copy the `[keybinds]` section and the `[plugins.*]` keybind sections from your preferred profile into your user `config.toml` file, which is located at:
+just copy over the contents of the desired profile into your `config.toml` file located at:
+
 - linux/macos: `~/.config/rovr/config.toml`
-- windows: `%APPDATA%\rovr\config.toml`
+- windows: `%APPDATA%/rovr/config.toml`
 
-note: the profile files contain both main keybinds under `[keybinds]` and plugin-specific keybinds under `[plugins.zoxide]`, `[plugins.editor]`, and `[plugins.fd]`. copy all relevant sections for a complete profile setup.
-
-## default bindings
-
-the default configuration combines both vim and sane keybinds for maximum flexibility. this means most actions have multiple keybinds available.
+## main bindings
 
 | action                       | default hotkey                                 | description            |
 | ---------------------------- | ---------------------------------------------- | ---------------------- |

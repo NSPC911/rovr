@@ -55,7 +55,7 @@ select_home = ["shift+home"]
 select_end = ["shift+end"]
 # i dont trust ctrl + tab being available
 tab_next = ["ctrl+left_square_brace"]
-tab_previous = ["ctrl+left_square_brace"]
+tab_previous = ["ctrl+right_square_brace"]
 # but i know ctrl+t and ctrl+w are
 tab_new = ["ctrl+t"]
 tab_close = ["ctrl+w"]
@@ -116,3 +116,6 @@ keybinds = ["ctrl+o"]
 
 [plugins.fd]
 keybinds = ["ctrl+g"]
+
+[plugins.rg]
+keybinds = ["\\"]

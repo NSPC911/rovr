@@ -15,8 +15,29 @@ page = """
 title: Keybindings
 description: A reference for all default keybindings in rovr.
 ---
+<!-- do not directly modify this file, modify the template in docs/scripts/generate_keybinds.py -->
+
+import { Aside } from "@astrojs/starlight/components"
 
 this page provides a comprehensive list of the default keybindings in `rovr`. you can customize these keybindings in your `config.toml` file.
+
+<Aside type="tip">
+  you can make use of the cli arg `--show-keys` to view the key that you just pressed to help you in configuring your keybinds!
+</Aside>
+
+## keybind profiles
+rovr provides two pre-configured keybind profiles that you can use as a starting point:
+
+### sane profile
+find this profile at `src/rovr/config/keybinds/sane.toml` in the repository.<br>the **sane** profile is designed for users who prefer more traditional keybindings
+
+### vim profile
+find this profile at `src/rovr/config/keybinds/vim.toml` in the repository.<br>the **vim** profile is tailored for users familiar with vim-style keybindings
+
+### using a profile
+just copy over the contents of the desired profile into your `config.toml` file located at:
+- linux/macos: `~/.config/rovr/config.toml`
+- windows: `%APPDATA%/rovr/config.toml`
 
 ## main bindings
 

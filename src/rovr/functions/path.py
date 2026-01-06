@@ -11,6 +11,7 @@ from typing import Callable, Literal, NamedTuple, TypeAlias, TypedDict, overload
 import psutil
 from natsort import natsorted
 from rich.console import Console
+from rich.traceback import Traceback
 from textual import work
 from textual.app import App
 from textual.dom import DOMNode
@@ -724,7 +725,7 @@ def get_mime_type(
     return None
 
 
-def dump_exc(widget: DOMNode, exc: Exception) -> str | None:
+def dump_exc(widget: DOMNode, exc: Exception | Traceback) -> str | None:
     """Dump an exception to the console for debugging purposes.
 
     Args:
@@ -734,18 +735,24 @@ def dump_exc(widget: DOMNode, exc: Exception) -> str | None:
     Returns:
         str: The path to the log file where the exception was dumped.
     """
-    from rich.traceback import Traceback
+    from datetime import datetime
+
+    from rich.panel import Panel
 
     from rovr.variables.maps import VAR_TO_DIR
 
-    rich_traceback = Traceback.from_exception(
-        type(exc),
-        exc,
-        exc.__traceback__,
-        width=None,
-        code_width=None,
-        show_locals=True,
-        max_frames=5,
+    rich_traceback = (
+        Traceback.from_exception(
+            type(exc),
+            exc,
+            exc.__traceback__,
+            width=None,
+            code_width=None,
+            show_locals=True,
+            max_frames=5,
+        )
+        if isinstance(exc, Exception)
+        else exc
     )
     widget.log(rich_traceback)
 
@@ -758,5 +765,8 @@ def dump_exc(widget: DOMNode, exc: Exception) -> str | None:
     with open(dump_path, "w") as file_log:
         # don't need to handle OS Error, Textual automatically chains errors
         error_log = Console(file=file_log, legacy_windows=True)
-        error_log.print(rich_traceback)
+        # section it with time and date
+        error_log.print(
+            Panel(rich_traceback, title=f"Exception dumped on {str(datetime.now())}")
+        )
     return dump_path

@@ -101,11 +101,11 @@ class NewItemButton(Button):
                     title="New Item",
                     severity="error",
                 )
-        self.app.file_list_pause_check = True  # ty: ignore[invalid-assignment]
+        self.app.file_list.file_list_pause_check = True
         self.app.file_list.focus()
         worker: Worker = self.app.file_list.update_file_list(
             add_to_session=False, focus_on=path.basename(location)
         )
         with contextlib.suppress(WorkerError):
             await worker.wait()
-        self.app.file_list_pause_check = False  # ty: ignore[invalid-assignment]
+        self.app.file_list.file_list_pause_check = False

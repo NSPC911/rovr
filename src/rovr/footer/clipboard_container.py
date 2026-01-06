@@ -1,6 +1,6 @@
 import asyncio
 from os import path
-from typing import ClassVar
+from typing import ClassVar, Self, Sequence
 
 from rich.segment import Segment
 from rich.style import Style
@@ -13,7 +13,9 @@ from textual.widgets.option_list import OptionDoesNotExist
 from textual.worker import Worker
 
 from rovr.classes import ClipboardSelection
+from rovr.classes.textual_options import ClipboardSelectionValue
 from rovr.functions import icons as icon_utils
+from rovr.functions.path import dump_exc
 from rovr.variables.constants import config, vindings
 
 
@@ -26,6 +28,7 @@ class Clipboard(SelectionList, inherit_bindings=False):
         super().__init__(**kwargs)
         self.clipboard_contents = []
         self._checker_worker: Worker | None = None
+        self._options: list[ClipboardSelection] = []
 
     def on_mount(self) -> None:
         self.paste_button: Button = self.app.query_one("#paste")
@@ -33,6 +36,26 @@ class Clipboard(SelectionList, inherit_bindings=False):
         self.set_interval(
             5, self.checker_wrapper, name="Check existence of clipboard items"
         )
+
+    @property
+    def options(self) -> Sequence[ClipboardSelection]:
+        """Sequence of options in the OptionList.
+
+        !!! note "This is read-only"
+
+        """
+        return self._options
+
+    @property
+    def selected(self) -> list[ClipboardSelectionValue]:
+        """The selected values.
+
+        This is a list of all of the
+        [values][textual.widgets.selection_list.Selection.value] associated
+        with selections in the list that are currently in the selected
+        state.
+        """
+        return list(self._selected.keys())
 
     @work
     async def copy_to_clipboard(self, items: list[str]) -> None:
@@ -70,6 +93,8 @@ class Clipboard(SelectionList, inherit_bindings=False):
                 )
         for item_number in range(len(items)):
             self.select(self.get_option_at_index(item_number))
+        # then go through filelist and dim the cut items
+        self.app.file_list.update_dimmed_items(items)
 
     # Use better versions of the checkbox icons
     def _get_left_gutter_width(
@@ -184,7 +209,10 @@ class Clipboard(SelectionList, inherit_bindings=False):
                         severity="warning",
                     )
                     return
-                self.remove_option_at_index(self.highlighted)
+                try:
+                    self.remove_option_at_index(self.highlighted)
+                except KeyError as exc:
+                    dump_exc(self, exc)
                 if self.option_count == 0:
                     return
                 event.stop()
@@ -196,16 +224,22 @@ class Clipboard(SelectionList, inherit_bindings=False):
                     self.select_all()
                 event.stop()
 
+    def _remove_option(self, option: ClipboardSelection) -> Self:  # ty: ignore[invalid-method-override]  # oh my god, will you please stfu
+        super()._remove_option(option)
+        self.app.file_list.update_dimmed_items([value.path for value in self.selected])
+        return self
+
     async def on_selection_list_selected_changed(
         self, event: SelectionList.SelectedChanged
     ) -> None:
         self.paste_button.disabled = len(self.selected) == 0
+        self.app.file_list.update_dimmed_items([value.path for value in self.selected])
 
     @work(thread=True)
     def check_clipboard_existence(self) -> None:
         """Check if the files in the clipboard still exist."""
         for option in self.options:
-            if not path.exists(option.path):
+            if not path.exists(option.value.path):
                 assert isinstance(option.id, str)
                 self.app.call_from_thread(self.remove_option, option.id)
 

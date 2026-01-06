@@ -1,16 +1,17 @@
 import contextlib
 from os import getcwd, path
 from os import system as cmd
-from typing import ClassVar, Iterable, Self, cast
+from typing import ClassVar, Iterable, Self, Sequence, cast
 
 from rich.segment import Segment
-from rich.style import Style
+from rich.style import Style as RichStyle
 from textual import events, on, work
 from textual.binding import BindingType
 from textual.content import ContentText
 from textual.css.query import NoMatches
 from textual.geometry import Region
 from textual.strip import Strip
+from textual.style import Style as TextualStyle
 from textual.widgets import Button, Input, OptionList, SelectionList
 from textual.widgets.option_list import Option, OptionDoesNotExist
 from textual.widgets.selection_list import Selection, SelectionType
@@ -56,6 +57,7 @@ class FileList(SelectionList, inherit_bindings=False):
             select (bool): Whether the selection is select or normal.
         """
         super().__init__(*args, **kwargs)
+        self._options: list[FileListSelectionWidget] = []
         self.dummy = dummy
         self.enter_into = enter_into
         self.select_mode_enabled = select
@@ -219,6 +221,7 @@ class FileList(SelectionList, inherit_bindings=False):
                             icon=item["icon"],
                             label=item["name"],
                             dir_entry=item["dir_entry"],
+                            clipboard=self.app.Clipboard,
                         )
                         for item in file_list_options
                     ]
@@ -325,7 +328,7 @@ class FileList(SelectionList, inherit_bindings=False):
                     await self.toggle_mode()
                 self.update_border_subtitle()
         finally:
-            self.app.file_list_pause_check = False  # ty: ignore[invalid-assignment]
+            self.file_list_pause_check = False  # ty: ignore[invalid-assignment]
 
     async def file_selected_handler(self, target_path: str) -> None:
         if self.app._chooser_file:
@@ -416,6 +419,10 @@ class FileList(SelectionList, inherit_bindings=False):
         self.app.query_one("#unzip").disabled = not await utils.is_archive(
             highlighted_option.dir_entry.path
         )
+
+    @property
+    def options(self) -> Sequence[FileListSelectionWidget]:
+        return self._options
 
     # Use better versions of the checkbox icons
     def _get_left_gutter_width(
@@ -519,10 +526,12 @@ class FileList(SelectionList, inherit_bindings=False):
 
         button_style = self.get_component_rich_style(component_style)
 
-        side_style = Style.from_color(button_style.bgcolor, underlying_style.bgcolor)
+        side_style = RichStyle.from_color(
+            button_style.bgcolor, underlying_style.bgcolor
+        )
 
-        side_style += Style(meta={"option": selection_index})
-        button_style += Style(meta={"option": selection_index})
+        side_style += RichStyle(meta={"option": selection_index})
+        button_style += RichStyle(meta={"option": selection_index})
 
         return Strip([
             Segment(icon_utils.get_toggle_button_icon("left"), style=side_style),
@@ -597,6 +606,21 @@ class FileList(SelectionList, inherit_bindings=False):
                 for option in options
                 if isinstance(option, FileListSelectionWidget)
             ]
+
+    def update_dimmed_items(self, paths: list[str]) -> None:
+        """Update the dimmed items in the file list based on the cut items.
+
+        Args:
+            paths (list[str]): The list of paths to dim.
+        """
+        for option in self.options:
+            if path_utils.normalise(option.dir_entry.path) in paths:
+                option._set_prompt(option.prompt.stylize("dim"))
+            else:
+                option._set_prompt(option.prompt.stylize(TextualStyle(dim=False)))
+        self._clear_caches()
+        self._update_lines()
+        self.refresh()
 
     async def on_key(self, event: events.Key) -> None:
         """Handle key events for the file list."""

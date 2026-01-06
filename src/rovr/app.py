@@ -52,7 +52,6 @@ from rovr.functions.path import (
     normalise,
 )
 from rovr.functions.themes import get_custom_themes
-from rovr.functions.utils import should_cancel
 from rovr.header import HeaderArea
 from rovr.header.tabs import Tabline
 from rovr.navigation_widgets import (
@@ -140,6 +139,8 @@ class Application(App, inherit_bindings=False):
         self._force_crash_in: float = force_crash_in
         self._file_list_container = FileListContainer()
         self.file_list = self._file_list_container.filelist
+        # cannot use self.clipboard, reserved for textual's clipboard
+        self.Clipboard = Clipboard(id="clipboard")
 
     def compose(self) -> ComposeResult:
         self.log("Starting Rovr...")
@@ -180,7 +181,7 @@ class Application(App, inherit_bindings=False):
             with HorizontalGroup(id="footer"):
                 yield ProcessContainer()
                 yield MetadataContainer(id="metadata")
-                yield Clipboard(id="clipboard")
+                yield self.Clipboard
             yield StateManager(id="state_manager")
 
     def on_mount(self) -> None:
@@ -240,11 +241,6 @@ class Application(App, inherit_bindings=False):
             self.query_one("#up").tooltip = "Go up the directory tree"
         self.tabWidget: Tabline = self.query_one(Tabline)
 
-        # Change to startup directory. This also calls update_file_list()
-        self.cd(
-            directory=path.abspath(self.startup_path),
-            focus_on=path.basename(self.startup_path),
-        )
         self.file_list = self.query_one("#file_list", FileList)
         self.file_list.focus()
         # restore UI state from saved state file
@@ -264,7 +260,6 @@ class Application(App, inherit_bindings=False):
         self.title = ""
         if self._force_crash_in > 0:
             self.set_timer(self._force_crash_in, lambda: 1 / 0)
-        # file_list because im using this guy basically everywhere
 
     @work
     async def action_focus_next(self) -> None:
@@ -585,7 +580,7 @@ class Application(App, inherit_bindings=False):
             for _ in range(4):
                 # essentially sleep 1 second, but with extra steps
                 sleep(0.25)
-                if should_cancel():
+                if self.return_code is not None:
                     # failsafe if for any reason, the thread continues running after exit
                     return
             count += 1
@@ -601,12 +596,7 @@ class Application(App, inherit_bindings=False):
                 else:
                     items = None
                     with suppress(OSError):
-                        # this is weird, so `get_filtered_dir_names` is a sync
-                        # function, so `call_from_thread` shouldn't be required
-                        # but without it, this thread goes in a limbo state where
-                        # after quiting, it still runs this, so the app never quits
-                        items: set[str] = self.call_from_thread(
-                            get_filtered_dir_names,
+                        items = get_filtered_dir_names(
                             cwd,
                             config["interface"]["show_hidden_files"],
                         )
@@ -890,6 +880,7 @@ class Application(App, inherit_bindings=False):
                 print(renderable.segments)
             if isinstance(renderable, Traceback):
                 traceback_involved = True
+                dump_exc(self, renderable)
         if traceback_involved:
             if error_count > 1:
                 self.error_console.print(

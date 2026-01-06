@@ -64,18 +64,30 @@ class StateManager(Widget):
                     if file_version and file_version != self.current_version:
                         self.previous_version = file_version
 
-                    self.pinned_sidebar_visible = loaded_state.get(
-                        "pinned_sidebar_visible", True
-                    )
-                    self.preview_sidebar_visible = loaded_state.get(
-                        "preview_sidebar_visible", True
-                    )
-                    self.footer_visible = loaded_state.get("footer_visible", True)
-                    self.menuwrapper_visible = loaded_state.get(
-                        "menuwrapper_visible", True
-                    )
-                    self.sort_by = loaded_state.get("sort_by", "name")
-                    if self.sort_by not in [
+                    if self.pinned_sidebar_visible != (
+                        pinned_sidebar_visible := loaded_state.get(
+                            "pinned_sidebar_visible", True
+                        )
+                    ):
+                        self.pinned_sidebar_visible = pinned_sidebar_visible
+                    if self.preview_sidebar_visible != (
+                        preview_sidebar_visible := loaded_state.get(
+                            "preview_sidebar_visible", True
+                        )
+                    ):
+                        self.preview_sidebar_visible = preview_sidebar_visible
+                    if self.footer_visible != (
+                        footer_visible := loaded_state.get("footer_visible", True)
+                    ):
+                        self.footer_visible = footer_visible
+                    if self.menuwrapper_visible != (
+                        menuwrapper_visible := loaded_state.get(
+                            "menuwrapper_visible", True
+                        )
+                    ):
+                        self.menuwrapper_visible = menuwrapper_visible
+                    sort_by = loaded_state.get("sort_by", "name")
+                    if sort_by not in [
                         "name",
                         "size",
                         "modified",
@@ -83,8 +95,14 @@ class StateManager(Widget):
                         "extension",
                         "natural",
                     ]:
-                        self.sort_by = "name"
-                    self.sort_descending = loaded_state.get("sort_descending", False)
+                        sort_by = "name"
+                    # clearly sort_by = "name" wouldn't lead to the condition being trye
+                    elif self.sort_by != sort_by:
+                        self.sort_by = sort_by
+                    if self.sort_descending != (
+                        sort_descending := loaded_state.get("sort_descending", False)
+                    ):
+                        self.sort_descending = sort_descending
             except (tomli.TOMLDecodeError, OSError):
                 self._create_default_state()
         else:
@@ -177,7 +195,7 @@ sort_descending = {str(self.sort_descending).lower()}
             return
         self._save_state()
         with suppress(NoMatches):
-            self.app.file_list.update_file_list(add_to_session=False)
+            self.log("Updating file list due to sort_by change")
         # Update sort button icon
         with suppress(NoMatches):
             self.app.query_one("#sort_order").update_icon()

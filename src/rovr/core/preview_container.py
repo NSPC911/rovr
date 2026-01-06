@@ -640,6 +640,7 @@ class PreviewContainer(Container):
                             icon=item["icon"],
                             label=item["name"],
                             dir_entry=item["dir_entry"],
+                            clipboard=self.app.Clipboard,
                         )
                     )
                     if start_time + 0.25 < time():

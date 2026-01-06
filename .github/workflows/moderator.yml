@@ -9,7 +9,7 @@ on:
 
 jobs:
   spam-detection:
-    if: github.actor != 'coderabbitAi' && github.actor != 'copilot-swe-agent'
+    if: github.actor != 'coderabbitai' && github.actor != 'copilot-swe-agent'
     runs-on: ubuntu-latest
     permissions:
       issues: write
@@ -20,7 +20,7 @@ jobs:
       - uses: actions/checkout@v4
       - uses: github/ai-moderator@v1
         with:
-          token: ${{ secrets.GITHUB_TOKEN }}
+          token: ${{ secrets.BOT_TOKEN }}
           spam-label: 'spam'
           ai-label: 'ai-generated'
           minimize-detected-comments: true

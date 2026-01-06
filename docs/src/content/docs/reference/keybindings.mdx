@@ -3,7 +3,7 @@ title: Keybindings
 description: A reference for all default keybindings in rovr.
 ---
 
-<!-- do not directly modify this file, modify the template in docs/scripts/generate_keybinds.py -->
+{/* do not directly modify this file, modify the template in docs/scripts/generate_keybinds.py */}
 
 import { Aside } from "@astrojs/starlight/components";
 
@@ -20,11 +20,11 @@ rovr provides two pre-configured keybind profiles that you can use as a starting
 
 ### sane profile
 
-find this profile at `src/rovr/config/keybinds/sane.toml` in the repository.<br>the **sane** profile is designed for users who prefer more traditional keybindings
+find this profile at `src/rovr/config/keybinds/sane.toml` in the repository.<br/>the **sane** profile is designed for users who prefer more traditional keybindings
 
 ### vim profile
 
-find this profile at `src/rovr/config/keybinds/vim.toml` in the repository.<br>the **vim** profile is tailored for users familiar with vim-style keybindings
+find this profile at `src/rovr/config/keybinds/vim.toml` in the repository.<br/>the **vim** profile is tailored for users familiar with vim-style keybindings
 
 ### using a profile
 
@@ -35,61 +35,61 @@ just copy over the contents of the desired profile into your `config.toml` file 
 
 ## main bindings
 
-| action                       | default hotkey                                 | description            |
-| ---------------------------- | ---------------------------------------------- | ---------------------- |
-| toggle_pin                   | <kbd>P</kbd>                                   | Pin folder             |
-| toggle_pinned_sidebar        | <kbd>S</kbd>                                   | Toggle sidebar         |
-| toggle_preview_sidebar       | <kbd>I</kbd>                                   | Toggle preview         |
-| toggle_footer                | <kbd>F</kbd>                                   | Toggle footer          |
-| toggle_menuwrapper           | <kbd>M</kbd>                                   | Toggle menu wrapper    |
-| focus_toggle_pinned_sidebar  | <kbd>s</kbd>                                   | Focus sidebar          |
-| focus_file_list              | <kbd>escape</kbd>                              | Focus file list        |
-| focus_toggle_preview_sidebar | <kbd>i</kbd>                                   | Focus preview          |
-| focus_toggle_path_switcher   | <kbd>ctrl+l</kbd>                              | Focus path             |
-| focus_toggle_processes       | <kbd>#</kbd>                                   | Focus processes        |
-| focus_toggle_clipboard       | <kbd>c</kbd>                                   | Focus clipboard        |
-| focus_toggle_metadata        | <kbd>m</kbd>                                   | Focus metadata         |
-| focus_search                 | <kbd>slash</kbd>                               | Search                 |
-| copy                         | <kbd>y</kbd> <kbd>ctrl+c</kbd>                 | Copy                   |
-| paste                        | <kbd>p</kbd> <kbd>ctrl+v</kbd>                 | Paste                  |
-| cut                          | <kbd>x</kbd> <kbd>ctrl+x</kbd>                 | Cut                    |
-| delete                       | <kbd>d</kbd> <kbd>delete</kbd>                 | Delete                 |
-| rename                       | <kbd>r</kbd> <kbd>f2</kbd>                     | Rename                 |
-| new                          | <kbd>ctrl+n</kbd> <kbd>o</kbd>                 | New                    |
-| toggle_all                   | <kbd>%</kbd> <kbd>ctrl+a</kbd>                 | Select all             |
-| zip                          | <kbd>E</kbd>                                   | Zip                    |
-| unzip                        | <kbd>ctrl+e</kbd>                              | Unzip                  |
-| copy_path                    | <kbd>Y</kbd>                                   | Copy path              |
-| up                           | <kbd>up</kbd> <kbd>k</kbd>                     | Up                     |
-| down                         | <kbd>down</kbd> <kbd>j</kbd>                   | Down                   |
-| up_tree                      | <kbd>left</kbd> <kbd>h</kbd>                   | Go up directory        |
-| down_tree                    | <kbd>right</kbd> <kbd>l</kbd> <kbd>enter</kbd> | Enter/Select           |
-| page_up                      | <kbd>pageup</kbd> <kbd>ctrl+b</kbd>            | Page Up                |
-| page_down                    | <kbd>pagedown</kbd> <kbd>ctrl+f</kbd>          | Page Down              |
-| home                         | <kbd>home</kbd> <kbd>g</kbd>                   | First                  |
-| end                          | <kbd>end</kbd> <kbd>G</kbd>                    | Last                   |
-| hist_previous                | <kbd>backspace</kbd> <kbd>u</kbd>              | History back           |
-| hist_next                    | <kbd>space</kbd>                               | History forward        |
-| toggle_visual                | <kbd>v</kbd>                                   | Visual mode            |
-| toggle_hidden_files          | <kbd>full_stop</kbd>                           | Toggle hidden files    |
-| select_up                    | <kbd>shift+up</kbd> <kbd>K</kbd>               | Select up              |
-| select_down                  | <kbd>shift+down</kbd> <kbd>J</kbd>             | Select down            |
-| select_page_up               | <kbd>shift+pageup</kbd>                        | Select page up         |
-| select_page_down             | <kbd>shift+pagedown</kbd>                      | Select page down       |
-| select_home                  | <kbd>shift+home</kbd>                          | Select to top          |
-| select_end                   | <kbd>shift+end</kbd>                           | Select to end          |
-| tab_next                     | <kbd>ctrl+j</kbd>                              | Next tab               |
-| tab_previous                 | <kbd>ctrl+k</kbd>                              | Previous tab           |
-| tab_new                      | <kbd>n</kbd>                                   | New tab                |
-| tab_close                    | <kbd>w</kbd>                                   | Close tab              |
-| preview_scroll_left          | <kbd>left</kbd> <kbd>h</kbd>                   | Scroll left            |
-| preview_scroll_right         | <kbd>right</kbd> <kbd>l</kbd>                  | Scroll right           |
-| preview_select_right         | <kbd>shift+right</kbd> <kbd>L</kbd>            | Select right           |
-| preview_select_left          | <kbd>shift+left</kbd> <kbd>H</kbd>             | Select left            |
-| show_keybinds                | <kbd>?</kbd>                                   | Show keybinds          |
-| quit_app                     | <kbd>q</kbd> <kbd>ctrl+q</kbd>                 | Quit app               |
-| command_palette              | <kbd>ctrl+p</kbd>                              | Launch command palette |
-| suspend_app                  | <kbd>ctrl+z</kbd>                              | Suspend app            |
+| action                       | description            | default                                        | vim                                            | sane                                     |
+| ---------------------------- | ---------------------- | ---------------------------------------------- | ---------------------------------------------- | ---------------------------------------- |
+| toggle_pin                   | Pin folder             | <kbd>P</kbd>                                   | <kbd>P</kbd>                                   | <kbd>P</kbd>                             |
+| toggle_pinned_sidebar        | Toggle sidebar         | <kbd>S</kbd>                                   | <kbd>S</kbd>                                   | <kbd>S</kbd>                             |
+| toggle_preview_sidebar       | Toggle preview         | <kbd>I</kbd>                                   | <kbd>I</kbd>                                   | <kbd>I</kbd>                             |
+| toggle_footer                | Toggle footer          | <kbd>F</kbd>                                   | <kbd>F</kbd>                                   | <kbd>F</kbd>                             |
+| toggle_menuwrapper           | Toggle menu wrapper    | <kbd>M</kbd>                                   | <kbd>M</kbd>                                   | <kbd>M</kbd>                             |
+| focus_toggle_pinned_sidebar  | Focus sidebar          | <kbd>s</kbd>                                   | <kbd>s</kbd>                                   | <kbd>s</kbd>                             |
+| focus_file_list              | Focus file list        | <kbd>escape</kbd>                              | <kbd>escape</kbd>                              | <kbd>escape</kbd>                        |
+| focus_toggle_preview_sidebar | Focus preview          | <kbd>i</kbd>                                   | <kbd>i</kbd>                                   | <kbd>i</kbd>                             |
+| focus_toggle_path_switcher   | Focus path switcher    | <kbd>ctrl+l</kbd>                              | <kbd>ctrl+l</kbd>                              | <kbd>ctrl+l</kbd>                        |
+| focus_toggle_processes       | Focus processes        | <kbd>#</kbd>                                   | <kbd>#</kbd>                                   | <kbd>p</kbd>                             |
+| focus_toggle_clipboard       | Focus clipboard        | <kbd>c</kbd>                                   | <kbd>c</kbd>                                   | <kbd>c</kbd>                             |
+| focus_toggle_metadata        | Focus metadata         | <kbd>m</kbd>                                   | <kbd>m</kbd>                                   | <kbd>m</kbd>                             |
+| focus_search                 | Search                 | <kbd>slash</kbd>                               | <kbd>slash</kbd>                               | <kbd>ctrl+f</kbd>                        |
+| copy                         | Copy                   | <kbd>y</kbd> <kbd>ctrl+c</kbd>                 | <kbd>y</kbd>                                   | <kbd>ctrl+c</kbd>                        |
+| paste                        | Paste                  | <kbd>p</kbd> <kbd>ctrl+v</kbd>                 | <kbd>p</kbd>                                   | <kbd>ctrl+v</kbd>                        |
+| cut                          | Cut                    | <kbd>x</kbd> <kbd>ctrl+x</kbd>                 | <kbd>x</kbd>                                   | <kbd>ctrl+x</kbd>                        |
+| delete                       | Delete                 | <kbd>d</kbd> <kbd>delete</kbd>                 | <kbd>d</kbd>                                   | <kbd>delete</kbd>                        |
+| rename                       | Rename                 | <kbd>r</kbd> <kbd>f2</kbd>                     | <kbd>r</kbd>                                   | <kbd>f2</kbd>                            |
+| new                          | New                    | <kbd>ctrl+n</kbd> <kbd>o</kbd>                 | <kbd>o</kbd>                                   | <kbd>ctrl+n</kbd>                        |
+| toggle_all                   | Select all             | <kbd>%</kbd> <kbd>ctrl+a</kbd>                 | <kbd>%</kbd> <kbd>ctrl+a</kbd>                 | <kbd>ctrl+a</kbd>                        |
+| zip                          | Zip                    | <kbd>E</kbd>                                   | <kbd>E</kbd>                                   | <kbd>E</kbd>                             |
+| unzip                        | Unzip                  | <kbd>ctrl+e</kbd>                              | <kbd>ctrl+e</kbd>                              | <kbd>ctrl+e</kbd>                        |
+| copy_path                    | Copy path              | <kbd>Y</kbd>                                   | <kbd>Y</kbd>                                   | <kbd>C</kbd>                             |
+| up                           | Up                     | <kbd>up</kbd> <kbd>k</kbd>                     | <kbd>k</kbd> <kbd>up</kbd>                     | <kbd>up</kbd>                            |
+| down                         | Down                   | <kbd>down</kbd> <kbd>j</kbd>                   | <kbd>j</kbd> <kbd>down</kbd>                   | <kbd>down</kbd>                          |
+| up_tree                      | Go up directory        | <kbd>left</kbd> <kbd>h</kbd>                   | <kbd>h</kbd> <kbd>left</kbd>                   | <kbd>left</kbd> <kbd>alt+up</kbd>        |
+| down_tree                    | Enter/Select           | <kbd>right</kbd> <kbd>l</kbd> <kbd>enter</kbd> | <kbd>l</kbd> <kbd>right</kbd> <kbd>enter</kbd> | <kbd>right</kbd> <kbd>enter</kbd>        |
+| page_up                      | Page Up                | <kbd>pageup</kbd> <kbd>ctrl+b</kbd>            | <kbd>ctrl+b</kbd> <kbd>pageup</kbd>            | <kbd>pageup</kbd>                        |
+| page_down                    | Page Down              | <kbd>pagedown</kbd> <kbd>ctrl+f</kbd>          | <kbd>ctrl+f</kbd> <kbd>pagedown</kbd>          | <kbd>pagedown</kbd>                      |
+| home                         | First                  | <kbd>home</kbd> <kbd>g</kbd>                   | <kbd>g</kbd>                                   | <kbd>home</kbd>                          |
+| end                          | Last                   | <kbd>end</kbd> <kbd>G</kbd>                    | <kbd>G</kbd>                                   | <kbd>end</kbd>                           |
+| hist_previous                | History back           | <kbd>backspace</kbd> <kbd>u</kbd>              | <kbd>u</kbd> <kbd>backspace</kbd>              | <kbd>backspace</kbd> <kbd>alt+left</kbd> |
+| hist_next                    | History forward        | <kbd>space</kbd>                               | <kbd>ctrl+r</kbd> <kbd>space</kbd>             | <kbd>alt+right</kbd>                     |
+| toggle_visual                | Visual mode            | <kbd>v</kbd>                                   | <kbd>v</kbd>                                   | <kbd>ctrl+space</kbd>                    |
+| toggle_hidden_files          | Toggle hidden files    | <kbd>full_stop</kbd>                           | <kbd>full_stop</kbd>                           | <kbd>.</kbd>                             |
+| select_up                    | Select up              | <kbd>shift+up</kbd> <kbd>K</kbd>               | <kbd>K</kbd> <kbd>shift+up</kbd>               | <kbd>shift+up</kbd>                      |
+| select_down                  | Select down            | <kbd>shift+down</kbd> <kbd>J</kbd>             | <kbd>J</kbd> <kbd>shift+down</kbd>             | <kbd>shift+down</kbd>                    |
+| select_page_up               | Select page up         | <kbd>shift+pageup</kbd>                        | <kbd>shift+pageup</kbd>                        | <kbd>shift+pageup</kbd>                  |
+| select_page_down             | Select page down       | <kbd>shift+pagedown</kbd>                      | <kbd>shift+pagedown</kbd>                      | <kbd>shift+pagedown</kbd>                |
+| select_home                  | Select to top          | <kbd>shift+home</kbd>                          | <kbd>shift+home</kbd>                          | <kbd>shift+home</kbd>                    |
+| select_end                   | Select to end          | <kbd>shift+end</kbd>                           | <kbd>shift+end</kbd>                           | <kbd>shift+end</kbd>                     |
+| tab_next                     | Next tab               | <kbd>ctrl+j</kbd>                              | <kbd>ctrl+j</kbd>                              | <kbd>ctrl+left_square_brace</kbd>        |
+| tab_previous                 | Previous tab           | <kbd>ctrl+k</kbd>                              | <kbd>ctrl+k</kbd>                              | <kbd>ctrl+right_square_brace</kbd>       |
+| tab_new                      | New tab                | <kbd>n</kbd>                                   | <kbd>n</kbd>                                   | <kbd>ctrl+t</kbd>                        |
+| tab_close                    | Close tab              | <kbd>w</kbd>                                   | <kbd>w</kbd>                                   | <kbd>ctrl+w</kbd>                        |
+| preview_scroll_left          | Scroll left            | <kbd>left</kbd> <kbd>h</kbd>                   | <kbd>h</kbd> <kbd>left</kbd>                   | <kbd>left</kbd>                          |
+| preview_scroll_right         | Scroll right           | <kbd>right</kbd> <kbd>l</kbd>                  | <kbd>l</kbd> <kbd>right</kbd>                  | <kbd>right</kbd>                         |
+| preview_select_right         | Select right           | <kbd>shift+right</kbd> <kbd>L</kbd>            | <kbd>L</kbd> <kbd>shift+right</kbd>            | _none_                                   |
+| preview_select_left          | Select left            | <kbd>shift+left</kbd> <kbd>H</kbd>             | <kbd>H</kbd> <kbd>shift+left</kbd>             | _none_                                   |
+| show_keybinds                | Show keybinds          | <kbd>?</kbd>                                   | <kbd>?</kbd>                                   | <kbd>f1</kbd>                            |
+| quit_app                     | Quit app               | <kbd>q</kbd> <kbd>ctrl+q</kbd>                 | <kbd>q</kbd> <kbd>ctrl+q</kbd>                 | <kbd>ctrl+q</kbd>                        |
+| command_palette              | Launch command palette | <kbd>ctrl+p</kbd>                              | <kbd>ctrl+p</kbd>                              | <kbd>ctrl+p</kbd>                        |
+| suspend_app                  | Suspend app            | <kbd>ctrl+z</kbd>                              | <kbd>ctrl+z</kbd>                              | <kbd>ctrl+z</kbd>                        |
 
 ## alternate layers
 
@@ -99,66 +99,66 @@ keybinds related to the alternate screens and popups in rovr.
 
 Keybinds related to changing the sort order
 
-| action     | default hotkey | description           |
-| ---------- | -------------- | --------------------- |
-| open_popup | <kbd>,</kbd>   | Open sort order popup |
-| name       | <kbd>a</kbd>   | Sort by name          |
-| extension  | <kbd>e</kbd>   | Sort by extension     |
-| natural    | <kbd>n</kbd>   | Sort naturally        |
-| size       | <kbd>s</kbd>   | Sort by size          |
-| created    | <kbd>c</kbd>   | Sort by created       |
-| modified   | <kbd>m</kbd>   | Sort by modified      |
-| descending | <kbd>d</kbd>   | Toggle descending     |
+| action     | default      | vim          | sane         | description           |
+| ---------- | ------------ | ------------ | ------------ | --------------------- |
+| open_popup | <kbd>,</kbd> | <kbd>,</kbd> | <kbd>o</kbd> | Open sort order popup |
+| name       | <kbd>a</kbd> | <kbd>a</kbd> | <kbd>n</kbd> | Sort by name          |
+| extension  | <kbd>e</kbd> | <kbd>e</kbd> | <kbd>e</kbd> | Sort by extension     |
+| natural    | <kbd>n</kbd> | <kbd>n</kbd> | <kbd>t</kbd> | Sort naturally        |
+| size       | <kbd>s</kbd> | <kbd>s</kbd> | <kbd>s</kbd> | Sort by size          |
+| created    | <kbd>c</kbd> | <kbd>c</kbd> | <kbd>c</kbd> | Sort by created       |
+| modified   | <kbd>m</kbd> | <kbd>m</kbd> | <kbd>m</kbd> | Sort by modified      |
+| descending | <kbd>d</kbd> | <kbd>d</kbd> | <kbd>d</kbd> | Toggle descending     |
 
 ### `delete_files`
 
 Keybinds related to the delete confirmation screen
 
-| action | default hotkey                 | description           |
-| ------ | ------------------------------ | --------------------- |
-| trash  | <kbd>d</kbd>                   | Delete to recycle bin |
-| delete | <kbd>x</kbd>                   | Permanently delete    |
-| cancel | <kbd>c</kbd> <kbd>escape</kbd> | Cancel deletion       |
+| action | default                        | vim                            | sane               | description           |
+| ------ | ------------------------------ | ------------------------------ | ------------------ | --------------------- |
+| trash  | <kbd>d</kbd>                   | <kbd>d</kbd>                   | <kbd>d</kbd>       | Delete to recycle bin |
+| delete | <kbd>x</kbd>                   | <kbd>x</kbd>                   | <kbd>shift+d</kbd> | Permanently delete    |
+| cancel | <kbd>c</kbd> <kbd>escape</kbd> | <kbd>c</kbd> <kbd>escape</kbd> | <kbd>escape</kbd>  | Cancel deletion       |
 
 ### `filename_conflict`
 
 Keybinds related to handling a conflict with two files of the same name
 
-| action         | default hotkey                 | description        |
-| -------------- | ------------------------------ | ------------------ |
-| overwrite      | <kbd>o</kbd>                   | Overwrite file     |
-| skip           | <kbd>s</kbd>                   | Skip file          |
-| rename         | <kbd>r</kbd>                   | Rename file        |
-| cancel         | <kbd>c</kbd> <kbd>escape</kbd> | Cancel operation   |
-| dont_ask_again | <kbd>a</kbd>                   | Don't ask me again |
+| action         | default                        | vim                            | sane              | description        |
+| -------------- | ------------------------------ | ------------------------------ | ----------------- | ------------------ |
+| overwrite      | <kbd>o</kbd>                   | <kbd>o</kbd>                   | <kbd>o</kbd>      | Overwrite file     |
+| skip           | <kbd>s</kbd>                   | <kbd>s</kbd>                   | <kbd>s</kbd>      | Skip file          |
+| rename         | <kbd>r</kbd>                   | <kbd>r</kbd>                   | <kbd>r</kbd>      | Rename file        |
+| cancel         | <kbd>c</kbd> <kbd>escape</kbd> | <kbd>c</kbd> <kbd>escape</kbd> | <kbd>escape</kbd> | Cancel operation   |
+| dont_ask_again | <kbd>a</kbd>                   | <kbd>a</kbd>                   | <kbd>a</kbd>      | Don't ask me again |
 
 ### `file_in_use`
 
 Keybinds related to handling a file that is in use by another process
 
-| action         | default hotkey                 | description        |
-| -------------- | ------------------------------ | ------------------ |
-| retry          | <kbd>r</kbd>                   | Retry operation    |
-| skip           | <kbd>s</kbd>                   | Skip file          |
-| cancel         | <kbd>c</kbd> <kbd>escape</kbd> | Cancel operation   |
-| dont_ask_again | <kbd>a</kbd>                   | Don't ask me again |
+| action         | default                        | vim                            | sane              | description        |
+| -------------- | ------------------------------ | ------------------------------ | ----------------- | ------------------ |
+| retry          | <kbd>r</kbd>                   | <kbd>r</kbd>                   | <kbd>r</kbd>      | Retry operation    |
+| skip           | <kbd>s</kbd>                   | <kbd>s</kbd>                   | <kbd>s</kbd>      | Skip file          |
+| cancel         | <kbd>c</kbd> <kbd>escape</kbd> | <kbd>c</kbd> <kbd>escape</kbd> | <kbd>escape</kbd> | Cancel operation   |
+| dont_ask_again | <kbd>a</kbd>                   | <kbd>a</kbd>                   | <kbd>a</kbd>      | Don't ask me again |
 
 ### `filter_modal`
 
 Keybinds related to selecting options in a modal screen (like FileSearch or ZDToDirectory)
 
-| action | default hotkey                    | description |
-| ------ | --------------------------------- | ----------- |
-| exit   | <kbd>escape</kbd>                 | Exit modal  |
-| down   | <kbd>down</kbd> <kbd>ctrl+j</kbd> | Select down |
-| up     | <kbd>up</kbd> <kbd>ctrl+k</kbd>   | Select up   |
+| action | default                           | vim                               | sane              | description |
+| ------ | --------------------------------- | --------------------------------- | ----------------- | ----------- |
+| exit   | <kbd>escape</kbd>                 | <kbd>escape</kbd>                 | <kbd>escape</kbd> | Exit modal  |
+| down   | <kbd>down</kbd> <kbd>ctrl+j</kbd> | <kbd>ctrl+j</kbd> <kbd>down</kbd> | <kbd>down</kbd>   | Select down |
+| up     | <kbd>up</kbd> <kbd>ctrl+k</kbd>   | <kbd>ctrl+k</kbd> <kbd>up</kbd>   | <kbd>up</kbd>     | Select up   |
 
 ### `yes_or_no`
 
 Keybinds related to yes/no confirmation modals
 
-| action         | default hotkey                 | description        |
-| -------------- | ------------------------------ | ------------------ |
-| yes            | <kbd>y</kbd>                   | Yes                |
-| no             | <kbd>n</kbd> <kbd>escape</kbd> | No                 |
-| dont_ask_again | <kbd>a</kbd>                   | Don't ask me again |
+| action         | default                        | vim                            | sane                           | description        |
+| -------------- | ------------------------------ | ------------------------------ | ------------------------------ | ------------------ |
+| yes            | <kbd>y</kbd>                   | <kbd>y</kbd>                   | <kbd>y</kbd> <kbd>enter</kbd>  | Yes                |
+| no             | <kbd>n</kbd> <kbd>escape</kbd> | <kbd>n</kbd> <kbd>escape</kbd> | <kbd>n</kbd> <kbd>escape</kbd> | No                 |
+| dont_ask_again | <kbd>a</kbd>                   | <kbd>a</kbd>                   | <kbd>a</kbd>                   | Don't ask me again |

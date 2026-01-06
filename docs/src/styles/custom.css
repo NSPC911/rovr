@@ -120,6 +120,24 @@ html * {
       var(--sl-transition-duration) scrollbar-color ease-in-out;
   }
 }
+html svg,
+html svg * {
+  text-transform: initial !important;
+}
+th {
+  position: sticky
+}
+th,
+td {
+  border: 2px solid var(--sl-color-accent);
+  padding: 10px;
+  text-align: center
+}
+table {
+  border: 2px solid var(--sl-color-accent);
+  overscroll-behavior-x: contain;
+  width: fit-content;
+}
 svg.rich-terminal * {
   font-family: "CaskaydiaCoveNFM" !important;
 }
@@ -218,6 +236,9 @@ img {
   .content-panel {
     max-width: calc(100vw - 525px);
   }
+  table {
+    max-width: calc(80vw - 300px) !important;
+  }
 }
 @media (min-width: 50rem) {
   .hero {
@@ -248,6 +269,11 @@ img {
   body > div:has(> nav) > div .main-frame {
     max-width: calc(
       100vw - clamp(220px, var(--sl-content-inline-start), 300px)
+    );
+  }
+  table {
+    max-width: calc(
+      100vw - clamp(260px, var(--sl-content-inline-start), 300px)
     );
   }
   [data-theme="light"] .sidebar-pane,

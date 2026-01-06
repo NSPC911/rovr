@@ -244,7 +244,10 @@ class Application(App, inherit_bindings=False):
         self.file_list = self.query_one("#file_list", FileList)
         self.file_list.focus()
         # restore UI state from saved state file
-        self.query_one(StateManager).restore_state()
+        state_manager = self.query_one(StateManager)
+        state_manager.restore_state()
+        # Apply folder-specific sort preferences for initial directory
+        state_manager.apply_folder_sort_prefs(normalise(getcwd()))
         # start mini watcher
         self.watch_for_changes_and_update()
         # disable scrollbars
@@ -552,6 +555,11 @@ class Application(App, inherit_bindings=False):
                     f"{directory}\nno longer exists!", title="App: cd", severity="error"
                 )
                 return
+
+        # Apply folder-specific sort preferences if they exist
+        with suppress(NoMatches):
+            state_manager: StateManager = self.query_one(StateManager)
+            state_manager.apply_folder_sort_prefs(normalise(getcwd()))
 
         self.file_list.update_file_list(
             add_to_session=add_to_history, focus_on=focus_on

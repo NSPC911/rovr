@@ -6,6 +6,7 @@ from textual.widgets.option_list import Option
 from rovr.components import PopupOptionList
 from rovr.functions.icons import get_icon, get_toggle_button_icon
 from rovr.functions.utils import check_key, get_shortest_bind
+from rovr.state_manager import StateManager
 from rovr.variables.constants import config
 
 # Get the shortest keybind for each sort option
@@ -104,6 +105,7 @@ class SortOrderPopup(PopupOptionList):
 
     @on(events.Show)
     def on_show(self, event: events.Show | None = None) -> None:
+        state_manager: StateManager = self.app.query_one(StateManager)
         self.set_options([
             SortOrderPopupOptions(
                 name_bind,
@@ -148,6 +150,13 @@ class SortOrderPopup(PopupOptionList):
                 self.app.file_list.sort_descending,
                 id="descending",
             ),
+            Option("", id="separator2", disabled=True),
+            SortOrderPopupOptions(
+                "",  # No keybind for this option
+                "This path only",
+                state_manager.custom_sort_enabled,
+                id="custom_sort",
+            ),
         ])
         # just do a quick width check
         width = 0
@@ -177,10 +186,19 @@ class SortOrderPopup(PopupOptionList):
         self.get_option("separator")._set_prompt(
             "[$secondary]" + ("-" * self.width) + "[/]"
         )
+        self.get_option("separator2")._set_prompt(
+            "[$secondary]" + ("-" * self.width) + "[/]"
+        )
 
     def on_option_list_option_selected(self, event: OptionList.OptionSelected) -> None:
         if event.option.id == "descending":
             self.app.file_list.sort_descending = not self.app.file_list.sort_descending
+        elif event.option.id == "custom_sort":
+            # Toggle custom sort for this folder
+            state_manager: StateManager = self.app.query_one(StateManager)
+            state_manager.toggle_custom_sort()
+            # Refresh file list to apply the change
+            self.app.file_list.update_file_list(add_to_session=False)
         else:
             self.app.file_list.sort_by = event.option.id
         self.go_hide()

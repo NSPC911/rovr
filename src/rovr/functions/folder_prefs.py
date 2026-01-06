@@ -97,7 +97,9 @@ def get_folder_pref(folder_path: str) -> FolderPrefDict | None:
     return folder_prefs.get(normalised)
 
 
-def set_folder_pref(folder_path: str, sort_by: SortByOptions, sort_descending: bool) -> None:
+def set_folder_pref(
+    folder_path: str, sort_by: SortByOptions, sort_descending: bool
+) -> None:
     """
     Set the sort preference for a specific folder.
 

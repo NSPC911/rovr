@@ -40,7 +40,7 @@ class StateManager(Widget):
     preview_sidebar_visible: reactive[bool] = reactive(True, init=False)
     footer_visible: reactive[bool] = reactive(True, init=False)
     menuwrapper_visible: reactive[bool] = reactive(True, init=False)
-    sort_by: reactive[str] = reactive("name", init=False)
+    sort_by: reactive[SortByOptions] = reactive("name", init=False)
     sort_descending: reactive[bool] = reactive(False, init=False)
     custom_sort_enabled: reactive[bool] = reactive(False, init=False)
 
@@ -200,7 +200,7 @@ sort_descending = {str(self.sort_descending).lower()}
         if self._locked_by == "menuwrapper":
             self._save_state()
 
-    def watch_sort_by(self, value: str) -> None:
+    def watch_sort_by(self, value: SortByOptions) -> None:
         if self._is_loading:
             return
         # Save to folder prefs if custom sort is enabled, otherwise save global
@@ -305,6 +305,7 @@ sort_descending = {str(self.sort_descending).lower()}
                     self.sort_descending = sort_descending
                 self._is_loading = False
         except (tomli.TOMLDecodeError, OSError):
+            # if any issue, just use defaults
             pass
 
     def toggle_custom_sort(self) -> None:

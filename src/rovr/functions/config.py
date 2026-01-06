@@ -165,6 +165,14 @@ def schema_dump(doc_path: str, exception: ValidationError, config_content: str) 
 
     doc: list = config_content.splitlines()
 
+    if exception.message.startswith("Additional properties are not allowed"):
+        # `Additional properties are not allowed ('<key>' was unexpected)`
+        # grabs only the key
+        cause = exception.message.split("'")
+        if len(cause) == 3:
+            exception.path.append(cause[1])
+        else:
+            pass
     # find the line no for the error path
     path_str = ".".join(str(p) for p in exception.path) if exception.path else "root"
     lineno = find_path_line(doc, exception.path)
@@ -239,7 +247,9 @@ def schema_dump(doc_path: str, exception: ValidationError, config_content: str) 
             to_print.add_row(f"[dim]> {item['extra']}[/]")
             pprint(Padding(to_print, (0, rjust + 4, 0, rjust + 3)))
             break
-    exit(1)
+
+    if not exception.message.startswith("Additional properties are not allowed"):
+        exit(1)
 
 
 def load_config() -> tuple[dict, dict]:
@@ -315,17 +325,7 @@ def load_config() -> tuple[dict, dict]:
     try:
         jsonschema.validate(config, schema)
     except ValidationError as exception:
-        if exception.validator == "additionalProperties":
-            # message: "Additional properties are not allowed ('flag' was unexpected)"
-            # can be was or were, depends on flags count
-            try:
-                flags = exception.message.split("(")[1].split(" was")[0].split(" were")[0].replace("'", "")
-                flag_path = ".".join(str(p) for p in exception.path) if exception.path else "root level"
-                pprint(f"[yellow]Warning:[/] Ignoring additional config key(s) [bright_cyan]{flags}[/] at [cyan]{flag_path}[/] (not in schema)")
-            except (IndexError, AttributeError):
-                pprint("[yellow]Warning:[/] Ignoring additional config key(s) (not in schema)")
-        else:
-            schema_dump(user_config_path, exception, user_config_content)
+        schema_dump(user_config_path, exception, user_config_content)
 
     # slight config fixes
     # image protocol because "AutoImage" doesn't work with Sixel

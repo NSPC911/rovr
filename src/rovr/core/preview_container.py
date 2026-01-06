@@ -6,7 +6,7 @@ from time import time
 from typing import cast
 
 import textual_image.widget as timg
-from pdf2image import convert_from_path
+from pdf2image import convert_from_path, pdfinfo_from_path
 from PIL import Image, UnidentifiedImageError
 from PIL.Image import Image as PILImage
 from rich.syntax import Syntax
@@ -34,9 +34,50 @@ titles = PreviewContainerTitles()
 
 @dataclass
 class PDFHandler:
+    # It is 0 indexed, although most poppler functions
+    # like convert_from_path expects 1 based indexing
     current_page: int = 0
     total_pages: int = 0
     images: list[PILImage] | None = None
+
+    def count_loaded(self) -> int:
+        return 0 if self.images is None else len(self.images)
+
+    def must_load_next_batch(self) -> bool:
+        return self.current_page >= self.count_loaded()
+
+    def should_load_next_batch(self) -> bool:
+        if self.count_loaded() >= self.total_pages:
+            return False
+
+        # If going further down half the batch will cross currently loaded pages
+        # then its better to preload in advance
+        return (
+            self.current_page + PDFHandler.pdf_batch_size() // 2
+        ) >= self.count_loaded()
+
+    def get_last_page_to_load(self) -> int:
+        # We should load till current page, if user scrolls too fast and reaches
+        # beyond the batch before our load. This can happen on slow loads, and smaller batch sizes
+        last_page = max(
+            self.current_page + 1,
+            self.count_loaded() + PDFHandler.pdf_batch_size(),
+        )
+        return min(last_page, self.total_pages)
+
+    @staticmethod
+    def pdf_batch_size() -> int:
+        # Lesser typing, more readable calculations
+        return config["plugins"]["poppler"]["pdf_batch_size"]
+
+    @staticmethod
+    def get_poppler_folder() -> str | None:
+        poppler_folder: str | None = cast(
+            str | None, config["plugins"]["poppler"]["poppler_folder"]
+        )
+        if poppler_folder == "":
+            poppler_folder = None
+        return poppler_folder
 
 
 class LoadingPreview(Static):
@@ -212,11 +253,61 @@ class PreviewContainer(Container):
         if should_cancel():
             return
 
-    def show_pdf_preview(self, depth: int = 0) -> None:
-        """Show PDF preview. Runs in a thread.
+    def update_current_pdf_page_by_diff(self, diff: int) -> None:
+        """Updates the current pages by a diff"""
+        self.update_current_pdf_page(self.pdf.current_page + diff)
+
+    # Note : We must ensure that any update to current_page happens via this
+    def update_current_pdf_page(self, current_page: int) -> None:
+        """Updates the current pages and ensure to spawn a worker that will eventually load them"""
+        if current_page < 0 or current_page >= self.pdf.total_pages:
+            return
+        if current_page == self.pdf.current_page:
+            return
+
+        self.pdf.current_page = current_page
+        setattr(
+            self,
+            "border_subtitle",
+            f"Page {self.pdf.current_page + 1}/{self.pdf.total_pages}",
+        )
+        self._trigger_pdf_update()
+
+    def load_pdf_pages(self, first_page: int, last_page: int) -> list[Image.Image]:
+        """
+        Returns:
+            List of images, one per pages fetched
 
         Raises:
             ValueError: If PDF conversion returns 0 pages.
+        """
+        if first_page > last_page:
+            raise ValueError(
+                f"Invalid args, first_page={first_page} > last_page={last_page}"
+            )
+
+        result = convert_from_path(
+            str(self._current_file_path),
+            transparent=False,
+            fmt="png",
+            single_file=False,
+            first_page=first_page,
+            last_page=last_page,
+            use_pdftocairo=config["plugins"]["poppler"]["use_pdftocairo"],
+            thread_count=config["plugins"]["poppler"]["threads"],
+            poppler_path=cast(str | PurePath, PDFHandler.get_poppler_folder()),  # type: ignore[arg-type]
+        )
+        if len(result) == 0:
+            raise ValueError(
+                "Obtained 0 pages from Poppler. Something may have gone wrong..."
+            )
+        return result
+
+    def show_pdf_preview(self, depth: int = 0) -> None:
+        """
+        Show PDF preview. Runs in a thread.
+        The job of this function is to load the pdf file for the first time.
+        Or ensure the batchwise loading
         """
         self.app.call_from_thread(setattr, self, "border_title", titles.pdf)
 
@@ -225,23 +316,14 @@ class PreviewContainer(Container):
 
         # Convert PDF to images if not already done
         if self.pdf.images is None:
-            poppler_folder: str | None = config["plugins"]["poppler"]["poppler_folder"]
-            if poppler_folder == "":
-                poppler_folder = None
             try:
-                result = convert_from_path(
-                    self._current_file_path,
-                    transparent=False,
-                    fmt="png",
-                    single_file=False,
-                    use_pdftocairo=config["plugins"]["poppler"]["use_pdftocairo"],
-                    thread_count=config["plugins"]["poppler"]["threads"],
-                    poppler_path=cast(str | PurePath, poppler_folder),
+                self.pdf.total_pages = pdfinfo_from_path(
+                    str(self._current_file_path),
+                    poppler_path=cast(str, PDFHandler.get_poppler_folder()),
+                )["Pages"]
+                result = self.load_pdf_pages(
+                    first_page=1, last_page=self.pdf.get_last_page_to_load()
                 )
-                if len(result) == 0:
-                    raise ValueError(
-                        "Obtained 0 pages from Poppler. Something may have gone wrong\u2026"
-                    )
             except Exception as exc:
                 if should_cancel():
                     return
@@ -251,22 +333,62 @@ class PreviewContainer(Container):
                     Static(f"{type(exc).__name__}: {str(exc)}", classes="special"),
                 )
                 return
-
             self.pdf.images = result
-            self.pdf.total_pages = len(self.pdf.images)
+
+            # The only one case when current page and border subtites
+            # should be manually adjusted. Not the best design though.
             self.pdf.current_page = 0
+            self.app.call_from_thread(
+                setattr,
+                self,
+                "border_subtitle",
+                f"Page {self.pdf.current_page + 1}/{self.pdf.total_pages}",
+            )
+
+        elif self.pdf.should_load_next_batch():
+            # Saving the value per thread instead of recalculating after the load
+            # Even if something changes in between, we want the threads that set the status to
+            # loading, to always unset it
+            toggle_loading = self.pdf.must_load_next_batch()
+
+            if toggle_loading:
+                self.post_message(self.SetLoading(True))
+            try:
+                result = self.load_pdf_pages(
+                    first_page=self.pdf.count_loaded() + 1,
+                    last_page=self.pdf.get_last_page_to_load(),
+                )
+            except Exception as exc:
+                if should_cancel():
+                    return
+                self.app.call_from_thread(self.remove_children)
+                self.app.call_from_thread(
+                    self.mount,
+                    Static(f"{type(exc).__name__}: {str(exc)}", classes="special"),
+                )
+                return
+            if toggle_loading:
+                self.call_later(lambda: self.post_message(self.SetLoading(False)))
+            # Note - This should_cancel must be kept here, not before the `load_pdf_pages` call
+            # That, somehow doesn't prevents multiple threads executing the load
+            # Even though, we do succesfully prevent multiple threads appending the results
+            # via this one
+            # Also we must ensure to cancel only after you reset the SetLoading(false)
+            # We don't want threads to Set the screen in Loading state, and never turn it back
+            if should_cancel():
+                return
+
+            # This mutation on the `images` object should be done by one one thread
+            # and the entire flow of checking `should_load_next_batch` to loading
+            # to appending the pages should be atomic.
+            # At this point, we are using `should_cancel` to allow only one thread
+            # to reach here
+            self.pdf.images += result
 
         if should_cancel():
             return
 
         current_image = self.pdf.images[self.pdf.current_page]
-
-        self.app.call_from_thread(
-            setattr,
-            self,
-            "border_subtitle",
-            f"Page {self.pdf.current_page + 1}/{self.pdf.total_pages}",
-        )
 
         if not self.has_child(".image_preview"):
             self.app.call_from_thread(self.remove_children)
@@ -846,17 +968,13 @@ class PreviewContainer(Container):
         """Handle mouse scroll up for PDF navigation."""
         if self.border_title == titles.pdf and self._file_type == "pdf":
             event.stop()
-            if self.pdf.current_page > 0:
-                self.pdf.current_page -= 1
-                self._trigger_pdf_update()
+            self.update_current_pdf_page_by_diff(-1)
 
     def on_mouse_scroll_down(self, event: events.MouseScrollDown) -> None:
         """Handle mouse scroll down for PDF navigation."""
         if self.border_title == titles.pdf and self._file_type == "pdf":
             event.stop()
-            if self.pdf.current_page < self.pdf.total_pages - 1:
-                self.pdf.current_page += 1
-                self._trigger_pdf_update()
+            self.update_current_pdf_page_by_diff(1)
 
     # not sure if exclusive does anything, but whatever
     @work(thread=True, exclusive=True)
@@ -894,31 +1012,24 @@ class PreviewContainer(Container):
             and self._file_type == "pdf"
             and self.pdf.images is not None
         ):
-            if (
-                check_key(
-                    event, config["keybinds"]["down"] + config["keybinds"]["page_down"]
-                )
-                and self.pdf.current_page < self.pdf.total_pages - 1
+            if check_key(
+                event, config["keybinds"]["down"] + config["keybinds"]["page_down"]
             ):
                 event.stop()
-                self.pdf.current_page += 1
-            elif (
-                check_key(
-                    event, config["keybinds"]["up"] + config["keybinds"]["page_up"]
-                )
-                and self.pdf.current_page > 0
+                self.update_current_pdf_page_by_diff(1)
+            elif check_key(
+                event, config["keybinds"]["up"] + config["keybinds"]["page_up"]
             ):
-                event.stop()
-                self.pdf.current_page -= 1
+                self.update_current_pdf_page_by_diff(-1)
             elif check_key(event, config["keybinds"]["home"]):
                 event.stop()
-                self.pdf.current_page = 0
+                self.update_current_pdf_page(0)
+
             elif check_key(event, config["keybinds"]["end"]):
                 event.stop()
-                self.pdf.current_page = self.pdf.total_pages - 1
+                self.update_current_pdf_page(self.pdf.total_pages - 1)
             else:
                 return
-            self._trigger_pdf_update()
         elif self.border_title == titles.archive:
             widget: FileList = self.query_one(FileList)
             if check_key(event, config["keybinds"]["up"]):

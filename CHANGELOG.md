@@ -4,6 +4,7 @@
 
 ## new features
 - cli: add `--config-folder` option to specify custom config folder #185
+- preview: batched pdf loading #184
 - filelist: dim files/folders that are cut in clipboard #188
 
 <details>

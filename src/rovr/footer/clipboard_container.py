@@ -2,24 +2,21 @@ import asyncio
 from os import path
 from typing import ClassVar, Self, Sequence
 
-from rich.segment import Segment
-from rich.style import Style
 from textual import events, work
 from textual.binding import BindingType
 from textual.content import Content
-from textual.strip import Strip
 from textual.widgets import Button, SelectionList
-from textual.widgets.option_list import OptionDoesNotExist
 from textual.worker import Worker
 
 from rovr.classes import ClipboardSelection
+from rovr.classes.mixins import CheckboxRenderingMixin
 from rovr.classes.textual_options import ClipboardSelectionValue
 from rovr.functions import icons as icon_utils
 from rovr.functions.path import dump_exc
 from rovr.variables.constants import config, vindings
 
 
-class Clipboard(SelectionList, inherit_bindings=False):
+class Clipboard(CheckboxRenderingMixin, SelectionList, inherit_bindings=False):
     """A selection list that displays the clipboard contents."""
 
     BINDINGS: ClassVar[list[BindingType]] = list(vindings)
@@ -95,69 +92,6 @@ class Clipboard(SelectionList, inherit_bindings=False):
             self.select(self.get_option_at_index(item_number))
         # then go through filelist and dim the cut items
         self.app.file_list.update_dimmed_items(items)
-
-    # Use better versions of the checkbox icons
-    def _get_left_gutter_width(
-        self,
-    ) -> int:
-        """Returns the size of any left gutter that should be taken into account.
-
-        Returns:
-            The width of the left gutter.
-        """
-        return len(
-            icon_utils.get_toggle_button_icon("left")
-            + icon_utils.get_toggle_button_icon("inner")
-            + icon_utils.get_toggle_button_icon("right")
-            + " "
-        )
-
-    def render_line(self, y: int) -> Strip:
-        """Render a line in the display.
-
-        Args:
-            y: The line to render.
-
-        Returns:
-            A [`Strip`][textual.strip.Strip] that is the line to render.
-        """
-        line = super(SelectionList, self).render_line(y)
-
-        _, scroll_y = self.scroll_offset
-        selection_index = scroll_y + y
-        try:
-            selection = self.get_option_at_index(selection_index)
-        except OptionDoesNotExist:
-            return line
-
-        component_style = "selection-list--button"
-        if selection.value in self._selected:
-            component_style += "-selected"
-        if self.highlighted == selection_index:
-            component_style += "-highlighted"
-
-        underlying_style = next(iter(line)).style or self.rich_style
-        assert underlying_style is not None
-
-        button_style = self.get_component_rich_style(component_style)
-
-        side_style = Style.from_color(button_style.bgcolor, underlying_style.bgcolor)
-
-        side_style += Style(meta={"option": selection_index})
-        button_style += Style(meta={"option": selection_index})
-
-        return Strip([
-            Segment(icon_utils.get_toggle_button_icon("left"), style=side_style),
-            Segment(
-                icon_utils.get_toggle_button_icon("inner_filled")
-                if selection.value in self._selected
-                else icon_utils.get_toggle_button_icon("inner"),
-                style=button_style,
-            ),
-            Segment(icon_utils.get_toggle_button_icon("right"), style=side_style),
-            Segment(" ", style=underlying_style),
-            *line,
-        ])
 
     # Why isnt this already a thing
     def insert_selection_at_beginning(self, content: ClipboardSelection) -> None:

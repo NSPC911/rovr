@@ -3,14 +3,11 @@ from os import getcwd, path
 from os import system as cmd
 from typing import ClassVar, Iterable, Self, Sequence, cast
 
-from rich.segment import Segment
-from rich.style import Style as RichStyle
 from textual import events, on, work
 from textual.binding import BindingType
 from textual.content import ContentText
 from textual.css.query import NoMatches
 from textual.geometry import Region
-from textual.strip import Strip
 from textual.style import Style as TextualStyle
 from textual.widgets import Button, Input, OptionList, SelectionList
 from textual.widgets.option_list import Option, OptionDoesNotExist
@@ -18,6 +15,7 @@ from textual.widgets.selection_list import Selection, SelectionType
 from textual.worker import WorkerError
 
 from rovr.classes import FileListSelectionWidget
+from rovr.classes.mixins import CheckboxRenderingMixin
 from rovr.classes.session_manager import SessionManager
 from rovr.components import PopupOptionList
 from rovr.functions import icons as icon_utils
@@ -34,7 +32,7 @@ from rovr.variables.constants import (
 )
 
 
-class FileList(SelectionList, inherit_bindings=False):
+class FileList(CheckboxRenderingMixin, SelectionList, inherit_bindings=False):
     """
     OptionList but can multi-select files and folders.
     """
@@ -423,128 +421,6 @@ class FileList(SelectionList, inherit_bindings=False):
     @property
     def options(self) -> Sequence[FileListSelectionWidget]:
         return self._options
-
-    # Use better versions of the checkbox icons
-    def _get_left_gutter_width(
-        self,
-    ) -> int:
-        """Returns the size of any left gutter that should be taken into account.
-
-        Returns:
-            The width of the left gutter.
-        """
-        # In normal mode or dummy mode, we don't have a gutter
-        if self.dummy or not self.select_mode_enabled:
-            return 0
-        else:
-            # Calculate the exact width of the checkbox components
-            return len(
-                icon_utils.get_toggle_button_icon("left")
-                + icon_utils.get_toggle_button_icon("inner")
-                + icon_utils.get_toggle_button_icon("right")
-                + " "
-            )
-
-    def render_line(self, y: int) -> Strip:
-        """Render a line in the display.
-
-        Args:
-            y: The line to render.
-
-        Returns:
-            A [`Strip`][textual.strip.Strip] that is the line to render.
-        """
-        # Insane monkey patching was done here, mainly:
-        # - replacing render_line from OptionList with super_render_line()
-        #   to theme selected options when not highlighted.
-        # - ignoring rendering of the checkboxes when
-        #   it is a dummy or not in select mode.
-        #   - ignore checkbox rendering on disabled options.
-        # - using custom icons for the checkbox.
-
-        def super_render_line(y: int, selection_style: str = "") -> Strip:
-            line_number = self.scroll_offset.y + y
-            try:
-                option_index, line_offset = self._lines[line_number]
-                option = self.options[option_index]
-            except IndexError:
-                return Strip.blank(
-                    self.scrollable_content_region.width,
-                    self.get_visual_style("option-list--option").rich_style,
-                )
-
-            mouse_over: bool = self._mouse_hovering_over == option_index
-            component_class = ""
-            if selection_style == "selection-list--button-selected":
-                component_class = selection_style
-            elif option.disabled:
-                component_class = "option-list--option-disabled"
-            elif self.highlighted == option_index:
-                component_class = "option-list--option-highlighted"
-            elif mouse_over:
-                component_class = "option-list--option-hover"
-
-            if component_class:
-                style = self.get_visual_style("option-list--option", component_class)
-            else:
-                style = self.get_visual_style("option-list--option")
-
-            strips = self._get_option_render(option, style)
-            try:
-                strip = strips[line_offset]
-            except IndexError:
-                return Strip.blank(
-                    self.scrollable_content_region.width,
-                    self.get_visual_style("option-list--option").rich_style,
-                )
-            return strip
-
-        # just return standard rendering
-        if self.dummy or not self.select_mode_enabled:
-            return super_render_line(y)
-
-        # calculate with checkbox rendering
-        _, scroll_y = self.scroll_offset
-        selection_index = scroll_y + y
-        try:
-            selection = self.get_option_at_index(selection_index)
-        except OptionDoesNotExist:
-            return Strip([*super_render_line(y)])
-
-        if selection.disabled:
-            return Strip([*super_render_line(y)])
-
-        component_style = "selection-list--button"
-        if selection.value in self._selected:
-            component_style += "-selected"
-        if self.highlighted == selection_index:
-            component_style += "-highlighted"
-
-        line = super_render_line(y, component_style)
-        underlying_style = next(iter(line)).style or self.rich_style
-        assert underlying_style is not None
-
-        button_style = self.get_component_rich_style(component_style)
-
-        side_style = RichStyle.from_color(
-            button_style.bgcolor, underlying_style.bgcolor
-        )
-
-        side_style += RichStyle(meta={"option": selection_index})
-        button_style += RichStyle(meta={"option": selection_index})
-
-        return Strip([
-            Segment(icon_utils.get_toggle_button_icon("left"), style=side_style),
-            Segment(
-                icon_utils.get_toggle_button_icon("inner_filled")
-                if selection.value in self._selected
-                else icon_utils.get_toggle_button_icon("inner"),
-                style=button_style,
-            ),
-            Segment(icon_utils.get_toggle_button_icon("right"), style=side_style),
-            Segment(" ", style=underlying_style),
-            *line,
-        ])
 
     async def toggle_hidden_files(self) -> None:
         """Toggle the visibility of hidden files."""

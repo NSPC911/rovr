@@ -1,0 +1,121 @@
+# Sane keybinds profile for rovr
+# This profile uses standard keyboard shortcuts familiar to most users via explorer.exe
+
+[keybinds]
+toggle_pin = ["P"]
+toggle_pinned_sidebar = ["S"]
+toggle_preview_sidebar = ["I"]
+toggle_footer = ["F"]
+toggle_menuwrapper = ["M"]
+focus_toggle_pinned_sidebar = ["s"]
+focus_file_list = ["escape"]
+focus_toggle_preview_sidebar = ["i"]
+focus_toggle_path_switcher = ["ctrl+l"]
+focus_search = ["ctrl+f"]
+focus_toggle_processes = ["p"]
+focus_toggle_clipboard = ["c"]
+focus_toggle_metadata = ["m"]
+# standard
+copy = ["ctrl+c"]
+paste = ["ctrl+v"]
+cut = ["ctrl+x"]
+delete = ["delete"]
+rename = ["f2"]
+new = ["ctrl+n"]
+# off standard but seems reasonable enough
+zip = ["E"]
+unzip = ["ctrl+e"]
+# issue is that terminals tend to take ctrl+shift+c to copy
+# selections done with shift + mouse
+copy_path = ["C"]
+# standard
+up = ["up"]
+down = ["down"]
+up_tree = ["left", "alt+up"]
+down_tree = ["right", "enter"]
+page_up = ["pageup"]
+page_down = ["pagedown"]
+home = ["home"]
+end = ["end"]
+# from explorer.exe
+hist_previous = ["backspace", "alt+left"]
+hist_next = ["alt+right"]
+toggle_all = ["ctrl+a"]
+toggle_visual = ["ctrl+space"]
+# reasonable enough, unless `h` is preferred by others
+toggle_hidden_files = ["."]
+select_up = ["shift+up"]
+select_down = ["shift+down"]
+# these are most likely taken by terminals, but i dont
+# know what else to pick as a sane, non-vim binding
+select_page_up = ["shift+pageup"]
+select_page_down = ["shift+pagedown"]
+# definitely available
+select_home = ["shift+home"]
+select_end = ["shift+end"]
+# i dont trust ctrl + tab being available
+tab_next = ["ctrl+left_square_brace"]
+tab_previous = ["ctrl+right_square_brace"]
+# but i know ctrl+t and ctrl+w are
+tab_new = ["ctrl+t"]
+tab_close = ["ctrl+w"]
+preview_scroll_left = ["left"]
+preview_scroll_right = ["right"]
+show_keybinds = ["f1"]
+# quit with ctrl+q only to avoid accidental quits (also because ctrl+c is taken by copy)
+quit_app = ["ctrl+q"]
+command_palette = "ctrl+p"
+suspend_app = ["ctrl+z"]
+# unavailable for now
+preview_select_left = []
+preview_select_right = []
+
+[keybinds.change_sort_order]
+open_popup = ["o"]
+name = ["n"]
+extension = ["e"]
+natural = ["t"]
+size = ["s"]
+created = ["c"]
+modified = ["m"]
+descending = ["d"]
+
+[keybinds.delete_files]
+trash = ["d"]
+delete = ["shift+d"]
+cancel = ["escape"]
+
+[keybinds.filename_conflict]
+overwrite = ["o"]
+skip = ["s"]
+rename = ["r"]
+cancel = ["escape"]
+dont_ask_again = ["a"]
+
+[keybinds.file_in_use]
+retry = ["r"]
+skip = ["s"]
+cancel = ["escape"]
+dont_ask_again = ["a"]
+
+[keybinds.filter_modal]
+exit = ["escape"]
+down = ["down"]
+up = ["up"]
+
+[keybinds.yes_or_no]
+yes = ["y", "enter"]
+no = ["n", "escape"]
+dont_ask_again = ["a"]
+
+[plugins.zoxide]
+keybinds = ["ctrl+d"]
+
+[plugins.editor]
+keybinds = ["ctrl+o"]
+
+[plugins.fd]
+keybinds = ["ctrl+g"]
+
+[plugins.rg]
+keybinds = ["\\"]

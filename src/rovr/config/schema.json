@@ -502,7 +502,7 @@
         "focus_toggle_path_switcher": {
           "$ref": "#/definitions/keybind",
           "description": "Focus toggle between path switcher and file list.",
-          "display_name": "Focus path"
+          "display_name": "Focus path switcher"
         },
         "focus_toggle_processes": {
           "$ref": "#/definitions/keybind",

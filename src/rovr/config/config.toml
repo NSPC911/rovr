@@ -122,8 +122,9 @@ is_dark = true
 "button-focus-text-style" = "reverse"
 
 [keybinds]
-# id love to get some help separating
-# vi bindings from sane bindings
+# For keybind profiles, see keybinds/sane.toml and keybinds/vim.toml
+# The default configuration below combines both styles for maximum flexibility.
+# Users can copy their preferred profile to their config directory.
 toggle_pin = ["P"]
 toggle_pinned_sidebar = ["S"]
 toggle_preview_sidebar = ["I"]
@@ -241,7 +242,7 @@ default_filter_types = ["file", "directory"]
 
 [plugins.rg]
 enabled = true
-keybinds = ["R"]
+keybinds = ["\\"]
 executable = "rg"
 case_sensitive = true
 no_ignore_parent = false

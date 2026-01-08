@@ -8,6 +8,9 @@ jobs:
   label:
     runs-on: ubuntu-slim
     steps:
+      - name: Checkout your repository using git
+        uses: actions/checkout@v4
+
       - name: Add OS labels
         env:
           GH_TOKEN: ${{ github.token }}

@@ -75,7 +75,7 @@ class CheckboxRenderingMixin:
             A Strip that is the line to render.
         """
         # Check if we should render checkboxes
-        if not (hasattr(self, "dummy") and self.dummy) or not (
+        if (hasattr(self, "dummy") and self.dummy) or (
             hasattr(self, "select_mode_enabled") and not self.select_mode_enabled
         ):
             return self.super_render_line(y)
@@ -118,14 +118,14 @@ class CheckboxRenderingMixin:
         ]
 
         return Strip([
-            Segment(icons[0], style=side_style),  # left icon
+            Segment(icons[0], style=side_style),
             Segment(
                 icon_utils.get_toggle_button_icon("inner_filled")
                 if selection.value in self._selected
-                else icons[1],  # inner icon (empty or filled)
+                else icons[1],
                 style=button_style,
             ),
-            Segment(icons[2], style=side_style),  # right icon
-            Segment(icons[3], style=underlying_style),  # spacing
+            Segment(icons[2], style=side_style),
+            Segment(icons[3], style=underlying_style),
             *line,
         ])

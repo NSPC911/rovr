@@ -449,9 +449,8 @@ class FileList(CheckboxRenderingMixin, SelectionList, inherit_bindings=False):
         ):
             return
         self.select_mode_enabled = not self.select_mode_enabled
-        if not self.select_mode_enabled:
-            self._line_cache.clear()
-            self._option_render_cache.clear()
+        self._line_cache.clear()
+        self._option_render_cache.clear()
         self.refresh(layout=True, repaint=True)
         self.app.tabWidget.active_tab.session.selectMode = self.select_mode_enabled
         with self.prevent(SelectionList.SelectedChanged):

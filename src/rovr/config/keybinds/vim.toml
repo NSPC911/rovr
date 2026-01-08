@@ -95,6 +95,7 @@ yes = ["y"]
 no = ["n", "escape"]
 dont_ask_again = ["a"]
 
+# plugins
 [plugins.zoxide]
 keybinds = ["z"]
 

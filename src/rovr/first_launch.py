@@ -1,19 +1,43 @@
+import os
+from importlib import resources
+from importlib.metadata import PackageNotFoundError, version
 from io import BytesIO
+from os import path
 from shutil import which
-from typing import Callable, Literal, TypedDict
+from time import sleep
+from typing import Callable
 
 import aiohttp
 import textual_image.widget as timg
+import tomli
 from PIL import Image as PILImage
 from PIL.Image import Image
+from rich.syntax import Syntax
+from rich.text import Text
 from textual import events, on, work
 from textual.app import App, ComposeResult
 from textual.binding import Binding
-from textual.containers import Center, HorizontalGroup, VerticalGroup
+from textual.containers import (
+    Center,
+    Container,
+    HorizontalGroup,
+    ScrollableContainer,
+    VerticalGroup,
+)
 from textual.css.query import NoMatches
-from textual.screen import Screen
+from textual.screen import ModalScreen, Screen
 from textual.theme import BUILTIN_THEMES
-from textual.widgets import Button, RadioButton, RadioSet, Select, Static, Switch
+from textual.widgets import (
+    Button,
+    RadioButton,
+    RadioSet,
+    Select,
+    Static,
+    Switch,
+)
+from textual.worker import get_current_worker
+
+from rovr.variables.maps import VAR_TO_DIR
 
 prot_to_timg: dict[str, Callable] = {
     "auto": timg.Image,
@@ -24,23 +48,76 @@ prot_to_timg: dict[str, Callable] = {
 }
 
 
+prot_to_schema: dict[str, str] = {
+    "auto": "Auto",
+    "tgp": "TGP",
+    "sixel": "Sixel",
+    "halfcell": "Halfcell",
+    "unicode": "Unicode",
+}
+
+
+try:
+    schema_ref = f"refs/tags/v{version('rovr')}"
+except PackageNotFoundError:
+    schema_ref = "refs/heads/master"
+
+
 class DummyScreen(Screen[None]):
     def on_mount(self) -> None:
         self.dismiss()
 
 
-class Options(TypedDict):
-    keybinds: Literal["sane", "vim"]
-    theme: str
-    plugins_rg: bool
-    plugins_fd: bool
-    plugins_bat: bool
-    plugins_zoxide: bool
-    plugins_poppler: bool
-    plugins_file_one: bool
+class FinalStuff(ModalScreen[None]):
+    def __init__(self) -> None:
+        super().__init__()
+
+    def compose(self) -> ComposeResult:
+        with Container(classes="modal-wrapper"):
+            yield Static("Done! You can now exit the app via the big red button!")
+            yield Static(
+                Text.from_markup(
+                    "Make sure to [link=https://github.com/NSPC911/rovr][u]star the repo[/][/link] or [u][link=https://nspc911.github.io/rovr]visit the documentation[/link][/] for more information!"
+                )
+            )
+            yield Static(classes="padding")
+            yield Button("Bye!", variant="error")
+
+    def on_button_pressed(self, event: Button.Pressed) -> None:
+        self.app.exit(0)
 
 
-class Application(App, inherit_bindings=False):
+class AskWrite(ModalScreen[bool]):
+    def __init__(self, content: str) -> None:
+        super().__init__()
+        self.content = Syntax(
+            content,
+            "toml",
+            theme="native",
+            background_color="default",
+            line_numbers=True,
+        )
+
+    def compose(self) -> ComposeResult:
+        with Container(classes="modal-wrapper"):
+            yield Static("Write config to disk?")
+            yield Static(
+                f"The following content will be written to [u]{path.realpath(f'{VAR_TO_DIR["CONFIG"]}/config.toml')}[/]:"
+            )
+            yield Static(classes="padding")
+            with ScrollableContainer():
+                yield Static(self.content, id="config-preview")
+            with HorizontalGroup():
+                yield Button("Ok!", id="yes", variant="success")
+                yield Button("No.", id="no", variant="error")
+
+    def on_button_pressed(self, event: Button.Pressed) -> None:
+        self.dismiss(event.button.id == "yes")
+
+
+class FirstLaunchApp(App, inherit_bindings=False):
+    AUTO_FOCUS = False
+
     # dont need ctrl+c
     BINDINGS = [
         Binding(
@@ -56,18 +133,10 @@ class Application(App, inherit_bindings=False):
 
     HORIZONTAL_BREAKPOINTS = [(0, "-full"), (50, "-seventy-five"), (100, "-fifty")]
 
+    ENABLE_COMMAND_PALETTE = False
+
     def __init__(self) -> None:
         super().__init__(watch_css=True)
-        self.user_options: Options = {
-            "keybinds": "sane",
-            "theme": "textual-dark",
-            "plugins_rg": False,
-            "plugins_fd": False,
-            "plugins_bat": False,
-            "plugins_zoxide": False,
-            "plugins_poppler": False,
-            "plugins_file_one": False,
-        }
         self.preview_image: Image | None = None
 
     def compose(self) -> ComposeResult:
@@ -75,10 +144,11 @@ class Application(App, inherit_bindings=False):
         yield Static(classes="padding")
         yield Static("Welcome to [b][u]rovr[/][/]!")
         yield Static("Let's get you started!")
+        yield Static("[dim]Press [/]tab[dim] to navigate the options below.[/]")
         yield Static(classes="padding")
         with Center(), RadioSet(id="theme"):
             yield from [
-                RadioButton(theme, True, id=theme)
+                RadioButton(theme, value=True, id=theme)
                 for theme in BUILTIN_THEMES
                 if theme != "textual-ansi"
             ]
@@ -95,10 +165,9 @@ class Application(App, inherit_bindings=False):
                 tooltip="taken from windows file explorer and other editors",
             )
             yield RadioButton(
-                "Vi keybinds~ish",
-                value=True,
-                id="vi",
-                tooltip="keybinds as close to vi as possible",
+                "Vim keybinds~ish",
+                id="vim",
+                tooltip="keybinds as close to vim as possible",
             )
         yield Static(classes="padding")
         with Center(classes="plugins"):
@@ -166,24 +235,33 @@ class Application(App, inherit_bindings=False):
         for plugin, desc in plugins.items():
             self.query_one(f"#plugins-{plugin}", HorizontalGroup).tooltip = desc
         self.query_one("#image_protocol", VerticalGroup).mount()
-        # call aiohttp and pull https://github.com/Textualize/.github/assets/554369/037e6aa1-8527-44f3-958d-28841d975d40 into a PIL object
-        async with aiohttp.ClientSession() as session:  # noqa: SIM117
-            async with session.get(
-                "https://github.com/Textualize/.github/assets/554369/037e6aa1-8527-44f3-958d-28841d975d40"
-            ) as resp:
-                if resp.status == 200:
-                    data = await resp.read()
-                    self.preview_image = PILImage.open(BytesIO(data))
-                    timg_image = prot_to_timg["auto"](
-                        self.preview_image,
-                    )
-                    self.query_one("#image_protocol", VerticalGroup).mount(timg_image)
-                else:
-                    self.preview_image = None
-                    self.notify(
-                        f"Failed to load preview image. Code: {resp.status}",
-                        severity="error",
-                    )
+        try:
+            # call aiohttp and pull https://github.com/Textualize/.github/assets/554369/037e6aa1-8527-44f3-958d-28841d975d40 into a PIL object
+            async with aiohttp.ClientSession() as session:  # noqa: SIM117
+                async with session.get(
+                    "https://github.com/Textualize/.github/assets/554369/037e6aa1-8527-44f3-958d-28841d975d40"
+                ) as resp:
+                    if resp.status == 200:
+                        data = await resp.read()
+                        self.preview_image = PILImage.open(BytesIO(data))
+                        timg_image = prot_to_timg["auto"](
+                            self.preview_image,
+                        )
+                        self.query_one("#image_protocol", VerticalGroup).mount(
+                            timg_image
+                        )
+                    else:
+                        self.preview_image = None
+                        self.notify(
+                            f"Failed to load preview image. Code: {resp.status}",
+                            severity="error",
+                        )
+        except aiohttp.ClientConnectorDNSError:
+            self.preview_image = None
+            self.notify(
+                "Failed to load preview image. Could not connect to the internet.",
+                severity="error",
+            )
 
     @on(RadioSet.Changed, "#theme")
     def on_radio_set_changed(self, event: RadioSet.Changed) -> None:
@@ -223,5 +301,73 @@ class Application(App, inherit_bindings=False):
     async def _toggle_transparency(self) -> None:
         await self.push_screen_wait(DummyScreen())
 
+    @work
+    @on(Button.Pressed, "#finish_setup")
+    async def on_finish_setup_pressed(self, event: Button.Pressed) -> None:
+        # get appropriate keybind
+        with open(
+            resources.files("rovr.config.keybinds")
+            / f"{self.query_one('#keybinds', RadioSet).pressed_button.id}.toml",
+            "r",
+        ) as f:
+            file: list[str] = f.read().split("\n# plugins\n")
+            plugins = tomli.loads(file[1])
+            keybinds: str = file[0]
+            keybinds = "\n".join([
+                line for line in keybinds.splitlines() if not line.startswith("#")
+            ])
+        # manually create toml file yipee (imagine using tomliw (one extra dependency smh))
+        toml = f"""#:schema https://raw.githubusercontent.com/NSPC911/rovr/{schema_ref}/src/rovr/config/schema.json
+[interface]
+use_reactive_layout = {str(self.query_one("#use_reactive_layout", Switch).value).lower()}
+show_hidden_files = {str(self.query_one("#show_hidden_files", Switch).value).lower()}
+image_protocol = "{prot_to_schema[str(self.query_one("#image_protocol_select", Select).value)]}"
 
-Application().run()
+[theme]
+default =  "{self.query_one("#theme", RadioSet).pressed_button.id}"
+transparent = {str(self.query_one("#transparent_mode", Switch).value).lower()}
+{keybinds}
+
+[plugins.rg]
+enabled = {str(self.query_one("#plugins-rg Switch", Switch).value).lower()}
+keybinds = {plugins["plugins"]["rg"]["keybinds"]}
+
+[plugins.fd]
+enabled = {str(self.query_one("#plugins-fd Switch", Switch).value).lower()}
+keybinds = {plugins["plugins"]["fd"]["keybinds"]}
+
+[plugins.bat]
+enabled = {str(self.query_one("#plugins-bat Switch", Switch).value).lower()}
+
+[plugins.editor]
+keybinds = {plugins["plugins"]["editor"]["keybinds"]}
+
+[plugins.zoxide]
+enabled = {str(self.query_one("#plugins-zoxide Switch", Switch).value).lower()}
+keybinds = {plugins["plugins"]["zoxide"]["keybinds"]}
+
+[plugins.poppler]
+enabled = {str(self.query_one("#plugins-poppler Switch", Switch).value).lower()}
+
+[plugins.file_one]
+enabled = {str(self.query_one("#plugins-file Switch", Switch).value).lower()}"""
+        if await self.push_screen_wait(AskWrite(toml)):
+            os.makedirs(VAR_TO_DIR["CONFIG"], exist_ok=True)
+            with open(f"{VAR_TO_DIR['CONFIG']}/config.toml", "w") as f:
+                f.write(toml)
+            self.notify("Done!")
+        await self.push_screen_wait(FinalStuff())
+
+    @work(thread=True, exclusive=True)
+    def action_quit(self) -> None:
+        self.notify(
+            "You won't be able to do this again. Are you sure?\nYou will be using weird defaults.\n(Press Ctrl+q again)",
+            severity="error",
+        )
+        sleep(3)
+        if get_current_worker().is_cancelled:
+            self.exit(-1)
+
+
+if __name__ == "__main__":
+    FirstLaunchApp().run()

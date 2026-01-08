@@ -1,3 +1,4 @@
+import os
 import sys
 from io import TextIOWrapper
 from os import environ
@@ -58,7 +59,6 @@ def eager_set_folder(ctx: click.Context, param: click.Parameter, value: str) -> 
     type=click.Path(exists=True, file_okay=False, dir_okay=True, resolve_path=True),
     default=None,
     is_eager=True,
-    expose_value=False,
     callback=eager_set_folder,
     help="Change the config folder location.",
 )
@@ -193,6 +193,7 @@ def eager_set_folder(ctx: click.Context, param: click.Parameter, value: str) -> 
 @click.rich_config({"show_arguments": True})
 def cli(
     mode: str,
+    config_folder: str,
     with_features: list[str],
     without_features: list[str],
     show_config_path: bool,
@@ -280,10 +281,10 @@ example_function(10)"""
         else:
             # print as json for user to parse (jq, nu, pwsh, idk)
             print(f"""\u007b
-"custom_config": "{config_path}/config.toml",
-"pinned_folders": "{config_path}/pins.json",
-"custom_styles": "{config_path}/style.tcss",
-"persistent_state": "{config_path}/state.toml"
+    "custom_config": "{config_path}/config.toml",
+    "pinned_folders": "{config_path}/pins.json",
+    "custom_styles": "{config_path}/style.tcss",
+    "persistent_state": "{config_path}/state.toml"
 \u007d""")
         return
     elif show_version:
@@ -306,6 +307,15 @@ example_function(10)"""
         else:
             print(_get_version())
         return
+
+    if not config_folder:  # noqa: SIM102
+        # check config existence
+        if (not os.path.exists(VAR_TO_DIR["CONFIG"])) or (
+            len(os.listdir(VAR_TO_DIR["CONFIG"])) == 0
+        ):
+            from rovr.first_launch import FirstLaunchApp
+
+            FirstLaunchApp().run()
 
     from rovr.functions.config import apply_mode
     from rovr.functions.utils import set_nested_value

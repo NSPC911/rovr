@@ -1,0 +1,90 @@
+RadioSet {
+  padding: 0;
+  border: $primary round;
+  background: transparent;
+  max-height: 10;
+  width: 1fr;
+  border-title-align: center;
+  border-title-color: $primary-lighten-1;
+  border-subtitle-align: center;
+  border-subtitle-color: $primary-darken-1;
+  &:focus,
+  &:focus-within {
+    border: $accent round;
+    border-title-color: $accent-lighten-1;
+    border-top: $accent-lighten-1 round;
+    border-bottom: $accent-darken-1 round;
+    border-subtitle-color: $accent-darken-2;
+  }
+}
+Center.plugins {
+  padding: 0;
+  border: $primary round;
+  background: transparent;
+  max-height: 11;
+  width: 1fr;
+  border-title-align: center;
+  border-title-color: $primary-lighten-1;
+  border-subtitle-align: center;
+  border-subtitle-color: $primary-darken-1;
+  overflow-y: scroll;
+  &:focus,
+  &:focus-within {
+    border: $accent round;
+    border-title-color: $accent-lighten-1;
+    border-top: $accent-lighten-1 round;
+    border-bottom: $accent-darken-1 round;
+    border-subtitle-color: $accent-darken-2;
+  }
+  Static {
+    padding: 1 0 0 3;
+  }
+}
+Screen > Static {
+  width: 1fr;
+  text-align: center;
+  content-align: center middle;
+  align: center middle;
+}
+Screen {
+  align: center top;
+  &.-full {
+    width: 100vw !important;
+    max-width: 100vw !important;
+    & > * {
+      width: 100vw;
+    }
+    #reactive_layout > Static {
+      margin: 0 2;
+    }
+  }
+  &.-seventy-five {
+    width: 75vw !important;
+    max-width: 75vw !important;
+    & > * {
+      width: 75vw;
+    }
+  }
+  &.-fifty {
+    width: 50vw;
+    & > * {
+      width: 50vw;
+    }
+  }
+}
+Switch {
+  background: transparent !important;
+  border: $primary round;
+  margin: 0 1;
+  padding: 0 1;
+  &:focus {
+    border: $accent round;
+    background-tint: transparent !important;
+  }
+}
+#hidden_files > Static {
+  margin: 1 2;
+}
+#reactive_layout > Static {
+  margin: 0 2;
+}

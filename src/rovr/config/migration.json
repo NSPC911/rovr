@@ -1,6 +1,17 @@
 [
   {
     "keys": [
+      "modes",
+      "modes.*"
+    ],
+    "message": [
+      "[bright_blue]modes[/] have been removed to replace [bright_cyan]`--config-folder`[/] which should be used to load custom modes instead.",
+      "modes were considered an experimental feature for me to mess around, but I haven't seen anyone else use it."
+    ],
+    "extra": "Removed in v0.7.0"
+  },
+  {
+    "keys": [
       "settings.show_hidden_files",
       "settings.allow_tab_nav",
       "settings.append_new_tabs",

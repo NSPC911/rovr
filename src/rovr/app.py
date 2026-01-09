@@ -122,12 +122,9 @@ class Application(App, inherit_bindings=False):
         chooser_file: str | TextIOWrapper | None = None,
         show_keys: bool = False,
         tree_dom: bool = False,
-        mode: str = "",
         force_crash_in: float = 0,
     ) -> None:
         super().__init__(watch_css=True)
-        if mode:
-            self.add_class(mode)
         self.app_blurred: bool = False
         self.startup_path: str = startup_path
         self.has_pushed_screen: bool = False

@@ -1124,15 +1124,6 @@
           }
         }
       }
-    },
-    "mode": {
-      "type": "object",
-      "additionalProperties": {
-        "type": "object",
-        "additionalProperties": true,
-        "description": "Config overrides for this mode using dot-notation paths as keys."
-      },
-      "description": "Define preset modes with config overrides. Use --mode <name> to activate."
     }
   }
 }

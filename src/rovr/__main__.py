@@ -1,7 +1,6 @@
 import os
 import sys
 from io import TextIOWrapper
-from os import environ
 
 import rich_click as click
 from rich import box
@@ -10,7 +9,7 @@ from rich.table import Table
 
 pprint = Console().print
 
-textual_flags = set(environ.get("TEXTUAL", "").split(","))
+textual_flags = set(os.environ.get("TEXTUAL", "").split(","))
 # both flags exist if ran with `textual run --dev`
 is_dev = {"debug", "devtools"}.issubset(textual_flags)
 
@@ -225,7 +224,7 @@ def cli(
 
     global is_dev
     if dev or is_dev:
-        environ["TEXTUAL"] = "devtools,debug"
+        os.environ["TEXTUAL"] = "devtools,debug"
         is_dev = True
         pprint("  [bold bright_cyan]Development mode activated![/]")
         pprint(
@@ -319,13 +318,13 @@ example_function(10)"""
         return
 
     # check config existence
-    if (
+    if force_first_launch or (
         not config_folder
-        and not (
-            os.path.exists(VAR_TO_DIR["CONFIG"])
-            or (len(os.listdir(VAR_TO_DIR["CONFIG"])) != 0)
+        and (
+            not os.path.exists(VAR_TO_DIR["CONFIG"])
+            or len(os.listdir(VAR_TO_DIR["CONFIG"])) == 0
         )
-    ) or force_first_launch:
+    ):
         from rovr.first_launch import FirstLaunchApp
 
         FirstLaunchApp().run()

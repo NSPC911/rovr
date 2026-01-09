@@ -2,7 +2,6 @@ import os
 from importlib import resources
 from importlib.metadata import PackageNotFoundError, version
 from io import BytesIO
-from os import path
 from shutil import which
 from time import sleep
 from typing import Callable
@@ -102,7 +101,7 @@ class AskWrite(ModalScreen[bool]):
         with Container(classes="modal-wrapper"):
             yield Static("Write config to disk?")
             yield Static(
-                f"The following content will be written to [u]{path.realpath(f'{VAR_TO_DIR["CONFIG"]}/config.toml')}[/]:"
+                f"The following content will be written to [u]{os.path.realpath(f'{VAR_TO_DIR["CONFIG"]}/config.toml')}[/]:"
             )
             yield Static(classes="padding")
             with ScrollableContainer():
@@ -118,7 +117,7 @@ class AskWrite(ModalScreen[bool]):
 class FirstLaunchApp(App, inherit_bindings=False):
     AUTO_FOCUS = False
 
-    # dont need ctrl+c
+    # don't need ctrl+c
     BINDINGS = [
         Binding(
             "ctrl+q",
@@ -235,7 +234,6 @@ class FirstLaunchApp(App, inherit_bindings=False):
         }
         for plugin, desc in plugins.items():
             self.query_one(f"#plugins-{plugin}", HorizontalGroup).tooltip = desc
-        self.query_one("#image_protocol", VerticalGroup).mount()
         try:
             # call aiohttp and pull https://github.com/Textualize/.github/assets/554369/037e6aa1-8527-44f3-958d-28841d975d40 into a PIL object
             async with aiohttp.ClientSession() as session:  # noqa: SIM117
@@ -257,10 +255,11 @@ class FirstLaunchApp(App, inherit_bindings=False):
                             f"Failed to load preview image. Code: {resp.status}",
                             severity="error",
                         )
-        except aiohttp.ClientConnectorDNSError:
+        except aiohttp.ClientError as exc:
             self.preview_image = None
             self.notify(
-                "Failed to load preview image. Could not connect to the internet.",
+                f"Failed to load preview image. Could not connect to the internet.\n{exc}",
+                title=type(exc).__name__,
                 severity="error",
             )
 
@@ -311,14 +310,15 @@ class FirstLaunchApp(App, inherit_bindings=False):
             / f"{self.query_one('#keybinds', RadioSet).pressed_button.id}.toml",
             "r",
         ) as f:
-            file: list[str] = f.read().split("\n# plugins\n")
-            plugins = tomli.loads(file[1])
-            keybinds: str = file[0]
+            # hardcoding is my passion
+            keybinds_sections: list[str] = f.read().split("\n# plugins\n")
+            plugins = tomli.loads(keybinds_sections[1])
+            keybinds: str = keybinds_sections[0]
             keybinds = "\n".join([
                 line for line in keybinds.splitlines() if not line.startswith("#")
             ])
         # manually create toml file yipee (imagine using tomliw (one extra dependency smh))
-        toml = f"""#:schema https://raw.githubusercontent.com/NSPC911/rovr/{schema_ref}/src/rovr/config/schema.json
+        config_toml = f"""#:schema https://raw.githubusercontent.com/NSPC911/rovr/{schema_ref}/src/rovr/config/schema.json
 [interface]
 use_reactive_layout = {str(self.query_one("#use_reactive_layout", Switch).value).lower()}
 show_hidden_files = {str(self.query_one("#show_hidden_files", Switch).value).lower()}
@@ -352,10 +352,11 @@ enabled = {str(self.query_one("#plugins-poppler Switch", Switch).value).lower()}
 
 [plugins.file_one]
 enabled = {str(self.query_one("#plugins-file Switch", Switch).value).lower()}"""
-        if await self.push_screen_wait(AskWrite(toml)):
+        # trust me it loads properly
+        if await self.push_screen_wait(AskWrite(config_toml)):
             os.makedirs(VAR_TO_DIR["CONFIG"], exist_ok=True)
             with open(f"{VAR_TO_DIR['CONFIG']}/config.toml", "w") as f:
-                f.write(toml)
+                f.write(config_toml)
             self.notify("Done!")
         await self.push_screen_wait(FinalStuff())
 

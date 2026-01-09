@@ -283,8 +283,6 @@ description: config schema humanified
   - [8.7. Property `Rovr Config > plugins > file_one`](#plugins_file_one)
     - [8.7.1. Property `Rovr Config > plugins > file_one > enabled`](#plugins_file_one_enabled)
     - [8.7.2. Property `Rovr Config > plugins > file_one > get_description`](#plugins_file_one_get_description)
-- [9. Property `Rovr Config > mode`](#mode)
-  - [9.1. Property `Rovr Config > mode > additionalProperties`](#mode_additionalProperties)
 
 **Title:** Rovr Config
 
@@ -294,17 +292,16 @@ description: config schema humanified
 | **Required**              | No          |
 | **Additional properties** | Not allowed |
 
-| Property                      | Type            | Title/Description                                                               |
-| ----------------------------- | --------------- | ------------------------------------------------------------------------------- |
-| [interface](#interface)       | object          | Settings related to the user interface and experience                           |
-| [settings](#settings)         | object          | Settings related to behavior of file operations                                 |
-| [metadata](#metadata)         | object          |                                                                                 |
-| [icons](#icons)               | object          | Custom icon configurations for files and folders                                |
-| [theme](#theme)               | object          |                                                                                 |
-| [custom_theme](#custom_theme) | array of object |                                                                                 |
-| [keybinds](#keybinds)         | object          |                                                                                 |
-| [plugins](#plugins)           | object          |                                                                                 |
-| [mode](#mode)                 | object          | Define preset modes with config overrides. Use --mode &lt;name&gt; to activate. |
+| Property                      | Type            | Title/Description                                     |
+| ----------------------------- | --------------- | ----------------------------------------------------- |
+| [interface](#interface)       | object          | Settings related to the user interface and experience |
+| [settings](#settings)         | object          | Settings related to behavior of file operations       |
+| [metadata](#metadata)         | object          |                                                       |
+| [icons](#icons)               | object          | Custom icon configurations for files and folders      |
+| [theme](#theme)               | object          |                                                       |
+| [custom_theme](#custom_theme) | array of object |                                                       |
+| [keybinds](#keybinds)         | object          |                                                       |
+| [plugins](#plugins)           | object          |                                                       |
 
 ## <a name="interface"></a>1. Property `Rovr Config > interface`
 
@@ -4175,7 +4172,7 @@ Must be one of:
 | [threads](#plugins_poppler_threads)               | integer | How many threads should poppler use?                                                               |
 | [use_pdftocairo](#plugins_poppler_use_pdftocairo) | boolean | Use pdftocairo instead of pdftoppm, may help performance                                           |
 | [poppler_folder](#plugins_poppler_poppler_folder) | string  | Path to the folder where Poppler-related binaries are located. Leave empty to use the system PATH. |
-| [pdf_batch_size](#plugins_poppler_pdf_batch_size) | integer | Number of PDF pages to load in each batch.                   |
+| [pdf_batch_size](#plugins_poppler_pdf_batch_size) | integer | Number of PDF pages to load in each batch.                                                         |
 
 #### <a name="plugins_poppler_enabled"></a>8.6.1. Property `Rovr Config > plugins > poppler > enabled`
 
@@ -4223,11 +4220,11 @@ Must be one of:
 
 #### <a name="plugins_poppler_pdf_batch_size"></a>8.6.5. Property `Rovr Config > plugins > poppler > pdf_batch_size`
 
-|              |          |
-| ------------ | -------- |
-| **Type**     | `integer`|
-| **Required** | No       |
-| **Default**  | `2`      |
+|              |           |
+| ------------ | --------- |
+| **Type**     | `integer` |
+| **Required** | No        |
+| **Default**  | `2`       |
 
 **Description:** Number of PDF pages to load in each batch.
 
@@ -4267,33 +4264,5 @@ Must be one of:
 | **Default**  | `true`    |
 
 **Description:** Use file(1) to get additional information of the file type.
-
-## <a name="mode"></a>9. Property `Rovr Config > mode`
-
-|                           |                                                                                   |
-| ------------------------- | --------------------------------------------------------------------------------- |
-| **Type**                  | `object`                                                                          |
-| **Required**              | No                                                                                |
-| **Additional properties** | [Each additional property must conform to the schema](#mode_additionalProperties) |
-
-**Description:** Define preset modes with config overrides. Use --mode &lt;name&gt; to activate.
-
-| Property                       | Type   | Title/Description                                                |
-| ------------------------------ | ------ | ---------------------------------------------------------------- |
-| [](#mode_additionalProperties) | object | Config overrides for this mode using dot-notation paths as keys. |
-
-### <a name="mode_additionalProperties"></a>9.1. Property `Rovr Config > mode > additionalProperties`
-
-|                           |                  |
-| ------------------------- | ---------------- |
-| **Type**                  | `object`         |
-| **Required**              | No               |
-| **Additional properties** | Any type allowed |
-
-**Description:** Config overrides for this mode using dot-notation paths as keys.
-
-| Property                                            | Type   | Title/Description |
-| --------------------------------------------------- | ------ | ----------------- |
-| [](#mode_additionalProperties_additionalProperties) | object |                   |
 
 ---

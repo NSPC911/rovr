@@ -69,6 +69,46 @@ Center.plugins {
   }
 }
 
+Center.compact-things {
+  border: $border-blurred round;
+  background: transparent;
+  border-title-align: center;
+  border-title-color: $border-blurred;
+  &:focus,
+  &:focus-within {
+    border: $border round;
+    border-title-color: $border;
+  }
+  Static {
+    margin: 1 0 0 2
+  }
+}
+
+Center.plugins-editor {
+  border: $border-blurred round;
+  background: transparent;
+  border-title-align: center;
+  border-title-color: $border-blurred;
+  Static {
+    width: 1.5fr !important;
+    margin-top: 1;
+  }
+  Input {
+    border: $border-blurred round;
+    background: transparent;
+    margin: 0 1;
+    width: 1fr !important;
+    &:focus {
+      border: $border round;
+    }
+  }
+  &:focus,
+  &:focus-within {
+    border: $border round;
+    border-title-color: $border;
+  }
+}
+
 FinalStuff {
   align: center middle !important;
   .modal-wrapper {

@@ -1,9 +1,9 @@
 import os
+from asyncio import sleep
 from importlib import resources
 from importlib.metadata import PackageNotFoundError, version
 from io import BytesIO
 from shutil import which
-from time import sleep
 from typing import Callable
 
 import aiohttp
@@ -11,6 +11,7 @@ import textual_image.widget as timg
 import tomli
 from PIL import Image as PILImage
 from PIL.Image import Image
+from pygments.styles import get_all_styles
 from rich.syntax import Syntax
 from rich.text import Text
 from textual import events, on, work
@@ -28,13 +29,13 @@ from textual.screen import ModalScreen, Screen
 from textual.theme import BUILTIN_THEMES
 from textual.widgets import (
     Button,
+    Input,
     RadioButton,
     RadioSet,
     Select,
     Static,
     Switch,
 )
-from textual.worker import get_current_worker
 
 from rovr.variables.maps import VAR_TO_DIR
 
@@ -190,6 +191,16 @@ class FirstLaunchApp(App, inherit_bindings=False):
                 yield Switch(which("file") is not None)
                 yield Static("[u]file(1)[/] integration")
         yield Static(classes="padding")
+        with Center(classes="plugins-editor"):
+            with HorizontalGroup(id="plugins-editor-file"):
+                yield Input(value=os.environ.get("EDITOR", ""), id="editor_input")
+                yield Static("File editor")
+            with HorizontalGroup(id="plugins-editor-folders"):
+                yield Input(
+                    value=os.environ.get("EDITOR", ""), id="editor_folders_input"
+                )
+                yield Static("Folder editor")
+        yield Static(classes="padding")
         with HorizontalGroup(id="hidden_files"):
             yield Switch(value=False, id="show_hidden_files")
             yield Static("Show hidden files by default")
@@ -198,6 +209,14 @@ class FirstLaunchApp(App, inherit_bindings=False):
             yield Static(
                 "Use reactive layout (automatically disable certain UI elements at certain heights and widths)"
             )
+        yield Static(classes="padding")
+        with Center(classes="compact-things"):
+            with HorizontalGroup(id="compact-buttons"):
+                yield Switch(value=False, id="compact_buttons")
+                yield Static("Use compact header")
+            with HorizontalGroup(id="compact-panels"):
+                yield Switch(value=False, id="compact_panels")
+                yield Static("Use compact panels")
         yield Static(classes="padding")
         with VerticalGroup(id="image_protocol"):
             yield Select(
@@ -224,16 +243,22 @@ class FirstLaunchApp(App, inherit_bindings=False):
         self.query_one("#keybinds", RadioSet).border_title = "Choose a Preset Keybind"
         self.query_one(".plugins", Center).border_title = "Plugins/Integrations"
         self.query_one("SelectCurrent").border_title = "Image Protocol"
-        plugins = {
-            "rg": "Uses ripgrep to search all files for content quickly",
-            "fd": "Uses fd to quickly search for files and directories (and other weird path types)",
-            "bat": "Uses bat as an alternate previewer",
-            "zoxide": "Uses zoxide to zip around directories quickly",
-            "poppler": "Uses poppler-utils to preview PDF files",
-            "file": "Uses the file(1) command to get better file type information",
+        self.query_one(
+            ".plugins-editor", Center
+        ).border_title = "Default editor when editing files"
+        self.query_one(".compact-things", Center).border_title = "Compact Mode Options"
+        popups = {
+            "#plugins-rg": "Uses ripgrep to search all files for content quickly",
+            "#plugins-fd": "Uses fd to quickly search for files and directories (and other weird path types)",
+            "#plugins-bat": "Uses bat as an alternate previewer",
+            "#plugins-zoxide": "Uses zoxide to zip around directories quickly",
+            "#plugins-poppler": "Uses poppler-utils to preview PDF files",
+            "#plugins-file": "Uses the file(1) command to get better file type information",
+            "#compact-buttons": "Makes the header area a bit more compact (5 char tall instead of 7)",
+            "#compact-panels": "Makes the panels take lesser size, for more center room",
         }
-        for plugin, desc in plugins.items():
-            self.query_one(f"#plugins-{plugin}", HorizontalGroup).tooltip = desc
+        for widget, desc in popups.items():
+            self.query_one(widget).tooltip = desc
         try:
             # call aiohttp and pull https://github.com/Textualize/.github/assets/554369/037e6aa1-8527-44f3-958d-28841d975d40 into a PIL object
             async with aiohttp.ClientSession() as session:  # noqa: SIM117
@@ -318,14 +343,19 @@ class FirstLaunchApp(App, inherit_bindings=False):
                 line for line in keybinds.splitlines() if not line.startswith("#")
             ])
         # manually create toml file yipee (imagine using tomliw (one extra dependency smh))
+        theme = self.query_one("#theme", RadioSet).pressed_button.id
         config_toml = f"""#:schema https://raw.githubusercontent.com/NSPC911/rovr/{schema_ref}/src/rovr/config/schema.json
 [interface]
 use_reactive_layout = {str(self.query_one("#use_reactive_layout", Switch).value).lower()}
 show_hidden_files = {str(self.query_one("#show_hidden_files", Switch).value).lower()}
 image_protocol = "{prot_to_schema[str(self.query_one("#image_protocol_select", Select).value)]}"
+[interface.compact_mode]
+buttons = {str(self.query_one("#compact_buttons", Switch).value).lower()}
+panels = {str(self.query_one("#compact_panels", Switch).value).lower()}
 
 [theme]
-default =  "{self.query_one("#theme", RadioSet).pressed_button.id}"
+default =  "{theme}"
+{f'preview = "{theme}"' if theme in list(get_all_styles()) else ""}
 transparent = {str(self.query_one("#transparent_mode", Switch).value).lower()}
 {keybinds}
 
@@ -342,6 +372,8 @@ enabled = {str(self.query_one("#plugins-bat Switch", Switch).value).lower()}
 
 [plugins.editor]
 keybinds = {plugins["plugins"]["editor"]["keybinds"]}
+file_executable = "{self.query_one("#editor_input", Input).value}"
+folder_executable = "{self.query_one("#editor_folders_input", Input).value}"
 
 [plugins.zoxide]
 enabled = {str(self.query_one("#plugins-zoxide Switch", Switch).value).lower()}
@@ -357,11 +389,10 @@ enabled = {str(self.query_one("#plugins-file Switch", Switch).value).lower()}"""
             os.makedirs(VAR_TO_DIR["CONFIG"], exist_ok=True)
             with open(f"{VAR_TO_DIR['CONFIG']}/config.toml", "w") as f:
                 f.write(config_toml)
-            self.notify("Done!")
         await self.push_screen_wait(FinalStuff())
 
-    @work(thread=True, exclusive=True)
-    def action_quit(self) -> None:
+    @work(exclusive=True)
+    async def action_quit(self) -> None:
         if self._wants_to_quit:
             self.exit(1)
         self.notify(
@@ -369,11 +400,8 @@ enabled = {str(self.query_one("#plugins-file Switch", Switch).value).lower()}"""
             severity="error",
         )
         self._wants_to_quit = True
-        sleep(3)
-        if get_current_worker().is_cancelled:
-            self.exit(-1)
-        else:
-            self._wants_to_quit = False
+        await sleep(3)
+        self._wants_to_quit = False
 
 
 if __name__ == "__main__":

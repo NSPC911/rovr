@@ -62,14 +62,6 @@ def eager_set_folder(ctx: click.Context, param: click.Parameter, value: str) -> 
     help="Change the config folder location.",
 )
 @click.option(
-    "--mode",
-    "mode",
-    multiple=False,
-    type=str,
-    default="",
-    help="Activate a preset mode defined in config (e.g., 'gui').",
-)
-@click.option(
     "--with",
     "with_features",
     multiple=True,
@@ -169,9 +161,7 @@ def eager_set_folder(ctx: click.Context, param: click.Parameter, value: str) -> 
     help="Force a crash after N seconds (for testing crash recovery)",
     hidden=not is_dev,
 )
-@click.option_panel(
-    "Config", options=["--mode", "--with", "--without", "--config-folder"]
-)
+@click.option_panel("Config", options=["--with", "--without", "--config-folder"])
 @click.option_panel(
     "Paths",
     options=["--chooser-file", "--cwd-file"],
@@ -200,7 +190,6 @@ def eager_set_folder(ctx: click.Context, param: click.Parameter, value: str) -> 
 @click.argument("path", type=str, required=False, default="")
 @click.rich_config({"show_arguments": True})
 def cli(
-    mode: str,
     config_folder: str,
     with_features: list[str],
     force_first_launch: bool,
@@ -329,12 +318,8 @@ example_function(10)"""
 
         FirstLaunchApp().run()
 
-    from rovr.functions.config import apply_mode
     from rovr.functions.utils import set_nested_value
     from rovr.variables.constants import config
-
-    if mode:
-        apply_mode(config, mode)
 
     for feature_path in with_features:
         set_nested_value(config, feature_path, True)
@@ -374,7 +359,6 @@ example_function(10)"""
             chooser_file=chooser_file if chooser_file else None,
             show_keys=show_keys,
             tree_dom=tree_dom,
-            mode=mode,
             force_crash_in=force_crash_in,
         ).run()
     else:

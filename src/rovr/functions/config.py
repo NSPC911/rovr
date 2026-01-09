@@ -247,7 +247,9 @@ def schema_dump(doc_path: str, exception: ValidationError, config_content: str) 
             to_print.add_row(f"[dim]> {item['extra']}[/]")
             pprint(Padding(to_print, (0, rjust + 4, 0, rjust + 3)))
             break
-    exit(1)
+
+    if not exception.message.startswith("Additional properties are not allowed"):
+        exit(1)
 
 
 def load_config() -> tuple[dict, dict]:

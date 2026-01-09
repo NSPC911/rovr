@@ -1,8 +1,8 @@
 [
   {
     "keys": [
-      "modes",
-      "modes.*"
+      "mode",
+      "mode.*"
     ],
     "message": [
       "[bright_blue]modes[/] have been removed to replace [bright_cyan]`--config-folder`[/] which should be used to load custom modes instead.",

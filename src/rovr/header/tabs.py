@@ -7,7 +7,8 @@ from textual.await_complete import AwaitComplete
 from textual.containers import Container, Horizontal, Vertical
 from textual.css.query import NoMatches
 from textual.renderables.bar import Bar as BarRenderable
-from textual.widgets import Button, Input, SelectionList, Tabs
+from textual.widget import Widget
+from textual.widgets import Button, Input, Tabs
 from textual.widgets._tabs import Tab, Underline
 from textual.widgets.option_list import OptionDoesNotExist
 
@@ -140,7 +141,7 @@ class Tabline(Tabs):
 
         def callback() -> None:
             assert isinstance(event.tab, TablineTab)
-            file_list: SelectionList = self.app.query_one("#file_list")
+            file_list: Widget = self.app.query_one("#file_list")
             assert isinstance(file_list.input, Input)
             file_list.select_mode_enabled = event.tab.session.selectMode
             if event.tab.session.selectMode:

@@ -131,13 +131,14 @@ class FirstLaunchApp(App, inherit_bindings=False):
     ]
     CSS_PATH = ["first_launch.tcss"]
 
-    HORIZONTAL_BREAKPOINTS = [(0, "-full"), (50, "-seventy-five"), (100, "-fifty")]
+    HORIZONTAL_BREAKPOINTS = [(0, "-full"), (55, "-seventy-five"), (110, "-fifty")]
 
     ENABLE_COMMAND_PALETTE = False
 
     def __init__(self) -> None:
         super().__init__(watch_css=True)
         self.preview_image: Image | None = None
+        self._wants_to_quit: bool = False
 
     def compose(self) -> ComposeResult:
         yield Static(classes="padding")
@@ -360,13 +361,18 @@ enabled = {str(self.query_one("#plugins-file Switch", Switch).value).lower()}"""
 
     @work(thread=True, exclusive=True)
     def action_quit(self) -> None:
+        if self._wants_to_quit:
+            self.exit(1)
         self.notify(
             "You won't be able to do this again. Are you sure?\nYou will be using weird defaults.\n(Press Ctrl+q again)",
             severity="error",
         )
+        self._wants_to_quit = True
         sleep(3)
         if get_current_worker().is_cancelled:
             self.exit(-1)
+        else:
+            self._wants_to_quit = False
 
 
 if __name__ == "__main__":

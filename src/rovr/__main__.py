@@ -85,6 +85,15 @@ def eager_set_folder(ctx: click.Context, param: click.Parameter, value: str) -> 
     help="Disable a feature (e.g., 'interface.tooltips').",
 )
 @click.option(
+    "--force-first-launch",
+    "force_first_launch",
+    multiple=False,
+    type=bool,
+    default=False,
+    is_flag=True,
+    help="Force the first launch experience (even if config exists).",
+)
+@click.option(
     "--config-path",
     "show_config_path",
     multiple=False,
@@ -195,6 +204,7 @@ def cli(
     mode: str,
     config_folder: str,
     with_features: list[str],
+    force_first_launch: bool,
     without_features: list[str],
     show_config_path: bool,
     show_version: bool,
@@ -308,14 +318,17 @@ example_function(10)"""
             print(_get_version())
         return
 
-    if not config_folder:  # noqa: SIM102
-        # check config existence
-        if (not os.path.exists(VAR_TO_DIR["CONFIG"])) or (
-            len(os.listdir(VAR_TO_DIR["CONFIG"])) == 0
-        ):
-            from rovr.first_launch import FirstLaunchApp
+    # check config existence
+    if (
+        not config_folder
+        and not (
+            os.path.exists(VAR_TO_DIR["CONFIG"])
+            or (len(os.listdir(VAR_TO_DIR["CONFIG"])) != 0)
+        )
+    ) or force_first_launch:
+        from rovr.first_launch import FirstLaunchApp
 
-            FirstLaunchApp().run()
+        FirstLaunchApp().run()
 
     from rovr.functions.config import apply_mode
     from rovr.functions.utils import set_nested_value

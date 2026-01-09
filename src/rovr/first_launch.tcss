@@ -159,6 +159,9 @@ Screen {
       height: 87.5vh;
       width: 87.5vw
     }
+    #reactive_layout > Static {
+      margin: 0 2;
+    }
   }
 
   &.-fifty {
@@ -171,6 +174,9 @@ Screen {
     .modal-wrapper {
       height: 75vh;
       width: 75vw
+    }
+    #reactive_layout > Static {
+      margin: 1 2;
     }
   }
 }

@@ -2,10 +2,31 @@
 <summary><h1>[v0.7.0.dev2]</h1></summary>
 <p>
 
+## breaking changes
+- app!: remove `modes` (use `--config-folder`) #195
+- config?: allow additional flags in config #191
+
 ## new features
 - cli: add `--config-folder` option to specify custom config folder #185
 - preview: batched pdf loading #184
 - filelist: dim files/folders that are cut in clipboard #188
+- filelist/state: option to remember sort order per forlder #193
+- cli: allow setting config folder #185
+- log: improve logging mechanism f8c0988
+- clipboard: dim file list options that were cut #188
+- config: provide two separate profiles for keybinds #179
+
+## fixes
+- filelist: properly show file list checkboxes 8a63ce9
+- app: stop watching thread from exiting 5459741
+
+## perf
+- preview: batch pdf loading #184
+- app?: stop causing triple threads to occur f8e015f
+
+## refactor
+- clipboard: slightly refactor code #188
+- mixins: mixin filelist, clipboard and rgsearch 644e4e3
 
 <details>
 <summary><h1>[v0.7.0.dev1]</h1></summary>

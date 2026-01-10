@@ -629,21 +629,10 @@ wheels = [
 
 [[package]]
 name = "nuitka"
-version = "2.8.9"
-source = { registry = "https://pypi.org/simple" }
+version = "4.0rc7"
+source = { git = "https://github.com/Nuitka/Nuitka?rev=factory#383d69d2459d2325c59f3b7b88ad68792845937c" }
 dependencies = [
-    { name = "ordered-set" },
     { name = "zstandard" },
-]
-sdist = { url = "https://files.pythonhosted.org/packages/d8/fb/51df3b30b0f9b3e73f3ba6bea8b94516b16035297c4b3452aaa632a130ae/nuitka-2.8.9.tar.gz", hash = "sha256:b178cd437f2110c46943b368db51d20d57d586a13f8f6323ab1be4e51e2fabf8", size = 4332046, upload-time = "2025-11-29T11:32:20.733Z" }
-
-[[package]]
-name = "ordered-set"
-version = "4.1.0"
-source = { registry = "https://pypi.org/simple" }
-sdist = { url = "https://files.pythonhosted.org/packages/4c/ca/bfac8bc689799bcca4157e0e0ced07e70ce125193fc2e166d2e685b7e2fe/ordered-set-4.1.0.tar.gz", hash = "sha256:694a8e44c87657c59292ede72891eb91d34131f6531463aab3009191c77364a8", size = 12826, upload-time = "2022-01-26T14:38:56.6Z" }
-wheels = [
-    { url = "https://files.pythonhosted.org/packages/33/55/af02708f230eb77084a299d7b08175cff006dea4f2721074b92cdb0296c0/ordered_set-4.1.0-py3-none-any.whl", hash = "sha256:046e1132c71fcf3330438a539928932caf51ddbc582496833e23de611de14562", size = 7634, upload-time = "2022-01-26T14:38:48.677Z" },
 ]
 
 [[package]]
@@ -1074,7 +1063,7 @@ requires-dist = [
 dev = [
     { name = "commitizen", specifier = ">=4.10.0" },
     { name = "json-schema-for-humans", specifier = ">=1.5.1" },
-    { name = "nuitka", specifier = ">=2.8.9" },
+    { name = "nuitka", git = "https://github.com/Nuitka/Nuitka?rev=factory" },
     { name = "poethepoet", specifier = ">=0.38.0" },
     { name = "prek", specifier = ">=0.2.25" },
     { name = "pyinstrument", specifier = ">=5.1.2" },

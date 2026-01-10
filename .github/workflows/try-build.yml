@@ -25,9 +25,9 @@ jobs:
         uv sync --dev
       shell: pwsh
 
-    - name: Build with Nuitka
+    - name: Build with Nuitka (standalone)
       run: |
-        uv run nuitka --mode=onefile ./src/rovr --assume-yes-for-downloads --output-filename=rovr --show-scons --enable-plugins=anti-bloat --enable-plugins=no-qt --include-data-dir=src/rovr/config=rovr/config --output-folder-name="rovr.dist"
+        uv run nuitka --mode=standalone --assume-yes-for-downloads --enable-plugins=no-qt --python-flag=-m src/rovr --include-package-data=rovr
       shell: pwsh
 
     - name: List dist items
@@ -39,4 +39,17 @@ jobs:
       with:
         name: rovr_windows_build
         path: rovr.dist
-        retention-days: 90
+        retention-days: 30
+
+    - name: Build with Nuitka (onefile)
+      run: |
+        uv run nuitka --mode=onefile --assume-yes-for-downloads --enable-plugins=no-qt --python-flag=-m src/rovr --include-package-data=rovr
+      shell: pwsh
+
+    - name: Upload Onefile Executable
+      uses: actions/upload-artifact@v4
+      # upload executable at ./rovr.exe
+      with:
+        path: rovr.exe
+        name: rovr_windows_onefile_build
+        retention-days: 30

@@ -27,7 +27,7 @@ jobs:
 
     - name: Build with Nuitka
       run: |
-        uv run nuitka --mode=onefile ./src/rovr --assume-yes-for-downloads --output-filename=rovr --show-scons --enable-plugins=anti-bloat --enable-plugins=no-qt --include-data-dir=src/rovr/config=rovr/config --output-folder-name="rovr.dist"
+        uv run nuitka --remove-output --mode=onefile --assume-yes-for-downloads --enable-plugins=no-qt --python-flag=-m src/rovr --run --include-package-data=rovr
       shell: pwsh
 
     - name: List dist items

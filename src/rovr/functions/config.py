@@ -121,12 +121,14 @@ def find_path_line(lines: list[str], path: deque) -> int | None:
 
             if current_section in (path_without_indices, path_list):
                 return i
+            for depth in range(1, len(current_section) + 1):
+                if current_section[:depth] in (path_without_indices, path_list):
+                    return i
         elif "=" in stripped:
             key = stripped.split("=")[0].strip().strip('"').strip("'")
             full_path = current_section + [key]
             if full_path in (path_without_indices, path_list):
                 return i
-
     return None
 
 

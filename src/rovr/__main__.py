@@ -1,6 +1,6 @@
+import os
 import sys
 from io import TextIOWrapper
-from os import environ
 
 import rich_click as click
 from rich import box
@@ -9,7 +9,7 @@ from rich.table import Table
 
 pprint = Console().print
 
-textual_flags = set(environ.get("TEXTUAL", "").split(","))
+textual_flags = set(os.environ.get("TEXTUAL", "").split(","))
 # both flags exist if ran with `textual run --dev`
 is_dev = {"debug", "devtools"}.issubset(textual_flags)
 
@@ -58,7 +58,6 @@ def eager_set_folder(ctx: click.Context, param: click.Parameter, value: str) -> 
     type=click.Path(exists=True, file_okay=False, dir_okay=True, resolve_path=True),
     default=None,
     is_eager=True,
-    expose_value=False,
     callback=eager_set_folder,
     help="Change the config folder location.",
 )
@@ -75,6 +74,15 @@ def eager_set_folder(ctx: click.Context, param: click.Parameter, value: str) -> 
     multiple=True,
     type=str,
     help="Disable a feature (e.g., 'interface.tooltips').",
+)
+@click.option(
+    "--force-first-launch",
+    "force_first_launch",
+    multiple=False,
+    type=bool,
+    default=False,
+    is_flag=True,
+    help="Force the first launch experience (even if config exists).",
 )
 @click.option(
     "--config-path",
@@ -182,7 +190,9 @@ def eager_set_folder(ctx: click.Context, param: click.Parameter, value: str) -> 
 @click.argument("path", type=str, required=False, default="")
 @click.rich_config({"show_arguments": True})
 def cli(
+    config_folder: str,
     with_features: list[str],
+    force_first_launch: bool,
     without_features: list[str],
     show_config_path: bool,
     show_version: bool,
@@ -203,7 +213,7 @@ def cli(
 
     global is_dev
     if dev or is_dev:
-        environ["TEXTUAL"] = "devtools,debug"
+        os.environ["TEXTUAL"] = "devtools,debug"
         is_dev = True
         pprint("  [bold bright_cyan]Development mode activated![/]")
         pprint(
@@ -269,10 +279,10 @@ example_function(10)"""
         else:
             # print as json for user to parse (jq, nu, pwsh, idk)
             print(f"""\u007b
-"custom_config": "{config_path}/config.toml",
-"pinned_folders": "{config_path}/pins.json",
-"custom_styles": "{config_path}/style.tcss",
-"persistent_state": "{config_path}/state.toml"
+    "custom_config": "{config_path}/config.toml",
+    "pinned_folders": "{config_path}/pins.json",
+    "custom_styles": "{config_path}/style.tcss",
+    "persistent_state": "{config_path}/state.toml"
 \u007d""")
         return
     elif show_version:
@@ -295,6 +305,18 @@ example_function(10)"""
         else:
             print(_get_version())
         return
+
+    # check config existence
+    if force_first_launch or (
+        not config_folder
+        and (
+            not os.path.exists(VAR_TO_DIR["CONFIG"])
+            or len(os.listdir(VAR_TO_DIR["CONFIG"])) == 0
+        )
+    ):
+        from rovr.first_launch import FirstLaunchApp
+
+        FirstLaunchApp().run()
 
     from rovr.functions.utils import set_nested_value
     from rovr.variables.constants import config

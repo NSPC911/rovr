@@ -207,6 +207,7 @@ def threaded_get_cwd_object(
     return_nothing_if_this_returns_true: Callable[[], bool] | None = None,
 ) -> tuple[list[CWDObjectReturnDict], list[CWDObjectReturnDict]] | tuple[None, None]:
     return sync_get_cwd_object(
+        node,
         cwd,
         show_hidden,
         sort_by,
@@ -217,6 +218,7 @@ def threaded_get_cwd_object(
 
 @overload
 def sync_get_cwd_object(
+    dom_node: DOMNode,
     cwd: str,
     show_hidden: bool = False,
     sort_by: Literal[
@@ -228,6 +230,7 @@ def sync_get_cwd_object(
 
 @overload
 def sync_get_cwd_object(
+    dom_node: DOMNode,
     cwd: str,
     show_hidden: bool = False,
     sort_by: Literal[
@@ -241,6 +244,7 @@ def sync_get_cwd_object(
 
 
 def sync_get_cwd_object(
+    dom_node: DOMNode,
     cwd: str,
     show_hidden: bool = False,
     sort_by: Literal[
@@ -252,6 +256,7 @@ def sync_get_cwd_object(
     """
     Get the objects (files and folders) in a provided directory
     Args:
+        dom_node(DOMNode): The DOM node requesting this operation
         cwd(str): The working directory to check
         show_hidden(bool): Whether to include hidden files/folders (dot-prefixed on Unix; flagged hidden on Windows/macOS)
         sort_by(str): What to sort by
@@ -273,7 +278,7 @@ def sync_get_cwd_object(
     except (PermissionError, FileNotFoundError, OSError):
         raise PermissionError(f"PermissionError: Unable to access {cwd}")
 
-    print(f"Scanned {len(entries)} entries in {cwd}")
+    dom_node.log(f"Scanned {len(entries)} entries in {cwd}")
 
     if (
         return_nothing_if_this_returns_true is not None
@@ -309,10 +314,10 @@ def sync_get_cwd_object(
             and return_nothing_if_this_returns_true()
         ):
             if globals().get("is_dev", False):
-                print("Cut off early during dictionary building")
+                dom_node.log("Cut off early during dictionary building")
             return None, None
 
-    print(f"Collected {len(folders)} folders and {len(files)} files in {cwd}")
+    dom_node.log(f"Collected {len(folders)} folders and {len(files)} files in {cwd}")
 
     # sort order
     match sort_by:
@@ -348,14 +353,14 @@ def sync_get_cwd_object(
         and return_nothing_if_this_returns_true()
     ):
         if globals().get("is_dev", False):
-            print("Cut off early before reversing results")
+            dom_node.log("Cut off early before reversing results")
         return None, None
     if reverse:
         files.reverse()
         folders.reverse()
 
     if globals().get("is_dev", False):
-        print(f"Found {len(folders)} folders and {len(files)} files in {cwd}")
+        dom_node.log(f"Found {len(folders)} folders and {len(files)} files in {cwd}")
     return folders, files
 
 
@@ -730,7 +735,7 @@ def dump_exc(widget: DOMNode, exc: Exception | Traceback) -> str | None:
 
     Args:
         widget (DOMNode): The widget where the exception occurred.
-        exc (Exception): The exception to dump.
+        exc (Exception, Traceback): The exception to dump.
 
     Returns:
         str: The path to the log file where the exception was dumped.
@@ -762,7 +767,7 @@ def dump_exc(widget: DOMNode, exc: Exception | Traceback) -> str | None:
         f"{log_name}.log",
     )
     os.makedirs(path.dirname(dump_path), exist_ok=True)
-    with open(dump_path, "w") as file_log:
+    with open(dump_path, "a") as file_log:
         # don't need to handle OS Error, Textual automatically chains errors
         error_log = Console(file=file_log, legacy_windows=True)
         # section it with time and date

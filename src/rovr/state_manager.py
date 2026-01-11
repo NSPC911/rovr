@@ -106,7 +106,7 @@ class StateManager(Widget):
                         "natural",
                     ]:
                         sort_by = "name"
-                    # clearly sort_by = "name" wouldn't lead to the condition being trye
+                    # clearly sort_by = "name" wouldn't lead to the condition being true
                     elif self.sort_by != sort_by:
                         self.sort_by = sort_by
                     if self.sort_descending != (

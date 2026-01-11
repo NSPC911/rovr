@@ -23,15 +23,14 @@ class PasteButton(Button):
             self.tooltip = "Paste files from clipboard"
 
     async def on_button_pressed(self, event: Button.Pressed) -> None:
+        """Paste files from clipboard"""
         if self.disabled:
             return
-        """Paste files from clipboard"""
         selected_items: list[ClipboardSelectionValue] = self.app.query_one(
             "Clipboard"
         ).selected  # dont include highlighted
         if selected_items:
-            # decompress items
-            # split into two items, those ending with `-cut` and those ending with `-copy`
+            # split into copy/cut based on attrs
             to_copy, to_cut = (
                 [
                     item.path

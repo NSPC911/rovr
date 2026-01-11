@@ -28,6 +28,8 @@
 - clipboard: slightly refactor code #188
 - mixins: mixin filelist, clipboard and rgsearch 644e4e3
 
+</p>
+</details>
 <details>
 <summary><h1>[v0.7.0.dev1]</h1></summary>
 <p>

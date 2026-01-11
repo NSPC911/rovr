@@ -617,6 +617,7 @@ class PreviewContainer(Container):
                 lambda: setattr(self, "border_subtitle", "Getting list\u2026"),
             )
             folders, files = path_utils.sync_get_cwd_object(
+                self,
                 folder_path,
                 config["interface"]["show_hidden_files"],
                 sort_by=this_list.sort_by,

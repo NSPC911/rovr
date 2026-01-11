@@ -10,7 +10,7 @@ const repoName = 'rovr';
     <a href={`https://github.com/${repoOwner}/${repoName}/network/members`} class="github-stat" title="Release">
       <span>󰓼</span>
       <span>󰓹</span>
-      <span id="gh-release">v0.7.0.dev1</span>
+      <span id="gh-release">v0.7.0.dev2</span>
     </a>
 
     <a href={`https://github.com/${repoOwner}/${repoName}/stargazers`} class="github-stat" title="Stars">
@@ -73,20 +73,20 @@ const repoName = 'rovr';
 
   async function fetchGitHubStats(): Promise<Omit<CachedStats, 'timestamp'> | null> {
     try {
-      const [repoRes, releasesRes] = await Promise.all([
+      const [repoRes, releaseRes] = await Promise.all([
         fetch(`https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}`),
-        fetch(`https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/releases`)
+        fetch(`https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/releases/latest`)
       ]);
 
       if (!repoRes.ok) return null;
 
       const repo = await repoRes.json();
-      const releases = releasesRes.ok ? await releasesRes.json() : [];
+      const release = releaseRes.ok ? await releaseRes.json() : [];
 
       return {
         stars: repo.stargazers_count,
         forks: repo.forks_count,
-        release_tag: releases.length > 0 ? releases[0].tag_name : 'v0.7.0.dev1'
+        release_tag: release.tag_name
       };
     } catch {
       return null;

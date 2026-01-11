@@ -482,12 +482,14 @@ class FileList(CheckboxRenderingMixin, SelectionList, inherit_bindings=False):
                 if isinstance(option, FileListSelectionWidget)
             ]
 
-    def update_dimmed_items(self, paths: list[str]) -> None:
+    def update_dimmed_items(self, paths: list[str] | None = None) -> None:
         """Update the dimmed items in the file list based on the cut items.
 
         Args:
             paths (list[str]): The list of paths to dim.
         """
+        if paths is None:
+            paths = []
         for option in self.options:
             if path_utils.normalise(option.dir_entry.path) in paths:
                 option._set_prompt(option.prompt.stylize("dim"))

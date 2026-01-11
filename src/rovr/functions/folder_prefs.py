@@ -11,7 +11,7 @@ from .path import normalise
 
 
 class FolderPrefDict(TypedDict):
-    sort_by: str
+    sort_by: SortByOptions
     sort_descending: bool
 
 

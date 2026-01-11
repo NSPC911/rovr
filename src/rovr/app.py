@@ -7,7 +7,6 @@ from typing import Callable, Iterable
 
 from rich.console import Console, RenderableType
 from rich.protocol import is_renderable
-from rich.segment import Segments
 from textual import events, on, work
 from textual.app import WINDOWS, App, ComposeResult, ScreenStackError, SystemCommand
 from textual.binding import Binding
@@ -881,8 +880,6 @@ class Application(App, inherit_bindings=False):
         traceback_involved = False
         for renderable in self._exit_renderables:
             self.error_console.print(renderable)
-            if isinstance(renderable, Segments):
-                print(renderable.segments)
             if isinstance(renderable, Traceback):
                 traceback_involved = True
                 dump_exc(self, renderable)

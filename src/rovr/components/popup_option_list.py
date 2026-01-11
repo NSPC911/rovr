@@ -1,3 +1,5 @@
+import contextlib
+
 from textual import events, on
 from textual.widgets import OptionList
 
@@ -39,7 +41,9 @@ class PopupOptionList(OptionList):
 
     def go_hide(self) -> None:
         self.add_class("hidden")
-        self.app.file_list.focus()
+        with contextlib.suppress(Exception):
+            # just for the sake of it
+            self.app.file_list.focus()
 
     @on(events.Key)
     def check_escape(self, event: events.Key) -> None:

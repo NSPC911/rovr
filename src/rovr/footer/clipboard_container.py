@@ -72,7 +72,6 @@ class Clipboard(CheckboxRenderingMixin, SelectionList, inherit_bindings=False):
         for item_number in range(len(items)):
             self.select(self.get_option_at_index(item_number))
         # then go through filelist and dim the cut items
-        self.app.file_list.update_dimmed_items(items)
 
     @work
     async def cut_to_clipboard(self, items: list[str]) -> None:
@@ -92,8 +91,6 @@ class Clipboard(CheckboxRenderingMixin, SelectionList, inherit_bindings=False):
                 )
         for item_number in range(len(items)):
             self.select(self.get_option_at_index(item_number))
-        # then go through filelist and dim the cut items
-        self.app.file_list.update_dimmed_items(items)
 
     # Why isnt this already a thing
     def insert_selection_at_beginning(self, selection: ClipboardSelection) -> None:
@@ -167,7 +164,9 @@ class Clipboard(CheckboxRenderingMixin, SelectionList, inherit_bindings=False):
                     self.select_all()
                 event.stop()
 
-    def _remove_option(self, option: ClipboardSelection) -> Self:  # ty: ignore[invalid-method-override]  # oh my god, will you please stfu
+    def _remove_option(
+        self, option: ClipboardSelection
+    ) -> Self:  # ty: ignore[invalid-method-override]  # oh my god, will you please stfu
         super()._remove_option(option)
         self.app.file_list.update_dimmed_items([value.path for value in self.selected])
         return self
@@ -176,7 +175,12 @@ class Clipboard(CheckboxRenderingMixin, SelectionList, inherit_bindings=False):
         self, event: SelectionList.SelectedChanged
     ) -> None:
         self.paste_button.disabled = len(self.selected) == 0
-        self.app.file_list.update_dimmed_items([value.path for value in self.selected])
+        # go through each option, check if they are both selected and are the cut type, update filelist with that list
+        self.app.file_list.update_dimmed_items([
+            option.value.path
+            for option in self.options
+            if option.value in self.selected and option.value.type_of_selection == "cut"
+        ])
 
     @work(thread=True)
     def check_clipboard_existence(self) -> None:

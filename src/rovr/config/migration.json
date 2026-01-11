@@ -1,12 +1,9 @@
 [
   {
-    "keys": [
-      "mode",
-      "mode.*"
-    ],
+    "keys": ["mode", "mode.*"],
     "message": [
-      "[bright_blue]modes[/] have been removed to replace [bright_cyan]`--config-folder`[/] which should be used to load custom modes instead.",
-      "modes were considered an experimental feature for me to mess around, but I haven't seen anyone else use it."
+      "[bright_blue]modes[/] have been removed, use [bright_cyan]--config-folder[/] to load custom configurations instead.",
+      "Modes were experimental and are now deprecated/removed."
     ],
     "extra": "Removed in v0.7.0"
   },
@@ -25,10 +22,7 @@
     "extra": "Moved in v0.7.0"
   },
   {
-    "keys": [
-      "plugins.file_one.mime_rules.*",
-      "plugins.file_one.mime_rules"
-    ],
+    "keys": ["plugins.file_one.mime_rules.*", "plugins.file_one.mime_rules"],
     "message": [
       "[bright_blue]plugins.file_one.mime_rules.*[/] has been renamed to [bright_cyan]interface.mime_rules.*[/] because file(1) is no longer a requirement to make use of mime types."
     ],
@@ -61,9 +55,7 @@
     "extra": "Expanded in v0.6.0"
   },
   {
-    "keys": [
-      "keybinds.change_sort_order"
-    ],
+    "keys": ["keybinds.change_sort_order"],
     "message": [
       "[bright_blue]keybinds.change_sort_order[/] has had a minor change.",
       "It is now expanded to support changing keybinds for the different sort options.",
@@ -72,10 +64,7 @@
     "extra": "Expanded in v0.6.0"
   },
   {
-    "keys": [
-      "interface.preview_error",
-      "interface.preview_start"
-    ],
+    "keys": ["interface.preview_error", "interface.preview_start"],
     "message": [
       "[bright_blue]interface.preview_error[/] and [bright_blue]interface.preview_start[/] have been moved over to their own section.",
       "The new location is now at [bright_blue]interface.preview_text[/], which can contain",

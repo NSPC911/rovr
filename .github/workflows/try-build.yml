@@ -28,7 +28,7 @@ jobs:
           - os: macos-latest
             name: macos-arm64
             executable: rovr.bin
-          - os: macos-13
+          - os: macos-15
             name: macos-x64
             executable: rovr.bin
 

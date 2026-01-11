@@ -86,7 +86,9 @@ class FileListSelectionWidget(Selection):
         prompt = FileListSelectionWidget._icon_content_cache[cache_key] + Content(label)
         dir_entry_path = normalise(dir_entry.path)
         if any(
-            dir_entry_path == clipboard_val.path for clipboard_val in clipboard.selected
+            clipboard_val.type_of_selection == "cut"
+            and dir_entry_path == clipboard_val.path
+            for clipboard_val in clipboard.selected
         ):
             prompt = prompt.stylize("dim")
         self.dir_entry = dir_entry

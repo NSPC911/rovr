@@ -71,6 +71,8 @@ class Clipboard(CheckboxRenderingMixin, SelectionList, inherit_bindings=False):
             )
         for item_number in range(len(items)):
             self.select(self.get_option_at_index(item_number))
+        # then go through filelist and dim the cut items
+        self.app.file_list.update_dimmed_items(items)
 
     @work
     async def cut_to_clipboard(self, items: list[str]) -> None:
@@ -94,21 +96,28 @@ class Clipboard(CheckboxRenderingMixin, SelectionList, inherit_bindings=False):
         self.app.file_list.update_dimmed_items(items)
 
     # Why isnt this already a thing
-    def insert_selection_at_beginning(self, content: ClipboardSelection) -> None:
+    def insert_selection_at_beginning(self, selection: ClipboardSelection) -> None:
         """Insert a new selection at the beginning of the clipboard list.
 
         Args:
-            content (ClipboardSelection): A pre-created Selection object to insert.
+            selection (ClipboardSelection): A pre-created Selection object to insert.
         """
         # Check for duplicate ID
-        if content.id is not None and content.id in self._id_to_option:
-            self.remove_option(content.id)
+        if selection.id is not None and selection.id in self._id_to_option:
+            self.remove_option(selection.id)
+        # check for duplicate path
+        if any(selection.value.path == option.value.path for option in self.options):
+            # find the option with the same path
+            for option in self.options:
+                if selection.value.path == option.value.path:
+                    self._remove_option(option)
+                    break
 
         # insert
-        self._options.insert(0, content)
+        self._options.insert(0, selection)
 
         # update self._values
-        values = {content.value: 0}
+        values = {selection.value: 0}
 
         # update mapping
         for option, index in list(self._option_to_index.items()):
@@ -116,11 +125,11 @@ class Clipboard(CheckboxRenderingMixin, SelectionList, inherit_bindings=False):
         for key, value in self._values.items():
             values[key] = value + 1
         self._values = values
-        self._option_to_index[content] = 0
+        self._option_to_index[selection] = 0
 
         # update id mapping
-        if content.id is not None:
-            self._id_to_option[content.id] = content
+        if selection.id is not None:
+            self._id_to_option[selection.id] = selection
 
         # force redraw
         self._clear_caches()
@@ -158,7 +167,9 @@ class Clipboard(CheckboxRenderingMixin, SelectionList, inherit_bindings=False):
                     self.select_all()
                 event.stop()
 
-    def _remove_option(self, option: ClipboardSelection) -> Self:  # ty: ignore[invalid-method-override]  # oh my god, will you please stfu
+    def _remove_option(
+        self, option: ClipboardSelection
+    ) -> Self:  # ty: ignore[invalid-method-override]  # oh my god, will you please stfu
         super()._remove_option(option)
         self.app.file_list.update_dimmed_items([value.path for value in self.selected])
         return self

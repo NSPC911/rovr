@@ -13,16 +13,13 @@
     "@astrojs/sitemap": "^3.6.1",
     "@astrojs/starlight": "^0.37.2",
     "astro": "^5.16.8",
-    "astro-mermaid": "^1.2.0",
+    "astro-mermaid": "github:joesaby/astro-mermaid#v1.2.1",
     "mermaid": "^11.12.2",
     "sharp": "^0.34.5",
     "starlight-contributor-list": "^0.3.2"
   },
   "devDependencies": {
     "astro-vtbot": "^2.1.10"
-  },
-  "overrides": {
-    "@anthropic-ai/claude-code": "./__EXCLUDE"
   },
   "packageManager": "pnpm"
 }

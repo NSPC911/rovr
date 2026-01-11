@@ -9,47 +9,62 @@ on:
 
 jobs:
   build:
-    runs-on: windows-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: windows-latest
+            name: windows-x64
+            executable: rovr.exe
+          - os: windows-11-arm64
+            name: windows-arm64
+            executable: rovr.exe
+          - os: ubuntu-latest
+            name: linux-x64
+            executable: rovr.bin
+          - os: ubuntu-24.04-arm
+            name: linux-arm64
+            executable: rovr.bin
+          - os: macos-latest
+            name: macos-arm64
+            executable: rovr.bin
+          - os: macos-13
+            name: macos-x64
+            executable: rovr.bin
+
+    runs-on: ${{ matrix.os }}
+    name: Build (${{ matrix.name }})
 
     steps:
-    - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
-    - name: Setup uv
-      uses: astral-sh/setup-uv@v6
-      with:
-        activate-environment: true
-        python-version: "3.12"
+      - name: Setup uv
+        uses: astral-sh/setup-uv@v6
+        with:
+          activate-environment: true
+          python-version: "3.12"
 
-    - name: Install dependencies
-      run: |
-        uv sync --dev
-      shell: pwsh
+      - name: Cache Nuitka
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cache/Nuitka
+            ~/AppData/Local/Nuitka/Nuitka
+            ~/Library/Caches/Nuitka
+          key: nuitka-${{ matrix.name }}-${{ hashFiles('uv.lock') }}
+          restore-keys: |
+            nuitka-${{ matrix.name }}-
 
-    - name: Build with Nuitka (standalone)
-      run: |
-        uv run nuitka --mode=standalone --assume-yes-for-downloads --enable-plugins=no-qt --python-flag=-m src/rovr --include-package-data=rovr
-      shell: pwsh
+      - name: Install dependencies
+        run: uv sync --dev
 
-    - name: List dist items
-      run: Get-ChildItem -Recurse .\rovr.dist
-      shell: pwsh
+      - name: Build with Nuitka (onefile)
+        run: |
+          uv run nuitka --mode=onefile --assume-yes-for-downloads --enable-plugins=no-qt --python-flag=-m src/rovr --include-package-data=rovr
 
-    - name: Upload Executable
-      uses: actions/upload-artifact@v4
-      with:
-        name: rovr_windows_build
-        path: rovr.dist
-        retention-days: 30
-
-    - name: Build with Nuitka (onefile)
-      run: |
-        uv run nuitka --mode=onefile --assume-yes-for-downloads --enable-plugins=no-qt --python-flag=-m src/rovr --include-package-data=rovr
-      shell: pwsh
-
-    - name: Upload Onefile Executable
-      uses: actions/upload-artifact@v4
-      # upload executable at ./rovr.exe
-      with:
-        path: rovr.exe
-        name: rovr_windows_onefile_build
-        retention-days: 30
+      - name: Upload Executable
+        uses: actions/upload-artifact@v4
+        with:
+          path: ${{ matrix.executable }}
+          name: rovr-${{ matrix.name }}
+          retention-days: 30

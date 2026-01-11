@@ -105,7 +105,7 @@ class NewItemButton(Button):
             self.app.file_list.file_list_pause_check = True
             self.app.file_list.focus()
             worker: Worker = self.app.file_list.update_file_list(
-                add_to_session=False, focus_on=path.basename(location)
+                add_to_session=False, focus_on=path.basename(location.rstrip("/"))
             )
             with contextlib.suppress(WorkerError):
                 await worker.wait()

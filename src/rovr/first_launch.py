@@ -302,8 +302,8 @@ class FirstLaunchApp(App, inherit_bindings=False):
     @on(Switch.Changed, "#transparent_mode")
     def on_transparent_mode_changed(self, event: Switch.Changed) -> None:
         self.ansi_color = event.value
-        self.query_one(RadioSet).disabled = event.value
-        self.query_one(RadioSet).tooltip = (
+        self.query_one("#theme", RadioSet).disabled = event.value
+        self.query_one("#theme", RadioSet).tooltip = (
             "Disabled when transparent mode is enabled" if event.value else None
         )
         self._toggle_transparency()
@@ -354,7 +354,7 @@ buttons = {str(self.query_one("#compact_buttons", Switch).value).lower()}
 panels = {str(self.query_one("#compact_panels", Switch).value).lower()}
 
 [theme]
-default =  "{theme}"
+default = "{theme}"
 {f'preview = "{theme}"' if theme in list(get_all_styles()) else ""}
 transparent = {str(self.query_one("#transparent_mode", Switch).value).lower()}
 {keybinds}
@@ -389,7 +389,7 @@ enabled = {str(self.query_one("#plugins-file Switch", Switch).value).lower()}"""
             os.makedirs(VAR_TO_DIR["CONFIG"], exist_ok=True)
             with open(f"{VAR_TO_DIR['CONFIG']}/config.toml", "w") as f:
                 f.write(config_toml)
-        await self.push_screen_wait(FinalStuff())
+            await self.push_screen_wait(FinalStuff())
 
     @work(exclusive=True)
     async def action_quit(self) -> None:

@@ -8,10 +8,8 @@
 
 ## new features
 - cli: add `--config-folder` option to specify custom config folder #185
-- preview: batched pdf loading #184
 - filelist: dim files/folders that are cut in clipboard #188
-- filelist/state: option to remember sort order per forlder #193
-- cli: allow setting config folder #185
+- filelist/state: option to remember sort order per folder #193
 - log: improve logging mechanism f8c0988
 - clipboard: dim file list options that were cut #188
 - config: provide two separate profiles for keybinds #179

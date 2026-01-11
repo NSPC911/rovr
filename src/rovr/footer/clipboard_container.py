@@ -6,6 +6,7 @@ from textual import events, work
 from textual.binding import BindingType
 from textual.content import Content
 from textual.widgets import Button, SelectionList
+from textual.widgets.option_list import OptionDoesNotExist
 from textual.worker import Worker
 
 from rovr.classes import ClipboardSelection
@@ -113,7 +114,6 @@ class Clipboard(CheckboxRenderingMixin, SelectionList, inherit_bindings=False):
         # insert
         self._options.insert(0, selection)
 
-        # update self._values
         values = {selection.value: 0}
 
         # update mapping
@@ -124,19 +124,19 @@ class Clipboard(CheckboxRenderingMixin, SelectionList, inherit_bindings=False):
         self._values = values
         self._option_to_index[selection] = 0
 
-        # update id mapping
         if selection.id is not None:
             self._id_to_option[selection.id] = selection
 
         # force redraw
         self._clear_caches()
+        self._update_lines()
 
         # since you insert at beginning, highlighted should go down
         if self.highlighted is not None:
             self.highlighted += 1
 
-        # redraw
-        # self.refresh(layout=True)
+        # redraw because may not work, but idk honestly, just a preventive measure again
+        self.refresh(layout=True)
 
     async def on_key(self, event: events.Key) -> None:
         if self.has_focus:
@@ -151,7 +151,7 @@ class Clipboard(CheckboxRenderingMixin, SelectionList, inherit_bindings=False):
                     return
                 try:
                     self.remove_option_at_index(self.highlighted)
-                except KeyError as exc:
+                except (KeyError, OptionDoesNotExist) as exc:
                     dump_exc(self, exc)
                 if self.option_count == 0:
                     return
@@ -164,9 +164,15 @@ class Clipboard(CheckboxRenderingMixin, SelectionList, inherit_bindings=False):
                     self.select_all()
                 event.stop()
 
-    def _remove_option(self, option: ClipboardSelection) -> Self:  # ty: ignore[invalid-method-override]  # oh my god, will you please stfu
+    def _remove_option(
+        self, option: ClipboardSelection
+    ) -> Self:  # ty: ignore[invalid-method-override]  # oh my god, will you please stfu
         super()._remove_option(option)
-        self.app.file_list.update_dimmed_items([value.path for value in self.selected])
+        self.app.file_list.update_dimmed_items([
+            opt.value.path
+            for opt in self.options
+            if opt.value in self.selected and opt.value.type_of_selection == "cut"
+        ])
         return self
 
     async def on_selection_list_selected_changed(

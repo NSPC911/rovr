@@ -317,6 +317,10 @@ class PreviewContainer(Container):
             try:
                 self.pdf.total_pages = pdfinfo_from_path(
                     str(self._current_file_path),
+                    # okay so this is the fault of the mentally ill type hinting
+                    # that pdf2image uses, the creator adds type hinting like
+                    # `path: str = None` so ty just like dies or something,
+                    # idfk, so we are forced to cast to string
                     poppler_path=cast(str, PDFHandler.get_poppler_folder()),
                 )["Pages"]
                 result = self.load_pdf_pages(

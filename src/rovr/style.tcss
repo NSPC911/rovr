@@ -414,9 +414,6 @@ Tooltip {
     width: auto;
     height: auto;
     align: center middle;
-    margin: 0 1
-  }
-  &.pdf Image {
     margin: 0 1 1 1;
   }
 }

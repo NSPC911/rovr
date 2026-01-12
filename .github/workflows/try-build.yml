@@ -60,7 +60,7 @@ jobs:
 
       - name: Build with Nuitka (onefile)
         run: |
-          uv run nuitka --mode=onefile --assume-yes-for-downloads --enable-plugins=no-qt --python-flag=-m src/rovr --include-package-data=rovr
+          uv run poe build
 
       - name: Upload Executable
         uses: actions/upload-artifact@v4

@@ -16,8 +16,8 @@ jobs:
           - os: windows-latest
             name: windows-x64
             executable: rovr.exe
-          - os: windows-11-arm64
-            name: windows-arm64
+          - os: windows-11-arm
+            name: windows-arm
             executable: rovr.exe
           - os: ubuntu-latest
             name: linux-x64

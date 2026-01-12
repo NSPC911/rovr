@@ -9,7 +9,7 @@ from textual.worker import Worker, WorkerError
 
 from rovr.classes import IsValidFilePath, PathDoesntExist
 from rovr.functions.icons import get_icon
-from rovr.functions.path import normalise
+from rovr.functions.path import dump_exc, normalise
 from rovr.screens import ModalInput
 from rovr.variables.constants import config
 
@@ -101,12 +101,15 @@ class NewItemButton(Button):
                     title="New Item",
                     severity="error",
                 )
-        self.app.file_list_pause_check = True  # ty: ignore[invalid-assignment]
-        file_list = self.app.query_one("#file_list")
-        file_list.focus()
-        worker: Worker = file_list.update_file_list(
-            add_to_session=False, focus_on=path.basename(location)
-        )
-        with contextlib.suppress(WorkerError):
-            await worker.wait()
-        self.app.file_list_pause_check = False  # ty: ignore[invalid-assignment]
+        try:
+            self.app.file_list.file_list_pause_check = True
+            self.app.file_list.focus()
+            worker: Worker = self.app.file_list.update_file_list(
+                add_to_session=False, focus_on=path.basename(location.rstrip("/"))
+            )
+            with contextlib.suppress(WorkerError):
+                await worker.wait()
+        except Exception as exc:
+            dump_exc(self, exc)
+        finally:
+            self.app.file_list.file_list_pause_check = False

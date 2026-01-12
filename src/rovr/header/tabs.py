@@ -7,7 +7,6 @@ from textual.await_complete import AwaitComplete
 from textual.containers import Container, Horizontal, Vertical
 from textual.css.query import NoMatches
 from textual.renderables.bar import Bar as BarRenderable
-from textual.widget import Widget
 from textual.widgets import Button, Input, Tabs
 from textual.widgets._tabs import Tab, Underline
 from textual.widgets.option_list import OptionDoesNotExist
@@ -141,18 +140,17 @@ class Tabline(Tabs):
 
         def callback() -> None:
             assert isinstance(event.tab, TablineTab)
-            file_list: Widget = self.app.query_one("#file_list")
-            assert isinstance(file_list.input, Input)
-            file_list.select_mode_enabled = event.tab.session.selectMode
+            assert isinstance(self.app.file_list.input, Input)
+            self.app.file_list.select_mode_enabled = event.tab.session.selectMode
             if event.tab.session.selectMode:
                 for option in event.tab.session.selectedItems:
                     try:
-                        file_list.select(file_list.get_option(option))
+                        self.app.file_list.select(self.app.file_list.get_option(option))
                         self.log(f"Successfully selected option: {option}")
                     except (OptionDoesNotExist, AttributeError) as e:
                         self.log(f"Failed to select option {option}: {e}")
             if event.tab.session.search != "":
-                file_list.input.value = event.tab.session.search
+                self.app.file_list.input.value = event.tab.session.search
 
         self.app.cd(event.tab.directory, add_to_history=False, callback=callback)
 

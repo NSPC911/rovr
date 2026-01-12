@@ -25,8 +25,7 @@ class DeleteButton(Button):
         """Delete selected files or directories"""
         if self.disabled:
             return
-        file_list = self.app.query_one("#file_list")
-        selected_files = await file_list.get_selected_objects()
+        selected_files = await self.app.file_list.get_selected_objects()
         if selected_files:
 
             async def callback(response: str) -> None:

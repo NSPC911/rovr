@@ -13,7 +13,7 @@ from jsonschema import ValidationError
 from rich import box
 from rich.console import Console
 
-from rovr.functions.utils import deep_merge, set_nested_value
+from rovr.functions.utils import deep_merge
 from rovr.variables.maps import (
     VAR_TO_DIR,
 )
@@ -121,12 +121,14 @@ def find_path_line(lines: list[str], path: deque) -> int | None:
 
             if current_section in (path_without_indices, path_list):
                 return i
+            for depth in range(1, len(current_section) + 1):
+                if current_section[:depth] in (path_without_indices, path_list):
+                    return i
         elif "=" in stripped:
             key = stripped.split("=")[0].strip().strip('"').strip("'")
             full_path = current_section + [key]
             if full_path in (path_without_indices, path_list):
                 return i
-
     return None
 
 
@@ -353,54 +355,6 @@ def load_config() -> tuple[dict, dict]:
             pdfinfo_path = path.dirname(pdfinfo_executable)
         config["plugins"]["poppler"]["poppler_folder"] = pdfinfo_path
     return schema, config
-
-
-def apply_mode(config: dict, mode_name: str) -> None:
-    """
-    Apply mode-specific config overrides to the config dictionary.
-
-    Args:
-        config (dict): The config dictionary to modify (modified in-place)
-        mode_name (str): The name of the mode to apply
-    """
-    if "mode" not in config:
-        from rich.syntax import Syntax
-
-        pprint("[bright_red]Error:[/] No modes defined in config")
-        pprint("[yellow]Hint:[/] Define modes in config.toml like:")
-        print()
-        pprint(
-            Syntax(
-                "[mode.gui]",
-                lexer="toml",
-                background_color="default",
-                theme="ansi_dark",
-            )
-        )
-        pprint(
-            Syntax(
-                '"plugins.editor.file_executable" = "vscode"',
-                lexer="toml",
-                background_color="default",
-                theme="ansi_dark",
-            )
-        )
-        print()
-        exit(1)
-
-    if mode_name not in config["mode"]:
-        available_modes = ", ".join(f"'{m}'" for m in config["mode"])
-        pprint(f"[bright_red]Error:[/] Mode '{mode_name}' not found in config")
-        pprint(f"[yellow]Available modes:[/] {available_modes}")
-        exit(1)
-
-    mode_config = config["mode"][mode_name]
-
-    for path_str, value in mode_config.items():
-        set_nested_value(config, path_str, value)
-
-    if "mode" in config:
-        del config["mode"]
 
 
 def config_setup() -> None:

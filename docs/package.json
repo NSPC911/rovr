@@ -10,19 +10,16 @@
     "astro": "astro"
   },
   "dependencies": {
-    "@astrojs/sitemap": "^3.6.0",
-    "@astrojs/starlight": "^0.37.1",
-    "astro": "^5.16.6",
-    "astro-mermaid": "^1.2.0",
+    "@astrojs/sitemap": "^3.6.1",
+    "@astrojs/starlight": "^0.37.2",
+    "astro": "^5.16.8",
+    "astro-mermaid": "github:joesaby/astro-mermaid#v1.2.1",
     "mermaid": "^11.12.2",
     "sharp": "^0.34.5",
-    "starlight-contributor-list": "^0.3.1"
+    "starlight-contributor-list": "^0.3.2"
   },
   "devDependencies": {
-    "astro-vtbot": "^2.1.9"
-  },
-  "overrides": {
-    "@anthropic-ai/claude-code": "./__EXCLUDE"
+    "astro-vtbot": "^2.1.10"
   },
   "packageManager": "pnpm"
 }

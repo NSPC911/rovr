@@ -1,23 +1,23 @@
 import asyncio
 from os import path
-from typing import ClassVar
+from typing import ClassVar, Self, Sequence
 
-from rich.segment import Segment
-from rich.style import Style
 from textual import events, work
 from textual.binding import BindingType
 from textual.content import Content
-from textual.strip import Strip
 from textual.widgets import Button, SelectionList
 from textual.widgets.option_list import OptionDoesNotExist
 from textual.worker import Worker
 
 from rovr.classes import ClipboardSelection
+from rovr.classes.mixins import CheckboxRenderingMixin
+from rovr.classes.textual_options import ClipboardSelectionValue
 from rovr.functions import icons as icon_utils
+from rovr.functions.path import dump_exc
 from rovr.variables.constants import config, vindings
 
 
-class Clipboard(SelectionList, inherit_bindings=False):
+class Clipboard(CheckboxRenderingMixin, SelectionList, inherit_bindings=False):
     """A selection list that displays the clipboard contents."""
 
     BINDINGS: ClassVar[list[BindingType]] = list(vindings)
@@ -26,14 +26,34 @@ class Clipboard(SelectionList, inherit_bindings=False):
         super().__init__(**kwargs)
         self.clipboard_contents = []
         self._checker_worker: Worker | None = None
+        self._options: list[ClipboardSelection] = []
 
     def on_mount(self) -> None:
         self.paste_button: Button = self.app.query_one("#paste")
         self.paste_button.disabled = True
-        self.file_list = self.app.query_one("#file_list")
         self.set_interval(
             5, self.checker_wrapper, name="Check existence of clipboard items"
         )
+
+    @property
+    def options(self) -> Sequence[ClipboardSelection]:
+        """Sequence of options in the OptionList.
+
+        !!! note "This is read-only"
+
+        """
+        return self._options
+
+    @property
+    def selected(self) -> list[ClipboardSelectionValue]:
+        """The selected values.
+
+        This is a list of all of the
+        [values][textual.widgets.selection_list.Selection.value] associated
+        with selections in the list that are currently in the selected
+        state.
+        """
+        return list(self._selected.keys())
 
     @work
     async def copy_to_clipboard(self, items: list[str]) -> None:
@@ -52,6 +72,7 @@ class Clipboard(SelectionList, inherit_bindings=False):
             )
         for item_number in range(len(items)):
             self.select(self.get_option_at_index(item_number))
+        # then go through filelist and dim the cut items
 
     @work
     async def cut_to_clipboard(self, items: list[str]) -> None:
@@ -72,85 +93,28 @@ class Clipboard(SelectionList, inherit_bindings=False):
         for item_number in range(len(items)):
             self.select(self.get_option_at_index(item_number))
 
-    # Use better versions of the checkbox icons
-    def _get_left_gutter_width(
-        self,
-    ) -> int:
-        """Returns the size of any left gutter that should be taken into account.
-
-        Returns:
-            The width of the left gutter.
-        """
-        return len(
-            icon_utils.get_toggle_button_icon("left")
-            + icon_utils.get_toggle_button_icon("inner")
-            + icon_utils.get_toggle_button_icon("right")
-            + " "
-        )
-
-    def render_line(self, y: int) -> Strip:
-        """Render a line in the display.
-
-        Args:
-            y: The line to render.
-
-        Returns:
-            A [`Strip`][textual.strip.Strip] that is the line to render.
-        """
-        line = super(SelectionList, self).render_line(y)
-
-        _, scroll_y = self.scroll_offset
-        selection_index = scroll_y + y
-        try:
-            selection = self.get_option_at_index(selection_index)
-        except OptionDoesNotExist:
-            return line
-
-        component_style = "selection-list--button"
-        if selection.value in self._selected:
-            component_style += "-selected"
-        if self.highlighted == selection_index:
-            component_style += "-highlighted"
-
-        underlying_style = next(iter(line)).style or self.rich_style
-        assert underlying_style is not None
-
-        button_style = self.get_component_rich_style(component_style)
-
-        side_style = Style.from_color(button_style.bgcolor, underlying_style.bgcolor)
-
-        side_style += Style(meta={"option": selection_index})
-        button_style += Style(meta={"option": selection_index})
-
-        return Strip([
-            Segment(icon_utils.get_toggle_button_icon("left"), style=side_style),
-            Segment(
-                icon_utils.get_toggle_button_icon("inner_filled")
-                if selection.value in self._selected
-                else icon_utils.get_toggle_button_icon("inner"),
-                style=button_style,
-            ),
-            Segment(icon_utils.get_toggle_button_icon("right"), style=side_style),
-            Segment(" ", style=underlying_style),
-            *line,
-        ])
-
     # Why isnt this already a thing
-    def insert_selection_at_beginning(self, content: ClipboardSelection) -> None:
+    def insert_selection_at_beginning(self, selection: ClipboardSelection) -> None:
         """Insert a new selection at the beginning of the clipboard list.
 
         Args:
-            content (ClipboardSelection): A pre-created Selection object to insert.
+            selection (ClipboardSelection): A pre-created Selection object to insert.
         """
         # Check for duplicate ID
-        if content.id is not None and content.id in self._id_to_option:
-            self.remove_option(content.id)
+        if selection.id is not None and selection.id in self._id_to_option:
+            self.remove_option(selection.id)
+        # check for duplicate path
+        if any(selection.value.path == option.value.path for option in self.options):
+            # find the option with the same path
+            for option in self.options:
+                if selection.value.path == option.value.path:
+                    self._remove_option(option)
+                    break
 
         # insert
-        self._options.insert(0, content)
+        self._options.insert(0, selection)
 
-        # update self._values
-        values = {content.value: 0}
+        values = {selection.value: 0}
 
         # update mapping
         for option, index in list(self._option_to_index.items()):
@@ -158,21 +122,21 @@ class Clipboard(SelectionList, inherit_bindings=False):
         for key, value in self._values.items():
             values[key] = value + 1
         self._values = values
-        self._option_to_index[content] = 0
+        self._option_to_index[selection] = 0
 
-        # update id mapping
-        if content.id is not None:
-            self._id_to_option[content.id] = content
+        if selection.id is not None:
+            self._id_to_option[selection.id] = selection
 
         # force redraw
         self._clear_caches()
+        self._update_lines()
 
         # since you insert at beginning, highlighted should go down
         if self.highlighted is not None:
             self.highlighted += 1
 
-        # redraw
-        # self.refresh(layout=True)
+        # redraw because may not work, but idk honestly, just a preventive measure again
+        self.refresh(layout=True)
 
     async def on_key(self, event: events.Key) -> None:
         if self.has_focus:
@@ -185,7 +149,10 @@ class Clipboard(SelectionList, inherit_bindings=False):
                         severity="warning",
                     )
                     return
-                self.remove_option_at_index(self.highlighted)
+                try:
+                    self.remove_option_at_index(self.highlighted)
+                except (KeyError, OptionDoesNotExist) as exc:
+                    dump_exc(self, exc)
                 if self.option_count == 0:
                     return
                 event.stop()
@@ -197,16 +164,31 @@ class Clipboard(SelectionList, inherit_bindings=False):
                     self.select_all()
                 event.stop()
 
+    def _remove_option(self, option: ClipboardSelection) -> Self:  # ty: ignore[invalid-method-override]  # oh my god, will you please stfu
+        super()._remove_option(option)
+        self.app.file_list.update_dimmed_items([
+            opt.value.path
+            for opt in self.options
+            if opt.value in self.selected and opt.value.type_of_selection == "cut"
+        ])
+        return self
+
     async def on_selection_list_selected_changed(
         self, event: SelectionList.SelectedChanged
     ) -> None:
         self.paste_button.disabled = len(self.selected) == 0
+        # go through each option, check if they are both selected and are the cut type, update filelist with that list
+        self.app.file_list.update_dimmed_items([
+            option.value.path
+            for option in self.options
+            if option.value in self.selected and option.value.type_of_selection == "cut"
+        ])
 
     @work(thread=True)
     def check_clipboard_existence(self) -> None:
         """Check if the files in the clipboard still exist."""
         for option in self.options:
-            if not path.exists(option.path):
+            if not path.exists(option.value.path):
                 assert isinstance(option.id, str)
                 self.app.call_from_thread(self.remove_option, option.id)
 

@@ -104,10 +104,6 @@ export default defineConfig({
               label: "project structure",
               slug: "contributing/project-structure",
             },
-            {
-              label: "optimisations",
-              slug: "contributing/optimisation",
-            },
           ],
         },
         {

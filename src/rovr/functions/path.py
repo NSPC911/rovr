@@ -11,6 +11,7 @@ from typing import Callable, Literal, NamedTuple, TypeAlias, TypedDict, overload
 import psutil
 from natsort import natsorted
 from rich.console import Console
+from rich.traceback import Traceback
 from textual import work
 from textual.app import App
 from textual.dom import DOMNode
@@ -206,6 +207,7 @@ def threaded_get_cwd_object(
     return_nothing_if_this_returns_true: Callable[[], bool] | None = None,
 ) -> tuple[list[CWDObjectReturnDict], list[CWDObjectReturnDict]] | tuple[None, None]:
     return sync_get_cwd_object(
+        node,
         cwd,
         show_hidden,
         sort_by,
@@ -216,6 +218,7 @@ def threaded_get_cwd_object(
 
 @overload
 def sync_get_cwd_object(
+    dom_node: DOMNode,
     cwd: str,
     show_hidden: bool = False,
     sort_by: Literal[
@@ -227,6 +230,7 @@ def sync_get_cwd_object(
 
 @overload
 def sync_get_cwd_object(
+    dom_node: DOMNode,
     cwd: str,
     show_hidden: bool = False,
     sort_by: Literal[
@@ -240,6 +244,7 @@ def sync_get_cwd_object(
 
 
 def sync_get_cwd_object(
+    dom_node: DOMNode,
     cwd: str,
     show_hidden: bool = False,
     sort_by: Literal[
@@ -251,6 +256,7 @@ def sync_get_cwd_object(
     """
     Get the objects (files and folders) in a provided directory
     Args:
+        dom_node(DOMNode): The DOM node requesting this operation
         cwd(str): The working directory to check
         show_hidden(bool): Whether to include hidden files/folders (dot-prefixed on Unix; flagged hidden on Windows/macOS)
         sort_by(str): What to sort by
@@ -271,6 +277,8 @@ def sync_get_cwd_object(
         entries = list(os.scandir(cwd))
     except (PermissionError, FileNotFoundError, OSError):
         raise PermissionError(f"PermissionError: Unable to access {cwd}")
+
+    dom_node.log(f"Scanned {len(entries)} entries in {cwd}")
 
     if (
         return_nothing_if_this_returns_true is not None
@@ -306,8 +314,11 @@ def sync_get_cwd_object(
             and return_nothing_if_this_returns_true()
         ):
             if globals().get("is_dev", False):
-                print("Cut off early during dictionary building")
+                dom_node.log("Cut off early during dictionary building")
             return None, None
+
+    dom_node.log(f"Collected {len(folders)} folders and {len(files)} files in {cwd}")
+
     # sort order
     match sort_by:
         case "name":
@@ -342,14 +353,14 @@ def sync_get_cwd_object(
         and return_nothing_if_this_returns_true()
     ):
         if globals().get("is_dev", False):
-            print("Cut off early before reversing results")
+            dom_node.log("Cut off early before reversing results")
         return None, None
     if reverse:
         files.reverse()
         folders.reverse()
 
     if globals().get("is_dev", False):
-        print(f"Found {len(folders)} folders and {len(files)} files in {cwd}")
+        dom_node.log(f"Found {len(folders)} folders and {len(files)} files in {cwd}")
     return folders, files
 
 
@@ -719,28 +730,34 @@ def get_mime_type(
     return None
 
 
-def dump_exc(widget: DOMNode, exc: Exception) -> str | None:
+def dump_exc(widget: DOMNode, exc: Exception | Traceback) -> str | None:
     """Dump an exception to the console for debugging purposes.
 
     Args:
         widget (DOMNode): The widget where the exception occurred.
-        exc (Exception): The exception to dump.
+        exc (Exception, Traceback): The exception to dump.
 
     Returns:
         str: The path to the log file where the exception was dumped.
     """
-    from rich.traceback import Traceback
+    from datetime import datetime
+
+    from rich.panel import Panel
 
     from rovr.variables.maps import VAR_TO_DIR
 
-    rich_traceback = Traceback.from_exception(
-        type(exc),
-        exc,
-        exc.__traceback__,
-        width=None,
-        code_width=None,
-        show_locals=True,
-        max_frames=5,
+    rich_traceback = (
+        Traceback.from_exception(
+            type(exc),
+            exc,
+            exc.__traceback__,
+            width=None,
+            code_width=None,
+            show_locals=True,
+            max_frames=5,
+        )
+        if isinstance(exc, Exception)
+        else exc
     )
     widget.log(rich_traceback)
 
@@ -750,8 +767,11 @@ def dump_exc(widget: DOMNode, exc: Exception) -> str | None:
         f"{log_name}.log",
     )
     os.makedirs(path.dirname(dump_path), exist_ok=True)
-    with open(dump_path, "w") as file_log:
+    with open(dump_path, "a") as file_log:
         # don't need to handle OS Error, Textual automatically chains errors
         error_log = Console(file=file_log, legacy_windows=True)
-        error_log.print(rich_traceback)
+        # section it with time and date
+        error_log.print(
+            Panel(rich_traceback, title=f"Exception dumped on {str(datetime.now())}")
+        )
     return dump_path

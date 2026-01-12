@@ -1,4 +1,4 @@
-from textual.widgets import Button, SelectionList
+from textual.widgets import Button
 
 from rovr.classes.textual_options import FileListSelectionWidget
 from rovr.functions.icons import get_icon
@@ -23,16 +23,15 @@ class PathCopyButton(Button):
             self.tooltip = "Copy path of item to the clipboard"
 
     async def on_button_pressed(self, event: Button.Pressed) -> None:
-        """Copy selected files to the clipboard"""
+        """Copy highlighted file to the clipboard"""
         if self.disabled:
             return
-        highlighted: FileListSelectionWidget | None = self.app.query_one(  # ty: ignore[invalid-assignment]
-            "#file_list",
-            SelectionList,  # honestly don't want to fix this type indicator
-        ).highlighted_option
+        highlighted: FileListSelectionWidget | None = (
+            self.app.file_list.highlighted_option
+        )
         if highlighted is None or not hasattr(highlighted, "dir_entry"):
             self.notify(
-                "No items were selected.", title="Copy Path", severity="information"
+                "No item was highlighted.", title="Copy Path", severity="information"
             )
         else:
             self.app.copy_to_clipboard(normalise(highlighted.dir_entry.path))

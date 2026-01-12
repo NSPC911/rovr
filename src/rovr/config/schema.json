@@ -502,7 +502,7 @@
         "focus_toggle_path_switcher": {
           "$ref": "#/definitions/keybind",
           "description": "Focus toggle between path switcher and file list.",
-          "display_name": "Focus path"
+          "display_name": "Focus path switcher"
         },
         "focus_toggle_processes": {
           "$ref": "#/definitions/keybind",
@@ -1098,6 +1098,12 @@
               "type": "string",
               "default": "",
               "description": "Path to the folder where Poppler-related binaries are located. Leave empty to use the system PATH."
+            },
+            "pdf_batch_size": {
+              "type": "integer",
+              "default": 2,
+              "minimum": 1,
+              "description": "Number of PDF pages to load in each batch."
             }
           }
         },
@@ -1118,15 +1124,6 @@
           }
         }
       }
-    },
-    "mode": {
-      "type": "object",
-      "additionalProperties": {
-        "type": "object",
-        "additionalProperties": false,
-        "description": "Config overrides for this mode using dot-notation paths as keys."
-      },
-      "description": "Define preset modes with config overrides. Use --mode <name> to activate."
     }
   }
 }

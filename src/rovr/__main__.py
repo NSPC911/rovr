@@ -1,6 +1,6 @@
+import os
 import sys
 from io import TextIOWrapper
-from os import environ
 
 import rich_click as click
 from rich import box
@@ -9,7 +9,7 @@ from rich.table import Table
 
 pprint = Console().print
 
-textual_flags = set(environ.get("TEXTUAL", "").split(","))
+textual_flags = set(os.environ.get("TEXTUAL", "").split(","))
 # both flags exist if ran with `textual run --dev`
 is_dev = {"debug", "devtools"}.issubset(textual_flags)
 
@@ -35,14 +35,31 @@ click.rich_click.STYLE_OPTIONS_PANEL_BORDER = "blue bold"
 click.rich_click.STYLE_COMMANDS_PANEL_BORDER = "white"
 
 
+def eager_set_folder(ctx: click.Context, param: click.Parameter, value: str) -> str:
+    """Eager callback to set config folder before other options are processed.
+
+    Returns:
+        str: The config folder path (passthrough)
+    """
+    if value:
+        from os import path
+
+        from rovr.variables.maps import VAR_TO_DIR
+
+        VAR_TO_DIR["CONFIG"] = path.realpath(value.replace("\\", "/"))
+    return value
+
+
 @click.command(help="A post-modern terminal file explorer")
 @click.option(
-    "--mode",
-    "mode",
+    "--config-folder",
+    "config_folder",
     multiple=False,
-    type=str,
-    default="",
-    help="Activate a preset mode defined in config (e.g., 'gui').",
+    type=click.Path(exists=True, file_okay=False, dir_okay=True, resolve_path=True),
+    default=None,
+    is_eager=True,
+    callback=eager_set_folder,
+    help="Change the config folder location.",
 )
 @click.option(
     "--with",
@@ -57,6 +74,15 @@ click.rich_click.STYLE_COMMANDS_PANEL_BORDER = "white"
     multiple=True,
     type=str,
     help="Disable a feature (e.g., 'interface.tooltips').",
+)
+@click.option(
+    "--force-first-launch",
+    "force_first_launch",
+    multiple=False,
+    type=bool,
+    default=False,
+    is_flag=True,
+    help="Force the first launch experience (even if config exists).",
 )
 @click.option(
     "--config-path",
@@ -135,7 +161,7 @@ click.rich_click.STYLE_COMMANDS_PANEL_BORDER = "white"
     help="Force a crash after N seconds (for testing crash recovery)",
     hidden=not is_dev,
 )
-@click.option_panel("Config", options=["--mode", "--with", "--without"])
+@click.option_panel("Config", options=["--with", "--without", "--config-folder"])
 @click.option_panel(
     "Paths",
     options=["--chooser-file", "--cwd-file"],
@@ -164,8 +190,9 @@ click.rich_click.STYLE_COMMANDS_PANEL_BORDER = "white"
 @click.argument("path", type=str, required=False, default="")
 @click.rich_config({"show_arguments": True})
 def cli(
-    mode: str,
+    config_folder: str,
     with_features: list[str],
+    force_first_launch: bool,
     without_features: list[str],
     show_config_path: bool,
     show_version: bool,
@@ -186,7 +213,7 @@ def cli(
 
     global is_dev
     if dev or is_dev:
-        environ["TEXTUAL"] = "devtools,debug"
+        os.environ["TEXTUAL"] = "devtools,debug"
         is_dev = True
         pprint("  [bold bright_cyan]Development mode activated![/]")
         pprint(
@@ -252,10 +279,10 @@ example_function(10)"""
         else:
             # print as json for user to parse (jq, nu, pwsh, idk)
             print(f"""\u007b
-"custom_config": "{config_path}/config.toml",
-"pinned_folders": "{config_path}/pins.json",
-"custom_styles": "{config_path}/style.tcss",
-"persistent_state": "{config_path}/state.toml"
+    "custom_config": "{config_path}/config.toml",
+    "pinned_folders": "{config_path}/pins.json",
+    "custom_styles": "{config_path}/style.tcss",
+    "persistent_state": "{config_path}/state.toml"
 \u007d""")
         return
     elif show_version:
@@ -279,12 +306,20 @@ example_function(10)"""
             print(_get_version())
         return
 
-    from rovr.functions.config import apply_mode
+    # check config existence
+    if force_first_launch or (
+        not config_folder
+        and (
+            not os.path.exists(VAR_TO_DIR["CONFIG"])
+            or len(os.listdir(VAR_TO_DIR["CONFIG"])) == 0
+        )
+    ):
+        from rovr.first_launch import FirstLaunchApp
+
+        FirstLaunchApp().run()
+
     from rovr.functions.utils import set_nested_value
     from rovr.variables.constants import config
-
-    if mode:
-        apply_mode(config, mode)
 
     for feature_path in with_features:
         set_nested_value(config, feature_path, True)
@@ -324,7 +359,6 @@ example_function(10)"""
             chooser_file=chooser_file if chooser_file else None,
             show_keys=show_keys,
             tree_dom=tree_dom,
-            mode=mode,
             force_crash_in=force_crash_in,
         ).run()
     else:

@@ -3,6 +3,9 @@ title: installation
 description: how to install rovr
 ---
 
+import { Aside } from "@astrojs/starlight/components";
+import InlineSVG from "@/components/InlineSVG.astro";
+
 ### requirements
 
 - a patched font that supports nerd font icons
@@ -18,7 +21,7 @@ description: how to install rovr
   you are recommended to use `uv`, as it handles everything for you, like
   installing the python version, a lot faster than what `pipx`, or `pip` would
   take
-- an editor with toml lsp
+- an editor with lsp support for toml
   <br />
   only necessary if you want an autocomplete box while configuring rovr.
 
@@ -33,8 +36,12 @@ uvx rovr
 #### uv (install)
 
 ```sh
-uv tool install rovr
+uv tool install --compile-bytecode rovr
 ```
+
+<Aside type="note">
+I highly recommend installing with `--compile-bytecode`, as startup times will be slower (albeit by not that much) if not cached.
+</Aside>
 
 #### pipx (install)
 
@@ -57,3 +64,20 @@ rovr --version
 to see the current version installed
 
 ![version](/rovr/screenshots/version.png)
+
+you can then start the installation by just invoking
+```sh
+rovr
+```
+If you dont see something like this
+<InlineSVG src="/rovr/screenshots/install-helper.svg" alt="install helper" />
+you can force the install helper by running
+```sh
+rovr --force-first-launch
+```
+
+you can make the changes you want (optionally, hover over certain options to see a tooltip explaining what it does)
+
+once done, you can press the big green button at the end, take a final glance at your config, before it writes it down.
+
+You finally installed rovr!

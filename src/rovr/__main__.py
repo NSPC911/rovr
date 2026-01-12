@@ -362,7 +362,7 @@ example_function(10)"""
             force_crash_in=force_crash_in,
         ).run()
     else:
-        pprint(
+        print(
             "Error: rovr needs a TTY to run the application.",
         )
 

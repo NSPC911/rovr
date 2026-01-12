@@ -26,7 +26,17 @@ You can create wrapper functions in your shell config for convenience:
 <Tabs>
   <TabItem label="bash/zsh">
     <Code
-      code={`rovr () {\n    local cwd_file=$(mktemp -t rovr_cwd.XXXXXX)\n    command rovr --cwd-file "$cwd_file" "$@"\n    if [ -f "$cwd_file" ]; then\n        local new_loc=$(cat "$cwd_file")\n        if [ -n "$new_loc" ] && [ "$new_loc" != "$PWD" ]; then\n            cd "$new_loc"\n        fi\n        rm -f "$cwd_file"\n    fi\n}`}
+      code={`rovr () {
+    local cwd_file=$(mktemp -t rovr_cwd.XXXXXX)
+    command rovr --cwd-file "$cwd_file" "$@"
+    if [ -f "$cwd_file" ]; then
+        local new_loc=$(cat "$cwd_file")
+        if [ -n "$new_loc" ] && [ "$new_loc" != "$PWD" ]; then
+            cd "$new_loc"
+        fi
+        rm -f "$cwd_file"
+    fi
+}`}
       lang="bash"
       frame="code"
       title=".bashrc / .zshrc"
@@ -34,7 +44,17 @@ You can create wrapper functions in your shell config for convenience:
   </TabItem>
   <TabItem label="fish">
     <Code
-      code={`function rovr\n    set cwd_file (mktemp -t rovr_cwd.XXXXXX)\n    command rovr --cwd-file "$cwd_file" $argv\n    if test -f "$cwd_file"\n        set new_loc (cat "$cwd_file")\n        if test -n "$new_loc" -a "$new_loc" != "$PWD"\n            cd "$new_loc"\n        end\n        rm -f "$cwd_file"\n    end\nend`}
+      code={`function rovr
+    set cwd_file (mktemp -t rovr_cwd.XXXXXX)
+    command rovr --cwd-file "$cwd_file" $argv
+    if test -f "$cwd_file"
+        set new_loc (cat "$cwd_file")
+        if test -n "$new_loc" -a "$new_loc" != "$PWD"
+            cd "$new_loc"
+        end
+        rm -f "$cwd_file"
+    end
+end`}
       lang="fish"
       frame="code"
       title="config.fish"
@@ -42,7 +62,17 @@ You can create wrapper functions in your shell config for convenience:
   </TabItem>
   <TabItem label="nushell">
     <Code
-      code={`def --env --wrapped rovr [...args: string] {\n    let cwd_file = (mktemp -t rovr_cwd.XXXXXX)\n    ^rovr --cwd-file $cwd_file ...$args\n    if ($cwd_file | path exists) {\n        let new_path = ($cwd_file | open | str trim)\n        if ($new_path != "" and $new_path != $env.PWD) {\n            cd $new_path\n        }\n        rm -fp $cwd_file\n    }\n}`}
+      code={`def --env --wrapped rovr [...args: string] {
+    let cwd_file = (mktemp -t rovr_cwd.XXXXXX)
+    ^rovr --cwd-file $cwd_file ...$args
+    if ($cwd_file | path exists) {
+        let new_path = ($cwd_file | open | str trim)
+        if ($new_path != "" and $new_path != $env.PWD) {
+            cd $new_path
+        }
+        rm -fp $cwd_file
+    }
+}`}
       lang="nu"
       frame="code"
       title="config.nu"
@@ -50,7 +80,18 @@ You can create wrapper functions in your shell config for convenience:
   </TabItem>
   <TabItem label="powershell">
     <Code
-      code={`function rovr {\n    $cwd_file = New-TemporaryFile\n    & rovr.exe --cwd-file $cwd_file $args\n    if (Test-Path $cwd_file) {\n        $new_loc = Get-Content $cwd_file\n        if (-not [String]::IsNullOrEmpty($new_loc) -and $new_loc -ne (Get-Location).Path) {\n            Set-Location $new_loc -ErrorAction SilentlyContinue\n        }\n        Remove-Item $cwd_file\n    }\n}`}
+      code={`function rovr {
+    $cwd_file = New-TemporaryFile
+    $rovrPath = Get-Command rovr -CommandType Application | Select-Object -ExpandProperty Source
+    & $rovrPath --cwd-file $cwd_file $args
+    if (Test-Path $cwd_file) {
+        $new_loc = Get-Content $cwd_file
+        if (-not [String]::IsNullOrEmpty($new_loc) -and $new_loc -ne (Get-Location).Path) {
+            Set-Location $new_loc -ErrorAction SilentlyContinue
+        }
+        Remove-Item $cwd_file
+    }
+}`}
       lang="powershell"
       frame="code"
       title="$PROFILE"
@@ -111,18 +152,6 @@ rm -f "$cwd_file" "$chooser_file"
 
 ### integrations
 
-as much as it might be tempting, this will not work. i use helix <sub>btw</sub> and just like superfile, it just cannot launch the app. i'm not sure why, but it might be a conflict between terminal buffer areas.
-so something like yazi's
+don't even try.
 
-```toml
-[keys.normal]
-C-y = [
-  ':sh rm -f /tmp/unique-file',
-  ':insert-output rovr %{buffer_name} --chooser-file=/tmp/unique-file',
-  ':insert-output echo "\x1b[?1049h\x1b[?2004h" > /dev/tty',
-  ':open %sh{cat /tmp/unique-file}',
-  ':redraw',
-]
-```
-
-will not work
+rovr is unable to redirect stdout and stderr to alternate paths (`/dev/tty` or `$CONOUT`). I am working on it, but it is a low priority.

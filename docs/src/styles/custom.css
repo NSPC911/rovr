@@ -22,9 +22,6 @@
   }
 }
 
-code {
-  background-color: transparent;
-}
 /* Dark mode colors. */
 :root {
   --sl-color-accent: #8fbcbb;

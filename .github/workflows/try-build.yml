@@ -68,3 +68,16 @@ jobs:
           path: ${{ matrix.executable }}
           name: rovr-${{ matrix.name }}
           retention-days: 30
+      - name: Notify Discord
+        uses: sarisia/actions-status-discord@v1.13.0
+        with:
+          webhook: ${{ secrets.LOG_HOOK }}
+          title: rovr ci build is complete!
+          status: ${{ job.status }}
+          description: |
+            Commit `${{ github.sha }}` by ${{ github.actor }}
+            Click [here](https://nightly.link/NSPC911/rovr/actions/runs/${{ github.run_id }}) to download!
+          avatar_url: "https://avatars.githubusercontent.com/u/176916861?v=4"
+          username: "NSPBot911"
+          nodetail: false
+          notimestamp: true

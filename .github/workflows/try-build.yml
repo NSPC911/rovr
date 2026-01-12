@@ -75,9 +75,11 @@ jobs:
           title: rovr ci build is complete!
           status: ${{ job.status }}
           description: |
-            Commit `${{ github.sha }}` by ${{ github.actor }}
-            Click [here](https://nightly.link/NSPC911/rovr/actions/runs/${{ github.run_id }}) to download!
+            Matrix ${{ matrix.name }} finished compiling!
+            Click [here](https://nightly.link/NSPC911/rovr/actions/runs/${{ github.run_id }}/rovr-${{ matrix.name }}.zip) to download!
+            -# caused by ${{ github.actor }}
           avatar_url: "https://avatars.githubusercontent.com/u/176916861?v=4"
           username: "NSPBot911"
-          nodetail: false
+          nodetail: true
           notimestamp: true
+          noprefix: true

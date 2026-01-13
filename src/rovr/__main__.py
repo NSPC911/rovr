@@ -381,10 +381,12 @@ example_function(10)"""
         open_stdout = "CONOUT$" if os.name == "nt" else "/dev/tty"
         open_stdin = "CONIN$" if os.name == "nt" else "/dev/tty"
         with (
-            open(open_stdout, "w") as sys.__stdout__,
-            open(open_stdout, "w") as sys.__stderr__,
-            open(open_stdin, "r") as sys.__stdin__,
+            open(open_stdout, "w") as tty_out,
+            open(open_stdin, "r") as tty_in,
         ):
+            sys.__stdout__ = sys.stdout = tty_out
+            sys.__stderr__ = sys.stderr = tty_out
+            sys.__stdin__ = sys.stdin = tty_in
             Application(
                 startup_path=path,
                 cwd_file=cwd_file if cwd_file else None,

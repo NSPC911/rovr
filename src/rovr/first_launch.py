@@ -5,8 +5,8 @@ from importlib.metadata import PackageNotFoundError, version
 from io import BytesIO
 from shutil import which
 from typing import Callable
+from urllib import error, request
 
-import aiohttp
 import textual_image.widget as timg
 import tomli
 from PIL import Image as PILImage
@@ -239,7 +239,7 @@ class FirstLaunchApp(App, inherit_bindings=False):
     @work
     async def on_mount(self) -> None:
         self.query_one("#theme", RadioSet).border_title = "Choose a theme!"
-        self.query_one("#theme", RadioSet).border_subtitle = "More coming soon\u2026"
+        self.query_one("#theme", RadioSet).border_subtitle = "More coming soon…"
         self.query_one("#keybinds", RadioSet).border_title = "Choose a Preset Keybind"
         self.query_one(".plugins", Center).border_title = "Plugins/Integrations"
         self.query_one("SelectCurrent").border_title = "Image Protocol"
@@ -259,34 +259,40 @@ class FirstLaunchApp(App, inherit_bindings=False):
         }
         for widget, desc in popups.items():
             self.query_one(widget).tooltip = desc
+        worker = self._fetch_preview_image()
         try:
-            # call aiohttp and pull https://github.com/Textualize/.github/assets/554369/037e6aa1-8527-44f3-958d-28841d975d40 into a PIL object
-            async with aiohttp.ClientSession() as session:  # noqa: SIM117
-                async with session.get(
-                    "https://github.com/Textualize/.github/assets/554369/037e6aa1-8527-44f3-958d-28841d975d40"
-                ) as resp:
-                    if resp.status == 200:
-                        data = await resp.read()
-                        self.preview_image = PILImage.open(BytesIO(data))
-                        timg_image = prot_to_timg["auto"](
-                            self.preview_image,
-                        )
-                        self.query_one("#image_protocol", VerticalGroup).mount(
-                            timg_image
-                        )
-                    else:
-                        self.preview_image = None
-                        self.notify(
-                            f"Failed to load preview image. Code: {resp.status}",
-                            severity="error",
-                        )
-        except aiohttp.ClientError as exc:
-            self.preview_image = None
+            await worker.wait()
+            self.preview_image = worker.result
+        except Exception:
+            return
+        if self.preview_image is not None:
+            timg_image = prot_to_timg["auto"](
+                self.preview_image,
+            )
+            self.query_one("#image_protocol", VerticalGroup).mount(timg_image)
+
+    @work(thread=True)
+    def _fetch_preview_image(self) -> Image | None:
+        try:
+            with request.urlopen(
+                "https://github.com/Textualize/.github/assets/554369/037e6aa1-8527-44f3-958d-28841d975d40"
+            ) as response:
+                if response.getcode() == 200:
+                    data = response.read()
+                    return PILImage.open(BytesIO(data))
+                else:
+                    self.notify(
+                        f"Failed to load preview image. Code: {response.getcode()}",
+                        severity="error",
+                    )
+                    return None
+        except error.URLError as exc:
             self.notify(
                 f"Failed to load preview image. Could not connect to the internet.\n{exc}",
                 title=type(exc).__name__,
                 severity="error",
             )
+            return None
 
     @on(RadioSet.Changed, "#theme")
     def on_radio_set_changed(self, event: RadioSet.Changed) -> None:

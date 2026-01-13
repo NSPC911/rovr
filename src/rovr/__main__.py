@@ -103,6 +103,15 @@ def eager_set_folder(ctx: click.Context, param: click.Parameter, value: str) -> 
     help="Show the current version of rovr.",
 )
 @click.option(
+    "--force-tty",
+    "force_tty",
+    multiple=False,
+    type=bool,
+    default=False,
+    is_flag=True,
+    help="Force rovr into the system tty ([grey50]CONOUT$[/] or [grey50]/dev/tty[/]) even if stdout is not a tty. Buggy on Windows.",
+)
+@click.option(
     "--cwd-file",
     "cwd_file",
     multiple=False,
@@ -173,6 +182,8 @@ def eager_set_folder(ctx: click.Context, param: click.Parameter, value: str) -> 
     "Miscellaneous",
     options=[
         "--version",
+        "--force-tty",
+        "--force-first-launch",
         "--config-path",
         "--help",
     ],
@@ -196,6 +207,7 @@ def cli(
     without_features: list[str],
     show_config_path: bool,
     show_version: bool,
+    force_tty: bool,
     cwd_file: str
     | TextIOWrapper
     | None,  # necessary because later on, replaced by stdout/stderr file
@@ -327,6 +339,10 @@ example_function(10)"""
     for feature_path in without_features:
         set_nested_value(config, feature_path, False)
 
+    if not sys.stdout.isatty():
+        sys.__backup__stdout__ = sys.__stdout__
+        sys.__backup__stderr__ = sys.__stderr__
+
     from rovr.app import Application
 
     # __backup__std***__ for future
@@ -361,9 +377,25 @@ example_function(10)"""
             tree_dom=tree_dom,
             force_crash_in=force_crash_in,
         ).run()
+    elif force_tty:
+        open_stdout = "CONOUT$" if os.name == "nt" else "/dev/tty"
+        open_stdin = "CONIN$" if os.name == "nt" else "/dev/tty"
+        with (
+            open(open_stdout, "w") as sys.__stdout__,
+            open(open_stdout, "w") as sys.__stderr__,
+            open(open_stdin, "r") as sys.__stdin__,
+        ):
+            Application(
+                startup_path=path,
+                cwd_file=cwd_file if cwd_file else None,
+                chooser_file=chooser_file if chooser_file else None,
+                show_keys=show_keys,
+                tree_dom=tree_dom,
+                force_crash_in=force_crash_in,
+            ).run()
     else:
         print(
-            "Error: rovr needs a TTY to run the application.",
+            "Error: rovr needs a TTY to run in application.",
         )
 
 

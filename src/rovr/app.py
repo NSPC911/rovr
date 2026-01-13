@@ -62,7 +62,6 @@ from rovr.navigation_widgets import (
 )
 from rovr.screens import (
     ContentSearch,
-    DummyScreen,
     FileSearch,
     Keybinds,
     YesOrNo,
@@ -755,13 +754,13 @@ class Application(App, inherit_bindings=False):
                 yield SystemCommand(
                     "Disable Transparent Theme",
                     "Go back to an opaque background.",
-                    lambda: self.set_timer(0.1, self._toggle_transparency),
+                    lambda: self.call_later(self._toggle_transparency),
                 )
             else:
                 yield SystemCommand(
                     "Enable Transparent Theme",
                     "Have a transparent background.",
-                    lambda: self.set_timer(0.1, self._toggle_transparency),
+                    lambda: self.call_later(self._toggle_transparency),
                 )
 
         if (
@@ -816,7 +815,8 @@ class Application(App, inherit_bindings=False):
     @work
     async def _toggle_transparency(self) -> None:
         self.ansi_color = not self.ansi_color
-        await self.push_screen_wait(DummyScreen())
+        self.refresh()
+        self.refresh_css()
         self.file_list.update_border_subtitle()
 
     @on(events.Click)

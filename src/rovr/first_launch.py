@@ -25,7 +25,7 @@ from textual.containers import (
     VerticalGroup,
 )
 from textual.css.query import NoMatches
-from textual.screen import ModalScreen, Screen
+from textual.screen import ModalScreen
 from textual.theme import BUILTIN_THEMES
 from textual.widgets import (
     Button,
@@ -61,11 +61,6 @@ try:
     schema_ref = f"refs/tags/v{version('rovr')}"
 except PackageNotFoundError:
     schema_ref = "refs/heads/master"
-
-
-class DummyScreen(Screen[None]):
-    def on_mount(self) -> None:
-        self.dismiss()
 
 
 class FinalStuff(ModalScreen[None]):
@@ -312,7 +307,8 @@ class FirstLaunchApp(App, inherit_bindings=False):
         self.query_one("#theme", RadioSet).tooltip = (
             "Disabled when transparent mode is enabled" if event.value else None
         )
-        self._toggle_transparency()
+        self.refresh_css()
+        self.refresh()
 
     @on(Select.Changed, "#image_protocol_select")
     def on_image_protocol_select_changed(self, event: Select.Changed) -> None:
@@ -327,10 +323,6 @@ class FirstLaunchApp(App, inherit_bindings=False):
                 if not isinstance(child, Select):
                     child.remove()
             container.mount(timg_image)
-
-    @work
-    async def _toggle_transparency(self) -> None:
-        await self.push_screen_wait(DummyScreen())
 
     @work
     @on(Button.Pressed, "#finish_setup")

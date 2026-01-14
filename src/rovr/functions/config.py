@@ -2,8 +2,7 @@ import os
 from collections import deque
 from importlib import resources
 from importlib.metadata import PackageNotFoundError, version
-from os import environ, path
-from platform import system
+from os import path
 from shutil import which
 
 import jsonschema
@@ -347,9 +346,27 @@ def load_config() -> tuple[dict, dict]:
     if config["interface"]["image_protocol"] == "Auto":
         config["interface"]["image_protocol"] = ""
     # editor empty or $EDITOR: expand to actual editor command
-    default_editor = environ.get(
-        "EDITOR", "nano" if system() != "Windows" else "notepad"
-    )
+    if which("hx"):
+        # helix
+        default_editor = "hx"
+    elif which("nvim"):
+        # neovim
+        default_editor = "nvim"
+    elif which("vim"):
+        # vim
+        default_editor = "vim"
+    elif which("vi"):
+        # vi
+        default_editor = "vi"
+    elif which("nano"):
+        # theoretically shouldnt come this far
+        default_editor = "nano"
+    elif which("code"):
+        # vscode
+        default_editor = "code --wait"
+    elif which("edit"):
+        # exists from 25h2
+        default_editor = "edit"
     for key in ["file", "folder", "bulk_rename"]:
         if not config["settings"]["editor"][key]["run"]:
             config["settings"]["editor"][key]["run"] = default_editor

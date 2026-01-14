@@ -34,16 +34,21 @@ description: config schema humanified
 - [2. Property `Rovr Config > settings`](#settings)
   - [2.1. Property `Rovr Config > settings > use_recycle_bin`](#settings_use_recycle_bin)
   - [2.2. Property `Rovr Config > settings > copy_includes_metadata`](#settings_copy_includes_metadata)
-  - [2.3. Property `Rovr Config > settings > editor`](#settings_editor)
-    - [2.3.1. Property `Rovr Config > settings > editor > file`](#settings_editor_file)
-      - [2.3.1.1. Property `Rovr Config > settings > editor > file > run`](#settings_editor_file_run)
-      - [2.3.1.2. Property `Rovr Config > settings > editor > file > block`](#settings_editor_file_block)
-      - [2.3.1.3. Property `Rovr Config > settings > editor > file > suspend`](#settings_editor_file_suspend)
-    - [2.3.2. Property `Rovr Config > settings > editor > folder`](#settings_editor_folder)
-      - [2.3.2.1. Property `Rovr Config > settings > editor > folder > run`](#settings_editor_folder_run)
-      - [2.3.2.2. Property `Rovr Config > settings > editor > folder > block`](#settings_editor_folder_block)
-      - [2.3.2.3. Property `Rovr Config > settings > editor > folder > suspend`](#settings_editor_folder_suspend)
-    - [2.3.3. Property `Rovr Config > settings > editor > open_all_in_editor`](#settings_editor_open_all_in_editor)
+  - [2.3. Property `Rovr Config > settings > bulk_rename`](#settings_bulk_rename)
+    - [2.3.1. Property `Rovr Config > settings > bulk_rename > show_as_mapping`](#settings_bulk_rename_show_as_mapping)
+  - [2.4. Property `Rovr Config > settings > editor`](#settings_editor)
+    - [2.4.1. Property `Rovr Config > settings > editor > file`](#settings_editor_file)
+      - [2.4.1.1. Property `Rovr Config > settings > editor > file > run`](#settings_editor_file_run)
+      - [2.4.1.2. Property `Rovr Config > settings > editor > file > block`](#settings_editor_file_block)
+      - [2.4.1.3. Property `Rovr Config > settings > editor > file > suspend`](#settings_editor_file_suspend)
+    - [2.4.2. Property `Rovr Config > settings > editor > folder`](#settings_editor_folder)
+      - [2.4.2.1. Property `Rovr Config > settings > editor > folder > run`](#settings_editor_folder_run)
+      - [2.4.2.2. Property `Rovr Config > settings > editor > folder > block`](#settings_editor_folder_block)
+      - [2.4.2.3. Property `Rovr Config > settings > editor > folder > suspend`](#settings_editor_folder_suspend)
+    - [2.4.3. Property `Rovr Config > settings > editor > bulk_rename`](#settings_editor_bulk_rename)
+      - [2.4.3.1. Property `Rovr Config > settings > editor > bulk_rename > run`](#settings_editor_bulk_rename_run)
+      - [2.4.3.2. Property `Rovr Config > settings > editor > bulk_rename > suspend`](#settings_editor_bulk_rename_suspend)
+    - [2.4.4. Property `Rovr Config > settings > editor > open_all_in_editor`](#settings_editor_open_all_in_editor)
 - [3. Property `Rovr Config > metadata`](#metadata)
   - [3.1. Property `Rovr Config > metadata > fields`](#metadata_fields)
     - [3.1.1. Rovr Config > metadata > fields > fields items](#metadata_fields_items)
@@ -673,6 +678,7 @@ Must be one of:
 | ---------------------------------------------------------- | ------- | ------------------------------------------------------------------------------------------------------------ |
 | [use_recycle_bin](#settings_use_recycle_bin)               | boolean | When deleting a file, allow moving the file to the recycle bin.                                              |
 | [copy_includes_metadata](#settings_copy_includes_metadata) | boolean | When copying over a file, preserve metadata from the original file, such as creation and modification times. |
+| [bulk_rename](#settings_bulk_rename)                       | object  |                                                                                                              |
 | [editor](#settings_editor)                                 | object  | Settings related to the editor used for different operations                                                 |
 
 ### <a name="settings_use_recycle_bin"></a>2.1. Property `Rovr Config > settings > use_recycle_bin`
@@ -695,7 +701,29 @@ Must be one of:
 
 **Description:** When copying over a file, preserve metadata from the original file, such as creation and modification times.
 
-### <a name="settings_editor"></a>2.3. Property `Rovr Config > settings > editor`
+### <a name="settings_bulk_rename"></a>2.3. Property `Rovr Config > settings > bulk_rename`
+
+|                           |             |
+| ------------------------- | ----------- |
+| **Type**                  | `object`    |
+| **Required**              | No          |
+| **Additional properties** | Not allowed |
+
+| Property                                                 | Type    | Title/Description                                                                  |
+| -------------------------------------------------------- | ------- | ---------------------------------------------------------------------------------- |
+| [show_as_mapping](#settings_bulk_rename_show_as_mapping) | boolean | Show as a mapping of \`&lt;old&gt; ➔ &lt;new&gt;\` instead of just \`&lt;old&gt;\` |
+
+#### <a name="settings_bulk_rename_show_as_mapping"></a>2.3.1. Property `Rovr Config > settings > bulk_rename > show_as_mapping`
+
+|              |           |
+| ------------ | --------- |
+| **Type**     | `boolean` |
+| **Required** | No        |
+| **Default**  | `true`    |
+
+**Description:** Show as a mapping of `&lt;old&gt; ➔ &lt;new&gt;` instead of just `&lt;old&gt;`
+
+### <a name="settings_editor"></a>2.4. Property `Rovr Config > settings > editor`
 
 |                           |             |
 | ------------------------- | ----------- |
@@ -709,9 +737,10 @@ Must be one of:
 | --------------------------------------------------------- | ------- | ------------------------------------------------------------------------------------------------------------------------------------- |
 | [file](#settings_editor_file)                             | object  | Editor to use when opening a file                                                                                                     |
 | [folder](#settings_editor_folder)                         | object  | Editor to use when opening a folder                                                                                                   |
+| [bulk_rename](#settings_editor_bulk_rename)               | object  | Editor to use for bulk renaming                                                                                                       |
 | [open_all_in_editor](#settings_editor_open_all_in_editor) | boolean | Open all in the configured editor, regardless of file encoding or type. When disabled, it opens them in the system configured editor. |
 
-#### <a name="settings_editor_file"></a>2.3.1. Property `Rovr Config > settings > editor > file`
+#### <a name="settings_editor_file"></a>2.4.1. Property `Rovr Config > settings > editor > file`
 
 |                           |             |
 | ------------------------- | ----------- |
@@ -727,7 +756,7 @@ Must be one of:
 | [block](#settings_editor_file_block)     | boolean | Block rovr until the editor closes          |
 | [suspend](#settings_editor_file_suspend) | boolean | Suspend (hide) rovr until the editor closes |
 
-##### <a name="settings_editor_file_run"></a>2.3.1.1. Property `Rovr Config > settings > editor > file > run`
+##### <a name="settings_editor_file_run"></a>2.4.1.1. Property `Rovr Config > settings > editor > file > run`
 
 |              |             |
 | ------------ | ----------- |
@@ -737,7 +766,7 @@ Must be one of:
 
 **Description:** Editor to use when opening a file
 
-##### <a name="settings_editor_file_block"></a>2.3.1.2. Property `Rovr Config > settings > editor > file > block`
+##### <a name="settings_editor_file_block"></a>2.4.1.2. Property `Rovr Config > settings > editor > file > block`
 
 |              |           |
 | ------------ | --------- |
@@ -747,7 +776,7 @@ Must be one of:
 
 **Description:** Block rovr until the editor closes
 
-##### <a name="settings_editor_file_suspend"></a>2.3.1.3. Property `Rovr Config > settings > editor > file > suspend`
+##### <a name="settings_editor_file_suspend"></a>2.4.1.3. Property `Rovr Config > settings > editor > file > suspend`
 
 |              |           |
 | ------------ | --------- |
@@ -757,7 +786,7 @@ Must be one of:
 
 **Description:** Suspend (hide) rovr until the editor closes
 
-#### <a name="settings_editor_folder"></a>2.3.2. Property `Rovr Config > settings > editor > folder`
+#### <a name="settings_editor_folder"></a>2.4.2. Property `Rovr Config > settings > editor > folder`
 
 |                           |             |
 | ------------------------- | ----------- |
@@ -773,7 +802,7 @@ Must be one of:
 | [block](#settings_editor_folder_block)     | boolean | Block rovr until the editor closes          |
 | [suspend](#settings_editor_folder_suspend) | boolean | Suspend (hide) rovr until the editor closes |
 
-##### <a name="settings_editor_folder_run"></a>2.3.2.1. Property `Rovr Config > settings > editor > folder > run`
+##### <a name="settings_editor_folder_run"></a>2.4.2.1. Property `Rovr Config > settings > editor > folder > run`
 
 |              |             |
 | ------------ | ----------- |
@@ -783,7 +812,7 @@ Must be one of:
 
 **Description:** Editor to use when opening a folder
 
-##### <a name="settings_editor_folder_block"></a>2.3.2.2. Property `Rovr Config > settings > editor > folder > block`
+##### <a name="settings_editor_folder_block"></a>2.4.2.2. Property `Rovr Config > settings > editor > folder > block`
 
 |              |           |
 | ------------ | --------- |
@@ -793,7 +822,7 @@ Must be one of:
 
 **Description:** Block rovr until the editor closes
 
-##### <a name="settings_editor_folder_suspend"></a>2.3.2.3. Property `Rovr Config > settings > editor > folder > suspend`
+##### <a name="settings_editor_folder_suspend"></a>2.4.2.3. Property `Rovr Config > settings > editor > folder > suspend`
 
 |              |           |
 | ------------ | --------- |
@@ -803,7 +832,42 @@ Must be one of:
 
 **Description:** Suspend (hide) rovr until the editor closes
 
-#### <a name="settings_editor_open_all_in_editor"></a>2.3.3. Property `Rovr Config > settings > editor > open_all_in_editor`
+#### <a name="settings_editor_bulk_rename"></a>2.4.3. Property `Rovr Config > settings > editor > bulk_rename`
+
+|                           |             |
+| ------------------------- | ----------- |
+| **Type**                  | `object`    |
+| **Required**              | No          |
+| **Additional properties** | Not allowed |
+
+**Description:** Editor to use for bulk renaming
+
+| Property                                        | Type    | Title/Description                           |
+| ----------------------------------------------- | ------- | ------------------------------------------- |
+| [run](#settings_editor_bulk_rename_run)         | string  | Editor to use for bulk renaming             |
+| [suspend](#settings_editor_bulk_rename_suspend) | boolean | Suspend (hide) rovr until the editor closes |
+
+##### <a name="settings_editor_bulk_rename_run"></a>2.4.3.1. Property `Rovr Config > settings > editor > bulk_rename > run`
+
+|              |             |
+| ------------ | ----------- |
+| **Type**     | `string`    |
+| **Required** | No          |
+| **Default**  | `"$EDITOR"` |
+
+**Description:** Editor to use for bulk renaming
+
+##### <a name="settings_editor_bulk_rename_suspend"></a>2.4.3.2. Property `Rovr Config > settings > editor > bulk_rename > suspend`
+
+|              |           |
+| ------------ | --------- |
+| **Type**     | `boolean` |
+| **Required** | No        |
+| **Default**  | `true`    |
+
+**Description:** Suspend (hide) rovr until the editor closes
+
+#### <a name="settings_editor_open_all_in_editor"></a>2.4.4. Property `Rovr Config > settings > editor > open_all_in_editor`
 
 |              |           |
 | ------------ | --------- |

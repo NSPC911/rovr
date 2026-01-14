@@ -61,6 +61,9 @@ panels = false
 copy_includes_metadata = true
 use_recycle_bin = true
 
+[settings.bulk_rename]
+show_as_mapping = true
+
 [settings.editor]
 open_all_in_editor = false
 
@@ -72,6 +75,10 @@ suspend = true
 [settings.editor.folder]
 run = "$EDITOR"
 block = false
+suspend = true
+
+[settings.editor.bulk_rename]
+run = "$EDITOR"
 suspend = true
 
 [metadata]

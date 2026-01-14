@@ -767,7 +767,7 @@ def dump_exc(widget: DOMNode, exc: Exception | Traceback) -> str | None:
         f"{log_name}.log",
     )
     os.makedirs(path.dirname(dump_path), exist_ok=True)
-    with open(dump_path, "a") as file_log:
+    with open(dump_path, "a", encoding="utf-8") as file_log:
         # don't need to handle OS Error, Textual automatically chains errors
         error_log = Console(file=file_log, legacy_windows=True)
         # section it with time and date

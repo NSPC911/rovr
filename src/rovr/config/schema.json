@@ -189,6 +189,17 @@
           "default": true,
           "description": "When copying over a file, preserve metadata from the original file, such as creation and modification times."
         },
+        "bulk_rename": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "show_as_mapping": {
+              "type": "boolean",
+              "default": true,
+              "description": "Show as a mapping of `<old> ➔ <new>` instead of just `<old>`"
+            }
+          }
+        },
         "editor": {
           "type": "object",
           "description": "Settings related to the editor used for different operations",
@@ -237,6 +248,23 @@
                 }
               },
               "description": "Editor to use when opening a folder"
+            },
+            "bulk_rename": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "run": {
+                  "type": "string",
+                  "default": "$EDITOR",
+                  "description": "Editor to use for bulk renaming"
+                },
+                "suspend": {
+                  "type": "boolean",
+                  "default": true,
+                  "description": "Suspend (hide) rovr until the editor closes"
+                }
+              },
+              "description": "Editor to use for bulk renaming"
             },
             "open_all_in_editor": {
               "type": "boolean",

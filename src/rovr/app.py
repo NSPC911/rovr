@@ -125,7 +125,6 @@ class Application(App, inherit_bindings=False):
     ) -> None:
         super().__init__(watch_css=True)
         self.app_blurred: bool = False
-        self.startup_path: str = startup_path
         self.has_pushed_screen: bool = False
         # Runtime output files from CLI
         self._cwd_file: str | TextIOWrapper | None = cwd_file
@@ -137,6 +136,8 @@ class Application(App, inherit_bindings=False):
         self.file_list = self._file_list_container.filelist
         # cannot use self.clipboard, reserved for textual's clipboard
         self.Clipboard = Clipboard(id="clipboard")
+        if startup_path:
+            chdir(ensure_existing_directory(startup_path))
 
     def compose(self) -> ComposeResult:
         self.log("Starting Rovr...")
@@ -903,6 +904,3 @@ class Application(App, inherit_bindings=False):
                 )
         self._exit_renderables.clear()
         self.workers.cancel_all()
-
-
-app = Application()

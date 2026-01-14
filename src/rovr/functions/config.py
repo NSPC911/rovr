@@ -346,15 +346,18 @@ def load_config() -> tuple[dict, dict]:
     # image protocol because "AutoImage" doesn't work with Sixel
     if config["interface"]["image_protocol"] == "Auto":
         config["interface"]["image_protocol"] = ""
-    # editor empty use $EDITOR
-    if config["plugins"]["editor"]["file_executable"] == "":
-        config["plugins"]["editor"]["file_executable"] = environ.get(
-            "EDITOR", "nano" if system() != "Windows" else "notepad"
-        )
-    if config["plugins"]["editor"]["folder_executable"] == "":
-        config["plugins"]["editor"]["folder_executable"] = environ.get(
-            "EDITOR", "vim" if system() != "Windows" else "code"
-        )
+    # editor empty or $EDITOR: expand to actual editor command
+    default_editor = environ.get(
+        "EDITOR", "nano" if system() != "Windows" else "notepad"
+    )
+    for key in ["file", "folder", "bulk_rename"]:
+        if not config["settings"]["editor"][key]["run"]:
+            config["settings"]["editor"][key]["run"] = default_editor
+        else:
+            # expand var
+            config["settings"]["editor"][key]["run"] = os.path.expandvars(
+                config["settings"]["editor"][key]["run"]
+            )
     # pdf fixer
     if (
         config["plugins"]["poppler"]["enabled"]

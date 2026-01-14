@@ -1,6 +1,7 @@
 import contextlib
+import shlex
+import subprocess
 from os import getcwd, path
-from os import system as cmd
 from typing import ClassVar, Iterable, Self, Sequence, cast
 
 from textual import events, on, work
@@ -331,16 +332,18 @@ class FileList(CheckboxRenderingMixin, SelectionList, inherit_bindings=False):
     async def file_selected_handler(self, target_path: str) -> None:
         if self.app._chooser_file:
             self.app.action_quit()
-        elif config["plugins"]["editor"]["open_all_in_editor"]:
-            if config["plugins"]["editor"]["file_suspend"]:
+        elif config["settings"]["editor"]["open_all_in_editor"]:
+            editor_config = config["settings"]["editor"]["file"]
+            command = shlex.split(editor_config["run"]) + [target_path]
+            if editor_config["suspend"]:
                 with self.app.suspend():
-                    cmd(
-                        f'{config["plugins"]["editor"]["file_executable"]} "{target_path}"'
-                    )
+                    subprocess.run(command)
+            elif editor_config["block"]:
+                subprocess.run(command)
             else:
                 self.app.run_in_thread(
-                    cmd,
-                    f'{config["plugins"]["editor"]["file_executable"]} "{target_path}"',
+                    subprocess.run,
+                    command,
                 )
         else:
             path_utils.open_file(self.app, target_path)
@@ -644,33 +647,39 @@ class FileList(CheckboxRenderingMixin, SelectionList, inherit_bindings=False):
                 assert isinstance(old, int) and isinstance(new, int)
                 for index in range(old, new + 1):
                     self.select(self.get_option_at_index(index))
-            elif config["plugins"]["editor"]["enabled"] and check_key(
-                event, config["plugins"]["editor"]["keybinds"]
-            ):
+            elif check_key(event, config["keybinds"]["open_editor"]):
                 if self.highlighted_option and self.highlighted_option.disabled:
                     return
                 if path.isdir(self.highlighted_option.dir_entry.path):
-                    if config["plugins"]["editor"]["folder_suspend"]:
+                    editor_config = config["settings"]["editor"]["folder"]
+                    command = shlex.split(editor_config["run"]) + [
+                        self.highlighted_option.dir_entry.path
+                    ]
+                    if editor_config["suspend"]:
                         with self.app.suspend():
-                            cmd(
-                                f'{config["plugins"]["editor"]["folder_executable"]} "{self.highlighted_option.dir_entry.path}"'
-                            )
+                            subprocess.run(command)
+                    elif editor_config["block"]:
+                        subprocess.run(command)
                     else:
                         self.app.run_in_thread(
-                            cmd,
-                            f'{config["plugins"]["editor"]["folder_executable"]} "{self.highlighted_option.dir_entry.path}"',
+                            subprocess.run,
+                            command,
                         )
 
                 else:
-                    if config["plugins"]["editor"]["file_suspend"]:
+                    editor_config = config["settings"]["editor"]["file"]
+                    command = shlex.split(editor_config["run"]) + [
+                        self.highlighted_option.dir_entry.path
+                    ]
+                    if editor_config["suspend"]:
                         with self.app.suspend():
-                            cmd(
-                                f'{config["plugins"]["editor"]["file_executable"]} "{self.highlighted_option.dir_entry.path}"'
-                            )
+                            subprocess.run(command)
+                    elif editor_config["block"]:
+                        subprocess.run(command)
                     else:
                         self.app.run_in_thread(
-                            cmd,
-                            f'{config["plugins"]["editor"]["file_executable"]} "{self.highlighted_option.dir_entry.path}"',
+                            subprocess.run,
+                            command,
                         )
             elif check_key(event, config["keybinds"]["copy_path"]):
                 await self.app.query_one("PathCopyButton").on_button_pressed(

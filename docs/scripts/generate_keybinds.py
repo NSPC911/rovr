@@ -142,3 +142,7 @@ except FileNotFoundError:
     pprint("[red]Do not run manually with python! Run [blue]poe gen-keys[/][/]")
     pprint(Traceback(show_locals=True))
     exit(1)
+except Exception:
+    from rich.traceback import Traceback
+
+    pprint(Traceback(show_locals=True))

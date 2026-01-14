@@ -188,6 +188,62 @@
           "type": "boolean",
           "default": true,
           "description": "When copying over a file, preserve metadata from the original file, such as creation and modification times."
+        },
+        "editor": {
+          "type": "object",
+          "description": "Settings related to the editor used for different operations",
+          "additionalProperties": false,
+          "properties": {
+            "file": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "run": {
+                  "type": "string",
+                  "default": "$EDITOR",
+                  "description": "Editor to use when opening a file"
+                },
+                "block": {
+                  "type": "boolean",
+                  "default": true,
+                  "description": "Block rovr until the editor closes"
+                },
+                "suspend": {
+                  "type": "boolean",
+                  "default": true,
+                  "description": "Suspend (hide) rovr until the editor closes"
+                }
+              },
+              "description": "Editor to use when opening a file"
+            },
+            "folder": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "run": {
+                  "type": "string",
+                  "default": "$EDITOR",
+                  "description": "Editor to use when opening a folder"
+                },
+                "block": {
+                  "type": "boolean",
+                  "default": true,
+                  "description": "Block rovr until the editor closes"
+                },
+                "suspend": {
+                  "type": "boolean",
+                  "default": true,
+                  "description": "Suspend (hide) rovr until the editor closes"
+                }
+              },
+              "description": "Editor to use when opening a folder"
+            },
+            "open_all_in_editor": {
+              "type": "boolean",
+              "default": false,
+              "description": "Open all in the configured editor, regardless of file encoding or type. When disabled, it opens them in the system configured editor."
+            }
+          }
         }
       }
     },
@@ -770,6 +826,11 @@
           "description": "Suspend the app's process, bringing you back to the terminal",
           "display_name": "Suspend app"
         },
+        "open_editor": {
+          "$ref": "#/definitions/keybind",
+          "description": "Open the selected file or folder in the configured editor.",
+          "display_name": "Open in editor"
+        },
         "delete_files": {
           "type": "object",
           "description": "Keybinds related to the delete confirmation screen",
@@ -931,48 +992,6 @@
               "type": "string",
               "default": "bat",
               "description": "The executable for bat."
-            }
-          }
-        },
-        "editor": {
-          "type": "object",
-          "additionalProperties": false,
-          "properties": {
-            "enabled": {
-              "type": "boolean",
-              "default": true,
-              "description": "Enable opening a file in your editor."
-            },
-            "file_executable": {
-              "type": "string",
-              "default": "nano",
-              "description": "Open files in this app."
-            },
-            "file_suspend": {
-              "type": "boolean",
-              "default": true,
-              "description": "Suspend the app when editing a file. Useful for TUI editors, but not for something like VSCode or Notepad++."
-            },
-            "folder_executable": {
-              "type": "string",
-              "default": "code",
-              "description": "Open folders in this app."
-            },
-            "folder_suspend": {
-              "type": "boolean",
-              "default": true,
-              "description": "Suspend the app when editing a folder. Useful for TUI editors, but not for something like VSCode or Notepad++."
-            },
-            "open_all_in_editor": {
-              "type": "boolean",
-              "default": false,
-              "description": "Open all files in the configured editor, regardless of file encoding or type. When disabled, files that cannot be opened due to encoding issues will use the system's default application instead."
-            },
-            "keybinds": {
-              "$ref": "#/definitions/keybind",
-              "default": ["e"],
-              "description": "The keybind to launch your editor.",
-              "display_name": "Open file with editor"
             }
           }
         },

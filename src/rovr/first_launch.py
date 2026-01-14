@@ -191,11 +191,11 @@ class FirstLaunchApp(App, inherit_bindings=False):
                 yield Switch(which("file") is not None)
                 yield Static("[u]file(1)[/] integration")
         yield Static(classes="padding")
-        with Center(classes="plugins-editor"):
-            with HorizontalGroup(id="plugins-editor-file"):
+        with Center(classes="settings-editor"):
+            with HorizontalGroup(id="settings-editor-file"):
                 yield Input(value=os.environ.get("EDITOR", ""), id="editor_input")
                 yield Static("File editor")
-            with HorizontalGroup(id="plugins-editor-folders"):
+            with HorizontalGroup(id="settings-editor-folders"):
                 yield Input(
                     value=os.environ.get("EDITOR", ""), id="editor_folders_input"
                 )
@@ -244,7 +244,7 @@ class FirstLaunchApp(App, inherit_bindings=False):
         self.query_one(".plugins", Center).border_title = "Plugins/Integrations"
         self.query_one("SelectCurrent").border_title = "Image Protocol"
         self.query_one(
-            ".plugins-editor", Center
+            ".settings-editor", Center
         ).border_title = "Default editor when editing files"
         self.query_one(".compact-things", Center).border_title = "Compact Mode Options"
         popups = {
@@ -342,11 +342,15 @@ class FirstLaunchApp(App, inherit_bindings=False):
             "r",
         ) as f:
             # hardcoding is my passion
-            keybinds_sections: list[str] = f.read().split("\n# plugins\n")
+            full_content = f.read()
+            keybinds_sections: list[str] = full_content.split("\n# plugins\n")
+            parsed_keybinds = tomli.loads(keybinds_sections[0])
             plugins = tomli.loads(keybinds_sections[1])
             keybinds: str = keybinds_sections[0]
             keybinds = "\n".join([
-                line for line in keybinds.splitlines() if not line.startswith("#")
+                line
+                for line in keybinds.splitlines()
+                if not line.startswith("#") and "open_editor" not in line
             ])
         # manually create toml file yipee (imagine using tomliw (one extra dependency smh))
         theme = self.query_one("#theme", RadioSet).pressed_button.id
@@ -359,11 +363,25 @@ image_protocol = "{prot_to_schema[str(self.query_one("#image_protocol_select", S
 buttons = {str(self.query_one("#compact_buttons", Switch).value).lower()}
 panels = {str(self.query_one("#compact_panels", Switch).value).lower()}
 
+[settings.editor]
+open_all_in_editor = false
+
+[settings.editor.file]
+run = "{self.query_one("#editor_input", Input).value}"
+block = false
+suspend = true
+
+[settings.editor.folder]
+run = "{self.query_one("#editor_folders_input", Input).value}"
+block = false
+suspend = true
+
 [theme]
 default = "{theme}"
 {f'preview = "{theme}"' if theme in list(get_all_styles()) else ""}
 transparent = {str(self.query_one("#transparent_mode", Switch).value).lower()}
 {keybinds}
+open_editor = {parsed_keybinds["keybinds"]["open_editor"]}
 
 [plugins.rg]
 enabled = {str(self.query_one("#plugins-rg Switch", Switch).value).lower()}
@@ -375,11 +393,6 @@ keybinds = {plugins["plugins"]["fd"]["keybinds"]}
 
 [plugins.bat]
 enabled = {str(self.query_one("#plugins-bat Switch", Switch).value).lower()}
-
-[plugins.editor]
-keybinds = {plugins["plugins"]["editor"]["keybinds"]}
-file_executable = "{self.query_one("#editor_input", Input).value}"
-folder_executable = "{self.query_one("#editor_folders_input", Input).value}"
 
 [plugins.zoxide]
 enabled = {str(self.query_one("#plugins-zoxide Switch", Switch).value).lower()}

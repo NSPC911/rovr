@@ -84,7 +84,7 @@ Center.compact-things {
   }
 }
 
-Center.plugins-editor {
+Center.settings-editor {
   border: $border-blurred round;
   background: transparent;
   border-title-align: center;

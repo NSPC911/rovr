@@ -308,6 +308,23 @@ def load_config() -> tuple[dict, dict]:
     except tomli.TOMLDecodeError as exc:
         toml_dump(path.join(path.dirname(__file__), "../config/config.toml"), exc)
 
+    # check with schema
+    content = resources.files("rovr.config").joinpath("schema.json").read_text("utf-8")
+    schema = ujson.loads(content)
+
+    # ensure that template config works
+    try:
+        jsonschema.validate(template_config, schema)
+    except ValidationError as exception:
+        schema_dump(
+            path.join(path.dirname(__file__), "../config/config.toml"),
+            exception,
+            resources.files("rovr.config").joinpath("config.toml").read_text("utf-8"),
+        )
+        pprint(
+            "        [red]I will refuse to launch as long as the template config is invalid.[/]"
+        )
+        exit(1)
     user_config = {}
     user_config_content = ""
     if path.exists(user_config_path):
@@ -320,10 +337,6 @@ def load_config() -> tuple[dict, dict]:
                     toml_dump(user_config_path, exc)
     # Don't really have to consider the else part, because it's created further down
     config = deep_merge(template_config, user_config)
-    # check with schema
-    content = resources.files("rovr.config").joinpath("schema.json").read_text("utf-8")
-    schema = ujson.loads(content)
-
     try:
         jsonschema.validate(config, schema)
     except ValidationError as exception:

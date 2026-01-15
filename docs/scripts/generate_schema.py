@@ -26,7 +26,8 @@ try:
         schema_content = f.read()
     with open("src/rovr/config/schema.json", "w", encoding="utf-8") as f:
         f.write(
-            schema_content.replace("|", "&#124;")
+            schema_content
+            .replace("|", "&#124;")
             .replace(">", "&gt;")
             .replace("<", "&lt;")
         )

@@ -1,6 +1,4 @@
 import contextlib
-import shlex
-import subprocess
 from os import getcwd, path
 from typing import ClassVar, Iterable, Self, Sequence, cast
 
@@ -334,24 +332,18 @@ class FileList(CheckboxRenderingMixin, SelectionList, inherit_bindings=False):
             self.app.action_quit()
         elif config["settings"]["editor"]["open_all_in_editor"]:
             editor_config = config["settings"]["editor"]["file"]
-            command = shlex.split(editor_config["run"]) + ["--", target_path]
-            if editor_config["suspend"]:
-                with self.app.suspend():
-                    process = subprocess.run(command)
-                if process.returncode != 0:
-                    self.notify(f"Error Code {process.returncode}", severity="error")
-            elif editor_config["block"]:
-                process = subprocess.run(command, capture_output=True)
-                if process.returncode != 0:
-                    self.notify(
-                        process.stderr.decode(),
-                        title=f"Error Code {process.returncode}",
-                        severity="error",
-                    )
-            else:
-                self.app.run_in_thread(
-                    subprocess.run,
-                    command,
+
+            def on_error(message: str, title: str) -> None:
+                self.notify(message, title=title, severity="error")
+
+            try:
+                utils.run_editor_command(self.app, editor_config, target_path, on_error)
+            except Exception as exc:
+                path_utils.dump_exc(self, exc)
+                self.notify(
+                    f"{type(exc).__name__}: {exc}",
+                    title="Error launching editor",
+                    severity="error",
                 )
         else:
             path_utils.open_file(self.app, target_path)
@@ -658,73 +650,27 @@ class FileList(CheckboxRenderingMixin, SelectionList, inherit_bindings=False):
             elif check_key(event, config["keybinds"]["open_editor"]):
                 if self.highlighted_option and self.highlighted_option.disabled:
                     return
-                if path.isdir(self.highlighted_option.dir_entry.path):
-                    editor_config = config["settings"]["editor"]["folder"]
-                    command = shlex.split(editor_config["run"]) + [
-                        "--",
-                        self.highlighted_option.dir_entry.path,
-                    ]
-                    try:
-                        if editor_config["suspend"]:
-                            with self.app.suspend():
-                                process = subprocess.run(command)
-                            if process.returncode != 0:
-                                self.notify(
-                                    f"Error Code {process.returncode}", severity="error"
-                                )
-                        elif editor_config["block"]:
-                            process = subprocess.run(command, capture_output=True)
-                            if process.returncode != 0:
-                                self.notify(
-                                    process.stderr.decode(),
-                                    title=f"Error Code {process.returncode}",
-                                    severity="error",
-                                )
-                        else:
-                            self.app.run_in_thread(
-                                subprocess.run, command, capture_output=True
-                            )
-                    except Exception as exc:
-                        path_utils.dump_exc(self, exc)
-                        self.notify(
-                            f"{type(exc).__name__}: {exc}",
-                            title="Error launching editor",
-                            severity="error",
-                        )
 
+                def on_error(message: str, title: str) -> None:
+                    self.notify(message, title=title, severity="error")
+
+                target_path = self.highlighted_option.dir_entry.path
+                if path.isdir(target_path):
+                    editor_config = config["settings"]["editor"]["folder"]
                 else:
                     editor_config = config["settings"]["editor"]["file"]
-                    command = shlex.split(editor_config["run"]) + [
-                        "--",
-                        self.highlighted_option.dir_entry.path,
-                    ]
-                    try:
-                        if editor_config["suspend"]:
-                            with self.app.suspend():
-                                process = subprocess.run(command)
-                            if process.returncode != 0:
-                                self.notify(
-                                    f"Error Code {process.returncode}", severity="error"
-                                )
-                        elif editor_config["block"]:
-                            process = subprocess.run(command, capture_output=True)
-                            if process.returncode != 0:
-                                self.notify(
-                                    process.stderr.decode(),
-                                    title=f"Error Code {process.returncode}",
-                                    severity="error",
-                                )
-                        else:
-                            self.app.run_in_thread(
-                                subprocess.run, command, capture_output=True
-                            )
-                    except Exception as exc:
-                        path_utils.dump_exc(self, exc)
-                        self.notify(
-                            f"{type(exc).__name__}: {exc}",
-                            title="Error launching editor",
-                            severity="error",
-                        )
+
+                try:
+                    utils.run_editor_command(
+                        self.app, editor_config, target_path, on_error
+                    )
+                except Exception as exc:
+                    path_utils.dump_exc(self, exc)
+                    self.notify(
+                        f"{type(exc).__name__}: {exc}",
+                        title="Error launching editor",
+                        severity="error",
+                    )
             elif check_key(event, config["keybinds"]["copy_path"]):
                 await self.app.query_one("PathCopyButton").on_button_pressed(
                     Button.Pressed

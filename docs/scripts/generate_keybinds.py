@@ -143,6 +143,4 @@ except FileNotFoundError:
     pprint(Traceback(show_locals=True))
     exit(1)
 except Exception:
-    from rich.traceback import Traceback
-
     pprint(Traceback(show_locals=True))

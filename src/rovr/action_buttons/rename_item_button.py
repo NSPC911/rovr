@@ -1,8 +1,8 @@
 import contextlib
-import shlex
-import subprocess
+import os
 from os import getcwd, path
 from shutil import move
+from tempfile import NamedTemporaryFile
 
 from textual import work
 from textual.widgets import Button
@@ -11,6 +11,7 @@ from textual.worker import Worker, WorkerError
 from rovr.classes import IsValidFilePath, PathDoesntExist
 from rovr.functions.icons import get_icon
 from rovr.functions.path import dump_exc, normalise
+from rovr.functions.utils import run_editor_command
 from rovr.screens import ModalInput
 from rovr.variables.constants import config
 
@@ -90,9 +91,12 @@ class RenameItemButton(Button):
 
             # create file
             show_as_mapping: bool = config["settings"]["bulk_rename"]["show_as_mapping"]
-            from tempfile import NamedTemporaryFile
 
-            with NamedTemporaryFile("w+", encoding="utf-8") as temp:
+            temp = NamedTemporaryFile(  # noqa: SIM115
+                "w", encoding="utf-8", delete=False
+            )
+            temp_path = temp.name
+            try:
                 max_len = (
                     max(len(path.basename(f)) for f in selected_files)
                     if show_as_mapping
@@ -104,27 +108,21 @@ class RenameItemButton(Button):
                         temp.write(f"{selecteditem:<{max_len}}  ➔  {selecteditem}\n")
                     else:
                         temp.write(f"{selecteditem}\n")
-                temp.seek(0)
+                temp.flush()
+                temp.close()
+
                 # spawn editor
                 bulk_editor = config["settings"]["editor"]["bulk_rename"]
-                command = shlex.split(bulk_editor["run"]) + ["--", temp.name]
-                if bulk_editor["suspend"]:
-                    with self.app.suspend():
-                        process = subprocess.run(command)
-                    if process.returncode != 0:
-                        self.notify(
-                            f"Error Code {process.returncode}", severity="error"
-                        )
-                else:
-                    process = subprocess.run(command, capture_output=True)
-                    if process.returncode != 0:
-                        self.notify(
-                            process.stderr.decode(),
-                            title=f"Error Code {process.returncode}",
-                            severity="error",
-                        )
-                temp.seek(0)
-                lines = temp.read().strip().splitlines()
+
+                def on_error(message: str, title: str) -> None:
+                    self.notify(message, title=title, severity="error")
+
+                run_editor_command(self.app, bulk_editor, temp_path, on_error)
+
+                # read edited contents
+                with open(temp_path, encoding="utf-8") as f:
+                    lines = f.read().strip().splitlines()
+
                 # check line number
                 if len(lines) != len(selected_files):
                     self.notify(
@@ -171,6 +169,9 @@ class RenameItemButton(Button):
                             dump_exc(self, exc)
                 # highlighting purposes
                 new_name = highlighted_file
+            finally:
+                with contextlib.suppress(OSError):
+                    os.unlink(temp_path)
         try:
             self.app.file_list.file_list_pause_check = True
             self.app.file_list.focus()

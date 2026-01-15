@@ -342,15 +342,11 @@ class FirstLaunchApp(App, inherit_bindings=False):
             "r",
         ) as f:
             # hardcoding is my passion
-            full_content = f.read()
-            keybinds_sections: list[str] = full_content.split("\n# plugins\n")
-            parsed_keybinds = tomli.loads(keybinds_sections[0])
+            keybinds_sections: list[str] = f.read().split("\n# plugins\n")
             plugins = tomli.loads(keybinds_sections[1])
             keybinds: str = keybinds_sections[0]
             keybinds = "\n".join([
-                line
-                for line in keybinds.splitlines()
-                if not line.startswith("#") and "open_editor" not in line
+                line for line in keybinds.splitlines() if not line.startswith("#")
             ])
         # manually create toml file yipee (imagine using tomliw (one extra dependency smh))
         theme = self.query_one("#theme", RadioSet).pressed_button.id
@@ -381,7 +377,6 @@ default = "{theme}"
 {f'preview = "{theme}"' if theme in list(get_all_styles()) else ""}
 transparent = {str(self.query_one("#transparent_mode", Switch).value).lower()}
 {keybinds}
-open_editor = {parsed_keybinds["keybinds"]["open_editor"]}
 
 [plugins.rg]
 enabled = {str(self.query_one("#plugins-rg Switch", Switch).value).lower()}

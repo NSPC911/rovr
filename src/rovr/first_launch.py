@@ -62,8 +62,10 @@ try:
 except PackageNotFoundError:
     schema_ref = "refs/heads/master"
 
+
 def _escape_toml_string(value: str) -> str:
     return value.replace("\\", "\\\\").replace('"', '\\"')
+
 
 class FinalStuff(ModalScreen[None]):
     def __init__(self) -> None:

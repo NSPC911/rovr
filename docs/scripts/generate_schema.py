@@ -26,8 +26,7 @@ try:
         schema_content = f.read()
     with open("src/rovr/config/schema.json", "w", encoding="utf-8") as f:
         f.write(
-            schema_content
-            .replace("|", "&#124;")
+            schema_content.replace("|", "&#124;")
             .replace(">", "&gt;")
             .replace("<", "&lt;")
         )
@@ -78,6 +77,9 @@ try:
     )
 except FileNotFoundError:
     pprint("[red]Do not run manually with python! Run [blue]poe gen-schema[/][/]")
+    pprint(Traceback(show_locals=True))
+    exit(1)
+except Exception:
     pprint(Traceback(show_locals=True))
     exit(1)
 finally:

@@ -144,3 +144,4 @@ except FileNotFoundError:
     exit(1)
 except Exception:
     pprint(Traceback(show_locals=True))
+    exit(1)

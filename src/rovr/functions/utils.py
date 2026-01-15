@@ -1,6 +1,6 @@
 import shlex
 import subprocess
-from typing import TYPE_CHECKING, Any, Callable, TypedDict
+from typing import TYPE_CHECKING, Any, Callable, Required, TypedDict
 
 from humanize import naturalsize
 from rich.console import Console
@@ -19,7 +19,7 @@ if TYPE_CHECKING:
 class EditorConfig(TypedDict, total=False):
     """Configuration for editor commands."""
 
-    run: str
+    run: Required[str]
     suspend: bool
     block: bool
 

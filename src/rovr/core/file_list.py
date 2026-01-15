@@ -334,12 +334,20 @@ class FileList(CheckboxRenderingMixin, SelectionList, inherit_bindings=False):
             self.app.action_quit()
         elif config["settings"]["editor"]["open_all_in_editor"]:
             editor_config = config["settings"]["editor"]["file"]
-            command = shlex.split(editor_config["run"]) + [target_path]
+            command = shlex.split(editor_config["run"]) + ["--", target_path]
             if editor_config["suspend"]:
                 with self.app.suspend():
-                    subprocess.run(command)
+                    process = subprocess.run(command)
+                if process.returncode != 0:
+                    self.notify(f"Error Code {process.returncode}", severity="error")
             elif editor_config["block"]:
-                subprocess.run(command)
+                process = subprocess.run(command, capture_output=True)
+                if process.returncode != 0:
+                    self.notify(
+                        process.stderr.decode(),
+                        title=f"Error Code {process.returncode}",
+                        severity="error",
+                    )
             else:
                 self.app.run_in_thread(
                     subprocess.run,
@@ -653,33 +661,69 @@ class FileList(CheckboxRenderingMixin, SelectionList, inherit_bindings=False):
                 if path.isdir(self.highlighted_option.dir_entry.path):
                     editor_config = config["settings"]["editor"]["folder"]
                     command = shlex.split(editor_config["run"]) + [
-                        self.highlighted_option.dir_entry.path
+                        "--",
+                        self.highlighted_option.dir_entry.path,
                     ]
-                    if editor_config["suspend"]:
-                        with self.app.suspend():
-                            subprocess.run(command)
-                    elif editor_config["block"]:
-                        subprocess.run(command)
-                    else:
-                        self.app.run_in_thread(
-                            subprocess.run,
-                            command,
+                    try:
+                        if editor_config["suspend"]:
+                            with self.app.suspend():
+                                process = subprocess.run(command)
+                            if process.returncode != 0:
+                                self.notify(
+                                    f"Error Code {process.returncode}", severity="error"
+                                )
+                        elif editor_config["block"]:
+                            process = subprocess.run(command, capture_output=True)
+                            if process.returncode != 0:
+                                self.notify(
+                                    process.stderr.decode(),
+                                    title=f"Error Code {process.returncode}",
+                                    severity="error",
+                                )
+                        else:
+                            self.app.run_in_thread(
+                                subprocess.run, command, capture_output=True
+                            )
+                    except Exception as exc:
+                        path_utils.dump_exc(self, exc)
+                        self.notify(
+                            f"{type(exc).__name__}: {exc}",
+                            title="Error launching editor",
+                            severity="error",
                         )
 
                 else:
                     editor_config = config["settings"]["editor"]["file"]
                     command = shlex.split(editor_config["run"]) + [
-                        self.highlighted_option.dir_entry.path
+                        "--",
+                        self.highlighted_option.dir_entry.path,
                     ]
-                    if editor_config["suspend"]:
-                        with self.app.suspend():
-                            subprocess.run(command)
-                    elif editor_config["block"]:
-                        subprocess.run(command)
-                    else:
-                        self.app.run_in_thread(
-                            subprocess.run,
-                            command,
+                    try:
+                        if editor_config["suspend"]:
+                            with self.app.suspend():
+                                process = subprocess.run(command)
+                            if process.returncode != 0:
+                                self.notify(
+                                    f"Error Code {process.returncode}", severity="error"
+                                )
+                        elif editor_config["block"]:
+                            process = subprocess.run(command, capture_output=True)
+                            if process.returncode != 0:
+                                self.notify(
+                                    process.stderr.decode(),
+                                    title=f"Error Code {process.returncode}",
+                                    severity="error",
+                                )
+                        else:
+                            self.app.run_in_thread(
+                                subprocess.run, command, capture_output=True
+                            )
+                    except Exception as exc:
+                        path_utils.dump_exc(self, exc)
+                        self.notify(
+                            f"{type(exc).__name__}: {exc}",
+                            title="Error launching editor",
+                            severity="error",
                         )
             elif check_key(event, config["keybinds"]["copy_path"]):
                 await self.app.query_one("PathCopyButton").on_button_pressed(

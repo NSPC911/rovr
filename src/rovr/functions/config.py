@@ -345,28 +345,32 @@ def load_config() -> tuple[dict, dict]:
     # image protocol because "AutoImage" doesn't work with Sixel
     if config["interface"]["image_protocol"] == "Auto":
         config["interface"]["image_protocol"] = ""
+    default_editor = ""  # screw anyone that wants to do this to me
     # editor empty or $EDITOR: expand to actual editor command
-    if which("hx"):
+    editors = [
         # helix
-        default_editor = "hx"
-    elif which("nvim"):
+        "hx",
         # neovim
-        default_editor = "nvim"
-    elif which("vim"):
+        "nvim",
         # vim
-        default_editor = "vim"
-    elif which("vi"):
+        "vim",
         # vi
-        default_editor = "vi"
-    elif which("nano"):
+        "vi",
         # theoretically shouldnt come this far
-        default_editor = "nano"
-    elif which("code"):
+        "nano",
+        # should exist in windows ever since msedit was added
+        "edit",
+        "msedit",
+    ]
+    found_reasonable_cli_editor = False
+    for editor in editors:
+        if which(editor):
+            default_editor = editor + " --"
+            found_reasonable_cli_editor = True
+            break
+    if not found_reasonable_cli_editor and which("code"):
         # vscode
-        default_editor = "code --wait"
-    elif which("edit"):
-        # exists from 25h2
-        default_editor = "edit"
+        default_editor = "code --wait --"
     for key in ["file", "folder", "bulk_rename"]:
         if not config["settings"]["editor"][key]["run"]:
             config["settings"]["editor"][key]["run"] = default_editor

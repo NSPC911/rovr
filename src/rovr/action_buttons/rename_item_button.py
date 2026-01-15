@@ -90,9 +90,9 @@ class RenameItemButton(Button):
 
             # create file
             show_as_mapping: bool = config["settings"]["bulk_rename"]["show_as_mapping"]
-            from tempfile import TemporaryFile
+            from tempfile import NamedTemporaryFile
 
-            with TemporaryFile("w+", encoding="utf-8") as temp:
+            with NamedTemporaryFile("w+", encoding="utf-8") as temp:
                 max_len = (
                     max(len(path.basename(f)) for f in selected_files)
                     if show_as_mapping
@@ -107,12 +107,22 @@ class RenameItemButton(Button):
                 temp.seek(0)
                 # spawn editor
                 bulk_editor = config["settings"]["editor"]["bulk_rename"]
-                command = shlex.split(bulk_editor["run"]) + [temp.name]
+                command = shlex.split(bulk_editor["run"]) + ["--", temp.name]
                 if bulk_editor["suspend"]:
                     with self.app.suspend():
-                        subprocess.run(command)
+                        process = subprocess.run(command)
+                    if process.returncode != 0:
+                        self.notify(
+                            f"Error Code {process.returncode}", severity="error"
+                        )
                 else:
-                    subprocess.run(command)
+                    process = subprocess.run(command, capture_output=True)
+                    if process.returncode != 0:
+                        self.notify(
+                            process.stderr.decode(),
+                            title=f"Error Code {process.returncode}",
+                            severity="error",
+                        )
                 temp.seek(0)
                 lines = temp.read().strip().splitlines()
                 # check line number

@@ -63,6 +63,10 @@ except PackageNotFoundError:
     schema_ref = "refs/heads/master"
 
 
+def _escape_toml_string(value: str) -> str:
+    return value.replace("\\", "\\\\").replace('"', '\\"')
+
+
 class DummyScreen(Screen[None]):
     def on_mount(self) -> None:
         self.dismiss()
@@ -363,12 +367,12 @@ panels = {str(self.query_one("#compact_panels", Switch).value).lower()}
 open_all_in_editor = false
 
 [settings.editor.file]
-run = "{self.query_one("#editor_input", Input).value}"
+run = "{_escape_toml_string(self.query_one("#editor_input", Input).value)}"
 block = false
 suspend = true
 
 [settings.editor.folder]
-run = "{self.query_one("#editor_folders_input", Input).value}"
+run = "{_escape_toml_string(self.query_one("#editor_folders_input", Input).value)}"
 block = false
 suspend = true
 

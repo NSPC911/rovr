@@ -87,6 +87,8 @@ class RenameItemButton(Button):
                 )
         else:
             # save highlighted file name
+            # okay so if you think about it logically, highlighted option would
+            # not be None because there are selected files, so this is safe
             highlighted_file = self.app.file_list.highlighted_option.dir_entry.name
 
             # create file
@@ -117,7 +119,23 @@ class RenameItemButton(Button):
                 def on_error(message: str, title: str) -> None:
                     self.notify(message, title=title, severity="error")
 
-                run_editor_command(self.app, bulk_editor, temp_path, on_error)
+                try:
+                    run_editor_command(self.app, bulk_editor, temp_path, on_error)
+                except FileNotFoundError:
+                    self.notify(
+                        f"Editor '{bulk_editor}' not found. Check your config.",
+                        title="Editor not found",
+                        severity="error",
+                    )
+                    return
+                except Exception as exc:
+                    dump_exc(self, exc)
+                    self.notify(
+                        f"{type(exc).__name__}: {exc}",
+                        title="Error launching editor",
+                        severity="error",
+                    )
+                    return
 
                 # read edited contents
                 with open(temp_path, encoding="utf-8") as f:

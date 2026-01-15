@@ -150,8 +150,17 @@ done < "$chooser_file"
 rm -f "$cwd_file" "$chooser_file"
 ```
 
-### integrations
+### `--force-tty` and `__stdout__`/`__stderr__`
 
-don't even try.
+<Aside type="caution">
+  This may be highly unstable. Use at your own risk, lest your session be ruined.
+</Aside>
 
-rovr is unable to redirect stdout and stderr to alternate paths (`/dev/tty` or `$CONOUT`). I am working on it, but it is a low priority.
+If you are on Unix, or are fine losing truecolor on Windows, you can enable tty emulation with `--force-tty`, which makes rovr think it's running in a terminal even when its output is being piped.
+
+If you combine this with something like `--cwd-file __stdout__`, rovr will write the current working directory to standard output, which you can then capture directly.
+
+```bash
+new_dir=$(rovr --force-tty --cwd-file __stdout__)
+cd "$new_dir"
+```

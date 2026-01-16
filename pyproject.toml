@@ -97,6 +97,8 @@ exclude = [
 
 [tool.ruff.lint]
 select = [
+  "ASYNC220",
+  "ASYNC221",
   "ASYNC251",
   "ANN",
   "COM819",

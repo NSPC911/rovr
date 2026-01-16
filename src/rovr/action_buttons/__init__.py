@@ -5,6 +5,7 @@ from .delete_button import DeleteButton
 from .new_item_button import NewItemButton
 from .paste_button import PasteButton
 from .rename_item_button import RenameItemButton
+from .system_copy_button import SystemCopyButton
 from .unzip_button import UnzipButton
 from .zip_button import ZipButton
 
@@ -17,5 +18,6 @@ __all__ = [
     "RenameItemButton",
     "UnzipButton",
     "ZipButton",
+    "SystemCopyButton",
     "PathCopyButton",
 ]

@@ -66,6 +66,7 @@ show_keybinds = ["f1"]
 quit_app = ["ctrl+q"]
 command_palette = "ctrl+p"
 suspend_app = ["ctrl+z"]
+open_editor = ["ctrl+o"]
 # unavailable for now
 preview_select_left = []
 preview_select_right = []
@@ -111,9 +112,6 @@ dont_ask_again = ["a"]
 # plugins
 [plugins.zoxide]
 keybinds = ["ctrl+d"]
-
-[plugins.editor]
-keybinds = ["ctrl+o"]
 
 [plugins.fd]
 keybinds = ["ctrl+g"]

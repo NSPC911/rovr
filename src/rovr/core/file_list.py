@@ -1,6 +1,5 @@
 import contextlib
 from os import getcwd, path
-from os import system as cmd
 from typing import ClassVar, Iterable, Self, Sequence, cast
 
 from textual import events, on, work
@@ -331,16 +330,20 @@ class FileList(CheckboxRenderingMixin, SelectionList, inherit_bindings=False):
     async def file_selected_handler(self, target_path: str) -> None:
         if self.app._chooser_file:
             self.app.action_quit()
-        elif config["plugins"]["editor"]["open_all_in_editor"]:
-            if config["plugins"]["editor"]["file_suspend"]:
-                with self.app.suspend():
-                    cmd(
-                        f'{config["plugins"]["editor"]["file_executable"]} "{target_path}"'
-                    )
-            else:
-                self.app.run_in_thread(
-                    cmd,
-                    f'{config["plugins"]["editor"]["file_executable"]} "{target_path}"',
+        elif config["settings"]["editor"]["open_all_in_editor"]:
+            editor_config = config["settings"]["editor"]["file"]
+
+            def on_error(message: str, title: str) -> None:
+                self.notify(message, title=title, severity="error")
+
+            try:
+                utils.run_editor_command(self.app, editor_config, target_path, on_error)
+            except Exception as exc:
+                path_utils.dump_exc(self, exc)
+                self.notify(
+                    f"{type(exc).__name__}: {exc}",
+                    title="Error launching editor",
+                    severity="error",
                 )
         else:
             path_utils.open_file(self.app, target_path)
@@ -644,34 +647,30 @@ class FileList(CheckboxRenderingMixin, SelectionList, inherit_bindings=False):
                 assert isinstance(old, int) and isinstance(new, int)
                 for index in range(old, new + 1):
                     self.select(self.get_option_at_index(index))
-            elif config["plugins"]["editor"]["enabled"] and check_key(
-                event, config["plugins"]["editor"]["keybinds"]
-            ):
+            elif check_key(event, config["keybinds"]["open_editor"]):
                 if self.highlighted_option and self.highlighted_option.disabled:
                     return
-                if path.isdir(self.highlighted_option.dir_entry.path):
-                    if config["plugins"]["editor"]["folder_suspend"]:
-                        with self.app.suspend():
-                            cmd(
-                                f'{config["plugins"]["editor"]["folder_executable"]} "{self.highlighted_option.dir_entry.path}"'
-                            )
-                    else:
-                        self.app.run_in_thread(
-                            cmd,
-                            f'{config["plugins"]["editor"]["folder_executable"]} "{self.highlighted_option.dir_entry.path}"',
-                        )
 
+                def on_error(message: str, title: str) -> None:
+                    self.notify(message, title=title, severity="error")
+
+                target_path = self.highlighted_option.dir_entry.path
+                if path.isdir(target_path):
+                    editor_config = config["settings"]["editor"]["folder"]
                 else:
-                    if config["plugins"]["editor"]["file_suspend"]:
-                        with self.app.suspend():
-                            cmd(
-                                f'{config["plugins"]["editor"]["file_executable"]} "{self.highlighted_option.dir_entry.path}"'
-                            )
-                    else:
-                        self.app.run_in_thread(
-                            cmd,
-                            f'{config["plugins"]["editor"]["file_executable"]} "{self.highlighted_option.dir_entry.path}"',
-                        )
+                    editor_config = config["settings"]["editor"]["file"]
+
+                try:
+                    utils.run_editor_command(
+                        self.app, editor_config, target_path, on_error
+                    )
+                except Exception as exc:
+                    path_utils.dump_exc(self, exc)
+                    self.notify(
+                        f"{type(exc).__name__}: {exc}",
+                        title="Error launching editor",
+                        severity="error",
+                    )
             elif check_key(event, config["keybinds"]["copy_path"]):
                 await self.app.query_one("PathCopyButton").on_button_pressed(
                     Button.Pressed

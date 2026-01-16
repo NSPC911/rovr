@@ -61,6 +61,26 @@ panels = false
 copy_includes_metadata = true
 use_recycle_bin = true
 
+[settings.bulk_rename]
+show_as_mapping = true
+
+[settings.editor]
+open_all_in_editor = false
+
+[settings.editor.file]
+run = "$EDITOR"
+block = false
+suspend = true
+
+[settings.editor.folder]
+run = "$EDITOR"
+block = false
+suspend = true
+
+[settings.editor.bulk_rename]
+run = "$EDITOR"
+suspend = true
+
 [metadata]
 fields = [
   "type",
@@ -180,6 +200,7 @@ show_keybinds = ["?"]
 quit_app = ["q", "ctrl+q"]
 command_palette = "ctrl+p"
 suspend_app = ["ctrl+z"]
+open_editor = ["e"]
 [keybinds.change_sort_order]
 open_popup = [","]
 name = ["a"]
@@ -221,15 +242,6 @@ show_scores = false
 [plugins.bat]
 enabled = false
 executable = "bat"
-
-[plugins.editor]
-enabled = true
-file_executable = ""
-folder_executable = ""
-file_suspend = true
-folder_suspend = true
-open_all_in_editor = false
-keybinds = ["e"]
 
 [plugins.fd]
 enabled = true

@@ -63,6 +63,10 @@ except PackageNotFoundError:
     schema_ref = "refs/heads/master"
 
 
+def _escape_toml_string(value: str) -> str:
+    return value.replace("\\", "\\\\").replace('"', '\\"')
+
+
 class FinalStuff(ModalScreen[None]):
     def __init__(self) -> None:
         super().__init__()
@@ -186,11 +190,11 @@ class FirstLaunchApp(App, inherit_bindings=False):
                 yield Switch(which("file") is not None)
                 yield Static("[u]file(1)[/] integration")
         yield Static(classes="padding")
-        with Center(classes="plugins-editor"):
-            with HorizontalGroup(id="plugins-editor-file"):
+        with Center(classes="settings-editor"):
+            with HorizontalGroup(id="settings-editor-file"):
                 yield Input(value=os.environ.get("EDITOR", ""), id="editor_input")
                 yield Static("File editor")
-            with HorizontalGroup(id="plugins-editor-folders"):
+            with HorizontalGroup(id="settings-editor-folders"):
                 yield Input(
                     value=os.environ.get("EDITOR", ""), id="editor_folders_input"
                 )
@@ -239,7 +243,7 @@ class FirstLaunchApp(App, inherit_bindings=False):
         self.query_one(".plugins", Center).border_title = "Plugins/Integrations"
         self.query_one("SelectCurrent").border_title = "Image Protocol"
         self.query_one(
-            ".plugins-editor", Center
+            ".settings-editor", Center
         ).border_title = "Default editor when editing files"
         self.query_one(".compact-things", Center).border_title = "Compact Mode Options"
         popups = {
@@ -351,6 +355,19 @@ image_protocol = "{prot_to_schema[str(self.query_one("#image_protocol_select", S
 buttons = {str(self.query_one("#compact_buttons", Switch).value).lower()}
 panels = {str(self.query_one("#compact_panels", Switch).value).lower()}
 
+[settings.editor]
+open_all_in_editor = false
+
+[settings.editor.file]
+run = "{_escape_toml_string(self.query_one("#editor_input", Input).value)}"
+block = false
+suspend = true
+
+[settings.editor.folder]
+run = "{_escape_toml_string(self.query_one("#editor_folders_input", Input).value)}"
+block = false
+suspend = true
+
 [theme]
 default = "{theme}"
 {f'preview = "{theme}"' if theme in list(get_all_styles()) else ""}
@@ -367,11 +384,6 @@ keybinds = {plugins["plugins"]["fd"]["keybinds"]}
 
 [plugins.bat]
 enabled = {str(self.query_one("#plugins-bat Switch", Switch).value).lower()}
-
-[plugins.editor]
-keybinds = {plugins["plugins"]["editor"]["keybinds"]}
-file_executable = "{self.query_one("#editor_input", Input).value}"
-folder_executable = "{self.query_one("#editor_folders_input", Input).value}"
 
 [plugins.zoxide]
 enabled = {str(self.query_one("#plugins-zoxide Switch", Switch).value).lower()}

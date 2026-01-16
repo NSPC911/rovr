@@ -34,6 +34,21 @@ description: config schema humanified
 - [2. Property `Rovr Config > settings`](#settings)
   - [2.1. Property `Rovr Config > settings > use_recycle_bin`](#settings_use_recycle_bin)
   - [2.2. Property `Rovr Config > settings > copy_includes_metadata`](#settings_copy_includes_metadata)
+  - [2.3. Property `Rovr Config > settings > bulk_rename`](#settings_bulk_rename)
+    - [2.3.1. Property `Rovr Config > settings > bulk_rename > show_as_mapping`](#settings_bulk_rename_show_as_mapping)
+  - [2.4. Property `Rovr Config > settings > editor`](#settings_editor)
+    - [2.4.1. Property `Rovr Config > settings > editor > file`](#settings_editor_file)
+      - [2.4.1.1. Property `Rovr Config > settings > editor > file > run`](#settings_editor_file_run)
+      - [2.4.1.2. Property `Rovr Config > settings > editor > file > block`](#settings_editor_file_block)
+      - [2.4.1.3. Property `Rovr Config > settings > editor > file > suspend`](#settings_editor_file_suspend)
+    - [2.4.2. Property `Rovr Config > settings > editor > folder`](#settings_editor_folder)
+      - [2.4.2.1. Property `Rovr Config > settings > editor > folder > run`](#settings_editor_folder_run)
+      - [2.4.2.2. Property `Rovr Config > settings > editor > folder > block`](#settings_editor_folder_block)
+      - [2.4.2.3. Property `Rovr Config > settings > editor > folder > suspend`](#settings_editor_folder_suspend)
+    - [2.4.3. Property `Rovr Config > settings > editor > bulk_rename`](#settings_editor_bulk_rename)
+      - [2.4.3.1. Property `Rovr Config > settings > editor > bulk_rename > run`](#settings_editor_bulk_rename_run)
+      - [2.4.3.2. Property `Rovr Config > settings > editor > bulk_rename > suspend`](#settings_editor_bulk_rename_suspend)
+    - [2.4.4. Property `Rovr Config > settings > editor > open_all_in_editor`](#settings_editor_open_all_in_editor)
 - [3. Property `Rovr Config > metadata`](#metadata)
   - [3.1. Property `Rovr Config > metadata > fields`](#metadata_fields)
     - [3.1.1. Rovr Config > metadata > fields > fields items](#metadata_fields_items)
@@ -196,47 +211,49 @@ description: config schema humanified
   - [7.53. Property `Rovr Config > keybinds > command_palette`](#keybinds_command_palette)
   - [7.54. Property `Rovr Config > keybinds > suspend_app`](#keybinds_suspend_app)
     - [7.54.1. Rovr Config > keybinds > toggle_pin > toggle_pin items](#keybinds_toggle_pin_items)
-  - [7.55. Property `Rovr Config > keybinds > delete_files`](#keybinds_delete_files)
-    - [7.55.1. Property `Rovr Config > keybinds > delete_files > trash`](#keybinds_delete_files_trash)
-      - [7.55.1.1. Rovr Config > keybinds > toggle_pin > toggle_pin items](#keybinds_toggle_pin_items)
-    - [7.55.2. Property `Rovr Config > keybinds > delete_files > delete`](#keybinds_delete_files_delete)
-      - [7.55.2.1. Rovr Config > keybinds > toggle_pin > toggle_pin items](#keybinds_toggle_pin_items)
-    - [7.55.3. Property `Rovr Config > keybinds > delete_files > cancel`](#keybinds_delete_files_cancel)
-      - [7.55.3.1. Rovr Config > keybinds > toggle_pin > toggle_pin items](#keybinds_toggle_pin_items)
-  - [7.56. Property `Rovr Config > keybinds > filename_conflict`](#keybinds_filename_conflict)
-    - [7.56.1. Property `Rovr Config > keybinds > filename_conflict > overwrite`](#keybinds_filename_conflict_overwrite)
+  - [7.55. Property `Rovr Config > keybinds > open_editor`](#keybinds_open_editor)
+    - [7.55.1. Rovr Config > keybinds > toggle_pin > toggle_pin items](#keybinds_toggle_pin_items)
+  - [7.56. Property `Rovr Config > keybinds > delete_files`](#keybinds_delete_files)
+    - [7.56.1. Property `Rovr Config > keybinds > delete_files > trash`](#keybinds_delete_files_trash)
       - [7.56.1.1. Rovr Config > keybinds > toggle_pin > toggle_pin items](#keybinds_toggle_pin_items)
-    - [7.56.2. Property `Rovr Config > keybinds > filename_conflict > skip`](#keybinds_filename_conflict_skip)
+    - [7.56.2. Property `Rovr Config > keybinds > delete_files > delete`](#keybinds_delete_files_delete)
       - [7.56.2.1. Rovr Config > keybinds > toggle_pin > toggle_pin items](#keybinds_toggle_pin_items)
-    - [7.56.3. Property `Rovr Config > keybinds > filename_conflict > rename`](#keybinds_filename_conflict_rename)
+    - [7.56.3. Property `Rovr Config > keybinds > delete_files > cancel`](#keybinds_delete_files_cancel)
       - [7.56.3.1. Rovr Config > keybinds > toggle_pin > toggle_pin items](#keybinds_toggle_pin_items)
-    - [7.56.4. Property `Rovr Config > keybinds > filename_conflict > cancel`](#keybinds_filename_conflict_cancel)
-      - [7.56.4.1. Rovr Config > keybinds > toggle_pin > toggle_pin items](#keybinds_toggle_pin_items)
-    - [7.56.5. Property `Rovr Config > keybinds > filename_conflict > dont_ask_again`](#keybinds_filename_conflict_dont_ask_again)
-      - [7.56.5.1. Rovr Config > keybinds > toggle_pin > toggle_pin items](#keybinds_toggle_pin_items)
-  - [7.57. Property `Rovr Config > keybinds > file_in_use`](#keybinds_file_in_use)
-    - [7.57.1. Property `Rovr Config > keybinds > file_in_use > retry`](#keybinds_file_in_use_retry)
+  - [7.57. Property `Rovr Config > keybinds > filename_conflict`](#keybinds_filename_conflict)
+    - [7.57.1. Property `Rovr Config > keybinds > filename_conflict > overwrite`](#keybinds_filename_conflict_overwrite)
       - [7.57.1.1. Rovr Config > keybinds > toggle_pin > toggle_pin items](#keybinds_toggle_pin_items)
-    - [7.57.2. Property `Rovr Config > keybinds > file_in_use > skip`](#keybinds_file_in_use_skip)
+    - [7.57.2. Property `Rovr Config > keybinds > filename_conflict > skip`](#keybinds_filename_conflict_skip)
       - [7.57.2.1. Rovr Config > keybinds > toggle_pin > toggle_pin items](#keybinds_toggle_pin_items)
-    - [7.57.3. Property `Rovr Config > keybinds > file_in_use > cancel`](#keybinds_file_in_use_cancel)
+    - [7.57.3. Property `Rovr Config > keybinds > filename_conflict > rename`](#keybinds_filename_conflict_rename)
       - [7.57.3.1. Rovr Config > keybinds > toggle_pin > toggle_pin items](#keybinds_toggle_pin_items)
-    - [7.57.4. Property `Rovr Config > keybinds > file_in_use > dont_ask_again`](#keybinds_file_in_use_dont_ask_again)
+    - [7.57.4. Property `Rovr Config > keybinds > filename_conflict > cancel`](#keybinds_filename_conflict_cancel)
       - [7.57.4.1. Rovr Config > keybinds > toggle_pin > toggle_pin items](#keybinds_toggle_pin_items)
-  - [7.58. Property `Rovr Config > keybinds > filter_modal`](#keybinds_filter_modal)
-    - [7.58.1. Property `Rovr Config > keybinds > filter_modal > exit`](#keybinds_filter_modal_exit)
+    - [7.57.5. Property `Rovr Config > keybinds > filename_conflict > dont_ask_again`](#keybinds_filename_conflict_dont_ask_again)
+      - [7.57.5.1. Rovr Config > keybinds > toggle_pin > toggle_pin items](#keybinds_toggle_pin_items)
+  - [7.58. Property `Rovr Config > keybinds > file_in_use`](#keybinds_file_in_use)
+    - [7.58.1. Property `Rovr Config > keybinds > file_in_use > retry`](#keybinds_file_in_use_retry)
       - [7.58.1.1. Rovr Config > keybinds > toggle_pin > toggle_pin items](#keybinds_toggle_pin_items)
-    - [7.58.2. Property `Rovr Config > keybinds > filter_modal > down`](#keybinds_filter_modal_down)
+    - [7.58.2. Property `Rovr Config > keybinds > file_in_use > skip`](#keybinds_file_in_use_skip)
       - [7.58.2.1. Rovr Config > keybinds > toggle_pin > toggle_pin items](#keybinds_toggle_pin_items)
-    - [7.58.3. Property `Rovr Config > keybinds > filter_modal > up`](#keybinds_filter_modal_up)
+    - [7.58.3. Property `Rovr Config > keybinds > file_in_use > cancel`](#keybinds_file_in_use_cancel)
       - [7.58.3.1. Rovr Config > keybinds > toggle_pin > toggle_pin items](#keybinds_toggle_pin_items)
-  - [7.59. Property `Rovr Config > keybinds > yes_or_no`](#keybinds_yes_or_no)
-    - [7.59.1. Property `Rovr Config > keybinds > yes_or_no > yes`](#keybinds_yes_or_no_yes)
+    - [7.58.4. Property `Rovr Config > keybinds > file_in_use > dont_ask_again`](#keybinds_file_in_use_dont_ask_again)
+      - [7.58.4.1. Rovr Config > keybinds > toggle_pin > toggle_pin items](#keybinds_toggle_pin_items)
+  - [7.59. Property `Rovr Config > keybinds > filter_modal`](#keybinds_filter_modal)
+    - [7.59.1. Property `Rovr Config > keybinds > filter_modal > exit`](#keybinds_filter_modal_exit)
       - [7.59.1.1. Rovr Config > keybinds > toggle_pin > toggle_pin items](#keybinds_toggle_pin_items)
-    - [7.59.2. Property `Rovr Config > keybinds > yes_or_no > no`](#keybinds_yes_or_no_no)
+    - [7.59.2. Property `Rovr Config > keybinds > filter_modal > down`](#keybinds_filter_modal_down)
       - [7.59.2.1. Rovr Config > keybinds > toggle_pin > toggle_pin items](#keybinds_toggle_pin_items)
-    - [7.59.3. Property `Rovr Config > keybinds > yes_or_no > dont_ask_again`](#keybinds_yes_or_no_dont_ask_again)
+    - [7.59.3. Property `Rovr Config > keybinds > filter_modal > up`](#keybinds_filter_modal_up)
       - [7.59.3.1. Rovr Config > keybinds > toggle_pin > toggle_pin items](#keybinds_toggle_pin_items)
+  - [7.60. Property `Rovr Config > keybinds > yes_or_no`](#keybinds_yes_or_no)
+    - [7.60.1. Property `Rovr Config > keybinds > yes_or_no > yes`](#keybinds_yes_or_no_yes)
+      - [7.60.1.1. Rovr Config > keybinds > toggle_pin > toggle_pin items](#keybinds_toggle_pin_items)
+    - [7.60.2. Property `Rovr Config > keybinds > yes_or_no > no`](#keybinds_yes_or_no_no)
+      - [7.60.2.1. Rovr Config > keybinds > toggle_pin > toggle_pin items](#keybinds_toggle_pin_items)
+    - [7.60.3. Property `Rovr Config > keybinds > yes_or_no > dont_ask_again`](#keybinds_yes_or_no_dont_ask_again)
+      - [7.60.3.1. Rovr Config > keybinds > toggle_pin > toggle_pin items](#keybinds_toggle_pin_items)
 - [8. Property `Rovr Config > plugins`](#plugins)
   - [8.1. Property `Rovr Config > plugins > zoxide`](#plugins_zoxide)
     - [8.1.1. Property `Rovr Config > plugins > zoxide > enabled`](#plugins_zoxide_enabled)
@@ -246,43 +263,34 @@ description: config schema humanified
   - [8.2. Property `Rovr Config > plugins > bat`](#plugins_bat)
     - [8.2.1. Property `Rovr Config > plugins > bat > enabled`](#plugins_bat_enabled)
     - [8.2.2. Property `Rovr Config > plugins > bat > executable`](#plugins_bat_executable)
-  - [8.3. Property `Rovr Config > plugins > editor`](#plugins_editor)
-    - [8.3.1. Property `Rovr Config > plugins > editor > enabled`](#plugins_editor_enabled)
-    - [8.3.2. Property `Rovr Config > plugins > editor > file_executable`](#plugins_editor_file_executable)
-    - [8.3.3. Property `Rovr Config > plugins > editor > file_suspend`](#plugins_editor_file_suspend)
-    - [8.3.4. Property `Rovr Config > plugins > editor > folder_executable`](#plugins_editor_folder_executable)
-    - [8.3.5. Property `Rovr Config > plugins > editor > folder_suspend`](#plugins_editor_folder_suspend)
-    - [8.3.6. Property `Rovr Config > plugins > editor > open_all_in_editor`](#plugins_editor_open_all_in_editor)
-    - [8.3.7. Property `Rovr Config > plugins > editor > keybinds`](#plugins_editor_keybinds)
-      - [8.3.7.1. Rovr Config > keybinds > toggle_pin > toggle_pin items](#keybinds_toggle_pin_items)
-  - [8.4. Property `Rovr Config > plugins > fd`](#plugins_fd)
-    - [8.4.1. Property `Rovr Config > plugins > fd > enabled`](#plugins_fd_enabled)
-    - [8.4.2. Property `Rovr Config > plugins > fd > keybinds`](#plugins_fd_keybinds)
+  - [8.3. Property `Rovr Config > plugins > fd`](#plugins_fd)
+    - [8.3.1. Property `Rovr Config > plugins > fd > enabled`](#plugins_fd_enabled)
+    - [8.3.2. Property `Rovr Config > plugins > fd > keybinds`](#plugins_fd_keybinds)
+      - [8.3.2.1. Rovr Config > keybinds > toggle_pin > toggle_pin items](#keybinds_toggle_pin_items)
+    - [8.3.3. Property `Rovr Config > plugins > fd > executable`](#plugins_fd_executable)
+    - [8.3.4. Property `Rovr Config > plugins > fd > relative_paths`](#plugins_fd_relative_paths)
+    - [8.3.5. Property `Rovr Config > plugins > fd > follow_symlinks`](#plugins_fd_follow_symlinks)
+    - [8.3.6. Property `Rovr Config > plugins > fd > no_ignore_parent`](#plugins_fd_no_ignore_parent)
+    - [8.3.7. Property `Rovr Config > plugins > fd > default_filter_types`](#plugins_fd_default_filter_types)
+      - [8.3.7.1. Rovr Config > plugins > fd > default_filter_types > default_filter_types items](#plugins_fd_default_filter_types_items)
+  - [8.4. Property `Rovr Config > plugins > rg`](#plugins_rg)
+    - [8.4.1. Property `Rovr Config > plugins > rg > enabled`](#plugins_rg_enabled)
+    - [8.4.2. Property `Rovr Config > plugins > rg > keybinds`](#plugins_rg_keybinds)
       - [8.4.2.1. Rovr Config > keybinds > toggle_pin > toggle_pin items](#keybinds_toggle_pin_items)
-    - [8.4.3. Property `Rovr Config > plugins > fd > executable`](#plugins_fd_executable)
-    - [8.4.4. Property `Rovr Config > plugins > fd > relative_paths`](#plugins_fd_relative_paths)
-    - [8.4.5. Property `Rovr Config > plugins > fd > follow_symlinks`](#plugins_fd_follow_symlinks)
-    - [8.4.6. Property `Rovr Config > plugins > fd > no_ignore_parent`](#plugins_fd_no_ignore_parent)
-    - [8.4.7. Property `Rovr Config > plugins > fd > default_filter_types`](#plugins_fd_default_filter_types)
-      - [8.4.7.1. Rovr Config > plugins > fd > default_filter_types > default_filter_types items](#plugins_fd_default_filter_types_items)
-  - [8.5. Property `Rovr Config > plugins > rg`](#plugins_rg)
-    - [8.5.1. Property `Rovr Config > plugins > rg > enabled`](#plugins_rg_enabled)
-    - [8.5.2. Property `Rovr Config > plugins > rg > keybinds`](#plugins_rg_keybinds)
-      - [8.5.2.1. Rovr Config > keybinds > toggle_pin > toggle_pin items](#keybinds_toggle_pin_items)
-    - [8.5.3. Property `Rovr Config > plugins > rg > executable`](#plugins_rg_executable)
-    - [8.5.4. Property `Rovr Config > plugins > rg > case_sensitive`](#plugins_rg_case_sensitive)
-    - [8.5.5. Property `Rovr Config > plugins > rg > follow_symlinks`](#plugins_rg_follow_symlinks)
-    - [8.5.6. Property `Rovr Config > plugins > rg > no_ignore_parent`](#plugins_rg_no_ignore_parent)
-    - [8.5.7. Property `Rovr Config > plugins > rg > search_hidden`](#plugins_rg_search_hidden)
-  - [8.6. Property `Rovr Config > plugins > poppler`](#plugins_poppler)
-    - [8.6.1. Property `Rovr Config > plugins > poppler > enabled`](#plugins_poppler_enabled)
-    - [8.6.2. Property `Rovr Config > plugins > poppler > threads`](#plugins_poppler_threads)
-    - [8.6.3. Property `Rovr Config > plugins > poppler > use_pdftocairo`](#plugins_poppler_use_pdftocairo)
-    - [8.6.4. Property `Rovr Config > plugins > poppler > poppler_folder`](#plugins_poppler_poppler_folder)
-    - [8.6.5. Property `Rovr Config > plugins > poppler > pdf_batch_size`](#plugins_poppler_pdf_batch_size)
-  - [8.7. Property `Rovr Config > plugins > file_one`](#plugins_file_one)
-    - [8.7.1. Property `Rovr Config > plugins > file_one > enabled`](#plugins_file_one_enabled)
-    - [8.7.2. Property `Rovr Config > plugins > file_one > get_description`](#plugins_file_one_get_description)
+    - [8.4.3. Property `Rovr Config > plugins > rg > executable`](#plugins_rg_executable)
+    - [8.4.4. Property `Rovr Config > plugins > rg > case_sensitive`](#plugins_rg_case_sensitive)
+    - [8.4.5. Property `Rovr Config > plugins > rg > follow_symlinks`](#plugins_rg_follow_symlinks)
+    - [8.4.6. Property `Rovr Config > plugins > rg > no_ignore_parent`](#plugins_rg_no_ignore_parent)
+    - [8.4.7. Property `Rovr Config > plugins > rg > search_hidden`](#plugins_rg_search_hidden)
+  - [8.5. Property `Rovr Config > plugins > poppler`](#plugins_poppler)
+    - [8.5.1. Property `Rovr Config > plugins > poppler > enabled`](#plugins_poppler_enabled)
+    - [8.5.2. Property `Rovr Config > plugins > poppler > threads`](#plugins_poppler_threads)
+    - [8.5.3. Property `Rovr Config > plugins > poppler > use_pdftocairo`](#plugins_poppler_use_pdftocairo)
+    - [8.5.4. Property `Rovr Config > plugins > poppler > poppler_folder`](#plugins_poppler_poppler_folder)
+    - [8.5.5. Property `Rovr Config > plugins > poppler > pdf_batch_size`](#plugins_poppler_pdf_batch_size)
+  - [8.6. Property `Rovr Config > plugins > file_one`](#plugins_file_one)
+    - [8.6.1. Property `Rovr Config > plugins > file_one > enabled`](#plugins_file_one_enabled)
+    - [8.6.2. Property `Rovr Config > plugins > file_one > get_description`](#plugins_file_one_get_description)
 
 **Title:** Rovr Config
 
@@ -670,6 +678,8 @@ Must be one of:
 | ---------------------------------------------------------- | ------- | ------------------------------------------------------------------------------------------------------------ |
 | [use_recycle_bin](#settings_use_recycle_bin)               | boolean | When deleting a file, allow moving the file to the recycle bin.                                              |
 | [copy_includes_metadata](#settings_copy_includes_metadata) | boolean | When copying over a file, preserve metadata from the original file, such as creation and modification times. |
+| [bulk_rename](#settings_bulk_rename)                       | object  |                                                                                                              |
+| [editor](#settings_editor)                                 | object  | Settings related to the editor used for different operations                                                 |
 
 ### <a name="settings_use_recycle_bin"></a>2.1. Property `Rovr Config > settings > use_recycle_bin`
 
@@ -690,6 +700,182 @@ Must be one of:
 | **Default**  | `true`    |
 
 **Description:** When copying over a file, preserve metadata from the original file, such as creation and modification times.
+
+### <a name="settings_bulk_rename"></a>2.3. Property `Rovr Config > settings > bulk_rename`
+
+|                           |             |
+| ------------------------- | ----------- |
+| **Type**                  | `object`    |
+| **Required**              | No          |
+| **Additional properties** | Not allowed |
+
+| Property                                                 | Type    | Title/Description                                                                  |
+| -------------------------------------------------------- | ------- | ---------------------------------------------------------------------------------- |
+| [show_as_mapping](#settings_bulk_rename_show_as_mapping) | boolean | Show as a mapping of \`&lt;old&gt; ➔ &lt;new&gt;\` instead of just \`&lt;old&gt;\` |
+
+#### <a name="settings_bulk_rename_show_as_mapping"></a>2.3.1. Property `Rovr Config > settings > bulk_rename > show_as_mapping`
+
+|              |           |
+| ------------ | --------- |
+| **Type**     | `boolean` |
+| **Required** | No        |
+| **Default**  | `true`    |
+
+**Description:** Show as a mapping of `&lt;old&gt; ➔ &lt;new&gt;` instead of just `&lt;old&gt;`
+
+### <a name="settings_editor"></a>2.4. Property `Rovr Config > settings > editor`
+
+|                           |             |
+| ------------------------- | ----------- |
+| **Type**                  | `object`    |
+| **Required**              | No          |
+| **Additional properties** | Not allowed |
+
+**Description:** Settings related to the editor used for different operations
+
+| Property                                                  | Type    | Title/Description                                                                                                                     |
+| --------------------------------------------------------- | ------- | ------------------------------------------------------------------------------------------------------------------------------------- |
+| [file](#settings_editor_file)                             | object  | Editor to use when opening a file                                                                                                     |
+| [folder](#settings_editor_folder)                         | object  | Editor to use when opening a folder                                                                                                   |
+| [bulk_rename](#settings_editor_bulk_rename)               | object  | Editor to use for bulk renaming                                                                                                       |
+| [open_all_in_editor](#settings_editor_open_all_in_editor) | boolean | Open all in the configured editor, regardless of file encoding or type. When disabled, it opens them in the system configured editor. |
+
+#### <a name="settings_editor_file"></a>2.4.1. Property `Rovr Config > settings > editor > file`
+
+|                           |             |
+| ------------------------- | ----------- |
+| **Type**                  | `object`    |
+| **Required**              | No          |
+| **Additional properties** | Not allowed |
+
+**Description:** Editor to use when opening a file
+
+| Property                                 | Type    | Title/Description                           |
+| ---------------------------------------- | ------- | ------------------------------------------- |
+| [run](#settings_editor_file_run)         | string  | Editor to use when opening a file           |
+| [block](#settings_editor_file_block)     | boolean | Block rovr until the editor closes          |
+| [suspend](#settings_editor_file_suspend) | boolean | Suspend (hide) rovr until the editor closes |
+
+##### <a name="settings_editor_file_run"></a>2.4.1.1. Property `Rovr Config > settings > editor > file > run`
+
+|              |             |
+| ------------ | ----------- |
+| **Type**     | `string`    |
+| **Required** | No          |
+| **Default**  | `"$EDITOR"` |
+
+**Description:** Editor to use when opening a file
+
+##### <a name="settings_editor_file_block"></a>2.4.1.2. Property `Rovr Config > settings > editor > file > block`
+
+|              |           |
+| ------------ | --------- |
+| **Type**     | `boolean` |
+| **Required** | No        |
+| **Default**  | `true`    |
+
+**Description:** Block rovr until the editor closes
+
+##### <a name="settings_editor_file_suspend"></a>2.4.1.3. Property `Rovr Config > settings > editor > file > suspend`
+
+|              |           |
+| ------------ | --------- |
+| **Type**     | `boolean` |
+| **Required** | No        |
+| **Default**  | `true`    |
+
+**Description:** Suspend (hide) rovr until the editor closes
+
+#### <a name="settings_editor_folder"></a>2.4.2. Property `Rovr Config > settings > editor > folder`
+
+|                           |             |
+| ------------------------- | ----------- |
+| **Type**                  | `object`    |
+| **Required**              | No          |
+| **Additional properties** | Not allowed |
+
+**Description:** Editor to use when opening a folder
+
+| Property                                   | Type    | Title/Description                           |
+| ------------------------------------------ | ------- | ------------------------------------------- |
+| [run](#settings_editor_folder_run)         | string  | Editor to use when opening a folder         |
+| [block](#settings_editor_folder_block)     | boolean | Block rovr until the editor closes          |
+| [suspend](#settings_editor_folder_suspend) | boolean | Suspend (hide) rovr until the editor closes |
+
+##### <a name="settings_editor_folder_run"></a>2.4.2.1. Property `Rovr Config > settings > editor > folder > run`
+
+|              |             |
+| ------------ | ----------- |
+| **Type**     | `string`    |
+| **Required** | No          |
+| **Default**  | `"$EDITOR"` |
+
+**Description:** Editor to use when opening a folder
+
+##### <a name="settings_editor_folder_block"></a>2.4.2.2. Property `Rovr Config > settings > editor > folder > block`
+
+|              |           |
+| ------------ | --------- |
+| **Type**     | `boolean` |
+| **Required** | No        |
+| **Default**  | `true`    |
+
+**Description:** Block rovr until the editor closes
+
+##### <a name="settings_editor_folder_suspend"></a>2.4.2.3. Property `Rovr Config > settings > editor > folder > suspend`
+
+|              |           |
+| ------------ | --------- |
+| **Type**     | `boolean` |
+| **Required** | No        |
+| **Default**  | `true`    |
+
+**Description:** Suspend (hide) rovr until the editor closes
+
+#### <a name="settings_editor_bulk_rename"></a>2.4.3. Property `Rovr Config > settings > editor > bulk_rename`
+
+|                           |             |
+| ------------------------- | ----------- |
+| **Type**                  | `object`    |
+| **Required**              | No          |
+| **Additional properties** | Not allowed |
+
+**Description:** Editor to use for bulk renaming
+
+| Property                                        | Type    | Title/Description                           |
+| ----------------------------------------------- | ------- | ------------------------------------------- |
+| [run](#settings_editor_bulk_rename_run)         | string  | Editor to use for bulk renaming             |
+| [suspend](#settings_editor_bulk_rename_suspend) | boolean | Suspend (hide) rovr until the editor closes |
+
+##### <a name="settings_editor_bulk_rename_run"></a>2.4.3.1. Property `Rovr Config > settings > editor > bulk_rename > run`
+
+|              |             |
+| ------------ | ----------- |
+| **Type**     | `string`    |
+| **Required** | No          |
+| **Default**  | `"$EDITOR"` |
+
+**Description:** Editor to use for bulk renaming
+
+##### <a name="settings_editor_bulk_rename_suspend"></a>2.4.3.2. Property `Rovr Config > settings > editor > bulk_rename > suspend`
+
+|              |           |
+| ------------ | --------- |
+| **Type**     | `boolean` |
+| **Required** | No        |
+| **Default**  | `true`    |
+
+**Description:** Suspend (hide) rovr until the editor closes
+
+#### <a name="settings_editor_open_all_in_editor"></a>2.4.4. Property `Rovr Config > settings > editor > open_all_in_editor`
+
+|              |           |
+| ------------ | --------- |
+| **Type**     | `boolean` |
+| **Required** | No        |
+| **Default**  | `false`   |
+
+**Description:** Open all in the configured editor, regardless of file encoding or type. When disabled, it opens them in the system configured editor.
 
 ## <a name="metadata"></a>3. Property `Rovr Config > metadata`
 
@@ -1307,6 +1493,7 @@ Refer to https://textual.textualize.io/guide/design/#additional-variables for mo
 | [quit_app](#keybinds_quit_app)                                         | array of string | Quit the application                                                                              |
 | [command_palette](#keybinds_command_palette)                           | string          | Launch Textual's mildly useful command palette (only one keybind is allowed!)                     |
 | [suspend_app](#keybinds_suspend_app)                                   | array of string | Suspend the app's process, bringing you back to the terminal                                      |
+| [open_editor](#keybinds_open_editor)                                   | array of string | Open the selected file or folder in the configured editor.                                        |
 | [delete_files](#keybinds_delete_files)                                 | object          | Keybinds related to the delete confirmation screen                                                |
 | [filename_conflict](#keybinds_filename_conflict)                       | object          | Keybinds related to handling a conflict with two files of the same name                           |
 | [file_in_use](#keybinds_file_in_use)                                   | object          | Keybinds related to handling a file that is in use by another process                             |
@@ -3083,7 +3270,36 @@ Refer to https://textual.textualize.io/guide/design/#additional-variables for mo
 | **Type**     | `string` |
 | **Required** | No       |
 
-### <a name="keybinds_delete_files"></a>7.55. Property `Rovr Config > keybinds > delete_files`
+### <a name="keybinds_open_editor"></a>7.55. Property `Rovr Config > keybinds > open_editor`
+
+|                |                       |
+| -------------- | --------------------- |
+| **Type**       | `array of string`     |
+| **Required**   | No                    |
+| **Defined in** | #/definitions/keybind |
+
+**Description:** Open the selected file or folder in the configured editor.
+
+|                      | Array restrictions |
+| -------------------- | ------------------ |
+| **Min items**        | N/A                |
+| **Max items**        | N/A                |
+| **Items unicity**    | False              |
+| **Additional items** | False              |
+| **Tuple validation** | See below          |
+
+| Each item of this array must be                | Description |
+| ---------------------------------------------- | ----------- |
+| [toggle_pin items](#keybinds_toggle_pin_items) |             |
+
+#### <a name="keybinds_toggle_pin_items"></a>7.55.1. Rovr Config > keybinds > toggle_pin > toggle_pin items
+
+|              |          |
+| ------------ | -------- |
+| **Type**     | `string` |
+| **Required** | No       |
+
+### <a name="keybinds_delete_files"></a>7.56. Property `Rovr Config > keybinds > delete_files`
 
 |                           |                  |
 | ------------------------- | ---------------- |
@@ -3099,7 +3315,7 @@ Refer to https://textual.textualize.io/guide/design/#additional-variables for mo
 | [delete](#keybinds_delete_files_delete) | array of string | Confirm deletion and permanently delete files.      |
 | [cancel](#keybinds_delete_files_cancel) | array of string | Cancel deletion and go back to the main screen.     |
 
-#### <a name="keybinds_delete_files_trash"></a>7.55.1. Property `Rovr Config > keybinds > delete_files > trash`
+#### <a name="keybinds_delete_files_trash"></a>7.56.1. Property `Rovr Config > keybinds > delete_files > trash`
 
 |                |                       |
 | -------------- | --------------------- |
@@ -3121,14 +3337,14 @@ Refer to https://textual.textualize.io/guide/design/#additional-variables for mo
 | ---------------------------------------------- | ----------- |
 | [toggle_pin items](#keybinds_toggle_pin_items) |             |
 
-##### <a name="keybinds_toggle_pin_items"></a>7.55.1.1. Rovr Config > keybinds > toggle_pin > toggle_pin items
+##### <a name="keybinds_toggle_pin_items"></a>7.56.1.1. Rovr Config > keybinds > toggle_pin > toggle_pin items
 
 |              |          |
 | ------------ | -------- |
 | **Type**     | `string` |
 | **Required** | No       |
 
-#### <a name="keybinds_delete_files_delete"></a>7.55.2. Property `Rovr Config > keybinds > delete_files > delete`
+#### <a name="keybinds_delete_files_delete"></a>7.56.2. Property `Rovr Config > keybinds > delete_files > delete`
 
 |                |                       |
 | -------------- | --------------------- |
@@ -3150,14 +3366,14 @@ Refer to https://textual.textualize.io/guide/design/#additional-variables for mo
 | ---------------------------------------------- | ----------- |
 | [toggle_pin items](#keybinds_toggle_pin_items) |             |
 
-##### <a name="keybinds_toggle_pin_items"></a>7.55.2.1. Rovr Config > keybinds > toggle_pin > toggle_pin items
+##### <a name="keybinds_toggle_pin_items"></a>7.56.2.1. Rovr Config > keybinds > toggle_pin > toggle_pin items
 
 |              |          |
 | ------------ | -------- |
 | **Type**     | `string` |
 | **Required** | No       |
 
-#### <a name="keybinds_delete_files_cancel"></a>7.55.3. Property `Rovr Config > keybinds > delete_files > cancel`
+#### <a name="keybinds_delete_files_cancel"></a>7.56.3. Property `Rovr Config > keybinds > delete_files > cancel`
 
 |                |                       |
 | -------------- | --------------------- |
@@ -3179,14 +3395,14 @@ Refer to https://textual.textualize.io/guide/design/#additional-variables for mo
 | ---------------------------------------------- | ----------- |
 | [toggle_pin items](#keybinds_toggle_pin_items) |             |
 
-##### <a name="keybinds_toggle_pin_items"></a>7.55.3.1. Rovr Config > keybinds > toggle_pin > toggle_pin items
+##### <a name="keybinds_toggle_pin_items"></a>7.56.3.1. Rovr Config > keybinds > toggle_pin > toggle_pin items
 
 |              |          |
 | ------------ | -------- |
 | **Type**     | `string` |
 | **Required** | No       |
 
-### <a name="keybinds_filename_conflict"></a>7.56. Property `Rovr Config > keybinds > filename_conflict`
+### <a name="keybinds_filename_conflict"></a>7.57. Property `Rovr Config > keybinds > filename_conflict`
 
 |                           |                  |
 | ------------------------- | ---------------- |
@@ -3204,7 +3420,7 @@ Refer to https://textual.textualize.io/guide/design/#additional-variables for mo
 | [cancel](#keybinds_filename_conflict_cancel)                 | array of string | Cancel the entire copy/move operation.                                  |
 | [dont_ask_again](#keybinds_filename_conflict_dont_ask_again) | array of string | Apply the selected action to all future conflicts without asking again. |
 
-#### <a name="keybinds_filename_conflict_overwrite"></a>7.56.1. Property `Rovr Config > keybinds > filename_conflict > overwrite`
+#### <a name="keybinds_filename_conflict_overwrite"></a>7.57.1. Property `Rovr Config > keybinds > filename_conflict > overwrite`
 
 |                |                       |
 | -------------- | --------------------- |
@@ -3226,168 +3442,6 @@ Refer to https://textual.textualize.io/guide/design/#additional-variables for mo
 | ---------------------------------------------- | ----------- |
 | [toggle_pin items](#keybinds_toggle_pin_items) |             |
 
-##### <a name="keybinds_toggle_pin_items"></a>7.56.1.1. Rovr Config > keybinds > toggle_pin > toggle_pin items
-
-|              |          |
-| ------------ | -------- |
-| **Type**     | `string` |
-| **Required** | No       |
-
-#### <a name="keybinds_filename_conflict_skip"></a>7.56.2. Property `Rovr Config > keybinds > filename_conflict > skip`
-
-|                |                       |
-| -------------- | --------------------- |
-| **Type**       | `array of string`     |
-| **Required**   | No                    |
-| **Defined in** | #/definitions/keybind |
-
-**Description:** Skip this file and do not copy/move it.
-
-|                      | Array restrictions |
-| -------------------- | ------------------ |
-| **Min items**        | N/A                |
-| **Max items**        | N/A                |
-| **Items unicity**    | False              |
-| **Additional items** | False              |
-| **Tuple validation** | See below          |
-
-| Each item of this array must be                | Description |
-| ---------------------------------------------- | ----------- |
-| [toggle_pin items](#keybinds_toggle_pin_items) |             |
-
-##### <a name="keybinds_toggle_pin_items"></a>7.56.2.1. Rovr Config > keybinds > toggle_pin > toggle_pin items
-
-|              |          |
-| ------------ | -------- |
-| **Type**     | `string` |
-| **Required** | No       |
-
-#### <a name="keybinds_filename_conflict_rename"></a>7.56.3. Property `Rovr Config > keybinds > filename_conflict > rename`
-
-|                |                       |
-| -------------- | --------------------- |
-| **Type**       | `array of string`     |
-| **Required**   | No                    |
-| **Defined in** | #/definitions/keybind |
-
-**Description:** Rename the new file being copied/moved.
-
-|                      | Array restrictions |
-| -------------------- | ------------------ |
-| **Min items**        | N/A                |
-| **Max items**        | N/A                |
-| **Items unicity**    | False              |
-| **Additional items** | False              |
-| **Tuple validation** | See below          |
-
-| Each item of this array must be                | Description |
-| ---------------------------------------------- | ----------- |
-| [toggle_pin items](#keybinds_toggle_pin_items) |             |
-
-##### <a name="keybinds_toggle_pin_items"></a>7.56.3.1. Rovr Config > keybinds > toggle_pin > toggle_pin items
-
-|              |          |
-| ------------ | -------- |
-| **Type**     | `string` |
-| **Required** | No       |
-
-#### <a name="keybinds_filename_conflict_cancel"></a>7.56.4. Property `Rovr Config > keybinds > filename_conflict > cancel`
-
-|                |                       |
-| -------------- | --------------------- |
-| **Type**       | `array of string`     |
-| **Required**   | No                    |
-| **Defined in** | #/definitions/keybind |
-
-**Description:** Cancel the entire copy/move operation.
-
-|                      | Array restrictions |
-| -------------------- | ------------------ |
-| **Min items**        | N/A                |
-| **Max items**        | N/A                |
-| **Items unicity**    | False              |
-| **Additional items** | False              |
-| **Tuple validation** | See below          |
-
-| Each item of this array must be                | Description |
-| ---------------------------------------------- | ----------- |
-| [toggle_pin items](#keybinds_toggle_pin_items) |             |
-
-##### <a name="keybinds_toggle_pin_items"></a>7.56.4.1. Rovr Config > keybinds > toggle_pin > toggle_pin items
-
-|              |          |
-| ------------ | -------- |
-| **Type**     | `string` |
-| **Required** | No       |
-
-#### <a name="keybinds_filename_conflict_dont_ask_again"></a>7.56.5. Property `Rovr Config > keybinds > filename_conflict > dont_ask_again`
-
-|                |                       |
-| -------------- | --------------------- |
-| **Type**       | `array of string`     |
-| **Required**   | No                    |
-| **Defined in** | #/definitions/keybind |
-
-**Description:** Apply the selected action to all future conflicts without asking again.
-
-|                      | Array restrictions |
-| -------------------- | ------------------ |
-| **Min items**        | N/A                |
-| **Max items**        | N/A                |
-| **Items unicity**    | False              |
-| **Additional items** | False              |
-| **Tuple validation** | See below          |
-
-| Each item of this array must be                | Description |
-| ---------------------------------------------- | ----------- |
-| [toggle_pin items](#keybinds_toggle_pin_items) |             |
-
-##### <a name="keybinds_toggle_pin_items"></a>7.56.5.1. Rovr Config > keybinds > toggle_pin > toggle_pin items
-
-|              |          |
-| ------------ | -------- |
-| **Type**     | `string` |
-| **Required** | No       |
-
-### <a name="keybinds_file_in_use"></a>7.57. Property `Rovr Config > keybinds > file_in_use`
-
-|                           |                  |
-| ------------------------- | ---------------- |
-| **Type**                  | `object`         |
-| **Required**              | No               |
-| **Additional properties** | Any type allowed |
-
-**Description:** Keybinds related to handling a file that is in use by another process
-
-| Property                                               | Type            | Title/Description                                                                  |
-| ------------------------------------------------------ | --------------- | ---------------------------------------------------------------------------------- |
-| [retry](#keybinds_file_in_use_retry)                   | array of string | Retry the operation on the file.                                                   |
-| [skip](#keybinds_file_in_use_skip)                     | array of string | Skip this file and do not copy/move it.                                            |
-| [cancel](#keybinds_file_in_use_cancel)                 | array of string | Cancel the entire copy/move operation.                                             |
-| [dont_ask_again](#keybinds_file_in_use_dont_ask_again) | array of string | Apply the selected action to all future 'file in use' errors without asking again. |
-
-#### <a name="keybinds_file_in_use_retry"></a>7.57.1. Property `Rovr Config > keybinds > file_in_use > retry`
-
-|                |                       |
-| -------------- | --------------------- |
-| **Type**       | `array of string`     |
-| **Required**   | No                    |
-| **Defined in** | #/definitions/keybind |
-
-**Description:** Retry the operation on the file.
-
-|                      | Array restrictions |
-| -------------------- | ------------------ |
-| **Min items**        | N/A                |
-| **Max items**        | N/A                |
-| **Items unicity**    | False              |
-| **Additional items** | False              |
-| **Tuple validation** | See below          |
-
-| Each item of this array must be                | Description |
-| ---------------------------------------------- | ----------- |
-| [toggle_pin items](#keybinds_toggle_pin_items) |             |
-
 ##### <a name="keybinds_toggle_pin_items"></a>7.57.1.1. Rovr Config > keybinds > toggle_pin > toggle_pin items
 
 |              |          |
@@ -3395,7 +3449,7 @@ Refer to https://textual.textualize.io/guide/design/#additional-variables for mo
 | **Type**     | `string` |
 | **Required** | No       |
 
-#### <a name="keybinds_file_in_use_skip"></a>7.57.2. Property `Rovr Config > keybinds > file_in_use > skip`
+#### <a name="keybinds_filename_conflict_skip"></a>7.57.2. Property `Rovr Config > keybinds > filename_conflict > skip`
 
 |                |                       |
 | -------------- | --------------------- |
@@ -3424,7 +3478,36 @@ Refer to https://textual.textualize.io/guide/design/#additional-variables for mo
 | **Type**     | `string` |
 | **Required** | No       |
 
-#### <a name="keybinds_file_in_use_cancel"></a>7.57.3. Property `Rovr Config > keybinds > file_in_use > cancel`
+#### <a name="keybinds_filename_conflict_rename"></a>7.57.3. Property `Rovr Config > keybinds > filename_conflict > rename`
+
+|                |                       |
+| -------------- | --------------------- |
+| **Type**       | `array of string`     |
+| **Required**   | No                    |
+| **Defined in** | #/definitions/keybind |
+
+**Description:** Rename the new file being copied/moved.
+
+|                      | Array restrictions |
+| -------------------- | ------------------ |
+| **Min items**        | N/A                |
+| **Max items**        | N/A                |
+| **Items unicity**    | False              |
+| **Additional items** | False              |
+| **Tuple validation** | See below          |
+
+| Each item of this array must be                | Description |
+| ---------------------------------------------- | ----------- |
+| [toggle_pin items](#keybinds_toggle_pin_items) |             |
+
+##### <a name="keybinds_toggle_pin_items"></a>7.57.3.1. Rovr Config > keybinds > toggle_pin > toggle_pin items
+
+|              |          |
+| ------------ | -------- |
+| **Type**     | `string` |
+| **Required** | No       |
+
+#### <a name="keybinds_filename_conflict_cancel"></a>7.57.4. Property `Rovr Config > keybinds > filename_conflict > cancel`
 
 |                |                       |
 | -------------- | --------------------- |
@@ -3446,14 +3529,147 @@ Refer to https://textual.textualize.io/guide/design/#additional-variables for mo
 | ---------------------------------------------- | ----------- |
 | [toggle_pin items](#keybinds_toggle_pin_items) |             |
 
-##### <a name="keybinds_toggle_pin_items"></a>7.57.3.1. Rovr Config > keybinds > toggle_pin > toggle_pin items
+##### <a name="keybinds_toggle_pin_items"></a>7.57.4.1. Rovr Config > keybinds > toggle_pin > toggle_pin items
 
 |              |          |
 | ------------ | -------- |
 | **Type**     | `string` |
 | **Required** | No       |
 
-#### <a name="keybinds_file_in_use_dont_ask_again"></a>7.57.4. Property `Rovr Config > keybinds > file_in_use > dont_ask_again`
+#### <a name="keybinds_filename_conflict_dont_ask_again"></a>7.57.5. Property `Rovr Config > keybinds > filename_conflict > dont_ask_again`
+
+|                |                       |
+| -------------- | --------------------- |
+| **Type**       | `array of string`     |
+| **Required**   | No                    |
+| **Defined in** | #/definitions/keybind |
+
+**Description:** Apply the selected action to all future conflicts without asking again.
+
+|                      | Array restrictions |
+| -------------------- | ------------------ |
+| **Min items**        | N/A                |
+| **Max items**        | N/A                |
+| **Items unicity**    | False              |
+| **Additional items** | False              |
+| **Tuple validation** | See below          |
+
+| Each item of this array must be                | Description |
+| ---------------------------------------------- | ----------- |
+| [toggle_pin items](#keybinds_toggle_pin_items) |             |
+
+##### <a name="keybinds_toggle_pin_items"></a>7.57.5.1. Rovr Config > keybinds > toggle_pin > toggle_pin items
+
+|              |          |
+| ------------ | -------- |
+| **Type**     | `string` |
+| **Required** | No       |
+
+### <a name="keybinds_file_in_use"></a>7.58. Property `Rovr Config > keybinds > file_in_use`
+
+|                           |                  |
+| ------------------------- | ---------------- |
+| **Type**                  | `object`         |
+| **Required**              | No               |
+| **Additional properties** | Any type allowed |
+
+**Description:** Keybinds related to handling a file that is in use by another process
+
+| Property                                               | Type            | Title/Description                                                                  |
+| ------------------------------------------------------ | --------------- | ---------------------------------------------------------------------------------- |
+| [retry](#keybinds_file_in_use_retry)                   | array of string | Retry the operation on the file.                                                   |
+| [skip](#keybinds_file_in_use_skip)                     | array of string | Skip this file and do not copy/move it.                                            |
+| [cancel](#keybinds_file_in_use_cancel)                 | array of string | Cancel the entire copy/move operation.                                             |
+| [dont_ask_again](#keybinds_file_in_use_dont_ask_again) | array of string | Apply the selected action to all future 'file in use' errors without asking again. |
+
+#### <a name="keybinds_file_in_use_retry"></a>7.58.1. Property `Rovr Config > keybinds > file_in_use > retry`
+
+|                |                       |
+| -------------- | --------------------- |
+| **Type**       | `array of string`     |
+| **Required**   | No                    |
+| **Defined in** | #/definitions/keybind |
+
+**Description:** Retry the operation on the file.
+
+|                      | Array restrictions |
+| -------------------- | ------------------ |
+| **Min items**        | N/A                |
+| **Max items**        | N/A                |
+| **Items unicity**    | False              |
+| **Additional items** | False              |
+| **Tuple validation** | See below          |
+
+| Each item of this array must be                | Description |
+| ---------------------------------------------- | ----------- |
+| [toggle_pin items](#keybinds_toggle_pin_items) |             |
+
+##### <a name="keybinds_toggle_pin_items"></a>7.58.1.1. Rovr Config > keybinds > toggle_pin > toggle_pin items
+
+|              |          |
+| ------------ | -------- |
+| **Type**     | `string` |
+| **Required** | No       |
+
+#### <a name="keybinds_file_in_use_skip"></a>7.58.2. Property `Rovr Config > keybinds > file_in_use > skip`
+
+|                |                       |
+| -------------- | --------------------- |
+| **Type**       | `array of string`     |
+| **Required**   | No                    |
+| **Defined in** | #/definitions/keybind |
+
+**Description:** Skip this file and do not copy/move it.
+
+|                      | Array restrictions |
+| -------------------- | ------------------ |
+| **Min items**        | N/A                |
+| **Max items**        | N/A                |
+| **Items unicity**    | False              |
+| **Additional items** | False              |
+| **Tuple validation** | See below          |
+
+| Each item of this array must be                | Description |
+| ---------------------------------------------- | ----------- |
+| [toggle_pin items](#keybinds_toggle_pin_items) |             |
+
+##### <a name="keybinds_toggle_pin_items"></a>7.58.2.1. Rovr Config > keybinds > toggle_pin > toggle_pin items
+
+|              |          |
+| ------------ | -------- |
+| **Type**     | `string` |
+| **Required** | No       |
+
+#### <a name="keybinds_file_in_use_cancel"></a>7.58.3. Property `Rovr Config > keybinds > file_in_use > cancel`
+
+|                |                       |
+| -------------- | --------------------- |
+| **Type**       | `array of string`     |
+| **Required**   | No                    |
+| **Defined in** | #/definitions/keybind |
+
+**Description:** Cancel the entire copy/move operation.
+
+|                      | Array restrictions |
+| -------------------- | ------------------ |
+| **Min items**        | N/A                |
+| **Max items**        | N/A                |
+| **Items unicity**    | False              |
+| **Additional items** | False              |
+| **Tuple validation** | See below          |
+
+| Each item of this array must be                | Description |
+| ---------------------------------------------- | ----------- |
+| [toggle_pin items](#keybinds_toggle_pin_items) |             |
+
+##### <a name="keybinds_toggle_pin_items"></a>7.58.3.1. Rovr Config > keybinds > toggle_pin > toggle_pin items
+
+|              |          |
+| ------------ | -------- |
+| **Type**     | `string` |
+| **Required** | No       |
+
+#### <a name="keybinds_file_in_use_dont_ask_again"></a>7.58.4. Property `Rovr Config > keybinds > file_in_use > dont_ask_again`
 
 |                |                       |
 | -------------- | --------------------- |
@@ -3475,14 +3691,14 @@ Refer to https://textual.textualize.io/guide/design/#additional-variables for mo
 | ---------------------------------------------- | ----------- |
 | [toggle_pin items](#keybinds_toggle_pin_items) |             |
 
-##### <a name="keybinds_toggle_pin_items"></a>7.57.4.1. Rovr Config > keybinds > toggle_pin > toggle_pin items
+##### <a name="keybinds_toggle_pin_items"></a>7.58.4.1. Rovr Config > keybinds > toggle_pin > toggle_pin items
 
 |              |          |
 | ------------ | -------- |
 | **Type**     | `string` |
 | **Required** | No       |
 
-### <a name="keybinds_filter_modal"></a>7.58. Property `Rovr Config > keybinds > filter_modal`
+### <a name="keybinds_filter_modal"></a>7.59. Property `Rovr Config > keybinds > filter_modal`
 
 |                           |                  |
 | ------------------------- | ---------------- |
@@ -3498,7 +3714,7 @@ Refer to https://textual.textualize.io/guide/design/#additional-variables for mo
 | [down](#keybinds_filter_modal_down) | array of string | Move the selection down in the modal list. |
 | [up](#keybinds_filter_modal_up)     | array of string | Move the selection up in the modal list.   |
 
-#### <a name="keybinds_filter_modal_exit"></a>7.58.1. Property `Rovr Config > keybinds > filter_modal > exit`
+#### <a name="keybinds_filter_modal_exit"></a>7.59.1. Property `Rovr Config > keybinds > filter_modal > exit`
 
 |                |                       |
 | -------------- | --------------------- |
@@ -3520,14 +3736,14 @@ Refer to https://textual.textualize.io/guide/design/#additional-variables for mo
 | ---------------------------------------------- | ----------- |
 | [toggle_pin items](#keybinds_toggle_pin_items) |             |
 
-##### <a name="keybinds_toggle_pin_items"></a>7.58.1.1. Rovr Config > keybinds > toggle_pin > toggle_pin items
+##### <a name="keybinds_toggle_pin_items"></a>7.59.1.1. Rovr Config > keybinds > toggle_pin > toggle_pin items
 
 |              |          |
 | ------------ | -------- |
 | **Type**     | `string` |
 | **Required** | No       |
 
-#### <a name="keybinds_filter_modal_down"></a>7.58.2. Property `Rovr Config > keybinds > filter_modal > down`
+#### <a name="keybinds_filter_modal_down"></a>7.59.2. Property `Rovr Config > keybinds > filter_modal > down`
 
 |                |                       |
 | -------------- | --------------------- |
@@ -3549,14 +3765,14 @@ Refer to https://textual.textualize.io/guide/design/#additional-variables for mo
 | ---------------------------------------------- | ----------- |
 | [toggle_pin items](#keybinds_toggle_pin_items) |             |
 
-##### <a name="keybinds_toggle_pin_items"></a>7.58.2.1. Rovr Config > keybinds > toggle_pin > toggle_pin items
+##### <a name="keybinds_toggle_pin_items"></a>7.59.2.1. Rovr Config > keybinds > toggle_pin > toggle_pin items
 
 |              |          |
 | ------------ | -------- |
 | **Type**     | `string` |
 | **Required** | No       |
 
-#### <a name="keybinds_filter_modal_up"></a>7.58.3. Property `Rovr Config > keybinds > filter_modal > up`
+#### <a name="keybinds_filter_modal_up"></a>7.59.3. Property `Rovr Config > keybinds > filter_modal > up`
 
 |                |                       |
 | -------------- | --------------------- |
@@ -3578,14 +3794,14 @@ Refer to https://textual.textualize.io/guide/design/#additional-variables for mo
 | ---------------------------------------------- | ----------- |
 | [toggle_pin items](#keybinds_toggle_pin_items) |             |
 
-##### <a name="keybinds_toggle_pin_items"></a>7.58.3.1. Rovr Config > keybinds > toggle_pin > toggle_pin items
+##### <a name="keybinds_toggle_pin_items"></a>7.59.3.1. Rovr Config > keybinds > toggle_pin > toggle_pin items
 
 |              |          |
 | ------------ | -------- |
 | **Type**     | `string` |
 | **Required** | No       |
 
-### <a name="keybinds_yes_or_no"></a>7.59. Property `Rovr Config > keybinds > yes_or_no`
+### <a name="keybinds_yes_or_no"></a>7.60. Property `Rovr Config > keybinds > yes_or_no`
 
 |                           |                  |
 | ------------------------- | ---------------- |
@@ -3601,7 +3817,7 @@ Refer to https://textual.textualize.io/guide/design/#additional-variables for mo
 | [no](#keybinds_yes_or_no_no)                         | array of string | Decline with 'no'.                                                          |
 | [dont_ask_again](#keybinds_yes_or_no_dont_ask_again) | array of string | Apply the selected action to all future confirmations without asking again. |
 
-#### <a name="keybinds_yes_or_no_yes"></a>7.59.1. Property `Rovr Config > keybinds > yes_or_no > yes`
+#### <a name="keybinds_yes_or_no_yes"></a>7.60.1. Property `Rovr Config > keybinds > yes_or_no > yes`
 
 |                |                       |
 | -------------- | --------------------- |
@@ -3623,14 +3839,14 @@ Refer to https://textual.textualize.io/guide/design/#additional-variables for mo
 | ---------------------------------------------- | ----------- |
 | [toggle_pin items](#keybinds_toggle_pin_items) |             |
 
-##### <a name="keybinds_toggle_pin_items"></a>7.59.1.1. Rovr Config > keybinds > toggle_pin > toggle_pin items
+##### <a name="keybinds_toggle_pin_items"></a>7.60.1.1. Rovr Config > keybinds > toggle_pin > toggle_pin items
 
 |              |          |
 | ------------ | -------- |
 | **Type**     | `string` |
 | **Required** | No       |
 
-#### <a name="keybinds_yes_or_no_no"></a>7.59.2. Property `Rovr Config > keybinds > yes_or_no > no`
+#### <a name="keybinds_yes_or_no_no"></a>7.60.2. Property `Rovr Config > keybinds > yes_or_no > no`
 
 |                |                       |
 | -------------- | --------------------- |
@@ -3652,14 +3868,14 @@ Refer to https://textual.textualize.io/guide/design/#additional-variables for mo
 | ---------------------------------------------- | ----------- |
 | [toggle_pin items](#keybinds_toggle_pin_items) |             |
 
-##### <a name="keybinds_toggle_pin_items"></a>7.59.2.1. Rovr Config > keybinds > toggle_pin > toggle_pin items
+##### <a name="keybinds_toggle_pin_items"></a>7.60.2.1. Rovr Config > keybinds > toggle_pin > toggle_pin items
 
 |              |          |
 | ------------ | -------- |
 | **Type**     | `string` |
 | **Required** | No       |
 
-#### <a name="keybinds_yes_or_no_dont_ask_again"></a>7.59.3. Property `Rovr Config > keybinds > yes_or_no > dont_ask_again`
+#### <a name="keybinds_yes_or_no_dont_ask_again"></a>7.60.3. Property `Rovr Config > keybinds > yes_or_no > dont_ask_again`
 
 |                |                       |
 | -------------- | --------------------- |
@@ -3681,7 +3897,7 @@ Refer to https://textual.textualize.io/guide/design/#additional-variables for mo
 | ---------------------------------------------- | ----------- |
 | [toggle_pin items](#keybinds_toggle_pin_items) |             |
 
-##### <a name="keybinds_toggle_pin_items"></a>7.59.3.1. Rovr Config > keybinds > toggle_pin > toggle_pin items
+##### <a name="keybinds_toggle_pin_items"></a>7.60.3.1. Rovr Config > keybinds > toggle_pin > toggle_pin items
 
 |              |          |
 | ------------ | -------- |
@@ -3700,7 +3916,6 @@ Refer to https://textual.textualize.io/guide/design/#additional-variables for mo
 | ----------------------------- | ------ | ----------------- |
 | [zoxide](#plugins_zoxide)     | object |                   |
 | [bat](#plugins_bat)           | object |                   |
-| [editor](#plugins_editor)     | object |                   |
 | [fd](#plugins_fd)             | object |                   |
 | [rg](#plugins_rg)             | object |                   |
 | [poppler](#plugins_poppler)   | object |                   |
@@ -3803,115 +4018,7 @@ Refer to https://textual.textualize.io/guide/design/#additional-variables for mo
 
 **Description:** The executable for bat.
 
-### <a name="plugins_editor"></a>8.3. Property `Rovr Config > plugins > editor`
-
-|                           |             |
-| ------------------------- | ----------- |
-| **Type**                  | `object`    |
-| **Required**              | No          |
-| **Additional properties** | Not allowed |
-
-| Property                                                 | Type            | Title/Description                                                                                                                                                                                  |
-| -------------------------------------------------------- | --------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| [enabled](#plugins_editor_enabled)                       | boolean         | Enable opening a file in your editor.                                                                                                                                                              |
-| [file_executable](#plugins_editor_file_executable)       | string          | Open files in this app.                                                                                                                                                                            |
-| [file_suspend](#plugins_editor_file_suspend)             | boolean         | Suspend the app when editing a file. Useful for TUI editors, but not for something like VSCode or Notepad++.                                                                                       |
-| [folder_executable](#plugins_editor_folder_executable)   | string          | Open folders in this app.                                                                                                                                                                          |
-| [folder_suspend](#plugins_editor_folder_suspend)         | boolean         | Suspend the app when editing a folder. Useful for TUI editors, but not for something like VSCode or Notepad++.                                                                                     |
-| [open_all_in_editor](#plugins_editor_open_all_in_editor) | boolean         | Open all files in the configured editor, regardless of file encoding or type. When disabled, files that cannot be opened due to encoding issues will use the system's default application instead. |
-| [keybinds](#plugins_editor_keybinds)                     | array of string | The keybind to launch your editor.                                                                                                                                                                 |
-
-#### <a name="plugins_editor_enabled"></a>8.3.1. Property `Rovr Config > plugins > editor > enabled`
-
-|              |           |
-| ------------ | --------- |
-| **Type**     | `boolean` |
-| **Required** | No        |
-| **Default**  | `true`    |
-
-**Description:** Enable opening a file in your editor.
-
-#### <a name="plugins_editor_file_executable"></a>8.3.2. Property `Rovr Config > plugins > editor > file_executable`
-
-|              |          |
-| ------------ | -------- |
-| **Type**     | `string` |
-| **Required** | No       |
-| **Default**  | `"nano"` |
-
-**Description:** Open files in this app.
-
-#### <a name="plugins_editor_file_suspend"></a>8.3.3. Property `Rovr Config > plugins > editor > file_suspend`
-
-|              |           |
-| ------------ | --------- |
-| **Type**     | `boolean` |
-| **Required** | No        |
-| **Default**  | `true`    |
-
-**Description:** Suspend the app when editing a file. Useful for TUI editors, but not for something like VSCode or Notepad++.
-
-#### <a name="plugins_editor_folder_executable"></a>8.3.4. Property `Rovr Config > plugins > editor > folder_executable`
-
-|              |          |
-| ------------ | -------- |
-| **Type**     | `string` |
-| **Required** | No       |
-| **Default**  | `"code"` |
-
-**Description:** Open folders in this app.
-
-#### <a name="plugins_editor_folder_suspend"></a>8.3.5. Property `Rovr Config > plugins > editor > folder_suspend`
-
-|              |           |
-| ------------ | --------- |
-| **Type**     | `boolean` |
-| **Required** | No        |
-| **Default**  | `true`    |
-
-**Description:** Suspend the app when editing a folder. Useful for TUI editors, but not for something like VSCode or Notepad++.
-
-#### <a name="plugins_editor_open_all_in_editor"></a>8.3.6. Property `Rovr Config > plugins > editor > open_all_in_editor`
-
-|              |           |
-| ------------ | --------- |
-| **Type**     | `boolean` |
-| **Required** | No        |
-| **Default**  | `false`   |
-
-**Description:** Open all files in the configured editor, regardless of file encoding or type. When disabled, files that cannot be opened due to encoding issues will use the system's default application instead.
-
-#### <a name="plugins_editor_keybinds"></a>8.3.7. Property `Rovr Config > plugins > editor > keybinds`
-
-|                |                       |
-| -------------- | --------------------- |
-| **Type**       | `array of string`     |
-| **Required**   | No                    |
-| **Default**    | `["e"]`               |
-| **Defined in** | #/definitions/keybind |
-
-**Description:** The keybind to launch your editor.
-
-|                      | Array restrictions |
-| -------------------- | ------------------ |
-| **Min items**        | N/A                |
-| **Max items**        | N/A                |
-| **Items unicity**    | False              |
-| **Additional items** | False              |
-| **Tuple validation** | See below          |
-
-| Each item of this array must be                | Description |
-| ---------------------------------------------- | ----------- |
-| [toggle_pin items](#keybinds_toggle_pin_items) |             |
-
-##### <a name="keybinds_toggle_pin_items"></a>8.3.7.1. Rovr Config > keybinds > toggle_pin > toggle_pin items
-
-|              |          |
-| ------------ | -------- |
-| **Type**     | `string` |
-| **Required** | No       |
-
-### <a name="plugins_fd"></a>8.4. Property `Rovr Config > plugins > fd`
+### <a name="plugins_fd"></a>8.3. Property `Rovr Config > plugins > fd`
 
 |                           |             |
 | ------------------------- | ----------- |
@@ -3929,7 +4036,7 @@ Refer to https://textual.textualize.io/guide/design/#additional-variables for mo
 | [no_ignore_parent](#plugins_fd_no_ignore_parent)         | boolean                   | Don't use \*ignore files from parent folders when searching.  |
 | [default_filter_types](#plugins_fd_default_filter_types) | array of enum (of string) | The default file types to show when using fd.                 |
 
-#### <a name="plugins_fd_enabled"></a>8.4.1. Property `Rovr Config > plugins > fd > enabled`
+#### <a name="plugins_fd_enabled"></a>8.3.1. Property `Rovr Config > plugins > fd > enabled`
 
 |              |           |
 | ------------ | --------- |
@@ -3939,7 +4046,7 @@ Refer to https://textual.textualize.io/guide/design/#additional-variables for mo
 
 **Description:** Enable recursive file search using fd.
 
-#### <a name="plugins_fd_keybinds"></a>8.4.2. Property `Rovr Config > plugins > fd > keybinds`
+#### <a name="plugins_fd_keybinds"></a>8.3.2. Property `Rovr Config > plugins > fd > keybinds`
 
 |                |                       |
 | -------------- | --------------------- |
@@ -3962,14 +4069,14 @@ Refer to https://textual.textualize.io/guide/design/#additional-variables for mo
 | ---------------------------------------------- | ----------- |
 | [toggle_pin items](#keybinds_toggle_pin_items) |             |
 
-##### <a name="keybinds_toggle_pin_items"></a>8.4.2.1. Rovr Config > keybinds > toggle_pin > toggle_pin items
+##### <a name="keybinds_toggle_pin_items"></a>8.3.2.1. Rovr Config > keybinds > toggle_pin > toggle_pin items
 
 |              |          |
 | ------------ | -------- |
 | **Type**     | `string` |
 | **Required** | No       |
 
-#### <a name="plugins_fd_executable"></a>8.4.3. Property `Rovr Config > plugins > fd > executable`
+#### <a name="plugins_fd_executable"></a>8.3.3. Property `Rovr Config > plugins > fd > executable`
 
 |              |          |
 | ------------ | -------- |
@@ -3979,7 +4086,7 @@ Refer to https://textual.textualize.io/guide/design/#additional-variables for mo
 
 **Description:** fd executable name or path.
 
-#### <a name="plugins_fd_relative_paths"></a>8.4.4. Property `Rovr Config > plugins > fd > relative_paths`
+#### <a name="plugins_fd_relative_paths"></a>8.3.4. Property `Rovr Config > plugins > fd > relative_paths`
 
 |              |           |
 | ------------ | --------- |
@@ -3989,7 +4096,7 @@ Refer to https://textual.textualize.io/guide/design/#additional-variables for mo
 
 **Description:** Whether to show fd results as relative path or absolute path.
 
-#### <a name="plugins_fd_follow_symlinks"></a>8.4.5. Property `Rovr Config > plugins > fd > follow_symlinks`
+#### <a name="plugins_fd_follow_symlinks"></a>8.3.5. Property `Rovr Config > plugins > fd > follow_symlinks`
 
 |              |           |
 | ------------ | --------- |
@@ -3999,7 +4106,7 @@ Refer to https://textual.textualize.io/guide/design/#additional-variables for mo
 
 **Description:** Whether fd should follow symlinks when searching.
 
-#### <a name="plugins_fd_no_ignore_parent"></a>8.4.6. Property `Rovr Config > plugins > fd > no_ignore_parent`
+#### <a name="plugins_fd_no_ignore_parent"></a>8.3.6. Property `Rovr Config > plugins > fd > no_ignore_parent`
 
 |              |           |
 | ------------ | --------- |
@@ -4009,7 +4116,7 @@ Refer to https://textual.textualize.io/guide/design/#additional-variables for mo
 
 **Description:** Don't use \*ignore files from parent folders when searching.
 
-#### <a name="plugins_fd_default_filter_types"></a>8.4.7. Property `Rovr Config > plugins > fd > default_filter_types`
+#### <a name="plugins_fd_default_filter_types"></a>8.3.7. Property `Rovr Config > plugins > fd > default_filter_types`
 
 |              |                             |
 | ------------ | --------------------------- |
@@ -4031,7 +4138,7 @@ Refer to https://textual.textualize.io/guide/design/#additional-variables for mo
 | -------------------------------------------------------------------- | ----------- |
 | [default_filter_types items](#plugins_fd_default_filter_types_items) |             |
 
-##### <a name="plugins_fd_default_filter_types_items"></a>8.4.7.1. Rovr Config > plugins > fd > default_filter_types > default_filter_types items
+##### <a name="plugins_fd_default_filter_types_items"></a>8.3.7.1. Rovr Config > plugins > fd > default_filter_types > default_filter_types items
 
 |              |                    |
 | ------------ | ------------------ |
@@ -4050,7 +4157,7 @@ Must be one of:
 - "char-device"
 - "block-device"
 
-### <a name="plugins_rg"></a>8.5. Property `Rovr Config > plugins > rg`
+### <a name="plugins_rg"></a>8.4. Property `Rovr Config > plugins > rg`
 
 |                           |             |
 | ------------------------- | ----------- |
@@ -4068,7 +4175,7 @@ Must be one of:
 | [no_ignore_parent](#plugins_rg_no_ignore_parent) | boolean         | Don't use \*ignore files from parent folders when searching. |
 | [search_hidden](#plugins_rg_search_hidden)       | boolean         | Whether to search hidden files by default.                   |
 
-#### <a name="plugins_rg_enabled"></a>8.5.1. Property `Rovr Config > plugins > rg > enabled`
+#### <a name="plugins_rg_enabled"></a>8.4.1. Property `Rovr Config > plugins > rg > enabled`
 
 |              |           |
 | ------------ | --------- |
@@ -4078,7 +4185,7 @@ Must be one of:
 
 **Description:** Enable content searching using rg.
 
-#### <a name="plugins_rg_keybinds"></a>8.5.2. Property `Rovr Config > plugins > rg > keybinds`
+#### <a name="plugins_rg_keybinds"></a>8.4.2. Property `Rovr Config > plugins > rg > keybinds`
 
 |                |                       |
 | -------------- | --------------------- |
@@ -4101,14 +4208,14 @@ Must be one of:
 | ---------------------------------------------- | ----------- |
 | [toggle_pin items](#keybinds_toggle_pin_items) |             |
 
-##### <a name="keybinds_toggle_pin_items"></a>8.5.2.1. Rovr Config > keybinds > toggle_pin > toggle_pin items
+##### <a name="keybinds_toggle_pin_items"></a>8.4.2.1. Rovr Config > keybinds > toggle_pin > toggle_pin items
 
 |              |          |
 | ------------ | -------- |
 | **Type**     | `string` |
 | **Required** | No       |
 
-#### <a name="plugins_rg_executable"></a>8.5.3. Property `Rovr Config > plugins > rg > executable`
+#### <a name="plugins_rg_executable"></a>8.4.3. Property `Rovr Config > plugins > rg > executable`
 
 |              |          |
 | ------------ | -------- |
@@ -4118,7 +4225,7 @@ Must be one of:
 
 **Description:** rg executable name or path.
 
-#### <a name="plugins_rg_case_sensitive"></a>8.5.4. Property `Rovr Config > plugins > rg > case_sensitive`
+#### <a name="plugins_rg_case_sensitive"></a>8.4.4. Property `Rovr Config > plugins > rg > case_sensitive`
 
 |              |           |
 | ------------ | --------- |
@@ -4128,7 +4235,7 @@ Must be one of:
 
 **Description:** Whether the search should be case sensitive by default.
 
-#### <a name="plugins_rg_follow_symlinks"></a>8.5.5. Property `Rovr Config > plugins > rg > follow_symlinks`
+#### <a name="plugins_rg_follow_symlinks"></a>8.4.5. Property `Rovr Config > plugins > rg > follow_symlinks`
 
 |              |           |
 | ------------ | --------- |
@@ -4138,7 +4245,7 @@ Must be one of:
 
 **Description:** Whether rg should follow symlinks when searching.
 
-#### <a name="plugins_rg_no_ignore_parent"></a>8.5.6. Property `Rovr Config > plugins > rg > no_ignore_parent`
+#### <a name="plugins_rg_no_ignore_parent"></a>8.4.6. Property `Rovr Config > plugins > rg > no_ignore_parent`
 
 |              |           |
 | ------------ | --------- |
@@ -4148,7 +4255,7 @@ Must be one of:
 
 **Description:** Don't use \*ignore files from parent folders when searching.
 
-#### <a name="plugins_rg_search_hidden"></a>8.5.7. Property `Rovr Config > plugins > rg > search_hidden`
+#### <a name="plugins_rg_search_hidden"></a>8.4.7. Property `Rovr Config > plugins > rg > search_hidden`
 
 |              |           |
 | ------------ | --------- |
@@ -4158,7 +4265,7 @@ Must be one of:
 
 **Description:** Whether to search hidden files by default.
 
-### <a name="plugins_poppler"></a>8.6. Property `Rovr Config > plugins > poppler`
+### <a name="plugins_poppler"></a>8.5. Property `Rovr Config > plugins > poppler`
 
 |                           |             |
 | ------------------------- | ----------- |
@@ -4174,7 +4281,7 @@ Must be one of:
 | [poppler_folder](#plugins_poppler_poppler_folder) | string  | Path to the folder where Poppler-related binaries are located. Leave empty to use the system PATH. |
 | [pdf_batch_size](#plugins_poppler_pdf_batch_size) | integer | Number of PDF pages to load in each batch.                                                         |
 
-#### <a name="plugins_poppler_enabled"></a>8.6.1. Property `Rovr Config > plugins > poppler > enabled`
+#### <a name="plugins_poppler_enabled"></a>8.5.1. Property `Rovr Config > plugins > poppler > enabled`
 
 |              |           |
 | ------------ | --------- |
@@ -4184,7 +4291,7 @@ Must be one of:
 
 **Description:** Enable poppler for PDF previews.
 
-#### <a name="plugins_poppler_threads"></a>8.6.2. Property `Rovr Config > plugins > poppler > threads`
+#### <a name="plugins_poppler_threads"></a>8.5.2. Property `Rovr Config > plugins > poppler > threads`
 
 |              |           |
 | ------------ | --------- |
@@ -4198,7 +4305,7 @@ Must be one of:
 | ------------ | ------ |
 | **Minimum**  | &ge; 1 |
 
-#### <a name="plugins_poppler_use_pdftocairo"></a>8.6.3. Property `Rovr Config > plugins > poppler > use_pdftocairo`
+#### <a name="plugins_poppler_use_pdftocairo"></a>8.5.3. Property `Rovr Config > plugins > poppler > use_pdftocairo`
 
 |              |           |
 | ------------ | --------- |
@@ -4208,7 +4315,7 @@ Must be one of:
 
 **Description:** Use pdftocairo instead of pdftoppm, may help performance
 
-#### <a name="plugins_poppler_poppler_folder"></a>8.6.4. Property `Rovr Config > plugins > poppler > poppler_folder`
+#### <a name="plugins_poppler_poppler_folder"></a>8.5.4. Property `Rovr Config > plugins > poppler > poppler_folder`
 
 |              |          |
 | ------------ | -------- |
@@ -4218,7 +4325,7 @@ Must be one of:
 
 **Description:** Path to the folder where Poppler-related binaries are located. Leave empty to use the system PATH.
 
-#### <a name="plugins_poppler_pdf_batch_size"></a>8.6.5. Property `Rovr Config > plugins > poppler > pdf_batch_size`
+#### <a name="plugins_poppler_pdf_batch_size"></a>8.5.5. Property `Rovr Config > plugins > poppler > pdf_batch_size`
 
 |              |           |
 | ------------ | --------- |
@@ -4232,7 +4339,7 @@ Must be one of:
 | ------------ | ------ |
 | **Minimum**  | &ge; 1 |
 
-### <a name="plugins_file_one"></a>8.7. Property `Rovr Config > plugins > file_one`
+### <a name="plugins_file_one"></a>8.6. Property `Rovr Config > plugins > file_one`
 
 |                           |             |
 | ------------------------- | ----------- |
@@ -4245,7 +4352,7 @@ Must be one of:
 | [enabled](#plugins_file_one_enabled)                 | boolean | Enable secondary file(1) type detection if both puremagic and plaintext detection fails. |
 | [get_description](#plugins_file_one_get_description) | boolean | Use file(1) to get additional information of the file type.                              |
 
-#### <a name="plugins_file_one_enabled"></a>8.7.1. Property `Rovr Config > plugins > file_one > enabled`
+#### <a name="plugins_file_one_enabled"></a>8.6.1. Property `Rovr Config > plugins > file_one > enabled`
 
 |              |           |
 | ------------ | --------- |
@@ -4255,7 +4362,7 @@ Must be one of:
 
 **Description:** Enable secondary file(1) type detection if both puremagic and plaintext detection fails.
 
-#### <a name="plugins_file_one_get_description"></a>8.7.2. Property `Rovr Config > plugins > file_one > get_description`
+#### <a name="plugins_file_one_get_description"></a>8.6.2. Property `Rovr Config > plugins > file_one > get_description`
 
 |              |           |
 | ------------ | --------- |

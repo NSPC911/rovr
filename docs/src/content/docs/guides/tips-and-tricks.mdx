@@ -40,8 +40,12 @@ rovr provides some in-house archive handling:
 
 ### external integration
 - **enter** on files: open with system default application
-- external editor plugin available (disabled by default)
-- configure with `file_executable` and `folder_executable` in config
+- **e** (vim) or **ctrl+o** (sane): open selected file/folder in your configured editor
+- configure editor settings under `[settings.editor]` in your config:
+  - `settings.editor.file.run`: command to open files
+  - `settings.editor.folder.run`: command to open folders
+  - `settings.editor.file.suspend`: suspend rovr when opening files (recommended for TUI editors)
+  - `settings.editor.folder.suspend`: suspend rovr when opening folders
 
 ## customization tips
 

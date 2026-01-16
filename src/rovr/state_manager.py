@@ -210,7 +210,10 @@ sort_descending = {str(self.sort_descending).lower()}
             self._save_state()
         # Update file list with new sort order
         with suppress(NoMatches):
-            self.app.file_list.update_file_list(add_to_session=False)
+            file_list = self.app.file_list
+            if file_list.sort_by != value:
+                file_list.sort_by = value
+            file_list.update_file_list(add_to_session=False)
         # Update sort button icon
         with suppress(NoMatches):
             self.app.query_one("#sort_order").update_icon()
@@ -224,7 +227,10 @@ sort_descending = {str(self.sort_descending).lower()}
         else:
             self._save_state()
         with suppress(NoMatches):
-            self.app.file_list.update_file_list(add_to_session=False)
+            file_list = self.app.file_list
+            if file_list.sort_descending != value:
+                file_list.sort_descending = value
+            file_list.update_file_list(add_to_session=False)
         # Update sort button icon
         with suppress(NoMatches):
             self.app.query_one("#sort_order").update_icon()

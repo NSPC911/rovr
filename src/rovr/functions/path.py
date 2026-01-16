@@ -36,9 +36,6 @@ else:
 pprint = Console().print
 
 
-pins = {}
-
-
 def normalise(location: str | bytes) -> str:
     """'Normalise' the path
     Args:
@@ -730,11 +727,11 @@ def get_mime_type(
     return None
 
 
-def dump_exc(widget: DOMNode, exc: Exception | Traceback) -> str | None:
+def dump_exc(widget: DOMNode | None, exc: Exception | Traceback) -> str | None:
     """Dump an exception to the console for debugging purposes.
 
     Args:
-        widget (DOMNode): The widget where the exception occurred.
+        widget (DOMNode, None): The widget where the exception occurred.
         exc (Exception, Traceback): The exception to dump.
 
     Returns:
@@ -759,7 +756,8 @@ def dump_exc(widget: DOMNode, exc: Exception | Traceback) -> str | None:
         if isinstance(exc, Exception)
         else exc
     )
-    widget.log(rich_traceback)
+    if isinstance(widget, DOMNode):
+        widget.log(rich_traceback)
 
     dump_path = path.join(
         path.realpath(VAR_TO_DIR["CONFIG"]),

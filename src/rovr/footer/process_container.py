@@ -229,11 +229,11 @@ class ProcessContainer(VerticalScroll):
                                 # An inherent issue with long paths on windows
                                 path_to_trash = path_to_trash.replace("/", "\\")
                             send2trash(path_to_trash)
-                        except (PermissionError, OSError) as e:
+                        except (PermissionError, OSError) as exc:
                             # On Windows, a file being used by another process
                             # raises a PermissionError/OSError with winerror 32.
                             if (
-                                is_file_in_use := is_being_used(e)
+                                is_file_in_use := is_being_used(exc)
                             ) and os_type == "Windows":
                                 current_action, action_on_file_in_use = (
                                     self._handle_file_in_use_error(
@@ -257,11 +257,12 @@ class ProcessContainer(VerticalScroll):
                                 item_dict["path"]
                             ):
                                 os.remove(item_dict["path"])
-                        except Exception as e:
+                        except Exception as exc:
+                            path_utils.dump_exc(self, exc)
                             do_what = self.app.call_from_thread(
                                 self.app.push_screen_wait,
                                 YesOrNo(
-                                    f"Trashing failed due to\n{e}\nDo Permenant Deletion?",
+                                    f"Trashing failed due to\n{exc}\nDo Permenant Deletion?",
                                     with_toggle=True,
                                     border_subtitle="If this is a bug, please file an issue!",
                                 ),
@@ -278,9 +279,9 @@ class ProcessContainer(VerticalScroll):
                 except FileNotFoundError:
                     # it's deleted, so why care?
                     pass
-                except (PermissionError, OSError) as e:
+                except (PermissionError, OSError) as exc:
                     # Try to detect if file is in use on Windows
-                    if (is_file_in_use := is_being_used(e)) and os_type == "Windows":
+                    if (is_file_in_use := is_being_used(exc)) and os_type == "Windows":
                         current_action, action_on_file_in_use = (
                             self._handle_file_in_use_error(
                                 action_on_file_in_use,
@@ -301,11 +302,12 @@ class ProcessContainer(VerticalScroll):
                     # fallback for regular permission issues
                     if path_utils.force_obtain_write_permission(item_dict["path"]):
                         os.remove(item_dict["path"])
-                except Exception as e:
+                except Exception as exc:
                     # TODO: should probably let it continue, then have a summary
+                    path_utils.dump_exc(self, exc)
                     bar.panic(
                         dismiss_with={
-                            "message": f"Deleting failed due to\n{e}\nProcess Aborted.",
+                            "message": f"Deleting failed due to\n{exc}\nProcess Aborted.",
                             "subtitle": "If this is a bug, please file an issue!",
                         },
                         bar_text="Unhandled Error",
@@ -523,6 +525,7 @@ class ProcessContainer(VerticalScroll):
                                 _archive.add(p, arcname=arcname)
 
         except Exception as e:
+            path_utils.dump_exc(self, e)
             bar.panic(
                 dismiss_with={
                     "message": f"Archiving failed due to\n{e}\nProcess Aborted.",
@@ -649,6 +652,7 @@ class ProcessContainer(VerticalScroll):
                         "Password-protected archive files cannot be unzipped"
                     )
             else:
+                path_utils.dump_exc(self, e)
                 dismiss_with = {
                     "message": f"Unzipping failed due to {type(e).__name__}\n{e}\nProcess Aborted.",
                     "subtitle": "If this is a bug, file an issue!",
@@ -656,6 +660,7 @@ class ProcessContainer(VerticalScroll):
             bar.panic(dismiss_with=dismiss_with, bar_text="Error extracting archive")
             return
         except Exception as e:
+            path_utils.dump_exc(self, e)
             bar.panic(
                 dismiss_with={
                     "message": f"Unzipping failed due to {type(e).__name__}\n{e}\nProcess Aborted.",
@@ -799,11 +804,11 @@ class ProcessContainer(VerticalScroll):
                     # midway through the process, which means the user is
                     # literally testing the limits, so yeah uhh, pass
                     pass
-                except Exception as e:
+                except Exception as exc:
                     # TODO: should probably let it continue, then have a summary
                     bar.panic(
                         dismiss_with={
-                            "message": f"Copying failed due to {type(e).__name__}\n{e}\nProcess Aborted.",
+                            "message": f"Copying failed due to {type(exc).__name__}\n{exc}\nProcess Aborted.",
                             "subtitle": "If this is a bug, please file an issue!",
                         },
                         bar_text="Unhandled Error",
@@ -909,11 +914,12 @@ class ProcessContainer(VerticalScroll):
                     # midway through the process, which means the user is
                     # literally testing the limits, so yeah uhh, pass
                     pass
-                except Exception as e:
+                except Exception as exc:
                     # TODO: should probably let it continue, then have a summary
+                    path_utils.dump_exc(self, exc)
                     bar.panic(
                         dismiss_with={
-                            "message": f"Moving failed due to {type(e).__name__}\n{e}\nProcess Aborted.",
+                            "message": f"Moving failed due to {type(exc).__name__}\n{exc}\nProcess Aborted.",
                             "subtitle": "If this is a bug, please file an issue!",
                         },
                         bar_text="Unhandled Error",

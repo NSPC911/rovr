@@ -25,9 +25,6 @@ new = ["ctrl+n"]
 # off standard but seems reasonable enough
 zip = ["E"]
 unzip = ["ctrl+e"]
-# issue is that terminals tend to take ctrl+shift+c to copy
-# selections done with shift + mouse
-copy_path = ["C"]
 # standard
 up = ["up"]
 down = ["down"]

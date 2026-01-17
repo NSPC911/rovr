@@ -36,7 +36,7 @@ else:
 pprint = Console().print
 
 
-def normalise(location: str | bytes) -> str:
+def normalise(*location: str | bytes) -> str:
     """'Normalise' the path
     Args:
         location (str): The location to the item
@@ -47,7 +47,9 @@ def normalise(location: str | bytes) -> str:
     # path.normalise fixes the relative references
     # replace \\ with / on windows
     # by any chance if somehow a \\\\ was to enter, fix that
-    return str(path.normpath(location)).replace("\\", "/").replace("//", "/")
+    return (
+        str(path.normpath(path.join(*location))).replace("\\", "/").replace("//", "/")
+    )
 
 
 def is_hidden_file(filepath: str) -> bool:

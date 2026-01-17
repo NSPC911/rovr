@@ -628,6 +628,27 @@
           "description": "Delete the selected files in the file list.",
           "display_name": "Delete"
         },
+        "delete_files": {
+          "type": "object",
+          "description": "Keybinds related to the delete confirmation screen",
+          "properties": {
+            "trash": {
+              "$ref": "#/definitions/keybind",
+              "description": "Confirm deletion and move files to the recycle bin.",
+              "display_name": "Delete to recycle bin"
+            },
+            "delete": {
+              "$ref": "#/definitions/keybind",
+              "description": "Confirm deletion and permanently delete files.",
+              "display_name": "Permanently delete"
+            },
+            "cancel": {
+              "$ref": "#/definitions/keybind",
+              "description": "Cancel deletion and go back to the main screen.",
+              "display_name": "Cancel deletion"
+            }
+          }
+        },
         "rename": {
           "$ref": "#/definitions/keybind",
           "description": "Rename the selected file in the file list to something else.",
@@ -653,10 +674,37 @@
           "description": "Extract a selected zip archive.",
           "display_name": "Unzip"
         },
-        "copy_path": {
-          "$ref": "#/definitions/keybind",
-          "description": "Copy the path of the item to the system clipboard.",
-          "display_name": "Copy path"
+        "extra_copy": {
+          "type": "object",
+          "description": "Keybinds related to extra copy options",
+          "additionalProperties": false,
+          "properties": {
+            "open_popup": {
+              "$ref": "#/definitions/keybind",
+              "description": "Open the menu with extra copy options.",
+              "display_name": "Copy options"
+            },
+            "copy_to_rovr": {
+              "$ref": "#/definitions/keybind",
+              "description": "Copy the selected files to rovr's clipboard",
+              "display_name": "Copy to rovr's clipboard"
+            },
+            "copy_single_path": {
+              "$ref": "#/definitions/keybind",
+              "description": "Copy only the highlighted file to the system clipboard",
+              "display_name": "Copy highlighted file path"
+            },
+            "copy_to_system_clip": {
+              "$ref": "#/definitions/keybind",
+              "description": "Copy the selected files to the system clipboard",
+              "display_name": "Copy to system clipboard"
+            },
+            "copy_parent_path": {
+              "$ref": "#/definitions/keybind",
+              "description": "Copy the parent directory to the system clipboard",
+              "display_name": "Copy parent directory path"
+            }
+          }
         },
         "up": {
           "$ref": "#/definitions/keybind",
@@ -858,27 +906,6 @@
           "$ref": "#/definitions/keybind",
           "description": "Open the selected file or folder in the configured editor.",
           "display_name": "Open in editor"
-        },
-        "delete_files": {
-          "type": "object",
-          "description": "Keybinds related to the delete confirmation screen",
-          "properties": {
-            "trash": {
-              "$ref": "#/definitions/keybind",
-              "description": "Confirm deletion and move files to the recycle bin.",
-              "display_name": "Delete to recycle bin"
-            },
-            "delete": {
-              "$ref": "#/definitions/keybind",
-              "description": "Confirm deletion and permanently delete files.",
-              "display_name": "Permanently delete"
-            },
-            "cancel": {
-              "$ref": "#/definitions/keybind",
-              "description": "Cancel deletion and go back to the main screen.",
-              "display_name": "Cancel deletion"
-            }
-          }
         },
         "filename_conflict": {
           "type": "object",

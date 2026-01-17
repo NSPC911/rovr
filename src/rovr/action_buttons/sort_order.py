@@ -207,32 +207,9 @@ class SortOrderPopup(PopupOptionList):
         self.button.update_icon()
 
     async def on_key(self, event: events.Key) -> None:
-        # no i will not refactor this, or accept PRs to refactor this.
-        if check_key(event, config["keybinds"]["change_sort_order"]["name"]):
-            self.highlighted = self.get_option_index("name")
-            event.stop()
-            self.action_select()
-        elif check_key(event, config["keybinds"]["change_sort_order"]["extension"]):
-            self.highlighted = self.get_option_index("extension")
-            event.stop()
-            self.action_select()
-        elif check_key(event, config["keybinds"]["change_sort_order"]["natural"]):
-            self.highlighted = self.get_option_index("natural")
-            event.stop()
-            self.action_select()
-        elif check_key(event, config["keybinds"]["change_sort_order"]["size"]):
-            self.highlighted = self.get_option_index("size")
-            event.stop()
-            self.action_select()
-        elif check_key(event, config["keybinds"]["change_sort_order"]["created"]):
-            self.highlighted = self.get_option_index("created")
-            event.stop()
-            self.action_select()
-        elif check_key(event, config["keybinds"]["change_sort_order"]["modified"]):
-            self.highlighted = self.get_option_index("modified")
-            event.stop()
-            self.action_select()
-        elif check_key(event, config["keybinds"]["change_sort_order"]["descending"]):
-            self.highlighted = self.get_option_index("descending")
-            event.stop()
-            self.action_select()
+        for option, keys in config["keybinds"]["change_sort_order"].items():
+            if check_key(event, keys):
+                self.highlighted = self.get_option_index(option)
+                event.stop()
+                self.action_select()
+                return

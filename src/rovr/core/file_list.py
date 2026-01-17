@@ -517,6 +517,8 @@ class FileList(CheckboxRenderingMixin, SelectionList, inherit_bindings=False):
             await self.app.query_one("PinnedSidebar").reload_pins()
         elif check_key(event, config["keybinds"]["copy"]):
             await self.app.query_one("#copy").on_button_pressed(Button.Pressed)
+        elif check_key(event, config["keybinds"]["extra_copy"]["open_popup"]):
+            await self.app.query_one("#copy").open_popup(event)
         elif check_key(event, config["keybinds"]["cut"]):
             await self.app.query_one("#cut").on_button_pressed(Button.Pressed)
         elif check_key(event, config["keybinds"]["paste"]):
@@ -654,10 +656,6 @@ class FileList(CheckboxRenderingMixin, SelectionList, inherit_bindings=False):
                         title="Error launching editor",
                         severity="error",
                     )
-            elif check_key(event, config["keybinds"]["copy_path"]):
-                await self.app.query_one("PathCopyButton").on_button_pressed(
-                    Button.Pressed
-                )
 
     def update_border_subtitle(self) -> None:
         if self.dummy or type(self.highlighted) is not int or not self.parent:

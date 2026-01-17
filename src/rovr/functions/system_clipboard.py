@@ -1,8 +1,11 @@
+# with reference from https://gitee.com/DreamMaoMao/clipboard.yazi
 import asyncio
 import platform
-import shlex
 import shutil
 from dataclasses import dataclass
+from pathlib import Path
+
+import ujson
 
 
 @dataclass
@@ -121,7 +124,7 @@ async def _copy_macos(paths: list[str]) -> ProcessResult | None:
         )
 
     # Escape paths for AppleScript
-    escaped_paths = [shlex.quote(path) for path in paths]
+    escaped_paths = [ujson.dumps(path) for path in paths]
     posix_files = ", ".join(f"POSIX file {path}" for path in escaped_paths)
 
     script = f"set the clipboard to {{{posix_files}}}"
@@ -147,7 +150,7 @@ async def _copy_linux(paths: list[str]) -> ProcessResult | None:
         return None
 
     # Convert to text/uri-list format
-    uri_list = "\r\n".join(f"file://{path}" for path in paths) + "\r\n"
+    uri_list = "\r\n".join(Path(path).resolve().as_uri() for path in paths) + "\r\n"
 
     # Try wl-copy first (Wayland)
     if shutil.which("wl-copy"):

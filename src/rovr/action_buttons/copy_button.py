@@ -28,13 +28,7 @@ copy_parent_bind = get_shortest_bind(
 
 
 class CopyPanelOption(Option):
-    def __init__(
-        self,
-        bind: str,
-        prompt: str,
-        id: str,
-        disabled: bool = False
-    ) -> None:
+    def __init__(self, bind: str, prompt: str, id: str, disabled: bool = False) -> None:
         super().__init__(f" [d]{bind}[/] {prompt}", id=id, disabled=disabled)
 
 
@@ -194,10 +188,21 @@ class CopyPanelOptions(PopupOptionList):
     async def on_show(self, event: events.Show) -> None:
         should_disable = self.app.file_list.options[0].disabled
         self.set_options([
-            CopyPanelOption(rovr_bind, "Copy to rovr clipboard", "rovr", disabled=should_disable),
-            CopyPanelOption(path_bind, "Copy single file path", "path", disabled=should_disable),
-            CopyPanelOption(copy_parent_bind, "Copy parent directory path ", "parent_path"),
-            CopyPanelOption(system_bind, "Copy to system clipboard", "system", disabled=should_disable),
+            CopyPanelOption(
+                rovr_bind, "Copy to rovr clipboard", "rovr", disabled=should_disable
+            ),
+            CopyPanelOption(
+                path_bind, "Copy single file path", "path", disabled=should_disable
+            ),
+            CopyPanelOption(
+                copy_parent_bind, "Copy parent directory path ", "parent_path"
+            ),
+            CopyPanelOption(
+                system_bind,
+                "Copy to system clipboard",
+                "system",
+                disabled=should_disable,
+            ),
         ])
         height = (
             self.option_count

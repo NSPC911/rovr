@@ -28,15 +28,19 @@
 
 ![image](https://github.com/NSPC911/rovr/blob/master/docs%2Fpublic%2Fscreenshots%2Fmain.png?raw=true)
 
-### Installation
+### To test the main branch
 
 ```pwsh
-# Test the main branch
 uvx git+https://github.com/NSPC911/rovr.git
-# Install
+```
+
+### Installation
+```pwsh
 ## uv (my fav)
 uv tool install rovr
-## or pipx
+## add to pixi environment
+pixi add rovr --pypi
+## run via pipx
 pipx install rovr
 ## or plain old pip
 pip install rovr

@@ -10,9 +10,9 @@
     "astro": "astro"
   },
   "dependencies": {
-    "@astrojs/sitemap": "^3.6.1",
-    "@astrojs/starlight": "^0.37.2",
-    "astro": "^5.16.8",
+    "@astrojs/sitemap": "^3.7.0",
+    "@astrojs/starlight": "^0.37.3",
+    "astro": "^5.16.11",
     "astro-mermaid": "github:joesaby/astro-mermaid#v1.2.1",
     "mermaid": "^11.12.2",
     "sharp": "^0.34.5",

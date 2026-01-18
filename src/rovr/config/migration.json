@@ -4,8 +4,9 @@
       "keybinds.copy_path"
     ],
     "message": [
-      "[bright_blue]keybinds.copy_path[/] has been renamed to [bright_cyan]keybinds.copy_paths[/] to better reflect its functionality of copying multiple paths when multiple files are selected."
-    ]
+      "The copy path button has been combined with the copy button. You now press [bright_cyan]keybinds.extra_copy.open_popup[/] (most likely `Y`) followed by [bright_cyan]keybinds.extra_copy.copy_single_path[/] (most likely `p`) to copy the path to your clipboard."
+    ],
+    "extra": "Changed in v0.7.0"
   },
   {
     "keys": [

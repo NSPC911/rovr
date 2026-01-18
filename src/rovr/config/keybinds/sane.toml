@@ -66,7 +66,7 @@ suspend_app = ["ctrl+z"]
 open_editor = ["ctrl+o"]
 
 [keybinds.extra_copy]
-open_popup = ["Y"]
+open_popup = ["C"]
 copy_to_rovr = ["y"]
 copy_single_path = ["p"]
 copy_to_system_clip = ["s"]

@@ -179,9 +179,7 @@ class CopyPanelOptions(PopupOptionList):
         super().__init__()
         self.do_adjust: bool = False
 
-    def on_mount(
-        self, event: events.Mount
-    ) -> None:  # ty: ignore[invalid-method-override]
+    def on_mount(self, event: events.Mount) -> None:  # ty: ignore[invalid-method-override]
         # calling super()._on_mount is useless, and super().mount()
         # doesnt do anything significant, hence ty ignore
         self.button: CopyButton = self.app.query_one(CopyButton)

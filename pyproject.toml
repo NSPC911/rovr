@@ -18,8 +18,8 @@ classifiers = [
 ]
 dependencies = [
   "backports-zstd>=1.2.0; python_version < '3.14'",
+  "fastjsonschema>=2.21.2",
   "humanize>=4.14.0",
-  "jsonschema>=4.25.0",
   "natsort>=8.4.0",
   "pathvalidate>=3.3.1",
   "pdf2image>=1.17.0",
@@ -45,9 +45,14 @@ Documentation = "https://nspc911.github.io/rovr"
 [project.scripts]
 rovr = "rovr:main"
 
+[project.optional-dependencies]
+dev = [
+  "pyinstrument>=5.1.2",
+  "commitizen>=4.10.0",
+]
+
 [dependency-groups]
 dev = [
-  "commitizen>=4.10.0",
   "json-schema-for-humans>=1.5.1",
   "poethepoet>=0.38.0",
   "prek>=0.2.25",
@@ -56,7 +61,7 @@ dev = [
   "ty==0.0.8",
 ]
 speedups = [
-    "textual-speedups>=0.2.1",
+  "textual-speedups>=0.2.1",
 ]
 
 [build-system]
@@ -78,16 +83,17 @@ major_version_zero = true
 dev = "textual run --dev rovr.__main__:cli --"
 run = "rovr"
 log = "textual console -x WORKER -x SYSTEM -x DEBUG -x EVENT"
-"gen-schema" = "docs/scripts/generate_schema.py"
-"icon-test" = "docs/scripts/icon_test.py"
-"gen-keys" = "docs/scripts/generate_keybinds.py"
+gen-schema = "docs/scripts/generate_schema.py"
+icon-test = "docs/scripts/icon_test.py"
+gen-keys = "docs/scripts/generate_keybinds.py"
 check.sequence = [
   { cmd = "ty check" },
   { cmd = "ruff check" }
 ]
 format.sequence = [{ cmd = "ruff check --unsafe-fixes --fix"}, { cmd = "ruff format"}]
 fmt = ["format"]
-"screenshot-format" = "pnpx prettier --write docs/public/screenshots/*.svg --parser html --bracket-same-line --print-width 160"
+screenshot-format = "pnpx prettier --write docs/public/screenshots/*.svg --parser html --bracket-same-line --print-width 160"
+flame = "pyinstrument --renderer=html --timeline --use-timing-thread --show-all -m rovr"
 
 [tool.ruff]
 force-exclude = true

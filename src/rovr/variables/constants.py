@@ -1,4 +1,4 @@
-import platform
+import sys
 from dataclasses import dataclass
 from datetime import datetime
 from os import environ
@@ -142,7 +142,17 @@ vindings: list[BindingType] = (
     ]
 )
 
-os_type: str = platform.system()
+if "os_type" not in globals():
+    global os_type
+    match sys.platform:
+        case "win32":
+            os_type = "windows"
+        case "darwin" | "ios":
+            os_type = "darwin"
+        case _:
+            os_type = "linux"
+else:
+    os_type = globals()["os_type"]
 
 SortByOptions: TypeAlias = Literal[
     "name", "size", "modified", "created", "extension", "natural"

@@ -1,5 +1,7 @@
 import os
+import platform
 import sys
+import threading
 from io import TextIOWrapper
 
 import rich_click as click
@@ -329,6 +331,9 @@ example_function(10)"""
         from rovr.first_launch import FirstLaunchApp
 
         FirstLaunchApp().run()
+
+    # start separate thread for platform to cache
+    threading.Thread(target=platform.system, daemon=True).start()
 
     from rovr.functions.utils import set_nested_value
     from rovr.variables.constants import config

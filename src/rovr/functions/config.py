@@ -5,10 +5,10 @@ from importlib.metadata import PackageNotFoundError, version
 from os import path
 from shutil import which
 
-import jsonschema
+import fastjsonschema
 import tomli
 import ujson
-from jsonschema import ValidationError
+from fastjsonschema import JsonSchemaValueException
 from rich import box
 from rich.console import Console
 
@@ -131,7 +131,9 @@ def find_path_line(lines: list[str], path: deque) -> int | None:
     return None
 
 
-def schema_dump(doc_path: str, exception: ValidationError, config_content: str) -> None:
+def schema_dump(
+    doc_path: str, exception: JsonSchemaValueException, config_content: str
+) -> None:
     """
     Dump an error message for schema validation errors
 
@@ -146,7 +148,7 @@ def schema_dump(doc_path: str, exception: ValidationError, config_content: str) 
     from rich.syntax import Syntax
     from rich.table import Table
 
-    def get_message(exception: ValidationError) -> tuple[str, bool]:
+    def get_message(exception: JsonSchemaValueException) -> tuple[str, bool]:
         failed = False
         match exception.validator:
             case "required":
@@ -309,12 +311,12 @@ def load_config() -> tuple[dict, dict]:
 
     # check with schema
     content = resources.files("rovr.config").joinpath("schema.json").read_text("utf-8")
-    schema = ujson.loads(content)
+    schema = fastjsonschema.compile(ujson.loads(content))
 
     # ensure that template config works
     try:
-        jsonschema.validate(template_config, schema)
-    except ValidationError as exception:
+        schema(template_config)
+    except JsonSchemaValueException as exception:
         schema_dump(
             path.join(path.dirname(__file__), "../config/config.toml"),
             exception,
@@ -337,8 +339,8 @@ def load_config() -> tuple[dict, dict]:
     # Don't really have to consider the else part, because it's created further down
     config = deep_merge(template_config, user_config)
     try:
-        jsonschema.validate(config, schema)
-    except ValidationError as exception:
+        schema(config)
+    except JsonSchemaValueException as exception:
         schema_dump(user_config_path, exception, user_config_content)
 
     # slight config fixes

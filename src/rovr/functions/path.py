@@ -580,12 +580,12 @@ def _should_include_linux_mount_point(partition: "psutil._common.sdiskpart") -> 
     ))
 
 
-def get_mounted_drives() -> list:
+def get_mounted_drives() -> list[str]:
     """
     Get a list of mounted drives on the system.
 
     Returns:
-        list: List of mounted drives.
+        list[str]: List of mounted drives.
     """
     drives = []
     try:

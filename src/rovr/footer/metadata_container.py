@@ -7,6 +7,7 @@ from os import DirEntry, lstat, path, walk
 from textual import events, on, work
 from textual.containers import VerticalGroup, VerticalScroll
 from textual.css.query import NoMatches
+from textual.widget import MountError
 from textual.widgets import Static
 from textual.worker import WorkerState
 
@@ -99,6 +100,9 @@ class MetadataContainer(VerticalScroll, inherit_bindings=False):
         After debouncing the update
         Args:
             dir_entry (DirEntry): The nt.DirEntry object
+
+        Raises:
+            MountError: if something happens while attempting to fix a mount
         """
         if self.any_in_queue():
             return
@@ -200,7 +204,13 @@ class MetadataContainer(VerticalScroll, inherit_bindings=False):
                     case "created":
                         keys_list.append(Static("Created"))
             keys = VerticalGroup(*keys_list, id="metadata-keys")
-            self.app.call_from_thread(self.mount, keys, values)
+            try:
+                self.app.call_from_thread(self.mount, keys, values)
+            except MountError:
+                if self.app.return_code is None:
+                    return
+                else:
+                    raise
         self.current_path = dir_entry.path
         if type_str == "Directory" and self.has_focus:
             self._size_worker = self.calculate_folder_size(dir_entry.path)

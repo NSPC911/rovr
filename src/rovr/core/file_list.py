@@ -516,7 +516,7 @@ class FileList(CheckboxRenderingMixin, SelectionList, inherit_bindings=False):
             pin_utils.toggle_pin(path.basename(getcwd()), getcwd())
             await self.app.query_one("PinnedSidebar").reload_pins()
         elif check_key(event, config["keybinds"]["copy"]):
-            await self.app.query_one("#copy").on_button_pressed(Button.Pressed)
+            self.app.query_one("#copy").on_button_pressed()
         elif check_key(event, config["keybinds"]["extra_copy"]["open_popup"]):
             await self.app.query_one("#copy").open_popup(event)
         elif check_key(event, config["keybinds"]["cut"]):
@@ -785,7 +785,7 @@ class FileListRightClickOptionList(PopupOptionList):
         # Handle menu item selection
         match event.option.id:
             case "copy":
-                await self.app.query_one("#copy").on_button_pressed(Button.Pressed)
+                self.app.query_one("#copy").on_button_pressed()
             case "cut":
                 await self.app.query_one("#cut").on_button_pressed(Button.Pressed)
             case "delete":

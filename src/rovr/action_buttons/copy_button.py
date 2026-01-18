@@ -1,7 +1,7 @@
 from os import getcwd
 from typing import Literal, Self
 
-from textual import events, on, work
+from textual import events, work
 from textual.css.query import NoMatches
 from textual.message import Message
 from textual.widgets import Button, OptionList
@@ -103,6 +103,7 @@ class CopyButton(Button):
             )
         elif isinstance(event, events.Key):
             popup_widget.do_adjust = True
+        popup_widget.pre_show()
         popup_widget.remove_class("hidden")
         popup_widget.focus()
 
@@ -178,28 +179,32 @@ class CopyPanelOptions(PopupOptionList):
         super().__init__()
         self.do_adjust: bool = False
 
-    def on_mount(self, event: events.Mount) -> None:  # ty: ignore[invalid-method-override]
+    def on_mount(
+        self, event: events.Mount
+    ) -> None:  # ty: ignore[invalid-method-override]
+        # calling super()._on_mount is useless, and super().mount()
+        # doesnt do anything significant, hence ty ignore
         self.button: CopyButton = self.app.query_one(CopyButton)
         self.styles.scrollbar_size_vertical = 0
-        # calling super()._on_mount is useless, and super().mount()
-        # doesnt do anything significant
 
-    @on(events.Show)
-    async def on_show(self, event: events.Show) -> None:
+    def pre_show(self) -> None:
         should_disable = self.app.file_list.options[0].disabled
         self.set_options([
             CopyPanelOption(
-                rovr_bind, "Copy to rovr clipboard", "rovr", disabled=should_disable
+                rovr_bind,
+                "Copy files to rovr clipboard ",
+                "rovr",
+                disabled=should_disable,
             ),
             CopyPanelOption(
-                path_bind, "Copy single file path", "path", disabled=should_disable
+                path_bind, "Copy single file path ", "path", disabled=should_disable
             ),
             CopyPanelOption(
                 copy_parent_bind, "Copy parent directory path ", "parent_path"
             ),
             CopyPanelOption(
                 system_bind,
-                "Copy to system clipboard",
+                "Copy to system clipboard ",
                 "system",
                 disabled=should_disable,
             ),
@@ -236,6 +241,7 @@ class CopyPanelOptions(PopupOptionList):
             self.button.copy_to_system_clip()
         else:
             return
+        event.stop()
         self.go_hide()
 
     def on_option_list_option_selected(self, event: OptionList.OptionSelected) -> None:

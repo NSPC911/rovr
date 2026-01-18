@@ -65,6 +65,13 @@ command_palette = "ctrl+p"
 suspend_app = ["ctrl+z"]
 open_editor = ["ctrl+o"]
 
+[keybinds.extra_copy]
+open_popup = ["Y"]
+copy_to_rovr = ["y"]
+copy_single_path = ["p"]
+copy_to_system_clip = ["s"]
+copy_parent_path = ["d"]
+
 [keybinds.change_sort_order]
 open_popup = ["o"]
 name = ["n"]

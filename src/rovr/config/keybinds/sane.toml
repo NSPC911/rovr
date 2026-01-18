@@ -67,9 +67,6 @@ quit_app = ["ctrl+q"]
 command_palette = "ctrl+p"
 suspend_app = ["ctrl+z"]
 open_editor = ["ctrl+o"]
-# unavailable for now
-preview_select_left = []
-preview_select_right = []
 
 [keybinds.change_sort_order]
 open_popup = ["o"]

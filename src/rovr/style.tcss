@@ -1008,6 +1008,7 @@ Screen {
     #zoxide_group,
     #file_search_group,
     #content_search_group,
+    #keybinds_group,
     .--textual-command-palette #--container,
     #dialog,
     #modalInput_group {
@@ -1023,6 +1024,7 @@ Screen {
     #zoxide_group,
     #file_search_group,
     #content_search_group,
+    #keybinds_group,
     .--textual-command-palette #--container,
     #dialog,
     #modalInput_group {

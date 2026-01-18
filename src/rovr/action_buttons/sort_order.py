@@ -1,4 +1,4 @@
-from textual import events, on
+from textual import events
 from textual.css.query import NoMatches
 from textual.widgets import Button, OptionList
 from textual.widgets.option_list import Option
@@ -88,6 +88,7 @@ class SortOrderButton(Button):
             )
         elif isinstance(event, events.Key):
             popup_widget.do_adjust = True
+        popup_widget.pre_show()
         popup_widget.remove_class("hidden")
         popup_widget.focus()
 
@@ -97,14 +98,15 @@ class SortOrderPopup(PopupOptionList):
         super().__init__()
         self.do_adjust: bool = False
 
-    def on_mount(self, event: events.Mount) -> None:  # ty: ignore[invalid-method-override]
+    def on_mount(
+        self, event: events.Mount
+    ) -> None:  # ty: ignore[invalid-method-override]
         self.button: SortOrderButton = self.app.query_one(SortOrderButton)
         self.styles.scrollbar_size_vertical = 0
         # calling super()._on_mount is useless, and super().mount()
         # doesnt do anything significant
 
-    @on(events.Show)
-    def on_show(self, event: events.Show | None = None) -> None:
+    def pre_show(self) -> None:
         state_manager: StateManager = self.app.query_one(StateManager)
         self.set_options([
             SortOrderPopupOptions(

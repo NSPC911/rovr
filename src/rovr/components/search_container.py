@@ -78,9 +78,13 @@ class SearchInput(Input):
         segment: list[
             tuple[Option, int | float, int]
         ] = []  # (option, score, original_index)
-        for idx, option in enumerate(self.items_list.list_of_options):  # type: ignore[invalid-argument-type]
+        for idx, option in enumerate(self.items_list.list_of_options):
             assert isinstance(option, Option)
-            if self.always_add_disabled and option.disabled:
+            if (
+                self.always_add_disabled
+                and option.disabled
+                or (hasattr(option, "pseudo_disabled") and option.pseudo_disabled)
+            ):
                 if segment:
                     segment.sort(key=lambda tup: (-tup[1], tup[2]))
                     output.extend(o for o, _, _ in segment)

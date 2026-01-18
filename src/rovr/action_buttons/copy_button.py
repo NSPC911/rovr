@@ -136,7 +136,7 @@ class CopyButton(Button):
             self.notify("Copied!", title="Copy Path", severity="information")
 
     def copy_parent_path(self) -> None:
-        parent_path = Path(getcwd()).parent.as_posix()
+        parent_path = Path(getcwd()).as_posix()
         self.app.copy_to_clipboard(parent_path)
         self.notify("Copied!", title="Copy Parent Path", severity="information")
 
@@ -235,9 +235,9 @@ class CopyPanelOptions(PopupOptionList):
         elif check_key(event, config["keybinds"]["extra_copy"]["copy_single_path"]):
             self.button.copy_path()
         elif check_key(event, config["keybinds"]["extra_copy"]["copy_to_system_clip"]):
-            self.button.copy_parent_path()
-        elif check_key(event, config["keybinds"]["extra_copy"]["copy_parent_path"]):
             self.button.copy_to_system_clip()
+        elif check_key(event, config["keybinds"]["extra_copy"]["copy_parent_path"]):
+            self.button.copy_parent_path()
         else:
             return
         event.stop()

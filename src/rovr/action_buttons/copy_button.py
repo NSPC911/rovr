@@ -1,4 +1,5 @@
 from os import getcwd
+from pathlib import Path
 from typing import Literal, Self
 
 from textual import events, work
@@ -135,7 +136,7 @@ class CopyButton(Button):
             self.notify("Copied!", title="Copy Path", severity="information")
 
     def copy_parent_path(self) -> None:
-        parent_path = normalise(getcwd(), "/..")
+        parent_path = Path(getcwd()).parent.as_posix()
         self.app.copy_to_clipboard(parent_path)
         self.notify("Copied!", title="Copy Parent Path", severity="information")
 
@@ -179,7 +180,9 @@ class CopyPanelOptions(PopupOptionList):
         super().__init__()
         self.do_adjust: bool = False
 
-    def on_mount(self, event: events.Mount) -> None:  # ty: ignore[invalid-method-override]
+    def on_mount(
+        self, event: events.Mount
+    ) -> None:  # ty: ignore[invalid-method-override]
         # calling super()._on_mount is useless, and super().mount()
         # doesnt do anything significant, hence ty ignore
         self.button: CopyButton = self.app.query_one(CopyButton)
@@ -229,13 +232,13 @@ class CopyPanelOptions(PopupOptionList):
             )
 
     def on_key(self, event: events.Key) -> None:
-        if check_key(event, rovr_bind):
+        if check_key(event, config["keybinds"]["extra_copy"]["copy_to_rovr"]):
             self.button.on_button_pressed()
-        elif check_key(event, path_bind):
+        elif check_key(event, config["keybinds"]["extra_copy"]["copy_single_path"]):
             self.button.copy_path()
-        elif check_key(event, copy_parent_bind):
+        elif check_key(event, config["keybinds"]["extra_copy"]["copy_to_system_clip"]):
             self.button.copy_parent_path()
-        elif check_key(event, system_bind):
+        elif check_key(event, config["keybinds"]["extra_copy"]["copy_parent_path"]):
             self.button.copy_to_system_clip()
         else:
             return

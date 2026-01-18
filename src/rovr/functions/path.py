@@ -39,11 +39,16 @@ pprint = Console().print
 def normalise(*location: str | bytes) -> str:
     """'Normalise' the path
     Args:
-        location (str): The location to the item
+        *location (str | bytes): The location to the item
 
     Returns:
         str: A normalised path
+
+    Raises:
+        ValueError: When no path components are provided
     """
+    if not location:
+        raise ValueError("At least one path component must be provided")
     # path.normalise fixes the relative references
     # replace \\ with / on windows
     # by any chance if somehow a \\\\ was to enter, fix that

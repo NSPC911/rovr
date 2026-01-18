@@ -86,9 +86,7 @@ async def _copy_windows(paths: list[str]) -> ProcessResult | None:
             "powershell", "Windows", "PowerShell should be available on Windows"
         )
 
-    escaped_paths = [
-        f'"{path.replace(chr(34), chr(39))}"' for path in paths
-    ]  # Replace " with ' to avoid issues
+    escaped_paths = [f'"{path.replace('"', '`"')}"' for path in paths]
     paths_list = ",".join(escaped_paths)
 
     command = [
@@ -105,7 +103,12 @@ async def _copy_windows(paths: list[str]) -> ProcessResult | None:
         stdout=asyncio.subprocess.PIPE,
         stderr=asyncio.subprocess.PIPE,
     )
-    stdout, stderr = await asyncio.wait_for(process.communicate(), timeout=15)
+    try:
+        stdout, stderr = await asyncio.wait_for(process.communicate(), timeout=15)
+    except TimeoutError:
+        process.kill()
+        await process.wait()
+        raise
     return ProcessResult(
         returncode=process.returncode or 0,
         args=command,
@@ -136,7 +139,12 @@ async def _copy_macos(paths: list[str]) -> ProcessResult | None:
         stdout=asyncio.subprocess.PIPE,
         stderr=asyncio.subprocess.PIPE,
     )
-    stdout, stderr = await asyncio.wait_for(process.communicate(), timeout=15)
+    try:
+        stdout, stderr = await asyncio.wait_for(process.communicate(), timeout=15)
+    except TimeoutError:
+        process.kill()
+        await process.wait()
+        raise
     return ProcessResult(
         returncode=process.returncode or 0,
         args=command,
@@ -155,44 +163,32 @@ async def _copy_linux(paths: list[str]) -> ProcessResult | None:
     # Try wl-copy first (Wayland)
     if shutil.which("wl-copy"):
         command = ["wl-copy", "-t", "text/uri-list"]
-        process = await asyncio.create_subprocess_exec(
-            *command,
-            stdin=asyncio.subprocess.PIPE,
-            stdout=asyncio.subprocess.PIPE,
-            stderr=asyncio.subprocess.PIPE,
-        )
-        stdout, stderr = await asyncio.wait_for(
-            process.communicate(input=uri_list.encode()), timeout=15
-        )
-        return ProcessResult(
-            returncode=process.returncode or 0,
-            args=command,
-            stdout=stdout.decode().strip(),
-            stderr=stderr.decode().strip(),
-        )
-
     # Fall back to xclip (X11)
-    if shutil.which("xclip"):
+    elif shutil.which("xclip"):
         command = ["xclip", "-selection", "clipboard", "-t", "text/uri-list"]
-        process = await asyncio.create_subprocess_exec(
-            *command,
-            stdin=asyncio.subprocess.PIPE,
-            stdout=asyncio.subprocess.PIPE,
-            stderr=asyncio.subprocess.PIPE,
+    else:
+        raise ClipboardToolNotFoundError(
+            "wl-copy or xclip",
+            "Linux",
+            "Install 'wl-clipboard' (Wayland) or 'xclip' (X11) via your package manager",
         )
+    process = await asyncio.create_subprocess_exec(
+        *command,
+        stdin=asyncio.subprocess.PIPE,
+        stdout=asyncio.subprocess.PIPE,
+        stderr=asyncio.subprocess.PIPE,
+    )
+    try:
         stdout, stderr = await asyncio.wait_for(
             process.communicate(input=uri_list.encode()), timeout=15
         )
-        return ProcessResult(
-            returncode=process.returncode or 0,
-            args=command,
-            stdout=stdout.decode().strip(),
-            stderr=stderr.decode().strip(),
-        )
-
-    # Neither tool found
-    raise ClipboardToolNotFoundError(
-        "wl-copy or xclip",
-        "Linux",
-        "Install 'wl-clipboard' (Wayland) or 'xclip' (X11) via your package manager",
+    except TimeoutError:
+        process.kill()
+        await process.wait()
+        raise
+    return ProcessResult(
+        returncode=process.returncode or 0,
+        args=command,
+        stdout=stdout.decode().strip(),
+        stderr=stderr.decode().strip(),
     )

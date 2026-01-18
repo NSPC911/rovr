@@ -829,8 +829,9 @@ class Application(App, inherit_bindings=False):
             self.hide_popups()
 
     def hide_popups(self) -> None:
-        for popup in self.query(PopupOptionList):
-            with suppress(NoMatches):
+        # just in case
+        with suppress(NoMatches):
+            for popup in self.query(PopupOptionList):
                 popup.add_class("hidden")
 
     @work(thread=True)

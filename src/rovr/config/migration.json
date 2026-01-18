@@ -1,6 +1,14 @@
 [
   {
     "keys": [
+      "keybinds.copy_path"
+    ],
+    "message": [
+      "[bright_blue]keybinds.copy_path[/] has been renamed to [bright_cyan]keybinds.copy_paths[/] to better reflect its functionality of copying multiple paths when multiple files are selected."
+    ]
+  },
+  {
+    "keys": [
       "plugins.editor",
       "plugins.editor.enabled",
       "plugins.editor.file_executable",

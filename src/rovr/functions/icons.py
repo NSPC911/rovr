@@ -93,6 +93,21 @@ def get_icon_for_folder(location: str) -> list[str]:
     return ICONS["folder"]["default"]
 
 
+def get_icon_smart(location: str) -> list[str]:
+    """Get the icon and color for a file or folder based on its path.
+
+    Args:
+        location (str): The path of the file or folder.
+
+    Returns:
+        list: The icon and color for the file or folder.
+    """
+    if path.isdir(location):
+        return get_icon_for_folder(location)
+    else:
+        return get_icon_for_file(location)
+
+
 @lru_cache(maxsize=1024)
 def get_icon(outer_key: str, inner_key: str) -> list:
     """Get an icon from double keys.

@@ -2,7 +2,7 @@
 from textual.app import App, ComposeResult
 from textual.widgets import Button
 
-from rovr.screens import FileInUse
+from rovr.screens.paste_screen import PasteScreen
 
 
 class Test(App):
@@ -13,11 +13,15 @@ class Test(App):
 
     def on_button_pressed(self, event: Button.Pressed) -> None:
         self.push_screen(
-            FileInUse(
-                "The file appears to be open in another application and cannot be deleted.\nPath: file.txt",
+            PasteScreen(
+                "Yo imma do some stuff with these files rq",
+                {
+                    "copy": ["/path/to/file1", "/path/to/file2"],
+                    "cut": ["/path/to/file3"],
+                },
             ),
             lambda x: self.notify(str(x)),
         )
 
 
-Test().run()
+Test(watch_css=True).run()

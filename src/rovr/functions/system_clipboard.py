@@ -128,9 +128,9 @@ async def _copy_macos(paths: list[str]) -> ProcessResult | None:
 
     # Escape paths for AppleScript
     escaped_paths = [ujson.dumps(path) for path in paths]
-    posix_files = ", ".join(f"POSIX file {path}" for path in escaped_paths)
+    posix_files = ", ".join(f'POSIX file "{path}"' for path in escaped_paths)
 
-    script = f"set the clipboard to {{{posix_files}}}"
+    script = f"set the clipboard to \u007b{posix_files}\u007d"
 
     command = ["osascript", "-e", script]
 

@@ -43,7 +43,21 @@ once in visual mode, you can select multiple files:
 
 <InlineSVG src="/rovr/screenshots/right-click.svg" alt="a mini popup from right-clicking an object" />
 
-rovr supports mouse interactions for enhanced usability:
+rovr supports mouse interactions for better usability:
 
 - **right-click**: open a context menu for the selected file or folder with common operations
 - **double click**: open the directory/launch the app
+
+### extra copy
+
+<InlineSVG src="/rovr/screenshots/extra-copy-menu.svg" alt="another mini popup from right-clicking" />
+
+in addition to copying to rovr's internal clipboard, you can also copy other things to the system clipboard:
+- copy file path to system clipboard: `Y` &gt; `p`
+- copy parent directory path to system clipboard: `Y` &gt; `d`
+- copy selected file(s) as objects to system clipboard: `Y` &gt; `s`
+
+keep in mind that copying files as objects may not work in all applications.
+- on windows: you need powershell 5.0
+- on macos: applescript support is required
+- on linux: xclip or wl-clip is needed

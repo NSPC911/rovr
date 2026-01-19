@@ -9,7 +9,25 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- `app`: add force tty option #197
+- `app`: add batch rename support #198
 - `screens`: add file list to screen for paste and delete files #202
+
+### Fixed
+
+- `app`: prevent weird image preview bug that makes it scroll up 9fddec4
+- `filelist`: add safeguard from crash bab18b0
+- `firstrun`: use the proper dependency dd3c89d
+- `config`: prevent startup if config fails 1dcdd98
+- `app`: fix cd on startup not working 3dda6b6
+
+### Performance
+
+- `config`: improve schema checking performance abb1606
+
+### Removed
+
+- [BREAKING] `plugins`: moved `plugins.editor` to `settings.editor` #198
 
 ## [0.7.0.dev2] - 2026-01-12
 

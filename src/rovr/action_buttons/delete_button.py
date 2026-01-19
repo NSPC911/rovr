@@ -44,6 +44,7 @@ class DeleteButton(Button):
             self.app.push_screen(
                 DeleteFiles(
                     message=f"Are you sure you want to delete {len(selected_files)} file{'s' if len(selected_files) != 1 else ''}?",
+                    paths=selected_files,
                 ),
                 callback=callback,
             )

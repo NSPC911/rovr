@@ -1,10 +1,11 @@
 from os import R_OK, access, path
 from typing import ClassVar
 
-from textual import events
+from textual import events, work
 from textual.binding import BindingType
 from textual.widgets import Input, OptionList
 from textual.widgets.option_list import Option
+from textual.worker import WorkerError
 
 from rovr.classes import FolderNotFileError, PinnedSidebarOption
 from rovr.functions import icons as icon_utils
@@ -20,6 +21,7 @@ class PinnedSidebar(OptionList, inherit_bindings=False):
     def __init__(self, **kwargs) -> None:
         super().__init__(**kwargs)
 
+    @work
     async def reload_pins(self) -> None:
         """Reload pins shown
 
@@ -33,7 +35,7 @@ class PinnedSidebar(OptionList, inherit_bindings=False):
         id_list = []
         self.list_of_options = []
         # get current highlight
-        prev_highlighted: int = self.highlighted if self.highlighted else 0
+        prev_highlighted: int = self.highlighted if type(self.highlighted) is int else 0
         self.log(f"Reloading pins: {available_pins}")
         self.log(f"Reloading default folders: {default}")
         for default_folder in default:
@@ -115,7 +117,13 @@ class PinnedSidebar(OptionList, inherit_bindings=False):
         self.list_of_options.append(
             Option(" Drives", id="drives-header", disabled=True)
         )
-        drives = path_utils.get_mounted_drives()
+        drive_worker = self.app.run_in_thread(path_utils.get_mounted_drives)
+        try:
+            await drive_worker.wait()
+        except WorkerError as exc:
+            path_utils.dump_exc(self, exc)
+            return
+        drives = drive_worker.result
         for drive in drives:
             if access(drive, R_OK):
                 new_id = f"{path_utils.compress(drive)}-drives"
@@ -135,7 +143,7 @@ class PinnedSidebar(OptionList, inherit_bindings=False):
         """Reload the pinned files from the config."""
         assert self.parent
         self.input: Input = self.parent.query_one(Input)
-        self.run_worker(self.reload_pins)
+        self.reload_pins()
 
     async def on_option_list_option_selected(
         self, event: OptionList.OptionSelected

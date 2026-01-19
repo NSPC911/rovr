@@ -6,6 +6,10 @@
   <br>
   <img alt="GitHub Actions Docs Build Status" src="https://img.shields.io/github/actions/workflow/status/nspc911/rovr/.github%2Fworkflows%2Fdeploy.yml?style=for-the-badge&label=docs&logo=opencontainersinitiative" height="24px" width="auto">
   <img alt="GitHub Actions Formatting Status" src="https://img.shields.io/github/actions/workflow/status/nspc911/rovr/.github%2Fworkflows%2Fformatting.yml?style=for-the-badge&label=style&logo=opencontainersinitiative" height="24px" width="auto">
+  <br>
+  <a href="https://terminaltrove.com/rovr">
+    <img src="https://terminaltrove.com/static/assets/media/terminal_trove_normal.png" alt="terminal trove" height="24px" width="auto">
+  </a>
 </div>
 
 > [!warning]

@@ -20,6 +20,9 @@ class SpecialOption(Option):
             loc = (
                 Content(" ")
                 + Content(icon_utils.get_icon("general", copy_or_cut)[0])
+                # the icon is under the assumption that the user has navigated to
+                # the directory with the file, which means they rendered the icon
+                # for the file already, so theoretically, no need to re-render it here
                 + FileListSelectionWidget._icon_content_cache.get(
                     icon, Content.from_markup(f" [{icon[1]}]{icon[0]}[/{icon[1]}] ")
                 )

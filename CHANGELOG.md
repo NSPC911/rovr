@@ -12,6 +12,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `app`: add force tty option #197
 - `app`: add batch rename support #198
 - `screens`: add file list to screen for paste and delete files #202
+- [BREAKING] `actions`: add extra panel for copy related actions #200
+
 
 ### Fixed
 

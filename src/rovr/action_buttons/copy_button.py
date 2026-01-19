@@ -24,7 +24,7 @@ rovr_bind = get_shortest_bind(config["keybinds"]["extra_copy"]["copy_to_rovr"])
 path_bind = get_shortest_bind(config["keybinds"]["extra_copy"]["copy_single_path"])
 system_bind = get_shortest_bind(config["keybinds"]["extra_copy"]["copy_to_system_clip"])
 copy_parent_bind = get_shortest_bind(
-    config["keybinds"]["extra_copy"]["copy_parent_path"]
+    config["keybinds"]["extra_copy"]["copy_current_directory"]
 )
 
 
@@ -135,7 +135,7 @@ class CopyButton(Button):
             self.app.copy_to_clipboard(normalise(highlighted.dir_entry.path))
             self.notify("Copied!", title="Copy Path", severity="information")
 
-    def copy_parent_path(self) -> None:
+    def copy_current_directory(self) -> None:
         parent_path = Path(getcwd()).as_posix()
         self.app.copy_to_clipboard(parent_path)
         self.notify("Copied!", title="Copy Parent Path", severity="information")
@@ -187,7 +187,9 @@ class CopyPanelOptions(PopupOptionList):
         self.styles.scrollbar_size_vertical = 0
 
     def pre_show(self) -> None:
-        should_disable = self.app.file_list.options[0].disabled
+        should_disable: bool = (
+            not self.app.file_list.options
+        ) or self.app.file_list.options[0].disabled
         self.set_options([
             CopyPanelOption(
                 rovr_bind,
@@ -236,8 +238,10 @@ class CopyPanelOptions(PopupOptionList):
             self.button.copy_path()
         elif check_key(event, config["keybinds"]["extra_copy"]["copy_to_system_clip"]):
             self.button.copy_to_system_clip()
-        elif check_key(event, config["keybinds"]["extra_copy"]["copy_parent_path"]):
-            self.button.copy_parent_path()
+        elif check_key(
+            event, config["keybinds"]["extra_copy"]["copy_current_directory"]
+        ):
+            self.button.copy_current_directory()
         else:
             return
         event.stop()
@@ -249,7 +253,7 @@ class CopyPanelOptions(PopupOptionList):
         elif event.option.id == "path":
             self.button.copy_path()
         elif event.option.id == "parent_path":
-            self.button.copy_parent_path()
+            self.button.copy_current_directory()
         elif event.option.id == "system":
             self.button.copy_to_system_clip()
         else:

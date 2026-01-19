@@ -699,10 +699,10 @@
               "description": "Copy the selected files to the system clipboard",
               "display_name": "Copy to system clipboard"
             },
-            "copy_parent_path": {
+            "copy_current_directory": {
               "$ref": "#/definitions/keybind",
-              "description": "Copy the parent directory to the system clipboard",
-              "display_name": "Copy parent directory path"
+              "description": "Copy the current directory to the system clipboard",
+              "display_name": "Copy current directory path"
             }
           }
         },

@@ -149,7 +149,7 @@ description: config schema humanified
       - [7.24.3.1. Rovr Config > keybinds > toggle_pin > toggle_pin items](#keybinds_toggle_pin_items)
     - [7.24.4. Property `Rovr Config > keybinds > extra_copy > copy_to_system_clip`](#keybinds_extra_copy_copy_to_system_clip)
       - [7.24.4.1. Rovr Config > keybinds > toggle_pin > toggle_pin items](#keybinds_toggle_pin_items)
-    - [7.24.5. Property `Rovr Config > keybinds > extra_copy > copy_parent_path`](#keybinds_extra_copy_copy_parent_path)
+    - [7.24.5. Property `Rovr Config > keybinds > extra_copy > copy_current_directory`](#keybinds_extra_copy_copy_current_directory)
       - [7.24.5.1. Rovr Config > keybinds > toggle_pin > toggle_pin items](#keybinds_toggle_pin_items)
   - [7.25. Property `Rovr Config > keybinds > up`](#keybinds_up)
     - [7.25.1. Rovr Config > keybinds > toggle_pin > toggle_pin items](#keybinds_toggle_pin_items)
@@ -2260,13 +2260,13 @@ Refer to https://textual.textualize.io/guide/design/#additional-variables for mo
 
 **Description:** Keybinds related to extra copy options
 
-| Property                                                        | Type            | Title/Description                                      |
-| --------------------------------------------------------------- | --------------- | ------------------------------------------------------ |
-| [open_popup](#keybinds_extra_copy_open_popup)                   | array of string | Open the menu with extra copy options.                 |
-| [copy_to_rovr](#keybinds_extra_copy_copy_to_rovr)               | array of string | Copy the selected files to rovr's clipboard            |
-| [copy_single_path](#keybinds_extra_copy_copy_single_path)       | array of string | Copy only the highlighted file to the system clipboard |
-| [copy_to_system_clip](#keybinds_extra_copy_copy_to_system_clip) | array of string | Copy the selected files to the system clipboard        |
-| [copy_parent_path](#keybinds_extra_copy_copy_parent_path)       | array of string | Copy the parent directory to the system clipboard      |
+| Property                                                              | Type            | Title/Description                                      |
+| --------------------------------------------------------------------- | --------------- | ------------------------------------------------------ |
+| [open_popup](#keybinds_extra_copy_open_popup)                         | array of string | Open the menu with extra copy options.                 |
+| [copy_to_rovr](#keybinds_extra_copy_copy_to_rovr)                     | array of string | Copy the selected files to rovr's clipboard            |
+| [copy_single_path](#keybinds_extra_copy_copy_single_path)             | array of string | Copy only the highlighted file to the system clipboard |
+| [copy_to_system_clip](#keybinds_extra_copy_copy_to_system_clip)       | array of string | Copy the selected files to the system clipboard        |
+| [copy_current_directory](#keybinds_extra_copy_copy_current_directory) | array of string | Copy the current directory to the system clipboard     |
 
 #### <a name="keybinds_extra_copy_open_popup"></a>7.24.1. Property `Rovr Config > keybinds > extra_copy > open_popup`
 
@@ -2384,7 +2384,7 @@ Refer to https://textual.textualize.io/guide/design/#additional-variables for mo
 | **Type**     | `string` |
 | **Required** | No       |
 
-#### <a name="keybinds_extra_copy_copy_parent_path"></a>7.24.5. Property `Rovr Config > keybinds > extra_copy > copy_parent_path`
+#### <a name="keybinds_extra_copy_copy_current_directory"></a>7.24.5. Property `Rovr Config > keybinds > extra_copy > copy_current_directory`
 
 |                |                       |
 | -------------- | --------------------- |
@@ -2392,7 +2392,7 @@ Refer to https://textual.textualize.io/guide/design/#additional-variables for mo
 | **Required**   | No                    |
 | **Defined in** | #/definitions/keybind |
 
-**Description:** Copy the parent directory to the system clipboard
+**Description:** Copy the current directory to the system clipboard
 
 |                      | Array restrictions |
 | -------------------- | ------------------ |

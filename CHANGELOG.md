@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- `screens`: add file list to screen for paste and delete files #202
+
 ## [0.7.0.dev2] - 2026-01-12
 
 ### Added

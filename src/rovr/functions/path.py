@@ -343,8 +343,8 @@ def sync_get_cwd_object(
             # folders dont have extensions btw
             # and i will not count dot prepended folders
             folders.sort(key=lambda x: x["name"].lower())
-
             files.sort(key=get_extension_sort_key)
+
     if (
         return_nothing_if_this_returns_true is not None
         and return_nothing_if_this_returns_true()

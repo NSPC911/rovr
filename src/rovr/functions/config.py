@@ -150,7 +150,7 @@ def schema_dump(
 
     def get_message(exception: JsonSchemaValueException) -> tuple[str, bool]:
         failed = False
-        match exception.validator:
+        match exception.type:
             case "required":
                 error_msg = f"Missing required field: {exception.message}"
             case "type":

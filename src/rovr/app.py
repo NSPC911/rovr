@@ -485,6 +485,7 @@ class Application(App, inherit_bindings=False):
                 f"{len(process_container.query('ProgressBarContainer')) - len(process_container.query('.done')) - len(process_container.query('.error'))}"
                 + " processes are still running!\nAre you sure you want to quit?",
                 border_title="Quit [teal]rovr[/teal]",
+                destructive=True,
             )
         ):
             return

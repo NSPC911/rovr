@@ -64,6 +64,7 @@ class PasteButton(Button):
                     )
                     + "?",
                     paths={"copy": to_copy, "cut": to_cut},
+                    destructive=True,
                 ),
                 callback=callback,
             )

@@ -18,7 +18,7 @@ class YesOrNo(ModalScreen):
     def __init__(
         self,
         message: str,
-        reverse_color: bool = False,
+        destructive: bool = False,
         with_toggle: bool = False,
         border_title: str = "",
         border_subtitle: str = "",
@@ -26,7 +26,7 @@ class YesOrNo(ModalScreen):
     ) -> None:
         super().__init__(**kwargs)
         self.message = message
-        self.reverse_color = reverse_color
+        self.destructive = destructive
         self.with_toggle = with_toggle
         self.border_title = border_title
         self.border_subtitle = border_subtitle
@@ -38,12 +38,12 @@ class YesOrNo(ModalScreen):
                     yield Label(message, classes="question")
             yield Button(
                 f"\\[{yes_bind}] Yes",
-                variant="error" if self.reverse_color else "primary",
+                variant="error" if self.destructive else "success",
                 id="yes",
             )
             yield Button(
                 f"\\[{no_bind}] No",
-                variant="primary" if self.reverse_color else "error",
+                variant="success" if self.destructive else "error",
                 id="no",
             )
             if self.with_toggle:

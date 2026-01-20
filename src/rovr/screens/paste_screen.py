@@ -1,3 +1,4 @@
+from os import getcwd, path
 from typing import Literal
 
 from textual.containers import VerticalGroup
@@ -17,9 +18,19 @@ class SpecialOption(Option):
         if isinstance(loc, str):
             icon = icon_utils.get_icon_smart(loc)
             icon = (icon[0], icon[1])
+
+            copy_cut_icon = icon_utils.get_icon("general", copy_or_cut)[0]
+            # check existence of file, and if so, turn it red
+            if (
+                path.exists(path.join(getcwd(), path.basename(loc)))
+                and copy_or_cut == "copy"
+            ):
+                icon_content = Content.from_markup(f"[$error]{copy_cut_icon[0]}[/]")
+            else:
+                icon_content = Content(copy_cut_icon)
             loc = (
                 Content(" ")
-                + Content(icon_utils.get_icon("general", copy_or_cut)[0])
+                + icon_content
                 # the icon is under the assumption that the user has navigated to
                 # the directory with the file, which means they rendered the icon
                 # for the file already, so theoretically, no need to re-render it here
@@ -36,13 +47,13 @@ class PasteScreen(YesOrNo):
         self,
         message: str,
         paths: dict[Literal["copy", "cut"], list[str]],
-        reverse_color: bool = False,
+        destructive: bool = False,
         with_toggle: bool = False,
         border_title: str = "",
         border_subtitle: str = "",
     ) -> None:
         super().__init__(
-            message, reverse_color, with_toggle, border_title, border_subtitle
+            message, destructive, with_toggle, border_title, border_subtitle
         )
         self.paths = paths
 

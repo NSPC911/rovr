@@ -265,6 +265,7 @@ class ProcessContainer(VerticalScroll):
                                     f"Trashing failed due to\n{exc}\nDo Permenant Deletion?",
                                     with_toggle=True,
                                     border_subtitle="If this is a bug, please file an issue!",
+                                    destructive=True,
                                 ),
                             )
                             do_what = cast(typed.YesOrNo, do_what)

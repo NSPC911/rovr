@@ -5,8 +5,6 @@ import shutil
 from dataclasses import dataclass
 from pathlib import Path
 
-import ujson
-
 
 @dataclass
 class ProcessResult:
@@ -121,19 +119,16 @@ async def _copy_macos(paths: list[str]) -> ProcessResult | None:
     if not paths:
         return None
 
-    if not shutil.which("osascript"):
+    # as much as I want to use osascript, there is no way
+    # to add multiple files to it. No, pbcopy does not support files.
+    # so we are forced to use https://github.com/neilberkman/clippy
+    if not shutil.which("clippy"):
         raise ClipboardToolNotFoundError(
-            "osascript", "macOS", "osascript should be available on macOS"
+            "clippy",
+            "macOS",
+            "Install 'clippy' via Homebrew: 'brew install clippy'\nIf you know how to use osascript to copy files, please open an issue!",
         )
-
-    # Escape paths for AppleScript
-    escaped_paths = [ujson.dumps(path) for path in paths]
-    posix_files = ", ".join(f'POSIX file "{path}"' for path in escaped_paths)
-
-    script = f"set the clipboard to \u007b{posix_files}\u007d"
-
-    command = ["osascript", "-e", script]
-
+    command = ["clippy"] + [f'"{path}"' for path in paths]
     process = await asyncio.create_subprocess_exec(
         *command,
         stdout=asyncio.subprocess.PIPE,

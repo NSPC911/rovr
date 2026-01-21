@@ -53,6 +53,7 @@ from rovr.functions.path import (
 from rovr.functions.themes import get_custom_themes
 from rovr.header import HeaderArea
 from rovr.header.tabs import Tabline
+from rovr.managers.state import StateManager
 from rovr.navigation_widgets import (
     BackButton,
     ForwardButton,
@@ -68,7 +69,6 @@ from rovr.screens import (
     ZDToDirectory,
 )
 from rovr.screens.way_too_small import TerminalTooSmall
-from rovr.state_manager import StateManager
 from rovr.variables.constants import MaxPossible, config, log_name
 from rovr.variables.maps import VAR_TO_DIR
 

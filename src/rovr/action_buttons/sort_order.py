@@ -6,7 +6,7 @@ from textual.widgets.option_list import Option
 from rovr.components import PopupOptionList
 from rovr.functions.icons import get_icon, get_toggle_button_icon
 from rovr.functions.utils import check_key, get_shortest_bind
-from rovr.state_manager import StateManager
+from rovr.managers.state import StateManager
 from rovr.variables.constants import config
 
 # Get the shortest keybind for each sort option

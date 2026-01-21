@@ -4,6 +4,7 @@ from importlib import resources
 from importlib.metadata import PackageNotFoundError, version
 from os import path
 from shutil import which
+from typing import Callable
 
 import fastjsonschema
 import tomli
@@ -311,7 +312,8 @@ def load_config() -> tuple[dict, dict]:
 
     # check with schema
     content = resources.files("rovr.config").joinpath("schema.json").read_text("utf-8")
-    schema = fastjsonschema.compile(ujson.loads(content))
+    schema_dict = ujson.loads(content)
+    schema: Callable[[dict], None] = fastjsonschema.compile(schema_dict)
 
     # ensure that template config works
     try:
@@ -393,7 +395,7 @@ def load_config() -> tuple[dict, dict]:
         else:
             pdfinfo_path = path.dirname(pdfinfo_executable)
         config["plugins"]["poppler"]["poppler_folder"] = pdfinfo_path
-    return schema, config
+    return schema_dict, config
 
 
 def config_setup() -> None:

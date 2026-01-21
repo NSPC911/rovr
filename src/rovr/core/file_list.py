@@ -22,8 +22,8 @@ from rovr.functions import icons as icon_utils
 from rovr.functions import path as path_utils
 from rovr.functions import pins as pin_utils
 from rovr.functions import utils
+from rovr.managers.state import StateManager
 from rovr.navigation_widgets import PathInput
-from rovr.state_manager import StateManager
 from rovr.variables.constants import (
     SortByOptions,
     buttons_that_depend_on_path,

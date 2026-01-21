@@ -1,10 +1,24 @@
 from os import path
+from typing import TypedDict
 
 from platformdirs import PlatformDirs
+from rich._spinners import SPINNERS
 
 dirs = PlatformDirs("rovr", ".")  # Ah yes, my name is "."
 
-VAR_TO_DIR = {
+
+class PlatformDirsVars(TypedDict):
+    DOCUMENTS: str
+    DOWNLOADS: str
+    MUSIC: str
+    PICTURES: str
+    DESKTOP: str
+    HOME: str
+    VIDEOS: str
+    CONFIG: str
+
+
+VAR_TO_DIR: PlatformDirsVars = {
     "DOCUMENTS": dirs.user_documents_dir.replace("\\", "/"),
     "DOWNLOADS": dirs.user_downloads_dir.replace("\\", "/"),
     "MUSIC": dirs.user_music_dir.replace("\\", "/"),
@@ -73,6 +87,22 @@ ICONS = {
         "link": ["\U000f0337", "cyan"],
         "symlink": ["\uf481", "cyan"],
         "special": ["\uf2dc", "magenta"],
+    },
+    "sorting": {
+        "alpha_asc": ["\uf15d", "white"],
+        "alpha_desc": ["\uf15e", "white"],
+        "numeric_asc": ["\uf162", "white"],
+        "numeric_desc": ["\uf163", "white"],
+        "time_asc": ["\U000f1549", "white"],
+        "time_desc": ["\U000f154b", "white"],
+        "alpha_alt_asc": ["\U000f05bd", "white"],
+        "alpha_alt_desc": ["\U000f05bf", "white"],
+        "time_alt_asc": ["\U000f154a", "white"],
+        "time_alt_desc": ["\U000f154c", "white"],
+        "numeric_alt_asc": ["\U000f0ad2", "white"],
+        "numeric_alt_desc": ["\U000f090d", "white"],
+        "generic_asc": ["\U000f04bc", "white"],
+        "generic_desc": ["\U000f033c", "white"],
     },
     "folder": {
         "default": ["\uf07b", "#DAA520"],
@@ -497,6 +527,7 @@ FILE_MAP = {
     ".log": "log",
     ".markdown": "markdown",
     ".md": "markdown",
+    ".mdx": "markdown",
     ".rdoc": "markdown",
     ".rst": "rst",
     ".text": "text",
@@ -810,6 +841,7 @@ FILE_MAP = {
 EXT_TO_LANG_MAP = {
     ".py": "python",
     ".md": "markdown",
+    ".mdx": "markdown",
     ".json": "json",
     ".toml": "toml",
     ".yaml": "yaml",
@@ -1007,17 +1039,9 @@ FILES_MAP = {
     "jenkinsfile": "jenkinsfile",
 }
 
-ARCHIVE_EXTENSIONS = [
-    ".zip",
-    ".tar",
-    ".gz",
-    ".bz2",
-    ".xz",
-    ".rar",
-]
 
-PIL_EXTENSIONS = [
-    # reminder that stuff can also not work, just remove it if it doesnt work
+PIL_EXTENSIONS = (
+    # reminder that stuff can also not work, just remove it if it doesn't work
     ".avif",
     ".bmp",
     ".dds",
@@ -1067,7 +1091,7 @@ PIL_EXTENSIONS = [
     ".pxr",
     ".qoi",
     ".tim",
-]
+)
 
 
 TOGGLE_BUTTON_ICONS = {
@@ -1104,4 +1128,18 @@ BORDER_BOTTOM = {
     "wide": "▔",
 }
 
-SPINNER = ["\\", "|", "/", "-"]
+SPINNER = SPINNERS["dots2"]["frames"]
+assert isinstance(SPINNER, (str, list))
+SPINNER_LENGTH = len(SPINNER)
+
+FD_TYPE_TO_ALIAS = {
+    "file": "f",
+    "directory": "d",
+    "symlink": "l",
+    "executable": "x",
+    "empty": "e",
+    "socket": "s",
+    "pipe": "p",
+    "char-device": "c",
+    "block-device": "b",
+}

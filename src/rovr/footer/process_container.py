@@ -1,10 +1,10 @@
-import platform
+import os
 import shutil
 import tarfile
 import time
 import zipfile
-from contextlib import suppress
-from os import getcwd, listdir, makedirs, path, remove, walk
+from os import path
+from typing import Callable, cast
 
 from send2trash import send2trash
 from textual import events, work
@@ -13,19 +13,19 @@ from textual.containers import HorizontalGroup, VerticalGroup, VerticalScroll
 from textual.renderables.bar import Bar as BarRenderable
 from textual.types import UnusedParameter
 from textual.widgets import Label, ProgressBar
-from textual.widgets.option_list import OptionDoesNotExist
 
 from rovr.classes import Archive
 from rovr.functions import icons as icon_utils
 from rovr.functions import path as path_utils
+from rovr.functions.utils import is_being_used
 from rovr.screens import (
     CommonFileNameDoWhat,
     Dismissable,
     FileInUse,
-    GiveMePermission,
     YesOrNo,
+    typed,
 )
-from rovr.variables.constants import config, scroll_vindings
+from rovr.variables.constants import config, os_type, scroll_vindings
 
 
 class ThickBar(BarRenderable):
@@ -75,7 +75,7 @@ class ProgressBarContainer(VerticalGroup, inherit_bindings=False):
         if is_path and config["interface"]["truncate_progress_file_path"]:
             new_label = label.split("/")
             new_path = new_label[0]
-            for path_item in new_label[1:-1]:
+            for _ in new_label[1:-1]:
                 new_path += "/\u2026"
             new_path += f"/{new_label[-1]}"
             label = new_path
@@ -118,6 +118,7 @@ class ProgressBarContainer(VerticalGroup, inherit_bindings=False):
             self.progress_bar.gradient = Gradient.from_colors(
                 *self.app.get_theme(self.app.theme).bar_gradient["error"]
             )
+        assert isinstance(self.icon_label.content, str)
         self.update_icon(
             self.icon_label.content + " " + icon_utils.get_icon("general", "close")[0]
         )
@@ -135,11 +136,14 @@ class ProgressBarContainer(VerticalGroup, inherit_bindings=False):
             self.notify(
                 message=notify["message"], severity="error", title=notify["title"]
             )
+        self.app.query_one("Clipboard").checker_wrapper()
 
 
 class ProcessContainer(VerticalScroll):
     def __init__(self, *args, **kwargs) -> None:
         super().__init__(id="processes", *args, **kwargs)
+        self.has_perm_error: bool = False
+        self.has_in_use_error: bool = False
 
     async def new_process_bar(
         self, max: int | None = None, id: str | None = None, classes: str | None = None
@@ -149,6 +153,15 @@ class ProcessContainer(VerticalScroll):
         )
         await self.mount(new_bar, before=0)
         return new_bar
+
+    def threaded_new_process_bar(
+        self, max: int | None = None, id: str | None = None, classes: str | None = None
+    ) -> ProgressBarContainer:
+        bar = self.app.call_from_thread(
+            self.new_process_bar, max=max, id=id, classes=classes
+        )
+        assert isinstance(bar, ProgressBarContainer)
+        return bar
 
     @work(thread=True)
     def delete_files(
@@ -161,11 +174,13 @@ class ProcessContainer(VerticalScroll):
             files (list[str]): List of file paths to remove.
             compressed (bool): Whether the file paths are compressed. Defaults to True.
             ignore_trash (bool): If True, files will be permanently deleted instead of sent to the recycle bin. Defaults to False.
+
+        Raises:
+            OSError: re-raises if the file usage handler fails
+            PermissionError: re-raises if the file usage handler fails
         """
         # Create progress/process bar (why have I set names as such...)
-        bar: ProgressBarContainer = self.app.call_from_thread(
-            self.new_process_bar, classes="active"
-        )
+        bar = self.threaded_new_process_bar(classes="active")
         self.app.call_from_thread(
             bar.update_icon,
             icon_utils.get_icon("general", "delete")[0],
@@ -180,7 +195,7 @@ class ProcessContainer(VerticalScroll):
         for file in files:
             if compressed:
                 file = path_utils.decompress(file)
-            if path.isdir(file):
+            if path_utils.file_is_type(file) == "directory":
                 folders_to_delete.append(file)
             files_to_add, folders_to_add = path_utils.get_recursive_files(
                 file, with_folders=True
@@ -188,7 +203,7 @@ class ProcessContainer(VerticalScroll):
             files_to_delete.extend(files_to_add)
             folders_to_delete.extend(folders_to_add)
         self.app.call_from_thread(bar.update_progress, total=len(files_to_delete) + 1)
-        action_on_permission_error = "ask"
+        action_on_file_in_use = "ask"
         last_update_time = time.monotonic()
         for i, item_dict in enumerate(files_to_delete):
             current_time = time.monotonic()
@@ -210,62 +225,38 @@ class ProcessContainer(VerticalScroll):
                     if config["settings"]["use_recycle_bin"] and not ignore_trash:
                         try:
                             path_to_trash = item_dict["path"]
-                            if platform.system() == "Windows":
+                            if os_type == "Windows":
                                 # An inherent issue with long paths on windows
                                 path_to_trash = path_to_trash.replace("/", "\\")
-                                pass
                             send2trash(path_to_trash)
-                        except PermissionError as e:
+                        except (PermissionError, OSError) as e:
                             # On Windows, a file being used by another process
                             # raises a PermissionError/OSError with winerror 32.
-                            is_file_in_use = False
-                            try:
-                                # Some PermissionError instances expose winerror
-                                is_file_in_use = getattr(e, "winerror", None) == 32
-                            except Exception:
-                                is_file_in_use = False
-                            if is_file_in_use and platform.system() == "Windows":
-                                # Ask the user specifically that the file is in use
-                                response = self.app.call_from_thread(
-                                    self.app.push_screen_wait,
-                                    FileInUse(
-                                        f"The file appears to be open in another application and cannot be deleted.\nPath: {item_dict['relative_loc']}",
-                                    ),
+                            if (
+                                is_file_in_use := is_being_used(e)
+                            ) and os_type == "Windows":
+                                current_action, action_on_file_in_use = (
+                                    self._handle_file_in_use_error(
+                                        action_on_file_in_use,
+                                        item_dict["relative_loc"],
+                                        lambda: send2trash(path_to_trash),
+                                    )
                                 )
-                                if not response["value"]:
+                                if current_action == "cancel":
                                     bar.panic()
                                     return
-                                else:
-                                    continue
+                                elif current_action == "skip":
+                                    pass  # Skip this file, continue to next
+                                continue
                             elif is_file_in_use:
                                 # need to ensure unix users see an
                                 # error so they create an issue
-                                self.app.panic()
+                                raise
                             # fallback for regular permission issues
-                            if action_on_permission_error == "ask":
-                                do_what = self.app.call_from_thread(
-                                    self.app.push_screen_wait,
-                                    GiveMePermission(
-                                        "Path has no write access to be deleted.\nForcefully obtain and delete it?",
-                                        border_title=item_dict["path"],
-                                    ),
-                                )
-                                if do_what["toggle"]:
-                                    action_on_permission_error = do_what["value"]
-                                action = do_what["value"]
-                            else:
-                                action = action_on_permission_error
-                            match action:
-                                case "force":
-                                    if path_utils.force_obtain_write_permission(
-                                        item_dict["path"]
-                                    ):
-                                        remove(item_dict["path"])
-                                case "skip":
-                                    continue
-                                case "cancel":
-                                    bar.panic()
-                                    return
+                            if path_utils.force_obtain_write_permission(
+                                item_dict["path"]
+                            ):
+                                os.remove(item_dict["path"])
                         except Exception as e:
                             do_what = self.app.call_from_thread(
                                 self.app.push_screen_wait,
@@ -275,65 +266,41 @@ class ProcessContainer(VerticalScroll):
                                     border_subtitle="If this is a bug, please file an issue!",
                                 ),
                             )
+                            do_what = cast(typed.YesOrNo, do_what)
                             if do_what["toggle"]:
                                 ignore_trash = do_what["value"]
                             if do_what["value"]:
-                                remove(item_dict["path"])
+                                os.remove(item_dict["path"])
                             else:
                                 continue
                     else:
-                        remove(item_dict["path"])
+                        os.remove(item_dict["path"])
                 except FileNotFoundError:
                     # it's deleted, so why care?
                     pass
-                except PermissionError as e:
+                except (PermissionError, OSError) as e:
                     # Try to detect if file is in use on Windows
-                    is_file_in_use = False
-                    try:
-                        is_file_in_use = getattr(e, "winerror", None) == 32
-                    except Exception:
-                        is_file_in_use = False
-                    if is_file_in_use and platform.system() == "Windows":
-                        response = self.app.call_from_thread(
-                            self.app.push_screen_wait,
-                            FileInUse(
-                                f"The file appears to be open in another application and cannot be deleted.\nPath: {item_dict['relative_loc']}",
-                            ),
+                    if (is_file_in_use := is_being_used(e)) and os_type == "Windows":
+                        current_action, action_on_file_in_use = (
+                            self._handle_file_in_use_error(
+                                action_on_file_in_use,
+                                item_dict["relative_loc"],
+                                lambda: os.remove(item_dict["path"]),
+                            )
                         )
-                        if not response["value"]:
+                        if current_action == "cancel":
                             bar.panic()
                             return
-                        else:
-                            continue
+                        elif current_action == "skip":
+                            pass  # Skip this file, continue to next
+                        continue
                     elif is_file_in_use:
                         # need to ensure unix users see an
                         # error so they create an issue
                         self.app.panic()
                     # fallback for regular permission issues
-                    if action_on_permission_error == "ask":
-                        do_what = self.app.call_from_thread(
-                            self.app.push_screen_wait,
-                            GiveMePermission(
-                                "Path has no write access to be deleted.\nForcefully obtain and delete it?",
-                                border_title=item_dict["path"],
-                            ),
-                        )
-                        if do_what["toggle"]:
-                            action_on_permission_error = do_what["value"]
-                        action = do_what["value"]
-                    else:
-                        action = action_on_permission_error
-                    match action:
-                        case "force":
-                            if path_utils.force_obtain_write_permission(
-                                item_dict["path"]
-                            ):
-                                remove(item_dict["path"])
-                        case "skip":
-                            continue
-                        case "cancel":
-                            bar.panic()
-                            return
+                    if path_utils.force_obtain_write_permission(item_dict["path"]):
+                        os.remove(item_dict["path"])
                 except Exception as e:
                     # TODO: should probably let it continue, then have a summary
                     bar.panic(
@@ -346,19 +313,22 @@ class ProcessContainer(VerticalScroll):
                     return
         # The reason for an extra +1 in the total is for this
         # handling folders
-        has_perm_error = False
+        self.has_perm_error = False
+        self.has_in_use_error = False
         for folder in folders_to_delete:
-            try:
-                shutil.rmtree(folder)
-            except PermissionError:
-                has_perm_error = True
-            except FileNotFoundError:
-                # ig it got removed?
-                pass
-        if has_perm_error:
+            shutil.rmtree(folder, onexc=self.rmtree_fixer)
+        if self.has_in_use_error:
             bar.panic(
                 notify={
-                    "message": f"Certain files in {folder} could not be deleted due to PermissionError.",
+                    "message": "Certain files could not be deleted as they are currently being used",
+                    "title": "Delete Files",
+                },
+            )
+            return
+        if self.has_perm_error:
+            bar.panic(
+                notify={
+                    "message": "Certain files could not be deleted due to PermissionError.",
                     "title": "Delete Files",
                 },
             )
@@ -378,10 +348,105 @@ class ProcessContainer(VerticalScroll):
         # finished successfully
         self.app.call_from_thread(
             bar.update_icon,
-            bar.icon_label.content + " " + icon_utils.get_icon("general", "check")[0],
+            str(bar.icon_label.content)
+            + " "
+            + icon_utils.get_icon("general", "check")[0],
         )
         self.app.call_from_thread(bar.progress_bar.advance)
         self.app.call_from_thread(bar.add_class, "done")
+        self.app.query_one("Clipboard").checker_wrapper()
+
+    def _handle_file_in_use_error(
+        self,
+        action_on_file_in_use: str,
+        item_display_name: str,
+        retry_func: Callable[[], None],
+    ) -> tuple[str, str]:
+        """
+        Handle file-in-use errors with user prompts and automatic retries.
+
+        Args:
+            action_on_file_in_use (str): Current action ("ask", "try_again", "skip", "cancel")
+            item_display_name (str): Display name for the file
+            retry_func (Callable): Function to call to retry the operation
+
+        Returns:
+            tuple[str, str]: (current_action, updated_default_action)
+                - current_action: What to do with this file ("skip", "try_again", or raises)
+                - updated_default_action: Updated default for future errors
+
+        Raises:
+            PermissionError: If it still fails
+            OSError: If it still fails
+        """
+        persisted_default = action_on_file_in_use
+        if action_on_file_in_use in ("skip", "cancel"):
+            # Persisted skip/cancel: short-circuit without retry
+            return action_on_file_in_use, action_on_file_in_use
+        if action_on_file_in_use == "try_again":
+            # Persisted try_again: attempt retry once just like interactive success path
+            prev_action = action_on_file_in_use
+            try:
+                retry_func()
+                return "try_again", prev_action
+            except (PermissionError, OSError) as e:
+                if not is_being_used(e):
+                    # Different error type; propagate upwards
+                    raise
+                # Still in use; fall back to interactive prompt loop below
+                action_on_file_in_use = "ask"
+
+        while True:
+            response = self.app.call_from_thread(
+                self.app.push_screen_wait,
+                FileInUse(
+                    f"The file appears to be open in another application and cannot be operated on.\nPath: {item_display_name}",
+                ),
+            )
+            response = cast(typed.FileInUse, response)
+            # Handle toggle: remember the action for future file-in-use scenarios
+            updated_action = persisted_default
+            if response["toggle"]:
+                updated_action = response["value"]
+                persisted_default = updated_action
+
+            if response["value"] == "cancel":
+                return "cancel", updated_action
+            elif response["value"] == "skip":
+                return "skip", updated_action
+            # Try again: check if file is still in use
+            try:
+                retry_func()
+                return "try_again", updated_action  # Success, return updated action
+            except (PermissionError, OSError) as e:
+                if not is_being_used(e):
+                    raise  # Not a file-in-use error, re-raise
+                # Otherwise, loop again for another try/cancel
+
+    def rmtree_fixer(
+        self, function: Callable[[str], None], item_path: str, exc: BaseException
+    ) -> None:
+        """
+        Ran when shutil.rmtree faces an issue
+        Args:
+            function(Callable): the function that caused the issue
+            item_path(str): the path that caused the issue
+            exc(BaseException): the exact exception that caused the error
+        """
+        if isinstance(exc, FileNotFoundError):
+            # ig it got removed?
+            return
+        elif isinstance(exc, (OSError, PermissionError)) and is_being_used(exc):
+            # cannot do anything
+            self.has_in_use_error = True
+        elif (isinstance(exc, OSError) and "symbolic" in exc.__str__()) or (
+            path_utils.force_obtain_write_permission(item_path)
+        ):
+            os.remove(item_path)
+        elif isinstance(exc, PermissionError):
+            self.has_perm_error = True
+        else:
+            raise
 
     @work(thread=True)
     def create_archive(self, files: list[str], archive_name: str) -> None:
@@ -392,9 +457,7 @@ class ProcessContainer(VerticalScroll):
             files (list[str]): List of file paths to compress.
             archive_name (str): Path for the output archive.
         """
-        bar: ProgressBarContainer = self.app.call_from_thread(
-            self.new_process_bar, classes="active"
-        )
+        bar = self.threaded_new_process_bar(classes="active")
         self.app.call_from_thread(
             bar.update_icon,
             icon_utils.get_icon("general", "zip")[0],
@@ -404,10 +467,10 @@ class ProcessContainer(VerticalScroll):
         files_to_archive = []
         for p in files:
             if path.isdir(p):
-                if not listdir(p):  # empty directory
+                if not os.listdir(p):  # empty directory
                     files_to_archive.append(p)
                 else:
-                    for dirpath, _, filenames in walk(p):
+                    for dirpath, _, filenames in os.walk(p):
                         for f in filenames:
                             files_to_archive.append(path.join(dirpath, f))
             else:
@@ -441,18 +504,18 @@ class ProcessContainer(VerticalScroll):
                         last_update_time = current_time
                     _archive = archive._archive
                     if _archive:
-                        if archive._is_zip:
+                        if archive._archive_type == "zip":
                             assert isinstance(_archive, zipfile.ZipFile)
                             _archive.write(file_path, arcname=arcname)
                         else:
                             assert isinstance(_archive, tarfile.TarFile)
                             _archive.add(file_path, arcname=arcname)
                 for p in files:
-                    if path.isdir(p) and not listdir(p):
+                    if path.isdir(p) and not os.listdir(p):
                         arcname = path.relpath(p, base_path)
                         _archive = archive._archive
                         if _archive:
-                            if archive._is_zip:
+                            if archive._archive_type == "zip":
                                 assert isinstance(_archive, zipfile.ZipFile)
                                 _archive.write(p, arcname=arcname)
                             else:
@@ -470,7 +533,9 @@ class ProcessContainer(VerticalScroll):
 
         self.app.call_from_thread(
             bar.update_icon,
-            bar.icon_label.content + " " + icon_utils.get_icon("general", "check")[0],
+            str(bar.icon_label.content)
+            + " "
+            + icon_utils.get_icon("general", "check")[0],
         )
         self.app.call_from_thread(bar.progress_bar.advance)
         self.app.call_from_thread(bar.add_class, "done")
@@ -484,9 +549,7 @@ class ProcessContainer(VerticalScroll):
             archive_path (str): Path to the zip archive.
             destination_path (str): Path to the destination folder.
         """
-        bar: ProgressBarContainer = self.app.call_from_thread(
-            self.new_process_bar, classes="active"
-        )
+        bar = self.threaded_new_process_bar(classes="active")
         self.app.call_from_thread(
             bar.update_icon,
             icon_utils.get_icon("general", "open")[0],
@@ -497,10 +560,9 @@ class ProcessContainer(VerticalScroll):
         )
 
         do_what_on_existance = "ask"
-        action_on_permission_error = "ask"
         try:
             if not path.exists(destination_path):
-                makedirs(destination_path)
+                os.makedirs(destination_path)
 
             with Archive(archive_path, "r") as archive:
                 file_list = archive.infolist()
@@ -531,6 +593,7 @@ class ProcessContainer(VerticalScroll):
                                     border_subtitle=f"Extracting to {destination_path}",
                                 ),
                             )
+                            response = cast(typed.CommonFileNameDoWhat, response)
                             if response["same_for_next"]:
                                 do_what_on_existance = response["value"]
                             val = response["value"]
@@ -566,30 +629,10 @@ class ProcessContainer(VerticalScroll):
                     try:
                         archive.extract(file, path=destination_path)
                     except PermissionError:
-                        if action_on_permission_error == "ask":
-                            do_what = self.app.call_from_thread(
-                                self.app.push_screen_wait,
-                                GiveMePermission(
-                                    "Path has no write access to be overwritten.\nForcefully obtain and overwrite?",
-                                    border_title=filename,
-                                ),
-                            )
-                            if do_what["toggle"]:
-                                action_on_permission_error = do_what["value"]
-                            action = do_what["value"]
-                        else:
-                            action = action_on_permission_error
-                        match action:
-                            case "force":
-                                if path_utils.force_obtain_write_permission(
-                                    path.join(destination_path, filename)
-                                ):
-                                    archive.extract(file, path=destination_path)
-                            case "skip":
-                                continue
-                            case "cancel":
-                                bar.panic()
-                                return
+                        if path_utils.force_obtain_write_permission(
+                            path.join(destination_path, filename)
+                        ):
+                            archive.extract(file, path=destination_path)
         except (zipfile.BadZipFile, tarfile.TarError, ValueError) as e:
             dismiss_with = {"subtitle": ""}
             if isinstance(e, ValueError) and "Password" in e.__str__():
@@ -639,10 +682,8 @@ class ProcessContainer(VerticalScroll):
             dest (str) = getcwd(): The directory to copy to.
         """
         if dest == "":
-            dest = getcwd()
-        bar: ProgressBarContainer = self.app.call_from_thread(
-            self.new_process_bar, classes="active"
-        )
+            dest = os.getcwd()
+        bar = self.threaded_new_process_bar(classes="active")
         self.app.call_from_thread(
             bar.update_icon,
             icon_utils.get_icon("general", "paste")[0],
@@ -666,7 +707,6 @@ class ProcessContainer(VerticalScroll):
             bar.update_progress, total=int(len(files_to_copy) + len(files_to_cut)) + 1
         )
         action_on_existance = "ask"
-        action_on_permission_error = "ask"
         last_update_time = time.monotonic()
         if files_to_copy:
             self.app.call_from_thread(
@@ -689,7 +729,7 @@ class ProcessContainer(VerticalScroll):
             if path.exists(item_dict["path"]):
                 # again checks just in case something goes wrong
                 try:
-                    makedirs(
+                    os.makedirs(
                         path_utils.normalise(
                             path.join(dest, item_dict["relative_loc"], "..")
                         ),
@@ -706,6 +746,7 @@ class ProcessContainer(VerticalScroll):
                                     border_subtitle=f"Copying to {dest}",
                                 ),
                             )
+                            response = cast(typed.CommonFileNameDoWhat, response)
                             if response["same_for_next"]:
                                 action_on_existance = response["value"]
                             val = response["value"]
@@ -746,39 +787,13 @@ class ProcessContainer(VerticalScroll):
                     # OSError from shutil: The destination location must be writable;
                     # otherwise, an OSError exception will be raised
                     # Permission Error just in case
-                    if action_on_permission_error == "ask":
-                        do_what = self.app.call_from_thread(
-                            self.app.push_screen_wait,
-                            GiveMePermission(
-                                "Path has no write access to be overwritten.\nForefully obtain and overwrite?",
-                                border_title=item_dict["relative_loc"],
-                            ),
+                    if path_utils.force_obtain_write_permission(
+                        path.join(dest, item_dict["relative_loc"])
+                    ):
+                        shutil.copy(
+                            item_dict["path"],
+                            path.join(dest, item_dict["relative_loc"]),
                         )
-                        if do_what["toggle"]:
-                            action_on_permission_error = do_what["value"]
-                        action = do_what["value"]
-                    else:
-                        action = action_on_permission_error
-                    match action:
-                        case "force":
-                            if path_utils.force_obtain_write_permission(
-                                path.join(dest, item_dict["relative_loc"])
-                            ):
-                                shutil.copy(
-                                    item_dict["path"],
-                                    path.join(dest, item_dict["relative_loc"]),
-                                )
-                        case "skip":
-                            continue
-                        case "cancel":
-                            self.app.call_from_thread(bar.add_class, "error")
-                            self.app.call_from_thread(
-                                bar.update_icon,
-                                icon_utils.get_icon("general", "copy")[0]
-                                + " "
-                                + icon_utils.get_icon("general", "close")[0],
-                            )
-                            return
                 except FileNotFoundError:
                     # the only way this can happen is if the file is deleted
                     # midway through the process, which means the user is
@@ -796,7 +811,6 @@ class ProcessContainer(VerticalScroll):
                     return
 
         cut_ignore = []
-        action_on_permission_error = "ask"
         last_update_time = time.monotonic()
         if files_to_cut:
             self.app.call_from_thread(
@@ -819,14 +833,14 @@ class ProcessContainer(VerticalScroll):
             if path.exists(item_dict["path"]):
                 # again checks just in case something goes wrong
                 try:
-                    makedirs(
+                    os.makedirs(
                         path_utils.normalise(
                             path.join(dest, item_dict["relative_loc"], "..")
                         ),
                         exist_ok=True,
                     )
                     if path.exists(path.join(dest, item_dict["relative_loc"])):
-                        print(
+                        self.log(
                             path_utils.normalise(
                                 path.join(dest, item_dict["relative_loc"])
                             ),
@@ -847,6 +861,7 @@ class ProcessContainer(VerticalScroll):
                                     border_subtitle=f"Moving to {dest}",
                                 ),
                             )
+                            response = cast(typed.CommonFileNameDoWhat, response)
                             if response["same_for_next"]:
                                 action_on_existance = response["value"]
                             val = response["value"]
@@ -882,35 +897,13 @@ class ProcessContainer(VerticalScroll):
                     # OSError from shutil: The destination location must be writable;
                     # otherwise, an OSError exception will be raised
                     # Permission Error just in case
-                    if action_on_permission_error == "ask":
-                        do_what = self.app.call_from_thread(
-                            self.app.push_screen_wait,
-                            GiveMePermission(
-                                "Path has no write access to be overwritten.\nForcefully obtain and overwrite?",
-                                border_title=item_dict["relative_loc"],
-                            ),
+                    if path_utils.force_obtain_write_permission(
+                        path.join(dest, item_dict["relative_loc"])
+                    ) and path_utils.force_obtain_write_permission(item_dict["path"]):
+                        shutil.move(
+                            item_dict["path"],
+                            path.join(dest, item_dict["relative_loc"]),
                         )
-                        if do_what["toggle"]:
-                            action_on_permission_error = do_what["value"]
-                        action = do_what["value"]
-                    else:
-                        action = action_on_permission_error
-                    match action:
-                        case "force":
-                            if path_utils.force_obtain_write_permission(
-                                path.join(dest, item_dict["relative_loc"])
-                            ) and path_utils.force_obtain_write_permission(
-                                item_dict["path"]
-                            ):
-                                shutil.move(
-                                    item_dict["path"],
-                                    path.join(dest, item_dict["relative_loc"]),
-                                )
-                        case "skip":
-                            continue
-                        case "cancel":
-                            bar.panic(bar_text="Process cancelled.")
-                            return
                 except FileNotFoundError:
                     # the only way this can happen is if the file is deleted
                     # midway through the process, which means the user is
@@ -927,39 +920,35 @@ class ProcessContainer(VerticalScroll):
                     )
                     return
         # delete the folders
-        has_perm_error = False
+        self.has_perm_error = False
+        self.has_in_use_error = False
         for folder in cut_files__folders:
-            try:
-                skip = False
-                for file in cut_ignore:
-                    if folder in file:
-                        skip = True
-                        break
-                if not skip:
-                    shutil.rmtree(folder)
-            except PermissionError:
-                has_perm_error = True
-            except FileNotFoundError:
-                # ig it got removed?
-                continue
-        if has_perm_error:
+            skip = False
+            for file in cut_ignore:
+                if folder in file:
+                    skip = True
+                    break
+            if not skip:
+                shutil.rmtree(folder, onexc=self.rmtree_fixer)
+        if self.has_in_use_error:
             bar.panic(
                 notify={
-                    "message": f"Certain files in {folder} could not be deleted due to PermissionError.",
+                    "message": "Certain files could not be deleted as they are currently being used",
                     "title": "Delete Files",
                 },
                 bar_text=path.basename(cutted[-1]),
             )
             return
-        # remove from clipboard
-        for item in cutted:
-            # cant bother to figure out how this happens,
-            # just catch it
-            with suppress(OptionDoesNotExist):
-                self.app.call_from_thread(
-                    self.app.query_one("Clipboard").remove_option,
-                    path_utils.compress(item),
-                )
+        if self.has_perm_error:
+            bar.panic(
+                notify={
+                    "message": "Certain files could not be deleted due to PermissionError.",
+                    "title": "Delete Files",
+                },
+                bar_text=path.basename(cutted[-1]),
+            )
+            return
+        self.app.query_one("Clipboard").checker_wrapper()
         self.app.call_from_thread(
             bar.update_icon,
             icon_utils.get_icon("general", "cut" if len(cutted) else "copy")[0],

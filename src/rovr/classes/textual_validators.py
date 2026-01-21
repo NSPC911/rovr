@@ -4,6 +4,7 @@ from pathvalidate import sanitize_filepath
 from textual.validation import ValidationResult, Validator
 
 from rovr.functions.path import normalise
+from rovr.variables.constants import os_type
 
 
 class IsValidFilePath(Validator):
@@ -20,27 +21,46 @@ class IsValidFilePath(Validator):
 
 
 class PathDoesntExist(Validator):
-    def __init__(self, strict: bool = True) -> None:
+    def __init__(self, strict: bool = True, accept: list[str] | None = None) -> None:
         super().__init__(failure_description="Path already exists.")
         self.strict = strict
+        self.accept = accept
 
     def validate(self, value: str) -> ValidationResult:
-        value = str(normalise(str(getcwd()) + "/" + value))
-        if path.exists(value):
-            return self.failure()
+        item_path = str(normalise(str(getcwd()) + "/" + value))
+        if path.exists(item_path):
+            # check for acceptance
+            if os_type == "Windows" and self.accept is not None:
+                # check
+                lower_val = value.lower()
+                if any(
+                    lower_val == accepted.lower() and value != accepted
+                    for accepted in self.accept
+                ):
+                    return self.success()
+                else:
+                    return self.failure()
+            else:
+                return self.failure()
         else:
             return self.success()
 
 
 class EndsWithAnArchiveExtension(Validator):
     def __init__(self) -> None:
-        super().__init__(
-            failure_description="Path does not end with a valid extension."
-        )
+        super().__init__(failure_description="Extension is not a valid archive type.")
         self.strict = True
+        self.allowed_extensions: tuple[str, ...]
+        allowed: list[str] = []
+        from rovr.classes.archive import ARCHIVE_EXTENSIONS
+
+        for exts in ARCHIVE_EXTENSIONS:
+            for ext in exts:
+                allowed.append(str(ext))
+        self.allowed_extensions = tuple(allowed)
 
     def validate(self, value: str) -> ValidationResult:
-        if value.endswith((".tar.gz", ".tgz", ".tar.bz2", ".tbz2", ".tar.xz", ".zip")):
+        if value.endswith(self.allowed_extensions):
             return self.success()
         else:
             return self.failure()

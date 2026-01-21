@@ -1,0 +1,63 @@
+---
+title: Tips and Tricks
+description: just some more tips and tricks
+---
+
+some simple tips
+
+## clipboard operations
+rovr provides an interesting clipboard management:
+- yanking/copying will push it to the clipboard, and select them for pasting
+- clipboard shows current selection and operations
+- access clipboard panel by focusing it with `c`
+- you can delete items, or unselect them from being pasted
+
+## navigation stuff
+
+### path history navigation
+- **backspace** or **u**: go back to previous location
+- **space**: go forward in history (after going back)
+
+### pinned folders
+pin frequently accessed directories for quick access:
+- **shift+p**: pin the current folder
+- pinned folders appear in the sidebar
+- pins are saved and restored, and automatically updated across sessions
+
+### quick jumping
+- **ctrl+l**: focus path switcher, similarly to `explorer.exe`
+- **f**: if `plugins.fd` is enabled, search for something in the current directory recursively using `fd`
+- **z**: if `plugins.zoxide` is enabled, use `zoxide` to go to another directory
+
+## file operations
+
+### archive management
+rovr provides some in-house archive handling:
+- **ctrl+e**: extract archives
+- **E**: compress selected files/folders into an archive
+- browse inside archives without extracting them
+- supports most common archive formats (`.zip`, `*.tar`, `.rar`)
+
+### external integration
+- **enter** on files: open with system default application
+- external editor plugin available (disabled by default)
+- configure with `file_executable` and `folder_executable` in config
+
+## customization tips
+
+### themes and appearance
+- themes can be configured in `config.toml` under `[theme]` section
+- built-in themes include "nord", "solarized-dark", "dark-pink" (more soon + overhaul)
+- create custom themes with `[[custom_theme]]` sections
+- transparency can also be enabled (at runtime as well using command palette)
+
+### command palette
+access the command palette for advanced operations:
+- **ctrl+p**: open command palette
+- search and execute any available command
+
+### search and filtering
+make finding files easier:
+- **ctrl+f** or **/**: search in current directory
+- search is fuzzy and matches partial names
+- search results are navigable with arrow keys

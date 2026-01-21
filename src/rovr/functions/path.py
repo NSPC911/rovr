@@ -1,23 +1,41 @@
 import asyncio
+import base64
 import ctypes
+import fnmatch
 import os
 import stat
+import subprocess
 from os import path
+from typing import Callable, Literal, NamedTuple, TypeAlias, TypedDict, overload
 
 import psutil
-from lzstring import LZString
+from natsort import natsorted
 from rich.console import Console
+from rich.traceback import Traceback
 from textual import work
 from textual.app import App
+from textual.dom import DOMNode
+from textual.highlight import guess_language
 
 from rovr.functions.icons import get_icon_for_file, get_icon_for_folder
-from rovr.variables.constants import os_type
+from rovr.monkey_patches.puremagic_patch import puremagic
+from rovr.variables.constants import config, log_name, os_type
 
-lzstring = LZString()
+# windows needs nt, because scandir returns
+# nt.DirEntry instead of os.DirEntry on
+# windows. weird, yes, but I can't do anything
+if os_type == "Windows":
+    import nt
+
+    DirEntryType: TypeAlias = os.DirEntry | nt.DirEntry
+    DirEntryTypes = (os.DirEntry, nt.DirEntry)
+else:
+    DirEntryType: TypeAlias = os.DirEntry
+    DirEntryTypes = os.DirEntry
+
 pprint = Console().print
 
 
-config = {}
 pins = {}
 
 
@@ -32,7 +50,7 @@ def normalise(location: str | bytes) -> str:
     # path.normalise fixes the relative references
     # replace \\ with / on windows
     # by any chance if somehow a \\\\ was to enter, fix that
-    return str(path.normpath(location).replace("\\", "/").replace("//", "/"))
+    return str(path.normpath(location)).replace("\\", "/").replace("//", "/")
 
 
 def is_hidden_file(filepath: str) -> bool:
@@ -62,18 +80,16 @@ def is_hidden_file(filepath: str) -> bool:
         return path.basename(filepath).startswith(".")
 
 
-# Okay so the reason why I have wrapper functions is
-# I was messing around with different LZString options
-# and Encoded URI Component seems to best option. I've just
-# left it here, in case we can switch to something like
-# base 64 because Encoded URI Component can get quite long
-# very fast, which isn't really the purpose of LZString
+# insanely scuffed implementation, but it's required due
+# to Textual's strict limitation for ids to consist of
+# letters, numbers, underscores, or hyphens, and must
+# not begin with a number
 def compress(text: str) -> str:
-    return lzstring.compressToEncodedURIComponent(text)
+    return "u_" + base64.urlsafe_b64encode(text.encode("utf-8")).decode("ascii")
 
 
 def decompress(text: str) -> str:
-    return lzstring.decompressFromEncodedURIComponent(text)
+    return base64.urlsafe_b64decode(text[2:].encode("ascii")).decode("utf-8")
 
 
 @work
@@ -85,6 +101,10 @@ async def open_file(app: App, filepath: str) -> None:
         filepath (str): Path to the file to open
     """
     system = os_type.lower()
+    # check if it is available first
+    if not path.exists(filepath):
+        app.notify(f"File not found: {filepath}", title="Open File", severity="error")
+        return
 
     try:
         match system:
@@ -156,28 +176,124 @@ def get_filtered_dir_names(cwd: str | bytes, show_hidden: bool = False) -> set[s
     return names
 
 
-def get_cwd_object(
-    cwd: str, show_hidden: bool = False
-) -> tuple[list[dict], list[dict]]:
+class CWDObjectReturnDict(TypedDict):
+    name: str
+    icon: list[str]
+    dir_entry: DirEntryType
+
+
+def get_extension_sort_key(file_dict: dict) -> tuple[int, str]:
+    name = file_dict["name"]
+    if "." not in name:
+        # extensionless files
+        return (1, name.lower())
+    elif name.startswith(".") and name.count(".") == 1:
+        # dotfiles
+        return (2, name[1:].lower())
+    else:
+        # files with extensions
+        return (3, name.split(".")[-1].lower())
+
+
+@work(thread=True)
+def threaded_get_cwd_object(
+    node: DOMNode,
+    cwd: str,
+    show_hidden: bool = False,
+    sort_by: Literal[
+        "name", "size", "modified", "created", "extension", "natural"
+    ] = "name",
+    reverse: bool = False,
+    return_nothing_if_this_returns_true: Callable[[], bool] | None = None,
+) -> tuple[list[CWDObjectReturnDict], list[CWDObjectReturnDict]] | tuple[None, None]:
+    return sync_get_cwd_object(
+        node,
+        cwd,
+        show_hidden,
+        sort_by,
+        reverse,
+        return_nothing_if_this_returns_true,
+    )
+
+
+@overload
+def sync_get_cwd_object(
+    dom_node: DOMNode,
+    cwd: str,
+    show_hidden: bool = False,
+    sort_by: Literal[
+        "name", "size", "modified", "created", "extension", "natural"
+    ] = "name",
+    reverse: bool = False,
+) -> tuple[list[CWDObjectReturnDict], list[CWDObjectReturnDict]]: ...
+
+
+@overload
+def sync_get_cwd_object(
+    dom_node: DOMNode,
+    cwd: str,
+    show_hidden: bool = False,
+    sort_by: Literal[
+        "name", "size", "modified", "created", "extension", "natural"
+    ] = "name",
+    reverse: bool = False,
+    return_nothing_if_this_returns_true: Callable[[], bool] | None = None,
+) -> (
+    tuple[list[CWDObjectReturnDict], list[CWDObjectReturnDict]] | tuple[None, None]
+): ...
+
+
+def sync_get_cwd_object(
+    dom_node: DOMNode,
+    cwd: str,
+    show_hidden: bool = False,
+    sort_by: Literal[
+        "name", "size", "modified", "created", "extension", "natural"
+    ] = "name",
+    reverse: bool = False,
+    return_nothing_if_this_returns_true: Callable[[], bool] | None = None,
+) -> tuple[list[CWDObjectReturnDict], list[CWDObjectReturnDict]] | tuple[None, None]:
     """
     Get the objects (files and folders) in a provided directory
     Args:
+        dom_node(DOMNode): The DOM node requesting this operation
         cwd(str): The working directory to check
         show_hidden(bool): Whether to include hidden files/folders (dot-prefixed on Unix; flagged hidden on Windows/macOS)
+        sort_by(str): What to sort by
+        reverse(bool): Whether to reverse the sorting
+        return_nothing_if_this_returns_true(Callable[[], bool] | None): A callable that returns a bool. If it returns True, the function returns None.
+
     Returns:
-        folders(list[dict]): A list of dictionaries, containing "name" as the item's name and "icon" as the respective icon
-        files(list[dict]): A list of dictionaries, containing "name" as the item's name and "icon" as the respective icon
+        tuple[list[dict], list[dict]]: (folders, files) on success
+        tuple[None, None]: When early termination is triggered
 
     Raises:
+        TypeError: if the wrong type is received
         PermissionError: When access to the directory is denied
     """
-    folders, files = [], []
+
+    # Offload the blocking os.scandir call to a thread pool
     try:
-        listed_dir = os.scandir(cwd)
+        entries = list(os.scandir(cwd))
     except (PermissionError, FileNotFoundError, OSError):
         raise PermissionError(f"PermissionError: Unable to access {cwd}")
-    for item in listed_dir:
-        # Skip hidden files if show_hidden is False
+
+    dom_node.log(f"Scanned {len(entries)} entries in {cwd}")
+
+    if (
+        return_nothing_if_this_returns_true is not None
+        and return_nothing_if_this_returns_true()
+    ):
+        if globals().get("is_dev", False):
+            print("Cut off early after scandir")
+        return None, None
+
+    folders: list[CWDObjectReturnDict] = []
+    files: list[CWDObjectReturnDict] = []
+
+    for item in entries:
+        if not isinstance(item, DirEntryTypes):
+            raise TypeError(f"Expected a DirEntry object but got {type(item)}")
         if not show_hidden and is_hidden_file(item.path):
             continue
 
@@ -193,14 +309,64 @@ def get_cwd_object(
                 "icon": get_icon_for_file(item.name),
                 "dir_entry": item,
             })
-    # Sort folders and files properly
-    folders.sort(key=lambda x: x["name"].lower())
-    files.sort(key=lambda x: x["name"].lower())
-    print(f"Found {len(folders)} folders and {len(files)} files in {cwd}")
+        if (
+            return_nothing_if_this_returns_true is not None
+            and return_nothing_if_this_returns_true()
+        ):
+            if globals().get("is_dev", False):
+                dom_node.log("Cut off early during dictionary building")
+            return None, None
+
+    dom_node.log(f"Collected {len(folders)} folders and {len(files)} files in {cwd}")
+
+    # sort order
+    match sort_by:
+        case "name":
+            folders.sort(key=lambda x: x["name"].lower())
+            files.sort(key=lambda x: x["name"].lower())
+        case "natural":
+            # no we will not be using `natsort`'s os_sorted
+            folders: list[CWDObjectReturnDict] = natsorted(
+                folders, key=lambda x: x["name"].lower()
+            )
+            files: list[CWDObjectReturnDict] = natsorted(
+                files, key=lambda x: x["name"].lower()
+            )
+        case "created":
+            folders.sort(key=lambda x: x["dir_entry"].stat().st_ctime_ns)
+            files.sort(key=lambda x: x["dir_entry"].stat().st_ctime_ns)
+        case "modified":
+            folders.sort(key=lambda x: x["dir_entry"].stat().st_mtime_ns)
+            files.sort(key=lambda x: x["dir_entry"].stat().st_mtime_ns)
+        case "size":
+            # no we will not be calculating the folder size
+            folders.sort(key=lambda x: x["name"].lower())
+            files.sort(key=lambda x: x["dir_entry"].stat().st_size)
+        case "extension":
+            # folders dont have extensions btw
+            # and i will not count dot prepended folders
+            folders.sort(key=lambda x: x["name"].lower())
+
+            files.sort(key=get_extension_sort_key)
+    if (
+        return_nothing_if_this_returns_true is not None
+        and return_nothing_if_this_returns_true()
+    ):
+        if globals().get("is_dev", False):
+            dom_node.log("Cut off early before reversing results")
+        return None, None
+    if reverse:
+        files.reverse()
+        folders.reverse()
+
+    if globals().get("is_dev", False):
+        dom_node.log(f"Found {len(folders)} folders and {len(files)} files in {cwd}")
     return folders, files
 
 
-def file_is_type(file_path: str) -> str:
+def file_is_type(
+    file_path: str,
+) -> Literal["unknown", "symlink", "directory", "junction", "file"]:
     """Get a given path's type
     Args:
         file_path(str): The file path to check
@@ -250,6 +416,22 @@ def force_obtain_write_permission(item_path: str) -> bool:
         return False
 
 
+@overload
+def get_recursive_files(object_path: str) -> list[dict]: ...
+
+
+@overload
+def get_recursive_files(
+    object_path: str, with_folders: Literal[False]
+) -> list[dict]: ...
+
+
+@overload
+def get_recursive_files(
+    object_path: str, with_folders: Literal[True]
+) -> tuple[list[dict], list[dict]]: ...
+
+
 def get_recursive_files(
     object_path: str, with_folders: bool = False
 ) -> list[dict] | tuple[list[dict], list[dict]]:
@@ -264,9 +446,7 @@ def get_recursive_files(
         list: A list of dictionaries, with a "path" key and "relative_loc" key for files
         list: A list of path strings that were involved in the file list.
     """
-    if path.isfile(path.realpath(object_path)) or path.islink(
-        path.realpath(object_path)
-    ):
+    if file_is_type(object_path) != "directory":
         if with_folders:
             return [
                 {
@@ -413,27 +593,185 @@ def get_mounted_drives() -> list:
     drives = []
     try:
         # get all partitions
-        partitions = psutil.disk_partitions(all=False)
+        partitions = psutil.disk_partitions(all=True)
 
         if os_type == "Windows":
             # For Windows, return the drive letters
             drives = [
                 normalise(p.mountpoint)
                 for p in partitions
-                if p.device and ":" in p.device
+                if p.device and ":" in p.device and path.isdir(p.device)
             ]
         elif os_type == "Darwin":
             # For macOS, filter out system volumes and keep only user-relevant drives
             drives = [
-                p.mountpoint for p in partitions if _should_include_macos_mount_point(p)
+                p.mountpoint
+                for p in partitions
+                if path.isdir(p.mountpoint) and _should_include_macos_mount_point(p)
             ]
         else:
             # For other Unix-like systems (Linux, WSL, etc.), filter out system mount points
             drives = [
-                p.mountpoint for p in partitions if _should_include_linux_mount_point(p)
+                p.mountpoint
+                for p in partitions
+                if path.isdir(p.mountpoint) and _should_include_linux_mount_point(p)
             ]
     except Exception as e:
-        print(f"Error getting mounted drives: {e}")
-        print("Using fallback method")
+        if globals().get("is_dev", False):
+            print(f"Error getting mounted drives: {e}\nUsing fallback method...")
         drives = [path.expanduser("~")]
     return drives
+
+
+def match_mime_to_preview_type(
+    mime_type: str,
+) -> Literal["text", "image", "pdf", "archive", "folder", "remime"] | None:
+    """
+    Match a MIME type against configured rules to determine preview type.
+
+    Args:
+        mime_type: The MIME type to match (e.g., "text/plain", "image/png")
+
+    Returns:
+        str : The preview type ("text", "image", "pdf", "archive", "folder")
+        None: None if no rule matches
+    """
+    for pattern, preview_type in config["interface"]["mime_rules"].items():
+        if fnmatch.fnmatch(mime_type, pattern):
+            return preview_type
+    return None
+
+
+class MimeResult(NamedTuple):
+    method: Literal["basic", "puremagic", "file1"]
+    mime_type: str
+    content: str | None = None
+
+
+def get_mime_type(
+    file_path: str, ignore: list[Literal["basic", "puremagic", "file1"]] | None = None
+) -> MimeResult | None:
+    """
+    Synchronous/Threaded wrapper to get the MIME type of a file.
+
+    Args:
+        file_path: Path to the file to check
+        ignore: List of detection methods to skip
+
+    Returns:
+        MimeResult: The method used and the detected MIME type
+        None: If the method is not available or failed
+    """
+    if ignore is None:
+        ignore = []
+
+    file_extension = path.splitext(file_path)[1].lower()
+
+    # Read file bytes once, reuse for both puremagic and basic detection
+    try:
+        with open(file_path, "rb") as f:
+            file_bytes = f.read(1024)  # Read first 1KiB
+    except OSError:
+        # Cannot open file at all
+        return None
+
+    # Step 1: Try puremagic (magic byte detection) first
+    if "puremagic" not in ignore:
+        try:
+            puremagic_result: list[puremagic.PureMagicWithConfidence] = (
+                puremagic.magic_string(file_bytes)
+            )
+            if puremagic_result:
+                # If multiple matches exist, prefer one matching the file extension
+                for match in puremagic_result:
+                    if match.extension.lower() == file_extension and match.mime_type:
+                        return MimeResult("puremagic", match.mime_type)
+                # Otherwise, return first result with a mime type
+                for match in puremagic_result:
+                    if match.mime_type:
+                        return MimeResult("puremagic", match.mime_type)
+        except Exception:
+            # puremagic failed, continue to next method
+            pass
+
+    # Step 2: Try decoding as UTF-8 text
+    # If puremagic didn't recognise it, it might perhaps be a plain text file
+    if "basic" not in ignore:
+        try:
+            content = file_bytes.decode("utf-8")
+            return MimeResult(
+                "basic", f"text/{guess_language(content, file_path)}", content
+            )
+        except UnicodeDecodeError:
+            # Not valid UTF-8 text
+            pass
+
+    # Step 3: Fall back to file(1) command if available
+    if "file1" not in ignore:
+        try:
+            process = subprocess.run(
+                ["file", "--mime-type", "-b", file_path],
+                capture_output=True,
+                text=True,
+                check=True,
+                timeout=1,
+            )
+            mime_type = process.stdout.strip()
+            if mime_type:
+                return MimeResult("file1", mime_type)
+        except (
+            subprocess.CalledProcessError,
+            subprocess.TimeoutExpired,
+            FileNotFoundError,
+        ):
+            # file(1) command failed or is not available
+            pass
+
+    return None
+
+
+def dump_exc(widget: DOMNode, exc: Exception | Traceback) -> str | None:
+    """Dump an exception to the console for debugging purposes.
+
+    Args:
+        widget (DOMNode): The widget where the exception occurred.
+        exc (Exception, Traceback): The exception to dump.
+
+    Returns:
+        str: The path to the log file where the exception was dumped.
+    """
+    from datetime import datetime
+
+    from rich.panel import Panel
+
+    from rovr.variables.maps import VAR_TO_DIR
+
+    rich_traceback = (
+        Traceback.from_exception(
+            type(exc),
+            exc,
+            exc.__traceback__,
+            width=None,
+            code_width=None,
+            show_locals=True,
+            max_frames=5,
+        )
+        if isinstance(exc, Exception)
+        else exc
+    )
+    widget.log(rich_traceback)
+
+    dump_path = path.join(
+        path.realpath(VAR_TO_DIR["CONFIG"]),
+        "logs",
+        f"{log_name}.log",
+    )
+    os.makedirs(path.dirname(dump_path), exist_ok=True)
+    with open(dump_path, "a") as file_log:
+        # don't need to handle OS Error, Textual automatically chains errors
+        error_log = Console(file=file_log, legacy_windows=True)
+        # section it with time and date
+        error_log.print(
+            Panel(rich_traceback, title=f"Exception dumped on {str(datetime.now())}")
+        )
+    return dump_path

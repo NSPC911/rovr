@@ -3,56 +3,117 @@ import DefaultSocialIcons from '@astrojs/starlight/components/SocialIcons.astro'
 
 const repoOwner = 'NSPC911';
 const repoName = 'rovr';
-
-let stars = 0;
-let forks = 0;
-let watchers = 0;
-let release_tag = "";
-
-try {
-  const repoResponse = await fetch(`https://api.github.com/repos/${repoOwner}/${repoName}`);
-  if (repoResponse.ok) {
-    const repo = await repoResponse.json();
-    stars = repo.stargazers_count;
-    forks = repo.forks_count;
-    watchers = repo.subscribers_count;
-  }
-
-  const releasesResponse = await fetch(`https://api.github.com/repos/${repoOwner}/${repoName}/releases`);
-  if (releasesResponse.ok) {
-    const releases = await releasesResponse.json();
-    if (releases.length > 0) {
-      release_tag = releases[0].tag_name;
-    }
-  }
-} catch (error) {
-  console.error('Failed to fetch GitHub stats:', error);
-}
 ---
 
 <div class="social-wrapper">
-  <div class="github-stats">
-    <a href={`https://github.com/${repoOwner}/${repoName}/network/members`} class="github-stat" title="Forks">
+  <div class="github-stats" hidden>
+    <a href={`https://github.com/${repoOwner}/${repoName}/network/members`} class="github-stat" title="Release">
       <span>󰓼</span>
       <span>󰓹</span>
-      <span>{release_tag || "v0.3.0"}</span>
+      <span id="gh-release">v0.7.0.dev2</span>
     </a>
 
     <a href={`https://github.com/${repoOwner}/${repoName}/stargazers`} class="github-stat" title="Stars">
       <span></span>
       <span></span>
-      <span>{stars || 69}</span>
+      <span id="gh-stars">104</span>
     </a>
 
     <a href={`https://github.com/${repoOwner}/${repoName}/network/members`} class="github-stat" title="Forks">
       <span></span>
       <span></span>
-      <span>{forks || 17}</span>
+      <span id="gh-forks">17</span>
     </a>
   </div>
 
   <DefaultSocialIcons><slot /></DefaultSocialIcons>
 </div>
+
+<script>
+  const REPO_OWNER = 'NSPC911';
+  const REPO_NAME = 'rovr';
+  const CACHE_KEY = 'github-stats';
+  const CACHE_TTL = 24 * 60 * 60 * 1000;
+
+  interface CachedStats {
+    stars: number;
+    forks: number;
+    release_tag: string;
+    timestamp: number;
+  }
+
+  function getCachedStats(): CachedStats | null {
+    try {
+      const cached = localStorage.getItem(CACHE_KEY);
+      if (!cached) return null;
+      return JSON.parse(cached) as CachedStats;
+    } catch {
+      return null;
+    }
+  }
+
+  function setCachedStats(stats: Omit<CachedStats, 'timestamp'>): void {
+    try {
+      const data: CachedStats = { ...stats, timestamp: Date.now() };
+      localStorage.setItem(CACHE_KEY, JSON.stringify(data));
+    } catch {}
+  }
+
+  function updateDOM(stars: number, forks: number, release_tag: string): void {
+    const starsEl = document.getElementById('gh-stars');
+    const forksEl = document.getElementById('gh-forks');
+    const releaseEl = document.getElementById('gh-release');
+
+    if (starsEl) starsEl.textContent = String(stars);
+    if (forksEl) forksEl.textContent = String(forks);
+    if (releaseEl) releaseEl.textContent = release_tag;
+
+    document.querySelector('.github-stats')?.removeAttribute('hidden');
+  }
+
+  async function fetchGitHubStats(): Promise<Omit<CachedStats, 'timestamp'> | null> {
+    try {
+      const [repoRes, releaseRes] = await Promise.all([
+        fetch(`https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}`),
+        fetch(`https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/releases/latest`)
+      ]);
+
+      if (!repoRes.ok) return null;
+
+      const repo = await repoRes.json();
+      const release = releaseRes.ok ? await releaseRes.json() : [];
+
+      return {
+        stars: repo.stargazers_count,
+        forks: repo.forks_count,
+        release_tag: release.tag_name
+      };
+    } catch {
+      return null;
+    }
+  }
+
+  async function fetchAndUpdate(): Promise<void> {
+    const cached = getCachedStats();
+    const now = Date.now();
+
+    if (cached && (now - cached.timestamp) < CACHE_TTL) {
+      updateDOM(cached.stars, cached.forks, cached.release_tag);
+      return;
+    }
+
+    const fresh = await fetchGitHubStats();
+
+    if (fresh) {
+      setCachedStats(fresh);
+      updateDOM(fresh.stars, fresh.forks, fresh.release_tag);
+    } else if (cached) {
+      updateDOM(cached.stars, cached.forks, cached.release_tag);
+    }
+  }
+
+  fetchAndUpdate();
+</script>
 
 <style>
   .social-wrapper {
@@ -78,5 +139,8 @@ try {
     gap: 0.25rem;
     color: var(--sl-color-text);
     text-decoration: none;
+  }
+  [hidden] {
+    display: none !important
   }
 </style>

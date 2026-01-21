@@ -30,7 +30,7 @@ class UnzipButton(Button):
     async def on_button_pressed(self, event: Button.Pressed) -> None:
         if self.disabled:
             return
-        selected_files = await self.app.query_one("#file_list").get_selected_objects()
+        selected_files = await self.app.file_list.get_selected_objects()
         if not selected_files or len(selected_files) != 1:
             self.notify(
                 "Please select exactly one archive to extract.",
@@ -64,4 +64,4 @@ class UnzipButton(Button):
         self.app.query_one("ProcessContainer").unzip_file(
             archive_path, destination_path
         )
-        self.app.query_one("#file_list").focus()
+        self.app.file_list.focus()

@@ -3,11 +3,11 @@ from textual.screen import Screen
 from .common_file_name_do_what import CommonFileNameDoWhat
 from .delete_files import DeleteFiles
 from .dismissable import Dismissable
+from .fd_search import FileSearch
 from .file_in_use import FileInUse
-from .file_search import FileSearch
-from .give_permission import GiveMePermission
 from .input import ModalInput
 from .keybinds import Keybinds
+from .rg_search import ContentSearch
 from .way_too_small import TerminalTooSmall
 from .yes_or_no import YesOrNo
 from .zd_to_directory import ZDToDirectory
@@ -26,9 +26,9 @@ __all__ = [
     "YesOrNo",
     "ZDToDirectory",
     "FileSearch",
-    "GiveMePermission",
     "FileInUse",
     "DummyScreen",
     "TerminalTooSmall",
     "Keybinds",
+    "ContentSearch",
 ]

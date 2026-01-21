@@ -3,6 +3,10 @@ title: user interface
 description: an overview of the rovr user interface and how to navigate it.
 ---
 
+import InlineSVG from "@/components/InlineSVG.astro";
+
+<InlineSVG src="/rovr/screenshots/main.svg" alt="main interface" />
+
 rovr's user interface has several panels that you can navigate between using the keyboard.
 
 ### panels
@@ -29,16 +33,26 @@ you can show or hide panels to customize your view:
 
 ### compact mode
 
-rovr supports a compact mode for smaller terminal windows or when you want to maximize the file list space. in compact mode, the footer panels automatically hide when they're not in use, giving you more space for file browsing.
+rovr supports compact mode options for smaller terminal windows or when you want to maximize the file list space. compact mode has two separate options that can be enabled independently:
 
-To enable compact mode, set the following in your `config.toml`:
+- **buttons**: compacts the action buttons and path input to one line instead of three
+  <InlineSVG src="/rovr/screenshots/compact_buttons.svg" alt="compact buttons enabled" />
+- **panels**: makes the footer panels smaller to give more room for the file list
+  <InlineSVG src="/rovr/screenshots/compact_panels.svg" alt="compact panels enabled" />
+
+To enable compact mode options, set the following in your `config.toml`:
 
 ```toml
-[interface]
-compact_mode = true
+[interface.compact_mode]
+buttons = true  # compact buttons and path input
+panels = true   # make panels smaller
 ```
 
+You can enable either or both options depending on your preferences and terminal size.
+
 ### tabs
+
+<InlineSVG src="/rovr/screenshots/tabs.svg" alt="multiple tabs" />
 
 rovr supports tabs to manage multiple file list views simultaneously.
 
@@ -48,5 +62,7 @@ rovr supports tabs to manage multiple file list views simultaneously.
 - go to the previous tab: `ctrl+k`
 
 ### help and shortcuts
+
+<InlineSVG src="/rovr/screenshots/keybind-list.svg" alt="keybind list" />
 
 - view all available keybindings: `?` - this opens a help screen showing all available shortcuts and their functions

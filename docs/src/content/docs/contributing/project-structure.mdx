@@ -12,8 +12,8 @@ the current file structure seperates each section in each folder
 <FileTree>
 - src/rovr
   - app.py houses the main application
+  - state_manager.py manages persistent state
   - py.typed
-  - search_container.py search bar in pinned folders and file list
   - style.tcss default style
 </FileTree>
 
@@ -28,6 +28,7 @@ the current file structure seperates each section in each folder
   - new_item_button.py create new item
   - paste_button.py paste from rovr's clipboard into cwd
   - rename_item_button.py rename selected **item**
+  - sort_order.py changes sort order
   - unzip_button.py unzip selected **item**
   - zip_button.py zip selected items
 </FileTree>
@@ -44,11 +45,20 @@ the current file structure seperates each section in each folder
   - theme.py a class for themes
 </FileTree>
 
+### components
+
+<FileTree>
+- src/rovr/components
+  - popup_option_list.py for popup selectors
+  - search_container.py used for fuzzy searching
+</FileTree>
+
 ### config
 
 <FileTree>
 - src/rovr/config
   - config.toml default config
+  - migration.json shows appropriate messages for removed features
   - pins.json default pins
   - schema.json schema for reference
 </FileTree>
@@ -60,19 +70,17 @@ handles the middle elements
 <FileTree>
 - src/rovr/core
   - file_list.py a list that shows files
+  - file_list_container.py the container for the main file list
   - pinned_sidebar.py a list that shows pinned items
   - preview_container.py a container that shows the appropriate preview
 </FileTree>
-`PreviewContainer` uses `FileList` as part of its Folder Preview mechanism. it
-currently doesn't use it for archive previews, so I'm ready to accept prs that
-fix this issue
 
 ### footer
 
 handles the bottom row
 
 <FileTree>
-  - src/rovr/footer
+- src/rovr/footer
   - clipboard_container.py a list that contains copied/cut items
   - metadata_container.py shows metadata on the current primary selection
   - process_container.py shows a list of active processes
@@ -116,16 +124,17 @@ handles the modal screens used
 
 <FileTree>
 - src/rovr/screens
+  - _tester.py screen tester, not used at all
   - common_file_name_do_what.py when a conflicting file exists
   - delete_files.py when you want to delete files
   - dismissable.py dismissable modal, for notices
-  - give_permission.py raise permission when you get permission errored
+  - file_in_use.py shown when trying to delete a file that is being used
+  - file_search.py used for integration with fd
   - input.py modal input, also supporting path input
   - keybinds.py show all keybindings
   - way_too_small.py screen shown when window is too small
   - yes_or_no.py simple yes or no prompt
   - zd_to_directory.py zoxide integration
-  - _tester.py screen tester, not used at all
 </FileTree>
 
 ### variables
@@ -134,4 +143,13 @@ handles the modal screens used
 - src/rovr/variables
   - constants.py global constants, including the loaded config
   - maps.py maps to icons and other things
+</FileTree>
+
+### monkey patches
+
+anything that needs to be modified at runtime due to reasons
+<FileTree>
+- src/rovr/monkey_patches
+  - puremagic_patch.py patches for puremagic
+  - magic_data.json slightly modified puremagic data file
 </FileTree>

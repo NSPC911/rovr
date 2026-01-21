@@ -5,6 +5,10 @@
   font-family: "CaskaydiaCove NFP";
   src: url("./caskaydiacovenfp.ttf") format("truetype");
 }
+@font-face {
+  font-family: "CaskaydiaCoveNFM";
+  src: url("./caskaydiacovenfm.ttf") format("truetype");
+}
 
 :root {
   --sl-sidebar-width: 20vw;
@@ -50,6 +54,7 @@ code {
   --sl-color-text-invert: var(--sl-color-black);
   --sl-color-bg-sidebar: hsl(from var(--sl-color-gray-5) h s l / 50%);
   --sl-color-bg-nav: hsl(from var(--sl-color-gray-5) h s l / 50%);
+  --table-border-color: color-mix(in oklab, var(--sl-color-accent) 75%, var(--sl-color-black));
 }
 /* Light mode colors. */
 :root[data-theme="light"] {
@@ -78,6 +83,7 @@ code {
   --sl-color-text-invert: var(--sl-color-black);
   --sl-color-bg-sidebar: hsl(from var(--sl-color-gray-6) h s l / 50%);
   --sl-color-bg-nav: hsl(from var(--sl-color-gray-6) h s l / 50%);
+  --table-border-color: color-mix(in oklab, var(--sl-color-accent) 75%, var(--sl-color-white));
 }
 html {
   background: var(--sl-color-white);
@@ -116,6 +122,33 @@ html * {
       var(--sl-transition-duration) scrollbar-color ease-in-out;
   }
 }
+html svg,
+html svg * {
+  text-transform: initial !important;
+}
+th {
+  top: 0;
+  position: sticky;
+}
+th {
+  border: 2px solid var(--table-border-color);
+  padding: 10px;
+  text-align: center;
+}
+td {
+  border: 0.5px solid var(--table-border-color);
+  padding: 10px;
+  text-align: center;
+}
+table {
+  border: 2px solid var(--table-border-color);
+  overscroll-behavior-x: contain;
+  width: fit-content;
+  border-radius: 5px;
+}
+svg.rich-terminal * {
+  font-family: "CaskaydiaCoveNFM" !important;
+}
 code {
   text-transform: none;
   overflow-wrap: break-word;
@@ -149,14 +182,20 @@ code {
         display: flex;
         flex-direction: row;
         &::before {
-          content: "❯ ";
+          content: " ";
           position: relative;
           display: block;
+        }
+        &:has(> span)::before {
+          content: "❯ ";
         }
       }
       .header::before {
         left: unset !important;
-        right: var(--ec-uiPadInl);
+        right: calc(var(--ec-uiPadInl) + -1px);
+        background: linear-gradient(90deg, green 33%, yellow 0%, yellow 66%, red 0%, red 100%) !important;
+        width: 2rem;
+        height: 0.625rem;
       }
     }
   }
@@ -178,6 +217,10 @@ summary:not(#starlight__on-this-page--mobile) {
 .large {
   font-weight: 599;
 }
+img {
+  border: 2.5px solid var(--sl-color-accent);
+  border-radius: 5px;
+}
 @media (min-width: 72rem) {
   .main-pane {
     margin: auto;
@@ -197,6 +240,12 @@ summary:not(#starlight__on-this-page--mobile) {
   .content-panel > .sl-container {
     max-width: unset !important;
     margin-inline: 0 !important;
+  }
+  .content-panel {
+    max-width: calc(100vw - 525px);
+  }
+  table {
+    max-width: calc(80vw - 300px) !important;
   }
 }
 @media (min-width: 50rem) {
@@ -222,12 +271,17 @@ summary:not(#starlight__on-this-page--mobile) {
     border-inline-end: none;
   }
   .main-frame {
-    cursor:default;
+    cursor: default;
     padding-inline-start: 0;
   }
   body > div:has(> nav) > div .main-frame {
     max-width: calc(
       100vw - clamp(220px, var(--sl-content-inline-start), 300px)
+    );
+  }
+  table {
+    max-width: calc(
+      100vw - clamp(260px, var(--sl-content-inline-start), 300px)
     );
   }
   [data-theme="light"] .sidebar-pane,
@@ -238,6 +292,9 @@ summary:not(#starlight__on-this-page--mobile) {
 @media (max-width: 72rem) {
   :root {
     --sl-content-width: none;
+  }
+  .sidebar-content {
+    padding-left: 1ch;
   }
 }
 @media (max-width: 50rem) {
@@ -386,11 +443,13 @@ body > div:has(> nav) > div {
   }
 }
 figure.frame {
-  &:has(> figcaption > span) > pre[data-language] {
+  &:has(> figcaption > span)
+    > pre[data-language]:not([data-language="plaintext"]) {
     border-top-left-radius: 0;
     border-top-right-radius: 0;
   }
-  &:not(:has(> figcaption > span)) > pre[data-language] {
+  &:not(:has(> figcaption > span))
+    > pre[data-language]:not([data-language="plaintext"]) {
     padding-top: 1em;
     &::before {
       position: absolute;
@@ -402,7 +461,7 @@ figure.frame {
     }
   }
 
-  > pre[data-language] {
+  > pre[data-language]:not([data-language="plaintext"]) {
     border-radius: 5px;
   }
   > figcaption {
@@ -607,4 +666,12 @@ ul.isMobile li:hover > a {
     var(--sl-color-gray-6),
     var(--sl-color-gray-5)
   );
+}
+@keyframes showCopyThing {
+  from {
+    transform: translateX(-0.5ch)
+  }
+}
+.feedback {
+  animation: showCopyThing 0.125s ease-out;
 }

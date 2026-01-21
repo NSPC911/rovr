@@ -27,10 +27,9 @@ class ModalInput(ModalScreen):
         self.border_title = border_title
         self.border_subtitle = border_subtitle
         self.initial_value = initial_value
-        self.validators = [
-            Length(minimum=1, failure_description="A value is required.")
-        ] + validators
-        self.validators[0].strict = True
+        length_checker = Length(minimum=1, failure_description="A value is required.")
+        length_checker.strict = True
+        self.validators = [length_checker] + validators
         self.is_path = is_path
         self.is_folder = is_folder
         if self.is_path:
@@ -43,7 +42,7 @@ class ModalInput(ModalScreen):
             self.icon_widget = Label("> ", id="icon", shrink=True)
 
     def compose(self) -> ComposeResult:
-        with HorizontalGroup():
+        with HorizontalGroup(id="modalInput_group"):
             yield self.icon_widget
             yield Input(
                 id="input",
@@ -51,7 +50,13 @@ class ModalInput(ModalScreen):
                 value=self.initial_value,
                 valid_empty=False,
                 validators=self.validators,
-                validate_on=["changed", "submitted"],
+                # ty ignore because a list is iterable,
+                # but it is crashing out, because it thinks
+                # lists aren't iterable, weird
+                validate_on=[
+                    "changed",
+                    "submitted",
+                ],  # ty: ignore[invalid-argument-type]
             )
 
     @work(exclusive=True)
@@ -67,9 +72,18 @@ class ModalInput(ModalScreen):
                 self.icon_widget.classes = "invalid"
                 self.horizontal_group.classes = "invalid"
                 if event.validation_result:
-                    self.horizontal_group.border_subtitle = str(
-                        event.validation_result.failure_descriptions[0]
-                    )
+                    try:
+                        self.horizontal_group.border_subtitle = str(
+                            event.validation_result.failure_descriptions[0]
+                        )
+                    except IndexError:
+                        # I got an error from this, but it couldn't
+                        # be properly printed, so I'm leaving this here
+                        # in case someone else gets the same issue
+                        # so that they can create a new issue ^_^
+                        raise IndexError(
+                            f"Empty failure description.\nIf you see this, create an issue, thanks!\n{event.validation_result=}, {event.value=}"
+                        ) from None
                 else:
                     # valid_empty = False
                     self.horizontal_group.border_subtitle = (
@@ -126,5 +140,11 @@ class ModalInput(ModalScreen):
     def on_key(self, event: events.Key) -> None:
         """Handle escape key to dismiss the dialog."""
         if event.key == "escape":
+            event.stop()
+            self.dismiss("")
+
+    def on_click(self, event: events.Click) -> None:
+        if event.widget is self:
+            # ie click outside
             event.stop()
             self.dismiss("")

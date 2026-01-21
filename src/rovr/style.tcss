@@ -7,10 +7,16 @@ $border-disabled: $panel;
 
 /* Layout Dimensions */
 $pinned_sidebar_width: 17;
-$file_list_width: 1fr;
-$preview_sidebar_width: 35vw;
+$file_list_width: 1.25fr;
+$preview_sidebar_width: 0.75fr;
 $footer_unfocus_height: 7;
 $footer_focus_height: 9;
+
+/* for compact mode */
+$compact_pinned_sidebar_width: 16;
+$compact_preview_sidebar_width: 0.5fr;
+$compact_footer_unfocus_height: 5;
+$compact_footer_focus_height: 7;
 
 /* Scrollbar Colors */
 $scrollbar: $primary;
@@ -21,7 +27,6 @@ $scrollbar-background-hover: $primary-muted;
 $scrollbar-background-active: $primary-muted;
 $scrollbar-corner-color: $primary-muted;
 
-
 * {
   scrollbar-size: 1 1;
   &:ansi {
@@ -30,18 +35,31 @@ $scrollbar-corner-color: $primary-muted;
   }
 }
 
+Screen.-all-horizontal.compact-buttons {
+  #menuwrapper #below_menu #path_switcher {
+    border-left: $border-style $border-blurred
+  }
+  #menuwrapper:focus-within #below_menu #path_switcher {
+    border-left: $border-style $border
+  }
+  #menuwrapper:focus-within #below_menu #path_switcher.hide_border_bottom {
+    border-left: $border-style $accent
+  }
+}
+
 /* border styling for main widgets */
-#menu,
-#below_menu,
+#menuwrapper,
 #pinned_sidebar_container,
 #file_list_container,
 #preview_sidebar,
-#path_switcher,
-#zoxide_options,
-#file_search_options,
-#below_menu Button,
+ZoxideOptionList,
+FileSearchOptionList, FileSearchToggles,
+ContentSearchOptionList, ContentSearchToggles,
 #footer > *,
-FileListRightClickOptionList {
+FileListRightClickOptionList,
+SortOrderPopup,
+.comfy-buttons #path_switcher,
+.comfy-buttons #below_menu Button {
   background: transparent;
   border: $border-style $border-blurred;
   border-subtitle-color: $background;
@@ -67,22 +85,25 @@ FileListRightClickOptionList {
   }
 }
 
-#menu:focus-within,
-#below_menu:focus-within,
+#menuwrapper:focus-within,
 #pinned_sidebar_container:focus-within,
 #file_list_container:focus-within,
 #preview_sidebar:focus-within,
 #preview_sidebar:focus,
-#path_switcher:focus-within,
-#zoxide_options,
-#file_search_options,
-#below_menu Button:focus,
-#below_menu Button:hover,
+ZDToDirectory > VerticalGroup:focus-within > ZoxideOptionList,
+FileSearch > VerticalGroup:focus-within > FileSearchOptionList,
+FileSearchToggles:focus,
+ContentSearch > VerticalGroup:focus-within > ContentSearchOptionList,
+ContentSearchToggles:focus,
 #file_list.-maximized,
 #pinned_sidebar.-maximized,
 #preview_sidebar .inner_preview.-maximized,
 #footer > *:focus,
-FileListRightClickOptionList {
+FileListRightClickOptionList,
+SortOrderPopup,
+.comfy-buttons #path_switcher:focus-within,
+.comfy-buttons #below_menu Button:focus,
+.comfy-buttons #below_menu Button:hover {
   border: $border-style $border;
   border-subtitle-background: $border;
   &:ansi {
@@ -99,16 +120,18 @@ FileListRightClickOptionList {
   }
 }
 
-.hide,
-.hidden { display: none }
+.hide, .hidden { display: none }
 
-Input, TextArea {
+Input {
+  scrollbar-size: 0 0;
+  scrollbar-visibility: hidden;
+  overflow: hidden hidden;
   .input--placeholder,
   .text-area--placeholder { color: $foreground-darken-1 }
   .text-area--cursor-gutter {
-      color: $foreground;
-      background: $boost;
-      text-style: bold;
+    color: $foreground;
+    background: $boost;
+    text-style: bold;
   }
   &:ansi {
     .input--cursor,
@@ -126,6 +149,8 @@ Input, TextArea {
 Toast {
   max-height: 100%;
   width: 33vw;
+  max-width: 100vw;
+  layer: toastLayer;
   .toast--title {
     text-style: underline;
   }
@@ -158,12 +183,12 @@ Tooltip {
   &:ansi {
     background: transparent;
     border: $border-style $border-blurred;
+    padding: 0 1;
   }
   &:light:ansi { border: $border-style $border-blurred-light }
 }
 
 #headerArea {
-  padding: 0 1 0 1;
   #newTabRight {
     width: 1fr;
     Button {
@@ -225,7 +250,8 @@ Tooltip {
 
   &:focus-within > Tabline .underline--bar { background: $foreground-darken-3 }
 
-  HeaderClock, #newTabRight {
+  HeaderClock,
+  #newTabRight {
     background: transparent;
     dock: none;
     opacity: 1 !important;
@@ -242,60 +268,53 @@ Tooltip {
   }
 }
 
+#menuwrapper {
+  #below_menu { border-top: $border-style $border-blurred }
+  &:focus-within #below_menu { border-top: $border-style $border }
+}
+
 #menu {
   align: left middle;
-  height: 3;
-  margin: 0 1 0 1;
+  height: 1;
   padding: 0 1;
   scrollbar-size: 0 0;
-  Button {
-    &:ansi { background: transparent }
-    &:disabled {
-      opacity: 1 !important;
-      background-tint: transparent !important;
-      text-opacity: 1 !important;
-      color: $panel-lighten-3;
-      tint: transparent !important;
-    }
-    &:light:disabled { color: $panel-darken-3 }
-    &:ansi:hover { color: $primary }
-    &:light:ansi:hover { color: $secondary }
+}
+.comfy-buttons #menu Button {
+  &:ansi { background: transparent }
+  &:disabled {
+    opacity: 1 !important;
+    background-tint: transparent !important;
+    text-opacity: 1 !important;
+    color: $panel-lighten-3;
+    tint: transparent !important;
   }
+  &:light:disabled { color: $panel-darken-3 }
+  &:ansi:hover { color: $primary }
+  &:light:ansi:hover { color: $secondary }
 }
 
 #below_menu {
-  margin: 0 1 0 1;
+  margin: 0;
   max-height: 11;
   Input {
-    height: 3;
     width: 1fr;
-    margin: 0 1 0 1;
-    padding: 0 1 0 1;
-    overflow: hidden hidden;
+    margin: 0 1;
+    padding: 0 1;
     color: $foreground;
-  }
-  Input.hide_border_bottom {
-    border: $border-style $accent !important;
-    border-bottom: none !important;
-    height: 3;
+    border: none;
   }
   Button {
     margin: 0 1;
-    height: 3;
-    max-width: 7;
   }
   PathAutoCompleteInput {
-    padding: 0 1 0 1;
-    margin: -1 1 0 25;
+    padding: 0 1;
     overlay: screen;
     width: 1fr;
     border: $border-style $accent;
     border-top: none;
-    background: $background;
-    &:ansi { background: transparent }
     AutoCompleteList {
       width: 1fr;
-      max-height: 4;
+      max-height: 10vh;
       scrollbar-color: $accent;
       scrollbar-background: $accent-muted;
       scrollbar-color-hover: $accent-lighten-3;
@@ -313,9 +332,6 @@ Tooltip {
 
 .option {
   border: none;
-  height: 1;
-  max-width: 3;
-  width: 3;
   padding: 0;
   margin: 0 1 0 0;
 }
@@ -324,8 +340,6 @@ Tooltip {
   padding: 0 0;
   height: 1fr;
   align: center middle;
-  /* I legit have no clue why there is a random right padding and i cant get rid of it, so compensation with a left padding */
-  margin: 0 0 0 1;
 }
 
 #file_list_container {
@@ -357,47 +371,54 @@ Tooltip {
   height: 1fr;
   margin: 0;
   width: $pinned_sidebar_width;
-  scrollbar-size: 0 0 !important;
-  & > PinnedSidebar { scrollbar-size: 0 0 !important }
-  & > Input { display: none }
-  &:focus-within > Input,
-  Input.show,
-  & > Input:hover,
-  &:hover > Input { display: block }
 }
 
-#pinned_sidebar { height: 1fr }
-#pinned_sidebar { padding: 0 }
+#pinned_sidebar {
+  height: 1fr;
+  padding: 0
+}
 
 #preview_sidebar {
-  height: 1fr;
   margin: 0;
   width: $preview_sidebar_width;
   layout: horizontal;
-  padding: 0 1;
-  overflow: auto auto;
-  scrollbar-size: 1 1;
+  height: 1fr;
   & > Static {
-    text-overflow: clip;
+    text-overflow: ellipsis;
     text-wrap: nowrap;
-    width: auto;
-  }
- /* scrollbars are useless, reminder */
-  &.clip { scrollbar-size: 0 0 }
-  &.clip > Static {
     width: 1fr;
-    overflow-x: hidden !important;
+    overflow-x: hidden;
   }
   & > * {
+  /* scrollbars are useless, reminder */
     background: transparent;
     border: none;
     padding: 0;
     margin: 0;
-    &TextArea {
+    &Static {
       padding: 0 1;
+      scrollbar-size: 0 0;
+      overflow: hidden;
+      &#bat_preview {
+        padding: 0
+      }
+      &#special {
+        text-wrap: wrap;
+        text-overflow: fold;
+        padding: 0 1;
+      }
     }
+    &FileList { height: 1fr }
   }
-  & > FileList { height: 1fr }
+  Image {
+    width: auto;
+    height: auto;
+    align: center middle;
+    margin: 0 1
+  }
+  &.pdf Image {
+    margin: 0 1 1 1;
+  }
 }
 
 #preview_sidebar { padding: 0 }
@@ -410,7 +431,6 @@ Tooltip {
 
 #footer {
   height: $footer_unfocus_height;
-  margin: 0 1;
 
   & > * {
     height: 1fr;
@@ -457,13 +477,22 @@ ProgressBarContainer {
 }
 
 Content.selected { color: red }
-FileList, PinnedSidebar, Clipboard, CommandList, #zoxide_options, FileListRightClickOptionList, #file_search_options {
+CommandList,
+FileList, PinnedSidebar, Clipboard,
+FileListRightClickOptionList, SortOrderPopup,
+ZoxideOptionList,
+FileSearchToggles, FileSearchOptionList,
+ContentSearchToggles, ContentSearchOptionList,
+KeybindList {
   padding: 0 0 0 0;
+  background-tint: ansi_default !important;
+  .option-list--separator { color: $foreground }
   .option-list--option-disabled { color: $border-blurred }
   &:light .option-list--option-disabled { color: $border-blurred-light }
   .option-list--option-highlighted {
     color: $foreground;
     background: transparent;
+    text-style: none;
   }
   .option-list--option-hover {
     color: $primary;
@@ -473,6 +502,7 @@ FileList, PinnedSidebar, Clipboard, CommandList, #zoxide_options, FileListRightC
   &.-popup-shown .option-list--option-highlighted {
     color: $block-cursor-foreground;
     background: $primary;
+    text-style: none;
   }
   &:blur .selection-list--button-selected-highlighted,
   &:blur .selection-list--button-highlighted {
@@ -550,35 +580,60 @@ ModalScreen Button:ansi {
   }
 }
 
-ZDToDirectory, FileSearch {
+ZDToDirectory,
+FileSearch,
+ContentSearch {
   align: center middle;
-  Input {
-    width: 100%;
-    max-width: 100%;
-    padding: 0 1;
-    background: transparent;
-    border: $border-style $border;
-  }
-  OptionList {
-    width: 100%;
-    max-width: 100%;
-    height: 1fr;
-    background: transparent;
-    border: $border-style $border;
-    padding: 0;
-    .option-list--option-highlighted {
-      background: $primary !important;
-      color: $background !important;
-    }
-    &.empty {
-      border: $border-style $error !important;
-      border-subtitle-background: $error !important;
-    }
-  }
+  layout: horizontal;
   & > VerticalGroup {
     max-width: 50vw;
     max-height: 50vh;
+    OptionList {
+      width: 100%;
+      max-width: 100%;
+      height: 1fr;
+      padding: 0;
+      &.empty {
+        border: $border-style $error-darken-3 !important;
+        border-subtitle-color: $error-darken-3 !important;
+      }
+    }
+    Input {
+      width: 100%;
+      max-width: 100%;
+      padding: 0 1;
+      background: transparent;
+      border: $border-style $border-blurred;
+    }
+    &:focus-within {
+      OptionList {
+        border: $border-style $border;
+        .option-list--option-highlighted {
+          background: $primary !important;
+          color: $background !important;
+        }
+        &.empty {
+          border: $border-style $error !important;
+          border-subtitle-color: $error !important;
+        }
+      }
+      Input {
+        border: $border-style $border;
+      }
+    }
   }
+}
+
+FileSearch FileSearchToggles,
+ContentSearch ContentSearchToggles {
+  width: 24;
+  height: auto;
+  max-height: 50vh;
+}
+
+ContentSearch ContentSearchToggles {
+  /* size fix */
+  width: 25
 }
 
 Keybinds {
@@ -705,77 +760,50 @@ CommonFileNameDoWhat {
   }
 }
 
-GiveMePermission {
-  align: center middle;
-  #dialog {
-    grid-size: 2;
-    grid-gutter: 1 2;
-    grid-rows: 2 3 3 1; /* need the two lines for the label */
-    padding: 1 3;
-    border: $border-style $border;
-    max-height: 16;
-  }
-  #question_container {
-    column-span: 2;
-    height: 1fr;
-    width: 1fr;
-    content-align: center middle;
-    .question {
-      content-align: center middle;
-      width: 1fr;
-      height: 1fr;
-      text-align: center;
-    }
-  }
-  Button { width: 100% }
-  HorizontalGroup {
-    column-span: 2;
-    align: center middle;
-    Button#cancel { width: 50% }
-  }
-  #dontAskAgain {
-    column-span: 2;
-    content-align: center middle;
-    align: center middle;
-    Switch {
-      border: none;
-      padding: 0;
-      background: transparent;
-      margin: 0 2 0 0;
-      &:focus {
-        border: none;
-        & > .switch--slider { color: $panel-lighten-1 }
-        &.-on > .switch--slider { color: $success-lighten-1 }
-      }
-    }
-  }
-}
-
 FileInUse {
-  align: center middle;
-  #dialog {
-    grid-size: 1;
-    grid-gutter: 1 2;
-    grid-rows: 1fr 3; /* take up all the space available like Dismissable */
-    padding: 1 3;
-    border: $border-style $border;
-    max-height: 16;
-  }
-  #question_container {
-    column-span: 2;
-    height: 1fr;
-    width: 1fr;
-    content-align: center middle;
-    .question {
-      content-align: center middle;
-      width: 1fr;
-      height: 1fr;
-      text-align: center;
-    }
-  }
-  Container { align: center middle }
-  Button { width: 50% }
-  HorizontalGroup { column-span: 2; align: center middle }
+   align: center middle;
+   #dialog {
+     grid-size: 2;
+     grid-gutter: 1 2;
+     grid-rows: 1fr 3 3 1; /* space for toggle row */
+     padding: 1 3;
+     border: $border-style $border;
+     max-height: 16;
+   }
+   #question_container {
+     column-span: 2;
+     height: 1fr;
+     width: 1fr;
+     content-align: center middle;
+     .question {
+       content-align: center middle;
+       width: 1fr;
+       height: 1fr;
+       text-align: center;
+     }
+   }
+   Button { width: 100% }
+   Container {
+     column-span: 2;
+     align: center middle;
+     Button#cancel { width: 50% }
+   }
+   #dontAskAgain {
+     column-span: 2;
+     content-align: center middle;
+     align: center middle;
+     Switch {
+       border: none;
+       padding: 0;
+       background: transparent;
+       margin: 0 2 0 0;
+       &:focus {
+         border: none;
+         & > .switch--slider { color: $panel-lighten-1 }
+         &.-on > .switch--slider { color: $success-lighten-1 }
+       }
+     }
+   }
 }
 
 DeleteFiles {
@@ -807,7 +835,6 @@ ModalInput {
     border: $border-style $border;
     width: 50vw;
     max-height: 3;
-    padding: 0 1;
     background: transparent !important;
     border-title-align: left;
     border-subtitle-align: right;
@@ -816,8 +843,8 @@ ModalInput {
   }
   Input {
     background: transparent !important;
-    scrollbar-size: 0 0;
-    overflow-x: scroll;
+    overflow-x: hidden;
+    width: 1fr;
   }
   Label { height: 1 }
 }
@@ -827,7 +854,10 @@ TerminalTooSmall {
   background: transparent;
   height: 1fr;
   scrollbar-size: 0 0;
-  #logo { offset: 0 -1 }
+  #logo {
+    offset: 1 -1;
+    color: $primary
+  }
   HorizontalGroup {
     width: auto;
     background: transparent;
@@ -858,7 +888,7 @@ CommandPalette {
     margin-left: 2;
     margin-top: 1;
   }
-  & > Vertical {
+  #--container {
     background: transparent;
     width: 50vw;
     height: 50vh;
@@ -869,66 +899,172 @@ CommandPalette {
   LoadingIndicator { border-bottom: $border-style $border }
 }
 
-Screen {
-  &.-filelistonly {
-    #pinned_sidebar_container,
-    #preview_sidebar,
-    #below_menu Button { display: none !important }
-    #below_menu PathAutoCompleteInput { margin: -1 1 0 1 !important }
-    #zoxide_group,
-    CommandPalette > Vertical,
-    #dialog,
-    ModalInput {
-      width: 90vw;
-      max-width: 90vw;
-    }
-  }
-  &.-nopreview {
-    #preview_sidebar,
-    #below_menu Button { display: none !important }
-    #below_menu PathAutoCompleteInput { margin: -1 1 0 1 !important }
-    #pinned_sidebar_container { max-width: 25vw }
-    #zoxide_group,
-    CommandPalette > Vertical,
-    #dialog,
-    ModalInput {
-      width: 75vw;
-      max-width: 75vw;
-    }
-  }
-  &.-all-vertical #footer { max-height: 25vh }
-  &.-nopath {
-    #below_menu { display: none !important }
-    #footer { max-height: 30vh }
-  }
-  &.-nomenu-atall {
-    #menu,
-    #below_menu { display: none !important }
-    #footer { max-height: 30vh }
-  }
-  &.-filelistonly-vertical {
-    #menu { display: none !important }
-  }
-  &.-middle-only {
-    #menu,
-    #below_menu { display: none !important }
-    #footer { max-height: 25vh }
-  }
-}
-FileListRightClickOptionList {
+FileListRightClickOptionList,
+SortOrderPopup {
   width: auto;
   .option-list--option-highlighted {
     background: $primary;
     color: $background;
   }
 }
+
 LoadingIndicator {
   background: transparent;
 }
 /* Compact mode */
-.compact {
-  #menu { display: none; }
-  #below_menu { border: none; }
-  #pinned_sidebar_container { width: 16; }
-  #preview_sidebar { width: 25vw; }
+.compact-panels {
+  #pinned_sidebar_container { width: $compact_pinned_sidebar_width }
+  #preview_sidebar { width: $compact_preview_sidebar_width }
+  HeaderArea { height: 1 }
+  HeaderClock { border-bottom: none !important }
+  #footer {
+    height: $compact_footer_unfocus_height;
+    &:focus-within { height: $compact_footer_focus_height }
+  }
+}
+.compact-buttons {
+  #below_menu {
+    height: 2;
+    Input {
+      background: transparent;
+      padding-left: 1;
+      &.hide_border_bottom {
+        height: 1;
+      }
+    }
+    PathAutoCompleteInput {
+      margin: -1 -1 0 13;
+      background: transparent;
+    }
+    #showKeys {
+      height: 1;
+      border-left: $border-style $border-blurred
+    }
+  }
+  .option {
+    opacity: 1 !important;
+    background-tint: transparent !important;
+    text-opacity: 1 !important;
+    tint: transparent !important;
+    background: transparent;
+    width: 3;
+    max-width: 3;
+    height: 1;
+    &:disabled {
+      color: $panel-lighten-3;
+    }
+    &:light:disabled { color: $panel-darken-3 }
+    &:ansi:hover { color: $primary }
+    &:light:ansi:hover { color: $secondary }
+    &:disabled:hover { color: $panel-lighten-3 }
+  }
+}
+.comfy-buttons {
+  #below_menu {
+    Input {
+      &.hide_border_bottom {
+        border: $border-style $accent !important;
+        border-bottom: none !important;
+        height: 3;
+      }
+    }
+    PathAutoCompleteInput {
+      background: $background;
+      margin: -1 1 0 25;
+      &:ansi { background: transparent }
+    }
+    .option {
+      width: 7;
+      max-width: 7;
+      height: 3;
+    }
+    #showKeys {
+      height: 3;
+      border: $border-style $border-blurred
+    }
+  }
+  .option {
+    width: 3;
+    max-width: 3;
+  }
+}
+App.comfy-buttons Screen.-nopreview #below_menu PathAutoCompleteInput,
+App.comfy-buttons Screen.-filelistonly #below_menu PathAutoCompleteInput {
+  margin: -1 1 0 1
+}
+App.compact-buttons Screen.-nopreview #below_menu PathAutoCompleteInput,
+App.compact-buttons Screen.-filelistonly #below_menu PathAutoCompleteInput {
+  margin: -1 -1 0 -1
+}
+Screen.-filelistonly,
+Screen.-nopreview {
+  #preview_sidebar,
+  #below_menu Button { display: none !important }
+}
+Screen.-nomenu-atall #menuwrapper,
+Screen.-middle-only #menuwrapper {
+  display: none;
+}
+Screen {
+  &.-filelistonly {
+    #pinned_sidebar_container { display: none !important }
+    #zoxide_group,
+    #file_search_group,
+    #content_search_group,
+    .--textual-command-palette #--container,
+    #dialog,
+    #modalInput_group {
+      width: 90vw;
+      max-width: 90vw;
+    }
+    Toast { width: 90vw }
+    #file_search_toggles,
+    #content_search_toggles { display: none }
+  }
+  &.-nopreview {
+    #pinned_sidebar_container { max-width: 25vw }
+    #zoxide_group,
+    #file_search_group,
+    #content_search_group,
+    .--textual-command-palette #--container,
+    #dialog,
+    #modalInput_group {
+      width: 75vw;
+      max-width: 75vw;
+    }
+    Toast { width: 50vw }
+    #file_search_toggles,
+    #content_search_toggles { display: none }
+  }
+  &.-all-vertical #footer { max-height: 25vh }
+  &.-nopath {
+    #below_menu { display: none !important }
+    #footer { max-height: 30vh }
+    #zoxide_group, #file_search_group, #content_search_group {
+      max-height: 75vh;
+    }
+  }
+  &.-nomenu-atall {
+    #footer { max-height: 30vh }
+    #zoxide_group, #file_search_group, #content_search_group {
+      max-height: 90vh;
+    }
+  }
+  &.-filelistonly-vertical {
+    #menu { display: none !important }
+  }
+  &.-middle-only {
+    #footer { max-height: 25vh }
+    #zoxide_group, #file_search_group, #content_search_group {
+      max-height: 100vh !important;
+    }
+  }
+}
+#showKeys {
+  align: right middle;
+  width: auto;
+  max-width: 25vw;
+  margin-right: 1;
+  min-width: 5;
+  padding: 0 1;
 }

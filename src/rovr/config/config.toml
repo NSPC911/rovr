@@ -8,27 +8,58 @@ use_reactive_layout = true
 show_progress_eta = false
 show_progress_percentage = true
 truncate_progress_file_path = false
-preview_error = "Hmm, I think this file got corrupted (or maybe not?)"
-preview_binary = "This file is not UTF-8 encoded, so I decline to read it."
-preview_start = "print(\"Hello, world!\")"
-compact_mode = false
 show_line_numbers = true
+show_hidden_files = false
+allow_tab_nav = true
+append_new_tabs = true
+double_click_delay = 0.25
+drive_watcher_frequency = 3.0
+# yazi style is 5
+# but it has more space
+scrolloff = 3
+image_protocol = "Auto"
+max_preview_image_width = 1920
+max_preview_image_height = 1080
+
+[interface.preview_text]
+error = "couldn't read this file! (\u00AC_\u00AC)" # ¬_¬
+start = """
+  ___ ___
+ |  _| . |
+ |_| |___|
+  _ _ ___
+ | | |  _|
+  \\_/|_|
+"""
 
 [interface.clock]
 enabled = true
 align = "left"
 
+[interface.compact_mode]
+buttons = false
+panels = false
+
+[interface.mime_rules]
+"text/*" = "text"
+"image/*" = "image"
+"application/pdf" = "pdf"
+"application/zip" = "archive"
+"application/gzip" = "archive"
+"application/bzip2" = "archive"
+"application/xz" = "archive"
+"application/x-tar" = "archive"
+"application/x-gzip" = "archive"
+"application/x-bzip2" = "archive"
+"application/x-xz" = "archive"
+"application/x-rar" = "archive"
+"application/vnd.rar" = "archive"
+"application/x-7z-compressed" = "archive"
+"inode/directory" = "folder"
+
 [settings]
-preview_full = false
-image_protocol = "Auto"
-show_hidden_files = false
 copy_includes_metadata = true
 use_recycle_bin = true
-allow_tab_nav = true
-append_new_tabs = true
-cd_on_quit = false
-double_click_delay = 0.25
-drive_watcher_frequency = 3.0
 
 [metadata]
 fields = [
@@ -44,20 +75,9 @@ datetime_format = "%Y-%m-%d %H:%M"
 filesize_decimals = 1
 filesize_suffix = "decimal"
 
-[[icons.files]]
-pattern = "yaml"
-match_type = "endswith"
-icon = "\ue60b"
-color = "#F71A10"
-
-[[icons.folders]]
-pattern = "node_modules"
-match_type = "exact"
-icon = "\ue5fa"
-color = "green"
-
 [theme]
 default = "nord"
+preview = "nord"
 transparent = false
 
 [[custom_theme]]
@@ -77,24 +97,6 @@ is_dark = true
 [custom_theme.bar_gradient]
 default = ["#88c0d0", "#5e81ac"]
 error = ["#bf616a", "#d08770"]
-
-[[custom_theme]]
-name = "Solarized Dark"
-primary = "#93A1A1"
-secondary = "#839496"
-warning = "#B58900"
-error = "#DC322F"
-success = "#859900"
-accent = "#D33682"
-foreground = "#EEE8D5"
-background = "#073642"
-surface = "#284149"
-panel = "#657B83"
-is_dark = true
-
-[custom_theme.bar_gradient]
-default = ["#93A1A1", "#D33682"]
-error = ["#dc322f", "#b58900"]
 
 [[custom_theme]]
 name = "Dark Pink"
@@ -120,18 +122,20 @@ is_dark = true
 "button-focus-text-style" = "reverse"
 
 [keybinds]
-# id love to get some help separating
-# vi bindings from sane bindings
+# For keybind profiles, see keybinds/sane.toml and keybinds/vim.toml
+# The default configuration below combines both styles for maximum flexibility.
+# Users can copy their preferred profile to their config directory.
 toggle_pin = ["P"]
 toggle_pinned_sidebar = ["S"]
 toggle_preview_sidebar = ["I"]
 toggle_footer = ["F"]
+toggle_menuwrapper = ["M"]
 focus_toggle_pinned_sidebar = ["s"]
 focus_file_list = ["escape"]
 focus_toggle_preview_sidebar = ["i"]
 focus_toggle_path_switcher = ["ctrl+l"]
-focus_search = ["ctrl+f", "slash"]
-focus_toggle_processes = ["f6"]
+focus_search = ["slash"]
+focus_toggle_processes = ["#"]
 focus_toggle_clipboard = ["c"]
 focus_toggle_metadata = ["m"]
 copy = ["y", "ctrl+c"]
@@ -172,13 +176,45 @@ preview_scroll_left = ["left", "h"]
 preview_scroll_right = ["right", "l"]
 preview_select_left = ["shift+left", "H"]
 preview_select_right = ["shift+right", "L"]
-show_keybinds = ["question_mark"]
+show_keybinds = ["?"]
 quit_app = ["q", "ctrl+q"]
 command_palette = "ctrl+p"
 suspend_app = ["ctrl+z"]
+[keybinds.change_sort_order]
+open_popup = [","]
+name = ["a"]
+extension = ["e"]
+natural = ["n"]
+size = ["s"]
+created = ["c"]
+modified = ["m"]
+descending = ["d"]
+[keybinds.delete_files]
+trash = ["d"]
+delete = ["x"]
+cancel = ["c", "escape"]
+[keybinds.filename_conflict]
+overwrite = ["o"]
+skip = ["s"]
+rename = ["r"]
+cancel = ["c", "escape"]
+dont_ask_again = ["a"]
+[keybinds.file_in_use]
+retry = ["r"]
+skip = ["s"]
+cancel = ["c", "escape"]
+dont_ask_again = ["a"]
+[keybinds.filter_modal]
+exit = ["escape"]
+down = ["down", "ctrl+j"]
+up = ["up", "ctrl+k"]
+[keybinds.yes_or_no]
+yes = ["y"]
+no = ["n", "escape"]
+dont_ask_again = ["a"]
 
 [plugins.zoxide]
-enabled = false
+enabled = true
 keybinds = ["z"]
 show_scores = false
 
@@ -187,14 +223,39 @@ enabled = false
 executable = "bat"
 
 [plugins.editor]
-enabled = false
-file_executable = "nano"
-folder_executable = "code"
+enabled = true
+file_executable = ""
+folder_executable = ""
+file_suspend = true
+folder_suspend = true
+open_all_in_editor = false
 keybinds = ["e"]
 
-[plugins.finder]
-enabled = false
+[plugins.fd]
+enabled = true
 keybinds = ["f"]
 executable = "fd"
 relative_paths = true
 follow_symlinks = false
+no_ignore_parent = false
+default_filter_types = ["file", "directory"]
+
+[plugins.rg]
+enabled = true
+keybinds = ["\\"]
+executable = "rg"
+case_sensitive = true
+no_ignore_parent = false
+follow_symlinks = false
+search_hidden = false
+
+[plugins.poppler]
+enabled = true
+threads = 1
+use_pdftocairo = false
+poppler_folder = ""
+pdf_batch_size = 2
+
+[plugins.file_one]
+enabled = false
+get_description = true

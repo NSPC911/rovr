@@ -3,24 +3,52 @@ title: previewing files
 description: how rovr's file preview panel works.
 ---
 
+import { Aside } from "@astrojs/starlight/components";
+import InlineSVG from "@/components/InlineSVG.astro";
+
 `rovr` includes a powerful preview sidebar that can display the contents of various filetypes.
 
 ### text files
 
+<InlineSVG src="/rovr/screenshots/preview-file.svg" alt="file preview" />
+
 plain text files are displayed in a text area with syntax highlighting. the language is determined by the file extension. `rovr` supports a wide range of languages.
 
+### unknown/binary files
+
+<InlineSVG src="/rovr/screenshots/mime-type.svg" alt="mime type detection" />
+mime types are automatically obtained using [puremagic](https://pypi.org/project/puremagic) to give you a more accurate information of the file's type. If you additionally have `plugins.file_one` enabled with `plugins.file_one.get_description`, you can view extra information, like how many sections, what type, etc.
+
 ### bat plugin
+
+<InlineSVG src="/rovr/screenshots/preview-file-bat.svg" alt="file preview with bat" />
 
 if you have [`bat`](/rovr/features/plugins#bat) installed and enabled in the `rovr` config, it will be used to display text files with syntax highlighting for much more languages and theming.
 
 ### images
 
+<sub>no screenshots, they don't play nicely with svg</sub>
+
 `rovr` can display images directly in the terminal. refer to the [image previews](/rovr/features/image-previews) guide for more details on terminal compatibility and configuration.
 
 ### folders
 
+<InlineSVG src="/rovr/screenshots/preview-folder.svg" alt="folder preview" />
+
 when a folder is selected, the preview panel will show a list of the files and folders inside it, allowing you to see the contents without navigating into it.
+
+<Aside type="tip">
+  If you focus on the folder preview, you can navigate in there to open files and folders, letting you skip actually cd-ing into it!
+</Aside>
 
 ### archives
 
-for archive files (like `.zip`, `.tar.gz`, `.rar`, etc.), `rovr` will display a list of the files and folders contained within the archive.
+<InlineSVG src="/rovr/screenshots/preview-archive.svg" alt="archive preview" />
+
+for archive files (like `.zip`, `.tar.gz`, `.rar`), rovr will display a list of the files and folders contained within the archive.
+
+### pdf
+
+![pdf preview](/rovr/screenshots/preview-pdf.png)
+
+for pdf files, rovr makes use of [poppler](https://poppler.freedesktop.org) via [pdf2image](https://pypi.org/project/pdf2image). you can also scroll through the pdf with your mouse (scrollbars are unavailable for now) or use your keyboard to navigate it.

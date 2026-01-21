@@ -514,7 +514,7 @@ class FileList(CheckboxRenderingMixin, SelectionList, inherit_bindings=False):
         # Toggle pin on current directory
         elif check_key(event, config["keybinds"]["toggle_pin"]):
             pin_utils.toggle_pin(path.basename(getcwd()), getcwd())
-            await self.app.query_one("PinnedSidebar").reload_pins()
+            self.app.query_one("PinnedSidebar").reload_pins()
         elif check_key(event, config["keybinds"]["copy"]):
             await self.app.query_one("#copy").on_button_pressed(Button.Pressed)
         elif check_key(event, config["keybinds"]["cut"]):

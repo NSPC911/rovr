@@ -152,12 +152,13 @@ async def _copy_linux(paths: list[str]) -> ProcessResult | None:
     if not paths:
         return None
 
-    # Convert to text/uri-list format
-    uri_list = [f"{Path(path).resolve().as_uri()}\n" for path in paths]
+    encoded_paths = [
+        f"{Path(path).resolve().as_uri()}\n" for path in paths
+    ]
 
     # Try wl-copy first (Wayland)
     if shutil.which("wl-copy"):
-        command = ["wl-copy", "--type", "text/uri-list", "--"] + uri_list
+        command = ["wl-copy", "--type", "text/uri-list", "--"] + encoded_paths
         print(command)
         process = await asyncio.create_subprocess_exec(
             *command,
@@ -169,12 +170,34 @@ async def _copy_linux(paths: list[str]) -> ProcessResult | None:
         )
     # Fall back to xclip (X11)
     elif shutil.which("xclip"):
-        command = ["xclip-copyfile"] + uri_list
+        command = [
+            "xclip",
+            "-i",
+            "-selection",
+            "clipboard",
+            "-t",
+            "x-special/gnome-copied-files",
+        ]
         process = await asyncio.create_subprocess_exec(
-                *command,
-                stdout=asyncio.subprocess.PIPE,
-                stderr=asyncio.subprocess.PIPE,
+            *command,
+            stdin=asyncio.subprocess.PIPE,
+            stdout=asyncio.subprocess.PIPE,
+            stderr=asyncio.subprocess.PIPE,
+        )
+        try:
+            stdout, stderr = await asyncio.wait_for(
+                process.communicate(input=("copy\n" + "".join(encoded_paths)).encode()), timeout=15
             )
+        except TimeoutError:
+            process.kill()
+            await process.wait()
+            raise NotImplementedError(command)
+        return ProcessResult(
+            returncode=process.returncode or 0,
+            args=command,
+            stdout=stdout.decode().strip(),
+            stderr=stderr.decode().strip(),
+        )
     else:
         raise ClipboardToolNotFoundError(
             "wl-copy or xclip",
@@ -182,9 +205,7 @@ async def _copy_linux(paths: list[str]) -> ProcessResult | None:
             "Install 'wl-clipboard' (Wayland) or 'xclip' (X11) via your package manager",
         )
     try:
-        stdout, stderr = await asyncio.wait_for(
-            process.communicate(), timeout=15
-        )
+        stdout, stderr = await asyncio.wait_for(process.communicate(), timeout=15)
     except TimeoutError:
         process.kill()
         await process.wait()

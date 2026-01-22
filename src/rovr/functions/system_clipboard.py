@@ -153,37 +153,45 @@ async def _copy_linux(paths: list[str]) -> ProcessResult | None:
         return None
 
     # Convert to text/uri-list format
-    uri_list = "\r\n".join(Path(path).resolve().as_uri() for path in paths) + "\r\n"
+    uri_list = [f"{Path(path).resolve().as_uri()}\n" for path in paths]
 
     # Try wl-copy first (Wayland)
     if shutil.which("wl-copy"):
-        command = ["wl-copy", "-t", "text/uri-list"]
+        command = ["wl-copy", "--type", "text/uri-list", "--"] + uri_list
+        print(command)
+        process = await asyncio.create_subprocess_exec(
+            *command,
+            stdout=asyncio.subprocess.PIPE,
+            # quite weird, the issue with this is that
+            # i must not pipe wl-copy's 2 stream
+            # to null, so im forced to leave stderr open
+            # stderr=asyncio.subprocess.STDOUT,
+        )
     # Fall back to xclip (X11)
     elif shutil.which("xclip"):
-        command = ["xclip", "-selection", "clipboard", "-t", "text/uri-list"]
+        command = ["xclip-copyfile"] + uri_list
+        process = await asyncio.create_subprocess_exec(
+                *command,
+                stdout=asyncio.subprocess.PIPE,
+                stderr=asyncio.subprocess.PIPE,
+            )
     else:
         raise ClipboardToolNotFoundError(
             "wl-copy or xclip",
             "Linux",
             "Install 'wl-clipboard' (Wayland) or 'xclip' (X11) via your package manager",
         )
-    process = await asyncio.create_subprocess_exec(
-        *command,
-        stdin=asyncio.subprocess.PIPE,
-        stdout=asyncio.subprocess.PIPE,
-        stderr=asyncio.subprocess.PIPE,
-    )
     try:
         stdout, stderr = await asyncio.wait_for(
-            process.communicate(input=uri_list.encode()), timeout=15
+            process.communicate(), timeout=15
         )
     except TimeoutError:
         process.kill()
         await process.wait()
-        raise
+        raise NotImplementedError(command)
     return ProcessResult(
         returncode=process.returncode or 0,
         args=command,
-        stdout=stdout.decode().strip(),
-        stderr=stderr.decode().strip(),
+        stdout="" if stdout is None else stdout.decode().strip(),
+        stderr="" if stderr is None else stderr.decode().strip(),
     )

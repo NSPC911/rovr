@@ -152,9 +152,7 @@ async def _copy_linux(paths: list[str]) -> ProcessResult | None:
     if not paths:
         return None
 
-    encoded_paths = [
-        f"{Path(path).resolve().as_uri()}\n" for path in paths
-    ]
+    encoded_paths = [f"{Path(path).resolve().as_uri()}\n" for path in paths]
 
     # Try wl-copy first (Wayland)
     if shutil.which("wl-copy"):
@@ -186,7 +184,8 @@ async def _copy_linux(paths: list[str]) -> ProcessResult | None:
         )
         try:
             stdout, stderr = await asyncio.wait_for(
-                process.communicate(input=("copy\n" + "".join(encoded_paths)).encode()), timeout=15
+                process.communicate(input=("copy\n" + "".join(encoded_paths)).encode()),
+                timeout=15,
             )
         except TimeoutError:
             process.kill()

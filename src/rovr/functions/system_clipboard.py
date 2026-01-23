@@ -40,7 +40,9 @@ class ClipboardCommandError(ClipboardError):
         super().__init__(message)
 
 
-async def copy_files_to_system_clipboard(paths: list[str]) -> bool | ClipboardError:
+async def copy_files_to_system_clipboard(
+    paths: list[str],
+) -> bool | ClipboardError | TimeoutError:
     """Copy file paths to the system clipboard.
 
     Args:
@@ -67,9 +69,9 @@ async def copy_files_to_system_clipboard(paths: list[str]) -> bool | ClipboardEr
         else:
             tool = output.args[0] if output.args else "unknown"
             return ClipboardCommandError(tool, output.returncode, output.stderr)
-    except TimeoutError as exc:
-        return ClipboardError(f"Clipboard operation timed out: {exc}")
     except ClipboardError as exc:
+        return exc
+    except TimeoutError as exc:
         return exc
     except Exception as exc:
         return ClipboardError(f"Unexpected error: {exc}")
@@ -89,6 +91,9 @@ async def _copy_windows(paths: list[str]) -> ProcessResult | None:
 
     command = [
         "powershell",
+        "-NoProfile",
+        "-NoLogo",
+        "-NonInteractive",
         "-Command",
         f"Add-Type -AssemblyName System.Windows.Forms; "
         f"$data = New-Object System.Collections.Specialized.StringCollection; "
@@ -102,11 +107,12 @@ async def _copy_windows(paths: list[str]) -> ProcessResult | None:
         stderr=asyncio.subprocess.PIPE,
     )
     try:
-        stdout, stderr = await asyncio.wait_for(process.communicate(), timeout=15)
-    except TimeoutError:
+        stdout, stderr = await asyncio.wait_for(process.communicate(), timeout=5)
+    except TimeoutError as exc:
         process.kill()
         await process.wait()
-        raise
+        exc.add_note("powershell clipboard command timed out")
+        raise exc from None
     return ProcessResult(
         returncode=process.returncode or 0,
         args=command,
@@ -126,7 +132,7 @@ async def _copy_macos(paths: list[str]) -> ProcessResult | None:
         raise ClipboardToolNotFoundError(
             "clippy",
             "macOS",
-            "Install 'clippy' via Homebrew: 'brew install clippy'\nIf you know how to use osascript to copy files, please open an issue!",
+            "Install 'clippy' via Homebrew:\n'brew install clippy'\nIf you know how to use osascript to copy multiple files, please open an issue!",
         )
     command = ["clippy"] + [f'"{path}"' for path in paths]
     process = await asyncio.create_subprocess_exec(
@@ -135,11 +141,12 @@ async def _copy_macos(paths: list[str]) -> ProcessResult | None:
         stderr=asyncio.subprocess.PIPE,
     )
     try:
-        stdout, stderr = await asyncio.wait_for(process.communicate(), timeout=15)
-    except TimeoutError:
+        stdout, stderr = await asyncio.wait_for(process.communicate(), timeout=5)
+    except TimeoutError as exc:
         process.kill()
         await process.wait()
-        raise
+        exc.add_note("clippy timed out")
+        raise exc from None
     return ProcessResult(
         returncode=process.returncode or 0,
         args=command,
@@ -166,6 +173,8 @@ async def _copy_linux(paths: list[str]) -> ProcessResult | None:
             # to null, so im forced to leave stderr open
             # stderr=asyncio.subprocess.STDOUT,
         )
+        stdin = None
+        using = "wl-copy"
     # Fall back to xclip (X11)
     elif shutil.which("xclip"):
         command = [
@@ -174,7 +183,7 @@ async def _copy_linux(paths: list[str]) -> ProcessResult | None:
             "-selection",
             "clipboard",
             "-t",
-            "x-special/gnome-copied-files",
+            "text/uri-list",
         ]
         process = await asyncio.create_subprocess_exec(
             *command,
@@ -182,33 +191,15 @@ async def _copy_linux(paths: list[str]) -> ProcessResult | None:
             stdout=asyncio.subprocess.PIPE,
             stderr=asyncio.subprocess.PIPE,
         )
-        try:
-            stdout, stderr = await asyncio.wait_for(
-                process.communicate(input=("copy\n" + "".join(encoded_paths)).encode()),
-                timeout=15,
-            )
-        except TimeoutError:
-            process.kill()
-            await process.wait()
-            raise NotImplementedError(command)
-        return ProcessResult(
-            returncode=process.returncode or 0,
-            args=command,
-            stdout=stdout.decode().strip(),
-            stderr=stderr.decode().strip(),
-        )
-    else:
-        raise ClipboardToolNotFoundError(
-            "wl-copy or xclip",
-            "Linux",
-            "Install 'wl-clipboard' (Wayland) or 'xclip' (X11) via your package manager",
-        )
+        stdin = "".join(encoded_paths).encode()
+        using = "xclip"
     try:
-        stdout, stderr = await asyncio.wait_for(process.communicate(), timeout=15)
-    except TimeoutError:
+        stdout, stderr = await asyncio.wait_for(process.communicate(stdin), timeout=5)
+    except TimeoutError as exc:
         process.kill()
         await process.wait()
-        raise NotImplementedError(command)
+        exc.add_note(f"{using} timed out")
+        raise exc from None
     return ProcessResult(
         returncode=process.returncode or 0,
         args=command,

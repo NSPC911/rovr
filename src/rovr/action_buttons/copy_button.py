@@ -159,6 +159,13 @@ class CopyButton(Button):
                 title="System Copy",
                 severity="information",
             )
+        elif isinstance(output, TimeoutError):
+            self.notify(
+                f"\n{'\n'.join(output.__notes__)}" if output.__notes__ else "",
+                title="System Copy Timeout",
+                severity="error",
+                timeout=5,
+            )
         elif isinstance(output, ClipboardToolNotFoundError):
             self.notify(
                 str(output),
@@ -180,7 +187,9 @@ class CopyPanelOptions(PopupOptionList):
         super().__init__()
         self.do_adjust: bool = False
 
-    def on_mount(self, event: events.Mount) -> None:  # ty: ignore[invalid-method-override]
+    def on_mount(
+        self, event: events.Mount
+    ) -> None:  # ty: ignore[invalid-method-override]
         # calling super()._on_mount is useless, and super().mount()
         # doesnt do anything significant, hence ty ignore
         self.button: CopyButton = self.app.query_one(CopyButton)

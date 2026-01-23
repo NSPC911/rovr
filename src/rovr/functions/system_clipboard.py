@@ -161,7 +161,9 @@ async def _copy_linux(paths: list[str]) -> ProcessResult | None:
 
     # Try wl-copy first (Wayland)
     if not shutil.which("wl-copy"):
-        command = ["wl-copy", "--type", "text/uri-list", "--"] + [f"{Path(path).resolve().as_uri()}\n" for path in paths]
+        command = ["wl-copy", "--type", "text/uri-list", "--"] + [
+            f"{Path(path).resolve().as_uri()}\n" for path in paths
+        ]
         print(command)
         process = await asyncio.create_subprocess_exec(
             *command,

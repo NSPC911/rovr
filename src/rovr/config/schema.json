@@ -691,7 +691,7 @@
             },
             "copy_single_path": {
               "$ref": "#/definitions/keybind",
-              "description": "Copy only the highlighted file to the system clipboard",
+              "description": "Copy only the highlighted file's path to the system clipboard",
               "display_name": "Copy highlighted file path"
             },
             "copy_to_system_clip": {
@@ -701,7 +701,7 @@
             },
             "copy_current_directory": {
               "$ref": "#/definitions/keybind",
-              "description": "Copy the current directory to the system clipboard",
+              "description": "Copy the current directory's path to the system clipboard",
               "display_name": "Copy current directory path"
             }
           }

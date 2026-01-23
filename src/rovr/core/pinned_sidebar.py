@@ -5,7 +5,7 @@ from textual import events, work
 from textual.binding import BindingType
 from textual.widgets import Input, OptionList
 from textual.widgets.option_list import Option
-from textual.worker import WorkerError
+from textual.worker import WorkerCancelled
 
 from rovr.classes import FolderNotFileError, PinnedSidebarOption
 from rovr.functions import icons as icon_utils
@@ -120,8 +120,10 @@ class PinnedSidebar(OptionList, inherit_bindings=False):
         drive_worker = self.app.run_in_thread(path_utils.get_mounted_drives)
         try:
             await drive_worker.wait()
-        except WorkerError as exc:
+        except WorkerCancelled as exc:
             path_utils.dump_exc(self, exc)
+            # retry again
+            self.call_later(self.reload_pins)
             return
         drives = drive_worker.result
         for drive in drives:

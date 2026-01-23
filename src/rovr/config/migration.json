@@ -1,6 +1,15 @@
 [
   {
     "keys": [
+      "keybinds.copy_path"
+    ],
+    "message": [
+      "The copy path button has been combined with the copy button. You now press [bright_cyan]keybinds.extra_copy.open_popup[/] (most likely `Y`) followed by [bright_cyan]keybinds.extra_copy.copy_single_path[/] (most likely `p`) to copy the path to your clipboard."
+    ],
+    "extra": "Changed in v0.7.0"
+  },
+  {
+    "keys": [
       "plugins.editor",
       "plugins.editor.enabled",
       "plugins.editor.file_executable",

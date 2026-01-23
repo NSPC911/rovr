@@ -32,13 +32,13 @@ from rovr.action_buttons import (
     DeleteButton,
     NewItemButton,
     PasteButton,
-    PathCopyButton,
     RenameItemButton,
     UnzipButton,
     ZipButton,
 )
 from rovr.action_buttons.sort_order import SortOrderButton, SortOrderPopup
 from rovr.components import SearchInput
+from rovr.components.popup_option_list import PopupOptionList
 from rovr.core import FileList, FileListContainer, PinnedSidebar, PreviewContainer
 from rovr.core.file_list import FileListRightClickOptionList
 from rovr.footer import Clipboard, MetadataContainer, ProcessContainer
@@ -152,8 +152,8 @@ class Application(App, inherit_bindings=False):
                     yield DeleteButton()
                     yield ZipButton()
                     yield UnzipButton()
-                    yield PathCopyButton()
                     yield SortOrderButton()
+
                 with VerticalGroup(id="below_menu"):
                     with HorizontalGroup():
                         yield BackButton()
@@ -826,10 +826,10 @@ class Application(App, inherit_bindings=False):
             self.hide_popups()
 
     def hide_popups(self) -> None:
+        # just in case
         with suppress(NoMatches):
-            self.query_one(FileListRightClickOptionList).add_class("hidden")
-        with suppress(NoMatches):
-            self.query_one(SortOrderPopup).add_class("hidden")
+            for popup in self.query(PopupOptionList):
+                popup.add_class("hidden")
 
     @work(thread=True)
     def run_in_thread(self, function: Callable, *args, **kwargs) -> Worker:

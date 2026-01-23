@@ -25,9 +25,6 @@ new = ["ctrl+n"]
 # off standard but seems reasonable enough
 zip = ["E"]
 unzip = ["ctrl+e"]
-# issue is that terminals tend to take ctrl+shift+c to copy
-# selections done with shift + mouse
-copy_path = ["C"]
 # standard
 up = ["up"]
 down = ["down"]
@@ -68,11 +65,18 @@ command_palette = "ctrl+p"
 suspend_app = ["ctrl+z"]
 open_editor = ["ctrl+o"]
 
+[keybinds.extra_copy]
+open_popup = ["C"]
+copy_to_rovr = ["r"]
+copy_single_path = ["p"]
+copy_to_system_clip = ["s"]
+copy_current_directory = ["u"]
+
 [keybinds.change_sort_order]
 open_popup = ["o"]
-name = ["n"]
+name = ["a"]
 extension = ["e"]
-natural = ["t"]
+natural = ["n"]
 size = ["s"]
 created = ["c"]
 modified = ["m"]

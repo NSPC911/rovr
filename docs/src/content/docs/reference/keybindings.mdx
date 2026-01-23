@@ -59,7 +59,6 @@ just copy over the contents of the desired profile into your `config.toml` file 
 | toggle_all                   | Select all             | <kbd>%</kbd> <kbd>ctrl+a</kbd>                 | <kbd>%</kbd> <kbd>ctrl+a</kbd>                 | <kbd>ctrl+a</kbd>                        |
 | zip                          | Zip                    | <kbd>E</kbd>                                   | <kbd>E</kbd>                                   | <kbd>E</kbd>                             |
 | unzip                        | Unzip                  | <kbd>ctrl+e</kbd>                              | <kbd>ctrl+e</kbd>                              | <kbd>ctrl+e</kbd>                        |
-| copy_path                    | Copy path              | <kbd>Y</kbd>                                   | <kbd>Y</kbd>                                   | <kbd>C</kbd>                             |
 | up                           | Up                     | <kbd>up</kbd> <kbd>k</kbd>                     | <kbd>k</kbd> <kbd>up</kbd>                     | <kbd>up</kbd>                            |
 | down                         | Down                   | <kbd>down</kbd> <kbd>j</kbd>                   | <kbd>j</kbd> <kbd>down</kbd>                   | <kbd>down</kbd>                          |
 | up_tree                      | Go up directory        | <kbd>left</kbd> <kbd>h</kbd>                   | <kbd>h</kbd> <kbd>left</kbd>                   | <kbd>left</kbd> <kbd>alt+up</kbd>        |
@@ -82,10 +81,10 @@ just copy over the contents of the desired profile into your `config.toml` file 
 | tab_previous                 | Previous tab           | <kbd>ctrl+k</kbd>                              | <kbd>ctrl+k</kbd>                              | <kbd>ctrl+right_square_brace</kbd>       |
 | tab_new                      | New tab                | <kbd>n</kbd>                                   | <kbd>n</kbd>                                   | <kbd>ctrl+t</kbd>                        |
 | tab_close                    | Close tab              | <kbd>w</kbd>                                   | <kbd>w</kbd>                                   | <kbd>ctrl+w</kbd>                        |
-| preview_scroll_left          | Scroll left            | <kbd>left</kbd> <kbd>h</kbd>                   | <kbd>h</kbd> <kbd>left</kbd>                   | <kbd>left</kbd>                          |
-| preview_scroll_right         | Scroll right           | <kbd>right</kbd> <kbd>l</kbd>                  | <kbd>l</kbd> <kbd>right</kbd>                  | <kbd>right</kbd>                         |
-| preview_select_right         | Select right           | <kbd>shift+right</kbd> <kbd>L</kbd>            | <kbd>L</kbd> <kbd>shift+right</kbd>            | _none_                                   |
-| preview_select_left          | Select left            | <kbd>shift+left</kbd> <kbd>H</kbd>             | <kbd>H</kbd> <kbd>shift+left</kbd>             | _none_                                   |
+| preview_scroll_left          | Scroll left            | _none_                                         | <kbd>h</kbd> <kbd>left</kbd>                   | <kbd>left</kbd>                          |
+| preview_scroll_right         | Scroll right           | _none_                                         | <kbd>l</kbd> <kbd>right</kbd>                  | <kbd>right</kbd>                         |
+| preview_select_right         | Select right           | _none_                                         | <kbd>L</kbd> <kbd>shift+right</kbd>            | _none_                                   |
+| preview_select_left          | Select left            | _none_                                         | <kbd>H</kbd> <kbd>shift+left</kbd>             | _none_                                   |
 | show_keybinds                | Show keybinds          | <kbd>?</kbd>                                   | <kbd>?</kbd>                                   | <kbd>f1</kbd>                            |
 | quit_app                     | Quit app               | <kbd>q</kbd> <kbd>ctrl+q</kbd>                 | <kbd>q</kbd> <kbd>ctrl+q</kbd>                 | <kbd>ctrl+q</kbd>                        |
 | command_palette              | Launch command palette | <kbd>ctrl+p</kbd>                              | <kbd>ctrl+p</kbd>                              | <kbd>ctrl+p</kbd>                        |
@@ -96,21 +95,6 @@ just copy over the contents of the desired profile into your `config.toml` file 
 
 keybinds related to the alternate screens and popups in rovr.
 
-### `change_sort_order`
-
-Keybinds related to changing the sort order
-
-| action     | default      | vim          | sane         | description           |
-| ---------- | ------------ | ------------ | ------------ | --------------------- |
-| open_popup | <kbd>,</kbd> | <kbd>,</kbd> | <kbd>o</kbd> | Open sort order popup |
-| name       | <kbd>a</kbd> | <kbd>a</kbd> | <kbd>n</kbd> | Sort by name          |
-| extension  | <kbd>e</kbd> | <kbd>e</kbd> | <kbd>e</kbd> | Sort by extension     |
-| natural    | <kbd>n</kbd> | <kbd>n</kbd> | <kbd>t</kbd> | Sort naturally        |
-| size       | <kbd>s</kbd> | <kbd>s</kbd> | <kbd>s</kbd> | Sort by size          |
-| created    | <kbd>c</kbd> | <kbd>c</kbd> | <kbd>c</kbd> | Sort by created       |
-| modified   | <kbd>m</kbd> | <kbd>m</kbd> | <kbd>m</kbd> | Sort by modified      |
-| descending | <kbd>d</kbd> | <kbd>d</kbd> | <kbd>d</kbd> | Toggle descending     |
-
 ### `delete_files`
 
 Keybinds related to the delete confirmation screen
@@ -120,6 +104,33 @@ Keybinds related to the delete confirmation screen
 | trash  | <kbd>d</kbd>                   | <kbd>d</kbd>                   | <kbd>d</kbd>       | Delete to recycle bin |
 | delete | <kbd>x</kbd>                   | <kbd>x</kbd>                   | <kbd>shift+d</kbd> | Permanently delete    |
 | cancel | <kbd>c</kbd> <kbd>escape</kbd> | <kbd>c</kbd> <kbd>escape</kbd> | <kbd>escape</kbd>  | Cancel deletion       |
+
+### `extra_copy`
+
+Keybinds related to extra copy options
+
+| action                 | default      | vim          | sane         | description                 |
+| ---------------------- | ------------ | ------------ | ------------ | --------------------------- |
+| open_popup             | <kbd>Y</kbd> | <kbd>Y</kbd> | <kbd>C</kbd> | Copy options                |
+| copy_to_rovr           | <kbd>y</kbd> | <kbd>y</kbd> | <kbd>r</kbd> | Copy to rovr's clipboard    |
+| copy_single_path       | <kbd>p</kbd> | <kbd>c</kbd> | <kbd>p</kbd> | Copy highlighted file path  |
+| copy_to_system_clip    | <kbd>s</kbd> | <kbd>s</kbd> | <kbd>s</kbd> | Copy to system clipboard    |
+| copy_current_directory | <kbd>d</kbd> | <kbd>d</kbd> | <kbd>u</kbd> | Copy current directory path |
+
+### `change_sort_order`
+
+Keybinds related to changing the sort order
+
+| action     | default      | vim          | sane         | description           |
+| ---------- | ------------ | ------------ | ------------ | --------------------- |
+| open_popup | <kbd>,</kbd> | <kbd>,</kbd> | <kbd>o</kbd> | Open sort order popup |
+| name       | <kbd>a</kbd> | <kbd>a</kbd> | <kbd>a</kbd> | Sort by name          |
+| extension  | <kbd>e</kbd> | <kbd>e</kbd> | <kbd>e</kbd> | Sort by extension     |
+| natural    | <kbd>n</kbd> | <kbd>n</kbd> | <kbd>n</kbd> | Sort naturally        |
+| size       | <kbd>s</kbd> | <kbd>s</kbd> | <kbd>s</kbd> | Sort by size          |
+| created    | <kbd>c</kbd> | <kbd>c</kbd> | <kbd>c</kbd> | Sort by created       |
+| modified   | <kbd>m</kbd> | <kbd>m</kbd> | <kbd>m</kbd> | Sort by modified      |
+| descending | <kbd>d</kbd> | <kbd>d</kbd> | <kbd>d</kbd> | Toggle descending     |
 
 ### `filename_conflict`
 

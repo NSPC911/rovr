@@ -56,8 +56,7 @@ ZoxideOptionList,
 FileSearchOptionList, FileSearchToggles,
 ContentSearchOptionList, ContentSearchToggles,
 #footer > *,
-FileListRightClickOptionList,
-SortOrderPopup,
+PopupOptionList,
 .comfy-buttons #path_switcher,
 .comfy-buttons #below_menu Button,
 PasteScreen OptionList,
@@ -101,8 +100,7 @@ ContentSearchToggles:focus,
 #pinned_sidebar.-maximized,
 #preview_sidebar .inner_preview.-maximized,
 #footer > *:focus,
-FileListRightClickOptionList,
-SortOrderPopup,
+PopupOptionList,
 .comfy-buttons #path_switcher:focus-within,
 .comfy-buttons #below_menu Button:focus,
 .comfy-buttons #below_menu Button:hover,
@@ -480,7 +478,7 @@ ProgressBarContainer {
 Content.selected { color: red }
 CommandList,
 FileList, PinnedSidebar, Clipboard,
-FileListRightClickOptionList, SortOrderPopup,
+PopupOptionList,
 ZoxideOptionList,
 FileSearchToggles, FileSearchOptionList,
 ContentSearchToggles, ContentSearchOptionList,
@@ -922,8 +920,7 @@ CommandPalette {
   LoadingIndicator { border-bottom: $border-style $border }
 }
 
-FileListRightClickOptionList,
-SortOrderPopup {
+PopupOptionList {
   width: auto;
   .option-list--option-highlighted {
     background: $primary;

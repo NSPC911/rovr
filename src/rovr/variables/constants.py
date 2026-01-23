@@ -65,7 +65,6 @@ buttons_that_depend_on_path = [
     "#rename",
     "#delete",
     "#zip",
-    "#copy_path",
 ]
 
 ascii_logo = r"""

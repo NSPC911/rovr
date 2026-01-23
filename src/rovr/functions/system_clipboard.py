@@ -134,7 +134,7 @@ async def _copy_macos(paths: list[str]) -> ProcessResult | None:
             "macOS",
             "Install 'clippy' via Homebrew:\n'brew install clippy'\nIf you know how to use osascript to copy multiple files, please open an issue!",
         )
-    command = ["clippy"] + [f'"{path.replace('"', r'\"')}"' for path in paths]
+    command = ["clippy"] + [f'"{path.replace('"', r"\"")}"' for path in paths]
     process = await asyncio.create_subprocess_exec(
         *command,
         stdout=asyncio.subprocess.PIPE,

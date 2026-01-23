@@ -134,7 +134,7 @@ async def _copy_macos(paths: list[str]) -> ProcessResult | None:
             "macOS",
             "Install 'clippy' via Homebrew:\n'brew install clippy'\nIf you know how to use osascript to copy multiple files, please open an issue!",
         )
-    command = ["clippy"] + [f'"{path}"' for path in paths]
+    command = ["clippy"] + [f'"{path.replace('"', r'\"')}"' for path in paths]
     process = await asyncio.create_subprocess_exec(
         *command,
         stdout=asyncio.subprocess.PIPE,
@@ -160,11 +160,10 @@ async def _copy_linux(paths: list[str]) -> ProcessResult | None:
         return None
 
     # Try wl-copy first (Wayland)
-    if not shutil.which("wl-copy"):
+    if shutil.which("wl-copy"):
         command = ["wl-copy", "--type", "text/uri-list", "--"] + [
             f"{Path(path).resolve().as_uri()}\n" for path in paths
         ]
-        print(command)
         process = await asyncio.create_subprocess_exec(
             *command,
             stdout=asyncio.subprocess.PIPE,
@@ -192,7 +191,6 @@ async def _copy_linux(paths: list[str]) -> ProcessResult | None:
             # stderr=asyncio.subprocess.PIPE,
         )
         stdin = "\n".join([Path(path).resolve().as_uri() for path in paths]).encode()
-        print(stdin)
         using = "xclip"
     try:
         stdout, stderr = await asyncio.wait_for(process.communicate(stdin), timeout=5)

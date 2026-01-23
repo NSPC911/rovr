@@ -138,7 +138,7 @@ class CopyButton(Button):
     def copy_current_directory(self) -> None:
         parent_path = Path(getcwd()).as_posix()
         self.app.copy_to_clipboard(parent_path)
-        self.notify("Copied!", title="Copy Parent Path", severity="information")
+        self.notify("Copied!", title="Copy Current Directory", severity="information")
 
     @work
     async def copy_to_system_clip(self) -> None:
@@ -208,7 +208,7 @@ class CopyPanelOptions(PopupOptionList):
                 path_bind, "Copy single file path ", "path", disabled=should_disable
             ),
             CopyPanelOption(
-                copy_parent_bind, "Copy parent directory path ", "parent_path"
+                copy_parent_bind, "Copy current directory path ", "parent_path"
             ),
             CopyPanelOption(
                 system_bind,

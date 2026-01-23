@@ -302,6 +302,7 @@
             "created",
             "hidden"
           ],
+          "uniqueItems": true,
           "description": "The order of the metadata tags that you want to see in the Metadata section."
         },
         "datetime_format": {
@@ -1062,6 +1063,7 @@
               "type": "array",
               "default": ["file", "directory"],
               "description": "The default file types to show when using fd.",
+              "uniqueItems": true,
               "items": {
                 "type": "string",
                 "enum": [

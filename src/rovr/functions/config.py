@@ -1,10 +1,9 @@
 import os
-from collections import deque
 from importlib import resources
 from importlib.metadata import PackageNotFoundError, version
 from os import path
 from shutil import which
-from typing import Callable
+from typing import Callable, cast
 
 import fastjsonschema
 import tomli
@@ -85,12 +84,12 @@ def toml_dump(doc_path: str, exception: tomli.TOMLDecodeError) -> None:
     exit(1)
 
 
-def find_path_line(lines: list[str], path: deque) -> int | None:
+def find_path_line(lines: list[str], path: list) -> int | None:
     """Find the line number for a given JSON path in TOML content
 
     Args:
         lines: list of lines from the TOML file
-        path: the JSON path from the ValidationError
+        path: the JSON path from the ValidationError (from fastjsonschema, starts with ['data', ...])
 
     Returns:
         int | None: the line number (0-indexed) or None if not found
@@ -98,12 +97,13 @@ def find_path_line(lines: list[str], path: deque) -> int | None:
     if not path:
         return 0
 
+    path_filtered = [p for p in path if not isinstance(p, int)]
+    if not path_filtered:
+        return 0
+
     current_section = []
 
-    # Convert path to list and filter out indices for comparison
-    path_list = list(path)
-    path_without_indices = [p for p in path_list if not isinstance(p, int)]
-
+    best_match_line: int = -1
     for i, line in enumerate(lines):
         stripped = line.strip()
         if not stripped or stripped.startswith("#"):
@@ -119,17 +119,17 @@ def find_path_line(lines: list[str], path: deque) -> int | None:
                 section_name = stripped.strip("[]").strip()
                 current_section = section_name.split(".")
 
-            if current_section in (path_without_indices, path_list):
-                return i
+            if current_section == path_filtered:
+                best_match_line = i
             for depth in range(1, len(current_section) + 1):
-                if current_section[:depth] in (path_without_indices, path_list):
-                    return i
+                if current_section[:depth] == path_filtered[:depth]:
+                    best_match_line = i
         elif "=" in stripped:
             key = stripped.split("=")[0].strip().strip('"').strip("'")
             full_path = current_section + [key]
-            if full_path in (path_without_indices, path_list):
-                return i
-    return None
+            if full_path == path_filtered:
+                best_match_line = i
+    return best_match_line if best_match_line != -1 else None
 
 
 def schema_dump(
@@ -149,34 +149,37 @@ def schema_dump(
     from rich.syntax import Syntax
     from rich.table import Table
 
+    exception.message = exception.message.replace("data.", "")
+    exception.name = (
+        cast(list, exception.name)[5:]
+        if exception.name.startswith("data.")
+        else exception.name
+    )
+
     def get_message(exception: JsonSchemaValueException) -> tuple[str, bool]:
         failed = False
-        match exception.type:
+        match exception.rule:
             case "required":
                 error_msg = f"Missing required field: {exception.message}"
             case "type":
-                error_msg = f"Expected [bright_cyan]{exception.validator_value}[/] type, but got [bright_yellow]{type(exception.instance).__name__}[/] instead"
+                error_msg = f"Expected [bright_cyan]{exception.rule_definition}[/] type, but got [bright_yellow]{type(exception.value).__name__}[/] instead"
             case "enum":
-                error_msg = f"Provided value '{exception.instance}' is not inside allowlist of {exception.validator_value}"
+                error_msg = f"'{exception.value}' is not inside allowlist of {exception.rule_definition}"
             case "minimum":
-                error_msg = f"Value for [bright_cyan]{'.'.join(str(p) for p in exception.relative_path)}[/] must be >= {exception.validator_value} (cannot be {exception.instance})"
+                error_msg = f"Value for [bright_cyan]{exception.name}[/] must be >= {exception.rule_definition} (cannot be {exception.value})"
             case "maximum":
-                error_msg = f"Value for [bright_cyan]{'.'.join(str(p) for p in exception.relative_path)}[/] must be <= {exception.validator_value} (cannot be {exception.instance})"
+                error_msg = f"Value for [bright_cyan]{exception.name}[/] must be <= {exception.rule_definition} (cannot be {exception.value})"
+            case "additionalProperties":
+                error_msg = exception.message
+            case "uniqueItems":
+                error_msg = f"[bright_cyan]{exception.name}[/] must have unique items (item '{cast(list, exception.value)[0]}' is duplicated)"
             case _:
                 error_msg = exception.message
                 failed = True
-        return (f"schema\\[{exception.validator}]: {error_msg}", failed)
+        return (f"schema\\[{exception.rule}]: {error_msg}", failed)
 
     doc: list = config_content.splitlines()
 
-    if exception.message.startswith("Additional properties are not allowed"):
-        # `Additional properties are not allowed ('<key>' was unexpected)`
-        # grabs only the key
-        cause = exception.message.split("'")
-        if len(cause) == 3:
-            exception.path.append(cause[1])
-        else:
-            pass
     # find the line no for the error path
     path_str = ".".join(str(p) for p in exception.path) if exception.path else "root"
     lineno = find_path_line(doc, exception.path)
@@ -252,7 +255,7 @@ def schema_dump(
             pprint(Padding(to_print, (0, rjust + 4, 0, rjust + 3)))
             break
 
-    if not exception.message.startswith("Additional properties are not allowed"):
+    if exception.rule != "additionalProperties":
         exit(1)
 
 

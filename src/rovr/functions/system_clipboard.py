@@ -86,7 +86,9 @@ async def _copy_windows(paths: list[str]) -> ProcessResult | None:
             "powershell", "Windows", "PowerShell should be available on Windows"
         )
 
-    escaped_paths = [f"'{path.replace('"', '`"').replace("'", "`'")}'" for path in paths]
+    escaped_paths = [
+        f"'{path.replace('"', '`"').replace("'", "`'")}'" for path in paths
+    ]
     paths_list = ",".join(escaped_paths)
 
     command = [

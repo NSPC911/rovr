@@ -18,8 +18,6 @@ drive_watcher_frequency = 3.0
 # but it has more space
 scrolloff = 3
 image_protocol = "Auto"
-max_preview_image_width = 1920
-max_preview_image_height = 1080
 
 [interface.preview_text]
 error = "couldn't read this file! (\u00AC_\u00AC)" # ¬_¬

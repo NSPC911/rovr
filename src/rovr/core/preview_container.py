@@ -148,43 +148,19 @@ class PreviewContainer(Container):
         except NoMatches:
             return False
 
-    def load_image(self) -> PILImage | None:
-        """Load image in a thread.
+    def any_in_queue(self) -> bool:
+        """Check if there's a queued task and run it if so.
+
         Returns:
-            PILImage | None: The loaded image or None if cancelled.
+            bool: True if queue was processed or cancelled, False otherwise.
         """
-        assert self._current_file_path is not None
-        pil_object: PILImage = Image.open(self._current_file_path)
-        max_width = config["interface"]["max_preview_image_width"]
-        max_height = config["interface"]["max_preview_image_height"]
-
-        reduce_factor = 1
-        # Calculate reduction factor based on each active dimension independently.
-        # A value of 0 disables limiting for that dimension.
-        factors: list[float] = []
-        if max_width > 0:
-            factors.append(pil_object.width / max_width)
-        if max_height > 0:
-            factors.append(pil_object.height / max_height)
-        if factors:
-            # Use the larger factor, rounded down to an integer and clamped to at least 1.
-            reduce_factor = max(1, int(max(factors)))
-
         if should_cancel():
-            # the actually intensive part is
-            # the reduction and nothing else
-            return
-
-        if reduce_factor > 1:
-            self.log(
-                f"Image will be reduced by factor {reduce_factor}: "
-                f"{pil_object.width}x{pil_object.height} -> "
-                f"{pil_object.width // reduce_factor}x{pil_object.height // reduce_factor}"
-            )
-            pil_object = pil_object.reduce(reduce_factor)
-        else:
-            pil_object.load()
-        return pil_object
+            return True
+        if self._queued_task is not None:
+            self._queued_task(self._queued_task_args)
+            self._queued_task, self._queued_task_args = None, None
+            return True
+        return False
 
     def show_image_preview(self, depth: int = 0) -> None:
         """Show image preview. Runs in a thread."""
@@ -193,11 +169,9 @@ class PreviewContainer(Container):
             return
 
         try:
-            pil_object = self.load_image()
-            if should_cancel():
-                return
-        except (UnidentifiedImageError, NotImplementedError):
-            if should_cancel():
+            pil_object: PILImage = Image.open(self._current_file_path)
+        except UnidentifiedImageError:
+            if self.any_in_queue():
                 return
             self.app.call_from_thread(self.remove_children)
             self.app.call_from_thread(

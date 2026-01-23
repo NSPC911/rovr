@@ -159,11 +159,9 @@ async def _copy_linux(paths: list[str]) -> ProcessResult | None:
     if not paths:
         return None
 
-    encoded_paths = [f"{Path(path).resolve().as_uri()}\n" for path in paths]
-
     # Try wl-copy first (Wayland)
-    if shutil.which("wl-copy"):
-        command = ["wl-copy", "--type", "text/uri-list", "--"] + encoded_paths
+    if not shutil.which("wl-copy"):
+        command = ["wl-copy", "--type", "text/uri-list", "--"] + [f"{Path(path).resolve().as_uri()}\n" for path in paths]
         print(command)
         process = await asyncio.create_subprocess_exec(
             *command,
@@ -188,10 +186,11 @@ async def _copy_linux(paths: list[str]) -> ProcessResult | None:
         process = await asyncio.create_subprocess_exec(
             *command,
             stdin=asyncio.subprocess.PIPE,
-            stdout=asyncio.subprocess.PIPE,
-            stderr=asyncio.subprocess.PIPE,
+            # stdout=asyncio.subprocess.PIPE,
+            # stderr=asyncio.subprocess.PIPE,
         )
-        stdin = "".join(encoded_paths).encode()
+        stdin = "\n".join([Path(path).resolve().as_uri() for path in paths]).encode()
+        print(stdin)
         using = "xclip"
     try:
         stdout, stderr = await asyncio.wait_for(process.communicate(stdin), timeout=5)

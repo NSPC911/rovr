@@ -2,7 +2,7 @@
 
 ---
 
-by sumbitting this pull request, i agree that
+by submitting this pull request, i agree that
 
 - [ ] i have run `poe check` to check for any style issues
 - [ ] i have tested both the dev version (in venv) and the built version (uv build then install) of rovr

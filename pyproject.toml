@@ -28,6 +28,7 @@ dependencies = [
   "psutil>=7.1.0",
   "puremagic==1.30", # I will use an exact pin, and you can't make me change it
   "rarfile>=4.2",
+  "rich==14.2.0", # issue with 14.3.0 that breaks nerd fonts
   "rich-click>=1.9.3",
   "send2trash>=1.8.3",
   "textual~=7.0",

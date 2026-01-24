@@ -1,4 +1,7 @@
 # with reference from https://gitee.com/DreamMaoMao/clipboard.yazi
+# except for macos which uses 'clippy' because I dont want to use
+# pyobjc just for clipboard operations. if you know a way to use
+# osascript to copy multiple files to clipboard, please open an issue.
 import asyncio
 import platform
 import shutil
@@ -137,7 +140,7 @@ async def _copy_macos(paths: list[str]) -> ProcessResult | None:
             "macOS",
             "Install 'clippy' via Homebrew:\n'brew install clippy'\nIf you know how to use osascript to copy multiple files, please open an issue!",
         )
-    command = ["clippy"] + [f'"{path.replace('"', r"\"")}"' for path in paths]
+    command = ["clippy"] + paths
     process = await asyncio.create_subprocess_exec(
         *command,
         stdout=asyncio.subprocess.PIPE,

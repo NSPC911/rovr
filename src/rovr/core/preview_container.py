@@ -157,7 +157,7 @@ class PreviewContainer(Container):
         try:
             pil_object: PILImage = Image.open(self._current_file_path)
         except UnidentifiedImageError:
-            if self.should_cancel():
+            if should_cancel():
                 return
             self.app.call_from_thread(self.remove_children)
             self.app.call_from_thread(

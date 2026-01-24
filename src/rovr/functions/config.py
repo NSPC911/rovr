@@ -89,7 +89,7 @@ def find_path_line(lines: list[str], path: list) -> int | None:
 
     Args:
         lines: list of lines from the TOML file
-        path: the JSON path from the ValidationError (from fastjsonschema, starts with ['data', ...])
+        path: the JSON path from the ValidationError
 
     Returns:
         int | None: the line number (0-indexed) or None if not found
@@ -149,6 +149,9 @@ def schema_dump(
     from rich.syntax import Syntax
     from rich.table import Table
 
+    # i dont know what sort of mental illness the package has
+    # to insert a data prefix to the path, but i cant blame them
+    # i would also make stupid mistakes everywhere
     exception.message = exception.message.replace("data.", "")
     exception.name = (
         cast(str, exception.name)[5:]
@@ -181,6 +184,7 @@ def schema_dump(
     doc: list = config_content.splitlines()
 
     # find the line no for the error path
+    # exception.path is just exception.name but as a property
     path_str = ".".join(str(p) for p in exception.path) if exception.path else "root"
     lineno = find_path_line(doc, exception.path)
 
@@ -366,6 +370,7 @@ def load_config() -> tuple[dict, dict]:
         # theoretically shouldnt come this far
         "nano",
         # should exist in windows ever since msedit was added
+        # like last year or something
         "edit",
         "msedit",
     ]
@@ -383,9 +388,13 @@ def load_config() -> tuple[dict, dict]:
             config["settings"]["editor"][key]["run"] = default_editor
         else:
             # expand var
-            config["settings"]["editor"][key]["run"] = os.path.expandvars(
-                config["settings"]["editor"][key]["run"]
-            )
+            if config["settings"]["editor"][key]["run"] != (
+                pathvar := os.path.expandvars(config["settings"]["editor"][key]["run"])
+            ):
+                config["settings"]["editor"][key]["run"] = pathvar
+            else:
+                # use reasonable editor
+                config["settings"]["editor"][key]["run"] = default_editor
     # pdf fixer
     if (
         config["plugins"]["poppler"]["enabled"]

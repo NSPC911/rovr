@@ -615,6 +615,11 @@ class Application(App, inherit_bindings=False):
             if new_mtime != pins_mtime:
                 pins_mtime = new_mtime
                 if new_mtime is not None:
+                    # no, this doesnt need to be called from thread
+                    # wtf is wrong with you coderabbit, one day you say
+                    # it has to be called from thread, and the other day
+                    # you say it shouldnt be called from thread, make up
+                    # your mind (but i already made up my own.)
                     self.query_one(PinnedSidebar).reload_pins()
                     reload_called = True
             # check state.toml

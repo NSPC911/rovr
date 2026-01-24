@@ -110,7 +110,7 @@ def get_icon_smart(location: str) -> list[str]:
 
 
 @lru_cache(maxsize=1024)
-def get_icon(outer_key: str, inner_key: str) -> list[str]:
+def get_icon(outer_key: str, inner_key: str) -> list:
     """Get an icon from double keys.
     Args:
         outer_key (str): The category name (general/folder/file)
@@ -120,9 +120,9 @@ def get_icon(outer_key: str, inner_key: str) -> list[str]:
         list[str,str]: The icon and color for the icon
     """
     if not config["interface"]["nerd_font"]:
-        return ASCII_ICONS.get(outer_key, {"empty": None}).get(inner_key, " ")
+        return ASCII_ICONS.get(outer_key, {}).get(inner_key, [" ", ""])
     else:
-        return ICONS[outer_key][inner_key]
+        return ICONS.get(outer_key, {}).get(inner_key, [" ", ""])
 
 
 @lru_cache(maxsize=1024)

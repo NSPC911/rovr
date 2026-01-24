@@ -114,7 +114,7 @@ class MetadataContainer(VerticalScroll, inherit_bindings=False):
                 )
                 return
             except MountError:
-                if self.app.return_code is None:
+                if self.app.return_code is not None:
                     return
                 # just a defensive raise
                 raise
@@ -215,7 +215,7 @@ class MetadataContainer(VerticalScroll, inherit_bindings=False):
             try:
                 self.app.call_from_thread(self.mount, keys, values)
             except MountError:
-                if self.app.return_code is None:
+                if self.app.return_code is not None:
                     return
                 # not exactly sure why it would happen
                 # just a defensive raise

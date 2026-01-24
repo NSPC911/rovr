@@ -386,24 +386,26 @@ example_function(10)"""
     elif force_tty:
         open_stdout = "CONOUT$" if os.name == "nt" else "/dev/tty"
         open_stdin = "CONIN$" if os.name == "nt" else "/dev/tty"
-        with (
-            open(open_stdout, "w") as tty_out,
-            open(open_stdin, "r") as tty_in,
-        ):
-            sys.__stdout__ = sys.stdout = tty_out
-            sys.__stderr__ = sys.stderr = tty_out
-            sys.__stdin__ = sys.stdin = tty_in
-            Application(
-                startup_path=path,
-                cwd_file=cwd_file if cwd_file else None,
-                chooser_file=chooser_file if chooser_file else None,
-                show_keys=show_keys,
-                tree_dom=tree_dom,
-                force_crash_in=force_crash_in,
-            ).run()
-        sys.__stdout__ = sys.stdout = sys.__backup__stdout__
-        sys.__stderr__ = sys.stderr = sys.__backup__stderr__
-        sys.__stdin__ = sys.stdin = sys.__backup__stdin__
+        try:
+            with (
+                open(open_stdout, "w") as tty_out,
+                open(open_stdin, "r") as tty_in,
+            ):
+                sys.__stdout__ = sys.stdout = tty_out
+                sys.__stderr__ = sys.stderr = tty_out
+                sys.__stdin__ = sys.stdin = tty_in
+                Application(
+                    startup_path=path,
+                    cwd_file=cwd_file if cwd_file else None,
+                    chooser_file=chooser_file if chooser_file else None,
+                    show_keys=show_keys,
+                    tree_dom=tree_dom,
+                    force_crash_in=force_crash_in,
+                ).run()
+        finally:
+            sys.__stdout__ = sys.stdout = sys.__backup__stdout__
+            sys.__stderr__ = sys.stderr = sys.__backup__stderr__
+            sys.__stdin__ = sys.stdin = sys.__backup__stdin__
     else:
         print(
             "Error: rovr needs a TTY to run in application.",

@@ -65,8 +65,7 @@ except PackageNotFoundError:
 
 def _escape_toml_string(value: str) -> str:
     return (
-        value
-        .replace("\\", "\\\\")
+        value.replace("\\", "\\\\")
         .replace('"', '\\"')
         .replace("\n", "\\n")
         .replace("\r", "\\r")
@@ -281,7 +280,8 @@ class FirstLaunchApp(App, inherit_bindings=False):
     def _fetch_preview_image(self) -> Image | None:
         try:
             with request.urlopen(
-                "https://github.com/Textualize/.github/assets/554369/037e6aa1-8527-44f3-958d-28841d975d40"
+                "https://github.com/Textualize/.github/assets/554369/037e6aa1-8527-44f3-958d-28841d975d40",
+                timeout=5,
             ) as response:
                 if response.getcode() == 200:
                     data = response.read()
@@ -299,6 +299,12 @@ class FirstLaunchApp(App, inherit_bindings=False):
                 severity="error",
             )
             return None
+        except Exception as exc:
+            self.notify(
+                f"{type(exc).__name__}: {exc}",
+                title="Failed to load preview image",
+                severity="error",
+            )
 
     @on(RadioSet.Changed, "#theme")
     def on_radio_set_changed(self, event: RadioSet.Changed) -> None:

@@ -155,7 +155,9 @@ class PreviewContainer(Container):
             return
 
         try:
-            pil_object: PILImage = Image.open(self._current_file_path)
+            with Image.open(self._current_file_path) as img:
+                img.load()
+                pil_object = img.copy()
         except UnidentifiedImageError:
             if should_cancel():
                 return

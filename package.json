@@ -1,6 +1,5 @@
 {
   "dependencies": {
-    "prettier": "^3.8.0"
-  },
-  "packageManager": "pnpm"
+    "prettier": "^3.8.1"
+  }
 }

@@ -87,7 +87,8 @@ async def _copy_windows(paths: list[str]) -> ProcessResult | None:
         )
 
     escaped_paths = [
-        f"'{path.replace('`', '``').replace('"', '`"').replace("'", "`'")}'" for path in paths
+        f"'{path.replace('`', '``').replace('"', '`"').replace("'", "`'")}'"
+        for path in paths
     ]
     paths_list = ",".join(escaped_paths)
 

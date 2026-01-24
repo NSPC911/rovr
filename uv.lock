@@ -1011,17 +1011,13 @@ dependencies = [
     { name = "ujson" },
 ]
 
-[package.optional-dependencies]
-dev = [
-    { name = "commitizen" },
-    { name = "pyinstrument" },
-]
-
 [package.dev-dependencies]
 dev = [
+    { name = "commitizen" },
     { name = "json-schema-for-humans" },
     { name = "poethepoet" },
     { name = "prek" },
+    { name = "pyinstrument" },
     { name = "ruff" },
     { name = "textual-dev" },
     { name = "ty" },
@@ -1033,7 +1029,6 @@ speedups = [
 [package.metadata]
 requires-dist = [
     { name = "backports-zstd", marker = "python_full_version < '3.14'", specifier = ">=1.2.0" },
-    { name = "commitizen", marker = "extra == 'dev'", specifier = ">=4.10.0" },
     { name = "fastjsonschema", specifier = ">=2.21.2" },
     { name = "humanize", specifier = ">=4.14.0" },
     { name = "natsort", specifier = ">=8.4.0" },
@@ -1043,7 +1038,6 @@ requires-dist = [
     { name = "platformdirs", specifier = ">=4.5.0" },
     { name = "psutil", specifier = ">=7.1.0" },
     { name = "puremagic", specifier = "==1.30" },
-    { name = "pyinstrument", marker = "extra == 'dev'", specifier = ">=5.1.2" },
     { name = "rarfile", specifier = ">=4.2" },
     { name = "rich-click", specifier = ">=1.9.3" },
     { name = "send2trash", specifier = ">=1.8.3" },
@@ -1053,13 +1047,14 @@ requires-dist = [
     { name = "tomli", specifier = ">=2.3.0" },
     { name = "ujson", specifier = ">=5.11.0" },
 ]
-provides-extras = ["dev"]
 
 [package.metadata.requires-dev]
 dev = [
+    { name = "commitizen", specifier = ">=4.10.0" },
     { name = "json-schema-for-humans", specifier = ">=1.5.1" },
     { name = "poethepoet", specifier = ">=0.38.0" },
     { name = "prek", specifier = ">=0.2.25" },
+    { name = "pyinstrument", specifier = ">=5.1.2" },
     { name = "ruff", specifier = ">=0.14.10" },
     { name = "textual-dev", specifier = ">=1.7.0" },
     { name = "ty", specifier = "==0.0.8" },

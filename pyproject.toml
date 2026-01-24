@@ -45,12 +45,6 @@ Documentation = "https://nspc911.github.io/rovr"
 [project.scripts]
 rovr = "rovr:main"
 
-[project.optional-dependencies]
-dev = [
-  "pyinstrument>=5.1.2",
-  "commitizen>=4.10.0",
-]
-
 [dependency-groups]
 dev = [
   "json-schema-for-humans>=1.5.1",
@@ -59,6 +53,8 @@ dev = [
   "ruff>=0.14.10",
   "textual-dev>=1.7.0",
   "ty==0.0.8",
+  "pyinstrument>=5.1.2",
+  "commitizen>=4.10.0",
 ]
 speedups = [
   "textual-speedups>=0.2.1",

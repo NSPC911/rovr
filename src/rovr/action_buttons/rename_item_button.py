@@ -37,9 +37,9 @@ class RenameItemButton(Button):
         if self.disabled:
             return
         selected_files = await self.app.file_list.get_selected_objects()
-        if selected_files is None:
+        if not selected_files:
             self.notify(
-                "Please select a file to rename",
+                "Please select at least one file to rename",
                 title="Rename File",
                 severity="warning",
             )

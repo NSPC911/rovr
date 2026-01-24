@@ -51,13 +51,13 @@ async def copy_files_to_system_clipboard(
     Returns:
         True if successful, or a ClipboardError if something went wrong.
     """
-    system = platform.system().lower()
+    system = platform.system()
     try:
-        if system == "windows":
+        if system == "Windows":
             output = await _copy_windows(paths)
-        elif system == "darwin":
+        elif system == "Darwin":
             output = await _copy_macos(paths)
-        elif system == "linux":
+        elif system == "Linux":
             output = await _copy_linux(paths)
         else:
             return ClipboardError(f"Unsupported platform: {system}")
@@ -87,7 +87,7 @@ async def _copy_windows(paths: list[str]) -> ProcessResult | None:
         )
 
     escaped_paths = [
-        f"'{path.replace('"', '`"').replace("'", "`'")}'" for path in paths
+        f"'{path.replace('`', '``').replace('"', '`"').replace("'", "`'")}'" for path in paths
     ]
     paths_list = ",".join(escaped_paths)
 
@@ -194,6 +194,13 @@ async def _copy_linux(paths: list[str]) -> ProcessResult | None:
         )
         stdin = "\n".join([Path(path).resolve().as_uri() for path in paths]).encode()
         using = "xclip"
+    else:
+        # warn
+        raise ClipboardToolNotFoundError(
+            "wl-copy/xclip",
+            "Linux",
+            "Install 'wl-clipboard' for Wayland or 'xclip' for X11 using your package manager.",
+        )
     try:
         stdout, stderr = await asyncio.wait_for(process.communicate(stdin), timeout=5)
     except TimeoutError as exc:

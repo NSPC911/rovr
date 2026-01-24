@@ -347,6 +347,7 @@ example_function(10)"""
     if not sys.stdout.isatty():
         sys.__backup__stdout__ = sys.__stdout__
         sys.__backup__stderr__ = sys.__stderr__
+        sys.__backup__stdin__ = sys.__stdin__
 
     from rovr.app import Application
 
@@ -400,6 +401,9 @@ example_function(10)"""
                 tree_dom=tree_dom,
                 force_crash_in=force_crash_in,
             ).run()
+        sys.__stdout__ = sys.stdout = sys.__backup__stdout__
+        sys.__stderr__ = sys.stderr = sys.__backup__stderr__
+        sys.__stdin__ = sys.stdin = sys.__backup__stdin__
     else:
         print(
             "Error: rovr needs a TTY to run in application.",

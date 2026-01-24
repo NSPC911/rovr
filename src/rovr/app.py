@@ -615,7 +615,7 @@ class Application(App, inherit_bindings=False):
             if new_mtime != pins_mtime:
                 pins_mtime = new_mtime
                 if new_mtime is not None:
-                    self.app.call_from_thread(self.query_one(PinnedSidebar).reload_pins)
+                    self.query_one(PinnedSidebar).reload_pins()
                     reload_called = True
             # check state.toml
             new_state_mtime = None

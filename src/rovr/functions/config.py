@@ -151,7 +151,7 @@ def schema_dump(
 
     exception.message = exception.message.replace("data.", "")
     exception.name = (
-        cast(list, exception.name)[5:]
+        cast(str, exception.name)[5:]
         if exception.name.startswith("data.")
         else exception.name
     )

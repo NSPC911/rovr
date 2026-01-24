@@ -495,6 +495,8 @@ def ensure_existing_directory(directory: str) -> str:
             break
 
         directory = parent
+    if directory == "":
+        directory = "."
     return directory
 
 

@@ -525,11 +525,11 @@ class ProcessContainer(VerticalScroll):
                                 assert isinstance(_archive, tarfile.TarFile)
                                 _archive.add(p, arcname=arcname)
 
-        except Exception as e:
-            path_utils.dump_exc(self, e)
+        except Exception as exc:
+            path_utils.dump_exc(self, exc)
             bar.panic(
                 dismiss_with={
-                    "message": f"Archiving failed due to\n{e}\nProcess Aborted.",
+                    "message": f"Archiving failed due to\n{exc}\nProcess Aborted.",
                     "subtitle": "File an issue if this is a bug!",
                 }
             )
@@ -637,14 +637,14 @@ class ProcessContainer(VerticalScroll):
                             path.join(destination_path, filename)
                         ):
                             archive.extract(file, path=destination_path)
-        except (zipfile.BadZipFile, tarfile.TarError, ValueError) as e:
+        except (zipfile.BadZipFile, tarfile.TarError, ValueError) as exc:
             dismiss_with = {"subtitle": ""}
-            if isinstance(e, ValueError) and "Password" in e.__str__():
-                if "ZIP" in e.__str__():
+            if isinstance(exc, ValueError) and "Password" in exc.__str__():
+                if "ZIP" in exc.__str__():
                     dismiss_with["message"] = (
                         "Password-protected ZIP files cannot be unzipped"
                     )
-                elif "RAR" in e.__str__():
+                elif "RAR" in exc.__str__():
                     dismiss_with["message"] = (
                         "Password-protected RAR files cannot be unzipped"
                     )
@@ -653,18 +653,18 @@ class ProcessContainer(VerticalScroll):
                         "Password-protected archive files cannot be unzipped"
                     )
             else:
-                path_utils.dump_exc(self, e)
+                path_utils.dump_exc(self, exc)
                 dismiss_with = {
-                    "message": f"Unzipping failed due to {type(e).__name__}\n{e}\nProcess Aborted.",
+                    "message": f"Unzipping failed due to {type(exc).__name__}\n{exc}\nProcess Aborted.",
                     "subtitle": "If this is a bug, file an issue!",
                 }
             bar.panic(dismiss_with=dismiss_with, bar_text="Error extracting archive")
             return
-        except Exception as e:
-            path_utils.dump_exc(self, e)
+        except Exception as exc:
+            path_utils.dump_exc(self, exc)
             bar.panic(
                 dismiss_with={
-                    "message": f"Unzipping failed due to {type(e).__name__}\n{e}\nProcess Aborted.",
+                    "message": f"Unzipping failed due to {type(exc).__name__}\n{exc}\nProcess Aborted.",
                     "subtitle": "If this is a bug, please file an issue!",
                 },
                 bar_text="Unhandled Error",
@@ -814,6 +814,7 @@ class ProcessContainer(VerticalScroll):
                         },
                         bar_text="Unhandled Error",
                     )
+                    path_utils.dump_exc(self, exc)
                     return
 
         cut_ignore = []

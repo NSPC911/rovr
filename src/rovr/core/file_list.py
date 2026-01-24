@@ -476,7 +476,7 @@ class FileList(CheckboxRenderingMixin, SelectionList, inherit_bindings=False):
         """
         if paths is None:
             paths = []
-        if self.get_option_at_index(0).disabled:
+        if self.option_count == 0 or self.get_option_at_index(0).disabled:
             return
         for option in self.options:
             if path_utils.normalise(option.dir_entry.path) in paths:

@@ -107,11 +107,17 @@ class MetadataContainer(VerticalScroll, inherit_bindings=False):
         if self.any_in_queue():
             return
         if not path.exists(dir_entry.path):
-            self.app.call_from_thread(self.remove_children)
-            self.app.call_from_thread(
-                self.mount, Static("Item not found or inaccessible.")
-            )
-            return
+            try:
+                self.app.call_from_thread(self.remove_children)
+                self.app.call_from_thread(
+                    self.mount, Static("Item not found or inaccessible.")
+                )
+                return
+            except MountError:
+                if self.app.return_code is None:
+                    return
+                # just a defensive raise
+                raise
 
         type_str = "Unknown"
         if dir_entry.is_junction():
@@ -185,7 +191,9 @@ class MetadataContainer(VerticalScroll, inherit_bindings=False):
         except NoMatches:
             if self.any_in_queue():
                 return
+            # if an error occurs here and you are looking at this
             self.app.call_from_thread(self.remove_children)
+            # please file an issue!
             keys_list = []
             for field in config["metadata"]["fields"]:
                 match field:
@@ -209,8 +217,9 @@ class MetadataContainer(VerticalScroll, inherit_bindings=False):
             except MountError:
                 if self.app.return_code is None:
                     return
-                else:
-                    raise
+                # not exactly sure why it would happen
+                # just a defensive raise
+                raise
         self.current_path = dir_entry.path
         if type_str == "Directory" and self.has_focus:
             self._size_worker = self.calculate_folder_size(dir_entry.path)

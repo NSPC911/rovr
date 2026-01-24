@@ -230,7 +230,8 @@ class CopyPanelOptions(PopupOptionList):
             width += 1
         if self.styles.border_right[0] != "":
             width += 1
-        width -= 7  # for textual markup fix
+        # for textual markup fix because the length of ` [d][/] ` is 7 but displays as 0 width
+        width -= 7
         if self.do_adjust:
             self.do_adjust = False
             self.styles.offset = (

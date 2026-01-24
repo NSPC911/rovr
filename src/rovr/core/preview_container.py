@@ -148,20 +148,6 @@ class PreviewContainer(Container):
         except NoMatches:
             return False
 
-    def any_in_queue(self) -> bool:
-        """Check if there's a queued task and run it if so.
-
-        Returns:
-            bool: True if queue was processed or cancelled, False otherwise.
-        """
-        if should_cancel():
-            return True
-        if self._queued_task is not None:
-            self._queued_task(self._queued_task_args)
-            self._queued_task, self._queued_task_args = None, None
-            return True
-        return False
-
     def show_image_preview(self, depth: int = 0) -> None:
         """Show image preview. Runs in a thread."""
         self.app.call_from_thread(setattr, self, "border_title", titles.image)
@@ -171,7 +157,7 @@ class PreviewContainer(Container):
         try:
             pil_object: PILImage = Image.open(self._current_file_path)
         except UnidentifiedImageError:
-            if self.any_in_queue():
+            if self.should_cancel():
                 return
             self.app.call_from_thread(self.remove_children)
             self.app.call_from_thread(

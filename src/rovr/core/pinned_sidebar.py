@@ -21,7 +21,7 @@ class PinnedSidebar(OptionList, inherit_bindings=False):
     def __init__(self, **kwargs) -> None:
         super().__init__(**kwargs)
 
-    @work
+    @work(exclusive=True)
     async def reload_pins(self) -> None:
         """Reload pins shown
 
@@ -121,6 +121,10 @@ class PinnedSidebar(OptionList, inherit_bindings=False):
         try:
             await drive_worker.wait()
         except WorkerCancelled as exc:
+            # keep in mind, i dont exactly know why this is happening
+            # either theres a race condition somewhere, or textual is
+            # cancelling it for some reason. i only get this error
+            # while im on my linux setup, not on windows, which is odd
             path_utils.dump_exc(self, exc)
             # retry again
             self.call_later(self.reload_pins)

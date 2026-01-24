@@ -204,13 +204,13 @@
                 },
                 "block": {
                   "type": "boolean",
-                  "default": true,
+                  "default": false,
                   "description": "Block rovr until the editor closes"
                 },
                 "suspend": {
                   "type": "boolean",
                   "default": true,
-                  "description": "Suspend (hide) rovr until the editor closes"
+                  "description": "Suspend (hide) rovr until the editor closes. Will block regardless."
                 }
               },
               "description": "Editor to use when opening a file"
@@ -226,13 +226,13 @@
                 },
                 "block": {
                   "type": "boolean",
-                  "default": true,
+                  "default": false,
                   "description": "Block rovr until the editor closes"
                 },
                 "suspend": {
                   "type": "boolean",
                   "default": true,
-                  "description": "Suspend (hide) rovr until the editor closes"
+                  "description": "Suspend (hide) rovr until the editor closes. Will block regardless."
                 }
               },
               "description": "Editor to use when opening a folder"

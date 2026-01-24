@@ -93,6 +93,7 @@ def get_icon_for_folder(location: str) -> list[str]:
     return ICONS["folder"]["default"]
 
 
+@lru_cache(maxsize=1024)
 def get_icon_smart(location: str) -> list[str]:
     """Get the icon and color for a file or folder based on its path.
 
@@ -109,7 +110,7 @@ def get_icon_smart(location: str) -> list[str]:
 
 
 @lru_cache(maxsize=1024)
-def get_icon(outer_key: str, inner_key: str) -> list:
+def get_icon(outer_key: str, inner_key: str) -> list[str]:
     """Get an icon from double keys.
     Args:
         outer_key (str): The category name (general/folder/file)

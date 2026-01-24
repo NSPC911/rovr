@@ -727,11 +727,11 @@ Must be one of:
 
 **Description:** Editor to use when opening a file
 
-| Property                                 | Type    | Title/Description                           |
-| ---------------------------------------- | ------- | ------------------------------------------- |
-| [run](#settings_editor_file_run)         | string  | Editor to use when opening a file           |
-| [block](#settings_editor_file_block)     | boolean | Block rovr until the editor closes          |
-| [suspend](#settings_editor_file_suspend) | boolean | Suspend (hide) rovr until the editor closes |
+| Property                                 | Type    | Title/Description                                                   |
+| ---------------------------------------- | ------- | ------------------------------------------------------------------- |
+| [run](#settings_editor_file_run)         | string  | Editor to use when opening a file                                   |
+| [block](#settings_editor_file_block)     | boolean | Block rovr until the editor closes                                  |
+| [suspend](#settings_editor_file_suspend) | boolean | Suspend (hide) rovr until the editor closes. Will block regardless. |
 
 ##### <a name="settings_editor_file_run"></a>2.4.1.1. Property `Rovr Config > settings > editor > file > run`
 
@@ -749,7 +749,7 @@ Must be one of:
 | ------------ | --------- |
 | **Type**     | `boolean` |
 | **Required** | No        |
-| **Default**  | `true`    |
+| **Default**  | `false`   |
 
 **Description:** Block rovr until the editor closes
 
@@ -761,7 +761,7 @@ Must be one of:
 | **Required** | No        |
 | **Default**  | `true`    |
 
-**Description:** Suspend (hide) rovr until the editor closes
+**Description:** Suspend (hide) rovr until the editor closes. Will block regardless.
 
 #### <a name="settings_editor_folder"></a>2.4.2. Property `Rovr Config > settings > editor > folder`
 
@@ -773,11 +773,11 @@ Must be one of:
 
 **Description:** Editor to use when opening a folder
 
-| Property                                   | Type    | Title/Description                           |
-| ------------------------------------------ | ------- | ------------------------------------------- |
-| [run](#settings_editor_folder_run)         | string  | Editor to use when opening a folder         |
-| [block](#settings_editor_folder_block)     | boolean | Block rovr until the editor closes          |
-| [suspend](#settings_editor_folder_suspend) | boolean | Suspend (hide) rovr until the editor closes |
+| Property                                   | Type    | Title/Description                                                   |
+| ------------------------------------------ | ------- | ------------------------------------------------------------------- |
+| [run](#settings_editor_folder_run)         | string  | Editor to use when opening a folder                                 |
+| [block](#settings_editor_folder_block)     | boolean | Block rovr until the editor closes                                  |
+| [suspend](#settings_editor_folder_suspend) | boolean | Suspend (hide) rovr until the editor closes. Will block regardless. |
 
 ##### <a name="settings_editor_folder_run"></a>2.4.2.1. Property `Rovr Config > settings > editor > folder > run`
 
@@ -795,7 +795,7 @@ Must be one of:
 | ------------ | --------- |
 | **Type**     | `boolean` |
 | **Required** | No        |
-| **Default**  | `true`    |
+| **Default**  | `false`   |
 
 **Description:** Block rovr until the editor closes
 
@@ -807,7 +807,7 @@ Must be one of:
 | **Required** | No        |
 | **Default**  | `true`    |
 
-**Description:** Suspend (hide) rovr until the editor closes
+**Description:** Suspend (hide) rovr until the editor closes. Will block regardless.
 
 #### <a name="settings_editor_bulk_rename"></a>2.4.3. Property `Rovr Config > settings > editor > bulk_rename`
 

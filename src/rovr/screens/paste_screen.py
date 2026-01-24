@@ -25,7 +25,7 @@ class SpecialOption(Option):
                 path.exists(path.join(getcwd(), path.basename(loc)))
                 and copy_or_cut == "copy"
             ):
-                icon_content = Content.from_markup(f"[$error]{copy_cut_icon[0]}[/]")
+                icon_content = Content.from_markup(f"[$error]{copy_cut_icon}[/]")
             else:
                 icon_content = Content(copy_cut_icon)
             loc = (

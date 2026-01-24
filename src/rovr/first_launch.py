@@ -65,7 +65,8 @@ except PackageNotFoundError:
 
 def _escape_toml_string(value: str) -> str:
     return (
-        value.replace("\\", "\\\\")
+        value
+        .replace("\\", "\\\\")
         .replace('"', '\\"')
         .replace("\n", "\\n")
         .replace("\r", "\\r")

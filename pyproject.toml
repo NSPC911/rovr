@@ -1,6 +1,6 @@
 [project]
 name = "rovr"
-version = "0.7.0.dev2"
+version = "0.7.0.dev3"
 description = "A post-modern terminal file explorer"
 readme = "README.md"
 requires-python = ">=3.12, <3.14"
@@ -28,7 +28,7 @@ dependencies = [
   "psutil>=7.1.0",
   "puremagic==1.30", # I will use an exact pin, and you can't make me change it
   "rarfile>=4.2",
-  "rich==14.2.0", # issue with 14.3.0 that breaks nerd fonts
+  "rich>=14.3.1", # issue with 14.3.0 that breaks nerd fonts
   "rich-click>=1.9.3",
   "send2trash>=1.8.3",
   "textual~=7.0",
@@ -91,6 +91,7 @@ format.sequence = [{ cmd = "ruff check --unsafe-fixes --fix"}, { cmd = "ruff for
 fmt = ["format"]
 screenshot-format = "pnpx prettier --write docs/public/screenshots/*.svg --parser html --bracket-same-line --print-width 160"
 flame = "pyinstrument --renderer=html --timeline --use-timing-thread --show-all -m rovr"
+screen-test = "textual run rovr.screens.__main__"
 
 [tool.ruff]
 force-exclude = true

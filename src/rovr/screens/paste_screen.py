@@ -23,8 +23,10 @@ class SpecialOption(Option):
 
             copy_cut_icon = icon_utils.get_icon("general", copy_or_cut)[0]
             # check existence of file, and if so, turn it red
+            basename = path.basename(path.normpath(loc))
             if (
-                path.exists(path.join(getcwd(), path.basename(loc)))
+                basename
+                and path.exists(path.join(getcwd(), basename))
                 and copy_or_cut == "copy"
             ):
                 icon_content = Content.from_markup(f"[$error]{copy_cut_icon}[/]")

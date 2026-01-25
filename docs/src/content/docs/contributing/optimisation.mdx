@@ -6,7 +6,7 @@ description: ways rovr optimises its performance
 import { Aside } from "@astrojs/starlight/components";
 
 `rovr` uses textual, which uses python, which is known for how terrible a performance it gives.
-<br/>hence, `rovr` makes use of a couple optimisations to make it perform reasonably well
+<br/>hence, `rovr` makes use of a couple of optimisations to make it perform reasonably well
 
 ### queue of length 1
 
@@ -27,10 +27,10 @@ flowchart TD
     i --> s(stop)
 ```
 
-this diagram roughly shows how the mechanism works, with the main thing being an intentional debouncer.
+This diagram roughly shows how the mechanism works, with the main thing being an intentional debouncer.
 
-- having a normal queue means that it would take a while for each item in the queue to be run, hence a very noticeable lag.
-- however, by having a queue of length 1, and overwriting the queue, it means that the latest added item is considered, and anything in between is ignored, greatly improving performance
+- Having a normal queue means that it would take a while for each item in the queue to be run, hence a very noticeable lag.
+- However, by having a queue of length 1, and overwriting the queue, it means that the latest added item is considered, and anything in between is ignored, greatly improving performance
 
 <Aside type="note">
 this has been slated to be removed, mainly due to issues with threads in general.<br/>
@@ -58,4 +58,4 @@ this diagram shows how it works
 - when doing heavy tasks, like calculating folder size, or deleting folders, the appropriate widgets' labels are updated too frequently.
 - by using a 'debouncer', more time is spent on actually doing the process, than to update the progress of the process
 
-I am certainly not the first person to have discovered this, but it is such a nice mechanism to have
+This is certainly not a one-of-a-kind optimisation, but it is a nice thing to have.

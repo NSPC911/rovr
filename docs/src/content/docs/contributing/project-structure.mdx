@@ -5,7 +5,7 @@ description: the structure of the project
 
 import { FileTree } from "@astrojs/starlight/components";
 
-the current file structure separates each section in each folder
+the current file structure separates each section into its own folder
 
 ### root
 
@@ -73,16 +73,13 @@ handles the middle elements
   - pinned_sidebar.py a list that shows pinned items
   - preview_container.py a container that shows the appropriate preview
 </FileTree>
-`PreviewContainer` uses `FileList` as part of its Folder Preview mechanism. it
-currently doesn't use it for archive previews, so I'm ready to accept prs that
-fix this issue
 
 ### footer
 
 handles the bottom row
 
 <FileTree>
-  - src/rovr/footer
+- src/rovr/footer
   - clipboard_container.py a list that contains copied/cut items
   - metadata_container.py shows metadata on the current primary selection
   - process_container.py shows a list of active processes

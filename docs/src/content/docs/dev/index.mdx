@@ -1,0 +1,33 @@
+---
+title: rovr
+description: A modern, customizable, and aesthetically pleasing terminal file explorer.
+template: splash
+lastUpdated: false
+editUrl: false
+hero:
+  tagline: a modern, customizable, and aesthetically pleasing terminal file explorer.
+  actions:
+    - text: get started
+      link: /rovr/dev/overview
+      icon: right-arrow
+    - text: view on github
+      link: https://github.com/NSPC911/rovr
+      icon: external
+---
+
+import { Card, CardGrid } from "@astrojs/starlight/components";
+
+<CardGrid stagger>
+  <Card title="modern tui" icon="laptop">
+    `rovr` provides a modern and intuitive terminal user interface powered by Textual.
+  </Card>
+  <Card title="customizable" icon="setting">
+    tailor the appearance, keybindings, and features to your liking through simple configuration files.
+  </Card>
+  <Card title="feature-rich" icon="rocket">
+    enjoy tabs, file previews, plugins, and other features you thought you didn't need.
+  </Card>
+  <Card title="cross-platform" icon="open-book">
+  works on windows, macos and linux out of the box, without any issues
+  </Card>
+</CardGrid>

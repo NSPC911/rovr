@@ -58,6 +58,16 @@ export default defineConfig({
       },
       tableOfContents: { minHeadingLevel: 1, maxHeadingLevel: 4 },
       lastUpdated: true,
+      locales: {
+        root: {
+          label: "stable",
+          lang: "en",
+        },
+        dev: {
+          label: "dev",
+          lang: "en",
+        },
+      },
       sidebar: [
         { label: "overview", slug: "overview" },
         {
@@ -72,7 +82,7 @@ export default defineConfig({
           items: [
             { label: "user interface", slug: "guides/user-interface" },
             { label: "file operations", slug: "guides/file-operations" },
-            { label: "tips and tricks", slug: "guides/tips-and-tricks"}
+            { label: "tips and tricks", slug: "guides/tips-and-tricks" },
           ],
         },
         {
@@ -114,9 +124,7 @@ export default defineConfig({
           ],
         },
       ],
-      plugins: [
-        viewTransitions(),
-      ],
+      plugins: [viewTransitions()],
     }),
     sitemap(),
   ],

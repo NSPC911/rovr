@@ -1,0 +1,68 @@
+---
+title: user interface
+description: an overview of the rovr user interface and how to navigate it.
+---
+
+import InlineSVG from "@/components/InlineSVG.astro";
+
+<InlineSVG src="/rovr/screenshots/main.svg" alt="main interface" />
+
+rovr's user interface has several panels that you can navigate between using the keyboard.
+
+### panels
+
+the main panels are:
+
+- pinned folder sidebar: a list of your favorite or frequently accessed folders. (focus with `s`)
+- file list: the main panel, showing the files and folders in the current directory.
+- preview sidebar: shows a preview of the selected file or folder. (focus with `i`)
+- footer: contains three smaller panels:
+  - processes list: shows ongoing processes like copying or deleting files. (focus with `f6`)
+  - metadata list: displays metadata for the selected item. (focus with `m`)
+  - clipboard list: shows items that you have copied or cut. (focus with `c`)
+
+to return focus to the main file list from any other panel, press `esc`.
+
+### toggling panel visibility
+
+you can show or hide panels to customize your view:
+
+- pinned folder sidebar: `shift+s`
+- preview sidebar: `shift+i`
+- footer (all three panels): `shift+f`
+
+### compact mode
+
+rovr supports compact mode options for smaller terminal windows or when you want to maximize the file list space. compact mode has two separate options that can be enabled independently:
+
+- **buttons**: compacts the action buttons and path input to one line instead of three
+  <InlineSVG src="/rovr/screenshots/compact_buttons.svg" alt="compact buttons enabled" />
+- **panels**: makes the footer panels smaller to give more room for the file list
+  <InlineSVG src="/rovr/screenshots/compact_panels.svg" alt="compact panels enabled" />
+
+To enable compact mode options, set the following in your `config.toml`:
+
+```toml
+[interface.compact_mode]
+buttons = true  # compact buttons and path input
+panels = true   # make panels smaller
+```
+
+You can enable either or both options depending on your preferences and terminal size.
+
+### tabs
+
+<InlineSVG src="/rovr/screenshots/tabs.svg" alt="multiple tabs" />
+
+rovr supports tabs to manage multiple file list views simultaneously.
+
+- create a new tab: `n`
+- close the current tab: `w`
+- go to the next tab: `ctrl+j`
+- go to the previous tab: `ctrl+k`
+
+### help and shortcuts
+
+<InlineSVG src="/rovr/screenshots/keybind-list.svg" alt="keybind list" />
+
+- view all available keybindings: `?` - this opens a help screen showing all available shortcuts and their functions

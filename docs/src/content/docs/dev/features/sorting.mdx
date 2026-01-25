@@ -1,0 +1,94 @@
+---
+title: sorting files
+description: how to sort files and folders in rovr.
+---
+
+import InlineSVG from "@/components/InlineSVG.astro";
+
+<InlineSVG src="/rovr/screenshots/sort-order.svg" alt="sort options" />
+
+rovr provides multiple ways to sort files and folders in the file list, allowing you to organize your view based on different criteria.
+
+## accessing the sort menu
+
+You can access the sort menu by:
+
+- clicking the sort button in the action button menu
+  <InlineSVG src="/rovr/screenshots/sort-order-button.svg" alt="sort order button" />
+- pressing `,` to open the menu
+
+## sort criteria
+
+rovr supports the following sort options:
+
+### sort by name
+
+<InlineSVG src="/rovr/screenshots/sortby-name.svg" alt="sort by name" />
+
+Sorts files alphabetically by their name. This is the default sorting method.
+
+- **keybinding**: `a` (when sort menu is open)
+- **order**: can be ascending (A-Z) or descending (Z-A)
+
+### sort by extension
+
+<InlineSVG src="/rovr/screenshots/sortby-extension.svg" alt="sort by extension" />
+
+Groups files by their file extension, making it easy to find files of the same type together.
+
+- **keybinding**: `e` (when sort menu is open)
+- **order**: can be ascending or descending
+
+### sort by natural order
+
+<InlineSVG src="/rovr/screenshots/sortby-natural.svg" alt="sort by natural" />
+
+Uses natural sorting, which handles numbers in file names more intuitively (e.g., "file2" comes before "file10").
+
+- **keybinding**: `n` (when sort menu is open)
+- **order**: can be ascending or descending
+
+### sort by size
+
+<InlineSVG src="/rovr/screenshots/sortby-size.svg" alt="sort by size" />
+
+Sorts files by their size, useful for finding large or small files quickly.
+
+- **keybinding**: `s` (when sort menu is open)
+- **order**: can be ascending (smallest first) or descending (largest first)
+
+### sort by created time
+
+<InlineSVG src="/rovr/screenshots/sortby-creation.svg" alt="sort by creation" />
+
+Sorts files by their creation time.
+
+- **keybinding**: `c` (when sort menu is open)
+- **order**: can be ascending (oldest first) or descending (newest first)
+
+### sort by modified time
+
+<InlineSVG src="/rovr/screenshots/sortby-modified.svg" alt="sort by modified" />
+
+Sorts files by their last modification time.
+
+- **keybinding**: `m` (when sort menu is open)
+- **order**: can be ascending (oldest first) or descending (newest first)
+
+## toggling sort direction
+
+You can toggle between ascending and descending order:
+
+- **keybinding**: `d` (when sort menu is open)
+- this switches the current sort order between ascending and descending
+
+The sort menu dynamically updates to show the current direction for each sort option.
+
+## persistence
+
+Your sort preferences are automatically saved and persist between sessions. When you close and reopen rovr, it will remember:
+
+- your selected sort criteria (name, size, extension, etc.)
+- your sort direction (ascending or descending)
+
+Optionally, you can enable `This path only` in the sort menu to apply to only the current directory.

@@ -1,0 +1,33 @@
+---
+title: welcome to rovr
+description: overview on rovr with latest features
+---
+
+import InlineSVG from "@/components/InlineSVG.astro";
+
+<InlineSVG src="/rovr/screenshots/main.svg" alt="normal user interface" />
+
+let's use the [5W1H framework](https://en.wikipedia.org/wiki/Five_Ws) to describe rovr and its latest improvements
+
+### what is rovr?
+
+a modern answer to a terminal file explorer, that can be customized to fit your workflow easily, while being aesthetically pleasing. rovr now features advanced **state management**, flexible **compact modes**, and an improved **sort order switcher** for enhanced usability.
+
+### why should I use rovr?
+
+I can't answer this question, but I can answer why you _shouldn't_ use rovr.
+<br/>you shouldn't use rovr if
+
+1. you have an existing workflow with any other file explorers (superfile excluded)
+   <br/>other file managers like [yazi](https://github.com/sxyazi/yazi), [ranger](https://github.com/ranger/ranger) or [nnn](https://github.com/jarun/nnn) are amazing file explorers, and rovr cannot compete with their flexibility, extensibility or just raw speed.
+
+2. when you are allergic to non-compiled apps
+   <br/>rovr is made in python, and uses some features that prevents it from being compiled by [pyinstaller](https://github.com/pyinstaller/pyinstaller) or [nuitka](https://github.com/Nuitka/Nuitka). if you are someone who is allergic to such an app, please step away now.
+
+### why did I make it?
+
+I had quite some issues with [superfile](https://github.com/yorukot/superfile). it is an amazing project, and you should definitely go check it out.
+
+<br/>however, some issues I had was with its performance. spf does not utilize either threads nor asyncio, everything runs on a single app process, which can lead to plenty of lag when traveling.
+<br/>I wouldve loved to fix these issues, but I dont have any golang background, and I found [textual](https://github.com/Textualize/Textual) as a framework, and really wanted to put my skills to the test.
+<br/>so I guess we are here now.

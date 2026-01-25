@@ -32,13 +32,13 @@ from rovr.action_buttons import (
     DeleteButton,
     NewItemButton,
     PasteButton,
-    PathCopyButton,
     RenameItemButton,
     UnzipButton,
     ZipButton,
 )
 from rovr.action_buttons.sort_order import SortOrderButton, SortOrderPopup
 from rovr.components import SearchInput
+from rovr.components.popup_option_list import PopupOptionList
 from rovr.core import FileList, FileListContainer, PinnedSidebar, PreviewContainer
 from rovr.core.file_list import FileListRightClickOptionList
 from rovr.footer import Clipboard, MetadataContainer, ProcessContainer
@@ -62,7 +62,6 @@ from rovr.navigation_widgets import (
 )
 from rovr.screens import (
     ContentSearch,
-    DummyScreen,
     FileSearch,
     Keybinds,
     YesOrNo,
@@ -125,7 +124,6 @@ class Application(App, inherit_bindings=False):
     ) -> None:
         super().__init__(watch_css=True)
         self.app_blurred: bool = False
-        self.startup_path: str = startup_path
         self.has_pushed_screen: bool = False
         # Runtime output files from CLI
         self._cwd_file: str | TextIOWrapper | None = cwd_file
@@ -137,6 +135,8 @@ class Application(App, inherit_bindings=False):
         self.file_list = self._file_list_container.filelist
         # cannot use self.clipboard, reserved for textual's clipboard
         self.Clipboard = Clipboard(id="clipboard")
+        if startup_path:
+            chdir(ensure_existing_directory(startup_path))
 
     def compose(self) -> ComposeResult:
         self.log("Starting Rovr...")
@@ -152,8 +152,8 @@ class Application(App, inherit_bindings=False):
                     yield DeleteButton()
                     yield ZipButton()
                     yield UnzipButton()
-                    yield PathCopyButton()
                     yield SortOrderButton()
+
                 with VerticalGroup(id="below_menu"):
                     with HorizontalGroup():
                         yield BackButton()
@@ -485,6 +485,7 @@ class Application(App, inherit_bindings=False):
                 f"{len(process_container.query('ProgressBarContainer')) - len(process_container.query('.done')) - len(process_container.query('.error'))}"
                 + " processes are still running!\nAre you sure you want to quit?",
                 border_title="Quit [teal]rovr[/teal]",
+                destructive=True,
             )
         ):
             return
@@ -614,9 +615,12 @@ class Application(App, inherit_bindings=False):
             if new_mtime != pins_mtime:
                 pins_mtime = new_mtime
                 if new_mtime is not None:
-                    self.app.call_from_thread(
-                        self.query_one("#pinned_sidebar").reload_pins
-                    )
+                    # no, this doesnt need to be called from thread
+                    # wtf is wrong with you coderabbit, one day you say
+                    # it has to be called from thread, and the other day
+                    # you say it shouldnt be called from thread, make up
+                    # your mind (but i already made up my own.)
+                    self.query_one(PinnedSidebar).reload_pins()
                     reload_called = True
             # check state.toml
             new_state_mtime = None
@@ -634,9 +638,7 @@ class Application(App, inherit_bindings=False):
                     new_drives = get_mounted_drives()
                     if new_drives != drives:
                         drives = new_drives
-                        self.app.call_from_thread(
-                            self.query_one("#pinned_sidebar").reload_pins
-                        )
+                        self.query_one(PinnedSidebar).reload_pins()
                 except Exception as exc:
                     self.notify(
                         f"{type(exc).__name__}: {exc}",
@@ -755,13 +757,13 @@ class Application(App, inherit_bindings=False):
                 yield SystemCommand(
                     "Disable Transparent Theme",
                     "Go back to an opaque background.",
-                    lambda: self.set_timer(0.1, self._toggle_transparency),
+                    lambda: self.call_later(self._toggle_transparency),
                 )
             else:
                 yield SystemCommand(
                     "Enable Transparent Theme",
                     "Have a transparent background.",
-                    lambda: self.set_timer(0.1, self._toggle_transparency),
+                    lambda: self.call_later(self._toggle_transparency),
                 )
 
         if (
@@ -816,7 +818,8 @@ class Application(App, inherit_bindings=False):
     @work
     async def _toggle_transparency(self) -> None:
         self.ansi_color = not self.ansi_color
-        await self.push_screen_wait(DummyScreen())
+        self.refresh()
+        self.refresh_css()
         self.file_list.update_border_subtitle()
 
     @on(events.Click)
@@ -828,10 +831,10 @@ class Application(App, inherit_bindings=False):
             self.hide_popups()
 
     def hide_popups(self) -> None:
+        # just in case
         with suppress(NoMatches):
-            self.query_one(FileListRightClickOptionList).add_class("hidden")
-        with suppress(NoMatches):
-            self.query_one(SortOrderPopup).add_class("hidden")
+            for popup in self.query(PopupOptionList):
+                popup.add_class("hidden")
 
     @work(thread=True)
     def run_in_thread(self, function: Callable, *args, **kwargs) -> Worker:
@@ -903,6 +906,3 @@ class Application(App, inherit_bindings=False):
                 )
         self._exit_renderables.clear()
         self.workers.cancel_all()
-
-
-app = Application()

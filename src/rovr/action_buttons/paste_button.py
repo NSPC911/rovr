@@ -2,7 +2,7 @@ from textual.widgets import Button
 
 from rovr.classes.textual_options import ClipboardSelectionValue
 from rovr.functions.icons import get_icon
-from rovr.screens import YesOrNo
+from rovr.screens.paste_screen import PasteScreen
 from rovr.variables.constants import config
 
 
@@ -50,7 +50,7 @@ class PasteButton(Button):
                     self.app.query_one("ProcessContainer").paste_items(to_copy, to_cut)
 
             self.app.push_screen(
-                YesOrNo(
+                PasteScreen(
                     message="Are you sure you want to "
                     + (
                         f"copy {len(to_copy)} item{'s' if len(to_copy) != 1 else ''}{' and ' if len(to_cut) != 0 else ''}"
@@ -62,7 +62,9 @@ class PasteButton(Button):
                         if len(to_cut) > 0
                         else ""
                     )
-                    + "?"
+                    + "?",
+                    paths={"copy": to_copy, "cut": to_cut},
+                    destructive=True,
                 ),
                 callback=callback,
             )

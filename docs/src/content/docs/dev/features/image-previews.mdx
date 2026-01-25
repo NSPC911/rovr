@@ -1,0 +1,63 @@
+---
+title: image previews
+description: how rovr displays images in the terminal.
+---
+
+import { Code } from "@astrojs/starlight/components";
+
+`rovr` uses the [`textual-image`](https://github.com/lnqs/textual-image) package to render images directly in the terminal. this allows for a rich file preview experience.
+
+however, image support depends on the capabilities of your terminal emulator. different terminals support different image protocols.
+
+### supported terminals
+
+here is a summary of terminals and their support for the image protocols used by `rovr`:
+
+| Terminal           | TGP support | Sixel support |
+| ------------------ | :---------: | :-----------: |
+| Black Box          |     ❌      |      ✅       |
+| Foot               |     ❌      |      ✅       |
+| Gnome Terminal     |     ❌      |      ❌       |
+| Iterm2             |     ❌      |      ✅       |
+| Kitty              |     ✅      |      ❌       |
+| Konsole            |     ✅      |      ✅       |
+| Tmux               |     ❌      |      ✅       |
+| Visual Studio Code |     ❌      |      ✅       |
+| Warp               |     ❌      |      ❌       |
+| Wezterm            |     ✅      |      ✅       |
+| Windows Console    |     ❌      |      ❌       |
+| Windows Terminal   |     ❌      |      ✅       |
+| Xterm              |     ❌      |      ✅       |
+
+> the `iterm2 inline images` protocol is not supported. see [lnqs/textual-image #68](https://github.com/lnqs/textual-image/issues/68) for more details.
+
+### configuring the image protocol
+
+if you are using a terminal that doesn't support the default image protocol, `textual-image` will fall back to a `half-cell` representation.
+
+if images do not appear correctly, you can manually override the image protocol in your `config.toml` file.
+
+<Code
+  code={`[settings]\nimage_protocol = "Sixel"`}
+  lang="toml"
+  title="config.toml"
+/>
+
+available `image_protocol` values are: `"Auto"`, `"TGP"`, `"Sixel"`, `"Halfcell"`, and `"Unicode"`.
+
+### configuring the image size
+
+this lets you configure the maximum width and height of image previews in pixels. by default, `rovr` sets these values to `1920` (width) and `1080` (height).
+
+<Code
+  code={`[interface]\nmax_preview_image_width = 1920\nmax_preview_image_height = 1080`}
+  lang="toml"
+  title="config.toml"
+/>
+
+you can choose to disable this by setting either value to `0`, which means the image preview will use the image as-is.
+
+### known issues
+
+- some low-resolution images will look horrible, I'm not really sure why that happens, but it might be due to an unnecessary up-scaling attempt by `textual-image`
+- transparent images do not get shown with a transparent background. this _used_ to work, but textual-image is just really scuffed (beggars cant be choosers). I may take a look some day, but the internals is too advanced.

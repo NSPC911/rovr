@@ -94,6 +94,22 @@ def get_icon_for_folder(location: str) -> list[str]:
 
 
 @lru_cache(maxsize=1024)
+def get_icon_smart(location: str) -> list[str]:
+    """Get the icon and color for a file or folder based on its path.
+
+    Args:
+        location (str): The path of the file or folder.
+
+    Returns:
+        list: The icon and color for the file or folder.
+    """
+    if path.isdir(location):
+        return get_icon_for_folder(location)
+    else:
+        return get_icon_for_file(location)
+
+
+@lru_cache(maxsize=1024)
 def get_icon(outer_key: str, inner_key: str) -> list:
     """Get an icon from double keys.
     Args:
@@ -104,9 +120,9 @@ def get_icon(outer_key: str, inner_key: str) -> list:
         list[str,str]: The icon and color for the icon
     """
     if not config["interface"]["nerd_font"]:
-        return ASCII_ICONS.get(outer_key, {"empty": None}).get(inner_key, " ")
+        return ASCII_ICONS.get(outer_key, {}).get(inner_key, [" ", ""])
     else:
-        return ICONS[outer_key][inner_key]
+        return ICONS.get(outer_key, {}).get(inner_key, [" ", ""])
 
 
 @lru_cache(maxsize=1024)

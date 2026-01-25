@@ -69,18 +69,6 @@
           "description": "The image protocol to use when displaying an image",
           "enum": ["Auto", "TGP", "Sixel", "Halfcell", "Unicode"]
         },
-        "max_preview_image_width": {
-          "type": "integer",
-          "minimum": 0,
-          "default": 1920,
-          "description": "Maximum width for preview images in pixels. Images wider than this will be downscaled using integer reduction. Set to 0 to disable resizing."
-        },
-        "max_preview_image_height": {
-          "type": "integer",
-          "minimum": 0,
-          "default": 1080,
-          "description": "Maximum height for preview images in pixels. Images taller than this will be downscaled using integer reduction. Set to 0 to disable resizing."
-        },
         "allow_tab_nav": {
           "type": "boolean",
           "default": false,
@@ -188,6 +176,90 @@
           "type": "boolean",
           "default": true,
           "description": "When copying over a file, preserve metadata from the original file, such as creation and modification times."
+        },
+        "bulk_rename": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "show_as_mapping": {
+              "type": "boolean",
+              "default": true,
+              "description": "Show as a mapping of `<old> ➔ <new>` instead of just `<old>`"
+            }
+          }
+        },
+        "editor": {
+          "type": "object",
+          "description": "Settings related to the editor used for different operations",
+          "additionalProperties": false,
+          "properties": {
+            "file": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "run": {
+                  "type": "string",
+                  "default": "$EDITOR",
+                  "description": "Editor to use when opening a file"
+                },
+                "block": {
+                  "type": "boolean",
+                  "default": false,
+                  "description": "Block rovr until the editor closes"
+                },
+                "suspend": {
+                  "type": "boolean",
+                  "default": true,
+                  "description": "Suspend (hide) rovr until the editor closes. Will block regardless."
+                }
+              },
+              "description": "Editor to use when opening a file"
+            },
+            "folder": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "run": {
+                  "type": "string",
+                  "default": "$EDITOR",
+                  "description": "Editor to use when opening a folder"
+                },
+                "block": {
+                  "type": "boolean",
+                  "default": false,
+                  "description": "Block rovr until the editor closes"
+                },
+                "suspend": {
+                  "type": "boolean",
+                  "default": true,
+                  "description": "Suspend (hide) rovr until the editor closes. Will block regardless."
+                }
+              },
+              "description": "Editor to use when opening a folder"
+            },
+            "bulk_rename": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "run": {
+                  "type": "string",
+                  "default": "$EDITOR",
+                  "description": "Editor to use for bulk renaming"
+                },
+                "suspend": {
+                  "type": "boolean",
+                  "default": true,
+                  "description": "Suspend (hide) rovr until the editor closes"
+                }
+              },
+              "description": "Editor to use for bulk renaming"
+            },
+            "open_all_in_editor": {
+              "type": "boolean",
+              "default": false,
+              "description": "Open all in the configured editor, regardless of file encoding or type. When disabled, it opens them in the system configured editor."
+            }
+          }
         }
       }
     },
@@ -218,6 +290,7 @@
             "created",
             "hidden"
           ],
+          "uniqueItems": true,
           "description": "The order of the metadata tags that you want to see in the Metadata section."
         },
         "datetime_format": {
@@ -304,56 +377,25 @@
         "preview": {
           "type": "string",
           "default": "nord",
-          "description": "The theme to use when previewing files in the preview sidebar.",
+          "description":"The theme to use when previewing files in the preview sidebar.",
           "enum": [
-            "abap",
-            "algol",
-            "algol_nu",
-            "arduino",
-            "autumn",
-            "bw",
-            "borland",
-            "coffee",
-            "colorful",
-            "default",
-            "dracula",
+            "abap", "algol", "algol_nu", "arduino", "autumn",
+            "bw", "borland",
+            "coffee", "colorful",
+            "default", "dracula",
             "emacs",
-            "friendly_grayscale",
-            "friendly",
-            "fruity",
-            "github-dark",
-            "gruvbox-dark",
-            "gruvbox-light",
-            "igor",
-            "inkpot",
-            "lightbulb",
-            "lilypond",
-            "lovelace",
-            "manni",
-            "material",
-            "monokai",
-            "murphy",
-            "native",
-            "nord-darker",
-            "nord",
+            "friendly_grayscale", "friendly", "fruity",
+            "github-dark", "gruvbox-dark", "gruvbox-light",
+            "igor", "inkpot",
+            "lightbulb", "lilypond", "lovelace",
+            "manni", "material", "monokai", "murphy",
+            "native", "nord-darker", "nord",
             "one-dark",
-            "paraiso-dark",
-            "paraiso-light",
-            "pastie",
-            "perldoc",
-            "rainbow_dash",
-            "rrt",
-            "sas",
-            "solarized-dark",
-            "solarized-light",
-            "staroffice",
-            "stata-dark",
-            "stata-light",
-            "tango",
-            "trac",
-            "vim",
-            "vs",
-            "xcode",
+            "paraiso-dark", "paraiso-light", "pastie", "perldoc",
+            "rainbow_dash", "rrt",
+            "sas", "solarized-dark", "solarized-light", "staroffice", "stata-dark", "stata-light",
+            "tango", "trac",
+            "vim", "vs", "xcode",
             "zenburn"
           ]
         },
@@ -544,6 +586,27 @@
           "description": "Delete the selected files in the file list.",
           "display_name": "Delete"
         },
+        "delete_files": {
+          "type": "object",
+          "description": "Keybinds related to the delete confirmation screen",
+          "properties": {
+            "trash": {
+              "$ref": "#/definitions/keybind",
+              "description": "Confirm deletion and move files to the recycle bin.",
+              "display_name": "Delete to recycle bin"
+            },
+            "delete": {
+              "$ref": "#/definitions/keybind",
+              "description": "Confirm deletion and permanently delete files.",
+              "display_name": "Permanently delete"
+            },
+            "cancel": {
+              "$ref": "#/definitions/keybind",
+              "description": "Cancel deletion and go back to the main screen.",
+              "display_name": "Cancel deletion"
+            }
+          }
+        },
         "rename": {
           "$ref": "#/definitions/keybind",
           "description": "Rename the selected file in the file list to something else.",
@@ -569,10 +632,37 @@
           "description": "Extract a selected zip archive.",
           "display_name": "Unzip"
         },
-        "copy_path": {
-          "$ref": "#/definitions/keybind",
-          "description": "Copy the path of the item to the system clipboard.",
-          "display_name": "Copy path"
+        "extra_copy": {
+          "type": "object",
+          "description": "Keybinds related to extra copy options",
+          "additionalProperties": false,
+          "properties": {
+            "open_popup": {
+              "$ref": "#/definitions/keybind",
+              "description": "Open the menu with extra copy options.",
+              "display_name": "Copy options"
+            },
+            "copy_to_rovr": {
+              "$ref": "#/definitions/keybind",
+              "description": "Copy the selected files to rovr's clipboard",
+              "display_name": "Copy to rovr's clipboard"
+            },
+            "copy_single_path": {
+              "$ref": "#/definitions/keybind",
+              "description": "Copy only the highlighted file's path to the system clipboard",
+              "display_name": "Copy highlighted file path"
+            },
+            "copy_to_system_clip": {
+              "$ref": "#/definitions/keybind",
+              "description": "Copy the selected files to the system clipboard",
+              "display_name": "Copy to system clipboard"
+            },
+            "copy_current_directory": {
+              "$ref": "#/definitions/keybind",
+              "description": "Copy the current directory's path to the system clipboard",
+              "display_name": "Copy current directory path"
+            }
+          }
         },
         "up": {
           "$ref": "#/definitions/keybind",
@@ -770,26 +860,10 @@
           "description": "Suspend the app's process, bringing you back to the terminal",
           "display_name": "Suspend app"
         },
-        "delete_files": {
-          "type": "object",
-          "description": "Keybinds related to the delete confirmation screen",
-          "properties": {
-            "trash": {
-              "$ref": "#/definitions/keybind",
-              "description": "Confirm deletion and move files to the recycle bin.",
-              "display_name": "Delete to recycle bin"
-            },
-            "delete": {
-              "$ref": "#/definitions/keybind",
-              "description": "Confirm deletion and permanently delete files.",
-              "display_name": "Permanently delete"
-            },
-            "cancel": {
-              "$ref": "#/definitions/keybind",
-              "description": "Cancel deletion and go back to the main screen.",
-              "display_name": "Cancel deletion"
-            }
-          }
+        "open_editor": {
+          "$ref": "#/definitions/keybind",
+          "description": "Open the selected file or folder in the configured editor.",
+          "display_name": "Open in editor"
         },
         "filename_conflict": {
           "type": "object",
@@ -934,48 +1008,6 @@
             }
           }
         },
-        "editor": {
-          "type": "object",
-          "additionalProperties": false,
-          "properties": {
-            "enabled": {
-              "type": "boolean",
-              "default": true,
-              "description": "Enable opening a file in your editor."
-            },
-            "file_executable": {
-              "type": "string",
-              "default": "nano",
-              "description": "Open files in this app."
-            },
-            "file_suspend": {
-              "type": "boolean",
-              "default": true,
-              "description": "Suspend the app when editing a file. Useful for TUI editors, but not for something like VSCode or Notepad++."
-            },
-            "folder_executable": {
-              "type": "string",
-              "default": "code",
-              "description": "Open folders in this app."
-            },
-            "folder_suspend": {
-              "type": "boolean",
-              "default": true,
-              "description": "Suspend the app when editing a folder. Useful for TUI editors, but not for something like VSCode or Notepad++."
-            },
-            "open_all_in_editor": {
-              "type": "boolean",
-              "default": false,
-              "description": "Open all files in the configured editor, regardless of file encoding or type. When disabled, files that cannot be opened due to encoding issues will use the system's default application instead."
-            },
-            "keybinds": {
-              "$ref": "#/definitions/keybind",
-              "default": ["e"],
-              "description": "The keybind to launch your editor.",
-              "display_name": "Open file with editor"
-            }
-          }
-        },
         "fd": {
           "type": "object",
           "additionalProperties": false,
@@ -1015,6 +1047,7 @@
               "type": "array",
               "default": ["file", "directory"],
               "description": "The default file types to show when using fd.",
+              "uniqueItems": true,
               "items": {
                 "type": "string",
                 "enum": [

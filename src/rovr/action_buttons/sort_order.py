@@ -1,4 +1,4 @@
-from textual import events, on
+from textual import events
 from textual.css.query import NoMatches
 from textual.widgets import Button, OptionList
 from textual.widgets.option_list import Option
@@ -88,6 +88,7 @@ class SortOrderButton(Button):
             )
         elif isinstance(event, events.Key):
             popup_widget.do_adjust = True
+        popup_widget.pre_show()
         popup_widget.remove_class("hidden")
         popup_widget.focus()
 
@@ -103,8 +104,7 @@ class SortOrderPopup(PopupOptionList):
         # calling super()._on_mount is useless, and super().mount()
         # doesnt do anything significant
 
-    @on(events.Show)
-    def on_show(self, event: events.Show | None = None) -> None:
+    def pre_show(self) -> None:
         state_manager: StateManager = self.app.query_one(StateManager)
         self.set_options([
             SortOrderPopupOptions(
@@ -205,32 +205,11 @@ class SortOrderPopup(PopupOptionList):
         self.button.update_icon()
 
     async def on_key(self, event: events.Key) -> None:
-        # no i will not refactor this, or accept PRs to refactor this.
-        if check_key(event, config["keybinds"]["change_sort_order"]["name"]):
-            self.highlighted = self.get_option_index("name")
-            event.stop()
-            self.action_select()
-        elif check_key(event, config["keybinds"]["change_sort_order"]["extension"]):
-            self.highlighted = self.get_option_index("extension")
-            event.stop()
-            self.action_select()
-        elif check_key(event, config["keybinds"]["change_sort_order"]["natural"]):
-            self.highlighted = self.get_option_index("natural")
-            event.stop()
-            self.action_select()
-        elif check_key(event, config["keybinds"]["change_sort_order"]["size"]):
-            self.highlighted = self.get_option_index("size")
-            event.stop()
-            self.action_select()
-        elif check_key(event, config["keybinds"]["change_sort_order"]["created"]):
-            self.highlighted = self.get_option_index("created")
-            event.stop()
-            self.action_select()
-        elif check_key(event, config["keybinds"]["change_sort_order"]["modified"]):
-            self.highlighted = self.get_option_index("modified")
-            event.stop()
-            self.action_select()
-        elif check_key(event, config["keybinds"]["change_sort_order"]["descending"]):
-            self.highlighted = self.get_option_index("descending")
-            event.stop()
-            self.action_select()
+        for option, keys in config["keybinds"]["change_sort_order"].items():
+            if option == "open_popup":
+                continue
+            if check_key(event, keys):
+                self.highlighted = self.get_option_index(option)
+                event.stop()
+                self.action_select()
+                return

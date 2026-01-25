@@ -11,15 +11,14 @@
   },
   "dependencies": {
     "@astrojs/sitemap": "^3.7.0",
-    "@astrojs/starlight": "^0.37.3",
-    "astro": "^5.16.11",
-    "astro-mermaid": "github:joesaby/astro-mermaid#v1.2.1",
+    "@astrojs/starlight": "^0.37.4",
+    "astro": "^5.16.15",
+    "astro-mermaid": "^1.3.1",
     "mermaid": "^11.12.2",
     "sharp": "^0.34.5",
     "starlight-contributor-list": "^0.3.2"
   },
   "devDependencies": {
     "astro-vtbot": "^2.1.10"
-  },
-  "packageManager": "pnpm"
+  }
 }

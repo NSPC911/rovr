@@ -36,21 +36,25 @@ else:
 pprint = Console().print
 
 
-pins = {}
-
-
-def normalise(location: str | bytes) -> str:
+def normalise(*location: str | bytes) -> str:
     """'Normalise' the path
     Args:
-        location (str): The location to the item
+        *location (str | bytes): The location to the item
 
     Returns:
         str: A normalised path
+
+    Raises:
+        ValueError: When no path components are provided
     """
+    if not location:
+        raise ValueError("At least one path component must be provided")
     # path.normalise fixes the relative references
     # replace \\ with / on windows
     # by any chance if somehow a \\\\ was to enter, fix that
-    return str(path.normpath(location)).replace("\\", "/").replace("//", "/")
+    return (
+        str(path.normpath(path.join(*location))).replace("\\", "/").replace("//", "/")
+    )
 
 
 def is_hidden_file(filepath: str) -> bool:
@@ -346,8 +350,8 @@ def sync_get_cwd_object(
             # folders dont have extensions btw
             # and i will not count dot prepended folders
             folders.sort(key=lambda x: x["name"].lower())
-
             files.sort(key=get_extension_sort_key)
+
     if (
         return_nothing_if_this_returns_true is not None
         and return_nothing_if_this_returns_true()
@@ -491,6 +495,8 @@ def ensure_existing_directory(directory: str) -> str:
             break
 
         directory = parent
+    if directory == "":
+        directory = "."
     return directory
 
 
@@ -583,12 +589,12 @@ def _should_include_linux_mount_point(partition: "psutil._common.sdiskpart") -> 
     ))
 
 
-def get_mounted_drives() -> list:
+def get_mounted_drives() -> list[str]:
     """
     Get a list of mounted drives on the system.
 
     Returns:
-        list: List of mounted drives.
+        list[str]: List of mounted drives.
     """
     drives = []
     try:
@@ -730,11 +736,11 @@ def get_mime_type(
     return None
 
 
-def dump_exc(widget: DOMNode, exc: Exception | Traceback) -> str | None:
+def dump_exc(widget: DOMNode | None, exc: Exception | Traceback) -> str | None:
     """Dump an exception to the console for debugging purposes.
 
     Args:
-        widget (DOMNode): The widget where the exception occurred.
+        widget (DOMNode, None): The widget where the exception occurred.
         exc (Exception, Traceback): The exception to dump.
 
     Returns:
@@ -759,7 +765,8 @@ def dump_exc(widget: DOMNode, exc: Exception | Traceback) -> str | None:
         if isinstance(exc, Exception)
         else exc
     )
-    widget.log(rich_traceback)
+    if isinstance(widget, DOMNode):
+        widget.log(rich_traceback)
 
     dump_path = path.join(
         path.realpath(VAR_TO_DIR["CONFIG"]),
@@ -767,7 +774,7 @@ def dump_exc(widget: DOMNode, exc: Exception | Traceback) -> str | None:
         f"{log_name}.log",
     )
     os.makedirs(path.dirname(dump_path), exist_ok=True)
-    with open(dump_path, "a") as file_log:
+    with open(dump_path, "a", encoding="utf-8") as file_log:
         # don't need to handle OS Error, Textual automatically chains errors
         error_log = Console(file=file_log, legacy_windows=True)
         # section it with time and date

@@ -5,14 +5,13 @@ description: the structure of the project
 
 import { FileTree } from "@astrojs/starlight/components";
 
-the current file structure seperates each section in each folder
+the current file structure separates each section into its own folder
 
 ### root
 
 <FileTree>
 - src/rovr
   - app.py houses the main application
-  - state_manager.py manages persistent state
   - py.typed
   - style.tcss default style
 </FileTree>
@@ -143,13 +142,4 @@ handles the modal screens used
 - src/rovr/variables
   - constants.py global constants, including the loaded config
   - maps.py maps to icons and other things
-</FileTree>
-
-### monkey patches
-
-anything that needs to be modified at runtime due to reasons
-<FileTree>
-- src/rovr/monkey_patches
-  - puremagic_patch.py patches for puremagic
-  - magic_data.json slightly modified puremagic data file
 </FileTree>

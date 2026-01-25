@@ -1,0 +1,75 @@
+---
+title: theming
+description: how to theme rovr
+---
+
+rovr can be themed in two ways, via the `config.toml` file and `style.tcss` file.
+
+### config.toml
+
+the config has a way to define themes using variables
+
+```toml
+[[custom_theme]]
+name       = "<name>"
+primary    = "<color>"
+secondary  = "<color>"
+warning    = "<color>"
+error      = "<color>"
+success    = "<color>"
+accent     = "<color>"
+foreground = "<color>"
+background = "<color>"
+surface    = "<color>"
+panel      = "<color>"
+is_dark    = true
+variables  = { "<var>" = "<key>" }
+```
+
+you can take a look at the reference in [textual](https://textual.textualize.io/guide/design), or the table below
+
+| Variables  | Description                                                                                                                                   |
+| ---------- | --------------------------------------------------------------------------------------------------------------------------------------------- |
+| primary    | The primary color, can be considered the *branding* color. Typically used for titles, and backgrounds for strong emphasis.                    |
+| secondary  | An alternative branding color, used for similar purposes as `primary`, where an app needs to differentiate something from the primary color.  |
+| foreground | The default text color, which should be legible on `background`, `surface`, and `panel`.                                                      |
+| background | A color used for the background, where there is no content. Used as the default background color for screens.                                 |
+| surface    | The default background color of widgets, typically sitting on top of `background`.                                                            |
+| panel      | A color used to differentiate a part of the UI form the main content. Used sparingly in Textual itself.                                       |
+| boost      | A color with alpha that can be used to create *layers* on a background.                                                                       |
+| warning    | Indicates a warning. Typically used as a background color. `text-warning` can be used for foreground.                                         |
+| error      | Indicates an error. Typically used as a background color. `text-error` can be used for foreground.                                            |
+| success    | Used to indicate success. Typically used as a background color. `text-success` can be used for foreground.                                    |
+| accent     | Used sparingly to draw attention. Typically contrasts with `primary` and `secondary`.                                                         |
+| is_dark    | A boolean indicating whether the theme is dark or light.                                                                                      |
+| variables  | custom variables that are used by textual. [variables](https://textual.textualize.io/guide/design/#additional-variables)                      |
+
+### style.tcss
+
+styling in textual is handled by `tcss` files, a simplified version of the web's `css`. a reference is available in the [textual docs](https://textual.textualize.io/styles/)
+
+you can get the full DOM list by running
+
+```shell
+rovr --tree-dom
+```
+
+`tcss` works the same as `css`, so, if you want to target the `FileList` inside the `#file_list_container` you can do
+
+```css
+#file_list_container > FileList {
+  ...
+}
+```
+
+however, if you took a look at the dom, or a truncated dom below
+
+```
+Application class="-dark-mode"
+└── Vertical id="root"
+    └── HorizontalGroup id="main"
+        └── FileListContainer id="file_list_container"
+            └── FileList id="file_list" class="file-list"
+```
+
+you may notice that class inheritance is not shown, `FileListContainer` inherits `VerticalGroup` while `FileList` inherits `SelectionList`. I will soon add support, but not just yet.

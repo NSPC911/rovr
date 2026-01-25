@@ -65,7 +65,6 @@ buttons_that_depend_on_path = [
     "#rename",
     "#delete",
     "#zip",
-    "#copy_path",
 ]
 
 ascii_logo = r"""
@@ -142,7 +141,7 @@ vindings: list[BindingType] = (
     ]
 )
 
-os_type: str = platform.system()
+os_type = platform.system()
 
 SortByOptions: TypeAlias = Literal[
     "name", "size", "modified", "created", "extension", "natural"

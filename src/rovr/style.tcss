@@ -56,10 +56,11 @@ ZoxideOptionList,
 FileSearchOptionList, FileSearchToggles,
 ContentSearchOptionList, ContentSearchToggles,
 #footer > *,
-FileListRightClickOptionList,
-SortOrderPopup,
+PopupOptionList,
 .comfy-buttons #path_switcher,
-.comfy-buttons #below_menu Button {
+.comfy-buttons #below_menu Button,
+PasteScreen OptionList,
+DeleteFiles OptionList {
   background: transparent;
   border: $border-style $border-blurred;
   border-subtitle-color: $background;
@@ -99,11 +100,12 @@ ContentSearchToggles:focus,
 #pinned_sidebar.-maximized,
 #preview_sidebar .inner_preview.-maximized,
 #footer > *:focus,
-FileListRightClickOptionList,
-SortOrderPopup,
+PopupOptionList,
 .comfy-buttons #path_switcher:focus-within,
 .comfy-buttons #below_menu Button:focus,
-.comfy-buttons #below_menu Button:hover {
+.comfy-buttons #below_menu Button:hover,
+PasteScreen OptionList,
+DeleteFiles OptionList {
   border: $border-style $border;
   border-subtitle-background: $border;
   &:ansi {
@@ -380,6 +382,7 @@ Tooltip {
 
 #preview_sidebar {
   margin: 0;
+  padding: 0;
   width: $preview_sidebar_width;
   layout: horizontal;
   height: 1fr;
@@ -414,14 +417,9 @@ Tooltip {
     width: auto;
     height: auto;
     align: center middle;
-    margin: 0 1
-  }
-  &.pdf Image {
     margin: 0 1 1 1;
   }
 }
-
-#preview_sidebar { padding: 0 }
 
 #image_preview {
   width: auto;
@@ -479,11 +477,13 @@ ProgressBarContainer {
 Content.selected { color: red }
 CommandList,
 FileList, PinnedSidebar, Clipboard,
-FileListRightClickOptionList, SortOrderPopup,
+PopupOptionList,
 ZoxideOptionList,
 FileSearchToggles, FileSearchOptionList,
 ContentSearchToggles, ContentSearchOptionList,
-KeybindList {
+KeybindList,
+PasteScreen OptionList,
+DeleteFiles OptionList {
   padding: 0 0 0 0;
   background-tint: ansi_default !important;
   .option-list--separator { color: $foreground }
@@ -528,17 +528,10 @@ KeybindList {
     color: $background;
   }
 }
-FileList .option-list--option-highlighted {
-  color: $block-cursor-background;
-  background: transparent;
-  text-style: bold;
-}
 
 #dialog {
-  max-width: 57;
-  max-height: 15;
-  height: 75vh;
-  width: 75vw;
+  max-width: 50vw;
+  max-height: 50vh;
   overflow-y: auto;
   border-title-align: center;
   border-subtitle-align: center;
@@ -586,8 +579,8 @@ ContentSearch {
   align: center middle;
   layout: horizontal;
   & > VerticalGroup {
-    max-width: 50vw;
-    max-height: 50vh;
+    max-width: 60vw;
+    max-height: 60vh;
     OptionList {
       width: 100%;
       max-width: 100%;
@@ -628,12 +621,20 @@ FileSearch FileSearchToggles,
 ContentSearch ContentSearchToggles {
   width: 24;
   height: auto;
-  max-height: 50vh;
+  max-height: 60vh;
 }
 
 ContentSearch ContentSearchToggles {
   /* size fix */
   width: 25
+}
+
+/* Shared OptionList highlight style */
+Keybinds #keybinds_data .option-list--option-highlighted,
+CommandPalette CommandList > .option-list--option-highlighted,
+PopupOptionList .option-list--option-highlighted {
+  background: $primary;
+  color: $background;
 }
 
 Keybinds {
@@ -644,10 +645,6 @@ Keybinds {
     height: 1fr;
     background: transparent;
     padding: 0;
-    .option-list--option-highlighted {
-      background: $primary;
-      color: $background;
-    }
   }
   #keybinds_group {
     max-width: 60vw;
@@ -656,8 +653,54 @@ Keybinds {
   }
 }
 
-Dismissable {
+/* Modal Dialog Shared Styles */
+Dismissable,
+YesOrNo,
+CommonFileNameDoWhat,
+FileInUse,
+DeleteFiles,
+ModalInput,
+TerminalTooSmall { align: center middle }
+
+YesOrNo #dialog #question_container,
+CommonFileNameDoWhat #dialog #question_container,
+FileInUse #question_container {
+  column-span: 2;
+  height: 1fr;
+  width: 1fr;
+  content-align: center middle;
+  .question {
+    content-align: center middle;
+    width: 1fr;
+    height: 1fr;
+    text-align: center;
+  }
+}
+
+YesOrNo #dialog #dontAskAgain,
+CommonFileNameDoWhat #dialog #dontAskAgain,
+FileInUse #dontAskAgain {
+  column-span: 2;
+  content-align: center middle;
   align: center middle;
+  Switch {
+    border: none;
+    padding: 0;
+    background: transparent;
+    margin: 0 2 0 0;
+    &:focus {
+      border: none;
+      & > .switch--slider { color: $panel-lighten-1 }
+      &.-on > .switch--slider { color: $success-lighten-1 }
+    }
+  }
+}
+
+YesOrNo #dialog Button,
+CommonFileNameDoWhat #dialog Button,
+FileInUse Button { width: 100% }
+
+Dismissable {
   #dialog {
     grid-size: 1;
     grid-gutter: 1 2;
@@ -676,152 +719,55 @@ Dismissable {
   Button { width: 50% }
 }
 
-YesOrNo {
-  align: center middle;
-  #dialog {
-    grid-size: 2;
-    grid-gutter: 1 2;
-    padding: 1 3 1 3;
-    border: $border-style $border;
-    grid-rows: 1fr 3; /* enough space for 1fr */
-    &.with_toggle {
-      grid-rows: 2 3 1; /* not enough space for two lines at times */
-      padding: 1 3 0 3;
-    }
-    #question_container {
-      column-span: 2;
-      height: 1fr;
-      width: 1fr;
-      content-align: center middle;
-      .question {
-        content-align: center middle;
-        width: 1fr;
-        height: 1fr;
-        text-align: center;
-      }
-    }
-    Button { width: 100% }
-    #dontAskAgain {
-      column-span: 2;
-      content-align: center middle;
-      align: center middle;
-      Switch {
-        border: none;
-        padding: 0;
-        background: transparent;
-        margin: 0 2 0 0;
-        &:focus {
-          border: none;
-          & > .switch--slider { color: $panel-lighten-1 }
-          &.-on > .switch--slider { color: $success-lighten-1 }
-        }
-      }
-    }
+YesOrNo #dialog {
+  grid-size: 2;
+  grid-gutter: 1 2;
+  padding: 1 3 1 3;
+  border: $border-style $border;
+  grid-rows: 1fr 3; /* enough space for 1fr */
+  &.with_toggle {
+    grid-rows: 1fr 3 1;
+    padding: 1 3 0 3;
   }
 }
 
-CommonFileNameDoWhat {
-  align: center middle;
-  #dialog {
-    grid-size: 2;
-    grid-gutter: 1 2;
-    grid-rows: 2 3 3 1; /* need the two lines for label */
-    padding: 1 3 0 3;
-    border: $border-style $border;
-    #question_container {
-      column-span: 2;
-      height: 1fr;
-      width: 1fr;
-      content-align: center middle;
-      .question {
-        content-align: center middle;
-        width: 1fr;
-        height: 1fr;
-        text-align: center;
-      }
-    }
-    Button { width: 100% }
-    #dontAskAgain {
-      column-span: 2;
-      content-align: center middle;
-      align: center middle;
-      Switch {
-        border: none;
-        padding: 0;
-        background: transparent;
-        margin: 0 2 0 0;
-        &:focus {
-          border: none;
-          & > .switch--slider { color: $panel-lighten-1 }
-          &.-on > .switch--slider { color: $success-lighten-1 }
-        }
-      }
-    }
+PasteScreen > #dialog {
+  grid-size: 2 3;
+  grid-gutter: 1 2;
+  grid-rows: 0.75fr 1fr 3;
+  &.with_toggle {
+    grid-rows: 0.75fr 1fr 3 1;
   }
+  OptionList {
+    column-span: 2;
+    padding: 0;
+    height: 1fr
+  }
+  Button {
+    column-span: 1
+  }
+  #question_container {
+    column-span: 2;
+  }
+}
+
+CommonFileNameDoWhat #dialog {
+  grid-size: 2;
+  grid-gutter: 1 2;
+  grid-rows: 1fr 3 3 1; /* need the two lines for label */
+  padding: 1 3 0 3;
+  border: $border-style $border;
 }
 
 FileInUse {
-   align: center middle;
-   #dialog {
-     grid-size: 2;
-     grid-gutter: 1 2;
-     grid-rows: 1fr 3 3 1; /* space for toggle row */
-     padding: 1 3;
-     border: $border-style $border;
-     max-height: 16;
-   }
-   #question_container {
-     column-span: 2;
-     height: 1fr;
-     width: 1fr;
-     content-align: center middle;
-     .question {
-       content-align: center middle;
-       width: 1fr;
-       height: 1fr;
-       text-align: center;
-     }
-   }
-   Button { width: 100% }
-   Container {
-     column-span: 2;
-     align: center middle;
-     Button#cancel { width: 50% }
-   }
-   #dontAskAgain {
-     column-span: 2;
-     content-align: center middle;
-     align: center middle;
-     Switch {
-       border: none;
-       padding: 0;
-       background: transparent;
-       margin: 0 2 0 0;
-       &:focus {
-         border: none;
-         & > .switch--slider { color: $panel-lighten-1 }
-         &.-on > .switch--slider { color: $success-lighten-1 }
-       }
-     }
-   }
-}
-
-DeleteFiles {
-  align: center middle;
   #dialog {
     grid-size: 2;
     grid-gutter: 1 2;
-    grid-rows: 1fr 3 3 1; /* no issues for now */
+    grid-rows: 1fr 3 3 1; /* space for toggle row */
     padding: 1 3;
     border: $border-style $border;
+    max-height: 16;
   }
-  #question {
-    column-span: 2;
-    height: 1fr;
-    width: 1fr;
-    content-align: center middle;
-  }
-  Button { width: 100% }
   Container {
     column-span: 2;
     align: center middle;
@@ -829,8 +775,36 @@ DeleteFiles {
   }
 }
 
+DeleteFiles {
+  #dialog {
+    grid-size: 2 3;
+    grid-gutter: 1 2;
+    grid-rows: 0.75fr 1fr 3 1; /* no issues for now */
+    padding: 1 3;
+    border: $border-style $border;
+    &.with_trash {
+      grid-size: 3 3;
+    }
+  }
+  #question {
+    column-span: 3;
+    height: 1fr;
+    width: 1fr;
+    content-align: center middle;
+  }
+  Button { width: 1fr }
+  Container {
+    column-span: 2;
+    align: center middle;
+  }
+  SpecialOptionList {
+    column-span: 3;
+    padding: 0;
+    height: 1fr;
+  }
+}
+
 ModalInput {
-  align: center middle;
   HorizontalGroup {
     border: $border-style $border;
     width: 50vw;
@@ -850,7 +824,6 @@ ModalInput {
 }
 
 TerminalTooSmall {
-  align: center middle;
   background: transparent;
   height: 1fr;
   scrollbar-size: 0 0;
@@ -878,11 +851,7 @@ CommandPalette {
   CommandList {
     border: $border-style $border;
     border-top: none;
-    max-height: 50vh;
-    & > .option-list--option-highlighted {
-      color: $background;
-      background: $primary;
-    }
+    max-height: 60vh;
   }
   SearchIcon {
     margin-left: 2;
@@ -899,14 +868,7 @@ CommandPalette {
   LoadingIndicator { border-bottom: $border-style $border }
 }
 
-FileListRightClickOptionList,
-SortOrderPopup {
-  width: auto;
-  .option-list--option-highlighted {
-    background: $primary;
-    color: $background;
-  }
-}
+PopupOptionList { width: auto }
 
 LoadingIndicator {
   background: transparent;
@@ -1002,30 +964,44 @@ Screen.-nopreview {
   #below_menu Button { display: none !important }
 }
 Screen.-nomenu-atall #menuwrapper,
-Screen.-middle-only #menuwrapper {
-  display: none;
-}
+Screen.-middle-only #menuwrapper { display: none }
+
 Screen {
   &.-filelistonly {
     #pinned_sidebar_container { display: none !important }
     #zoxide_group,
     #file_search_group,
     #content_search_group,
+    #keybinds_group,
     .--textual-command-palette #--container,
     #dialog,
     #modalInput_group {
-      width: 90vw;
-      max-width: 90vw;
+      width: 100vw;
+      max-width: 100vw;
     }
-    Toast { width: 90vw }
+    Toast { width: 100vw }
     #file_search_toggles,
     #content_search_toggles { display: none }
+    #dialog.delete {
+      grid-size: 1 5 !important;
+      max-height: 100vh;
+      grid-rows: 0.75fr 1fr 3 3 1 !important;
+      padding: 0 1;
+      &.with_trash { grid-rows: 0.75fr 1fr 3 3 3 1 !important }
+    }
+    #dialog.file_in_use {
+      max-height: 75vh;
+      grid-size: 1 5 !important;
+      grid-rows: 1fr 3 3 3 1 !important;
+      #cancel { width: 100% }
+    }
   }
   &.-nopreview {
     #pinned_sidebar_container { max-width: 25vw }
     #zoxide_group,
     #file_search_group,
     #content_search_group,
+    #keybinds_group,
     .--textual-command-palette #--container,
     #dialog,
     #modalInput_group {
@@ -1035,31 +1011,41 @@ Screen {
     Toast { width: 50vw }
     #file_search_toggles,
     #content_search_toggles { display: none }
+    #dialog.delete {
+      grid-size: 2 4 !important;
+      max-height: 75vh;
+      grid-rows: 0.75fr 1fr 3 3 1 !important;
+      padding: 0 1;
+      &.with_trash { grid-rows: 0.75fr 1fr 3 3 3 1 !important }
+      #cancel { width: 50% }
+    }
+    #dialog.file_in_use {
+      max-height: 75vh;
+      grid-size: 2 4 !important;
+      grid-rows: 1fr 3 3 1 !important;
+      #cancel { width: 100% }
+    }
   }
-  &.-all-vertical #footer { max-height: 25vh }
+  &.-all-vertical {
+    #footer { max-height: 25vh }
+    #dialog.file_in_use #cancel { width: 50% }
+  }
   &.-nopath {
     #below_menu { display: none !important }
     #footer { max-height: 30vh }
-    #zoxide_group, #file_search_group, #content_search_group {
-      max-height: 75vh;
-    }
+    #zoxide_group, #file_search_group, #content_search_group { max-height: 75vh }
   }
   &.-nomenu-atall {
     #footer { max-height: 30vh }
-    #zoxide_group, #file_search_group, #content_search_group {
-      max-height: 90vh;
-    }
+    #zoxide_group, #file_search_group, #content_search_group { max-height: 100vh }
   }
-  &.-filelistonly-vertical {
-    #menu { display: none !important }
-  }
+  &.-filelistonly-vertical #menu { display: none !important }
   &.-middle-only {
     #footer { max-height: 25vh }
-    #zoxide_group, #file_search_group, #content_search_group {
-      max-height: 100vh !important;
-    }
+    #zoxide_group, #file_search_group, #content_search_group { max-height: 100vh !important }
   }
 }
+
 #showKeys {
   align: right middle;
   width: auto;
@@ -1067,4 +1053,13 @@ Screen {
   margin-right: 1;
   min-width: 5;
   padding: 0 1;
+}
+
+FileList .option-list--option-highlighted,
+Clipboard .option-list--option-highlighted,
+DeleteFiles OptionList .option-list--option-highlighted,
+PasteScreen OptionList .option-list--option-highlighted {
+  color: $block-cursor-background;
+  background: transparent;
+  text-style: bold;
 }

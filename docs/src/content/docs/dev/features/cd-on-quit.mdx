@@ -1,0 +1,128 @@
+---
+title: cd on quit
+description: how to make rovr change your shell's directory on quit and export selected files.
+---
+
+import { Tabs, TabItem, Code, Aside } from "@astrojs/starlight/components";
+
+rovr can change the current directory to wherever you were when you quit using the `--cwd-file` CLI option.
+
+### Using `--cwd-file`
+
+The `--cwd-file` option writes the current working directory to a specified file when rovr exits:
+
+```bash
+# Create a temporary file and use it with rovr
+cwd_file=$(mktemp -t rovr_cwd.XXXXXX)
+rovr --cwd-file "$cwd_file"
+cd "$(cat "$cwd_file")"
+rm -f "$cwd_file"
+```
+
+#### shell configuration
+
+You can create wrapper functions in your shell config for convenience:
+
+<Tabs>
+  <TabItem label="bash/zsh">
+    <Code
+      code={`rovr () {\n    local cwd_file=$(mktemp -t rovr_cwd.XXXXXX)\n    command rovr --cwd-file "$cwd_file" "$@"\n    if [ -f "$cwd_file" ]; then\n        local new_loc=$(cat "$cwd_file")\n        if [ -n "$new_loc" ] && [ "$new_loc" != "$PWD" ]; then\n            cd "$new_loc"\n        fi\n        rm -f "$cwd_file"\n    fi\n}`}
+      lang="bash"
+      frame="code"
+      title=".bashrc / .zshrc"
+    />
+  </TabItem>
+  <TabItem label="fish">
+    <Code
+      code={`function rovr\n    set cwd_file (mktemp -t rovr_cwd.XXXXXX)\n    command rovr --cwd-file "$cwd_file" $argv\n    if test -f "$cwd_file"\n        set new_loc (cat "$cwd_file")\n        if test -n "$new_loc" -a "$new_loc" != "$PWD"\n            cd "$new_loc"\n        end\n        rm -f "$cwd_file"\n    end\nend`}
+      lang="fish"
+      frame="code"
+      title="config.fish"
+    />
+  </TabItem>
+  <TabItem label="nushell">
+    <Code
+      code={`def --env --wrapped rovr [...args: string] {\n    let cwd_file = (mktemp -t rovr_cwd.XXXXXX)\n    ^rovr --cwd-file $cwd_file ...$args\n    if ($cwd_file | path exists) {\n        let new_path = ($cwd_file | open | str trim)\n        if ($new_path != "" and $new_path != $env.PWD) {\n            cd $new_path\n        }\n        rm -fp $cwd_file\n    }\n}`}
+      lang="nu"
+      frame="code"
+      title="config.nu"
+    />
+  </TabItem>
+  <TabItem label="powershell">
+    <Code
+      code={`function rovr {\n    $cwd_file = New-TemporaryFile\n    & rovr.exe --cwd-file $cwd_file $args\n    if (Test-Path $cwd_file) {\n        $new_loc = Get-Content $cwd_file\n        if (-not [String]::IsNullOrEmpty($new_loc) -and $new_loc -ne (Get-Location).Path) {\n            Set-Location $new_loc -ErrorAction SilentlyContinue\n        }\n        Remove-Item $cwd_file\n    }\n}`}
+      lang="powershell"
+      frame="code"
+      title="$PROFILE"
+    />
+    Powershell may prevent you from running such functions, so you may have to
+    run
+    <Code
+      code={`Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope LocalMachine`}
+      lang="powershell"
+    />
+    for it to work. For more information on `Set-ExecutionPolicy`, refer to its
+    [docs](https://learn.microsoft.com/en-us/powershell/module/microsoft.powershell.security/set-executionpolicy)
+  </TabItem>
+</Tabs>
+
+<Aside type="note">
+  The shell functions above use temporary files for better security while
+  avoiding conflicts.
+</Aside>
+
+### Additional CLI options
+
+rovr also supports other Yazi-style CLI options for direct integration with scripts and tools:
+
+#### `--chooser-file`
+
+Write selected files to a specified file when rovr exits:
+
+```bash
+# Using a temporary file
+chooser_file=$(mktemp -t rovr_selected.XXXXXX)
+rovr --chooser-file "$chooser_file"
+while IFS= read -r file; do
+    echo "Selected: $file"
+done < "$chooser_file"
+rm -f "$chooser_file"
+```
+
+#### Combined usage
+
+You can use both options together:
+
+```bash
+# Using temporary files for both options
+cwd_file=$(mktemp -t rovr_cwd.XXXXXX)
+chooser_file=$(mktemp -t rovr_selected.XXXXXX)
+rovr --cwd-file "$cwd_file" --chooser-file "$chooser_file"
+
+# Process results
+cd "$(cat "$cwd_file")"
+while IFS= read -r file; do
+    echo "Selected: $file"
+done < "$chooser_file"
+
+# Clean up
+rm -f "$cwd_file" "$chooser_file"
+```
+
+### integrations
+
+as much as it might be tempting, this will not work. i use helix <sub>btw</sub> and just like superfile, it just cannot launch the app. i'm not sure why, but it might be a conflict between terminal buffer areas.
+so something like yazi's
+
+```toml
+[keys.normal]
+C-y = [
+  ':sh rm -f /tmp/unique-file',
+  ':insert-output rovr %{buffer_name} --chooser-file=/tmp/unique-file',
+  ':insert-output echo "\x1b[?1049h\x1b[?2004h" > /dev/tty',
+  ':open %sh{cat /tmp/unique-file}',
+  ':redraw',
+]
+```
+
+will not work

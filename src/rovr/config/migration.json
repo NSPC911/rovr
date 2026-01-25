@@ -1,5 +1,38 @@
 [
   {
+    "keys": [
+      "keybinds.copy_path"
+    ],
+    "message": [
+      "The copy path button has been combined with the copy button. You now press [bright_cyan]keybinds.extra_copy.open_popup[/] (most likely `Y`) followed by [bright_cyan]keybinds.extra_copy.copy_single_path[/] (most likely `p`) to copy the path to your clipboard."
+    ],
+    "extra": "Changed in v0.7.0"
+  },
+  {
+    "keys": [
+      "plugins.editor",
+      "plugins.editor.enabled",
+      "plugins.editor.file_executable",
+      "plugins.editor.folder_executable",
+      "plugins.editor.file_suspend",
+      "plugins.editor.folder_suspend",
+      "plugins.editor.open_all_in_editor",
+      "plugins.editor.keybinds"
+    ],
+    "message": [
+      "[bright_blue]plugins.editor.*[/] has been moved to [bright_cyan]settings.editor.*[/] with a restructured configuration.",
+      "The editor is no longer a plugin, but a core feature.",
+      "- [bright_blue]plugins.editor.file_executable[/] -> [bright_cyan]settings.editor.file.run[/]",
+      "- [bright_blue]plugins.editor.file_suspend[/] -> [bright_cyan]settings.editor.file.suspend[/]",
+      "- [bright_blue]plugins.editor.folder_executable[/] -> [bright_cyan]settings.editor.folder.run[/]",
+      "- [bright_blue]plugins.editor.folder_suspend[/] -> [bright_cyan]settings.editor.folder.suspend[/]",
+      "- [bright_blue]plugins.editor.open_all_in_editor[/] -> [bright_cyan]settings.editor.open_all_in_editor[/]",
+      "- [bright_blue]plugins.editor.keybinds[/] -> [bright_cyan]keybinds.open_editor[/]",
+      "Note: [bright_blue]plugins.editor.enabled[/] is removed; the editor is always available."
+    ],
+    "extra": "Moved in v0.7.0"
+  },
+  {
     "keys": ["mode", "mode.*"],
     "message": [
       "[bright_blue]modes[/] have been removed, use [bright_cyan]--config-folder[/] to load custom configurations instead.",

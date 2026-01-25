@@ -5,8 +5,8 @@ from importlib.metadata import PackageNotFoundError, version
 from io import BytesIO
 from shutil import which
 from typing import Callable
+from urllib import error, request
 
-import aiohttp
 import textual_image.widget as timg
 import tomli
 from PIL import Image as PILImage
@@ -25,7 +25,7 @@ from textual.containers import (
     VerticalGroup,
 )
 from textual.css.query import NoMatches
-from textual.screen import ModalScreen, Screen
+from textual.screen import ModalScreen
 from textual.theme import BUILTIN_THEMES
 from textual.widgets import (
     Button,
@@ -63,9 +63,15 @@ except PackageNotFoundError:
     schema_ref = "refs/heads/master"
 
 
-class DummyScreen(Screen[None]):
-    def on_mount(self) -> None:
-        self.dismiss()
+def _escape_toml_string(value: str) -> str:
+    return (
+        value
+        .replace("\\", "\\\\")
+        .replace('"', '\\"')
+        .replace("\n", "\\n")
+        .replace("\r", "\\r")
+        .replace("\t", "\\t")
+    )
 
 
 class FinalStuff(ModalScreen[None]):
@@ -191,11 +197,11 @@ class FirstLaunchApp(App, inherit_bindings=False):
                 yield Switch(which("file") is not None)
                 yield Static("[u]file(1)[/] integration")
         yield Static(classes="padding")
-        with Center(classes="plugins-editor"):
-            with HorizontalGroup(id="plugins-editor-file"):
+        with Center(classes="settings-editor"):
+            with HorizontalGroup(id="settings-editor-file"):
                 yield Input(value=os.environ.get("EDITOR", ""), id="editor_input")
                 yield Static("File editor")
-            with HorizontalGroup(id="plugins-editor-folders"):
+            with HorizontalGroup(id="settings-editor-folders"):
                 yield Input(
                     value=os.environ.get("EDITOR", ""), id="editor_folders_input"
                 )
@@ -239,12 +245,12 @@ class FirstLaunchApp(App, inherit_bindings=False):
     @work
     async def on_mount(self) -> None:
         self.query_one("#theme", RadioSet).border_title = "Choose a theme!"
-        self.query_one("#theme", RadioSet).border_subtitle = "More coming soon\u2026"
+        self.query_one("#theme", RadioSet).border_subtitle = "More coming soon…"
         self.query_one("#keybinds", RadioSet).border_title = "Choose a Preset Keybind"
         self.query_one(".plugins", Center).border_title = "Plugins/Integrations"
         self.query_one("SelectCurrent").border_title = "Image Protocol"
         self.query_one(
-            ".plugins-editor", Center
+            ".settings-editor", Center
         ).border_title = "Default editor when editing files"
         self.query_one(".compact-things", Center).border_title = "Compact Mode Options"
         popups = {
@@ -259,32 +265,45 @@ class FirstLaunchApp(App, inherit_bindings=False):
         }
         for widget, desc in popups.items():
             self.query_one(widget).tooltip = desc
+        worker = self._fetch_preview_image()
         try:
-            # call aiohttp and pull https://github.com/Textualize/.github/assets/554369/037e6aa1-8527-44f3-958d-28841d975d40 into a PIL object
-            async with aiohttp.ClientSession() as session:  # noqa: SIM117
-                async with session.get(
-                    "https://github.com/Textualize/.github/assets/554369/037e6aa1-8527-44f3-958d-28841d975d40"
-                ) as resp:
-                    if resp.status == 200:
-                        data = await resp.read()
-                        self.preview_image = PILImage.open(BytesIO(data))
-                        timg_image = prot_to_timg["auto"](
-                            self.preview_image,
-                        )
-                        self.query_one("#image_protocol", VerticalGroup).mount(
-                            timg_image
-                        )
-                    else:
-                        self.preview_image = None
-                        self.notify(
-                            f"Failed to load preview image. Code: {resp.status}",
-                            severity="error",
-                        )
-        except aiohttp.ClientError as exc:
-            self.preview_image = None
+            await worker.wait()
+            self.preview_image = worker.result
+        except Exception:
+            return
+        if self.preview_image is not None:
+            timg_image = prot_to_timg["auto"](
+                self.preview_image,
+            )
+            self.query_one("#image_protocol", VerticalGroup).mount(timg_image)
+
+    @work(thread=True)
+    def _fetch_preview_image(self) -> Image | None:
+        try:
+            with request.urlopen(
+                "https://github.com/Textualize/.github/assets/554369/037e6aa1-8527-44f3-958d-28841d975d40",
+                timeout=5,
+            ) as response:
+                if response.getcode() == 200:
+                    data = response.read()
+                    return PILImage.open(BytesIO(data))
+                else:
+                    self.notify(
+                        f"Failed to load preview image. Code: {response.getcode()}",
+                        severity="error",
+                    )
+                    return None
+        except error.URLError as exc:
             self.notify(
                 f"Failed to load preview image. Could not connect to the internet.\n{exc}",
                 title=type(exc).__name__,
+                severity="error",
+            )
+            return None
+        except Exception as exc:
+            self.notify(
+                f"{type(exc).__name__}: {exc}",
+                title="Failed to load preview image",
                 severity="error",
             )
 
@@ -306,7 +325,8 @@ class FirstLaunchApp(App, inherit_bindings=False):
         self.query_one("#theme", RadioSet).tooltip = (
             "Disabled when transparent mode is enabled" if event.value else None
         )
-        self._toggle_transparency()
+        self.refresh_css()
+        self.refresh()
 
     @on(Select.Changed, "#image_protocol_select")
     def on_image_protocol_select_changed(self, event: Select.Changed) -> None:
@@ -321,10 +341,6 @@ class FirstLaunchApp(App, inherit_bindings=False):
                 if not isinstance(child, Select):
                     child.remove()
             container.mount(timg_image)
-
-    @work
-    async def _toggle_transparency(self) -> None:
-        await self.push_screen_wait(DummyScreen())
 
     @work
     @on(Button.Pressed, "#finish_setup")
@@ -353,6 +369,19 @@ image_protocol = "{prot_to_schema[str(self.query_one("#image_protocol_select", S
 buttons = {str(self.query_one("#compact_buttons", Switch).value).lower()}
 panels = {str(self.query_one("#compact_panels", Switch).value).lower()}
 
+[settings.editor]
+open_all_in_editor = false
+
+[settings.editor.file]
+run = "{_escape_toml_string(self.query_one("#editor_input", Input).value)}"
+block = false
+suspend = true
+
+[settings.editor.folder]
+run = "{_escape_toml_string(self.query_one("#editor_folders_input", Input).value)}"
+block = false
+suspend = true
+
 [theme]
 default = "{theme}"
 {f'preview = "{theme}"' if theme in list(get_all_styles()) else ""}
@@ -369,11 +398,6 @@ keybinds = {plugins["plugins"]["fd"]["keybinds"]}
 
 [plugins.bat]
 enabled = {str(self.query_one("#plugins-bat Switch", Switch).value).lower()}
-
-[plugins.editor]
-keybinds = {plugins["plugins"]["editor"]["keybinds"]}
-file_executable = "{self.query_one("#editor_input", Input).value}"
-folder_executable = "{self.query_one("#editor_folders_input", Input).value}"
 
 [plugins.zoxide]
 enabled = {str(self.query_one("#plugins-zoxide Switch", Switch).value).lower()}

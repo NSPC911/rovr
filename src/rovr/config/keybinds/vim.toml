@@ -24,7 +24,6 @@ rename = ["r"]
 new = ["o"]
 zip = ["E"]
 unzip = ["ctrl+e"]
-copy_path = ["Y"]
 up = ["k", "up"]
 down = ["j", "down"]
 up_tree = ["h", "left"]
@@ -56,6 +55,14 @@ show_keybinds = ["?"]
 quit_app = ["q", "ctrl+q"]
 command_palette = "ctrl+p"
 suspend_app = ["ctrl+z"]
+open_editor = ["e"]
+
+[keybinds.extra_copy]
+open_popup = ["Y"]
+copy_to_rovr = ["y"]
+copy_single_path = ["c"]
+copy_to_system_clip = ["s"]
+copy_current_directory = ["d"]
 
 [keybinds.change_sort_order]
 open_popup = [","]
@@ -98,9 +105,6 @@ dont_ask_again = ["a"]
 # plugins
 [plugins.zoxide]
 keybinds = ["z"]
-
-[plugins.editor]
-keybinds = ["e"]
 
 [plugins.fd]
 keybinds = ["f"]

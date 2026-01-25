@@ -1,5 +1,7 @@
 import os
+import platform
 import sys
+import threading
 from io import TextIOWrapper
 
 import rich_click as click
@@ -103,6 +105,15 @@ def eager_set_folder(ctx: click.Context, param: click.Parameter, value: str) -> 
     help="Show the current version of rovr.",
 )
 @click.option(
+    "--force-tty",
+    "force_tty",
+    multiple=False,
+    type=bool,
+    default=False,
+    is_flag=True,
+    help="Force rovr into the system tty ([grey50]CONOUT$[/] or [grey50]/dev/tty[/]) even if stdout is not a tty. Buggy on Windows.",
+)
+@click.option(
     "--cwd-file",
     "cwd_file",
     multiple=False,
@@ -173,6 +184,8 @@ def eager_set_folder(ctx: click.Context, param: click.Parameter, value: str) -> 
     "Miscellaneous",
     options=[
         "--version",
+        "--force-tty",
+        "--force-first-launch",
         "--config-path",
         "--help",
     ],
@@ -196,6 +209,7 @@ def cli(
     without_features: list[str],
     show_config_path: bool,
     show_version: bool,
+    force_tty: bool,
     cwd_file: str
     | TextIOWrapper
     | None,  # necessary because later on, replaced by stdout/stderr file
@@ -318,6 +332,9 @@ example_function(10)"""
 
         FirstLaunchApp().run()
 
+    # start separate thread for platform to cache
+    threading.Thread(target=platform.system, daemon=True).start()
+
     from rovr.functions.utils import set_nested_value
     from rovr.variables.constants import config
 
@@ -326,6 +343,11 @@ example_function(10)"""
 
     for feature_path in without_features:
         set_nested_value(config, feature_path, False)
+
+    if not sys.stdout.isatty():
+        sys.__backup__stdout__ = sys.__stdout__
+        sys.__backup__stderr__ = sys.__stderr__
+        sys.__backup__stdin__ = sys.__stdin__
 
     from rovr.app import Application
 
@@ -361,9 +383,32 @@ example_function(10)"""
             tree_dom=tree_dom,
             force_crash_in=force_crash_in,
         ).run()
+    elif force_tty:
+        open_stdout = "CONOUT$" if os.name == "nt" else "/dev/tty"
+        open_stdin = "CONIN$" if os.name == "nt" else "/dev/tty"
+        try:
+            with (
+                open(open_stdout, "w") as tty_out,
+                open(open_stdin, "r") as tty_in,
+            ):
+                sys.__stdout__ = sys.stdout = tty_out
+                sys.__stderr__ = sys.stderr = tty_out
+                sys.__stdin__ = sys.stdin = tty_in
+                Application(
+                    startup_path=path,
+                    cwd_file=cwd_file if cwd_file else None,
+                    chooser_file=chooser_file if chooser_file else None,
+                    show_keys=show_keys,
+                    tree_dom=tree_dom,
+                    force_crash_in=force_crash_in,
+                ).run()
+        finally:
+            sys.__stdout__ = sys.stdout = sys.__backup__stdout__
+            sys.__stderr__ = sys.stderr = sys.__backup__stderr__
+            sys.__stdin__ = sys.stdin = sys.__backup__stdin__
     else:
-        pprint(
-            "Error: rovr needs a TTY to run the application.",
+        print(
+            "Error: rovr needs a TTY to run in application.",
         )
 
 

@@ -8,7 +8,7 @@ from rovr.variables.maps import (
     VAR_TO_DIR,
 )
 
-from .path import normalise
+from .path import dump_exc, normalise
 
 pins = {}
 
@@ -54,8 +54,8 @@ def load_pins() -> PinsDict:
         try:
             with open(user_pins_file_path, "w") as f:
                 ujson.dump(tempins, f, escape_forward_slashes=False, indent=2)
-        except IOError:
-            pass
+        except IOError as exc:
+            dump_exc(None, exc)
 
     try:
         with open(user_pins_file_path, "r") as f:
@@ -142,8 +142,8 @@ def add_pin(pin_name: str, pin_path: str | bytes) -> None:
         user_pins_file_path = path.join(VAR_TO_DIR["CONFIG"], "pins.json")
         with open(user_pins_file_path, "w") as f:
             ujson.dump(pins_to_write, f, escape_forward_slashes=False, indent=2)
-    except IOError:
-        pass
+    except IOError as exc:
+        dump_exc(None, exc)
 
     load_pins()
 
@@ -183,8 +183,8 @@ def remove_pin(pin_path: str | bytes) -> None:
         user_pins_file_path = path.join(VAR_TO_DIR["CONFIG"], "pins.json")
         with open(user_pins_file_path, "w") as f:
             ujson.dump(pins_to_write, f, escape_forward_slashes=False, indent=2)
-    except IOError:
-        pass
+    except IOError as exc:
+        dump_exc(None, exc)
 
     load_pins()  # Reload
 

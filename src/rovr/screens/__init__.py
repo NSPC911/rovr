@@ -1,5 +1,3 @@
-from textual.screen import Screen
-
 from .common_file_name_do_what import CommonFileNameDoWhat
 from .delete_files import DeleteFiles
 from .dismissable import Dismissable
@@ -7,16 +5,11 @@ from .fd_search import FileSearch
 from .file_in_use import FileInUse
 from .input import ModalInput
 from .keybinds import Keybinds
+from .paste_screen import PasteScreen
 from .rg_search import ContentSearch
 from .way_too_small import TerminalTooSmall
 from .yes_or_no import YesOrNo
 from .zd_to_directory import ZDToDirectory
-
-
-class DummyScreen(Screen[None]):
-    def on_mount(self) -> None:
-        self.dismiss()
-
 
 __all__ = [
     "Dismissable",
@@ -27,8 +20,8 @@ __all__ = [
     "ZDToDirectory",
     "FileSearch",
     "FileInUse",
-    "DummyScreen",
     "TerminalTooSmall",
     "Keybinds",
     "ContentSearch",
+    "PasteScreen",
 ]

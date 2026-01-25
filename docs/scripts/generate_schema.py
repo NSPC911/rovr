@@ -11,6 +11,7 @@ from rich.traceback import Traceback
 start_time = perf_counter()
 pprint = Console().print
 
+schema_content: str | None = None
 try:
     config = GenerationConfiguration()
     if config.template_md_options is not None:
@@ -80,7 +81,11 @@ except FileNotFoundError:
     pprint("[red]Do not run manually with python! Run [blue]poe gen-schema[/][/]")
     pprint(Traceback(show_locals=True))
     exit(1)
+except Exception:
+    pprint(Traceback(show_locals=True))
+    exit(1)
 finally:
     # rewrite schema file
-    with open("src/rovr/config/schema.json", "w", encoding="utf-8") as f:
-        f.write(schema_content)
+    if schema_content is not None:
+        with open("src/rovr/config/schema.json", "w", encoding="utf-8") as f:
+            f.write(schema_content)

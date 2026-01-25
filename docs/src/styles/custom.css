@@ -22,9 +22,6 @@
   }
 }
 
-code {
-  background-color: transparent;
-}
 /* Dark mode colors. */
 :root {
   --sl-color-accent: #8fbcbb;
@@ -563,6 +560,17 @@ starlight-file-tree {
 }
 starlight-file-tree ul:has(> li.file) {
   border-inline-start: 2px solid var(--sl-color-gray-4);
+}
+starlight-lang-select label {
+  &::before {
+    content: "";
+    display: block;
+    position: absolute;
+    left: -0.1ch;
+  }
+  svg.icon:first-of-type > path {
+    display: none
+  }
 }
 
 .hero {

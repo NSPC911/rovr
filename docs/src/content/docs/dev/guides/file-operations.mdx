@@ -1,0 +1,49 @@
+---
+title: file operations
+description: how to manage files and folders in rovr.
+---
+
+import InlineSVG from "@/components/InlineSVG.astro";
+
+### clipboard actions
+
+- copy to clipboard: `y` or `ctrl+c`
+- cut to clipboard: `x` or `ctrl+x`
+- paste from clipboard: `p` or `ctrl+v`
+
+### basic operations
+
+- rename item: `r` or `f2`
+- delete item: `d` or `delete`
+- create new item (file or folder): `o` or `ctrl+n`
+
+### archiving
+
+- create a compressed file: `shift+e`
+- extract a compressed file: `ctrl+e`
+
+### visual/select mode
+
+<InlineSVG src="/rovr/screenshots/select-mode.svg" alt="select/visual mode" />
+
+the main file list supports a multi-selection mode, sort of like vi's visual mode.
+
+- toggle visual mode: `v`
+
+once in visual mode, you can select multiple files:
+
+- select up: `shift+up` or `shift+k`
+- select down: `shift+down` or `shift+j`
+- select page up: `shift+pageup`
+- select page down: `shift+pagedown`
+- select to start of list: `shift+home`
+- select to end of list: `shift+end`
+
+### mouse interactions
+
+<InlineSVG src="/rovr/screenshots/right-click.svg" alt="a mini popup from right-clicking an object" />
+
+rovr supports mouse interactions for enhanced usability:
+
+- **right-click**: open a context menu for the selected file or folder with common operations
+- **double click**: open the directory/launch the app

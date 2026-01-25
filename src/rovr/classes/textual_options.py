@@ -183,6 +183,7 @@ class KeybindOption(Option):
         super().__init__(label, **kwargs)
         if description == "--section--":
             self.disabled = True
+        self.pseudo_disabled = keys == "--section--"
 
         self.is_layer_bind = is_layer
 

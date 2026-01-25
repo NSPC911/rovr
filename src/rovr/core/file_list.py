@@ -1,6 +1,5 @@
 import contextlib
 from os import getcwd, path
-from os import system as cmd
 from typing import ClassVar, Iterable, Self, Sequence, cast
 
 from textual import events, on, work
@@ -8,6 +7,7 @@ from textual.binding import BindingType
 from textual.content import ContentText
 from textual.css.query import NoMatches
 from textual.geometry import Region
+from textual.reactive import reactive
 from textual.style import Style as TextualStyle
 from textual.widgets import Button, Input, OptionList, SelectionList
 from textual.widgets.option_list import Option, OptionDoesNotExist
@@ -39,6 +39,9 @@ class FileList(CheckboxRenderingMixin, SelectionList, inherit_bindings=False):
 
     BINDINGS: ClassVar[list[BindingType]] = list(vindings)
 
+    sort_by: reactive[SortByOptions] = reactive("name")
+    sort_descending: reactive[bool] = reactive(False)
+
     def __init__(
         self,
         dummy: bool = False,
@@ -67,38 +70,17 @@ class FileList(CheckboxRenderingMixin, SelectionList, inherit_bindings=False):
         if not self.dummy and self.parent:
             self.input: Input = self.parent.query_one(Input)
 
-    @property
-    def sort_by(
-        self,
-    ) -> SortByOptions:
-        try:
-            return self.app.query_one("StateManager").sort_by
-        except (NoMatches, AttributeError):
-            return "name"
-
-    @sort_by.setter
-    def sort_by(
-        self,
-        value: SortByOptions,
-    ) -> None:
-        if value not in ["name", "size", "modified", "created", "extension", "natural"]:
-            raise ValueError(
-                f"Expected sort_by value to be one of 'name', 'size', 'modified', 'created', 'extension' or 'natural', but got '{value}'"
-            )
+    def watch_sort_by(self, value: SortByOptions) -> None:
         with contextlib.suppress(NoMatches):
-            self.app.query_one("StateManager", StateManager).sort_by = value
+            state_manager = self.app.query_one("StateManager", StateManager)
+            if state_manager.sort_by != value:
+                state_manager.sort_by = value
 
-    @property
-    def sort_descending(self) -> bool:
-        try:
-            return self.app.query_one("StateManager").sort_descending
-        except (NoMatches, AttributeError):
-            return False
-
-    @sort_descending.setter
-    def sort_descending(self, value: bool) -> None:
+    def watch_sort_descending(self, value: bool) -> None:
         with contextlib.suppress(NoMatches):
-            self.app.query_one("StateManager", StateManager).sort_descending = value
+            state_manager = self.app.query_one("StateManager", StateManager)
+            if state_manager.sort_descending != value:
+                state_manager.sort_descending = value
 
     @property
     def highlighted_option(self) -> FileListSelectionWidget | None:
@@ -331,16 +313,20 @@ class FileList(CheckboxRenderingMixin, SelectionList, inherit_bindings=False):
     async def file_selected_handler(self, target_path: str) -> None:
         if self.app._chooser_file:
             self.app.action_quit()
-        elif config["plugins"]["editor"]["open_all_in_editor"]:
-            if config["plugins"]["editor"]["file_suspend"]:
-                with self.app.suspend():
-                    cmd(
-                        f'{config["plugins"]["editor"]["file_executable"]} "{target_path}"'
-                    )
-            else:
-                self.app.run_in_thread(
-                    cmd,
-                    f'{config["plugins"]["editor"]["file_executable"]} "{target_path}"',
+        elif config["settings"]["editor"]["open_all_in_editor"]:
+            editor_config = config["settings"]["editor"]["file"]
+
+            def on_error(message: str, title: str) -> None:
+                self.notify(message, title=title, severity="error")
+
+            try:
+                utils.run_editor_command(self.app, editor_config, target_path, on_error)
+            except Exception as exc:
+                path_utils.dump_exc(self, exc)
+                self.notify(
+                    f"{type(exc).__name__}: {exc}",
+                    title="Error launching editor",
+                    severity="error",
                 )
         else:
             path_utils.open_file(self.app, target_path)
@@ -490,6 +476,8 @@ class FileList(CheckboxRenderingMixin, SelectionList, inherit_bindings=False):
         """
         if paths is None:
             paths = []
+        if self.option_count == 0 or self.get_option_at_index(0).disabled:
+            return
         for option in self.options:
             if path_utils.normalise(option.dir_entry.path) in paths:
                 option._set_prompt(option.prompt.stylize("dim"))
@@ -526,9 +514,11 @@ class FileList(CheckboxRenderingMixin, SelectionList, inherit_bindings=False):
         # Toggle pin on current directory
         elif check_key(event, config["keybinds"]["toggle_pin"]):
             pin_utils.toggle_pin(path.basename(getcwd()), getcwd())
-            await self.app.query_one("PinnedSidebar").reload_pins()
+            self.app.query_one("PinnedSidebar").reload_pins()
         elif check_key(event, config["keybinds"]["copy"]):
-            await self.app.query_one("#copy").on_button_pressed(Button.Pressed)
+            self.app.query_one("#copy").on_button_pressed()
+        elif check_key(event, config["keybinds"]["extra_copy"]["open_popup"]):
+            await self.app.query_one("#copy").open_popup(event)
         elif check_key(event, config["keybinds"]["cut"]):
             await self.app.query_one("#cut").on_button_pressed(Button.Pressed)
         elif check_key(event, config["keybinds"]["paste"]):
@@ -642,38 +632,30 @@ class FileList(CheckboxRenderingMixin, SelectionList, inherit_bindings=False):
                 assert isinstance(old, int) and isinstance(new, int)
                 for index in range(old, new + 1):
                     self.select(self.get_option_at_index(index))
-            elif config["plugins"]["editor"]["enabled"] and check_key(
-                event, config["plugins"]["editor"]["keybinds"]
-            ):
+            elif check_key(event, config["keybinds"]["open_editor"]):
                 if self.highlighted_option and self.highlighted_option.disabled:
                     return
-                if path.isdir(self.highlighted_option.dir_entry.path):
-                    if config["plugins"]["editor"]["folder_suspend"]:
-                        with self.app.suspend():
-                            cmd(
-                                f'{config["plugins"]["editor"]["folder_executable"]} "{self.highlighted_option.dir_entry.path}"'
-                            )
-                    else:
-                        self.app.run_in_thread(
-                            cmd,
-                            f'{config["plugins"]["editor"]["folder_executable"]} "{self.highlighted_option.dir_entry.path}"',
-                        )
 
+                def on_error(message: str, title: str) -> None:
+                    self.notify(message, title=title, severity="error")
+
+                target_path = self.highlighted_option.dir_entry.path
+                if path.isdir(target_path):
+                    editor_config = config["settings"]["editor"]["folder"]
                 else:
-                    if config["plugins"]["editor"]["file_suspend"]:
-                        with self.app.suspend():
-                            cmd(
-                                f'{config["plugins"]["editor"]["file_executable"]} "{self.highlighted_option.dir_entry.path}"'
-                            )
-                    else:
-                        self.app.run_in_thread(
-                            cmd,
-                            f'{config["plugins"]["editor"]["file_executable"]} "{self.highlighted_option.dir_entry.path}"',
-                        )
-            elif check_key(event, config["keybinds"]["copy_path"]):
-                await self.app.query_one("PathCopyButton").on_button_pressed(
-                    Button.Pressed
-                )
+                    editor_config = config["settings"]["editor"]["file"]
+
+                try:
+                    utils.run_editor_command(
+                        self.app, editor_config, target_path, on_error
+                    )
+                except Exception as exc:
+                    path_utils.dump_exc(self, exc)
+                    self.notify(
+                        f"{type(exc).__name__}: {exc}",
+                        title="Error launching editor",
+                        severity="error",
+                    )
 
     def update_border_subtitle(self) -> None:
         if self.dummy or type(self.highlighted) is not int or not self.parent:
@@ -803,7 +785,7 @@ class FileListRightClickOptionList(PopupOptionList):
         # Handle menu item selection
         match event.option.id:
             case "copy":
-                await self.app.query_one("#copy").on_button_pressed(Button.Pressed)
+                self.app.query_one("#copy").on_button_pressed()
             case "cut":
                 await self.app.query_one("#cut").on_button_pressed(Button.Pressed)
             case "delete":

@@ -13,21 +13,21 @@ however, image support depends on the capabilities of your terminal emulator. di
 
 here is a summary of terminals and their support for the image protocols used by `rovr`:
 
-| terminal           | tgp support | sixel support |
+| Terminal           | TGP support | Sixel support |
 | ------------------ | :---------: | :-----------: |
-| black box          |     ❌      |      ✅       |
-| foot               |     ❌      |      ✅       |
-| gnome terminal     |     ❌      |      ❌       |
-| iterm2             |     ❌      |      ✅       |
-| kitty              |     ✅      |      ❌       |
-| konsole            |     ✅      |      ✅       |
-| tmux               |     ❌      |      ✅       |
-| visual studio code |     ❌      |      ✅       |
-| warp               |     ❌      |      ❌       |
-| wezterm            |     ✅      |      ✅       |
-| windows console    |     ❌      |      ❌       |
-| windows terminal   |     ❌      |      ✅       |
-| xterm              |     ❌      |      ✅       |
+| Black Box          |     ❌      |      ✅       |
+| Foot               |     ❌      |      ✅       |
+| Gnome Terminal     |     ❌      |      ❌       |
+| Iterm2             |     ❌      |      ✅       |
+| Kitty              |     ✅      |      ❌       |
+| Konsole            |     ✅      |      ✅       |
+| Tmux               |     ❌      |      ✅       |
+| Visual Studio Code |     ❌      |      ✅       |
+| Warp               |     ❌      |      ❌       |
+| Wezterm            |     ✅      |      ✅       |
+| Windows Console    |     ❌      |      ❌       |
+| Windows Terminal   |     ❌      |      ✅       |
+| Xterm              |     ❌      |      ✅       |
 
 > the `iterm2 inline images` protocol is not supported. see [lnqs/textual-image #68](https://github.com/lnqs/textual-image/issues/68) for more details.
 
@@ -45,19 +45,7 @@ if images do not appear correctly, you can manually override the image protocol 
 
 available `image_protocol` values are: `"Auto"`, `"TGP"`, `"Sixel"`, `"Halfcell"`, and `"Unicode"`.
 
-### configuring the image size
-
-this lets you configure the maximum width and height of image previews in pixels. by default, `rovr` sets these values to `1920` (width) and `1080` (height).
-
-<Code
-  code={`[interface]\nmax_preview_image_width = 1920\nmax_preview_image_height = 1080`}
-  lang="toml"
-  title="config.toml"
-/>
-
-you can choose to disable this by setting either value to `0`, which means the image preview will use the image as-is.
-
 ### known issues
 
 - some low-resolution images will look horrible, I'm not really sure why that happens, but it might be due to an unnecessary up-scaling attempt by `textual-image`
-- opaque images do not get shown with a transparent background. this _used_ to work, but textual-image is just really scuffed (beggars cant be choosers). I may take a look some day, but the internals is too advanced.
+- transparent images do not get shown with a transparent background. this _used_ to work, but textual-image is just really scuffed (beggars cant be choosers). I may take a look some day, but the internals is too advanced.

@@ -34,7 +34,7 @@ this diagram roughly shows how the mechanism works, with the main thing being an
 
 <Aside type="note">
 this has been slated to be removed, mainly due to issues with threads in general.<br/>
-textual isnt able to handle threads as well, hence for heavier previews, it needs to cut into the main process, which leads to too much lag.
+textual isn't able to handle threads as well, hence for heavier previews, it needs to cut into the main process, which leads to too much lag.
 </Aside>
 
 ### debounced updates
@@ -55,7 +55,7 @@ flowchart TD
 
 this diagram shows how it works
 
-- when doing heavy tasks, like calculating folder size, or deleting folders, the appropriate widgets' labels are update spammed.
+- when doing heavy tasks, like calculating folder size, or deleting folders, the appropriate widgets' labels are updated too frequently.
 - by using a 'debouncer', more time is spent on actually doing the process, than to update the progress of the process
 
 I am certainly not the first person to have discovered this, but it is such a nice mechanism to have

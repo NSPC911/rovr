@@ -58,12 +58,16 @@ class PasteScreen(YesOrNo):
             message, destructive, with_toggle, border_title, border_subtitle
         )
         self.paths = paths
+        self.options = [SpecialOption(path, "copy") for path in self.paths["copy"]] + [
+            SpecialOption(path, "cut") for path in self.paths["cut"]
+        ]
 
     def compose(self) -> ComposeResult:
         with Grid(id="dialog", classes="paste"):
             with VerticalGroup(id="question_container"):
                 for message in self.message.splitlines():
                     yield Label(message, classes="question")
+            yield SpecialOptionList(*self.options)
             yield Button(
                 f"\\[{yes_bind}] Yes",
                 variant="error" if self.destructive else "success",
@@ -78,13 +82,3 @@ class PasteScreen(YesOrNo):
                 with HorizontalGroup(id="dontAskAgain"):
                     yield Switch()
                     yield Label(f"\\[{dont_ask_bind}] Don't ask again")
-
-    def on_mount(self) -> None:
-        options = [SpecialOption(path, "copy") for path in self.paths["copy"]] + [
-            SpecialOption(path, "cut") for path in self.paths["cut"]
-        ]
-        self.query_one("#dialog").mount(
-            SpecialOptionList(*options),
-            after=self.query_one("#question_container", VerticalGroup),
-        )
-        return super().on_mount()

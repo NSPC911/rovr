@@ -32,7 +32,6 @@ const repoName = 'rovr';
 <script>
   const REPO_OWNER = 'NSPC911';
   const REPO_NAME = 'rovr';
-  const CACHE_KEY = 'github-stats';
   const CACHE_TTL = 24 * 60 * 60 * 1000;
 
   interface CachedStats {
@@ -42,9 +41,14 @@ const repoName = 'rovr';
     timestamp: number;
   }
 
+  function getCacheKey(): string {
+    const isDev = window.location.pathname.includes('/dev');
+    return `github-stats-${isDev ? 'dev' : 'stable'}`;
+  }
+
   function getCachedStats(): CachedStats | null {
     try {
-      const cached = localStorage.getItem(CACHE_KEY);
+      const cached = localStorage.getItem(getCacheKey());
       if (!cached) return null;
       return JSON.parse(cached) as CachedStats;
     } catch {
@@ -55,7 +59,7 @@ const repoName = 'rovr';
   function setCachedStats(stats: Omit<CachedStats, 'timestamp'>): void {
     try {
       const data: CachedStats = { ...stats, timestamp: Date.now() };
-      localStorage.setItem(CACHE_KEY, JSON.stringify(data));
+      localStorage.setItem(getCacheKey(), JSON.stringify(data));
     } catch {}
   }
 
@@ -71,6 +75,27 @@ const repoName = 'rovr';
     document.querySelector('.github-stats')?.removeAttribute('hidden');
   }
 
+  async function fetchRealGithubStats(): Promise<Omit<CachedStats, 'timestamp'> | null> {
+    try {
+      const [repoRes, releasesRes] = await Promise.all([
+        fetch(`https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}`),
+        fetch(`https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/releases`)
+      ]);
+      if (!repoRes.ok) return null;
+
+      const repo = await repoRes.json();
+      const releases = releasesRes.ok ? await releasesRes.json() : [];
+
+      return {
+        stars: repo.stargazers_count,
+        forks: repo.forks_count,
+        release_tag: releases.length > 0 ? releases[0].tag_name : 'latest'
+      };
+    } catch {
+      return null;
+    }
+  }
+
   async function fetchGitHubStats(): Promise<Omit<CachedStats, 'timestamp'> | null> {
     try {
       const [repoRes, releaseRes] = await Promise.all([
@@ -81,12 +106,14 @@ const repoName = 'rovr';
       if (!repoRes.ok) return null;
 
       const repo = await repoRes.json();
-      const release = releaseRes.ok ? await releaseRes.json() : [];
+      const release = releaseRes.ok ? await releaseRes.json() : null;
+
+      const release_tag = release?.tag_name || 'latest';
 
       return {
         stars: repo.stargazers_count,
         forks: repo.forks_count,
-        release_tag: release.tag_name
+        release_tag
       };
     } catch {
       return null;
@@ -102,7 +129,12 @@ const repoName = 'rovr';
       return;
     }
 
-    const fresh = await fetchGitHubStats();
+    let fresh
+    if (window.location.pathname.includes('/dev')) {
+      fresh = await fetchRealGithubStats();
+    } else {
+      fresh = await fetchGitHubStats();
+    }
 
     if (fresh) {
       setCachedStats(fresh);

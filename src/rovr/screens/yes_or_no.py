@@ -32,7 +32,7 @@ class YesOrNo(ModalScreen):
         self.border_subtitle = border_subtitle
 
     def compose(self) -> ComposeResult:
-        with Grid(id="dialog"):
+        with Grid(id="dialog", classes="yes_or_no"):
             with VerticalGroup(id="question_container"):
                 for message in self.message.splitlines():
                     yield Label(message, classes="question")

@@ -21,7 +21,7 @@ class FileInUse(ModalScreen):
         self.message = message
 
     def compose(self) -> ComposeResult:
-        with Grid(id="dialog"):
+        with Grid(id="dialog", classes="file_in_use"):
             with VerticalGroup(id="question_container"):
                 for message in self.message.splitlines():
                     yield Label(message, classes="question")

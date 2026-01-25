@@ -1,16 +1,18 @@
 from os import getcwd, path
 from typing import Literal
 
-from textual.containers import VerticalGroup
+from textual.app import ComposeResult
+from textual.containers import Grid, HorizontalGroup, VerticalGroup
 from textual.content import Content
 from textual.visual import VisualType
+from textual.widgets import Button, Label, Switch
 from textual.widgets.option_list import Option
 
 from rovr.classes.textual_options import FileListSelectionWidget
 from rovr.components import SpecialOptionList
 from rovr.functions import icons as icon_utils
 
-from .yes_or_no import YesOrNo
+from .yes_or_no import YesOrNo, dont_ask_bind, no_bind, yes_bind
 
 
 class SpecialOption(Option):
@@ -56,6 +58,26 @@ class PasteScreen(YesOrNo):
             message, destructive, with_toggle, border_title, border_subtitle
         )
         self.paths = paths
+
+    def compose(self) -> ComposeResult:
+        with Grid(id="dialog", classes="paste"):
+            with VerticalGroup(id="question_container"):
+                for message in self.message.splitlines():
+                    yield Label(message, classes="question")
+            yield Button(
+                f"\\[{yes_bind}] Yes",
+                variant="error" if self.destructive else "success",
+                id="yes",
+            )
+            yield Button(
+                f"\\[{no_bind}] No",
+                variant="success" if self.destructive else "error",
+                id="no",
+            )
+            if self.with_toggle:
+                with HorizontalGroup(id="dontAskAgain"):
+                    yield Switch()
+                    yield Label(f"\\[{dont_ask_bind}] Don't ask again")
 
     def on_mount(self) -> None:
         options = [SpecialOption(path, "copy") for path in self.paths["copy"]] + [

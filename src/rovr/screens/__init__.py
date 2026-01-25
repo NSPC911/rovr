@@ -5,6 +5,7 @@ from .fd_search import FileSearch
 from .file_in_use import FileInUse
 from .input import ModalInput
 from .keybinds import Keybinds
+from .paste_screen import PasteScreen
 from .rg_search import ContentSearch
 from .way_too_small import TerminalTooSmall
 from .yes_or_no import YesOrNo
@@ -22,4 +23,5 @@ __all__ = [
     "TerminalTooSmall",
     "Keybinds",
     "ContentSearch",
+    "PasteScreen",
 ]

@@ -388,13 +388,9 @@ def load_config() -> tuple[dict, dict]:
             config["settings"]["editor"][key]["run"] = default_editor
         else:
             # expand var
-            if config["settings"]["editor"][key]["run"] != (
-                pathvar := os.path.expandvars(config["settings"]["editor"][key]["run"])
-            ):
-                config["settings"]["editor"][key]["run"] = pathvar
-            else:
-                # use reasonable editor
-                config["settings"]["editor"][key]["run"] = default_editor
+            config["settings"]["editor"][key]["run"] = os.path.expandvars(
+                config["settings"]["editor"][key]["run"]
+            )
     # pdf fixer
     if (
         config["plugins"]["poppler"]["enabled"]

@@ -33,7 +33,7 @@ class ModalInput(ModalScreen):
         self.is_folder = is_folder
         if self.is_path:
             self.icon_widget = Label(
-                f"> {icon_utils.get_icon('file', 'default')[0]} ",
+                f" {icon_utils.get_icon('file', 'default')[0]} ",
                 id="icon",
                 shrink=True,
                 classes="system",
@@ -98,7 +98,7 @@ class ModalInput(ModalScreen):
                 # file
                 icon = icon_utils.get_icon_for_file(event.value)
             self.icon_widget.update(
-                Content.from_markup(f"> [{icon[1]}]{icon[0]}[{icon[1]}] ")
+                Content.from_markup(f" [{icon[1]}]{icon[0]}[{icon[1]}] ")
             )
 
     def on_mount(self) -> None:

@@ -888,11 +888,10 @@ ArchiveCreationScreen {
     border-title-align: left;
     border-subtitle-align: right;
     column-span: 2;
-    &.invalid { border: $border-style $error-lighten-3 }
+    &.invalid { border: $border-style $error }
     &:light { border: $border-style $error }
-    &:focus-within {
-      border: $border-style $border;
-    }
+    &:focus-within { border: $border-style $border }
+    &.invalid:focus-within { border: $border-style $error-lighten-3 }
   }
   HorizontalGroup {
     width: 50vw;

@@ -153,19 +153,18 @@ class Test(App):
             lambda: self.set_timer(0.1, self.deliver_screenshot),
         )
 
-        if len(self.screen_stack) <= 2:
-            if self.ansi_color:
-                yield SystemCommand(
-                    "Disable Transparent Theme",
-                    "Go back to an opaque background.",
-                    lambda: self.call_later(self._toggle_transparency),
-                )
-            else:
-                yield SystemCommand(
-                    "Enable Transparent Theme",
-                    "Have a transparent background.",
-                    lambda: self.call_later(self._toggle_transparency),
-                )
+        if self.ansi_color:
+            yield SystemCommand(
+                "Disable Transparent Theme",
+                "Go back to an opaque background.",
+                lambda: self.call_later(self._toggle_transparency),
+            )
+        else:
+            yield SystemCommand(
+                "Enable Transparent Theme",
+                "Have a transparent background.",
+                lambda: self.call_later(self._toggle_transparency),
+            )
 
     async def _on_css_change(self) -> None:
         if self.css_monitor is not None:

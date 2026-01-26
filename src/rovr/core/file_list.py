@@ -164,7 +164,7 @@ class FileList(CheckboxRenderingMixin, SelectionList, inherit_bindings=False):
             self.list_of_options: list[FileListSelectionWidget | Selection] = []
             self.items_in_cwd: set[str] = set()
 
-            to_highlight_index: int = 0
+            to_highlight_index: int = -1
             if not focus_on and cwd in session.lastHighlighted:
                 last_highlight = session.lastHighlighted[cwd]
                 focus_on = last_highlight["name"]
@@ -274,7 +274,7 @@ class FileList(CheckboxRenderingMixin, SelectionList, inherit_bindings=False):
                 session.historyIndex == len(session.directories) - 1
             )
             if (
-                to_highlight_index == 0
+                to_highlight_index == -1
                 and cwd in session.lastHighlighted
                 and session.lastHighlighted[cwd]["index"]
             ):

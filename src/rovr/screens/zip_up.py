@@ -1,14 +1,15 @@
 from asyncio import sleep
 from pathlib import Path
-from typing import ClassVar
+from typing import ClassVar, Iterable, Literal, Self
 
 from pathvalidate import sanitize_filepath
 from textual import events, on, work
 from textual.app import ComposeResult
 from textual.binding import BindingType
 from textual.containers import HorizontalGroup
+from textual.content import ContentText
 from textual.widgets import Input, SelectionList
-from textual.widgets.selection_list import Selection
+from textual.widgets.selection_list import Selection, SelectionType
 
 from rovr.classes.mixins import CheckboxRenderingMixin
 from rovr.functions import icons as icon_utils
@@ -60,12 +61,8 @@ class ZipTypes(CheckboxRenderingMixin, SelectionList, inherit_bindings=False):
             for option in self._options:
                 self._deselect(option.value)
         self.select(self.get_option_at_index(event.selection_index))
-        zip_compression_widget = self.parent.query_one(ZipCompression)
-        zip_compression_widget.disabled = event.selection.value == "tar"
-        zip_compression_widget.tooltip = (
-            "tar files do not support compression!"
-            if event.selection.value == "tar"
-            else ""
+        self.parent.query_one(ZipCompression).update_compressions(
+            self.get_option_at_index(event.selection_index).value
         )
 
 
@@ -108,21 +105,62 @@ class ZipCompression(CheckboxRenderingMixin, SelectionList, inherit_bindings=Fal
                 self._deselect(option.value)
         self.select(self.get_option_at_index(event.selection_index))
 
+    def update_compressions(
+        self, algo: Literal["zip", "tar", "tar.gz", "tar.bz2", "tar.xz", "tar.zst"]
+    ) -> None:
+        """Update compression levels based on selected algorithm."""
+        if algo == "zip" or algo == "tar.gz" or algo == "tar.bz2" or algo == "tar.xz":
+            self.set_options(
+                Selection(str(level), value=str(level)) for level in range(1, 10)
+            )
+        elif algo == "tar.zst":
+            self.set_options(
+                Selection(str(level), value=str(level)) for level in range(1, 24)
+            )
+        else:
+            self.set_options([])
+
+        self.refresh()
+        if self.options:
+            self.select(self.get_option_at_index(0))
+
+    def set_options(
+        self,
+        options: Iterable[
+            Selection[SelectionType]
+            | tuple[ContentText, SelectionType]
+            | tuple[ContentText, SelectionType, bool]
+        ],
+    ) -> Self:  # ty: ignore[invalid-method-override]
+        # Okay, lemme make myself clear here.
+        # A PR for this is already open at
+        # https://github.com/Textualize/textual/pull/6224
+        # essentially, the issue is that there isnt a set_options
+        # method for SelectionList, only for OptionList, but using
+        # OptionList's set_options doesnt clear selected or values
+        # but nothing was done, so I added it myself.
+        self._selected.clear()
+        self._values.clear()
+        # the ty ignore is important here, because options
+        # should be a Iterable["Option | VisualType | None"]
+        # but that isnt the case (based on the signature)
+        # so ty is crashing out.
+        super().set_options(options)  # ty: ignore[invalid-argument-type]
+        return self
+
 
 class ZipUpScreen(ModalInput):
     def __init__(
         self,
-        border_title: str,
         border_subtitle: str = "",
         initial_value: str = "",
         validators: list | None = None,
         is_path: bool = False,
-        is_folder: bool = False,
     ) -> None:
         if validators is None:
             validators = []
         super().__init__(
-            border_title, border_subtitle, initial_value, validators, is_path, is_folder
+            "Create Zip Archive", border_subtitle, initial_value, validators, is_path
         )
 
     def compose(self) -> ComposeResult:

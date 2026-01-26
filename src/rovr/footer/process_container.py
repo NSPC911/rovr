@@ -456,7 +456,7 @@ class ProcessContainer(VerticalScroll):
         self,
         files: list[str],
         archive_name: str,
-        mode: Literal["zip", "tar", "tar.gz", "tar.bz2", "tar.xz", "tar.zst"],
+        algo: Literal["zip", "tar", "tar.gz", "tar.bz2", "tar.xz", "tar.zst"],
         level: int,
     ) -> None:
         """
@@ -495,7 +495,7 @@ class ProcessContainer(VerticalScroll):
             base_path = path.commonpath(files)
 
         try:
-            with Archive(archive_name, mode, "w", level) as archive:
+            with Archive(archive_name, algo, "w", level) as archive:
                 assert archive._archive is not None
                 last_update_time = time.monotonic()
                 for i, file_path in enumerate(files_to_archive):

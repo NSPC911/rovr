@@ -129,7 +129,6 @@ class Test(App):
     def zip_up_screen(self) -> None:
         self.push_screen(
             ZipUpScreen(
-                border_title="Create Zip Archive",
                 border_subtitle="Enter the name for the zip file",
                 initial_value="archive.zip",
                 is_path=True,

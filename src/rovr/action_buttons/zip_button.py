@@ -49,7 +49,6 @@ class ZipButton(Button):
             ZipScreenReturnType,
             await self.app.push_screen(
                 ZipUpScreen(
-                    border_title="Create Zip Archive",
                     border_subtitle="Enter the name for the zip file",
                     initial_value=default_zip_name,
                     validators=[
@@ -64,12 +63,12 @@ class ZipButton(Button):
             ),
         )
 
-        if not response or response is None:
+        if not response:
             return
 
         archive_name = normalise(path.join(getcwd(), response.path))
 
         self.app.query_one("ProcessContainer").create_archive(
-            selected_files, archive_name, response.mode, response.level
+            selected_files, archive_name, response.algo, response.level
         )
         self.app.file_list.focus()

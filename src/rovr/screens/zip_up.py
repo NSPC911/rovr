@@ -1,9 +1,12 @@
+from asyncio import sleep
 from typing import ClassVar
 
+from pathvalidate import sanitize_filepath
+from textual import work
 from textual.app import ComposeResult
 from textual.binding import BindingType
 from textual.containers import HorizontalGroup
-from textual.widgets import SelectionList
+from textual.widgets import Input, SelectionList
 from textual.widgets.selection_list import Selection
 
 from rovr.classes.mixins import CheckboxRenderingMixin
@@ -65,6 +68,7 @@ class ZipCompression(CheckboxRenderingMixin, SelectionList, inherit_bindings=Fal
 
     def on_mount(self) -> None:
         self.border_title = "compression level"
+        self.select(self.get_option_at_index(0))
 
     def _get_checkbox_icon_set(self) -> list[str]:
         """
@@ -89,7 +93,7 @@ class ZipCompression(CheckboxRenderingMixin, SelectionList, inherit_bindings=Fal
         self.select(self.get_option_at_index(event.selection_index))
 
 
-class ZipUpScreen(ModalInput):
+class ZipUpScreen(ModalInput[tuple[str, str, int]]):
     def __init__(
         self,
         border_title: str,
@@ -108,3 +112,32 @@ class ZipUpScreen(ModalInput):
         with HorizontalGroup():
             yield ZipTypes()
             yield ZipCompression()
+
+    @work
+    async def on_input_submitted(self, event: Input.Submitted) -> None:
+        """Handle input submission."""
+        if (
+            not self.query_one(Input).is_valid
+            and event.validation_result
+            and event.validation_result.failures
+        ):
+            # shake
+            for _ in range(2):
+                self.horizontal_group.styles.offset = (1, 0)
+                await sleep(0.1)
+                self.horizontal_group.styles.offset = (0, 0)
+                await sleep(0.1)
+            return
+        return_path = (
+            sanitize_filepath(event.input.value) if self.is_path else event.input.value
+        )
+        if event.input.value.endswith(("/", "\\")) and not return_path.endswith((
+            "/",
+            "\\",
+        )):
+            return_path += "/"
+        self.dismiss((
+            return_path,
+            self.query_one(ZipTypes).selected[0],
+            int(self.query_one(ZipCompression).selected[0]),
+        ))

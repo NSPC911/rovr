@@ -19,6 +19,7 @@ from rovr.screens import (
     FileInUse,
     PasteScreen,
     YesOrNo,
+    ZipUpScreen,
 )
 
 console = Console()
@@ -51,6 +52,7 @@ class Test(App):
         yield Button("File In Use", id="FileInUse")
         yield Button("Paste Screen", id="PasteScreen")
         yield Button("Yes Or No", id="YesOrNo")
+        yield Button("Zip Up Screen", id="ZipUpScreen")
 
     @on(Button.Pressed, "#CommonFileNameDoWhat")
     def common_file_name_do_what(self) -> None:
@@ -120,6 +122,18 @@ class Test(App):
     def yes_or_no(self) -> None:
         self.push_screen(
             YesOrNo("Do you want to continue?"),
+            callback=lambda result: self.notify(str(result)),
+        )
+
+    @on(Button.Pressed, "#ZipUpScreen")
+    def zip_up_screen(self) -> None:
+        self.push_screen(
+            ZipUpScreen(
+                border_title="Create Zip Archive",
+                border_subtitle="Enter the name for the zip file",
+                initial_value="archive.zip",
+                is_path=True,
+            ),
             callback=lambda result: self.notify(str(result)),
         )
 

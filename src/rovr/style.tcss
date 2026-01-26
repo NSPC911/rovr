@@ -60,7 +60,8 @@ PopupOptionList,
 .comfy-buttons #path_switcher,
 .comfy-buttons #below_menu Button,
 PasteScreen OptionList,
-DeleteFiles OptionList {
+DeleteFiles OptionList,
+ZipUpScreen OptionList {
   background: transparent;
   border: $border-style $border-blurred;
   border-subtitle-color: $background;
@@ -105,7 +106,8 @@ PopupOptionList,
 .comfy-buttons #below_menu Button:focus,
 .comfy-buttons #below_menu Button:hover,
 PasteScreen OptionList,
-DeleteFiles OptionList {
+DeleteFiles OptionList,
+ZipUpScreen OptionList {
   border: $border-style $border;
   border-subtitle-background: $border;
   &:ansi {
@@ -483,7 +485,8 @@ FileSearchToggles, FileSearchOptionList,
 ContentSearchToggles, ContentSearchOptionList,
 KeybindList,
 PasteScreen OptionList,
-DeleteFiles OptionList {
+DeleteFiles OptionList,
+ZipUpScreen OptionList {
   padding: 0 0 0 0;
   background-tint: ansi_default !important;
   .option-list--separator { color: $foreground }
@@ -575,7 +578,8 @@ ModalScreen Button:ansi {
 
 ZDToDirectory,
 FileSearch,
-ContentSearch {
+ContentSearch,
+ZipUpScreen {
   align: center middle;
   layout: horizontal;
   & > VerticalGroup {
@@ -599,7 +603,8 @@ ContentSearch {
       border: $border-style $border-blurred;
     }
     &:focus-within {
-      OptionList {
+      OptionList,
+      RadioList {
         border: $border-style $border;
         .option-list--option-highlighted {
           background: $primary !important;
@@ -805,7 +810,7 @@ DeleteFiles {
 }
 
 ModalInput {
-  HorizontalGroup {
+  #modalInput_group {
     border: $border-style $border;
     width: 50vw;
     max-height: 3;
@@ -821,6 +826,7 @@ ModalInput {
     width: 1fr;
   }
   Label { height: 1 }
+  Label.arrow { color: $border }
 }
 
 TerminalTooSmall {
@@ -845,7 +851,6 @@ TerminalTooSmall {
   }
 }
 
-
 CommandPalette {
   align: center middle;
   CommandList {
@@ -866,6 +871,21 @@ CommandPalette {
   #--input { border: $border-style $border }
   #--input.--list-visible { border-bottom: none }
   LoadingIndicator { border-bottom: $border-style $border }
+}
+
+ZipUpScreen {
+  layout: vertical;
+  grid-size: 2 2;
+  grid-rows: 3 1fr;
+  #modalInput_group {
+    column-span: 2;
+  }
+  HorizontalGroup {
+    width: 50vw;
+    OptionList {
+      height: 8;
+    }
+  }
 }
 
 PopupOptionList { width: auto }
@@ -1058,7 +1078,8 @@ Screen {
 FileList .option-list--option-highlighted,
 Clipboard .option-list--option-highlighted,
 DeleteFiles OptionList .option-list--option-highlighted,
-PasteScreen OptionList .option-list--option-highlighted {
+PasteScreen OptionList .option-list--option-highlighted,
+ZipUpScreen OptionList .option-list--option-highlighted {
   color: $block-cursor-background;
   background: transparent;
   text-style: bold;

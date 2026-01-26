@@ -10,6 +10,7 @@ from .rg_search import ContentSearch
 from .way_too_small import TerminalTooSmall
 from .yes_or_no import YesOrNo
 from .zd_to_directory import ZDToDirectory
+from .zip_up import ZipUpScreen
 
 __all__ = [
     "Dismissable",
@@ -24,4 +25,5 @@ __all__ = [
     "Keybinds",
     "ContentSearch",
     "PasteScreen",
+    "ZipUpScreen",
 ]

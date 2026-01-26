@@ -21,9 +21,8 @@ class ModalInput(ModalScreen):
         validators: list = [],
         is_path: bool = False,
         is_folder: bool = False,
-        **kwargs,
     ) -> None:
-        super().__init__(**kwargs)
+        super().__init__()
         self.border_title = border_title
         self.border_subtitle = border_subtitle
         self.initial_value = initial_value
@@ -37,9 +36,10 @@ class ModalInput(ModalScreen):
                 f"> {icon_utils.get_icon('file', 'default')[0]} ",
                 id="icon",
                 shrink=True,
+                classes="system",
             )
         else:
-            self.icon_widget = Label("> ", id="icon", shrink=True)
+            self.icon_widget = Label("> ", id="icon", shrink=True, classes="arrow")
 
     def compose(self) -> ComposeResult:
         with HorizontalGroup(id="modalInput_group"):

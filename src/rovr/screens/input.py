@@ -77,13 +77,12 @@ class ModalInput(ModalScreen):
                             event.validation_result.failure_descriptions[0]
                         )
                     except IndexError:
-                        # I got an error from this, but it couldn't
-                        # be properly printed, so I'm leaving this here
-                        # in case someone else gets the same issue
-                        # so that they can create a new issue ^_^
-                        raise IndexError(
-                            f"Empty failure description.\nIf you see this, create an issue, thanks!\n{event.validation_result=}, {event.value=}"
-                        ) from None
+                        # fuck it, just post a new message
+                        inp = self.query_one(Input)
+                        self.post_message(
+                            Input.Changed(inp, inp.value, inp.validate(inp.value))
+                        )
+                        return
                 else:
                     # valid_empty = False
                     self.horizontal_group.border_subtitle = (

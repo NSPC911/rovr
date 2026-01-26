@@ -5,8 +5,6 @@ from textual import work
 from textual.widgets import Button
 
 from rovr.classes import (
-    EndsWithAnArchiveExtension,
-    EndsWithRar,
     IsValidFilePath,
     PathDoesntExist,
 )
@@ -49,13 +47,10 @@ class ZipButton(Button):
             ZipScreenReturnType,
             await self.app.push_screen(
                 ZipUpScreen(
-                    border_subtitle="Enter the name for the zip file",
                     initial_value=default_zip_name,
                     validators=[
                         PathDoesntExist(strict=False),
                         IsValidFilePath(),
-                        EndsWithRar(),
-                        EndsWithAnArchiveExtension(),
                     ],
                     is_path=True,
                 ),

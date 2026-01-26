@@ -71,8 +71,8 @@ class ZipCompression(CheckboxRenderingMixin, SelectionList, inherit_bindings=Fal
 
     def __init__(self) -> None:
         super().__init__(
+            # default 1-10
             *[Selection(str(level), value=str(level)) for level in range(1, 10)],
-            # no i will ignore zst's ability for 23 compression levels
             id="zip_compression_toggles",
         )
 
@@ -152,16 +152,13 @@ class ZipCompression(CheckboxRenderingMixin, SelectionList, inherit_bindings=Fal
 class ZipUpScreen(ModalInput):
     def __init__(
         self,
-        border_subtitle: str = "",
         initial_value: str = "",
         validators: list | None = None,
         is_path: bool = False,
     ) -> None:
         if validators is None:
             validators = []
-        super().__init__(
-            "Create Zip Archive", border_subtitle, initial_value, validators, is_path
-        )
+        super().__init__("Create Zip Archive", "", initial_value, validators, is_path)
 
     def compose(self) -> ComposeResult:
         yield from super().compose()

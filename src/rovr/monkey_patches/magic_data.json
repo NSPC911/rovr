@@ -668,59 +668,6 @@
     ["4d444d5093a7", 0, ".hdmp", "", "Windows dump file"],
     ["464f524d", 0, ".aiff", "audio/aiff", "Audio Interchange File"],
     ["2e524d46", 0, ".rmvb", "", "RealMedia streaming media"],
-    [
-      "504b0304", 0, ".docx", "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-      "MS Office Open XML Format Document"
-    ],
-    [
-      "504b0304", 0, ".pptx", "application/vnd.openxmlformats-officedocument.presentationml.presentation",
-      "MS Office Open XML Format Document"
-    ],
-    [
-      "504b0304", 0, ".xlsx", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-      "MS Office Open XML Format Document"
-    ],
-    [
-      "504b0304", 0, ".xlsb", "application/vnd.ms-excel.sheet.binary.macroenabled.12",
-      "Microsoft Excel - Binary Workbook"
-    ],
-    [
-      "504b0304", 0, ".xltm", "application/vnd.ms-excel.template.macroenabled.12",
-      "Microsoft Excel - Macro-Enabled Template File"
-    ],
-    [
-      "504b0304", 0, ".xltx", "application/vnd.openxmlformats-officedocument.spreadsheetml.template",
-      "Microsoft Office - OOXML - Spreadsheet Template"
-    ],
-    ["504b0304", 0, ".xlam", "application/vnd.ms-excel.addin.macroenabled.12", "Microsoft Excel - Add-In File"],
-    [
-      "504b0304", 0, ".docm", "application/vnd.ms-word.document.macroEnabled.12",
-      "Microsoft Word - Macro-Enabled Document"
-    ],
-    [
-      "504b0304", 0, ".dotx", "application/vnd.openxmlformats-officedocument.wordprocessingml.template",
-      "Microsoft Office - OOXML - Word Document Template"
-    ],
-    [
-      "504b0304", 0, ".dotm", "application/vnd.ms-word.template.macroenabled.12",
-      "Microsoft Word - Macro-Enabled Template"
-    ],
-    [
-      "504b0304", 0, ".pptm", "application/vnd.ms-powerpoint.presentation.macroEnabled.12",
-      "Microsoft PowerPoint - Macro-Enabled Presentation File"
-    ],
-    [
-      "504b0304", 0, ".potx", "application/vnd.openxmlformats-officedocument.presentationml.template",
-      "Microsoft Office - OOXML - Presentation Template"
-    ],
-    [
-      "504b0304", 0, ".potm", "application/vnd.ms-powerpoint.template.macroenabled.12",
-      "Microsoft PowerPoint - Macro-Enabled Template File"
-    ],
-    [
-      "504b0304", 0, ".xlsm", "application/vnd.ms-excel.sheet.macroEnabled.12",
-      "Microsoft Excel - Macro-Enabled Workbook"
-    ],
     ["7a626578", 0, ".info", "", "ZoomBrowser Image Index"],
     ["425a68", 0, ".tbz2", "application/x-bzip2", "bzip2 compressed archive"],
     ["ffd8ff", 0, ".jfif", "image/jpeg", "JPEG|EXIF|SPIFF images"],

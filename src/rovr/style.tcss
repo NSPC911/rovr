@@ -33,6 +33,9 @@ $scrollbar-corner-color: $primary-muted;
     scrollbar-background-hover: $scrollbar-background;
     scrollbar-background-active: $scrollbar-background;
   }
+  &:disabled {
+    scrollbar-size: 0 0;
+  }
 }
 
 Screen.-all-horizontal.compact-buttons {
@@ -107,7 +110,7 @@ PopupOptionList,
 .comfy-buttons #below_menu Button:hover,
 PasteScreen OptionList,
 DeleteFiles OptionList,
-ZipUpScreen OptionList {
+ZipUpScreen OptionList:focus {
   border: $border-style $border;
   border-subtitle-background: $border;
   &:ansi {
@@ -878,13 +881,27 @@ ZipUpScreen {
   grid-size: 2 2;
   grid-rows: 3 1fr;
   #modalInput_group {
+    border: $border-style $border-blurred;
+    width: 50vw;
+    max-height: 3;
+    background: transparent !important;
+    border-title-align: left;
+    border-subtitle-align: right;
     column-span: 2;
+    &.invalid { border: $border-style $error-lighten-3 }
+    &:light { border: $border-style $error }
+    &:focus-within {
+      border: $border-style $border;
+    }
   }
   HorizontalGroup {
     width: 50vw;
     OptionList {
       height: 8;
     }
+  }
+  ZipCompression:disabled {
+    border: $border-style $error !important;
   }
 }
 

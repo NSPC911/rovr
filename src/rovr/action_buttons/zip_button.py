@@ -64,7 +64,7 @@ class ZipButton(Button):
             ),
         )
 
-        if not response:
+        if not response or response is None:
             return
 
         archive_name = normalise(path.join(getcwd(), response.path))

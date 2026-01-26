@@ -3,7 +3,7 @@ from pathlib import Path
 from typing import ClassVar
 
 from pathvalidate import sanitize_filepath
-from textual import on, work
+from textual import events, on, work
 from textual.app import ComposeResult
 from textual.binding import BindingType
 from textual.containers import HorizontalGroup
@@ -29,18 +29,18 @@ class ZipTypes(CheckboxRenderingMixin, SelectionList, inherit_bindings=False):
             Selection("Tar Bz2 (.tar.bz2)", value="tar.bz2"),
             Selection("Tar Xz  (.tar.xz)", value="tar.xz"),
             Selection("Tar Zst (.tar.zst)", value="tar.zst"),
-            id="file_search_toggles",
+            id="zip_types_toggles",
         )
 
     def on_mount(self) -> None:
-        self.border_title = "zip options"
+        self.border_title = "Archive Formats"
         self.select(self.get_option_at_index(0))
 
     def _get_checkbox_icon_set(self) -> list[str]:
         """
         Get the set of icons to use for checkbox rendering.
 
-        ContentSearchToggles uses a different icon set (missing right icon).
+        ZipTypes uses a different icon set (missing right icon).
 
         Returns:
             List of icon strings for left, inner, right, and spacing.
@@ -55,10 +55,18 @@ class ZipTypes(CheckboxRenderingMixin, SelectionList, inherit_bindings=False):
     def on_selection_list_selection_toggled(
         self, event: SelectionList.SelectionToggled
     ) -> None:
+        # not using self.deselect_all to prevent a refresh
         with self.prevent(ZipTypes.SelectedChanged):
             for option in self._options:
                 self._deselect(option.value)
         self.select(self.get_option_at_index(event.selection_index))
+        zip_compression_widget = self.parent.query_one(ZipCompression)
+        zip_compression_widget.disabled = event.selection.value == "tar"
+        zip_compression_widget.tooltip = (
+            "tar files do not support compression!"
+            if event.selection.value == "tar"
+            else ""
+        )
 
 
 class ZipCompression(CheckboxRenderingMixin, SelectionList, inherit_bindings=False):
@@ -66,19 +74,20 @@ class ZipCompression(CheckboxRenderingMixin, SelectionList, inherit_bindings=Fal
 
     def __init__(self) -> None:
         super().__init__(
-            *[Selection(str(level), value=str(level)) for level in range(0, 10)],
+            *[Selection(str(level), value=str(level)) for level in range(1, 10)],
+            # no i will ignore zst's ability for 23 compression levels
             id="zip_compression_toggles",
         )
 
     def on_mount(self) -> None:
-        self.border_title = "compression level"
+        self.border_title = "Compression Levels"
         self.select(self.get_option_at_index(0))
 
     def _get_checkbox_icon_set(self) -> list[str]:
         """
         Get the set of icons to use for checkbox rendering.
 
-        ContentSearchToggles uses a different icon set (missing right icon).
+        ZipCompression uses a different icon set (missing right icon).
 
         Returns:
             List of icon strings for left, inner, right, and spacing.
@@ -93,7 +102,10 @@ class ZipCompression(CheckboxRenderingMixin, SelectionList, inherit_bindings=Fal
     def on_selection_list_selection_toggled(
         self, event: SelectionList.SelectionToggled
     ) -> None:
-        self.deselect_all()
+        # not using self.deselect_all to prevent a refresh
+        with self.prevent(ZipCompression.SelectedChanged):
+            for option in self._options:
+                self._deselect(option.value)
         self.select(self.get_option_at_index(event.selection_index))
 
 
@@ -103,10 +115,12 @@ class ZipUpScreen(ModalInput):
         border_title: str,
         border_subtitle: str = "",
         initial_value: str = "",
-        validators: list = [],
+        validators: list | None = None,
         is_path: bool = False,
         is_folder: bool = False,
     ) -> None:
+        if validators is None:
+            validators = []
         super().__init__(
             border_title, border_subtitle, initial_value, validators, is_path, is_folder
         )
@@ -156,3 +170,15 @@ class ZipUpScreen(ModalInput):
         if base.endswith(".tar"):
             base = ".".join(base.split(".")[:-1])
         input_widget.value = f"{base}.{event.selection.value}"
+
+    def on_key(self, event: events.Key) -> None:
+        """Handle escape key to dismiss the dialog."""
+        if event.key == "escape":
+            event.stop()
+            self.dismiss(None)
+
+    def on_click(self, event: events.Click) -> None:
+        if event.widget is self:
+            # ie click outside
+            event.stop()
+            self.dismiss(None)

@@ -267,7 +267,7 @@ class Archive:
                 raise ValueError("Zstandard compression level must be between 1-22")
             return tarfile.open(self.filename, tar_mode, level=self.compression_level)
         else:
-            return tarfile.open(self.filename, compresslevel=self.compression_level)
+            return tarfile.open(self.filename, mode="w")
 
     def infolist(
         self,

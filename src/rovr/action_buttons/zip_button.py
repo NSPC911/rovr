@@ -1,4 +1,5 @@
 from os import getcwd, path
+from typing import cast
 
 from textual import work
 from textual.widgets import Button
@@ -11,7 +12,8 @@ from rovr.classes import (
 )
 from rovr.functions.icons import get_icon
 from rovr.functions.path import normalise
-from rovr.screens import ModalInput
+from rovr.screens import ZipUpScreen
+from rovr.screens.typed import ZipScreenReturnType
 from rovr.variables.constants import config
 
 
@@ -43,28 +45,31 @@ class ZipButton(Button):
         parent_folder_name = path.basename(getcwd())
         default_zip_name = f"{parent_folder_name}.zip"
 
-        response: str = await self.app.push_screen(
-            ModalInput(
-                border_title="Create Zip Archive",
-                border_subtitle="Enter the name for the zip file",
-                initial_value=default_zip_name,
-                validators=[
-                    PathDoesntExist(strict=False),
-                    IsValidFilePath(),
-                    EndsWithRar(),
-                    EndsWithAnArchiveExtension(),
-                ],
-                is_path=True,
+        response = cast(
+            ZipScreenReturnType,
+            await self.app.push_screen(
+                ZipUpScreen(
+                    border_title="Create Zip Archive",
+                    border_subtitle="Enter the name for the zip file",
+                    initial_value=default_zip_name,
+                    validators=[
+                        PathDoesntExist(strict=False),
+                        IsValidFilePath(),
+                        EndsWithRar(),
+                        EndsWithAnArchiveExtension(),
+                    ],
+                    is_path=True,
+                ),
+                wait_for_dismiss=True,
             ),
-            wait_for_dismiss=True,
         )
 
         if not response:
             return
 
-        archive_name = normalise(path.join(getcwd(), response))
+        archive_name = normalise(path.join(getcwd(), response.path))
 
         self.app.query_one("ProcessContainer").create_archive(
-            selected_files, archive_name
+            selected_files, archive_name, response.mode, response.level
         )
         self.app.file_list.focus()

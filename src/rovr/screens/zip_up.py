@@ -1,8 +1,9 @@
 from asyncio import sleep
+from pathlib import Path
 from typing import ClassVar
 
 from pathvalidate import sanitize_filepath
-from textual import work
+from textual import on, work
 from textual.app import ComposeResult
 from textual.binding import BindingType
 from textual.containers import HorizontalGroup
@@ -14,6 +15,7 @@ from rovr.functions import icons as icon_utils
 from rovr.variables.constants import vindings
 
 from .input import ModalInput
+from .typed import ZipScreenReturnType
 
 
 class ZipTypes(CheckboxRenderingMixin, SelectionList, inherit_bindings=False):
@@ -23,10 +25,10 @@ class ZipTypes(CheckboxRenderingMixin, SelectionList, inherit_bindings=False):
         super().__init__(
             Selection("Zip     (.zip)", value="zip"),
             Selection("Tar     (.tar)", value="tar"),
-            Selection("Tar Gz  (.tar.gz)", value="tar_gz"),
-            Selection("Tar Bz2 (.tar.bz2)", value="tar_bz2"),
-            Selection("Tar Xz  (.tar.xz)", value="tar_xz"),
-            Selection("Tar Zst (.tar.zst)", value="tar_zst"),
+            Selection("Tar Gz  (.tar.gz)", value="tar.gz"),
+            Selection("Tar Bz2 (.tar.bz2)", value="tar.bz2"),
+            Selection("Tar Xz  (.tar.xz)", value="tar.xz"),
+            Selection("Tar Zst (.tar.zst)", value="tar.zst"),
             id="file_search_toggles",
         )
 
@@ -53,7 +55,9 @@ class ZipTypes(CheckboxRenderingMixin, SelectionList, inherit_bindings=False):
     def on_selection_list_selection_toggled(
         self, event: SelectionList.SelectionToggled
     ) -> None:
-        self.deselect_all()
+        with self.prevent(ZipTypes.SelectedChanged):
+            for option in self._options:
+                self._deselect(option.value)
         self.select(self.get_option_at_index(event.selection_index))
 
 
@@ -93,7 +97,7 @@ class ZipCompression(CheckboxRenderingMixin, SelectionList, inherit_bindings=Fal
         self.select(self.get_option_at_index(event.selection_index))
 
 
-class ZipUpScreen(ModalInput[tuple[str, str, int]]):
+class ZipUpScreen(ModalInput):
     def __init__(
         self,
         border_title: str,
@@ -136,8 +140,19 @@ class ZipUpScreen(ModalInput[tuple[str, str, int]]):
             "\\",
         )):
             return_path += "/"
-        self.dismiss((
-            return_path,
-            self.query_one(ZipTypes).selected[0],
-            int(self.query_one(ZipCompression).selected[0]),
-        ))
+        self.dismiss(
+            ZipScreenReturnType(
+                return_path,
+                self.query_one(ZipTypes).selected[0],
+                int(self.query_one(ZipCompression).selected[0]),
+            )
+        )
+
+    @on(ZipTypes.SelectionToggled, "ZipTypes")
+    def zip_type_toggled(self, event: ZipTypes.SelectionToggled) -> None:
+        """Handle zip type selection toggling."""
+        input_widget = self.query_one(Input)
+        base = Path(input_widget.value).stem
+        if base.endswith(".tar"):
+            base = ".".join(base.split(".")[:-1])
+        input_widget.value = f"{base}.{event.selection.value}"

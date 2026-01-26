@@ -1,17 +1,17 @@
 from os import getcwd, path
+from typing import cast
 
 from textual import work
 from textual.widgets import Button
 
 from rovr.classes import (
-    EndsWithAnArchiveExtension,
-    EndsWithRar,
     IsValidFilePath,
     PathDoesntExist,
 )
 from rovr.functions.icons import get_icon
 from rovr.functions.path import normalise
-from rovr.screens import ModalInput
+from rovr.screens import ArchiveCreationScreen
+from rovr.screens.typed import ArchiveScreenReturnType
 from rovr.variables.constants import config
 
 
@@ -43,28 +43,27 @@ class ZipButton(Button):
         parent_folder_name = path.basename(getcwd())
         default_zip_name = f"{parent_folder_name}.zip"
 
-        response: str = await self.app.push_screen(
-            ModalInput(
-                border_title="Create Zip Archive",
-                border_subtitle="Enter the name for the zip file",
-                initial_value=default_zip_name,
-                validators=[
-                    PathDoesntExist(strict=False),
-                    IsValidFilePath(),
-                    EndsWithRar(),
-                    EndsWithAnArchiveExtension(),
-                ],
-                is_path=True,
+        response = cast(
+            ArchiveScreenReturnType,
+            await self.app.push_screen(
+                ArchiveCreationScreen(
+                    initial_value=default_zip_name,
+                    validators=[
+                        PathDoesntExist(strict=False),
+                        IsValidFilePath(),
+                    ],
+                    is_path=True,
+                ),
+                wait_for_dismiss=True,
             ),
-            wait_for_dismiss=True,
         )
 
         if not response:
             return
 
-        archive_name = normalise(path.join(getcwd(), response))
+        archive_name = normalise(path.join(getcwd(), response.path))
 
         self.app.query_one("ProcessContainer").create_archive(
-            selected_files, archive_name
+            selected_files, archive_name, response.algo, response.level
         )
         self.app.file_list.focus()

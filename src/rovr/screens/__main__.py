@@ -13,6 +13,7 @@ from textual.screen import Screen
 from textual.widgets import Button
 
 from rovr.screens import (
+    ArchiveCreationScreen,
     CommonFileNameDoWhat,
     DeleteFiles,
     Dismissable,
@@ -51,6 +52,7 @@ class Test(App):
         yield Button("File In Use", id="FileInUse")
         yield Button("Paste Screen", id="PasteScreen")
         yield Button("Yes Or No", id="YesOrNo")
+        yield Button("Zip Up Screen", id="ArchiveCreationScreen")
 
     @on(Button.Pressed, "#CommonFileNameDoWhat")
     def common_file_name_do_what(self) -> None:
@@ -120,6 +122,16 @@ class Test(App):
     def yes_or_no(self) -> None:
         self.push_screen(
             YesOrNo("Do you want to continue?"),
+            callback=lambda result: self.notify(str(result)),
+        )
+
+    @on(Button.Pressed, "#ArchiveCreationScreen")
+    def archive_creation_screen(self) -> None:
+        self.push_screen(
+            ArchiveCreationScreen(
+                initial_value="archive.zip",
+                is_path=True,
+            ),
             callback=lambda result: self.notify(str(result)),
         )
 

@@ -1,3 +1,4 @@
+from .archive_creator import ArchiveCreationScreen
 from .common_file_name_do_what import CommonFileNameDoWhat
 from .delete_files import DeleteFiles
 from .dismissable import Dismissable
@@ -24,4 +25,5 @@ __all__ = [
     "Keybinds",
     "ContentSearch",
     "PasteScreen",
+    "ArchiveCreationScreen",
 ]

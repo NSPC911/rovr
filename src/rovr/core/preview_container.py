@@ -797,7 +797,7 @@ class PreviewContainer(Container):
 
                 if file_type == "archive":
                     try:
-                        with Archive(file_path, "r") as archive:
+                        with Archive(file_path, mode="r") as archive:
                             all_files = []
                             for member in archive.infolist():
                                 if should_cancel():

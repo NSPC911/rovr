@@ -50,6 +50,8 @@ class Archive:
     def __init__(
         self,
         filename: str | Path,
+        algo: Literal["zip", "tar", "rar", "tar.gz", "tar.bz2", "tar.xz", "tar.zst"]
+        | None = None,
         mode: str = "r",
         compression_level: int | None = None,
     ) -> None:
@@ -67,6 +69,7 @@ class Archive:
         self.filename = str(filename)
         self.mode = mode
         self.compression_level = compression_level
+        self.algo = algo
         self._archive: zipfile.ZipFile | tarfile.TarFile | rarfile.RarFile | None = None
         self._archive_type: Literal["zip", "rar", "tar"] | None = None
         self._compress_file_obj: IO[bytes] | None = None
@@ -177,7 +180,7 @@ class Archive:
         """
         filename_lower = self.filename.lower()
 
-        if filename_lower.endswith(ARCHIVE_EXTENSIONS.zip):
+        if filename_lower.endswith(ARCHIVE_EXTENSIONS.zip) or (self.algo == "zip"):
             self._archive_type = "zip"
             if self.compression_level is not None:
                 if not (0 <= self.compression_level <= 9):
@@ -187,7 +190,7 @@ class Archive:
                 )
             else:
                 self._archive = zipfile.ZipFile(self.filename, self.mode)
-        elif filename_lower.endswith(ARCHIVE_EXTENSIONS.rar):
+        elif filename_lower.endswith(ARCHIVE_EXTENSIONS.rar) or (self.algo == "rar"):
             raise ValueError("RAR files can only be opened in read mode ('r')")
         else:
             # Assume it's a tar file
@@ -205,13 +208,17 @@ class Archive:
             Appropriate tarfile mode string for writing
         """
         filename_lower = self.filename.lower()
-        if filename_lower.endswith(ARCHIVE_EXTENSIONS.gz):
+        if filename_lower.endswith(ARCHIVE_EXTENSIONS.gz) or (self.algo == "tar.gz"):
             return "w:gz"
-        elif filename_lower.endswith(ARCHIVE_EXTENSIONS.bz2):
+        elif filename_lower.endswith(ARCHIVE_EXTENSIONS.bz2) or (
+            self.algo == "tar.bz2"
+        ):
             return "w:bz2"
-        elif filename_lower.endswith(ARCHIVE_EXTENSIONS.xz):
+        elif filename_lower.endswith(ARCHIVE_EXTENSIONS.xz) or (self.algo == "tar.xz"):
             return "w:xz"
-        elif filename_lower.endswith(ARCHIVE_EXTENSIONS.zst):
+        elif filename_lower.endswith(ARCHIVE_EXTENSIONS.zst) or (
+            self.algo == "tar.zst"
+        ):
             return "w:zst"
         else:
             return "w"
@@ -260,7 +267,7 @@ class Archive:
                 raise ValueError("Zstandard compression level must be between 1-22")
             return tarfile.open(self.filename, tar_mode, level=self.compression_level)
         else:
-            return tarfile.open(self.filename, compresslevel=self.compression_level)
+            return tarfile.open(self.filename, mode="w")
 
     def infolist(
         self,

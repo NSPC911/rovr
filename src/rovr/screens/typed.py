@@ -16,7 +16,7 @@ class CommonFileNameDoWhat(TypedDict):
     same_for_next: bool
 
 
-class ZipScreenReturnType(NamedTuple):
+class ArchiveScreenReturnType(NamedTuple):
     path: str
     algo: Literal["zip", "tar", "tar.gz", "tar.bz2", "tar.xz", "tar.zst"]
     level: int

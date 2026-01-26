@@ -1,3 +1,4 @@
+from .archive_creator import ArchiveCreationScreen
 from .common_file_name_do_what import CommonFileNameDoWhat
 from .delete_files import DeleteFiles
 from .dismissable import Dismissable
@@ -10,7 +11,6 @@ from .rg_search import ContentSearch
 from .way_too_small import TerminalTooSmall
 from .yes_or_no import YesOrNo
 from .zd_to_directory import ZDToDirectory
-from .zip_up import ZipUpScreen
 
 __all__ = [
     "Dismissable",
@@ -25,5 +25,5 @@ __all__ = [
     "Keybinds",
     "ContentSearch",
     "PasteScreen",
-    "ZipUpScreen",
+    "ArchiveCreationScreen",
 ]

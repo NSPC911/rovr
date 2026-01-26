@@ -64,7 +64,7 @@ PopupOptionList,
 .comfy-buttons #below_menu Button,
 PasteScreen OptionList,
 DeleteFiles OptionList,
-ZipUpScreen OptionList {
+ArchiveCreationScreen OptionList {
   background: transparent;
   border: $border-style $border-blurred;
   border-subtitle-color: $background;
@@ -110,7 +110,7 @@ PopupOptionList,
 .comfy-buttons #below_menu Button:hover,
 PasteScreen OptionList,
 DeleteFiles OptionList,
-ZipUpScreen OptionList:focus {
+ArchiveCreationScreen OptionList:focus {
   border: $border-style $border;
   border-subtitle-background: $border;
   &:ansi {
@@ -489,7 +489,7 @@ ContentSearchToggles, ContentSearchOptionList,
 KeybindList,
 PasteScreen OptionList,
 DeleteFiles OptionList,
-ZipUpScreen OptionList {
+ArchiveCreationScreen OptionList {
   padding: 0 0 0 0;
   background-tint: ansi_default !important;
   .option-list--separator { color: $foreground }
@@ -582,7 +582,7 @@ ModalScreen Button:ansi {
 ZDToDirectory,
 FileSearch,
 ContentSearch,
-ZipUpScreen {
+ArchiveCreationScreen {
   align: center middle;
   layout: horizontal;
   & > VerticalGroup {
@@ -876,7 +876,7 @@ CommandPalette {
   LoadingIndicator { border-bottom: $border-style $border }
 }
 
-ZipUpScreen {
+ArchiveCreationScreen {
   layout: vertical;
   grid-size: 2 2;
   grid-rows: 3 1fr;
@@ -900,7 +900,7 @@ ZipUpScreen {
       height: 8;
     }
   }
-  ZipCompression:disabled {
+  ArchiveCompression:disabled {
     border: $border-style $error !important;
   }
 }
@@ -1096,7 +1096,7 @@ FileList .option-list--option-highlighted,
 Clipboard .option-list--option-highlighted,
 DeleteFiles OptionList .option-list--option-highlighted,
 PasteScreen OptionList .option-list--option-highlighted,
-ZipUpScreen OptionList .option-list--option-highlighted {
+ArchiveCreationScreen OptionList .option-list--option-highlighted {
   color: $block-cursor-background;
   background: transparent;
   text-style: bold;

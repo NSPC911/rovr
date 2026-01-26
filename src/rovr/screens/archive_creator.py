@@ -16,10 +16,10 @@ from rovr.functions import icons as icon_utils
 from rovr.variables.constants import vindings
 
 from .input import ModalInput
-from .typed import ZipScreenReturnType
+from .typed import ArchiveScreenReturnType
 
 
-class ZipTypes(CheckboxRenderingMixin, SelectionList, inherit_bindings=False):
+class ArchiveTypes(CheckboxRenderingMixin, SelectionList, inherit_bindings=False):
     BINDINGS: ClassVar[list[BindingType]] = list(vindings)
 
     def __init__(self) -> None:
@@ -30,7 +30,7 @@ class ZipTypes(CheckboxRenderingMixin, SelectionList, inherit_bindings=False):
             Selection("Tar Bz2 (.tar.bz2)", value="tar.bz2"),
             Selection("Tar Xz  (.tar.xz)", value="tar.xz"),
             Selection("Tar Zst (.tar.zst)", value="tar.zst"),
-            id="zip_types_toggles",
+            id="archive_types_toggles",
         )
 
     def on_mount(self) -> None:
@@ -41,7 +41,7 @@ class ZipTypes(CheckboxRenderingMixin, SelectionList, inherit_bindings=False):
         """
         Get the set of icons to use for checkbox rendering.
 
-        ZipTypes uses a different icon set (missing right icon).
+        ArchiveTypes uses a different icon set (missing right icon).
 
         Returns:
             List of icon strings for left, inner, right, and spacing.
@@ -57,23 +57,23 @@ class ZipTypes(CheckboxRenderingMixin, SelectionList, inherit_bindings=False):
         self, event: SelectionList.SelectionToggled
     ) -> None:
         # not using self.deselect_all to prevent a refresh
-        with self.prevent(ZipTypes.SelectedChanged):
+        with self.prevent(ArchiveTypes.SelectedChanged):
             for option in self._options:
                 self._deselect(option.value)
         self.select(self.get_option_at_index(event.selection_index))
-        self.parent.query_one(ZipCompression).update_compressions(
+        self.parent.query_one(ArchiveCompression).update_compressions(
             self.get_option_at_index(event.selection_index).value
         )
 
 
-class ZipCompression(CheckboxRenderingMixin, SelectionList, inherit_bindings=False):
+class ArchiveCompression(CheckboxRenderingMixin, SelectionList, inherit_bindings=False):
     BINDINGS: ClassVar[list[BindingType]] = list(vindings)
 
     def __init__(self) -> None:
         super().__init__(
             # default 1-10
             *[Selection(str(level), value=str(level)) for level in range(1, 10)],
-            id="zip_compression_toggles",
+            id="archive_compression_toggles",
         )
 
     def on_mount(self) -> None:
@@ -84,7 +84,7 @@ class ZipCompression(CheckboxRenderingMixin, SelectionList, inherit_bindings=Fal
         """
         Get the set of icons to use for checkbox rendering.
 
-        ZipCompression uses a different icon set (missing right icon).
+        ArchiveCompression uses a different icon set (missing right icon).
 
         Returns:
             List of icon strings for left, inner, right, and spacing.
@@ -100,7 +100,7 @@ class ZipCompression(CheckboxRenderingMixin, SelectionList, inherit_bindings=Fal
         self, event: SelectionList.SelectionToggled
     ) -> None:
         # not using self.deselect_all to prevent a refresh
-        with self.prevent(ZipCompression.SelectedChanged):
+        with self.prevent(ArchiveCompression.SelectedChanged):
             for option in self._options:
                 self._deselect(option.value)
         self.select(self.get_option_at_index(event.selection_index))
@@ -153,7 +153,7 @@ class ZipCompression(CheckboxRenderingMixin, SelectionList, inherit_bindings=Fal
         return self
 
 
-class ZipUpScreen(ModalInput):
+class ArchiveCreationScreen(ModalInput):
     def __init__(
         self,
         initial_value: str = "",
@@ -162,13 +162,13 @@ class ZipUpScreen(ModalInput):
     ) -> None:
         if validators is None:
             validators = []
-        super().__init__("Create Zip Archive", "", initial_value, validators, is_path)
+        super().__init__("Create Archive", "", initial_value, validators, is_path)
 
     def compose(self) -> ComposeResult:
         yield from super().compose()
         with HorizontalGroup():
-            yield ZipTypes()
-            yield ZipCompression()
+            yield ArchiveTypes()
+            yield ArchiveCompression()
 
     @work
     async def on_input_submitted(self, event: Input.Submitted) -> None:
@@ -193,17 +193,17 @@ class ZipUpScreen(ModalInput):
             "\\",
         )):
             return_path += "/"
-        compression_selection = self.query_one(ZipCompression).selected
+        compression_selection = self.query_one(ArchiveCompression).selected
         self.dismiss(
-            ZipScreenReturnType(
+            ArchiveScreenReturnType(
                 return_path,
-                self.query_one(ZipTypes).selected[0],
+                self.query_one(ArchiveTypes).selected[0],
                 int(compression_selection[0] if compression_selection else 0),
             )
         )
 
-    @on(ZipTypes.SelectionToggled, "ZipTypes")
-    def zip_type_toggled(self, event: ZipTypes.SelectionToggled) -> None:
+    @on(ArchiveTypes.SelectionToggled, "ArchiveTypes")
+    def zip_type_toggled(self, event: ArchiveTypes.SelectionToggled) -> None:
         """Handle zip type selection toggling."""
         input_widget = self.query_one(Input)
         base = Path(input_widget.value).stem

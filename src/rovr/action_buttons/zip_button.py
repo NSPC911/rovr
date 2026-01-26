@@ -10,8 +10,8 @@ from rovr.classes import (
 )
 from rovr.functions.icons import get_icon
 from rovr.functions.path import normalise
-from rovr.screens import ZipUpScreen
-from rovr.screens.typed import ZipScreenReturnType
+from rovr.screens import ArchiveCreationScreen
+from rovr.screens.typed import ArchiveScreenReturnType
 from rovr.variables.constants import config
 
 
@@ -44,9 +44,9 @@ class ZipButton(Button):
         default_zip_name = f"{parent_folder_name}.zip"
 
         response = cast(
-            ZipScreenReturnType,
+            ArchiveScreenReturnType,
             await self.app.push_screen(
-                ZipUpScreen(
+                ArchiveCreationScreen(
                     initial_value=default_zip_name,
                     validators=[
                         PathDoesntExist(strict=False),

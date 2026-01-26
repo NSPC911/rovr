@@ -109,16 +109,20 @@ class ZipCompression(CheckboxRenderingMixin, SelectionList, inherit_bindings=Fal
         self, algo: Literal["zip", "tar", "tar.gz", "tar.bz2", "tar.xz", "tar.zst"]
     ) -> None:
         """Update compression levels based on selected algorithm."""
-        if algo == "zip" or algo == "tar.gz" or algo == "tar.bz2" or algo == "tar.xz":
+        if algo == "zip" or algo == "tar.gz" or algo == "tar.xz":
+            self.set_options(
+                Selection(str(level), value=str(level)) for level in range(0, 10)
+            )
+        elif algo == "tar.bz2":
             self.set_options(
                 Selection(str(level), value=str(level)) for level in range(1, 10)
             )
         elif algo == "tar.zst":
             self.set_options(
-                Selection(str(level), value=str(level)) for level in range(1, 24)
+                Selection(str(level), value=str(level)) for level in range(1, 23)
             )
         else:
-            self.set_options([])
+            self.set_options([Selection("  NIL", value="0", disabled=True)])
 
         self.refresh()
         if self.options:
@@ -189,11 +193,12 @@ class ZipUpScreen(ModalInput):
             "\\",
         )):
             return_path += "/"
+        compression_selection = self.query_one(ZipCompression).selected
         self.dismiss(
             ZipScreenReturnType(
                 return_path,
                 self.query_one(ZipTypes).selected[0],
-                int(self.query_one(ZipCompression).selected[0]),
+                int(compression_selection[0] if compression_selection else 0),
             )
         )
 

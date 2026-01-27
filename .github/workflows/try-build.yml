@@ -44,9 +44,6 @@ jobs:
           activate-environment: true
           python-version: "3.13"
 
-      - name: Ensure latest factory version of nuitka
-        run: uv sync --upgrade-package nuitka
-
       - name: Cache Nuitka
         uses: actions/cache@v4
         with:
@@ -59,8 +56,8 @@ jobs:
           restore-keys: |
             nuitka-${{ matrix.name }}
 
-      - name: Install dependencies
-        run: uv sync --dev
+      - name: Ensure latest factory version of nuitka
+        run: uv sync --upgrade-package nuitka --dev
 
       - name: Build with Nuitka (onefile)
         run: |

@@ -42,7 +42,10 @@ jobs:
         uses: astral-sh/setup-uv@v6
         with:
           activate-environment: true
-          python-version: "3.12"
+          python-version: "3.13"
+
+      - name: Ensure latest factory version of nuitka
+        run: uv sync --upgrade-package nuitka
 
       - name: Cache Nuitka
         uses: actions/cache@v4
@@ -51,6 +54,7 @@ jobs:
             ~/.cache/Nuitka
             ~/AppData/Local/Nuitka/Nuitka
             ~/Library/Caches/Nuitka
+            .venv
           key: nuitka-${{ matrix.name }}-${{ hashFiles('uv.lock') }}
           restore-keys: |
             nuitka-${{ matrix.name }}-

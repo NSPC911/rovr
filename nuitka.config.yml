@@ -1,0 +1,4 @@
+- module-name: 'rich'
+  implicit-imports:
+    - depends:
+        - 'rich._unicode_data.*'

@@ -55,9 +55,9 @@ jobs:
             ~/AppData/Local/Nuitka/Nuitka
             ~/Library/Caches/Nuitka
             .venv
-          key: nuitka-${{ matrix.name }}-${{ hashFiles('uv.lock') }}
+          key: nuitka-${{ matrix.name }}
           restore-keys: |
-            nuitka-${{ matrix.name }}-
+            nuitka-${{ matrix.name }}
 
       - name: Install dependencies
         run: uv sync --dev

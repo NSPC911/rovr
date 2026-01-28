@@ -57,6 +57,7 @@ dev = [
   "ty==0.0.8",
   "pyinstrument>=5.1.2",
   "commitizen>=4.10.0",
+  "zstandard>=0.25.0",
 ]
 speedups = [
   "textual-speedups>=0.2.1",

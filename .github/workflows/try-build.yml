@@ -1,4 +1,4 @@
-name: Build with Nuitka
+name: Build with Nuitka and PyApp
 
 on:
   push:
@@ -8,7 +8,7 @@ on:
   workflow_dispatch:
 
 jobs:
-  build:
+  build-nuitka:
     strategy:
       fail-fast: false
       matrix:
@@ -33,7 +33,7 @@ jobs:
             executable: rovr.bin
 
     runs-on: ${{ matrix.os }}
-    name: Build (${{ matrix.name }})
+    name: Nuitka Build (${{ matrix.name }})
 
     steps:
       - uses: actions/checkout@v4
@@ -51,10 +51,17 @@ jobs:
             ~/.cache/Nuitka
             ~/AppData/Local/Nuitka/Nuitka
             ~/Library/Caches/Nuitka
-            .venv
           key: nuitka-${{ matrix.name }}
           restore-keys: |
             nuitka-${{ matrix.name }}
+
+      - name: Cache .venv
+        uses: actions/cache@v4
+        with:
+          path: .venv
+          key: venv-${{ matrix.name }}
+          restore-keys: |
+            venv-${{ matrix.name }}
 
       - name: Ensure latest factory version of nuitka
         run: uv sync --upgrade-package nuitka --dev
@@ -67,8 +74,9 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           path: ${{ matrix.executable }}
-          name: rovr-${{ matrix.name }}
+          name: rovr-${{ matrix.name }}-nuitka
           retention-days: 30
+
       - name: Notify Discord
         uses: sarisia/actions-status-discord@v1.13.0
         with:
@@ -77,10 +85,104 @@ jobs:
           status: ${{ job.status }}
           description: |
             Matrix ${{ matrix.name }} finished compiling!
-            Click [here](https://nightly.link/NSPC911/rovr/actions/runs/${{ github.run_id }}/rovr-${{ matrix.name }}.zip) to download!
+            Click [here](https://nightly.link/NSPC911/rovr/actions/runs/${{ github.run_id }}/rovr-${{ matrix.name }}-nuitka.zip) to download!
             -# caused by ${{ github.actor }}
           avatar_url: "https://avatars.githubusercontent.com/u/176916861?v=4"
           username: "NSPBot911"
           nodetail: true
           notimestamp: true
           noprefix: true
+
+  build-pyapp:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: windows-latest
+            name: windows-x64
+            executable: rovr.exe
+          - os: windows-11-arm
+            name: windows-arm
+            executable: rovr.exe
+          - os: ubuntu-latest
+            name: linux-x64
+            executable: rovr.bin
+          - os: ubuntu-24.04-arm
+            name: linux-arm64
+            executable: rovr.bin
+          - os: macos-latest
+            name: macos-arm64
+            executable: rovr.bin
+          - os: macos-15
+            name: macos-x64
+            executable: rovr.bin
+
+    runs-on: ${{ matrix.os }}
+    name: PyApp Build (${{ matrix.name }})
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup uv
+        uses: astral-sh/setup-uv@v6
+        with:
+          activate-environment: true
+          python-version: "3.13"
+
+      - name: Cache .venv
+        uses: actions/cache@v4
+        with:
+          path: .venv
+          key: venv-${{ matrix.name }}
+          restore-keys: |
+            venv-${{ matrix.name }}
+
+      - name: Build wheel
+        run: uv build
+
+      - name: Checkout PyApp
+        uses: actions/checkout@v4
+        with:
+          repository: ofek/pyapp
+          path: pyapp
+
+      - name: Get ls
+        run: ls
+
+      - name: Pull Cargo Cache
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cargo/registry
+            ~/.cargo/git
+            pyapp/target
+          key: cargo-${{ matrix.name }}
+
+      - name: Build with pyapp
+        run: |
+          $env:PYAPP_PROJECT_PATH=(Get-Item "$($PWD.Path)/dist/*.whl" | Select -Expand FullName)
+          $env:PYAPP_PROJECT_NAME="rovr"
+          $env:PYAPP_DISTRIBUTION_EMBED="1"
+          $env:PYAPP_UV_ENABLED="1"
+          cd pyapp
+          cargo build --release
+        shell: pwsh
+
+      - name: Rename executable
+        shell: pwsh
+        if: ${{ matrix.executable == 'rovr.bin' }}
+        run: |
+          Move-Item "pyapp/target/release/pyapp" "pyapp/target/release/${{ matrix.executable }}" -Force
+
+      - name: Rename executable
+        shell: pwsh
+        if: ${{ matrix.executable == 'rovr.exe' }}
+        run: |
+          Move-Item "pyapp/target/release/pyapp.exe" "pyapp/target/release/${{ matrix.executable }}" -Force
+
+      - name: Upload Executable
+        uses: actions/upload-artifact@v4
+        with:
+          path: pyapp/target/release/${{ matrix.executable }}
+          name: rovr-${{ matrix.name }}-pyapp
+          retention-days: 30

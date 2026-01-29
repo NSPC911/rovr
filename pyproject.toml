@@ -86,6 +86,7 @@ dev.help = "Run rovr in development mode with textual-dev"
 dev.cmd = "textual run --dev rovr.__main__:cli --"
 log.help = "Launch textual's console (need rovr to be launched as dev)"
 log.cmd = "textual console -x WORKER -x SYSTEM -x DEBUG -x EVENT"
+
 gen-schema.help = "Generate the JSON schema for rovr's config"
 gen-schema.cmd = "docs/scripts/generate_schema.py"
 icon-test.help = "Print all available icons to the terminal for testing"
@@ -93,22 +94,27 @@ icon-test.cmd = "docs/scripts/icon_test.py"
 gen-keys.help = "Generate the keybinds documentation"
 gen-keys.cmd = "docs/scripts/generate_keybinds.py"
 check.help = "Run all checks (type checking and linting)"
-check.sequence = [
-  { cmd = "ty check" },
-  { cmd = "ruff check" }
-]
+check.sequence = [ { cmd = "ty check" },{ cmd = "ruff check" } ]
+
 format.help = "Run ruff related formatters"
-format.sequence = [{ cmd = "ruff check --unsafe-fixes --fix"}, { cmd = "ruff format"}]
+format.sequence = [ { cmd = "ruff check --unsafe-fixes --fix"}, { cmd = "ruff format"} ]
 fmt.help = "(alias) Run ruff related formatters"
 fmt.sequence = ["format"]
+
 screenshot-format.help = "Format all SVG screenshots in the docs"
 screenshot-format.cmd = 'pnpx prettier --write "docs/public/screenshots/*.svg" --parser html --bracket-same-line --print-width 160'
 svg-fmt.help = "(alias) Format all SVG files in the docs"
 svg-fmt.sequence = ["screenshot-format"]
-build.help = "Build rovr into a single executable using Nuitka"
-build.cmd = 'nuitka --mode=onefile --assume-yes-for-downloads --enable-plugins=no-qt --python-flag=-m --python-flag="no_docstrings" --include-package-data=rovr --lto=yes src/rovr --onefile-cache-mode=cached --onefile-child-grace-time=0 --user-package-configuration-file=nuitka.config.yml'
+
 flame.help = "Start rovr with pyinstrument for flamegraph profiling"
 flame.cmd = "pyinstrument --renderer=html --timeline --use-timing-thread --show-all -m rovr"
+
+[tool.poe.tasks.build]
+help = "Build rovr into an executable using Nuitka"
+cmd = 'nuitka --mode=${mode} --assume-yes-for-downloads --enable-plugins=no-qt --python-flag=-m --python-flag="no_docstrings" --include-package-data=rovr --lto=yes src/rovr --onefile-cache-mode=cached --onefile-child-grace-time=0 --user-package-configuration-file=nuitka.config.yml'
+args = [
+  { name = "mode", help = "Build mode: onefile (default) or standalone", default = "onefile", positional = true, choices = ["standalone", "onefile"] }
+]
 
 [tool.ruff]
 force-exclude = true

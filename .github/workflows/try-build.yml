@@ -63,13 +63,26 @@ jobs:
         run: uv sync --upgrade-package nuitka --dev
 
       - name: Build with Nuitka (onefile)
-        run: uv run poe build
+        run: uv run poe build onefile
 
       - name: Upload Executable
         uses: actions/upload-artifact@v4
         with:
           path: ${{ matrix.executable }}
-          name: rovr-${{ matrix.name }}-nuitka
+          name: rovr-${{ matrix.name }}-nuitka-onefile
+          retention-days: 30
+
+      - name: Build with Nuitka (standalone)
+        shell: pwsh
+        run: |
+          Remove-Item -Recurse -Force rovr.dist -ErrorAction SilentlyContinue
+          uv run poe build standalone
+
+      - name: Upload Executable (standalone)
+        uses: actions/upload-artifact@v4
+        with:
+          path: rovr.dist
+          name: rovr-${{ matrix.name }}-nuitka-standalone
           retention-days: 30
 
   notify-nuitka-completion:
@@ -124,6 +137,7 @@ jobs:
 
     runs-on: ${{ matrix.os }}
     name: PyApp Build (${{ matrix.name }})
+    if: false # temporary disable
     steps:
       - uses: actions/checkout@v4
 

@@ -1,10 +1,8 @@
 name: Build with Nuitka and PyApp
 
 on:
-  push:
-    branches: "*"
-  pull_request:
-    branches: "*"
+  schedule:
+    - cron: "0 16 * * 6"
   workflow_dispatch:
 
 jobs:
@@ -31,10 +29,8 @@ jobs:
           - os: macos-15
             name: macos-x64
             executable: rovr.bin
-
     runs-on: ${{ matrix.os }}
     name: Nuitka Build (${{ matrix.name }})
-
     steps:
       - uses: actions/checkout@v4
 
@@ -67,8 +63,7 @@ jobs:
         run: uv sync --upgrade-package nuitka --dev
 
       - name: Build with Nuitka (onefile)
-        run: |
-          uv run poe build
+        run: uv run poe build
 
       - name: Upload Executable
         uses: actions/upload-artifact@v4
@@ -77,15 +72,25 @@ jobs:
           name: rovr-${{ matrix.name }}-nuitka
           retention-days: 30
 
-      - name: Notify Discord
+  notify-nuitka-completion:
+    needs: build-nuitka
+    runs-on: ubuntu-latest
+    name: Notify Nuitka Completion
+    steps:
+      - name: Notify Discord - Nuitka Complete
         uses: sarisia/actions-status-discord@v1.13.0
         with:
           webhook: ${{ secrets.LOG_HOOK }}
-          title: rovr ci build is complete!
+          title: rovr nuitka builds complete!
           status: ${{ job.status }}
           description: |
-            Matrix ${{ matrix.name }} finished compiling!
-            Click [here](https://nightly.link/NSPC911/rovr/actions/runs/${{ github.run_id }}/rovr-${{ matrix.name }}-nuitka.zip) to download!
+            Download artifacts:
+            - [windows-x64](https://nightly.link/NSPC911/rovr/actions/runs/${{ github.run_id }}/rovr-windows-x64-nuitka.zip)
+            - [windows-arm](https://nightly.link/NSPC911/rovr/actions/runs/${{ github.run_id }}/rovr-windows-arm-nuitka.zip)
+            - [linux-x64](https://nightly.link/NSPC911/rovr/actions/runs/${{ github.run_id }}/rovr-linux-x64-nuitka.zip)
+            - [linux-arm64](https://nightly.link/NSPC911/rovr/actions/runs/${{ github.run_id }}/rovr-linux-arm64-nuitka.zip)
+            - [macos-arm64](https://nightly.link/NSPC911/rovr/actions/runs/${{ github.run_id }}/rovr-macos-arm64-nuitka.zip)
+            - [macos-x64](https://nightly.link/NSPC911/rovr/actions/runs/${{ github.run_id }}/rovr-macos-x64-nuitka.zip)
             -# caused by ${{ github.actor }}
           avatar_url: "https://avatars.githubusercontent.com/u/176916861?v=4"
           username: "NSPBot911"
@@ -119,7 +124,6 @@ jobs:
 
     runs-on: ${{ matrix.os }}
     name: PyApp Build (${{ matrix.name }})
-
     steps:
       - uses: actions/checkout@v4
 
@@ -186,3 +190,29 @@ jobs:
           path: pyapp/target/release/${{ matrix.executable }}
           name: rovr-${{ matrix.name }}-pyapp
           retention-days: 30
+
+  notify-pyapp-completion:
+    needs: build-pyapp
+    runs-on: ubuntu-latest
+    name: Notify PyApp Completion
+    steps:
+      - name: Notify Discord - PyApp Complete
+        uses: sarisia/actions-status-discord@v1.13.0
+        with:
+          webhook: ${{ secrets.LOG_HOOK }}
+          title: rovr pyapp builds complete!
+          status: ${{ job.status }}
+          description: |
+            Download artifacts:
+            - [windows-x64](https://nightly.link/NSPC911/rovr/actions/runs/${{ github.run_id }}/rovr-windows-x64-pyapp.zip)
+            - [windows-arm](https://nightly.link/NSPC911/rovr/actions/runs/${{ github.run_id }}/rovr-windows-arm-pyapp.zip)
+            - [linux-x64](https://nightly.link/NSPC911/rovr/actions/runs/${{ github.run_id }}/rovr-linux-x64-pyapp.zip)
+            - [linux-arm64](https://nightly.link/NSPC911/rovr/actions/runs/${{ github.run_id }}/rovr-linux-arm64-pyapp.zip)
+            - [macos-arm64](https://nightly.link/NSPC911/rovr/actions/runs/${{ github.run_id }}/rovr-macos-arm64-pyapp.zip)
+            - [macos-x64](https://nightly.link/NSPC911/rovr/actions/runs/${{ github.run_id }}/rovr-macos-x64-pyapp.zip)
+            -# caused by ${{ github.actor }}
+          avatar_url: "https://avatars.githubusercontent.com/u/176916861?v=4"
+          username: "NSPBot911"
+          nodetail: true
+          notimestamp: true
+          noprefix: true

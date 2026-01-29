@@ -149,6 +149,7 @@ jobs:
         with:
           repository: ofek/pyapp
           path: pyapp
+          ref: 09bfa79cebf2ffc9fb54bda916043ce6165b984a
 
       - name: Get ls
         run: ls

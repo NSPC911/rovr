@@ -1008,6 +1008,7 @@ dependencies = [
     { name = "textual" },
     { name = "textual-autocomplete" },
     { name = "textual-image", extra = ["textual"] },
+    { name = "textual-speedups" },
     { name = "tomli" },
     { name = "ujson" },
 ]
@@ -1022,9 +1023,6 @@ dev = [
     { name = "ruff" },
     { name = "textual-dev" },
     { name = "ty" },
-]
-speedups = [
-    { name = "textual-speedups" },
 ]
 
 [package.metadata]
@@ -1046,6 +1044,7 @@ requires-dist = [
     { name = "textual", specifier = "~=7.0" },
     { name = "textual-autocomplete", specifier = ">=4.0.6" },
     { name = "textual-image", extras = ["textual"], specifier = ">=0.8.4" },
+    { name = "textual-speedups", specifier = ">=0.2.1" },
     { name = "tomli", specifier = ">=2.3.0" },
     { name = "ujson", specifier = ">=5.11.0" },
 ]
@@ -1061,7 +1060,6 @@ dev = [
     { name = "textual-dev", specifier = ">=1.7.0" },
     { name = "ty", specifier = "==0.0.8" },
 ]
-speedups = [{ name = "textual-speedups", specifier = ">=0.2.1" }]
 
 [[package]]
 name = "ruff"

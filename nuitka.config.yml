@@ -1,0 +1,4 @@
+- module-name: 'rich' # checksum: ecf5cc77
+  implicit-imports:
+    - depends:
+        - 'rich._unicode_data.*'

@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+- zip: add additional options for creating an archive 5f26813
+
+### Fixed
+- filelist: fix autofocus not working when the first option needs to be highlighted 2ecb37e
+- filelist: fix crash on entering a directory that cannot be accessed 732c0aa
+
 ## [0.7.0.dev3] - 2026-01-25
 
 ### Added

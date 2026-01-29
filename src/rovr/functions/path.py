@@ -209,15 +209,22 @@ def threaded_get_cwd_object(
     ] = "name",
     reverse: bool = False,
     return_nothing_if_this_returns_true: Callable[[], bool] | None = None,
-) -> tuple[list[CWDObjectReturnDict], list[CWDObjectReturnDict]] | tuple[None, None]:
-    return sync_get_cwd_object(
-        node,
-        cwd,
-        show_hidden,
-        sort_by,
-        reverse,
-        return_nothing_if_this_returns_true,
-    )
+) -> (
+    tuple[list[CWDObjectReturnDict], list[CWDObjectReturnDict]]
+    | tuple[None, None]
+    | PermissionError
+):
+    try:
+        return sync_get_cwd_object(
+            node,
+            cwd,
+            show_hidden,
+            sort_by,
+            reverse,
+            return_nothing_if_this_returns_true,
+        )
+    except PermissionError as exc:
+        return exc
 
 
 @overload
@@ -276,7 +283,6 @@ def sync_get_cwd_object(
         PermissionError: When access to the directory is denied
     """
 
-    # Offload the blocking os.scandir call to a thread pool
     try:
         entries = list(os.scandir(cwd))
     except (PermissionError, FileNotFoundError, OSError):

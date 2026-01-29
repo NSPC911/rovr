@@ -47,6 +47,7 @@ jobs:
             ~/.cache/Nuitka
             ~/AppData/Local/Nuitka/Nuitka
             ~/Library/Caches/Nuitka
+            rovr.build
           key: nuitka-${{ matrix.name }}
           restore-keys: |
             nuitka-${{ matrix.name }}

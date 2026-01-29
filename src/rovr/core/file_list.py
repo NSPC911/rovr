@@ -180,6 +180,8 @@ class FileList(CheckboxRenderingMixin, SelectionList, inherit_bindings=False):
                     await worker.wait()
                 except WorkerError:
                     return
+                if isinstance(worker.result, PermissionError):
+                    raise worker.result
                 folders, files = cast(
                     tuple[
                         list[path_utils.CWDObjectReturnDict],

@@ -403,6 +403,9 @@ Tooltip {
     border: none;
     padding: 0;
     margin: 0;
+    &.-maximized {
+      border: $border-style $border
+    }
     &Static {
       padding: 0 1;
       scrollbar-size: 0 0;

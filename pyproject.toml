@@ -50,6 +50,7 @@ rovr = "rovr:main"
 [dependency-groups]
 dev = [
   "json-schema-for-humans>=1.5.1",
+  "nuitka>=2.8.9",
   "poethepoet>=0.38.0",
   "prek>=0.2.25",
   "ruff>=0.14.10",
@@ -57,6 +58,7 @@ dev = [
   "ty==0.0.8",
   "pyinstrument>=5.1.2",
   "commitizen>=4.10.0",
+  "zstandard>=0.25.0",
 ]
 
 [build-system]
@@ -65,6 +67,9 @@ build-backend = "uv_build"
 
 [tool.uv]
 compile-bytecode = true
+
+[tool.uv.sources]
+nuitka = { git = "https://github.com/Nuitka/Nuitka", rev = "factory" }
 
 [tool.commitizen]
 name = "cz_conventional_commits"
@@ -75,21 +80,41 @@ update_changelog_on_bump = true
 major_version_zero = true
 
 [tool.poe.tasks]
-dev = "textual run --dev rovr.__main__:cli --"
-run = "rovr"
-log = "textual console -x WORKER -x SYSTEM -x DEBUG -x EVENT"
-gen-schema = "docs/scripts/generate_schema.py"
-icon-test = "docs/scripts/icon_test.py"
-gen-keys = "docs/scripts/generate_keybinds.py"
-check.sequence = [
-  { cmd = "ty check" },
-  { cmd = "ruff check" }
+run.help = "Run rovr"
+run.cmd = "rovr"
+dev.help = "Run rovr in development mode with textual-dev"
+dev.cmd = "textual run --dev rovr.__main__:cli --"
+log.help = "Launch textual's console (need rovr to be launched as dev)"
+log.cmd = "textual console -x WORKER -x SYSTEM -x DEBUG -x EVENT"
+
+gen-schema.help = "Generate the JSON schema for rovr's config"
+gen-schema.cmd = "docs/scripts/generate_schema.py"
+icon-test.help = "Print all available icons to the terminal for testing"
+icon-test.cmd = "docs/scripts/icon_test.py"
+gen-keys.help = "Generate the keybinds documentation"
+gen-keys.cmd = "docs/scripts/generate_keybinds.py"
+check.help = "Run all checks (type checking and linting)"
+check.sequence = [ { cmd = "ty check" },{ cmd = "ruff check" } ]
+
+format.help = "Run ruff related formatters"
+format.sequence = [ { cmd = "ruff check --unsafe-fixes --fix"}, { cmd = "ruff format"} ]
+fmt.help = "(alias) Run ruff related formatters"
+fmt.sequence = ["format"]
+
+screenshot-format.help = "Format all SVG screenshots in the docs"
+screenshot-format.cmd = 'pnpx prettier --write "docs/public/screenshots/*.svg" --parser html --bracket-same-line --print-width 160'
+svg-fmt.help = "(alias) Format all SVG files in the docs"
+svg-fmt.sequence = ["screenshot-format"]
+
+flame.help = "Start rovr with pyinstrument for flamegraph profiling"
+flame.cmd = "pyinstrument --renderer=html --timeline --use-timing-thread --show-all -m rovr"
+
+[tool.poe.tasks.build]
+help = "Build rovr into an executable using Nuitka"
+cmd = 'nuitka --mode=${mode} --assume-yes-for-downloads --enable-plugins=no-qt --python-flag=-m --python-flag="no_docstrings" --include-package-data=rovr --lto=yes src/rovr --onefile-cache-mode=cached --onefile-child-grace-time=0 --user-package-configuration-file=nuitka.config.yml'
+args = [
+  { name = "mode", help = "Build mode: onefile (default) or standalone", default = "onefile", positional = true, choices = ["standalone", "onefile"] }
 ]
-format.sequence = [{ cmd = "ruff check --unsafe-fixes --fix"}, { cmd = "ruff format"}]
-fmt = ["format"]
-screenshot-format = "pnpx prettier --write docs/public/screenshots/*.svg --parser html --bracket-same-line --print-width 160"
-flame = "pyinstrument --renderer=html --timeline --use-timing-thread --show-all -m rovr"
-screen-test = "textual run rovr.screens.__main__"
 
 [tool.ruff]
 force-exclude = true

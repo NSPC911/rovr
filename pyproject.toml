@@ -1,6 +1,6 @@
 [project]
 name = "rovr"
-version = "0.7.0.dev3"
+version = "0.7.0"
 description = "A post-modern terminal file explorer"
 readme = "README.md"
 requires-python = ">=3.12, <3.14"

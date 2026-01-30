@@ -94,10 +94,12 @@ Center.settings-editor {
     margin-top: 1;
   }
   Input {
+    scrollbar-size: 0 0;
     border: $border-blurred round;
     background: transparent;
     margin: 0 1;
     width: 1fr !important;
+    padding: 0 1;
     &:focus {
       border: $border round;
     }
@@ -113,8 +115,6 @@ FinalStuff {
   align: center middle !important;
   .modal-wrapper {
     padding: 1 2;
-    height: 50vh !important;
-    width: 50vw !important;
     border: $border round;
     Static {
       margin-bottom: 1;
@@ -124,6 +124,18 @@ FinalStuff {
     }
     Button {
       width: 1fr;
+    }
+  }
+  HorizontalGroup {
+    width: 1fr;
+    Button {
+      width: 0.75fr;
+      &:first-child {
+        margin-right: 3;
+      }
+      &:last-child {
+        margin-left: 3;
+      }
     }
   }
 }
@@ -171,15 +183,15 @@ Screen {
   align: center top;
 
   &.-full {
-    width: 100vw !important;
+    width: 1fr !important;
     max-width: 100vw !important;
 
     & > * {
-      width: 100vw;
+      width: 1fr;
     }
 
     .modal-wrapper {
-      height: 100vh
+      height: 1fr
     }
 
     #reactive_layout > Static {

@@ -617,6 +617,7 @@ class PreviewContainer(Container):
                         )
                         start_time = time()
                         if should_cancel():
+                            loading_timer.stop()
                             return
         except PermissionError:
             options = [
@@ -627,10 +628,11 @@ class PreviewContainer(Container):
                     disabled=True,
                 )
             ]
+        loading_timer.stop()
         if should_cancel():
             return
+        self.call_next(setattr, self, "border_subtitle", "")
         self.app.call_from_thread(this_list.set_options, options)
-        self.app.call_from_thread(setattr, self, "border_subtitle", "")
 
     def show_archive_preview(self) -> None:
         """Show archive preview."""
@@ -797,7 +799,7 @@ class PreviewContainer(Container):
 
                 if file_type == "archive":
                     try:
-                        with Archive(file_path, "r") as archive:
+                        with Archive(file_path, mode="r") as archive:
                             all_files = []
                             for member in archive.infolist():
                                 if should_cancel():
@@ -843,9 +845,9 @@ class PreviewContainer(Container):
             if should_cancel():
                 return
         except Exception as exc:
-            self.app.call_from_thread(
-                self.notify,
+            self.notify(
                 f"{type(exc).__name__} was raised while generating the preview",
+                severity="error",
             )
             path_utils.dump_exc(self, exc)
 

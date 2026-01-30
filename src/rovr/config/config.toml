@@ -35,7 +35,7 @@ enabled = true
 align = "left"
 
 [interface.compact_mode]
-buttons = false
+buttons = true
 panels = false
 
 [interface.mime_rules]

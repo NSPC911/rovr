@@ -4,7 +4,7 @@ import tarfile
 import time
 import zipfile
 from os import path
-from typing import Callable, cast
+from typing import Callable, Literal, cast
 
 from send2trash import send2trash
 from textual import events, work
@@ -452,7 +452,13 @@ class ProcessContainer(VerticalScroll):
             raise
 
     @work(thread=True)
-    def create_archive(self, files: list[str], archive_name: str) -> None:
+    def create_archive(
+        self,
+        files: list[str],
+        archive_name: str,
+        algo: Literal["zip", "tar", "tar.gz", "tar.bz2", "tar.xz", "tar.zst"],
+        level: int,
+    ) -> None:
         """
         Compress files into an archive.
 
@@ -489,7 +495,7 @@ class ProcessContainer(VerticalScroll):
             base_path = path.commonpath(files)
 
         try:
-            with Archive(archive_name, "w") as archive:
+            with Archive(archive_name, algo, "w", level) as archive:
                 assert archive._archive is not None
                 last_update_time = time.monotonic()
                 for i, file_path in enumerate(files_to_archive):
@@ -568,7 +574,7 @@ class ProcessContainer(VerticalScroll):
             if not path.exists(destination_path):
                 os.makedirs(destination_path)
 
-            with Archive(archive_path, "r") as archive:
+            with Archive(archive_path, mode="r") as archive:
                 file_list = archive.infolist()
                 self.app.call_from_thread(bar.update_progress, total=len(file_list) + 1)
 

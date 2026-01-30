@@ -13,6 +13,7 @@ from textual.screen import Screen
 from textual.widgets import Button
 
 from rovr.screens import (
+    ArchiveCreationScreen,
     CommonFileNameDoWhat,
     DeleteFiles,
     Dismissable,
@@ -51,6 +52,7 @@ class Test(App):
         yield Button("File In Use", id="FileInUse")
         yield Button("Paste Screen", id="PasteScreen")
         yield Button("Yes Or No", id="YesOrNo")
+        yield Button("Zip Up Screen", id="ArchiveCreationScreen")
 
     @on(Button.Pressed, "#CommonFileNameDoWhat")
     def common_file_name_do_what(self) -> None:
@@ -123,6 +125,16 @@ class Test(App):
             callback=lambda result: self.notify(str(result)),
         )
 
+    @on(Button.Pressed, "#ArchiveCreationScreen")
+    def archive_creation_screen(self) -> None:
+        self.push_screen(
+            ArchiveCreationScreen(
+                initial_value="archive.zip",
+                is_path=True,
+            ),
+            callback=lambda result: self.notify(str(result)),
+        )
+
     def get_system_commands(self, screen: Screen) -> Iterable[SystemCommand]:
         if not self.ansi_color:
             yield SystemCommand(
@@ -153,19 +165,18 @@ class Test(App):
             lambda: self.set_timer(0.1, self.deliver_screenshot),
         )
 
-        if len(self.screen_stack) <= 2:
-            if self.ansi_color:
-                yield SystemCommand(
-                    "Disable Transparent Theme",
-                    "Go back to an opaque background.",
-                    lambda: self.call_later(self._toggle_transparency),
-                )
-            else:
-                yield SystemCommand(
-                    "Enable Transparent Theme",
-                    "Have a transparent background.",
-                    lambda: self.call_later(self._toggle_transparency),
-                )
+        if self.ansi_color:
+            yield SystemCommand(
+                "Disable Transparent Theme",
+                "Go back to an opaque background.",
+                lambda: self.call_later(self._toggle_transparency),
+            )
+        else:
+            yield SystemCommand(
+                "Enable Transparent Theme",
+                "Have a transparent background.",
+                lambda: self.call_later(self._toggle_transparency),
+            )
 
     async def _on_css_change(self) -> None:
         if self.css_monitor is not None:

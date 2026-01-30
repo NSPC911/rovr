@@ -12,7 +12,10 @@ the current file structure separates each section into its own folder
 <FileTree>
 - src/rovr
   - app.py houses the main application
+  - first_launch.py handles first launch tasks
+  - first_launch.tcss styles for first launch
   - py.typed
+  - state_manager.py manages persistent state
   - style.tcss default style
 </FileTree>
 
@@ -21,7 +24,6 @@ the current file structure separates each section into its own folder
 <FileTree>
 - src/rovr/action_buttons
   - copy_button.py copy selections to clipboard
-  - copy_path.py copy path of selected item to real clipboard
   - cut_button.py cut selections to clipboard
   - delete_button.py delete selections
   - new_item_button.py create new item
@@ -38,6 +40,7 @@ the current file structure separates each section into its own folder
 - src/rovr/classes
   - archive.py classes for handling archives
   - exceptions.py custom exceptions that are raised where necessary
+  - mixins.py mixin classes for reuse
   - session_manager.py a class for managing session state
   - textual_options.py classes for option/selection elements
   - textual_validators.py validations for input elements
@@ -50,6 +53,7 @@ the current file structure separates each section into its own folder
 - src/rovr/components
   - popup_option_list.py for popup selectors
   - search_container.py used for fuzzy searching
+  - special_option_list.py just a really special option list
 </FileTree>
 
 ### config
@@ -60,6 +64,9 @@ the current file structure separates each section into its own folder
   - migration.json shows appropriate messages for removed features
   - pins.json default pins
   - schema.json schema for reference
+  - keybinds
+    - sane.toml sane default keybinds
+    - vim.toml vim-like keybinds
 </FileTree>
 
 ### core
@@ -90,9 +97,11 @@ handles the bottom row
 <FileTree>
 - src/rovr/functions
   - config.py functions for loading and validating the config
+  - folder_prefs.py functions for managing folder sort preferences
   - icons.py functions for getting icons
   - path.py functions for path manipulation
   - pins.py functions for managing pins
+  - system_clipboard.py functions for copying to the system clipboard
   - themes.py theme loader
   - utils.py miscellaneous utility functions
 </FileTree>
@@ -105,6 +114,16 @@ handles the top most row
 - src/rovr/header
   - header.py the header container itself
   - tabs.py the tabs and new tab button
+</FileTree>
+
+### monkey patches
+
+handles monkey patches whenever necessary
+
+<FileTree>
+- src/rovr/monkey_patches
+  - puremagic_patch.py patches for puremagic
+  - magic_data.json slightly modified puremagic data file
 </FileTree>
 
 ### navigation widgets
@@ -123,14 +142,18 @@ handles the modal screens used
 
 <FileTree>
 - src/rovr/screens
-  - _tester.py screen tester, not used at all
+  - __main__.py screen tester, not used at all
+  - archive_creator.py screen for creating archives
   - common_file_name_do_what.py when a conflicting file exists
   - delete_files.py when you want to delete files
   - dismissable.py dismissable modal, for notices
+  - fd_search.py used for integration with fd
   - file_in_use.py shown when trying to delete a file that is being used
-  - file_search.py used for integration with fd
   - input.py modal input, also supporting path input
   - keybinds.py show all keybindings
+  - paste_screen.py screen shown when pasting files
+  - rg_search.py used for integration with ripgrep
+  - typed.py type hints for certain return values
   - way_too_small.py screen shown when window is too small
   - yes_or_no.py simple yes or no prompt
   - zd_to_directory.py zoxide integration

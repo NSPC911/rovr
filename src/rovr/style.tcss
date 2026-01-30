@@ -33,6 +33,9 @@ $scrollbar-corner-color: $primary-muted;
     scrollbar-background-hover: $scrollbar-background;
     scrollbar-background-active: $scrollbar-background;
   }
+  &:disabled {
+    scrollbar-size: 0 0;
+  }
 }
 
 Screen.-all-horizontal.compact-buttons {
@@ -60,7 +63,8 @@ PopupOptionList,
 .comfy-buttons #path_switcher,
 .comfy-buttons #below_menu Button,
 PasteScreen OptionList,
-DeleteFiles OptionList {
+DeleteFiles OptionList,
+ArchiveCreationScreen OptionList {
   background: transparent;
   border: $border-style $border-blurred;
   border-subtitle-color: $background;
@@ -105,7 +109,8 @@ PopupOptionList,
 .comfy-buttons #below_menu Button:focus,
 .comfy-buttons #below_menu Button:hover,
 PasteScreen OptionList,
-DeleteFiles OptionList {
+DeleteFiles OptionList,
+ArchiveCreationScreen OptionList:focus {
   border: $border-style $border;
   border-subtitle-background: $border;
   &:ansi {
@@ -398,6 +403,9 @@ Tooltip {
     border: none;
     padding: 0;
     margin: 0;
+    &.-maximized {
+      border: $border-style $border
+    }
     &Static {
       padding: 0 1;
       scrollbar-size: 0 0;
@@ -483,7 +491,8 @@ FileSearchToggles, FileSearchOptionList,
 ContentSearchToggles, ContentSearchOptionList,
 KeybindList,
 PasteScreen OptionList,
-DeleteFiles OptionList {
+DeleteFiles OptionList,
+ArchiveCreationScreen OptionList {
   padding: 0 0 0 0;
   background-tint: ansi_default !important;
   .option-list--separator { color: $foreground }
@@ -575,7 +584,8 @@ ModalScreen Button:ansi {
 
 ZDToDirectory,
 FileSearch,
-ContentSearch {
+ContentSearch,
+ArchiveCreationScreen {
   align: center middle;
   layout: horizontal;
   & > VerticalGroup {
@@ -599,7 +609,8 @@ ContentSearch {
       border: $border-style $border-blurred;
     }
     &:focus-within {
-      OptionList {
+      OptionList,
+      RadioList {
         border: $border-style $border;
         .option-list--option-highlighted {
           background: $primary !important;
@@ -805,7 +816,7 @@ DeleteFiles {
 }
 
 ModalInput {
-  HorizontalGroup {
+  #modalInput_group {
     border: $border-style $border;
     width: 50vw;
     max-height: 3;
@@ -821,6 +832,7 @@ ModalInput {
     width: 1fr;
   }
   Label { height: 1 }
+  Label.arrow { color: $border }
 }
 
 TerminalTooSmall {
@@ -845,7 +857,6 @@ TerminalTooSmall {
   }
 }
 
-
 CommandPalette {
   align: center middle;
   CommandList {
@@ -866,6 +877,34 @@ CommandPalette {
   #--input { border: $border-style $border }
   #--input.--list-visible { border-bottom: none }
   LoadingIndicator { border-bottom: $border-style $border }
+}
+
+ArchiveCreationScreen {
+  layout: vertical;
+  grid-size: 2 2;
+  grid-rows: 3 1fr;
+  #modalInput_group {
+    border: $border-style $border-blurred;
+    width: 50vw;
+    max-height: 3;
+    background: transparent !important;
+    border-title-align: left;
+    border-subtitle-align: right;
+    column-span: 2;
+    &.invalid { border: $border-style $error }
+    &:light { border: $border-style $error }
+    &:focus-within { border: $border-style $border }
+    &.invalid:focus-within { border: $border-style $error-lighten-3 }
+  }
+  HorizontalGroup {
+    width: 50vw;
+    OptionList {
+      height: 8;
+    }
+  }
+  ArchiveCompression:disabled {
+    border: $border-style $error !important;
+  }
 }
 
 PopupOptionList { width: auto }
@@ -1058,7 +1097,8 @@ Screen {
 FileList .option-list--option-highlighted,
 Clipboard .option-list--option-highlighted,
 DeleteFiles OptionList .option-list--option-highlighted,
-PasteScreen OptionList .option-list--option-highlighted {
+PasteScreen OptionList .option-list--option-highlighted,
+ArchiveCreationScreen OptionList .option-list--option-highlighted {
   color: $block-cursor-background;
   background: transparent;
   text-style: bold;

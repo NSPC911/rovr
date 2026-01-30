@@ -10,7 +10,7 @@ import InlineSVG from "@/components/InlineSVG.astro";
 
 - a patched font that supports nerd font icons
   <br />
-  if you dont have any supported fonts, get one from
+  if you don't have any supported fonts, get one from
   [nerdfonts.com](https://www.nerdfonts.com/font-downloads) for the best
   experience.
   <br />
@@ -64,3 +64,20 @@ rovr --version
 to see the current version installed
 
 ![version](/rovr/screenshots/version.png)
+
+you can then start the installation by just invoking
+```sh
+rovr
+```
+If you dont see something like this
+<InlineSVG src="/rovr/screenshots/install-helper.svg" alt="install helper" />
+you can force the install helper by running
+```sh
+rovr --force-first-launch
+```
+
+you can make the changes you want (optionally, hover over certain options to see a tooltip explaining what it does)
+
+once done, you can press the big green button at the end, take a final glance at your config, before it writes it down.
+
+You finally installed rovr!

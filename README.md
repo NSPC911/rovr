@@ -13,7 +13,7 @@
 </div>
 
 > [!warning]
-> This project is in its very early stages. While this can be daily driven, expect some issues here and there.
+> This project is considered beta software. It is functional, but may contain bugs and incomplete features. Use at your own risk.
 
 <!--toc:start-->
 - [Screenshot](#screenshot)

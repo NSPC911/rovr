@@ -23,6 +23,7 @@ from textual.containers import (
     HorizontalGroup,
     ScrollableContainer,
     VerticalGroup,
+    VerticalScroll,
 )
 from textual.css.query import NoMatches
 from textual.screen import ModalScreen
@@ -79,17 +80,41 @@ class FinalStuff(ModalScreen[None]):
         super().__init__()
 
     def compose(self) -> ComposeResult:
-        with Container(classes="modal-wrapper"):
+        with VerticalScroll(classes="modal-wrapper"):
             yield Static("Done! You can now exit the app via the big red button!")
             yield Static(
                 Text.from_markup(
                     "Make sure to [link=https://github.com/NSPC911/rovr][u]star the repo[/][/link] or [u][link=https://nspc911.github.io/rovr]visit the documentation[/link][/] for more information!"
                 )
             )
+            yield Static("This app will exit in 5 seconds...", id="countdown")
             yield Static(classes="padding")
-            yield Button("Bye!", variant="error")
+            with HorizontalGroup():
+                yield Button("Bye!", variant="error", id="bye")
+                yield Button("Not yet!", variant="primary", id="not-yet")
 
-    def on_button_pressed(self, event: Button.Pressed) -> None:
+    def on_mount(self) -> None:
+        self.hide_in_five()
+
+    @work
+    async def hide_in_five(self) -> None:
+        for i in range(4, -1, -1):
+            await sleep(1)
+            self.query_one("#countdown", Static).update(
+                f"This app will exit in {i} second{'s' if i != 1 else ''}..."
+            )
+        await sleep(0.5)
+        self.app.exit(0)
+
+    @on(Button.Pressed, "#not-yet")
+    def bye(self, event: Button.Pressed) -> None:
+        self.dismiss()
+
+    @on(Button.Pressed, "#bye")
+    @on(events.Key)
+    def die(self, event: Button.Pressed | events.Key) -> None:
+        if isinstance(event, events.Key) and event.key != "escape":
+            return
         self.app.exit(0)
 
 
@@ -218,7 +243,7 @@ class FirstLaunchApp(App, inherit_bindings=False):
         yield Static(classes="padding")
         with Center(classes="compact-things"):
             with HorizontalGroup(id="compact-buttons"):
-                yield Switch(value=False, id="compact_buttons")
+                yield Switch(value=True, id="compact_buttons")
                 yield Static("Use compact header")
             with HorizontalGroup(id="compact-panels"):
                 yield Switch(value=False, id="compact_panels")

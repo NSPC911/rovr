@@ -1,5 +1,4 @@
 from asyncio import sleep
-from pathlib import Path
 from typing import ClassVar, Iterable, Literal, Self
 
 from pathvalidate import sanitize_filepath
@@ -71,8 +70,8 @@ class ArchiveCompression(CheckboxRenderingMixin, SelectionList, inherit_bindings
 
     def __init__(self) -> None:
         super().__init__(
-            # default 1-10
-            *[Selection(str(level), value=str(level)) for level in range(1, 10)],
+            # default 0-10
+            *[Selection(str(level), value=str(level)) for level in range(0, 10)],
             id="archive_compression_toggles",
         )
 
@@ -206,7 +205,7 @@ class ArchiveCreationScreen(ModalInput):
     def zip_type_toggled(self, event: ArchiveTypes.SelectionToggled) -> None:
         """Handle zip type selection toggling."""
         input_widget = self.query_one(Input)
-        base = Path(input_widget.value).stem
+        base = ".".join(input_widget.value.split(".")[:-1])
         if base.endswith(".tar"):
             base = ".".join(base.split(".")[:-1])
         input_widget.value = f"{base}.{event.selection.value}"

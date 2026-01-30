@@ -332,6 +332,9 @@ example_function(10)"""
 
         FirstLaunchApp().run()
 
+    if force_first_launch:
+        return
+
     # start separate thread for platform to cache
     threading.Thread(target=platform.system, daemon=True).start()
 

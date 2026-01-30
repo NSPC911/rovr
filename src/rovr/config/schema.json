@@ -128,7 +128,7 @@
           "properties": {
             "buttons": {
               "type": "boolean",
-              "default": false,
+              "default": true,
               "description": "Whether to compact the buttons and path input to one line instead of three."
             },
             "panels": {

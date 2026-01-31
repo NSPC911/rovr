@@ -1,6 +1,6 @@
 import os
 import shutil
-import tarfile
+import sys
 import time
 import zipfile
 from os import path
@@ -26,6 +26,11 @@ from rovr.screens import (
     typed,
 )
 from rovr.variables.constants import config, os_type, scroll_vindings
+
+if sys.version_info.major == 3 and sys.version_info.minor <= 13:
+    from backports.zstd import tarfile
+else:
+    import tarfile
 
 
 class ThickBar(BarRenderable):

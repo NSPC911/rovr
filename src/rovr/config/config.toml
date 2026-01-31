@@ -44,6 +44,7 @@ panels = false
 "application/pdf" = "pdf"
 "application/zip" = "archive"
 "application/gzip" = "archive"
+"application/zstd" = "archive"
 "application/bzip2" = "archive"
 "application/xz" = "archive"
 "application/x-tar" = "archive"

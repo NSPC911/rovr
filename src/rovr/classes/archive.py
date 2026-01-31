@@ -10,11 +10,8 @@ from typing import IO, List, Literal, NamedTuple
 
 import rarfile
 
-if sys.version_info <= (3, 13):
-    try:
-        from backports.zstd import tarfile
-    except ModuleNotFoundError:
-        import tarfile
+if sys.version_info.major == 3 and sys.version_info.minor <= 13:
+    from backports.zstd import tarfile
 else:
     import tarfile
 

@@ -48,9 +48,12 @@ Documentation = "https://nspc911.github.io/rovr"
 rovr = "rovr:main"
 
 [dependency-groups]
+build = [
+  "nuitka",
+  "zstandard>=0.25.0",
+]
 dev = [
   "json-schema-for-humans>=1.5.1",
-  "nuitka>=2.8.9",
   "poethepoet>=0.38.0",
   "prek>=0.2.25",
   "ruff>=0.14.10",
@@ -58,7 +61,6 @@ dev = [
   "ty==0.0.8",
   "pyinstrument>=5.1.2",
   "commitizen>=4.10.0",
-  "zstandard>=0.25.0",
 ]
 
 [build-system]

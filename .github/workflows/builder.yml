@@ -80,7 +80,7 @@ jobs:
             venv-${{ matrix.name }}
 
       - name: Ensure latest factory version of nuitka
-        run: uv sync --upgrade-package nuitka --dev
+        run: uv sync --upgrade-package nuitka --no-dev --group build
 
       - name: Build with Nuitka
         shell: pwsh

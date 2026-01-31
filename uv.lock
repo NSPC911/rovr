@@ -1019,17 +1019,19 @@ dependencies = [
 ]
 
 [package.dev-dependencies]
+build = [
+    { name = "nuitka" },
+    { name = "zstandard" },
+]
 dev = [
     { name = "commitizen" },
     { name = "json-schema-for-humans" },
-    { name = "nuitka" },
     { name = "poethepoet" },
     { name = "prek" },
     { name = "pyinstrument" },
     { name = "ruff" },
     { name = "textual-dev" },
     { name = "ty" },
-    { name = "zstandard" },
 ]
 
 [package.metadata]
@@ -1057,17 +1059,19 @@ requires-dist = [
 ]
 
 [package.metadata.requires-dev]
+build = [
+    { name = "nuitka", git = "https://github.com/Nuitka/Nuitka?rev=factory" },
+    { name = "zstandard", specifier = ">=0.25.0" },
+]
 dev = [
     { name = "commitizen", specifier = ">=4.10.0" },
     { name = "json-schema-for-humans", specifier = ">=1.5.1" },
-    { name = "nuitka", git = "https://github.com/Nuitka/Nuitka?rev=factory" },
     { name = "poethepoet", specifier = ">=0.38.0" },
     { name = "prek", specifier = ">=0.2.25" },
     { name = "pyinstrument", specifier = ">=5.1.2" },
     { name = "ruff", specifier = ">=0.14.10" },
     { name = "textual-dev", specifier = ">=1.7.0" },
     { name = "ty", specifier = "==0.0.8" },
-    { name = "zstandard", specifier = ">=0.25.0" },
 ]
 
 [[package]]

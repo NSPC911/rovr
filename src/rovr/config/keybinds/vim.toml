@@ -1,6 +1,7 @@
-# Vim keybinds profile for rovr
-# This profile uses vim-style keyboard shortcuts familiar to vim users.
-# Uses h/j/k/l for navigation and vim-style shortcuts for common actions.
+# vim stuff
+
+[settings.bulk_rename]
+show_as_mapping = false
 
 [keybinds]
 toggle_pin = ["P"]

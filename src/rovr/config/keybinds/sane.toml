@@ -1,5 +1,7 @@
-# Sane keybinds profile for rovr
-# This profile uses standard keyboard shortcuts familiar to most users via explorer.exe
+# Sane stuff
+
+[settings.bulk_rename]
+show_as_mapping = true
 
 [keybinds]
 toggle_pin = ["P"]

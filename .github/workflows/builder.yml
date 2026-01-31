@@ -1,9 +1,9 @@
 name: Build with Nuitka and PyApp
 
 on:
-  # run every day as well
+  # run every 3 days
   schedule:
-    - cron: "0 0 * * *"
+    - cron: "0 0 */3 * *"
   workflow_dispatch:
 
 jobs:

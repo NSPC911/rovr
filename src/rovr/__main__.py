@@ -1,8 +1,8 @@
 import os
 import platform
 import sys
-import threading
 from io import TextIOWrapper
+from multiprocessing import Process
 
 import rich_click as click
 from rich import box
@@ -336,7 +336,8 @@ example_function(10)"""
         return
 
     # start separate thread for platform to cache
-    threading.Thread(target=platform.system, daemon=True).start()
+    platproc = Process(target=platform.system)
+    platproc.start()
 
     from rovr.functions.utils import set_nested_value
     from rovr.variables.constants import config
@@ -413,6 +414,7 @@ example_function(10)"""
         print(
             "Error: rovr needs a TTY to run in application.",
         )
+    platproc.join()
 
 
 if __name__ == "__main__":

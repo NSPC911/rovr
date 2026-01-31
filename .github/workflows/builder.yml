@@ -7,7 +7,25 @@ on:
   workflow_dispatch:
 
 jobs:
+  starting-build:
+    runs-on: ubuntu-slim
+    name: Notify Nuitka Completion
+    steps:
+      - name: Notify Discord - Nuitka Build Starting
+        uses: sarisia/actions-status-discord@v1.13.0
+        with:
+          webhook: ${{ secrets.LOG_HOOK }}
+          title: rovr nuitka builds starting!
+          color: 0xFFFF00
+          description: "Build started by ${{ github.actor }}"
+          avatar_url: "https://avatars.githubusercontent.com/u/176916861?v=4"
+          username: "NSPBot911"
+          nodetail: true
+          notimestamp: true
+          noprefix: true
+
   build-nuitka:
+    needs: starting-build
     strategy:
       fail-fast: false
       matrix:
@@ -79,7 +97,7 @@ jobs:
 
   notify-nuitka-completion:
     needs: build-nuitka
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-slim
     name: Notify Nuitka Completion
     steps:
       - name: Notify Discord - Nuitka Complete

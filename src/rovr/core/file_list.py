@@ -1,4 +1,3 @@
-import contextlib
 from os import getcwd, path
 from typing import ClassVar, Iterable, Self, Sequence, cast
 
@@ -7,7 +6,6 @@ from textual.binding import BindingType
 from textual.content import ContentText
 from textual.css.query import NoMatches
 from textual.geometry import Region
-from textual.reactive import reactive
 from textual.style import Style as TextualStyle
 from textual.widgets import Button, Input, OptionList, SelectionList
 from textual.widgets.option_list import Option, OptionDoesNotExist
@@ -25,7 +23,6 @@ from rovr.functions import utils
 from rovr.navigation_widgets import PathInput
 from rovr.state_manager import StateManager
 from rovr.variables.constants import (
-    SortByOptions,
     buttons_that_depend_on_path,
     config,
     vindings,
@@ -38,9 +35,6 @@ class FileList(CheckboxRenderingMixin, SelectionList, inherit_bindings=False):
     """
 
     BINDINGS: ClassVar[list[BindingType]] = list(vindings)
-
-    sort_by: reactive[SortByOptions] = reactive("name")
-    sort_descending: reactive[bool] = reactive(False)
 
     def __init__(
         self,
@@ -69,18 +63,6 @@ class FileList(CheckboxRenderingMixin, SelectionList, inherit_bindings=False):
     def on_mount(self) -> None:
         if not self.dummy and self.parent:
             self.input: Input = self.parent.query_one(Input)
-
-    def watch_sort_by(self, value: SortByOptions) -> None:
-        with contextlib.suppress(NoMatches):
-            state_manager = self.app.query_one("StateManager", StateManager)
-            if state_manager.sort_by != value:
-                state_manager.sort_by = value
-
-    def watch_sort_descending(self, value: bool) -> None:
-        with contextlib.suppress(NoMatches):
-            state_manager = self.app.query_one("StateManager", StateManager)
-            if state_manager.sort_descending != value:
-                state_manager.sort_descending = value
 
     @property
     def highlighted_option(self) -> FileListSelectionWidget | None:
@@ -145,6 +127,11 @@ class FileList(CheckboxRenderingMixin, SelectionList, inherit_bindings=False):
             focus_on (str | None): A custom item to set the focus as.
         """
         cwd = path_utils.normalise(getcwd())
+
+        # Query StateManager for sort preferences
+        state_manager = self.app.query_one("StateManager", StateManager)
+        sort_by, sort_descending = state_manager.get_sort_prefs(cwd)
+
         # get sessionstate
         try:
             session: SessionManager = self.app.tabWidget.active_tab.session
@@ -173,8 +160,8 @@ class FileList(CheckboxRenderingMixin, SelectionList, inherit_bindings=False):
                     self,
                     cwd,
                     config["interface"]["show_hidden_files"],
-                    sort_by=self.sort_by,
-                    reverse=self.sort_descending,
+                    sort_by=sort_by,
+                    reverse=sort_descending,
                 )
                 try:
                     await worker.wait()

@@ -209,12 +209,6 @@ sort_descending = {str(self.sort_descending).lower()}
             set_folder_pref(self._current_folder, value, self.sort_descending)
         else:
             self._save_state()
-        # Update file list with new sort order
-        with suppress(NoMatches):
-            file_list = self.app.file_list
-            if file_list.sort_by != value:
-                file_list.sort_by = value
-            file_list.update_file_list(add_to_session=False)
         # Update sort button icon
         with suppress(NoMatches):
             self.app.query_one("#sort_order").update_icon()
@@ -227,11 +221,6 @@ sort_descending = {str(self.sort_descending).lower()}
             set_folder_pref(self._current_folder, self.sort_by, value)
         else:
             self._save_state()
-        with suppress(NoMatches):
-            file_list = self.app.file_list
-            if file_list.sort_descending != value:
-                file_list.sort_descending = value
-            file_list.update_file_list(add_to_session=False)
         # Update sort button icon
         with suppress(NoMatches):
             self.app.query_one("#sort_order").update_icon()
@@ -263,8 +252,11 @@ sort_descending = {str(self.sort_descending).lower()}
 
     def apply_folder_sort_prefs(self, folder_path: str) -> None:
         """
-        Apply folder-specific sort preferences if they exist.
-        Otherwise, keep the global sort settings.
+        Load folder-specific sort preferences if they exist.
+        Otherwise, use the global sort settings.
+
+        Note: This method only updates StateManager's internal state.
+        FileList will query the preferences when it needs them via get_sort_prefs().
 
         Args:
             folder_path: The path to the folder being navigated to.
@@ -272,20 +264,21 @@ sort_descending = {str(self.sort_descending).lower()}
         self._current_folder = normalise(folder_path)
         folder_pref = get_folder_pref(self._current_folder)
 
+        self._is_loading = True  # Prevent watchers during state load
+
         if folder_pref:
             # Folder has custom sort preferences
-            self._is_loading = True  # Prevent triggering watchers while loading
             self.custom_sort_enabled = True
             if self.sort_by != folder_pref["sort_by"]:
                 self.sort_by = folder_pref["sort_by"]
             if self.sort_descending != folder_pref["sort_descending"]:
                 self.sort_descending = folder_pref["sort_descending"]
-            self._is_loading = False
         else:
             # No custom preferences, use global settings
             self.custom_sort_enabled = False
-            # Reload global state to ensure we're using global sort settings
             self._apply_global_sort()
+
+        self._is_loading = False
 
     def _apply_global_sort(self) -> None:
         """Apply the global sort settings from state.toml."""
@@ -338,3 +331,58 @@ sort_descending = {str(self.sort_descending).lower()}
 
     def get_current_folder(self) -> str:
         return self._current_folder
+
+    def get_sort_prefs(
+        self, folder_path: str | None = None
+    ) -> tuple[SortByOptions, bool]:
+        """
+        Get the sort preferences for a specific folder.
+
+        Args:
+            folder_path: The path to query. If None, uses the current folder.
+
+        Returns:
+            A tuple of (sort_by, sort_descending).
+            Returns folder-specific preferences if they exist, otherwise global preferences.
+        """
+        if folder_path is None:
+            folder_path = self._current_folder
+
+        if not folder_path:
+            # No folder specified, return global
+            return self.sort_by, self.sort_descending
+
+        normalised_path = normalise(folder_path)
+        folder_pref = get_folder_pref(normalised_path)
+
+        if folder_pref:
+            # Return folder-specific preferences
+            return folder_pref["sort_by"], folder_pref["sort_descending"]
+        else:
+            # Return global preferences
+            return self.sort_by, self.sort_descending
+
+    def set_sort_preference(
+        self, sort_by: SortByOptions | None = None, sort_descending: bool | None = None
+    ) -> None:
+        """
+        Set sort preferences. If custom_sort_enabled, saves to folder prefs.
+        Otherwise, saves to global state.
+
+        Args:
+            sort_by: The sort method to set. If None, keeps current value.
+            sort_descending: Whether to sort descending. If None, keeps current value.
+        """
+        # Update internal state
+        if sort_by is not None and self.sort_by != sort_by:
+            self.sort_by = sort_by
+        if sort_descending is not None and self.sort_descending != sort_descending:
+            self.sort_descending = sort_descending
+
+        # Persist the change
+        if self.custom_sort_enabled and self._current_folder:
+            # Save to folder preferences
+            set_folder_pref(self._current_folder, self.sort_by, self.sort_descending)
+        else:
+            # Save to global state
+            self._save_state()

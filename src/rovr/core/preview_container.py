@@ -573,8 +573,13 @@ class PreviewContainer(Container):
         this_list: FileList = self.query_one(FileList)
         self.app.call_from_thread(this_list.set_classes, "file-list")
 
-        this_list.sort_by = self.app.file_list.sort_by
-        this_list.sort_descending = self.app.file_list.sort_descending
+        # Query StateManager for sort preferences for the previewed folder
+        from rovr.functions.path import normalise
+        from rovr.state_manager import StateManager
+
+        state_manager: StateManager = self.app.query_one(StateManager)
+        normalised_path = normalise(folder_path)
+        sort_by, sort_descending = state_manager.get_sort_prefs(normalised_path)
         options = []
         try:
             loading_timer = self.app.call_from_thread(
@@ -586,8 +591,8 @@ class PreviewContainer(Container):
                 self,
                 folder_path,
                 config["interface"]["show_hidden_files"],
-                sort_by=this_list.sort_by,
-                reverse=this_list.sort_descending,
+                sort_by=sort_by,
+                reverse=sort_descending,
                 return_nothing_if_this_returns_true=should_cancel,
             )
             loading_timer.stop()  # if timer did not fire, stop it

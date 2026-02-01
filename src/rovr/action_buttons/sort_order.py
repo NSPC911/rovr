@@ -46,8 +46,9 @@ class SortOrderButton(Button):
 
     def update_icon(self) -> None:
         state_manager = self.app.query_one("StateManager")
-        order = "desc" if state_manager.sort_descending else "asc"
-        match state_manager.sort_by:
+        sort_by, sort_descending = state_manager.get_sort_prefs()
+        order = "desc" if sort_descending else "asc"
+        match sort_by:
             case "name":
                 self.label = get_icon("sorting", "alpha_" + order)[0]
             case "extension":
@@ -106,48 +107,50 @@ class SortOrderPopup(PopupOptionList):
 
     def pre_show(self) -> None:
         state_manager: StateManager = self.app.query_one(StateManager)
+        # Get current sort preferences from StateManager
+        sort_by, sort_descending = state_manager.get_sort_prefs()
         self.set_options([
             SortOrderPopupOptions(
                 name_bind,
                 "Name",
-                self.app.file_list.sort_by == "name",
+                sort_by == "name",
                 id="name",
             ),
             SortOrderPopupOptions(
                 extension_bind,
                 "Extension",
-                self.app.file_list.sort_by == "extension",
+                sort_by == "extension",
                 id="extension",
             ),
             SortOrderPopupOptions(
                 natural_bind,
                 "Natural",
-                self.app.file_list.sort_by == "natural",
+                sort_by == "natural",
                 id="natural",
             ),
             SortOrderPopupOptions(
                 size_bind,
                 "Size",
-                self.app.file_list.sort_by == "size",
+                sort_by == "size",
                 id="size",
             ),
             SortOrderPopupOptions(
                 created_bind,
                 "Created",
-                self.app.file_list.sort_by == "created",
+                sort_by == "created",
                 id="created",
             ),
             SortOrderPopupOptions(
                 modified_bind,
                 "Modified",
-                self.app.file_list.sort_by == "modified",
+                sort_by == "modified",
                 id="modified",
             ),
             Option("", id="separator", disabled=True),
             SortOrderPopupOptions(
                 descending_bind,
                 "Descending",
-                self.app.file_list.sort_descending,
+                sort_descending,
                 id="descending",
             ),
             Option("", id="separator2", disabled=True),
@@ -176,7 +179,7 @@ class SortOrderPopup(PopupOptionList):
             + (1 if self.styles.border_bottom[0] != "" else 0)
         )
         self.height = height
-        self.highlighted = self.get_option_index(self.app.file_list.sort_by)
+        self.highlighted = self.get_option_index(sort_by)
         if self.do_adjust:
             self.do_adjust = False
             self.styles.offset = (
@@ -191,16 +194,28 @@ class SortOrderPopup(PopupOptionList):
         )
 
     def on_option_list_option_selected(self, event: OptionList.OptionSelected) -> None:
+        state_manager: StateManager = self.app.query_one(StateManager)
+
         if event.option.id == "descending":
-            self.app.file_list.sort_descending = not self.app.file_list.sort_descending
+            # Toggle descending
+            _, current_descending = state_manager.get_sort_prefs()
+            state_manager.set_sort_preference(sort_descending=not current_descending)
         elif event.option.id == "custom_sort":
             # Toggle custom sort for this folder
-            state_manager: StateManager = self.app.query_one(StateManager)
             state_manager.toggle_custom_sort()
-            # Refresh file list to apply the change
-            self.app.file_list.update_file_list(add_to_session=False)
         else:
-            self.app.file_list.sort_by = event.option.id
+            # Change sort_by
+            from typing import cast
+
+            from rovr.variables.constants import SortByOptions
+
+            state_manager.set_sort_preference(
+                sort_by=cast(SortByOptions, event.option.id)
+            )
+
+        # Refresh file list to apply the change
+        self.app.file_list.update_file_list(add_to_session=False)
+
         self.go_hide()
         self.button.update_icon()
 

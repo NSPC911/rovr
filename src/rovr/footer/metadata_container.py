@@ -12,7 +12,7 @@ from textual.widgets import Static
 from textual.worker import WorkerState
 
 from rovr.functions import utils
-from rovr.functions.path import is_hidden_file
+from rovr.functions.path import get_direntry_for, is_hidden_file
 from rovr.variables.constants import config, scroll_vindings
 from rovr.variables.maps import SPINNER, SPINNER_LENGTH
 
@@ -106,6 +106,10 @@ class MetadataContainer(VerticalScroll, inherit_bindings=False):
         """
         if self.any_in_queue():
             return
+        # just sanity check
+        updated_dir_entry = get_direntry_for(dir_entry.path)
+        if updated_dir_entry is not None:
+            dir_entry = updated_dir_entry
         if not path.exists(dir_entry.path):
             try:
                 self.app.call_from_thread(self.remove_children)

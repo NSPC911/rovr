@@ -742,6 +742,27 @@ def get_mime_type(
     return None
 
 
+def get_direntry_for(file_path: str) -> DirEntryType | None:
+    """Get the DirEntry object for a given file path.
+
+    Args:
+        file_path (str): The path to the file
+
+    Returns:
+        DirEntryType | None: The DirEntry object if found, else None
+    """
+    parent_dir = path.dirname(file_path)
+    base_name = path.basename(file_path)
+    try:
+        with os.scandir(parent_dir) as it:
+            for entry in it:
+                if entry.name == base_name:
+                    return entry
+    except (PermissionError, FileNotFoundError, OSError):
+        return None
+    return None
+
+
 def dump_exc(widget: DOMNode | None, exc: Exception | Traceback) -> str | None:
     """Dump an exception to the console for debugging purposes.
 

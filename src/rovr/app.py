@@ -523,7 +523,7 @@ class Application(App, inherit_bindings=False):
                     except OSError:
                         # Any failure writing chooser file should not block exit
                         message += f"Failed to write chooser file `{path.basename(self._chooser_file)}`"
-        self.exit(message.strip())
+        self.exit(message.strip() if message else None)
 
     def cd(
         self,

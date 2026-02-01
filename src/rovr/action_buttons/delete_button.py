@@ -32,12 +32,11 @@ class DeleteButton(Button):
                 """Callback to remove files after confirmation"""
                 if response == "delete":
                     self.app.query_one("ProcessContainer").delete_files(
-                        selected_files, compressed=False, ignore_trash=True
+                        selected_files, ignore_trash=True
                     )
                 elif response == "trash":
                     self.app.query_one("ProcessContainer").delete_files(
                         selected_files,
-                        compressed=False,
                         ignore_trash=False,
                     )
 

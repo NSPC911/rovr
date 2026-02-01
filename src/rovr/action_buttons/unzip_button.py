@@ -61,7 +61,7 @@ class UnzipButton(Button):
 
         destination_path = normalise(path.join(getcwd(), response))
 
-        self.app.query_one("ProcessContainer").unzip_file(
+        self.app.query_one("ProcessContainer").extract_archive(
             archive_path, destination_path
         )
         self.app.file_list.focus()

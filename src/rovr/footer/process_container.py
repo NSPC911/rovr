@@ -79,6 +79,9 @@ class ProgressBarContainer(VerticalGroup, inherit_bindings=False):
         """
         if is_path and config["interface"]["truncate_progress_file_path"]:
             new_label = label.split("/")
+            if len(new_label) == 1:
+                self.text_label.update(label)
+                return
             new_path = new_label[0]
             for _ in new_label[1:-1]:
                 new_path += "/\u2026"
@@ -169,15 +172,12 @@ class ProcessContainer(VerticalScroll):
         return bar
 
     @work(thread=True)
-    def delete_files(
-        self, files: list[str], compressed: bool = True, ignore_trash: bool = False
-    ) -> None:
+    def delete_files(self, files: list[str], ignore_trash: bool = False) -> None:
         """
         Remove files from the filesystem.
 
         Args:
             files (list[str]): List of file paths to remove.
-            compressed (bool): Whether the file paths are compressed. Defaults to True.
             ignore_trash (bool): If True, files will be permanently deleted instead of sent to the recycle bin. Defaults to False.
 
         Raises:
@@ -198,8 +198,6 @@ class ProcessContainer(VerticalScroll):
         files_to_delete = []
         folders_to_delete = []
         for file in files:
-            if compressed:
-                file = path_utils.decompress(file)
             if path_utils.file_is_type(file) == "directory":
                 folders_to_delete.append(file)
             files_to_add, folders_to_add = path_utils.get_recursive_files(
@@ -346,7 +344,7 @@ class ProcessContainer(VerticalScroll):
         if files_to_delete == [] and folders_to_delete != []:
             self.app.call_from_thread(
                 bar.update_text,
-                folders_to_delete[-1],
+                files[-1],
             )
         elif files_to_delete == folders_to_delete == []:
             # this cannot happen, but just as an easter egg :shippit:
@@ -556,7 +554,7 @@ class ProcessContainer(VerticalScroll):
         self.app.call_from_thread(bar.add_class, "done")
 
     @work(thread=True)
-    def unzip_file(self, archive_path: str, destination_path: str) -> None:
+    def extract_archive(self, archive_path: str, destination_path: str) -> None:
         """
         Extracts a zip archive to a destination.
 
@@ -598,7 +596,8 @@ class ProcessContainer(VerticalScroll):
                         )
                         self.app.call_from_thread(bar.update_progress, progress=i + 1)
                         last_update_time = current_time
-                    if path.exists(path.join(destination_path, filename)):
+                    final_path = path.join(destination_path, filename)
+                    if path.exists(final_path) and path.isfile(final_path):
                         if do_what_on_existance == "ask":
                             response = self.app.call_from_thread(
                                 self.app.push_screen_wait,
@@ -644,10 +643,22 @@ class ProcessContainer(VerticalScroll):
                     try:
                         archive.extract(file, path=destination_path)
                     except PermissionError:
-                        if path_utils.force_obtain_write_permission(
-                            path.join(destination_path, filename)
-                        ):
-                            archive.extract(file, path=destination_path)
+                        try:
+                            if path_utils.force_obtain_write_permission(
+                                # cannot ensure final_path exists here
+                                path.join(destination_path, filename)
+                            ):
+                                archive.extract(file, path=destination_path)
+                        except PermissionError as exc:  # on stupid rare chances
+                            path_utils.dump_exc(self, exc)
+                            bar.panic(
+                                dismiss_with={
+                                    "message": f"Extracting failed due to\n{exc}\nProcess Aborted.",
+                                    "subtitle": "If this is a bug, please file an issue!",
+                                },
+                                bar_text="Permission Error",
+                            )
+                            return
         except (zipfile.BadZipFile, tarfile.TarError, ValueError) as exc:
             dismiss_with = {"subtitle": ""}
             if isinstance(exc, ValueError) and "Password" in exc.__str__():

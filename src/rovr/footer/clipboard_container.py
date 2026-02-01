@@ -190,7 +190,7 @@ class Clipboard(CheckboxRenderingMixin, SelectionList, inherit_bindings=False):
         for option in self.options:
             if not path.exists(option.value.path):
                 assert isinstance(option.id, str)
-                self.app.call_from_thread(self.remove_option, option.id)
+                self.call_later(self.remove_option, option.id)
 
     def checker_wrapper(self) -> None:
         if self._checker_worker is None or not self._checker_worker.is_running:

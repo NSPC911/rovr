@@ -11,6 +11,23 @@ permissions:
   id-token: write
 
 jobs:
+  starting-build:
+    runs-on: ubuntu-slim
+    name: Notify Docs Build Starting
+    steps:
+      - name: Notify Discord - Docs Build Starting
+        uses: sarisia/actions-status-discord@v1.13.0
+        with:
+          webhook: ${{ secrets.LOG_HOOK }}
+          title: rovr docs build starting!
+          color: 0xFFFF00
+          description: "Build started by ${{ github.actor }}"
+          avatar_url: "https://avatars.githubusercontent.com/u/176916861?v=4"
+          username: "NSPBot911"
+          nodetail: true
+          notimestamp: true
+          noprefix: true
+
   build:
     runs-on: ubuntu-latest
     steps:
@@ -33,3 +50,24 @@ jobs:
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4
+
+  notify-success:
+    runs-on: ubuntu-slim
+    name: Notify Docs Build Success
+    steps:
+      - name: Notify Discord - Docs Build Success
+        uses: sarisia/actions-status-discord@v1.13.0
+        with:
+          webhook: ${{ secrets.LOG_HOOK }}
+          title: rovr docs build succeeded!
+          color: 0xFFFF00
+          description: |
+            - Stable: https://nspc911.github.io/rovr
+            - Dev   : https://nspc911.github.io/rovr/dev
+            -# caused by ${{ github.actor }}
+          avatar_url: "https://avatars.githubusercontent.com/u/176916861?v=4"
+          username: "NSPBot911"
+          nodetail: true
+          notimestamp: true
+          noprefix: true
+

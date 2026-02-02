@@ -9,7 +9,7 @@ on:
 jobs:
   starting-build:
     runs-on: ubuntu-slim
-    name: Notify Nuitka Completion
+    name: Notify Nuitka Starting
     steps:
       - name: Notify Discord - Nuitka Build Starting
         uses: sarisia/actions-status-discord@v1.13.0

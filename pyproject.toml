@@ -81,6 +81,10 @@ version_provider = "uv"
 update_changelog_on_bump = true
 major_version_zero = true
 
+[tool.poe.executor]
+type = "uv"
+no-sync = true
+
 [tool.poe.tasks]
 run.help = "Run rovr"
 run.cmd = "rovr"

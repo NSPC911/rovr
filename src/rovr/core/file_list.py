@@ -507,7 +507,13 @@ class FileList(CheckboxRenderingMixin, SelectionList, inherit_bindings=False):
             to_dir = path.dirname(getcwd())
             prev_to_dir = getcwd()
             try:
-                while len(listdir(to_dir)) == 1:
+                while True:
+                    entries = listdir(to_dir)
+                    if len(entries) != 1:
+                        break
+                    only_entry = path.join(to_dir, entries[0])
+                    if not path.isdir(only_entry):
+                        break
                     if to_dir == "" or to_dir == path.dirname(to_dir):
                         break
                     prev_to_dir = to_dir
@@ -528,8 +534,11 @@ class FileList(CheckboxRenderingMixin, SelectionList, inherit_bindings=False):
                     prev_to_dir = getcwd()
                     try:
                         while len(dirlist := listdir(to_dir)) == 1:
+                            next_path = path.join(to_dir, dirlist[0])
+                            if not path.isdir(next_path):
+                                break
                             prev_to_dir = to_dir
-                            to_dir = path.join(to_dir, dirlist[0])
+                            to_dir = next_path
                         self.app.cd(to_dir)
                     except PermissionError:
                         self.app.cd(prev_to_dir)

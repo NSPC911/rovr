@@ -1,4 +1,4 @@
-from os import getcwd, path
+from os import getcwd, listdir, path
 from typing import ClassVar, Iterable, Self, Sequence, cast
 
 from textual import events, on, work
@@ -500,6 +500,48 @@ class FileList(CheckboxRenderingMixin, SelectionList, inherit_bindings=False):
             event, config["keybinds"]["up_tree"]
         ):
             self.app.query_one("UpButton").on_button_pressed(Button.Pressed)
+        elif not self.select_mode_enabled and check_key(
+            event, config["keybinds"]["bypass_up_tree"]
+        ):
+            # get parent directory, go up until theres a folder with more than one item
+            to_dir = path.dirname(getcwd())
+            prev_to_dir = getcwd()
+            try:
+                while True:
+                    entries = listdir(to_dir)
+                    if len(entries) != 1:
+                        break
+                    only_entry = path.join(to_dir, entries[0])
+                    if not path.isdir(only_entry):
+                        break
+                    if to_dir == "" or to_dir == path.dirname(to_dir):
+                        break
+                    prev_to_dir = to_dir
+                    to_dir = path.dirname(to_dir)
+                self.app.cd(to_dir)
+            except PermissionError:
+                self.app.cd(prev_to_dir)
+        elif not self.select_mode_enabled and check_key(
+            event, config["keybinds"]["bypass_down_tree"]
+        ):
+            highlighted_option = self.highlighted_option
+            if highlighted_option is not None:
+                if highlighted_option.dir_entry.is_file():
+                    return
+                else:
+                    to_dir = highlighted_option.dir_entry.path
+                    dirlist = []
+                    prev_to_dir = getcwd()
+                    try:
+                        while len(dirlist := listdir(to_dir)) == 1:
+                            next_path = path.join(to_dir, dirlist[0])
+                            if not path.isdir(next_path):
+                                break
+                            prev_to_dir = to_dir
+                            to_dir = next_path
+                        self.app.cd(to_dir)
+                    except PermissionError:
+                        self.app.cd(prev_to_dir)
         # Toggle pin on current directory
         elif check_key(event, config["keybinds"]["toggle_pin"]):
             pin_utils.toggle_pin(path.basename(getcwd()), getcwd())

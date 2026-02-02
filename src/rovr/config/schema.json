@@ -684,6 +684,16 @@
           "description": "Go down the file tree, or open the currently selected item.",
           "display_name": "Enter/Select"
         },
+        "bypass_up_tree": {
+          "$ref": "#/definitions/keybind",
+          "description": "Recursively exit parent directory, skipping parents with only a single subdirectory",
+          "display_name": "Bypass up directory"
+        },
+        "bypass_down_tree": {
+          "$ref": "#/definitions/keybind",
+          "description": "Recursively enter child directory, skipping children with only a single subdirectory",
+          "display_name": "Bypass down directory"
+        },
         "page_up": {
           "$ref": "#/definitions/keybind",
           "description": "Page Up in the file list options.",

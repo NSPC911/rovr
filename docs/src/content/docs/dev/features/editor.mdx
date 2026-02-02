@@ -1,0 +1,50 @@
+---
+title: editor
+description: opening files and folders in your preferred editor.
+---
+
+rovr has options to change the default editor when opening a file, folder or when bulk renaming files.
+
+### configure file editor
+options:
+```toml
+[settings.editor.file]
+run = "$EDITOR"
+block = false
+suspend = true
+```
+- run: the command to open files. `$EDITOR` will use your system's default editor.
+- block: whether to block rovr until the editor is closed (recommended for GUI editors, like `code --wait`)
+- suspend: whether to suspend rovr. ignores blocking (because it is already blocking execution). recommended for TUI editors, like `nvim`.
+
+### configure file editor
+options:
+```toml
+[settings.editor.folder]
+run = "$EDITOR"
+block = false
+suspend = true
+```
+- run: the command to open files. `$EDITOR` will use your system's default editor.
+- block: whether to block rovr until the editor is closed (recommended for GUI editors, like `code --wait`)
+- suspend: whether to suspend rovr. ignores blocking (because it is already blocking execution). recommended for TUI editors, like `nvim`.
+
+### configure bulk renaming editor
+options:
+```toml
+[settings.editor.bulk_rename]
+run = "$EDITOR"
+suspend = true
+```
+- run: the command to open files. `$EDITOR` will use your system's default editor.
+- suspend: whether to suspend rovr. ignores blocking (because it is already blocking execution). recommended for TUI editors, like `nvim`.
+
+blocking is automatically enabled when bulk renaming files, as rovr needs to wait for the renaming to be completed before proceeding.
+
+### additional notes
+there is an additional option
+```toml
+[settings.editor]
+open_all_in_editor = false
+```
+- open_all_in_editor: if enabled, rather than using your system's default opener, it opens them in the relevant editor configured

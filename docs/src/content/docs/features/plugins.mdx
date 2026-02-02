@@ -24,18 +24,6 @@ to allow for more file previews, [bat](https://github.com/sharkdp/bat) can be us
 - **executable:** specify the path to the `bat` executable if it's not in your system's `PATH`.
 - **line numbers:** toggle line numbers with `plugins.bat.show_line_numbers`.
 
-### editor
-
-opens files and folders in your preferred editor.
-
-- **enable:** `plugins.editor.enabled = true`
-- **executables:** set the command to open files (`file_executable`) and folders (`folder_executable`).
-- **keybinding:** the default keybinding is `e`.
-- **suspending:** whether to suspend rovr when opening a file in an editor (recommended for TUI editors, disable for GUI editors for seamless workflow)
-  - `file_suspend`: suspend when opening files (default: `true`)
-  - `folder_suspend`: suspend when opening folders (default: `true`)
-- **open all in editor:** set `plugins.editor.open_all_in_editor = true` to force all files to open in your configured editor, regardless of encoding or file type. when disabled (default), files that cannot be read due to encoding issues will open with the system's default application instead.
-
 ### fd
 
 <InlineSVG src="/rovr/screenshots/plugins-fd.svg" alt="rovr's fd integration" />

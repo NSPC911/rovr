@@ -53,6 +53,7 @@ jobs:
 
   notify-success:
     runs-on: ubuntu-slim
+    needs: deploy
     name: Notify Docs Build Success
     steps:
       - name: Notify Discord - Docs Build Success
@@ -60,7 +61,7 @@ jobs:
         with:
           webhook: ${{ secrets.LOG_HOOK }}
           title: rovr docs build succeeded!
-          color: 0xFFFF00
+          color: 0x00FF00
           description: |
             - Stable: https://nspc911.github.io/rovr
             - Dev   : https://nspc911.github.io/rovr/dev

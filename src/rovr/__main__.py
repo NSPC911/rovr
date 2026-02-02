@@ -268,18 +268,13 @@ example_function(10)"""
     from rovr.variables.maps import VAR_TO_DIR
 
     if show_config_path:
-        from pathlib import Path
 
         def _normalise(location: str | bytes) -> str:
             from os import path
 
             return str(path.normpath(location)).replace("\\", "/").replace("//", "/")
 
-        path_config = Path(VAR_TO_DIR["CONFIG"])
-        if path_config.is_relative_to(Path.home()):
-            config_path = "~/" + _normalise(str(path_config.relative_to(Path.home())))
-        else:
-            config_path = path_config
+        config_path = _normalise(VAR_TO_DIR["CONFIG"])
 
         if sys.stdout.isatty():
             table = Table(title="", border_style="blue", box=box.ROUNDED)

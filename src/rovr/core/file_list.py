@@ -534,6 +534,8 @@ class FileList(CheckboxRenderingMixin, SelectionList, inherit_bindings=False):
                     prev_to_dir = getcwd()
                     try:
                         while len(dirlist := listdir(to_dir)) == 1:
+                            if len(dirlist) == 0:
+                                break
                             next_path = path.join(to_dir, dirlist[0])
                             if not path.isdir(next_path):
                                 break

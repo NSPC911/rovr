@@ -19,12 +19,12 @@ class SessionManager:
         historyIndex (int): The index of the session in the directories.
             This can be a number between 0 and the length of the list - 1,
             inclusive.
-        lastHighlighted (dict[str, SessionOptionDict]): A dictionary mapping directory paths
-            to the index of the last highlighted item. If a directory is not
-            in the dictionary, the default is 0.
+        lastHighlighted (dict[str, SessionOptionDict]): A dictionary mapping directory
+                                 paths to the index of the last highlighted item. If a
+                                 directory is not in the dictionary, the default is 0.
         selectMode (bool): Whether select mode is enabled for that directory.
-        selectedItems (list[SessionOptionDict]): A dictionary mapping directory paths to the
-            list of selected items in that directory.
+        selectedItems (list[SessionOptionDict]): A list of selected items within the
+                                                                      current directory
         search (str): The current search string.
     """
 

@@ -1,5 +1,6 @@
 import subprocess
 from dataclasses import dataclass
+from io import BytesIO
 from os import path
 from pathlib import PurePath
 from time import time
@@ -9,6 +10,7 @@ import textual_image.widget as timg
 from pdf2image import convert_from_path, pdfinfo_from_path
 from PIL import Image, UnidentifiedImageError
 from PIL.Image import Image as PILImage
+from resvg_py import svg_to_bytes
 from rich.syntax import Syntax
 from rich.text import Text
 from textual import events, on, work
@@ -148,11 +150,63 @@ class PreviewContainer(Container):
         except NoMatches:
             return False
 
-    def show_image_preview(self, depth: int = 0) -> None:
-        """Show image preview. Runs in a thread."""
-        self.app.call_from_thread(setattr, self, "border_title", titles.image)
+    def show_resvg_preview(self) -> None:
+        """Show svg preview using resvg"""
         if should_cancel() or self._current_file_path is None:
             return
+        self.app.call_from_thread(setattr, self, "border_title", "loading...")
+
+        # load svg as bytes
+        try:
+            with open(self._current_file_path, "r", encoding="utf-8") as f:
+                svg_data = f.read()
+            png_bytes = svg_to_bytes(svg_data)
+            pil_object = Image.open(BytesIO(png_bytes))
+            # force a load
+            pil_object.load()
+            if not self.has_child(".image_preview"):
+                self.app.call_from_thread(self.remove_children)
+
+                if should_cancel():
+                    return
+
+                image_widget = timg.__dict__[
+                    config["interface"]["image_protocol"] + "Image"
+                ](
+                    pil_object,
+                    classes="image_preview",
+                )
+                image_widget.can_focus = True
+                self.app.call_from_thread(self.mount, image_widget)
+            else:
+                try:
+                    if should_cancel():
+                        return
+                    image_widget = self.query_one(".image_preview")
+                    self.app.call_from_thread(
+                        setattr, image_widget, "image", pil_object
+                    )
+                except NoMatches:
+                    return
+        except ValueError as exc:
+            if should_cancel():
+                return
+            self.app.call_from_thread(self.remove_children)
+            self.app.call_from_thread(
+                self.mount,
+                Static(
+                    f"Cannot render svg.\n{str(exc)}",
+                    classes="special",
+                ),
+            )
+            return
+        self.app.call_from_thread(setattr, self, "border_title", titles.svg)
+
+    def show_image_preview(self, depth: int = 0) -> None:
+        """Show image preview. Runs in a thread."""
+        if should_cancel() or self._current_file_path is None:
+            return
+        self.app.call_from_thread(setattr, self, "border_title", titles.image)
 
         try:
             with Image.open(self._current_file_path) as img:
@@ -876,6 +930,9 @@ class PreviewContainer(Container):
         if file_type == "folder":
             self.log("Showing folder preview")
             self.show_folder_preview(file_path)
+        elif file_type == "resvg":
+            self.log("Showing resvg preview")
+            self.show_resvg_preview()
         elif file_type == "image":
             self.log("Showing image preview")
             self.show_image_preview()

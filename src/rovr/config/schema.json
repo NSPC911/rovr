@@ -142,10 +142,11 @@
           "type": "object",
           "additionalProperties": {
             "type": "string",
-            "enum": ["text", "image", "pdf", "archive", "folder", "remime"]
+            "enum": ["text", "image", "pdf", "archive", "folder", "remime", "resvg"]
           },
           "default": {
             "text/*": "text",
+            "image/svg+xml": "resvg",
             "image/*": "image",
             "application/pdf": "pdf",
             "application/zip": "archive",

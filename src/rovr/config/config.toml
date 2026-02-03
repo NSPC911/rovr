@@ -40,6 +40,7 @@ panels = false
 
 [interface.mime_rules]
 "text/*" = "text"
+"image/svg+xml" = "resvg"
 "image/*" = "image"
 "application/pdf" = "pdf"
 "application/zip" = "archive"

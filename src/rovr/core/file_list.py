@@ -146,6 +146,7 @@ class FileList(CheckboxRenderingMixin, SelectionList, inherit_bindings=False):
             self.clear_options()
             return
         self.file_list_pause_check = True  # ty: ignore[invalid-assignment]
+        items_in_cwd: list[str] = []
         try:
             preview = self.app.query_one("PreviewContainer")
 
@@ -196,9 +197,7 @@ class FileList(CheckboxRenderingMixin, SelectionList, inherit_bindings=False):
                         )
                         for item in file_list_options
                     ]
-                    items_in_cwd: list[str] = [
-                        item["name"] for item in file_list_options
-                    ]
+                    items_in_cwd = [item["name"] for item in file_list_options]
                     if focus_on in items_in_cwd:
                         to_highlight_index = items_in_cwd.index(focus_on)
                     self.items_in_cwd = set(items_in_cwd)
@@ -240,7 +239,7 @@ class FileList(CheckboxRenderingMixin, SelectionList, inherit_bindings=False):
 
             self.set_options(self.list_of_options)
             # fix selected options
-            if has_selected:
+            if has_selected and items_in_cwd:
                 self.update_from_session(session, items_in_cwd)
             # session handler
             self.app.query_one("#path_switcher", PathInput).value = cwd + (
@@ -308,6 +307,8 @@ class FileList(CheckboxRenderingMixin, SelectionList, inherit_bindings=False):
     def update_from_session(
         self, session: SessionManager, items_in_cwd: list[str]
     ) -> None:
+        # so far dont seem to have any issues when running this in a thread
+        # but if it does, remove the decorator
         self.log("Restoring selected items from session...")
         self.log(session.selectedItems)
         with self.prevent(SelectionList.SelectedChanged):

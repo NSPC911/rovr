@@ -530,6 +530,7 @@ class Application(App, inherit_bindings=False):
         directory: str,
         add_to_history: bool = True,
         focus_on: str | None = None,
+        has_selected: bool = False,
         callback: Callable | None = None,
     ) -> None:
         # Makes sure `directory` is a directory, or chdir will fail with exception
@@ -559,7 +560,7 @@ class Application(App, inherit_bindings=False):
             state_manager.apply_folder_sort_prefs(normalise(getcwd()))
 
         self.file_list.update_file_list(
-            add_to_session=add_to_history, focus_on=focus_on
+            add_to_session=add_to_history, focus_on=focus_on, has_selected=has_selected
         )
         if hasattr(self, "tabWidget"):
             self.tabWidget.active_tab.session.search = ""

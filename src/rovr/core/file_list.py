@@ -119,12 +119,14 @@ class FileList(CheckboxRenderingMixin, SelectionList, inherit_bindings=False):
         self,
         add_to_session: bool = True,
         focus_on: str | None = None,
+        has_selected: bool = False,
     ) -> None:
         """Update the file list with the current directory contents.
 
         Args:
             add_to_session (bool): Whether to add the current directory to the session history.
             focus_on (str | None): A custom item to set the focus as.
+            has_selected (bool): Whether there are selected items in the file list (used for session management).
         """
         cwd = path_utils.normalise(getcwd())
 
@@ -237,6 +239,9 @@ class FileList(CheckboxRenderingMixin, SelectionList, inherit_bindings=False):
             self.app.query_one("#up").disabled = cwd == path.dirname(cwd)
 
             self.set_options(self.list_of_options)
+            # fix selected options
+            if has_selected:
+                self.update_from_session(session, items_in_cwd)
             # session handler
             self.app.query_one("#path_switcher", PathInput).value = cwd + (
                 "" if cwd.endswith("/") else "/"
@@ -299,6 +304,21 @@ class FileList(CheckboxRenderingMixin, SelectionList, inherit_bindings=False):
         finally:
             self.file_list_pause_check = False  # ty: ignore[invalid-assignment]
 
+    @work(thread=True, exclusive=True)
+    def update_from_session(
+        self, session: SessionManager, items_in_cwd: list[str]
+    ) -> None:
+        self.log("Restoring selected items from session...")
+        self.log(session.selectedItems)
+        with self.prevent(SelectionList.SelectedChanged):
+            self.deselect_all()
+            for item in session.selectedItems:
+                if item["name"] in items_in_cwd:
+                    self.select(self.list_of_options[items_in_cwd.index(item["name"])])
+                else:
+                    to_select = min(item["index"], len(self.list_of_options) - 1)
+                    self.select(self.list_of_options[to_select].id)
+
     async def file_selected_handler(self, target_path: str) -> None:
         if self.app._chooser_file:
             self.app.action_quit()
@@ -359,7 +379,16 @@ class FileList(CheckboxRenderingMixin, SelectionList, inherit_bindings=False):
                 self.highlighted = 0
             self.app.tabWidget.active_tab.selectedItems = []
         else:
-            self.app.tabWidget.active_tab.session.selectedItems = self.selected.copy()
+            # self.app.tabWidget.active_tab.session.selectedItems = self.selected.copy()
+            selected_ids = self.selected.copy()
+            session: SessionManager = self.app.tabWidget.active_tab.session
+            session.selectedItems = []
+            for selected_id in selected_ids:
+                option = self.get_option(selected_id)
+                session.selectedItems.append({
+                    "name": option.dir_entry.name,
+                    "index": self.options.index(option),
+                })
 
     # No clue why I'm using an OptionList method for SelectionList
     async def on_option_list_option_highlighted(

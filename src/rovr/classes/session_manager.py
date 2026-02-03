@@ -1,7 +1,7 @@
 from typing import TypedDict
 
 
-class LastHighlightedDict(TypedDict):
+class SessionOptionDict(TypedDict):
     name: str
     "Name of the last highlighted option"
     index: int
@@ -31,7 +31,7 @@ class SessionManager:
     def __init__(self) -> None:
         self.directories: list[str] = []
         self.historyIndex: int = 0
-        self.lastHighlighted: dict[str, LastHighlightedDict] = {}
+        self.lastHighlighted: dict[str, SessionOptionDict] = {}
         self.selectMode: bool = False
-        self.selectedItems: list[str] = []
+        self.selectedItems: list[SessionOptionDict] = []
         self.search: str = ""

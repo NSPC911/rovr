@@ -200,6 +200,18 @@ class PreviewContainer(Container):
                 ),
             )
             return
+        except Exception as exc:
+            if should_cancel():
+                return
+            self.app.call_from_thread(self.remove_children)
+            self.app.call_from_thread(
+                self.mount,
+                Static(
+                    f"Cannot render svg.\n{type(exc).__name__}: {str(exc)}",
+                    classes="special",
+                ),
+            )
+            return
         self.app.call_from_thread(setattr, self, "border_title", titles.svg)
 
     def show_image_preview(self, depth: int = 0) -> None:

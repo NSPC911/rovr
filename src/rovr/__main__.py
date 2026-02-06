@@ -87,6 +87,15 @@ def eager_set_folder(ctx: click.Context, param: click.Parameter, value: str) -> 
     help="Force the first launch experience (even if config exists).",
 )
 @click.option(
+    "--ignore-first-launch",
+    "ignore_first_launch",
+    multiple=False,
+    type=bool,
+    default=False,
+    is_flag=True,
+    help="Ignore first launch setup (not recommended).",
+)
+@click.option(
     "--config-path",
     "show_config_path",
     multiple=False,
@@ -186,6 +195,7 @@ def eager_set_folder(ctx: click.Context, param: click.Parameter, value: str) -> 
         "--version",
         "--force-tty",
         "--force-first-launch",
+        "--ignore-first-launch",
         "--config-path",
         "--help",
     ],
@@ -206,6 +216,7 @@ def cli(
     config_folder: str,
     with_features: list[str],
     force_first_launch: bool,
+    ignore_first_launch: bool,
     without_features: list[str],
     show_config_path: bool,
     show_version: bool,
@@ -236,6 +247,7 @@ def cli(
         pprint(
             "  [dim]  - Keep in mind that the console needs to be running [i]before[/] you start the app![/]"
         )
+
     if list_preview_themes:
         from pygments.styles import get_all_styles
         from rich.syntax import Syntax
@@ -315,8 +327,26 @@ example_function(10)"""
             print(_get_version())
         return
 
-    # check config existence
-    if force_first_launch or (
+    if force_first_launch and ignore_first_launch:
+        pprint(
+            "[bold red]Error:[/] --force-first-launch and --ignore-first-launch are mutually exclusive, and hence cannot be used simultaneously."
+        )
+        sys.exit(1)
+    elif ignore_first_launch:
+        if not config_folder and (
+            not os.path.exists(VAR_TO_DIR["CONFIG"])
+            or len(os.listdir(VAR_TO_DIR["CONFIG"])) == 0
+        ):
+            pprint(
+                "[bold yellow]Warning:[/] Ignoring first launch setup is not recommended. Some features may not work properly without proper configuration."
+            )
+            # Actually skip the first launch setup
+            pass
+        else:
+            pprint(
+                "[bold yellow]Warning[/]: Config already available, `--ignore-first-launch` does nothing."
+            )
+    elif force_first_launch or (
         not config_folder
         and (
             not os.path.exists(VAR_TO_DIR["CONFIG"])

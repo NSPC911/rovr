@@ -20,3 +20,8 @@ class ArchiveScreenReturnType(NamedTuple):
     path: str
     algo: Literal["zip", "tar", "tar.gz", "tar.bz2", "tar.xz", "tar.zst"]
     level: int
+
+
+class ShellExecReturnType(NamedTuple):
+    command: str
+    mode: Literal["background", "block", "suspend"]

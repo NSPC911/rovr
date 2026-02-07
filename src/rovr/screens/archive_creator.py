@@ -4,7 +4,7 @@ from typing import ClassVar, Iterable, Literal, Self
 from pathvalidate import sanitize_filepath
 from textual import events, on, work
 from textual.app import ComposeResult
-from textual.binding import BindingType
+from textual.binding import Binding, BindingType
 from textual.containers import HorizontalGroup
 from textual.content import ContentText
 from textual.widgets import Input, SelectionList
@@ -153,6 +153,12 @@ class ArchiveCompression(CheckboxRenderingMixin, SelectionList, inherit_bindings
 
 
 class ArchiveCreationScreen(ModalInput):
+    BINDINGS = [
+        Binding("tab", "app.focus_next", "Focus Next", show=False),
+        Binding("shift+tab", "app.focus_previous", "Focus Previous", show=False),
+        Binding("ctrl+c,super+c", "screen.copy_text", "Copy selected text", show=False),
+    ]
+
     def __init__(
         self,
         initial_value: str = "",

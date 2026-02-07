@@ -64,9 +64,11 @@ from rovr.screens import (
     ContentSearch,
     FileSearch,
     Keybinds,
+    ShellExec,
     YesOrNo,
     ZDToDirectory,
 )
+from rovr.screens.typed import ShellExecReturnType
 from rovr.screens.way_too_small import TerminalTooSmall
 from rovr.state_manager import StateManager
 from rovr.variables.constants import MaxPossible, config, log_name
@@ -468,6 +470,64 @@ class Application(App, inherit_bindings=False):
                 self.action_suspend_process()
         elif check_key(event, config["keybinds"]["change_sort_order"]["open_popup"]):
             await self.query_one(SortOrderButton).open_popup(event)
+        elif check_key(event, ">"):
+            self.push_screen(
+                ShellExec(),
+                callback=lambda response: self.on_shell_exec_response(response),
+            )
+
+    @work
+    async def on_shell_exec_response(
+        self, response: ShellExecReturnType | None
+    ) -> None:
+        if response is None:
+            return
+        match response.mode:
+            case "background":
+                import asyncio
+
+                proc = await asyncio.create_subprocess_shell(
+                    response.command,
+                    stdin=asyncio.subprocess.DEVNULL,
+                    stdout=asyncio.subprocess.PIPE,
+                    stderr=asyncio.subprocess.PIPE,
+                )
+                stdout, stderr = await proc.communicate()
+                self.notify(
+                    Content(
+                        f"stdout: {stdout.decode().strip()}\nstderr: {stderr.decode().strip()}"
+                    ),  # ty: ignore[invalid-argument-type]
+                    title=f"Shell: {response.command}",
+                    severity="information" if proc.returncode == 0 else "error",
+                )
+            case "block":
+                import subprocess
+
+                output = subprocess.run(  # noqa: ASYNC221
+                    response.command,
+                    shell=True,
+                    capture_output=True,
+                    text=True,
+                    check=False,
+                )
+                self.notify(
+                    Content(
+                        f"stdout: {output.stdout.strip()}\nstderr: {output.stderr.strip()}"
+                    ),  # ty: ignore[invalid-argument-type]
+                    title=f"Shell: {response.command}",
+                    severity="information" if output.returncode == 0 else "error",
+                )
+            case "suspend":
+                import asyncio
+
+                with self.suspend():
+                    proc = await asyncio.create_subprocess_shell(response.command)
+                    return_code = await proc.wait()
+                    self.notify(
+                        f"Process exited with return code {return_code}",
+                        title=f"Shell: {response.command}",
+                        severity="information" if return_code == 0 else "error",
+                    )
 
     def on_app_blur(self, event: events.AppBlur) -> None:
         self.app_blurred = True

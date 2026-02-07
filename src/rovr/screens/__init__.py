@@ -8,22 +8,24 @@ from .input import ModalInput
 from .keybinds import Keybinds
 from .paste_screen import PasteScreen
 from .rg_search import ContentSearch
+from .shell_exec import ShellExec
 from .way_too_small import TerminalTooSmall
 from .yes_or_no import YesOrNo
 from .zd_to_directory import ZDToDirectory
 
 __all__ = [
-    "Dismissable",
+    "ArchiveCreationScreen",
     "CommonFileNameDoWhat",
+    "ContentSearch",
     "DeleteFiles",
+    "Dismissable",
+    "FileInUse",
+    "FileSearch",
+    "Keybinds",
     "ModalInput",
+    "PasteScreen",
+    "ShellExec",
+    "TerminalTooSmall",
     "YesOrNo",
     "ZDToDirectory",
-    "FileSearch",
-    "FileInUse",
-    "TerminalTooSmall",
-    "Keybinds",
-    "ContentSearch",
-    "PasteScreen",
-    "ArchiveCreationScreen",
 ]

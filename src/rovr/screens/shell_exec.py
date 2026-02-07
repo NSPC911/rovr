@@ -32,9 +32,7 @@ class ShellExec(ModalInput):
             event.stop()
             modes = list(mode_to_subtitle.keys())
             current_index = modes.index(self.mode)
-            self.mode = modes[
-                (current_index + 1) % len(modes)
-            ]  # ty: ignore[invalid-assignment]
+            self.mode = modes[(current_index + 1) % len(modes)]  # ty: ignore[invalid-assignment]
             self.horizontal_group.border_subtitle = mode_to_subtitle[self.mode]
             self.horizontal_group.classes = self.mode
 

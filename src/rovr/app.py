@@ -521,6 +521,8 @@ class Application(App, inherit_bindings=False):
                 import subprocess
 
                 with self.suspend():
+                    # intended to block the app, await does nothing because the
+                    # app itself is suspended
                     output = subprocess.run(  # noqa: ASYNC221
                         response.command,
                         shell=True,

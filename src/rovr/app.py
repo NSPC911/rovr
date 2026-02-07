@@ -470,7 +470,7 @@ class Application(App, inherit_bindings=False):
                 self.action_suspend_process()
         elif check_key(event, config["keybinds"]["change_sort_order"]["open_popup"]):
             await self.query_one(SortOrderButton).open_popup(event)
-        elif check_key(event, ">"):
+        elif check_key(event, config["keybinds"]["show_shell_screen"]):
             self.push_screen(
                 ShellExec(),
                 callback=lambda response: self.on_shell_exec_response(response),

@@ -868,13 +868,18 @@
         },
         "suspend_app": {
           "$ref": "#/definitions/keybind",
-          "description": "Suspend the app's process, bringing you back to the terminal",
+          "description": "Suspend the app's process, bringing you back to the terminal (*nix only)",
           "display_name": "Suspend app"
         },
         "open_editor": {
           "$ref": "#/definitions/keybind",
           "description": "Open the selected file or folder in the configured editor.",
           "display_name": "Open in editor"
+        },
+        "show_shell_screen": {
+          "$ref": "#/definitions/keybind",
+          "description": "Show the shell screen to run a command in the current directory.",
+          "display_name": "Open shell screen"
         },
         "filename_conflict": {
           "type": "object",

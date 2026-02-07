@@ -198,6 +198,7 @@ quit_app = ["q", "ctrl+q"]
 command_palette = "ctrl+p"
 suspend_app = ["ctrl+z"]
 open_editor = ["e"]
+show_shell_screen = [">"]
 # unavailable for now
 preview_select_left = []
 preview_select_right = []

@@ -480,7 +480,7 @@ class Application(App, inherit_bindings=False):
     async def on_shell_exec_response(
         self, response: ShellExecReturnType | None
     ) -> None:
-        if response is None:
+        if response is None or response.command == "":
             return
         match response.mode:
             case "background":
@@ -518,16 +518,21 @@ class Application(App, inherit_bindings=False):
                     severity="information" if output.returncode == 0 else "error",
                 )
             case "suspend":
-                import asyncio
+                import subprocess
 
                 with self.suspend():
-                    proc = await asyncio.create_subprocess_shell(response.command)
-                    return_code = await proc.wait()
-                    self.notify(
-                        f"Process exited with return code {return_code}",
-                        title=f"Shell: {response.command}",
-                        severity="information" if return_code == 0 else "error",
+                    output = subprocess.run(  # noqa: ASYNC221
+                        response.command,
+                        shell=True,
+                        check=False,
                     )
+                self.notify(
+                    Content(
+                        f"Command '{response.command}' finished with return code {output.returncode}."
+                    ),  # ty: ignore[invalid-argument-type]
+                    title=f"Shell: {response.command}",
+                    severity="information" if output.returncode == 0 else "error",
+                )
 
     def on_app_blur(self, event: events.AppBlur) -> None:
         self.app_blurred = True

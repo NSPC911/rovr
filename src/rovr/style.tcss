@@ -27,17 +27,6 @@ $scrollbar-background-hover: $primary-muted;
 $scrollbar-background-active: $primary-muted;
 $scrollbar-corner-color: $primary-muted;
 
-* {
-  scrollbar-size: 1 1;
-  &:ansi {
-    scrollbar-background-hover: $scrollbar-background;
-    scrollbar-background-active: $scrollbar-background;
-  }
-  &:disabled {
-    scrollbar-size: 0 0;
-  }
-}
-
 Screen.-all-horizontal.compact-buttons {
   #menuwrapper #below_menu #path_switcher {
     border-left: $border-style $border-blurred
@@ -73,9 +62,7 @@ ArchiveCreationScreen OptionList {
   background-tint: transparent !important;
   text-opacity: 1 !important;
   tint: transparent !important;
-  &:disabled {
-    border: $border-style $border-disabled;
-  }
+  &:disabled { border: $border-style $border-disabled }
   &:ansi {
     border-subtitle-background: transparent;
     border-subtitle-color: $border-blurred;
@@ -456,6 +443,7 @@ Tooltip {
   padding-left: 1;
   padding-right: 0;
   scrollbar-gutter: stable;
+  scrollbar-size: 1 1;
   & > VerticalGroup > Static {
     text-wrap: nowrap;
     text-overflow: ellipsis;
@@ -495,6 +483,7 @@ DeleteFiles OptionList,
 ArchiveCreationScreen OptionList {
   padding: 0 0 0 0;
   background-tint: ansi_default !important;
+  scrollbar-size: 1 1;
   .option-list--separator { color: $foreground }
   .option-list--option-disabled { color: $border-blurred }
   &:light .option-list--option-disabled { color: $border-blurred-light }

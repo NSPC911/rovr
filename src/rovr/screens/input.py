@@ -12,13 +12,13 @@ from textual.widgets import Input, Label
 from rovr.functions import icons as icon_utils
 
 
-class ModalInput(ModalScreen):
+class ModalInput(ModalScreen, inherit_bindings=False):
     def __init__(
         self,
         border_title: str,
         border_subtitle: str = "",
         initial_value: str = "",
-        validators: list = [],
+        validators: list | None = None,
         is_path: bool = False,
         is_folder: bool = False,
     ) -> None:
@@ -28,6 +28,8 @@ class ModalInput(ModalScreen):
         self.initial_value = initial_value
         length_checker = Length(minimum=1, failure_description="A value is required.")
         length_checker.strict = True
+        if validators is None:
+            validators = []
         self.validators = [length_checker] + validators
         self.is_path = is_path
         self.is_folder = is_folder
@@ -39,7 +41,7 @@ class ModalInput(ModalScreen):
                 classes="system",
             )
         else:
-            self.icon_widget = Label("> ", id="icon", shrink=True, classes="arrow")
+            self.icon_widget = Label(" > ", id="icon", shrink=True, classes="arrow")
 
     def compose(self) -> ComposeResult:
         with HorizontalGroup(id="modalInput_group"):

@@ -101,20 +101,15 @@ export default defineConfig({
             { label: "image previews", slug: "features/image-previews" },
             { label: "cd on quit", slug: "features/cd-on-quit" },
             { label: "context menu", slug: "features/context-menu" },
+            { label: "shell execution", slug: "features/shell-exec", badge: { text: "dev", variant: "caution" } },
             { label: "plugins", slug: "features/plugins" },
           ],
         },
         {
           label: "contributing",
           items: [
-            {
-              label: "how to contribute",
-              slug: "contributing/how-to-contribute",
-            },
-            {
-              label: "project structure",
-              slug: "contributing/project-structure",
-            },
+            { label: "how to contribute", slug: "contributing/how-to-contribute" },
+            { label: "project structure", slug: "contributing/project-structure" },
           ],
         },
         {

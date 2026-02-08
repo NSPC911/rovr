@@ -28,11 +28,11 @@ class ShellExec(ModalInput):
         if event.key == "escape":
             event.stop()
             self.dismiss(None)
-        elif event.key == "tab":  # cycle through modes
+        elif event.key in ("tab", "shift+tab"):  # cycle through modes
             event.stop()
             modes = list(mode_to_subtitle.keys())
-            current_index = modes.index(self.mode)
-            self.mode = modes[(current_index + 1) % len(modes)]  # ty: ignore[invalid-assignment]
+            to_index = modes.index(self.mode) + (1 if event.key == "tab" else -1)
+            self.mode = modes[(to_index) % len(modes)]  # ty: ignore[invalid-assignment]
             self.horizontal_group.border_subtitle = mode_to_subtitle[self.mode]
             self.horizontal_group.classes = self.mode
 

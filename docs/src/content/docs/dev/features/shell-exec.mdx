@@ -1,0 +1,69 @@
+---
+title: shell exec
+description: execute shell commands directly from rovr with different execution modes.
+---
+
+import InlineSVG from "@/components/InlineSVG.astro";
+
+rovr lets you run shell commands without needing to suspend or quit.
+
+<InlineSVG src="/rovr/screenshots/shell-exec.svg" alt="shell exec" />
+
+## accessing shell exec
+
+you can open the shell exec screen by:
+
+- pressing `>` (or your configured keybind)
+- the modal will appear with an input field for your command
+
+## execution modes
+
+shell exec supports three different execution modes, each suited for different use cases:
+
+### background mode
+
+runs the command in the background without blocking rovr. ideal for long-running commands that don't require immediate feedback.
+
+- rovr remains responsive while the command executes
+- you'll receive a notification when the command completes with stdout/stderr output
+
+### block mode
+
+runs the command and blocks rovr until it completes. suitable for quick commands where you want to wait for results.
+
+- rovr waits for the command to finish
+- displays stdout/stderr output in a notification
+- ui remains visible but unresponsive during execution
+
+### suspend mode
+
+suspends the rovr process and gives full control to the command being ran.
+
+- rovr suspends completely, giving full terminal control to the command
+- perfect for interactive editors, shells, or TUI applications
+- rovr resumes after the command exits
+
+## switching modes
+
+cycle through execution modes by pressing `Tab` while in the shell exec screen. the border color indicates the current mode:
+
+- **green**: background mode
+
+<InlineSVG src="/rovr/screenshots/shell-exec-background.svg" alt="background mode"/>
+
+- **yellow**: block mode
+
+<InlineSVG src="/rovr/screenshots/shell-exec-block.svg" alt="block mode"/>
+
+- **red**: suspend mode
+
+<InlineSVG src="/rovr/screenshots/shell-exec-suspend.svg" alt="suspend mode"/>
+
+## configuration
+
+customize the keybind in your configuration file:
+
+```toml
+[keybinds]
+show_shell_screen = [">"]
+```

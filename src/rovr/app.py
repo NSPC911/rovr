@@ -495,7 +495,7 @@ class Application(App, inherit_bindings=False):
                 stdout, stderr = await proc.communicate()
                 self.notify(
                     Content(
-                        f"stdout: {stdout.decode().strip()}\nstderr: {stderr.decode().strip()}"
+                        f"stdout: {stdout.decode(errors="ignore").strip()}\nstderr: {stderr.decode(errors="ignore").strip()}"
                     ),  # ty: ignore[invalid-argument-type]
                     title=f"Shell: {response.command}",
                     severity="information" if proc.returncode == 0 else "error",

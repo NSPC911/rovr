@@ -118,10 +118,22 @@ flame.cmd = "pyinstrument --renderer=html --timeline --use-timing-thread --show-
 
 [tool.poe.tasks.build]
 help = "Build rovr into an executable using Nuitka"
-cmd = 'nuitka --mode=${mode} --assume-yes-for-downloads --enable-plugins=no-qt --python-flag=-m --python-flag="no_docstrings" --include-package-data=rovr --lto=${lto} src/rovr --onefile-cache-mode=cached --onefile-child-grace-time=0 --user-package-configuration-file=nuitka.config.yml'
+sequence = [
+  { shell = "git rev-parse HEAD > src/rovr/COMMIT_HASH" },
+  { cmd = 'nuitka --mode=${mode} --assume-yes-for-downloads --enable-plugins=no-qt --python-flag=-m --python-flag="no_docstrings" --include-package-data=rovr --lto=${lto} src/rovr --onefile-cache-mode=cached --onefile-child-grace-time=0 --user-package-configuration-file=nuitka.config.yml' },
+  { cmd = "python -c \"import os; os.path.exists('src/rovr/COMMIT_HASH') and os.remove('src/rovr/COMMIT_HASH')\"" },
+]
 args = [
   { name = "mode", help = "Build mode: onefile (default) or standalone", default = "onefile", positional = true, choices = ["standalone", "onefile"] },
   { name = "lto", help = "Enable LTO (link time optimization)", default = "yes", choices = ["yes", "no"], options = ["--lto"] },
+]
+
+[tool.poe.tasks.uv-build]
+help = "Build rovr distributions using uv and include commit hash"
+sequence = [
+  { shell = "git rev-parse HEAD > src/rovr/COMMIT_HASH" },
+  { cmd = "uv build" },
+  { cmd = "python -c \"import os; os.path.exists('src/rovr/COMMIT_HASH') and os.remove('src/rovr/COMMIT_HASH')\"" },
 ]
 
 [tool.ruff]

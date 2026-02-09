@@ -317,9 +317,21 @@ example_function(10)"""
             from importlib.metadata import PackageNotFoundError, version
 
             try:
-                return version("rovr")
+                ver = version("rovr")
             except PackageNotFoundError:
-                return "master"
+                ver = "unknown"
+
+            try:
+                from importlib import resources
+                commit_hash_file = resources.files("rovr") / "COMMIT_HASH"
+                if os.path.exists(str(commit_hash_file)):
+                    commit_hash = commit_hash_file.read_text(encoding="utf-8").strip()
+                    if commit_hash:
+                        return f"{ver} [link=https://github.com/NSPC911/rovr/commit/{commit_hash}][u]({commit_hash[:7]})[/][/]"
+            except Exception:
+                pass
+
+            return ver
 
         if sys.stdout.isatty():
             pprint(f"rovr version [cyan]v{_get_version()}[/]")

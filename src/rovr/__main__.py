@@ -323,6 +323,7 @@ example_function(10)"""
 
             try:
                 from importlib import resources
+
                 commit_hash_file = resources.files("rovr") / "COMMIT_HASH"
                 if os.path.exists(str(commit_hash_file)):
                     commit_hash = commit_hash_file.read_text(encoding="utf-8").strip()

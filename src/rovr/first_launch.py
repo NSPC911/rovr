@@ -166,10 +166,11 @@ class FirstLaunchApp(App, inherit_bindings=False):
 
     ENABLE_COMMAND_PALETTE = False
 
-    def __init__(self) -> None:
+    def __init__(self, can_exit: bool = False) -> None:
         super().__init__(watch_css=True)
         self.preview_image: Image | None = None
         self._wants_to_quit: bool = False
+        self.can_exit: bool = can_exit
 
     def compose(self) -> ComposeResult:
         yield Static(classes="padding")
@@ -177,6 +178,7 @@ class FirstLaunchApp(App, inherit_bindings=False):
         yield Static("Welcome to [b][u]rovr[/][/]!")
         yield Static("Let's get you started!")
         yield Static("[dim]Press [/]tab[dim] to navigate the options below.[/]")
+        yield Static("[dim]Quit at any time with [/]Ctrl + q[dim] (not recommended).[/]")
         yield Static(classes="padding")
         with Center(), RadioSet(id="theme"):
             yield from [
@@ -442,7 +444,7 @@ enabled = {str(self.query_one("#plugins-file Switch", Switch).value).lower()}"""
 
     @work(exclusive=True)
     async def action_quit(self) -> None:
-        if self._wants_to_quit:
+        if self._wants_to_quit or self.can_exit:
             self.exit(1)
         self.notify(
             "You won't be able to do this again. Are you sure?\nYou will be using weird defaults.\n(Press Ctrl+q again)",

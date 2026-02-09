@@ -355,7 +355,7 @@ example_function(10)"""
     ):
         from rovr.first_launch import FirstLaunchApp
 
-        FirstLaunchApp().run()
+        FirstLaunchApp(can_exit=force_first_launch).run()
 
     if force_first_launch:
         return

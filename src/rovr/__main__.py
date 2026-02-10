@@ -308,7 +308,7 @@ example_function(10)"""
         return
     elif show_version:
 
-        def _get_version() -> str:
+        def _get_version() -> list[str]:
             """Get version from package metadata
 
             Returns:
@@ -325,19 +325,26 @@ example_function(10)"""
                 from importlib import resources
 
                 commit_hash_file = resources.files("rovr") / "COMMIT_HASH"
-                if os.path.exists(str(commit_hash_file)):
-                    commit_hash = commit_hash_file.read_text(encoding="utf-8").strip()
-                    if commit_hash:
-                        return f"{ver} [link=https://github.com/NSPC911/rovr/commit/{commit_hash}][u]({commit_hash[:7]})[/][/]"
+                commit_hash = commit_hash_file.read_text(encoding="utf-8").strip()
+                if commit_hash:
+                    return [ver, commit_hash]
             except Exception:
                 pass
 
-            return ver
+            return [ver, ""]
 
+        ver = _get_version()
         if sys.stdout.isatty():
-            pprint(f"rovr version [cyan]v{_get_version()}[/]")
+            pprint(
+                f"rovr [bold cyan]{ver[0]}[/]"
+                + (
+                    f" ([link=https://github.com/NSPC911/rovr/commit/{ver[1]}][dim]{ver[1][:7]}[/][/])"
+                    if ver[1]
+                    else ""
+                )
+            )
         else:
-            print(_get_version())
+            print(f"rovr {ver[0]} ({ver[1][:7]})" if ver[1] else f"rovr {ver[0]}")
         return
 
     if force_first_launch and ignore_first_launch:

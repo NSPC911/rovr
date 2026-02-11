@@ -116,12 +116,27 @@ svg-fmt.sequence = ["screenshot-format"]
 flame.help = "Start rovr with pyinstrument for flamegraph profiling"
 flame.cmd = "pyinstrument --renderer=html --timeline --use-timing-thread --show-all -m rovr"
 
+_hash_dump.shell = "git rev-parse HEAD > src/rovr/COMMIT_HASH"
+_hash_clean.shell = "python -c \"import os; os.path.exists('src/rovr/COMMIT_HASH') and os.remove('src/rovr/COMMIT_HASH')\""
+
 [tool.poe.tasks.build]
 help = "Build rovr into an executable using Nuitka"
-cmd = 'nuitka --mode=${mode} --assume-yes-for-downloads --enable-plugins=no-qt --python-flag=-m --python-flag="no_docstrings" --include-package-data=rovr --lto=${lto} src/rovr --onefile-cache-mode=cached --onefile-child-grace-time=0 --user-package-configuration-file=nuitka.config.yml'
+sequence = [
+  "_hash_dump",
+  { cmd = 'nuitka --mode=${mode} --assume-yes-for-downloads --enable-plugins=no-qt --python-flag=-m --python-flag="no_docstrings" --include-package-data=rovr --lto=${lto} src/rovr --onefile-cache-mode=cached --onefile-child-grace-time=0 --user-package-configuration-file=nuitka.config.yml' },
+  "_hash_clean",
+]
 args = [
   { name = "mode", help = "Build mode: onefile (default) or standalone", default = "onefile", positional = true, choices = ["standalone", "onefile"] },
   { name = "lto", help = "Enable LTO (link time optimization)", default = "yes", choices = ["yes", "no"], options = ["--lto"] },
+]
+
+[tool.poe.tasks.uv-build]
+help = "Build rovr distributions using uv and include commit hash"
+sequence = [
+  "_hash_dump",
+  { cmd = "uv build" },
+  "_hash_clean",
 ]
 
 [tool.ruff]

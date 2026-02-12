@@ -6,7 +6,7 @@
   <br>
   <img alt="GitHub Actions Formatting Status" src="https://img.shields.io/github/actions/workflow/status/NSPC911/rovr/.github%2Fworkflows%2Fformatting.yml?style=for-the-badge&logo=opencontainersinitiative&label=style" height="24px" width="auto">
   <img alt="GitHub Actions Docs Build Status" src="https://img.shields.io/github/actions/workflow/status/NSPC911/rovr/.github%2Fworkflows%2Fdocs-build.yml?style=for-the-badge&logo=opencontainersinitiative&label=Docs" height="24px" width="auto">
-  <img alt="GitHub Actions Nuitka Build Status" src="https://img.shields.io/github/actions/workflow/status/NSPC911/rovr/.github%2Fworkflows%2Fnuitka-build.yml?style=for-the-badge&logo=opencontainersinitiative&label=build">
+  <img alt="GitHub Actions Nuitka Build Status" src="https://img.shields.io/github/actions/workflow/status/NSPC911/rovr/.github%2Fworkflows%2Fnuitka-build.yml?style=for-the-badge&logo=opencontainersinitiative&label=build" height="24px" width="auto">
   <br>
   <a href="https://terminaltrove.com/rovr">
     <img src="https://terminaltrove.com/static/assets/media/terminal_trove_normal.png" alt="terminal trove" height="24px" width="auto">

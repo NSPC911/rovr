@@ -1,6 +1,8 @@
 name: Deploy to GitHub Pages
 
 on:
+  schedule:
+    - cron: "0 0 * * *"
   release:
     types: [published]
   workflow_dispatch:
@@ -21,7 +23,7 @@ jobs:
           webhook: ${{ secrets.LOG_HOOK }}
           title: rovr docs build starting!
           color: 0xFFFF00
-          description: "Build started by ${{ github.actor }}"
+          description: "Docs Build started due to ${{ github.event_name }}"
           avatar_url: "https://avatars.githubusercontent.com/u/176916861?v=4"
           username: "NSPBot911"
           nodetail: true

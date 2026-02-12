@@ -15,6 +15,7 @@ from textual.worker import Worker, WorkerCancelled, get_current_worker
 
 from rovr.classes.mixins import CheckboxRenderingMixin
 from rovr.classes.textual_options import ModalSearcherOption
+from rovr.components import DoubleClickableOptionList
 from rovr.functions import icons as icon_utils
 from rovr.functions import path as path_utils
 from rovr.functions.icons import get_icon_for_file, get_icon_for_folder
@@ -26,26 +27,6 @@ INITIAL_FILTER_TYPES: dict[str, bool] = {
     ft: (ft in config["plugins"]["fd"]["default_filter_types"])
     for ft in FD_TYPE_TO_ALIAS
 }
-
-
-class FileSearchOptionList(OptionList):
-    async def _on_click(self, event: events.Click) -> None:
-        """React to the mouse being clicked on an item.
-
-        Args:
-            event: The click event.
-        """
-        event.prevent_default()
-        clicked_option: int | None = event.style.meta.get("option")
-        if clicked_option is not None and not self._options[clicked_option].disabled:
-            if event.chain == 2:
-                if self.highlighted != clicked_option:
-                    self.highlighted = clicked_option
-                self.action_select()
-            else:
-                self.highlighted = clicked_option
-        if self.screen.focused is not self.screen.search_input:
-            self.screen.search_input.focus()
 
 
 class FileSearchToggles(CheckboxRenderingMixin, SelectionList, inherit_bindings=False):
@@ -131,7 +112,7 @@ class FileSearch(ModalScreen):
                 id="file_search_input",
                 placeholder="Type to search files (fd)",
             )
-            yield FileSearchOptionList(
+            yield DoubleClickableOptionList(
                 Option("  No input provided", disabled=True),
                 id="file_search_options",
                 classes="empty",
@@ -142,7 +123,7 @@ class FileSearch(ModalScreen):
         self.search_input: Input = self.query_one("#file_search_input")
         self.search_input.border_title = "Find Files"
         self.search_input.focus()
-        self.search_options: FileSearchOptionList = self.query_one(
+        self.search_options: DoubleClickableOptionList = self.query_one(
             "#file_search_options"
         )
         self.search_options.border_title = "Files"

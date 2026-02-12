@@ -9,26 +9,9 @@ from textual.widgets import Input, OptionList
 from textual.worker import WorkerCancelled
 
 from rovr.classes.textual_options import ModalSearcherOption
+from rovr.components.special_option_list import DoubleClickableOptionList
 from rovr.functions.utils import check_key, should_cancel
 from rovr.variables.constants import config
-
-
-class ZoxideOptionList(OptionList):
-    async def _on_click(self, event: events.Click) -> None:
-        """React to the mouse being clicked on an item.
-
-        Args:
-            event: The click event.
-        """
-        event.prevent_default()
-        clicked_option: int | None = event.style.meta.get("option")
-        if clicked_option is not None and not self._options[clicked_option].disabled:
-            if event.chain == 2:
-                if self.highlighted != clicked_option:
-                    self.highlighted = clicked_option
-                self.action_select()
-            else:
-                self.highlighted = clicked_option
 
 
 class ZDToDirectory(ModalScreen):
@@ -43,7 +26,7 @@ class ZDToDirectory(ModalScreen):
                 id="zoxide_input",
                 placeholder="Enter directory name or pattern",
             )
-            yield ZoxideOptionList(
+            yield DoubleClickableOptionList(
                 ModalSearcherOption(None, "  No input provided", disabled=True),
                 id="zoxide_options",
                 classes="empty",
@@ -53,7 +36,9 @@ class ZDToDirectory(ModalScreen):
         self.zoxide_input: Input = self.query_one("#zoxide_input")
         self.zoxide_input.border_title = "zoxide"
         self.zoxide_input.focus()
-        self.zoxide_options: ZoxideOptionList = self.query_one("#zoxide_options")
+        self.zoxide_options: DoubleClickableOptionList = self.query_one(
+            "#zoxide_options"
+        )
         self.zoxide_options.border_title = "Folders"
         self.zoxide_options.can_focus = False
         self.zoxide_updater(Input.Changed(self.zoxide_input, value=""))

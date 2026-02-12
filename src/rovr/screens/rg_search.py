@@ -15,31 +15,12 @@ from textual.worker import Worker, WorkerCancelled, get_current_worker
 
 from rovr.classes.mixins import CheckboxRenderingMixin
 from rovr.classes.textual_options import ModalSearcherOption
+from rovr.components import DoubleClickableOptionList
 from rovr.functions import icons as icon_utils
 from rovr.functions import path as path_utils
 from rovr.functions.icons import get_icon_for_file, get_icon_for_folder
 from rovr.functions.utils import check_key
 from rovr.variables.constants import config, vindings
-
-
-class ContentSearchOptionList(OptionList):
-    async def _on_click(self, event: events.Click) -> None:
-        """React to the mouse being clicked on an item.
-
-        Args:
-            event: The click event.
-        """
-        event.prevent_default()
-        clicked_option: int | None = event.style.meta.get("option")
-        if clicked_option is not None and not self._options[clicked_option].disabled:
-            if event.chain == 2:
-                if self.highlighted != clicked_option:
-                    self.highlighted = clicked_option
-                self.action_select()
-            else:
-                self.highlighted = clicked_option
-        if self.screen.focused is not self.screen.search_input:
-            self.screen.search_input.focus()
 
 
 class ContentSearchToggles(CheckboxRenderingMixin, SelectionList):
@@ -104,7 +85,7 @@ class ContentSearch(ModalScreen):
                 id="content_search_input",
                 placeholder="Type to search files (rg)",
             )
-            yield ContentSearchOptionList(
+            yield DoubleClickableOptionList(
                 Option("  No input provided", disabled=True),
                 id="content_search_options",
                 classes="empty",
@@ -115,7 +96,7 @@ class ContentSearch(ModalScreen):
         self.search_input: Input = self.query_one("#content_search_input")
         self.search_input.border_title = "Find in files"
         self.search_input.focus()
-        self.search_options: ContentSearchOptionList = self.query_one(
+        self.search_options: DoubleClickableOptionList = self.query_one(
             "#content_search_options"
         )
         self.search_options.border_title = "Results"

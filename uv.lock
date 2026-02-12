@@ -629,8 +629,8 @@ wheels = [
 
 [[package]]
 name = "nuitka"
-version = "4.0rc8"
-source = { git = "https://github.com/Nuitka/Nuitka?rev=factory#da63327ed933f8431c431f6ab4b924102f413291" }
+version = "4.1rc1"
+source = { git = "https://github.com/Nuitka/Nuitka?rev=factory#1fe436b5ac7fe756bb68d9968f944dc304390046" }
 
 [[package]]
 name = "packaging"

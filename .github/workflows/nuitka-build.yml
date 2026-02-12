@@ -1,4 +1,4 @@
-name: Build with Nuitka and PyApp
+name: Build with Nuitka
 
 on:
   # run every 3 days

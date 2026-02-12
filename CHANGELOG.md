@@ -8,8 +8,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
-- `screens`: add a shell execution screen #217
 - `filelist`: add bypassing single folder dirs #208
+- `preview`: add resvg for svg rendering #213
+- `cli`: add `--ignore-first-launch` 9640c0d4
+- `screens`: add a shell execution screen #217
+- `cli`: inclue commit hash for `--version` 88d094d
+
+### Fixed
+- `firstlaunch`: allow single press quit when forced ae292a4
+- `tabs+filelist`: keep selections when switching tabs 9ace592
 
 ## [0.7.0] - 2026-01-31
 

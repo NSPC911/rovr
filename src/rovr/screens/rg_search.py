@@ -3,23 +3,21 @@ import contextlib
 from os import path
 from typing import ClassVar
 
-from textual import events, on, work
+from textual import on, work
 from textual.app import ComposeResult
 from textual.binding import BindingType
 from textual.containers import VerticalGroup
-from textual.screen import ModalScreen
-from textual.widgets import Input, OptionList, SelectionList
+from textual.widgets import Input, SelectionList
 from textual.widgets.option_list import Option
 from textual.widgets.selection_list import Selection
-from textual.worker import Worker, WorkerCancelled, get_current_worker
+from textual.worker import WorkerCancelled, get_current_worker
 
 from rovr.classes.mixins import CheckboxRenderingMixin
 from rovr.classes.textual_options import ModalSearcherOption
-from rovr.components import DoubleClickableOptionList
+from rovr.components import DoubleClickableOptionList, ModalSearchScreen
 from rovr.functions import icons as icon_utils
 from rovr.functions import path as path_utils
 from rovr.functions.icons import get_icon_for_file, get_icon_for_folder
-from rovr.functions.utils import check_key
 from rovr.variables.constants import config, vindings
 
 
@@ -71,13 +69,8 @@ class ContentSearchToggles(CheckboxRenderingMixin, SelectionList):
         ]
 
 
-class ContentSearch(ModalScreen):
+class ContentSearch(ModalSearchScreen):
     """Search file contents recursively using rg."""
-
-    def __init__(self, **kwargs) -> None:
-        super().__init__(**kwargs)
-        # same thing as fd
-        self._active_worker: Worker | None = None
 
     def compose(self) -> ComposeResult:
         with VerticalGroup(id="content_search_group"):
@@ -93,14 +86,9 @@ class ContentSearch(ModalScreen):
         yield ContentSearchToggles()
 
     def on_mount(self) -> None:
-        self.search_input: Input = self.query_one("#content_search_input")
+        super().on_mount()
         self.search_input.border_title = "Find in files"
-        self.search_input.focus()
-        self.search_options: DoubleClickableOptionList = self.query_one(
-            "#content_search_options"
-        )
         self.search_options.border_title = "Results"
-        self.search_options.can_focus = False
         self.rg_updater(Input.Changed(self.search_input, value=""))
 
     def on_input_changed(self, event: Input.Changed) -> None:
@@ -132,6 +120,7 @@ class ContentSearch(ModalScreen):
             self.search_options.border_subtitle = ""
             return
         self.search_options.set_options([Option("  Searching...", disabled=True)])
+        rg_process = None
         try:
             rg_process = await asyncio.create_subprocess_exec(
                 *rg_cmd, stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE
@@ -139,8 +128,9 @@ class ContentSearch(ModalScreen):
             # 30 seconds is quite generous for rg to respond
             stdout, _ = await asyncio.wait_for(rg_process.communicate(), timeout=30)
         except (OSError, asyncio.exceptions.TimeoutError) as exc:
-            if isinstance(exc, asyncio.exceptions.TimeoutError):
+            if isinstance(exc, asyncio.exceptions.TimeoutError) and rg_process:
                 rg_process.kill()
+
                 with contextlib.suppress(
                     asyncio.exceptions.TimeoutError, ProcessLookupError
                 ):
@@ -174,7 +164,9 @@ class ContentSearch(ModalScreen):
             stdout_lines.sort(key=lambda x: x[1], reverse=True)
             worker = self.create_options(stdout_lines)
             try:
-                options: list[ModalSearcherOption] = await worker.wait()
+                options_result = await worker.wait()
+                if options_result is not None:
+                    options = options_result
             except WorkerCancelled:
                 return  # anyways
             if self._active_worker is not get_current_worker():
@@ -194,47 +186,6 @@ class ContentSearch(ModalScreen):
             )
             self.search_options.add_class("empty")
             self.search_options.border_subtitle = ""
-
-    def on_input_submitted(self, event: Input.Submitted) -> None:
-        if any(
-            worker.is_running and worker.node is self for worker in self.app.workers
-        ):
-            return
-        if self.search_options.highlighted is None:
-            self.search_options.highlighted = 0
-        if self.search_options.option_count == 0 or (
-            self.search_options.highlighted_option
-            and self.search_options.highlighted_option.disabled
-        ):
-            return
-        self.search_options.action_select()
-
-    @work(exclusive=True)
-    @on(OptionList.OptionSelected, "ContentSearchOptionList")
-    async def content_search_option_selected(
-        self, event: OptionList.OptionSelected
-    ) -> None:
-        if not isinstance(event.option, ModalSearcherOption):
-            self.dismiss(None)
-            return
-        selected_value = event.option.file_path
-        if selected_value and not event.option.disabled:
-            self.dismiss(selected_value)
-        else:
-            self.dismiss(None)
-
-    @on(OptionList.OptionHighlighted, "ContentSearchOptionList")
-    def content_search_change_highlighted(
-        self, _: OptionList.OptionHighlighted
-    ) -> None:
-        if (
-            self.search_options.option_count == 0
-            or self.search_options.get_option_at_index(0).disabled
-            or self.search_options.highlighted is None
-        ):
-            self.search_options.border_subtitle = "0/0"
-        else:
-            self.search_options.border_subtitle = f"{str(self.search_options.highlighted + 1)}/{self.search_options.option_count}"
 
     @on(SelectionList.SelectionToggled)
     def toggles_toggled(self, event: SelectionList.SelectionToggled) -> None:
@@ -269,32 +220,3 @@ class ContentSearch(ModalScreen):
                 )
             )
         return options
-
-    def on_key(self, event: events.Key) -> None:
-        if check_key(event, config["keybinds"]["filter_modal"]["exit"]):
-            event.stop()
-            self.dismiss(None)
-        elif check_key(
-            event, config["keybinds"]["filter_modal"]["down"]
-        ) and isinstance(self.focused, Input):
-            event.stop()
-            if self.search_options.options:
-                self.search_options.action_cursor_down()
-        elif check_key(event, config["keybinds"]["filter_modal"]["up"]) and isinstance(
-            self.focused, Input
-        ):
-            event.stop()
-            if self.search_options.options:
-                self.search_options.action_cursor_up()
-        elif event.key == "tab":
-            event.stop()
-            self.focus_next()
-        elif event.key == "shift+tab":
-            event.stop()
-            self.focus_previous()
-
-    def on_click(self, event: events.Click) -> None:
-        if event.widget is self:
-            # ie click outside
-            event.stop()
-            self.dismiss(None)

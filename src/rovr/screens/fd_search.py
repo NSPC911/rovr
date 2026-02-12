@@ -3,23 +3,21 @@ import contextlib
 from os import path
 from typing import ClassVar
 
-from textual import events, on, work
+from textual import on, work
 from textual.app import ComposeResult
 from textual.binding import BindingType
 from textual.containers import VerticalGroup
-from textual.screen import ModalScreen
-from textual.widgets import Input, OptionList, SelectionList
+from textual.widgets import Input, SelectionList
 from textual.widgets.option_list import Option
 from textual.widgets.selection_list import Selection
-from textual.worker import Worker, WorkerCancelled, get_current_worker
+from textual.worker import WorkerCancelled, get_current_worker
 
 from rovr.classes.mixins import CheckboxRenderingMixin
 from rovr.classes.textual_options import ModalSearcherOption
-from rovr.components import DoubleClickableOptionList
+from rovr.components import DoubleClickableOptionList, ModalSearchScreen
 from rovr.functions import icons as icon_utils
 from rovr.functions import path as path_utils
 from rovr.functions.icons import get_icon_for_file, get_icon_for_folder
-from rovr.functions.utils import check_key
 from rovr.variables.constants import config, vindings
 from rovr.variables.maps import FD_TYPE_TO_ALIAS
 
@@ -86,25 +84,12 @@ class FileSearchToggles(CheckboxRenderingMixin, SelectionList, inherit_bindings=
         ]
 
 
-class FileSearch(ModalScreen):
+class FileSearch(ModalSearchScreen):
     """Search for files recursively using fd."""
 
     FILTER_TYPES: dict[str, bool] = INITIAL_FILTER_TYPES.copy()
     """Class Var for filter types, intentional so that it is
     carried over in that session"""
-
-    def __init__(self, **kwargs) -> None:
-        super().__init__(**kwargs)
-        # Okay, so I will need to explain myself for this design choice.
-        # fd, even though it is built in rust, the fastest and safest language
-        # it still takes time in large directories,
-        #   and even more time when creating a lot of options
-        # so when the options are passed to the create_options method (thread)
-        #   but if the fd_updater method is triggered again, the thread will
-        #   be confused or something and spam warnings, which I don't think
-        #   looks nice. I still haven't done the same for zoxide, but I haven't
-        #   experienced this issue, so zoxide will be staying like that for now
-        self._active_worker: Worker | None = None
 
     def compose(self) -> ComposeResult:
         with VerticalGroup(id="file_search_group", classes="file_search_group"):
@@ -120,14 +105,9 @@ class FileSearch(ModalScreen):
         yield FileSearchToggles()
 
     def on_mount(self) -> None:
-        self.search_input: Input = self.query_one("#file_search_input")
+        super().on_mount()
         self.search_input.border_title = "Find Files"
-        self.search_input.focus()
-        self.search_options: DoubleClickableOptionList = self.query_one(
-            "#file_search_options"
-        )
         self.search_options.border_title = "Files"
-        self.search_options.can_focus = False
         self.fd_updater(Input.Changed(self.search_input, value=""))
 
     def on_input_changed(self, event: Input.Changed) -> None:
@@ -161,14 +141,16 @@ class FileSearch(ModalScreen):
             self.search_options.border_subtitle = ""
             return
         self.search_options.set_options([Option("  Searching...", disabled=True)])
+        fd_process = None
         try:
             fd_process = await asyncio.create_subprocess_exec(
                 *fd_cmd, stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE
             )
             stdout, _ = await asyncio.wait_for(fd_process.communicate(), timeout=3)
         except (OSError, asyncio.exceptions.TimeoutError) as exc:
-            if isinstance(exc, asyncio.exceptions.TimeoutError):
+            if isinstance(exc, asyncio.exceptions.TimeoutError) and fd_process:
                 fd_process.kill()
+
                 with contextlib.suppress(
                     asyncio.exceptions.TimeoutError, ProcessLookupError
                 ):
@@ -189,7 +171,9 @@ class FileSearch(ModalScreen):
             stdout = stdout.decode()
             worker = self.create_options(stdout)
             try:
-                options: list[ModalSearcherOption] = await worker.wait()
+                options_result = await worker.wait()
+                if options_result is not None:
+                    options = options_result
             except WorkerCancelled:
                 return  # anyways
             if self._active_worker is not get_current_worker():
@@ -214,47 +198,6 @@ class FileSearch(ModalScreen):
             )
             self.search_options.add_class("empty")
             self.search_options.border_subtitle = ""
-
-    def on_input_submitted(self, event: Input.Submitted) -> None:
-        if any(
-            worker.is_running and worker.node is self for worker in self.app.workers
-        ):
-            return
-        if self.search_options.highlighted is None:
-            self.search_options.highlighted = 0
-        if self.search_options.option_count == 0 or (
-            self.search_options.highlighted_option
-            and self.search_options.highlighted_option.disabled
-        ):
-            return
-        self.search_options.action_select()
-
-    @work(exclusive=True)
-    @on(OptionList.OptionSelected, "FileSearchOptionList")
-    async def file_search_option_selected(
-        self, event: OptionList.OptionSelected
-    ) -> None:
-        if not isinstance(event.option, ModalSearcherOption):
-            self.dismiss(None)
-            return
-        selected_value = event.option.file_path
-        if selected_value and not event.option.disabled:
-            self.dismiss(selected_value)
-        else:
-            self.dismiss(None)
-
-    @on(OptionList.OptionHighlighted, "FileSearchOptionList")
-    def file_search_change_highlighted(
-        self, event: OptionList.OptionHighlighted
-    ) -> None:
-        if (
-            self.search_options.option_count == 0
-            or self.search_options.get_option_at_index(0).disabled
-            or self.search_options.highlighted is None
-        ):
-            self.search_options.border_subtitle = "0/0"
-        else:
-            self.search_options.border_subtitle = f"{str(self.search_options.highlighted + 1)}/{self.search_options.option_count}"
 
     @on(SelectionList.SelectionToggled)
     def toggles_toggled(self, event: SelectionList.SelectionToggled) -> None:
@@ -292,32 +235,3 @@ class FileSearch(ModalScreen):
                 )
             )
         return options
-
-    def on_key(self, event: events.Key) -> None:
-        if check_key(event, config["keybinds"]["filter_modal"]["exit"]):
-            event.stop()
-            self.dismiss(None)
-        elif check_key(
-            event, config["keybinds"]["filter_modal"]["down"]
-        ) and isinstance(self.focused, Input):
-            event.stop()
-            if self.search_options.options:
-                self.search_options.action_cursor_down()
-        elif check_key(event, config["keybinds"]["filter_modal"]["up"]) and isinstance(
-            self.focused, Input
-        ):
-            event.stop()
-            if self.search_options.options:
-                self.search_options.action_cursor_up()
-        elif event.key == "tab":
-            event.stop()
-            self.focus_next()
-        elif event.key == "shift+tab":
-            event.stop()
-            self.focus_previous()
-
-    def on_click(self, event: events.Click) -> None:
-        if event.widget is self:
-            # ie click outside
-            event.stop()
-            self.dismiss(None)

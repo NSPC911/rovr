@@ -9,7 +9,7 @@ from textual.widgets import Input, OptionList
 from textual.worker import WorkerCancelled
 
 from rovr.classes.textual_options import ModalSearcherOption
-from rovr.components.special_option_list import DoubleClickableOptionList
+from rovr.components import DoubleClickableOptionList
 from rovr.functions.utils import check_key, should_cancel
 from rovr.variables.constants import config
 

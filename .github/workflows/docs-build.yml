@@ -66,7 +66,7 @@ jobs:
           color: 0x00FF00
           description: |
             - Stable: https://nspc911.github.io/rovr
-            - Dev   : https://nspc911.github.io/rovr/dev
+            - Dev: https://nspc911.github.io/rovr/dev
             -# caused by ${{ github.actor }}
           avatar_url: "https://avatars.githubusercontent.com/u/176916861?v=4"
           username: "NSPBot911"

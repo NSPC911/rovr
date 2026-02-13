@@ -1064,6 +1064,7 @@ dependencies = [
 [package.dev-dependencies]
 build = [
     { name = "nuitka" },
+    { name = "poethepoet" },
     { name = "zstandard" },
 ]
 dev = [
@@ -1105,6 +1106,7 @@ requires-dist = [
 [package.metadata.requires-dev]
 build = [
     { name = "nuitka", git = "https://github.com/Nuitka/Nuitka?rev=factory" },
+    { name = "poethepoet", specifier = ">=0.38.0" },
     { name = "zstandard", specifier = ">=0.25.0" },
 ]
 dev = [

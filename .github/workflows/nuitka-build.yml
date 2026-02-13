@@ -71,14 +71,6 @@ jobs:
           restore-keys: |
             nuitka-${{ matrix.name }}
 
-      - name: Cache .venv
-        uses: actions/cache@v4
-        with:
-          path: .venv
-          key: venv-${{ matrix.name }}
-          restore-keys: |
-            venv-${{ matrix.name }}
-
       - name: Ensure latest factory version of nuitka
         run: uv sync --upgrade-package nuitka --no-dev --group build
 
@@ -86,7 +78,7 @@ jobs:
         shell: pwsh
         run: |
           Remove-Item -Recurse -Force rovr.dist -ErrorAction SilentlyContinue
-          uv run poe build standalone
+          uv run --no-sync poe build standalone
 
       - name: Upload Executable
         uses: actions/upload-artifact@v4

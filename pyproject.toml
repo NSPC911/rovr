@@ -52,6 +52,7 @@ rovr = "rovr:main"
 build = [
   "nuitka",
   "zstandard>=0.25.0",
+  "poethepoet>=0.38.0",
 ]
 dev = [
   "json-schema-for-humans>=1.5.1",

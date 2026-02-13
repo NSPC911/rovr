@@ -12,9 +12,20 @@ from rovr.functions.utils import set_scuffed_subtitle
 
 
 class SearchInput(Input):
-    def __init__(self, always_add_disabled: bool = True, placeholder: str = "") -> None:
+    def __init__(
+        self,
+        id: str | None = None,
+        classes: str | None = None,
+        always_add_disabled: bool = True,
+        placeholder: str = "",
+    ) -> None:
         super().__init__(
-            password=False, compact=True, select_on_focus=False, placeholder=placeholder
+            id=id,
+            classes=classes,
+            password=False,
+            compact=True,
+            select_on_focus=False,
+            placeholder=placeholder,
         )
         self.always_add_disabled = always_add_disabled
         self.selected = set()

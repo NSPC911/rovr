@@ -95,6 +95,20 @@ jobs:
           name: rovr-${{ matrix.name }}-nuitka
           retention-days: 30
 
+      - name: Alert if fail
+        if: failure()
+        uses: sarisia/actions-status-discord@v1.13.0
+        with:
+          webhook: ${{ secrets.LOG_HOOK }}
+          title: rovr nuitka build failed on ${{ matrix.name }}!
+          status: failure
+          description: "Check the workflow [details](https://github.com/NSPC911/rovr/actions/runs/${{ github.run_id }}) for more info."
+          avatar_url: "https://avatars.githubusercontent.com/u/176916861?v=4"
+          username: "NSPBot911"
+          nodetail: true
+          notimestamp: true
+          noprefix: true
+
   notify-nuitka-completion:
     needs: build-nuitka
     runs-on: ubuntu-slim

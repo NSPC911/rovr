@@ -17,7 +17,9 @@ jobs:
           webhook: ${{ secrets.LOG_HOOK }}
           title: rovr nuitka builds starting!
           color: 0xFFFF00
-          description: "Nuitka Build started due to ${{ github.event_name }}"
+          description: |
+            Nuitka Build started due to ${{ github.event_name }}
+            -# watch changes at https://github.com/NSPC911/rovr/actions/runs/${{ github.run_id }}
           avatar_url: "https://avatars.githubusercontent.com/u/176916861?v=4"
           username: "NSPBot911"
           nodetail: true

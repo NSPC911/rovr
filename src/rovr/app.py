@@ -261,6 +261,13 @@ class Application(App, inherit_bindings=False):
         self.title = ""
         if self._force_crash_in > 0:
             self.set_timer(self._force_crash_in, lambda: 1 / 0)
+        self.set_timer(1, self.test_dump_css_vars)
+
+    def test_dump_css_vars(self) -> None:
+        """Utility function to dump all CSS variables to the console, for debugging purposes."""
+        with self.suspend():
+            console.print(self.theme_variables)
+            self.app.exit()
 
     @work
     async def action_focus_next(self) -> None:

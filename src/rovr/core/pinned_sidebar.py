@@ -1,3 +1,4 @@
+import asyncio
 from os import R_OK, access, path
 from typing import ClassVar
 
@@ -117,6 +118,9 @@ class PinnedSidebar(OptionList, inherit_bindings=False):
         self.list_of_options.append(
             Option(" Drives", id="drives-header", disabled=True)
         )
+        self.set_options(self.list_of_options)
+        # force refresh
+        await asyncio.sleep(0)
         drive_worker = self.app.run_in_thread(path_utils.get_mounted_drives)
         try:
             # yes, I know that run_in_thread can return an exception
@@ -146,7 +150,8 @@ class PinnedSidebar(OptionList, inherit_bindings=False):
                         )
                     )
                     id_list.append(new_id)
-        self.set_options(self.list_of_options)
+                    self.add_option(self.list_of_options[-1])
+        # self.set_options(self.list_of_options)
         self.highlighted = prev_highlighted
 
     def on_mount(self) -> None:

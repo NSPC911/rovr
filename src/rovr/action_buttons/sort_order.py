@@ -1,3 +1,5 @@
+from typing import cast
+
 from textual import events
 from textual.css.query import NoMatches
 from textual.widgets import Button, OptionList
@@ -99,7 +101,9 @@ class SortOrderPopup(PopupOptionList):
         super().__init__()
         self.do_adjust: bool = False
 
-    def on_mount(self, event: events.Mount) -> None:  # ty: ignore[invalid-method-override]
+    def on_mount(
+        self, event: events.Mount
+    ) -> None:  # ty: ignore[invalid-method-override]
         self.button: SortOrderButton = self.app.query_one(SortOrderButton)
         self.styles.scrollbar_size_vertical = 0
         # calling super()._on_mount is useless, and super().mount()
@@ -223,6 +227,7 @@ class SortOrderPopup(PopupOptionList):
         for option, keys in config["keybinds"]["change_sort_order"].items():
             if option == "open_popup":
                 continue
+            keys = cast(list[str], keys)
             if check_key(event, keys):
                 self.highlighted = self.get_option_index(option)
                 event.stop()

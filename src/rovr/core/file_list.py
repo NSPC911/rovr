@@ -12,9 +12,9 @@ from textual.widgets.option_list import Option, OptionDoesNotExist
 from textual.widgets.selection_list import Selection, SelectionType
 from textual.worker import WorkerError
 
-from rovr.classes import FileListSelectionWidget
 from rovr.classes.mixins import CheckboxRenderingMixin
 from rovr.classes.session_manager import SessionManager
+from rovr.classes.textual_options import FileListSelectionWidget
 from rovr.components import PopupOptionList
 from rovr.functions import icons as icon_utils
 from rovr.functions import path as path_utils

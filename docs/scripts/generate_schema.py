@@ -3,17 +3,22 @@ from subprocess import CalledProcessError, run
 from time import perf_counter
 
 from humanize import precisedelta
-from json_schema_for_humans.generate import generate_from_filename
-from json_schema_for_humans.generation_configuration import GenerationConfiguration
 from rich.console import Console
 from rich.traceback import Traceback
 
 start_time = perf_counter()
 pprint = Console().print
 
+try:
+    import json_schema_for_humans as jsfh  # ty: ignore # noqa
+except ImportError:
+    pprint(
+        "[red]json-schema-for-humans is not installed. Make sure to install the \\[docscripts] group as well!"
+    )
+
 schema_content: str | None = None
 try:
-    config = GenerationConfiguration()
+    config = jsfh.generation_configuration.GenerationConfiguration()
     if config.template_md_options is not None:
         config.template_md_options["properties_table_columns"] = [
             "Property",
@@ -27,12 +32,11 @@ try:
         schema_content = f.read()
     with open("src/rovr/config/schema.json", "w", encoding="utf-8") as f:
         f.write(
-            schema_content
-            .replace("|", "&#124;")
+            schema_content.replace("|", "&#124;")
             .replace(">", "&gt;")
             .replace("<", "&lt;")
         )
-    generate_from_filename(
+    jsfh.generate.generate_from_filename(
         "src/rovr/config/schema.json",
         "docs/src/content/docs/reference/schema.mdx",
         config=config,

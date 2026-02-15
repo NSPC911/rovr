@@ -112,7 +112,7 @@ class Application(App, inherit_bindings=False):
         if config["interface"]["use_reactive_layout"]
         else []
     )
-    CLICK_CHAIN_TIME_THRESHOLD: int = config["interface"]["double_click_delay"]
+    CLICK_CHAIN_TIME_THRESHOLD = config["interface"]["double_click_delay"]
 
     def __init__(
         self,
@@ -211,9 +211,9 @@ class Application(App, inherit_bindings=False):
             for theme in get_custom_themes():
                 self.register_theme(theme)
             parse_failed = False
-        except ColorParseError as e:
+        except ColorParseError as exc:
             parse_failed = True
-            exception = e
+            exception = exc
         if parse_failed:
             self.exit(
                 return_code=1,

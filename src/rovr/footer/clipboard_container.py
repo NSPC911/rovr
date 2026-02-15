@@ -9,9 +9,8 @@ from textual.widgets import Button, SelectionList
 from textual.widgets.option_list import OptionDoesNotExist
 from textual.worker import Worker
 
-from rovr.classes import ClipboardSelection
 from rovr.classes.mixins import CheckboxRenderingMixin
-from rovr.classes.textual_options import ClipboardSelectionValue
+from rovr.classes.textual_options import ClipboardSelection, ClipboardSelectionValue
 from rovr.functions import icons as icon_utils
 from rovr.functions.path import dump_exc
 from rovr.variables.constants import config, vindings
@@ -164,7 +163,9 @@ class Clipboard(CheckboxRenderingMixin, SelectionList, inherit_bindings=False):
                     self.select_all()
                 event.stop()
 
-    def _remove_option(self, option: ClipboardSelection) -> Self:  # ty: ignore[invalid-method-override]  # oh my god, will you please stfu
+    def _remove_option(
+        self, option: ClipboardSelection
+    ) -> Self:  # ty: ignore[invalid-method-override]  # oh my god, will you please stfu
         super()._remove_option(option)
         self.app.file_list.update_dimmed_items([
             opt.value.path

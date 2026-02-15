@@ -3,7 +3,7 @@ from importlib import resources
 from importlib.metadata import PackageNotFoundError, version
 from os import path
 from shutil import which
-from typing import Callable, cast
+from typing import Callable, Literal, cast
 
 import fastjsonschema
 import tomli
@@ -12,6 +12,7 @@ from fastjsonschema import JsonSchemaValueException
 from rich import box
 from rich.console import Console
 
+from rovr.classes.config import RovrConfig
 from rovr.functions.utils import deep_merge
 from rovr.variables.maps import (
     VAR_TO_DIR,
@@ -263,7 +264,7 @@ def schema_dump(
         exit(1)
 
 
-def load_config() -> tuple[dict, dict]:
+def load_config() -> tuple[dict, RovrConfig]:
     """
     Load both the template config and the user config
 
@@ -347,6 +348,7 @@ def load_config() -> tuple[dict, dict]:
                     toml_dump(user_config_path, exc)
     # Don't really have to consider the else part, because it's created further down
     config = deep_merge(template_config, user_config)
+    config = cast(RovrConfig, config)
     try:
         schema(config)
     except JsonSchemaValueException as exception:
@@ -355,7 +357,10 @@ def load_config() -> tuple[dict, dict]:
     # slight config fixes
     # image protocol because "AutoImage" doesn't work with Sixel
     if config["interface"]["image_protocol"] == "Auto":
-        config["interface"]["image_protocol"] = ""
+        # another no choice fix, because if Auto then
+        # AutoImage is grabbed, which sucks in rendering
+        # sixel for some weird unknown reason
+        config["interface"]["image_protocol"] = ""  # ty: ignore[invalid-assignment]
     default_editor = ""  # screw anyone that wants to do this to me
     # editor empty or $EDITOR: expand to actual editor command
     editors = [
@@ -384,6 +389,7 @@ def load_config() -> tuple[dict, dict]:
         # vscode
         default_editor = "code --wait --"
     for key in ["file", "folder", "bulk_rename"]:
+        key = cast(Literal["file", "folder", "bulk_rename"], key)
         if not config["settings"]["editor"][key]["run"]:
             config["settings"]["editor"][key]["run"] = default_editor
         else:
@@ -392,17 +398,21 @@ def load_config() -> tuple[dict, dict]:
                 config["settings"]["editor"][key]["run"]
             )
     # pdf fixer
-    if (
-        config["plugins"]["poppler"]["enabled"]
-        and config["plugins"]["poppler"]["poppler_folder"] == ""
-    ):
+    if config["plugins"]["poppler"]["enabled"] and config["plugins"]["poppler"][
+        "poppler_folder"
+    ].lower() in ("", "path"):
         pdfinfo_executable = which("pdfinfo")
         pdfinfo_path: str | None = None
         if pdfinfo_executable is None:
             config["plugins"]["poppler"]["enabled"] = False
         else:
             pdfinfo_path = path.dirname(pdfinfo_executable)
-        config["plugins"]["poppler"]["poppler_folder"] = pdfinfo_path
+        # need to ignore in this case. because pdf2image asks for a
+        # string or None, but if it is empty, it will take it as
+        # a string, so kinda forced to do this
+        config["plugins"]["poppler"]["poppler_folder"] = (
+            pdfinfo_path  # ty: ignore[invalid-assignment]
+        )
     return schema_dict, config
 
 

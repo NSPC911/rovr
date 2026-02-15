@@ -3,6 +3,7 @@ import platform
 import sys
 from io import TextIOWrapper
 from multiprocessing import Process
+from typing import cast
 
 import rich_click as click
 from rich import box
@@ -388,10 +389,10 @@ example_function(10)"""
     from rovr.variables.constants import config
 
     for feature_path in with_features:
-        set_nested_value(config, feature_path, True)
+        set_nested_value(cast(dict, config), feature_path, True)
 
     for feature_path in without_features:
-        set_nested_value(config, feature_path, False)
+        set_nested_value(cast(dict, config), feature_path, False)
 
     if not sys.stdout.isatty():
         sys.__backup__stdout__ = sys.__stdout__

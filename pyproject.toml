@@ -55,14 +55,17 @@ build = [
   "poethepoet>=0.38.0",
 ]
 dev = [
-  "json-schema-for-humans>=1.5.1",
-  "poethepoet>=0.38.0",
   "prek>=0.2.25",
   "ruff>=0.14.10",
   "textual-dev>=1.7.0",
   "ty==0.0.8",
   "pyinstrument>=5.1.2",
   "commitizen>=4.10.0",
+]
+docscripts = [
+  "json-schema-for-humans>=1.5.1",
+  "poethepoet>=0.38.0",
+  "jsonschema-gentypes>=2.13.0",
 ]
 
 [build-system]
@@ -88,6 +91,12 @@ type = "uv"
 no-sync = true
 
 [tool.poe.tasks]
+_hash_dump.shell = "git rev-parse HEAD > src/rovr/COMMIT_HASH"
+_hash_clean.shell = "python -c \"import os; os.path.exists('src/rovr/COMMIT_HASH') and os.remove('src/rovr/COMMIT_HASH')\""
+
+_docscripts_setup.cmd = "uv sync --group docscripts"
+_docscripts_cleanup.cmd = "uv sync"
+
 run.help = "Run rovr"
 run.cmd = "rovr"
 dev.help = "Run rovr in development mode with textual-dev"
@@ -96,11 +105,24 @@ log.help = "Launch textual's console (need rovr to be launched as dev)"
 log.cmd = "textual console -x WORKER -x SYSTEM -x DEBUG -x EVENT"
 
 gen-schema.help = "Generate the JSON schema for rovr's config"
-gen-schema.cmd = "docs/scripts/generate_schema.py"
+gen-schema.sequence = [
+  "_docscripts_setup",
+  { cmd = "docs/scripts/generate_schema.py" },
+  "_docscripts_cleanup"
+]
 icon-test.help = "Print all available icons to the terminal for testing"
 icon-test.cmd = "docs/scripts/icon_test.py"
 gen-keys.help = "Generate the keybinds documentation"
 gen-keys.cmd = "docs/scripts/generate_keybinds.py"
+schema-to-dict.help = "Convert the JSON schema into a Python TypedDict for internal use"
+schema-to-dict.sequence = [
+  "_docscripts_setup",
+  { cmd = "jsonschema-gentypes --json-schema ./src/rovr/config/schema.json --python ./src/rovr/classes/config.py" },
+  "_docscripts_cleanup"
+]
+typed.help = "(alias) Convert the JSON schema into a Python TypedDict for internal use"
+typed.sequence = ["schema-to-dict"]
+
 check.help = "Run all checks (type checking and linting)"
 check.sequence = [ { cmd = "ty check" },{ cmd = "ruff check" } ]
 
@@ -116,9 +138,6 @@ svg-fmt.sequence = ["screenshot-format"]
 
 flame.help = "Start rovr with pyinstrument for flamegraph profiling"
 flame.cmd = "pyinstrument --renderer=html --timeline --use-timing-thread --show-all -m rovr"
-
-_hash_dump.shell = "git rev-parse HEAD > src/rovr/COMMIT_HASH"
-_hash_clean.shell = "python -c \"import os; os.path.exists('src/rovr/COMMIT_HASH') and os.remove('src/rovr/COMMIT_HASH')\""
 
 [tool.poe.tasks.build]
 help = "Build rovr into an executable using Nuitka"

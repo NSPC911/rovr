@@ -23,8 +23,11 @@ from textual.widget import Widget
 from textual.widgets import Static
 from textual.widgets.selection_list import Selection
 
-from rovr.classes import ArchiveFileListSelection, FileListSelectionWidget
 from rovr.classes.archive import Archive, BadArchiveError
+from rovr.classes.textual_options import (
+    ArchiveFileListSelection,
+    FileListSelectionWidget,
+)
 from rovr.core import FileList
 from rovr.functions import icons as icon_utils
 from rovr.functions import path as path_utils

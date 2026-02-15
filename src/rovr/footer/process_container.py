@@ -14,7 +14,7 @@ from textual.renderables.bar import Bar as BarRenderable
 from textual.types import UnusedParameter
 from textual.widgets import Label, ProgressBar
 
-from rovr.classes import Archive
+from rovr.classes.archive import Archive
 from rovr.functions import icons as icon_utils
 from rovr.functions import path as path_utils
 from rovr.functions.utils import is_being_used

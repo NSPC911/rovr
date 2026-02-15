@@ -8,7 +8,7 @@ from textual import work
 from textual.widgets import Button
 from textual.worker import Worker, WorkerError
 
-from rovr.classes import IsValidFilePath, PathDoesntExist
+from rovr.classes.textual_validators import IsValidFilePath, PathDoesntExist
 from rovr.functions.icons import get_icon
 from rovr.functions.path import dump_exc, normalise
 from rovr.functions.utils import run_editor_command

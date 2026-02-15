@@ -17,6 +17,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 - `firstlaunch`: allow single press quit when forced ae292a4
 - `tabs+filelist`: keep selections when switching tabs 9ace592
+- `app`: load the first paint faster c4f3a2c
+
+### Performance
+- `path_utils`: directly use `os.scandir` for iteration e19bd08
+- `pinned_sidebar`: await 0 seconds a3692c5
 
 ## [0.7.0] - 2026-01-31
 

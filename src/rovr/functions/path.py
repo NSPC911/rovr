@@ -284,48 +284,47 @@ def sync_get_cwd_object(
     """
 
     try:
-        entries = list(os.scandir(cwd))
+        scanned_entries = os.scandir(cwd)
     except (PermissionError, FileNotFoundError, OSError):
         raise PermissionError(f"PermissionError: Unable to access {cwd}")
 
-    dom_node.log(f"Scanned {len(entries)} entries in {cwd}")
-
-    if (
-        return_nothing_if_this_returns_true is not None
-        and return_nothing_if_this_returns_true()
-    ):
-        if globals().get("is_dev", False):
-            print("Cut off early after scandir")
-        return None, None
-
-    folders: list[CWDObjectReturnDict] = []
-    files: list[CWDObjectReturnDict] = []
-
-    for item in entries:
-        if not isinstance(item, DirEntryTypes):
-            raise TypeError(f"Expected a DirEntry object but got {type(item)}")
-        if not show_hidden and is_hidden_file(item.path):
-            continue
-
-        if item.is_dir():
-            folders.append({
-                "name": item.name,
-                "icon": get_icon_for_folder(item.name),
-                "dir_entry": item,
-            })
-        else:
-            files.append({
-                "name": item.name,
-                "icon": get_icon_for_file(item.name),
-                "dir_entry": item,
-            })
+    with scanned_entries as entries:
         if (
             return_nothing_if_this_returns_true is not None
             and return_nothing_if_this_returns_true()
         ):
             if globals().get("is_dev", False):
-                dom_node.log("Cut off early during dictionary building")
+                print("Cut off early after scandir")
             return None, None
+
+        folders: list[CWDObjectReturnDict] = []
+        files: list[CWDObjectReturnDict] = []
+
+        for item in entries:
+            if not isinstance(item, DirEntryTypes):
+                raise TypeError(f"Expected a DirEntry object but got {type(item)}")
+            if not show_hidden and is_hidden_file(item.path):
+                continue
+
+            if item.is_dir():
+                folders.append({
+                    "name": item.name,
+                    "icon": get_icon_for_folder(item.name),
+                    "dir_entry": item,
+                })
+            else:
+                files.append({
+                    "name": item.name,
+                    "icon": get_icon_for_file(item.name),
+                    "dir_entry": item,
+                })
+            if (
+                return_nothing_if_this_returns_true is not None
+                and return_nothing_if_this_returns_true()
+            ):
+                if globals().get("is_dev", False):
+                    dom_node.log("Cut off early during dictionary building")
+                return None, None
 
     dom_node.log(f"Collected {len(folders)} folders and {len(files)} files in {cwd}")
 

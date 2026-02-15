@@ -78,7 +78,7 @@ class PDFHandler:
     @staticmethod
     def get_poppler_folder() -> str | None:
         poppler_folder: str | None = config["plugins"]["poppler"]["poppler_folder"]
-        if poppler_folder == "":
+        if poppler_folder == "" or poppler_folder.lower() == "path":
             poppler_folder = None
         return poppler_folder
 

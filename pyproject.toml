@@ -122,7 +122,7 @@ schema-to-dict.sequence = [
   "_docscripts_cleanup"
 ]
 typed.help = "(alias) Convert the JSON schema into a Python TypedDict for internal use"
-typed.sequence = ["schema-to-dict"]
+typed.ref = "schema-to-dict"
 
 check.help = "Run all checks (type checking and linting)"
 check.sequence = [ { cmd = "ty check" },{ cmd = "ruff check" } ]
@@ -130,12 +130,12 @@ check.sequence = [ { cmd = "ty check" },{ cmd = "ruff check" } ]
 format.help = "Run ruff related formatters"
 format.sequence = [ { cmd = "ruff check --unsafe-fixes --fix"}, { cmd = "ruff format"} ]
 fmt.help = "(alias) Run ruff related formatters"
-fmt.sequence = ["format"]
+fmt.ref = "format"
 
 screenshot-format.help = "Format all SVG screenshots in the docs"
 screenshot-format.cmd = 'pnpx prettier --write "docs/public/screenshots/*.svg" --parser html --bracket-same-line --print-width 160'
 svg-fmt.help = "(alias) Format all SVG files in the docs"
-svg-fmt.sequence = ["screenshot-format"]
+svg-fmt.ref = "screenshot-format"
 
 flame.help = "Start rovr with pyinstrument for flamegraph profiling"
 flame.cmd = "pyinstrument --renderer=html --timeline --use-timing-thread --show-all -m rovr"

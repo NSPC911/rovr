@@ -6,7 +6,7 @@ from textual import events, work
 from textual.binding import BindingType
 from textual.widgets import Input, OptionList
 from textual.widgets.option_list import Option
-from textual.worker import Worker, WorkerCancelled
+from textual.worker import WorkerCancelled
 
 from rovr.classes.exceptions import FolderNotFileError
 from rovr.classes.textual_options import PinnedSidebarOption
@@ -189,6 +189,3 @@ class PinnedSidebar(OptionList, inherit_bindings=False):
     def on_key(self, event: events.Key) -> None:
         if event.key in config["keybinds"]["focus_search"]:
             self.input.focus()
-
-    def on_worker_state_changed(self, event: Worker.StateChanged) -> None:
-        self.log(f"Worker state changed: {event.worker} is now {event.worker.state}")

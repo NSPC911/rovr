@@ -61,6 +61,8 @@ class KeybindList(OptionList, inherit_bindings=False):
         primary_keys: list[str] = []
         subkeys: list[tuple[str, dict[str, list[str] | str]]] = []
         keybinds_schema = schema["properties"]["keybinds"]["properties"]
+        # no choice to use Any, else ty screams at me and I want
+        # to see zero errors from ty
         config_keybinds = cast(dict[str, Any], config["keybinds"])
         for action, keys in config_keybinds.items():
             if isinstance(keys, dict):
@@ -152,6 +154,7 @@ class Keybinds(ModalScreen):
         self.container.border_subtitle = f"Press Esc {additional_key_string}to close"
 
     def on_key(self, event: events.Key) -> None:
+        # same thing here, ty will scream at me if not
         config_keybinds = cast(dict[str, Any], config["keybinds"])
         if check_key(event, config_keybinds["focus_search"]):
             event.stop()

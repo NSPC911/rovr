@@ -10,15 +10,17 @@ start_time = perf_counter()
 pprint = Console().print
 
 try:
-    import json_schema_for_humans as jsfh  # ty: ignore # noqa
+    from json_schema_for_humans.generate import generate_from_filename  # noqa  # ty: ignore
+    from json_schema_for_humans.generation_configuration import GenerationConfiguration  # noqa  # ty: ignore
 except ImportError:
     pprint(
         "[red]json-schema-for-humans is not installed. Make sure to install the \\[docscripts] group as well!"
     )
+    exit(1)
 
 schema_content: str | None = None
 try:
-    config = jsfh.generation_configuration.GenerationConfiguration()
+    config = GenerationConfiguration()
     if config.template_md_options is not None:
         config.template_md_options["properties_table_columns"] = [
             "Property",
@@ -36,7 +38,7 @@ try:
             .replace(">", "&gt;")
             .replace("<", "&lt;")
         )
-    jsfh.generate.generate_from_filename(
+    generate_from_filename(
         "src/rovr/config/schema.json",
         "docs/src/content/docs/reference/schema.mdx",
         config=config,

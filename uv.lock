@@ -1127,6 +1127,7 @@ build = [
 ]
 dev = [
     { name = "commitizen" },
+    { name = "poethepoet" },
     { name = "prek" },
     { name = "pyinstrument" },
     { name = "ruff" },
@@ -1172,6 +1173,7 @@ build = [
 ]
 dev = [
     { name = "commitizen", specifier = ">=4.10.0" },
+    { name = "poethepoet", specifier = ">=0.38.0" },
     { name = "prek", specifier = ">=0.2.25" },
     { name = "pyinstrument", specifier = ">=5.1.2" },
     { name = "ruff", specifier = ">=0.14.10" },

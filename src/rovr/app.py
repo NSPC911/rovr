@@ -52,7 +52,6 @@ from rovr.functions.path import (
 )
 from rovr.functions.themes import get_custom_themes
 from rovr.header import HeaderArea
-from rovr.header.tabs import Tabline
 from rovr.navigation_widgets import (
     BackButton,
     ForwardButton,
@@ -143,7 +142,9 @@ class Application(App, inherit_bindings=False):
     def compose(self) -> ComposeResult:
         self.log("Starting Rovr...")
         with Vertical(id="root"):
-            yield HeaderArea(id="headerArea")
+            header = HeaderArea(id="headerArea")
+            self.tabWidget = header.tabline
+            yield header
             with VerticalGroup(id="menuwrapper"):
                 with HorizontalScroll(id="menu"):
                     yield CopyButton()
@@ -237,7 +238,6 @@ class Application(App, inherit_bindings=False):
             self.query_one("#back").tooltip = "Go back in history"
             self.query_one("#forward").tooltip = "Go forward in history"
             self.query_one("#up").tooltip = "Go up the directory tree"
-        self.tabWidget: Tabline = self.query_one(Tabline)
 
         self.file_list = self.query_one("#file_list", FileList)
         self.file_list.focus()

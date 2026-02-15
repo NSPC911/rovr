@@ -13,15 +13,15 @@ from .tabs import NewTabButton, Tabline, TablineTab
 
 
 class HeaderArea(HorizontalGroup):
+    tabline = Tabline(TablineTab(directory=getcwd()))
+
     def compose(self) -> ComposeResult:
         if (
             config["interface"]["clock"]["enabled"]
             and config["interface"]["clock"]["align"] == "left"
         ):
             yield HeaderClock()
-        yield Tabline(
-            TablineTab(directory=getcwd()),
-        )
+        yield self.tabline
         with HorizontalGroup(id="newTabRight"):
             yield NewTabButton()
             yield Static()

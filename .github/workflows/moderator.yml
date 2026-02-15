@@ -10,7 +10,7 @@ on:
 jobs:
   spam-detection:
     if: github.actor != 'coderabbitai' && github.actor != 'copilot-swe-agent'
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-slim
     permissions:
       issues: write
       pull-requests: write

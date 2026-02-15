@@ -48,7 +48,7 @@ jobs:
           git config --global user.email "${GITHUB_ACTOR_EMAIL:-176916861+NSPBot911@users.noreply.github.com}"
           git add .
           if ! git diff --cached --quiet; then
-            git commit -m "style: auto-format with ruff" -m "[skip ci]" -m "$(git log -1 --pretty=format:'%an') forgot to run ruff format" -m "skip-checks: true"
+            git commit -m "style: auto-format with ruff" -m "[skip ci]" -m "${{ GITHUB.ACTOR }} forgot to run ruff format" -m "skip-checks: true"
             git push
           fi
         env:
@@ -60,6 +60,9 @@ jobs:
           uv run poe gen-schema
           uv run poe gen-keys
           uv run poe typed
+          # need to do ruff because type hints use scuffed configs
+          uv run ruff format .
+          uv run ruff check --fix --unsafe-fixes
 
       - name: Commit and push changes if needed (main repo)
         if: github.repository == env.MAIN_REPO && (github.event_name != 'pull_request' || github.event.pull_request.head.repo.fork == false)
@@ -68,7 +71,7 @@ jobs:
           git config --global user.email "${GITHUB_ACTOR_EMAIL:-176916861+NSPBot911@users.noreply.github.com}"
           git add .
           if ! git diff --cached --quiet; then
-            git commit -m "docs: generate things" -m "[skip ci]" -m "$(git log -1 --pretty=format:'%an') forgot to run some scripts" -m "skip-checks: true"
+            git commit -m "docs: generate things" -m "[skip ci]" -m "${{ GITHUB.ACTOR }} forgot to run some scripts" -m "skip-checks: true"
             git push
           fi
         env:

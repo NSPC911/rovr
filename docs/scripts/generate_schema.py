@@ -3,13 +3,20 @@ from subprocess import CalledProcessError, run
 from time import perf_counter
 
 from humanize import precisedelta
-from json_schema_for_humans.generate import generate_from_filename
-from json_schema_for_humans.generation_configuration import GenerationConfiguration
 from rich.console import Console
 from rich.traceback import Traceback
 
 start_time = perf_counter()
 pprint = Console().print
+
+try:
+    from json_schema_for_humans.generate import generate_from_filename  # noqa  # ty: ignore
+    from json_schema_for_humans.generation_configuration import GenerationConfiguration  # noqa  # ty: ignore
+except ImportError:
+    pprint(
+        "[red]json-schema-for-humans is not installed. Make sure to install the \\[docscripts] group as well!"
+    )
+    exit(1)
 
 schema_content: str | None = None
 try:

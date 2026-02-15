@@ -1,5 +1,5 @@
 {
-  "$schema": "https://json-schema.org/draft-04/schema",
+  "$schema": "http://json-schema.org/draft-04/schema",
   "title": "Rovr Config",
   "type": "object",
   "additionalProperties": false,
@@ -1145,7 +1145,7 @@
             },
             "poppler_folder": {
               "type": "string",
-              "default": "",
+              "default": "PATH",
               "description": "Path to the folder where Poppler-related binaries are located. Leave empty to use the system PATH."
             },
             "pdf_batch_size": {

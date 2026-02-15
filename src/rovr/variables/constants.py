@@ -3,10 +3,11 @@ from dataclasses import dataclass
 from datetime import datetime
 from os import environ
 from shutil import which
-from typing import Literal, TypeAlias
+from typing import Literal, TypeAlias, cast
 
 from textual.binding import Binding, BindingType
 
+from rovr.classes.config import RovrConfig
 from rovr.functions.config import config_setup, load_config
 from rovr.functions.utils import classproperty
 
@@ -17,6 +18,7 @@ if "config" not in globals():
     config_setup()
 else:
     config = globals()["config"]
+    config = cast(RovrConfig, config)
     schema = globals()["schema"]
 
 

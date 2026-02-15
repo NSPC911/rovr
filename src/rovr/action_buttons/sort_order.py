@@ -1,3 +1,5 @@
+from typing import cast
+
 from textual import events
 from textual.css.query import NoMatches
 from textual.widgets import Button, OptionList
@@ -223,6 +225,7 @@ class SortOrderPopup(PopupOptionList):
         for option, keys in config["keybinds"]["change_sort_order"].items():
             if option == "open_popup":
                 continue
+            keys = cast(list[str], keys)
             if check_key(event, keys):
                 self.highlighted = self.get_option_index(option)
                 event.stop()

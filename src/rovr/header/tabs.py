@@ -10,7 +10,7 @@ from textual.renderables.bar import Bar as BarRenderable
 from textual.widgets import Button, Input, Tabs
 from textual.widgets._tabs import Tab, Underline
 
-from rovr.classes import SessionManager
+from rovr.classes.session_manager import SessionManager
 from rovr.functions.path import normalise
 
 

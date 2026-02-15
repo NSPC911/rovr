@@ -1,6 +1,6 @@
 import shlex
 import subprocess
-from typing import TYPE_CHECKING, Any, Callable, Required, TypedDict
+from typing import TYPE_CHECKING, Any, Callable
 
 from humanize import naturalsize
 from rich.console import Console
@@ -8,20 +8,17 @@ from textual import events
 from textual.dom import DOMNode
 from textual.worker import NoActiveWorker, WorkerCancelled, get_current_worker
 
+from rovr.classes.config import (
+    _RovrConfigSettingsEditorBulkRename,
+    _RovrConfigSettingsEditorFile,
+    _RovrConfigSettingsEditorFolder,
+)
 from rovr.variables.maps import (
     BORDER_BOTTOM,
 )
 
 if TYPE_CHECKING:
     from textual.app import App
-
-
-class EditorConfig(TypedDict, total=False):
-    """Configuration for editor commands."""
-
-    run: Required[str]
-    suspend: bool
-    block: bool
 
 
 pprint = Console().print
@@ -228,7 +225,9 @@ def get_shortest_bind(binds: list[str]) -> str:
 
 def run_editor_command(
     app: "App",
-    editor_config: EditorConfig,
+    editor_config: _RovrConfigSettingsEditorFile
+    | _RovrConfigSettingsEditorFolder
+    | _RovrConfigSettingsEditorBulkRename,
     target_path: str,
     on_error: Callable[[str, str], None] | None = None,
 ) -> subprocess.CompletedProcess | None:

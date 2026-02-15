@@ -1,4 +1,4 @@
-from typing import ClassVar
+from typing import Any, ClassVar, cast
 
 from textual import events
 from textual.app import ComposeResult
@@ -61,7 +61,8 @@ class KeybindList(OptionList, inherit_bindings=False):
         primary_keys: list[str] = []
         subkeys: list[tuple[str, dict[str, list[str] | str]]] = []
         keybinds_schema = schema["properties"]["keybinds"]["properties"]
-        for action, keys in config["keybinds"].items():
+        config_keybinds = cast(dict[str, Any], config["keybinds"])
+        for action, keys in config_keybinds.items():
             if isinstance(keys, dict):
                 # it is a subdict, for other modals
                 subkeys.append((action, keys))
@@ -72,24 +73,29 @@ class KeybindList(OptionList, inherit_bindings=False):
                     formatted_keys = "<disabled>"
                     primary_keys.append("")
                 else:
-                    if isinstance(keys, str):
-                        keys = [keys]
-                    formatted_keys = " ".join(f"<{key}>" for key in keys)
-                    primary_keys.append(keys[0])
+                    keys_list: list[str] = [keys] if isinstance(keys, str) else keys
+                    formatted_keys = " ".join(f"<{key}>" for key in keys_list)
+                    primary_keys.append(keys_list[0])
                 keybind_data.append((formatted_keys, display_name))
 
         keybind_data.append(("plugins", "--section--"))
         primary_keys.append("")
         # for plugins
         plugins_schema = schema["properties"]["plugins"]["properties"]
-        for key, value in config["plugins"].items():
-            if "enabled" in value and "keybinds" in value and key in plugins_schema:
-                if not value["keybinds"] or not value["enabled"]:
+        config_plugins = cast(dict[str, Any], config["plugins"])
+        for key, value in config_plugins.items():
+            value_dict = cast(dict[str, Any], value)
+            if (
+                "enabled" in value_dict
+                and "keybinds" in value_dict
+                and key in plugins_schema
+            ):
+                if not value_dict["keybinds"] or not value_dict["enabled"]:
                     formatted_keys = "<disabled>"
                     primary_keys.append("")
                 else:
-                    formatted_keys = " ".join(f"<{k}>" for k in value["keybinds"])
-                    primary_keys.append(value["keybinds"][0])
+                    formatted_keys = " ".join(f"<{k}>" for k in value_dict["keybinds"])
+                    primary_keys.append(value_dict["keybinds"][0])
                 plugins_properties = plugins_schema[key]["properties"]
                 display_name = plugins_properties["keybinds"].get("display_name", key)
                 keybind_data.append((formatted_keys, display_name))
@@ -130,14 +136,15 @@ class Keybinds(ModalScreen):
 
     def on_mount(self) -> None:
         self.input: SearchInput = self.query_one(SearchInput)
-        self.container: VerticalGroup = self.query_one("#keybinds_group")
-        self.keybinds_list: KeybindList = self.query_one("#keybinds_data")
+        self.container = cast(VerticalGroup, self.query_one("#keybinds_group"))
+        self.keybinds_list = cast(KeybindList, self.query_one("#keybinds_data"))
 
         self.input.focus()
 
         self.container.border_title = "Keybinds"
 
-        keybind_keys = config["keybinds"]["show_keybinds"]
+        config_keybinds = cast(dict[str, Any], config["keybinds"])
+        keybind_keys = config_keybinds["show_keybinds"]
         additional_key_string = ""
         if keybind_keys:
             short_key = "?" if keybind_keys[0] == "question_mark" else keybind_keys[0]
@@ -145,21 +152,26 @@ class Keybinds(ModalScreen):
         self.container.border_subtitle = f"Press Esc {additional_key_string}to close"
 
     def on_key(self, event: events.Key) -> None:
-        if check_key(event, config["keybinds"]["focus_search"]):
+        config_keybinds = cast(dict[str, Any], config["keybinds"])
+        if check_key(event, config_keybinds["focus_search"]):
             event.stop()
             self.input.focus()
         elif check_key(
             event,
-            config["keybinds"]["show_keybinds"]
-            + config["keybinds"]["filter_modal"]["exit"],
+            config_keybinds["show_keybinds"]
+            + cast(dict[str, Any], config_keybinds["filter_modal"])["exit"],
         ):
             event.stop()
             self.dismiss()
-        elif check_key(event, config["keybinds"]["filter_modal"]["down"]):
+        elif check_key(
+            event, cast(dict[str, Any], config_keybinds["filter_modal"])["down"]
+        ):
             event.stop()
             if self.keybinds_list.options:
                 self.keybinds_list.action_cursor_down()
-        elif check_key(event, config["keybinds"]["filter_modal"]["up"]):
+        elif check_key(
+            event, cast(dict[str, Any], config_keybinds["filter_modal"])["up"]
+        ):
             event.stop()
             if self.keybinds_list.options:
                 self.keybinds_list.action_cursor_up()

@@ -2,6 +2,8 @@ from dataclasses import dataclass, field
 
 from textual.theme import Theme
 
+from .config import _RovrConfigCustomThemeItemBarGradient
+
 
 @dataclass
 class RovrThemeClass(Theme):
@@ -21,4 +23,4 @@ class RovrThemeClass(Theme):
     luminosity_spread: float = 0.15
     text_alpha: float = 0.95
     variables: dict[str, str] = field(default_factory=dict)
-    bar_gradient: list[str] | None = None
+    bar_gradient: _RovrConfigCustomThemeItemBarGradient | None = None

@@ -3,7 +3,7 @@ from os import getcwd, path
 from textual import work
 from textual.widgets import Button
 
-from rovr.classes import IsValidFilePath
+from rovr.classes.textual_validators import IsValidFilePath
 from rovr.functions.icons import get_icon
 from rovr.functions.path import normalise
 from rovr.screens import ModalInput

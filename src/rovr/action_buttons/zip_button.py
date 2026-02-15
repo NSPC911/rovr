@@ -4,7 +4,7 @@ from typing import cast
 from textual import work
 from textual.widgets import Button
 
-from rovr.classes import (
+from rovr.classes.textual_validators import (
     IsValidFilePath,
     PathDoesntExist,
 )

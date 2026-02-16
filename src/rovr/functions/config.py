@@ -409,9 +409,7 @@ def load_config() -> tuple[dict, RovrConfig]:
         # need to ignore in this case. poppler_folder is typed as str
         # in the config schema, but pdfinfo_path can be None when
         # resolved from PATH, so we suppress the type error
-        config["plugins"]["poppler"]["poppler_folder"] = (
-            pdfinfo_path  # ty: ignore[invalid-assignment]
-        )
+        config["plugins"]["poppler"]["poppler_folder"] = pdfinfo_path  # ty: ignore[invalid-assignment]
     return schema_dict, config
 
 

@@ -2,12 +2,9 @@ import subprocess
 from dataclasses import dataclass
 from io import BytesIO
 from os import path
-from pathlib import PurePath
 from time import time
-from typing import cast
 
 import textual_image.widget as timg
-from pdf2image import convert_from_path, pdfinfo_from_path
 from PIL import Image, UnidentifiedImageError
 from PIL.Image import Image as PILImage
 from resvg_py import svg_to_bytes
@@ -31,6 +28,7 @@ from rovr.classes.textual_options import (
 from rovr.core import FileList
 from rovr.functions import icons as icon_utils
 from rovr.functions import path as path_utils
+from rovr.functions.pdf import get_pdf_images, get_pdf_info
 from rovr.functions.utils import should_cancel
 from rovr.variables.constants import PreviewContainerTitles, config, file_executable
 
@@ -40,7 +38,7 @@ titles = PreviewContainerTitles()
 @dataclass
 class PDFHandler:
     # It is 0 indexed, although most poppler functions
-    # like convert_from_path expects 1 based indexing
+    # like get_pdf_images expects 1 based indexing
     current_page: int = 0
     total_pages: int = 0
     images: list[PILImage] | None = None
@@ -302,7 +300,7 @@ class PreviewContainer(Container):
         )
         self._trigger_pdf_update()
 
-    def load_pdf_pages(self, first_page: int, last_page: int) -> list[Image.Image]:
+    def load_pdf_pages(self, first_page: int, last_page: int) -> list[PILImage]:
         """
         Returns:
             List of images, one per pages fetched
@@ -315,16 +313,13 @@ class PreviewContainer(Container):
                 f"Invalid args, first_page={first_page} > last_page={last_page}"
             )
 
-        result = convert_from_path(
+        result = get_pdf_images(
             str(self._current_file_path),
-            transparent=False,
-            fmt="png",
-            single_file=False,
             first_page=first_page,
             last_page=last_page,
             use_pdftocairo=config["plugins"]["poppler"]["use_pdftocairo"],
             thread_count=config["plugins"]["poppler"]["threads"],
-            poppler_path=cast(str | PurePath, PDFHandler.get_poppler_folder()),  # type: ignore[arg-type]
+            poppler_path=PDFHandler.get_poppler_folder(),
         )
         if len(result) == 0:
             raise ValueError(
@@ -346,14 +341,12 @@ class PreviewContainer(Container):
         # Convert PDF to images if not already done
         if self.pdf.images is None:
             try:
-                self.pdf.total_pages = pdfinfo_from_path(
-                    str(self._current_file_path),
-                    # okay so this is the fault of the mentally ill type hinting
-                    # that pdf2image uses, the creator adds type hinting like
-                    # `path: str = None` so ty just like dies or something,
-                    # idfk, so we are forced to cast to string
-                    poppler_path=cast(str, PDFHandler.get_poppler_folder()),
-                )["Pages"]
+                self.pdf.total_pages = int(
+                    get_pdf_info(
+                        str(self._current_file_path),
+                        poppler_path=PDFHandler.get_poppler_folder(),
+                    )["Pages"]
+                )
                 result = self.load_pdf_pages(
                     first_page=1, last_page=self.pdf.get_last_page_to_load()
                 )

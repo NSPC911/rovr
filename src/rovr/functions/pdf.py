@@ -269,7 +269,7 @@ def _render_with_pdftoppm(
             proc = Popen(
                 args, env=env, stdout=PIPE, stderr=PIPE, startupinfo=startupinfo
             )
-            data, _ = proc.communicate(timeout=5)
+            data, _ = proc.communicate(timeout=15)
         except TimeoutExpired:
             proc.kill()
             proc.communicate()
@@ -298,14 +298,23 @@ def _render_with_pdftoppm(
         remainder -= int(remainder > 0)
 
     images: list[PILImage] = []
+    saved_exception: TimeoutExpired | None = None
     for proc in processes:
-        try:
-            data, _ = proc.communicate(timeout=5)
-        except TimeoutExpired:
+        if saved_exception is not None:
             proc.kill()
             proc.communicate()
-            raise
+            continue
+        try:
+            data, _ = proc.communicate(timeout=15)
+        except TimeoutExpired as exc:
+            proc.kill()
+            proc.communicate()
+            if not saved_exception:
+                saved_exception = exc
+                continue
         images += _parse_ppm_buffer(data)
+    if saved_exception is not None:
+        raise saved_exception
 
     return images
 
@@ -354,7 +363,7 @@ def _render_with_pdftocairo(
                 args, env=env, stdout=PIPE, stderr=PIPE, startupinfo=startupinfo
             )
             try:
-                proc.communicate(timeout=5)
+                proc.communicate(timeout=15)
             except TimeoutExpired:
                 proc.kill()
                 proc.communicate()
@@ -385,14 +394,23 @@ def _render_with_pdftocairo(
             remainder -= int(remainder > 0)
 
         images: list[PILImage] = []
+        saved_exception: TimeoutExpired | None = None
         for prefix, proc in processes:
-            try:
-                proc.communicate(timeout=5)
-            except TimeoutExpired:
+            if saved_exception is not None:
                 proc.kill()
                 proc.communicate()
-                raise
+                continue
+            try:
+                proc.communicate(timeout=15)
+            except TimeoutExpired as exc:
+                proc.kill()
+                proc.communicate()
+                if not saved_exception:
+                    saved_exception = exc
+                    continue
             images += _load_images_from_folder(output_folder, prefix, "png")
+        if saved_exception is not None:
+            raise saved_exception
 
         return images
     finally:

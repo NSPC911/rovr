@@ -4,7 +4,7 @@ import shutil
 import subprocess
 import tempfile
 from io import BytesIO
-from subprocess import PIPE, Popen
+from subprocess import PIPE, Popen, TimeoutExpired
 
 from PIL import Image
 from PIL.Image import Image as PILImage
@@ -68,11 +68,21 @@ def _parse_ppm_buffer(data: bytes) -> list[PILImage]:
 
     Returns:
         list[PILImage]: list parsed from the PPM stream
+
+    Raises:
+        ValueError: If the expected PPM format is not found in data
     """
     images: list[PILImage] = []
     index = 0
 
+    if not data:
+        return images
+
     while index < len(data):
+        if data[index : index + 2] != b"P6":
+            raise ValueError(
+                f"Expected PPM magic 'P6' at offset {index}, got {repr(data[index : index + 10])}"
+            )
         # PPM header: P6\n<width> <height>\n<maxval>\n<pixel data>
         header_parts = data[index : index + 40].split(b"\n")[0:3]
         code, size, rgb = header_parts[0], header_parts[1], header_parts[2]
@@ -99,9 +109,9 @@ def _load_images_from_folder(
     images: list[PILImage] = []
     for filename in sorted(os.listdir(output_folder)):
         if filename.startswith(output_prefix) and filename.endswith(f".{extension}"):
-            img = Image.open(os.path.join(output_folder, filename))
-            img.load()
-            images.append(img)
+            with Image.open(os.path.join(output_folder, filename)) as img:
+                img.load()
+                images.append(img)
     return images
 
 
@@ -119,6 +129,7 @@ def get_pdf_info(
 
     Raises:
         ValueError: Page count cannot be determined from output.
+        TimeoutExpired: If the pdfinfo command takes too long to execute.
     """
     command = [_get_command_path("pdfinfo", poppler_path), pdf_path]
 
@@ -129,7 +140,17 @@ def get_pdf_info(
         stderr=PIPE,
         startupinfo=_get_startupinfo(),
     )
-    out, err = proc.communicate()
+    try:
+        out, err = proc.communicate(timeout=5)
+    except TimeoutExpired:
+        proc.kill()
+        proc.communicate()
+        raise
+
+    if proc.returncode != 0:
+        raise ValueError(
+            f"pdfinfo failed with error code {proc.returncode}.\n{err.decode('utf8', 'ignore')}"
+        )
 
     result: dict[str, str | int] = {}
     for field in out.decode("utf8", "ignore").split("\n"):
@@ -230,6 +251,9 @@ def _render_with_pdftoppm(
 
     Returns:
         List of PIL images
+
+    Raises:
+        TimeoutExpired: If any pdftoppm command takes too long to execute
     """
     command_base = _get_command_path("pdftoppm", poppler_path)
 
@@ -241,8 +265,15 @@ def _render_with_pdftoppm(
             args.extend(["-l", str(last_page)])
         args.append(pdf_path)
 
-        proc = Popen(args, env=env, stdout=PIPE, stderr=PIPE, startupinfo=startupinfo)
-        data, _ = proc.communicate()
+        try:
+            proc = Popen(
+                args, env=env, stdout=PIPE, stderr=PIPE, startupinfo=startupinfo
+            )
+            data, _ = proc.communicate(timeout=5)
+        except TimeoutExpired:
+            proc.kill()
+            proc.communicate()
+            raise
         return _parse_ppm_buffer(data)
 
     # Multi-process: split page ranges across subprocesses
@@ -268,7 +299,12 @@ def _render_with_pdftoppm(
 
     images: list[PILImage] = []
     for proc in processes:
-        data, _ = proc.communicate()
+        try:
+            data, _ = proc.communicate(timeout=5)
+        except TimeoutExpired:
+            proc.kill()
+            proc.communicate()
+            raise
         images += _parse_ppm_buffer(data)
 
     return images
@@ -298,6 +334,9 @@ def _render_with_pdftocairo(
 
     Returns:
         List of PIL images
+
+    Raises:
+        TimeoutExpired: If any pdftocairo command takes too long to execute
     """
     command_base = _get_command_path("pdftocairo", poppler_path)
     output_folder = tempfile.mkdtemp()
@@ -314,7 +353,12 @@ def _render_with_pdftocairo(
             proc = Popen(
                 args, env=env, stdout=PIPE, stderr=PIPE, startupinfo=startupinfo
             )
-            proc.communicate()
+            try:
+                proc.communicate(timeout=5)
+            except TimeoutExpired:
+                proc.kill()
+                proc.communicate()
+                raise
             return _load_images_from_folder(output_folder, prefix, "png")
 
         # multi proc stuff
@@ -342,7 +386,12 @@ def _render_with_pdftocairo(
 
         images: list[PILImage] = []
         for prefix, proc in processes:
-            proc.communicate()
+            try:
+                proc.communicate(timeout=5)
+            except TimeoutExpired:
+                proc.kill()
+                proc.communicate()
+                raise
             images += _load_images_from_folder(output_folder, prefix, "png")
 
         return images

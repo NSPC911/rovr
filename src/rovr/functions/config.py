@@ -406,10 +406,12 @@ def load_config() -> tuple[dict, RovrConfig]:
             config["plugins"]["poppler"]["enabled"] = False
         else:
             pdfinfo_path = path.dirname(pdfinfo_executable)
-        # need to ignore in this case. because pdf2image asks for a
-        # string or None, but if it is empty, it will take it as
-        # a string, so kinda forced to do this
-        config["plugins"]["poppler"]["poppler_folder"] = pdfinfo_path  # ty: ignore[invalid-assignment]
+        # need to ignore in this case. poppler_folder is typed as str
+        # in the config schema, but pdfinfo_path can be None when
+        # resolved from PATH, so we suppress the type error
+        config["plugins"]["poppler"]["poppler_folder"] = (
+            pdfinfo_path  # ty: ignore[invalid-assignment]
+        )
     return schema_dict, config
 
 

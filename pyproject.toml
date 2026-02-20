@@ -69,6 +69,7 @@ docscripts = [
 ]
 test = [
     "pytest>=9.0.2",
+    "pytest-asyncio>=1.3.0",
     "pytest-textual-snapshot>=1.0.0",
 ]
 
@@ -125,6 +126,9 @@ schema-to-dict.sequence = [
   "format"
 ]
 
+test.help = "Run tests"
+test.cmd = "pytest"
+
 check.help = "Run all checks (type checking and linting)"
 check.sequence = [ { cmd = "ty check" },{ cmd = "ruff check" } ]
 
@@ -169,6 +173,12 @@ sequence = [
   { cmd = "uv build" },
   "_hash_clean",
 ]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+markers = ["snapshot: marks tests as snapshot tests (run with --snapshot-update to update)"]
+asyncio_mode = "auto"
+timeout = 10
 
 [tool.ruff]
 force-exclude = true

@@ -67,6 +67,10 @@ docscripts = [
   "poethepoet>=0.41.0",
   "ruff>=0.15.0",
 ]
+test = [
+    "pytest>=9.0.2",
+    "pytest-textual-snapshot>=1.0.0",
+]
 
 [build-system]
 requires = ["uv_build>=0.9.0,<0.10.0"]

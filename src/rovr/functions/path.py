@@ -6,7 +6,7 @@ import re
 import stat
 import subprocess
 from os import path
-from typing import Callable, Literal, NamedTuple, TypeAlias, TypedDict, cast, overload
+from typing import Callable, Literal, NamedTuple, TypeAlias, TypedDict, overload
 
 import psutil
 import puremagic
@@ -35,14 +35,10 @@ else:
 
 pprint = Console().print
 
-global mime_re_cache
-mime_re_cache = cast(
-    dict[
-        Literal["text", "image", "pdf", "archive", "folder", "remime", "resvg"],
-        list[re.Pattern],
-    ],
-    {},
-)
+mime_re_cache: dict[
+    Literal["text", "image", "pdf", "archive", "folder", "remime", "resvg"],
+    list[re.Pattern],
+] = {}
 
 
 def normalise(*location: str | bytes) -> str:

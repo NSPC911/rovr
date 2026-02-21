@@ -25,7 +25,7 @@ dependencies = [
   "pillow>=12.1.0",
   "platformdirs>=4.9.0",
   "psutil>=7.2.0",
-  "puremagic==1.30", # I will use an exact pin, and you can't make me change it
+  "puremagic>=2.0.0",
   "rarfile>=4.2",
   "resvg-py>=0.2.6",
   "rich>=14.3.1", # issue with 14.3.0 that breaks nerd fonts

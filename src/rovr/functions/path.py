@@ -1,14 +1,15 @@
 import asyncio
 import base64
 import ctypes
-import fnmatch
 import os
+import re
 import stat
 import subprocess
 from os import path
-from typing import Callable, Literal, NamedTuple, TypeAlias, TypedDict, overload
+from typing import Callable, Literal, NamedTuple, TypeAlias, TypedDict, cast, overload
 
 import psutil
+import puremagic
 from natsort import natsorted
 from rich.console import Console
 from rich.traceback import Traceback
@@ -18,7 +19,6 @@ from textual.dom import DOMNode
 from textual.highlight import guess_language
 
 from rovr.functions.icons import get_icon_for_file, get_icon_for_folder
-from rovr.monkey_patches.puremagic_patch import puremagic
 from rovr.variables.constants import config, log_name, os_type
 
 # windows needs nt, because os.scandir returns
@@ -34,6 +34,15 @@ else:
     DirEntryTypes = os.DirEntry
 
 pprint = Console().print
+
+global mime_re_cache
+mime_re_cache = cast(
+    dict[
+        Literal["text", "image", "pdf", "archive", "folder", "remime", "resvg"],
+        list[re.Pattern],
+    ],
+    {},
+)
 
 
 def normalise(*location: str | bytes) -> str:
@@ -647,9 +656,19 @@ def match_mime_to_preview_type(
         str : The preview type ("text", "image", "pdf", "archive", "folder")
         None: None if no rule matches
     """
-    for pattern, preview_type in config["interface"]["mime_rules"].items():
-        if fnmatch.fnmatch(mime_type, pattern):
-            return preview_type
+    global mime_re_cache
+
+    if not mime_re_cache:
+        print("Compiling MIME type regexes for the first time...")
+        for pattern, preview_type in config["interface"]["mime_rules"].items():
+            if preview_type not in mime_re_cache:
+                mime_re_cache[preview_type] = []
+            mime_re_cache[preview_type].append(re.compile(pattern))
+
+    for preview_type, patterns in mime_re_cache.items():
+        for pattern in patterns:
+            if pattern.match(mime_type):
+                return preview_type
     return None
 
 

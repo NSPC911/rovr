@@ -1124,6 +1124,7 @@ docscripts = [
     { name = "json-schema-for-humans" },
     { name = "jsonschema-gentypes" },
     { name = "poethepoet" },
+    { name = "ruff" },
 ]
 
 [package.metadata]
@@ -1168,6 +1169,7 @@ docscripts = [
     { name = "json-schema-for-humans", specifier = ">=1.5.1" },
     { name = "jsonschema-gentypes", specifier = ">=2.13.0" },
     { name = "poethepoet", specifier = ">=0.41.0" },
+    { name = "ruff", specifier = ">=0.15.0" },
 ]
 
 [[package]]

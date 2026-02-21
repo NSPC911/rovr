@@ -644,12 +644,14 @@ def get_mounted_drives() -> list[str]:
 
 
 def match_mime_to_preview_type(
+    widget: DOMNode,
     mime_type: str,
 ) -> Literal["text", "image", "pdf", "archive", "folder", "remime", "resvg"] | None:
     """
     Match a MIME type against configured rules to determine preview type.
 
     Args:
+        widget: The DOMNode widget to log to if needed
         mime_type: The MIME type to match (e.g., "text/plain", "image/png")
 
     Returns:
@@ -659,7 +661,7 @@ def match_mime_to_preview_type(
     global mime_re_cache
 
     if not mime_re_cache:
-        print("Compiling MIME type regexes for the first time...")
+        widget.log("Compiling MIME type regexes for the first time...")
         for pattern, preview_type in config["interface"]["mime_rules"].items():
             if preview_type not in mime_re_cache:
                 mime_re_cache[preview_type] = []
@@ -667,7 +669,7 @@ def match_mime_to_preview_type(
 
     for preview_type, patterns in mime_re_cache.items():
         for pattern in patterns:
-            if pattern.match(mime_type):
+            if pattern.fullmatch(mime_type):
                 return preview_type
     return None
 

@@ -822,7 +822,9 @@ class PreviewContainer(Container):
                     return
                 content = mime_result.content
 
-                file_type = path_utils.match_mime_to_preview_type(mime_result.mime_type)
+                file_type = path_utils.match_mime_to_preview_type(
+                    self, mime_result.mime_type
+                )
                 if file_type is None:
                     self.log("Could not match MIME type to preview type")
                     self.update_ui(
@@ -850,7 +852,7 @@ class PreviewContainer(Container):
                         )
                         return
                     file_type = path_utils.match_mime_to_preview_type(
-                        mime_result.mime_type
+                        self, mime_result.mime_type
                     )
                     if file_type is None:
                         self.log("Could not match MIME type to preview type")

@@ -642,7 +642,10 @@ def get_mounted_drives() -> list[str]:
 def match_mime_to_preview_type(
     widget: DOMNode,
     mime_type: str,
-) -> Literal["text", "image", "pdf", "archive", "folder", "remime", "resvg"] | None:
+) -> (
+    Literal["text", "image", "pdf", "archive", "folder", "remime", "resvg", "font"]
+    | None
+):
     """
     Match a MIME type against configured rules to determine preview type.
 

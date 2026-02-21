@@ -4,8 +4,9 @@ from io import BytesIO
 from os import path
 from time import time
 
+import textual_image
 import textual_image.widget as timg
-from PIL import Image, UnidentifiedImageError
+from PIL import Image, ImageDraw, ImageFont, UnidentifiedImageError
 from PIL.Image import Image as PILImage
 from resvg_py import svg_to_bytes
 from rich.syntax import Syntax
@@ -150,6 +151,92 @@ class PreviewContainer(Container):
             return True
         except NoMatches:
             return False
+
+    def show_font_preview(self) -> None:
+        """Show font preview with PIL.ImageFont and a custom PIL.ImageDraw"""
+        if should_cancel() or self._current_file_path is None:
+            return
+
+        self.app.call_from_thread(setattr, self, "border_title", "loading...")
+
+        # need to do this weird check because sixel doesn't support transparency
+        # so just check whether auto renderer is sixel, and config configured
+        # to use auto (empty string) or sixel (explicitly)
+        if (
+            textual_image.renderable.Image is textual_image.renderable.sixel.Image
+        ) and (config["interface"]["image_protocol"] in ("Sixel", "")):
+            from textual.color import Color
+
+            bg_color = Color.parse(self.app.theme_variables["background"])
+            img = Image.new(
+                "RGB", (800, 450), color=(bg_color.r, bg_color.g, bg_color.b)
+            )
+        else:
+            img = Image.new("RGBA", (800, 450), color=(0, 0, 0, 0))
+        draw = ImageDraw.Draw(img)
+
+        try:
+            font = ImageFont.truetype(self._current_file_path, size=40)
+            if should_cancel():
+                return
+        except OSError:
+            if should_cancel():
+                return
+            self.app.call_from_thread(self.remove_children)
+            self.app.call_from_thread(
+                self.mount,
+                Static(
+                    "Cannot load font. The file may be corrupted or not a font file.",
+                    classes="special",
+                ),
+            )
+            return
+        # TODO: make this customisable
+        text = "abcdefghijklmnopqrstuvwxyz\nABCDEFGHIJKLMNOPQRSTUVWXYZ\n0123456789\n!@#$%^&*()-_=+[]{}|;:'\",.<>/?`~"
+        # used for centering
+        bbox = draw.multiline_textbbox((0, 0), text, font=font)
+        text_width, text_height = bbox[2] - bbox[0], bbox[3] - bbox[1]
+        width, height = img.size
+        x, y = (width - text_width) // 2, (height - text_height) // 2
+
+        draw.text((x, y), text, font=font, fill=(255, 255, 255, 255))
+        if should_cancel():
+            return
+
+        try:
+            if not self.has_child(".image_preview"):
+                self.app.call_from_thread(self.remove_children)
+
+                if should_cancel():
+                    return
+
+                image_widget = timg.__dict__[
+                    config["interface"]["image_protocol"] + "Image"
+                ](
+                    img,
+                    classes="image_preview",
+                )
+                image_widget.can_focus = True
+                self.app.call_from_thread(self.mount, image_widget)
+            else:
+                try:
+                    image_widget = self.query_one(".image_preview")
+                    self.app.call_from_thread(setattr, image_widget, "image", img)
+                except NoMatches:
+                    return
+        except Exception as exc:
+            if should_cancel():
+                return
+            self.app.call_from_thread(self.remove_children)
+            self.app.call_from_thread(
+                self.mount,
+                Static(
+                    f"Cannot render font preview.\n{type(exc).__name__}: {str(exc)}",
+                    classes="special",
+                ),
+            )
+            return
+        self.app.call_from_thread(setattr, self, "border_title", titles.font)
 
     def show_resvg_preview(self) -> None:
         """Show svg preview using resvg"""
@@ -942,9 +1029,6 @@ class PreviewContainer(Container):
         if file_type == "folder":
             self.log("Showing folder preview")
             self.show_folder_preview(file_path)
-        elif file_type == "resvg":
-            self.log("Showing resvg preview")
-            self.show_resvg_preview()
         elif file_type == "image":
             self.log("Showing image preview")
             self.show_image_preview()
@@ -955,6 +1039,12 @@ class PreviewContainer(Container):
             self.log("Showing pdf preview")
             self.app.call_from_thread(self.add_class, "pdf")
             self.show_pdf_preview()
+        elif file_type == "resvg":
+            self.log("Showing resvg preview")
+            self.show_resvg_preview()
+        elif file_type == "font":
+            self.log("Showing font preview")
+            self.show_font_preview()
         else:
             if content in self._preview_texts.values():
                 self.log("Showing special preview")

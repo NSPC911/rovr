@@ -24,6 +24,7 @@ description: config schema humanified
   - [1.16. Property `Rovr Config > interface > preview_text`](#interface_preview_text)
     - [1.16.1. Property `Rovr Config > interface > preview_text > error`](#interface_preview_text_error)
     - [1.16.2. Property `Rovr Config > interface > preview_text > start`](#interface_preview_text_start)
+    - [1.16.3. Property `Rovr Config > interface > preview_text > font_text`](#interface_preview_text_font_text)
   - [1.17. Property `Rovr Config > interface > compact_mode`](#interface_compact_mode)
     - [1.17.1. Property `Rovr Config > interface > compact_mode > buttons`](#interface_compact_mode_buttons)
     - [1.17.2. Property `Rovr Config > interface > compact_mode > panels`](#interface_compact_mode_panels)
@@ -557,10 +558,11 @@ Must be one of:
 | **Required**              | No          |
 | **Additional properties** | Not allowed |
 
-| Property                               | Type   | Title/Description                                                                                                                                          |
-| -------------------------------------- | ------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| [error](#interface_preview_text_error) | string | If for any reason the file preview refused to show, this appears.                                                                                          |
-| [start](#interface_preview_text_start) | string | This is shown when the rovr starts up. You may see it for a split second, but it will never appear afterwards. You cannot view this properly in this docs. |
+| Property                                       | Type   | Title/Description                                                                                                                                                                                                                                        |
+| ---------------------------------------------- | ------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| [error](#interface_preview_text_error)         | string | If for any reason the file preview refused to show, this appears.                                                                                                                                                                                        |
+| [start](#interface_preview_text_start)         | string | This is shown when the rovr starts up. You may see it for a split second, but it will never appear afterwards. You cannot view this properly in this docs.                                                                                               |
+| [font_text](#interface_preview_text_font_text) | string | When a font file is previewed, this text will be rendered in the font if possible. If not specified, it will default to 'abcdefghijklmnopqrstuvwxyz<br />ABCDEFGHIJKLMNOPQRSTUVWXYZ<br />0123456789<br />!@#$%^&\*()-\_=+[]{}&#124;;:\'",.&lt;&gt;/?\`~' |
 
 #### <a name="interface_preview_text_error"></a>1.16.1. Property `Rovr Config > interface > preview_text > error`
 
@@ -581,6 +583,19 @@ Must be one of:
 | **Default**  | `" ___ ___\n&#124;  _&#124; . &#124;\n&#124;_&#124; &#124;___&#124;\n _ _ ___\n&#124; &#124; &#124;  _&#124;\n \\_/&#124;_&#124;\n"` |
 
 **Description:** This is shown when the rovr starts up. You may see it for a split second, but it will never appear afterwards. You cannot view this properly in this docs.
+
+#### <a name="interface_preview_text_font_text"></a>1.16.3. Property `Rovr Config > interface > preview_text > font_text`
+
+|              |                                                                                                                      |
+| ------------ | -------------------------------------------------------------------------------------------------------------------- |
+| **Type**     | `string`                                                                                                             |
+| **Required** | No                                                                                                                   |
+| **Default**  | `"abcdefghijklmnopqrstuvwxyz\nABCDEFGHIJKLMNOPQRSTUVWXYZ\n0123456789\n!@#$%^&*()-_=+[]{}&#124;;:'\",.&lt;&gt;/?`~'"` |
+
+**Description:** When a font file is previewed, this text will be rendered in the font if possible. If not specified, it will default to 'abcdefghijklmnopqrstuvwxyz
+ABCDEFGHIJKLMNOPQRSTUVWXYZ
+0123456789
+!@#$%^&\*()-\_=+[]{}&#124;;:\'",.&lt;&gt;/?`~'
 
 ### <a name="interface_compact_mode"></a>1.17. Property `Rovr Config > interface > compact_mode`
 
@@ -617,12 +632,12 @@ Must be one of:
 
 ### <a name="interface_mime_rules"></a>1.18. Property `Rovr Config > interface > mime_rules`
 
-|                           |                                                                                                                                                                                                                                                                                                                                                                                                         |
-| ------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Type**                  | `object`                                                                                                                                                                                                                                                                                                                                                                                                |
-| **Required**              | No                                                                                                                                                                                                                                                                                                                                                                                                      |
-| **Additional properties** | [Each additional property must conform to the schema](#interface_mime_rules_additionalProperties)                                                                                                                                                                                                                                                                                                       |
-| **Default**               | `{"text/*": "text", "image/svg+xml": "resvg", "image/*": "image", "application/pdf": "pdf", "application/zip": "archive", "application/x-tar": "archive", "application/gzip": "archive", "application/x-bzip2": "archive", "application/x-xz": "archive", "application/x-rar": "archive", "application/x-7z-compressed": "archive", "inode/directory": "folder", "application/octet-stream": "remime"}` |
+|                           |                                                                                                                                                                                                                                                                                                                                                                                                                           |
+| ------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Type**                  | `object`                                                                                                                                                                                                                                                                                                                                                                                                                  |
+| **Required**              | No                                                                                                                                                                                                                                                                                                                                                                                                                        |
+| **Additional properties** | [Each additional property must conform to the schema](#interface_mime_rules_additionalProperties)                                                                                                                                                                                                                                                                                                                         |
+| **Default**               | `{"text/*": "text", "image/svg+xml": "resvg", "image/*": "image", "application/pdf": "pdf", "application/zip": "archive", "application/x-tar": "archive", "application/gzip": "archive", "application/x-bzip2": "archive", "application/x-xz": "archive", "application/x-rar": "archive", "application/x-7z-compressed": "archive", "inode/directory": "folder", "application/octet-stream": "remime", "font/*": "font"}` |
 
 **Description:** Map MIME type patterns to preview types. Supports glob patterns (e.g., 'text/\*' matches 'text/plain', 'text/html', etc.). Valid preview types: text, image, pdf, archive, folder, remime.
 -&gt; Use 'remime' if you want a more accurate description from file(1)
@@ -647,6 +662,7 @@ Must be one of:
 - "folder"
 - "remime"
 - "resvg"
+- "font"
 
 ## <a name="settings"></a>2. Property `Rovr Config > settings`
 

@@ -60,6 +60,7 @@ class PreviewContainerTitles:
     archive = "Archive Preview"
     pdf = "PDF Preview"
     svg = "SVG Preview"
+    font = "Font Preview"
 
 
 buttons_that_depend_on_path = [

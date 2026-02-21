@@ -119,6 +119,11 @@
               "type": "string",
               "default": " ___ ___\n|  _| . |\n|_| |___|\n _ _ ___\n| | |  _|\n \\_/|_|\n",
               "description": "This is shown when the rovr starts up. You may see it for a split second, but it will never appear afterwards. You cannot view this properly in this docs."
+            },
+            "font_text": {
+              "type": "string",
+              "description": "When a font file is previewed, this text will be rendered in the font if possible. If not specified, it will default to 'abcdefghijklmnopqrstuvwxyz\nABCDEFGHIJKLMNOPQRSTUVWXYZ\n0123456789\n!@#$%^&*()-_=+[]{}|;:\\'\",.<>/?`~'",
+              "default": "abcdefghijklmnopqrstuvwxyz\nABCDEFGHIJKLMNOPQRSTUVWXYZ\n0123456789\n!@#$%^&*()-_=+[]{}|;:'\",.<>/?`~'"
             }
           }
         },
@@ -142,7 +147,7 @@
           "type": "object",
           "additionalProperties": {
             "type": "string",
-            "enum": ["text", "image", "pdf", "archive", "folder", "remime", "resvg"]
+            "enum": ["text", "image", "pdf", "archive", "folder", "remime", "resvg", "font"]
           },
           "default": {
             "text/*": "text",
@@ -157,7 +162,8 @@
             "application/x-rar": "archive",
             "application/x-7z-compressed": "archive",
             "inode/directory": "folder",
-            "application/octet-stream": "remime"
+            "application/octet-stream": "remime",
+            "font/*": "font"
           },
           "description": "Map MIME type patterns to preview types. Supports glob patterns (e.g., 'text/*' matches 'text/plain', 'text/html', etc.). Valid preview types: text, image, pdf, archive, folder, remime.\n-> Use 'remime' if you want a more accurate description from file(1)"
         }

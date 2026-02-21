@@ -78,6 +78,7 @@ _ROVR_CONFIG_INTERFACE_MIME_RULES_DEFAULT = {
     "application/x-7z-compressed": "archive",
     "inode/directory": "folder",
     "application/octet-stream": "remime",
+    "font/*": "font",
 }
 r""" Default value of the field path 'Rovr Config interface mime_rules' """
 
@@ -88,6 +89,10 @@ r""" Default value of the field path 'Rovr Config interface nerd_font' """
 
 _ROVR_CONFIG_INTERFACE_PREVIEW_TEXT_ERROR_DEFAULT = "couldn't read this file! (¬_¬ )"
 r""" Default value of the field path 'Rovr Config interface preview_text error' """
+
+
+_ROVR_CONFIG_INTERFACE_PREVIEW_TEXT_FONT_TEXT_DEFAULT = "abcdefghijklmnopqrstuvwxyz\nABCDEFGHIJKLMNOPQRSTUVWXYZ\n0123456789\n!@#$%^&*()-_=+[]{}|;:'\",.<>/?`~'"
+r""" Default value of the field path 'Rovr Config interface preview_text font_text' """
 
 
 _ROVR_CONFIG_INTERFACE_PREVIEW_TEXT_START_DEFAULT = (
@@ -613,6 +618,7 @@ class _RovrConfigInterface(TypedDict, total=False):
       application/x-tar: archive
       application/x-xz: archive
       application/zip: archive
+      font/*: font
       image/*: image
       image/svg+xml: resvg
       inode/directory: folder
@@ -696,6 +702,7 @@ _RovrConfigInterfaceMimeRulesAdditionalproperties = (
     | Literal["folder"]
     | Literal["remime"]
     | Literal["resvg"]
+    | Literal["font"]
 )
 _ROVRCONFIGINTERFACEMIMERULESADDITIONALPROPERTIES_TEXT: Literal["text"] = "text"
 r"""The values for the '_RovrConfigInterfaceMimeRulesAdditionalproperties' enum"""
@@ -712,6 +719,8 @@ r"""The values for the '_RovrConfigInterfaceMimeRulesAdditionalproperties' enum"
 _ROVRCONFIGINTERFACEMIMERULESADDITIONALPROPERTIES_REMIME: Literal["remime"] = "remime"
 r"""The values for the '_RovrConfigInterfaceMimeRulesAdditionalproperties' enum"""
 _ROVRCONFIGINTERFACEMIMERULESADDITIONALPROPERTIES_RESVG: Literal["resvg"] = "resvg"
+r"""The values for the '_RovrConfigInterfaceMimeRulesAdditionalproperties' enum"""
+_ROVRCONFIGINTERFACEMIMERULESADDITIONALPROPERTIES_FONT: Literal["font"] = "font"
 r"""The values for the '_RovrConfigInterfaceMimeRulesAdditionalproperties' enum"""
 
 
@@ -734,6 +743,19 @@ class _RovrConfigInterfacePreviewText(TypedDict, total=False):
 | | |  _|
  \_/|_|
 
+    """
+
+    font_text: str
+    r"""
+    When a font file is previewed, this text will be rendered in the font if possible. If not specified, it will default to 'abcdefghijklmnopqrstuvwxyz
+    ABCDEFGHIJKLMNOPQRSTUVWXYZ
+    0123456789
+    !@#$%^&*()-_=+[]{}|;:\'",.<>/?`~'
+
+    default: abcdefghijklmnopqrstuvwxyz
+ABCDEFGHIJKLMNOPQRSTUVWXYZ
+0123456789
+!@#$%^&*()-_=+[]{}|;:'",.<>/?`~'
     """
 
 

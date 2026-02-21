@@ -29,6 +29,7 @@ start = """
  | | |  _|
   \\_/|_|
 """
+font_text = "abcdefghijklmnopqrstuvwxyz\nABCDEFGHIJKLMNOPQRSTUVWXYZ\noO08 iIlL1 {} [] g9qCGQ ~- +=>"
 
 [interface.clock]
 enabled = true
@@ -54,6 +55,7 @@ panels = false
 "application/virtualbox-(vhd|vhdx)" = "archive"
 "application/(debian.*-package|redhat-package-manager|rpm|android\\.package-archive)" = "archive"
 "inode/directory" = "folder"
+"font/*" = "font"
 
 [settings]
 copy_includes_metadata = true

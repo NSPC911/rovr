@@ -65,20 +65,25 @@ r""" Default value of the field path 'Rovr Config interface image_protocol' """
 
 
 _ROVR_CONFIG_INTERFACE_MIME_RULES_DEFAULT = {
-    "text/*": "text",
-    "image/svg+xml": "resvg",
-    "image/*": "image",
+    "text/.*": "text",
+    "application/(json|javascript|xml|raml\\+yaml)": "text",
+    "application/x-(yaml|script|pem-file|subrip|typescript)": "text",
+    "application/(mbox|ndjson|wine-extension-ini)": "text",
+    "image/svg\\+xml": "resvg",
+    "image/(avif|hei.|jxl)": "image",
+    "image/.*": "image",
     "application/pdf": "pdf",
-    "application/zip": "archive",
-    "application/x-tar": "archive",
-    "application/gzip": "archive",
-    "application/x-bzip2": "archive",
-    "application/x-xz": "archive",
-    "application/x-rar": "archive",
-    "application/x-7z-compressed": "archive",
+    "application/(zip|gzip|zstd|bzip2|vnd\\.rar)": "archive",
+    "application/x-(xz|x-tar|x-gzip|x-bzip2|x-xz|x-rar|x-rar-compressed|x-7z-compressed)": "archive",
+    "application/(rar|7z.*|tar|xz|bzip.*|lzma|compress|archive|cpio|arj|xar|ms-cab.*)": "archive",
+    "application/(iso9660-image|qemu-disk|ms-wim|apple-diskimage)": "archive",
+    "application/virtualbox-(vhd|vhdx)": "archive",
+    "application/(debian.*-package|redhat-package-manager|rpm|android\\.package-archive)": "archive",
     "inode/directory": "folder",
-    "application/octet-stream": "remime",
-    "font/*": "font",
+    "font/.*": "font",
+    "application/ms-opentype": "font",
+    "application/font-.*": "font",
+    "application/x-font-.*": "font",
 }
 r""" Default value of the field path 'Rovr Config interface mime_rules' """
 
@@ -605,24 +610,29 @@ class _RovrConfigInterface(TypedDict, total=False):
     compact_mode: "_RovrConfigInterfaceCompactMode"
     mime_rules: dict[str, "_RovrConfigInterfaceMimeRulesAdditionalproperties"]
     r"""
-    Map MIME type patterns to preview types. Supports glob patterns (e.g., 'text/*' matches 'text/plain', 'text/html', etc.). Valid preview types: text, image, pdf, archive, folder, remime.
+    Map MIME type patterns to preview types. Uses regex patterns. Valid preview types: text, image, pdf, archive, folder, resvg, font, remime.
     -> Use 'remime' if you want a more accurate description from file(1)
 
     default:
-      application/gzip: archive
-      application/octet-stream: remime
+      application/(debian.*-package|redhat-package-manager|rpm|android\.package-archive): archive
+      application/(iso9660-image|qemu-disk|ms-wim|apple-diskimage): archive
+      application/(json|javascript|xml|raml\+yaml): text
+      application/(mbox|ndjson|wine-extension-ini): text
+      application/(rar|7z.*|tar|xz|bzip.*|lzma|compress|archive|cpio|arj|xar|ms-cab.*): archive
+      application/(zip|gzip|zstd|bzip2|vnd\.rar): archive
+      application/font-.*: font
+      application/ms-opentype: font
       application/pdf: pdf
-      application/x-7z-compressed: archive
-      application/x-bzip2: archive
-      application/x-rar: archive
-      application/x-tar: archive
-      application/x-xz: archive
-      application/zip: archive
-      font/*: font
-      image/*: image
-      image/svg+xml: resvg
+      application/virtualbox-(vhd|vhdx): archive
+      application/x-(xz|x-tar|x-gzip|x-bzip2|x-xz|x-rar|x-rar-compressed|x-7z-compressed): archive
+      application/x-(yaml|script|pem-file|subrip|typescript): text
+      application/x-font-.*: font
+      font/.*: font
+      image/(avif|hei.|jxl): image
+      image/.*: image
+      image/svg\+xml: resvg
       inode/directory: folder
-      text/*: text
+      text/.*: text
     """
 
 

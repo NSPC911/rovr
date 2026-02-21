@@ -154,11 +154,15 @@ class PreviewContainer(Container):
 
     def show_font_preview(self) -> None:
         """Show font preview with PIL.ImageFont and a custom PIL.ImageDraw"""
+        from textual.color import Color
+
         if should_cancel() or self._current_file_path is None:
             return
 
         self.app.call_from_thread(setattr, self, "border_title", titles.font)
 
+        fg_color = Color.parse(self.app.theme_variables["foreground"])
+        text_fill: tuple[int, ...]
         # need to do this weird check because sixel doesn't support transparency
         # so just check whether auto renderer is sixel, and config configured
         # to use auto (empty string) or sixel (explicitly)
@@ -168,14 +172,14 @@ class PreviewContainer(Container):
             # when loading the config, but just for the sake of shutting AI
             # up, I'm going to leave this here.
         ) and (config["interface"]["image_protocol"] in ("Sixel", "Auto", "")):
-            from textual.color import Color
-
             bg_color = Color.parse(self.app.theme_variables["background"])
             img = Image.new(
                 "RGB", (800, 450), color=(bg_color.r, bg_color.g, bg_color.b)
             )
+            text_fill = (fg_color.r, fg_color.g, fg_color.b)
         else:
             img = Image.new("RGBA", (800, 450), color=(0, 0, 0, 0))
+            text_fill = (fg_color.r, fg_color.g, fg_color.b, 255)
         draw = ImageDraw.Draw(img)
 
         try:
@@ -199,9 +203,16 @@ class PreviewContainer(Container):
         bbox = draw.multiline_textbbox((0, 0), text, font=font)
         text_width, text_height = bbox[2] - bbox[0], bbox[3] - bbox[1]
         width, height = img.size
-        x, y = (width - text_width) // 2, (height - text_height) // 2
 
-        draw.multiline_text((x, y), text, font=font, fill=(255, 255, 255, 255))
+        draw.multiline_text(
+            (
+                (width - text_width) // 2 - bbox[0],
+                (height - text_height) // 2 - bbox[1],
+            ),
+            text,
+            font=font,
+            fill=text_fill,
+        )
         if should_cancel():
             return
 

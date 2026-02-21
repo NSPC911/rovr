@@ -157,14 +157,17 @@ class PreviewContainer(Container):
         if should_cancel() or self._current_file_path is None:
             return
 
-        self.app.call_from_thread(setattr, self, "border_title", "loading...")
+        self.app.call_from_thread(setattr, self, "border_title", titles.font)
 
         # need to do this weird check because sixel doesn't support transparency
         # so just check whether auto renderer is sixel, and config configured
         # to use auto (empty string) or sixel (explicitly)
         if (
             textual_image.renderable.Image is textual_image.renderable.sixel.Image
-        ) and (config["interface"]["image_protocol"] in ("Sixel", "")):
+            # image_protocol shouldn't be "Auto" because it is replaced early on
+            # when loading the config, but just for the sake of shutting AI
+            # up, I'm going to leave this here.
+        ) and (config["interface"]["image_protocol"] in ("Sixel", "Auto", "")):
             from textual.color import Color
 
             bg_color = Color.parse(self.app.theme_variables["background"])
@@ -191,15 +194,14 @@ class PreviewContainer(Container):
                 ),
             )
             return
-        # TODO: make this customisable
-        text = "abcdefghijklmnopqrstuvwxyz\nABCDEFGHIJKLMNOPQRSTUVWXYZ\n0123456789\n!@#$%^&*()-_=+[]{}|;:'\",.<>/?`~"
+        text = self._preview_texts["font_text"]
         # used for centering
         bbox = draw.multiline_textbbox((0, 0), text, font=font)
         text_width, text_height = bbox[2] - bbox[0], bbox[3] - bbox[1]
         width, height = img.size
         x, y = (width - text_width) // 2, (height - text_height) // 2
 
-        draw.text((x, y), text, font=font, fill=(255, 255, 255, 255))
+        draw.multiline_text((x, y), text, font=font, fill=(255, 255, 255, 255))
         if should_cancel():
             return
 
@@ -236,7 +238,6 @@ class PreviewContainer(Container):
                 ),
             )
             return
-        self.app.call_from_thread(setattr, self, "border_title", titles.font)
 
     def show_resvg_preview(self) -> None:
         """Show svg preview using resvg"""

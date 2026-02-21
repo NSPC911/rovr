@@ -63,8 +63,9 @@ dev = [
 ]
 docscripts = [
   "json-schema-for-humans>=1.5.1",
-  "poethepoet>=0.41.0",
   "jsonschema-gentypes>=2.13.0",
+  "poethepoet>=0.41.0",
+  "ruff>=0.15.0",
 ]
 
 [build-system]

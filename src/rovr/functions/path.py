@@ -36,7 +36,7 @@ else:
 pprint = Console().print
 
 mime_re_cache: dict[
-    Literal["text", "image", "pdf", "archive", "folder", "remime", "resvg"],
+    Literal["text", "image", "pdf", "archive", "folder", "remime", "resvg", "font"],
     list[re.Pattern],
 ] = {}
 

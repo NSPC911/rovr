@@ -122,8 +122,8 @@
             },
             "font_text": {
               "type": "string",
-              "description": "When a font file is previewed, this text will be rendered in the font if possible. If not specified, it will default to 'abcdefghijklmnopqrstuvwxyz\nABCDEFGHIJKLMNOPQRSTUVWXYZ\n0123456789\n!@#$%^&*()-_=+[]{}|;:\\'\",.<>/?`~'",
-              "default": "abcdefghijklmnopqrstuvwxyz\nABCDEFGHIJKLMNOPQRSTUVWXYZ\n0123456789\n!@#$%^&*()-_=+[]{}|;:'\",.<>/?`~'"
+              "description": "When a font file is previewed, this text will be rendered in the font if possible.",
+              "default": "abcdefghijklmnopqrstuvwxyz\nABCDEFGHIJKLMNOPQRSTUVWXYZ\noO08 iIlL1 g9qCQG a@ 5sS\n{} [==>  ] (*) <> ~-+ /\\\n"
             }
           }
         },

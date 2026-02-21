@@ -91,7 +91,7 @@ _ROVR_CONFIG_INTERFACE_PREVIEW_TEXT_ERROR_DEFAULT = "couldn't read this file! (Â
 r""" Default value of the field path 'Rovr Config interface preview_text error' """
 
 
-_ROVR_CONFIG_INTERFACE_PREVIEW_TEXT_FONT_TEXT_DEFAULT = "abcdefghijklmnopqrstuvwxyz\nABCDEFGHIJKLMNOPQRSTUVWXYZ\n0123456789\n!@#$%^&*()-_=+[]{}|;:'\",.<>/?`~'"
+_ROVR_CONFIG_INTERFACE_PREVIEW_TEXT_FONT_TEXT_DEFAULT = "abcdefghijklmnopqrstuvwxyz\nABCDEFGHIJKLMNOPQRSTUVWXYZ\noO08 iIlL1 g9qCQG a@ 5sS\n{} [==>  ] (*) <> ~-+ /\\\n"
 r""" Default value of the field path 'Rovr Config interface preview_text font_text' """
 
 
@@ -747,15 +747,13 @@ class _RovrConfigInterfacePreviewText(TypedDict, total=False):
 
     font_text: str
     r"""
-    When a font file is previewed, this text will be rendered in the font if possible. If not specified, it will default to 'abcdefghijklmnopqrstuvwxyz
-    ABCDEFGHIJKLMNOPQRSTUVWXYZ
-    0123456789
-    !@#$%^&*()-_=+[]{}|;:\'",.<>/?`~'
+    When a font file is previewed, this text will be rendered in the font if possible.
 
     default: abcdefghijklmnopqrstuvwxyz
 ABCDEFGHIJKLMNOPQRSTUVWXYZ
-0123456789
-!@#$%^&*()-_=+[]{}|;:'",.<>/?`~'
+oO08 iIlL1 g9qCQG a@ 5sS
+{} [==>  ] (*) <> ~-+ /\
+
     """
 
 

@@ -558,11 +558,11 @@ Must be one of:
 | **Required**              | No          |
 | **Additional properties** | Not allowed |
 
-| Property                                       | Type   | Title/Description                                                                                                                                                                                                                                        |
-| ---------------------------------------------- | ------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| [error](#interface_preview_text_error)         | string | If for any reason the file preview refused to show, this appears.                                                                                                                                                                                        |
-| [start](#interface_preview_text_start)         | string | This is shown when the rovr starts up. You may see it for a split second, but it will never appear afterwards. You cannot view this properly in this docs.                                                                                               |
-| [font_text](#interface_preview_text_font_text) | string | When a font file is previewed, this text will be rendered in the font if possible. If not specified, it will default to 'abcdefghijklmnopqrstuvwxyz<br />ABCDEFGHIJKLMNOPQRSTUVWXYZ<br />0123456789<br />!@#$%^&\*()-\_=+[]{}&#124;;:\'",.&lt;&gt;/?\`~' |
+| Property                                       | Type   | Title/Description                                                                                                                                          |
+| ---------------------------------------------- | ------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| [error](#interface_preview_text_error)         | string | If for any reason the file preview refused to show, this appears.                                                                                          |
+| [start](#interface_preview_text_start)         | string | This is shown when the rovr starts up. You may see it for a split second, but it will never appear afterwards. You cannot view this properly in this docs. |
+| [font_text](#interface_preview_text_font_text) | string | When a font file is previewed, this text will be rendered in the font if possible.                                                                         |
 
 #### <a name="interface_preview_text_error"></a>1.16.1. Property `Rovr Config > interface > preview_text > error`
 
@@ -586,16 +586,13 @@ Must be one of:
 
 #### <a name="interface_preview_text_font_text"></a>1.16.3. Property `Rovr Config > interface > preview_text > font_text`
 
-|              |                                                                                                                      |
-| ------------ | -------------------------------------------------------------------------------------------------------------------- |
-| **Type**     | `string`                                                                                                             |
-| **Required** | No                                                                                                                   |
-| **Default**  | `"abcdefghijklmnopqrstuvwxyz\nABCDEFGHIJKLMNOPQRSTUVWXYZ\n0123456789\n!@#$%^&*()-_=+[]{}&#124;;:'\",.&lt;&gt;/?`~'"` |
+|              |                                                                                                                            |
+| ------------ | -------------------------------------------------------------------------------------------------------------------------- |
+| **Type**     | `string`                                                                                                                   |
+| **Required** | No                                                                                                                         |
+| **Default**  | `"abcdefghijklmnopqrstuvwxyz\nABCDEFGHIJKLMNOPQRSTUVWXYZ\noO08 iIlL1 g9qCQG a@ 5sS\n{} [==&gt;  ] (*) &lt;&gt; ~-+ /\\\n"` |
 
-**Description:** When a font file is previewed, this text will be rendered in the font if possible. If not specified, it will default to 'abcdefghijklmnopqrstuvwxyz
-ABCDEFGHIJKLMNOPQRSTUVWXYZ
-0123456789
-!@#$%^&\*()-\_=+[]{}&#124;;:\'",.&lt;&gt;/?`~'
+**Description:** When a font file is previewed, this text will be rendered in the font if possible.
 
 ### <a name="interface_compact_mode"></a>1.17. Property `Rovr Config > interface > compact_mode`
 

@@ -13,7 +13,11 @@ description: config schema humanified
   - [1.7. Property `Rovr Config > interface > show_line_numbers`](#interface_show_line_numbers)
   - [1.8. Property `Rovr Config > interface > scrolloff`](#interface_scrolloff)
   - [1.9. Property `Rovr Config > interface > show_hidden_files`](#interface_show_hidden_files)
-  - [1.10. Property `Rovr Config > interface > image_protocol`](#interface_image_protocol)
+  - [1.10. Property `Rovr Config > interface > image_viewer`](#interface_image_viewer)
+    - [1.10.1. Property `Rovr Config > interface > image_viewer > protocol`](#interface_image_viewer_protocol)
+    - [1.10.2. Property `Rovr Config > interface > image_viewer > max_size`](#interface_image_viewer_max_size)
+      - [1.10.2.1. Rovr Config > interface > image_viewer > max_size > max_size items](#interface_image_viewer_max_size_items)
+    - [1.10.3. Property `Rovr Config > interface > image_viewer > resampling`](#interface_image_viewer_resampling)
   - [1.11. Property `Rovr Config > interface > allow_tab_nav`](#interface_allow_tab_nav)
   - [1.12. Property `Rovr Config > interface > append_new_tabs`](#interface_append_new_tabs)
   - [1.13. Property `Rovr Config > interface > double_click_delay`](#interface_double_click_delay)
@@ -335,26 +339,26 @@ description: config schema humanified
 
 **Description:** Settings related to the user interface and experience
 
-| Property                                                              | Type             | Title/Description                                                                                                                                                                                                       |
-| --------------------------------------------------------------------- | ---------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| [tooltips](#interface_tooltips)                                       | boolean          | Show tooltips when your mouse is over a tooltip supported button.<br />This is not hot reloaded.                                                                                                                        |
-| [nerd_font](#interface_nerd_font)                                     | boolean          | Use nerd font for rendering icons instead of weird characters and stuff.<br />Not properly hot-reloaded.                                                                                                                |
-| [use_reactive_layout](#interface_use_reactive_layout)                 | boolean          | Hide certain elements based on the width and height of the terminal.                                                                                                                                                    |
-| [show_progress_eta](#interface_show_progress_eta)                     | boolean          | When copying or deleting files, show an ETA for when the action will be completed.                                                                                                                                      |
-| [show_progress_percentage](#interface_show_progress_percentage)       | boolean          | When copying or deleting files, show a percentage of how much had been completed.                                                                                                                                       |
-| [truncate_progress_file_path](#interface_truncate_progress_file_path) | boolean          | When the process container is using file paths, truncate the file path to only view the first and last names of the path.                                                                                               |
-| [show_line_numbers](#interface_show_line_numbers)                     | boolean          | Add line numbers to the left gutter if you are viewing a text file.                                                                                                                                                     |
-| [scrolloff](#interface_scrolloff)                                     | integer          | The number of files to keep above and below the cursor when moving through the file list.                                                                                                                               |
-| [show_hidden_files](#interface_show_hidden_files)                     | boolean          | Show hidden files and folders (those starting with a dot on Unix, or explicitly hidden on Windows/MacOS).                                                                                                               |
-| [image_protocol](#interface_image_protocol)                           | enum (of string) | The image protocol to use when displaying an image                                                                                                                                                                      |
-| [allow_tab_nav](#interface_allow_tab_nav)                             | boolean          | Allow navigating the main app screen with \`tab\` and \`shift+tab\`                                                                                                                                                     |
-| [append_new_tabs](#interface_append_new_tabs)                         | boolean          | Choose whether or not to append new tabs instead of inserting them.<br />\`true\` =&gt; Append to the end of the tab list.<br />\`false\` =&gt; Insert after the active tab.                                            |
-| [double_click_delay](#interface_double_click_delay)                   | number           | The delay between two consecutive clicks to enter into a directory, or open a file.                                                                                                                                     |
-| [drive_watcher_frequency](#interface_drive_watcher_frequency)         | number           | How often (in seconds) to check for changes in mounted drives in the sidebar.                                                                                                                                           |
-| [clock](#interface_clock)                                             | object           |                                                                                                                                                                                                                         |
-| [preview_text](#interface_preview_text)                               | object           |                                                                                                                                                                                                                         |
-| [compact_mode](#interface_compact_mode)                               | object           |                                                                                                                                                                                                                         |
-| [mime_rules](#interface_mime_rules)                                   | object           | Map MIME type patterns to preview types. Uses regex patterns. Valid preview types: text, image, pdf, archive, folder, resvg, font, remime.<br />-&gt; Use 'remime' if you want a more accurate description from file(1) |
+| Property                                                              | Type    | Title/Description                                                                                                                                                                                                       |
+| --------------------------------------------------------------------- | ------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| [tooltips](#interface_tooltips)                                       | boolean | Show tooltips when your mouse is over a tooltip supported button.<br />This is not hot reloaded.                                                                                                                        |
+| [nerd_font](#interface_nerd_font)                                     | boolean | Use nerd font for rendering icons instead of weird characters and stuff.<br />Not properly hot-reloaded.                                                                                                                |
+| [use_reactive_layout](#interface_use_reactive_layout)                 | boolean | Hide certain elements based on the width and height of the terminal.                                                                                                                                                    |
+| [show_progress_eta](#interface_show_progress_eta)                     | boolean | When copying or deleting files, show an ETA for when the action will be completed.                                                                                                                                      |
+| [show_progress_percentage](#interface_show_progress_percentage)       | boolean | When copying or deleting files, show a percentage of how much had been completed.                                                                                                                                       |
+| [truncate_progress_file_path](#interface_truncate_progress_file_path) | boolean | When the process container is using file paths, truncate the file path to only view the first and last names of the path.                                                                                               |
+| [show_line_numbers](#interface_show_line_numbers)                     | boolean | Add line numbers to the left gutter if you are viewing a text file.                                                                                                                                                     |
+| [scrolloff](#interface_scrolloff)                                     | integer | The number of files to keep above and below the cursor when moving through the file list.                                                                                                                               |
+| [show_hidden_files](#interface_show_hidden_files)                     | boolean | Show hidden files and folders (those starting with a dot on Unix, or explicitly hidden on Windows/MacOS).                                                                                                               |
+| [image_viewer](#interface_image_viewer)                               | object  | Settings related to the image viewer used in the preview sidebar                                                                                                                                                        |
+| [allow_tab_nav](#interface_allow_tab_nav)                             | boolean | Allow navigating the main app screen with \`tab\` and \`shift+tab\`                                                                                                                                                     |
+| [append_new_tabs](#interface_append_new_tabs)                         | boolean | Choose whether or not to append new tabs instead of inserting them.<br />\`true\` =&gt; Append to the end of the tab list.<br />\`false\` =&gt; Insert after the active tab.                                            |
+| [double_click_delay](#interface_double_click_delay)                   | number  | The delay between two consecutive clicks to enter into a directory, or open a file.                                                                                                                                     |
+| [drive_watcher_frequency](#interface_drive_watcher_frequency)         | number  | How often (in seconds) to check for changes in mounted drives in the sidebar.                                                                                                                                           |
+| [clock](#interface_clock)                                             | object  |                                                                                                                                                                                                                         |
+| [preview_text](#interface_preview_text)                               | object  |                                                                                                                                                                                                                         |
+| [compact_mode](#interface_compact_mode)                               | object  |                                                                                                                                                                                                                         |
+| [mime_rules](#interface_mime_rules)                                   | object  | Map MIME type patterns to preview types. Uses regex patterns. Valid preview types: text, image, pdf, archive, folder, resvg, font, remime.<br />-&gt; Use 'remime' if you want a more accurate description from file(1) |
 
 ### <a name="interface_tooltips"></a>1.1. Property `Rovr Config > interface > tooltips`
 
@@ -452,7 +456,23 @@ Not properly hot-reloaded.
 
 **Description:** Show hidden files and folders (those starting with a dot on Unix, or explicitly hidden on Windows/MacOS).
 
-### <a name="interface_image_protocol"></a>1.10. Property `Rovr Config > interface > image_protocol`
+### <a name="interface_image_viewer"></a>1.10. Property `Rovr Config > interface > image_viewer`
+
+|                           |             |
+| ------------------------- | ----------- |
+| **Type**                  | `object`    |
+| **Required**              | No          |
+| **Additional properties** | Not allowed |
+
+**Description:** Settings related to the image viewer used in the preview sidebar
+
+| Property                                         | Type             | Title/Description                                                                                                                                                |
+| ------------------------------------------------ | ---------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| [protocol](#interface_image_viewer_protocol)     | enum (of string) | The image protocol to use when displaying an image                                                                                                               |
+| [max_size](#interface_image_viewer_max_size)     | array of integer | The maximum size for the image viewer. If the image exceeds this size, it will be scaled down to fit within these dimensions while maintaining its aspect ratio. |
+| [resampling](#interface_image_viewer_resampling) | enum (of string) | The resampling method to use when resizing images. This is only applicable when the image exceeds the maximum size specified in \`max_size\`.                    |
+
+#### <a name="interface_image_viewer_protocol"></a>1.10.1. Property `Rovr Config > interface > image_viewer > protocol`
 
 |              |                    |
 | ------------ | ------------------ |
@@ -469,6 +489,58 @@ Must be one of:
 - "Sixel"
 - "Halfcell"
 - "Unicode"
+
+#### <a name="interface_image_viewer_max_size"></a>1.10.2. Property `Rovr Config > interface > image_viewer > max_size`
+
+|              |                    |
+| ------------ | ------------------ |
+| **Type**     | `array of integer` |
+| **Required** | No                 |
+| **Default**  | `[4000, 4000]`     |
+
+**Description:** The maximum size for the image viewer. If the image exceeds this size, it will be scaled down to fit within these dimensions while maintaining its aspect ratio.
+
+|                      | Array restrictions |
+| -------------------- | ------------------ |
+| **Min items**        | 2                  |
+| **Max items**        | 2                  |
+| **Items unicity**    | False              |
+| **Additional items** | False              |
+| **Tuple validation** | See below          |
+
+| Each item of this array must be                          | Description |
+| -------------------------------------------------------- | ----------- |
+| [max_size items](#interface_image_viewer_max_size_items) |             |
+
+##### <a name="interface_image_viewer_max_size_items"></a>1.10.2.1. Rovr Config > interface > image_viewer > max_size > max_size items
+
+|              |           |
+| ------------ | --------- |
+| **Type**     | `integer` |
+| **Required** | No        |
+
+| Restrictions |        |
+| ------------ | ------ |
+| **Minimum**  | &ge; 1 |
+
+#### <a name="interface_image_viewer_resampling"></a>1.10.3. Property `Rovr Config > interface > image_viewer > resampling`
+
+|              |                    |
+| ------------ | ------------------ |
+| **Type**     | `enum (of string)` |
+| **Required** | No                 |
+| **Default**  | `"nearest"`        |
+
+**Description:** The resampling method to use when resizing images. This is only applicable when the image exceeds the maximum size specified in `max_size`.
+
+Must be one of:
+
+- "nearest"
+- "lanczos"
+- "bilinear"
+- "bicubic"
+- "box"
+- "hamming"
 
 ### <a name="interface_allow_tab_nav"></a>1.11. Property `Rovr Config > interface > allow_tab_nav`
 

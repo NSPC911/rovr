@@ -1,11 +1,5 @@
-import asyncio
+import sys
 
-from rovr.app import Application
-
-
-async def test_run() -> None:
-    app = Application()
-    async with app.run_test() as pilot:
-        await asyncio.sleep(1)
-        await pilot.press("?")
-        assert True
+# textual_image queries sixel terminal support at import time via sys.stdin.buffer.fileno(),
+# which fails when pytest replaces stdin with a pseudofile. Restore the real stdin first.
+sys.stdin = sys.__stdin__

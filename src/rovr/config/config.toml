@@ -17,7 +17,10 @@ drive_watcher_frequency = 3.0
 # yazi style is 5
 # but it has more space
 scrolloff = 3
-image_protocol = "Auto"
+
+[interface.image_viewer]
+protocol = "Auto"
+max_size = [4000, 4000]
 
 [interface.preview_text]
 error = "couldn't read this file! (\u00AC_\u00AC)" # ¬_¬

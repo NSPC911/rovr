@@ -63,11 +63,35 @@
           "default": false,
           "description": "Show hidden files and folders (those starting with a dot on Unix, or explicitly hidden on Windows/MacOS)."
         },
-        "image_protocol": {
-          "type": "string",
-          "default": "Auto",
-          "description": "The image protocol to use when displaying an image",
-          "enum": ["Auto", "TGP", "Sixel", "Halfcell", "Unicode"]
+        "image_viewer": {
+          "type": "object",
+          "description": "Settings related to the image viewer used in the preview sidebar",
+          "additionalProperties": false,
+          "properties": {
+            "protocol": {
+              "type": "string",
+              "default": "Auto",
+              "description": "The image protocol to use when displaying an image",
+              "enum": ["Auto", "TGP", "Sixel", "Halfcell", "Unicode"]
+            },
+            "max_size": {
+              "type": "array",
+              "default": [4000, 4000],
+              "description": "The maximum size for the image viewer. If the image exceeds this size, it will be scaled down to fit within these dimensions while maintaining its aspect ratio.",
+              "maxItems": 2,
+              "minItems": 2,
+              "items": {
+                "type": "integer",
+                "minimum": 1
+              }
+            },
+            "resampling": {
+              "type": "string",
+              "default": "nearest",
+              "description": "The resampling method to use when resizing images. This is only applicable when the image exceeds the maximum size specified in `max_size`.",
+              "enum": ["nearest", "lanczos", "bilinear", "bicubic", "box", "hamming"]
+            }
+          }
         },
         "allow_tab_nav": {
           "type": "boolean",

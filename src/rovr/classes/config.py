@@ -60,8 +60,16 @@ _ROVR_CONFIG_INTERFACE_DRIVE_WATCHER_FREQUENCY_DEFAULT = 3.0
 r""" Default value of the field path 'Rovr Config interface drive_watcher_frequency' """
 
 
-_ROVR_CONFIG_INTERFACE_IMAGE_PROTOCOL_DEFAULT = "Auto"
-r""" Default value of the field path 'Rovr Config interface image_protocol' """
+_ROVR_CONFIG_INTERFACE_IMAGE_VIEWER_MAX_SIZE_DEFAULT = [4000, 4000]
+r""" Default value of the field path 'Rovr Config interface image_viewer max_size' """
+
+
+_ROVR_CONFIG_INTERFACE_IMAGE_VIEWER_PROTOCOL_DEFAULT = "Auto"
+r""" Default value of the field path 'Rovr Config interface image_viewer protocol' """
+
+
+_ROVR_CONFIG_INTERFACE_IMAGE_VIEWER_RESAMPLING_DEFAULT = "nearest"
+r""" Default value of the field path 'Rovr Config interface image_viewer resampling' """
 
 
 _ROVR_CONFIG_INTERFACE_MIME_RULES_DEFAULT = {
@@ -568,12 +576,8 @@ class _RovrConfigInterface(TypedDict, total=False):
     default: False
     """
 
-    image_protocol: "_RovrConfigInterfaceImageProtocol"
-    r"""
-    The image protocol to use when displaying an image
-
-    default: Auto
-    """
+    image_viewer: "_RovrConfigInterfaceImageViewer"
+    r""" Settings related to the image viewer used in the preview sidebar """
 
     allow_tab_nav: bool
     r"""
@@ -680,7 +684,40 @@ class _RovrConfigInterfaceCompactMode(TypedDict, total=False):
     """
 
 
-_RovrConfigInterfaceImageProtocol = (
+class _RovrConfigInterfaceImageViewer(TypedDict, total=False):
+    r"""Settings related to the image viewer used in the preview sidebar"""
+
+    protocol: "_RovrConfigInterfaceImageViewerProtocol"
+    r"""
+    The image protocol to use when displaying an image
+
+    default: Auto
+    """
+
+    max_size: list["_RovrConfigInterfaceImageViewerMaxSizeItem"]
+    r"""
+    The maximum size for the image viewer. If the image exceeds this size, it will be scaled down to fit within these dimensions while maintaining its aspect ratio.
+
+    default:
+      - 4000
+      - 4000
+    maxItems: 2
+    minItems: 2
+    """
+
+    resampling: "_RovrConfigInterfaceImageViewerResampling"
+    r"""
+    The resampling method to use when resizing images. This is only applicable when the image exceeds the maximum size specified in `max_size`.
+
+    default: nearest
+    """
+
+
+_RovrConfigInterfaceImageViewerMaxSizeItem = int
+r""" minimum: 1 """
+
+
+_RovrConfigInterfaceImageViewerProtocol = (
     Literal["Auto"]
     | Literal["TGP"]
     | Literal["Sixel"]
@@ -692,16 +729,43 @@ The image protocol to use when displaying an image
 
 default: Auto
 """
-_ROVRCONFIGINTERFACEIMAGEPROTOCOL_AUTO: Literal["Auto"] = "Auto"
+_ROVRCONFIGINTERFACEIMAGEVIEWERPROTOCOL_AUTO: Literal["Auto"] = "Auto"
 r"""The values for the 'The image protocol to use when displaying an image' enum"""
-_ROVRCONFIGINTERFACEIMAGEPROTOCOL_TGP: Literal["TGP"] = "TGP"
+_ROVRCONFIGINTERFACEIMAGEVIEWERPROTOCOL_TGP: Literal["TGP"] = "TGP"
 r"""The values for the 'The image protocol to use when displaying an image' enum"""
-_ROVRCONFIGINTERFACEIMAGEPROTOCOL_SIXEL: Literal["Sixel"] = "Sixel"
+_ROVRCONFIGINTERFACEIMAGEVIEWERPROTOCOL_SIXEL: Literal["Sixel"] = "Sixel"
 r"""The values for the 'The image protocol to use when displaying an image' enum"""
-_ROVRCONFIGINTERFACEIMAGEPROTOCOL_HALFCELL: Literal["Halfcell"] = "Halfcell"
+_ROVRCONFIGINTERFACEIMAGEVIEWERPROTOCOL_HALFCELL: Literal["Halfcell"] = "Halfcell"
 r"""The values for the 'The image protocol to use when displaying an image' enum"""
-_ROVRCONFIGINTERFACEIMAGEPROTOCOL_UNICODE: Literal["Unicode"] = "Unicode"
+_ROVRCONFIGINTERFACEIMAGEVIEWERPROTOCOL_UNICODE: Literal["Unicode"] = "Unicode"
 r"""The values for the 'The image protocol to use when displaying an image' enum"""
+
+
+_RovrConfigInterfaceImageViewerResampling = (
+    Literal["nearest"]
+    | Literal["lanczos"]
+    | Literal["bilinear"]
+    | Literal["bicubic"]
+    | Literal["box"]
+    | Literal["hamming"]
+)
+r"""
+The resampling method to use when resizing images. This is only applicable when the image exceeds the maximum size specified in `max_size`.
+
+default: nearest
+"""
+_ROVRCONFIGINTERFACEIMAGEVIEWERRESAMPLING_NEAREST: Literal["nearest"] = "nearest"
+r"""The values for the 'The resampling method to use when resizing images. This is only applicable when the image exceeds the maximum size specified in `max_size`' enum"""
+_ROVRCONFIGINTERFACEIMAGEVIEWERRESAMPLING_LANCZOS: Literal["lanczos"] = "lanczos"
+r"""The values for the 'The resampling method to use when resizing images. This is only applicable when the image exceeds the maximum size specified in `max_size`' enum"""
+_ROVRCONFIGINTERFACEIMAGEVIEWERRESAMPLING_BILINEAR: Literal["bilinear"] = "bilinear"
+r"""The values for the 'The resampling method to use when resizing images. This is only applicable when the image exceeds the maximum size specified in `max_size`' enum"""
+_ROVRCONFIGINTERFACEIMAGEVIEWERRESAMPLING_BICUBIC: Literal["bicubic"] = "bicubic"
+r"""The values for the 'The resampling method to use when resizing images. This is only applicable when the image exceeds the maximum size specified in `max_size`' enum"""
+_ROVRCONFIGINTERFACEIMAGEVIEWERRESAMPLING_BOX: Literal["box"] = "box"
+r"""The values for the 'The resampling method to use when resizing images. This is only applicable when the image exceeds the maximum size specified in `max_size`' enum"""
+_ROVRCONFIGINTERFACEIMAGEVIEWERRESAMPLING_HAMMING: Literal["hamming"] = "hamming"
+r"""The values for the 'The resampling method to use when resizing images. This is only applicable when the image exceeds the maximum size specified in `max_size`' enum"""
 
 
 _RovrConfigInterfaceMimeRulesAdditionalproperties = (

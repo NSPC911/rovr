@@ -1,11 +1,11 @@
 import subprocess
 from dataclasses import dataclass
+from functools import partial
 from io import BytesIO
 from os import path
 from time import time
 
-import textual_image
-import textual_image.widget as timg
+import textual_image.widget
 from PIL import Image, ImageDraw, ImageFont, UnidentifiedImageError
 from PIL.Image import Image as PILImage
 from resvg_py import svg_to_bytes
@@ -34,6 +34,30 @@ from rovr.functions.utils import should_cancel
 from rovr.variables.constants import PreviewContainerTitles, config, file_executable
 
 titles = PreviewContainerTitles()
+
+
+NewImage: partial[textual_image.widget._base.Image] = partial(
+    textual_image.widget.__dict__[
+        config["interface"]["image_viewer"]["protocol"] + "Image"
+    ],
+    classes="image_preview",
+)
+
+resampling_method = {
+    "nearest": Image.Resampling.NEAREST,
+    "lanczos": Image.Resampling.LANCZOS,
+    "bicubic": Image.Resampling.BICUBIC,
+    "box": Image.Resampling.BOX,
+    "hamming": Image.Resampling.HAMMING,
+}.get(config["interface"]["image_viewer"]["resampling"], Image.Resampling.NEAREST)
+
+
+def resample(image: Image.Image) -> Image.Image:
+    max_size = tuple(config["interface"]["image_viewer"]["max_size"])
+    image.thumbnail(
+        max_size, resample=resampling_method
+    )  # ty: ignore[invalid-argument-type]
+    return image
 
 
 @dataclass
@@ -168,17 +192,25 @@ class PreviewContainer(Container):
         # to use auto (empty string) or sixel (explicitly)
         if (
             textual_image.renderable.Image is textual_image.renderable.sixel.Image
-            # image_protocol shouldn't be "Auto" because it is replaced early on
+            # image_viewer.protocol shouldn't be "Auto" because it is replaced early on
             # when loading the config, but just for the sake of shutting AI
             # up, I'm going to leave this here.
-        ) and (config["interface"]["image_protocol"] in ("Sixel", "Auto", "")):
+        ) and (
+            config["interface"]["image_viewer"]["protocol"] in ("Sixel", "Auto", "")
+        ):
             bg_color = Color.parse(self.app.theme_variables["background"])
             img = Image.new(
-                "RGB", (800, 450), color=(bg_color.r, bg_color.g, bg_color.b)
+                "RGB",
+                config["interface"]["image_viewer"]["max_size"],
+                color=(bg_color.r, bg_color.g, bg_color.b),
             )
             text_fill = (fg_color.r, fg_color.g, fg_color.b)
         else:
-            img = Image.new("RGBA", (800, 450), color=(0, 0, 0, 0))
+            img = Image.new(
+                "RGBA",
+                config["interface"]["image_viewer"]["max_size"],
+                color=(0, 0, 0, 0),
+            )
             text_fill = (fg_color.r, fg_color.g, fg_color.b, 255)
         draw = ImageDraw.Draw(img)
 
@@ -223,12 +255,8 @@ class PreviewContainer(Container):
                 if should_cancel():
                     return
 
-                image_widget = timg.__dict__[
-                    config["interface"]["image_protocol"] + "Image"
-                ](
-                    img,
-                    classes="image_preview",
-                )
+                image_widget = NewImage(img)
+                # no need to resample, already ensured that canvas is max size
                 image_widget.can_focus = True
                 self.app.call_from_thread(self.mount, image_widget)
             else:
@@ -261,21 +289,16 @@ class PreviewContainer(Container):
             with open(self._current_file_path, "r", encoding="utf-8") as f:
                 svg_data = f.read()
             png_bytes = svg_to_bytes(svg_data)
-            pil_object = Image.open(BytesIO(png_bytes))
-            # force a load
+            pil_object = resample(Image.open(BytesIO(png_bytes)))
             pil_object.load()
+            # force a load
             if not self.has_child(".image_preview"):
                 self.app.call_from_thread(self.remove_children)
 
                 if should_cancel():
                     return
 
-                image_widget = timg.__dict__[
-                    config["interface"]["image_protocol"] + "Image"
-                ](
-                    pil_object,
-                    classes="image_preview",
-                )
+                image_widget = NewImage(pil_object)
                 image_widget.can_focus = True
                 self.app.call_from_thread(self.mount, image_widget)
             else:
@@ -324,6 +347,7 @@ class PreviewContainer(Container):
             with Image.open(self._current_file_path) as img:
                 img.load()
                 pil_object = img.copy()
+            pil_object = resample(pil_object)
         except UnidentifiedImageError:
             if should_cancel():
                 return
@@ -355,12 +379,7 @@ class PreviewContainer(Container):
             if should_cancel():
                 return
 
-            image_widget = timg.__dict__[
-                config["interface"]["image_protocol"] + "Image"
-            ](
-                pil_object,
-                classes="image_preview",
-            )
+            image_widget = NewImage(pil_object)
             image_widget.can_focus = True
             self.app.call_from_thread(self.mount, image_widget)
         else:
@@ -424,7 +443,8 @@ class PreviewContainer(Container):
             raise ValueError(
                 "Obtained 0 pages from Poppler. Something may have gone wrong..."
             )
-        return result
+        # Resample images once when loaded for better performance
+        return [resample(img) for img in result]
 
     def show_pdf_preview(self, depth: int = 0) -> None:
         """
@@ -522,12 +542,7 @@ class PreviewContainer(Container):
             if should_cancel():
                 return
 
-            image_widget = timg.__dict__[
-                config["interface"]["image_protocol"] + "Image"
-            ](
-                current_image,
-                classes="image_preview",
-            )
+            image_widget = NewImage(current_image)
             image_widget.can_focus = True
             self.app.call_from_thread(self.mount, image_widget)
         else:

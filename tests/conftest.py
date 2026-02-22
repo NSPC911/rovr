@@ -1,5 +1,6 @@
-import sys
+from unittest.mock import patch
 
-# textual_image queries sixel terminal support at import time via sys.stdin.buffer.fileno(),
-# which fails when pytest replaces stdin with a pseudofile. Restore the real stdin first.
-sys.stdin = sys.__stdin__
+# Patch sys.__stdin__ early (before test collection imports application modules)
+# so that textual_image skips terminal queries that require a real TTY.
+_stdin_patch = patch("sys.__stdin__", None)
+_stdin_patch.start()

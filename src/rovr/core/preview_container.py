@@ -46,14 +46,15 @@ NewImage: partial[textual_image.widget._base.Image] = partial(
 resampling_method = {
     "nearest": Image.Resampling.NEAREST,
     "lanczos": Image.Resampling.LANCZOS,
+    "bilinear": Image.Resampling.BILINEAR,
     "bicubic": Image.Resampling.BICUBIC,
     "box": Image.Resampling.BOX,
     "hamming": Image.Resampling.HAMMING,
 }.get(config["interface"]["image_viewer"]["resampling"], Image.Resampling.NEAREST)
+max_size: tuple[int, int] = tuple(config["interface"]["image_viewer"]["max_size"])  # ty: ignore
 
 
 def resample(image: Image.Image) -> Image.Image:
-    max_size = tuple(config["interface"]["image_viewer"]["max_size"])
     image.thumbnail(
         max_size,  # ty: ignore[invalid-argument-type]
         resample=resampling_method,
@@ -202,14 +203,14 @@ class PreviewContainer(Container):
             bg_color = Color.parse(self.app.theme_variables["background"])
             img = Image.new(
                 "RGB",
-                config["interface"]["image_viewer"]["max_size"],
+                max_size,
                 color=(bg_color.r, bg_color.g, bg_color.b),
             )
             text_fill = (fg_color.r, fg_color.g, fg_color.b)
         else:
             img = Image.new(
                 "RGBA",
-                config["interface"]["image_viewer"]["max_size"],
+                max_size,
                 color=(0, 0, 0, 0),
             )
             text_fill = (fg_color.r, fg_color.g, fg_color.b, 255)
@@ -291,8 +292,8 @@ class PreviewContainer(Container):
                 svg_data = f.read()
             png_bytes = svg_to_bytes(svg_data)
             pil_object = resample(Image.open(BytesIO(png_bytes)))
-            pil_object.load()
             # force a load
+            pil_object.load()
             if not self.has_child(".image_preview"):
                 self.app.call_from_thread(self.remove_children)
 

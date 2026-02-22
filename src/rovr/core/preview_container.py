@@ -55,8 +55,9 @@ resampling_method = {
 def resample(image: Image.Image) -> Image.Image:
     max_size = tuple(config["interface"]["image_viewer"]["max_size"])
     image.thumbnail(
-        max_size, resample=resampling_method
-    )  # ty: ignore[invalid-argument-type]
+        max_size,  # ty: ignore[invalid-argument-type]
+        resample=resampling_method,
+    )
     return image
 
 

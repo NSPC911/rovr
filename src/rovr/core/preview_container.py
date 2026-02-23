@@ -186,14 +186,14 @@ class PreviewContainer(Container):
             bg_color = Color.parse(self.app.theme_variables["background"])
             img = Image.new(
                 "RGB",
-                preview_utils.max_size,
+                preview_utils.MAX_SIZE,
                 color=(bg_color.r, bg_color.g, bg_color.b),
             )
             text_fill = (fg_color.r, fg_color.g, fg_color.b)
         else:
             img = Image.new(
                 "RGBA",
-                preview_utils.max_size,
+                preview_utils.MAX_SIZE,
                 color=(0, 0, 0, 0),
             )
             text_fill = (fg_color.r, fg_color.g, fg_color.b, 255)

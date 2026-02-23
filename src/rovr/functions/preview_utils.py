@@ -5,11 +5,12 @@ from multiprocessing.connection import Connection
 from PIL import Image
 from PIL.Image import Image as PILImage
 
+from rovr.functions.path import dump_exc
 from rovr.functions.utils import should_cancel
 from rovr.variables.constants import config
 
 # Configuration variables used by the resampling functions
-resampling_method = {
+RESAMPLING_METHOD = {
     "nearest": Image.Resampling.NEAREST,
     "lanczos": Image.Resampling.LANCZOS,
     "bilinear": Image.Resampling.BILINEAR,
@@ -17,7 +18,9 @@ resampling_method = {
     "box": Image.Resampling.BOX,
     "hamming": Image.Resampling.HAMMING,
 }.get(config["interface"]["image_viewer"]["resampling"], Image.Resampling.NEAREST)
-max_size: tuple[int, int] = tuple(config["interface"]["image_viewer"]["max_size"])  # ty: ignore
+MAX_SIZE: tuple[int, int] = tuple(
+    config["interface"]["image_viewer"]["max_size"]
+)  # ty: ignore
 
 
 def resample_worker(
@@ -53,6 +56,8 @@ def resample_bytes_worker(
                 resample_method,
             ))
         )
+    except Exception as exc:
+        dump_exc(None, exc)
     finally:
         conn.close()
 
@@ -169,8 +174,8 @@ def resample_batch(images: list[PILImage]) -> list[PILImage]:
             image.tobytes(),
             image.mode,
             image.size,
-            max_size,
-            int(resampling_method),
+            MAX_SIZE,
+            int(RESAMPLING_METHOD),
         )
         for image in images
     ]
@@ -201,8 +206,8 @@ def resample(image: Image.Image) -> Image.Image:
             image.tobytes(),
             image.mode,
             image.size,
-            max_size,
-            int(resampling_method),
+            MAX_SIZE,
+            int(RESAMPLING_METHOD),
         ),
     )
     proc.start()
@@ -227,7 +232,7 @@ def resample_file(file_path: str) -> Image.Image | None:
     parent_conn, child_conn = multiprocessing.Pipe()
     proc = multiprocessing.Process(
         target=resample_file_worker,
-        args=(child_conn, file_path, max_size, int(resampling_method)),
+        args=(child_conn, file_path, MAX_SIZE, int(RESAMPLING_METHOD)),
     )
     proc.start()
     child_conn.close()

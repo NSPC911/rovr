@@ -1,4 +1,3 @@
-import multiprocessing
 import subprocess
 from dataclasses import dataclass
 from functools import partial
@@ -30,8 +29,8 @@ from rovr.classes.textual_options import (
 from rovr.core import FileList
 from rovr.functions import icons as icon_utils
 from rovr.functions import path as path_utils
+from rovr.functions import preview_utils
 from rovr.functions.pdf import get_pdf_images, get_pdf_info
-from rovr.functions.resample import resample_bytes_worker, resample_file_worker
 from rovr.functions.utils import should_cancel
 from rovr.variables.constants import PreviewContainerTitles, config, file_executable
 
@@ -44,108 +43,6 @@ NewImage: partial[textual_image.widget._base.Image] = partial(
     ],
     classes="image_preview",
 )
-
-resampling_method = {
-    "nearest": Image.Resampling.NEAREST,
-    "lanczos": Image.Resampling.LANCZOS,
-    "bilinear": Image.Resampling.BILINEAR,
-    "bicubic": Image.Resampling.BICUBIC,
-    "box": Image.Resampling.BOX,
-    "hamming": Image.Resampling.HAMMING,
-}.get(config["interface"]["image_viewer"]["resampling"], Image.Resampling.NEAREST)
-max_size: tuple[int, int] = tuple(config["interface"]["image_viewer"]["max_size"])  # ty: ignore
-
-
-def _await_resample_process(
-    proc: multiprocessing.Process,
-    parent_conn: multiprocessing.connection.Connection,
-) -> tuple[bytes, str, tuple[int, int]] | None:
-    """Wait for a resample subprocess, checking for worker cancellation.
-
-    Returns:
-        Raw image data tuple, or None if cancelled/failed.
-    """
-    try:
-        while proc.is_alive():
-            if should_cancel():
-                proc.kill()
-                proc.join()
-                return None
-            if parent_conn.poll(0.2):
-                result = parent_conn.recv()
-                proc.join()
-                if isinstance(result, Exception):
-                    raise result
-                return result
-        proc.join()
-        if parent_conn.poll(0):
-            result = parent_conn.recv()
-            if isinstance(result, Exception):
-                raise result
-            return result
-        return None
-    except (EOFError, BrokenPipeError, ConnectionResetError):
-        if proc.is_alive():
-            proc.kill()
-        proc.join()
-        return None
-    finally:
-        parent_conn.close()
-        if proc.is_alive():
-            proc.kill()
-            proc.join()
-
-
-def resample(image: Image.Image) -> Image.Image:
-    """Resample an in-memory image in a subprocess that can be killed.
-
-    Returns:
-        The resampled image, or the original if cancelled.
-    """
-    parent_conn, child_conn = multiprocessing.Pipe()
-    proc = multiprocessing.Process(
-        target=resample_bytes_worker,
-        args=(
-            child_conn,
-            image.tobytes(),
-            image.mode,
-            image.size,
-            max_size,
-            int(resampling_method),
-        ),
-    )
-    proc.start()
-    child_conn.close()
-
-    result = _await_resample_process(proc, parent_conn)
-    if result is None:
-        return image
-    data, mode, size = result
-    return Image.frombytes(mode, size, data)
-
-
-def resample_file(file_path: str) -> Image.Image | None:
-    """Open and resample an image file in a Process.
-
-    Returns:
-        The resampled image, or None if the worker was cancelled.
-
-    Raises:
-        Same exceptions as Image.open (UnidentifiedImageError, etc.).
-    """
-    parent_conn, child_conn = multiprocessing.Pipe()
-    proc = multiprocessing.Process(
-        target=resample_file_worker,
-        args=(child_conn, file_path, max_size, int(resampling_method)),
-    )
-    proc.start()
-    child_conn.close()
-
-    result = _await_resample_process(proc, parent_conn)
-    if result is None:
-        return None
-    data, mode, size = result
-    return Image.frombytes(mode, size, data)
 
 
 @dataclass
@@ -289,14 +186,14 @@ class PreviewContainer(Container):
             bg_color = Color.parse(self.app.theme_variables["background"])
             img = Image.new(
                 "RGB",
-                max_size,
+                preview_utils.max_size,
                 color=(bg_color.r, bg_color.g, bg_color.b),
             )
             text_fill = (fg_color.r, fg_color.g, fg_color.b)
         else:
             img = Image.new(
                 "RGBA",
-                max_size,
+                preview_utils.max_size,
                 color=(0, 0, 0, 0),
             )
             text_fill = (fg_color.r, fg_color.g, fg_color.b, 255)
@@ -377,7 +274,7 @@ class PreviewContainer(Container):
             with open(self._current_file_path, "r", encoding="utf-8") as f:
                 svg_data = f.read()
             png_bytes = svg_to_bytes(svg_data)
-            pil_object = resample(Image.open(BytesIO(png_bytes)))
+            pil_object = preview_utils.resample(Image.open(BytesIO(png_bytes)))
             # force a load
             pil_object.load()
             if not self.has_child(".image_preview"):
@@ -432,7 +329,7 @@ class PreviewContainer(Container):
         self.app.call_from_thread(setattr, self, "border_title", titles.image)
 
         try:
-            pil_object = resample_file(self._current_file_path)
+            pil_object = preview_utils.resample_file(self._current_file_path)
             if pil_object is None:
                 return
         except UnidentifiedImageError:
@@ -531,7 +428,7 @@ class PreviewContainer(Container):
                 "Obtained 0 pages from Poppler. Something may have gone wrong..."
             )
         # Resample images once when loaded for better performance
-        return [resample(img) for img in result]
+        return preview_utils.resample_batch(result)
 
     def show_pdf_preview(self, depth: int = 0) -> None:
         """

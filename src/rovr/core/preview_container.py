@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import subprocess
 from dataclasses import dataclass
 from functools import partial
@@ -190,14 +192,20 @@ class PreviewContainer(Container):
             bg_color = Color.parse(self.app.theme_variables["background"])
             img = Image.new(
                 "RGB",
-                preview_utils.MAX_SIZE,
+                (
+                    max(1000, preview_utils.MAX_SIZE[0] // 2),
+                    max(1000, preview_utils.MAX_SIZE[1] // 2),
+                ),
                 color=(bg_color.r, bg_color.g, bg_color.b),
             )
             text_fill = (fg_color.r, fg_color.g, fg_color.b)
         else:
             img = Image.new(
                 "RGBA",
-                preview_utils.MAX_SIZE,
+                (
+                    max(1000, preview_utils.MAX_SIZE[0] // 2),
+                    max(1000, preview_utils.MAX_SIZE[1] // 2),
+                ),
                 color=(0, 0, 0, 0),
             )
             text_fill = (fg_color.r, fg_color.g, fg_color.b, 255)

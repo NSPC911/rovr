@@ -11,7 +11,7 @@
         "replace": "interface.image_viewer.protocol"
       },
       {
-        "find": "image_protocol",
+        "find": "(?<!\\.)image_protocol",
         "replace": "image_viewer.protocol"
       }
     ]

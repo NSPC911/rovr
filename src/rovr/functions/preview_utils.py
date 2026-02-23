@@ -16,7 +16,20 @@ RESAMPLING_METHOD = {
     "box": Image.Resampling.BOX,
     "hamming": Image.Resampling.HAMMING,
 }.get(config["interface"]["image_viewer"]["resampling"], Image.Resampling.NEAREST)
-MAX_SIZE: tuple[int, int] = tuple(config["interface"]["image_viewer"]["max_size"])  # ty: ignore
+MAX_SIZE: tuple[int, int] = tuple(
+    config["interface"]["image_viewer"]["max_size"]
+)  # ty: ignore
+
+
+def _depalette(image: Image.Image) -> Image.Image:
+    """Convert paletted images to RGBA
+
+    Returns:
+        The original image, or an RGBA-converted copy if paletted.
+    """
+    if image.mode in ("P", "PA"):
+        return image.convert("RGBA")
+    return image
 
 
 def resample_worker(
@@ -61,7 +74,7 @@ def resample_bytes_worker(
 def resample_file_worker(
     conn: Connection,
     file_path: str,
-    max_sz: tuple[int, int],
+    max_size: tuple[int, int],
     resample_method: int,
 ) -> None:
     """Open a file, resample it, and send the result back."""
@@ -69,7 +82,8 @@ def resample_file_worker(
         with Image.open(file_path) as img:
             img.load()
             pil = img.copy()
-        pil.thumbnail(max_sz, resample=Image.Resampling(resample_method))
+        pil = _depalette(pil)
+        pil.thumbnail(max_size, resample=Image.Resampling(resample_method))
         conn.send((pil.tobytes(), pil.mode, pil.size))
     except Exception as exc:
         conn.send(exc)
@@ -166,16 +180,16 @@ def resample_batch(images: list[PILImage]) -> list[PILImage]:
     if should_cancel():
         raise RuntimeError("PDF page resampling was cancelled.")
 
-    payloads = [
-        (
+    payloads = []
+    for image in images:
+        image = _depalette(image)
+        payloads.append((
             image.tobytes(),
             image.mode,
             image.size,
             MAX_SIZE,
             int(RESAMPLING_METHOD),
-        )
-        for image in images
-    ]
+        ))
     executor = ProcessPoolExecutor(max_workers=_get_resample_pool_size(len(payloads)))
     try:
         futures = {
@@ -195,6 +209,7 @@ def resample(image: Image.Image) -> Image.Image:
     Returns:
         The resampled image, or the original if cancelled.
     """
+    image = _depalette(image)
     parent_conn, child_conn = multiprocessing.Pipe()
     proc = multiprocessing.Process(
         target=resample_bytes_worker,

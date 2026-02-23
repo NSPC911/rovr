@@ -5,11 +5,9 @@ from multiprocessing.connection import Connection
 from PIL import Image
 from PIL.Image import Image as PILImage
 
-from rovr.functions.path import dump_exc
 from rovr.functions.utils import should_cancel
 from rovr.variables.constants import config
 
-# Configuration variables used by the resampling functions
 RESAMPLING_METHOD = {
     "nearest": Image.Resampling.NEAREST,
     "lanczos": Image.Resampling.LANCZOS,
@@ -18,7 +16,9 @@ RESAMPLING_METHOD = {
     "box": Image.Resampling.BOX,
     "hamming": Image.Resampling.HAMMING,
 }.get(config["interface"]["image_viewer"]["resampling"], Image.Resampling.NEAREST)
-MAX_SIZE: tuple[int, int] = tuple(config["interface"]["image_viewer"]["max_size"])  # ty: ignore
+MAX_SIZE: tuple[int, int] = tuple(
+    config["interface"]["image_viewer"]["max_size"]
+)  # ty: ignore
 
 
 def resample_worker(
@@ -55,7 +55,7 @@ def resample_bytes_worker(
             ))
         )
     except Exception as exc:
-        dump_exc(None, exc)
+        conn.send(exc)
     finally:
         conn.close()
 
@@ -75,7 +75,8 @@ def resample_file_worker(
         conn.send((pil.tobytes(), pil.mode, pil.size))
     except Exception as exc:
         conn.send(exc)
-    conn.close()
+    finally:
+        conn.close()
 
 
 def _await_resample_process(

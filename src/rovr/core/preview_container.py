@@ -53,9 +53,7 @@ resampling_method = {
     "box": Image.Resampling.BOX,
     "hamming": Image.Resampling.HAMMING,
 }.get(config["interface"]["image_viewer"]["resampling"], Image.Resampling.NEAREST)
-max_size: tuple[int, int] = tuple(
-    config["interface"]["image_viewer"]["max_size"]
-)  # ty: ignore
+max_size: tuple[int, int] = tuple(config["interface"]["image_viewer"]["max_size"])  # ty: ignore
 
 
 def _await_resample_process(

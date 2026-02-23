@@ -1,3 +1,4 @@
+import multiprocessing
 import subprocess
 from dataclasses import dataclass
 from functools import partial
@@ -30,6 +31,7 @@ from rovr.core import FileList
 from rovr.functions import icons as icon_utils
 from rovr.functions import path as path_utils
 from rovr.functions.pdf import get_pdf_images, get_pdf_info
+from rovr.functions.resample import resample_bytes_worker, resample_file_worker
 from rovr.functions.utils import should_cancel
 from rovr.variables.constants import PreviewContainerTitles, config, file_executable
 
@@ -51,15 +53,101 @@ resampling_method = {
     "box": Image.Resampling.BOX,
     "hamming": Image.Resampling.HAMMING,
 }.get(config["interface"]["image_viewer"]["resampling"], Image.Resampling.NEAREST)
-max_size: tuple[int, int] = tuple(config["interface"]["image_viewer"]["max_size"])  # ty: ignore
+max_size: tuple[int, int] = tuple(
+    config["interface"]["image_viewer"]["max_size"]
+)  # ty: ignore
+
+
+def _await_resample_process(
+    proc: multiprocessing.Process,
+    parent_conn: multiprocessing.connection.Connection,
+) -> tuple[bytes, str, tuple[int, int]] | None:
+    """Wait for a resample subprocess, checking for worker cancellation.
+
+    Returns:
+        Raw image data tuple, or None if cancelled/failed.
+    """
+    try:
+        while proc.is_alive():
+            if should_cancel():
+                proc.kill()
+                proc.join()
+                return None
+            if parent_conn.poll(0.2):
+                result = parent_conn.recv()
+                proc.join()
+                if isinstance(result, Exception):
+                    raise result
+                return result
+        proc.join()
+        if parent_conn.poll(0):
+            result = parent_conn.recv()
+            if isinstance(result, Exception):
+                raise result
+            return result
+        return None
+    except (EOFError, BrokenPipeError, ConnectionResetError):
+        if proc.is_alive():
+            proc.kill()
+        proc.join()
+        return None
+    finally:
+        parent_conn.close()
+        if proc.is_alive():
+            proc.kill()
+            proc.join()
 
 
 def resample(image: Image.Image) -> Image.Image:
-    image.thumbnail(
-        max_size,  # ty: ignore[invalid-argument-type]
-        resample=resampling_method,
+    """Resample an in-memory image in a subprocess that can be killed.
+
+    Returns:
+        The resampled image, or the original if cancelled.
+    """
+    parent_conn, child_conn = multiprocessing.Pipe()
+    proc = multiprocessing.Process(
+        target=resample_bytes_worker,
+        args=(
+            child_conn,
+            image.tobytes(),
+            image.mode,
+            image.size,
+            max_size,
+            int(resampling_method),
+        ),
     )
-    return image
+    proc.start()
+    child_conn.close()
+
+    result = _await_resample_process(proc, parent_conn)
+    if result is None:
+        return image
+    data, mode, size = result
+    return Image.frombytes(mode, size, data)
+
+
+def resample_file(file_path: str) -> Image.Image | None:
+    """Open and resample an image file in a Process.
+
+    Returns:
+        The resampled image, or None if the worker was cancelled.
+
+    Raises:
+        Same exceptions as Image.open (UnidentifiedImageError, etc.).
+    """
+    parent_conn, child_conn = multiprocessing.Pipe()
+    proc = multiprocessing.Process(
+        target=resample_file_worker,
+        args=(child_conn, file_path, max_size, int(resampling_method)),
+    )
+    proc.start()
+    child_conn.close()
+
+    result = _await_resample_process(proc, parent_conn)
+    if result is None:
+        return None
+    data, mode, size = result
+    return Image.frombytes(mode, size, data)
 
 
 @dataclass
@@ -346,10 +434,9 @@ class PreviewContainer(Container):
         self.app.call_from_thread(setattr, self, "border_title", titles.image)
 
         try:
-            with Image.open(self._current_file_path) as img:
-                img.load()
-                pil_object = img.copy()
-            pil_object = resample(pil_object)
+            pil_object = resample_file(self._current_file_path)
+            if pil_object is None:
+                return
         except UnidentifiedImageError:
             if should_cancel():
                 return

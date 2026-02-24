@@ -183,7 +183,6 @@ sequence = [
 testpaths = ["tests"]
 markers = ["snapshot: marks tests as snapshot tests (run with --snapshot-update to update)"]
 asyncio_mode = "auto"
-timeout = 10
 
 [tool.ruff]
 force-exclude = true

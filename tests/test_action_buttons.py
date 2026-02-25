@@ -27,7 +27,8 @@ async def test_copy_button() -> None:
         await pilot.pause()
         assert len(app.query_one("Clipboard", SelectionList).options) == 1
         assert (
-            app.query_one("Clipboard", SelectionList)
+            app
+            .query_one("Clipboard", SelectionList)
             .get_option_at_index(0)
             .value.type_of_selection
             == "copy"
@@ -36,7 +37,8 @@ async def test_copy_button() -> None:
         await pilot.pause()
         assert len(app.query_one("Clipboard", SelectionList).options) == 1
         assert (
-            app.query_one("Clipboard", SelectionList)
+            app
+            .query_one("Clipboard", SelectionList)
             .get_option_at_index(0)
             .value.type_of_selection
             == "copy"
@@ -52,7 +54,8 @@ async def test_cut_button() -> None:
         await pilot.pause()
         assert len(app.query_one("Clipboard", SelectionList).options) == 1
         assert (
-            app.query_one("Clipboard", SelectionList)
+            app
+            .query_one("Clipboard", SelectionList)
             .get_option_at_index(0)
             .value.type_of_selection
             == "cut"
@@ -61,7 +64,8 @@ async def test_cut_button() -> None:
         await pilot.pause()
         assert len(app.query_one("Clipboard", SelectionList).options) == 1
         assert (
-            app.query_one("Clipboard", SelectionList)
+            app
+            .query_one("Clipboard", SelectionList)
             .get_option_at_index(0)
             .value.type_of_selection
             == "cut"
@@ -79,7 +83,8 @@ async def test_copy_to_cut() -> None:
         await pilot.pause()
         assert len(app.query_one("Clipboard", SelectionList).options) == 1
         assert (
-            app.query_one("Clipboard", SelectionList)
+            app
+            .query_one("Clipboard", SelectionList)
             .get_option_at_index(0)
             .value.type_of_selection
             == "cut"
@@ -97,7 +102,8 @@ async def test_cut_to_copy() -> None:
         await pilot.pause()
         assert len(app.query_one("Clipboard", SelectionList).options) == 1
         assert (
-            app.query_one("Clipboard", SelectionList)
+            app
+            .query_one("Clipboard", SelectionList)
             .get_option_at_index(0)
             .value.type_of_selection
             == "copy"
@@ -120,7 +126,8 @@ async def test_paste_button() -> None:
             await pilot.pause(1)
             assert isinstance(app.screen, PasteScreen)
             assert (
-                app.screen.query_one("SpecialOptionList", OptionList)
+                app.screen
+                .query_one("SpecialOptionList", OptionList)
                 .get_option_at_index(0)
                 .copy_or_cut
                 == "copy"
@@ -133,7 +140,8 @@ async def test_paste_button() -> None:
             await pilot.pause(1)
             assert isinstance(app.screen, PasteScreen)
             assert (
-                app.screen.query_one("SpecialOptionList", OptionList)
+                app.screen
+                .query_one("SpecialOptionList", OptionList)
                 .get_option_at_index(0)
                 .copy_or_cut
                 == "cut"

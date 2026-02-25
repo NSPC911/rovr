@@ -44,6 +44,7 @@ class SpecialOption(Option):
                 + Content(loc)
             )
         super().__init__(loc)
+        self.copy_or_cut = copy_or_cut
 
 
 class PasteScreen(YesOrNo):

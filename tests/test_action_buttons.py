@@ -3,7 +3,6 @@ from pathlib import Path
 from tempfile import TemporaryDirectory
 
 import pytest
-from rich.console import Console  # noqa: F401
 from textual.widgets import OptionList, SelectionList
 
 from rovr.action_buttons import (
@@ -17,9 +16,6 @@ from rovr.action_buttons import (
     ZipButton,
 )
 from rovr.app import Application
-
-# conout = open("CONOUT$", "w")  # noqa: SIM115
-# console = Console(file=conout)
 
 
 @pytest.mark.asyncio

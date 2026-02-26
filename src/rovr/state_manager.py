@@ -130,7 +130,6 @@ class StateManager(Widget):
         self.menu_wrapper_visible = True
         self.sort_by = "name"
         self.sort_descending = False
-        self._save_state(force=True)
 
     def _save_state(self, force: bool = False) -> None:
         if self._skip_save and not force:

@@ -149,7 +149,7 @@ class FileList(CheckboxRenderingMixin, SelectionList, inherit_bindings=False):
             self.clear_options()
             return
         self.file_list_pause_check = True  # ty: ignore[invalid-assignment]
-        items_in_cwd: list[str] = []
+        name_to_index: dict[str, int] = {}
         try:
             preview = self.app.query_one("PreviewContainer")
 
@@ -244,8 +244,8 @@ class FileList(CheckboxRenderingMixin, SelectionList, inherit_bindings=False):
 
             self.set_options(self.list_of_options)
             # fix selected options
-            if has_selected and items_in_cwd:
-                self.update_from_session(session, items_in_cwd)
+            if has_selected and name_to_index:
+                self.update_from_session(session, name_to_index)
             # session handler
             self.app.query_one("#path_switcher", PathInput).value = cwd + (
                 "" if cwd.endswith("/") else "/"
@@ -310,9 +310,9 @@ class FileList(CheckboxRenderingMixin, SelectionList, inherit_bindings=False):
             if callback:
                 callback()
 
-    @work(thread=True, exclusive=True)
+    @work(thread=True)
     def update_from_session(
-        self, session: SessionManager, items_in_cwd: list[str]
+        self, session: SessionManager, name_to_index: dict[str, int]
     ) -> None:
         # so far dont seem to have any issues when running this in a thread
         # but if it does, remove the decorator
@@ -321,8 +321,8 @@ class FileList(CheckboxRenderingMixin, SelectionList, inherit_bindings=False):
         with self.prevent(SelectionList.SelectedChanged):
             self.deselect_all()
             for item in session.selectedItems:
-                if item["name"] in items_in_cwd:
-                    self.select(self.list_of_options[items_in_cwd.index(item["name"])])
+                if item["name"] in name_to_index:
+                    self.select(self.list_of_options[name_to_index[item["name"]]])
                 else:
                     to_select = min(item["index"], len(self.list_of_options) - 1)
                     self.select(self.list_of_options[to_select].id)

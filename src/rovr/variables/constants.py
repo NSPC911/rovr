@@ -8,14 +8,13 @@ from typing import Literal, cast
 from textual.binding import Binding, BindingType
 
 from rovr.classes.config import RovrConfig
-from rovr.functions.config import config_setup, load_config
+from rovr.functions.config import load_config
 from rovr.functions.utils import classproperty
 
 # Initialize the config once at import time
 if "config" not in globals():
     global config, schema
     schema, config = load_config()
-    config_setup()
 else:
     config = globals()["config"]
     config = cast(RovrConfig, config)

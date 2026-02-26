@@ -95,7 +95,15 @@ class Application(App, inherit_bindings=False):
         for key in config["keybinds"]["quit_app"]
     ]
     # higher index = higher priority
-    CSS_PATH = ["style.tcss", path.join(VAR_TO_DIR["CONFIG"], "style.tcss")]
+    CSS_PATH: list[str] = ["style.tcss"] + (
+        [path.join(VAR_TO_DIR["CONFIG"], "style.tcss")]
+        if path.exists(path.join(VAR_TO_DIR["CONFIG"], "style.tcss"))
+        else []
+    )
+
+    CUSTOM_STYLE_AVAILABLE: bool = path.exists(
+        path.join(VAR_TO_DIR["CONFIG"], "style.tcss")
+    )
 
     # command palette
     COMMAND_PALETTE_BINDING = config["keybinds"]["command_palette"]
@@ -660,6 +668,8 @@ class Application(App, inherit_bindings=False):
         drives = get_mounted_drives()
         drive_update_every = int(config["interface"]["drive_watcher_frequency"])
         count: int = -1
+        style_available: bool = self.CUSTOM_STYLE_AVAILABLE
+        custom_style_path = path.join(VAR_TO_DIR["CONFIG"], "style.tcss")
         while True:
             for _ in range(4):
                 # essentially sleep 1 second, but with extra steps
@@ -725,6 +735,16 @@ class Application(App, inherit_bindings=False):
                         title="Change Watcher",
                         severity="warning",
                     )
+            if not self.CUSTOM_STYLE_AVAILABLE:
+                if not style_available and path.exists(custom_style_path):
+                    style_available = True
+                    self.notify(
+                        "Custom [b]style.tcss[/] was detected.\nPlease relaunch rovr to apply the custom stylesheet.",
+                        title="Styles",
+                        severity="information",
+                    )
+                elif not path.exists(custom_style_path):
+                    style_available = False
 
     @work(exclusive=True)
     async def on_resize(self, event: events.Resize) -> None:
@@ -761,11 +781,30 @@ class Application(App, inherit_bindings=False):
                     #  nothing here, knowing that we'll retry again very soon, on the next file monitor invocation.
                     #  Related issue: https://github.com/Textualize/textual/issues/3996
                     self._css_has_errors = True
-                    self.notify(
-                        str(error),
-                        title=f"CSS: {type(error).__name__}",
-                        severity="error",
-                    )
+                    if all(path.exists(css_path) for css_path in css_paths):
+                        self.notify(
+                            str(error),
+                            title=f"CSS: {type(error).__name__}",
+                            severity="error",
+                        )
+                    else:
+                        unable_path = [
+                            css_path
+                            for css_path in css_paths
+                            if not path.exists(css_path)
+                        ]
+                        if len(unable_path) == 1:
+                            self.notify(
+                                f"CSS file {unable_path[0]} cannot be found.",
+                                title="CSS: File Not Found",
+                                severity="warning",
+                            )
+                        else:
+                            self.notify(
+                                f"CSS files {unable_path} cannot be found.",
+                                title="CSS: Files Not Found",
+                                severity="warning",
+                            )
                     return
                 stylesheet.parse()
                 elapsed = (perf_counter() - time) * 1000

@@ -314,9 +314,6 @@ def load_config() -> tuple[dict, RovrConfig]:
         dict: the config
     """
 
-    if not path.exists(VAR_TO_DIR["CONFIG"]):
-        os.makedirs(VAR_TO_DIR["CONFIG"])
-
     current_version = get_version()
     if current_version == "master":
         schema_ref = "refs/heads/master"
@@ -327,8 +324,7 @@ def load_config() -> tuple[dict, RovrConfig]:
 
     # Create config file if it doesn't exist
     if not path.exists(user_config_path):
-        with open(user_config_path, "w", encoding="utf-8") as file:
-            file.write(DEFAULT_CONFIG.format(schema_url=schema_url))
+        pass
     else:
         # Update schema version if needed
         with open(user_config_path, "r", encoding="utf-8") as f:
@@ -450,16 +446,3 @@ def load_config() -> tuple[dict, RovrConfig]:
         # resolved from PATH, so we suppress the type error
         config["plugins"]["poppler"]["poppler_folder"] = pdfinfo_path  # ty: ignore[invalid-assignment]
     return schema_dict, config
-
-
-def config_setup() -> None:
-    # check config folder
-    if not path.exists(VAR_TO_DIR["CONFIG"]):
-        os.makedirs(VAR_TO_DIR["CONFIG"])
-    # Textual doesn't seem to have a way to check whether the
-    # CSS file exists while it is in operation, but textual
-    # only craps itself when it can't find it as the app starts
-    # so no issues
-    if not path.exists(path.join(VAR_TO_DIR["CONFIG"], "style.tcss")):
-        with open(path.join(VAR_TO_DIR["CONFIG"], "style.tcss"), "a") as _:
-            pass

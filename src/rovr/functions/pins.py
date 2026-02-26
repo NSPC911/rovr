@@ -1,5 +1,4 @@
 import json
-import os
 from copy import deepcopy
 from os import path
 from typing import TypedDict, cast
@@ -9,7 +8,7 @@ from rovr.variables.maps import SORTED_VARS, VAR_TO_DIR
 from .path import dump_exc, normalise
 
 pins = {}
-pin_path = path.join(VAR_TO_DIR["CONFIG"], "pins.json")
+PIN_PATH = path.join(VAR_TO_DIR["CONFIG"], "pins.json")
 
 
 class PinsDict(TypedDict):
@@ -33,10 +32,7 @@ def load_pins() -> PinsDict:
     global pins
     _pins: PinsDict
 
-    # Ensure the user's config directory exists
-    if not path.exists(VAR_TO_DIR["CONFIG"]):
-        os.makedirs(VAR_TO_DIR["CONFIG"])
-    if not path.exists(pin_path):
+    if not path.exists(PIN_PATH):
         _pins = {
             "default": [
                 {"name": "Home", "path": "$HOME"},
@@ -49,32 +45,27 @@ def load_pins() -> PinsDict:
             ],
             "pins": [],
         }
+    else:
         try:
-            with open(pin_path, "w") as f:
-                json.dump(_pins, f, indent=2)
-        except IOError as exc:
-            dump_exc(None, exc)
-
-    try:
-        with open(pin_path, "r") as f:
-            loaded = json.load(f)
-        if not isinstance(loaded, dict):
-            raise ValueError()
-        _pins = cast(PinsDict, loaded)
-    except (IOError, ValueError, json.JSONDecodeError):
-        # Reset pins on corrupt or something else happened
-        _pins = {
-            "default": [
-                {"name": "Home", "path": "$HOME"},
-                {"name": "Downloads", "path": "$DOWNLOADS"},
-                {"name": "Documents", "path": "$DOCUMENTS"},
-                {"name": "Desktop", "path": "$DESKTOP"},
-                {"name": "Pictures", "path": "$PICTURES"},
-                {"name": "Videos", "path": "$VIDEOS"},
-                {"name": "Music", "path": "$MUSIC"},
-            ],
-            "pins": [],
-        }
+            with open(PIN_PATH, "r") as f:
+                loaded = json.load(f)
+            if not isinstance(loaded, dict):
+                raise ValueError()
+            _pins = cast(PinsDict, loaded)
+        except (IOError, ValueError, json.JSONDecodeError):
+            # Reset pins on corrupt or something else happened
+            _pins = {
+                "default": [
+                    {"name": "Home", "path": "$HOME"},
+                    {"name": "Downloads", "path": "$DOWNLOADS"},
+                    {"name": "Documents", "path": "$DOCUMENTS"},
+                    {"name": "Desktop", "path": "$DESKTOP"},
+                    {"name": "Pictures", "path": "$PICTURES"},
+                    {"name": "Videos", "path": "$VIDEOS"},
+                    {"name": "Music", "path": "$MUSIC"},
+                ],
+                "pins": [],
+            }
 
     # If list died
     if "default" not in _pins or not isinstance(_pins["default"], list):
@@ -136,7 +127,7 @@ def add_pin(pin_name: str, pin_path: str | bytes) -> None:
                         item["path"] = item["path"].replace(dir_path_val, f"${var}")
 
     try:
-        with open(pin_path, "w") as f:
+        with open(PIN_PATH, "w") as f:
             json.dump(pins_to_write, f, indent=2)
     except IOError as exc:
         dump_exc(None, exc)

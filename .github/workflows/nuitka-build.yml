@@ -77,6 +77,7 @@ jobs:
         shell: pwsh
         run: |
           Remove-Item -Recurse -Force rovr.dist -ErrorAction SilentlyContinue
+          uv sync --no-dev --group build
           uv run --no-sync poe build standalone
 
       - name: Upload Executable

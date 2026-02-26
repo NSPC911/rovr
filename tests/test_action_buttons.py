@@ -177,12 +177,11 @@ async def test_delete_button(tmp_path: Path) -> None:
 
 
 @pytest.mark.asyncio
-async def test_new_button() -> None:
+async def test_new_button(tmp_path: Path) -> None:
     from rovr.screens import ModalInput
 
-    temp_dir = TemporaryDirectory()
     try:
-        app = Application(startup_path=temp_dir.name)
+        app = Application(startup_path=tmp_path.as_posix())
         async with app.run_test(size=(143, 37)) as pilot:
             await pilot.pause()
             await pilot.click(NewItemButton)
@@ -198,17 +197,15 @@ async def test_new_button() -> None:
             )
     finally:
         os.chdir(Path("~").expanduser())
-        temp_dir.cleanup()
 
 
 @pytest.mark.asyncio
-async def test_rename_button() -> None:
+async def test_rename_button(tmp_path: Path) -> None:
     from rovr.screens import ModalInput
 
-    temp_dir = TemporaryDirectory()
-    open(os.path.join(temp_dir.name, "test_file.txt"), "w").close()
+    open(tmp_path / "test_file.txt", "w").close()
     try:
-        app = Application(startup_path=temp_dir.name)
+        app = Application(startup_path=tmp_path.as_posix())
         async with app.run_test(size=(143, 37)) as pilot:
             await pilot.pause()
             assert (
@@ -244,7 +241,6 @@ async def test_rename_button() -> None:
             )
     finally:
         os.chdir(Path("~").expanduser())
-        temp_dir.cleanup()
 
 
 @pytest.mark.asyncio
@@ -281,13 +277,12 @@ async def test_zip_button() -> None:
 
 
 @pytest.mark.asyncio
-async def test_zip_button_creates_archive() -> None:
+async def test_zip_button_creates_archive(tmp_path: Path) -> None:
     from rovr.screens import ArchiveCreationScreen
 
-    temp_dir = TemporaryDirectory()
-    open(os.path.join(temp_dir.name, "test_file.txt"), "w").close()
+    open(tmp_path / "test_file.txt", "w").close()
     try:
-        app = Application(startup_path=temp_dir.name)
+        app = Application(startup_path=tmp_path.as_posix())
         async with app.run_test(size=(143, 37)) as pilot:
             await pilot.pause()
             await pilot.click(ZipButton)
@@ -296,10 +291,9 @@ async def test_zip_button_creates_archive() -> None:
             await pilot.press("enter")
             await pilot.pause(1)
             assert not isinstance(app.screen, ArchiveCreationScreen)
-            assert any(f.endswith(".zip") for f in os.listdir(temp_dir.name))
+            assert any(f.endswith(".zip") for f in os.listdir(tmp_path))
     finally:
         os.chdir(Path("~").expanduser())
-        temp_dir.cleanup()
 
 
 @pytest.mark.asyncio
@@ -340,17 +334,16 @@ async def test_unzip_button() -> None:
 
 
 @pytest.mark.asyncio
-async def test_unzip_button_extracts_archive() -> None:
+async def test_unzip_button_extracts_archive(tmp_path: Path) -> None:
     import zipfile
 
     from rovr.screens import ModalInput
 
-    temp_dir = TemporaryDirectory()
-    zip_path = os.path.join(temp_dir.name, "test_archive.zip")
+    zip_path = tmp_path / "test_archive.zip"
     with zipfile.ZipFile(zip_path, "w") as zf:
         zf.writestr("dummy.txt", "hello")
     try:
-        app = Application(startup_path=temp_dir.name)
+        app = Application(startup_path=tmp_path.as_posix())
         async with app.run_test(size=(143, 37)) as pilot:
             await pilot.pause()
             await pilot.click(UnzipButton)
@@ -359,7 +352,6 @@ async def test_unzip_button_extracts_archive() -> None:
             await pilot.press("enter")
             await pilot.pause(1)
             assert not isinstance(app.screen, ModalInput)
-            assert os.path.isdir(os.path.join(temp_dir.name, "test_archive"))
+            assert os.path.isdir(tmp_path / "test_archive")
     finally:
         os.chdir(Path("~").expanduser())
-        temp_dir.cleanup()

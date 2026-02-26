@@ -1,5 +1,4 @@
 import json
-from os import path
 from pathlib import Path
 
 from rovr.functions.folder_prefs import (
@@ -39,7 +38,10 @@ def test_remove_folder_preference_updates_state(tmp_path: Path) -> None:
 
 
 def test_load_folder_prefs_expands_variable_paths() -> None:
-    prefs_file = path.join(VAR_TO_DIR["CONFIG"], "folder_preferences.json")
+    folder_path = Path(VAR_TO_DIR["CONFIG"])
+    if not folder_path.exists():
+        folder_path.mkdir(parents=True)
+    prefs_file = folder_path / "folder_preferences.json"
     with open(prefs_file, "w", encoding="utf-8") as file:
         json.dump(
             {

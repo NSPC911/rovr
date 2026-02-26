@@ -19,8 +19,9 @@ from rovr.app import Application
 
 
 @pytest.mark.asyncio
-async def test_copy_button() -> None:
-    app = Application()
+async def test_copy_button(tmp_path: Path) -> None:
+    app = Application(tmp_path.as_posix())
+    open(tmp_path / "test_file.txt", "w").close()
     async with app.run_test(size=(143, 37)) as pilot:
         await pilot.pause()
         await pilot.click(CopyButton)
@@ -46,8 +47,9 @@ async def test_copy_button() -> None:
 
 
 @pytest.mark.asyncio
-async def test_cut_button() -> None:
-    app = Application()
+async def test_cut_button(tmp_path: Path) -> None:
+    app = Application(startup_path=tmp_path.as_posix())
+    open(tmp_path / "test_file.txt", "w").close()
     async with app.run_test(size=(143, 37)) as pilot:
         await pilot.pause()
         await pilot.click(CutButton)
@@ -73,8 +75,9 @@ async def test_cut_button() -> None:
 
 
 @pytest.mark.asyncio
-async def test_copy_to_cut() -> None:
-    app = Application()
+async def test_copy_to_cut(tmp_path: Path) -> None:
+    app = Application(startup_path=tmp_path.as_posix())
+    open(tmp_path / "test_file.txt", "w").close()
     async with app.run_test(size=(143, 37)) as pilot:
         await pilot.pause()
         await pilot.click(CopyButton)
@@ -92,8 +95,9 @@ async def test_copy_to_cut() -> None:
 
 
 @pytest.mark.asyncio
-async def test_cut_to_copy() -> None:
-    app = Application()
+async def test_cut_to_copy(tmp_path: Path) -> None:
+    app = Application(startup_path=tmp_path.as_posix())
+    open(tmp_path / "test_file.txt", "w").close()
     async with app.run_test(size=(143, 37)) as pilot:
         await pilot.pause()
         await pilot.click(CutButton)
@@ -111,13 +115,12 @@ async def test_cut_to_copy() -> None:
 
 
 @pytest.mark.asyncio
-async def test_paste_button() -> None:
+async def test_paste_button(tmp_path: Path) -> None:
     from rovr.screens import PasteScreen
 
-    temp_dir = TemporaryDirectory()
-    open(os.path.join(temp_dir.name, "test_file.txt"), "w").close()
+    open(tmp_path / "test_file.txt", "w").close()
     try:
-        app = Application(startup_path=temp_dir.name)
+        app = Application(startup_path=tmp_path.as_posix())
         async with app.run_test(size=(143, 37)) as pilot:
             await pilot.pause()
             await pilot.click(CopyButton)
@@ -148,19 +151,16 @@ async def test_paste_button() -> None:
             )
     finally:
         os.chdir(Path("~").expanduser())
-        temp_dir.cleanup()
 
 
 @pytest.mark.asyncio
-async def test_delete_button() -> None:
+async def test_delete_button(tmp_path: Path) -> None:
     from rovr.screens import DeleteFiles
 
-    temp_dir = TemporaryDirectory()
-    open(os.path.join(temp_dir.name, "test_file.txt"), "w").close()
+    open(tmp_path / "test_file.txt", "w").close()
     try:
-        app = Application(startup_path=temp_dir.name)
+        app = Application(startup_path=tmp_path.as_posix())
         async with app.run_test(size=(143, 37)) as pilot:
-            await pilot.pause()
             assert (
                 app.file_list.get_option_at_index(0).dir_entry.name == "test_file.txt"
             )
@@ -168,11 +168,12 @@ async def test_delete_button() -> None:
             await pilot.pause()
             assert isinstance(app.screen, DeleteFiles)
             await pilot.click("#trash")
-            await pilot.pause(1)
+            # wait 2 seconds so you ensure watcher thread goes at least once
+            # and updates the file list
+            await pilot.pause(2)
             assert app.file_list.get_option_at_index(0).disabled
     finally:
         os.chdir(Path("~").expanduser())
-        temp_dir.cleanup()
 
 
 @pytest.mark.asyncio

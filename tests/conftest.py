@@ -3,7 +3,6 @@ from unittest.mock import patch
 
 import pytest
 
-from rovr.functions import folder_prefs
 from rovr.variables import maps
 
 # Patch sys.__stdin__ early (before test collection imports application modules)
@@ -15,6 +14,4 @@ _stdin_patch.start()
 @pytest.fixture(autouse=True)
 def isolate_test_state(tmp_path: Path) -> None:
     config_dir = tmp_path / "config"
-    config_dir.mkdir()
     maps.VAR_TO_DIR["CONFIG"] = config_dir.as_posix()
-    folder_prefs.folder_prefs.clear()

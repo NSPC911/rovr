@@ -168,8 +168,8 @@ async def test_delete_button(tmp_path: Path) -> None:
             await pilot.pause()
             assert isinstance(app.screen, DeleteFiles)
             await pilot.click("#trash")
-            # wait 2 seconds so you ensure watcher thread goes at least once
-            # and updates the file list
+            await pilot.pause(2)
+            app.cd(os.getcwd(), add_to_history=False)
             await pilot.pause(2)
             assert app.file_list.get_option_at_index(0).disabled
     finally:

@@ -97,13 +97,9 @@ async def _copy_windows(paths: list[str]) -> ProcessResult | None:
     paths_list = ",".join(escaped_paths)
 
     command = [
-        # peak powershell scripting
         "powershell",
-        # ignore profile
         "-NoProfile",
-        # shut up timing
         "-NoLogo",
-        # how am i going to interact with you
         "-NonInteractive",
         "-Command",
         f"Add-Type -AssemblyName System.Windows.Forms; "
@@ -155,11 +151,10 @@ def _copy_macos_ctypes(paths: list[str]) -> None:
 
     Raises:
         ClipboardError: If the pasteboard write operation fails.
-        RuntimeError: If libobjc cannot be found or loaded.
     """
     objc = ctypes.util.find_library("objc")
     if objc is None:
-        raise RuntimeError("Could not find libobjc on this system")
+        raise ClipboardError("Could not find libobjc on this system")
     libobjc = ctypes.cdll.LoadLibrary(objc)
     ctypes.cdll.LoadLibrary("/System/Library/Frameworks/AppKit.framework/AppKit")
     objc_getClass = libobjc.objc_getClass
@@ -214,16 +209,24 @@ def _copy_macos_ctypes(paths: list[str]) -> None:
         msg0(pasteboard, sel("clearContents"))
 
         array = msg_i(NSMutableArray, sel("arrayWithCapacity:"), len(paths))
+        failed_paths: list[str] = []
         for path in paths:
             resolved = str(Path(path).resolve())
             ns_string = msg_s(NSString, sel("stringWithUTF8String:"), resolved.encode())
             if not ns_string:
+                failed_paths.append(path)
                 continue
             file_url = msg1(NSURL, sel("fileURLWithPath:"), ns_string)
             if not file_url:
+                failed_paths.append(path)
                 continue
             msg1(array, sel("addObject:"), file_url)
 
+        if failed_paths:
+            raise ClipboardError(
+                "Failed to create NSURLs for the following paths:\n"
+                + "\n".join(failed_paths)
+            )
         success = msg_b1(pasteboard, sel("writeObjects:"), array)
         if not success:
             raise ClipboardError("NSPasteboard writeObjects: returned NO")
@@ -287,7 +290,6 @@ async def _copy_linux(paths: list[str]) -> ProcessResult | None:
     except TimeoutError as exc:
         process.kill()
         await process.wait()
-        # need to show which one timing out
         exc.add_note(f"{using} timed out")
         raise exc from None
     return ProcessResult(

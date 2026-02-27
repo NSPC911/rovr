@@ -1,4 +1,4 @@
-import platform
+import sys
 from dataclasses import dataclass
 from datetime import datetime
 from os import environ
@@ -144,4 +144,17 @@ bindings: list[BindingType] = (
     ]
 )
 
-os_type = platform.system()
+match sys.platform:
+    case "win32":
+        os_type = "Windows"
+    case "darwin":
+        os_type = "Darwin"
+    case linux if linux.startswith("linux"):
+        os_type = "Linux"
+    case "android":
+        os_type = "Linux"
+    case _:
+        import platform
+
+        # sure okay, fuck you in particular freebsd user
+        os_type = platform.system()

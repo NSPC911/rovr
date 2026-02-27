@@ -387,6 +387,17 @@ example_function(10)"""
     if force_first_launch:
         return
 
+    try:
+        import asyncio
+
+        if sys.platform == "win32":
+            import winloop as libuv
+        else:
+            import uvloop as libuv
+        asyncio.set_event_loop_policy(libuv.EventLoopPolicy())
+    except (ModuleNotFoundError, ImportError):
+        pass
+
     # start separate thread for platform to cache
     platproc = Process(target=platform.system)
     platproc.start()

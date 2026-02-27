@@ -6,6 +6,7 @@ import re
 import stat
 import subprocess
 from os import path
+from pathlib import Path
 from typing import Callable, Literal, NamedTuple, TypedDict, overload
 
 import psutil
@@ -88,11 +89,15 @@ def is_hidden_file(filepath: str) -> bool:
 # letters, numbers, underscores, or hyphens, and must
 # not begin with a number
 def compress(text: str) -> str:
-    return "u_" + base64.urlsafe_b64encode(text.encode("utf-8")).decode("ascii")
+    return "u_" + base64.urlsafe_b64encode(text.encode("utf-8")).decode(
+        "ascii"
+    ).replace("=", "_")
 
 
 def decompress(text: str) -> str:
-    return base64.urlsafe_b64decode(text[2:].encode("ascii")).decode("utf-8")
+    return base64.urlsafe_b64decode(text[2:].replace("_", "=").encode("ascii")).decode(
+        "utf-8"
+    )
 
 
 @work
@@ -165,14 +170,15 @@ def get_filtered_dir_names(cwd: str | bytes, show_hidden: bool = False) -> set[s
     Raises:
         PermissionError: When access to the directory is denied
     """
+    # Refactored to use Path.iterdir for better readability and compatibility with pathlib
     try:
-        listed_dir = os.scandir(cwd)
+        listed_dir = Path(str(cwd)).iterdir()
     except (PermissionError, FileNotFoundError, OSError):
         raise PermissionError(f"PermissionError: Unable to access {cwd}")
 
     names = set()
     for item in listed_dir:
-        if not show_hidden and is_hidden_file(item.path):
+        if not show_hidden and is_hidden_file(str(item)):
             continue
         names.add(item.name)
 
@@ -383,14 +389,14 @@ def file_is_type(
     mode = file_stat.st_mode
     if stat.S_ISLNK(mode):
         return "symlink"
-    elif stat.S_ISDIR(mode):
-        return "directory"
     elif (
         os_type == "Windows"
         and hasattr(file_stat, "st_file_attributes")
         and file_stat.st_file_attributes & stat.FILE_ATTRIBUTE_REPARSE_POINT
     ):
         return "junction"
+    elif stat.S_ISDIR(mode):
+        return "directory"
     else:
         return "file"
 

@@ -1,8 +1,10 @@
 # with reference from https://gitee.com/DreamMaoMao/clipboard.yazi
-# except for macos which uses 'clippy' because I dont want to use
-# pyobjc just for clipboard operations. if you know a way to use
-# osascript to copy multiple files to clipboard, please open an issue.
+# macos uses ctypes to call the Objective-C runtime (libobjc) directly,
+# interacting with NSPasteboard to copy file references without any
+# external dependencies (no pyobjc, no clippy, no osascript).
 import asyncio
+import ctypes
+import ctypes.util
 import platform
 import shutil
 from dataclasses import dataclass
@@ -131,34 +133,80 @@ async def _copy_macos(paths: list[str]) -> ProcessResult | None:
     if not paths:
         return None
 
-    # as much as I want to use osascript, there is no way
-    # to add multiple files to it. No, pbcopy does not support files.
-    # so we are forced to use https://github.com/neilberkman/clippy
-    if not shutil.which("clippy"):
-        raise ClipboardToolNotFoundError(
-            "clippy",
-            "macOS",
-            "Install 'clippy' via Homebrew:\n'brew install clippy'\nIf you know how to use osascript to copy multiple files, please open an issue!",
-        )
-    command = ["clippy"] + paths
-    process = await asyncio.create_subprocess_exec(
-        *command,
-        stdout=asyncio.subprocess.PIPE,
-        stderr=asyncio.subprocess.PIPE,
-    )
     try:
-        stdout, stderr = await asyncio.wait_for(process.communicate(), timeout=5)
-    except TimeoutError as exc:
-        process.kill()
-        await process.wait()
-        exc.add_note("clippy timed out")
-        raise exc from None
+        _copy_macos_ctypes(paths)
+    except ClipboardError:
+        raise
+    except OSError as exc:
+        raise ClipboardError(f"Failed to load macOS frameworks: {exc}") from exc
+    except Exception as exc:
+        raise ClipboardError(f"macOS clipboard error: {exc}") from exc
     return ProcessResult(
-        return_code=process.return_code or 0,
-        args=command,
-        stdout=stdout.decode().strip(),
-        stderr=stderr.decode().strip(),
+        return_code=0, args=["ctypes:NSPasteboard"], stdout="", stderr=""
     )
+
+
+def _copy_macos_ctypes(paths: list[str]) -> None:
+    """Copy file paths to macOS clipboard via ctypes and the Objective-C runtime.
+
+    Raises:
+        ClipboardError: If the pasteboard write operation fails.
+    """
+    libobjc = ctypes.cdll.LoadLibrary(ctypes.util.find_library("objc"))  # type: ignore[arg-type]
+    ctypes.cdll.LoadLibrary("/System/Library/Frameworks/AppKit.framework/AppKit")
+
+    objc_getClass = libobjc.objc_getClass
+    objc_getClass.restype = ctypes.c_void_p
+    objc_getClass.argtypes = [ctypes.c_char_p]
+
+    sel_registerName = libobjc.sel_registerName
+    sel_registerName.restype = ctypes.c_void_p
+    sel_registerName.argtypes = [ctypes.c_char_p]
+
+    # Typed objc_msgSend wrappers via CFUNCTYPE (arm64-safe, non-variadic)
+    _ptr = ctypes.cast(libobjc.objc_msgSend, ctypes.c_void_p).value
+    VP = ctypes.c_void_p
+    # id fn(id, SEL)
+    msg0 = ctypes.CFUNCTYPE(VP, VP, VP)(_ptr)
+    # id fn(id, SEL, id)
+    msg1 = ctypes.CFUNCTYPE(VP, VP, VP, VP)(_ptr)
+    # id fn(id, SEL, char*)
+    msg_s = ctypes.CFUNCTYPE(VP, VP, VP, ctypes.c_char_p)(_ptr)
+    # BOOL fn(id, SEL, id)
+    msg_b1 = ctypes.CFUNCTYPE(ctypes.c_bool, VP, VP, VP)(_ptr)
+    # id fn(id, SEL, NSUInteger)
+    msg_i = ctypes.CFUNCTYPE(VP, VP, VP, ctypes.c_ulong)(_ptr)
+
+    def sel(name: str) -> ctypes.c_void_p:
+        return sel_registerName(name.encode())
+
+    NSAutoreleasePool = objc_getClass(b"NSAutoreleasePool")
+    NSPasteboard = objc_getClass(b"NSPasteboard")
+    NSString = objc_getClass(b"NSString")
+    NSURL = objc_getClass(b"NSURL")
+    NSMutableArray = objc_getClass(b"NSMutableArray")
+    NSApplication = objc_getClass(b"NSApplication")
+
+    # Initialize AppKit context (required for pasteboard access)
+    msg0(NSApplication, sel("sharedApplication"))
+
+    pool = msg0(msg0(NSAutoreleasePool, sel("alloc")), sel("init"))
+    try:
+        pasteboard = msg0(NSPasteboard, sel("generalPasteboard"))
+        msg0(pasteboard, sel("clearContents"))
+
+        array = msg_i(NSMutableArray, sel("arrayWithCapacity:"), len(paths))
+        for path in paths:
+            resolved = str(Path(path).resolve())
+            ns_string = msg_s(NSString, sel("stringWithUTF8String:"), resolved.encode())
+            file_url = msg1(NSURL, sel("fileURLWithPath:"), ns_string)
+            msg1(array, sel("addObject:"), file_url)
+
+        success = msg_b1(pasteboard, sel("writeObjects:"), array)
+        if not success:
+            raise ClipboardError("NSPasteboard writeObjects: returned NO")
+    finally:
+        msg0(pool, sel("drain"))
 
 
 async def _copy_linux(paths: list[str]) -> ProcessResult | None:

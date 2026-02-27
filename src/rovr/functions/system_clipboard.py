@@ -217,7 +217,11 @@ def _copy_macos_ctypes(paths: list[str]) -> None:
         for path in paths:
             resolved = str(Path(path).resolve())
             ns_string = msg_s(NSString, sel("stringWithUTF8String:"), resolved.encode())
+            if not ns_string:
+                continue
             file_url = msg1(NSURL, sel("fileURLWithPath:"), ns_string)
+            if not file_url:
+                continue
             msg1(array, sel("addObject:"), file_url)
 
         success = msg_b1(pasteboard, sel("writeObjects:"), array)

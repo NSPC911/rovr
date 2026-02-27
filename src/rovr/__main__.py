@@ -391,9 +391,9 @@ example_function(10)"""
         import asyncio
 
         if sys.platform == "win32":
-            import winloop as libuv
+            import winloop as libuv  # ty: ignore[unresolved-import]
         else:
-            import uvloop as libuv
+            import uvloop as libuv  # ty: ignore[unresolved-import]
         asyncio.set_event_loop_policy(libuv.EventLoopPolicy())
     except (ModuleNotFoundError, ImportError):
         pass

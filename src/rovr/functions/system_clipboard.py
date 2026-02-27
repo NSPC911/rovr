@@ -138,9 +138,9 @@ async def _copy_macos(paths: list[str]) -> ProcessResult | None:
     except ClipboardError:
         raise
     except OSError as exc:
-        raise ClipboardError(f"Failed to load macOS frameworks: {exc}") from exc
+        raise ClipboardError(f"Failed to load macOS frameworks: {exc}")
     except Exception as exc:
-        raise ClipboardError(f"macOS clipboard error: {exc}") from exc
+        raise ClipboardError(f"macOS clipboard error: \\[{type(exc).__name__}]\n{exc}")
     return ProcessResult(
         return_code=0, args=["ctypes:NSPasteboard"], stdout="", stderr=""
     )
@@ -151,10 +151,18 @@ def _copy_macos_ctypes(paths: list[str]) -> None:
 
     Raises:
         ClipboardError: If the pasteboard write operation fails.
+        RuntimeError: If libobjc cannot be found or loaded.
     """
-    libobjc = ctypes.cdll.LoadLibrary(ctypes.util.find_library("objc"))  # type: ignore[arg-type]
+    objc = ctypes.util.find_library("objc")
+    if objc is None:
+        raise RuntimeError("Could not find libobjc on this system")
+    libobjc = ctypes.cdll.LoadLibrary(objc)
     ctypes.cdll.LoadLibrary("/System/Library/Frameworks/AppKit.framework/AppKit")
-
+    objc_path = ctypes.util.find_library("objc")
+    if objc_path is None:
+        raise ClipboardError("Could not locate libobjc on this system")
+    libobjc = ctypes.cdll.LoadLibrary(objc_path)
+    ctypes.cdll.LoadLibrary("/System/Library/Frameworks/AppKit.framework/AppKit")
     objc_getClass = libobjc.objc_getClass
     objc_getClass.restype = ctypes.c_void_p
     objc_getClass.argtypes = [ctypes.c_char_p]
@@ -186,6 +194,18 @@ def _copy_macos_ctypes(paths: list[str]) -> None:
     NSURL = objc_getClass(b"NSURL")
     NSMutableArray = objc_getClass(b"NSMutableArray")
     NSApplication = objc_getClass(b"NSApplication")
+
+    required_classes = [
+        NSAutoreleasePool,
+        NSPasteboard,
+        NSString,
+        NSURL,
+        NSMutableArray,
+        NSApplication,
+    ]
+    for cls in required_classes:
+        if not cls:
+            raise ClipboardError(f"Failed to load Objective-C class: {cls = }")
 
     # Initialize AppKit context (required for pasteboard access)
     msg0(NSApplication, sel("sharedApplication"))

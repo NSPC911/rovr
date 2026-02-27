@@ -1,7 +1,6 @@
-# with reference from https://gitee.com/DreamMaoMao/clipboard.yazi
-# macos uses ctypes to call the Objective-C runtime (libobjc) directly,
-# interacting with NSPasteboard to copy file references without any
-# external dependencies (no pyobjc, no clippy, no osascript).
+# with reference from https://gitee.com/DreamMaoMao/clipboard.yazi aside from macos
+# macos uses ctypes (yipee) (without pyobjc bridge) or any external dependencies
+# like clippy: https://github.com/neilberkman/clippy
 import asyncio
 import ctypes
 import ctypes.util
@@ -68,7 +67,7 @@ async def copy_files_to_system_clipboard(
             return ClipboardError(f"Unsupported platform: {system}")
 
         if output is None:
-            return True  # No operation needed for empty paths
+            return True  # No operation needed for empty output
         elif output.return_code == 0:
             return True
         else:
@@ -98,9 +97,13 @@ async def _copy_windows(paths: list[str]) -> ProcessResult | None:
     paths_list = ",".join(escaped_paths)
 
     command = [
+        # peak powershell scripting
         "powershell",
+        # ignore profile
         "-NoProfile",
+        # shut up timing
         "-NoLogo",
+        # how am i going to interact with you
         "-NonInteractive",
         "-Command",
         f"Add-Type -AssemblyName System.Windows.Forms; "
@@ -146,6 +149,7 @@ async def _copy_macos(paths: list[str]) -> ProcessResult | None:
     )
 
 
+# no, pbcopy is not enough, here is death by ctypes
 def _copy_macos_ctypes(paths: list[str]) -> None:
     """Copy file paths to macOS clipboard via ctypes and the Objective-C runtime.
 
@@ -166,7 +170,7 @@ def _copy_macos_ctypes(paths: list[str]) -> None:
     sel_registerName.restype = ctypes.c_void_p
     sel_registerName.argtypes = [ctypes.c_char_p]
 
-    # Typed objc_msgSend wrappers via CFUNCTYPE (arm64-safe, non-variadic)
+    # Typed objc_msgSend wrappers via CFUNCTYPE
     _ptr = ctypes.cast(libobjc.objc_msgSend, ctypes.c_void_p).value
     VP = ctypes.c_void_p
     # id fn(id, SEL)
@@ -201,7 +205,7 @@ def _copy_macos_ctypes(paths: list[str]) -> None:
         if not cls:
             raise ClipboardError(f"Failed to load Objective-C class: {name}")
 
-    # Initialize AppKit context (required for pasteboard access)
+    # init appkit content for clipboard stuff
     msg0(NSApplication, sel("sharedApplication"))
 
     pool = msg0(msg0(NSAutoreleasePool, sel("alloc")), sel("init"))
@@ -236,9 +240,10 @@ async def _copy_linux(paths: list[str]) -> ProcessResult | None:
             *command,
             stdout=asyncio.subprocess.PIPE,
             # quite weird, the issue with this is that
-            # i must not pipe wl-copy's 2 stream
+            # i must not pipe wl-copy's stderr/&2 stream
             # to null, so im forced to leave stderr open
-            # stderr=asyncio.subprocess.STDOUT,
+            # hopefully it doesnt cause issues...
+            # # stderr=asyncio.subprocess.STDOUT,
         )
         stdin = None
         using = "wl-copy"
@@ -255,23 +260,30 @@ async def _copy_linux(paths: list[str]) -> ProcessResult | None:
         process = await asyncio.create_subprocess_exec(
             *command,
             stdin=asyncio.subprocess.PIPE,
-            # stdout=asyncio.subprocess.PIPE,
-            # stderr=asyncio.subprocess.PIPE,
+            # same issue here, but i cant even pipe
+            # stdout, what in the scuffed code is this
+            # who thought this was a great idea
+            # # stdout=asyncio.subprocess.PIPE,
+            # # stderr=asyncio.subprocess.PIPE,
         )
         stdin = "\n".join([Path(path).resolve().as_uri() for path in paths]).encode()
         using = "xclip"
     else:
-        # warn
         raise ClipboardToolNotFoundError(
             "wl-copy/xclip",
             "Linux",
             "Install 'wl-clipboard' for Wayland or 'xclip' for X11 using your package manager.",
         )
     try:
-        stdout, stderr = await asyncio.wait_for(process.communicate(stdin), timeout=5)
+        stdout, stderr = await asyncio.wait_for(
+            # pass in files as stdin
+            process.communicate(stdin),
+            timeout=5,
+        )
     except TimeoutError as exc:
         process.kill()
         await process.wait()
+        # need to show which one timing out
         exc.add_note(f"{using} timed out")
         raise exc from None
     return ProcessResult(

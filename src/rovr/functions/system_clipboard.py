@@ -209,6 +209,8 @@ def _copy_macos_ctypes(paths: list[str]) -> None:
         msg0(pasteboard, sel("clearContents"))
 
         array = msg_i(NSMutableArray, sel("arrayWithCapacity:"), len(paths))
+        if not array:
+            raise ClipboardError("Failed to create NSMutableArray for clipboard")
         failed_paths: list[str] = []
         for path in paths:
             resolved = str(Path(path).resolve())

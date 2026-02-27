@@ -245,12 +245,10 @@ def cli(
     if dev or is_dev:
         os.environ["TEXTUAL"] = "devtools,debug"
         is_dev = True
-        pprint("  [bold bright_cyan]Development mode activated![/]")
         pprint(
-            "  [dim]Make sure to have [grey50]`textual console`[/] (or [grey50]`uvx --from textual-dev textual console`[/]) running![/]"
-        )
-        pprint(
-            "  [dim]  - Keep in mind that the console needs to be running [i]before[/] you start the app![/]"
+            "  [bold bright_cyan]Development mode activated![/]\n",
+            "  [dim]Make sure to have [/]textual console[dim] (or [/]uvx --from textual-dev textual console[dim]) running![/]\n",
+            "  [dim]  - Keep in mind that the console needs to be running [i]before[/] you start the app![/]",
         )
 
     if list_preview_themes:
@@ -395,7 +393,11 @@ example_function(10)"""
         else:
             import uvloop as libuv  # ty: ignore[unresolved-import]
         asyncio.set_event_loop_policy(libuv.EventLoopPolicy())
-    except (ModuleNotFoundError, ImportError):
+        if is_dev:
+            pprint(
+                f"  [dim]Using [/]{'winloop' if sys.platform == 'win32' else 'uvloop'}[dim], performance may or may not be improved - do your own tests.[/]"
+            )
+    except ImportError:
         pass
 
     # start separate thread for platform to cache

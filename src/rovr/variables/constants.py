@@ -154,4 +154,7 @@ match sys.platform:
     case "android":
         os_type = "Linux"
     case _:
-        raise NotImplementedError(f"Unsupported platform: {sys.platform}")
+        import platform
+
+        # sure okay, fuck you in particular freebsd user
+        os_type = platform.system()

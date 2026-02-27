@@ -357,6 +357,17 @@ example_function(10)"""
     import rovr.monkey_patches._classes  # noqa: F401, I001
     import rovr.monkey_patches._platform  # noqa: F401
 
+    try:
+        import asyncio
+
+        if sys.platform == "win32":
+            import winloop as libuv
+        else:
+            import uvloop as libuv
+        asyncio.set_event_loop_policy(libuv.EventLoopPolicy())
+    except (ModuleNotFoundError, ImportError):
+        pass
+
     from rovr.functions.config import set_nested_value
     from rovr.variables.constants import config
 

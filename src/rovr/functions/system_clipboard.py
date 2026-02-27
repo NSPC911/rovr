@@ -158,11 +158,6 @@ def _copy_macos_ctypes(paths: list[str]) -> None:
         raise RuntimeError("Could not find libobjc on this system")
     libobjc = ctypes.cdll.LoadLibrary(objc)
     ctypes.cdll.LoadLibrary("/System/Library/Frameworks/AppKit.framework/AppKit")
-    objc_path = ctypes.util.find_library("objc")
-    if objc_path is None:
-        raise ClipboardError("Could not locate libobjc on this system")
-    libobjc = ctypes.cdll.LoadLibrary(objc_path)
-    ctypes.cdll.LoadLibrary("/System/Library/Frameworks/AppKit.framework/AppKit")
     objc_getClass = libobjc.objc_getClass
     objc_getClass.restype = ctypes.c_void_p
     objc_getClass.argtypes = [ctypes.c_char_p]
@@ -195,17 +190,16 @@ def _copy_macos_ctypes(paths: list[str]) -> None:
     NSMutableArray = objc_getClass(b"NSMutableArray")
     NSApplication = objc_getClass(b"NSApplication")
 
-    required_classes = [
-        NSAutoreleasePool,
-        NSPasteboard,
-        NSString,
-        NSURL,
-        NSMutableArray,
-        NSApplication,
-    ]
-    for cls in required_classes:
+    for name, cls in {
+        "NSAutoreleasePool": NSAutoreleasePool,
+        "NSPasteboard": NSPasteboard,
+        "NSString": NSString,
+        "NSURL": NSURL,
+        "NSMutableArray": NSMutableArray,
+        "NSApplication": NSApplication,
+    }.items():
         if not cls:
-            raise ClipboardError(f"Failed to load Objective-C class: {cls = }")
+            raise ClipboardError(f"Failed to load Objective-C class: {name}")
 
     # Initialize AppKit context (required for pasteboard access)
     msg0(NSApplication, sel("sharedApplication"))

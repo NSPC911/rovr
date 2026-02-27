@@ -167,7 +167,7 @@ def remove_pin(pin_path: str | bytes) -> None:
                         item["path"] = item["path"].replace(dir_path_val, f"${var}")
 
     try:
-        with open(pin_path, "w") as f:
+        with open(PIN_PATH, "w") as f:
             json.dump(pins_to_write, f, indent=2)
     except IOError as exc:
         dump_exc(None, exc)

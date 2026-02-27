@@ -1,6 +1,6 @@
 import shlex
 import subprocess
-from typing import TYPE_CHECKING, Any, Callable
+from typing import TYPE_CHECKING, Any, Callable, Literal
 
 from humanize import naturalsize
 from rich.console import Console
@@ -132,8 +132,9 @@ def set_scuffed_subtitle(element: DOMNode, *sections: str) -> None:
     element.border_subtitle = subtitle
 
 
-def natural_size(integer: int, suffix: str, filesize_decimals: int) -> str:
-    assert suffix in ["decimal", "binary", "gnu"]
+def natural_size(
+    integer: int, suffix: Literal["gnu", "binary", "decimal"], filesize_decimals: int
+) -> str:
     match suffix:
         case "gnu":
             return naturalsize(
@@ -147,7 +148,7 @@ def natural_size(integer: int, suffix: str, filesize_decimals: int) -> str:
                 binary=True,
                 format=f"%.{filesize_decimals}f",
             )
-        case _:
+        case "decimal":
             return naturalsize(value=integer, format=f"%.{filesize_decimals}f")
 
 

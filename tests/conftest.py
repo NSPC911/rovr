@@ -14,6 +14,7 @@ _stdin_patch.start()
 
 
 @pytest.fixture(autouse=True)
-def isolate_test_state(tmp_path: Path) -> None:
+def isolate_test_state(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
     config_dir = tmp_path / "config"
-    maps.VAR_TO_DIR["CONFIG"] = config_dir.as_posix()
+    monkeypatch.setitem(maps.VAR_TO_DIR, "CONFIG", config_dir.as_posix())
+    monkeypatch.setattr("rovr.functions.pins.PIN_PATH", str(config_dir / "pins.json"))

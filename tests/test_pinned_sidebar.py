@@ -1,4 +1,5 @@
 import os
+import sys
 from pathlib import Path
 
 import pytest
@@ -6,7 +7,7 @@ import pytest
 
 @pytest.mark.asyncio
 async def test_default_pinned_sidebar(tmp_path: Path) -> None:
-    dirs = {
+    base_map = {
         "Documents": tmp_path / "Documents",
         "Downloads": tmp_path / "Downloads",
         "Music": tmp_path / "Music",
@@ -16,10 +17,40 @@ async def test_default_pinned_sidebar(tmp_path: Path) -> None:
         "Videos": tmp_path / "Videos",
     }
     # change variables to platformdirs
-    if os.name == "nt":
-        for name, path in dirs.items():
+    if sys.platform == "win32":
+        for name, path in base_map.items():
             path.mkdir(exist_ok=True)
             os.environ[f"WIN_PD_OVERRIDE_{name.upper()}"] = str(path)
+    elif sys.platform == "darwin":
+        xdg_map = {
+            "Documents": "XDG_DOCUMENTS_DIR",
+            "Downloads": "XDG_DOWNLOAD_DIR",
+            "Music": "XDG_MUSIC_DIR",
+            "Pictures": "XDG_PICTURES_DIR",
+            "Desktop": "XDG_DESKTOP_DIR",
+            "Videos": "XDG_VIDEOS_DIR",
+        }
+        for name, path in base_map.items():
+            path.mkdir(exist_ok=True)
+            if name == "Home":
+                os.environ["HOME"] = str(path)
+            else:
+                os.environ[xdg_map[name]] = str(path)
+    else:
+        xdg_map = {
+            "Documents": "XDG_DOCUMENTS_DIR",
+            "Downloads": "XDG_DOWNLOAD_DIR",
+            "Music": "XDG_MUSIC_DIR",
+            "Pictures": "XDG_PICTURES_DIR",
+            "Desktop": "XDG_DESKTOP_DIR",
+            "Videos": "XDG_VIDEOS_DIR",
+        }
+        for name, path in base_map.items():
+            path.mkdir(exist_ok=True)
+            if name == "Home":
+                os.environ["HOME"] = str(path)
+            else:
+                os.environ[xdg_map[name]] = str(path)
 
     from rovr.app import Application
 
@@ -30,8 +61,8 @@ async def test_default_pinned_sidebar(tmp_path: Path) -> None:
         await pilot.pause(1)
         for option in sidebar.list_of_options:
             if hasattr(option, "label"):
-                assert option.label in dirs
-                dirs.pop(option.label)
+                assert option.label in base_map
+                base_map.pop(option.label)
             elif option.prompt.strip() == "Pinned":
                 break
 

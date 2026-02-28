@@ -15,7 +15,12 @@ from rovr.action_buttons import (
     UnzipButton,
     ZipButton,
 )
+from rovr.action_buttons.sort_order import (
+    SortOrderButton,
+    SortOrderPopup,
+)
 from rovr.app import Application
+from rovr.state_manager import StateManager
 
 
 @pytest.mark.asyncio
@@ -355,3 +360,35 @@ async def test_unzip_button_extracts_archive(tmp_path: Path) -> None:
             assert os.path.isdir(tmp_path / "test_archive")
     finally:
         os.chdir(Path("~").expanduser())
+
+
+@pytest.mark.asyncio
+async def test_switch_to_extension(tmp_path: Path) -> None:
+    app = Application(tmp_path.as_posix())
+    open(tmp_path / "test_file.txt", "w").close()
+    async with app.run_test(size=(143, 37)) as pilot:
+        await pilot.pause()
+        await pilot.click(SortOrderButton)
+        await pilot.pause(1)
+        assert (popup := app.query_one(SortOrderPopup)).display
+        popup.action_cursor_down()
+        await pilot.pause()
+        popup.action_select()
+        await pilot.pause()
+        assert app.query_one(StateManager).sort_by == "extension"
+
+
+@pytest.mark.asyncio
+async def test_toggles(tmp_path: Path) -> None:
+    app = Application(tmp_path.as_posix())
+    open(tmp_path / "test_file.txt", "w").close()
+    async with app.run_test(size=(143, 37)) as pilot:
+        await pilot.pause()
+        await pilot.click(SortOrderButton)
+        await pilot.pause(1)
+        assert (popup := app.query_one(SortOrderPopup)).display
+        popup.highlighted = popup.get_option_index("descending")
+        await pilot.pause()
+        popup.action_select()
+        await pilot.pause()
+        assert app.query_one(StateManager).sort_descending

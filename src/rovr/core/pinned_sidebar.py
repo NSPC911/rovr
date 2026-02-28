@@ -30,8 +30,9 @@ class PinnedSidebar(OptionList, inherit_bindings=False):
         Raises:
             FolderNotFileError: If the pin location is a file, and not a folder.
         """
-        # be extra sure
-        available_pins = pin_utils.load_pins()
+        available_pins: pin_utils.PinsDict = globals().get(
+            "pins", pin_utils.load_pins()
+        )
         pins = available_pins["pins"]
         default = available_pins["default"]
         id_list = []
@@ -185,6 +186,7 @@ class PinnedSidebar(OptionList, inherit_bindings=False):
         self.app.file_list.focus()
         with self.input.prevent(Input.Changed):
             self.input.clear()
+            self.set_options(self.list_of_options)
 
     def on_key(self, event: events.Key) -> None:
         if event.key in config["keybinds"]["focus_search"]:

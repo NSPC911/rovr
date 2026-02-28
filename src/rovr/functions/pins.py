@@ -1,6 +1,6 @@
 import json
 from copy import deepcopy
-from os import path
+from os import makedirs, path
 from typing import TypedDict, cast
 
 from rovr.variables.maps import SORTED_VARS, VAR_TO_DIR
@@ -104,7 +104,17 @@ def add_pin(pin_name: str, pin_path: str | bytes) -> None:
     Args:
         pin_name (str): Name of the pin.
         pin_path (str): Path of the pin.
+
+    Raises:
+        FileNotFoundError: If the pin path does not exist.
+        ValueError: If the pin path is a file, and not a folder.
     """
+
+    if path.isfile(pin_path):
+        raise ValueError(f"Expected a folder but got a file: {pin_path}")
+    elif not path.exists(pin_path):
+        raise FileNotFoundError(f"Path does not exist: {pin_path}")
+
     global pins
 
     pins_to_write = deepcopy(pins)
@@ -125,6 +135,9 @@ def add_pin(pin_name: str, pin_path: str | bytes) -> None:
                 ):
                     for var, dir_path_val in SORTED_VARS:
                         item["path"] = item["path"].replace(dir_path_val, f"${var}")
+
+    if not path.exists(PIN_PATH):
+        makedirs(path.dirname(PIN_PATH), exist_ok=True)
 
     try:
         with open(PIN_PATH, "w") as f:

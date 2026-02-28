@@ -66,7 +66,6 @@ async def test_add_pins(tmp_path: Path) -> None:
 
         # now check whether you can cd
         sidebar.highlighted = found_at
-        await pilot.pause(0)
         sidebar.action_select()
         await pilot.pause(1)
         assert Path(os.getcwd()).as_posix() == test.as_posix()

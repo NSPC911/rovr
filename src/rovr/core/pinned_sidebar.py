@@ -174,7 +174,7 @@ class PinnedSidebar(OptionList, inherit_bindings=False):
         selected_option = event.option
         # Get the file path from the option id
         assert selected_option.id is not None
-        file_path = path_utils.decompress(selected_option.id.split("-")[0])
+        file_path = path_utils.decompress(selected_option.id.rsplit("-", 1)[0])
         if not path.isdir(file_path):
             if path.exists(file_path):
                 raise FolderNotFileError(

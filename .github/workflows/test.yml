@@ -54,6 +54,9 @@ jobs:
             Write-Host "Attempt $($retryCount + 1) of $maxRetries"
             try {
               uv run poe test -n 8
+              if ($LASTEXITCODE -ne 0) {
+                throw "Tests failed with exit code $LASTEXITCODE"
+              }
               Write-Host "Tests passed!"
               $success = $true
               break

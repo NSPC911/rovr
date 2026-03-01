@@ -14,15 +14,11 @@ def test_normalise() -> None:
 
 
 def test_compress_decompress() -> None:
-    from textual.dom import BadIdentifier
     from textual.widgets import Static
 
     the_path = os.getcwd()
     compressed = path_utils.compress(the_path)
-    try:
-        Static(id=compressed, classes=compressed)
-    except BadIdentifier as exc:
-        raise AssertionError from exc
+    assert Static(id=compressed, classes=compressed)
     decompressed = path_utils.decompress(compressed)
     assert decompressed == the_path
 

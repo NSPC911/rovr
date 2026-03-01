@@ -124,38 +124,35 @@ async def test_paste_button(tmp_path: Path) -> None:
     from rovr.screens import PasteScreen
 
     open(tmp_path / "test_file.txt", "w").close()
-    try:
-        app = Application(startup_path=tmp_path.as_posix())
-        async with app.run_test(size=(143, 37)) as pilot:
-            await pilot.pause()
-            await pilot.click(CopyButton)
-            await pilot.pause()
-            await pilot.click(PasteButton)
-            await pilot.pause(1)
-            assert isinstance(app.screen, PasteScreen)
-            assert (
-                app.screen
-                .query_one("SpecialOptionList", OptionList)
-                .get_option_at_index(0)
-                .copy_or_cut
-                == "copy"
-            )
-            await pilot.click("#no")
-            await pilot.pause()
-            await pilot.click(CutButton)
-            await pilot.pause()
-            await pilot.click(PasteButton)
-            await pilot.pause(1)
-            assert isinstance(app.screen, PasteScreen)
-            assert (
-                app.screen
-                .query_one("SpecialOptionList", OptionList)
-                .get_option_at_index(0)
-                .copy_or_cut
-                == "cut"
-            )
-    finally:
-        os.chdir(Path("~").expanduser())
+    app = Application(startup_path=tmp_path.as_posix())
+    async with app.run_test(size=(143, 37)) as pilot:
+        await pilot.pause()
+        await pilot.click(CopyButton)
+        await pilot.pause()
+        await pilot.click(PasteButton)
+        await pilot.pause(1)
+        assert isinstance(app.screen, PasteScreen)
+        assert (
+            app.screen
+            .query_one("SpecialOptionList", OptionList)
+            .get_option_at_index(0)
+            .copy_or_cut
+            == "copy"
+        )
+        await pilot.click("#no")
+        await pilot.pause()
+        await pilot.click(CutButton)
+        await pilot.pause()
+        await pilot.click(PasteButton)
+        await pilot.pause(1)
+        assert isinstance(app.screen, PasteScreen)
+        assert (
+            app.screen
+            .query_one("SpecialOptionList", OptionList)
+            .get_option_at_index(0)
+            .copy_or_cut
+            == "cut"
+        )
 
 
 @pytest.mark.asyncio
@@ -163,45 +160,35 @@ async def test_delete_button(tmp_path: Path) -> None:
     from rovr.screens import DeleteFiles
 
     open(tmp_path / "test_file.txt", "w").close()
-    try:
-        app = Application(startup_path=tmp_path.as_posix())
-        async with app.run_test(size=(143, 37)) as pilot:
-            assert (
-                app.file_list.get_option_at_index(0).dir_entry.name == "test_file.txt"
-            )
-            await pilot.click(DeleteButton)
-            await pilot.pause()
-            assert isinstance(app.screen, DeleteFiles)
-            await pilot.click("#trash")
-            await pilot.pause(2)
-            app.cd(os.getcwd(), add_to_history=False)
-            await pilot.pause(2)
-            assert app.file_list.get_option_at_index(0).disabled
-    finally:
-        os.chdir(Path("~").expanduser())
+    app = Application(startup_path=tmp_path.as_posix())
+    async with app.run_test(size=(143, 37)) as pilot:
+        assert app.file_list.get_option_at_index(0).dir_entry.name == "test_file.txt"
+        await pilot.click(DeleteButton)
+        await pilot.pause()
+        assert isinstance(app.screen, DeleteFiles)
+        await pilot.click("#trash")
+        await pilot.pause(2)
+        app.cd(os.getcwd(), add_to_history=False)
+        await pilot.pause(2)
+        assert app.file_list.get_option_at_index(0).disabled
 
 
 @pytest.mark.asyncio
 async def test_new_button(tmp_path: Path) -> None:
     from rovr.screens import ModalInput
 
-    try:
-        app = Application(startup_path=tmp_path.as_posix())
-        async with app.run_test(size=(143, 37)) as pilot:
-            await pilot.pause()
-            await pilot.click(NewItemButton)
-            await pilot.pause()
-            assert isinstance(app.screen, ModalInput)
-            await pilot.press(
-                "t", "e", "s", "t", "_", "f", "i", "l", "e", ".", "t", "x", "t", "enter"
-            )
-            await pilot.pause(1)
-            assert not isinstance(app.screen, ModalInput)
-            assert (
-                app.file_list.get_option_at_index(0).dir_entry.name == "test_file.txt"
-            )
-    finally:
-        os.chdir(Path("~").expanduser())
+    app = Application(startup_path=tmp_path.as_posix())
+    async with app.run_test(size=(143, 37)) as pilot:
+        await pilot.pause()
+        await pilot.click(NewItemButton)
+        await pilot.pause()
+        assert isinstance(app.screen, ModalInput)
+        await pilot.press(
+            "t", "e", "s", "t", "_", "f", "i", "l", "e", ".", "t", "x", "t", "enter"
+        )
+        await pilot.pause(1)
+        assert not isinstance(app.screen, ModalInput)
+        assert app.file_list.get_option_at_index(0).dir_entry.name == "test_file.txt"
 
 
 @pytest.mark.asyncio
@@ -209,43 +196,35 @@ async def test_rename_button(tmp_path: Path) -> None:
     from rovr.screens import ModalInput
 
     open(tmp_path / "test_file.txt", "w").close()
-    try:
-        app = Application(startup_path=tmp_path.as_posix())
-        async with app.run_test(size=(143, 37)) as pilot:
-            await pilot.pause()
-            assert (
-                app.file_list.get_option_at_index(0).dir_entry.name == "test_file.txt"
-            )
-            await pilot.click(RenameItemButton)
-            await pilot.pause()
-            assert isinstance(app.screen, ModalInput)
-            await pilot.press(
-                "r",
-                "e",
-                "n",
-                "a",
-                "m",
-                "e",
-                "d",
-                "_",
-                "f",
-                "i",
-                "l",
-                "e",
-                ".",
-                "t",
-                "x",
-                "t",
-                "enter",
-            )
-            await pilot.pause(1)
-            assert not isinstance(app.screen, ModalInput)
-            assert (
-                app.file_list.get_option_at_index(0).dir_entry.name
-                == "renamed_file.txt"
-            )
-    finally:
-        os.chdir(Path("~").expanduser())
+    app = Application(startup_path=tmp_path.as_posix())
+    async with app.run_test(size=(143, 37)) as pilot:
+        await pilot.pause()
+        assert app.file_list.get_option_at_index(0).dir_entry.name == "test_file.txt"
+        await pilot.click(RenameItemButton)
+        await pilot.pause()
+        assert isinstance(app.screen, ModalInput)
+        await pilot.press(
+            "r",
+            "e",
+            "n",
+            "a",
+            "m",
+            "e",
+            "d",
+            "_",
+            "f",
+            "i",
+            "l",
+            "e",
+            ".",
+            "t",
+            "x",
+            "t",
+            "enter",
+        )
+        await pilot.pause(1)
+        assert not isinstance(app.screen, ModalInput)
+        assert app.file_list.get_option_at_index(0).dir_entry.name == "renamed_file.txt"
 
 
 @pytest.mark.asyncio
@@ -286,19 +265,16 @@ async def test_zip_button_creates_archive(tmp_path: Path) -> None:
     from rovr.screens import ArchiveCreationScreen
 
     open(tmp_path / "test_file.txt", "w").close()
-    try:
-        app = Application(startup_path=tmp_path.as_posix())
-        async with app.run_test(size=(143, 37)) as pilot:
-            await pilot.pause()
-            await pilot.click(ZipButton)
-            await pilot.pause(1)
-            assert isinstance(app.screen, ArchiveCreationScreen)
-            await pilot.press("enter")
-            await pilot.pause(1)
-            assert not isinstance(app.screen, ArchiveCreationScreen)
-            assert any(f.endswith(".zip") for f in os.listdir(tmp_path))
-    finally:
-        os.chdir(Path("~").expanduser())
+    app = Application(startup_path=tmp_path.as_posix())
+    async with app.run_test(size=(143, 37)) as pilot:
+        await pilot.pause()
+        await pilot.click(ZipButton)
+        await pilot.pause(1)
+        assert isinstance(app.screen, ArchiveCreationScreen)
+        await pilot.press("enter")
+        await pilot.pause(1)
+        assert not isinstance(app.screen, ArchiveCreationScreen)
+        assert any(f.endswith(".zip") for f in os.listdir(tmp_path))
 
 
 @pytest.mark.asyncio
@@ -347,19 +323,16 @@ async def test_unzip_button_extracts_archive(tmp_path: Path) -> None:
     zip_path = tmp_path / "test_archive.zip"
     with zipfile.ZipFile(zip_path, "w") as zf:
         zf.writestr("dummy.txt", "hello")
-    try:
-        app = Application(startup_path=tmp_path.as_posix())
-        async with app.run_test(size=(143, 37)) as pilot:
-            await pilot.pause()
-            await pilot.click(UnzipButton)
-            await pilot.pause(1)
-            assert isinstance(app.screen, ModalInput)
-            await pilot.press("enter")
-            await pilot.pause(1)
-            assert not isinstance(app.screen, ModalInput)
-            assert os.path.isdir(tmp_path / "test_archive")
-    finally:
-        os.chdir(Path("~").expanduser())
+    app = Application(startup_path=tmp_path.as_posix())
+    async with app.run_test(size=(143, 37)) as pilot:
+        await pilot.pause()
+        await pilot.click(UnzipButton)
+        await pilot.pause(1)
+        assert isinstance(app.screen, ModalInput)
+        await pilot.press("enter")
+        await pilot.pause(1)
+        assert not isinstance(app.screen, ModalInput)
+        assert os.path.isdir(tmp_path / "test_archive")
 
 
 @pytest.mark.asyncio

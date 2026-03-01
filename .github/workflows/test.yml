@@ -41,5 +41,5 @@ jobs:
       - name: Install dependencies
         run: uv sync --all-groups --no-group build
 
-      - name: Run ty
-        run: uv run poe test -n 4
+      - name: Run test
+        run: uv run poe test

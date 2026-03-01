@@ -1,7 +1,8 @@
-import logging
 import os
 import sys
 from pathlib import Path
+
+import pytest
 
 from rovr.footer import MetadataContainer
 
@@ -69,10 +70,9 @@ def test_info_of_dir_entry(tmp_path: Path) -> None:
         )
         if output.returncode != 0:
             # assume pass, cant really bother if it doesn't work
-            logging.warning(
-                "Failed to create junction, skipping test: %s", output.stderr
-            )
-        dir_entry = next(os.scandir(tmp_path))
-        result = metadata.info_of_dir_entry(dir_entry, "Junction")
-        assert result.startswith("j")
-        assert len(result) == 10
+            pytest.skip("Junction creation failed, skipping test")
+        else:
+            dir_entry = next(os.scandir(tmp_path))
+            result = metadata.info_of_dir_entry(dir_entry, "Junction")
+            assert result.startswith("j")
+            assert len(result) == 10

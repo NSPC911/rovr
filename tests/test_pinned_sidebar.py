@@ -6,7 +6,9 @@ import pytest
 
 
 @pytest.mark.asyncio
-async def test_default_pinned_sidebar(tmp_path: Path) -> None:
+async def test_default_pinned_sidebar(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
     base_map = {
         "Documents": tmp_path / "Documents",
         "Downloads": tmp_path / "Downloads",
@@ -20,7 +22,7 @@ async def test_default_pinned_sidebar(tmp_path: Path) -> None:
     if sys.platform == "win32":
         for name, path in base_map.items():
             path.mkdir(exist_ok=True)
-            os.environ[f"WIN_PD_OVERRIDE_{name.upper()}"] = str(path)
+            monkeypatch.setenv(f"{name.upper()}_DIR", str(path))
     elif sys.platform == "darwin":
         xdg_map = {
             "Documents": "XDG_DOCUMENTS_DIR",
@@ -33,9 +35,9 @@ async def test_default_pinned_sidebar(tmp_path: Path) -> None:
         for name, path in base_map.items():
             path.mkdir(exist_ok=True)
             if name == "Home":
-                os.environ["HOME"] = str(path)
+                monkeypatch.setenv("HOME", str(path))
             else:
-                os.environ[xdg_map[name]] = str(path)
+                monkeypatch.setenv(xdg_map[name], str(path))
     else:
         xdg_map = {
             "Documents": "XDG_DOCUMENTS_DIR",
@@ -48,9 +50,9 @@ async def test_default_pinned_sidebar(tmp_path: Path) -> None:
         for name, path in base_map.items():
             path.mkdir(exist_ok=True)
             if name == "Home":
-                os.environ["HOME"] = str(path)
+                monkeypatch.setenv("HOME", str(path))
             else:
-                os.environ[xdg_map[name]] = str(path)
+                monkeypatch.setenv(xdg_map[name], str(path))
 
     from rovr.app import Application
 
@@ -65,6 +67,7 @@ async def test_default_pinned_sidebar(tmp_path: Path) -> None:
                 base_map.pop(option.label)
             elif option.prompt.strip() == "Pinned":
                 break
+        assert not base_map
 
 
 @pytest.mark.asyncio

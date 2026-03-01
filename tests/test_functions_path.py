@@ -89,12 +89,12 @@ def test_file_type(tmp_path: Path) -> None:
             text=True,
         )
         if output.returncode != 0:
-            # assume pass, cant really bother if it doesnt work
-            return
-        assert (
-            path_utils.file_is_type(tmp_path.joinpath("junction").as_posix())
-            == "junction"
-        )
+            pytest.skip("Junction creation failed, skipping test")
+        else:
+            assert (
+                path_utils.file_is_type(tmp_path.joinpath("junction").as_posix())
+                == "junction"
+            )
 
 
 def test_ensure_existing_directory(tmp_path: Path) -> None:

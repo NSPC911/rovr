@@ -1,4 +1,5 @@
 import logging
+from collections.abc import Iterator
 from pathlib import Path
 from unittest.mock import patch
 
@@ -6,11 +7,17 @@ import pytest
 
 from rovr.variables import maps
 
-# Patch sys.__stdin__ early (before test collection imports application modules)
-# so that textual_image skips terminal queries that require a real TTY.
 logging.getLogger("textual_image._terminal").setLevel(logging.FATAL)
-_stdin_patch = patch("sys.__stdin__", None)
-_stdin_patch.start()
+
+
+@pytest.fixture(scope="session", autouse=True)
+def _patch_stdin() -> Iterator[None]:
+    stdin_patch = patch("sys.__stdin__", None)
+    stdin_patch.start()
+    try:
+        yield
+    finally:
+        stdin_patch.stop()
 
 
 @pytest.fixture(autouse=True)

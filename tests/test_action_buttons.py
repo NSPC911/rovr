@@ -240,7 +240,6 @@ async def test_zip_button() -> None:
             await pilot.pause()
             assert not isinstance(app.screen, ArchiveCreationScreen)
     finally:
-        os.chdir(Path("~").expanduser())
         empty_dir.cleanup()
 
     temp_dir = TemporaryDirectory()
@@ -256,7 +255,6 @@ async def test_zip_button() -> None:
             await pilot.pause()
             assert not isinstance(app.screen, ArchiveCreationScreen)
     finally:
-        os.chdir(Path("~").expanduser())
         temp_dir.cleanup()
 
 
@@ -292,7 +290,6 @@ async def test_unzip_button() -> None:
             await pilot.pause()
             assert not isinstance(app.screen, ModalInput)
     finally:
-        os.chdir(Path("~").expanduser())
         empty_dir.cleanup()
 
     temp_dir = TemporaryDirectory()
@@ -310,7 +307,6 @@ async def test_unzip_button() -> None:
             await pilot.pause()
             assert not isinstance(app.screen, ModalInput)
     finally:
-        os.chdir(Path("~").expanduser())
         temp_dir.cleanup()
 
 

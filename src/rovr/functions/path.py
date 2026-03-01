@@ -6,7 +6,6 @@ import re
 import stat
 import subprocess
 from os import path
-from pathlib import Path
 from typing import Callable, Literal, NamedTuple, TypedDict, overload
 
 import psutil
@@ -170,9 +169,8 @@ def get_filtered_dir_names(cwd: str | bytes, show_hidden: bool = False) -> set[s
     Raises:
         PermissionError: When access to the directory is denied
     """
-    # Refactored to use Path.iterdir for better readability and compatibility with pathlib
     try:
-        listed_dir = Path(str(cwd)).iterdir()
+        listed_dir = os.scandir(cwd)
     except (PermissionError, FileNotFoundError, OSError):
         raise PermissionError(f"PermissionError: Unable to access {cwd}")
 

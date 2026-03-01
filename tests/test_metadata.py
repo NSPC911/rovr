@@ -7,9 +7,9 @@ import pytest
 from rovr.footer import MetadataContainer
 
 
-def test_info_of_dir_entry(tmp_path: Path) -> None:
+def test_info_of_dir_entry(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
     """Test the info_of_dir_entry function with various file types and permissions."""
-    os.chdir(tmp_path)
+    monkeypatch.chdir(tmp_path)
     metadata = MetadataContainer()
 
     # Create test files with different permissions
@@ -47,7 +47,8 @@ def test_info_of_dir_entry(tmp_path: Path) -> None:
         os.remove(test_symlink)
         os.remove(test_file)
     except (OSError, NotImplementedError):
-        pass
+        if sys.platform != "win32":
+            pytest.skip("Symlink creation failed, skipping test")
 
     result = metadata.info_of_dir_entry(dir_entry, "Unknown")
     assert result == "?????????"

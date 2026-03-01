@@ -184,6 +184,7 @@ async def test_delete_button(tmp_path: Path) -> None:
         await iter_until(pilot, lambda: not isinstance(app.screen, DeleteFiles))
         assert not isinstance(app.screen, DeleteFiles)
         worker = app.cd(os.getcwd(), add_to_history=False)
+        assert worker is not None
         await worker.wait()
         await pilot.pause()
         assert app.file_list.get_option_at_index(0).disabled
@@ -202,7 +203,7 @@ async def test_new_button(tmp_path: Path) -> None:
         await pilot.press(
             "t", "e", "s", "t", "_", "f", "i", "l", "e", ".", "t", "x", "t", "enter"
         )
-        await pilot.pause(1)
+        await iter_until(pilot, lambda: isinstance(app.screen, ModalInput))
         assert not isinstance(app.screen, ModalInput)
         assert app.file_list.get_option_at_index(0).dir_entry.name == "test_file.txt"
 

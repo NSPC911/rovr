@@ -17,7 +17,7 @@ def test_info_of_dir_entry(tmp_path: Path) -> None:
     test_dir.mkdir()
 
     dir_entry: os.DirEntry = next(os.scandir(tmp_path))
-    dir_entry.path = str(test_file)
+    # dir_entry.path = str(test_file)
 
     result = metadata.info_of_dir_entry(dir_entry, "File")
     assert result.startswith("-")

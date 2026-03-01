@@ -6,6 +6,8 @@ import pytest
 from rovr.app import Application
 from rovr.navigation_widgets import BackButton
 
+from .conftest import iter_until
+
 
 @pytest.mark.asyncio
 async def test_nav(tmp_path: Path) -> None:
@@ -84,8 +86,9 @@ async def test_tab_highlight(tmp_path: Path) -> None:
         await app.tabWidget.add_tab("")
         await pilot.pause()
         app.tabWidget.action_next_tab()
-        await pilot.pause()
-
+        await iter_until(
+            pilot, lambda: app.file_list.highlighted_option.dir_entry.name == name
+        )
         assert app.file_list.highlighted_option.dir_entry.name == name
         assert app.file_list.highlighted == index
 
@@ -108,6 +111,8 @@ async def test_tab_search(tmp_path: Path) -> None:
         await app.tabWidget.add_tab("")
         await pilot.pause()
         app.tabWidget.action_next_tab()
+        # forced to do this, i cant check for file list updates
+        # or anything of that kind, so im just gonna wait a bit and hope it updates by then
         await pilot.pause(1)
 
         assert app.file_list.input.value == "file"

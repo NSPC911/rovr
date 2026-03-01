@@ -1,10 +1,8 @@
 import os
 from pathlib import Path
 from tempfile import TemporaryDirectory
-from typing import Callable
 
 import pytest
-from textual.pilot import Pilot
 from textual.widgets import OptionList, SelectionList
 
 from rovr.action_buttons import (
@@ -24,17 +22,7 @@ from rovr.action_buttons.sort_order import (
 from rovr.app import Application
 from rovr.state_manager import StateManager
 
-
-async def iter_until(
-    pilot: Pilot,
-    method: Callable[[], bool],
-    timeout: float = 2.0,
-    interval: float = 0.1,
-) -> None:
-    for _ in range(int(timeout / interval)):
-        await pilot.pause(interval)
-        if method():
-            return
+from .conftest import iter_until
 
 
 @pytest.mark.asyncio
@@ -171,6 +159,7 @@ async def test_paste_button(tmp_path: Path) -> None:
 
 @pytest.mark.asyncio
 async def test_delete_button(tmp_path: Path) -> None:
+    from rovr.footer.process_container import ProcessContainer, ProgressBarContainer
     from rovr.screens import DeleteFiles
 
     open(tmp_path / "test_file.txt", "w").close()
@@ -183,6 +172,17 @@ async def test_delete_button(tmp_path: Path) -> None:
         await pilot.click("#trash")
         await iter_until(pilot, lambda: not isinstance(app.screen, DeleteFiles))
         assert not isinstance(app.screen, DeleteFiles)
+        await iter_until(
+            pilot,
+            lambda: (
+                app
+                .query_one(ProcessContainer)
+                .query(ProgressBarContainer)
+                .first()
+                .progress_bar.percentage
+                == 1
+            ),
+        )
         worker = app.cd(os.getcwd(), add_to_history=False)
         assert worker is not None
         await worker.wait()

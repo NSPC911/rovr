@@ -1,10 +1,25 @@
 import logging
 from pathlib import Path
+from typing import Callable
 from unittest.mock import patch
 
 import pytest
+from textual.pilot import Pilot
 
 from rovr.variables import maps
+
+
+async def iter_until(
+    pilot: Pilot,
+    method: Callable[[], bool],
+    timeout: float = 2.0,
+    interval: float = 0.1,
+) -> None:
+    for _ in range(int(timeout / interval)):
+        await pilot.pause(interval)
+        if method():
+            return
+
 
 # Patch sys.__stdin__ early (before test collection imports application modules)
 # so that textual_image skips terminal queries that require a real TTY.

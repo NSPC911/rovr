@@ -49,11 +49,11 @@ async def test_dimming(tmp_path: Path) -> None:
         clipboard.highlighted = 0
         await pilot.pause()
         clipboard.action_select()
-        await pilot.pause(1)
+        await pilot.pause(0.5)
         # once unselected, the dimness should be gone
         assert not check_dim(app.file_list.options[0]._prompt.spans[-1].style)
         clipboard.action_select()
-        await pilot.pause(1)
+        await pilot.pause(0.5)
         await pilot.click("CopyButton")
         await pilot.pause()
         # copying should not cause dimness

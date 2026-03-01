@@ -111,9 +111,15 @@ async def test_tab_search(tmp_path: Path) -> None:
         await app.tabWidget.add_tab("")
         await pilot.pause()
         app.tabWidget.action_next_tab()
-        # forced to do this, i cant check for file list updates
-        # or anything of that kind, so im just gonna wait a bit and hope it updates by then
-        await pilot.pause(1)
+        await iter_until(pilot, lambda: app.tabWidget.active_tab)
+        await iter_until(
+            pilot,
+            lambda: (
+                not any(
+                    worker for worker in app.workers if worker.node == app.file_list
+                )
+            ),
+        )
 
         assert app.file_list.input.value == "file"
         assert app.file_list.highlighted_option.dir_entry.name == name

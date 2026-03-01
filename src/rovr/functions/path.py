@@ -635,7 +635,7 @@ def match_mime_to_preview_type(
     widget: DOMNode,
     mime_type: str,
 ) -> (
-    Literal["text", "image", "pdf", "archive", "folder", "remime", "resvg", "font"]
+    Literal["text", "image", "pdf", "archive", "folder", "remime", "resvg", "font", "video"]
     | None
 ):
     """

@@ -22,6 +22,13 @@ scrolloff = 3
 protocol = "Auto"
 max_size = [4000, 4000]
 
+[interface.video_viewer]
+protocol = "Halfcell"
+fps_decrease_factor = 3
+pause_icon_type = 'unicode'
+show_controls = true
+show_track = true
+
 [interface.preview_text]
 error = "couldn't read this file! (\u00AC_\u00AC)" # ¬_¬
 start = """
@@ -67,6 +74,7 @@ panels = false
 "application/ms-opentype" = "font"
 "application/font-.*" = "font"
 "application/x-font-.*" = "font"
+"video/mp4" = "video"
 
 [settings]
 copy_includes_metadata = true

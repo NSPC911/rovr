@@ -27,6 +27,8 @@ from textual.timer import Timer
 from textual.widget import Widget
 from textual.widgets import Static
 from textual.widgets.selection_list import Selection
+from textual_video import VideoPlayer
+from textual_video.enums import IconType, ImageType
 
 from rovr.classes.archive import Archive, BadArchiveError
 from rovr.classes.textual_options import (
@@ -348,6 +350,27 @@ class PreviewContainer(Container):
             )
             return
         self.app.call_from_thread(setattr, self, "border_title", titles.svg)
+
+    def show_video_preview(self, depth: int = 0) -> None:
+        """Show video preview. Runs in a thread."""
+        if should_cancel() or self._current_file_path is None:
+            return
+        self.app.call_from_thread(setattr, self, "border_title", titles.video)
+        self.app.call_from_thread(self.remove_children)
+
+        if should_cancel():
+            return
+        self.app.call_from_thread(self.mount, VideoPlayer(
+            self._current_file_path,
+            image_type=ImageType(config["interface"]["video_viewer"]["protocol"]),
+            fps_decrease_factor=config["interface"]["video_viewer"]["fps_decrease_factor"],
+            pause_icon_type=IconType(config["interface"]["video_viewer"]["pause_icon_type"]),
+            show_controls=config["interface"]["video_viewer"]["show_controls"],
+            show_track=config["interface"]["video_viewer"]["show_track"]
+        ))
+
+        if should_cancel():
+            return
 
     def show_image_preview(self, depth: int = 0) -> None:
         """Show image preview. Runs in a thread."""
@@ -1052,6 +1075,9 @@ class PreviewContainer(Container):
         elif file_type == "image":
             self.log("Showing image preview")
             self.show_image_preview()
+        elif file_type == "video":
+            self.log("Showing video preview")
+            self.show_video_preview()
         elif file_type == "archive":
             self.log("Showing archive preview")
             self.show_archive_preview()

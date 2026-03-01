@@ -36,6 +36,7 @@ dependencies = [
   "textual-image[textual]>=0.8.4",
   "textual-speedups>=0.2.1",
   "tomli>=2.4.0",
+  "textual-video>=0.1.4",
 ]
 
 [project.urls]

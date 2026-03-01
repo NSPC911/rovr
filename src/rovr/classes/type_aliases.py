@@ -3,7 +3,7 @@ import platform
 from typing import Literal, TypeAlias
 
 PreviewTypes: TypeAlias = Literal[
-    "text", "image", "pdf", "archive", "folder", "remime", "resvg", "font"
+    "text", "image", "pdf", "archive", "folder", "remime", "resvg", "font", "video"
 ]
 SortByOptions: TypeAlias = Literal[
     "name", "size", "modified", "created", "extension", "natural"

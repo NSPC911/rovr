@@ -86,8 +86,8 @@ def test_file_type(tmp_path: Path) -> None:
             [
                 "mklink",
                 "/J",
-                str(tmp_path / "junction"),
-                str(tmp_path / "folder"),
+                (tmp_path / "junction").as_posix().replace("/", "\\"),
+                (tmp_path / "folder").as_posix().replace("/", "\\"),
             ],
             shell=True,
             capture_output=True,
@@ -103,7 +103,7 @@ def test_file_type(tmp_path: Path) -> None:
 
 
 def test_ensure_existing_directory(tmp_path: Path) -> None:
-    # basically check the directory it goes to if the target directory doesnt exist or isnt a directory
+    # basically check the directory it goes to if the target directory doesn't exist or isn't a directory
     target_dir = tmp_path / "nonexistent" / "subdir" / "target" / "dir"
     ensured = path_utils.ensure_existing_directory(target_dir.as_posix())
     assert ensured == tmp_path.as_posix()

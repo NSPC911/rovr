@@ -619,7 +619,7 @@ class Application(App, inherit_bindings=False):
         focus_on: str | None = None,
         has_selected: bool = False,
         callback: Callable | None = None,
-    ) -> None:
+    ) -> Worker | None:
         # Makes sure `directory` is a directory, or chdir will fail with exception
         directory = ensure_existing_directory(directory)
 
@@ -646,7 +646,7 @@ class Application(App, inherit_bindings=False):
             state_manager: StateManager = self.query_one(StateManager)
             state_manager.apply_folder_sort_prefs(normalise(getcwd()))
 
-        self.file_list.update_file_list(
+        return self.file_list.update_file_list(
             add_to_session=add_to_history,
             focus_on=focus_on,
             has_selected=has_selected,

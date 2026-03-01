@@ -1,9 +1,10 @@
 import os
 from pathlib import Path
 from tempfile import TemporaryDirectory
+from typing import Callable
 
 import pytest
-from textual.css.query import NoMatches
+from textual.pilot import Pilot
 from textual.widgets import OptionList, SelectionList
 
 from rovr.action_buttons import (
@@ -22,6 +23,18 @@ from rovr.action_buttons.sort_order import (
 )
 from rovr.app import Application
 from rovr.state_manager import StateManager
+
+
+async def iter_until(
+    pilot: Pilot,
+    method: Callable[[], bool],
+    timeout: float = 2.0,
+    interval: float = 0.1,
+) -> None:
+    for _ in range(int(timeout / interval)):
+        await pilot.pause(interval)
+        if method():
+            return
 
 
 @pytest.mark.asyncio
@@ -131,7 +144,7 @@ async def test_paste_button(tmp_path: Path) -> None:
         await pilot.click(CopyButton)
         await pilot.pause()
         await pilot.click(PasteButton)
-        await pilot.pause(1)
+        await iter_until(pilot, lambda: isinstance(app.screen, PasteScreen))
         assert isinstance(app.screen, PasteScreen)
         assert (
             app.screen
@@ -145,7 +158,7 @@ async def test_paste_button(tmp_path: Path) -> None:
         await pilot.click(CutButton)
         await pilot.pause()
         await pilot.click(PasteButton)
-        await pilot.pause(1)
+        await iter_until(pilot, lambda: isinstance(app.screen, PasteScreen))
         assert isinstance(app.screen, PasteScreen)
         assert (
             app.screen
@@ -168,9 +181,11 @@ async def test_delete_button(tmp_path: Path) -> None:
         await pilot.pause()
         assert isinstance(app.screen, DeleteFiles)
         await pilot.click("#trash")
-        await pilot.pause(2)
-        app.cd(os.getcwd(), add_to_history=False)
-        await pilot.pause(2)
+        await iter_until(pilot, lambda: not isinstance(app.screen, DeleteFiles))
+        assert not isinstance(app.screen, DeleteFiles)
+        worker = app.cd(os.getcwd(), add_to_history=False)
+        await worker.wait()
+        await pilot.pause()
         assert app.file_list.get_option_at_index(0).disabled
 
 
@@ -202,7 +217,7 @@ async def test_rename_button(tmp_path: Path) -> None:
         await pilot.pause()
         assert app.file_list.get_option_at_index(0).dir_entry.name == "test_file.txt"
         await pilot.click(RenameItemButton)
-        await pilot.pause()
+        await iter_until(pilot, lambda: isinstance(app.screen, ModalInput))
         assert isinstance(app.screen, ModalInput)
         await pilot.press(
             "r",
@@ -223,7 +238,7 @@ async def test_rename_button(tmp_path: Path) -> None:
             "t",
             "enter",
         )
-        await pilot.pause(1)
+        await iter_until(pilot, lambda: not isinstance(app.screen, ModalInput))
         assert not isinstance(app.screen, ModalInput)
         assert app.file_list.get_option_at_index(0).dir_entry.name == "renamed_file.txt"
 
@@ -251,7 +266,9 @@ async def test_zip_button() -> None:
         async with app.run_test(size=(143, 37)) as pilot:
             await pilot.pause()
             await pilot.click(ZipButton)
-            await pilot.pause(1)
+            await iter_until(
+                pilot, lambda: isinstance(app.screen, ArchiveCreationScreen)
+            )
             assert isinstance(app.screen, ArchiveCreationScreen)
             await pilot.press("escape")
             await pilot.pause()
@@ -270,10 +287,12 @@ async def test_zip_button_creates_archive(tmp_path: Path) -> None:
     async with app.run_test(size=(143, 37)) as pilot:
         await pilot.pause()
         await pilot.click(ZipButton)
-        await pilot.pause(1)
+        await iter_until(pilot, lambda: isinstance(app.screen, ArchiveCreationScreen))
         assert isinstance(app.screen, ArchiveCreationScreen)
         await pilot.press("enter")
-        await pilot.pause(1)
+        await iter_until(
+            pilot, lambda: not isinstance(app.screen, ArchiveCreationScreen)
+        )
         assert not isinstance(app.screen, ArchiveCreationScreen)
         assert any(f.endswith(".zip") for f in os.listdir(tmp_path))
 
@@ -305,16 +324,10 @@ async def test_unzip_button() -> None:
         async with app.run_test(size=(143, 37)) as pilot:
             await pilot.pause()
             await pilot.click(UnzipButton)
-            for _ in range(20):
-                await pilot.pause(0.1)
-                if isinstance(app.screen, ModalInput):
-                    break
+            await iter_until(pilot, lambda: isinstance(app.screen, ModalInput))
             assert isinstance(app.screen, ModalInput)
             await pilot.press("escape")
-            for _ in range(20):
-                await pilot.pause(0.1)
-                if not isinstance(app.screen, ModalInput):
-                    break
+            await iter_until(pilot, lambda: not isinstance(app.screen, ModalInput))
             assert not isinstance(app.screen, ModalInput)
     finally:
         os.chdir(Path("~").expanduser())
@@ -334,16 +347,10 @@ async def test_unzip_button_extracts_archive(tmp_path: Path) -> None:
     async with app.run_test(size=(143, 37)) as pilot:
         await pilot.pause()
         await pilot.click(UnzipButton)
-        for _ in range(20):
-            await pilot.pause(0.1)
-            if isinstance(app.screen, ModalInput):
-                break
+        await iter_until(pilot, lambda: isinstance(app.screen, ModalInput))
         assert isinstance(app.screen, ModalInput)
         await pilot.press("enter")
-        for _ in range(20):
-            await pilot.pause(0.1)
-            if not isinstance(app.screen, ModalInput):
-                break
+        await iter_until(pilot, lambda: not isinstance(app.screen, ModalInput))
         assert not isinstance(app.screen, ModalInput)
         assert os.path.isdir(tmp_path / "test_archive")
 
@@ -355,13 +362,7 @@ async def test_switch_to_extension(tmp_path: Path) -> None:
     async with app.run_test(size=(143, 37)) as pilot:
         await pilot.pause()
         await pilot.click(SortOrderButton)
-        for _ in range(20):
-            await pilot.pause(0.1)
-            try:
-                if app.query_one(SortOrderPopup).display:
-                    break
-            except NoMatches:
-                pass
+        await iter_until(pilot, lambda: app.query_one(SortOrderPopup).display)
         assert (popup := app.query_one(SortOrderPopup)).display
         popup.action_cursor_down()
         await pilot.pause()
@@ -377,7 +378,7 @@ async def test_toggles(tmp_path: Path) -> None:
     async with app.run_test(size=(143, 37)) as pilot:
         await pilot.pause()
         await pilot.click(SortOrderButton)
-        await pilot.pause(1)
+        await iter_until(pilot, lambda: app.query_one(SortOrderPopup).display)
         assert (popup := app.query_one(SortOrderPopup)).display
         popup.highlighted = popup.get_option_index("descending")
         await pilot.pause()

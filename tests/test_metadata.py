@@ -40,15 +40,14 @@ def test_info_of_dir_entry(tmp_path: Path) -> None:
             if entry.name == "test_symlink":
                 dir_entry = entry
                 break
+        result = metadata.info_of_dir_entry(dir_entry, "Symlink")
+        assert result.startswith("l")
+        assert len(result) == 10
+
+        os.remove(test_symlink)
+        os.remove(test_file)
     except (OSError, NotImplementedError):
-        pytest.skip("Symlink creation failed, skipping test")
-
-    result = metadata.info_of_dir_entry(dir_entry, "Symlink")
-    assert result.startswith("l")
-    assert len(result) == 10
-
-    os.remove(test_symlink)
-    os.remove(test_file)
+        pass
 
     result = metadata.info_of_dir_entry(dir_entry, "Unknown")
     assert result == "?????????"
@@ -64,15 +63,15 @@ def test_info_of_dir_entry(tmp_path: Path) -> None:
             [
                 "mklink",
                 "/J",
-                str(tmp_path / "junction"),
-                str(tmp_path / "folder"),
+                # because windows cmd considers forward slashes as switches
+                (tmp_path / "junction").as_posix().replace("/", "\\"),
+                (tmp_path / "folder").as_posix().replace("/", "\\"),
             ],
             shell=True,
             capture_output=True,
             text=True,
         )
         if output.returncode != 0:
-            # assume pass, cant really bother if it doesn't work
             pytest.skip("Junction creation failed, skipping test")
         else:
             dir_entry = next(os.scandir(tmp_path))

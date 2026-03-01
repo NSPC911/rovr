@@ -1,5 +1,5 @@
 import json
-from os import path
+from os import makedirs, path
 from typing import TypedDict, cast
 
 from rovr.classes.type_aliases import SortByOptions
@@ -70,6 +70,8 @@ def save_folder_prefs() -> None:
             folder_path = folder_path.replace(dir_path_val, f"${var}")
         collapsed[folder_path] = pref
 
+    if not path.exists(VAR_TO_DIR["CONFIG"]):
+        makedirs(VAR_TO_DIR["CONFIG"], exist_ok=True)
     try:
         with open(prefs_file, "w", encoding="utf-8") as f:
             json.dump(collapsed, f, indent=2)

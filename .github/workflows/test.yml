@@ -81,7 +81,7 @@ jobs:
           status: failure
           description: |
             <:wazowski:1308074746772062248> Check the workflow [details](https://github.com/NSPC911/rovr/actions/runs/${{ github.run_id }}) for more info.
-             -# branch `${{ github.ref_name }}`
+             -# branch `${{ github.ref_name }}` (due to `${{ github.event_name }}`)
           avatar_url: "https://avatars.githubusercontent.com/u/176916861?v=4"
           username: "NSPBot911"
           nodetail: true
@@ -101,7 +101,7 @@ jobs:
           status: success
           description: |
             <:joe_ye:1308074319934525545> All tests passed!
-            -# branch `${{ github.ref_name }}`
+            -# branch `${{ github.ref_name }}` (due to `${{ github.event_name }}`)
           avatar_url: "https://avatars.githubusercontent.com/u/176916861?v=4"
           username: "NSPBot911"
           nodetail: true

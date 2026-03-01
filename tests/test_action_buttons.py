@@ -3,6 +3,7 @@ from pathlib import Path
 from tempfile import TemporaryDirectory
 
 import pytest
+from textual.css.query import NoMatches
 from textual.widgets import OptionList, SelectionList
 
 from rovr.action_buttons import (
@@ -304,10 +305,16 @@ async def test_unzip_button() -> None:
         async with app.run_test(size=(143, 37)) as pilot:
             await pilot.pause()
             await pilot.click(UnzipButton)
-            await pilot.pause(1)
+            for _ in range(20):
+                await pilot.pause(0.1)
+                if isinstance(app.screen, ModalInput):
+                    break
             assert isinstance(app.screen, ModalInput)
             await pilot.press("escape")
-            await pilot.pause()
+            for _ in range(20):
+                await pilot.pause(0.1)
+                if not isinstance(app.screen, ModalInput):
+                    break
             assert not isinstance(app.screen, ModalInput)
     finally:
         os.chdir(Path("~").expanduser())
@@ -327,10 +334,16 @@ async def test_unzip_button_extracts_archive(tmp_path: Path) -> None:
     async with app.run_test(size=(143, 37)) as pilot:
         await pilot.pause()
         await pilot.click(UnzipButton)
-        await pilot.pause(1)
+        for _ in range(20):
+            await pilot.pause(0.1)
+            if isinstance(app.screen, ModalInput):
+                break
         assert isinstance(app.screen, ModalInput)
         await pilot.press("enter")
-        await pilot.pause(1)
+        for _ in range(20):
+            await pilot.pause(0.1)
+            if not isinstance(app.screen, ModalInput):
+                break
         assert not isinstance(app.screen, ModalInput)
         assert os.path.isdir(tmp_path / "test_archive")
 
@@ -342,7 +355,13 @@ async def test_switch_to_extension(tmp_path: Path) -> None:
     async with app.run_test(size=(143, 37)) as pilot:
         await pilot.pause()
         await pilot.click(SortOrderButton)
-        await pilot.pause(1)
+        for _ in range(20):
+            await pilot.pause(0.1)
+            try:
+                if app.query_one(SortOrderPopup).display:
+                    break
+            except NoMatches:
+                pass
         assert (popup := app.query_one(SortOrderPopup)).display
         popup.action_cursor_down()
         await pilot.pause()

@@ -31,14 +31,17 @@ def test_info_of_dir_entry(tmp_path: Path) -> None:
     assert len(result) == 10
 
     os.rmdir(test_dir)
-    test_file = tmp_path / "test_file.txt"
-    test_file.write_text("test content")
-    test_symlink = tmp_path / "test_symlink"
-    test_symlink.symlink_to(test_file)
-    for entry in os.scandir(tmp_path):
-        if entry.name == "test_symlink":
-            dir_entry = entry
-            break
+    try:
+        test_file = tmp_path / "test_file.txt"
+        test_file.write_text("test content")
+        test_symlink = tmp_path / "test_symlink"
+        test_symlink.symlink_to(test_file)
+        for entry in os.scandir(tmp_path):
+            if entry.name == "test_symlink":
+                dir_entry = entry
+                break
+    except (OSError, NotImplementedError):
+        pytest.skip("Symlink creation failed, skipping test")
 
     result = metadata.info_of_dir_entry(dir_entry, "Symlink")
     assert result.startswith("l")

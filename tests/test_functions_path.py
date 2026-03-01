@@ -69,8 +69,13 @@ def test_file_type(tmp_path: Path) -> None:
     )
 
     # symlink
-    os.symlink(tmp_path / "file.txt", tmp_path / "link")
-    assert path_utils.file_is_type(tmp_path.joinpath("link").as_posix()) == "symlink"
+    try:
+        os.symlink(tmp_path / "file.txt", tmp_path / "link")
+        assert (
+            path_utils.file_is_type(tmp_path.joinpath("link").as_posix()) == "symlink"
+        )
+    except (OSError, NotImplementedError):
+        pytest.skip("Symlink creation failed, skipping test")
 
     # junction (if windows)
     if sys.platform == "win32":

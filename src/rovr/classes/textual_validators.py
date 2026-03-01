@@ -44,35 +44,3 @@ class PathNoLongerExists(Validator):
                 return self.failure()
         else:
             return self.success()
-
-
-class EndsWithAnArchiveExtension(Validator):
-    def __init__(self) -> None:
-        super().__init__(failure_description="Extension is not a valid archive type.")
-        self.strict = True
-        self.allowed_extensions: tuple[str, ...]
-        allowed: list[str] = []
-        from rovr.classes.archive import ARCHIVE_EXTENSIONS
-
-        for exts in ARCHIVE_EXTENSIONS:
-            for ext in exts:
-                allowed.append(str(ext))
-        self.allowed_extensions = tuple(allowed)
-
-    def validate(self, value: str) -> ValidationResult:
-        if value.endswith(self.allowed_extensions):
-            return self.success()
-        else:
-            return self.failure()
-
-
-class EndsWithRar(Validator):
-    def __init__(self) -> None:
-        super().__init__(failure_description="RAR files cannot be created.")
-        self.strict = True
-
-    def validate(self, value: str) -> ValidationResult:
-        if value.endswith(".rar"):
-            return self.failure()
-        else:
-            return self.success()

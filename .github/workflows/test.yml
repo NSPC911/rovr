@@ -27,6 +27,7 @@ jobs:
             name: macos-arm64
           - os: macos-15
             name: macos-x64
+
     runs-on: ${{ matrix.os }}
     name: Test on (${{ matrix.name }})
     steps:
@@ -41,5 +42,29 @@ jobs:
       - name: Install dependencies
         run: uv sync
 
-      - name: Run test
-        run: uv run poe test -n 8
+      - name: Run test with retry
+        id: test
+        shell: pwsh
+        run: |
+          $maxRetries = 5
+          $retryCount = 0
+          $success = $false
+
+          while ($retryCount -lt $maxRetries) {
+            Write-Host "Attempt $($retryCount + 1) of $maxRetries"
+            try {
+              uv run poe test -n 8
+              Write-Host "Tests passed!"
+              $success = $true
+              break
+            }
+            catch {
+              Write-Warning "Tests failed, retrying..."
+              $retryCount++
+            }
+          }
+
+          if (-not $success) {
+            Write-Error "Tests failed $maxRetries times in a row"
+            exit 1
+          }

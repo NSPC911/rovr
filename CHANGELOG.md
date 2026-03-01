@@ -13,6 +13,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `mimetype`: update puremagic + use regex for matching 92a709b
 - `preview`: add font previewing support 0d4aec5
 - `preview`: add max image preview size #226
+- `mime`: check different encodings for mimetype detection c6d61d4
 
 ### Fixed
 - `cli`: silence textual-image warnings c9d3865
@@ -25,10 +26,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `footer`: make children use one wide scrollbar 697a686
 - `preview`: force set enter_into to bypass selected folders in the preview 34317f2
 - `app`: call callback directly in FileList c337728
+- `preview`: dont wrap errors d5c51c1
+- `config`: avoid creating configs as far as possible 69afa5e
+- `preview`: fix issues where normal file preview simply fails 9337468 e5a5629
+- `file(1)`: use the actual executable and not depend on path
+- `fiilelist`: previously saved stuff should be saved again
 
 ### Performance
 - `preview`: move image loading into separate Process #226
 - `filelist`?: use dict and convert to set for faster lookups? d120056
+- `preview`: debounce the loading state a119744 2d4cb70
+
+### Refactor
+- `preview`: directly use `has_child` instead of re-checking children again 7ecaf73
 
 ## [0.8.0.dev1] - 2026-02-16
 

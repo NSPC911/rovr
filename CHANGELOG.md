@@ -7,35 +7,55 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Notable
+- feat(`preview`): add font previewing support 0d4aec5
+- feat(`mimetype`): update puremagic + use regex for matching 92a709b
+- feat(`mime`): check different encodings for mimetype detection c6d61d4
+- fix(`cli`): silence textual-image warnings c9d3865
+- fix(`config`): actually point to the error line in the config file 0733791
+- fix(`file(1)`): use the actual executable and not depend on path
+- fix(`macos-clipboard`): replace clippy with ctypes (absolute chaos) 8f4c83c
+- fix(`preview`): bypass selected folders in the preview should work now 34317f2
+- fix(`preview`): fix issues where normal file preview simply fails 9337468 e5a5629
+- fix(`utils`): make editor query shutil.which before running dfa4691
+- perf(`preview`): debounce the loading state a119744 2d4cb70
+- perf(`preview`): move image loading into separate Process #226
+
 ### Added
 - `cli`: add logs folder to config-path 550639c
 - `config`: add config migration templates b5a7f61
+- `mime`: check different encodings for mimetype detection c6d61d4
 - `mimetype`: update puremagic + use regex for matching 92a709b
 - `preview`: add font previewing support 0d4aec5
 - `preview`: add max image preview size #226
-- `mime`: check different encodings for mimetype detection c6d61d4
 
 ### Fixed
-- `cli`: silence textual-image warnings c9d3865
-- `metadata`: handle negative unix timestamp because of nt epoch 4e8ba9d
-- `config`: actually point to the error line in the config file 0733791
-- `pdf`: use future annotations to prevent crash faf9f06
+- (dev) `cli`: use asyncio to crash when using `--force-crash-in` 53ec6da
+- `app`: call callback directly in FileList c337728
 - `app`: download screenshot to proper location 52e6a45
 - `app`: use threading event to stop background thread 907fd86
-- (dev) `cli`: use asyncio to crash when using `--force-crash-in` 53ec6da
-- `footer`: make children use one wide scrollbar 697a686
-- `preview`: force set enter_into to bypass selected folders in the preview 34317f2
-- `app`: call callback directly in FileList c337728
-- `preview`: dont wrap errors d5c51c1
-- `config`: avoid creating configs as far as possible 69afa5e
-- `preview`: fix issues where normal file preview simply fails 9337468 e5a5629
+- `cli`: silence textual-image warnings c9d3865
+- `config`: actually point to the error line in the config file 0733791
+- `config`: don't create config directory until necessary 69afa5e
 - `file(1)`: use the actual executable and not depend on path
-- `fiilelist`: previously saved stuff should be saved again
+- `filelist`: previously saved stuff should be saved again
+- `footer`: make children use one wide scrollbar 697a686
+- `folder_prefs_utils`: ensure config directory exists e9a982a
+- `macos-clipboard`: replace clippy with ctypes (absolute chaos) 8f4c83c
+- `metadata`: handle negative unix timestamp because of nt epoch 4e8ba9d
+- `pdf`: use future annotations to prevent crash faf9f06
+- `pinned_sidebar`: fix typo + create config dir if not found 37a944c
+- `preview`: dont save lookup error thing 1a6d984
+- `preview`: fix issues where normal file preview simply fails 9337468 e5a5629
+- `preview`: force set enter_into to bypass selected folders in the preview 34317f2
+- `preview`: wrap errors d5c51c1
+- `utils`: make editor query shutil.which before running dfa4691
+- `windows-clipboard`: use proper property for return code 59fdc5d
 
 ### Performance
-- `preview`: move image loading into separate Process #226
 - `filelist`?: use dict and convert to set for faster lookups? d120056
 - `preview`: debounce the loading state a119744 2d4cb70
+- `preview`: move image loading into separate Process #226
 
 ### Refactor
 - `preview`: directly use `has_child` instead of re-checking children again 7ecaf73

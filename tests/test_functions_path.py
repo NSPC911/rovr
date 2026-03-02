@@ -114,7 +114,7 @@ def test_get_recursive_files(tmp_path: Path) -> None:
     for i in range(5):
         open(path1 / f"file_1_{i}", "w").close()
 
-    for _ in range(10):
+    for i in range(10):
         open(path2 / f"file_2_{i}", "w").close()
     files = path_utils.get_recursive_files(tmp_path.as_posix())
     assert len(files) == 15

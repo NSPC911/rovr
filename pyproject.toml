@@ -157,7 +157,7 @@ sequence = [
 ]
 args = [
   { name = "FILES", help = "Specific test files or directories to run (optional)", type = "string", positional = true, required = false, multiple = true },
-  { name = "workers", help = "Number of parallel workers for test execution (optional)", default = 1, type = "integer", options = ["-n"] },
+  { name = "workers", help = "Number of parallel workers for test execution (optional)", default = 4, type = "integer", options = ["-n"] },
 ]
 
 [tool.poe.tasks.build]
@@ -180,9 +180,8 @@ sequence = [
   "_hash_clean",
 ]
 
-[tool.pytest.ini_options]
+[tool.pytest]
 testpaths = ["tests"]
-markers = ["snapshot: marks tests as snapshot tests (run with --snapshot-update to update)"]
 asyncio_mode = "auto"
 
 [tool.ruff]

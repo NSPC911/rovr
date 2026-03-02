@@ -93,6 +93,29 @@
             }
           }
         },
+        "font_preview": {
+          "type": "object",
+          "description": "Settings related to the font preview used in the preview sidebar",
+          "additionalProperties": false,
+          "properties": {
+            "max_size": {
+              "type": "array",
+              "default": [1000, 1000],
+              "description": "The maximum size for the font preview. If the rendered font preview exceeds this size, it will be scaled down to fit within these dimensions while maintaining its aspect ratio.",
+              "maxItems": 2,
+              "minItems": 2,
+              "items": {
+                "type": "integer",
+                "minimum": 1
+              }
+            },
+            "font_size": {
+              "type": "integer",
+              "default": 40,
+              "description": "The font size to use when rendering font previews. This is only applicable when the font preview exceeds the maximum size specified in `max_size`."
+            }
+          }
+        },
         "allow_tab_nav": {
           "type": "boolean",
           "default": false,

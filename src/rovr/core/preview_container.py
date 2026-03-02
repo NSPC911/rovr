@@ -215,27 +215,24 @@ class PreviewContainer(Container):
             bg_color = Color.parse(self.app.theme_variables["background"])
             img = Image.new(
                 "RGB",
-                (
-                    max(1000, preview_utils.MAX_SIZE[0] // 2),
-                    max(1000, preview_utils.MAX_SIZE[1] // 2),
-                ),
+                (preview_utils.MAX_FONT_SIZE[0], preview_utils.MAX_FONT_SIZE[1]),
                 color=(bg_color.r, bg_color.g, bg_color.b),
             )
             text_fill = (fg_color.r, fg_color.g, fg_color.b)
         else:
             img = Image.new(
                 "RGBA",
-                (
-                    max(1000, preview_utils.MAX_SIZE[0] // 2),
-                    max(1000, preview_utils.MAX_SIZE[1] // 2),
-                ),
+                (preview_utils.MAX_FONT_SIZE[0], preview_utils.MAX_FONT_SIZE[1]),
                 color=(0, 0, 0, 0),
             )
             text_fill = (fg_color.r, fg_color.g, fg_color.b, 255)
         draw = ImageDraw.Draw(img)
 
         try:
-            font = ImageFont.truetype(self._current_file_path, size=40)
+            font = ImageFont.truetype(
+                self._current_file_path,
+                size=config["interface"]["font_preview"]["font_size"],
+            )
             if should_cancel():
                 return
         except OSError:

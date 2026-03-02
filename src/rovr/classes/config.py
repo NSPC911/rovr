@@ -60,6 +60,14 @@ _ROVR_CONFIG_INTERFACE_DRIVE_WATCHER_FREQUENCY_DEFAULT = 3.0
 r""" Default value of the field path 'Rovr Config interface drive_watcher_frequency' """
 
 
+_ROVR_CONFIG_INTERFACE_FONT_PREVIEW_FONT_SIZE_DEFAULT = 40
+r""" Default value of the field path 'Rovr Config interface font_preview font_size' """
+
+
+_ROVR_CONFIG_INTERFACE_FONT_PREVIEW_MAX_SIZE_DEFAULT = [1000, 1000]
+r""" Default value of the field path 'Rovr Config interface font_preview max_size' """
+
+
 _ROVR_CONFIG_INTERFACE_IMAGE_VIEWER_MAX_SIZE_DEFAULT = [4000, 4000]
 r""" Default value of the field path 'Rovr Config interface image_viewer max_size' """
 
@@ -579,6 +587,9 @@ class _RovrConfigInterface(TypedDict, total=False):
     image_viewer: "_RovrConfigInterfaceImageViewer"
     r""" Settings related to the image viewer used in the preview sidebar """
 
+    font_preview: "_RovrConfigInterfaceFontPreview"
+    r""" Settings related to the font preview used in the preview sidebar """
+
     allow_tab_nav: bool
     r"""
     Allow navigating the main app screen with `tab` and `shift+tab`
@@ -682,6 +693,32 @@ class _RovrConfigInterfaceCompactMode(TypedDict, total=False):
 
     default: False
     """
+
+
+class _RovrConfigInterfaceFontPreview(TypedDict, total=False):
+    r"""Settings related to the font preview used in the preview sidebar"""
+
+    max_size: list["_RovrConfigInterfaceFontPreviewMaxSizeItem"]
+    r"""
+    The maximum size for the font preview. If the rendered font preview exceeds this size, it will be scaled down to fit within these dimensions while maintaining its aspect ratio.
+
+    default:
+      - 1000
+      - 1000
+    maxItems: 2
+    minItems: 2
+    """
+
+    font_size: int
+    r"""
+    The font size to use when rendering font previews. This is only applicable when the font preview exceeds the maximum size specified in `max_size`.
+
+    default: 40
+    """
+
+
+_RovrConfigInterfaceFontPreviewMaxSizeItem = int
+r""" minimum: 1 """
 
 
 class _RovrConfigInterfaceImageViewer(TypedDict, total=False):

@@ -16,7 +16,8 @@ RESAMPLING_METHOD = {
     "box": Image.Resampling.BOX,
     "hamming": Image.Resampling.HAMMING,
 }.get(config["interface"]["image_viewer"]["resampling"], Image.Resampling.NEAREST)
-MAX_SIZE: tuple[int, int] = tuple(config["interface"]["image_viewer"]["max_size"])  # ty: ignore
+MAX_IMAGE_SIZE: tuple[int, int] = tuple(config["interface"]["image_viewer"]["max_size"])  # ty: ignore
+MAX_FONT_SIZE: tuple[int, int] = tuple(config["interface"]["font_preview"]["max_size"])  # ty: ignore
 
 
 def _depalette(image: Image.Image) -> Image.Image:
@@ -185,7 +186,7 @@ def resample_batch(images: list[PILImage]) -> list[PILImage]:
             image.tobytes(),
             image.mode,
             image.size,
-            MAX_SIZE,
+            MAX_IMAGE_SIZE,
             int(RESAMPLING_METHOD),
         ))
     executor = ProcessPoolExecutor(max_workers=_get_resample_pool_size(len(payloads)))
@@ -216,7 +217,7 @@ def resample(image: Image.Image) -> Image.Image:
             image.tobytes(),
             image.mode,
             image.size,
-            MAX_SIZE,
+            MAX_IMAGE_SIZE,
             int(RESAMPLING_METHOD),
         ),
     )
@@ -242,7 +243,7 @@ def resample_file(file_path: str) -> Image.Image | None:
     parent_conn, child_conn = multiprocessing.Pipe()
     proc = multiprocessing.Process(
         target=resample_file_worker,
-        args=(child_conn, file_path, MAX_SIZE, int(RESAMPLING_METHOD)),
+        args=(child_conn, file_path, MAX_IMAGE_SIZE, int(RESAMPLING_METHOD)),
     )
     proc.start()
     child_conn.close()

@@ -22,6 +22,10 @@ scrolloff = 3
 protocol = "Auto"
 max_size = [4000, 4000]
 
+[interface.font_preview]
+max_size = [1000, 1000]
+font_size = 50
+
 [interface.preview_text]
 error = "couldn't read this file! (\u00AC_\u00AC)" # ¬_¬
 start = """

@@ -398,9 +398,13 @@ def load_config() -> tuple[dict, RovrConfig]:
         # another no choice fix, because if Auto then
         # AutoImage is grabbed, which sucks in rendering
         # sixel for some weird unknown reason
-        config["interface"]["image_viewer"]["protocol"] = ""  # ty: ignore[invalid-assignment]
+        config["interface"]["image_viewer"]["protocol"] = (
+            ""  # ty: ignore[invalid-assignment]
+        )
+
     default_editor = ""  # screw anyone that wants to do this to me
     # editor empty or $EDITOR: expand to actual editor command
+    # try to find tui editors as much as possible
     editors = [
         "hx",
         "nvim",
@@ -419,7 +423,11 @@ def load_config() -> tuple[dict, RovrConfig]:
             default_editor = editor + " --"
             found_reasonable_cli_editor = True
             break
-    if not found_reasonable_cli_editor and which("code"):
+    # gui
+    if not found_reasonable_cli_editor and which("zed"):
+        # Zed
+        default_editor = "zed --wait --"
+    elif not found_reasonable_cli_editor and which("code"):
         # VSCode
         default_editor = "code --wait --"
     for key in ["file", "folder", "bulk_rename"]:
@@ -431,6 +439,10 @@ def load_config() -> tuple[dict, RovrConfig]:
             config["settings"]["editor"][key]["run"] = os.path.expandvars(
                 config["settings"]["editor"][key]["run"]
             )
+            # expanded to blank
+            if not config["settings"]["editor"][key]["run"]:
+                config["settings"]["editor"][key]["run"] = default_editor
+
     # pdf fixer
     if config["plugins"]["poppler"]["enabled"] and config["plugins"]["poppler"][
         "poppler_folder"
@@ -444,5 +456,7 @@ def load_config() -> tuple[dict, RovrConfig]:
         # need to ignore in this case. poppler_folder is typed as str
         # in the config schema, but pdfinfo_path can be None when
         # resolved from PATH, so we suppress the type error
-        config["plugins"]["poppler"]["poppler_folder"] = pdfinfo_path  # ty: ignore[invalid-assignment]
+        config["plugins"]["poppler"]["poppler_folder"] = (
+            pdfinfo_path  # ty: ignore[invalid-assignment]
+        )
     return schema_dict, config

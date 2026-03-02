@@ -1,10 +1,12 @@
 import shlex
 import subprocess
-from typing import TYPE_CHECKING, Any, Callable, Literal
+from shutil import which
+from typing import Any, Callable, Literal
 
 from humanize import naturalsize
 from rich.console import Console
 from textual import events
+from textual.app import App
 from textual.dom import DOMNode
 from textual.worker import NoActiveWorker, WorkerCancelled, get_current_worker
 
@@ -16,10 +18,6 @@ from rovr.classes.config import (
 from rovr.variables.maps import (
     BORDER_BOTTOM,
 )
-
-if TYPE_CHECKING:
-    from textual.app import App
-
 
 pprint = Console().print
 
@@ -225,7 +223,7 @@ def get_shortest_bind(binds: list[str]) -> str:
 
 
 def run_editor_command(
-    app: "App",
+    app: App,
     editor_config: _RovrConfigSettingsEditorFile
     | _RovrConfigSettingsEditorFolder
     | _RovrConfigSettingsEditorBulkRename,
@@ -244,6 +242,8 @@ def run_editor_command(
         CompletedProcess if command was run synchronously, None if run in thread.
     """
     command = shlex.split(editor_config["run"]) + [target_path]
+    # expand first part because path
+    command = [which(command[0])] + command[1:]
 
     if editor_config.get("suspend", False):
         with app.suspend():

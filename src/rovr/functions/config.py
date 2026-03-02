@@ -398,9 +398,7 @@ def load_config() -> tuple[dict, RovrConfig]:
         # another no choice fix, because if Auto then
         # AutoImage is grabbed, which sucks in rendering
         # sixel for some weird unknown reason
-        config["interface"]["image_viewer"]["protocol"] = (
-            ""  # ty: ignore[invalid-assignment]
-        )
+        config["interface"]["image_viewer"]["protocol"] = ""  # ty: ignore[invalid-assignment]
 
     default_editor = ""  # screw anyone that wants to do this to me
     # editor empty or $EDITOR: expand to actual editor command
@@ -456,7 +454,5 @@ def load_config() -> tuple[dict, RovrConfig]:
         # need to ignore in this case. poppler_folder is typed as str
         # in the config schema, but pdfinfo_path can be None when
         # resolved from PATH, so we suppress the type error
-        config["plugins"]["poppler"]["poppler_folder"] = (
-            pdfinfo_path  # ty: ignore[invalid-assignment]
-        )
+        config["plugins"]["poppler"]["poppler_folder"] = pdfinfo_path  # ty: ignore[invalid-assignment]
     return schema_dict, config

@@ -133,7 +133,6 @@ async def test_paste_button(tmp_path: Path) -> None:
         await pilot.pause()
         await pilot.click(PasteButton)
         await iter_until(pilot, lambda: isinstance(app.screen, PasteScreen))
-        assert isinstance(app.screen, PasteScreen)
         assert (
             app.screen
             .query_one("SpecialOptionList", OptionList)
@@ -147,7 +146,6 @@ async def test_paste_button(tmp_path: Path) -> None:
         await pilot.pause()
         await pilot.click(PasteButton)
         await iter_until(pilot, lambda: isinstance(app.screen, PasteScreen))
-        assert isinstance(app.screen, PasteScreen)
         assert (
             app.screen
             .query_one("SpecialOptionList", OptionList)
@@ -171,7 +169,6 @@ async def test_delete_button(tmp_path: Path) -> None:
         assert isinstance(app.screen, DeleteFiles)
         await pilot.click("#trash")
         await iter_until(pilot, lambda: not isinstance(app.screen, DeleteFiles))
-        assert not isinstance(app.screen, DeleteFiles)
         await iter_until(
             pilot,
             lambda: (
@@ -183,7 +180,7 @@ async def test_delete_button(tmp_path: Path) -> None:
                 == 1
             ),
         )
-        worker = app.cd(os.getcwd(), add_to_history=False)
+        worker = app.cd(tmp_path.as_posix(), add_to_history=False)
         assert worker is not None
         await worker.wait()
         await pilot.pause()
@@ -203,8 +200,7 @@ async def test_new_button(tmp_path: Path) -> None:
         await pilot.press(
             "t", "e", "s", "t", "_", "f", "i", "l", "e", ".", "t", "x", "t", "enter"
         )
-        await iter_until(pilot, lambda: isinstance(app.screen, ModalInput))
-        assert not isinstance(app.screen, ModalInput)
+        await iter_until(pilot, lambda: not isinstance(app.screen, ModalInput))
         assert app.file_list.get_option_at_index(0).dir_entry.name == "test_file.txt"
 
 
@@ -219,7 +215,6 @@ async def test_rename_button(tmp_path: Path) -> None:
         assert app.file_list.get_option_at_index(0).dir_entry.name == "test_file.txt"
         await pilot.click(RenameItemButton)
         await iter_until(pilot, lambda: isinstance(app.screen, ModalInput))
-        assert isinstance(app.screen, ModalInput)
         await pilot.press(
             "r",
             "e",
@@ -240,7 +235,6 @@ async def test_rename_button(tmp_path: Path) -> None:
             "enter",
         )
         await iter_until(pilot, lambda: not isinstance(app.screen, ModalInput))
-        assert not isinstance(app.screen, ModalInput)
         assert app.file_list.get_option_at_index(0).dir_entry.name == "renamed_file.txt"
 
 
@@ -270,10 +264,10 @@ async def test_zip_button() -> None:
             await iter_until(
                 pilot, lambda: isinstance(app.screen, ArchiveCreationScreen)
             )
-            assert isinstance(app.screen, ArchiveCreationScreen)
             await pilot.press("escape")
-            await pilot.pause()
-            assert not isinstance(app.screen, ArchiveCreationScreen)
+            await iter_until(
+                pilot, lambda: not isinstance(app.screen, ArchiveCreationScreen)
+            )
     finally:
         os.chdir(Path("~").expanduser())
         temp_dir.cleanup()
@@ -368,8 +362,9 @@ async def test_switch_to_extension(tmp_path: Path) -> None:
         popup.action_cursor_down()
         await pilot.pause()
         popup.action_select()
-        await pilot.pause()
-        assert app.query_one(StateManager).sort_by == "extension"
+        await iter_until(
+            pilot, lambda: app.query_one(StateManager).sort_by == "extension"
+        )
 
 
 @pytest.mark.asyncio
@@ -384,5 +379,4 @@ async def test_toggles(tmp_path: Path) -> None:
         popup.highlighted = popup.get_option_index("descending")
         await pilot.pause()
         popup.action_select()
-        await pilot.pause()
-        assert app.query_one(StateManager).sort_descending
+        await iter_until(pilot, lambda: app.query_one(StateManager).sort_descending)

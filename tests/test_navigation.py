@@ -68,11 +68,8 @@ async def test_history_nav(tmp_path: Path) -> None:
 
 @pytest.mark.asyncio
 async def test_tab_highlight(tmp_path: Path) -> None:
-    import string
-    from random import choices
-
-    for _ in range(10):
-        open(tmp_path / "".join(choices(string.ascii_letters, k=10)), "w").close()
+    for i in range(10):
+        open(tmp_path / f"file{i}", "w").close()
 
     app = Application(startup_path=tmp_path.as_posix())
     async with app.run_test(size=(143, 37)) as pilot:
@@ -87,10 +84,12 @@ async def test_tab_highlight(tmp_path: Path) -> None:
         await pilot.pause()
         app.tabWidget.action_next_tab()
         await iter_until(
-            pilot, lambda: app.file_list.highlighted_option.dir_entry.name == name
+            pilot,
+            lambda: (
+                app.file_list.highlighted_option.dir_entry.name == name
+                and app.file_list.highlighted == index
+            ),
         )
-        assert app.file_list.highlighted_option.dir_entry.name == name
-        assert app.file_list.highlighted == index
 
 
 @pytest.mark.asyncio
@@ -128,11 +127,8 @@ async def test_tab_search(tmp_path: Path) -> None:
 
 @pytest.mark.asyncio
 async def test_tab_multiselection(tmp_path: Path) -> None:
-    import string
-    from random import choices
-
-    for _ in range(10):
-        open(tmp_path / "".join(choices(string.ascii_letters, k=10)), "w").close()
+    for i in range(10):
+        open(tmp_path / f"file{i}", "w").close()
 
     app = Application(startup_path=tmp_path.as_posix())
     async with app.run_test(size=(143, 37)) as pilot:

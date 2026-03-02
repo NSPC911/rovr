@@ -4,6 +4,8 @@ from pathlib import Path
 
 import pytest
 
+from .conftest import iter_until
+
 
 @pytest.mark.asyncio
 async def test_default_pinned_sidebar(
@@ -60,7 +62,7 @@ async def test_default_pinned_sidebar(
 
     async with app.run_test() as pilot:
         sidebar = app.query_one("PinnedSidebar")
-        await pilot.pause(1)
+        await iter_until(pilot, lambda: app.file_list.options)
         for option in sidebar.list_of_options:
             if hasattr(option, "label"):
                 assert option.label in base_map
@@ -101,8 +103,7 @@ async def test_add_pins(tmp_path: Path) -> None:
         # now check whether you can cd
         sidebar.highlighted = found_at
         sidebar.action_select()
-        await pilot.pause(1)
-        assert Path(os.getcwd()).as_posix() == test.as_posix()
+        await iter_until(pilot, lambda: Path(os.getcwd()).as_posix() == test.as_posix())
 
 
 @pytest.mark.asyncio

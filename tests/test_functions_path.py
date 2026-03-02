@@ -43,12 +43,8 @@ def test_extension_sort_key() -> None:
 
 
 def test_filtered_dir_names(tmp_path: Path) -> None:
-    import string
-    from random import choices
-
-    for _ in range(10):
-        random_name = "".join(choices(string.ascii_letters + string.digits, k=8))
-        open(tmp_path / random_name, "w").close()
+    for i in range(10):
+        open(tmp_path / f"file{i}", "w").close()
 
     dir_names = set(f.name for f in tmp_path.iterdir())
     filtered = path_utils.get_filtered_dir_names(tmp_path.as_posix())
@@ -111,20 +107,15 @@ def test_ensure_existing_directory(tmp_path: Path) -> None:
 
 
 def test_get_recursive_files(tmp_path: Path) -> None:
-    import string
-    from random import choices
-
     path1 = tmp_path / "path1"
     path2 = tmp_path / "path2"
     path1.mkdir()
     path2.mkdir()
-    for _ in range(5):
-        random_name = "".join(choices(string.ascii_letters + string.digits, k=8))
-        open(path1 / random_name, "w").close()
+    for i in range(5):
+        open(path1 / f"file_1_{i}", "w").close()
 
     for _ in range(10):
-        random_name = "".join(choices(string.ascii_letters + string.digits, k=8))
-        open(path2 / random_name, "w").close()
+        open(path2 / f"file_2_{i}", "w").close()
     files = path_utils.get_recursive_files(tmp_path.as_posix())
     assert len(files) == 15
     files, folders = path_utils.get_recursive_files(

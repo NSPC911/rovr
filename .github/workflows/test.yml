@@ -1,0 +1,109 @@
+name: Testing
+
+on:
+  push:
+    branches:
+      - "**"
+  pull_request:
+    branches:
+      - "**"
+  workflow_dispatch:
+
+jobs:
+  test:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: windows-latest
+            name: windows-x64
+          - os: windows-11-arm
+            name: windows-arm
+          - os: ubuntu-latest
+            name: linux-x64
+          - os: ubuntu-24.04-arm
+            name: linux-arm64
+          - os: macos-latest
+            name: macos-arm64
+          - os: macos-15
+            name: macos-x64
+
+    runs-on: ${{ matrix.os }}
+    name: Test on (${{ matrix.name }})
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup uv
+        uses: astral-sh/setup-uv@v6
+        with:
+          activate-environment: true
+
+      - name: Install dependencies
+        run: uv sync
+
+      - name: Run test with retry
+        id: test
+        shell: pwsh
+        run: |
+          $maxRetries = 5
+          $retryCount = 0
+          $success = $false
+
+          while ($retryCount -lt $maxRetries) {
+            Write-Host "Attempt $($retryCount + 1) of $maxRetries"
+            try {
+              uv run poe test -n 8
+              if ($LASTEXITCODE -ne 0) {
+                throw "Tests failed with exit code $LASTEXITCODE"
+              }
+              Write-Host "Tests passed!"
+              $success = $true
+              break
+            }
+            catch {
+              Write-Warning "Tests failed, retrying..."
+              $retryCount++
+            }
+          }
+
+          if (-not $success) {
+            Write-Error "Tests failed $maxRetries times in a row"
+            exit 1
+          }
+
+      - name: Alert if fail
+        if: failure()
+        uses: sarisia/actions-status-discord@v1.13.0
+        with:
+          webhook: ${{ secrets.LOG_HOOK }}
+          title: rovr tests failed on ${{ matrix.name }}!
+          status: failure
+          description: |
+            <:wazowski:1308074746772062248> Check the workflow [details](https://github.com/NSPC911/rovr/actions/runs/${{ github.run_id }}) for more info.
+            -# branch `${{ github.ref_name }}` (due to `${{ github.event_name }}`)
+          avatar_url: "https://avatars.githubusercontent.com/u/176916861?v=4"
+          username: "NSPBot911"
+          nodetail: true
+          notimestamp: true
+          noprefix: true
+
+  notify-test-completion:
+    needs: test
+    runs-on: ubuntu-slim
+    name: Notify Test Completion
+    steps:
+      - name: Notify Discord - Tests Complete
+        uses: sarisia/actions-status-discord@v1.13.0
+        with:
+          webhook: ${{ secrets.LOG_HOOK }}
+          title: rovr tests passed!
+          status: success
+          description: |
+            <:joe_ye:1308074319934525545> All tests passed!
+            -# branch `${{ github.ref_name }}` (due to `${{ github.event_name }}`)
+          avatar_url: "https://avatars.githubusercontent.com/u/176916861?v=4"
+          username: "NSPBot911"
+          nodetail: true
+          notimestamp: true
+          noprefix: true

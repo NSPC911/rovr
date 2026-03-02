@@ -6,34 +6,39 @@ A post-modern terminal file explorer built with Python and Textual.
 
 ```bash
 # Setup
-uv sync --dev                    # Install all dependencies
-prek install                     # Install pre-commit hooks (optional)
+uv sync --dev                      # Install all dependencies
+prek install                       # Install pre-commit hooks (optional)
 
 # Running
-uv run rovr                      # Run the application
-poe run                          # Alias for uv run rovr
-poe dev                          # Run in dev mode with textual-dev console
-poe log                          # Launch textual console for debug output
+uv run rovr                        # Run the application
+poe run                            # Alias for uv run rovr
+poe dev                            # Run in dev mode with textual-dev console
+poe log                            # Launch textual console for debug output
 
 # Code Quality
-poe check                        # Run all checks (ty + ruff)
-  ty check                       # Type checking with ty
-  ruff check                     # Linting
+poe check                          # Run all checks (ty + ruff)
+  ty check                         # Type checking with ty
+  ruff check                       # Linting
 
-poe format                       # Format code
-poe fmt                          # Alias for poe format
+poe format                         # Format code
+poe fmt                            # Alias for poe format
   ruff check --unsafe-fixes --fix
   ruff format
 
+# Testing
+poe test                           # Run tests with pytest
+  poe test tests/                  # Run all tests
+  poe test tests/test_clipboard.py # Run specific test file
+  poe test -n 4                    # Run with 4 parallel workers
 
 # Building
-poe build                        # Build executable with Nuitka (onefile but can be customised)
-poe uv-build                     # Build wheel/sdist with uv
+poe build                          # Build executable with Nuitka (onefile but can be customised)
+poe uv-build                       # Build wheel/sdist with uv
 
 # Docs/Scripts
-poe gen-schema                   # Generate JSON schema for config
-poe gen-keys                     # Generate keybinds documentation
-poe typed                        # Convert schema to TypedDict
+poe gen-schema                     # Generate JSON schema for config
+poe gen-keys                       # Generate keybinds documentation
+poe typed                          # Convert schema to TypedDict
 ```
 
 ## Code Style Guidelines
@@ -113,6 +118,10 @@ src/rovr/
   functions/          # Utility functions
   screens/            # Screen classes
   variables/          # Constants and config
+
+tests/
+  test_*.py           # Test suite using pytest
+  conftest.py         # Pytest configuration and fixtures
 ```
 
 ### Pre-commit Hooks
@@ -136,14 +145,13 @@ Types: `feat`, `fix`, `docs`, `style`, `refactor`, `test`, `chore`
 ### Important Notes
 
 - **Refactors discouraged**: The project prefers features over refactors
-- **No tests**: This project does not have a test suite
 - **Type checking excludes**: `src/rovr/classes/archive.py`
 - **Formatting excludes**: `src/rovr/monkey_patches/sys_stdout.py`
 - Use `uv` commands; do not use `pip` or `python -m`
-- Always run `poe check` before committing
-- There is no test suites. The author refuses to write tests and prefers to test manually.
+- Always run `poe check` before committing. Ruff may mention that certain errors are fixable; if so, run `poe fmt` to apply fixes.
+- Make sure to also run `poe test` to ensure no tests are broken before committing.
 
 ### Author preferences
 
 - Avoid `if TYPE_CHECKING` blocks for imports; it looks bad
-- Avoid adding unecessary comments, aim for self-documenting code instead
+- Avoid adding unnecessary comments, aim for self-documenting code instead

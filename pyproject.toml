@@ -67,6 +67,11 @@ docscripts = [
   "poethepoet>=0.41.0",
   "ruff>=0.15.0",
 ]
+test = [
+  "pytest>=9.0.2",
+  "pytest-asyncio>=1.3.0",
+  "pytest-xdist>=3.8.0",
+]
 
 [build-system]
 requires = ["uv_build>=0.9.0,<0.10.0"]
@@ -92,7 +97,7 @@ _hash_dump.shell = "git rev-parse HEAD > src/rovr/COMMIT_HASH"
 _hash_clean.shell = "python -c \"import os; os.path.exists('src/rovr/COMMIT_HASH') and os.remove('src/rovr/COMMIT_HASH')\""
 
 _docscripts_setup.cmd = "uv sync --group docscripts"
-_docscripts_cleanup.cmd = "uv sync"
+_test_setup.cmd = "uv sync --group test"
 
 run.help = "Run rovr"
 run.cmd = "rovr"
@@ -105,7 +110,6 @@ gen-schema.help = "Generate the JSON schema for rovr's config"
 gen-schema.sequence = [
   "_docscripts_setup",
   { cmd = "docs/scripts/generate_schema.py" },
-  "_docscripts_cleanup"
 ]
 icon-test.help = "Print all available icons to the terminal for testing"
 icon-test.cmd = "docs/scripts/icon_test.py"
@@ -117,7 +121,6 @@ schema-to-dict.help = "Convert the JSON schema into a Python TypedDict for inter
 schema-to-dict.sequence = [
   "_docscripts_setup",
   { cmd = "jsonschema-gentypes --json-schema ./src/rovr/config/schema.json --python ./src/rovr/classes/config.py" },
-  "_docscripts_cleanup",
   "format"
 ]
 
@@ -146,6 +149,17 @@ snip.args = [
   { name = "delay", help = "Delay in seconds before taking the screenshot", default = 10, type = "integer" },
 ]
 
+[tool.poe.tasks.test]
+help = "Run tests"
+sequence = [
+  "_test_setup",
+  { cmd = "pytest -n ${workers} ${FILES}" }
+]
+args = [
+  { name = "FILES", help = "Specific test files or directories to run (optional)", type = "string", positional = true, required = false, multiple = true },
+  { name = "workers", help = "Number of parallel workers for test execution (optional)", default = 4, type = "integer", options = ["-n"] },
+]
+
 [tool.poe.tasks.build]
 help = "Build rovr into an executable using Nuitka"
 sequence = [
@@ -165,6 +179,10 @@ sequence = [
   { cmd = "uv build" },
   "_hash_clean",
 ]
+
+[tool.pytest]
+testpaths = ["tests"]
+asyncio_mode = "auto"
 
 [tool.ruff]
 force-exclude = true

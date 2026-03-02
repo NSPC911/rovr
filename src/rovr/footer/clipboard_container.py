@@ -71,7 +71,6 @@ class Clipboard(CheckboxRenderingMixin, SelectionList, inherit_bindings=False):
             )
         for item_number in range(len(items)):
             self.select(self.get_option_at_index(item_number))
-        # then go through filelist and dim the cut items
 
     @work
     async def cut_to_clipboard(self, items: list[str]) -> None:

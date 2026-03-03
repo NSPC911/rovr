@@ -131,8 +131,8 @@ class PreviewContainer(Container):
         to: bool
         """What to set the `loading` attribute to"""
 
-    def __init__(self, *args, **kwargs) -> None:
-        super().__init__(*args, **kwargs)
+    def __init__(self) -> None:
+        super().__init__(id="preview_sidebar")
         self._pending_preview_path: str | None = None
         self._current_content: str | list[str] | None = None
         self._current_file_path = None

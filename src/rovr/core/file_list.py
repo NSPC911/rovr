@@ -41,8 +41,10 @@ class FileList(CheckboxRenderingMixin, SelectionList, inherit_bindings=False):
         dummy: bool = False,
         enter_into: str = "",
         select: bool = False,
-        *args,
-        **kwargs,
+        name: str | None = None,
+        id: str | None = None,
+        classes: str | None = None,
+        disabled: bool = False,
     ) -> None:
         """
         Initialize the FileList widget.
@@ -51,7 +53,7 @@ class FileList(CheckboxRenderingMixin, SelectionList, inherit_bindings=False):
             enter_into (str): The path to enter into when a folder is selected.
             select (bool): Whether the selection is select or normal.
         """
-        super().__init__(*args, **kwargs)
+        super().__init__(name=name, id=id, classes=classes, disabled=disabled)
         self._options: list[FileListSelectionWidget] = []
         self.dummy = dummy
         self.enter_into = enter_into

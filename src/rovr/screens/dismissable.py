@@ -8,8 +8,8 @@ from textual.widgets import Button, Label
 class Dismissible(ModalScreen):
     """Super simple screen that can be dismissed."""
 
-    def __init__(self, message: str, border_subtitle: str = "", **kwargs) -> None:
-        super().__init__(**kwargs)
+    def __init__(self, message: str, border_subtitle: str = "") -> None:
+        super().__init__()
         self.message = message
         self.border_subtitle = border_subtitle
 

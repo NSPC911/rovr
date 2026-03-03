@@ -21,8 +21,8 @@ class Clipboard(CheckboxRenderingMixin, SelectionList, inherit_bindings=False):
 
     BINDINGS: ClassVar[list[BindingType]] = list(bindings)
 
-    def __init__(self, **kwargs) -> None:
-        super().__init__(**kwargs)
+    def __init__(self) -> None:
+        super().__init__(id="clipboard")
         self.clipboard_contents = []
         self._checker_worker: Worker | None = None
         self._options: list[ClipboardSelection] = []

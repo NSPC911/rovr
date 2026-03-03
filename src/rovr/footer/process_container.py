@@ -149,8 +149,8 @@ class ProgressBarContainer(VerticalGroup, inherit_bindings=False):
 
 
 class ProcessContainer(VerticalScroll):
-    def __init__(self, *args, **kwargs) -> None:
-        super().__init__(id="processes", *args, **kwargs)
+    def __init__(self) -> None:
+        super().__init__(id="processes")
         self.has_perm_error: bool = False
         self.has_in_use_error: bool = False
 

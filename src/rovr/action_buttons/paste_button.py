@@ -9,14 +9,8 @@ from rovr.variables.constants import config
 class PasteButton(Button):
     ALLOW_MAXIMIZE = False
 
-    def __init__(self, *args, **kwargs) -> None:
-        super().__init__(
-            get_icon("general", "paste")[0],
-            classes="option",
-            id="paste",
-            *args,
-            **kwargs,
-        )
+    def __init__(self) -> None:
+        super().__init__(get_icon("general", "paste")[0], classes="option", id="paste")
 
     def on_mount(self) -> None:
         if config["interface"]["tooltips"]:

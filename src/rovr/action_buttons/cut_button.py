@@ -7,10 +7,8 @@ from rovr.variables.constants import config
 class CutButton(Button):
     ALLOW_MAXIMIZE = False
 
-    def __init__(self, *args, **kwargs) -> None:
-        super().__init__(
-            get_icon("general", "cut")[0], classes="option", id="cut", *args, **kwargs
-        )
+    def __init__(self) -> None:
+        super().__init__(get_icon("general", "cut")[0], classes="option", id="cut")
 
     def on_mount(self) -> None:
         if config["interface"]["tooltips"]:

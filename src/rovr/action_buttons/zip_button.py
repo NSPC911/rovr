@@ -18,10 +18,8 @@ from rovr.variables.constants import config
 class ZipButton(Button):
     ALLOW_MAXIMIZE = False
 
-    def __init__(self, *args, **kwargs) -> None:
-        super().__init__(
-            get_icon("general", "zip")[0], classes="option", id="zip", *args, **kwargs
-        )
+    def __init__(self) -> None:
+        super().__init__(get_icon("general", "zip")[0], classes="option", id="zip")
 
     def on_mount(self) -> None:
         if config["interface"]["tooltips"]:

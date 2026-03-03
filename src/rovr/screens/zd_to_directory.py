@@ -30,7 +30,6 @@ class ZDToDirectory(ModalSearchScreen):
             )
 
     def on_mount(self) -> None:
-        super().on_mount()
         self.search_input.border_title = "zoxide"
         self.search_options.border_title = "Folders"
         self.zoxide_updater(Input.Changed(self.search_input, value=""))

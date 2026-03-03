@@ -13,14 +13,8 @@ from rovr.variables.constants import config
 class UnzipButton(Button):
     ALLOW_MAXIMIZE = False
 
-    def __init__(self, *args, **kwargs) -> None:
-        super().__init__(
-            get_icon("general", "open")[0],
-            classes="option",
-            id="unzip",
-            *args,
-            **kwargs,
-        )
+    def __init__(self) -> None:
+        super().__init__(get_icon("general", "open")[0], classes="option", id="unzip")
 
     def on_mount(self) -> None:
         if config["interface"]["tooltips"]:

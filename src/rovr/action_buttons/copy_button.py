@@ -57,10 +57,8 @@ class CopyButton(Button):
             """
             return self.button
 
-    def __init__(self, *args, **kwargs) -> None:
-        super().__init__(
-            get_icon("general", "copy")[0], classes="option", id="copy", *args, **kwargs
-        )
+    def __init__(self) -> None:
+        super().__init__(get_icon("general", "copy")[0], classes="option", id="copy")
 
     def on_mount(self) -> None:
         if config["interface"]["tooltips"]:
@@ -183,13 +181,8 @@ class CopyButton(Button):
 
 
 class CopyPanelOptions(PopupOptionList):
-    def __init__(self) -> None:
-        super().__init__()
-        self.do_adjust: bool = False
-
     def on_mount(self, event: events.Mount) -> None:  # ty: ignore[invalid-method-override]
-        # calling super()._on_mount is useless, and super().mount()
-        # doesn't do anything significant, hence ty ignore
+        self.do_adjust: bool = False
         self.button: CopyButton = self.app.query_one(CopyButton)
         self.styles.scrollbar_size_vertical = 0
 

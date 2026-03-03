@@ -86,8 +86,7 @@ class Test(App):
     def file_in_use(self) -> None:
         self.push_screen(
             FileInUse(
-                "The file 'example.txt' is currently in use by another application.",
-                "example.txt",
+                "The file 'example.txt' is currently in use by another application.\nexample.txt",
             ),
             callback=lambda result: self.notify(str(result)),
         )

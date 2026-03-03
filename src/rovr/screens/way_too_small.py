@@ -8,9 +8,6 @@ from rovr.variables.constants import MaxPossible, ascii_logo
 
 
 class TerminalTooSmall(ModalScreen):
-    def __init__(self, *args, **kwargs) -> None:
-        super().__init__(*args, **kwargs)
-
     def compose(self) -> ComposeResult:
         yield Static(id="filler-up")
         with Center():

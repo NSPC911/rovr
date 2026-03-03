@@ -20,8 +20,8 @@ from rovr.variables.maps import SPINNER, SPINNER_LENGTH
 class MetadataContainer(VerticalScroll, inherit_bindings=False):
     BINDINGS = scroll_bindings
 
-    def __init__(self, *args, **kwargs) -> None:
-        super().__init__(*args, **kwargs)
+    def __init__(self) -> None:
+        super().__init__(id="metadata")
         self.current_path: str | None = None
         self._size_worker = None
         self._update_task = None

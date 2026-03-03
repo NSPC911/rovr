@@ -8,13 +8,11 @@ from rovr.variables.constants import config
 class DeleteButton(Button):
     ALLOW_MAXIMIZE = False
 
-    def __init__(self, *args, **kwargs) -> None:
+    def __init__(self) -> None:
         super().__init__(
             get_icon("general", "delete")[0],
             classes="option",
             id="delete",
-            *args,
-            **kwargs,
         )
 
     def on_mount(self) -> None:

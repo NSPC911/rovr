@@ -22,9 +22,8 @@ class YesOrNo(ModalScreen):
         with_toggle: bool = False,
         border_title: str = "",
         border_subtitle: str = "",
-        **kwargs,
     ) -> None:
-        super().__init__(**kwargs)
+        super().__init__()
         self.message = message
         self.destructive = destructive
         self.with_toggle = with_toggle

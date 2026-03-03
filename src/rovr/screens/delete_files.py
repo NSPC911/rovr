@@ -16,8 +16,8 @@ cancel_bind = get_shortest_bind(config["keybinds"]["delete_files"]["cancel"])
 class DeleteFiles(ModalScreen):
     """Screen with a dialog to confirm whether to delete files."""
 
-    def __init__(self, message: str, paths: list[str], **kwargs) -> None:
-        super().__init__(**kwargs)
+    def __init__(self, message: str, paths: list[str]) -> None:
+        super().__init__()
         self.message = message
         self.paths = paths
 

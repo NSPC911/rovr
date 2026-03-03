@@ -19,13 +19,9 @@ from rovr.variables.constants import config
 class RenameItemButton(Button):
     ALLOW_MAXIMIZE = False
 
-    def __init__(self, *args, **kwargs) -> None:
+    def __init__(self) -> None:
         super().__init__(
-            get_icon("general", "rename")[0],
-            classes="option",
-            id="rename",
-            *args,
-            **kwargs,
+            get_icon("general", "rename")[0], classes="option", id="rename"
         )
 
     def on_mount(self) -> None:

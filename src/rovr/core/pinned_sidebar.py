@@ -20,9 +20,6 @@ class PinnedSidebar(OptionList, inherit_bindings=False):
     # Just so that I can disable space
     BINDINGS: ClassVar[list[BindingType]] = list(bindings)
 
-    def __init__(self, **kwargs) -> None:
-        super().__init__(**kwargs)
-
     @work(exclusive=True)
     async def reload_pins(self) -> None:
         """Reload pins shown

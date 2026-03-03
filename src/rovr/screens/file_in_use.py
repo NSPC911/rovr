@@ -16,8 +16,8 @@ dont_ask_bind = get_shortest_bind(config["keybinds"]["file_in_use"]["dont_ask_ag
 class FileInUse(ModalScreen):
     """Screen to show when a file is in use by another process on Windows."""
 
-    def __init__(self, message: str, *args, **kwargs) -> None:
-        super().__init__(*args, **kwargs)
+    def __init__(self, message: str) -> None:
+        super().__init__()
         self.message = message
 
     def compose(self) -> ComposeResult:

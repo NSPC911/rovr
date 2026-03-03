@@ -151,14 +151,14 @@ class Application(App, inherit_bindings=False):
         # shutdown event for bg thread
         self._shutdown_event = threading.Event()
         # cannot use self.clipboard, reserved for Textual's clipboard
-        self.Clipboard = Clipboard(id="clipboard")
+        self.Clipboard = Clipboard()
         if startup_path:
             chdir(ensure_existing_directory(startup_path))
 
     def compose(self) -> ComposeResult:
         self.log("Starting Rovr...")
         with Vertical(id="root"):
-            header = HeaderArea(id="headerArea")
+            header = HeaderArea()
             self.tabWidget = header.tabline
             yield header
             with VerticalGroup(id="menu_wrapper"):
@@ -190,12 +190,10 @@ class Application(App, inherit_bindings=False):
                     )
                     yield PinnedSidebar(id="pinned_sidebar")
                 yield self._file_list_container
-                yield PreviewContainer(
-                    id="preview_sidebar",
-                )
+                yield PreviewContainer()
             with HorizontalGroup(id="footer"):
                 yield ProcessContainer()
-                yield MetadataContainer(id="metadata")
+                yield MetadataContainer()
                 yield self.Clipboard
             yield StateManager()
 

@@ -98,15 +98,10 @@ class SortOrderButton(Button):
 
 
 class SortOrderPopup(PopupOptionList):
-    def __init__(self) -> None:
-        super().__init__()
-        self.do_adjust: bool = False
-
     def on_mount(self, event: events.Mount) -> None:  # ty: ignore[invalid-method-override]
+        self.do_adjust: bool = False
         self.button: SortOrderButton = self.app.query_one(SortOrderButton)
         self.styles.scrollbar_size_vertical = 0
-        # calling super()._on_mount is useless, and super().mount()
-        # doesn't do anything significant
 
     def pre_show(self) -> None:
         state_manager: StateManager = self.app.query_one(StateManager)

@@ -12,11 +12,8 @@ from rovr.variables.constants import config
 class ModalSearchScreen(ModalScreen):
     """Base class for search-as-you-type modal screens."""
 
-    def __init__(self, **kwargs) -> None:
-        super().__init__(**kwargs)
-        self._active_worker: Worker | None = None
-
     def on_mount(self) -> None:
+        self._active_worker: Worker | None = None
         self.search_input: Input = self.query_one(Input)
         self.search_options: DoubleClickableOptionList = self.query_one(
             DoubleClickableOptionList

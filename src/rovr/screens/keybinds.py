@@ -17,7 +17,7 @@ from rovr.variables.constants import bindings, config, schema
 class KeybindList(OptionList, inherit_bindings=False):
     BINDINGS: ClassVar[list[BindingType]] = list(bindings)
 
-    def __init__(self, **kwargs) -> None:
+    def __init__(self) -> None:
         keybind_data, primary_keybind_data = self.get_keybind_data()
 
         max_key_width = max(len(keys) for keys, _ in keybind_data)
@@ -32,7 +32,7 @@ class KeybindList(OptionList, inherit_bindings=False):
                     keys, description, max_key_width, primary_key, passed_alt_layer
                 )
             )
-        super().__init__(*self.list_of_options, **kwargs)
+        super().__init__(*self.list_of_options, id="keybinds_data")
 
     # ignore single clicks
     async def _on_click(self, event: events.Click) -> None:
@@ -134,7 +134,7 @@ class Keybinds(ModalScreen):
                 always_add_disabled=True,
                 placeholder=f"{icons.get_icon('general', 'search')[0]} Search keybinds...",
             )
-            yield KeybindList(id="keybinds_data")
+            yield KeybindList()
 
     def on_mount(self) -> None:
         self.input: SearchInput = self.query_one(SearchInput)

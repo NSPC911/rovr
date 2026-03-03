@@ -20,9 +20,9 @@ class CommonFileNameDoWhat(ModalScreen):
     """Screen with a dialog to confirm whether to overwrite, rename, skip or cancel."""
 
     def __init__(
-        self, message: str, border_title: str = "", border_subtitle: str = "", **kwargs
+        self, message: str, border_title: str = "", border_subtitle: str = ""
     ) -> None:
-        super().__init__(**kwargs)
+        super().__init__()
         self.message = message
         self.border_title = border_title
         self.border_subtitle = border_subtitle

@@ -141,7 +141,14 @@ async def test_tab_multiselection(tmp_path: Path) -> None:
         await app.tabWidget.add_tab("")
         await pilot.pause()
         app.tabWidget.action_next_tab()
-        await pilot.pause()
+        await iter_until(
+            pilot,
+            lambda: (
+                not any(
+                    worker for worker in app.workers if worker.node == app.file_list
+                )
+            ),
+        )
 
         assert app.file_list.select_mode_enabled
         indexes = [0, 2, 4, 7]

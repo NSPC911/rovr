@@ -97,11 +97,9 @@ jobs:
         uses: sarisia/actions-status-discord@v1.13.0
         with:
           webhook: ${{ secrets.LOG_HOOK }}
-          title: rovr tests passed!
+          title: <:joe_ye:1308074319934525545> All tests passed!
           status: success
-          description: |
-            <:joe_ye:1308074319934525545> All tests passed!
-            -# branch `${{ github.ref_name }}` (due to `${{ github.event_name }}`)
+          description: -# branch `${{ github.ref_name }}` (due to `${{ github.event_name }}`)
           avatar_url: "https://avatars.githubusercontent.com/u/176916861?v=4"
           username: "NSPBot911"
           nodetail: true

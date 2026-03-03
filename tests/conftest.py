@@ -15,6 +15,16 @@ async def iter_until(
     timeout: float = 2.0,
     interval: float = 0.1,
 ) -> None:
+    """Helper function to repeatedly call a method until it returns True or a timeout is reached.
+     Args:
+        pilot: The Pilot instance to use for pausing between calls.
+        method: A callable that returns a boolean indicating whether the desired condition is met.
+        timeout: The maximum time to wait for the condition to be met, in seconds.
+        interval: The time to wait between calls to the method, in seconds.
+
+    Raises:
+        AssertionError: If the method does not return True within the specified timeout.
+    """  # noqa: DOC502
     for _ in range(int(timeout / interval)):
         await pilot.pause(interval)
         if method():

@@ -7,6 +7,8 @@ from textual.worker import Worker
 from rovr.app import Application
 from rovr.footer.clipboard_container import Clipboard
 
+from .conftest import iter_until
+
 # no need to check deduplication, thats done in test_action_buttons
 
 
@@ -43,7 +45,14 @@ async def test_dimming(tmp_path: Path) -> None:
         await pilot.pause()
         clipboard = app.query_one(Clipboard)
         await pilot.click("CutButton")
-        await pilot.pause()
+        await iter_until(
+            pilot,
+            lambda: (
+                worker
+                for worker in app.workers
+                if worker.node == clipboard and worker.is_finished
+            ),
+        )
         # get first option's dimness
         assert check_dim(app.file_list.options[0]._prompt.spans[-1].style)
         clipboard.highlighted = 0
@@ -55,10 +64,27 @@ async def test_dimming(tmp_path: Path) -> None:
         clipboard.action_select()
         await pilot.pause(0.5)
         await pilot.click("CopyButton")
-        await pilot.pause()
+        await iter_until(
+            pilot,
+            lambda: (
+                worker
+                for worker in app.workers
+                if (worker.node == clipboard or worker.node == app.file_list)
+                and worker.is_finished
+            ),
+        )
         # copying should not cause dimness
         assert not check_dim(app.file_list.options[0]._prompt.spans[-1].style)
         # then retry cutting, should cause dimness again
         await pilot.click("CutButton")
         await pilot.pause()
+        await iter_until(
+            pilot,
+            lambda: (
+                worker
+                for worker in app.workers
+                if (worker.node == clipboard or worker.node == app.file_list)
+                and worker.is_finished
+            ),
+        )
         assert check_dim(app.file_list.options[0]._prompt.spans[-1].style)

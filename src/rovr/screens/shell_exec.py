@@ -21,6 +21,7 @@ class ShellExec(ModalInput):
         self.mode: Literal["background", "block", "suspend"] = "background"
 
     def on_mount(self) -> None:
+        super().on_mount()
         self.horizontal_group.classes = self.mode
 
     def on_key(self, event: events.Key) -> None:

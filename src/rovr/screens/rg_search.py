@@ -86,6 +86,7 @@ class ContentSearch(ModalSearchScreen):
         yield ContentSearchToggles()
 
     def on_mount(self) -> None:
+        super().on_mount()
         self.search_input.border_title = "Find in files"
         self.search_options.border_title = "Results"
         self.rg_updater(Input.Changed(self.search_input, value=""))

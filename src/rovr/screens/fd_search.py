@@ -105,6 +105,7 @@ class FileSearch(ModalSearchScreen):
         yield FileSearchToggles()
 
     def on_mount(self) -> None:
+        super().on_mount()
         self.search_input.border_title = "Find Files"
         self.search_options.border_title = "Files"
         self.fd_updater(Input.Changed(self.search_input, value=""))

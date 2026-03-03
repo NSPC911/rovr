@@ -263,7 +263,7 @@ class Application(App, inherit_bindings=False):
         # Apply folder-specific sort preferences for initial directory
         state_manager.apply_folder_sort_prefs(normalise(getcwd()))
         # start mini watcher
-        self.watch_for_changes_and_update()
+        self.call_after_refresh(self.watch_for_changes_and_update)
         # disable scrollbars
         self.show_horizontal_scrollbar = False
         self.show_vertical_scrollbar = False

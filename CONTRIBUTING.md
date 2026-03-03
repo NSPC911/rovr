@@ -25,11 +25,17 @@ To set up the development environment, run:
 uv sync --dev
 ```
 
-`uv` handles venvs for you, but if necessary, activate it by running:
+`uv` handles virtual environments for you, but if necessary, activate it by running:
 ```bash
 source .venv/bin/activate
 ```
 (On Windows, you might need to run `.venv\Scripts\activate`)
+
+[poe-the-poet](https://poethepoet.natn.io) is used for task management. i highly recommend installing poe globally via uv
+
+```bash
+uv tool install poethepoet
+```
 
 ### Code Style and Linting
 
@@ -43,6 +49,22 @@ We also use `ty` for type checking.
 ty check
 ```
 
+### Testing
+
+We use `pytest` for testing. To run the tests, execute:
+```bash
+poe test
+```
+
+### Generating templates and stuff
+
+If you created a new feature that directly affects the config and schema, ensure you run the following commands to update the generated files:
+```bash
+poe gen-schema # to update documentation schema
+poe gen-keys   # to update keybind documentation
+poe typed      # to update type hints
+```
+
 ### Committing your changes
 
 We follow the [Conventional Commits](https://www.conventionalcommits.org) specification.
@@ -51,14 +73,22 @@ Run `uv run cz c` to create a commit with commitizen.
 
 ### Making a Pull Request
 
-When you're ready to make a pull request, please ensure you do the following:
+When you're ready to make a pull request, please ensure you add the following template to your PR description:
+```md
+<!--describe your pull request-->
 
-- [ ] I have run `ruff format` to format the code and `ty check` to ensure proper typing.
-- [ ] I have tested both the dev version and the built version of rovr.
-- [ ] Cache, logs and others are not accidentally added to git's tracking history.
-- [ ] My commits follow the conventional commits format.
-- [ ] The documentation has been updated if necessary.
+<!--also include videos, screenshots or gifs if applicable if it is a new feature-->
 
+---
+
+by submitting this pull request, i agree that
+
+- [ ] i have run `poe check` to check for any style issues and fixed them
+- [ ] i have tested rovr (and also ran `poe test` if applicable) to make sure my changes do not break anything
+- [ ] cache, logs, dotfiles and/or others were not accidentally added to git's tracking history
+- [ ] my commits (or at least the pr title) follow the conventional commits format as much as possible
+- [ ] the documentation has been updated wherever necessary (run `poe gen-schema` and `poe gen-keys` if applicable)
+```
 If your PR is addressing an issue, please link it in the PR description (e.g., "Fixes #123").
 
 ## Types of Contributions

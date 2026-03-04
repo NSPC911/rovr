@@ -17,7 +17,7 @@ async def test_delete_from_clipboard(tmp_path: Path) -> None:
     file = tmp_path / "file.txt"
     file.touch()
     app = Application(tmp_path.as_posix())
-    async with app.run_test() as pilot:
+    async with app.run_test(size=(143, 37)) as pilot:
         await pilot.pause()
         clipboard = app.query_one(Clipboard)
         worker: Worker = clipboard.copy_to_clipboard([file.as_posix()])
@@ -41,7 +41,7 @@ async def test_dimming(tmp_path: Path) -> None:
     file = tmp_path / "file.txt"
     file.touch()
     app = Application(tmp_path.as_posix())
-    async with app.run_test() as pilot:
+    async with app.run_test(size=(143, 37)) as pilot:
         await pilot.pause()
         clipboard = app.query_one(Clipboard)
         await pilot.click("CutButton")

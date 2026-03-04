@@ -156,7 +156,8 @@ class PinnedSidebar(OptionList, inherit_bindings=False):
         """Reload the pinned files from the config."""
         assert self.parent
         self.input: Input = self.parent.query_one(Input)
-        self.call_later(self.reload_pins)
+        # peak scheduling
+        self.call_later(self.call_later, self.reload_pins)
 
     async def on_option_list_option_selected(
         self, event: OptionList.OptionSelected

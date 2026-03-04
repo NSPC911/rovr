@@ -60,7 +60,7 @@ async def test_default_pinned_sidebar(
 
     app = Application(tmp_path.as_posix())
 
-    async with app.run_test() as pilot:
+    async with app.run_test(size=(143, 37)) as pilot:
         sidebar = app.query_one("PinnedSidebar")
         await iter_until(pilot, lambda: app.file_list.options)
         for option in sidebar.list_of_options:
@@ -82,7 +82,7 @@ async def test_add_pins(tmp_path: Path) -> None:
 
     app = Application(tmp_path.as_posix())
 
-    async with app.run_test() as pilot:
+    async with app.run_test(size=(143, 37)) as pilot:
         sidebar = app.query_one(PinnedSidebar)
         await pilot.pause()
         test = tmp_path / "TestFolder"
@@ -113,7 +113,7 @@ async def test_pin_no_exist(tmp_path: Path) -> None:
 
     app = Application(tmp_path.as_posix())
 
-    async with app.run_test() as pilot:
+    async with app.run_test(size=(143, 37)) as pilot:
         await pilot.pause()
         test = tmp_path / "TestFolder"
         with pytest.raises(FileNotFoundError):

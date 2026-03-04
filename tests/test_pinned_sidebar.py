@@ -83,14 +83,14 @@ async def test_add_pins(tmp_path: Path) -> None:
     app = Application(tmp_path.as_posix())
 
     async with app.run_test(size=(143, 37)) as pilot:
-        sidebar = app.query_one(PinnedSidebar)
         await pilot.pause()
+        sidebar = app.query_one(PinnedSidebar)
         test = tmp_path / "TestFolder"
         test.mkdir()
         pins.add_pin("TestFolder", test.as_posix())
         worker: Worker = sidebar.reload_pins()
         await worker.wait()
-        await pilot.pause(1)
+        await pilot.pause()
         found: bool = False
         found_at: int | None = None
         for index, option in enumerate(sidebar.list_of_options):

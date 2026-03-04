@@ -4,6 +4,7 @@ from typing import Callable
 from unittest.mock import patch
 
 import pytest
+from textual.dom import DOMNode
 from textual.pilot import Pilot
 
 from rovr.variables import maps
@@ -30,6 +31,39 @@ async def iter_until(
         if method():
             return
     assert method()
+
+
+async def workers_finished(
+    pilot: Pilot,
+    dom_node: DOMNode | str,
+    timeout: float = 2.0,
+    interval: float = 0.1,
+) -> None:
+    """Helper function to wait until there are no running workers associated with a specific DOM node.
+    Args:
+        pilot: The Pilot instance to use for pausing between checks.
+        dom_node: The DOM node (or its selector) to check for associated workers.
+        timeout: The maximum time to wait for the workers to stop, in seconds.
+        interval: The time to wait between checks, in seconds.
+    Raises:
+        AssertionError: If there are still running workers associated with the DOM node after the specified timeout.
+    """  # noqa: DOC502
+    the_widget_in_question: DOMNode = (
+        pilot.app.query_one(dom_node) if isinstance(dom_node, str) else dom_node
+    )
+
+    def can() -> bool:
+        return not any(
+            worker
+            for worker in pilot.app.workers
+            if worker.node == the_widget_in_question and worker.is_running
+        )
+
+    for _ in range(int(timeout / interval)):
+        await pilot.pause(interval)
+        if can():
+            return
+    assert can()
 
 
 # Patch sys.__stdin__ early (before test collection imports application modules)

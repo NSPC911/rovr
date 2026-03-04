@@ -6,7 +6,7 @@ import pytest
 from rovr.app import Application
 from rovr.navigation_widgets import BackButton
 
-from .conftest import iter_until
+from .conftest import iter_until, workers_finished
 
 
 @pytest.mark.asyncio
@@ -15,19 +15,22 @@ async def test_nav(tmp_path: Path) -> None:
     open(tmp_path / "test" / "file.txt", "w").close()
     app = Application(startup_path=tmp_path.as_posix())
     async with app.run_test(size=(143, 37)) as pilot:
-        await pilot.pause()
+        await iter_until(pilot, lambda: app.file_list.get_option_at_index(0))
         assert (nested_thing := app.file_list.get_option_at_index(0))
         assert (
             nested_thing.dir_entry.is_dir()
             and nested_thing.dir_entry.name == Path(tmp_path / "test").name
         )
         app.file_list.select(app.file_list.get_option_at_index(0))
-        await pilot.pause()
-        assert (option := app.file_list.get_option_at_index(0))
-        assert option.dir_entry.is_file() and option.dir_entry.name == "file.txt"
+        # honestly no better way to do that
+        await iter_until(
+            pilot, lambda: app.file_list.get_option_at_index(0).dir_entry.is_file()
+        )
+        assert app.file_list.get_option_at_index(0).dir_entry.name == "file.txt"
         await pilot.click(BackButton)
-        await pilot.pause()
-        assert (option := app.file_list.get_option_at_index(0))
+        await iter_until(
+            pilot, lambda: app.file_list.get_option_at_index(0).dir_entry.is_dir()
+        )
 
 
 @pytest.mark.asyncio
@@ -117,14 +120,7 @@ async def test_tab_search(tmp_path: Path) -> None:
         await pilot.pause()
         app.tabWidget.action_next_tab()
         await iter_until(pilot, lambda: app.tabWidget.active_tab)
-        await iter_until(
-            pilot,
-            lambda: (
-                not any(
-                    worker for worker in app.workers if worker.node == app.file_list
-                )
-            ),
-        )
+        await workers_finished(pilot, app.file_list)
 
         assert app.file_list.input.value == "file"
         assert app.file_list.highlighted_option.dir_entry.name == name
@@ -147,14 +143,7 @@ async def test_tab_multiselection(tmp_path: Path) -> None:
         await app.tabWidget.add_tab("")
         await pilot.pause()
         app.tabWidget.action_next_tab()
-        await iter_until(
-            pilot,
-            lambda: (
-                not any(
-                    worker for worker in app.workers if worker.node == app.file_list
-                )
-            ),
-        )
+        await workers_finished(pilot, app.file_list)
 
         assert app.file_list.select_mode_enabled
         indexes = [0, 2, 4, 7]
@@ -176,13 +165,6 @@ async def test_preview_bypass_folder(tmp_path: Path) -> None:
         await pilot.pause()
         app.query_one("PreviewContainer").query_one("FileList").action_select()
         await pilot.pause()
-        await iter_until(
-            pilot,
-            lambda: (
-                worker
-                for worker in app.workers
-                if worker.node == app.file_list and worker.is_finished
-            ),
-        )
+        await workers_finished(pilot, app.file_list)
         assert app.file_list.highlighted == 0
         assert app.file_list.highlighted_option.dir_entry.name == "subfoldered-file.txt"

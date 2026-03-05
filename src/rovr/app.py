@@ -332,81 +332,42 @@ class Application(App, inherit_bindings=False):
             return
         # focus toggle pinned sidebar
         elif check_key(event, config["keybinds"]["focus_toggle_pinned_sidebar"]):
-            if (
-                self.focused.id == "pinned_sidebar"
-                or "hide" in self.query_one("#pinned_sidebar_container").classes
-            ):
-                self.file_list.focus()
-            elif self.query_one("#pinned_sidebar_container").display:
-                self.query_one("#pinned_sidebar").focus()
+            self.action_focus_toggle_pinned_sidebar()
         # Focus file list from anywhere except input
         elif check_key(event, config["keybinds"]["focus_file_list"]):
-            self.file_list.focus()
+            self.action_focus_file_list
         # Focus toggle preview sidebar
         elif check_key(event, config["keybinds"]["focus_toggle_preview_sidebar"]):
-            if (
-                self.focused.id == "preview_sidebar"
-                or self.focused.parent.id == "preview_sidebar"
-                or "hide" in self.query_one("#preview_sidebar").classes
-            ):
-                self.file_list.focus()
-            elif self.query_one(PreviewContainer).display:
-                with suppress(NoMatches):
-                    self.query_one("PreviewContainer > *").focus()
-            else:
-                self.file_list.focus()
+            self.action_focus_toggle_pinned_sidebar()
         # Focus path switcher
         elif check_key(event, config["keybinds"]["focus_toggle_path_switcher"]):
-            self.query_one("#path_switcher").focus()
+            self.action_focus_path_switcher()
         # Focus processes
         elif check_key(event, config["keybinds"]["focus_toggle_processes"]):
-            if (
-                self.focused.id == "processes"
-                or "hide" in self.query_one("#processes").classes
-            ):
-                self.file_list.focus()
-            elif self.query_one("#footer").display:
-                self.query_one("#processes").focus()
+            self.action_focus_toggle_processes()
         # Focus metadata
         elif check_key(event, config["keybinds"]["focus_toggle_metadata"]):
-            if self.focused.id == "metadata":
-                self.file_list.focus()
-            elif self.query_one("#footer").display:
-                self.query_one("#metadata").focus()
+            self.action_focus_toggle_metadata()
         # Focus clipboard
         elif check_key(event, config["keybinds"]["focus_toggle_clipboard"]):
-            if self.focused.id == "clipboard":
-                self.file_list.focus()
-            elif self.query_one("#footer").display:
-                self.query_one("#clipboard").focus()
+            self.action_focus_toggle_clipboard()
         # Toggle hiding panels
         elif check_key(event, config["keybinds"]["toggle_pinned_sidebar"]):
-            self.file_list.focus()
-            self.query_one(StateManager).toggle_pinned_sidebar()
+            self.action_focus_toggle_pinned_sidebar()
         elif check_key(event, config["keybinds"]["toggle_preview_sidebar"]):
-            self.file_list.focus()
-            self.query_one(StateManager).toggle_preview_sidebar()
+            self.action_focus_toggle_preview_sidebar()
         elif check_key(event, config["keybinds"]["toggle_footer"]):
-            self.file_list.focus()
-            self.query_one(StateManager).toggle_footer()
+            self.action_toggle_footer()
         elif check_key(event, config["keybinds"]["toggle_menu_wrapper"]):
-            self.file_list.focus()
-            self.query_one(StateManager).toggle_menu_wrapper()
-        elif (
-            check_key(event, config["keybinds"]["tab_next"])
-            and self.tabWidget.active_tab is not None
-        ):
-            self.tabWidget.action_next_tab()
-        elif self.tabWidget.active_tab is not None and check_key(
-            event, config["keybinds"]["tab_previous"]
-        ):
-            self.tabWidget.action_previous_tab()
+            self.action_toggle_menu_wrapper()
+        elif check_key(event, config["keybinds"]["tab_next"]):
+            self.action_next_tab()
+        elif check_key(event, config["keybinds"]["tab_previous"]):
+            self.action_previous_tab()
         elif check_key(event, config["keybinds"]["tab_new"]):
-            await self.tabWidget.add_tab(after=self.tabWidget.active_tab)
-        elif self.tabWidget.tab_count > 1 and check_key(
-            event, config["keybinds"]["tab_close"]
-        ):
-            await self.tabWidget.remove_tab(self.tabWidget.active_tab)
+            await self.tabWidget.add_tab()
+        elif check_key(event, config["keybinds"]["tab_close"]):
+            self.action_close_tab()
         # zoxide
         elif config["plugins"]["zoxide"]["enabled"] and check_key(
             event, config["plugins"]["zoxide"]["keybinds"]
@@ -1022,3 +983,84 @@ class Application(App, inherit_bindings=False):
                 )
         self._exit_renderables.clear()
         self.workers.cancel_all()
+
+    # actions
+    def action_focus_toggle_pinned_sidebar(self) -> None:
+        if (
+            self.focused.id == "pinned_sidebar"
+            or "hide" in self.query_one("#pinned_sidebar_container").classes
+        ):
+            self.file_list.focus()
+        elif self.query_one("#pinned_sidebar_container").display:
+            self.query_one("#pinned_sidebar").focus()
+
+    def action_focus_file_list(self) -> None:
+        self.file_list.focus()
+
+    def action_focus_toggle_preview_sidebar(self) -> None:
+        if (
+            self.focused.id == "preview_sidebar"
+            or self.focused.parent.id == "preview_sidebar"
+            or "hide" in self.query_one("#preview_sidebar").classes
+        ):
+            self.file_list.focus()
+        elif self.query_one(PreviewContainer).display:
+            with suppress(NoMatches):
+                self.query_one("PreviewContainer > *").focus()
+        else:
+            self.file_list.focus()
+
+    def action_focus_path_switcher(self) -> None:
+        self.query_one("#path_switcher").focus()
+
+    def action_focus_toggle_processes(self) -> None:
+        if (
+            self.focused.id == "processes"
+            or "hide" in self.query_one("#processes").classes
+        ):
+            self.file_list.focus()
+        elif self.query_one("#footer").display:
+            self.query_one("#processes").focus()
+
+    def action_focus_toggle_metadata(self) -> None:
+        if self.focused.id == "metadata":
+            self.file_list.focus()
+        elif self.query_one("#footer").display:
+            self.query_one("#metadata").focus()
+
+    def action_focus_toggle_clipboard(self) -> None:
+        if self.focused.id == "clipboard":
+            self.file_list.focus()
+        elif self.query_one("#footer").display:
+            self.query_one("#clipboard").focus()
+
+    def action_toggle_pinned_sidebar(self) -> None:
+        self.file_list.focus()
+        self.query_one(StateManager).toggle_pinned_sidebar()
+
+    def action_toggle_preview_sidebar(self) -> None:
+        self.file_list.focus()
+        self.query_one(StateManager).toggle_preview_sidebar()
+
+    def action_toggle_footer(self) -> None:
+        self.file_list.focus()
+        self.query_one(StateManager).toggle_footer()
+
+    def action_toggle_menu_wrapper(self) -> None:
+        self.file_list.focus()
+        self.query_one(StateManager).toggle_menu_wrapper()
+
+    def action_tab_next(self) -> None:
+        if self.tabWidget.active_tab is not None:
+            self.tabWidget.action_next_tab()
+
+    def action_tab_previous(self) -> None:
+        if self.tabWidget.active_tab is not None:
+            self.tabWidget.action_previous_tab()
+
+    async def action_tab_new(self) -> None:
+        await self.tabWidget.add_tab(after=self.tabWidget.active_tab)
+
+    def action_tab_close(self) -> None:
+        if self.tabWidget.tab_count > 1:
+            self.tabWidget.remove_tab(self.tabWidget.active_tab)

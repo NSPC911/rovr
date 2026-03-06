@@ -16,7 +16,7 @@ class PasteButton(Button):
         if config["interface"]["tooltips"]:
             self.tooltip = "Paste files from clipboard"
 
-    async def on_button_pressed(self, event: Button.Pressed) -> None:
+    async def on_button_pressed(self) -> None:
         """Paste files from clipboard"""
         if self.disabled:
             return

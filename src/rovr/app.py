@@ -812,13 +812,13 @@ class Application(App, inherit_bindings=False):
                 yield SystemCommand(
                     "Hide Hidden Files",
                     "Exclude listing of hidden files and folders",
-                    self.file_list.toggle_hidden_files,
+                    self.file_list.action_toggle_hidden_files,
                 )
             else:
                 yield SystemCommand(
                     "Show Hidden Files",
                     "Include listing of hidden files and folders",
-                    self.file_list.toggle_hidden_files,
+                    self.file_list.action_toggle_hidden_files,
                 )
         yield SystemCommand(
             "Reload File List",

@@ -25,7 +25,7 @@ class NewItemButton(Button):
             self.tooltip = "Create a new file or directory"
 
     @work
-    async def on_button_pressed(self, event: Button.Pressed) -> None:
+    async def on_button_pressed(self) -> None:
         if self.disabled:
             return
         response: str = await self.app.push_screen(

@@ -14,7 +14,7 @@ class CutButton(Button):
         if config["interface"]["tooltips"]:
             self.tooltip = "Cut selected files"
 
-    async def on_button_pressed(self, event: Button.Pressed) -> None:
+    async def on_button_pressed(self) -> None:
         """Cut selected files to the clipboard"""
         if self.disabled:
             return

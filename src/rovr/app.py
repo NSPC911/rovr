@@ -368,94 +368,28 @@ class Application(App, inherit_bindings=False):
             await self.tabWidget.add_tab()
         elif check_key(event, config["keybinds"]["tab_close"]):
             self.action_close_tab()
+        elif check_key(event, config["keybinds"]["show_keybinds"]):
+            self.action_show_keybinds()
+        elif check_key(event, config["keybinds"]["change_sort_order"]["open_popup"]):
+            self.action_show_sort_order_popup()
+        elif check_key(event, config["keybinds"]["show_shell_screen"]):
+            self.action_show_shell_screen()
         # zoxide
         elif config["plugins"]["zoxide"]["enabled"] and check_key(
             event, config["plugins"]["zoxide"]["keybinds"]
         ):
-            if shutil.which("zoxide") is None:
-                self.notify(
-                    "Zoxide is not installed or not in PATH.",
-                    title="Zoxide",
-                    severity="error",
-                )
-
-            def on_response(response: str) -> None:
-                """Handle the response from the ZDToDirectory dialog."""
-                if response:
-                    pathInput: PathInput = self.query_one(PathInput)
-                    pathInput.value = response
-                    pathInput.on_input_submitted(
-                        PathInput.Submitted(pathInput, pathInput.value)
-                    )
-
-            self.push_screen(ZDToDirectory(), on_response)
+            self.action_plugin_zoxide()
         # keybinds
-        elif check_key(event, config["keybinds"]["show_keybinds"]):
-            self.push_screen(Keybinds())
         elif config["plugins"]["fd"]["enabled"] and check_key(
             event, config["plugins"]["fd"]["keybinds"]
         ):
-            fd_exec: str = config["plugins"]["fd"]["executable"]
-            if shutil.which(fd_exec) is not None:
-                try:
-
-                    def on_response(selected: str | None) -> None:
-                        if selected is None or selected == "":
-                            return
-                        if path.isdir(selected):
-                            self.cd(selected)
-                        else:
-                            self.cd(
-                                path.dirname(selected),
-                                focus_on=path.basename(selected),
-                            )
-
-                    self.push_screen(FileSearch(), on_response)
-                except Exception as exc:
-                    dump_exc(self, exc)
-                    self.notify(str(exc), title="Plugins: fd", severity="error")
-            else:
-                self.notify(
-                    f"{config['plugins']['fd']['executable']} cannot be found in PATH.",
-                    title="Plugins: fd",
-                    severity="error",
-                )
+            self.action_plugin_fd()
         elif config["plugins"]["rg"]["enabled"] and check_key(
             event, config["plugins"]["rg"]["keybinds"]
         ):
-            rg_exec: str = config["plugins"]["rg"]["executable"]
-            if shutil.which(rg_exec) is not None:
-                try:
-
-                    def on_response(selected: str | None) -> None:
-                        if selected is None or selected == "":
-                            return
-                        else:
-                            self.cd(
-                                path.dirname(selected),
-                                focus_on=path.basename(selected),
-                            )
-
-                    self.push_screen(ContentSearch(), on_response)
-                except Exception as exc:
-                    dump_exc(self, exc)
-                    self.notify(str(exc), title="Plugins: rg", severity="error")
+            self.action_plugin_rg()
         elif check_key(event, config["keybinds"]["suspend_app"]):
-            if WINDOWS:
-                self.notify(
-                    "rovr cannot be suspended on Windows!",
-                    title="Suspend App",
-                    severity="warning",
-                )
-            else:
-                self.action_suspend_process()
-        elif check_key(event, config["keybinds"]["change_sort_order"]["open_popup"]):
-            await self.query_one(SortOrderButton).open_popup(event)
-        elif check_key(event, config["keybinds"]["show_shell_screen"]):
-            self.push_screen(
-                ShellExec(),
-                callback=lambda response: self.on_shell_exec_response(response),
-            )
+            self.action_suspend_process()
 
     @work
     async def on_shell_exec_response(
@@ -1064,3 +998,113 @@ class Application(App, inherit_bindings=False):
     def action_tab_close(self) -> None:
         if self.tabWidget.tab_count > 1:
             self.tabWidget.remove_tab(self.tabWidget.active_tab)
+
+    def action_plugin_zoxide(self) -> None:
+        if shutil.which("zoxide") is None:
+            self.notify(
+                "Zoxide is not installed or not in PATH.",
+                title="Zoxide",
+                severity="error",
+            )
+
+        def on_response(response: str) -> None:
+            """Handle the response from the ZDToDirectory dialog."""
+            if response:
+                pathInput: PathInput = self.query_one(PathInput)
+                pathInput.value = response
+                pathInput.on_input_submitted(
+                    PathInput.Submitted(pathInput, pathInput.value)
+                )
+
+        self.push_screen(ZDToDirectory(), on_response)
+
+    def action_show_keybinds(self) -> None:
+        self.push_screen(Keybinds())
+
+    def action_plugin_fd(self) -> None:
+        fd_exec: str = config["plugins"]["fd"]["executable"]
+        if shutil.which(fd_exec) is not None:
+            try:
+
+                def on_response(selected: str | None) -> None:
+                    if selected is None or selected == "":
+                        return
+                    if path.isdir(selected):
+                        self.cd(selected)
+                    else:
+                        self.cd(
+                            path.dirname(selected),
+                            focus_on=path.basename(selected),
+                        )
+
+                self.push_screen(FileSearch(), on_response)
+            except Exception as exc:
+                dump_exc(self, exc)
+                self.notify(str(exc), title="Plugins: fd", severity="error")
+        else:
+            self.notify(
+                f"{config['plugins']['fd']['executable']} cannot be found in PATH.",
+                title="Plugins: fd",
+                severity="error",
+            )
+
+    def action_plugin_rg(self) -> None:
+        rg_exec: str = config["plugins"]["rg"]["executable"]
+        if shutil.which(rg_exec) is not None:
+            try:
+
+                def on_response(selected: str | None) -> None:
+                    if selected is None or selected == "":
+                        return
+                    else:
+                        self.cd(
+                            path.dirname(selected),
+                            focus_on=path.basename(selected),
+                        )
+
+                self.push_screen(ContentSearch(), on_response)
+            except Exception as exc:
+                dump_exc(self, exc)
+                self.notify(str(exc), title="Plugins: rg", severity="error")
+        else:
+            rg_exec: str = config["plugins"]["rg"]["executable"]
+            if shutil.which(rg_exec) is not None:
+                try:
+
+                    def on_response(selected: str | None) -> None:
+                        if selected is None or selected == "":
+                            return
+                        else:
+                            self.cd(
+                                path.dirname(selected),
+                                focus_on=path.basename(selected),
+                            )
+
+                    self.push_screen(ContentSearch(), on_response)
+                except Exception as exc:
+                    dump_exc(self, exc)
+                    self.notify(str(exc), title="Plugins: rg", severity="error")
+
+    def action_suspend_process(self) -> None:
+        if WINDOWS:
+            self.notify(
+                "rovr cannot be suspended on Windows!",
+                title="Suspend App",
+                severity="warning",
+            )
+        else:
+            super().action_suspend_process()
+
+    async def action_change_sort_order_open_popup(self) -> None:
+        await self.query_one(SortOrderButton).open_popup(
+            events.Key(
+                key=config["keybinds"]["change_sort_order"]["open_popup"][0],
+                character=None,
+            )
+        )
+
+    def action_show_shell_screen(self) -> None:
+        self.push_screen(
+            ShellExec(),
+            callback=lambda response: self.on_shell_exec_response(response),
+        )

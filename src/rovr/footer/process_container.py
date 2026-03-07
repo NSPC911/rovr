@@ -993,8 +993,12 @@ class ProcessContainer(VerticalScroll):
         self.app.call_from_thread(bar.progress_bar.advance)
         self.app.call_from_thread(bar.add_class, "done")
 
-    async def on_key(self, event: events.Key) -> None:
+    def on_key(self, event: events.Key) -> None:
         if event.key in config["keybinds"]["delete"]:
             event.stop()
-            await self.remove_children(".done")
-            await self.remove_children(".error")
+            self.action_delete()
+
+    @work
+    async def action_delete(self) -> None:
+        await self.remove_children(".done")
+        await self.remove_children(".error")

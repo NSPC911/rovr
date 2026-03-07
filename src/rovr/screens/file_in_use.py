@@ -42,22 +42,34 @@ class FileInUse(ModalScreen):
     def on_key(self, event: events.Key) -> None:
         if check_key(event, config["keybinds"]["file_in_use"]["retry"]):
             event.stop()
-            self.dismiss({
-                "value": "try_again",
-                "toggle": self.query_one(Switch).value,
-            })
+            self.action_retry()
         elif check_key(event, config["keybinds"]["file_in_use"]["cancel"]):
             event.stop()
-            self.dismiss({
-                "value": "cancel",
-                "toggle": self.query_one(Switch).value,
-            })
+            self.action_cancel()
         elif check_key(event, config["keybinds"]["file_in_use"]["skip"]):
             event.stop()
-            self.dismiss({"value": "skip", "toggle": self.query_one(Switch).value})
+            self.action_skip()
         elif check_key(event, config["keybinds"]["file_in_use"]["dont_ask_again"]):
             event.stop()
-            self.query_one(Switch).action_toggle_switch()
+            self.action_toggle_dont_ask_again()
+
+    def action_retry(self) -> None:
+        self.dismiss({
+            "value": "try_again",
+            "toggle": self.query_one(Switch).value,
+        })
+
+    def action_cancel(self) -> None:
+        self.dismiss({
+            "value": "cancel",
+            "toggle": self.query_one(Switch).value,
+        })
+
+    def action_skip(self) -> None:
+        self.dismiss({"value": "skip", "toggle": self.query_one(Switch).value})
+
+    def action_toggle_dont_ask_again(self) -> None:
+        self.query_one(Switch).action_toggle_switch()
 
     def on_button_pressed(self, event: Button.Pressed) -> None:
         self.dismiss({
@@ -69,4 +81,4 @@ class FileInUse(ModalScreen):
         if event.widget is self:
             # ie click outside
             event.stop()
-            self.dismiss({"value": "cancel", "toggle": self.query_one(Switch).value})
+            self.action_cancel()

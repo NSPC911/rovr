@@ -371,7 +371,7 @@ class Application(App, inherit_bindings=False):
         elif check_key(event, config["keybinds"]["show_keybinds"]):
             self.action_show_keybinds()
         elif check_key(event, config["keybinds"]["change_sort_order"]["open_popup"]):
-            self.action_show_sort_order_popup()
+            await self.action_change_sort_order_open_popup()
         elif check_key(event, config["keybinds"]["show_shell_screen"]):
             self.action_show_shell_screen()
         # zoxide

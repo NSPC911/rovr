@@ -3,7 +3,7 @@ from typing import cast
 from textual import events
 from textual.css.query import NoMatches
 from textual.widgets import Button, OptionList
-from textual.widgets.option_list import Option
+from textual.widgets.option_list import Option, OptionDoesNotExist
 
 from rovr.classes.type_aliases import SortByOptions
 from rovr.components import PopupOptionList
@@ -209,7 +209,11 @@ class SortOrderPopup(PopupOptionList):
         # Refresh file list to apply the change
         self.app.file_list.update_file_list(add_to_session=False)
 
-        self.go_hide()
+        if event.option.id != "custom_sort":
+            self.go_hide()
+        else:
+            self.pre_show()
+            self.highlighted = self.get_option_index("custom_sort")
         self.button.update_icon()
 
     async def on_key(self, event: events.Key) -> None:
@@ -218,7 +222,11 @@ class SortOrderPopup(PopupOptionList):
                 continue
             keys = cast(list[str], keys)
             if check_key(event, keys):
-                self.highlighted = self.get_option_index(option)
                 event.stop()
+                try:
+                    self.highlighted = self.get_option_index(option)
+                except OptionDoesNotExist:
+                    self.notify("Option does not exist", severity="error")
+                    return
                 self.action_select()
                 return

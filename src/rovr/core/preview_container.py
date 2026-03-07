@@ -1154,50 +1154,63 @@ class PreviewContainer(Container):
         """Check for vim keybinds."""
         from rovr.functions.utils import check_key
 
-        # Handle PDF page navigation
-        if (
-            self.border_title == titles.pdf
-            and self._file_type == "pdf"
-            and self.pdf.images is not None
-        ):
-            if check_key(
-                event, config["keybinds"]["down"] + config["keybinds"]["page_down"]
-            ):
-                event.stop()
-                self.update_current_pdf_page_by_diff(1)
-            elif check_key(
-                event, config["keybinds"]["up"] + config["keybinds"]["page_up"]
-            ):
-                self.update_current_pdf_page_by_diff(-1)
-            elif check_key(event, config["keybinds"]["home"]):
-                event.stop()
-                self.update_current_pdf_page(0)
+        if check_key(event, config["keybinds"]["up"]):
+            event.stop()
+            self.action_up()
+        elif check_key(event, config["keybinds"]["down"]):
+            event.stop()
+            self.action_down()
+        elif check_key(event, config["keybinds"]["page_up"]):
+            event.stop()
+            self.action_page_up()
+        elif check_key(event, config["keybinds"]["page_down"]):
+            event.stop()
+            self.action_page_down()
+        elif check_key(event, config["keybinds"]["home"]):
+            event.stop()
+            self.action_home()
+        elif check_key(event, config["keybinds"]["end"]):
+            event.stop()
+            self.action_end()
 
-            elif check_key(event, config["keybinds"]["end"]):
-                event.stop()
-                self.update_current_pdf_page(self.pdf.total_pages - 1)
-            else:
-                return
+    def _is_pdf(self) -> bool:
+        return self.border_title == titles.pdf and self._file_type == "pdf"
+
+    def action_up(self) -> None:
+        if self._is_pdf() and self.pdf.images is not None:
+            self.update_current_pdf_page_by_diff(-1)
         elif self.border_title == titles.archive:
-            widget: FileList = self.query_one(FileList)
-            if check_key(event, config["keybinds"]["up"]):
-                event.stop()
-                widget.scroll_up(animate=False)
-            elif check_key(event, config["keybinds"]["down"]):
-                event.stop()
-                widget.scroll_down(animate=False)
-            elif check_key(event, config["keybinds"]["page_up"]):
-                event.stop()
-                widget.scroll_page_up(animate=False)
-            elif check_key(event, config["keybinds"]["page_down"]):
-                event.stop()
-                widget.scroll_page_down(animate=False)
-            elif check_key(event, config["keybinds"]["home"]):
-                event.stop()
-                widget.scroll_home(animate=False)
-            elif check_key(event, config["keybinds"]["end"]):
-                event.stop()
-                widget.scroll_end(animate=False)
+            self.query_one(FileList).scroll_up(animate=False)
+
+    def action_down(self) -> None:
+        if self._is_pdf() and self.pdf.images is not None:
+            self.update_current_pdf_page_by_diff(-1)
+        elif self.border_title == titles.archive:
+            self.query_one(FileList).scroll_down(animate=False)
+
+    def action_page_up(self) -> None:
+        if self._is_pdf() and self.pdf.images is not None:
+            self.update_current_pdf_page_by_diff(-1)
+        elif self.border_title == titles.archive:
+            self.query_one(FileList).scroll_page_up(animate=False)
+
+    def action_page_down(self) -> None:
+        if self._is_pdf() and self.pdf.images is not None:
+            self.update_current_pdf_page_by_diff(1)
+        elif self.border_title == titles.archive:
+            self.query_one(FileList).scroll_page_down(animate=False)
+
+    def action_home(self) -> None:
+        if self._is_pdf() and self.pdf.images is not None:
+            self.update_current_pdf_page(0)
+        elif self.border_title == titles.archive:
+            self.query_one(FileList).scroll_home(animate=False)
+
+    def action_end(self) -> None:
+        if self._is_pdf() and self.pdf.images is not None:
+            self.update_current_pdf_page(self.pdf.total_pages - 1)
+        elif self.border_title == titles.archive:
+            self.query_one(FileList).scroll_end(animate=False)
 
     @on(events.Show)
     async def when_become_visible(self, event: events.Show) -> None:

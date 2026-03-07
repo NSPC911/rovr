@@ -51,6 +51,12 @@ class DeleteFiles(ModalScreen):
         """Handle button presses."""
         self.dismiss(event.button.id)
 
+    def on_click(self, event: events.Click) -> None:
+        if event.widget is self:
+            # ie click outside
+            event.stop()
+            self.dismiss("cancel")
+
     def on_key(self, event: events.Key) -> None:
         """Handle key presses."""
         if check_key(event, config["keybinds"]["delete_files"]["delete"]):
@@ -72,9 +78,3 @@ class DeleteFiles(ModalScreen):
     def action_trash(self) -> None:
         if config["settings"]["use_recycle_bin"]:
             self.dismiss("trash")
-
-    def on_click(self, event: events.Click) -> None:
-        if event.widget is self:
-            # ie click outside
-            event.stop()
-            self.dismiss("cancel")

@@ -53,6 +53,18 @@ class FileInUse(ModalScreen):
             event.stop()
             self.action_toggle_dont_ask_again()
 
+    def on_button_pressed(self, event: Button.Pressed) -> None:
+        self.dismiss({
+            "value": event.button.id,
+            "toggle": self.query_one(Switch).value,
+        })
+
+    def on_click(self, event: events.Click) -> None:
+        if event.widget is self:
+            # ie click outside
+            event.stop()
+            self.action_cancel()
+
     def action_retry(self) -> None:
         self.dismiss({
             "value": "try_again",
@@ -70,15 +82,3 @@ class FileInUse(ModalScreen):
 
     def action_toggle_dont_ask_again(self) -> None:
         self.query_one(Switch).action_toggle_switch()
-
-    def on_button_pressed(self, event: Button.Pressed) -> None:
-        self.dismiss({
-            "value": event.button.id,
-            "toggle": self.query_one(Switch).value,
-        })
-
-    def on_click(self, event: events.Click) -> None:
-        if event.widget is self:
-            # ie click outside
-            event.stop()
-            self.action_cancel()

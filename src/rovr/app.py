@@ -370,8 +370,6 @@ class Application(App, inherit_bindings=False):
             self.action_close_tab()
         elif check_key(event, config["keybinds"]["show_keybinds"]):
             self.action_show_keybinds()
-        elif check_key(event, config["keybinds"]["change_sort_order"]["open_popup"]):
-            await self.action_change_sort_order_open_popup()
         elif check_key(event, config["keybinds"]["show_shell_screen"]):
             self.action_show_shell_screen()
         # zoxide
@@ -784,13 +782,7 @@ class Application(App, inherit_bindings=False):
             yield SystemCommand(
                 "Open fd",
                 "Start searching the current directory using `fd`",
-                lambda: self.on_key(
-                    events.Key(
-                        key=config["plugins"]["fd"]["keybinds"][0],
-                        # character doesn't matter
-                        character=config["plugins"]["fd"]["keybinds"][0],
-                    )
-                ),
+                self.action_plugin_fd,
             )
         if (
             config["plugins"]["zoxide"]["enabled"]
@@ -799,13 +791,13 @@ class Application(App, inherit_bindings=False):
             yield SystemCommand(
                 "Open zoxide",
                 "Start searching for a directory to `z` to",
-                lambda: self.on_key(
-                    events.Key(
-                        key=config["plugins"]["zoxide"]["keybinds"][0],
-                        # character doesn't matter
-                        character=config["plugins"]["zoxide"]["keybinds"][0],
-                    )
-                ),
+                self.action_plugin_zoxide,
+            )
+        if config["plugins"]["rg"]["enabled"] and config["plugins"]["rg"]["keybinds"]:
+            yield SystemCommand(
+                "Open ripgrep",
+                "Start searching the current directory for a string using `rg`",
+                self.action_plugin_zoxide,
             )
         if config["keybinds"]["toggle_hidden_files"]:
             if config["interface"]["show_hidden_files"]:
@@ -1094,14 +1086,6 @@ class Application(App, inherit_bindings=False):
             )
         else:
             super().action_suspend_process()
-
-    async def action_change_sort_order_open_popup(self) -> None:
-        await self.query_one(SortOrderButton).open_popup(
-            events.Key(
-                key=config["keybinds"]["change_sort_order"]["open_popup"][0],
-                character=None,
-            )
-        )
 
     def action_show_shell_screen(self) -> None:
         self.push_screen(

@@ -55,6 +55,15 @@ class YesOrNo(ModalScreen):
         self.query_one("#dialog").border_title = self.border_title
         self.query_one("#dialog").border_subtitle = self.border_subtitle
 
+    def on_button_pressed(self, event: Button.Pressed) -> None:
+        (self.action_yes if event.button.id == "yes" else self.action_no)()
+
+    def on_click(self, event: events.Click) -> None:
+        if event.widget is self:
+            # ie click outside
+            event.stop()
+            self.action_no()
+
     def on_key(self, event: events.Key) -> None:
         """Handle key presses."""
         if check_key(event, config["keybinds"]["yes_or_no"]["yes"]):
@@ -84,12 +93,3 @@ class YesOrNo(ModalScreen):
     def action_toggle_dont_ask_again(self) -> None:
         if self.with_toggle:
             self.query_one(Switch).action_toggle_switch()
-
-    def on_button_pressed(self, event: Button.Pressed) -> None:
-        (self.action_yes if event.button.id == "yes" else self.action_no)()
-
-    def on_click(self, event: events.Click) -> None:
-        if event.widget is self:
-            # ie click outside
-            event.stop()
-            self.action_no()

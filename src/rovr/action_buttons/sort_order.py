@@ -72,9 +72,9 @@ class SortOrderButton(Button):
         self.update_icon()
 
     async def on_button_pressed(self, event: Button.Pressed) -> None:
-        await self.open_popup(event)
+        await self.action_open_popup(event)
 
-    async def open_popup(
+    async def action_open_popup(
         self,
         event: events.Click | events.Key | Button.Pressed,
     ) -> None:

@@ -470,7 +470,7 @@ class FileList(CheckboxRenderingMixin, SelectionList, inherit_bindings=False):
             values = self.selected
             if not values:
                 return []
-            options = [self.get_option(value) for value in values]
+            options = (self.get_option(value) for value in values)
 
             return [
                 str(path_utils.normalise(option.dir_entry.path))
@@ -520,17 +520,17 @@ class FileList(CheckboxRenderingMixin, SelectionList, inherit_bindings=False):
         elif check_key(event, config["keybinds"]["copy"]):
             self.app.query_one("#copy").on_button_pressed()
         elif check_key(event, config["keybinds"]["extra_copy"]["open_popup"]):
-            await self.action_extra_copy_open_popup()
+            self.action_extra_copy_open_popup()
         elif check_key(event, config["keybinds"]["cut"]):
-            await self.action_cut()
+            self.action_cut()
         elif check_key(event, config["keybinds"]["paste"]):
-            await self.action_paste()
+            self.action_paste()
         elif check_key(event, config["keybinds"]["new"]):
             self.action_new()
         elif check_key(event, config["keybinds"]["rename"]):
             self.action_rename()
         elif check_key(event, config["keybinds"]["delete"]):
-            await self.action_delete()
+            self.action_delete()
         elif check_key(event, config["keybinds"]["zip"]):
             self.action_zip()
         elif check_key(event, config["keybinds"]["unzip"]):
@@ -541,6 +541,8 @@ class FileList(CheckboxRenderingMixin, SelectionList, inherit_bindings=False):
         # toggle hidden files
         elif check_key(event, config["keybinds"]["toggle_hidden_files"]):
             await self.action_toggle_hidden_files()
+        elif check_key(event, config["keybinds"]["change_sort_order"]["open_popup"]):
+            await self.action_change_sort_order_open_popup()
         elif check_key(event, config["keybinds"]["toggle_visual"]):
             await self.action_toggle_visual()
         elif check_key(event, config["keybinds"]["toggle_all"]):
@@ -715,33 +717,35 @@ class FileList(CheckboxRenderingMixin, SelectionList, inherit_bindings=False):
         self.app.query_one("PinnedSidebar").reload_pins()
 
     def action_copy(self) -> None:
-        self.app.query_one("#copy").on_button_pressed()
+        self.app.query_one("#copy").action_press()
 
-    async def action_extra_copy_open_popup(self) -> None:
-        await self.app.query_one("#copy").open_popup(
-            events.Key(config["keybinds"]["extra_copy"]["open_popup"][0], None)
+    def action_extra_copy_open_popup(self) -> None:
+        self.app.query_one("#copy").action_open_popup(
+            events.Key(
+                key=config["keybinds"]["extra_copy"]["open_popup"][0], character=None
+            )
         )
 
-    async def action_cut(self) -> None:
-        await self.app.query_one("#cut").on_button_pressed()
+    def action_cut(self) -> None:
+        self.app.query_one("#cut").action_press()
 
-    async def action_paste(self) -> None:
-        await self.app.query_one("#paste").on_button_pressed()
+    def action_paste(self) -> None:
+        self.app.query_one("#paste").action_press()
 
     def action_new(self) -> None:
-        self.app.query_one("#new").on_button_pressed()
+        self.app.query_one("#new").action_press()
 
     def action_rename(self) -> None:
-        self.app.query_one("#rename").on_button_pressed()
+        self.app.query_one("#rename").action_press()
 
-    async def action_delete(self) -> None:
-        await self.app.query_one("#delete").on_button_pressed()
+    def action_delete(self) -> None:
+        self.app.query_one("#delete").action_press()
 
     def action_zip(self) -> None:
-        self.app.query_one("#zip").on_button_pressed(Button.Pressed)
+        self.app.query_one("#zip").action_press()
 
     def action_unzip(self) -> None:
-        self.app.query_one("#unzip").on_button_pressed(Button.Pressed)
+        self.app.query_one("#unzip").action_press()
 
     def action_focus_search(self) -> None:
         self.input.focus()
@@ -763,6 +767,14 @@ class FileList(CheckboxRenderingMixin, SelectionList, inherit_bindings=False):
         assert self.parent and self.parent.parent
         if self.parent.parent.query("PreviewContainer > FileList") and not self.dummy:
             self.highlighted = self.highlighted
+
+    async def action_change_sort_order_open_popup(self) -> None:
+        await self.app.query_one("SortOrderButton").open_popup(
+            events.Key(
+                key=config["keybinds"]["change_sort_order"]["open_popup"][0],
+                character=None,
+            )
+        )
 
     async def action_toggle_visual(self) -> None:
         if self.highlighted_option:

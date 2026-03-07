@@ -1150,6 +1150,13 @@ class PreviewContainer(Container):
             return
         self.show_normal_file_preview()
 
+    @on(events.Show)
+    async def when_become_visible(self, event: events.Show) -> None:
+        if isinstance(self._pending_preview_path, str):
+            pending = self._pending_preview_path
+            self._pending_preview_path = None
+            await self.show_preview(pending)
+
     def on_key(self, event: events.Key) -> None:
         """Check for vim keybinds."""
         from rovr.functions.utils import check_key
@@ -1211,10 +1218,3 @@ class PreviewContainer(Container):
             self.update_current_pdf_page(self.pdf.total_pages - 1)
         elif self.border_title == titles.archive:
             self.query_one(FileList).scroll_end(animate=False)
-
-    @on(events.Show)
-    async def when_become_visible(self, event: events.Show) -> None:
-        if isinstance(self._pending_preview_path, str):
-            pending = self._pending_preview_path
-            self._pending_preview_path = None
-            await self.show_preview(pending)

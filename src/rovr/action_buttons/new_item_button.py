@@ -45,7 +45,8 @@ class NewItemButton(Button):
         if location.endswith("/"):
             # recursive directory creation
             try:
-                makedirs(location)
+                worker = self.app.run_in_thread(makedirs, location)
+                await worker.wait()
             except Exception as e:
                 self.notify(
                     # i had to force a cast, i didn't have any other choice
@@ -65,7 +66,8 @@ class NewItemButton(Button):
             location_parts = location.split("/")
             dir_path = "/".join(location_parts[:-1])
             try:
-                makedirs(dir_path)
+                worker = self.app.run_in_thread(makedirs, dir_path)
+                await worker.wait()
                 with open(location, "w") as f:
                     f.write("")  # Create an empty file
             except FileExistsError:

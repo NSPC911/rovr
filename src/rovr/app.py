@@ -335,10 +335,10 @@ class Application(App, inherit_bindings=False):
             self.action_focus_toggle_pinned_sidebar()
         # Focus file list from anywhere except input
         elif check_key(event, config["keybinds"]["focus_file_list"]):
-            self.action_focus_file_list
+            self.action_focus_file_list()
         # Focus toggle preview sidebar
         elif check_key(event, config["keybinds"]["focus_toggle_preview_sidebar"]):
-            self.action_focus_toggle_pinned_sidebar()
+            self.action_focus_toggle_preview_sidebar()
         # Focus path switcher
         elif check_key(event, config["keybinds"]["focus_toggle_path_switcher"]):
             self.action_focus_path_switcher()
@@ -353,19 +353,19 @@ class Application(App, inherit_bindings=False):
             self.action_focus_toggle_clipboard()
         # Toggle hiding panels
         elif check_key(event, config["keybinds"]["toggle_pinned_sidebar"]):
-            self.action_focus_toggle_pinned_sidebar()
+            self.action_toggle_pinned_sidebar()
         elif check_key(event, config["keybinds"]["toggle_preview_sidebar"]):
-            self.action_focus_toggle_preview_sidebar()
+            self.action_toggle_preview_sidebar()
         elif check_key(event, config["keybinds"]["toggle_footer"]):
             self.action_toggle_footer()
         elif check_key(event, config["keybinds"]["toggle_menu_wrapper"]):
             self.action_toggle_menu_wrapper()
         elif check_key(event, config["keybinds"]["tab_next"]):
-            self.action_next_tab()
+            self.action_tab_next()
         elif check_key(event, config["keybinds"]["tab_previous"]):
-            self.action_previous_tab()
+            self.action_tab_previous()
         elif check_key(event, config["keybinds"]["tab_new"]):
-            await self.tabWidget.add_tab()
+            await self.action_tab_new()
         elif check_key(event, config["keybinds"]["tab_close"]):
             self.action_close_tab()
         elif check_key(event, config["keybinds"]["show_keybinds"]):
@@ -791,7 +791,7 @@ class Application(App, inherit_bindings=False):
             yield SystemCommand(
                 "Open ripgrep",
                 "Start searching the current directory for a string using `rg`",
-                self.action_plugin_zoxide,
+                self.action_plugin_rg,
             )
         if config["keybinds"]["toggle_hidden_files"]:
             if config["interface"]["show_hidden_files"]:
@@ -979,7 +979,7 @@ class Application(App, inherit_bindings=False):
             self.tabWidget.action_previous_tab()
 
     async def action_tab_new(self) -> None:
-        await self.tabWidget.add_tab(after=self.tabWidget.active_tab)
+        self.query_one("NewTabButton").action_press()
 
     def action_tab_close(self) -> None:
         if self.tabWidget.tab_count > 1:

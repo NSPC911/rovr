@@ -55,7 +55,7 @@ class DeleteFiles(ModalScreen):
         if event.widget is self:
             # ie click outside
             event.stop()
-            self.dismiss("cancel")
+            self.action_cancel()
 
     def on_key(self, event: events.Key) -> None:
         """Handle key presses."""

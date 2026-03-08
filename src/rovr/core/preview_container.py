@@ -7,7 +7,7 @@ from functools import partial
 from io import BytesIO
 from os import path
 from time import time
-from typing import cast
+from typing import Literal, cast
 
 import textual_image.widget
 from PIL import Image, ImageDraw, ImageFont, UnidentifiedImageError
@@ -1161,60 +1161,69 @@ class PreviewContainer(Container):
         """Check for vim keybinds."""
         from rovr.functions.utils import check_key
 
-        if check_key(event, config["keybinds"]["up"]):
+        if (
+            check_key(event, config["keybinds"]["up"])
+            and self.action_up() is None
+            or check_key(event, config["keybinds"]["down"])
+            and self.action_down() is None
+            or check_key(event, config["keybinds"]["page_up"])
+            and self.action_page_up() is None
+            or check_key(event, config["keybinds"]["page_down"])
+            and self.action_page_down() is None
+            or check_key(event, config["keybinds"]["home"])
+            and self.action_home() is None
+            or check_key(event, config["keybinds"]["end"])
+            and self.action_end() is None
+        ):
             event.stop()
-            self.action_up()
-        elif check_key(event, config["keybinds"]["down"]):
-            event.stop()
-            self.action_down()
-        elif check_key(event, config["keybinds"]["page_up"]):
-            event.stop()
-            self.action_page_up()
-        elif check_key(event, config["keybinds"]["page_down"]):
-            event.stop()
-            self.action_page_down()
-        elif check_key(event, config["keybinds"]["home"]):
-            event.stop()
-            self.action_home()
-        elif check_key(event, config["keybinds"]["end"]):
-            event.stop()
-            self.action_end()
 
     def _is_pdf(self) -> bool:
         return self.border_title == titles.pdf and self._file_type == "pdf"
 
-    def action_up(self) -> None:
+    def action_up(self) -> Literal[False] | None:
         if self._is_pdf() and self.pdf.images is not None:
             self.update_current_pdf_page_by_diff(-1)
         elif self.border_title == titles.archive:
             self.query_one(FileList).scroll_up(animate=False)
+        else:
+            return False
 
-    def action_down(self) -> None:
+    def action_down(self) -> Literal[False] | None:
         if self._is_pdf() and self.pdf.images is not None:
-            self.update_current_pdf_page_by_diff(-1)
+            self.update_current_pdf_page_by_diff(1)
         elif self.border_title == titles.archive:
             self.query_one(FileList).scroll_down(animate=False)
+        else:
+            return False
 
-    def action_page_up(self) -> None:
+    def action_page_up(self) -> Literal[False] | None:  # ty: ignore[invalid-method-override]
         if self._is_pdf() and self.pdf.images is not None:
             self.update_current_pdf_page_by_diff(-1)
         elif self.border_title == titles.archive:
             self.query_one(FileList).scroll_page_up(animate=False)
+        else:
+            return False
 
-    def action_page_down(self) -> None:
+    def action_page_down(self) -> Literal[False] | None:  # ty: ignore[invalid-method-override]
         if self._is_pdf() and self.pdf.images is not None:
             self.update_current_pdf_page_by_diff(1)
         elif self.border_title == titles.archive:
             self.query_one(FileList).scroll_page_down(animate=False)
+        else:
+            return False
 
-    def action_home(self) -> None:
+    def action_home(self) -> Literal[False] | None:
         if self._is_pdf() and self.pdf.images is not None:
             self.update_current_pdf_page(0)
         elif self.border_title == titles.archive:
             self.query_one(FileList).scroll_home(animate=False)
+        else:
+            return False
 
-    def action_end(self) -> None:
+    def action_end(self) -> Literal[False] | None:
         if self._is_pdf() and self.pdf.images is not None:
             self.update_current_pdf_page(self.pdf.total_pages - 1)
         elif self.border_title == titles.archive:
             self.query_one(FileList).scroll_end(animate=False)
+        else:
+            return False

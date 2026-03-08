@@ -49,7 +49,7 @@ class CopyButton(Button):
             else:
                 await self.action_open_popup(Button.Pressed(self))
 
-    async def action_open_popup(self, event: Button.Pressed | events.Key) -> None:
+    async def action_open_popup(self, event: Button.Pressed | events.Key = events.Key("", None)) -> None:
         try:
             popup_widget = self.app.query_one(CopyPanelOptions)
         except NoMatches:

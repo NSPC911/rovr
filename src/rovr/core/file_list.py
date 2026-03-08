@@ -507,7 +507,7 @@ class FileList(CheckboxRenderingMixin, SelectionList, inherit_bindings=False):
         if check_key(event, config["keybinds"]["hist_previous"]):
             self.action_hist_previous()
         elif check_key(event, config["keybinds"]["hist_next"]):
-            self.app.query_one("ForwardButton").on_button_pressed(Button.Pressed)
+            self.app.query_one("ForwardButton").action_press()
         elif check_key(event, config["keybinds"]["up_tree"]):
             self.action_up_tree()
         elif check_key(event, config["keybinds"]["bypass_up_tree"]):
@@ -518,7 +518,7 @@ class FileList(CheckboxRenderingMixin, SelectionList, inherit_bindings=False):
         elif check_key(event, config["keybinds"]["toggle_pin"]):
             self.action_toggle_pin()
         elif check_key(event, config["keybinds"]["copy"]):
-            self.app.query_one("#copy").on_button_pressed()
+            self.action_copy()
         elif check_key(event, config["keybinds"]["extra_copy"]["open_popup"]):
             self.action_extra_copy_open_popup()
         elif check_key(event, config["keybinds"]["cut"]):
@@ -769,12 +769,7 @@ class FileList(CheckboxRenderingMixin, SelectionList, inherit_bindings=False):
             self.highlighted = self.highlighted
 
     async def action_change_sort_order_open_popup(self) -> None:
-        await self.app.query_one("SortOrderButton").open_popup(
-            events.Key(
-                key=config["keybinds"]["change_sort_order"]["open_popup"][0],
-                character=None,
-            )
-        )
+        await self.app.query_one("SortOrderButton").action_open_popup()
 
     async def action_toggle_visual(self) -> None:
         if self.highlighted_option:
@@ -884,7 +879,7 @@ class FileList(CheckboxRenderingMixin, SelectionList, inherit_bindings=False):
                 self.select(self.get_option_at_index(index))
 
     def action_open_editor(self) -> None:
-        if self.highlighted and not (
+        if (self.highlighted is not None) and not (
             self.highlighted_option and self.highlighted_option.disabled
         ):
             target_path = self.highlighted_option.dir_entry.path
@@ -947,17 +942,17 @@ class FileListRightClickOptionList(PopupOptionList):
         # Handle menu item selection
         match event.option.id:
             case "copy":
-                self.app.query_one("#copy").on_button_pressed()
+                self.app.query_one("#copy").action_press()
             case "cut":
-                await self.app.query_one("#cut").on_button_pressed(Button.Pressed)
+                await self.app.query_one("#cut").action_press()
             case "delete":
-                await self.app.query_one("#delete").on_button_pressed(Button.Pressed)
+                await self.app.query_one("#delete").action_press()
             case "rename":
-                self.app.query_one("#rename").on_button_pressed(Button.Pressed)
+                self.app.query_one("#rename").action_press()
             case "zip":
-                self.app.query_one("#zip").on_button_pressed(Button.Pressed)
+                self.app.query_one("#zip").action_press()
             case "unzip":
-                self.app.query_one("#unzip").on_button_pressed(Button.Pressed)
+                self.app.query_one("#unzip").action_press()
             case _:
                 return
         self.go_hide()

@@ -56,7 +56,10 @@ class YesOrNo(ModalScreen):
         self.query_one("#dialog").border_subtitle = self.border_subtitle
 
     def on_button_pressed(self, event: Button.Pressed) -> None:
-        (self.action_yes if event.button.id == "yes" else self.action_no)()
+        if event.button.id == "yes":
+            self.action_yes()
+        else:
+            self.action_no()
 
     def on_click(self, event: events.Click) -> None:
         if event.widget is self:

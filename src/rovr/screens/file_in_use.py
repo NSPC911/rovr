@@ -31,7 +31,7 @@ class FileInUse(ModalScreen):
                 yield Button(f"\\[{cancel_bind}] Cancel", variant="error", id="cancel")
             with HorizontalGroup(id="dontAskAgain"):
                 yield Switch()
-                yield Label(f"[{dont_ask_bind}] Don't ask again")
+                yield Label(f"\\[{dont_ask_bind}] Don't ask again")
 
     def on_mount(self) -> None:
         self.query_one("#dialog").border_title = "File in Use"

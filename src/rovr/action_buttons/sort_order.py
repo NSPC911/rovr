@@ -76,7 +76,7 @@ class SortOrderButton(Button):
 
     async def action_open_popup(
         self,
-        event: events.Click | events.Key | Button.Pressed,
+        event: events.Click | events.Key | Button.Pressed = events.Key("", None),
     ) -> None:
         try:
             popup_widget = self.app.query_one(SortOrderPopup)

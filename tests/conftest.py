@@ -77,7 +77,7 @@ _stdin_patch.start()
 
 @pytest.fixture(autouse=True)
 def isolate_test_state(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
-    config_dir = tmp_path / "config"
+    config_dir = tmp_path / "../config"
     # ensure cd
     monkeypatch.chdir(tmp_path)
     # reset

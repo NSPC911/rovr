@@ -7,12 +7,12 @@
     "extra": "Renamed in v0.7.0",
     "regex": [
       {
-        "find": "interface.image_protocol",
-        "replace": "interface.image_viewer.protocol"
+        "find": "image_protocol",
+        "replace": "image_viewer.protocol"
       },
       {
-        "find": "(?<!\\.)image_protocol",
-        "replace": "image_viewer.protocol"
+        "find": "interface.image_protocol",
+        "replace": "interface.image_viewer.protocol"
       }
     ]
   },

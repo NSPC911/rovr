@@ -393,7 +393,10 @@ class FirstLaunchApp(App, inherit_bindings=False):
 [interface]
 use_reactive_layout = {str(self.query_one("#use_reactive_layout", Switch).value).lower()}
 show_hidden_files = {str(self.query_one("#show_hidden_files", Switch).value).lower()}
-image_protocol = "{prot_to_schema[str(self.query_one("#image_protocol_select", Select).value)]}"
+
+[interface.image_viewer]
+protocol = "{prot_to_schema[str(self.query_one("#image_protocol_select", Select).value)]}"
+
 [interface.compact_mode]
 buttons = {str(self.query_one("#compact_buttons", Switch).value).lower()}
 panels = {str(self.query_one("#compact_panels", Switch).value).lower()}

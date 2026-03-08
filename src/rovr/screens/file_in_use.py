@@ -1,3 +1,4 @@
+from rich.markup import escape
 from textual import events
 from textual.app import ComposeResult
 from textual.containers import Container, Grid, HorizontalGroup, VerticalGroup
@@ -24,7 +25,7 @@ class FileInUse(ModalScreen):
         with Grid(id="dialog", classes="file_in_use"):
             with VerticalGroup(id="question_container"):
                 for message in self.message.splitlines():
-                    yield Label(message, classes="question")
+                    yield Label(escape(message), classes="question")
             yield Button(f"\\[{retry_bind}] Retry", variant="primary", id="try_again")
             yield Button(f"\\[{skip_bind}] Skip", variant="warning", id="skip")
             with Container():

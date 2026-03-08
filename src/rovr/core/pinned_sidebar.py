@@ -188,4 +188,7 @@ class PinnedSidebar(OptionList, inherit_bindings=False):
 
     def on_key(self, event: events.Key) -> None:
         if event.key in config["keybinds"]["focus_search"]:
-            self.input.focus()
+            self.action_focus_search()
+
+    def action_focus_search(self) -> None:
+        self.input.focus()

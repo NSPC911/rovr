@@ -18,6 +18,7 @@ class PopupOptionList(OptionList):
         self.force_highlight_option_list = force_highlight_option_list
 
     def _on_mount(self, event: events.Mount) -> None:
+        event.prevent_default()
         if self.styles.overflow_y == "scroll":
             self.show_vertical_scrollbar = True
         if self.styles.overflow_x == "scroll":

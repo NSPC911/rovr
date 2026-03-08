@@ -142,10 +142,10 @@ class ModalInput(ModalScreen, inherit_bindings=False):
         """Handle escape key to dismiss the dialog."""
         if event.key == "escape":
             event.stop()
-            self.dismiss("")
+            self.dismiss()
 
     def on_click(self, event: events.Click) -> None:
         if event.widget is self:
             # ie click outside
             event.stop()
-            self.dismiss("")
+            self.dismiss()

@@ -43,14 +43,15 @@ class CopyButton(Button):
 
     async def _on_click(self, event: events.Click) -> None:
         event.stop()
+        event.prevent_default()
         if not self.has_class("-active"):
             if event.button == 1:
                 self.press()
             else:
-                await self.action_open_popup(Button.Pressed(self))
+                await self.action_open_popup(event)
 
     async def action_open_popup(
-        self, event: Button.Pressed | events.Key = events.Key("", None)
+        self, event: Button.Pressed | events.Key | events.Click = events.Key("", None)
     ) -> None:
         try:
             popup_widget = self.app.query_one(CopyPanelOptions)
@@ -64,6 +65,8 @@ class CopyButton(Button):
             )
         elif isinstance(event, events.Key):
             popup_widget.do_adjust = True
+        elif isinstance(event, events.Click):
+            popup_widget.styles.offset = (event.screen_x, event.screen_y)
         popup_widget.pre_show()
         popup_widget.remove_class("hidden")
         popup_widget.focus()
@@ -212,7 +215,7 @@ class CopyPanelOptions(PopupOptionList):
 
     def on_option_list_option_selected(self, event: OptionList.OptionSelected) -> None:
         if event.option.id == "rovr":
-            self.button.on_button_pressed()
+            self.button.action_press()
         elif event.option.id == "path":
             self.button.copy_path()
         elif event.option.id == "parent_path":

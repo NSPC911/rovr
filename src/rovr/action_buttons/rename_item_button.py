@@ -57,7 +57,7 @@ class RenameItemButton(Button):
                 ),
                 wait_for_dismiss=True,
             )
-            if response in ["", path.basename(selected_file)]:
+            if not response or response == path.basename(selected_file):
                 return
             old_name = normalise(path.abspath(path.join(getcwd(), selected_file)))
             new_name = normalise(path.abspath(path.join(getcwd(), response)))

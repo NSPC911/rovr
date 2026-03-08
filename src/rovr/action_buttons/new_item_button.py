@@ -37,7 +37,7 @@ class NewItemButton(Button):
             ),
             wait_for_dismiss=True,
         )
-        if response == "":
+        if not response:
             return
         location = normalise(path.join(getcwd(), response)) + (
             "/" if response.endswith("/") or response.endswith("\\") else ""
@@ -68,6 +68,8 @@ class NewItemButton(Button):
             try:
                 worker = self.app.run_in_thread(makedirs, dir_path)
                 await worker.wait()
+                if isinstance(worker.result, Exception):
+                    raise worker.result
                 with open(location, "w") as f:
                     f.write("")  # Create an empty file
             except FileExistsError:

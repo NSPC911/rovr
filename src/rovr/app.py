@@ -365,9 +365,9 @@ class Application(App, inherit_bindings=False):
         elif check_key(event, config["keybinds"]["tab_previous"]):
             self.action_tab_previous()
         elif check_key(event, config["keybinds"]["tab_new"]):
-            await self.action_tab_new()
+            self.action_tab_new()
         elif check_key(event, config["keybinds"]["tab_close"]):
-            self.action_close_tab()
+            self.action_tab_close()
         elif check_key(event, config["keybinds"]["show_keybinds"]):
             self.action_show_keybinds()
         elif check_key(event, config["keybinds"]["show_shell_screen"]):
@@ -978,7 +978,7 @@ class Application(App, inherit_bindings=False):
         if self.tabWidget.active_tab is not None:
             self.tabWidget.action_previous_tab()
 
-    async def action_tab_new(self) -> None:
+    def action_tab_new(self) -> None:
         self.query_one("NewTabButton").action_press()
 
     def action_tab_close(self) -> None:

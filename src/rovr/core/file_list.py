@@ -507,7 +507,7 @@ class FileList(CheckboxRenderingMixin, SelectionList, inherit_bindings=False):
         if check_key(event, config["keybinds"]["hist_previous"]):
             self.action_hist_previous()
         elif check_key(event, config["keybinds"]["hist_next"]):
-            self.app.query_one("ForwardButton").action_press()
+            self.app.action_hist_next()
         elif check_key(event, config["keybinds"]["up_tree"]):
             self.action_up_tree()
         elif check_key(event, config["keybinds"]["bypass_up_tree"]):
@@ -520,7 +520,7 @@ class FileList(CheckboxRenderingMixin, SelectionList, inherit_bindings=False):
         elif check_key(event, config["keybinds"]["copy"]):
             self.action_copy()
         elif check_key(event, config["keybinds"]["extra_copy"]["open_popup"]):
-            self.action_extra_copy_open_popup()
+            await self.action_extra_copy_open_popup()
         elif check_key(event, config["keybinds"]["cut"]):
             self.action_cut()
         elif check_key(event, config["keybinds"]["paste"]):
@@ -656,17 +656,17 @@ class FileList(CheckboxRenderingMixin, SelectionList, inherit_bindings=False):
     def action_hist_previous(self) -> None:
         if not self.select_mode_enabled:
             if self.app.query_one("#back").disabled:
-                self.app.query_one("UpButton").on_button_pressed(Button.Pressed)
+                self.app.query_one("UpButton").action_press()
             else:
-                self.app.query_one("BackButton").on_button_pressed(Button.Pressed)
+                self.app.query_one("BackButton").action_press()
 
     def action_hist_next(self) -> None:
         if not self.select_mode_enabled and not self.app.query_one("#forward").disabled:
-            self.app.query_one("ForwardButton").on_button_pressed(Button.Pressed)
+            self.app.query_one("ForwardButton").action_press()
 
     def action_up_tree(self) -> None:
         if not self.select_mode_enabled:
-            self.app.query_one("UpButton").on_button_pressed(Button.Pressed)
+            self.app.query_one("UpButton").action_press()
 
     def action_bypass_up_tree(self) -> None:
         if not self.select_mode_enabled:
@@ -719,8 +719,8 @@ class FileList(CheckboxRenderingMixin, SelectionList, inherit_bindings=False):
     def action_copy(self) -> None:
         self.app.query_one("#copy").action_press()
 
-    def action_extra_copy_open_popup(self) -> None:
-        self.app.query_one("#copy").action_open_popup(
+    async def action_extra_copy_open_popup(self) -> None:
+        await self.app.query_one("#copy").action_open_popup(
             events.Key(
                 key=config["keybinds"]["extra_copy"]["open_popup"][0], character=None
             )
@@ -944,9 +944,9 @@ class FileListRightClickOptionList(PopupOptionList):
             case "copy":
                 self.app.query_one("#copy").action_press()
             case "cut":
-                await self.app.query_one("#cut").action_press()
+                self.app.query_one("#cut").action_press()
             case "delete":
-                await self.app.query_one("#delete").action_press()
+                self.app.query_one("#delete").action_press()
             case "rename":
                 self.app.query_one("#rename").action_press()
             case "zip":

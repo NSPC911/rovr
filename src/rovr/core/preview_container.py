@@ -346,7 +346,7 @@ class PreviewContainer(Container):
             return
         self.app.call_from_thread(setattr, self, "border_title", titles.svg)
 
-    def show_image_preview(self, depth: int = 0) -> None:
+    def show_image_preview(self) -> None:
         """Show image preview. Runs in a thread."""
         if should_cancel() or self._current_file_path is None:
             return
@@ -446,7 +446,7 @@ class PreviewContainer(Container):
         # Resample images once when loaded for better performance
         return preview_utils.resample_batch(result)
 
-    def show_pdf_preview(self, depth: int = 0) -> None:
+    def show_pdf_preview(self) -> None:
         """
         Show PDF preview. Runs in a thread.
         The job of this function is to load the pdf file for the first time.
@@ -1151,7 +1151,7 @@ class PreviewContainer(Container):
         self.show_normal_file_preview()
 
     @on(events.Show)
-    async def when_become_visible(self, event: events.Show) -> None:
+    async def when_become_visible(self) -> None:
         if isinstance(self._pending_preview_path, str):
             pending = self._pending_preview_path
             self._pending_preview_path = None

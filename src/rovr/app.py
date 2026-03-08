@@ -373,20 +373,14 @@ class Application(App, inherit_bindings=False):
         elif check_key(event, config["keybinds"]["show_shell_screen"]):
             self.action_show_shell_screen()
         # zoxide
-        elif config["plugins"]["zoxide"]["enabled"] and check_key(
-            event, config["plugins"]["zoxide"]["keybinds"]
-        ):
+        elif check_key(event, config["plugins"]["zoxide"]["keybinds"]):
             self.action_plugin_zoxide()
         # keybinds
-        elif config["plugins"]["fd"]["enabled"] and check_key(
-            event, config["plugins"]["fd"]["keybinds"]
-        ):
+        elif check_key(event, config["plugins"]["fd"]["keybinds"]):
             self.action_plugin_fd()
-        elif config["plugins"]["rg"]["enabled"] and check_key(
-            event, config["plugins"]["rg"]["keybinds"]
-        ):
+        elif check_key(event, config["plugins"]["rg"]["keybinds"]):
             self.action_plugin_rg()
-        elif check_key(event, config["keybinds"]["suspend_app"]):
+        elif check_key(event, config["keybinds"]["suspend_process"]):
             self.action_suspend_process()
 
     @work
@@ -992,12 +986,15 @@ class Application(App, inherit_bindings=False):
             self.tabWidget.remove_tab(self.tabWidget.active_tab)
 
     def action_plugin_zoxide(self) -> None:
+        if not config["plugins"]["zoxide"]["enabled"]:
+            return
         if shutil.which("zoxide") is None:
             self.notify(
                 "Zoxide is not installed or not in PATH.",
                 title="Zoxide",
                 severity="error",
             )
+            return
 
         def on_response(response: str) -> None:
             """Handle the response from the ZDToDirectory dialog."""
@@ -1014,8 +1011,12 @@ class Application(App, inherit_bindings=False):
         self.push_screen(Keybinds())
 
     def action_plugin_fd(self) -> None:
-        fd_exec: str = config["plugins"]["fd"]["executable"]
-        if shutil.which(fd_exec) is not None:
+        if not config["plugins"]["fd"]["enabled"]:
+            return
+        fd_exec = shutil.which(config["plugins"]["fd"]["executable"]) or shutil.which(
+            "fd"
+        )
+        if fd_exec is not None:
             try:
 
                 def on_response(selected: str | None) -> None:
@@ -1041,8 +1042,12 @@ class Application(App, inherit_bindings=False):
             )
 
     def action_plugin_rg(self) -> None:
-        rg_exec: str = config["plugins"]["rg"]["executable"]
-        if shutil.which(rg_exec) is not None:
+        if not config["plugins"]["rg"]["enabled"]:
+            return
+        rg_exec = shutil.which(config["plugins"]["rg"]["executable"]) or shutil.which(
+            "rg"
+        )
+        if rg_exec is not None:
             try:
 
                 def on_response(selected: str | None) -> None:
@@ -1059,23 +1064,11 @@ class Application(App, inherit_bindings=False):
                 dump_exc(self, exc)
                 self.notify(str(exc), title="Plugins: rg", severity="error")
         else:
-            rg_exec: str = config["plugins"]["rg"]["executable"]
-            if shutil.which(rg_exec) is not None:
-                try:
-
-                    def on_response(selected: str | None) -> None:
-                        if selected is None or selected == "":
-                            return
-                        else:
-                            self.cd(
-                                path.dirname(selected),
-                                focus_on=path.basename(selected),
-                            )
-
-                    self.push_screen(ContentSearch(), on_response)
-                except Exception as exc:
-                    dump_exc(self, exc)
-                    self.notify(str(exc), title="Plugins: rg", severity="error")
+            self.notify(
+                f"{config['plugins']['rg']['executable']} cannot be found in PATH.",
+                title="Plugins: rg",
+                severity="error",
+            )
 
     def action_suspend_process(self) -> None:
         if WINDOWS:

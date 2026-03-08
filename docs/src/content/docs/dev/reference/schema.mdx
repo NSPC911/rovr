@@ -236,7 +236,7 @@ description: config schema humanified
   - [7.55. Property `Rovr Config > keybinds > quit_app`](#keybinds_quit_app)
     - [7.55.1. Rovr Config > keybinds > toggle_pin > toggle_pin items](#keybinds_toggle_pin_items)
   - [7.56. Property `Rovr Config > keybinds > command_palette`](#keybinds_command_palette)
-  - [7.57. Property `Rovr Config > keybinds > suspend_app`](#keybinds_suspend_app)
+  - [7.57. Property `Rovr Config > keybinds > suspend_process`](#keybinds_suspend_process)
     - [7.57.1. Rovr Config > keybinds > toggle_pin > toggle_pin items](#keybinds_toggle_pin_items)
   - [7.58. Property `Rovr Config > keybinds > open_editor`](#keybinds_open_editor)
     - [7.58.1. Rovr Config > keybinds > toggle_pin > toggle_pin items](#keybinds_toggle_pin_items)
@@ -1627,7 +1627,7 @@ Refer to https://textual.textualize.io/guide/design/#additional-variables for mo
 | [change_sort_order](#keybinds_change_sort_order)                       | object          | Keybinds related to changing the sort order                                                       |
 | [quit_app](#keybinds_quit_app)                                         | array of string | Quit the application                                                                              |
 | [command_palette](#keybinds_command_palette)                           | string          | Launch Textual's mildly useful command palette (only one keybind is allowed!)                     |
-| [suspend_app](#keybinds_suspend_app)                                   | array of string | Suspend the app's process, bringing you back to the terminal (\*nix only)                         |
+| [suspend_process](#keybinds_suspend_process)                           | array of string | Suspend the app's process, bringing you back to the terminal (\*nix only)                         |
 | [open_editor](#keybinds_open_editor)                                   | array of string | Open the selected file or folder in the configured editor.                                        |
 | [show_shell_screen](#keybinds_show_shell_screen)                       | array of string | Show the shell screen to run a command in the current directory.                                  |
 | [filename_conflict](#keybinds_filename_conflict)                       | object          | Keybinds related to handling a conflict with two files of the same name                           |
@@ -3671,7 +3671,7 @@ Refer to https://textual.textualize.io/guide/design/#additional-variables for mo
 
 **Description:** Launch Textual's mildly useful command palette (only one keybind is allowed!)
 
-### <a name="keybinds_suspend_app"></a>7.57. Property `Rovr Config > keybinds > suspend_app`
+### <a name="keybinds_suspend_process"></a>7.57. Property `Rovr Config > keybinds > suspend_process`
 
 |                |                       |
 | -------------- | --------------------- |

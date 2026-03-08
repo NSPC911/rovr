@@ -933,7 +933,7 @@
           "display_name": "Launch command palette",
           "type": "string"
         },
-        "suspend_app": {
+        "suspend_process": {
           "$ref": "#/definitions/keybind",
           "description": "Suspend the app's process, bringing you back to the terminal (*nix only)",
           "display_name": "Suspend app"

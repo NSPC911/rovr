@@ -937,7 +937,7 @@ class _RovrConfigKeybinds(TypedDict, total=False):
     display_name: Launch command palette
     """
 
-    suspend_app: list[str]
+    suspend_process: list[str]
     open_editor: list[str]
     show_shell_screen: list[str]
     filename_conflict: "_RovrConfigKeybindsFilenameConflict"

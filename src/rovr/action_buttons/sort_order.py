@@ -230,3 +230,35 @@ class SortOrderPopup(PopupOptionList):
                     return
                 self.action_select()
                 return
+
+    def action_change_sort_order_name(self) -> None:
+        self.highlighted = self.get_option_index("name")
+        self.action_select()
+
+    def action_change_sort_order_extension(self) -> None:
+        self.highlighted = self.get_option_index("extension")
+        self.action_select()
+
+    def action_change_sort_order_natural(self) -> None:
+        self.highlighted = self.get_option_index("natural")
+        self.action_select()
+
+    def action_change_sort_order_size(self) -> None:
+        self.highlighted = self.get_option_index("size")
+        self.action_select()
+
+    def action_change_sort_order_created(self) -> None:
+        self.highlighted = self.get_option_index("created")
+        self.action_select()
+
+    def action_change_sort_order_modified(self) -> None:
+        self.highlighted = self.get_option_index("modified")
+        self.action_select()
+
+    def action_change_sort_order_descending(self) -> None:
+        self.highlighted = self.get_option_index("descending")
+        self.action_select()
+
+    def action_toggle_custom_sort(self) -> None:
+        self.highlighted = self.get_option_index("custom_sort")
+        self.action_select()

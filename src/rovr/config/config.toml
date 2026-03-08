@@ -211,7 +211,7 @@ tab_close = ["w"]
 show_keybinds = ["?"]
 quit_app = ["q", "ctrl+q"]
 command_palette = "ctrl+p"
-suspend_app = ["ctrl+z"]
+suspend_process = ["ctrl+z"]
 open_editor = ["e"]
 show_shell_screen = [">"]
 # unavailable for now

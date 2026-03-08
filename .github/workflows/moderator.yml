@@ -9,7 +9,7 @@ on:
 
 jobs:
   spam-detection:
-    if: github.actor != 'coderabbitai' && github.actor != 'copilot-swe-agent'
+    if: github.actor != 'coderabbitai[bot]' && github.actor != 'Copilot'
     runs-on: ubuntu-slim
     permissions:
       issues: write
@@ -18,6 +18,10 @@ jobs:
       contents: read
     steps:
       - uses: actions/checkout@v4
+
+      - name: print actor for debug purposes
+        run: 'echo "Actor: ${{ github.actor }}"'
+
       - uses: github/ai-moderator@v1
         with:
           token: ${{ secrets.BOT_TOKEN }}

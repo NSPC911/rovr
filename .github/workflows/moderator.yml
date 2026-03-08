@@ -9,7 +9,7 @@ on:
 
 jobs:
   spam-detection:
-    if: github.actor != 'coderabbitai' && github.actor != 'copilot-swe-agent'
+    if: github.actor != 'coderabbitai[bot]' && github.actor != 'Copilot'
     runs-on: ubuntu-slim
     permissions:
       issues: write

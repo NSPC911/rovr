@@ -55,22 +55,20 @@ class CommonFileNameDoWhat(ModalScreen):
     def on_key(self, event: events.Key) -> None:
         """Handle key presses."""
         if check_key(event, config["keybinds"]["filename_conflict"]["overwrite"]):
-            event.stop()
             self.action_overwrite()
         elif check_key(event, config["keybinds"]["filename_conflict"]["rename"]):
-            event.stop()
             self.action_rename()
         elif check_key(event, config["keybinds"]["filename_conflict"]["skip"]):
-            event.stop()
             self.action_skip()
         elif check_key(event, config["keybinds"]["filename_conflict"]["cancel"]):
-            event.stop()
             self.action_cancel()
         elif check_key(
             event, config["keybinds"]["filename_conflict"]["dont_ask_again"]
         ):
-            event.stop()
             self.action_dont_ask_again()
+        else:
+            return
+        event.stop()
 
     def on_click(self, event: events.Click) -> None:
         if event.widget is self:

@@ -3,7 +3,7 @@ from typing import cast
 from textual import events
 from textual.css.query import NoMatches
 from textual.widgets import Button, OptionList
-from textual.widgets.option_list import Option
+from textual.widgets.option_list import Option, OptionDoesNotExist
 
 from rovr.classes.type_aliases import SortByOptions
 from rovr.components import PopupOptionList
@@ -72,11 +72,11 @@ class SortOrderButton(Button):
         self.update_icon()
 
     async def on_button_pressed(self, event: Button.Pressed) -> None:
-        await self.open_popup(event)
+        await self.action_open_popup(event)
 
-    async def open_popup(
+    async def action_open_popup(
         self,
-        event: events.Click | events.Key | Button.Pressed,
+        event: events.Click | events.Key | Button.Pressed = events.Key("", None),
     ) -> None:
         try:
             popup_widget = self.app.query_one(SortOrderPopup)
@@ -209,7 +209,11 @@ class SortOrderPopup(PopupOptionList):
         # Refresh file list to apply the change
         self.app.file_list.update_file_list(add_to_session=False)
 
-        self.go_hide()
+        if event.option.id != "custom_sort":
+            self.go_hide()
+        else:
+            self.pre_show()
+            self.highlighted = self.get_option_index("custom_sort")
         self.button.update_icon()
 
     async def on_key(self, event: events.Key) -> None:
@@ -218,7 +222,43 @@ class SortOrderPopup(PopupOptionList):
                 continue
             keys = cast(list[str], keys)
             if check_key(event, keys):
-                self.highlighted = self.get_option_index(option)
                 event.stop()
+                try:
+                    self.highlighted = self.get_option_index(option)
+                except OptionDoesNotExist:
+                    self.notify("Option does not exist", severity="error")
+                    return
                 self.action_select()
                 return
+
+    def action_change_sort_order_name(self) -> None:
+        self.highlighted = self.get_option_index("name")
+        self.action_select()
+
+    def action_change_sort_order_extension(self) -> None:
+        self.highlighted = self.get_option_index("extension")
+        self.action_select()
+
+    def action_change_sort_order_natural(self) -> None:
+        self.highlighted = self.get_option_index("natural")
+        self.action_select()
+
+    def action_change_sort_order_size(self) -> None:
+        self.highlighted = self.get_option_index("size")
+        self.action_select()
+
+    def action_change_sort_order_created(self) -> None:
+        self.highlighted = self.get_option_index("created")
+        self.action_select()
+
+    def action_change_sort_order_modified(self) -> None:
+        self.highlighted = self.get_option_index("modified")
+        self.action_select()
+
+    def action_change_sort_order_descending(self) -> None:
+        self.highlighted = self.get_option_index("descending")
+        self.action_select()
+
+    def action_toggle_custom_sort(self) -> None:
+        self.highlighted = self.get_option_index("custom_sort")
+        self.action_select()

@@ -51,23 +51,30 @@ class DeleteFiles(ModalScreen):
         """Handle button presses."""
         self.dismiss(event.button.id)
 
-    def on_key(self, event: events.Key) -> None:
-        """Handle key presses."""
-        if check_key(event, config["keybinds"]["delete_files"]["delete"]):
-            event.stop()
-            self.dismiss("delete")
-        elif check_key(event, config["keybinds"]["delete_files"]["cancel"]):
-            event.stop()
-            self.dismiss("cancel")
-        elif (
-            check_key(event, config["keybinds"]["delete_files"]["trash"])
-            and config["settings"]["use_recycle_bin"]
-        ):
-            event.stop()
-            self.dismiss("trash")
-
     def on_click(self, event: events.Click) -> None:
         if event.widget is self:
             # ie click outside
             event.stop()
-            self.dismiss("cancel")
+            self.action_cancel()
+
+    def on_key(self, event: events.Key) -> None:
+        """Handle key presses."""
+        if check_key(event, config["keybinds"]["delete_files"]["delete"]):
+            event.stop()
+            self.action_delete()
+        elif check_key(event, config["keybinds"]["delete_files"]["cancel"]):
+            event.stop()
+            self.action_cancel()
+        elif check_key(event, config["keybinds"]["delete_files"]["trash"]):
+            event.stop()
+            self.action_trash()
+
+    def action_delete(self) -> None:
+        self.dismiss("delete")
+
+    def action_cancel(self) -> None:
+        self.dismiss("cancel")
+
+    def action_trash(self) -> None:
+        if config["settings"]["use_recycle_bin"]:
+            self.dismiss("trash")

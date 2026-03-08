@@ -156,6 +156,6 @@ class NewTabButton(Button):
     def __init__(self) -> None:
         super().__init__(label="+", variant="primary", compact=True)
 
-    async def on_button_pressed(self, event: Button.Pressed) -> None:
+    async def on_button_pressed(self) -> None:
         assert self.parent and self.parent.parent
         await self.parent.parent.query_one(Tabline).add_tab(getcwd())

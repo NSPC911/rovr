@@ -332,169 +332,56 @@ class Application(App, inherit_bindings=False):
             return
         # focus toggle pinned sidebar
         elif check_key(event, config["keybinds"]["focus_toggle_pinned_sidebar"]):
-            if (
-                self.focused.id == "pinned_sidebar"
-                or "hide" in self.query_one("#pinned_sidebar_container").classes
-            ):
-                self.file_list.focus()
-            elif self.query_one("#pinned_sidebar_container").display:
-                self.query_one("#pinned_sidebar").focus()
+            self.action_focus_toggle_pinned_sidebar()
         # Focus file list from anywhere except input
         elif check_key(event, config["keybinds"]["focus_file_list"]):
-            self.file_list.focus()
+            self.action_focus_file_list()
         # Focus toggle preview sidebar
         elif check_key(event, config["keybinds"]["focus_toggle_preview_sidebar"]):
-            if (
-                self.focused.id == "preview_sidebar"
-                or self.focused.parent.id == "preview_sidebar"
-                or "hide" in self.query_one("#preview_sidebar").classes
-            ):
-                self.file_list.focus()
-            elif self.query_one(PreviewContainer).display:
-                with suppress(NoMatches):
-                    self.query_one("PreviewContainer > *").focus()
-            else:
-                self.file_list.focus()
+            self.action_focus_toggle_preview_sidebar()
         # Focus path switcher
         elif check_key(event, config["keybinds"]["focus_toggle_path_switcher"]):
-            self.query_one("#path_switcher").focus()
+            self.action_focus_path_switcher()
         # Focus processes
         elif check_key(event, config["keybinds"]["focus_toggle_processes"]):
-            if (
-                self.focused.id == "processes"
-                or "hide" in self.query_one("#processes").classes
-            ):
-                self.file_list.focus()
-            elif self.query_one("#footer").display:
-                self.query_one("#processes").focus()
+            self.action_focus_toggle_processes()
         # Focus metadata
         elif check_key(event, config["keybinds"]["focus_toggle_metadata"]):
-            if self.focused.id == "metadata":
-                self.file_list.focus()
-            elif self.query_one("#footer").display:
-                self.query_one("#metadata").focus()
+            self.action_focus_toggle_metadata()
         # Focus clipboard
         elif check_key(event, config["keybinds"]["focus_toggle_clipboard"]):
-            if self.focused.id == "clipboard":
-                self.file_list.focus()
-            elif self.query_one("#footer").display:
-                self.query_one("#clipboard").focus()
+            self.action_focus_toggle_clipboard()
         # Toggle hiding panels
         elif check_key(event, config["keybinds"]["toggle_pinned_sidebar"]):
-            self.file_list.focus()
-            self.query_one(StateManager).toggle_pinned_sidebar()
+            self.action_toggle_pinned_sidebar()
         elif check_key(event, config["keybinds"]["toggle_preview_sidebar"]):
-            self.file_list.focus()
-            self.query_one(StateManager).toggle_preview_sidebar()
+            self.action_toggle_preview_sidebar()
         elif check_key(event, config["keybinds"]["toggle_footer"]):
-            self.file_list.focus()
-            self.query_one(StateManager).toggle_footer()
+            self.action_toggle_footer()
         elif check_key(event, config["keybinds"]["toggle_menu_wrapper"]):
-            self.file_list.focus()
-            self.query_one(StateManager).toggle_menu_wrapper()
-        elif (
-            check_key(event, config["keybinds"]["tab_next"])
-            and self.tabWidget.active_tab is not None
-        ):
-            self.tabWidget.action_next_tab()
-        elif self.tabWidget.active_tab is not None and check_key(
-            event, config["keybinds"]["tab_previous"]
-        ):
-            self.tabWidget.action_previous_tab()
+            self.action_toggle_menu_wrapper()
+        elif check_key(event, config["keybinds"]["tab_next"]):
+            self.action_tab_next()
+        elif check_key(event, config["keybinds"]["tab_previous"]):
+            self.action_tab_previous()
         elif check_key(event, config["keybinds"]["tab_new"]):
-            await self.tabWidget.add_tab(after=self.tabWidget.active_tab)
-        elif self.tabWidget.tab_count > 1 and check_key(
-            event, config["keybinds"]["tab_close"]
-        ):
-            await self.tabWidget.remove_tab(self.tabWidget.active_tab)
-        # zoxide
-        elif config["plugins"]["zoxide"]["enabled"] and check_key(
-            event, config["plugins"]["zoxide"]["keybinds"]
-        ):
-            if shutil.which("zoxide") is None:
-                self.notify(
-                    "Zoxide is not installed or not in PATH.",
-                    title="Zoxide",
-                    severity="error",
-                )
-
-            def on_response(response: str) -> None:
-                """Handle the response from the ZDToDirectory dialog."""
-                if response:
-                    pathInput: PathInput = self.query_one(PathInput)
-                    pathInput.value = response
-                    pathInput.on_input_submitted(
-                        PathInput.Submitted(pathInput, pathInput.value)
-                    )
-
-            self.push_screen(ZDToDirectory(), on_response)
-        # keybinds
+            await self.action_tab_new()
+        elif check_key(event, config["keybinds"]["tab_close"]):
+            self.action_close_tab()
         elif check_key(event, config["keybinds"]["show_keybinds"]):
-            self.push_screen(Keybinds())
-        elif config["plugins"]["fd"]["enabled"] and check_key(
-            event, config["plugins"]["fd"]["keybinds"]
-        ):
-            fd_exec: str = config["plugins"]["fd"]["executable"]
-            if shutil.which(fd_exec) is not None:
-                try:
-
-                    def on_response(selected: str | None) -> None:
-                        if selected is None or selected == "":
-                            return
-                        if path.isdir(selected):
-                            self.cd(selected)
-                        else:
-                            self.cd(
-                                path.dirname(selected),
-                                focus_on=path.basename(selected),
-                            )
-
-                    self.push_screen(FileSearch(), on_response)
-                except Exception as exc:
-                    dump_exc(self, exc)
-                    self.notify(str(exc), title="Plugins: fd", severity="error")
-            else:
-                self.notify(
-                    f"{config['plugins']['fd']['executable']} cannot be found in PATH.",
-                    title="Plugins: fd",
-                    severity="error",
-                )
-        elif config["plugins"]["rg"]["enabled"] and check_key(
-            event, config["plugins"]["rg"]["keybinds"]
-        ):
-            rg_exec: str = config["plugins"]["rg"]["executable"]
-            if shutil.which(rg_exec) is not None:
-                try:
-
-                    def on_response(selected: str | None) -> None:
-                        if selected is None or selected == "":
-                            return
-                        else:
-                            self.cd(
-                                path.dirname(selected),
-                                focus_on=path.basename(selected),
-                            )
-
-                    self.push_screen(ContentSearch(), on_response)
-                except Exception as exc:
-                    dump_exc(self, exc)
-                    self.notify(str(exc), title="Plugins: rg", severity="error")
-        elif check_key(event, config["keybinds"]["suspend_app"]):
-            if WINDOWS:
-                self.notify(
-                    "rovr cannot be suspended on Windows!",
-                    title="Suspend App",
-                    severity="warning",
-                )
-            else:
-                self.action_suspend_process()
-        elif check_key(event, config["keybinds"]["change_sort_order"]["open_popup"]):
-            await self.query_one(SortOrderButton).open_popup(event)
+            self.action_show_keybinds()
         elif check_key(event, config["keybinds"]["show_shell_screen"]):
-            self.push_screen(
-                ShellExec(),
-                callback=lambda response: self.on_shell_exec_response(response),
-            )
+            self.action_show_shell_screen()
+        # zoxide
+        elif check_key(event, config["plugins"]["zoxide"]["keybinds"]):
+            self.action_plugin_zoxide()
+        # keybinds
+        elif check_key(event, config["plugins"]["fd"]["keybinds"]):
+            self.action_plugin_fd()
+        elif check_key(event, config["plugins"]["rg"]["keybinds"]):
+            self.action_plugin_rg()
+        elif check_key(event, config["keybinds"]["suspend_process"]):
+            self.action_suspend_process()
 
     @work
     async def on_shell_exec_response(
@@ -889,13 +776,7 @@ class Application(App, inherit_bindings=False):
             yield SystemCommand(
                 "Open fd",
                 "Start searching the current directory using `fd`",
-                lambda: self.on_key(
-                    events.Key(
-                        key=config["plugins"]["fd"]["keybinds"][0],
-                        # character doesn't matter
-                        character=config["plugins"]["fd"]["keybinds"][0],
-                    )
-                ),
+                self.action_plugin_fd,
             )
         if (
             config["plugins"]["zoxide"]["enabled"]
@@ -904,26 +785,26 @@ class Application(App, inherit_bindings=False):
             yield SystemCommand(
                 "Open zoxide",
                 "Start searching for a directory to `z` to",
-                lambda: self.on_key(
-                    events.Key(
-                        key=config["plugins"]["zoxide"]["keybinds"][0],
-                        # character doesn't matter
-                        character=config["plugins"]["zoxide"]["keybinds"][0],
-                    )
-                ),
+                self.action_plugin_zoxide,
+            )
+        if config["plugins"]["rg"]["enabled"] and config["plugins"]["rg"]["keybinds"]:
+            yield SystemCommand(
+                "Open ripgrep",
+                "Start searching the current directory for a string using `rg`",
+                self.action_plugin_rg,
             )
         if config["keybinds"]["toggle_hidden_files"]:
             if config["interface"]["show_hidden_files"]:
                 yield SystemCommand(
                     "Hide Hidden Files",
                     "Exclude listing of hidden files and folders",
-                    self.file_list.toggle_hidden_files,
+                    self.file_list.action_toggle_hidden_files,
                 )
             else:
                 yield SystemCommand(
                     "Show Hidden Files",
                     "Include listing of hidden files and folders",
-                    self.file_list.toggle_hidden_files,
+                    self.file_list.action_toggle_hidden_files,
                 )
         yield SystemCommand(
             "Reload File List",
@@ -1022,3 +903,185 @@ class Application(App, inherit_bindings=False):
                 )
         self._exit_renderables.clear()
         self.workers.cancel_all()
+
+    # actions
+    def action_focus_toggle_pinned_sidebar(self) -> None:
+        if (
+            self.focused.id == "pinned_sidebar"
+            or "hide" in self.query_one("#pinned_sidebar_container").classes
+        ):
+            self.file_list.focus()
+        elif self.query_one("#pinned_sidebar_container").display:
+            self.query_one("#pinned_sidebar").focus()
+
+    def action_focus_file_list(self) -> None:
+        self.file_list.focus()
+
+    def action_focus_toggle_preview_sidebar(self) -> None:
+        if (
+            self.focused.id == "preview_sidebar"
+            or self.focused.parent.id == "preview_sidebar"
+            or "hide" in self.query_one("#preview_sidebar").classes
+        ):
+            self.file_list.focus()
+        elif self.query_one(PreviewContainer).display:
+            with suppress(NoMatches):
+                self.query_one("PreviewContainer > *").focus()
+        else:
+            self.file_list.focus()
+
+    def action_focus_path_switcher(self) -> None:
+        self.query_one("#path_switcher").focus()
+
+    def action_focus_toggle_processes(self) -> None:
+        if (
+            self.focused.id == "processes"
+            or "hide" in self.query_one("#processes").classes
+        ):
+            self.file_list.focus()
+        elif self.query_one("#footer").display:
+            self.query_one("#processes").focus()
+
+    def action_focus_toggle_metadata(self) -> None:
+        if self.focused.id == "metadata":
+            self.file_list.focus()
+        elif self.query_one("#footer").display:
+            self.query_one("#metadata").focus()
+
+    def action_focus_toggle_clipboard(self) -> None:
+        if self.focused.id == "clipboard":
+            self.file_list.focus()
+        elif self.query_one("#footer").display:
+            self.query_one("#clipboard").focus()
+
+    def action_toggle_pinned_sidebar(self) -> None:
+        self.file_list.focus()
+        self.query_one(StateManager).toggle_pinned_sidebar()
+
+    def action_toggle_preview_sidebar(self) -> None:
+        self.file_list.focus()
+        self.query_one(StateManager).toggle_preview_sidebar()
+
+    def action_toggle_footer(self) -> None:
+        self.file_list.focus()
+        self.query_one(StateManager).toggle_footer()
+
+    def action_toggle_menu_wrapper(self) -> None:
+        self.file_list.focus()
+        self.query_one(StateManager).toggle_menu_wrapper()
+
+    def action_tab_next(self) -> None:
+        if self.tabWidget.active_tab is not None:
+            self.tabWidget.action_next_tab()
+
+    def action_tab_previous(self) -> None:
+        if self.tabWidget.active_tab is not None:
+            self.tabWidget.action_previous_tab()
+
+    async def action_tab_new(self) -> None:
+        self.query_one("NewTabButton").action_press()
+
+    def action_tab_close(self) -> None:
+        if self.tabWidget.tab_count > 1:
+            self.tabWidget.remove_tab(self.tabWidget.active_tab)
+
+    def action_plugin_zoxide(self) -> None:
+        if not config["plugins"]["zoxide"]["enabled"]:
+            return
+        if shutil.which("zoxide") is None:
+            self.notify(
+                "Zoxide is not installed or not in PATH.",
+                title="Zoxide",
+                severity="error",
+            )
+            return
+
+        def on_response(response: str) -> None:
+            """Handle the response from the ZDToDirectory dialog."""
+            if response:
+                pathInput: PathInput = self.query_one(PathInput)
+                pathInput.value = response
+                pathInput.on_input_submitted(
+                    PathInput.Submitted(pathInput, pathInput.value)
+                )
+
+        self.push_screen(ZDToDirectory(), on_response)
+
+    def action_show_keybinds(self) -> None:
+        self.push_screen(Keybinds())
+
+    def action_plugin_fd(self) -> None:
+        if not config["plugins"]["fd"]["enabled"]:
+            return
+        fd_exec = shutil.which(config["plugins"]["fd"]["executable"]) or shutil.which(
+            "fd"
+        )
+        if fd_exec is not None:
+            try:
+
+                def on_response(selected: str | None) -> None:
+                    if selected is None or selected == "":
+                        return
+                    if path.isdir(selected):
+                        self.cd(selected)
+                    else:
+                        self.cd(
+                            path.dirname(selected),
+                            focus_on=path.basename(selected),
+                        )
+
+                self.push_screen(FileSearch(), on_response)
+            except Exception as exc:
+                dump_exc(self, exc)
+                self.notify(str(exc), title="Plugins: fd", severity="error")
+        else:
+            self.notify(
+                f"{config['plugins']['fd']['executable']} cannot be found in PATH.",
+                title="Plugins: fd",
+                severity="error",
+            )
+
+    def action_plugin_rg(self) -> None:
+        if not config["plugins"]["rg"]["enabled"]:
+            return
+        rg_exec = shutil.which(config["plugins"]["rg"]["executable"]) or shutil.which(
+            "rg"
+        )
+        if rg_exec is not None:
+            try:
+
+                def on_response(selected: str | None) -> None:
+                    if selected is None or selected == "":
+                        return
+                    else:
+                        self.cd(
+                            path.dirname(selected),
+                            focus_on=path.basename(selected),
+                        )
+
+                self.push_screen(ContentSearch(), on_response)
+            except Exception as exc:
+                dump_exc(self, exc)
+                self.notify(str(exc), title="Plugins: rg", severity="error")
+        else:
+            self.notify(
+                f"{config['plugins']['rg']['executable']} cannot be found in PATH.",
+                title="Plugins: rg",
+                severity="error",
+            )
+
+    def action_suspend_process(self) -> None:
+        if WINDOWS:
+            self.notify(
+                "rovr cannot be suspended on Windows!",
+                title="Suspend App",
+                severity="warning",
+            )
+        else:
+            super().action_suspend_process()
+
+    def action_show_shell_screen(self) -> None:
+        self.push_screen(
+            ShellExec(),
+            callback=lambda response: self.on_shell_exec_response(response),
+        )

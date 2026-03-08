@@ -55,42 +55,44 @@ class YesOrNo(ModalScreen):
         self.query_one("#dialog").border_title = self.border_title
         self.query_one("#dialog").border_subtitle = self.border_subtitle
 
-    def on_key(self, event: events.Key) -> None:
-        """Handle key presses."""
-        if check_key(event, config["keybinds"]["yes_or_no"]["yes"]):
-            event.stop()
-            self.dismiss(
-                {"value": True, "toggle": self.query_one(Switch).value}
-                if self.with_toggle
-                else True
-            )
-        elif check_key(event, config["keybinds"]["yes_or_no"]["no"]):
-            event.stop()
-            self.dismiss(
-                {"value": False, "toggle": self.query_one(Switch).value}
-                if self.with_toggle
-                else False
-            )
-        elif (
-            check_key(event, config["keybinds"]["yes_or_no"]["dont_ask_again"])
-            and self.with_toggle
-        ):
-            event.stop()
-            self.query_one(Switch).action_toggle_switch()
-
     def on_button_pressed(self, event: Button.Pressed) -> None:
-        self.dismiss(
-            {"value": event.button.id == "yes", "toggle": self.query_one(Switch).value}
-            if self.with_toggle
-            else event.button.id == "yes"
-        )
+        if event.button.id == "yes":
+            self.action_yes()
+        else:
+            self.action_no()
 
     def on_click(self, event: events.Click) -> None:
         if event.widget is self:
             # ie click outside
             event.stop()
-            self.dismiss(
-                {"value": False, "toggle": self.query_one(Switch).value}
-                if self.with_toggle
-                else False
-            )
+            self.action_no()
+
+    def on_key(self, event: events.Key) -> None:
+        """Handle key presses."""
+        if check_key(event, config["keybinds"]["yes_or_no"]["yes"]):
+            event.stop()
+            self.action_yes()
+        elif check_key(event, config["keybinds"]["yes_or_no"]["no"]):
+            event.stop()
+            self.action_no()
+        elif check_key(event, config["keybinds"]["yes_or_no"]["dont_ask_again"]):
+            event.stop()
+            self.action_toggle_dont_ask_again()
+
+    def action_yes(self) -> None:
+        self.dismiss(
+            {"value": True, "toggle": self.query_one(Switch).value}
+            if self.with_toggle
+            else True
+        )
+
+    def action_no(self) -> None:
+        self.dismiss(
+            {"value": False, "toggle": self.query_one(Switch).value}
+            if self.with_toggle
+            else False
+        )
+
+    def action_toggle_dont_ask_again(self) -> None:
+        if self.with_toggle:
+            self.query_one(Switch).action_toggle_switch()

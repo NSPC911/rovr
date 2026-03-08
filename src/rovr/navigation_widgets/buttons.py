@@ -10,7 +10,7 @@ class BackButton(Button):
     def __init__(self) -> None:
         super().__init__(get_icon("general", "left")[0], id="back", classes="option")
 
-    def on_button_pressed(self, event: Button.Pressed) -> None:
+    def on_button_pressed(self) -> None:
         """Go back in the session's history"""
         if self.disabled:
             return
@@ -29,7 +29,7 @@ class ForwardButton(Button):
             get_icon("general", "right")[0], id="forward", classes="option"
         )
 
-    def on_button_pressed(self, event: Button.Pressed) -> None:
+    def on_button_pressed(self) -> None:
         """Go forward in the session's history"""
         if self.disabled:
             return
@@ -46,7 +46,7 @@ class UpButton(Button):
     def __init__(self) -> None:
         super().__init__(get_icon("general", "up")[0], id="up", classes="option")
 
-    def on_button_pressed(self, event: Button.Pressed) -> None:
+    def on_button_pressed(self) -> None:
         """Go up the current location's directory"""
         if self.disabled:
             return

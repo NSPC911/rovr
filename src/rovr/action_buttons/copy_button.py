@@ -1,10 +1,8 @@
 from os import getcwd
 from pathlib import Path
-from typing import Literal, Self
 
 from textual import events, work
 from textual.css.query import NoMatches
-from textual.message import Message
 from textual.widgets import Button, OptionList
 from textual.widgets.option_list import Option
 
@@ -36,27 +34,6 @@ class CopyPanelOption(Option):
 class CopyButton(Button):
     ALLOW_MAXIMIZE = False
 
-    class AlternatePressed(Message):
-        """Event sent when a `Button` is pressed and there is no Button action.
-
-        Can be handled using `on_button_pressed` in a subclass of
-        [`Button`][textual.widgets.Button] or in a parent widget in the DOM.
-        """
-
-        def __init__(self, button: Button, click_button: Literal[1, 3] = 1) -> None:
-            self.button: Button = button
-            self.click_button = click_button
-            """The button that was pressed."""
-            super().__init__()
-
-        @property
-        def control(self) -> Button:
-            """An alias for [Pressed.button][textual.widgets.Button.Pressed.button].
-
-            This will be the same value as [Pressed.button][textual.widgets.Button.Pressed.button].
-            """
-            return self.button
-
     def __init__(self) -> None:
         super().__init__(get_icon("general", "copy")[0], classes="option", id="copy")
 
@@ -70,32 +47,17 @@ class CopyButton(Button):
             if event.button == 1:
                 self.press()
             else:
-                self.alternate_press()
+                await self.action_open_popup(Button.Pressed(self))
 
-    def alternate_press(self) -> Self:
-        if self.disabled or not self.display:
-            return self
-        # Manage the "active" effect:
-        self._start_active_affect()
-        # ...and let other components know that we've just been clicked:
-        if self.action is None:
-            self.post_message(CopyButton.AlternatePressed(self))
-        else:
-            self.call_later(
-                self.app.run_action, self.action, default_namespace=self._parent
-            )
-        return self
-
-    async def on_copy_button_alternate_pressed(self, event: AlternatePressed) -> None:
-        await self.open_popup(event)
-
-    async def open_popup(self, event: AlternatePressed | events.Key) -> None:
+    async def action_open_popup(
+        self, event: Button.Pressed | events.Key = events.Key("", None)
+    ) -> None:
         try:
             popup_widget = self.app.query_one(CopyPanelOptions)
         except NoMatches:
             popup_widget = CopyPanelOptions()
             await self.app.mount(popup_widget)
-        if isinstance(event, CopyButton.AlternatePressed):
+        if isinstance(event, Button.Pressed):
             popup_widget.styles.offset = (
                 self.app.mouse_position.x,
                 self.app.mouse_position.y,
@@ -234,7 +196,7 @@ class CopyPanelOptions(PopupOptionList):
 
     def on_key(self, event: events.Key) -> None:
         if check_key(event, config["keybinds"]["extra_copy"]["copy_to_rovr"]):
-            self.button.on_button_pressed()
+            self.button.action_press()
         elif check_key(event, config["keybinds"]["extra_copy"]["copy_single_path"]):
             self.button.copy_path()
         elif check_key(event, config["keybinds"]["extra_copy"]["copy_to_system_clip"]):

@@ -197,7 +197,7 @@ class CopyPanelOptions(PopupOptionList):
                 (self.app.size.height - height) // 2,
             )
 
-    def on_key(self, event: events.Key) -> None:
+    async def on_key(self, event: events.Key) -> None:
         if check_key(event, config["keybinds"]["extra_copy"]["copy_to_rovr"]):
             self.button.action_press()
         elif check_key(event, config["keybinds"]["extra_copy"]["copy_single_path"]):

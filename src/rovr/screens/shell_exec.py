@@ -33,6 +33,9 @@ class ShellExec(ModalInput):
                 self.action_cycle_mode_forward()
             case "shift+tab":
                 self.action_cycle_mode_backward()
+            case _:
+                return
+        event.stop()
 
     def on_click(self, event: events.Click) -> None:
         if event.widget is self:

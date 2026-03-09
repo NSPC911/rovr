@@ -1,5 +1,5 @@
 from rich.markup import escape
-from textual import events
+from textual import events, on
 from textual.app import ComposeResult
 from textual.containers import Container, Grid, HorizontalGroup, VerticalGroup
 from textual.screen import ModalScreen
@@ -54,30 +54,27 @@ class FileInUse(ModalScreen):
             event.stop()
             self.action_toggle_dont_ask_again()
 
-    def on_button_pressed(self, event: Button.Pressed) -> None:
-        self.dismiss({
-            "value": event.button.id,
-            "toggle": self.query_one(Switch).value,
-        })
-
     def on_click(self, event: events.Click) -> None:
         if event.widget is self:
             # ie click outside
             event.stop()
             self.action_cancel()
 
+    @on(Button.Pressed, "#try_again")
     def action_retry(self) -> None:
         self.dismiss({
             "value": "try_again",
             "toggle": self.query_one(Switch).value,
         })
 
+    @on(Button.Pressed, "#cancel")
     def action_cancel(self) -> None:
         self.dismiss({
             "value": "cancel",
             "toggle": self.query_one(Switch).value,
         })
 
+    @on(Button.Pressed, "#skip")
     def action_skip(self) -> None:
         self.dismiss({"value": "skip", "toggle": self.query_one(Switch).value})
 

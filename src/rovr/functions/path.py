@@ -233,7 +233,7 @@ def sync_get_cwd_object(
     dom_node: DOMNode,
     cwd: str,
     show_hidden: bool = False,
-    sort_by: SortByOptions = "name",
+    sort_by: SortByOptions | None = "name",
     reverse: bool = False,
 ) -> tuple[list[CWDObjectReturnDict], list[CWDObjectReturnDict]]: ...
 
@@ -243,7 +243,7 @@ def sync_get_cwd_object(
     dom_node: DOMNode,
     cwd: str,
     show_hidden: bool = False,
-    sort_by: SortByOptions = "name",
+    sort_by: SortByOptions | None = "name",
     reverse: bool = False,
     return_nothing_if_this_returns_true: Callable[[], bool] | None = None,
 ) -> (
@@ -255,9 +255,7 @@ def sync_get_cwd_object(
     dom_node: DOMNode,
     cwd: str,
     show_hidden: bool = False,
-    sort_by: Literal[
-        "name", "size", "modified", "created", "extension", "natural"
-    ] = "name",
+    sort_by: SortByOptions | None = "name",
     reverse: bool = False,
     return_nothing_if_this_returns_true: Callable[[], bool] | None = None,
 ) -> tuple[list[CWDObjectReturnDict], list[CWDObjectReturnDict]] | tuple[None, None]:
@@ -353,6 +351,8 @@ def sync_get_cwd_object(
             # and i will not count dot prepended folders
             folders.sort(key=lambda x: x["name"].lower())
             files.sort(key=get_extension_sort_key)
+        case None:
+            pass
 
     if (
         return_nothing_if_this_returns_true is not None

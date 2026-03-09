@@ -1,4 +1,4 @@
-from os import getcwd, listdir, path
+from os import getcwd, path
 from typing import Callable, ClassVar, Iterable, Self, Sequence, cast
 
 from textual import events, on, work
@@ -653,20 +653,23 @@ class FileList(CheckboxRenderingMixin, SelectionList, inherit_bindings=False):
         super().set_options(options)  # ty: ignore[invalid-argument-type]
         return self
 
+    # not exactly sure, but there's this issue where if I click the
+    # hist_previous keybind twice too fast, it registers it as once, so
+    # there really is no choice, aside from using on_button_pressed :/
     def action_hist_previous(self) -> None:
         if not self.select_mode_enabled:
             if self.app.query_one("#back").disabled:
-                self.app.query_one("UpButton").action_press()
+                self.app.query_one("UpButton").on_button_pressed()
             else:
-                self.app.query_one("BackButton").action_press()
+                self.app.query_one("BackButton").on_button_pressed()
 
     def action_hist_next(self) -> None:
         if not self.select_mode_enabled and not self.app.query_one("#forward").disabled:
-            self.app.query_one("ForwardButton").action_press()
+            self.app.query_one("ForwardButton").on_button_pressed()
 
     def action_up_tree(self) -> None:
         if not self.select_mode_enabled:
-            self.app.query_one("UpButton").action_press()
+            self.app.query_one("UpButton").on_button_pressed()
 
     def action_bypass_up_tree(self) -> None:
         if not self.select_mode_enabled:
@@ -674,11 +677,18 @@ class FileList(CheckboxRenderingMixin, SelectionList, inherit_bindings=False):
             to_dir = path.dirname(getcwd())
             prev_to_dir = getcwd()
             try:
-                while True:
-                    entries = listdir(to_dir)
-                    if len(entries) != 1:
+                for _ in range(
+                    1000
+                ):  # hardcoded limitation, I don't want it to remain stuck
+                    folders, files = path_utils.sync_get_cwd_object(
+                        self,
+                        to_dir,
+                        config["interface"]["show_hidden_files"],
+                        sort_by=None,
+                    )
+                    if len(files) != 0 or len(folders) != 1:
                         break
-                    only_entry = path.join(to_dir, entries[0])
+                    only_entry = path.join(to_dir, folders[0]["name"])
                     if not path.isdir(only_entry):
                         break
                     if to_dir == "" or to_dir == path.dirname(to_dir):
@@ -697,13 +707,20 @@ class FileList(CheckboxRenderingMixin, SelectionList, inherit_bindings=False):
                     return
                 else:
                     to_dir = highlighted_option.dir_entry.path
-                    dirlist = []
                     prev_to_dir = getcwd()
                     try:
-                        while len(dirlist := listdir(to_dir)) == 1:
-                            if len(dirlist) == 0:
+                        for _ in range(
+                            1000
+                        ):  # hardcoded limitation, I don't want it to remain stuck
+                            folders, files = path_utils.sync_get_cwd_object(
+                                self,
+                                to_dir,
+                                config["interface"]["show_hidden_files"],
+                                sort_by=None,
+                            )
+                            if len(files) != 0 or len(folders) != 1:
                                 break
-                            next_path = path.join(to_dir, dirlist[0])
+                            next_path = folders[0]["dir_entry"].path
                             if not path.isdir(next_path):
                                 break
                             prev_to_dir = to_dir
@@ -712,6 +729,10 @@ class FileList(CheckboxRenderingMixin, SelectionList, inherit_bindings=False):
                     except PermissionError:
                         self.app.cd(prev_to_dir)
 
+    # Unlike for Up/Down/HistBack/HistForward, there is nothing beneficial
+    # if you spam the keybind for them, so I don't need to worry about
+    # it being registered once instead of twice (you don't want to create
+    # two items do you?)
     def action_toggle_pin(self) -> None:
         pin_utils.toggle_pin(path.basename(getcwd()), getcwd())
         self.app.query_one("PinnedSidebar").reload_pins()
@@ -942,17 +963,17 @@ class FileListRightClickOptionList(PopupOptionList):
         # Handle menu item selection
         match event.option.id:
             case "copy":
-                self.app.query_one("#copy").action_press()
+                self.file_list.action_copy()
             case "cut":
-                self.app.query_one("#cut").action_press()
+                self.file_list.action_cut()
             case "delete":
-                self.app.query_one("#delete").action_press()
+                self.file_list.action_delete()
             case "rename":
-                self.app.query_one("#rename").action_press()
+                self.file_list.action_rename()
             case "zip":
-                self.app.query_one("#zip").action_press()
+                self.file_list.action_zip()
             case "unzip":
-                self.app.query_one("#unzip").action_press()
+                self.file_list.action_unzip()
             case _:
                 return
         self.go_hide()

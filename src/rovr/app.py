@@ -318,9 +318,9 @@ class Application(App, inherit_bindings=False):
         # Make sure that key binds don't break
         # placeholder, not yet existing
         if event.key == "escape" and self.focused.id and "search" in self.focused.id:
-            if self.focused.id == "search_file_list":
+            if self._focused_id == "search_file_list":
                 self.file_list.focus()
-            elif self.focused.id == "search_pinned_sidebar":
+            elif self._focused_id == "search_pinned_sidebar":
                 self.query_one("#pinned_sidebar").focus()
             return
         # backspace is used by default bindings to head up in history
@@ -399,9 +399,7 @@ class Application(App, inherit_bindings=False):
                 )
                 stdout, stderr = await proc.communicate()
                 self.notify(
-                    Content(
-                        f"stdout: {stdout.decode(errors='ignore').strip()}\nstderr: {stderr.decode(errors='ignore').strip()}"
-                    ),  # ty: ignore[invalid-argument-type]
+                    f"stdout: {stdout.decode(errors='ignore').strip()}\nstderr: {stderr.decode(errors='ignore').strip()}",
                     title=f"Shell: {response.command}",
                     severity="information" if proc.returncode == 0 else "error",
                 )
@@ -416,9 +414,7 @@ class Application(App, inherit_bindings=False):
                     check=False,
                 )
                 self.notify(
-                    Content(
-                        f"stdout: {output.stdout.strip()}\nstderr: {output.stderr.strip()}"
-                    ),  # ty: ignore[invalid-argument-type]
+                    f"stdout: {output.stdout.strip()}\nstderr: {output.stderr.strip()}",
                     title=f"Shell: {response.command}",
                     severity="information" if output.returncode == 0 else "error",
                 )
@@ -434,9 +430,7 @@ class Application(App, inherit_bindings=False):
                         check=False,
                     )
                 self.notify(
-                    Content(
-                        f"Command '{response.command}' finished with return code {output.returncode}."
-                    ),  # ty: ignore[invalid-argument-type]
+                    f"Command '{response.command}' finished with return code {output.returncode}.",
                     title=f"Shell: {response.command}",
                     severity="information" if output.returncode == 0 else "error",
                 )
@@ -904,10 +898,16 @@ class Application(App, inherit_bindings=False):
         self._exit_renderables.clear()
         self.workers.cancel_all()
 
+    @property
+    def _focused_id(self) -> str | None:
+        if self.focused is not None:
+            return self.focused.id
+        return None
+
     # actions
     def action_focus_toggle_pinned_sidebar(self) -> None:
         if (
-            self.focused.id == "pinned_sidebar"
+            self._focused_id == "pinned_sidebar"
             or "hide" in self.query_one("#pinned_sidebar_container").classes
         ):
             self.file_list.focus()
@@ -919,7 +919,7 @@ class Application(App, inherit_bindings=False):
 
     def action_focus_toggle_preview_sidebar(self) -> None:
         if (
-            self.focused.id == "preview_sidebar"
+            self._focused_id == "preview_sidebar"
             or self.focused.parent.id == "preview_sidebar"
             or "hide" in self.query_one("#preview_sidebar").classes
         ):
@@ -935,7 +935,7 @@ class Application(App, inherit_bindings=False):
 
     def action_focus_toggle_processes(self) -> None:
         if (
-            self.focused.id == "processes"
+            self._focused_id == "processes"
             or "hide" in self.query_one("#processes").classes
         ):
             self.file_list.focus()
@@ -943,13 +943,13 @@ class Application(App, inherit_bindings=False):
             self.query_one("#processes").focus()
 
     def action_focus_toggle_metadata(self) -> None:
-        if self.focused.id == "metadata":
+        if self._focused_id == "metadata":
             self.file_list.focus()
         elif self.query_one("#footer").display:
             self.query_one("#metadata").focus()
 
     def action_focus_toggle_clipboard(self) -> None:
-        if self.focused.id == "clipboard":
+        if self._focused_id == "clipboard":
             self.file_list.focus()
         elif self.query_one("#footer").display:
             self.query_one("#clipboard").focus()
@@ -978,8 +978,8 @@ class Application(App, inherit_bindings=False):
         if self.tabWidget.active_tab is not None:
             self.tabWidget.action_previous_tab()
 
-    def action_tab_new(self) -> None:
-        self.query_one("NewTabButton").action_press()
+    async def action_tab_new(self) -> None:
+        await self.query_one("NewTabButton").on_button_pressed()
 
     def action_tab_close(self) -> None:
         if self.tabWidget.tab_count > 1:

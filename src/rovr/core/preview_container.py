@@ -500,6 +500,8 @@ class PreviewContainer(Container):
             except Exception as exc:
                 if should_cancel():
                     return
+                if toggle_loading:
+                    self.call_later(lambda: self.post_message(self.SetLoading(False)))
                 self.app.call_from_thread(self.remove_children)
                 self.app.call_from_thread(
                     self.mount,

@@ -508,7 +508,7 @@ class FileList(CheckboxRenderingMixin, SelectionList, inherit_bindings=False):
         if check_key(event, config["keybinds"]["hist_previous"]):
             self.action_hist_previous()
         elif check_key(event, config["keybinds"]["hist_next"]):
-            self.app.action_hist_next()
+            self.action_hist_next()
         elif check_key(event, config["keybinds"]["up_tree"]):
             self.action_up_tree()
         elif check_key(event, config["keybinds"]["bypass_up_tree"]):

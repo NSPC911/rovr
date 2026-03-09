@@ -45,7 +45,7 @@ class NewItemButton(Button):
         if location.endswith("/"):
             # recursive directory creation
             try:
-                worker = self.app.run_in_thread(makedirs, location, exists_ok=True)
+                worker = self.app.run_in_thread(makedirs, location)
                 await worker.wait()
                 if isinstance(worker.result, Exception):
                     raise worker.result
@@ -69,12 +69,15 @@ class NewItemButton(Button):
             location_parts = location.split("/")
             dir_path = "/".join(location_parts[:-1])
             try:
-                worker = self.app.run_in_thread(makedirs, dir_path, exists_ok=True)
+                worker = self.app.run_in_thread(makedirs, dir_path)
                 await worker.wait()
                 if isinstance(worker.result, Exception):
                     raise worker.result
                 with open(location, "w") as f:
                     f.write("")  # Create an empty file
+            except FileExistsError:
+                with open(location, "w") as f:
+                    f.write("")
             except Exception as exc:
                 # i had to force a cast, i didn't have any other choice
                 # notify supports non-string objects, but ty wasn't taking
@@ -102,7 +105,6 @@ class NewItemButton(Button):
                     severity="error",
                     markup=False,
                 )
-                return
         try:
             self.app.file_list.file_list_pause_check = True
             self.app.file_list.focus()

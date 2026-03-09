@@ -62,6 +62,7 @@ class NewItemButton(Button):
                     ),
                     title="New Item",
                     severity="error",
+                    markup=False,
                 )
         elif len(location.split("/")) > 1:
             # recursive directory until file creation
@@ -90,6 +91,7 @@ class NewItemButton(Button):
                     ),
                     title="New Item",
                     severity="error",
+                    markup=False,
                 )
         else:
             # normal file creation I hope
@@ -101,6 +103,7 @@ class NewItemButton(Button):
                     message=f"Error creating file '{response}'\n{type(exc).__name__}: {exc}",
                     title="New Item",
                     severity="error",
+                    markup=False,
                 )
         try:
             self.app.file_list.file_list_pause_check = True

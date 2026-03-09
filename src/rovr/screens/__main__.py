@@ -62,7 +62,7 @@ class Test(App):
                 border_title="test.txt",
                 border_subtitle=f"Extracting to {getcwd()}",
             ),
-            callback=lambda result: self.notify(str(result)),
+            callback=lambda result: self.notify(str(result), markup=False),
         )
 
     @on(Button.Pressed, "#DeleteFiles")
@@ -72,14 +72,14 @@ class Test(App):
                 "Are you sure you want to delete the following files?",
                 ["file1.txt", "file2.txt", "file3.txt"],
             ),
-            callback=lambda result: self.notify(str(result)),
+            callback=lambda result: self.notify(str(result), markup=False),
         )
 
     @on(Button.Pressed, "#Dismissible")
     def dismissable(self) -> None:
         self.push_screen(
             Dismissible("This is a dismissable screen. Press any key to dismiss."),
-            callback=lambda result: self.notify(str(result)),
+            callback=lambda result: self.notify(str(result), markup=False),
         )
 
     @on(Button.Pressed, "#FileInUse")
@@ -88,7 +88,7 @@ class Test(App):
             FileInUse(
                 "The file 'example.txt' is currently in use by another application.\nexample.txt",
             ),
-            callback=lambda result: self.notify(str(result)),
+            callback=lambda result: self.notify(str(result), markup=False),
         )
 
     @on(Button.Pressed, "#PasteScreen")
@@ -114,14 +114,14 @@ class Test(App):
                 + "?",
                 paths={"copy": to_copy, "cut": to_cut},
             ),
-            callback=lambda result: self.notify(str(result)),
+            callback=lambda result: self.notify(str(result), markup=False),
         )
 
     @on(Button.Pressed, "#YesOrNo")
     def yes_or_no(self) -> None:
         self.push_screen(
             YesOrNo("Do you want to continue?"),
-            callback=lambda result: self.notify(str(result)),
+            callback=lambda result: self.notify(str(result), markup=False),
         )
 
     @on(Button.Pressed, "#ArchiveCreationScreen")
@@ -131,7 +131,7 @@ class Test(App):
                 initial_value="archive.zip",
                 is_path=True,
             ),
-            callback=lambda result: self.notify(str(result)),
+            callback=lambda result: self.notify(str(result), markup=False),
         )
 
     def get_system_commands(self, screen: Screen) -> Iterable[SystemCommand]:
@@ -199,6 +199,7 @@ class Test(App):
                         str(error),
                         title=f"CSS: {type(error).__name__}",
                         severity="error",
+                        markup=False,
                     )
                     return
                 stylesheet.parse()
@@ -220,7 +221,10 @@ class Test(App):
                 self._css_has_errors = True
                 self.bell()
                 self.notify(
-                    str(error), title=f"CSS: {type(error).__name__}", severity="error"
+                    str(error),
+                    title=f"CSS: {type(error).__name__}",
+                    severity="error",
+                    markup=False,
                 )
             else:
                 self._css_has_errors = False

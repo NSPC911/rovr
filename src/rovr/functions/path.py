@@ -110,7 +110,12 @@ async def open_file(app: App, filepath: str) -> None:
     system = os_type.lower()
     # check if it is available first
     if not path.exists(filepath):
-        app.notify(f"File not found: {filepath}", title="Open File", severity="error")
+        app.notify(
+            f"File not found: {filepath}",
+            title="Open File",
+            severity="error",
+            markup=False,
+        )
         return
 
     try:
@@ -142,16 +147,20 @@ async def open_file(app: App, filepath: str) -> None:
         _, stderr = await process.communicate()
         if stderr:
             app.notify(
-                str(stderr.decode().strip()), title="Open File", severity="error"
+                str(stderr.decode().strip()),
+                title="Open File",
+                severity="error",
+                markup=False,
             )
         elif process.returncode and process.returncode != 0:
             app.notify(
                 f"Process exited with return code {process.returncode}",
                 title="Open File",
                 severity="error",
+                markup=False,
             )
     except Exception as e:
-        app.notify(str(e), title="Open File", severity="error")
+        app.notify(str(e), title="Open File", severity="error", markup=False)
 
 
 def get_filtered_dir_names(cwd: str | bytes, show_hidden: bool = False) -> set[str]:

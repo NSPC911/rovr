@@ -152,6 +152,7 @@ sort_descending = {str(self.sort_descending).lower()}
             self.notify(
                 f"Attempted to write state file, but {type(exc).__name__} occurred\n{exc}",
                 severity="error",
+                markup=False,
             )
 
     def watch_pinned_sidebar_visible(self, visible: bool) -> None:

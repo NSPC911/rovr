@@ -1015,6 +1015,7 @@ class PreviewContainer(Container):
             self.notify(
                 f"{type(exc).__name__} was raised while generating the preview",
                 severity="error",
+                markup=False,
             )
             path_utils.dump_exc(self, exc)
 

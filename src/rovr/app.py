@@ -402,6 +402,7 @@ class Application(App, inherit_bindings=False):
                     f"stdout: {stdout.decode(errors='ignore').strip()}\nstderr: {stderr.decode(errors='ignore').strip()}",
                     title=f"Shell: {response.command}",
                     severity="information" if proc.returncode == 0 else "error",
+                    markup=False,
                 )
             case "block":
                 import subprocess
@@ -417,6 +418,7 @@ class Application(App, inherit_bindings=False):
                     f"stdout: {output.stdout.strip()}\nstderr: {output.stderr.strip()}",
                     title=f"Shell: {response.command}",
                     severity="information" if output.returncode == 0 else "error",
+                    markup=False,
                 )
             case "suspend":
                 import subprocess
@@ -433,6 +435,7 @@ class Application(App, inherit_bindings=False):
                     f"Command '{response.command}' finished with return code {output.returncode}.",
                     title=f"Shell: {response.command}",
                     severity="information" if output.returncode == 0 else "error",
+                    markup=False,
                 )
 
     def on_app_blur(self, event: events.AppBlur) -> None:
@@ -512,11 +515,15 @@ class Application(App, inherit_bindings=False):
                     f"You cannot enter into {directory}!\n{exc.strerror}",
                     title="App: cd",
                     severity="error",
+                    markup=False,
                 )
                 return
             except FileNotFoundError:
                 self.notify(
-                    f"{directory}\nno longer exists!", title="App: cd", severity="error"
+                    f"{directory}\nno longer exists!",
+                    title="App: cd",
+                    severity="error",
+                    markup=False,
                 )
                 return
 
@@ -613,6 +620,7 @@ class Application(App, inherit_bindings=False):
                         f"{type(exc).__name__}: {exc}",
                         title="Change Watcher",
                         severity="warning",
+                        markup=False,
                     )
             if not self.CUSTOM_STYLE_AVAILABLE:
                 if not style_available and path.exists(custom_style_path):
@@ -665,6 +673,7 @@ class Application(App, inherit_bindings=False):
                             str(error),
                             title=f"CSS: {type(error).__name__}",
                             severity="error",
+                            markup=False,
                         )
                     else:
                         unable_path = [
@@ -677,12 +686,14 @@ class Application(App, inherit_bindings=False):
                                 f"CSS file {unable_path[0]} cannot be found.",
                                 title="CSS: File Not Found",
                                 severity="warning",
+                                markup=False,
                             )
                         else:
                             self.notify(
                                 f"CSS files {unable_path} cannot be found.",
                                 title="CSS: Files Not Found",
                                 severity="warning",
+                                markup=False,
                             )
                     return
                 stylesheet.parse()
@@ -704,7 +715,10 @@ class Application(App, inherit_bindings=False):
                 self._css_has_errors = True
                 self.bell()
                 self.notify(
-                    str(error), title=f"CSS: {type(error).__name__}", severity="error"
+                    str(error),
+                    title=f"CSS: {type(error).__name__}",
+                    severity="error",
+                    markup=False,
                 )
             else:
                 self._css_has_errors = False
@@ -1033,12 +1047,15 @@ class Application(App, inherit_bindings=False):
                 self.push_screen(FileSearch(), on_response)
             except Exception as exc:
                 dump_exc(self, exc)
-                self.notify(str(exc), title="Plugins: fd", severity="error")
+                self.notify(
+                    str(exc), title="Plugins: fd", severity="error", markup=False
+                )
         else:
             self.notify(
                 f"{config['plugins']['fd']['executable']} cannot be found in PATH.",
                 title="Plugins: fd",
                 severity="error",
+                markup=False,
             )
 
     def action_plugin_rg(self) -> None:
@@ -1062,12 +1079,15 @@ class Application(App, inherit_bindings=False):
                 self.push_screen(ContentSearch(), on_response)
             except Exception as exc:
                 dump_exc(self, exc)
-                self.notify(str(exc), title="Plugins: rg", severity="error")
+                self.notify(
+                    str(exc), title="Plugins: rg", severity="error", markup=False
+                )
         else:
             self.notify(
                 f"{config['plugins']['rg']['executable']} cannot be found in PATH.",
                 title="Plugins: rg",
                 severity="error",
+                markup=False,
             )
 
     def action_suspend_process(self) -> None:

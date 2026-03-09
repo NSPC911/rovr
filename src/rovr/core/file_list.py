@@ -336,7 +336,7 @@ class FileList(CheckboxRenderingMixin, SelectionList, inherit_bindings=False):
             editor_config = config["settings"]["editor"]["file"]
 
             def on_error(message: str, title: str) -> None:
-                self.notify(message, title=title, severity="error")
+                self.notify(message, title=title, severity="error", markup=False)
 
             try:
                 utils.run_editor_command(self.app, editor_config, target_path, on_error)
@@ -346,6 +346,7 @@ class FileList(CheckboxRenderingMixin, SelectionList, inherit_bindings=False):
                     f"{type(exc).__name__}: {exc}",
                     title="Error launching editor",
                     severity="error",
+                    markup=False,
                 )
         else:
             path_utils.open_file(self.app, target_path)
@@ -915,7 +916,7 @@ class FileList(CheckboxRenderingMixin, SelectionList, inherit_bindings=False):
                     editor_config,
                     target_path,
                     lambda message, title: self.notify(
-                        message=message, title=title, severity="error"
+                        message=message, title=title, severity="error", markup=False
                     ),
                 )
             except Exception as exc:
@@ -924,6 +925,7 @@ class FileList(CheckboxRenderingMixin, SelectionList, inherit_bindings=False):
                     f"{type(exc).__name__}: {exc}",
                     title="Error launching editor",
                     severity="error",
+                    markup=False,
                 )
 
 

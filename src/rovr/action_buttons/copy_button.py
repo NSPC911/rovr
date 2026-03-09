@@ -128,12 +128,14 @@ class CopyButton(Button):
                 title="System Copy Timeout",
                 severity="error",
                 timeout=5,
+                markup=False,
             )
         elif isinstance(output, ClipboardToolNotFoundError):
             self.notify(
                 str(output),
                 title="Missing Clipboard Tool",
                 severity="error",
+                markup=False,
             )
             dump_exc(self, output)
         elif isinstance(output, ClipboardError):
@@ -141,6 +143,7 @@ class CopyButton(Button):
                 str(output),
                 title="Clipboard Error",
                 severity="error",
+                markup=False,
             )
             dump_exc(self, output)
 

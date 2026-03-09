@@ -327,6 +327,7 @@ class FirstLaunchApp(App, inherit_bindings=False):
                 f"Failed to load preview image. Could not connect to the internet.\n{exc}",
                 title=type(exc).__name__,
                 severity="error",
+                markup=False,
             )
             return None
         except Exception as exc:
@@ -334,6 +335,7 @@ class FirstLaunchApp(App, inherit_bindings=False):
                 f"{type(exc).__name__}: {exc}",
                 title="Failed to load preview image",
                 severity="error",
+                markup=False,
             )
 
     @on(RadioSet.Changed, "#theme")

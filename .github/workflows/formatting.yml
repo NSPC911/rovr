@@ -33,7 +33,7 @@ jobs:
         run: uv sync --all-groups --no-group build
 
       - name: Run ty
-        run: uv run ty check || (echo "::error::Type checking failed! Please fix type errors before committing." && exit 1)
+        run: uv run ty check
 
       - name: Run ruff format if needed (main repo)
         if: github.repository == env.MAIN_REPO && (github.event_name != 'pull_request' || github.event.pull_request.head.repo.fork == false)

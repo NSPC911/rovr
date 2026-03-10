@@ -92,8 +92,7 @@ def load_pins() -> PinsDict:
                 for var, dir_path_val in VAR_TO_DIR.items():
                     item["path"] = item["path"].replace(f"${var}", dir_path_val)
                 # Normalize to forward slashes
-                assert item["path"] is str
-                item["path"] = normalise(item["path"])
+                item["path"] = normalise(str(item["path"]))
     pins = _pins
     return _pins
 

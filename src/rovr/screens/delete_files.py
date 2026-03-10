@@ -49,7 +49,15 @@ class DeleteFiles(ModalScreen):
 
     def on_button_pressed(self, event: Button.Pressed) -> None:
         """Handle button presses."""
-        self.dismiss(event.button.id)
+        match event.button.id:
+            case "delete":
+                self.action_delete()
+            case "cancel":
+                self.action_cancel()
+            case "trash":
+                self.action_trash()
+            case _:
+                return
 
     def on_click(self, event: events.Click) -> None:
         if event.widget is self:

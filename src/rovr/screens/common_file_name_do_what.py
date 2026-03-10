@@ -47,10 +47,15 @@ class CommonFileNameDoWhat(ModalScreen):
         self.query_one("#dialog").border_subtitle = self.border_subtitle
 
     def on_button_pressed(self, event: Button.Pressed) -> None:
-        self.dismiss({
-            "value": event.button.id,
-            "same_for_next": self.query_one(Switch).value,
-        })
+        match event.button.id:
+            case "overwrite":
+                self.action_overwrite()
+            case "rename":
+                self.action_rename()
+            case "skip":
+                self.action_skip()
+            case "cancel":
+                self.action_cancel()
 
     def on_key(self, event: events.Key) -> None:
         """Handle key presses."""

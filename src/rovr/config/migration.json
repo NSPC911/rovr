@@ -11,7 +11,7 @@
         "replace": "suspend_process"
       },
       {
-        "find": "keybinds.suspend_process",
+        "find": "keybinds.suspend_app",
         "replace": "keybinds.suspend_process"
       }
     ]
@@ -28,7 +28,7 @@
         "replace": "image_viewer.protocol"
       },
       {
-        "find": "interface.image_viewer.protocol",
+        "find": "interface.image_protocol",
         "replace": "interface.image_viewer.protocol"
       }
     ]

@@ -998,7 +998,6 @@ class ProcessContainer(VerticalScroll):
             event.stop()
             self.action_delete()
 
-    @work
-    async def action_delete(self) -> None:
-        await self.remove_children(".done")
-        await self.remove_children(".error")
+    def action_delete(self) -> None:
+        self.remove_children(".done")
+        self.remove_children(".error")

@@ -216,7 +216,7 @@ def threaded_get_cwd_object(
     node: DOMNode,
     cwd: str,
     show_hidden: bool = False,
-    sort_by: SortByOptions = "name",
+    sort_by: SortByOptions | None = "name",
     reverse: bool = False,
     return_nothing_if_this_returns_true: Callable[[], bool] | None = None,
 ) -> (

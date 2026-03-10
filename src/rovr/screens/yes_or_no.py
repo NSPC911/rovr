@@ -70,14 +70,16 @@ class YesOrNo(ModalScreen):
     def on_key(self, event: events.Key) -> None:
         """Handle key presses."""
         if check_key(event, config["keybinds"]["yes_or_no"]["yes"]):
-            event.stop()
             self.action_yes()
         elif check_key(event, config["keybinds"]["yes_or_no"]["no"]):
-            event.stop()
             self.action_no()
-        elif check_key(event, config["keybinds"]["yes_or_no"]["dont_ask_again"]):
-            event.stop()
+        elif self.with_toggle and check_key(
+            event, config["keybinds"]["yes_or_no"]["dont_ask_again"]
+        ):
             self.action_toggle_dont_ask_again()
+        else:
+            return
+        event.stop()
 
     def action_yes(self) -> None:
         self.dismiss(

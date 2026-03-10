@@ -54,7 +54,7 @@ class DeleteFiles(ModalScreen):
                 self.action_delete()
             case "cancel":
                 self.action_cancel()
-            case "trash":
+            case "trash" if config["settings"]["use_recycle_bin"]:
                 self.action_trash()
             case _:
                 return
@@ -73,7 +73,9 @@ class DeleteFiles(ModalScreen):
         elif check_key(event, config["keybinds"]["delete_files"]["cancel"]):
             event.stop()
             self.action_cancel()
-        elif check_key(event, config["keybinds"]["delete_files"]["trash"]):
+        elif config["settings"]["use_recycle_bin"] and check_key(
+            event, config["keybinds"]["delete_files"]["trash"]
+        ):
             event.stop()
             self.action_trash()
 

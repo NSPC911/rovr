@@ -995,9 +995,9 @@ class Application(App, inherit_bindings=False):
     async def action_tab_new(self) -> None:
         await self.query_one("NewTabButton").on_button_pressed()
 
-    def action_tab_close(self) -> None:
+    async def action_tab_close(self) -> None:
         if self.tabWidget.tab_count > 1:
-            self.tabWidget.remove_tab(self.tabWidget.active_tab)
+            await self.tabWidget.remove_tab(self.tabWidget.active_tab)
 
     def action_plugin_zoxide(self) -> None:
         if not config["plugins"]["zoxide"]["enabled"]:

@@ -38,7 +38,7 @@ class UnzipButton(Button):
 
         default_folder_name = archive_name.rsplit(".", 1)[0]
 
-        response: str = await self.app.push_screen(
+        response = await self.app.push_screen(
             ModalInput(
                 border_title="Extract Archive",
                 border_subtitle=f"Extract '{archive_name}' to a new folder:",
@@ -52,6 +52,8 @@ class UnzipButton(Button):
 
         if not response:
             return
+
+        response = str(response)
 
         destination_path = normalise(path.join(getcwd(), response))
 

@@ -43,7 +43,7 @@ class RenameItemButton(Button):
         elif len(selected_files) == 1:
             selected_file = selected_files[0]
             type_of_file = "Folder" if path.isdir(selected_file) else "File"
-            response: str = await self.app.push_screen(
+            response = await self.app.push_screen(
                 ModalInput(
                     border_title=f"Rename {type_of_file}",
                     border_subtitle=f"Current name: {path.basename(selected_file)}",
@@ -59,6 +59,7 @@ class RenameItemButton(Button):
             )
             if not response or response == path.basename(selected_file):
                 return
+            response = str(response)
             old_name = normalise(path.abspath(path.join(getcwd(), selected_file)))
             new_name = normalise(path.abspath(path.join(getcwd(), response)))
             if not path.exists(old_name):

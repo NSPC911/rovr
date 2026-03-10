@@ -104,17 +104,7 @@ class FileList(CheckboxRenderingMixin, SelectionList, inherit_bindings=False):
                 self.highlighted = clicked_option
         if event.button == 3 and not self.dummy:
             # Show right click menu
-            try:
-                rightclickoptionlist: FileListRightClickOptionList = self.app.query_one(
-                    FileListRightClickOptionList
-                )
-            except NoMatches:
-                # it happens, but I really cannot be bothered to figure it out
-                rightclickoptionlist = FileListRightClickOptionList(classes="hidden")
-                await self.app.mount(rightclickoptionlist)
-            rightclickoptionlist.remove_class("hidden")
-            rightclickoptionlist.update_location(event)
-            rightclickoptionlist.focus()
+            await self.action_open_right_click_menu(event)
             event.stop()
 
     @work(exclusive=True)
@@ -928,6 +918,34 @@ class FileList(CheckboxRenderingMixin, SelectionList, inherit_bindings=False):
                     markup=False,
                 )
 
+    async def action_open_right_click_menu(
+        self, event: events.Click | None = None
+    ) -> None:
+        # Show right click menu
+        try:
+            rightclickoptionlist: FileListRightClickOptionList = self.app.query_one(
+                FileListRightClickOptionList
+            )
+        except NoMatches:
+            # it happens, but I really cannot be bothered to figure it out
+            rightclickoptionlist = FileListRightClickOptionList(classes="hidden")
+            await self.app.mount(rightclickoptionlist)
+        rightclickoptionlist.remove_class("hidden")
+        if event is None:
+            event = events.Click(
+                self,
+                (self.app.size.width - 12) // 2,
+                (self.app.size.height - 8) // 2,
+                0,
+                0,
+                3,
+                False,
+                False,
+                False,
+            )
+        rightclickoptionlist.update_location(event)
+        rightclickoptionlist.focus()
+
 
 class FileListRightClickOptionList(PopupOptionList):
     def __init__(self, classes: str | None = None, id: str | None = None) -> None:
@@ -938,7 +956,7 @@ class FileListRightClickOptionList(PopupOptionList):
         )
 
     @on(events.Show)
-    async def on_show(self, event: events.Show) -> None:
+    async def on_show(self) -> None:
         self.set_options([
             Option(f" {icon_utils.get_icon('general', 'copy')[0]} Copy", id="copy"),
             Option(f" {icon_utils.get_icon('general', 'cut')[0]} Cut", id="cut"),

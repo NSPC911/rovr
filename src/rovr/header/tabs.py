@@ -1,7 +1,9 @@
+from asyncio import sleep
 from os import getcwd, path
+from typing import Callable
 
 from rich.style import Style
-from textual import on
+from textual import on, work
 from textual.app import ComposeResult, RenderResult
 from textual.await_complete import AwaitComplete
 from textual.containers import Container, Horizontal, Vertical
@@ -150,6 +152,76 @@ class Tabline(Tabs):
             has_selected=event.tab.session.selectMode,
             callback=callback,
         )
+
+    def _highlight_active(
+        self,
+        animate: bool = True,
+    ) -> None:
+        """Move the underline bar to under the active tab.
+
+        Args:
+            animate: Should the bar animate?
+        """
+        underline = self.query_one(Underline)
+        try:
+            _active_tab = self.query_one("#tabs-list > Tab.-active")
+        except NoMatches:
+            underline.show_highlight = False
+            underline.highlight_start = 0
+            underline.highlight_end = 0
+        else:
+            underline.show_highlight = True
+
+            def move_underline(animate: bool) -> None:
+                """Move the tab underline.
+
+                Args:
+                    animate: animate the underline to its new position.
+                """
+                try:
+                    active_tab = self.query_one("#tabs-list > Tab.-active")
+                except NoMatches:
+                    pass
+                else:
+                    tab_region = active_tab.virtual_region.shrink(
+                        active_tab.styles.gutter
+                    )
+                    start, end = tab_region.column_span
+                    if animate:
+                        underline.animate(
+                            "highlight_start",
+                            start,
+                            duration=0.3,
+                            level="basic",
+                        )
+                        underline.animate(
+                            "highlight_end",
+                            end,
+                            duration=0.3,
+                            level="basic",
+                        )
+                    else:
+                        underline.highlight_start = start
+                        underline.highlight_end = end
+
+            if animate and self.app.animation_level != "none":
+                self.run_after_time(
+                    0.02,
+                    lambda: self.call_after_refresh(move_underline, True),
+                )
+            else:
+                self.call_after_refresh(move_underline, False)
+
+    @work
+    async def run_after_time(self, delay: float, callback: Callable[[], None]) -> None:
+        """Run a callback after a delay.
+
+        Args:
+            delay: The delay to wait before running the callback.
+            callback: The callback to run after the delay.
+        """
+        await sleep(delay)
+        callback()
 
 
 class NewTabButton(Button):

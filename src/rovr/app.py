@@ -157,7 +157,14 @@ class Application(App, inherit_bindings=False):
 
     def compose(self) -> ComposeResult:
         self.log("Starting Rovr...")
-        with Vertical(id="root"):
+        root_classes = (
+            "compact-buttons"
+            if config["interface"]["compact_mode"]["buttons"]
+            else "comfy-buttons" + " compact-panels"
+            if config["interface"]["compact_mode"]["panels"]
+            else " comfy-panels"
+        )
+        with Vertical(id="root", classes=root_classes):
             header = HeaderArea()
             self.tabWidget = header.tabline
             yield header
@@ -204,17 +211,6 @@ class Application(App, inherit_bindings=False):
                 console.print(self.tree)
                 self.exit()
             return
-        # compact mode
-        self.query_one("#root").add_class(
-            "compact-buttons"
-            if config["interface"]["compact_mode"]["buttons"]
-            else "comfy-buttons"
-        )
-        self.query_one("#root").add_class(
-            "compact-panels"
-            if config["interface"]["compact_mode"]["panels"]
-            else "comfy-panels"
-        )
 
         # border titles
         self.query_one("#menu_wrapper").border_title = "Options"

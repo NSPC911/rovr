@@ -22,10 +22,10 @@ from textual.dom import DOMNode
 from textual.geometry import Size
 from textual.highlight import guess_language
 from textual.message import Message
-from textual.timer import Timer
 from textual.widget import Widget
 from textual.widgets import Static
 from textual.widgets.selection_list import Selection
+from textual.worker import NoActiveWorker, Worker, get_current_worker
 
 from rovr.classes.archive import Archive, BadArchiveError
 from rovr.classes.textual_options import (
@@ -141,7 +141,7 @@ class PreviewContainer(Container):
         self._mime_type: path_utils.MimeResult | None = None
         self._preview_texts: dict[str, str] = config["interface"]["preview_text"]
         self.pdf = PDFHandler()
-        self._loading_debounce_timer: Timer | None = None
+        self._loading_worker: Worker | None = None
 
     def compose(self) -> ComposeResult:
         yield Static(self._preview_texts["start"], classes="special")
@@ -154,19 +154,23 @@ class PreviewContainer(Container):
         """
         return LoadingPreview()
 
-    def on_preview_container_set_loading(self, event: SetLoading) -> None:
+    @work
+    async def on_preview_container_set_loading(self, event: SetLoading) -> None:
         if event.to:
-            if self._loading_debounce_timer is not None:
+            if self._loading_worker is not None:
                 # means that it keeps trying to set loading to true, so just
                 # let the timer run so it goes into loading like we want
                 return
-            self._loading_debounce_timer = self.set_timer(
-                0.2, lambda: self.set_loading(True)
-            )
+            try:
+                self._loading_worker = get_current_worker()
+            except NoActiveWorker:
+                raise RuntimeError(
+                    "SetLoading receiver must be a async worker (but it is not?)"
+                ) from None
         else:
-            if self._loading_debounce_timer is not None:
-                self._loading_debounce_timer.stop()
-                self._loading_debounce_timer = None
+            if self._loading_worker is not None:
+                self._loading_worker.cancel()
+                self._loading_worker = None
             self.set_loading(False)
 
     def has_child(self, selector: str) -> DOMNode | None:

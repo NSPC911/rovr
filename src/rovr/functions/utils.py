@@ -55,6 +55,9 @@ def set_nested_value(
         d (dict): The dictionary to modify.
         path_str (str): The dot-separated path to the key (e.g., "plugins.bat").
         value (Union[bool, str, int, float, list, dict]): The value to set.
+
+    Raises:
+        SystemExit: If the path is invalid or if there's a type mismatch when setting the value.
     """
     from rich import box
     from rich.panel import Panel
@@ -85,7 +88,7 @@ def set_nested_value(
                             expand=False,
                         )
                     )
-                    exit(1)
+                    raise SystemExit(1)
             except KeyError:
                 pprint(
                     Panel(
@@ -96,7 +99,7 @@ def set_nested_value(
                         expand=False,
                     )
                 )
-                exit(1)
+                raise SystemExit(1)
         else:
             if not isinstance(current.get(key), dict):
                 current[key] = {}

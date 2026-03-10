@@ -41,23 +41,22 @@ class ZipButton(Button):
         parent_folder_name = path.basename(getcwd())
         default_zip_name = f"{parent_folder_name}.zip"
 
-        response = cast(
-            ArchiveScreenReturnType,
-            await self.app.push_screen(
-                ArchiveCreationScreen(
-                    initial_value=default_zip_name,
-                    validators=[
-                        PathNoLongerExists(strict=False),
-                        IsValidFilePath(),
-                    ],
-                    is_path=True,
-                ),
-                wait_for_dismiss=True,
+        response = await self.app.push_screen(
+            ArchiveCreationScreen(
+                initial_value=default_zip_name,
+                validators=[
+                    PathNoLongerExists(strict=False),
+                    IsValidFilePath(),
+                ],
+                is_path=True,
             ),
+            wait_for_dismiss=True,
         )
 
         if not response:
             return
+
+        response = cast(ArchiveScreenReturnType, response)
 
         archive_name = normalise(path.join(getcwd(), response.path))
 

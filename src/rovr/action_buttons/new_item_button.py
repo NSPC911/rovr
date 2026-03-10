@@ -28,7 +28,7 @@ class NewItemButton(Button):
     async def on_button_pressed(self, event: Button.Pressed) -> None:
         if self.disabled:
             return
-        response: str = await self.app.push_screen(
+        response = await self.app.push_screen(
             ModalInput(
                 border_title="Create New Item",
                 border_subtitle="End with a slash (/) to create a directory",
@@ -39,6 +39,7 @@ class NewItemButton(Button):
         )
         if response == "":
             return
+        response = str(response)
         location = normalise(path.join(getcwd(), response)) + (
             "/" if response.endswith("/") or response.endswith("\\") else ""
         )

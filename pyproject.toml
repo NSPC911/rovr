@@ -57,7 +57,7 @@ dev = [
   "prek>=0.2.25",
   "ruff>=0.15.0",
   "textual-dev>=1.8.0",
-  "ty==0.0.8",
+  "ty==0.0.20",
   "pyinstrument>=5.1.2",
   "commitizen>=4.13.0",
 ]
@@ -74,7 +74,7 @@ test = [
 ]
 
 [build-system]
-requires = ["uv_build>=0.9.0,<0.10.0"]
+requires = ["uv_build==0.10.*"]
 build-backend = "uv_build"
 
 [tool.uv]

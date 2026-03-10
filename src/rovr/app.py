@@ -367,7 +367,7 @@ class Application(App, inherit_bindings=False):
         elif check_key(event, config["keybinds"]["tab_new"]):
             await self.action_tab_new()
         elif check_key(event, config["keybinds"]["tab_close"]):
-            self.action_tab_close()
+            await self.action_tab_close()
         elif check_key(event, config["keybinds"]["show_keybinds"]):
             self.action_show_keybinds()
         elif check_key(event, config["keybinds"]["show_shell_screen"]):

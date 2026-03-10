@@ -161,6 +161,7 @@ async def test_preview_bypass_folder(tmp_path: Path) -> None:
     async with app.run_test(size=(143, 37)) as pilot:
         await pilot.pause()
         assert app.file_list.highlighted == 0
+        await workers_finished(pilot, app.query_one("PreviewContainer"))
         app.query_one("PreviewContainer").query_one("FileList").highlighted = 0
         await pilot.pause()
         app.query_one("PreviewContainer").query_one("FileList").action_select()

@@ -5,7 +5,7 @@ from os import environ
 from shutil import which
 from typing import Literal, cast
 
-from textual.binding import Binding, BindingType
+from textual.binding import Binding
 
 from rovr.classes.config import RovrConfig
 from rovr.functions.config import load_config
@@ -87,7 +87,7 @@ class MaxPossible:
         return 26 if config["interface"]["use_reactive_layout"] else 70
 
 
-scroll_bindings: list[BindingType] = (
+scroll_bindings = (
     [
         Binding(bind, "scroll_down", "Scroll Down", show=False)
         for bind in config["keybinds"]["down"]
@@ -116,7 +116,7 @@ scroll_bindings: list[BindingType] = (
     ]
 )
 
-bindings: list[BindingType] = (
+bindings = (
     [
         Binding(bind, "cursor_down", "Down", show=False)
         for bind in config["keybinds"]["down"]

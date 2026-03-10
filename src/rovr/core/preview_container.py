@@ -134,12 +134,12 @@ class PreviewContainer(Container):
         super().__init__(id="preview_sidebar")
         self._pending_preview_path: str | None = None
         self._current_content: str | list[str] | None = None
-        self._current_file_path = None
+        self._current_file_path: str | None = None
         self._initial_height = self.size.height
         self._file_type: str = "none"
         self._file_mtime: float | None = None
         self._mime_type: path_utils.MimeResult | None = None
-        self._preview_texts: dict[str, str] = config["interface"]["preview_text"]
+        self._preview_texts = config["interface"]["preview_text"]
         self.pdf = PDFHandler()
         self._loading_worker: Worker | None = None
 
@@ -568,6 +568,7 @@ class PreviewContainer(Container):
         max_lines = self.size.height
         if max_lines > 0:
             command.append(f"--line-range=:{max_lines}")
+        assert self._current_file_path is not None
         command.extend(["--", self._current_file_path])
 
         if should_cancel():

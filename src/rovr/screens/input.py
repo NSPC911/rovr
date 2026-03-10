@@ -52,13 +52,10 @@ class ModalInput(ModalScreen, inherit_bindings=False):
                 value=self.initial_value,
                 valid_empty=False,
                 validators=self.validators,
-                # ty ignore because a list is iterable,
-                # but it is crashing out, because it thinks
-                # lists aren't iterable, weird
                 validate_on=[
                     "changed",
                     "submitted",
-                ],  # ty: ignore[invalid-argument-type]
+                ],
             )
 
     @work(exclusive=True)

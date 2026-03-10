@@ -75,7 +75,7 @@ class FileList(CheckboxRenderingMixin, SelectionList, inherit_bindings=False):
             An Option, or `None`.
         """
         if self.highlighted is not None:
-            return self.options[self.highlighted]  # ty: ignore[invalid-argument-type]
+            return self.options[self.highlighted]
         else:
             return None
 
@@ -150,7 +150,7 @@ class FileList(CheckboxRenderingMixin, SelectionList, inherit_bindings=False):
             # the watcher function)
             self.clear_options()
             return
-        self.file_list_pause_check = True  # ty: ignore[invalid-assignment]
+        self.file_list_pause_check = True
         name_to_index: dict[str, int] = {}
         if add_to_session:
             if session.historyIndex != len(session.directories) - 1:
@@ -307,7 +307,7 @@ class FileList(CheckboxRenderingMixin, SelectionList, inherit_bindings=False):
                     await self.toggle_mode()
                 self.update_border_subtitle()
         finally:
-            self.file_list_pause_check = False  # ty: ignore[invalid-assignment]
+            self.file_list_pause_check = False
             if callback:
                 callback()
 
@@ -829,7 +829,7 @@ class FileListRightClickOptionList(PopupOptionList):
         )
 
     @on(events.Show)
-    async def on_show(self, event: events.Show) -> None:
+    async def on_show(self, event: events.Show) -> None:  # ty: ignore[invalid-method-override]
         self.set_options([
             Option(f" {icon_utils.get_icon('general', 'copy')[0]} Copy", id="copy"),
             Option(f" {icon_utils.get_icon('general', 'cut')[0]} Cut", id="cut"),

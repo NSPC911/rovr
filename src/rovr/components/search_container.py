@@ -112,7 +112,7 @@ class SearchInput(Input):
                 )
                 assert self.items_list.parent is not None
                 set_scuffed_subtitle(
-                    self.items_list.parent,  # type: ignore[invalid-argument-type]
+                    self.items_list.parent,
                     "SELECT" if self.items_list.select_mode_enabled else "NORMAL",
                     "0/0",
                 )

@@ -89,7 +89,14 @@
               "type": "string",
               "default": "nearest",
               "description": "The resampling method to use when resizing images. This is only applicable when the image exceeds the maximum size specified in `max_size`.",
-              "enum": ["nearest", "lanczos", "bilinear", "bicubic", "box", "hamming"]
+              "enum": [
+                "nearest",
+                "lanczos",
+                "bilinear",
+                "bicubic",
+                "box",
+                "hamming"
+              ]
             }
           }
         },
@@ -445,7 +452,7 @@
         "preview": {
           "type": "string",
           "default": "nord",
-          "description":"The theme to use when previewing files in the preview sidebar.",
+          "description": "The theme to use when previewing files in the preview sidebar.",
           "enum": [
             "abap", "algol", "algol_nu", "arduino", "autumn",
             "bw", "borland",
@@ -568,6 +575,7 @@
     "keybinds": {
       "type": "object",
       "additionalProperties": false,
+      "deprecated": true,
       "properties": {
         "toggle_pin": {
           "$ref": "#/definitions/keybind",
@@ -1046,6 +1054,18 @@
               "display_name": "Don't ask me again"
             }
           }
+        }
+      }
+    },
+    "keys": {
+      "type": "object",
+      "description": "WIP key binding system. Section headers define widget selectors (e.g., app, screen, FileList, #preview_sidebar). Values are actions with optional state prefix.",
+      "additionalProperties": {
+        "type": "object",
+        "description": "Key bindings for a specific widget selector",
+        "additionalProperties": {
+          "type": "string",
+          "description": "Action name with optional extras.\nKeep in mind that these action targets must exist in the section header (like app, #file_list, etc)\nFormat: `([focused|blurred|focus-within]=[<selector>]:[<action>])`\nExamples:\n- `down`: Sends an action_down event to the target selector.\n- `focused=FileList:up`: Sends an action_up event to the target selector if FileList is currently highlighted.\n- `focus-within=PreviewSidebar:page_down`: Sends an action_page_down event to the target selector if it or any of PreviewSidebar's children are currently focused."
         }
       }
     },

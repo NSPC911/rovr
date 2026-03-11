@@ -17,6 +17,11 @@ class RovrConfig(TypedDict, total=False):
     theme: "_RovrConfigTheme"
     custom_theme: list["_RovrConfigCustomThemeItem"]
     keybinds: "_RovrConfigKeybinds"
+    r""" deprecated: True """
+
+    keys: dict[str, "_RovrConfigKeysAdditionalproperties"]
+    r""" New key binding system. Section headers define widget selectors (e.g., app, screen, FileList, #preview_sidebar). Values are actions with optional state prefix. """
+
     plugins: "_RovrConfigPlugins"
 
 
@@ -869,6 +874,8 @@ oO08 iIlL1 g9qCQG a@ 5sS
 
 
 class _RovrConfigKeybinds(TypedDict, total=False):
+    r"""deprecated: True"""
+
     toggle_pin: list[str]
     toggle_pinned_sidebar: list[str]
     toggle_preview_sidebar: list[str]
@@ -1017,6 +1024,24 @@ class _RovrConfigKeybindsYesOrNo(TypedDict, total=False):
     yes: list[str]
     no: list[str]
     dont_ask_again: list[str]
+
+
+_RovrConfigKeysAdditionalproperties = dict[
+    str, "_RovrConfigKeysAdditionalpropertiesAdditionalproperties"
+]
+r""" Key bindings for a specific widget selector """
+
+
+_RovrConfigKeysAdditionalpropertiesAdditionalproperties = str
+r"""
+Action name with optional extras.
+Keep in mind that these action targets must exist in the section header (like app, #file_list, etc)
+Format: `([focused|blurred|focus-within]=[<selector>]:[<action>])`
+Examples:
+- `down`: Sends an action_down event to the target selector.
+- `focused=FileList:up`: Sends an action_up event to the target selector if FileList is currently highlighted.
+- `focus-within=PreviewSidebar:page_down`: Sends an action_page_down event to the target selector if it or any of PreviewSidebar's children are currently focused.
+"""
 
 
 class _RovrConfigMetadata(TypedDict, total=False):

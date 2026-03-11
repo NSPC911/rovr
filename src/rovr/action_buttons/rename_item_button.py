@@ -29,7 +29,7 @@ class RenameItemButton(Button):
             self.tooltip = "Rename selected files"
 
     @work
-    async def on_button_pressed(self, event: Button.Pressed) -> None:
+    async def on_button_pressed(self) -> None:
         if self.disabled:
             return
         selected_files = await self.app.file_list.get_selected_objects()
@@ -57,7 +57,7 @@ class RenameItemButton(Button):
                 ),
                 wait_for_dismiss=True,
             )
-            if response in ["", path.basename(selected_file)]:
+            if not response or response == path.basename(selected_file):
                 return
             response = str(response)
             old_name = normalise(path.abspath(path.join(getcwd(), selected_file)))
@@ -67,6 +67,7 @@ class RenameItemButton(Button):
                     message=f"'{selected_file}' no longer exists.",
                     title="Rename",
                     severity="error",
+                    markup=False,
                 )
                 return
             elif old_name == new_name:
@@ -81,6 +82,7 @@ class RenameItemButton(Button):
                     f"Error renaming '{selected_file}' to '{response}': {exc}",
                     title="Rename",
                     severity="error",
+                    markup=False,
                 )
         else:
             # save highlighted file name
@@ -116,7 +118,7 @@ class RenameItemButton(Button):
                 bulk_editor = config["settings"]["editor"]["bulk_rename"]
 
                 def on_error(message: str, title: str) -> None:
-                    self.notify(message, title=title, severity="error")
+                    self.notify(message, title=title, severity="error", markup=False)
 
                 try:
                     run_editor_command(self.app, bulk_editor, temp_path, on_error)
@@ -125,6 +127,7 @@ class RenameItemButton(Button):
                         f"Editor '{bulk_editor}' not found. Check your config.",
                         title="Editor not found",
                         severity="error",
+                        markup=False,
                     )
                     return
                 except Exception as exc:
@@ -133,6 +136,7 @@ class RenameItemButton(Button):
                         f"{type(exc).__name__}: {exc}",
                         title="Error launching editor",
                         severity="error",
+                        markup=False,
                     )
                     return
 
@@ -174,6 +178,7 @@ class RenameItemButton(Button):
                                 f"Error renaming '{old}' to '{new}': {exc}",
                                 title="Rename",
                                 severity="error",
+                                markup=False,
                             )
                             dump_exc(self, exc)
                 else:
@@ -192,6 +197,7 @@ class RenameItemButton(Button):
                                 f"Error renaming '{old}' to '{new}': {exc}",
                                 title="Rename",
                                 severity="error",
+                                markup=False,
                             )
                             dump_exc(self, exc)
                 # highlighting purposes
@@ -208,6 +214,7 @@ class RenameItemButton(Button):
                         title="Bulk Rename",
                         severity="error",
                         timeout=ln(len(message_lines)) + 3,
+                        markup=False,
                     )
             finally:
                 with contextlib.suppress(OSError):

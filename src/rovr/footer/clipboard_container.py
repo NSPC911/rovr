@@ -139,27 +139,10 @@ class Clipboard(CheckboxRenderingMixin, SelectionList, inherit_bindings=False):
     async def on_key(self, event: events.Key) -> None:
         if self.has_focus:
             if event.key in config["keybinds"]["delete"]:
-                """Delete the selected files from the clipboard."""
-                if self.highlighted is None:
-                    self.notify(
-                        "No files selected to delete from the clipboard.",
-                        title="Clipboard",
-                        severity="warning",
-                    )
-                    return
-                try:
-                    self.remove_option_at_index(self.highlighted)
-                except (KeyError, OptionDoesNotExist) as exc:
-                    dump_exc(self, exc)
-                if self.option_count == 0:
-                    return
+                self.action_delete()
                 event.stop()
             elif event.key in config["keybinds"]["toggle_all"]:
-                """Select all items in the clipboard."""
-                if len(self.selected) == len(self.options):
-                    self.deselect_all()
-                else:
-                    self.select_all()
+                self.action_toggle_all()
                 event.stop()
 
     def _remove_option(self, option: ClipboardSelection) -> Self:  # ty: ignore[invalid-method-override]  # oh my god, will you please stfu
@@ -193,3 +176,24 @@ class Clipboard(CheckboxRenderingMixin, SelectionList, inherit_bindings=False):
     def checker_wrapper(self) -> None:
         if self._checker_worker is None or not self._checker_worker.is_running:
             self._checker_worker: Worker = self.check_clipboard_existence()
+
+    def action_delete(self) -> None:
+        """Delete the selected files from the clipboard."""
+        if self.highlighted is None:
+            self.notify(
+                "No files selected to delete from the clipboard.",
+                title="Clipboard",
+                severity="warning",
+            )
+            return
+        try:
+            self.remove_option_at_index(self.highlighted)
+        except (KeyError, OptionDoesNotExist) as exc:
+            dump_exc(self, exc)
+
+    def action_toggle_all(self) -> None:
+        """Select all items in the clipboard."""
+        if len(self.selected) == len(self.options):
+            self.deselect_all()
+        else:
+            self.select_all()

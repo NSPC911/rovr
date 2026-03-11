@@ -19,7 +19,7 @@ class DeleteButton(Button):
         if config["interface"]["tooltips"]:
             self.tooltip = "Delete selected files"
 
-    async def on_button_pressed(self, event: Button.Pressed) -> None:
+    async def on_button_pressed(self) -> None:
         """Delete selected files or directories"""
         if self.disabled:
             return

@@ -26,7 +26,7 @@ class ZipButton(Button):
             self.tooltip = "Compress selected files"
 
     @work
-    async def on_button_pressed(self, event: Button.Pressed) -> None:
+    async def on_button_pressed(self) -> None:
         if self.disabled:
             return
         selected_files = await self.app.file_list.get_selected_objects()

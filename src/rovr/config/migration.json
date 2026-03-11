@@ -1,18 +1,35 @@
 [
   {
+    "keys": ["keybinds.suspend_app"],
+    "message": [
+      "The [bright_cyan]keybinds.suspend_app[/] keybind has been renamed to [bright_blue]keybinds.suspend_process[/] because it suspends the process (in *nix terms)"
+    ],
+    "extra": "Renamed in v0.8.0",
+    "regex": [
+      {
+        "find": "keybinds.suspend_app",
+        "replace": "keybinds.suspend_process"
+      },
+      {
+        "find": "suspend_app",
+        "replace": "suspend_process"
+      }
+    ]
+  },
+  {
     "keys": ["interface.image_protocol"],
     "message": [
       "The [bright_cyan]interface.image_protocol[/] setting has been renamed to [bright_blue]interface.image_viewer.protocol[/] to be categorised into similar settings related to image previewing"
     ],
-    "extra": "Renamed in v0.7.0",
+    "extra": "Renamed in v0.8.0",
     "regex": [
-      {
-        "find": "image_protocol",
-        "replace": "image_viewer.protocol"
-      },
       {
         "find": "interface.image_protocol",
         "replace": "interface.image_viewer.protocol"
+      },
+      {
+        "find": "image_protocol",
+        "replace": "image_viewer.protocol"
       }
     ]
   },

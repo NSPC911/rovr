@@ -47,48 +47,63 @@ class CommonFileNameDoWhat(ModalScreen):
         self.query_one("#dialog").border_subtitle = self.border_subtitle
 
     def on_button_pressed(self, event: Button.Pressed) -> None:
-        self.dismiss({
-            "value": event.button.id,
-            "same_for_next": self.query_one(Switch).value,
-        })
+        match event.button.id:
+            case "overwrite":
+                self.action_overwrite()
+            case "rename":
+                self.action_rename()
+            case "skip":
+                self.action_skip()
+            case "cancel":
+                self.action_cancel()
 
     def on_key(self, event: events.Key) -> None:
         """Handle key presses."""
         if check_key(event, config["keybinds"]["filename_conflict"]["overwrite"]):
-            event.stop()
-            self.dismiss({
-                "value": "overwrite",
-                "same_for_next": self.query_one(Switch).value,
-            })
+            self.action_overwrite()
         elif check_key(event, config["keybinds"]["filename_conflict"]["rename"]):
-            event.stop()
-            self.dismiss({
-                "value": "rename",
-                "same_for_next": self.query_one(Switch).value,
-            })
+            self.action_rename()
         elif check_key(event, config["keybinds"]["filename_conflict"]["skip"]):
-            event.stop()
-            self.dismiss({
-                "value": "skip",
-                "same_for_next": self.query_one(Switch).value,
-            })
+            self.action_skip()
         elif check_key(event, config["keybinds"]["filename_conflict"]["cancel"]):
-            event.stop()
-            self.dismiss({
-                "value": "cancel",
-                "same_for_next": self.query_one(Switch).value,
-            })
+            self.action_cancel()
         elif check_key(
             event, config["keybinds"]["filename_conflict"]["dont_ask_again"]
         ):
-            event.stop()
-            self.query_one(Switch).action_toggle_switch()
+            self.action_dont_ask_again()
+        else:
+            return
+        event.stop()
 
     def on_click(self, event: events.Click) -> None:
         if event.widget is self:
             # ie click outside
             event.stop()
-            self.dismiss({
-                "value": "cancel",
-                "same_for_next": self.query_one(Switch).value,
-            })
+            self.action_cancel()
+
+    def action_overwrite(self) -> None:
+        self.dismiss({
+            "value": "overwrite",
+            "same_for_next": self.query_one(Switch).value,
+        })
+
+    def action_rename(self) -> None:
+        self.dismiss({
+            "value": "rename",
+            "same_for_next": self.query_one(Switch).value,
+        })
+
+    def action_skip(self) -> None:
+        self.dismiss({
+            "value": "skip",
+            "same_for_next": self.query_one(Switch).value,
+        })
+
+    def action_cancel(self) -> None:
+        self.dismiss({
+            "value": "cancel",
+            "same_for_next": self.query_one(Switch).value,
+        })
+
+    def action_dont_ask_again(self) -> None:
+        self.query_one(Switch).action_toggle_switch()

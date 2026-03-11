@@ -174,5 +174,6 @@ class PathInput(Input):
 
     def on_key(self, event: events.Key) -> None:
         if event.key == "backspace":
+            # might be used for back history, so force the behaviour
             event.stop()
             self.action_delete_left()

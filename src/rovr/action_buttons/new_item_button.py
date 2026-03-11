@@ -25,7 +25,7 @@ class NewItemButton(Button):
             self.tooltip = "Create a new file or directory"
 
     @work
-    async def on_button_pressed(self, event: Button.Pressed) -> None:
+    async def on_button_pressed(self) -> None:
         if self.disabled:
             return
         response = await self.app.push_screen(
@@ -37,7 +37,7 @@ class NewItemButton(Button):
             ),
             wait_for_dismiss=True,
         )
-        if response == "":
+        if not response:
             return
         response = str(response)
         location = normalise(path.join(getcwd(), response)) + (
@@ -46,8 +46,11 @@ class NewItemButton(Button):
         if location.endswith("/"):
             # recursive directory creation
             try:
-                makedirs(location)
-            except Exception as e:
+                worker = self.app.run_in_thread(makedirs, location)
+                await worker.wait()
+                if isinstance(worker.result, Exception):
+                    raise worker.result
+            except Exception as exc:
                 self.notify(
                     # i had to force a cast, i didn't have any other choice
                     # notify supports non-string objects, but ty wasn't taking
@@ -55,24 +58,31 @@ class NewItemButton(Button):
                     message=cast(
                         str,
                         Content(
-                            f"Error creating directory '{response}'\n{type(e).__name__}: {e}"
+                            f"Error creating directory '{response}'\n{type(exc).__name__}: {exc}"
                         ),
                     ),
                     title="New Item",
                     severity="error",
+                    markup=False,
                 )
         elif len(location.split("/")) > 1:
             # recursive directory until file creation
             location_parts = location.split("/")
             dir_path = "/".join(location_parts[:-1])
             try:
-                makedirs(dir_path)
+                worker = self.app.run_in_thread(makedirs, dir_path)
+                await worker.wait()
+                if isinstance(worker.result, Exception):
+                    raise worker.result
+                # performance wise shouldn't be that bad, unless
+                # the file is being created in a directory with a very long path
+                # or some weird voodoo stuff happens, idk
                 with open(location, "w") as f:
                     f.write("")  # Create an empty file
             except FileExistsError:
                 with open(location, "w") as f:
                     f.write("")
-            except Exception as e:
+            except Exception as exc:
                 # i had to force a cast, i didn't have any other choice
                 # notify supports non-string objects, but ty wasn't taking
                 # any of it, so i had to cast it
@@ -80,27 +90,24 @@ class NewItemButton(Button):
                     message=cast(
                         str,
                         Content(
-                            f"Error creating file '{response}'\n{type(e).__name__}: {e}"
+                            f"Error creating file '{response}'\n{type(exc).__name__}: {exc}"
                         ),
                     ),
                     title="New Item",
                     severity="error",
+                    markup=False,
                 )
         else:
             # normal file creation I hope
             try:
                 with open(location, "w") as f:
                     f.write("")  # Create an empty file
-            except Exception as e:
+            except Exception as exc:
                 self.notify(
-                    message=cast(
-                        str,
-                        Content(
-                            f"Error creating file '{response}'\n{type(e).__name__}: {e}"
-                        ),
-                    ),
+                    message=f"Error creating file '{response}'\n{type(exc).__name__}: {exc}",
                     title="New Item",
                     severity="error",
+                    markup=False,
                 )
         try:
             self.app.file_list.file_list_pause_check = True

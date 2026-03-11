@@ -6,7 +6,7 @@ from functools import partial
 from io import BytesIO
 from os import path
 from time import time
-from typing import cast
+from typing import Literal, cast
 
 import textual_image.widget
 from PIL import Image, ImageDraw, ImageFont, UnidentifiedImageError
@@ -173,14 +173,15 @@ class PreviewContainer(Container):
                 self._loading_worker = None
             self.set_loading(False)
 
-    def has_child(self, selector: str) -> DOMNode | None:
+    def get_child(self, selector: str | type[DOMNode]) -> DOMNode | None:
         """
-        Check for whether this element contains this selector or not
+        Check for whether this element contains this selector and return the element if it does.
         Args:
             selector(str): the selector to test
 
         Returns:
-            bool: whether the selector is valid
+            DOMNode: the element if it exists
+            None: if it doesn't exist
         """
         try:
             return self.query_one(selector)
@@ -263,7 +264,7 @@ class PreviewContainer(Container):
             return
 
         try:
-            if image_widget := self.has_child(".image_preview"):
+            if image_widget := self.get_child(".image_preview"):
                 self.app.call_from_thread(setattr, image_widget, "image", img)
             else:
                 self.app.call_from_thread(self.remove_children)
@@ -306,7 +307,7 @@ class PreviewContainer(Container):
             if should_cancel():
                 return
 
-            if image_widget := self.has_child(".image_preview"):
+            if image_widget := self.get_child(".image_preview"):
                 self.app.call_from_thread(setattr, image_widget, "image", pil_object)
             else:
                 self.app.call_from_thread(self.remove_children)
@@ -343,7 +344,7 @@ class PreviewContainer(Container):
             return
         self.app.call_from_thread(setattr, self, "border_title", titles.svg)
 
-    def show_image_preview(self, depth: int = 0) -> None:
+    def show_image_preview(self) -> None:
         """Show image preview. Runs in a thread."""
         if should_cancel() or self._current_file_path is None:
             return
@@ -378,7 +379,7 @@ class PreviewContainer(Container):
             )
             return
 
-        if image_widget := self.has_child(".image_preview"):
+        if image_widget := self.get_child(".image_preview"):
             if should_cancel():
                 return
             self.app.call_from_thread(setattr, image_widget, "image", pil_object)
@@ -443,7 +444,7 @@ class PreviewContainer(Container):
         # Resample images once when loaded for better performance
         return preview_utils.resample_batch(result)
 
-    def show_pdf_preview(self, depth: int = 0) -> None:
+    def show_pdf_preview(self) -> None:
         """
         Show PDF preview. Runs in a thread.
         The job of this function is to load the pdf file for the first time.
@@ -503,6 +504,8 @@ class PreviewContainer(Container):
             except Exception as exc:
                 if should_cancel():
                     return
+                if toggle_loading:
+                    self.call_later(lambda: self.post_message(self.SetLoading(False)))
                 self.app.call_from_thread(self.remove_children)
                 self.app.call_from_thread(
                     self.mount,
@@ -532,7 +535,7 @@ class PreviewContainer(Container):
 
         current_image = self.pdf.images[self.pdf.current_page]
 
-        if image_widget := self.has_child(".image_preview"):
+        if image_widget := self.get_child(".image_preview"):
             if should_cancel():
                 return
             self.app.call_from_thread(setattr, image_widget, "image", current_image)
@@ -593,7 +596,7 @@ class PreviewContainer(Container):
                 if should_cancel():
                     return False
 
-                if static_widget := self.has_child("Static"):
+                if static_widget := self.get_child("Static"):
                     self.log("Using existing Static")
                     self.app.call_from_thread(static_widget.update, new_content)
                     self.app.call_from_thread(static_widget.set_classes, "bat_preview")
@@ -697,7 +700,7 @@ class PreviewContainer(Container):
         if should_cancel():
             return
 
-        if static_widget := self.has_child("Static"):
+        if static_widget := self.get_child("Static"):
             self.app.call_from_thread(static_widget.update, syntax)
         else:
             self.app.call_from_thread(self.remove_children)
@@ -716,7 +719,7 @@ class PreviewContainer(Container):
             return
         self.app.call_from_thread(setattr, self, "border_title", titles.folder)
 
-        if not (this_list := self.has_child("FileList")):
+        if not (this_list := self.get_child("FileList")):
             self.app.call_from_thread(self.remove_children)
 
             if should_cancel():
@@ -810,7 +813,7 @@ class PreviewContainer(Container):
             return
         self.app.call_from_thread(setattr, self, "border_title", titles.archive)
 
-        if not (file_list := self.has_child("FileList")):
+        if not (file_list := self.get_child("FileList")):
             self.app.call_from_thread(self.remove_children)
 
             if should_cancel():
@@ -1019,6 +1022,7 @@ class PreviewContainer(Container):
             self.notify(
                 f"{type(exc).__name__} was raised while generating the preview",
                 severity="error",
+                markup=False,
             )
             path_utils.dump_exc(self, exc)
 
@@ -1096,7 +1100,7 @@ class PreviewContainer(Container):
                 except (subprocess.SubprocessError, FileNotFoundError) as exc:
                     path_utils.dump_exc(self, exc)
 
-        if static_widget := self.has_child("Static"):
+        if static_widget := self.get_child("Static"):
             self.app.call_from_thread(static_widget.update, display_content)
             self.app.call_from_thread(static_widget.set_classes, "special")
         else:
@@ -1139,7 +1143,7 @@ class PreviewContainer(Container):
     # resolve that
     # def on_resize(self, event: events.Resize) -> None:
     #     """Re-render the preview on resize"""
-    #     if self.has_child("Static") and event.size.height != self._initial_height:
+    #     if self.get_child("Static") and event.size.height != self._initial_height:
     #         if self._current_content is not None:
     #             is_special_content = self._current_content in self._preview_texts.values()
     #             if not is_special_content:
@@ -1153,58 +1157,92 @@ class PreviewContainer(Container):
             return
         self.show_normal_file_preview()
 
-    def on_key(self, event: events.Key) -> None:
-        """Check for vim keybinds."""
-        from rovr.functions.utils import check_key
-
-        # Handle PDF page navigation
-        if (
-            self.border_title == titles.pdf
-            and self._file_type == "pdf"
-            and self.pdf.images is not None
-        ):
-            if check_key(
-                event, config["keybinds"]["down"] + config["keybinds"]["page_down"]
-            ):
-                event.stop()
-                self.update_current_pdf_page_by_diff(1)
-            elif check_key(
-                event, config["keybinds"]["up"] + config["keybinds"]["page_up"]
-            ):
-                self.update_current_pdf_page_by_diff(-1)
-            elif check_key(event, config["keybinds"]["home"]):
-                event.stop()
-                self.update_current_pdf_page(0)
-
-            elif check_key(event, config["keybinds"]["end"]):
-                event.stop()
-                self.update_current_pdf_page(self.pdf.total_pages - 1)
-            else:
-                return
-        elif self.border_title == titles.archive:
-            widget: FileList = self.query_one(FileList)
-            if check_key(event, config["keybinds"]["up"]):
-                event.stop()
-                widget.scroll_up(animate=False)
-            elif check_key(event, config["keybinds"]["down"]):
-                event.stop()
-                widget.scroll_down(animate=False)
-            elif check_key(event, config["keybinds"]["page_up"]):
-                event.stop()
-                widget.scroll_page_up(animate=False)
-            elif check_key(event, config["keybinds"]["page_down"]):
-                event.stop()
-                widget.scroll_page_down(animate=False)
-            elif check_key(event, config["keybinds"]["home"]):
-                event.stop()
-                widget.scroll_home(animate=False)
-            elif check_key(event, config["keybinds"]["end"]):
-                event.stop()
-                widget.scroll_end(animate=False)
-
     @on(events.Show)
-    async def when_become_visible(self, event: events.Show) -> None:
+    async def when_become_visible(self) -> None:
         if isinstance(self._pending_preview_path, str):
             pending = self._pending_preview_path
             self._pending_preview_path = None
             await self.show_preview(pending)
+
+    def on_key(self, event: events.Key) -> None:
+        """Check for vim keybinds."""
+        from rovr.functions.utils import check_key
+
+        if (
+            check_key(event, config["keybinds"]["up"])
+            and self.action_up() is None
+            or check_key(event, config["keybinds"]["down"])
+            and self.action_down() is None
+            or check_key(event, config["keybinds"]["page_up"])
+            and self.action_page_up() is None
+            or check_key(event, config["keybinds"]["page_down"])
+            and self.action_page_down() is None
+            or check_key(event, config["keybinds"]["home"])
+            and self.action_home() is None
+            or check_key(event, config["keybinds"]["end"])
+            and self.action_end() is None
+        ):
+            event.stop()
+
+    def _is_pdf(self) -> bool:
+        return self.border_title == titles.pdf and self._file_type == "pdf"
+
+    def action_up(self) -> Literal[False] | None:
+        if self._is_pdf() and self.pdf.images is not None:
+            self.update_current_pdf_page_by_diff(-1)
+        elif self.border_title == titles.archive and (
+            filelist := self.get_child(FileList)
+        ):
+            filelist.scroll_up(animate=False)
+        else:
+            return False
+
+    def action_down(self) -> Literal[False] | None:
+        if self._is_pdf() and self.pdf.images is not None:
+            self.update_current_pdf_page_by_diff(1)
+        elif self.border_title == titles.archive and (
+            filelist := self.get_child(FileList)
+        ):
+            filelist.scroll_down(animate=False)
+        else:
+            return False
+
+    def action_page_up(self) -> Literal[False] | None:  # ty: ignore[invalid-method-override]
+        if self._is_pdf() and self.pdf.images is not None:
+            self.update_current_pdf_page_by_diff(-1)
+        elif self.border_title == titles.archive and (
+            filelist := self.get_child(FileList)
+        ):
+            filelist.scroll_page_up(animate=False)
+        else:
+            return False
+
+    def action_page_down(self) -> Literal[False] | None:  # ty: ignore[invalid-method-override]
+        if self._is_pdf() and self.pdf.images is not None:
+            self.update_current_pdf_page_by_diff(1)
+        elif self.border_title == titles.archive and (
+            filelist := self.get_child(FileList)
+        ):
+            filelist.scroll_page_down(animate=False)
+        else:
+            return False
+
+    def action_home(self) -> Literal[False] | None:
+        if self._is_pdf() and self.pdf.images is not None:
+            self.update_current_pdf_page(0)
+        elif self.border_title == titles.archive and (
+            filelist := self.get_child(FileList)
+        ):
+            filelist.scroll_home(animate=False)
+        else:
+            return False
+
+    def action_end(self) -> Literal[False] | None:
+        if self._is_pdf() and self.pdf.images is not None:
+            self.update_current_pdf_page(self.pdf.total_pages - 1)
+        elif self.border_title == titles.archive and (
+            filelist := self.get_child(FileList)
+        ):
+            filelist.scroll_end(animate=False)
+        else:
+            return False

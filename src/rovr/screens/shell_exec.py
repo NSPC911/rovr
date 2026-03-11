@@ -25,16 +25,17 @@ class ShellExec(ModalInput):
         self.horizontal_group.classes = self.mode
 
     def on_key(self, event: events.Key) -> None:
-        if event.key == "escape":
-            event.stop()
-            self.dismiss(None)
-        elif event.key in ("tab", "shift+tab"):  # cycle through modes
-            event.stop()
-            modes = list(mode_to_subtitle.keys())
-            to_index = modes.index(self.mode) + (1 if event.key == "tab" else -1)
-            self.mode = modes[(to_index) % len(modes)]  # ty: ignore[invalid-assignment]
-            self.horizontal_group.border_subtitle = mode_to_subtitle[self.mode]
-            self.horizontal_group.classes = self.mode
+        match event.key:
+            case "escape":
+                event.stop()
+                self.action_dismiss(None)
+            case "tab":
+                self.action_cycle_mode_forward()
+            case "shift+tab":
+                self.action_cycle_mode_backward()
+            case _:
+                return
+        event.stop()
 
     def on_click(self, event: events.Click) -> None:
         if event.widget is self:
@@ -45,3 +46,17 @@ class ShellExec(ModalInput):
     @work
     async def on_input_submitted(self, event: Input.Submitted) -> None:
         self.dismiss(ShellExecReturnType(command=event.input.value, mode=self.mode))
+
+    def action_cycle_mode_forward(self) -> None:
+        modes = list(mode_to_subtitle.keys())
+        to_index = modes.index(self.mode) + 1
+        self.mode = modes[to_index % len(modes)]  # type: ignore[assignment]
+        self.horizontal_group.border_subtitle = mode_to_subtitle[self.mode]
+        self.horizontal_group.classes = self.mode
+
+    def action_cycle_mode_backward(self) -> None:
+        modes = list(mode_to_subtitle.keys())
+        to_index = modes.index(self.mode) - 1
+        self.mode = modes[to_index % len(modes)]  # type: ignore[assignment]
+        self.horizontal_group.border_subtitle = mode_to_subtitle[self.mode]
+        self.horizontal_group.classes = self.mode

@@ -12,7 +12,7 @@ from fastjsonschema import JsonSchemaValueException
 from rich import box
 from rich.console import Console
 
-from rovr.classes.config import RovrConfig
+from rovr.classes.config import RovrConfig, _RovrConfigKeysAdditionalproperties
 from rovr.functions.utils import deep_merge
 from rovr.variables.maps import (
     VAR_TO_DIR,
@@ -306,6 +306,77 @@ def schema_dump(
         exit(1)
 
 
+def check_keys(
+    config: dict[str, _RovrConfigKeysAdditionalproperties], config_path: str
+) -> None:
+    """
+    Check for keys format
+    Args:
+        config (dict): the config to check
+         config_path (str): the path to the config file, for error reporting
+    """
+    for key, value in config.items():
+        if isinstance(value, dict):
+            for value in value.values():
+                # parse the value for selectors
+                # allowed format is ([focused|blurred|focus-within]=[<selector>]:[<action>])
+                # so if any state appears, it must be followed by an = and a selector, and then a : and an action
+                # action is compulsory, but state and selector are optional, but mutually dependent
+                parts: list[str]
+                if ":" in value:
+                    parts = value.split(":")
+                    # check for state and/or selector
+                    if "=" in parts[0]:
+                        parts: list[str] = parts[0].split("=") + [parts[1]]
+                        if parts[0] not in ("focused", "blurred", "focus-within"):
+                            from pathlib import Path
+
+                            schema_dump(
+                                config_path,
+                                JsonSchemaValueException(
+                                    f"Invalid target state [dim]{parts[0]}[/]. Allowed states are focused, blurred, and focus-within.",
+                                    rule="pattern",
+                                    name=f"keys.{key}",
+                                    value=value,
+                                ),
+                                Path(config_path).read_text(encoding="utf-8")
+                                if config_path
+                                else "",
+                            )
+                    elif len(parts) == 2:
+                        from pathlib import Path
+
+                        schema_dump(
+                            config_path,
+                            JsonSchemaValueException(
+                                "Both state and selector must be present while checking for widget state.",
+                                rule="pattern",
+                                name=f"keys.{key}",
+                                value=value,
+                            ),
+                            Path(config_path).read_text(encoding="utf-8")
+                            if config_path
+                            else "",
+                        )
+                else:
+                    parts = [value]
+                if parts[-1].startswith("actions_"):
+                    from pathlib import Path
+
+                    schema_dump(
+                        config_path,
+                        JsonSchemaValueException(
+                            "Keybinds must not start with [dim]actions_[/]; it is automatically handled",
+                            rule="keys_format",
+                            name=f"keys.{key}",
+                            value=value,
+                        ),
+                        Path(config_path).read_text(encoding="utf-8")
+                        if config_path
+                        else "",
+                    )
+
+
 def load_config() -> tuple[dict, RovrConfig]:
     """
     Load both the template config and the user config
@@ -374,6 +445,10 @@ def load_config() -> tuple[dict, RovrConfig]:
             "        [red]I will refuse to launch as long as the template config is invalid.[/]"
         )
         exit(1)
+    check_keys(
+        template_config["keys"],
+        path.join(path.dirname(__file__), "../config/config.toml"),
+    )
     user_config = {}
     user_config_content = ""
     if path.exists(user_config_path):
@@ -391,6 +466,8 @@ def load_config() -> tuple[dict, RovrConfig]:
         schema(config)
     except JsonSchemaValueException as exception:
         schema_dump(user_config_path, exception, user_config_content)
+
+    check_keys(config["keys"], user_config_path)
 
     # slight config fixes
     # image protocol because "AutoImage" doesn't work with Sixel

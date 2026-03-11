@@ -33,7 +33,7 @@ jobs:
         run: uv sync --all-groups --no-group build
 
       - name: Run ty
-        run: uv run ty check || (echo "::error::Type checking failed! Please fix type errors before committing." && exit 1)
+        run: uv run ty check
 
       - name: Run ruff format if needed (main repo)
         if: github.repository == env.MAIN_REPO && (github.event_name != 'pull_request' || github.event.pull_request.head.repo.fork == false)
@@ -94,8 +94,42 @@ jobs:
         run: uv sync --all-groups --no-group build
 
       - name: Run ty
+        id: ty_check
         run: uv run ty check || (echo "::error::Type checking failed! Please fix type errors before committing." && exit 1)
+
+      - name: Alert if ty fails
+        if: failure() && steps.ty_check.outcome == 'failure'
+        uses: sarisia/actions-status-discord@v1.13.0
+        with:
+          webhook: ${{ secrets.LOG_HOOK }}
+          title: rovr ty check failed!
+          status: failure
+          description: |
+            <:wazowski:1308074746772062248> Type checking failed on branch `${{ github.ref_name }}` (due to `${{ github.event_name }}`)
+            Check the workflow [details](https://github.com/NSPC911/rovr/actions/runs/${{ github.run_id }}) for more info.
+          avatar_url: "https://avatars.githubusercontent.com/u/176916861?v=4"
+          username: "NSPBot911"
+          nodetail: true
+          notimestamp: true
+          noprefix: true
 
       # If on a fork, only check and fail if there are issues (no fixes/commits)
       - name: Run ruff
+        id: ruff_check
         uses: astral-sh/ruff-action@v3
+
+      - name: Alert if ruff fails
+        if: failure() && steps.ruff_check.outcome == 'failure'
+        uses: sarisia/actions-status-discord@v1.13.0
+        with:
+          webhook: ${{ secrets.LOG_HOOK }}
+          title: rovr ruff check failed!
+          status: failure
+          description: |
+            <:wazowski:1308074746772062248> Code formatting/linting failed on branch `${{ github.ref_name }}` (due to `${{ github.event_name }}`)
+            Check the workflow [details](https://github.com/NSPC911/rovr/actions/runs/${{ github.run_id }}) for more info.
+          avatar_url: "https://avatars.githubusercontent.com/u/176916861?v=4"
+          username: "NSPBot911"
+          nodetail: true
+          notimestamp: true
+          noprefix: true

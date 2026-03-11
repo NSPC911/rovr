@@ -75,7 +75,7 @@ class FileList(CheckboxRenderingMixin, SelectionList, inherit_bindings=False):
             An Option, or `None`.
         """
         if self.highlighted is not None:
-            return self.options[self.highlighted]  # ty: ignore[invalid-argument-type]
+            return self.options[self.highlighted]
         else:
             return None
 
@@ -140,8 +140,13 @@ class FileList(CheckboxRenderingMixin, SelectionList, inherit_bindings=False):
             # the watcher function)
             self.clear_options()
             return
-        self.file_list_pause_check = True  # ty: ignore[invalid-assignment]
+        self.file_list_pause_check = True
         name_to_index: dict[str, int] = {}
+        if add_to_session:
+            if session.historyIndex != len(session.directories) - 1:
+                session.directories = session.directories[: session.historyIndex + 1]
+            session.directories.append(cwd)
+            session.historyIndex = len(session.directories) - 1
         try:
             preview = self.app.query_one("PreviewContainer")
 
@@ -243,11 +248,6 @@ class FileList(CheckboxRenderingMixin, SelectionList, inherit_bindings=False):
                 "" if cwd.endswith("/") else "/"
             )
             if add_to_session:
-                if session.historyIndex != len(session.directories) - 1:
-                    session.directories = session.directories[
-                        : session.historyIndex + 1
-                    ]
-                session.directories.append(cwd)
                 if session.lastHighlighted.get(cwd) is None and isinstance(
                     self.list_of_options[0], FileListSelectionWidget
                 ):
@@ -256,7 +256,6 @@ class FileList(CheckboxRenderingMixin, SelectionList, inherit_bindings=False):
                         "name": self.list_of_options[0].dir_entry.name,
                         "index": 0,
                     }
-                session.historyIndex = len(session.directories) - 1
             elif session.directories == []:
                 session.directories = [path_utils.normalise(getcwd())]
             self.app.query_one("Button#back").disabled = session.historyIndex <= 0
@@ -298,7 +297,7 @@ class FileList(CheckboxRenderingMixin, SelectionList, inherit_bindings=False):
                     await self.toggle_mode()
                 self.update_border_subtitle()
         finally:
-            self.file_list_pause_check = False  # ty: ignore[invalid-assignment]
+            self.file_list_pause_check = False
             if callback:
                 callback()
 

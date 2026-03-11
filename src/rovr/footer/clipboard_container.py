@@ -28,7 +28,7 @@ class Clipboard(CheckboxRenderingMixin, SelectionList, inherit_bindings=False):
         self._options: list[ClipboardSelection] = []
 
     def on_mount(self) -> None:
-        self.paste_button: Button = self.app.query_one("#paste")
+        self.paste_button: Button = self.app.query_one("#paste", Button)
         self.paste_button.disabled = True
         self.set_interval(
             5, self.checker_wrapper, name="Check existence of clipboard items"

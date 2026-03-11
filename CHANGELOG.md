@@ -5,10 +5,10 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
+## [0.8.0.dev2]
 
 ### Notable
-- feat(`preview`): add font previewing support 0d4aec5
+- feat(`preview`): add font previewing support 0d4aec5 49fbb93
 - feat(`mimetype`): update puremagic + use regex for matching 92a709b
 - feat(`mime`): check different encodings for mimetype detection c6d61d4
 - fix(`cli`): silence textual-image warnings c9d3865
@@ -38,7 +38,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `config`: actually point to the error line in the config file 0733791
 - `config`: don't create config directory until necessary 69afa5e
 - `file(1)`: use the actual executable and not depend on path
-- `filelist`: previously saved stuff should be saved again
+- `filelist`: add to session before creating options 447845f
+- `filelist`: previously saved stuff should be saved again 2a14985
+- `firstlaunch`: use proper path for config dumper 53baee7
 - `footer`: make children use one wide scrollbar 697a686
 - `folder_prefs_utils`: ensure config directory exists e9a982a
 - `macos-clipboard`: replace clippy with ctypes (absolute chaos) 8f4c83c
@@ -46,16 +48,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `pdf`: use future annotations to prevent crash faf9f06
 - `pinned_sidebar`: fix typo + create config dir if not found 37a944c
 - `preview`: dont save lookup error thing 1a6d984
-- `preview`: fix issues where normal file preview simply fails 9337468 e5a5629
+- `preview`: fix issues where normal file preview simply fails 9337468 e5a5629 49f3456
 - `preview`: force set enter_into to bypass selected folders in the preview 34317f2
 - `preview`: wrap errors d5c51c1
 - `utils`: make editor query shutil.which before running dfa4691
 - `windows-clipboard`: use proper property for return code 59fdc5d
 
 ### Performance
+- `app+pins`?: improve startup 92ebc91
 - `filelist`?: use dict and convert to set for faster lookups? d120056
 - `preview`: debounce the loading state a119744 2d4cb70
 - `preview`: move image loading into separate Process #226
+- `preview`: try to not use threads (locks suck) f5bbf65
 
 ### Refactor
 - `preview`: directly use `has_child` instead of re-checking children again 7ecaf73
@@ -320,6 +324,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `style`: fix image and option padding/styling
 
 [Unreleased]: https://github.com/NSPC911/rovr/compare/v0.8.0.dev1...HEAD
+[0.8.0.dev2]: https://github.com/NSPC911/rovr/compare/v0.8.0.dev1...v0.8.0.dev2
 [0.8.0.dev1]: https://github.com/NSPC911/rovr/compare/v0.7.0...v0.8.0.dev1
 [0.7.0]: https://github.com/NSPC911/rovr/compare/v0.7.0.dev3...v0.7.0
 [0.7.0.dev3]: https://github.com/NSPC911/rovr/compare/v0.7.0.dev2...v0.7.0.dev3

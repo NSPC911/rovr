@@ -9,7 +9,7 @@ from rovr.functions.utils import check_key
 from rovr.variables.constants import config
 
 
-class ModalSearchScreen(ModalScreen):
+class ModalSearchScreen(ModalScreen, inherit_bindings=False):
     """Base class for search-as-you-type modal screens."""
 
     def on_mount(self) -> None:
@@ -51,8 +51,8 @@ class ModalSearchScreen(ModalScreen):
         if not isinstance(event.option, ModalSearcherOption):
             self.dismiss(None)
             return
-        selected_value = event.option.file_path
-        if selected_value and not event.option.disabled:
+        selected_value: str | None = event.option.file_path
+        if isinstance(selected_value, str) and not event.option.disabled:
             self.dismiss(selected_value)
         else:
             self.dismiss(None)

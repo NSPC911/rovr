@@ -955,7 +955,7 @@ class FileListRightClickOptionList(PopupOptionList):
         )
 
     @on(events.Show)
-    async def on_show(self) -> None:
+    async def on_show(self) -> None:  # ty: ignore[invalid-method-override]
         self.set_options([
             Option(f" {icon_utils.get_icon('general', 'copy')[0]} Copy", id="copy"),
             Option(f" {icon_utils.get_icon('general', 'cut')[0]} Cut", id="cut"),

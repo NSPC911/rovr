@@ -276,43 +276,46 @@ description: config schema humanified
       - [7.63.2.1. Rovr Config > keybinds > toggle_pin > toggle_pin items](#keybinds_toggle_pin_items)
     - [7.63.3. Property `Rovr Config > keybinds > yes_or_no > dont_ask_again`](#keybinds_yes_or_no_dont_ask_again)
       - [7.63.3.1. Rovr Config > keybinds > toggle_pin > toggle_pin items](#keybinds_toggle_pin_items)
-- [8. Property `Rovr Config > plugins`](#plugins)
-  - [8.1. Property `Rovr Config > plugins > zoxide`](#plugins_zoxide)
-    - [8.1.1. Property `Rovr Config > plugins > zoxide > enabled`](#plugins_zoxide_enabled)
-    - [8.1.2. Property `Rovr Config > plugins > zoxide > keybinds`](#plugins_zoxide_keybinds)
-      - [8.1.2.1. Rovr Config > keybinds > toggle_pin > toggle_pin items](#keybinds_toggle_pin_items)
-    - [8.1.3. Property `Rovr Config > plugins > zoxide > show_scores`](#plugins_zoxide_show_scores)
-  - [8.2. Property `Rovr Config > plugins > bat`](#plugins_bat)
-    - [8.2.1. Property `Rovr Config > plugins > bat > enabled`](#plugins_bat_enabled)
-    - [8.2.2. Property `Rovr Config > plugins > bat > executable`](#plugins_bat_executable)
-  - [8.3. Property `Rovr Config > plugins > fd`](#plugins_fd)
-    - [8.3.1. Property `Rovr Config > plugins > fd > enabled`](#plugins_fd_enabled)
-    - [8.3.2. Property `Rovr Config > plugins > fd > keybinds`](#plugins_fd_keybinds)
-      - [8.3.2.1. Rovr Config > keybinds > toggle_pin > toggle_pin items](#keybinds_toggle_pin_items)
-    - [8.3.3. Property `Rovr Config > plugins > fd > executable`](#plugins_fd_executable)
-    - [8.3.4. Property `Rovr Config > plugins > fd > relative_paths`](#plugins_fd_relative_paths)
-    - [8.3.5. Property `Rovr Config > plugins > fd > follow_symlinks`](#plugins_fd_follow_symlinks)
-    - [8.3.6. Property `Rovr Config > plugins > fd > no_ignore_parent`](#plugins_fd_no_ignore_parent)
-    - [8.3.7. Property `Rovr Config > plugins > fd > default_filter_types`](#plugins_fd_default_filter_types)
-      - [8.3.7.1. Rovr Config > plugins > fd > default_filter_types > default_filter_types items](#plugins_fd_default_filter_types_items)
-  - [8.4. Property `Rovr Config > plugins > rg`](#plugins_rg)
-    - [8.4.1. Property `Rovr Config > plugins > rg > enabled`](#plugins_rg_enabled)
-    - [8.4.2. Property `Rovr Config > plugins > rg > keybinds`](#plugins_rg_keybinds)
-      - [8.4.2.1. Rovr Config > keybinds > toggle_pin > toggle_pin items](#keybinds_toggle_pin_items)
-    - [8.4.3. Property `Rovr Config > plugins > rg > executable`](#plugins_rg_executable)
-    - [8.4.4. Property `Rovr Config > plugins > rg > case_sensitive`](#plugins_rg_case_sensitive)
-    - [8.4.5. Property `Rovr Config > plugins > rg > follow_symlinks`](#plugins_rg_follow_symlinks)
-    - [8.4.6. Property `Rovr Config > plugins > rg > no_ignore_parent`](#plugins_rg_no_ignore_parent)
-    - [8.4.7. Property `Rovr Config > plugins > rg > search_hidden`](#plugins_rg_search_hidden)
-  - [8.5. Property `Rovr Config > plugins > poppler`](#plugins_poppler)
-    - [8.5.1. Property `Rovr Config > plugins > poppler > enabled`](#plugins_poppler_enabled)
-    - [8.5.2. Property `Rovr Config > plugins > poppler > threads`](#plugins_poppler_threads)
-    - [8.5.3. Property `Rovr Config > plugins > poppler > use_pdftocairo`](#plugins_poppler_use_pdftocairo)
-    - [8.5.4. Property `Rovr Config > plugins > poppler > poppler_folder`](#plugins_poppler_poppler_folder)
-    - [8.5.5. Property `Rovr Config > plugins > poppler > pdf_batch_size`](#plugins_poppler_pdf_batch_size)
-  - [8.6. Property `Rovr Config > plugins > file_one`](#plugins_file_one)
-    - [8.6.1. Property `Rovr Config > plugins > file_one > enabled`](#plugins_file_one_enabled)
-    - [8.6.2. Property `Rovr Config > plugins > file_one > get_description`](#plugins_file_one_get_description)
+- [8. Property `Rovr Config > keys`](#keys)
+  - [8.1. Property `Rovr Config > keys > additionalProperties`](#keys_additionalProperties)
+    - [8.1.1. Property `Rovr Config > keys > additionalProperties > additionalProperties`](#keys_additionalProperties_additionalProperties)
+- [9. Property `Rovr Config > plugins`](#plugins)
+  - [9.1. Property `Rovr Config > plugins > zoxide`](#plugins_zoxide)
+    - [9.1.1. Property `Rovr Config > plugins > zoxide > enabled`](#plugins_zoxide_enabled)
+    - [9.1.2. Property `Rovr Config > plugins > zoxide > keybinds`](#plugins_zoxide_keybinds)
+      - [9.1.2.1. Rovr Config > keybinds > toggle_pin > toggle_pin items](#keybinds_toggle_pin_items)
+    - [9.1.3. Property `Rovr Config > plugins > zoxide > show_scores`](#plugins_zoxide_show_scores)
+  - [9.2. Property `Rovr Config > plugins > bat`](#plugins_bat)
+    - [9.2.1. Property `Rovr Config > plugins > bat > enabled`](#plugins_bat_enabled)
+    - [9.2.2. Property `Rovr Config > plugins > bat > executable`](#plugins_bat_executable)
+  - [9.3. Property `Rovr Config > plugins > fd`](#plugins_fd)
+    - [9.3.1. Property `Rovr Config > plugins > fd > enabled`](#plugins_fd_enabled)
+    - [9.3.2. Property `Rovr Config > plugins > fd > keybinds`](#plugins_fd_keybinds)
+      - [9.3.2.1. Rovr Config > keybinds > toggle_pin > toggle_pin items](#keybinds_toggle_pin_items)
+    - [9.3.3. Property `Rovr Config > plugins > fd > executable`](#plugins_fd_executable)
+    - [9.3.4. Property `Rovr Config > plugins > fd > relative_paths`](#plugins_fd_relative_paths)
+    - [9.3.5. Property `Rovr Config > plugins > fd > follow_symlinks`](#plugins_fd_follow_symlinks)
+    - [9.3.6. Property `Rovr Config > plugins > fd > no_ignore_parent`](#plugins_fd_no_ignore_parent)
+    - [9.3.7. Property `Rovr Config > plugins > fd > default_filter_types`](#plugins_fd_default_filter_types)
+      - [9.3.7.1. Rovr Config > plugins > fd > default_filter_types > default_filter_types items](#plugins_fd_default_filter_types_items)
+  - [9.4. Property `Rovr Config > plugins > rg`](#plugins_rg)
+    - [9.4.1. Property `Rovr Config > plugins > rg > enabled`](#plugins_rg_enabled)
+    - [9.4.2. Property `Rovr Config > plugins > rg > keybinds`](#plugins_rg_keybinds)
+      - [9.4.2.1. Rovr Config > keybinds > toggle_pin > toggle_pin items](#keybinds_toggle_pin_items)
+    - [9.4.3. Property `Rovr Config > plugins > rg > executable`](#plugins_rg_executable)
+    - [9.4.4. Property `Rovr Config > plugins > rg > case_sensitive`](#plugins_rg_case_sensitive)
+    - [9.4.5. Property `Rovr Config > plugins > rg > follow_symlinks`](#plugins_rg_follow_symlinks)
+    - [9.4.6. Property `Rovr Config > plugins > rg > no_ignore_parent`](#plugins_rg_no_ignore_parent)
+    - [9.4.7. Property `Rovr Config > plugins > rg > search_hidden`](#plugins_rg_search_hidden)
+  - [9.5. Property `Rovr Config > plugins > poppler`](#plugins_poppler)
+    - [9.5.1. Property `Rovr Config > plugins > poppler > enabled`](#plugins_poppler_enabled)
+    - [9.5.2. Property `Rovr Config > plugins > poppler > threads`](#plugins_poppler_threads)
+    - [9.5.3. Property `Rovr Config > plugins > poppler > use_pdftocairo`](#plugins_poppler_use_pdftocairo)
+    - [9.5.4. Property `Rovr Config > plugins > poppler > poppler_folder`](#plugins_poppler_poppler_folder)
+    - [9.5.5. Property `Rovr Config > plugins > poppler > pdf_batch_size`](#plugins_poppler_pdf_batch_size)
+  - [9.6. Property `Rovr Config > plugins > file_one`](#plugins_file_one)
+    - [9.6.1. Property `Rovr Config > plugins > file_one > enabled`](#plugins_file_one_enabled)
+    - [9.6.2. Property `Rovr Config > plugins > file_one > get_description`](#plugins_file_one_get_description)
 
 **Title:** Rovr Config
 
@@ -322,16 +325,17 @@ description: config schema humanified
 | **Required**              | No          |
 | **Additional properties** | Not allowed |
 
-| Property                      | Type            | Title/Description                                     |
-| ----------------------------- | --------------- | ----------------------------------------------------- |
-| [interface](#interface)       | object          | Settings related to the user interface and experience |
-| [settings](#settings)         | object          | Settings related to behavior of file operations       |
-| [metadata](#metadata)         | object          |                                                       |
-| [icons](#icons)               | object          | Custom icon configurations for files and folders      |
-| [theme](#theme)               | object          |                                                       |
-| [custom_theme](#custom_theme) | array of object |                                                       |
-| [keybinds](#keybinds)         | object          |                                                       |
-| [plugins](#plugins)           | object          |                                                       |
+| Property                      | Type            | Title/Description                                                                                                                                               |
+| ----------------------------- | --------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| [interface](#interface)       | object          | Settings related to the user interface and experience                                                                                                           |
+| [settings](#settings)         | object          | Settings related to behavior of file operations                                                                                                                 |
+| [metadata](#metadata)         | object          |                                                                                                                                                                 |
+| [icons](#icons)               | object          | Custom icon configurations for files and folders                                                                                                                |
+| [theme](#theme)               | object          |                                                                                                                                                                 |
+| [custom_theme](#custom_theme) | array of object |                                                                                                                                                                 |
+| [keybinds](#keybinds)         | object          |                                                                                                                                                                 |
+| [keys](#keys)                 | object          | WIP key binding system. Section headers define widget selectors (e.g., app, screen, FileList, #preview_sidebar). Values are actions with optional state prefix. |
+| [plugins](#plugins)           | object          |                                                                                                                                                                 |
 
 ## <a name="interface"></a>1. Property `Rovr Config > interface`
 
@@ -4260,7 +4264,51 @@ Refer to https://textual.textualize.io/guide/design/#additional-variables for mo
 | **Type**     | `string` |
 | **Required** | No       |
 
-## <a name="plugins"></a>8. Property `Rovr Config > plugins`
+## <a name="keys"></a>8. Property `Rovr Config > keys`
+
+|                           |                                                                                   |
+| ------------------------- | --------------------------------------------------------------------------------- |
+| **Type**                  | `object`                                                                          |
+| **Required**              | No                                                                                |
+| **Additional properties** | [Each additional property must conform to the schema](#keys_additionalProperties) |
+
+**Description:** WIP key binding system. Section headers define widget selectors (e.g., app, screen, FileList, #preview_sidebar). Values are actions with optional state prefix.
+
+| Property                       | Type   | Title/Description                           |
+| ------------------------------ | ------ | ------------------------------------------- |
+| [](#keys_additionalProperties) | object | Key bindings for a specific widget selector |
+
+### <a name="keys_additionalProperties"></a>8.1. Property `Rovr Config > keys > additionalProperties`
+
+|                           |                                                                                                        |
+| ------------------------- | ------------------------------------------------------------------------------------------------------ |
+| **Type**                  | `object`                                                                                               |
+| **Required**              | No                                                                                                     |
+| **Additional properties** | [Each additional property must conform to the schema](#keys_additionalProperties_additionalProperties) |
+
+**Description:** Key bindings for a specific widget selector
+
+| Property                                            | Type   | Title/Description                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             |
+| --------------------------------------------------- | ------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| [](#keys_additionalProperties_additionalProperties) | string | Action name with optional extras.<br />Keep in mind that these action targets must exist in the section header (like app, #file_list, etc)<br />Format: \`([focused&#124;blurred&#124;focus-within]=[&lt;selector&gt;]:[&lt;action&gt;])\`<br />Examples:<br />- \`down\`: Sends an action_down event to the target selector.<br />- \`focused=FileList:up\`: Sends an action_up event to the target selector if FileList is currently highlighted.<br />- \`focus-within=PreviewSidebar:page_down\`: Sends an action_page_down event to the target selector if it or any of PreviewSidebar's children are currently focused. |
+
+#### <a name="keys_additionalProperties_additionalProperties"></a>8.1.1. Property `Rovr Config > keys > additionalProperties > additionalProperties`
+
+|              |          |
+| ------------ | -------- |
+| **Type**     | `string` |
+| **Required** | No       |
+
+**Description:** Action name with optional extras.
+Keep in mind that these action targets must exist in the section header (like app, #file_list, etc)
+Format: `([focused&#124;blurred&#124;focus-within]=[&lt;selector&gt;]:[&lt;action&gt;])`
+Examples:
+
+- `down`: Sends an action_down event to the target selector.
+- `focused=FileList:up`: Sends an action_up event to the target selector if FileList is currently highlighted.
+- `focus-within=PreviewSidebar:page_down`: Sends an action_page_down event to the target selector if it or any of PreviewSidebar's children are currently focused.
+
+## <a name="plugins"></a>9. Property `Rovr Config > plugins`
 
 |                           |             |
 | ------------------------- | ----------- |
@@ -4277,7 +4325,7 @@ Refer to https://textual.textualize.io/guide/design/#additional-variables for mo
 | [poppler](#plugins_poppler)   | object |                   |
 | [file_one](#plugins_file_one) | object |                   |
 
-### <a name="plugins_zoxide"></a>8.1. Property `Rovr Config > plugins > zoxide`
+### <a name="plugins_zoxide"></a>9.1. Property `Rovr Config > plugins > zoxide`
 
 |                           |             |
 | ------------------------- | ----------- |
@@ -4291,7 +4339,7 @@ Refer to https://textual.textualize.io/guide/design/#additional-variables for mo
 | [keybinds](#plugins_zoxide_keybinds)       | array of string | The keybind to open the zoxide modal.                      |
 | [show_scores](#plugins_zoxide_show_scores) | boolean         | Display zoxide frequency scores alongside directory paths. |
 
-#### <a name="plugins_zoxide_enabled"></a>8.1.1. Property `Rovr Config > plugins > zoxide > enabled`
+#### <a name="plugins_zoxide_enabled"></a>9.1.1. Property `Rovr Config > plugins > zoxide > enabled`
 
 |              |           |
 | ------------ | --------- |
@@ -4301,7 +4349,7 @@ Refer to https://textual.textualize.io/guide/design/#additional-variables for mo
 
 **Description:** Enable or disable zoxide travelling.
 
-#### <a name="plugins_zoxide_keybinds"></a>8.1.2. Property `Rovr Config > plugins > zoxide > keybinds`
+#### <a name="plugins_zoxide_keybinds"></a>9.1.2. Property `Rovr Config > plugins > zoxide > keybinds`
 
 |                |                       |
 | -------------- | --------------------- |
@@ -4324,14 +4372,14 @@ Refer to https://textual.textualize.io/guide/design/#additional-variables for mo
 | ---------------------------------------------- | ----------- |
 | [toggle_pin items](#keybinds_toggle_pin_items) |             |
 
-##### <a name="keybinds_toggle_pin_items"></a>8.1.2.1. Rovr Config > keybinds > toggle_pin > toggle_pin items
+##### <a name="keybinds_toggle_pin_items"></a>9.1.2.1. Rovr Config > keybinds > toggle_pin > toggle_pin items
 
 |              |          |
 | ------------ | -------- |
 | **Type**     | `string` |
 | **Required** | No       |
 
-#### <a name="plugins_zoxide_show_scores"></a>8.1.3. Property `Rovr Config > plugins > zoxide > show_scores`
+#### <a name="plugins_zoxide_show_scores"></a>9.1.3. Property `Rovr Config > plugins > zoxide > show_scores`
 
 |              |           |
 | ------------ | --------- |
@@ -4341,7 +4389,7 @@ Refer to https://textual.textualize.io/guide/design/#additional-variables for mo
 
 **Description:** Display zoxide frequency scores alongside directory paths.
 
-### <a name="plugins_bat"></a>8.2. Property `Rovr Config > plugins > bat`
+### <a name="plugins_bat"></a>9.2. Property `Rovr Config > plugins > bat`
 
 |                           |             |
 | ------------------------- | ----------- |
@@ -4354,7 +4402,7 @@ Refer to https://textual.textualize.io/guide/design/#additional-variables for mo
 | [enabled](#plugins_bat_enabled)       | boolean | Enable or disable bat for previewing files. |
 | [executable](#plugins_bat_executable) | string  | The executable for bat.                     |
 
-#### <a name="plugins_bat_enabled"></a>8.2.1. Property `Rovr Config > plugins > bat > enabled`
+#### <a name="plugins_bat_enabled"></a>9.2.1. Property `Rovr Config > plugins > bat > enabled`
 
 |              |           |
 | ------------ | --------- |
@@ -4364,7 +4412,7 @@ Refer to https://textual.textualize.io/guide/design/#additional-variables for mo
 
 **Description:** Enable or disable bat for previewing files.
 
-#### <a name="plugins_bat_executable"></a>8.2.2. Property `Rovr Config > plugins > bat > executable`
+#### <a name="plugins_bat_executable"></a>9.2.2. Property `Rovr Config > plugins > bat > executable`
 
 |              |          |
 | ------------ | -------- |
@@ -4374,7 +4422,7 @@ Refer to https://textual.textualize.io/guide/design/#additional-variables for mo
 
 **Description:** The executable for bat.
 
-### <a name="plugins_fd"></a>8.3. Property `Rovr Config > plugins > fd`
+### <a name="plugins_fd"></a>9.3. Property `Rovr Config > plugins > fd`
 
 |                           |             |
 | ------------------------- | ----------- |
@@ -4392,7 +4440,7 @@ Refer to https://textual.textualize.io/guide/design/#additional-variables for mo
 | [no_ignore_parent](#plugins_fd_no_ignore_parent)         | boolean                   | Don't use \*ignore files from parent folders when searching.  |
 | [default_filter_types](#plugins_fd_default_filter_types) | array of enum (of string) | The default file types to show when using fd.                 |
 
-#### <a name="plugins_fd_enabled"></a>8.3.1. Property `Rovr Config > plugins > fd > enabled`
+#### <a name="plugins_fd_enabled"></a>9.3.1. Property `Rovr Config > plugins > fd > enabled`
 
 |              |           |
 | ------------ | --------- |
@@ -4402,7 +4450,7 @@ Refer to https://textual.textualize.io/guide/design/#additional-variables for mo
 
 **Description:** Enable recursive file search using fd.
 
-#### <a name="plugins_fd_keybinds"></a>8.3.2. Property `Rovr Config > plugins > fd > keybinds`
+#### <a name="plugins_fd_keybinds"></a>9.3.2. Property `Rovr Config > plugins > fd > keybinds`
 
 |                |                       |
 | -------------- | --------------------- |
@@ -4425,14 +4473,14 @@ Refer to https://textual.textualize.io/guide/design/#additional-variables for mo
 | ---------------------------------------------- | ----------- |
 | [toggle_pin items](#keybinds_toggle_pin_items) |             |
 
-##### <a name="keybinds_toggle_pin_items"></a>8.3.2.1. Rovr Config > keybinds > toggle_pin > toggle_pin items
+##### <a name="keybinds_toggle_pin_items"></a>9.3.2.1. Rovr Config > keybinds > toggle_pin > toggle_pin items
 
 |              |          |
 | ------------ | -------- |
 | **Type**     | `string` |
 | **Required** | No       |
 
-#### <a name="plugins_fd_executable"></a>8.3.3. Property `Rovr Config > plugins > fd > executable`
+#### <a name="plugins_fd_executable"></a>9.3.3. Property `Rovr Config > plugins > fd > executable`
 
 |              |          |
 | ------------ | -------- |
@@ -4442,7 +4490,7 @@ Refer to https://textual.textualize.io/guide/design/#additional-variables for mo
 
 **Description:** fd executable name or path.
 
-#### <a name="plugins_fd_relative_paths"></a>8.3.4. Property `Rovr Config > plugins > fd > relative_paths`
+#### <a name="plugins_fd_relative_paths"></a>9.3.4. Property `Rovr Config > plugins > fd > relative_paths`
 
 |              |           |
 | ------------ | --------- |
@@ -4452,7 +4500,7 @@ Refer to https://textual.textualize.io/guide/design/#additional-variables for mo
 
 **Description:** Whether to show fd results as relative path or absolute path.
 
-#### <a name="plugins_fd_follow_symlinks"></a>8.3.5. Property `Rovr Config > plugins > fd > follow_symlinks`
+#### <a name="plugins_fd_follow_symlinks"></a>9.3.5. Property `Rovr Config > plugins > fd > follow_symlinks`
 
 |              |           |
 | ------------ | --------- |
@@ -4462,7 +4510,7 @@ Refer to https://textual.textualize.io/guide/design/#additional-variables for mo
 
 **Description:** Whether fd should follow symlinks when searching.
 
-#### <a name="plugins_fd_no_ignore_parent"></a>8.3.6. Property `Rovr Config > plugins > fd > no_ignore_parent`
+#### <a name="plugins_fd_no_ignore_parent"></a>9.3.6. Property `Rovr Config > plugins > fd > no_ignore_parent`
 
 |              |           |
 | ------------ | --------- |
@@ -4472,7 +4520,7 @@ Refer to https://textual.textualize.io/guide/design/#additional-variables for mo
 
 **Description:** Don't use \*ignore files from parent folders when searching.
 
-#### <a name="plugins_fd_default_filter_types"></a>8.3.7. Property `Rovr Config > plugins > fd > default_filter_types`
+#### <a name="plugins_fd_default_filter_types"></a>9.3.7. Property `Rovr Config > plugins > fd > default_filter_types`
 
 |              |                             |
 | ------------ | --------------------------- |
@@ -4494,7 +4542,7 @@ Refer to https://textual.textualize.io/guide/design/#additional-variables for mo
 | -------------------------------------------------------------------- | ----------- |
 | [default_filter_types items](#plugins_fd_default_filter_types_items) |             |
 
-##### <a name="plugins_fd_default_filter_types_items"></a>8.3.7.1. Rovr Config > plugins > fd > default_filter_types > default_filter_types items
+##### <a name="plugins_fd_default_filter_types_items"></a>9.3.7.1. Rovr Config > plugins > fd > default_filter_types > default_filter_types items
 
 |              |                    |
 | ------------ | ------------------ |
@@ -4513,7 +4561,7 @@ Must be one of:
 - "char-device"
 - "block-device"
 
-### <a name="plugins_rg"></a>8.4. Property `Rovr Config > plugins > rg`
+### <a name="plugins_rg"></a>9.4. Property `Rovr Config > plugins > rg`
 
 |                           |             |
 | ------------------------- | ----------- |
@@ -4531,7 +4579,7 @@ Must be one of:
 | [no_ignore_parent](#plugins_rg_no_ignore_parent) | boolean         | Don't use \*ignore files from parent folders when searching. |
 | [search_hidden](#plugins_rg_search_hidden)       | boolean         | Whether to search hidden files by default.                   |
 
-#### <a name="plugins_rg_enabled"></a>8.4.1. Property `Rovr Config > plugins > rg > enabled`
+#### <a name="plugins_rg_enabled"></a>9.4.1. Property `Rovr Config > plugins > rg > enabled`
 
 |              |           |
 | ------------ | --------- |
@@ -4541,7 +4589,7 @@ Must be one of:
 
 **Description:** Enable content searching using rg.
 
-#### <a name="plugins_rg_keybinds"></a>8.4.2. Property `Rovr Config > plugins > rg > keybinds`
+#### <a name="plugins_rg_keybinds"></a>9.4.2. Property `Rovr Config > plugins > rg > keybinds`
 
 |                |                       |
 | -------------- | --------------------- |
@@ -4564,14 +4612,14 @@ Must be one of:
 | ---------------------------------------------- | ----------- |
 | [toggle_pin items](#keybinds_toggle_pin_items) |             |
 
-##### <a name="keybinds_toggle_pin_items"></a>8.4.2.1. Rovr Config > keybinds > toggle_pin > toggle_pin items
+##### <a name="keybinds_toggle_pin_items"></a>9.4.2.1. Rovr Config > keybinds > toggle_pin > toggle_pin items
 
 |              |          |
 | ------------ | -------- |
 | **Type**     | `string` |
 | **Required** | No       |
 
-#### <a name="plugins_rg_executable"></a>8.4.3. Property `Rovr Config > plugins > rg > executable`
+#### <a name="plugins_rg_executable"></a>9.4.3. Property `Rovr Config > plugins > rg > executable`
 
 |              |          |
 | ------------ | -------- |
@@ -4581,7 +4629,7 @@ Must be one of:
 
 **Description:** rg executable name or path.
 
-#### <a name="plugins_rg_case_sensitive"></a>8.4.4. Property `Rovr Config > plugins > rg > case_sensitive`
+#### <a name="plugins_rg_case_sensitive"></a>9.4.4. Property `Rovr Config > plugins > rg > case_sensitive`
 
 |              |           |
 | ------------ | --------- |
@@ -4591,7 +4639,7 @@ Must be one of:
 
 **Description:** Whether the search should be case sensitive by default.
 
-#### <a name="plugins_rg_follow_symlinks"></a>8.4.5. Property `Rovr Config > plugins > rg > follow_symlinks`
+#### <a name="plugins_rg_follow_symlinks"></a>9.4.5. Property `Rovr Config > plugins > rg > follow_symlinks`
 
 |              |           |
 | ------------ | --------- |
@@ -4601,7 +4649,7 @@ Must be one of:
 
 **Description:** Whether rg should follow symlinks when searching.
 
-#### <a name="plugins_rg_no_ignore_parent"></a>8.4.6. Property `Rovr Config > plugins > rg > no_ignore_parent`
+#### <a name="plugins_rg_no_ignore_parent"></a>9.4.6. Property `Rovr Config > plugins > rg > no_ignore_parent`
 
 |              |           |
 | ------------ | --------- |
@@ -4611,7 +4659,7 @@ Must be one of:
 
 **Description:** Don't use \*ignore files from parent folders when searching.
 
-#### <a name="plugins_rg_search_hidden"></a>8.4.7. Property `Rovr Config > plugins > rg > search_hidden`
+#### <a name="plugins_rg_search_hidden"></a>9.4.7. Property `Rovr Config > plugins > rg > search_hidden`
 
 |              |           |
 | ------------ | --------- |
@@ -4621,7 +4669,7 @@ Must be one of:
 
 **Description:** Whether to search hidden files by default.
 
-### <a name="plugins_poppler"></a>8.5. Property `Rovr Config > plugins > poppler`
+### <a name="plugins_poppler"></a>9.5. Property `Rovr Config > plugins > poppler`
 
 |                           |             |
 | ------------------------- | ----------- |
@@ -4637,7 +4685,7 @@ Must be one of:
 | [poppler_folder](#plugins_poppler_poppler_folder) | string  | Path to the folder where Poppler-related binaries are located. Leave empty to use the system PATH. |
 | [pdf_batch_size](#plugins_poppler_pdf_batch_size) | integer | Number of PDF pages to load in each batch.                                                         |
 
-#### <a name="plugins_poppler_enabled"></a>8.5.1. Property `Rovr Config > plugins > poppler > enabled`
+#### <a name="plugins_poppler_enabled"></a>9.5.1. Property `Rovr Config > plugins > poppler > enabled`
 
 |              |           |
 | ------------ | --------- |
@@ -4647,7 +4695,7 @@ Must be one of:
 
 **Description:** Enable poppler for PDF previews.
 
-#### <a name="plugins_poppler_threads"></a>8.5.2. Property `Rovr Config > plugins > poppler > threads`
+#### <a name="plugins_poppler_threads"></a>9.5.2. Property `Rovr Config > plugins > poppler > threads`
 
 |              |           |
 | ------------ | --------- |
@@ -4661,7 +4709,7 @@ Must be one of:
 | ------------ | ------ |
 | **Minimum**  | &ge; 1 |
 
-#### <a name="plugins_poppler_use_pdftocairo"></a>8.5.3. Property `Rovr Config > plugins > poppler > use_pdftocairo`
+#### <a name="plugins_poppler_use_pdftocairo"></a>9.5.3. Property `Rovr Config > plugins > poppler > use_pdftocairo`
 
 |              |           |
 | ------------ | --------- |
@@ -4671,7 +4719,7 @@ Must be one of:
 
 **Description:** Use pdftocairo instead of pdftoppm, may help performance
 
-#### <a name="plugins_poppler_poppler_folder"></a>8.5.4. Property `Rovr Config > plugins > poppler > poppler_folder`
+#### <a name="plugins_poppler_poppler_folder"></a>9.5.4. Property `Rovr Config > plugins > poppler > poppler_folder`
 
 |              |          |
 | ------------ | -------- |
@@ -4681,7 +4729,7 @@ Must be one of:
 
 **Description:** Path to the folder where Poppler-related binaries are located. Leave empty to use the system PATH.
 
-#### <a name="plugins_poppler_pdf_batch_size"></a>8.5.5. Property `Rovr Config > plugins > poppler > pdf_batch_size`
+#### <a name="plugins_poppler_pdf_batch_size"></a>9.5.5. Property `Rovr Config > plugins > poppler > pdf_batch_size`
 
 |              |           |
 | ------------ | --------- |
@@ -4695,7 +4743,7 @@ Must be one of:
 | ------------ | ------ |
 | **Minimum**  | &ge; 1 |
 
-### <a name="plugins_file_one"></a>8.6. Property `Rovr Config > plugins > file_one`
+### <a name="plugins_file_one"></a>9.6. Property `Rovr Config > plugins > file_one`
 
 |                           |             |
 | ------------------------- | ----------- |
@@ -4708,7 +4756,7 @@ Must be one of:
 | [enabled](#plugins_file_one_enabled)                 | boolean | Enable secondary file(1) type detection if both puremagic and plaintext detection fails. |
 | [get_description](#plugins_file_one_get_description) | boolean | Use file(1) to get additional information of the file type.                              |
 
-#### <a name="plugins_file_one_enabled"></a>8.6.1. Property `Rovr Config > plugins > file_one > enabled`
+#### <a name="plugins_file_one_enabled"></a>9.6.1. Property `Rovr Config > plugins > file_one > enabled`
 
 |              |           |
 | ------------ | --------- |
@@ -4718,7 +4766,7 @@ Must be one of:
 
 **Description:** Enable secondary file(1) type detection if both puremagic and plaintext detection fails.
 
-#### <a name="plugins_file_one_get_description"></a>8.6.2. Property `Rovr Config > plugins > file_one > get_description`
+#### <a name="plugins_file_one_get_description"></a>9.6.2. Property `Rovr Config > plugins > file_one > get_description`
 
 |              |           |
 | ------------ | --------- |

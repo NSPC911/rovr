@@ -20,7 +20,7 @@ class RovrConfig(TypedDict, total=False):
     r""" deprecated: True """
 
     keys: dict[str, "_RovrConfigKeysAdditionalproperties"]
-    r""" New key binding system. Section headers define widget selectors (e.g., app, screen, FileList, #preview_sidebar). Values are actions with optional state prefix. """
+    r""" WIP key binding system. Section headers define widget selectors (e.g., app, screen, FileList, #preview_sidebar). Values are actions with optional state prefix. """
 
     plugins: "_RovrConfigPlugins"
 

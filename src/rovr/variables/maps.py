@@ -1,8 +1,10 @@
 from os import path
-from typing import TypedDict
+from typing import Awaitable, Callable, Literal, NamedTuple, TypedDict
 
 from platformdirs import PlatformDirs
 from rich._spinners import SPINNERS
+from textual.dom import DOMNode
+from textual.worker import Worker
 
 dirs = PlatformDirs("rovr", ".")  # Ah yes, my name is "."
 
@@ -1142,3 +1144,9 @@ FD_TYPE_TO_ALIAS = {
     "char-device": "c",
     "block-device": "b",
 }
+
+
+class ActionInfo(NamedTuple):
+    action: Callable[[], Awaitable[None] | Worker[None] | None]
+    target: DOMNode
+    condition: Literal["hover", "focused", "focus-within", "blurred"] | None = None

@@ -73,7 +73,7 @@ from rovr.screens.typed import ShellExecReturnType
 from rovr.screens.way_too_small import TerminalTooSmall
 from rovr.state_manager import StateManager
 from rovr.variables.constants import MaxPossible, config, log_name
-from rovr.variables.maps import VAR_TO_DIR
+from rovr.variables.maps import VAR_TO_DIR, ActionInfo
 
 console = Console()
 
@@ -912,6 +912,76 @@ class Application(App, inherit_bindings=False):
     def _focused_id(self) -> str | None:
         if self.focused is not None:
             return self.focused.id
+        return None
+
+    def parse_action(self, target: DOMNode, action: str) -> ActionInfo | None:
+        # Format: `action_name` or `state=selector:action_name`
+        # where state is one of: focused, blurred, focus-within
+        if "=" in action and ":" in action:
+            eq_pos = action.index("=")
+            colon_pos = action.index(":")
+            if eq_pos < colon_pos:
+                state = action[:eq_pos]
+                selector = action[eq_pos + 1 : colon_pos]
+                action_name = action[colon_pos + 1 :]
+            else:
+                return None
+        elif ":" in action:
+            return None
+        else:
+            action_name = action
+            state = None
+            selector = None
+
+        method_name = f"action_{action_name}"
+        if not callable(getattr(target, method_name, None)):
+            return None
+        func = getattr(target, method_name)
+
+        if state is None:
+            return ActionInfo(action=func, target=target, condition=None)
+        if selector is None:
+            return None
+
+        widgets = list(self.query(selector))
+        if not widgets:
+            return None
+
+        match state:
+            case "focused":
+                for widget in widgets:
+                    if self.focused is not None and self.focused == widget:
+                        return ActionInfo(
+                            action=func, target=target, condition="focused"
+                        )
+            case "blurred":
+                for widget in widgets:
+                    if self.focused is None or self.focused != widget:
+                        return ActionInfo(
+                            action=func, target=target, condition="blurred"
+                        )
+            case "focus-within":
+                for widget in widgets:
+                    if widget.has_focus_within:
+                        return ActionInfo(
+                            action=func, target=target, condition="focus-within"
+                        )
+            case _:
+                return None
+        return None
+
+    def get_action(self, event: events.Key) -> ActionInfo | None:
+        key: str | None = event.character if event.is_printable else event.key
+        if key is None:
+            return None
+        for selector, binds in config.get("keys", {}).items():
+            if key not in binds:
+                continue
+            action_str = binds[key]
+            for widget in self.query(selector):
+                result = self.parse_action(widget, action_str)
+                if result is not None:
+                    return result
         return None
 
     # actions

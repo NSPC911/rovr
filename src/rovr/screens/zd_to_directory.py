@@ -102,6 +102,16 @@ class ZDToDirectory(ModalSearchScreen):
                 )
             )
             return
+        except AttributeError as exc:
+            # issue with nuitka, for some reason _asyncio.Future doesn't have a get_pid attribute
+            # so i guess we try again? I'm not honestly sure what should be done
+            self.notify(
+                f"AttributeError: {exc}\nRetrying...",
+                title="Zoxide Plugin",
+                severity="error",
+            )
+            self.zoxide_updater(event)
+            return
 
         # check 2 for queue, to ignore mounting as a whole
         if should_cancel():

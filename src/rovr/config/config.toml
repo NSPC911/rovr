@@ -279,21 +279,11 @@ dont_ask_again = ["a"]
 "?" = "show_keybinds"
 "ctrl+p" = "command_palette"
 "ctrl+z" = "suspend_process"
-[keys."#file_list"]
-"slash" = "focused=#file_list:focus_search"
-"y" = "focused=#file_list:copy"
-"ctrl+c" = "focused=#file_list:copy"
-"p" = "focused=#file_list:paste"
-"x" = "focused=#file_list:cut"
-"d" = "focused=#file_list:delete"
-"r" = "focused=#file_list:rename"
-"f2" = "focused=#file_list:rename"
-"ctrl+n" = "focused=#file_list:new"
-"o" = "focused=#file_list:new"
-"E" = "focused=#file_list:zip"
-"ctrl+e" = "focused=#file_list:unzip"
+[keys.FileList]
 "up" = "focused=#file_list:up"
 "down" = "focused=#file_list:down"
+"k" = "focused=#file_list:up"
+"j" = "focused=#file_list:down"
 "left" = "focused=#file_list:up_tree"
 "right" = "focused=#file_list:down_tree"
 "h" = "focused=#file_list:up_tree"
@@ -309,6 +299,20 @@ dont_ask_again = ["a"]
 "g" = "focused=#file_list:home"
 "end" = "focused=#file_list:end"
 "G" = "focused=#file_list:end"
+
+[keys."#file_list"]
+"slash" = "focused=#file_list:focus_search"
+"y" = "focused=#file_list:copy"
+"ctrl+c" = "focused=#file_list:copy"
+"p" = "focused=#file_list:paste"
+"x" = "focused=#file_list:cut"
+"d" = "focused=#file_list:delete"
+"r" = "focused=#file_list:rename"
+"f2" = "focused=#file_list:rename"
+"ctrl+n" = "focused=#file_list:new"
+"o" = "focused=#file_list:new"
+"E" = "focused=#file_list:zip"
+"ctrl+e" = "focused=#file_list:unzip"
 "backspace" = "focused=#file_list:hist_previous"
 "u" = "focused=#file_list:hist_previous"
 "space" = "focused=#file_list:hist_next"
@@ -325,6 +329,18 @@ dont_ask_again = ["a"]
 ">" = "focused=#file_list:show_shell_screen"
 [keys.PinnedSidebar]
 "slash" = "focused=#pinned_sidebar:focus_search"
+[keys.PreviewContainer]
+"alt+j" = "down"
+"alt+k" = "up"
+"up" = "focused=#preview_container:up"
+"down" = "focused=#preview_container:down"
+"j" = "focused=#preview_container:down"
+"k" = "focused=#preview_container:up"
+"pageup" = "focused=#preview_container:page_up"
+"ctrl+b" = "focused=#preview_container:page_up"
+"pagedown" = "focused=#preview_container:page_down"
+"ctrl+f" = "focused=#preview_container:page_down"
+
 [keys.CopyPanelOptions]
 "Y" = "focused=#copy_panel:open_popup"
 "y" = "focused=#copy_panel:copy_to_rovr"
@@ -369,8 +385,7 @@ dont_ask_again = ["a"]
 "down" = "focused=Input:next_option"
 "ctrl+j" = "focused=Input:next_option"
 # future me: also consider something like [keys."-focused"] to target whatever is focused
-#          ╰── dont add selectors for that please
-
+#          don't add selectors for that please ╶┴────────┘
 
 [plugins.zoxide]
 enabled = true

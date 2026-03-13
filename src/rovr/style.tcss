@@ -389,7 +389,7 @@ Tooltip {
     }
   }
   & > * {
-  /* scrollbars are useless, reminder */
+    /* scrollbars are useless, reminder */
     background: transparent;
     border: none;
     padding: 0;
@@ -663,14 +663,14 @@ Keybinds {
 /* Modal Dialog Shared Styles */
 Dismissible,
 YesOrNo,
-CommonFileNameDoWhat,
+FileNameConflict,
 FileInUse,
 DeleteFiles,
 ModalInput,
 TerminalTooSmall { align: center middle }
 
 YesOrNo #dialog #question_container,
-CommonFileNameDoWhat #dialog #question_container,
+FileNameConflict #dialog #question_container,
 FileInUse #question_container {
   column-span: 2;
   height: 1fr;
@@ -685,7 +685,7 @@ FileInUse #question_container {
 }
 
 YesOrNo #dialog #dontAskAgain,
-CommonFileNameDoWhat #dialog #dontAskAgain,
+FileNameConflict #dialog #dontAskAgain,
 FileInUse #dontAskAgain {
   column-span: 2;
   content-align: center middle;
@@ -704,7 +704,7 @@ FileInUse #dontAskAgain {
 }
 
 YesOrNo #dialog Button,
-CommonFileNameDoWhat #dialog Button,
+FileNameConflict #dialog Button,
 FileInUse Button { width: 100% }
 
 Dismissible {
@@ -758,16 +758,16 @@ PasteScreen > #dialog {
   }
 }
 
-CommonFileNameDoWhat #dialog {
+FileNameConflict #dialog {
   grid-size: 2;
   grid-gutter: 1 2;
   grid-rows: 1fr 3 3 1; /* need the two lines for label */
   padding: 1 3 0 3;
   border: $border-style $border;
-    height: 60vh;
-    max-height: 60vh;
-    width: 60vw;
-    max-width: 60vw;
+  height: 60vh;
+  max-height: 60vh;
+  width: 60vw;
+  max-width: 60vw;
 }
 
 FileInUse {

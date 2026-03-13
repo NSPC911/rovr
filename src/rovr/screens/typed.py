@@ -11,7 +11,7 @@ class YesOrNo(TypedDict):
     toggle: bool
 
 
-class CommonFileNameDoWhat(TypedDict):
+class FileNameConflict(TypedDict):
     value: Literal["overwrite", "rename", "skip", "cancel"]
     same_for_next: bool
 

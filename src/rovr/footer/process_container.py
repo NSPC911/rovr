@@ -19,9 +19,9 @@ from rovr.functions import icons as icon_utils
 from rovr.functions import path as path_utils
 from rovr.functions.utils import is_being_used
 from rovr.screens import (
-    CommonFileNameDoWhat,
     Dismissible,
     FileInUse,
+    FileNameConflict,
     YesOrNo,
     typed,
 )
@@ -602,13 +602,13 @@ class ProcessContainer(VerticalScroll):
                         if do_what_on_existence == "ask":
                             response = self.app.call_from_thread(
                                 self.app.push_screen_wait,
-                                CommonFileNameDoWhat(
+                                FileNameConflict(
                                     "Path already exists in destination\nWhat do you want to do now?",
                                     border_title=filename,
                                     border_subtitle=f"Extracting to {destination_path}",
                                 ),
                             )
-                            response = cast(typed.CommonFileNameDoWhat, response)
+                            response = cast(typed.FileNameConflict, response)
                             if response["same_for_next"]:
                                 do_what_on_existence = response["value"]
                             val = response["value"]
@@ -771,13 +771,13 @@ class ProcessContainer(VerticalScroll):
                         if action_on_existence == "ask":
                             response = self.app.call_from_thread(
                                 self.app.push_screen_wait,
-                                CommonFileNameDoWhat(
+                                FileNameConflict(
                                     "The destination already has file of that name.\nWhat do you want to do now?",
                                     border_title=item_dict["relative_loc"],
                                     border_subtitle=f"Copying to {dest}",
                                 ),
                             )
-                            response = cast(typed.CommonFileNameDoWhat, response)
+                            response = cast(typed.FileNameConflict, response)
                             if response["same_for_next"]:
                                 action_on_existence = response["value"]
                             val = response["value"]
@@ -887,13 +887,13 @@ class ProcessContainer(VerticalScroll):
                         if action_on_existence == "ask":
                             response = self.app.call_from_thread(
                                 self.app.push_screen_wait,
-                                CommonFileNameDoWhat(
+                                FileNameConflict(
                                     "The destination already has file of that name.\nWhat do you want to do now?",
                                     border_title=item_dict["relative_loc"],
                                     border_subtitle=f"Moving to {dest}",
                                 ),
                             )
-                            response = cast(typed.CommonFileNameDoWhat, response)
+                            response = cast(typed.FileNameConflict, response)
                             if response["same_for_next"]:
                                 action_on_existence = response["value"]
                             val = response["value"]

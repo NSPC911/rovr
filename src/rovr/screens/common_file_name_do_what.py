@@ -16,7 +16,7 @@ dont_ask_bind = get_shortest_bind(
 )
 
 
-class CommonFileNameDoWhat(ModalScreen):
+class FileNameConflict(ModalScreen):
     """Screen with a dialog to confirm whether to overwrite, rename, skip or cancel."""
 
     def __init__(

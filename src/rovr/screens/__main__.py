@@ -14,10 +14,10 @@ from textual.widgets import Button
 
 from rovr.screens import (
     ArchiveCreationScreen,
-    CommonFileNameDoWhat,
     DeleteFiles,
     Dismissible,
     FileInUse,
+    FileNameConflict,
     PasteScreen,
     YesOrNo,
 )
@@ -46,7 +46,7 @@ class Test(App):
         super().__init__(watch_css=True)
 
     def compose(self) -> ComposeResult:
-        yield Button("Common File Name Do What", id="CommonFileNameDoWhat")
+        yield Button("File Name Conflict", id="FileNameConflict")
         yield Button("Delete Files", id="DeleteFiles")
         yield Button("Dismissible", id="Dismissible")
         yield Button("File In Use", id="FileInUse")
@@ -54,10 +54,10 @@ class Test(App):
         yield Button("Yes Or No", id="YesOrNo")
         yield Button("Zip Up Screen", id="ArchiveCreationScreen")
 
-    @on(Button.Pressed, "#CommonFileNameDoWhat")
+    @on(Button.Pressed, "#FileNameConflict")
     def common_file_name_do_what(self) -> None:
         self.push_screen(
-            CommonFileNameDoWhat(
+            FileNameConflict(
                 "Path already exists in destination\nWhat do you want to do now?",
                 border_title="test.txt",
                 border_subtitle=f"Extracting to {getcwd()}",

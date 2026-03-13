@@ -1,5 +1,5 @@
 from .archive_creator import ArchiveCreationScreen
-from .common_file_name_do_what import CommonFileNameDoWhat
+from .common_file_name_do_what import FileNameConflict
 from .delete_files import DeleteFiles
 from .dismissable import Dismissible
 from .fd_search import FileSearch
@@ -15,7 +15,7 @@ from .zd_to_directory import ZDToDirectory
 
 __all__ = [
     "ArchiveCreationScreen",
-    "CommonFileNameDoWhat",
+    "FileNameConflict",
     "ContentSearch",
     "DeleteFiles",
     "Dismissible",

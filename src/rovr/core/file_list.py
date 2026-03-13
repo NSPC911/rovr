@@ -442,6 +442,10 @@ class FileList(CheckboxRenderingMixin, SelectionList, inherit_bindings=False):
         with self.prevent(SelectionList.SelectedChanged):
             self.deselect_all()
         self.update_border_subtitle()
+        if self.select_mode_enabled:
+            self.add_class("select-mode")
+        else:
+            self.remove_class("select-mode")
 
     async def get_selected_objects(self) -> list[str] | None:
         """Get the selected objects in the file list.

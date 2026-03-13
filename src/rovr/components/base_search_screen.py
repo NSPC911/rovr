@@ -65,20 +65,28 @@ class ModalSearchScreen(ModalScreen, inherit_bindings=False):
             event, config["keybinds"]["filter_modal"]["down"]
         ) and isinstance(self.focused, Input):
             event.stop()
-            if self.search_options.options:
-                self.search_options.action_cursor_down()
+            self.action_next_option()
         elif check_key(event, config["keybinds"]["filter_modal"]["up"]) and isinstance(
             self.focused, Input
         ):
             event.stop()
-            if self.search_options.options:
-                self.search_options.action_cursor_up()
+            self.action_previous_option()
         elif event.key == "tab":
             event.stop()
             self.focus_next()
         elif event.key == "shift+tab":
             event.stop()
             self.focus_previous()
+
+    def action_next_option(self) -> None:
+        if self.search_options.options:
+            self.search_options.action_cursor_down()
+            self.search_options.focus()
+
+    def action_previous_option(self) -> None:
+        if self.search_options.options:
+            self.search_options.action_cursor_up()
+            self.search_options.focus()
 
     def on_click(self, event: events.Click) -> None:
         if event.widget is self:

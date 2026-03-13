@@ -259,6 +259,118 @@ no = ["n", "escape"]
 dont_ask_again = ["a"]
 
 [keys]
+[keys."-app"]
+"P" = "toggle_pin"
+"S" = "toggle_pinned_sidebar"
+"I" = "toggle_preview_sidebar"
+"F" = "toggle_footer"
+"M" = "toggle_menu_wrapper"
+"s" = "focus_toggle_pinned_sidebar"
+"escape" = "focus_file_list"
+"i" = "focus_toggle_preview_sidebar"
+"ctrl+l" = "focus_toggle_path_switcher"
+"#" = "focus_toggle_processes"
+"c" = "focus_toggle_clipboard"
+"m" = "focus_toggle_metadata"
+"ctrl+j" = "tab_next"
+"ctrl+k" = "tab_previous"
+"n" = "tab_new"
+"w" = "tab_close"
+"?" = "show_keybinds"
+"ctrl+p" = "command_palette"
+"ctrl+z" = "suspend_process"
+[keys."#file_list"]
+"slash" = "focused=#file_list:focus_search"
+"y" = "focused=#file_list:copy"
+"ctrl+c" = "focused=#file_list:copy"
+"p" = "focused=#file_list:paste"
+"x" = "focused=#file_list:cut"
+"d" = "focused=#file_list:delete"
+"r" = "focused=#file_list:rename"
+"f2" = "focused=#file_list:rename"
+"ctrl+n" = "focused=#file_list:new"
+"o" = "focused=#file_list:new"
+"E" = "focused=#file_list:zip"
+"ctrl+e" = "focused=#file_list:unzip"
+"up" = "focused=#file_list:up"
+"down" = "focused=#file_list:down"
+"left" = "focused=#file_list:up_tree"
+"right" = "focused=#file_list:down_tree"
+"h" = "focused=#file_list:up_tree"
+"l" = "focused=#file_list:down_tree"
+"enter" = "focused=#file_list:down_tree"
+"H" = "focused=#file_list:bypass_up_tree"
+"L" = "focused=#file_list:bypass_down_tree"
+"pageup" = "focused=#file_list:page_up"
+"ctrl+b" = "focused=#file_list:page_up"
+"pagedown" = "focused=#file_list:page_down"
+"ctrl+f" = "focused=#file_list:page_down"
+"home" = "focused=#file_list:home"
+"g" = "focused=#file_list:home"
+"end" = "focused=#file_list:end"
+"G" = "focused=#file_list:end"
+"backspace" = "focused=#file_list:hist_previous"
+"u" = "focused=#file_list:hist_previous"
+"space" = "focused=#file_list:hist_next"
+"v" = "focused=#file_list:toggle_visual"
+"%" = "focused=#file_list:toggle_all"
+"ctrl+a" = "focused=#file_list:toggle_all"
+"shift+up" = "focused=#file_list:select_up"
+"shift+down" = "focused=#file_list:select_down"
+"shift+pageup" = "focused=#file_list:select_page_up"
+"shift+pagedown" = "focused=#file_list:select_page_down"
+"shift+home" = "focused=#file_list:select_home"
+"shift+end" = "focused=#file_list:select_end"
+"e" = "focused=#file_list:open_editor"
+">" = "focused=#file_list:show_shell_screen"
+[keys.PinnedSidebar]
+"slash" = "focused=#pinned_sidebar:focus_search"
+[keys.CopyPanelOptions]
+"Y" = "focused=#copy_panel:open_popup"
+"y" = "focused=#copy_panel:copy_to_rovr"
+"p" = "focused=#copy_panel:copy_single_path"
+"s" = "focused=#copy_panel:copy_to_system_clip"
+"d" = "focused=#copy_panel:copy_current_directory"
+[keys.SortOrderPopup]
+# reminder to anyone reading this, you dont need it to
+# be focused, as long as sort order is available, you can
+# trigger these keybinds. but it makes more sense to
+# require focus, else what is the point of the popup?
+"," = "focused=#sort_order_popup:open_popup"
+"a" = "focused=#sort_order_popup:change_sort_order_name"
+"e" = "focused=#sort_order_popup:change_sort_order_extension"
+"n" = "focused=#sort_order_popup:change_sort_order_natural"
+"s" = "focused=#sort_order_popup:change_sort_order_size"
+"c" = "focused=#sort_order_popup:change_sort_order_created"
+"m" = "focused=#sort_order_popup:change_sort_order_modified"
+"d" = "focused=#sort_order_popup:change_sort_order_descending"
+[keys."-screen:DeleteFiles"]
+# this one doesn't need focused; because it's a screen itself
+"d" = "trash"
+"x" = "delete"
+"c" = "cancel"
+[keys."-screen:FileNameConflict"]
+"o" = "overwrite"
+"s" = "skip"
+"r" = "rename"
+"c" = "cancel"
+"a" = "dont_ask_again"
+[keys."-screen:FileInUse"]
+"r" = "retry"
+"s" = "skip"
+[keys."-screen:YesOrNo"]
+"y" = "yes"
+"n" = "no"
+"a" = "dont_ask_again"
+[keys."-screen:ModalSearchScreen"]
+"escape" = "dismiss"
+"up" = "focused=Input:previous_option"
+"ctrl+k" = "focused=Input:previous_option"
+"down" = "focused=Input:next_option"
+"ctrl+j" = "focused=Input:next_option"
+# future me: also consider something like [keys."-focused"] to target whatever is focused
+#          ╰── dont add selectors for that please
+
 
 [plugins.zoxide]
 enabled = true

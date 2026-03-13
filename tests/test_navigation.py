@@ -92,6 +92,7 @@ async def test_tab_highlight(tmp_path: Path) -> None:
         await app.tabWidget.add_tab("")
         await pilot.pause()
         app.tabWidget.action_next_tab()
+        await pilot.pause()
         await iter_until(
             pilot,
             lambda: (

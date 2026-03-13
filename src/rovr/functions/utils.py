@@ -207,7 +207,7 @@ class classproperty:  # noqa: N801
         return self.func(owner)
 
 
-async def is_archive(path_str: str) -> bool:
+def is_archive(path_str: str) -> bool:
     from rovr.classes.archive import Archive
 
     try:

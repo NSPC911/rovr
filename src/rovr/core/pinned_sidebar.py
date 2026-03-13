@@ -157,7 +157,7 @@ class PinnedSidebar(OptionList, inherit_bindings=False):
         assert self.parent
         self.input: Input = self.parent.query_one(Input)
         # peak scheduling
-        self.call_later(self.call_later, self.reload_pins)
+        self.call_later(self.reload_pins)
 
     async def on_option_list_option_selected(
         self, event: OptionList.OptionSelected

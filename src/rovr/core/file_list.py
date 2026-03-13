@@ -391,7 +391,7 @@ class FileList(CheckboxRenderingMixin, SelectionList, inherit_bindings=False):
                 })
 
     # No clue why I'm using an OptionList method for SelectionList
-    async def on_option_list_option_highlighted(
+    def on_option_list_option_highlighted(
         self, event: OptionList.OptionHighlighted
     ) -> None:
         if self.dummy:
@@ -414,11 +414,11 @@ class FileList(CheckboxRenderingMixin, SelectionList, inherit_bindings=False):
         if self.highlighted is None:
             self.highlighted = 0
         # preview
-        await self.app.query_one("PreviewContainer").show_preview(
+        self.app.query_one("PreviewContainer").show_preview(
             highlighted_option.dir_entry.path
         )
         self.app.query_one("MetadataContainer").update_metadata(event.option.dir_entry)
-        self.app.query_one("#unzip").disabled = not await utils.is_archive(
+        self.app.query_one("#unzip").disabled = not utils.is_archive(
             highlighted_option.dir_entry.path
         )
 
@@ -959,7 +959,7 @@ class FileListRightClickOptionList(PopupOptionList):
         )
 
     @on(events.Show)
-    async def on_show(self) -> None:  # ty: ignore[invalid-method-override]
+    def on_show(self) -> None:
         self.set_options([
             Option(f" {icon_utils.get_icon('general', 'copy')[0]} Copy", id="copy"),
             Option(f" {icon_utils.get_icon('general', 'cut')[0]} Cut", id="cut"),
@@ -973,7 +973,7 @@ class FileListRightClickOptionList(PopupOptionList):
             Option(
                 f" {icon_utils.get_icon('general', 'open')[0]} Unzip",
                 id="unzip",
-                disabled=not await utils.is_archive(
+                disabled=not utils.is_archive(
                     self.app.file_list.highlighted_option.dir_entry.path
                 ),
             ),

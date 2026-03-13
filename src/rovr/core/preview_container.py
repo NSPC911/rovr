@@ -868,7 +868,7 @@ class PreviewContainer(Container):
         self.app.call_from_thread(file_list.set_options, options)
         self.app.call_from_thread(setattr, self, "border_subtitle", "")
 
-    async def show_preview(self, file_path: str) -> None:
+    def show_preview(self, file_path: str) -> None:
         """Public method to show preview."""
         if (
             "hide" in self.classes
@@ -1158,11 +1158,11 @@ class PreviewContainer(Container):
         self.show_normal_file_preview()
 
     @on(events.Show)
-    async def when_become_visible(self) -> None:
+    def when_become_visible(self) -> None:
         if isinstance(self._pending_preview_path, str):
             pending = self._pending_preview_path
             self._pending_preview_path = None
-            await self.show_preview(pending)
+            self.show_preview(pending)
 
     def on_key(self, event: events.Key) -> None:
         """Check for vim keybinds."""

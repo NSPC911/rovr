@@ -741,6 +741,20 @@ class FileList(CheckboxRenderingMixin, SelectionList, inherit_bindings=False):
             )
         )
 
+    # nav stuff that i dont want to rename just yet
+    def action_up(self) -> None:
+        self.action_cursor_up()
+
+    def action_down(self) -> None:
+        self.action_cursor_down()
+
+    def action_home(self) -> None:
+        self.action_first()
+
+    def action_end(self) -> None:
+        self.action_last()
+
+    # action stuff now
     def action_cut(self) -> None:
         self.app.query_one("#cut").action_press()
 

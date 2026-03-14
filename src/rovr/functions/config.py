@@ -136,7 +136,10 @@ def find_path_line(lines: list[str], path: list) -> int | None:
 
 
 def schema_dump(
-    doc_path: str, exception: JsonSchemaValueException, config_content: str
+    doc_path: str,
+    exception: JsonSchemaValueException,
+    config_content: str,
+    dont_exit: bool = False,
 ) -> None:
     """
     Dump an error message for schema validation errors
@@ -145,6 +148,7 @@ def schema_dump(
         doc_path: path to the config file
         exception: the ValidationError that occurred
         config_content: the raw file content
+        dont_exit: whether to exit after dumping the error (default: False)
     """
     import fnmatch
 
@@ -302,7 +306,7 @@ def schema_dump(
             pprint(Padding(to_print, (0, rjust + 4, 0, rjust + 3)))
             break
 
-    if exception.rule != "additionalProperties":
+    if (not dont_exit) and exception.rule != "additionalProperties":
         exit(1)
 
 
@@ -468,6 +472,19 @@ def load_config() -> tuple[dict, RovrConfig]:
         schema_dump(user_config_path, exception, user_config_content)
 
     check_keys(config["keys"], user_config_path)
+
+    if config.get("keybinds", None):
+        schema_dump(
+            user_config_path,
+            JsonSchemaValueException(
+                "The 'keybinds' section has been deprecated.",
+                rule="deprecated",
+                name="keybinds",
+                value=config["keybinds"],
+            ),
+            user_config_content,
+            dont_exit=True,
+        )
 
     # slight config fixes
     # image protocol because "AutoImage" doesn't work with Sixel

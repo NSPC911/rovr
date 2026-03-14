@@ -1,5 +1,13 @@
 [
   {
+    "keys": ["keybinds"],
+    "message": [
+      "The [bright_cyan]keybinds[/] section has been deprecated in favour of the new [bright_blue]keys.*[/] section, which is more flexible and easier to customise.",
+      "rovr will continue to work until v0.9.0 with the old [bright_cyan]keybinds[/] section, but it is recommended to switch to the new [bright_blue]keys.*[/] section as soon as possible."
+    ],
+    "extra": "Deprecated in v0.8.0"
+  },
+  {
     "keys": ["keybinds.suspend_app"],
     "message": [
       "The [bright_cyan]keybinds.suspend_app[/] keybind has been renamed to [bright_blue]keybinds.suspend_process[/] because it suspends the process (in *nix terms)"

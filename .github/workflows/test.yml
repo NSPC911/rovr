@@ -72,6 +72,27 @@ jobs:
             exit 1
           }
 
+          "retry_count=$retryCount" >> $env:GITHUB_OUTPUT
+
+      - name: Upload retry info
+        if: success()
+        shell: pwsh
+        run: |
+          $retryCount = "${{ steps.test.outputs.retry_count }}"
+          if ([int]$retryCount -gt 0) {
+            New-Item -ItemType Directory -Force -Path retry-info | Out-Null
+            Set-Content -Path "retry-info/${{ matrix.name }}.txt" -Value "${{ matrix.name }} ($retryCount retries)"
+          }
+
+      - name: Upload retry artifact
+        if: success()
+        uses: actions/upload-artifact@v4
+        with:
+          name: retry-info-${{ matrix.name }}
+          path: retry-info/
+          if-no-files-found: ignore
+          retention-days: 1
+
       - name: Alert if fail
         if: failure()
         uses: sarisia/actions-status-discord@v1.13.0
@@ -93,13 +114,37 @@ jobs:
     runs-on: ubuntu-slim
     name: Notify Test Completion
     steps:
+      - name: Download retry artifacts
+        uses: actions/download-artifact@v4
+        with:
+          pattern: retry-info-*
+          path: retry-info
+          merge-multiple: true
+
+      - name: Build retry description
+        id: retries
+        shell: pwsh
+        run: |
+          $files = Get-ChildItem -Path retry-info -Filter "*.txt" -ErrorAction SilentlyContinue | Sort-Object Name
+          if (-not $files) {
+            "description=" >> $env:GITHUB_OUTPUT
+          } else {
+            $lines = $files | ForEach-Object { "- " + (Get-Content $_.FullName) }
+            "description<<EOF" >> $env:GITHUB_OUTPUT
+            "Matrices that needed retries:" >> $env:GITHUB_OUTPUT
+            $lines >> $env:GITHUB_OUTPUT
+            "EOF" >> $env:GITHUB_OUTPUT
+          }
+
       - name: Notify Discord - Tests Complete
         uses: sarisia/actions-status-discord@v1.13.0
         with:
           webhook: ${{ secrets.LOG_HOOK }}
           title: <:joe_ye:1308074319934525545> All tests passed!
           status: success
-          description: -# branch `${{ github.ref_name }}` (due to `${{ github.event_name }}`)
+          description: |
+            ${{ steps.retries.outputs.description }}
+            -# branch `${{ github.ref_name }}` (due to `${{ github.event_name }}`)
           avatar_url: "https://avatars.githubusercontent.com/u/176916861?v=4"
           username: "NSPBot911"
           nodetail: true

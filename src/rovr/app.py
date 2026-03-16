@@ -5,7 +5,7 @@ from contextlib import suppress
 from io import TextIOWrapper
 from os import chdir, getcwd, path
 from time import perf_counter
-from typing import Callable, Iterable
+from typing import Awaitable, Callable, Iterable
 
 from rich.console import Console, RenderableType
 from rich.protocol import is_renderable
@@ -44,10 +44,6 @@ from rovr.core import FileList, FileListContainer, PinnedSidebar, PreviewContain
 from rovr.core.file_list import FileListRightClickOptionList
 from rovr.footer import Clipboard, MetadataContainer, ProcessContainer
 from rovr.functions import icons
-from rovr.functions.config import (  # noqa: F401
-    find_all_keys_for_action,
-    find_key_for_action,
-)
 from rovr.functions.path import (
     dump_exc,
     ensure_existing_directory,
@@ -76,7 +72,7 @@ from rovr.screens.typed import ShellExecReturnType
 from rovr.screens.way_too_small import TerminalTooSmall
 from rovr.state_manager import StateManager
 from rovr.variables.constants import MaxPossible, config, log_name
-from rovr.variables.maps import VAR_TO_DIR, ActionInfo
+from rovr.variables.maps import VAR_TO_DIR
 
 console = Console()
 
@@ -281,6 +277,54 @@ class Application(App, inherit_bindings=False):
         if config["interface"]["allow_tab_nav"]:
             super().action_focus_previous()
 
+    def parse_action(
+        self, node: str, action: str
+    ) -> Callable[[], None | Awaitable | Worker] | None:
+        if len(self.query(node)) != 0:
+            # start parsing action       ╭─╴not necessary!╶─╮
+            # action is in a template of (<state>=<selector>):<action_name>
+            chunks = action.split(":")
+            if len(chunks) == 2:
+                chunks = chunks[0].split("=") + [chunks[1]]
+                if len(chunks) != 3:
+                    raise RuntimeError(f"Invalid action format: {action}")
+                else:
+                    if len(query := self.query(chunks[1])) != 0:
+                        for widget in query:
+                            if callable(
+                                _action := getattr(widget, f"action_{chunks[2]}", None)
+                            ):
+                                match chunks[0]:
+                                    case "focused":
+                                        if (
+                                            self.focused is not None
+                                            and self.focused == widget
+                                        ):
+                                            return _action
+                                    case "blurred":
+                                        if (
+                                            self.focused is None
+                                            or self.focused != widget
+                                        ):
+                                            return _action
+                                    case "focus-within":
+                                        if widget.has_focus_within:
+                                            return _action
+                                    case _:
+                                        raise RuntimeError(
+                                            f"Invalid action state: {chunks[0]}"
+                                        )
+            elif len(chunks) == 1:
+                if len(query := self.query(node)) != 0:
+                    widget = query[0]
+                    if callable(_action := getattr(widget, f"action_{chunks[0]}")):
+                        return _action
+            else:
+                raise RuntimeError(f"Invalid action format: {action}")
+            # action is in a template of <action_name>
+        else:
+            return
+
     async def on_key(self, event: events.Key) -> None:
         from rovr.functions.utils import check_key
 
@@ -371,6 +415,8 @@ class Application(App, inherit_bindings=False):
             self.action_plugin_rg()
         elif check_key(event, config["keybinds"]["suspend_process"]):
             self.action_suspend_process()
+        elif config.get("keys", []):
+            ...
 
     @work
     async def on_shell_exec_response(
@@ -905,76 +951,6 @@ class Application(App, inherit_bindings=False):
     def _focused_id(self) -> str | None:
         if self.focused is not None:
             return self.focused.id
-        return None
-
-    def parse_action(self, target: DOMNode, action: str) -> ActionInfo | None:
-        # Format: `action_name` or `state=selector:action_name`
-        # where state is one of: focused, blurred, focus-within
-        if "=" in action and ":" in action:
-            eq_pos = action.index("=")
-            colon_pos = action.index(":")
-            if eq_pos < colon_pos:
-                state = action[:eq_pos]
-                selector = action[eq_pos + 1 : colon_pos]
-                action_name = action[colon_pos + 1 :]
-            else:
-                return None
-        elif ":" in action:
-            return None
-        else:
-            action_name = action
-            state = None
-            selector = None
-
-        method_name = f"action_{action_name}"
-        if not callable(getattr(target, method_name, None)):
-            return None
-        func = getattr(target, method_name)
-
-        if state is None:
-            return ActionInfo(action=func, target=target, condition=None)
-        if selector is None:
-            return None
-
-        widgets = list(self.query(selector))
-        if not widgets:
-            return None
-
-        match state:
-            case "focused":
-                for widget in widgets:
-                    if self.focused is not None and self.focused == widget:
-                        return ActionInfo(
-                            action=func, target=target, condition="focused"
-                        )
-            case "blurred":
-                for widget in widgets:
-                    if self.focused is None or self.focused != widget:
-                        return ActionInfo(
-                            action=func, target=target, condition="blurred"
-                        )
-            case "focus-within":
-                for widget in widgets:
-                    if widget.has_focus_within:
-                        return ActionInfo(
-                            action=func, target=target, condition="focus-within"
-                        )
-            case _:
-                return None
-        return None
-
-    def get_action(self, event: events.Key) -> ActionInfo | None:
-        key: str | None = event.character if event.is_printable else event.key
-        if key is None:
-            return None
-        for selector, binds in config.get("keys", {}).items():
-            if key not in binds:
-                continue
-            action_str = binds[key]
-            for widget in self.query(selector):
-                result = self.parse_action(widget, action_str)
-                if result is not None:
-                    return result
         return None
 
     # actions

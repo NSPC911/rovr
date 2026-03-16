@@ -149,7 +149,7 @@ class CopyButton(Button):
 
 
 class CopyPanelOptions(PopupOptionList):
-    def on_mount(self, event: events.Mount) -> None:  # ty: ignore[invalid-method-override]
+    def on_mount(self) -> None:
         self.do_adjust: bool = False
         self.button: CopyButton = self.app.query_one(CopyButton)
         self.styles.scrollbar_size_vertical = 0

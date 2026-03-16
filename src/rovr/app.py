@@ -95,7 +95,7 @@ class Application(App, inherit_bindings=False):
         for key in config["keybinds"]["quit_app"]
     ]
     # higher index = higher priority
-    CSS_PATH: list[str] = ["style.tcss"] + (
+    CSS_PATH = ["style.tcss"] + (
         [path.join(VAR_TO_DIR["CONFIG"], "style.tcss")]
         if path.exists(path.join(VAR_TO_DIR["CONFIG"], "style.tcss"))
         else []
@@ -838,7 +838,7 @@ class Application(App, inherit_bindings=False):
                 popup.add_class("hidden")
 
     @work(thread=True)
-    def run_in_thread(self, function: Callable, *args, **kwargs) -> Worker:
+    def run_in_thread(self, function: Callable, *args, **kwargs) -> Worker | Exception:
         """
         Run a function in a thread and return a worker for it.
         Args:
@@ -853,7 +853,7 @@ class Application(App, inherit_bindings=False):
         try:
             return function(*args, **kwargs)
         except Exception as exc:
-            return exc  # ty: ignore[invalid-return-type]
+            return exc
 
     def panic(self, *renderables: RenderableType) -> None:
         if not all(is_renderable(renderable) for renderable in renderables):

@@ -277,7 +277,7 @@ class Application(App, inherit_bindings=False):
         if config["interface"]["allow_tab_nav"]:
             super().action_focus_previous()
 
-    def parse_action(
+    def rovr_parse_action(
         self, node: str, action: str
     ) -> Callable[[], None | Awaitable | Worker] | None:
         if len(self.query(node)) != 0:

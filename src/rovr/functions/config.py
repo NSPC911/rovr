@@ -12,7 +12,7 @@ from fastjsonschema import JsonSchemaValueException
 from rich import box
 from rich.console import Console
 
-from rovr.classes.config import RovrConfig, _RovrConfigKeysAdditionalproperties
+from rovr.classes.config import RovrConfig
 from rovr.functions.utils import deep_merge
 from rovr.variables.maps import (
     VAR_TO_DIR,
@@ -316,16 +316,59 @@ def schema_dump(
         exit(1)
 
 
-def check_keys(
-    config: dict[str, _RovrConfigKeysAdditionalproperties], config_path: str
-) -> None:
+def find_key_for_action(
+    config: RovrConfig, action: str, selector: str | None = None
+) -> str | None:
+    """
+    Find the keybind for a given action
+
+    Args:
+        config (RovrConfig): the config to search
+        action (str): the action to find
+        selector (str | None): the selector to match (optional)
+    Returns:
+        str | None: the keybind for the action, or None if not found
+    """
+    for target, value in config["keys"].items():
+        for key, action_str in value.items():
+            if action_str.endswith(action) and (
+                not selector or selector.split(":")[0] in target
+            ):
+                return key
+    return None
+
+
+def find_all_keys_for_action(
+    config: RovrConfig, action: str, selector: str | None = None
+) -> list[str]:
+    """
+    Find all keybinds for a given action
+
+    Args:
+        config (RovrConfig): the config to search
+        action (str): the action to find
+        selector (str | None): the selector to match (optional)
+    Returns:
+        list[str]: a list of keybinds for the action
+    """
+    keys = []
+    for target, value in config["keys"].items():
+        for key, action_str in value.items():
+            if action_str.endswith(action) and (
+                not selector or selector.split(":")[0] in target
+            ):
+                keys.append(key)
+    return keys
+
+
+def check_keys(config: RovrConfig, config_path: str) -> None:
     """
     Check for keys format
     Args:
         config (dict): the config to check
          config_path (str): the path to the config file, for error reporting
     """
-    for key, value in config.items():
+    for key, value in config.get("keys", {}).items():
         if isinstance(value, dict):
             for value in value.values():
                 # parse the value for selectors
@@ -456,7 +499,7 @@ def load_config() -> tuple[dict, RovrConfig]:
         )
         exit(1)
     check_keys(
-        template_config["keys"],
+        cast(RovrConfig, template_config),
         path.join(path.dirname(__file__), "../config/config.toml"),
     )
     user_config = {}
@@ -477,7 +520,7 @@ def load_config() -> tuple[dict, RovrConfig]:
     except JsonSchemaValueException as exception:
         schema_dump(user_config_path, exception, user_config_content)
 
-    check_keys(config["keys"], user_config_path)
+    check_keys(config, user_config_path)
 
     if config.get("keybinds", None):
         schema_dump(

@@ -279,6 +279,8 @@ dont_ask_again = ["a"]
 "?" = "show_keybinds"
 "ctrl+p" = "command_palette"
 "ctrl+z" = "suspend_process"
+"q" = "quit"
+"ctrl+q" = "quit"
 [keys."FileList:focus"]
 "up" = "up"
 "down" = "down"

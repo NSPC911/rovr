@@ -11,7 +11,6 @@ from rich.console import Console, RenderableType
 from rich.protocol import is_renderable
 from textual import constants, events, on, work
 from textual.app import WINDOWS, App, ComposeResult, ScreenStackError, SystemCommand
-from textual.binding import Binding
 from textual.color import ColorParseError
 from textual.containers import (
     HorizontalGroup,
@@ -45,6 +44,10 @@ from rovr.core import FileList, FileListContainer, PinnedSidebar, PreviewContain
 from rovr.core.file_list import FileListRightClickOptionList
 from rovr.footer import Clipboard, MetadataContainer, ProcessContainer
 from rovr.functions import icons
+from rovr.functions.config import (  # noqa: F401
+    find_all_keys_for_action,
+    find_key_for_action,
+)
 from rovr.functions.path import (
     dump_exc,
     ensure_existing_directory,
@@ -83,17 +86,7 @@ if constants.SCREENSHOT_LOCATION:
 
 class Application(App, inherit_bindings=False):
     # dont need ctrl+c
-    BINDINGS = [
-        Binding(
-            key,
-            "quit",
-            "Quit",
-            tooltip="Quit the app and return to the command prompt.",
-            show=False,
-            priority=True,
-        )
-        for key in config["keybinds"]["quit_app"]
-    ]
+    BINDINGS = []
     # higher index = higher priority
     CSS_PATH = ["style.tcss"] + (
         [path.join(VAR_TO_DIR["CONFIG"], "style.tcss")]
@@ -106,7 +99,7 @@ class Application(App, inherit_bindings=False):
     )
 
     # command palette
-    COMMAND_PALETTE_BINDING = config["keybinds"]["command_palette"]
+    COMMAND_PALETTE_BINDING = ""
 
     # reactivity
     HORIZONTAL_BREAKPOINTS = (

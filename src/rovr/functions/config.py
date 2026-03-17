@@ -98,6 +98,9 @@ def find_path_line(lines: list[str], path: list) -> int | None:
     if not path:
         return 0
 
+    if path[0] == "data":
+        path.pop(0)
+
     path_filtered = [p for p in path if not isinstance(p, int)]
     if not path_filtered:
         return 0
@@ -201,7 +204,8 @@ def schema_dump(
                 prop = values[0]
                 name_match = re.match(r"^(.+) must not contain", exception.message)
                 name = name_match.group(1) if name_match else "<unknown>"
-                new_message = f"{prop} is not allowed in '{name}'"
+                part = f"in '{name}'" if name != "data" else "at root"
+                new_message = f"{prop} is not allowed {part}"
                 exception.message = new_message
                 if exception.name is not None:
                     exception.name += f".{prop.strip("'")}"
@@ -209,6 +213,8 @@ def schema_dump(
     # find the line no for the error path
     # exception.path is just exception.name but as a property
     path_str = ".".join(str(p) for p in exception.path) if exception.path else "root"
+    if path_str.startswith("data"):
+        path_str = path_str[5:] if len(path_str) > 5 else "root"
     lineno = find_path_line(doc, exception.path)
 
     rjust: int = 0

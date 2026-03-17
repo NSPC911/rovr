@@ -4,7 +4,7 @@ from importlib import resources
 from importlib.metadata import PackageNotFoundError, version
 from os import path
 from shutil import which
-from typing import Callable, Literal, cast
+from typing import Any, Callable, Literal, cast
 
 import fastjsonschema
 import tomli
@@ -314,6 +314,21 @@ def schema_dump(
 
     if (not dont_exit) and exception.rule != "additionalProperties":
         exit(1)
+
+
+def get_from(
+    path: list[str], default: list[str] | str | None = None
+) -> list[str] | str:
+    from rovr.variables.constants import config
+
+    copied: Any = config
+
+    for part in path:
+        copied = copied.get(part, {})
+    if isinstance(copied, (list, str)):
+        return copied
+    else:
+        return default if default is not None else []
 
 
 def find_key_for_action(

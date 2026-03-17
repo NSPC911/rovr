@@ -217,7 +217,9 @@ def is_archive(path_str: str) -> bool:
         return False
 
 
-def get_shortest_bind(binds: list[str]) -> str:
+def get_shortest_bind(binds: list[str] | str) -> str:
+    if isinstance(binds, str):
+        return binds
     least_len: tuple[int | None, str] = (None, "")
     for bind in binds:
         if least_len[0] is None or least_len[0] > len(bind):

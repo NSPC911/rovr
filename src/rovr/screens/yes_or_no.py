@@ -4,12 +4,12 @@ from textual.containers import Grid, HorizontalGroup, VerticalGroup
 from textual.screen import ModalScreen
 from textual.widgets import Button, Label, Switch
 
+from rovr.functions.config import get_from
 from rovr.functions.utils import check_key, get_shortest_bind
-from rovr.variables.constants import config
 
-yes_bind = get_shortest_bind(config["keybinds"]["yes_or_no"]["yes"])
-no_bind = get_shortest_bind(config["keybinds"]["yes_or_no"]["no"])
-dont_ask_bind = get_shortest_bind(config["keybinds"]["yes_or_no"]["dont_ask_again"])
+yes_bind = get_shortest_bind(get_from(["keybinds", "yes_or_no", "yes"]))
+no_bind = get_shortest_bind(get_from(["keybinds", "yes_or_no", "no"]))
+dont_ask_bind = get_shortest_bind(get_from(["keybinds", "yes_or_no", "dont_ask_again"]))
 
 
 class YesOrNo(ModalScreen):
@@ -69,12 +69,12 @@ class YesOrNo(ModalScreen):
 
     def on_key(self, event: events.Key) -> None:
         """Handle key presses."""
-        if check_key(event, config["keybinds"]["yes_or_no"]["yes"]):
+        if check_key(event, get_from(["keybinds", "yes_or_no", "yes"])):
             self.action_yes()
-        elif check_key(event, config["keybinds"]["yes_or_no"]["no"]):
+        elif check_key(event, get_from(["keybinds", "yes_or_no", "no"])):
             self.action_no()
         elif self.with_toggle and check_key(
-            event, config["keybinds"]["yes_or_no"]["dont_ask_again"]
+            event, get_from(["keybinds", "yes_or_no", "dont_ask_again"])
         ):
             self.action_toggle_dont_ask_again()
         else:

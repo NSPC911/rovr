@@ -11,6 +11,7 @@ from rich.console import Console, RenderableType
 from rich.protocol import is_renderable
 from textual import constants, events, on, work
 from textual.app import WINDOWS, App, ComposeResult, ScreenStackError, SystemCommand
+from textual.binding import Binding
 from textual.color import ColorParseError
 from textual.containers import (
     HorizontalGroup,
@@ -44,6 +45,7 @@ from rovr.core import FileList, FileListContainer, PinnedSidebar, PreviewContain
 from rovr.core.file_list import FileListRightClickOptionList
 from rovr.footer import Clipboard, MetadataContainer, ProcessContainer
 from rovr.functions import icons
+from rovr.functions.config import get_from
 from rovr.functions.path import (
     dump_exc,
     ensure_existing_directory,
@@ -82,7 +84,17 @@ if constants.SCREENSHOT_LOCATION:
 
 class Application(App, inherit_bindings=False):
     # dont need ctrl+c
-    BINDINGS = []
+    BINDINGS = [
+        Binding(
+            key,
+            "quit",
+            "Quit",
+            tooltip="Quit the app and return to the command prompt.",
+            show=False,
+            priority=True,
+        )
+        for key in get_from(["keybinds", "quit_app"])
+    ]
     # higher index = higher priority
     CSS_PATH = ["style.tcss"] + (
         [path.join(VAR_TO_DIR["CONFIG"], "style.tcss")]
@@ -95,7 +107,7 @@ class Application(App, inherit_bindings=False):
     )
 
     # command palette
-    COMMAND_PALETTE_BINDING = ""
+    COMMAND_PALETTE_BINDING = get_from(["keybinds", "command_palette"], "")
 
     # reactivity
     HORIZONTAL_BREAKPOINTS = (
@@ -364,56 +376,56 @@ class Application(App, inherit_bindings=False):
         ):
             return
         # focus toggle pinned sidebar
-        elif check_key(event, config["keybinds"]["focus_toggle_pinned_sidebar"]):
+        elif check_key(event, get_from(["keybinds", "focus_toggle_pinned_sidebar"])):
             self.action_focus_toggle_pinned_sidebar()
         # Focus file list from anywhere except input
-        elif check_key(event, config["keybinds"]["focus_file_list"]):
+        elif check_key(event, get_from(["keybinds", "focus_file_list"])):
             self.action_focus_file_list()
         # Focus toggle preview sidebar
-        elif check_key(event, config["keybinds"]["focus_toggle_preview_sidebar"]):
+        elif check_key(event, get_from(["keybinds", "focus_toggle_preview_sidebar"])):
             self.action_focus_toggle_preview_sidebar()
         # Focus path switcher
-        elif check_key(event, config["keybinds"]["focus_toggle_path_switcher"]):
+        elif check_key(event, get_from(["keybinds", "focus_toggle_path_switcher"])):
             self.action_focus_path_switcher()
         # Focus processes
-        elif check_key(event, config["keybinds"]["focus_toggle_processes"]):
+        elif check_key(event, get_from(["keybinds", "focus_toggle_processes"])):
             self.action_focus_toggle_processes()
         # Focus metadata
-        elif check_key(event, config["keybinds"]["focus_toggle_metadata"]):
+        elif check_key(event, get_from(["keybinds", "focus_toggle_metadata"])):
             self.action_focus_toggle_metadata()
         # Focus clipboard
-        elif check_key(event, config["keybinds"]["focus_toggle_clipboard"]):
+        elif check_key(event, get_from(["keybinds", "focus_toggle_clipboard"])):
             self.action_focus_toggle_clipboard()
         # Toggle hiding panels
-        elif check_key(event, config["keybinds"]["toggle_pinned_sidebar"]):
+        elif check_key(event, get_from(["keybinds", "toggle_pinned_sidebar"])):
             self.action_toggle_pinned_sidebar()
-        elif check_key(event, config["keybinds"]["toggle_preview_sidebar"]):
+        elif check_key(event, get_from(["keybinds", "toggle_preview_sidebar"])):
             self.action_toggle_preview_sidebar()
-        elif check_key(event, config["keybinds"]["toggle_footer"]):
+        elif check_key(event, get_from(["keybinds", "toggle_footer"])):
             self.action_toggle_footer()
-        elif check_key(event, config["keybinds"]["toggle_menu_wrapper"]):
+        elif check_key(event, get_from(["keybinds", "toggle_menu_wrapper"])):
             self.action_toggle_menu_wrapper()
-        elif check_key(event, config["keybinds"]["tab_next"]):
+        elif check_key(event, get_from(["keybinds", "tab_next"])):
             self.action_tab_next()
-        elif check_key(event, config["keybinds"]["tab_previous"]):
+        elif check_key(event, get_from(["keybinds", "tab_previous"])):
             self.action_tab_previous()
-        elif check_key(event, config["keybinds"]["tab_new"]):
+        elif check_key(event, get_from(["keybinds", "tab_new"])):
             await self.action_tab_new()
-        elif check_key(event, config["keybinds"]["tab_close"]):
+        elif check_key(event, get_from(["keybinds", "tab_close"])):
             await self.action_tab_close()
-        elif check_key(event, config["keybinds"]["show_keybinds"]):
+        elif check_key(event, get_from(["keybinds", "show_keybinds"])):
             self.action_show_keybinds()
-        elif check_key(event, config["keybinds"]["show_shell_screen"]):
+        elif check_key(event, get_from(["keybinds", "show_shell_screen"])):
             self.action_show_shell_screen()
         # zoxide
-        elif check_key(event, config["plugins"]["zoxide"]["keybinds"]):
+        elif check_key(event, get_from(["plugins", "zoxide", "keybinds"])):
             self.action_plugin_zoxide()
         # keybinds
-        elif check_key(event, config["plugins"]["fd"]["keybinds"]):
+        elif check_key(event, get_from(["plugins", "fd", "keybinds"])):
             self.action_plugin_fd()
-        elif check_key(event, config["plugins"]["rg"]["keybinds"]):
+        elif check_key(event, get_from(["plugins", "rg", "keybinds"])):
             self.action_plugin_rg()
-        elif check_key(event, config["keybinds"]["suspend_process"]):
+        elif check_key(event, get_from(["keybinds", "suspend_process"])):
             self.action_suspend_process()
         elif config.get("keys", []):
             ...

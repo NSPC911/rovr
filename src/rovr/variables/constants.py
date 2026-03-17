@@ -90,57 +90,60 @@ class MaxPossible:
 scroll_bindings = (
     [
         Binding(bind, "scroll_down", "Scroll Down", show=False)
-        for bind in config["keybinds"]["down"]
+        for bind in config.get("keybinds", {}).get("down", [])
     ]
     + [
         Binding(bind, "scroll_up", "Scroll Up", show=False)
-        for bind in config["keybinds"]["up"]
+        for bind in config.get("keybinds", {}).get("up", [])
     ]
     + [
         Binding(bind, action="scroll_page_up", description="Scroll Page Up", show=False)
-        for bind in config["keybinds"]["page_up"]
+        for bind in config.get("keybinds", {}).get("page_up", [])
     ]
     + [
         Binding(
             bind, action="scroll_page_down", description="Scroll Page Down", show=False
         )
-        for bind in config["keybinds"]["page_down"]
+        for bind in config.get("keybinds", {}).get("page_down", [])
     ]
     + [
         Binding(bind, "scroll_home", "Scroll First", show=False)
-        for bind in config["keybinds"]["home"]
+        for bind in config.get("keybinds", {}).get("home", [])
     ]
     + [
         Binding(bind, "scroll_end", "Scroll End", show=False)
-        for bind in config["keybinds"]["end"]
+        for bind in config.get("keybinds", {}).get("end", [])
     ]
 )
 
 bindings = (
     [
         Binding(bind, "cursor_down", "Down", show=False)
-        for bind in config["keybinds"]["down"]
+        for bind in config.get("keybinds", {}).get("down", [])
     ]
     + [
         Binding(bind, "cursor_up", "Up", show=False)
-        for bind in config["keybinds"]["up"]
+        for bind in config.get("keybinds", {}).get("up", [])
     ]
     + [
         Binding(bind, "first", "First", show=False)
-        for bind in config["keybinds"]["home"]
+        for bind in config.get("keybinds", {}).get("home", [])
     ]
-    + [Binding(bind, "last", "Last", show=False) for bind in config["keybinds"]["end"]]
+    + [
+        Binding(bind, "last", "Last", show=False)
+        for bind in config.get("keybinds", {}).get("end", [])
+    ]
     + [
         Binding(bind, "page_down", "Page Down", show=False)
-        for bind in config["keybinds"]["page_down"]
+        for bind in config.get("keybinds", {}).get("page_down", [])
     ]
     + [
         Binding(bind, "page_up", "Page Up", show=False)
-        for bind in config["keybinds"]["page_up"]
+        for bind in config.get("keybinds", {}).get("page_up", [])
     ]
     + [
         Binding(bind, "select", "Select", show=False)
-        for bind in config["keybinds"]["down_tree"]
+        for bind in config.get("keybinds", {}).get("down_tree", [])
     ]
 )
 

@@ -13,7 +13,8 @@ from rovr.classes.textual_options import PinnedSidebarOption
 from rovr.functions import icons as icon_utils
 from rovr.functions import path as path_utils
 from rovr.functions import pins as pin_utils
-from rovr.variables.constants import bindings, config
+from rovr.functions.config import get_from
+from rovr.variables.constants import bindings
 
 
 class PinnedSidebar(OptionList, inherit_bindings=False):
@@ -187,7 +188,7 @@ class PinnedSidebar(OptionList, inherit_bindings=False):
             self.set_options(self.list_of_options)
 
     def on_key(self, event: events.Key) -> None:
-        if event.key in config["keybinds"]["focus_search"]:
+        if event.key in get_from(["keybinds", "focus_search"]):
             self.action_focus_search()
 
     def action_focus_search(self) -> None:

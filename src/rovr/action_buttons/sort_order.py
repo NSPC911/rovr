@@ -7,20 +7,25 @@ from textual.widgets.option_list import Option, OptionDoesNotExist
 
 from rovr.classes.type_aliases import SortByOptions
 from rovr.components import PopupOptionList
+from rovr.functions.config import get_from
 from rovr.functions.icons import get_icon, get_toggle_button_icon
 from rovr.functions.utils import check_key, get_shortest_bind
 from rovr.state_manager import StateManager
 from rovr.variables.constants import config
 
 # Get the shortest keybind for each sort option
-name_bind = get_shortest_bind(config["keybinds"]["change_sort_order"]["name"])
-extension_bind = get_shortest_bind(config["keybinds"]["change_sort_order"]["extension"])
-natural_bind = get_shortest_bind(config["keybinds"]["change_sort_order"]["natural"])
-size_bind = get_shortest_bind(config["keybinds"]["change_sort_order"]["size"])
-created_bind = get_shortest_bind(config["keybinds"]["change_sort_order"]["created"])
-modified_bind = get_shortest_bind(config["keybinds"]["change_sort_order"]["modified"])
+name_bind = get_shortest_bind(get_from(["keybinds", "change_sort_order", "name"]))
+extension_bind = get_shortest_bind(
+    get_from(["keybinds", "change_sort_order", "extension"])
+)
+natural_bind = get_shortest_bind(get_from(["keybinds", "change_sort_order", "natural"]))
+size_bind = get_shortest_bind(get_from(["keybinds", "change_sort_order", "size"]))
+created_bind = get_shortest_bind(get_from(["keybinds", "change_sort_order", "created"]))
+modified_bind = get_shortest_bind(
+    get_from(["keybinds", "change_sort_order", "modified"])
+)
 descending_bind = get_shortest_bind(
-    config["keybinds"]["change_sort_order"]["descending"]
+    get_from(["keybinds", "change_sort_order", "descending"])
 )
 
 
@@ -217,7 +222,9 @@ class SortOrderPopup(PopupOptionList):
         self.button.update_icon()
 
     async def on_key(self, event: events.Key) -> None:
-        for option, keys in config["keybinds"]["change_sort_order"].items():
+        for option, keys in (
+            config.get("keybinds", {}).get("change_sort_order", {}).items()
+        ):
             if option == "open_popup":
                 continue
             keys = cast(list[str], keys)

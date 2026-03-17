@@ -17,6 +17,7 @@ from textual.widgets import Label, ProgressBar
 from rovr.classes.archive import Archive
 from rovr.functions import icons as icon_utils
 from rovr.functions import path as path_utils
+from rovr.functions.config import get_from
 from rovr.functions.utils import is_being_used
 from rovr.screens import (
     Dismissible,
@@ -994,7 +995,7 @@ class ProcessContainer(VerticalScroll):
         self.app.call_from_thread(bar.add_class, "done")
 
     def on_key(self, event: events.Key) -> None:
-        if event.key in config["keybinds"]["delete"]:
+        if event.key in get_from(["keybinds", "delete"]):
             event.stop()
             self.action_delete()
 

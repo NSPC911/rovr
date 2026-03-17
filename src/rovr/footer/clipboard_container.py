@@ -12,8 +12,9 @@ from textual.worker import Worker
 from rovr.classes.mixins import CheckboxRenderingMixin
 from rovr.classes.textual_options import ClipboardSelection, ClipboardSelectionValue
 from rovr.functions import icons as icon_utils
+from rovr.functions.config import get_from
 from rovr.functions.path import dump_exc
-from rovr.variables.constants import bindings, config
+from rovr.variables.constants import bindings
 
 
 class Clipboard(CheckboxRenderingMixin, SelectionList, inherit_bindings=False):
@@ -138,10 +139,10 @@ class Clipboard(CheckboxRenderingMixin, SelectionList, inherit_bindings=False):
 
     async def on_key(self, event: events.Key) -> None:
         if self.has_focus:
-            if event.key in config["keybinds"]["delete"]:
+            if event.key in get_from(["keybinds", "delete"]):
                 self.action_delete()
                 event.stop()
-            elif event.key in config["keybinds"]["toggle_all"]:
+            elif event.key in get_from(["keybinds", "toggle_all"]):
                 self.action_toggle_all()
                 event.stop()
 

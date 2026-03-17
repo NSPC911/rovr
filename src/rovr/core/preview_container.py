@@ -36,6 +36,7 @@ from rovr.core import FileList
 from rovr.functions import icons as icon_utils
 from rovr.functions import path as path_utils
 from rovr.functions import preview_utils
+from rovr.functions.config import get_from
 from rovr.functions.pdf import get_pdf_images, get_pdf_info
 from rovr.functions.utils import should_cancel
 from rovr.variables.constants import PreviewContainerTitles, config, file_executable
@@ -1169,17 +1170,17 @@ class PreviewContainer(Container):
         from rovr.functions.utils import check_key
 
         if (
-            check_key(event, config["keybinds"]["up"])
+            check_key(event, get_from(["keybinds", "up"]))
             and self.action_up() is None
-            or check_key(event, config["keybinds"]["down"])
+            or check_key(event, get_from(["keybinds", "down"]))
             and self.action_down() is None
-            or check_key(event, config["keybinds"]["page_up"])
+            or check_key(event, get_from(["keybinds", "page_up"]))
             and self.action_page_up() is None
-            or check_key(event, config["keybinds"]["page_down"])
+            or check_key(event, get_from(["keybinds", "page_down"]))
             and self.action_page_down() is None
-            or check_key(event, config["keybinds"]["home"])
+            or check_key(event, get_from(["keybinds", "home"]))
             and self.action_home() is None
-            or check_key(event, config["keybinds"]["end"])
+            or check_key(event, get_from(["keybinds", "end"]))
             and self.action_end() is None
         ):
             event.stop()

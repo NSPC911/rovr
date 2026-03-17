@@ -20,6 +20,7 @@ from rovr.functions import icons as icon_utils
 from rovr.functions import path as path_utils
 from rovr.functions import pins as pin_utils
 from rovr.functions import utils
+from rovr.functions.config import get_from
 from rovr.navigation_widgets import PathInput
 from rovr.state_manager import StateManager
 from rovr.variables.constants import (
@@ -498,62 +499,64 @@ class FileList(CheckboxRenderingMixin, SelectionList, inherit_bindings=False):
         from rovr.functions.utils import check_key
 
         # hit buttons with keybinds
-        if check_key(event, config["keybinds"]["hist_previous"]):
+        if check_key(event, get_from(["keybinds", "hist_previous"])):
             self.action_hist_previous()
-        elif check_key(event, config["keybinds"]["hist_next"]):
+        elif check_key(event, get_from(["keybinds", "hist_next"])):
             self.action_hist_next()
-        elif check_key(event, config["keybinds"]["up_tree"]):
+        elif check_key(event, get_from(["keybinds", "up_tree"])):
             self.action_up_tree()
-        elif check_key(event, config["keybinds"]["bypass_up_tree"]):
+        elif check_key(event, get_from(["keybinds", "bypass_up_tree"])):
             self.action_bypass_up_tree()
-        elif check_key(event, config["keybinds"]["bypass_down_tree"]):
+        elif check_key(event, get_from(["keybinds", "bypass_down_tree"])):
             self.action_bypass_down_tree()
         # Toggle pin on current directory
-        elif check_key(event, config["keybinds"]["toggle_pin"]):
+        elif check_key(event, get_from(["keybinds", "toggle_pin"])):
             self.action_toggle_pin()
-        elif check_key(event, config["keybinds"]["copy"]):
+        elif check_key(event, get_from(["keybinds", "copy"])):
             self.action_copy()
-        elif check_key(event, config["keybinds"]["extra_copy"]["open_popup"]):
+        elif check_key(event, get_from(["keybinds", "extra_copy", "open_popup"])):
             await self.action_extra_copy_open_popup()
-        elif check_key(event, config["keybinds"]["cut"]):
+        elif check_key(event, get_from(["keybinds", "cut"])):
             self.action_cut()
-        elif check_key(event, config["keybinds"]["paste"]):
+        elif check_key(event, get_from(["keybinds", "paste"])):
             self.action_paste()
-        elif check_key(event, config["keybinds"]["new"]):
+        elif check_key(event, get_from(["keybinds", "new"])):
             self.action_new()
-        elif check_key(event, config["keybinds"]["rename"]):
+        elif check_key(event, get_from(["keybinds", "rename"])):
             self.action_rename()
-        elif check_key(event, config["keybinds"]["delete"]):
+        elif check_key(event, get_from(["keybinds", "delete"])):
             self.action_delete()
-        elif check_key(event, config["keybinds"]["zip"]):
+        elif check_key(event, get_from(["keybinds", "zip"])):
             self.action_zip()
-        elif check_key(event, config["keybinds"]["unzip"]):
+        elif check_key(event, get_from(["keybinds", "unzip"])):
             self.action_unzip()
         # search
-        elif check_key(event, config["keybinds"]["focus_search"]):
+        elif check_key(event, get_from(["keybinds", "focus_search"])):
             self.action_focus_search()
         # toggle hidden files
-        elif check_key(event, config["keybinds"]["toggle_hidden_files"]):
+        elif check_key(event, get_from(["keybinds", "toggle_hidden_files"])):
             await self.action_toggle_hidden_files()
-        elif check_key(event, config["keybinds"]["change_sort_order"]["open_popup"]):
+        elif check_key(
+            event, get_from(["keybinds", "change_sort_order", "open_popup"])
+        ):
             await self.action_change_sort_order_open_popup()
-        elif check_key(event, config["keybinds"]["toggle_visual"]):
+        elif check_key(event, get_from(["keybinds", "toggle_visual"])):
             await self.action_toggle_visual()
-        elif check_key(event, config["keybinds"]["toggle_all"]):
+        elif check_key(event, get_from(["keybinds", "toggle_all"])):
             await self.action_toggle_all()
-        elif check_key(event, config["keybinds"]["select_up"]):
+        elif check_key(event, get_from(["keybinds", "select_up"])):
             self.action_select_up()
-        elif check_key(event, config["keybinds"]["select_down"]):
+        elif check_key(event, get_from(["keybinds", "select_down"])):
             self.action_select_down()
-        elif check_key(event, config["keybinds"]["select_page_up"]):
+        elif check_key(event, get_from(["keybinds", "select_page_up"])):
             self.action_select_page_up()
-        elif check_key(event, config["keybinds"]["select_page_down"]):
+        elif check_key(event, get_from(["keybinds", "select_page_down"])):
             self.action_select_page_down()
-        elif check_key(event, config["keybinds"]["select_home"]):
+        elif check_key(event, get_from(["keybinds", "select_home"])):
             self.action_select_home()
-        elif check_key(event, config["keybinds"]["select_end"]):
+        elif check_key(event, get_from(["keybinds", "select_end"])):
             self.action_select_end()
-        elif check_key(event, config["keybinds"]["open_editor"]):
+        elif check_key(event, get_from(["keybinds", "open_editor"])):
             self.action_open_editor()
 
     def update_border_subtitle(self) -> None:
@@ -735,10 +738,9 @@ class FileList(CheckboxRenderingMixin, SelectionList, inherit_bindings=False):
         self.app.query_one("#copy").action_press()
 
     async def action_extra_copy_open_popup(self) -> None:
+        # key event doesn't matter
         await self.app.query_one("#copy").action_open_popup(
-            events.Key(
-                key=config["keybinds"]["extra_copy"]["open_popup"][0], character=None
-            )
+            events.Key(key="", character=None)
         )
 
     # nav stuff that i dont want to rename just yet

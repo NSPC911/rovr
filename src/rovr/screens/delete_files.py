@@ -5,12 +5,13 @@ from textual.screen import ModalScreen
 from textual.widgets import Button, Label
 
 from rovr.components import PaddedOption, SpecialOptionList
+from rovr.functions.config import get_from
 from rovr.functions.utils import check_key, get_shortest_bind
 from rovr.variables.constants import config
 
-delete_bind = get_shortest_bind(config["keybinds"]["delete_files"]["delete"])
-trash_bind = get_shortest_bind(config["keybinds"]["delete_files"]["trash"])
-cancel_bind = get_shortest_bind(config["keybinds"]["delete_files"]["cancel"])
+delete_bind = get_shortest_bind(get_from(["keybinds", "delete_files", "delete"]))
+trash_bind = get_shortest_bind(get_from(["keybinds", "delete_files", "trash"]))
+cancel_bind = get_shortest_bind(get_from(["keybinds", "delete_files", "cancel"]))
 
 
 class DeleteFiles(ModalScreen):
@@ -67,14 +68,14 @@ class DeleteFiles(ModalScreen):
 
     def on_key(self, event: events.Key) -> None:
         """Handle key presses."""
-        if check_key(event, config["keybinds"]["delete_files"]["delete"]):
+        if check_key(event, get_from(["keybinds", "delete_files", "delete"])):
             event.stop()
             self.action_delete()
-        elif check_key(event, config["keybinds"]["delete_files"]["cancel"]):
+        elif check_key(event, get_from(["keybinds", "delete_files", "cancel"])):
             event.stop()
             self.action_cancel()
         elif config["settings"]["use_recycle_bin"] and check_key(
-            event, config["keybinds"]["delete_files"]["trash"]
+            event, get_from(["keybinds", "delete_files", "trash"])
         ):
             event.stop()
             self.action_trash()

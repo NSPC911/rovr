@@ -5,13 +5,15 @@ from textual.containers import Container, Grid, HorizontalGroup, VerticalGroup
 from textual.screen import ModalScreen
 from textual.widgets import Button, Label, Switch
 
+from rovr.functions.config import get_from
 from rovr.functions.utils import check_key, get_shortest_bind
-from rovr.variables.constants import config
 
-retry_bind = get_shortest_bind(config["keybinds"]["file_in_use"]["retry"])
-cancel_bind = get_shortest_bind(config["keybinds"]["file_in_use"]["cancel"])
-skip_bind = get_shortest_bind(config["keybinds"]["file_in_use"]["skip"])
-dont_ask_bind = get_shortest_bind(config["keybinds"]["file_in_use"]["dont_ask_again"])
+retry_bind = get_shortest_bind(get_from(["keybinds", "file_in_use", "retry"]))
+cancel_bind = get_shortest_bind(get_from(["keybinds", "file_in_use", "cancel"]))
+skip_bind = get_shortest_bind(get_from(["keybinds", "file_in_use", "skip"]))
+dont_ask_bind = get_shortest_bind(
+    get_from(["keybinds", "file_in_use", "dont_ask_again"])
+)
 
 
 class FileInUse(ModalScreen):
@@ -41,16 +43,16 @@ class FileInUse(ModalScreen):
         # Optionally add padding or styling here if needed for consistency
 
     def on_key(self, event: events.Key) -> None:
-        if check_key(event, config["keybinds"]["file_in_use"]["retry"]):
+        if check_key(event, get_from(["keybinds", "file_in_use", "retry"])):
             event.stop()
             self.action_retry()
-        elif check_key(event, config["keybinds"]["file_in_use"]["cancel"]):
+        elif check_key(event, get_from(["keybinds", "file_in_use", "cancel"])):
             event.stop()
             self.action_cancel()
-        elif check_key(event, config["keybinds"]["file_in_use"]["skip"]):
+        elif check_key(event, get_from(["keybinds", "file_in_use", "skip"])):
             event.stop()
             self.action_skip()
-        elif check_key(event, config["keybinds"]["file_in_use"]["dont_ask_again"]):
+        elif check_key(event, get_from(["keybinds", "file_in_use", "dont_ask_again"])):
             event.stop()
             self.action_toggle_dont_ask_again()
 

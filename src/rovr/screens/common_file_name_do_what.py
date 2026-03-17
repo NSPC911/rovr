@@ -4,15 +4,17 @@ from textual.containers import Grid, HorizontalGroup, VerticalGroup
 from textual.screen import ModalScreen
 from textual.widgets import Button, Label, Switch
 
+from rovr.functions.config import get_from
 from rovr.functions.utils import check_key, get_shortest_bind
-from rovr.variables.constants import config
 
-overwrite_bind = get_shortest_bind(config["keybinds"]["filename_conflict"]["overwrite"])
-rename_bind = get_shortest_bind(config["keybinds"]["filename_conflict"]["rename"])
-skip_bind = get_shortest_bind(config["keybinds"]["filename_conflict"]["skip"])
-cancel_bind = get_shortest_bind(config["keybinds"]["filename_conflict"]["cancel"])
+overwrite_bind = get_shortest_bind(
+    get_from(["keybinds", "filename_conflict", "overwrite"])
+)
+rename_bind = get_shortest_bind(get_from(["keybinds", "filename_conflict", "rename"]))
+skip_bind = get_shortest_bind(get_from(["keybinds", "filename_conflict", "skip"]))
+cancel_bind = get_shortest_bind(get_from(["keybinds", "filename_conflict", "cancel"]))
 dont_ask_bind = get_shortest_bind(
-    config["keybinds"]["filename_conflict"]["dont_ask_again"]
+    get_from(["keybinds", "filename_conflict", "dont_ask_again"])
 )
 
 
@@ -59,16 +61,16 @@ class FileNameConflict(ModalScreen):
 
     def on_key(self, event: events.Key) -> None:
         """Handle key presses."""
-        if check_key(event, config["keybinds"]["filename_conflict"]["overwrite"]):
+        if check_key(event, get_from(["keybinds", "filename_conflict", "overwrite"])):
             self.action_overwrite()
-        elif check_key(event, config["keybinds"]["filename_conflict"]["rename"]):
+        elif check_key(event, get_from(["keybinds", "filename_conflict", "rename"])):
             self.action_rename()
-        elif check_key(event, config["keybinds"]["filename_conflict"]["skip"]):
+        elif check_key(event, get_from(["keybinds", "filename_conflict", "skip"])):
             self.action_skip()
-        elif check_key(event, config["keybinds"]["filename_conflict"]["cancel"]):
+        elif check_key(event, get_from(["keybinds", "filename_conflict", "cancel"])):
             self.action_cancel()
         elif check_key(
-            event, config["keybinds"]["filename_conflict"]["dont_ask_again"]
+            event, get_from(["keybinds", "filename_conflict", "dont_ask_again"])
         ):
             self.action_dont_ask_again()
         else:

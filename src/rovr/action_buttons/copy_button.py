@@ -8,6 +8,7 @@ from textual.widgets.option_list import Option
 
 from rovr.classes.textual_options import FileListSelectionWidget
 from rovr.components.popup_option_list import PopupOptionList
+from rovr.functions.config import get_from
 from rovr.functions.icons import get_icon
 from rovr.functions.path import dump_exc, normalise
 from rovr.functions.system_clipboard import (
@@ -18,11 +19,13 @@ from rovr.functions.system_clipboard import (
 from rovr.functions.utils import check_key, get_shortest_bind
 from rovr.variables.constants import config
 
-rovr_bind = get_shortest_bind(config["keybinds"]["extra_copy"]["copy_to_rovr"])
-path_bind = get_shortest_bind(config["keybinds"]["extra_copy"]["copy_single_path"])
-system_bind = get_shortest_bind(config["keybinds"]["extra_copy"]["copy_to_system_clip"])
+rovr_bind = get_shortest_bind(get_from(["keybinds", "extra_copy", "copy_to_rovr"]))
+path_bind = get_shortest_bind(get_from(["keybinds", "extra_copy", "copy_single_path"]))
+system_bind = get_shortest_bind(
+    get_from(["keybinds", "extra_copy", "copy_to_system_clip"])
+)
 copy_parent_bind = get_shortest_bind(
-    config["keybinds"]["extra_copy"]["copy_current_directory"]
+    get_from(["keybinds", "extra_copy", "copy_current_directory"])
 )
 
 
@@ -201,14 +204,16 @@ class CopyPanelOptions(PopupOptionList):
             )
 
     async def on_key(self, event: events.Key) -> None:
-        if check_key(event, config["keybinds"]["extra_copy"]["copy_to_rovr"]):
+        if check_key(event, get_from(["keybinds", "extra_copy", "copy_to_rovr"])):
             self.button.action_press()
-        elif check_key(event, config["keybinds"]["extra_copy"]["copy_single_path"]):
+        elif check_key(event, get_from(["keybinds", "extra_copy", "copy_single_path"])):
             self.button.copy_path()
-        elif check_key(event, config["keybinds"]["extra_copy"]["copy_to_system_clip"]):
+        elif check_key(
+            event, get_from(["keybinds", "extra_copy", "copy_to_system_clip"])
+        ):
             self.button.copy_to_system_clip()
         elif check_key(
-            event, config["keybinds"]["extra_copy"]["copy_current_directory"]
+            event, get_from(["keybinds", "extra_copy", "copy_current_directory"])
         ):
             self.button.copy_current_directory()
         else:

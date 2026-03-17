@@ -5,8 +5,8 @@ from textual.worker import Worker
 
 from rovr.classes.textual_options import ModalSearcherOption
 from rovr.components.special_option_lists import DoubleClickableOptionList
+from rovr.functions.config import get_from
 from rovr.functions.utils import check_key
-from rovr.variables.constants import config
 
 
 class ModalSearchScreen(ModalScreen, inherit_bindings=False):
@@ -58,17 +58,17 @@ class ModalSearchScreen(ModalScreen, inherit_bindings=False):
             self.dismiss(None)
 
     def on_key(self, event: events.Key) -> None:
-        if check_key(event, config["keybinds"]["filter_modal"]["exit"]):
+        if check_key(event, get_from(["keybinds", "filter_modal", "exit"])):
             event.stop()
             self.dismiss(None)
         elif check_key(
-            event, config["keybinds"]["filter_modal"]["down"]
+            event, get_from(["keybinds", "filter_modal", "down"])
         ) and isinstance(self.focused, Input):
             event.stop()
             self.action_next_option()
-        elif check_key(event, config["keybinds"]["filter_modal"]["up"]) and isinstance(
-            self.focused, Input
-        ):
+        elif check_key(
+            event, get_from(["keybinds", "filter_modal", "up"])
+        ) and isinstance(self.focused, Input):
             event.stop()
             self.action_previous_option()
         elif event.key == "tab":

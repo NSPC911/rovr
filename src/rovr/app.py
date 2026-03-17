@@ -842,13 +842,17 @@ class Application(App, inherit_bindings=False):
                 "Start searching for a directory to `z` to",
                 self.action_plugin_zoxide,
             )
-        if config["plugins"]["rg"]["enabled"] and config["plugins"]["rg"]["keybinds"]:
+        if config["plugins"]["rg"]["enabled"] and get_from([
+            "plugins",
+            "rg",
+            "keybinds",
+        ]):
             yield SystemCommand(
                 "Open ripgrep",
                 "Start searching the current directory for a string using `rg`",
                 self.action_plugin_rg,
             )
-        if config["keybinds"]["toggle_hidden_files"]:
+        if get_from(["keybinds", "toggle_hidden_files"]):
             if config["interface"]["show_hidden_files"]:
                 yield SystemCommand(
                     "Hide Hidden Files",

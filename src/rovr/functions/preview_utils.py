@@ -1,10 +1,15 @@
 import multiprocessing
 from concurrent.futures import FIRST_COMPLETED, Future, ProcessPoolExecutor, wait
-from multiprocessing.connection import Connection
 
 from PIL import Image
 from PIL.Image import Image as PILImage
 
+from rovr.functions.preview_workers import (
+    _depalette,
+    resample_bytes_worker,
+    resample_file_worker,
+    resample_worker,
+)
 from rovr.functions.utils import should_cancel
 from rovr.variables.constants import config
 
@@ -18,76 +23,6 @@ RESAMPLING_METHOD = {
 }.get(config["interface"]["image_viewer"]["resampling"], Image.Resampling.NEAREST)
 MAX_IMAGE_SIZE: tuple[int, int] = tuple(config["interface"]["image_viewer"]["max_size"])  # ty: ignore
 MAX_FONT_SIZE: tuple[int, int] = tuple(config["interface"]["font_preview"]["max_size"])  # ty: ignore
-
-
-def _depalette(image: Image.Image) -> Image.Image:
-    """Convert paletted images to RGBA
-
-    Returns:
-        The original image, or an RGBA-converted copy if paletted.
-    """
-    if image.mode in ("P", "PA"):
-        return image.convert("RGBA")
-    return image
-
-
-def resample_worker(
-    args: tuple[bytes, str, tuple[int, int], tuple[int, int], int],
-) -> tuple[bytes, str, tuple[int, int]]:
-    """Resample an image from raw pixel bytes.
-
-    Returns:
-        Tuple containing resampled image bytes, mode, and size.
-    """
-    image_data, image_mode, image_size, max_sz, resample_method = args
-    img = Image.frombytes(image_mode, image_size, image_data)
-    img.thumbnail(max_sz, resample=Image.Resampling(resample_method))
-    return (img.tobytes(), img.mode, img.size)
-
-
-def resample_bytes_worker(
-    conn: Connection,
-    image_data: bytes,
-    image_mode: str,
-    image_size: tuple[int, int],
-    max_sz: tuple[int, int],
-    resample_method: int,
-) -> None:
-    """Resample an image from raw pixel bytes."""
-    try:
-        conn.send(
-            resample_worker((
-                image_data,
-                image_mode,
-                image_size,
-                max_sz,
-                resample_method,
-            ))
-        )
-    except Exception as exc:
-        conn.send(exc)
-    finally:
-        conn.close()
-
-
-def resample_file_worker(
-    conn: Connection,
-    file_path: str,
-    max_size: tuple[int, int],
-    resample_method: int,
-) -> None:
-    """Open a file, resample it, and send the result back."""
-    try:
-        with Image.open(file_path) as img:
-            img.load()
-            pil = img.copy()
-        pil = _depalette(pil)
-        pil.thumbnail(max_size, resample=Image.Resampling(resample_method))
-        conn.send((pil.tobytes(), pil.mode, pil.size))
-    except Exception as exc:
-        conn.send(exc)
-    finally:
-        conn.close()
 
 
 def _await_resample_process(

@@ -114,6 +114,7 @@ class FileList(CheckboxRenderingMixin, SelectionList, inherit_bindings=False):
         focus_on: str | None = None,
         has_selected: bool = False,
         callback: Callable | None = None,
+        clear_search: bool = True,
     ) -> None:
         """Update the file list with the current directory contents.
 
@@ -290,6 +291,8 @@ class FileList(CheckboxRenderingMixin, SelectionList, inherit_bindings=False):
             self.app.tabWidget.parent.on_resize()
             with self.input.prevent(self.input.Changed):
                 self.input.clear()
+            if clear_search:
+                self.app.tabWidget.active_tab.session.search = ""
             if not add_to_session:
                 self.input.clear_selected()
             if self.list_of_options[0].disabled:  # special option
@@ -361,7 +364,7 @@ class FileList(CheckboxRenderingMixin, SelectionList, inherit_bindings=False):
             if path.isdir(target_path):
                 # if the folder is selected, then cd there,
                 # skipping the middle folder entirely
-                self.app.cd(target_path)
+                self.app.cd(target_path, clear_search=True)
                 self.app.tabWidget.active_tab.selectedItems = []
                 self.app.file_list.focus()
             else:
@@ -372,7 +375,7 @@ class FileList(CheckboxRenderingMixin, SelectionList, inherit_bindings=False):
         elif not self.select_mode_enabled:
             full_path = path.join(cwd, file_name)
             if path.isdir(full_path):
-                self.app.cd(full_path)
+                self.app.cd(full_path, clear_search=True)
             else:
                 await self.file_selected_handler(full_path)
             if self.highlighted is None:
@@ -689,9 +692,9 @@ class FileList(CheckboxRenderingMixin, SelectionList, inherit_bindings=False):
                         break
                     prev_to_dir = to_dir
                     to_dir = path.dirname(to_dir)
-                self.app.cd(to_dir)
+                self.app.cd(to_dir, clear_search=True)
             except PermissionError:
-                self.app.cd(prev_to_dir)
+                self.app.cd(prev_to_dir, clear_search=True)
 
     def action_bypass_down_tree(self) -> None:
         if not self.select_mode_enabled:
@@ -719,9 +722,9 @@ class FileList(CheckboxRenderingMixin, SelectionList, inherit_bindings=False):
                                 break
                             prev_to_dir = to_dir
                             to_dir = next_path
-                        self.app.cd(to_dir)
+                        self.app.cd(to_dir, clear_search=True)
                     except PermissionError:
-                        self.app.cd(prev_to_dir)
+                        self.app.cd(prev_to_dir, clear_search=True)
 
     # Unlike for Up/Down/HistBack/HistForward, there is nothing beneficial
     # if you spam the keybind for them, so I don't need to worry about

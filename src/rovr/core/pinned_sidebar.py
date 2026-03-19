@@ -180,7 +180,7 @@ class PinnedSidebar(OptionList, inherit_bindings=False):
                 )
             else:
                 return
-        self.app.cd(file_path)
+        self.app.cd(file_path, clear_search=True)
         self.app.file_list.focus()
         with self.input.prevent(Input.Changed):
             self.input.clear()

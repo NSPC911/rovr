@@ -151,6 +151,7 @@ class Tabline(Tabs):
             add_to_history=False,
             has_selected=event.tab.session.selectMode,
             callback=callback,
+            clear_search=False,
         )
 
     def _highlight_active(

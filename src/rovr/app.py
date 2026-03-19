@@ -497,6 +497,7 @@ class Application(App, inherit_bindings=False):
         focus_on: str | None = None,
         has_selected: bool = False,
         callback: Callable | None = None,
+        clear_search: bool = True,
     ) -> Worker | None:
         # Makes sure `directory` is a directory, or chdir will fail with exception
         directory = ensure_existing_directory(directory)
@@ -533,6 +534,7 @@ class Application(App, inherit_bindings=False):
             focus_on=focus_on,
             has_selected=has_selected,
             callback=callback,
+            clear_search=clear_search,
         )
 
     @work(thread=True)

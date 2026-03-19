@@ -167,7 +167,7 @@ class PathInput(Input):
     def on_input_submitted(self, event: Input.Submitted) -> None:
         """Use a custom path entered as the current working directory"""
         if path.exists(event.value) and event.value != "":
-            self.app.cd(event.value)
+            self.app.cd(event.value, clear_search=True)
         else:
             self.notify("Path provided is not valid.", severity="error")
         self.app.file_list.focus()

@@ -4,6 +4,7 @@ from pathlib import Path
 import pytest
 
 from rovr.app import Application
+from rovr.components.search_container import SearchInput
 from rovr.navigation_widgets import BackButton
 
 from .conftest import iter_until, workers_finished
@@ -124,8 +125,50 @@ async def test_tab_search(tmp_path: Path) -> None:
         await workers_finished(pilot, app.file_list)
 
         assert app.file_list.input.value == "file"
+        assert app.tabWidget.active_tab.session.search == "file"
         assert app.file_list.highlighted_option.dir_entry.name == name
         assert app.file_list.highlighted == index
+
+
+@pytest.mark.asyncio
+async def test_tab_search_clears_on_navigation(tmp_path: Path) -> None:
+    os.mkdir(tmp_path / "nested")
+    open(tmp_path / "file0.txt", "w").close()
+
+    app = Application(startup_path=tmp_path.as_posix())
+    async with app.run_test(size=(143, 37)) as pilot:
+        await iter_until(pilot, lambda: app.file_list.options)
+        app.file_list.input.value = "file"
+        await pilot.pause()
+        assert app.tabWidget.active_tab.session.search == "file"
+
+        app.cd((tmp_path / "nested").as_posix())
+        await workers_finished(pilot, app.file_list)
+        await pilot.pause()
+
+        assert app.file_list.input.value == ""
+        assert app.tabWidget.active_tab.session.search == ""
+
+
+@pytest.mark.asyncio
+async def test_sidebar_search_does_not_override_tab_search(tmp_path: Path) -> None:
+    for i in range(3):
+        open(tmp_path / f"file{i}.txt", "w").close()
+
+    app = Application(startup_path=tmp_path.as_posix())
+    async with app.run_test(size=(143, 37)) as pilot:
+        await iter_until(pilot, lambda: app.file_list.options)
+        app.file_list.input.value = "file"
+        await pilot.pause()
+        assert app.tabWidget.active_tab.session.search == "file"
+
+        sidebar_search = app.query_one("#pinned_sidebar_container").query_one(
+            SearchInput
+        )
+        sidebar_search.value = "home"
+        await pilot.pause()
+
+        assert app.tabWidget.active_tab.session.search == "file"
 
 
 @pytest.mark.asyncio

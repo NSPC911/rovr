@@ -406,7 +406,7 @@ class FileList(CheckboxRenderingMixin, SelectionList, inherit_bindings=False):
             return
         if not isinstance(event.option, FileListSelectionWidget):
             return
-        self.update_border_subtitle()
+        self.call_later(self.update_border_subtitle)
         # Get the highlighted option
         highlighted_option = event.option
         self.app.tabWidget.active_tab.session.lastHighlighted[

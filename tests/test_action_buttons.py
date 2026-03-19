@@ -33,7 +33,7 @@ async def test_copy_button(tmp_path: Path) -> None:
         await pilot.pause()
         await pilot.click(CopyButton)
         await pilot.pause()
-        assert len(app.query_one("Clipboard", SelectionList).options) == 1
+        assert len(app.Clipboard.options) == 1
         assert (
             app
             .query_one("Clipboard", SelectionList)
@@ -43,7 +43,7 @@ async def test_copy_button(tmp_path: Path) -> None:
         )
         await pilot.click(CopyButton)
         await pilot.pause()
-        assert len(app.query_one("Clipboard", SelectionList).options) == 1
+        assert len(app.Clipboard.options) == 1
         assert (
             app
             .query_one("Clipboard", SelectionList)
@@ -61,7 +61,7 @@ async def test_cut_button(tmp_path: Path) -> None:
         await pilot.pause()
         await pilot.click(CutButton)
         await pilot.pause()
-        assert len(app.query_one("Clipboard", SelectionList).options) == 1
+        assert len(app.Clipboard.options) == 1
         assert (
             app
             .query_one("Clipboard", SelectionList)
@@ -71,7 +71,7 @@ async def test_cut_button(tmp_path: Path) -> None:
         )
         await pilot.click(CutButton)
         await pilot.pause()
-        assert len(app.query_one("Clipboard", SelectionList).options) == 1
+        assert len(app.Clipboard.options) == 1
         assert (
             app
             .query_one("Clipboard", SelectionList)
@@ -91,7 +91,7 @@ async def test_copy_to_cut(tmp_path: Path) -> None:
         await pilot.pause()
         await pilot.click(CutButton)
         await pilot.pause()
-        assert len(app.query_one("Clipboard", SelectionList).options) == 1
+        assert len(app.Clipboard.options) == 1
         assert (
             app
             .query_one("Clipboard", SelectionList)
@@ -111,7 +111,7 @@ async def test_cut_to_copy(tmp_path: Path) -> None:
         await pilot.pause()
         await pilot.click(CopyButton)
         await pilot.pause()
-        assert len(app.query_one("Clipboard", SelectionList).options) == 1
+        assert len(app.Clipboard.options) == 1
         assert (
             app
             .query_one("Clipboard", SelectionList)

@@ -219,7 +219,7 @@ class Application(App, inherit_bindings=False):
         self.query_one("#file_list_container").border_title = "Files"
         self.query_one("#processes").border_title = "Processes"
         self.query_one("#metadata").border_title = "Metadata"
-        self.query_one("#clipboard").border_title = "Clipboard"
+        self.Clipboard.border_title = "Clipboard"
         # themes
         try:
             for theme in get_custom_themes():
@@ -1003,7 +1003,7 @@ class Application(App, inherit_bindings=False):
         if self._focused_id == "clipboard":
             self.file_list.focus()
         elif self.query_one("#footer").display:
-            self.query_one("#clipboard").focus()
+            self.Clipboard.focus()
 
     def action_toggle_pinned_sidebar(self) -> None:
         self.file_list.focus()

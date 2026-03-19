@@ -5,7 +5,6 @@ from textual.style import Style
 from textual.worker import Worker
 
 from rovr.app import Application
-from rovr.footer.clipboard_container import Clipboard
 
 from .conftest import workers_finished
 
@@ -19,16 +18,15 @@ async def test_delete_from_clipboard(tmp_path: Path) -> None:
     app = Application(tmp_path.as_posix())
     async with app.run_test(size=(143, 37)) as pilot:
         await pilot.pause()
-        clipboard = app.query_one(Clipboard)
-        worker: Worker = clipboard.copy_to_clipboard([file.as_posix()])
+        worker: Worker = app.Clipboard.copy_to_clipboard([file.as_posix()])
         await worker.wait()
         await pilot.pause()
-        assert clipboard.options[0].value.path == file.as_posix()
+        assert app.Clipboard.options[0].value.path == file.as_posix()
         file.unlink()
-        worker: Worker = clipboard.check_clipboard_existence()
+        worker: Worker = app.Clipboard.check_clipboard_existence()
         await worker.wait()
         await pilot.pause()
-        assert len(clipboard.options) == 0
+        assert len(app.Clipboard.options) == 0
 
 
 @pytest.mark.asyncio
@@ -43,24 +41,23 @@ async def test_dimming(tmp_path: Path) -> None:
     app = Application(tmp_path.as_posix())
     async with app.run_test(size=(143, 37)) as pilot:
         await pilot.pause()
-        clipboard = app.query_one(Clipboard)
         await pilot.click("CutButton")
-        await workers_finished(pilot, clipboard)
+        await workers_finished(pilot, app.Clipboard)
         # get first option's dimness
         assert check_dim(app.file_list.options[0]._prompt.spans[-1].style)
-        clipboard.highlighted = 0
+        app.Clipboard.highlighted = 0
         await pilot.pause()
-        clipboard.action_select()
+        app.Clipboard.action_select()
         await pilot.pause(0.5)
         # once unselected, the dimness should be gone
         assert not check_dim(app.file_list.options[0]._prompt.spans[-1].style)
         await pilot.click("CopyButton")
-        await workers_finished(pilot, clipboard)
+        await workers_finished(pilot, app.Clipboard)
         # copying should not cause dimness
         assert not check_dim(app.file_list.options[0]._prompt.spans[-1].style)
         # then retry cutting, should cause dimness again
         await pilot.click("CutButton")
         await pilot.pause()
-        await workers_finished(pilot, clipboard)
+        await workers_finished(pilot, app.Clipboard)
         await workers_finished(pilot, app.file_list)
         assert check_dim(app.file_list.options[0]._prompt.spans[-1].style)

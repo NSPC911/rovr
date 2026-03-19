@@ -145,7 +145,7 @@ class ProgressBarContainer(VerticalGroup, inherit_bindings=False):
             self.notify(
                 message=notify["message"], severity="error", title=notify["title"]
             )
-        self.app.query_one("Clipboard").checker_wrapper()
+        self.app.Clipboard.checker_wrapper()
 
 
 class ProcessContainer(VerticalScroll):
@@ -361,7 +361,7 @@ class ProcessContainer(VerticalScroll):
         )
         self.app.call_from_thread(bar.progress_bar.advance)
         self.app.call_from_thread(bar.add_class, "done")
-        self.app.query_one("Clipboard").checker_wrapper()
+        self.app.Clipboard.checker_wrapper()
 
     def _handle_file_in_use_error(
         self,
@@ -981,7 +981,7 @@ class ProcessContainer(VerticalScroll):
                 bar_text=path.basename(has_cut[-1]),
             )
             return
-        self.app.query_one("Clipboard").checker_wrapper()
+        self.app.Clipboard.checker_wrapper()
         self.app.call_from_thread(
             bar.update_icon,
             icon_utils.get_icon("general", "cut" if len(has_cut) else "copy")[0],

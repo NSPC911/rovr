@@ -27,10 +27,6 @@ jobs:
             name: macos-arm64
           - os: macos-15
             name: macos-x64
-          - os: ubuntu-24.04-arm
-            name: arm64v8a
-          - os: ubuntu-24.04-arm
-            name: armabiv7a
 
     runs-on: ${{ matrix.os }}
     name: Test on (${{ matrix.name }})

@@ -5,7 +5,7 @@ from contextlib import suppress
 from io import TextIOWrapper
 from os import chdir, getcwd, path
 from time import perf_counter
-from typing import Callable, Iterable
+from typing import Callable, Iterable, overload
 
 from rich.console import Console, RenderableType
 from rich.protocol import is_renderable
@@ -21,10 +21,11 @@ from textual.containers import (
 )
 from textual.content import Content
 from textual.css.errors import StylesheetError
-from textual.css.query import NoMatches
+from textual.css.query import NoMatches, QueryType
 from textual.css.stylesheet import StylesheetParseError
 from textual.dom import DOMNode
 from textual.screen import Screen
+from textual.widget import Widget
 from textual.widgets import Input, Label
 from textual.worker import Worker
 
@@ -915,6 +916,44 @@ class Application(App, inherit_bindings=False):
         if self.focused is not None:
             return self.focused.id
         return None
+
+    @overload
+    def query_one(self, selector: str) -> Widget: ...
+
+    @overload
+    def query_one(self, selector: type[QueryType]) -> QueryType: ...
+
+    @overload
+    def query_one(self, selector: str, expect_type: type[QueryType]) -> QueryType: ...
+
+    def query_one(
+        self,
+        selector: str | type[QueryType],
+        expect_type: type[QueryType] | None = None,
+    ) -> QueryType | Widget:
+        try:
+            return super().query_one(selector, expect_type)  # ty: ignore[invalid-argument-type]
+        except NoMatches:
+            # Try fixing the problem ourselves
+            if selector in ("FileList", "#file_list") or FileList in (
+                selector,
+                expect_type,
+            ):
+                # weird bug where sometimes the filelist just disappears, so we just remake the widget
+                self.file_list = FileList()
+                self._file_list_container.mount(self.file_list, before="PathInput")
+                self._file_list_container.filelist = self.file_list
+                return self.file_list
+            elif selector in ("#clipboard", "Clipboard") or Clipboard in (
+                selector,
+                expect_type,
+            ):
+                # same issue here, albeit less common
+                self.Clipboard = Clipboard()
+                self.query_one("#footer").mount(self.Clipboard)
+                return self.Clipboard
+            else:
+                raise
 
     # actions
     def action_focus_toggle_pinned_sidebar(self) -> None:

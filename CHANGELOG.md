@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [0.8.0.dev3]
 
 ### Notable
+- fix: ensure search is cleared when going to a new directory 880f6d6
 - refactor: switch to an actions oriented method api #238
 
 ### Added
@@ -15,13 +16,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 - `zoxide`: try fix for nuitka ig 362a9ad
-- `nuitka`: build on proper os for macos x64
+- `nuitka`: build on proper os for macos x64 4a90521
+- `config`: fix mimerules for archive files 9b4865d
+- `preview`: actually show loading state 879f2c3
+- `filelist`: try preventing crash 773abc1
 
 ### Refactor
 - `screens`!: rename `CommonFileNameDoWhat` to `FileNameConflict` 8eea71f
 
 ### Performance
-- all?: use non-async + push to after first pain(t) 9e2a5d6
+- `all`?: use non-async + push to after first pain(t) 9e2a5d6
+- `clipboard`?: use direct clipboard reference in app 13ebaa4
 
 ## [0.8.0.dev2]
 

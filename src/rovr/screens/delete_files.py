@@ -69,16 +69,16 @@ class DeleteFiles(ModalScreen):
     def on_key(self, event: events.Key) -> None:
         """Handle key presses."""
         if check_key(event, get_from(["keybinds", "delete_files", "delete"])):
-            event.stop()
             self.action_delete()
         elif check_key(event, get_from(["keybinds", "delete_files", "cancel"])):
-            event.stop()
             self.action_cancel()
         elif config["settings"]["use_recycle_bin"] and check_key(
             event, get_from(["keybinds", "delete_files", "trash"])
         ):
-            event.stop()
             self.action_trash()
+        else:
+            return
+        event.stop()
 
     def action_delete(self) -> None:
         self.dismiss("delete")

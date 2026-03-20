@@ -157,19 +157,16 @@ class Keybinds(ModalScreen):
         # same thing here, ty will scream at me if not
         config_keybinds = cast(dict[str, Any], config["keybinds"])
         if check_key(event, config_keybinds["focus_search"]):
-            event.stop()
             self.input.focus()
         elif check_key(
             event,
             config_keybinds["show_keybinds"]
             + cast(dict[str, Any], config_keybinds["filter_modal"])["exit"],
         ):
-            event.stop()
             self.dismiss()
         elif check_key(
             event, cast(dict[str, Any], config_keybinds["filter_modal"])["down"]
         ):
-            event.stop()
             if self.keybinds_list.options:
                 self.keybinds_list.action_cursor_down()
         elif check_key(
@@ -178,6 +175,9 @@ class Keybinds(ModalScreen):
             event.stop()
             if self.keybinds_list.options:
                 self.keybinds_list.action_cursor_up()
+        else:
+            return
+        event.stop()
 
     def on_option_list_option_selected(self, event: OptionList.OptionSelected) -> None:
         if isinstance(event.option, KeybindOption):

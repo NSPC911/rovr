@@ -44,17 +44,16 @@ class FileInUse(ModalScreen):
 
     def on_key(self, event: events.Key) -> None:
         if check_key(event, get_from(["keybinds", "file_in_use", "retry"])):
-            event.stop()
             self.action_retry()
         elif check_key(event, get_from(["keybinds", "file_in_use", "cancel"])):
-            event.stop()
             self.action_cancel()
         elif check_key(event, get_from(["keybinds", "file_in_use", "skip"])):
-            event.stop()
             self.action_skip()
         elif check_key(event, get_from(["keybinds", "file_in_use", "dont_ask_again"])):
-            event.stop()
             self.action_toggle_dont_ask_again()
+        else:
+            return
+        event.stop()
 
     def on_click(self, event: events.Click) -> None:
         if event.widget is self:

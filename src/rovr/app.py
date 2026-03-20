@@ -146,6 +146,7 @@ class Application(App, inherit_bindings=False):
         self._show_keys: bool = show_keys
         self._exit_with_tree: bool = tree_dom
         self._force_crash_in: float = force_crash_in
+        self._pins_mtime: float | None = None
 
         self._file_list_container = FileListContainer()
         self.file_list = self._file_list_container.filelist
@@ -543,9 +544,8 @@ class Application(App, inherit_bindings=False):
         cwd = getcwd()
         file_list: FileList = self.query_one(FileList)
         pins_path = path.join(VAR_TO_DIR["CONFIG"], "pins.json")
-        pins_mtime = None
         with suppress(OSError):
-            pins_mtime = path.getmtime(pins_path)
+            self._pins_mtime = path.getmtime(pins_path)
         state_path = path.join(VAR_TO_DIR["CONFIG"], "state.toml")
         state_mtime = None
         with suppress(OSError):
@@ -587,8 +587,8 @@ class Application(App, inherit_bindings=False):
             reload_called: bool = False
             with suppress(OSError):
                 new_mtime = path.getmtime(pins_path)
-            if new_mtime != pins_mtime:
-                pins_mtime = new_mtime
+            if new_mtime != self._pins_mtime:
+                self._pins_mtime = new_mtime
                 if new_mtime is not None:
                     # no, this doesn't need to be called from thread
                     # this is _not_ a sync function, it is a worker

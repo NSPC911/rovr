@@ -128,12 +128,13 @@ class PinnedSidebar(OptionList, inherit_bindings=False):
             # this is a perfectly working code, shut up
             await drive_worker.wait()
         except WorkerCancelled:
-            # keep in mind, i dont exactly know why this is happening
-            # either there's a race condition somewhere, or textual is
-            # cancelling it for some reason.
-            # path_utils.dump_exc(self, exc)
-            # retry again
-            self.call_later(self.reload_pins)
+            # Update to the comment that was previously here:
+            # The reason why worker would fail is if on weird systems like mine,
+            # the psutil.disk_partitions can take quite some time (like 0.5-5s)
+            # to return. the app's threaded watcher also detects that the
+            # pins.json has changed so it tries to reload the pin, but since
+            # this worker is designated as exclusive, this operation fails.
+            # hence, it is quite safe to ignore this error
             return
         drives = drive_worker.result
         for drive in drives:

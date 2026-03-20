@@ -1,3 +1,4 @@
+from contextlib import suppress
 from os import getcwd, path
 from typing import Callable, ClassVar, Iterable, Self, Sequence, cast
 
@@ -732,6 +733,8 @@ class FileList(CheckboxRenderingMixin, SelectionList, inherit_bindings=False):
     # two items do you?)
     def action_toggle_pin(self) -> None:
         pin_utils.toggle_pin(path.basename(getcwd()), getcwd())
+        with suppress(OSError):
+            setattr(self.app, "_pins_mtime", path.getmtime(pin_utils.PIN_PATH))
         self.app.query_one("PinnedSidebar").reload_pins()
 
     def action_copy(self) -> None:

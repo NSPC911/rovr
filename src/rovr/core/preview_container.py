@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import asyncio
 import subprocess
 from dataclasses import dataclass
 from functools import partial
@@ -25,7 +26,6 @@ from textual.message import Message
 from textual.widget import Widget
 from textual.widgets import Static
 from textual.widgets.selection_list import Selection
-from textual.worker import NoActiveWorker, Worker, get_current_worker
 
 from rovr.classes.archive import Archive, BadArchiveError
 from rovr.classes.textual_options import (
@@ -142,7 +142,7 @@ class PreviewContainer(Container):
         self._mime_type: path_utils.MimeResult | None = None
         self._preview_texts = config["interface"]["preview_text"]
         self.pdf = PDFHandler()
-        self._loading_worker: Worker | None = None
+        self._set_loading_to: bool = False
 
     def compose(self) -> ComposeResult:
         yield Static(self._preview_texts["start"], classes="special")
@@ -157,22 +157,15 @@ class PreviewContainer(Container):
 
     @work
     async def on_preview_container_set_loading(self, event: SetLoading) -> None:
-        if event.to:
-            if self._loading_worker is not None:
-                # means that it keeps trying to set loading to true, so just
-                # let the timer run so it goes into loading like we want
-                return
-            try:
-                self._loading_worker = get_current_worker()
-            except NoActiveWorker:
-                raise RuntimeError(
-                    "SetLoading receiver must be a async worker (but it is not?)"
-                ) from None
+        if event.to == self._set_loading_to:
+            return  # already in the desired state
         else:
-            if self._loading_worker is not None:
-                self._loading_worker.cancel()
-                self._loading_worker = None
-            self.set_loading(False)
+            self._set_loading_to = event.to
+            await asyncio.sleep(0.25)
+            if event.to != self._set_loading_to:
+                return  # state changed during wait, do not update
+            else:
+                self.set_loading(event.to)
 
     def get_child(self, selector: str | type[DOMNode]) -> DOMNode | None:
         """

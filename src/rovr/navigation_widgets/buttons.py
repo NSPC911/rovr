@@ -20,6 +20,7 @@ class BackButton(Button):
             self.app.cd(
                 state.directories[state.historyIndex],
                 add_to_history=False,
+                clear_search=True,
             )
 
 
@@ -39,6 +40,7 @@ class ForwardButton(Button):
             self.app.cd(
                 state.directories[state.historyIndex],
                 add_to_history=False,
+                clear_search=True,
             )
 
 
@@ -52,4 +54,4 @@ class UpButton(Button):
             return
         cwd = getcwd()
         to_focus = path.basename(cwd)
-        self.app.cd(path.dirname(cwd), focus_on=to_focus)
+        self.app.cd(path.dirname(cwd), focus_on=to_focus, clear_search=True)

@@ -20,7 +20,7 @@ class CutButton(Button):
             return
         selected_files = await self.app.file_list.get_selected_objects()
         if selected_files:
-            self.app.query_one("#clipboard").cut_to_clipboard(selected_files)
+            self.app.Clipboard.cut_to_clipboard(selected_files)
         else:
             self.notify(
                 "No files selected to cut.", title="Cut Files", severity="warning"

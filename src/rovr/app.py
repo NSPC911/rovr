@@ -5,7 +5,7 @@ from contextlib import suppress
 from io import TextIOWrapper
 from os import chdir, getcwd, path
 from time import perf_counter
-from typing import Awaitable, Callable, Iterable
+from typing import Awaitable, Callable, Iterable, overload
 
 from rich.console import Console, RenderableType
 from rich.protocol import is_renderable
@@ -21,10 +21,11 @@ from textual.containers import (
 )
 from textual.content import Content
 from textual.css.errors import StylesheetError
-from textual.css.query import NoMatches
+from textual.css.query import NoMatches, QueryType
 from textual.css.stylesheet import StylesheetParseError
 from textual.dom import DOMNode
 from textual.screen import Screen
+from textual.widget import Widget
 from textual.widgets import Input, Label
 from textual.worker import Worker
 
@@ -219,7 +220,7 @@ class Application(App, inherit_bindings=False):
         self.query_one("#file_list_container").border_title = "Files"
         self.query_one("#processes").border_title = "Processes"
         self.query_one("#metadata").border_title = "Metadata"
-        self.query_one("#clipboard").border_title = "Clipboard"
+        self.Clipboard.border_title = "Clipboard"
         # themes
         try:
             for theme in get_custom_themes():
@@ -548,6 +549,7 @@ class Application(App, inherit_bindings=False):
         focus_on: str | None = None,
         has_selected: bool = False,
         callback: Callable | None = None,
+        clear_search: bool = True,
     ) -> Worker | None:
         # Makes sure `directory` is a directory, or chdir will fail with exception
         directory = ensure_existing_directory(directory)
@@ -584,6 +586,7 @@ class Application(App, inherit_bindings=False):
             focus_on=focus_on,
             has_selected=has_selected,
             callback=callback,
+            clear_search=clear_search,
         )
 
     @work(thread=True)
@@ -969,6 +972,44 @@ class Application(App, inherit_bindings=False):
             return self.focused.id
         return None
 
+    @overload
+    def query_one(self, selector: str) -> Widget: ...
+
+    @overload
+    def query_one(self, selector: type[QueryType]) -> QueryType: ...
+
+    @overload
+    def query_one(self, selector: str, expect_type: type[QueryType]) -> QueryType: ...
+
+    def query_one(
+        self,
+        selector: str | type[QueryType],
+        expect_type: type[QueryType] | None = None,
+    ) -> QueryType | Widget:
+        try:
+            return super().query_one(selector, expect_type)  # ty: ignore[invalid-argument-type]
+        except NoMatches:
+            # Try fixing the problem ourselves
+            if selector in ("FileList", "#file_list") or FileList in (
+                selector,
+                expect_type,
+            ):
+                # weird bug where sometimes the filelist just disappears, so we just remake the widget
+                self.file_list = FileList()
+                self._file_list_container.mount(self.file_list, before="PathInput")
+                self._file_list_container.filelist = self.file_list
+                return self.file_list
+            elif selector in ("#clipboard", "Clipboard") or Clipboard in (
+                selector,
+                expect_type,
+            ):
+                # same issue here, albeit less common
+                self.Clipboard = Clipboard()
+                self.query_one("#footer").mount(self.Clipboard)
+                return self.Clipboard
+            else:
+                raise
+
     # actions
     def action_focus_toggle_pinned_sidebar(self) -> None:
         if (
@@ -1017,7 +1058,7 @@ class Application(App, inherit_bindings=False):
         if self._focused_id == "clipboard":
             self.file_list.focus()
         elif self.query_one("#footer").display:
-            self.query_one("#clipboard").focus()
+            self.Clipboard.focus()
 
     def action_toggle_pinned_sidebar(self) -> None:
         self.file_list.focus()

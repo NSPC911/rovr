@@ -43,7 +43,8 @@ class SearchInput(Input):
             highlighted = self.items_list.highlighted_option.id
         except AttributeError:
             highlighted = None
-        self.app.tabWidget.active_tab.session.search = event.value
+        if self.item_list_type == "Selection":
+            self.app.tabWidget.active_tab.session.search = event.value
         if event.value == "":
             self.items_list.set_options(self.items_list.list_of_options)
             if highlighted is not None:

@@ -5,7 +5,7 @@ from contextlib import suppress
 from io import TextIOWrapper
 from os import chdir, getcwd, path
 from time import perf_counter
-from typing import Awaitable, Callable, Iterable, overload
+from typing import Awaitable, Callable, Iterable, Self, overload
 
 from rich.console import Console, RenderableType
 from rich.protocol import is_renderable
@@ -21,7 +21,7 @@ from textual.containers import (
 )
 from textual.content import Content
 from textual.css.errors import StylesheetError
-from textual.css.query import NoMatches, QueryType
+from textual.css.query import DOMQuery, NoMatches, QueryType
 from textual.css.stylesheet import StylesheetParseError
 from textual.dom import DOMNode
 from textual.screen import Screen
@@ -293,7 +293,7 @@ class Application(App, inherit_bindings=False):
     def rovr_parse_action(
         self, node: str, action: str
     ) -> Callable[[], None | Awaitable | Worker] | None:
-        if len(self.query(node)) != 0:
+        if self.rovr_query_one(node, allow_crash=False):
             # start parsing action       ╭─╴not necessary!╶─╮
             # action is in a template of (<state>=<selector>):<action_name>
             chunks = action.split(":")
@@ -302,8 +302,8 @@ class Application(App, inherit_bindings=False):
                 if len(chunks) != 3:
                     raise RuntimeError(f"Invalid action format: {action}")
                 else:
-                    if len(query := self.query(chunks[1])) != 0:
-                        for widget in query:
+                    if len(widgets := self.rovr_query(chunks[1])) != 0:
+                        for widget in widgets:
                             if callable(
                                 _action := getattr(widget, f"action_{chunks[2]}", None)
                             ):
@@ -328,9 +328,11 @@ class Application(App, inherit_bindings=False):
                                             f"Invalid action state: {chunks[0]}"
                                         )
             elif len(chunks) == 1:
-                if len(query := self.query(node)) != 0:
-                    widget = query[0]
-                    if callable(_action := getattr(widget, f"action_{chunks[0]}")):
+                if len(widgets := self.rovr_query(node)) != 0:
+                    widget = widgets[0]
+                    if callable(
+                        _action := getattr(widget, f"action_{chunks[0]}", None)
+                    ):
                         return _action
             else:
                 raise RuntimeError(f"Invalid action format: {action}")
@@ -428,8 +430,68 @@ class Application(App, inherit_bindings=False):
             self.action_plugin_rg()
         elif check_key(event, get_from(["keybinds", "suspend_process"])):
             self.action_suspend_process()
-        elif config.get("keys", []):
-            ...
+        elif config.get("keys", {}):
+            for selector, subdict in config["keys"].items():
+                for key, action in subdict.items():
+                    # check key first
+                    if self.key_check(event, key):
+                        _action = self.rovr_parse_action(selector, action)
+                        if _action is not None:
+                            result = _action()
+                            if isinstance(result, Awaitable):
+                                await result
+                            elif isinstance(result, Worker):
+                                await result.wait()
+                        break
+
+    def rovr_query_one(
+        self, selector: str | type[QueryType], allow_crash: bool = False
+    ) -> QueryType | Widget | Self | None:
+        if selector.startswith("-"):
+            # using specific query types
+            if selector == "-app":
+                return self
+            elif selector.startswith("-screen"):
+                self.log(self.screen_stack)
+                if isinstance(selector, str) and ":" in selector:
+                    _, screen_name = selector.split(":", 1)
+                    for screen in self.screen_stack:
+                        if screen.name == screen_name:
+                            return screen
+                else:
+                    return self.screen
+        else:
+            try:
+                return self.query_one(selector)
+            except NoMatches:
+                if allow_crash:
+                    raise
+                else:
+                    return None
+
+    def rovr_query(
+        self, selector: str | type[QueryType]
+    ) -> DOMQuery[Widget | QueryType] | list[Widget | QueryType | Self]:
+        if selector.startswith("-"):
+            # most likely only one (or even zero) matches
+            out = self.rovr_query_one(selector)
+            if out is None:
+                return []
+            else:
+                return [out]
+        return super().query(selector)
+
+    def key_check(self, event: events.Key, key: str) -> bool:
+        # i cant use check_key for this, since i want to be more consistent
+        # and ensure that only one key can be bound to an action
+        if event.is_printable:
+            # very special needs
+            if event.key.startswith("alt+"):
+                return event.key == key
+            else:
+                return event.character == key
+        else:
+            return event.key == key
 
     @work
     async def on_shell_exec_response(

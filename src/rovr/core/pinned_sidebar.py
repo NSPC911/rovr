@@ -134,7 +134,7 @@ class PinnedSidebar(OptionList, inherit_bindings=False):
             # cancelling it for some reason.
             # path_utils.dump_exc(self, exc)
             # retry again
-            self.call_later(self.reload_pins)
+            # self.call_later(self.reload_pins)
             return
         drives = drive_worker.result
         for drive in drives:
@@ -193,3 +193,9 @@ class PinnedSidebar(OptionList, inherit_bindings=False):
 
     def action_focus_search(self) -> None:
         self.input.focus()
+
+    def action_up(self) -> None:
+        super().action_cursor_up()
+
+    def action_down(self) -> None:
+        super().action_cursor_down()

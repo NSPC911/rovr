@@ -18,8 +18,7 @@ from rich.text import Text
 from textual import events, on, work
 from textual.app import ComposeResult
 from textual.containers import Container
-from textual.css.query import NoMatches
-from textual.dom import DOMNode
+from textual.css.query import NoMatches, QueryType
 from textual.geometry import Size
 from textual.highlight import guess_language
 from textual.message import Message
@@ -167,7 +166,7 @@ class PreviewContainer(Container):
             else:
                 self.set_loading(event.to)
 
-    def get_child(self, selector: str | type[DOMNode]) -> DOMNode | None:
+    def get_child(self, selector: str | type[QueryType]) -> QueryType | Widget | None:
         """
         Check for whether this element contains this selector and return the element if it does.
         Args:
@@ -1184,9 +1183,7 @@ class PreviewContainer(Container):
     def action_up(self) -> Literal[False] | None:
         if self._is_pdf() and self.pdf.images is not None:
             self.update_current_pdf_page_by_diff(-1)
-        elif self.border_title == titles.archive and (
-            filelist := self.get_child(FileList)
-        ):
+        elif filelist := self.get_child(FileList):
             filelist.scroll_up(animate=False)
         else:
             return False
@@ -1194,9 +1191,7 @@ class PreviewContainer(Container):
     def action_down(self) -> Literal[False] | None:
         if self._is_pdf() and self.pdf.images is not None:
             self.update_current_pdf_page_by_diff(1)
-        elif self.border_title == titles.archive and (
-            filelist := self.get_child(FileList)
-        ):
+        elif filelist := self.get_child(FileList):
             filelist.scroll_down(animate=False)
         else:
             return False
@@ -1204,9 +1199,7 @@ class PreviewContainer(Container):
     def action_page_up(self) -> Literal[False] | None:  # ty: ignore[invalid-method-override]
         if self._is_pdf() and self.pdf.images is not None:
             self.update_current_pdf_page_by_diff(-1)
-        elif self.border_title == titles.archive and (
-            filelist := self.get_child(FileList)
-        ):
+        elif filelist := self.get_child(FileList):
             filelist.scroll_page_up(animate=False)
         else:
             return False
@@ -1214,9 +1207,7 @@ class PreviewContainer(Container):
     def action_page_down(self) -> Literal[False] | None:  # ty: ignore[invalid-method-override]
         if self._is_pdf() and self.pdf.images is not None:
             self.update_current_pdf_page_by_diff(1)
-        elif self.border_title == titles.archive and (
-            filelist := self.get_child(FileList)
-        ):
+        elif filelist := self.get_child(FileList):
             filelist.scroll_page_down(animate=False)
         else:
             return False
@@ -1224,9 +1215,7 @@ class PreviewContainer(Container):
     def action_home(self) -> Literal[False] | None:
         if self._is_pdf() and self.pdf.images is not None:
             self.update_current_pdf_page(0)
-        elif self.border_title == titles.archive and (
-            filelist := self.get_child(FileList)
-        ):
+        elif filelist := self.get_child(FileList):
             filelist.scroll_home(animate=False)
         else:
             return False
@@ -1234,9 +1223,7 @@ class PreviewContainer(Container):
     def action_end(self) -> Literal[False] | None:
         if self._is_pdf() and self.pdf.images is not None:
             self.update_current_pdf_page(self.pdf.total_pages - 1)
-        elif self.border_title == titles.archive and (
-            filelist := self.get_child(FileList)
-        ):
+        elif filelist := self.get_child(FileList):
             filelist.scroll_end(animate=False)
         else:
             return False

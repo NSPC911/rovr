@@ -381,7 +381,11 @@ def load_config() -> tuple[dict, RovrConfig]:
 
     config_dir = os.environ.get("ROVR_CONFIG_FOLDER")
     if not config_dir:
-        config_dir = PlatformDirs("rovr", ".").user_config_dir.replace("\\", "/")
+        from rovr.variables.maps import VAR_TO_DIR
+
+        config_dir = VAR_TO_DIR.get("CONFIG") or PlatformDirs(
+            "rovr", "."
+        ).user_config_dir.replace("\\", "/")
     user_config_path = path.join(config_dir, "config.toml")
 
     # Startup path should remain read-only for existing user config.

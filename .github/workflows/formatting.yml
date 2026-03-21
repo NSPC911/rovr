@@ -78,6 +78,20 @@ jobs:
           GITHUB_ACTOR_NAME: ${{ vars.BOT_NAME || 'NSPBot911' }}
           GITHUB_ACTOR_EMAIL: ${{ vars.BOT_EMAIL || '176916861+NSPBot911@users.noreply.github.com' }}
 
+      - name: Alert if fail
+        if: failure()
+        uses: sarisia/actions-status-discord@v1.13.0
+        with:
+          webhook: ${{ secrets.LOG_HOOK }}
+          title: Post Commit checks failed!
+          status: failure
+          description: "Check the workflow [details](https://github.com/NSPC911/rovr/actions/runs/${{ github.run_id }}) for more info."
+          avatar_url: "https://avatars.githubusercontent.com/u/176916861?v=4"
+          username: "NSPBot911"
+          nodetail: true
+          notimestamp: true
+          noprefix: true
+
   format_and_alert:
     runs-on: ubuntu-slim
     if: github.event_name == 'pull_request'

@@ -1,6 +1,7 @@
-import platform
+import sys
 from dataclasses import dataclass
 from datetime import datetime
+from functools import cache
 from os import environ
 from shutil import which
 from typing import Literal, cast
@@ -21,27 +22,25 @@ else:
     schema = globals()["schema"]
 
 
-if "file_executable" not in globals():
-    global file_executable
+@cache
+def get_file_executable() -> str | None:
     # check for $ROVR_FILE_ONE
     if (  # noqa: SIM114
         "ROVR_FILE_ONE" in environ
         and (found := which(environ["ROVR_FILE_ONE"])) is not None
     ):
-        file_executable = found
+        return found
     # check for $YAZI_FILE_ONE
-    elif (  # noqa: SIM114
+    if (  # noqa: SIM114
         "YAZI_FILE_ONE" in environ
         and (found := which(environ["YAZI_FILE_ONE"])) is not None
     ):
-        file_executable = found
+        return found
     # check for `file` existence
-    elif (found := which("file")) is not None:
-        file_executable = found
-    else:
-        file_executable = None
-else:
-    file_executable = globals()["file_executable"]
+    if (found := which("file")) is not None:
+        return found
+    return None
+
 
 if "log_name" not in globals():
     global log_name
@@ -144,4 +143,10 @@ bindings = (
     ]
 )
 
-os_type = platform.system()
+os_type = (
+    "Windows"
+    if sys.platform == "win32"
+    else "Darwin"
+    if sys.platform == "darwin"
+    else sys.platform.capitalize()
+)

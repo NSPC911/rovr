@@ -38,7 +38,7 @@ from rovr.functions import path as path_utils
 from rovr.functions import preview_utils
 from rovr.functions.pdf import get_pdf_images, get_pdf_info
 from rovr.functions.utils import should_cancel
-from rovr.variables.constants import PreviewContainerTitles, config, file_executable
+from rovr.variables.constants import PreviewContainerTitles, config, get_file_executable
 
 titles = PreviewContainerTitles()
 
@@ -1082,14 +1082,16 @@ class PreviewContainer(Container):
                 and config["plugins"]["file_one"]["get_description"]
             ):
                 try:
-                    process = subprocess.run(
-                        [file_executable, "--brief", "--", self._current_file_path],
-                        capture_output=True,
-                        text=True,
-                        check=True,
-                        timeout=1,
-                    )
-                    display_content += f"\n{process.stdout.strip()}"
+                    executable = get_file_executable()
+                    if executable:
+                        process = subprocess.run(
+                            [executable, "--brief", "--", self._current_file_path],
+                            capture_output=True,
+                            text=True,
+                            check=True,
+                            timeout=1,
+                        )
+                        display_content += f"\n{process.stdout.strip()}"
                 except (subprocess.SubprocessError, FileNotFoundError) as exc:
                     path_utils.dump_exc(self, exc)
 

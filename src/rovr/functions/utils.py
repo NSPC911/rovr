@@ -6,7 +6,6 @@ from typing import Any, Callable, Literal
 from humanize import naturalsize
 from rich.console import Console
 from textual import events
-from textual.app import App
 from textual.dom import DOMNode
 from textual.worker import NoActiveWorker, WorkerCancelled, get_current_worker
 
@@ -19,7 +18,7 @@ from rovr.variables.maps import (
     BORDER_BOTTOM,
 )
 
-pprint = Console().print
+pprint = globals().get("pprint", Console().print)
 
 
 def deep_merge(old: dict, new: dict) -> dict:
@@ -226,7 +225,7 @@ def get_shortest_bind(binds: list[str]) -> str:
 
 
 def run_editor_command(
-    app: App,
+    app: DOMNode,
     editor_config: _RovrConfigSettingsEditorFile
     | _RovrConfigSettingsEditorFolder
     | _RovrConfigSettingsEditorBulkRename,

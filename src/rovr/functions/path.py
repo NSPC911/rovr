@@ -24,9 +24,9 @@ from rovr.classes.type_aliases import (
     SortByOptions,
 )
 from rovr.functions.icons import get_icon_for_file, get_icon_for_folder
-from rovr.variables.constants import config, file_executable, log_name, os_type
+from rovr.variables.constants import config, get_file_executable, log_name, os_type
 
-pprint = Console().print
+pprint = globals().get("pprint", Console().print)
 
 mime_re_cache: dict[
     PreviewTypes,
@@ -698,6 +698,9 @@ def get_mime_type(
     Returns:
         MimeResult: The method used and the detected MIME type
         None: If the method is not available or failed
+
+    Raises:
+        FileNotFoundError: If file(1) executable is unavailable when that method is selected.
     """
     if ignore is None:
         ignore = []
@@ -759,6 +762,9 @@ def get_mime_type(
     # Step 3: Fall back to file(1) command if available
     if "file1" not in ignore:
         try:
+            file_executable = get_file_executable()
+            if file_executable is None:
+                raise FileNotFoundError
             process = subprocess.run(
                 [file_executable, "--mime-type", "-b", file_path],
                 capture_output=True,

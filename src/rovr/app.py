@@ -1,5 +1,4 @@
 import asyncio
-import shutil
 import threading
 from contextlib import suppress
 from io import TextIOWrapper
@@ -62,16 +61,7 @@ from rovr.navigation_widgets import (
     PathInput,
     UpButton,
 )
-from rovr.screens import (
-    ContentSearch,
-    FileSearch,
-    Keybinds,
-    ShellExec,
-    YesOrNo,
-    ZDToDirectory,
-)
 from rovr.screens.typed import ShellExecReturnType
-from rovr.screens.way_too_small import TerminalTooSmall
 from rovr.state_manager import StateManager
 from rovr.variables.constants import MaxPossible, config, log_name
 from rovr.variables.maps import VAR_TO_DIR
@@ -209,18 +199,12 @@ class Application(App, inherit_bindings=False):
     def on_mount(self) -> None:
         # exit for tree print
         if self._exit_with_tree:
+            console = Console()
             with self.suspend():
                 console.print(self.tree)
                 self.exit()
             return
 
-        # border titles
-        self.query_one("#menu_wrapper").border_title = "Options"
-        self.query_one("#pinned_sidebar_container").border_title = "Sidebar"
-        self.query_one("#file_list_container").border_title = "Files"
-        self.query_one("#processes").border_title = "Processes"
-        self.query_one("#metadata").border_title = "Metadata"
-        self.Clipboard.border_title = "Clipboard"
         # themes
         try:
             for theme in get_custom_themes():
@@ -247,6 +231,24 @@ class Application(App, inherit_bindings=False):
                 severity="warning",
             )
         self.ansi_color = config["theme"]["transparent"]
+
+        # title for screenshots
+        self.title = ""
+
+        if self._force_crash_in > 0:
+            self.call_later(self._force_crash)
+
+        self.call_after_refresh(self._finish_post_mount_setup)
+
+    def _finish_post_mount_setup(self) -> None:
+        # border titles
+        self.query_one("#menu_wrapper").border_title = "Options"
+        self.query_one("#pinned_sidebar_container").border_title = "Sidebar"
+        self.query_one("#file_list_container").border_title = "Files"
+        self.query_one("#processes").border_title = "Processes"
+        self.query_one("#metadata").border_title = "Metadata"
+        self.Clipboard.border_title = "Clipboard"
+
         # tooltips
         if config["interface"]["tooltips"]:
             self.query_one("#back").tooltip = "Go back in history"
@@ -259,7 +261,7 @@ class Application(App, inherit_bindings=False):
         # Apply folder-specific sort preferences for initial directory
         state_manager.apply_folder_sort_prefs(normalise(getcwd()))
         # start mini watcher
-        self.call_after_refresh(self.watch_for_changes_and_update)
+        self.watch_for_changes_and_update()
         # disable scrollbars
         self.show_horizontal_scrollbar = False
         self.show_vertical_scrollbar = False
@@ -269,10 +271,6 @@ class Application(App, inherit_bindings=False):
             self.query_one("#below_menu > HorizontalGroup").mount(
                 label, after="PathInput"
             )
-        # title for screenshots
-        self.title = ""
-        if self._force_crash_in > 0:
-            self.call_after_refresh(self._force_crash)
 
     @work
     async def _force_crash(self) -> None:
@@ -444,6 +442,8 @@ class Application(App, inherit_bindings=False):
 
     @work
     async def action_quit(self) -> None:
+        from rovr.screens import YesOrNo
+
         process_container = self.query_one(ProcessContainer)
         if len(process_container.query("ProgressBarContainer")) != len(
             process_container.query(".done")
@@ -634,6 +634,8 @@ class Application(App, inherit_bindings=False):
 
     @work(exclusive=True)
     async def on_resize(self, event: events.Resize) -> None:
+        from rovr.screens.way_too_small import TerminalTooSmall
+
         if (
             event.size.height < MaxPossible.height
             or event.size.width < MaxPossible.width
@@ -743,7 +745,7 @@ class Application(App, inherit_bindings=False):
         yield SystemCommand(
             "Show keybinds available",
             "Show an interactive list of keybinds that have been set in the config",
-            lambda: self.push_screen(Keybinds()),
+            self.action_show_keybinds,
         )
 
         if screen.maximized is not None:
@@ -1037,6 +1039,8 @@ class Application(App, inherit_bindings=False):
             await self.tabWidget.remove_tab(self.tabWidget.active_tab)
 
     def action_plugin_zoxide(self) -> None:
+        import shutil
+
         if not config["plugins"]["zoxide"]["enabled"]:
             return
         if shutil.which("zoxide") is None:
@@ -1056,12 +1060,18 @@ class Application(App, inherit_bindings=False):
                     PathInput.Submitted(pathInput, pathInput.value)
                 )
 
+        from rovr.screens import ZDToDirectory
+
         self.push_screen(ZDToDirectory(), on_response)
 
     def action_show_keybinds(self) -> None:
+        from rovr.screens import Keybinds
+
         self.push_screen(Keybinds())
 
     def action_plugin_fd(self) -> None:
+        import shutil
+
         if not config["plugins"]["fd"]["enabled"]:
             return
         fd_exec = shutil.which(config["plugins"]["fd"]["executable"]) or shutil.which(
@@ -1081,6 +1091,8 @@ class Application(App, inherit_bindings=False):
                             focus_on=path.basename(selected),
                         )
 
+                from rovr.screens import FileSearch
+
                 self.push_screen(FileSearch(), on_response)
             except Exception as exc:
                 dump_exc(self, exc)
@@ -1096,6 +1108,8 @@ class Application(App, inherit_bindings=False):
             )
 
     def action_plugin_rg(self) -> None:
+        import shutil
+
         if not config["plugins"]["rg"]["enabled"]:
             return
         rg_exec = shutil.which(config["plugins"]["rg"]["executable"]) or shutil.which(
@@ -1112,6 +1126,8 @@ class Application(App, inherit_bindings=False):
                             path.dirname(selected),
                             focus_on=path.basename(selected),
                         )
+
+                from rovr.screens import ContentSearch
 
                 self.push_screen(ContentSearch(), on_response)
             except Exception as exc:
@@ -1138,6 +1154,8 @@ class Application(App, inherit_bindings=False):
             super().action_suspend_process()
 
     def action_show_shell_screen(self) -> None:
+        from rovr.screens import ShellExec
+
         self.push_screen(
             ShellExec(),
             callback=lambda response: self.on_shell_exec_response(response),

@@ -1,9 +1,7 @@
 import logging
 import os
-import platform
 import sys
 from io import TextIOWrapper
-from multiprocessing import Process
 from typing import cast
 
 import rich_click as click
@@ -14,6 +12,7 @@ from rich.table import Table
 # need to shush textual-image
 logging.getLogger("textual_image._terminal").setLevel(logging.FATAL)
 
+global pprint
 pprint = Console().print
 
 textual_flags = set(os.environ.get("TEXTUAL", "").split(","))
@@ -387,10 +386,6 @@ example_function(10)"""
     if force_first_launch:
         return
 
-    # start separate thread for platform to cache
-    platproc = Process(target=platform.system)
-    platproc.start()
-
     from rovr.functions.utils import set_nested_value
     from rovr.variables.constants import config
 
@@ -400,35 +395,21 @@ example_function(10)"""
     for feature_path in without_features:
         set_nested_value(cast(dict, config), feature_path, False)
 
-    if not sys.stdout.isatty():
-        sys.__backup__stdout__ = sys.__stdout__
-        sys.__backup__stderr__ = sys.__stderr__
-        sys.__backup__stdin__ = sys.__stdin__
+    backup_stdout = sys.__stdout__
+    backup_stderr = sys.__stderr__
+    backup_stdin = sys.__stdin__
 
     from rovr.app import Application
 
-    # __backup__std***__ for future
     if chooser_file == "__stdout__":
-        if hasattr(sys, "__backup__stdout__"):
-            chooser_file = sys.__backup__stdout__
-        else:
-            chooser_file = sys.__stdout__
+        chooser_file = backup_stdout
     elif chooser_file == "__stderr__":
-        if hasattr(sys, "__backup__stderr__"):
-            chooser_file = sys.__backup__stderr__
-        else:
-            chooser_file = sys.__stderr__
+        chooser_file = backup_stderr
 
     if cwd_file == "__stdout__":
-        if hasattr(sys, "__backup__stdout__"):
-            cwd_file = sys.__backup__stdout__
-        else:
-            cwd_file = sys.__stdout__
+        cwd_file = backup_stdout
     elif cwd_file == "__stderr__":
-        if hasattr(sys, "__backup__stderr__"):
-            cwd_file = sys.__backup__stderr__
-        else:
-            cwd_file = sys.__stderr__
+        cwd_file = backup_stderr
 
     if sys.stdout.isatty():
         Application(
@@ -459,14 +440,13 @@ example_function(10)"""
                     force_crash_in=force_crash_in,
                 ).run()
         finally:
-            sys.__stdout__ = sys.stdout = sys.__backup__stdout__
-            sys.__stderr__ = sys.stderr = sys.__backup__stderr__
-            sys.__stdin__ = sys.stdin = sys.__backup__stdin__
+            sys.__stdout__ = sys.stdout = backup_stdout
+            sys.__stderr__ = sys.stderr = backup_stderr
+            sys.__stdin__ = sys.stdin = backup_stdin
     else:
         print(
             "Error: rovr needs a TTY to run in application.",
         )
-    platproc.join()
 
 
 if __name__ == "__main__":

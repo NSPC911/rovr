@@ -5,7 +5,7 @@ from importlib import resources
 from importlib.metadata import PackageNotFoundError, version
 from os import path
 from shutil import which
-from typing import Callable, Literal, cast
+from typing import Callable, cast
 
 import fastjsonschema
 import tomli
@@ -33,7 +33,7 @@ _schema_validator_cache: Callable[[dict], None] | None = None
 
 
 @cache
-def resolve_default_editor() -> str:
+def editor() -> str:
     for editor in EDITOR_CANDIDATES:
         if which(editor):
             return editor + " --"
@@ -84,6 +84,7 @@ def deep_merge(old: dict, new: dict) -> dict:
     return old
 
 
+@cache
 def get_version() -> str:
     """Get version from package metadata
 
@@ -440,10 +441,9 @@ def load_config() -> tuple[dict, RovrConfig]:
         config_dict["interface"]["image_viewer"]["protocol"] = ""
 
     for key in ["file", "folder", "bulk_rename"]:
-        key = cast(Literal["file", "folder", "bulk_rename"], key)
         expanded_run = os.path.expandvars(config_dict["settings"]["editor"][key]["run"])
         if not expanded_run:
-            expanded_run = resolve_default_editor()
+            expanded_run = editor()
         config_dict["settings"]["editor"][key]["run"] = expanded_run
 
     # pdf fixer

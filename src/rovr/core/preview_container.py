@@ -38,7 +38,7 @@ from rovr.functions import path as path_utils
 from rovr.functions import preview_utils
 from rovr.functions.pdf import get_pdf_images, get_pdf_info
 from rovr.functions.utils import should_cancel
-from rovr.variables.constants import PreviewContainerTitles, config, get_file_executable
+from rovr.variables.constants import PreviewContainerTitles, config, file_one
 
 titles = PreviewContainerTitles()
 
@@ -1082,7 +1082,7 @@ class PreviewContainer(Container):
                 and config["plugins"]["file_one"]["get_description"]
             ):
                 try:
-                    executable = get_file_executable()
+                    executable = file_one()
                     if executable:
                         process = subprocess.run(
                             [executable, "--brief", "--", self._current_file_path],

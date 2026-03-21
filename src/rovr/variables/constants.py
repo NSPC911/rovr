@@ -23,23 +23,21 @@ else:
 
 
 @cache
-def get_file_executable() -> str | None:
+def file_one() -> str | None:
     # check for $ROVR_FILE_ONE
-    if (  # noqa: SIM114
+    if (
         "ROVR_FILE_ONE" in environ
         and (found := which(environ["ROVR_FILE_ONE"])) is not None
     ):
         return found
     # check for $YAZI_FILE_ONE
-    if (  # noqa: SIM114
+    if (
         "YAZI_FILE_ONE" in environ
         and (found := which(environ["YAZI_FILE_ONE"])) is not None
     ):
         return found
     # check for `file` existence
-    if (found := which("file")) is not None:
-        return found
-    return None
+    return which("file")
 
 
 if "log_name" not in globals():

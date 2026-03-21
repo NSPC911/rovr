@@ -10,7 +10,6 @@ from typing import Callable, Literal, NamedTuple, TypedDict, overload
 
 import psutil
 import puremagic
-from natsort import natsorted
 from rich.console import Console
 from rich.traceback import Traceback
 from textual import work
@@ -24,7 +23,7 @@ from rovr.classes.type_aliases import (
     SortByOptions,
 )
 from rovr.functions.icons import get_icon_for_file, get_icon_for_folder
-from rovr.variables.constants import config, get_file_executable, log_name, os_type
+from rovr.variables.constants import config, file_one, log_name, os_type
 
 pprint = globals().get("pprint", Console().print)
 
@@ -338,6 +337,8 @@ def sync_get_cwd_object(
             folders.sort(key=lambda x: x["name"].lower())
             files.sort(key=lambda x: x["name"].lower())
         case "natural":
+            from natsort import natsorted
+
             # no we will not be using `natsort`'s os_sorted
             folders: list[CWDObjectReturnDict] = natsorted(
                 folders, key=lambda x: x["name"].lower()
@@ -762,7 +763,7 @@ def get_mime_type(
     # Step 3: Fall back to file(1) command if available
     if "file1" not in ignore:
         try:
-            file_executable = get_file_executable()
+            file_executable = file_one()
             if file_executable is None:
                 raise FileNotFoundError
             process = subprocess.run(

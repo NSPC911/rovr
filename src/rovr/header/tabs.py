@@ -136,6 +136,7 @@ class Tabline(Tabs):
 
     @on(Tab.Clicked)
     @on(Tabs.TabActivated)
+    @work
     async def check_tab_click(self, event: TablineTab.Clicked) -> None:
         assert isinstance(event.tab, TablineTab)
 
@@ -146,13 +147,15 @@ class Tabline(Tabs):
             if event.tab.session.search != "":
                 self.app.file_list.input.value = event.tab.session.search
 
-        self.app.cd(
+        worker = self.app.cd(
             event.tab.directory,
             add_to_history=False,
             has_selected=event.tab.session.selectMode,
             callback=callback,
             clear_search=False,
         )
+        if worker is not None:
+            await worker.wait()
 
     def _highlight_active(
         self,

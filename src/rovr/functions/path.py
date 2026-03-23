@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import asyncio
 import base64
 import ctypes
@@ -10,9 +12,7 @@ from os import path
 from typing import Callable, Literal, NamedTuple, TypedDict, overload
 
 import psutil
-import puremagic
 from rich.console import Console
-from rich.traceback import Traceback
 from textual import work
 from textual.app import App
 from textual.dom import DOMNode
@@ -723,6 +723,8 @@ def get_mime_type(
 
     # Step 1: Try puremagic (magic byte detection) first
     if "puremagic" not in ignore:
+        import puremagic
+
         try:
             puremagic_result: list[puremagic.PureMagicWithConfidence] = (
                 puremagic.magic_string(file_bytes)
@@ -813,7 +815,8 @@ def get_direntry_for(file_path: str) -> DirEntryType | None:
     return None
 
 
-def dump_exc(widget: DOMNode | None, exc: Exception | Traceback) -> str | None:
+# trust me ruff, I know what I'm doing
+def dump_exc(widget: DOMNode | None, exc: Exception | Traceback) -> str | None:  # noqa: F821
     """Dump an exception to the console for debugging purposes.
 
     Args:
@@ -826,6 +829,7 @@ def dump_exc(widget: DOMNode | None, exc: Exception | Traceback) -> str | None:
     from datetime import datetime
 
     from rich.panel import Panel
+    from rich.traceback import Traceback
 
     from rovr.variables.maps import RovrVars
 

@@ -13,8 +13,6 @@ import textual_image.widget
 from PIL import Image, ImageDraw, ImageFont, UnidentifiedImageError
 from PIL.Image import Image as PILImage
 from resvg_py import svg_to_bytes
-from rich.syntax import Syntax
-from rich.text import Text
 from textual import events, on, work
 from textual.app import ComposeResult
 from textual.containers import Container
@@ -569,6 +567,9 @@ class PreviewContainer(Container):
 
         if should_cancel():
             return False
+
+        from rich.text import Text
+
         self.app.call_from_thread(setattr, self, "border_title", titles.bat)
 
         try:
@@ -632,6 +633,9 @@ class PreviewContainer(Container):
         """Show normal file preview with syntax highlighting. Runs in a thread."""
         if should_cancel():
             return
+
+        from rich.syntax import Syntax
+
         self.app.call_from_thread(setattr, self, "border_title", titles.file)
 
         if not isinstance(self._current_content, str):

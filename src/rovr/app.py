@@ -41,8 +41,13 @@ from rovr.action_buttons import (
 from rovr.action_buttons.sort_order import SortOrderButton, SortOrderPopup
 from rovr.components import SearchInput
 from rovr.components.popup_option_list import PopupOptionList
-from rovr.core import FileList, FileListContainer, PinnedSidebar, PreviewContainer
-from rovr.core.file_list import FileListRightClickOptionList
+from rovr.core import (
+    FileList,
+    FileListContainer,
+    FileListRightClickOptionList,
+    PinnedSidebar,
+    PreviewContainer,
+)
 from rovr.footer import Clipboard, MetadataContainer, ProcessContainer
 from rovr.functions import icons
 from rovr.functions.path import (

@@ -5,6 +5,7 @@ import os
 import re
 import stat
 import subprocess
+from functools import lru_cache
 from os import path
 from typing import Callable, Literal, NamedTuple, TypedDict, overload
 
@@ -32,6 +33,17 @@ mime_re_cache: dict[
     list[re.Pattern],
 ] = {}
 mime_preview_cache: dict[str, PreviewTypes | None] = {}
+
+
+# natsort dead
+@lru_cache(maxsize=8196)
+def natsort(key: str) -> list:
+    import re
+
+    return [
+        int(text) if text.isdigit() else text.lower()
+        for text in re.split(r"(\d+)", key)
+    ]
 
 
 def normalise(*location: str | bytes) -> str:
@@ -337,15 +349,8 @@ def sync_get_cwd_object(
             folders.sort(key=lambda x: x["name"].lower())
             files.sort(key=lambda x: x["name"].lower())
         case "natural":
-            from natsort import natsorted
-
-            # no we will not be using `natsort`'s os_sorted
-            folders: list[CWDObjectReturnDict] = natsorted(
-                folders, key=lambda x: x["name"].lower()
-            )
-            files: list[CWDObjectReturnDict] = natsorted(
-                files, key=lambda x: x["name"].lower()
-            )
+            folders.sort(key=lambda x: natsort(x["name"]))
+            files.sort(key=lambda x: natsort(x["name"]))
         case "created":
             folders.sort(key=lambda x: x["dir_entry"].stat().st_ctime_ns)
             files.sort(key=lambda x: x["dir_entry"].stat().st_ctime_ns)

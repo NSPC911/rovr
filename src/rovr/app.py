@@ -64,7 +64,7 @@ from rovr.navigation_widgets import (
 from rovr.screens.typed import ShellExecReturnType
 from rovr.state_manager import StateManager
 from rovr.variables.constants import MaxPossible, config, log_name
-from rovr.variables.maps import VAR_TO_DIR
+from rovr.variables.maps import RovrVars
 
 console = Console()
 
@@ -87,13 +87,13 @@ class Application(App, inherit_bindings=False):
     ]
     # higher index = higher priority
     CSS_PATH = ["style.tcss"] + (
-        [path.join(VAR_TO_DIR["CONFIG"], "style.tcss")]
-        if path.exists(path.join(VAR_TO_DIR["CONFIG"], "style.tcss"))
+        [path.join(RovrVars.ROVRCONFIG, "style.tcss")]
+        if path.exists(path.join(RovrVars.ROVRCONFIG, "style.tcss"))
         else []
     )
 
     CUSTOM_STYLE_AVAILABLE: bool = path.exists(
-        path.join(VAR_TO_DIR["CONFIG"], "style.tcss")
+        path.join(RovrVars.ROVRCONFIG, "style.tcss")
     )
 
     # command palette
@@ -543,10 +543,10 @@ class Application(App, inherit_bindings=False):
     def watch_for_changes_and_update(self) -> None:
         cwd = getcwd()
         file_list: FileList = self.query_one(FileList)
-        pins_path = path.join(VAR_TO_DIR["CONFIG"], "pins.json")
+        pins_path = path.join(RovrVars.ROVRCONFIG, "pins.json")
         with suppress(OSError):
             self._pins_mtime = path.getmtime(pins_path)
-        state_path = path.join(VAR_TO_DIR["CONFIG"], "state.toml")
+        state_path = path.join(RovrVars.ROVRCONFIG, "state.toml")
         state_mtime = None
         with suppress(OSError):
             state_mtime = path.getmtime(state_path)
@@ -554,7 +554,7 @@ class Application(App, inherit_bindings=False):
         drive_update_every = int(config["interface"]["drive_watcher_frequency"])
         count: int = -1
         style_available: bool = self.CUSTOM_STYLE_AVAILABLE
-        custom_style_path = path.join(VAR_TO_DIR["CONFIG"], "style.tcss")
+        custom_style_path = path.join(RovrVars.ROVRCONFIG, "style.tcss")
         while True:
             for _ in range(4):
                 # essentially sleep 1 second, but with extra steps
@@ -899,7 +899,7 @@ class Application(App, inherit_bindings=False):
                 )
             if error_count != 0:
                 dump_path = path.join(
-                    path.realpath(VAR_TO_DIR["CONFIG"]), "logs", f"{log_name}.log"
+                    path.realpath(RovrVars.ROVRCONFIG), "logs", f"{log_name}.log"
                 )
                 self.error_console.print(
                     Panel(

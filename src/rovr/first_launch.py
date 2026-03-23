@@ -38,7 +38,7 @@ from textual.widgets import (
     Switch,
 )
 
-from rovr.variables.maps import VAR_TO_DIR
+from rovr.variables.maps import RovrVars
 
 prot_to_timg: dict[str, Callable] = {
     "auto": timg.Image,
@@ -133,7 +133,7 @@ class AskWrite(ModalScreen[bool]):
         with Container(classes="modal-wrapper"):
             yield Static("Write config to disk?")
             yield Static(
-                f"The following content will be written to [u]{os.path.realpath(f'{VAR_TO_DIR["CONFIG"]}/config.toml')}[/]:"
+                f"The following content will be written to [u]{os.path.realpath(f'{RovrVars.ROVRCONFIG}/config.toml')}[/]:"
             )
             yield Static(classes="padding")
             with ScrollableContainer():
@@ -444,8 +444,8 @@ enabled = {str(self.query_one("#plugins-poppler Switch", Switch).value).lower()}
 enabled = {str(self.query_one("#plugins-file Switch", Switch).value).lower()}"""
         # trust me it loads properly
         if await self.push_screen_wait(AskWrite(config_toml)):
-            os.makedirs(VAR_TO_DIR["CONFIG"], exist_ok=True)
-            with open(f"{VAR_TO_DIR['CONFIG']}/config.toml", "w") as f:
+            os.makedirs(RovrVars.ROVRCONFIG, exist_ok=True)
+            with open(f"{RovrVars.ROVRCONFIG}/config.toml", "w") as f:
                 f.write(config_toml)
             await self.push_screen_wait(FinalStuff())
 

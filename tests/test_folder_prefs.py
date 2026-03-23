@@ -8,7 +8,7 @@ from rovr.functions.folder_prefs import (
     remove_folder_pref,
     set_folder_pref,
 )
-from rovr.variables.maps import VAR_TO_DIR
+from rovr.variables.maps import RovrVars
 
 
 def test_set_and_load_folder_preferences_round_trip(tmp_path: Path) -> None:
@@ -38,7 +38,7 @@ def test_remove_folder_preference_updates_state(tmp_path: Path) -> None:
 
 
 def test_load_folder_prefs_expands_variable_paths() -> None:
-    folder_path = Path(VAR_TO_DIR["CONFIG"])
+    folder_path = Path(RovrVars.ROVRCONFIG)
     if not folder_path.exists():
         folder_path.mkdir(parents=True)
     prefs_file = folder_path / "folder_preferences.json"
@@ -54,4 +54,4 @@ def test_load_folder_prefs_expands_variable_paths() -> None:
         )
 
     loaded = load_folder_prefs()
-    assert f"{VAR_TO_DIR['HOME']}/fixture" in loaded
+    assert f"{RovrVars.HOME}/fixture" in loaded

@@ -822,7 +822,7 @@ def dump_exc(widget: DOMNode | None, exc: Exception | Traceback) -> str | None:
 
     from rich.panel import Panel
 
-    from rovr.variables.maps import VAR_TO_DIR
+    from rovr.variables.maps import RovrVars
 
     rich_traceback = (
         Traceback.from_exception(
@@ -841,7 +841,7 @@ def dump_exc(widget: DOMNode | None, exc: Exception | Traceback) -> str | None:
         widget.log(rich_traceback)
 
     dump_path = path.join(
-        path.realpath(VAR_TO_DIR["CONFIG"]),
+        path.realpath(RovrVars.ROVRCONFIG),
         "logs",
         f"{log_name}.log",
     )

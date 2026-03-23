@@ -5,7 +5,7 @@ import pytest
 
 import rovr.functions.pins as pins_module
 from rovr.functions.pins import add_pin, load_pins, remove_pin, toggle_pin
-from rovr.variables.maps import VAR_TO_DIR
+from rovr.variables.maps import RovrVars
 
 DEFAULT_NAMES = {
     "Home",
@@ -43,7 +43,7 @@ def test_load_pins_valid_file_expands_home_variable() -> None:
 
     result = load_pins()
 
-    home = VAR_TO_DIR["HOME"]
+    home = RovrVars.HOME
     assert result["default"][0]["path"] == home
     assert result["pins"][0]["path"] == f"{home}/mydir"
 

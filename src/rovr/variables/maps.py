@@ -1,34 +1,35 @@
+from dataclasses import dataclass
 from os import path
-from typing import TypedDict
 
 from platformdirs import PlatformDirs
 from rich._spinners import SPINNERS
 
+from rovr.functions.utils import classproperty
+
 dirs = PlatformDirs("rovr", ".")  # Ah yes, my name is "."
+general = PlatformDirs()
 
 
-class PlatformDirsVars(TypedDict):
-    DOCUMENTS: str
-    DOWNLOADS: str
-    MUSIC: str
-    PICTURES: str
-    DESKTOP: str
-    HOME: str
-    VIDEOS: str
-    CONFIG: str
+@dataclass
+class _RovrVars:
+    DOCUMENTS: str = general.user_documents_dir.replace("\\", "/")
+    DOCUMENTS: str = general.user_documents_dir.replace("\\", "/")
+    DOWNLOADS: str = general.user_downloads_dir.replace("\\", "/")
+    MUSIC: str = general.user_music_dir.replace("\\", "/")
+    PICTURES: str = general.user_pictures_dir.replace("\\", "/")
+    DESKTOP: str = general.user_desktop_dir.replace("\\", "/")
+    HOME: str = path.expanduser("~").replace("\\", "/")
+    VIDEOS: str = general.user_videos_dir.replace("\\", "/")
+    CONFIG: str = general.user_config_dir.replace("\\", "/")
+    CACHE: str = general.user_cache_dir.replace("\\", "/")
+    ROVRCONFIG: str = dirs.user_config_dir.replace("\\", "/")
+
+    @classproperty
+    def ROVRCACHE(self) -> str:  # noqa: N802
+        return path.join(self.ROVRCONFIG, "cache").replace("\\", "/")
 
 
-VAR_TO_DIR: PlatformDirsVars = {
-    "DOCUMENTS": dirs.user_documents_dir.replace("\\", "/"),
-    "DOWNLOADS": dirs.user_downloads_dir.replace("\\", "/"),
-    "MUSIC": dirs.user_music_dir.replace("\\", "/"),
-    "PICTURES": dirs.user_pictures_dir.replace("\\", "/"),
-    "DESKTOP": dirs.user_desktop_dir.replace("\\", "/"),
-    "HOME": path.expanduser("~").replace("\\", "/"),
-    "VIDEOS": dirs.user_videos_dir.replace("\\", "/"),
-    "CONFIG": dirs.user_config_dir.replace("\\", "/"),
-}
-SORTED_VARS = sorted(VAR_TO_DIR.items(), key=lambda x: len(x[1]), reverse=True)
+RovrVars = _RovrVars()
 
 ASCII_ICONS = {
     "general": {

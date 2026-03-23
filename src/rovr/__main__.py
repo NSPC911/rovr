@@ -50,9 +50,9 @@ def eager_set_folder(ctx: click.Context, param: click.Parameter, value: str) -> 
     if value:
         from os import path
 
-        from rovr.variables.maps import VAR_TO_DIR
+        from rovr.variables.maps import RovrVars
 
-        VAR_TO_DIR["CONFIG"] = path.realpath(value.replace("\\", "/"))
+        RovrVars.ROVRCONFIG = path.realpath(value.replace("\\", "/"))
     return value
 
 
@@ -281,7 +281,7 @@ example_function(10)"""
             print("\n".join(styles))
         return
 
-    from rovr.variables.maps import VAR_TO_DIR
+    from rovr.variables.maps import RovrVars
 
     if show_config_path:
 
@@ -290,7 +290,7 @@ example_function(10)"""
 
             return str(path.normpath(location)).replace("\\", "/").replace("//", "/")
 
-        config_path = _normalise(VAR_TO_DIR["CONFIG"])
+        config_path = _normalise(RovrVars.ROVRCONFIG)
 
         if sys.stdout.isatty():
             table = Table(title="", border_style="blue", box=box.ROUNDED)
@@ -360,8 +360,8 @@ example_function(10)"""
         sys.exit(1)
     elif ignore_first_launch:
         if not config_folder and (
-            not os.path.exists(VAR_TO_DIR["CONFIG"])
-            or len(os.listdir(VAR_TO_DIR["CONFIG"])) == 0
+            not os.path.exists(RovrVars.ROVRCONFIG)
+            or len(os.listdir(RovrVars.ROVRCONFIG)) == 0
         ):
             pprint(
                 "[bold yellow]Warning:[/] Ignoring first launch setup is not recommended. Some features may not work properly without proper configuration."
@@ -375,8 +375,8 @@ example_function(10)"""
     elif force_first_launch or (
         not config_folder
         and (
-            not os.path.exists(VAR_TO_DIR["CONFIG"])
-            or len(os.listdir(VAR_TO_DIR["CONFIG"])) == 0
+            not os.path.exists(RovrVars.ROVRCONFIG)
+            or len(os.listdir(RovrVars.ROVRCONFIG)) == 0
         )
     ):
         from rovr.first_launch import FirstLaunchApp

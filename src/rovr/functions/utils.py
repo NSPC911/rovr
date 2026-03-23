@@ -14,9 +14,6 @@ from rovr.classes.config import (
     _RovrConfigSettingsEditorFile,
     _RovrConfigSettingsEditorFolder,
 )
-from rovr.variables.maps import (
-    BORDER_BOTTOM,
-)
 
 pprint = globals().get("pprint", Console().print)
 
@@ -113,6 +110,8 @@ def set_scuffed_subtitle(element: DOMNode, *sections: str) -> None:
         element (Widget): The element containing style information.
         *sections (str): The sections to display
     """
+    from rovr.variables.maps import BORDER_BOTTOM
+
     try:
         border_bottom = BORDER_BOTTOM.get(
             element.styles.border_bottom[0], BORDER_BOTTOM["blank"]

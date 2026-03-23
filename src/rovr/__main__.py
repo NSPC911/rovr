@@ -386,6 +386,7 @@ example_function(10)"""
     if force_first_launch:
         return
 
+    import rovr.cache._platform  # noqa: F401
     from rovr.functions.utils import set_nested_value
     from rovr.variables.constants import config
 

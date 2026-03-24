@@ -963,17 +963,15 @@ wheels = [
 ]
 
 [[package]]
-name = "rich-click"
-version = "1.9.7"
+name = "rich-argparse"
+version = "1.7.2"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
-    { name = "click" },
-    { name = "colorama", marker = "sys_platform == 'win32'" },
     { name = "rich" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/04/27/091e140ea834272188e63f8dd6faac1f5c687582b687197b3e0ec3c78ebf/rich_click-1.9.7.tar.gz", hash = "sha256:022997c1e30731995bdbc8ec2f82819340d42543237f033a003c7b1f843fc5dc", size = 74838, upload-time = "2026-01-31T04:29:27.707Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/4c/f7/1c65e0245d4c7009a87ac92908294a66e7e7635eccf76a68550f40c6df80/rich_argparse-1.7.2.tar.gz", hash = "sha256:64fd2e948fc96e8a1a06e0e72c111c2ce7f3af74126d75c0f5f63926e7289cd1", size = 38500, upload-time = "2025-11-01T10:35:44.232Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/ca/e5/d708d262b600a352abe01c2ae360d8ff75b0af819b78e9af293191d928e6/rich_click-1.9.7-py3-none-any.whl", hash = "sha256:2f99120fca78f536e07b114d3b60333bc4bb2a0969053b1250869bcdc1b5351b", size = 71491, upload-time = "2026-01-31T04:29:26.777Z" },
+    { url = "https://files.pythonhosted.org/packages/04/80/97b6f357ac458d9ad9872cc3183ca09ef7439ac89e030ea43053ba1294b6/rich_argparse-1.7.2-py3-none-any.whl", hash = "sha256:0559b1f47a19bbeb82bf15f95a057f99bcbbc98385532f57937f9fc57acc501a", size = 25476, upload-time = "2025-11-01T10:35:42.681Z" },
 ]
 
 [[package]]
@@ -992,7 +990,7 @@ dependencies = [
     { name = "rarfile" },
     { name = "resvg-py" },
     { name = "rich" },
-    { name = "rich-click" },
+    { name = "rich-argparse" },
     { name = "send2trash" },
     { name = "textual" },
     { name = "textual-autocomplete" },
@@ -1041,7 +1039,7 @@ requires-dist = [
     { name = "rarfile", specifier = ">=4.2" },
     { name = "resvg-py", specifier = ">=0.2.6" },
     { name = "rich", specifier = ">=14.3.1" },
-    { name = "rich-click", specifier = ">=1.9.3" },
+    { name = "rich-argparse", specifier = ">=1.7.2" },
     { name = "send2trash", specifier = ">=2.1.0" },
     { name = "textual", specifier = "~=7.0" },
     { name = "textual-autocomplete", specifier = ">=4.0.6" },

@@ -84,5 +84,7 @@ def isolate_test_state(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.setattr("rovr.functions.pins.pins", {})
     monkeypatch.setattr("rovr.functions.folder_prefs.folder_prefs", {})
 
-    monkeypatch.setattr(maps.RovrVars, "ROVRCONFIG", config_dir.as_posix())
+    config_root = config_dir.as_posix()
+    monkeypatch.setattr(maps.RovrVars, "ROVRCONFIG", config_root)
+    monkeypatch.setattr(type(maps.RovrVars), "ROVRCONFIG", config_root)
     monkeypatch.setattr("rovr.functions.pins.PIN_PATH", str(config_dir / "pins.json"))

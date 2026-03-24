@@ -1,4 +1,5 @@
 from asyncio import sleep
+from contextlib import suppress
 from os import getcwd, path
 from typing import Callable
 
@@ -156,10 +157,8 @@ class Tabline(Tabs):
             clear_search=False,
         )
         if worker is not None:
-            try:
+            with suppress(WorkerCancelled):
                 await worker.wait()
-            except WorkerCancelled:
-                return
 
     def _highlight_active(
         self,

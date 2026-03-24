@@ -1,10 +1,8 @@
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from os import path
 
 from platformdirs import PlatformDirs
 from rich._spinners import SPINNERS
-
-from rovr.functions.utils import classproperty
 
 dirs = PlatformDirs("rovr", ".")  # Ah yes, my name is "."
 general = PlatformDirs()
@@ -12,7 +10,6 @@ general = PlatformDirs()
 
 @dataclass
 class _RovrVars:
-    DOCUMENTS: str = general.user_documents_dir.replace("\\", "/")
     DOCUMENTS: str = general.user_documents_dir.replace("\\", "/")
     DOWNLOADS: str = general.user_downloads_dir.replace("\\", "/")
     MUSIC: str = general.user_music_dir.replace("\\", "/")
@@ -23,10 +20,10 @@ class _RovrVars:
     CONFIG: str = general.user_config_dir.replace("\\", "/")
     CACHE: str = general.user_cache_dir.replace("\\", "/")
     ROVRCONFIG: str = dirs.user_config_dir.replace("\\", "/")
+    ROVRCACHE: str = field(init=False)
 
-    @classproperty
-    def ROVRCACHE(self) -> str:  # noqa: N802
-        return path.join(self.ROVRCONFIG, "cache").replace("\\", "/")
+    def __post_init__(self) -> None:
+        self.ROVRCACHE = path.join(self.ROVRCONFIG, "cache").replace("\\", "/")
 
 
 RovrVars = _RovrVars()

@@ -52,7 +52,9 @@ def eager_set_folder(ctx: click.Context, param: click.Parameter, value: str) -> 
 
         from rovr.variables.maps import RovrVars
 
-        RovrVars.ROVRCONFIG = path.realpath(value.replace("\\", "/"))
+        config_root = path.realpath(value.replace("\\", "/"))
+        RovrVars.ROVRCONFIG = config_root
+        type(RovrVars).ROVRCONFIG = config_root
     return value
 
 

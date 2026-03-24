@@ -73,9 +73,17 @@ def deep_merge(old: dict, new: dict) -> dict:
     try:
         for key, value in new.items():
             if isinstance(value, dict):
-                old[key] = deep_merge(old.get(key, {}), value)
+                existing = old.get(key, {})
+                old[key] = deep_merge(
+                    existing if isinstance(existing, dict) else {}, value
+                )
             else:
                 old[key] = value
+    except TypeError as exc:
+        pprint(
+            f"Type conflict at key '{key}': cannot merge {type(value).__name__} into {type(old.get(key)).__name__}\n    {exc}\nPlease check your config for type errors. rovr will not be launching until this is resolved."
+        )
+        exit(1)
     except Exception as exc:
         pprint(
             f"While deep merging the default config with the userconfig, {type(exc).__name__} was raised.\n    {exc}\nSince the conflict cannot be resolved, rovr will not be launching."
@@ -441,7 +449,12 @@ def load_config() -> tuple[dict, RovrConfig]:
         config_dict["interface"]["image_viewer"]["protocol"] = ""
 
     for key in ["file", "folder", "bulk_rename"]:
-        expanded_run = os.path.expandvars(config_dict["settings"]["editor"][key]["run"])
+        raw_run = config_dict["settings"]["editor"][key]["run"]
+        expanded_run = os.path.expandvars(raw_run)
+        if expanded_run == raw_run and any(
+            token in raw_run for token in ("$EDITOR", "${EDITOR}", "%EDITOR%")
+        ):
+            expanded_run = ""
         if not expanded_run:
             expanded_run = editor()
         config_dict["settings"]["editor"][key]["run"] = expanded_run

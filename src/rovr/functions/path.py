@@ -707,6 +707,8 @@ def get_mime_type(
 
     Raises:
         FileNotFoundError: If file(1) executable is unavailable when that method is selected.
+        ╰╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┴> Ruff wants this part here, even though the function
+                           handles it internally, so I'm just leaving it here
     """
     if ignore is None:
         ignore = []

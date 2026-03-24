@@ -11,6 +11,7 @@ from textual.css.query import NoMatches
 from textual.renderables.bar import Bar as BarRenderable
 from textual.widgets import Button, Input, Tabs
 from textual.widgets._tabs import Tab, Underline
+from textual.worker import WorkerCancelled
 
 from rovr.classes.session_manager import SessionManager
 from rovr.functions.path import normalise
@@ -155,7 +156,10 @@ class Tabline(Tabs):
             clear_search=False,
         )
         if worker is not None:
-            await worker.wait()
+            try:
+                await worker.wait()
+            except WorkerCancelled:
+                return
 
     def _highlight_active(
         self,

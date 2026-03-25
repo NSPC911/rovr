@@ -28,15 +28,12 @@ EDITOR_CANDIDATES = [
     "msedit",
 ]
 
-_schema_dict_cache: dict | None = None
-_schema_validator_cache: Callable[[dict], None] | None = None
-
 
 @cache
 def editor() -> str:
-    for editor in EDITOR_CANDIDATES:
-        if which(editor):
-            return editor + " --"
+    for edtr in EDITOR_CANDIDATES:
+        if which(edtr):
+            return edtr + " --"
     if which("zed"):
         return "zed --wait --"
     if which("code"):
@@ -44,18 +41,11 @@ def editor() -> str:
     return ""
 
 
+@cache
 def get_schema_validator() -> tuple[dict, Callable[[dict], None]]:
-    global _schema_dict_cache, _schema_validator_cache
-
-    if _schema_dict_cache is None or _schema_validator_cache is None:
-        content = (
-            resources.files("rovr.config").joinpath("schema.json").read_text("utf-8")
-        )
-        _schema_dict_cache = json.loads(content)
-        _schema_validator_cache = fastjsonschema.compile(_schema_dict_cache)
-
-    if _schema_dict_cache is None or _schema_validator_cache is None:
-        raise RuntimeError("Failed to initialize schema validator")
+    content = resources.files("rovr.config").joinpath("schema.json").read_text("utf-8")
+    _schema_dict_cache = json.loads(content)
+    _schema_validator_cache = fastjsonschema.compile(_schema_dict_cache)
 
     return _schema_dict_cache, _schema_validator_cache
 

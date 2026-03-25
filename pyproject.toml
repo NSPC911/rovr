@@ -28,7 +28,6 @@ dependencies = [
   "rarfile>=4.2",
   "resvg-py>=0.2.6",
   "rich>=14.3.1", # issue with 14.3.0 that breaks nerd fonts
-  "rich-click>=1.9.3",
   "send2trash>=2.1.0",
   "textual~=7.0",
   "textual-autocomplete>=4.0.6",

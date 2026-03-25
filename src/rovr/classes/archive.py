@@ -1,4 +1,4 @@
-# this is the only file in the entire repository that is written fully by AI
+# this is one of two files in the entire repository that is written fully by AI
 import bz2 as bzip2
 import gzip
 import lzma

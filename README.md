@@ -125,7 +125,7 @@ variables = {
     - Keep in mind, you can disable them. The screenshot is my setup, and the default setup. Textual CSS lets you hide things, disable borders, etc etc, so you can make it look however you want.
 
 11. Is this vibe-coded?
-    - Depends on the meaning. AI was used in certain parts of the code, especially in [archive handling](https://github.com/NSPC911/rovr/blob/master/src/rovr/classes/archive.py) and [cli functions](https://github.com/NSPC911/rovr/blob/master/src/rovr/functions/cli.py), but aside from that, it is pretty far and few between.
+    - Depends on the meaning. AI was used in certain parts of the code, especially in [archive handling](https://github.com/NSPC911/rovr/blob/master/src/rovr/classes/archive.py) and [cli functions](https://github.com/NSPC911/rovr/blob/master/src/rovr/functions/cli.py), but aside from that, it is few and far between.
 
 ### License
 This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.

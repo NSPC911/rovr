@@ -296,11 +296,11 @@ example_function(10)"""
             "[bold red]Error:[/] --force-first-launch and --ignore-first-launch are mutually exclusive, and hence cannot be used simultaneously."
         )
         sys.exit(1)
+    config_missing = not os.path.exists(RovrVars.ROVRCONFIG) or not os.listdir(
+        RovrVars.ROVRCONFIG
+    )
     if args.ignore_first_launch:
-        if not args.config_folder and (
-            not os.path.exists(RovrVars.ROVRCONFIG)
-            or len(os.listdir(RovrVars.ROVRCONFIG)) == 0
-        ):
+        if config_missing:
             pprint(
                 "[bold yellow]Warning:[/] Ignoring first launch setup is not recommended. Some features may not work properly without proper configuration."
             )
@@ -308,13 +308,7 @@ example_function(10)"""
             pprint(
                 "[bold yellow]Warning[/]: Config already available, `--ignore-first-launch` does nothing."
             )
-    elif args.force_first_launch or (
-        not args.config_folder
-        and (
-            not os.path.exists(RovrVars.ROVRCONFIG)
-            or len(os.listdir(RovrVars.ROVRCONFIG)) == 0
-        )
-    ):
+    elif args.force_first_launch or config_missing:
         from rovr.first_launch import FirstLaunchApp
 
         FirstLaunchApp(can_exit=args.force_first_launch).run()
@@ -385,6 +379,7 @@ example_function(10)"""
             sys.__stdin__ = sys.stdin = backup_stdin
     else:
         print("Error: rovr needs a TTY to run in application.")
+        exit(1)
 
 
 if __name__ == "__main__":

@@ -6,6 +6,7 @@ from collections.abc import Sequence
 from typing import Any, Never
 
 from rich.console import Console
+from rich.markup import escape
 from rich.panel import Panel
 from rich.table import Table
 
@@ -17,7 +18,7 @@ class RichArgumentParser(argparse.ArgumentParser):
 
     def error(self, message: str) -> Never:
         # custom error rendering to match rich-click style
-        pretty_message = self._format_error_message(message)
+        pretty_message = escape(self._format_error_message(message))
         panel = Panel(
             pretty_message,
             title="Error",
@@ -133,29 +134,16 @@ def print_rich_help(parser: argparse.ArgumentParser) -> None:
         pprint(f" [dim]{parser.description}[/]")
         pprint(" ")
 
-    groups = {group.title: group for group in parser._action_groups}
-
-    # order of groups in the help output
-    config_group = groups.get("Config")
-    paths_group = groups.get("Paths")
-    misc_group = groups.get("Miscellaneous")
-    dev_group = groups.get("Dev")
-    args_group = groups.get("Arguments")
-
-    if config_group is not None:
-        _render_panel("Config", _iter_visible_actions(config_group))
-    if paths_group is not None:
-        _render_panel(
-            "Paths",
-            _iter_visible_actions(paths_group),
-            subtitle=(paths_group.description or ""),
-        )
-    if misc_group is not None:
-        _render_panel("Miscellaneous", _iter_visible_actions(misc_group))
-    if dev_group is not None:
-        _render_panel("Dev", _iter_visible_actions(dev_group))
-    if args_group is not None:
-        _render_panel("Arguments", _iter_visible_actions(args_group))
+    ordered_titles = ("Config", "Paths", "Miscellaneous", "Dev", "Arguments")
+    for title in ordered_titles:
+        for group in parser._action_groups:
+            if group.title != title:
+                continue
+            _render_panel(
+                title,
+                _iter_visible_actions(group),
+                subtitle=(group.description or "") if title == "Paths" else "",
+            )
 
 
 class RichPanelHelpAction(argparse.Action):
@@ -180,9 +168,9 @@ def existing_dir(value: str) -> str:
         str: The normalized directory path if it exists.
     Raises:
         argparse.ArgumentTypeError: If the directory does not exist."""
-    normalized = os.path.realpath(value.replace("\\", "/"))
-    if not os.path.isdir(normalized):
-        raise argparse.ArgumentTypeError(f"Directory does not exist: {value}")
+    normalized = os.path.realpath(value).replace("\\", "/")
+    if os.path.exists(normalized) and not os.path.isdir(normalized):
+        raise argparse.ArgumentTypeError(f"Not a directory: {value}")
     return normalized
 
 
@@ -190,12 +178,11 @@ def eager_set_folder(config_folder: str | None) -> None:
     if not config_folder:
         return
 
-    from os import path
-
     from rovr.variables.maps import RovrVars
 
-    config_root = path.realpath(config_folder.replace("\\", "/"))
+    config_root = os.path.realpath(config_folder).replace("\\", "/")
     RovrVars.ROVRCONFIG = type(RovrVars).ROVRCONFIG = config_root
-    RovrVars.ROVRCACHE = type(RovrVars).ROVRCACHE = path.join(
+    RovrVars.ROVRCACHE = type(RovrVars).ROVRCACHE = os.path.join(
         config_root, "cache"
     ).replace("\\", "/")
+    os.environ["ROVR_CONFIG_FOLDER"] = config_root

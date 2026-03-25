@@ -8,6 +8,7 @@ from typing import cast
 from rich.console import Console
 
 from rovr.functions.cli import (
+    RichArgumentParser,
     RichPanelHelpAction,
     eager_set_folder,
     existing_dir,
@@ -27,7 +28,7 @@ def _build_parser() -> argparse.ArgumentParser:
     formatter_class: type[argparse.HelpFormatter] = argparse.HelpFormatter
     with_context_help = "Set to __stdout__ to write to stdout (__stderr__ for stderr)"
 
-    parser = argparse.ArgumentParser(
+    parser = RichArgumentParser(
         prog="rovr",
         description="A post-modern terminal file explorer",
         usage="rovr [OPTIONS] [PATH]",

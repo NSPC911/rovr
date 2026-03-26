@@ -1,6 +1,6 @@
 from contextlib import suppress
 from os import getcwd, path
-from typing import Callable, ClassVar, Iterable, Self, Sequence, cast
+from typing import Callable, ClassVar, Iterable, Self, Sequence
 
 from textual import events, on, work
 from textual.binding import BindingType
@@ -11,7 +11,6 @@ from textual.style import Style as TextualStyle
 from textual.widgets import Button, Input, OptionList, SelectionList
 from textual.widgets.option_list import Option, OptionDoesNotExist
 from textual.widgets.selection_list import Selection, SelectionType
-from textual.worker import WorkerError
 
 from rovr.classes.mixins import CheckboxRenderingMixin
 from rovr.classes.session_manager import SessionManager
@@ -161,25 +160,33 @@ class FileList(CheckboxRenderingMixin, SelectionList, inherit_bindings=False):
                 last_highlight = session.lastHighlighted[cwd]
                 focus_on = last_highlight["name"]
             try:
-                worker = path_utils.threaded_get_cwd_object(
+                # leaving this as an architectural marvel
+                # worker = path_utils.threaded_get_cwd_object(
+                #     self,
+                #     cwd,
+                #     config["interface"]["show_hidden_files"],
+                #     sort_by=sort_by,
+                #     reverse=sort_descending,
+                # )
+                # try:
+                #     await worker.wait()
+                # except WorkerError:
+                #     return
+                # if isinstance(worker.result, PermissionError):
+                #     raise worker.result
+                # folders, files = cast(
+                #     tuple[
+                #         list[path_utils.CWDObjectReturnDict],
+                #         list[path_utils.CWDObjectReturnDict],
+                #     ],
+                #     worker.result,
+                # )
+                folders, files = path_utils.sync_get_cwd_object(
                     self,
                     cwd,
                     config["interface"]["show_hidden_files"],
                     sort_by=sort_by,
                     reverse=sort_descending,
-                )
-                try:
-                    await worker.wait()
-                except WorkerError:
-                    return
-                if isinstance(worker.result, PermissionError):
-                    raise worker.result
-                folders, files = cast(
-                    tuple[
-                        list[path_utils.CWDObjectReturnDict],
-                        list[path_utils.CWDObjectReturnDict],
-                    ],
-                    worker.result,
                 )
                 if not folders and not files:
                     self.list_of_options.append(
@@ -299,7 +306,7 @@ class FileList(CheckboxRenderingMixin, SelectionList, inherit_bindings=False):
             if self.list_of_options[0].disabled:  # special option
                 if self.select_mode_enabled:
                     await self.toggle_mode()
-                self.update_border_subtitle()
+                self.call_later(self.update_border_subtitle)
         finally:
             self.file_list_pause_check = False
             if callback:

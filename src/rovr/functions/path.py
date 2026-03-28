@@ -222,32 +222,6 @@ def get_extension_sort_key(file_dict: dict) -> tuple[int, str]:
         return (3, name.split(".")[-1].lower())
 
 
-@work(thread=True)
-def threaded_get_cwd_object(
-    node: DOMNode,
-    cwd: str,
-    show_hidden: bool = False,
-    sort_by: SortByOptions | None = "name",
-    reverse: bool = False,
-    return_nothing_if_this_returns_true: Callable[[], bool] | None = None,
-) -> (
-    tuple[list[CWDObjectReturnDict], list[CWDObjectReturnDict]]
-    | tuple[None, None]
-    | PermissionError
-):
-    try:
-        return sync_get_cwd_object(
-            node,
-            cwd,
-            show_hidden,
-            sort_by,
-            reverse,
-            return_nothing_if_this_returns_true,
-        )
-    except PermissionError as exc:
-        return exc
-
-
 @overload
 def sync_get_cwd_object(
     dom_node: DOMNode,

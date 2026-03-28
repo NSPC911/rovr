@@ -160,27 +160,6 @@ class FileList(CheckboxRenderingMixin, SelectionList, inherit_bindings=False):
                 last_highlight = session.lastHighlighted[cwd]
                 focus_on = last_highlight["name"]
             try:
-                # leaving this as an architectural marvel
-                # worker = path_utils.threaded_get_cwd_object(
-                #     self,
-                #     cwd,
-                #     config["interface"]["show_hidden_files"],
-                #     sort_by=sort_by,
-                #     reverse=sort_descending,
-                # )
-                # try:
-                #     await worker.wait()
-                # except WorkerError:
-                #     return
-                # if isinstance(worker.result, PermissionError):
-                #     raise worker.result
-                # folders, files = cast(
-                #     tuple[
-                #         list[path_utils.CWDObjectReturnDict],
-                #         list[path_utils.CWDObjectReturnDict],
-                #     ],
-                #     worker.result,
-                # )
                 folders, files = path_utils.sync_get_cwd_object(
                     self,
                     cwd,

@@ -171,6 +171,8 @@ def existing_dir(value: str) -> str:
     normalized = os.path.realpath(value).replace("\\", "/")
     if os.path.exists(normalized) and not os.path.isdir(normalized):
         raise argparse.ArgumentTypeError(f"Not a directory: {value}")
+    elif not os.path.exists(normalized):
+        raise argparse.ArgumentTypeError(f"Directory does not exist: {value}")
     return normalized
 
 

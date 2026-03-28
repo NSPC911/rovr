@@ -10,17 +10,17 @@ general = PlatformDirs()
 
 @dataclass
 class _RovrVars:
+    ROVRCONFIG: str = dirs.user_config_dir.replace("\\", "/")
+    ROVRCACHE: str = field(init=False)
     DOCUMENTS: str = general.user_documents_dir.replace("\\", "/")
     DOWNLOADS: str = general.user_downloads_dir.replace("\\", "/")
-    MUSIC: str = general.user_music_dir.replace("\\", "/")
     PICTURES: str = general.user_pictures_dir.replace("\\", "/")
     DESKTOP: str = general.user_desktop_dir.replace("\\", "/")
-    HOME: str = path.expanduser("~").replace("\\", "/")
     VIDEOS: str = general.user_videos_dir.replace("\\", "/")
     CONFIG: str = general.user_config_dir.replace("\\", "/")
     CACHE: str = general.user_cache_dir.replace("\\", "/")
-    ROVRCONFIG: str = dirs.user_config_dir.replace("\\", "/")
-    ROVRCACHE: str = field(init=False)
+    MUSIC: str = general.user_music_dir.replace("\\", "/")
+    HOME: str = path.expanduser("~").replace("\\", "/")
 
     def __post_init__(self) -> None:
         self.ROVRCACHE = path.join(self.ROVRCONFIG, "cache").replace("\\", "/")

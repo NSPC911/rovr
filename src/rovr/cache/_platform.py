@@ -28,9 +28,8 @@ elif path.exists(jsonpath := path.join(cache, "uname.json")):
             os.remove(jsonpath)
         _platform = platform.uname()._asdict()
 
-    # need to hardcode a bit, since 'processor' is in json (because it
-    # is available in `_fields`), but not in namedtuple's allowed
-    # `__init__` slots. how does that happen, i have no clue
+    # you cannot directly kwarg-expand the _platform dict because the processor
+    # field is missing from `__init__`, so you have to do it manually
     _processor = _platform.get("processor", "")
     _platform = platform.uname_result(
         system=_platform["system"],

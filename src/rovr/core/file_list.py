@@ -160,6 +160,7 @@ class FileList(CheckboxRenderingMixin, SelectionList, inherit_bindings=False):
                 last_highlight = session.lastHighlighted[cwd]
                 focus_on = last_highlight["name"]
             try:
+                # intentional, please shut up
                 folders, files = path_utils.sync_get_cwd_object(
                     self,
                     cwd,

@@ -70,8 +70,16 @@ def deep_merge(old: dict, new: dict) -> dict:
             else:
                 old[key] = value
     except TypeError as exc:
+        if locals().get("key") is None and locals().get("value") is None:
+            pprint(
+                f"Type conflict: cannot merge {type(new).__name__} into {type(old).__name__}"
+            )
+        else:
+            pprint(
+                f"Type conflict at key '{key}': cannot merge {type(value).__name__} into {type(old.get(key)).__name__}"
+            )
         pprint(
-            f"Type conflict at key '{key}': cannot merge {type(value).__name__} into {type(old.get(key)).__name__}\n    {exc}\nPlease check your config for type errors. rovr will not be launching until this is resolved."
+            f"    {exc}\nPlease check your config for type errors. rovr will not be launching until this is resolved."
         )
         exit(1)
     except Exception as exc:

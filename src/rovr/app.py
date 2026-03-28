@@ -53,6 +53,7 @@ from rovr.functions import icons
 from rovr.functions.path import (
     dump_exc,
     ensure_existing_directory,
+    get_direntry_for,
     get_filtered_dir_names,
     get_mounted_drives,
     normalise,
@@ -142,6 +143,7 @@ class Application(App, inherit_bindings=False):
         self._exit_with_tree: bool = tree_dom
         self._force_crash_in: float = force_crash_in
         self._pins_mtime: float | None = None
+        self._highlighted_file_mtime: float | None = None
 
         self._file_list_container = FileListContainer()
         self.file_list = self._file_list_container.filelist
@@ -626,6 +628,29 @@ class Application(App, inherit_bindings=False):
                         severity="warning",
                         markup=False,
                     )
+            # check highlighted file mtime
+            if not self.file_list.file_list_pause_check:
+                highlighted_option = file_list.highlighted_option
+                if highlighted_option is not None:
+                    highlighted_path = highlighted_option.dir_entry.path
+                    if not path.isdir(highlighted_path):
+                        new_highlighted_mtime = None
+                        with suppress(OSError):
+                            new_highlighted_mtime = path.getmtime(highlighted_path)
+                        if (
+                            new_highlighted_mtime is not None
+                            and new_highlighted_mtime != self._highlighted_file_mtime
+                        ):
+                            self._highlighted_file_mtime = new_highlighted_mtime
+                            self.query_one(PreviewContainer).show_preview(
+                                highlighted_path
+                            )
+                            dir_entry = get_direntry_for(highlighted_path)
+                            if dir_entry is not None:
+                                highlighted_option.dir_entry = dir_entry
+                                self.query_one(MetadataContainer).update_metadata(
+                                    dir_entry
+                                )
             if not self.CUSTOM_STYLE_AVAILABLE:
                 if not style_available and path.exists(custom_style_path):
                     style_available = True

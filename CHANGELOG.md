@@ -5,7 +5,16 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [0.8.0.dev3]
+## [0.8.0.pre1] - 2026-03-28
+
+### Performance
+- `app`: improve startup times in general #240
+- `cli`: use custom argparse instead of rich-click #241
+
+### Fixed
+- `pins`: dont reload the pins continuously 10e3467
+
+## [0.8.0.dev3] - 2026-03-20
 
 ### Notable
 - fix: ensure search is cleared when going to a new directory 880f6d6
@@ -28,7 +37,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `all`?: use non-async + push to after first pain(t) 9e2a5d6
 - `clipboard`?: use direct clipboard reference in app 13ebaa4
 
-## [0.8.0.dev2]
+## [0.8.0.dev2] - 2026-03-11
 
 ### Notable
 - feat(`preview`): add font previewing support 0d4aec5 49fbb93

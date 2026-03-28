@@ -39,6 +39,7 @@ from rovr.action_buttons import (
     ZipButton,
 )
 from rovr.action_buttons.sort_order import SortOrderButton, SortOrderPopup
+from rovr.classes.type_aliases import DirEntryType
 from rovr.components import SearchInput
 from rovr.components.popup_option_list import PopupOptionList
 from rovr.core import (
@@ -631,7 +632,9 @@ class Application(App, inherit_bindings=False):
             # check highlighted file mtime
             if not self.file_list.file_list_pause_check:
                 highlighted_option = file_list.highlighted_option
-                if highlighted_option is not None:
+                if highlighted_option is not None and isinstance(
+                    getattr(highlighted_option, "dir_entry", None), DirEntryType
+                ):
                     highlighted_path = highlighted_option.dir_entry.path
                     if not path.isdir(highlighted_path):
                         new_highlighted_mtime = None

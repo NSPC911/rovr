@@ -17,7 +17,7 @@ from rovr.functions.folder_prefs import (
     set_folder_pref,
 )
 from rovr.functions.path import normalise
-from rovr.variables.maps import VAR_TO_DIR
+from rovr.variables.maps import RovrVars
 
 
 class StateDict(TypedDict):
@@ -57,7 +57,7 @@ class StateManager(Widget):
 
     def __init__(self) -> None:
         super().__init__(id="state_manager")
-        self.state_file: str = path.join(VAR_TO_DIR["CONFIG"], "state.toml")
+        self.state_file: str = path.join(RovrVars.ROVRCONFIG, "state.toml")
         self.current_version: str = get_version()
         self.previous_version: str | None = None
         self._skip_save = True

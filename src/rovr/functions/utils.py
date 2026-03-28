@@ -6,7 +6,6 @@ from typing import Any, Callable, Literal
 from humanize import naturalsize
 from rich.console import Console
 from textual import events
-from textual.app import App
 from textual.dom import DOMNode
 from textual.worker import NoActiveWorker, WorkerCancelled, get_current_worker
 
@@ -15,11 +14,8 @@ from rovr.classes.config import (
     _RovrConfigSettingsEditorFile,
     _RovrConfigSettingsEditorFolder,
 )
-from rovr.variables.maps import (
-    BORDER_BOTTOM,
-)
 
-pprint = Console().print
+pprint = globals().get("pprint", Console().print)
 
 
 def deep_merge(old: dict, new: dict) -> dict:
@@ -114,6 +110,8 @@ def set_scuffed_subtitle(element: DOMNode, *sections: str) -> None:
         element (Widget): The element containing style information.
         *sections (str): The sections to display
     """
+    from rovr.variables.maps import BORDER_BOTTOM
+
     try:
         border_bottom = BORDER_BOTTOM.get(
             element.styles.border_bottom[0], BORDER_BOTTOM["blank"]
@@ -226,7 +224,7 @@ def get_shortest_bind(binds: list[str]) -> str:
 
 
 def run_editor_command(
-    app: App,
+    app: DOMNode,
     editor_config: _RovrConfigSettingsEditorFile
     | _RovrConfigSettingsEditorFolder
     | _RovrConfigSettingsEditorBulkRename,

@@ -3,7 +3,7 @@ from os import makedirs, path
 from typing import TypedDict, cast
 
 from rovr.classes.type_aliases import SortByOptions
-from rovr.variables.maps import SORTED_VARS, VAR_TO_DIR
+from rovr.variables.maps import RovrVars
 
 from .path import normalise
 
@@ -24,7 +24,7 @@ def load_folder_prefs() -> dict[str, FolderPrefDict]:
         dict: A dictionary mapping folder paths to their sort preferences.
     """
     global folder_prefs
-    prefs_file = path.join(VAR_TO_DIR["CONFIG"], "folder_preferences.json")
+    prefs_file = path.join(RovrVars.ROVRCONFIG, "folder_preferences.json")
 
     if not path.exists(prefs_file):
         folder_prefs = {}
@@ -47,7 +47,7 @@ def load_folder_prefs() -> dict[str, FolderPrefDict]:
                 and isinstance(pref["sort_by"], str)
                 and isinstance(pref["sort_descending"], bool)
             ):
-                for var, dir_path_val in VAR_TO_DIR.items():
+                for var, dir_path_val in vars(RovrVars).items():
                     folder_path = folder_path.replace(f"${var}", dir_path_val)
                 expanded[folder_path] = cast(FolderPrefDict, pref)
 
@@ -61,17 +61,17 @@ def load_folder_prefs() -> dict[str, FolderPrefDict]:
 def save_folder_prefs() -> None:
     """Save folder preferences to the JSON file."""
     global folder_prefs
-    prefs_file = path.join(VAR_TO_DIR["CONFIG"], "folder_preferences.json")
+    prefs_file = path.join(RovrVars.ROVRCONFIG, "folder_preferences.json")
 
     collapsed: dict[str, FolderPrefDict] = {}
     for folder_path, pref in folder_prefs.items():
         folder_path = normalise(folder_path)
-        for var, dir_path_val in SORTED_VARS:
+        for var, dir_path_val in vars(RovrVars).items():
             folder_path = folder_path.replace(dir_path_val, f"${var}")
         collapsed[folder_path] = pref
 
-    if not path.exists(VAR_TO_DIR["CONFIG"]):
-        makedirs(VAR_TO_DIR["CONFIG"], exist_ok=True)
+    if not path.exists(RovrVars.ROVRCONFIG):
+        makedirs(RovrVars.ROVRCONFIG, exist_ok=True)
     try:
         with open(prefs_file, "w", encoding="utf-8") as f:
             json.dump(collapsed, f, indent=2)

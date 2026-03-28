@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import asyncio
 import base64
 import ctypes
@@ -5,14 +7,12 @@ import os
 import re
 import stat
 import subprocess
+from functools import lru_cache
 from os import path
 from typing import Callable, Literal, NamedTuple, TypedDict, overload
 
 import psutil
-import puremagic
-from natsort import natsorted
 from rich.console import Console
-from rich.traceback import Traceback
 from textual import work
 from textual.app import App
 from textual.dom import DOMNode
@@ -24,15 +24,26 @@ from rovr.classes.type_aliases import (
     SortByOptions,
 )
 from rovr.functions.icons import get_icon_for_file, get_icon_for_folder
-from rovr.variables.constants import config, file_executable, log_name, os_type
+from rovr.variables.constants import config, file_one, log_name, os_type
 
-pprint = Console().print
+pprint = globals().get("pprint", Console().print)
 
 mime_re_cache: dict[
     PreviewTypes,
     list[re.Pattern],
 ] = {}
 mime_preview_cache: dict[str, PreviewTypes | None] = {}
+
+
+# natsort dead
+@lru_cache(maxsize=8196)
+def natsort(key: str) -> list:
+    import re
+
+    return [
+        int(text) if text.isdigit() else text.lower()
+        for text in re.split(r"(\d+)", key)
+    ]
 
 
 def normalise(*location: str | bytes) -> str:
@@ -211,32 +222,6 @@ def get_extension_sort_key(file_dict: dict) -> tuple[int, str]:
         return (3, name.split(".")[-1].lower())
 
 
-@work(thread=True)
-def threaded_get_cwd_object(
-    node: DOMNode,
-    cwd: str,
-    show_hidden: bool = False,
-    sort_by: SortByOptions | None = "name",
-    reverse: bool = False,
-    return_nothing_if_this_returns_true: Callable[[], bool] | None = None,
-) -> (
-    tuple[list[CWDObjectReturnDict], list[CWDObjectReturnDict]]
-    | tuple[None, None]
-    | PermissionError
-):
-    try:
-        return sync_get_cwd_object(
-            node,
-            cwd,
-            show_hidden,
-            sort_by,
-            reverse,
-            return_nothing_if_this_returns_true,
-        )
-    except PermissionError as exc:
-        return exc
-
-
 @overload
 def sync_get_cwd_object(
     dom_node: DOMNode,
@@ -338,13 +323,8 @@ def sync_get_cwd_object(
             folders.sort(key=lambda x: x["name"].lower())
             files.sort(key=lambda x: x["name"].lower())
         case "natural":
-            # no we will not be using `natsort`'s os_sorted
-            folders: list[CWDObjectReturnDict] = natsorted(
-                folders, key=lambda x: x["name"].lower()
-            )
-            files: list[CWDObjectReturnDict] = natsorted(
-                files, key=lambda x: x["name"].lower()
-            )
+            folders.sort(key=lambda x: natsort(x["name"]))
+            files.sort(key=lambda x: natsort(x["name"]))
         case "created":
             folders.sort(key=lambda x: x["dir_entry"].stat().st_ctime_ns)
             files.sort(key=lambda x: x["dir_entry"].stat().st_ctime_ns)
@@ -698,6 +678,11 @@ def get_mime_type(
     Returns:
         MimeResult: The method used and the detected MIME type
         None: If the method is not available or failed
+
+    Raises:
+        FileNotFoundError: If file(1) executable is unavailable when that method is selected.
+        ╰╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┴> Ruff wants this part here, even though the function
+                           handles it internally, so I'm just leaving it here
     """
     if ignore is None:
         ignore = []
@@ -714,6 +699,8 @@ def get_mime_type(
 
     # Step 1: Try puremagic (magic byte detection) first
     if "puremagic" not in ignore:
+        import puremagic
+
         try:
             puremagic_result: list[puremagic.PureMagicWithConfidence] = (
                 puremagic.magic_string(file_bytes)
@@ -759,6 +746,9 @@ def get_mime_type(
     # Step 3: Fall back to file(1) command if available
     if "file1" not in ignore:
         try:
+            file_executable = file_one()
+            if file_executable is None:
+                raise FileNotFoundError
             process = subprocess.run(
                 [file_executable, "--mime-type", "-b", file_path],
                 capture_output=True,
@@ -801,7 +791,8 @@ def get_direntry_for(file_path: str) -> DirEntryType | None:
     return None
 
 
-def dump_exc(widget: DOMNode | None, exc: Exception | Traceback) -> str | None:
+# trust me ruff, I know what I'm doing
+def dump_exc(widget: DOMNode | None, exc: Exception | Traceback) -> str | None:  # noqa: F821
     """Dump an exception to the console for debugging purposes.
 
     Args:
@@ -814,8 +805,9 @@ def dump_exc(widget: DOMNode | None, exc: Exception | Traceback) -> str | None:
     from datetime import datetime
 
     from rich.panel import Panel
+    from rich.traceback import Traceback
 
-    from rovr.variables.maps import VAR_TO_DIR
+    from rovr.variables.maps import RovrVars
 
     rich_traceback = (
         Traceback.from_exception(
@@ -834,7 +826,7 @@ def dump_exc(widget: DOMNode | None, exc: Exception | Traceback) -> str | None:
         widget.log(rich_traceback)
 
     dump_path = path.join(
-        path.realpath(VAR_TO_DIR["CONFIG"]),
+        path.realpath(RovrVars.ROVRCONFIG),
         "logs",
         f"{log_name}.log",
     )

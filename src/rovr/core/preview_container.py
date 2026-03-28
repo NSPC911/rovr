@@ -13,8 +13,6 @@ import textual_image.widget
 from PIL import Image, ImageDraw, ImageFont, UnidentifiedImageError
 from PIL.Image import Image as PILImage
 from resvg_py import svg_to_bytes
-from rich.syntax import Syntax
-from rich.text import Text
 from textual import events, on, work
 from textual.app import ComposeResult
 from textual.containers import Container
@@ -38,7 +36,7 @@ from rovr.functions import path as path_utils
 from rovr.functions import preview_utils
 from rovr.functions.pdf import get_pdf_images, get_pdf_info
 from rovr.functions.utils import should_cancel
-from rovr.variables.constants import PreviewContainerTitles, config, file_executable
+from rovr.variables.constants import PreviewContainerTitles, config, file_one
 
 titles = PreviewContainerTitles()
 
@@ -569,6 +567,9 @@ class PreviewContainer(Container):
 
         if should_cancel():
             return False
+
+        from rich.text import Text
+
         self.app.call_from_thread(setattr, self, "border_title", titles.bat)
 
         try:
@@ -632,6 +633,9 @@ class PreviewContainer(Container):
         """Show normal file preview with syntax highlighting. Runs in a thread."""
         if should_cancel():
             return
+
+        from rich.syntax import Syntax
+
         self.app.call_from_thread(setattr, self, "border_title", titles.file)
 
         if not isinstance(self._current_content, str):
@@ -1082,14 +1086,16 @@ class PreviewContainer(Container):
                 and config["plugins"]["file_one"]["get_description"]
             ):
                 try:
-                    process = subprocess.run(
-                        [file_executable, "--brief", "--", self._current_file_path],
-                        capture_output=True,
-                        text=True,
-                        check=True,
-                        timeout=1,
-                    )
-                    display_content += f"\n{process.stdout.strip()}"
+                    executable = file_one()
+                    if executable:
+                        process = subprocess.run(
+                            [executable, "--brief", "--", self._current_file_path],
+                            capture_output=True,
+                            text=True,
+                            check=True,
+                            timeout=1,
+                        )
+                        display_content += f"\n{process.stdout.strip()}"
                 except (subprocess.SubprocessError, FileNotFoundError) as exc:
                     path_utils.dump_exc(self, exc)
 

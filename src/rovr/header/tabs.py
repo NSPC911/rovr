@@ -1,4 +1,5 @@
 from asyncio import sleep
+from contextlib import suppress
 from os import getcwd, path
 from typing import Callable
 
@@ -11,6 +12,7 @@ from textual.css.query import NoMatches
 from textual.renderables.bar import Bar as BarRenderable
 from textual.widgets import Button, Input, Tabs
 from textual.widgets._tabs import Tab, Underline
+from textual.worker import WorkerCancelled
 
 from rovr.classes.session_manager import SessionManager
 from rovr.functions.path import normalise
@@ -136,6 +138,7 @@ class Tabline(Tabs):
 
     @on(Tab.Clicked)
     @on(Tabs.TabActivated)
+    @work
     async def check_tab_click(self, event: TablineTab.Clicked) -> None:
         assert isinstance(event.tab, TablineTab)
 
@@ -146,13 +149,16 @@ class Tabline(Tabs):
             if event.tab.session.search != "":
                 self.app.file_list.input.value = event.tab.session.search
 
-        self.app.cd(
+        worker = self.app.cd(
             event.tab.directory,
             add_to_history=False,
             has_selected=event.tab.session.selectMode,
             callback=callback,
             clear_search=False,
         )
+        if worker is not None:
+            with suppress(WorkerCancelled):
+                await worker.wait()
 
     def _highlight_active(
         self,

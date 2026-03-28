@@ -1,28 +1,96 @@
 import json
 import os
+from functools import cache
 from importlib import resources
 from importlib.metadata import PackageNotFoundError, version
 from os import path
 from shutil import which
-from typing import Callable, Literal, cast
+from typing import Callable, cast
 
 import fastjsonschema
 import tomli
 from fastjsonschema import JsonSchemaValueException
-from rich import box
+from platformdirs import user_config_dir
 from rich.console import Console
 
 from rovr.classes.config import RovrConfig
-from rovr.functions.utils import deep_merge
-from rovr.variables.maps import (
-    VAR_TO_DIR,
-)
 
-pprint = Console().print
-
-DEFAULT_CONFIG = '#:schema {schema_url}\n[theme]\ndefault = "nord"'
+pprint = globals().get("pprint", Console().print)
 
 
+EDITOR_CANDIDATES = [
+    "hx",
+    "nvim",
+    "vim",
+    "vi",
+    "nano",
+    "edit",
+    "msedit",
+]
+
+
+@cache
+def editor() -> str:
+    for edtr in EDITOR_CANDIDATES:
+        if which(edtr):
+            return edtr + " --"
+    if which("zed"):
+        return "zed --wait --"
+    if which("code"):
+        return "code --wait --"
+    return ""
+
+
+@cache
+def get_schema_validator() -> tuple[dict, Callable[[dict], None]]:
+    content = resources.files("rovr.config").joinpath("schema.json").read_text("utf-8")
+    _schema_dict_cache = json.loads(content)
+    _schema_validator_cache = fastjsonschema.compile(_schema_dict_cache)
+
+    return _schema_dict_cache, _schema_validator_cache
+
+
+def deep_merge(old: dict, new: dict) -> dict:
+    """Mini lodash merge
+
+    Args:
+        old (dict): old dictionary
+        new (dict): new dictionary, to merge on top of old
+
+    Returns:
+        dict: Merged dictionary
+    """
+    try:
+        for key, value in new.items():
+            if isinstance(value, dict):
+                existing = old.get(key, {})
+                old[key] = deep_merge(
+                    existing if isinstance(existing, dict) else {}, value
+                )
+            else:
+                old[key] = value
+    except TypeError as exc:
+        if locals().get("key") is None and locals().get("value") is None:
+            pprint(
+                f"Type conflict: cannot merge {type(new).__name__} into {type(old).__name__}"
+            )
+        else:
+            pprint(
+                f"Type conflict at key '{key}': cannot merge {type(value).__name__} into {type(old.get(key)).__name__}"
+            )
+        pprint(
+            f"    {exc}\nPlease check your config for type errors. rovr will not be launching until this is resolved."
+        )
+        exit(1)
+    except Exception as exc:
+        pprint(
+            f"While deep merging the default config with the userconfig, {type(exc).__name__} was raised.\n    {exc}\nSince the conflict cannot be resolved, rovr will not be launching."
+        )
+        exit(1)
+    return old
+
+
+@cache
 def get_version() -> str:
     """Get version from package metadata
 
@@ -151,6 +219,7 @@ def schema_dump(
     """
     import fnmatch
 
+    from rich import box
     from rich.padding import Padding
     from rich.syntax import Syntax
     from rich.table import Table
@@ -159,11 +228,8 @@ def schema_dump(
     # to insert a data prefix to the path, but i cant blame them
     # i would also make stupid mistakes everywhere
     exception.message = exception.message.replace("data.", "")
-    exception.name = (
-        cast(str, exception.name)[5:]
-        if exception.name.startswith("data.")
-        else exception.name
-    )
+    if exception.name is not None and exception.name.startswith("data."):
+        exception.name = exception.name[5:]
 
     def get_message(exception: JsonSchemaValueException) -> tuple[str, bool]:
         failed = False
@@ -320,41 +386,19 @@ def load_config() -> tuple[dict, RovrConfig]:
         dict: the config
     """
 
-    current_version = get_version()
-    if current_version == "master":
-        schema_ref = "refs/heads/master"
-    else:
-        schema_ref = f"refs/tags/v{current_version}"
-    schema_url = f"https://raw.githubusercontent.com/NSPC911/rovr/{schema_ref}/src/rovr/config/schema.json"
-    user_config_path = path.join(VAR_TO_DIR["CONFIG"], "config.toml")
+    config_dir = os.environ.get("ROVR_CONFIG_FOLDER")
+    if not config_dir:
+        from rovr.variables.maps import RovrVars
 
-    # Create config file if it doesn't exist
-    if not path.exists(user_config_path):
-        pass
-    else:
-        # Update schema version if needed
-        with open(user_config_path, "r", encoding="utf-8") as f:
-            lines = f.readlines()
+        config_dir: str = vars(RovrVars).get("ROVRCONFIG", None) or user_config_dir(
+            "rovr", "."
+        ).replace("\\", "/")
+    user_config_path = path.join(config_dir, "config.toml")
 
-        expected_schema_line = f"#:schema {schema_url}\n"
-        if lines and lines[0] != expected_schema_line:
-            # check if it is schema in the first place
-            header = lines[0].lstrip("\ufeff").lstrip()
-            if header.startswith("#:schema"):
-                lines[0] = expected_schema_line
-            else:
-                lines.insert(0, expected_schema_line)
-
-            with open(user_config_path, "w", encoding="utf-8") as f:
-                f.writelines(lines)
-
-            display_version = (
-                f"v{current_version}" if current_version != "master" else "master"
-            )
-            pprint(f"[yellow]Updated config schema to {display_version}[/]")
-        elif not lines:
-            with open(user_config_path, "w", encoding="utf-8") as file:
-                file.write(DEFAULT_CONFIG.format(schema_url=schema_url))
+    # Startup path should remain read-only for existing user config.
+    # Any schema header normalization is intentionally left for explicit
+    # config migration/update flows, not hot startup.
+    template_config: dict = {}
     try:
         template_config = tomli.loads(
             resources.files("rovr.config").joinpath("config.toml").read_text("utf-8")
@@ -362,10 +406,7 @@ def load_config() -> tuple[dict, RovrConfig]:
     except tomli.TOMLDecodeError as exc:
         toml_dump(path.join(path.dirname(__file__), "../config/config.toml"), exc)
 
-    # check with schema
-    content = resources.files("rovr.config").joinpath("schema.json").read_text("utf-8")
-    schema_dict = json.loads(content)
-    schema: Callable[[dict], None] = fastjsonschema.compile(schema_dict)
+    schema_dict, schema = get_schema_validator()
 
     # ensure that template config works
     try:
@@ -391,74 +432,43 @@ def load_config() -> tuple[dict, RovrConfig]:
                 except tomli.TOMLDecodeError as exc:
                     toml_dump(user_config_path, exc)
     # Don't really have to consider the else part, because it's created further down
-    config = deep_merge(template_config, user_config)
-    config = cast(RovrConfig, config)
+    config_dict = deep_merge(template_config, user_config)
     try:
-        schema(config)
+        schema(config_dict)
     except JsonSchemaValueException as exception:
         schema_dump(user_config_path, exception, user_config_content)
 
     # slight config fixes
     # image protocol because "AutoImage" doesn't work with Sixel
-    if config["interface"]["image_viewer"]["protocol"] == "Auto":
+    if config_dict["interface"]["image_viewer"]["protocol"] == "Auto":
         # another no choice fix, because if Auto then
         # AutoImage is grabbed, which sucks in rendering
         # sixel for some weird unknown reason
-        config["interface"]["image_viewer"]["protocol"] = ""  # ty: ignore[invalid-assignment]
+        config_dict["interface"]["image_viewer"]["protocol"] = ""
 
-    default_editor = ""  # screw anyone that wants to do this to me
-    # editor empty or $EDITOR: expand to actual editor command
-    # try to find tui editors as much as possible
-    editors = [
-        "hx",
-        "nvim",
-        "vim",
-        "vi",
-        # theoretically shouldn't come this far
-        "nano",
-        # should exist in windows ever since ms-edit was added
-        # like last year or something
-        "edit",
-        "msedit",
-    ]
-    found_reasonable_cli_editor = False
-    for editor in editors:
-        if which(editor):
-            default_editor = editor + " --"
-            found_reasonable_cli_editor = True
-            break
-    # gui
-    if not found_reasonable_cli_editor and which("zed"):
-        # Zed
-        default_editor = "zed --wait --"
-    elif not found_reasonable_cli_editor and which("code"):
-        # VSCode
-        default_editor = "code --wait --"
     for key in ["file", "folder", "bulk_rename"]:
-        key = cast(Literal["file", "folder", "bulk_rename"], key)
-        if not config["settings"]["editor"][key]["run"]:
-            config["settings"]["editor"][key]["run"] = default_editor
-        else:
-            # expand var
-            config["settings"]["editor"][key]["run"] = os.path.expandvars(
-                config["settings"]["editor"][key]["run"]
-            )
-            # expanded to blank
-            if not config["settings"]["editor"][key]["run"]:
-                config["settings"]["editor"][key]["run"] = default_editor
+        raw_run = config_dict["settings"]["editor"][key]["run"]
+        expanded_run = os.path.expandvars(raw_run)
+        if expanded_run == raw_run and any(
+            token in raw_run for token in ("$EDITOR", "${EDITOR}", "%EDITOR%")
+        ):
+            expanded_run = ""
+        if not expanded_run:
+            expanded_run = editor()
+        config_dict["settings"]["editor"][key]["run"] = expanded_run
 
     # pdf fixer
-    if config["plugins"]["poppler"]["enabled"] and config["plugins"]["poppler"][
-        "poppler_folder"
-    ].lower() in ("", "path"):
+    if config_dict["plugins"]["poppler"]["enabled"] and config_dict["plugins"][
+        "poppler"
+    ]["poppler_folder"].lower() in ("", "path"):
         pdfinfo_executable = which("pdfinfo")
         pdfinfo_path: str | None = None
         if pdfinfo_executable is None:
-            config["plugins"]["poppler"]["enabled"] = False
+            config_dict["plugins"]["poppler"]["enabled"] = False
         else:
             pdfinfo_path = path.dirname(pdfinfo_executable)
         # need to ignore in this case. poppler_folder is typed as str
         # in the config schema, but pdfinfo_path can be None when
         # resolved from PATH, so we suppress the type error
-        config["plugins"]["poppler"]["poppler_folder"] = pdfinfo_path  # ty: ignore[invalid-assignment]
-    return schema_dict, config
+        config_dict["plugins"]["poppler"]["poppler_folder"] = pdfinfo_path
+    return schema_dict, cast(RovrConfig, config_dict)

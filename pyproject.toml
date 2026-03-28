@@ -20,7 +20,6 @@ dependencies = [
   "backports-zstd>=1.3.0; python_version < '3.14'",
   "fastjsonschema>=2.21.2",
   "humanize>=4.15.0",
-  "natsort>=8.4.0",
   "pathvalidate>=3.3.1",
   "pillow>=12.1.0",
   "platformdirs>=4.9.0",
@@ -29,7 +28,6 @@ dependencies = [
   "rarfile>=4.2",
   "resvg-py>=0.2.6",
   "rich>=14.3.1", # issue with 14.3.0 that breaks nerd fonts
-  "rich-click>=1.9.3",
   "send2trash>=2.1.0",
   "textual~=7.0",
   "textual-autocomplete>=4.0.6",
@@ -164,7 +162,7 @@ args = [
 help = "Build rovr into an executable using Nuitka"
 sequence = [
   "_hash_dump",
-  { cmd = 'nuitka --mode=${mode} --assume-yes-for-downloads --enable-plugins=no-qt --python-flag=-m --python-flag="no_docstrings" --include-package-data=rovr --lto=${lto} src/rovr --onefile-cache-mode=cached --onefile-child-grace-time=0 --user-package-configuration-file=nuitka.config.yml' },
+  { cmd = 'nuitka --mode=${mode} --assume-yes-for-downloads --enable-plugins=no-qt --python-flag=-m --python-flag="no_docstrings" --include-package-data=rovr --lto=${lto} src/rovr --onefile-cache-mode=cached --onefile-child-grace-time=0 --user-package-configuration-file=nuitka.config.yml --report="rovr.dist/report.xml"' },
   "_hash_clean",
 ]
 args = [

@@ -3,12 +3,12 @@ from copy import deepcopy
 from os import makedirs, path
 from typing import TypedDict, cast
 
-from rovr.variables.maps import SORTED_VARS, VAR_TO_DIR
+from rovr.variables.maps import RovrVars
 
 from .path import dump_exc, normalise
 
 pins = {}
-PIN_PATH = path.join(VAR_TO_DIR["CONFIG"], "pins.json")
+PIN_PATH = path.join(RovrVars.ROVRCONFIG, "pins.json")
 
 
 class PinsDict(TypedDict):
@@ -89,7 +89,7 @@ def load_pins() -> PinsDict:
             # because of the replace code a few lines below
             if type(item) is dict and "path" in item and type(item["path"]) is str:
                 # Expand variables
-                for var, dir_path_val in VAR_TO_DIR.items():
+                for var, dir_path_val in vars(RovrVars).items():
                     item["path"] = item["path"].replace(f"${var}", dir_path_val)
                 # Normalize to forward slashes
                 item["path"] = normalise(str(item["path"]))
@@ -133,7 +133,7 @@ def add_pin(pin_name: str, pin_path: str | bytes) -> None:
                     and "path" in item
                     and isinstance(item["path"], str)
                 ):
-                    for var, dir_path_val in SORTED_VARS:
+                    for var, dir_path_val in vars(RovrVars).items():
                         item["path"] = item["path"].replace(dir_path_val, f"${var}")
 
     if not path.exists(PIN_PATH):
@@ -167,7 +167,7 @@ def remove_pin(pin_path: str | bytes) -> None:
             if not (isinstance(pin, dict) and pin.get("path") == pin_path_normalized)
         ]
 
-    SORTED_VARS = sorted(VAR_TO_DIR.items(), key=lambda x: len(x[1]), reverse=True)
+    SORTED_VARS = sorted(vars(RovrVars).items(), key=lambda x: len(x[1]), reverse=True)
     for section_key in ["default", "pins"]:
         if section_key in pins_to_write:
             for item in pins_to_write[section_key]:

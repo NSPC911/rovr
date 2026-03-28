@@ -16,7 +16,6 @@ words = [
     "keybind",
     "msedit",
     "namelist",
-    "natsort",
     "pathlib",
     "pdftocairo",
     "pprint",

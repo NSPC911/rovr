@@ -104,6 +104,7 @@ class LoadingPreview(Static):
 
     def __init__(self) -> None:
         super().__init__("Loading...")
+        self.timer_enabled = False
 
     def on_mount(self) -> None:
         assert isinstance(self.parent, PreviewContainer)
@@ -113,6 +114,9 @@ class LoadingPreview(Static):
         self.styles.border = self.parent.styles.border
         self.styles.background = self.parent.styles.background
         self.can_focus = True
+        if not self.timer_enabled:
+            self.timer_enabled = True
+            self.set_interval(0.25, self.on_mount)
 
     async def on_event(self, event: events.Event) -> None:
         self.on_mount()
@@ -387,6 +391,8 @@ class PreviewContainer(Container):
         if should_cancel():
             return
 
+    # ------------ PDF related functions start ------------
+
     def update_current_pdf_page_by_diff(self, diff: int) -> None:
         """Updates the current pages by a diff"""
         self.update_current_pdf_page(self.pdf.current_page + diff)
@@ -543,6 +549,8 @@ class PreviewContainer(Container):
 
         if should_cancel():
             return
+
+    # ------------ PDF related functions end ------------
 
     def show_bat_file_preview(self) -> bool:
         """Show bat file preview. Runs in a thread.
@@ -1017,7 +1025,7 @@ class PreviewContainer(Container):
                 return
         except Exception as exc:
             self.notify(
-                f"{type(exc).__name__} was raised while generating the preview",
+                f"{type(exc).__name__} was raised while generating the preview\n{str(exc)}",
                 severity="error",
                 markup=False,
             )

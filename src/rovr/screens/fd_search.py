@@ -21,7 +21,7 @@ from rovr.functions.icons import get_icon_for_file, get_icon_for_folder
 from rovr.variables.constants import bindings, config
 from rovr.variables.maps import FD_TYPE_TO_ALIAS
 
-INITIAL_FILTER_TYPES: dict[str, bool] = {
+FILTER_TYPES: dict[str, bool] = {
     ft: (ft in config["plugins"]["fd"]["default_filter_types"])
     for ft in FD_TYPE_TO_ALIAS
 }
@@ -48,19 +48,15 @@ class FileSearchToggles(CheckboxRenderingMixin, SelectionList, inherit_bindings=
                 config["plugins"]["fd"]["no_ignore_parent"],
             ),
             Selection("Filter Type", "", False, disabled=True),
-            Selection("Files", "file", INITIAL_FILTER_TYPES["file"]),
-            Selection("Folders", "directory", INITIAL_FILTER_TYPES["directory"]),
-            Selection("Symlinks", "symlink", INITIAL_FILTER_TYPES["symlink"]),
-            Selection("Executables", "executable", INITIAL_FILTER_TYPES["executable"]),
-            Selection("Empty", "empty", INITIAL_FILTER_TYPES["empty"]),
-            Selection("Socket", "socket", INITIAL_FILTER_TYPES["socket"]),
-            Selection("Pipe", "pipe", INITIAL_FILTER_TYPES["pipe"]),
-            Selection(
-                "Char-Device", "char-device", INITIAL_FILTER_TYPES["char-device"]
-            ),
-            Selection(
-                "Block-Device", "block-device", INITIAL_FILTER_TYPES["block-device"]
-            ),
+            Selection("Files", "file", FILTER_TYPES["file"]),
+            Selection("Folders", "directory", FILTER_TYPES["directory"]),
+            Selection("Symlinks", "symlink", FILTER_TYPES["symlink"]),
+            Selection("Executables", "executable", FILTER_TYPES["executable"]),
+            Selection("Empty", "empty", FILTER_TYPES["empty"]),
+            Selection("Socket", "socket", FILTER_TYPES["socket"]),
+            Selection("Pipe", "pipe", FILTER_TYPES["pipe"]),
+            Selection("Char-Device", "char-device", FILTER_TYPES["char-device"]),
+            Selection("Block-Device", "block-device", FILTER_TYPES["block-device"]),
             id="file_search_toggles",
         )
 
@@ -86,10 +82,6 @@ class FileSearchToggles(CheckboxRenderingMixin, SelectionList, inherit_bindings=
 
 class FileSearch(ModalSearchScreen):
     """Search for files recursively using fd."""
-
-    FILTER_TYPES: dict[str, bool] = INITIAL_FILTER_TYPES.copy()
-    """Class Var for filter types, intentional so that it is
-    carried over in that session"""
 
     def compose(self) -> ComposeResult:
         with VerticalGroup(id="file_search_group", classes="file_search_group"):
@@ -129,7 +121,7 @@ class FileSearch(ModalSearchScreen):
             fd_cmd.append("--follow")
         if config["plugins"]["fd"]["no_ignore_parent"]:
             fd_cmd.append("--no-ignore-parent")
-        for filter_type, should_use in self.FILTER_TYPES.items():
+        for filter_type, should_use in FILTER_TYPES.items():
             if should_use:
                 fd_cmd.extend(["--type", FD_TYPE_TO_ALIAS[filter_type]])
         if search_term:
@@ -201,8 +193,8 @@ class FileSearch(ModalSearchScreen):
 
     @on(SelectionList.SelectionToggled)
     def toggles_toggled(self, event: SelectionList.SelectionToggled) -> None:
-        if event.selection.value in self.FILTER_TYPES:
-            self.FILTER_TYPES[event.selection.value] = (
+        if event.selection.value in FILTER_TYPES:
+            FILTER_TYPES[event.selection.value] = (
                 event.selection.value in event.selection_list.selected
             )
         elif event.selection.value in config["plugins"]["fd"]:

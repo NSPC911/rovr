@@ -404,6 +404,15 @@ class FileList(CheckboxRenderingMixin, SelectionList, inherit_bindings=False):
         # total files as footer
         if self.highlighted is None:
             self.highlighted = 0
+        # update tracked mtime for the watcher
+        highlighted_path = highlighted_option.dir_entry.path
+        if path.exists(highlighted_path) and not path.isdir(highlighted_path):
+            from contextlib import suppress
+
+            with suppress(OSError):
+                self.app._highlighted_file_mtime = path.getmtime(highlighted_path)
+        else:
+            self.app._highlighted_file_mtime = None
         # preview
         self.app.query_one("PreviewContainer").show_preview(
             highlighted_option.dir_entry.path

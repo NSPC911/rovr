@@ -155,6 +155,8 @@ class Application(App, inherit_bindings=False):
         if startup_path:
             chdir(ensure_existing_directory(startup_path))
 
+        self._on_mount_done: bool = False
+
     def compose(self) -> ComposeResult:
         self.log("Starting Rovr...")
         root_classes = (
@@ -246,9 +248,10 @@ class Application(App, inherit_bindings=False):
         if self._force_crash_in > 0:
             self.call_later(self._force_crash)
 
-        self.call_after_refresh(self._finish_post_mount_setup)
+        self.call_later(self.call_later, self.post_mount)
+        self._on_mount_done = True
 
-    def _finish_post_mount_setup(self) -> None:
+    def post_mount(self) -> None:
         # border titles
         self.query_one("#menu_wrapper").border_title = "Options"
         self.query_one("#pinned_sidebar_container").border_title = "Sidebar"

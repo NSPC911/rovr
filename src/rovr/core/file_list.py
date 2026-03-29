@@ -286,7 +286,7 @@ class FileList(CheckboxRenderingMixin, SelectionList, inherit_bindings=False):
             if self.list_of_options[0].disabled:  # special option
                 if self.select_mode_enabled:
                     await self.toggle_mode()
-                self.call_later(self.update_border_subtitle)
+                self.update_border_subtitle()
         finally:
             self.file_list_pause_check = False
             if callback:
@@ -394,7 +394,10 @@ class FileList(CheckboxRenderingMixin, SelectionList, inherit_bindings=False):
             return
         if not isinstance(event.option, FileListSelectionWidget):
             return
-        self.call_later(self.update_border_subtitle)
+        if self.app._on_mount_done:
+            self.update_border_subtitle()
+        else:
+            self.call_after_refresh(self.update_border_subtitle)
         # Get the highlighted option
         highlighted_option = event.option
         self.app.tabWidget.active_tab.session.lastHighlighted[

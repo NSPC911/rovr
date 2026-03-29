@@ -47,6 +47,11 @@ class FileSearchToggles(CheckboxRenderingMixin, SelectionList, inherit_bindings=
                 "no_ignore_parent",
                 config["plugins"]["fd"]["no_ignore_parent"],
             ),
+            Selection(
+                "Search Hidden",
+                "search_hidden",
+                config["plugins"]["fd"]["search_hidden"],
+            ),
             Selection("Filter Type", "", False, disabled=True),
             Selection("Files", "file", FILTER_TYPES["file"]),
             Selection("Folders", "directory", FILTER_TYPES["directory"]),
@@ -121,6 +126,8 @@ class FileSearch(ModalSearchScreen):
             fd_cmd.append("--follow")
         if config["plugins"]["fd"]["no_ignore_parent"]:
             fd_cmd.append("--no-ignore-parent")
+        if config["plugins"]["fd"]["search_hidden"]:
+            fd_cmd.append("--hidden")
         for filter_type, should_use in FILTER_TYPES.items():
             if should_use:
                 fd_cmd.extend(["--type", FD_TYPE_TO_ALIAS[filter_type]])

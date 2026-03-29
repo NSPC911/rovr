@@ -293,8 +293,9 @@ description: config schema humanified
     - [8.3.4. Property `Rovr Config > plugins > fd > relative_paths`](#plugins_fd_relative_paths)
     - [8.3.5. Property `Rovr Config > plugins > fd > follow_symlinks`](#plugins_fd_follow_symlinks)
     - [8.3.6. Property `Rovr Config > plugins > fd > no_ignore_parent`](#plugins_fd_no_ignore_parent)
-    - [8.3.7. Property `Rovr Config > plugins > fd > default_filter_types`](#plugins_fd_default_filter_types)
-      - [8.3.7.1. Rovr Config > plugins > fd > default_filter_types > default_filter_types items](#plugins_fd_default_filter_types_items)
+    - [8.3.7. Property `Rovr Config > plugins > fd > search_hidden`](#plugins_fd_search_hidden)
+    - [8.3.8. Property `Rovr Config > plugins > fd > default_filter_types`](#plugins_fd_default_filter_types)
+      - [8.3.8.1. Rovr Config > plugins > fd > default_filter_types > default_filter_types items](#plugins_fd_default_filter_types_items)
   - [8.4. Property `Rovr Config > plugins > rg`](#plugins_rg)
     - [8.4.1. Property `Rovr Config > plugins > rg > enabled`](#plugins_rg_enabled)
     - [8.4.2. Property `Rovr Config > plugins > rg > keybinds`](#plugins_rg_keybinds)
@@ -4390,6 +4391,7 @@ Refer to https://textual.textualize.io/guide/design/#additional-variables for mo
 | [relative_paths](#plugins_fd_relative_paths)             | boolean                   | Whether to show fd results as relative path or absolute path. |
 | [follow_symlinks](#plugins_fd_follow_symlinks)           | boolean                   | Whether fd should follow symlinks when searching.             |
 | [no_ignore_parent](#plugins_fd_no_ignore_parent)         | boolean                   | Don't use \*ignore files from parent folders when searching.  |
+| [search_hidden](#plugins_fd_search_hidden)               | boolean                   | Whether to include hidden files in fd results by default.     |
 | [default_filter_types](#plugins_fd_default_filter_types) | array of enum (of string) | The default file types to show when using fd.                 |
 
 #### <a name="plugins_fd_enabled"></a>8.3.1. Property `Rovr Config > plugins > fd > enabled`
@@ -4472,7 +4474,17 @@ Refer to https://textual.textualize.io/guide/design/#additional-variables for mo
 
 **Description:** Don't use \*ignore files from parent folders when searching.
 
-#### <a name="plugins_fd_default_filter_types"></a>8.3.7. Property `Rovr Config > plugins > fd > default_filter_types`
+#### <a name="plugins_fd_search_hidden"></a>8.3.7. Property `Rovr Config > plugins > fd > search_hidden`
+
+|              |           |
+| ------------ | --------- |
+| **Type**     | `boolean` |
+| **Required** | No        |
+| **Default**  | `false`   |
+
+**Description:** Whether to include hidden files in fd results by default.
+
+#### <a name="plugins_fd_default_filter_types"></a>8.3.8. Property `Rovr Config > plugins > fd > default_filter_types`
 
 |              |                             |
 | ------------ | --------------------------- |
@@ -4494,7 +4506,7 @@ Refer to https://textual.textualize.io/guide/design/#additional-variables for mo
 | -------------------------------------------------------------------- | ----------- |
 | [default_filter_types items](#plugins_fd_default_filter_types_items) |             |
 
-##### <a name="plugins_fd_default_filter_types_items"></a>8.3.7.1. Rovr Config > plugins > fd > default_filter_types > default_filter_types items
+##### <a name="plugins_fd_default_filter_types_items"></a>8.3.8.1. Rovr Config > plugins > fd > default_filter_types > default_filter_types items
 
 |              |                    |
 | ------------ | ------------------ |

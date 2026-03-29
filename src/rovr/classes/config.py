@@ -214,6 +214,10 @@ _ROVR_CONFIG_PLUGINS_FD_RELATIVE_PATHS_DEFAULT = True
 r""" Default value of the field path 'Rovr Config plugins fd relative_paths' """
 
 
+_ROVR_CONFIG_PLUGINS_FD_SEARCH_HIDDEN_DEFAULT = False
+r""" Default value of the field path 'Rovr Config plugins fd search_hidden' """
+
+
 _ROVR_CONFIG_PLUGINS_FILE_ONE_ENABLED_DEFAULT = False
 r""" Default value of the field path 'Rovr Config plugins file_one enabled' """
 
@@ -1163,6 +1167,13 @@ class _RovrConfigPluginsFd(TypedDict, total=False):
     no_ignore_parent: bool
     r"""
     Don't use *ignore files from parent folders when searching.
+
+    default: False
+    """
+
+    search_hidden: bool
+    r"""
+    Whether to include hidden files in fd results by default.
 
     default: False
     """

@@ -1126,6 +1126,11 @@
               "default": false,
               "description": "Don't use *ignore files from parent folders when searching."
             },
+            "search_hidden": {
+              "type": "boolean",
+              "default": false,
+              "description": "Whether to include hidden files in fd results by default."
+            },
             "default_filter_types": {
               "type": "array",
               "default": ["file", "directory"],

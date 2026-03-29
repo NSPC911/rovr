@@ -130,7 +130,7 @@ class PreviewContainer(Container):
 
     def __init__(self) -> None:
         super().__init__(id="preview_sidebar")
-        self._pending_preview_path: str | None = None
+        self._pending_preview_args: tuple[str, int | float] | None = None
         self._current_content: str | list[str] | None = None
         self._current_file_path: str | None = None
         self._initial_height = self.size.height
@@ -865,20 +865,20 @@ class PreviewContainer(Container):
         self.app.call_from_thread(file_list.set_options, options)
         self.app.call_from_thread(setattr, self, "border_subtitle", "")
 
-    def show_preview(self, file_path: str) -> None:
+    def show_preview(self, file_path: str, mtime: int | float) -> None:
         """Public method to show preview."""
         if (
             "hide" in self.classes
             or "-no-preview" in self.screen.classes
             or "-filelist-only" in self.screen.classes
         ):
-            self._pending_preview_path = file_path
+            self._pending_preview_args = (file_path, mtime)
             return
-        self._pending_preview_path = None
-        self.perform_show_preview(file_path)
+        self._pending_preview_args = None
+        self.perform_show_preview(file_path, mtime)
 
     @work(exclusive=True, thread=True)
-    def perform_show_preview(self, file_path: str) -> None:
+    def perform_show_preview(self, file_path: str, mtime: int) -> None:
         """Main preview worker. Runs in a thread."""
         try:
             if should_cancel():
@@ -909,7 +909,7 @@ class PreviewContainer(Container):
                 )
             else:
                 content = None  # for now
-                mime_result = path_utils.get_mime_type(file_path)
+                mime_result = path_utils.get_mime_type(file_path, mtime)
                 self.log(mime_result)
                 if mime_result is None:
                     self.log(f"Could not get MIME type for {file_path}")
@@ -937,7 +937,7 @@ class PreviewContainer(Container):
                     return
                 elif file_type == "remime":
                     mime_result = path_utils.get_mime_type(
-                        file_path, ["basic", "puremagic"]
+                        file_path, mtime, ["basic", "puremagic"]
                     )
                     if mime_result is None:
                         self.log("Could not get MIME type for remime")
@@ -1158,10 +1158,10 @@ class PreviewContainer(Container):
 
     @on(events.Show)
     def when_become_visible(self) -> None:
-        if isinstance(self._pending_preview_path, str):
-            pending = self._pending_preview_path
-            self._pending_preview_path = None
-            self.show_preview(pending)
+        if isinstance(self._pending_preview_args, tuple):
+            pending = self._pending_preview_args
+            self._pending_preview_args = None
+            self.show_preview(pending[0], pending[1])
 
     def on_key(self, event: events.Key) -> None:
         """Check for vim keybinds."""

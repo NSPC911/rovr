@@ -410,12 +410,17 @@ class FileList(CheckboxRenderingMixin, SelectionList, inherit_bindings=False):
             from contextlib import suppress
 
             with suppress(OSError):
-                self.app._highlighted_file_mtime = path.getmtime(highlighted_path)
+                setattr(
+                    self.app,
+                    "_highlighted_file_mtime",
+                    highlighted_option.dir_entry.stat().st_mtime,
+                )
         else:
-            self.app._highlighted_file_mtime = None
+            setattr(self.app, "_highlighted_file_mtime", None)
         # preview
         self.app.query_one("PreviewContainer").show_preview(
-            highlighted_option.dir_entry.path
+            highlighted_option.dir_entry.path,
+            highlighted_option.dir_entry.stat().st_mtime,
         )
         self.app.query_one("MetadataContainer").update_metadata(event.option.dir_entry)
         self.app.query_one("#unzip").disabled = not utils.is_archive(

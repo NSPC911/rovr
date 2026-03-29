@@ -665,14 +665,18 @@ class MimeResult(NamedTuple):
     content: str | None = None
 
 
+@lru_cache(maxsize=8192)
 def get_mime_type(
-    file_path: str, ignore: list[Literal["basic", "puremagic", "file1"]] | None = None
+    file_path: str,
+    mtime: int | float,
+    ignore: list[Literal["basic", "puremagic", "file1"]] | None = None,
 ) -> MimeResult | None:
     """
     Synchronous/Threaded wrapper to get the MIME type of a file.
 
     Args:
         file_path: Path to the file to check
+        mtime: The last modified time of the file, used for caching purposes
         ignore: List of detection methods to skip
 
     Returns:

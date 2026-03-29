@@ -646,7 +646,8 @@ class Application(App, inherit_bindings=False):
                         ):
                             self._highlighted_file_mtime = new_highlighted_mtime
                             self.query_one(PreviewContainer).show_preview(
-                                highlighted_path
+                                highlighted_path,
+                                new_highlighted_mtime,
                             )
                             dir_entry = get_direntry_for(highlighted_path)
                             if dir_entry is not None:

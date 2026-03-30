@@ -168,12 +168,14 @@ def existing_dir(value: str) -> str:
         str: The normalized directory path if it exists.
     Raises:
         argparse.ArgumentTypeError: If the directory does not exist."""
-    normalized = os.path.realpath(value).replace("\\", "/")
-    if not os.path.exists(normalized):
+    from pathlib import Path
+
+    path = Path(value).expanduser().resolve()
+    if not path.exists():
         raise argparse.ArgumentTypeError(f"Directory does not exist: {value}")
-    elif not os.path.isdir(normalized):
+    elif not path.is_dir():
         raise argparse.ArgumentTypeError(f"Not a directory: {value}")
-    return normalized
+    return path.as_posix()
 
 
 def eager_set_folder(config_folder: str | None) -> None:

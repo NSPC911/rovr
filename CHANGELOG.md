@@ -14,6 +14,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 - `preview`: fix preview not updating loading indicator's border subtitle 038a473
 - `fd`: fix toggle changes not applying visually 4acc181
+- `cli`: fix rare circumstance where path of config folder cannot be resolved e2ab50a
 
 ### Performance
 - `preview`: use mtime as cache for preview 659f7b7

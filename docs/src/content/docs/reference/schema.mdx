@@ -13,22 +13,31 @@ description: config schema humanified
   - [1.7. Property `Rovr Config > interface > show_line_numbers`](#interface_show_line_numbers)
   - [1.8. Property `Rovr Config > interface > scrolloff`](#interface_scrolloff)
   - [1.9. Property `Rovr Config > interface > show_hidden_files`](#interface_show_hidden_files)
-  - [1.10. Property `Rovr Config > interface > image_protocol`](#interface_image_protocol)
-  - [1.11. Property `Rovr Config > interface > allow_tab_nav`](#interface_allow_tab_nav)
-  - [1.12. Property `Rovr Config > interface > append_new_tabs`](#interface_append_new_tabs)
-  - [1.13. Property `Rovr Config > interface > double_click_delay`](#interface_double_click_delay)
-  - [1.14. Property `Rovr Config > interface > drive_watcher_frequency`](#interface_drive_watcher_frequency)
-  - [1.15. Property `Rovr Config > interface > clock`](#interface_clock)
-    - [1.15.1. Property `Rovr Config > interface > clock > enabled`](#interface_clock_enabled)
-    - [1.15.2. Property `Rovr Config > interface > clock > align`](#interface_clock_align)
-  - [1.16. Property `Rovr Config > interface > preview_text`](#interface_preview_text)
-    - [1.16.1. Property `Rovr Config > interface > preview_text > error`](#interface_preview_text_error)
-    - [1.16.2. Property `Rovr Config > interface > preview_text > start`](#interface_preview_text_start)
-  - [1.17. Property `Rovr Config > interface > compact_mode`](#interface_compact_mode)
-    - [1.17.1. Property `Rovr Config > interface > compact_mode > buttons`](#interface_compact_mode_buttons)
-    - [1.17.2. Property `Rovr Config > interface > compact_mode > panels`](#interface_compact_mode_panels)
-  - [1.18. Property `Rovr Config > interface > mime_rules`](#interface_mime_rules)
-    - [1.18.1. Property `Rovr Config > interface > mime_rules > additionalProperties`](#interface_mime_rules_additionalProperties)
+  - [1.10. Property `Rovr Config > interface > image_viewer`](#interface_image_viewer)
+    - [1.10.1. Property `Rovr Config > interface > image_viewer > protocol`](#interface_image_viewer_protocol)
+    - [1.10.2. Property `Rovr Config > interface > image_viewer > max_size`](#interface_image_viewer_max_size)
+      - [1.10.2.1. Rovr Config > interface > image_viewer > max_size > max_size items](#interface_image_viewer_max_size_items)
+    - [1.10.3. Property `Rovr Config > interface > image_viewer > resampling`](#interface_image_viewer_resampling)
+  - [1.11. Property `Rovr Config > interface > font_preview`](#interface_font_preview)
+    - [1.11.1. Property `Rovr Config > interface > font_preview > max_size`](#interface_font_preview_max_size)
+      - [1.11.1.1. Rovr Config > interface > font_preview > max_size > max_size items](#interface_font_preview_max_size_items)
+    - [1.11.2. Property `Rovr Config > interface > font_preview > font_size`](#interface_font_preview_font_size)
+  - [1.12. Property `Rovr Config > interface > allow_tab_nav`](#interface_allow_tab_nav)
+  - [1.13. Property `Rovr Config > interface > append_new_tabs`](#interface_append_new_tabs)
+  - [1.14. Property `Rovr Config > interface > double_click_delay`](#interface_double_click_delay)
+  - [1.15. Property `Rovr Config > interface > drive_watcher_frequency`](#interface_drive_watcher_frequency)
+  - [1.16. Property `Rovr Config > interface > clock`](#interface_clock)
+    - [1.16.1. Property `Rovr Config > interface > clock > enabled`](#interface_clock_enabled)
+    - [1.16.2. Property `Rovr Config > interface > clock > align`](#interface_clock_align)
+  - [1.17. Property `Rovr Config > interface > preview_text`](#interface_preview_text)
+    - [1.17.1. Property `Rovr Config > interface > preview_text > error`](#interface_preview_text_error)
+    - [1.17.2. Property `Rovr Config > interface > preview_text > start`](#interface_preview_text_start)
+    - [1.17.3. Property `Rovr Config > interface > preview_text > font_text`](#interface_preview_text_font_text)
+  - [1.18. Property `Rovr Config > interface > compact_mode`](#interface_compact_mode)
+    - [1.18.1. Property `Rovr Config > interface > compact_mode > buttons`](#interface_compact_mode_buttons)
+    - [1.18.2. Property `Rovr Config > interface > compact_mode > panels`](#interface_compact_mode_panels)
+  - [1.19. Property `Rovr Config > interface > mime_rules`](#interface_mime_rules)
+    - [1.19.1. Property `Rovr Config > interface > mime_rules > additionalProperties`](#interface_mime_rules_additionalProperties)
 - [2. Property `Rovr Config > settings`](#settings)
   - [2.1. Property `Rovr Config > settings > use_recycle_bin`](#settings_use_recycle_bin)
   - [2.2. Property `Rovr Config > settings > copy_includes_metadata`](#settings_copy_includes_metadata)
@@ -95,7 +104,7 @@ description: config schema humanified
     - [7.3.1. Rovr Config > keybinds > toggle_pin > toggle_pin items](#keybinds_toggle_pin_items)
   - [7.4. Property `Rovr Config > keybinds > toggle_footer`](#keybinds_toggle_footer)
     - [7.4.1. Rovr Config > keybinds > toggle_pin > toggle_pin items](#keybinds_toggle_pin_items)
-  - [7.5. Property `Rovr Config > keybinds > toggle_menuwrapper`](#keybinds_toggle_menuwrapper)
+  - [7.5. Property `Rovr Config > keybinds > toggle_menu_wrapper`](#keybinds_toggle_menu_wrapper)
     - [7.5.1. Rovr Config > keybinds > toggle_pin > toggle_pin items](#keybinds_toggle_pin_items)
   - [7.6. Property `Rovr Config > keybinds > focus_toggle_pinned_sidebar`](#keybinds_focus_toggle_pinned_sidebar)
     - [7.6.1. Rovr Config > keybinds > toggle_pin > toggle_pin items](#keybinds_toggle_pin_items)
@@ -227,7 +236,7 @@ description: config schema humanified
   - [7.55. Property `Rovr Config > keybinds > quit_app`](#keybinds_quit_app)
     - [7.55.1. Rovr Config > keybinds > toggle_pin > toggle_pin items](#keybinds_toggle_pin_items)
   - [7.56. Property `Rovr Config > keybinds > command_palette`](#keybinds_command_palette)
-  - [7.57. Property `Rovr Config > keybinds > suspend_app`](#keybinds_suspend_app)
+  - [7.57. Property `Rovr Config > keybinds > suspend_process`](#keybinds_suspend_process)
     - [7.57.1. Rovr Config > keybinds > toggle_pin > toggle_pin items](#keybinds_toggle_pin_items)
   - [7.58. Property `Rovr Config > keybinds > open_editor`](#keybinds_open_editor)
     - [7.58.1. Rovr Config > keybinds > toggle_pin > toggle_pin items](#keybinds_toggle_pin_items)
@@ -284,8 +293,9 @@ description: config schema humanified
     - [8.3.4. Property `Rovr Config > plugins > fd > relative_paths`](#plugins_fd_relative_paths)
     - [8.3.5. Property `Rovr Config > plugins > fd > follow_symlinks`](#plugins_fd_follow_symlinks)
     - [8.3.6. Property `Rovr Config > plugins > fd > no_ignore_parent`](#plugins_fd_no_ignore_parent)
-    - [8.3.7. Property `Rovr Config > plugins > fd > default_filter_types`](#plugins_fd_default_filter_types)
-      - [8.3.7.1. Rovr Config > plugins > fd > default_filter_types > default_filter_types items](#plugins_fd_default_filter_types_items)
+    - [8.3.7. Property `Rovr Config > plugins > fd > search_hidden`](#plugins_fd_search_hidden)
+    - [8.3.8. Property `Rovr Config > plugins > fd > default_filter_types`](#plugins_fd_default_filter_types)
+      - [8.3.8.1. Rovr Config > plugins > fd > default_filter_types > default_filter_types items](#plugins_fd_default_filter_types_items)
   - [8.4. Property `Rovr Config > plugins > rg`](#plugins_rg)
     - [8.4.1. Property `Rovr Config > plugins > rg > enabled`](#plugins_rg_enabled)
     - [8.4.2. Property `Rovr Config > plugins > rg > keybinds`](#plugins_rg_keybinds)
@@ -334,26 +344,27 @@ description: config schema humanified
 
 **Description:** Settings related to the user interface and experience
 
-| Property                                                              | Type             | Title/Description                                                                                                                                                                                                                                                       |
-| --------------------------------------------------------------------- | ---------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| [tooltips](#interface_tooltips)                                       | boolean          | Show tooltips when your mouse is over a tooltip supported button.<br />This is not hot reloaded.                                                                                                                                                                        |
-| [nerd_font](#interface_nerd_font)                                     | boolean          | Use nerd font for rendering icons instead of weird characters and stuff.<br />Not properly hot-reloaded.                                                                                                                                                                |
-| [use_reactive_layout](#interface_use_reactive_layout)                 | boolean          | Hide certain elements based on the width and height of the terminal.                                                                                                                                                                                                    |
-| [show_progress_eta](#interface_show_progress_eta)                     | boolean          | When copying or deleting files, show an ETA for when the action will be completed.                                                                                                                                                                                      |
-| [show_progress_percentage](#interface_show_progress_percentage)       | boolean          | When copying or deleting files, show a percentage of how much had been completed.                                                                                                                                                                                       |
-| [truncate_progress_file_path](#interface_truncate_progress_file_path) | boolean          | When the process container is using file paths, truncate the file path to only view the first and last names of the path.                                                                                                                                               |
-| [show_line_numbers](#interface_show_line_numbers)                     | boolean          | Add line numbers to the left gutter if you are viewing a text file.                                                                                                                                                                                                     |
-| [scrolloff](#interface_scrolloff)                                     | integer          | The number of files to keep above and below the cursor when moving through the file list.                                                                                                                                                                               |
-| [show_hidden_files](#interface_show_hidden_files)                     | boolean          | Show hidden files and folders (those starting with a dot on Unix, or explicitly hidden on Windows/MacOS).                                                                                                                                                               |
-| [image_protocol](#interface_image_protocol)                           | enum (of string) | The image protocol to use when displaying an image                                                                                                                                                                                                                      |
-| [allow_tab_nav](#interface_allow_tab_nav)                             | boolean          | Allow navigating the main app screen with \`tab\` and \`shift+tab\`                                                                                                                                                                                                     |
-| [append_new_tabs](#interface_append_new_tabs)                         | boolean          | Choose whether or not to append new tabs instead of inserting them.<br />\`true\` =&gt; Append to the end of the tab list.<br />\`false\` =&gt; Insert after the active tab.                                                                                            |
-| [double_click_delay](#interface_double_click_delay)                   | number           | The delay between two consecutive clicks to enter into a directory, or open a file.                                                                                                                                                                                     |
-| [drive_watcher_frequency](#interface_drive_watcher_frequency)         | number           | How often (in seconds) to check for changes in mounted drives in the sidebar.                                                                                                                                                                                           |
-| [clock](#interface_clock)                                             | object           |                                                                                                                                                                                                                                                                         |
-| [preview_text](#interface_preview_text)                               | object           |                                                                                                                                                                                                                                                                         |
-| [compact_mode](#interface_compact_mode)                               | object           |                                                                                                                                                                                                                                                                         |
-| [mime_rules](#interface_mime_rules)                                   | object           | Map MIME type patterns to preview types. Supports glob patterns (e.g., 'text/\*' matches 'text/plain', 'text/html', etc.). Valid preview types: text, image, pdf, archive, folder, remime.<br />-&gt; Use 'remime' if you want a more accurate description from file(1) |
+| Property                                                              | Type    | Title/Description                                                                                                                                                                                                       |
+| --------------------------------------------------------------------- | ------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| [tooltips](#interface_tooltips)                                       | boolean | Show tooltips when your mouse is over a tooltip supported button.<br />This is not hot reloaded.                                                                                                                        |
+| [nerd_font](#interface_nerd_font)                                     | boolean | Use nerd font for rendering icons instead of weird characters and stuff.<br />Not properly hot-reloaded.                                                                                                                |
+| [use_reactive_layout](#interface_use_reactive_layout)                 | boolean | Hide certain elements based on the width and height of the terminal.                                                                                                                                                    |
+| [show_progress_eta](#interface_show_progress_eta)                     | boolean | When copying or deleting files, show an ETA for when the action will be completed.                                                                                                                                      |
+| [show_progress_percentage](#interface_show_progress_percentage)       | boolean | When copying or deleting files, show a percentage of how much had been completed.                                                                                                                                       |
+| [truncate_progress_file_path](#interface_truncate_progress_file_path) | boolean | When the process container is using file paths, truncate the file path to only view the first and last names of the path.                                                                                               |
+| [show_line_numbers](#interface_show_line_numbers)                     | boolean | Add line numbers to the left gutter if you are viewing a text file.                                                                                                                                                     |
+| [scrolloff](#interface_scrolloff)                                     | integer | The number of files to keep above and below the cursor when moving through the file list.                                                                                                                               |
+| [show_hidden_files](#interface_show_hidden_files)                     | boolean | Show hidden files and folders (those starting with a dot on Unix, or explicitly hidden on Windows/MacOS).                                                                                                               |
+| [image_viewer](#interface_image_viewer)                               | object  | Settings related to the image viewer used in the preview sidebar                                                                                                                                                        |
+| [font_preview](#interface_font_preview)                               | object  | Settings related to the font preview used in the preview sidebar                                                                                                                                                        |
+| [allow_tab_nav](#interface_allow_tab_nav)                             | boolean | Allow navigating the main app screen with \`tab\` and \`shift+tab\`                                                                                                                                                     |
+| [append_new_tabs](#interface_append_new_tabs)                         | boolean | Choose whether or not to append new tabs instead of inserting them.<br />\`true\` =&gt; Append to the end of the tab list.<br />\`false\` =&gt; Insert after the active tab.                                            |
+| [double_click_delay](#interface_double_click_delay)                   | number  | The delay between two consecutive clicks to enter into a directory, or open a file.                                                                                                                                     |
+| [drive_watcher_frequency](#interface_drive_watcher_frequency)         | number  | How often (in seconds) to check for changes in mounted drives in the sidebar.                                                                                                                                           |
+| [clock](#interface_clock)                                             | object  |                                                                                                                                                                                                                         |
+| [preview_text](#interface_preview_text)                               | object  |                                                                                                                                                                                                                         |
+| [compact_mode](#interface_compact_mode)                               | object  |                                                                                                                                                                                                                         |
+| [mime_rules](#interface_mime_rules)                                   | object  | Map MIME type patterns to preview types. Uses regex patterns. Valid preview types: text, image, pdf, archive, folder, resvg, font, remime.<br />-&gt; Use 'remime' if you want a more accurate description from file(1) |
 
 ### <a name="interface_tooltips"></a>1.1. Property `Rovr Config > interface > tooltips`
 
@@ -451,7 +462,23 @@ Not properly hot-reloaded.
 
 **Description:** Show hidden files and folders (those starting with a dot on Unix, or explicitly hidden on Windows/MacOS).
 
-### <a name="interface_image_protocol"></a>1.10. Property `Rovr Config > interface > image_protocol`
+### <a name="interface_image_viewer"></a>1.10. Property `Rovr Config > interface > image_viewer`
+
+|                           |             |
+| ------------------------- | ----------- |
+| **Type**                  | `object`    |
+| **Required**              | No          |
+| **Additional properties** | Not allowed |
+
+**Description:** Settings related to the image viewer used in the preview sidebar
+
+| Property                                         | Type             | Title/Description                                                                                                                                                |
+| ------------------------------------------------ | ---------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| [protocol](#interface_image_viewer_protocol)     | enum (of string) | The image protocol to use when displaying an image                                                                                                               |
+| [max_size](#interface_image_viewer_max_size)     | array of integer | The maximum size for the image viewer. If the image exceeds this size, it will be scaled down to fit within these dimensions while maintaining its aspect ratio. |
+| [resampling](#interface_image_viewer_resampling) | enum (of string) | The resampling method to use when resizing images. This is only applicable when the image exceeds the maximum size specified in \`max_size\`.                    |
+
+#### <a name="interface_image_viewer_protocol"></a>1.10.1. Property `Rovr Config > interface > image_viewer > protocol`
 
 |              |                    |
 | ------------ | ------------------ |
@@ -469,7 +496,117 @@ Must be one of:
 - "Halfcell"
 - "Unicode"
 
-### <a name="interface_allow_tab_nav"></a>1.11. Property `Rovr Config > interface > allow_tab_nav`
+#### <a name="interface_image_viewer_max_size"></a>1.10.2. Property `Rovr Config > interface > image_viewer > max_size`
+
+|              |                    |
+| ------------ | ------------------ |
+| **Type**     | `array of integer` |
+| **Required** | No                 |
+| **Default**  | `[4000, 4000]`     |
+
+**Description:** The maximum size for the image viewer. If the image exceeds this size, it will be scaled down to fit within these dimensions while maintaining its aspect ratio.
+
+|                      | Array restrictions |
+| -------------------- | ------------------ |
+| **Min items**        | 2                  |
+| **Max items**        | 2                  |
+| **Items unicity**    | False              |
+| **Additional items** | False              |
+| **Tuple validation** | See below          |
+
+| Each item of this array must be                          | Description |
+| -------------------------------------------------------- | ----------- |
+| [max_size items](#interface_image_viewer_max_size_items) |             |
+
+##### <a name="interface_image_viewer_max_size_items"></a>1.10.2.1. Rovr Config > interface > image_viewer > max_size > max_size items
+
+|              |           |
+| ------------ | --------- |
+| **Type**     | `integer` |
+| **Required** | No        |
+
+| Restrictions |        |
+| ------------ | ------ |
+| **Minimum**  | &ge; 1 |
+
+#### <a name="interface_image_viewer_resampling"></a>1.10.3. Property `Rovr Config > interface > image_viewer > resampling`
+
+|              |                    |
+| ------------ | ------------------ |
+| **Type**     | `enum (of string)` |
+| **Required** | No                 |
+| **Default**  | `"nearest"`        |
+
+**Description:** The resampling method to use when resizing images. This is only applicable when the image exceeds the maximum size specified in `max_size`.
+
+Must be one of:
+
+- "nearest"
+- "lanczos"
+- "bilinear"
+- "bicubic"
+- "box"
+- "hamming"
+
+### <a name="interface_font_preview"></a>1.11. Property `Rovr Config > interface > font_preview`
+
+|                           |             |
+| ------------------------- | ----------- |
+| **Type**                  | `object`    |
+| **Required**              | No          |
+| **Additional properties** | Not allowed |
+
+**Description:** Settings related to the font preview used in the preview sidebar
+
+| Property                                       | Type             | Title/Description                                                                                                                                                                |
+| ---------------------------------------------- | ---------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| [max_size](#interface_font_preview_max_size)   | array of integer | The maximum size for the font preview. If the rendered font preview exceeds this size, it will be scaled down to fit within these dimensions while maintaining its aspect ratio. |
+| [font_size](#interface_font_preview_font_size) | integer          | The font size to use when rendering font previews. This is only applicable when the font preview exceeds the maximum size specified in \`max_size\`.                             |
+
+#### <a name="interface_font_preview_max_size"></a>1.11.1. Property `Rovr Config > interface > font_preview > max_size`
+
+|              |                    |
+| ------------ | ------------------ |
+| **Type**     | `array of integer` |
+| **Required** | No                 |
+| **Default**  | `[1000, 1000]`     |
+
+**Description:** The maximum size for the font preview. If the rendered font preview exceeds this size, it will be scaled down to fit within these dimensions while maintaining its aspect ratio.
+
+|                      | Array restrictions |
+| -------------------- | ------------------ |
+| **Min items**        | 2                  |
+| **Max items**        | 2                  |
+| **Items unicity**    | False              |
+| **Additional items** | False              |
+| **Tuple validation** | See below          |
+
+| Each item of this array must be                          | Description |
+| -------------------------------------------------------- | ----------- |
+| [max_size items](#interface_font_preview_max_size_items) |             |
+
+##### <a name="interface_font_preview_max_size_items"></a>1.11.1.1. Rovr Config > interface > font_preview > max_size > max_size items
+
+|              |           |
+| ------------ | --------- |
+| **Type**     | `integer` |
+| **Required** | No        |
+
+| Restrictions |        |
+| ------------ | ------ |
+| **Minimum**  | &ge; 1 |
+
+#### <a name="interface_font_preview_font_size"></a>1.11.2. Property `Rovr Config > interface > font_preview > font_size`
+
+|              |           |
+| ------------ | --------- |
+| **Type**     | `integer` |
+| **Required** | No        |
+| **Default**  | `40`      |
+
+**Description:** The font size to use when rendering font previews. This is only applicable when the font preview exceeds the maximum size specified in `max_size`.
+
+### <a name="interface_allow_tab_nav"></a>1.12. Property `Rovr Config > interface > allow_tab_nav`
 
 |              |           |
 | ------------ | --------- |
@@ -479,7 +616,7 @@ Must be one of:
 
 **Description:** Allow navigating the main app screen with `tab` and `shift+tab`
 
-### <a name="interface_append_new_tabs"></a>1.12. Property `Rovr Config > interface > append_new_tabs`
+### <a name="interface_append_new_tabs"></a>1.13. Property `Rovr Config > interface > append_new_tabs`
 
 |              |           |
 | ------------ | --------- |
@@ -491,7 +628,7 @@ Must be one of:
 `true` =&gt; Append to the end of the tab list.
 `false` =&gt; Insert after the active tab.
 
-### <a name="interface_double_click_delay"></a>1.13. Property `Rovr Config > interface > double_click_delay`
+### <a name="interface_double_click_delay"></a>1.14. Property `Rovr Config > interface > double_click_delay`
 
 |              |          |
 | ------------ | -------- |
@@ -501,7 +638,7 @@ Must be one of:
 
 **Description:** The delay between two consecutive clicks to enter into a directory, or open a file.
 
-### <a name="interface_drive_watcher_frequency"></a>1.14. Property `Rovr Config > interface > drive_watcher_frequency`
+### <a name="interface_drive_watcher_frequency"></a>1.15. Property `Rovr Config > interface > drive_watcher_frequency`
 
 |              |          |
 | ------------ | -------- |
@@ -511,7 +648,7 @@ Must be one of:
 
 **Description:** How often (in seconds) to check for changes in mounted drives in the sidebar.
 
-### <a name="interface_clock"></a>1.15. Property `Rovr Config > interface > clock`
+### <a name="interface_clock"></a>1.16. Property `Rovr Config > interface > clock`
 
 |                           |             |
 | ------------------------- | ----------- |
@@ -524,7 +661,7 @@ Must be one of:
 | [enabled](#interface_clock_enabled) | boolean          | Show a clock in the tabs bar.                                    |
 | [align](#interface_clock_align)     | enum (of string) | Align the clock to either the 'right' or 'left' of the tabs bar. |
 
-#### <a name="interface_clock_enabled"></a>1.15.1. Property `Rovr Config > interface > clock > enabled`
+#### <a name="interface_clock_enabled"></a>1.16.1. Property `Rovr Config > interface > clock > enabled`
 
 |              |           |
 | ------------ | --------- |
@@ -534,7 +671,7 @@ Must be one of:
 
 **Description:** Show a clock in the tabs bar.
 
-#### <a name="interface_clock_align"></a>1.15.2. Property `Rovr Config > interface > clock > align`
+#### <a name="interface_clock_align"></a>1.16.2. Property `Rovr Config > interface > clock > align`
 
 |              |                    |
 | ------------ | ------------------ |
@@ -549,7 +686,7 @@ Must be one of:
 - "left"
 - "right"
 
-### <a name="interface_preview_text"></a>1.16. Property `Rovr Config > interface > preview_text`
+### <a name="interface_preview_text"></a>1.17. Property `Rovr Config > interface > preview_text`
 
 |                           |             |
 | ------------------------- | ----------- |
@@ -557,12 +694,13 @@ Must be one of:
 | **Required**              | No          |
 | **Additional properties** | Not allowed |
 
-| Property                               | Type   | Title/Description                                                                                                                                          |
-| -------------------------------------- | ------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| [error](#interface_preview_text_error) | string | If for any reason the file preview refused to show, this appears.                                                                                          |
-| [start](#interface_preview_text_start) | string | This is shown when the rovr starts up. You may see it for a split second, but it will never appear afterwards. You cannot view this properly in this docs. |
+| Property                                       | Type   | Title/Description                                                                                                                                          |
+| ---------------------------------------------- | ------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| [error](#interface_preview_text_error)         | string | If for any reason the file preview refused to show, this appears.                                                                                          |
+| [start](#interface_preview_text_start)         | string | This is shown when the rovr starts up. You may see it for a split second, but it will never appear afterwards. You cannot view this properly in this docs. |
+| [font_text](#interface_preview_text_font_text) | string | When a font file is previewed, this text will be rendered in the font if possible.                                                                         |
 
-#### <a name="interface_preview_text_error"></a>1.16.1. Property `Rovr Config > interface > preview_text > error`
+#### <a name="interface_preview_text_error"></a>1.17.1. Property `Rovr Config > interface > preview_text > error`
 
 |              |                                     |
 | ------------ | ----------------------------------- |
@@ -572,7 +710,7 @@ Must be one of:
 
 **Description:** If for any reason the file preview refused to show, this appears.
 
-#### <a name="interface_preview_text_start"></a>1.16.2. Property `Rovr Config > interface > preview_text > start`
+#### <a name="interface_preview_text_start"></a>1.17.2. Property `Rovr Config > interface > preview_text > start`
 
 |              |                                                                                                                                      |
 | ------------ | ------------------------------------------------------------------------------------------------------------------------------------ |
@@ -582,7 +720,17 @@ Must be one of:
 
 **Description:** This is shown when the rovr starts up. You may see it for a split second, but it will never appear afterwards. You cannot view this properly in this docs.
 
-### <a name="interface_compact_mode"></a>1.17. Property `Rovr Config > interface > compact_mode`
+#### <a name="interface_preview_text_font_text"></a>1.17.3. Property `Rovr Config > interface > preview_text > font_text`
+
+|              |                                                                                                                            |
+| ------------ | -------------------------------------------------------------------------------------------------------------------------- |
+| **Type**     | `string`                                                                                                                   |
+| **Required** | No                                                                                                                         |
+| **Default**  | `"abcdefghijklmnopqrstuvwxyz\nABCDEFGHIJKLMNOPQRSTUVWXYZ\noO08 iIlL1 g9qCQG a@ 5sS\n{} [==&gt;  ] (*) &lt;&gt; ~-+ /\\\n"` |
+
+**Description:** When a font file is previewed, this text will be rendered in the font if possible.
+
+### <a name="interface_compact_mode"></a>1.18. Property `Rovr Config > interface > compact_mode`
 
 |                           |             |
 | ------------------------- | ----------- |
@@ -595,7 +743,7 @@ Must be one of:
 | [buttons](#interface_compact_mode_buttons) | boolean | Whether to compact the buttons and path input to one line instead of three.  |
 | [panels](#interface_compact_mode_panels)   | boolean | Whether to make the panels smaller to add more room for the file list itself |
 
-#### <a name="interface_compact_mode_buttons"></a>1.17.1. Property `Rovr Config > interface > compact_mode > buttons`
+#### <a name="interface_compact_mode_buttons"></a>1.18.1. Property `Rovr Config > interface > compact_mode > buttons`
 
 |              |           |
 | ------------ | --------- |
@@ -605,7 +753,7 @@ Must be one of:
 
 **Description:** Whether to compact the buttons and path input to one line instead of three.
 
-#### <a name="interface_compact_mode_panels"></a>1.17.2. Property `Rovr Config > interface > compact_mode > panels`
+#### <a name="interface_compact_mode_panels"></a>1.18.2. Property `Rovr Config > interface > compact_mode > panels`
 
 |              |           |
 | ------------ | --------- |
@@ -615,23 +763,23 @@ Must be one of:
 
 **Description:** Whether to make the panels smaller to add more room for the file list itself
 
-### <a name="interface_mime_rules"></a>1.18. Property `Rovr Config > interface > mime_rules`
+### <a name="interface_mime_rules"></a>1.19. Property `Rovr Config > interface > mime_rules`
 
-|                           |                                                                                                                                                                                                                                                                                                                                                                                                         |
-| ------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Type**                  | `object`                                                                                                                                                                                                                                                                                                                                                                                                |
-| **Required**              | No                                                                                                                                                                                                                                                                                                                                                                                                      |
-| **Additional properties** | [Each additional property must conform to the schema](#interface_mime_rules_additionalProperties)                                                                                                                                                                                                                                                                                                       |
-| **Default**               | `{"text/*": "text", "image/svg+xml": "resvg", "image/*": "image", "application/pdf": "pdf", "application/zip": "archive", "application/x-tar": "archive", "application/gzip": "archive", "application/x-bzip2": "archive", "application/x-xz": "archive", "application/x-rar": "archive", "application/x-7z-compressed": "archive", "inode/directory": "folder", "application/octet-stream": "remime"}` |
+|                           |                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          |
+| ------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| **Type**                  | `object`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
+| **Required**              | No                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       |
+| **Additional properties** | [Each additional property must conform to the schema](#interface_mime_rules_additionalProperties)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        |
+| **Default**               | `{"text/.*": "text", "application/(json&#124;javascript&#124;xml&#124;raml\\+yaml)": "text", "application/x-(yaml&#124;script&#124;pem-file&#124;subrip&#124;typescript)": "text", "application/(mbox&#124;ndjson&#124;wine-extension-ini)": "text", "image/svg\\+xml": "resvg", "image/(avif&#124;hei.&#124;jxl)": "image", "image/.*": "image", "application/pdf": "pdf", "application/(zip&#124;gzip&#124;zstd&#124;bzip2&#124;vnd\\.rar)": "archive", "application/x-(xz&#124;x-tar&#124;x-gzip&#124;x-bzip2&#124;x-xz&#124;x-rar&#124;x-rar-compressed&#124;x-7z-compressed)": "archive", "application/(rar&#124;7z.*&#124;tar&#124;xz&#124;bzip.*&#124;lzma&#124;compress&#124;archive&#124;cpio&#124;arj&#124;xar&#124;ms-cab.*)": "archive", "application/(iso9660-image&#124;qemu-disk&#124;ms-wim&#124;apple-diskimage)": "archive", "application/virtualbox-(vhd&#124;vhdx)": "archive", "application/(debian.*-package&#124;redhat-package-manager&#124;rpm&#124;android\\.package-archive)": "archive", "inode/directory": "folder", "font/.*": "font", "application/ms-opentype": "font", "application/font-.*": "font", "application/x-font-.*": "font"}` |
 
-**Description:** Map MIME type patterns to preview types. Supports glob patterns (e.g., 'text/\*' matches 'text/plain', 'text/html', etc.). Valid preview types: text, image, pdf, archive, folder, remime.
+**Description:** Map MIME type patterns to preview types. Uses regex patterns. Valid preview types: text, image, pdf, archive, folder, resvg, font, remime.
 -&gt; Use 'remime' if you want a more accurate description from file(1)
 
 | Property                                       | Type             | Title/Description |
 | ---------------------------------------------- | ---------------- | ----------------- |
 | [](#interface_mime_rules_additionalProperties) | enum (of string) |                   |
 
-#### <a name="interface_mime_rules_additionalProperties"></a>1.18.1. Property `Rovr Config > interface > mime_rules > additionalProperties`
+#### <a name="interface_mime_rules_additionalProperties"></a>1.19.1. Property `Rovr Config > interface > mime_rules > additionalProperties`
 
 |              |                    |
 | ------------ | ------------------ |
@@ -647,6 +795,7 @@ Must be one of:
 - "folder"
 - "remime"
 - "resvg"
+- "font"
 
 ## <a name="settings"></a>2. Property `Rovr Config > settings`
 
@@ -1427,7 +1576,7 @@ Refer to https://textual.textualize.io/guide/design/#additional-variables for mo
 | [toggle_pinned_sidebar](#keybinds_toggle_pinned_sidebar)               | array of string | Toggle viewing the pinned sidebar.                                                                |
 | [toggle_preview_sidebar](#keybinds_toggle_preview_sidebar)             | array of string | Toggle viewing the preview sidebar.                                                               |
 | [toggle_footer](#keybinds_toggle_footer)                               | array of string | Toggle viewing the footer.                                                                        |
-| [toggle_menuwrapper](#keybinds_toggle_menuwrapper)                     | array of string | Toggle viewing the menu wrapper.                                                                  |
+| [toggle_menu_wrapper](#keybinds_toggle_menu_wrapper)                   | array of string | Toggle viewing the menu wrapper.                                                                  |
 | [focus_toggle_pinned_sidebar](#keybinds_focus_toggle_pinned_sidebar)   | array of string | Toggle focus between pinned folder sidebar and file list.                                         |
 | [focus_file_list](#keybinds_focus_file_list)                           | array of string | Focus the file list.                                                                              |
 | [focus_toggle_preview_sidebar](#keybinds_focus_toggle_preview_sidebar) | array of string | Focus toggle between preview sidebar and file list.                                               |
@@ -1479,7 +1628,7 @@ Refer to https://textual.textualize.io/guide/design/#additional-variables for mo
 | [change_sort_order](#keybinds_change_sort_order)                       | object          | Keybinds related to changing the sort order                                                       |
 | [quit_app](#keybinds_quit_app)                                         | array of string | Quit the application                                                                              |
 | [command_palette](#keybinds_command_palette)                           | string          | Launch Textual's mildly useful command palette (only one keybind is allowed!)                     |
-| [suspend_app](#keybinds_suspend_app)                                   | array of string | Suspend the app's process, bringing you back to the terminal (\*nix only)                         |
+| [suspend_process](#keybinds_suspend_process)                           | array of string | Suspend the app's process, bringing you back to the terminal (\*nix only)                         |
 | [open_editor](#keybinds_open_editor)                                   | array of string | Open the selected file or folder in the configured editor.                                        |
 | [show_shell_screen](#keybinds_show_shell_screen)                       | array of string | Show the shell screen to run a command in the current directory.                                  |
 | [filename_conflict](#keybinds_filename_conflict)                       | object          | Keybinds related to handling a conflict with two files of the same name                           |
@@ -1603,7 +1752,7 @@ Refer to https://textual.textualize.io/guide/design/#additional-variables for mo
 | **Type**     | `string` |
 | **Required** | No       |
 
-### <a name="keybinds_toggle_menuwrapper"></a>7.5. Property `Rovr Config > keybinds > toggle_menuwrapper`
+### <a name="keybinds_toggle_menu_wrapper"></a>7.5. Property `Rovr Config > keybinds > toggle_menu_wrapper`
 
 |                |                       |
 | -------------- | --------------------- |
@@ -3523,7 +3672,7 @@ Refer to https://textual.textualize.io/guide/design/#additional-variables for mo
 
 **Description:** Launch Textual's mildly useful command palette (only one keybind is allowed!)
 
-### <a name="keybinds_suspend_app"></a>7.57. Property `Rovr Config > keybinds > suspend_app`
+### <a name="keybinds_suspend_process"></a>7.57. Property `Rovr Config > keybinds > suspend_process`
 
 |                |                       |
 | -------------- | --------------------- |
@@ -4242,6 +4391,7 @@ Refer to https://textual.textualize.io/guide/design/#additional-variables for mo
 | [relative_paths](#plugins_fd_relative_paths)             | boolean                   | Whether to show fd results as relative path or absolute path. |
 | [follow_symlinks](#plugins_fd_follow_symlinks)           | boolean                   | Whether fd should follow symlinks when searching.             |
 | [no_ignore_parent](#plugins_fd_no_ignore_parent)         | boolean                   | Don't use \*ignore files from parent folders when searching.  |
+| [search_hidden](#plugins_fd_search_hidden)               | boolean                   | Whether to include hidden files in fd results by default.     |
 | [default_filter_types](#plugins_fd_default_filter_types) | array of enum (of string) | The default file types to show when using fd.                 |
 
 #### <a name="plugins_fd_enabled"></a>8.3.1. Property `Rovr Config > plugins > fd > enabled`
@@ -4324,7 +4474,17 @@ Refer to https://textual.textualize.io/guide/design/#additional-variables for mo
 
 **Description:** Don't use \*ignore files from parent folders when searching.
 
-#### <a name="plugins_fd_default_filter_types"></a>8.3.7. Property `Rovr Config > plugins > fd > default_filter_types`
+#### <a name="plugins_fd_search_hidden"></a>8.3.7. Property `Rovr Config > plugins > fd > search_hidden`
+
+|              |           |
+| ------------ | --------- |
+| **Type**     | `boolean` |
+| **Required** | No        |
+| **Default**  | `false`   |
+
+**Description:** Whether to include hidden files in fd results by default.
+
+#### <a name="plugins_fd_default_filter_types"></a>8.3.8. Property `Rovr Config > plugins > fd > default_filter_types`
 
 |              |                             |
 | ------------ | --------------------------- |
@@ -4346,7 +4506,7 @@ Refer to https://textual.textualize.io/guide/design/#additional-variables for mo
 | -------------------------------------------------------------------- | ----------- |
 | [default_filter_types items](#plugins_fd_default_filter_types_items) |             |
 
-##### <a name="plugins_fd_default_filter_types_items"></a>8.3.7.1. Rovr Config > plugins > fd > default_filter_types > default_filter_types items
+##### <a name="plugins_fd_default_filter_types_items"></a>8.3.8.1. Rovr Config > plugins > fd > default_filter_types > default_filter_types items
 
 |              |                    |
 | ------------ | ------------------ |

@@ -71,6 +71,14 @@ rovr automatically detects `file` in your `PATH`, or you can set the `YAZI_FILE_
 - **enable:** `plugins.file_one.enabled = true`
 - **get_description:** whether to get extra file description from `file -b <file>` (default: `true`)
 
+### resvg
+
+uses the [`resvg_py`](https://github.com/baseplate-admin/resvg-py) module to provide svg image preview support
+
+this cannot be disabled, as it doesn't depend on the resvg binary, but rather the maturin binding itself.
+
+no configuration is available for this.
+
 ---
 
 a plugin system is also under works, stay tuned!

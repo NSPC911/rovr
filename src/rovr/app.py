@@ -166,10 +166,13 @@ class Application(App, inherit_bindings=False):
         root_classes = (
             "compact-buttons"
             if config["interface"]["compact_mode"]["buttons"]
-            else "comfy-buttons" + " compact-panels"
+            else "comfy-buttons"
+        ) + (
+            " compact-panels"
             if config["interface"]["compact_mode"]["panels"]
             else " comfy-panels"
         )
+        root_classes = root_classes.strip()
         with Vertical(id="root", classes=root_classes):
             header = HeaderArea()
             self.tabWidget = header.tabline

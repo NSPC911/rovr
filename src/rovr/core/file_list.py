@@ -970,7 +970,7 @@ class FileListRightClickOptionList(PopupOptionList):
 
     @on(events.Show)
     def on_show(self) -> None:
-        self.set_options([
+        options = [
             Option(f" {icon_utils.get_icon('general', 'copy')[0]} Copy", id="copy"),
             Option(f" {icon_utils.get_icon('general', 'cut')[0]} Cut", id="cut"),
             Option(
@@ -983,11 +983,21 @@ class FileListRightClickOptionList(PopupOptionList):
             Option(
                 f" {icon_utils.get_icon('general', 'open')[0]} Unzip",
                 id="unzip",
-                disabled=not utils.is_archive(
-                    self.app.file_list.highlighted_option.dir_entry.path
+                disabled=not (
+                    hasattr(self.app.file_list.highlighted_option, "dir_entry")
+                    and utils.is_archive(
+                        self.app.file_list.highlighted_option.dir_entry.path
+                    )
                 ),
             ),
-        ])
+        ]
+        if (
+            self.app.file_list.highlighted_option
+            and self.app.file_list.highlighted_option.disabled
+        ):
+            for option in options:
+                option.disabled = True
+        self.set_options(options)
         self.call_next(self.refresh)
 
     async def on_option_list_option_selected(

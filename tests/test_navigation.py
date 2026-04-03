@@ -2,9 +2,10 @@ import os
 from pathlib import Path
 
 import pytest
+from textual import events
 
 from rovr.app import Application
-from rovr.components.search_container import SearchInput
+from rovr.components import PopupOptionList, SearchInput
 from rovr.navigation_widgets import BackButton
 
 from .conftest import iter_until, workers_finished
@@ -213,3 +214,28 @@ async def test_preview_bypass_folder(tmp_path: Path) -> None:
         await workers_finished(pilot, app.file_list)
         assert app.file_list.highlighted == 0
         assert app.file_list.highlighted_option.dir_entry.name == "subfoldered-file.txt"
+
+
+@pytest.mark.asyncio
+async def test_right_click_empty(tmp_path: Path) -> None:
+    os.makedirs(tmp_path / "folder")
+    app = Application(startup_path=(tmp_path / "folder").as_posix())
+    async with app.run_test(size=(143, 37)) as pilot:
+        await pilot.pause()
+        await pilot._post_mouse_events(
+            [events.MouseDown, events.MouseUp, events.Click],
+            app.file_list,
+            (8, 0),
+            button=3,
+            shift=False,
+            meta=False,
+            control=False,
+            times=1,
+        )
+        await pilot.pause()
+        assert all(
+            option.disabled
+            for option in app.query_one(
+                "FileListRightClickOptionList", PopupOptionList
+            ).options
+        )

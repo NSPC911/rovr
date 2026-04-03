@@ -27,3 +27,13 @@ class FileListContainer(VerticalGroup):
 
     def on_resize(self, event: events.Resize) -> None:
         self.filelist.scroll_to_highlight()
+
+    def remount_filelist(self) -> None:
+        """Remount the file list to reset its state"""
+        self.filelist.remove()
+        self.filelist = FileList(
+            id="file_list",
+            name="File List",
+            classes="file-list",
+        )
+        self.call_later(self.mount, self.filelist)

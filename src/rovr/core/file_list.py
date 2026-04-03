@@ -983,7 +983,8 @@ class FileListRightClickOptionList(PopupOptionList):
             Option(
                 f" {icon_utils.get_icon('general', 'open')[0]} Unzip",
                 id="unzip",
-                disabled=not utils.is_archive(
+                disabled=not self.app.file_list.highlighted_option.value
+                or not utils.is_archive(
                     self.app.file_list.highlighted_option.dir_entry.path
                 ),
             ),

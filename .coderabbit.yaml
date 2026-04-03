@@ -1,21 +1,46 @@
 # yaml-language-server: $schema=https://coderabbit.ai/integrations/schema.v2.json
 # Minimal configuration for getting started
-language: "en-US"
+# yaml-language-server: $schema=https://coderabbit.ai/integrations/schema.v2.json
+language: en-GB
+tone_instructions: >-
+  Be friendly and inquisitive/friendly, but do your research properly. For the love of god, don't
+  mention that I'm right.
 reviews:
-  profile: "chill"
-  high_level_summary: true
+  request_changes_workflow: true
+  auto_title_placeholder: generate a title
+  review_details: true
+  fail_commit_status: true
+  sequence_diagrams: false
+  related_prs: false
+  suggested_labels: false
+  auto_assign_reviewers: true
+  in_progress_fortune: false
+  poem: false
   auto_review:
-    enabled: true
-    drafts: false
-    ignore_title_keywords: ["WIP", "wip"]
-    base_brances:
-      - "master"
-      - "dev"
+    base_branches:
+      - dev
+      - master
   finishing_touches:
+    docstrings:
+      enabled: false
     unit_tests:
       enabled: false
-    doc_strings:
-      enabled: false
-  tools:
-    ruff:
-      enabled: true
+chat:
+  art: false
+  integrations:
+    jira:
+      usage: disabled
+    linear:
+      usage: disabled
+knowledge_base:
+  jira:
+    usage: disabled
+  linear:
+    usage: disabled
+issue_enrichment:
+  auto_enrich:
+    enabled: false
+  planning:
+    enabled: false
+  labeling:
+    auto_apply_labels: true

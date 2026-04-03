@@ -1006,17 +1006,17 @@ class FileListRightClickOptionList(PopupOptionList):
         # Handle menu item selection
         match event.option.id:
             case "copy":
-                self.file_list.action_copy()
+                self.app.file_list.action_copy()
             case "cut":
-                self.file_list.action_cut()
+                self.app.file_list.action_cut()
             case "delete":
-                self.file_list.action_delete()
+                self.app.file_list.action_delete()
             case "rename":
-                self.file_list.action_rename()
+                self.app.file_list.action_rename()
             case "zip":
-                self.file_list.action_zip()
+                self.app.file_list.action_zip()
             case "unzip":
-                self.file_list.action_unzip()
+                self.app.file_list.action_unzip()
             case _:
                 return
         self.go_hide()

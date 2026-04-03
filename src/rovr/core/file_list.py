@@ -976,7 +976,7 @@ class FileListRightClickOptionList(PopupOptionList):
             and self.app.file_list.highlighted_option.disabled
         )
         cannot_write: bool = self.app.file_list.options[0].id == "perm"
-        no_clip: bool = len(self.app.Clipboard.options) >= 0
+        no_clip: bool = len(self.app.Clipboard.selected) == 0
 
         options = [
             Option(

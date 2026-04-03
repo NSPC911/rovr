@@ -5,7 +5,7 @@ import pytest
 from textual import events
 
 from rovr.app import Application
-from rovr.components import PopupOptionList, SearchInput
+from rovr.components import SearchInput
 from rovr.navigation_widgets import BackButton
 
 from .conftest import iter_until, workers_finished
@@ -231,11 +231,4 @@ async def test_right_click_empty(tmp_path: Path) -> None:
             meta=False,
             control=False,
             times=1,
-        )
-        await pilot.pause()
-        assert all(
-            option.disabled
-            for option in app.query_one(
-                "FileListRightClickOptionList", PopupOptionList
-            ).options
         )

@@ -1,6 +1,7 @@
+import asyncio
 from contextlib import suppress
 from os import getcwd, path
-from typing import Callable, ClassVar, Iterable, Self, Sequence
+from typing import Awaitable, Callable, ClassVar, Iterable, Self, Sequence
 
 from textual import events, on, work
 from textual.binding import BindingType
@@ -970,16 +971,49 @@ class FileListRightClickOptionList(PopupOptionList):
 
     @on(events.Show)
     def on_show(self) -> None:
+        no_items: bool = (
+            self.app.file_list.highlighted_option
+            and self.app.file_list.highlighted_option.disabled
+        )
+        cannot_write: bool = self.app.file_list.options[0].id == "perm"
+        no_clip: bool = len(self.app.Clipboard.options) >= 0
+
         options = [
-            Option(f" {icon_utils.get_icon('general', 'copy')[0]} Copy", id="copy"),
-            Option(f" {icon_utils.get_icon('general', 'cut')[0]} Cut", id="cut"),
             Option(
-                f" {icon_utils.get_icon('general', 'delete')[0]} Delete ", id="delete"
+                f" {icon_utils.get_icon('general', 'copy')[0]} Copy",
+                id="copy",
+                disabled=no_items,
             ),
             Option(
-                f" {icon_utils.get_icon('general', 'rename')[0]} Rename ", id="rename"
+                f" {icon_utils.get_icon('general', 'cut')[0]} Cut",
+                id="cut",
+                disabled=no_items,
             ),
-            Option(f" {icon_utils.get_icon('general', 'zip')[0]} Zip", id="zip"),
+            Option(
+                f" {icon_utils.get_icon('general', 'paste')[0]} Paste",
+                id="paste",
+                disabled=cannot_write or no_clip,
+            ),
+            Option(
+                f" {icon_utils.get_icon('general', 'new')[0]} New",
+                id="new",
+                disabled=cannot_write,
+            ),
+            Option(
+                f" {icon_utils.get_icon('general', 'rename')[0]} Rename ",
+                id="rename",
+                disabled=no_items,
+            ),
+            Option(
+                f" {icon_utils.get_icon('general', 'delete')[0]} Delete ",
+                id="delete",
+                disabled=no_items,
+            ),
+            Option(
+                f" {icon_utils.get_icon('general', 'zip')[0]} Zip",
+                id="zip",
+                disabled=no_items,
+            ),
             Option(
                 f" {icon_utils.get_icon('general', 'open')[0]} Unzip",
                 id="unzip",
@@ -991,12 +1025,6 @@ class FileListRightClickOptionList(PopupOptionList):
                 ),
             ),
         ]
-        if (
-            self.app.file_list.highlighted_option
-            and self.app.file_list.highlighted_option.disabled
-        ):
-            for option in options:
-                option.disabled = True
         self.set_options(options)
         self.call_next(self.refresh)
 
@@ -1004,19 +1032,12 @@ class FileListRightClickOptionList(PopupOptionList):
         self, event: OptionList.OptionSelected
     ) -> None:
         # Handle menu item selection
-        match event.option.id:
-            case "copy":
-                self.app.file_list.action_copy()
-            case "cut":
-                self.app.file_list.action_cut()
-            case "delete":
-                self.app.file_list.action_delete()
-            case "rename":
-                self.app.file_list.action_rename()
-            case "zip":
-                self.app.file_list.action_zip()
-            case "unzip":
-                self.app.file_list.action_unzip()
-            case _:
-                return
+        if hasattr(self.app.file_list, f"action_{event.option.id}"):
+            func: Callable[[], Awaitable | None] = getattr(
+                self.app.file_list, f"action_{event.option.id}"
+            )
+            if asyncio.iscoroutinefunction(func):
+                await func()
+            else:
+                func()
         self.go_hide()

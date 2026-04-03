@@ -945,7 +945,7 @@ class PreviewContainer(Container):
                     return
                 elif file_type == "remime":
                     mime_result = path_utils.get_mime_type(
-                        file_path, mtime, ["basic", "puremagic"]
+                        file_path, mtime, ("basic", "puremagic")
                     )
                     if mime_result is None:
                         self.log("Could not get MIME type for remime")

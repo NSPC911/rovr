@@ -669,7 +669,7 @@ class MimeResult(NamedTuple):
 def get_mime_type(
     file_path: str,
     mtime: int | float,
-    ignore: list[Literal["basic", "puremagic", "file1"]] | None = None,
+    ignore: tuple[Literal["basic", "puremagic", "file1"], ...] | None = None,
 ) -> MimeResult | None:
     """
     Synchronous/Threaded wrapper to get the MIME type of a file.
@@ -689,7 +689,7 @@ def get_mime_type(
                            handles it internally, so I'm just leaving it here
     """
     if ignore is None:
-        ignore = []
+        ignore = ()
 
     file_extension = path.splitext(file_path)[1].lower()
 

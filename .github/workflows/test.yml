@@ -4,6 +4,10 @@ on:
   push:
     branches:
       - "**"
+    paths:
+      - "**/*.py"
+      - "pyproject.toml"
+      - "uv.lock"
   pull_request:
     branches:
       - "**"

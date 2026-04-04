@@ -1,0 +1,157 @@
+from os import path
+
+import psutil
+
+
+def normalise(*location: str | bytes) -> str:
+    """'Normalise' the path
+    Args:
+        *location (str | bytes): The location to the item
+
+    Returns:
+        str: A normalised path
+
+    Raises:
+        ValueError: When no path components are provided
+    """
+    if not location:
+        raise ValueError("At least one path component must be provided")
+    # path.normalise fixes the relative references
+    # replace \\ with / on windows
+    # by any chance if somehow a \\\\ was to enter, fix that
+    return (
+        str(path.normpath(path.join(*location))).replace("\\", "/").replace("//", "/")
+    )
+
+
+def _should_include_macos_mount_point(partition: "psutil._common.sdiskpart") -> bool:
+    """
+    Determine if a macOS mount point should be included in the drive list.
+
+    Args:
+        partition: A partition object from psutil.disk_partitions()
+
+    Returns:
+        bool: True if the mount point should be included, False otherwise.
+    """
+    # Skip virtual/system filesystem types:
+    # - autofs: Automounter filesystem for automatic mounting/unmounting
+    # - devfs: Device filesystem providing access to device files
+    # - devtmpfs: Device temporary filesystem (like devfs but in tmpfs)
+    # - tmpfs: Temporary filesystem stored in memory
+    if partition.fstype in ("autofs", "devfs", "devtmpfs", "tmpfs"):
+        return False
+
+    # Skip system volumes under /System/Volumes/ (VM, Preboot, Update, Data, etc.)
+    if partition.mountpoint.startswith("/System/Volumes/"):
+        return False
+
+    # Include everything else unless it's a system path (/System/, /dev, /private)
+    return not partition.mountpoint.startswith(("/System/", "/dev", "/private"))
+
+
+def _should_include_linux_mount_point(partition: "psutil._common.sdiskpart") -> bool:
+    """
+    Determine if a Linux/WSL mount point should be included in the drive list.
+
+    Args:
+        partition: A partition object from psutil.disk_partitions()
+
+    Returns:
+        bool: True if the mount point should be included, False otherwise.
+    """
+    # Skip virtual/system filesystem types:
+    # - autofs: Automounter filesystem for automatic mounting/unmounting
+    # - devfs: Device filesystem providing access to device files
+    # - devtmpfs: Device temporary filesystem (like devfs but in tmpfs)
+    # - tmpfs: Temporary filesystem stored in memory
+    # - proc: Process information filesystem
+    # - sysfs: System information filesystem
+    # - cgroup2: Control group filesystem for resource management
+    # - debugfs, tracefs, fusectl, configfs: Kernel debugging/configuration filesystems
+    # - securityfs, pstore, bpf: Security and kernel subsystem filesystems
+    # - hugetlbfs, mqueue: Specialized system filesystems
+    # - devpts: Pseudo-terminal filesystem
+    # - binfmt_misc: Binary format support filesystem
+    if partition.fstype in (
+        "autofs",
+        "devfs",
+        "devtmpfs",
+        "tmpfs",
+        "proc",
+        "sysfs",
+        "cgroup2",
+        "debugfs",
+        "tracefs",
+        "fusectl",
+        "configfs",
+        "securityfs",
+        "pstore",
+        "bpf",
+        "hugetlbfs",
+        "mqueue",
+        "devpts",
+        "binfmt_misc",
+    ):
+        return False
+
+    # Skip system paths that users typically don't access:
+    # - /dev, /proc, /sys: System directories
+    # - /run: Runtime data directory
+    # - /boot: Boot partition (typically not accessed by users)
+    # - /mnt/wslg: WSL GUI support directory
+    # - /mnt/wsl: WSL system integration directory
+    # Include everything else (root filesystem, /home, /media, Windows drives in WSL like /mnt/c, etc.)
+    return not partition.mountpoint.startswith((
+        "/dev",
+        "/proc",
+        "/sys",
+        "/run",
+        "/boot",
+        "/mnt/wslg",
+        "/mnt/wsl",
+    ))
+
+
+def get_mounted_drives(os_type: str) -> list[str]:
+    """
+    Worker function to get mounted drives - isolated from config imports.
+
+    Args:
+        os_type: Operating system type ("Windows", "Darwin", or other)
+
+    Returns:
+        list[str]: List of mounted drives.
+    """
+    drives = []
+    try:
+        # get all partitions
+        partitions = psutil.disk_partitions(all=True)
+
+        if os_type == "Windows":
+            # For Windows, return the drive letters
+            drives = [
+                normalise(p.mountpoint)
+                for p in partitions
+                if p.device and ":" in p.device and path.isdir(p.device)
+            ]
+        elif os_type == "Darwin":
+            # For macOS, filter out system volumes and keep only user-relevant drives
+            drives = [
+                p.mountpoint
+                for p in partitions
+                if path.isdir(p.mountpoint) and _should_include_macos_mount_point(p)
+            ]
+        else:
+            # For other Unix-like systems (Linux, WSL, etc.), filter out system mount points
+            drives = [
+                p.mountpoint
+                for p in partitions
+                if path.isdir(p.mountpoint) and _should_include_linux_mount_point(p)
+            ]
+    except Exception as exc:
+        if globals().get("is_dev", False):
+            print(f"Error getting mounted drives: {exc}\nReturning nothing...")
+        # Fallback to home directory on error
+        drives = []
+    return drives

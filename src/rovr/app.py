@@ -1,5 +1,7 @@
 import asyncio
 import threading
+from concurrent.futures import ProcessPoolExecutor
+from concurrent.futures import TimeoutError as FuturesTimeoutError
 from contextlib import suppress
 from io import TextIOWrapper
 from os import chdir, getcwd, path
@@ -50,12 +52,12 @@ from rovr.core import (
 )
 from rovr.footer import Clipboard, MetadataContainer, ProcessContainer
 from rovr.functions import icons
+from rovr.functions.drive_workers import get_mounted_drives
 from rovr.functions.path import (
     dump_exc,
     ensure_existing_directory,
     get_direntry_for,
     get_filtered_dir_names,
-    get_mounted_drives,
     normalise,
 )
 from rovr.functions.themes import get_custom_themes
@@ -69,7 +71,7 @@ from rovr.navigation_widgets import (
 )
 from rovr.screens.typed import ShellExecReturnType
 from rovr.state_manager import StateManager
-from rovr.variables.constants import MaxPossible, config, log_name
+from rovr.variables.constants import MaxPossible, config, log_name, os_type
 from rovr.variables.maps import RovrVars
 
 console = Console()
@@ -568,19 +570,17 @@ class Application(App, inherit_bindings=False):
         state_mtime = None
         with suppress(OSError):
             state_mtime = path.getmtime(state_path)
-        drives = get_mounted_drives()
+        drives = get_mounted_drives(os_type)
         drive_update_every = int(config["interface"]["drive_watcher_frequency"])
         count: int = -1
         style_available: bool = self.CUSTOM_STYLE_AVAILABLE
         custom_style_path = path.join(RovrVars.ROVRCONFIG, "style.tcss")
         while True:
-            for _ in range(4):
-                # essentially sleep 1 second, but with extra steps
-                if self._shutdown_event.wait(timeout=0.25):
-                    return
-                if self.return_code is not None:
-                    # fail safe if for any reason, the thread continues running after exit
-                    return
+            if self._shutdown_event.wait(timeout=1):
+                return
+            if self.return_code is not None:
+                # fail safe if for any reason, the thread continues running after exit
+                return
             count += 1
             if count >= drive_update_every:
                 count = 0
@@ -627,12 +627,25 @@ class Application(App, inherit_bindings=False):
                     self.app.call_from_thread(state_manager.restore_state)
             # check drives
             if count == 0 and not reload_called:
+                executor = None
                 try:
-                    new_drives = get_mounted_drives()
-                    if new_drives != drives:
-                        drives = new_drives
-                        self.query_one(PinnedSidebar).reload_pins()
+                    # Run drive check in a separate process to avoid blocking
+                    executor = ProcessPoolExecutor(max_workers=1)
+                    future = executor.submit(get_mounted_drives, os_type)
+                    try:
+                        # Timeout after 2 seconds to prevent long hangs
+                        new_drives = future.result(timeout=2.0)
+                        if new_drives != drives:
+                            drives = new_drives
+                            self.query_one(PinnedSidebar).reload_pins()
+                        executor.shutdown(wait=True)
+                    except FuturesTimeoutError:
+                        # Drive check took too long, skip this iteration
+                        future.cancel()
+                        executor.shutdown(wait=False, cancel_futures=True)
                 except Exception as exc:
+                    if executor is not None:
+                        executor.shutdown(wait=False, cancel_futures=True)
                     self.notify(
                         f"{type(exc).__name__}: {exc}",
                         title="Change Watcher",

@@ -10,10 +10,11 @@ from textual.worker import WorkerCancelled
 
 from rovr.classes.exceptions import FolderNotFileError
 from rovr.classes.textual_options import PinnedSidebarOption
+from rovr.functions import drive_workers as drive_utils
 from rovr.functions import icons as icon_utils
 from rovr.functions import path as path_utils
 from rovr.functions import pins as pin_utils
-from rovr.variables.constants import bindings, config
+from rovr.variables.constants import bindings, config, os_type
 
 
 class PinnedSidebar(OptionList, inherit_bindings=False):
@@ -118,9 +119,19 @@ class PinnedSidebar(OptionList, inherit_bindings=False):
             Option(" Drives", id="drives-header", disabled=True)
         )
         self.set_options(self.list_of_options)
-        # force refresh
         await asyncio.sleep(0)
-        drive_worker = self.app.run_in_thread(path_utils.get_mounted_drives)
+        if prev_highlighted < len(self.list_of_options):
+            self.highlighted = prev_highlighted
+            self.call_after_refresh(self.refresh_drives, id_list, prev_highlighted)
+            return
+        self.call_after_refresh(self.refresh_drives, id_list, None)
+
+    @work
+    async def refresh_drives(
+        self, id_list: list[str], prev_highlighted: int | None = None
+    ) -> None:
+        # force refresh
+        drive_worker = self.app.run_in_thread(drive_utils.get_mounted_drives, os_type)
         try:
             # yes, I know that run_in_thread can return an exception
             # but worker decoration forces return to be a Worker
@@ -137,6 +148,8 @@ class PinnedSidebar(OptionList, inherit_bindings=False):
             # hence, it is quite safe to ignore this error
             return
         drives = drive_worker.result
+        if isinstance(drives, Exception):
+            raise drives
         for drive in drives:
             if access(drive, R_OK):
                 new_id = f"{path_utils.compress(drive)}-drives"
@@ -150,8 +163,10 @@ class PinnedSidebar(OptionList, inherit_bindings=False):
                     )
                     id_list.append(new_id)
                     self.add_option(self.list_of_options[-1])
-        # self.set_options(self.list_of_options)
-        self.highlighted = prev_highlighted
+        if prev_highlighted is not None and prev_highlighted < len(
+            self.list_of_options
+        ):
+            self.highlighted = prev_highlighted
 
     def on_mount(self) -> None:
         """Reload the pinned files from the config."""

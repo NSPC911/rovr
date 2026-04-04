@@ -19,8 +19,6 @@ class NewItemButton(Button):
 
     def __init__(self) -> None:
         super().__init__(get_icon("general", "new")[0], classes="option", id="new")
-
-    def on_mount(self) -> None:
         if config["interface"]["tooltips"]:
             self.tooltip = "Create a new file or directory"
 

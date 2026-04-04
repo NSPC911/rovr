@@ -9,8 +9,6 @@ class CutButton(Button):
 
     def __init__(self) -> None:
         super().__init__(get_icon("general", "cut")[0], classes="option", id="cut")
-
-    def on_mount(self) -> None:
         if config["interface"]["tooltips"]:
             self.tooltip = "Cut selected files"
 

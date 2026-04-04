@@ -570,16 +570,20 @@ class Application(App, inherit_bindings=False):
         state_mtime = None
         with suppress(OSError):
             state_mtime = path.getmtime(state_path)
-        drives = get_mounted_drives(os_type)
+        drives = []
         drive_update_every = int(config["interface"]["drive_watcher_frequency"])
-        count: int = -1
+        count: int = 0
         style_available: bool = self.CUSTOM_STYLE_AVAILABLE
         custom_style_path = path.join(RovrVars.ROVRCONFIG, "style.tcss")
+
+        i_should_shut_down = lambda: (  # noqa: E731
+            self._shutdown_event.is_set() or self.return_code is not None
+        )
+
         while True:
             if self._shutdown_event.wait(timeout=1):
                 return
-            if self.return_code is not None:
-                # fail safe if for any reason, the thread continues running after exit
+            if i_should_shut_down:
                 return
             count += 1
             if count >= drive_update_every:
@@ -600,6 +604,9 @@ class Application(App, inherit_bindings=False):
                         )
                     if items is not None and items != file_list.items_in_cwd:
                         self.cd(cwd)
+            if i_should_shut_down:
+                return
+
             # check pins.json
             new_mtime = None
             reload_called: bool = False
@@ -615,6 +622,9 @@ class Application(App, inherit_bindings=False):
                     # models raising false issues on thread safety
                     self.query_one(PinnedSidebar).reload_pins()
                     reload_called = True
+            if i_should_shut_down:
+                return
+
             # check state.toml
             new_state_mtime = None
             with suppress(OSError):
@@ -625,6 +635,9 @@ class Application(App, inherit_bindings=False):
                     state_manager: StateManager = self.query_one(StateManager)
                     self.app.call_from_thread(state_manager._load_state)
                     self.app.call_from_thread(state_manager.restore_state)
+            if i_should_shut_down:
+                return
+
             # check drives
             if count == 0 and not reload_called:
                 executor = None
@@ -652,6 +665,9 @@ class Application(App, inherit_bindings=False):
                         severity="warning",
                         markup=False,
                     )
+            if i_should_shut_down:
+                return
+
             # check highlighted file mtime
             if not self.file_list.file_list_pause_check:
                 highlighted_option = file_list.highlighted_option
@@ -678,6 +694,9 @@ class Application(App, inherit_bindings=False):
                                 self.query_one(MetadataContainer).update_metadata(
                                     dir_entry
                                 )
+            if i_should_shut_down:
+                return
+
             if not self.CUSTOM_STYLE_AVAILABLE:
                 if not style_available and path.exists(custom_style_path):
                     style_available = True

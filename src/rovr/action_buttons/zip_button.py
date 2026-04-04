@@ -20,8 +20,6 @@ class ZipButton(Button):
 
     def __init__(self) -> None:
         super().__init__(get_icon("general", "zip")[0], classes="option", id="zip")
-
-    def on_mount(self) -> None:
         if config["interface"]["tooltips"]:
             self.tooltip = "Compress selected files"
 

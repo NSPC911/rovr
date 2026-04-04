@@ -391,25 +391,30 @@ def force_obtain_write_permission(item_path: str) -> bool:
         return False
 
 
+class FileObj(TypedDict):
+    path: str
+    relative_loc: str
+
+
 @overload
-def get_recursive_files(object_path: str) -> list[dict]: ...
+def get_recursive_files(object_path: str) -> list[FileObj]: ...
 
 
 @overload
 def get_recursive_files(
     object_path: str, with_folders: Literal[False]
-) -> list[dict]: ...
+) -> list[FileObj]: ...
 
 
 @overload
 def get_recursive_files(
     object_path: str, with_folders: Literal[True]
-) -> tuple[list[dict], list[dict]]: ...
+) -> tuple[list[FileObj], list[FileObj]]: ...
 
 
 def get_recursive_files(
     object_path: str, with_folders: bool = False
-) -> list[dict] | tuple[list[dict], list[dict]]:
+) -> list[FileObj] | tuple[list[FileObj], list[FileObj]]:
     """Get the files available at a directory recursively, regardless of whether it is a directory or not
     Args:
         object_path (str): The object's path
@@ -424,16 +429,16 @@ def get_recursive_files(
     if file_is_type(object_path) != "directory":
         if with_folders:
             return [
-                {
-                    "path": normalise(object_path),
-                    "relative_loc": path.basename(object_path),
-                }
+                FileObj(
+                    path=normalise(object_path),
+                    relative_loc=path.basename(object_path),
+                )
             ], []
         return [
-            {
-                "path": normalise(object_path),
-                "relative_loc": path.basename(object_path),
-            }
+            FileObj(
+                path=normalise(object_path),
+                relative_loc=path.basename(object_path),
+            )
         ]
     else:
         files = []
@@ -446,12 +451,14 @@ def get_recursive_files(
                         folders.append(full_path)
             for file in files_in_folder:
                 full_path = normalise(path.join(folder, file))  # normalise the path
-                files.append({
-                    "path": full_path,
-                    "relative_loc": normalise(
-                        path.relpath(full_path, object_path + "/..")
-                    ),
-                })
+                files.append(
+                    FileObj(
+                        path=full_path,
+                        relative_loc=normalise(
+                            path.relpath(full_path, object_path + "/..")
+                        ),
+                    )
+                )
         if with_folders:
             return files, folders
         return files

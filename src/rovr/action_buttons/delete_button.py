@@ -14,8 +14,6 @@ class DeleteButton(Button):
             classes="option",
             id="delete",
         )
-
-    def on_mount(self) -> None:
         if config["interface"]["tooltips"]:
             self.tooltip = "Delete selected files"
 

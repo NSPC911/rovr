@@ -23,8 +23,6 @@ class RenameItemButton(Button):
         super().__init__(
             get_icon("general", "rename")[0], classes="option", id="rename"
         )
-
-    def on_mount(self) -> None:
         if config["interface"]["tooltips"]:
             self.tooltip = "Rename selected files"
 

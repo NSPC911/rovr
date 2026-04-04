@@ -5,9 +5,24 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.8.1] - 2026-04-04
+
+### Added
+- `filelist`: add create item and paste item to right click 7198cfa ad11200
+
+### Fixed
+- `filelist`: fix right click bugs and stuff 53acbcd 0629cd7 7198cfa ad11200
+- `config`: use `D` not `shift+d` f171500
+- `preview`: use hashables cd95fca
+- `app`: safeguard filelist property hopefully be3fdd9 0baa63b
+- `app`: comfy buttons should work now ee62cc0
+
+### Performance
+- `app`: move drive stuff to separate process 44a669d
+
 ## [0.8.0] - 2026-03-31
 
-### Feature
+### Added
 - `app`: watch for changes in mtime of highlighted file and update if changes #242
 - `fd`: show hidden files optionally e0e6fc1
 

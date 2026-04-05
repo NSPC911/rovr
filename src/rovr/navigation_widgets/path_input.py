@@ -1,4 +1,4 @@
-from os import getcwd, path, scandir
+from os import getcwd, path
 from pathlib import Path
 from typing import cast
 
@@ -62,61 +62,68 @@ class PathAutoCompleteInput(PathAutoComplete):
         )
 
     def get_candidates(self, target_state: TargetState) -> list[DropdownItem]:
-        """Get the candidates for the current path segment, folders only.
-        Args:
-            target_state (TargetState): The current state of the Input element
+        import string
+        from pathlib import Path
 
-        Returns:
-            list[DropdownItem]: A list of DropdownItems to use as AutoComplete"""
-        current_input = target_state.text[: target_state.cursor_position]
+        from textual.fuzzy import Matcher
 
-        if "/" in current_input:
-            last_slash_index = current_input.rindex("/")
-            path_segment = current_input[:last_slash_index] or "/"
-            directory = self.path / path_segment if path_segment != "/" else self.path
+        # If empty string, return available drives
+        path_str = target_state.text
+        if not path_str:
+            drives = []
+            for letter in string.ascii_uppercase:
+                drive_path = Path(f"{letter}:/")
+                if drive_path.exists():
+                    drives.append(f"{letter}:/")
+            return drives
+
+        # Parse the input path
+        path_obj = Path(path_str)
+
+        # Handle drive letter inputs (C, C:, C:/)
+        if len(path_str) <= 3 and path_str[0].isalpha():
+            # Extract drive letter
+            drive_letter = path_str[0].upper()
+            return [DropdownItem(f"{drive_letter}:/")]
+
+        # Determine parent directory and search pattern
+        if path_str.endswith("/") or path_str.endswith("\\"):
+            # List contents of this directory
+            parent = path_obj
+            pattern = ""
         else:
-            directory = self.path
+            # Check if the path exists as a directory
+            if path_obj.exists() and path_obj.is_dir():
+                # If it's a directory but doesn't end with /, return it with /
+                return [DropdownItem(path_obj.name + "/")]
 
-        # Use the directory path as the cache key
-        cache_key = str(directory)
-        cached_entries = self._directory_cache.get(cache_key)
+            # Otherwise, treat the last part as a search pattern
+            parent = path_obj.parent
+            pattern = path_obj.name
 
-        if cached_entries is not None:
-            entries = cached_entries
-        else:
-            try:
-                entries = list(scandir(directory))
-                self._directory_cache[cache_key] = entries
-            except OSError:
-                return []
+        # Get all directories in parent
+        try:
+            directories = []
+            for item in parent.iterdir():
+                if item.is_dir():
+                    directories.append(item.name)
 
-        results: list[PathDropdownItem] = []
-        has_directories = False
+            # Apply fuzzy matching if there's a pattern
+            if pattern:
+                matcher = Matcher(pattern)
+                matched = []
+                for dir_name in directories:
+                    score = matcher.match(dir_name)
+                    if score > 0:
+                        matched.append((score, dir_name))
+                # Sort by score (descending) to get best matches first
+                matched.sort(key=lambda x: x[0], reverse=True)
+                return [DropdownItem(name) for _, name in matched]
 
-        for entry in entries:
-            if entry.is_dir():
-                has_directories = True
-                completion = entry.name
-                if not self.show_dotfiles and completion.startswith("."):
-                    continue
-                completion += "/"
-                results.append(PathDropdownItem(completion, path=Path(entry.path)))
+            return [DropdownItem(name) for name in directories]
 
-        if not has_directories:
-            self._empty_directory = True
-            return [DropdownItem("", prefix="No folders found")]
-        else:
-            self._empty_directory = False
-
-        results.sort(key=self.sort_key)
-        folder_prefix = self.folder_prefix
-        return [
-            DropdownItem(
-                item.main,
-                prefix=folder_prefix,
-            )
-            for item in results
-        ]
+        except (FileNotFoundError, PermissionError):
+            return []
 
     def _align_to_target(self) -> None:
         """Empty function that was supposed to align the completion box to the cursor."""

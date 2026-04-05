@@ -1,5 +1,5 @@
 def get_candidates(path_str: str) -> list[str]:
-    from pathlib import Path
+    from os import listdir, path
 
     from textual.fuzzy import Matcher
 
@@ -7,21 +7,27 @@ def get_candidates(path_str: str) -> list[str]:
         return ["/"]
 
     if path_str.endswith("/"):
-        p = Path(path_str)
-        if p.exists() and p.is_dir():
-            return [item.name for item in sorted(p.iterdir()) if item.is_dir()]
+        if path.exists(path_str) and path.isdir(path_str):
+            return [
+                item
+                for item in sorted(listdir(path_str), key=str.lower)
+                if path.isdir(path.join(path_str, item))
+            ]
         return []
 
-    p = Path(path_str)
-
-    if p.exists() and p.is_dir():
+    path_str = path.realpath(path.expanduser(path_str))
+    if path.exists(path_str) and path.isdir(path_str):
         return [path_str.split("/")[-1] + "/"]
 
-    parent = p.parent
-    partial_name = p.name
+    parent = path.dirname(path_str)
+    partial_name = path.basename(path_str)
 
-    if parent.exists() and parent.is_dir():
-        all_items = [item.name for item in parent.iterdir() if item.is_dir()]
+    if path.exists(parent) and path.isdir(parent):
+        all_items = [
+            item
+            for item in sorted(listdir(parent), key=str.lower)
+            if path.isdir(path.join(parent, item))
+        ]
 
         matcher = Matcher(partial_name)
         matches = [(matcher.match(item), item) for item in all_items]
@@ -30,7 +36,6 @@ def get_candidates(path_str: str) -> list[str]:
         valid_matches.sort(reverse=True, key=lambda x: x[0])
 
         return [item for score, item in valid_matches]
-
     return []
 
 

@@ -583,7 +583,7 @@ class Application(App, inherit_bindings=False):
         while True:
             if self._shutdown_event.wait(timeout=1):
                 return
-            if i_should_shut_down:
+            if i_should_shut_down():
                 return
             count += 1
             if count >= drive_update_every:
@@ -604,7 +604,7 @@ class Application(App, inherit_bindings=False):
                         )
                     if items is not None and items != file_list.items_in_cwd:
                         self.cd(cwd)
-            if i_should_shut_down:
+            if i_should_shut_down():
                 return
 
             # check pins.json
@@ -622,7 +622,7 @@ class Application(App, inherit_bindings=False):
                     # models raising false issues on thread safety
                     self.query_one(PinnedSidebar).reload_pins()
                     reload_called = True
-            if i_should_shut_down:
+            if i_should_shut_down():
                 return
 
             # check state.toml
@@ -635,7 +635,7 @@ class Application(App, inherit_bindings=False):
                     state_manager: StateManager = self.query_one(StateManager)
                     self.app.call_from_thread(state_manager._load_state)
                     self.app.call_from_thread(state_manager.restore_state)
-            if i_should_shut_down:
+            if i_should_shut_down():
                 return
 
             # check drives
@@ -665,7 +665,7 @@ class Application(App, inherit_bindings=False):
                         severity="warning",
                         markup=False,
                     )
-            if i_should_shut_down:
+            if i_should_shut_down():
                 return
 
             # check highlighted file mtime
@@ -694,7 +694,7 @@ class Application(App, inherit_bindings=False):
                                 self.query_one(MetadataContainer).update_metadata(
                                     dir_entry
                                 )
-            if i_should_shut_down:
+            if i_should_shut_down():
                 return
 
             if not self.CUSTOM_STYLE_AVAILABLE:

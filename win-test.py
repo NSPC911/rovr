@@ -1,8 +1,6 @@
 def get_candidates(path_str: str) -> list[str]:
     import os
 
-    from textual.fuzzy import Matcher
-
     # Case 1: Empty string - return available drives
     if not path_str:
         drives = []
@@ -36,25 +34,14 @@ def get_candidates(path_str: str) -> list[str]:
     if os.path.exists(path_str) and os.path.isdir(path_str):
         return [path_str.split("/")[-1] + "/"]
 
-    # Otherwise, it's a partial path - use fuzzy matching to find items in parent directory
+    # Otherwise, it's a partial path - return every directory
     parent = os.path.dirname(path_str)
-    partial_name = os.path.basename(path_str)
-
+    items = []
     if os.path.exists(parent) and os.path.isdir(parent):
-        # Get all items in parent directory
-        all_items = sorted(os.listdir(parent), key=str.lower)
-
-        # Use fuzzy matcher to find matches
-        matcher = Matcher(partial_name)
-        matches = [(matcher.match(item), item) for item in all_items]
-
-        # Filter out non-matches (score 0) and sort by score (descending)
-        valid_matches = [(score, item) for score, item in matches if score > 0]
-        valid_matches.sort(reverse=True, key=lambda x: x[0])
-
-        # Return matched item names
-        return [item + "/" for score, item in valid_matches]
-
+        for item in sorted(os.listdir(parent), key=str.lower):
+            if os.path.isdir(os.path.join(parent, item)):
+                items.append(item + "/")
+        return sorted(items, key=str.lower)
     return []
 
 
@@ -80,8 +67,11 @@ def test_get_candidates() -> None:
     assert get_candidates("C:/Users/notso/Git/i") == [
         "100k_files/",
         "aio/",
+        "BedrockTweaks/",
         "Kitty-Tools/",
         "noi/",
+        "NSPC911/",
+        "omp-test/",
         "PowerShellEditorServices/",
         "rovr.dist/",
         "superfile/",

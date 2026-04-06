@@ -41,6 +41,8 @@ uv tool install --compile-bytecode rovr
 
 <Aside type="note">
 I highly recommend installing with `--compile-bytecode`, as startup times will be slower (albeit by not that much) if not cached.
+
+Although not recommended, you can test out `--python 3.13t` if you want to try with free threading. Based on my own tests, it seems much faster, but it may be more buggy since rovr doesn't account for the lack of the GIL
 </Aside>
 
 #### pipx (install)

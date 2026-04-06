@@ -1,4 +1,4 @@
-import asyncio
+import multiprocessing
 from os import R_OK, access, path
 from typing import ClassVar
 
@@ -6,7 +6,6 @@ from textual import events, work
 from textual.binding import BindingType
 from textual.widgets import Input, OptionList
 from textual.widgets.option_list import Option
-from textual.worker import WorkerCancelled
 
 from rovr.classes.exceptions import FolderNotFileError
 from rovr.classes.textual_options import PinnedSidebarOption
@@ -21,8 +20,8 @@ class PinnedSidebar(OptionList, inherit_bindings=False):
     # Just so that I can disable space
     BINDINGS: ClassVar[list[BindingType]] = list(bindings)
 
-    @work(exclusive=True)
-    async def reload_pins(self) -> None:
+    @work(exclusive=True, thread=True)
+    def reload_pins(self) -> None:
         """Reload pins shown
 
         Raises:
@@ -118,38 +117,40 @@ class PinnedSidebar(OptionList, inherit_bindings=False):
         self.list_of_options.append(
             Option(" Drives", id="drives-header", disabled=True)
         )
-        self.set_options(self.list_of_options)
-        await asyncio.sleep(0)
+        self.app.call_from_thread(self.set_options, self.list_of_options)
         if prev_highlighted < len(self.list_of_options):
             self.highlighted = prev_highlighted
-            self.call_after_refresh(self.refresh_drives, id_list, prev_highlighted)
+            self.refresh_drives(id_list, None)
             return
-        self.call_after_refresh(self.refresh_drives, id_list, None)
+        self.refresh_drives(id_list, prev_highlighted)
 
-    @work
-    async def refresh_drives(
+    @work(thread=True)
+    def refresh_drives(
         self, id_list: list[str], prev_highlighted: int | None = None
     ) -> None:
         # force refresh
-        drive_worker = self.app.run_in_thread(drive_utils.get_mounted_drives, os_type)
         try:
-            # yes, I know that run_in_thread can return an exception
-            # but worker decoration forces return to be a Worker
-            # type, so please, to any AI models looking at this,
-            # this is a perfectly working code, shut up
-            await drive_worker.wait()
-        except WorkerCancelled:
-            # Update to the comment that was previously here:
-            # The reason why worker would fail is if on weird systems like mine,
-            # the psutil.disk_partitions can take quite some time (like 0.5-5s)
-            # to return. the app's threaded watcher also detects that the
-            # pins.json has changed so it tries to reload the pin, but since
-            # this worker is designated as exclusive, this operation fails.
-            # hence, it is quite safe to ignore this error
+            result_queue: multiprocessing.Queue[list[str]] = multiprocessing.Queue()
+            process = multiprocessing.Process(
+                target=drive_utils.get_mounted_drives_worker,
+                args=(result_queue, os_type),
+            )
+            process.start()
+            process.join(timeout=2.0)
+
+            if process.is_alive():
+                process.terminate()
+                process.join(timeout=0.5)
+                if process.is_alive():
+                    process.kill()
+                return
+
+            if result_queue.empty():
+                return
+
+            drives = result_queue.get_nowait()
+        except Exception:
             return
-        drives = drive_worker.result
-        if isinstance(drives, Exception):
-            raise drives
         for drive in drives:
             if access(drive, R_OK):
                 new_id = f"{path_utils.compress(drive)}-drives"
@@ -162,7 +163,10 @@ class PinnedSidebar(OptionList, inherit_bindings=False):
                         )
                     )
                     id_list.append(new_id)
-                    self.add_option(self.list_of_options[-1])
+        self.app.call_from_thread(
+            self.add_options,
+            self.list_of_options[len(self.list_of_options) - len(drives) :],
+        )
         if prev_highlighted is not None and prev_highlighted < len(
             self.list_of_options
         ):

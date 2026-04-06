@@ -151,6 +151,11 @@ Types: `feat`, `fix`, `docs`, `style`, `refactor`, `test`, `chore`
 - Always run `poe check` before committing. Ruff may mention that certain errors are fixable; if so, run `poe fmt` to apply fixes.
 - Make sure to also run `poe test` to ensure no tests are broken before committing.
 
+#### multiprocessing.ProcessPoolExecutor and multiprocessing.Process notices
+- Avoid creating a function in the same file as the `ProcessPoolExecutor` or `Process`.
+  It is very likely that the file imports `rovr.variables.constants`, which checks in the global scope for the presence of `config`, and if not, re-loads the config, which can result to stdout being corrupted if the config has any issues
+  For example of this, check out `src/rovr/functions/preview_workers.py` and its parent file `src/rovr/core/preview_container.py`
+
 ### Author preferences
 
 - Avoid `if TYPE_CHECKING` blocks for imports; it looks bad

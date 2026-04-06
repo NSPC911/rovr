@@ -1,7 +1,6 @@
 import asyncio
+import multiprocessing
 import threading
-from concurrent.futures import ProcessPoolExecutor
-from concurrent.futures import TimeoutError as FuturesTimeoutError
 from contextlib import suppress
 from io import TextIOWrapper
 from os import chdir, getcwd, path
@@ -52,7 +51,7 @@ from rovr.core import (
 )
 from rovr.footer import Clipboard, MetadataContainer, ProcessContainer
 from rovr.functions import icons
-from rovr.functions.drive_workers import get_mounted_drives
+from rovr.functions.drive_workers import get_mounted_drives_worker
 from rovr.functions.path import (
     dump_exc,
     ensure_existing_directory,
@@ -640,31 +639,39 @@ class Application(App, inherit_bindings=False):
 
             # check drives
             if count == 0 and not reload_called:
-                executor = None
                 try:
-                    # Run drive check in a separate process to avoid blocking
-                    executor = ProcessPoolExecutor(max_workers=1)
-                    future = executor.submit(get_mounted_drives, os_type)
-                    try:
-                        # Timeout after 2 seconds to prevent long hangs
-                        new_drives = future.result(timeout=2.0)
+                    # Run drive check in a separate process using multiprocessing.Process
+                    # Using Queue to get the result back from the process
+                    result_queue: multiprocessing.Queue[list[str]] = (
+                        multiprocessing.Queue()
+                    )
+
+                    process = multiprocessing.Process(
+                        target=get_mounted_drives_worker, args=(result_queue, os_type)
+                    )
+                    process.start()
+                    process.join(timeout=2.0)
+
+                    if process.is_alive():
+                        # Timeout - terminate the process
+                        process.terminate()
+                        process.join(timeout=0.5)
+                        if process.is_alive():
+                            process.kill()
+                    elif not result_queue.empty():
+                        # Process completed successfully
+                        new_drives = result_queue.get_nowait()
                         if new_drives != drives:
                             drives = new_drives
                             self.query_one(PinnedSidebar).reload_pins()
-                        executor.shutdown(wait=True)
-                    except FuturesTimeoutError:
-                        # Drive check took too long, skip this iteration
-                        future.cancel()
-                        executor.shutdown(wait=False, cancel_futures=True)
                 except Exception as exc:
-                    if executor is not None:
-                        executor.shutdown(wait=False, cancel_futures=True)
                     self.notify(
                         f"{type(exc).__name__}: {exc}",
                         title="Change Watcher",
                         severity="warning",
                         markup=False,
                     )
+                    dump_exc(self, exc)
             if i_should_shut_down():
                 return
 

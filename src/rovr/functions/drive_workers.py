@@ -1,3 +1,4 @@
+import multiprocessing
 from os import path
 
 import psutil
@@ -155,3 +156,20 @@ def get_mounted_drives(os_type: str) -> list[str]:
         # Fallback to home directory on error
         drives = []
     return drives
+
+
+def get_mounted_drives_worker(
+    queue: "multiprocessing.Queue[list[str]]", os_type: str
+) -> None:
+    """
+    Multiprocessing worker that gets mounted drives and puts result in a queue.
+
+    Args:
+        queue: Multiprocessing queue to put the result into
+        os_type: Operating system type ("Windows", "Darwin", or other)
+    """
+    try:
+        result = get_mounted_drives(os_type)
+        queue.put(result)
+    except Exception:
+        queue.put([])

@@ -149,7 +149,7 @@ def toml_dump(doc_path: str, exception: tomli.TOMLDecodeError) -> None:
         # What? <key> already exists?<dict>
         msg_split = exception.msg.split()
         exception.msg = f"Redefinition of [bright_cyan]{msg_split[1]}[/] is not allowed. Keep to a table, or not use one at all"
-    pprint(f"[bright_red]╰─{'─' * rjust}─❯[/] {exception.msg}")
+    pprint(f"[bright_red]╰─{'─' * rjust}─❯[/] Syntax Error: {exception.msg}")
     exit(1)
 
 

@@ -122,9 +122,7 @@ class ContentSearch(ModalSearchScreen):
         self.search_options.set_options([Option("  Searching...", disabled=True)])
         rg_process = None
         try:
-            rg_process = await asyncio.create_subprocess_exec(
-                *rg_cmd, stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE
-            )
+            rg_process = await self.create_proc(*rg_cmd)
             # 30 seconds is quite generous for rg to respond
             stdout, _ = await asyncio.wait_for(rg_process.communicate(), timeout=30)
         except (OSError, asyncio.exceptions.TimeoutError) as exc:

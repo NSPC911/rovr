@@ -142,9 +142,7 @@ class FileSearch(ModalSearchScreen):
         self.search_options.set_options([Option("  Searching...", disabled=True)])
         fd_process = None
         try:
-            fd_process = await asyncio.create_subprocess_exec(
-                *fd_cmd, stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE
-            )
+            fd_process = await self.create_proc(*fd_cmd)
             stdout, _ = await asyncio.wait_for(fd_process.communicate(), timeout=3)
         except (OSError, asyncio.exceptions.TimeoutError) as exc:
             if isinstance(exc, asyncio.exceptions.TimeoutError) and fd_process:

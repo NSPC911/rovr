@@ -81,11 +81,7 @@ class ZDToDirectory(ModalSearchScreen):
 
         zoxide_process = None
         try:
-            zoxide_process = await asyncio.create_subprocess_exec(
-                *zoxide_cmd,
-                stdout=asyncio.subprocess.PIPE,
-                stderr=asyncio.subprocess.PIPE,
-            )
+            zoxide_process = await self.create_proc(*zoxide_cmd)
             stdout, _ = await asyncio.wait_for(zoxide_process.communicate(), timeout=3)
         except (OSError, asyncio.exceptions.TimeoutError) as exc:
             if isinstance(exc, asyncio.exceptions.TimeoutError) and zoxide_process:

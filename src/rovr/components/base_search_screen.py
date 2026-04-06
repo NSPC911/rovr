@@ -1,3 +1,6 @@
+import asyncio
+from typing import Coroutine
+
 from textual import events, on
 from textual.screen import ModalScreen
 from textual.widgets import Input, OptionList
@@ -11,6 +14,16 @@ from rovr.variables.constants import config
 
 class ModalSearchScreen(ModalScreen, inherit_bindings=False):
     """Base class for search-as-you-type modal screens."""
+
+    def create_proc(
+        self, program: str, *args: str
+    ) -> Coroutine[None, None, asyncio.subprocess.Process]:
+        return asyncio.create_subprocess_exec(
+            program,
+            *args,
+            stdout=asyncio.subprocess.PIPE,
+            stderr=asyncio.subprocess.PIPE,
+        )
 
     def on_mount(self) -> None:
         self._active_worker: Worker | None = None

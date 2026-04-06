@@ -7,7 +7,7 @@ import os
 import re
 import stat
 import subprocess
-from functools import lru_cache
+from functools import lru_cache, partial
 from os import path
 from typing import Callable, Literal, NamedTuple, TypedDict, overload
 
@@ -90,6 +90,13 @@ def decompress(text: str) -> str:
     )
 
 
+create_proc = partial(
+    asyncio.create_subprocess_exec,
+    stdout=asyncio.subprocess.PIPE,
+    stderr=asyncio.subprocess.PIPE,
+)
+
+
 @work
 async def open_file(app: App, filepath: str) -> None:
     """Cross-platform function to open files with their default application.
@@ -112,29 +119,17 @@ async def open_file(app: App, filepath: str) -> None:
     try:
         match system:
             case "windows":
-                process = await asyncio.create_subprocess_exec(
+                process = await create_proc(
                     "cmd",
                     "/c",
                     "start",
                     "",
                     filepath,
-                    stdout=asyncio.subprocess.PIPE,
-                    stderr=asyncio.subprocess.PIPE,
                 )
             case "darwin":  # macOS
-                process = await asyncio.create_subprocess_exec(
-                    "open",
-                    filepath,
-                    stdout=asyncio.subprocess.PIPE,
-                    stderr=asyncio.subprocess.PIPE,
-                )
+                process = await create_proc("open", filepath)
             case _:  # Linux and other Unix-like
-                process = await asyncio.create_subprocess_exec(
-                    "xdg-open",
-                    filepath,
-                    stdout=asyncio.subprocess.PIPE,
-                    stderr=asyncio.subprocess.PIPE,
-                )
+                process = await create_proc("xdg-open", filepath)
         _, stderr = await process.communicate()
         if stderr:
             app.notify(

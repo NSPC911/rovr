@@ -18,30 +18,18 @@ def get_candidates(path_str: str) -> list[str]:
             return [drive]
         return []
 
-    # Case 3: Path ends with "/" - list contents of that directory (directories only)
-    if path_str.endswith(("/", "\\")):
-        if os.path.exists(path_str) and os.path.isdir(path_str):
+    if os.path.exists(path_str) and os.path.isdir(path_str):
+        # Case 3: Path ends with "/" - list contents of that directory (directories only)
+        if path_str.endswith(("/", "\\")):
             items = []
             for item in sorted(os.listdir(path_str), key=str.lower):
                 if os.path.isdir(os.path.join(path_str, item)):
                     items.append(item + "/")
             return items
-        return []
 
-    # Case 4: Path doesn't end with "/" - either exact match or partial completion
-
-    # Check if it's an exact directory match
-    if os.path.exists(path_str) and os.path.isdir(path_str):
-        return [path_str.split("/")[-1] + "/"]
-
-    # Otherwise, it's a partial path - return every directory
-    parent = os.path.dirname(path_str)
-    items = []
-    if os.path.exists(parent) and os.path.isdir(parent):
-        for item in sorted(os.listdir(parent), key=str.lower):
-            if os.path.isdir(os.path.join(parent, item)):
-                items.append(item + "/")
-        return sorted(items, key=str.lower)
+        # Check if it's an exact directory match
+        if os.path.exists(path_str) and os.path.isdir(path_str):
+            return [path_str.split("/")[-1] + "/"]
     return []
 
 

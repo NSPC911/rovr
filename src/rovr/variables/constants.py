@@ -139,6 +139,10 @@ bindings = (
         Binding(bind, "select", "Select", show=False)
         for bind in config["keybinds"]["down_tree"]
     ]
+    + [
+        Binding(bind, "toggle_select_item", "Toggle Selection", show=False)
+        for bind in config["keybinds"].get("toggle_select_item", [])
+    ]
 )
 
 os_type = (

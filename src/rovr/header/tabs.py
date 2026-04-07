@@ -136,10 +136,12 @@ class Tabline(Tabs):
 
         return AwaitComplete(do_remove())
 
-    @on(Tab.Clicked)
+    # commented out temproarily because of issue #250 until I
+    # figure out why I added this in the first place
+    # @on(Tab.Clicked)
     @on(Tabs.TabActivated)
     @work
-    async def check_tab_click(self, event: TablineTab.Clicked) -> None:
+    async def check_tab_click(self, event: Tabs.TabActivated) -> None:
         assert isinstance(event.tab, TablineTab)
 
         def callback() -> None:

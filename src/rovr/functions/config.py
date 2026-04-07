@@ -454,7 +454,9 @@ def load_config() -> tuple[dict, RovrConfig]:
                             f.write("\n".join(lines))
 
                         display_version = (
-                            f"v{current_version}" if current_version != "master" else "master"
+                            f"v{current_version}"
+                            if current_version != "master"
+                            else "master"
                         )
                         pprint(f"[yellow]Updated config schema to {display_version}[/]")
 

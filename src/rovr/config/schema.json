@@ -802,6 +802,11 @@
           "description": "Toggle the visibility of hidden files (dot-prefixed on Unix, or flagged hidden on Windows/macOS).",
           "display_name": "Toggle hidden files"
         },
+        "toggle_select_item": {
+          "$ref": "#/definitions/keybind",
+          "description": "While in visual mode, toggle selection of the currently highlighted file or folder. Similar to Space or Insert in Norton/Midnight Commander.",
+          "display_name": "Toggle selection (visual mode)"
+        },
         "select_up": {
           "$ref": "#/definitions/keybind",
           "description": "While in visual mode, extend the selection up.",

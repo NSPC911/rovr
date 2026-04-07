@@ -196,10 +196,13 @@ page_down = ["pagedown", "ctrl+f"]
 home = ["home", "g"]
 end = ["end", "G"]
 hist_previous = ["backspace", "u"]
+# personal preference
 hist_next = ["space"]
 toggle_visual = ["v"]
 toggle_all = ["%", "ctrl+a"]
 toggle_hidden_files = ["full_stop"]
+# similar to Midnight Commander / Norton Commander
+toggle_select_item = ["insert"]
 select_up = ["shift+up", "K"]
 select_down = ["shift+down", "J"]
 select_page_up = ["shift+pageup"]

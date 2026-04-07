@@ -28,7 +28,7 @@ def get_candidates(path_str: str) -> list[str]:
 
     parent = os.path.dirname(path_str)
     if os.path.exists(parent) and os.path.isdir(parent):
-        # Case 3: Path ends with "/" - list contents of that directory (directories only)
+        # Case 4: Path ends with "/" - list contents of that directory (directories only)
         return sorted(
             [
                 item + "/"

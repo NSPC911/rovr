@@ -18,18 +18,25 @@ def get_candidates(path_str: str) -> list[str]:
             return [drive]
         return []
 
-    if os.path.exists(path_str) and os.path.isdir(path_str):
-        # Case 3: Path ends with "/" - list contents of that directory (directories only)
-        if path_str.endswith(("/", "\\")):
-            items = []
-            for item in sorted(os.listdir(path_str), key=str.lower):
-                if os.path.isdir(os.path.join(path_str, item)):
-                    items.append(item + "/")
-            return items
+    # Case 3: Check if it's an exact directory match
+    if (
+        (not path_str.endswith(("/", "\\")))
+        and os.path.exists(path_str)
+        and os.path.isdir(path_str)
+    ):
+        return [path_str.split("/")[-1] + "/"]
 
-        # Check if it's an exact directory match
-        if os.path.exists(path_str) and os.path.isdir(path_str):
-            return [path_str.split("/")[-1] + "/"]
+    parent = os.path.dirname(path_str)
+    if os.path.exists(parent) and os.path.isdir(parent):
+        # Case 3: Path ends with "/" - list contents of that directory (directories only)
+        return sorted(
+            [
+                item + "/"
+                for item in os.listdir(parent)
+                if os.path.isdir(os.path.join(parent, item))
+            ],
+            key=str.lower,
+        )
     return []
 
 
@@ -44,8 +51,8 @@ def test_get_candidates() -> None:
         "inetpub/",
         "PerfLogs/",
         "ProcLogs/",
-        "Program Files/",
         "Program Files (x86)/",
+        "Program Files/",
         "ProgramData/",
         "Recovery/",
         "System Volume Information/",
@@ -72,8 +79,8 @@ def test_get_candidates() -> None:
         "dotfiles/",
         "forks/",
         "le-bucket/",
-        "NSPC911/",
         "nspc911.github.io/",
+        "NSPC911/",
         "rovr/",
         "rowelix/",
         "test/",

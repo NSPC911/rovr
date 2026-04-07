@@ -46,7 +46,7 @@ toggle_visual = ["ctrl+space"]
 # reasonable enough, unless `h` is preferred by others
 toggle_hidden_files = ["."]
 # similar to Midnight Commander / Norton Commander
-toggle_select_item = ["insert"]
+toggle_select_item = ["insert", "space"]
 select_up = ["shift+up"]
 select_down = ["shift+down"]
 # these are most likely taken by terminals, but i dont

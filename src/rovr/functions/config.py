@@ -28,6 +28,8 @@ EDITOR_CANDIDATES = [
     "msedit",
 ]
 
+DEFAULT_CONFIG = '#:schema {schema_url}\n[theme]\ndefault = "nord"'
+
 
 @cache
 def editor() -> str:
@@ -394,6 +396,12 @@ def load_config() -> tuple[dict, RovrConfig]:
             "rovr", "."
         ).replace("\\", "/")
     user_config_path = path.join(config_dir, "config.toml")
+    current_version = get_version()
+    if current_version == "master":
+        schema_ref = "refs/heads/master"
+    else:
+        schema_ref = f"refs/tags/v{current_version}"
+    schema_url = f"https://raw.githubusercontent.com/NSPC911/rovr/{schema_ref}/src/rovr/config/schema.json"
 
     # Startup path should remain read-only for existing user config.
     # Any schema header normalization is intentionally left for explicit
@@ -428,7 +436,28 @@ def load_config() -> tuple[dict, RovrConfig]:
             user_config_content = f.read()
             if user_config_content:
                 try:
+                    schema_url = f"https://raw.githubusercontent.com/NSPC911/rovr/{schema_ref}/src/rovr/config/schema.json"
                     user_config = tomli.loads(user_config_content)
+
+                    # check version
+                    lines = user_config_content.splitlines()
+                    expected_schema_line = f"#:schema {schema_url}"
+                    if lines and lines[0] != expected_schema_line:
+                        # check if it is schema in the first place
+                        header = lines[0].lstrip("\ufeff").lstrip()
+                        if header.startswith("#:schema"):
+                            lines[0] = expected_schema_line
+                        else:
+                            lines.insert(0, expected_schema_line)
+
+                        with open(user_config_path, "w", encoding="utf-8") as f:
+                            f.write("\n".join(lines))
+
+                        display_version = (
+                            f"v{current_version}" if current_version != "master" else "master"
+                        )
+                        pprint(f"[yellow]Updated config schema to {display_version}[/]")
+
                 except tomli.TOMLDecodeError as exc:
                     toml_dump(user_config_path, exc)
     # Don't really have to consider the else part, because it's created further down

@@ -149,7 +149,10 @@ Types: `feat`, `fix`, `docs`, `style`, `refactor`, `test`, `chore`
 - **Formatting excludes**: `src/rovr/monkey_patches/sys_stdout.py`
 - Use `uv` commands; do not use `pip` or `python -m`
 - Always run `poe check` before committing. Ruff may mention that certain errors are fixable; if so, run `poe fmt` to apply fixes.
+
+#### Tests
 - Make sure to also run `poe test` to ensure no tests are broken before committing.
+- Keep in mind that the tests can be quite flaky at times. If an error occurs, just try again until it passes or 5 tries have been made. If it still fails after 5 tries, then there may be an actual issue that needs to be looked into.
 
 #### multiprocessing.ProcessPoolExecutor and multiprocessing.Process notices
 - Avoid creating a function in the same file as the `ProcessPoolExecutor` or `Process`.
@@ -160,3 +163,6 @@ Types: `feat`, `fix`, `docs`, `style`, `refactor`, `test`, `chore`
 
 - Avoid `if TYPE_CHECKING` blocks for imports; it looks bad
 - Avoid adding unnecessary comments, aim for self-documenting code instead
+- Commit with `NSPBot911 <176916861+NSPBot911@users.noreply.github.com>` to better distinguish between human and bot commits in the history.
+  NEVER co-author with your provider (like `NSPBot911 <176916861+NSPBot911@users.noreply.github.com>` or `Claude Opus 4.6 <noreply@anthropic.com>`)
+  You can, however, mention the provider used in the commit message, but you must use a syntax of `Used [Provider Name]: [Model Name]`

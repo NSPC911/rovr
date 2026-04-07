@@ -40,6 +40,8 @@ hist_next = ["ctrl+r", "space"]
 toggle_visual = ["v"]
 toggle_all = ["%", "ctrl+a"]
 toggle_hidden_files = ["full_stop"]
+# similar to Midnight Commander / Norton Commander
+toggle_select_item = ["insert"]
 select_up = ["K", "shift+up"]
 select_down = ["J", "shift+down"]
 select_page_up = ["shift+pageup"]

@@ -915,6 +915,7 @@ class _RovrConfigKeybinds(TypedDict, total=False):
     hist_next: list[str]
     toggle_visual: list[str]
     toggle_hidden_files: list[str]
+    toggle_select_item: list[str]
     select_up: list[str]
     select_down: list[str]
     select_page_up: list[str]

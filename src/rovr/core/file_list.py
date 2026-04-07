@@ -904,6 +904,15 @@ class FileList(CheckboxRenderingMixin, SelectionList, inherit_bindings=False):
             for index in range(old, new + 1):
                 self.select(self.get_option_at_index(index))
 
+    def action_toggle_select_item(self) -> None:
+        """Toggle selection of the currently highlighted item in visual mode."""
+        if (
+            self.highlighted_option
+            and self.select_mode_enabled
+            and (not self.get_option_at_index(0).disabled)
+        ):
+            self.action_select()
+
     def action_open_editor(self) -> None:
         if (self.highlighted is not None) and not (
             self.highlighted_option and self.highlighted_option.disabled

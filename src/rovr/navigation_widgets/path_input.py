@@ -88,7 +88,10 @@ def _win_get_candidates(path_str: str) -> list[DropdownItem]:
 
     # Reject relative paths that don't start with ..\ or ../ or .\ or ./
     # Allow absolute paths (start with drive letter or /) and relative paths that start with .. or .
-    is_absolute = (len(path_str) >= 2 and path_str[1] == ":") or path_str.startswith(("/", "\\"))
+    is_absolute = (len(path_str) >= 2 and path_str[1] == ":") or path_str.startswith((
+        "/",
+        "\\",
+    ))
     if (
         not is_absolute
         and not path_str.startswith(("../", ".\\", "..\\", "./"))

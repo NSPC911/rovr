@@ -19,8 +19,9 @@ def get_candidates(path_str: str) -> list[str]:
         return []
 
     # Case 3: Check if it's an exact directory match
+    # Skip this case if the path ends with "." or ".." to avoid returning "./" or "../"
     if (
-        (not path_str.endswith(("/", "\\")))
+        (not path_str.endswith(("/", "\\", ".", "..")))
         and os.path.exists(path_str)
         and os.path.isdir(path_str)
     ):

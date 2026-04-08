@@ -1,19 +1,71 @@
-from os import getcwd, path
-from pathlib import Path
+from os import getcwd, listdir, path
 from typing import cast
 
+from rich.text import Text
 from textual import events
+from textual.content import Content
+from textual.css.query import NoMatches
 from textual.validation import Function
 from textual.widgets import Input
 from textual_autocomplete import DropdownItem, PathAutoComplete, TargetState
 
-from rovr.functions.icons import get_icon
+from rovr.classes.textual_options import FileListSelectionWidget
+from rovr.functions.icons import get_icon, get_icon_for_folder
 
 
 class PathDropdownItem(DropdownItem):
-    def __init__(self, completion: str, path: Path) -> None:
-        super().__init__(completion)
+    def __init__(self, completion: str, path: str) -> None:
+        icon = get_icon_for_folder(path)
+        cache_key = (icon[0], icon[1])
+        if cache_key not in FileListSelectionWidget._icon_content_cache:
+            # Parse the icon markup once and cache it as Content
+            FileListSelectionWidget._icon_content_cache[cache_key] = (
+                Content.from_markup(f" [{icon[1]}]{icon[0]}[/{icon[1]}] ")
+            )
+        prefix = FileListSelectionWidget._icon_content_cache[cache_key]
+        super().__init__(completion, prefix)
         self.path = path
+
+
+def _win_get_candidates(path_str: str) -> list[DropdownItem]:
+    # Case 1: Empty string - return available drives
+    if not path_str:
+        drives = []
+        for letter in "ABCDEFGHIJKLMNOPQRSTUVWXYZ":
+            drive = f"{letter}:/"
+            if path.exists(drive):
+                drives.append(PathDropdownItem(drive, drive))
+        return drives
+
+    # Case 2: Just a drive letter (e.g., "C") or drive with colon (e.g., "C:")
+    if len(path_str) <= 2 and path_str[0].isalpha():
+        drive_letter = path_str[0].upper()
+        drive = f"{drive_letter}:/"
+        if path.exists(drive):
+            return [PathDropdownItem(drive, drive)]
+        return []
+
+    # Case 3: Check if it's an exact directory match
+    # Skip this case if the path ends with "." or ".." to avoid returning "./" or "../"
+    if (
+        (not path_str.endswith(("/", "\\", ".", "..")))
+        and path.exists(path_str)
+        and path.isdir(path_str)
+    ):
+        target = path_str.split("/")[-1] + "/"
+        return [PathDropdownItem(path.basename(target), target)]
+
+    parent = path.dirname(path_str)
+    if path.exists(parent) and path.isdir(parent):
+        # Case 4: Path ends with "/" - list contents of that directory (directories only)
+        items = []
+        for item in listdir(parent):
+            full_item_path = path.join(parent, item)
+            if path.isdir(full_item_path):
+                items.append(PathDropdownItem(item + "/", full_item_path))
+        items.sort(key=lambda x: x.path.lower())
+        return items
+    return []
 
 
 def path_input_sort_key(item: PathDropdownItem) -> tuple[bool, bool, str]:
@@ -55,75 +107,105 @@ class PathAutoCompleteInput(PathAutoComplete):
 
     def should_show_dropdown(self, search_string: str) -> bool:
         default_behavior = super().should_show_dropdown(search_string)
-        return (
-            default_behavior
-            or (search_string == "" and self.target.value != "")
-            and self.option_list.option_count > 0
-        )
+        return default_behavior or (search_string == "" and self.target.value != "")
+
+    def _rebuild_options(self, target_state: TargetState, search_string: str) -> None:
+        """Rebuild the options in the dropdown.
+
+        Args:
+            target_state: The state of the target widget.
+        """
+        option_list = self.option_list
+        option_list.clear_options()
+        if self.target.has_focus:
+            matches = self._compute_matches(target_state, search_string)
+            if matches:
+                option_list.add_options(matches)
+                option_list.highlighted = None
+
+    def _listen_to_messages(self, event: events.Event) -> None:
+        """Listen to some events of the target widget."""
+        event.prevent_default()
+
+        try:
+            option_list = self.option_list
+        except NoMatches:
+            # This can happen if the event is an Unmount event
+            # during application shutdown.
+            return
+
+        if isinstance(event, events.Key) and option_list.option_count:
+            displayed = self.display
+            if event.key == "down":
+                if option_list.highlighted is None:
+                    option_list.highlighted = 0
+                    return
+                # Check if there's only one item and it matches the search string
+                if option_list.option_count == 1:
+                    search_string = self.get_search_string(self._get_target_state())
+                    first_option = option_list.get_option_at_index(0).prompt
+                    text_from_option = (
+                        first_option.plain
+                        if isinstance(first_option, Text)
+                        else first_option
+                    )
+                    if text_from_option == search_string:
+                        # Don't prevent default behavior in this case
+                        return
+
+                # If you press `down` while in an Input and the autocomplete is currently
+                # hidden, then we should show the dropdown.
+                event.prevent_default()
+                event.stop()
+                if displayed:
+                    option_list.highlighted = (
+                        option_list.highlighted + 1
+                    ) % option_list.option_count
+                else:
+                    self.display = True
+                    option_list.highlighted = 0
+
+                option_list.highlighted = option_list.highlighted
+
+            elif event.key == "up":
+                if displayed:
+                    event.prevent_default()
+                    event.stop()
+                    if option_list.highlighted is None:
+                        option_list.highlighted = len(option_list.options) - 1
+                        return
+                    option_list.highlighted = (
+                        option_list.highlighted - 1
+                    ) % option_list.option_count
+                    option_list.highlighted = option_list.highlighted
+            elif event.key == "enter":
+                if option_list.highlighted is None:
+                    return
+                if self.prevent_default_enter and displayed:
+                    event.prevent_default()
+                    event.stop()
+                if option_list.highlighted is not None:
+                    self._complete(option_index=option_list.highlighted)
+            elif event.key == "tab":
+                if self.prevent_default_tab and displayed:
+                    event.prevent_default()
+                    event.stop()
+                if option_list.highlighted is not None:
+                    self._complete(option_index=option_list.highlighted)
+            elif event.key == "escape":
+                if displayed:
+                    event.prevent_default()
+                    event.stop()
+                self.action_hide()
+
+        if isinstance(event, Input.Changed):
+            # We suppress Changed events from the target widget, so that we don't
+            # handle change events as a result of performing a completion.
+            self._handle_target_update()
 
     def get_candidates(self, target_state: TargetState) -> list[DropdownItem]:
-        import string
-        from pathlib import Path
-
-        from textual.fuzzy import Matcher
-
-        # If empty string, return available drives
-        path_str = target_state.text
-        if not path_str:
-            drives = []
-            for letter in string.ascii_uppercase:
-                drive_path = Path(f"{letter}:/")
-                if drive_path.exists():
-                    drives.append(f"{letter}:/")
-            return drives
-
-        # Parse the input path
-        path_obj = Path(path_str)
-
-        # Handle drive letter inputs (C, C:, C:/)
-        if len(path_str) <= 3 and path_str[0].isalpha():
-            # Extract drive letter
-            drive_letter = path_str[0].upper()
-            return [DropdownItem(f"{drive_letter}:/")]
-
-        # Determine parent directory and search pattern
-        if path_str.endswith("/") or path_str.endswith("\\"):
-            # List contents of this directory
-            parent = path_obj
-            pattern = ""
-        else:
-            # Check if the path exists as a directory
-            if path_obj.exists() and path_obj.is_dir():
-                # If it's a directory but doesn't end with /, return it with /
-                return [DropdownItem(path_obj.name + "/")]
-
-            # Otherwise, treat the last part as a search pattern
-            parent = path_obj.parent
-            pattern = path_obj.name
-
-        # Get all directories in parent
-        try:
-            directories = []
-            for item in parent.iterdir():
-                if item.is_dir():
-                    directories.append(item.name)
-
-            # Apply fuzzy matching if there's a pattern
-            if pattern:
-                matcher = Matcher(pattern)
-                matched = []
-                for dir_name in directories:
-                    score = matcher.match(dir_name)
-                    if score > 0:
-                        matched.append((score, dir_name))
-                # Sort by score (descending) to get best matches first
-                matched.sort(key=lambda x: x[0], reverse=True)
-                return [DropdownItem(name) for _, name in matched]
-
-            return [DropdownItem(name) for name in directories]
-
-        except (FileNotFoundError, PermissionError):
-            return []
+        cand = _win_get_candidates(target_state.text)
+        return cand
 
     def _align_to_target(self) -> None:
         """Empty function that was supposed to align the completion box to the cursor."""

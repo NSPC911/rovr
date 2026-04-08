@@ -171,7 +171,7 @@ def get_filtered_dir_names(cwd: str | bytes, show_hidden: bool = False) -> set[s
 
     names = set()
     for item in listed_dir:
-        if not show_hidden and is_hidden_file(str(item)):
+        if not show_hidden and is_hidden_file(item.path):
             continue
         names.add(item.name)
 

@@ -1,8 +1,9 @@
 from os import getcwd, listdir, path
-from typing import cast
+from typing import ClassVar, cast
 
 from rich.text import Text
 from textual import events
+from textual.binding import Binding, BindingType
 from textual.content import Content
 from textual.css.query import NoMatches
 from textual.validation import Function
@@ -11,7 +12,8 @@ from textual_autocomplete import DropdownItem, PathAutoComplete, TargetState
 
 from rovr.classes.textual_options import FileListSelectionWidget
 from rovr.functions.icons import get_icon, get_icon_for_folder
-from rovr.variables.constants import os_type
+from rovr.functions.utils import check_key
+from rovr.variables.constants import config, os_type
 
 
 class PathDropdownItem(DropdownItem):
@@ -139,6 +141,12 @@ class PathAutoCompleteInput(PathAutoComplete):
         )
         self._target: Input = target
         assert isinstance(self._target, Input)
+
+    def _get_target_state(self) -> TargetState:
+        return TargetState(
+            text=self.target.value,
+            cursor_position=len(self.target.value),
+        )
 
     def should_show_dropdown(self, search_string: str) -> bool:
         # ignore search_string, it's inaccurate
@@ -296,8 +304,61 @@ class PathAutoCompleteInput(PathAutoComplete):
         self.post_completion()
 
 
-class PathInput(Input):
+class PathInput(Input, inherit_bindings=False):
     ALLOW_MAXIMIZE = False
+    BINDINGS: ClassVar[list[BindingType]] = [
+        Binding("left", "cursor_left", "Move cursor left", show=False),
+        Binding(
+            "shift+left",
+            "cursor_left(True)",
+            "Move cursor left and select",
+            show=False,
+        ),
+        Binding("ctrl+left", "cursor_left_word", "Move cursor left a word", show=False),
+        Binding(
+            "ctrl+shift+left",
+            "cursor_left_word(True)",
+            "Move cursor left a word and select",
+            show=False,
+        ),
+        Binding(
+            "right",
+            "cursor_right",
+            "Move cursor right or accept the completion suggestion",
+            show=False,
+        ),
+        Binding(
+            "shift+right",
+            "cursor_right(True)",
+            "Move cursor right and select",
+            show=False,
+        ),
+        Binding(
+            "ctrl+right",
+            "cursor_right_word",
+            "Move cursor right a word",
+            show=False,
+        ),
+        Binding(
+            "ctrl+shift+right",
+            "cursor_right_word(True)",
+            "Move cursor right a word and select",
+            show=False,
+        ),
+        Binding("delete,ctrl+d", "delete_right", "Delete character right", show=False),
+        Binding("enter", "submit", "Submit", show=False),
+        Binding(
+            "ctrl+w", "delete_left_word", "Delete left to start of word", show=False
+        ),
+        Binding("ctrl+u", "delete_left_all", "Delete all to the left", show=False),
+        Binding(
+            "ctrl+f", "delete_right_word", "Delete right to start of word", show=False
+        ),
+        Binding("ctrl+k", "delete_right_all", "Delete all to the right", show=False),
+        Binding("ctrl+x", "cut", "Cut selected text", show=False),
+        Binding("ctrl+c,super+c", "copy", "Copy selected text", show=False),
+        Binding("ctrl+v", "paste", "Paste text from the clipboard", show=False),
+    ]
 
     def __init__(self) -> None:
         super().__init__(
@@ -326,8 +387,23 @@ class PathInput(Input):
     def on_key(self, event: events.Key) -> None:
         if event.key == "backspace":
             # might be used for back history, so force the behaviour
-            event.stop()
             self.action_delete_left()
+        elif len(event.key) != 1 and not event.is_printable:
+            if check_key(event, config["keybinds"]["toggle_all"]):
+                self.select_all()
+            elif check_key(event, config["keybinds"]["home"]):
+                self.action_home()
+            elif check_key(event, config["keybinds"]["end"]):
+                self.action_end()
+            elif check_key(event, config["keybinds"]["select_home"]):
+                self.action_home(select=True)
+            elif check_key(event, config["keybinds"]["select_end"]):
+                self.action_end(select=True)
+            else:
+                return
+        else:
+            return
+        event.stop()
 
     def on_blur(self) -> None:
         self.auto_completer.action_hide()

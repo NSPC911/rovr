@@ -134,7 +134,9 @@ class PathAutoCompleteInput(PathAutoComplete):
 
     def should_show_dropdown(self, search_string: str) -> bool:
         # ignore search_string, it's inaccurate
-        return (self.option_list.option_count > 0 and (self._target.has_focus or self.has_focus))
+        return self.option_list.option_count > 0 and (
+            self._target.has_focus or self.has_focus
+        )
 
     def _compute_matches(
         self, target_state: TargetState, search_string: str

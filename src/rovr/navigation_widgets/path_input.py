@@ -35,9 +35,23 @@ def _unix_get_candidates(path_str: str) -> list[DropdownItem]:
     if not path_str:
         return [PathDropdownItem("/", "/")]
 
-    # Case 2: list directories
-    if (not path_str.endswith("/")) and path.exists(path_str) and path.isdir(path_str):
-        # Case 3: exact directory match
+    # Reject relative paths that don't start with ../ or ./
+    # Allow absolute paths (start with /) and relative paths that start with .. or .
+    if (
+        not path_str.startswith("/")
+        and not path_str.startswith(("../", "./"))
+        and path_str.startswith(".")
+        and path_str not in (".", "..")
+    ):
+        # Don't continue with dotfile/folder paths unless they start with ../ or ./
+        return []
+
+    # Case 2: exact directory match (but not if it ends with /. or /..)
+    if (
+        (not path_str.endswith(("/", "/.", "/..")))
+        and path.exists(path_str)
+        and path.isdir(path_str)
+    ):
         target = path.realpath(path.expanduser(path_str))
         return [PathDropdownItem(path.basename(target) + "/", target)]
 
@@ -72,10 +86,22 @@ def _win_get_candidates(path_str: str) -> list[DropdownItem]:
             return [PathDropdownItem(drive, drive)]
         return []
 
-    # Case 3: Check if it's an exact directory match
-    # Skip this case if the path ends with "." or ".." to avoid returning "./" or "../"
+    # Reject relative paths that don't start with ..\ or ../ or .\ or ./
+    # Allow absolute paths (start with drive letter or /) and relative paths that start with .. or .
+    is_absolute = (len(path_str) >= 2 and path_str[1] == ":") or path_str.startswith(("/", "\\"))
     if (
-        (not path_str.endswith(("/", "\\", ".", "..")))
+        not is_absolute
+        and not path_str.startswith(("../", ".\\", "..\\", "./"))
+        and path_str.startswith(".")
+        and path_str not in (".", "..")
+    ):
+        # Don't continue with dotfile/folder paths unless they start with ../ or ./
+        return []
+
+    # Case 3: Check if it's an exact directory match
+    # Skip this case if the path ends with /. or /.. or \. or \.. to allow listing contents
+    if (
+        (not path_str.endswith(("/", "\\", "/.", "/..", "\\.", "\\..")))
         and path.exists(path_str)
         and path.isdir(path_str)
     ):

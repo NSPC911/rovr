@@ -255,8 +255,19 @@ class PathAutoCompleteInput(PathAutoComplete):
                         event.stop()
                     if option_list.highlighted is not None:
                         self._complete(option_index=option_list.highlighted)
-                case _:
-                    super()._listen_to_messages(event)
+                case "tab":
+                    if self.prevent_default_tab and displayed:
+                        event.prevent_default()
+                        event.stop()
+                    if option_list.highlighted is None:
+                        option_list.highlighted = 0
+                    else:
+                        self._complete(option_index=option_list.highlighted)
+                case "escape":
+                    if displayed:
+                        event.prevent_default()
+                        event.stop()
+                    self.action_hide()
 
         if isinstance(event, Input.Changed):
             # We suppress Changed events from the target widget, so that we don't

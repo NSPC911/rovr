@@ -72,6 +72,8 @@ def _win_get_candidates(path_str: str) -> list[DropdownItem]:
 
     # Case 2: Just a drive letter (e.g., "C") or drive with colon (e.g., "C:")
     if len(path_str) <= 2 and path_str[0].isalpha():
+        if len(path_str) == 2 and path_str[1] != ":":
+            return []  # invalid format
         drive_letter = path_str[0].upper()
         drive = f"{drive_letter}:/"
         if path.exists(drive):

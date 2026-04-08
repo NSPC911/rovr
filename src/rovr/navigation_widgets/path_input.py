@@ -80,12 +80,10 @@ def _win_get_candidates(path_str: str) -> list[DropdownItem]:
         and path.isdir(path_str)
     ):
         target = path.realpath(path_str)
-        print(f"Exact directory match found: {path.basename(target)}")
         return [PathDropdownItem(path.basename(target) + "/", target)]
 
     parent = path.dirname(path_str)
     if path.exists(parent) and path.isdir(parent):
-        print(f"Parent directory: {parent}")
         # Case 4: Path ends with "/" - list contents of that directory (directories only)
         items = []
         for item in listdir(parent):

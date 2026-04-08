@@ -296,6 +296,7 @@ Tooltip {
     padding: 0 1;
     color: $foreground;
     border: none;
+
   }
   Button {
     margin: 0 1;
@@ -308,7 +309,7 @@ Tooltip {
     border-top: none;
     AutoCompleteList {
       width: 1fr;
-      max-height: 10vh;
+      max-height: 7;
       scrollbar-color: $accent;
       scrollbar-background: $accent-muted;
       scrollbar-color-hover: $accent-lighten-3;

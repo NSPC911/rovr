@@ -11,6 +11,7 @@ from textual_autocomplete import DropdownItem, PathAutoComplete, TargetState
 
 from rovr.classes.textual_options import FileListSelectionWidget
 from rovr.functions.icons import get_icon, get_icon_for_folder
+from rovr.variables.constants import os_type
 
 
 class PathDropdownItem(DropdownItem):
@@ -25,6 +26,32 @@ class PathDropdownItem(DropdownItem):
         prefix = FileListSelectionWidget._icon_content_cache[cache_key]
         super().__init__(completion, prefix)
         self.path = path
+
+
+def _unix_get_candidates(path_str: str) -> list[DropdownItem]:
+    from os import listdir, path
+
+    # Case 1: nothing
+    if not path_str:
+        return [PathDropdownItem("/", "/")]
+
+    # Case 2: list directories
+    if (not path_str.endswith("/")) and path.exists(path_str) and path.isdir(path_str):
+        # Case 3: exact directory match
+        target = path.realpath(path.expanduser(path_str))
+        return [PathDropdownItem(path.basename(target) + "/", target)]
+
+    # Case 3: list contents of parent
+    parent = path.dirname(path_str)
+    if path.exists(parent) and path.isdir(parent):
+        items = []
+        for item in listdir(parent):
+            full_item_path = path.join(parent, item)
+            if path.isdir(full_item_path):
+                items.append(PathDropdownItem(item + "/", full_item_path))
+        items.sort(key=lambda x: x.path.lower())
+        return items
+    return []
 
 
 def _win_get_candidates(path_str: str) -> list[DropdownItem]:
@@ -52,11 +79,13 @@ def _win_get_candidates(path_str: str) -> list[DropdownItem]:
         and path.exists(path_str)
         and path.isdir(path_str)
     ):
-        target = path_str.split("/")[-1] + "/"
-        return [PathDropdownItem(path.basename(target), target)]
+        target = path.realpath(path_str)
+        print(f"Exact directory match found: {path.basename(target)}")
+        return [PathDropdownItem(path.basename(target) + "/", target)]
 
     parent = path.dirname(path_str)
     if path.exists(parent) and path.isdir(parent):
+        print(f"Parent directory: {parent}")
         # Case 4: Path ends with "/" - list contents of that directory (directories only)
         items = []
         for item in listdir(parent):
@@ -106,8 +135,17 @@ class PathAutoCompleteInput(PathAutoComplete):
         assert isinstance(self._target, Input)
 
     def should_show_dropdown(self, search_string: str) -> bool:
-        default_behavior = super().should_show_dropdown(search_string)
-        return default_behavior or (search_string == "" and self.target.value != "")
+        # ignore search_string, it's inaccurate
+        return self.option_list.option_count > 0
+
+    def _compute_matches(
+        self, target_state: TargetState, search_string: str
+    ) -> list[DropdownItem]:
+        candidates = self.get_candidates(target_state)
+        if not candidates:
+            return []
+        matches = self.get_matches(target_state, candidates, search_string)
+        return matches
 
     def _rebuild_options(self, target_state: TargetState, search_string: str) -> None:
         """Rebuild the options in the dropdown.
@@ -116,11 +154,13 @@ class PathAutoCompleteInput(PathAutoComplete):
             target_state: The state of the target widget.
         """
         option_list = self.option_list
-        option_list.clear_options()
         if self.target.has_focus:
             matches = self._compute_matches(target_state, search_string)
             if matches:
-                option_list.add_options(matches)
+                option_list.set_options(matches)
+                option_list.highlighted = None
+            elif matches == []:
+                option_list.clear_options()
                 option_list.highlighted = None
 
     def _listen_to_messages(self, event: events.Event) -> None:
@@ -136,67 +176,58 @@ class PathAutoCompleteInput(PathAutoComplete):
 
         if isinstance(event, events.Key) and option_list.option_count:
             displayed = self.display
-            if event.key == "down":
-                if option_list.highlighted is None:
-                    option_list.highlighted = 0
-                    return
-                # Check if there's only one item and it matches the search string
-                if option_list.option_count == 1:
-                    search_string = self.get_search_string(self._get_target_state())
-                    first_option = option_list.get_option_at_index(0).prompt
-                    text_from_option = (
-                        first_option.plain
-                        if isinstance(first_option, Text)
-                        else first_option
-                    )
-                    if text_from_option == search_string:
-                        # Don't prevent default behavior in this case
-                        return
-
-                # If you press `down` while in an Input and the autocomplete is currently
-                # hidden, then we should show the dropdown.
-                event.prevent_default()
-                event.stop()
-                if displayed:
-                    option_list.highlighted = (
-                        option_list.highlighted + 1
-                    ) % option_list.option_count
-                else:
-                    self.display = True
-                    option_list.highlighted = 0
-
-                option_list.highlighted = option_list.highlighted
-
-            elif event.key == "up":
-                if displayed:
-                    event.prevent_default()
-                    event.stop()
+            match event.key:
+                case "down":
                     if option_list.highlighted is None:
-                        option_list.highlighted = len(option_list.options) - 1
+                        option_list.highlighted = 0
                         return
-                    option_list.highlighted = (
-                        option_list.highlighted - 1
-                    ) % option_list.option_count
+                    # Check if there's only one item and it matches the search string
+                    if option_list.option_count == 1:
+                        search_string = self.get_search_string(self._get_target_state())
+                        first_option = option_list.get_option_at_index(0).prompt
+                        text_from_option = (
+                            first_option.plain
+                            if isinstance(first_option, Text)
+                            else first_option
+                        )
+                        if text_from_option == search_string:
+                            # Don't prevent default behavior in this case
+                            return
+
+                    # If you press `down` while in an Input and the autocomplete is currently
+                    # hidden, then we should show the dropdown.
+                    event.prevent_default()
+                    event.stop()
+                    if displayed:
+                        option_list.highlighted = (
+                            option_list.highlighted + 1
+                        ) % option_list.option_count
+                    else:
+                        self.display = True
+                        option_list.highlighted = 0
+
                     option_list.highlighted = option_list.highlighted
-            elif event.key == "enter":
-                if option_list.highlighted is None:
-                    return
-                if self.prevent_default_enter and displayed:
-                    event.prevent_default()
-                    event.stop()
-                if option_list.highlighted is not None:
-                    self._complete(option_index=option_list.highlighted)
-            elif event.key == "tab":
-                if self.prevent_default_tab and displayed:
-                    event.prevent_default()
-                    event.stop()
-                if option_list.highlighted is not None:
-                    self._complete(option_index=option_list.highlighted)
-            elif event.key == "escape":
-                if displayed:
-                    event.prevent_default()
-                    event.stop()
-                self.action_hide()
+                case "up":
+                    if displayed:
+                        event.prevent_default()
+                        event.stop()
+                        if option_list.highlighted is None:
+                            option_list.highlighted = len(option_list.options) - 1
+                            return
+                        option_list.highlighted = (
+                            option_list.highlighted - 1
+                        ) % option_list.option_count
+                        option_list.highlighted = option_list.highlighted
+                case "enter":
+                    if option_list.highlighted is None:
+                        return
+                    if self.prevent_default_enter and displayed:
+                        event.prevent_default()
+                        event.stop()
+                    if option_list.highlighted is not None:
+                        self._complete(option_index=option_list.highlighted)
+                case _:
+                    super()._listen_to_messages(event)
 
         if isinstance(event, Input.Changed):
             # We suppress Changed events from the target widget, so that we don't
@@ -204,8 +235,9 @@ class PathAutoCompleteInput(PathAutoComplete):
             self._handle_target_update()
 
     def get_candidates(self, target_state: TargetState) -> list[DropdownItem]:
-        cand = _win_get_candidates(target_state.text)
-        return cand
+        if os_type == "Windows":
+            return _win_get_candidates(target_state.text)
+        return _unix_get_candidates(target_state.text)
 
     def _align_to_target(self) -> None:
         """Empty function that was supposed to align the completion box to the cursor."""
@@ -216,7 +248,10 @@ class PathAutoCompleteInput(PathAutoComplete):
         self._target.add_class("hide_border_bottom", update=True)
 
     def _on_hide(self, event: events.Hide) -> None:
-        super()._on_hide(event)
+        if self.show_horizontal_scrollbar:
+            self.horizontal_scrollbar.post_message(event)
+        if self.show_vertical_scrollbar:
+            self.vertical_scrollbar.post_message(event)
         self._target.remove_class("hide_border_bottom", update=True)
 
     def _complete(self, option_index: int) -> None:

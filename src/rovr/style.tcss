@@ -296,7 +296,6 @@ Tooltip {
     padding: 0 1;
     color: $foreground;
     border: none;
-
   }
   Button {
     margin: 0 1;

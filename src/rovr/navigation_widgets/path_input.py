@@ -134,7 +134,7 @@ class PathAutoCompleteInput(PathAutoComplete):
 
     def should_show_dropdown(self, search_string: str) -> bool:
         # ignore search_string, it's inaccurate
-        return self.option_list.option_count > 0
+        return (self.option_list.option_count > 0 and (self._target.has_focus or self.has_focus))
 
     def _compute_matches(
         self, target_state: TargetState, search_string: str
@@ -286,6 +286,9 @@ class PathInput(Input):
             validate_on=["changed"],
         )
 
+    def on_mount(self) -> None:
+        self.auto_completer = self.parent.parent.query_one(PathAutoCompleteInput)
+
     def on_input_submitted(self, event: Input.Submitted) -> None:
         """Use a custom path entered as the current working directory"""
         if path.exists(event.value) and event.value != "":
@@ -299,3 +302,6 @@ class PathInput(Input):
             # might be used for back history, so force the behaviour
             event.stop()
             self.action_delete_left()
+
+    def on_blur(self) -> None:
+        self.auto_completer.action_hide()

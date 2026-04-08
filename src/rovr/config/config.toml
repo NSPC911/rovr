@@ -10,6 +10,7 @@ show_progress_percentage = true
 truncate_progress_file_path = false
 show_line_numbers = true
 show_hidden_files = false
+show_drives = true
 allow_tab_nav = true
 append_new_tabs = true
 double_click_delay = 0.25

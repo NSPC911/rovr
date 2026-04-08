@@ -126,6 +126,10 @@ _ROVR_CONFIG_INTERFACE_SCROLLOFF_DEFAULT = 3
 r""" Default value of the field path 'Rovr Config interface scrolloff' """
 
 
+_ROVR_CONFIG_INTERFACE_SHOW_DRIVES_DEFAULT = True
+r""" Default value of the field path 'Rovr Config interface show_drives' """
+
+
 _ROVR_CONFIG_INTERFACE_SHOW_HIDDEN_FILES_DEFAULT = False
 r""" Default value of the field path 'Rovr Config interface show_hidden_files' """
 
@@ -586,6 +590,13 @@ class _RovrConfigInterface(TypedDict, total=False):
     Show hidden files and folders (those starting with a dot on Unix, or explicitly hidden on Windows/MacOS).
 
     default: False
+    """
+
+    show_drives: bool
+    r"""
+    Show drives and mounted directories.
+
+    default: True
     """
 
     image_viewer: "_RovrConfigInterfaceImageViewer"

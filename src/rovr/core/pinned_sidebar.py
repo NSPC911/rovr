@@ -114,15 +114,19 @@ class PinnedSidebar(OptionList, inherit_bindings=False):
                     )
                 )
                 id_list.append(new_id)
-        self.list_of_options.append(
-            Option(" Drives", id="drives-header", disabled=True)
-        )
-        self.app.call_from_thread(self.set_options, self.list_of_options)
-        if prev_highlighted < len(self.list_of_options):
-            self.highlighted = prev_highlighted
-            self.refresh_drives(id_list, None)
-            return
-        self.refresh_drives(id_list, prev_highlighted)
+
+        if config["interface"]["show_drives"]:
+            self.list_of_options.append(
+                Option(" Drives", id="drives-header", disabled=True)
+            )
+            self.app.call_from_thread(self.set_options, self.list_of_options)
+            if prev_highlighted < len(self.list_of_options):
+                self.highlighted = prev_highlighted
+                self.refresh_drives(id_list, None)
+                return
+            self.refresh_drives(id_list, prev_highlighted)
+        else:
+            self.app.call_from_thread(self.set_options, self.list_of_options)
 
     @work(thread=True)
     def refresh_drives(

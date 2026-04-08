@@ -63,6 +63,11 @@
           "default": false,
           "description": "Show hidden files and folders (those starting with a dot on Unix, or explicitly hidden on Windows/MacOS)."
         },
+        "show_drives": {
+          "type": "boolean",
+          "default": true,
+          "description": "Show drives and mounted directories."
+        },
         "image_viewer": {
           "type": "object",
           "description": "Settings related to the image viewer used in the preview sidebar",

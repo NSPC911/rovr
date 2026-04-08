@@ -6,7 +6,7 @@ from textual import events
 from textual.content import Content
 from textual.css.query import NoMatches
 from textual.validation import Function
-from textual.widgets import Input
+from textual.widgets._input import Input
 from textual_autocomplete import DropdownItem, PathAutoComplete, TargetState
 
 from rovr.classes.textual_options import FileListSelectionWidget
@@ -34,6 +34,10 @@ def _unix_get_candidates(path_str: str) -> list[DropdownItem]:
     # Case 1: nothing
     if not path_str:
         return [PathDropdownItem("/", "/")]
+
+    # Reject relative paths - must be absolute
+    if not path.isabs(path_str):
+        return []
 
     # Case 2: list directories
     if (not path_str.endswith("/")) and path.exists(path_str) and path.isdir(path_str):
@@ -70,6 +74,10 @@ def _win_get_candidates(path_str: str) -> list[DropdownItem]:
         drive = f"{drive_letter}:/"
         if path.exists(drive):
             return [PathDropdownItem(drive, drive)]
+        return []
+
+    # Reject relative paths - must be absolute (has drive letter)
+    if not path.isabs(path_str):
         return []
 
     # Case 3: Check if it's an exact directory match
@@ -165,13 +173,12 @@ class PathAutoCompleteInput(PathAutoComplete):
 
     def _listen_to_messages(self, event: events.Event) -> None:
         """Listen to some events of the target widget."""
-        event.prevent_default()
-
         try:
             option_list = self.option_list
         except NoMatches:
             # This can happen if the event is an Unmount event
             # during application shutdown.
+            event.prevent_default()
             return
 
         if isinstance(event, events.Key) and option_list.option_count:
@@ -239,11 +246,11 @@ class PathAutoCompleteInput(PathAutoComplete):
                         event.prevent_default()
                         event.stop()
                     self.action_hide()
-
-        if isinstance(event, Input.Changed):
-            # We suppress Changed events from the target widget, so that we don't
-            # handle change events as a result of performing a completion.
-            self._handle_target_update()
+                case _:
+                    return
+            event.prevent_default()
+        else:
+            super()._listen_to_messages(event)
 
     def get_candidates(self, target_state: TargetState) -> list[DropdownItem]:
         if os_type == "Windows":
@@ -255,10 +262,10 @@ class PathAutoCompleteInput(PathAutoComplete):
         pass
 
     def _on_show(self, event: events.Show) -> None:
-        super()._on_show(event)
         self._target.add_class("hide_border_bottom", update=True)
 
     def _on_hide(self, event: events.Hide) -> None:
+        event.prevent_default()
         if self.show_horizontal_scrollbar:
             self.horizontal_scrollbar.post_message(event)
         if self.show_vertical_scrollbar:
@@ -295,16 +302,22 @@ class PathInput(Input):
     def __init__(self) -> None:
         super().__init__(
             id="path_switcher",
-            validators=[Function(lambda x: path.exists(x), "Path does not exist")],
+            validators=[
+                Function(lambda x: path.isabs(x), "Path must be absolute"),
+                Function(lambda x: path.exists(x), "Path does not exist"),
+            ],
             validate_on=["changed"],
+            select_on_focus=False,
         )
 
     def on_mount(self) -> None:
-        self.auto_completer = self.parent.parent.query_one(PathAutoCompleteInput)
+        self.auto_completer = self.app.query_one(PathAutoCompleteInput)
 
     def on_input_submitted(self, event: Input.Submitted) -> None:
         """Use a custom path entered as the current working directory"""
-        if path.exists(event.value) and event.value != "":
+        if not path.isabs(event.value):
+            self.notify("Path must be absolute.", severity="error")
+        elif path.exists(event.value) and event.value != "":
             self.app.cd(event.value, clear_search=True)
         else:
             self.notify("Path provided is not valid.", severity="error")
@@ -318,3 +331,8 @@ class PathInput(Input):
 
     def on_blur(self) -> None:
         self.auto_completer.action_hide()
+
+    def on_focus(self) -> None:
+        self.app.call_after_refresh(
+            self.auto_completer._listen_to_messages, Input.Changed(self, self.value)
+        )

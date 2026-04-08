@@ -31,8 +31,6 @@ class PathDropdownItem(DropdownItem):
 
 
 def _unix_get_candidates(path_str: str) -> list[DropdownItem]:
-    from os import listdir, path
-
     # Case 1: nothing
     if not path_str:
         return [PathDropdownItem("/", "/")]
@@ -71,7 +69,7 @@ def _win_get_candidates(path_str: str) -> list[DropdownItem]:
         return drives
 
     # Case 2: Just a drive letter (e.g., "C") or drive with colon (e.g., "C:")
-    if len(path_str) <= 2 and path_str[0].isalpha():
+    if 0 < len(path_str) <= 2 and path_str[0].isalpha():
         if len(path_str) == 2 and path_str[1] != ":":
             return []  # invalid format
         drive_letter = path_str[0].upper()
@@ -87,7 +85,8 @@ def _win_get_candidates(path_str: str) -> list[DropdownItem]:
     # Case 3: Check if it's an exact directory match
     # Skip this case if the path ends with "." or ".." to avoid returning "./" or "../"
     if (
-        (not path_str.endswith(("/", "\\", ".", "..")))
+        (not path_str.endswith(("/", "\\")))
+        and (path.split(path_str)[-1] not in (".", ".."))
         and path.exists(path_str)
         and path.isdir(path_str)
     ):
@@ -107,25 +106,6 @@ def _win_get_candidates(path_str: str) -> list[DropdownItem]:
     return []
 
 
-def path_input_sort_key(item: PathDropdownItem) -> tuple[bool, bool, str]:
-    """Sort key function for results within the dropdown.
-
-    Args:
-        item: The PathDropdownItem to get a sort key for.
-
-    Returns:
-        A tuple of (is_file, is_non_dotfile, lowercase_name) for sorting.
-        Directories sort before files, non-dotfiles before dotfiles, then alphabetically.
-    """
-    name = item.path.name
-    is_dotfile = name.startswith(".")
-    try:
-        return (not item.path.is_dir(), not is_dotfile, name.lower())
-    except OSError:
-        # assume it is a file
-        return (True, not is_dotfile, name.lower())
-
-
 class PathAutoCompleteInput(PathAutoComplete):
     def __init__(self, target: Input) -> None:
         """An autocomplete widget for filesystem paths.
@@ -139,7 +119,7 @@ class PathAutoCompleteInput(PathAutoComplete):
             folder_prefix=" " + get_icon("folder", "default")[0] + " ",
             file_prefix=" " + get_icon("file", "default")[0] + " ",
             id="path_autocomplete",
-            sort_key=path_input_sort_key,  # ty: ignore[invalid-argument-type]
+            sort_key=lambda item: item.lower(),
         )
         self._target: Input = target
         assert isinstance(self._target, Input)

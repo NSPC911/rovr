@@ -205,6 +205,8 @@ class PinnedSidebar(OptionList, inherit_bindings=False):
         with self.input.prevent(Input.Changed):
             self.input.clear()
             self.set_options(self.list_of_options)
+        if event.option.id:
+            self.highlighted = self.get_option_index(event.option.id)
 
     def on_key(self, event: events.Key) -> None:
         if event.key in config["keybinds"]["focus_search"]:

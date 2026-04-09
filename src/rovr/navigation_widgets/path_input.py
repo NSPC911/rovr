@@ -30,6 +30,20 @@ class PathDropdownItem(DropdownItem):
         self.path = path
 
 
+def listdir_or(path: str | None = None) -> list[str]:
+    """Wrapper around os.listdir that returns an empty list if the path doesn't exist.
+    Args:
+        path: The path to list. If None, lists the current directory.
+
+    Returns:
+        A list of directory entries in the given path, or an empty list if the path doesn't exist.
+    """
+    try:
+        return listdir(path)
+    except OSError:
+        return []
+
+
 def _unix_get_candidates(path_str: str) -> list[DropdownItem]:
     # Case 1: nothing
     if not path_str:
@@ -49,7 +63,7 @@ def _unix_get_candidates(path_str: str) -> list[DropdownItem]:
     parent = path.dirname(path_str)
     if path.exists(parent) and path.isdir(parent):
         items = []
-        for item in listdir(parent):
+        for item in listdir_or(parent):
             full_item_path = path.join(parent, item)
             if path.isdir(full_item_path):
                 items.append(PathDropdownItem(item + "/", full_item_path))
@@ -97,7 +111,7 @@ def _win_get_candidates(path_str: str) -> list[DropdownItem]:
     if path.exists(parent) and path.isdir(parent):
         # Case 4: Path ends with "/" - list contents of that directory (directories only)
         items = []
-        for item in listdir(parent):
+        for item in listdir_or(parent):
             full_item_path = path.join(parent, item)
             if path.isdir(full_item_path):
                 items.append(PathDropdownItem(item + "/", full_item_path))
@@ -177,6 +191,7 @@ class PathAutoCompleteInput(PathAutoComplete):
                 case "down":
                     if option_list.highlighted is None:
                         option_list.highlighted = 0
+                        event.prevent_default()
                         return
                     # Check if there's only one item and it matches the search string
                     if option_list.option_count == 1:
@@ -188,7 +203,7 @@ class PathAutoCompleteInput(PathAutoComplete):
                             else first_option
                         )
                         if text_from_option == search_string:
-                            # Don't prevent default behavior in this case
+                            event.prevent_default()
                             return
 
                     # If you press `down` while in an Input and the autocomplete is currently
@@ -218,23 +233,26 @@ class PathAutoCompleteInput(PathAutoComplete):
                 case "enter":
                     if option_list.highlighted is None:
                         return
-                    if self.prevent_default_enter and displayed:
-                        event.prevent_default()
-                        event.stop()
-                    if option_list.highlighted is not None:
-                        self._complete(option_index=option_list.highlighted)
-                case "tab":
-                    if self.prevent_default_tab and displayed:
-                        event.prevent_default()
-                        event.stop()
-                    if option_list.highlighted is None:
-                        option_list.highlighted = 0
-                    else:
-                        self._complete(option_index=option_list.highlighted)
-                case "escape":
                     if displayed:
                         event.prevent_default()
                         event.stop()
+                    if option_list.highlighted is not None:
+                        self._complete(option_list.highlighted)
+                case "tab":
+                    if displayed:
+                        event.prevent_default()
+                        event.stop()
+                    if (
+                        option_list.highlighted is None
+                        and option_list.option_count != 1
+                    ):
+                        option_list.highlighted = 0
+                    else:
+                        highlighted: int = option_list.highlighted or 0
+                        self._complete(highlighted)
+                case "escape":
+                    event.prevent_default()
+                    event.stop()
                     self.action_hide()
                 case _:
                     return

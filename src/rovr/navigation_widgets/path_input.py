@@ -7,7 +7,7 @@ from textual.binding import Binding, BindingType
 from textual.content import Content
 from textual.css.query import NoMatches
 from textual.validation import Function
-from textual.widgets._input import Input
+from textual.widgets import Input
 from textual_autocomplete import DropdownItem, PathAutoComplete, TargetState
 
 from rovr.classes.textual_options import FileListSelectionWidget

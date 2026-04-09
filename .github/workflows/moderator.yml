@@ -9,7 +9,7 @@ on:
 
 jobs:
   spam-detection:
-    if: github.actor != 'coderabbitai[bot]' && github.actor != 'Copilot'
+    if: github.actor != 'coderabbitai[bot]' && github.actor != 'Copilot' && github.actor != 'sourcery-ai[bot]'
     runs-on: ubuntu-slim
     permissions:
       issues: write

@@ -40,17 +40,16 @@ from rovr.action_buttons import (
 )
 from rovr.action_buttons.sort_order import SortOrderButton, SortOrderPopup
 from rovr.classes.type_aliases import DirEntryType
-from rovr.components import SearchInput
 from rovr.components.popup_option_list import PopupOptionList
 from rovr.core import (
     FileList,
     FileListContainer,
     FileListRightClickOptionList,
     PinnedSidebar,
+    PinnedSidebarContainer,
     PreviewContainer,
 )
 from rovr.footer import Clipboard, MetadataContainer, ProcessContainer
-from rovr.functions import icons
 from rovr.functions.drive_workers import get_mounted_drives_worker
 from rovr.functions.path import (
     dump_exc,
@@ -201,11 +200,7 @@ class Application(App, inherit_bindings=False):
                         target=path_switcher,
                     )
             with HorizontalGroup(id="main"):
-                with VerticalGroup(id="pinned_sidebar_container"):
-                    yield SearchInput(
-                        placeholder=f"{icons.get_icon('general', 'search')[0]} Search"
-                    )
-                    yield PinnedSidebar(id="pinned_sidebar")
+                yield PinnedSidebarContainer()
                 yield self._file_list_container
                 yield PreviewContainer()
             with HorizontalGroup(id="footer"):

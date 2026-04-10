@@ -37,3 +37,7 @@ class FileListContainer(VerticalGroup):
             classes="file-list",
         )
         self.call_later(self.mount, self.filelist)
+
+    def on_click(self, event: events.Click) -> None:
+        if event.widget is self:
+            self.filelist.focus()

@@ -1191,6 +1191,10 @@ class PreviewContainer(Container):
         ):
             event.stop()
 
+    def on_click(self, event: events.Click) -> None:
+        if event.widget is self and self.children:
+            self.children[-1].focus()
+
     def _is_pdf(self) -> bool:
         return self.border_title == titles.pdf and self._file_type == "pdf"
 

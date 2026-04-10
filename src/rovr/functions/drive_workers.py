@@ -68,9 +68,9 @@ def _should_include_linux_mount_point(partition: "psutil._common.sdiskpart") -> 
     # - /mnt/wslg: WSL GUI support directory
     # - /mnt/wsl: WSL system integration directory
     return partition.mountpoint.startswith((
-        "/run/media",
-        "/media",
-        "/mnt",
+        "/run/media/",
+        "/media/",
+        "/mnt/",
     )) and not partition.mountpoint.startswith((
         "/mnt/wslg/",
         "/mnt/wsl/",

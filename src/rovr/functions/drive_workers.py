@@ -72,8 +72,8 @@ def _should_include_linux_mount_point(partition: "psutil._common.sdiskpart") -> 
         "/media/",
         "/mnt/",
     )) and not partition.mountpoint.startswith((
-        "/mnt/wslg/",
-        "/mnt/wsl/",
+        "/mnt/wslg",
+        "/mnt/wsl",
     ))
 
 

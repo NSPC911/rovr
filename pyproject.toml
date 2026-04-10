@@ -31,7 +31,7 @@ dependencies = [
   "send2trash>=2.1.0",
   "textual~=8.0",
   "textual-autocomplete>=4.0.6",
-  "textual-image[textual]>=0.11.0",
+  "textual-image[textual]<0.11.0",
   "textual-speedups>=0.2.1",
   "tomli>=2.4.0",
 ]

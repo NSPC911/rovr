@@ -23,7 +23,7 @@ dependencies = [
   "pathvalidate>=3.3.1",
   "pillow>=12.1.0",
   "platformdirs>=4.9.0",
-  "psutil>=7.2.0",
+  "psutil>=7.2.0; sys_platform != 'android'",
   "puremagic>=2.2.0",
   "rarfile>=4.2",
   "resvg-py>=0.3.0",

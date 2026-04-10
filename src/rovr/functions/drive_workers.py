@@ -1,7 +1,15 @@
 import multiprocessing
 from os import path
 
-import psutil
+try:
+    import psutil
+except ModuleNotFoundError:
+    from typing import Callable
+
+    class _Psutil:
+        def __getatt__(self) -> Callable[[], list]:
+            return lambda: []
+    psutil = _Psutil()
 
 
 def normalise(*location: str | bytes) -> str:

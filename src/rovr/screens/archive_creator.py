@@ -178,6 +178,8 @@ class ArchiveCreationScreen(ModalInput):
     @work
     async def on_input_submitted(self, event: Input.Submitted) -> None:
         """Handle input submission."""
+        event.prevent_default()
+        event.stop()
         if (
             not self.query_one(Input).is_valid
             and event.validation_result
@@ -220,6 +222,7 @@ class ArchiveCreationScreen(ModalInput):
         """Handle escape key to dismiss the dialog."""
         if event.key == "escape":
             event.stop()
+            event.prevent_default()
             self.dismiss(None)
 
     def on_click(self, event: events.Click) -> None:

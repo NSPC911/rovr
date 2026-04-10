@@ -1,6 +1,5 @@
 import os
 from pathlib import Path
-from tempfile import TemporaryDirectory
 
 import pytest
 from textual.widgets import OptionList, SelectionList
@@ -103,8 +102,8 @@ async def test_copy_to_cut(tmp_path: Path) -> None:
 
 @pytest.mark.asyncio
 async def test_cut_to_copy(tmp_path: Path) -> None:
-    app = Application(startup_path=tmp_path.as_posix())
     open(tmp_path / "test_file.txt", "w").close()
+    app = Application(startup_path=tmp_path.as_posix())
     async with app.run_test(size=(143, 37)) as pilot:
         await pilot.pause()
         await pilot.click(CutButton)
@@ -239,38 +238,31 @@ async def test_rename_button(tmp_path: Path) -> None:
 
 
 @pytest.mark.asyncio
-async def test_zip_button() -> None:
+async def test_zip_button(tmp_path: Path) -> None:
     from rovr.screens import ArchiveCreationScreen
 
-    empty_dir = TemporaryDirectory()
-    try:
-        app = Application(startup_path=empty_dir.name)
-        async with app.run_test(size=(143, 37)) as pilot:
-            await pilot.pause()
-            await pilot.click(ZipButton)
-            await pilot.pause()
-            assert not isinstance(app.screen, ArchiveCreationScreen)
-    finally:
-        os.chdir(Path("~").expanduser())
-        empty_dir.cleanup()
+    app = Application(startup_path=tmp_path.as_posix())
+    async with app.run_test(size=(143, 37)) as pilot:
+        await pilot.pause()
+        await pilot.click(ZipButton)
+        await pilot.pause()
+        assert not isinstance(app.screen, ArchiveCreationScreen)
 
-    temp_dir = TemporaryDirectory()
-    open(os.path.join(temp_dir.name, "test_file.txt"), "w").close()
-    try:
-        app = Application(startup_path=temp_dir.name)
-        async with app.run_test(size=(143, 37)) as pilot:
-            await pilot.pause()
-            await pilot.click(ZipButton)
-            await iter_until(
-                pilot, lambda: isinstance(app.screen, ArchiveCreationScreen)
-            )
-            await pilot.press("escape")
-            await iter_until(
-                pilot, lambda: not isinstance(app.screen, ArchiveCreationScreen)
-            )
-    finally:
-        os.chdir(Path("~").expanduser())
-        temp_dir.cleanup()
+
+@pytest.mark.asyncio
+async def test_zip_button_modal(tmp_path: Path) -> None:
+    from rovr.screens import ArchiveCreationScreen
+
+    open(tmp_path / "test_file.txt", "w").close()
+    app = Application(startup_path=tmp_path.as_posix())
+    async with app.run_test(size=(143, 37)) as pilot:
+        await pilot.pause()
+        await pilot.click(ZipButton)
+        await iter_until(pilot, lambda: isinstance(app.screen, ArchiveCreationScreen))
+        await pilot.press("escape")
+        await iter_until(
+            pilot, lambda: not isinstance(app.screen, ArchiveCreationScreen)
+        )
 
 
 @pytest.mark.asyncio
@@ -293,40 +285,35 @@ async def test_zip_button_creates_archive(tmp_path: Path) -> None:
 
 
 @pytest.mark.asyncio
-async def test_unzip_button() -> None:
+async def test_unzip_button(tmp_path: Path) -> None:
+    from rovr.screens import ModalInput
+
+    app = Application(startup_path=tmp_path.as_posix())
+    async with app.run_test(size=(143, 37)) as pilot:
+        await pilot.pause()
+        await pilot.click(UnzipButton)
+        await pilot.pause()
+        assert not isinstance(app.screen, ModalInput)
+
+
+@pytest.mark.asyncio
+async def test_unzip_button_modal(tmp_path: Path) -> None:
     import zipfile
 
     from rovr.screens import ModalInput
 
-    empty_dir = TemporaryDirectory()
-    try:
-        app = Application(startup_path=empty_dir.name)
-        async with app.run_test(size=(143, 37)) as pilot:
-            await pilot.pause()
-            await pilot.click(UnzipButton)
-            await pilot.pause()
-            assert not isinstance(app.screen, ModalInput)
-    finally:
-        os.chdir(Path("~").expanduser())
-        empty_dir.cleanup()
-
-    temp_dir = TemporaryDirectory()
-    zip_path = os.path.join(temp_dir.name, "test_archive.zip")
+    zip_path = tmp_path / "test_archive.zip"
     with zipfile.ZipFile(zip_path, "w") as zf:
         zf.writestr("dummy.txt", "hello")
-    try:
-        app = Application(startup_path=temp_dir.name)
-        async with app.run_test(size=(143, 37)) as pilot:
-            await pilot.pause()
-            await pilot.click(UnzipButton)
-            await iter_until(pilot, lambda: isinstance(app.screen, ModalInput))
-            assert isinstance(app.screen, ModalInput)
-            await pilot.press("escape")
-            await iter_until(pilot, lambda: not isinstance(app.screen, ModalInput))
-            assert not isinstance(app.screen, ModalInput)
-    finally:
-        os.chdir(Path("~").expanduser())
-        temp_dir.cleanup()
+    app = Application(startup_path=tmp_path.as_posix())
+    async with app.run_test(size=(143, 37)) as pilot:
+        await pilot.pause()
+        await pilot.click(UnzipButton)
+        await iter_until(pilot, lambda: isinstance(app.screen, ModalInput))
+        assert isinstance(app.screen, ModalInput)
+        await pilot.press("escape")
+        await iter_until(pilot, lambda: not isinstance(app.screen, ModalInput))
+        assert not isinstance(app.screen, ModalInput)
 
 
 @pytest.mark.asyncio

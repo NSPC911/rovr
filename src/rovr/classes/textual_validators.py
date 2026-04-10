@@ -21,26 +21,33 @@ class IsValidFilePath(Validator):
 
 
 class PathNoLongerExists(Validator):
-    def __init__(self, strict: bool = True, accept: list[str] | None = None) -> None:
+    def __init__(
+        self, accept: list[str] | None = None, accept_equal: bool = False
+    ) -> None:
         super().__init__(failure_description="Path already exists.")
-        self.strict = strict
         self.accept = accept
+        self.accept_equal = accept_equal
 
     def validate(self, value: str) -> ValidationResult:
         item_path = str(normalise(str(getcwd()) + "/" + value))
         if path.exists(item_path):
             # check for acceptance
             if os_type == "Windows" and self.accept is not None:
+                print(self.accept)
+                print(item_path)
                 # check
                 lower_val = value.lower()
                 if any(
-                    lower_val == accepted.lower() and value != accepted
+                    lower_val == accepted.lower()
+                    and (self.accept_equal or value != accepted)
                     for accepted in self.accept
                 ):
                     return self.success()
                 else:
                     return self.failure()
             else:
-                return self.failure()
+                return self.failure(
+                    f"A {'folder' if path.isdir(item_path) else 'file'} with that name already exists."
+                )
         else:
             return self.success()

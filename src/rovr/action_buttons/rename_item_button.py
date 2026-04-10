@@ -48,7 +48,9 @@ class RenameItemButton(Button):
                     initial_value=path.basename(selected_file),
                     validators=[
                         IsValidFilePath(),
-                        PathNoLongerExists(accept=[path.basename(selected_file)]),
+                        PathNoLongerExists(
+                            accept=[path.basename(selected_file)], accept_equal=True
+                        ),
                     ],
                     is_path=True,
                     is_folder=type_of_file == "Folder",

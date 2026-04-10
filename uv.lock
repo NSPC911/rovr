@@ -1028,7 +1028,7 @@ requires-dist = [
     { name = "resvg-py", specifier = ">=0.3.0" },
     { name = "rich", specifier = ">=14.3.1" },
     { name = "send2trash", specifier = ">=2.1.0" },
-    { name = "textual", specifier = "~=7.0" },
+    { name = "textual", specifier = "~=8.0" },
     { name = "textual-autocomplete", specifier = ">=4.0.6" },
     { name = "textual-image", extras = ["textual"], specifier = ">=0.11.0" },
     { name = "textual-speedups", specifier = ">=0.2.1" },
@@ -1144,7 +1144,7 @@ wheels = [
 
 [[package]]
 name = "textual"
-version = "7.5.0"
+version = "8.2.3"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "markdown-it-py", extra = ["linkify"] },
@@ -1154,9 +1154,9 @@ dependencies = [
     { name = "rich" },
     { name = "typing-extensions" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/9f/38/7d169a765993efde5095c70a668bf4f5831bb7ac099e932f2783e9b71abf/textual-7.5.0.tar.gz", hash = "sha256:c730cba1e3d704e8f1ca915b6a3af01451e3bca380114baacf6abf87e9dac8b6", size = 1592319, upload-time = "2026-01-30T13:46:39.881Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/cf/2f/d44f0f12b3ddb1f0b88f7775652e99c6b5a43fd733badf4ce064bdbfef4a/textual-8.2.3.tar.gz", hash = "sha256:beea7b86b03b03558a2224f0cc35252e60ef8b0c4353b117b2f40972902d976a", size = 1848738, upload-time = "2026-04-05T09:12:45.338Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/9c/78/96ddb99933e11d91bc6e05edae23d2687e44213066bcbaca338898c73c47/textual-7.5.0-py3-none-any.whl", hash = "sha256:849dfee9d705eab3b2d07b33152b7bd74fb1f5056e002873cc448bce500c6374", size = 718164, upload-time = "2026-01-30T13:46:37.635Z" },
+    { url = "https://files.pythonhosted.org/packages/0e/28/a81d6ce9f4804818bd1231a9a6e4d56ea84ebbe8385c49591444f0234fa2/textual-8.2.3-py3-none-any.whl", hash = "sha256:5008ac581bebf1f6fa0520404261844a231e5715fdbddd10ca73916a3af48ca2", size = 724231, upload-time = "2026-04-05T09:12:48.747Z" },
 ]
 
 [[package]]

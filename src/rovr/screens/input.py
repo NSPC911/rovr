@@ -1,8 +1,9 @@
+import contextlib
 from asyncio import sleep
 
 from pathvalidate import sanitize_filepath
 from textual import events, work
-from textual.app import ComposeResult
+from textual.app import ComposeResult, ScreenStackError
 from textual.containers import HorizontalGroup
 from textual.content import Content
 from textual.screen import ModalScreen
@@ -133,7 +134,10 @@ class ModalInput(ModalScreen, inherit_bindings=False):
             "\\",
         )):
             return_path += "/"
-        self.dismiss(return_path)
+
+        # just assume that the screen was already dismissed, I can't fix this
+        with contextlib.suppress(ScreenStackError):
+            self.dismiss(return_path)
 
     def on_key(self, event: events.Key) -> None:
         """Handle escape key to dismiss the dialog."""

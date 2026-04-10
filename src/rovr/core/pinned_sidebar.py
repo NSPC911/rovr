@@ -202,11 +202,13 @@ class PinnedSidebar(OptionList, inherit_bindings=False):
                 return
         self.app.cd(file_path, clear_search=True)
         self.app.file_list.focus()
-        with self.input.prevent(Input.Changed):
-            self.input.clear()
-            self.set_options(self.list_of_options)
-        if event.option.id:
-            self.highlighted = self.get_option_index(event.option.id)
+        if self.input.value != "":
+            # assume that you don't need to reset the highlighted
+            with self.input.prevent(Input.Changed):
+                self.input.clear()
+                self.set_options(self.list_of_options)
+                if event.option.id:
+                    self.highlighted = self.get_option_index(event.option.id)
 
     def on_key(self, event: events.Key) -> None:
         if event.key in config["keybinds"]["focus_search"]:

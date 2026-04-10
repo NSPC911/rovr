@@ -61,54 +61,17 @@ def _should_include_linux_mount_point(partition: "psutil._common.sdiskpart") -> 
     Returns:
         bool: True if the mount point should be included, False otherwise.
     """
-    # Skip virtual/system filesystem types:
-    # - autofs: Automounter filesystem for automatic mounting/unmounting
-    # - devfs: Device filesystem providing access to device files
-    # - devtmpfs: Device temporary filesystem (like devfs but in tmpfs)
-    # - tmpfs: Temporary filesystem stored in memory
-    # - proc: Process information filesystem
-    # - sysfs: System information filesystem
-    # - cgroup2: Control group filesystem for resource management
-    # - debugfs, tracefs, fusectl, configfs: Kernel debugging/configuration filesystems
-    # - securityfs, pstore, bpf: Security and kernel subsystem filesystems
-    # - hugetlbfs, mqueue: Specialized system filesystems
-    # - devpts: Pseudo-terminal filesystem
-    # - binfmt_misc: Binary format support filesystem
-    if partition.fstype in (
-        "autofs",
-        "devfs",
-        "devtmpfs",
-        "tmpfs",
-        "proc",
-        "sysfs",
-        "cgroup2",
-        "debugfs",
-        "tracefs",
-        "fusectl",
-        "configfs",
-        "securityfs",
-        "pstore",
-        "bpf",
-        "hugetlbfs",
-        "mqueue",
-        "devpts",
-        "binfmt_misc",
-    ):
-        return False
-
-    # Skip system paths that users typically don't access:
-    # - /dev, /proc, /sys: System directories
-    # - /run: Runtime data directory
-    # - /boot: Boot partition (typically not accessed by users)
+    # Skip all uncommon places but include:
+    # - /run/media, /media: removable media
+    # - /mnt: common mounts
+    # Some things that should be excluded:
     # - /mnt/wslg: WSL GUI support directory
     # - /mnt/wsl: WSL system integration directory
-    # Include everything else (root filesystem, /home, /media, Windows drives in WSL like /mnt/c, etc.)
-    return not partition.mountpoint.startswith((
-        "/dev",
-        "/proc",
-        "/sys",
-        "/run",
-        "/boot",
+    return partition.mountpoint.startswith((
+        "/run/media/",
+        "/media/",
+        "/mnt/",
+    )) and not partition.mountpoint.startswith((
         "/mnt/wslg",
         "/mnt/wsl",
     ))

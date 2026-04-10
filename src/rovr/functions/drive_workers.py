@@ -9,6 +9,7 @@ except ModuleNotFoundError:
     class _Psutil:
         def __getatt__(self) -> Callable[[], list]:
             return lambda: []
+
     psutil = _Psutil()
 
 

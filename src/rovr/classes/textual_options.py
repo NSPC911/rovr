@@ -1,13 +1,14 @@
-from os import DirEntry
+from os import DirEntry, getcwd, path
 from typing import Literal, NamedTuple
 
 from textual.content import Content, ContentText
+from textual.visual import VisualType
 from textual.widgets import SelectionList
 from textual.widgets.option_list import Option
 from textual.widgets.selection_list import Selection
 from textual_autocomplete import DropdownItem
 
-from rovr.functions.icons import get_icon_for_folder
+from rovr.functions import icons as icon_utils
 from rovr.functions.path import normalise
 
 _icon_content_cache: dict[tuple[str, str], Content] = {}
@@ -206,7 +207,41 @@ class ModalSearcherOption(Option):
 
 class PathDropdownItem(DropdownItem):
     def __init__(self, completion: str, path: str) -> None:
-        icon = get_icon_for_folder(path)
+        icon = icon_utils.get_icon_for_folder(path)
         prefix = _get_cached_icon(icon)
         super().__init__(completion, prefix)
         self.path = path
+
+
+class PaddedOption(Option):
+    def __init__(self, prompt: VisualType) -> None:
+        if isinstance(prompt, str):
+            icon = icon_utils.get_icon_smart(prompt)
+            icon = (icon[0], icon[1])
+            # the icon is under the assumption that the user has navigated to
+            # the directory with the file, which means they rendered the icon
+            # for the file already, so theoretically, no need to re-render it here
+            prompt = _get_cached_icon(icon) + Content(prompt)
+        super().__init__(prompt)
+
+
+class PasteScreenOption(Option):
+    def __init__(self, loc: VisualType, copy_or_cut: Literal["copy", "cut"]) -> None:
+        if isinstance(loc, str):
+            icon = icon_utils.get_icon_smart(loc)
+            icon = (icon[0], icon[1])
+
+            copy_cut_icon = icon_utils.get_icon("general", copy_or_cut)[0]
+            # check existence of file, and if so, turn it red
+            basename = path.basename(path.normpath(loc))
+            if (
+                basename
+                and path.exists(path.join(getcwd(), basename))
+                and copy_or_cut == "copy"
+            ):
+                icon_content = Content.from_markup(f"[$error]{copy_cut_icon}[/]")
+            else:
+                icon_content = Content(copy_cut_icon)
+            loc = Content(" ") + icon_content + _get_cached_icon(icon) + Content(loc)
+        super().__init__(loc)
+        self.copy_or_cut = copy_or_cut

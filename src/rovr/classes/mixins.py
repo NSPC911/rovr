@@ -1,10 +1,51 @@
 from rich.segment import Segment
 from rich.style import Style
+from textual.geometry import Size
 from textual.strip import Strip
 from textual.widgets import OptionList
 from textual.widgets.option_list import OptionDoesNotExist
 
 from rovr.functions import icons as icon_utils
+
+
+class SingleLineOptionLayoutMixin:
+    """OptionList/SelectionList layout optimization for single-line rows."""
+
+    def _update_lines(self) -> None:
+        """Update line caches without forcing prompt visualization for all options."""
+        if not self.scrollable_content_region:
+            return
+
+        line_cache = self._line_cache
+        lines = line_cache.lines
+        next_index = lines[-1][0] + 1 if lines else 0
+
+        if next_index < len(self.options):
+            for index, option in enumerate(self.options[next_index:], next_index):
+                line_cache.index_to_line[index] = len(line_cache.lines)
+                line_count = 1 + int(option._divider)
+                line_cache.heights[index] = line_count
+                line_cache.lines.extend(
+                    (index, line_no) for line_no in range(line_count)
+                )
+
+        last_divider = self.options and self.options[-1]._divider
+        width = self.scrollable_content_region.width - self._get_left_gutter_width()
+        virtual_size = Size(width, len(lines) - (1 if last_divider else 0))
+        if virtual_size != self.virtual_size:
+            self.virtual_size = virtual_size
+            self._scroll_update(virtual_size)
+
+    def get_content_width(self, container: Size, viewport: Size) -> int:
+        del viewport
+        return container.width
+
+    def get_content_height(self, container: Size, viewport: Size, width: int) -> int:
+        del container, viewport, width
+        last_divider = self.options and self.options[-1]._divider
+        return sum(1 + int(option._divider) for option in self.options) - (
+            1 if last_divider else 0
+        )
 
 
 class CheckboxRenderingMixin:

@@ -10,7 +10,7 @@ except ModuleNotFoundError:
         def __getatt__(self) -> Callable[[], list]:
             return lambda: []
 
-    psutil = _Psutil()
+    psutil = _Psutil()  # ty: ignore[invalid-assignment]
 
 
 def normalise(*location: str | bytes) -> str:

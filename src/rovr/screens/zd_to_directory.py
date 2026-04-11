@@ -157,6 +157,7 @@ class ZDToDirectory(ModalSearchScreen):
     @on(OptionList.OptionSelected)
     async def handle_zd_option_selected(self, event: OptionList.OptionSelected) -> None:
         event.stop()
+        event.prevent_default()
         if not isinstance(event.option, ModalSearcherOption):
             # theoretically this shouldn't happen, but precautions
             self.dismiss(None)

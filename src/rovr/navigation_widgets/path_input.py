@@ -178,6 +178,12 @@ class PathAutoCompleteInput(PathAutoComplete):
                         option_list.highlighted = 0
                         event.prevent_default()
                         return
+                    elif option_list.highlighted == option_list.option_count - 1:
+                        option_list.set_reactive(type(option_list).highlighted, 0)
+                        option_list.scroll_to_highlight()
+                        option_list.set_reactive(type(option_list).highlighted, None)
+                        event.prevent_default()
+                        return
                     # Check if there's only one item and it matches the search string
                     if option_list.option_count == 1:
                         search_string = self.get_search_string(self._get_target_state())
@@ -208,6 +214,9 @@ class PathAutoCompleteInput(PathAutoComplete):
                     if displayed:
                         event.prevent_default()
                         event.stop()
+                        if option_list.highlighted == 0:
+                            option_list.highlighted = None
+                            return
                         if option_list.highlighted is None:
                             option_list.highlighted = len(option_list.options) - 1
                             return

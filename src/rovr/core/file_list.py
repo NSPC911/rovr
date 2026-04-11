@@ -14,7 +14,7 @@ from textual.widgets.selection_list import Selection, SelectionType
 
 from rovr.classes.mixins import CheckboxRenderingMixin, SingleLineOptionLayoutMixin
 from rovr.classes.session_manager import SessionManager
-from rovr.classes.textual_options import FileListSelectionWidget
+from rovr.classes.textual_options import FileListSelectionWidget, LazySelection
 from rovr.components import PopupOptionList
 from rovr.functions import icons as icon_utils
 from rovr.functions import path as path_utils
@@ -636,6 +636,7 @@ class FileList(
         self,
         options: Iterable[
             Selection[SelectionType]
+            | LazySelection[SelectionType]
             | tuple[ContentText, SelectionType]
             | tuple[ContentText, SelectionType, bool]
         ],

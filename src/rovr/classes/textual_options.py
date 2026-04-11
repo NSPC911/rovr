@@ -123,7 +123,7 @@ class LazySelection(LazyOption, Selection[SelectionType]):
     @property
     def value(self) -> SelectionType:
         """The value associated with the selection."""
-        return self._value
+        return self._value  # ty: ignore[invalid-return-type]
 
     @property
     def initial_state(self) -> bool:

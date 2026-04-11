@@ -4,30 +4,15 @@ from typing import ClassVar, cast
 from rich.text import Text
 from textual import events
 from textual.binding import Binding, BindingType
-from textual.content import Content
 from textual.css.query import NoMatches
 from textual.validation import Function
 from textual.widgets import Input
 from textual_autocomplete import DropdownItem, PathAutoComplete, TargetState
 
-from rovr.classes.textual_options import FileListSelectionWidget
-from rovr.functions.icons import get_icon, get_icon_for_folder
+from rovr.classes.textual_options import PathDropdownItem
+from rovr.functions.icons import get_icon
 from rovr.functions.utils import check_key
 from rovr.variables.constants import config, os_type
-
-
-class PathDropdownItem(DropdownItem):
-    def __init__(self, completion: str, path: str) -> None:
-        icon = get_icon_for_folder(path)
-        cache_key = (icon[0], icon[1])
-        if cache_key not in FileListSelectionWidget._icon_content_cache:
-            # Parse the icon markup once and cache it as Content
-            FileListSelectionWidget._icon_content_cache[cache_key] = (
-                Content.from_markup(f" [{icon[1]}]{icon[0]}[/{icon[1]}] ")
-            )
-        prefix = FileListSelectionWidget._icon_content_cache[cache_key]
-        super().__init__(completion, prefix)
-        self.path = path
 
 
 def listdir_or(path: str | None = None) -> list[str]:

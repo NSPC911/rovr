@@ -147,11 +147,7 @@ class Clipboard(CheckboxRenderingMixin, SelectionList, inherit_bindings=False):
 
     def _remove_option(self, option: ClipboardSelection) -> Self:  # ty: ignore[invalid-method-override]  # oh my god, will you please stfu
         super()._remove_option(option)
-        self.app.file_list.update_dimmed_items([
-            opt.value.path
-            for opt in self.options
-            if opt.value in self.selected and opt.value.type_of_selection == "cut"
-        ])
+        self.app.file_list.update_dimmed_items()
         return self
 
     async def on_selection_list_selected_changed(
@@ -159,11 +155,7 @@ class Clipboard(CheckboxRenderingMixin, SelectionList, inherit_bindings=False):
     ) -> None:
         self.paste_button.disabled = len(self.selected) == 0
         # go through each option, check if they are both selected and are the cut type, update filelist with that list
-        self.app.file_list.update_dimmed_items([
-            option.value.path
-            for option in self.options
-            if option.value in self.selected and option.value.type_of_selection == "cut"
-        ])
+        self.app.file_list.update_dimmed_items()
 
     @work(thread=True)
     def check_clipboard_existence(self) -> None:

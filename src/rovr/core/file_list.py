@@ -485,13 +485,8 @@ class FileList(
                 if isinstance(option, FileListSelectionWidget)
             ]
 
-    def update_dimmed_items(self, paths: list[str] | None = None) -> None:
-        """Update the dimmed items in the file list based on the cut items.
-
-        Args:
-            paths (list[str]): The list of paths to dim.
-        """
-        del paths
+    def update_dimmed_items(self) -> None:
+        """Update the dimmed items in the file list based on the cut items."""
         if self.option_count == 0 or self.get_option_at_index(0).disabled:
             return
         for option in self.options:

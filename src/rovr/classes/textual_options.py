@@ -123,7 +123,7 @@ class LazySelection(LazyOption, Selection[SelectionType]):
     @property
     def value(self) -> SelectionType:
         """The value associated with the selection."""
-        return self._value  # ty: ignore[invalid-return-type]
+        return self._value
 
     @property
     def initial_state(self) -> bool:
@@ -304,7 +304,7 @@ class ModalSearcherOption(LazyOption):
         Initialise the option
 
         Args:
-            icon (list[str] | None): The icon list from a utils function.
+            icon (list[str] | IconFactor | None): The icon list from a utils function.
             label (str): The label for the option.
             file_path (str | None): The file path
             disabled (bool) = False: The initial enabled/disabled state.

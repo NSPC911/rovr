@@ -7,8 +7,7 @@ from textual import events, on, work
 from textual.binding import BindingType
 from textual.content import ContentText
 from textual.css.query import NoMatches
-from textual.geometry import Region
-from textual.style import Style as TextualStyle
+from textual.geometry import Region, Size
 from textual.widgets import Button, Input, OptionList, SelectionList
 from textual.widgets.option_list import Option, OptionDoesNotExist
 from textual.widgets.selection_list import Selection, SelectionType
@@ -487,18 +486,54 @@ class FileList(CheckboxRenderingMixin, SelectionList, inherit_bindings=False):
         Args:
             paths (list[str]): The list of paths to dim.
         """
-        if paths is None:
-            paths = []
+        del paths
         if self.option_count == 0 or self.get_option_at_index(0).disabled:
             return
         for option in self.options:
-            if path_utils.normalise(option.dir_entry.path) in paths:
-                option._set_prompt(option.prompt.stylize("dim"))
-            else:
-                option._set_prompt(option.prompt.stylize(TextualStyle(dim=False)))
+            option._invalidate_prompt_cache()
         self._clear_caches()
         self._update_lines()
         self.refresh()
+
+    def _update_lines(self) -> None:
+        """Update line caches without measuring every option's visual.
+
+        FileList options are rendered as single-line entries, so we can avoid
+        OptionList's eager per-option visual construction (which defeats lazy prompts).
+        """
+        if not self.scrollable_content_region:
+            return
+
+        line_cache = self._line_cache
+        lines = line_cache.lines
+        next_index = lines[-1][0] + 1 if lines else 0
+
+        if next_index < len(self.options):
+            for index, option in enumerate(self.options[next_index:], next_index):
+                line_cache.index_to_line[index] = len(line_cache.lines)
+                line_count = 1 + int(option._divider)
+                line_cache.heights[index] = line_count
+                line_cache.lines.extend(
+                    (index, line_no) for line_no in range(line_count)
+                )
+
+        last_divider = self.options and self.options[-1]._divider
+        width = self.scrollable_content_region.width - self._get_left_gutter_width()
+        virtual_size = Size(width, len(lines) - (1 if last_divider else 0))
+        if virtual_size != self.virtual_size:
+            self.virtual_size = virtual_size
+            self._scroll_update(virtual_size)
+
+    def get_content_width(self, container: Size, viewport: Size) -> int:
+        del viewport
+        return container.width
+
+    def get_content_height(self, container: Size, viewport: Size, width: int) -> int:
+        del container, viewport, width
+        last_divider = self.options and self.options[-1]._divider
+        return sum(1 + int(option._divider) for option in self.options) - (
+            1 if last_divider else 0
+        )
 
     async def on_key(self, event: events.Key) -> None:
         """Handle key events for the file list."""

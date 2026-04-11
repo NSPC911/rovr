@@ -516,6 +516,8 @@ class Application(App, inherit_bindings=False):
         clear_search: bool = True,
     ) -> Worker | None:
         # Makes sure `directory` is a directory, or chdir will fail with exception
+        if self.return_code is not None:
+            return
         directory = ensure_existing_directory(directory)
 
         if normalise(getcwd()) == normalise(directory) or directory == "":

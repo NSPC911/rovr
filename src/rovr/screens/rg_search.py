@@ -205,7 +205,7 @@ class ContentSearch(ModalSearchScreen):
             if not file_path:
                 continue
             display_text = f" {file_path}:[dim]{line[1]}[/]"
-            icon: list[str] = (
+            icon: tuple[str, str] = (
                 get_icon_for_folder(file_path)
                 if path.isdir(file_path)
                 else get_icon_for_file(file_path)

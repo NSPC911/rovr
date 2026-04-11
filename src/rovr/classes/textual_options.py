@@ -10,7 +10,9 @@ from rovr.functions.path import normalise
 
 
 class PinnedSidebarOption(Option):
-    def __init__(self, icon: list, label: str, id: str | None = None) -> None:
+    def __init__(
+        self, icon: tuple[str, str], label: str, id: str | None = None
+    ) -> None:
         """Initialise the option.
 
         Args:
@@ -31,24 +33,21 @@ class ArchiveFileListSelection(Selection):
     # Cache for pre-parsed icon Content objects to avoid repeated markup parsing
     _icon_content_cache: dict[tuple[str, str], Content] = {}
 
-    def __init__(self, icon: list, label: str) -> None:
+    def __init__(self, icon: tuple[str, str], label: str) -> None:
         """Initialise the option.
 
         Args:
             icon: The icon for the option
             label: The text for the option
         """
-        cache_key = (icon[0], icon[1])
-        if cache_key not in ArchiveFileListSelection._icon_content_cache:
+        if icon not in ArchiveFileListSelection._icon_content_cache:
             # Parse the icon markup once and cache it as Content
-            ArchiveFileListSelection._icon_content_cache[cache_key] = (
-                Content.from_markup(f" [{icon[1]}]{icon[0]}[/{icon[1]}] ")
+            ArchiveFileListSelection._icon_content_cache[icon] = Content.from_markup(
+                f" [{icon[1]}]{icon[0]}[/{icon[1]}] "
             )
 
         # Create prompt by combining cached icon content with label
-        prompt = ArchiveFileListSelection._icon_content_cache[cache_key] + Content(
-            label
-        )
+        prompt = ArchiveFileListSelection._icon_content_cache[icon] + Content(label)
 
         super().__init__(prompt=prompt, value="", disabled=True)
         self.label = label
@@ -60,7 +59,7 @@ class FileListSelectionWidget(Selection):
 
     def __init__(
         self,
-        icon: list[str],
+        icon: tuple[str, str],
         label: str,
         dir_entry: DirEntry,
         clipboard: SelectionList,
@@ -70,20 +69,19 @@ class FileListSelectionWidget(Selection):
         Initialise the selection.
 
         Args:
-            icon (list[str]): The icon list from a utils function.
+            icon (tuple[str, str]): The icon list from a utils function.
             label (str): The label for the option.
             dir_entry (DirEntry): The nt.DirEntry class
             disabled (bool) = False: The initial enabled/disabled state. Enabled by default.
         """
-        cache_key = (icon[0], icon[1])
-        if cache_key not in FileListSelectionWidget._icon_content_cache:
+        if icon not in FileListSelectionWidget._icon_content_cache:
             # Parse the icon markup once and cache it as Content
-            FileListSelectionWidget._icon_content_cache[cache_key] = (
-                Content.from_markup(f" [{icon[1]}]{icon[0]}[/{icon[1]}] ")
+            FileListSelectionWidget._icon_content_cache[icon] = Content.from_markup(
+                f" [{icon[1]}]{icon[0]}[/{icon[1]}] "
             )
 
         # Create prompt by combining cached icon content with label
-        prompt = FileListSelectionWidget._icon_content_cache[cache_key] + Content(label)
+        prompt = FileListSelectionWidget._icon_content_cache[icon] + Content(label)
         dir_entry_path = normalise(dir_entry.path)
         if any(
             clipboard_val.type_of_selection == "cut"
@@ -194,7 +192,7 @@ class ModalSearcherOption(Option):
 
     def __init__(
         self,
-        icon: list[str] | None,
+        icon: tuple[str, str] | None,
         label: str,
         file_path: str | None = None,
         disabled: bool = False,
@@ -209,16 +207,15 @@ class ModalSearcherOption(Option):
             disabled (bool) = False: The initial enabled/disabled state.
         """
         if icon:
-            cache_key = (icon[0], icon[1])
-            if cache_key not in ModalSearcherOption._icon_content_cache:
+            if icon not in ModalSearcherOption._icon_content_cache:
                 # Parse
-                ModalSearcherOption._icon_content_cache[cache_key] = (
-                    Content.from_markup(f" [{icon[1]}]{icon[0]}[/] ")
+                ModalSearcherOption._icon_content_cache[icon] = Content.from_markup(
+                    f" [{icon[1]}]{icon[0]}[/] "
                 )
 
             # create prompt
             prompt = ModalSearcherOption._icon_content_cache[
-                cache_key
+                icon
             ] + Content.from_markup(label)
         else:
             prompt = Content(label)

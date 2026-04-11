@@ -1,7 +1,7 @@
 import json
 from copy import deepcopy
 from os import makedirs, path
-from typing import TypedDict, cast
+from typing import NotRequired, TypedDict, cast
 
 from rovr.variables.maps import RovrVars
 
@@ -11,10 +11,16 @@ pins = {}
 PIN_PATH = path.join(RovrVars.ROVRCONFIG, "pins.json")
 
 
+class PinItem(TypedDict):
+    name: str
+    path: str
+    icon: NotRequired[tuple[str, str]]
+
+
 class PinsDict(TypedDict):
-    default: list[dict[str, str | list[str]]]
+    default: list[PinItem]
     "The files to show in the default location"
-    pins: list[dict[str, str | list[str]]]
+    pins: list[PinItem]
     "Other added folders"
 
 

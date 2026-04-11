@@ -1,5 +1,4 @@
 import fnmatch
-from functools import lru_cache
 from os import path
 
 from rovr.variables.constants import config
@@ -14,8 +13,7 @@ from rovr.variables.maps import (
 )
 
 
-@lru_cache(maxsize=1024)
-def get_icon_for_file(location: str) -> list[str]:
+def get_icon_for_file(location: str) -> tuple[str, str]:
     """
     Get the icon and color for a file based on its name or extension.
 
@@ -23,7 +21,7 @@ def get_icon_for_file(location: str) -> list[str]:
         location (str): The name or path of the file.
 
     Returns:
-        list: The icon and color for the file.
+        tuple: The icon and color for the file.
     """
     if not config["interface"]["nerd_font"]:
         return ASCII_ICONS["file"]["default"]
@@ -39,7 +37,7 @@ def get_icon_for_file(location: str) -> list[str]:
         for custom_icon in config["icons"]["files"]:
             pattern = custom_icon["pattern"].lower()
             if fnmatch.fnmatch(file_name, pattern):
-                return [custom_icon["icon"], custom_icon["color"]]
+                return (custom_icon["icon"], custom_icon["color"])
 
     # 2. Check for full filename match
     if file_name in FILES_MAP:
@@ -58,15 +56,14 @@ def get_icon_for_file(location: str) -> list[str]:
     return ICONS["file"]["default"]
 
 
-@lru_cache(maxsize=1024)
-def get_icon_for_folder(location: str) -> list[str]:
+def get_icon_for_folder(location: str) -> tuple[str, str]:
     """Get the icon and color for a folder based on its name.
 
     Args:
         location (str): The name or path of the folder.
 
     Returns:
-        list: The icon and color for the folder.
+        tuple: The icon and color for the folder.
     """
     if not config["interface"]["nerd_font"]:
         return ASCII_ICONS["folder"]["default"]
@@ -82,7 +79,7 @@ def get_icon_for_folder(location: str) -> list[str]:
         for custom_icon in config["icons"]["folders"]:
             pattern = custom_icon["pattern"].lower()
             if fnmatch.fnmatch(folder_name, pattern):
-                return [custom_icon["icon"], custom_icon["color"]]
+                return (custom_icon["icon"], custom_icon["color"])
 
     # 2. Check for special folder types
     if folder_name in FOLDER_MAP:
@@ -93,15 +90,14 @@ def get_icon_for_folder(location: str) -> list[str]:
     return ICONS["folder"]["default"]
 
 
-@lru_cache(maxsize=1024)
-def get_icon_smart(location: str) -> list[str]:
+def get_icon_smart(location: str) -> tuple[str, str]:
     """Get the icon and color for a file or folder based on its path.
 
     Args:
         location (str): The path of the file or folder.
 
     Returns:
-        list: The icon and color for the file or folder.
+        tuple: The icon and color for the file or folder.
     """
     if path.isdir(location):
         return get_icon_for_folder(location)
@@ -109,15 +105,14 @@ def get_icon_smart(location: str) -> list[str]:
         return get_icon_for_file(location)
 
 
-@lru_cache(maxsize=1024)
-def get_icon(outer_key: str, inner_key: str) -> list:
+def get_icon(outer_key: str, inner_key: str) -> tuple[str, str]:
     """Get an icon from double keys.
     Args:
         outer_key (str): The category name (general/folder/file)
         inner_key (str): The icon's name
 
     Returns:
-        list[str,str]: The icon and color for the icon
+        tuple[str,str]: The icon and color for the icon
     """
     if not config["interface"]["nerd_font"]:
         return ASCII_ICONS.get(outer_key, {}).get(inner_key, [" ", ""])
@@ -125,7 +120,6 @@ def get_icon(outer_key: str, inner_key: str) -> list:
         return ICONS.get(outer_key, {}).get(inner_key, [" ", ""])
 
 
-@lru_cache(maxsize=1024)
 def get_toggle_button_icon(key: str) -> str:
     if not config["interface"]["nerd_font"]:
         return ASCII_TOGGLE_BUTTON_ICONS[key]

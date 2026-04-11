@@ -180,7 +180,7 @@ def get_filtered_dir_names(cwd: str | bytes, show_hidden: bool = False) -> set[s
 
 class CWDObjectReturnDict(TypedDict):
     name: str
-    icon: list[str]
+    icon: tuple[str, str]
     dir_entry: DirEntryType
 
 

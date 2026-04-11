@@ -130,11 +130,11 @@ class PathAutoCompleteInput(PathAutoComplete):
         super().__init__(
             target=target,
             path=getcwd().split(path.sep)[0],
-            folder_prefix=" " + get_icon("folder", "default")[0] + " ",
-            file_prefix=" " + get_icon("file", "default")[0] + " ",
             id="path_autocomplete",
             sort_key=lambda item: item.lower(),
         )
+        self.folder_prefix = " " + get_icon("folder", "default")[0] + " "
+        self.file_prefix = " " + get_icon("file", "default")[0] + " "
         self._target: Input = target
         assert isinstance(self._target, Input)
 

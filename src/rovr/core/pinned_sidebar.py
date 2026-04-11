@@ -1,6 +1,6 @@
 import multiprocessing
 from os import R_OK, access, path
-from typing import ClassVar
+from typing import ClassVar, cast
 
 from textual import events, work
 from textual.binding import BindingType
@@ -27,8 +27,8 @@ class PinnedSidebar(OptionList, inherit_bindings=False):
         Raises:
             FolderNotFileError: If the pin location is a file, and not a folder.
         """
-        available_pins: pin_utils.PinsDict = globals().get(
-            "pins", pin_utils.load_pins()
+        available_pins = cast(
+            pin_utils.PinsDict, globals().get("pins", pin_utils.load_pins())
         )
         pins = available_pins["pins"]
         default = available_pins["default"]
@@ -53,11 +53,15 @@ class PinnedSidebar(OptionList, inherit_bindings=False):
                 and isinstance(default_folder["icon"], list)
                 and len(default_folder["icon"]) == 2
             ):
-                icon: list[str] = default_folder["icon"]
+                icon: tuple[str, str] = default_folder["icon"]
             elif path.isdir(default_folder["path"]):
-                icon: list[str] = icon_utils.get_icon_for_folder(default_folder["name"])
+                icon: tuple[str, str] = icon_utils.get_icon_for_folder(
+                    default_folder["name"]
+                )
             else:
-                icon: list[str] = icon_utils.get_icon_for_file(default_folder["name"])
+                icon: tuple[str, str] = icon_utils.get_icon_for_file(
+                    default_folder["name"]
+                )
             if not (
                 isinstance(default_folder["path"], str)
                 and isinstance(default_folder["name"], str)
@@ -96,11 +100,15 @@ class PinnedSidebar(OptionList, inherit_bindings=False):
                 and isinstance(pin["icon"], list)
                 and len(pin["icon"]) == 2
             ):
+                # statically analyzed, it is impossible, but because there
+                # is no way to tell json it is an immutable list, and type
+                # hint is tuple for pin["icon"], this will work in runtime,
+                # just wont work when statically analysed.
                 icon = pin["icon"]
             elif path.isdir(pin["path"]):
-                icon: list[str] = icon_utils.get_icon_for_folder(pin["name"])
+                icon: tuple[str, str] = icon_utils.get_icon_for_folder(pin["name"])
             else:
-                icon: list[str] = icon_utils.get_icon_for_file(pin["name"])
+                icon: tuple[str, str] = icon_utils.get_icon_for_file(pin["name"])
             if not (isinstance(pin["path"], str) and isinstance(pin["name"], str)):
                 # just ignore, shouldn't happen
                 continue

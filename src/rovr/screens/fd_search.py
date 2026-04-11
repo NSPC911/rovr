@@ -219,7 +219,7 @@ class FileSearch(ModalSearchScreen):
             if not file_path_str:
                 continue
             display_text = f" {file_path_str}"
-            icon: list[str] = (
+            icon: tuple[str, str] = (
                 get_icon_for_folder(file_path_str)
                 if path.isdir(file_path_str)
                 else get_icon_for_file(file_path_str)

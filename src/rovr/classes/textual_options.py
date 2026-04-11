@@ -1,5 +1,5 @@
 from os import DirEntry, getcwd, path
-from typing import Callable, Literal, NamedTuple
+from typing import Callable, Literal, NamedTuple, TypeAlias
 
 import rich.repr
 from textual.content import Content, ContentText
@@ -13,7 +13,7 @@ from rovr.functions import icons as icon_utils
 from rovr.functions.path import normalise
 
 _icon_content_cache: dict[tuple[str, str], Content] = {}
-IconFactory = Callable[[], tuple[str, str]]
+IconFactory: TypeAlias = Callable[[], tuple[str, str]]
 
 
 def _get_cached_icon(icon: tuple[str, str]) -> Content:
@@ -292,10 +292,10 @@ class KeybindOption(Option):
         self.is_layer_bind = is_layer
 
 
-class ModalSearcherOption(Option):
+class ModalSearcherOption(LazyOption):
     def __init__(
         self,
-        icon: tuple[str, str] | None,
+        icon: tuple[str, str] | IconFactory | None,
         label: str,
         file_path: str | None = None,
         disabled: bool = False,
@@ -309,11 +309,16 @@ class ModalSearcherOption(Option):
             file_path (str | None): The file path
             disabled (bool) = False: The initial enabled/disabled state.
         """
-        if icon:
-            prompt = _get_cached_icon(icon) + Content.from_markup(label)
-        else:
-            prompt = Content(label)
-        super().__init__(prompt=prompt, disabled=disabled)
+        icon_factory = None
+        if icon is not None:
+            icon_factory = (lambda icon=icon: icon) if isinstance(icon, tuple) else icon
+
+        def get_prompt() -> Content:
+            if icon_factory is None:
+                return Content(label)
+            return _get_cached_icon(icon_factory()) + Content.from_markup(label)
+
+        super().__init__(prompt=get_prompt, disabled=disabled)
         self.label = label
         self.file_path = file_path
 

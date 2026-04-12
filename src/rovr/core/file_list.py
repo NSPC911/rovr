@@ -181,20 +181,20 @@ class FileList(
                     preview.border_title = ""
                 else:
                     file_list_options = folders + files
+                    self.list_of_options = []
+                    name_to_index: dict[str, int] = {}
 
-                    self.list_of_options = [
-                        FileListSelectionWidget(
-                            icon=item["icon"],
-                            label=item["name"],
-                            dir_entry=item["dir_entry"],
-                            clipboard=self.app.Clipboard,
+                    for i, item in enumerate(file_list_options):
+                        self.list_of_options.append(
+                            FileListSelectionWidget(
+                                icon=item["icon"],
+                                label=item["name"],
+                                dir_entry=item["dir_entry"],
+                                clipboard=self.app.Clipboard,
+                            )
                         )
-                        for item in file_list_options
-                    ]
-                    name_to_index: dict[str, int] = {
-                        item["name"]: i for i, item in enumerate(file_list_options)
-                    }
-                    self.items_in_cwd = set(name_to_index)
+                        name_to_index[item["name"]] = i
+
                     if focus_on in name_to_index:
                         to_highlight_index = name_to_index[focus_on]
 

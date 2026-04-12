@@ -189,31 +189,34 @@ class FileListSelectionWidget(LazySelection[str]):
             disabled (bool) = False: The initial enabled/disabled state. Enabled by default.
         """
         self.dir_entry = dir_entry
-        dir_entry_path = normalise(dir_entry.path)
         this_id = str(id(self))
-        icon_factory = (lambda icon=icon: icon) if isinstance(icon, tuple) else icon
-
-        def get_prompt() -> Content:
-            prompt = _get_cached_icon(icon_factory()) + Content(label)
-            if any(
-                clipboard_val.type_of_selection == "cut"
-                and dir_entry_path == clipboard_val.path
-                for clipboard_val in clipboard.selected
-            ):
-                return prompt.stylize("dim")
-            return prompt
+        self.__icon_factory = (
+            (lambda icon=icon: icon) if isinstance(icon, tuple) else icon
+        )
+        self.__label = label
+        self.__clipboard = clipboard
 
         super().__init__(
-            prompt=get_prompt,
+            prompt=self.get_prompt,
             # this is kinda required for FileList.get_selected_object's select mode
             # because it gets selected (which is dictionary of values)
             # which it then queries for `id` (because there's no way to query for
             # values directly)
-            value=str(this_id),
-            id=str(this_id),
+            value=this_id,
+            id=this_id,
             disabled=disabled,
         )
         self.label = label
+
+    def get_prompt(self) -> Content:
+        prompt = _get_cached_icon(self.__icon_factory()) + Content(self.__label)
+        if any(
+            clipboard_val.type_of_selection == "cut"
+            and normalise(self.dir_entry.path) == clipboard_val.path
+            for clipboard_val in self.__clipboard.selected
+        ):
+            return prompt.stylize("dim")
+        return prompt
 
 
 class ClipboardSelectionValue(NamedTuple):

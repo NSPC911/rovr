@@ -209,7 +209,8 @@ class PinnedSidebar(OptionList, inherit_bindings=False):
             else:
                 return
         self.app.cd(file_path, clear_search=True)
-        self.app.file_list.focus()
+        if not isinstance(event._sender, PinnedSidebar):
+            self.app.file_list.focus()
         if self.input.value != "":
             # assume that you don't need to reset the highlighted
             with self.input.prevent(Input.Changed):

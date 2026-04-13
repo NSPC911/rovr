@@ -120,11 +120,12 @@ async def test_tab_search(tmp_path: Path) -> None:
             app.file_list.highlighted,
         )
         await app.tabWidget.add_tab("")
-        await pilot.pause()
         app.tabWidget.action_next_tab()
         await iter_until(pilot, lambda: app.tabWidget.active_tab)
         await workers_finished(pilot, app.file_list)
 
+        # this also helps to find issues with the watcher, don't ignore
+        # errors related to this please!
         assert app.file_list.input.value == "file"
         assert app.tabWidget.active_tab.session.search == "file"
         assert app.file_list.highlighted_option.dir_entry.name == name
@@ -145,7 +146,7 @@ async def test_tab_search_clears_on_navigation(tmp_path: Path) -> None:
 
         app.cd((tmp_path / "nested").as_posix())
         await workers_finished(pilot, app.file_list)
-        await pilot.pause()
+        await pilot.pause(1)
 
         assert app.file_list.input.value == ""
         assert app.tabWidget.active_tab.session.search == ""

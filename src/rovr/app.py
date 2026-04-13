@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import asyncio
 import multiprocessing
 import threading
@@ -25,8 +27,9 @@ from textual.css.query import NoMatches
 from textual.css.stylesheet import StylesheetParseError
 from textual.dom import DOMNode
 from textual.screen import Screen
+from textual.types import NoActiveAppError
 from textual.widgets import Input, Label
-from textual.worker import Worker
+from textual.worker import Worker, WorkerFailed
 
 from rovr.action_buttons import (
     CopyButton,
@@ -253,6 +256,15 @@ class Application(App, inherit_bindings=False):
 
         self.call_later(self.call_later, self.post_mount)
         self._on_mount_done = True
+        if self.is_headless:
+            if os_type == "Windows":
+                self._original_stderr = open(  # noqa: SIM115
+                    "CONOUT$", "w", encoding="utf-8", errors="ignore"
+                )
+            else:
+                self._original_stderr = open(  # noqa: SIM115
+                    "/dev/stderr", "w", encoding="utf-8", errors="ignore"
+                )
 
     def post_mount(self) -> None:
         # border titles
@@ -547,13 +559,21 @@ class Application(App, inherit_bindings=False):
             state_manager: StateManager = self.query_one(StateManager)
             state_manager.apply_folder_sort_prefs(normalise(getcwd()))
 
-        return self.file_list.update_file_list(
-            add_to_session=add_to_history,
-            focus_on=focus_on,
-            has_selected=has_selected,
-            callback=callback,
-            clear_search=clear_search,
-        )
+        try:
+            worker = self.file_list.update_file_list(
+                add_to_session=add_to_history,
+                focus_on=focus_on,
+                has_selected=has_selected,
+                callback=callback,
+                clear_search=clear_search,
+            )
+            return worker
+        except (NoActiveAppError, WorkerFailed) as exc:
+            exc = exc.error if isinstance(exc, WorkerFailed) else exc
+            if isinstance(exc, NoActiveAppError):
+                # This can only happen if the app is in the process of shutting
+                # down, so we can just ignore this error
+                return
 
     @work(thread=True)
     def watch_for_changes_and_update(self) -> None:

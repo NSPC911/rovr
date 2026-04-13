@@ -1136,6 +1136,11 @@
               "default": false,
               "description": "Whether to include hidden files in fd results by default."
             },
+            "timeout": {
+              "type": "integer",
+              "default": 5,
+              "description": "The maximum time (in seconds) to wait for fd to return results before giving up."
+            },
             "default_filter_types": {
               "type": "array",
               "default": ["file", "directory"],
@@ -1197,6 +1202,11 @@
               "type": "boolean",
               "default": false,
               "description": "Whether to search hidden files by default."
+            },
+            "timeout": {
+              "type": "integer",
+              "default": 30,
+              "description": "The maximum time (in seconds) to wait for rg to return results before giving up."
             }
           }
         },

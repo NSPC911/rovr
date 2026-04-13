@@ -125,6 +125,8 @@ class PinnedSidebar(OptionList, inherit_bindings=False):
         self.list_of_options.append(
             Option(" Drives", id="drives-header", disabled=True)
         )
+        if self.app.return_code is not None:
+            return
         self.app.call_from_thread(self.set_options, self.list_of_options)
         if prev_highlighted < len(self.list_of_options):
             self.highlighted = prev_highlighted

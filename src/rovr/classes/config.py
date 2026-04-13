@@ -218,6 +218,10 @@ _ROVR_CONFIG_PLUGINS_FD_SEARCH_HIDDEN_DEFAULT = False
 r""" Default value of the field path 'Rovr Config plugins fd search_hidden' """
 
 
+_ROVR_CONFIG_PLUGINS_FD_TIMEOUT_DEFAULT = 5
+r""" Default value of the field path 'Rovr Config plugins fd timeout' """
+
+
 _ROVR_CONFIG_PLUGINS_FILE_ONE_ENABLED_DEFAULT = False
 r""" Default value of the field path 'Rovr Config plugins file_one enabled' """
 
@@ -272,6 +276,10 @@ r""" Default value of the field path 'Rovr Config plugins rg no_ignore_parent' "
 
 _ROVR_CONFIG_PLUGINS_RG_SEARCH_HIDDEN_DEFAULT = False
 r""" Default value of the field path 'Rovr Config plugins rg search_hidden' """
+
+
+_ROVR_CONFIG_PLUGINS_RG_TIMEOUT_DEFAULT = 30
+r""" Default value of the field path 'Rovr Config plugins rg timeout' """
 
 
 _ROVR_CONFIG_PLUGINS_ZOXIDE_ENABLED_DEFAULT = True
@@ -1179,6 +1187,13 @@ class _RovrConfigPluginsFd(TypedDict, total=False):
     default: False
     """
 
+    timeout: int
+    r"""
+    The maximum time (in seconds) to wait for fd to return results before giving up.
+
+    default: 5
+    """
+
     default_filter_types: list["_RovrConfigPluginsFdDefaultFilterTypesItem"]
     r"""
     The default file types to show when using fd.
@@ -1324,6 +1339,13 @@ class _RovrConfigPluginsRg(TypedDict, total=False):
     Whether to search hidden files by default.
 
     default: False
+    """
+
+    timeout: int
+    r"""
+    The maximum time (in seconds) to wait for rg to return results before giving up.
+
+    default: 30
     """
 
 

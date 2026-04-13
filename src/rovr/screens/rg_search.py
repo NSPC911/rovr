@@ -125,7 +125,9 @@ class ContentSearch(ModalSearchScreen):
         try:
             rg_process = await self.create_proc(*rg_cmd)
             # 30 seconds is quite generous for rg to respond
-            stdout, _ = await asyncio.wait_for(rg_process.communicate(), timeout=30)
+            stdout, _ = await asyncio.wait_for(
+                rg_process.communicate(), timeout=config["plugins"]["rg"]["timeout"]
+            )
         except (OSError, asyncio.exceptions.TimeoutError) as exc:
             if isinstance(exc, asyncio.exceptions.TimeoutError) and rg_process:
                 rg_process.kill()

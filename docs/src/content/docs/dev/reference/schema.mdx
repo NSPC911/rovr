@@ -296,8 +296,9 @@ description: config schema humanified
     - [8.3.5. Property `Rovr Config > plugins > fd > follow_symlinks`](#plugins_fd_follow_symlinks)
     - [8.3.6. Property `Rovr Config > plugins > fd > no_ignore_parent`](#plugins_fd_no_ignore_parent)
     - [8.3.7. Property `Rovr Config > plugins > fd > search_hidden`](#plugins_fd_search_hidden)
-    - [8.3.8. Property `Rovr Config > plugins > fd > default_filter_types`](#plugins_fd_default_filter_types)
-      - [8.3.8.1. Rovr Config > plugins > fd > default_filter_types > default_filter_types items](#plugins_fd_default_filter_types_items)
+    - [8.3.8. Property `Rovr Config > plugins > fd > timeout`](#plugins_fd_timeout)
+    - [8.3.9. Property `Rovr Config > plugins > fd > default_filter_types`](#plugins_fd_default_filter_types)
+      - [8.3.9.1. Rovr Config > plugins > fd > default_filter_types > default_filter_types items](#plugins_fd_default_filter_types_items)
   - [8.4. Property `Rovr Config > plugins > rg`](#plugins_rg)
     - [8.4.1. Property `Rovr Config > plugins > rg > enabled`](#plugins_rg_enabled)
     - [8.4.2. Property `Rovr Config > plugins > rg > keybinds`](#plugins_rg_keybinds)
@@ -307,6 +308,7 @@ description: config schema humanified
     - [8.4.5. Property `Rovr Config > plugins > rg > follow_symlinks`](#plugins_rg_follow_symlinks)
     - [8.4.6. Property `Rovr Config > plugins > rg > no_ignore_parent`](#plugins_rg_no_ignore_parent)
     - [8.4.7. Property `Rovr Config > plugins > rg > search_hidden`](#plugins_rg_search_hidden)
+    - [8.4.8. Property `Rovr Config > plugins > rg > timeout`](#plugins_rg_timeout)
   - [8.5. Property `Rovr Config > plugins > poppler`](#plugins_poppler)
     - [8.5.1. Property `Rovr Config > plugins > poppler > enabled`](#plugins_poppler_enabled)
     - [8.5.2. Property `Rovr Config > plugins > poppler > threads`](#plugins_poppler_threads)
@@ -4415,16 +4417,17 @@ Refer to https://textual.textualize.io/guide/design/#additional-variables for mo
 | **Required**              | No          |
 | **Additional properties** | Not allowed |
 
-| Property                                                 | Type                      | Title/Description                                             |
-| -------------------------------------------------------- | ------------------------- | ------------------------------------------------------------- |
-| [enabled](#plugins_fd_enabled)                           | boolean                   | Enable recursive file search using fd.                        |
-| [keybinds](#plugins_fd_keybinds)                         | array of string           | The keybind to open the file search picker.                   |
-| [executable](#plugins_fd_executable)                     | string                    | fd executable name or path.                                   |
-| [relative_paths](#plugins_fd_relative_paths)             | boolean                   | Whether to show fd results as relative path or absolute path. |
-| [follow_symlinks](#plugins_fd_follow_symlinks)           | boolean                   | Whether fd should follow symlinks when searching.             |
-| [no_ignore_parent](#plugins_fd_no_ignore_parent)         | boolean                   | Don't use \*ignore files from parent folders when searching.  |
-| [search_hidden](#plugins_fd_search_hidden)               | boolean                   | Whether to include hidden files in fd results by default.     |
-| [default_filter_types](#plugins_fd_default_filter_types) | array of enum (of string) | The default file types to show when using fd.                 |
+| Property                                                 | Type                      | Title/Description                                                                |
+| -------------------------------------------------------- | ------------------------- | -------------------------------------------------------------------------------- |
+| [enabled](#plugins_fd_enabled)                           | boolean                   | Enable recursive file search using fd.                                           |
+| [keybinds](#plugins_fd_keybinds)                         | array of string           | The keybind to open the file search picker.                                      |
+| [executable](#plugins_fd_executable)                     | string                    | fd executable name or path.                                                      |
+| [relative_paths](#plugins_fd_relative_paths)             | boolean                   | Whether to show fd results as relative path or absolute path.                    |
+| [follow_symlinks](#plugins_fd_follow_symlinks)           | boolean                   | Whether fd should follow symlinks when searching.                                |
+| [no_ignore_parent](#plugins_fd_no_ignore_parent)         | boolean                   | Don't use \*ignore files from parent folders when searching.                     |
+| [search_hidden](#plugins_fd_search_hidden)               | boolean                   | Whether to include hidden files in fd results by default.                        |
+| [timeout](#plugins_fd_timeout)                           | integer                   | The maximum time (in seconds) to wait for fd to return results before giving up. |
+| [default_filter_types](#plugins_fd_default_filter_types) | array of enum (of string) | The default file types to show when using fd.                                    |
 
 #### <a name="plugins_fd_enabled"></a>8.3.1. Property `Rovr Config > plugins > fd > enabled`
 
@@ -4516,7 +4519,17 @@ Refer to https://textual.textualize.io/guide/design/#additional-variables for mo
 
 **Description:** Whether to include hidden files in fd results by default.
 
-#### <a name="plugins_fd_default_filter_types"></a>8.3.8. Property `Rovr Config > plugins > fd > default_filter_types`
+#### <a name="plugins_fd_timeout"></a>8.3.8. Property `Rovr Config > plugins > fd > timeout`
+
+|              |           |
+| ------------ | --------- |
+| **Type**     | `integer` |
+| **Required** | No        |
+| **Default**  | `5`       |
+
+**Description:** The maximum time (in seconds) to wait for fd to return results before giving up.
+
+#### <a name="plugins_fd_default_filter_types"></a>8.3.9. Property `Rovr Config > plugins > fd > default_filter_types`
 
 |              |                             |
 | ------------ | --------------------------- |
@@ -4538,7 +4551,7 @@ Refer to https://textual.textualize.io/guide/design/#additional-variables for mo
 | -------------------------------------------------------------------- | ----------- |
 | [default_filter_types items](#plugins_fd_default_filter_types_items) |             |
 
-##### <a name="plugins_fd_default_filter_types_items"></a>8.3.8.1. Rovr Config > plugins > fd > default_filter_types > default_filter_types items
+##### <a name="plugins_fd_default_filter_types_items"></a>8.3.9.1. Rovr Config > plugins > fd > default_filter_types > default_filter_types items
 
 |              |                    |
 | ------------ | ------------------ |
@@ -4565,15 +4578,16 @@ Must be one of:
 | **Required**              | No          |
 | **Additional properties** | Not allowed |
 
-| Property                                         | Type            | Title/Description                                            |
-| ------------------------------------------------ | --------------- | ------------------------------------------------------------ |
-| [enabled](#plugins_rg_enabled)                   | boolean         | Enable content searching using rg.                           |
-| [keybinds](#plugins_rg_keybinds)                 | array of string | The keybind to open the content search picker.               |
-| [executable](#plugins_rg_executable)             | string          | rg executable name or path.                                  |
-| [case_sensitive](#plugins_rg_case_sensitive)     | boolean         | Whether the search should be case sensitive by default.      |
-| [follow_symlinks](#plugins_rg_follow_symlinks)   | boolean         | Whether rg should follow symlinks when searching.            |
-| [no_ignore_parent](#plugins_rg_no_ignore_parent) | boolean         | Don't use \*ignore files from parent folders when searching. |
-| [search_hidden](#plugins_rg_search_hidden)       | boolean         | Whether to search hidden files by default.                   |
+| Property                                         | Type            | Title/Description                                                                |
+| ------------------------------------------------ | --------------- | -------------------------------------------------------------------------------- |
+| [enabled](#plugins_rg_enabled)                   | boolean         | Enable content searching using rg.                                               |
+| [keybinds](#plugins_rg_keybinds)                 | array of string | The keybind to open the content search picker.                                   |
+| [executable](#plugins_rg_executable)             | string          | rg executable name or path.                                                      |
+| [case_sensitive](#plugins_rg_case_sensitive)     | boolean         | Whether the search should be case sensitive by default.                          |
+| [follow_symlinks](#plugins_rg_follow_symlinks)   | boolean         | Whether rg should follow symlinks when searching.                                |
+| [no_ignore_parent](#plugins_rg_no_ignore_parent) | boolean         | Don't use \*ignore files from parent folders when searching.                     |
+| [search_hidden](#plugins_rg_search_hidden)       | boolean         | Whether to search hidden files by default.                                       |
+| [timeout](#plugins_rg_timeout)                   | integer         | The maximum time (in seconds) to wait for rg to return results before giving up. |
 
 #### <a name="plugins_rg_enabled"></a>8.4.1. Property `Rovr Config > plugins > rg > enabled`
 
@@ -4664,6 +4678,16 @@ Must be one of:
 | **Default**  | `false`   |
 
 **Description:** Whether to search hidden files by default.
+
+#### <a name="plugins_rg_timeout"></a>8.4.8. Property `Rovr Config > plugins > rg > timeout`
+
+|              |           |
+| ------------ | --------- |
+| **Type**     | `integer` |
+| **Required** | No        |
+| **Default**  | `30`      |
+
+**Description:** The maximum time (in seconds) to wait for rg to return results before giving up.
 
 ### <a name="plugins_poppler"></a>8.5. Property `Rovr Config > plugins > poppler`
 

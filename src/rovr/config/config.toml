@@ -281,6 +281,7 @@ follow_symlinks = false
 no_ignore_parent = false
 search_hidden = false
 default_filter_types = ["file", "directory"]
+timeout = 5
 
 [plugins.rg]
 enabled = true

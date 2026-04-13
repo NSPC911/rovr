@@ -144,7 +144,9 @@ class FileSearch(ModalSearchScreen):
         fd_process = None
         try:
             fd_process = await self.create_proc(*fd_cmd)
-            stdout, _ = await asyncio.wait_for(fd_process.communicate(), timeout=3)
+            stdout, _ = await asyncio.wait_for(
+                fd_process.communicate(), timeout=config["plugins"]["fd"]["timeout"]
+            )
         except (OSError, asyncio.exceptions.TimeoutError) as exc:
             if isinstance(exc, asyncio.exceptions.TimeoutError) and fd_process:
                 fd_process.kill()

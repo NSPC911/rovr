@@ -17,8 +17,6 @@ jobs:
       models: read
       contents: read
     steps:
-      - uses: actions/checkout@v4
-
       - name: print actor for debug purposes
         run: 'echo "Actor: ${{ github.actor }}"'
 

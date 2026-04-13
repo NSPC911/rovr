@@ -54,7 +54,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     name: Nuitka Build (${{ matrix.name }})
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
 
       - name: Setup uv
         uses: astral-sh/setup-uv@v6
@@ -89,7 +89,7 @@ jobs:
           retention-days: 30
 
       - name: Upload Build Report
-        uses: actions/upload-artifact
+        uses: actions/upload-artifact@v4
         with:
           path: report.xml
           name: rovr-${{ matrix.name }}-report.xml

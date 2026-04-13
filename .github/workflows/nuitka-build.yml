@@ -88,6 +88,14 @@ jobs:
           name: rovr-${{ matrix.name }}-nuitka
           retention-days: 30
 
+      - name: Upload Build Report
+        uses: actions/upload-artifact
+        with:
+          path: report.xml
+          name: rovr-${{ matrix.name }}-report.xml
+          retention-days: 30
+          archive: false
+
       - name: Alert if fail
         if: failure()
         uses: sarisia/actions-status-discord@v1.13.0

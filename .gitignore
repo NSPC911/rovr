@@ -8,3 +8,4 @@ dist
 rovr.exe
 rovr.dist
 /src/rovr/COMMIT_HASH
+report.xml

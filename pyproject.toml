@@ -10,7 +10,7 @@ authors = [{ name = "NSPC911" }]
 keywords = ["filemanager", "fs", "python", "textual", "tui"]
 classifiers = [
   "Development Status :: 4 - Beta",
-  "License :: OSI Approved :: MIT License",
+  # "License :: OSI Approved :: MIT License",
   "Programming Language :: Python :: 3.13",
   # "Framework :: Textual", # I highly believe textual deserves its own category
   "Topic :: Desktop Environment :: File Managers",
@@ -21,12 +21,12 @@ dependencies = [
   "fastjsonschema>=2.21.2",
   "humanize>=4.15.0",
   "pathvalidate>=3.3.1",
-  "pillow>=12.1.0",
+  "pillow>=12.2.0",
   "platformdirs>=4.9.0",
   "psutil>=7.2.0; sys_platform != 'android'",
   "puremagic>=2.2.0",
   "rarfile>=4.2",
-  "resvg-py>=0.3.0",
+  "resvg-py>=0.3.1",
   "rich>=14.3.1", # issue with 14.3.0 that breaks nerd fonts
   "send2trash>=2.1.0",
   "textual~=8.0",
@@ -162,7 +162,7 @@ args = [
 help = "Build rovr into an executable using Nuitka"
 sequence = [
   "_hash_dump",
-  { cmd = 'nuitka --mode=${mode} --python-flag=-m --lto=${lto} --assume-yes-for-downloads --disable-plugin=tk-inter --nofollow-import-to="tkinter" --enable-plugin=anti-bloat --enable-plugin=implicit-imports --enable-plugin=multiprocessing --enable-plugin=options-nanny --enable-plugins=no-qt --include-package-data=rovr --macos-app-console-mode=force --macos-signed-app-name=com.NSPC911.rovr --onefile-cache-mode=cached --onefile-child-grace-time=0 --python-flag=no_docstrings --python-flag=no_site --python-flag=static_hashes --warn-unusual-code --windows-console-mode=force src/rovr --user-package-configuration-file=nuitka.config.yml --report=report.xml' },
+  { cmd = 'nuitka --assume-yes-for-downloads --disable-plugin=tk-inter --enable-plugin=anti-bloat --enable-plugin=implicit-imports --enable-plugin=multiprocessing --enable-plugin=options-nanny --enable-plugins=no-qt --include-package-data=rovr --lto=${lto} --macos-app-console-mode=force --macos-signed-app-name=com.NSPC911.rovr --mode=${mode} --nofollow-import-to="tkinter" --onefile-cache-mode=cached --onefile-child-grace-time=0 --python-flag=-m --python-flag=isolated --python-flag=no_asserts --python-flag=no_docstrings --python-flag=no_site --python-flag=no_warnings --python-flag=safe_path --python-flag=static_hashes --report=report.xml --user-package-configuration-file=nuitka.config.yml --warn-unusual-code --windows-console-mode=force src/rovr' },
   "_hash_clean",
 ]
 args = [

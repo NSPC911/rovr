@@ -1,5 +1,6 @@
 import asyncio
 import contextlib
+from functools import partial
 from os import path
 from typing import ClassVar
 
@@ -205,14 +206,13 @@ class ContentSearch(ModalSearchScreen):
             if not file_path:
                 continue
             display_text = f" {file_path}:[dim]{line[1]}[/]"
-            icon: tuple[str, str] = (
-                get_icon_for_folder(file_path)
-                if path.isdir(file_path)
-                else get_icon_for_file(file_path)
-            )
+            if path.isdir(file_path):
+                icon_factory = partial(get_icon_for_folder, file_path)
+            else:
+                icon_factory = partial(get_icon_for_file, file_path)
             options.append(
                 ModalSearcherOption(
-                    icon,
+                    icon_factory,
                     display_text,
                     file_path,
                 )

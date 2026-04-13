@@ -180,7 +180,7 @@ def get_filtered_dir_names(cwd: str | bytes, show_hidden: bool = False) -> set[s
 
 class CWDObjectReturnDict(TypedDict):
     name: str
-    icon: tuple[str, str]
+    icon: Callable[[], tuple[str, str]]
     dir_entry: DirEntryType
 
 
@@ -271,15 +271,17 @@ def sync_get_cwd_object(
                 continue
 
             if item.is_dir():
+                item_name = item.name
                 folders.append({
-                    "name": item.name,
-                    "icon": get_icon_for_folder(item.name),
+                    "name": item_name,
+                    "icon": lambda item_name=item_name: get_icon_for_folder(item_name),
                     "dir_entry": item,
                 })
             else:
+                item_name = item.name
                 files.append({
-                    "name": item.name,
-                    "icon": get_icon_for_file(item.name),
+                    "name": item_name,
+                    "icon": lambda item_name=item_name: get_icon_for_file(item_name),
                     "dir_entry": item,
                 })
             if (

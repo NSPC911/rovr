@@ -8,14 +8,13 @@ from textual.binding import BindingType
 from textual.content import ContentText
 from textual.css.query import NoMatches
 from textual.geometry import Region
-from textual.style import Style as TextualStyle
 from textual.widgets import Button, Input, OptionList, SelectionList
 from textual.widgets.option_list import Option, OptionDoesNotExist
 from textual.widgets.selection_list import Selection, SelectionType
 
-from rovr.classes.mixins import CheckboxRenderingMixin
+from rovr.classes.mixins import CheckboxRenderingMixin, SingleLineOptionLayoutMixin
 from rovr.classes.session_manager import SessionManager
-from rovr.classes.textual_options import FileListSelectionWidget
+from rovr.classes.textual_options import FileListSelectionWidget, LazySelection
 from rovr.components import PopupOptionList
 from rovr.functions import icons as icon_utils
 from rovr.functions import path as path_utils
@@ -30,7 +29,12 @@ from rovr.variables.constants import (
 )
 
 
-class FileList(CheckboxRenderingMixin, SelectionList, inherit_bindings=False):
+class FileList(
+    CheckboxRenderingMixin,
+    SingleLineOptionLayoutMixin,
+    SelectionList,
+    inherit_bindings=False,
+):
     """
     OptionList but can multi-select files and folders.
     """
@@ -177,20 +181,21 @@ class FileList(CheckboxRenderingMixin, SelectionList, inherit_bindings=False):
                     preview.border_title = ""
                 else:
                     file_list_options = folders + files
+                    self.list_of_options = []
+                    name_to_index: dict[str, int] = {}
 
-                    self.list_of_options = [
-                        FileListSelectionWidget(
-                            icon=item["icon"],
-                            label=item["name"],
-                            dir_entry=item["dir_entry"],
-                            clipboard=self.app.Clipboard,
+                    for i, item in enumerate(file_list_options):
+                        self.list_of_options.append(
+                            FileListSelectionWidget(
+                                icon=item["icon"],
+                                label=item["name"],
+                                dir_entry=item["dir_entry"],
+                                clipboard=self.app.Clipboard,
+                            )
                         )
-                        for item in file_list_options
-                    ]
-                    name_to_index: dict[str, int] = {
-                        item["name"]: i for i, item in enumerate(file_list_options)
-                    }
-                    self.items_in_cwd = set(name_to_index)
+                        name_to_index[item["name"]] = i
+                    self.items_in_cwd = set(name_to_index.keys())
+
                     if focus_on in name_to_index:
                         to_highlight_index = name_to_index[focus_on]
 
@@ -481,21 +486,12 @@ class FileList(CheckboxRenderingMixin, SelectionList, inherit_bindings=False):
                 if isinstance(option, FileListSelectionWidget)
             ]
 
-    def update_dimmed_items(self, paths: list[str] | None = None) -> None:
-        """Update the dimmed items in the file list based on the cut items.
-
-        Args:
-            paths (list[str]): The list of paths to dim.
-        """
-        if paths is None:
-            paths = []
+    def update_dimmed_items(self) -> None:
+        """Update the dimmed items in the file list based on the cut items."""
         if self.option_count == 0 or self.get_option_at_index(0).disabled:
             return
         for option in self.options:
-            if path_utils.normalise(option.dir_entry.path) in paths:
-                option._set_prompt(option.prompt.stylize("dim"))
-            else:
-                option._set_prompt(option.prompt.stylize(TextualStyle(dim=False)))
+            option._invalidate_prompt_cache()
         self._clear_caches()
         self._update_lines()
         self.refresh()
@@ -636,6 +632,7 @@ class FileList(CheckboxRenderingMixin, SelectionList, inherit_bindings=False):
         self,
         options: Iterable[
             Selection[SelectionType]
+            | LazySelection[SelectionType]
             | tuple[ContentText, SelectionType]
             | tuple[ContentText, SelectionType, bool]
         ],

@@ -1,17 +1,19 @@
 from os import DirEntry, getcwd, path
-from typing import Literal, NamedTuple
+from typing import Callable, Literal, NamedTuple, TypeAlias
 
+import rich.repr
 from textual.content import Content, ContentText
-from textual.visual import VisualType
+from textual.visual import Visual, VisualType
 from textual.widgets import SelectionList
 from textual.widgets.option_list import Option
-from textual.widgets.selection_list import Selection
+from textual.widgets.selection_list import Selection, SelectionType
 from textual_autocomplete import DropdownItem
 
 from rovr.functions import icons as icon_utils
 from rovr.functions.path import normalise
 
 _icon_content_cache: dict[tuple[str, str], Content] = {}
+IconFactory: TypeAlias = Callable[[], tuple[str, str]]
 
 
 def _get_cached_icon(icon: tuple[str, str]) -> Content:
@@ -20,6 +22,113 @@ def _get_cached_icon(icon: tuple[str, str]) -> Content:
             f" [{icon[1]}]{icon[0]}[/{icon[1]}] "
         )
     return _icon_content_cache[icon]
+
+
+@rich.repr.auto
+class LazyOption(Option):
+    """Lazier version of option that only renders the prompt when necessary,
+    letting the dev provide a function that generates the prompt so that
+    it is lazy loaded and provided when necessary + also caches the output
+    so that it doesn't have to be re-rendered every time."""
+
+    def __init__(
+        self,
+        prompt: Callable[[], VisualType],
+        id: str | None = None,
+        disabled: bool = False,
+    ) -> None:
+        """Initialise the option.
+
+        Args:
+            prompt: The prompt (text displayed) for the option.
+            id: An option ID for the option.
+            disabled: Disable the option (will be shown grayed out, and will not be selectable).
+
+        """
+        self.__prompt_factory: Callable[[], VisualType] = prompt
+        self._prompt: VisualType | None = None
+        self._visual: Visual | None = None
+        self._id = id
+        self.disabled = disabled
+        self._divider = False
+
+    @property
+    def prompt(self) -> VisualType:
+        """The original prompt.
+
+        Returns:
+            VisualType: The rendered prompt.
+        """
+        if self._prompt is None:
+            self._prompt = self.__prompt_factory()
+        return self._prompt
+
+    @property
+    def id(self) -> str | None:
+        """Optional ID for the option."""
+        return self._id
+
+    def _set_prompt(self, prompt: VisualType) -> None:
+        """Update the prompt.
+
+        Args:
+            prompt: New prompt.
+
+        """
+        self.__prompt_factory = lambda: prompt
+        self._prompt = prompt
+        self._visual = None
+
+    def _invalidate_prompt_cache(self) -> None:
+        """Clear cached prompt and visual so prompt factories rerun lazily."""
+        self._prompt = None
+        self._visual = None
+
+    def __hash__(self) -> int:
+        return id(self)
+
+    def __rich_repr__(self) -> rich.repr.Result:
+        yield "prompt_factory", self.__prompt_factory, None
+        yield "cached_prompt", self._prompt, None
+        yield "id", self._id, None
+        yield "disabled", self.disabled, False
+        yield "_divider", self._divider, False
+
+
+class LazySelection(LazyOption, Selection[SelectionType]):
+    """Lazy version of Selection that inherits from LazyOption, so it has all the lazy loading and caching features, but also has a value associated with it like Selection does."""
+
+    def __init__(
+        self,
+        prompt: Callable[[], VisualType],
+        value: SelectionType,
+        initial_state: bool = False,
+        id: str | None = None,
+        disabled: bool = False,
+    ) -> None:
+        """Initialise the selection.
+
+        Args:
+            prompt: The prompt (text displayed) for the selection.
+            value: The value associated with the selection.
+            initial_state: The initial selected state of the selection. Defaults to False.
+            id: An option ID for the selection.
+            disabled: Disable the selection (will be shown grayed out, and will not be selectable).
+
+        """
+        super().__init__(prompt, id=id, disabled=disabled)
+        self._value: SelectionType = value
+        self._initial_state: bool = initial_state
+
+    @property
+    def value(self) -> SelectionType:
+        """The value associated with the selection."""
+        return self._value
+
+    @property
+    def initial_state(self) -> bool:
+        """The initial selected state of the selection."""
+        return self._initial_state
 
 
 class PinnedSidebarOption(Option):
@@ -42,24 +151,28 @@ class PinnedSidebarOption(Option):
         self.label = label
 
 
-class ArchiveFileListSelection(Selection):
-    def __init__(self, icon: tuple[str, str], label: str) -> None:
+class ArchiveFileListSelection(LazySelection[str]):
+    def __init__(self, icon: tuple[str, str] | IconFactory, label: str) -> None:
         """Initialise the option.
 
         Args:
             icon: The icon for the option
             label: The text for the option
         """
-        prompt = _get_cached_icon(icon) + Content(label)
 
-        super().__init__(prompt=prompt, value="", disabled=True)
+        icon_factory = (lambda icon=icon: icon) if isinstance(icon, tuple) else icon
+
+        def get_prompt() -> Content:
+            return _get_cached_icon(icon_factory()) + Content(label)
+
+        super().__init__(prompt=get_prompt, value="", disabled=True)
         self.label = label
 
 
-class FileListSelectionWidget(Selection):
+class FileListSelectionWidget(LazySelection[str]):
     def __init__(
         self,
-        icon: tuple[str, str],
+        icon: tuple[str, str] | IconFactory,
         label: str,
         dir_entry: DirEntry,
         clipboard: SelectionList,
@@ -69,38 +182,41 @@ class FileListSelectionWidget(Selection):
         Initialise the selection.
 
         Args:
-            icon (tuple[str, str]): The icon list from a utils function.
+            icon (tuple[str, str] | Callable[[], tuple[str, str]]):
+                The icon list from a utils function or a lazy icon resolver.
             label (str): The label for the option.
             dir_entry (DirEntry): The nt.DirEntry class
             disabled (bool) = False: The initial enabled/disabled state. Enabled by default.
         """
-        prompt = _get_cached_icon(icon) + Content(label)
-        dir_entry_path = normalise(dir_entry.path)
-        if any(
-            clipboard_val.type_of_selection == "cut"
-            and dir_entry_path == clipboard_val.path
-            for clipboard_val in clipboard.selected
-        ):
-            prompt = prompt.stylize("dim")
         self.dir_entry = dir_entry
         this_id = str(id(self))
+        self.__icon_factory = (
+            (lambda icon=icon: icon) if isinstance(icon, tuple) else icon
+        )
+        self.__label = label
+        self.__clipboard = clipboard
 
         super().__init__(
-            prompt=prompt,
+            prompt=self.get_prompt,
             # this is kinda required for FileList.get_selected_object's select mode
             # because it gets selected (which is dictionary of values)
             # which it then queries for `id` (because there's no way to query for
             # values directly)
-            value=str(this_id),
-            id=str(this_id),
+            value=this_id,
+            id=this_id,
             disabled=disabled,
         )
-        self._prompt: Content
         self.label = label
 
-    @property
-    def prompt(self) -> Content:
-        return self._prompt
+    def get_prompt(self) -> Content:
+        prompt = _get_cached_icon(self.__icon_factory()) + Content(self.__label)
+        if any(
+            clipboard_val.type_of_selection == "cut"
+            and normalise(self.dir_entry.path) == clipboard_val.path
+            for clipboard_val in self.__clipboard.selected
+        ):
+            return prompt.stylize("dim")
+        return prompt
 
 
 class ClipboardSelectionValue(NamedTuple):
@@ -179,10 +295,10 @@ class KeybindOption(Option):
         self.is_layer_bind = is_layer
 
 
-class ModalSearcherOption(Option):
+class ModalSearcherOption(LazyOption):
     def __init__(
         self,
-        icon: tuple[str, str] | None,
+        icon: tuple[str, str] | IconFactory | None,
         label: str,
         file_path: str | None = None,
         disabled: bool = False,
@@ -191,16 +307,21 @@ class ModalSearcherOption(Option):
         Initialise the option
 
         Args:
-            icon (list[str] | None): The icon list from a utils function.
+            icon (list[str] | IconFactor | None): The icon list from a utils function.
             label (str): The label for the option.
             file_path (str | None): The file path
             disabled (bool) = False: The initial enabled/disabled state.
         """
-        if icon:
-            prompt = _get_cached_icon(icon) + Content.from_markup(label)
-        else:
-            prompt = Content(label)
-        super().__init__(prompt=prompt, disabled=disabled)
+        icon_factory = None
+        if icon is not None:
+            icon_factory = (lambda icon=icon: icon) if isinstance(icon, tuple) else icon
+
+        def get_prompt() -> Content:
+            if icon_factory is None:
+                return Content(label)
+            return _get_cached_icon(icon_factory()) + Content.from_markup(label)
+
+        super().__init__(prompt=get_prompt, disabled=disabled)
         self.label = label
         self.file_path = file_path
 

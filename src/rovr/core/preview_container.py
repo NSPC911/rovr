@@ -841,19 +841,18 @@ class PreviewContainer(Container):
         if not self._current_content:
             options = [Selection("  --no-files--", value="", id="", disabled=True)]
         else:
+
+            def get_archive_icon(target_file_path: str) -> tuple[str, str]:
+                if target_file_path.endswith("/"):
+                    return icon_utils.get_icon_for_folder(target_file_path.strip("/"))
+                return icon_utils.get_icon_for_file(target_file_path)
+
             file_list_length = len(self._current_content)
             start_time = time()
             for index, file_path in enumerate(self._current_content):
-                if file_path.endswith("/"):
-                    icon = icon_utils.get_icon_for_folder(file_path.strip("/"))
-                else:
-                    icon = icon_utils.get_icon_for_file(file_path)
-
-                # Create a selection widget similar to FileListSelectionWidget but simpler
-                # since we don't have dir_entry metadata for archive contents
                 options.append(
                     ArchiveFileListSelection(
-                        icon,
+                        lambda file_path=file_path: get_archive_icon(file_path),
                         file_path,
                     )
                 )

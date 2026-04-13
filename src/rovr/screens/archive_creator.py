@@ -1,7 +1,6 @@
 from asyncio import sleep
 from typing import ClassVar, Iterable, Literal, Self
 
-from pathvalidate import sanitize_filepath
 from textual import events, on, work
 from textual.app import ComposeResult
 from textual.binding import Binding, BindingType
@@ -178,6 +177,8 @@ class ArchiveCreationScreen(ModalInput):
     @work
     async def on_input_submitted(self, event: Input.Submitted) -> None:
         """Handle input submission."""
+        from pathvalidate import sanitize_filepath
+
         event.prevent_default()
         event.stop()
         if (

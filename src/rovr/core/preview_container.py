@@ -10,7 +10,7 @@ from time import time
 from typing import Literal, cast
 
 import textual_image.widget
-from PIL import Image, ImageDraw, ImageFont, UnidentifiedImageError
+from PIL import Image, UnidentifiedImageError
 from PIL.Image import Image as PILImage
 from resvg_py import svg_to_bytes
 from textual import events, on, work
@@ -185,6 +185,7 @@ class PreviewContainer(Container):
 
     def show_font_preview(self) -> None:
         """Show font preview with PIL.ImageFont and a custom PIL.ImageDraw"""
+        from PIL import ImageDraw, ImageFont
         from textual.color import Color
 
         if should_cancel() or self._current_file_path is None:

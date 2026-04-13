@@ -1,7 +1,6 @@
 import contextlib
 from asyncio import sleep
 
-from pathvalidate import sanitize_filepath
 from textual import events, work
 from textual.app import ComposeResult, ScreenStackError
 from textual.containers import HorizontalGroup
@@ -114,6 +113,8 @@ class ModalInput(ModalScreen, inherit_bindings=False):
     @work
     async def on_input_submitted(self, event: Input.Submitted) -> None:
         """Handle input submission."""
+        from pathvalidate import sanitize_filepath
+
         if (
             not self.query_one(Input).is_valid
             and event.validation_result

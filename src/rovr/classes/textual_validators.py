@@ -1,6 +1,5 @@
 from os import getcwd, path
 
-from pathvalidate import sanitize_filepath
 from textual.validation import ValidationResult, Validator
 
 from rovr.functions.path import normalise
@@ -13,6 +12,8 @@ class IsValidFilePath(Validator):
         self.strict = strict
 
     def validate(self, value: str) -> ValidationResult:
+        from pathvalidate import sanitize_filepath
+
         value = str(normalise(str(getcwd()) + "/" + value))
         if value == normalise(sanitize_filepath(value)):
             return self.success()

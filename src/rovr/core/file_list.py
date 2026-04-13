@@ -194,6 +194,7 @@ class FileList(
                             )
                         )
                         name_to_index[item["name"]] = i
+                    self.items_in_cwd = set(name_to_index.keys())
 
                     if focus_on in name_to_index:
                         to_highlight_index = name_to_index[focus_on]

@@ -181,12 +181,12 @@ def existing_dir(value: str) -> str:
 def eager_set_folder(config_folder: str | None) -> None:
     if not config_folder:
         return
+    config_root = os.path.realpath(config_folder).replace("\\", "/")
+    os.environ["ROVR_CONFIG_FOLDER"] = config_root
 
     from rovr.variables.maps import RovrVars
 
-    config_root = os.path.realpath(config_folder).replace("\\", "/")
     RovrVars.ROVRCONFIG = type(RovrVars).ROVRCONFIG = config_root
     RovrVars.ROVRCACHE = type(RovrVars).ROVRCACHE = os.path.join(
         config_root, "cache"
     ).replace("\\", "/")
-    os.environ["ROVR_CONFIG_FOLDER"] = config_root

@@ -1,5 +1,5 @@
 from dataclasses import dataclass, field
-from os import path
+from os import environ, path
 
 from platformdirs import PlatformDirs
 from rich._spinners import SPINNERS
@@ -17,7 +17,9 @@ class _RovrVars:
     PICTURES: str = general.user_pictures_dir.replace("\\", "/")
     DESKTOP: str = general.user_desktop_dir.replace("\\", "/")
     VIDEOS: str = general.user_videos_dir.replace("\\", "/")
-    CONFIG: str = general.user_config_dir.replace("\\", "/")
+    CONFIG: str = environ.get("ROVR_CONFIG_FOLDER") or general.user_config_dir.replace(
+        "\\", "/"
+    )
     CACHE: str = general.user_cache_dir.replace("\\", "/")
     MUSIC: str = general.user_music_dir.replace("\\", "/")
     HOME: str = path.expanduser("~").replace("\\", "/")

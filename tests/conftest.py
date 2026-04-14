@@ -1,4 +1,6 @@
 import logging
+import os
+import tempfile
 from pathlib import Path
 from typing import Callable
 from unittest.mock import patch
@@ -7,7 +9,11 @@ import pytest
 from textual.dom import DOMNode
 from textual.pilot import Pilot
 
-from rovr.variables import maps
+# Patch environment BEFORE importing any rovr modules so config is initialized isolated
+_test_config_dir = tempfile.mkdtemp(prefix="rovr_test_config_")
+os.environ["ROVR_CONFIG_FOLDER"] = _test_config_dir
+
+from rovr.variables import maps  # noqa: E402
 
 
 async def iter_until(

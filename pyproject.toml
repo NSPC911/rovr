@@ -147,6 +147,9 @@ snip.args = [
   { name = "delay", help = "Delay in seconds before taking the screenshot", default = 10, type = "integer" },
 ]
 
+tokei.help = "Run tokei"
+tokei.cmd = "tokei --sort lines --exclude '*.svg' --exclude 'src/rovr/classes/config.py' --exclude '*lock*' --hidden"
+
 [tool.poe.tasks.test]
 help = "Run tests"
 sequence = [
@@ -184,9 +187,7 @@ asyncio_mode = "auto"
 
 [tool.ruff]
 force-exclude = true
-exclude = [
-  "src/rovr/monkey_patches/sys_stdout.py"
-]
+exclude = []
 
 [tool.ruff.lint]
 select = [

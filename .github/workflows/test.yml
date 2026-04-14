@@ -36,10 +36,10 @@ jobs:
     name: Test on (${{ matrix.name }})
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Setup uv
-        uses: astral-sh/setup-uv@v6
+        uses: astral-sh/setup-uv@cec208311dfd045dd5311c1add060b2062131d57
         with:
           activate-environment: true
 
@@ -90,7 +90,7 @@ jobs:
 
       - name: Upload retry artifact
         if: success()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: retry-info-${{ matrix.name }}
           path: retry-info/
@@ -99,7 +99,7 @@ jobs:
 
       - name: Alert if fail
         if: failure()
-        uses: sarisia/actions-status-discord@v1.13.0
+        uses: sarisia/actions-status-discord@v1.16.0
         with:
           webhook: ${{ secrets.LOG_HOOK }}
           title: rovr tests failed on ${{ matrix.name }}!
@@ -141,7 +141,7 @@ jobs:
           }
 
       - name: Notify Discord - Tests Complete
-        uses: sarisia/actions-status-discord@v1.13.0
+        uses: sarisia/actions-status-discord@v1.16.0
         with:
           webhook: ${{ secrets.LOG_HOOK }}
           title: <:joe_ye:1308074319934525545> All tests passed!

@@ -25,7 +25,7 @@ jobs:
         uses: actions/checkout@v6
 
       - name: Setup uv
-        uses: astral-sh/setup-uv@v6
+        uses: astral-sh/setup-uv@cec208311dfd045dd5311c1add060b2062131d57
         with:
           activate-environment: true
 
@@ -80,7 +80,7 @@ jobs:
 
       - name: Alert if fail
         if: failure()
-        uses: sarisia/actions-status-discord@v1.13.0
+        uses: sarisia/actions-status-discord@v1.16.0
         with:
           webhook: ${{ secrets.LOG_HOOK }}
           title: Post Commit checks failed!
@@ -100,7 +100,7 @@ jobs:
         uses: actions/checkout@v6
 
       - name: Setup uv
-        uses: astral-sh/setup-uv@v6
+        uses: astral-sh/setup-uv@cec208311dfd045dd5311c1add060b2062131d57
         with:
           activate-environment: true
 
@@ -113,7 +113,7 @@ jobs:
 
       - name: Alert if ty fails
         if: failure() && steps.ty_check.outcome == 'failure'
-        uses: sarisia/actions-status-discord@v1.13.0
+        uses: sarisia/actions-status-discord@v1.16.0
         with:
           webhook: ${{ secrets.LOG_HOOK }}
           title: rovr ty check failed!
@@ -130,11 +130,11 @@ jobs:
       # If on a fork, only check and fail if there are issues (no fixes/commits)
       - name: Run ruff
         id: ruff_check
-        uses: astral-sh/ruff-action@v3
+        uses: astral-sh/ruff-action@v4.0.0
 
       - name: Alert if ruff fails
         if: failure() && steps.ruff_check.outcome == 'failure'
-        uses: sarisia/actions-status-discord@v1.13.0
+        uses: sarisia/actions-status-discord@v1.16.0
         with:
           webhook: ${{ secrets.LOG_HOOK }}
           title: rovr ruff check failed!

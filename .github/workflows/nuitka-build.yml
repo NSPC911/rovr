@@ -57,13 +57,13 @@ jobs:
       - uses: actions/checkout@v6
 
       - name: Setup uv
-        uses: astral-sh/setup-uv@v6
+        uses: astral-sh/setup-uv@v8
         with:
           activate-environment: true
           python-version: "3.13"
 
       - name: Cache Nuitka
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: |
             ~/.cache/Nuitka
@@ -82,17 +82,20 @@ jobs:
           uv run --no-sync poe build standalone
 
       - name: Upload Executable
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           path: rovr.dist
           name: rovr-${{ matrix.name }}-nuitka
           retention-days: 30
 
+      - name: Rename Report
+        shell: pwsh
+        run: Move-Item report.xml 'rovr-${{ matrix.name }}-report.xml'
+
       - name: Upload Build Report
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
-          path: report.xml
-          name: rovr-${{ matrix.name }}-report.xml
+          path: rovr-${{ matrix.name }}-report.xml
           retention-days: 30
           archive: false
 

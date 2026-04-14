@@ -18,7 +18,7 @@ jobs:
     name: Notify Docs Build Starting
     steps:
       - name: Notify Discord - Docs Build Starting
-        uses: sarisia/actions-status-discord@v1.13.0
+        uses: sarisia/actions-status-discord@v1.16.0
         with:
           webhook: ${{ secrets.LOG_HOOK }}
           title: rovr docs build starting!
@@ -54,7 +54,7 @@ jobs:
     steps:
       - name: Deploy to GitHub Pages
         id: deployment
-        uses: actions/deploy-pages@v4
+        uses: actions/deploy-pages@v5
 
   notify-success:
     runs-on: ubuntu-slim
@@ -62,7 +62,7 @@ jobs:
     name: Notify Docs Build Success
     steps:
       - name: Notify Discord - Docs Build Success
-        uses: sarisia/actions-status-discord@v1.13.0
+        uses: sarisia/actions-status-discord@v1.16.0
         with:
           webhook: ${{ secrets.LOG_HOOK }}
           title: rovr docs build succeeded!

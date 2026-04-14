@@ -17,6 +17,9 @@ jobs:
       models: read
       contents: read
     steps:
+      - name: Checkout your repository using git
+        uses: actions/checkout@v6
+
       - name: print actor for debug purposes
         run: 'echo "Actor: ${{ github.actor }}"'
 

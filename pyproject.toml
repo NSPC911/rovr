@@ -1,6 +1,6 @@
 [project]
 name = "rovr"
-version = "0.8.1"
+version = "0.8.2"
 description = "A post-modern terminal file explorer"
 readme = "README.md"
 requires-python = "==3.13.*"
@@ -164,13 +164,14 @@ args = [
 [tool.poe.tasks.build]
 help = "Build rovr into an executable using Nuitka"
 sequence = [
+  { cmd = "uv sync --group build --no-dev" },  # no dev because for some reason, stuff gets included
   "_hash_dump",
-  { cmd = 'nuitka --assume-yes-for-downloads --disable-plugin=tk-inter --enable-plugin=anti-bloat --enable-plugin=implicit-imports --enable-plugin=multiprocessing --enable-plugin=options-nanny --enable-plugins=no-qt --include-package-data=rovr --lto=${lto} --macos-app-console-mode=force --macos-signed-app-name=com.NSPC911.rovr --mode=${mode} --nofollow-import-to="tkinter" --onefile-cache-mode=cached --onefile-child-grace-time=0 --python-flag=-m --python-flag=isolated --python-flag=no_asserts --python-flag=no_docstrings --python-flag=no_site --python-flag=safe_path --python-flag=static_hashes --report=report.xml --user-package-configuration-file=nuitka.config.yml --warn-unusual-code --windows-console-mode=force src/rovr --nofollow-import-to=aiohttp --clang' },
+  { cmd = 'nuitka --assume-yes-for-downloads --disable-plugin=tk-inter --enable-plugin=anti-bloat --enable-plugin=implicit-imports --enable-plugin=multiprocessing --enable-plugin=options-nanny --enable-plugins=no-qt --include-package-data=rovr --lto=${lto} --macos-app-console-mode=force --macos-signed-app-name=com.NSPC911.rovr --mode=${mode} --nofollow-import-to="tkinter" --onefile-cache-mode=cached --onefile-child-grace-time=1 --python-flag=-m --python-flag=isolated --python-flag=no_asserts --python-flag=no_docstrings --python-flag=no_site --python-flag=safe_path --python-flag=static_hashes --report=report.xml --user-package-configuration-file=nuitka.config.yml --warn-unusual-code --windows-console-mode=force src/rovr --nofollow-import-to=aiohttp' },
   "_hash_clean",
 ]
 args = [
   { name = "mode", help = "Build mode: onefile (default) or standalone", default = "onefile", positional = true, choices = ["standalone", "onefile"] },
-  { name = "lto", help = "Enable LTO (link time optimization)", default = "yes", choices = ["yes", "no"], options = ["--lto"] },
+  { name = "lto", help = "Enable LTO (doesn't work with zig)", default = "yes", choices = ["yes", "no"], options = ["--lto"] },
 ]
 
 [tool.poe.tasks.uv-build]

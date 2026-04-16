@@ -88,8 +88,7 @@ class LazyOption(Option):
         return id(self)
 
     def __rich_repr__(self) -> rich.repr.Result:
-        yield "prompt_factory", self.__prompt_factory, None
-        yield "cached_prompt", self._prompt, None
+        yield "is_cached", self._prompt is not None, False
         yield "id", self._id, None
         yield "disabled", self.disabled, False
         yield "_divider", self._divider, False
@@ -151,7 +150,7 @@ class PinnedSidebarOption(Option):
         self.label = label
 
 
-class ArchiveFileListSelection(LazySelection[str]):
+class ArchiveFileListSelection(LazySelection):
     def __init__(self, icon: tuple[str, str] | IconFactory, label: str) -> None:
         """Initialise the option.
 
@@ -169,7 +168,7 @@ class ArchiveFileListSelection(LazySelection[str]):
         self.label = label
 
 
-class FileListSelectionWidget(LazySelection[str]):
+class FileListSelectionWidget(LazySelection):
     def __init__(
         self,
         icon: tuple[str, str] | IconFactory,

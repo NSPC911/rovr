@@ -297,6 +297,7 @@ class Application(App, inherit_bindings=False):
             self.query_one("#below_menu > HorizontalGroup").mount(
                 label, after="PathInput"
             )
+        self.file_list.update_border_subtitle()
 
     @work
     async def _force_crash(self) -> None:

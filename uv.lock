@@ -1030,7 +1030,7 @@ requires-dist = [
     { name = "send2trash", specifier = ">=2.1.0" },
     { name = "textual", specifier = "~=8.0" },
     { name = "textual-autocomplete", specifier = ">=4.0.6" },
-    { name = "textual-image", extras = ["textual"], specifier = "<0.11.0" },
+    { name = "textual-image", extras = ["textual"], specifier = "<0.10.0" },
     { name = "textual-speedups", specifier = ">=0.2.1" },
     { name = "tomli", specifier = ">=2.4.0" },
 ]
@@ -1191,15 +1191,15 @@ wheels = [
 
 [[package]]
 name = "textual-image"
-version = "0.10.0"
+version = "0.9.0"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "pillow" },
     { name = "rich" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/88/25/52c6e92df487c74c280d42e1dd63ad260b4c06cabb401bd9358803345008/textual_image-0.10.0.tar.gz", hash = "sha256:8568883ab297f8d9d80452d842bd0fa2048d1f1b3ec91e34472264485a97290c", size = 115903, upload-time = "2026-04-07T18:00:08.819Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/7c/9f/bd73be34ba6d425b25b86af1534edc1c228551d6c185565e0dc532218b81/textual_image-0.9.0.tar.gz", hash = "sha256:de89cf1a8c1cb33b4360e44aeb070c0a8baff4c241f4c1dc49adcab7822c5e18", size = 109281, upload-time = "2026-04-06T18:41:15.906Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/84/b1/b98d31f1bc322332212328f1d282b87a91b88acf0c06910d651e59792c95/textual_image-0.10.0-py3-none-any.whl", hash = "sha256:c6a53ac7bc892a5832a27edeb6f058761ede3244414e7fc30b478fb191655bda", size = 115215, upload-time = "2026-04-07T18:00:07.144Z" },
+    { url = "https://files.pythonhosted.org/packages/ff/0f/6a6314a9ef768ed902e965dcb8fce4bd39ebdd70dab9190f4a650f53e633/textual_image-0.9.0-py3-none-any.whl", hash = "sha256:d06a859470cafc89aaef75d8245be7082bdbf456c20d3b17afa927825caecafc", size = 109748, upload-time = "2026-04-06T18:41:14.193Z" },
 ]
 
 [package.optional-dependencies]

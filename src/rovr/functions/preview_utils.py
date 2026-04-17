@@ -11,16 +11,8 @@ from rovr.functions.preview_workers import (
     resample_worker,
 )
 from rovr.functions.utils import should_cancel
-from rovr.variables.constants import config
+from rovr.variables.constants import RESAMPLING_METHOD, config
 
-RESAMPLING_METHOD = {
-    "nearest": Image.Resampling.NEAREST,
-    "lanczos": Image.Resampling.LANCZOS,
-    "bilinear": Image.Resampling.BILINEAR,
-    "bicubic": Image.Resampling.BICUBIC,
-    "box": Image.Resampling.BOX,
-    "hamming": Image.Resampling.HAMMING,
-}.get(config["interface"]["image_viewer"]["resampling"], Image.Resampling.NEAREST)
 MAX_IMAGE_SIZE: tuple[int, int] = tuple(config["interface"]["image_viewer"]["max_size"])  # ty: ignore
 MAX_FONT_SIZE: tuple[int, int] = tuple(config["interface"]["font_preview"]["max_size"])  # ty: ignore
 

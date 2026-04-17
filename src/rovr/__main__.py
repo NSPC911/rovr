@@ -316,9 +316,11 @@ example_function(10)"""
     if args.force_first_launch:
         return
 
-    import rovr.cache._platform  # noqa: F401
-    from rovr.functions.utils import set_nested_value
+    from rovr.functions.utils import set_nested_value  # noqa: I001
     from rovr.variables.constants import config
+
+    import rovr.monkey_patches._classes  # noqa: F401
+    import rovr.monkey_patches._platform  # noqa: F401
 
     for feature_path in args.with_features:
         set_nested_value(cast(dict, config), feature_path, True)

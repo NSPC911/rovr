@@ -6,6 +6,7 @@ from os import environ
 from shutil import which
 from typing import Literal, cast
 
+from PIL import Image
 from textual.binding import Binding
 
 from rovr.classes.config import RovrConfig
@@ -152,3 +153,12 @@ os_type = (
     if sys.platform == "darwin"
     else sys.platform.capitalize()
 )
+
+RESAMPLING_METHOD = {
+    "nearest": Image.Resampling.NEAREST,
+    "lanczos": Image.Resampling.LANCZOS,
+    "bilinear": Image.Resampling.BILINEAR,
+    "bicubic": Image.Resampling.BICUBIC,
+    "box": Image.Resampling.BOX,
+    "hamming": Image.Resampling.HAMMING,
+}.get(config["interface"]["image_viewer"]["resampling"], Image.Resampling.NEAREST)

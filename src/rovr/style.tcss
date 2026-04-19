@@ -413,10 +413,10 @@ Tooltip {
     &FileList { height: 1fr }
   }
   Image {
-    width: auto;
+    width: 1fr;
     height: auto;
     align: center middle;
-    margin: 0 1 1 1;
+    /* margin: 0 1 1 1; */
   }
 }
 

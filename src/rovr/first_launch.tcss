@@ -300,9 +300,10 @@ SelectOverlay {
 }
 
 Image {
-  width: auto;
+  width: 1fr;
   height: auto;
   align: center middle;
   margin: 0 0;
+  /* padding-left: 1; */
   border: $accent-darken-3 round;
 }

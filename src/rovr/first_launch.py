@@ -360,7 +360,7 @@ class FirstLaunchApp(App, inherit_bindings=False):
         self.refresh()
 
     @on(Select.Changed, "#image_protocol_select")
-    def on_image_protocol_select_changed(self, event: Select.Changed) -> None:
+    async def on_image_protocol_select_changed(self, event: Select.Changed) -> None:
         protocol = event.value
         if self.preview_image is not None:
             timg_image = prot_to_timg[protocol](  # ty: ignore
@@ -371,7 +371,7 @@ class FirstLaunchApp(App, inherit_bindings=False):
             for child in container.children:
                 if not isinstance(child, Select):
                     child.remove()
-            container.mount(timg_image)
+            await container.mount(timg_image)
 
     @work
     @on(Button.Pressed, "#finish_setup")

@@ -240,7 +240,7 @@ class FileList(
                     self.list_of_options[0].id == "perm"
                 )
             else:
-                # this shouldnt happen, but just in case
+                # this shouldn't happen, but just in case
                 self.app.query_one("#new").disabled = True
 
             # special check for up tree
@@ -323,9 +323,6 @@ class FileList(
             for item in session.selectedItems:
                 if item["name"] in name_to_index:
                     self.select(self.list_of_options[name_to_index[item["name"]]])
-                else:
-                    to_select = min(item["index"], len(self.list_of_options) - 1)
-                    self.select(self.list_of_options[to_select].id)
 
     async def file_selected_handler(self, target_path: str) -> None:
         if self.app._chooser_file:

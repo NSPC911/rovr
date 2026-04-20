@@ -5,7 +5,6 @@ from typing import ClassVar, Self, Sequence
 from textual import events, work
 from textual.binding import BindingType
 from textual.content import Content
-from textual.widgets import Button, SelectionList
 from textual.widgets.option_list import OptionDoesNotExist
 from textual.worker import Worker
 
@@ -14,6 +13,7 @@ from rovr.classes.textual_options import ClipboardSelection, ClipboardSelectionV
 from rovr.functions import icons as icon_utils
 from rovr.functions.path import dump_exc
 from rovr.variables.constants import bindings, config
+from rovr.widgets import Button, SelectionList
 
 
 class Clipboard(CheckboxRenderingMixin, SelectionList, inherit_bindings=False):

@@ -8,7 +8,6 @@ from textual import on, work
 from textual.app import ComposeResult
 from textual.binding import BindingType
 from textual.containers import VerticalGroup
-from textual.widgets import Input, SelectionList
 from textual.widgets.option_list import Option
 from textual.widgets.selection_list import Selection
 from textual.worker import WorkerCancelled, get_current_worker
@@ -20,6 +19,7 @@ from rovr.functions import icons as icon_utils
 from rovr.functions import path as path_utils
 from rovr.functions.icons import get_icon_for_file, get_icon_for_folder
 from rovr.variables.constants import bindings, config
+from rovr.widgets import Input, SelectionList
 
 
 class ContentSearchToggles(CheckboxRenderingMixin, SelectionList):

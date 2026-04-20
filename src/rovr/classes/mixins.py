@@ -2,10 +2,10 @@ from rich.segment import Segment
 from rich.style import Style
 from textual.geometry import Size
 from textual.strip import Strip
-from textual.widgets import OptionList
 from textual.widgets.option_list import OptionDoesNotExist
 
 from rovr.functions import icons as icon_utils
+from rovr.widgets import OptionList
 
 
 class SingleLineOptionLayoutMixin:

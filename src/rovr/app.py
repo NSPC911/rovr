@@ -28,7 +28,6 @@ from textual.css.stylesheet import StylesheetParseError
 from textual.dom import DOMNode
 from textual.screen import Screen
 from textual.types import NoActiveAppError
-from textual.widgets import Input, Label
 from textual.worker import Worker, WorkerFailed
 
 from rovr.action_buttons import (
@@ -74,6 +73,7 @@ from rovr.screens.typed import ShellExecReturnType
 from rovr.state_manager import StateManager
 from rovr.variables.constants import MaxPossible, config, log_name, os_type
 from rovr.variables.maps import RovrVars
+from rovr.widgets import Input, Label
 
 console = Console()
 

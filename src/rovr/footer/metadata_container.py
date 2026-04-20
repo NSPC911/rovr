@@ -8,13 +8,13 @@ from textual import events, on, work
 from textual.containers import VerticalGroup, VerticalScroll
 from textual.css.query import NoMatches
 from textual.widget import MountError
-from textual.widgets import Static
 from textual.worker import WorkerState
 
 from rovr.functions import utils
 from rovr.functions.path import get_direntry_for, is_hidden_file
 from rovr.variables.constants import config, scroll_bindings
 from rovr.variables.maps import SPINNER, SPINNER_LENGTH
+from rovr.widgets import Static
 
 
 class MetadataContainer(VerticalScroll, inherit_bindings=False):

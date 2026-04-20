@@ -6,13 +6,13 @@ from textual import events
 from textual.binding import Binding, BindingType
 from textual.css.query import NoMatches
 from textual.validation import Function
-from textual.widgets import Input
 from textual_autocomplete import DropdownItem, PathAutoComplete, TargetState
 
 from rovr.classes.textual_options import PathDropdownItem
 from rovr.functions.icons import get_icon
 from rovr.functions.utils import check_key
 from rovr.variables.constants import config, os_type
+from rovr.widgets import Input
 
 
 def listdir_or(path: str | None = None) -> list[str]:

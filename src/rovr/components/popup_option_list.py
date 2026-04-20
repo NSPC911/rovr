@@ -1,7 +1,8 @@
 import contextlib
 
 from textual import events, on
-from textual.widgets import OptionList
+
+from rovr.widgets import OptionList
 
 
 class PopupOptionList(OptionList):

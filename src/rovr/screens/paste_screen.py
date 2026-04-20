@@ -2,10 +2,10 @@ from typing import Literal
 
 from textual.app import ComposeResult
 from textual.containers import Grid, HorizontalGroup, VerticalGroup
-from textual.widgets import Button, Label, Switch
 
 from rovr.classes.textual_options import PasteScreenOption
 from rovr.components import SpecialOptionList
+from rovr.widgets import Button, Label, Switch
 
 from .yes_or_no import YesOrNo, dont_ask_bind, no_bind, yes_bind
 

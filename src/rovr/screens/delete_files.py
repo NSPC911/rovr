@@ -2,11 +2,11 @@ from textual import events
 from textual.app import ComposeResult
 from textual.containers import Container, Grid
 from textual.screen import ModalScreen
-from textual.widgets import Button, Label
 
 from rovr.components import PaddedOption, SpecialOptionList
 from rovr.functions.utils import check_key, get_shortest_bind
 from rovr.variables.constants import config
+from rovr.widgets import Button, Label
 
 delete_bind = get_shortest_bind(config["keybinds"]["delete_files"]["delete"])
 trash_bind = get_shortest_bind(config["keybinds"]["delete_files"]["trash"])

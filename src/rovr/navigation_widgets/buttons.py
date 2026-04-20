@@ -1,9 +1,8 @@
 from os import getcwd, path
 
-from textual.widgets import Button
-
 from rovr.classes.session_manager import SessionManager
 from rovr.functions.icons import get_icon
+from rovr.widgets import Button
 
 
 class BackButton(Button):

@@ -1,9 +1,8 @@
-from textual.widgets import Button
-
 from rovr.classes.textual_options import ClipboardSelectionValue
 from rovr.functions.icons import get_icon
 from rovr.screens.paste_screen import PasteScreen
 from rovr.variables.constants import config
+from rovr.widgets import Button
 
 
 class PasteButton(Button):

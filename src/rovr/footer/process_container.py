@@ -12,7 +12,6 @@ from textual.color import Gradient
 from textual.containers import HorizontalGroup, VerticalGroup, VerticalScroll
 from textual.renderables.bar import Bar as BarRenderable
 from textual.types import UnusedParameter
-from textual.widgets import Label, ProgressBar
 
 from rovr.classes.archive import Archive
 from rovr.functions import icons as icon_utils
@@ -26,6 +25,7 @@ from rovr.screens import (
     typed,
 )
 from rovr.variables.constants import config, os_type, scroll_bindings
+from rovr.widgets import Label, ProgressBar
 
 if sys.version_info.major == 3 and sys.version_info.minor <= 13:
     from backports.zstd import tarfile

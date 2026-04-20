@@ -5,13 +5,13 @@ from typing import cast
 from textual import on, work
 from textual.app import ComposeResult
 from textual.containers import VerticalGroup
-from textual.widgets import Input, OptionList
 from textual.worker import WorkerCancelled
 
 from rovr.classes.textual_options import ModalSearcherOption
 from rovr.components import DoubleClickableOptionList, ModalSearchScreen
 from rovr.functions.utils import should_cancel
 from rovr.variables.constants import config
+from rovr.widgets import Input, OptionList
 
 
 class ZDToDirectory(ModalSearchScreen):

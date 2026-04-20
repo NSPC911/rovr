@@ -1,9 +1,9 @@
 from textual import events
-from textual.widgets import OptionList
 
 from rovr.classes.mixins import SingleLineOptionLayoutMixin
 from rovr.classes.textual_options import PaddedOption
 from rovr.variables.constants import bindings
+from rovr.widgets import OptionList
 
 
 class DoubleClickableOptionList(SingleLineOptionLayoutMixin, OptionList):

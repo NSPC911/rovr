@@ -4,10 +4,10 @@ from textual import events, work
 from textual.app import ComposeResult
 from textual.containers import HorizontalGroup
 from textual.css.query import NoMatches
-from textual.widgets import Static
 from textual.widgets._header import HeaderClock
 
 from rovr.variables.constants import config
+from rovr.widgets import Static
 
 from .tabs import NewTabButton, Tabline, TablineTab
 

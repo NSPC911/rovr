@@ -6,12 +6,12 @@ from textual.app import ComposeResult
 from textual.binding import Binding, BindingType
 from textual.containers import HorizontalGroup
 from textual.content import ContentText
-from textual.widgets import Input, SelectionList
 from textual.widgets.selection_list import Selection, SelectionType
 
 from rovr.classes.mixins import CheckboxRenderingMixin
 from rovr.functions import icons as icon_utils
 from rovr.variables.constants import bindings
+from rovr.widgets import Input, SelectionList
 
 from .input import ModalInput
 from .typed import ArchiveScreenReturnType

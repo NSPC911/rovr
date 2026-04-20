@@ -22,7 +22,6 @@ from textual.geometry import Size
 from textual.highlight import guess_language
 from textual.message import Message
 from textual.widget import Widget
-from textual.widgets import Static
 from textual.widgets.selection_list import Selection
 
 from rovr.classes.archive import Archive, BadArchiveError
@@ -37,6 +36,7 @@ from rovr.functions import preview_utils
 from rovr.functions.pdf import get_pdf_images, get_pdf_info
 from rovr.functions.utils import should_cancel
 from rovr.variables.constants import PreviewContainerTitles, config, file_one
+from rovr.widgets import Static
 
 titles = PreviewContainerTitles()
 

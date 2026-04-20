@@ -10,12 +10,12 @@ from textual.await_complete import AwaitComplete
 from textual.containers import Container, Horizontal, Vertical
 from textual.css.query import NoMatches
 from textual.renderables.bar import Bar as BarRenderable
-from textual.widgets import Button, Input, Tabs
 from textual.widgets._tabs import Tab, Underline
 from textual.worker import WorkerCancelled
 
 from rovr.classes.session_manager import SessionManager
 from rovr.functions.path import normalise
+from rovr.widgets import Button, Input, Tabs
 
 
 class BetterBarRenderable(BarRenderable):

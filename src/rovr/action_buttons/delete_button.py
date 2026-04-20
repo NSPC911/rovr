@@ -1,8 +1,7 @@
-from textual.widgets import Button
-
 from rovr.functions.icons import get_icon
 from rovr.screens import DeleteFiles
 from rovr.variables.constants import config
+from rovr.widgets import Button
 
 
 class DeleteButton(Button):

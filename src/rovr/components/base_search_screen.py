@@ -3,13 +3,13 @@ from typing import Coroutine
 
 from textual import events, on
 from textual.screen import ModalScreen
-from textual.widgets import Input, OptionList
 from textual.worker import Worker
 
 from rovr.classes.textual_options import ModalSearcherOption
 from rovr.components.special_option_lists import DoubleClickableOptionList
 from rovr.functions.utils import check_key
 from rovr.variables.constants import config
+from rovr.widgets import Input, OptionList
 
 
 class ModalSearchScreen(ModalScreen, inherit_bindings=False):

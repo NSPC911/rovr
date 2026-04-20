@@ -28,7 +28,9 @@ from textual.containers import (
 from textual.css.query import NoMatches
 from textual.screen import ModalScreen
 from textual.theme import BUILTIN_THEMES
-from textual.widgets import (
+
+from rovr.variables.maps import RovrVars
+from rovr.widgets import (
     Button,
     Input,
     RadioButton,
@@ -37,8 +39,6 @@ from textual.widgets import (
     Static,
     Switch,
 )
-
-from rovr.variables.maps import RovrVars
 
 prot_to_timg: dict[str, Callable] = {
     "auto": timg.Image,

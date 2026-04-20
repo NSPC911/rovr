@@ -2,9 +2,9 @@ from textual import events, work
 from textual.app import ComposeResult
 from textual.containers import Center, HorizontalGroup
 from textual.screen import ModalScreen
-from textual.widgets import Label, Static
 
 from rovr.variables.constants import MaxPossible, ascii_logo
+from rovr.widgets import Label, Static
 
 
 class TerminalTooSmall(ModalScreen):

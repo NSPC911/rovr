@@ -2,7 +2,6 @@ from typing import cast
 
 from textual import events
 from textual.css.query import NoMatches
-from textual.widgets import Button, OptionList
 from textual.widgets.option_list import Option, OptionDoesNotExist
 
 from rovr.classes.type_aliases import SortByOptions
@@ -11,6 +10,7 @@ from rovr.functions.icons import get_icon, get_toggle_button_icon
 from rovr.functions.utils import check_key, get_shortest_bind
 from rovr.state_manager import StateManager
 from rovr.variables.constants import config
+from rovr.widgets import Button, OptionList
 
 # Get the shortest keybind for each sort option
 name_bind = get_shortest_bind(config["keybinds"]["change_sort_order"]["name"])

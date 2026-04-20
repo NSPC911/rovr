@@ -2,7 +2,6 @@ from os import getcwd, path
 from typing import cast
 
 from textual import work
-from textual.widgets import Button
 
 from rovr.classes.textual_validators import (
     IsValidFilePath,
@@ -12,6 +11,7 @@ from rovr.functions.path import normalise
 from rovr.screens import ArchiveCreationScreen
 from rovr.screens.typed import ArchiveScreenReturnType
 from rovr.variables.constants import config
+from rovr.widgets import Button
 
 
 class ZipButton(Button):

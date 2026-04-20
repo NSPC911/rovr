@@ -5,7 +5,6 @@ from shutil import move
 from tempfile import NamedTemporaryFile
 
 from textual import work
-from textual.widgets import Button
 from textual.worker import Worker, WorkerError
 
 from rovr.classes.textual_validators import IsValidFilePath, PathNoLongerExists
@@ -14,6 +13,7 @@ from rovr.functions.path import dump_exc, normalise
 from rovr.functions.utils import run_editor_command
 from rovr.screens import ModalInput
 from rovr.variables.constants import config
+from rovr.widgets import Button
 
 
 class RenameItemButton(Button):

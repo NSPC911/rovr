@@ -2,7 +2,8 @@ from textual import events, on
 from textual.app import ComposeResult
 from textual.containers import Container, Grid
 from textual.screen import ModalScreen
-from textual.widgets import Button, Label
+
+from rovr.widgets import Button, Label
 
 
 class Dismissible(ModalScreen):

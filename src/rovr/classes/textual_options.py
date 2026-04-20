@@ -4,13 +4,13 @@ from typing import Callable, Literal, NamedTuple, TypeAlias
 import rich.repr
 from textual.content import Content, ContentText
 from textual.visual import Visual, VisualType
-from textual.widgets import SelectionList
 from textual.widgets.option_list import Option
 from textual.widgets.selection_list import Selection, SelectionType
 from textual_autocomplete import DropdownItem
 
 from rovr.functions import icons as icon_utils
 from rovr.functions.path import normalise
+from rovr.widgets import SelectionList
 
 _icon_content_cache: dict[tuple[str, str], Content] = {}
 IconFactory: TypeAlias = Callable[[], tuple[str, str]]

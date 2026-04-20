@@ -4,7 +4,6 @@ from typing import cast
 
 from textual import work
 from textual.content import Content
-from textual.widgets import Button
 from textual.worker import Worker, WorkerError
 
 from rovr.classes.textual_validators import IsValidFilePath, PathNoLongerExists
@@ -12,6 +11,7 @@ from rovr.functions.icons import get_icon
 from rovr.functions.path import dump_exc, normalise
 from rovr.screens import ModalInput
 from rovr.variables.constants import config
+from rovr.widgets import Button
 
 
 class NewItemButton(Button):

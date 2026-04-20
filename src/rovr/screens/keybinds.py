@@ -5,13 +5,13 @@ from textual.app import ComposeResult
 from textual.binding import BindingType
 from textual.containers import VerticalGroup
 from textual.screen import ModalScreen
-from textual.widgets import OptionList
 
 from rovr.classes.textual_options import KeybindOption
 from rovr.components import SearchInput
 from rovr.functions import icons
 from rovr.functions.utils import check_key
 from rovr.variables.constants import bindings, config, schema
+from rovr.widgets import OptionList
 
 
 class KeybindList(OptionList, inherit_bindings=False):

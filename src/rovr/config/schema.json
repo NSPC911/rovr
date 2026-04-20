@@ -9,6 +9,12 @@
       "items": {
         "type": "string"
       }
+    },
+    "key_action_map": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "string"
+      }
     }
   },
   "properties": {
@@ -563,6 +569,53 @@
           "panel",
           "is_dark"
         ]
+      }
+    },
+    "keys": {
+      "type": "object",
+      "description": "Key-to-action mapping split by context.",
+      "additionalProperties": false,
+      "properties": {
+        "general": {
+          "$ref": "#/definitions/key_action_map",
+          "description": "Bindings active in the main app context."
+        },
+        "normal": {
+          "$ref": "#/definitions/key_action_map",
+          "description": "Bindings used during regular file-list navigation."
+        },
+        "select": {
+          "$ref": "#/definitions/key_action_map",
+          "description": "Bindings used while selecting multiple items."
+        },
+        "extra_copy": {
+          "$ref": "#/definitions/key_action_map",
+          "description": "Bindings for the extra copy popup."
+        },
+        "change_sort_order": {
+          "$ref": "#/definitions/key_action_map",
+          "description": "Bindings for the sort order popup."
+        },
+        "delete_files": {
+          "$ref": "#/definitions/key_action_map",
+          "description": "Bindings for the delete confirmation screen."
+        },
+        "filename_conflict": {
+          "$ref": "#/definitions/key_action_map",
+          "description": "Bindings for filename conflict prompts."
+        },
+        "file_in_use": {
+          "$ref": "#/definitions/key_action_map",
+          "description": "Bindings for file-in-use prompts."
+        },
+        "filter_modal": {
+          "$ref": "#/definitions/key_action_map",
+          "description": "Bindings for search/filter modal navigation."
+        },
+        "yes_or_no": {
+          "$ref": "#/definitions/key_action_map",
+          "description": "Bindings for yes/no confirmation prompts."
+        }
       }
     },
     "keybinds": {

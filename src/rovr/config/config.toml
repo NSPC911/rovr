@@ -158,114 +158,141 @@ is_dark = true
 "button-color-foreground" = "#2E3440"
 "button-focus-text-style" = "reverse"
 
-[keybinds]
-# For keybind profiles, see keybinds/sane.toml and keybinds/vim.toml
-# The default configuration below combines both styles for maximum flexibility.
-# Users can copy their preferred profile to their config directory.
-toggle_pin = ["P"]
-toggle_pinned_sidebar = ["S"]
-toggle_preview_sidebar = ["I"]
-toggle_footer = ["F"]
-toggle_menu_wrapper = ["M"]
-focus_toggle_pinned_sidebar = ["s"]
-focus_file_list = ["escape"]
-focus_toggle_preview_sidebar = ["i"]
-focus_toggle_path_switcher = ["ctrl+l"]
-focus_search = ["slash"]
-focus_toggle_processes = ["#"]
-focus_toggle_clipboard = ["c"]
-focus_toggle_metadata = ["m"]
-copy = ["y", "ctrl+c"]
-paste = ["p", "ctrl+v"]
-cut = ["x", "ctrl+x"]
-delete = ["d", "delete"]
-rename = ["r", "f2"]
-new = ["ctrl+n", "o"]
-zip = ["E"]
-unzip = ["ctrl+e"]
-# id love to use ctrl+shift+c
-# but that is taken by terminals
-up = ["up", "k"]
-down = ["down", "j"]
-up_tree = ["left", "h"]
-down_tree = ["right", "l", "enter"]
-bypass_up_tree = ["H"]
-bypass_down_tree = ["L"]
-page_up = ["pageup", "ctrl+b"]
-page_down = ["pagedown", "ctrl+f"]
-home = ["home", "g"]
-end = ["end", "G"]
-hist_previous = ["backspace", "u"]
-# personal preference
-hist_next = ["space"]
-toggle_visual = ["v"]
-toggle_all = ["%", "ctrl+a"]
-toggle_hidden_files = ["full_stop"]
-# similar to Midnight Commander / Norton Commander
-toggle_select_item = ["insert"]
-select_up = ["shift+up", "K"]
-select_down = ["shift+down", "J"]
-select_page_up = ["shift+pageup"]
-select_page_down = ["shift+pagedown"]
-select_home = ["shift+home"]
-select_end = ["shift+end"]
-tab_next = ["ctrl+j"]
-tab_previous = ["ctrl+k"]
-tab_new = ["n"]
-tab_close = ["w"]
-show_keybinds = ["?"]
-quit_app = ["q", "ctrl+q"]
-command_palette = "ctrl+p"
-suspend_process = ["ctrl+z"]
-open_editor = ["e"]
-show_shell_screen = [">"]
-# unavailable for now
-preview_select_left = []
-preview_select_right = []
-preview_scroll_left = []
-preview_scroll_right = []
-[keybinds.extra_copy]
-open_popup = ["Y"]
-copy_to_rovr = ["y"]
-copy_single_path = ["p"]
-copy_to_system_clip = ["s"]
-copy_current_directory = ["d"]
-[keybinds.change_sort_order]
-open_popup = [","]
-name = ["a"]
-extension = ["e"]
-natural = ["n"]
-size = ["s"]
-created = ["c"]
-modified = ["m"]
-descending = ["d"]
-[keybinds.delete_files]
-trash = ["d"]
-delete = ["x"]
-cancel = ["c", "escape"]
-[keybinds.filename_conflict]
-overwrite = ["o"]
-skip = ["s"]
-rename = ["r"]
-cancel = ["c", "escape"]
-dont_ask_again = ["a"]
-[keybinds.file_in_use]
-retry = ["r"]
-skip = ["s"]
-cancel = ["c", "escape"]
-dont_ask_again = ["a"]
-[keybinds.filter_modal]
-exit = ["escape"]
-down = ["down", "ctrl+j"]
-up = ["up", "ctrl+k"]
-[keybinds.yes_or_no]
-yes = ["y"]
-no = ["n", "escape"]
-dont_ask_again = ["a"]
+[keys.general]
+"P" = "toggle_pin"
+"S" = "toggle_pinned_sidebar"
+"I" = "toggle_preview_sidebar"
+"F" = "toggle_footer"
+"M" = "toggle_menu_wrapper"
+"s" = "focus_toggle_pinned_sidebar"
+"escape" = "focus_file_list"
+"i" = "focus_toggle_preview_sidebar"
+"ctrl+l" = "focus_toggle_path_switcher"
+"/" = "focus_search"
+"#" = "focus_toggle_processes"
+"c" = "focus_toggle_clipboard"
+"m" = "focus_toggle_metadata"
+"ctrl+j" = "tab_next"
+"ctrl+k" = "tab_previous"
+"n" = "tab_new"
+"w" = "tab_close"
+"?" = "show_keybinds"
+"q" = "quit_app"
+"ctrl+q" = "quit_app"
+"ctrl+p" = "command_palette"
+"ctrl+z" = "suspend_process"
+">" = "show_shell_screen"
+"z" = "plugin_zoxide"
+"f" = "plugin_fd"
+"\\" = "plugin_rg"
+
+[keys.normal]
+"y" = "copy"
+"ctrl+c" = "copy"
+"p" = "paste"
+"ctrl+v" = "paste"
+"x" = "cut"
+"ctrl+x" = "cut"
+"d" = "delete"
+"delete" = "delete"
+"r" = "rename"
+"f2" = "rename"
+"ctrl+n" = "new"
+"o" = "new"
+"E" = "zip"
+"ctrl+e" = "unzip"
+"up" = "up"
+"k" = "up"
+"down" = "down"
+"j" = "down"
+"left" = "up_tree"
+"h" = "up_tree"
+"right" = "down_tree"
+"l" = "down_tree"
+"enter" = "down_tree"
+"H" = "bypass_up_tree"
+"L" = "bypass_down_tree"
+"pageup" = "page_up"
+"ctrl+b" = "page_up"
+"pagedown" = "page_down"
+"ctrl+f" = "page_down"
+"home" = "home"
+"g" = "home"
+"end" = "end"
+"G" = "end"
+"backspace" = "hist_previous"
+"u" = "hist_previous"
+"space" = "hist_next"
+"v" = "toggle_visual"
+"%" = "toggle_all"
+"ctrl+a" = "toggle_all"
+"full_stop" = "toggle_hidden_files"
+"insert" = "toggle_select_item"
+"e" = "open_editor"
+
+[keys.select]
+"shift+up" = "select_up"
+"K" = "select_up"
+"shift+down" = "select_down"
+"J" = "select_down"
+"shift+pageup" = "select_page_up"
+"shift+pagedown" = "select_page_down"
+"shift+home" = "select_home"
+"shift+end" = "select_end"
+
+[keys.extra_copy]
+"Y" = "open_popup"
+"y" = "copy_to_rovr"
+"p" = "copy_single_path"
+"s" = "copy_to_system_clip"
+"d" = "copy_current_directory"
+
+[keys.change_sort_order]
+"," = "open_popup"
+"a" = "name"
+"e" = "extension"
+"n" = "natural"
+"s" = "size"
+"c" = "created"
+"m" = "modified"
+"d" = "descending"
+
+[keys.delete_files]
+"d" = "trash"
+"x" = "delete"
+"c" = "cancel"
+"escape" = "cancel"
+
+[keys.filename_conflict]
+"o" = "overwrite"
+"s" = "skip"
+"r" = "rename"
+"c" = "cancel"
+"escape" = "cancel"
+"a" = "dont_ask_again"
+
+[keys.file_in_use]
+"r" = "retry"
+"s" = "skip"
+"c" = "cancel"
+"escape" = "cancel"
+"a" = "dont_ask_again"
+
+[keys.filter_modal]
+"escape" = "exit"
+"down" = "down"
+"ctrl+j" = "down"
+"up" = "up"
+"ctrl+k" = "up"
+
+[keys.yes_or_no]
+"y" = "yes"
+"n" = "no"
+"escape" = "no"
+"a" = "dont_ask_again"
 
 [plugins.zoxide]
 enabled = true
-keybinds = ["z"]
 show_scores = false
 
 [plugins.bat]
@@ -274,7 +301,6 @@ executable = "bat"
 
 [plugins.fd]
 enabled = true
-keybinds = ["f"]
 executable = "fd"
 relative_paths = true
 follow_symlinks = false
@@ -285,7 +311,6 @@ timeout = 5
 
 [plugins.rg]
 enabled = true
-keybinds = ["\\"]
 executable = "rg"
 case_sensitive = true
 no_ignore_parent = false

@@ -11,6 +11,20 @@ from rich.traceback import Traceback
 start_time = perf_counter()
 pprint = Console().print
 
+KEY_NAMESPACES = (
+    "general",
+    "normal",
+    "select",
+    "extra_copy",
+    "change_sort_order",
+    "delete_files",
+    "filename_conflict",
+    "file_in_use",
+    "filter_modal",
+    "yes_or_no",
+)
+NESTED_KEY_NAMESPACES = set(KEY_NAMESPACES[3:])
+
 
 def format_keybinds(keys: str | list[str] | None) -> str:
     if keys is None:
@@ -31,6 +45,27 @@ def get_nested_key(data: dict, *keys: str) -> str | list[str] | None:
     if isinstance(data, (str, list)):
         return data
     return None
+
+
+def compile_legacy_keybinds(config_data: dict) -> dict:
+    if not isinstance(config_data.get("keys"), dict):
+        return config_data.get("keybinds", {})
+    keys_config = config_data["keys"]
+    keybinds: dict = {}
+    for namespace in KEY_NAMESPACES:
+        keymap = keys_config.get(namespace, {})
+        if not isinstance(keymap, dict):
+            continue
+        for key, action in keymap.items():
+            if namespace in NESTED_KEY_NAMESPACES:
+                keybinds.setdefault(namespace, {}).setdefault(action, []).append(key)
+            elif action.startswith("plugin_"):
+                continue
+            else:
+                keybinds.setdefault(action, []).append(key)
+    if isinstance(keybinds.get("command_palette"), list):
+        keybinds["command_palette"] = keybinds["command_palette"][0]
+    return keybinds
 
 
 page = """
@@ -68,11 +103,11 @@ just copy over the contents of the desired profile into your `config.toml` file 
 | ------ | ----------- | ------- | --- | ---- |"""
 try:
     with open("src/rovr/config/config.toml", "rb") as file:
-        binds: dict = tomli.load(file)["keybinds"]
+        binds: dict = compile_legacy_keybinds(tomli.load(file))
     with open("src/rovr/config/keybinds/vim.toml", "rb") as file:
-        vim_binds: dict = tomli.load(file)["keybinds"]
+        vim_binds: dict = compile_legacy_keybinds(tomli.load(file))
     with open("src/rovr/config/keybinds/sane.toml", "rb") as file:
-        sane_binds: dict = tomli.load(file)["keybinds"]
+        sane_binds: dict = compile_legacy_keybinds(tomli.load(file))
     with open("src/rovr/config/schema.json", "r", encoding="utf-8") as file:
         sub_schema: dict = json.load(file)["properties"]["keybinds"]["properties"]
     sub_schemas: dict[str, dict] = {}

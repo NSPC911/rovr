@@ -33,6 +33,14 @@ just copy over the contents of the desired profile into your `config.toml` file 
 - linux/macos: `~/.config/rovr/config.toml`
 - windows: `%APPDATA%/rovr/config.toml`
 
+## migration guide (`[keybinds]` -> `[keys.*]`)
+
+- move top-level keybinds into context tables like `[keys.general]`, `[keys.normal]`, and `[keys.select]`
+- invert each entry from `action = ["key1", "key2"]` to `"key1" = "action"` and `"key2" = "action"`
+- move alternate-layer keybind tables to matching key namespaces (for example `[keybinds.extra_copy]` -> `[keys.extra_copy]`)
+- move plugin keybinds to `[keys.general]` using `plugin_` actions (for example `"\\\\" = "plugin_rg"`)
+- remove old `keybinds` tables and `plugins.*.keybinds` entries once converted
+
 ## main bindings
 
 | action                       | description                    | default                                        | vim                                            | sane                                     |

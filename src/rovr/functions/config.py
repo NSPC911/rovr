@@ -5,7 +5,7 @@ from importlib import resources
 from importlib.metadata import PackageNotFoundError, version
 from os import path
 from shutil import which
-from typing import Callable, cast
+from typing import Any, Callable, cast
 
 import fastjsonschema
 import tomli
@@ -29,6 +29,72 @@ EDITOR_CANDIDATES = [
 ]
 
 DEFAULT_CONFIG = '#:schema {schema_url}\n[theme]\ndefault = "nord"'
+
+KEY_NAMESPACES = (
+    "general",
+    "normal",
+    "select",
+    "extra_copy",
+    "change_sort_order",
+    "delete_files",
+    "filename_conflict",
+    "file_in_use",
+    "filter_modal",
+    "yes_or_no",
+)
+
+NESTED_KEY_NAMESPACES = {
+    "extra_copy",
+    "change_sort_order",
+    "delete_files",
+    "filename_conflict",
+    "file_in_use",
+    "filter_modal",
+    "yes_or_no",
+}
+
+PLUGIN_ACTION_PREFIX = "plugin_"
+
+
+def _compile_legacy_keybinds_from_keys(
+    keys_config: dict[str, dict[str, str]],
+    template_keybinds: dict[str, Any],
+) -> tuple[dict[str, Any], dict[str, list[str]]]:
+    compiled_keybinds: dict[str, Any] = {}
+    plugin_keybinds: dict[str, list[str]] = {}
+    for namespace in KEY_NAMESPACES:
+        keymap = keys_config.get(namespace, {})
+        if not isinstance(keymap, dict):
+            continue
+        for key, action in keymap.items():
+            if not isinstance(key, str) or not isinstance(action, str):
+                continue
+            if action.startswith(PLUGIN_ACTION_PREFIX):
+                plugin_name = action.removeprefix(PLUGIN_ACTION_PREFIX)
+                plugin_keybinds.setdefault(plugin_name, []).append(key)
+                continue
+            if namespace in NESTED_KEY_NAMESPACES:
+                section = compiled_keybinds.setdefault(namespace, {})
+                if isinstance(section, dict):
+                    section.setdefault(action, []).append(key)
+                continue
+            compiled_keybinds.setdefault(action, []).append(key)
+
+    for nested_namespace in NESTED_KEY_NAMESPACES:
+        nested_template = template_keybinds.get(nested_namespace, {})
+        nested_compiled = compiled_keybinds.get(nested_namespace, {})
+        if isinstance(nested_template, dict) and isinstance(nested_compiled, dict):
+            compiled_keybinds[nested_namespace] = deep_merge(nested_template, nested_compiled)
+
+    command_palette_bind = compiled_keybinds.get("command_palette")
+    if isinstance(command_palette_bind, list):
+        compiled_keybinds["command_palette"] = (
+            command_palette_bind[0]
+            if command_palette_bind
+            else cast(str, template_keybinds["command_palette"])
+        )
+
+    return deep_merge(template_keybinds, compiled_keybinds), plugin_keybinds
 
 
 @cache
@@ -468,6 +534,18 @@ def load_config() -> tuple[dict, RovrConfig]:
         schema(config_dict)
     except JsonSchemaValueException as exception:
         schema_dump(user_config_path, exception, user_config_content)
+
+    if isinstance(config_dict.get("keys"), dict):
+        template_keybinds = cast(dict[str, Any], template_config.get("keybinds", {}))
+        compiled_keybinds, plugin_keybinds = _compile_legacy_keybinds_from_keys(
+            cast(dict[str, dict[str, str]], config_dict["keys"]),
+            template_keybinds,
+        )
+        config_dict["keybinds"] = compiled_keybinds
+        plugins = cast(dict[str, dict[str, Any]], config_dict.get("plugins", {}))
+        for plugin_name, keybinds in plugin_keybinds.items():
+            if plugin_name in plugins and isinstance(plugins[plugin_name], dict):
+                plugins[plugin_name]["keybinds"] = keybinds
 
     # slight config fixes
     # image protocol because "AutoImage" doesn't work with Sixel

@@ -1,5 +1,20 @@
 [
   {
+    "keys": [
+      "keybinds",
+      "keybinds.*",
+      "plugins.fd.keybinds",
+      "plugins.rg.keybinds",
+      "plugins.zoxide.keybinds"
+    ],
+    "message": [
+      "The [bright_blue]keybinds[/] table has been replaced by [bright_cyan]keys.*[/] key-to-action maps.",
+      "Plugin bindings are now actions under [bright_cyan]keys.general[/] using the [bright_green]plugin_<name>[/] namespace.",
+      "Refer to the keybinding migration guide for converting your old action-to-keys layout."
+    ],
+    "extra": "Changed in v0.9.0"
+  },
+  {
     "keys": ["keybinds.suspend_app"],
     "message": [
       "The [bright_cyan]keybinds.suspend_app[/] keybind has been renamed to [bright_blue]keybinds.suspend_process[/] because it suspends the process (in *nix terms)"

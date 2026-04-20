@@ -3,115 +3,128 @@
 [settings.bulk_rename]
 show_as_mapping = false
 
-[keybinds]
-toggle_pin = ["P"]
-toggle_pinned_sidebar = ["S"]
-toggle_preview_sidebar = ["I"]
-toggle_footer = ["F"]
-toggle_menu_wrapper = ["M"]
-focus_toggle_pinned_sidebar = ["s"]
-focus_file_list = ["escape"]
-focus_toggle_preview_sidebar = ["i"]
-focus_toggle_path_switcher = ["ctrl+l"]
-focus_search = ["slash"]
-focus_toggle_processes = ["#"]
-focus_toggle_clipboard = ["c"]
-focus_toggle_metadata = ["m"]
-copy = ["y"]
-paste = ["p"]
-cut = ["x"]
-delete = ["d"]
-rename = ["r"]
-new = ["o"]
-zip = ["E"]
-unzip = ["ctrl+e"]
-up = ["k", "up"]
-down = ["j", "down"]
-up_tree = ["h", "left"]
-down_tree = ["l", "right", "enter"]
-bypass_up_tree = ["H"]
-bypass_down_tree = ["L"]
-page_up = ["ctrl+b", "pageup"]
-page_down = ["ctrl+f", "pagedown"]
-home = ["g"]
-end = ["G"]
-hist_previous = ["u", "backspace"]
-hist_next = ["ctrl+r", "space"]
-toggle_visual = ["v"]
-toggle_all = ["%", "ctrl+a"]
-toggle_hidden_files = ["full_stop"]
-toggle_select_item = []
-select_up = ["K", "shift+up"]
-select_down = ["J", "shift+down"]
-select_page_up = ["shift+pageup"]
-select_page_down = ["shift+pagedown"]
-select_home = ["shift+home"]
-select_end = ["shift+end"]
-tab_next = ["ctrl+j"]
-tab_previous = ["ctrl+k"]
-tab_new = ["n"]
-tab_close = ["w"]
-preview_scroll_left = ["h", "left"]
-preview_scroll_right = ["l", "right"]
-preview_select_left = ["H", "shift+left"]
-preview_select_right = ["L", "shift+right"]
-show_keybinds = ["?"]
-quit_app = ["q", "ctrl+q"]
-command_palette = "ctrl+p"
-suspend_process = ["ctrl+z"]
-open_editor = ["e"]
+[keys.general]
+"P" = "toggle_pin"
+"S" = "toggle_pinned_sidebar"
+"I" = "toggle_preview_sidebar"
+"F" = "toggle_footer"
+"M" = "toggle_menu_wrapper"
+"s" = "focus_toggle_pinned_sidebar"
+"escape" = "focus_file_list"
+"i" = "focus_toggle_preview_sidebar"
+"ctrl+l" = "focus_toggle_path_switcher"
+"/" = "focus_search"
+"#" = "focus_toggle_processes"
+"c" = "focus_toggle_clipboard"
+"m" = "focus_toggle_metadata"
+"ctrl+j" = "tab_next"
+"ctrl+k" = "tab_previous"
+"n" = "tab_new"
+"w" = "tab_close"
+"?" = "show_keybinds"
+"q" = "quit_app"
+"ctrl+q" = "quit_app"
+"ctrl+p" = "command_palette"
+"ctrl+z" = "suspend_process"
+"z" = "plugin_zoxide"
+"f" = "plugin_fd"
+"\\" = "plugin_rg"
 
-[keybinds.extra_copy]
-open_popup = ["Y"]
-copy_to_rovr = ["y"]
-copy_single_path = ["c"]
-copy_to_system_clip = ["s"]
-copy_current_directory = ["d"]
+[keys.normal]
+"y" = "copy"
+"p" = "paste"
+"x" = "cut"
+"d" = "delete"
+"r" = "rename"
+"o" = "new"
+"E" = "zip"
+"ctrl+e" = "unzip"
+"k" = "up"
+"up" = "up"
+"j" = "down"
+"down" = "down"
+"h" = "up_tree"
+"left" = "up_tree"
+"l" = "down_tree"
+"right" = "down_tree"
+"enter" = "down_tree"
+"H" = "bypass_up_tree"
+"L" = "bypass_down_tree"
+"ctrl+b" = "page_up"
+"pageup" = "page_up"
+"ctrl+f" = "page_down"
+"pagedown" = "page_down"
+"g" = "home"
+"G" = "end"
+"u" = "hist_previous"
+"backspace" = "hist_previous"
+"ctrl+r" = "hist_next"
+"space" = "hist_next"
+"v" = "toggle_visual"
+"%" = "toggle_all"
+"ctrl+a" = "toggle_all"
+"full_stop" = "toggle_hidden_files"
+"e" = "open_editor"
 
-[keybinds.change_sort_order]
-open_popup = [","]
-name = ["a"]
-extension = ["e"]
-natural = ["n"]
-size = ["s"]
-created = ["c"]
-modified = ["m"]
-descending = ["d"]
+[keys.select]
+"K" = "select_up"
+"shift+up" = "select_up"
+"J" = "select_down"
+"shift+down" = "select_down"
+"shift+pageup" = "select_page_up"
+"shift+pagedown" = "select_page_down"
+"shift+home" = "select_home"
+"shift+end" = "select_end"
+"shift+left" = "preview_select_left"
+"shift+right" = "preview_select_right"
 
-[keybinds.delete_files]
-trash = ["d"]
-delete = ["x"]
-cancel = ["c", "escape"]
+[keys.extra_copy]
+"Y" = "open_popup"
+"y" = "copy_to_rovr"
+"c" = "copy_single_path"
+"s" = "copy_to_system_clip"
+"d" = "copy_current_directory"
 
-[keybinds.filename_conflict]
-overwrite = ["o"]
-skip = ["s"]
-rename = ["r"]
-cancel = ["c", "escape"]
-dont_ask_again = ["a"]
+[keys.change_sort_order]
+"," = "open_popup"
+"a" = "name"
+"e" = "extension"
+"n" = "natural"
+"s" = "size"
+"c" = "created"
+"m" = "modified"
+"d" = "descending"
 
-[keybinds.file_in_use]
-retry = ["r"]
-skip = ["s"]
-cancel = ["c", "escape"]
-dont_ask_again = ["a"]
+[keys.delete_files]
+"d" = "trash"
+"x" = "delete"
+"c" = "cancel"
+"escape" = "cancel"
 
-[keybinds.filter_modal]
-exit = ["escape"]
-down = ["ctrl+j", "down"]
-up = ["ctrl+k", "up"]
+[keys.filename_conflict]
+"o" = "overwrite"
+"s" = "skip"
+"r" = "rename"
+"c" = "cancel"
+"escape" = "cancel"
+"a" = "dont_ask_again"
 
-[keybinds.yes_or_no]
-yes = ["y"]
-no = ["n", "escape"]
-dont_ask_again = ["a"]
+[keys.file_in_use]
+"r" = "retry"
+"s" = "skip"
+"c" = "cancel"
+"escape" = "cancel"
+"a" = "dont_ask_again"
 
-# plugins
-[plugins.zoxide]
-keybinds = ["z"]
+[keys.filter_modal]
+"escape" = "exit"
+"ctrl+j" = "down"
+"down" = "down"
+"ctrl+k" = "up"
+"up" = "up"
 
-[plugins.fd]
-keybinds = ["f"]
-
-[plugins.rg]
-keybinds = ["\\"]
+[keys.yes_or_no]
+"y" = "yes"
+"n" = "no"
+"escape" = "no"
+"a" = "dont_ask_again"

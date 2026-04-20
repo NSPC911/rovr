@@ -2,11 +2,11 @@ import contextlib
 
 from textual import events, work
 from textual.css.query import NoMatches
-from textual.fuzzy import Matcher
 from textual.types import OptionDoesNotExist
 from textual.widgets import Input, OptionList, SelectionList
 from textual.widgets.option_list import Option
 from textual.widgets.selection_list import Selection, SelectionError
+from textual_autocomplete.fuzzy_search import Matcher
 
 from rovr.functions.utils import set_scuffed_subtitle
 

@@ -94,7 +94,7 @@ async def test_add_pins(tmp_path: Path) -> None:
         found: bool = False
         found_at: int | None = None
         for index, option in enumerate(sidebar.list_of_options):
-            if hasattr(option, "label") and option.label == "TestFolder":
+            if getattr(option, "label", "") == "TestFolder":
                 found = True
                 found_at = index
                 break

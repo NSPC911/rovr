@@ -355,8 +355,8 @@ def file_is_type(
         return "symlink"
     elif (
         os_type == "Windows"
-        and hasattr(file_stat, "st_file_attributes")
-        and file_stat.st_file_attributes & stat.FILE_ATTRIBUTE_REPARSE_POINT
+        and getattr(file_stat, "st_file_attributes", 0)
+        & stat.FILE_ATTRIBUTE_REPARSE_POINT
     ):
         return "junction"
     elif stat.S_ISDIR(mode):

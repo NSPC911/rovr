@@ -1,5 +1,7 @@
+import contextlib
+
 from textual import events, work
-from textual.app import ComposeResult
+from textual.app import ComposeResult, ScreenStackError
 from textual.containers import Center, HorizontalGroup
 from textual.screen import ModalScreen
 
@@ -46,7 +48,8 @@ class TerminalTooSmall(ModalScreen):
             event.size.height >= MaxPossible.height
             and event.size.width >= MaxPossible.width
         ):
-            self.dismiss()
+            with contextlib.suppress(ScreenStackError):
+                self.dismiss()
             return
         self.extra_changes()
 

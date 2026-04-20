@@ -407,7 +407,7 @@ class ProcessContainer(VerticalScroll):
             response = self.app.call_from_thread(
                 self.app.push_screen_wait,
                 FileInUse(
-                    f"The file appears to be open in another application and cannot be operated on.\nPath: {item_display_name}",
+                    f"The file appears to be open elsewhere.\nHence, I cannot take any action on it.\nPath: {item_display_name}",
                 ),
             )
             response = cast(typed.FileInUse, response)

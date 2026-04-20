@@ -162,7 +162,7 @@ def is_being_used(exc: OSError) -> bool:
     """
     # 32: Used by another process
     # 145: Access is denied
-    return getattr(exc, "winerror", None) in (32, 145)
+    return getattr(exc, "winerror", None) in (5, 13, 32, 145)
 
 
 def should_cancel() -> bool:

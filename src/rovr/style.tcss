@@ -676,11 +676,14 @@ FileInUse #question_container {
   height: 1fr;
   width: 1fr;
   content-align: center middle;
+  text-wrap: wrap;
   .question {
     content-align: center middle;
     width: 1fr;
     height: 1fr;
     text-align: center;
+    text-wrap: wrap;
+    text-overflow: fold;
   }
 }
 
@@ -777,7 +780,8 @@ FileInUse {
     grid-rows: 1fr 3 3 1; /* space for toggle row */
     padding: 1 3;
     border: $border-style $border;
-    max-height: 16;
+    max-height: 20;
+    height: auto;
   }
   Container {
     column-span: 2;

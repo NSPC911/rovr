@@ -56,10 +56,18 @@ NESTED_KEY_NAMESPACES = {
 PLUGIN_ACTION_PREFIX = "plugin_"
 
 
-def _compile_legacy_keybinds_from_keys(
+def _compile_keybinds_from_keys(
     keys_config: dict[str, dict[str, str]],
     template_keybinds: dict[str, Any],
 ) -> tuple[dict[str, Any], dict[str, list[str]]]:
+    """Compile key->action maps into the internal action->keys structure.
+
+    Also extracts plugin bindings from `plugin_<name>` actions in the
+    `general` namespace so they can be merged back into `plugins.*.keybinds`.
+
+    Returns:
+        tuple[dict[str, Any], dict[str, list[str]]]: Compiled keybinds and plugin keybinds.
+    """
     compiled_keybinds: dict[str, Any] = {}
     plugin_keybinds: dict[str, list[str]] = {}
     for namespace in KEY_NAMESPACES:
@@ -75,8 +83,7 @@ def _compile_legacy_keybinds_from_keys(
                 continue
             if namespace in NESTED_KEY_NAMESPACES:
                 section = compiled_keybinds.setdefault(namespace, {})
-                if isinstance(section, dict):
-                    section.setdefault(action, []).append(key)
+                section.setdefault(action, []).append(key)
                 continue
             compiled_keybinds.setdefault(action, []).append(key)
 
@@ -88,10 +95,11 @@ def _compile_legacy_keybinds_from_keys(
 
     command_palette_bind = compiled_keybinds.get("command_palette")
     if isinstance(command_palette_bind, list):
+        # Textual only supports a single command-palette binding.
         compiled_keybinds["command_palette"] = (
             command_palette_bind[0]
-            if command_palette_bind
-            else cast(str, template_keybinds["command_palette"])
+            if len(command_palette_bind) > 0
+            else cast(str, template_keybinds.get("command_palette", ""))
         )
 
     return deep_merge(template_keybinds, compiled_keybinds), plugin_keybinds
@@ -537,7 +545,7 @@ def load_config() -> tuple[dict, RovrConfig]:
 
     if isinstance(config_dict.get("keys"), dict):
         template_keybinds = cast(dict[str, Any], template_config.get("keybinds", {}))
-        compiled_keybinds, plugin_keybinds = _compile_legacy_keybinds_from_keys(
+        compiled_keybinds, plugin_keybinds = _compile_keybinds_from_keys(
             cast(dict[str, dict[str, str]], config_dict["keys"]),
             template_keybinds,
         )

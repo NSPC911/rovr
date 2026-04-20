@@ -23,7 +23,15 @@ KEY_NAMESPACES = (
     "filter_modal",
     "yes_or_no",
 )
-NESTED_KEY_NAMESPACES = set(KEY_NAMESPACES[3:])
+NESTED_KEY_NAMESPACES = {
+    "extra_copy",
+    "change_sort_order",
+    "delete_files",
+    "filename_conflict",
+    "file_in_use",
+    "filter_modal",
+    "yes_or_no",
+}
 
 
 def format_keybinds(keys: str | list[str] | None) -> str:
@@ -48,6 +56,14 @@ def get_nested_key(data: dict, *keys: str) -> str | list[str] | None:
 
 
 def compile_legacy_keybinds(config_data: dict) -> dict:
+    """Compile `[keys.*]` key->action maps into legacy action->keys tables.
+
+    This keeps docs generation compatible with the existing schema-driven
+    table rendering logic.
+
+    Returns:
+        dict: Keybinds in the legacy action->keys shape.
+    """
     if not isinstance(config_data.get("keys"), dict):
         return config_data.get("keybinds", {})
     keys_config = config_data["keys"]

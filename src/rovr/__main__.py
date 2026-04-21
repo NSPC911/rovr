@@ -352,7 +352,10 @@ example_function(10)"""
     from rovr.functions.utils import set_nested_value
     from rovr.variables.constants import config, os_type
 
-    if multiprocessing.get_start_method(allow_none=True) is None and os_type != "Windows":
+    if (
+        multiprocessing.get_start_method(allow_none=True) is None
+        and os_type != "Windows"
+    ):
         multiprocessing.start_method("forkserver")
 
     for feature_path in args.with_features:

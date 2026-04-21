@@ -142,6 +142,7 @@ def resample_batch(images: list[PILImage]) -> list[PILImage]:
         results = _await_resample_futures(executor, futures)
     except Exception as exc:
         if _is_fds_to_keep_error(exc):
+            executor.shutdown(wait=False, cancel_futures=True)
             fallback_results = [resample_worker(payload) for payload in payloads]
             return [
                 Image.frombytes(mode, size, data)

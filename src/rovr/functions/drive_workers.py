@@ -1,6 +1,7 @@
 import multiprocessing
 from contextlib import suppress
 from os import path
+from queue import Empty as queueEmpty
 
 try:
     import psutil
@@ -12,6 +13,11 @@ except ModuleNotFoundError:
             return lambda: []
 
     psutil = _Psutil()  # ty: ignore[invalid-assignment]
+
+
+# cant separate to a function, because functions.utils brings heavy imports
+def _is_fds_to_keep_error(exc: Exception) -> bool:
+    return isinstance(exc, ValueError) and "fds_to_keep" in str(exc)
 
 
 def normalise(*location: str | bytes) -> str:
@@ -35,7 +41,7 @@ def normalise(*location: str | bytes) -> str:
     )
 
 
-def _should_include_macos_mount_point(partition: psutil._ntuples.sdiskpart) -> bool:
+def _should_include_macos_mount_point(partition: "psutil._ntuples.sdiskpart") -> bool:
     """
     Determine if a macOS mount point should be included in the drive list.
 
@@ -61,7 +67,7 @@ def _should_include_macos_mount_point(partition: psutil._ntuples.sdiskpart) -> b
     return not partition.mountpoint.startswith(("/System/", "/dev", "/private"))
 
 
-def _should_include_linux_mount_point(partition: psutil._ntuples.sdiskpart) -> bool:
+def _should_include_linux_mount_point(partition: "psutil._ntuples.sdiskpart") -> bool:
     """
     Determine if a Linux/WSL mount point should be included in the drive list.
 
@@ -148,10 +154,6 @@ def get_mounted_drives_worker(
         queue.put([])
 
 
-def _is_fds_to_keep_error(exc: Exception) -> bool:
-    return isinstance(exc, ValueError) and "fds_to_keep" in str(exc)
-
-
 def get_mounted_drives_with_timeout(
     os_type: str,
     timeout: float = 2.0,
@@ -194,9 +196,9 @@ def get_mounted_drives_with_timeout(
         return []
 
     try:
-        if result_queue.empty():
-            return []
         return result_queue.get_nowait()
+    except queueEmpty:
+        return []
     finally:
         with suppress(Exception):
             result_queue.close()

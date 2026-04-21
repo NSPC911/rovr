@@ -17,6 +17,7 @@ MAX_IMAGE_SIZE: tuple[int, int] = tuple(config["interface"]["image_viewer"]["max
 MAX_FONT_SIZE: tuple[int, int] = tuple(config["interface"]["font_preview"]["max_size"])  # ty: ignore
 
 
+# cant separate to a function, because functions.utils brings heavy imports
 def _is_fds_to_keep_error(exc: Exception) -> bool:
     return isinstance(exc, ValueError) and "fds_to_keep" in str(exc)
 

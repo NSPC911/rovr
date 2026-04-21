@@ -40,10 +40,7 @@ def test_get_mounted_drives_with_timeout_fallbacks_on_fds_to_keep(
         lambda _os_type: ["/fallback-drive"],
     )
 
-    assert (
-        drive_workers.get_mounted_drives_with_timeout("Linux")
-        == ["/fallback-drive"]
-    )
+    assert drive_workers.get_mounted_drives_with_timeout("Linux") == ["/fallback-drive"]
 
 
 def test_get_mounted_drives_with_timeout_reraises_other_value_error(

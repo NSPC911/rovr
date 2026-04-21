@@ -17,6 +17,10 @@ MAX_IMAGE_SIZE: tuple[int, int] = tuple(config["interface"]["image_viewer"]["max
 MAX_FONT_SIZE: tuple[int, int] = tuple(config["interface"]["font_preview"]["max_size"])  # ty: ignore
 
 
+def _is_fds_to_keep_error(exc: Exception) -> bool:
+    return isinstance(exc, ValueError) and "fds_to_keep" in str(exc)
+
+
 def _await_resample_process(
     proc: multiprocessing.Process,
     parent_conn: multiprocessing.connection.Connection,
@@ -125,7 +129,17 @@ def resample_batch(images: list[PILImage]) -> list[PILImage]:
     except Exception:
         executor.shutdown(wait=False, cancel_futures=True)
         raise
-    results = _await_resample_futures(executor, futures)
+    try:
+        results = _await_resample_futures(executor, futures)
+    except Exception as exc:
+        if _is_fds_to_keep_error(exc):
+            return [
+                Image.frombytes(mode, size, data)
+                for data, mode, size in (
+                    resample_worker(payload) for payload in payloads
+                )
+            ]
+        raise
     return [Image.frombytes(mode, size, data) for data, mode, size in results]
 
 
@@ -148,7 +162,21 @@ def resample(image: Image.Image) -> Image.Image:
             int(RESAMPLING_METHOD),
         ),
     )
-    proc.start()
+    try:
+        proc.start()
+    except Exception as exc:
+        child_conn.close()
+        parent_conn.close()
+        if _is_fds_to_keep_error(exc):
+            data, mode, size = resample_worker((
+                image.tobytes(),
+                image.mode,
+                image.size,
+                MAX_IMAGE_SIZE,
+                int(RESAMPLING_METHOD),
+            ))
+            return Image.frombytes(mode, size, data)
+        raise
     child_conn.close()
 
     result = _await_resample_process(proc, parent_conn)
@@ -172,7 +200,19 @@ def resample_file(file_path: str) -> Image.Image | None:
         target=resample_file_worker,
         args=(child_conn, file_path, MAX_IMAGE_SIZE, int(RESAMPLING_METHOD)),
     )
-    proc.start()
+    try:
+        proc.start()
+    except Exception as exc:
+        child_conn.close()
+        parent_conn.close()
+        if _is_fds_to_keep_error(exc):
+            with Image.open(file_path) as img:
+                img.load()
+                pil = img.copy()
+            pil = _depalette(pil)
+            pil.thumbnail(MAX_IMAGE_SIZE, resample=Image.Resampling(int(RESAMPLING_METHOD)))
+            return pil
+        raise
     child_conn.close()
 
     result = _await_resample_process(proc, parent_conn)

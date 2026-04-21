@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import asyncio
-import multiprocessing
 import threading
 from contextlib import suppress
 from io import TextIOWrapper
@@ -52,7 +51,7 @@ from rovr.core import (
     PreviewContainer,
 )
 from rovr.footer import Clipboard, MetadataContainer, ProcessContainer
-from rovr.functions.drive_workers import get_mounted_drives_worker
+from rovr.functions.drive_workers import get_mounted_drives_with_timeout
 from rovr.functions.path import (
     dump_exc,
     ensure_existing_directory,
@@ -658,30 +657,10 @@ class Application(App, inherit_bindings=False):
             # check drives
             if count == 0 and not reload_called:
                 try:
-                    # Run drive check in a separate process using multiprocessing.Process
-                    # Using Queue to get the result back from the process
-                    result_queue: multiprocessing.Queue[list[str]] = (
-                        multiprocessing.Queue()
-                    )
-
-                    process = multiprocessing.Process(
-                        target=get_mounted_drives_worker, args=(result_queue, os_type)
-                    )
-                    process.start()
-                    process.join(timeout=2.0)
-
-                    if process.is_alive():
-                        # Timeout - terminate the process
-                        process.terminate()
-                        process.join(timeout=0.5)
-                        if process.is_alive():
-                            process.kill()
-                    elif not result_queue.empty():
-                        # Process completed successfully
-                        new_drives = result_queue.get_nowait()
-                        if new_drives != drives:
-                            drives = new_drives
-                            self.query_one(PinnedSidebar).reload_pins()
+                    new_drives = get_mounted_drives_with_timeout(os_type)
+                    if new_drives != drives:
+                        drives = new_drives
+                        self.query_one(PinnedSidebar).reload_pins()
                 except Exception as exc:
                     self.notify(
                         f"{type(exc).__name__}: {exc}",

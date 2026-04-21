@@ -1,4 +1,3 @@
-import multiprocessing
 from os import R_OK, access, path
 from typing import ClassVar, cast
 
@@ -140,25 +139,7 @@ class PinnedSidebar(OptionList, inherit_bindings=False):
     ) -> None:
         # force refresh
         try:
-            result_queue: multiprocessing.Queue[list[str]] = multiprocessing.Queue()
-            process = multiprocessing.Process(
-                target=drive_utils.get_mounted_drives_worker,
-                args=(result_queue, os_type),
-            )
-            process.start()
-            process.join(timeout=2.0)
-
-            if process.is_alive():
-                process.terminate()
-                process.join(timeout=0.5)
-                if process.is_alive():
-                    process.kill()
-                return
-
-            if result_queue.empty():
-                return
-
-            drives = result_queue.get_nowait()
+            drives = drive_utils.get_mounted_drives_with_timeout(os_type)
         except Exception:
             return
         for drive in drives:

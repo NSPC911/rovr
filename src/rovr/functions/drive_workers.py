@@ -1,4 +1,5 @@
 import multiprocessing
+from contextlib import suppress
 from os import path
 
 try:
@@ -145,3 +146,41 @@ def get_mounted_drives_worker(
         queue.put(result)
     except Exception:
         queue.put([])
+
+
+def get_mounted_drives_with_timeout(
+    os_type: str,
+    timeout: float = 2.0,
+) -> list[str]:
+    """Get mounted drives using a worker process, with fallback on spawn fd errors."""
+    result_queue: multiprocessing.Queue[list[str]] = multiprocessing.Queue()
+    process = multiprocessing.Process(
+        target=get_mounted_drives_worker,
+        args=(result_queue, os_type),
+    )
+    try:
+        process.start()
+    except ValueError as exc:
+        if "fds_to_keep" in str(exc):
+            with suppress(Exception):
+                result_queue.close()
+            return get_mounted_drives(os_type)
+        raise
+    process.join(timeout=timeout)
+
+    if process.is_alive():
+        process.terminate()
+        process.join(timeout=0.5)
+        if process.is_alive():
+            process.kill()
+        with suppress(Exception):
+            result_queue.close()
+        return []
+
+    try:
+        if result_queue.empty():
+            return []
+        return result_queue.get_nowait()
+    finally:
+        with suppress(Exception):
+            result_queue.close()

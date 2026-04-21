@@ -21,6 +21,15 @@ def _is_fds_to_keep_error(exc: Exception) -> bool:
     return isinstance(exc, ValueError) and "fds_to_keep" in str(exc)
 
 
+def _resample_file_inline(file_path: str) -> Image.Image:
+    with Image.open(file_path) as img:
+        img.load()
+        pil = img.copy()
+    pil = _depalette(pil)
+    pil.thumbnail(MAX_IMAGE_SIZE, resample=Image.Resampling(int(RESAMPLING_METHOD)))
+    return pil
+
+
 def _await_resample_process(
     proc: multiprocessing.Process,
     parent_conn: multiprocessing.connection.Connection,
@@ -150,17 +159,17 @@ def resample(image: Image.Image) -> Image.Image:
         The resampled image, or the original if cancelled.
     """
     image = _depalette(image)
+    payload = (
+        image.tobytes(),
+        image.mode,
+        image.size,
+        MAX_IMAGE_SIZE,
+        int(RESAMPLING_METHOD),
+    )
     parent_conn, child_conn = multiprocessing.Pipe()
     proc = multiprocessing.Process(
         target=resample_bytes_worker,
-        args=(
-            child_conn,
-            image.tobytes(),
-            image.mode,
-            image.size,
-            MAX_IMAGE_SIZE,
-            int(RESAMPLING_METHOD),
-        ),
+        args=(child_conn, *payload),
     )
     try:
         proc.start()
@@ -168,13 +177,7 @@ def resample(image: Image.Image) -> Image.Image:
         child_conn.close()
         parent_conn.close()
         if _is_fds_to_keep_error(exc):
-            data, mode, size = resample_worker((
-                image.tobytes(),
-                image.mode,
-                image.size,
-                MAX_IMAGE_SIZE,
-                int(RESAMPLING_METHOD),
-            ))
+            data, mode, size = resample_worker(payload)
             return Image.frombytes(mode, size, data)
         raise
     child_conn.close()
@@ -206,12 +209,7 @@ def resample_file(file_path: str) -> Image.Image | None:
         child_conn.close()
         parent_conn.close()
         if _is_fds_to_keep_error(exc):
-            with Image.open(file_path) as img:
-                img.load()
-                pil = img.copy()
-            pil = _depalette(pil)
-            pil.thumbnail(MAX_IMAGE_SIZE, resample=Image.Resampling(int(RESAMPLING_METHOD)))
-            return pil
+            return _resample_file_inline(file_path)
         raise
     child_conn.close()
 

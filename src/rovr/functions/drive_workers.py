@@ -152,7 +152,19 @@ def get_mounted_drives_with_timeout(
     os_type: str,
     timeout: float = 2.0,
 ) -> list[str]:
-    """Get mounted drives using a worker process, with fallback on spawn fd errors."""
+    """
+    Get mounted drives using a worker process, with fallback on spawn fd errors.
+
+    Args:
+        os_type: Operating system type ("Windows", "Darwin", or other)
+        timeout: Max number of seconds to wait for worker completion
+
+    Returns:
+        list[str]: List of mounted drives.
+
+    Raises:
+        ValueError: If process startup fails for a reason other than fds_to_keep.
+    """
     result_queue: multiprocessing.Queue[list[str]] = multiprocessing.Queue()
     process = multiprocessing.Process(
         target=get_mounted_drives_worker,

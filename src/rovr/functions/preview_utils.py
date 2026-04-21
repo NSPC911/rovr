@@ -142,11 +142,10 @@ def resample_batch(images: list[PILImage]) -> list[PILImage]:
         results = _await_resample_futures(executor, futures)
     except Exception as exc:
         if _is_fds_to_keep_error(exc):
+            fallback_results = [resample_worker(payload) for payload in payloads]
             return [
                 Image.frombytes(mode, size, data)
-                for data, mode, size in (
-                    resample_worker(payload) for payload in payloads
-                )
+                for data, mode, size in fallback_results
             ]
         raise
     return [Image.frombytes(mode, size, data) for data, mode, size in results]
@@ -174,13 +173,13 @@ def resample(image: Image.Image) -> Image.Image:
     try:
         proc.start()
     except Exception as exc:
-        child_conn.close()
         parent_conn.close()
         if _is_fds_to_keep_error(exc):
             data, mode, size = resample_worker(payload)
             return Image.frombytes(mode, size, data)
         raise
-    child_conn.close()
+    finally:
+        child_conn.close()
 
     result = _await_resample_process(proc, parent_conn)
     if result is None:
@@ -206,12 +205,12 @@ def resample_file(file_path: str) -> Image.Image | None:
     try:
         proc.start()
     except Exception as exc:
-        child_conn.close()
         parent_conn.close()
         if _is_fds_to_keep_error(exc):
             return _resample_file_inline(file_path)
         raise
-    child_conn.close()
+    finally:
+        child_conn.close()
 
     result = _await_resample_process(proc, parent_conn)
     if result is None:

@@ -148,6 +148,10 @@ def get_mounted_drives_worker(
         queue.put([])
 
 
+def _is_fds_to_keep_error(exc: Exception) -> bool:
+    return isinstance(exc, ValueError) and "fds_to_keep" in str(exc)
+
+
 def get_mounted_drives_with_timeout(
     os_type: str,
     timeout: float = 2.0,
@@ -173,7 +177,7 @@ def get_mounted_drives_with_timeout(
     try:
         process.start()
     except ValueError as exc:
-        if "fds_to_keep" in str(exc):
+        if _is_fds_to_keep_error(exc):
             with suppress(Exception):
                 result_queue.close()
             return get_mounted_drives(os_type)

@@ -664,7 +664,7 @@ class Application(App, inherit_bindings=False):
                 except Exception as exc:
                     self.notify(
                         f"{type(exc).__name__}: {exc}",
-                        title="Change Watcher",
+                        title="Drive Watcher",
                         severity="warning",
                         markup=False,
                     )

@@ -412,6 +412,7 @@ example_function(10)"""
         print("Error: rovr needs a TTY to run in application.")
         exit(1)
 
+
 if __name__ == "__main__":
     from rovr import main
 

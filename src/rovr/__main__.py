@@ -32,6 +32,7 @@ import logging
 import os
 import sys
 from io import TextIOWrapper
+from multiprocessing import get_start_method, set_start_method
 from typing import cast
 
 from rich.console import Console
@@ -47,6 +48,14 @@ logging.getLogger("textual_image._terminal").setLevel(logging.FATAL)
 
 textual_flags = set(os.environ.get("TEXTUAL", "").split(","))
 is_dev = {"debug", "devtools"}.issubset(textual_flags)
+
+
+def _ensure_multiprocessing_start_method() -> None:
+    if get_start_method(allow_none=True) is None:
+        set_start_method("spawn")
+
+
+_ensure_multiprocessing_start_method()
 
 
 global pprint

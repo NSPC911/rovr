@@ -1,3 +1,32 @@
+# nuitka-project: --assume-yes-for-downloads
+# nuitka-project: --clang
+# nuitka-project: --disable-plugin=tk-inter
+# nuitka-project: --enable-plugin=anti-bloat
+# nuitka-project: --enable-plugin=implicit-imports
+# nuitka-project: --enable-plugin=multiprocessing
+# nuitka-project: --enable-plugin=options-nanny
+# nuitka-project: --enable-plugins=no-qt
+# nuitka-project: --include-package-data=rovr
+# nuitka-project: --nofollow-import-to="tkinter"
+# nuitka-project: --nofollow-import-to=aiohttp
+# nuitka-project: --onefile-cache-mode=cached
+# nuitka-project: --onefile-child-grace-time=1
+# nuitka-project: --python-flag=isolated
+# nuitka-project: --python-flag=no_asserts
+# nuitka-project: --python-flag=no_docstrings
+# nuitka-project: --python-flag=no_site
+# nuitka-project: --python-flag=safe_path
+# nuitka-project: --python-flag=static_hashes
+# nuitka-project: --report=report.xml
+# nuitka-project: --warn-unusual-code
+
+# nuitka-project-if: {OS} in ("MACOS"):
+#    nuitka-project: --macos-app-console-mode=force
+#    nuitka-project: --macos-signed-app-name=com.NSPC911.rovr
+
+# nuitka-project-if: {OS} in ("Windows"):
+#    nuitka-project: --windows-console-mode=force
+
 import argparse
 import logging
 import os
@@ -382,7 +411,6 @@ example_function(10)"""
     else:
         print("Error: rovr needs a TTY to run in application.")
         exit(1)
-
 
 if __name__ == "__main__":
     from rovr import main

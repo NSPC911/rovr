@@ -2,10 +2,12 @@
 node_modules
 __pycache__
 log.txt
-src/carto/mre.py
 *.egg-info/
 dist
-rovr.exe
-rovr.dist
 /src/rovr/COMMIT_HASH
 report.xml
+rovr.dist
+rovr.build
+rovr.onefile-build
+rovr.exe
+rovr.bin

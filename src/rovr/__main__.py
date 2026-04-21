@@ -32,7 +32,6 @@ import logging
 import os
 import sys
 from io import TextIOWrapper
-from multiprocessing import get_start_method, set_start_method
 from typing import cast
 
 from rich.console import Console
@@ -48,14 +47,6 @@ logging.getLogger("textual_image._terminal").setLevel(logging.FATAL)
 
 textual_flags = set(os.environ.get("TEXTUAL", "").split(","))
 is_dev = {"debug", "devtools"}.issubset(textual_flags)
-
-
-def _ensure_multiprocessing_start_method() -> None:
-    if get_start_method(allow_none=True) is None:
-        set_start_method("spawn")
-
-
-_ensure_multiprocessing_start_method()
 
 
 global pprint
@@ -354,11 +345,15 @@ example_function(10)"""
     if args.force_first_launch:
         return
 
-    from rovr.functions.utils import set_nested_value  # noqa: I001
-    from rovr.variables.constants import config
+    import multiprocessing
 
     import rovr.monkey_patches._classes  # noqa: F401
     import rovr.monkey_patches._platform  # noqa: F401
+    from rovr.functions.utils import set_nested_value
+    from rovr.variables.constants import config, os_type
+
+    if multiprocessing.get_start_method(allow_none=True) is None and os_type != "Windows":
+        multiprocessing.start_method("forkserver")
 
     for feature_path in args.with_features:
         set_nested_value(cast(dict, config), feature_path, True)

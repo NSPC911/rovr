@@ -9,10 +9,13 @@ from rovr.widgets import Button, Label
 class Dismissible(ModalScreen):
     """Super simple screen that can be dismissed."""
 
-    def __init__(self, message: str, border_subtitle: str = "") -> None:
+    def __init__(
+        self, message: str, border_subtitle: str = "", additional_classes: str = ""
+    ) -> None:
         super().__init__()
         self.message = message
         self.border_subtitle = border_subtitle
+        self.add_class(additional_classes)
 
     def compose(self) -> ComposeResult:
         with Grid(id="dialog"):

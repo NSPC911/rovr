@@ -69,6 +69,7 @@ from rovr.navigation_widgets import (
     PathInput,
     UpButton,
 )
+from rovr.screens import Dismissible
 from rovr.screens.typed import ShellExecReturnType
 from rovr.state_manager import StateManager
 from rovr.variables.constants import MaxPossible, config, log_name, os_type
@@ -685,11 +686,35 @@ class Application(App, inherit_bindings=False):
                 except Exception as exc:
                     self.notify(
                         f"{type(exc).__name__}: {exc}",
-                        title="Change Watcher",
+                        title="Drives Watcher",
                         severity="warning",
                         markup=False,
                     )
-                    dump_exc(self, exc)
+
+                    def already_displaying_multiprocessing_issue() -> bool:
+                        return (
+                            isinstance(self.screen, Dismissible)
+                            and "multiprocessing-issue" in self.screen.classes
+                        )
+
+                    if not already_displaying_multiprocessing_issue():
+                        dump_exc(self, exc)
+                    if (
+                        isinstance(exc, ValueError) and "fds_to_keep" in str(exc)
+                    ) and not already_displaying_multiprocessing_issue():
+                        self.call_from_thread(
+                            self.push_screen,
+                            Dismissible(
+                                "You have this issue as well!\n"
+                                "There seems to be an issue on [i]certain systems[/] where multiprocessing decides to just like die, or something\n"
+                                "I still don't exactly know the full cause or know why that happens\n"
+                                "I'm really desperate because I cannot replicate this issue\n"
+                                "Can you please attempt a fix for this\n"
+                                "(I don't care if it is vibecoded, I'm that desperate)\n"
+                                f"Log is available at {log_name} in the rovr config folder",
+                                additional_classes="multiprocessing-issue",
+                            ),
+                        )
             if i_should_shut_down():
                 return
 

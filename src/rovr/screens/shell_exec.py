@@ -1,6 +1,7 @@
 from typing import Literal
 
 from textual import events, work
+from textual.binding import Binding
 
 from rovr.widgets import Input
 
@@ -15,6 +16,20 @@ mode_to_subtitle: dict[str, str] = {
 
 
 class ShellExec(ModalInput):
+    BINDINGS = [
+        Binding("escape", "dismiss"),
+        Binding(
+            "tab",
+            "cycle_mode_forward",
+            description="Cycle execution mode forward",
+        ),
+        Binding(
+            "shift+tab",
+            "cycle_mode_backward",
+            description="Cycle execution mode backward",
+        ),
+    ]
+
     def __init__(self) -> None:
         super().__init__(
             border_title="Execute Shell Command", border_subtitle="Run in background"
@@ -24,19 +39,6 @@ class ShellExec(ModalInput):
     def on_mount(self) -> None:
         super().on_mount()
         self.horizontal_group.classes = self.mode
-
-    def on_key(self, event: events.Key) -> None:
-        match event.key:
-            case "escape":
-                event.stop()
-                self.action_dismiss(None)
-            case "tab":
-                self.action_cycle_mode_forward()
-            case "shift+tab":
-                self.action_cycle_mode_backward()
-            case _:
-                return
-        event.stop()
 
     def on_click(self, event: events.Click) -> None:
         if event.widget is self:
@@ -51,13 +53,13 @@ class ShellExec(ModalInput):
     def action_cycle_mode_forward(self) -> None:
         modes = list(mode_to_subtitle.keys())
         to_index = modes.index(self.mode) + 1
-        self.mode = modes[to_index % len(modes)]  # type: ignore[assignment]
+        self.mode = modes[to_index % len(modes)]  # ty: ignore[invalid-assignment]
         self.horizontal_group.border_subtitle = mode_to_subtitle[self.mode]
         self.horizontal_group.classes = self.mode
 
     def action_cycle_mode_backward(self) -> None:
         modes = list(mode_to_subtitle.keys())
         to_index = modes.index(self.mode) - 1
-        self.mode = modes[to_index % len(modes)]  # type: ignore[assignment]
+        self.mode = modes[to_index % len(modes)]  # ty: ignore[invalid-assignment]
         self.horizontal_group.border_subtitle = mode_to_subtitle[self.mode]
         self.horizontal_group.classes = self.mode

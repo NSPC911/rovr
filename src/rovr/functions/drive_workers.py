@@ -1,8 +1,11 @@
+from __future__ import annotations
+
 import multiprocessing
 from os import path
 
 try:
     import psutil
+    import psutil._ntuples
 except ModuleNotFoundError:
     from typing import Callable
 
@@ -34,7 +37,7 @@ def normalise(*location: str | bytes) -> str:
     )
 
 
-def _should_include_macos_mount_point(partition: psutil._ntuples.sdiskpart) -> bool:
+def _should_include_macos_mount_point(partition: "psutil._ntuples.sdiskpart") -> bool:
     """
     Determine if a macOS mount point should be included in the drive list.
 
@@ -60,7 +63,7 @@ def _should_include_macos_mount_point(partition: psutil._ntuples.sdiskpart) -> b
     return not partition.mountpoint.startswith(("/System/", "/dev", "/private"))
 
 
-def _should_include_linux_mount_point(partition: psutil._ntuples.sdiskpart) -> bool:
+def _should_include_linux_mount_point(partition: "psutil._ntuples.sdiskpart") -> bool:
     """
     Determine if a Linux/WSL mount point should be included in the drive list.
 

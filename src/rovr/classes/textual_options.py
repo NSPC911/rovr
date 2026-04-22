@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from os import DirEntry, getcwd, path
 from typing import Callable, Literal, NamedTuple, TypeAlias
 
@@ -151,15 +153,13 @@ class PinnedSidebarOption(Option):
 
 
 class ArchiveFileListSelection(LazySelection):
-    def __init__(self, icon: tuple[str, str] | IconFactory, label: str) -> None:
+    def __init__(self, icon_factory: IconFactory, label: str) -> None:
         """Initialise the option.
 
         Args:
-            icon: The icon for the option
+            icon_factory: The icon for the option
             label: The text for the option
         """
-
-        icon_factory = (lambda icon=icon: icon) if isinstance(icon, tuple) else icon
 
         def get_prompt() -> Content:
             return _get_cached_icon(icon_factory()) + Content(label)
@@ -171,7 +171,7 @@ class ArchiveFileListSelection(LazySelection):
 class FileListSelectionWidget(LazySelection):
     def __init__(
         self,
-        icon: tuple[str, str] | IconFactory,
+        icon_factory: IconFactory,
         label: str,
         dir_entry: DirEntry,
         clipboard: SelectionList,
@@ -181,17 +181,14 @@ class FileListSelectionWidget(LazySelection):
         Initialise the selection.
 
         Args:
-            icon (tuple[str, str] | Callable[[], tuple[str, str]]):
-                The icon list from a utils function or a lazy icon resolver.
-            label (str): The label for the option.
-            dir_entry (DirEntry): The nt.DirEntry class
-            disabled (bool) = False: The initial enabled/disabled state. Enabled by default.
+            icon_factory: The icon list from a utils function or a lazy icon resolver.
+            label: The label for the option.
+            dir_entry: The nt.DirEntry class
+            disabled: The initial enabled/disabled state. Enabled by default.
         """
         self.dir_entry = dir_entry
         this_id = str(id(self))
-        self.__icon_factory = (
-            (lambda icon=icon: icon) if isinstance(icon, tuple) else icon
-        )
+        self.__icon_factory = icon_factory
         self.__label = label
         self.__clipboard = clipboard
 
@@ -297,7 +294,7 @@ class KeybindOption(Option):
 class ModalSearcherOption(LazyOption):
     def __init__(
         self,
-        icon: tuple[str, str] | IconFactory | None,
+        icon_factory: IconFactory | None,
         label: str,
         file_path: str | None = None,
         disabled: bool = False,
@@ -306,14 +303,11 @@ class ModalSearcherOption(LazyOption):
         Initialise the option
 
         Args:
-            icon (list[str] | IconFactor | None): The icon list from a utils function.
+            icon_factory (IconFactor | None): The icon list from a utils function.
             label (str): The label for the option.
             file_path (str | None): The file path
             disabled (bool) = False: The initial enabled/disabled state.
         """
-        icon_factory = None
-        if icon is not None:
-            icon_factory = (lambda icon=icon: icon) if isinstance(icon, tuple) else icon
 
         def get_prompt() -> Content:
             if icon_factory is None:

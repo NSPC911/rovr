@@ -62,7 +62,7 @@ async def test_default_pinned_sidebar(
 
     async with app.run_test(size=(143, 37)) as pilot:
         sidebar = app.query_one("PinnedSidebar")
-        await iter_until(pilot, lambda: app.file_list.options)
+        await iter_until(pilot, lambda: bool(app.file_list.options))
         for option in sidebar.list_of_options:
             if hasattr(option, "label"):
                 assert option.label in base_map

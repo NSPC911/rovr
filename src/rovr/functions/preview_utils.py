@@ -1,5 +1,7 @@
 import multiprocessing
+import multiprocessing.connection
 from concurrent.futures import FIRST_COMPLETED, Future, ProcessPoolExecutor, wait
+from typing import TypeAlias
 
 from PIL import Image
 from PIL.Image import Image as PILImage
@@ -17,9 +19,14 @@ MAX_IMAGE_SIZE: tuple[int, int] = tuple(config["interface"]["image_viewer"]["max
 MAX_FONT_SIZE: tuple[int, int] = tuple(config["interface"]["font_preview"]["max_size"])  # ty: ignore
 
 
+Connection: TypeAlias = (
+    multiprocessing.connection.Connection | multiprocessing.connection.PipeConnection
+)
+
+
 def _await_resample_process(
     proc: multiprocessing.Process,
-    parent_conn: multiprocessing.connection.Connection,
+    parent_conn: Connection,
 ) -> tuple[bytes, str, tuple[int, int]] | None:
     """Wait for a resample subprocess, checking for worker cancellation.
 
@@ -70,7 +77,7 @@ def _await_resample_futures(
     futures: dict[Future[tuple[bytes, str, tuple[int, int]]], int],
 ) -> list[tuple[bytes, str, tuple[int, int]]]:
     pending: set[Future[tuple[bytes, str, tuple[int, int]]]] = set(futures)
-    ordered_results: list[tuple[bytes, str, tuple[int, int]] | None] = [None] * len(
+    ordered_results: list[None | tuple[bytes, str, tuple[int, int]]] = [None] * len(
         futures
     )
 

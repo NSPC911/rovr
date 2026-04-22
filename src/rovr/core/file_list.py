@@ -196,7 +196,7 @@ class FileList(
                     #     name_to_index[item["name"]] = i
                     self.list_of_options = [
                         FileListSelectionWidget(
-                            icon=item["icon"],
+                            icon_factory=item["icon"],
                             label=item["name"],
                             dir_entry=item["dir_entry"],
                             clipboard=self.app.Clipboard,
@@ -326,7 +326,7 @@ class FileList(
 
     async def file_selected_handler(self, target_path: str) -> None:
         if self.app._chooser_file:
-            self.app.action_quit()
+            self.call_next(self.app.action_quit)
         elif config["settings"]["editor"]["open_all_in_editor"]:
             editor_config = config["settings"]["editor"]["file"]
 

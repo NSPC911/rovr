@@ -17,7 +17,7 @@ async def test_nav(tmp_path: Path) -> None:
     open(tmp_path / "test" / "file.txt", "w").close()
     app = Application(startup_path=tmp_path.as_posix())
     async with app.run_test(size=(143, 37)) as pilot:
-        await iter_until(pilot, lambda: app.file_list.get_option_at_index(0))
+        await iter_until(pilot, lambda: bool(app.file_list.get_option_at_index(0)))
         assert (nested_thing := app.file_list.get_option_at_index(0))
         assert (
             nested_thing.dir_entry.is_dir()
@@ -121,7 +121,7 @@ async def test_tab_search(tmp_path: Path) -> None:
         )
         await app.tabWidget.add_tab("")
         app.tabWidget.action_next_tab()
-        await iter_until(pilot, lambda: app.tabWidget.active_tab)
+        await iter_until(pilot, lambda: bool(app.tabWidget.active_tab))
         await workers_finished(pilot, app.file_list)
 
         # this also helps to find issues with the watcher, don't ignore
@@ -139,7 +139,7 @@ async def test_tab_search_clears_on_navigation(tmp_path: Path) -> None:
 
     app = Application(startup_path=tmp_path.as_posix())
     async with app.run_test(size=(143, 37)) as pilot:
-        await iter_until(pilot, lambda: app.file_list.options)
+        await iter_until(pilot, lambda: bool(app.file_list.options))
         app.file_list.input.value = "file"
         await pilot.pause()
         assert app.tabWidget.active_tab.session.search == "file"
@@ -159,7 +159,7 @@ async def test_sidebar_search_does_not_override_tab_search(tmp_path: Path) -> No
 
     app = Application(startup_path=tmp_path.as_posix())
     async with app.run_test(size=(143, 37)) as pilot:
-        await iter_until(pilot, lambda: app.file_list.options)
+        await iter_until(pilot, lambda: bool(app.file_list.options))
         app.file_list.input.value = "file"
         await pilot.pause()
         assert app.tabWidget.active_tab.session.search == "file"

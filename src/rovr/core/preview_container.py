@@ -9,6 +9,7 @@ from os import path
 from time import time
 from typing import Literal, cast
 
+import textual_image.renderable
 import textual_image.widget
 from PIL import Image, UnidentifiedImageError
 from PIL.Image import Image as PILImage
@@ -781,7 +782,7 @@ class PreviewContainer(Container):
                 for index, item in enumerate(file_list_options):
                     options.append(
                         FileListSelectionWidget(
-                            icon=item["icon"],
+                            icon_factory=item["icon"],
                             label=item["name"],
                             dir_entry=item["dir_entry"],
                             clipboard=self.app.Clipboard,

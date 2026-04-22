@@ -55,7 +55,7 @@ dev = [
   "prek>=0.2.25",
   "ruff>=0.15.0",
   "textual-dev>=1.8.0",
-  "ty==0.0.20",
+  "ty==0.0.32",
   "pyinstrument>=5.1.2",
   "commitizen>=4.13.0",
 ]

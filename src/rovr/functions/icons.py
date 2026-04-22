@@ -115,9 +115,9 @@ def get_icon(outer_key: str, inner_key: str) -> tuple[str, str]:
         tuple[str,str]: The icon and color for the icon
     """
     if not config["interface"]["nerd_font"]:
-        return ASCII_ICONS.get(outer_key, {}).get(inner_key, [" ", ""])
+        return ASCII_ICONS.get(outer_key, {}).get(inner_key, (" ", ""))
     else:
-        return ICONS.get(outer_key, {}).get(inner_key, [" ", ""])
+        return ICONS.get(outer_key, {}).get(inner_key, (" ", ""))
 
 
 def get_toggle_button_icon(key: str) -> str:

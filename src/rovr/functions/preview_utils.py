@@ -19,9 +19,13 @@ MAX_IMAGE_SIZE: tuple[int, int] = tuple(config["interface"]["image_viewer"]["max
 MAX_FONT_SIZE: tuple[int, int] = tuple(config["interface"]["font_preview"]["max_size"])  # ty: ignore
 
 
-Connection: TypeAlias = (
-    multiprocessing.connection.Connection | multiprocessing.connection.PipeConnection
-)
+if hasattr(multiprocessing.connection, "PipeConnection"):
+    Connection: TypeAlias = (
+        multiprocessing.connection.Connection  # ty: ignore
+        | multiprocessing.connection.PipeConnection  # ty: ignore
+    )
+else:
+    Connection: TypeAlias = multiprocessing.connection.Connection  # ty: ignore
 
 
 def _await_resample_process(

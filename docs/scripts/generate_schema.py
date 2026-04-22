@@ -10,8 +10,8 @@ start_time = perf_counter()
 pprint = Console().print
 
 try:
-    from json_schema_for_humans.generate import generate_from_filename  # noqa  # ty: ignore[unresolved-import, unused-ignore-comment]
-    from json_schema_for_humans.generation_configuration import GenerationConfiguration  # noqa  # ty: ignore[unresolved-import, unused-ignore-comment]
+    from json_schema_for_humans.generate import generate_from_filename  # noqa  # ty: ignore
+    from json_schema_for_humans.generation_configuration import GenerationConfiguration  # noqa  # ty: ignore
 except ImportError:
     pprint(
         "[red]json-schema-for-humans is not installed. Make sure to install the \\[docscripts] group as well!"

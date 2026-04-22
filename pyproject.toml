@@ -234,3 +234,4 @@ unresolved-attribute = "ignore"
 no-matching-overload = "ignore" # not that accurate
 possibly-missing-attribute = "ignore" # no it is not missing
 invalid-assignment = "warn" # probably already but warn for future
+unused-ignore-comment = "ignore"

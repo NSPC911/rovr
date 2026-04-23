@@ -1,10 +1,11 @@
 from rich.segment import Segment
 from rich.style import Style
-from textual.geometry import Size
+from textual.geometry import Region, Size
 from textual.strip import Strip
 from textual.widgets.option_list import OptionDoesNotExist
 
 from rovr.functions import icons as icon_utils
+from rovr.variables.constants import config
 from rovr.widgets import OptionList
 
 
@@ -168,3 +169,53 @@ class CheckboxRenderingMixin:
             Segment(icons[3], style=underlying_style),
             *line,
         ])
+
+
+class ScrollOffMixin:
+    def scroll_to_highlight(
+        self, top: bool = False, scrolloff: int = config["interface"]["scrolloff"]
+    ) -> None:
+        """Scroll to the highlighted option.
+
+        Args:
+            top: Ensure highlighted option is at the top of the widget.
+            scrolloff: Minimum number of lines to keep visible above/below the highlighted option.
+                If scrolloff is larger than half the screen height, the cursor will be centered.
+        """
+        highlighted = self.highlighted
+        if type(highlighted) is not int or not self.is_mounted:
+            return
+
+        self._update_lines()
+
+        try:
+            y = self._index_to_line[highlighted]
+        except KeyError:
+            return
+        height = self._heights[highlighted]
+
+        # --peak-monkey-patching #
+        scrollable_height = self.scrollable_content_region.height
+
+        # yazi like
+        if scrolloff > scrollable_height / 2:
+            super().scroll_to_region(
+                Region(0, y, self.scrollable_content_region.width, height),
+                force=True,
+                animate=False,
+                center=True,
+                immediate=True,
+            )
+        else:
+            adjusted_y = max(0, y - scrolloff)
+            adjusted_height = height + scrolloff * 2
+
+            super().scroll_to_region(
+                Region(
+                    0, adjusted_y, self.scrollable_content_region.width, adjusted_height
+                ),
+                force=True,
+                animate=False,
+                top=top,
+                immediate=True,
+            )

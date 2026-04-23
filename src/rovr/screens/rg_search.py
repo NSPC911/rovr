@@ -2,6 +2,7 @@ import asyncio
 import contextlib
 from functools import partial
 from os import path
+from time import time
 from typing import ClassVar
 
 from textual import on, work
@@ -10,9 +11,9 @@ from textual.binding import BindingType
 from textual.containers import VerticalGroup
 from textual.widgets.option_list import Option
 from textual.widgets.selection_list import Selection
-from textual.worker import WorkerCancelled, get_current_worker
+from textual.worker import get_current_worker
 
-from rovr.classes.mixins import CheckboxRenderingMixin
+from rovr.classes.mixins import CheckboxRenderingMixin, ScrollOffMixin
 from rovr.classes.textual_options import ModalSearcherOption
 from rovr.components import DoubleClickableOptionList, ModalSearchScreen
 from rovr.functions import icons as icon_utils
@@ -22,7 +23,7 @@ from rovr.variables.constants import bindings, config
 from rovr.widgets import Input, SelectionList
 
 
-class ContentSearchToggles(CheckboxRenderingMixin, SelectionList):
+class ContentSearchToggles(ScrollOffMixin, CheckboxRenderingMixin, SelectionList):
     BINDINGS: ClassVar[list[BindingType]] = list(bindings)
 
     def __init__(self) -> None:
@@ -73,6 +74,8 @@ class ContentSearchToggles(CheckboxRenderingMixin, SelectionList):
 class ContentSearch(ModalSearchScreen):
     """Search file contents recursively using rg."""
 
+    STREAM_BATCH_TIME: float = 0.25
+
     def compose(self) -> ComposeResult:
         with VerticalGroup(id="content_search_group"):
             yield Input(
@@ -97,7 +100,6 @@ class ContentSearch(ModalSearchScreen):
 
     @work
     async def rg_updater(self, event: Input.Changed) -> None:
-        """Update the list using rg based on the search term."""
         self._active_worker = get_current_worker()
         self.search_options.border_subtitle = ""
         search_term = event.value.strip()
@@ -122,12 +124,94 @@ class ContentSearch(ModalSearchScreen):
             return
         self.search_options.set_options([Option("  Searching...", disabled=True)])
         rg_process = None
+        stderr_task: asyncio.Task[bytes] | None = None
         try:
             rg_process = await self.create_proc(*rg_cmd)
-            # 30 seconds is quite generous for rg to respond
-            stdout, _ = await asyncio.wait_for(
-                rg_process.communicate(), timeout=config["plugins"]["rg"]["timeout"]
+            timeout = float(config["plugins"]["rg"]["timeout"])
+            loop = asyncio.get_running_loop()
+            deadline = loop.time() + timeout
+
+            if rg_process.stderr is not None:
+                stderr_task = asyncio.create_task(rg_process.stderr.read())
+
+            options: list[ModalSearcherOption] = []
+            pending_options: list[ModalSearcherOption] = []
+            did_render_results = False
+            last_flush = time()
+
+            while True:
+                if self._active_worker is not get_current_worker():
+                    rg_process.kill()
+                    with contextlib.suppress(ProcessLookupError):
+                        await rg_process.wait()
+                    return
+
+                if rg_process.stdout is None:
+                    break
+
+                remaining = deadline - loop.time()
+                if remaining <= 0:
+                    raise asyncio.exceptions.TimeoutError
+
+                line = await asyncio.wait_for(
+                    rg_process.stdout.readline(), timeout=remaining
+                )
+                if not line:
+                    break
+
+                option = self.create_option_from_count_line(
+                    line.decode(errors="replace")
+                )
+                if option is None:
+                    continue
+
+                pending_options.append(option)
+
+                if time() - last_flush < self.STREAM_BATCH_TIME:
+                    continue
+
+                last_flush = time()
+
+                if not did_render_results:
+                    self.search_options.clear_options()
+                    self.search_options.remove_class("empty")
+                    did_render_results = True
+
+                self.search_options.add_options(pending_options)
+                options.extend(pending_options)
+                pending_options.clear()
+
+            if pending_options:
+                if not did_render_results:
+                    self.search_options.clear_options()
+                    self.search_options.remove_class("empty")
+                    did_render_results = True
+                self.search_options.add_options(pending_options)
+
+            remaining = deadline - loop.time()
+            if remaining <= 0:
+                raise asyncio.exceptions.TimeoutError
+            await asyncio.wait_for(rg_process.wait(), timeout=remaining)
+
+            if stderr_task is not None:
+                with contextlib.suppress(asyncio.CancelledError):
+                    await stderr_task
+
+            if self._active_worker is not get_current_worker():
+                return
+
+            if options:
+                if self.search_options.highlighted is None:
+                    self.search_options.highlighted = 0
+                return
+
+            self.search_options.clear_options()
+            self.search_options.add_option(
+                Option("  --No matches found--", disabled=True),
             )
+            self.search_options.add_class("empty")
+            self.search_options.border_subtitle = ""
+            return
         except (OSError, asyncio.exceptions.TimeoutError) as exc:
             if isinstance(exc, asyncio.exceptions.TimeoutError) and rg_process:
                 rg_process.kill()
@@ -146,47 +230,9 @@ class ContentSearch(ModalSearchScreen):
                 Option(f"{type(exc).__name__}: {exc}", disabled=True),
             ])
             return
-
-        options: list[ModalSearcherOption] = []
-        if stdout:
-            stdout = stdout.decode()
-            # fix output from --count
-            # arranged as <path>:<count>
-            # convert to (path, count) list
-            stdout_lines: list[tuple[str, int]] = []
-            for line in stdout.splitlines():
-                if ":" in line:
-                    path, count = line.rsplit(":", 1)
-                    try:
-                        stdout_lines.append((path, int(count)))
-                    except ValueError:
-                        continue  # skip lines with invalid count
-
-            stdout_lines.sort(key=lambda x: x[1], reverse=True)
-            worker = self.create_options(stdout_lines)
-            try:
-                options_result = await worker.wait()
-                if options_result is not None:
-                    options = options_result
-            except WorkerCancelled:
-                return  # anyways
-            if self._active_worker is not get_current_worker():
-                return  # another worker has taken over
-            if options is None:
-                return
-            self.search_options.clear_options()
-            if options:
-                self.search_options.add_options(options)
-                self.search_options.remove_class("empty")
-                self.search_options.highlighted = 0
-                return
-        else:
-            self.search_options.clear_options()
-            self.search_options.add_option(
-                Option("  --No matches found--", disabled=True),
-            )
-            self.search_options.add_class("empty")
-            self.search_options.border_subtitle = ""
+        finally:
+            if stderr_task is not None and not stderr_task.done():
+                stderr_task.cancel()
 
     @on(SelectionList.SelectionToggled)
     def toggles_toggled(self, event: SelectionList.SelectionToggled) -> None:
@@ -198,25 +244,28 @@ class ContentSearch(ModalSearchScreen):
             Input.Changed(self.search_input, value=self.search_input.value)
         )
 
-    @work(thread=True, exit_on_error=False)
-    def create_options(
-        self, stdout: list[tuple[str, int]]
-    ) -> list[ModalSearcherOption] | None:
-        options: list[ModalSearcherOption] = []
-        for line in stdout:
-            file_path = path_utils.normalise(line[0].strip())
-            if not file_path:
-                continue
-            display_text = f" {file_path}:[dim]{line[1]}[/]"
-            if path.isdir(file_path):
-                icon_factory = partial(get_icon_for_folder, file_path)
-            else:
-                icon_factory = partial(get_icon_for_file, file_path)
-            options.append(
-                ModalSearcherOption(
-                    icon_factory,
-                    display_text,
-                    file_path,
-                )
-            )
-        return options
+    def create_option_from_count_line(
+        self, raw_line: str
+    ) -> ModalSearcherOption | None:
+        if ":" not in raw_line:
+            return None
+        raw_path, raw_count = raw_line.rsplit(":", 1)
+        try:
+            count = int(raw_count.strip())
+        except ValueError:
+            return None
+
+        file_path = str(path_utils.normalise(raw_path.strip()))
+        if not file_path:
+            return None
+
+        display_text = f" {file_path}:[dim]{count}[/]"
+        if path.isdir(file_path):
+            icon_factory = partial(get_icon_for_folder, file_path)
+        else:
+            icon_factory = partial(get_icon_for_file, file_path)
+        return ModalSearcherOption(
+            icon_factory,
+            display_text,
+            file_path,
+        )

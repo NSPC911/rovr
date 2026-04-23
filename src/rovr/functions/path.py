@@ -16,6 +16,7 @@ from textual import work
 from textual.app import App
 from textual.dom import DOMNode
 
+from rovr import pprint
 from rovr.classes.type_aliases import (
     DirEntryType,
     DirEntryTypes,
@@ -26,8 +27,6 @@ from rovr.variables.constants import config, file_one, log_name, os_type
 
 from .drive_workers import normalise
 from .icons import get_icon_for_file, get_icon_for_folder
-
-pprint = globals().get("pprint", Console().print)
 
 mime_re_cache: dict[
     PreviewTypes,

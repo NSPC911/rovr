@@ -9,7 +9,7 @@ from os import chdir, getcwd, path
 from time import perf_counter
 from typing import Callable, Iterable
 
-from rich.console import Console, RenderableType
+from rich.console import RenderableType
 from rich.protocol import is_renderable
 from textual import constants, events, on, work
 from textual.app import WINDOWS, App, ComposeResult, ScreenStackError, SystemCommand
@@ -30,6 +30,7 @@ from textual.screen import Screen
 from textual.types import NoActiveAppError
 from textual.worker import Worker, WorkerFailed
 
+from rovr import console
 from rovr.action_buttons import (
     CopyButton,
     CutButton,
@@ -75,8 +76,6 @@ from rovr.state_manager import StateManager
 from rovr.variables.constants import MaxPossible, config, log_name, os_type
 from rovr.variables.maps import RovrVars
 from rovr.widgets import Input, Label
-
-console = Console()
 
 if constants.SCREENSHOT_LOCATION:
     constants.SCREENSHOT_LOCATION = normalise(getcwd(), constants.SCREENSHOT_LOCATION)
@@ -216,7 +215,6 @@ class Application(App, inherit_bindings=False):
     def on_mount(self) -> None:
         # exit for tree print
         if self._exit_with_tree:
-            console = Console()
             with self.suspend():
                 console.print(self.tree)
                 self.exit()

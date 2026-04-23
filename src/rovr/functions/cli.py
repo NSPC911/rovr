@@ -5,12 +5,11 @@ import re
 from collections.abc import Sequence
 from typing import Any, Never
 
-from rich.console import Console
 from rich.markup import escape
 from rich.panel import Panel
 from rich.table import Table
 
-pprint = Console().print
+from rovr import pprint
 
 
 class RichArgumentParser(argparse.ArgumentParser):

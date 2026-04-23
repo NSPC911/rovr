@@ -4,14 +4,13 @@ from datetime import datetime
 from functools import cache
 from os import environ
 from shutil import which
-from typing import Literal, cast
+from typing import Any, Callable, Literal, cast
 
 from PIL import Image
 from textual.binding import Binding
 
 from rovr.classes.config import RovrConfig
 from rovr.functions.config import load_config
-from rovr.functions.utils import classproperty
 
 # Initialize the config once at import time
 if "config" not in globals():
@@ -73,6 +72,14 @@ ascii_logo = r"""
 │ ╭─╯│ ╷ ││╰╮╭╯││ ╭─╯
 │ │  │ ╵ │╰╮╰╯╭╯│ │
 ╰─╯  ╰───╯ ╰──╯ ╰─╯"""
+
+
+class classproperty:  # noqa: N801
+    def __init__(self, func: Callable) -> None:
+        self.func = func
+
+    def __get__(self, instance: Any, owner: Any) -> Any:  # noqa: ANN401
+        return self.func(owner)
 
 
 class MaxPossible:

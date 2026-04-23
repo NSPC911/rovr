@@ -1,21 +1,19 @@
 import shlex
 import subprocess
 from shutil import which
-from typing import Any, Callable, Literal
+from typing import Callable, Literal
 
 from humanize import naturalsize
-from rich.console import Console
 from textual import events
 from textual.dom import DOMNode
 from textual.worker import NoActiveWorker, WorkerCancelled, get_current_worker
 
+from rovr import pprint
 from rovr.classes.config import (
     _RovrConfigSettingsEditorBulkRename,
     _RovrConfigSettingsEditorFile,
     _RovrConfigSettingsEditorFolder,
 )
-
-pprint = globals().get("pprint", Console().print)
 
 
 def deep_merge(old: dict, new: dict) -> dict:
@@ -39,68 +37,6 @@ def deep_merge(old: dict, new: dict) -> dict:
         )
         exit(1)
     return old
-
-
-def set_nested_value(
-    d: dict, path_str: str, value: bool | str | int | float | list | dict
-) -> None:
-    """
-    Sets a value in a nested dictionary using a dot-separated path string.
-
-    Args:
-        d (dict): The dictionary to modify.
-        path_str (str): The dot-separated path to the key (e.g., "plugins.bat").
-        value (Union[bool, str, int, float, list, dict]): The value to set.
-
-    Raises:
-        SystemExit: If the path is invalid or if there's a type mismatch when setting the value.
-    """
-    from rich import box
-    from rich.panel import Panel
-
-    keys = path_str.split(".")
-    current = d
-    passed_keys = ""
-    for i, key in enumerate(keys):
-        if i == len(keys) - 1:
-            try:
-                if (
-                    isinstance(value, bool)
-                    and isinstance(current[key], dict)
-                    and "enabled" in current[key]
-                ):
-                    # Special case: For boolean values targeting plugin dicts,
-                    # set the 'enabled' field rather than replacing the whole dict
-                    current[key]["enabled"] = value
-                elif isinstance(current[key], type(value)):
-                    current[key] = value
-                else:
-                    pprint(
-                        Panel(
-                            f"[cyan bold]{path_str}[/]'s new value of type [cyan b]{type(value).__name__}[/] is not a [bold cyan]{type(current[key]).__name__}[/] type, and cannot be modified.",
-                            box=box.ROUNDED,
-                            title="[bright_red underline]Config Error:[/]",
-                            title_align="left",
-                            expand=False,
-                        )
-                    )
-                    raise SystemExit(1)
-            except KeyError:
-                pprint(
-                    Panel(
-                        f"[cyan b]{path_str}[/] is not a valid path to an existing value and hence cannot be set.\n  [red]ValueError[/]: Key named [red b]{key}[/] was not found in [cyan b]{passed_keys[:-1]}[/]",
-                        box=box.ROUNDED,
-                        title="[bright_red underline]Config Error:[/]",
-                        title_align="left",
-                        expand=False,
-                    )
-                )
-                raise SystemExit(1)
-        else:
-            if not isinstance(current.get(key), dict):
-                current[key] = {}
-            current = current[key]
-            passed_keys += f"{key}."
 
 
 def set_scuffed_subtitle(element: DOMNode, *sections: str) -> None:
@@ -195,14 +131,6 @@ def check_key(event: events.Key, key_list: list[str] | str) -> bool:
         or event.is_printable
         and event.character in key_list
     )
-
-
-class classproperty:  # noqa: N801
-    def __init__(self, func: Callable) -> None:
-        self.func = func
-
-    def __get__(self, instance: Any, owner: Any) -> Any:  # noqa: ANN401
-        return self.func(owner)
 
 
 def is_archive(path_str: str) -> bool:

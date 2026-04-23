@@ -34,8 +34,7 @@ import sys
 from io import TextIOWrapper
 from typing import cast
 
-from rich.console import Console
-
+from rovr import main, pprint
 from rovr.functions.cli import (
     RichArgumentParser,
     RichPanelHelpAction,
@@ -47,10 +46,6 @@ logging.getLogger("textual_image._terminal").setLevel(logging.FATAL)
 
 textual_flags = set(os.environ.get("TEXTUAL", "").split(","))
 is_dev = {"debug", "devtools"}.issubset(textual_flags)
-
-
-global pprint
-pprint = Console().print
 
 
 def _build_parser() -> argparse.ArgumentParser:
@@ -345,7 +340,7 @@ example_function(10)"""
     if args.force_first_launch:
         return
 
-    from rovr.functions.utils import set_nested_value  # noqa: I001
+    from rovr.functions.config import set_nested_value  # noqa: I001
     from rovr.variables.constants import config
 
     import rovr.monkey_patches._classes  # noqa: F401
@@ -414,6 +409,4 @@ example_function(10)"""
 
 
 if __name__ == "__main__":
-    from rovr import main
-
     main()

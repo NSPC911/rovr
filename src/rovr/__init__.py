@@ -1,3 +1,9 @@
+from rich.console import Console
+
+console = Console()
+pprint = console.print
+
+
 def main() -> None:
     try:
         from rovr.__main__ import cli

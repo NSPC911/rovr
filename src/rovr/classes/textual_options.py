@@ -309,14 +309,16 @@ class ModalSearcherOption(LazyOption):
             disabled (bool) = False: The initial enabled/disabled state.
         """
 
-        def get_prompt() -> Content:
-            if icon_factory is None:
-                return Content(label)
-            return _get_cached_icon(icon_factory()) + Content.from_markup(label)
+        self.__icon_factory = icon_factory
 
-        super().__init__(prompt=get_prompt, disabled=disabled)
+        super().__init__(prompt=self.get_prompt, disabled=disabled)
         self.label = label
         self.file_path = file_path
+
+    def get_prompt(self) -> Content:
+        if self.__icon_factory is None:
+            return Content(self.label)
+        return _get_cached_icon(self.__icon_factory()) + Content.from_markup(self.label)
 
 
 class PathDropdownItem(DropdownItem):

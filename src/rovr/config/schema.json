@@ -1028,6 +1028,16 @@
               "$ref": "#/definitions/keybind",
               "description": "Move the selection up in the modal list.",
               "display_name": "Select up"
+            },
+            "page_down": {
+              "$ref": "#/definitions/keybind",
+              "description": "Move the selection down by a page in the modal list.",
+              "display_name": "Select page down"
+            },
+            "page_up": {
+              "$ref": "#/definitions/keybind",
+              "description": "Move the selection up by a page in the modal list.",
+              "display_name": "Select page up"
             }
           }
         },
@@ -1138,7 +1148,7 @@
             },
             "timeout": {
               "type": "integer",
-              "default": 5,
+              "default": 15,
               "description": "The maximum time (in seconds) to wait for fd to return results before giving up."
             },
             "default_filter_types": {
@@ -1205,7 +1215,7 @@
             },
             "timeout": {
               "type": "integer",
-              "default": 30,
+              "default": 60,
               "description": "The maximum time (in seconds) to wait for rg to return results before giving up."
             }
           }

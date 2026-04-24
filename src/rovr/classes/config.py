@@ -218,7 +218,7 @@ _ROVR_CONFIG_PLUGINS_FD_SEARCH_HIDDEN_DEFAULT = False
 r""" Default value of the field path 'Rovr Config plugins fd search_hidden' """
 
 
-_ROVR_CONFIG_PLUGINS_FD_TIMEOUT_DEFAULT = 5
+_ROVR_CONFIG_PLUGINS_FD_TIMEOUT_DEFAULT = 15
 r""" Default value of the field path 'Rovr Config plugins fd timeout' """
 
 
@@ -278,7 +278,7 @@ _ROVR_CONFIG_PLUGINS_RG_SEARCH_HIDDEN_DEFAULT = False
 r""" Default value of the field path 'Rovr Config plugins rg search_hidden' """
 
 
-_ROVR_CONFIG_PLUGINS_RG_TIMEOUT_DEFAULT = 30
+_ROVR_CONFIG_PLUGINS_RG_TIMEOUT_DEFAULT = 60
 r""" Default value of the field path 'Rovr Config plugins rg timeout' """
 
 
@@ -1022,6 +1022,8 @@ class _RovrConfigKeybindsFilterModal(TypedDict, total=False):
     exit: list[str]
     down: list[str]
     up: list[str]
+    page_down: list[str]
+    page_up: list[str]
 
 
 class _RovrConfigKeybindsYesOrNo(TypedDict, total=False):
@@ -1191,7 +1193,7 @@ class _RovrConfigPluginsFd(TypedDict, total=False):
     r"""
     The maximum time (in seconds) to wait for fd to return results before giving up.
 
-    default: 5
+    default: 15
     """
 
     default_filter_types: list["_RovrConfigPluginsFdDefaultFilterTypesItem"]
@@ -1345,7 +1347,7 @@ class _RovrConfigPluginsRg(TypedDict, total=False):
     r"""
     The maximum time (in seconds) to wait for rg to return results before giving up.
 
-    default: 30
+    default: 60
     """
 
 

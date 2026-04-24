@@ -100,6 +100,8 @@ dont_ask_again = ["a"]
 exit = ["escape"]
 down = ["ctrl+j", "down"]
 up = ["ctrl+k", "up"]
+page_up = ["ctrl+b", "pageup"]
+page_down = ["ctrl+f", "pagedown"]
 
 [keybinds.yes_or_no]
 yes = ["y"]

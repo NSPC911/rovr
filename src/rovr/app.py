@@ -26,6 +26,7 @@ from textual.css.errors import StylesheetError
 from textual.css.query import NoMatches
 from textual.css.stylesheet import StylesheetParseError
 from textual.dom import DOMNode
+from textual.messages import ExitApp
 from textual.screen import Screen
 from textual.types import NoActiveAppError
 from textual.worker import Worker, WorkerFailed
@@ -612,7 +613,6 @@ class Application(App, inherit_bindings=False):
                     cwd = new_cwd
                     continue
                 else:
-                    items = None
                     with suppress(OSError):
                         items = get_filtered_dir_names(
                             cwd,
@@ -984,6 +984,10 @@ class Application(App, inherit_bindings=False):
         except Exception as exc:
             return exc
 
+    @on(ExitApp)
+    def on_exit_app(self) -> None:
+        import rovr.monkey_patches._spam  # noqa: F401
+
     def panic(self, *renderables: RenderableType) -> None:
         if not all(is_renderable(renderable) for renderable in renderables):
             raise TypeError("Can only call panic with strings or Rich renderables")
@@ -995,6 +999,8 @@ class Application(App, inherit_bindings=False):
         """Exits the app after an unhandled exception."""
         import rich
         from rich.traceback import Traceback
+
+        self.on_exit_app()
 
         self.bell()
         traceback = Traceback(

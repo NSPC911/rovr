@@ -1,6 +1,6 @@
 from textual import events
 
-from rovr.classes.mixins import SingleLineOptionLayoutMixin
+from rovr.classes.mixins import ScrollOffMixin, SingleLineOptionLayoutMixin
 from rovr.classes.textual_options import PaddedOption
 from rovr.variables.constants import bindings
 from rovr.widgets import OptionList
@@ -26,8 +26,16 @@ class DoubleClickableOptionList(SingleLineOptionLayoutMixin, OptionList):
             self.screen.search_input.focus()
 
 
+class DoubleClickableScrollOffOptionList(ScrollOffMixin, DoubleClickableOptionList): ...
+
+
 class SpecialOptionList(OptionList):
     BINDINGS = list(bindings)
 
 
-__all__ = ["DoubleClickableOptionList", "SpecialOptionList", "PaddedOption"]
+__all__ = [
+    "DoubleClickableOptionList",
+    "DoubleClickableScrollOffOptionList",
+    "SpecialOptionList",
+    "PaddedOption",
+]

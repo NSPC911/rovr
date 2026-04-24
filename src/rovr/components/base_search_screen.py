@@ -49,15 +49,20 @@ class ModalSearchScreen(ModalScreen, inherit_bindings=False):
         self.search_options.action_select()
 
     @on(OptionList.OptionHighlighted)
-    def handle_highlighted(self, event: OptionList.OptionHighlighted) -> None:
+    def handle_highlighted(self) -> None:
         if (
             self.search_options.option_count == 0
             or self.search_options.get_option_at_index(0).disabled
-            or self.search_options.highlighted is None
         ):
             self.search_options.border_subtitle = "0/0"
         else:
-            self.search_options.border_subtitle = f"{self.search_options.highlighted + 1}/{self.search_options.option_count}"
+            if self.search_options.highlighted is None:
+                highlighted = 0
+            else:
+                highlighted = self.search_options.highlighted + 1
+            self.search_options.border_subtitle = (
+                f"{highlighted}/{self.search_options.option_count}"
+            )
 
     @on(OptionList.OptionSelected)
     async def handle_option_selected(self, event: OptionList.OptionSelected) -> None:
@@ -86,6 +91,18 @@ class ModalSearchScreen(ModalScreen, inherit_bindings=False):
             event.stop()
             if self.search_options.options:
                 self.search_options.action_cursor_up()
+        elif check_key(
+            event, config["keybinds"]["filter_modal"]["page_down"]
+        ) and isinstance(self.focused, Input):
+            event.stop()
+            if self.search_options.options:
+                self.search_options.action_page_down()
+        elif check_key(
+            event, config["keybinds"]["filter_modal"]["page_up"]
+        ) and isinstance(self.focused, Input):
+            event.stop()
+            if self.search_options.options:
+                self.search_options.action_page_up()
         elif event.key == "tab":
             event.stop()
             self.focus_next()

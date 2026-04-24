@@ -7,8 +7,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+- `rg+fd`: allow custom timeout d497bfd
+- `pinned_sidebar`: keep focus if click on #264
+- `image`: use resampler based on config d13c104
+
+### Fixed
+- `options`: dont cause recursion error when `--dev` c14239b
+- dont check for global vars fe644b7
+
 ### Performance
-- `filelist`: improve loading by lazy loading renderer and stuff #263
+- `filelist`: improve loading by lazy loading renderer and stuff #263 8de7b30
+- `options`: use module level cache for options c29c1c3
+- even lazier imports 74cb7f6
+- `filelist`: in select mode, select only if name matches dc7a46d 7ded7d4
+- `rg+fd`: incrementally add options for better responsiveness #268
 
 ## [0.8.1] - 2026-04-10
 

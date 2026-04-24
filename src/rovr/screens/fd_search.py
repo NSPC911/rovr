@@ -232,7 +232,8 @@ class FileSearch(ModalSearchScreen):
             ))
             self.search_options.add_class("empty")
             self.search_options.border_subtitle = ""
-            return
+            if not stderr_task:
+                return
         except (OSError, asyncio.exceptions.TimeoutError) as exc:
             if isinstance(exc, asyncio.exceptions.TimeoutError) and fd_process:
                 fd_process.kill()

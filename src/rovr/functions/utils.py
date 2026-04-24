@@ -194,6 +194,6 @@ def run_editor_command(
 
 
 def dismiss(screen: Screen, result: ScreenResultType | None = None) -> None:
-    if screen in screen.app.screens:
+    if screen in screen.app.screen_stack:
         with suppress(ScreenStackError):
             screen.dismiss(result)

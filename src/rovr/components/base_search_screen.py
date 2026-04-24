@@ -91,6 +91,18 @@ class ModalSearchScreen(ModalScreen, inherit_bindings=False):
             event.stop()
             if self.search_options.options:
                 self.search_options.action_cursor_up()
+        elif check_key(
+            event, config["keybinds"]["filter_modal"]["page_down"]
+        ) and isinstance(self.focused, Input):
+            event.stop()
+            if self.search_options.options:
+                self.search_options.action_page_down()
+        elif check_key(
+            event, config["keybinds"]["filter_modal"]["page_up"]
+        ) and isinstance(self.focused, Input):
+            event.stop()
+            if self.search_options.options:
+                self.search_options.action_page_up()
         elif event.key == "tab":
             event.stop()
             self.focus_next()

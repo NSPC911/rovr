@@ -1028,6 +1028,16 @@
               "$ref": "#/definitions/keybind",
               "description": "Move the selection up in the modal list.",
               "display_name": "Select up"
+            },
+            "page_down": {
+              "$ref": "#/definitions/keybind",
+              "description": "Move the selection down by a page in the modal list.",
+              "display_name": "Select page down"
+            },
+            "page_up": {
+              "$ref": "#/definitions/keybind",
+              "description": "Move the selection up by a page in the modal list.",
+              "display_name": "Select page up"
             }
           }
         },

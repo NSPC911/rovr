@@ -271,6 +271,10 @@ description: config schema humanified
       - [7.63.2.1. Rovr Config > keybinds > toggle_pin > toggle_pin items](#keybinds_toggle_pin_items)
     - [7.63.3. Property `Rovr Config > keybinds > filter_modal > up`](#keybinds_filter_modal_up)
       - [7.63.3.1. Rovr Config > keybinds > toggle_pin > toggle_pin items](#keybinds_toggle_pin_items)
+    - [7.63.4. Property `Rovr Config > keybinds > filter_modal > page_down`](#keybinds_filter_modal_page_down)
+      - [7.63.4.1. Rovr Config > keybinds > toggle_pin > toggle_pin items](#keybinds_toggle_pin_items)
+    - [7.63.5. Property `Rovr Config > keybinds > filter_modal > page_up`](#keybinds_filter_modal_page_up)
+      - [7.63.5.1. Rovr Config > keybinds > toggle_pin > toggle_pin items](#keybinds_toggle_pin_items)
   - [7.64. Property `Rovr Config > keybinds > yes_or_no`](#keybinds_yes_or_no)
     - [7.64.1. Property `Rovr Config > keybinds > yes_or_no > yes`](#keybinds_yes_or_no_yes)
       - [7.64.1.1. Rovr Config > keybinds > toggle_pin > toggle_pin items](#keybinds_toggle_pin_items)
@@ -4099,11 +4103,13 @@ Refer to https://textual.textualize.io/guide/design/#additional-variables for mo
 
 **Description:** Keybinds related to selecting options in a modal screen (like FileSearch or ZDToDirectory)
 
-| Property                            | Type            | Title/Description                          |
-| ----------------------------------- | --------------- | ------------------------------------------ |
-| [exit](#keybinds_filter_modal_exit) | array of string | Exit the modal without making a selection. |
-| [down](#keybinds_filter_modal_down) | array of string | Move the selection down in the modal list. |
-| [up](#keybinds_filter_modal_up)     | array of string | Move the selection up in the modal list.   |
+| Property                                      | Type            | Title/Description                                    |
+| --------------------------------------------- | --------------- | ---------------------------------------------------- |
+| [exit](#keybinds_filter_modal_exit)           | array of string | Exit the modal without making a selection.           |
+| [down](#keybinds_filter_modal_down)           | array of string | Move the selection down in the modal list.           |
+| [up](#keybinds_filter_modal_up)               | array of string | Move the selection up in the modal list.             |
+| [page_down](#keybinds_filter_modal_page_down) | array of string | Move the selection down by a page in the modal list. |
+| [page_up](#keybinds_filter_modal_page_up)     | array of string | Move the selection up by a page in the modal list.   |
 
 #### <a name="keybinds_filter_modal_exit"></a>7.63.1. Property `Rovr Config > keybinds > filter_modal > exit`
 
@@ -4186,6 +4192,64 @@ Refer to https://textual.textualize.io/guide/design/#additional-variables for mo
 | [toggle_pin items](#keybinds_toggle_pin_items) |             |
 
 ##### <a name="keybinds_toggle_pin_items"></a>7.63.3.1. Rovr Config > keybinds > toggle_pin > toggle_pin items
+
+|              |          |
+| ------------ | -------- |
+| **Type**     | `string` |
+| **Required** | No       |
+
+#### <a name="keybinds_filter_modal_page_down"></a>7.63.4. Property `Rovr Config > keybinds > filter_modal > page_down`
+
+|                |                       |
+| -------------- | --------------------- |
+| **Type**       | `array of string`     |
+| **Required**   | No                    |
+| **Defined in** | #/definitions/keybind |
+
+**Description:** Move the selection down by a page in the modal list.
+
+|                      | Array restrictions |
+| -------------------- | ------------------ |
+| **Min items**        | N/A                |
+| **Max items**        | N/A                |
+| **Items unicity**    | False              |
+| **Additional items** | False              |
+| **Tuple validation** | See below          |
+
+| Each item of this array must be                | Description |
+| ---------------------------------------------- | ----------- |
+| [toggle_pin items](#keybinds_toggle_pin_items) |             |
+
+##### <a name="keybinds_toggle_pin_items"></a>7.63.4.1. Rovr Config > keybinds > toggle_pin > toggle_pin items
+
+|              |          |
+| ------------ | -------- |
+| **Type**     | `string` |
+| **Required** | No       |
+
+#### <a name="keybinds_filter_modal_page_up"></a>7.63.5. Property `Rovr Config > keybinds > filter_modal > page_up`
+
+|                |                       |
+| -------------- | --------------------- |
+| **Type**       | `array of string`     |
+| **Required**   | No                    |
+| **Defined in** | #/definitions/keybind |
+
+**Description:** Move the selection up by a page in the modal list.
+
+|                      | Array restrictions |
+| -------------------- | ------------------ |
+| **Min items**        | N/A                |
+| **Max items**        | N/A                |
+| **Items unicity**    | False              |
+| **Additional items** | False              |
+| **Tuple validation** | See below          |
+
+| Each item of this array must be                | Description |
+| ---------------------------------------------- | ----------- |
+| [toggle_pin items](#keybinds_toggle_pin_items) |             |
+
+##### <a name="keybinds_toggle_pin_items"></a>7.63.5.1. Rovr Config > keybinds > toggle_pin > toggle_pin items
 
 |              |          |
 | ------------ | -------- |
@@ -4525,7 +4589,7 @@ Refer to https://textual.textualize.io/guide/design/#additional-variables for mo
 | ------------ | --------- |
 | **Type**     | `integer` |
 | **Required** | No        |
-| **Default**  | `5`       |
+| **Default**  | `15`      |
 
 **Description:** The maximum time (in seconds) to wait for fd to return results before giving up.
 
@@ -4685,7 +4749,7 @@ Must be one of:
 | ------------ | --------- |
 | **Type**     | `integer` |
 | **Required** | No        |
-| **Default**  | `30`      |
+| **Default**  | `60`      |
 
 **Description:** The maximum time (in seconds) to wait for rg to return results before giving up.
 

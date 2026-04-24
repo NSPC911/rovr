@@ -248,7 +248,7 @@ class FileList(
 
             self.set_options(self.list_of_options)
             # fix selected options
-            if has_selected and name_to_index:
+            if (has_selected or self.select_mode_enabled) and name_to_index:
                 self.update_from_session(session, name_to_index)
             # session handler
             self.app.query_one("#path_switcher", PathInput).value = cwd + (

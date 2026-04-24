@@ -134,7 +134,6 @@ class ContentSearch(ModalSearchScreen):
             if rg_process.stderr is not None:
                 stderr_task = asyncio.create_task(rg_process.stderr.read())
 
-            options: list[ModalSearcherOption] = []
             pending_options: list[ModalSearcherOption] = []
             did_render_results = False
             last_flush = time()
@@ -159,13 +158,13 @@ class ContentSearch(ModalSearchScreen):
                 if not line:
                     break
 
-                option = self.create_option_from_count_line(
+                counted_option = self.create_option_from_count_line(
                     line.decode(errors="replace")
                 )
-                if option is None:
+                if counted_option is None:
                     continue
 
-                pending_options.append(option)
+                pending_options.append(counted_option[1])
 
                 if time() - last_flush < self.STREAM_BATCH_TIME:
                     continue
@@ -178,8 +177,10 @@ class ContentSearch(ModalSearchScreen):
                     did_render_results = True
 
                 self.search_options.add_options(pending_options)
-                options.extend(pending_options)
                 pending_options.clear()
+                if self.search_options.highlighted is None:
+                    self.search_options.highlighted = 0
+                self.handle_highlighted()
 
             if pending_options:
                 if not did_render_results:
@@ -200,7 +201,7 @@ class ContentSearch(ModalSearchScreen):
             if self._active_worker is not get_current_worker():
                 return
 
-            if options:
+            if self.search_options:
                 if self.search_options.highlighted is None:
                     self.search_options.highlighted = 0
                 return
@@ -211,7 +212,8 @@ class ContentSearch(ModalSearchScreen):
             )
             self.search_options.add_class("empty")
             self.search_options.border_subtitle = ""
-            return
+            if not stderr_task:
+                return
         except (OSError, asyncio.exceptions.TimeoutError) as exc:
             if isinstance(exc, asyncio.exceptions.TimeoutError) and rg_process:
                 rg_process.kill()
@@ -246,7 +248,7 @@ class ContentSearch(ModalSearchScreen):
 
     def create_option_from_count_line(
         self, raw_line: str
-    ) -> ModalSearcherOption | None:
+    ) -> tuple[int, ModalSearcherOption] | None:
         if ":" not in raw_line:
             return None
         raw_path, raw_count = raw_line.rsplit(":", 1)
@@ -264,8 +266,11 @@ class ContentSearch(ModalSearchScreen):
             icon_factory = partial(get_icon_for_folder, file_path)
         else:
             icon_factory = partial(get_icon_for_file, file_path)
-        return ModalSearcherOption(
-            icon_factory,
-            display_text,
-            file_path,
+        return (
+            count,
+            ModalSearcherOption(
+                icon_factory,
+                display_text,
+                file_path,
+            ),
         )

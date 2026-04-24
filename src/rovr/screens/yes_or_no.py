@@ -3,7 +3,7 @@ from textual.app import ComposeResult
 from textual.containers import Grid, HorizontalGroup, VerticalGroup
 from textual.screen import ModalScreen
 
-from rovr.functions.utils import check_key, get_shortest_bind
+from rovr.functions.utils import check_key, dismiss, get_shortest_bind
 from rovr.variables.constants import config
 from rovr.widgets import Button, Label, Switch
 
@@ -82,17 +82,19 @@ class YesOrNo(ModalScreen):
         event.stop()
 
     def action_yes(self) -> None:
-        self.dismiss(
+        dismiss(
+            self,
             {"value": True, "toggle": self.query_one(Switch).value}
             if self.with_toggle
-            else True
+            else True,
         )
 
     def action_no(self) -> None:
-        self.dismiss(
+        dismiss(
+            self,
             {"value": False, "toggle": self.query_one(Switch).value}
             if self.with_toggle
-            else False
+            else False,
         )
 
     def action_toggle_dont_ask_again(self) -> None:

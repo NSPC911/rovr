@@ -1,11 +1,14 @@
 import shlex
 import subprocess
+from contextlib import suppress
 from shutil import which
 from typing import Callable, Literal
 
 from humanize import naturalsize
 from textual import events
+from textual.app import ScreenStackError
 from textual.dom import DOMNode
+from textual.screen import Screen, ScreenResultType
 from textual.worker import NoActiveWorker, WorkerCancelled, get_current_worker
 
 from rovr import pprint
@@ -188,3 +191,9 @@ def run_editor_command(
     else:
         app.run_in_thread(subprocess.run, command, capture_output=True)
         return None
+
+
+def dismiss(screen: Screen, result: ScreenResultType | None = None) -> None:
+    if screen in screen.app.screens:
+        with suppress(ScreenStackError):
+            screen.dismiss(result)

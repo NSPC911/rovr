@@ -9,7 +9,7 @@ from textual.screen import ModalScreen
 from rovr.classes.textual_options import KeybindOption
 from rovr.components import SearchInput
 from rovr.functions import icons
-from rovr.functions.utils import check_key
+from rovr.functions.utils import check_key, dismiss
 from rovr.variables.constants import bindings, config, schema
 from rovr.widgets import OptionList
 
@@ -165,7 +165,7 @@ class Keybinds(ModalScreen):
             + cast(dict[str, Any], config_keybinds["filter_modal"])["exit"],
         ):
             event.stop()
-            self.dismiss()
+            dismiss(self)
         elif check_key(
             event, cast(dict[str, Any], config_keybinds["filter_modal"])["down"]
         ):
@@ -183,7 +183,7 @@ class Keybinds(ModalScreen):
         if isinstance(event.option, KeybindOption):
             if not event.option.is_layer_bind:
                 event.stop()
-                self.dismiss()
+                dismiss(self)
                 self.app.simulate_key(event.option.key_press)
         else:
             raise RuntimeError(
@@ -194,4 +194,4 @@ class Keybinds(ModalScreen):
         if event.widget is self:
             # ie click outside
             event.stop()
-            self.dismiss()
+            dismiss(self)

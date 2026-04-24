@@ -3,6 +3,7 @@ from typing import Literal
 from textual import events, work
 from textual.binding import Binding
 
+from rovr.functions.utils import dismiss
 from rovr.widgets import Input
 
 from .input import ModalInput
@@ -44,11 +45,11 @@ class ShellExec(ModalInput):
         if event.widget is self:
             # ie click outside
             event.stop()
-            self.dismiss(None)
+            dismiss(self, None)
 
     @work
     async def on_input_submitted(self, event: Input.Submitted) -> None:
-        self.dismiss(ShellExecReturnType(command=event.input.value, mode=self.mode))
+        dismiss(self, ShellExecReturnType(command=event.input.value, mode=self.mode))
 
     def action_cycle_mode_forward(self) -> None:
         modes = list(mode_to_subtitle.keys())

@@ -7,7 +7,7 @@ from textual.worker import Worker
 
 from rovr.classes.textual_options import ModalSearcherOption
 from rovr.components.special_option_lists import DoubleClickableOptionList
-from rovr.functions.utils import check_key
+from rovr.functions.utils import check_key, dismiss
 from rovr.variables.constants import config
 from rovr.widgets import Input, OptionList
 
@@ -62,18 +62,18 @@ class ModalSearchScreen(ModalScreen, inherit_bindings=False):
     @on(OptionList.OptionSelected)
     async def handle_option_selected(self, event: OptionList.OptionSelected) -> None:
         if not isinstance(event.option, ModalSearcherOption):
-            self.dismiss(None)
+            dismiss(self, None)
             return
         selected_value: str | None = event.option.file_path
         if isinstance(selected_value, str) and not event.option.disabled:
-            self.dismiss(selected_value)
+            dismiss(self, selected_value)
         else:
-            self.dismiss(None)
+            dismiss(self, None)
 
     def on_key(self, event: events.Key) -> None:
         if check_key(event, config["keybinds"]["filter_modal"]["exit"]):
             event.stop()
-            self.dismiss(None)
+            dismiss(self, None)
         elif check_key(
             event, config["keybinds"]["filter_modal"]["down"]
         ) and isinstance(self.focused, Input):
@@ -97,4 +97,4 @@ class ModalSearchScreen(ModalScreen, inherit_bindings=False):
         if event.widget is self:
             # ie click outside
             event.stop()
-            self.dismiss(None)
+            dismiss(self, None)

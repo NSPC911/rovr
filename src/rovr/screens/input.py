@@ -9,6 +9,7 @@ from textual.screen import ModalScreen
 from textual.validation import Length
 
 from rovr.functions import icons as icon_utils
+from rovr.functions.utils import dismiss
 from rovr.widgets import Input, Label
 
 
@@ -138,16 +139,16 @@ class ModalInput(ModalScreen, inherit_bindings=False):
 
         # just assume that the screen was already dismissed, I can't fix this
         with contextlib.suppress(ScreenStackError):
-            self.dismiss(return_path)
+            dismiss(self, return_path)
 
     def on_key(self, event: events.Key) -> None:
         """Handle escape key to dismiss the dialog."""
         if event.key == "escape":
             event.stop()
-            self.dismiss()
+            dismiss(self)
 
     def on_click(self, event: events.Click) -> None:
         if event.widget is self:
             # ie click outside
             event.stop()
-            self.dismiss()
+            dismiss(self)

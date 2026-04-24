@@ -4,7 +4,7 @@ from textual.containers import Container, Grid
 from textual.screen import ModalScreen
 
 from rovr.components import PaddedOption, SpecialOptionList
-from rovr.functions.utils import check_key, get_shortest_bind
+from rovr.functions.utils import check_key, dismiss, get_shortest_bind
 from rovr.variables.constants import config
 from rovr.widgets import Button, Label
 
@@ -80,11 +80,11 @@ class DeleteFiles(ModalScreen):
             self.action_trash()
 
     def action_delete(self) -> None:
-        self.dismiss("delete")
+        dismiss(self, "delete")
 
     def action_cancel(self) -> None:
-        self.dismiss("cancel")
+        dismiss(self, "cancel")
 
     def action_trash(self) -> None:
         if config["settings"]["use_recycle_bin"]:
-            self.dismiss("trash")
+            dismiss(self, "trash")

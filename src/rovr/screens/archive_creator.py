@@ -10,6 +10,7 @@ from textual.widgets.selection_list import Selection, SelectionType
 
 from rovr.classes.mixins import CheckboxRenderingMixin
 from rovr.functions import icons as icon_utils
+from rovr.functions.utils import dismiss
 from rovr.variables.constants import bindings
 from rovr.widgets import Input, SelectionList
 
@@ -202,12 +203,13 @@ class ArchiveCreationScreen(ModalInput):
         )):
             return_path += "/"
         compression_selection = self.query_one(ArchiveCompression).selected
-        self.dismiss(
+        dismiss(
+            self,
             ArchiveScreenReturnType(
                 return_path,
                 self.query_one(ArchiveTypes).selected[0],
                 int(compression_selection[0] if compression_selection else 0),
-            )
+            ),
         )
 
     @on(ArchiveTypes.SelectionToggled, "ArchiveTypes")
@@ -224,10 +226,10 @@ class ArchiveCreationScreen(ModalInput):
         if event.key == "escape":
             event.stop()
             event.prevent_default()
-            self.dismiss(None)
+            dismiss(self, None)
 
     def on_click(self, event: events.Click) -> None:
         if event.widget is self:
             # ie click outside
             event.stop()
-            self.dismiss(None)
+            dismiss(self, None)

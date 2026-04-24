@@ -4,7 +4,7 @@ from textual.app import ComposeResult
 from textual.containers import Container, Grid, HorizontalGroup, VerticalGroup
 from textual.screen import ModalScreen
 
-from rovr.functions.utils import check_key, get_shortest_bind
+from rovr.functions.utils import check_key, dismiss, get_shortest_bind
 from rovr.variables.constants import config
 from rovr.widgets import Button, Label, Switch
 
@@ -62,21 +62,27 @@ class FileInUse(ModalScreen):
 
     @on(Button.Pressed, "#try_again")
     def action_retry(self) -> None:
-        self.dismiss({
-            "value": "try_again",
-            "toggle": self.query_one(Switch).value,
-        })
+        dismiss(
+            self,
+            {
+                "value": "try_again",
+                "toggle": self.query_one(Switch).value,
+            },
+        )
 
     @on(Button.Pressed, "#cancel")
     def action_cancel(self) -> None:
-        self.dismiss({
-            "value": "cancel",
-            "toggle": self.query_one(Switch).value,
-        })
+        dismiss(
+            self,
+            {
+                "value": "cancel",
+                "toggle": self.query_one(Switch).value,
+            },
+        )
 
     @on(Button.Pressed, "#skip")
     def action_skip(self) -> None:
-        self.dismiss({"value": "skip", "toggle": self.query_one(Switch).value})
+        dismiss(self, {"value": "skip", "toggle": self.query_one(Switch).value})
 
     def action_toggle_dont_ask_again(self) -> None:
         self.query_one(Switch).action_toggle_switch()

@@ -3,6 +3,7 @@ from textual.app import ComposeResult
 from textual.containers import Container, Grid
 from textual.screen import ModalScreen
 
+from rovr.functions.utils import dismiss
 from rovr.widgets import Button, Label
 
 
@@ -31,15 +32,15 @@ class Dismissible(ModalScreen):
         """Handle key presses."""
         if event.key in ("escape", "enter"):
             event.stop()
-            self.dismiss()
+            dismiss(self)
 
     @on(Button.Pressed, "#ok")
     def on_button_pressed(self, event: Button.Pressed) -> None:
         """Handle button presses."""
-        self.dismiss()
+        dismiss(self)
 
     def on_click(self, event: events.Click) -> None:
         if event.widget is self:
             # ie click outside
             event.stop()
-            self.dismiss()
+            dismiss(self)

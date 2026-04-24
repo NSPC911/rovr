@@ -3,7 +3,7 @@ from textual.app import ComposeResult
 from textual.containers import Grid, HorizontalGroup, VerticalGroup
 from textual.screen import ModalScreen
 
-from rovr.functions.utils import check_key, get_shortest_bind
+from rovr.functions.utils import check_key, dismiss, get_shortest_bind
 from rovr.variables.constants import config
 from rovr.widgets import Button, Label, Switch
 
@@ -82,28 +82,40 @@ class FileNameConflict(ModalScreen):
             self.action_cancel()
 
     def action_overwrite(self) -> None:
-        self.dismiss({
-            "value": "overwrite",
-            "same_for_next": self.query_one(Switch).value,
-        })
+        dismiss(
+            self,
+            {
+                "value": "overwrite",
+                "same_for_next": self.query_one(Switch).value,
+            },
+        )
 
     def action_rename(self) -> None:
-        self.dismiss({
-            "value": "rename",
-            "same_for_next": self.query_one(Switch).value,
-        })
+        dismiss(
+            self,
+            {
+                "value": "rename",
+                "same_for_next": self.query_one(Switch).value,
+            },
+        )
 
     def action_skip(self) -> None:
-        self.dismiss({
-            "value": "skip",
-            "same_for_next": self.query_one(Switch).value,
-        })
+        dismiss(
+            self,
+            {
+                "value": "skip",
+                "same_for_next": self.query_one(Switch).value,
+            },
+        )
 
     def action_cancel(self) -> None:
-        self.dismiss({
-            "value": "cancel",
-            "same_for_next": self.query_one(Switch).value,
-        })
+        dismiss(
+            self,
+            {
+                "value": "cancel",
+                "same_for_next": self.query_one(Switch).value,
+            },
+        )
 
     def action_dont_ask_again(self) -> None:
         self.query_one(Switch).action_toggle_switch()

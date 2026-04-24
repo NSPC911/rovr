@@ -9,7 +9,7 @@ from textual.worker import WorkerCancelled
 
 from rovr.classes.textual_options import ModalSearcherOption
 from rovr.components import DoubleClickableOptionList, ModalSearchScreen
-from rovr.functions.utils import should_cancel
+from rovr.functions.utils import dismiss, should_cancel
 from rovr.variables.constants import config
 from rovr.widgets import Input, OptionList
 
@@ -160,12 +160,12 @@ class ZDToDirectory(ModalSearchScreen):
         event.prevent_default()
         if not isinstance(event.option, ModalSearcherOption):
             # theoretically this shouldn't happen, but precautions
-            self.dismiss(None)
+            dismiss(self, None)
             return
 
         selected_value = event.option.file_path
         if selected_value is None:
-            self.dismiss(None)
+            dismiss(self, None)
             return None
         # ignore if zoxide got uninstalled, why are you doing this
         with contextlib.suppress(asyncio.exceptions.TimeoutError, OSError):
@@ -178,9 +178,9 @@ class ZDToDirectory(ModalSearchScreen):
             )
             _, _ = await asyncio.wait_for(zoxide_process.communicate(), timeout=3)
         if not event.option.disabled:
-            self.dismiss(selected_value)
+            dismiss(self, selected_value)
         else:
-            self.dismiss(None)
+            dismiss(self, None)
 
     @work(thread=True)
     def create_options(

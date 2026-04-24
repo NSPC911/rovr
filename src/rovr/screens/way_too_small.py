@@ -5,6 +5,7 @@ from textual.app import ComposeResult, ScreenStackError
 from textual.containers import Center, HorizontalGroup
 from textual.screen import ModalScreen
 
+from rovr.functions.utils import dismiss
 from rovr.variables.constants import MaxPossible, ascii_logo
 from rovr.widgets import Label, Static
 
@@ -49,7 +50,7 @@ class TerminalTooSmall(ModalScreen):
             and event.size.width >= MaxPossible.width
         ):
             with contextlib.suppress(ScreenStackError):
-                self.dismiss()
+                dismiss(self)
             return
         self.extra_changes()
 

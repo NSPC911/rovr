@@ -135,7 +135,7 @@ class ContentSearch(ModalSearchScreen):
                 stderr_task = asyncio.create_task(rg_process.stderr.read())
 
             pending_options: list[ModalSearcherOption] = []
-            did_render_results = False
+            is_empty = True
             last_flush = time()
 
             while True:
@@ -158,9 +158,7 @@ class ContentSearch(ModalSearchScreen):
                 if not line:
                     break
 
-                counted_option = self.create_option_from_count_line(
-                    line.decode(errors="replace")
-                )
+                counted_option = self.create_option(line.decode(errors="replace"))
                 if counted_option is None:
                     continue
 
@@ -171,10 +169,10 @@ class ContentSearch(ModalSearchScreen):
 
                 last_flush = time()
 
-                if not did_render_results:
+                if is_empty:
                     self.search_options.clear_options()
                     self.search_options.remove_class("empty")
-                    did_render_results = True
+                    is_empty = False
 
                 self.search_options.add_options(pending_options)
                 pending_options.clear()
@@ -183,10 +181,10 @@ class ContentSearch(ModalSearchScreen):
                 self.handle_highlighted()
 
             if pending_options:
-                if not did_render_results:
+                if is_empty:
                     self.search_options.clear_options()
                     self.search_options.remove_class("empty")
-                    did_render_results = True
+                    is_empty = False
                 self.search_options.add_options(pending_options)
 
             remaining = deadline - loop.time()
@@ -201,15 +199,14 @@ class ContentSearch(ModalSearchScreen):
             if self._active_worker is not get_current_worker():
                 return
 
-            if self.search_options:
+            if not self.search_options.get_option_at_index(0).disabled:
                 if self.search_options.highlighted is None:
                     self.search_options.highlighted = 0
                 return
 
-            self.search_options.clear_options()
-            self.search_options.add_option(
+            self.search_options.set_options((
                 Option("  --No matches found--", disabled=True),
-            )
+            ))
             self.search_options.add_class("empty")
             self.search_options.border_subtitle = ""
             if not stderr_task:
@@ -246,9 +243,7 @@ class ContentSearch(ModalSearchScreen):
             Input.Changed(self.search_input, value=self.search_input.value)
         )
 
-    def create_option_from_count_line(
-        self, raw_line: str
-    ) -> tuple[int, ModalSearcherOption] | None:
+    def create_option(self, raw_line: str) -> tuple[int, ModalSearcherOption] | None:
         if ":" not in raw_line:
             return None
         raw_path, raw_count = raw_line.rsplit(":", 1)

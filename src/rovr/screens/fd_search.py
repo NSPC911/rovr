@@ -155,11 +155,9 @@ class FileSearch(ModalSearchScreen):
             if fd_process.stderr is not None:
                 stderr_task = asyncio.create_task(fd_process.stderr.read())
 
-            options: list[ModalSearcherOption] = []
             pending_options: list[ModalSearcherOption] = []
-            is_empty = False
-
-            start_time = time()
+            is_empty = True
+            last_flush = time()
 
             while True:
                 if self._active_worker is not get_current_worker():
@@ -187,25 +185,24 @@ class FileSearch(ModalSearchScreen):
 
                 pending_options.append(option)
 
-                if time() - start_time < self.STREAM_BATCH_TIME:
+                if time() - last_flush < self.STREAM_BATCH_TIME:
                     continue
                 else:
-                    start_time = time()
+                    last_flush = time()
 
-                if not is_empty:
+                if is_empty:
                     self.search_options.clear_options()
                     self.search_options.remove_class("empty")
-                    is_empty = True
+                    is_empty = False
 
                 self.search_options.add_options(pending_options)
-                options.extend(pending_options)
                 pending_options.clear()
                 if self.search_options.highlighted is None:
                     self.search_options.highlighted = 0
                 self.handle_highlighted()
 
             if pending_options:
-                if not is_empty:
+                if is_empty:
                     self.search_options.clear_options()
                     self.search_options.remove_class("empty")
                 self.search_options.add_options(pending_options)
@@ -222,7 +219,7 @@ class FileSearch(ModalSearchScreen):
             if self._active_worker is not get_current_worker():
                 return
 
-            if options:
+            if not self.search_options.get_option_at_index(0).disabled:
                 if self.search_options.highlighted is None:
                     self.search_options.highlighted = 0
                 return

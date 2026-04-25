@@ -168,7 +168,7 @@ sequence = [
   { cmd = "docs/scripts/pre_nuitka_build.py" },
   "_hash_dump",
   # --python-flag=-m
-  { cmd = 'nuitka --lto=${lto} --mode=${mode} --report=${report} --user-package-configuration-file=nuitka.config.yml src/rovr --onefile-tempdir-spec="{TEMP}/rovr_onefile_0.8.2" --clang' },
+  { cmd = 'nuitka --lto=${lto} --mode=${mode} --report=${report} --user-package-configuration-file=nuitka.config.yml src/rovr --onefile-tempdir-spec="{TEMP}/rovr_onefile_0.8.2"' },
   "_hash_clean",
 ]
 args = [

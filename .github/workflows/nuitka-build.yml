@@ -30,7 +30,7 @@ jobs:
   build-nuitka:
     needs: starting-build
     strategy:
-      fail-fast: false
+      fail-fast: true
       matrix:
         include:
           - os: windows-latest
@@ -87,6 +87,7 @@ jobs:
           path: rovr.dist
           name: rovr-${{ matrix.name }}-nuitka
           retention-days: 30
+          if-no-files-found: error
 
       - name: Rename Report
         shell: pwsh

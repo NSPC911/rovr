@@ -95,8 +95,10 @@ def load_pins() -> PinsDict:
             # because of the replace code a few lines below
             if type(item) is dict and "path" in item and type(item["path"]) is str:
                 # Expand variables
-                for var, dir_path_val in vars(RovrVars).items():
-                    item["path"] = item["path"].replace(f"${var}", dir_path_val)
+                for var in RovrVars.slots:
+                    item["path"] = item["path"].replace(
+                        f"${var}", getattr(RovrVars, var)
+                    )
                 # Normalize to forward slashes
                 item["path"] = normalise(str(item["path"]))
     pins = _pins
@@ -139,8 +141,10 @@ def add_pin(pin_name: str, pin_path: str | bytes) -> None:
                     and "path" in item
                     and isinstance(item["path"], str)
                 ):
-                    for var, dir_path_val in vars(RovrVars).items():
-                        item["path"] = item["path"].replace(dir_path_val, f"${var}")
+                    for var in RovrVars.slots:
+                        item["path"] = item["path"].replace(
+                            getattr(RovrVars, var), f"${var}"
+                        )
 
     if not path.exists(PIN_PATH):
         makedirs(path.dirname(PIN_PATH), exist_ok=True)

@@ -1,4 +1,4 @@
-from dataclasses import dataclass, field
+from functools import cached_property
 from os import environ, path
 
 from platformdirs import PlatformDirs
@@ -8,24 +8,68 @@ dirs = PlatformDirs("rovr", ".")  # Ah yes, my name is "."
 general = PlatformDirs()
 
 
-@dataclass
 class _RovrVars:
-    ROVRCONFIG: str = dirs.user_config_dir.replace("\\", "/")
-    ROVRCACHE: str = field(init=False)
-    DOCUMENTS: str = general.user_documents_dir.replace("\\", "/")
-    DOWNLOADS: str = general.user_downloads_dir.replace("\\", "/")
-    PICTURES: str = general.user_pictures_dir.replace("\\", "/")
-    DESKTOP: str = general.user_desktop_dir.replace("\\", "/")
-    VIDEOS: str = general.user_videos_dir.replace("\\", "/")
-    CONFIG: str = environ.get("ROVR_CONFIG_FOLDER") or general.user_config_dir.replace(
-        "\\", "/"
+    slots = (
+        "DOCUMENTS",
+        "DOWNLOADS",
+        "PICTURES",
+        "DESKTOP",
+        "VIDEOS",
+        "CONFIG",
+        "CACHE",
+        "MUSIC",
+        "HOME",
     )
-    CACHE: str = general.user_cache_dir.replace("\\", "/")
-    MUSIC: str = general.user_music_dir.replace("\\", "/")
-    HOME: str = path.expanduser("~").replace("\\", "/")
 
-    def __post_init__(self) -> None:
-        self.ROVRCACHE = path.join(self.ROVRCONFIG, "cache").replace("\\", "/")
+    @cached_property
+    def ROVRCONFIG(self) -> str:  # noqa: N802
+        return (environ.get("ROVR_CONFIG_FOLDER") or dirs.user_config_dir).replace(
+            "\\", "/"
+        )
+
+    @cached_property
+    def ROVRCACHE(self) -> str:  # noqa: N802
+        return dirs.user_cache_dir.replace("\\", "/")
+
+    @cached_property
+    def ROVRTEMP(self) -> str:  # noqa: N802
+        return dirs.user_runtime_dir.replace("\\", "/")
+
+    @cached_property
+    def DOCUMENTS(self) -> str:  # noqa: N802
+        return general.user_documents_dir.replace("\\", "/")
+
+    @cached_property
+    def DOWNLOADS(self) -> str:  # noqa: N802
+        return general.user_downloads_dir.replace("\\", "/")
+
+    @cached_property
+    def PICTURES(self) -> str:  # noqa: N802
+        return general.user_pictures_dir.replace("\\", "/")
+
+    @cached_property
+    def DESKTOP(self) -> str:  # noqa: N802
+        return general.user_desktop_dir.replace("\\", "/")
+
+    @cached_property
+    def VIDEOS(self) -> str:  # noqa: N802
+        return general.user_videos_dir.replace("\\", "/")
+
+    @cached_property
+    def CONFIG(self) -> str:  # noqa: N802
+        return general.user_config_dir.replace("\\", "/")
+
+    @cached_property
+    def CACHE(self) -> str:  # noqa: N802
+        return general.user_cache_dir.replace("\\", "/")
+
+    @cached_property
+    def MUSIC(self) -> str:  # noqa: N802
+        return general.user_music_dir.replace("\\", "/")
+
+    @cached_property
+    def HOME(self) -> str:  # noqa: N802
+        return path.expanduser("~").replace("\\", "/")
 
 
 RovrVars = _RovrVars()

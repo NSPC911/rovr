@@ -700,7 +700,7 @@ class PreviewContainer(Container):
             word_wrap=False,
             tab_size=4,
             theme=config["theme"]["preview"],
-            background_color="default",
+            background_color=None,
             code_width=max_width,
         )
 

@@ -600,15 +600,13 @@ class ProcessContainer(VerticalScroll):
                     final_path = path.join(destination_path, filename)
                     if path.exists(final_path) and path.isfile(final_path):
                         if do_what_on_existence == "ask":
-                            response = self.app.call_from_thread(
-                                self.app.push_screen_wait,
+                            response = self.helper_push_and_get_filenameconflict(
                                 FileNameConflict(
                                     "Path already exists in destination\nWhat do you want to do now?",
                                     border_title=filename,
                                     border_subtitle=f"Extracting to {destination_path}",
                                 ),
                             )
-                            response = cast(typed.FileNameConflict, response)
                             if response["same_for_next"]:
                                 do_what_on_existence = response["value"]
                             val = response["value"]
@@ -620,18 +618,11 @@ class ProcessContainer(VerticalScroll):
                             case "skip":
                                 continue
                             case "rename":
-                                base_name, extension = path.splitext(filename)
-                                tested_number = 1
-                                while True:
-                                    new_filename = (
-                                        f"{base_name} ({tested_number}){extension}"
+                                new_path = path_utils.normalise(
+                                    self.helper_rename(
+                                        path.join(destination_path, filename)
                                     )
-                                    new_path = path_utils.normalise(
-                                        path.join(destination_path, new_filename)
-                                    )
-                                    if not path.exists(new_path):
-                                        break
-                                    tested_number += 1
+                                )
 
                                 source = archive.open(file)
                                 if source:
@@ -723,9 +714,9 @@ class ProcessContainer(VerticalScroll):
             bar.update_text,
             "Getting items to paste...",
         )
-        files_to_copy = []
-        files_to_cut = []
-        cut_files__folders = []
+        files_to_copy: list[path_utils.FileObj] = []
+        files_to_cut: list[path_utils.FileObj] = []
+        cut_files__folders: list[str] = []
         for file in copied:
             files_to_copy.extend(path_utils.get_recursive_files(file))
         for file in has_cut:
@@ -769,15 +760,14 @@ class ProcessContainer(VerticalScroll):
                     if path.exists(path.join(dest, item_dict["relative_loc"])):
                         # check if overwrite
                         if action_on_existence == "ask":
-                            response = self.app.call_from_thread(
-                                self.app.push_screen_wait,
+                            response = self.helper_push_and_get_filenameconflict(
                                 FileNameConflict(
                                     "The destination already has file of that name.\nWhat do you want to do now?",
                                     border_title=item_dict["relative_loc"],
                                     border_subtitle=f"Copying to {dest}",
+                                    allow_overwrite=False,
                                 ),
                             )
-                            response = cast(typed.FileNameConflict, response)
                             if response["same_for_next"]:
                                 action_on_existence = response["value"]
                             val = response["value"]
@@ -789,31 +779,53 @@ class ProcessContainer(VerticalScroll):
                             case "skip":
                                 continue
                             case "rename":
-                                base_name, extension = path.splitext(
-                                    item_dict["relative_loc"]
-                                )
-                                tested_number = 1
-                                while True:
-                                    new_rel_path = (
-                                        f"{base_name} ({tested_number}){extension}"
+                                item_dict["relative_loc"] = path_utils.normalise(
+                                    path.relpath(
+                                        self.helper_rename(
+                                            path.join(dest, item_dict["relative_loc"])
+                                        ),
+                                        dest,
                                     )
-                                    if not path.exists(path.join(dest, new_rel_path)):
-                                        break
-                                    tested_number += 1
-                                item_dict["relative_loc"] = new_rel_path
+                                )
                             case "cancel":
                                 bar.panic(bar_text="Process cancelled.")
                                 return
-                    if config["settings"]["copy_includes_metadata"]:
-                        shutil.copy2(
-                            item_dict["path"],
-                            path.join(dest, item_dict["relative_loc"]),
+                    self.helper_copy(
+                        item_dict["path"],
+                        path.join(dest, item_dict["relative_loc"]),
+                    )
+                except shutil.SameFileError:
+                    if action_on_existence == "ask":
+                        response = self.helper_push_and_get_filenameconflict(
+                            FileNameConflict(
+                                "Target and Destination are the same files.\nWhat do you want to do now?",
+                                border_title=item_dict["relative_loc"],
+                                border_subtitle=f"Copying to {dest}",
+                            )
                         )
+                        if response["same_for_next"]:
+                            action_on_existence = response["value"]
+                        val = response["value"]
                     else:
-                        shutil.copy(
-                            item_dict["path"],
-                            path.join(dest, item_dict["relative_loc"]),
-                        )
+                        val = action_on_existence
+                    match val:
+                        case "skip":
+                            continue
+                        case "rename":
+                            item_dict["relative_loc"] = path_utils.normalise(
+                                path.relpath(
+                                    self.helper_rename(
+                                        path.join(dest, item_dict["relative_loc"])
+                                    ),
+                                    dest,
+                                )
+                            )
+                        case "cancel":
+                            bar.panic(bar_text="Process cancelled.")
+                            return
+                    self.helper_copy(
+                        item_dict["path"], path.join(dest, item_dict["relative_loc"])
+                    )
                 except (OSError, PermissionError):
                     # OSError from shutil: The destination location must be writable;
                     # otherwise, an OSError exception will be raised
@@ -821,7 +833,7 @@ class ProcessContainer(VerticalScroll):
                     if path_utils.force_obtain_write_permission(
                         path.join(dest, item_dict["relative_loc"])
                     ):
-                        shutil.copy(
+                        self.helper_copy(
                             item_dict["path"],
                             path.join(dest, item_dict["relative_loc"]),
                         )
@@ -885,15 +897,13 @@ class ProcessContainer(VerticalScroll):
                             cut_ignore.append(item_dict["path"])
                             continue
                         if action_on_existence == "ask":
-                            response = self.app.call_from_thread(
-                                self.app.push_screen_wait,
+                            response = self.helper_push_and_get_filenameconflict(
                                 FileNameConflict(
                                     "The destination already has file of that name.\nWhat do you want to do now?",
                                     border_title=item_dict["relative_loc"],
                                     border_subtitle=f"Moving to {dest}",
                                 ),
                             )
-                            response = cast(typed.FileNameConflict, response)
                             if response["same_for_next"]:
                                 action_on_existence = response["value"]
                             val = response["value"]
@@ -906,18 +916,15 @@ class ProcessContainer(VerticalScroll):
                                 cut_ignore.append(item_dict["path"])
                                 continue
                             case "rename":
-                                base_name, extension = path.splitext(
-                                    item_dict["relative_loc"]
-                                )
-                                tested_number = 1
-                                while True:
-                                    new_rel_path = (
-                                        f"{base_name} ({tested_number}){extension}"
+                                new_relative_loc = path_utils.normalise(
+                                    path.relpath(
+                                        self.helper_rename(
+                                            path.join(dest, item_dict["relative_loc"])
+                                        ),
+                                        dest,
                                     )
-                                    if not path.exists(path.join(dest, new_rel_path)):
-                                        break
-                                    tested_number += 1
-                                item_dict["relative_loc"] = new_rel_path
+                                )
+                                item_dict["relative_loc"] = new_relative_loc
                             case "cancel":
                                 bar.panic(bar_text="Process cancelled.")
                                 return
@@ -1001,3 +1008,25 @@ class ProcessContainer(VerticalScroll):
     def action_delete(self) -> None:
         self.remove_children(".done")
         self.remove_children(".error")
+
+    def helper_copy(self, target: str, destination: str) -> None:
+        if config["settings"]["copy_includes_metadata"]:
+            shutil.copy2(target, destination)
+        else:
+            shutil.copy(target, destination)
+
+    def helper_push_and_get_filenameconflict(
+        self, screen: FileNameConflict
+    ) -> typed.FileNameConflict:
+        response = self.app.call_from_thread(self.app.push_screen_wait, screen)
+        return cast(typed.FileNameConflict, response)
+
+    @staticmethod
+    def helper_rename(target: str) -> str:
+        base_name, extension = path.splitext(target)
+        tested_number = 1
+        while True:
+            new_name = f"{base_name} ({tested_number}){extension}"
+            if not path.exists(new_name):
+                return new_name
+            tested_number += 1

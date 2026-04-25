@@ -773,6 +773,14 @@ FileNameConflict #dialog {
   max-width: 60vw;
 }
 
+FileNameConflict.no_overwrite #dialog Container {
+  column-span: 2;
+  align: center middle;
+  & > Button#cancel {
+    width: 50%;
+  }
+}
+
 FileInUse {
   #dialog {
     grid-size: 2;

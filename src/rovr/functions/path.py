@@ -405,12 +405,12 @@ def get_recursive_files(
 @overload
 def get_recursive_files(
     object_path: str, with_folders: Literal[True]
-) -> tuple[list[FileObj], list[FileObj]]: ...
+) -> tuple[list[FileObj], list[str]]: ...
 
 
 def get_recursive_files(
     object_path: str, with_folders: bool = False
-) -> list[FileObj] | tuple[list[FileObj], list[FileObj]]:
+) -> list[FileObj] | tuple[list[FileObj], list[str]]:
     """Get the files available at a directory recursively, regardless of whether it is a directory or not
     Args:
         object_path (str): The object's path

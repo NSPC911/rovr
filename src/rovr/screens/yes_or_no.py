@@ -1,6 +1,7 @@
 from textual import events
 from textual.app import ComposeResult
 from textual.containers import Grid, HorizontalGroup, VerticalGroup
+from textual.message import Message
 from textual.screen import ModalScreen
 
 from rovr.functions.utils import check_key, dismiss, get_shortest_bind
@@ -57,22 +58,21 @@ class YesOrNo(ModalScreen):
 
     def on_button_pressed(self, event: Button.Pressed) -> None:
         if event.button.id == "yes":
-            self.action_yes()
+            self.action_yes(event)
         else:
-            self.action_no()
+            self.action_no(event)
 
     def on_click(self, event: events.Click) -> None:
         if event.widget is self:
             # ie click outside
-            event.stop()
-            self.action_no()
+            self.action_no(event)
 
     def on_key(self, event: events.Key) -> None:
         """Handle key presses."""
         if check_key(event, config["keybinds"]["yes_or_no"]["yes"]):
-            self.action_yes()
+            self.action_yes(event)
         elif check_key(event, config["keybinds"]["yes_or_no"]["no"]):
-            self.action_no()
+            self.action_no(event)
         elif self.with_toggle and check_key(
             event, config["keybinds"]["yes_or_no"]["dont_ask_again"]
         ):
@@ -81,20 +81,22 @@ class YesOrNo(ModalScreen):
             return
         event.stop()
 
-    def action_yes(self) -> None:
+    def action_yes(self, event: Message | None = None) -> None:
         dismiss(
             self,
             {"value": True, "toggle": self.query_one(Switch).value}
             if self.with_toggle
             else True,
+            event,
         )
 
-    def action_no(self) -> None:
+    def action_no(self, event: Message | None = None) -> None:
         dismiss(
             self,
             {"value": False, "toggle": self.query_one(Switch).value}
             if self.with_toggle
             else False,
+            event,
         )
 
     def action_toggle_dont_ask_again(self) -> None:

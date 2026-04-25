@@ -210,6 +210,7 @@ class ArchiveCreationScreen(ModalInput):
                 self.query_one(ArchiveTypes).selected[0],
                 int(compression_selection[0] if compression_selection else 0),
             ),
+            event,
         )
 
     @on(ArchiveTypes.SelectionToggled, "ArchiveTypes")
@@ -224,12 +225,9 @@ class ArchiveCreationScreen(ModalInput):
     def on_key(self, event: events.Key) -> None:
         """Handle escape key to dismiss the dialog."""
         if event.key == "escape":
-            event.stop()
-            event.prevent_default()
-            dismiss(self, None)
+            dismiss(self, None, event)
 
     def on_click(self, event: events.Click) -> None:
         if event.widget is self:
             # ie click outside
-            event.stop()
-            dismiss(self, None)
+            dismiss(self, None, event)

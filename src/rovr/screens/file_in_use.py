@@ -2,6 +2,7 @@ from rich.markup import escape
 from textual import events, on
 from textual.app import ComposeResult
 from textual.containers import Container, Grid, HorizontalGroup, VerticalGroup
+from textual.message import Message
 from textual.screen import ModalScreen
 
 from rovr.functions.utils import check_key, dismiss, get_shortest_bind
@@ -42,16 +43,12 @@ class FileInUse(ModalScreen):
 
     def on_key(self, event: events.Key) -> None:
         if check_key(event, config["keybinds"]["file_in_use"]["retry"]):
-            event.stop()
-            self.action_retry()
+            self.action_retry(event)
         elif check_key(event, config["keybinds"]["file_in_use"]["cancel"]):
-            event.stop()
-            self.action_cancel()
+            self.action_cancel(event)
         elif check_key(event, config["keybinds"]["file_in_use"]["skip"]):
-            event.stop()
-            self.action_skip()
+            self.action_skip(event)
         elif check_key(event, config["keybinds"]["file_in_use"]["dont_ask_again"]):
-            event.stop()
             self.action_toggle_dont_ask_again()
 
     def on_click(self, event: events.Click) -> None:
@@ -61,28 +58,34 @@ class FileInUse(ModalScreen):
             self.action_cancel()
 
     @on(Button.Pressed, "#try_again")
-    def action_retry(self) -> None:
+    def action_retry(self, event: Message | None = None) -> None:
         dismiss(
             self,
             {
                 "value": "try_again",
                 "toggle": self.query_one(Switch).value,
             },
+            event,
         )
 
     @on(Button.Pressed, "#cancel")
-    def action_cancel(self) -> None:
+    def action_cancel(self, event: Message | None = None) -> None:
         dismiss(
             self,
             {
                 "value": "cancel",
                 "toggle": self.query_one(Switch).value,
             },
+            event,
         )
 
     @on(Button.Pressed, "#skip")
-    def action_skip(self) -> None:
-        dismiss(self, {"value": "skip", "toggle": self.query_one(Switch).value})
+    def action_skip(self, event: Message | None = None) -> None:
+        dismiss(
+            self,
+            {"value": "skip", "toggle": self.query_one(Switch).value},
+            event,
+        )
 
     def action_toggle_dont_ask_again(self) -> None:
         self.query_one(Switch).action_toggle_switch()

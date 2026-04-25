@@ -1,6 +1,7 @@
-from textual import events
+from textual import events, on
 from textual.app import ComposeResult
 from textual.containers import Grid, HorizontalGroup, VerticalGroup
+from textual.message import Message
 from textual.screen import ModalScreen
 
 from rovr.functions.utils import check_key, dismiss, get_shortest_bind
@@ -46,27 +47,16 @@ class FileNameConflict(ModalScreen):
         self.query_one("#dialog").border_title = self.border_title
         self.query_one("#dialog").border_subtitle = self.border_subtitle
 
-    def on_button_pressed(self, event: Button.Pressed) -> None:
-        match event.button.id:
-            case "overwrite":
-                self.action_overwrite()
-            case "rename":
-                self.action_rename()
-            case "skip":
-                self.action_skip()
-            case "cancel":
-                self.action_cancel()
-
     def on_key(self, event: events.Key) -> None:
         """Handle key presses."""
         if check_key(event, config["keybinds"]["filename_conflict"]["overwrite"]):
-            self.action_overwrite()
+            self.action_overwrite(event)
         elif check_key(event, config["keybinds"]["filename_conflict"]["rename"]):
-            self.action_rename()
+            self.action_rename(event)
         elif check_key(event, config["keybinds"]["filename_conflict"]["skip"]):
-            self.action_skip()
+            self.action_skip(event)
         elif check_key(event, config["keybinds"]["filename_conflict"]["cancel"]):
-            self.action_cancel()
+            self.action_cancel(event)
         elif check_key(
             event, config["keybinds"]["filename_conflict"]["dont_ask_again"]
         ):
@@ -78,43 +68,50 @@ class FileNameConflict(ModalScreen):
     def on_click(self, event: events.Click) -> None:
         if event.widget is self:
             # ie click outside
-            event.stop()
-            self.action_cancel()
+            self.action_cancel(event)
 
-    def action_overwrite(self) -> None:
+    @on(Button.Pressed, "#overwrite")
+    def action_overwrite(self, event: Message | None = None) -> None:
         dismiss(
             self,
             {
                 "value": "overwrite",
                 "same_for_next": self.query_one(Switch).value,
             },
+            event,
         )
 
-    def action_rename(self) -> None:
+    @on(Button.Pressed, "#rename")
+    def action_rename(self, event: Message | None = None) -> None:
         dismiss(
             self,
             {
                 "value": "rename",
                 "same_for_next": self.query_one(Switch).value,
             },
+            event,
         )
 
-    def action_skip(self) -> None:
+    @on(Button.Pressed, "#skip")
+    def action_skip(self, event: Message | None = None) -> None:
         dismiss(
             self,
             {
                 "value": "skip",
                 "same_for_next": self.query_one(Switch).value,
             },
+            event,
         )
 
-    def action_cancel(self) -> None:
+    @on(Button.Pressed, "#cancel")
+    def action_cancel(self, event: Message | None = None) -> None:
         dismiss(
             self,
             {
                 "value": "cancel",
                 "same_for_next": self.query_one(Switch).value,
             },
+            event,
         )
 
     def action_dont_ask_again(self) -> None:

@@ -1,6 +1,7 @@
-from textual import events
+from textual import events, on
 from textual.app import ComposeResult
 from textual.containers import Container, Grid
+from textual.message import Message
 from textual.screen import ModalScreen
 
 from rovr.components import PaddedOption, SpecialOptionList
@@ -47,44 +48,31 @@ class DeleteFiles(ModalScreen):
     def on_mount(self) -> None:
         self.query_one("#cancel").focus()
 
-    def on_button_pressed(self, event: Button.Pressed) -> None:
-        """Handle button presses."""
-        match event.button.id:
-            case "delete":
-                self.action_delete()
-            case "cancel":
-                self.action_cancel()
-            case "trash" if config["settings"]["use_recycle_bin"]:
-                self.action_trash()
-            case _:
-                return
-
     def on_click(self, event: events.Click) -> None:
         if event.widget is self:
             # ie click outside
-            event.stop()
-            self.action_cancel()
+            self.action_cancel(event)
 
     def on_key(self, event: events.Key) -> None:
         """Handle key presses."""
         if check_key(event, config["keybinds"]["delete_files"]["delete"]):
-            event.stop()
-            self.action_delete()
+            self.action_delete(event)
         elif check_key(event, config["keybinds"]["delete_files"]["cancel"]):
             event.stop()
-            self.action_cancel()
+            self.action_cancel(event)
         elif config["settings"]["use_recycle_bin"] and check_key(
             event, config["keybinds"]["delete_files"]["trash"]
         ):
-            event.stop()
-            self.action_trash()
+            self.action_trash(event)
 
-    def action_delete(self) -> None:
-        dismiss(self, "delete")
+    @on(Button.Pressed, "#delete")
+    def action_delete(self, event: Message) -> None:
+        dismiss(self, "delete", event)
 
-    def action_cancel(self) -> None:
-        dismiss(self, "cancel")
+    @on(Button.Pressed, "#cancel")
+    def action_cancel(self, event: Message) -> None:
+        dismiss(self, "cancel", event)
 
-    def action_trash(self) -> None:
-        if config["settings"]["use_recycle_bin"]:
-            dismiss(self, "trash")
+    @on(Button.Pressed, "#trash")
+    def action_trash(self, event: Message) -> None:
+        dismiss(self, "trash", event)

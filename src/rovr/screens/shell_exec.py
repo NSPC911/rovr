@@ -45,11 +45,13 @@ class ShellExec(ModalInput):
         if event.widget is self:
             # ie click outside
             event.stop()
-            dismiss(self, None)
+            dismiss(self, None, event)
 
     @work
     async def on_input_submitted(self, event: Input.Submitted) -> None:
-        dismiss(self, ShellExecReturnType(command=event.input.value, mode=self.mode))
+        dismiss(
+            self, ShellExecReturnType(command=event.input.value, mode=self.mode), event
+        )
 
     def action_cycle_mode_forward(self) -> None:
         modes = list(mode_to_subtitle.keys())

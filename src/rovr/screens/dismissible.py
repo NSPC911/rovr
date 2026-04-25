@@ -31,8 +31,7 @@ class Dismissible(ModalScreen):
     def on_key(self, event: events.Key) -> None:
         """Handle key presses."""
         if event.key in ("escape", "enter"):
-            event.stop()
-            dismiss(self)
+            dismiss(self, event=event)
 
     @on(Button.Pressed, "#ok")
     def on_button_pressed(self, event: Button.Pressed) -> None:

@@ -8,6 +8,7 @@ from humanize import naturalsize
 from textual import events
 from textual.app import ScreenStackError
 from textual.dom import DOMNode
+from textual.message import Message
 from textual.screen import Screen, ScreenResultType
 from textual.worker import NoActiveWorker, WorkerCancelled, get_current_worker
 
@@ -193,7 +194,14 @@ def run_editor_command(
         return None
 
 
-def dismiss(screen: Screen, result: ScreenResultType | None = None) -> None:
+def dismiss(
+    screen: Screen, result: ScreenResultType | None = None, event: Message | None = None
+) -> None:
+    if event is not None:
+        event.prevent_default()
+        event.stop()
+        event._set_forwarded()
+
     if screen in screen.app.screen_stack:
         with suppress(ScreenStackError):
             screen.dismiss(result)

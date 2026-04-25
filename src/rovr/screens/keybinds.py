@@ -164,18 +164,19 @@ class Keybinds(ModalScreen):
             config_keybinds["show_keybinds"]
             + cast(dict[str, Any], config_keybinds["filter_modal"])["exit"],
         ):
-            event.stop()
-            dismiss(self)
+            dismiss(self, event=event)
         elif check_key(
             event, cast(dict[str, Any], config_keybinds["filter_modal"])["down"]
         ):
             event.stop()
+            event.prevent_default()
             if self.keybinds_list.options:
                 self.keybinds_list.action_cursor_down()
         elif check_key(
             event, cast(dict[str, Any], config_keybinds["filter_modal"])["up"]
         ):
             event.stop()
+            event.prevent_default()
             if self.keybinds_list.options:
                 self.keybinds_list.action_cursor_up()
 
@@ -183,7 +184,7 @@ class Keybinds(ModalScreen):
         if isinstance(event.option, KeybindOption):
             if not event.option.is_layer_bind:
                 event.stop()
-                dismiss(self)
+                dismiss(self, event=event)
                 self.app.simulate_key(event.option.key_press)
         else:
             raise RuntimeError(

@@ -340,11 +340,18 @@ example_function(10)"""
     if args.force_first_launch:
         return
 
-    from rovr.functions.config import set_nested_value  # noqa: I001
-    from rovr.variables.constants import config
+    import multiprocessing  # noqa: I001
 
     import rovr.monkey_patches._classes  # noqa: F401
     import rovr.monkey_patches._platform  # noqa: F401
+
+    from rovr.functions.config import set_nested_value
+    from rovr.variables.constants import config
+
+    try:
+        multiprocessing.set_start_method("forkserver", force=True)
+    except ValueError:
+        multiprocessing.set_start_method("spawn", force=True)
 
     for feature_path in args.with_features:
         set_nested_value(cast(dict, config), feature_path, True)

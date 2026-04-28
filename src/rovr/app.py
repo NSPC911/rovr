@@ -587,7 +587,7 @@ class Application(App, inherit_bindings=False):
         state_mtime = None
         with suppress(OSError):
             state_mtime = path.getmtime(state_path)
-        drives = []
+        drives = lambda: self.app.query_one(PinnedSidebar).DRIVES  # noqa: E731
         drive_update_every = int(config["interface"]["drive_watcher_frequency"])
         count: int = 0
         style_available: bool = self.CUSTOM_STYLE_AVAILABLE
@@ -678,8 +678,7 @@ class Application(App, inherit_bindings=False):
                     elif not result_queue.empty():
                         # Process completed successfully
                         new_drives = result_queue.get_nowait()
-                        if new_drives != drives:
-                            drives = new_drives
+                        if new_drives != drives():
                             self.query_one(PinnedSidebar).reload_pins()
                 except Exception as exc:
                     self.notify(

@@ -19,6 +19,7 @@ from rovr.widgets import Input, OptionList
 class PinnedSidebar(OptionList, inherit_bindings=False):
     # Just so that I can disable space
     BINDINGS: ClassVar[list[BindingType]] = list(bindings)
+    DRIVES: list[str] = []
 
     @work(exclusive=True, thread=True)
     def reload_pins(self) -> None:
@@ -87,6 +88,7 @@ class PinnedSidebar(OptionList, inherit_bindings=False):
             except KeyError:
                 continue
             if not isinstance(pin["path"], str):
+                # same thing, just ignore this
                 continue
             if not path.isdir(pin["path"]):
                 if path.exists(pin["path"]):
@@ -159,6 +161,7 @@ class PinnedSidebar(OptionList, inherit_bindings=False):
                 return
 
             drives = result_queue.get_nowait()
+            self.DRIVES = drives
         except Exception:
             return
         for drive in drives:

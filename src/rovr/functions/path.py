@@ -196,6 +196,25 @@ def get_extension_sort_key(file_dict: dict) -> tuple[int, str]:
         return (3, name.split(".")[-1].lower())
 
 
+def sorter(
+    thing: CWDObjectReturnDict, sort_st: Literal["ctime", "mtime", "size"]
+) -> int | float | str:
+    try:
+        match sort_st:
+            case "ctime":
+                return thing["dir_entry"].stat().st_ctime_ns
+            case "mtime":
+                return thing["dir_entry"].stat().st_mtime_ns
+            case "size":
+                try:
+                    return thing["dir_entry"].stat().st_size
+                except FileNotFoundError:
+                    return 0  # only for this, since it makes sense
+    except FileNotFoundError:
+        # if  we cant access it, sort with name
+        return thing["name"].lower()
+
+
 @overload
 def sync_get_cwd_object(
     dom_node: DOMNode,
@@ -302,15 +321,15 @@ def sync_get_cwd_object(
             folders.sort(key=lambda x: natsort(x["name"]))
             files.sort(key=lambda x: natsort(x["name"]))
         case "created":
-            folders.sort(key=lambda x: x["dir_entry"].stat().st_ctime_ns)
-            files.sort(key=lambda x: x["dir_entry"].stat().st_ctime_ns)
+            folders.sort(key=lambda x: sorter(x, "ctime"))
+            files.sort(key=lambda x: sorter(x, "ctime"))
         case "modified":
-            folders.sort(key=lambda x: x["dir_entry"].stat().st_mtime_ns)
-            files.sort(key=lambda x: x["dir_entry"].stat().st_mtime_ns)
+            folders.sort(key=lambda x: sorter(x, "mtime"))
+            files.sort(key=lambda x: sorter(x, "mtime"))
         case "size":
             # no we will not be calculating the folder size
             folders.sort(key=lambda x: x["name"].lower())
-            files.sort(key=lambda x: x["dir_entry"].stat().st_size)
+            files.sort(key=lambda x: sorter(x, "size"))
         case "extension":
             # folders dont have extensions btw
             # and i will not count dot prepended folders

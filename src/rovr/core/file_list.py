@@ -29,7 +29,7 @@ from rovr.variables.constants import (
     buttons_that_depend_on_path,
     config,
 )
-from rovr.widgets import Button, Input, OptionList, SelectionList, Static
+from rovr.widgets import Button, Input, OptionList, SelectionList
 
 
 class FileList(
@@ -448,24 +448,9 @@ class FileList(
             )
         except FileNotFoundError:
             # if the file is deleted, just remove the preview and return
-            await self.app.query_one("PreviewContainer").remove_children()
-            self.app.query_one("PreviewContainer").border_title = ""
-            self.app.query_one("PreviewContainer").border_subtitle = ""
-            if highlighted_option.dir_entry.is_symlink():
-                await self.app.query_one("PreviewContainer").mount(
-                    Static("The symlink target is not found!", classes="special")
-                )
-                # also update option if necessary
-                if highlighted_option.icon != icon_utils.get_icon(
-                    "general", "broken_symlink"
-                ):
-                    highlighted_option.set_icon(
-                        icon_utils.get_icon("general", "broken_symlink")
-                    )
-            else:
-                await self.app.query_one("PreviewContainer").mount(
-                    Static("This file no longer exists...", classes="special")
-                )
+            await self.app.query_one("PreviewContainer").file_not_found(
+                highlighted_option.dir_entry.path, highlighted_option
+            )
             return
         self.app.query_one("#unzip").disabled = not utils.is_archive(
             highlighted_option.dir_entry.path

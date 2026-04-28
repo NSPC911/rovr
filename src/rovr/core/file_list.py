@@ -29,7 +29,7 @@ from rovr.variables.constants import (
     buttons_that_depend_on_path,
     config,
 )
-from rovr.widgets import Button, Input, OptionList, SelectionList
+from rovr.widgets import Button, Input, OptionList, SelectionList, Static
 
 
 class FileList(
@@ -401,7 +401,7 @@ class FileList(
                 })
 
     # No clue why I'm using an OptionList method for SelectionList
-    def on_option_list_option_highlighted(
+    async def on_option_list_option_highlighted(
         self, event: OptionList.OptionHighlighted
     ) -> None:
         if self.dummy:
@@ -440,11 +440,33 @@ class FileList(
         else:
             setattr(self.app, "_highlighted_file_mtime", None)
         # preview
-        self.app.query_one("PreviewContainer").show_preview(
-            highlighted_option.dir_entry.path,
-            highlighted_option.dir_entry.stat().st_mtime,
-        )
         self.app.query_one("MetadataContainer").update_metadata(event.option.dir_entry)
+        try:
+            self.app.query_one("PreviewContainer").show_preview(
+                highlighted_option.dir_entry.path,
+                highlighted_option.dir_entry.stat().st_mtime,
+            )
+        except FileNotFoundError:
+            # if the file is deleted, just remove the preview and return
+            await self.app.query_one("PreviewContainer").remove_children()
+            self.app.query_one("PreviewContainer").border_title = ""
+            self.app.query_one("PreviewContainer").border_subtitle = ""
+            if highlighted_option.dir_entry.is_symlink():
+                await self.app.query_one("PreviewContainer").mount(
+                    Static("The symlink target is not found!", classes="special")
+                )
+            else:
+                await self.app.query_one("PreviewContainer").mount(
+                    Static("This file no longer exists...", classes="special")
+                )
+            # also update option if necessary
+            if highlighted_option.icon != icon_utils.get_icon(
+                "general", "broken_symlink"
+            ):
+                highlighted_option.set_icon(
+                    icon_utils.get_icon("general", "broken_symlink")
+                )
+            return
         self.app.query_one("#unzip").disabled = not utils.is_archive(
             highlighted_option.dir_entry.path
         )

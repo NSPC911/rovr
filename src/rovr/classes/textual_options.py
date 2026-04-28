@@ -214,6 +214,14 @@ class FileListSelectionWidget(LazySelection):
             return prompt.stylize("dim")
         return prompt
 
+    @property
+    def icon(self) -> tuple[str, str]:
+        return self.__icon_factory()
+
+    def set_icon(self, new_icon: tuple[str, str]) -> None:
+        self.__icon_factory = lambda: new_icon
+        self._invalidate_prompt_cache()
+
 
 class ClipboardSelectionValue(NamedTuple):
     path: str

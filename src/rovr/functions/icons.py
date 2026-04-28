@@ -26,9 +26,13 @@ def get_icon_for_file(location: str) -> tuple[str, str]:
     if not config["interface"]["nerd_font"]:
         return ASCII_ICONS["file"]["default"]
 
-    # 0. check junction/symlink
+    # 0. check symlink
     if path.islink(location):
-        return ICONS["general"]["symlink"]
+        # 0.1. Check if symlink target exists
+        if path.exists(location):
+            return ICONS["general"]["symlink"]
+        else:
+            return ICONS["general"]["broken_symlink"]
 
     file_name = path.basename(location).lower()
 
@@ -70,7 +74,11 @@ def get_icon_for_folder(location: str) -> tuple[str, str]:
 
     # 0. check junction/symlink
     if path.islink(location) or path.isjunction(location):
-        return ICONS["general"]["symlink"]
+        # 0.1. Check if junction/symlink target exists
+        if path.exists(location):
+            return ICONS["general"]["symlink"]
+        else:
+            return ICONS["general"]["broken_symlink"]
 
     folder_name = path.basename(location).lower()
 

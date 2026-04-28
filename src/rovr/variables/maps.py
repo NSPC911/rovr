@@ -131,6 +131,7 @@ ICONS = {
         "zip": ("\uf410", "yellow"),
         "link": ("\U000f0337", "cyan"),
         "symlink": ("\uf481", "cyan"),
+        "broken_symlink": ("\uf127", "red"),
         "special": ("\uf2dc", "magenta"),
     },
     "sorting": {

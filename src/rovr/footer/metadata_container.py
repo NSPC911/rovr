@@ -240,7 +240,11 @@ class MetadataContainer(VerticalScroll, inherit_bindings=False):
     @work(thread=True)
     async def calculate_folder_size(self, folder_path: str) -> None:
         """Calculate the size of a folder and update the metadata."""
-        size_widget = self.query_one("#metadata-size", Static)
+        try:
+            size_widget = self.query_one("#metadata-size", Static)
+        except NoMatches:
+            # likely nothing is there, so just ignore
+            return
         self.app.call_from_thread(size_widget.update, "Calculating...")
 
         total_size = 0

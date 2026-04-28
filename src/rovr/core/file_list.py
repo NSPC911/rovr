@@ -401,7 +401,7 @@ class FileList(
                 })
 
     # No clue why I'm using an OptionList method for SelectionList
-    def on_option_list_option_highlighted(
+    async def on_option_list_option_highlighted(
         self, event: OptionList.OptionHighlighted
     ) -> None:
         if self.dummy:
@@ -440,11 +440,18 @@ class FileList(
         else:
             setattr(self.app, "_highlighted_file_mtime", None)
         # preview
-        self.app.query_one("PreviewContainer").show_preview(
-            highlighted_option.dir_entry.path,
-            highlighted_option.dir_entry.stat().st_mtime,
-        )
         self.app.query_one("MetadataContainer").update_metadata(event.option.dir_entry)
+        try:
+            self.app.query_one("PreviewContainer").show_preview(
+                highlighted_option.dir_entry.path,
+                highlighted_option.dir_entry.stat().st_mtime,
+            )
+        except FileNotFoundError:
+            # if the file is deleted, just remove the preview and return
+            await self.app.query_one("PreviewContainer").file_not_found(
+                highlighted_option.dir_entry.path, highlighted_option
+            )
+            return
         self.app.query_one("#unzip").disabled = not utils.is_archive(
             highlighted_option.dir_entry.path
         )

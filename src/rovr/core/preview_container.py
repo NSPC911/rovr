@@ -184,6 +184,31 @@ class PreviewContainer(Container):
         except NoMatches:
             return None
 
+    async def file_not_found(
+        self, location: str, highlighted_option: FileListSelectionWidget | None = None
+    ) -> None:
+        await self.remove_children()
+        self.border_title = ""
+        self.border_subtitle = ""
+        dir_entry = path_utils.get_direntry_for(location)
+        if dir_entry.is_symlink():
+            await self.mount(
+                Static("The symlink target is not found!", classes="special")
+            )
+            # also update option if necessary
+            if (
+                FileListSelectionWidget is not None
+                and highlighted_option.icon
+                != icon_utils.get_icon("general", "broken_symlink")
+            ):
+                highlighted_option.set_icon(
+                    icon_utils.get_icon("general", "broken_symlink")
+                )
+        else:
+            await self.app.query_one("PreviewContainer").mount(
+                Static("This file no longer exists...", classes="special")
+            )
+
     def show_font_preview(self) -> None:
         """Show font preview with PIL.ImageFont and a custom PIL.ImageDraw"""
         from PIL import ImageDraw, ImageFont
@@ -616,7 +641,6 @@ class PreviewContainer(Container):
                     if should_cancel():
                         return False
                     static_widget.can_focus = True
-
                 return True
             else:
                 error_message = result.stderr.decode("utf-8", errors="ignore")
@@ -895,7 +919,12 @@ class PreviewContainer(Container):
 
             if file_path == self._current_file_path:
                 # check mtime as well
-                new_mtime = path.getmtime(file_path)
+                try:
+                    new_mtime = path.getmtime(file_path)
+                except FileNotFoundError:
+                    # if file is gone/symlink target is gone
+                    self.app.call_from_thread(self.file_not_found, file_path)
+                    return
                 if self._file_mtime == new_mtime:
                     return
 

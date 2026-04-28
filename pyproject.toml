@@ -27,7 +27,11 @@ dependencies = [
   "puremagic>=2.2.0",
   "rarfile>=4.2",
   "resvg-py>=0.3.1",
-  "rich>=14.3.1", # issue with 14.3.0 that breaks nerd fonts
+  # https://github.com/Textualize/rich/commit/69cee6e1be30071c3ee994608590004eddce1501 causes a regression
+  # in the way it handles CRLF endings (it splits by `\n`, but ignores the `r` part), which results in
+  # empty lines because `\r` is a carriage return and not a newline on Windows.
+  # Appropriate issue: https://github.com/Textualize/rich/issues/4090
+  "rich>=14.3.1",
   "send2trash>=2.1.0",
   "textual~=8.0",
   "textual-autocomplete>=4.0.6",

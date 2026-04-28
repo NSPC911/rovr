@@ -616,14 +616,6 @@ class PreviewContainer(Container):
                     if should_cancel():
                         return False
                     static_widget.can_focus = True
-                self.app.call_from_thread(
-                    lambda: self.notify(
-                        "Rendered with Bat",
-                        title="Plugins: Bat",
-                        severity="information",
-                    )
-                )
-                self.set_loading(False)
                 return True
             else:
                 error_message = result.stderr.decode("utf-8", errors="ignore")

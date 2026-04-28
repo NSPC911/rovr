@@ -1,4 +1,3 @@
-import re
 from typing import Iterable
 
 from rich.ansi import AnsiDecoder
@@ -18,8 +17,8 @@ _pixeldata.PixelData.scaled = scaled  # ty: ignore[invalid-assignment]
 
 # https://github.com/Textualize/rich/issues/4090
 def decode(self: AnsiDecoder, terminal_text: str) -> Iterable[Text]:
-    for line in re.split(r"(?<=\n)", terminal_text):
-        yield self.decode_line(line.rstrip("\n").rstrip("\r"))
+    for line in terminal_text.splitlines():
+        yield self.decode_line(line)
 
 
 AnsiDecoder.decode = decode  # ty: ignore[invalid-assignment]

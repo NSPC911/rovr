@@ -1,3 +1,4 @@
+import multiprocessing
 import shlex
 import subprocess
 from contextlib import suppress
@@ -6,7 +7,7 @@ from typing import Callable, Literal
 
 from humanize import naturalsize
 from textual import events
-from textual.app import ScreenStackError
+from textual.app import App, ScreenStackError
 from textual.dom import DOMNode
 from textual.message import Message
 from textual.screen import Screen, ScreenResultType
@@ -205,3 +206,28 @@ def dismiss(
     if screen in screen.app.screen_stack:
         with suppress(ScreenStackError):
             screen.dismiss(result)
+
+
+def multiprocessing_process_error_checker(app: App, exc: Exception) -> bool:
+    if isinstance(exc, ValueError) and "fds_to_keep" in str(exc):
+        match multiprocessing.get_start_method(allow_none=True):
+            case None:
+                # try forkserver
+                try:
+                    multiprocessing.set_start_method("forkserver")
+                    app.notify("multiprocessing is now using forkserver")
+                except ValueError as val_exc:
+                    if "cannot find context" in str(val_exc):
+                        multiprocessing.set_start_method("spawn")
+                        app.notify("multiprocessing is now using spawn")
+            case "fork":  # theoretically this shouldn't happen
+                multiprocessing.set_start_method("forkserver")
+                app.notify("multiprocessing is now using forkserver")
+            case "forkserver":
+                multiprocessing.set_start_method("spawn")
+                app.notify("multiprocessing is now using spawn")
+            case "spawn":
+                # nothing else we can do, except forcefully stop using Process
+                app.MULTIPROCESSING_PROCESS_ALLOWED = False
+        return True
+    return False

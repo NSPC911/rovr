@@ -54,7 +54,7 @@ from rovr.core import (
     PreviewContainer,
 )
 from rovr.footer import Clipboard, MetadataContainer, ProcessContainer
-from rovr.functions.drive_workers import get_mounted_drives_worker
+from rovr.functions import drive_workers
 from rovr.functions.path import (
     dump_exc,
     ensure_existing_directory,
@@ -63,6 +63,7 @@ from rovr.functions.path import (
     normalise,
 )
 from rovr.functions.themes import get_custom_themes
+from rovr.functions.utils import multiprocessing_process_error_checker
 from rovr.header import HeaderArea
 from rovr.navigation_widgets import (
     BackButton,
@@ -125,6 +126,8 @@ class Application(App, inherit_bindings=False):
         else []
     )
     CLICK_CHAIN_TIME_THRESHOLD = config["interface"]["double_click_delay"]
+
+    MULTIPROCESSING_PROCESS_ALLOWED: bool = True
 
     def __init__(
         self,
@@ -588,7 +591,7 @@ class Application(App, inherit_bindings=False):
             state_mtime = path.getmtime(state_path)
         drives = lambda: self.app.query_one(PinnedSidebar).DRIVES  # noqa: E731
         drive_update_every = int(config["interface"]["drive_watcher_frequency"])
-        count: int = 0
+        count: int = -1
         style_available: bool = self.CUSTOM_STYLE_AVAILABLE
         custom_style_path = path.join(RovrVars.ROVRCONFIG, "style.tcss")
 
@@ -656,61 +659,36 @@ class Application(App, inherit_bindings=False):
             # check drives
             if count == 0 and not reload_called:
                 try:
-                    # Run drive check in a separate process using multiprocessing.Process
-                    # Using Queue to get the result back from the process
-                    result_queue: multiprocessing.Queue[list[str]] = (
-                        multiprocessing.Queue()
-                    )
+                    if self.MULTIPROCESSING_PROCESS_ALLOWED:
+                        # Run drive check in a separate process using multiprocessing.Process
+                        # Using Queue to get the result back from the process
+                        result_queue: multiprocessing.Queue[list[str]] = (
+                            multiprocessing.Queue()
+                        )
 
-                    process = multiprocessing.Process(
-                        target=get_mounted_drives_worker, args=(result_queue, os_type)
-                    )
-                    process.start()
-                    process.join(timeout=2.0)
+                        process = multiprocessing.Process(
+                            target=drive_workers.get_mounted_drives_worker,
+                            args=(result_queue, os_type),
+                        )
+                        process.start()
+                        process.join(timeout=2.0)
 
-                    if process.is_alive():
-                        # Timeout - terminate the process
-                        process.terminate()
-                        process.join(timeout=0.5)
                         if process.is_alive():
-                            process.kill()
-                    elif not result_queue.empty():
-                        # Process completed successfully
-                        new_drives = result_queue.get_nowait()
-                        if new_drives != drives():
-                            self.query_one(PinnedSidebar).reload_pins()
+                            # Timeout - terminate the process
+                            process.terminate()
+                            process.join(timeout=0.5)
+                            if process.is_alive():
+                                process.kill()
+                        elif not result_queue.empty():
+                            # Process completed successfully
+                            new_drives = result_queue.get_nowait()
+                    else:
+                        new_drives = drive_workers.get_mounted_drives(os_type)
+                    if new_drives != drives():
+                        self.query_one(PinnedSidebar).reload_pins()
                 except Exception as exc:
-                    if isinstance(exc, ValueError) and "fds_to_keep" in str(exc):
-                        # check spawner
-                        match multiprocessing.get_start_method(allow_none=True):
-                            case None:
-                                # try forkserver
-                                try:
-                                    multiprocessing.set_start_method("forkserver")
-                                    self.notify(
-                                        "multiprocessing is now using forkserver"
-                                    )
-                                except ValueError as val_exc:
-                                    if "cannot find context" in str(val_exc):
-                                        multiprocessing.set_start_method("spawn")
-                                        self.notify(
-                                            "multiprocessing is now using spawn"
-                                        )
-                            case "fork":  # theoretically this shouldn't happen
-                                multiprocessing.set_start_method("forkserver")
-                                self.notify("multiprocessing is now using forkserver")
-                            case "forkserver":
-                                multiprocessing.set_start_method("spawn")
-                                self.notify("multiprocessing is now using spawn")
-                            case "spawn":
-                                # nothing else we can do
-                                self.notify(
-                                    f"ValueError: {exc}",
-                                    title="Drives Watcher (Process)",
-                                    severity="error",
-                                    markup=False,
-                                )
-                                dump_exc(self, exc)
+                    if multiprocessing_process_error_checker(self, exc):
+                        count = -1  # try again immediately on next loop
                     else:
                         self.notify(
                             f"{type(exc).__name__}: {exc}",

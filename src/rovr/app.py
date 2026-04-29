@@ -680,13 +680,45 @@ class Application(App, inherit_bindings=False):
                         if new_drives != drives():
                             self.query_one(PinnedSidebar).reload_pins()
                 except Exception as exc:
-                    self.notify(
-                        f"{type(exc).__name__}: {exc}",
-                        title="Drives Watcher",
-                        severity="warning",
-                        markup=False,
-                    )
-                    dump_exc(self, exc)
+                    if isinstance(exc, ValueError) and "fds_to_keep" in str(exc):
+                        # check spawner
+                        match multiprocessing.get_start_method(allow_none=True):
+                            case None:
+                                # try forkserver
+                                try:
+                                    multiprocessing.set_start_method("forkserver")
+                                    self.notify(
+                                        "multiprocessing is now using forkserver"
+                                    )
+                                except ValueError as val_exc:
+                                    if "cannot find context" in str(val_exc):
+                                        multiprocessing.set_start_method("spawn")
+                                        self.notify(
+                                            "multiprocessing is now using spawn"
+                                        )
+                            case "fork":  # theoretically this shouldn't happen
+                                multiprocessing.set_start_method("forkserver")
+                                self.notify("multiprocessing is now using forkserver")
+                            case "forkserver":
+                                multiprocessing.set_start_method("spawn")
+                                self.notify("multiprocessing is now using spawn")
+                            case "spawn":
+                                # nothing else we can do
+                                self.notify(
+                                    f"ValueError: {exc}",
+                                    title="Drives Watcher (Process)",
+                                    severity="error",
+                                    markup=False,
+                                )
+                                dump_exc(self, exc)
+                    else:
+                        self.notify(
+                            f"{type(exc).__name__}: {exc}",
+                            title="Drives Watcher",
+                            severity="warning",
+                            markup=False,
+                        )
+                        dump_exc(self, exc)
             if i_should_shut_down():
                 return
 

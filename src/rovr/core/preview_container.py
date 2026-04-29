@@ -13,7 +13,6 @@ import textual_image.renderable
 import textual_image.widget
 from PIL import Image, UnidentifiedImageError
 from PIL.Image import Image as PILImage
-from resvg_py import svg_to_bytes
 from textual import events, on, work
 from textual.app import ComposeResult
 from textual.containers import Container
@@ -22,7 +21,6 @@ from textual.dom import DOMNode
 from textual.geometry import Size
 from textual.highlight import guess_language
 from textual.message import Message
-from textual.widget import Widget
 from textual.widgets.selection_list import Selection
 
 from rovr.classes.archive import Archive, BadArchiveError
@@ -124,6 +122,8 @@ class LoadingPreview(Static):
 
 
 class PreviewContainer(Container):
+    LOADER_WIDGET = LoadingPreview()
+
     @dataclass
     class SetLoading(Message):
         """
@@ -149,13 +149,14 @@ class PreviewContainer(Container):
     def compose(self) -> ComposeResult:
         yield Static(self._preview_texts["start"], classes="special")
 
-    def get_loading_widget(self) -> Widget:
+    def get_loading_widget(self) -> LoadingPreview:
         """Get a widget to display a loading indicator.
 
         Returns:
             A widget in place of this widget to indicate a loading.
         """
-        return LoadingPreview()
+        self.LOADER_WIDGET = LoadingPreview()
+        return self.LOADER_WIDGET
 
     @work
     async def on_preview_container_set_loading(self, event: SetLoading) -> None:
@@ -315,16 +316,30 @@ class PreviewContainer(Container):
         """Show svg preview using resvg"""
         if should_cancel() or self._current_file_path is None:
             return
-        self.app.call_from_thread(setattr, self, "border_title", "loading...")
+        self.app.call_from_thread(setattr, self, "border_title", titles.svg)
 
         # load svg as bytes
         try:
-            with open(self._current_file_path, "r", encoding="utf-8") as f:
-                svg_data = f.read()
-            png_bytes = svg_to_bytes(svg_data)
+            self.call_next(self.LOADER_WIDGET.update, "loading svg...")
+            png_bytes = preview_utils.load_svg(self._current_file_path)
+            if png_bytes is None:
+                self.notify(
+                    "Failed to load SVG. The file may be corrupted or not an SVG file.",
+                    title="SVG Preview",
+                    severity="error",
+                )
+                self.app.call_from_thread(self.remove_children)
+                self.border_title = ""
+                return
+            elif png_bytes == b"cancelled":
+                return
+
+            if should_cancel():
+                return
+
+            self.call_next(self.LOADER_WIDGET.update, "resampling svg...")
+
             pil_object = preview_utils.resample(Image.open(BytesIO(png_bytes)))
-            # force a load
-            pil_object.load()
 
             if should_cancel():
                 return
@@ -364,7 +379,6 @@ class PreviewContainer(Container):
                 ),
             )
             return
-        self.app.call_from_thread(setattr, self, "border_title", titles.svg)
 
     def show_image_preview(self) -> None:
         """Show image preview. Runs in a thread."""

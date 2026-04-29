@@ -71,3 +71,17 @@ def resample_file_worker(
         conn.send(exc)
     finally:
         conn.close()
+
+
+def svg_image_worker(
+    conn: Connection,
+    svg_path: str,
+) -> None:
+    from resvg_py import svg_to_bytes
+
+    try:
+        conn.send(svg_to_bytes(svg_path=svg_path))
+    except Exception as exc:
+        conn.send(exc)
+    finally:
+        conn.close()

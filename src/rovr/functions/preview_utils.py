@@ -11,6 +11,7 @@ from rovr.functions.preview_workers import (
     resample_bytes_worker,
     resample_file_worker,
     resample_worker,
+    svg_image_worker,
 )
 from rovr.functions.utils import should_cancel
 from rovr.variables.constants import RESAMPLING_METHOD, config
@@ -191,3 +192,34 @@ def resample_file(file_path: str) -> Image.Image | None:
         return None
     data, mode, size = result
     return Image.frombytes(mode, size, data)
+
+
+def load_svg(file_path: str) -> bytes | None:
+    parent_conn, child_conn = multiprocessing.Pipe()
+    proc = multiprocessing.Process(
+        target=svg_image_worker, args=(child_conn, file_path)
+    )
+    proc.start()
+    child_conn.close()
+
+    # wait for it to complete
+    while proc.is_alive():
+        if should_cancel():
+            proc.kill()
+            proc.join()
+            return b"cancelled"
+        if parent_conn.poll(0.2):
+            result = parent_conn.recv()
+            proc.join()
+            if isinstance(result, Exception):
+                if proc.is_alive():
+                    proc.kill()
+                proc.join()
+            return result
+    proc.join()
+    if parent_conn.poll(0):
+        result = parent_conn.recv()
+        if isinstance(result, Exception):
+            raise result
+        return result
+    return None

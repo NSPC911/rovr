@@ -5,23 +5,34 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
+## [0.8.2] - 2026-04-30
 
 ### Added
 - `rg+fd`: allow custom timeout d497bfd
 - `pinned_sidebar`: keep focus if click on #264
 - `image`: use resampler based on config d13c104
+- `filelist`: visually distinguish broken symlinks 7f5232e
 
 ### Fixed
+- `app`: prevent second drive check 76de6c5
+- `app`: force forkserver > spawn for Process e69d124
+- `filelist`: prevent crash on broken symlink #271
+- `metadata`: no crash on focus e0994ee
 - `options`: dont cause recursion error when `--dev` c14239b
+- `preview`: use transparent background color when not bat 3778b4a
+- `process`: correctly handle same file error fdd7b96
+- `rich`: monkeypatch ansi decoder 01e0c95 639f0ea
+- `screens`: dismiss cancel event 723eee9
+- `sortorder`: use box char for separator 80439d6
 - dont check for global vars fe644b7
 
 ### Performance
 - `filelist`: improve loading by lazy loading renderer and stuff #263 8de7b30
 - `options`: use module level cache for options c29c1c3
-- even lazier imports 74cb7f6
 - `filelist`: in select mode, select only if name matches dc7a46d 7ded7d4
 - `rg+fd`: incrementally add options for better responsiveness #268
+- `preview`: move svg loader to Process 35ca21e
+- even lazier imports 74cb7f6
 
 ## [0.8.1] - 2026-04-10
 
@@ -404,7 +415,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `sort_order`: fix icon setting and tooltips
 - `style`: fix image and option padding/styling
 
-[Unreleased]: https://github.com/NSPC911/rovr/compare/v0.8.1...HEAD
+[Unreleased]: https://github.com/NSPC911/rovr/compare/v0.8.2...HEAD
+[0.8.2]: https://github.com/NSPC911/rovr/compare/v0.8.1...v0.8.2
 [0.8.1]: https://github.com/NSPC911/rovr/compare/v0.8.0...v0.8.1
 [0.8.0]: https://github.com/NSPC911/rovr/compare/v0.8.0rc1...v0.8.0
 [0.8.0rc1]: https://github.com/NSPC911/rovr/compare/v0.8.0.dev3...v0.8.0rc1

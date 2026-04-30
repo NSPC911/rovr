@@ -214,17 +214,17 @@ def multiprocessing_process_error_checker(app: App, exc: Exception) -> bool:
             case None:
                 # try forkserver
                 try:
-                    multiprocessing.set_start_method("forkserver")
+                    multiprocessing.set_start_method("forkserver", force=True)
                     app.notify("multiprocessing is now using forkserver")
                 except ValueError as val_exc:
                     if "cannot find context" in str(val_exc):
-                        multiprocessing.set_start_method("spawn")
+                        multiprocessing.set_start_method("spawn", force=True)
                         app.notify("multiprocessing is now using spawn")
             case "fork":  # theoretically this shouldn't happen
-                multiprocessing.set_start_method("forkserver")
+                multiprocessing.set_start_method("forkserver", force=True)
                 app.notify("multiprocessing is now using forkserver")
             case "forkserver":
-                multiprocessing.set_start_method("spawn")
+                multiprocessing.set_start_method("spawn", force=True)
                 app.notify("multiprocessing is now using spawn")
             case "spawn":
                 # nothing else we can do, except forcefully stop using Process

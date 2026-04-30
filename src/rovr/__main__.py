@@ -138,7 +138,15 @@ def _build_parser() -> argparse.ArgumentParser:
         "--force-tty",
         dest="force_tty",
         action="store_true",
-        help="Force rovr into the system tty (CONOUT$ or /dev/tty) even if stdout is not a tty. Buggy on Windows.",
+        help="Force rovr into the system tty (CONOUT$ or /dev/tty) even if stdout is not a tty. Slightly buggy on Windows.",
+    )
+    misc_group.add_argument(
+        "--ignore-missing-tty",
+        dest="ignore_missing_tty",
+        action="store_true",
+        help="Ignore missing TTY and attempt to run anyway (not recommended)."
+        if is_dev
+        else argparse.SUPPRESS,
     )
     misc_group.add_argument(
         "--force-first-launch",
@@ -378,7 +386,7 @@ example_function(10)"""
     elif cwd_file == "__stderr__":
         cwd_file = backup_stderr
 
-    if sys.stdout.isatty():
+    if args.ignore_missing_tty or sys.stdout.isatty():
         Application(
             startup_path=args.path,
             cwd_file=cwd_file if cwd_file else None,

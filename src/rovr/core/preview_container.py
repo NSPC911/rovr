@@ -33,7 +33,13 @@ from rovr.functions import icons as icon_utils
 from rovr.functions import path as path_utils
 from rovr.functions import preview_utils
 from rovr.functions.pdf import get_pdf_images, get_pdf_info
-from rovr.functions.utils import should_cancel
+from rovr.functions.preview_utils import (
+    load_svg_sync,
+    resample_batch_sync,
+    resample_file_sync,
+    resample_sync,
+)
+from rovr.functions.utils import multiprocessing_process_error_checker, should_cancel
 from rovr.variables.constants import PreviewContainerTitles, config, file_one
 from rovr.widgets import Static
 
@@ -313,7 +319,11 @@ class PreviewContainer(Container):
             return
 
     def show_resvg_preview(self) -> None:
-        """Show svg preview using resvg"""
+        """Show svg preview using resvg.
+
+        Raises:
+            ValueError: If SVG loading fails for non-fds_to_keep reasons.
+        """
         if should_cancel() or self._current_file_path is None:
             return
         self.app.call_from_thread(setattr, self, "border_title", titles.svg)
@@ -321,7 +331,16 @@ class PreviewContainer(Container):
         # load svg as bytes
         try:
             self.call_next(self.LOADER_WIDGET.update, "loading svg...")
-            png_bytes = preview_utils.load_svg(self._current_file_path)
+            if self.app.MULTIPROCESSING_PROCESS_ALLOWED:
+                try:
+                    png_bytes = preview_utils.load_svg(self._current_file_path)
+                except ValueError as exc:
+                    if multiprocessing_process_error_checker(self.app, exc):
+                        png_bytes = load_svg_sync(self._current_file_path)
+                    else:
+                        raise
+            else:
+                png_bytes = load_svg_sync(self._current_file_path)
             if png_bytes is None:
                 self.notify(
                     "Failed to load SVG. The file may be corrupted or not an SVG file.",
@@ -339,7 +358,16 @@ class PreviewContainer(Container):
 
             self.call_next(self.LOADER_WIDGET.update, "resampling svg...")
 
-            pil_object = preview_utils.resample(Image.open(BytesIO(png_bytes)))
+            if self.app.MULTIPROCESSING_PROCESS_ALLOWED:
+                try:
+                    pil_object = preview_utils.resample(Image.open(BytesIO(png_bytes)))
+                except ValueError as exc:
+                    if multiprocessing_process_error_checker(self.app, exc):
+                        pil_object = resample_sync(Image.open(BytesIO(png_bytes)))
+                    else:
+                        raise
+            else:
+                pil_object = resample_sync(Image.open(BytesIO(png_bytes)))
 
             if should_cancel():
                 return
@@ -381,13 +409,26 @@ class PreviewContainer(Container):
             return
 
     def show_image_preview(self) -> None:
-        """Show image preview. Runs in a thread."""
+        """Show image preview. Runs in a thread.
+
+        Raises:
+            ValueError: If image loading fails for non-fds_to_keep reasons.
+        """
         if should_cancel() or self._current_file_path is None:
             return
         self.app.call_from_thread(setattr, self, "border_title", titles.image)
 
         try:
-            pil_object = preview_utils.resample_file(self._current_file_path)
+            if self.app.MULTIPROCESSING_PROCESS_ALLOWED:
+                try:
+                    pil_object = preview_utils.resample_file(self._current_file_path)
+                except ValueError as exc:
+                    if multiprocessing_process_error_checker(self.app, exc):
+                        pil_object = resample_file_sync(self._current_file_path)
+                    else:
+                        raise
+            else:
+                pil_object = resample_file_sync(self._current_file_path)
             if pil_object is None:
                 return
         except UnidentifiedImageError:
@@ -480,7 +521,14 @@ class PreviewContainer(Container):
                 "Obtained 0 pages from Poppler. Something may have gone wrong..."
             )
         # Resample images once when loaded for better performance
-        return preview_utils.resample_batch(result)
+        if self.app.MULTIPROCESSING_PROCESS_ALLOWED:
+            try:
+                return preview_utils.resample_batch(result)
+            except ValueError as exc:
+                if multiprocessing_process_error_checker(self.app, exc):
+                    return resample_batch_sync(result)
+                raise
+        return resample_batch_sync(result)
 
     def show_pdf_preview(self) -> None:
         """

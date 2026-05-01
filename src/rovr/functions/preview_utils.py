@@ -223,3 +223,26 @@ def load_svg(file_path: str) -> bytes | None:
             raise result
         return result
     return None
+
+
+def load_svg_sync(file_path: str) -> bytes | None:
+    from resvg_py import svg_to_bytes
+
+    return svg_to_bytes(svg_path=file_path)
+
+
+def resample_file_sync(file_path: str) -> Image.Image | None:
+    image = Image.open(file_path)
+    image = _depalette(image)
+    return image.resize(MAX_IMAGE_SIZE, RESAMPLING_METHOD)
+
+
+def resample_sync(image: Image.Image) -> Image.Image:
+    image = _depalette(image)
+    return image.resize(MAX_IMAGE_SIZE, RESAMPLING_METHOD)
+
+
+def resample_batch_sync(images: list[PILImage]) -> list[PILImage]:
+    return [
+        _depalette(image).resize(MAX_IMAGE_SIZE, RESAMPLING_METHOD) for image in images
+    ]

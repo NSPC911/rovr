@@ -12,6 +12,7 @@ from rovr.functions import drive_workers as drive_utils
 from rovr.functions import icons as icon_utils
 from rovr.functions import path as path_utils
 from rovr.functions import pins as pin_utils
+from rovr.functions.utils import multiprocessing_process_error_checker
 from rovr.variables.constants import bindings, config, os_type
 from rovr.widgets import Input, OptionList
 
@@ -142,28 +143,33 @@ class PinnedSidebar(OptionList, inherit_bindings=False):
     ) -> None:
         # force refresh
         try:
-            result_queue: multiprocessing.Queue[list[str]] = multiprocessing.Queue()
-            process = multiprocessing.Process(
-                target=drive_utils.get_mounted_drives_worker,
-                args=(result_queue, os_type),
-            )
-            process.start()
-            process.join(timeout=2.0)
+            if self.app.MULTIPROCESSING_PROCESS_ALLOWED:
+                result_queue: multiprocessing.Queue[list[str]] = multiprocessing.Queue()
+                process = multiprocessing.Process(
+                    target=drive_utils.get_mounted_drives_worker,
+                    args=(result_queue, os_type),
+                )
+                process.start()
+                process.join(timeout=2.0)
 
-            if process.is_alive():
-                process.terminate()
-                process.join(timeout=0.5)
                 if process.is_alive():
-                    process.kill()
-                return
+                    process.terminate()
+                    process.join(timeout=0.5)
+                    if process.is_alive():
+                        process.kill()
+                    return
 
-            if result_queue.empty():
-                return
+                if result_queue.empty():
+                    return
 
-            drives = result_queue.get_nowait()
-            self.DRIVES = drives
-        except Exception:
-            return
+                drives = result_queue.get_nowait()
+            else:
+                drives = drive_utils.get_mounted_drives(os_type)
+        except Exception as exc:
+            if not multiprocessing_process_error_checker(self.app, exc):
+                return
+            drives = drive_utils.get_mounted_drives(os_type)
+        self.DRIVES = drives
         for drive in drives:
             if access(drive, R_OK):
                 new_id = f"{path_utils.compress(drive)}-drives"

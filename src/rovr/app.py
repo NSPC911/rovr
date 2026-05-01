@@ -594,7 +594,7 @@ class Application(App, inherit_bindings=False):
         count: int = -2
         style_available: bool = self.CUSTOM_STYLE_AVAILABLE
         custom_style_path = path.join(RovrVars.ROVRCONFIG, "style.tcss")
-        new_drives = []
+        new_drives: list[str] | None = None
 
         i_should_shut_down = lambda: (  # noqa: E731
             self._shutdown_event.is_set() or self.return_code is not None
@@ -685,7 +685,7 @@ class Application(App, inherit_bindings=False):
                             new_drives = result_queue.get_nowait()
                     else:
                         new_drives = drive_workers.get_mounted_drives(os_type)
-                    if new_drives != drives():
+                    if new_drives is not None and new_drives != drives():
                         self.query_one(PinnedSidebar).reload_pins()
                 except Exception as exc:
                     if multiprocessing_process_error_checker(self, exc):

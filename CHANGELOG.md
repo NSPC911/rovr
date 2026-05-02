@@ -5,33 +5,35 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [0.8.2] - 2026-04-30
+## [0.8.2] - 2026-05-02
 
 ### Added
-- `rg+fd`: allow custom timeout [d497bfd](https://github.com/NSPC911/rovr/commit/d497bfd2ceb3a8cc0b249b4112395ebff5a3a05c)
-- `pinned_sidebar`: keep focus if click on [#264](https://github.com/NSPC911/rovr/pull/264)
-- `image`: use resampler based on config [d13c104](https://github.com/NSPC911/rovr/commit/d13c10457b66aabbaac0351f11c99317b670e851)
 - `filelist`: visually distinguish broken symlinks [7f5232e](https://github.com/NSPC911/rovr/commit/7f5232ef06dcde70e8056a31f8ef6453535c396a)
+- `image`: use resampler based on config [d13c104](https://github.com/NSPC911/rovr/commit/d13c10457b66aabbaac0351f11c99317b670e851)
+- `pinned_sidebar`: keep focus if click on [#264](https://github.com/NSPC911/rovr/pull/264)
+- `rg+fd`: allow custom timeout [d497bfd](https://github.com/NSPC911/rovr/commit/d497bfd2ceb3a8cc0b249b4112395ebff5a3a05c)
 
 ### Fixed
-- `app`: prevent second drive check [76de6c5](https://github.com/NSPC911/rovr/commit/76de6c5db0f954fbb53a8e27a25716c8493dabd6)
 - `app`: force forkserver > spawn for Process [e69d124](https://github.com/NSPC911/rovr/commit/e69d124092c67d484ef9e2fcee37e3bcc363dfb7)
+- `app`: prevent second drive check [76de6c5](https://github.com/NSPC911/rovr/commit/76de6c5db0f954fbb53a8e27a25716c8493dabd6)
 - `filelist`: prevent crash on broken symlink [#271](https://github.com/NSPC911/rovr/pull/271)
 - `metadata`: no crash on focus [e0994ee](https://github.com/NSPC911/rovr/commit/e0994ee88cefd9c9fe0de2364c1c83890b1686f1)
 - `options`: dont cause recursion error when `--dev` [c14239b](https://github.com/NSPC911/rovr/commit/c14239bdad0560d0407299ea4f4c8197b2a2fc9f)
 - `preview`: use transparent background color when not bat [3778b4a](https://github.com/NSPC911/rovr/commit/3778b4a8bcb5676a1b13a9c45db5603bcdbc4a2e)
 - `process`: correctly handle same file error [fdd7b96](https://github.com/NSPC911/rovr/commit/fdd7b96a061818eae7951be6dd93fd469e851357)
+- `multiprocess`: forcefully disable multiprocessing if user's machine is bad [b0dcba9](https://gitihub.com/NSPC911/rovr/commit/b0dcba964250beaf94458ad32c2381e6f69251a6)
 - `rich`: monkeypatch ansi decoder [01e0c95](https://github.com/NSPC911/rovr/commit/01e0c954a49556fa4902e08d2d898c2f1892baeb) [639f0ea](https://github.com/NSPC911/rovr/commit/639f0eab75151cdc959cc0c95afde159b11c60f9)
 - `screens`: dismiss cancel event [723eee9](https://github.com/NSPC911/rovr/commit/723eee96c2583c32bd84b2aa3ec98e101958bb12)
 - `sortorder`: use box char for separator [80439d6](https://github.com/NSPC911/rovr/commit/80439d6e8fed71e17b2ddf283a14cd27314d81f4)
 - dont check for global vars [fe644b7](https://github.com/NSPC911/rovr/commit/fe644b70f776dc622238d65d36c8d6be45b6b8d4)
 
 ### Performance
-- `filelist`: improve loading by lazy loading renderer and stuff [#263](https://github.com/NSPC911/rovr/pull/263) 8de7b30
-- `options`: use module level cache for options [c29c1c3](https://github.com/NSPC911/rovr/commit/c29c1c38de7b3016788a92612bdbd881cef044fe)
+- `config`: cache schema [bbd38af](https://github.com/NSPC911/rovr/commit/bbd38af8a25f8ca0b23f1580cd7ef72cd3b6cdec) [4f810c6](https://github.com/NSPC911/rovr/commit/4f810c67ac21d17630fb4ad5c63cbd4c6bacf1fc)
+- `filelist`: improve loading by lazy loading renderer and stuff [#263](https://github.com/NSPC911/rovr/pull/263) [5653956](https://github.com/NSPC911/rovr/commit/565395644835d51c165b418ce314bb3e5d795244)
 - `filelist`: in select mode, select only if name matches [dc7a46d](https://github.com/NSPC911/rovr/commit/dc7a46d3fee8457062091d5f4336ed5842399c14) [7ded7d4](https://github.com/NSPC911/rovr/commit/7ded7d49b75b3b0f26fabda56220ca9761f4bc33)
-- `rg+fd`: incrementally add options for better responsiveness [#268](https://github.com/NSPC911/rovr/pull/268)
+- `options`: use module level cache for options [c29c1c3](https://github.com/NSPC911/rovr/commit/c29c1c38de7b3016788a92612bdbd881cef044fe)
 - `preview`: move svg loader to Process [35ca21e](https://github.com/NSPC911/rovr/commit/35ca21ea5cd8858257955ad5c02826e8c1ef9ab3)
+- `rg+fd`: incrementally add options for better responsiveness [#268](https://github.com/NSPC911/rovr/pull/268)
 - even lazier imports [74cb7f6](https://github.com/NSPC911/rovr/commit/74cb7f6f8d057f8fde8eb0cbcc0659f457bdc0da)
 
 ## [0.8.1] - 2026-04-10

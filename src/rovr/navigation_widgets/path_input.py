@@ -382,6 +382,8 @@ class PathInput(Input, inherit_bindings=False):
         if event.key == "backspace":
             # might be used for back history, so force the behaviour
             self.action_delete_left()
+        elif event.key == "escape":
+            self.app.file_list.focus()
         elif len(event.key) != 1 and not event.is_printable:
             if check_key(event, config["keybinds"]["toggle_all"]):
                 self.select_all()

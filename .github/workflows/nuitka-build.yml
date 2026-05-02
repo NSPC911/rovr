@@ -5,6 +5,9 @@ on:
   schedule:
     - cron: "0 0 */3 * *"
   workflow_dispatch:
+  push:
+    branches:
+      - nuitka-*
 
 jobs:
   starting-build:
@@ -80,6 +83,7 @@ jobs:
           Remove-Item -Recurse -Force rovr.dist -ErrorAction SilentlyContinue
           uv sync --no-dev --group build
           uv run --no-sync poe build standalone
+          Move-Item -Path report.xml -Destination "rovr-${{ matrix.name }}-report.xml"
 
       - name: Upload Executable
         uses: actions/upload-artifact@v7
@@ -88,14 +92,33 @@ jobs:
           name: rovr-${{ matrix.name }}-nuitka
           retention-days: 30
 
-      - name: Rename Report
-        shell: pwsh
-        run: Move-Item report.xml 'rovr-${{ matrix.name }}-report.xml'
-
       - name: Upload Build Report
         uses: actions/upload-artifact@v7
         with:
           path: rovr-${{ matrix.name }}-report.xml
+          retention-days: 30
+          archive: false
+
+      - name: Build onefile with Nuitka
+        shell: pwsh
+        run: |
+          Remove-Item -Recurse -Force rovr.dist -ErrorAction SilentlyContinue
+          uv sync --no-dev --group build
+          uv run --no-sync poe build onefile
+          Move-Item -Path "${{ matrix.executable }}" -Destination "nuitka-onefile-${{ matrix.executable }}" -ErrorAction SilentlyContinue
+          Move-Item -Path report.xml -Destination "report-${{ matrix.name }}-onefile-report.xml"
+
+      - name: Upload Onefile Executable
+        uses: actions/upload-artifact@v7
+        with:
+          path: nuitka-onefile-${{ matrix.executable }}
+          retention-days: 30
+          archive: false
+
+      - name: Upload Onefile Build Report
+        uses: actions/upload-artifact@v7
+        with:
+          path: rovr-${{ matrix.name }}-onefile-report.xml
           retention-days: 30
           archive: false
 
@@ -126,6 +149,7 @@ jobs:
           status: ${{ job.status }}
           description: |
             Download artifacts:
+            ### Standalone
             - [windows-x64](https://nightly.link/NSPC911/rovr/actions/runs/${{ github.run_id }}/rovr-windows-x64-nuitka.zip)
             - [windows-arm](https://nightly.link/NSPC911/rovr/actions/runs/${{ github.run_id }}/rovr-windows-arm-nuitka.zip)
             - [linux-x64](https://nightly.link/NSPC911/rovr/actions/runs/${{ github.run_id }}/rovr-linux-x64-nuitka.zip)

@@ -44,7 +44,7 @@ def editor() -> str:
 @cache
 def get_schema_validator() -> tuple[dict, Callable[[dict], None]]:
     schema_file = resources.files("rovr.config").joinpath("schema.json")
-    mtime = schema_file.stat().st_mtime
+    mtime = path.getmtime(schema_file.as_posix())
     schema_py = path.join(RovrVars.ROVRTEMP, "schema.py")
     if path.isfile(schema_py):
         try:

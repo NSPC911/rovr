@@ -11,7 +11,6 @@
 # nuitka-project: --nofollow-import-to=aiohttp
 # nuitka-project: --onefile-cache-mode=cached
 # nuitka-project: --onefile-child-grace-time=1
-# nuitka-project: --python-flag=isolated
 # nuitka-project: --python-flag=no_asserts
 # nuitka-project: --python-flag=no_docstrings
 # nuitka-project: --python-flag=no_site

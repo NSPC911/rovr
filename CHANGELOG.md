@@ -5,7 +5,7 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [0.8.2] - 2026-05-02
+## [0.8.2] - 2026-05-04
 
 ### Added
 - `filelist`: visually distinguish broken symlinks [7f5232e](https://github.com/NSPC911/rovr/commit/7f5232ef06dcde70e8056a31f8ef6453535c396a)

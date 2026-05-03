@@ -1,5 +1,4 @@
 # nuitka-project: --assume-yes-for-downloads
-# nuitka-project: --clang
 # nuitka-project: --disable-plugin=tk-inter
 # nuitka-project: --enable-plugin=anti-bloat
 # nuitka-project: --enable-plugin=implicit-imports

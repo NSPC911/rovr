@@ -19,6 +19,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `filelist`: prevent crash on broken symlink [#271](https://github.com/NSPC911/rovr/pull/271)
 - `metadata`: no crash on focus [e0994ee](https://github.com/NSPC911/rovr/commit/e0994ee88cefd9c9fe0de2364c1c83890b1686f1)
 - `options`: dont cause recursion error when `--dev` [c14239b](https://github.com/NSPC911/rovr/commit/c14239bdad0560d0407299ea4f4c8197b2a2fc9f)
+- `path_input`: 'escape' out [ab82a7f](https://github.com/NSPC911/rovr/commit/ab82a7fd1098c94f38e1e34973e1d54de4af8442)
 - `preview`: use transparent background color when not bat [3778b4a](https://github.com/NSPC911/rovr/commit/3778b4a8bcb5676a1b13a9c45db5603bcdbc4a2e)
 - `process`: correctly handle same file error [fdd7b96](https://github.com/NSPC911/rovr/commit/fdd7b96a061818eae7951be6dd93fd469e851357)
 - `multiprocess`: forcefully disable multiprocessing if user's machine is bad [b0dcba9](https://gitihub.com/NSPC911/rovr/commit/b0dcba964250beaf94458ad32c2381e6f69251a6)

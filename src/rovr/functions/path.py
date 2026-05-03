@@ -564,7 +564,11 @@ def get_mime_type(
     if ignore is None:
         ignore = ()
 
-    file_extension = path.splitext(file_path)[1].lower()
+    base = path.basename(file_path)
+    if base.startswith("."):
+        file_extension = base[1:]
+    else:
+        file_extension = "".join(base.split(".")[1:]).lower()
 
     # Read file bytes once, reuse for both puremagic and basic detection
     try:

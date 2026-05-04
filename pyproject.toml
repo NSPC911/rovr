@@ -20,6 +20,7 @@ dependencies = [
   "backports-zstd>=1.3.0; python_version < '3.14'",
   "fastjsonschema>=2.21.2",
   "humanize>=4.15.0",
+  "multiarchive>=0.1.0",
   "pathvalidate>=3.3.1",
   "pillow>=12.2.0",
   "platformdirs>=4.9.0",
@@ -225,11 +226,6 @@ quote-style = "double"
 indent-style = "space"
 line-ending = "auto"
 preview = true
-
-[tool.ty.src]
-exclude = [
-  "src/rovr/classes/archive.py"
-] # i dont want to add type indicators
 
 [tool.ty.rules]
 # possibly-missing-import = "ignore"

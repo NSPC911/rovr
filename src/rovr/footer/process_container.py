@@ -6,6 +6,7 @@ import zipfile
 from os import path
 from typing import Callable, Literal, cast
 
+from multiarchive import Archive
 from send2trash import send2trash
 from textual import events, work
 from textual.color import Gradient
@@ -13,7 +14,6 @@ from textual.containers import HorizontalGroup, VerticalGroup, VerticalScroll
 from textual.renderables.bar import Bar as BarRenderable
 from textual.types import UnusedParameter
 
-from rovr.classes.archive import Archive
 from rovr.functions import icons as icon_utils
 from rovr.functions import path as path_utils
 from rovr.functions.utils import is_being_used

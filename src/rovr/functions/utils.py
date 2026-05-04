@@ -139,7 +139,7 @@ def check_key(event: events.Key, key_list: list[str] | str) -> bool:
 
 
 def is_archive(path_str: str) -> bool:
-    from rovr.classes.archive import Archive
+    from multiarchive import Archive
 
     try:
         with Archive(path_str) as _:

@@ -145,7 +145,6 @@ Types: `feat`, `fix`, `docs`, `style`, `refactor`, `test`, `chore`
 ### Important Notes
 
 - **Refactors discouraged**: The project prefers features over refactors
-- **Type checking excludes**: `src/rovr/classes/archive.py`
 - **Formatting excludes**: `src/rovr/monkey_patches/sys_stdout.py`
 - Use `uv` commands; do not use `pip` or `python -m`
 - Always run `poe check` before committing. Ruff may mention that certain errors are fixable; if so, run `poe fmt` to apply fixes.

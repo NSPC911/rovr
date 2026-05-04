@@ -522,6 +522,15 @@ wheels = [
 ]
 
 [[package]]
+name = "multiarchive"
+version = "0.1.0.post2"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/75/8d/461c3df9b6abe31b755bb003f92f0963cfb9ca671c78aa54d29a2c7236f8/multiarchive-0.1.0.post2.tar.gz", hash = "sha256:0a171f969a9cf8a3f96cb7aa6ac8a99f324ae5db629c228f09723b791b118000", size = 8617, upload-time = "2026-05-04T13:47:48.594Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/c3/6d/527179edc7a087770b1156b6f168b2749642b227693b63ec355d36807e2e/multiarchive-0.1.0.post2-py3-none-any.whl", hash = "sha256:f99aa92885411e5ef288a78d0596f5007642dd7ffaf2d501b9b82445c720c558", size = 8894, upload-time = "2026-05-04T13:47:50.529Z" },
+]
+
+[[package]]
 name = "multidict"
 version = "6.7.1"
 source = { registry = "https://pypi.org/simple" }
@@ -971,6 +980,7 @@ dependencies = [
     { name = "backports-zstd" },
     { name = "fastjsonschema" },
     { name = "humanize" },
+    { name = "multiarchive" },
     { name = "pathvalidate" },
     { name = "pillow" },
     { name = "platformdirs" },
@@ -1019,6 +1029,7 @@ requires-dist = [
     { name = "backports-zstd", marker = "python_full_version < '3.14'", specifier = ">=1.3.0" },
     { name = "fastjsonschema", specifier = ">=2.21.2" },
     { name = "humanize", specifier = ">=4.15.0" },
+    { name = "multiarchive", specifier = ">=0.1.0" },
     { name = "pathvalidate", specifier = ">=3.3.1" },
     { name = "pillow", specifier = ">=12.2.0" },
     { name = "platformdirs", specifier = ">=4.9.0" },

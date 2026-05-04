@@ -11,6 +11,7 @@ from typing import Literal, cast
 
 import textual_image.renderable
 import textual_image.widget
+from multiarchive._archive import Archive, BadArchiveError
 from PIL import Image, UnidentifiedImageError
 from PIL.Image import Image as PILImage
 from textual import events, on, work
@@ -23,7 +24,6 @@ from textual.highlight import guess_language
 from textual.message import Message
 from textual.widgets.selection_list import Selection
 
-from rovr.classes.archive import Archive, BadArchiveError
 from rovr.classes.textual_options import (
     ArchiveFileListSelection,
     FileListSelectionWidget,
@@ -1081,19 +1081,8 @@ class PreviewContainer(Container):
                                     )
                                     return
 
-                                filename = getattr(
-                                    member, "filename", getattr(member, "name", "")
-                                )
-                                is_dir_func = getattr(
-                                    member, "is_dir", getattr(member, "isdir", None)
-                                )
-                                is_dir = (
-                                    is_dir_func()
-                                    if is_dir_func
-                                    else filename.replace("\\", "/").endswith("/")
-                                )
-                                if not is_dir:
-                                    all_files.append(filename)
+                                if not member.is_dir:
+                                    all_files.append(member.name)
                         content = all_files
                     except (
                         BadArchiveError,

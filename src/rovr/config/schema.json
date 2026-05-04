@@ -227,6 +227,26 @@
             "application/x-font-.*": "font"
           },
           "description": "Map MIME type patterns to preview types. Uses regex patterns. Valid preview types: text, image, pdf, archive, folder, resvg, font, remime.\n-> Use 'remime' if you want a more accurate description from file(1)"
+        },
+        "pins_places": {
+              "type": "array",
+              "default": ["rovr"],
+              "description": "Provider for the pinned places in the side pane.",
+              "minItems": 1,
+              "items": {
+                "type": "string",
+                "enum": ["empty", "default", "rovr"]
+              }
+        },
+        "pins_bookmarks": {
+              "type": "array",
+              "default": ["rovr"],
+              "description": "Provider for the pinned bookmarks in the side pane.",
+              "minItems": 1,
+              "items": {
+                "type": "string",
+                "enum": ["empty", "rovr", "gtk", "kde"]
+              }
         }
       }
     },

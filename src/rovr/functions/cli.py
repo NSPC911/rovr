@@ -185,7 +185,5 @@ def eager_set_folder(config_folder: str | None) -> None:
 
     from rovr.variables.maps import RovrVars
 
-    RovrVars.ROVRCONFIG = type(RovrVars).ROVRCONFIG = config_root
-    RovrVars.ROVRCACHE = type(RovrVars).ROVRCACHE = os.path.join(
-        config_root, "cache"
-    ).replace("\\", "/")
+    RovrVars.ROVRCONFIG = config_root
+    RovrVars.ROVRCACHE = os.path.join(config_root, "cache").replace("\\", "/")

@@ -1,4 +1,4 @@
-from functools import cached_property
+from dataclasses import dataclass
 from os import environ, path
 
 from platformdirs import PlatformDirs
@@ -8,71 +8,33 @@ dirs = PlatformDirs("rovr", ".")  # Ah yes, my name is "."
 general = PlatformDirs()
 
 
-class _RovrVars:
-    slots = (
-        "DOCUMENTS",
-        "DOWNLOADS",
-        "PICTURES",
-        "DESKTOP",
-        "VIDEOS",
-        "CONFIG",
-        "CACHE",
-        "MUSIC",
-        "HOME",
+@dataclass
+class RovrVars:
+    ROVRCONFIG = (environ.get("ROVR_CONFIG_FOLDER") or dirs.user_config_dir).replace(
+        "\\", "/"
     )
-
-    @cached_property
-    def ROVRCONFIG(self) -> str:  # noqa: N802
-        return (environ.get("ROVR_CONFIG_FOLDER") or dirs.user_config_dir).replace(
-            "\\", "/"
-        )
-
-    @cached_property
-    def ROVRCACHE(self) -> str:  # noqa: N802
-        return dirs.user_cache_dir.replace("\\", "/")
-
-    @cached_property
-    def ROVRTEMP(self) -> str:  # noqa: N802
-        return dirs.user_runtime_dir.replace("\\", "/")
-
-    @cached_property
-    def DOCUMENTS(self) -> str:  # noqa: N802
-        return general.user_documents_dir.replace("\\", "/")
-
-    @cached_property
-    def DOWNLOADS(self) -> str:  # noqa: N802
-        return general.user_downloads_dir.replace("\\", "/")
-
-    @cached_property
-    def PICTURES(self) -> str:  # noqa: N802
-        return general.user_pictures_dir.replace("\\", "/")
-
-    @cached_property
-    def DESKTOP(self) -> str:  # noqa: N802
-        return general.user_desktop_dir.replace("\\", "/")
-
-    @cached_property
-    def VIDEOS(self) -> str:  # noqa: N802
-        return general.user_videos_dir.replace("\\", "/")
-
-    @cached_property
-    def CONFIG(self) -> str:  # noqa: N802
-        return general.user_config_dir.replace("\\", "/")
-
-    @cached_property
-    def CACHE(self) -> str:  # noqa: N802
-        return general.user_cache_dir.replace("\\", "/")
-
-    @cached_property
-    def MUSIC(self) -> str:  # noqa: N802
-        return general.user_music_dir.replace("\\", "/")
-
-    @cached_property
-    def HOME(self) -> str:  # noqa: N802
-        return path.expanduser("~").replace("\\", "/")
+    ROVRCACHE = dirs.user_cache_dir.replace("\\", "/")
+    ROVRTEMP = dirs.user_runtime_dir.replace("\\", "/")
+    DOCUMENTS = general.user_documents_dir.replace("\\", "/")
+    DOWNLOADS = general.user_downloads_dir.replace("\\", "/")
+    PICTURES = general.user_pictures_dir.replace("\\", "/")
+    DESKTOP = general.user_desktop_dir.replace("\\", "/")
+    VIDEOS = general.user_videos_dir.replace("\\", "/")
+    CONFIG = general.user_config_dir.replace("\\", "/")
+    CACHE = general.user_cache_dir.replace("\\", "/")
+    MUSIC = general.user_music_dir.replace("\\", "/")
+    HOME = path.expanduser("~").replace("\\", "/")
 
 
-RovrVars = _RovrVars()
+SORTED_VARS = dict(
+    sorted(
+        {
+            key: value
+            for key, value in vars(RovrVars).items()
+            if not key.startswith(("__", "ROVR"))
+        }.items()
+    )
+)
 
 ASCII_ICONS = {
     "general": {
@@ -316,7 +278,7 @@ ICONS = {
         "ko": ("\uebc6", "#9b59b6"),
         "kt": ("\ue634", "#7F52FF"),
         "less": ("\ue758", "#1D365D"),
-        "license": ("\ue60a", "#E7E480"),
+        "license": ("\U000f05d1", "#E7E480"),
         "lisp": ("\ue6b0", "black"),
         "lock": ("\uf023", "#F1C40F"),
         "log": ("\uf18d", "#7F8C8D"),

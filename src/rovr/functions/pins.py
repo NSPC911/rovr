@@ -3,7 +3,7 @@ from copy import deepcopy
 from os import makedirs, path
 from typing import NotRequired, TypedDict, cast
 
-from rovr.variables.maps import RovrVars
+from rovr.variables.maps import SORTED_VARS, RovrVars
 
 from .path import dump_exc, normalise
 
@@ -95,7 +95,9 @@ def load_pins() -> PinsDict:
             # because of the replace code a few lines below
             if type(item) is dict and "path" in item and type(item["path"]) is str:
                 # Expand variables
-                for var in RovrVars.slots:
+                for var in vars(RovrVars):
+                    if var.startswith(("__", "ROVR")):
+                        continue
                     item["path"] = item["path"].replace(
                         f"${var}", getattr(RovrVars, var)
                     )
@@ -141,7 +143,9 @@ def add_pin(pin_name: str, pin_path: str | bytes) -> None:
                     and "path" in item
                     and isinstance(item["path"], str)
                 ):
-                    for var in RovrVars.slots:
+                    for var in vars(RovrVars):
+                        if var.startswith(("__", "ROVR")):
+                            continue
                         item["path"] = item["path"].replace(
                             getattr(RovrVars, var), f"${var}"
                         )
@@ -177,7 +181,6 @@ def remove_pin(pin_path: str | bytes) -> None:
             if not (isinstance(pin, dict) and pin.get("path") == pin_path_normalized)
         ]
 
-    SORTED_VARS = sorted(vars(RovrVars).items(), key=lambda x: len(x[1]), reverse=True)
     for section_key in ["default", "pins"]:
         if section_key in pins_to_write:
             for item in pins_to_write[section_key]:
@@ -186,7 +189,7 @@ def remove_pin(pin_path: str | bytes) -> None:
                     and "path" in item
                     and isinstance(item["path"], str)
                 ):
-                    for var, dir_path_val in SORTED_VARS:
+                    for var, dir_path_val in SORTED_VARS.items():
                         item["path"] = item["path"].replace(dir_path_val, f"${var}")
 
     try:

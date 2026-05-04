@@ -47,7 +47,9 @@ def load_folder_prefs() -> dict[str, FolderPrefDict]:
                 and isinstance(pref["sort_by"], str)
                 and isinstance(pref["sort_descending"], bool)
             ):
-                for var in RovrVars.slots:
+                for var in vars(RovrVars):
+                    if var.startswith(("__", "ROVR")):
+                        continue
                     folder_path = folder_path.replace(f"${var}", getattr(RovrVars, var))
                 expanded[folder_path] = cast(FolderPrefDict, pref)
 
@@ -67,6 +69,8 @@ def save_folder_prefs() -> None:
     for folder_path, pref in folder_prefs.items():
         folder_path = normalise(folder_path)
         for var, dir_path_val in vars(RovrVars).items():
+            if var.startswith(("__", "ROVR")):
+                continue
             folder_path = folder_path.replace(dir_path_val, f"${var}")
         collapsed[folder_path] = pref
 

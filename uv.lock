@@ -965,7 +965,7 @@ wheels = [
 
 [[package]]
 name = "rovr"
-version = "0.8.2"
+version = "0.8.2.post1"
 source = { editable = "." }
 dependencies = [
     { name = "backports-zstd" },

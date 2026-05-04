@@ -16,7 +16,8 @@ class Dismissible(ModalScreen):
         super().__init__()
         self.message = message
         self.border_subtitle = border_subtitle
-        self.add_class(additional_classes)
+        if additional_classes:
+            self.add_class(additional_classes)
 
     def compose(self) -> ComposeResult:
         with Grid(id="dialog"):

@@ -956,80 +956,117 @@ class FileListRightClickOptionList(PopupOptionList):
         no_clip: bool = len(self.app.Clipboard.selected) == 0
 
         options = []
-        for option in config["settings"]["right_click"]:
+        longest_prompt = 0
+        for i, option in enumerate(config["settings"]["right_click"]):
             if "options" in option:
-                continue
-            match option["action"]:
-                case "rovr:copy":
-                    options.append(
-                        Option(f" {option['icon']} Copy ", "copy", disabled=no_items)
+                options.append(
+                    Option(
+                        f" {option['icon']} {option['group'].capitalize()} ",
+                        id=f"group{i}",
+                        disabled=no_items,
                     )
-                case "rovr:cut":
-                    options.append(
-                        Option(f" {option['icon']} Cut ", "cut", disabled=no_items)
-                    )
-                case "rovr:paste":
-                    options.append(
-                        Option(f" {option['icon']} Paste ", "paste", disabled=no_clip)
-                    )
-                case "rovr:new":
-                    options.append(
-                        Option(
-                            f" {option['icon']} New Item ", "new", disabled=cannot_write
+                )
+            else:
+                match option["action"]:
+                    case "rovr:copy":
+                        options.append(
+                            Option(
+                                f" {option['icon']} Copy ", "copy", disabled=no_items
+                            )
                         )
-                    )
-                case "rovr:rename":
-                    options.append(
-                        Option(
-                            f" {option['icon']} Rename ", "rename", disabled=no_items
+                    case "rovr:cut":
+                        options.append(
+                            Option(f" {option['icon']} Cut ", "cut", disabled=no_items)
                         )
-                    )
-                case "rovr:delete":
-                    options.append(
-                        Option(
-                            f" {option['icon']} Delete ", "delete", disabled=no_items
+                    case "rovr:paste":
+                        options.append(
+                            Option(
+                                f" {option['icon']} Paste ", "paste", disabled=no_clip
+                            )
                         )
-                    )
-                case "rovr:zip":
-                    options.append(
-                        Option(f" {option['icon']} Zip ", "zip", disabled=no_items)
-                    )
-                case "rovr:unzip":
-                    options.append(
-                        Option(f" {option['icon']} Unzip ", "unzip", disabled=no_items)
-                    )
-                case "system:copy_highlighted":
-                    options.append(
-                        Option(
-                            f" {option['icon']} Copy Highlighted File Path ",
-                            "copy_highlighted",
-                            disabled=no_items,
+                    case "rovr:new":
+                        options.append(
+                            Option(
+                                f" {option['icon']} New Item ",
+                                "new",
+                                disabled=cannot_write,
+                            )
                         )
-                    )
-                case "system:copy_current_directory":
-                    options.append(
-                        Option(
-                            f" {option['icon']} Copy Current Directory Path ",
-                            "copy_current_directory",
-                            disabled=no_items,
+                    case "rovr:rename":
+                        options.append(
+                            Option(
+                                f" {option['icon']} Rename ",
+                                "rename",
+                                disabled=no_items,
+                            )
                         )
-                    )
-                case "system:copy_to_system_clip":
-                    options.append(
-                        Option(
-                            f" {option['icon']} Copy to System Clipboard ",
-                            "copy_to_system_clip",
-                            disabled=no_items,
+                    case "rovr:delete":
+                        options.append(
+                            Option(
+                                f" {option['icon']} Delete ",
+                                "delete",
+                                disabled=no_items,
+                            )
                         )
-                    )
+                    case "rovr:zip":
+                        options.append(
+                            Option(f" {option['icon']} Zip ", "zip", disabled=no_items)
+                        )
+                    case "rovr:unzip":
+                        options.append(
+                            Option(
+                                f" {option['icon']} Unzip ", "unzip", disabled=no_items
+                            )
+                        )
+                    case "system:copy_highlighted":
+                        options.append(
+                            Option(
+                                f" {option['icon']} Copy Highlighted File Path ",
+                                "copy_highlighted",
+                                disabled=no_items,
+                            )
+                        )
+                    case "system:copy_current_directory":
+                        options.append(
+                            Option(
+                                f" {option['icon']} Copy Current Directory Path ",
+                                "copy_current_directory",
+                                disabled=no_items,
+                            )
+                        )
+                    case "system:copy_to_system_clip":
+                        options.append(
+                            Option(
+                                f" {option['icon']} Copy to System Clipboard ",
+                                "copy_to_system_clip",
+                                disabled=no_items,
+                            )
+                        )
+            longest_prompt = max(longest_prompt, len(options[-1].prompt))
+        for option in options:
+            if option.id.startswith("group"):
+                if len(option.prompt) < longest_prompt - 2:
+                    option._set_prompt(f"{option.prompt:<{longest_prompt - 2}} ")
+                else:
+                    option._set_prompt(f"{option.prompt} ")
         self.set_options(options)
         self.call_next(self.refresh)
+
+    async def on_option_list_option_highlighted(
+        self, event: OptionList.OptionHighlighted
+    ) -> None:
+        # Get the highlighted option
+        if not event.option.id.startswith("group"):
+            ...
 
     async def on_option_list_option_selected(
         self, event: OptionList.OptionSelected
     ) -> None:
         # Handle menu item selection
-        if event.option.id.startswith("copy_") and hasattr(
+        if event.option.id.startswith("group"):
+            # need to handle the submenu options here soon
+            return
+        elif event.option.id.startswith("copy_") and hasattr(
             self.app.query_one("CopyButton"), f"{event.option.id}"
         ):
             func: Callable[[], Awaitable | None] = getattr(

@@ -1,5 +1,22 @@
 [
   {
+    "keys": ["interface.mime_rules"],
+    "message": [
+      "The [bright_cyan]interface.mime_rules[/] setting has been moved to [bright_blue]settings.preview_rules[/] to be more consistent with what it does."
+    ],
+    "extra": "Moved in v0.8.2",
+    "regex": [
+      {
+        "find": "interface.mime_rules",
+        "replace": "settings.preview_rules"
+      },
+      {
+        "find": "mime_rules",
+        "replace": "preview_rules"
+      }
+    ]
+  },
+  {
     "keys": ["keybinds.suspend_app"],
     "message": [
       "The [bright_cyan]keybinds.suspend_app[/] keybind has been renamed to [bright_blue]keybinds.suspend_process[/] because it suspends the process (in *nix terms)"

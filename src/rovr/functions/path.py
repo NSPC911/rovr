@@ -518,7 +518,7 @@ def match_mime_to_preview_type(
 
     if not mime_re_cache:
         widget.log("Compiling MIME type regexes for the first time...")
-        for pattern, preview_type in config["interface"]["mime_rules"].items():
+        for pattern, preview_type in config["settings"]["preview_rules"].items():
             if preview_type not in mime_re_cache:
                 mime_re_cache[preview_type] = []
             mime_re_cache[preview_type].append(re.compile(pattern))

@@ -51,13 +51,16 @@ align = "left"
 buttons = true
 panels = false
 
-[interface.mime_rules]
+[settings]
+copy_includes_metadata = true
+use_recycle_bin = true
+
+[settings.preview_rules]
 "text/.*" = "text"
 "application/(json|javascript|xml|raml\\+yaml)" = "text"
 "application/x-(yaml|script|pem-file|subrip|typescript)" = "text"
 "application/(mbox|ndjson|wine-extension-ini)" = "text"
 "image/svg\\+xml" = "resvg"
-"image/(avif|hei.|jxl)" = "image"
 "image/.*" = "image"
 "application/pdf" = "pdf"
 "application/(zip|gzip|zstd|bzip2|vnd\\.rar)" = "archive"
@@ -73,10 +76,6 @@ panels = false
 "application/x-font-.*" = "font"
 # inaccurately determined by puremagic (it isnt always magic)
 "application/vnd.openxmlformats-officedocument.wordprocessingml.document" = "remime"
-
-[settings]
-copy_includes_metadata = true
-use_recycle_bin = true
 
 [settings.bulk_rename]
 show_as_mapping = true

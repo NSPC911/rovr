@@ -147,7 +147,7 @@ class PreviewContainer(Container):
         self._initial_height = self.size.height
         self._file_type: str = "none"
         self._file_mtime: float | None = None
-        self._mime_type: path_utils.MimeResult | None = None
+        self._mime_type: preview_utils.MimeResult | None = None
         self._preview_texts = config["interface"]["preview_text"]
         self.pdf = PDFHandler()
         self._set_loading_to: bool = False
@@ -1004,12 +1004,12 @@ class PreviewContainer(Container):
             if path.isdir(file_path):
                 self.update_ui(
                     file_path=file_path,
-                    mime_type=path_utils.MimeResult("basic", "inode/directory"),
+                    mime_type=preview_utils.MimeResult("basic", "inode/directory"),
                     file_type="folder",
                 )
             else:
                 content = None  # for now
-                mime_result = path_utils.get_mime_type(file_path, mtime)
+                mime_result = preview_utils.get_mime_type(file_path, mtime)
                 self.log(mime_result)
                 if mime_result is None:
                     self.log(f"Could not get MIME type for {file_path}")
@@ -1022,7 +1022,7 @@ class PreviewContainer(Container):
                     return
                 content = mime_result.content
 
-                file_type = path_utils.match_mime_to_preview_type(
+                file_type = preview_utils.match_mime_to_preview_type(
                     self, mime_result.mime_type
                 )
                 if file_type is None:
@@ -1036,7 +1036,7 @@ class PreviewContainer(Container):
                     self.call_later(lambda: self.post_message(self.SetLoading(False)))
                     return
                 elif file_type == "remime":
-                    mime_result = path_utils.get_mime_type(
+                    mime_result = preview_utils.get_mime_type(
                         file_path, mtime, ("basic", "puremagic")
                     )
                     if mime_result is None:
@@ -1051,7 +1051,7 @@ class PreviewContainer(Container):
                             lambda: self.post_message(self.SetLoading(False))
                         )
                         return
-                    file_type = path_utils.match_mime_to_preview_type(
+                    file_type = preview_utils.match_mime_to_preview_type(
                         self, mime_result.mime_type
                     )
                     if file_type is None:
@@ -1117,7 +1117,7 @@ class PreviewContainer(Container):
         file_path: str,
         file_type: str,
         content: str | list[str] | None = None,
-        mime_type: path_utils.MimeResult | None = None,
+        mime_type: preview_utils.MimeResult | None = None,
     ) -> None:
         """
         Update the preview UI. Runs in a thread, uses call_from_thread for UI ops.

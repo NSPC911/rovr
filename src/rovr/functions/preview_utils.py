@@ -1,11 +1,17 @@
 import multiprocessing
 import multiprocessing.connection
+import re
+import subprocess
 from concurrent.futures import FIRST_COMPLETED, Future, ProcessPoolExecutor, wait
-from typing import TypeAlias
+from functools import lru_cache
+from os import path
+from typing import Literal, NamedTuple, TypeAlias
 
 from PIL import Image
 from PIL.Image import Image as PILImage
+from textual.dom import DOMNode
 
+from rovr.classes.type_aliases import PreviewTypes
 from rovr.functions.preview_workers import (
     _depalette,
     resample_bytes_worker,
@@ -14,7 +20,14 @@ from rovr.functions.preview_workers import (
     svg_image_worker,
 )
 from rovr.functions.utils import should_cancel
-from rovr.variables.constants import RESAMPLING_METHOD, config
+from rovr.variables.constants import RESAMPLING_METHOD, config, file_one
+
+mime_re_cache: dict[
+    PreviewTypes,
+    list[re.Pattern],
+] = {}
+mime_preview_cache: dict[str, PreviewTypes | None] = {}
+
 
 MAX_IMAGE_SIZE: tuple[int, int] = tuple(config["interface"]["image_viewer"]["max_size"])  # ty: ignore
 MAX_FONT_SIZE: tuple[int, int] = tuple(config["interface"]["font_preview"]["max_size"])  # ty: ignore
@@ -246,3 +259,161 @@ def resample_batch_sync(images: list[PILImage]) -> list[PILImage]:
     return [
         _depalette(image).resize(MAX_IMAGE_SIZE, RESAMPLING_METHOD) for image in images
     ]
+
+
+def match_mime_to_preview_type(
+    widget: DOMNode,
+    mime_type: str,
+) -> (
+    Literal["text", "image", "pdf", "archive", "folder", "remime", "resvg", "font"]
+    | None
+):
+    """
+    Match a MIME type against configured rules to determine preview type.
+
+    Args:
+        widget: The DOMNode widget to log to if needed
+        mime_type: The MIME type to match (e.g., "text/plain", "image/png")
+
+    Returns:
+        str : The preview type ("text", "image", "pdf", "archive", "folder")
+        None: None if no rule matches
+    """
+    if mime_type in mime_preview_cache:
+        return mime_preview_cache[mime_type]
+
+    global mime_re_cache
+
+    if not mime_re_cache:
+        widget.log("Compiling MIME type regexes for the first time...")
+        for pattern, preview_type in config["settings"]["preview_rules"].items():
+            if preview_type not in mime_re_cache:
+                mime_re_cache[preview_type] = []
+            mime_re_cache[preview_type].append(re.compile(pattern))
+
+    for preview_type, patterns in mime_re_cache.items():
+        for pattern in patterns:
+            if pattern.fullmatch(mime_type):
+                mime_preview_cache[mime_type] = preview_type
+                return preview_type
+    mime_preview_cache[mime_type] = None
+    return None
+
+
+class MimeResult(NamedTuple):
+    method: Literal["basic", "puremagic", "file1"]
+    mime_type: str
+    content: str | None = None
+
+
+@lru_cache(maxsize=8192)
+def get_mime_type(
+    file_path: str,
+    mtime: int | float,
+    ignore: tuple[Literal["basic", "puremagic", "file1"], ...] | None = None,
+) -> MimeResult | None:
+    """
+    Synchronous/Threaded wrapper to get the MIME type of a file.
+
+    Args:
+        file_path: Path to the file to check
+        mtime: The last modified time of the file, used for caching purposes
+        ignore: List of detection methods to skip
+
+    Returns:
+        MimeResult: The method used and the detected MIME type
+        None: If the method is not available or failed
+
+    Raises:
+        FileNotFoundError: If file(1) executable is unavailable when that method is selected.
+        ╰╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┴> Ruff wants this part here, even though the function
+                           handles it internally, so I'm just leaving it here
+    """
+    if ignore is None:
+        ignore = ()
+
+    base = path.basename(file_path)
+    if base.startswith("."):
+        file_extension = base[1:]
+    else:
+        file_extension = "".join(base.split(".")[1:]).lower()
+
+    # Read file bytes once, reuse for both puremagic and basic detection
+    try:
+        with open(file_path, "rb") as f:
+            file_bytes = f.read(1024)  # Read first 1KiB
+    except OSError:
+        # Cannot open file at all
+        return None
+
+    # Step 1: Try puremagic (magic byte detection) first
+    if "puremagic" not in ignore:
+        import puremagic
+
+        try:
+            puremagic_result: list[puremagic.PureMagicWithConfidence] = (
+                puremagic.magic_string(file_bytes)
+            )
+            if puremagic_result:
+                # If multiple matches exist, prefer one matching the file extension
+                for match in puremagic_result:
+                    if match.extension.lower() == file_extension and match.mime_type:
+                        return MimeResult("puremagic", match.mime_type)
+                # Otherwise, return first result with a mime type
+                for match in puremagic_result:
+                    if match.mime_type:
+                        return MimeResult("puremagic", match.mime_type)
+        except Exception:
+            # puremagic failed, continue to next method
+            pass
+
+    # Step 2: Try decoding as text, checking all encodings in order of most likely
+    # If puremagic didn't recognise it, it might perhaps be a plain text file
+    if "basic" not in ignore:
+        from textual.highlight import guess_language
+
+        encodings_to_try = [
+            "utf8",
+            "utf16",
+            "utf32",
+            "latin1",
+            "iso8859-1",
+            "mbcs",
+            "ascii",
+            "us-ascii",
+        ]
+
+        for encoding in encodings_to_try:
+            try:
+                content = file_bytes.decode(encoding)
+                return MimeResult(
+                    "basic", f"text/{guess_language(content, file_path)}", content
+                )
+            except UnicodeDecodeError:
+                pass
+
+    # Step 3: Fall back to file(1) command if available
+    if "file1" not in ignore:
+        try:
+            file_executable = file_one()
+            if file_executable is None:
+                raise FileNotFoundError
+            process = subprocess.run(
+                [file_executable, "--mime-type", "-b", file_path],
+                capture_output=True,
+                text=True,
+                check=True,
+                timeout=1,
+            )
+            mime_type = process.stdout.strip()
+            if mime_type:
+                return MimeResult("file1", mime_type)
+        except (
+            subprocess.CalledProcessError,
+            subprocess.TimeoutExpired,
+            FileNotFoundError,
+        ):
+            # file(1) command failed or is not available
+            pass
+
+    return None

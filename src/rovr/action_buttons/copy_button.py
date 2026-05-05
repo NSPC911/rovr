@@ -19,7 +19,7 @@ from rovr.variables.constants import config
 from rovr.widgets import Button, OptionList
 
 rovr_bind = get_shortest_bind(config["keybinds"]["extra_copy"]["copy_to_rovr"])
-path_bind = get_shortest_bind(config["keybinds"]["extra_copy"]["copy_single_path"])
+path_bind = get_shortest_bind(config["keybinds"]["extra_copy"]["copy_highlighted"])
 system_bind = get_shortest_bind(config["keybinds"]["extra_copy"]["copy_to_system_clip"])
 copy_parent_bind = get_shortest_bind(
     config["keybinds"]["extra_copy"]["copy_current_directory"]
@@ -82,7 +82,7 @@ class CopyButton(Button):
                 "No files selected to copy.", title="Copy Files", severity="warning"
             )
 
-    def copy_path(self) -> None:
+    def copy_highlighted(self) -> None:
         if self.disabled:
             return
         highlighted: FileListSelectionWidget | None = (
@@ -201,8 +201,8 @@ class CopyPanelOptions(PopupOptionList):
     async def on_key(self, event: events.Key) -> None:
         if check_key(event, config["keybinds"]["extra_copy"]["copy_to_rovr"]):
             self.button.action_press()
-        elif check_key(event, config["keybinds"]["extra_copy"]["copy_single_path"]):
-            self.button.copy_path()
+        elif check_key(event, config["keybinds"]["extra_copy"]["copy_highlighted"]):
+            self.button.copy_highlighted()
         elif check_key(event, config["keybinds"]["extra_copy"]["copy_to_system_clip"]):
             self.button.copy_to_system_clip()
         elif check_key(
@@ -218,7 +218,7 @@ class CopyPanelOptions(PopupOptionList):
         if event.option.id == "rovr":
             self.button.action_press()
         elif event.option.id == "path":
-            self.button.copy_path()
+            self.button.copy_highlighted()
         elif event.option.id == "parent_path":
             self.button.copy_current_directory()
         elif event.option.id == "system":

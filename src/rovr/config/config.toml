@@ -54,6 +54,21 @@ panels = false
 [settings]
 copy_includes_metadata = true
 use_recycle_bin = true
+right_click = [
+  { icon = "\uf0c5", group = "copy", options = [
+    { icon = "\uf07f", action = "rovr:copy" },
+    { icon = "\U000f0147", action = "system:copy_highlighted" },
+    { icon = "\U000f14e5", action = "system:copy_current_directory" },
+    { icon = "\U000f1265", action = "system:copy_to_system_clip" }
+  ] },
+  { icon = "\uf0c4", action = "rovr:cut" },
+  { icon = "\uf429", action = "rovr:paste" },
+  { icon = "\uea7f", action = "rovr:new" },
+  { icon = "\uf246", action = "rovr:rename" },
+  { icon = "\uf014", action = "rovr:delete" },
+  { icon = "\uf410", action = "rovr:zip" },
+  { icon = "\uf07c", action = "rovr:unzip" }
+]
 
 [settings.preview_rules]
 "text/.*" = "text"
@@ -227,7 +242,7 @@ preview_scroll_right = []
 [keybinds.extra_copy]
 open_popup = ["Y"]
 copy_to_rovr = ["y"]
-copy_single_path = ["p"]
+copy_highlighted = ["p"]
 copy_to_system_clip = ["s"]
 copy_current_directory = ["d"]
 [keybinds.change_sort_order]

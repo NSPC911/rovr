@@ -202,6 +202,51 @@
           "default": true,
           "description": "When deleting a file, allow moving the file to the recycle bin."
         },
+        "right_click": {
+          "type": "array",
+          "description": "Configuration for the right-click context menu",
+          "items": {
+            "type": "object",
+            "properties": {
+              "icon": {
+                "type": "string",
+                "description": "Icon to display for the menu item"
+              },
+              "action": {
+                "type": "string",
+                "description": "Action to perform when the item is selected"
+              },
+              "group": {
+                "type": "string",
+                "description": "Name of the group if this item opens a submenu"
+              },
+              "options": {
+                "type": "array",
+                "description": "Submenu items (only supported at the top level)",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "icon": {
+                      "type": "string",
+                      "description": "Icon to display for the submenu item"
+                    },
+                    "action": {
+                      "type": "string",
+                      "description": "Action to perform when the submenu item is selected"
+                    }
+                  },
+                  "required": ["action"],
+                  "additionalProperties": false
+                }
+              }
+            },
+            "oneOf": [
+              { "required": ["action"] },
+              { "required": ["group", "options"] }
+            ],
+            "additionalProperties": false
+          }
+        },
         "copy_includes_metadata": {
           "type": "boolean",
           "default": true,
@@ -715,7 +760,7 @@
               "description": "Copy the selected files to rovr's clipboard",
               "display_name": "Copy to rovr's clipboard"
             },
-            "copy_single_path": {
+            "copy_highlighted": {
               "$ref": "#/definitions/keybind",
               "description": "Copy only the highlighted file's path to the system clipboard",
               "display_name": "Copy highlighted file path"

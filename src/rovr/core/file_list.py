@@ -18,7 +18,6 @@ from rovr.classes.mixins import (
 from rovr.classes.session_manager import SessionManager
 from rovr.classes.textual_options import FileListSelectionWidget, LazySelection
 from rovr.components import PopupOptionList
-from rovr.functions import icons as icon_utils
 from rovr.functions import path as path_utils
 from rovr.functions import pins as pin_utils
 from rovr.functions import utils
@@ -956,53 +955,73 @@ class FileListRightClickOptionList(PopupOptionList):
         cannot_write: bool = self.app.file_list.options[0].id == "perm"
         no_clip: bool = len(self.app.Clipboard.selected) == 0
 
-        options = [
-            Option(
-                f" {icon_utils.get_icon('general', 'copy')[0]} Copy",
-                id="copy",
-                disabled=no_items,
-            ),
-            Option(
-                f" {icon_utils.get_icon('general', 'cut')[0]} Cut",
-                id="cut",
-                disabled=no_items,
-            ),
-            Option(
-                f" {icon_utils.get_icon('general', 'paste')[0]} Paste",
-                id="paste",
-                disabled=cannot_write or no_clip,
-            ),
-            Option(
-                f" {icon_utils.get_icon('general', 'new')[0]} New",
-                id="new",
-                disabled=cannot_write,
-            ),
-            Option(
-                f" {icon_utils.get_icon('general', 'rename')[0]} Rename ",
-                id="rename",
-                disabled=no_items,
-            ),
-            Option(
-                f" {icon_utils.get_icon('general', 'delete')[0]} Delete ",
-                id="delete",
-                disabled=no_items,
-            ),
-            Option(
-                f" {icon_utils.get_icon('general', 'zip')[0]} Zip",
-                id="zip",
-                disabled=no_items,
-            ),
-            Option(
-                f" {icon_utils.get_icon('general', 'open')[0]} Unzip",
-                id="unzip",
-                disabled=not (
-                    hasattr(self.app.file_list.highlighted_option, "dir_entry")
-                    and utils.is_archive(
-                        self.app.file_list.highlighted_option.dir_entry.path
+        options = []
+        for option in config["settings"]["right_click"]:
+            if "options" in option:
+                continue
+            match option["action"]:
+                case "rovr:copy":
+                    options.append(
+                        Option(f" {option['icon']} Copy ", "copy", disabled=no_items)
                     )
-                ),
-            ),
-        ]
+                case "rovr:cut":
+                    options.append(
+                        Option(f" {option['icon']} Cut ", "cut", disabled=no_items)
+                    )
+                case "rovr:paste":
+                    options.append(
+                        Option(f" {option['icon']} Paste ", "paste", disabled=no_clip)
+                    )
+                case "rovr:new":
+                    options.append(
+                        Option(
+                            f" {option['icon']} New Item ", "new", disabled=cannot_write
+                        )
+                    )
+                case "rovr:rename":
+                    options.append(
+                        Option(
+                            f" {option['icon']} Rename ", "rename", disabled=no_items
+                        )
+                    )
+                case "rovr:delete":
+                    options.append(
+                        Option(
+                            f" {option['icon']} Delete ", "delete", disabled=no_items
+                        )
+                    )
+                case "rovr:zip":
+                    options.append(
+                        Option(f" {option['icon']} Zip ", "zip", disabled=no_items)
+                    )
+                case "rovr:unzip":
+                    options.append(
+                        Option(f" {option['icon']} Unzip ", "unzip", disabled=no_items)
+                    )
+                case "system:copy_highlighted":
+                    options.append(
+                        Option(
+                            f" {option['icon']} Copy Highlighted File Path ",
+                            "copy_highlighted",
+                            disabled=no_items,
+                        )
+                    )
+                case "system:copy_current_directory":
+                    options.append(
+                        Option(
+                            f" {option['icon']} Copy Current Directory Path ",
+                            "copy_current_directory",
+                            disabled=no_items,
+                        )
+                    )
+                case "system:copy_to_system_clip":
+                    options.append(
+                        Option(
+                            f" {option['icon']} Copy to System Clipboard ",
+                            "copy_to_system_clip",
+                            disabled=no_items,
+                        )
+                    )
         self.set_options(options)
         self.call_next(self.refresh)
 
@@ -1010,7 +1029,17 @@ class FileListRightClickOptionList(PopupOptionList):
         self, event: OptionList.OptionSelected
     ) -> None:
         # Handle menu item selection
-        if hasattr(self.app.file_list, f"action_{event.option.id}"):
+        if event.option.id.startswith("copy_") and hasattr(
+            self.app.query_one("CopyButton"), f"{event.option.id}"
+        ):
+            func: Callable[[], Awaitable | None] = getattr(
+                self.app.query_one("CopyButton"), f"action_{event.option.id}"
+            )
+            if asyncio.iscoroutinefunction(func):
+                await func()
+            else:
+                func()
+        elif hasattr(self.app.file_list, f"action_{event.option.id}"):
             func: Callable[[], Awaitable | None] = getattr(
                 self.app.file_list, f"action_{event.option.id}"
             )

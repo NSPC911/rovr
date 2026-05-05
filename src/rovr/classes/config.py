@@ -936,7 +936,7 @@ class _RovrConfigKeybindsExtraCopy(TypedDict, total=False):
 
     open_popup: list[str]
     copy_to_rovr: list[str]
-    copy_single_path: list[str]
+    copy_highlighted: list[str]
     copy_to_system_clip: list[str]
     copy_current_directory: list[str]
 
@@ -1322,6 +1322,9 @@ class _RovrConfigSettings(TypedDict, total=False):
     default: True
     """
 
+    right_click: list["_RovrConfigSettingsRightClickItem"]
+    r""" Configuration for the right-click context menu """
+
     copy_includes_metadata: bool
     r"""
     When copying over a file, preserve metadata from the original file, such as creation and modification times.
@@ -1486,6 +1489,41 @@ _ROVRCONFIGSETTINGSPREVIEWRULESADDITIONALPROPERTIES_RESVG: Literal["resvg"] = "r
 r"""The values for the '_RovrConfigSettingsPreviewRulesAdditionalproperties' enum"""
 _ROVRCONFIGSETTINGSPREVIEWRULESADDITIONALPROPERTIES_FONT: Literal["font"] = "font"
 r"""The values for the '_RovrConfigSettingsPreviewRulesAdditionalproperties' enum"""
+
+
+class _RovrConfigSettingsRightClickItem(TypedDict, total=False):
+    r"""
+    oneOf:
+      - required:
+        - action
+      - required:
+        - group
+        - options
+    """
+
+    icon: str
+    r""" Icon to display for the menu item """
+
+    action: str
+    r""" Action to perform when the item is selected """
+
+    group: str
+    r""" Name of the group if this item opens a submenu """
+
+    options: list["_RovrConfigSettingsRightClickItemOptionsItem"]
+    r""" Submenu items (only supported at the top level) """
+
+
+class _RovrConfigSettingsRightClickItemOptionsItem(TypedDict, total=False):
+    icon: str
+    r""" Icon to display for the submenu item """
+
+    action: Required[str]
+    r"""
+    Action to perform when the submenu item is selected
+
+    Required property
+    """
 
 
 class _RovrConfigTheme(TypedDict, total=False):

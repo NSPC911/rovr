@@ -48,7 +48,7 @@ from rovr.components.popup_option_list import PopupOptionList
 from rovr.core import (
     FileList,
     FileListContainer,
-    FileListRightClickOptionList,
+    FileListRightClickMenu,
     PinnedSidebar,
     PinnedSidebarContainer,
     PreviewContainer,
@@ -940,7 +940,7 @@ class Application(App, inherit_bindings=False):
     @on(events.Click)
     def when_got_click(self, event: events.Click) -> None:
         if (
-            not isinstance(event.widget, (FileListRightClickOptionList, SortOrderPopup))
+            not isinstance(event.widget, (FileListRightClickMenu, SortOrderPopup))
             or event.button == 1
         ):
             self.hide_popups()

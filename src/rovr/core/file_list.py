@@ -1,13 +1,12 @@
-import asyncio
 from contextlib import suppress
 from os import getcwd, path
-from typing import Awaitable, Callable, ClassVar, Iterable, Self, Sequence
+from typing import Callable, ClassVar, Iterable, Self, Sequence
 
-from textual import events, on, work
+from textual import events, work
 from textual.binding import BindingType
 from textual.content import ContentText
 from textual.css.query import NoMatches
-from textual.widgets.option_list import Option, OptionDoesNotExist
+from textual.widgets.option_list import OptionDoesNotExist
 from textual.widgets.selection_list import Selection, SelectionType
 
 from rovr.classes.mixins import (
@@ -17,7 +16,6 @@ from rovr.classes.mixins import (
 )
 from rovr.classes.session_manager import SessionManager
 from rovr.classes.textual_options import FileListSelectionWidget, LazySelection
-from rovr.components import PopupOptionList
 from rovr.functions import path as path_utils
 from rovr.functions import pins as pin_utils
 from rovr.functions import utils
@@ -29,6 +27,8 @@ from rovr.variables.constants import (
     config,
 )
 from rovr.widgets import Button, Input, OptionList, SelectionList
+
+from .file_list_right_click_menu import FileListRightClickMenu
 
 
 class FileList(
@@ -914,12 +914,12 @@ class FileList(
     ) -> None:
         # Show right click menu
         try:
-            rightclickoptionlist: FileListRightClickOptionList = self.app.query_one(
-                FileListRightClickOptionList
+            rightclickoptionlist: FileListRightClickMenu = self.app.query_one(
+                FileListRightClickMenu
             )
         except NoMatches:
             # it happens, but I really cannot be bothered to figure it out
-            rightclickoptionlist = FileListRightClickOptionList(classes="hidden")
+            rightclickoptionlist = FileListRightClickMenu(classes="hidden")
             await self.app.mount(rightclickoptionlist)
         rightclickoptionlist.remove_class("hidden")
         if event is None:
@@ -936,152 +936,3 @@ class FileList(
             )
         rightclickoptionlist.update_location(event)
         rightclickoptionlist.focus()
-
-
-class FileListRightClickOptionList(PopupOptionList):
-    def __init__(self, classes: str | None = None, id: str | None = None) -> None:
-        # Only show unzip option for archive files
-        super().__init__(
-            id=id,
-            classes=classes,
-        )
-
-    @on(events.Show)
-    def on_show(self) -> None:
-        no_items: bool = (
-            self.app.file_list.highlighted_option
-            and self.app.file_list.highlighted_option.disabled
-        )
-        cannot_write: bool = self.app.file_list.options[0].id == "perm"
-        no_clip: bool = len(self.app.Clipboard.selected) == 0
-
-        options = []
-        longest_prompt = 0
-        for i, option in enumerate(config["settings"]["right_click"]):
-            if "options" in option:
-                options.append(
-                    Option(
-                        f" {option['icon']} {option['group'].capitalize()} ",
-                        id=f"group{i}",
-                        disabled=no_items,
-                    )
-                )
-            else:
-                match option["action"]:
-                    case "rovr:copy":
-                        options.append(
-                            Option(
-                                f" {option['icon']} Copy ", "copy", disabled=no_items
-                            )
-                        )
-                    case "rovr:cut":
-                        options.append(
-                            Option(f" {option['icon']} Cut ", "cut", disabled=no_items)
-                        )
-                    case "rovr:paste":
-                        options.append(
-                            Option(
-                                f" {option['icon']} Paste ", "paste", disabled=no_clip
-                            )
-                        )
-                    case "rovr:new":
-                        options.append(
-                            Option(
-                                f" {option['icon']} New Item ",
-                                "new",
-                                disabled=cannot_write,
-                            )
-                        )
-                    case "rovr:rename":
-                        options.append(
-                            Option(
-                                f" {option['icon']} Rename ",
-                                "rename",
-                                disabled=no_items,
-                            )
-                        )
-                    case "rovr:delete":
-                        options.append(
-                            Option(
-                                f" {option['icon']} Delete ",
-                                "delete",
-                                disabled=no_items,
-                            )
-                        )
-                    case "rovr:zip":
-                        options.append(
-                            Option(f" {option['icon']} Zip ", "zip", disabled=no_items)
-                        )
-                    case "rovr:unzip":
-                        options.append(
-                            Option(
-                                f" {option['icon']} Unzip ", "unzip", disabled=no_items
-                            )
-                        )
-                    case "system:copy_highlighted":
-                        options.append(
-                            Option(
-                                f" {option['icon']} Copy Highlighted File Path ",
-                                "copy_highlighted",
-                                disabled=no_items,
-                            )
-                        )
-                    case "system:copy_current_directory":
-                        options.append(
-                            Option(
-                                f" {option['icon']} Copy Current Directory Path ",
-                                "copy_current_directory",
-                                disabled=no_items,
-                            )
-                        )
-                    case "system:copy_to_system_clip":
-                        options.append(
-                            Option(
-                                f" {option['icon']} Copy to System Clipboard ",
-                                "copy_to_system_clip",
-                                disabled=no_items,
-                            )
-                        )
-            longest_prompt = max(longest_prompt, len(options[-1].prompt))
-        for option in options:
-            if option.id.startswith("group"):
-                if len(option.prompt) < longest_prompt - 2:
-                    option._set_prompt(f"{option.prompt:<{longest_prompt - 2}} ")
-                else:
-                    option._set_prompt(f"{option.prompt} ")
-        self.set_options(options)
-        self.call_next(self.refresh)
-
-    async def on_option_list_option_highlighted(
-        self, event: OptionList.OptionHighlighted
-    ) -> None:
-        # Get the highlighted option
-        if not event.option.id.startswith("group"):
-            ...
-
-    async def on_option_list_option_selected(
-        self, event: OptionList.OptionSelected
-    ) -> None:
-        # Handle menu item selection
-        if event.option.id.startswith("group"):
-            # need to handle the submenu options here soon
-            return
-        elif event.option.id.startswith("copy_") and hasattr(
-            self.app.query_one("CopyButton"), f"{event.option.id}"
-        ):
-            func: Callable[[], Awaitable | None] = getattr(
-                self.app.query_one("CopyButton"), f"action_{event.option.id}"
-            )
-            if asyncio.iscoroutinefunction(func):
-                await func()
-            else:
-                func()
-        elif hasattr(self.app.file_list, f"action_{event.option.id}"):
-            func: Callable[[], Awaitable | None] = getattr(
-                self.app.file_list, f"action_{event.option.id}"
-            )
-            if asyncio.iscoroutinefunction(func):
-                await func()
-            else:
-                func()
-        self.go_hide()

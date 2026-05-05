@@ -110,15 +110,15 @@ keybinds related to the alternate screens and popups in rovr.
         file.write(page)
     invoker = []
     executor = ""
-    if executor := which("prettier"):
+    if executor := which("oxfmt"):
         invoker = [executor]
     elif executor := which("npx"):
-        invoker = [executor, "prettier"]
+        invoker = [executor, "oxfmt"]
     elif executor := which("npm"):
-        invoker = [executor, "exec", "prettier"]
+        invoker = [executor, "exec", "oxfmt"]
     else:
         pprint(
-            "[red][blue]prettier[/] and [blue]npx[/] are not available on PATH, and hence the generated files cannot be formatted."
+            "[red][blue]oxfmt[/] and [blue]npx[/] are not available on PATH, and hence the generated files cannot be formatted."
         )
         exit(1)
     # attempt to format it

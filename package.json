@@ -1,5 +1,5 @@
 {
   "dependencies": {
-    "prettier": "^3.8.1"
+    "oxfmt": "^0.47.0"
   }
 }

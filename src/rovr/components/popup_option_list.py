@@ -40,7 +40,6 @@ class PopupOptionList(OptionList):
         ):
             self.highlighted = hovered_option
 
-    @on(events.Blur)
     def on_blur(self, event: events.Blur) -> None:
         self.go_hide()
 

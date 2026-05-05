@@ -120,6 +120,12 @@ class FileListRightClickMenu(PopupOptionList):
             )
             child_menu.display = True
             child_menu.on_show()
+        else:
+            try:
+                child_menu = self.app.query_one(FileListRightClickChildMenu)
+                child_menu.go_hide()
+            except NoMatches:
+                pass
 
     async def on_option_list_option_selected(
         self, event: OptionList.OptionSelected
@@ -132,7 +138,7 @@ class FileListRightClickMenu(PopupOptionList):
             self.app.query_one("CopyButton"), f"{event.option.id}"
         ):
             func: Callable[[], Awaitable | None] = getattr(
-                self.app.query_one("CopyButton"), f"action_{event.option.id}"
+                self.app.query_one("CopyButton"), f"{event.option.id}"
             )
             if asyncio.iscoroutinefunction(func):
                 await func()
@@ -148,7 +154,6 @@ class FileListRightClickMenu(PopupOptionList):
                 func()
         self.app.hide_popups()
 
-    @on(events.Blur)
     def on_blur(self, event: events.Blur) -> None:
         event.prevent_default().stop()
         try:
@@ -186,3 +191,11 @@ class FileListRightClickChildMenu(PopupOptionList):
             if new_option := give_me_an_option(option, self.app):
                 options.append(new_option)
         self.set_options(options)
+
+    def on_option_list_option_selected(self, event: OptionList.OptionSelected) -> None:
+        option_list = self.app.query_one(FileListRightClickMenu)
+        self.call_next(
+            option_list.on_option_list_option_selected,
+            OptionList.OptionSelected(option_list, event.option, event.option_index),
+        )
+        self.remove()

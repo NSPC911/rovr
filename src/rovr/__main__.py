@@ -137,7 +137,7 @@ def _build_parser() -> argparse.ArgumentParser:
         "--force-tty",
         dest="force_tty",
         action="store_true",
-        help="Force rovr into the system tty (CONOUT$ or /dev/tty) even if stdout is not a tty. Slightly buggy on Windows.",
+        help="Force rovr into the system tty (CONOUT$ or /dev/tty) even if stdout is a tty.",
     )
     misc_group.add_argument(
         "--ignore-missing-tty",
@@ -398,6 +398,15 @@ example_function(10)"""
                 sys.__stdout__ = sys.stdout = tty_out
                 sys.__stderr__ = sys.stderr = tty_out
                 sys.__stdin__ = sys.stdin = tty_in
+
+                from rich.color import ColorSystem
+
+                from rovr import console
+
+                if console._detect_color_system() == ColorSystem.WINDOWS:
+                    from textual import constants
+
+                    constants.COLOR_SYSTEM = "truecolor"
                 Application(
                     startup_path=args.path,
                     cwd_file=cwd_file if cwd_file else None,

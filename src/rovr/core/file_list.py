@@ -919,9 +919,9 @@ class FileList(
             )
         except NoMatches:
             # it happens, but I really cannot be bothered to figure it out
-            rightclickoptionlist = FileListRightClickMenu(classes="hidden")
+            rightclickoptionlist = FileListRightClickMenu()
             await self.app.mount(rightclickoptionlist)
-        rightclickoptionlist.remove_class("hidden")
+        rightclickoptionlist.display = True
         if event is None:
             event = events.Click(
                 self,

@@ -66,7 +66,7 @@ class CopyButton(Button):
         elif isinstance(event, events.Click):
             popup_widget.styles.offset = (event.screen_x, event.screen_y)
         popup_widget.pre_show()
-        popup_widget.remove_class("hidden")
+        popup_widget.display = True
         popup_widget.focus()
 
     @work

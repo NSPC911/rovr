@@ -1,8 +1,10 @@
 import asyncio
-from typing import Awaitable, Callable
+from functools import partial
+from typing import Awaitable, Callable, ClassVar
 
 from textual import events, on, work
 from textual.app import App
+from textual.binding import BindingType
 from textual.css.query import NoMatches
 from textual.reactive import reactive
 from textual.widgets.option_list import Option
@@ -12,7 +14,9 @@ from rovr.classes.config import (
     _RovrConfigSettingsRightClickItemOptionsItem,
 )
 from rovr.components import PopupOptionList
+from rovr.functions.utils import is_archive
 from rovr.variables.constants import (
+    bindings,
     config,
 )
 from rovr.widgets import OptionList
@@ -28,44 +32,42 @@ def give_me_an_option(
     )
     cannot_write: bool = app.file_list.options[0].id == "perm"
     no_clip: bool = len(app.Clipboard.selected) == 0
+    PartialOption = partial(Option, f" {option['label'].strip()} ")
+
     match option["action"]:
         case "rovr:copy":
-            return Option(f" {option['icon']} Copy ", "copy", disabled=no_items)
+            return PartialOption("copy", disabled=no_items)
         case "rovr:cut":
-            return Option(f" {option['icon']} Cut ", "cut", disabled=no_items)
+            return PartialOption("cut", disabled=no_items)
         case "rovr:paste":
-            return Option(f" {option['icon']} Paste ", "paste", disabled=no_clip)
+            return PartialOption("paste", disabled=no_clip)
         case "rovr:new":
-            return Option(f" {option['icon']} New ", "new", disabled=cannot_write)
+            return PartialOption("new", disabled=cannot_write)
         case "rovr:rename":
-            return Option(f" {option['icon']} Rename ", "rename", disabled=no_items)
+            return PartialOption("rename", disabled=no_items)
         case "rovr:delete":
-            return Option(f" {option['icon']} Delete ", "delete", disabled=no_items)
+            return PartialOption("delete", disabled=no_items)
         case "rovr:zip":
-            return Option(f" {option['icon']} Zip ", "zip", disabled=no_items)
+            return PartialOption("zip", disabled=no_items)
         case "rovr:unzip":
-            return Option(f" {option['icon']} Unzip ", "unzip", disabled=no_items)
+            return PartialOption(
+                "unzip",
+                disabled=not (
+                    hasattr(app.file_list.highlighted_option, "dir_entry")
+                    and is_archive(app.file_list.highlighted_option.dir_entry.path)
+                ),
+            )
         case "system:copy_highlighted":
-            return Option(
-                f" {option['icon']} Copy Highlighted File Path ",
-                "copy_highlighted",
-                disabled=no_items,
-            )
+            return PartialOption("copy_highlighted", disabled=no_items)
         case "system:copy_current_directory":
-            return Option(
-                f" {option['icon']} Copy Current Directory Path ",
-                "copy_current_directory",
-                disabled=no_items,
-            )
+            return PartialOption("copy_current_directory", disabled=no_items)
         case "system:copy_to_system_clip":
-            return Option(
-                f" {option['icon']} Copy to OS Clipboard ",
-                "copy_to_system_clip",
-                disabled=no_items,
-            )
+            return PartialOption("copy_to_system_clip", disabled=no_items)
 
 
-class FileListRightClickMenu(PopupOptionList):
+class FileListRightClickMenu(PopupOptionList, inherit_bindings=False):
+    BINDINGS: ClassVar[list[BindingType]] = list(bindings)
+
     def __init__(self, classes: str | None = None, id: str | None = None) -> None:
         # Only show unzip option for archive files
         super().__init__(
@@ -82,7 +84,7 @@ class FileListRightClickMenu(PopupOptionList):
             if "options" in option:
                 options.append(
                     Option(
-                        f" {option['icon']} {option['group'].capitalize()} ",
+                        f" {option['label'].strip()} ",
                         id=f"group_{i}",
                     )
                 )
@@ -123,7 +125,7 @@ class FileListRightClickMenu(PopupOptionList):
         else:
             try:
                 child_menu = self.app.query_one(FileListRightClickChildMenu)
-                child_menu.go_hide()
+                child_menu.display = False
             except NoMatches:
                 pass
 
@@ -133,6 +135,9 @@ class FileListRightClickMenu(PopupOptionList):
         # Handle menu item selection
         if event.option.id.startswith("group"):
             # need to handle the submenu options here soon
+            child_menu = self.app.query_one(FileListRightClickChildMenu)
+            child_menu.target_option = event.option
+            child_menu.focus()
             return
         elif event.option.id.startswith("copy_") and hasattr(
             self.app.query_one("CopyButton"), f"{event.option.id}"
@@ -154,7 +159,7 @@ class FileListRightClickMenu(PopupOptionList):
                 func()
         self.app.hide_popups()
 
-    def on_blur(self, event: events.Blur) -> None:
+    def on_blur(self, event: events.Blur) -> None:  # ty: ignore[invalid-method-override]
         event.prevent_default().stop()
         try:
             if not self.app.query_one(FileListRightClickChildMenu):

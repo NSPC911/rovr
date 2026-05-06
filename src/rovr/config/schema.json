@@ -208,17 +208,13 @@
           "items": {
             "type": "object",
             "properties": {
-              "icon": {
+              "label": {
                 "type": "string",
-                "description": "Icon to display for the menu item"
+                "description": "Label to show in the context menu for this item"
               },
               "action": {
                 "type": "string",
                 "description": "Action to perform when the item is selected"
-              },
-              "group": {
-                "type": "string",
-                "description": "Name of the group if this item opens a submenu"
               },
               "options": {
                 "type": "array",
@@ -226,23 +222,23 @@
                 "items": {
                   "type": "object",
                   "properties": {
-                    "icon": {
+                    "label": {
                       "type": "string",
-                      "description": "Icon to display for the submenu item"
+                      "description": "Label to show in the context menu for this submenu item"
                     },
                     "action": {
                       "type": "string",
                       "description": "Action to perform when the submenu item is selected"
                     }
                   },
-                  "required": ["action"],
+                  "required": ["label", "action"],
                   "additionalProperties": false
                 }
               }
             },
             "oneOf": [
-              { "required": ["action"] },
-              { "required": ["group", "options"] }
+              { "required": ["label", "action"] },
+              { "required": ["label", "options"] }
             ],
             "additionalProperties": false
           }

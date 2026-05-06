@@ -1495,28 +1495,30 @@ class _RovrConfigSettingsRightClickItem(TypedDict, total=False):
     r"""
     oneOf:
       - required:
+        - label
         - action
       - required:
-        - group
+        - label
         - options
     """
 
-    icon: str
-    r""" Icon to display for the menu item """
+    label: str
+    r""" Label to show in the context menu for this item """
 
     action: str
     r""" Action to perform when the item is selected """
-
-    group: str
-    r""" Name of the group if this item opens a submenu """
 
     options: list["_RovrConfigSettingsRightClickItemOptionsItem"]
     r""" Submenu items (only supported at the top level) """
 
 
 class _RovrConfigSettingsRightClickItemOptionsItem(TypedDict, total=False):
-    icon: str
-    r""" Icon to display for the submenu item """
+    label: Required[str]
+    r"""
+    Label to show in the context menu for this submenu item
+
+    Required property
+    """
 
     action: Required[str]
     r"""

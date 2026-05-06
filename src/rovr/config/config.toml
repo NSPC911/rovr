@@ -55,19 +55,19 @@ panels = false
 copy_includes_metadata = true
 use_recycle_bin = true
 right_click = [
-  { icon = "\uf0c5", group = "copy", options = [
-    { icon = "\uf07f", action = "rovr:copy" },
-    { icon = "\U000f0147", action = "system:copy_highlighted" },
-    { icon = "\U000f14e5", action = "system:copy_current_directory" },
-    { icon = "\U000f1265", action = "system:copy_to_system_clip" }
+  { label = "\uf0c5 Copy", options = [
+    { label = "\uf07f Copy in rovr", action = "rovr:copy" },
+    { label = "\U000f0147 Copy highlighted file path", action = "system:copy_highlighted" },
+    { label = "\U000f14e5 Copy current directory path", action = "system:copy_current_directory" },
+    { label = "\U000f1265 Copy to OS clipboard", action = "system:copy_to_system_clip" }
   ] },
-  { icon = "\uf0c4", action = "rovr:cut" },
-  { icon = "\uf429", action = "rovr:paste" },
-  { icon = "\uea7f", action = "rovr:new" },
-  { icon = "\uf246", action = "rovr:rename" },
-  { icon = "\uf014", action = "rovr:delete" },
-  { icon = "\uf410", action = "rovr:zip" },
-  { icon = "\uf07c", action = "rovr:unzip" }
+  { label = "\uf0c4 Cut", action = "rovr:cut" },
+  { label = "\uf429 Paste", action = "rovr:paste" },
+  { label = "\uea7f New", action = "rovr:new" },
+  { label = "\uf246 Rename", action = "rovr:rename" },
+  { label = "\uf014 Delete", action = "rovr:delete" },
+  { label = "\uf410 Zip", action = "rovr:zip" },
+  { label = "\uf07c Unzip", action = "rovr:unzip" }
 ]
 
 [settings.preview_rules]

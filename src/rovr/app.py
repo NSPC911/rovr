@@ -949,7 +949,7 @@ class Application(App, inherit_bindings=False):
         # just in case
         with suppress(NoMatches):
             for popup in self.query(PopupOptionList):
-                popup.add_class("hidden")
+                popup.display = False
 
     @work(thread=True)
     def run_in_thread(self, function: Callable, *args, **kwargs) -> Worker | Exception:

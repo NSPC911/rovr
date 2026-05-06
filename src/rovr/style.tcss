@@ -91,7 +91,7 @@ ContentSearchToggles:focus,
 #pinned_sidebar.-maximized,
 #preview_sidebar .inner_preview.-maximized,
 #footer > *:focus,
-PopupOptionList,
+PopupOptionList:focus,
 .comfy-buttons #path_switcher:focus-within,
 .comfy-buttons #below_menu Button:focus,
 .comfy-buttons #below_menu Button:hover,
@@ -476,6 +476,13 @@ ProgressBarContainer {
   .bar--bar { color: $warning }
 }
 
+PopupOptionList:blur {
+  .option-list--option-highlighted {
+    color: $primary;
+    background: transparent !important;
+  }
+}
+
 Content.selected { color: red }
 CommandList,
 FileList, PinnedSidebar, Clipboard,
@@ -638,8 +645,7 @@ ContentSearch ContentSearchToggles {
 
 /* Shared OptionList highlight style */
 Keybinds #keybinds_data .option-list--option-highlighted,
-CommandPalette CommandList > .option-list--option-highlighted,
-PopupOptionList .option-list--option-highlighted {
+CommandPalette CommandList > .option-list--option-highlighted {
   background: $primary;
   color: $background;
 }

@@ -27,9 +27,6 @@ class PopupOptionList(OptionList):
         self.styles.layer = "overlay"
         self.go_hide()
 
-    def follow_mouse(self, event: events.Click) -> None:
-        self.styles.offset = (event.screen_x, event.screen_y)
-
     @on(events.MouseMove)
     def highlight_follow_mouse(self, event: events.MouseMove) -> None:
         hovered_option: int | None = event.style.meta.get("option")

@@ -935,4 +935,4 @@ class FileList(
                 False,
             )
         rightclickoptionlist.update_location(event)
-        rightclickoptionlist.focus()
+        self.call_later(rightclickoptionlist.focus)

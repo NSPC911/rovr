@@ -945,6 +945,7 @@ class Application(App, inherit_bindings=False):
         ):
             self.hide_popups()
 
+    @on(events.AppBlur)
     def hide_popups(self) -> None:
         # just in case
         with suppress(NoMatches):

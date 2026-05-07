@@ -170,11 +170,12 @@ class PinnedSidebar(OptionList, inherit_bindings=False):
                 return
             drives = drive_utils.get_mounted_drives(os_type)
         self.DRIVES = drives
+        new_options: list[PinnedSidebarOption] = []
         for drive in drives:
             if access(drive, R_OK):
                 new_id = f"{path_utils.compress(drive)}-drives"
                 if new_id not in id_list:
-                    self.list_of_options.append(
+                    new_options.append(
                         PinnedSidebarOption(
                             icon=icon_utils.get_icon("folder", ":/drive:"),
                             label=drive,
@@ -184,8 +185,9 @@ class PinnedSidebar(OptionList, inherit_bindings=False):
                     id_list.append(new_id)
         self.app.call_from_thread(
             self.add_options,
-            self.list_of_options[len(self.list_of_options) - len(drives) :],
+            new_options,
         )
+        self.list_of_options.extend(new_options)
         if prev_highlighted is not None and prev_highlighted < len(
             self.list_of_options
         ):

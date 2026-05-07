@@ -4,7 +4,7 @@
     "message": [
       "The [bright_cyan]interface.mime_rules[/] setting has been moved to [bright_blue]settings.preview_rules[/] to be more consistent with what it does."
     ],
-    "extra": "Moved in v0.8.2",
+    "extra": "Moved in v0.8.3 (sorry about that!)",
     "regex": [
       {
         "find": "interface.mime_rules",

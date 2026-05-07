@@ -193,6 +193,9 @@ sequence = [
 [tool.pytest]
 testpaths = ["tests"]
 asyncio_mode = "auto"
+filterwarnings = [
+  'ignore::DeprecationWarning'
+]
 
 [tool.ruff]
 force-exclude = true

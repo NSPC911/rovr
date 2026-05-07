@@ -30,6 +30,7 @@ import argparse
 import logging
 import os
 import sys
+import warnings
 from io import TextIOWrapper
 from typing import cast
 
@@ -42,6 +43,7 @@ from rovr.functions.cli import (
 )
 
 logging.getLogger("textual_image._terminal").setLevel(logging.FATAL)
+warnings.filterwarnings("ignore")
 
 textual_flags = set(os.environ.get("TEXTUAL", "").split(","))
 is_dev = {"debug", "devtools"}.issubset(textual_flags)

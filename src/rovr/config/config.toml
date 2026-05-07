@@ -69,6 +69,7 @@ use_recycle_bin = true
 "application/(iso9660-image|qemu-disk|ms-wim|apple-diskimage)" = "archive"
 "application/virtualbox-(vhd|vhdx)" = "archive"
 "application/(debian.*-package|redhat-package-manager|rpm|android\\.package-archive)" = "archive"
+"application/java-archive" = "archive"
 "inode/directory" = "folder"
 "font/.*" = "font"
 "application/ms-opentype" = "font"

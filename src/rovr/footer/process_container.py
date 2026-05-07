@@ -903,6 +903,7 @@ class ProcessContainer(VerticalScroll):
                 bar.update_icon,
                 icon_utils.get_icon("general", "copy")[0],
             )
+        # first create folders
         for folder_dict in copy_folders_to_create:
             progress_count += 1
             relative_loc = folder_dict["relative_loc"]
@@ -1002,7 +1003,10 @@ class ProcessContainer(VerticalScroll):
                                     "The destination already has file of that name.\nWhat do you want to do now?",
                                     border_title=item_dict["relative_loc"],
                                     border_subtitle=f"Copying to {dest}",
-                                    allow_overwrite=False,
+                                    allow_overwrite=path_utils.normalise(
+                                        destination_item
+                                    )
+                                    != path_utils.normalise(item_dict["path"]),
                                 ),
                             )
                             if response["same_for_next"]:

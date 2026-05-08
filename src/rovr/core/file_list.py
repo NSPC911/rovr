@@ -925,10 +925,20 @@ class FileList(
             await self.app.mount(rightclickoptionlist)
         rightclickoptionlist.display = True
         if event is None:
+            self.scroll_to_highlight()
+
+            x = (self.app.size.width - 12) // 2
+            y = (self.app.size.height - 8) // 2
+
+            if self.highlighted is not None:
+                line_offset = self._index_to_line[self.highlighted]
+                y = self.content_region.y + line_offset - int(self.scroll_target_y)
+                x = self.content_region.x + len(str(self.highlighted_option.prompt)) + 1
+
             event = events.Click(
                 self,
-                (self.app.size.width - 12) // 2,
-                (self.app.size.height - 8) // 2,
+                x,
+                y,
                 0,
                 0,
                 3,

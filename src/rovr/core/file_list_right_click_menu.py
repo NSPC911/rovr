@@ -74,6 +74,7 @@ class FileListRightClickMenu(PopupOptionList, inherit_bindings=False):
         super().__init__(
             id=id,
             classes=classes,
+            force_highlight_option_list=True,
         )
         self.longest_prompt = 0
 
@@ -111,6 +112,7 @@ class FileListRightClickMenu(PopupOptionList, inherit_bindings=False):
                     option._set_prompt(f"{option.prompt} ")
         self.set_options(options)
         self.call_next(self.refresh)
+        self.call_after_refresh(setattr, self, "highlighted", 0)
 
     @work
     async def on_option_list_option_highlighted(
@@ -127,10 +129,13 @@ class FileListRightClickMenu(PopupOptionList, inherit_bindings=False):
             try:
                 visible_region = self.screen.find_widget(self).visible_region
             except NoWidget:
-                await self.remove()
-                await self.app.mount(FileListRightClickMenu())
                 return
 
+            # I swear Textual is on something (it is not _on to_ something)
+            # for some reason, top_right is considered as bottom right, so i
+            # need to manually parse and get the true top right to set the offset
+            # but the funny part is that if i initially mount it in app, i
+            # dont need to do this. so like idk man, whatever works
             child_menu.offset = visible_region.top_right - (
                 0,
                 self.size.height
@@ -140,13 +145,13 @@ class FileListRightClickMenu(PopupOptionList, inherit_bindings=False):
             child_menu.display = True
             child_menu.on_show()
             self.focus()
+            self.display = True
         else:
             try:
                 child_menu = self.app.query_one(FileListRightClickChildMenu)
                 child_menu.display = False
             except NoMatches:
                 pass
-        self.refresh()
 
     async def on_option_list_option_selected(
         self, event: OptionList.OptionSelected

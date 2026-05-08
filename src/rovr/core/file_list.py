@@ -579,6 +579,8 @@ class FileList(
             self.action_select_end()
         elif check_key(event, config["keybinds"]["open_editor"]):
             self.action_open_editor()
+        elif check_key(event, config["keybinds"]["open_right_click_menu"]):
+            await self.action_open_right_click_menu()
 
     def update_border_subtitle(self) -> None:
         if self.dummy or type(self.highlighted) is not int or not self.parent:

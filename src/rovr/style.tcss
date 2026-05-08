@@ -476,13 +476,6 @@ ProgressBarContainer {
   .bar--bar { color: $warning }
 }
 
-PopupOptionList:blur {
-  .option-list--option-highlighted {
-    color: $primary;
-    background: transparent !important;
-  }
-}
-
 Content.selected { color: red }
 CommandList,
 FileList, PinnedSidebar, Clipboard,
@@ -1139,7 +1132,8 @@ FileList .option-list--option-highlighted,
 Clipboard .option-list--option-highlighted,
 DeleteFiles OptionList .option-list--option-highlighted,
 PasteScreen OptionList .option-list--option-highlighted,
-ArchiveCreationScreen OptionList .option-list--option-highlighted {
+ArchiveCreationScreen OptionList .option-list--option-highlighted,
+PopupOptionList .option-list--option-highlighted {
   color: $block-cursor-background;
   background: transparent;
   text-style: bold;

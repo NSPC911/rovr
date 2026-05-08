@@ -234,6 +234,7 @@ command_palette = "ctrl+p"
 suspend_process = ["ctrl+z"]
 open_editor = ["e"]
 show_shell_screen = [">"]
+open_right_click_menu = ["shift+f10"]
 # unavailable for now
 preview_select_left = []
 preview_select_right = []

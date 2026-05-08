@@ -741,6 +741,11 @@
           "description": "Extract a selected zip archive.",
           "display_name": "Unzip"
         },
+        "open_right_click_menu": {
+          "$ref": "#/definitions/keybind",
+          "description": "Open the right-click context menu.",
+          "display_name": "Context menu"
+        },
         "extra_copy": {
           "type": "object",
           "description": "Keybinds related to extra copy options",

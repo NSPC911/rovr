@@ -158,7 +158,6 @@ class FileListRightClickMenu(PopupOptionList, inherit_bindings=False):
             child_menu.focus()
             if child_menu.highlighted is None:
                 child_menu.highlighted = 0
-            self.call_after_refresh(self.refresh)
             return
         elif event.option.id.startswith("copy_") and hasattr(
             self.app.query_one("CopyButton"), f"{event.option.id}"

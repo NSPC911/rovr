@@ -850,6 +850,7 @@ class _RovrConfigKeybinds(TypedDict, total=False):
     toggle_all: list[str]
     zip: list[str]
     unzip: list[str]
+    open_right_click_menu: list[str]
     extra_copy: "_RovrConfigKeybindsExtraCopy"
     r""" Keybinds related to extra copy options """
 

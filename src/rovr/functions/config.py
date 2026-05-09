@@ -211,6 +211,11 @@ def toml_dump(doc_path: str, exception: tomli.TOMLDecodeError) -> None:
     end: int = min(len(doc), exception.lineno + 2)
     rjust: int = len(str(end + 1))
     has_past = False
+    highlighted = (
+        Syntax("", "toml", background_color="default", theme="ansi_dark")
+        .highlight(exception.doc)
+        .split("\n")
+    )
     pprint(
         rjust * " "
         + f"  [bright_blue]-->[/] [white]{path.realpath(doc_path)}:{exception.lineno}:{exception.colno}[/]"
@@ -229,14 +234,7 @@ def toml_dump(doc_path: str, exception: tomli.TOMLDecodeError) -> None:
                 f"[bright_red]{startswith}[/][bright_blue]{str(line + 1).rjust(rjust)} │[/]",
                 end=" ",
             )
-        pprint(
-            Syntax(
-                doc[line],
-                "toml",
-                background_color="default",
-                theme="ansi_dark",
-            )
-        )
+        pprint(highlighted[line])
     # check if it is an interesting error message
     if exception.msg.startswith("What? "):
         # What? <key> already exists?<dict>
@@ -267,8 +265,7 @@ def find_path_line(lines: list[str], path: list) -> int | None:
         return 0
 
     current_section = []
-
-    best_match_line: int = -1
+    temp_best_match = best_match_line = (-1, 0)
     for i, line in enumerate(lines):
         stripped = line.strip()
         if not stripped or stripped.startswith("#"):
@@ -285,18 +282,30 @@ def find_path_line(lines: list[str], path: list) -> int | None:
                 current_section = section_name.split(".")
 
             if current_section == path_filtered:
-                best_match_line = i
+                temp_best_match = (i, len(current_section))
+                if temp_best_match[1] > best_match_line[1]:
+                    best_match_line = temp_best_match
+
             for depth in range(1, len(current_section) + 1):
                 if current_section[:depth] == path_filtered[:depth]:
-                    best_match_line = i
+                    temp_best_match = (i, depth)
+            if temp_best_match[1] > best_match_line[1]:
+                best_match_line = temp_best_match
         elif "=" in stripped:
             key = stripped.split("=")[0].strip().strip('"').strip("'")
             full_path = current_section + [key]
             if full_path == path_filtered:
                 # exact match
-                best_match_line = i
+                best_match_line = (i, len(full_path))
                 break
-    return best_match_line if best_match_line != -1 else None
+            elif full_path == path_filtered[: len(full_path)]:
+                # partial match, keep searching for better match
+                best_match_line = (
+                    (i, len(full_path))
+                    if len(full_path) > best_match_line[1]
+                    else best_match_line
+                )
+    return best_match_line[0] if best_match_line[0] != -1 else None
 
 
 def schema_dump(
@@ -393,6 +402,11 @@ def schema_dump(
         end: int = min(len(doc), lineno + 3)
         rjust = len(str(end + 1))
         has_past = False
+        highlighted = (
+            Syntax("", "toml", background_color="default", theme="ansi_dark")
+            .highlight(config_content)
+            .split("\n")
+        )
 
         pprint(
             rjust * " "
@@ -412,14 +426,7 @@ def schema_dump(
                     f"[bright_red]{startswith}[/][bright_blue]{str(line + 1).rjust(rjust)} │[/]",
                     end=" ",
                 )
-            pprint(
-                Syntax(
-                    doc[line],
-                    "toml",
-                    background_color="default",
-                    theme="ansi_dark",
-                )
-            )
+            pprint(highlighted[line])
 
         # Format the error message based on validator type
         error_msg, _ = get_message(exception)

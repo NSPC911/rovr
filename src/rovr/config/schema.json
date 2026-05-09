@@ -388,6 +388,7 @@
           "type": "array",
           "items": {
             "type": "object",
+            "additionalProperties": false,
             "properties": {
               "pattern": {
                 "type": "string",
@@ -411,8 +412,9 @@
           "type": "array",
           "items": {
             "type": "object",
+            "additionalProperties": false,
             "properties": {
-              "pattern": {
+                  "pattern": {
                 "type": "string",
                 "description": "The glob pattern to match against the folder name (e.g., 'src', '.*').\nBoth the folder name and glob will be forced to lowercase!"
               },

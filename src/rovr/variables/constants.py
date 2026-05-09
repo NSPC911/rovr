@@ -1,19 +1,25 @@
 import platform
 from dataclasses import dataclass
+from datetime import datetime
 from os import environ
 from shutil import which
-from typing import Literal
+from typing import Literal, cast
 
 from textual.binding import Binding, BindingType
 
-from rovr.functions.config import config_setup, load_config
+from rovr.classes.config import RovrConfig
+from rovr.functions.config import load_config
 from rovr.functions.utils import classproperty
 
 # Initialize the config once at import time
 if "config" not in globals():
     global config, schema
     schema, config = load_config()
-    config_setup()
+else:
+    config = globals()["config"]
+    config = cast(RovrConfig, config)
+    schema = globals()["schema"]
+
 
 if "file_executable" not in globals():
     global file_executable
@@ -34,6 +40,14 @@ if "file_executable" not in globals():
         file_executable = found
     else:
         file_executable = None
+else:
+    file_executable = globals()["file_executable"]
+
+if "log_name" not in globals():
+    global log_name
+    log_name = str(datetime.now()).replace(" ", "_").replace(":", "")
+else:
+    log_name = globals()["log_name"]
 
 
 @dataclass
@@ -44,6 +58,8 @@ class PreviewContainerTitles:
     folder = "Folder Preview"
     archive = "Archive Preview"
     pdf = "PDF Preview"
+    svg = "SVG Preview"
+    font = "Font Preview"
 
 
 buttons_that_depend_on_path = [
@@ -52,7 +68,6 @@ buttons_that_depend_on_path = [
     "#rename",
     "#delete",
     "#zip",
-    "#copy_path",
 ]
 
 ascii_logo = r"""
@@ -72,7 +87,7 @@ class MaxPossible:
         return 26 if config["interface"]["use_reactive_layout"] else 70
 
 
-scroll_vindings: list[BindingType] = (
+scroll_bindings: list[BindingType] = (
     [
         Binding(bind, "scroll_down", "Scroll Down", show=False)
         for bind in config["keybinds"]["down"]
@@ -101,7 +116,7 @@ scroll_vindings: list[BindingType] = (
     ]
 )
 
-vindings: list[BindingType] = (
+bindings: list[BindingType] = (
     [
         Binding(bind, "cursor_down", "Down", show=False)
         for bind in config["keybinds"]["down"]
@@ -129,4 +144,4 @@ vindings: list[BindingType] = (
     ]
 )
 
-os_type: str = platform.system()
+os_type = platform.system()

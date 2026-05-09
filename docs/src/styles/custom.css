@@ -22,9 +22,6 @@
   }
 }
 
-code {
-  background-color: transparent;
-}
 /* Dark mode colors. */
 :root {
   --sl-color-accent: #8fbcbb;
@@ -54,6 +51,7 @@ code {
   --sl-color-text-invert: var(--sl-color-black);
   --sl-color-bg-sidebar: hsl(from var(--sl-color-gray-5) h s l / 50%);
   --sl-color-bg-nav: hsl(from var(--sl-color-gray-5) h s l / 50%);
+  --table-border-color: color-mix(in oklab, var(--sl-color-accent) 75%, var(--sl-color-black));
 }
 /* Light mode colors. */
 :root[data-theme="light"] {
@@ -82,6 +80,7 @@ code {
   --sl-color-text-invert: var(--sl-color-black);
   --sl-color-bg-sidebar: hsl(from var(--sl-color-gray-6) h s l / 50%);
   --sl-color-bg-nav: hsl(from var(--sl-color-gray-6) h s l / 50%);
+  --table-border-color: color-mix(in oklab, var(--sl-color-accent) 75%, var(--sl-color-white));
 }
 html {
   background: var(--sl-color-white);
@@ -119,6 +118,33 @@ html * {
       var(--sl-transition-duration) border-inline-start ease-in-out,
       var(--sl-transition-duration) scrollbar-color ease-in-out;
   }
+}
+html svg,
+html svg * {
+  text-transform: initial !important;
+}
+th {
+  top: 0;
+  position: sticky;
+}
+th {
+  border: 2px solid var(--table-border-color);
+  padding: 10px;
+  text-align: center;
+}
+td {
+  border: 0.5px solid var(--table-border-color);
+  padding: 10px;
+  text-align: center;
+}
+table {
+  border: 2px solid var(--table-border-color);
+  overscroll-behavior-x: contain;
+  width: fit-content;
+  border-radius: 5px;
+}
+svg.rich-terminal * {
+  font-family: "CaskaydiaCoveNFM" !important;
 }
 code {
   text-transform: none;
@@ -192,6 +218,9 @@ img {
   border: 2.5px solid var(--sl-color-accent);
   border-radius: 5px;
 }
+.sidebar-content {
+  padding: 1rem 1rem 0 0.5rem
+}
 @media (min-width: 72rem) {
   .main-pane {
     margin: auto;
@@ -215,6 +244,9 @@ img {
   }
   .content-panel {
     max-width: calc(100vw - 525px);
+  }
+  table {
+    max-width: calc(80vw - 300px) !important;
   }
 }
 @media (min-width: 50rem) {
@@ -246,6 +278,11 @@ img {
   body > div:has(> nav) > div .main-frame {
     max-width: calc(
       100vw - clamp(220px, var(--sl-content-inline-start), 300px)
+    );
+  }
+  table {
+    max-width: calc(
+      100vw - clamp(260px, var(--sl-content-inline-start), 300px)
     );
   }
   [data-theme="light"] .sidebar-pane,
@@ -527,6 +564,17 @@ starlight-file-tree {
 }
 starlight-file-tree ul:has(> li.file) {
   border-inline-start: 2px solid var(--sl-color-gray-4);
+}
+starlight-lang-select label {
+  &::before {
+    content: "";
+    display: block;
+    position: absolute;
+    left: -0.1ch;
+  }
+  svg.icon:first-of-type > path {
+    display: none
+  }
 }
 
 .hero {

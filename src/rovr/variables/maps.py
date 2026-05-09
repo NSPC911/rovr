@@ -1,5 +1,5 @@
 from os import path
-from typing import NamedTuple, TypedDict
+from typing import TypedDict
 
 from platformdirs import PlatformDirs
 from rich._spinners import SPINNERS
@@ -28,6 +28,7 @@ VAR_TO_DIR: PlatformDirsVars = {
     "VIDEOS": dirs.user_videos_dir.replace("\\", "/"),
     "CONFIG": dirs.user_config_dir.replace("\\", "/"),
 }
+SORTED_VARS = sorted(VAR_TO_DIR.items(), key=lambda x: len(x[1]), reverse=True)
 
 ASCII_ICONS = {
     "general": {
@@ -348,7 +349,6 @@ ICONS = {
         "toml": ["\ue60b", "#9C4221"],
         "ts": ["\ue628", "#3178C6"],
         "tsx": ["\ue7ba", "#61DAFB"],
-        "ttf": ["\uf031", "#3498DB"],
         "twig": ["\ue61c", "#8BC34A"],
         "txt": ["\uf15c", "#7F8C8D"],
         "typst": ["\uf37f", "#5BC0AF"],
@@ -361,8 +361,6 @@ ICONS = {
         "wav": ["\uf001", "#FF5252"],
         "webp": ["\uf1c5", "#E74C3C"],
         "windows": ["\uf17a", "#0078D6"],
-        "woff": ["\uf031", "#3498DB"],
-        "woff2": ["\uf031", "#3498DB"],
         "xml": ["\uf121", "#0085C3"],
         "xsl": ["\uf121", "#5A96C6"],
         "yaml": ["\ue60b", "#F71A10"],
@@ -527,6 +525,7 @@ FILE_MAP = {
     ".log": "log",
     ".markdown": "markdown",
     ".md": "markdown",
+    ".mdx": "markdown",
     ".rdoc": "markdown",
     ".rst": "rst",
     ".text": "text",
@@ -705,6 +704,7 @@ FILE_MAP = {
     ".nimble": "nim",
     ".nix": "nix",
     ".nu": "shell",
+    ".otf": "font",
     ".php": "php",
     ".phar": "php",
     ".pl": "pl",
@@ -743,14 +743,14 @@ FILE_MAP = {
     ".tex": "tex",
     ".ts": "ts",
     ".tsx": "tsx",
-    ".ttf": "ttf",
+    ".ttf": "font",
     ".twig": "twig",
     ".typ": "typst",
     ".typst": "typst",
     ".vim": "vim",
     ".vue": "vue",
-    ".woff": "woff",
-    ".woff2": "woff2",
+    ".woff": "font",
+    ".woff2": "font",
     ".zig": "zig",
     ".zon": "toml",
     ".zsh": "shell",
@@ -840,6 +840,7 @@ FILE_MAP = {
 EXT_TO_LANG_MAP = {
     ".py": "python",
     ".md": "markdown",
+    ".mdx": "markdown",
     ".json": "json",
     ".toml": "toml",
     ".yaml": "yaml",
@@ -1038,19 +1039,6 @@ FILES_MAP = {
 }
 
 
-class ArchiveExtensions(NamedTuple):
-    zip: tuple[str, ...]
-    tar: tuple[str, ...]
-    rar: tuple[str, ...]
-
-
-ARCHIVE_EXTENSIONS = ArchiveExtensions(
-    (".zip",),
-    (".tar", ".tgz", ".tbz", ".tbz2", ".tar.gz", ".tar.bz2", ".tar.xz"),
-    (".rar",),
-)
-ARCHIVE_EXTENSIONS_FULL = tuple(ext for exts in ARCHIVE_EXTENSIONS for ext in exts)
-
 PIL_EXTENSIONS = (
     # reminder that stuff can also not work, just remove it if it doesn't work
     ".avif",
@@ -1142,3 +1130,15 @@ BORDER_BOTTOM = {
 SPINNER = SPINNERS["dots2"]["frames"]
 assert isinstance(SPINNER, (str, list))
 SPINNER_LENGTH = len(SPINNER)
+
+FD_TYPE_TO_ALIAS = {
+    "file": "f",
+    "directory": "d",
+    "symlink": "l",
+    "executable": "x",
+    "empty": "e",
+    "socket": "s",
+    "pipe": "p",
+    "char-device": "c",
+    "block-device": "b",
+}

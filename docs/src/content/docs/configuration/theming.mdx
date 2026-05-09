@@ -28,21 +28,21 @@ variables  = { "<var>" = "<key>" }
 
 you can take a look at the reference in [textual](https://textual.textualize.io/guide/design), or the table below
 
-| name       | description                                                                                                              |
-| ---------- | ------------------------------------------------------------------------------------------------------------------------ |
-| name       | the name of the theme                                                                                                    |
-| primary    | the primary color, can be considered the branding color.                                                                 |
-| secondary  | an alternative branding color.                                                                                           |
-| warning    | the default text color, which should be legible on `background`, `surface`, and `panel`.                                 |
-| error      | a color used for the background, where there is no content.                                                              |
-| success    | the default background color of widgets, typically sitting on top of `background`.                                       |
-| accent     | a color used to differentiate a part of the ui form the main content.                                                    |
-| foreground | a color with alpha that can be used to create layers on a background.                                                    |
-| background | indicates a warning. typically used as a background color.                                                               |
-| surface    | indicates an error. typically used as a background color.                                                                |
-| panel      | used to indicate success. typically used as a background color.                                                          |
-| is_dark    | used sparingly to draw attention and contrasts with `primary` and `secondary`                                            |
-| variables  | custom variables that are used by textual. [variables](https://textual.textualize.io/guide/design/#additional-variables) |
+| Variables  | Description                                                                                                                                   |
+| ---------- | --------------------------------------------------------------------------------------------------------------------------------------------- |
+| primary    | The primary color, can be considered the *branding* color. Typically used for titles, and backgrounds for strong emphasis.                    |
+| secondary  | An alternative branding color, used for similar purposes as `primary`, where an app needs to differentiate something from the primary color.  |
+| foreground | The default text color, which should be legible on `background`, `surface`, and `panel`.                                                      |
+| background | A color used for the background, where there is no content. Used as the default background color for screens.                                 |
+| surface    | The default background color of widgets, typically sitting on top of `background`.                                                            |
+| panel      | A color used to differentiate a part of the UI from the main content. Used sparingly in Textual itself.                                       |
+| boost      | A color with alpha that can be used to create *layers* on a background.                                                                       |
+| warning    | Indicates a warning. Typically used as a background color. `text-warning` can be used for foreground.                                         |
+| error      | Indicates an error. Typically used as a background color. `text-error` can be used for foreground.                                            |
+| success    | Used to indicate success. Typically used as a background color. `text-success` can be used for foreground.                                    |
+| accent     | Used sparingly to draw attention. Typically contrasts with `primary` and `secondary`.                                                         |
+| is_dark    | A boolean indicating whether the theme is dark or light.                                                                                      |
+| variables  | custom variables that are used by textual. [variables](https://textual.textualize.io/guide/design/#additional-variables)                      |
 
 ### style.tcss
 

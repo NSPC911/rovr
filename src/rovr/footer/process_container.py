@@ -1,11 +1,10 @@
 import os
 import shutil
-import tarfile
+import sys
 import time
 import zipfile
-from contextlib import suppress
 from os import path
-from typing import Callable
+from typing import Callable, Literal, cast
 
 from send2trash import send2trash
 from textual import events, work
@@ -14,19 +13,24 @@ from textual.containers import HorizontalGroup, VerticalGroup, VerticalScroll
 from textual.renderables.bar import Bar as BarRenderable
 from textual.types import UnusedParameter
 from textual.widgets import Label, ProgressBar
-from textual.widgets.option_list import OptionDoesNotExist
 
-from rovr.classes import Archive
+from rovr.classes.archive import Archive
 from rovr.functions import icons as icon_utils
 from rovr.functions import path as path_utils
 from rovr.functions.utils import is_being_used
 from rovr.screens import (
     CommonFileNameDoWhat,
-    Dismissable,
+    Dismissible,
     FileInUse,
     YesOrNo,
+    typed,
 )
-from rovr.variables.constants import config, os_type, scroll_vindings
+from rovr.variables.constants import config, os_type, scroll_bindings
+
+if sys.version_info.major == 3 and sys.version_info.minor <= 13:
+    from backports.zstd import tarfile
+else:
+    import tarfile
 
 
 class ThickBar(BarRenderable):
@@ -36,7 +40,7 @@ class ThickBar(BarRenderable):
 
 
 class ProgressBarContainer(VerticalGroup, inherit_bindings=False):
-    BINDINGS = scroll_vindings
+    BINDINGS = scroll_bindings
 
     def __init__(
         self,
@@ -63,6 +67,7 @@ class ProgressBarContainer(VerticalGroup, inherit_bindings=False):
         self.text_label = Label(label, id="label")
         self.label_container = HorizontalGroup(self.icon_label, self.text_label)
 
+    @work
     async def on_mount(self) -> None:
         await self.mount_all([self.label_container, self.progress_bar])
 
@@ -75,6 +80,9 @@ class ProgressBarContainer(VerticalGroup, inherit_bindings=False):
         """
         if is_path and config["interface"]["truncate_progress_file_path"]:
             new_label = label.split("/")
+            if len(new_label) == 1:
+                self.text_label.update(label)
+                return
             new_path = new_label[0]
             for _ in new_label[1:-1]:
                 new_path += "/\u2026"
@@ -106,7 +114,7 @@ class ProgressBarContainer(VerticalGroup, inherit_bindings=False):
     ) -> None:
         """Do something when an error occurs.
         Args:
-            dismiss_with(dict): The message for the Dismissable screen (must contain `message` and `subtitle`)
+            dismiss_with(dict): The message for the Dismissible screen (must contain `message` and `subtitle`)
             notify(dict): The notify message (must contain `message` and `title`)
             bar_text(str): The new text to update the label
         """
@@ -129,7 +137,7 @@ class ProgressBarContainer(VerticalGroup, inherit_bindings=False):
         if dismiss_with:
             self.app.call_from_thread(
                 self.app.push_screen_wait,
-                Dismissable(
+                Dismissible(
                     dismiss_with["message"], border_subtitle=dismiss_with["subtitle"]
                 ),
             )
@@ -137,6 +145,7 @@ class ProgressBarContainer(VerticalGroup, inherit_bindings=False):
             self.notify(
                 message=notify["message"], severity="error", title=notify["title"]
             )
+        self.app.query_one("Clipboard").checker_wrapper()
 
 
 class ProcessContainer(VerticalScroll):
@@ -154,16 +163,22 @@ class ProcessContainer(VerticalScroll):
         await self.mount(new_bar, before=0)
         return new_bar
 
+    def threaded_new_process_bar(
+        self, max: int | None = None, id: str | None = None, classes: str | None = None
+    ) -> ProgressBarContainer:
+        bar = self.app.call_from_thread(
+            self.new_process_bar, max=max, id=id, classes=classes
+        )
+        assert isinstance(bar, ProgressBarContainer)
+        return bar
+
     @work(thread=True)
-    def delete_files(
-        self, files: list[str], compressed: bool = True, ignore_trash: bool = False
-    ) -> None:
+    def delete_files(self, files: list[str], ignore_trash: bool = False) -> None:
         """
         Remove files from the filesystem.
 
         Args:
             files (list[str]): List of file paths to remove.
-            compressed (bool): Whether the file paths are compressed. Defaults to True.
             ignore_trash (bool): If True, files will be permanently deleted instead of sent to the recycle bin. Defaults to False.
 
         Raises:
@@ -171,9 +186,7 @@ class ProcessContainer(VerticalScroll):
             PermissionError: re-raises if the file usage handler fails
         """
         # Create progress/process bar (why have I set names as such...)
-        bar: ProgressBarContainer = self.app.call_from_thread(
-            self.new_process_bar, classes="active"
-        )
+        bar = self.threaded_new_process_bar(classes="active")
         self.app.call_from_thread(
             bar.update_icon,
             icon_utils.get_icon("general", "delete")[0],
@@ -186,8 +199,6 @@ class ProcessContainer(VerticalScroll):
         files_to_delete = []
         folders_to_delete = []
         for file in files:
-            if compressed:
-                file = path_utils.decompress(file)
             if path_utils.file_is_type(file) == "directory":
                 folders_to_delete.append(file)
             files_to_add, folders_to_add = path_utils.get_recursive_files(
@@ -222,11 +233,11 @@ class ProcessContainer(VerticalScroll):
                                 # An inherent issue with long paths on windows
                                 path_to_trash = path_to_trash.replace("/", "\\")
                             send2trash(path_to_trash)
-                        except (PermissionError, OSError) as e:
+                        except (PermissionError, OSError) as exc:
                             # On Windows, a file being used by another process
                             # raises a PermissionError/OSError with winerror 32.
                             if (
-                                is_file_in_use := is_being_used(e)
+                                is_file_in_use := is_being_used(exc)
                             ) and os_type == "Windows":
                                 current_action, action_on_file_in_use = (
                                     self._handle_file_in_use_error(
@@ -250,15 +261,18 @@ class ProcessContainer(VerticalScroll):
                                 item_dict["path"]
                             ):
                                 os.remove(item_dict["path"])
-                        except Exception as e:
+                        except Exception as exc:
+                            path_utils.dump_exc(self, exc)
                             do_what = self.app.call_from_thread(
                                 self.app.push_screen_wait,
                                 YesOrNo(
-                                    f"Trashing failed due to\n{e}\nDo Permenant Deletion?",
+                                    f"Trashing failed due to\n{exc}\nDo Permanent Deletion?",
                                     with_toggle=True,
                                     border_subtitle="If this is a bug, please file an issue!",
+                                    destructive=True,
                                 ),
                             )
+                            do_what = cast(typed.YesOrNo, do_what)
                             if do_what["toggle"]:
                                 ignore_trash = do_what["value"]
                             if do_what["value"]:
@@ -270,9 +284,9 @@ class ProcessContainer(VerticalScroll):
                 except FileNotFoundError:
                     # it's deleted, so why care?
                     pass
-                except (PermissionError, OSError) as e:
+                except (PermissionError, OSError) as exc:
                     # Try to detect if file is in use on Windows
-                    if (is_file_in_use := is_being_used(e)) and os_type == "Windows":
+                    if (is_file_in_use := is_being_used(exc)) and os_type == "Windows":
                         current_action, action_on_file_in_use = (
                             self._handle_file_in_use_error(
                                 action_on_file_in_use,
@@ -293,11 +307,12 @@ class ProcessContainer(VerticalScroll):
                     # fallback for regular permission issues
                     if path_utils.force_obtain_write_permission(item_dict["path"]):
                         os.remove(item_dict["path"])
-                except Exception as e:
+                except Exception as exc:
                     # TODO: should probably let it continue, then have a summary
+                    path_utils.dump_exc(self, exc)
                     bar.panic(
                         dismiss_with={
-                            "message": f"Deleting failed due to\n{e}\nProcess Aborted.",
+                            "message": f"Deleting failed due to\n{exc}\nProcess Aborted.",
                             "subtitle": "If this is a bug, please file an issue!",
                         },
                         bar_text="Unhandled Error",
@@ -325,25 +340,28 @@ class ProcessContainer(VerticalScroll):
                 },
             )
             return
-        # if there werent any files, show something useful
+        # if there weren't any files, show something useful
         # aside from 'Getting files to delete...'
         if files_to_delete == [] and folders_to_delete != []:
             self.app.call_from_thread(
                 bar.update_text,
-                folders_to_delete[-1],
+                files[-1],
             )
         elif files_to_delete == folders_to_delete == []:
-            # this cannot happen, but just as an easter egg :shippit:
+            # this cannot happen, but just as an easter egg
             self.app.call_from_thread(
                 bar.update_text, "Successfully deleted nothing!", False
             )
         # finished successfully
         self.app.call_from_thread(
             bar.update_icon,
-            bar.icon_label.content + " " + icon_utils.get_icon("general", "check")[0],
+            str(bar.icon_label.content)
+            + " "
+            + icon_utils.get_icon("general", "check")[0],
         )
         self.app.call_from_thread(bar.progress_bar.advance)
         self.app.call_from_thread(bar.add_class, "done")
+        self.app.query_one("Clipboard").checker_wrapper()
 
     def _handle_file_in_use_error(
         self,
@@ -392,6 +410,7 @@ class ProcessContainer(VerticalScroll):
                     f"The file appears to be open in another application and cannot be operated on.\nPath: {item_display_name}",
                 ),
             )
+            response = cast(typed.FileInUse, response)
             # Handle toggle: remember the action for future file-in-use scenarios
             updated_action = persisted_default
             if response["toggle"]:
@@ -437,7 +456,13 @@ class ProcessContainer(VerticalScroll):
             raise
 
     @work(thread=True)
-    def create_archive(self, files: list[str], archive_name: str) -> None:
+    def create_archive(
+        self,
+        files: list[str],
+        archive_name: str,
+        algo: Literal["zip", "tar", "tar.gz", "tar.bz2", "tar.xz", "tar.zst"],
+        level: int,
+    ) -> None:
         """
         Compress files into an archive.
 
@@ -445,9 +470,7 @@ class ProcessContainer(VerticalScroll):
             files (list[str]): List of file paths to compress.
             archive_name (str): Path for the output archive.
         """
-        bar: ProgressBarContainer = self.app.call_from_thread(
-            self.new_process_bar, classes="active"
-        )
+        bar = self.threaded_new_process_bar(classes="active")
         self.app.call_from_thread(
             bar.update_icon,
             icon_utils.get_icon("general", "zip")[0],
@@ -476,11 +499,11 @@ class ProcessContainer(VerticalScroll):
             base_path = path.commonpath(files)
 
         try:
-            with Archive(archive_name, "w") as archive:
+            with Archive(archive_name, algo, "w", level) as archive:
                 assert archive._archive is not None
                 last_update_time = time.monotonic()
                 for i, file_path in enumerate(files_to_archive):
-                    arcname = path.relpath(file_path, base_path)
+                    archive_name = path.relpath(file_path, base_path)
                     current_time = time.monotonic()
                     if (
                         current_time - last_update_time > 0.25
@@ -488,34 +511,35 @@ class ProcessContainer(VerticalScroll):
                     ):
                         self.app.call_from_thread(
                             bar.update_text,
-                            arcname,
+                            archive_name,
                         )
                         self.app.call_from_thread(bar.update_progress, progress=i + 1)
                         last_update_time = current_time
                     _archive = archive._archive
                     if _archive:
-                        if archive._is_zip:
+                        if archive._archive_type == "zip":
                             assert isinstance(_archive, zipfile.ZipFile)
-                            _archive.write(file_path, arcname=arcname)
+                            _archive.write(file_path, arcname=archive_name)
                         else:
                             assert isinstance(_archive, tarfile.TarFile)
-                            _archive.add(file_path, arcname=arcname)
+                            _archive.add(file_path, arcname=archive_name)
                 for p in files:
                     if path.isdir(p) and not os.listdir(p):
-                        arcname = path.relpath(p, base_path)
+                        archive_name = path.relpath(p, base_path)
                         _archive = archive._archive
                         if _archive:
-                            if archive._is_zip:
+                            if archive._archive_type == "zip":
                                 assert isinstance(_archive, zipfile.ZipFile)
-                                _archive.write(p, arcname=arcname)
+                                _archive.write(p, arcname=archive_name)
                             else:
                                 assert isinstance(_archive, tarfile.TarFile)
-                                _archive.add(p, arcname=arcname)
+                                _archive.add(p, arcname=archive_name)
 
-        except Exception as e:
+        except Exception as exc:
+            path_utils.dump_exc(self, exc)
             bar.panic(
                 dismiss_with={
-                    "message": f"Archiving failed due to\n{e}\nProcess Aborted.",
+                    "message": f"Archiving failed due to\n{exc}\nProcess Aborted.",
                     "subtitle": "File an issue if this is a bug!",
                 }
             )
@@ -523,13 +547,15 @@ class ProcessContainer(VerticalScroll):
 
         self.app.call_from_thread(
             bar.update_icon,
-            bar.icon_label.content + " " + icon_utils.get_icon("general", "check")[0],
+            str(bar.icon_label.content)
+            + " "
+            + icon_utils.get_icon("general", "check")[0],
         )
         self.app.call_from_thread(bar.progress_bar.advance)
         self.app.call_from_thread(bar.add_class, "done")
 
     @work(thread=True)
-    def unzip_file(self, archive_path: str, destination_path: str) -> None:
+    def extract_archive(self, archive_path: str, destination_path: str) -> None:
         """
         Extracts a zip archive to a destination.
 
@@ -537,9 +563,7 @@ class ProcessContainer(VerticalScroll):
             archive_path (str): Path to the zip archive.
             destination_path (str): Path to the destination folder.
         """
-        bar: ProgressBarContainer = self.app.call_from_thread(
-            self.new_process_bar, classes="active"
-        )
+        bar = self.threaded_new_process_bar(classes="active")
         self.app.call_from_thread(
             bar.update_icon,
             icon_utils.get_icon("general", "open")[0],
@@ -549,12 +573,12 @@ class ProcessContainer(VerticalScroll):
             "Preparing to extract...",
         )
 
-        do_what_on_existance = "ask"
+        do_what_on_existence = "ask"
         try:
             if not path.exists(destination_path):
                 os.makedirs(destination_path)
 
-            with Archive(archive_path, "r") as archive:
+            with Archive(archive_path, mode="r") as archive:
                 file_list = archive.infolist()
                 self.app.call_from_thread(bar.update_progress, total=len(file_list) + 1)
 
@@ -573,8 +597,9 @@ class ProcessContainer(VerticalScroll):
                         )
                         self.app.call_from_thread(bar.update_progress, progress=i + 1)
                         last_update_time = current_time
-                    if path.exists(path.join(destination_path, filename)):
-                        if do_what_on_existance == "ask":
+                    final_path = path.join(destination_path, filename)
+                    if path.exists(final_path) and path.isfile(final_path):
+                        if do_what_on_existence == "ask":
                             response = self.app.call_from_thread(
                                 self.app.push_screen_wait,
                                 CommonFileNameDoWhat(
@@ -583,11 +608,12 @@ class ProcessContainer(VerticalScroll):
                                     border_subtitle=f"Extracting to {destination_path}",
                                 ),
                             )
+                            response = cast(typed.CommonFileNameDoWhat, response)
                             if response["same_for_next"]:
-                                do_what_on_existance = response["value"]
+                                do_what_on_existence = response["value"]
                             val = response["value"]
                         else:
-                            val = do_what_on_existance
+                            val = do_what_on_existence
                         match val:
                             case "overwrite":
                                 pass
@@ -618,18 +644,30 @@ class ProcessContainer(VerticalScroll):
                     try:
                         archive.extract(file, path=destination_path)
                     except PermissionError:
-                        if path_utils.force_obtain_write_permission(
-                            path.join(destination_path, filename)
-                        ):
-                            archive.extract(file, path=destination_path)
-        except (zipfile.BadZipFile, tarfile.TarError, ValueError) as e:
+                        try:
+                            if path_utils.force_obtain_write_permission(
+                                # cannot ensure final_path exists here
+                                path.join(destination_path, filename)
+                            ):
+                                archive.extract(file, path=destination_path)
+                        except PermissionError as exc:  # on stupid rare chances
+                            path_utils.dump_exc(self, exc)
+                            bar.panic(
+                                dismiss_with={
+                                    "message": f"Extracting failed due to\n{exc}\nProcess Aborted.",
+                                    "subtitle": "If this is a bug, please file an issue!",
+                                },
+                                bar_text="Permission Error",
+                            )
+                            return
+        except (zipfile.BadZipFile, tarfile.TarError, ValueError) as exc:
             dismiss_with = {"subtitle": ""}
-            if isinstance(e, ValueError) and "Password" in e.__str__():
-                if "ZIP" in e.__str__():
+            if isinstance(exc, ValueError) and "Password" in exc.__str__():
+                if "ZIP" in exc.__str__():
                     dismiss_with["message"] = (
                         "Password-protected ZIP files cannot be unzipped"
                     )
-                elif "RAR" in e.__str__():
+                elif "RAR" in exc.__str__():
                     dismiss_with["message"] = (
                         "Password-protected RAR files cannot be unzipped"
                     )
@@ -638,16 +676,18 @@ class ProcessContainer(VerticalScroll):
                         "Password-protected archive files cannot be unzipped"
                     )
             else:
+                path_utils.dump_exc(self, exc)
                 dismiss_with = {
-                    "message": f"Unzipping failed due to {type(e).__name__}\n{e}\nProcess Aborted.",
+                    "message": f"Unzipping failed due to {type(exc).__name__}\n{exc}\nProcess Aborted.",
                     "subtitle": "If this is a bug, file an issue!",
                 }
             bar.panic(dismiss_with=dismiss_with, bar_text="Error extracting archive")
             return
-        except Exception as e:
+        except Exception as exc:
+            path_utils.dump_exc(self, exc)
             bar.panic(
                 dismiss_with={
-                    "message": f"Unzipping failed due to {type(e).__name__}\n{e}\nProcess Aborted.",
+                    "message": f"Unzipping failed due to {type(exc).__name__}\n{exc}\nProcess Aborted.",
                     "subtitle": "If this is a bug, please file an issue!",
                 },
                 bar_text="Unhandled Error",
@@ -662,19 +702,19 @@ class ProcessContainer(VerticalScroll):
         self.app.call_from_thread(bar.add_class, "done")
 
     @work(thread=True)
-    def paste_items(self, copied: list[str], cutted: list[str], dest: str = "") -> None:
+    def paste_items(
+        self, copied: list[str], has_cut: list[str], dest: str = ""
+    ) -> None:
         """
         Paste copied or cut files to the current directory
         Args:
             copied (list[str]): A list of items to be copied to the location
-            cutted (list[str]): A list of items to be cut to the location
-            dest (str) = getcwd(): The directory to copy to.
+            has_cut (list[str]): A list of items to be cut to the location
+            dest (str): The directory to copy to.
         """
         if dest == "":
             dest = os.getcwd()
-        bar: ProgressBarContainer = self.app.call_from_thread(
-            self.new_process_bar, classes="active"
-        )
+        bar = self.threaded_new_process_bar(classes="active")
         self.app.call_from_thread(
             bar.update_icon,
             icon_utils.get_icon("general", "paste")[0],
@@ -688,7 +728,7 @@ class ProcessContainer(VerticalScroll):
         cut_files__folders = []
         for file in copied:
             files_to_copy.extend(path_utils.get_recursive_files(file))
-        for file in cutted:
+        for file in has_cut:
             if path.isdir(file):
                 cut_files__folders.append(path_utils.normalise(file))
             files, folders = path_utils.get_recursive_files(file, with_folders=True)
@@ -697,7 +737,7 @@ class ProcessContainer(VerticalScroll):
         self.app.call_from_thread(
             bar.update_progress, total=int(len(files_to_copy) + len(files_to_cut)) + 1
         )
-        action_on_existance = "ask"
+        action_on_existence = "ask"
         last_update_time = time.monotonic()
         if files_to_copy:
             self.app.call_from_thread(
@@ -728,7 +768,7 @@ class ProcessContainer(VerticalScroll):
                     )
                     if path.exists(path.join(dest, item_dict["relative_loc"])):
                         # check if overwrite
-                        if action_on_existance == "ask":
+                        if action_on_existence == "ask":
                             response = self.app.call_from_thread(
                                 self.app.push_screen_wait,
                                 CommonFileNameDoWhat(
@@ -737,11 +777,12 @@ class ProcessContainer(VerticalScroll):
                                     border_subtitle=f"Copying to {dest}",
                                 ),
                             )
+                            response = cast(typed.CommonFileNameDoWhat, response)
                             if response["same_for_next"]:
-                                action_on_existance = response["value"]
+                                action_on_existence = response["value"]
                             val = response["value"]
                         else:
-                            val = action_on_existance
+                            val = action_on_existence
                         match val:
                             case "overwrite":
                                 pass
@@ -789,15 +830,16 @@ class ProcessContainer(VerticalScroll):
                     # midway through the process, which means the user is
                     # literally testing the limits, so yeah uhh, pass
                     pass
-                except Exception as e:
+                except Exception as exc:
                     # TODO: should probably let it continue, then have a summary
                     bar.panic(
                         dismiss_with={
-                            "message": f"Copying failed due to {type(e).__name__}\n{e}\nProcess Aborted.",
+                            "message": f"Copying failed due to {type(exc).__name__}\n{exc}\nProcess Aborted.",
                             "subtitle": "If this is a bug, please file an issue!",
                         },
                         bar_text="Unhandled Error",
                     )
+                    path_utils.dump_exc(self, exc)
                     return
 
         cut_ignore = []
@@ -842,7 +884,7 @@ class ProcessContainer(VerticalScroll):
                         ) == path_utils.normalise(item_dict["path"]):
                             cut_ignore.append(item_dict["path"])
                             continue
-                        if action_on_existance == "ask":
+                        if action_on_existence == "ask":
                             response = self.app.call_from_thread(
                                 self.app.push_screen_wait,
                                 CommonFileNameDoWhat(
@@ -851,11 +893,12 @@ class ProcessContainer(VerticalScroll):
                                     border_subtitle=f"Moving to {dest}",
                                 ),
                             )
+                            response = cast(typed.CommonFileNameDoWhat, response)
                             if response["same_for_next"]:
-                                action_on_existance = response["value"]
+                                action_on_existence = response["value"]
                             val = response["value"]
                         else:
-                            val = action_on_existance
+                            val = action_on_existence
                         match val:
                             case "overwrite":
                                 pass
@@ -898,11 +941,12 @@ class ProcessContainer(VerticalScroll):
                     # midway through the process, which means the user is
                     # literally testing the limits, so yeah uhh, pass
                     pass
-                except Exception as e:
+                except Exception as exc:
                     # TODO: should probably let it continue, then have a summary
+                    path_utils.dump_exc(self, exc)
                     bar.panic(
                         dismiss_with={
-                            "message": f"Moving failed due to {type(e).__name__}\n{e}\nProcess Aborted.",
+                            "message": f"Moving failed due to {type(exc).__name__}\n{exc}\nProcess Aborted.",
                             "subtitle": "If this is a bug, please file an issue!",
                         },
                         bar_text="Unhandled Error",
@@ -925,7 +969,7 @@ class ProcessContainer(VerticalScroll):
                     "message": "Certain files could not be deleted as they are currently being used",
                     "title": "Delete Files",
                 },
-                bar_text=path.basename(cutted[-1]),
+                bar_text=path.basename(has_cut[-1]),
             )
             return
         if self.has_perm_error:
@@ -934,21 +978,13 @@ class ProcessContainer(VerticalScroll):
                     "message": "Certain files could not be deleted due to PermissionError.",
                     "title": "Delete Files",
                 },
-                bar_text=path.basename(cutted[-1]),
+                bar_text=path.basename(has_cut[-1]),
             )
             return
-        # remove from clipboard
-        for item in cutted:
-            # cant bother to figure out how this happens,
-            # just catch it
-            with suppress(OptionDoesNotExist):
-                self.app.call_from_thread(
-                    self.app.query_one("Clipboard").remove_option,
-                    path_utils.compress(item),
-                )
+        self.app.query_one("Clipboard").checker_wrapper()
         self.app.call_from_thread(
             bar.update_icon,
-            icon_utils.get_icon("general", "cut" if len(cutted) else "copy")[0],
+            icon_utils.get_icon("general", "cut" if len(has_cut) else "copy")[0],
         )
         self.app.call_from_thread(
             bar.update_icon,

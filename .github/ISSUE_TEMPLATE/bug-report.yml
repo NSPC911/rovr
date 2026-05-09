@@ -7,7 +7,7 @@ body:
   - type: textarea
     id: bug-description
     attributes:
-      label: Issue descripton
+      label: Issue description
       description: Describe what happened that resulted in the crash
       placeholder: The issue happened when I do ..., but it never happens consistently unless I do ...
     validations:
@@ -40,6 +40,18 @@ body:
     attributes:
       label: What actually happened after doing the steps?
       description: Show what actually happened after doing the steps. Preferrably, paste the exception if the app had crashed.
+    validations:
+      required: true
+
+  - type: checkboxes
+    id: os-affected
+    attributes:
+      label: Affected Operating System(s)
+      description: Which OS(es) does this bug occur on?
+      options:
+        - label: Windows
+        - label: macOS
+        - label: Linux
     validations:
       required: true
 

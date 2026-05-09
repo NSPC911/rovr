@@ -12,34 +12,36 @@ from textual.widgets import Input, Label
 from rovr.functions import icons as icon_utils
 
 
-class ModalInput(ModalScreen):
+class ModalInput(ModalScreen, inherit_bindings=False):
     def __init__(
         self,
         border_title: str,
         border_subtitle: str = "",
         initial_value: str = "",
-        validators: list = [],
+        validators: list | None = None,
         is_path: bool = False,
         is_folder: bool = False,
-        **kwargs,
     ) -> None:
-        super().__init__(**kwargs)
+        super().__init__()
         self.border_title = border_title
         self.border_subtitle = border_subtitle
         self.initial_value = initial_value
         length_checker = Length(minimum=1, failure_description="A value is required.")
         length_checker.strict = True
+        if validators is None:
+            validators = []
         self.validators = [length_checker] + validators
         self.is_path = is_path
         self.is_folder = is_folder
         if self.is_path:
             self.icon_widget = Label(
-                f"> {icon_utils.get_icon('file', 'default')[0]} ",
+                f" {icon_utils.get_icon('file', 'default')[0]} ",
                 id="icon",
                 shrink=True,
+                classes="system",
             )
         else:
-            self.icon_widget = Label("> ", id="icon", shrink=True)
+            self.icon_widget = Label(" > ", id="icon", shrink=True, classes="arrow")
 
     def compose(self) -> ComposeResult:
         with HorizontalGroup(id="modalInput_group"):
@@ -72,9 +74,17 @@ class ModalInput(ModalScreen):
                 self.icon_widget.classes = "invalid"
                 self.horizontal_group.classes = "invalid"
                 if event.validation_result:
-                    self.horizontal_group.border_subtitle = str(
-                        event.validation_result.failure_descriptions[0]
-                    )
+                    try:
+                        self.horizontal_group.border_subtitle = str(
+                            event.validation_result.failure_descriptions[0]
+                        )
+                    except IndexError:
+                        # fuck it, just post a new message
+                        inp = self.query_one(Input)
+                        self.post_message(
+                            Input.Changed(inp, inp.value, inp.validate(inp.value))
+                        )
+                        return
                 else:
                     # valid_empty = False
                     self.horizontal_group.border_subtitle = (
@@ -90,7 +100,7 @@ class ModalInput(ModalScreen):
                 # file
                 icon = icon_utils.get_icon_for_file(event.value)
             self.icon_widget.update(
-                Content.from_markup(f"> [{icon[1]}]{icon[0]}[{icon[1]}] ")
+                Content.from_markup(f" [{icon[1]}]{icon[0]}[{icon[1]}] ")
             )
 
     def on_mount(self) -> None:

@@ -1,20 +1,13 @@
 {
-  "$schema": "https://json-schema.org/draft-04/schema",
+  "$schema": "http://json-schema.org/draft-04/schema",
   "title": "Rovr Config",
   "type": "object",
   "additionalProperties": false,
   "definitions": {
     "keybind": {
-      "type": "string",
-      "not": {
-        "enum": [
-          "ctrl+i",
-          "ctrl+m",
-          "ctrl+left_square_brace",
-          "ctrl+space",
-          "ctrl+at",
-          "newline"
-        ]
+      "type": "array",
+      "items": {
+        "type": "string"
       }
     }
   },
@@ -22,6 +15,7 @@
     "interface": {
       "type": "object",
       "additionalProperties": false,
+      "description": "Settings related to the user interface and experience",
       "properties": {
         "tooltips": {
           "type": "boolean",
@@ -64,6 +58,61 @@
           "default": 3,
           "description": "The number of files to keep above and below the cursor when moving through the file list."
         },
+        "show_hidden_files": {
+          "type": "boolean",
+          "default": false,
+          "description": "Show hidden files and folders (those starting with a dot on Unix, or explicitly hidden on Windows/MacOS)."
+        },
+        "image_viewer": {
+          "type": "object",
+          "description": "Settings related to the image viewer used in the preview sidebar",
+          "additionalProperties": false,
+          "properties": {
+            "protocol": {
+              "type": "string",
+              "default": "Auto",
+              "description": "The image protocol to use when displaying an image",
+              "enum": ["Auto", "TGP", "Sixel", "Halfcell", "Unicode"]
+            },
+            "max_size": {
+              "type": "array",
+              "default": [4000, 4000],
+              "description": "The maximum size for the image viewer. If the image exceeds this size, it will be scaled down to fit within these dimensions while maintaining its aspect ratio.",
+              "maxItems": 2,
+              "minItems": 2,
+              "items": {
+                "type": "integer",
+                "minimum": 1
+              }
+            },
+            "resampling": {
+              "type": "string",
+              "default": "nearest",
+              "description": "The resampling method to use when resizing images. This is only applicable when the image exceeds the maximum size specified in `max_size`.",
+              "enum": ["nearest", "lanczos", "bilinear", "bicubic", "box", "hamming"]
+            }
+          }
+        },
+        "allow_tab_nav": {
+          "type": "boolean",
+          "default": false,
+          "description": "Allow navigating the main app screen with `tab` and `shift+tab`"
+        },
+        "append_new_tabs": {
+          "type": "boolean",
+          "default": true,
+          "description": "Choose whether or not to append new tabs instead of inserting them.\n`true` => Append to the end of the tab list.\n`false` => Insert after the active tab."
+        },
+        "double_click_delay": {
+          "type": "number",
+          "default": 0.25,
+          "description": "The delay between two consecutive clicks to enter into a directory, or open a file."
+        },
+        "drive_watcher_frequency": {
+          "type": "number",
+          "default": 3.0,
+          "description": "How often (in seconds) to check for changes in mounted drives in the sidebar."
+        },
         "clock": {
           "type": "object",
           "additionalProperties": false,
@@ -90,25 +139,15 @@
               "default": "couldn't read this file! (\u00ac_\u00ac )",
               "description": "If for any reason the file preview refused to show, this appears."
             },
-            "binary": {
-              "type": "string",
-              "default": "the file does not use UTF-8, which isn't supported yet",
-              "description": "If the current file cannot be read due to an encoding issue (ie not UTF8), it will display this message."
-            },
             "start": {
               "type": "string",
               "default": " ___ ___\n|  _| . |\n|_| |___|\n _ _ ___\n| | |  _|\n \\_/|_|\n",
               "description": "This is shown when the rovr starts up. You may see it for a split second, but it will never appear afterwards. You cannot view this properly in this docs."
             },
-            "empty": {
+            "font_text": {
               "type": "string",
-              "default": "bytes be gone (\u2310\u25a0_\u25a0)",
-              "description": "If the current file has no content, this is shown"
-            },
-            "too_large": {
-              "type": "string",
-              "default": "this file is larger (but not larger than your mother)",
-              "description": "If the file is too large (hard capped at < 1MB), the preview will refuse to render this file regardless of your memory size"
+              "description": "When a font file is previewed, this text will be rendered in the font if possible.",
+              "default": "abcdefghijklmnopqrstuvwxyz\nABCDEFGHIJKLMNOPQRSTUVWXYZ\noO08 iIlL1 g9qCQG a@ 5sS\n{} [==>  ] (*) <> ~-+ /\\\n"
             }
           }
         },
@@ -118,7 +157,7 @@
           "properties": {
             "buttons": {
               "type": "boolean",
-              "default": false,
+              "default": true,
               "description": "Whether to compact the buttons and path input to one line instead of three."
             },
             "panels": {
@@ -127,18 +166,52 @@
               "description": "Whether to make the panels smaller to add more room for the file list itself"
             }
           }
+        },
+        "mime_rules": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "string",
+            "enum": [
+              "text",
+              "image",
+              "pdf",
+              "archive",
+              "folder",
+              "remime",
+              "resvg",
+              "font"
+            ]
+          },
+          "default": {
+            "text/.*": "text",
+            "application/(json|javascript|xml|raml\\+yaml)": "text",
+            "application/x-(yaml|script|pem-file|subrip|typescript)": "text",
+            "application/(mbox|ndjson|wine-extension-ini)": "text",
+            "image/svg\\+xml": "resvg",
+            "image/(avif|hei.|jxl)": "image",
+            "image/.*": "image",
+            "application/pdf": "pdf",
+            "application/(zip|gzip|zstd|bzip2|vnd\\.rar)": "archive",
+            "application/x-(xz|x-tar|x-gzip|x-bzip2|x-xz|x-rar|x-rar-compressed|x-7z-compressed)": "archive",
+            "application/(rar|7z.*|tar|xz|bzip.*|lzma|compress|archive|cpio|arj|xar|ms-cab.*)": "archive",
+            "application/(iso9660-image|qemu-disk|ms-wim|apple-diskimage)": "archive",
+            "application/virtualbox-(vhd|vhdx)": "archive",
+            "application/(debian.*-package|redhat-package-manager|rpm|android\\.package-archive)": "archive",
+            "inode/directory": "folder",
+            "font/.*": "font",
+            "application/ms-opentype": "font",
+            "application/font-.*": "font",
+            "application/x-font-.*": "font"
+          },
+          "description": "Map MIME type patterns to preview types. Uses regex patterns. Valid preview types: text, image, pdf, archive, folder, resvg, font, remime.\n-> Use 'remime' if you want a more accurate description from file(1)"
         }
       }
     },
     "settings": {
       "type": "object",
       "additionalProperties": false,
+      "description": "Settings related to behavior of file operations",
       "properties": {
-        "show_hidden_files": {
-          "type": "boolean",
-          "default": false,
-          "description": "Show hidden files and folders (those starting with a dot on Unix, or explicitly hidden on Windows/MacOS)."
-        },
         "use_recycle_bin": {
           "type": "boolean",
           "default": true,
@@ -149,31 +222,89 @@
           "default": true,
           "description": "When copying over a file, preserve metadata from the original file, such as creation and modification times."
         },
-        "image_protocol": {
-          "type": "string",
-          "default": "Auto",
-          "description": "The image protocol to use when displaying an image",
-          "enum": ["Auto", "TGP", "Sixel", "Halfcell", "Unicode"]
+        "bulk_rename": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "show_as_mapping": {
+              "type": "boolean",
+              "default": true,
+              "description": "Show as a mapping of `<old> ➔ <new>` instead of just `<old>`"
+            }
+          }
         },
-        "allow_tab_nav": {
-          "type": "boolean",
-          "default": false,
-          "description": "Allow navigating the main app screen with `tab` and `shift+tab`"
-        },
-        "append_new_tabs": {
-          "type": "boolean",
-          "default": true,
-          "description": "Choose whether or not to append new tabs instead of inserting them.\n`true` => Append to the end of the tab list.\n`false` => Insert after the active tab."
-        },
-        "double_click_delay": {
-          "type": "number",
-          "default": 0.25,
-          "description": "The delay between two consecutive clicks to enter into a directory, or open a file."
-        },
-        "drive_watcher_frequency": {
-          "type": "number",
-          "default": 3.0,
-          "description": "How often (in seconds) to check for changes in mounted drives in the sidebar."
+        "editor": {
+          "type": "object",
+          "description": "Settings related to the editor used for different operations",
+          "additionalProperties": false,
+          "properties": {
+            "file": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "run": {
+                  "type": "string",
+                  "default": "$EDITOR",
+                  "description": "Editor to use when opening a file"
+                },
+                "block": {
+                  "type": "boolean",
+                  "default": false,
+                  "description": "Block rovr until the editor closes"
+                },
+                "suspend": {
+                  "type": "boolean",
+                  "default": true,
+                  "description": "Suspend (hide) rovr until the editor closes. Will block regardless."
+                }
+              },
+              "description": "Editor to use when opening a file"
+            },
+            "folder": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "run": {
+                  "type": "string",
+                  "default": "$EDITOR",
+                  "description": "Editor to use when opening a folder"
+                },
+                "block": {
+                  "type": "boolean",
+                  "default": false,
+                  "description": "Block rovr until the editor closes"
+                },
+                "suspend": {
+                  "type": "boolean",
+                  "default": true,
+                  "description": "Suspend (hide) rovr until the editor closes. Will block regardless."
+                }
+              },
+              "description": "Editor to use when opening a folder"
+            },
+            "bulk_rename": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "run": {
+                  "type": "string",
+                  "default": "$EDITOR",
+                  "description": "Editor to use for bulk renaming"
+                },
+                "suspend": {
+                  "type": "boolean",
+                  "default": true,
+                  "description": "Suspend (hide) rovr until the editor closes"
+                }
+              },
+              "description": "Editor to use for bulk renaming"
+            },
+            "open_all_in_editor": {
+              "type": "boolean",
+              "default": false,
+              "description": "Open all in the configured editor, regardless of file encoding or type. When disabled, it opens them in the system configured editor."
+            }
+          }
         }
       }
     },
@@ -204,6 +335,7 @@
             "created",
             "hidden"
           ],
+          "uniqueItems": true,
           "description": "The order of the metadata tags that you want to see in the Metadata section."
         },
         "datetime_format": {
@@ -287,6 +419,31 @@
           "default": "nord",
           "description": "The default theme. Can be changed while in rovr, but it is not persistent."
         },
+        "preview": {
+          "type": "string",
+          "default": "nord",
+          "description":"The theme to use when previewing files in the preview sidebar.",
+          "enum": [
+            "abap", "algol", "algol_nu", "arduino", "autumn",
+            "bw", "borland",
+            "coffee", "colorful",
+            "default", "dracula",
+            "emacs",
+            "friendly_grayscale", "friendly", "fruity",
+            "github-dark", "gruvbox-dark", "gruvbox-light",
+            "igor", "inkpot",
+            "lightbulb", "lilypond", "lovelace",
+            "manni", "material", "monokai", "murphy",
+            "native", "nord-darker", "nord",
+            "one-dark",
+            "paraiso-dark", "paraiso-light", "pastie", "perldoc",
+            "rainbow_dash", "rrt",
+            "sas", "solarized-dark", "solarized-light", "staroffice", "stata-dark", "stata-light",
+            "tango", "trac",
+            "vim", "vs", "xcode",
+            "zenburn"
+          ]
+        },
         "transparent": {
           "type": "boolean",
           "default": false,
@@ -302,7 +459,7 @@
         "properties": {
           "name": {
             "type": "string",
-            "description": "A name for the theme. However, when the theme is available in the theme picker, it shows up as a hiphenated, lowercase version."
+            "description": "A name for the theme. However, when the theme is available in the theme picker, it shows up as a hyphenated, lowercase version."
           },
           "primary": {
             "type": "string",
@@ -390,273 +547,482 @@
       "additionalProperties": false,
       "properties": {
         "toggle_pin": {
-          "type": "array",
+          "$ref": "#/definitions/keybind",
           "description": "Toggle the current folder in the Pinned Folder Sidebar.",
           "display_name": "Pin folder"
         },
         "toggle_pinned_sidebar": {
-          "type": "array",
+          "$ref": "#/definitions/keybind",
           "description": "Toggle viewing the pinned sidebar.",
           "display_name": "Toggle sidebar"
         },
         "toggle_preview_sidebar": {
-          "type": "array",
+          "$ref": "#/definitions/keybind",
           "description": "Toggle viewing the preview sidebar.",
           "display_name": "Toggle preview"
         },
         "toggle_footer": {
-          "type": "array",
+          "$ref": "#/definitions/keybind",
           "description": "Toggle viewing the footer.",
           "display_name": "Toggle footer"
         },
-        "toggle_menuwrapper": {
-          "type": "array",
+        "toggle_menu_wrapper": {
+          "$ref": "#/definitions/keybind",
           "description": "Toggle viewing the menu wrapper.",
           "display_name": "Toggle menu wrapper"
         },
         "focus_toggle_pinned_sidebar": {
-          "type": "array",
+          "$ref": "#/definitions/keybind",
           "description": "Toggle focus between pinned folder sidebar and file list.",
           "display_name": "Focus sidebar"
         },
         "focus_file_list": {
-          "type": "array",
+          "$ref": "#/definitions/keybind",
           "description": "Focus the file list.",
           "display_name": "Focus file list"
         },
         "focus_toggle_preview_sidebar": {
-          "type": "array",
+          "$ref": "#/definitions/keybind",
           "description": "Focus toggle between preview sidebar and file list.",
           "display_name": "Focus preview"
         },
         "focus_toggle_path_switcher": {
-          "type": "array",
+          "$ref": "#/definitions/keybind",
           "description": "Focus toggle between path switcher and file list.",
-          "display_name": "Focus path"
+          "display_name": "Focus path switcher"
         },
         "focus_toggle_processes": {
-          "type": "array",
+          "$ref": "#/definitions/keybind",
           "description": "Focus toggle the processes container.",
           "display_name": "Focus processes"
         },
         "focus_toggle_clipboard": {
-          "type": "array",
+          "$ref": "#/definitions/keybind",
           "description": "Focus toggle the clipboard container.",
           "display_name": "Focus clipboard"
         },
         "focus_toggle_metadata": {
-          "type": "array",
+          "$ref": "#/definitions/keybind",
           "description": "Focus toggle the metadata container.",
           "display_name": "Focus metadata"
         },
         "focus_search": {
-          "type": "array",
+          "$ref": "#/definitions/keybind",
           "description": "Focus the search bar.",
           "display_name": "Search"
         },
         "copy": {
-          "type": "array",
+          "$ref": "#/definitions/keybind",
           "description": "Copy the selected files in the file list to the clipboard.",
           "display_name": "Copy"
         },
         "paste": {
-          "type": "array",
+          "$ref": "#/definitions/keybind",
           "description": "Paste the selected files in the clipboard into the current directory.",
           "display_name": "Paste"
         },
         "cut": {
-          "type": "array",
+          "$ref": "#/definitions/keybind",
           "description": "Cut the selected files in the file list to the clipboard.",
           "display_name": "Cut"
         },
         "delete": {
-          "type": "array",
+          "$ref": "#/definitions/keybind",
           "description": "Delete the selected files in the file list.",
           "display_name": "Delete"
         },
+        "delete_files": {
+          "type": "object",
+          "description": "Keybinds related to the delete confirmation screen",
+          "properties": {
+            "trash": {
+              "$ref": "#/definitions/keybind",
+              "description": "Confirm deletion and move files to the recycle bin.",
+              "display_name": "Delete to recycle bin"
+            },
+            "delete": {
+              "$ref": "#/definitions/keybind",
+              "description": "Confirm deletion and permanently delete files.",
+              "display_name": "Permanently delete"
+            },
+            "cancel": {
+              "$ref": "#/definitions/keybind",
+              "description": "Cancel deletion and go back to the main screen.",
+              "display_name": "Cancel deletion"
+            }
+          }
+        },
         "rename": {
-          "type": "array",
+          "$ref": "#/definitions/keybind",
           "description": "Rename the selected file in the file list to something else.",
           "display_name": "Rename"
         },
         "new": {
-          "type": "array",
+          "$ref": "#/definitions/keybind",
           "description": "Create a new item in the current directory.",
           "display_name": "New"
         },
         "toggle_all": {
-          "type": "array",
+          "$ref": "#/definitions/keybind",
           "description": "Enter into select mode and select/unselect everything.",
           "display_name": "Select all"
         },
         "zip": {
-          "type": "array",
+          "$ref": "#/definitions/keybind",
           "description": "Create a zip archive from selected files.",
           "display_name": "Zip"
         },
         "unzip": {
-          "type": "array",
+          "$ref": "#/definitions/keybind",
           "description": "Extract a selected zip archive.",
           "display_name": "Unzip"
         },
-        "copy_path": {
-          "type": "array",
-          "description": "Copy the path of the item to the system clipboard.",
-          "display_name": "Copy path"
+        "extra_copy": {
+          "type": "object",
+          "description": "Keybinds related to extra copy options",
+          "additionalProperties": false,
+          "properties": {
+            "open_popup": {
+              "$ref": "#/definitions/keybind",
+              "description": "Open the menu with extra copy options.",
+              "display_name": "Copy options"
+            },
+            "copy_to_rovr": {
+              "$ref": "#/definitions/keybind",
+              "description": "Copy the selected files to rovr's clipboard",
+              "display_name": "Copy to rovr's clipboard"
+            },
+            "copy_single_path": {
+              "$ref": "#/definitions/keybind",
+              "description": "Copy only the highlighted file's path to the system clipboard",
+              "display_name": "Copy highlighted file path"
+            },
+            "copy_to_system_clip": {
+              "$ref": "#/definitions/keybind",
+              "description": "Copy the selected files to the system clipboard",
+              "display_name": "Copy to system clipboard"
+            },
+            "copy_current_directory": {
+              "$ref": "#/definitions/keybind",
+              "description": "Copy the current directory's path to the system clipboard",
+              "display_name": "Copy current directory path"
+            }
+          }
         },
         "up": {
-          "type": "array",
+          "$ref": "#/definitions/keybind",
           "description": "Go up the file list options.",
           "display_name": "Up"
         },
         "down": {
-          "type": "array",
+          "$ref": "#/definitions/keybind",
           "description": "Go down the file list options.",
           "display_name": "Down"
         },
         "up_tree": {
-          "type": "array",
+          "$ref": "#/definitions/keybind",
           "description": "Go up the file tree.",
           "display_name": "Go up directory"
         },
         "down_tree": {
-          "type": "array",
+          "$ref": "#/definitions/keybind",
           "description": "Go down the file tree, or open the currently selected item.",
           "display_name": "Enter/Select"
         },
+        "bypass_up_tree": {
+          "$ref": "#/definitions/keybind",
+          "description": "Recursively exit parent directory, skipping parents with only a single subdirectory",
+          "display_name": "Bypass up directory"
+        },
+        "bypass_down_tree": {
+          "$ref": "#/definitions/keybind",
+          "description": "Recursively enter child directory, skipping children with only a single subdirectory",
+          "display_name": "Bypass down directory"
+        },
         "page_up": {
-          "type": "array",
+          "$ref": "#/definitions/keybind",
           "description": "Page Up in the file list options.",
           "display_name": "Page Up"
         },
         "page_down": {
-          "type": "array",
+          "$ref": "#/definitions/keybind",
           "description": "Page Down in the file list options.",
           "display_name": "Page Down"
         },
         "home": {
-          "type": "array",
+          "$ref": "#/definitions/keybind",
           "description": "Go to the first option in the file list options.",
           "display_name": "First"
         },
         "end": {
-          "type": "array",
+          "$ref": "#/definitions/keybind",
           "description": "Go to the last option in the file list options.",
           "display_name": "Last"
         },
         "hist_previous": {
-          "type": "array",
+          "$ref": "#/definitions/keybind",
           "description": "Go back in history.",
           "display_name": "History back"
         },
         "hist_next": {
-          "type": "array",
+          "$ref": "#/definitions/keybind",
           "description": "Go forward in history.",
           "display_name": "History forward"
         },
         "toggle_visual": {
-          "type": "array",
+          "$ref": "#/definitions/keybind",
           "description": "Enter or exit select/visual mode.",
           "display_name": "Visual mode"
         },
         "toggle_hidden_files": {
-          "type": "array",
+          "$ref": "#/definitions/keybind",
           "description": "Toggle the visibility of hidden files (dot-prefixed on Unix, or flagged hidden on Windows/macOS).",
           "display_name": "Toggle hidden files"
         },
         "select_up": {
-          "type": "array",
+          "$ref": "#/definitions/keybind",
           "description": "While in visual mode, extend the selection up.",
           "display_name": "Select up"
         },
         "select_down": {
-          "type": "array",
+          "$ref": "#/definitions/keybind",
           "description": "While in visual mode, extend the selection down.",
           "display_name": "Select down"
         },
         "select_page_up": {
-          "type": "array",
+          "$ref": "#/definitions/keybind",
           "description": "While in visual mode, extend the selection to the previous page.",
           "display_name": "Select page up"
         },
         "select_page_down": {
-          "type": "array",
+          "$ref": "#/definitions/keybind",
           "description": "While in visual mode, extend the selection to the next page.",
           "display_name": "Select page down"
         },
         "select_home": {
-          "type": "array",
+          "$ref": "#/definitions/keybind",
           "description": "While in visual mode, extend the selection to the first option.",
           "display_name": "Select to top"
         },
         "select_end": {
-          "type": "array",
+          "$ref": "#/definitions/keybind",
           "description": "While in visual mode, extend the selection to the last option.",
           "display_name": "Select to end"
         },
         "tab_next": {
-          "type": "array",
+          "$ref": "#/definitions/keybind",
           "description": "Go to the next tab, if it is available.",
           "display_name": "Next tab"
         },
         "tab_previous": {
-          "type": "array",
+          "$ref": "#/definitions/keybind",
           "description": "Go to the previous tab, if it is available.",
           "display_name": "Previous tab"
         },
         "tab_new": {
-          "type": "array",
+          "$ref": "#/definitions/keybind",
           "description": "Create a new tab.",
           "display_name": "New tab"
         },
         "tab_close": {
-          "type": "array",
+          "$ref": "#/definitions/keybind",
           "description": "Close the current tab.",
           "display_name": "Close tab"
         },
         "preview_scroll_left": {
-          "type": "array",
+          "$ref": "#/definitions/keybind",
           "description": "Temporarily unused.",
           "display_name": "Scroll left"
         },
         "preview_scroll_right": {
-          "type": "array",
+          "$ref": "#/definitions/keybind",
           "description": "Temporarily unused.",
           "display_name": "Scroll right"
         },
         "preview_select_right": {
-          "type": "array",
+          "$ref": "#/definitions/keybind",
           "description": "Temporarily unused.",
           "display_name": "Select right"
         },
         "preview_select_left": {
-          "type": "array",
+          "$ref": "#/definitions/keybind",
           "description": "Temporarily unused.",
           "display_name": "Select left"
         },
         "show_keybinds": {
-          "type": "array",
+          "$ref": "#/definitions/keybind",
           "description": "Show the keybinds list with all available keybinds.",
           "display_name": "Show keybinds"
         },
         "change_sort_order": {
-          "type": "array",
-          "description": "Show a chooser to change the sort order.",
-          "display_name": "Change sort order"
+          "type": "object",
+          "description": "Keybinds related to changing the sort order",
+          "properties": {
+            "open_popup": {
+              "$ref": "#/definitions/keybind",
+              "description": "Open the change sort order popup.",
+              "display_name": "Open sort order popup"
+            },
+            "name": {
+              "$ref": "#/definitions/keybind",
+              "description": "Sort by name.",
+              "display_name": "Sort by name"
+            },
+            "extension": {
+              "$ref": "#/definitions/keybind",
+              "description": "Sort by extension.",
+              "display_name": "Sort by extension"
+            },
+            "natural": {
+              "$ref": "#/definitions/keybind",
+              "description": "Sort naturally (numbers first).",
+              "display_name": "Sort naturally"
+            },
+            "size": {
+              "$ref": "#/definitions/keybind",
+              "description": "Sort by size.",
+              "display_name": "Sort by size"
+            },
+            "created": {
+              "$ref": "#/definitions/keybind",
+              "description": "Sort by creation time.",
+              "display_name": "Sort by created"
+            },
+            "modified": {
+              "$ref": "#/definitions/keybind",
+              "description": "Sort by modification time.",
+              "display_name": "Sort by modified"
+            },
+            "descending": {
+              "$ref": "#/definitions/keybind",
+              "description": "Toggle descending sort order.",
+              "display_name": "Toggle descending"
+            }
+          }
         },
         "quit_app": {
-          "type": "array",
+          "$ref": "#/definitions/keybind",
           "description": "Quit the application",
           "display_name": "Quit app"
         },
         "command_palette": {
           "description": "Launch Textual's mildly useful command palette (only one keybind is allowed!)",
-          "display_name": "Launch command palette"
+          "display_name": "Launch command palette",
+          "type": "string"
         },
         "suspend_app": {
-          "type": "array",
-          "description": "Suspend the app's process, bringing you back to the terminal",
+          "$ref": "#/definitions/keybind",
+          "description": "Suspend the app's process, bringing you back to the terminal (*nix only)",
           "display_name": "Suspend app"
+        },
+        "open_editor": {
+          "$ref": "#/definitions/keybind",
+          "description": "Open the selected file or folder in the configured editor.",
+          "display_name": "Open in editor"
+        },
+        "show_shell_screen": {
+          "$ref": "#/definitions/keybind",
+          "description": "Show the shell screen to run a command in the current directory.",
+          "display_name": "Open shell screen"
+        },
+        "filename_conflict": {
+          "type": "object",
+          "description": "Keybinds related to handling a conflict with two files of the same name",
+          "properties": {
+            "overwrite": {
+              "$ref": "#/definitions/keybind",
+              "description": "Overwrite the existing file with the new file.",
+              "display_name": "Overwrite file"
+            },
+            "skip": {
+              "$ref": "#/definitions/keybind",
+              "description": "Skip this file and do not copy/move it.",
+              "display_name": "Skip file"
+            },
+            "rename": {
+              "$ref": "#/definitions/keybind",
+              "description": "Rename the new file being copied/moved.",
+              "display_name": "Rename file"
+            },
+            "cancel": {
+              "$ref": "#/definitions/keybind",
+              "description": "Cancel the entire copy/move operation.",
+              "display_name": "Cancel operation"
+            },
+            "dont_ask_again": {
+              "$ref": "#/definitions/keybind",
+              "description": "Apply the selected action to all future conflicts without asking again.",
+              "display_name": "Don't ask me again"
+            }
+          }
+        },
+        "file_in_use": {
+          "type": "object",
+          "description": "Keybinds related to handling a file that is in use by another process",
+          "properties": {
+            "retry": {
+              "$ref": "#/definitions/keybind",
+              "description": "Retry the operation on the file.",
+              "display_name": "Retry operation"
+            },
+            "skip": {
+              "$ref": "#/definitions/keybind",
+              "description": "Skip this file and do not copy/move it.",
+              "display_name": "Skip file"
+            },
+            "cancel": {
+              "$ref": "#/definitions/keybind",
+              "description": "Cancel the entire copy/move operation.",
+              "display_name": "Cancel operation"
+            },
+            "dont_ask_again": {
+              "$ref": "#/definitions/keybind",
+              "description": "Apply the selected action to all future 'file in use' errors without asking again.",
+              "display_name": "Don't ask me again"
+            }
+          }
+        },
+        "filter_modal": {
+          "type": "object",
+          "description": "Keybinds related to selecting options in a modal screen (like FileSearch or ZDToDirectory)",
+          "properties": {
+            "exit": {
+              "$ref": "#/definitions/keybind",
+              "description": "Exit the modal without making a selection.",
+              "display_name": "Exit modal"
+            },
+            "down": {
+              "$ref": "#/definitions/keybind",
+              "description": "Move the selection down in the modal list.",
+              "display_name": "Select down"
+            },
+            "up": {
+              "$ref": "#/definitions/keybind",
+              "description": "Move the selection up in the modal list.",
+              "display_name": "Select up"
+            }
+          }
+        },
+        "yes_or_no": {
+          "type": "object",
+          "description": "Keybinds related to yes/no confirmation modals",
+          "properties": {
+            "yes": {
+              "$ref": "#/definitions/keybind",
+              "description": "Confirm with 'yes'.",
+              "display_name": "Yes"
+            },
+            "no": {
+              "$ref": "#/definitions/keybind",
+              "description": "Decline with 'no'.",
+              "display_name": "No"
+            },
+            "dont_ask_again": {
+              "$ref": "#/definitions/keybind",
+              "description": "Apply the selected action to all future confirmations without asking again.",
+              "display_name": "Don't ask me again"
+            }
+          }
         }
       }
     },
@@ -674,11 +1040,8 @@
               "description": "Enable or disable zoxide travelling."
             },
             "keybinds": {
-              "type": "array",
+              "$ref": "#/definitions/keybind",
               "default": ["z"],
-              "items": {
-                "$ref": "#/definitions/keybind"
-              },
               "description": "The keybind to open the zoxide modal.",
               "display_name": "Launch zoxide selector"
             },
@@ -705,52 +1068,7 @@
             }
           }
         },
-        "editor": {
-          "type": "object",
-          "additionalProperties": false,
-          "properties": {
-            "enabled": {
-              "type": "boolean",
-              "default": true,
-              "description": "Enable opening a file in your editor."
-            },
-            "file_executable": {
-              "type": "string",
-              "default": "nano",
-              "description": "Open files in this app."
-            },
-            "file_suspend": {
-              "type": "boolean",
-              "default": true,
-              "description": "Suspend the app when editing a file. Useful for TUI editors, but not for something like VSCode or Notepad++."
-            },
-            "folder_executable": {
-              "type": "string",
-              "default": "code",
-              "description": "Open folders in this app."
-            },
-            "folder_suspend": {
-              "type": "boolean",
-              "default": true,
-              "description": "Suspend the app when editing a folder. Useful for TUI editors, but not for something like VSCode or Notepad++."
-            },
-            "open_all_in_editor": {
-              "type": "boolean",
-              "default": false,
-              "description": "Open all files in the configured editor, regardless of file encoding or type. When disabled, files that cannot be opened due to encoding issues will use the system's default application instead."
-            },
-            "keybinds": {
-              "type": "array",
-              "default": ["e"],
-              "items": {
-                "$ref": "#/definitions/keybind"
-              },
-              "description": "The keybind to launch your editor.",
-              "display_name": "Open file with editor"
-            }
-          }
-        },
-        "finder": {
+        "fd": {
           "type": "object",
           "additionalProperties": false,
           "properties": {
@@ -760,13 +1078,10 @@
               "description": "Enable recursive file search using fd."
             },
             "keybinds": {
-              "type": "array",
+              "$ref": "#/definitions/keybind",
               "default": ["f"],
-              "items": {
-                "$ref": "#/definitions/keybind"
-              },
               "description": "The keybind to open the file search picker.",
-              "display_name": "Start search with fd"
+              "display_name": "Start file search with fd"
             },
             "executable": {
               "type": "string",
@@ -776,12 +1091,79 @@
             "relative_paths": {
               "type": "boolean",
               "default": true,
-              "description": "Whether to show as relative path or absolute path."
+              "description": "Whether to show fd results as relative path or absolute path."
             },
             "follow_symlinks": {
               "type": "boolean",
               "default": false,
               "description": "Whether fd should follow symlinks when searching."
+            },
+            "no_ignore_parent": {
+              "type": "boolean",
+              "default": false,
+              "description": "Don't use *ignore files from parent folders when searching."
+            },
+            "default_filter_types": {
+              "type": "array",
+              "default": ["file", "directory"],
+              "description": "The default file types to show when using fd.",
+              "uniqueItems": true,
+              "items": {
+                "type": "string",
+                "enum": [
+                  "file",
+                  "directory",
+                  "symlink",
+                  "executable",
+                  "empty",
+                  "socket",
+                  "pipe",
+                  "char-device",
+                  "block-device"
+                ]
+              }
+            }
+          }
+        },
+        "rg": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "enabled": {
+              "type": "boolean",
+              "default": true,
+              "description": "Enable content searching using rg."
+            },
+            "keybinds": {
+              "$ref": "#/definitions/keybind",
+              "default": ["R"],
+              "description": "The keybind to open the content search picker.",
+              "display_name": "Start content search with rg"
+            },
+            "executable": {
+              "type": "string",
+              "default": "rg",
+              "description": "rg executable name or path."
+            },
+            "case_sensitive": {
+              "type": "boolean",
+              "default": true,
+              "description": "Whether the search should be case sensitive by default."
+            },
+            "follow_symlinks": {
+              "type": "boolean",
+              "default": false,
+              "description": "Whether rg should follow symlinks when searching."
+            },
+            "no_ignore_parent": {
+              "type": "boolean",
+              "default": false,
+              "description": "Don't use *ignore files from parent folders when searching."
+            },
+            "search_hidden": {
+              "type": "boolean",
+              "default": false,
+              "description": "Whether to search hidden files by default."
             }
           }
         },
@@ -807,8 +1189,14 @@
             },
             "poppler_folder": {
               "type": "string",
-              "default": "",
+              "default": "PATH",
               "description": "Path to the folder where Poppler-related binaries are located. Leave empty to use the system PATH."
+            },
+            "pdf_batch_size": {
+              "type": "integer",
+              "default": 2,
+              "minimum": 1,
+              "description": "Number of PDF pages to load in each batch."
             }
           }
         },
@@ -819,41 +1207,16 @@
             "enabled": {
               "type": "boolean",
               "default": false,
-              "description": "Enable file(1) MIME type detection for preview selection. When enabled, rovr uses the `file` command to detect file types instead of relying solely on file extensions."
+              "description": "Enable secondary file(1) type detection if both puremagic and plaintext detection fails."
             },
-            "mime_rules": {
-              "type": "object",
-              "additionalProperties": {
-                "type": "string",
-                "enum": ["text", "image", "pdf", "archive", "folder"]
-              },
-              "default": {
-                "text/*": "text",
-                "image/*": "image",
-                "application/pdf": "pdf",
-                "application/zip": "archive",
-                "application/x-tar": "archive",
-                "application/gzip": "archive",
-                "application/x-bzip2": "archive",
-                "application/x-xz": "archive",
-                "application/x-rar": "archive",
-                "application/x-7z-compressed": "archive",
-                "inode/directory": "folder"
-              },
-              "description": "Map MIME type patterns to preview types. Supports glob patterns (e.g., 'text/*' matches 'text/plain', 'text/html', etc.). Valid preview types: text, image, pdf, archive, folder."
+            "get_description": {
+              "type": "boolean",
+              "default": true,
+              "description": "Use file(1) to get additional information of the file type."
             }
           }
         }
       }
-    },
-    "mode": {
-      "type": "object",
-      "additionalProperties": {
-        "type": "object",
-        "additionalProperties": true,
-        "description": "Config overrides for this mode using dot-notation paths as keys."
-      },
-      "description": "Define preset modes with config overrides. Use --mode <name> to activate."
     }
   }
 }

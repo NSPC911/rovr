@@ -3,7 +3,6 @@ import { defineConfig } from "astro/config";
 import starlight from "@astrojs/starlight";
 import sitemap from "@astrojs/sitemap";
 import { viewTransitions } from "astro-vtbot/starlight-view-transitions";
-import starlightLlmsTxt from "starlight-llms-txt";
 import mermaid from "astro-mermaid";
 
 export default defineConfig({
@@ -59,6 +58,16 @@ export default defineConfig({
       },
       tableOfContents: { minHeadingLevel: 1, maxHeadingLevel: 4 },
       lastUpdated: true,
+      locales: {
+        root: {
+          label: "stable",
+          lang: "en",
+        },
+        dev: {
+          label: "dev",
+          lang: "en",
+        },
+      },
       sidebar: [
         { label: "overview", slug: "overview" },
         {
@@ -73,7 +82,7 @@ export default defineConfig({
           items: [
             { label: "user interface", slug: "guides/user-interface" },
             { label: "file operations", slug: "guides/file-operations" },
-            { label: "tips and tricks", slug: "guides/tips-and-tricks"}
+            { label: "tips and tricks", slug: "guides/tips-and-tricks" },
           ],
         },
         {
@@ -87,28 +96,20 @@ export default defineConfig({
           label: "features",
           items: [
             { label: "sorting", slug: "features/sorting" },
+            { label: "editors", slug: "features/editor" },
             { label: "previewing files", slug: "features/previewing-files" },
             { label: "image previews", slug: "features/image-previews" },
             { label: "cd on quit", slug: "features/cd-on-quit" },
             { label: "context menu", slug: "features/context-menu" },
+            { label: "shell execution", slug: "features/shell-exec", badge: { text: "dev", variant: "caution" } },
             { label: "plugins", slug: "features/plugins" },
           ],
         },
         {
           label: "contributing",
           items: [
-            {
-              label: "how to contribute",
-              slug: "contributing/how-to-contribute",
-            },
-            {
-              label: "project structure",
-              slug: "contributing/project-structure",
-            },
-            {
-              label: "optimisations",
-              slug: "contributing/optimisation",
-            },
+            { label: "how to contribute", slug: "contributing/how-to-contribute" },
+            { label: "project structure", slug: "contributing/project-structure" },
           ],
         },
         {
@@ -119,12 +120,7 @@ export default defineConfig({
           ],
         },
       ],
-      plugins: [
-        viewTransitions(),
-        starlightLlmsTxt({
-          projectName: "rovr",
-        }),
-      ],
+      plugins: [viewTransitions()],
     }),
     sitemap(),
   ],

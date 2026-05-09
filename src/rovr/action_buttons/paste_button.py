@@ -1,8 +1,8 @@
 from textual.widgets import Button
 
+from rovr.classes.textual_options import ClipboardSelectionValue
 from rovr.functions.icons import get_icon
-from rovr.functions.path import decompress
-from rovr.screens import YesOrNo
+from rovr.screens.paste_screen import PasteScreen
 from rovr.variables.constants import config
 
 
@@ -23,19 +23,25 @@ class PasteButton(Button):
             self.tooltip = "Paste files from clipboard"
 
     async def on_button_pressed(self, event: Button.Pressed) -> None:
+        """Paste files from clipboard"""
         if self.disabled:
             return
-        """Paste files from clipboard"""
-        selected_items = self.app.query_one(
+        selected_items: list[ClipboardSelectionValue] = self.app.query_one(
             "Clipboard"
         ).selected  # dont include highlighted
         if selected_items:
-            # decompress items
-            selected_items = [decompress(item) for item in selected_items]
-            # split into two items, those ending with `-cut` and those ending with `-copy`
+            # split into copy/cut based on attrs
             to_copy, to_cut = (
-                [item[:-5] for item in selected_items if item.endswith("-copy")],
-                [item[:-4] for item in selected_items if item.endswith("-cut")],
+                [
+                    item.path
+                    for item in selected_items
+                    if item.type_of_selection == "copy"
+                ],
+                [
+                    item.path
+                    for item in selected_items
+                    if item.type_of_selection == "cut"
+                ],
             )
 
             async def callback(response: str) -> None:
@@ -44,7 +50,7 @@ class PasteButton(Button):
                     self.app.query_one("ProcessContainer").paste_items(to_copy, to_cut)
 
             self.app.push_screen(
-                YesOrNo(
+                PasteScreen(
                     message="Are you sure you want to "
                     + (
                         f"copy {len(to_copy)} item{'s' if len(to_copy) != 1 else ''}{' and ' if len(to_cut) != 0 else ''}"
@@ -56,7 +62,9 @@ class PasteButton(Button):
                         if len(to_cut) > 0
                         else ""
                     )
-                    + "?"
+                    + "?",
+                    paths={"copy": to_copy, "cut": to_cut},
+                    destructive=True,
                 ),
                 callback=callback,
             )

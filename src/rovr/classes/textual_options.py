@@ -1,11 +1,12 @@
 from os import DirEntry
-from typing import Literal
+from typing import Literal, NamedTuple
 
 from textual.content import Content, ContentText
+from textual.widgets import SelectionList
 from textual.widgets.option_list import Option
 from textual.widgets.selection_list import Selection
 
-from rovr.functions.path import compress
+from rovr.functions.path import normalise
 
 
 class PinnedSidebarOption(Option):
@@ -62,6 +63,7 @@ class FileListSelectionWidget(Selection):
         icon: list[str],
         label: str,
         dir_entry: DirEntry,
+        clipboard: SelectionList,
         disabled: bool = False,
     ) -> None:
         """
@@ -82,16 +84,37 @@ class FileListSelectionWidget(Selection):
 
         # Create prompt by combining cached icon content with label
         prompt = FileListSelectionWidget._icon_content_cache[cache_key] + Content(label)
+        dir_entry_path = normalise(dir_entry.path)
+        if any(
+            clipboard_val.type_of_selection == "cut"
+            and dir_entry_path == clipboard_val.path
+            for clipboard_val in clipboard.selected
+        ):
+            prompt = prompt.stylize("dim")
         self.dir_entry = dir_entry
         this_id = str(id(self))
 
         super().__init__(
             prompt=prompt,
+            # this is kinda required for FileList.get_selected_object's select mode
+            # because it gets selected (which is dictionary of values)
+            # which it then queries for `id` (because there's no way to query for
+            # values directly)
             value=str(this_id),
             id=str(this_id),
             disabled=disabled,
         )
+        self._prompt: Content
         self.label = label
+
+    @property
+    def prompt(self) -> Content:
+        return self._prompt
+
+
+class ClipboardSelectionValue(NamedTuple):
+    path: str
+    type_of_selection: Literal["copy", "cut"]
 
 
 class ClipboardSelection(Selection):
@@ -119,10 +142,17 @@ class ClipboardSelection(Selection):
             )
         super().__init__(
             prompt=prompt,
-            value=compress(f"{text}-{type_of_selection}"),
-            id=compress(text),
+            value=ClipboardSelectionValue(text, type_of_selection),
+            # in the future, if we want persistent clipboard,
+            # we will have to switch to use path.compress
+            id=str(id(self)),
         )
         self.initial_prompt = prompt
+
+    @property
+    def value(self) -> ClipboardSelectionValue:
+        """The value for this selection."""
+        return self._value
 
 
 class KeybindOption(Option):
@@ -132,15 +162,30 @@ class KeybindOption(Option):
         description: str,
         max_key_width: int,
         primary_key: str,
+        is_layer: bool,
         **kwargs,
     ) -> None:
         # Should be named 'label' for searching
-        self.label = f" {keys:>{max_key_width}} │ {description} "
+        if keys == "--section--":
+            self.label = f" {' ' * max_key_width} ├ {description}"
+            label = f"[$accent]{self.label}[/]"
+        elif description == "--section--":
+            self.label = f" {keys:>{max_key_width}} ┤"
+            label = f"[$primary]{self.label}[/]"
+        elif keys == "<disabled>":
+            self.label = f" {keys:>{max_key_width}} │ {description} "
+            label = f"[$background-lighten-3]{self.label}[/]"
+        else:
+            self.label = f" {keys:>{max_key_width}} │ {description} "
+            label = self.label
         self.key_press = primary_key
 
-        super().__init__(self.label, **kwargs)
-        if primary_key == "":
+        super().__init__(label, **kwargs)
+        if description == "--section--":
             self.disabled = True
+        self.pseudo_disabled = keys == "--section--"
+
+        self.is_layer_bind = is_layer
 
 
 class ModalSearcherOption(Option):
@@ -172,7 +217,9 @@ class ModalSearcherOption(Option):
                 )
 
             # create prompt
-            prompt = ModalSearcherOption._icon_content_cache[cache_key] + Content(label)
+            prompt = ModalSearcherOption._icon_content_cache[
+                cache_key
+            ] + Content.from_markup(label)
         else:
             prompt = Content(label)
         super().__init__(prompt=prompt, disabled=disabled)

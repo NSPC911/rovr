@@ -9,13 +9,21 @@ show_progress_eta = false
 show_progress_percentage = true
 truncate_progress_file_path = false
 show_line_numbers = true
+show_hidden_files = false
+allow_tab_nav = true
+append_new_tabs = true
+double_click_delay = 0.25
+drive_watcher_frequency = 3.0
 # yazi style is 5
 # but it has more space
 scrolloff = 3
 
+[interface.image_viewer]
+protocol = "Auto"
+max_size = [4000, 4000]
+
 [interface.preview_text]
 error = "couldn't read this file! (\u00AC_\u00AC)" # ¬_¬
-binary = "the file doesn't use UTF-8, which isn't supported yet"
 start = """
   ___ ___
  |  _| . |
@@ -24,27 +32,65 @@ start = """
  | | |  _|
   \\_/|_|
 """
-empty = "bytes be gone (\u2310\u25A0_\u25A0)" # (⌐■_■)
-# how do you even respond to this
-too_large = "this file is larger (but not larger than your mother)"
+font_text = """
+abcdefghijklmnopqrstuvwxyz
+ABCDEFGHIJKLMNOPQRSTUVWXYZ
+oO08 iIlL1 g9qCQG a@ 5sS
+{} [==>  ] (*) <> ~-+ /\\
+"""
 
 [interface.clock]
 enabled = true
 align = "left"
 
 [interface.compact_mode]
-buttons = false
+buttons = true
 panels = false
 
+[interface.mime_rules]
+"text/.*" = "text"
+"application/(json|javascript|xml|raml\\+yaml)" = "text"
+"application/x-(yaml|script|pem-file|subrip|typescript)" = "text"
+"application/(mbox|ndjson|wine-extension-ini)" = "text"
+"image/svg\\+xml" = "resvg"
+"image/(avif|hei.|jxl)" = "image"
+"image/.*" = "image"
+"application/pdf" = "pdf"
+"application/(zip|gzip|zstd|bzip2|vnd\\.rar)" = "archive"
+"application/x-(xz|x-tar|x-gzip|x-bzip2|x-xz|x-rar|x-rar-compressed|x-7z-compressed)" = "archive"
+"application/(rar|7z.*|tar|xz|bzip.*|lzma|compress|archive|cpio|arj|xar|ms-cab.*)" = "archive"
+"application/(iso9660-image|qemu-disk|ms-wim|apple-diskimage)" = "archive"
+"application/virtualbox-(vhd|vhdx)" = "archive"
+"application/(debian.*-package|redhat-package-manager|rpm|android\\.package-archive)" = "archive"
+"inode/directory" = "folder"
+"font/.*" = "font"
+"application/ms-opentype" = "font"
+"application/font-.*" = "font"
+"application/x-font-.*" = "font"
+
 [settings]
-image_protocol = "Auto"
-show_hidden_files = false
 copy_includes_metadata = true
 use_recycle_bin = true
-allow_tab_nav = true
-append_new_tabs = true
-double_click_delay = 0.25
-drive_watcher_frequency = 3.0
+
+[settings.bulk_rename]
+show_as_mapping = true
+
+[settings.editor]
+open_all_in_editor = false
+
+[settings.editor.file]
+run = "$EDITOR"
+block = false
+suspend = true
+
+[settings.editor.folder]
+run = "$EDITOR"
+block = false
+suspend = true
+
+[settings.editor.bulk_rename]
+run = "$EDITOR"
+suspend = true
 
 [metadata]
 fields = [
@@ -62,6 +108,7 @@ filesize_suffix = "decimal"
 
 [theme]
 default = "nord"
+preview = "nord"
 transparent = false
 
 [[custom_theme]]
@@ -81,24 +128,6 @@ is_dark = true
 [custom_theme.bar_gradient]
 default = ["#88c0d0", "#5e81ac"]
 error = ["#bf616a", "#d08770"]
-
-[[custom_theme]]
-name = "Solarized Dark"
-primary = "#93A1A1"
-secondary = "#839496"
-warning = "#B58900"
-error = "#DC322F"
-success = "#859900"
-accent = "#D33682"
-foreground = "#EEE8D5"
-background = "#073642"
-surface = "#284149"
-panel = "#657B83"
-is_dark = true
-
-[custom_theme.bar_gradient]
-default = ["#93A1A1", "#D33682"]
-error = ["#dc322f", "#b58900"]
 
 [[custom_theme]]
 name = "Dark Pink"
@@ -124,18 +153,19 @@ is_dark = true
 "button-focus-text-style" = "reverse"
 
 [keybinds]
-# id love to get some help separating
-# vi bindings from sane bindings
+# For keybind profiles, see keybinds/sane.toml and keybinds/vim.toml
+# The default configuration below combines both styles for maximum flexibility.
+# Users can copy their preferred profile to their config directory.
 toggle_pin = ["P"]
 toggle_pinned_sidebar = ["S"]
 toggle_preview_sidebar = ["I"]
 toggle_footer = ["F"]
-toggle_menuwrapper = ["M"]
+toggle_menu_wrapper = ["M"]
 focus_toggle_pinned_sidebar = ["s"]
 focus_file_list = ["escape"]
 focus_toggle_preview_sidebar = ["i"]
 focus_toggle_path_switcher = ["ctrl+l"]
-focus_search = ["ctrl+f", "slash"]
+focus_search = ["slash"]
 focus_toggle_processes = ["#"]
 focus_toggle_clipboard = ["c"]
 focus_toggle_metadata = ["m"]
@@ -149,11 +179,12 @@ zip = ["E"]
 unzip = ["ctrl+e"]
 # id love to use ctrl+shift+c
 # but that is taken by terminals
-copy_path = ["Y"]
 up = ["up", "k"]
 down = ["down", "j"]
 up_tree = ["left", "h"]
 down_tree = ["right", "l", "enter"]
+bypass_up_tree = ["H"]
+bypass_down_tree = ["L"]
 page_up = ["pageup", "ctrl+b"]
 page_down = ["pagedown", "ctrl+f"]
 home = ["home", "g"]
@@ -173,15 +204,55 @@ tab_next = ["ctrl+j"]
 tab_previous = ["ctrl+k"]
 tab_new = ["n"]
 tab_close = ["w"]
-preview_scroll_left = ["left", "h"]
-preview_scroll_right = ["right", "l"]
-preview_select_left = ["shift+left", "H"]
-preview_select_right = ["shift+right", "L"]
-show_keybinds = ["question_mark"]
-change_sort_order = ["comma"]
+show_keybinds = ["?"]
 quit_app = ["q", "ctrl+q"]
 command_palette = "ctrl+p"
 suspend_app = ["ctrl+z"]
+open_editor = ["e"]
+show_shell_screen = [">"]
+# unavailable for now
+preview_select_left = []
+preview_select_right = []
+preview_scroll_left = []
+preview_scroll_right = []
+[keybinds.extra_copy]
+open_popup = ["Y"]
+copy_to_rovr = ["y"]
+copy_single_path = ["p"]
+copy_to_system_clip = ["s"]
+copy_current_directory = ["d"]
+[keybinds.change_sort_order]
+open_popup = [","]
+name = ["a"]
+extension = ["e"]
+natural = ["n"]
+size = ["s"]
+created = ["c"]
+modified = ["m"]
+descending = ["d"]
+[keybinds.delete_files]
+trash = ["d"]
+delete = ["x"]
+cancel = ["c", "escape"]
+[keybinds.filename_conflict]
+overwrite = ["o"]
+skip = ["s"]
+rename = ["r"]
+cancel = ["c", "escape"]
+dont_ask_again = ["a"]
+[keybinds.file_in_use]
+retry = ["r"]
+skip = ["s"]
+cancel = ["c", "escape"]
+dont_ask_again = ["a"]
+[keybinds.filter_modal]
+exit = ["escape"]
+down = ["down", "ctrl+j"]
+up = ["up", "ctrl+k"]
+[keybinds.yes_or_no]
+yes = ["y"]
+no = ["n", "escape"]
+dont_ask_again = ["a"]
 
 [plugins.zoxide]
 enabled = true
@@ -192,40 +263,31 @@ show_scores = false
 enabled = false
 executable = "bat"
 
-[plugins.editor]
-enabled = true
-file_executable = ""
-folder_executable = ""
-file_suspend = true
-folder_suspend = true
-open_all_in_editor = false
-keybinds = ["e"]
-
-[plugins.finder]
+[plugins.fd]
 enabled = true
 keybinds = ["f"]
 executable = "fd"
 relative_paths = true
 follow_symlinks = false
+no_ignore_parent = false
+default_filter_types = ["file", "directory"]
+
+[plugins.rg]
+enabled = true
+keybinds = ["\\"]
+executable = "rg"
+case_sensitive = true
+no_ignore_parent = false
+follow_symlinks = false
+search_hidden = false
 
 [plugins.poppler]
 enabled = true
 threads = 1
 use_pdftocairo = false
 poppler_folder = ""
+pdf_batch_size = 2
 
 [plugins.file_one]
 enabled = false
-
-[plugins.file_one.mime_rules]
-"text/*" = "text"
-"image/*" = "image"
-"application/pdf" = "pdf"
-"application/zip" = "archive"
-"application/x-tar" = "archive"
-"application/gzip" = "archive"
-"application/x-bzip2" = "archive"
-"application/x-xz" = "archive"
-"application/x-rar" = "archive"
-"application/x-7z-compressed" = "archive"
-"inode/directory" = "folder"
+get_description = true

@@ -173,7 +173,7 @@ class PathInput(Input):
             self.app.cd(event.value)
         else:
             self.notify("Path provided is not valid.", severity="error")
-        self.app.query_one("#file_list").focus()
+        self.app.file_list.focus()
 
     def on_key(self, event: events.Key) -> None:
         if event.key == "backspace":

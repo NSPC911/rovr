@@ -1,0 +1,77 @@
+name: Deploy to GitHub Pages
+
+on:
+  schedule:
+    - cron: "0 0 * * *"
+  release:
+    types: [published]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+jobs:
+  starting-build:
+    runs-on: ubuntu-slim
+    name: Notify Docs Build Starting
+    steps:
+      - name: Notify Discord - Docs Build Starting
+        uses: sarisia/actions-status-discord@v1.13.0
+        with:
+          webhook: ${{ secrets.LOG_HOOK }}
+          title: rovr docs build starting!
+          color: 0xFFFF00
+          description: |
+            Docs Build started due to `${{ github.event_name }}` (acted by ${{ github.actor }})
+            -# watch changes at [NSPC911/rovr/actions](https://github.com/NSPC911/rovr/actions/runs/${{ github.run_id }})
+          avatar_url: "https://avatars.githubusercontent.com/u/176916861?v=4"
+          username: "NSPBot911"
+          nodetail: true
+          notimestamp: true
+          noprefix: true
+
+  build:
+    runs-on: ubuntu-slim
+    steps:
+      - name: Checkout your repository using git
+        uses: actions/checkout@v4
+      - name: Install, build, and upload your site
+        uses: withastro/action@v3
+        with:
+          path: ./docs
+          package-manager: pnpm@latest
+          node-version: 24
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-slim
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
+
+  notify-success:
+    runs-on: ubuntu-slim
+    needs: deploy
+    name: Notify Docs Build Success
+    steps:
+      - name: Notify Discord - Docs Build Success
+        uses: sarisia/actions-status-discord@v1.13.0
+        with:
+          webhook: ${{ secrets.LOG_HOOK }}
+          title: rovr docs build succeeded!
+          color: 0x00FF00
+          description: |
+            - Stable: https://nspc911.github.io/rovr
+            - Dev: https://nspc911.github.io/rovr/dev
+          avatar_url: "https://avatars.githubusercontent.com/u/176916861?v=4"
+          username: "NSPBot911"
+          nodetail: true
+          notimestamp: true
+          noprefix: true
+

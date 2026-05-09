@@ -1,0 +1,45 @@
+dictionaries = [
+    "en_gb",
+    "en_us",
+]
+words = [
+    "chdir",
+    "checkboxes",
+    "coderabbit",
+    "customisable",
+    "direntry",
+    "filelist",
+    "filesize",
+    "halfcell",
+    "infolist",
+    "isdir",
+    "keybind",
+    "msedit",
+    "namelist",
+    "natsort",
+    "pathlib",
+    "pdftocairo",
+    "pprint",
+    "psutil",
+    "puremagic",
+    "remime",
+    "resvg",
+    "rmtree",
+    "scandir",
+    "sixel",
+    "tabline",
+    "textual",
+    "winerror",
+    "zoxide",
+]
+ignore_paths = ["codebook.toml"]
+ignore_patterns = [
+    '(?i:textual)[^\s]+',
+    '\\n[^\s]+',
+    '(?i:renderabl)([^\s]+|[^\n]+)',
+    'CON([^\$]+|[^\s]+)',
+    '(?i:checkbo)[^\s]+',
+    '(?i:pdf)[^\s]+',
+    '(?i:popple)[^\s]+',
+]
+min_word_length = 5

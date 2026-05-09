@@ -11,7 +11,7 @@ class BackButton(Button):
         super().__init__(get_icon("general", "left")[0], id="back", classes="option")
 
     def on_button_pressed(self, event: Button.Pressed) -> None:
-        """Go back in the sesison's history"""
+        """Go back in the session's history"""
         if self.disabled:
             return
         state: SessionManager = self.app.tabWidget.active_tab.session

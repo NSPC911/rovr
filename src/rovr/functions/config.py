@@ -1,19 +1,19 @@
+import json
 import os
-from collections import deque
 from importlib import resources
 from importlib.metadata import PackageNotFoundError, version
-from os import environ, path
-from platform import system
+from os import path
 from shutil import which
+from typing import Callable, Literal, cast
 
-import jsonschema
-import toml
-import ujson
-from jsonschema import ValidationError
+import fastjsonschema
+import tomli
+from fastjsonschema import JsonSchemaValueException
 from rich import box
 from rich.console import Console
 
-from rovr.functions.utils import deep_merge, set_nested_value
+from rovr.classes.config import RovrConfig
+from rovr.functions.utils import deep_merge
 from rovr.variables.maps import (
     VAR_TO_DIR,
 )
@@ -35,14 +35,16 @@ def get_version() -> str:
         return "master"
 
 
-def toml_dump(doc_path: str, exception: toml.TomlDecodeError) -> None:
+def toml_dump(doc_path: str, exception: tomli.TOMLDecodeError) -> None:
     """
     Dump an error message for anything related to TOML loading
 
     Args:
         doc_path (str): the path to the document
-        exception (toml.TomlDecodeError): the exception that occurred
+        exception (tomli.TOMLDecodeError): the exception that occurred
     """
+    from rich.syntax import Syntax
+
     doc: list = exception.doc.splitlines()
     start: int = max(exception.lineno - 3, 0)
     end: int = min(len(doc), exception.lineno + 2)
@@ -53,19 +55,27 @@ def toml_dump(doc_path: str, exception: toml.TomlDecodeError) -> None:
         + f"  [bright_blue]-->[/] [white]{path.realpath(doc_path)}:{exception.lineno}:{exception.colno}[/]"
     )
     for line in range(start, end):
-        if "[" in doc[line]:
-            doc[line] = doc[line].replace("[", "\\[")
         if line + 1 == exception.lineno:
             startswith = "╭╴"
             has_past = True
             pprint(
-                f"[bright_red]{startswith}{str(line + 1).rjust(rjust)}[/][bright_blue] │[/] {doc[line]}"
+                f"[bright_red]{startswith}{str(line + 1).rjust(rjust)}[/][bright_blue] │[/]",
+                end=" ",
             )
         else:
             startswith = "│ " if has_past else "  "
             pprint(
-                f"[bright_red]{startswith}[/][bright_blue]{str(line + 1).rjust(rjust)} │[/] {doc[line]}"
+                f"[bright_red]{startswith}[/][bright_blue]{str(line + 1).rjust(rjust)} │[/]",
+                end=" ",
             )
+        pprint(
+            Syntax(
+                doc[line],
+                "toml",
+                background_color="default",
+                theme="ansi_dark",
+            )
+        )
     # check if it is an interesting error message
     if exception.msg.startswith("What? "):
         # What? <key> already exists?<dict>
@@ -75,7 +85,7 @@ def toml_dump(doc_path: str, exception: toml.TomlDecodeError) -> None:
     exit(1)
 
 
-def find_path_line(lines: list[str], path: deque) -> int | None:
+def find_path_line(lines: list[str], path: list) -> int | None:
     """Find the line number for a given JSON path in TOML content
 
     Args:
@@ -88,12 +98,13 @@ def find_path_line(lines: list[str], path: deque) -> int | None:
     if not path:
         return 0
 
+    path_filtered = [p for p in path if not isinstance(p, int)]
+    if not path_filtered:
+        return 0
+
     current_section = []
 
-    # Convert path to list and filter out indices for comparison
-    path_list = list(path)
-    path_without_indices = [p for p in path_list if not isinstance(p, int)]
-
+    best_match_line: int = -1
     for i, line in enumerate(lines):
         stripped = line.strip()
         if not stripped or stripped.startswith("#"):
@@ -109,18 +120,24 @@ def find_path_line(lines: list[str], path: deque) -> int | None:
                 section_name = stripped.strip("[]").strip()
                 current_section = section_name.split(".")
 
-            if current_section in (path_without_indices, path_list):
-                return i
+            if current_section == path_filtered:
+                best_match_line = i
+            for depth in range(1, len(current_section) + 1):
+                if current_section[:depth] == path_filtered[:depth]:
+                    best_match_line = i
         elif "=" in stripped:
             key = stripped.split("=")[0].strip().strip('"').strip("'")
             full_path = current_section + [key]
-            if full_path in (path_without_indices, path_list):
-                return i
+            if full_path == path_filtered:
+                # exact match
+                best_match_line = i
+                break
+    return best_match_line if best_match_line != -1 else None
 
-    return None
 
-
-def schema_dump(doc_path: str, exception: ValidationError, config_content: str) -> None:
+def schema_dump(
+    doc_path: str, exception: JsonSchemaValueException, config_content: str
+) -> None:
     """
     Dump an error message for schema validation errors
 
@@ -129,21 +146,68 @@ def schema_dump(doc_path: str, exception: ValidationError, config_content: str) 
         exception: the ValidationError that occurred
         config_content: the raw file content
     """
+    import fnmatch
+
     from rich.padding import Padding
     from rich.syntax import Syntax
     from rich.table import Table
 
+    # i dont know what sort of mental illness the package has
+    # to insert a data prefix to the path, but i cant blame them
+    # i would also make stupid mistakes everywhere
+    exception.message = exception.message.replace("data.", "")
+    exception.name = (
+        cast(str, exception.name)[5:]
+        if exception.name.startswith("data.")
+        else exception.name
+    )
+
+    def get_message(exception: JsonSchemaValueException) -> tuple[str, bool]:
+        failed = False
+        match exception.rule:
+            case "required":
+                error_msg = f"Missing required field: {exception.message}"
+            case "type":
+                error_msg = f"Expected [bright_cyan]{exception.rule_definition}[/] type, but got [bright_yellow]{type(exception.value).__name__}[/] instead"
+            case "enum":
+                error_msg = f"'{exception.value}' is not inside allowlist of {exception.rule_definition}"
+            case "minimum":
+                error_msg = f"Value for [bright_cyan]{exception.name}[/] must be >= {exception.rule_definition} (cannot be {exception.value})"
+            case "maximum":
+                error_msg = f"Value for [bright_cyan]{exception.name}[/] must be <= {exception.rule_definition} (cannot be {exception.value})"
+            case "additionalProperties":
+                error_msg = exception.message
+            case "uniqueItems":
+                error_msg = f"[bright_cyan]{exception.name}[/] must have unique items (item '{cast(list, exception.value)[0]}' is duplicated)"
+            case _:
+                error_msg = exception.message
+                failed = True
+        return (f"schema\\[{exception.rule}]: {error_msg}", failed)
+
     doc: list = config_content.splitlines()
 
-    if exception.message.startswith("Additional properties are not allowed"):
-        # `Additional properties are not allowed ('<key>' was unexpected)`
-        # grabs only the key
-        cause = exception.message.split("'")
-        if len(cause) == 3:
-            exception.path.append(cause[1])
-        else:
-            pass
+    # minor fix for additionalProperties
+    if exception.rule == "additionalProperties":
+        # the current message is like `<name> must not contain {<value>, <value>, ...} properties.`
+        # but i want one of them only, so i have to regex it out
+        # so that i can get `<value> is not allowed in <name>` or something like that
+        import re
+
+        match = re.search(r"\{([^}]+)\}", exception.message)
+        if match:
+            # Get the first value from the comma-separated list
+            values = [v.strip() for v in match.group(1).split(",")]
+            if values:
+                prop = values[0]
+                name_match = re.match(r"^(.+) must not contain", exception.message)
+                name = name_match.group(1) if name_match else "<unknown>"
+                new_message = f"{prop} is not allowed in '{name}'"
+                exception.message = new_message
+                if exception.name is not None:
+                    exception.name += f".{prop.strip("'")}"
+
     # find the line no for the error path
+    # exception.path is just exception.name but as a property
     path_str = ".".join(str(p) for p in exception.path) if exception.path else "root"
     lineno = find_path_line(doc, exception.path)
 
@@ -154,23 +218,11 @@ def schema_dump(doc_path: str, exception: ValidationError, config_content: str) 
         pprint(
             f"[underline bright_red]Config Error[/] at path [bold cyan]{path_str}[/]:"
         )
-        match exception.validator:
-            case "required":
-                pprint(f"{exception.message}, but is not provided.")
-            case "type":
-                type_error_message = (
-                    f"Invalid type: expected [yellow]{exception.validator_value}[/yellow], "
-                    f"but got [yellow]{type(exception.instance).__name__}[/yellow]."
-                )
-                pprint(type_error_message)
-            case "enum":
-                enum_error_message = (
-                    f"Invalid value [yellow]'{exception.instance}'[/yellow]. "
-                    f"\nAllowed values are: {exception.validator_value}"
-                )
-                pprint(enum_error_message)
-            case _:
-                pprint(f"[yellow]{exception.message}[/yellow]")
+        msg, failed = get_message(exception)
+        if failed:
+            pprint(f"[yellow]{msg}[/]")
+        else:
+            pprint(msg)
     else:
         start: int = max(lineno - 2, 0)
         end: int = min(len(doc), lineno + 3)
@@ -205,30 +257,16 @@ def schema_dump(doc_path: str, exception: ValidationError, config_content: str) 
             )
 
         # Format the error message based on validator type
-        match exception.validator:
-            case "required":
-                error_msg = f"Missing required field: {exception.message}"
-            case "type":
-                error_msg = f"Expected [bright_cyan]{exception.validator_value}[/] type, but got [bright_yellow]{type(exception.instance).__name__}[/] instead"
-            case "enum":
-                error_msg = f"Provided value '{exception.instance}' is not inside allowlist of {exception.validator_value}"
-            case "minimum":
-                error_msg = f"Value for [bright_cyan]{'.'.join(map(str, exception.relative_path))}[/] must be >= {exception.validator_value} (cannot be {exception.instance})"
-            case "maximum":
-                error_msg = f"Value for [bright_cyan]{'.'.join(map(str, exception.relative_path))}[/] must be <= {exception.validator_value} (cannot be {exception.instance})"
-            case _:
-                error_msg = exception.message
+        error_msg, _ = get_message(exception)
 
         pprint(f"[bright_red]╰─{'─' * rjust}─❯[/] {error_msg}")
     # check path for custom message from migration.json
-    with (
-        resources.files("rovr.config")
-        .joinpath("migration.json")
-        .open("r", encoding="utf-8") as f
-    ):
-        migration_docs = ujson.load(f)
+    migration_docs = json.loads(
+        resources.files("rovr.config").joinpath("migration.json").read_text("utf-8")
+    )
+
     for item in migration_docs:
-        if path_str in item["keys"]:
+        if any(fnmatch.fnmatch(path_str, path) for path in item["keys"]):
             message = "\n".join(item["message"])
             to_print = Table(
                 box=box.ROUNDED,
@@ -240,21 +278,41 @@ def schema_dump(doc_path: str, exception: ValidationError, config_content: str) 
             to_print.add_column()
             to_print.add_row(message)
             to_print.add_row(f"[dim]> {item['extra']}[/]")
+            if "regex" in item and doc_path != path.join(
+                path.dirname(__file__), "../config/config.toml"
+            ):
+                # bird migration
+                import re
+
+                fixed_content = config_content
+                for rule in item["regex"]:
+                    fixed_content = re.sub(
+                        re.escape(rule["find"]), rule["replace"], fixed_content
+                    )
+                if fixed_content != config_content:
+                    with open(doc_path, "w", encoding="utf-8") as _f:
+                        _f.write(fixed_content)
+                    to_print.add_row(
+                        "[bright_green]Auto-fix applied! Please re-run rovr.[/]"
+                    )
+                else:
+                    to_print.add_row(
+                        "[bright_yellow]I couldn't fix it for you. Please update your config manually.[/]"
+                    )
             pprint(Padding(to_print, (0, rjust + 4, 0, rjust + 3)))
             break
-    exit(1)
+
+    if exception.rule != "additionalProperties":
+        exit(1)
 
 
-def load_config() -> tuple[dict, dict]:
+def load_config() -> tuple[dict, RovrConfig]:
     """
     Load both the template config and the user config
 
     Returns:
         dict: the config
     """
-
-    if not path.exists(VAR_TO_DIR["CONFIG"]):
-        os.makedirs(VAR_TO_DIR["CONFIG"])
 
     current_version = get_version()
     if current_version == "master":
@@ -266,8 +324,7 @@ def load_config() -> tuple[dict, dict]:
 
     # Create config file if it doesn't exist
     if not path.exists(user_config_path):
-        with open(user_config_path, "w", encoding="utf-8") as file:
-            file.write(DEFAULT_CONFIG.format(schema_url=schema_url))
+        pass
     else:
         # Update schema version if needed
         with open(user_config_path, "r", encoding="utf-8") as f:
@@ -292,19 +349,31 @@ def load_config() -> tuple[dict, dict]:
         elif not lines:
             with open(user_config_path, "w", encoding="utf-8") as file:
                 file.write(DEFAULT_CONFIG.format(schema_url=schema_url))
+    try:
+        template_config = tomli.loads(
+            resources.files("rovr.config").joinpath("config.toml").read_text("utf-8")
+        )
+    except tomli.TOMLDecodeError as exc:
+        toml_dump(path.join(path.dirname(__file__), "../config/config.toml"), exc)
 
-    with (
-        resources.files("rovr.config")
-        .joinpath("config.toml")
-        .open("r", encoding="utf-8") as f
-    ):
-        # check header
-        try:
-            content = f.read()
-            template_config = toml.loads(content)
-        except toml.TomlDecodeError as exc:
-            toml_dump(path.join(path.dirname(__file__), "../config/config.toml"), exc)
+    # check with schema
+    content = resources.files("rovr.config").joinpath("schema.json").read_text("utf-8")
+    schema_dict = json.loads(content)
+    schema: Callable[[dict], None] = fastjsonschema.compile(schema_dict)
 
+    # ensure that template config works
+    try:
+        schema(template_config)
+    except JsonSchemaValueException as exception:
+        schema_dump(
+            path.join(path.dirname(__file__), "../config/config.toml"),
+            exception,
+            resources.files("rovr.config").joinpath("config.toml").read_text("utf-8"),
+        )
+        pprint(
+            "        [red]I will refuse to launch as long as the template config is invalid.[/]"
+        )
+        exit(1)
     user_config = {}
     user_config_content = ""
     if path.exists(user_config_path):
@@ -312,114 +381,68 @@ def load_config() -> tuple[dict, dict]:
             user_config_content = f.read()
             if user_config_content:
                 try:
-                    user_config = toml.loads(user_config_content)
-                except toml.TomlDecodeError as exc:
+                    user_config = tomli.loads(user_config_content)
+                except tomli.TOMLDecodeError as exc:
                     toml_dump(user_config_path, exc)
     # Don't really have to consider the else part, because it's created further down
     config = deep_merge(template_config, user_config)
-    # check with schema
-    with (
-        resources.files("rovr.config")
-        .joinpath("schema.json")
-        .open("r", encoding="utf-8") as f
-    ):
-        content = f.read()
-        schema = ujson.loads(content)
-
+    config = cast(RovrConfig, config)
     try:
-        jsonschema.validate(config, schema)
-    except ValidationError as exception:
+        schema(config)
+    except JsonSchemaValueException as exception:
         schema_dump(user_config_path, exception, user_config_content)
 
     # slight config fixes
     # image protocol because "AutoImage" doesn't work with Sixel
-    if config["settings"]["image_protocol"] == "Auto":
-        config["settings"]["image_protocol"] = ""
-    # editor empty use $EDITOR
-    if config["plugins"]["editor"]["file_executable"] == "":
-        config["plugins"]["editor"]["file_executable"] = environ.get(
-            "EDITOR", "nano" if system() != "Windows" else "notepad"
-        )
-    if config["plugins"]["editor"]["folder_executable"] == "":
-        config["plugins"]["editor"]["folder_executable"] = environ.get(
-            "EDITOR", "vim" if system() != "Windows" else "code"
-        )
+    if config["interface"]["image_viewer"]["protocol"] == "Auto":
+        # another no choice fix, because if Auto then
+        # AutoImage is grabbed, which sucks in rendering
+        # sixel for some weird unknown reason
+        config["interface"]["image_viewer"]["protocol"] = ""  # ty: ignore[invalid-assignment]
+    default_editor = ""  # screw anyone that wants to do this to me
+    # editor empty or $EDITOR: expand to actual editor command
+    editors = [
+        "hx",
+        "nvim",
+        "vim",
+        "vi",
+        # theoretically shouldn't come this far
+        "nano",
+        # should exist in windows ever since ms-edit was added
+        # like last year or something
+        "edit",
+        "msedit",
+    ]
+    found_reasonable_cli_editor = False
+    for editor in editors:
+        if which(editor):
+            default_editor = editor + " --"
+            found_reasonable_cli_editor = True
+            break
+    if not found_reasonable_cli_editor and which("code"):
+        # VSCode
+        default_editor = "code --wait --"
+    for key in ["file", "folder", "bulk_rename"]:
+        key = cast(Literal["file", "folder", "bulk_rename"], key)
+        if not config["settings"]["editor"][key]["run"]:
+            config["settings"]["editor"][key]["run"] = default_editor
+        else:
+            # expand var
+            config["settings"]["editor"][key]["run"] = os.path.expandvars(
+                config["settings"]["editor"][key]["run"]
+            )
     # pdf fixer
-    if (
-        config["plugins"]["poppler"]["enabled"]
-        and config["plugins"]["poppler"]["poppler_folder"] == ""
-    ):
+    if config["plugins"]["poppler"]["enabled"] and config["plugins"]["poppler"][
+        "poppler_folder"
+    ].lower() in ("", "path"):
         pdfinfo_executable = which("pdfinfo")
         pdfinfo_path: str | None = None
         if pdfinfo_executable is None:
-            pprint(
-                "[WARN] Poppler is enabled, but no poppler folder was specified, and it was not found in PATH.\n"
-                "[WARN] Please install Poppler and set the poppler_folder in rovr config.",
-                style="yellow",
-            )
             config["plugins"]["poppler"]["enabled"] = False
         else:
             pdfinfo_path = path.dirname(pdfinfo_executable)
-        config["plugins"]["poppler"]["poppler_folder"] = pdfinfo_path
-    return schema, config
-
-
-def apply_mode(config: dict, mode_name: str) -> None:
-    """
-    Apply mode-specific config overrides to the config dictionary.
-
-    Args:
-        config (dict): The config dictionary to modify (modified in-place)
-        mode_name (str): The name of the mode to apply
-    """
-    if "mode" not in config:
-        from rich.syntax import Syntax
-
-        pprint("[bright_red]Error:[/] No modes defined in config")
-        pprint("[yellow]Hint:[/] Define modes in config.toml like:")
-        print()
-        pprint(
-            Syntax(
-                "[mode.gui]",
-                lexer="toml",
-                background_color="default",
-                theme="ansi_dark",
-            )
-        )
-        pprint(
-            Syntax(
-                '"plugins.editor.file_executable" = "vscode"',
-                lexer="toml",
-                background_color="default",
-                theme="ansi_dark",
-            )
-        )
-        print()
-        exit(1)
-
-    if mode_name not in config["mode"]:
-        available_modes = ", ".join(f"'{m}'" for m in config["mode"])
-        pprint(f"[bright_red]Error:[/] Mode '{mode_name}' not found in config")
-        pprint(f"[yellow]Available modes:[/] {available_modes}")
-        exit(1)
-
-    mode_config = config["mode"][mode_name]
-
-    for path_str, value in mode_config.items():
-        set_nested_value(config, path_str, value)
-
-    if "mode" in config:
-        del config["mode"]
-
-
-def config_setup() -> None:
-    # check config folder
-    if not path.exists(VAR_TO_DIR["CONFIG"]):
-        os.makedirs(VAR_TO_DIR["CONFIG"])
-    # Textual doesn't seem to have a way to check whether the
-    # CSS file exists while it is in operation, but textual
-    # only craps itself when it can't find it as the app starts
-    # so no issues
-    if not path.exists(path.join(VAR_TO_DIR["CONFIG"], "style.tcss")):
-        with open(path.join(VAR_TO_DIR["CONFIG"], "style.tcss"), "a") as _:
-            pass
+        # need to ignore in this case. poppler_folder is typed as str
+        # in the config schema, but pdfinfo_path can be None when
+        # resolved from PATH, so we suppress the type error
+        config["plugins"]["poppler"]["poppler_folder"] = pdfinfo_path  # ty: ignore[invalid-assignment]
+    return schema_dict, config

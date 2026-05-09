@@ -27,38 +27,35 @@ $scrollbar-background-hover: $primary-muted;
 $scrollbar-background-active: $primary-muted;
 $scrollbar-corner-color: $primary-muted;
 
-* {
-  scrollbar-size: 1 1;
-  &:ansi {
-    scrollbar-background-hover: $scrollbar-background;
-    scrollbar-background-active: $scrollbar-background;
+Screen.-all-horizontal #root.compact-buttons {
+  #menu_wrapper #below_menu PathInput {
+    border-left: $border-style $border-blurred;
+    padding-left: 1;
   }
-}
-
-Screen.-all-horizontal.compact-buttons {
-  #menuwrapper #below_menu #path_switcher {
-    border-left: $border-style $border-blurred
+  #menu_wrapper:focus-within #below_menu #path_switcher {
+    border-left: $border-style $border;
   }
-  #menuwrapper:focus-within #below_menu #path_switcher {
-    border-left: $border-style $border
-  }
-  #menuwrapper:focus-within #below_menu #path_switcher.hide_border_bottom {
-    border-left: $border-style $accent
+  #menu_wrapper:focus-within #below_menu #path_switcher.hide_border_bottom {
+    border-left: $border-style $accent;
+    padding-left: 2;
   }
 }
 
 /* border styling for main widgets */
-#menuwrapper,
+#menu_wrapper,
 #pinned_sidebar_container,
 #file_list_container,
 #preview_sidebar,
-#zoxide_options,
-#file_search_options,
+FileSearchToggles,
+ContentSearchToggles,
+DoubleClickableOptionList,
 #footer > *,
-FileListRightClickOptionList,
-SortOrderPopup,
+PopupOptionList,
 .comfy-buttons #path_switcher,
-.comfy-buttons #below_menu Button {
+.comfy-buttons #below_menu Button,
+PasteScreen OptionList,
+DeleteFiles OptionList,
+ArchiveCreationScreen OptionList {
   background: transparent;
   border: $border-style $border-blurred;
   border-subtitle-color: $background;
@@ -67,9 +64,7 @@ SortOrderPopup,
   background-tint: transparent !important;
   text-opacity: 1 !important;
   tint: transparent !important;
-  &:disabled {
-    border: $border-style $border-disabled;
-  }
+  &:disabled { border: $border-style $border-disabled }
   &:ansi {
     border-subtitle-background: transparent;
     border-subtitle-color: $border-blurred;
@@ -84,22 +79,25 @@ SortOrderPopup,
   }
 }
 
-#menuwrapper:focus-within,
+#menu_wrapper:focus-within,
 #pinned_sidebar_container:focus-within,
 #file_list_container:focus-within,
 #preview_sidebar:focus-within,
 #preview_sidebar:focus,
-#zoxide_options,
-#file_search_options,
+ModalScreen > VerticalGroup:focus-within > DoubleClickableOptionList,
+FileSearchToggles:focus,
+ContentSearchToggles:focus,
 #file_list.-maximized,
 #pinned_sidebar.-maximized,
 #preview_sidebar .inner_preview.-maximized,
 #footer > *:focus,
-FileListRightClickOptionList,
-SortOrderPopup,
+PopupOptionList,
 .comfy-buttons #path_switcher:focus-within,
 .comfy-buttons #below_menu Button:focus,
-.comfy-buttons #below_menu Button:hover {
+.comfy-buttons #below_menu Button:hover,
+PasteScreen OptionList,
+DeleteFiles OptionList,
+ArchiveCreationScreen OptionList:focus {
   border: $border-style $border;
   border-subtitle-background: $border;
   &:ansi {
@@ -116,8 +114,7 @@ SortOrderPopup,
   }
 }
 
-.hide,
-.hidden { display: none }
+.hide, .hidden { display: none }
 
 Input {
   scrollbar-size: 0 0;
@@ -126,9 +123,9 @@ Input {
   .input--placeholder,
   .text-area--placeholder { color: $foreground-darken-1 }
   .text-area--cursor-gutter {
-      color: $foreground;
-      background: $boost;
-      text-style: bold;
+    color: $foreground;
+    background: $boost;
+    text-style: bold;
   }
   &:ansi {
     .input--cursor,
@@ -247,7 +244,8 @@ Tooltip {
 
   &:focus-within > Tabline .underline--bar { background: $foreground-darken-3 }
 
-  HeaderClock, #newTabRight {
+  HeaderClock,
+  #newTabRight {
     background: transparent;
     dock: none;
     opacity: 1 !important;
@@ -264,7 +262,7 @@ Tooltip {
   }
 }
 
-#menuwrapper {
+#menu_wrapper {
   #below_menu { border-top: $border-style $border-blurred }
   &:focus-within #below_menu { border-top: $border-style $border }
 }
@@ -369,10 +367,14 @@ Tooltip {
   width: $pinned_sidebar_width;
 }
 
-#pinned_sidebar { height: 1fr; padding: 0 }
+#pinned_sidebar {
+  height: 1fr;
+  padding: 0
+}
 
 #preview_sidebar {
   margin: 0;
+  padding: 0;
   width: $preview_sidebar_width;
   layout: horizontal;
   height: 1fr;
@@ -381,22 +383,32 @@ Tooltip {
     text-wrap: nowrap;
     width: 1fr;
     overflow-x: hidden;
+    &.special {
+      text-overflow: fold;
+      text-wrap: wrap;
+    }
   }
-  & > Static.special {
-    text-wrap: wrap;
-    text-overflow: fold;
-    padding: 0 1;
-  }
- /* scrollbars are useless, reminder */
   & > * {
+  /* scrollbars are useless, reminder */
     background: transparent;
     border: none;
     padding: 0;
     margin: 0;
+    &.-maximized {
+      border: $border-style $border
+    }
     &Static {
       padding: 0 1;
       scrollbar-size: 0 0;
       overflow: hidden;
+      &#bat_preview {
+        padding: 0
+      }
+      &#special {
+        text-wrap: wrap;
+        text-overflow: fold;
+        padding: 0 1;
+      }
     }
     &FileList { height: 1fr }
   }
@@ -404,14 +416,9 @@ Tooltip {
     width: auto;
     height: auto;
     align: center middle;
-    margin: 0 1
-  }
-  &.pdf Image {
     margin: 0 1 1 1;
   }
 }
-
-#preview_sidebar { padding: 0 }
 
 #image_preview {
   width: auto;
@@ -430,6 +437,9 @@ Tooltip {
   &:focus-within {
     height: $footer_focus_height;
     max-height: 40vh;
+  }
+  * {
+    scrollbar-size: 1 1;
   }
 }
 
@@ -467,9 +477,19 @@ ProgressBarContainer {
 }
 
 Content.selected { color: red }
-FileList, PinnedSidebar, Clipboard, CommandList, #zoxide_options, FileListRightClickOptionList, SortOrderPopup, #file_search_options {
+CommandList,
+FileList, PinnedSidebar, Clipboard,
+PopupOptionList,
+FileSearchToggles,
+ContentSearchToggles,
+DoubleClickableOptionList,
+KeybindList,
+PasteScreen OptionList,
+DeleteFiles OptionList,
+ArchiveCreationScreen OptionList {
   padding: 0 0 0 0;
   background-tint: ansi_default !important;
+  scrollbar-size: 1 1;
   .option-list--separator { color: $foreground }
   .option-list--option-disabled { color: $border-blurred }
   &:light .option-list--option-disabled { color: $border-blurred-light }
@@ -512,17 +532,10 @@ FileList, PinnedSidebar, Clipboard, CommandList, #zoxide_options, FileListRightC
     color: $background;
   }
 }
-FileList .option-list--option-highlighted {
-  color: $block-cursor-background;
-  background: transparent;
-  text-style: bold;
-}
 
 #dialog {
-  max-width: 57;
-  max-height: 15;
-  height: 75vh;
-  width: 75vw;
+  max-width: 50vw;
+  max-height: 50vh;
   overflow-y: auto;
   border-title-align: center;
   border-subtitle-align: center;
@@ -564,35 +577,71 @@ ModalScreen Button:ansi {
   }
 }
 
-ZDToDirectory, FileSearch {
+ZDToDirectory,
+FileSearch,
+ContentSearch,
+ArchiveCreationScreen {
   align: center middle;
-  Input {
-    width: 100%;
-    max-width: 100%;
-    padding: 0 1;
-    background: transparent;
-    border: $border-style $border;
-  }
-  OptionList {
-    width: 100%;
-    max-width: 100%;
-    height: 1fr;
-    background: transparent;
-    border: $border-style $border;
-    padding: 0;
-    .option-list--option-highlighted {
-      background: $primary !important;
-      color: $background !important;
-    }
-    &.empty {
-      border: $border-style $error !important;
-      border-subtitle-color: $error !important;
-    }
-  }
+  layout: horizontal;
   & > VerticalGroup {
-    max-width: 50vw;
-    max-height: 50vh;
+    max-width: 60vw;
+    max-height: 60vh;
+    OptionList {
+      width: 100%;
+      max-width: 100%;
+      height: 1fr;
+      padding: 0;
+      &.empty {
+        border: $border-style $error-darken-3 !important;
+        border-subtitle-color: $error-darken-3 !important;
+      }
+    }
+    Input {
+      width: 100%;
+      max-width: 100%;
+      padding: 0 1;
+      background: transparent;
+      border: $border-style $border-blurred;
+    }
+    &:focus-within {
+      OptionList,
+      RadioList {
+        border: $border-style $border;
+        background: transparent !important;
+        .option-list--option-highlighted {
+          background: $primary !important;
+          color: $background !important;
+        }
+        &.empty {
+          border: $border-style $error !important;
+          border-subtitle-color: $error !important;
+        }
+      }
+      Input {
+        border: $border-style $border;
+      }
+    }
   }
+}
+
+FileSearch FileSearchToggles,
+ContentSearch ContentSearchToggles {
+  width: 24;
+  height: auto;
+  max-height: 60vh;
+}
+
+ContentSearch ContentSearchToggles {
+  /* size fix */
+  width: 25
+}
+
+/* Shared OptionList highlight style */
+Keybinds #keybinds_data .option-list--option-highlighted,
+CommandPalette CommandList > .option-list--option-highlighted,
+PopupOptionList .option-list--option-highlighted {
+  background: $primary;
+  color: $background;
 }
 
 Keybinds {
@@ -603,10 +652,6 @@ Keybinds {
     height: 1fr;
     background: transparent;
     padding: 0;
-    .option-list--option-highlighted {
-      background: $primary;
-      color: $background;
-    }
   }
   #keybinds_group {
     max-width: 60vw;
@@ -615,8 +660,54 @@ Keybinds {
   }
 }
 
-Dismissable {
+/* Modal Dialog Shared Styles */
+Dismissible,
+YesOrNo,
+CommonFileNameDoWhat,
+FileInUse,
+DeleteFiles,
+ModalInput,
+TerminalTooSmall { align: center middle }
+
+YesOrNo #dialog #question_container,
+CommonFileNameDoWhat #dialog #question_container,
+FileInUse #question_container {
+  column-span: 2;
+  height: 1fr;
+  width: 1fr;
+  content-align: center middle;
+  .question {
+    content-align: center middle;
+    width: 1fr;
+    height: 1fr;
+    text-align: center;
+  }
+}
+
+YesOrNo #dialog #dontAskAgain,
+CommonFileNameDoWhat #dialog #dontAskAgain,
+FileInUse #dontAskAgain {
+  column-span: 2;
+  content-align: center middle;
   align: center middle;
+  Switch {
+    border: none;
+    padding: 0;
+    background: transparent;
+    margin: 0 2 0 0;
+    &:focus {
+      border: none;
+      & > .switch--slider { color: $panel-lighten-1 }
+      &.-on > .switch--slider { color: $success-lighten-1 }
+    }
+  }
+}
+
+YesOrNo #dialog Button,
+CommonFileNameDoWhat #dialog Button,
+FileInUse Button { width: 100% }
+
+Dismissible {
   #dialog {
     grid-size: 1;
     grid-gutter: 1 2;
@@ -635,152 +726,59 @@ Dismissable {
   Button { width: 50% }
 }
 
-YesOrNo {
-  align: center middle;
-  #dialog {
-    grid-size: 2;
-    grid-gutter: 1 2;
-    padding: 1 3 1 3;
-    border: $border-style $border;
-    grid-rows: 1fr 3; /* enough space for 1fr */
-    &.with_toggle {
-      grid-rows: 2 3 1; /* not enough space for two lines at times */
-      padding: 1 3 0 3;
-    }
-    #question_container {
-      column-span: 2;
-      height: 1fr;
-      width: 1fr;
-      content-align: center middle;
-      .question {
-        content-align: center middle;
-        width: 1fr;
-        height: 1fr;
-        text-align: center;
-      }
-    }
-    Button { width: 100% }
-    #dontAskAgain {
-      column-span: 2;
-      content-align: center middle;
-      align: center middle;
-      Switch {
-        border: none;
-        padding: 0;
-        background: transparent;
-        margin: 0 2 0 0;
-        &:focus {
-          border: none;
-          & > .switch--slider { color: $panel-lighten-1 }
-          &.-on > .switch--slider { color: $success-lighten-1 }
-        }
-      }
-    }
+YesOrNo #dialog {
+  grid-size: 2;
+  grid-gutter: 1 2;
+  padding: 1 3 1 3;
+  border: $border-style $border;
+  grid-rows: 1fr 3; /* enough space for 1fr */
+  &.with_toggle {
+    grid-rows: 1fr 3 1;
+    padding: 1 3 0 3;
   }
 }
 
-CommonFileNameDoWhat {
-  align: center middle;
-  #dialog {
-    grid-size: 2;
-    grid-gutter: 1 2;
-    grid-rows: 2 3 3 1; /* need the two lines for label */
-    padding: 1 3 0 3;
-    border: $border-style $border;
-    #question_container {
-      column-span: 2;
-      height: 1fr;
-      width: 1fr;
-      content-align: center middle;
-      .question {
-        content-align: center middle;
-        width: 1fr;
-        height: 1fr;
-        text-align: center;
-      }
-    }
-    Button { width: 100% }
-    #dontAskAgain {
-      column-span: 2;
-      content-align: center middle;
-      align: center middle;
-      Switch {
-        border: none;
-        padding: 0;
-        background: transparent;
-        margin: 0 2 0 0;
-        &:focus {
-          border: none;
-          & > .switch--slider { color: $panel-lighten-1 }
-          &.-on > .switch--slider { color: $success-lighten-1 }
-        }
-      }
-    }
+PasteScreen > #dialog {
+  grid-size: 2 3;
+  grid-gutter: 1 2;
+  grid-rows: 0.75fr 1fr 3;
+  &.with_toggle {
+    grid-rows: 0.75fr 1fr 3 1;
   }
+  OptionList {
+    column-span: 2;
+    padding: 0;
+    height: 1fr
+  }
+  Button {
+    column-span: 1
+  }
+  #question_container {
+    column-span: 2;
+  }
+}
+
+CommonFileNameDoWhat #dialog {
+  grid-size: 2;
+  grid-gutter: 1 2;
+  grid-rows: 1fr 3 3 1; /* need the two lines for label */
+  padding: 1 3 0 3;
+  border: $border-style $border;
+    height: 60vh;
+    max-height: 60vh;
+    width: 60vw;
+    max-width: 60vw;
 }
 
 FileInUse {
-   align: center middle;
-   #dialog {
-     grid-size: 2;
-     grid-gutter: 1 2;
-     grid-rows: 1fr 3 3 1; /* space for toggle row */
-     padding: 1 3;
-     border: $border-style $border;
-     max-height: 16;
-   }
-   #question_container {
-     column-span: 2;
-     height: 1fr;
-     width: 1fr;
-     content-align: center middle;
-     .question {
-       content-align: center middle;
-       width: 1fr;
-       height: 1fr;
-       text-align: center;
-     }
-   }
-   Button { width: 100% }
-   Container {
-     column-span: 2;
-     align: center middle;
-     Button#cancel { width: 50% }
-   }
-   #dontAskAgain {
-     column-span: 2;
-     content-align: center middle;
-     align: center middle;
-     Switch {
-       border: none;
-       padding: 0;
-       background: transparent;
-       margin: 0 2 0 0;
-       &:focus {
-         border: none;
-         & > .switch--slider { color: $panel-lighten-1 }
-         &.-on > .switch--slider { color: $success-lighten-1 }
-       }
-     }
-   }
-}
-
-DeleteFiles {
-  align: center middle;
   #dialog {
     grid-size: 2;
     grid-gutter: 1 2;
-    grid-rows: 1fr 3 3 1; /* no issues for now */
+    grid-rows: 1fr 3 3 1; /* space for toggle row */
     padding: 1 3;
     border: $border-style $border;
+    max-height: 16;
   }
-  #question {
-    column-span: 2;
-    height: 1fr;
-    width: 1fr;
-    content-align: center middle;
-  }
-  Button { width: 100% }
   Container {
     column-span: 2;
     align: center middle;
@@ -788,13 +786,44 @@ DeleteFiles {
   }
 }
 
+DeleteFiles {
+  #dialog {
+    grid-size: 2 3;
+    grid-gutter: 1 2;
+    grid-rows: 0.75fr 1fr 3 1; /* no issues for now */
+    padding: 1 3;
+    height: 60vh;
+    max-height: 60vh;
+    width: 60vw;
+    max-width: 60vw;
+    border: $border-style $border;
+    &.with_trash {
+      grid-size: 3 3;
+    }
+  }
+  #question {
+    column-span: 3;
+    height: 1fr;
+    width: 1fr;
+    content-align: center middle;
+  }
+  Button { width: 1fr }
+  Container {
+    column-span: 2;
+    align: center middle;
+  }
+  SpecialOptionList {
+    column-span: 3;
+    padding: 0;
+    height: 1fr;
+  }
+}
+
 ModalInput {
-  align: center middle;
-  HorizontalGroup {
+  #modalInput_group {
     border: $border-style $border;
     width: 50vw;
     max-height: 3;
-    padding: 0 1;
     background: transparent !important;
     border-title-align: left;
     border-subtitle-align: right;
@@ -803,13 +832,14 @@ ModalInput {
   }
   Input {
     background: transparent !important;
-    overflow-x: scroll;
+    overflow-x: hidden;
+    width: 1fr;
   }
   Label { height: 1 }
+  Label.arrow { color: $border }
 }
 
 TerminalTooSmall {
-  align: center middle;
   background: transparent;
   height: 1fr;
   scrollbar-size: 0 0;
@@ -831,17 +861,12 @@ TerminalTooSmall {
   }
 }
 
-
 CommandPalette {
   align: center middle;
   CommandList {
     border: $border-style $border;
     border-top: none;
-    max-height: 50vh;
-    & > .option-list--option-highlighted {
-      color: $background;
-      background: $primary;
-    }
+    max-height: 60vh;
   }
   SearchIcon {
     margin-left: 2;
@@ -858,14 +883,48 @@ CommandPalette {
   LoadingIndicator { border-bottom: $border-style $border }
 }
 
-FileListRightClickOptionList,
-SortOrderPopup {
-  width: auto;
-  .option-list--option-highlighted {
-    background: $primary;
-    color: $background;
+ArchiveCreationScreen {
+  layout: vertical;
+  grid-size: 2 2;
+  grid-rows: 3 1fr;
+  #modalInput_group {
+    border: $border-style $border-blurred;
+    width: 50vw;
+    max-height: 3;
+    background: transparent !important;
+    border-title-align: left;
+    border-subtitle-align: right;
+    column-span: 2;
+    &.invalid { border: $border-style $error }
+    &:light { border: $border-style $error }
+    &:focus-within { border: $border-style $border }
+    &.invalid:focus-within { border: $border-style $error-lighten-3 }
+  }
+  HorizontalGroup {
+    width: 50vw;
+    OptionList {
+      height: 8;
+    }
+  }
+  ArchiveCompression:disabled {
+    border: $border-style $error !important;
   }
 }
+
+ShellExec {
+  #modalInput_group {
+    &.background { border: $border-style $success-lighten-3 }
+    &.block { border: $border-style $warning-lighten-3 }
+    &.suspend { border: $border-style $error-lighten-3 }
+    &:light {
+      &.background { border: $border-style $success-darken-1 }
+      &.block { border: $border-style $warning-darken-1 }
+      &.suspend { border: $border-style $error-darken-1 }
+    }
+  }
+}
+
+PopupOptionList { width: auto }
 
 LoadingIndicator {
   background: transparent;
@@ -882,6 +941,12 @@ LoadingIndicator {
   }
 }
 .compact-buttons {
+  #headerArea {
+    height: 1;
+    HeaderClock {
+      border-bottom: none !important;
+    }
+  }
   #below_menu {
     height: 2;
     Input {
@@ -947,41 +1012,57 @@ LoadingIndicator {
     max-width: 3;
   }
 }
-App.comfy-buttons Screen.-nopreview #below_menu PathAutoCompleteInput,
-App.comfy-buttons Screen.-filelistonly #below_menu PathAutoCompleteInput {
+#root.comfy-buttons Screen.-no-preview #below_menu PathAutoCompleteInput,
+#root.comfy-buttons Screen.-filelist-only #below_menu PathAutoCompleteInput {
   margin: -1 1 0 1
 }
-App.compact-buttons Screen.-nopreview #below_menu PathAutoCompleteInput,
-App.compact-buttons Screen.-filelistonly #below_menu PathAutoCompleteInput {
+#root.compact-buttons Screen.-no-preview #below_menu PathAutoCompleteInput,
+#root.compact-buttons Screen.-filelist-only #below_menu PathAutoCompleteInput {
   margin: -1 -1 0 -1
 }
-Screen.-filelistonly,
-Screen.-nopreview {
+Screen.-filelist-only,
+Screen.-no-preview {
   #preview_sidebar,
   #below_menu Button { display: none !important }
-  #path_switcher { padding: 0 }
 }
-Screen.-nomenu-atall #menuwrapper,
-Screen.-middle-only #menuwrapper {
-  display: none;
-}
+Screen.-no-menu-at-all #menu_wrapper,
+Screen.-middle-only #menu_wrapper { display: none }
+
 Screen {
-  &.-filelistonly {
+  &.-filelist-only {
     #pinned_sidebar_container { display: none !important }
     #zoxide_group,
     #file_search_group,
+    #content_search_group,
+    #keybinds_group,
     .--textual-command-palette #--container,
     #dialog,
     #modalInput_group {
-      width: 90vw;
-      max-width: 90vw;
+      width: 100vw;
+      max-width: 100vw;
     }
-    Toast { width: 90vw }
+    Toast { width: 100vw }
+    #file_search_toggles,
+    #content_search_toggles { display: none }
+    #dialog.delete {
+      grid-size: 1 5 !important;
+      grid-rows: 0.75fr 1fr 3 3 1 !important;
+      padding: 0 1;
+      &.with_trash { grid-rows: 0.75fr 1fr 3 3 3 1 !important }
+    }
+    #dialog.file_in_use {
+      max-height: 75vh;
+      grid-size: 1 5 !important;
+      grid-rows: 1fr 3 3 3 1 !important;
+      #cancel { width: 100% }
+    }
   }
-  &.-nopreview {
+  &.-no-preview {
     #pinned_sidebar_container { max-width: 25vw }
     #zoxide_group,
     #file_search_group,
+    #content_search_group,
+    #keybinds_group,
     .--textual-command-palette #--container,
     #dialog,
     #modalInput_group {
@@ -989,22 +1070,44 @@ Screen {
       max-width: 75vw;
     }
     Toast { width: 50vw }
+    #file_search_toggles,
+    #content_search_toggles { display: none }
+    #dialog.delete {
+      grid-size: 2 4 !important;
+      max-width: 80vw;
+      width: 80vw;
+      grid-rows: 0.75fr 1fr 3 3 1 !important;
+      padding: 0 1;
+      &.with_trash { grid-rows: 0.75fr 1fr 3 3 3 1 !important }
+      #cancel { width: 50% }
+    }
+    #dialog.file_in_use {
+      max-height: 75vh;
+      grid-size: 2 4 !important;
+      grid-rows: 1fr 3 3 1 !important;
+      #cancel { width: 100% }
+    }
   }
-  &.-all-vertical #footer { max-height: 25vh }
-  &.-nopath {
+  &.-all-vertical {
+    #footer { max-height: 25vh }
+    #dialog.file_in_use #cancel { width: 50% }
+  }
+  &.-no-path {
     #below_menu { display: none !important }
     #footer { max-height: 30vh }
+    #zoxide_group, #file_search_group, #content_search_group { max-height: 75vh }
   }
-  &.-nomenu-atall {
+  &.-no-menu-at-all {
     #footer { max-height: 30vh }
+    #zoxide_group, #file_search_group, #content_search_group { max-height: 100vh }
   }
-  &.-filelistonly-vertical {
-    #menu { display: none !important }
-  }
+  &.-filelist-only-vertical #menu { display: none !important }
   &.-middle-only {
     #footer { max-height: 25vh }
+    #zoxide_group, #file_search_group, #content_search_group { max-height: 100vh !important }
   }
 }
+
 #showKeys {
   align: right middle;
   width: auto;
@@ -1012,4 +1115,14 @@ Screen {
   margin-right: 1;
   min-width: 5;
   padding: 0 1;
+}
+
+FileList .option-list--option-highlighted,
+Clipboard .option-list--option-highlighted,
+DeleteFiles OptionList .option-list--option-highlighted,
+PasteScreen OptionList .option-list--option-highlighted,
+ArchiveCreationScreen OptionList .option-list--option-highlighted {
+  color: $block-cursor-background;
+  background: transparent;
+  text-style: bold;
 }

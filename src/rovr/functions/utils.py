@@ -1,4 +1,6 @@
-from typing import Any, Callable
+import shlex
+import subprocess
+from typing import TYPE_CHECKING, Any, Callable
 
 from humanize import naturalsize
 from rich.console import Console
@@ -6,9 +8,18 @@ from textual import events
 from textual.dom import DOMNode
 from textual.worker import NoActiveWorker, WorkerCancelled, get_current_worker
 
+from rovr.classes.config import (
+    _RovrConfigSettingsEditorBulkRename,
+    _RovrConfigSettingsEditorFile,
+    _RovrConfigSettingsEditorFolder,
+)
 from rovr.variables.maps import (
     BORDER_BOTTOM,
 )
+
+if TYPE_CHECKING:
+    from textual.app import App
+
 
 pprint = Console().print
 
@@ -195,20 +206,55 @@ class classproperty:  # noqa: N801
 
 
 async def is_archive(path_str: str) -> bool:
-    from rovr.functions.path import get_mime_type, match_mime_to_preview_type
-    from rovr.variables.constants import config, file_executable
-    from rovr.variables.maps import ARCHIVE_EXTENSIONS_FULL
+    from rovr.classes.archive import Archive
 
-    if config["plugins"]["file_one"]["enabled"] and file_executable is not None:
-        mime_type = await get_mime_type(path_str)
-        if mime_type is None:
-            return path_str.lower().endswith(ARCHIVE_EXTENSIONS_FULL)
-        if (
-            match_mime_to_preview_type(
-                mime_type, config["plugins"]["file_one"]["mime_rules"]
-            )
-            == "archive"
-        ):
+    try:
+        with Archive(path_str) as _:
             return True
+    except Exception:
+        return False
 
-    return path_str.lower().endswith(ARCHIVE_EXTENSIONS_FULL)
+
+def get_shortest_bind(binds: list[str]) -> str:
+    least_len: tuple[int | None, str] = (None, "")
+    for bind in binds:
+        if least_len[0] is None or least_len[0] > len(bind):
+            least_len = (len(bind), bind)
+    return least_len[1]
+
+
+def run_editor_command(
+    app: "App",
+    editor_config: _RovrConfigSettingsEditorFile
+    | _RovrConfigSettingsEditorFolder
+    | _RovrConfigSettingsEditorBulkRename,
+    target_path: str,
+    on_error: Callable[[str, str], None] | None = None,
+) -> subprocess.CompletedProcess | None:
+    """Run an editor command based on configuration.
+
+    Args:
+        app: The Textual app instance (needed for suspend/run_in_thread).
+        editor_config: Configuration dict with 'run', 'suspend', and optionally 'block' keys.
+        target_path: The file/folder path to open in the editor.
+        on_error: Optional callback for error handling, receives (message, title).
+
+    Returns:
+        CompletedProcess if command was run synchronously, None if run in thread.
+    """
+    command = shlex.split(editor_config["run"]) + [target_path]
+
+    if editor_config.get("suspend", False):
+        with app.suspend():
+            process = subprocess.run(command)
+        if process.returncode != 0 and on_error:
+            on_error(f"Error Code {process.returncode}", "Editor Error")
+        return process
+    elif editor_config.get("block", False):
+        process = subprocess.run(command, capture_output=True)
+        if process.returncode != 0 and on_error:
+            on_error(process.stderr.decode(), f"Error Code {process.returncode}")
+        return process
+    else:
+        app.run_in_thread(subprocess.run, command, capture_output=True)
+        return None

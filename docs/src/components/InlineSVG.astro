@@ -1,0 +1,40 @@
+---
+import { readFile } from "node:fs/promises";
+import { join, basename } from "node:path";
+
+interface Props {
+  src: string;
+  alt?: string;
+  class?: string;
+}
+
+const { src, alt, class: className } = Astro.props;
+
+const cleanPath = src.replace(/^\/rovr\//, "/");
+const svgPath = join(process.cwd(), "public", cleanPath.replace(/^\//, ""));
+
+console.log(`\n[InlineSVG] Loading: ${basename(svgPath)}`);
+
+let svgContent = "";
+try {
+  svgContent = await readFile(svgPath, "utf-8");
+} catch (e) {
+  console.error(`Failed to read SVG file: ${svgPath}`, e);
+}
+---
+
+<div role="img" aria-label={alt} class:list={["inline-svg", className]}>
+  <Fragment set:html={svgContent} />
+</div>
+
+<style>
+  .inline-svg {
+    display: block;
+    width: 100%;
+  }
+  .inline-svg :global(svg) {
+    width: 100%;
+    height: auto;
+    display: block;
+  }
+</style>

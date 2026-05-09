@@ -1,16 +1,14 @@
-import os
+import json
+from copy import deepcopy
 from os import path
 from typing import TypedDict, cast
 
-import ujson
+from rovr.variables.maps import SORTED_VARS, VAR_TO_DIR
 
-from rovr.variables.maps import (
-    VAR_TO_DIR,
-)
-
-from .path import normalise
+from .path import dump_exc, normalise
 
 pins = {}
+PIN_PATH = path.join(VAR_TO_DIR["CONFIG"], "pins.json")
 
 
 class PinsDict(TypedDict):
@@ -32,14 +30,10 @@ def load_pins() -> PinsDict:
     # pins isn't set global, I can't be bothered for now
     # until an issue gets raised in the future
     global pins
-    tempins: PinsDict
-    user_pins_file_path = path.join(VAR_TO_DIR["CONFIG"], "pins.json")
+    _pins: PinsDict
 
-    # Ensure the user's config directory exists
-    if not path.exists(VAR_TO_DIR["CONFIG"]):
-        os.makedirs(VAR_TO_DIR["CONFIG"])
-    if not path.exists(user_pins_file_path):
-        tempins = {
+    if not path.exists(PIN_PATH):
+        _pins = {
             "default": [
                 {"name": "Home", "path": "$HOME"},
                 {"name": "Downloads", "path": "$DOWNLOADS"},
@@ -51,36 +45,31 @@ def load_pins() -> PinsDict:
             ],
             "pins": [],
         }
+    else:
         try:
-            with open(user_pins_file_path, "w") as f:
-                ujson.dump(tempins, f, escape_forward_slashes=False, indent=2)
-        except IOError:
-            pass
-
-    try:
-        with open(user_pins_file_path, "r") as f:
-            loaded = ujson.load(f)
-        if not isinstance(loaded, dict):
-            raise ValueError()
-        tempins = cast(PinsDict, loaded)
-    except (IOError, ValueError, ujson.JSONDecodeError):
-        # Reset pins on corrupt or something else happened
-        tempins = {
-            "default": [
-                {"name": "Home", "path": "$HOME"},
-                {"name": "Downloads", "path": "$DOWNLOADS"},
-                {"name": "Documents", "path": "$DOCUMENTS"},
-                {"name": "Desktop", "path": "$DESKTOP"},
-                {"name": "Pictures", "path": "$PICTURES"},
-                {"name": "Videos", "path": "$VIDEOS"},
-                {"name": "Music", "path": "$MUSIC"},
-            ],
-            "pins": [],
-        }
+            with open(PIN_PATH, "r") as f:
+                loaded = json.load(f)
+            if not isinstance(loaded, dict):
+                raise ValueError()
+            _pins = cast(PinsDict, loaded)
+        except (IOError, ValueError, json.JSONDecodeError):
+            # Reset pins on corrupt or something else happened
+            _pins = {
+                "default": [
+                    {"name": "Home", "path": "$HOME"},
+                    {"name": "Downloads", "path": "$DOWNLOADS"},
+                    {"name": "Documents", "path": "$DOCUMENTS"},
+                    {"name": "Desktop", "path": "$DESKTOP"},
+                    {"name": "Pictures", "path": "$PICTURES"},
+                    {"name": "Videos", "path": "$VIDEOS"},
+                    {"name": "Music", "path": "$MUSIC"},
+                ],
+                "pins": [],
+            }
 
     # If list died
-    if "default" not in tempins or not isinstance(tempins["default"], list):
-        tempins["default"] = [
+    if "default" not in _pins or not isinstance(_pins["default"], list):
+        _pins["default"] = [
             {"name": "Home", "path": "$HOME"},
             {"name": "Downloads", "path": "$DOWNLOADS"},
             {"name": "Documents", "path": "$DOCUMENTS"},
@@ -89,13 +78,13 @@ def load_pins() -> PinsDict:
             {"name": "Videos", "path": "$VIDEOS"},
             {"name": "Music", "path": "$MUSIC"},
         ]
-    if "pins" not in tempins or not isinstance(tempins["pins"], list):
-        tempins["pins"] = []
+    if "pins" not in _pins or not isinstance(_pins["pins"], list):
+        _pins["pins"] = []
 
     for section_key in ["default", "pins"]:
         # again, screw you ty, `section_key` can never be unknown
         # but i dont know how to assert that to you
-        for item in tempins[section_key]:  # ty: ignore[invalid-key]
+        for item in _pins[section_key]:  # ty: ignore[invalid-key]
             # no i will not use isinstance, ty screams at me
             # because of the replace code a few lines below
             if type(item) is dict and "path" in item and type(item["path"]) is str:
@@ -104,8 +93,8 @@ def load_pins() -> PinsDict:
                     item["path"] = item["path"].replace(f"${var}", dir_path_val)
                 # Normalize to forward slashes
                 item["path"] = normalise(item["path"])
-    pins = tempins
-    return tempins
+    pins = _pins
+    return _pins
 
 
 def add_pin(pin_name: str, pin_path: str | bytes) -> None:
@@ -118,7 +107,7 @@ def add_pin(pin_name: str, pin_path: str | bytes) -> None:
     """
     global pins
 
-    pins_to_write = ujson.loads(ujson.dumps(pins))
+    pins_to_write = deepcopy(pins)
 
     pin_path_normalized = normalise(pin_path)
     pins_to_write.setdefault("pins", []).append({
@@ -126,7 +115,6 @@ def add_pin(pin_name: str, pin_path: str | bytes) -> None:
         "path": pin_path_normalized,
     })
 
-    sorted_vars = sorted(VAR_TO_DIR.items(), key=lambda x: len(x[1]), reverse=True)
     for section_key in ["default", "pins"]:
         if section_key in pins_to_write:
             for item in pins_to_write[section_key]:
@@ -135,15 +123,14 @@ def add_pin(pin_name: str, pin_path: str | bytes) -> None:
                     and "path" in item
                     and isinstance(item["path"], str)
                 ):
-                    for var, dir_path_val in sorted_vars:
+                    for var, dir_path_val in SORTED_VARS:
                         item["path"] = item["path"].replace(dir_path_val, f"${var}")
 
     try:
-        user_pins_file_path = path.join(VAR_TO_DIR["CONFIG"], "pins.json")
-        with open(user_pins_file_path, "w") as f:
-            ujson.dump(pins_to_write, f, escape_forward_slashes=False, indent=2)
-    except IOError:
-        pass
+        with open(PIN_PATH, "w") as f:
+            json.dump(pins_to_write, f, indent=2)
+    except IOError as exc:
+        dump_exc(None, exc)
 
     load_pins()
 
@@ -157,7 +144,7 @@ def remove_pin(pin_path: str | bytes) -> None:
     """
     global pins
 
-    pins_to_write = ujson.loads(ujson.dumps(pins))
+    pins_to_write = deepcopy(pins)
 
     pin_path_normalized = normalise(pin_path)
     if "pins" in pins_to_write:
@@ -167,7 +154,7 @@ def remove_pin(pin_path: str | bytes) -> None:
             if not (isinstance(pin, dict) and pin.get("path") == pin_path_normalized)
         ]
 
-    sorted_vars = sorted(VAR_TO_DIR.items(), key=lambda x: len(x[1]), reverse=True)
+    SORTED_VARS = sorted(VAR_TO_DIR.items(), key=lambda x: len(x[1]), reverse=True)
     for section_key in ["default", "pins"]:
         if section_key in pins_to_write:
             for item in pins_to_write[section_key]:
@@ -176,15 +163,14 @@ def remove_pin(pin_path: str | bytes) -> None:
                     and "path" in item
                     and isinstance(item["path"], str)
                 ):
-                    for var, dir_path_val in sorted_vars:
+                    for var, dir_path_val in SORTED_VARS:
                         item["path"] = item["path"].replace(dir_path_val, f"${var}")
 
     try:
-        user_pins_file_path = path.join(VAR_TO_DIR["CONFIG"], "pins.json")
-        with open(user_pins_file_path, "w") as f:
-            ujson.dump(pins_to_write, f, escape_forward_slashes=False, indent=2)
-    except IOError:
-        pass
+        with open(pin_path, "w") as f:
+            json.dump(pins_to_write, f, indent=2)
+    except IOError as exc:
+        dump_exc(None, exc)
 
     load_pins()  # Reload
 

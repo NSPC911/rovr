@@ -1,37 +1,40 @@
-import asyncio
-import contextlib
-from os import getcwd, path
-from os import system as cmd
-from time import time
-from typing import ClassVar
+from os import getcwd, listdir, path
+from typing import Callable, ClassVar, Iterable, Self, Sequence, cast
 
-from rich.segment import Segment
-from rich.style import Style
 from textual import events, on, work
 from textual.binding import BindingType
+from textual.content import ContentText
 from textual.css.query import NoMatches
 from textual.geometry import Region
-from textual.strip import Strip
+from textual.style import Style as TextualStyle
 from textual.widgets import Button, Input, OptionList, SelectionList
 from textual.widgets.option_list import Option, OptionDoesNotExist
-from textual.widgets.selection_list import Selection
+from textual.widgets.selection_list import Selection, SelectionType
+from textual.worker import WorkerError
 
-from rovr.classes import ArchiveFileListSelection, FileListSelectionWidget
+from rovr.classes.mixins import CheckboxRenderingMixin
 from rovr.classes.session_manager import SessionManager
+from rovr.classes.textual_options import FileListSelectionWidget
 from rovr.components import PopupOptionList
 from rovr.functions import icons as icon_utils
 from rovr.functions import path as path_utils
 from rovr.functions import pins as pin_utils
 from rovr.functions import utils
-from rovr.variables.constants import buttons_that_depend_on_path, config, vindings
+from rovr.navigation_widgets import PathInput
+from rovr.state_manager import StateManager
+from rovr.variables.constants import (
+    bindings,
+    buttons_that_depend_on_path,
+    config,
+)
 
 
-class FileList(SelectionList, inherit_bindings=False):
+class FileList(CheckboxRenderingMixin, SelectionList, inherit_bindings=False):
     """
     OptionList but can multi-select files and folders.
     """
 
-    BINDINGS: ClassVar[list[BindingType]] = list(vindings)
+    BINDINGS: ClassVar[list[BindingType]] = list(bindings)
 
     def __init__(
         self,
@@ -49,43 +52,18 @@ class FileList(SelectionList, inherit_bindings=False):
             select (bool): Whether the selection is select or normal.
         """
         super().__init__(*args, **kwargs)
+        self._options: list[FileListSelectionWidget] = []
         self.dummy = dummy
         self.enter_into = enter_into
         self.select_mode_enabled = select
         if not self.dummy:
             self.items_in_cwd: set[str] = set()
+        self.file_list_pause_check = False
 
     def on_mount(self) -> None:
         if not self.dummy and self.parent:
             self.input: Input = self.parent.query_one(Input)
-
-    @property
-    def sort_by(self) -> str:
-        try:
-            return self.app.query_one("StateManager").sort_by
-        except (NoMatches, AttributeError):
-            return "name"
-
-    @sort_by.setter
-    def sort_by(self, value: str) -> None:
-        if value not in ["name", "size", "modified", "created", "extension", "natural"]:
-            raise ValueError(
-                f"Expected sort_by value to be one of 'name', 'size', 'modified', 'created', 'extension' or 'natural', but got '{value}'"
-            )
-        with contextlib.suppress(NoMatches):
-            self.app.query_one("StateManager").sort_by = value
-
-    @property
-    def sort_descending(self) -> bool:
-        try:
-            return self.app.query_one("StateManager").sort_descending
-        except (NoMatches, AttributeError):
-            return False
-
-    @sort_descending.setter
-    def sort_descending(self, value: bool) -> None:
-        with contextlib.suppress(NoMatches):
-            self.app.query_one("StateManager").sort_descending = value
+            self.focus()
 
     @property
     def highlighted_option(self) -> FileListSelectionWidget | None:
@@ -142,22 +120,36 @@ class FileList(SelectionList, inherit_bindings=False):
         self,
         add_to_session: bool = True,
         focus_on: str | None = None,
+        has_selected: bool = False,
+        callback: Callable | None = None,
     ) -> None:
         """Update the file list with the current directory contents.
 
         Args:
             add_to_session (bool): Whether to add the current directory to the session history.
             focus_on (str | None): A custom item to set the focus as.
+            has_selected (bool): Whether there are selected items in the file list (used for session management).
+            callback (Callable | None): A callback function to call after updating the file list.
         """
         cwd = path_utils.normalise(getcwd())
+
+        # Query StateManager for sort preferences
+        state_manager = self.app.query_one("StateManager", StateManager)
+        sort_by, sort_descending = state_manager.get_sort_prefs(cwd)
+
         # get sessionstate
         try:
-            # only happens when the tabs aren't mounted
             session: SessionManager = self.app.tabWidget.active_tab.session
         except AttributeError:
+            # only happens when the tabs aren't mounted
+            # this means that some stupid thing happened
+            # and i dont want filelist to die as well
+            # because it will be called later on (because of
+            # the watcher function)
             self.clear_options()
             return
-        self.app.file_list_pause_check = True
+        self.file_list_pause_check = True  # ty: ignore[invalid-assignment]
+        name_to_index: dict[str, int] = {}
         try:
             preview = self.app.query_one("PreviewContainer")
 
@@ -165,23 +157,36 @@ class FileList(SelectionList, inherit_bindings=False):
             self.list_of_options: list[FileListSelectionWidget | Selection] = []
             self.items_in_cwd: set[str] = set()
 
-            to_highlight_index: int = 0
+            to_highlight_index: int = -1
             if not focus_on and cwd in session.lastHighlighted:
                 last_highlight = session.lastHighlighted[cwd]
                 focus_on = last_highlight["name"]
             try:
-                folders, files = await path_utils.get_cwd_object(
+                worker = path_utils.threaded_get_cwd_object(
+                    self,
                     cwd,
-                    config["settings"]["show_hidden_files"],
-                    sort_by=self.sort_by,  # ty: ignore[invalid-argument-type]
-                    reverse=self.sort_descending,
+                    config["interface"]["show_hidden_files"],
+                    sort_by=sort_by,
+                    reverse=sort_descending,
+                )
+                try:
+                    await worker.wait()
+                except WorkerError:
+                    return
+                if isinstance(worker.result, PermissionError):
+                    raise worker.result
+                folders, files = cast(
+                    tuple[
+                        list[path_utils.CWDObjectReturnDict],
+                        list[path_utils.CWDObjectReturnDict],
+                    ],
+                    worker.result,
                 )
                 if not folders and not files:
                     self.list_of_options.append(
                         Selection("   --no-files--", value="", disabled=True)
                     )
                     await preview.remove_children()
-                    preview._current_preview_type = "none"
                     preview.border_title = ""
                 else:
                     file_list_options = folders + files
@@ -191,15 +196,16 @@ class FileList(SelectionList, inherit_bindings=False):
                             icon=item["icon"],
                             label=item["name"],
                             dir_entry=item["dir_entry"],
+                            clipboard=self.app.Clipboard,
                         )
                         for item in file_list_options
                     ]
-                    items_in_cwd: list[str] = [
-                        item["name"] for item in file_list_options
-                    ]
-                    if focus_on in items_in_cwd:
-                        to_highlight_index = items_in_cwd.index(focus_on)
-                    self.items_in_cwd = set(items_in_cwd)
+                    name_to_index: dict[str, int] = {
+                        item["name"]: i for i, item in enumerate(file_list_options)
+                    }
+                    self.items_in_cwd = set(name_to_index)
+                    if focus_on in name_to_index:
+                        to_highlight_index = name_to_index[focus_on]
 
             except PermissionError:
                 self.list_of_options.append(
@@ -211,12 +217,12 @@ class FileList(SelectionList, inherit_bindings=False):
                     ),
                 )
                 await preview.remove_children()
-                preview._current_preview_type = "none"
                 preview.border_title = ""
 
             # Query buttons once and update disabled state based on file list status
             buttons: list[Button] = [
-                self.app.query_one(selector) for selector in buttons_that_depend_on_path
+                self.app.query_one(selector, Button)
+                for selector in buttons_that_depend_on_path
             ]
             should_disable: bool = (
                 len(self.list_of_options) == 1 and self.list_of_options[0].disabled
@@ -225,19 +231,25 @@ class FileList(SelectionList, inherit_bindings=False):
             )
             for button in buttons:
                 button.disabled = should_disable
-            self.app.query_one("#new").disabled = self.list_of_options[0].id == "perm"
+            if len(self.list_of_options) > 0:
+                self.app.query_one("#new").disabled = (
+                    self.list_of_options[0].id == "perm"
+                )
+            else:
+                # this shouldnt happen, but just in case
+                self.app.query_one("#new").disabled = True
+
             # special check for up tree
             self.app.query_one("#up").disabled = cwd == path.dirname(cwd)
 
-            self.clear_options()
-            self.add_options(self.list_of_options)
+            self.set_options(self.list_of_options)
+            # fix selected options
+            if has_selected and name_to_index:
+                self.update_from_session(session, name_to_index)
             # session handler
-            self.app.query_one("#path_switcher").value = cwd + (
+            self.app.query_one("#path_switcher", PathInput).value = cwd + (
                 "" if cwd.endswith("/") else "/"
             )
-            # I question to myself why directories isn't a list[str]
-            # but is a list[dict], so I'm down to take some PRs, because
-            # I have other things that are more important.
             if add_to_session:
                 if session.historyIndex != len(session.directories) - 1:
                     session.directories = session.directories[
@@ -260,7 +272,7 @@ class FileList(SelectionList, inherit_bindings=False):
                 session.historyIndex == len(session.directories) - 1
             )
             if (
-                to_highlight_index == 0
+                to_highlight_index == -1
                 and cwd in session.lastHighlighted
                 and session.lastHighlighted[cwd]["index"]
             ):
@@ -294,119 +306,44 @@ class FileList(SelectionList, inherit_bindings=False):
                     await self.toggle_mode()
                 self.update_border_subtitle()
         finally:
-            self.app.file_list_pause_check = False
+            self.file_list_pause_check = False  # ty: ignore[invalid-assignment]
+            if callback:
+                callback()
 
-    @work(exclusive=True)
-    async def dummy_update_file_list(
-        self,
-        cwd: str,
+    @work(thread=True)
+    def update_from_session(
+        self, session: SessionManager, name_to_index: dict[str, int]
     ) -> None:
-        """Update the file list with the current directory contents.
-
-        Args:
-            cwd (str): The current working directory.
-        """
-        assert self.parent is not None
-        self.enter_into = cwd
-        # Separate folders and files
-        self.list_of_options = []
-
-        try:
-            folders, files = await path_utils.get_cwd_object(
-                cwd,
-                config["settings"]["show_hidden_files"],
-                sort_by=self.sort_by,  # ty: ignore[invalid-argument-type]
-                reverse=self.sort_descending,
-            )
-            if not folders and not files:
-                self.list_of_options.append(
-                    Selection("  --no-files--", value="", id="", disabled=True)
-                )
-            else:
-                file_list_options = folders + files
-                file_list_option_length = len(file_list_options)
-                start_time = time()
-                for index, item in enumerate(file_list_options):
-                    self.list_of_options.append(
-                        FileListSelectionWidget(
-                            icon=item["icon"],
-                            label=item["name"],
-                            dir_entry=item["dir_entry"],
-                        )
-                    )
-                    if start_time + 0.25 < time():
-                        self.parent.border_subtitle = (
-                            f"{index + 1} / {file_list_option_length}"
-                        )
-                        start_time = time()
-                    # await so that textual can still be responsive
-                    await asyncio.sleep(0)
-        except PermissionError:
-            self.list_of_options.append(
-                Selection(
-                    " Permission Error: Unable to access this directory.",
-                    id="",
-                    value="",
-                    disabled=True,
-                )
-            )
-        self.clear_options()
-        self.add_options(self.list_of_options)
-        self.parent.border_subtitle = ""
-
-    @work(exclusive=True)
-    async def create_archive_list(self, file_list: list[str]) -> None:
-        """Create a list display for archive file contents.
-
-        Args:
-            file_list (list[str]): List of file paths from archive contents.
-        """
-        assert self.parent is not None
-        self.clear_options()
-        self.list_of_options = []
-
-        if not file_list:
-            self.list_of_options.append(
-                Selection("  --no-files--", value="", id="", disabled=True)
-            )
-        else:
-            file_list_length = len(file_list)
-            start_time = time()
-            for index, file_path in enumerate(file_list):
-                if file_path.endswith("/"):
-                    icon = icon_utils.get_icon_for_folder(file_path.strip("/"))
+        # so far dont seem to have any issues when running this in a thread
+        # but if it does, remove the decorator
+        self.log("Restoring selected items from session...")
+        self.log(session.selectedItems)
+        with self.prevent(SelectionList.SelectedChanged):
+            self.deselect_all()
+            for item in session.selectedItems:
+                if item["name"] in name_to_index:
+                    self.select(self.list_of_options[name_to_index[item["name"]]])
                 else:
-                    icon = icon_utils.get_icon_for_file(file_path)
-
-                # Create a selection widget similar to FileListSelectionWidget but simpler
-                # since we don't have dir_entry metadata for archive contents
-                self.list_of_options.append(
-                    ArchiveFileListSelection(
-                        icon,
-                        file_path,
-                    )
-                )
-                if start_time + 0.25 < time():
-                    self.parent.border_subtitle = f"{index + 1} / {file_list_length}"
-                    start_time = time()
-                await asyncio.sleep(0)
-
-        self.add_options(self.list_of_options)
-        self.parent.border_subtitle = ""
+                    to_select = min(item["index"], len(self.list_of_options) - 1)
+                    self.select(self.list_of_options[to_select].id)
 
     async def file_selected_handler(self, target_path: str) -> None:
         if self.app._chooser_file:
             self.app.action_quit()
-        elif config["plugins"]["editor"]["open_all_in_editor"]:
-            if config["plugins"]["editor"]["file_suspend"]:
-                with self.app.suspend():
-                    cmd(
-                        f'{config["plugins"]["editor"]["file_executable"]} "{target_path}"'
-                    )
-            else:
-                self.app.run_in_thread(
-                    cmd,
-                    f'{config["plugins"]["editor"]["file_executable"]} "{target_path}"',
+        elif config["settings"]["editor"]["open_all_in_editor"]:
+            editor_config = config["settings"]["editor"]["file"]
+
+            def on_error(message: str, title: str) -> None:
+                self.notify(message, title=title, severity="error")
+
+            try:
+                utils.run_editor_command(self.app, editor_config, target_path, on_error)
+            except Exception as exc:
+                path_utils.dump_exc(self, exc)
+                self.notify(
+                    f"{type(exc).__name__}: {exc}",
+                    title="Error launching editor",
+                    severity="error",
                 )
         else:
             path_utils.open_file(self.app, target_path)
@@ -434,7 +371,7 @@ class FileList(SelectionList, inherit_bindings=False):
                 # skipping the middle folder entirely
                 self.app.cd(target_path)
                 self.app.tabWidget.active_tab.selectedItems = []
-                self.app.query_one("#file_list").focus()
+                self.app.file_list.focus()
             else:
                 await self.file_selected_handler(target_path)
                 if self.highlighted is None:
@@ -450,7 +387,16 @@ class FileList(SelectionList, inherit_bindings=False):
                 self.highlighted = 0
             self.app.tabWidget.active_tab.selectedItems = []
         else:
-            self.app.tabWidget.active_tab.session.selectedItems = self.selected.copy()
+            # self.app.tabWidget.active_tab.session.selectedItems = self.selected.copy()
+            selected_ids = self.selected.copy()
+            session: SessionManager = self.app.tabWidget.active_tab.session
+            session.selectedItems = []
+            for selected_id in selected_ids:
+                option = self.get_option(selected_id)
+                session.selectedItems.append({
+                    "name": option.dir_entry.name,
+                    "index": self.options.index(option),
+                })
 
     # No clue why I'm using an OptionList method for SelectionList
     async def on_option_list_option_highlighted(
@@ -476,7 +422,7 @@ class FileList(SelectionList, inherit_bindings=False):
         if self.highlighted is None:
             self.highlighted = 0
         # preview
-        self.app.query_one("PreviewContainer").show_preview(
+        await self.app.query_one("PreviewContainer").show_preview(
             highlighted_option.dir_entry.path
         )
         self.app.query_one("MetadataContainer").update_metadata(event.option.dir_entry)
@@ -484,135 +430,19 @@ class FileList(SelectionList, inherit_bindings=False):
             highlighted_option.dir_entry.path
         )
 
-    # Use better versions of the checkbox icons
-    def _get_left_gutter_width(
-        self,
-    ) -> int:
-        """Returns the size of any left gutter that should be taken into account.
-
-        Returns:
-            The width of the left gutter.
-        """
-        # In normal mode or dummy mode, we don't have a gutter
-        if self.dummy or not self.select_mode_enabled:
-            return 0
-        else:
-            # Calculate the exact width of the checkbox components
-            return len(
-                icon_utils.get_toggle_button_icon("left")
-                + icon_utils.get_toggle_button_icon("inner")
-                + icon_utils.get_toggle_button_icon("right")
-                + " "
-            )
-
-    def render_line(self, y: int) -> Strip:
-        """Render a line in the display.
-
-        Args:
-            y: The line to render.
-
-        Returns:
-            A [`Strip`][textual.strip.Strip] that is the line to render.
-        """
-        # Insane monkey patching was done here, mainly:
-        # - replacing render_line from OptionList with super_render_line()
-        #   to theme selected options when not highlighted.
-        # - ignoring rendering of the checkboxes when
-        #   it is a dummy or not in select mode.
-        #   - ignore checkbox rendering on disabled options.
-        # - using custom icons for the checkbox.
-
-        def super_render_line(y: int, selection_style: str = "") -> Strip:
-            line_number = self.scroll_offset.y + y
-            try:
-                option_index, line_offset = self._lines[line_number]
-                option = self.options[option_index]
-            except IndexError:
-                return Strip.blank(
-                    self.scrollable_content_region.width,
-                    self.get_visual_style("option-list--option").rich_style,
-                )
-
-            mouse_over: bool = self._mouse_hovering_over == option_index
-            component_class = ""
-            if selection_style == "selection-list--button-selected":
-                component_class = selection_style
-            elif option.disabled:
-                component_class = "option-list--option-disabled"
-            elif self.highlighted == option_index:
-                component_class = "option-list--option-highlighted"
-            elif mouse_over:
-                component_class = "option-list--option-hover"
-
-            if component_class:
-                style = self.get_visual_style("option-list--option", component_class)
-            else:
-                style = self.get_visual_style("option-list--option")
-
-            strips = self._get_option_render(option, style)
-            try:
-                strip = strips[line_offset]
-            except IndexError:
-                return Strip.blank(
-                    self.scrollable_content_region.width,
-                    self.get_visual_style("option-list--option").rich_style,
-                )
-            return strip
-
-        # just return standard rendering
-        if self.dummy or not self.select_mode_enabled:
-            return super_render_line(y)
-
-        # calculate with checkbox rendering
-        _, scroll_y = self.scroll_offset
-        selection_index = scroll_y + y
-        try:
-            selection = self.get_option_at_index(selection_index)
-        except OptionDoesNotExist:
-            return Strip([*super_render_line(y)])
-
-        if selection.disabled:
-            return Strip([*super_render_line(y)])
-
-        component_style = "selection-list--button"
-        if selection.value in self._selected:
-            component_style += "-selected"
-        if self.highlighted == selection_index:
-            component_style += "-highlighted"
-
-        line = super_render_line(y, component_style)
-        underlying_style = next(iter(line)).style or self.rich_style
-        assert underlying_style is not None
-
-        button_style = self.get_component_rich_style(component_style)
-
-        side_style = Style.from_color(button_style.bgcolor, underlying_style.bgcolor)
-
-        side_style += Style(meta={"option": selection_index})
-        button_style += Style(meta={"option": selection_index})
-
-        return Strip([
-            Segment(icon_utils.get_toggle_button_icon("left"), style=side_style),
-            Segment(
-                icon_utils.get_toggle_button_icon("inner_filled")
-                if selection.value in self._selected
-                else icon_utils.get_toggle_button_icon("inner"),
-                style=button_style,
-            ),
-            Segment(icon_utils.get_toggle_button_icon("right"), style=side_style),
-            Segment(" ", style=underlying_style),
-            *line,
-        ])
+    @property
+    def options(self) -> Sequence[FileListSelectionWidget]:
+        return self._options
 
     async def toggle_hidden_files(self) -> None:
         """Toggle the visibility of hidden files."""
-        config["settings"]["show_hidden_files"] = not config["settings"][
+        config["interface"]["show_hidden_files"] = not config["interface"][
             "show_hidden_files"
         ]
         self.update_file_list(add_to_session=False)
         status = (
             "[$success underline]shown"
-            if config["settings"]["show_hidden_files"]
+            if config["interface"]["show_hidden_files"]
             else "[$error underline]hidden"
         )
         self.app.notify(
@@ -631,9 +461,8 @@ class FileList(SelectionList, inherit_bindings=False):
         ):
             return
         self.select_mode_enabled = not self.select_mode_enabled
-        if not self.select_mode_enabled:
-            self._line_cache.clear()
-            self._option_render_cache.clear()
+        self._line_cache.clear()
+        self._option_render_cache.clear()
         self.refresh(layout=True, repaint=True)
         self.app.tabWidget.active_tab.session.selectMode = self.select_mode_enabled
         with self.prevent(SelectionList.SelectedChanged):
@@ -665,11 +494,122 @@ class FileList(SelectionList, inherit_bindings=False):
                 if isinstance(option, FileListSelectionWidget)
             ]
 
+    def update_dimmed_items(self, paths: list[str] | None = None) -> None:
+        """Update the dimmed items in the file list based on the cut items.
+
+        Args:
+            paths (list[str]): The list of paths to dim.
+        """
+        if paths is None:
+            paths = []
+        if self.option_count == 0 or self.get_option_at_index(0).disabled:
+            return
+        for option in self.options:
+            if path_utils.normalise(option.dir_entry.path) in paths:
+                option._set_prompt(option.prompt.stylize("dim"))
+            else:
+                option._set_prompt(option.prompt.stylize(TextualStyle(dim=False)))
+        self._clear_caches()
+        self._update_lines()
+        self.refresh()
+
     async def on_key(self, event: events.Key) -> None:
         """Handle key events for the file list."""
+        if self.dummy:
+            return
         from rovr.functions.utils import check_key
 
-        if not self.dummy and self.highlighted_option:
+        # hit buttons with keybinds
+        if not self.select_mode_enabled and check_key(
+            event, config["keybinds"]["hist_previous"]
+        ):
+            if self.app.query_one("#back").disabled:
+                self.app.query_one("UpButton").on_button_pressed(Button.Pressed)
+            else:
+                self.app.query_one("BackButton").on_button_pressed(Button.Pressed)
+        elif (
+            not self.select_mode_enabled
+            and check_key(event, config["keybinds"]["hist_next"])
+            and not self.app.query_one("#forward").disabled
+        ):
+            self.app.query_one("ForwardButton").on_button_pressed(Button.Pressed)
+        elif not self.select_mode_enabled and check_key(
+            event, config["keybinds"]["up_tree"]
+        ):
+            self.app.query_one("UpButton").on_button_pressed(Button.Pressed)
+        elif not self.select_mode_enabled and check_key(
+            event, config["keybinds"]["bypass_up_tree"]
+        ):
+            # get parent directory, go up until theres a folder with more than one item
+            to_dir = path.dirname(getcwd())
+            prev_to_dir = getcwd()
+            try:
+                while True:
+                    entries = listdir(to_dir)
+                    if len(entries) != 1:
+                        break
+                    only_entry = path.join(to_dir, entries[0])
+                    if not path.isdir(only_entry):
+                        break
+                    if to_dir == "" or to_dir == path.dirname(to_dir):
+                        break
+                    prev_to_dir = to_dir
+                    to_dir = path.dirname(to_dir)
+                self.app.cd(to_dir)
+            except PermissionError:
+                self.app.cd(prev_to_dir)
+        elif not self.select_mode_enabled and check_key(
+            event, config["keybinds"]["bypass_down_tree"]
+        ):
+            highlighted_option = self.highlighted_option
+            if highlighted_option is not None:
+                if highlighted_option.dir_entry.is_file():
+                    return
+                else:
+                    to_dir = highlighted_option.dir_entry.path
+                    dirlist = []
+                    prev_to_dir = getcwd()
+                    try:
+                        while len(dirlist := listdir(to_dir)) == 1:
+                            if len(dirlist) == 0:
+                                break
+                            next_path = path.join(to_dir, dirlist[0])
+                            if not path.isdir(next_path):
+                                break
+                            prev_to_dir = to_dir
+                            to_dir = next_path
+                        self.app.cd(to_dir)
+                    except PermissionError:
+                        self.app.cd(prev_to_dir)
+        # Toggle pin on current directory
+        elif check_key(event, config["keybinds"]["toggle_pin"]):
+            pin_utils.toggle_pin(path.basename(getcwd()), getcwd())
+            self.app.query_one("PinnedSidebar").reload_pins()
+        elif check_key(event, config["keybinds"]["copy"]):
+            self.app.query_one("#copy").on_button_pressed()
+        elif check_key(event, config["keybinds"]["extra_copy"]["open_popup"]):
+            await self.app.query_one("#copy").open_popup(event)
+        elif check_key(event, config["keybinds"]["cut"]):
+            await self.app.query_one("#cut").on_button_pressed(Button.Pressed)
+        elif check_key(event, config["keybinds"]["paste"]):
+            await self.app.query_one("#paste").on_button_pressed(Button.Pressed)
+        elif check_key(event, config["keybinds"]["new"]):
+            self.app.query_one("#new").on_button_pressed(Button.Pressed)
+        elif check_key(event, config["keybinds"]["rename"]):
+            self.app.query_one("#rename").on_button_pressed(Button.Pressed)
+        elif check_key(event, config["keybinds"]["delete"]):
+            await self.app.query_one("#delete").on_button_pressed(Button.Pressed)
+        elif check_key(event, config["keybinds"]["zip"]):
+            self.app.query_one("#zip").on_button_pressed(Button.Pressed)
+        elif check_key(event, config["keybinds"]["unzip"]):
+            self.app.query_one("#unzip").on_button_pressed(Button.Pressed)
+        # search
+        elif check_key(event, config["keybinds"]["focus_search"]):
+            self.input.focus()
+        # toggle hidden files
+        elif check_key(event, config["keybinds"]["toggle_hidden_files"]):
+            await self.toggle_hidden_files()
+        elif self.highlighted_option:
             # toggle select mode
             if check_key(event, config["keybinds"]["toggle_visual"]):
                 await self.toggle_mode()
@@ -762,82 +702,30 @@ class FileList(SelectionList, inherit_bindings=False):
                 assert isinstance(old, int) and isinstance(new, int)
                 for index in range(old, new + 1):
                     self.select(self.get_option_at_index(index))
-            elif config["plugins"]["editor"]["enabled"] and check_key(
-                event, config["plugins"]["editor"]["keybinds"]
-            ):
+            elif check_key(event, config["keybinds"]["open_editor"]):
                 if self.highlighted_option and self.highlighted_option.disabled:
                     return
-                if path.isdir(self.highlighted_option.dir_entry.path):
-                    if config["plugins"]["editor"]["folder_suspend"]:
-                        with self.app.suspend():
-                            cmd(
-                                f'{config["plugins"]["editor"]["folder_executable"]} "{self.highlighted_option.dir_entry.path}"'
-                            )
-                    else:
-                        self.app.run_in_thread(
-                            cmd,
-                            f'{config["plugins"]["editor"]["folder_executable"]} "{self.highlighted_option.dir_entry.path}"',
-                        )
 
+                def on_error(message: str, title: str) -> None:
+                    self.notify(message, title=title, severity="error")
+
+                target_path = self.highlighted_option.dir_entry.path
+                if path.isdir(target_path):
+                    editor_config = config["settings"]["editor"]["folder"]
                 else:
-                    if config["plugins"]["editor"]["file_suspend"]:
-                        with self.app.suspend():
-                            cmd(
-                                f'{config["plugins"]["editor"]["file_executable"]} "{self.highlighted_option.dir_entry.path}"'
-                            )
-                    else:
-                        self.app.run_in_thread(
-                            cmd,
-                            f'{config["plugins"]["editor"]["file_executable"]} "{self.highlighted_option.dir_entry.path}"',
-                        )
-            # hit buttons with keybinds
-            elif not self.select_mode_enabled and check_key(
-                event, config["keybinds"]["hist_previous"]
-            ):
-                if self.app.query_one("#back").disabled:
-                    self.app.query_one("UpButton").on_button_pressed(Button.Pressed)
-                else:
-                    self.app.query_one("BackButton").on_button_pressed(Button.Pressed)
-            elif (
-                not self.select_mode_enabled
-                and check_key(event, config["keybinds"]["hist_next"])
-                and not self.app.query_one("#forward").disabled
-            ):
-                self.app.query_one("ForwardButton").on_button_pressed(Button.Pressed)
-            elif not self.select_mode_enabled and check_key(
-                event, config["keybinds"]["up_tree"]
-            ):
-                self.app.query_one("UpButton").on_button_pressed(Button.Pressed)
-            elif check_key(event, config["keybinds"]["copy_path"]):
-                await self.app.query_one("PathCopyButton").on_button_pressed(
-                    Button.Pressed
-                )
-            # Toggle pin on current directory
-            elif check_key(event, config["keybinds"]["toggle_pin"]):
-                pin_utils.toggle_pin(path.basename(getcwd()), getcwd())
-                await self.app.query_one("PinnedSidebar").reload_pins()
-            elif check_key(event, config["keybinds"]["copy"]):
-                await self.app.query_one("#copy").on_button_pressed(Button.Pressed)
-            elif check_key(event, config["keybinds"]["cut"]):
-                await self.app.query_one("#cut").on_button_pressed(Button.Pressed)
-            elif check_key(event, config["keybinds"]["paste"]):
-                await self.app.query_one("#paste").on_button_pressed(Button.Pressed)
-            elif check_key(event, config["keybinds"]["new"]):
-                self.app.query_one("#new").on_button_pressed(Button.Pressed)
-            elif check_key(event, config["keybinds"]["rename"]):
-                self.app.query_one("#rename").on_button_pressed(Button.Pressed)
-            elif check_key(event, config["keybinds"]["delete"]):
-                await self.app.query_one("#delete").on_button_pressed(Button.Pressed)
-            elif check_key(event, config["keybinds"]["zip"]):
-                self.app.query_one("#zip").on_button_pressed(Button.Pressed)
-            elif check_key(event, config["keybinds"]["unzip"]):
-                self.app.query_one("#unzip").on_button_pressed(Button.Pressed)
-            # search
-            elif check_key(event, config["keybinds"]["focus_search"]):
-                self.input.focus()
-            # toggle hidden files
-            elif check_key(event, config["keybinds"]["toggle_hidden_files"]):
-                await self.toggle_hidden_files()
+                    editor_config = config["settings"]["editor"]["file"]
+
+                try:
+                    utils.run_editor_command(
+                        self.app, editor_config, target_path, on_error
+                    )
+                except Exception as exc:
+                    path_utils.dump_exc(self, exc)
+                    self.notify(
+                        f"{type(exc).__name__}: {exc}",
+                        title="Error launching editor",
+                        severity="error",
+                    )
 
     def update_border_subtitle(self) -> None:
         if self.dummy or type(self.highlighted) is not int or not self.parent:
@@ -906,6 +794,30 @@ class FileList(SelectionList, inherit_bindings=False):
                 immediate=True,
             )
 
+    def set_options(
+        self,
+        options: Iterable[
+            Selection[SelectionType]
+            | tuple[ContentText, SelectionType]
+            | tuple[ContentText, SelectionType, bool]
+        ],
+    ) -> Self:  # ty: ignore[invalid-method-override]
+        # Okay, lemme make myself clear here.
+        # A PR for this is already open at
+        # https://github.com/Textualize/textual/pull/6224
+        # essentially, the issue is that there isnt a set_options
+        # method for SelectionList, only for OptionList, but using
+        # OptionList's set_options doesnt clear selected or values
+        # but nothing was done, so I added it myself.
+        self._selected.clear()
+        self._values.clear()
+        # the ty ignore is important here, because options
+        # should be a Iterable["Option | VisualType | None"]
+        # but that isnt the case (based on the signature)
+        # so ty is crashing out.
+        super().set_options(options)  # ty: ignore[invalid-argument-type]
+        return self
+
 
 class FileListRightClickOptionList(PopupOptionList):
     def __init__(self, classes: str | None = None, id: str | None = None) -> None:
@@ -917,11 +829,6 @@ class FileListRightClickOptionList(PopupOptionList):
 
     @on(events.Show)
     async def on_show(self, event: events.Show) -> None:
-        if hasattr(self, "file_list"):
-            file_list = self.file_list
-        else:
-            file_list = self.app.query_one("#file_list", FileList)
-            self.file_list = file_list
         self.set_options([
             Option(f" {icon_utils.get_icon('general', 'copy')[0]} Copy", id="copy"),
             Option(f" {icon_utils.get_icon('general', 'cut')[0]} Cut", id="cut"),
@@ -936,7 +843,7 @@ class FileListRightClickOptionList(PopupOptionList):
                 f" {icon_utils.get_icon('general', 'open')[0]} Unzip",
                 id="unzip",
                 disabled=not await utils.is_archive(
-                    file_list.highlighted_option.dir_entry.path
+                    self.app.file_list.highlighted_option.dir_entry.path
                 ),
             ),
         ])
@@ -948,7 +855,7 @@ class FileListRightClickOptionList(PopupOptionList):
         # Handle menu item selection
         match event.option.id:
             case "copy":
-                await self.app.query_one("#copy").on_button_pressed(Button.Pressed)
+                self.app.query_one("#copy").on_button_pressed()
             case "cut":
                 await self.app.query_one("#cut").on_button_pressed(Button.Pressed)
             case "delete":

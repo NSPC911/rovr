@@ -1,17 +1,42 @@
-from textual import events, on
+from typing import cast
+
+from textual import events
 from textual.css.query import NoMatches
 from textual.widgets import Button, OptionList
 from textual.widgets.option_list import Option
 
+from rovr.classes.type_aliases import SortByOptions
 from rovr.components import PopupOptionList
 from rovr.functions.icons import get_icon, get_toggle_button_icon
+from rovr.functions.utils import check_key, get_shortest_bind
+from rovr.state_manager import StateManager
 from rovr.variables.constants import config
+
+# Get the shortest keybind for each sort option
+name_bind = get_shortest_bind(config["keybinds"]["change_sort_order"]["name"])
+extension_bind = get_shortest_bind(config["keybinds"]["change_sort_order"]["extension"])
+natural_bind = get_shortest_bind(config["keybinds"]["change_sort_order"]["natural"])
+size_bind = get_shortest_bind(config["keybinds"]["change_sort_order"]["size"])
+created_bind = get_shortest_bind(config["keybinds"]["change_sort_order"]["created"])
+modified_bind = get_shortest_bind(config["keybinds"]["change_sort_order"]["modified"])
+descending_bind = get_shortest_bind(
+    config["keybinds"]["change_sort_order"]["descending"]
+)
 
 
 class SortOrderPopupOptions(Option):
-    def __init__(self, icon: list[str], prompt: str, id: str | None = None) -> None:
+    def __init__(
+        self,
+        bind: str,
+        prompt: str,
+        is_selected: bool,
+        id: str | None = None,
+    ) -> None:
         self.label = prompt
-        super().__init__(" " + icon[0] + " " + prompt + " ", id=id)
+        super().__init__(
+            f" {get_toggle_button_icon('inner_filled' if is_selected else 'inner')} [d]{bind}[/] {prompt}",
+            id=id,
+        )
 
 
 class SortOrderButton(Button):
@@ -24,8 +49,9 @@ class SortOrderButton(Button):
 
     def update_icon(self) -> None:
         state_manager = self.app.query_one("StateManager")
-        order = "desc" if state_manager.sort_descending else "asc"
-        match state_manager.sort_by:
+        sort_by, sort_descending = state_manager.get_sort_prefs()
+        order = "desc" if sort_descending else "asc"
+        match sort_by:
             case "name":
                 self.label = get_icon("sorting", "alpha_" + order)[0]
             case "extension":
@@ -66,6 +92,7 @@ class SortOrderButton(Button):
             )
         elif isinstance(event, events.Key):
             popup_widget.do_adjust = True
+        popup_widget.pre_show()
         popup_widget.remove_class("hidden")
         popup_widget.focus()
 
@@ -75,81 +102,128 @@ class SortOrderPopup(PopupOptionList):
         super().__init__()
         self.do_adjust: bool = False
 
-    def on_mount(self) -> None:
+    def on_mount(self, event: events.Mount) -> None:  # ty: ignore[invalid-method-override]
         self.button: SortOrderButton = self.app.query_one(SortOrderButton)
         self.styles.scrollbar_size_vertical = 0
         # calling super()._on_mount is useless, and super().mount()
-        # doesnt do anything significant
+        # doesn't do anything significant
 
-    @on(events.Show)
-    def on_show(self, event: events.Show) -> None:
-        order = "desc" if self.file_list.sort_descending else "asc"
+    def pre_show(self) -> None:
+        state_manager: StateManager = self.app.query_one(StateManager)
+        # Get current sort preferences from StateManager
+        sort_by, sort_descending = state_manager.get_sort_prefs()
         self.set_options([
             SortOrderPopupOptions(
-                get_icon("sorting", "alpha_" + order), "N[u]a[/]me", id="name"
+                name_bind,
+                "Name",
+                sort_by == "name",
+                id="name",
             ),
             SortOrderPopupOptions(
-                get_icon("sorting", "alpha_alt_" + order),
-                "[u]E[/]xtension",
+                extension_bind,
+                "Extension",
+                sort_by == "extension",
                 id="extension",
             ),
             SortOrderPopupOptions(
-                get_icon("sorting", "numeric_alt_" + order),
-                "[u]N[/]atural",
+                natural_bind,
+                "Natural",
+                sort_by == "natural",
                 id="natural",
             ),
             SortOrderPopupOptions(
-                get_icon("sorting", "numeric_" + order), "[u]S[/]ize", id="size"
+                size_bind,
+                "Size",
+                sort_by == "size",
+                id="size",
             ),
             SortOrderPopupOptions(
-                get_icon("sorting", "time_" + order), "[u]C[/]reated", id="created"
+                created_bind,
+                "Created",
+                sort_by == "created",
+                id="created",
             ),
             SortOrderPopupOptions(
-                get_icon("sorting", "time_alt_" + order),
-                "[u]M[/]odified",
+                modified_bind,
+                "Modified",
+                sort_by == "modified",
                 id="modified",
             ),
+            Option("", id="separator", disabled=True),
             SortOrderPopupOptions(
-                get_toggle_button_icon(
-                    "inner_filled" if self.file_list.sort_descending else "inner"
-                ),
-                "[u]D[/]escending",
+                descending_bind,
+                "Descending",
+                sort_descending,
                 id="descending",
             ),
+            Option("", id="separator2", disabled=True),
+            SortOrderPopupOptions(
+                "",  # No keybind for this option
+                "This path only",
+                state_manager.custom_sort_enabled,
+                id="custom_sort",
+            ),
         ])
-        self.highlighted = self.get_option_index(self.file_list.sort_by)
+        # just do a quick width check
+        width = 0
+        for option in self.options:
+            if len(str(option.prompt)) > width:
+                width = len(str(option.prompt))
+        if self.styles.border_left[0] != "":
+            width += 1
+        if self.styles.border_right[0] != "":
+            width += 1
+        width -= 7  # for textual markup fix
+        self.width = width
+        # for future when more options
+        height = (
+            self.option_count
+            + (1 if self.styles.border_top[0] != "" else 0)
+            + (1 if self.styles.border_bottom[0] != "" else 0)
+        )
+        self.height = height
+        self.highlighted = self.get_option_index(sort_by)
         if self.do_adjust:
             self.do_adjust = False
             self.styles.offset = (
-                (self.app.size.width - 16) // 2,
-                (self.app.size.height - 9) // 2,
+                (self.app.size.width - width) // 2,
+                (self.app.size.height - height) // 2,
             )
+        self.get_option("separator")._set_prompt(
+            "[$secondary]" + ("-" * self.width) + "[/]"
+        )
+        self.get_option("separator2")._set_prompt(
+            "[$secondary]" + ("-" * self.width) + "[/]"
+        )
 
     def on_option_list_option_selected(self, event: OptionList.OptionSelected) -> None:
+        state_manager: StateManager = self.app.query_one(StateManager)
+
         if event.option.id == "descending":
-            self.file_list.sort_descending = not self.file_list.sort_descending
+            # Toggle descending
+            _, current_descending = state_manager.get_sort_prefs()
+            state_manager.set_sort_preference(sort_descending=not current_descending)
+        elif event.option.id == "custom_sort":
+            # Toggle custom sort for this folder
+            state_manager.toggle_custom_sort()
         else:
-            self.file_list.sort_by = event.option.id
+            state_manager.set_sort_preference(
+                sort_by=cast(SortByOptions, event.option.id)
+            )
+
+        # Refresh file list to apply the change
+        self.app.file_list.update_file_list(add_to_session=False)
+
         self.go_hide()
         self.button.update_icon()
 
     async def on_key(self, event: events.Key) -> None:
-        match event.key.lower():
-            case "a":
-                self.highlighted = self.get_option_index("name")
-            case "e":
-                self.highlighted = self.get_option_index("extension")
-            case "n":
-                self.highlighted = self.get_option_index("natural")
-            case "s":
-                self.highlighted = self.get_option_index("size")
-            case "c":
-                self.highlighted = self.get_option_index("created")
-            case "m":
-                self.highlighted = self.get_option_index("modified")
-            case "d":
-                self.highlighted = self.get_option_index("descending")
-            case _:
+        for option, keys in config["keybinds"]["change_sort_order"].items():
+            if option == "open_popup":
+                continue
+            keys = cast(list[str], keys)
+            if check_key(event, keys):
+                self.highlighted = self.get_option_index(option)
+                event.stop()
+                self.action_select()
                 return
-        event.stop()
-        self.action_select()

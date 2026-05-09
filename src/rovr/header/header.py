@@ -13,15 +13,17 @@ from .tabs import NewTabButton, Tabline, TablineTab
 
 
 class HeaderArea(HorizontalGroup):
+    def __init__(self, *args, **kwargs) -> None:
+        super().__init__(*args, **kwargs)
+        self.tabline = Tabline(TablineTab(directory=getcwd()))
+
     def compose(self) -> ComposeResult:
         if (
             config["interface"]["clock"]["enabled"]
             and config["interface"]["clock"]["align"] == "left"
         ):
             yield HeaderClock()
-        yield Tabline(
-            TablineTab(directory=getcwd()),
-        )
+        yield self.tabline
         with HorizontalGroup(id="newTabRight"):
             yield NewTabButton()
             yield Static()
@@ -36,11 +38,11 @@ class HeaderArea(HorizontalGroup):
         try:
             tab_line = self.query_exactly_one(Tabline)
         except NoMatches:
-            return  # havent mounted yet
+            return  # haven't mounted yet
         # this might be a bit concerning, so im gonna explain it a bit.
-        # max width serves to ensure the tab container doesnt get too long
+        # max width serves to ensure the tab container doesn't get too long
         # and push header clock to the right.
-        # width serves to ensure the new tab button follows the tabline's
+        # width serves to ensure the new tab button follows the TabLine's
         # width, so that it always stays at the right
         tab_line.styles.max_width = (
             self.app.size.width

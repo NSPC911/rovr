@@ -5,7 +5,7 @@ from textual.screen import ModalScreen
 from textual.widgets import Button, Label
 
 
-class Dismissable(ModalScreen):
+class Dismissible(ModalScreen):
     """Super simple screen that can be dismissed."""
 
     def __init__(self, message: str, border_subtitle: str = "", **kwargs) -> None:

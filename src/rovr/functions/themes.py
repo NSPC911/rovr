@@ -1,6 +1,6 @@
 from textual.color import Color
 
-from rovr.classes import RovrThemeClass
+from rovr.classes.theme import RovrThemeClass
 from rovr.variables.constants import config
 
 

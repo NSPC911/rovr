@@ -7,17 +7,18 @@ from os import DirEntry, lstat, path, walk
 from textual import events, on, work
 from textual.containers import VerticalGroup, VerticalScroll
 from textual.css.query import NoMatches
+from textual.widget import MountError
 from textual.widgets import Static
 from textual.worker import WorkerState
 
 from rovr.functions import utils
-from rovr.functions.path import is_hidden_file
-from rovr.variables.constants import config, scroll_vindings
+from rovr.functions.path import get_direntry_for, is_hidden_file
+from rovr.variables.constants import config, scroll_bindings
 from rovr.variables.maps import SPINNER, SPINNER_LENGTH
 
 
 class MetadataContainer(VerticalScroll, inherit_bindings=False):
-    BINDINGS = scroll_vindings
+    BINDINGS = scroll_bindings
 
     def __init__(self, *args, **kwargs) -> None:
         super().__init__(*args, **kwargs)
@@ -68,6 +69,8 @@ class MetadataContainer(VerticalScroll, inherit_bindings=False):
         return permission_string
 
     def any_in_queue(self) -> bool:
+        if utils.should_cancel():
+            return True
         if self._queued_task is not None:
             self._queued_task(self._queued_task_args)
             self._queued_task, self._queued_task_args = None, None
@@ -97,15 +100,28 @@ class MetadataContainer(VerticalScroll, inherit_bindings=False):
         After debouncing the update
         Args:
             dir_entry (DirEntry): The nt.DirEntry object
+
+        Raises:
+            MountError: if something happens while attempting to fix a mount
         """
         if self.any_in_queue():
             return
+        # just sanity check
+        updated_dir_entry = get_direntry_for(dir_entry.path)
+        if updated_dir_entry is not None:
+            dir_entry = updated_dir_entry
         if not path.exists(dir_entry.path):
-            self.app.call_from_thread(self.remove_children)
-            self.app.call_from_thread(
-                self.mount, Static("Item not found or inaccessible.")
-            )
-            return
+            try:
+                self.app.call_from_thread(self.remove_children)
+                self.app.call_from_thread(
+                    self.mount, Static("Item not found or inaccessible.")
+                )
+                return
+            except MountError:
+                if self.app.return_code is not None:
+                    return
+                # just a defensive raise
+                raise
 
         type_str = "Unknown"
         if dir_entry.is_junction():
@@ -123,50 +139,55 @@ class MetadataContainer(VerticalScroll, inherit_bindings=False):
 
         values_list = []
         for field in config["metadata"]["fields"]:
-            match field:
-                case "type":
-                    values_list.append(Static(type_str))
-                case "permissions":
-                    values_list.append(Static(file_info))
-                case "hidden":
-                    values_list.append(Static("Yes" if is_hidden else "No"))
-                case "size":
-                    values_list.append(
-                        Static(
-                            utils.natural_size(
-                                file_stat.st_size,
-                                config["metadata"]["filesize_suffix"],
-                                config["metadata"]["filesize_decimals"],
-                            )
-                            if type_str == "File"
-                            else "--",
-                            id="metadata-size",
-                        )
-                    )
-                case "modified":
-                    values_list.append(
-                        Static(
-                            datetime.fromtimestamp(file_stat.st_mtime).strftime(
-                                config["metadata"]["datetime_format"]
+            try:
+                match field:
+                    case "type":
+                        values_list.append(Static(type_str))
+                    case "permissions":
+                        values_list.append(Static(file_info))
+                    case "hidden":
+                        values_list.append(Static("Yes" if is_hidden else "No"))
+                    case "size":
+                        values_list.append(
+                            Static(
+                                utils.natural_size(
+                                    file_stat.st_size,
+                                    config["metadata"]["filesize_suffix"],
+                                    config["metadata"]["filesize_decimals"],
+                                )
+                                if type_str == "File"
+                                else "--",
+                                id="metadata-size",
                             )
                         )
-                    )
-                case "accessed":
-                    values_list.append(
-                        Static(
-                            datetime.fromtimestamp(file_stat.st_atime).strftime(
-                                config["metadata"]["datetime_format"]
+                    case "modified":
+                        values_list.append(
+                            Static(
+                                datetime.fromtimestamp(file_stat.st_mtime).strftime(
+                                    config["metadata"]["datetime_format"]
+                                )
                             )
                         )
-                    )
-                case "created":
-                    values_list.append(
-                        Static(
-                            datetime.fromtimestamp(file_stat.st_ctime).strftime(
-                                config["metadata"]["datetime_format"]
+                    case "accessed":
+                        values_list.append(
+                            Static(
+                                datetime.fromtimestamp(file_stat.st_atime).strftime(
+                                    config["metadata"]["datetime_format"]
+                                )
                             )
                         )
-                    )
+                    case "created":
+                        values_list.append(
+                            Static(
+                                datetime.fromtimestamp(file_stat.st_ctime).strftime(
+                                    config["metadata"]["datetime_format"]
+                                )
+                            )
+                        )
+            except OSError as exc:
+                # can appear here because of stupid nt epoch stuff
+                if exc.errno in (22, 23, 123):
+                    values_list.append(Static("Invalid date"))
         values = VerticalGroup(*values_list, id="metadata-values")
 
         try:
@@ -177,7 +198,11 @@ class MetadataContainer(VerticalScroll, inherit_bindings=False):
                     child_widget.update, values_list[index].content
                 )
         except NoMatches:
+            if self.any_in_queue():
+                return
+            # if an error occurs here and you are looking at this
             self.app.call_from_thread(self.remove_children)
+            # please file an issue!
             keys_list = []
             for field in config["metadata"]["fields"]:
                 match field:
@@ -196,7 +221,14 @@ class MetadataContainer(VerticalScroll, inherit_bindings=False):
                     case "created":
                         keys_list.append(Static("Created"))
             keys = VerticalGroup(*keys_list, id="metadata-keys")
-            self.app.call_from_thread(self.mount, keys, values)
+            try:
+                self.app.call_from_thread(self.mount, keys, values)
+            except MountError:
+                if self.app.return_code is not None:
+                    return
+                # not exactly sure why it would happen
+                # just a defensive raise
+                raise
         self.current_path = dir_entry.path
         if type_str == "Directory" and self.has_focus:
             self._size_worker = self.calculate_folder_size(dir_entry.path)

@@ -1,11 +1,11 @@
 from typing import TypedDict
 
 
-class LastHighlightedDict(TypedDict):
+class SessionOptionDict(TypedDict):
     name: str
-    "Name of the last highlighted option"
+    "Name of the option"
     index: int
-    "Index of the last highlighted option. Used as a fallback when `name` doesn't exist"
+    "Index of the option. Used as a fallback when `name` doesn't exist"
 
 
 # What is textual reactive?
@@ -19,19 +19,19 @@ class SessionManager:
         historyIndex (int): The index of the session in the directories.
             This can be a number between 0 and the length of the list - 1,
             inclusive.
-        lastHighlighted (dict[str, int]): A dictionary mapping directory paths
-            to the index of the last highlighted item. If a directory is not
-            in the dictionary, the default is 0.
+        lastHighlighted (dict[str, SessionOptionDict]): A dictionary mapping directory
+                                 paths to the index of the last highlighted item. If a
+                                 directory is not in the dictionary, the default is 0.
         selectMode (bool): Whether select mode is enabled for that directory.
-        selectedItems (list[str]): A dictionary mapping directory paths to the
-            list of selected items in that directory.
+        selectedItems (list[SessionOptionDict]): A list of selected items within the
+                                                                      current directory
         search (str): The current search string.
     """
 
     def __init__(self) -> None:
         self.directories: list[str] = []
         self.historyIndex: int = 0
-        self.lastHighlighted: dict[str, LastHighlightedDict] = {}
+        self.lastHighlighted: dict[str, SessionOptionDict] = {}
         self.selectMode: bool = False
-        self.selectedItems: list[str] = []
+        self.selectedItems: list[SessionOptionDict] = []
         self.search: str = ""

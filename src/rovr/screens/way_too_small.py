@@ -12,7 +12,7 @@ class TerminalTooSmall(ModalScreen):
         super().__init__(*args, **kwargs)
 
     def compose(self) -> ComposeResult:
-        yield Static(id="fillerup")
+        yield Static(id="filler-up")
         with Center():
             yield Label(ascii_logo, id="logo")
         with Center():
@@ -24,7 +24,7 @@ class TerminalTooSmall(ModalScreen):
                 yield Label("Width : ")
                 yield Label(f"[$success]{MaxPossible.width}[/] > ")
                 yield Label("", id="widthThing")
-        yield Static(id="fillerdown")
+        yield Static(id="filler-down")
 
     def on_mount(self) -> None:
         for child in self.query("*"):
@@ -40,7 +40,7 @@ class TerminalTooSmall(ModalScreen):
         self.query_one("#widthThing", Label).update(
             f"[${'error' if self.size.width < MaxPossible.width else 'success'}]{self.size.width}[/]"
         )
-        for widget in ["#width", "#height", "#fillerup", "#fillerdown", "#logo"]:
+        for widget in ["#width", "#height", "#filler-up", "#filler-down", "#logo"]:
             self.query_one(widget).classes = "" if self.size.height > 6 else "hidden"
 
     @work(exclusive=True)

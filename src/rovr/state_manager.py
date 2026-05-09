@@ -1,13 +1,22 @@
 from contextlib import suppress
 from os import path
-from typing import Literal, TypedDict
+from typing import Literal, TypedDict, cast
 
-import toml
+import tomli
+from textual import work
 from textual.css.query import NoMatches
 from textual.reactive import reactive
 from textual.widget import Widget
 
+from rovr.classes.type_aliases import SortByOptions
 from rovr.functions.config import get_version
+from rovr.functions.folder_prefs import (
+    get_folder_pref,
+    load_folder_prefs,
+    remove_folder_pref,
+    set_folder_pref,
+)
+from rovr.functions.path import normalise
 from rovr.variables.maps import VAR_TO_DIR
 
 
@@ -16,9 +25,19 @@ class StateDict(TypedDict):
     pinned_sidebar_visible: bool
     preview_sidebar_visible: bool
     footer_visible: bool
-    menuwrapper_visible: bool
-    sort_by: str
+    menu_wrapper_visible: bool
+    sort_by: SortByOptions
     sort_descending: bool
+
+
+_sort_by_options: list[str] = [
+    "name",
+    "size",
+    "modified",
+    "created",
+    "extension",
+    "natural",
+]
 
 
 class StateManager(Widget):
@@ -31,29 +50,32 @@ class StateManager(Widget):
     pinned_sidebar_visible: reactive[bool] = reactive(True, init=False)
     preview_sidebar_visible: reactive[bool] = reactive(True, init=False)
     footer_visible: reactive[bool] = reactive(True, init=False)
-    menuwrapper_visible: reactive[bool] = reactive(True, init=False)
-    sort_by: reactive[str] = reactive("name", init=False)
+    menu_wrapper_visible: reactive[bool] = reactive(True, init=False)
+    sort_by: reactive[SortByOptions] = reactive("name", init=False)
     sort_descending: reactive[bool] = reactive(False, init=False)
+    custom_sort_enabled: reactive[bool] = reactive(False, init=False)
 
-    def __init__(self, *args, **kwargs) -> None:
-        super().__init__(*args, **kwargs)
+    def __init__(self) -> None:
+        super().__init__(id="state_manager")
         self.state_file: str = path.join(VAR_TO_DIR["CONFIG"], "state.toml")
         self.current_version: str = get_version()
         self.previous_version: str | None = None
         self._skip_save = True
         self._is_loading = False
+        self._current_folder: str = ""  # Track current folder for custom sort
+        load_folder_prefs()  # Load folder preferences at startup
         self._load_state()
         self._skip_save = False
         self._locked_by: Literal[
-            "PinnedSidebar", "PreviewSidebar", "Footer", "menuwrapper", None
+            "PinnedSidebar", "PreviewSidebar", "Footer", "menu_wrapper", None
         ] = None
 
     def _load_state(self) -> None:
         self._is_loading = True
         if path.exists(self.state_file):
             try:
-                with open(self.state_file, "r", encoding="utf-8") as f:
-                    loaded_state: StateDict = toml.load(f)
+                with open(self.state_file, "rb") as f:
+                    loaded_state: StateDict = cast(StateDict, tomli.load(f))
                     # Check for version change
                     # TODO: do something with this later, maybe for messages
                     # or breaking changes <- need to refactor config because
@@ -63,28 +85,39 @@ class StateManager(Widget):
                     if file_version and file_version != self.current_version:
                         self.previous_version = file_version
 
-                    self.pinned_sidebar_visible = loaded_state.get(
-                        "pinned_sidebar_visible", True
-                    )
-                    self.preview_sidebar_visible = loaded_state.get(
-                        "preview_sidebar_visible", True
-                    )
-                    self.footer_visible = loaded_state.get("footer_visible", True)
-                    self.menuwrapper_visible = loaded_state.get(
-                        "menuwrapper_visible", True
-                    )
-                    self.sort_by = loaded_state.get("sort_by", "name")
-                    if self.sort_by not in [
-                        "name",
-                        "size",
-                        "modified",
-                        "created",
-                        "extension",
-                        "natural",
-                    ]:
-                        self.sort_by = "name"
-                    self.sort_descending = loaded_state.get("sort_descending", False)
-            except (toml.TomlDecodeError, OSError):
+                    if self.pinned_sidebar_visible != (
+                        pinned_sidebar_visible := loaded_state.get(
+                            "pinned_sidebar_visible", True
+                        )
+                    ):
+                        self.pinned_sidebar_visible = pinned_sidebar_visible
+                    if self.preview_sidebar_visible != (
+                        preview_sidebar_visible := loaded_state.get(
+                            "preview_sidebar_visible", True
+                        )
+                    ):
+                        self.preview_sidebar_visible = preview_sidebar_visible
+                    if self.footer_visible != (
+                        footer_visible := loaded_state.get("footer_visible", True)
+                    ):
+                        self.footer_visible = footer_visible
+                    if self.menu_wrapper_visible != (
+                        menu_wrapper_visible := loaded_state.get(
+                            "menu_wrapper_visible", True
+                        )
+                    ):
+                        self.menu_wrapper_visible = menu_wrapper_visible
+                    sort_by = loaded_state.get("sort_by", "name")
+                    if sort_by not in _sort_by_options:
+                        sort_by = "name"
+                    # clearly sort_by = "name" wouldn't lead to the condition being true
+                    elif self.sort_by != sort_by:
+                        self.sort_by = sort_by
+                    if self.sort_descending != (
+                        sort_descending := loaded_state.get("sort_descending", False)
+                    ):
+                        self.sort_descending = sort_descending
+            except (tomli.TOMLDecodeError, OSError):
                 self._create_default_state()
         else:
             self._create_default_state()
@@ -94,26 +127,27 @@ class StateManager(Widget):
         self.pinned_sidebar_visible = True
         self.preview_sidebar_visible = True
         self.footer_visible = True
-        self.menuwrapper_visible = True
+        self.menu_wrapper_visible = True
         self.sort_by = "name"
         self.sort_descending = False
-        self._save_state(force=True)
 
     def _save_state(self, force: bool = False) -> None:
         if self._skip_save and not force:
             return
         try:
             with open(self.state_file, "w", encoding="utf-8") as f:
-                state: StateDict = {
-                    "current_version": self.current_version,
-                    "pinned_sidebar_visible": self.pinned_sidebar_visible,
-                    "preview_sidebar_visible": self.preview_sidebar_visible,
-                    "footer_visible": self.footer_visible,
-                    "menuwrapper_visible": self.menuwrapper_visible,
-                    "sort_by": self.sort_by,
-                    "sort_descending": self.sort_descending,
-                }
-                toml.dump(state, f)
+                # peak hardcoding
+                # i refuse to add tomli-w just for this, and
+                # tomllib is still read only, so writing manually
+                # is the best option for now (source: trust me bro)
+                f.write(f"""current_version = "{self.current_version}"
+pinned_sidebar_visible = {str(self.pinned_sidebar_visible).lower()}
+preview_sidebar_visible = {str(self.preview_sidebar_visible).lower()}
+footer_visible = {str(self.footer_visible).lower()}
+menu_wrapper_visible = {str(self.menu_wrapper_visible).lower()}
+sort_by = "{self.sort_by}"
+sort_descending = {str(self.sort_descending).lower()}
+""")
         except (OSError, PermissionError) as exc:
             self.notify(
                 f"Attempted to write state file, but {type(exc).__name__} occurred\n{exc}",
@@ -159,28 +193,27 @@ class StateManager(Widget):
         if self._locked_by == "Footer":
             self._save_state()
 
-    def watch_menuwrapper_visible(self, visible: bool) -> None:
+    def watch_menu_wrapper_visible(self, visible: bool) -> None:
         if self._is_loading:
             return
-        self._locked_by = "menuwrapper"
+        self._locked_by = "menu_wrapper"
         with suppress(NoMatches):
-            menuwrapper = self.app.query_one("#menuwrapper")
+            menu_wrapper = self.app.query_one("#menu_wrapper")
             if visible:
-                menuwrapper.remove_class("hide")
+                menu_wrapper.remove_class("hide")
             else:
-                menuwrapper.add_class("hide")
-        if self._locked_by == "menuwrapper":
+                menu_wrapper.add_class("hide")
+        if self._locked_by == "menu_wrapper":
             self._save_state()
 
-    def watch_sort_by(self, value: str) -> None:
+    def watch_sort_by(self, value: SortByOptions) -> None:
         if self._is_loading:
             return
-        self._save_state()
-        try:
-            file_list = self.app.query_one("#file_list")
-            file_list.update_file_list(add_to_session=False)
-        except NoMatches:
-            pass
+        # Save to folder prefs if custom sort is enabled, otherwise save global
+        if self.custom_sort_enabled and self._current_folder:
+            set_folder_pref(self._current_folder, value, self.sort_descending)
+        else:
+            self._save_state()
         # Update sort button icon
         with suppress(NoMatches):
             self.app.query_one("#sort_order").update_icon()
@@ -188,12 +221,11 @@ class StateManager(Widget):
     def watch_sort_descending(self, value: bool) -> None:
         if self._is_loading:
             return
-        self._save_state()
-        try:
-            file_list = self.app.query_one("#file_list")
-            file_list.update_file_list(add_to_session=False)
-        except NoMatches:
-            pass
+        # Save to folder prefs if custom sort is enabled, otherwise save global
+        if self.custom_sort_enabled and self._current_folder:
+            set_folder_pref(self._current_folder, self.sort_by, value)
+        else:
+            self._save_state()
         # Update sort button icon
         with suppress(NoMatches):
             self.app.query_one("#sort_order").update_icon()
@@ -207,9 +239,10 @@ class StateManager(Widget):
     def toggle_footer(self) -> None:
         self.footer_visible = not self.footer_visible
 
-    def toggle_menuwrapper(self) -> None:
-        self.menuwrapper_visible = not self.menuwrapper_visible
+    def toggle_menu_wrapper(self) -> None:
+        self.menu_wrapper_visible = not self.menu_wrapper_visible
 
+    @work(thread=True)
     def restore_state(self) -> None:
         # just for safe measure, set it to false
         self._is_loading = False
@@ -217,7 +250,137 @@ class StateManager(Widget):
         self.watch_pinned_sidebar_visible(self.pinned_sidebar_visible)
         self.watch_preview_sidebar_visible(self.preview_sidebar_visible)
         self.watch_footer_visible(self.footer_visible)
-        self.watch_menuwrapper_visible(self.menuwrapper_visible)
+        self.watch_menu_wrapper_visible(self.menu_wrapper_visible)
         self.watch_sort_by(self.sort_by)
         self.watch_sort_descending(self.sort_descending)
         self._skip_save = False
+
+    def apply_folder_sort_prefs(self, folder_path: str) -> None:
+        """
+        Load folder-specific sort preferences if they exist.
+        Otherwise, use the global sort settings.
+
+        Note: This method only updates StateManager's internal state.
+        FileList will query the preferences when it needs them via get_sort_prefs().
+
+        Args:
+            folder_path: The path to the folder being navigated to.
+        """
+        self._current_folder = normalise(folder_path)
+        folder_pref = get_folder_pref(self._current_folder)
+
+        self._is_loading = True  # Prevent watchers during state load
+
+        if folder_pref:
+            # Folder has custom sort preferences
+            self.custom_sort_enabled = True
+            if self.sort_by != folder_pref["sort_by"]:
+                self.sort_by = folder_pref["sort_by"]
+            if self.sort_descending != folder_pref["sort_descending"]:
+                self.sort_descending = folder_pref["sort_descending"]
+        else:
+            # No custom preferences, use global settings
+            self.custom_sort_enabled = False
+            self._apply_global_sort()
+
+        self._is_loading = False
+
+    def _apply_global_sort(self) -> None:
+        """Apply the global sort settings from state.toml."""
+        if not path.exists(self.state_file):
+            return
+        try:
+            with open(self.state_file, "rb") as f:
+                loaded_state: StateDict = cast(StateDict, tomli.load(f))
+                sort_by = loaded_state.get("sort_by", "name")
+                if sort_by not in _sort_by_options:
+                    sort_by = "name"
+                sort_descending = loaded_state.get("sort_descending", False)
+
+                self._is_loading = True
+                if self.sort_by != sort_by:
+                    self.sort_by = sort_by
+                if self.sort_descending != sort_descending:
+                    self.sort_descending = sort_descending
+                self._is_loading = False
+        except (tomli.TOMLDecodeError, OSError):
+            # if any issue, just use defaults
+            pass
+
+    def toggle_custom_sort(self) -> None:
+        """
+        Toggle the custom sort preference for the current folder.
+
+        If enabling: saves current sort as the folder's custom preference.
+        If disabling: removes the folder's custom preference and reverts to global.
+        """
+        if not self._current_folder:
+            return
+
+        if self.custom_sort_enabled:
+            # Disabling: remove folder pref and revert to global
+            remove_folder_pref(self._current_folder)
+            self.custom_sort_enabled = False
+            self._apply_global_sort()
+        else:
+            # Enabling: save current sort as folder pref
+            set_folder_pref(self._current_folder, self.sort_by, self.sort_descending)
+            self.custom_sort_enabled = True
+
+    def get_current_folder(self) -> str:
+        return self._current_folder
+
+    def get_sort_prefs(
+        self, folder_path: str | None = None
+    ) -> tuple[SortByOptions, bool]:
+        """
+        Get the sort preferences for a specific folder.
+
+        Args:
+            folder_path: The path to query. If None, uses the current folder.
+
+        Returns:
+            A tuple of (sort_by, sort_descending).
+            Returns folder-specific preferences if they exist, otherwise global preferences.
+        """
+        if folder_path is None:
+            folder_path = self._current_folder
+
+        if not folder_path:
+            # No folder specified, return global
+            return self.sort_by, self.sort_descending
+
+        normalised_path = normalise(folder_path)
+        folder_pref = get_folder_pref(normalised_path)
+
+        if folder_pref:
+            # Return folder-specific preferences
+            return folder_pref["sort_by"], folder_pref["sort_descending"]
+        else:
+            # Return global preferences
+            return self.sort_by, self.sort_descending
+
+    def set_sort_preference(
+        self, sort_by: SortByOptions | None = None, sort_descending: bool | None = None
+    ) -> None:
+        """
+        Set sort preferences. If custom_sort_enabled, saves to folder prefs.
+        Otherwise, saves to global state.
+
+        Args:
+            sort_by: The sort method to set. If None, keeps current value.
+            sort_descending: Whether to sort descending. If None, keeps current value.
+        """
+        # Update internal state
+        if sort_by is not None and self.sort_by != sort_by:
+            self.sort_by = sort_by
+        if sort_descending is not None and self.sort_descending != sort_descending:
+            self.sort_descending = sort_descending
+
+        # Persist the change
+        if self.custom_sort_enabled and self._current_folder:
+            # Save to folder preferences
+            set_folder_pref(self._current_folder, self.sort_by, self.sort_descending)
+        else:
+            # Save to global state
+            self._save_state()

@@ -108,25 +108,41 @@ async def open_file(app: App, filepath: str) -> None:
     try:
         match system:
             case "windows":
-                process = await create_proc(
-                    "cmd",
-                    "/c",
-                    "start",
-                    "",
-                    filepath,
-                )
+                process = await create_proc("cmd", "/c", "start", "", filepath)
             case "darwin":  # macOS
                 process = await create_proc("open", filepath)
             case _:  # Linux and other Unix-like
                 process = await create_proc("xdg-open", filepath)
         _, stderr = await process.communicate()
         if stderr:
-            app.notify(
-                str(stderr.decode().strip()),
-                title="Open File",
-                severity="error",
-                markup=False,
-            )
+            if system == "windows":
+                # try with powershell
+                _, stderr = await (
+                    process := await create_proc(
+                        "powershell",
+                        "-NoProfile",
+                        "-Command",
+                        "Start-Process",
+                        filepath,
+                    )
+                ).communicate()
+                if stderr:
+                    # honestly cant do anything about this, i dont want to risk
+                    # stdout corruption (stares at pixelorama) by trying os.startfile
+                    # so just raise it and let the user deal with it
+                    app.notify(
+                        str(stderr.decode().strip()),
+                        title="Open File",
+                        severity="error",
+                        markup=False,
+                    )
+            else:
+                app.notify(
+                    str(stderr.decode().strip()),
+                    title="Open File",
+                    severity="error",
+                    markup=False,
+                )
         elif process.returncode and process.returncode != 0:
             app.notify(
                 f"Process exited with return code {process.returncode}",

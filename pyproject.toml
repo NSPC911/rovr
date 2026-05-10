@@ -138,7 +138,7 @@ format.sequence = [ { cmd = "ruff check --unsafe-fixes --fix"}, { cmd = "ruff fo
 svg-fmt.help = ""
 svg-fmt.ref = "screenshot-format"
 screenshot-format.help = "Format all SVG screenshots in the docs"
-screenshot-format.cmd = 'pnpx oxfmt --write "docs/public/screenshots/*.svg" --parser html --bracket-same-line --print-width 160'
+screenshot-format.cmd = 'pnpx prettier --write "docs/public/screenshots/*.svg" --parser html --bracket-same-line --print-width 160'
 
 flame.help = "Start rovr with pyinstrument for flamegraph profiling"
 flame.cmd = "pyinstrument --renderer=html --timeline --use-timing-thread --show-all -m rovr"

@@ -369,3 +369,15 @@ class PasteScreenOption(Option):
             loc = Content(" ") + icon_content + _get_cached_icon(icon) + Content(loc)
         super().__init__(loc)
         self.copy_or_cut = copy_or_cut
+
+
+class RightClickMenuOption(Option):
+    def __init__(
+        self,
+        prompt: VisualType,
+        action: str | None,
+        id: str | None = None,
+        disabled: bool = False,
+    ) -> None:
+        super().__init__(prompt, id=id, disabled=disabled)
+        self.action = action

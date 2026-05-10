@@ -54,12 +54,19 @@ panels = false
 [settings]
 copy_includes_metadata = true
 use_recycle_bin = true
+# comments are just how it could look like in your config, this will never be default
 right_click = [
+  # { label = "\uf0b0 Open With", if = { directory = false }, options = [
+  #   { label = "\ue8da VSCode", action = "sh:code \"${selected_files}\"" },
+  #   { label = "\ue272 Helix", action = 'shh:hx "${selected_files}"', if = { path = ["C:/Users/notso/Git/*"] } },
+  #   { label = "\ue0c6 Pixelorama", action = 'sh:pixelorama "${selected_files}"', if = { path = ["*.png"] } },
+  # ] },
   { label = "\uf0c5 Copy", options = [
     { label = "\uf07f Copy in rovr", action = "rovr:copy" },
     { label = "\U000f0147 Copy highlighted file path", action = "system:copy_highlighted" },
     { label = "\U000f14e5 Copy current directory path", action = "system:copy_current_directory" },
-    { label = "\U000f1265 Copy to OS clipboard", action = "system:copy_to_system_clip" }
+    { label = "\U000f1265 Copy to OS clipboard", action = "system:copy_to_system_clip" },
+    # { label = " Copy SHA256", action = 'sho:pwsh -nop -c "(Get-FileHash -Algorithm SHA256 \"${highlighted_file}\").Hash | Set-Clipboard"', if = { directory = false } }
   ] },
   { label = "\uf0c4 Cut", action = "rovr:cut" },
   { label = "\uf429 Paste", action = "rovr:paste" },
@@ -67,7 +74,8 @@ right_click = [
   { label = "\uf246 Rename", action = "rovr:rename" },
   { label = "\uf014 Delete", action = "rovr:delete" },
   { label = "\uf410 Zip", action = "rovr:zip" },
-  { label = "\uf07c Unzip", action = "rovr:unzip" }
+  { label = "\uf07c Unzip", action = "rovr:unzip" },
+  # { label = " Get SHA256", action = 'sho:pwsh -nop -c "(Get-FileHash -Algorithm SHA256 \"${highlighted_file}\").Hash', if = { directory = false }}
 ]
 
 [settings.preview_rules]

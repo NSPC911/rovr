@@ -309,7 +309,10 @@ def find_path_line(lines: list[str], path: list) -> int | None:
 
 
 def schema_dump(
-    doc_path: str, exception: JsonSchemaValueException, config_content: str
+    doc_path: str,
+    exception: JsonSchemaValueException,
+    config_content: str,
+    schema: dict,
 ) -> None:
     """
     Dump an error message for schema validation errors
@@ -350,6 +353,20 @@ def schema_dump(
                 error_msg = exception.message
             case "uniqueItems":
                 error_msg = f"[bright_cyan]{exception.name}[/] must have unique items (item '{cast(list, exception.value)[0]}' is duplicated)"
+            case "oneOf":
+                error_msg = f"Value for [bright_cyan]{exception.name}[/] does not match any of the allowed schemas"
+                # check specific paths because im too lazy to make it automatic
+                # also it would be quite hard to ensure that either ways, so this is much easier
+                if exception.name.startswith("settings.right_click"):
+                    error_msg += "\nHint: This only supports one of the following:"
+                    if exception.name.endswith("action"):
+                        error_msg += f"""
+    - one of {schema["properties"]["settings"]["properties"]["right_click"]["items"]["properties"]["action"]["oneOf"][0]["enum"]}
+    - matches regex [dodger_blue1]{schema["properties"]["settings"]["properties"]["right_click"]["items"]["properties"]["action"]["oneOf"][1]["pattern"]}[/]"""
+                    else:
+                        error_msg += """
+    - has [bright_cyan]"label"[/] and [bright_cyan]"actions"[/] fields
+    - has [bright_magenta]"label"[/] and [bright_magenta]"options"[/] fields for its submenu"""
             case _:
                 error_msg = exception.message
                 failed = True
@@ -430,6 +447,12 @@ def schema_dump(
 
         # Format the error message based on validator type
         error_msg, _ = get_message(exception)
+
+        if len(msgs := error_msg.split("\n")) != 1:
+            # multi-line: display with padding
+            error_msg = msgs[0]
+            for part in msgs[1:]:
+                error_msg += f"\n{(rjust + 5) * ' '}{part}"
 
         pprint(f"[bright_red]╰─{'─' * rjust}─❯[/] {error_msg}")
     # check path for custom message from migration.json
@@ -522,6 +545,7 @@ def load_config() -> tuple[dict, RovrConfig]:
             path.join(path.dirname(__file__), "../config/config.toml"),
             exception,
             resources.files("rovr.config").joinpath("config.toml").read_text("utf-8"),
+            schema_dict,
         )
         pprint(
             "        [red]I will refuse to launch as long as the template config is invalid.[/]"
@@ -565,7 +589,7 @@ def load_config() -> tuple[dict, RovrConfig]:
     try:
         schema(config_dict)
     except JsonSchemaValueException as exception:
-        schema_dump(user_config_path, exception, user_config_content)
+        schema_dump(user_config_path, exception, user_config_content, schema_dict)
 
     # slight config fixes
     # image protocol because "AutoImage" doesn't work with Sixel

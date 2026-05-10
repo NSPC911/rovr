@@ -9,6 +9,61 @@
       "items": {
         "type": "string"
       }
+    },
+    "right_click_action": {
+      "oneOf": [
+        {
+          "type": "string",
+          "enum": [
+            "rovr:copy",
+            "rovr:cut",
+            "rovr:paste",
+            "rovr:new",
+            "rovr:rename",
+            "rovr:delete",
+            "rovr:zip",
+            "rovr:unzip",
+            "system:copy_highlighted",
+            "system:copy_current_directory",
+            "system:copy_to_system_clip"
+          ]
+        },
+        {
+          "type": "string",
+          "pattern": "^sh[ho]?:.+$"
+        }
+      ]
+    },
+    "right_click_if": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "path": {
+          "description": "Only enable this menu item if the path matches one (or more) of the glob patterns in this list (look at https://docs.python.org/3/library/fnmatch.html for more info)",
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "os": {
+          "description": "Only enable this menu item if the operating system is one of the following (case insensitive)",
+          "type": "array",
+          "items": {
+            "type": "string",
+            "oneOf": [
+              { "enum": ["Windows", "Linux", "Darwin"] },
+              { "type": "string" }
+            ]
+          }
+        },
+        "cwd": {
+          "description": "Only enable this menu item if the current working directory matches one (or more) of the glob patterns in this list (look at https://docs.python.org/3/library/fnmatch.html for more info)",
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "directory": {
+          "type": "boolean",
+          "description": "Only enable this menu item if the selected item is a directory and its name matches this regex pattern (if unspecified, matches both files and directories)"
+        }
+      }
     }
   },
   "properties": {
@@ -213,8 +268,13 @@
                 "description": "Label to show in the context menu for this item"
               },
               "action": {
-                "type": "string",
-                "description": "Action to perform when the item is selected"
+                "$ref": "#/definitions/right_click_action",
+                "description": "Action to perform when the item is selected.\nShell commands must start with `sh` followed by an optional type (`h` hides the app, `o` shows the output on run) followed by a colon `:` then the command right after.\n Command expansions are supported."
+              },
+              "if": {
+                "type": "array",
+                "description": "Only show this menu item if a set criteria matches (ignored for rovr/system actions)",
+                "$ref": "#/definitions/right_click_if"
               },
               "options": {
                 "type": "array",
@@ -227,8 +287,13 @@
                       "description": "Label to show in the context menu for this submenu item"
                     },
                     "action": {
-                      "type": "string",
+                      "$ref": "#/definitions/right_click_action",
                       "description": "Action to perform when the submenu item is selected"
+                    },
+                    "if": {
+                      "type": "array",
+                      "description": "Only show this menu item if a set criteria matches (ignored for rovr/system actions)",
+                      "$ref": "#/definitions/right_click_if"
                     }
                   },
                   "required": ["label", "action"],

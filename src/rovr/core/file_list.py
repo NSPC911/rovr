@@ -6,6 +6,7 @@ from textual import events, work
 from textual.binding import BindingType
 from textual.content import ContentText
 from textual.css.query import NoMatches
+from textual.errors import NoWidget
 from textual.widgets.option_list import OptionDoesNotExist
 from textual.widgets.selection_list import Selection, SelectionType
 
@@ -280,6 +281,8 @@ class FileList(
                 to_highlight_index = min(
                     len(self.list_of_options) - 1, session.lastHighlighted[cwd]["index"]
                 )
+            # temporary fix until i start using session.scroll_target_y
+            self.scroll_target_y = 0
             try:
                 self.highlighted = to_highlight_index
             except (OptionDoesNotExist, KeyError):
@@ -923,17 +926,38 @@ class FileList(
             # it happens, but I really cannot be bothered to figure it out
             rightclickoptionlist = FileListRightClickMenu()
             await self.app.mount(rightclickoptionlist)
-        rightclickoptionlist.display = True
         if event is None:
             self.scroll_to_highlight()
 
-            x = (self.app.size.width - 12) // 2
-            y = (self.app.size.height - 8) // 2
+            try:
+                visible_region = self.screen.find_widget(self).visible_region
+                top_left = visible_region.offset
+            except NoWidget:
+                return
 
             if self.highlighted is not None:
                 line_offset = self._index_to_line[self.highlighted]
-                y = self.content_region.y + line_offset - int(self.scroll_target_y)
-                x = self.content_region.x + len(str(self.highlighted_option.prompt)) + 1
+                x = (
+                    top_left.x
+                    + min(
+                        visible_region.width // 2,
+                        len(str(self.highlighted_option.prompt)),
+                    )
+                    + 1
+                )
+                y = top_left.y + line_offset - int(self.scroll_target_y)
+            else:
+                x = (
+                    top_left.x
+                    + min(
+                        visible_region.width // 2,
+                        len(str(self.get_option_at_index(0).prompt)),
+                    )
+                    + 1
+                )
+                y = top_left.y + int(
+                    self.scroll_target_y
+                )  # why is it an addition, i have no clue
 
             event = events.Click(
                 self,
@@ -946,5 +970,7 @@ class FileList(
                 False,
                 False,
             )
+        rightclickoptionlist.pre_show()
         rightclickoptionlist.update_location(event)
+        rightclickoptionlist.display = True
         self.call_later(rightclickoptionlist.focus)

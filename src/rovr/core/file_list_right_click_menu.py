@@ -315,7 +315,7 @@ class FileListRightClickMenu(PopupOptionList, inherit_bindings=False):
                                 f"stdout: {stdout.decode().strip()}\nstderr: {stderr.decode().strip()}"
                             )
                         elif stdout:
-                            self.notify(f"{stdout.decode().strip()}", severity="error")
+                            self.notify(f"{stdout.decode().strip()}")
                     else:
                         self.notify(
                             f"stdout: {stdout.decode().strip()}\nstderr: {stderr.decode().strip()}",

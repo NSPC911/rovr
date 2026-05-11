@@ -2,8 +2,6 @@ import contextlib
 from typing import Self
 
 from textual import events, on
-from textual.dom import NoScreen
-from textual.widget import Widget
 
 from rovr.widgets import OptionList
 
@@ -42,20 +40,22 @@ class PopupOptionList(OptionList):
             hovered_option is not None
             and 0 <= hovered_option < len(self._options)
             and not self._options[hovered_option].disabled
+            and hovered_option != self.highlighted
         ):
             self.highlighted = hovered_option
+        # no choice here, i want something similar to focus on hover
+        # so that it feels better rather than a focus instantly followed
+        # by a hide (looks bad, which was why #264 pr was made for pins bar)
         self.reset_focus()
 
     def focus(self, scroll_visible: bool = True) -> Self:
-        def set_focus(widget: Widget) -> None:
-            """Callback to set the focus."""
-            with contextlib.suppress(NoScreen):
-                widget.screen.set_focus(self, scroll_visible=scroll_visible)
-
-        self.refresh()
-        self.app.call_later(set_focus, self)
+        # might be weird, but this is really necessary
+        # for some reason, focus doesnt seem to reset, which results in
+        # all the popups looking like they are focused (because the focus
+        # reactive is set to True for some reason), so schedule a reset
+        # after refresh to make sure that only this popup is focused
         self.app.call_after_refresh(self.reset_focus)
-        return self
+        return super().focus(scroll_visible)
 
     def on_blur(self, event: events.Blur) -> None:
         self.go_hide()

@@ -89,17 +89,25 @@ def deep_merge(old: dict, new: dict) -> dict:
         new (dict): new dictionary, to merge on top of old
 
     Returns:
-        dict: Merged dictionary
+        dict: Merged dictionary with new's keys taking priority
     """
     try:
+        result: dict = {}
         for key, value in new.items():
             if isinstance(value, dict):
                 existing = old.get(key, {})
-                old[key] = deep_merge(
+                result[key] = deep_merge(
                     existing if isinstance(existing, dict) else {}, value
                 )
             else:
-                old[key] = value
+                result[key] = value
+        for key, value in old.items():
+            if key not in new:
+                if isinstance(value, dict):
+                    existing = result.get(key, {})
+                    result[key] = deep_merge(existing, value)
+                else:
+                    result[key] = value
     except TypeError as exc:
         if locals().get("key") is None and locals().get("value") is None:
             pprint(
@@ -118,7 +126,7 @@ def deep_merge(old: dict, new: dict) -> dict:
             f"While deep merging the default config with the userconfig, {type(exc).__name__} was raised.\n    {exc}\nSince the conflict cannot be resolved, rovr will not be launching."
         )
         exit(1)
-    return old
+    return result
 
 
 def set_nested_value(

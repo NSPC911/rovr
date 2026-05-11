@@ -56,27 +56,27 @@ copy_includes_metadata = true
 use_recycle_bin = true
 
 [settings.preview_rules]
-"text/.*" = "text"
-"application/(json|javascript|xml|raml\\+yaml)" = "text"
-"application/x-(yaml|script|pem-file|subrip|typescript)" = "text"
-"application/(mbox|ndjson|wine-extension-ini)" = "text"
-"image/svg\\+xml" = "resvg"
-"image/.*" = "image"
-"application/pdf" = "pdf"
-"application/(zip|gzip|zstd|bzip2|vnd\\.rar)" = "archive"
-"application/x-(xz|tar|gzip|bzip2|xz|rar|rar-compressed|7z-compressed)" = "archive"
-"application/(rar|7z.*|tar|xz|bzip.*|lzma|compress|archive|cpio|arj|xar|ms-cab.*)" = "archive"
-"application/(iso9660-image|qemu-disk|ms-wim|apple-diskimage)" = "archive"
-"application/virtualbox-(vhd|vhdx)" = "archive"
 "application/(debian.*-package|redhat-package-manager|rpm|android\\.package-archive)" = "archive"
+"application/(iso9660-image|qemu-disk|ms-wim|apple-diskimage)" = "archive"
+"application/(rar|7z.*|tar|xz|bzip.*|lzma|compress|archive|cpio|arj|xar|ms-cab.*)" = "archive"
+"application/(zip|gzip|zstd|bzip2|vnd\\.rar)" = "archive"
 "application/java-archive" = "archive"
-"inode/directory" = "folder"
-"font/.*" = "font"
+"application/virtualbox-(vhd|vhdx)" = "archive"
+"application/x-(xz|tar|gzip|bzip2|xz|rar|rar-compressed|7z-compressed)" = "archive"
+"application/(json|javascript|xml|raml\\+yaml)" = "text"
+"application/(mbox|ndjson|wine-extension-ini)" = "text"
+"application/x-(yaml|script|pem-file|subrip|typescript)" = "text"
+"application/vnd.openxmlformats-officedocument.wordprocessingml.document" = "remime"
 "application/ms-opentype" = "font"
+"application/pdf" = "pdf"
+"image/svg\\+xml" = "resvg"
+"inode/directory" = "folder"
+
 "application/font-.*" = "font"
 "application/x-font-.*" = "font"
-# inaccurately determined by puremagic (it isnt always magic)
-"application/vnd.openxmlformats-officedocument.wordprocessingml.document" = "remime"
+"image/.*" = "image"
+"text/.*" = "text"
+"font/.*" = "font"
 
 [settings.bulk_rename]
 show_as_mapping = true

@@ -37,6 +37,7 @@ def ifed(app: App, conditions: _RightClickIf) -> bool:
     dir_entry: DirEntryType | None = getattr(
         app.file_list.highlighted_option, "dir_entry", None
     )
+    disabled = False
     for thing in conditions:
         match thing:
             case "path":
@@ -65,7 +66,7 @@ def ifed(app: App, conditions: _RightClickIf) -> bool:
     return disabled
 
 
-def get_shell_option(
+async def get_shell_option(
     app: App,
     option: _RovrConfigSettingsRightClickItemOptionsItem
     | _RovrConfigSettingsRightClickItem,
@@ -90,7 +91,7 @@ def get_shell_option(
     if "${highlighted_file}" in action:
         disabled = not dir_entry
     if not disabled and "${selected_files}" in action:
-        disabled = app.file_list.get_selected_objects() == []
+        disabled = await app.file_list.get_selected_objects() == []
     if "if" in option and ifed(app, option["if"]):
         return False
 
@@ -151,7 +152,13 @@ def give_me_an_option(
         case "system:copy_highlighted":
             return PartialOption(id="copy_highlighted", disabled=no_items)
         case "system:copy_current_directory":
-            return PartialOption(id="copy_current_directory", disabled=no_items)
+            try:
+                from os import getcwd
+
+                getcwd()
+                return PartialOption(id="copy_current_directory", disabled=False)
+            except FileNotFoundError:
+                return PartialOption(id="copy_current_directory", disabled=True)
         case "system:copy_to_system_clip":
             return PartialOption(id="copy_to_system_clip", disabled=no_items)
 
@@ -178,29 +185,27 @@ class FileListRightClickMenu(PopupOptionList, inherit_bindings=False):
                 ),
             )
 
-    def pre_show(self) -> None:
+    async def pre_show(self) -> None:
         options = []
         self.longest_prompt = 0
         for i, option in enumerate(config["settings"]["right_click"]):
             if "options" in option:
-                options.append(
-                    RightClickMenuOption(
-                        f" {option['label'].strip()} ",
-                        action=None,
-                        id=f"group_{i}",
-                        disabled=ifed(self.app, option["if"])
-                        if "if" in option
-                        else False,
-                    )
+                new_option = RightClickMenuOption(
+                    f" {option['label'].strip()} ",
+                    action=None,
+                    id=f"group_{i}",
+                    disabled=ifed(self.app, option["if"]) if "if" in option else False,
                 )
-            elif shell_option := get_shell_option(self.app, option, i):
-                options.append(shell_option)
+            elif shell_option := await get_shell_option(self.app, option, i):
+                new_option = shell_option
             elif shell_option is False:
                 continue
             else:
-                if new_option := give_me_an_option(self.app, option):
-                    options.append(new_option)
-            self.longest_prompt = max(self.longest_prompt, len(options[-1].prompt))
+                new_option = give_me_an_option(self.app, option)
+            if new_option is None:
+                continue
+            options.append(new_option)
+            self.longest_prompt = max(self.longest_prompt, len(str(new_option.prompt)))
         for option in options:
             if option.id.startswith("group"):
                 if len(option.prompt) < self.longest_prompt - 2:
@@ -259,7 +264,6 @@ class FileListRightClickMenu(PopupOptionList, inherit_bindings=False):
         self, event: OptionList.OptionSelected
     ) -> None:
         # Handle menu item selection
-        self.app.hide_popups()
         if event.option.id.startswith("group"):
             # need to handle the submenu options here soon
             child_menu = self.app.query_one(FileListRightClickChildMenu)
@@ -267,7 +271,8 @@ class FileListRightClickMenu(PopupOptionList, inherit_bindings=False):
             if child_menu.highlighted is None:
                 child_menu.highlighted = 0
             return
-        elif event.option.id.startswith("copy_") and hasattr(
+        self.app.hide_popups()
+        if event.option.id.startswith("copy_") and hasattr(
             self.app.query_one("CopyButton"), f"{event.option.id}"
         ):
             func: Callable[[], Awaitable | None] = getattr(
@@ -368,9 +373,9 @@ class FileListRightClickChildMenu(PopupOptionList, inherit_bindings=False):
         self, old: RightClickMenuOption, new: RightClickMenuOption
     ) -> None:
         if old != new:
-            self.on_show()
+            self.call_next(self.pre_show)
 
-    def pre_show(self) -> None:
+    async def pre_show(self) -> None:
         options = []
         try:
             target_group = int(self.target_option.id.split("_")[1])
@@ -379,7 +384,7 @@ class FileListRightClickChildMenu(PopupOptionList, inherit_bindings=False):
         for i, option in enumerate(
             config["settings"]["right_click"][target_group]["options"]
         ):
-            if shell_option := get_shell_option(self.app, option, i):
+            if shell_option := await get_shell_option(self.app, option, i):
                 options.append(shell_option)
             elif shell_option is False:
                 continue

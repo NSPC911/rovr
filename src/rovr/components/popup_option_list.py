@@ -9,8 +9,6 @@ from rovr.widgets import OptionList
 
 
 class PopupOptionList(OptionList):
-    layer: int = 0
-
     def __init__(
         self,
         id: str | None = None,
@@ -29,8 +27,7 @@ class PopupOptionList(OptionList):
             self.show_vertical_scrollbar = True
         if self.styles.overflow_x == "scroll":
             self.show_horizontal_scrollbar = True
-        self.layer += 1
-        self.styles.layer = "overlay_" + str(self.layer)
+        self.styles.layer = "overlay"
         self.go_hide()
 
     def reset_focus(self) -> None:

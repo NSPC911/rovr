@@ -54,11 +54,12 @@ panels = false
 [settings]
 copy_includes_metadata = true
 use_recycle_bin = true
-# comments are just how it could look like in your config, this will never be default
+# comments are just how shell config would look like, it will never be
+# set as default options in the menu, it can be used as reference
 right_click = [
   # { label = "\uf0b0 Open With", if = { directory = false }, options = [
-  #   { label = "\ue8da VSCode", action = "sh:code \"${selected_files}\"" },
-  #   { label = "\ue272 Helix", action = 'shh:hx "${selected_files}"', if = { path = ["C:/Users/notso/Git/*"] } },
+  #   { label = "\ue8da VSCode", action = 'sh:code "${selected_files}"' },
+  #   { label = "\ue272 Helix", action = "shh:hx ${selected_files}", if = { path = ["C:/Users/notso/Git/*"] } },
   #   { label = "\ue0c6 Pixelorama", action = 'sh:pixelorama "${selected_files}"', if = { path = ["*.png"] } },
   # ] },
   { label = "\uf0c5 Copy", options = [

@@ -365,7 +365,7 @@ def schema_dump(
     - matches regex [dodger_blue1]{schema["properties"]["settings"]["properties"]["right_click"]["items"]["properties"]["action"]["oneOf"][1]["pattern"]}[/]"""
                     else:
                         error_msg += """
-    - has [bright_cyan]"label"[/] and [bright_cyan]"actions"[/] fields
+    - has [bright_cyan]"label"[/] and [bright_cyan]"action"[/] fields
     - has [bright_magenta]"label"[/] and [bright_magenta]"options"[/] fields for its submenu"""
             case _:
                 error_msg = exception.message

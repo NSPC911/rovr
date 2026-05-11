@@ -48,7 +48,7 @@
           "type": "array",
           "items": {
             "type": "string",
-            "oneOf": [
+            "anyOf": [
               { "enum": ["Windows", "Linux", "Darwin"] },
               { "type": "string" }
             ]
@@ -61,7 +61,7 @@
         },
         "directory": {
           "type": "boolean",
-          "description": "Only enable this menu item if the selected item is a directory and its name matches this regex pattern (if unspecified, matches both files and directories)"
+          "description": "Only enable this menu item if the selected item is a directory (set to true) or a file (set to false) (if unspecified, matches both files and directories)"
         }
       }
     }
@@ -272,7 +272,7 @@
                 "description": "Action to perform when the item is selected.\nShell commands must start with `sh` followed by an optional type (`h` hides the app, `o` shows the output on run) followed by a colon `:` then the command right after.\n Command expansions are supported."
               },
               "if": {
-                "type": "array",
+                "type": "object",
                 "description": "Only show this menu item if a set criteria matches (ignored for rovr/system actions)",
                 "$ref": "#/definitions/right_click_if"
               },
@@ -291,7 +291,7 @@
                       "description": "Action to perform when the submenu item is selected"
                     },
                     "if": {
-                      "type": "array",
+                      "type": "object",
                       "description": "Only show this menu item if a set criteria matches (ignored for rovr/system actions)",
                       "$ref": "#/definitions/right_click_if"
                     }

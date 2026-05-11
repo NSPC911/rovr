@@ -416,20 +416,20 @@ class _RightClickIf(TypedDict, total=False):
     r""" Only enable this menu item if the current working directory matches one (or more) of the glob patterns in this list (look at https://docs.python.org/3/library/fnmatch.html for more info) """
 
     directory: bool
-    r""" Only enable this menu item if the selected item is a directory and its name matches this regex pattern (if unspecified, matches both files and directories) """
+    r""" Only enable this menu item if the selected item is a directory (set to true) or a file (set to false) (if unspecified, matches both files and directories) """
 
 
-_RightClickIfOsItem = Union["_RightClickIfOsItemOneof0", str]
-r""" Aggregation type: oneOf """
+_RightClickIfOsItem = Union["_RightClickIfOsItemAnyof0", str]
+r""" Aggregation type: anyOf """
 
 
-_RightClickIfOsItemOneof0 = Literal["Windows"] | Literal["Linux"] | Literal["Darwin"]
-_RIGHTCLICKIFOSITEMONEOF0_WINDOWS: Literal["Windows"] = "Windows"
-r"""The values for the '_RightClickIfOsItemOneof0' enum"""
-_RIGHTCLICKIFOSITEMONEOF0_LINUX: Literal["Linux"] = "Linux"
-r"""The values for the '_RightClickIfOsItemOneof0' enum"""
-_RIGHTCLICKIFOSITEMONEOF0_DARWIN: Literal["Darwin"] = "Darwin"
-r"""The values for the '_RightClickIfOsItemOneof0' enum"""
+_RightClickIfOsItemAnyof0 = Literal["Windows"] | Literal["Linux"] | Literal["Darwin"]
+_RIGHTCLICKIFOSITEMANYOF0_WINDOWS: Literal["Windows"] = "Windows"
+r"""The values for the '_RightClickIfOsItemAnyof0' enum"""
+_RIGHTCLICKIFOSITEMANYOF0_LINUX: Literal["Linux"] = "Linux"
+r"""The values for the '_RightClickIfOsItemAnyof0' enum"""
+_RIGHTCLICKIFOSITEMANYOF0_DARWIN: Literal["Darwin"] = "Darwin"
+r"""The values for the '_RightClickIfOsItemAnyof0' enum"""
 
 
 class _RovrConfigCustomThemeItem(TypedDict, total=False):

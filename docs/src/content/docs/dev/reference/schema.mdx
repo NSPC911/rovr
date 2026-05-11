@@ -49,11 +49,29 @@ description: config schema humanified
         - [2.2.1.4.1. Property `Rovr Config > settings > right_click > right_click items > action > oneOf > item 0`](#settings_right_click_items_action_oneOf_i0)
         - [2.2.1.4.2. Property `Rovr Config > settings > right_click > right_click items > action > oneOf > item 1`](#settings_right_click_items_action_oneOf_i1)
       - [2.2.1.5. Property `Rovr Config > settings > right_click > right_click items > if`](#settings_right_click_items_if)
+        - [2.2.1.5.1. Property `Rovr Config > settings > right_click > right_click items > if > path`](#settings_right_click_items_if_path)
+          - [2.2.1.5.1.1. Rovr Config > settings > right_click > right_click items > if > path > path items](#settings_right_click_items_if_path_items)
+        - [2.2.1.5.2. Property `Rovr Config > settings > right_click > right_click items > if > os`](#settings_right_click_items_if_os)
+          - [2.2.1.5.2.1. Rovr Config > settings > right_click > right_click items > if > os > os items](#settings_right_click_items_if_os_items)
+            - [2.2.1.5.2.1.1. Property `Rovr Config > settings > right_click > right_click items > if > os > os items > anyOf > item 0`](#settings_right_click_items_if_os_items_anyOf_i0)
+            - [2.2.1.5.2.1.2. Property `Rovr Config > settings > right_click > right_click items > if > os > os items > anyOf > item 1`](#settings_right_click_items_if_os_items_anyOf_i1)
+        - [2.2.1.5.3. Property `Rovr Config > settings > right_click > right_click items > if > cwd`](#settings_right_click_items_if_cwd)
+          - [2.2.1.5.3.1. Rovr Config > settings > right_click > right_click items > if > cwd > cwd items](#settings_right_click_items_if_cwd_items)
+        - [2.2.1.5.4. Property `Rovr Config > settings > right_click > right_click items > if > directory`](#settings_right_click_items_if_directory)
       - [2.2.1.6. Property `Rovr Config > settings > right_click > right_click items > options`](#settings_right_click_items_options)
         - [2.2.1.6.1. Rovr Config > settings > right_click > right_click items > options > options items](#settings_right_click_items_options_items)
           - [2.2.1.6.1.1. Property `Rovr Config > settings > right_click > right_click items > options > options items > label`](#settings_right_click_items_options_items_label)
           - [2.2.1.6.1.2. Property `Rovr Config > settings > right_click > right_click items > options > options items > action`](#settings_right_click_items_options_items_action)
           - [2.2.1.6.1.3. Property `Rovr Config > settings > right_click > right_click items > options > options items > if`](#settings_right_click_items_options_items_if)
+            - [2.2.1.6.1.3.1. Property `Rovr Config > settings > right_click > right_click items > if > path`](#settings_right_click_items_if_path)
+              - [2.2.1.6.1.3.1.1. Rovr Config > settings > right_click > right_click items > if > path > path items](#settings_right_click_items_if_path_items)
+            - [2.2.1.6.1.3.2. Property `Rovr Config > settings > right_click > right_click items > if > os`](#settings_right_click_items_if_os)
+              - [2.2.1.6.1.3.2.1. Rovr Config > settings > right_click > right_click items > if > os > os items](#settings_right_click_items_if_os_items)
+                - [2.2.1.6.1.3.2.1.1. Property `Rovr Config > settings > right_click > right_click items > if > os > os items > anyOf > item 0`](#settings_right_click_items_if_os_items_anyOf_i0)
+                - [2.2.1.6.1.3.2.1.2. Property `Rovr Config > settings > right_click > right_click items > if > os > os items > anyOf > item 1`](#settings_right_click_items_if_os_items_anyOf_i1)
+            - [2.2.1.6.1.3.3. Property `Rovr Config > settings > right_click > right_click items > if > cwd`](#settings_right_click_items_if_cwd)
+              - [2.2.1.6.1.3.3.1. Rovr Config > settings > right_click > right_click items > if > cwd > cwd items](#settings_right_click_items_if_cwd_items)
+            - [2.2.1.6.1.3.4. Property `Rovr Config > settings > right_click > right_click items > if > directory`](#settings_right_click_items_if_directory)
   - [2.3. Property `Rovr Config > settings > copy_includes_metadata`](#settings_copy_includes_metadata)
   - [2.4. Property `Rovr Config > settings > bulk_rename`](#settings_bulk_rename)
     - [2.4.1. Property `Rovr Config > settings > bulk_rename > show_as_mapping`](#settings_bulk_rename_show_as_mapping)
@@ -850,7 +868,7 @@ Must be one of:
 | ---------------------------------------------- | --------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | [label](#settings_right_click_items_label)     | string          | Label to show in the context menu for this item                                                                                                                                                                                                                           |
 | [action](#settings_right_click_items_action)   | object          | Action to perform when the item is selected.<br />Shell commands must start with \`sh\` followed by an optional type (\`h\` hides the app, \`o\` shows the output on run) followed by a colon \`:\` then the command right after.<br /> Command expansions are supported. |
-| [if](#settings_right_click_items_if)           | array           | Only show this menu item if a set criteria matches (ignored for rovr/system actions)                                                                                                                                                                                      |
+| [if](#settings_right_click_items_if)           | object          | Only show this menu item if a set criteria matches (ignored for rovr/system actions)                                                                                                                                                                                      |
 | [options](#settings_right_click_items_options) | array of object | Submenu items (only supported at the top level)                                                                                                                                                                                                                           |
 
 | One of(Option)                                 |
@@ -945,13 +963,30 @@ Must be one of:
 
 ##### <a name="settings_right_click_items_if"></a>2.2.1.5. Property `Rovr Config > settings > right_click > right_click items > if`
 
-|                |                              |
-| -------------- | ---------------------------- |
-| **Type**       | `array`                      |
-| **Required**   | No                           |
-| **Defined in** | #/definitions/right_click_if |
+|                           |                              |
+| ------------------------- | ---------------------------- |
+| **Type**                  | `object`                     |
+| **Required**              | No                           |
+| **Additional properties** | Not allowed                  |
+| **Defined in**            | #/definitions/right_click_if |
 
 **Description:** Only show this menu item if a set criteria matches (ignored for rovr/system actions)
+
+| Property                                              | Type            | Title/Description                                                                                                                                                                          |
+| ----------------------------------------------------- | --------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| [path](#settings_right_click_items_if_path)           | array of string | Only enable this menu item if the path matches one (or more) of the glob patterns in this list (look at https://docs.python.org/3/library/fnmatch.html for more info)                      |
+| [os](#settings_right_click_items_if_os)               | array of string | Only enable this menu item if the operating system is one of the following (case insensitive)                                                                                              |
+| [cwd](#settings_right_click_items_if_cwd)             | array of string | Only enable this menu item if the current working directory matches one (or more) of the glob patterns in this list (look at https://docs.python.org/3/library/fnmatch.html for more info) |
+| [directory](#settings_right_click_items_if_directory) | boolean         | Only enable this menu item if the selected item is a directory (set to true) or a file (set to false) (if unspecified, matches both files and directories)                                 |
+
+###### <a name="settings_right_click_items_if_path"></a>2.2.1.5.1. Property `Rovr Config > settings > right_click > right_click items > if > path`
+
+|              |                   |
+| ------------ | ----------------- |
+| **Type**     | `array of string` |
+| **Required** | No                |
+
+**Description:** Only enable this menu item if the path matches one (or more) of the glob patterns in this list (look at https://docs.python.org/3/library/fnmatch.html for more info)
 
 |                      | Array restrictions |
 | -------------------- | ------------------ |
@@ -959,7 +994,108 @@ Must be one of:
 | **Max items**        | N/A                |
 | **Items unicity**    | False              |
 | **Additional items** | False              |
-| **Tuple validation** | N/A                |
+| **Tuple validation** | See below          |
+
+| Each item of this array must be                         | Description |
+| ------------------------------------------------------- | ----------- |
+| [path items](#settings_right_click_items_if_path_items) |             |
+
+###### <a name="settings_right_click_items_if_path_items"></a>2.2.1.5.1.1. Rovr Config > settings > right_click > right_click items > if > path > path items
+
+|              |          |
+| ------------ | -------- |
+| **Type**     | `string` |
+| **Required** | No       |
+
+###### <a name="settings_right_click_items_if_os"></a>2.2.1.5.2. Property `Rovr Config > settings > right_click > right_click items > if > os`
+
+|              |                   |
+| ------------ | ----------------- |
+| **Type**     | `array of string` |
+| **Required** | No                |
+
+**Description:** Only enable this menu item if the operating system is one of the following (case insensitive)
+
+|                      | Array restrictions |
+| -------------------- | ------------------ |
+| **Min items**        | N/A                |
+| **Max items**        | N/A                |
+| **Items unicity**    | False              |
+| **Additional items** | False              |
+| **Tuple validation** | See below          |
+
+| Each item of this array must be                     | Description |
+| --------------------------------------------------- | ----------- |
+| [os items](#settings_right_click_items_if_os_items) |             |
+
+###### <a name="settings_right_click_items_if_os_items"></a>2.2.1.5.2.1. Rovr Config > settings > right_click > right_click items > if > os > os items
+
+|              |             |
+| ------------ | ----------- |
+| **Type**     | `combining` |
+| **Required** | No          |
+
+| Any of(Option)                                             |
+| ---------------------------------------------------------- |
+| [item 0](#settings_right_click_items_if_os_items_anyOf_i0) |
+| [item 1](#settings_right_click_items_if_os_items_anyOf_i1) |
+
+###### <a name="settings_right_click_items_if_os_items_anyOf_i0"></a>2.2.1.5.2.1.1. Property `Rovr Config > settings > right_click > right_click items > if > os > os items > anyOf > item 0`
+
+|              |                    |
+| ------------ | ------------------ |
+| **Type**     | `enum (of string)` |
+| **Required** | No                 |
+
+Must be one of:
+
+- "Windows"
+- "Linux"
+- "Darwin"
+
+###### <a name="settings_right_click_items_if_os_items_anyOf_i1"></a>2.2.1.5.2.1.2. Property `Rovr Config > settings > right_click > right_click items > if > os > os items > anyOf > item 1`
+
+|              |          |
+| ------------ | -------- |
+| **Type**     | `string` |
+| **Required** | No       |
+
+###### <a name="settings_right_click_items_if_cwd"></a>2.2.1.5.3. Property `Rovr Config > settings > right_click > right_click items > if > cwd`
+
+|              |                   |
+| ------------ | ----------------- |
+| **Type**     | `array of string` |
+| **Required** | No                |
+
+**Description:** Only enable this menu item if the current working directory matches one (or more) of the glob patterns in this list (look at https://docs.python.org/3/library/fnmatch.html for more info)
+
+|                      | Array restrictions |
+| -------------------- | ------------------ |
+| **Min items**        | N/A                |
+| **Max items**        | N/A                |
+| **Items unicity**    | False              |
+| **Additional items** | False              |
+| **Tuple validation** | See below          |
+
+| Each item of this array must be                       | Description |
+| ----------------------------------------------------- | ----------- |
+| [cwd items](#settings_right_click_items_if_cwd_items) |             |
+
+###### <a name="settings_right_click_items_if_cwd_items"></a>2.2.1.5.3.1. Rovr Config > settings > right_click > right_click items > if > cwd > cwd items
+
+|              |          |
+| ------------ | -------- |
+| **Type**     | `string` |
+| **Required** | No       |
+
+###### <a name="settings_right_click_items_if_directory"></a>2.2.1.5.4. Property `Rovr Config > settings > right_click > right_click items > if > directory`
+
+|              |           |
+| ------------ | --------- |
+| **Type**     | `boolean` |
+| **Required** | No        |
+
+**Description:** Only enable this menu item if the selected item is a directory (set to true) or a file (set to false) (if unspecified, matches both files and directories)
 
 ##### <a name="settings_right_click_items_options"></a>2.2.1.6. Property `Rovr Config > settings > right_click > right_click items > options`
 
@@ -994,7 +1130,7 @@ Must be one of:
 | ---------------------------------------------------------- | ------ | ------------------------------------------------------------------------------------ |
 | [label](#settings_right_click_items_options_items_label)   | string | Label to show in the context menu for this submenu item                              |
 | [action](#settings_right_click_items_options_items_action) | object | Action to perform when the submenu item is selected                                  |
-| [if](#settings_right_click_items_options_items_if)         | array  | Only show this menu item if a set criteria matches (ignored for rovr/system actions) |
+| [if](#settings_right_click_items_options_items_if)         | object | Only show this menu item if a set criteria matches (ignored for rovr/system actions) |
 
 ###### <a name="settings_right_click_items_options_items_label"></a>2.2.1.6.1.1. Property `Rovr Config > settings > right_click > right_click items > options > options items > label`
 
@@ -1018,13 +1154,30 @@ Must be one of:
 
 ###### <a name="settings_right_click_items_options_items_if"></a>2.2.1.6.1.3. Property `Rovr Config > settings > right_click > right_click items > options > options items > if`
 
-|                |                              |
-| -------------- | ---------------------------- |
-| **Type**       | `array`                      |
-| **Required**   | No                           |
-| **Defined in** | #/definitions/right_click_if |
+|                           |                              |
+| ------------------------- | ---------------------------- |
+| **Type**                  | `object`                     |
+| **Required**              | No                           |
+| **Additional properties** | Not allowed                  |
+| **Defined in**            | #/definitions/right_click_if |
 
 **Description:** Only show this menu item if a set criteria matches (ignored for rovr/system actions)
+
+| Property                                              | Type            | Title/Description                                                                                                                                                                          |
+| ----------------------------------------------------- | --------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| [path](#settings_right_click_items_if_path)           | array of string | Only enable this menu item if the path matches one (or more) of the glob patterns in this list (look at https://docs.python.org/3/library/fnmatch.html for more info)                      |
+| [os](#settings_right_click_items_if_os)               | array of string | Only enable this menu item if the operating system is one of the following (case insensitive)                                                                                              |
+| [cwd](#settings_right_click_items_if_cwd)             | array of string | Only enable this menu item if the current working directory matches one (or more) of the glob patterns in this list (look at https://docs.python.org/3/library/fnmatch.html for more info) |
+| [directory](#settings_right_click_items_if_directory) | boolean         | Only enable this menu item if the selected item is a directory (set to true) or a file (set to false) (if unspecified, matches both files and directories)                                 |
+
+###### <a name="settings_right_click_items_if_path"></a>2.2.1.6.1.3.1. Property `Rovr Config > settings > right_click > right_click items > if > path`
+
+|              |                   |
+| ------------ | ----------------- |
+| **Type**     | `array of string` |
+| **Required** | No                |
+
+**Description:** Only enable this menu item if the path matches one (or more) of the glob patterns in this list (look at https://docs.python.org/3/library/fnmatch.html for more info)
 
 |                      | Array restrictions |
 | -------------------- | ------------------ |
@@ -1032,7 +1185,108 @@ Must be one of:
 | **Max items**        | N/A                |
 | **Items unicity**    | False              |
 | **Additional items** | False              |
-| **Tuple validation** | N/A                |
+| **Tuple validation** | See below          |
+
+| Each item of this array must be                         | Description |
+| ------------------------------------------------------- | ----------- |
+| [path items](#settings_right_click_items_if_path_items) |             |
+
+###### <a name="settings_right_click_items_if_path_items"></a>2.2.1.6.1.3.1.1. Rovr Config > settings > right_click > right_click items > if > path > path items
+
+|              |          |
+| ------------ | -------- |
+| **Type**     | `string` |
+| **Required** | No       |
+
+###### <a name="settings_right_click_items_if_os"></a>2.2.1.6.1.3.2. Property `Rovr Config > settings > right_click > right_click items > if > os`
+
+|              |                   |
+| ------------ | ----------------- |
+| **Type**     | `array of string` |
+| **Required** | No                |
+
+**Description:** Only enable this menu item if the operating system is one of the following (case insensitive)
+
+|                      | Array restrictions |
+| -------------------- | ------------------ |
+| **Min items**        | N/A                |
+| **Max items**        | N/A                |
+| **Items unicity**    | False              |
+| **Additional items** | False              |
+| **Tuple validation** | See below          |
+
+| Each item of this array must be                     | Description |
+| --------------------------------------------------- | ----------- |
+| [os items](#settings_right_click_items_if_os_items) |             |
+
+###### <a name="settings_right_click_items_if_os_items"></a>2.2.1.6.1.3.2.1. Rovr Config > settings > right_click > right_click items > if > os > os items
+
+|              |             |
+| ------------ | ----------- |
+| **Type**     | `combining` |
+| **Required** | No          |
+
+| Any of(Option)                                             |
+| ---------------------------------------------------------- |
+| [item 0](#settings_right_click_items_if_os_items_anyOf_i0) |
+| [item 1](#settings_right_click_items_if_os_items_anyOf_i1) |
+
+###### <a name="settings_right_click_items_if_os_items_anyOf_i0"></a>2.2.1.6.1.3.2.1.1. Property `Rovr Config > settings > right_click > right_click items > if > os > os items > anyOf > item 0`
+
+|              |                    |
+| ------------ | ------------------ |
+| **Type**     | `enum (of string)` |
+| **Required** | No                 |
+
+Must be one of:
+
+- "Windows"
+- "Linux"
+- "Darwin"
+
+###### <a name="settings_right_click_items_if_os_items_anyOf_i1"></a>2.2.1.6.1.3.2.1.2. Property `Rovr Config > settings > right_click > right_click items > if > os > os items > anyOf > item 1`
+
+|              |          |
+| ------------ | -------- |
+| **Type**     | `string` |
+| **Required** | No       |
+
+###### <a name="settings_right_click_items_if_cwd"></a>2.2.1.6.1.3.3. Property `Rovr Config > settings > right_click > right_click items > if > cwd`
+
+|              |                   |
+| ------------ | ----------------- |
+| **Type**     | `array of string` |
+| **Required** | No                |
+
+**Description:** Only enable this menu item if the current working directory matches one (or more) of the glob patterns in this list (look at https://docs.python.org/3/library/fnmatch.html for more info)
+
+|                      | Array restrictions |
+| -------------------- | ------------------ |
+| **Min items**        | N/A                |
+| **Max items**        | N/A                |
+| **Items unicity**    | False              |
+| **Additional items** | False              |
+| **Tuple validation** | See below          |
+
+| Each item of this array must be                       | Description |
+| ----------------------------------------------------- | ----------- |
+| [cwd items](#settings_right_click_items_if_cwd_items) |             |
+
+###### <a name="settings_right_click_items_if_cwd_items"></a>2.2.1.6.1.3.3.1. Rovr Config > settings > right_click > right_click items > if > cwd > cwd items
+
+|              |          |
+| ------------ | -------- |
+| **Type**     | `string` |
+| **Required** | No       |
+
+###### <a name="settings_right_click_items_if_directory"></a>2.2.1.6.1.3.4. Property `Rovr Config > settings > right_click > right_click items > if > directory`
+
+|              |           |
+| ------------ | --------- |
+| **Type**     | `boolean` |
+| **Required** | No        |
+
+**Description:** Only enable this menu item if the selected item is a directory (set to true) or a file (set to false) (if unspecified, matches both files and directories)
 
 ### <a name="settings_copy_includes_metadata"></a>2.3. Property `Rovr Config > settings > copy_includes_metadata`
 

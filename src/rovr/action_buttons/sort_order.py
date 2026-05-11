@@ -93,7 +93,7 @@ class SortOrderButton(Button):
         elif isinstance(event, events.Key):
             popup_widget.do_adjust = True
         popup_widget.pre_show()
-        popup_widget.remove_class("hidden")
+        popup_widget.display = True
         popup_widget.focus()
 
 

@@ -64,7 +64,7 @@ open_editor = ["e"]
 [keybinds.extra_copy]
 open_popup = ["Y"]
 copy_to_rovr = ["y"]
-copy_single_path = ["c"]
+copy_highlighted = ["c"]
 copy_to_system_clip = ["s"]
 copy_current_directory = ["d"]
 

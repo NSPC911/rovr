@@ -43,13 +43,12 @@ from rovr.action_buttons import (
     UnzipButton,
     ZipButton,
 )
-from rovr.action_buttons.sort_order import SortOrderButton, SortOrderPopup
+from rovr.action_buttons.sort_order import SortOrderButton
 from rovr.classes.type_aliases import DirEntryType
 from rovr.components.popup_option_list import PopupOptionList
 from rovr.core import (
     FileList,
     FileListContainer,
-    FileListRightClickOptionList,
     PinnedSidebar,
     PinnedSidebarContainer,
     PreviewContainer,
@@ -953,17 +952,15 @@ class Application(App, inherit_bindings=False):
 
     @on(events.Click)
     def when_got_click(self, event: events.Click) -> None:
-        if (
-            not isinstance(event.widget, (FileListRightClickOptionList, SortOrderPopup))
-            or event.button == 1
-        ):
+        if not isinstance(event.widget, (PopupOptionList)) or event.button == 1:
             self.hide_popups()
 
+    @on(events.AppBlur)
     def hide_popups(self) -> None:
         # just in case
         with suppress(NoMatches):
             for popup in self.query(PopupOptionList):
-                popup.add_class("hidden")
+                popup.display = False
 
     @work(thread=True)
     def run_in_thread(self, function: Callable, *args, **kwargs) -> Worker | Exception:

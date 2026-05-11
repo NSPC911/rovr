@@ -1,4 +1,5 @@
 import multiprocessing
+import os
 import shlex
 import subprocess
 from contextlib import suppress
@@ -231,3 +232,35 @@ def multiprocessing_process_error_checker(app: App, exc: Exception) -> bool:
                 app.MULTIPROCESSING_PROCESS_ALLOWED = False
         return True
     return False
+
+
+def _replacer(string: str, old: str, new: str) -> str:
+    return string.replace(old, new).replace(f"'{old}'", new).replace(f'"{old}"', new)
+
+
+async def expand_command(app: App, command: str | list[str]) -> str:
+    from rovr.functions.path import normalise
+
+    command_str = shlex.join(command) if isinstance(command, list) else command
+
+    expanded = _replacer(
+        command_str,
+        "${current_working_directory}",
+        normalise(os.getcwd()),
+    )
+
+    if app.file_list.highlighted_option is not None and hasattr(
+        app.file_list.highlighted_option, "dir_entry"
+    ):
+        expanded = _replacer(
+            expanded,
+            "${highlighted_file}",
+            str(app.file_list.highlighted_option.dir_entry.path),
+        )
+
+    selected_files: list[str] | None = await app.file_list.get_selected_objects()
+    if selected_files:
+        joined = shlex.join(selected_files)
+        expanded = _replacer(expanded, '"${selected_files}"', joined)
+
+    return expanded

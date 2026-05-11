@@ -91,7 +91,7 @@ ContentSearchToggles:focus,
 #pinned_sidebar.-maximized,
 #preview_sidebar .inner_preview.-maximized,
 #footer > *:focus,
-PopupOptionList,
+PopupOptionList:focus,
 .comfy-buttons #path_switcher:focus-within,
 .comfy-buttons #below_menu Button:focus,
 .comfy-buttons #below_menu Button:hover,
@@ -638,8 +638,7 @@ ContentSearch ContentSearchToggles {
 
 /* Shared OptionList highlight style */
 Keybinds #keybinds_data .option-list--option-highlighted,
-CommandPalette CommandList > .option-list--option-highlighted,
-PopupOptionList .option-list--option-highlighted {
+CommandPalette CommandList > .option-list--option-highlighted {
   background: $primary;
   color: $background;
 }
@@ -1133,7 +1132,8 @@ FileList .option-list--option-highlighted,
 Clipboard .option-list--option-highlighted,
 DeleteFiles OptionList .option-list--option-highlighted,
 PasteScreen OptionList .option-list--option-highlighted,
-ArchiveCreationScreen OptionList .option-list--option-highlighted {
+ArchiveCreationScreen OptionList .option-list--option-highlighted,
+PopupOptionList .option-list--option-highlighted {
   color: $block-cursor-background;
   background: transparent;
   text-style: bold;

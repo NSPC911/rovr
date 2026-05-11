@@ -1,13 +1,13 @@
-import asyncio
 from contextlib import suppress
 from os import getcwd, path
-from typing import Awaitable, Callable, ClassVar, Iterable, Self, Sequence
+from typing import Callable, ClassVar, Iterable, Self, Sequence
 
-from textual import events, on, work
+from textual import events, work
 from textual.binding import BindingType
 from textual.content import ContentText
 from textual.css.query import NoMatches
-from textual.widgets.option_list import Option, OptionDoesNotExist
+from textual.errors import NoWidget
+from textual.widgets.option_list import OptionDoesNotExist
 from textual.widgets.selection_list import Selection, SelectionType
 
 from rovr.classes.mixins import (
@@ -17,8 +17,6 @@ from rovr.classes.mixins import (
 )
 from rovr.classes.session_manager import SessionManager
 from rovr.classes.textual_options import FileListSelectionWidget, LazySelection
-from rovr.components import PopupOptionList
-from rovr.functions import icons as icon_utils
 from rovr.functions import path as path_utils
 from rovr.functions import pins as pin_utils
 from rovr.functions import utils
@@ -30,6 +28,8 @@ from rovr.variables.constants import (
     config,
 )
 from rovr.widgets import Button, Input, OptionList, SelectionList
+
+from .file_list_right_click_menu import FileListRightClickMenu
 
 
 class FileList(
@@ -281,6 +281,8 @@ class FileList(
                 to_highlight_index = min(
                     len(self.list_of_options) - 1, session.lastHighlighted[cwd]["index"]
                 )
+            # temporary fix until i start using session.scroll_target_y
+            self.scroll_target_y = 0
             try:
                 self.highlighted = to_highlight_index
             except (OptionDoesNotExist, KeyError):
@@ -580,6 +582,8 @@ class FileList(
             self.action_select_end()
         elif check_key(event, config["keybinds"]["open_editor"]):
             self.action_open_editor()
+        elif check_key(event, config["keybinds"]["open_right_click_menu"]):
+            await self.action_open_right_click_menu()
 
     def update_border_subtitle(self) -> None:
         if self.dummy or type(self.highlighted) is not int or not self.parent:
@@ -915,19 +919,50 @@ class FileList(
     ) -> None:
         # Show right click menu
         try:
-            rightclickoptionlist: FileListRightClickOptionList = self.app.query_one(
-                FileListRightClickOptionList
+            rightclickoptionlist: FileListRightClickMenu = self.app.query_one(
+                FileListRightClickMenu
             )
         except NoMatches:
             # it happens, but I really cannot be bothered to figure it out
-            rightclickoptionlist = FileListRightClickOptionList(classes="hidden")
+            rightclickoptionlist = FileListRightClickMenu()
             await self.app.mount(rightclickoptionlist)
-        rightclickoptionlist.remove_class("hidden")
         if event is None:
+            self.scroll_to_highlight()
+
+            try:
+                visible_region = self.screen.find_widget(self).visible_region
+                top_left = visible_region.offset
+            except NoWidget:
+                return
+
+            if self.highlighted is not None:
+                line_offset = self._index_to_line[self.highlighted]
+                x = (
+                    top_left.x
+                    + min(
+                        visible_region.width // 2,
+                        len(str(self.highlighted_option.prompt)),
+                    )
+                    + 1
+                )
+                y = top_left.y + line_offset - int(self.scroll_target_y)
+            else:
+                x = (
+                    top_left.x
+                    + min(
+                        visible_region.width // 2,
+                        len(str(self.get_option_at_index(0).prompt)),
+                    )
+                    + 1
+                )
+                y = top_left.y + int(
+                    self.scroll_target_y
+                )  # why is it an addition, i have no clue
+
             event = events.Click(
                 self,
-                (self.app.size.width - 12) // 2,
-                (self.app.size.height - 8) // 2,
+                x,
+                y,
                 0,
                 0,
                 3,
@@ -935,87 +970,7 @@ class FileList(
                 False,
                 False,
             )
+        await rightclickoptionlist.pre_show()
         rightclickoptionlist.update_location(event)
-        rightclickoptionlist.focus()
-
-
-class FileListRightClickOptionList(PopupOptionList):
-    def __init__(self, classes: str | None = None, id: str | None = None) -> None:
-        # Only show unzip option for archive files
-        super().__init__(
-            id=id,
-            classes=classes,
-        )
-
-    @on(events.Show)
-    def on_show(self) -> None:
-        no_items: bool = (
-            self.app.file_list.highlighted_option
-            and self.app.file_list.highlighted_option.disabled
-        )
-        cannot_write: bool = self.app.file_list.options[0].id == "perm"
-        no_clip: bool = len(self.app.Clipboard.selected) == 0
-
-        options = [
-            Option(
-                f" {icon_utils.get_icon('general', 'copy')[0]} Copy",
-                id="copy",
-                disabled=no_items,
-            ),
-            Option(
-                f" {icon_utils.get_icon('general', 'cut')[0]} Cut",
-                id="cut",
-                disabled=no_items,
-            ),
-            Option(
-                f" {icon_utils.get_icon('general', 'paste')[0]} Paste",
-                id="paste",
-                disabled=cannot_write or no_clip,
-            ),
-            Option(
-                f" {icon_utils.get_icon('general', 'new')[0]} New",
-                id="new",
-                disabled=cannot_write,
-            ),
-            Option(
-                f" {icon_utils.get_icon('general', 'rename')[0]} Rename ",
-                id="rename",
-                disabled=no_items,
-            ),
-            Option(
-                f" {icon_utils.get_icon('general', 'delete')[0]} Delete ",
-                id="delete",
-                disabled=no_items,
-            ),
-            Option(
-                f" {icon_utils.get_icon('general', 'zip')[0]} Zip",
-                id="zip",
-                disabled=no_items,
-            ),
-            Option(
-                f" {icon_utils.get_icon('general', 'open')[0]} Unzip",
-                id="unzip",
-                disabled=not (
-                    hasattr(self.app.file_list.highlighted_option, "dir_entry")
-                    and utils.is_archive(
-                        self.app.file_list.highlighted_option.dir_entry.path
-                    )
-                ),
-            ),
-        ]
-        self.set_options(options)
-        self.call_next(self.refresh)
-
-    async def on_option_list_option_selected(
-        self, event: OptionList.OptionSelected
-    ) -> None:
-        # Handle menu item selection
-        if hasattr(self.app.file_list, f"action_{event.option.id}"):
-            func: Callable[[], Awaitable | None] = getattr(
-                self.app.file_list, f"action_{event.option.id}"
-            )
-            if asyncio.iscoroutinefunction(func):
-                await func()
-            else:
-                func()
-        self.go_hide()
+        rightclickoptionlist.display = True
+        self.call_later(rightclickoptionlist.focus)

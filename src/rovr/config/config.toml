@@ -54,6 +54,30 @@ panels = false
 [settings]
 copy_includes_metadata = true
 use_recycle_bin = true
+# comments are just how shell config would look like, it will never be
+# set as default options in the menu, it can be used as reference
+right_click = [
+  # { label = "\uf0b0 Open With", if = { directory = false }, options = [
+  #   { label = "\ue8da VSCode", action = 'sh:code "${selected_files}"' },
+  #   { label = "\ue272 Helix", action = "shh:hx ${selected_files}", if = { path = ["C:/Users/notso/Git/*"] } },
+  #   { label = "\ue0c6 Pixelorama", action = 'sh:pixelorama "${selected_files}"', if = { path = ["*.png"] } },
+  # ] },
+  { label = "\uf0c5 Copy", options = [
+    { label = "\uf07f Copy in rovr", action = "rovr:copy" },
+    { label = "\U000f0147 Copy highlighted file path", action = "system:copy_highlighted" },
+    { label = "\U000f14e5 Copy current directory path", action = "system:copy_current_directory" },
+    { label = "\U000f1265 Copy to OS clipboard", action = "system:copy_to_system_clip" },
+    # { label = " Copy SHA256", action = 'sho:pwsh -nop -c "(Get-FileHash -Algorithm SHA256 \"${highlighted_file}\").Hash | Set-Clipboard"', if = { directory = false } }
+  ] },
+  { label = "\uf0c4 Cut", action = "rovr:cut" },
+  { label = "\uf429 Paste", action = "rovr:paste" },
+  { label = "\uea7f New", action = "rovr:new" },
+  { label = "\uf246 Rename", action = "rovr:rename" },
+  { label = "\uf014 Delete", action = "rovr:delete" },
+  { label = "\uf410 Zip", action = "rovr:zip" },
+  { label = "\uf07c Unzip", action = "rovr:unzip" },
+  # { label = " Get SHA256", action = 'sho:pwsh -nop -c "(Get-FileHash -Algorithm SHA256 \"${highlighted_file}\").Hash', if = { directory = false }}
+]
 
 [settings.preview_rules]
 "application/(debian.*-package|redhat-package-manager|rpm|android\\.package-archive)" = "archive"
@@ -219,6 +243,7 @@ command_palette = "ctrl+p"
 suspend_process = ["ctrl+z"]
 open_editor = ["e"]
 show_shell_screen = [">"]
+open_right_click_menu = ["shift+f10"]
 # unavailable for now
 preview_select_left = []
 preview_select_right = []
@@ -227,7 +252,7 @@ preview_scroll_right = []
 [keybinds.extra_copy]
 open_popup = ["Y"]
 copy_to_rovr = ["y"]
-copy_single_path = ["p"]
+copy_highlighted = ["p"]
 copy_to_system_clip = ["s"]
 copy_current_directory = ["d"]
 [keybinds.change_sort_order]

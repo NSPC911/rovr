@@ -1,4 +1,4 @@
-from typing import Any, Literal, Required, TypedDict
+from typing import Any, Literal, Required, TypedDict, Union
 
 
 class RovrConfig(TypedDict, total=False):
@@ -352,6 +352,84 @@ r""" Default value of the field path 'Rovr Config theme preview' """
 
 _ROVR_CONFIG_THEME_TRANSPARENT_DEFAULT = False
 r""" Default value of the field path 'Rovr Config theme transparent' """
+
+
+_RightClickAction = Union["_RightClickActionOneof0", "_RightClickActionOneof1"]
+r""" Aggregation type: oneOf """
+
+
+_RightClickActionOneof0 = (
+    Literal["rovr:copy"]
+    | Literal["rovr:cut"]
+    | Literal["rovr:paste"]
+    | Literal["rovr:new"]
+    | Literal["rovr:rename"]
+    | Literal["rovr:delete"]
+    | Literal["rovr:zip"]
+    | Literal["rovr:unzip"]
+    | Literal["system:copy_highlighted"]
+    | Literal["system:copy_current_directory"]
+    | Literal["system:copy_to_system_clip"]
+)
+_RIGHTCLICKACTIONONEOF0_ROVR_COLON_COPY: Literal["rovr:copy"] = "rovr:copy"
+r"""The values for the '_RightClickActionOneof0' enum"""
+_RIGHTCLICKACTIONONEOF0_ROVR_COLON_CUT: Literal["rovr:cut"] = "rovr:cut"
+r"""The values for the '_RightClickActionOneof0' enum"""
+_RIGHTCLICKACTIONONEOF0_ROVR_COLON_PASTE: Literal["rovr:paste"] = "rovr:paste"
+r"""The values for the '_RightClickActionOneof0' enum"""
+_RIGHTCLICKACTIONONEOF0_ROVR_COLON_NEW: Literal["rovr:new"] = "rovr:new"
+r"""The values for the '_RightClickActionOneof0' enum"""
+_RIGHTCLICKACTIONONEOF0_ROVR_COLON_RENAME: Literal["rovr:rename"] = "rovr:rename"
+r"""The values for the '_RightClickActionOneof0' enum"""
+_RIGHTCLICKACTIONONEOF0_ROVR_COLON_DELETE: Literal["rovr:delete"] = "rovr:delete"
+r"""The values for the '_RightClickActionOneof0' enum"""
+_RIGHTCLICKACTIONONEOF0_ROVR_COLON_ZIP: Literal["rovr:zip"] = "rovr:zip"
+r"""The values for the '_RightClickActionOneof0' enum"""
+_RIGHTCLICKACTIONONEOF0_ROVR_COLON_UNZIP: Literal["rovr:unzip"] = "rovr:unzip"
+r"""The values for the '_RightClickActionOneof0' enum"""
+_RIGHTCLICKACTIONONEOF0_SYSTEM_COLON_COPY_HIGHLIGHTED: Literal[
+    "system:copy_highlighted"
+] = "system:copy_highlighted"
+r"""The values for the '_RightClickActionOneof0' enum"""
+_RIGHTCLICKACTIONONEOF0_SYSTEM_COLON_COPY_CURRENT_DIRECTORY: Literal[
+    "system:copy_current_directory"
+] = "system:copy_current_directory"
+r"""The values for the '_RightClickActionOneof0' enum"""
+_RIGHTCLICKACTIONONEOF0_SYSTEM_COLON_COPY_TO_SYSTEM_CLIP: Literal[
+    "system:copy_to_system_clip"
+] = "system:copy_to_system_clip"
+r"""The values for the '_RightClickActionOneof0' enum"""
+
+
+_RightClickActionOneof1 = str
+r""" pattern: ^sh[ho]?:.+$ """
+
+
+class _RightClickIf(TypedDict, total=False):
+    path: list[str]
+    r""" Only enable this menu item if the path matches one (or more) of the glob patterns in this list (look at https://docs.python.org/3/library/fnmatch.html for more info) """
+
+    os: list["_RightClickIfOsItem"]
+    r""" Only enable this menu item if the operating system is one of the following (case insensitive) """
+
+    cwd: list[str]
+    r""" Only enable this menu item if the current working directory matches one (or more) of the glob patterns in this list (look at https://docs.python.org/3/library/fnmatch.html for more info) """
+
+    directory: bool
+    r""" Only enable this menu item if the selected item is a directory (set to true) or a file (set to false) (if unspecified, matches both files and directories) """
+
+
+_RightClickIfOsItem = Union["_RightClickIfOsItemAnyof0", str]
+r""" Aggregation type: anyOf """
+
+
+_RightClickIfOsItemAnyof0 = Literal["Windows"] | Literal["Linux"] | Literal["Darwin"]
+_RIGHTCLICKIFOSITEMANYOF0_WINDOWS: Literal["Windows"] = "Windows"
+r"""The values for the '_RightClickIfOsItemAnyof0' enum"""
+_RIGHTCLICKIFOSITEMANYOF0_LINUX: Literal["Linux"] = "Linux"
+r"""The values for the '_RightClickIfOsItemAnyof0' enum"""
+_RIGHTCLICKIFOSITEMANYOF0_DARWIN: Literal["Darwin"] = "Darwin"
+r"""The values for the '_RightClickIfOsItemAnyof0' enum"""
 
 
 class _RovrConfigCustomThemeItem(TypedDict, total=False):
@@ -850,6 +928,7 @@ class _RovrConfigKeybinds(TypedDict, total=False):
     toggle_all: list[str]
     zip: list[str]
     unzip: list[str]
+    open_right_click_menu: list[str]
     extra_copy: "_RovrConfigKeybindsExtraCopy"
     r""" Keybinds related to extra copy options """
 
@@ -936,7 +1015,7 @@ class _RovrConfigKeybindsExtraCopy(TypedDict, total=False):
 
     open_popup: list[str]
     copy_to_rovr: list[str]
-    copy_single_path: list[str]
+    copy_highlighted: list[str]
     copy_to_system_clip: list[str]
     copy_current_directory: list[str]
 
@@ -1322,6 +1401,9 @@ class _RovrConfigSettings(TypedDict, total=False):
     default: True
     """
 
+    right_click: list["_RovrConfigSettingsRightClickItem"]
+    r""" Configuration for the right-click context menu """
+
     copy_includes_metadata: bool
     r"""
     When copying over a file, preserve metadata from the original file, such as creation and modification times.
@@ -1486,6 +1568,45 @@ _ROVRCONFIGSETTINGSPREVIEWRULESADDITIONALPROPERTIES_RESVG: Literal["resvg"] = "r
 r"""The values for the '_RovrConfigSettingsPreviewRulesAdditionalproperties' enum"""
 _ROVRCONFIGSETTINGSPREVIEWRULESADDITIONALPROPERTIES_FONT: Literal["font"] = "font"
 r"""The values for the '_RovrConfigSettingsPreviewRulesAdditionalproperties' enum"""
+
+
+# | oneOf:
+# |   - required:
+# |     - label
+# |     - action
+# |   - required:
+# |     - label
+# |     - options
+_RovrConfigSettingsRightClickItem = TypedDict(
+    "_RovrConfigSettingsRightClickItem",
+    {
+        # | Label to show in the context menu for this item
+        "label": str,
+        # | Aggregation type: oneOf
+        "action": "_RightClickAction",
+        "if": "_RightClickIf",
+        # | Submenu items (only supported at the top level)
+        "options": list["_RovrConfigSettingsRightClickItemOptionsItem"],
+    },
+    total=False,
+)
+
+
+_RovrConfigSettingsRightClickItemOptionsItem = TypedDict(
+    "_RovrConfigSettingsRightClickItemOptionsItem",
+    {
+        # | Label to show in the context menu for this submenu item
+        # |
+        # | Required property
+        "label": Required[str],
+        # | Aggregation type: oneOf
+        # |
+        # | Required property
+        "action": Required["_RightClickAction"],
+        "if": "_RightClickIf",
+    },
+    total=False,
+)
 
 
 class _RovrConfigTheme(TypedDict, total=False):

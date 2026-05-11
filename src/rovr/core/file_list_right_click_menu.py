@@ -48,7 +48,9 @@ def ifed(app: App, conditions: _RightClickIf) -> bool:
                     )
                 )
             case "os":
-                disabled = not any(os for os in conditions["os"] if os == os_type)
+                disabled = not any(
+                    os.lower() == os_type.lower() for os in conditions["os"]
+                )
             case "cwd":
                 disabled = not (
                     any(
@@ -132,7 +134,7 @@ def give_me_an_option(
         case "rovr:cut":
             return PartialOption(id="cut", disabled=no_items)
         case "rovr:paste":
-            return PartialOption(id="paste", disabled=no_clip)
+            return PartialOption(id="paste", disabled=no_clip or cannot_write)
         case "rovr:new":
             return PartialOption(id="new", disabled=cannot_write)
         case "rovr:rename":
@@ -248,7 +250,7 @@ class FileListRightClickMenu(PopupOptionList, inherit_bindings=False):
                 + (1 if self.styles.border_top else 0)
                 + (1 if self.styles.border_bottom else 0),
             )
-            child_menu.pre_show()
+            await child_menu.pre_show()
             child_menu.display = True
             self.focus()
             self.display = True

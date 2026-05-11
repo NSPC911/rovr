@@ -970,7 +970,7 @@ class FileList(
                 False,
                 False,
             )
-        rightclickoptionlist.pre_show()
+        await rightclickoptionlist.pre_show()
         rightclickoptionlist.update_location(event)
         rightclickoptionlist.display = True
         self.call_later(rightclickoptionlist.focus)

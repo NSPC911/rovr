@@ -239,4 +239,4 @@ class NewTabButton(Button):
 
     async def on_button_pressed(self) -> None:
         assert self.parent and self.parent.parent
-        await self.parent.parent.query_one(Tabline).add_tab(getcwd())
+        await self.parent.parent.query_one(Tabline).add_tab(self.app.last_available_cd)

@@ -29,6 +29,7 @@ from textual.dom import DOMNode
 from textual.messages import ExitApp
 from textual.screen import Screen
 from textual.types import NoActiveAppError
+from textual.widgets.selection_list import Selection
 from textual.worker import Worker, WorkerFailed
 
 from rovr import console
@@ -160,6 +161,7 @@ class Application(App, inherit_bindings=False):
             chdir(ensure_existing_directory(startup_path))
 
         self._on_mount_done: bool = False
+        self.last_available_cd = getcwd()
 
     @property
     def file_list(self) -> FileList:
@@ -535,27 +537,28 @@ class Application(App, inherit_bindings=False):
             return
         directory = ensure_existing_directory(directory)
 
-        if normalise(getcwd()) == normalise(directory) or directory == "":
-            add_to_history = False
-        else:
-            try:
+        try:
+            if normalise(getcwd()) == normalise(directory) or directory == "":
+                add_to_history = False
+            else:
                 chdir(directory)
-            except PermissionError as exc:
-                self.notify(
-                    f"You cannot enter into {directory}!\n{exc.strerror}",
-                    title="App: cd",
-                    severity="error",
-                    markup=False,
-                )
-                return
-            except FileNotFoundError:
-                self.notify(
-                    f"{directory}\nno longer exists!",
-                    title="App: cd",
-                    severity="error",
-                    markup=False,
-                )
-                return
+                self.last_available_cd = directory
+        except PermissionError as exc:
+            self.notify(
+                f"You cannot enter into {directory}!\n{exc.strerror}",
+                title="App: cd",
+                severity="error",
+                markup=False,
+            )
+            return
+        except FileNotFoundError:
+            self.notify(
+                f"{directory}\nno longer exists!",
+                title="App: cd",
+                severity="error",
+                markup=False,
+            )
+            return
 
         # Apply folder-specific sort preferences if they exist
         with suppress(NoMatches):
@@ -608,21 +611,32 @@ class Application(App, inherit_bindings=False):
             count += 1
             if count >= drive_update_every:
                 count = 0
-            new_cwd = getcwd()
-            if not self.file_list.file_list_pause_check:
-                if not path.exists(new_cwd):
-                    file_list.update_file_list(add_to_session=False)
-                elif cwd != new_cwd:
-                    cwd = new_cwd
-                    continue
-                else:
-                    with suppress(OSError):
-                        items = get_filtered_dir_names(
-                            cwd,
-                            config["interface"]["show_hidden_files"],
-                        )
-                    if items is not None and items != file_list.items_in_cwd:
-                        self.cd(cwd)
+            try:
+                new_cwd = getcwd()
+                if not self.file_list.file_list_pause_check:
+                    if not path.exists(new_cwd):
+                        file_list.update_file_list(add_to_session=False)
+                    elif cwd != new_cwd:
+                        cwd = new_cwd
+                        continue
+                    else:
+                        with suppress(OSError):
+                            items = get_filtered_dir_names(
+                                cwd,
+                                config["interface"]["show_hidden_files"],
+                            )
+                        if items is not None and items != file_list.items_in_cwd:
+                            self.cd(cwd)
+            except FileNotFoundError:
+                self.file_list.set_options([
+                    Selection(
+                        " FileNotFoundError: Directory was removed while inside it.",
+                        value="",
+                        id="perm",
+                        disabled=True,
+                    )
+                ])
+
             if i_should_shut_down():
                 return
 

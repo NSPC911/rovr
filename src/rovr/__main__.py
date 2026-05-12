@@ -17,7 +17,6 @@
 # nuitka-project: --python-flag=static_hashes
 # nuitka-project: --report=report.xml
 # nuitka-project: --warn-unusual-code
-# nuitka-project: --clang
 
 # nuitka-project-if: {OS} in ("MACOS"):
 #    nuitka-project: --macos-app-console-mode=force

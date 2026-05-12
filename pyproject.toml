@@ -52,7 +52,7 @@ rovr = "rovr:main"
 [dependency-groups]
 build = [
   "zstandard>=0.25.0",
-  "poethepoet>=0.41.0",
+  "poethepoet>=0.45.0",
   "nuitka>=4.0.0",
 ]
 dev = [
@@ -172,7 +172,8 @@ sequence = [
   { cmd = "uv sync --group build --no-dev" },  # no dev because for some reason, stuff gets included
   "_hash_dump",
   # --python-flag=-m
-  { cmd = 'nuitka --lto=${lto} --mode=${mode} --report=${report} --user-package-configuration-file=nuitka.config.yml src/rovr --onefile-tempdir-spec="{TEMP}/rovr_onefile_0.8.3"' },
+  # "nuitka $POE_EXTRA_ARGS",
+  { cmd = 'nuitka --lto=${lto} --mode=${mode} --report=${report} --user-package-configuration-file=nuitka.config.yml src/rovr --onefile-tempdir-spec="{TEMP}/rovr_onefile_0.8.3" $POE_EXTRA_ARGS' },
   "_hash_clean",
 ]
 args = [

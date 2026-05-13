@@ -303,7 +303,6 @@ def match_mime_to_preview_type(
 class MimeResult(NamedTuple):
     method: Literal["basic", "puremagic", "file1"]
     mime_type: str
-    content: str | None = None
 
 
 @lru_cache(maxsize=8192)
@@ -386,9 +385,7 @@ def get_mime_type(
         for encoding in encodings_to_try:
             try:
                 content = file_bytes.decode(encoding)
-                return MimeResult(
-                    "basic", f"text/{guess_language(content, file_path)}", content
-                )
+                return MimeResult("basic", f"text/{guess_language(content, file_path)}")
             except UnicodeDecodeError:
                 pass
 

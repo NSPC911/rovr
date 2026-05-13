@@ -19,7 +19,7 @@ from textual.app import ComposeResult
 from textual.containers import Container
 from textual.css.query import NoMatches
 from textual.dom import DOMNode
-from textual.geometry import Size
+from textual.geometry import Region
 from textual.highlight import guess_language
 from textual.message import Message
 from textual.widgets.selection_list import Selection
@@ -144,7 +144,6 @@ class PreviewContainer(Container):
         self._pending_preview_args: tuple[str, int | float] | None = None
         self._current_content: str | list[str] | None = None
         self._current_file_path: str | None = None
-        self._initial_height = self.size.height
         self._file_type: str = "none"
         self._file_mtime: float | None = None
         self._mime_type: preview_utils.MimeResult | None = None
@@ -656,7 +655,7 @@ class PreviewContainer(Container):
             if config["interface"]["show_line_numbers"]
             else "--style=plain",
         ]
-        max_lines = self.size.height
+        max_lines = self.region.height
         if max_lines > 0:
             command.append(f"--line-range=:{max_lines}")
         assert self._current_file_path is not None
@@ -734,49 +733,41 @@ class PreviewContainer(Container):
 
         self.app.call_from_thread(setattr, self, "border_title", titles.file)
 
-        if not isinstance(self._current_content, str):
-            # force read by brute-forcing encoding methods
-            encodings_to_try = [
-                "utf8",
-                "utf16",
-                "utf32",
-                "latin1",
-                "iso8859-1",
-                "mbcs",
-                "ascii",
-                "us-ascii",
-            ]
-            for encoding in encodings_to_try:
-                try:
-                    with open(self._current_file_path, "r", encoding=encoding) as f:
-                        self._current_content = f.read(1024)
-                    break
-                except (UnicodeDecodeError, FileNotFoundError):
-                    continue
-            if self._current_content is None:
-                self._current_content = self._preview_texts["error"]
-                self.mount_special_messages()
-                return
+        lines: list[str] | None = None
+        # force read by brute-forcing encoding methods
+        encodings_to_try = [
+            "utf8",
+            "utf16",
+            "utf32",
+            "latin1",
+            "iso8859-1",
+            "mbcs",
+            "ascii",
+            "us-ascii",
+        ]
+        for encoding in encodings_to_try:
+            try:
+                lines: list[str] | None = []
+                height = self.region.height or 50  # bums
+                with open(self._current_file_path, "r", encoding=encoding) as f:
+                    for _ in range(height):
+                        line = f.readline()
+                        if not line:
+                            break
+                        lines.append(line.strip("\n\r"))
+                        if should_cancel():
+                            return
+                break
+            except (UnicodeDecodeError, FileNotFoundError):
+                continue
+        if lines is None:
+            self._current_content = self._preview_texts["error"]
+            self.mount_special_messages()
+            return
 
-        lines = self._current_content.splitlines()
-        max_lines = self.size.height
-        if max_lines > 0:
-            if len(lines) > max_lines:
-                lines = lines[:max_lines]
-        else:
-            lines = []
-        max_width = self.size.width * 2
-        if max_width > 0:
-            processed_lines = []
-            for line in lines:
-                if len(line) > max_width:
-                    processed_lines.append(line[:max_width])
-                else:
-                    processed_lines.append(line)
-            lines = processed_lines
         text_to_display = "\n".join(lines)
         # add syntax highlighting
-        language = (
+        language: str = (
             guess_language(text_to_display, path=self._current_file_path) or "text"
         )
         syntax = Syntax(
@@ -786,8 +777,7 @@ class PreviewContainer(Container):
             word_wrap=False,
             tab_size=4,
             theme=config["theme"]["preview"],
-            background_color=None,
-            code_width=max_width,
+            background_color="default" if config["theme"]["transparent"] else None,
         )
 
         if should_cancel():
@@ -1020,7 +1010,6 @@ class PreviewContainer(Container):
                     )
                     self.call_later(lambda: self.post_message(self.SetLoading(False)))
                     return
-                content = mime_result.content
 
                 file_type = preview_utils.match_mime_to_preview_type(
                     self, mime_result.mime_type
@@ -1219,24 +1208,10 @@ class PreviewContainer(Container):
         self.show_pdf_preview()
 
     @property
-    def size(self) -> Size:
+    def region(self) -> Region:
         if self.loading:
-            return self._render_widget.size
-        else:
-            return self.content_region.size
-
-    # commented out until further notice
-    # felt like there was an issue with the way file list
-    # updates on resize, so this remains as is, until i
-    # resolve that
-    # def on_resize(self, event: events.Resize) -> None:
-    #     """Re-render the preview on resize"""
-    #     if self.get_child("Static") and event.size.height != self._initial_height:
-    #         if self._current_content is not None:
-    #             is_special_content = self._current_content in self._preview_texts.values()
-    #             if not is_special_content:
-    #                 self._trigger_resize_update()
-    #         self._initial_height = event.size.height
+            return self._render_widget.region
+        return super().region
 
     @work(thread=True)
     def _trigger_resize_update(self) -> None:

@@ -1,10 +1,12 @@
 import multiprocessing
 import multiprocessing.connection
 import re
+import stat
 import subprocess
 from concurrent.futures import FIRST_COMPLETED, Future, ProcessPoolExecutor, wait
 from functools import lru_cache
 from os import path
+from os import stat as os_stat
 from typing import Literal, NamedTuple, TypeAlias
 
 from PIL import Image
@@ -336,6 +338,12 @@ def get_mime_type(
         file_extension = base[1:]
     else:
         file_extension = "".join(base.split(".")[1:]).lower()
+
+    # CHECK IF IT IS A SOCKET OR FIFO
+    if stat.S_ISFIFO(mode := os_stat(file_path).st_mode):
+        return MimeResult("basic", "inode/fifo")
+    elif stat.S_ISSOCK(mode):
+        return MimeResult("basic", "inode/socket")
 
     # Read file bytes once, reuse for both puremagic and basic detection
     try:

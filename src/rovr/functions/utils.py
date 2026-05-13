@@ -140,6 +140,9 @@ def check_key(event: events.Key, key_list: list[str] | str) -> bool:
 
 
 def is_archive(path_str: str) -> bool:
+    if not os.path.isfile(path_str):
+        return False
+
     from multiarchive import Archive
 
     try:

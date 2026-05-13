@@ -992,11 +992,20 @@ class PreviewContainer(Container):
                 self.pdf.total_pages = 0
 
             if path.isdir(file_path):
-                self.update_ui(
-                    file_path=file_path,
-                    mime_type=preview_utils.MimeResult("basic", "inode/directory"),
-                    file_type="folder",
+                mime_type = preview_utils.MimeResult("basic", "inode/directory")
+                file_type = preview_utils.match_mime_to_preview_type(
+                    self, mime_type.mime_type
                 )
+                if file_type == "folder":
+                    self.update_ui(
+                        file_path=file_path, mime_type=mime_type, file_type=file_type
+                    )
+                else:
+                    self.notify(
+                        f"MIME type `inode/directory` must use `folder` preview type.\nGot {file_type=} (expected `folder`)",
+                        title="Preview Error",
+                        severity="error",
+                    )
             else:
                 content = None  # for now
                 mime_result = preview_utils.get_mime_type(file_path, mtime)

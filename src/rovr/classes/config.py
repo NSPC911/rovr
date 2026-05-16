@@ -2,7 +2,7 @@ from typing import Any, Literal, Required, TypedDict, Union
 
 
 class RovrConfig(TypedDict, total=False):
-    r"""Rovr Config."""
+    r""" Rovr Config. """
 
     interface: "_RovrConfigInterface"
     r""" Settings related to the user interface and experience """
@@ -24,385 +24,416 @@ _ROVR_CONFIG_ICONS_FILES_DEFAULT: list[Any] = []
 r""" Default value of the field path 'Rovr Config icons files' """
 
 
+
 _ROVR_CONFIG_ICONS_FOLDERS_DEFAULT: list[Any] = []
 r""" Default value of the field path 'Rovr Config icons folders' """
+
 
 
 _ROVR_CONFIG_INTERFACE_ALLOW_TAB_NAV_DEFAULT = False
 r""" Default value of the field path 'Rovr Config interface allow_tab_nav' """
 
 
+
 _ROVR_CONFIG_INTERFACE_APPEND_NEW_TABS_DEFAULT = True
 r""" Default value of the field path 'Rovr Config interface append_new_tabs' """
 
 
-_ROVR_CONFIG_INTERFACE_CLOCK_ALIGN_DEFAULT = "right"
+
+_ROVR_CONFIG_INTERFACE_CLOCK_ALIGN_DEFAULT = 'right'
 r""" Default value of the field path 'Rovr Config interface clock align' """
+
 
 
 _ROVR_CONFIG_INTERFACE_CLOCK_ENABLED_DEFAULT = True
 r""" Default value of the field path 'Rovr Config interface clock enabled' """
 
 
+
 _ROVR_CONFIG_INTERFACE_COMPACT_MODE_BUTTONS_DEFAULT = True
 r""" Default value of the field path 'Rovr Config interface compact_mode buttons' """
+
 
 
 _ROVR_CONFIG_INTERFACE_COMPACT_MODE_PANELS_DEFAULT = False
 r""" Default value of the field path 'Rovr Config interface compact_mode panels' """
 
 
+
 _ROVR_CONFIG_INTERFACE_DOUBLE_CLICK_DELAY_DEFAULT = 0.25
 r""" Default value of the field path 'Rovr Config interface double_click_delay' """
+
 
 
 _ROVR_CONFIG_INTERFACE_DRIVE_WATCHER_FREQUENCY_DEFAULT = 3.0
 r""" Default value of the field path 'Rovr Config interface drive_watcher_frequency' """
 
 
+
 _ROVR_CONFIG_INTERFACE_FONT_PREVIEW_FONT_SIZE_DEFAULT = 40
 r""" Default value of the field path 'Rovr Config interface font_preview font_size' """
+
 
 
 _ROVR_CONFIG_INTERFACE_FONT_PREVIEW_MAX_SIZE_DEFAULT = [1000, 1000]
 r""" Default value of the field path 'Rovr Config interface font_preview max_size' """
 
 
+
 _ROVR_CONFIG_INTERFACE_IMAGE_VIEWER_MAX_SIZE_DEFAULT = [4000, 4000]
 r""" Default value of the field path 'Rovr Config interface image_viewer max_size' """
 
 
-_ROVR_CONFIG_INTERFACE_IMAGE_VIEWER_PROTOCOL_DEFAULT = "Auto"
+
+_ROVR_CONFIG_INTERFACE_IMAGE_VIEWER_PROTOCOL_DEFAULT = 'Auto'
 r""" Default value of the field path 'Rovr Config interface image_viewer protocol' """
 
 
-_ROVR_CONFIG_INTERFACE_IMAGE_VIEWER_RESAMPLING_DEFAULT = "nearest"
+
+_ROVR_CONFIG_INTERFACE_IMAGE_VIEWER_RESAMPLING_DEFAULT = 'nearest'
 r""" Default value of the field path 'Rovr Config interface image_viewer resampling' """
+
 
 
 _ROVR_CONFIG_INTERFACE_NERD_FONT_DEFAULT = False
 r""" Default value of the field path 'Rovr Config interface nerd_font' """
 
 
+
 _ROVR_CONFIG_INTERFACE_PREVIEW_TEXT_ERROR_DEFAULT = "couldn't read this file! (¬_¬ )"
 r""" Default value of the field path 'Rovr Config interface preview_text error' """
 
 
-_ROVR_CONFIG_INTERFACE_PREVIEW_TEXT_FONT_TEXT_DEFAULT = "abcdefghijklmnopqrstuvwxyz\nABCDEFGHIJKLMNOPQRSTUVWXYZ\noO08 iIlL1 g9qCQG a@ 5sS\n{} [==>  ] (*) <> ~-+ /\\\n"
+
+_ROVR_CONFIG_INTERFACE_PREVIEW_TEXT_FONT_TEXT_DEFAULT = 'abcdefghijklmnopqrstuvwxyz\nABCDEFGHIJKLMNOPQRSTUVWXYZ\noO08 iIlL1 g9qCQG a@ 5sS\n{} [==>  ] (*) <> ~-+ /\\\n'
 r""" Default value of the field path 'Rovr Config interface preview_text font_text' """
 
 
-_ROVR_CONFIG_INTERFACE_PREVIEW_TEXT_START_DEFAULT = (
-    " ___ ___\n|  _| . |\n|_| |___|\n _ _ ___\n| | |  _|\n \\_/|_|\n"
-)
+
+_ROVR_CONFIG_INTERFACE_PREVIEW_TEXT_START_DEFAULT = ' ___ ___\n|  _| . |\n|_| |___|\n _ _ ___\n| | |  _|\n \\_/|_|\n'
 r""" Default value of the field path 'Rovr Config interface preview_text start' """
+
 
 
 _ROVR_CONFIG_INTERFACE_SCROLLOFF_DEFAULT = 3
 r""" Default value of the field path 'Rovr Config interface scrolloff' """
 
 
+
 _ROVR_CONFIG_INTERFACE_SHOW_HIDDEN_FILES_DEFAULT = False
 r""" Default value of the field path 'Rovr Config interface show_hidden_files' """
+
 
 
 _ROVR_CONFIG_INTERFACE_SHOW_LINE_NUMBERS_DEFAULT = False
 r""" Default value of the field path 'Rovr Config interface show_line_numbers' """
 
 
+
 _ROVR_CONFIG_INTERFACE_SHOW_PROGRESS_ETA_DEFAULT = False
 r""" Default value of the field path 'Rovr Config interface show_progress_eta' """
+
 
 
 _ROVR_CONFIG_INTERFACE_SHOW_PROGRESS_PERCENTAGE_DEFAULT = False
 r""" Default value of the field path 'Rovr Config interface show_progress_percentage' """
 
 
+
 _ROVR_CONFIG_INTERFACE_TOOLTIPS_DEFAULT = True
 r""" Default value of the field path 'Rovr Config interface tooltips' """
+
 
 
 _ROVR_CONFIG_INTERFACE_TRUNCATE_PROGRESS_FILE_PATH_DEFAULT = False
 r""" Default value of the field path 'Rovr Config interface truncate_progress_file_path' """
 
 
+
 _ROVR_CONFIG_INTERFACE_USE_REACTIVE_LAYOUT_DEFAULT = True
 r""" Default value of the field path 'Rovr Config interface use_reactive_layout' """
 
 
-_ROVR_CONFIG_METADATA_DATETIME_FORMAT_DEFAULT = "%Y-%m-%d %H:%M"
+
+_ROVR_CONFIG_METADATA_DATETIME_FORMAT_DEFAULT = '%Y-%m-%d %H:%M'
 r""" Default value of the field path 'Rovr Config metadata datetime_format' """
 
 
-_ROVR_CONFIG_METADATA_FIELDS_DEFAULT = [
-    "type",
-    "permissions",
-    "size",
-    "modified",
-    "accessed",
-    "created",
-    "hidden",
-]
+
+_ROVR_CONFIG_METADATA_FIELDS_DEFAULT = ['type', 'permissions', 'size', 'modified', 'accessed', 'created', 'hidden']
 r""" Default value of the field path 'Rovr Config metadata fields' """
+
 
 
 _ROVR_CONFIG_METADATA_FILESIZE_DECIMALS_DEFAULT = 1
 r""" Default value of the field path 'Rovr Config metadata filesize_decimals' """
 
 
-_ROVR_CONFIG_METADATA_FILESIZE_SUFFIX_DEFAULT = "decimal"
+
+_ROVR_CONFIG_METADATA_FILESIZE_SUFFIX_DEFAULT = 'decimal'
 r""" Default value of the field path 'Rovr Config metadata filesize_suffix' """
+
 
 
 _ROVR_CONFIG_PLUGINS_BAT_ENABLED_DEFAULT = False
 r""" Default value of the field path 'Rovr Config plugins bat enabled' """
 
 
-_ROVR_CONFIG_PLUGINS_BAT_EXECUTABLE_DEFAULT = "bat"
+
+_ROVR_CONFIG_PLUGINS_BAT_EXECUTABLE_DEFAULT = 'bat'
 r""" Default value of the field path 'Rovr Config plugins bat executable' """
 
 
-_ROVR_CONFIG_PLUGINS_FD_DEFAULT_FILTER_TYPES_DEFAULT = ["file", "directory"]
+
+_ROVR_CONFIG_PLUGINS_FD_DEFAULT_FILTER_TYPES_DEFAULT = ['file', 'directory']
 r""" Default value of the field path 'Rovr Config plugins fd default_filter_types' """
+
 
 
 _ROVR_CONFIG_PLUGINS_FD_ENABLED_DEFAULT = True
 r""" Default value of the field path 'Rovr Config plugins fd enabled' """
 
 
-_ROVR_CONFIG_PLUGINS_FD_EXECUTABLE_DEFAULT = "fd"
+
+_ROVR_CONFIG_PLUGINS_FD_EXECUTABLE_DEFAULT = 'fd'
 r""" Default value of the field path 'Rovr Config plugins fd executable' """
+
 
 
 _ROVR_CONFIG_PLUGINS_FD_FOLLOW_SYMLINKS_DEFAULT = False
 r""" Default value of the field path 'Rovr Config plugins fd follow_symlinks' """
 
 
-_ROVR_CONFIG_PLUGINS_FD_KEYBINDS_DEFAULT = ["f"]
+
+_ROVR_CONFIG_PLUGINS_FD_KEYBINDS_DEFAULT = ['f']
 r""" Default value of the field path 'Rovr Config plugins fd keybinds' """
+
 
 
 _ROVR_CONFIG_PLUGINS_FD_NO_IGNORE_PARENT_DEFAULT = False
 r""" Default value of the field path 'Rovr Config plugins fd no_ignore_parent' """
 
 
+
 _ROVR_CONFIG_PLUGINS_FD_RELATIVE_PATHS_DEFAULT = True
 r""" Default value of the field path 'Rovr Config plugins fd relative_paths' """
+
 
 
 _ROVR_CONFIG_PLUGINS_FD_SEARCH_HIDDEN_DEFAULT = False
 r""" Default value of the field path 'Rovr Config plugins fd search_hidden' """
 
 
+
 _ROVR_CONFIG_PLUGINS_FD_TIMEOUT_DEFAULT = 15
 r""" Default value of the field path 'Rovr Config plugins fd timeout' """
+
 
 
 _ROVR_CONFIG_PLUGINS_FILE_ONE_ENABLED_DEFAULT = False
 r""" Default value of the field path 'Rovr Config plugins file_one enabled' """
 
 
+
 _ROVR_CONFIG_PLUGINS_FILE_ONE_GET_DESCRIPTION_DEFAULT = True
 r""" Default value of the field path 'Rovr Config plugins file_one get_description' """
+
 
 
 _ROVR_CONFIG_PLUGINS_POPPLER_ENABLED_DEFAULT = True
 r""" Default value of the field path 'Rovr Config plugins poppler enabled' """
 
 
+
 _ROVR_CONFIG_PLUGINS_POPPLER_PDF_BATCH_SIZE_DEFAULT = 2
 r""" Default value of the field path 'Rovr Config plugins poppler pdf_batch_size' """
 
 
-_ROVR_CONFIG_PLUGINS_POPPLER_POPPLER_FOLDER_DEFAULT = "PATH"
+
+_ROVR_CONFIG_PLUGINS_POPPLER_POPPLER_FOLDER_DEFAULT = 'PATH'
 r""" Default value of the field path 'Rovr Config plugins poppler poppler_folder' """
+
 
 
 _ROVR_CONFIG_PLUGINS_POPPLER_THREADS_DEFAULT = 1
 r""" Default value of the field path 'Rovr Config plugins poppler threads' """
 
 
+
 _ROVR_CONFIG_PLUGINS_POPPLER_USE_PDFTOCAIRO_DEFAULT = False
 r""" Default value of the field path 'Rovr Config plugins poppler use_pdftocairo' """
+
 
 
 _ROVR_CONFIG_PLUGINS_RG_CASE_SENSITIVE_DEFAULT = True
 r""" Default value of the field path 'Rovr Config plugins rg case_sensitive' """
 
 
+
 _ROVR_CONFIG_PLUGINS_RG_ENABLED_DEFAULT = True
 r""" Default value of the field path 'Rovr Config plugins rg enabled' """
 
 
-_ROVR_CONFIG_PLUGINS_RG_EXECUTABLE_DEFAULT = "rg"
+
+_ROVR_CONFIG_PLUGINS_RG_EXECUTABLE_DEFAULT = 'rg'
 r""" Default value of the field path 'Rovr Config plugins rg executable' """
+
 
 
 _ROVR_CONFIG_PLUGINS_RG_FOLLOW_SYMLINKS_DEFAULT = False
 r""" Default value of the field path 'Rovr Config plugins rg follow_symlinks' """
 
 
-_ROVR_CONFIG_PLUGINS_RG_KEYBINDS_DEFAULT = ["R"]
+
+_ROVR_CONFIG_PLUGINS_RG_KEYBINDS_DEFAULT = ['R']
 r""" Default value of the field path 'Rovr Config plugins rg keybinds' """
+
 
 
 _ROVR_CONFIG_PLUGINS_RG_NO_IGNORE_PARENT_DEFAULT = False
 r""" Default value of the field path 'Rovr Config plugins rg no_ignore_parent' """
 
 
+
 _ROVR_CONFIG_PLUGINS_RG_SEARCH_HIDDEN_DEFAULT = False
 r""" Default value of the field path 'Rovr Config plugins rg search_hidden' """
+
 
 
 _ROVR_CONFIG_PLUGINS_RG_TIMEOUT_DEFAULT = 60
 r""" Default value of the field path 'Rovr Config plugins rg timeout' """
 
 
+
 _ROVR_CONFIG_PLUGINS_ZOXIDE_ENABLED_DEFAULT = True
 r""" Default value of the field path 'Rovr Config plugins zoxide enabled' """
 
 
-_ROVR_CONFIG_PLUGINS_ZOXIDE_KEYBINDS_DEFAULT = ["z"]
+
+_ROVR_CONFIG_PLUGINS_ZOXIDE_KEYBINDS_DEFAULT = ['z']
 r""" Default value of the field path 'Rovr Config plugins zoxide keybinds' """
+
 
 
 _ROVR_CONFIG_PLUGINS_ZOXIDE_SHOW_SCORES_DEFAULT = False
 r""" Default value of the field path 'Rovr Config plugins zoxide show_scores' """
 
 
+
 _ROVR_CONFIG_SETTINGS_BULK_RENAME_SHOW_AS_MAPPING_DEFAULT = True
 r""" Default value of the field path 'Rovr Config settings bulk_rename show_as_mapping' """
+
 
 
 _ROVR_CONFIG_SETTINGS_COPY_INCLUDES_METADATA_DEFAULT = True
 r""" Default value of the field path 'Rovr Config settings copy_includes_metadata' """
 
 
-_ROVR_CONFIG_SETTINGS_EDITOR_BULK_RENAME_RUN_DEFAULT = "$EDITOR"
+
+_ROVR_CONFIG_SETTINGS_EDITOR_BULK_RENAME_RUN_DEFAULT = '$EDITOR'
 r""" Default value of the field path 'Rovr Config settings editor bulk_rename run' """
+
 
 
 _ROVR_CONFIG_SETTINGS_EDITOR_BULK_RENAME_SUSPEND_DEFAULT = True
 r""" Default value of the field path 'Rovr Config settings editor bulk_rename suspend' """
 
 
+
 _ROVR_CONFIG_SETTINGS_EDITOR_FILE_BLOCK_DEFAULT = False
 r""" Default value of the field path 'Rovr Config settings editor file block' """
 
 
-_ROVR_CONFIG_SETTINGS_EDITOR_FILE_RUN_DEFAULT = "$EDITOR"
+
+_ROVR_CONFIG_SETTINGS_EDITOR_FILE_RUN_DEFAULT = '$EDITOR'
 r""" Default value of the field path 'Rovr Config settings editor file run' """
+
 
 
 _ROVR_CONFIG_SETTINGS_EDITOR_FILE_SUSPEND_DEFAULT = True
 r""" Default value of the field path 'Rovr Config settings editor file suspend' """
 
 
+
 _ROVR_CONFIG_SETTINGS_EDITOR_FOLDER_BLOCK_DEFAULT = False
 r""" Default value of the field path 'Rovr Config settings editor folder block' """
 
 
-_ROVR_CONFIG_SETTINGS_EDITOR_FOLDER_RUN_DEFAULT = "$EDITOR"
+
+_ROVR_CONFIG_SETTINGS_EDITOR_FOLDER_RUN_DEFAULT = '$EDITOR'
 r""" Default value of the field path 'Rovr Config settings editor folder run' """
+
 
 
 _ROVR_CONFIG_SETTINGS_EDITOR_FOLDER_SUSPEND_DEFAULT = True
 r""" Default value of the field path 'Rovr Config settings editor folder suspend' """
 
 
+
 _ROVR_CONFIG_SETTINGS_EDITOR_OPEN_ALL_IN_EDITOR_DEFAULT = False
 r""" Default value of the field path 'Rovr Config settings editor open_all_in_editor' """
 
 
-_ROVR_CONFIG_SETTINGS_PREVIEW_RULES_DEFAULT = {
-    "text/.*": "text",
-    "application/(json|javascript|xml|raml\\+yaml)": "text",
-    "application/x-(yaml|script|pem-file|subrip|typescript)": "text",
-    "application/(mbox|ndjson|wine-extension-ini)": "text",
-    "image/svg\\+xml": "resvg",
-    "image/(avif|hei.|jxl)": "image",
-    "image/.*": "image",
-    "application/pdf": "pdf",
-    "application/(zip|gzip|zstd|bzip2|vnd\\.rar)": "archive",
-    "application/x-(xz|x-tar|x-gzip|x-bzip2|x-xz|x-rar|x-rar-compressed|x-7z-compressed)": "archive",
-    "application/(rar|7z.*|tar|xz|bzip.*|lzma|compress|archive|cpio|arj|xar|ms-cab.*)": "archive",
-    "application/(iso9660-image|qemu-disk|ms-wim|apple-diskimage)": "archive",
-    "application/virtualbox-(vhd|vhdx)": "archive",
-    "application/(debian.*-package|redhat-package-manager|rpm|android\\.package-archive)": "archive",
-    "inode/directory": "folder",
-    "font/.*": "font",
-    "application/ms-opentype": "font",
-    "application/font-.*": "font",
-    "application/x-font-.*": "font",
-}
+
+_ROVR_CONFIG_SETTINGS_PREVIEW_RULES_DEFAULT = {'text/.*': 'text', 'application/(json|javascript|xml|raml\\+yaml)': 'text', 'application/x-(yaml|script|pem-file|subrip|typescript)': 'text', 'application/(mbox|ndjson|wine-extension-ini)': 'text', 'image/svg\\+xml': 'resvg', 'image/(avif|hei.|jxl)': 'image', 'image/.*': 'image', 'application/pdf': 'pdf', 'application/(zip|gzip|zstd|bzip2|vnd\\.rar)': 'archive', 'application/x-(xz|x-tar|x-gzip|x-bzip2|x-xz|x-rar|x-rar-compressed|x-7z-compressed)': 'archive', 'application/(rar|7z.*|tar|xz|bzip.*|lzma|compress|archive|cpio|arj|xar|ms-cab.*)': 'archive', 'application/(iso9660-image|qemu-disk|ms-wim|apple-diskimage)': 'archive', 'application/virtualbox-(vhd|vhdx)': 'archive', 'application/(debian.*-package|redhat-package-manager|rpm|android\\.package-archive)': 'archive', 'inode/directory': 'folder', 'font/.*': 'font', 'application/ms-opentype': 'font', 'application/font-.*': 'font', 'application/x-font-.*': 'font'}
 r""" Default value of the field path 'Rovr Config settings preview_rules' """
+
 
 
 _ROVR_CONFIG_SETTINGS_USE_RECYCLE_BIN_DEFAULT = True
 r""" Default value of the field path 'Rovr Config settings use_recycle_bin' """
 
 
-_ROVR_CONFIG_THEME_DEFAULT_DEFAULT = "nord"
+
+_ROVR_CONFIG_THEME_DEFAULT_DEFAULT = 'nord'
 r""" Default value of the field path 'Rovr Config theme default' """
 
 
-_ROVR_CONFIG_THEME_PREVIEW_DEFAULT = "nord"
+
+_ROVR_CONFIG_THEME_PREVIEW_DEFAULT = 'nord'
 r""" Default value of the field path 'Rovr Config theme preview' """
+
 
 
 _ROVR_CONFIG_THEME_TRANSPARENT_DEFAULT = False
 r""" Default value of the field path 'Rovr Config theme transparent' """
 
 
+
 _RightClickAction = Union["_RightClickActionOneof0", "_RightClickActionOneof1"]
 r""" Aggregation type: oneOf """
 
 
-_RightClickActionOneof0 = (
-    Literal["rovr:copy"]
-    | Literal["rovr:cut"]
-    | Literal["rovr:paste"]
-    | Literal["rovr:new"]
-    | Literal["rovr:rename"]
-    | Literal["rovr:delete"]
-    | Literal["rovr:zip"]
-    | Literal["rovr:unzip"]
-    | Literal["system:copy_highlighted"]
-    | Literal["system:copy_current_directory"]
-    | Literal["system:copy_to_system_clip"]
-)
-_RIGHTCLICKACTIONONEOF0_ROVR_COLON_COPY: Literal["rovr:copy"] = "rovr:copy"
+
+_RightClickActionOneof0 = Literal['rovr:copy'] | Literal['rovr:cut'] | Literal['rovr:paste'] | Literal['rovr:new'] | Literal['rovr:rename'] | Literal['rovr:delete'] | Literal['rovr:zip'] | Literal['rovr:unzip'] | Literal['system:copy_highlighted'] | Literal['system:copy_current_directory'] | Literal['system:copy_to_system_clip']
+_RIGHTCLICKACTIONONEOF0_ROVR_COLON_COPY: Literal['rovr:copy'] = "rovr:copy"
 r"""The values for the '_RightClickActionOneof0' enum"""
-_RIGHTCLICKACTIONONEOF0_ROVR_COLON_CUT: Literal["rovr:cut"] = "rovr:cut"
+_RIGHTCLICKACTIONONEOF0_ROVR_COLON_CUT: Literal['rovr:cut'] = "rovr:cut"
 r"""The values for the '_RightClickActionOneof0' enum"""
-_RIGHTCLICKACTIONONEOF0_ROVR_COLON_PASTE: Literal["rovr:paste"] = "rovr:paste"
+_RIGHTCLICKACTIONONEOF0_ROVR_COLON_PASTE: Literal['rovr:paste'] = "rovr:paste"
 r"""The values for the '_RightClickActionOneof0' enum"""
-_RIGHTCLICKACTIONONEOF0_ROVR_COLON_NEW: Literal["rovr:new"] = "rovr:new"
+_RIGHTCLICKACTIONONEOF0_ROVR_COLON_NEW: Literal['rovr:new'] = "rovr:new"
 r"""The values for the '_RightClickActionOneof0' enum"""
-_RIGHTCLICKACTIONONEOF0_ROVR_COLON_RENAME: Literal["rovr:rename"] = "rovr:rename"
+_RIGHTCLICKACTIONONEOF0_ROVR_COLON_RENAME: Literal['rovr:rename'] = "rovr:rename"
 r"""The values for the '_RightClickActionOneof0' enum"""
-_RIGHTCLICKACTIONONEOF0_ROVR_COLON_DELETE: Literal["rovr:delete"] = "rovr:delete"
+_RIGHTCLICKACTIONONEOF0_ROVR_COLON_DELETE: Literal['rovr:delete'] = "rovr:delete"
 r"""The values for the '_RightClickActionOneof0' enum"""
-_RIGHTCLICKACTIONONEOF0_ROVR_COLON_ZIP: Literal["rovr:zip"] = "rovr:zip"
+_RIGHTCLICKACTIONONEOF0_ROVR_COLON_ZIP: Literal['rovr:zip'] = "rovr:zip"
 r"""The values for the '_RightClickActionOneof0' enum"""
-_RIGHTCLICKACTIONONEOF0_ROVR_COLON_UNZIP: Literal["rovr:unzip"] = "rovr:unzip"
+_RIGHTCLICKACTIONONEOF0_ROVR_COLON_UNZIP: Literal['rovr:unzip'] = "rovr:unzip"
 r"""The values for the '_RightClickActionOneof0' enum"""
-_RIGHTCLICKACTIONONEOF0_SYSTEM_COLON_COPY_HIGHLIGHTED: Literal[
-    "system:copy_highlighted"
-] = "system:copy_highlighted"
+_RIGHTCLICKACTIONONEOF0_SYSTEM_COLON_COPY_HIGHLIGHTED: Literal['system:copy_highlighted'] = "system:copy_highlighted"
 r"""The values for the '_RightClickActionOneof0' enum"""
-_RIGHTCLICKACTIONONEOF0_SYSTEM_COLON_COPY_CURRENT_DIRECTORY: Literal[
-    "system:copy_current_directory"
-] = "system:copy_current_directory"
+_RIGHTCLICKACTIONONEOF0_SYSTEM_COLON_COPY_CURRENT_DIRECTORY: Literal['system:copy_current_directory'] = "system:copy_current_directory"
 r"""The values for the '_RightClickActionOneof0' enum"""
-_RIGHTCLICKACTIONONEOF0_SYSTEM_COLON_COPY_TO_SYSTEM_CLIP: Literal[
-    "system:copy_to_system_clip"
-] = "system:copy_to_system_clip"
+_RIGHTCLICKACTIONONEOF0_SYSTEM_COLON_COPY_TO_SYSTEM_CLIP: Literal['system:copy_to_system_clip'] = "system:copy_to_system_clip"
 r"""The values for the '_RightClickActionOneof0' enum"""
+
 
 
 _RightClickActionOneof1 = str
 r""" pattern: ^sh[ho]?:.+$ """
+
 
 
 class _RightClickIf(TypedDict, total=False):
@@ -419,17 +450,20 @@ class _RightClickIf(TypedDict, total=False):
     r""" Only enable this menu item if the selected item is a directory (set to true) or a file (set to false) (if unspecified, matches both files and directories) """
 
 
+
 _RightClickIfOsItem = Union["_RightClickIfOsItemAnyof0", str]
 r""" Aggregation type: anyOf """
 
 
-_RightClickIfOsItemAnyof0 = Literal["Windows"] | Literal["Linux"] | Literal["Darwin"]
-_RIGHTCLICKIFOSITEMANYOF0_WINDOWS: Literal["Windows"] = "Windows"
+
+_RightClickIfOsItemAnyof0 = Literal['Windows'] | Literal['Linux'] | Literal['Darwin']
+_RIGHTCLICKIFOSITEMANYOF0_WINDOWS: Literal['Windows'] = "Windows"
 r"""The values for the '_RightClickIfOsItemAnyof0' enum"""
-_RIGHTCLICKIFOSITEMANYOF0_LINUX: Literal["Linux"] = "Linux"
+_RIGHTCLICKIFOSITEMANYOF0_LINUX: Literal['Linux'] = "Linux"
 r"""The values for the '_RightClickIfOsItemAnyof0' enum"""
-_RIGHTCLICKIFOSITEMANYOF0_DARWIN: Literal["Darwin"] = "Darwin"
+_RIGHTCLICKIFOSITEMANYOF0_DARWIN: Literal['Darwin'] = "Darwin"
 r"""The values for the '_RightClickIfOsItemAnyof0' enum"""
+
 
 
 class _RovrConfigCustomThemeItem(TypedDict, total=False):
@@ -527,8 +561,9 @@ class _RovrConfigCustomThemeItem(TypedDict, total=False):
     """
 
 
+
 class _RovrConfigCustomThemeItemBarGradient(TypedDict, total=False):
-    r"""The gradient colors for the progress bar."""
+    r""" The gradient colors for the progress bar. """
 
     default: list[Any]
     r""" A list of hex codes, or named colors to use as the progress bar's gradient colors. Refer to https://textual.textualize.io/css_types/color/#named-colors for the named colors. """
@@ -537,8 +572,9 @@ class _RovrConfigCustomThemeItemBarGradient(TypedDict, total=False):
     r""" A list of hex codes, or named colors to use as the progress bar's gradient colors **when it encountered an error**. Refer to https://textual.textualize.io/css_types/color/#named-colors for the named colors. """
 
 
+
 class _RovrConfigIcons(TypedDict, total=False):
-    r"""Custom icon configurations for files and folders"""
+    r""" Custom icon configurations for files and folders """
 
     files: list["_RovrConfigIconsFilesItem"]
     r"""
@@ -555,6 +591,7 @@ class _RovrConfigIcons(TypedDict, total=False):
     default:
       []
     """
+
 
 
 class _RovrConfigIconsFilesItem(TypedDict, total=False):
@@ -581,6 +618,7 @@ class _RovrConfigIconsFilesItem(TypedDict, total=False):
     """
 
 
+
 class _RovrConfigIconsFoldersItem(TypedDict, total=False):
     pattern: Required[str]
     r"""
@@ -605,8 +643,9 @@ class _RovrConfigIconsFoldersItem(TypedDict, total=False):
     """
 
 
+
 class _RovrConfigInterface(TypedDict, total=False):
-    r"""Settings related to the user interface and experience"""
+    r""" Settings related to the user interface and experience """
 
     tooltips: bool
     r"""
@@ -731,16 +770,18 @@ class _RovrConfigInterfaceClock(TypedDict, total=False):
     """
 
 
-_RovrConfigInterfaceClockAlign = Literal["left"] | Literal["right"]
+
+_RovrConfigInterfaceClockAlign = Literal['left'] | Literal['right']
 r"""
 Align the clock to either the 'right' or 'left' of the tabs bar.
 
 default: right
 """
-_ROVRCONFIGINTERFACECLOCKALIGN_LEFT: Literal["left"] = "left"
+_ROVRCONFIGINTERFACECLOCKALIGN_LEFT: Literal['left'] = "left"
 r"""The values for the 'Align the clock to either the 'right' or 'left' of the tabs bar' enum"""
-_ROVRCONFIGINTERFACECLOCKALIGN_RIGHT: Literal["right"] = "right"
+_ROVRCONFIGINTERFACECLOCKALIGN_RIGHT: Literal['right'] = "right"
 r"""The values for the 'Align the clock to either the 'right' or 'left' of the tabs bar' enum"""
+
 
 
 class _RovrConfigInterfaceCompactMode(TypedDict, total=False):
@@ -759,8 +800,9 @@ class _RovrConfigInterfaceCompactMode(TypedDict, total=False):
     """
 
 
+
 class _RovrConfigInterfaceFontPreview(TypedDict, total=False):
-    r"""Settings related to the font preview used in the preview sidebar"""
+    r""" Settings related to the font preview used in the preview sidebar """
 
     max_size: list["_RovrConfigInterfaceFontPreviewMaxSizeItem"]
     r"""
@@ -781,12 +823,14 @@ class _RovrConfigInterfaceFontPreview(TypedDict, total=False):
     """
 
 
+
 _RovrConfigInterfaceFontPreviewMaxSizeItem = int
 r""" minimum: 1 """
 
 
+
 class _RovrConfigInterfaceImageViewer(TypedDict, total=False):
-    r"""Settings related to the image viewer used in the preview sidebar"""
+    r""" Settings related to the image viewer used in the preview sidebar """
 
     protocol: "_RovrConfigInterfaceImageViewerProtocol"
     r"""
@@ -814,59 +858,50 @@ class _RovrConfigInterfaceImageViewer(TypedDict, total=False):
     """
 
 
+
 _RovrConfigInterfaceImageViewerMaxSizeItem = int
 r""" minimum: 1 """
 
 
-_RovrConfigInterfaceImageViewerProtocol = (
-    Literal["Auto"]
-    | Literal["TGP"]
-    | Literal["Sixel"]
-    | Literal["Halfcell"]
-    | Literal["Unicode"]
-)
+
+_RovrConfigInterfaceImageViewerProtocol = Literal['Auto'] | Literal['TGP'] | Literal['Sixel'] | Literal['Halfcell'] | Literal['Unicode']
 r"""
 The image protocol to use when displaying an image
 
 default: Auto
 """
-_ROVRCONFIGINTERFACEIMAGEVIEWERPROTOCOL_AUTO: Literal["Auto"] = "Auto"
+_ROVRCONFIGINTERFACEIMAGEVIEWERPROTOCOL_AUTO: Literal['Auto'] = "Auto"
 r"""The values for the 'The image protocol to use when displaying an image' enum"""
-_ROVRCONFIGINTERFACEIMAGEVIEWERPROTOCOL_TGP: Literal["TGP"] = "TGP"
+_ROVRCONFIGINTERFACEIMAGEVIEWERPROTOCOL_TGP: Literal['TGP'] = "TGP"
 r"""The values for the 'The image protocol to use when displaying an image' enum"""
-_ROVRCONFIGINTERFACEIMAGEVIEWERPROTOCOL_SIXEL: Literal["Sixel"] = "Sixel"
+_ROVRCONFIGINTERFACEIMAGEVIEWERPROTOCOL_SIXEL: Literal['Sixel'] = "Sixel"
 r"""The values for the 'The image protocol to use when displaying an image' enum"""
-_ROVRCONFIGINTERFACEIMAGEVIEWERPROTOCOL_HALFCELL: Literal["Halfcell"] = "Halfcell"
+_ROVRCONFIGINTERFACEIMAGEVIEWERPROTOCOL_HALFCELL: Literal['Halfcell'] = "Halfcell"
 r"""The values for the 'The image protocol to use when displaying an image' enum"""
-_ROVRCONFIGINTERFACEIMAGEVIEWERPROTOCOL_UNICODE: Literal["Unicode"] = "Unicode"
+_ROVRCONFIGINTERFACEIMAGEVIEWERPROTOCOL_UNICODE: Literal['Unicode'] = "Unicode"
 r"""The values for the 'The image protocol to use when displaying an image' enum"""
 
 
-_RovrConfigInterfaceImageViewerResampling = (
-    Literal["nearest"]
-    | Literal["lanczos"]
-    | Literal["bilinear"]
-    | Literal["bicubic"]
-    | Literal["box"]
-    | Literal["hamming"]
-)
+
+_RovrConfigInterfaceImageViewerResampling = Literal['nearest'] | Literal['lanczos'] | Literal['bilinear'] | Literal['bicubic'] | Literal['box'] | Literal['hamming']
 r"""
 The resampling method to use when resizing images. This is only applicable when the image exceeds the maximum size specified in `max_size`.
 
 default: nearest
 """
-_ROVRCONFIGINTERFACEIMAGEVIEWERRESAMPLING_NEAREST: Literal["nearest"] = "nearest"
+_ROVRCONFIGINTERFACEIMAGEVIEWERRESAMPLING_NEAREST: Literal['nearest'] = "nearest"
 r"""The values for the 'The resampling method to use when resizing images. This is only applicable when the image exceeds the maximum size specified in `max_size`' enum"""
-_ROVRCONFIGINTERFACEIMAGEVIEWERRESAMPLING_LANCZOS: Literal["lanczos"] = "lanczos"
+_ROVRCONFIGINTERFACEIMAGEVIEWERRESAMPLING_LANCZOS: Literal['lanczos'] = "lanczos"
 r"""The values for the 'The resampling method to use when resizing images. This is only applicable when the image exceeds the maximum size specified in `max_size`' enum"""
-_ROVRCONFIGINTERFACEIMAGEVIEWERRESAMPLING_BILINEAR: Literal["bilinear"] = "bilinear"
+_ROVRCONFIGINTERFACEIMAGEVIEWERRESAMPLING_BILINEAR: Literal['bilinear'] = "bilinear"
 r"""The values for the 'The resampling method to use when resizing images. This is only applicable when the image exceeds the maximum size specified in `max_size`' enum"""
-_ROVRCONFIGINTERFACEIMAGEVIEWERRESAMPLING_BICUBIC: Literal["bicubic"] = "bicubic"
+_ROVRCONFIGINTERFACEIMAGEVIEWERRESAMPLING_BICUBIC: Literal['bicubic'] = "bicubic"
 r"""The values for the 'The resampling method to use when resizing images. This is only applicable when the image exceeds the maximum size specified in `max_size`' enum"""
-_ROVRCONFIGINTERFACEIMAGEVIEWERRESAMPLING_BOX: Literal["box"] = "box"
+_ROVRCONFIGINTERFACEIMAGEVIEWERRESAMPLING_BOX: Literal['box'] = "box"
 r"""The values for the 'The resampling method to use when resizing images. This is only applicable when the image exceeds the maximum size specified in `max_size`' enum"""
-_ROVRCONFIGINTERFACEIMAGEVIEWERRESAMPLING_HAMMING: Literal["hamming"] = "hamming"
+_ROVRCONFIGINTERFACEIMAGEVIEWERRESAMPLING_HAMMING: Literal['hamming'] = "hamming"
 r"""The values for the 'The resampling method to use when resizing images. This is only applicable when the image exceeds the maximum size specified in `max_size`' enum"""
+
 
 
 class _RovrConfigInterfacePreviewText(TypedDict, total=False):
@@ -900,6 +935,7 @@ oO08 iIlL1 g9qCQG a@ 5sS
 {} [==>  ] (*) <> ~-+ /\
 
     """
+
 
 
 class _RovrConfigKeybinds(TypedDict, total=False):
@@ -989,8 +1025,9 @@ class _RovrConfigKeybinds(TypedDict, total=False):
     r""" Keybinds related to yes/no confirmation modals """
 
 
+
 class _RovrConfigKeybindsChangeSortOrder(TypedDict, total=False):
-    r"""Keybinds related to changing the sort order"""
+    r""" Keybinds related to changing the sort order """
 
     open_popup: list[str]
     name: list[str]
@@ -1003,7 +1040,7 @@ class _RovrConfigKeybindsChangeSortOrder(TypedDict, total=False):
 
 
 class _RovrConfigKeybindsDeleteFiles(TypedDict, total=False):
-    r"""Keybinds related to the delete confirmation screen"""
+    r""" Keybinds related to the delete confirmation screen """
 
     trash: list[str]
     delete: list[str]
@@ -1011,7 +1048,7 @@ class _RovrConfigKeybindsDeleteFiles(TypedDict, total=False):
 
 
 class _RovrConfigKeybindsExtraCopy(TypedDict, total=False):
-    r"""Keybinds related to extra copy options"""
+    r""" Keybinds related to extra copy options """
 
     open_popup: list[str]
     copy_to_rovr: list[str]
@@ -1021,7 +1058,7 @@ class _RovrConfigKeybindsExtraCopy(TypedDict, total=False):
 
 
 class _RovrConfigKeybindsFileInUse(TypedDict, total=False):
-    r"""Keybinds related to handling a file that is in use by another process"""
+    r""" Keybinds related to handling a file that is in use by another process """
 
     retry: list[str]
     skip: list[str]
@@ -1030,7 +1067,7 @@ class _RovrConfigKeybindsFileInUse(TypedDict, total=False):
 
 
 class _RovrConfigKeybindsFilenameConflict(TypedDict, total=False):
-    r"""Keybinds related to handling a conflict with two files of the same name"""
+    r""" Keybinds related to handling a conflict with two files of the same name """
 
     overwrite: list[str]
     skip: list[str]
@@ -1040,7 +1077,7 @@ class _RovrConfigKeybindsFilenameConflict(TypedDict, total=False):
 
 
 class _RovrConfigKeybindsFilterModal(TypedDict, total=False):
-    r"""Keybinds related to selecting options in a modal screen (like FileSearch or ZDToDirectory)"""
+    r""" Keybinds related to selecting options in a modal screen (like FileSearch or ZDToDirectory) """
 
     exit: list[str]
     down: list[str]
@@ -1050,7 +1087,7 @@ class _RovrConfigKeybindsFilterModal(TypedDict, total=False):
 
 
 class _RovrConfigKeybindsYesOrNo(TypedDict, total=False):
-    r"""Keybinds related to yes/no confirmation modals"""
+    r""" Keybinds related to yes/no confirmation modals """
 
     yes: list[str]
     no: list[str]
@@ -1099,34 +1136,26 @@ class _RovrConfigMetadata(TypedDict, total=False):
     """
 
 
-_RovrConfigMetadataFieldsItem = (
-    Literal["type"]
-    | Literal["permissions"]
-    | Literal["size"]
-    | Literal["modified"]
-    | Literal["accessed"]
-    | Literal["created"]
-    | Literal["hidden"]
-)
-_ROVRCONFIGMETADATAFIELDSITEM_TYPE: Literal["type"] = "type"
+
+_RovrConfigMetadataFieldsItem = Literal['type'] | Literal['permissions'] | Literal['size'] | Literal['modified'] | Literal['accessed'] | Literal['created'] | Literal['hidden']
+_ROVRCONFIGMETADATAFIELDSITEM_TYPE: Literal['type'] = "type"
 r"""The values for the '_RovrConfigMetadataFieldsItem' enum"""
-_ROVRCONFIGMETADATAFIELDSITEM_PERMISSIONS: Literal["permissions"] = "permissions"
+_ROVRCONFIGMETADATAFIELDSITEM_PERMISSIONS: Literal['permissions'] = "permissions"
 r"""The values for the '_RovrConfigMetadataFieldsItem' enum"""
-_ROVRCONFIGMETADATAFIELDSITEM_SIZE: Literal["size"] = "size"
+_ROVRCONFIGMETADATAFIELDSITEM_SIZE: Literal['size'] = "size"
 r"""The values for the '_RovrConfigMetadataFieldsItem' enum"""
-_ROVRCONFIGMETADATAFIELDSITEM_MODIFIED: Literal["modified"] = "modified"
+_ROVRCONFIGMETADATAFIELDSITEM_MODIFIED: Literal['modified'] = "modified"
 r"""The values for the '_RovrConfigMetadataFieldsItem' enum"""
-_ROVRCONFIGMETADATAFIELDSITEM_ACCESSED: Literal["accessed"] = "accessed"
+_ROVRCONFIGMETADATAFIELDSITEM_ACCESSED: Literal['accessed'] = "accessed"
 r"""The values for the '_RovrConfigMetadataFieldsItem' enum"""
-_ROVRCONFIGMETADATAFIELDSITEM_CREATED: Literal["created"] = "created"
+_ROVRCONFIGMETADATAFIELDSITEM_CREATED: Literal['created'] = "created"
 r"""The values for the '_RovrConfigMetadataFieldsItem' enum"""
-_ROVRCONFIGMETADATAFIELDSITEM_HIDDEN: Literal["hidden"] = "hidden"
+_ROVRCONFIGMETADATAFIELDSITEM_HIDDEN: Literal['hidden'] = "hidden"
 r"""The values for the '_RovrConfigMetadataFieldsItem' enum"""
 
 
-_RovrConfigMetadataFilesizeSuffix = (
-    Literal["decimal"] | Literal["binary"] | Literal["gnu"]
-)
+
+_RovrConfigMetadataFilesizeSuffix = Literal['decimal'] | Literal['binary'] | Literal['gnu']
 r"""
 The filesize suffix to follow.
 `decimal`: 1024 -> 1.024kB
@@ -1135,12 +1164,13 @@ The filesize suffix to follow.
 
 default: decimal
 """
-_ROVRCONFIGMETADATAFILESIZESUFFIX_DECIMAL: Literal["decimal"] = "decimal"
+_ROVRCONFIGMETADATAFILESIZESUFFIX_DECIMAL: Literal['decimal'] = "decimal"
 r"""The values for the 'The filesize suffix to follow' enum"""
-_ROVRCONFIGMETADATAFILESIZESUFFIX_BINARY: Literal["binary"] = "binary"
+_ROVRCONFIGMETADATAFILESIZESUFFIX_BINARY: Literal['binary'] = "binary"
 r"""The values for the 'The filesize suffix to follow' enum"""
-_ROVRCONFIGMETADATAFILESIZESUFFIX_GNU: Literal["gnu"] = "gnu"
+_ROVRCONFIGMETADATAFILESIZESUFFIX_GNU: Literal['gnu'] = "gnu"
 r"""The values for the 'The filesize suffix to follow' enum"""
+
 
 
 class _RovrConfigPlugins(TypedDict, total=False):
@@ -1166,6 +1196,7 @@ class _RovrConfigPluginsBat(TypedDict, total=False):
 
     default: bat
     """
+
 
 
 class _RovrConfigPluginsFd(TypedDict, total=False):
@@ -1230,41 +1261,27 @@ class _RovrConfigPluginsFd(TypedDict, total=False):
     """
 
 
-_RovrConfigPluginsFdDefaultFilterTypesItem = (
-    Literal["file"]
-    | Literal["directory"]
-    | Literal["symlink"]
-    | Literal["executable"]
-    | Literal["empty"]
-    | Literal["socket"]
-    | Literal["pipe"]
-    | Literal["char-device"]
-    | Literal["block-device"]
-)
-_ROVRCONFIGPLUGINSFDDEFAULTFILTERTYPESITEM_FILE: Literal["file"] = "file"
+
+_RovrConfigPluginsFdDefaultFilterTypesItem = Literal['file'] | Literal['directory'] | Literal['symlink'] | Literal['executable'] | Literal['empty'] | Literal['socket'] | Literal['pipe'] | Literal['char-device'] | Literal['block-device']
+_ROVRCONFIGPLUGINSFDDEFAULTFILTERTYPESITEM_FILE: Literal['file'] = "file"
 r"""The values for the '_RovrConfigPluginsFdDefaultFilterTypesItem' enum"""
-_ROVRCONFIGPLUGINSFDDEFAULTFILTERTYPESITEM_DIRECTORY: Literal["directory"] = "directory"
+_ROVRCONFIGPLUGINSFDDEFAULTFILTERTYPESITEM_DIRECTORY: Literal['directory'] = "directory"
 r"""The values for the '_RovrConfigPluginsFdDefaultFilterTypesItem' enum"""
-_ROVRCONFIGPLUGINSFDDEFAULTFILTERTYPESITEM_SYMLINK: Literal["symlink"] = "symlink"
+_ROVRCONFIGPLUGINSFDDEFAULTFILTERTYPESITEM_SYMLINK: Literal['symlink'] = "symlink"
 r"""The values for the '_RovrConfigPluginsFdDefaultFilterTypesItem' enum"""
-_ROVRCONFIGPLUGINSFDDEFAULTFILTERTYPESITEM_EXECUTABLE: Literal["executable"] = (
-    "executable"
-)
+_ROVRCONFIGPLUGINSFDDEFAULTFILTERTYPESITEM_EXECUTABLE: Literal['executable'] = "executable"
 r"""The values for the '_RovrConfigPluginsFdDefaultFilterTypesItem' enum"""
-_ROVRCONFIGPLUGINSFDDEFAULTFILTERTYPESITEM_EMPTY: Literal["empty"] = "empty"
+_ROVRCONFIGPLUGINSFDDEFAULTFILTERTYPESITEM_EMPTY: Literal['empty'] = "empty"
 r"""The values for the '_RovrConfigPluginsFdDefaultFilterTypesItem' enum"""
-_ROVRCONFIGPLUGINSFDDEFAULTFILTERTYPESITEM_SOCKET: Literal["socket"] = "socket"
+_ROVRCONFIGPLUGINSFDDEFAULTFILTERTYPESITEM_SOCKET: Literal['socket'] = "socket"
 r"""The values for the '_RovrConfigPluginsFdDefaultFilterTypesItem' enum"""
-_ROVRCONFIGPLUGINSFDDEFAULTFILTERTYPESITEM_PIPE: Literal["pipe"] = "pipe"
+_ROVRCONFIGPLUGINSFDDEFAULTFILTERTYPESITEM_PIPE: Literal['pipe'] = "pipe"
 r"""The values for the '_RovrConfigPluginsFdDefaultFilterTypesItem' enum"""
-_ROVRCONFIGPLUGINSFDDEFAULTFILTERTYPESITEM_CHAR_DEVICE: Literal["char-device"] = (
-    "char-device"
-)
+_ROVRCONFIGPLUGINSFDDEFAULTFILTERTYPESITEM_CHAR_DEVICE: Literal['char-device'] = "char-device"
 r"""The values for the '_RovrConfigPluginsFdDefaultFilterTypesItem' enum"""
-_ROVRCONFIGPLUGINSFDDEFAULTFILTERTYPESITEM_BLOCK_DEVICE: Literal["block-device"] = (
-    "block-device"
-)
+_ROVRCONFIGPLUGINSFDDEFAULTFILTERTYPESITEM_BLOCK_DEVICE: Literal['block-device'] = "block-device"
 r"""The values for the '_RovrConfigPluginsFdDefaultFilterTypesItem' enum"""
+
 
 
 class _RovrConfigPluginsFileOne(TypedDict, total=False):
@@ -1281,6 +1298,7 @@ class _RovrConfigPluginsFileOne(TypedDict, total=False):
 
     default: True
     """
+
 
 
 class _RovrConfigPluginsPoppler(TypedDict, total=False):
@@ -1320,6 +1338,7 @@ class _RovrConfigPluginsPoppler(TypedDict, total=False):
     default: 2
     minimum: 1
     """
+
 
 
 class _RovrConfigPluginsRg(TypedDict, total=False):
@@ -1374,6 +1393,7 @@ class _RovrConfigPluginsRg(TypedDict, total=False):
     """
 
 
+
 class _RovrConfigPluginsZoxide(TypedDict, total=False):
     enabled: bool
     r"""
@@ -1391,8 +1411,9 @@ class _RovrConfigPluginsZoxide(TypedDict, total=False):
     """
 
 
+
 class _RovrConfigSettings(TypedDict, total=False):
-    r"""Settings related to behavior of file operations"""
+    r""" Settings related to behavior of file operations """
 
     use_recycle_bin: bool
     r"""
@@ -1443,6 +1464,7 @@ class _RovrConfigSettings(TypedDict, total=False):
     """
 
 
+
 class _RovrConfigSettingsBulkRename(TypedDict, total=False):
     show_as_mapping: bool
     r"""
@@ -1452,8 +1474,9 @@ class _RovrConfigSettingsBulkRename(TypedDict, total=False):
     """
 
 
+
 class _RovrConfigSettingsEditor(TypedDict, total=False):
-    r"""Settings related to the editor used for different operations"""
+    r""" Settings related to the editor used for different operations """
 
     file: "_RovrConfigSettingsEditorFile"
     r""" Editor to use when opening a file """
@@ -1472,8 +1495,9 @@ class _RovrConfigSettingsEditor(TypedDict, total=False):
     """
 
 
+
 class _RovrConfigSettingsEditorBulkRename(TypedDict, total=False):
-    r"""Editor to use for bulk renaming"""
+    r""" Editor to use for bulk renaming """
 
     run: str
     r"""
@@ -1490,8 +1514,9 @@ class _RovrConfigSettingsEditorBulkRename(TypedDict, total=False):
     """
 
 
+
 class _RovrConfigSettingsEditorFile(TypedDict, total=False):
-    r"""Editor to use when opening a file"""
+    r""" Editor to use when opening a file """
 
     run: str
     r"""
@@ -1515,8 +1540,9 @@ class _RovrConfigSettingsEditorFile(TypedDict, total=False):
     """
 
 
+
 class _RovrConfigSettingsEditorFolder(TypedDict, total=False):
-    r"""Editor to use when opening a folder"""
+    r""" Editor to use when opening a folder """
 
     run: str
     r"""
@@ -1540,34 +1566,25 @@ class _RovrConfigSettingsEditorFolder(TypedDict, total=False):
     """
 
 
-_RovrConfigSettingsPreviewRulesAdditionalproperties = (
-    Literal["text"]
-    | Literal["image"]
-    | Literal["pdf"]
-    | Literal["archive"]
-    | Literal["folder"]
-    | Literal["remime"]
-    | Literal["resvg"]
-    | Literal["font"]
-)
-_ROVRCONFIGSETTINGSPREVIEWRULESADDITIONALPROPERTIES_TEXT: Literal["text"] = "text"
+
+_RovrConfigSettingsPreviewRulesAdditionalproperties = Literal['text'] | Literal['image'] | Literal['pdf'] | Literal['archive'] | Literal['folder'] | Literal['remime'] | Literal['resvg'] | Literal['font']
+_ROVRCONFIGSETTINGSPREVIEWRULESADDITIONALPROPERTIES_TEXT: Literal['text'] = "text"
 r"""The values for the '_RovrConfigSettingsPreviewRulesAdditionalproperties' enum"""
-_ROVRCONFIGSETTINGSPREVIEWRULESADDITIONALPROPERTIES_IMAGE: Literal["image"] = "image"
+_ROVRCONFIGSETTINGSPREVIEWRULESADDITIONALPROPERTIES_IMAGE: Literal['image'] = "image"
 r"""The values for the '_RovrConfigSettingsPreviewRulesAdditionalproperties' enum"""
-_ROVRCONFIGSETTINGSPREVIEWRULESADDITIONALPROPERTIES_PDF: Literal["pdf"] = "pdf"
+_ROVRCONFIGSETTINGSPREVIEWRULESADDITIONALPROPERTIES_PDF: Literal['pdf'] = "pdf"
 r"""The values for the '_RovrConfigSettingsPreviewRulesAdditionalproperties' enum"""
-_ROVRCONFIGSETTINGSPREVIEWRULESADDITIONALPROPERTIES_ARCHIVE: Literal["archive"] = (
-    "archive"
-)
+_ROVRCONFIGSETTINGSPREVIEWRULESADDITIONALPROPERTIES_ARCHIVE: Literal['archive'] = "archive"
 r"""The values for the '_RovrConfigSettingsPreviewRulesAdditionalproperties' enum"""
-_ROVRCONFIGSETTINGSPREVIEWRULESADDITIONALPROPERTIES_FOLDER: Literal["folder"] = "folder"
+_ROVRCONFIGSETTINGSPREVIEWRULESADDITIONALPROPERTIES_FOLDER: Literal['folder'] = "folder"
 r"""The values for the '_RovrConfigSettingsPreviewRulesAdditionalproperties' enum"""
-_ROVRCONFIGSETTINGSPREVIEWRULESADDITIONALPROPERTIES_REMIME: Literal["remime"] = "remime"
+_ROVRCONFIGSETTINGSPREVIEWRULESADDITIONALPROPERTIES_REMIME: Literal['remime'] = "remime"
 r"""The values for the '_RovrConfigSettingsPreviewRulesAdditionalproperties' enum"""
-_ROVRCONFIGSETTINGSPREVIEWRULESADDITIONALPROPERTIES_RESVG: Literal["resvg"] = "resvg"
+_ROVRCONFIGSETTINGSPREVIEWRULESADDITIONALPROPERTIES_RESVG: Literal['resvg'] = "resvg"
 r"""The values for the '_RovrConfigSettingsPreviewRulesAdditionalproperties' enum"""
-_ROVRCONFIGSETTINGSPREVIEWRULESADDITIONALPROPERTIES_FONT: Literal["font"] = "font"
+_ROVRCONFIGSETTINGSPREVIEWRULESADDITIONALPROPERTIES_FONT: Literal['font'] = "font"
 r"""The values for the '_RovrConfigSettingsPreviewRulesAdditionalproperties' enum"""
+
 
 
 # | oneOf:
@@ -1577,36 +1594,28 @@ r"""The values for the '_RovrConfigSettingsPreviewRulesAdditionalproperties' enu
 # |   - required:
 # |     - label
 # |     - options
-_RovrConfigSettingsRightClickItem = TypedDict(
-    "_RovrConfigSettingsRightClickItem",
-    {
-        # | Label to show in the context menu for this item
-        "label": str,
-        # | Aggregation type: oneOf
-        "action": "_RightClickAction",
-        "if": "_RightClickIf",
-        # | Submenu items (only supported at the top level)
-        "options": list["_RovrConfigSettingsRightClickItemOptionsItem"],
-    },
-    total=False,
-)
+_RovrConfigSettingsRightClickItem = TypedDict('_RovrConfigSettingsRightClickItem', {
+    # | Label to show in the context menu for this item
+    'label': str,
+    # | Aggregation type: oneOf
+    'action': "_RightClickAction",
+    'if': "_RightClickIf",
+    # | Submenu items (only supported at the top level)
+    'options': list["_RovrConfigSettingsRightClickItemOptionsItem"],
+}, total=False)
 
 
-_RovrConfigSettingsRightClickItemOptionsItem = TypedDict(
-    "_RovrConfigSettingsRightClickItemOptionsItem",
-    {
-        # | Label to show in the context menu for this submenu item
-        # |
-        # | Required property
-        "label": Required[str],
-        # | Aggregation type: oneOf
-        # |
-        # | Required property
-        "action": Required["_RightClickAction"],
-        "if": "_RightClickIf",
-    },
-    total=False,
-)
+_RovrConfigSettingsRightClickItemOptionsItem = TypedDict('_RovrConfigSettingsRightClickItemOptionsItem', {
+    # | Label to show in the context menu for this submenu item
+    # | 
+    # | Required property
+    'label': Required[str],
+    # | Aggregation type: oneOf
+    # | 
+    # | Required property
+    'action': Required["_RightClickAction"],
+    'if': "_RightClickIf",
+}, total=False)
 
 
 class _RovrConfigTheme(TypedDict, total=False):
@@ -1632,159 +1641,109 @@ class _RovrConfigTheme(TypedDict, total=False):
     """
 
 
-_RovrConfigThemePreview = (
-    Literal["abap"]
-    | Literal["algol"]
-    | Literal["algol_nu"]
-    | Literal["arduino"]
-    | Literal["autumn"]
-    | Literal["bw"]
-    | Literal["borland"]
-    | Literal["coffee"]
-    | Literal["colorful"]
-    | Literal["default"]
-    | Literal["dracula"]
-    | Literal["emacs"]
-    | Literal["friendly_grayscale"]
-    | Literal["friendly"]
-    | Literal["fruity"]
-    | Literal["github-dark"]
-    | Literal["gruvbox-dark"]
-    | Literal["gruvbox-light"]
-    | Literal["igor"]
-    | Literal["inkpot"]
-    | Literal["lightbulb"]
-    | Literal["lilypond"]
-    | Literal["lovelace"]
-    | Literal["manni"]
-    | Literal["material"]
-    | Literal["monokai"]
-    | Literal["murphy"]
-    | Literal["native"]
-    | Literal["nord-darker"]
-    | Literal["nord"]
-    | Literal["one-dark"]
-    | Literal["paraiso-dark"]
-    | Literal["paraiso-light"]
-    | Literal["pastie"]
-    | Literal["perldoc"]
-    | Literal["rainbow_dash"]
-    | Literal["rrt"]
-    | Literal["sas"]
-    | Literal["solarized-dark"]
-    | Literal["solarized-light"]
-    | Literal["staroffice"]
-    | Literal["stata-dark"]
-    | Literal["stata-light"]
-    | Literal["tango"]
-    | Literal["trac"]
-    | Literal["vim"]
-    | Literal["vs"]
-    | Literal["xcode"]
-    | Literal["zenburn"]
-)
+
+_RovrConfigThemePreview = Literal['abap'] | Literal['algol'] | Literal['algol_nu'] | Literal['arduino'] | Literal['autumn'] | Literal['bw'] | Literal['borland'] | Literal['coffee'] | Literal['colorful'] | Literal['default'] | Literal['dracula'] | Literal['emacs'] | Literal['friendly_grayscale'] | Literal['friendly'] | Literal['fruity'] | Literal['github-dark'] | Literal['gruvbox-dark'] | Literal['gruvbox-light'] | Literal['igor'] | Literal['inkpot'] | Literal['lightbulb'] | Literal['lilypond'] | Literal['lovelace'] | Literal['manni'] | Literal['material'] | Literal['monokai'] | Literal['murphy'] | Literal['native'] | Literal['nord-darker'] | Literal['nord'] | Literal['one-dark'] | Literal['paraiso-dark'] | Literal['paraiso-light'] | Literal['pastie'] | Literal['perldoc'] | Literal['rainbow_dash'] | Literal['rrt'] | Literal['sas'] | Literal['solarized-dark'] | Literal['solarized-light'] | Literal['staroffice'] | Literal['stata-dark'] | Literal['stata-light'] | Literal['tango'] | Literal['trac'] | Literal['vim'] | Literal['vs'] | Literal['xcode'] | Literal['zenburn']
 r"""
 The theme to use when previewing files in the preview sidebar.
 
 default: nord
 """
-_ROVRCONFIGTHEMEPREVIEW_ABAP: Literal["abap"] = "abap"
+_ROVRCONFIGTHEMEPREVIEW_ABAP: Literal['abap'] = "abap"
 r"""The values for the 'The theme to use when previewing files in the preview sidebar' enum"""
-_ROVRCONFIGTHEMEPREVIEW_ALGOL: Literal["algol"] = "algol"
+_ROVRCONFIGTHEMEPREVIEW_ALGOL: Literal['algol'] = "algol"
 r"""The values for the 'The theme to use when previewing files in the preview sidebar' enum"""
-_ROVRCONFIGTHEMEPREVIEW_ALGOL_NU: Literal["algol_nu"] = "algol_nu"
+_ROVRCONFIGTHEMEPREVIEW_ALGOL_NU: Literal['algol_nu'] = "algol_nu"
 r"""The values for the 'The theme to use when previewing files in the preview sidebar' enum"""
-_ROVRCONFIGTHEMEPREVIEW_ARDUINO: Literal["arduino"] = "arduino"
+_ROVRCONFIGTHEMEPREVIEW_ARDUINO: Literal['arduino'] = "arduino"
 r"""The values for the 'The theme to use when previewing files in the preview sidebar' enum"""
-_ROVRCONFIGTHEMEPREVIEW_AUTUMN: Literal["autumn"] = "autumn"
+_ROVRCONFIGTHEMEPREVIEW_AUTUMN: Literal['autumn'] = "autumn"
 r"""The values for the 'The theme to use when previewing files in the preview sidebar' enum"""
-_ROVRCONFIGTHEMEPREVIEW_BW: Literal["bw"] = "bw"
+_ROVRCONFIGTHEMEPREVIEW_BW: Literal['bw'] = "bw"
 r"""The values for the 'The theme to use when previewing files in the preview sidebar' enum"""
-_ROVRCONFIGTHEMEPREVIEW_BORLAND: Literal["borland"] = "borland"
+_ROVRCONFIGTHEMEPREVIEW_BORLAND: Literal['borland'] = "borland"
 r"""The values for the 'The theme to use when previewing files in the preview sidebar' enum"""
-_ROVRCONFIGTHEMEPREVIEW_COFFEE: Literal["coffee"] = "coffee"
+_ROVRCONFIGTHEMEPREVIEW_COFFEE: Literal['coffee'] = "coffee"
 r"""The values for the 'The theme to use when previewing files in the preview sidebar' enum"""
-_ROVRCONFIGTHEMEPREVIEW_COLORFUL: Literal["colorful"] = "colorful"
+_ROVRCONFIGTHEMEPREVIEW_COLORFUL: Literal['colorful'] = "colorful"
 r"""The values for the 'The theme to use when previewing files in the preview sidebar' enum"""
-_ROVRCONFIGTHEMEPREVIEW_DEFAULT: Literal["default"] = "default"
+_ROVRCONFIGTHEMEPREVIEW_DEFAULT: Literal['default'] = "default"
 r"""The values for the 'The theme to use when previewing files in the preview sidebar' enum"""
-_ROVRCONFIGTHEMEPREVIEW_DRACULA: Literal["dracula"] = "dracula"
+_ROVRCONFIGTHEMEPREVIEW_DRACULA: Literal['dracula'] = "dracula"
 r"""The values for the 'The theme to use when previewing files in the preview sidebar' enum"""
-_ROVRCONFIGTHEMEPREVIEW_EMACS: Literal["emacs"] = "emacs"
+_ROVRCONFIGTHEMEPREVIEW_EMACS: Literal['emacs'] = "emacs"
 r"""The values for the 'The theme to use when previewing files in the preview sidebar' enum"""
-_ROVRCONFIGTHEMEPREVIEW_FRIENDLY_GRAYSCALE: Literal["friendly_grayscale"] = (
-    "friendly_grayscale"
-)
+_ROVRCONFIGTHEMEPREVIEW_FRIENDLY_GRAYSCALE: Literal['friendly_grayscale'] = "friendly_grayscale"
 r"""The values for the 'The theme to use when previewing files in the preview sidebar' enum"""
-_ROVRCONFIGTHEMEPREVIEW_FRIENDLY: Literal["friendly"] = "friendly"
+_ROVRCONFIGTHEMEPREVIEW_FRIENDLY: Literal['friendly'] = "friendly"
 r"""The values for the 'The theme to use when previewing files in the preview sidebar' enum"""
-_ROVRCONFIGTHEMEPREVIEW_FRUITY: Literal["fruity"] = "fruity"
+_ROVRCONFIGTHEMEPREVIEW_FRUITY: Literal['fruity'] = "fruity"
 r"""The values for the 'The theme to use when previewing files in the preview sidebar' enum"""
-_ROVRCONFIGTHEMEPREVIEW_GITHUB_DARK: Literal["github-dark"] = "github-dark"
+_ROVRCONFIGTHEMEPREVIEW_GITHUB_DARK: Literal['github-dark'] = "github-dark"
 r"""The values for the 'The theme to use when previewing files in the preview sidebar' enum"""
-_ROVRCONFIGTHEMEPREVIEW_GRUVBOX_DARK: Literal["gruvbox-dark"] = "gruvbox-dark"
+_ROVRCONFIGTHEMEPREVIEW_GRUVBOX_DARK: Literal['gruvbox-dark'] = "gruvbox-dark"
 r"""The values for the 'The theme to use when previewing files in the preview sidebar' enum"""
-_ROVRCONFIGTHEMEPREVIEW_GRUVBOX_LIGHT: Literal["gruvbox-light"] = "gruvbox-light"
+_ROVRCONFIGTHEMEPREVIEW_GRUVBOX_LIGHT: Literal['gruvbox-light'] = "gruvbox-light"
 r"""The values for the 'The theme to use when previewing files in the preview sidebar' enum"""
-_ROVRCONFIGTHEMEPREVIEW_IGOR: Literal["igor"] = "igor"
+_ROVRCONFIGTHEMEPREVIEW_IGOR: Literal['igor'] = "igor"
 r"""The values for the 'The theme to use when previewing files in the preview sidebar' enum"""
-_ROVRCONFIGTHEMEPREVIEW_INKPOT: Literal["inkpot"] = "inkpot"
+_ROVRCONFIGTHEMEPREVIEW_INKPOT: Literal['inkpot'] = "inkpot"
 r"""The values for the 'The theme to use when previewing files in the preview sidebar' enum"""
-_ROVRCONFIGTHEMEPREVIEW_LIGHTBULB: Literal["lightbulb"] = "lightbulb"
+_ROVRCONFIGTHEMEPREVIEW_LIGHTBULB: Literal['lightbulb'] = "lightbulb"
 r"""The values for the 'The theme to use when previewing files in the preview sidebar' enum"""
-_ROVRCONFIGTHEMEPREVIEW_LILYPOND: Literal["lilypond"] = "lilypond"
+_ROVRCONFIGTHEMEPREVIEW_LILYPOND: Literal['lilypond'] = "lilypond"
 r"""The values for the 'The theme to use when previewing files in the preview sidebar' enum"""
-_ROVRCONFIGTHEMEPREVIEW_LOVELACE: Literal["lovelace"] = "lovelace"
+_ROVRCONFIGTHEMEPREVIEW_LOVELACE: Literal['lovelace'] = "lovelace"
 r"""The values for the 'The theme to use when previewing files in the preview sidebar' enum"""
-_ROVRCONFIGTHEMEPREVIEW_MANNI: Literal["manni"] = "manni"
+_ROVRCONFIGTHEMEPREVIEW_MANNI: Literal['manni'] = "manni"
 r"""The values for the 'The theme to use when previewing files in the preview sidebar' enum"""
-_ROVRCONFIGTHEMEPREVIEW_MATERIAL: Literal["material"] = "material"
+_ROVRCONFIGTHEMEPREVIEW_MATERIAL: Literal['material'] = "material"
 r"""The values for the 'The theme to use when previewing files in the preview sidebar' enum"""
-_ROVRCONFIGTHEMEPREVIEW_MONOKAI: Literal["monokai"] = "monokai"
+_ROVRCONFIGTHEMEPREVIEW_MONOKAI: Literal['monokai'] = "monokai"
 r"""The values for the 'The theme to use when previewing files in the preview sidebar' enum"""
-_ROVRCONFIGTHEMEPREVIEW_MURPHY: Literal["murphy"] = "murphy"
+_ROVRCONFIGTHEMEPREVIEW_MURPHY: Literal['murphy'] = "murphy"
 r"""The values for the 'The theme to use when previewing files in the preview sidebar' enum"""
-_ROVRCONFIGTHEMEPREVIEW_NATIVE: Literal["native"] = "native"
+_ROVRCONFIGTHEMEPREVIEW_NATIVE: Literal['native'] = "native"
 r"""The values for the 'The theme to use when previewing files in the preview sidebar' enum"""
-_ROVRCONFIGTHEMEPREVIEW_NORD_DARKER: Literal["nord-darker"] = "nord-darker"
+_ROVRCONFIGTHEMEPREVIEW_NORD_DARKER: Literal['nord-darker'] = "nord-darker"
 r"""The values for the 'The theme to use when previewing files in the preview sidebar' enum"""
-_ROVRCONFIGTHEMEPREVIEW_NORD: Literal["nord"] = "nord"
+_ROVRCONFIGTHEMEPREVIEW_NORD: Literal['nord'] = "nord"
 r"""The values for the 'The theme to use when previewing files in the preview sidebar' enum"""
-_ROVRCONFIGTHEMEPREVIEW_ONE_DARK: Literal["one-dark"] = "one-dark"
+_ROVRCONFIGTHEMEPREVIEW_ONE_DARK: Literal['one-dark'] = "one-dark"
 r"""The values for the 'The theme to use when previewing files in the preview sidebar' enum"""
-_ROVRCONFIGTHEMEPREVIEW_PARAISO_DARK: Literal["paraiso-dark"] = "paraiso-dark"
+_ROVRCONFIGTHEMEPREVIEW_PARAISO_DARK: Literal['paraiso-dark'] = "paraiso-dark"
 r"""The values for the 'The theme to use when previewing files in the preview sidebar' enum"""
-_ROVRCONFIGTHEMEPREVIEW_PARAISO_LIGHT: Literal["paraiso-light"] = "paraiso-light"
+_ROVRCONFIGTHEMEPREVIEW_PARAISO_LIGHT: Literal['paraiso-light'] = "paraiso-light"
 r"""The values for the 'The theme to use when previewing files in the preview sidebar' enum"""
-_ROVRCONFIGTHEMEPREVIEW_PASTIE: Literal["pastie"] = "pastie"
+_ROVRCONFIGTHEMEPREVIEW_PASTIE: Literal['pastie'] = "pastie"
 r"""The values for the 'The theme to use when previewing files in the preview sidebar' enum"""
-_ROVRCONFIGTHEMEPREVIEW_PERLDOC: Literal["perldoc"] = "perldoc"
+_ROVRCONFIGTHEMEPREVIEW_PERLDOC: Literal['perldoc'] = "perldoc"
 r"""The values for the 'The theme to use when previewing files in the preview sidebar' enum"""
-_ROVRCONFIGTHEMEPREVIEW_RAINBOW_DASH: Literal["rainbow_dash"] = "rainbow_dash"
+_ROVRCONFIGTHEMEPREVIEW_RAINBOW_DASH: Literal['rainbow_dash'] = "rainbow_dash"
 r"""The values for the 'The theme to use when previewing files in the preview sidebar' enum"""
-_ROVRCONFIGTHEMEPREVIEW_RRT: Literal["rrt"] = "rrt"
+_ROVRCONFIGTHEMEPREVIEW_RRT: Literal['rrt'] = "rrt"
 r"""The values for the 'The theme to use when previewing files in the preview sidebar' enum"""
-_ROVRCONFIGTHEMEPREVIEW_SAS: Literal["sas"] = "sas"
+_ROVRCONFIGTHEMEPREVIEW_SAS: Literal['sas'] = "sas"
 r"""The values for the 'The theme to use when previewing files in the preview sidebar' enum"""
-_ROVRCONFIGTHEMEPREVIEW_SOLARIZED_DARK: Literal["solarized-dark"] = "solarized-dark"
+_ROVRCONFIGTHEMEPREVIEW_SOLARIZED_DARK: Literal['solarized-dark'] = "solarized-dark"
 r"""The values for the 'The theme to use when previewing files in the preview sidebar' enum"""
-_ROVRCONFIGTHEMEPREVIEW_SOLARIZED_LIGHT: Literal["solarized-light"] = "solarized-light"
+_ROVRCONFIGTHEMEPREVIEW_SOLARIZED_LIGHT: Literal['solarized-light'] = "solarized-light"
 r"""The values for the 'The theme to use when previewing files in the preview sidebar' enum"""
-_ROVRCONFIGTHEMEPREVIEW_STAROFFICE: Literal["staroffice"] = "staroffice"
+_ROVRCONFIGTHEMEPREVIEW_STAROFFICE: Literal['staroffice'] = "staroffice"
 r"""The values for the 'The theme to use when previewing files in the preview sidebar' enum"""
-_ROVRCONFIGTHEMEPREVIEW_STATA_DARK: Literal["stata-dark"] = "stata-dark"
+_ROVRCONFIGTHEMEPREVIEW_STATA_DARK: Literal['stata-dark'] = "stata-dark"
 r"""The values for the 'The theme to use when previewing files in the preview sidebar' enum"""
-_ROVRCONFIGTHEMEPREVIEW_STATA_LIGHT: Literal["stata-light"] = "stata-light"
+_ROVRCONFIGTHEMEPREVIEW_STATA_LIGHT: Literal['stata-light'] = "stata-light"
 r"""The values for the 'The theme to use when previewing files in the preview sidebar' enum"""
-_ROVRCONFIGTHEMEPREVIEW_TANGO: Literal["tango"] = "tango"
+_ROVRCONFIGTHEMEPREVIEW_TANGO: Literal['tango'] = "tango"
 r"""The values for the 'The theme to use when previewing files in the preview sidebar' enum"""
-_ROVRCONFIGTHEMEPREVIEW_TRAC: Literal["trac"] = "trac"
+_ROVRCONFIGTHEMEPREVIEW_TRAC: Literal['trac'] = "trac"
 r"""The values for the 'The theme to use when previewing files in the preview sidebar' enum"""
-_ROVRCONFIGTHEMEPREVIEW_VIM: Literal["vim"] = "vim"
+_ROVRCONFIGTHEMEPREVIEW_VIM: Literal['vim'] = "vim"
 r"""The values for the 'The theme to use when previewing files in the preview sidebar' enum"""
-_ROVRCONFIGTHEMEPREVIEW_VS: Literal["vs"] = "vs"
+_ROVRCONFIGTHEMEPREVIEW_VS: Literal['vs'] = "vs"
 r"""The values for the 'The theme to use when previewing files in the preview sidebar' enum"""
-_ROVRCONFIGTHEMEPREVIEW_XCODE: Literal["xcode"] = "xcode"
+_ROVRCONFIGTHEMEPREVIEW_XCODE: Literal['xcode'] = "xcode"
 r"""The values for the 'The theme to use when previewing files in the preview sidebar' enum"""
-_ROVRCONFIGTHEMEPREVIEW_ZENBURN: Literal["zenburn"] = "zenburn"
+_ROVRCONFIGTHEMEPREVIEW_ZENBURN: Literal['zenburn'] = "zenburn"
 r"""The values for the 'The theme to use when previewing files in the preview sidebar' enum"""
+

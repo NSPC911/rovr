@@ -6,10 +6,10 @@ from textual.containers import HorizontalGroup
 from textual.content import Content
 from textual.screen import ModalScreen
 from textual.validation import Length
+from textual.widgets import Input, Label
 
 from rovr.functions import icons as icon_utils
 from rovr.functions.utils import dismiss
-from rovr.widgets import Input, Label
 
 
 class ModalInput(ModalScreen, inherit_bindings=False):

@@ -8,6 +8,7 @@ from textual.binding import BindingType
 from textual.css.query import NoMatches
 from textual.errors import NoWidget
 from textual.reactive import reactive
+from textual.widgets import OptionList
 
 from rovr.classes.config import (
     _RightClickIf,
@@ -19,7 +20,6 @@ from rovr.classes.type_aliases import DirEntryType
 from rovr.components import PopupOptionList
 from rovr.functions.utils import check_key, expand_command, is_archive
 from rovr.variables.constants import bindings, config, os_type
-from rovr.widgets import OptionList
 
 
 def ifed(app: App, conditions: _RightClickIf) -> bool:

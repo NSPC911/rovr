@@ -22,6 +22,7 @@ from textual.dom import DOMNode
 from textual.geometry import Region
 from textual.highlight import guess_language
 from textual.message import Message
+from textual.widgets import Static
 from textual.widgets.selection_list import Selection
 
 from rovr.classes.textual_options import (
@@ -41,7 +42,6 @@ from rovr.functions.preview_utils import (
 )
 from rovr.functions.utils import multiprocessing_process_error_checker, should_cancel
 from rovr.variables.constants import PreviewContainerTitles, config, file_one
-from rovr.widgets import Static
 
 titles = PreviewContainerTitles()
 

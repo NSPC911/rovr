@@ -30,6 +30,7 @@ from textual.dom import DOMNode
 from textual.messages import ExitApp
 from textual.screen import Screen
 from textual.types import NoActiveAppError
+from textual.widgets import Input, Label
 from textual.widgets.selection_list import Selection
 from textual.worker import Worker, WorkerFailed
 
@@ -77,7 +78,6 @@ from rovr.screens.typed import ShellExecReturnType
 from rovr.state_manager import StateManager
 from rovr.variables.constants import MaxPossible, config, log_name, os_type
 from rovr.variables.maps import RovrVars
-from rovr.widgets import Input, Label
 
 if constants.SCREENSHOT_LOCATION:
     constants.SCREENSHOT_LOCATION = normalise(getcwd(), constants.SCREENSHOT_LOCATION)

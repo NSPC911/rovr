@@ -3,10 +3,10 @@ from textual.app import ComposeResult
 from textual.containers import Grid, HorizontalGroup, VerticalGroup
 from textual.message import Message
 from textual.screen import ModalScreen
+from textual.widgets import Button, Label, Switch
 
 from rovr.functions.utils import check_key, dismiss, get_shortest_bind
 from rovr.variables.constants import config
-from rovr.widgets import Button, Label, Switch
 
 yes_bind = get_shortest_bind(config["keybinds"]["yes_or_no"]["yes"])
 no_bind = get_shortest_bind(config["keybinds"]["yes_or_no"]["no"])

@@ -3,10 +3,10 @@ from textual.app import ComposeResult
 from textual.containers import Container, Grid, HorizontalGroup, VerticalGroup
 from textual.message import Message
 from textual.screen import ModalScreen
+from textual.widgets import Button, Label, Switch
 
 from rovr.functions.utils import check_key, dismiss, get_shortest_bind
 from rovr.variables.constants import config
-from rovr.widgets import Button, Label, Switch
 
 overwrite_bind = get_shortest_bind(config["keybinds"]["filename_conflict"]["overwrite"])
 rename_bind = get_shortest_bind(config["keybinds"]["filename_conflict"]["rename"])

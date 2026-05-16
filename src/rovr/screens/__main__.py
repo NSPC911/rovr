@@ -10,6 +10,7 @@ from textual.app import App, ComposeResult, SystemCommand
 from textual.css.errors import StylesheetError
 from textual.css.stylesheet import StylesheetParseError
 from textual.screen import Screen
+from textual.widgets import Button
 
 from rovr.screens import (
     ArchiveCreationScreen,
@@ -20,7 +21,6 @@ from rovr.screens import (
     PasteScreen,
     YesOrNo,
 )
-from rovr.widgets import Button
 
 console = Console()
 

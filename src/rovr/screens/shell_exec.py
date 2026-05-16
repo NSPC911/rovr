@@ -2,9 +2,9 @@ from typing import Literal
 
 from textual import events, work
 from textual.binding import Binding
+from textual.widgets import Input
 
 from rovr.functions.utils import dismiss
-from rovr.widgets import Input
 
 from .input import ModalInput
 from .typed import ShellExecReturnType

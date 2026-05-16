@@ -28,9 +28,7 @@ from textual.containers import (
 from textual.css.query import NoMatches
 from textual.screen import ModalScreen
 from textual.theme import BUILTIN_THEMES
-
-from rovr.variables.maps import RovrVars
-from rovr.widgets import (
+from textual.widgets import (
     Button,
     Input,
     RadioButton,
@@ -39,6 +37,8 @@ from rovr.widgets import (
     Static,
     Switch,
 )
+
+from rovr.variables.maps import RovrVars
 
 if globals().get("__compiled__"):
     resource = resources.files("_rovr")

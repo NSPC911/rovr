@@ -126,6 +126,7 @@ async def test_tab_search(tmp_path: Path) -> None:
 
         # this also helps to find issues with the watcher, don't ignore
         # errors related to this please!
+        await iter_until(pilot, lambda: bool(app.file_list.input.value == "file"))
         assert app.file_list.input.value == "file"
         assert app.tabWidget.active_tab.session.search == "file"
         assert app.file_list.highlighted_option.dir_entry.name == name

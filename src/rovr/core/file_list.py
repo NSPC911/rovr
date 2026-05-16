@@ -7,6 +7,7 @@ from textual.binding import BindingType
 from textual.content import ContentText
 from textual.css.query import NoMatches
 from textual.errors import NoWidget
+from textual.widgets import Button, Input, OptionList, SelectionList
 from textual.widgets.option_list import OptionDoesNotExist
 from textual.widgets.selection_list import Selection, SelectionType
 
@@ -27,7 +28,6 @@ from rovr.variables.constants import (
     buttons_that_depend_on_path,
     config,
 )
-from rovr.widgets import Button, Input, OptionList, SelectionList
 
 from .file_list_right_click_menu import FileListRightClickMenu
 

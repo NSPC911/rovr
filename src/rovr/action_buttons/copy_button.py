@@ -3,6 +3,7 @@ from pathlib import Path
 
 from textual import events, work
 from textual.css.query import NoMatches
+from textual.widgets import Button, OptionList
 from textual.widgets.option_list import Option
 
 from rovr.classes.textual_options import FileListSelectionWidget
@@ -16,7 +17,6 @@ from rovr.functions.system_clipboard import (
 )
 from rovr.functions.utils import check_key, get_shortest_bind
 from rovr.variables.constants import config
-from rovr.widgets import Button, OptionList
 
 rovr_bind = get_shortest_bind(config["keybinds"]["extra_copy"]["copy_to_rovr"])
 path_bind = get_shortest_bind(config["keybinds"]["extra_copy"]["copy_highlighted"])

@@ -4,6 +4,7 @@ from typing import ClassVar, cast
 
 from textual import events, work
 from textual.binding import BindingType
+from textual.widgets import Input, OptionList
 from textual.widgets.option_list import Option
 
 from rovr.classes.exceptions import FolderNotFileError
@@ -14,7 +15,6 @@ from rovr.functions import path as path_utils
 from rovr.functions import pins as pin_utils
 from rovr.functions.utils import multiprocessing_process_error_checker
 from rovr.variables.constants import bindings, config, os_type
-from rovr.widgets import Input, OptionList
 
 
 class PinnedSidebar(OptionList, inherit_bindings=False):

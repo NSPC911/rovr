@@ -985,7 +985,6 @@ dependencies = [
     { name = "textual" },
     { name = "textual-autocomplete" },
     { name = "textual-image", extra = ["textual"] },
-    { name = "textual-speedups" },
     { name = "tomli" },
 ]
 
@@ -1009,6 +1008,9 @@ docscripts = [
     { name = "jsonschema-gentypes" },
     { name = "poethepoet" },
     { name = "ruff" },
+]
+speedup = [
+    { name = "textual-speedups" },
 ]
 test = [
     { name = "pytest" },
@@ -1034,7 +1036,6 @@ requires-dist = [
     { name = "textual", specifier = "~=8.0" },
     { name = "textual-autocomplete", specifier = ">=4.0.6" },
     { name = "textual-image", extras = ["textual"], specifier = "<0.10.0" },
-    { name = "textual-speedups", specifier = ">=0.2.1" },
     { name = "tomli", specifier = ">=2.4.0" },
 ]
 
@@ -1059,6 +1060,7 @@ docscripts = [
     { name = "poethepoet", specifier = ">=0.41.0" },
     { name = "ruff", specifier = ">=0.15.0" },
 ]
+speedup = [{ name = "textual-speedups", specifier = ">=0.2.1" }]
 test = [
     { name = "pytest", specifier = ">=9.0.2" },
     { name = "pytest-asyncio", specifier = ">=1.3.0" },

@@ -37,7 +37,6 @@ dependencies = [
   "textual~=8.0",
   "textual-autocomplete>=4.0.6",
   "textual-image[textual]<0.10.0",
-  "textual-speedups>=0.2.1",
   "tomli>=2.4.0",
 ]
 
@@ -69,6 +68,9 @@ docscripts = [
   "jsonschema-gentypes>=2.13.0",
   "poethepoet>=0.41.0",
   "ruff>=0.15.0",
+]
+speedup = [
+    "textual-speedups>=0.2.1",
 ]
 test = [
   "pytest>=9.0.2",
@@ -170,7 +172,7 @@ args = [
 [tool.poe.tasks.build]
 help = "Build rovr into an executable using Nuitka"
 sequence = [
-  { cmd = "uv sync --group build --no-dev" },  # no dev because for some reason, stuff gets included
+  { cmd = "uv sync --group build --group speedup --no-dev" },  # no dev because for some reason, stuff gets included
   "_warn_dump",
   "_hash_dump",
   # --python-flag=-m

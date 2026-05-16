@@ -5,9 +5,11 @@ log.txt
 *.egg-info/
 dist
 /src/rovr/COMMIT_HASH
+/src/rovr/DO_NOT_EDIT_THESE_FILES
 report.xml
 rovr.dist
 rovr.build
 rovr.onefile-build
 rovr.exe
 rovr.bin
+rovr

@@ -40,6 +40,11 @@ from rovr.widgets import (
     Switch,
 )
 
+if globals().get("__compiled__"):
+    resource = resources.files("_rovr")
+else:
+    resource = resources.files("rovr")
+
 prot_to_timg: dict[str, Callable] = {
     "auto": timg.Image,
     "tgp": timg.TGPImage,
@@ -160,7 +165,7 @@ class FirstLaunchApp(App, inherit_bindings=False):
             priority=True,
         )
     ]
-    CSS_PATH = ["first_launch.tcss"]
+    CSS_PATH = [resource / "first_launch.tcss"]
 
     HORIZONTAL_BREAKPOINTS = [(0, "-full"), (55, "-seventy-five"), (110, "-fifty")]
 
@@ -378,7 +383,9 @@ class FirstLaunchApp(App, inherit_bindings=False):
     async def on_finish_setup_pressed(self, event: Button.Pressed) -> None:
         # get appropriate keybind
         with open(
-            resources.files("rovr.config.keybinds")
+            resource
+            / "config"
+            / "keybinds"
             / f"{self.query_one('#keybinds', RadioSet).pressed_button.id}.toml",
             "r",
         ) as f:

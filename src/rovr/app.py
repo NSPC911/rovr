@@ -4,6 +4,7 @@ import asyncio
 import multiprocessing
 import threading
 from contextlib import suppress
+from importlib import resources
 from io import TextIOWrapper
 from os import chdir, getcwd, path
 from time import perf_counter
@@ -96,7 +97,14 @@ class Application(App, inherit_bindings=False):
         for key in config["keybinds"]["quit_app"]
     ]
     # higher index = higher priority
-    CSS_PATH = ["style.tcss"] + (
+    CSS_PATH = [
+        (
+            resources.files("_rovr")
+            if globals().get("__compiled__")
+            else resources.files("rovr")
+        )
+        / "style.tcss"
+    ] + (
         [path.join(RovrVars.ROVRCONFIG, "style.tcss")]
         if path.exists(path.join(RovrVars.ROVRCONFIG, "style.tcss"))
         else []

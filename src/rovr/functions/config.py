@@ -41,9 +41,15 @@ def editor() -> str:
     return ""
 
 
+if globals().get("__compiled__"):
+    traverser = resources.files("_rovr.config")
+else:
+    traverser = resources.files("rovr.config")
+
+
 @cache
 def get_schema_validator() -> tuple[dict, Callable[[dict], None]]:
-    schema_file = resources.files("rovr.config").joinpath("schema.json")
+    schema_file = traverser.joinpath("schema.json")
     mtime = path.getmtime(schema_file.as_posix())
     schema_py = path.join(RovrVars.ROVRTEMP, "schema.py")
     if path.isfile(schema_py):
@@ -464,9 +470,7 @@ def schema_dump(
 
         pprint(f"[bright_red]╰─{'─' * rjust}─❯[/] {error_msg}")
     # check path for custom message from migration.json
-    migration_docs = json.loads(
-        resources.files("rovr.config").joinpath("migration.json").read_text("utf-8")
-    )
+    migration_docs = json.loads(traverser.joinpath("migration.json").read_text("utf-8"))
 
     for item in migration_docs:
         if any(fnmatch.fnmatch(path_str, path) for path in item["keys"]):
@@ -538,7 +542,7 @@ def load_config() -> tuple[dict, RovrConfig]:
     template_config: dict = {}
     try:
         template_config = tomli.loads(
-            resources.files("rovr.config").joinpath("config.toml").read_text("utf-8")
+            traverser.joinpath("config.toml").read_text("utf-8")
         )
     except tomli.TOMLDecodeError as exc:
         toml_dump(path.join(path.dirname(__file__), "../config/config.toml"), exc)
@@ -552,7 +556,7 @@ def load_config() -> tuple[dict, RovrConfig]:
         schema_dump(
             path.join(path.dirname(__file__), "../config/config.toml"),
             exception,
-            resources.files("rovr.config").joinpath("config.toml").read_text("utf-8"),
+            traverser.joinpath("config.toml").read_text("utf-8"),
             schema_dict,
         )
         pprint(

@@ -5,7 +5,7 @@
 # nuitka-project: --enable-plugin=multiprocessing
 # nuitka-project: --enable-plugin=options-nanny
 # nuitka-project: --enable-plugins=no-qt
-# nuitka-project: --include-package-data=rovr
+# nuitka-project: --include-data-dir=src/rovr=_rovr
 # nuitka-project: --nofollow-import-to="tkinter"
 # nuitka-project: --nofollow-import-to=aiohttp
 # nuitka-project: --onefile-cache-mode=cached
@@ -15,7 +15,7 @@
 # nuitka-project: --python-flag=no_site
 # nuitka-project: --python-flag=safe_path
 # nuitka-project: --python-flag=static_hashes
-# nuitka-project: --report=report.xml
+# nuitka-project: --report-diffable
 # nuitka-project: --warn-unusual-code
 
 # nuitka-project-if: {OS} in ("MACOS"):
@@ -24,6 +24,9 @@
 
 # nuitka-project-if: {OS} in ("Windows"):
 #    nuitka-project: --windows-console-mode=force
+#    nuitka-project: --output-filename=rovr.exe
+# nuitka-project-else:
+#    nuitka-project: --output-filename=rovr
 
 import argparse
 import logging
@@ -300,7 +303,10 @@ example_function(10)"""
             try:
                 from importlib import resources
 
-                commit_hash_file = resources.files("rovr") / "COMMIT_HASH"
+                if globals().get("__compiled__"):
+                    commit_hash_file = resources.files("_rovr") / "COMMIT_HASH"
+                else:
+                    commit_hash_file = resources.files("rovr") / "COMMIT_HASH"
                 commit_hash = commit_hash_file.read_text(encoding="utf-8").strip()
                 if commit_hash:
                     return [ver, commit_hash]

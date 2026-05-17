@@ -1,8 +1,10 @@
 import multiprocessing
 import os
+import re
 import shlex
 import subprocess
 from contextlib import suppress
+from functools import lru_cache
 from shutil import which
 from typing import Callable, Literal
 
@@ -267,3 +269,8 @@ async def expand_command(app: App, command: str | list[str]) -> str:
         expanded = _replacer(expanded, '"${selected_files}"', joined)
 
     return expanded
+
+
+@lru_cache(maxsize=512)
+def recache(pattern: str) -> re.Pattern:
+    return re.compile(pattern)

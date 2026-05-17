@@ -994,7 +994,7 @@ class PreviewContainer(Container):
             if path.isdir(file_path):
                 mime_type = preview_utils.MimeResult("basic", "inode/directory")
                 file_type = preview_utils.match_mime_to_preview_type(
-                    self, mime_type.mime_type
+                    mime_type.mime_type
                 )
                 if file_type == "folder":
                     self.update_ui(
@@ -1021,7 +1021,7 @@ class PreviewContainer(Container):
                     return
 
                 file_type = preview_utils.match_mime_to_preview_type(
-                    self, mime_result.mime_type
+                    mime_result.mime_type
                 )
                 if file_type is None:
                     self.log("Could not match MIME type to preview type")
@@ -1050,7 +1050,7 @@ class PreviewContainer(Container):
                         )
                         return
                     file_type = preview_utils.match_mime_to_preview_type(
-                        self, mime_result.mime_type
+                        mime_result.mime_type
                     )
                     if file_type is None:
                         self.log("Could not match MIME type to preview type")

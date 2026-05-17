@@ -1,6 +1,5 @@
 import multiprocessing
 import multiprocessing.connection
-import re
 import stat
 import subprocess
 from concurrent.futures import FIRST_COMPLETED, Future, ProcessPoolExecutor, wait
@@ -11,9 +10,7 @@ from typing import Literal, NamedTuple, TypeAlias
 
 from PIL import Image
 from PIL.Image import Image as PILImage
-from textual.dom import DOMNode
 
-from rovr.classes.type_aliases import PreviewTypes
 from rovr.functions.preview_workers import (
     _depalette,
     resample_bytes_worker,
@@ -21,15 +18,8 @@ from rovr.functions.preview_workers import (
     resample_worker,
     svg_image_worker,
 )
-from rovr.functions.utils import should_cancel
+from rovr.functions.utils import recache, should_cancel
 from rovr.variables.constants import RESAMPLING_METHOD, config, file_one
-
-mime_re_cache: dict[
-    PreviewTypes,
-    list[re.Pattern],
-] = {}
-mime_preview_cache: dict[str, PreviewTypes | None] = {}
-
 
 MAX_IMAGE_SIZE: tuple[int, int] = tuple(config["interface"]["image_viewer"]["max_size"])  # ty: ignore
 MAX_FONT_SIZE: tuple[int, int] = tuple(config["interface"]["font_preview"]["max_size"])  # ty: ignore
@@ -263,42 +253,27 @@ def resample_batch_sync(images: list[PILImage]) -> list[PILImage]:
     ]
 
 
+# surely the user doesn't go through 256 unique mime types right?
+@lru_cache(maxsize=256)
 def match_mime_to_preview_type(
-    widget: DOMNode,
     mime_type: str,
 ) -> (
     Literal["text", "image", "pdf", "archive", "folder", "remime", "resvg", "font"]
     | None
 ):
-    """
-    Match a MIME type against configured rules to determine preview type.
+    """Match a MIME type against configured rules to determine preview type.
 
     Args:
-        widget: The DOMNode widget to log to if needed
         mime_type: The MIME type to match (e.g., "text/plain", "image/png")
 
     Returns:
         str : The preview type ("text", "image", "pdf", "archive", "folder")
         None: None if no rule matches
     """
-    if mime_type in mime_preview_cache:
-        return mime_preview_cache[mime_type]
-
-    global mime_re_cache
-
-    if not mime_re_cache:
-        widget.log("Compiling MIME type regexes for the first time...")
-        for pattern, preview_type in config["settings"]["preview_rules"].items():
-            if preview_type not in mime_re_cache:
-                mime_re_cache[preview_type] = []
-            mime_re_cache[preview_type].append(re.compile(pattern))
-
-    for preview_type, patterns in mime_re_cache.items():
-        for pattern in patterns:
-            if pattern.fullmatch(mime_type):
-                mime_preview_cache[mime_type] = preview_type
-                return preview_type
-    mime_preview_cache[mime_type] = None
+    for pattern, preview_type in config["settings"]["preview_rules"].items():
+        if recache(pattern).fullmatch(mime_type):
+            print("Matched MIME Type")
+            return preview_type
     return None
 
 

@@ -1345,10 +1345,10 @@ Must be one of:
 
 **Description:** Editor to use when opening a file
 
-| Property                         | Type             | Title/Description                                                                                                                                                                                             |
-| -------------------------------- | ---------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| [run](#settings_editor_file_run) | string           | Editor to use when opening a file                                                                                                                                                                             |
-| [app](#settings_editor_file_app) | enum (of string) | How the app should wait for the editor to close:<br />\`block\`: Block rovr until the editor closes.<br />\`thread\`: Don't block rovr at all.<br />\`suspend\`: Suspend (hide) rovr until the editor closes. |
+| Property                         | Type             | Title/Description                                                                                                                                                                                                                                                    |
+| -------------------------------- | ---------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| [run](#settings_editor_file_run) | string           | Editor to use when opening a file                                                                                                                                                                                                                                    |
+| [app](#settings_editor_file_app) | enum (of string) | How the app should wait for the editor to close:<br />\`block\`: Block rovr until the editor closes.<br />\`orphan\`: Open editor orphaned, which means when rovr exits, the editor is still running.<br />\`suspend\`: Suspend (hide) rovr until the editor closes. |
 
 ##### <a name="settings_editor_file_run"></a>2.5.1.1. Property `Rovr Config > settings > editor > file > run`
 
@@ -1366,17 +1366,17 @@ Must be one of:
 | -------------- | ---------------------------------- |
 | **Type**       | `enum (of string)`                 |
 | **Required**   | Yes                                |
-| **Defined in** | #/definitions/block_thread_suspend |
+| **Defined in** | #/definitions/block_orphan_suspend |
 
 **Description:** How the app should wait for the editor to close:
 `block`: Block rovr until the editor closes.
-`thread`: Don't block rovr at all.
+`orphan`: Open editor orphaned, which means when rovr exits, the editor is still running.
 `suspend`: Suspend (hide) rovr until the editor closes.
 
 Must be one of:
 
 - "block"
-- "thread"
+- "orphan"
 - "suspend"
 
 #### <a name="settings_editor_folder"></a>2.5.2. Property `Rovr Config > settings > editor > folder`
@@ -1389,10 +1389,10 @@ Must be one of:
 
 **Description:** Editor to use when opening a folder
 
-| Property                           | Type             | Title/Description                                                                                                                                                                                             |
-| ---------------------------------- | ---------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| [run](#settings_editor_folder_run) | string           | Editor to use when opening a folder                                                                                                                                                                           |
-| [app](#settings_editor_folder_app) | enum (of string) | How the app should wait for the editor to close:<br />\`block\`: Block rovr until the editor closes.<br />\`thread\`: Don't block rovr at all.<br />\`suspend\`: Suspend (hide) rovr until the editor closes. |
+| Property                           | Type             | Title/Description                                                                                                                                                                                                                                                    |
+| ---------------------------------- | ---------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| [run](#settings_editor_folder_run) | string           | Editor to use when opening a folder                                                                                                                                                                                                                                  |
+| [app](#settings_editor_folder_app) | enum (of string) | How the app should wait for the editor to close:<br />\`block\`: Block rovr until the editor closes.<br />\`orphan\`: Open editor orphaned, which means when rovr exits, the editor is still running.<br />\`suspend\`: Suspend (hide) rovr until the editor closes. |
 
 ##### <a name="settings_editor_folder_run"></a>2.5.2.1. Property `Rovr Config > settings > editor > folder > run`
 
@@ -1414,7 +1414,7 @@ Must be one of:
 
 **Description:** How the app should wait for the editor to close:
 `block`: Block rovr until the editor closes.
-`thread`: Don't block rovr at all.
+`orphan`: Open editor orphaned, which means when rovr exits, the editor is still running.
 `suspend`: Suspend (hide) rovr until the editor closes.
 
 #### <a name="settings_editor_bulk_rename"></a>2.5.3. Property `Rovr Config > settings > editor > bulk_rename`

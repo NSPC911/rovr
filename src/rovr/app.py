@@ -3,6 +3,7 @@ from __future__ import annotations
 import asyncio
 import multiprocessing
 import threading
+import sys
 from contextlib import suppress
 from importlib import resources
 from io import TextIOWrapper
@@ -135,7 +136,7 @@ class Application(App, inherit_bindings=False):
     )
     CLICK_CHAIN_TIME_THRESHOLD = config["interface"]["double_click_delay"]
 
-    MULTIPROCESSING_PROCESS_ALLOWED: bool = True
+    MULTIPROCESSING_PROCESS_ALLOWED: bool = getattr(sys, "_is_gil_enabled", lambda: True)()
 
     def __init__(
         self,

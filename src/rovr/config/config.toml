@@ -78,6 +78,7 @@ right_click = [
   { label = "\uf07c Unzip", action = "rovr:unzip" },
   # { label = " Get SHA256", action = 'sho:pwsh -nop -c "(Get-FileHash -Algorithm SHA256 \"${highlighted_file}\").Hash', if = { directory = false }}
 ]
+extend_without_visual = false
 
 [settings.preview_rules]
 "application/(debian.*-package|redhat-package-manager|rpm|android\\.package-archive)" = "archive"

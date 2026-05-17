@@ -70,6 +70,7 @@ class FileList(
         if not self.dummy:
             self.items_in_cwd: set[str] = set()
         self.file_list_pause_check = False
+        self.automatic_select_mode = False
 
     def on_mount(self) -> None:
         if not self.dummy and self.parent:

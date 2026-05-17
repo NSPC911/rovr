@@ -29,6 +29,30 @@ _BLOCKORPHANSUSPEND_SUSPEND: Literal["suspend"] = "suspend"
 r"""The values for the '_BlockOrphanSuspend' enum"""
 
 
+class _OpenerIf(TypedDict, total=False):
+    cwd: list[str]
+    r""" Only use this opener if the current working directory matches one (or more) of the glob patterns in this list (look at https://docs.python.org/3/library/fnmatch.html for more info) """
+
+    os: list["_OpenerIfOsItem"]
+    r""" Only use this opener if the operating system is one of the following (case insensitive) """
+
+    directory: bool
+    r""" Only use this opener if the selected item is a directory (set to true) or a file (set to false) (if unspecified, matches both files and directories) """
+
+
+_OpenerIfOsItem = Union["_OpenerIfOsItemAnyof0", str]
+r""" Aggregation type: anyOf """
+
+
+_OpenerIfOsItemAnyof0 = Literal["Windows"] | Literal["Linux"] | Literal["Darwin"]
+_OPENERIFOSITEMANYOF0_WINDOWS: Literal["Windows"] = "Windows"
+r"""The values for the '_OpenerIfOsItemAnyof0' enum"""
+_OPENERIFOSITEMANYOF0_LINUX: Literal["Linux"] = "Linux"
+r"""The values for the '_OpenerIfOsItemAnyof0' enum"""
+_OPENERIFOSITEMANYOF0_DARWIN: Literal["Darwin"] = "Darwin"
+r"""The values for the '_OpenerIfOsItemAnyof0' enum"""
+
+
 _ROVR_CONFIG_ICONS_FILES_DEFAULT: list[Any] = []
 r""" Default value of the field path 'Rovr Config icons files' """
 
@@ -1427,7 +1451,7 @@ class _RovrConfigSettings(TypedDict, total=False):
       text/.*: text
     """
 
-    openers: dict[str, str]
+    openers: dict[str, "_RovrConfigSettingsOpenersAdditionalproperties"]
     r"""
     Map mime types to shell commands to open them. If `*` is used as key, it will be used as default for everything if it doesn't match anything else.
     If `*` is not used, the os's opener (windows uses cmd /c, macos uses open, linux uses xdg-open) is used
@@ -1516,6 +1540,23 @@ class _RovrConfigSettingsEditorFolder(TypedDict, total=False):
 
     app: Required["_BlockOrphanSuspend"]
     r""" Required property """
+
+
+_RovrConfigSettingsOpenersAdditionalproperties = Union[
+    str, "_RovrConfigSettingsOpenersAdditionalpropertiesOneof1"
+]
+r""" Aggregation type: oneOf """
+
+
+_RovrConfigSettingsOpenersAdditionalpropertiesOneof1 = TypedDict(
+    "_RovrConfigSettingsOpenersAdditionalpropertiesOneof1",
+    {
+        # | Shell command to run when opening a file with this MIME type. Replace ${path} with the file path (no other expansions are supported). If ${path} isn't provided, the file path is appended at the end with --
+        "run": str,
+        "if": "_OpenerIf",
+    },
+    total=False,
+)
 
 
 _RovrConfigSettingsPreviewRulesAdditionalproperties = (

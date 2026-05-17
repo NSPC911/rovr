@@ -34,6 +34,32 @@
         }
       ]
     },
+    "opener_if": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "cwd": {
+          "description": "Only use this opener if the current working directory matches one (or more) of the glob patterns in this list (look at https://docs.python.org/3/library/fnmatch.html for more info)",
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "os": {
+          "description": "Only use this opener if the operating system is one of the following (case insensitive)",
+          "type": "array",
+          "items": {
+            "type": "string",
+            "anyOf": [
+              { "enum": ["Windows", "Linux", "Darwin"] },
+              { "type": "string" }
+            ]
+          }
+        },
+        "directory": {
+          "type": "boolean",
+          "description": "Only use this opener if the selected item is a directory (set to true) or a file (set to false) (if unspecified, matches both files and directories)"
+        }
+      }
+    },
     "right_click_if": {
       "type": "object",
       "additionalProperties": false,
@@ -427,7 +453,24 @@
         "openers": {
           "type": "object",
           "additionalProperties": {
-            "type": "string"
+            "oneOf": [
+              {"type": "string"},
+              {
+                "type": "object",
+                "additionalProperties": false,
+                "properties": {
+                  "run": {
+                    "type": "string",
+                    "description": "Shell command to run when opening a file with this MIME type. Replace ${path} with the file path (no other expansions are supported). If ${path} isn't provided, the file path is appended at the end with --"
+                  },
+                  "if": {
+                    "type": "object",
+                    "description": "Only use this opener if a set criteria matches",
+                    "$ref": "#/definitions/opener_if"
+                  }
+                }
+              }
+            ]
           },
           "description": "Map mime types to shell commands to open them. If `*` is used as key, it will be used as default for everything if it doesn't match anything else.\nIf `*` is not used, the os's opener (windows uses cmd /c, macos uses open, linux uses xdg-open) is used"
         }

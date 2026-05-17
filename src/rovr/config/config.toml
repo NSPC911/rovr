@@ -110,17 +110,15 @@ open_all_in_editor = false
 
 [settings.editor.file]
 run = "$EDITOR"
-block = false
-suspend = true
+app = "suspend"
 
 [settings.editor.folder]
 run = "$EDITOR"
-block = false
-suspend = true
+app = "suspend"
 
 [settings.editor.bulk_rename]
 run = "$EDITOR"
-suspend = true
+app = "suspend"
 
 [metadata]
 fields = [

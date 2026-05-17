@@ -64,6 +64,10 @@
           "description": "Only enable this menu item if the selected item is a directory (set to true) or a file (set to false) (if unspecified, matches both files and directories)"
         }
       }
+    },
+    "block_thread_suspend": {
+      "type": "string",
+      "enum": ["block", "thread", "suspend"]
     }
   },
   "properties": {
@@ -338,18 +342,13 @@
                   "default": "$EDITOR",
                   "description": "Editor to use when opening a file"
                 },
-                "block": {
-                  "type": "boolean",
-                  "default": false,
-                  "description": "Block rovr until the editor closes"
-                },
-                "suspend": {
-                  "type": "boolean",
-                  "default": true,
-                  "description": "Suspend (hide) rovr until the editor closes. Will block regardless."
+                "app": {
+                  "$ref": "#/definitions/block_thread_suspend",
+                  "description": "How the app should wait for the editor to close:\n`block`: Block rovr until the editor closes.\n`thread`: Don't block rovr at all.\n`suspend`: Suspend (hide) rovr until the editor closes."
                 }
               },
-              "description": "Editor to use when opening a file"
+              "description": "Editor to use when opening a file",
+              "required": ["run", "app"]
             },
             "folder": {
               "type": "object",
@@ -360,18 +359,13 @@
                   "default": "$EDITOR",
                   "description": "Editor to use when opening a folder"
                 },
-                "block": {
-                  "type": "boolean",
-                  "default": false,
-                  "description": "Block rovr until the editor closes"
-                },
-                "suspend": {
-                  "type": "boolean",
-                  "default": true,
-                  "description": "Suspend (hide) rovr until the editor closes. Will block regardless."
+                "app": {
+                  "$ref": "#/definitions/block_thread_suspend",
+                  "description": "How the app should wait for the editor to close:\n`block`: Block rovr until the editor closes.\n`thread`: Don't block rovr at all.\n`suspend`: Suspend (hide) rovr until the editor closes."
                 }
               },
-              "description": "Editor to use when opening a folder"
+              "description": "Editor to use when opening a folder",
+              "required": ["run", "app"]
             },
             "bulk_rename": {
               "type": "object",
@@ -382,13 +376,14 @@
                   "default": "$EDITOR",
                   "description": "Editor to use for bulk renaming"
                 },
-                "suspend": {
-                  "type": "boolean",
-                  "default": true,
-                  "description": "Suspend (hide) rovr until the editor closes"
+                "app": {
+                  "type": "string",
+                  "enum": ["block", "suspend"],
+                  "description": "How the app should wait for the editor to close:\n`block`: Block rovr until the editor closes.\n`suspend`: Suspend (hide) rovr until the editor closes."
                 }
               },
-              "description": "Editor to use for bulk renaming"
+              "description": "Editor to use for bulk renaming",
+              "required": ["run", "app"]
             },
             "open_all_in_editor": {
               "type": "boolean",

@@ -185,20 +185,21 @@ def run_editor_command(
     # expand first part because path
     command = [which(command[0])] + command[1:]
 
-    if editor_config.get("suspend", False):
-        with app.suspend():
-            process = subprocess.run(command)
-        if process.returncode != 0 and on_error:
-            on_error(f"Error Code {process.returncode}", "Editor Error")
-        return process
-    elif editor_config.get("block", False):
-        process = subprocess.run(command, capture_output=True)
-        if process.returncode != 0 and on_error:
-            on_error(process.stderr.decode(), f"Error Code {process.returncode}")
-        return process
-    else:
-        app.run_in_thread(subprocess.run, command, capture_output=True)
-        return None
+    match editor_config.get("app", "thread"):
+        case "suspend":
+            with app.suspend():
+                process = subprocess.run(command)
+            if process.returncode != 0 and on_error:
+                on_error(f"Error Code {process.returncode}", "Editor Error")
+            return process
+        case "block":
+            process = subprocess.run(command, capture_output=True)
+            if process.returncode != 0 and on_error:
+                on_error(process.stderr.decode(), f"Error Code {process.returncode}")
+            return process
+        case "thread":
+            app.run_in_thread(subprocess.run, command, capture_output=True)
+            return None
 
 
 def dismiss(

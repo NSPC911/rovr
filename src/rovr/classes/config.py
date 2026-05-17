@@ -20,6 +20,15 @@ class RovrConfig(TypedDict, total=False):
     plugins: "_RovrConfigPlugins"
 
 
+_BlockThreadSuspend = Literal["block"] | Literal["thread"] | Literal["suspend"]
+_BLOCKTHREADSUSPEND_BLOCK: Literal["block"] = "block"
+r"""The values for the '_BlockThreadSuspend' enum"""
+_BLOCKTHREADSUSPEND_THREAD: Literal["thread"] = "thread"
+r"""The values for the '_BlockThreadSuspend' enum"""
+_BLOCKTHREADSUSPEND_SUSPEND: Literal["suspend"] = "suspend"
+r"""The values for the '_BlockThreadSuspend' enum"""
+
+
 _ROVR_CONFIG_ICONS_FILES_DEFAULT: list[Any] = []
 r""" Default value of the field path 'Rovr Config icons files' """
 
@@ -282,32 +291,12 @@ _ROVR_CONFIG_SETTINGS_EDITOR_BULK_RENAME_RUN_DEFAULT = "$EDITOR"
 r""" Default value of the field path 'Rovr Config settings editor bulk_rename run' """
 
 
-_ROVR_CONFIG_SETTINGS_EDITOR_BULK_RENAME_SUSPEND_DEFAULT = True
-r""" Default value of the field path 'Rovr Config settings editor bulk_rename suspend' """
-
-
-_ROVR_CONFIG_SETTINGS_EDITOR_FILE_BLOCK_DEFAULT = False
-r""" Default value of the field path 'Rovr Config settings editor file block' """
-
-
 _ROVR_CONFIG_SETTINGS_EDITOR_FILE_RUN_DEFAULT = "$EDITOR"
 r""" Default value of the field path 'Rovr Config settings editor file run' """
 
 
-_ROVR_CONFIG_SETTINGS_EDITOR_FILE_SUSPEND_DEFAULT = True
-r""" Default value of the field path 'Rovr Config settings editor file suspend' """
-
-
-_ROVR_CONFIG_SETTINGS_EDITOR_FOLDER_BLOCK_DEFAULT = False
-r""" Default value of the field path 'Rovr Config settings editor folder block' """
-
-
 _ROVR_CONFIG_SETTINGS_EDITOR_FOLDER_RUN_DEFAULT = "$EDITOR"
 r""" Default value of the field path 'Rovr Config settings editor folder run' """
-
-
-_ROVR_CONFIG_SETTINGS_EDITOR_FOLDER_SUSPEND_DEFAULT = True
-r""" Default value of the field path 'Rovr Config settings editor folder suspend' """
 
 
 _ROVR_CONFIG_SETTINGS_EDITOR_OPEN_ALL_IN_EDITOR_DEFAULT = False
@@ -1475,69 +1464,67 @@ class _RovrConfigSettingsEditor(TypedDict, total=False):
 class _RovrConfigSettingsEditorBulkRename(TypedDict, total=False):
     r"""Editor to use for bulk renaming"""
 
-    run: str
+    run: Required[str]
     r"""
     Editor to use for bulk renaming
 
     default: $EDITOR
+
+    Required property
     """
 
-    suspend: bool
+    app: Required["_RovrConfigSettingsEditorBulkRenameApp"]
     r"""
-    Suspend (hide) rovr until the editor closes
+    How the app should wait for the editor to close:
+    `block`: Block rovr until the editor closes.
+    `suspend`: Suspend (hide) rovr until the editor closes.
 
-    default: True
+    Required property
     """
+
+
+_RovrConfigSettingsEditorBulkRenameApp = Literal["block"] | Literal["suspend"]
+r"""
+How the app should wait for the editor to close:
+`block`: Block rovr until the editor closes.
+`suspend`: Suspend (hide) rovr until the editor closes.
+"""
+_ROVRCONFIGSETTINGSEDITORBULKRENAMEAPP_BLOCK: Literal["block"] = "block"
+r"""The values for the 'How the app should wait for the editor to close:' enum"""
+_ROVRCONFIGSETTINGSEDITORBULKRENAMEAPP_SUSPEND: Literal["suspend"] = "suspend"
+r"""The values for the 'How the app should wait for the editor to close:' enum"""
 
 
 class _RovrConfigSettingsEditorFile(TypedDict, total=False):
     r"""Editor to use when opening a file"""
 
-    run: str
+    run: Required[str]
     r"""
     Editor to use when opening a file
 
     default: $EDITOR
+
+    Required property
     """
 
-    block: bool
-    r"""
-    Block rovr until the editor closes
-
-    default: False
-    """
-
-    suspend: bool
-    r"""
-    Suspend (hide) rovr until the editor closes. Will block regardless.
-
-    default: True
-    """
+    app: Required["_BlockThreadSuspend"]
+    r""" Required property """
 
 
 class _RovrConfigSettingsEditorFolder(TypedDict, total=False):
     r"""Editor to use when opening a folder"""
 
-    run: str
+    run: Required[str]
     r"""
     Editor to use when opening a folder
 
     default: $EDITOR
+
+    Required property
     """
 
-    block: bool
-    r"""
-    Block rovr until the editor closes
-
-    default: False
-    """
-
-    suspend: bool
-    r"""
-    Suspend (hide) rovr until the editor closes. Will block regardless.
-
-    default: True
-    """
+    app: Required["_BlockThreadSuspend"]
+    r""" Required property """
 
 
 _RovrConfigSettingsPreviewRulesAdditionalproperties = (

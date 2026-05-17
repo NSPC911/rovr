@@ -78,15 +78,13 @@ description: config schema humanified
   - [2.5. Property `Rovr Config > settings > editor`](#settings_editor)
     - [2.5.1. Property `Rovr Config > settings > editor > file`](#settings_editor_file)
       - [2.5.1.1. Property `Rovr Config > settings > editor > file > run`](#settings_editor_file_run)
-      - [2.5.1.2. Property `Rovr Config > settings > editor > file > block`](#settings_editor_file_block)
-      - [2.5.1.3. Property `Rovr Config > settings > editor > file > suspend`](#settings_editor_file_suspend)
+      - [2.5.1.2. Property `Rovr Config > settings > editor > file > app`](#settings_editor_file_app)
     - [2.5.2. Property `Rovr Config > settings > editor > folder`](#settings_editor_folder)
       - [2.5.2.1. Property `Rovr Config > settings > editor > folder > run`](#settings_editor_folder_run)
-      - [2.5.2.2. Property `Rovr Config > settings > editor > folder > block`](#settings_editor_folder_block)
-      - [2.5.2.3. Property `Rovr Config > settings > editor > folder > suspend`](#settings_editor_folder_suspend)
+      - [2.5.2.2. Property `Rovr Config > settings > editor > folder > app`](#settings_editor_folder_app)
     - [2.5.3. Property `Rovr Config > settings > editor > bulk_rename`](#settings_editor_bulk_rename)
       - [2.5.3.1. Property `Rovr Config > settings > editor > bulk_rename > run`](#settings_editor_bulk_rename_run)
-      - [2.5.3.2. Property `Rovr Config > settings > editor > bulk_rename > suspend`](#settings_editor_bulk_rename_suspend)
+      - [2.5.3.2. Property `Rovr Config > settings > editor > bulk_rename > app`](#settings_editor_bulk_rename_app)
     - [2.5.4. Property `Rovr Config > settings > editor > open_all_in_editor`](#settings_editor_open_all_in_editor)
   - [2.6. Property `Rovr Config > settings > preview_rules`](#settings_preview_rules)
     - [2.6.1. Property `Rovr Config > settings > preview_rules > additionalProperties`](#settings_preview_rules_additionalProperties)
@@ -1347,41 +1345,39 @@ Must be one of:
 
 **Description:** Editor to use when opening a file
 
-| Property                                 | Type    | Title/Description                                                   |
-| ---------------------------------------- | ------- | ------------------------------------------------------------------- |
-| [run](#settings_editor_file_run)         | string  | Editor to use when opening a file                                   |
-| [block](#settings_editor_file_block)     | boolean | Block rovr until the editor closes                                  |
-| [suspend](#settings_editor_file_suspend) | boolean | Suspend (hide) rovr until the editor closes. Will block regardless. |
+| Property                         | Type             | Title/Description                                                                                                                                                                                             |
+| -------------------------------- | ---------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| [run](#settings_editor_file_run) | string           | Editor to use when opening a file                                                                                                                                                                             |
+| [app](#settings_editor_file_app) | enum (of string) | How the app should wait for the editor to close:<br />\`block\`: Block rovr until the editor closes.<br />\`thread\`: Don't block rovr at all.<br />\`suspend\`: Suspend (hide) rovr until the editor closes. |
 
 ##### <a name="settings_editor_file_run"></a>2.5.1.1. Property `Rovr Config > settings > editor > file > run`
 
 |              |             |
 | ------------ | ----------- |
 | **Type**     | `string`    |
-| **Required** | No          |
+| **Required** | Yes         |
 | **Default**  | `"$EDITOR"` |
 
 **Description:** Editor to use when opening a file
 
-##### <a name="settings_editor_file_block"></a>2.5.1.2. Property `Rovr Config > settings > editor > file > block`
+##### <a name="settings_editor_file_app"></a>2.5.1.2. Property `Rovr Config > settings > editor > file > app`
 
-|              |           |
-| ------------ | --------- |
-| **Type**     | `boolean` |
-| **Required** | No        |
-| **Default**  | `false`   |
+|                |                                    |
+| -------------- | ---------------------------------- |
+| **Type**       | `enum (of string)`                 |
+| **Required**   | Yes                                |
+| **Defined in** | #/definitions/block_thread_suspend |
 
-**Description:** Block rovr until the editor closes
+**Description:** How the app should wait for the editor to close:
+`block`: Block rovr until the editor closes.
+`thread`: Don't block rovr at all.
+`suspend`: Suspend (hide) rovr until the editor closes.
 
-##### <a name="settings_editor_file_suspend"></a>2.5.1.3. Property `Rovr Config > settings > editor > file > suspend`
+Must be one of:
 
-|              |           |
-| ------------ | --------- |
-| **Type**     | `boolean` |
-| **Required** | No        |
-| **Default**  | `true`    |
-
-**Description:** Suspend (hide) rovr until the editor closes. Will block regardless.
+- "block"
+- "thread"
+- "suspend"
 
 #### <a name="settings_editor_folder"></a>2.5.2. Property `Rovr Config > settings > editor > folder`
 
@@ -1393,41 +1389,33 @@ Must be one of:
 
 **Description:** Editor to use when opening a folder
 
-| Property                                   | Type    | Title/Description                                                   |
-| ------------------------------------------ | ------- | ------------------------------------------------------------------- |
-| [run](#settings_editor_folder_run)         | string  | Editor to use when opening a folder                                 |
-| [block](#settings_editor_folder_block)     | boolean | Block rovr until the editor closes                                  |
-| [suspend](#settings_editor_folder_suspend) | boolean | Suspend (hide) rovr until the editor closes. Will block regardless. |
+| Property                           | Type             | Title/Description                                                                                                                                                                                             |
+| ---------------------------------- | ---------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| [run](#settings_editor_folder_run) | string           | Editor to use when opening a folder                                                                                                                                                                           |
+| [app](#settings_editor_folder_app) | enum (of string) | How the app should wait for the editor to close:<br />\`block\`: Block rovr until the editor closes.<br />\`thread\`: Don't block rovr at all.<br />\`suspend\`: Suspend (hide) rovr until the editor closes. |
 
 ##### <a name="settings_editor_folder_run"></a>2.5.2.1. Property `Rovr Config > settings > editor > folder > run`
 
 |              |             |
 | ------------ | ----------- |
 | **Type**     | `string`    |
-| **Required** | No          |
+| **Required** | Yes         |
 | **Default**  | `"$EDITOR"` |
 
 **Description:** Editor to use when opening a folder
 
-##### <a name="settings_editor_folder_block"></a>2.5.2.2. Property `Rovr Config > settings > editor > folder > block`
+##### <a name="settings_editor_folder_app"></a>2.5.2.2. Property `Rovr Config > settings > editor > folder > app`
 
-|              |           |
-| ------------ | --------- |
-| **Type**     | `boolean` |
-| **Required** | No        |
-| **Default**  | `false`   |
+|                        |                                  |
+| ---------------------- | -------------------------------- |
+| **Type**               | `enum (of string)`               |
+| **Required**           | Yes                              |
+| **Same definition as** | [app](#settings_editor_file_app) |
 
-**Description:** Block rovr until the editor closes
-
-##### <a name="settings_editor_folder_suspend"></a>2.5.2.3. Property `Rovr Config > settings > editor > folder > suspend`
-
-|              |           |
-| ------------ | --------- |
-| **Type**     | `boolean` |
-| **Required** | No        |
-| **Default**  | `true`    |
-
-**Description:** Suspend (hide) rovr until the editor closes. Will block regardless.
+**Description:** How the app should wait for the editor to close:
+`block`: Block rovr until the editor closes.
+`thread`: Don't block rovr at all.
+`suspend`: Suspend (hide) rovr until the editor closes.
 
 #### <a name="settings_editor_bulk_rename"></a>2.5.3. Property `Rovr Config > settings > editor > bulk_rename`
 
@@ -1439,30 +1427,36 @@ Must be one of:
 
 **Description:** Editor to use for bulk renaming
 
-| Property                                        | Type    | Title/Description                           |
-| ----------------------------------------------- | ------- | ------------------------------------------- |
-| [run](#settings_editor_bulk_rename_run)         | string  | Editor to use for bulk renaming             |
-| [suspend](#settings_editor_bulk_rename_suspend) | boolean | Suspend (hide) rovr until the editor closes |
+| Property                                | Type             | Title/Description                                                                                                                                                   |
+| --------------------------------------- | ---------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| [run](#settings_editor_bulk_rename_run) | string           | Editor to use for bulk renaming                                                                                                                                     |
+| [app](#settings_editor_bulk_rename_app) | enum (of string) | How the app should wait for the editor to close:<br />\`block\`: Block rovr until the editor closes.<br />\`suspend\`: Suspend (hide) rovr until the editor closes. |
 
 ##### <a name="settings_editor_bulk_rename_run"></a>2.5.3.1. Property `Rovr Config > settings > editor > bulk_rename > run`
 
 |              |             |
 | ------------ | ----------- |
 | **Type**     | `string`    |
-| **Required** | No          |
+| **Required** | Yes         |
 | **Default**  | `"$EDITOR"` |
 
 **Description:** Editor to use for bulk renaming
 
-##### <a name="settings_editor_bulk_rename_suspend"></a>2.5.3.2. Property `Rovr Config > settings > editor > bulk_rename > suspend`
+##### <a name="settings_editor_bulk_rename_app"></a>2.5.3.2. Property `Rovr Config > settings > editor > bulk_rename > app`
 
-|              |           |
-| ------------ | --------- |
-| **Type**     | `boolean` |
-| **Required** | No        |
-| **Default**  | `true`    |
+|              |                    |
+| ------------ | ------------------ |
+| **Type**     | `enum (of string)` |
+| **Required** | Yes                |
 
-**Description:** Suspend (hide) rovr until the editor closes
+**Description:** How the app should wait for the editor to close:
+`block`: Block rovr until the editor closes.
+`suspend`: Suspend (hide) rovr until the editor closes.
+
+Must be one of:
+
+- "block"
+- "suspend"
 
 #### <a name="settings_editor_open_all_in_editor"></a>2.5.4. Property `Rovr Config > settings > editor > open_all_in_editor`
 

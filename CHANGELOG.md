@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 - `context`: add right click menu options [#279](https://github.com/NSPC911/rovr/pull/279)
+- `editor`: add support for opening editor as orphan [704400e](https://github.com/NSPC911/rovr/commit/704400e623fe2d47da432a3f6b873dd75841b8f7)
 
 ### Fixed
 - `drives`: dont list all of them instead [8cf0822](https://github.com/NSPC911/rovr/commit/8cf0822c5f40dbe57da57af788c62cce5bc9804a)

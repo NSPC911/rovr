@@ -65,9 +65,9 @@
         }
       }
     },
-    "block_thread_suspend": {
+    "block_orphan_suspend": {
       "type": "string",
-      "enum": ["block", "thread", "suspend"]
+      "enum": ["block", "orphan", "suspend"]
     }
   },
   "properties": {
@@ -343,8 +343,8 @@
                   "description": "Editor to use when opening a file"
                 },
                 "app": {
-                  "$ref": "#/definitions/block_thread_suspend",
-                  "description": "How the app should wait for the editor to close:\n`block`: Block rovr until the editor closes.\n`thread`: Don't block rovr at all.\n`suspend`: Suspend (hide) rovr until the editor closes."
+                  "$ref": "#/definitions/block_orphan_suspend",
+                  "description": "How the app should wait for the editor to close:\n`block`: Block rovr until the editor closes.\n`orphan`: Open editor orphaned, which means when rovr exits, the editor is still running.\n`suspend`: Suspend (hide) rovr until the editor closes."
                 }
               },
               "description": "Editor to use when opening a file",
@@ -360,8 +360,8 @@
                   "description": "Editor to use when opening a folder"
                 },
                 "app": {
-                  "$ref": "#/definitions/block_thread_suspend",
-                  "description": "How the app should wait for the editor to close:\n`block`: Block rovr until the editor closes.\n`thread`: Don't block rovr at all.\n`suspend`: Suspend (hide) rovr until the editor closes."
+                  "$ref": "#/definitions/block_orphan_suspend",
+                  "description": "How the app should wait for the editor to close:\n`block`: Block rovr until the editor closes.\n`orphan`: Open editor orphaned, which means when rovr exits, the editor is still running.\n`suspend`: Suspend (hide) rovr until the editor closes."
                 }
               },
               "description": "Editor to use when opening a folder",

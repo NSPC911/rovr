@@ -20,13 +20,13 @@ class RovrConfig(TypedDict, total=False):
     plugins: "_RovrConfigPlugins"
 
 
-_BlockThreadSuspend = Literal["block"] | Literal["thread"] | Literal["suspend"]
-_BLOCKTHREADSUSPEND_BLOCK: Literal["block"] = "block"
-r"""The values for the '_BlockThreadSuspend' enum"""
-_BLOCKTHREADSUSPEND_THREAD: Literal["thread"] = "thread"
-r"""The values for the '_BlockThreadSuspend' enum"""
-_BLOCKTHREADSUSPEND_SUSPEND: Literal["suspend"] = "suspend"
-r"""The values for the '_BlockThreadSuspend' enum"""
+_BlockOrphanSuspend = Literal["block"] | Literal["orphan"] | Literal["suspend"]
+_BLOCKORPHANSUSPEND_BLOCK: Literal["block"] = "block"
+r"""The values for the '_BlockOrphanSuspend' enum"""
+_BLOCKORPHANSUSPEND_ORPHAN: Literal["orphan"] = "orphan"
+r"""The values for the '_BlockOrphanSuspend' enum"""
+_BLOCKORPHANSUSPEND_SUSPEND: Literal["suspend"] = "suspend"
+r"""The values for the '_BlockOrphanSuspend' enum"""
 
 
 _ROVR_CONFIG_ICONS_FILES_DEFAULT: list[Any] = []
@@ -1507,7 +1507,7 @@ class _RovrConfigSettingsEditorFile(TypedDict, total=False):
     Required property
     """
 
-    app: Required["_BlockThreadSuspend"]
+    app: Required["_BlockOrphanSuspend"]
     r""" Required property """
 
 
@@ -1523,7 +1523,7 @@ class _RovrConfigSettingsEditorFolder(TypedDict, total=False):
     Required property
     """
 
-    app: Required["_BlockThreadSuspend"]
+    app: Required["_BlockOrphanSuspend"]
     r""" Required property """
 
 

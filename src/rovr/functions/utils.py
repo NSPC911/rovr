@@ -185,7 +185,7 @@ def run_editor_command(
     # expand first part because path
     command = [which(command[0])] + command[1:]
 
-    match editor_config.get("app", "thread"):
+    match editor_config.get("app", "orphan"):
         case "suspend":
             with app.suspend():
                 process = subprocess.run(command)
@@ -197,8 +197,26 @@ def run_editor_command(
             if process.returncode != 0 and on_error:
                 on_error(process.stderr.decode(), f"Error Code {process.returncode}")
             return process
-        case "thread":
-            app.run_in_thread(subprocess.run, command, capture_output=True)
+        case "orphan":
+            import sys
+
+            if sys.platform == "win32":
+                subprocess.Popen(
+                    command,
+                    stdin=subprocess.DEVNULL,
+                    stdout=subprocess.DEVNULL,
+                    stderr=subprocess.DEVNULL,
+                    creationflags=subprocess.CREATE_NEW_PROCESS_GROUP
+                    | subprocess.DETACHED_PROCESS,
+                )
+            else:
+                subprocess.Popen(
+                    command,
+                    stdin=subprocess.DEVNULL,
+                    stdout=subprocess.DEVNULL,
+                    stderr=subprocess.DEVNULL,
+                    start_new_session=True,
+                )
             return None
 
 

@@ -314,6 +314,10 @@ _ROVR_CONFIG_SETTINGS_EDITOR_OPEN_ALL_IN_EDITOR_DEFAULT = False
 r""" Default value of the field path 'Rovr Config settings editor open_all_in_editor' """
 
 
+_ROVR_CONFIG_SETTINGS_EXTEND_WITHOUT_VISUAL_DEFAULT = False
+r""" Default value of the field path 'Rovr Config settings extend_without_visual' """
+
+
 _ROVR_CONFIG_SETTINGS_PREVIEW_RULES_DEFAULT = {
     "text/.*": "text",
     "application/(json|javascript|xml|raml\\+yaml)": "text",
@@ -1440,6 +1444,14 @@ class _RovrConfigSettings(TypedDict, total=False):
       image/svg\+xml: resvg
       inode/directory: folder
       text/.*: text
+    """
+
+    extend_without_visual: bool
+    r"""
+    When using the keyboard, automatically enter select mode (and exit it) if you use any of the select_* keybinds
+    Enter if you started a selection, exit if only one (or none) is selected.
+
+    default: False
     """
 
 

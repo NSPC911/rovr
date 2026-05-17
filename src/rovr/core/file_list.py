@@ -333,7 +333,7 @@ class FileList(
     async def file_selected_handler(self, target_path: str) -> None:
         if self.app._chooser_file:
             self.call_next(self.app.action_quit)
-        elif config["settings"]["editor"]["open_all_in_editor"]:
+        elif config["settings"]["editor"].get("open_all_in_editor", False):
             editor_config = config["settings"]["editor"]["file"]
 
             def on_error(message: str, title: str) -> None:
@@ -349,9 +349,27 @@ class FileList(
                     severity="error",
                     markup=False,
                 )
+        elif config["settings"].get("openers"):
+            for pattern, command in config["settings"]["openers"]:
+                if utils.recache(pattern).fullmatch(target_path):
+                    try:
+                        proc = await path_utils.create_proc(
+                            self.app, command, target_path
+                        )
+                        await proc.communicate()
+                    except Exception as exc:
+                        path_utils.dump_exc(self, exc)
+                        self.notify(
+                            f"{type(exc).__name__}: {exc}",
+                            title="Error launching opener",
+                            severity="error",
+                            markup=False,
+                        )
+                    break
         else:
             path_utils.open_file(self.app, target_path)
 
+    @work
     async def on_selection_list_selected_changed(
         self, event: SelectionList.SelectedChanged
     ) -> None:

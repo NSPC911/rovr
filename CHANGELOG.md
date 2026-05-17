@@ -5,6 +5,28 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Added
+- `context`: add right click menu options [#279](https://github.com/NSPC911/rovr/pull/279)
+
+### Fixed
+- `drives`: dont list all of them instead [8cf0822](https://github.com/NSPC911/rovr/commit/8cf0822c5f40dbe57da57af788c62cce5bc9804a)
+- `config`: add java archive support ig [fb17dad](https://github.com/NSPC911/rovr/commit/fb17dada9b77e76893490e9c0bca18b721a9e04a)
+- `process`: show overwrite unless dest=initial [5d580c3](https://github.com/NSPC911/rovr/commit/5d580c37f60236102a17a40f657fd815948def91)
+- `pins`: fix warn from testing (not sure what happened but ok) [7cfa925](https://github.com/NSPC911/rovr/commit/7cfa925da8e0e345391d2cb6609a52b66b889d12)
+- `config`: properly render config errors [477fc95](https://github.com/NSPC911/rovr/commit/477fc954cfcd81ce00cdec33531b2c363d5cda28)
+- `path`: use powershell if another file is locking the file on windows [1a2d764](https://github.com/NSPC911/rovr/commit/1a2d764e0f019d79796b7582c8efa44054eec5d9)
+- `app`: dont crash if cwd goes missing [2e04330](https://github.com/NSPC911/rovr/commit/2e04330d534b2e9f16e8f6481923f5fe7510bbe5)
+- `config`: deepmerge with custom higher in order [0aeebe9](https://github.com/NSPC911/rovr/commit/0aeebe99feaa0515139d6890fa6e6c1db5deca0b)
+- `preview`: dont hang if attempting to read a socket/fifo [2027875](https://github.com/NSPC911/rovr/commit/202787581c37693b44d36fd9a3802b52e356725e)
+- `preview`: warn if inode/preview is not directory [9400cf2](https://github.com/NSPC911/rovr/commit/9400cf216f805ebe0493701e00c990f4ee2b1b10)
+
+### Refactor
+- `archive`: switch to external dependency [bc4c6e9](https://github.com/NSPC911/rovr/commit/bc4c6e9226762ea026835563149929ad9fde73ce)
+- `preview`!: rename `mime_rules` to `preview_rules` [36d1316](https://github.com/NSPC911/rovr/commit/36d131633a734ee118bca7e4cba2411b55e74bae)
+- `editor`!: use `app` to define what to do when editor is used [8e9b7a6455876751a0df19d1dc14be2566baa60a](https://github.com/NSPC911/rovr/commit/8e9b7a6455876751a0df19d1dc14be2566baa60a)
+
 ## [0.8.2] - 2026-05-04
 
 ### Added

@@ -299,10 +299,6 @@ _ROVR_CONFIG_SETTINGS_EDITOR_FOLDER_RUN_DEFAULT = "$EDITOR"
 r""" Default value of the field path 'Rovr Config settings editor folder run' """
 
 
-_ROVR_CONFIG_SETTINGS_EDITOR_OPEN_ALL_IN_EDITOR_DEFAULT = False
-r""" Default value of the field path 'Rovr Config settings editor open_all_in_editor' """
-
-
 _ROVR_CONFIG_SETTINGS_PREVIEW_RULES_DEFAULT = {
     "text/.*": "text",
     "application/(json|javascript|xml|raml\\+yaml)": "text",
@@ -1431,6 +1427,12 @@ class _RovrConfigSettings(TypedDict, total=False):
       text/.*: text
     """
 
+    openers: dict[str, str]
+    r"""
+    Map mime types to shell commands to open them. If `*` is used as key, it will be used as default for everything if it doesn't match anything else.
+    If `*` is not used, the os's opener (windows uses cmd /c, macos uses open, linux uses xdg-open) is used
+    """
+
 
 class _RovrConfigSettingsBulkRename(TypedDict, total=False):
     show_as_mapping: bool
@@ -1453,33 +1455,22 @@ class _RovrConfigSettingsEditor(TypedDict, total=False):
     bulk_rename: "_RovrConfigSettingsEditorBulkRename"
     r""" Editor to use for bulk renaming """
 
-    open_all_in_editor: bool
-    r"""
-    Open all in the configured editor, regardless of file encoding or type. When disabled, it opens them in the system configured editor.
-
-    default: False
-    """
-
 
 class _RovrConfigSettingsEditorBulkRename(TypedDict, total=False):
     r"""Editor to use for bulk renaming"""
 
-    run: Required[str]
+    run: str
     r"""
     Editor to use for bulk renaming
 
     default: $EDITOR
-
-    Required property
     """
 
-    app: Required["_RovrConfigSettingsEditorBulkRenameApp"]
+    app: "_RovrConfigSettingsEditorBulkRenameApp"
     r"""
     How the app should wait for the editor to close:
     `block`: Block rovr until the editor closes.
     `suspend`: Suspend (hide) rovr until the editor closes.
-
-    Required property
     """
 
 

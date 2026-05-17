@@ -382,13 +382,7 @@
                   "description": "How the app should wait for the editor to close:\n`block`: Block rovr until the editor closes.\n`suspend`: Suspend (hide) rovr until the editor closes."
                 }
               },
-              "description": "Editor to use for bulk renaming",
-              "required": ["run", "app"]
-            },
-            "open_all_in_editor": {
-              "type": "boolean",
-              "default": false,
-              "description": "Open all in the configured editor, regardless of file encoding or type. When disabled, it opens them in the system configured editor."
+              "description": "Editor to use for bulk renaming"
             }
           }
         },
@@ -429,6 +423,13 @@
             "application/x-font-.*": "font"
           },
           "description": "Map MIME type patterns to preview types. Uses regex patterns. Valid preview types: text, image, pdf, archive, folder, resvg, font, remime.\n-> Use 'remime' if you want a more accurate description from file(1)"
+        },
+        "openers": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "string"
+          },
+          "description": "Map mime types to shell commands to open them. If `*` is used as key, it will be used as default for everything if it doesn't match anything else.\nIf `*` is not used, the os's opener (windows uses cmd /c, macos uses open, linux uses xdg-open) is used"
         }
       }
     },

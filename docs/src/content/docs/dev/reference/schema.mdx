@@ -85,9 +85,10 @@ description: config schema humanified
     - [2.5.3. Property `Rovr Config > settings > editor > bulk_rename`](#settings_editor_bulk_rename)
       - [2.5.3.1. Property `Rovr Config > settings > editor > bulk_rename > run`](#settings_editor_bulk_rename_run)
       - [2.5.3.2. Property `Rovr Config > settings > editor > bulk_rename > app`](#settings_editor_bulk_rename_app)
-    - [2.5.4. Property `Rovr Config > settings > editor > open_all_in_editor`](#settings_editor_open_all_in_editor)
   - [2.6. Property `Rovr Config > settings > preview_rules`](#settings_preview_rules)
     - [2.6.1. Property `Rovr Config > settings > preview_rules > additionalProperties`](#settings_preview_rules_additionalProperties)
+  - [2.7. Property `Rovr Config > settings > openers`](#settings_openers)
+    - [2.7.1. Property `Rovr Config > settings > openers > additionalProperties`](#settings_openers_additionalProperties)
 - [3. Property `Rovr Config > metadata`](#metadata)
   - [3.1. Property `Rovr Config > metadata > fields`](#metadata_fields)
     - [3.1.1. Rovr Config > metadata > fields > fields items](#metadata_fields_items)
@@ -814,14 +815,15 @@ Must be one of:
 
 **Description:** Settings related to behavior of file operations
 
-| Property                                                   | Type            | Title/Description                                                                                                                                                                                                       |
-| ---------------------------------------------------------- | --------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| [use_recycle_bin](#settings_use_recycle_bin)               | boolean         | When deleting a file, allow moving the file to the recycle bin.                                                                                                                                                         |
-| [right_click](#settings_right_click)                       | array of object | Configuration for the right-click context menu                                                                                                                                                                          |
-| [copy_includes_metadata](#settings_copy_includes_metadata) | boolean         | When copying over a file, preserve metadata from the original file, such as creation and modification times.                                                                                                            |
-| [bulk_rename](#settings_bulk_rename)                       | object          |                                                                                                                                                                                                                         |
-| [editor](#settings_editor)                                 | object          | Settings related to the editor used for different operations                                                                                                                                                            |
-| [preview_rules](#settings_preview_rules)                   | object          | Map MIME type patterns to preview types. Uses regex patterns. Valid preview types: text, image, pdf, archive, folder, resvg, font, remime.<br />-&gt; Use 'remime' if you want a more accurate description from file(1) |
+| Property                                                   | Type            | Title/Description                                                                                                                                                                                                                                                   |
+| ---------------------------------------------------------- | --------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| [use_recycle_bin](#settings_use_recycle_bin)               | boolean         | When deleting a file, allow moving the file to the recycle bin.                                                                                                                                                                                                     |
+| [right_click](#settings_right_click)                       | array of object | Configuration for the right-click context menu                                                                                                                                                                                                                      |
+| [copy_includes_metadata](#settings_copy_includes_metadata) | boolean         | When copying over a file, preserve metadata from the original file, such as creation and modification times.                                                                                                                                                        |
+| [bulk_rename](#settings_bulk_rename)                       | object          |                                                                                                                                                                                                                                                                     |
+| [editor](#settings_editor)                                 | object          | Settings related to the editor used for different operations                                                                                                                                                                                                        |
+| [preview_rules](#settings_preview_rules)                   | object          | Map MIME type patterns to preview types. Uses regex patterns. Valid preview types: text, image, pdf, archive, folder, resvg, font, remime.<br />-&gt; Use 'remime' if you want a more accurate description from file(1)                                             |
+| [openers](#settings_openers)                               | object          | Map mime types to shell commands to open them. If \`_\` is used as key, it will be used as default for everything if it doesn't match anything else.<br />If \`_\` is not used, the os's opener (windows uses cmd /c, macos uses open, linux uses xdg-open) is used |
 
 ### <a name="settings_use_recycle_bin"></a>2.1. Property `Rovr Config > settings > use_recycle_bin`
 
@@ -1328,12 +1330,11 @@ Must be one of:
 
 **Description:** Settings related to the editor used for different operations
 
-| Property                                                  | Type    | Title/Description                                                                                                                     |
-| --------------------------------------------------------- | ------- | ------------------------------------------------------------------------------------------------------------------------------------- |
-| [file](#settings_editor_file)                             | object  | Editor to use when opening a file                                                                                                     |
-| [folder](#settings_editor_folder)                         | object  | Editor to use when opening a folder                                                                                                   |
-| [bulk_rename](#settings_editor_bulk_rename)               | object  | Editor to use for bulk renaming                                                                                                       |
-| [open_all_in_editor](#settings_editor_open_all_in_editor) | boolean | Open all in the configured editor, regardless of file encoding or type. When disabled, it opens them in the system configured editor. |
+| Property                                    | Type   | Title/Description                   |
+| ------------------------------------------- | ------ | ----------------------------------- |
+| [file](#settings_editor_file)               | object | Editor to use when opening a file   |
+| [folder](#settings_editor_folder)           | object | Editor to use when opening a folder |
+| [bulk_rename](#settings_editor_bulk_rename) | object | Editor to use for bulk renaming     |
 
 #### <a name="settings_editor_file"></a>2.5.1. Property `Rovr Config > settings > editor > file`
 
@@ -1437,7 +1438,7 @@ Must be one of:
 |              |             |
 | ------------ | ----------- |
 | **Type**     | `string`    |
-| **Required** | Yes         |
+| **Required** | No          |
 | **Default**  | `"$EDITOR"` |
 
 **Description:** Editor to use for bulk renaming
@@ -1447,7 +1448,7 @@ Must be one of:
 |              |                    |
 | ------------ | ------------------ |
 | **Type**     | `enum (of string)` |
-| **Required** | Yes                |
+| **Required** | No                 |
 
 **Description:** How the app should wait for the editor to close:
 `block`: Block rovr until the editor closes.
@@ -1457,16 +1458,6 @@ Must be one of:
 
 - "block"
 - "suspend"
-
-#### <a name="settings_editor_open_all_in_editor"></a>2.5.4. Property `Rovr Config > settings > editor > open_all_in_editor`
-
-|              |           |
-| ------------ | --------- |
-| **Type**     | `boolean` |
-| **Required** | No        |
-| **Default**  | `false`   |
-
-**Description:** Open all in the configured editor, regardless of file encoding or type. When disabled, it opens them in the system configured editor.
 
 ### <a name="settings_preview_rules"></a>2.6. Property `Rovr Config > settings > preview_rules`
 
@@ -1501,6 +1492,28 @@ Must be one of:
 - "remime"
 - "resvg"
 - "font"
+
+### <a name="settings_openers"></a>2.7. Property `Rovr Config > settings > openers`
+
+|                           |                                                                                               |
+| ------------------------- | --------------------------------------------------------------------------------------------- |
+| **Type**                  | `object`                                                                                      |
+| **Required**              | No                                                                                            |
+| **Additional properties** | [Each additional property must conform to the schema](#settings_openers_additionalProperties) |
+
+**Description:** Map mime types to shell commands to open them. If `*` is used as key, it will be used as default for everything if it doesn't match anything else.
+If `*` is not used, the os's opener (windows uses cmd /c, macos uses open, linux uses xdg-open) is used
+
+| Property                                   | Type   | Title/Description |
+| ------------------------------------------ | ------ | ----------------- |
+| [](#settings_openers_additionalProperties) | string |                   |
+
+#### <a name="settings_openers_additionalProperties"></a>2.7.1. Property `Rovr Config > settings > openers > additionalProperties`
+
+|              |          |
+| ------------ | -------- |
+| **Type**     | `string` |
+| **Required** | No       |
 
 ## <a name="metadata"></a>3. Property `Rovr Config > metadata`
 

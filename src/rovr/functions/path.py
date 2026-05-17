@@ -27,13 +27,20 @@ from .drive_workers import normalise
 from .icons import get_icon_for_file, get_icon_for_folder
 
 
-# natsort dead
-@lru_cache(maxsize=8196)
-def natsort(key: str) -> list:
+def _natsort(key: str) -> list:
     return [
         int(text) if text.isdigit() else text.lower()
         for text in re.split(r"(\d+)", key)
     ]
+
+
+@lru_cache(maxsize=2048)
+def natsort(key: str) -> list:
+    return _natsort(key)
+
+
+def natsort_cacheless(key: str) -> list:
+    return _natsort(key)
 
 
 def is_hidden_file(filepath: str) -> bool:
@@ -324,8 +331,14 @@ def sync_get_cwd_object(
             folders.sort(key=lambda x: x["name"].lower())
             files.sort(key=lambda x: x["name"].lower())
         case "natural":
-            folders.sort(key=lambda x: natsort(x["name"]))
-            files.sort(key=lambda x: natsort(x["name"]))
+            if len(folders) > 1024:
+                folders.sort(key=lambda x: natsort(x["name"]))
+            else:
+                folders.sort(key=lambda x: natsort_cacheless(x["name"]))
+            if len(files) > 1024:
+                files.sort(key=lambda x: natsort(x["name"]))
+            else:
+                files.sort(key=lambda x: natsort_cacheless(x["name"]))
         case "created":
             folders.sort(key=lambda x: sorter(x, "ctime"))
             files.sort(key=lambda x: sorter(x, "ctime"))

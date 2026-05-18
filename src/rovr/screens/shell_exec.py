@@ -4,7 +4,7 @@ from textual import events, work
 from textual.binding import Binding
 from textual.widgets import Input
 
-from rovr.functions.utils import dismiss
+from rovr.functions.utils import dismiss, expand_command
 
 from .input import ModalInput
 from .typed import ShellExecReturnType
@@ -50,7 +50,12 @@ class ShellExec(ModalInput):
     @work
     async def on_input_submitted(self, event: Input.Submitted) -> None:
         dismiss(
-            self, ShellExecReturnType(command=event.input.value, mode=self.mode), event
+            self,
+            ShellExecReturnType(
+                command=await expand_command(self.app, event.input.value),
+                mode=self.mode,
+            ),
+            event,
         )
 
     def action_cycle_mode_forward(self) -> None:

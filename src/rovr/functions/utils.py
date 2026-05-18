@@ -272,35 +272,22 @@ def multiprocessing_process_error_checker(app: App, exc: Exception) -> bool:
     return False
 
 
-def _replacer(string: str, old: str, new: str) -> str:
-    return string.replace(old, new).replace(f"'{old}'", new).replace(f'"{old}"', new)
-
-
-async def expand_command(app: App, command: str | list[str]) -> str:
+async def expand_command(app: App, command: str) -> str:
     from rovr.functions.path import normalise
 
-    command_str = shlex.join(command) if isinstance(command, list) else command
-
-    expanded = _replacer(
-        command_str,
-        "${current_working_directory}",
-        normalise(os.getcwd()),
-    )
-
+    cwd = normalise(os.getcwd())
+    highlighted = ""
     if app.file_list.highlighted_option is not None and hasattr(
         app.file_list.highlighted_option, "dir_entry"
     ):
-        expanded = _replacer(
-            expanded,
-            "${highlighted_file}",
-            str(app.file_list.highlighted_option.dir_entry.path),
-        )
+        highlighted = normalise(app.file_list.highlighted_option.dir_entry.path)
 
-    selected_files: list[str] | None = await app.file_list.get_selected_objects()
+    selected_files = await app.file_list.get_selected_objects() or []
+
+    expanded = command.replace("${current_working_directory}", cwd)
+    expanded = expanded.replace("${highlighted_file}", highlighted)
     if selected_files:
-        joined = shlex.join(selected_files)
-        expanded = _replacer(expanded, '"${selected_files}"', joined)
-
+        expanded = expanded.replace("${selected_files}", " ".join(selected_files))
     return expanded
 
 

@@ -335,7 +335,9 @@ class FileList(
     async def file_selected_handler(self, target_path: str) -> None:
         if self.app._chooser_file:
             self.call_next(self.app.action_quit)
-        elif config["settings"]["editor"].get("open_all_in_editor", False):
+            return
+
+        if config["settings"]["editor"].get("open_all_in_editor", False):
             editor_config = config["settings"]["editor"]["file"]
 
             def on_error(message: str, title: str) -> None:
@@ -351,7 +353,10 @@ class FileList(
                     severity="error",
                     markup=False,
                 )
-        elif config["settings"].get("openers"):
+            return
+
+        opened = False
+        if config["settings"].get("openers"):
             from fnmatch import fnmatch
 
             for pattern, openers in config["settings"]["openers"]:
@@ -370,12 +375,12 @@ class FileList(
                                 if isinstance(opener, dict)
                                 else "orphan",
                             )
-                        else:
-                            continue
+                            opened = True
+                            break
+                    if opened:
                         break
-            else:
-                path_utils.open_file(self.app, target_path)
-        else:
+
+        if not opened:
             path_utils.open_file(self.app, target_path)
 
     @work

@@ -163,7 +163,7 @@ def get_shortest_bind(binds: list[str]) -> str:
 
 
 def run_editor_command(
-    app: DOMNode,
+    app: App,
     editor_config: _RovrConfigSettingsEditorFile
     | _RovrConfigSettingsEditorFolder
     | _RovrConfigSettingsEditorBulkRename,
@@ -183,9 +183,23 @@ def run_editor_command(
     """
     command = shlex.split(editor_config["run"]) + [target_path]
     # expand first part because path
-    command = [which(command[0])] + command[1:]
+    if whiched := which(command[0]):
+        command = [whiched] + command[1:]
+    return run_command(
+        app,
+        command,
+        editor_config.get("mode", "suspend"),
+        on_error,
+    )
 
-    match editor_config.get("app", "orphan"):
+
+def run_command(
+    app: App,
+    command: list[str] | str,
+    mode: str,
+    on_error: Callable[[str, str], None] | None = None,
+) -> subprocess.CompletedProcess | None:
+    match mode:
         case "suspend":
             with app.suspend():
                 process = subprocess.run(command)

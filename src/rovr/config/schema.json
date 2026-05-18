@@ -452,27 +452,40 @@
         },
         "openers": {
           "type": "object",
+          "description": "A list of openers to open files with. These are used in the 'Open with...' section of the right-click context menu. You can have multiple openers for the same file type, and they will all show up in the menu.",
           "additionalProperties": {
-            "oneOf": [
-              {"type": "string"},
-              {
-                "type": "object",
-                "additionalProperties": false,
-                "properties": {
-                  "run": {
-                    "type": "string",
-                    "description": "Shell command to run when opening a file with this MIME type. Replace ${path} with the file path (no other expansions are supported). If ${path} isn't provided, the file path is appended at the end with --"
+            "type": "array",
+            "items": {
+              "oneOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "properties": {
+                    "run": {
+                      "type": "string",
+                      "description": "The command to run to open the file. Command expansions are supported."
+                    },
+                    "if": {
+                      "$ref": "#/definitions/opener_if",
+                      "description": "Only use this opener if a set criteria matches"
+                    },
+                    "app": {
+                      "$ref": "#/definitions/block_orphan_suspend",
+                      "description": "How the app should wait for the opener to close:\n`block`: Block rovr until the opener closes.\n`orphan`: Open opener orphaned, which means when rovr exits, the opener is still running.\n`suspend`: Suspend (hide) rovr until the opener closes."
+                    },
+                    "name": {
+                      "type": "string",
+                      "description": "The name of the opener to show in the menu (currently unused)"
+                    }
                   },
-                  "if": {
-                    "type": "object",
-                    "description": "Only use this opener if a set criteria matches",
-                    "$ref": "#/definitions/opener_if"
-                  }
+                  "required": ["run"]
                 }
-              }
-            ]
-          },
-          "description": "Map mime types to shell commands to open them. If `*` is used as key, it will be used as default for everything if it doesn't match anything else.\nIf `*` is not used, the os's opener (windows uses cmd /c, macos uses open, linux uses xdg-open) is used"
+              ]
+            }
+          }
         }
       }
     },

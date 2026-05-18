@@ -1,5 +1,7 @@
 from contextlib import suppress
 from os import getcwd, path
+from shlex import split as shplit
+from shutil import which
 from typing import Callable, ClassVar, Iterable, Self, Sequence
 
 from textual import events, work
@@ -29,7 +31,7 @@ from rovr.variables.constants import (
     config,
 )
 
-from .file_list_right_click_menu import FileListRightClickMenu
+from .file_list_right_click_menu import FileListRightClickMenu, ifed
 
 
 class FileList(
@@ -350,22 +352,27 @@ class FileList(
                     markup=False,
                 )
         elif config["settings"].get("openers"):
-            for pattern, command in config["settings"]["openers"]:
+            for pattern, openers in config["settings"]["openers"]:
                 if utils.recache(pattern).fullmatch(target_path):
-                    try:
-                        proc = await path_utils.create_proc(
-                            self.app, command, target_path
-                        )
-                        await proc.communicate()
-                    except Exception as exc:
-                        path_utils.dump_exc(self, exc)
-                        self.notify(
-                            f"{type(exc).__name__}: {exc}",
-                            title="Error launching opener",
-                            severity="error",
-                            markup=False,
-                        )
-                    break
+                    for opener in openers:
+                        if not isinstance(opener, str) and not ifed(
+                            self.app, opener.get("if", {})
+                        ):
+                            continue
+                        runner = opener if isinstance(opener, str) else opener["run"]
+                        if which(shplit(runner)[0]):
+                            utils.run_command(
+                                self.app,
+                                runner,
+                                opener.get("app", "orphan")
+                                if isinstance(opener, dict)
+                                else "orphan",
+                            )
+                        else:
+                            continue
+                        break
+            else:
+                path_utils.open_file(self.app, target_path)
         else:
             path_utils.open_file(self.app, target_path)
 

@@ -1451,11 +1451,8 @@ class _RovrConfigSettings(TypedDict, total=False):
       text/.*: text
     """
 
-    openers: dict[str, "_RovrConfigSettingsOpenersAdditionalproperties"]
-    r"""
-    Map mime types to shell commands to open them. If `*` is used as key, it will be used as default for everything if it doesn't match anything else.
-    If `*` is not used, the os's opener (windows uses cmd /c, macos uses open, linux uses xdg-open) is used
-    """
+    openers: dict[str, list["_RovrConfigSettingsOpenersAdditionalpropertiesItem"]]
+    r""" A list of openers to open files with. These are used in the 'Open with...' section of the right-click context menu. You can have multiple openers for the same file type, and they will all show up in the menu. """
 
 
 class _RovrConfigSettingsBulkRename(TypedDict, total=False):
@@ -1542,18 +1539,23 @@ class _RovrConfigSettingsEditorFolder(TypedDict, total=False):
     r""" Required property """
 
 
-_RovrConfigSettingsOpenersAdditionalproperties = Union[
-    str, "_RovrConfigSettingsOpenersAdditionalpropertiesOneof1"
+_RovrConfigSettingsOpenersAdditionalpropertiesItem = Union[
+    str, "_RovrConfigSettingsOpenersAdditionalpropertiesItemOneof1"
 ]
 r""" Aggregation type: oneOf """
 
 
-_RovrConfigSettingsOpenersAdditionalpropertiesOneof1 = TypedDict(
-    "_RovrConfigSettingsOpenersAdditionalpropertiesOneof1",
+_RovrConfigSettingsOpenersAdditionalpropertiesItemOneof1 = TypedDict(
+    "_RovrConfigSettingsOpenersAdditionalpropertiesItemOneof1",
     {
-        # | Shell command to run when opening a file with this MIME type. Replace ${path} with the file path (no other expansions are supported). If ${path} isn't provided, the file path is appended at the end with --
-        "run": str,
+        # | The command to run to open the file. Command expansions are supported.
+        # |
+        # | Required property
+        "run": Required[str],
         "if": "_OpenerIf",
+        "app": "_BlockOrphanSuspend",
+        # | The name of the opener to show in the menu (currently unused)
+        "name": str,
     },
     total=False,
 )

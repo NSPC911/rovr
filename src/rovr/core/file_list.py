@@ -352,8 +352,10 @@ class FileList(
                     markup=False,
                 )
         elif config["settings"].get("openers"):
+            from fnmatch import fnmatch
+
             for pattern, openers in config["settings"]["openers"]:
-                if utils.recache(pattern).fullmatch(target_path):
+                if fnmatch(target_path, pattern):
                     for opener in openers:
                         if not isinstance(opener, str) and not ifed(
                             self.app, opener.get("if", {})

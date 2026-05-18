@@ -1452,7 +1452,10 @@ class _RovrConfigSettings(TypedDict, total=False):
     """
 
     openers: dict[str, list["_RovrConfigSettingsOpenersAdditionalpropertiesItem"]]
-    r""" A list of openers to open files with. These are used in the 'Open with...' section of the right-click context menu. You can have multiple openers for the same file type, and they will all show up in the menu. """
+    r"""
+    A list of openers to open files with. These are used to open files, what were you expecting.
+    Key must be a valid glob pattern, but the value has to be a list that can contain a mix of strings and objects
+    """
 
 
 class _RovrConfigSettingsBulkRename(TypedDict, total=False):

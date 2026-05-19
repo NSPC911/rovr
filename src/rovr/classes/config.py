@@ -1503,11 +1503,13 @@ class _RovrConfigSettingsEditorFile(TypedDict, total=False):
     Required property
     """
 
-    orphan: bool
+    orphan: Required[bool]
     r"""
     Whether to open the editor as an orphan process.
 
     default: True
+
+    Required property
     """
 
 
@@ -1523,11 +1525,13 @@ class _RovrConfigSettingsEditorFolder(TypedDict, total=False):
     Required property
     """
 
-    orphan: bool
+    orphan: Required[bool]
     r"""
     Whether to open the editor as an orphan process.
 
     default: True
+
+    Required property
     """
 
 

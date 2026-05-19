@@ -107,11 +107,11 @@ right_click = [
 
 [settings.editor.file]
 run = "$EDITOR"
-app = "suspend"
+orphan = false
 
 [settings.editor.folder]
 run = "$EDITOR"
-app = "suspend"
+orphan = false
 
 [settings.editor.bulk_rename]
 show_as_mapping = true

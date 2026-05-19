@@ -360,7 +360,7 @@
                 }
               },
               "description": "Editor to use when opening a file",
-              "required": ["run", "app"]
+              "required": ["run", "orphan"]
             },
             "folder": {
               "type": "object",
@@ -378,7 +378,7 @@
                 }
               },
               "description": "Editor to use when opening a folder",
-              "required": ["run", "app"]
+              "required": ["run", "orphan"]
             },
             "bulk_rename": {
               "type": "object",

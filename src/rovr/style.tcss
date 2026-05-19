@@ -1123,8 +1123,7 @@ Screen {
   align: right middle;
   width: auto;
   max-width: 25vw;
-  margin-right: 1;
-  min-width: 5;
+  margin-right: 0;
   padding: 0 1;
 }
 

@@ -335,15 +335,15 @@ class Application(App, inherit_bindings=False):
         # show key
         if self._show_keys:
             with suppress(NoMatches):
-                self.query_one("#showKeys").update(event.key)
+                using = event.character
+                if not event.is_printable:
+                    using = event.key
+                self.query_one("#showKeys").update(using)
                 self.query_one("#showKeys").tooltip = (
                     f"Key = '{event.key}'"
-                    + (
-                        f"\nCharacter = '{event.character}'"
-                        if event.is_printable
-                        else ""
-                    )
-                    + f"\nAliases = {event.aliases}"
+                    f"\nCharacter = '{event.character}'"
+                    f"\nAliases = {event.aliases}"
+                    f"\nUsing: {using}"
                 )
 
         # Not really sure why this can happen, but I will still handle this

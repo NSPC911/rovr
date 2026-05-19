@@ -7,15 +7,15 @@ rovr allows you to configure custom commands to open files based on their MIME t
 
 ## configuration
 
-you can define your custom openers in the `settings.openers` section of your configuration file. the keys are regex patterns that match against the file's MIME type or path, and the values are lists of opener definitions.
+you can define your custom openers in the `settings.openers` section of your configuration file. the keys are glob patterns that match against the file's MIME type or path, and the values are lists of opener definitions.
 
 ```toml
 [settings.openers]
-"text/.*" = [
+"*.py" = [
     { run = "$EDITOR", app = "suspend" },
     { run = "code", app = "orphan" }
 ]
-"image/.*" = [
+"*.png" = [
     "imv"
 ]
 "*" = [
@@ -32,7 +32,7 @@ an opener can be defined simply as a string representing the command, or as an o
 
 when using an object, the following properties are available:
 
-- `run` (string): the command to execute. 
+- `run` (string): the command to execute.
 - `app` (string): how rovr should handle the execution. valid options are:
   - `suspend`: suspends rovr until the command finishes (ideal for terminal editors).
   - `block`: blocks rovr in the background until the command finishes.

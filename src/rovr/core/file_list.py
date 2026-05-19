@@ -359,7 +359,7 @@ class FileList(
         if config["settings"].get("openers"):
             from fnmatch import fnmatch
 
-            for pattern, openers in config["settings"]["openers"]:
+            for pattern, openers in config["settings"]["openers"].items():
                 if fnmatch(target_path, pattern):
                     for opener in openers:
                         if not isinstance(opener, str) and not ifed(

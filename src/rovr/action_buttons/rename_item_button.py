@@ -93,7 +93,9 @@ class RenameItemButton(Button):
             highlighted_file = self.app.file_list.highlighted_option.dir_entry.name
 
             # create file
-            show_as_mapping: bool = config["settings"]["bulk_rename"]["show_as_mapping"]
+            show_as_mapping: bool = config["settings"]["editor"]["bulk_rename"][
+                "show_as_mapping"
+            ]
 
             temp = NamedTemporaryFile(  # noqa: SIM115
                 "w", encoding="utf-8", delete=False

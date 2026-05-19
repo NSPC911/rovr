@@ -105,9 +105,6 @@ right_click = [
 [settings.openers]
 # unset for the end user
 
-[settings.bulk_rename]
-show_as_mapping = true
-
 [settings.editor.file]
 run = "$EDITOR"
 app = "suspend"
@@ -117,8 +114,8 @@ run = "$EDITOR"
 app = "suspend"
 
 [settings.editor.bulk_rename]
+show_as_mapping = true
 run = "$EDITOR"
-app = "suspend"
 
 [metadata]
 fields = [

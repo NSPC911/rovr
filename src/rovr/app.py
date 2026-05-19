@@ -469,7 +469,7 @@ class Application(App, inherit_bindings=False):
                         check=False,
                     )
                 self.notify(
-                    f"Command '{response.command}' finished with return code {output.returncode}.",
+                    f"Command finished with return code {output.returncode}.",
                     title=f"Shell: {response.command}",
                     severity="information" if output.returncode == 0 else "error",
                     markup=False,

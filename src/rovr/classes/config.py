@@ -20,15 +20,6 @@ class RovrConfig(TypedDict, total=False):
     plugins: "_RovrConfigPlugins"
 
 
-_BlockOrphanSuspend = Literal["block"] | Literal["orphan"] | Literal["suspend"]
-_BLOCKORPHANSUSPEND_BLOCK: Literal["block"] = "block"
-r"""The values for the '_BlockOrphanSuspend' enum"""
-_BLOCKORPHANSUSPEND_ORPHAN: Literal["orphan"] = "orphan"
-r"""The values for the '_BlockOrphanSuspend' enum"""
-_BLOCKORPHANSUSPEND_SUSPEND: Literal["suspend"] = "suspend"
-r"""The values for the '_BlockOrphanSuspend' enum"""
-
-
 class _OpenerIf(TypedDict, total=False):
     cwd: list[str]
     r""" Only use this opener if the current working directory matches one (or more) of the glob patterns in this list (look at https://docs.python.org/3/library/fnmatch.html for more info) """
@@ -303,16 +294,16 @@ _ROVR_CONFIG_PLUGINS_ZOXIDE_SHOW_SCORES_DEFAULT = False
 r""" Default value of the field path 'Rovr Config plugins zoxide show_scores' """
 
 
-_ROVR_CONFIG_SETTINGS_BULK_RENAME_SHOW_AS_MAPPING_DEFAULT = True
-r""" Default value of the field path 'Rovr Config settings bulk_rename show_as_mapping' """
-
-
 _ROVR_CONFIG_SETTINGS_COPY_INCLUDES_METADATA_DEFAULT = True
 r""" Default value of the field path 'Rovr Config settings copy_includes_metadata' """
 
 
 _ROVR_CONFIG_SETTINGS_EDITOR_BULK_RENAME_RUN_DEFAULT = "$EDITOR"
 r""" Default value of the field path 'Rovr Config settings editor bulk_rename run' """
+
+
+_ROVR_CONFIG_SETTINGS_EDITOR_BULK_RENAME_SHOW_AS_MAPPING_DEFAULT = True
+r""" Default value of the field path 'Rovr Config settings editor bulk_rename show_as_mapping' """
 
 
 _ROVR_CONFIG_SETTINGS_EDITOR_FILE_RUN_DEFAULT = "$EDITOR"
@@ -1420,7 +1411,6 @@ class _RovrConfigSettings(TypedDict, total=False):
     default: True
     """
 
-    bulk_rename: "_RovrConfigSettingsBulkRename"
     editor: "_RovrConfigSettingsEditor"
     r""" Settings related to the editor used for different operations """
 
@@ -1458,15 +1448,6 @@ class _RovrConfigSettings(TypedDict, total=False):
     """
 
 
-class _RovrConfigSettingsBulkRename(TypedDict, total=False):
-    show_as_mapping: bool
-    r"""
-    Show as a mapping of `<old> ➔ <new>` instead of just `<old>`
-
-    default: True
-    """
-
-
 class _RovrConfigSettingsEditor(TypedDict, total=False):
     r"""Settings related to the editor used for different operations"""
 
@@ -1490,24 +1471,12 @@ class _RovrConfigSettingsEditorBulkRename(TypedDict, total=False):
     default: $EDITOR
     """
 
-    app: "_RovrConfigSettingsEditorBulkRenameApp"
+    show_as_mapping: bool
     r"""
-    How the app should wait for the editor to close:
-    `block`: Block rovr until the editor closes.
-    `suspend`: Suspend (hide) rovr until the editor closes.
+    Show as a mapping of `<old> ➔ <new>` instead of just `<old>`
+
+    default: True
     """
-
-
-_RovrConfigSettingsEditorBulkRenameApp = Literal["block"] | Literal["suspend"]
-r"""
-How the app should wait for the editor to close:
-`block`: Block rovr until the editor closes.
-`suspend`: Suspend (hide) rovr until the editor closes.
-"""
-_ROVRCONFIGSETTINGSEDITORBULKRENAMEAPP_BLOCK: Literal["block"] = "block"
-r"""The values for the 'How the app should wait for the editor to close:' enum"""
-_ROVRCONFIGSETTINGSEDITORBULKRENAMEAPP_SUSPEND: Literal["suspend"] = "suspend"
-r"""The values for the 'How the app should wait for the editor to close:' enum"""
 
 
 class _RovrConfigSettingsEditorFile(TypedDict, total=False):
@@ -1522,7 +1491,7 @@ class _RovrConfigSettingsEditorFile(TypedDict, total=False):
     Required property
     """
 
-    app: Required["_BlockOrphanSuspend"]
+    app: Required["_ThreadOrphanSuspend"]
     r""" Required property """
 
 
@@ -1538,7 +1507,7 @@ class _RovrConfigSettingsEditorFolder(TypedDict, total=False):
     Required property
     """
 
-    app: Required["_BlockOrphanSuspend"]
+    app: Required["_ThreadOrphanSuspend"]
     r""" Required property """
 
 
@@ -1556,7 +1525,7 @@ _RovrConfigSettingsOpenersAdditionalpropertiesItemOneof1 = TypedDict(
         # | Required property
         "run": Required[str],
         "if": "_OpenerIf",
-        "app": "_BlockOrphanSuspend",
+        "app": "_ThreadOrphanSuspend",
         # | The name of the opener to show in the menu (currently unused)
         "name": str,
     },
@@ -1812,3 +1781,12 @@ _ROVRCONFIGTHEMEPREVIEW_XCODE: Literal["xcode"] = "xcode"
 r"""The values for the 'The theme to use when previewing files in the preview sidebar' enum"""
 _ROVRCONFIGTHEMEPREVIEW_ZENBURN: Literal["zenburn"] = "zenburn"
 r"""The values for the 'The theme to use when previewing files in the preview sidebar' enum"""
+
+
+_ThreadOrphanSuspend = Literal["thread"] | Literal["orphan"] | Literal["suspend"]
+_THREADORPHANSUSPEND_THREAD: Literal["thread"] = "thread"
+r"""The values for the '_ThreadOrphanSuspend' enum"""
+_THREADORPHANSUSPEND_ORPHAN: Literal["orphan"] = "orphan"
+r"""The values for the '_ThreadOrphanSuspend' enum"""
+_THREADORPHANSUSPEND_SUSPEND: Literal["suspend"] = "suspend"
+r"""The values for the '_ThreadOrphanSuspend' enum"""

@@ -1,5 +1,12 @@
 [
   {
+    "keys": ["settings.bulk_rename"],
+    "message": [
+      "The [bright_cyan]settings.bulk_rename[/] setting has been merged with [bright_blur]settings.editor.bulk_rename[/] since only one property is currently supported.",
+      "This means [bright_cyan]settings.bulk_rename.show_as_mapping[/] is now [bright_blue]settings.editor.bulk_rename.show_as_mapping[/]."
+    ]
+  },
+  {
     "keys": ["settings.editor.open_all_in_editor"],
     "message": [
       "The [bright_cyan]settings.editor.open_all_in_editor[/] is deprecated. While in 0.9.x, it will still work, but please use [bright_blue]settings.openers.'*'[/] to define an editor to open the file with."

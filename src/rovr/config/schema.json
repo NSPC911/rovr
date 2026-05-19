@@ -91,9 +91,9 @@
         }
       }
     },
-    "block_orphan_suspend": {
+    "thread_orphan_suspend": {
       "type": "string",
-      "enum": ["block", "orphan", "suspend"]
+      "enum": ["thread", "orphan", "suspend"]
     }
   },
   "properties": {
@@ -343,17 +343,6 @@
           "default": true,
           "description": "When copying over a file, preserve metadata from the original file, such as creation and modification times."
         },
-        "bulk_rename": {
-          "type": "object",
-          "additionalProperties": false,
-          "properties": {
-            "show_as_mapping": {
-              "type": "boolean",
-              "default": true,
-              "description": "Show as a mapping of `<old> ➔ <new>` instead of just `<old>`"
-            }
-          }
-        },
         "editor": {
           "type": "object",
           "description": "Settings related to the editor used for different operations",
@@ -369,8 +358,8 @@
                   "description": "Editor to use when opening a file"
                 },
                 "app": {
-                  "$ref": "#/definitions/block_orphan_suspend",
-                  "description": "How the app should wait for the editor to close:\n`block`: Block rovr until the editor closes.\n`orphan`: Open editor orphaned, which means when rovr exits, the editor is still running.\n`suspend`: Suspend (hide) rovr until the editor closes."
+                  "$ref": "#/definitions/thread_orphan_suspend",
+                  "description": "How the app should wait for the editor to close:\n`thread`: Open editor in a background thread. It will close when rovr closes.\n`orphan`: Open editor orphaned, which means when rovr exits, the editor is still running.\n`suspend`: Suspend (hide) rovr until the editor closes."
                 }
               },
               "description": "Editor to use when opening a file",
@@ -386,8 +375,8 @@
                   "description": "Editor to use when opening a folder"
                 },
                 "app": {
-                  "$ref": "#/definitions/block_orphan_suspend",
-                  "description": "How the app should wait for the editor to close:\n`block`: Block rovr until the editor closes.\n`orphan`: Open editor orphaned, which means when rovr exits, the editor is still running.\n`suspend`: Suspend (hide) rovr until the editor closes."
+                  "$ref": "#/definitions/thread_orphan_suspend",
+                  "description": "How the app should wait for the editor to close:\n`thread`: Open editor in a background thread. It will close when rovr closes.\n`orphan`: Open editor orphaned, which means when rovr exits, the editor is still running.\n`suspend`: Suspend (hide) rovr until the editor closes."
                 }
               },
               "description": "Editor to use when opening a folder",
@@ -402,10 +391,10 @@
                   "default": "$EDITOR",
                   "description": "Editor to use for bulk renaming"
                 },
-                "app": {
-                  "type": "string",
-                  "enum": ["block", "suspend"],
-                  "description": "How the app should wait for the editor to close:\n`block`: Block rovr until the editor closes.\n`suspend`: Suspend (hide) rovr until the editor closes."
+                "show_as_mapping": {
+                  "type": "boolean",
+                  "default": true,
+                  "description": "Show as a mapping of `<old> ➔ <new>` instead of just `<old>`"
                 }
               },
               "description": "Editor to use for bulk renaming"
@@ -473,8 +462,8 @@
                       "description": "Only use this opener if a set criteria matches"
                     },
                     "app": {
-                      "$ref": "#/definitions/block_orphan_suspend",
-                      "description": "How the app should wait for the opener to close:\n`block`: Block rovr until the opener closes.\n`orphan`: Open opener orphaned, which means when rovr exits, the opener is still running.\n`suspend`: Suspend (hide) rovr until the opener closes."
+                      "$ref": "#/definitions/thread_orphan_suspend",
+                      "description": "How the app should wait for the opener to close:\n`thread`: Open editor in a background thread. It will close when rovr closes.\n`orphan`: Open opener orphaned, which means when rovr exits, the opener is still running.\n`suspend`: Suspend (hide) rovr until the opener closes."
                     },
                     "name": {
                       "type": "string",

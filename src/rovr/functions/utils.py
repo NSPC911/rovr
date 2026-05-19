@@ -178,7 +178,7 @@ def run_editor_command(
         on_error: Optional callback for error handling, receives (message, title).
 
     Returns:
-        CompletedProcess if command was run synchronously, None if run in thread.
+        CompletedProcess if command was run synchronously, None if run in thread or orphaned.
     """
     return run_command(
         app,
@@ -201,11 +201,12 @@ def run_command(
             if process.returncode != 0 and on_error:
                 on_error(f"Error Code {process.returncode}", "Editor Error")
             return process
-        case "block":
-            process = subprocess.run(command, capture_output=True, shell=True)
-            if process.returncode != 0 and on_error:
-                on_error(process.stderr.decode(), f"Error Code {process.returncode}")
-            return process
+        case "thread":
+            app.run_in_thread(
+                subprocess.run,
+                command,
+                capture_output=True,
+            )
         case _:
             import sys
 
@@ -228,7 +229,6 @@ def run_command(
                     start_new_session=True,
                     shell=True,
                 )
-            return None
 
 
 def dismiss(

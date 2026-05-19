@@ -306,12 +306,24 @@ _ROVR_CONFIG_SETTINGS_EDITOR_BULK_RENAME_SHOW_AS_MAPPING_DEFAULT = True
 r""" Default value of the field path 'Rovr Config settings editor bulk_rename show_as_mapping' """
 
 
+_ROVR_CONFIG_SETTINGS_EDITOR_FILE_ORPHAN_DEFAULT = True
+r""" Default value of the field path 'Rovr Config settings editor file orphan' """
+
+
 _ROVR_CONFIG_SETTINGS_EDITOR_FILE_RUN_DEFAULT = "$EDITOR"
 r""" Default value of the field path 'Rovr Config settings editor file run' """
 
 
+_ROVR_CONFIG_SETTINGS_EDITOR_FOLDER_ORPHAN_DEFAULT = True
+r""" Default value of the field path 'Rovr Config settings editor folder orphan' """
+
+
 _ROVR_CONFIG_SETTINGS_EDITOR_FOLDER_RUN_DEFAULT = "$EDITOR"
 r""" Default value of the field path 'Rovr Config settings editor folder run' """
+
+
+_ROVR_CONFIG_SETTINGS_OPENERS_ADDITIONALPROPERTIES_ITEM_ONEOF1_ORPHAN_DEFAULT = True
+r""" Default value of the field path 'Rovr Config settings openers additionalProperties item oneof1 orphan' """
 
 
 _ROVR_CONFIG_SETTINGS_PREVIEW_RULES_DEFAULT = {
@@ -1491,8 +1503,12 @@ class _RovrConfigSettingsEditorFile(TypedDict, total=False):
     Required property
     """
 
-    app: Required["_ThreadOrphanSuspend"]
-    r""" Required property """
+    orphan: bool
+    r"""
+    Whether to open the editor as an orphan process.
+
+    default: True
+    """
 
 
 class _RovrConfigSettingsEditorFolder(TypedDict, total=False):
@@ -1507,8 +1523,12 @@ class _RovrConfigSettingsEditorFolder(TypedDict, total=False):
     Required property
     """
 
-    app: Required["_ThreadOrphanSuspend"]
-    r""" Required property """
+    orphan: bool
+    r"""
+    Whether to open the editor as an orphan process.
+
+    default: True
+    """
 
 
 _RovrConfigSettingsOpenersAdditionalpropertiesItem = Union[
@@ -1525,7 +1545,10 @@ _RovrConfigSettingsOpenersAdditionalpropertiesItemOneof1 = TypedDict(
         # | Required property
         "run": Required[str],
         "if": "_OpenerIf",
-        "app": "_ThreadOrphanSuspend",
+        # | Whether to open the opener as an orphan process.
+        # |
+        # | default: True
+        "orphan": bool,
         # | The name of the opener to show in the menu (currently unused)
         "name": str,
     },
@@ -1781,12 +1804,3 @@ _ROVRCONFIGTHEMEPREVIEW_XCODE: Literal["xcode"] = "xcode"
 r"""The values for the 'The theme to use when previewing files in the preview sidebar' enum"""
 _ROVRCONFIGTHEMEPREVIEW_ZENBURN: Literal["zenburn"] = "zenburn"
 r"""The values for the 'The theme to use when previewing files in the preview sidebar' enum"""
-
-
-_ThreadOrphanSuspend = Literal["thread"] | Literal["orphan"] | Literal["suspend"]
-_THREADORPHANSUSPEND_THREAD: Literal["thread"] = "thread"
-r"""The values for the '_ThreadOrphanSuspend' enum"""
-_THREADORPHANSUSPEND_ORPHAN: Literal["orphan"] = "orphan"
-r"""The values for the '_ThreadOrphanSuspend' enum"""
-_THREADORPHANSUSPEND_SUSPEND: Literal["suspend"] = "suspend"
-r"""The values for the '_ThreadOrphanSuspend' enum"""

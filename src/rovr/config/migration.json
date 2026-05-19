@@ -1,23 +1,42 @@
 [
   {
+    "keys": ["settings.editor.file.block", "settings.editor.file.suspend", "settings.editor.folder.block", "settings.editor.folder.suspend", "settings.editor.bulk_rename.suspend"],
+    "message": [
+      "You can no longer block the UI when opening a file or folder. You can either open it as an orphan process or suspend the app.",
+      "- Set the `orphan` property to `true` to open the file/folder as an orphan process. Else, it will suspend rovr until the process is closed."
+    ],
+    "extra": "Removed in v0.9.0"
+  },
+  {
+    "keys": ["settings.editor.file.app", "settings.editor.folder.app", "settings.editor.bulk_rename.app"],
+    "message": [
+      "Why were you even using the master branch.",
+      "The [bright_cyan]settings.editor.file.app[/], [bright_cyan]settings.editor.folder.app[/] and [bright_cyan]settings.editor.bulk_rename.app[/] settings have been removed since they were quite complicated and didn't achieve what I wanted",
+      "- Set the `orphan` property to `true` to open the file/folder as an orphan process. Else, it will suspend rovr until the process is closed."
+    ],
+    "extra": "Son, it was in the master branch"
+  },
+  {
     "keys": ["settings.bulk_rename"],
     "message": [
       "The [bright_cyan]settings.bulk_rename[/] setting has been merged with [bright_blur]settings.editor.bulk_rename[/] since only one property is currently supported.",
       "This means [bright_cyan]settings.bulk_rename.show_as_mapping[/] is now [bright_blue]settings.editor.bulk_rename.show_as_mapping[/]."
-    ]
+    ],
+    "extra": "Merged in v0.9.0"
   },
   {
     "keys": ["settings.editor.open_all_in_editor"],
     "message": [
       "The [bright_cyan]settings.editor.open_all_in_editor[/] is deprecated. While in 0.9.x, it will still work, but please use [bright_blue]settings.openers.'*'[/] to define an editor to open the file with."
-    ]
+    ],
+    "extra": "Deprecated in v0.9.0"
   },
   {
     "keys": ["interface.mime_rules"],
     "message": [
       "The [bright_cyan]interface.mime_rules[/] setting has been moved to [bright_blue]settings.preview_rules[/] to be more consistent with what it does."
     ],
-    "extra": "Moved in v0.8.3 (sorry about that!)",
+    "extra": "Moved in v0.9.0",
     "regex": [
       {
         "find": "interface.mime_rules",

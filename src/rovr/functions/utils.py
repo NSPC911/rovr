@@ -183,7 +183,7 @@ def run_editor_command(
     return run_command(
         app,
         editor_config["run"] + " " + shlex.quote(target_path),
-        editor_config.get("app", "suspend"),
+        editor_config.get("orphan", True),
         on_error,
     )
 
@@ -191,44 +191,37 @@ def run_editor_command(
 def run_command(
     app: App,
     command: str,
-    mode: str,
+    orphan: bool,
     on_error: Callable[[str, str], None] | None = None,
 ) -> subprocess.CompletedProcess | None:
-    match mode:
-        case "suspend":
-            with app.suspend():
-                process = subprocess.run(command, shell=True)
-            if process.returncode != 0 and on_error:
-                on_error(f"Error Code {process.returncode}", "Editor Error")
-            return process
-        case "thread":
-            app.run_in_thread(
-                subprocess.run,
-                command,
-                capture_output=True,
-            )
-        case _:
-            import sys
+    if orphan:
+        import sys
 
-            if sys.platform == "win32":
-                subprocess.Popen(
-                    command,
-                    stdin=subprocess.DEVNULL,
-                    stdout=subprocess.DEVNULL,
-                    stderr=subprocess.DEVNULL,
-                    creationflags=subprocess.CREATE_NEW_PROCESS_GROUP
-                    | subprocess.DETACHED_PROCESS,
-                    shell=True,
-                )
-            else:
-                subprocess.Popen(
-                    command,
-                    stdin=subprocess.DEVNULL,
-                    stdout=subprocess.DEVNULL,
-                    stderr=subprocess.DEVNULL,
-                    start_new_session=True,
-                    shell=True,
-                )
+        if sys.platform == "win32":
+            subprocess.Popen(
+                command,
+                stdin=subprocess.DEVNULL,
+                stdout=subprocess.DEVNULL,
+                stderr=subprocess.DEVNULL,
+                creationflags=subprocess.CREATE_NEW_PROCESS_GROUP
+                | subprocess.DETACHED_PROCESS,
+                shell=True,
+            )
+        else:
+            subprocess.Popen(
+                command,
+                stdin=subprocess.DEVNULL,
+                stdout=subprocess.DEVNULL,
+                stderr=subprocess.DEVNULL,
+                start_new_session=True,
+                shell=True,
+            )
+    else:
+        with app.suspend():
+            process = subprocess.run(command, shell=True)
+        if process.returncode != 0 and on_error:
+            on_error(f"Error Code {process.returncode}", "Editor Error")
+        return process
 
 
 def dismiss(

@@ -371,9 +371,9 @@ class FileList(
                             utils.run_command(
                                 self.app,
                                 runner,
-                                opener.get("app", "orphan")
+                                opener.get("orphan", True)
                                 if isinstance(opener, dict)
-                                else "orphan",
+                                else True,
                             )
                             opened = True
                             break

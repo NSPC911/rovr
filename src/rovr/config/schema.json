@@ -90,10 +90,6 @@
           "description": "Only enable this menu item if the selected item is a directory (set to true) or a file (set to false) (if unspecified, matches both files and directories)"
         }
       }
-    },
-    "thread_orphan_suspend": {
-      "type": "string",
-      "enum": ["thread", "orphan", "suspend"]
     }
   },
   "properties": {
@@ -357,9 +353,10 @@
                   "default": "$EDITOR",
                   "description": "Editor to use when opening a file"
                 },
-                "app": {
-                  "$ref": "#/definitions/thread_orphan_suspend",
-                  "description": "How the app should wait for the editor to close:\n`thread`: Open editor in a background thread. It will close when rovr closes.\n`orphan`: Open editor orphaned, which means when rovr exits, the editor is still running.\n`suspend`: Suspend (hide) rovr until the editor closes."
+                "orphan": {
+                  "type": "boolean",
+                  "default": true,
+                  "description": "Whether to open the editor as an orphan process."
                 }
               },
               "description": "Editor to use when opening a file",
@@ -374,9 +371,10 @@
                   "default": "$EDITOR",
                   "description": "Editor to use when opening a folder"
                 },
-                "app": {
-                  "$ref": "#/definitions/thread_orphan_suspend",
-                  "description": "How the app should wait for the editor to close:\n`thread`: Open editor in a background thread. It will close when rovr closes.\n`orphan`: Open editor orphaned, which means when rovr exits, the editor is still running.\n`suspend`: Suspend (hide) rovr until the editor closes."
+                "orphan": {
+                  "type": "boolean",
+                  "default": true,
+                  "description": "Whether to open the editor as an orphan process."
                 }
               },
               "description": "Editor to use when opening a folder",
@@ -461,9 +459,10 @@
                       "$ref": "#/definitions/opener_if",
                       "description": "Only use this opener if a set criteria matches"
                     },
-                    "app": {
-                      "$ref": "#/definitions/thread_orphan_suspend",
-                      "description": "How the app should wait for the opener to close:\n`thread`: Open editor in a background thread. It will close when rovr closes.\n`orphan`: Open opener orphaned, which means when rovr exits, the opener is still running.\n`suspend`: Suspend (hide) rovr until the opener closes."
+                    "orphan": {
+                      "type": "boolean",
+                      "default": true,
+                      "description": "Whether to open the opener as an orphan process."
                     },
                     "name": {
                       "type": "string",

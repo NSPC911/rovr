@@ -85,9 +85,24 @@ description: config schema humanified
     - [2.5.3. Property `Rovr Config > settings > editor > bulk_rename`](#settings_editor_bulk_rename)
       - [2.5.3.1. Property `Rovr Config > settings > editor > bulk_rename > run`](#settings_editor_bulk_rename_run)
       - [2.5.3.2. Property `Rovr Config > settings > editor > bulk_rename > app`](#settings_editor_bulk_rename_app)
-    - [2.5.4. Property `Rovr Config > settings > editor > open_all_in_editor`](#settings_editor_open_all_in_editor)
   - [2.6. Property `Rovr Config > settings > preview_rules`](#settings_preview_rules)
     - [2.6.1. Property `Rovr Config > settings > preview_rules > additionalProperties`](#settings_preview_rules_additionalProperties)
+  - [2.7. Property `Rovr Config > settings > openers`](#settings_openers)
+    - [2.7.1. Property `Rovr Config > settings > openers > additionalProperties`](#settings_openers_additionalProperties)
+      - [2.7.1.1. Rovr Config > settings > openers > additionalProperties > additionalProperties items](#settings_openers_additionalProperties_items)
+        - [2.7.1.1.1. Property `Rovr Config > settings > openers > additionalProperties > additionalProperties items > oneOf > item 0`](#settings_openers_additionalProperties_items_oneOf_i0)
+        - [2.7.1.1.2. Property `Rovr Config > settings > openers > additionalProperties > additionalProperties items > oneOf > item 1`](#settings_openers_additionalProperties_items_oneOf_i1)
+          - [2.7.1.1.2.1. Property `Rovr Config > settings > openers > additionalProperties > additionalProperties items > oneOf > item 1 > run`](#settings_openers_additionalProperties_items_oneOf_i1_run)
+          - [2.7.1.1.2.2. Property `Rovr Config > settings > openers > additionalProperties > additionalProperties items > oneOf > item 1 > if`](#settings_openers_additionalProperties_items_oneOf_i1_if)
+            - [2.7.1.1.2.2.1. Property `Rovr Config > settings > openers > additionalProperties > additionalProperties items > oneOf > item 1 > if > cwd`](#settings_openers_additionalProperties_items_oneOf_i1_if_cwd)
+              - [2.7.1.1.2.2.1.1. Rovr Config > settings > openers > additionalProperties > additionalProperties items > oneOf > item 1 > if > cwd > cwd items](#settings_openers_additionalProperties_items_oneOf_i1_if_cwd_items)
+            - [2.7.1.1.2.2.2. Property `Rovr Config > settings > openers > additionalProperties > additionalProperties items > oneOf > item 1 > if > os`](#settings_openers_additionalProperties_items_oneOf_i1_if_os)
+              - [2.7.1.1.2.2.2.1. Rovr Config > settings > openers > additionalProperties > additionalProperties items > oneOf > item 1 > if > os > os items](#settings_openers_additionalProperties_items_oneOf_i1_if_os_items)
+                - [2.7.1.1.2.2.2.1.1. Property `Rovr Config > settings > openers > additionalProperties > additionalProperties items > oneOf > item 1 > if > os > os items > anyOf > item 0`](#settings_openers_additionalProperties_items_oneOf_i1_if_os_items_anyOf_i0)
+                - [2.7.1.1.2.2.2.1.2. Property `Rovr Config > settings > openers > additionalProperties > additionalProperties items > oneOf > item 1 > if > os > os items > anyOf > item 1`](#settings_openers_additionalProperties_items_oneOf_i1_if_os_items_anyOf_i1)
+            - [2.7.1.1.2.2.3. Property `Rovr Config > settings > openers > additionalProperties > additionalProperties items > oneOf > item 1 > if > directory`](#settings_openers_additionalProperties_items_oneOf_i1_if_directory)
+          - [2.7.1.1.2.3. Property `Rovr Config > settings > openers > additionalProperties > additionalProperties items > oneOf > item 1 > app`](#settings_openers_additionalProperties_items_oneOf_i1_app)
+          - [2.7.1.1.2.4. Property `Rovr Config > settings > openers > additionalProperties > additionalProperties items > oneOf > item 1 > name`](#settings_openers_additionalProperties_items_oneOf_i1_name)
 - [3. Property `Rovr Config > metadata`](#metadata)
   - [3.1. Property `Rovr Config > metadata > fields`](#metadata_fields)
     - [3.1.1. Rovr Config > metadata > fields > fields items](#metadata_fields_items)
@@ -822,6 +837,7 @@ Must be one of:
 | [bulk_rename](#settings_bulk_rename)                       | object          |                                                                                                                                                                                                                         |
 | [editor](#settings_editor)                                 | object          | Settings related to the editor used for different operations                                                                                                                                                            |
 | [preview_rules](#settings_preview_rules)                   | object          | Map MIME type patterns to preview types. Uses regex patterns. Valid preview types: text, image, pdf, archive, folder, resvg, font, remime.<br />-&gt; Use 'remime' if you want a more accurate description from file(1) |
+| [openers](#settings_openers)                               | object          | A list of openers to open files with. These are used to open files, what were you expecting.<br />Key must be a valid glob pattern, but the value has to be a list that can contain a mix of strings and objects        |
 
 ### <a name="settings_use_recycle_bin"></a>2.1. Property `Rovr Config > settings > use_recycle_bin`
 
@@ -1328,12 +1344,11 @@ Must be one of:
 
 **Description:** Settings related to the editor used for different operations
 
-| Property                                                  | Type    | Title/Description                                                                                                                     |
-| --------------------------------------------------------- | ------- | ------------------------------------------------------------------------------------------------------------------------------------- |
-| [file](#settings_editor_file)                             | object  | Editor to use when opening a file                                                                                                     |
-| [folder](#settings_editor_folder)                         | object  | Editor to use when opening a folder                                                                                                   |
-| [bulk_rename](#settings_editor_bulk_rename)               | object  | Editor to use for bulk renaming                                                                                                       |
-| [open_all_in_editor](#settings_editor_open_all_in_editor) | boolean | Open all in the configured editor, regardless of file encoding or type. When disabled, it opens them in the system configured editor. |
+| Property                                    | Type   | Title/Description                   |
+| ------------------------------------------- | ------ | ----------------------------------- |
+| [file](#settings_editor_file)               | object | Editor to use when opening a file   |
+| [folder](#settings_editor_folder)           | object | Editor to use when opening a folder |
+| [bulk_rename](#settings_editor_bulk_rename) | object | Editor to use for bulk renaming     |
 
 #### <a name="settings_editor_file"></a>2.5.1. Property `Rovr Config > settings > editor > file`
 
@@ -1437,7 +1452,7 @@ Must be one of:
 |              |             |
 | ------------ | ----------- |
 | **Type**     | `string`    |
-| **Required** | Yes         |
+| **Required** | No          |
 | **Default**  | `"$EDITOR"` |
 
 **Description:** Editor to use for bulk renaming
@@ -1447,7 +1462,7 @@ Must be one of:
 |              |                    |
 | ------------ | ------------------ |
 | **Type**     | `enum (of string)` |
-| **Required** | Yes                |
+| **Required** | No                 |
 
 **Description:** How the app should wait for the editor to close:
 `block`: Block rovr until the editor closes.
@@ -1457,16 +1472,6 @@ Must be one of:
 
 - "block"
 - "suspend"
-
-#### <a name="settings_editor_open_all_in_editor"></a>2.5.4. Property `Rovr Config > settings > editor > open_all_in_editor`
-
-|              |           |
-| ------------ | --------- |
-| **Type**     | `boolean` |
-| **Required** | No        |
-| **Default**  | `false`   |
-
-**Description:** Open all in the configured editor, regardless of file encoding or type. When disabled, it opens them in the system configured editor.
 
 ### <a name="settings_preview_rules"></a>2.6. Property `Rovr Config > settings > preview_rules`
 
@@ -1501,6 +1506,213 @@ Must be one of:
 - "remime"
 - "resvg"
 - "font"
+
+### <a name="settings_openers"></a>2.7. Property `Rovr Config > settings > openers`
+
+|                           |                                                                                               |
+| ------------------------- | --------------------------------------------------------------------------------------------- |
+| **Type**                  | `object`                                                                                      |
+| **Required**              | No                                                                                            |
+| **Additional properties** | [Each additional property must conform to the schema](#settings_openers_additionalProperties) |
+
+**Description:** A list of openers to open files with. These are used to open files, what were you expecting.
+Key must be a valid glob pattern, but the value has to be a list that can contain a mix of strings and objects
+
+| Property                                   | Type  | Title/Description |
+| ------------------------------------------ | ----- | ----------------- |
+| [](#settings_openers_additionalProperties) | array |                   |
+
+#### <a name="settings_openers_additionalProperties"></a>2.7.1. Property `Rovr Config > settings > openers > additionalProperties`
+
+|              |         |
+| ------------ | ------- |
+| **Type**     | `array` |
+| **Required** | No      |
+
+|                      | Array restrictions |
+| -------------------- | ------------------ |
+| **Min items**        | N/A                |
+| **Max items**        | N/A                |
+| **Items unicity**    | False              |
+| **Additional items** | False              |
+| **Tuple validation** | See below          |
+
+| Each item of this array must be                                            | Description |
+| -------------------------------------------------------------------------- | ----------- |
+| [additionalProperties items](#settings_openers_additionalProperties_items) |             |
+
+##### <a name="settings_openers_additionalProperties_items"></a>2.7.1.1. Rovr Config > settings > openers > additionalProperties > additionalProperties items
+
+|                           |                  |
+| ------------------------- | ---------------- |
+| **Type**                  | `combining`      |
+| **Required**              | No               |
+| **Additional properties** | Any type allowed |
+
+| One of(Option)                                                  |
+| --------------------------------------------------------------- |
+| [item 0](#settings_openers_additionalProperties_items_oneOf_i0) |
+| [item 1](#settings_openers_additionalProperties_items_oneOf_i1) |
+
+###### <a name="settings_openers_additionalProperties_items_oneOf_i0"></a>2.7.1.1.1. Property `Rovr Config > settings > openers > additionalProperties > additionalProperties items > oneOf > item 0`
+
+|              |          |
+| ------------ | -------- |
+| **Type**     | `string` |
+| **Required** | No       |
+
+###### <a name="settings_openers_additionalProperties_items_oneOf_i1"></a>2.7.1.1.2. Property `Rovr Config > settings > openers > additionalProperties > additionalProperties items > oneOf > item 1`
+
+|                           |             |
+| ------------------------- | ----------- |
+| **Type**                  | `object`    |
+| **Required**              | No          |
+| **Additional properties** | Not allowed |
+
+| Property                                                           | Type             | Title/Description                                                                                                                                                                                                                                                    |
+| ------------------------------------------------------------------ | ---------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| [run](#settings_openers_additionalProperties_items_oneOf_i1_run)   | string           | The command to run to open the file. Command expansions are supported.                                                                                                                                                                                               |
+| [if](#settings_openers_additionalProperties_items_oneOf_i1_if)     | object           | Only use this opener if a set criteria matches                                                                                                                                                                                                                       |
+| [app](#settings_openers_additionalProperties_items_oneOf_i1_app)   | enum (of string) | How the app should wait for the opener to close:<br />\`block\`: Block rovr until the opener closes.<br />\`orphan\`: Open opener orphaned, which means when rovr exits, the opener is still running.<br />\`suspend\`: Suspend (hide) rovr until the opener closes. |
+| [name](#settings_openers_additionalProperties_items_oneOf_i1_name) | string           | The name of the opener to show in the menu (currently unused)                                                                                                                                                                                                        |
+
+###### <a name="settings_openers_additionalProperties_items_oneOf_i1_run"></a>2.7.1.1.2.1. Property `Rovr Config > settings > openers > additionalProperties > additionalProperties items > oneOf > item 1 > run`
+
+|              |          |
+| ------------ | -------- |
+| **Type**     | `string` |
+| **Required** | Yes      |
+
+**Description:** The command to run to open the file. Command expansions are supported.
+
+###### <a name="settings_openers_additionalProperties_items_oneOf_i1_if"></a>2.7.1.1.2.2. Property `Rovr Config > settings > openers > additionalProperties > additionalProperties items > oneOf > item 1 > if`
+
+|                           |                         |
+| ------------------------- | ----------------------- |
+| **Type**                  | `object`                |
+| **Required**              | No                      |
+| **Additional properties** | Not allowed             |
+| **Defined in**            | #/definitions/opener_if |
+
+**Description:** Only use this opener if a set criteria matches
+
+| Property                                                                        | Type            | Title/Description                                                                                                                                                                    |
+| ------------------------------------------------------------------------------- | --------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| [cwd](#settings_openers_additionalProperties_items_oneOf_i1_if_cwd)             | array of string | Only use this opener if the current working directory matches one (or more) of the glob patterns in this list (look at https://docs.python.org/3/library/fnmatch.html for more info) |
+| [os](#settings_openers_additionalProperties_items_oneOf_i1_if_os)               | array of string | Only use this opener if the operating system is one of the following (case insensitive)                                                                                              |
+| [directory](#settings_openers_additionalProperties_items_oneOf_i1_if_directory) | boolean         | Only use this opener if the selected item is a directory (set to true) or a file (set to false) (if unspecified, matches both files and directories)                                 |
+
+###### <a name="settings_openers_additionalProperties_items_oneOf_i1_if_cwd"></a>2.7.1.1.2.2.1. Property `Rovr Config > settings > openers > additionalProperties > additionalProperties items > oneOf > item 1 > if > cwd`
+
+|              |                   |
+| ------------ | ----------------- |
+| **Type**     | `array of string` |
+| **Required** | No                |
+
+**Description:** Only use this opener if the current working directory matches one (or more) of the glob patterns in this list (look at https://docs.python.org/3/library/fnmatch.html for more info)
+
+|                      | Array restrictions |
+| -------------------- | ------------------ |
+| **Min items**        | N/A                |
+| **Max items**        | N/A                |
+| **Items unicity**    | False              |
+| **Additional items** | False              |
+| **Tuple validation** | See below          |
+
+| Each item of this array must be                                                 | Description |
+| ------------------------------------------------------------------------------- | ----------- |
+| [cwd items](#settings_openers_additionalProperties_items_oneOf_i1_if_cwd_items) |             |
+
+###### <a name="settings_openers_additionalProperties_items_oneOf_i1_if_cwd_items"></a>2.7.1.1.2.2.1.1. Rovr Config > settings > openers > additionalProperties > additionalProperties items > oneOf > item 1 > if > cwd > cwd items
+
+|              |          |
+| ------------ | -------- |
+| **Type**     | `string` |
+| **Required** | No       |
+
+###### <a name="settings_openers_additionalProperties_items_oneOf_i1_if_os"></a>2.7.1.1.2.2.2. Property `Rovr Config > settings > openers > additionalProperties > additionalProperties items > oneOf > item 1 > if > os`
+
+|              |                   |
+| ------------ | ----------------- |
+| **Type**     | `array of string` |
+| **Required** | No                |
+
+**Description:** Only use this opener if the operating system is one of the following (case insensitive)
+
+|                      | Array restrictions |
+| -------------------- | ------------------ |
+| **Min items**        | N/A                |
+| **Max items**        | N/A                |
+| **Items unicity**    | False              |
+| **Additional items** | False              |
+| **Tuple validation** | See below          |
+
+| Each item of this array must be                                               | Description |
+| ----------------------------------------------------------------------------- | ----------- |
+| [os items](#settings_openers_additionalProperties_items_oneOf_i1_if_os_items) |             |
+
+###### <a name="settings_openers_additionalProperties_items_oneOf_i1_if_os_items"></a>2.7.1.1.2.2.2.1. Rovr Config > settings > openers > additionalProperties > additionalProperties items > oneOf > item 1 > if > os > os items
+
+|              |             |
+| ------------ | ----------- |
+| **Type**     | `combining` |
+| **Required** | No          |
+
+| Any of(Option)                                                                       |
+| ------------------------------------------------------------------------------------ |
+| [item 0](#settings_openers_additionalProperties_items_oneOf_i1_if_os_items_anyOf_i0) |
+| [item 1](#settings_openers_additionalProperties_items_oneOf_i1_if_os_items_anyOf_i1) |
+
+###### <a name="settings_openers_additionalProperties_items_oneOf_i1_if_os_items_anyOf_i0"></a>2.7.1.1.2.2.2.1.1. Property `Rovr Config > settings > openers > additionalProperties > additionalProperties items > oneOf > item 1 > if > os > os items > anyOf > item 0`
+
+|              |                    |
+| ------------ | ------------------ |
+| **Type**     | `enum (of string)` |
+| **Required** | No                 |
+
+Must be one of:
+
+- "Windows"
+- "Linux"
+- "Darwin"
+
+###### <a name="settings_openers_additionalProperties_items_oneOf_i1_if_os_items_anyOf_i1"></a>2.7.1.1.2.2.2.1.2. Property `Rovr Config > settings > openers > additionalProperties > additionalProperties items > oneOf > item 1 > if > os > os items > anyOf > item 1`
+
+|              |          |
+| ------------ | -------- |
+| **Type**     | `string` |
+| **Required** | No       |
+
+###### <a name="settings_openers_additionalProperties_items_oneOf_i1_if_directory"></a>2.7.1.1.2.2.3. Property `Rovr Config > settings > openers > additionalProperties > additionalProperties items > oneOf > item 1 > if > directory`
+
+|              |           |
+| ------------ | --------- |
+| **Type**     | `boolean` |
+| **Required** | No        |
+
+**Description:** Only use this opener if the selected item is a directory (set to true) or a file (set to false) (if unspecified, matches both files and directories)
+
+###### <a name="settings_openers_additionalProperties_items_oneOf_i1_app"></a>2.7.1.1.2.3. Property `Rovr Config > settings > openers > additionalProperties > additionalProperties items > oneOf > item 1 > app`
+
+|                        |                                  |
+| ---------------------- | -------------------------------- |
+| **Type**               | `enum (of string)`               |
+| **Required**           | No                               |
+| **Same definition as** | [app](#settings_editor_file_app) |
+
+**Description:** How the app should wait for the opener to close:
+`block`: Block rovr until the opener closes.
+`orphan`: Open opener orphaned, which means when rovr exits, the opener is still running.
+`suspend`: Suspend (hide) rovr until the opener closes.
+
+###### <a name="settings_openers_additionalProperties_items_oneOf_i1_name"></a>2.7.1.1.2.4. Property `Rovr Config > settings > openers > additionalProperties > additionalProperties items > oneOf > item 1 > name`
+
+|              |          |
+| ------------ | -------- |
+| **Type**     | `string` |
+| **Required** | No       |
+
+**Description:** The name of the opener to show in the menu (currently unused)
 
 ## <a name="metadata"></a>3. Property `Rovr Config > metadata`
 

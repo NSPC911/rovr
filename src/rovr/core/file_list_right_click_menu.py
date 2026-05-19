@@ -11,6 +11,7 @@ from textual.reactive import reactive
 from textual.widgets import OptionList
 
 from rovr.classes.config import (
+    _OpenerIf,
     _RightClickIf,
     _RovrConfigSettingsRightClickItem,
     _RovrConfigSettingsRightClickItemOptionsItem,
@@ -22,7 +23,7 @@ from rovr.functions.utils import check_key, expand_command, is_archive
 from rovr.variables.constants import bindings, config, os_type
 
 
-def ifed(app: App, conditions: _RightClickIf) -> bool:
+def ifed(app: App, conditions: _RightClickIf | _OpenerIf) -> bool:
     """Checks if the conditions for an option are met, used to determine if an option should be disabled
 
     Args:
@@ -44,7 +45,7 @@ def ifed(app: App, conditions: _RightClickIf) -> bool:
                 disabled = not (
                     any(
                         dir_entry and fnmatch(dir_entry.path, pattern)
-                        for pattern in conditions["path"]
+                        for pattern in conditions.get("path", [])
                     )
                 )
             case "os":

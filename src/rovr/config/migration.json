@@ -1,5 +1,11 @@
 [
   {
+    "keys": ["settings.editor.open_all_in_editor"],
+    "message": [
+      "The [bright_cyan]settings.editor.open_all_in_editor[/] is deprecated. While in 0.9.x, it will still work, but please use [bright_blue]settings.openers.'*'[/] to define an editor to open the file with."
+    ]
+  },
+  {
     "keys": ["interface.mime_rules"],
     "message": [
       "The [bright_cyan]interface.mime_rules[/] setting has been moved to [bright_blue]settings.preview_rules[/] to be more consistent with what it does."

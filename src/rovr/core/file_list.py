@@ -1,5 +1,7 @@
 from contextlib import suppress
 from os import getcwd, path
+from shlex import split as shplit
+from shutil import which
 from typing import Callable, ClassVar, Iterable, Self, Sequence
 
 from textual import events, work
@@ -29,7 +31,7 @@ from rovr.variables.constants import (
     config,
 )
 
-from .file_list_right_click_menu import FileListRightClickMenu
+from .file_list_right_click_menu import FileListRightClickMenu, ifed
 
 
 class FileList(
@@ -333,7 +335,9 @@ class FileList(
     async def file_selected_handler(self, target_path: str) -> None:
         if self.app._chooser_file:
             self.call_next(self.app.action_quit)
-        elif config["settings"]["editor"]["open_all_in_editor"]:
+            return
+
+        if config["settings"]["editor"].get("open_all_in_editor", False):
             editor_config = config["settings"]["editor"]["file"]
 
             def on_error(message: str, title: str) -> None:
@@ -349,9 +353,37 @@ class FileList(
                     severity="error",
                     markup=False,
                 )
-        else:
+            return
+
+        opened = False
+        if config["settings"].get("openers"):
+            from fnmatch import fnmatch
+
+            for pattern, openers in config["settings"]["openers"].items():
+                if fnmatch(target_path, pattern):
+                    for opener in openers:
+                        if not isinstance(opener, str) and not ifed(
+                            self.app, opener.get("if", {})
+                        ):
+                            continue
+                        runner = opener if isinstance(opener, str) else opener["run"]
+                        if which(shplit(runner)[0]):
+                            utils.run_command(
+                                self.app,
+                                runner,
+                                opener.get("app", "orphan")
+                                if isinstance(opener, dict)
+                                else "orphan",
+                            )
+                            opened = True
+                            break
+                    if opened:
+                        break
+
+        if not opened:
             path_utils.open_file(self.app, target_path)
 
+    @work
     async def on_selection_list_selected_changed(
         self, event: SelectionList.SelectedChanged
     ) -> None:

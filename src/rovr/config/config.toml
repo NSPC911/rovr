@@ -102,11 +102,11 @@ right_click = [
 "text/.*" = "text"
 "font/.*" = "font"
 
+[settings.openers]
+# unset for the end user
+
 [settings.bulk_rename]
 show_as_mapping = true
-
-[settings.editor]
-open_all_in_editor = false
 
 [settings.editor.file]
 run = "$EDITOR"

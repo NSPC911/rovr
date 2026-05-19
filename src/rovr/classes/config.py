@@ -29,6 +29,30 @@ _BLOCKORPHANSUSPEND_SUSPEND: Literal["suspend"] = "suspend"
 r"""The values for the '_BlockOrphanSuspend' enum"""
 
 
+class _OpenerIf(TypedDict, total=False):
+    cwd: list[str]
+    r""" Only use this opener if the current working directory matches one (or more) of the glob patterns in this list (look at https://docs.python.org/3/library/fnmatch.html for more info) """
+
+    os: list["_OpenerIfOsItem"]
+    r""" Only use this opener if the operating system is one of the following (case insensitive) """
+
+    directory: bool
+    r""" Only use this opener if the selected item is a directory (set to true) or a file (set to false) (if unspecified, matches both files and directories) """
+
+
+_OpenerIfOsItem = Union["_OpenerIfOsItemAnyof0", str]
+r""" Aggregation type: anyOf """
+
+
+_OpenerIfOsItemAnyof0 = Literal["Windows"] | Literal["Linux"] | Literal["Darwin"]
+_OPENERIFOSITEMANYOF0_WINDOWS: Literal["Windows"] = "Windows"
+r"""The values for the '_OpenerIfOsItemAnyof0' enum"""
+_OPENERIFOSITEMANYOF0_LINUX: Literal["Linux"] = "Linux"
+r"""The values for the '_OpenerIfOsItemAnyof0' enum"""
+_OPENERIFOSITEMANYOF0_DARWIN: Literal["Darwin"] = "Darwin"
+r"""The values for the '_OpenerIfOsItemAnyof0' enum"""
+
+
 _ROVR_CONFIG_ICONS_FILES_DEFAULT: list[Any] = []
 r""" Default value of the field path 'Rovr Config icons files' """
 
@@ -297,10 +321,6 @@ r""" Default value of the field path 'Rovr Config settings editor file run' """
 
 _ROVR_CONFIG_SETTINGS_EDITOR_FOLDER_RUN_DEFAULT = "$EDITOR"
 r""" Default value of the field path 'Rovr Config settings editor folder run' """
-
-
-_ROVR_CONFIG_SETTINGS_EDITOR_OPEN_ALL_IN_EDITOR_DEFAULT = False
-r""" Default value of the field path 'Rovr Config settings editor open_all_in_editor' """
 
 
 _ROVR_CONFIG_SETTINGS_PREVIEW_RULES_DEFAULT = {
@@ -1431,6 +1451,12 @@ class _RovrConfigSettings(TypedDict, total=False):
       text/.*: text
     """
 
+    openers: dict[str, list["_RovrConfigSettingsOpenersAdditionalpropertiesItem"]]
+    r"""
+    A list of openers to open files with. These are used to open files, what were you expecting.
+    Key must be a valid glob pattern, but the value has to be a list that can contain a mix of strings and objects
+    """
+
 
 class _RovrConfigSettingsBulkRename(TypedDict, total=False):
     show_as_mapping: bool
@@ -1453,33 +1479,22 @@ class _RovrConfigSettingsEditor(TypedDict, total=False):
     bulk_rename: "_RovrConfigSettingsEditorBulkRename"
     r""" Editor to use for bulk renaming """
 
-    open_all_in_editor: bool
-    r"""
-    Open all in the configured editor, regardless of file encoding or type. When disabled, it opens them in the system configured editor.
-
-    default: False
-    """
-
 
 class _RovrConfigSettingsEditorBulkRename(TypedDict, total=False):
     r"""Editor to use for bulk renaming"""
 
-    run: Required[str]
+    run: str
     r"""
     Editor to use for bulk renaming
 
     default: $EDITOR
-
-    Required property
     """
 
-    app: Required["_RovrConfigSettingsEditorBulkRenameApp"]
+    app: "_RovrConfigSettingsEditorBulkRenameApp"
     r"""
     How the app should wait for the editor to close:
     `block`: Block rovr until the editor closes.
     `suspend`: Suspend (hide) rovr until the editor closes.
-
-    Required property
     """
 
 
@@ -1525,6 +1540,28 @@ class _RovrConfigSettingsEditorFolder(TypedDict, total=False):
 
     app: Required["_BlockOrphanSuspend"]
     r""" Required property """
+
+
+_RovrConfigSettingsOpenersAdditionalpropertiesItem = Union[
+    str, "_RovrConfigSettingsOpenersAdditionalpropertiesItemOneof1"
+]
+r""" Aggregation type: oneOf """
+
+
+_RovrConfigSettingsOpenersAdditionalpropertiesItemOneof1 = TypedDict(
+    "_RovrConfigSettingsOpenersAdditionalpropertiesItemOneof1",
+    {
+        # | The command to run to open the file. Command expansions are supported.
+        # |
+        # | Required property
+        "run": Required[str],
+        "if": "_OpenerIf",
+        "app": "_BlockOrphanSuspend",
+        # | The name of the opener to show in the menu (currently unused)
+        "name": str,
+    },
+    total=False,
+)
 
 
 _RovrConfigSettingsPreviewRulesAdditionalproperties = (

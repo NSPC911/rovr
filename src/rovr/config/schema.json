@@ -34,6 +34,32 @@
         }
       ]
     },
+    "opener_if": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "cwd": {
+          "description": "Only use this opener if the current working directory matches one (or more) of the glob patterns in this list (look at https://docs.python.org/3/library/fnmatch.html for more info)",
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "os": {
+          "description": "Only use this opener if the operating system is one of the following (case insensitive)",
+          "type": "array",
+          "items": {
+            "type": "string",
+            "anyOf": [
+              { "enum": ["Windows", "Linux", "Darwin"] },
+              { "type": "string" }
+            ]
+          }
+        },
+        "directory": {
+          "type": "boolean",
+          "description": "Only use this opener if the selected item is a directory (set to true) or a file (set to false) (if unspecified, matches both files and directories)"
+        }
+      }
+    },
     "right_click_if": {
       "type": "object",
       "additionalProperties": false,
@@ -382,13 +408,7 @@
                   "description": "How the app should wait for the editor to close:\n`block`: Block rovr until the editor closes.\n`suspend`: Suspend (hide) rovr until the editor closes."
                 }
               },
-              "description": "Editor to use for bulk renaming",
-              "required": ["run", "app"]
-            },
-            "open_all_in_editor": {
-              "type": "boolean",
-              "default": false,
-              "description": "Open all in the configured editor, regardless of file encoding or type. When disabled, it opens them in the system configured editor."
+              "description": "Editor to use for bulk renaming"
             }
           }
         },
@@ -429,6 +449,43 @@
             "application/x-font-.*": "font"
           },
           "description": "Map MIME type patterns to preview types. Uses regex patterns. Valid preview types: text, image, pdf, archive, folder, resvg, font, remime.\n-> Use 'remime' if you want a more accurate description from file(1)"
+        },
+        "openers": {
+          "type": "object",
+          "description": "A list of openers to open files with. These are used to open files, what were you expecting.\nKey must be a valid glob pattern, but the value has to be a list that can contain a mix of strings and objects",
+          "additionalProperties": {
+            "type": "array",
+            "items": {
+              "oneOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "properties": {
+                    "run": {
+                      "type": "string",
+                      "description": "The command to run to open the file. Command expansions are supported."
+                    },
+                    "if": {
+                      "$ref": "#/definitions/opener_if",
+                      "description": "Only use this opener if a set criteria matches"
+                    },
+                    "app": {
+                      "$ref": "#/definitions/block_orphan_suspend",
+                      "description": "How the app should wait for the opener to close:\n`block`: Block rovr until the opener closes.\n`orphan`: Open opener orphaned, which means when rovr exits, the opener is still running.\n`suspend`: Suspend (hide) rovr until the opener closes."
+                    },
+                    "name": {
+                      "type": "string",
+                      "description": "The name of the opener to show in the menu (currently unused)"
+                    }
+                  },
+                  "required": ["run"]
+                }
+              ]
+            }
+          }
         }
       }
     },

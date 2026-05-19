@@ -5,7 +5,6 @@ import shlex
 import subprocess
 from contextlib import suppress
 from functools import lru_cache
-from shutil import which
 from typing import Callable, Literal
 
 from humanize import naturalsize
@@ -163,7 +162,7 @@ def get_shortest_bind(binds: list[str]) -> str:
 
 
 def run_editor_command(
-    app: DOMNode,
+    app: App,
     editor_config: _RovrConfigSettingsEditorFile
     | _RovrConfigSettingsEditorFolder
     | _RovrConfigSettingsEditorBulkRename,
@@ -181,23 +180,33 @@ def run_editor_command(
     Returns:
         CompletedProcess if command was run synchronously, None if run in thread.
     """
-    command = shlex.split(editor_config["run"]) + [target_path]
-    # expand first part because path
-    command = [which(command[0])] + command[1:]
+    return run_command(
+        app,
+        editor_config["run"] + " " + shlex.quote(target_path),
+        editor_config.get("app", "suspend"),
+        on_error,
+    )
 
-    match editor_config.get("app", "orphan"):
+
+def run_command(
+    app: App,
+    command: str,
+    mode: str,
+    on_error: Callable[[str, str], None] | None = None,
+) -> subprocess.CompletedProcess | None:
+    match mode:
         case "suspend":
             with app.suspend():
-                process = subprocess.run(command)
+                process = subprocess.run(command, shell=True)
             if process.returncode != 0 and on_error:
                 on_error(f"Error Code {process.returncode}", "Editor Error")
             return process
         case "block":
-            process = subprocess.run(command, capture_output=True)
+            process = subprocess.run(command, capture_output=True, shell=True)
             if process.returncode != 0 and on_error:
                 on_error(process.stderr.decode(), f"Error Code {process.returncode}")
             return process
-        case "orphan":
+        case _:
             import sys
 
             if sys.platform == "win32":
@@ -208,6 +217,7 @@ def run_editor_command(
                     stderr=subprocess.DEVNULL,
                     creationflags=subprocess.CREATE_NEW_PROCESS_GROUP
                     | subprocess.DETACHED_PROCESS,
+                    shell=True,
                 )
             else:
                 subprocess.Popen(
@@ -216,6 +226,7 @@ def run_editor_command(
                     stdout=subprocess.DEVNULL,
                     stderr=subprocess.DEVNULL,
                     start_new_session=True,
+                    shell=True,
                 )
             return None
 

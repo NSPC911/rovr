@@ -1023,12 +1023,12 @@ LoadingIndicator {
     max-width: 3;
   }
 }
-#root.comfy-buttons Screen.-no-preview #below_menu PathAutoCompleteInput,
-#root.comfy-buttons Screen.-filelist-only #below_menu PathAutoCompleteInput {
+Screen.-no-preview #root.comfy-buttons #below_menu PathAutoCompleteInput,
+Screen.-filelist-only #root.comfy-buttons #below_menu PathAutoCompleteInput {
   margin: -1 1 0 1
 }
-#root.compact-buttons Screen.-no-preview #below_menu PathAutoCompleteInput,
-#root.compact-buttons Screen.-filelist-only #below_menu PathAutoCompleteInput {
+Screen.-no-preview #root.compact-buttons #below_menu PathAutoCompleteInput,
+Screen.-filelist-only #root.compact-buttons #below_menu PathAutoCompleteInput {
   margin: -1 -1 0 -1
 }
 Screen.-filelist-only,

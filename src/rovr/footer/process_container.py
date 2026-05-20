@@ -8,13 +8,14 @@ from typing import Callable, Literal, cast
 
 from multiarchive import Archive
 from send2trash import send2trash
-from textual import events, work
+from textual import work
 from textual.color import Gradient
 from textual.containers import HorizontalGroup, VerticalGroup, VerticalScroll
 from textual.renderables.bar import Bar as BarRenderable
 from textual.types import UnusedParameter
 from textual.widgets import Label, ProgressBar
 
+from rovr.classes.mixins import Action, Actionable
 from rovr.functions import icons as icon_utils
 from rovr.functions import path as path_utils
 from rovr.functions.utils import is_being_used
@@ -148,11 +149,12 @@ class ProgressBarContainer(VerticalGroup, inherit_bindings=False):
         self.app.Clipboard.checker_wrapper()
 
 
-class ProcessContainer(VerticalScroll):
+class ProcessContainer(Actionable, VerticalScroll):
     def __init__(self) -> None:
         super().__init__(id="processes")
         self.has_perm_error: bool = False
         self.has_in_use_error: bool = False
+        self.ACTIONS: list[Action] = [Action("delete", config["keybinds"]["delete"])]
 
     async def new_process_bar(
         self, max: int | None = None, id: str | None = None, classes: str | None = None
@@ -1324,11 +1326,6 @@ class ProcessContainer(VerticalScroll):
         )
         self.app.call_from_thread(bar.progress_bar.advance)
         self.app.call_from_thread(bar.add_class, "done")
-
-    def on_key(self, event: events.Key) -> None:
-        if event.key in config["keybinds"]["delete"]:
-            event.stop()
-            self.action_delete()
 
     def action_delete(self) -> None:
         self.remove_children(".done")

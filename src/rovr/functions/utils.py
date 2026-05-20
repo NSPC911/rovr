@@ -228,9 +228,7 @@ def dismiss(
     screen: Screen, result: ScreenResultType | None = None, event: Message | None = None
 ) -> None:
     if event is not None:
-        event.prevent_default()
-        event.stop()
-        event._set_forwarded()
+        event.prevent_default().stop()._set_forwarded()
 
     if screen in screen.app.screen_stack:
         with suppress(ScreenStackError):

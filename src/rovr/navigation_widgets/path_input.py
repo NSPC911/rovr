@@ -9,6 +9,7 @@ from textual.validation import Function
 from textual.widgets import Input
 from textual_autocomplete import DropdownItem, PathAutoComplete, TargetState
 
+from rovr.classes.mixins import Action, Actionable
 from rovr.classes.textual_options import PathDropdownItem
 from rovr.functions.icons import get_icon
 from rovr.functions.utils import check_key
@@ -298,7 +299,7 @@ class PathAutoCompleteInput(PathAutoComplete):
         self.post_completion()
 
 
-class PathInput(Input, inherit_bindings=False):
+class PathInput(Actionable, Input, inherit_bindings=False):
     ALLOW_MAXIMIZE = False
     BINDINGS: ClassVar[list[BindingType]] = [
         Binding("left", "cursor_left", "Move cursor left", show=False),
@@ -364,6 +365,10 @@ class PathInput(Input, inherit_bindings=False):
             validate_on=["changed"],
             select_on_focus=False,
         )
+        self.ACTIONS: list[Action] = [
+            Action(self.action_delete_left, "backspace"),
+            Action(self.app.file_list.focus, "escape"),
+        ]
 
     def on_mount(self) -> None:
         self.auto_completer = self.app.query_one(PathAutoCompleteInput)
@@ -378,13 +383,8 @@ class PathInput(Input, inherit_bindings=False):
             self.notify("Path provided is not valid.", severity="error")
         self.app.file_list.focus()
 
-    def on_key(self, event: events.Key) -> None:
-        if event.key == "backspace":
-            # might be used for back history, so force the behaviour
-            self.action_delete_left()
-        elif event.key == "escape":
-            self.app.file_list.focus()
-        elif len(event.key) != 1 and not event.is_printable:
+    async def on_key(self, event: events.Key) -> None:
+        if len(event.key) != 1 and not event.is_printable:
             if check_key(event, config["keybinds"]["toggle_all"]):
                 self.select_all()
             elif check_key(event, config["keybinds"]["home"]):
@@ -399,7 +399,6 @@ class PathInput(Input, inherit_bindings=False):
                 return
         else:
             return
-        event.stop()
 
     def on_blur(self) -> None:
         self.auto_completer.action_hide()

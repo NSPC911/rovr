@@ -1,11 +1,15 @@
+from typing import Any, Awaitable, Callable, NamedTuple
+
 from rich.segment import Segment
 from rich.style import Style
+from textual.events import Key
 from textual.geometry import Region, Size
 from textual.strip import Strip
 from textual.widgets import OptionList
 from textual.widgets.option_list import OptionDoesNotExist
 
 from rovr.functions import icons as icon_utils
+from rovr.functions.utils import check_key
 from rovr.variables.constants import config
 
 
@@ -219,3 +223,38 @@ class ScrollOffMixin:
                 top=top,
                 immediate=True,
             )
+
+
+class Action(NamedTuple):
+    action: str | Callable[[], Any]
+    match_keys: str | list[str]
+    only_if: bool | Callable[[], bool] = True
+
+
+class Actionable:
+    ACTIONS: list[Action]
+
+    async def on_key(self, event: Key) -> None:
+        from inspect import isawaitable
+
+        if not hasattr(self, "ACTIONS"):
+            return
+        for action in self.ACTIONS:
+            if check_key(event, action.match_keys) and (
+                action.only_if() if callable(action.only_if) else action.only_if
+            ):
+                if not isinstance(action.action, str):
+                    func: Callable[[], Any] = action.action
+                else:
+                    func: Callable[[], Any] = getattr(
+                        self, f"action_{action.action}", lambda: None
+                    )
+                    if not callable(func):
+                        continue
+                result: Any | Awaitable = func()
+                if isawaitable(result):
+                    await result
+                event.prevent_default().stop()
+                return
+        if hasattr(super(), "on_key"):
+            await super().on_key(event)

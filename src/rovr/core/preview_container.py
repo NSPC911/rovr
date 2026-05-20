@@ -7,7 +7,7 @@ from functools import partial
 from io import BytesIO
 from os import path
 from time import time
-from typing import Literal, cast
+from typing import cast
 
 import textual_image.renderable
 import textual_image.widget
@@ -25,6 +25,7 @@ from textual.message import Message
 from textual.widgets import Static
 from textual.widgets.selection_list import Selection
 
+from rovr.classes.mixins import Action, Actionable
 from rovr.classes.textual_options import (
     ArchiveFileListSelection,
     FileListSelectionWidget,
@@ -127,8 +128,13 @@ class LoadingPreview(Static):
         self.on_mount()
 
 
-class PreviewContainer(Container):
+class PreviewContainer(Actionable, Container):
     LOADER_WIDGET = LoadingPreview()
+
+    ACTIONS: list[Action] = [
+        Action(action, config["keybinds"][action])
+        for action in ("up", "down", "page_up", "page_down", "home", "end")
+    ]
 
     @dataclass
     class SetLoading(Message):
@@ -1236,26 +1242,6 @@ class PreviewContainer(Container):
             self._pending_preview_args = None
             self.show_preview(pending[0], pending[1])
 
-    def on_key(self, event: events.Key) -> None:
-        """Check for vim keybinds."""
-        from rovr.functions.utils import check_key
-
-        if (
-            check_key(event, config["keybinds"]["up"])
-            and self.action_up() is None
-            or check_key(event, config["keybinds"]["down"])
-            and self.action_down() is None
-            or check_key(event, config["keybinds"]["page_up"])
-            and self.action_page_up() is None
-            or check_key(event, config["keybinds"]["page_down"])
-            and self.action_page_down() is None
-            or check_key(event, config["keybinds"]["home"])
-            and self.action_home() is None
-            or check_key(event, config["keybinds"]["end"])
-            and self.action_end() is None
-        ):
-            event.stop()
-
     def on_click(self, event: events.Click) -> None:
         if event.widget is self and self.children:
             self.children[-1].focus()
@@ -1263,62 +1249,50 @@ class PreviewContainer(Container):
     def _is_pdf(self) -> bool:
         return self.border_title == titles.pdf and self._file_type == "pdf"
 
-    def action_up(self) -> Literal[False] | None:
+    def action_up(self) -> None:
         if self._is_pdf() and self.pdf.images is not None:
             self.update_current_pdf_page_by_diff(-1)
         elif self.border_title == titles.archive and (
             filelist := self.get_child(FileList)
         ):
             filelist.scroll_up(animate=False)
-        else:
-            return False
 
-    def action_down(self) -> Literal[False] | None:
+    def action_down(self) -> None:
         if self._is_pdf() and self.pdf.images is not None:
             self.update_current_pdf_page_by_diff(1)
         elif self.border_title == titles.archive and (
             filelist := self.get_child(FileList)
         ):
             filelist.scroll_down(animate=False)
-        else:
-            return False
 
-    def action_page_up(self) -> Literal[False] | None:  # ty: ignore[invalid-method-override]
+    def action_page_up(self) -> None:
         if self._is_pdf() and self.pdf.images is not None:
             self.update_current_pdf_page_by_diff(-1)
         elif self.border_title == titles.archive and (
             filelist := self.get_child(FileList)
         ):
             filelist.scroll_page_up(animate=False)
-        else:
-            return False
 
-    def action_page_down(self) -> Literal[False] | None:  # ty: ignore[invalid-method-override]
+    def action_page_down(self) -> None:
         if self._is_pdf() and self.pdf.images is not None:
             self.update_current_pdf_page_by_diff(1)
         elif self.border_title == titles.archive and (
             filelist := self.get_child(FileList)
         ):
             filelist.scroll_page_down(animate=False)
-        else:
-            return False
 
-    def action_home(self) -> Literal[False] | None:
+    def action_home(self) -> None:
         if self._is_pdf() and self.pdf.images is not None:
             self.update_current_pdf_page(0)
         elif self.border_title == titles.archive and (
             filelist := self.get_child(FileList)
         ):
             filelist.scroll_home(animate=False)
-        else:
-            return False
 
-    def action_end(self) -> Literal[False] | None:
+    def action_end(self) -> None:
         if self._is_pdf() and self.pdf.images is not None:
             self.update_current_pdf_page(self.pdf.total_pages - 1)
         elif self.border_title == titles.archive and (
             filelist := self.get_child(FileList)
         ):
             filelist.scroll_end(animate=False)
-        else:
-            return False

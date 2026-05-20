@@ -2,12 +2,13 @@ import multiprocessing
 from os import R_OK, access, path
 from typing import ClassVar, cast
 
-from textual import events, work
+from textual import work
 from textual.binding import BindingType
 from textual.widgets import Input, OptionList
 from textual.widgets.option_list import Option
 
 from rovr.classes.exceptions import FolderNotFileError
+from rovr.classes.mixins import Action, Actionable
 from rovr.classes.textual_options import PinnedSidebarOption
 from rovr.functions import drive_workers as drive_utils
 from rovr.functions import icons as icon_utils
@@ -17,10 +18,11 @@ from rovr.functions.utils import multiprocessing_process_error_checker
 from rovr.variables.constants import bindings, config, os_type
 
 
-class PinnedSidebar(OptionList, inherit_bindings=False):
+class PinnedSidebar(Actionable, OptionList, inherit_bindings=False):
     # Just so that I can disable space
     BINDINGS: ClassVar[list[BindingType]] = list(bindings)
     DRIVES: list[str] = []
+    ACTIONS: list[Action] = [Action("focus_search", config["keybinds"]["focus_search"])]
 
     @work(exclusive=True, thread=True)
     def reload_pins(self) -> None:
@@ -232,10 +234,6 @@ class PinnedSidebar(OptionList, inherit_bindings=False):
                 self.set_options(self.list_of_options)
                 if event.option.id:
                     self.highlighted = self.get_option_index(event.option.id)
-
-    def on_key(self, event: events.Key) -> None:
-        if event.key in config["keybinds"]["focus_search"]:
-            self.action_focus_search()
 
     def action_focus_search(self) -> None:
         self.input.focus()

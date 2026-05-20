@@ -5,7 +5,8 @@ from textual.message import Message
 from textual.screen import ModalScreen
 from textual.widgets import Button, Label, Switch
 
-from rovr.functions.utils import check_key, dismiss, get_shortest_bind
+from rovr.classes.mixins import Action, Actionable
+from rovr.functions.utils import dismiss, get_shortest_bind
 from rovr.variables.constants import config
 
 yes_bind = get_shortest_bind(config["keybinds"]["yes_or_no"]["yes"])
@@ -13,7 +14,7 @@ no_bind = get_shortest_bind(config["keybinds"]["yes_or_no"]["no"])
 dont_ask_bind = get_shortest_bind(config["keybinds"]["yes_or_no"]["dont_ask_again"])
 
 
-class YesOrNo(ModalScreen):
+class YesOrNo(Actionable, ModalScreen):
     """Screen with a dialog that asks whether you accept or deny"""
 
     def __init__(
@@ -30,6 +31,17 @@ class YesOrNo(ModalScreen):
         self.with_toggle = with_toggle
         self.border_title = border_title
         self.border_subtitle = border_subtitle
+        self.ACTIONS: list[Action] = [
+            Action(part, config["keybinds"]["yes_or_no"][part])
+            for part in ("yes", "no")
+        ]
+        self.ACTIONS.append(
+            Action(
+                "dont_ask_again",
+                config["keybinds"]["yes_or_no"]["dont_ask_again"],
+                self.with_toggle,
+            )
+        )
 
     def compose(self) -> ComposeResult:
         with Grid(id="dialog", classes="yes_or_no"):
@@ -67,20 +79,6 @@ class YesOrNo(ModalScreen):
             # ie click outside
             self.action_no(event)
 
-    def on_key(self, event: events.Key) -> None:
-        """Handle key presses."""
-        if check_key(event, config["keybinds"]["yes_or_no"]["yes"]):
-            self.action_yes(event)
-        elif check_key(event, config["keybinds"]["yes_or_no"]["no"]):
-            self.action_no(event)
-        elif self.with_toggle and check_key(
-            event, config["keybinds"]["yes_or_no"]["dont_ask_again"]
-        ):
-            self.action_toggle_dont_ask_again()
-        else:
-            return
-        event.stop()
-
     def action_yes(self, event: Message | None = None) -> None:
         dismiss(
             self,
@@ -99,6 +97,6 @@ class YesOrNo(ModalScreen):
             event,
         )
 
-    def action_toggle_dont_ask_again(self) -> None:
+    def action_dont_ask_again(self) -> None:
         if self.with_toggle:
             self.query_one(Switch).action_toggle_switch()

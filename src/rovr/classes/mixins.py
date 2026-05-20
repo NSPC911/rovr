@@ -246,8 +246,8 @@ class Actionable:
                 if not isinstance(action.action, str):
                     func: Callable[[], Any] = action.action
                 else:
-                    func: Callable[[], Any] = getattr(
-                        self, f"action_{action.action}", lambda: None
+                    func: Callable[[], Any] | None = getattr(
+                        self, f"action_{action.action}"
                     )
                     if not callable(func):
                         continue
@@ -256,5 +256,3 @@ class Actionable:
                     await result
                 event.prevent_default().stop()
                 return
-        if hasattr(super(), "on_key"):
-            await super().on_key(event)

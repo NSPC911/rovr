@@ -47,6 +47,7 @@ from rovr.action_buttons import (
     ZipButton,
 )
 from rovr.action_buttons.sort_order import SortOrderButton
+from rovr.classes.mixins import Action, Actionable
 from rovr.classes.type_aliases import DirEntryType
 from rovr.components.popup_option_list import PopupOptionList
 from rovr.core import (
@@ -84,7 +85,42 @@ if constants.SCREENSHOT_LOCATION:
     constants.SCREENSHOT_LOCATION = normalise(getcwd(), constants.SCREENSHOT_LOCATION)
 
 
-class Application(App, inherit_bindings=False):
+class Application(Actionable, App, inherit_bindings=False):
+    # our own form of BINDINGS that utilises check_key
+    # key: str the action to use
+    # value: bool or callable that returns bool,
+    #        whether the keybind can be used or not
+    ACTIONS: list[Action] = [
+        Action(action, config["keybinds"][action])
+        for action in (
+            "focus_toggle_pinned_sidebar",
+            "focus_file_list",
+            "focus_toggle_preview_sidebar",
+            "focus_toggle_path_switcher",
+            "focus_toggle_processes",
+            "focus_toggle_metadata",
+            "focus_toggle_clipboard",
+            "toggle_pinned_sidebar",
+            "toggle_preview_sidebar",
+            "toggle_footer",
+            "toggle_menu_wrapper",
+            "tab_next",
+            "tab_previous",
+            "tab_new",
+            "tab_close",
+            "show_keybinds",
+            "show_shell_screen",
+            "suspend_process",
+        )
+    ] + [
+        Action(action, config["plugins"][plugin]["keybinds"])
+        for action, plugin in (
+            ("plugin_zoxide", "zoxide"),
+            ("plugin_fd", "fd"),
+            ("plugin_rg", "rg"),
+        )
+    ]
+
     # dont need ctrl+c
     BINDINGS = [
         Binding(
@@ -330,8 +366,6 @@ class Application(App, inherit_bindings=False):
             super().action_focus_previous()
 
     async def on_key(self, event: events.Key) -> None:
-        from rovr.functions.utils import check_key
-
         # show key
         if self._show_keys:
             with suppress(NoMatches):
@@ -346,11 +380,14 @@ class Application(App, inherit_bindings=False):
                     f"\nUsing: {using}"
                 )
 
-        # Not really sure why this can happen, but I will still handle this
-        if self.focused is None or not isinstance(self.focused.parent, DOMNode):
-            return
         # if current screen isn't the app screen
         if len(self.screen_stack) != 1:
+            event.prevent_default()
+            await self._on_key(event)
+            return
+        # Not really sure why this can happen, but I will still handle this
+        if self.focused is None or not isinstance(self.focused.parent, DOMNode):
+            event.prevent_default()
             return
         # Make sure that key binds don't break
         # placeholder, not yet existing
@@ -359,66 +396,14 @@ class Application(App, inherit_bindings=False):
                 self.file_list.focus()
             elif self._focused_id == "search_pinned_sidebar":
                 self.query_one("#pinned_sidebar").focus()
-            return
+            event.prevent_default()
         # backspace is used by default bindings to head up in history
         # so just avoid it
         elif event.key == "backspace" and (
             isinstance(self.focused, Input)
             or (self.focused.id and "search" in self.focused.id)
         ):
-            return
-        # focus toggle pinned sidebar
-        elif check_key(event, config["keybinds"]["focus_toggle_pinned_sidebar"]):
-            self.action_focus_toggle_pinned_sidebar()
-        # Focus file list from anywhere except input
-        elif check_key(event, config["keybinds"]["focus_file_list"]):
-            self.action_focus_file_list()
-        # Focus toggle preview sidebar
-        elif check_key(event, config["keybinds"]["focus_toggle_preview_sidebar"]):
-            self.action_focus_toggle_preview_sidebar()
-        # Focus path switcher
-        elif check_key(event, config["keybinds"]["focus_toggle_path_switcher"]):
-            self.action_focus_path_switcher()
-        # Focus processes
-        elif check_key(event, config["keybinds"]["focus_toggle_processes"]):
-            self.action_focus_toggle_processes()
-        # Focus metadata
-        elif check_key(event, config["keybinds"]["focus_toggle_metadata"]):
-            self.action_focus_toggle_metadata()
-        # Focus clipboard
-        elif check_key(event, config["keybinds"]["focus_toggle_clipboard"]):
-            self.action_focus_toggle_clipboard()
-        # Toggle hiding panels
-        elif check_key(event, config["keybinds"]["toggle_pinned_sidebar"]):
-            self.action_toggle_pinned_sidebar()
-        elif check_key(event, config["keybinds"]["toggle_preview_sidebar"]):
-            self.action_toggle_preview_sidebar()
-        elif check_key(event, config["keybinds"]["toggle_footer"]):
-            self.action_toggle_footer()
-        elif check_key(event, config["keybinds"]["toggle_menu_wrapper"]):
-            self.action_toggle_menu_wrapper()
-        elif check_key(event, config["keybinds"]["tab_next"]):
-            self.action_tab_next()
-        elif check_key(event, config["keybinds"]["tab_previous"]):
-            self.action_tab_previous()
-        elif check_key(event, config["keybinds"]["tab_new"]):
-            await self.action_tab_new()
-        elif check_key(event, config["keybinds"]["tab_close"]):
-            await self.action_tab_close()
-        elif check_key(event, config["keybinds"]["show_keybinds"]):
-            self.action_show_keybinds()
-        elif check_key(event, config["keybinds"]["show_shell_screen"]):
-            self.action_show_shell_screen()
-        # zoxide
-        elif check_key(event, config["plugins"]["zoxide"]["keybinds"]):
-            self.action_plugin_zoxide()
-        # keybinds
-        elif check_key(event, config["plugins"]["fd"]["keybinds"]):
-            self.action_plugin_fd()
-        elif check_key(event, config["plugins"]["rg"]["keybinds"]):
-            self.action_plugin_rg()
-        elif check_key(event, config["keybinds"]["suspend_process"]):
-            self.action_suspend_process()
+            event.prevent_default()
 
     @work
     async def on_shell_exec_response(
@@ -1082,8 +1067,11 @@ class Application(App, inherit_bindings=False):
         else:
             self.file_list.focus()
 
-    def action_focus_path_switcher(self) -> None:
-        self.query_one("#path_switcher").focus()
+    def action_focus_toggle_path_switcher(self) -> None:
+        if (path_switcher := self.query_one("#path_switcher")).has_focus:
+            self.file_list.focus()
+        else:
+            path_switcher.focus()
 
     def action_focus_toggle_processes(self) -> None:
         if (

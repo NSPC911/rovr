@@ -2,17 +2,23 @@ import asyncio
 from typing import Coroutine
 
 from textual import events, on
+from textual.dom import DOMNode
 from textual.screen import ModalScreen
 from textual.widgets import Input, OptionList
 from textual.worker import Worker
 
+from rovr.classes.mixins import Action, Actionable
 from rovr.classes.textual_options import ModalSearcherOption
 from rovr.components.special_option_lists import DoubleClickableOptionList
-from rovr.functions.utils import check_key, dismiss
+from rovr.functions.utils import dismiss
 from rovr.variables.constants import config
 
 
-class ModalSearchScreen(ModalScreen, inherit_bindings=False):
+def can_do_keybind(self: DOMNode) -> bool:
+    return bool(isinstance(self.focused, Input) and self.search_options.options)
+
+
+class ModalSearchScreen(Actionable, ModalScreen, inherit_bindings=False):
     """Base class for search-as-you-type modal screens."""
 
     def create_proc(
@@ -33,6 +39,31 @@ class ModalSearchScreen(ModalScreen, inherit_bindings=False):
         )
         self.search_input.focus()
         self.search_options.can_focus = False
+        self.ACTIONS: list[Action] = (
+            [
+                Action(
+                    lambda: dismiss(self, None),
+                    config["keybinds"]["filter_modal"]["exit"],
+                ),
+            ]
+            + [
+                Action(
+                    getattr(self.search_options, f"action_{part}"),
+                    config["keybinds"]["filter_modal"][another],
+                    lambda self=self: can_do_keybind(self),
+                )
+                for part, another in (
+                    ("cursor_down", "down"),
+                    ("cursor_up", "up"),
+                    ("page_down", "page_down"),
+                    ("page_up", "page_up"),
+                )
+            ]
+            + [
+                Action(self.focus_next, "tab"),
+                Action(self.focus_previous, "shift+tab"),
+            ]
+        )
 
     def on_input_submitted(self, event: Input.Submitted) -> None:
         if any(
@@ -74,41 +105,6 @@ class ModalSearchScreen(ModalScreen, inherit_bindings=False):
             dismiss(self, selected_value)
         else:
             dismiss(self, None)
-
-    def on_key(self, event: events.Key) -> None:
-        if check_key(event, config["keybinds"]["filter_modal"]["exit"]):
-            event.stop()
-            dismiss(self, None)
-        elif check_key(
-            event, config["keybinds"]["filter_modal"]["down"]
-        ) and isinstance(self.focused, Input):
-            event.stop()
-            if self.search_options.options:
-                self.search_options.action_cursor_down()
-        elif check_key(event, config["keybinds"]["filter_modal"]["up"]) and isinstance(
-            self.focused, Input
-        ):
-            event.stop()
-            if self.search_options.options:
-                self.search_options.action_cursor_up()
-        elif check_key(
-            event, config["keybinds"]["filter_modal"]["page_down"]
-        ) and isinstance(self.focused, Input):
-            event.stop()
-            if self.search_options.options:
-                self.search_options.action_page_down()
-        elif check_key(
-            event, config["keybinds"]["filter_modal"]["page_up"]
-        ) and isinstance(self.focused, Input):
-            event.stop()
-            if self.search_options.options:
-                self.search_options.action_page_up()
-        elif event.key == "tab":
-            event.stop()
-            self.focus_next()
-        elif event.key == "shift+tab":
-            event.stop()
-            self.focus_previous()
 
     def on_click(self, event: events.Click) -> None:
         if event.widget is self:

@@ -159,10 +159,12 @@ Types: `feat`, `fix`, `docs`, `style`, `refactor`, `test`, `chore`
   For example of this, check out `src/rovr/functions/preview_workers.py` and its parent file `src/rovr/core/preview_container.py`
 
 ### Author preferences
-
 - Avoid `if TYPE_CHECKING` blocks for imports; it looks bad
 - Avoid adding unnecessary comments, aim for self-documenting code instead
 - Commit with `NSPBot911 <176916861+NSPBot911@users.noreply.github.com>` to better distinguish between human and bot commits in the history.
   NEVER co-author with your provider (like `NSPBot911 <176916861+NSPBot911@users.noreply.github.com>` or `Claude Opus 4.6 <noreply@anthropic.com>`)
   You can, however, mention the provider used in the commit message, but you must use a syntax of `Used [Provider Name]: [Model Name]`
+
+### Interesting Textual Patterns
+- event handlers do not need to call their super() method. Textual implicitly handles this for you. If you don't want it to bubble to the super() method, call `prevent_default()` on the event.
 - Using `subprocess.run(shell=True)` is completely allowed, there are no security implications to worry about since the user is always in control on the config and are the only ones that can run commands.

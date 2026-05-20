@@ -14,6 +14,8 @@ from textual.widgets.option_list import OptionDoesNotExist
 from textual.widgets.selection_list import Selection, SelectionType
 
 from rovr.classes.mixins import (
+    Action,
+    Actionable,
     CheckboxRenderingMixin,
     ScrollOffMixin,
     SingleLineOptionLayoutMixin,
@@ -35,6 +37,7 @@ from .file_list_right_click_menu import FileListRightClickMenu, ifed
 
 
 class FileList(
+    Actionable,
     CheckboxRenderingMixin,
     ScrollOffMixin,
     SingleLineOptionLayoutMixin,
@@ -44,6 +47,44 @@ class FileList(
     """
     OptionList but can multi-select files and folders.
     """
+
+    ACTIONS: list[Action] = [
+        Action(action, config["keybinds"][action])
+        for action in (
+            "hist_previous",
+            "hist_next",
+            "up_tree",
+            "bypass_up_tree",
+            "bypass_down_tree",
+            "toggle_pin",
+            "copy",
+            "cut",
+            "paste",
+            "new",
+            "rename",
+            "delete",
+            "zip",
+            "unzip",
+            "focus_search",
+            "toggle_hidden_files",
+            "toggle_visual",
+            "toggle_all",
+            "select_up",
+            "select_down",
+            "select_page_up",
+            "select_page_down",
+            "select_home",
+            "select_end",
+            "open_editor",
+            "open_right_click_menu",
+        )
+    ] + [
+        Action("extra_copy_open_popup", config["keybinds"]["extra_copy"]["open_popup"]),
+        Action(
+            "change_sort_order_open_popup",
+            config["keybinds"]["change_sort_order"]["open_popup"],
+        ),
+    ]
 
     BINDINGS: ClassVar[list[BindingType]] = list(bindings)
 
@@ -553,69 +594,7 @@ class FileList(
     async def on_key(self, event: events.Key) -> None:
         """Handle key events for the file list."""
         if self.dummy:
-            return
-        from rovr.functions.utils import check_key
-
-        # hit buttons with keybinds
-        if check_key(event, config["keybinds"]["hist_previous"]):
-            self.action_hist_previous()
-        elif check_key(event, config["keybinds"]["hist_next"]):
-            self.action_hist_next()
-        elif check_key(event, config["keybinds"]["up_tree"]):
-            self.action_up_tree()
-        elif check_key(event, config["keybinds"]["bypass_up_tree"]):
-            self.action_bypass_up_tree()
-        elif check_key(event, config["keybinds"]["bypass_down_tree"]):
-            self.action_bypass_down_tree()
-        # Toggle pin on current directory
-        elif check_key(event, config["keybinds"]["toggle_pin"]):
-            self.action_toggle_pin()
-        elif check_key(event, config["keybinds"]["copy"]):
-            self.action_copy()
-        elif check_key(event, config["keybinds"]["extra_copy"]["open_popup"]):
-            await self.action_extra_copy_open_popup()
-        elif check_key(event, config["keybinds"]["cut"]):
-            self.action_cut()
-        elif check_key(event, config["keybinds"]["paste"]):
-            self.action_paste()
-        elif check_key(event, config["keybinds"]["new"]):
-            self.action_new()
-        elif check_key(event, config["keybinds"]["rename"]):
-            self.action_rename()
-        elif check_key(event, config["keybinds"]["delete"]):
-            self.action_delete()
-        elif check_key(event, config["keybinds"]["zip"]):
-            self.action_zip()
-        elif check_key(event, config["keybinds"]["unzip"]):
-            self.action_unzip()
-        # search
-        elif check_key(event, config["keybinds"]["focus_search"]):
-            self.action_focus_search()
-        # toggle hidden files
-        elif check_key(event, config["keybinds"]["toggle_hidden_files"]):
-            await self.action_toggle_hidden_files()
-        elif check_key(event, config["keybinds"]["change_sort_order"]["open_popup"]):
-            await self.action_change_sort_order_open_popup()
-        elif check_key(event, config["keybinds"]["toggle_visual"]):
-            await self.action_toggle_visual()
-        elif check_key(event, config["keybinds"]["toggle_all"]):
-            await self.action_toggle_all()
-        elif check_key(event, config["keybinds"]["select_up"]):
-            self.action_select_up()
-        elif check_key(event, config["keybinds"]["select_down"]):
-            self.action_select_down()
-        elif check_key(event, config["keybinds"]["select_page_up"]):
-            self.action_select_page_up()
-        elif check_key(event, config["keybinds"]["select_page_down"]):
-            self.action_select_page_down()
-        elif check_key(event, config["keybinds"]["select_home"]):
-            self.action_select_home()
-        elif check_key(event, config["keybinds"]["select_end"]):
-            self.action_select_end()
-        elif check_key(event, config["keybinds"]["open_editor"]):
-            self.action_open_editor()
-        elif check_key(event, config["keybinds"]["open_right_click_menu"]):
-            await self.action_open_right_click_menu()
+            event.prevent_default()
 
     def update_border_subtitle(self) -> None:
         if self.dummy or type(self.highlighted) is not int or not self.parent:

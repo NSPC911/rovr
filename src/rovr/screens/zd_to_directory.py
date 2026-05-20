@@ -1,5 +1,6 @@
 import asyncio
 import contextlib
+import subprocess
 from typing import cast
 
 from textual import on, work
@@ -63,6 +64,19 @@ class ZDToDirectory(ModalSearchScreen):
             self.log(f"Problems while parsing zoxide line - '{line}'")
             return line, None
 
+    async def _run_subprocess(
+        self, command: list[str], timeout: float
+    ) -> subprocess.CompletedProcess[bytes]:
+        result = await asyncio.to_thread(
+            subprocess.run,
+            command,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            timeout=timeout,
+            check=False,
+        )
+        return cast(subprocess.CompletedProcess[bytes], result)
+
     @work(exclusive=True)
     async def zoxide_updater(self, event: Input.Changed) -> None:
         """Update the list"""
@@ -78,14 +92,10 @@ class ZDToDirectory(ModalSearchScreen):
         zoxide_cmd.append("--")
 
         zoxide_cmd += search_term.split()
-
-        zoxide_process = None
         try:
-            zoxide_process = await self.create_proc(*zoxide_cmd)
-            stdout, _ = await asyncio.wait_for(zoxide_process.communicate(), timeout=3)
-        except (OSError, asyncio.exceptions.TimeoutError) as exc:
-            if isinstance(exc, asyncio.exceptions.TimeoutError) and zoxide_process:
-                zoxide_process.kill()
+            result = await self._run_subprocess(zoxide_cmd, 3)
+            stdout = result.stdout
+        except (OSError, subprocess.TimeoutExpired) as exc:
             # zoxide not installed
             self.search_options.clear_options()
             self.search_options.add_option(
@@ -97,16 +107,6 @@ class ZDToDirectory(ModalSearchScreen):
                     disabled=True,
                 )
             )
-            return
-        except AttributeError as exc:
-            # issue with nuitka, for some reason _asyncio.Future doesn't have a get_pid attribute
-            # so i guess we try again? I'm not honestly sure what should be done
-            self.notify(
-                f"AttributeError: {exc}\nRetrying...",
-                title="Zoxide Plugin",
-                severity="error",
-            )
-            self.zoxide_updater(event)
             return
 
         # check 2 for queue, to ignore mounting as a whole
@@ -168,15 +168,8 @@ class ZDToDirectory(ModalSearchScreen):
             dismiss(self, None)
             return None
         # ignore if zoxide got uninstalled, why are you doing this
-        with contextlib.suppress(asyncio.exceptions.TimeoutError, OSError):
-            zoxide_process = await asyncio.create_subprocess_exec(
-                "zoxide",
-                "add",
-                selected_value,
-                stdout=asyncio.subprocess.PIPE,
-                stderr=asyncio.subprocess.PIPE,
-            )
-            _, _ = await asyncio.wait_for(zoxide_process.communicate(), timeout=3)
+        with contextlib.suppress(subprocess.TimeoutExpired, OSError):
+            await self._run_subprocess(["zoxide", "add", selected_value], 3)
         if not event.option.disabled:
             dismiss(self, selected_value)
         else:

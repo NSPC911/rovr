@@ -10,6 +10,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 - `context`: add right click menu options [#279](https://github.com/NSPC911/rovr/pull/279)
 - `editor`: add support for opening editor as orphan [704400e](https://github.com/NSPC911/rovr/commit/704400e623fe2d47da432a3f6b873dd75841b8f7)
+- `shell_exec`: add command substitution support [464e71c](https://github.com/NSPC911/rovr/commit/464e71c977d48c5e599a17cc1f5b3ee1131683d2)
+- `openers`: add support for opening with a specific app [#281](https://github.com/NSPC911/rovr/pull/281)
 
 ### Fixed
 - `drives`: dont list all of them instead [8cf0822](https://github.com/NSPC911/rovr/commit/8cf0822c5f40dbe57da57af788c62cce5bc9804a)
@@ -22,11 +24,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `config`: deepmerge with custom higher in order [0aeebe9](https://github.com/NSPC911/rovr/commit/0aeebe99feaa0515139d6890fa6e6c1db5deca0b)
 - `preview`: dont hang if attempting to read a socket/fifo [2027875](https://github.com/NSPC911/rovr/commit/202787581c37693b44d36fd9a3802b52e356725e)
 - `preview`: warn if inode/preview is not directory [9400cf2](https://github.com/NSPC911/rovr/commit/9400cf216f805ebe0493701e00c990f4ee2b1b10)
+- `input`: follow screen sizes [df9923d](https://github.com/NSPC911/rovr/commit/df9923d4c36ca58edff1362d56b8d79c82a2137c)
+- `showkeys`: fix offset and other stuff [757b4c3](https://github.com/NSPC911/rovr/commit/757b4c3bd492c2da5f8a37368ad22bea14f11a67)
+- `zoxide`: dont crash with _asyncio.Future if nuitka compiled [6ad395b](https://github.com/NSPC911/rovr/commit/6ad395b4e54d86a56cd956d4e492d8536d7660b7)
 
 ### Refactor
 - `archive`: switch to external dependency [bc4c6e9](https://github.com/NSPC911/rovr/commit/bc4c6e9226762ea026835563149929ad9fde73ce)
 - `preview`!: rename `mime_rules` to `preview_rules` [36d1316](https://github.com/NSPC911/rovr/commit/36d131633a734ee118bca7e4cba2411b55e74bae)
-- `editor`!: use `app` to define what to do when editor is used [8e9b7a6455876751a0df19d1dc14be2566baa60a](https://github.com/NSPC911/rovr/commit/8e9b7a6455876751a0df19d1dc14be2566baa60a)
+- `editor`!: use `app` to define what to do when editor is used [8e9b7a6](https://github.com/NSPC911/rovr/commit/8e9b7a6455876751a0df19d1dc14be2566baa60a)
+- `app`: use a custom binding handler [#282](https://github.com/NSPC911/rovr/pull/282)
+
+### Removed
+- `editor`: remove blocked opening support (only orphan and suspend allowed) [e03a42d](https://github.com/NSPC911/rovr/commit/e03a42ddeeb5f4f05842234925b367668ca9f043) [3118230](https://github.com/NSPC911/rovr/commit/3118230559c88551a890b1d6f98f6a9bfb5b3f32)
 
 ## [0.8.2] - 2026-05-04
 

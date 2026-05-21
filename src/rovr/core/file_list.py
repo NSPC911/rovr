@@ -48,6 +48,24 @@ class FileList(
     OptionList but can multi-select files and folders.
     """
 
+    COMPONENT_CLASSES: ClassVar[set[str]] = {
+        "filelist--cut",
+        "filelist--cut--highlighted",
+        "filelist--cut--hovered",
+        "filelist--cut",
+        "filelist--cut--highlighted",
+        "filelist--cut--hovered",
+        "filelist--broken-link",
+        "filelist--broken-link--highlighted",
+        "filelist--broken-link--hovered",
+        "filelist--symlink",
+        "filelist--symlink--highlighted",
+        "filelist--symlink--hovered",
+        "filelist--hidden",
+        "filelist--hidden--highlighted",
+        "filelist--hidden--hovered",
+    }
+
     ACTIONS: list[Action] = [
         Action(action, config["keybinds"][action])
         for action in (

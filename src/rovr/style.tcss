@@ -533,6 +533,44 @@ ArchiveCreationScreen OptionList {
   }
 }
 
+FileList {
+  .filelist--hidden,
+  .filelist--hidden--hover,
+  .filelist--hidden--highlighted {
+    text-style: dim;
+  }
+
+  .filelist--cut {
+    background: $primary-background-darken-2;
+    color: $block-cursor-foreground;
+    text-style: dim
+  }
+  .filelist--cut--hover,
+  .filelist--cut--highlighted {
+    background: $primary-background;
+  }
+
+  .filelist--symlink {
+    color: $primary;
+  }
+  .filelist--symlink--hover,
+  .filelist--symlink--highlighted {
+    color: $primary;
+    background: transparent;
+  }
+
+  .filelist--broken-link {
+    background: $error;
+    color: $background;
+  }
+
+  .filelist--broken-link--hover,
+  .filelist--broken-link--highlighted {
+    background: $error-lighten-3;
+    color: $background;
+  }
+}
+
 #dialog {
   max-width: 50vw;
   max-height: 50vh;
@@ -609,8 +647,8 @@ ArchiveCreationScreen {
         border: $border-style $border;
         background: transparent !important;
         .option-list--option-highlighted {
-          background: $primary !important;
-          color: $background !important;
+          background: $primary;
+          color: $background;
         }
         &.empty {
           border: $border-style $error !important;

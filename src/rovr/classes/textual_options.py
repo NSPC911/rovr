@@ -12,7 +12,7 @@ from textual.widgets.selection_list import Selection, SelectionType
 from textual_autocomplete import DropdownItem
 
 from rovr.functions import icons as icon_utils
-from rovr.functions.path import normalise
+from rovr.functions.path import is_hidden_file, normalise
 
 _icon_content_cache: dict[tuple[str, str], Content] = {}
 IconFactory: TypeAlias = Callable[[], tuple[str, str]]
@@ -205,14 +205,30 @@ class FileListSelectionWidget(LazySelection):
         self.label = label
 
     def get_prompt(self) -> Content:
-        prompt = _get_cached_icon(self.__icon_factory()) + Content(self.__label)
+        return _get_cached_icon(self.__icon_factory()) + Content(self.__label)
+
+    def get_component_classes(self) -> list[str]:
+        classes: list[str] = []
+        file_path = self.dir_entry.path
+
+        is_symlink = self.dir_entry.is_symlink()
+        if is_symlink:
+            if path.exists(file_path):
+                classes.append("filelist--symlink")
+            else:
+                classes.append("filelist--broken-link")
+
+        if is_hidden_file(file_path):
+            classes.append("filelist--hidden")
+
         if any(
             clipboard_val.type_of_selection == "cut"
-            and normalise(self.dir_entry.path) == clipboard_val.path
+            and normalise(file_path) == clipboard_val.path
             for clipboard_val in self.__clipboard.selected
         ):
-            return prompt.stylize("dim")
-        return prompt
+            classes.append("filelist--cut")
+
+        return classes
 
     @property
     def icon(self) -> tuple[str, str]:

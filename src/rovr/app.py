@@ -404,6 +404,7 @@ class Application(Actionable, App, inherit_bindings=False):
             or (self.focused.id and "search" in self.focused.id)
         ):
             event.prevent_default()
+            await self._on_key(event)
 
     @work
     async def on_shell_exec_response(

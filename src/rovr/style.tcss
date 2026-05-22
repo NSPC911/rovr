@@ -550,11 +550,11 @@ FileList {
     background: $primary-background;
   }
 
-  .filelist--symlink {
+  .filelist--link {
     color: $primary;
   }
-  .filelist--symlink--hover,
-  .filelist--symlink--highlighted {
+  .filelist--link--hover,
+  .filelist--link--highlighted {
     color: $primary;
     background: transparent;
   }

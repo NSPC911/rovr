@@ -214,7 +214,7 @@ class FileListSelectionWidget(LazySelection):
         is_symlink = self.dir_entry.is_symlink()
         if is_symlink:
             if path.exists(file_path):
-                classes.append("filelist--symlink")
+                classes.append("filelist--link")
             else:
                 classes.append("filelist--broken-link")
 

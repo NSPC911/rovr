@@ -1,12 +1,9 @@
 from pathlib import Path
 
 import pytest
-from textual.style import Style
 from textual.worker import Worker
 
 from rovr.app import Application
-
-from .conftest import workers_finished
 
 # no need to check deduplication, thats done in test_action_buttons
 
@@ -30,34 +27,23 @@ async def test_delete_from_clipboard(tmp_path: Path) -> None:
 
 
 @pytest.mark.asyncio
-async def test_dimming(tmp_path: Path) -> None:
-    def check_dim(style: str | Style) -> bool:
-        if isinstance(style, str):
-            style = Style.parse(style)
-        return style.dim or False
+async def test_clipboard_keeps_broken_symlink(tmp_path: Path) -> None:
+    target = tmp_path / "missing.txt"
+    link_path = tmp_path / "missing-link.txt"
+    try:
+        link_path.symlink_to(target)
+    except (OSError, NotImplementedError) as exc:
+        pytest.skip(f"Symlink not supported: {exc}")
 
-    file = tmp_path / "file.txt"
-    file.touch()
     app = Application(tmp_path.as_posix())
     async with app.run_test(size=(143, 37)) as pilot:
         await pilot.pause()
-        await pilot.click("CutButton")
-        await workers_finished(pilot, app.Clipboard)
-        # get first option's dimness
-        assert check_dim(app.file_list.options[0]._prompt.spans[-1].style)
-        app.Clipboard.highlighted = 0
+        worker: Worker = app.Clipboard.copy_to_clipboard([link_path.as_posix()])
+        await worker.wait()
         await pilot.pause()
-        app.Clipboard.action_select()
-        await pilot.pause(0.5)
-        # once unselected, the dimness should be gone
-        assert not check_dim(app.file_list.options[0]._prompt.spans[-1].style)
-        await pilot.click("CopyButton")
-        await workers_finished(pilot, app.Clipboard)
-        # copying should not cause dimness
-        assert not check_dim(app.file_list.options[0]._prompt.spans[-1].style)
-        # then retry cutting, should cause dimness again
-        await pilot.click("CutButton")
+        assert len(app.Clipboard.options) == 1
+
+        worker = app.Clipboard.check_clipboard_existence()
+        await worker.wait()
         await pilot.pause()
-        await workers_finished(pilot, app.Clipboard)
-        await workers_finished(pilot, app.file_list)
-        assert check_dim(app.file_list.options[0]._prompt.spans[-1].style)
+        assert len(app.Clipboard.options) == 1

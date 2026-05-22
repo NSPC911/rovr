@@ -1,8 +1,5 @@
 # vim stuff
 
-[settings.bulk_rename]
-show_as_mapping = false
-
 [keybinds]
 toggle_pin = ["P"]
 toggle_pinned_sidebar = ["S"]
@@ -23,6 +20,7 @@ cut = ["x"]
 delete = ["d"]
 rename = ["r"]
 new = ["o"]
+bulk_create = ["O"]
 zip = ["E"]
 unzip = ["ctrl+e"]
 up = ["k", "up"]

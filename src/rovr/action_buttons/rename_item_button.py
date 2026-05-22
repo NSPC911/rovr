@@ -93,10 +93,9 @@ class RenameItemButton(Button):
             # if, IF a human got this exception, please virtually slap me.
             highlighted_file = self.app.file_list.highlighted_option.dir_entry.name
 
+            bulk_editor = config["settings"]["editor"]["bulk_editor"]
             # create file
-            show_as_mapping: bool = config["settings"]["editor"]["bulk_rename"][
-                "show_as_mapping"
-            ]
+            show_as_mapping: bool = bulk_editor["rename_show_as_mapping"]
 
             temp = NamedTemporaryFile(  # noqa: SIM115
                 "w", encoding="utf-8", delete=False
@@ -116,9 +115,6 @@ class RenameItemButton(Button):
                         temp.write(f"{selectedItem}\n")
                 temp.flush()
                 temp.close()
-
-                # spawn editor
-                bulk_editor = config["settings"]["editor"]["bulk_rename"]
 
                 def on_error(message: str, title: str) -> None:
                     self.notify(message, title=title, severity="error", markup=False)

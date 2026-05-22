@@ -186,6 +186,8 @@ def run_command(
             )
     else:
         with app.suspend():
+            if globals().get("is_dev", False):
+                print(command)
             process = subprocess.run(command, shell=shell)
         if process.returncode != 0 and on_error:
             on_error(f"Error Code {process.returncode}", "Editor Error")

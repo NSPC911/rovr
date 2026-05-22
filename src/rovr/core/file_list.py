@@ -62,6 +62,7 @@ class FileList(
             "cut",
             "paste",
             "new",
+            "bulk_create",
             "rename",
             "delete",
             "zip",
@@ -750,6 +751,9 @@ class FileList(
 
     def action_new(self) -> None:
         self.app.query_one("#new").action_press()
+
+    async def action_bulk_create(self) -> None:
+        self.app.query_one("#new").action_bulk_create()
 
     def action_rename(self) -> None:
         self.app.query_one("#rename").action_press()

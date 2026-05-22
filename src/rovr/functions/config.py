@@ -611,7 +611,7 @@ def load_config() -> tuple[dict, RovrConfig]:
         # sixel for some weird unknown reason
         config_dict["interface"]["image_viewer"]["protocol"] = ""
 
-    for key in ["file", "folder", "bulk_rename"]:
+    for key in ["file", "folder", "bulk_editor"]:
         raw_run = config_dict["settings"]["editor"][key]["run"]
         expanded_run = os.path.expandvars(raw_run)
         if expanded_run == raw_run and any(

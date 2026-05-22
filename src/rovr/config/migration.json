@@ -1,5 +1,31 @@
 [
   {
+    "keys": ["settings.editor.bulk_rename"],
+    "message": [
+      "The [bright_cyan]settings.editor.bulk_rename[/] has been renamed to [bright_cyan]settings.editor.bulk_[b]editor[/][/] to give way for a bulk creator"
+    ],
+    "extra": "Renamed in v0.9.0",
+    "regex": [
+      {
+        "find": "settings.editor.bulk_rename",
+        "replace": "settings.editor.bulk_editor"
+      }
+    ]
+  },
+  {
+    "keys": ["settings.editor.bulk_rename.show_as_mapping"],
+    "message": [
+      "The [bright_cyan]settings.editor.bulk_rename.show_as_mapping[/] has been renamed to [bright_cyan]settings.editor.bulk_editor.rename_show_as_mapping[/] to reflect the change in the parent setting."
+    ],
+    "extra": "Renamed in v0.9.0",
+    "regex": [
+      {
+        "find": "settings.editor.bulk_rename.show_as_mapping",
+        "replace": "settings.editor.bulk_editor.rename_show_as_mapping"
+      }
+    ]
+  },
+  {
     "keys": ["settings.editor.file.block", "settings.editor.file.suspend", "settings.editor.folder.block", "settings.editor.folder.suspend", "settings.editor.bulk_rename.suspend"],
     "message": [
       "You can no longer block the UI when opening a file or folder. You can either open it as an orphan process or suspend the app.",

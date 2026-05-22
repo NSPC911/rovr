@@ -380,22 +380,22 @@
               "description": "Editor to use when opening a folder",
               "required": ["run", "orphan"]
             },
-            "bulk_rename": {
+            "bulk_editor": {
               "type": "object",
               "additionalProperties": false,
               "properties": {
                 "run": {
                   "type": "string",
                   "default": "$EDITOR",
-                  "description": "Editor to use for bulk renaming"
+                  "description": "Editor to use for bulk editing"
                 },
-                "show_as_mapping": {
+                "rename_show_as_mapping": {
                   "type": "boolean",
                   "default": true,
-                  "description": "Show as a mapping of `<old> ➔ <new>` instead of just `<old>`"
+                  "description": "When doing a bulk rename, show as a mapping of `<old> ➔ <new>` instead of just showing only the new names"
                 }
               },
-              "description": "Editor to use for bulk renaming"
+              "description": "Editor to use for bulk editing"
             }
           }
         },
@@ -832,6 +832,11 @@
           "$ref": "#/definitions/keybind",
           "description": "Create a new item in the current directory.",
           "display_name": "New"
+        },
+        "bulk_create": {
+          "$ref": "#/definitions/keybind",
+          "description": "Bulk create files or folders using an editor list.",
+          "display_name": "Bulk create"
         },
         "toggle_all": {
           "$ref": "#/definitions/keybind",

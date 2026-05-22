@@ -298,12 +298,12 @@ _ROVR_CONFIG_SETTINGS_COPY_INCLUDES_METADATA_DEFAULT = True
 r""" Default value of the field path 'Rovr Config settings copy_includes_metadata' """
 
 
-_ROVR_CONFIG_SETTINGS_EDITOR_BULK_RENAME_RUN_DEFAULT = "$EDITOR"
-r""" Default value of the field path 'Rovr Config settings editor bulk_rename run' """
+_ROVR_CONFIG_SETTINGS_EDITOR_BULK_EDITOR_RENAME_SHOW_AS_MAPPING_DEFAULT = True
+r""" Default value of the field path 'Rovr Config settings editor bulk_editor rename_show_as_mapping' """
 
 
-_ROVR_CONFIG_SETTINGS_EDITOR_BULK_RENAME_SHOW_AS_MAPPING_DEFAULT = True
-r""" Default value of the field path 'Rovr Config settings editor bulk_rename show_as_mapping' """
+_ROVR_CONFIG_SETTINGS_EDITOR_BULK_EDITOR_RUN_DEFAULT = "$EDITOR"
+r""" Default value of the field path 'Rovr Config settings editor bulk_editor run' """
 
 
 _ROVR_CONFIG_SETTINGS_EDITOR_FILE_ORPHAN_DEFAULT = True
@@ -937,6 +937,7 @@ class _RovrConfigKeybinds(TypedDict, total=False):
 
     rename: list[str]
     new: list[str]
+    bulk_create: list[str]
     toggle_all: list[str]
     zip: list[str]
     unzip: list[str]
@@ -1469,23 +1470,23 @@ class _RovrConfigSettingsEditor(TypedDict, total=False):
     folder: "_RovrConfigSettingsEditorFolder"
     r""" Editor to use when opening a folder """
 
-    bulk_rename: "_RovrConfigSettingsEditorBulkRename"
-    r""" Editor to use for bulk renaming """
+    bulk_editor: "_RovrConfigSettingsEditorBulkEditor"
+    r""" Editor to use for bulk editing """
 
 
-class _RovrConfigSettingsEditorBulkRename(TypedDict, total=False):
-    r"""Editor to use for bulk renaming"""
+class _RovrConfigSettingsEditorBulkEditor(TypedDict, total=False):
+    r"""Editor to use for bulk editing"""
 
     run: str
     r"""
-    Editor to use for bulk renaming
+    Editor to use for bulk editing
 
     default: $EDITOR
     """
 
-    show_as_mapping: bool
+    rename_show_as_mapping: bool
     r"""
-    Show as a mapping of `<old> ➔ <new>` instead of just `<old>`
+    When doing a bulk rename, show as a mapping of `<old> ➔ <new>` instead of just showing only the new names
 
     default: True
     """

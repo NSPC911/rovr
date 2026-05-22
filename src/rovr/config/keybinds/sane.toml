@@ -1,8 +1,5 @@
 # Sane stuff
 
-[settings.bulk_rename]
-show_as_mapping = true
-
 [keybinds]
 toggle_pin = ["P"]
 toggle_pinned_sidebar = ["S"]
@@ -24,6 +21,7 @@ cut = ["ctrl+x"]
 delete = ["delete"]
 rename = ["f2"]
 new = ["ctrl+n"]
+bulk_create = ["ctrl+shift+n"]
 # off standard but seems reasonable enough
 zip = ["E"]
 unzip = ["ctrl+e"]

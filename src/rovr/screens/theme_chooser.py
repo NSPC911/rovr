@@ -17,7 +17,17 @@ default_themes_path = (
 custom_theme_path: Path = Path(RovrVars.ROVRCONFIG) / "themes"
 
 
-def extract_var(var: str, css: str) -> str | None:
+# clearly made with codex im sorry for those AI purists
+def extract_var(css: str) -> dict[str, str]:
+    """
+    Extracts variable definitions from the given CSS string.
+
+    Args:
+        css (str): The CSS string to extract variables from.
+
+    Returns:
+        dict[str, str]: A dictionary mapping variable names to their values.
+    """
     import re
 
     variable_pattern = re.compile(
@@ -106,10 +116,12 @@ def extract_var(var: str, css: str) -> str | None:
         return "".join(output)
 
     stripped_css = scrub_css(css)
+    results: dict[str, str] = {}
     for match in variable_pattern.finditer(stripped_css):
-        if match.group("name") == var:
-            return match.group("value").strip()
-    return None
+        name = match.group("name")
+        value = match.group("value").strip()
+        results[name] = value
+    return results
 
 
 class ThemeChooser(ModalSearchScreen):

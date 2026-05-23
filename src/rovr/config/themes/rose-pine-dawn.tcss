@@ -1,0 +1,22 @@
+$name: rose-pine-dawn;
+$primary: #907aa9;
+$secondary: #286983;
+$accent: #d7827e;
+$warning: #ea9d34;
+$error: #b4637a;
+$success: #56949f;
+$foreground: #575279;
+$background: #faf4ed;
+$surface: #fffaf3;
+$panel: #f2e9e1;
+$dark: false;
+
+/* other vars */
+$input-cursor-background: #575279;
+$input-selection-background: #dfdad9;
+$border: #cecacd;
+$border-blurred: #9893a5;
+$footer-background: #f2e9e1;
+$block-cursor-foreground: #faf4ed;
+$block-cursor-text-style: none;
+$block-cursor-background: #575279;

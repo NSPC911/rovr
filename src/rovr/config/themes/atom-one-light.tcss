@@ -1,0 +1,14 @@
+$name: atom-one-light;
+$primary: #4078F2;
+$secondary: #A626A4;
+$accent: #bf9232;
+$warning: #D8D938;
+$error: #F23F3F;
+$success: #6CF23F;
+$foreground: #383A42;
+$background: #FAFAFA;
+$surface: #E0E0E0;
+$panel: #CCCCCC;
+$dark: false;
+$luminosity-spread: 0.15;
+$text-alpha: 0.95;

@@ -1,0 +1,18 @@
+$name: flexoki;
+$primary: #205EA6;
+$secondary: #24837B;
+$accent: #9B76C8;
+$warning: #AD8301;
+$error: #AF3029;
+$success: #66800B;
+$background: #100F0F;
+$surface: #1C1B1A;
+$panel: #282726;
+$foreground: #FFFCF0;
+$dark: true;
+
+/* other vars */
+$input-cursor-foreground: #5E409D;
+$input-cursor-background: #FFFCF0;
+$input-selection-background: #6F6E69 35%;
+$button-color-foreground: #FFFCF0;

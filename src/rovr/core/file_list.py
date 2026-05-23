@@ -1,3 +1,4 @@
+import shlex
 from contextlib import suppress
 from os import getcwd, path
 from shlex import split as shplit
@@ -385,7 +386,12 @@ class FileList(
                 self.notify(message, title=title, severity="error", markup=False)
 
             try:
-                utils.run_editor_command(self.app, editor_config, target_path, on_error)
+                utils.run_command(
+                    self.app,
+                    shlex.split(editor_config["run"]) + [target_path],
+                    orphan=editor_config.get("orphan", True),
+                    on_error=on_error,
+                )
             except Exception as exc:
                 path_utils.dump_exc(self, exc)
                 self.notify(
@@ -908,11 +914,11 @@ class FileList(
                 editor_config = config["settings"]["editor"]["file"]
 
             try:
-                utils.run_editor_command(
+                utils.run_command(
                     self.app,
-                    editor_config,
-                    target_path,
-                    lambda message, title: self.notify(
+                    shlex.split(editor_config["run"]) + [target_path],
+                    orphan=editor_config.get("orphan", True),
+                    on_error=lambda message, title: self.notify(
                         message=message, title=title, severity="error", markup=False
                     ),
                 )

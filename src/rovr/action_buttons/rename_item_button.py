@@ -126,7 +126,7 @@ class RenameItemButton(Button):
                 try:
                     run_command(
                         self.app,
-                        bulk_editor["run"] + shlex.quote(temp_path),
+                        shlex.split(bulk_editor["run"]) + [temp_path],
                         orphan=False,
                         on_error=on_error,
                     )

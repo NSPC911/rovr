@@ -1,7 +1,6 @@
 import multiprocessing
 import os
 import re
-import shlex
 import subprocess
 from contextlib import suppress
 from functools import lru_cache
@@ -16,11 +15,6 @@ from textual.screen import Screen, ScreenResultType
 from textual.worker import NoActiveWorker, WorkerCancelled, get_current_worker
 
 from rovr import pprint
-from rovr.classes.config import (
-    _RovrConfigSettingsEditorBulkRename,
-    _RovrConfigSettingsEditorFile,
-    _RovrConfigSettingsEditorFolder,
-)
 
 
 def deep_merge(old: dict, new: dict) -> dict:
@@ -161,37 +155,11 @@ def get_shortest_bind(binds: list[str]) -> str:
     return least_len[1]
 
 
-def run_editor_command(
-    app: App,
-    editor_config: _RovrConfigSettingsEditorFile
-    | _RovrConfigSettingsEditorFolder
-    | _RovrConfigSettingsEditorBulkRename,
-    target_path: str,
-    on_error: Callable[[str, str], None] | None = None,
-) -> subprocess.CompletedProcess | None:
-    """Run an editor command based on configuration.
-
-    Args:
-        app: The Textual app instance (needed for suspend/run_in_thread).
-        editor_config: Configuration dict with 'run', 'suspend', and optionally 'block' keys.
-        target_path: The file/folder path to open in the editor.
-        on_error: Optional callback for error handling, receives (message, title).
-
-    Returns:
-        CompletedProcess if command was run synchronously, None if run in thread or orphaned.
-    """
-    return run_command(
-        app,
-        editor_config["run"] + " " + shlex.quote(target_path),
-        editor_config.get("orphan", True),
-        on_error,
-    )
-
-
 def run_command(
     app: App,
-    command: str,
+    command: str | list[str],
     orphan: bool,
+    shell: bool = True,
     on_error: Callable[[str, str], None] | None = None,
 ) -> subprocess.CompletedProcess | None:
     if orphan:
@@ -205,7 +173,7 @@ def run_command(
                 stderr=subprocess.DEVNULL,
                 creationflags=subprocess.CREATE_NEW_PROCESS_GROUP
                 | subprocess.DETACHED_PROCESS,
-                shell=True,
+                shell=shell,
             )
         else:
             subprocess.Popen(
@@ -214,11 +182,11 @@ def run_command(
                 stdout=subprocess.DEVNULL,
                 stderr=subprocess.DEVNULL,
                 start_new_session=True,
-                shell=True,
+                shell=shell,
             )
     else:
         with app.suspend():
-            process = subprocess.run(command, shell=True)
+            process = subprocess.run(command, shell=shell)
         if process.returncode != 0 and on_error:
             on_error(f"Error Code {process.returncode}", "Editor Error")
         return process

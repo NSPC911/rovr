@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from functools import lru_cache
 from os import DirEntry, getcwd, path
 from typing import Callable, Literal, NamedTuple, TypeAlias
 
@@ -14,16 +15,15 @@ from textual_autocomplete import DropdownItem
 from rovr.functions import icons as icon_utils
 from rovr.functions.path import is_hidden_file, normalise
 
-_icon_content_cache: dict[tuple[str, str], Content] = {}
 IconFactory: TypeAlias = Callable[[], tuple[str, str]]
 
 
+@lru_cache(maxsize=1024)
 def _get_cached_icon(icon: tuple[str, str]) -> Content:
-    if icon not in _icon_content_cache:
-        _icon_content_cache[icon] = Content.from_markup(
-            f" [{icon[1]}]{icon[0]}[/{icon[1]}] "
-        )
-    return _icon_content_cache[icon]
+    if icon[1] == "":
+        # if there is no style, ignore it
+        return Content(icon[0])
+    return Content.from_markup(f" [{icon[1]}]{icon[0]}[/{icon[1]}] ")
 
 
 @rich.repr.auto
@@ -343,6 +343,21 @@ class ModalSearcherOption(LazyOption):
         if self.__icon_factory is None:
             return Content(self.label)
         return _get_cached_icon(self.__icon_factory()) + Content.from_markup(self.label)
+
+    def _set_prompt(self, prompt: str | Content) -> None:  # ty:ignore[invalid-method-override]
+        """Update the prompt.
+
+        Args:
+            prompt: New prompt.
+
+        """
+        if self.__icon_factory is None:
+            self._prompt = prompt
+        else:
+            self._prompt = _get_cached_icon(
+                self.__icon_factory()
+            ) + Content.from_markup(prompt)
+        self._visual = None
 
 
 class PathDropdownItem(DropdownItem):

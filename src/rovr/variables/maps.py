@@ -15,6 +15,7 @@ class RovrVars:
     )
     ROVRCACHE = dirs.user_cache_dir.replace("\\", "/")
     ROVRTEMP = dirs.user_runtime_dir.replace("\\", "/")
+    ROVRTHEMES = dirs.user_config_dir.replace("\\", "/") + "/themes"
     DOCUMENTS = general.user_documents_dir.replace("\\", "/")
     DOWNLOADS = general.user_downloads_dir.replace("\\", "/")
     PICTURES = general.user_pictures_dir.replace("\\", "/")

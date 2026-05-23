@@ -618,7 +618,8 @@ ModalScreen Button:ansi {
 ZDToDirectory,
 FileSearch,
 ContentSearch,
-ArchiveCreationScreen {
+ArchiveCreationScreen,
+ThemeChooser {
   align: center middle;
   layout: horizontal;
   & > VerticalGroup {

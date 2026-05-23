@@ -9,23 +9,25 @@ from .keybinds import Keybinds
 from .paste_screen import PasteScreen
 from .rg_search import ContentSearch
 from .shell_exec import ShellExec
+from .theme_chooser import ThemeChooser
 from .way_too_small import TerminalTooSmall
 from .yes_or_no import YesOrNo
 from .zd_to_directory import ZDToDirectory
 
 __all__ = [
     "ArchiveCreationScreen",
-    "FileNameConflict",
     "ContentSearch",
     "DeleteFiles",
     "Dismissible",
     "FileInUse",
+    "FileNameConflict",
     "FileSearch",
     "Keybinds",
     "ModalInput",
     "PasteScreen",
     "ShellExec",
     "TerminalTooSmall",
+    "ThemeChooser",
     "YesOrNo",
     "ZDToDirectory",
 ]

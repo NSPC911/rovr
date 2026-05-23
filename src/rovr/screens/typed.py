@@ -24,4 +24,4 @@ class ArchiveScreenReturnType(NamedTuple):
 
 class ShellExecReturnType(NamedTuple):
     command: str
-    mode: Literal["background", "block", "suspend"]
+    orphan: bool

@@ -7,7 +7,7 @@ from textual.app import App
 from textual.binding import BindingType
 from textual.css.query import NoMatches
 from textual.errors import NoWidget
-from textual.reactive import reactive
+from textual.reactive import var
 from textual.widgets import OptionList
 
 from rovr.classes.config import (
@@ -355,7 +355,7 @@ class FileListRightClickMenu(PopupOptionList, inherit_bindings=False):
 class FileListRightClickChildMenu(PopupOptionList, inherit_bindings=False):
     BINDINGS: ClassVar[list[BindingType]] = list(bindings)
 
-    target_option: reactive[RightClickMenuOption] = reactive(
+    target_option: var[RightClickMenuOption] = var(
         RightClickMenuOption("", action=None)
     )
 

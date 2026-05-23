@@ -1,5 +1,3 @@
-from typing import Literal
-
 from textual import events, work
 from textual.binding import Binding
 from textual.widgets import Input
@@ -9,25 +7,19 @@ from rovr.functions.utils import dismiss, expand_command
 from .input import ModalInput
 from .typed import ShellExecReturnType
 
-mode_to_subtitle: dict[str, str] = {
-    "background": "Run in background",
-    "block": "Block until completion",
-    "suspend": "Hide app until completion",
-}
-
 
 class ShellExec(ModalInput):
     BINDINGS = [
         Binding("escape", "dismiss"),
         Binding(
             "tab",
-            "cycle_mode_forward",
-            description="Cycle execution mode forward",
+            "cycle_mode",
+            description="Cycle execution mode",
         ),
         Binding(
             "shift+tab",
-            "cycle_mode_backward",
-            description="Cycle execution mode backward",
+            "cycle_mode",
+            description="Cycle execution mode",
         ),
     ]
 
@@ -35,11 +27,11 @@ class ShellExec(ModalInput):
         super().__init__(
             border_title="Execute Shell Command", border_subtitle="Run in background"
         )
-        self.mode: Literal["background", "block", "suspend"] = "background"
+        self.orphan: bool = True
 
     def on_mount(self) -> None:
         super().on_mount()
-        self.horizontal_group.classes = self.mode
+        self.horizontal_group.add_class(f"orphan--{str(self.orphan).lower()}")
 
     def on_click(self, event: events.Click) -> None:
         if event.widget is self:
@@ -53,21 +45,15 @@ class ShellExec(ModalInput):
             self,
             ShellExecReturnType(
                 command=await expand_command(self.app, event.input.value),
-                mode=self.mode,
+                orphan=self.orphan,
             ),
             event,
         )
 
-    def action_cycle_mode_forward(self) -> None:
-        modes = list(mode_to_subtitle.keys())
-        to_index = modes.index(self.mode) + 1
-        self.mode = modes[to_index % len(modes)]  # ty: ignore[invalid-assignment]
-        self.horizontal_group.border_subtitle = mode_to_subtitle[self.mode]
-        self.horizontal_group.classes = self.mode
-
-    def action_cycle_mode_backward(self) -> None:
-        modes = list(mode_to_subtitle.keys())
-        to_index = modes.index(self.mode) - 1
-        self.mode = modes[to_index % len(modes)]  # ty: ignore[invalid-assignment]
-        self.horizontal_group.border_subtitle = mode_to_subtitle[self.mode]
-        self.horizontal_group.classes = self.mode
+    def action_cycle_mode(self) -> None:
+        self.horizontal_group.remove_class(f"orphan--{str(self.orphan).lower()}")
+        self.orphan = not self.orphan
+        self.horizontal_group.border_subtitle = (
+            "Run in background" if self.orphan else "Run in foreground"
+        )
+        self.horizontal_group.add_class(f"orphan--{str(self.orphan).lower()}")

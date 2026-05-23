@@ -1,5 +1,6 @@
 import contextlib
 import os
+import shlex
 from os import getcwd, path
 from shutil import move
 from tempfile import NamedTemporaryFile
@@ -11,7 +12,7 @@ from textual.worker import Worker, WorkerError
 from rovr.classes.textual_validators import IsValidFilePath, PathNoLongerExists
 from rovr.functions.icons import get_icon
 from rovr.functions.path import dump_exc, normalise
-from rovr.functions.utils import run_editor_command
+from rovr.functions.utils import run_command
 from rovr.screens import ModalInput
 from rovr.variables.constants import config
 
@@ -123,7 +124,12 @@ class RenameItemButton(Button):
                     self.notify(message, title=title, severity="error", markup=False)
 
                 try:
-                    run_editor_command(self.app, bulk_editor, temp_path, on_error)
+                    run_command(
+                        self.app,
+                        shlex.split(bulk_editor["run"]) + [temp_path],
+                        orphan=False,
+                        on_error=on_error,
+                    )
                 except FileNotFoundError:
                     self.notify(
                         f"Editor '{bulk_editor}' not found. Check your config.",

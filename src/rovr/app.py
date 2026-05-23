@@ -67,7 +67,7 @@ from rovr.functions.path import (
     normalise,
 )
 from rovr.functions.themes import get_custom_themes
-from rovr.functions.utils import multiprocessing_process_error_checker
+from rovr.functions.utils import multiprocessing_process_error_checker, run_command
 from rovr.header import HeaderArea
 from rovr.navigation_widgets import (
     BackButton,
@@ -406,60 +406,11 @@ class Application(Actionable, App, inherit_bindings=False):
             event.prevent_default()
             await self._on_key(event)
 
-    @work
-    async def on_shell_exec_response(
-        self, response: ShellExecReturnType | None
-    ) -> None:
+    def on_shell_exec_response(self, response: ShellExecReturnType | None) -> None:
         if response is None or response.command == "":
             return
-        match response.mode:
-            case "background":
-                proc = await asyncio.create_subprocess_shell(
-                    response.command,
-                    stdin=asyncio.subprocess.DEVNULL,
-                    stdout=asyncio.subprocess.PIPE,
-                    stderr=asyncio.subprocess.PIPE,
-                )
-                stdout, stderr = await proc.communicate()
-                self.notify(
-                    f"stdout: {stdout.decode(errors='ignore').strip()}\nstderr: {stderr.decode(errors='ignore').strip()}",
-                    title=f"Shell: {response.command}",
-                    severity="information" if proc.returncode == 0 else "error",
-                    markup=False,
-                )
-            case "block":
-                import subprocess
 
-                output = subprocess.run(  # noqa: ASYNC221
-                    response.command,
-                    shell=True,
-                    capture_output=True,
-                    text=True,
-                    check=False,
-                )
-                self.notify(
-                    f"stdout: {output.stdout.strip()}\nstderr: {output.stderr.strip()}",
-                    title=f"Shell: {response.command}",
-                    severity="information" if output.returncode == 0 else "error",
-                    markup=False,
-                )
-            case "suspend":
-                import subprocess
-
-                with self.suspend():
-                    # intended to block the app, await does nothing because the
-                    # app itself is suspended
-                    output = subprocess.run(  # noqa: ASYNC221
-                        response.command,
-                        shell=True,
-                        check=False,
-                    )
-                self.notify(
-                    f"Command finished with return code {output.returncode}.",
-                    title=f"Shell: {response.command}",
-                    severity="information" if output.returncode == 0 else "error",
-                    markup=False,
-                )
+        run_command(self, response.command, orphan=response.orphan)
 
     def on_app_blur(self, event: events.AppBlur) -> None:
         self.app_blurred = True

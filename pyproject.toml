@@ -1,6 +1,6 @@
 [project]
 name = "rovr"
-version = "0.9.0.dev1"
+version = "0.9.0.dev2"
 description = "A post-modern terminal file explorer"
 readme = "README.md"
 requires-python = "==3.13.*"
@@ -177,7 +177,7 @@ sequence = [
   "_hash_dump",
   # --python-flag=-m
   # "nuitka $POE_EXTRA_ARGS",
-  { cmd = 'nuitka --lto=${lto} --mode=${mode} --report=${report} --user-package-configuration-file=nuitka.config.yml src/rovr --onefile-tempdir-spec="{TEMP}/rovr_onefile_0.8.3" $POE_EXTRA_ARGS' },
+  { cmd = 'nuitka --lto=${lto} --mode=${mode} --report=${report} --user-package-configuration-file=nuitka.config.yml src/rovr --onefile-tempdir-spec="{TEMP}/rovr_onefile_0.9.0.dev2" $POE_EXTRA_ARGS' },
   "_hash_clean",
 ]
 args = [

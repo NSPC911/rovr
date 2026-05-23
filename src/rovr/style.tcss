@@ -962,13 +962,11 @@ ArchiveCreationScreen {
 
 ShellExec {
   #modalInput_group {
-    &.background { border: $border-style $success-lighten-3 }
-    &.block { border: $border-style $warning-lighten-3 }
-    &.suspend { border: $border-style $error-lighten-3 }
+    &.orphan--true { border: $border-style $success-lighten-3 }
+    &.orphan--false { border: $border-style $error-lighten-3 }
     &:light {
-      &.background { border: $border-style $success-darken-1 }
-      &.block { border: $border-style $warning-darken-1 }
-      &.suspend { border: $border-style $error-darken-1 }
+      &.orphan--true { border: $border-style $success-darken-1 }
+      &.orphan--false { border: $border-style $error-darken-1 }
     }
   }
 }

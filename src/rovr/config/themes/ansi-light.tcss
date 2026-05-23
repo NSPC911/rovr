@@ -1,4 +1,3 @@
-$name: ansi-light;
 $primary: ansi_blue;
 $secondary: ansi_cyan;
 $accent: ansi_magenta;

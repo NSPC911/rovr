@@ -555,8 +555,8 @@ FileList {
   }
   .filelist--link--hover,
   .filelist--link--highlighted {
-    color: $primary;
-    background: transparent;
+    color: $primary-lighten-3;
+    background: $secondary-darken-3;
   }
 
   .filelist--broken-link {

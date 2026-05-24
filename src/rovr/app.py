@@ -16,14 +16,12 @@ from rich.protocol import is_renderable
 from textual import constants, events, on, work
 from textual.app import WINDOWS, App, ComposeResult, ScreenStackError, SystemCommand
 from textual.binding import Binding
-from textual.color import ColorParseError
 from textual.containers import (
     HorizontalGroup,
     HorizontalScroll,
     Vertical,
     VerticalGroup,
 )
-from textual.content import Content
 from textual.css.errors import StylesheetError
 from textual.css.query import NoMatches
 from textual.css.stylesheet import StylesheetParseError
@@ -66,7 +64,6 @@ from rovr.functions.path import (
     get_filtered_dir_names,
     normalise,
 )
-from rovr.functions.themes import get_custom_themes
 from rovr.functions.utils import multiprocessing_process_error_checker, run_command
 from rovr.header import HeaderArea
 from rovr.navigation_widgets import (
@@ -271,31 +268,7 @@ class Application(Actionable, App, inherit_bindings=False):
                 self.exit()
             return
 
-        # themes
-        try:
-            for theme in get_custom_themes():
-                self.register_theme(theme)
-            parse_failed = False
-        except ColorParseError as exc:
-            parse_failed = True
-            exception = exc
-        if parse_failed:
-            self.exit(
-                return_code=1,
-                message=Content.from_markup(
-                    f"[underline ansi_red]Config Error[/]\n[bold ansi_cyan]custom_themes.bar_gradient[/]: {exception}"
-                ),
-            )
-            return
         self.theme = config["theme"]["default"]
-        if self.theme == "dark-pink":
-            from rovr.functions.config import get_version
-
-            self.notify(
-                f"The 'dark-pink' theme will be removed in v0.8.0 (Current version is {get_version()}). Switch to 'rose_pine' instead.",
-                title="Deprecation",
-                severity="warning",
-            )
         self.ansi_color = config["theme"]["transparent"]
 
         # title for screenshots

@@ -13,6 +13,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `editor`: add support for opening editor as orphan [704400e](https://github.com/NSPC911/rovr/commit/704400e623fe2d47da432a3f6b873dd75841b8f7)
 - `shell_exec`: add command substitution support [464e71c](https://github.com/NSPC911/rovr/commit/464e71c977d48c5e599a17cc1f5b3ee1131683d2)
 - `openers`: add support for opening with a specific app [#281](https://github.com/NSPC911/rovr/pull/281)
+- `new_item`!: add batch creation support
 
 ### Fixed
 

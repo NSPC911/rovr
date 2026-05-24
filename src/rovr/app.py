@@ -82,7 +82,7 @@ if constants.SCREENSHOT_LOCATION:
     constants.SCREENSHOT_LOCATION = normalise(getcwd(), constants.SCREENSHOT_LOCATION)
 
 
-class Application(Actionable, App, inherit_bindings=False):
+class Application(Actionable, App, inherit_bindings=False, inherit_css=False):
     # our own form of BINDINGS that utilises check_key
     # key: str the action to use
     # value: bool or callable that returns bool,
@@ -131,17 +131,30 @@ class Application(Actionable, App, inherit_bindings=False):
         for key in config["keybinds"]["quit_app"]
     ]
     # higher index = higher priority
-    CSS_PATH = [
-        (
-            resources.files("_rovr")
-            if globals().get("__compiled__")
-            else resources.files("rovr")
+    CSS_PATH = (
+        [
+            (
+                resources.files("_rovr")
+                if globals().get("__compiled__")
+                else resources.files("rovr")
+            )
+            / "config"
+            / "themes"
+            / "nord.tcss"
+        ]
+        + [
+            (
+                resources.files("_rovr")
+                if globals().get("__compiled__")
+                else resources.files("rovr")
+            )
+            / "style.tcss"
+        ]
+        + (
+            [path.join(RovrVars.ROVRCONFIG, "style.tcss")]
+            if path.exists(path.join(RovrVars.ROVRCONFIG, "style.tcss"))
+            else []
         )
-        / "style.tcss"
-    ] + (
-        [path.join(RovrVars.ROVRCONFIG, "style.tcss")]
-        if path.exists(path.join(RovrVars.ROVRCONFIG, "style.tcss"))
-        else []
     )
 
     CUSTOM_STYLE_AVAILABLE: bool = path.exists(
@@ -268,7 +281,7 @@ class Application(Actionable, App, inherit_bindings=False):
                 self.exit()
             return
 
-        self.theme = config["theme"]["default"]
+        # self.theme = config["theme"]["default"]
         self.ansi_color = config["theme"]["transparent"]
 
         # title for screenshots

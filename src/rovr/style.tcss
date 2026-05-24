@@ -1174,3 +1174,57 @@ PopupOptionList .option-list--option-highlighted {
   background: transparent;
   text-style: bold;
 }
+
+App {
+  background: $background;
+  color: $foreground;
+
+  &:ansi {
+    background: ansi_default;
+    color: ansi_default;
+
+    .-ansi-scrollbar {
+      scrollbar-background: ansi_default;
+      scrollbar-background-hover: ansi_default;
+      scrollbar-background-active: ansi_default;
+      scrollbar-color: ansi_blue;
+      scrollbar-color-active: ansi_bright_blue;
+      scrollbar-color-hover: ansi_bright_blue;
+      scrollbar-corner-color: ansi_default;
+    }
+
+    .bindings-table--key {
+      color: ansi_magenta;
+    }
+    .bindings-table--description {
+      color: ansi_default;
+    }
+
+    .bindings-table--header {
+      color: ansi_default;
+    }
+
+    .bindings-table--divider {
+      color: transparent;
+      text-style: dim;
+    }
+  }
+
+  /* When a widget is maximized */
+  Screen.-maximized-view {
+    layout: vertical !important;
+    hatch: right #4c566a;
+    overflow-y: auto !important;
+    align: center middle;
+    .-maximized {
+      dock: initial !important;
+    }
+  }
+  /* Fade the header title when app is blurred */
+  &:blur HeaderTitle {
+    text-opacity: 50%;
+  }
+}
+*:disabled:can-focus {
+    opacity: 0.7;
+}

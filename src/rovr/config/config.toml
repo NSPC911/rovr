@@ -113,8 +113,8 @@ orphan = false
 run = "$EDITOR"
 orphan = false
 
-[settings.editor.bulk_rename]
-show_as_mapping = true
+[settings.editor.bulk_editor]
+rename_show_as_mapping = true
 run = "$EDITOR"
 
 [metadata]
@@ -200,6 +200,8 @@ cut = ["x", "ctrl+x"]
 delete = ["d", "delete"]
 rename = ["r", "f2"]
 new = ["ctrl+n", "o"]
+# shift+n or shift+o, it isnt literally NO
+bulk_create = ["N", "O"]
 zip = ["E"]
 unzip = ["ctrl+e"]
 # id love to use ctrl+shift+c

@@ -28,21 +28,21 @@ variables  = { "<var>" = "<key>" }
 
 you can take a look at the reference in [textual](https://textual.textualize.io/guide/design), or the table below
 
-| Variables  | Description                                                                                                                                   |
-| ---------- | --------------------------------------------------------------------------------------------------------------------------------------------- |
-| primary    | The primary color, can be considered the *branding* color. Typically used for titles, and backgrounds for strong emphasis.                    |
-| secondary  | An alternative branding color, used for similar purposes as `primary`, where an app needs to differentiate something from the primary color.  |
-| foreground | The default text color, which should be legible on `background`, `surface`, and `panel`.                                                      |
-| background | A color used for the background, where there is no content. Used as the default background color for screens.                                 |
-| surface    | The default background color of widgets, typically sitting on top of `background`.                                                            |
-| panel      | A color used to differentiate a part of the UI from the main content. Used sparingly in Textual itself.                                       |
-| boost      | A color with alpha that can be used to create *layers* on a background.                                                                       |
-| warning    | Indicates a warning. Typically used as a background color. `text-warning` can be used for foreground.                                         |
-| error      | Indicates an error. Typically used as a background color. `text-error` can be used for foreground.                                            |
-| success    | Used to indicate success. Typically used as a background color. `text-success` can be used for foreground.                                    |
-| accent     | Used sparingly to draw attention. Typically contrasts with `primary` and `secondary`.                                                         |
-| is_dark    | A boolean indicating whether the theme is dark or light.                                                                                      |
-| variables  | custom variables that are used by textual. [variables](https://textual.textualize.io/guide/design/#additional-variables)                      |
+| Variables  | Description                                                                                                                                  |
+| ---------- | -------------------------------------------------------------------------------------------------------------------------------------------- |
+| primary    | The primary color, can be considered the _branding_ color. Typically used for titles, and backgrounds for strong emphasis.                   |
+| secondary  | An alternative branding color, used for similar purposes as `primary`, where an app needs to differentiate something from the primary color. |
+| foreground | The default text color, which should be legible on `background`, `surface`, and `panel`.                                                     |
+| background | A color used for the background, where there is no content. Used as the default background color for screens.                                |
+| surface    | The default background color of widgets, typically sitting on top of `background`.                                                           |
+| panel      | A color used to differentiate a part of the UI from the main content. Used sparingly in Textual itself.                                      |
+| boost      | A color with alpha that can be used to create _layers_ on a background.                                                                      |
+| warning    | Indicates a warning. Typically used as a background color. `text-warning` can be used for foreground.                                        |
+| error      | Indicates an error. Typically used as a background color. `text-error` can be used for foreground.                                           |
+| success    | Used to indicate success. Typically used as a background color. `text-success` can be used for foreground.                                   |
+| accent     | Used sparingly to draw attention. Typically contrasts with `primary` and `secondary`.                                                        |
+| is_dark    | A boolean indicating whether the theme is dark or light.                                                                                     |
+| variables  | custom variables that are used by textual. [variables](https://textual.textualize.io/guide/design/#additional-variables)                     |
 
 ### style.tcss
 
@@ -73,3 +73,50 @@ Application class="-dark-mode"
 ```
 
 you may notice that class inheritance is not shown, `FileListContainer` inherits `VerticalGroup` while `FileList` inherits `SelectionList`. I will soon add support, but not just yet.
+
+rovr includes some extra classes that can be used to narrow down the elements.
+
+#### FileList
+
+This is the main file list that you will be navigating
+
+| Class       | Description                                                                         | Example                |
+| ----------- | ----------------------------------------------------------------------------------- | ---------------------- |
+| select-mode | applied to the `FileList` when in select mode, where you can select multiple files. | `FileList.select-mode` |
+
+| Component Classes     | Description                                    | Example                             |
+| --------------------- | ---------------------------------------------- | ----------------------------------- |
+| filelist--cut         | applied on files/folders that are cut          | `FileList > .filelist--cut`         |
+| filelist--broken-link | applied on files/folders that are broken links | `FileList > .filelist--broken-link` |
+| filelist--link        | applied on files/folders that are links        | `FileList > .filelist--link`        |
+| filelist--hidden      | applied on files/folders that are hidden       | `FileList > .filelist--hidden`      |
+
+These component classes also come with their own sub classes due to textual limitations.
+
+| Component Classes | Description                                   | Example                                   |
+| ----------------- | --------------------------------------------- | ----------------------------------------- |
+| \*--hovered       | used when the option is currently hovered     | `FileList > .filelist--cut--hovered`      |
+| \*--highlighted   | used when the option is currently highlighted | `FileList > .filelist--link--highlighted` |
+
+#### ProgressBarContainer
+
+This is the wrapper container for progress bars seen at the bottom left part of the UI.
+
+| Class | Description                                                | Example                     |
+| ----- | ---------------------------------------------------------- | --------------------------- |
+| error | applied when an error occurred while in the process        | `ProcessBarContainer.error` |
+| done  | applied when the process is done, regardless of the result | `ProcessBarContainer.done`  |
+
+| Component Classes  | Description                                                        | Example                                     |
+| ------------------ | ------------------------------------------------------------------ | ------------------------------------------- |
+| bar--bar           | The default bar, used when the process is working                  | `ProcessBarContainer > .bar--bar`           |
+| bar--indeterminate | Used when the process is still calculating and has not started yet | `ProcessBarContainer > .bar--indeterminate` |
+| bar--complete      | Used when the process is complete                                  | `ProcessBarContainer > .bar--complete`      |
+
+#### Fuzzy Screens
+
+This is the base screen for other screens like ripgrep, fd and zoxide.
+
+| Class | Description                                                 | Example                              |
+| ----- | ----------------------------------------------------------- | ------------------------------------ |
+| empty | applied on the OptionList when there are no options to show | `ModalSearchScreen OptionList.empty` |

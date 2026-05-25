@@ -57,7 +57,7 @@ def _build_parser() -> argparse.ArgumentParser:
 
     parser = RichArgumentParser(
         prog="rovr",
-        description="A post-modern terminal file explorer",
+        description="a stylish, batteries-included terminal file manager.",
         usage="rovr [OPTIONS] [PATH]",
         formatter_class=formatter_class,
         add_help=False,

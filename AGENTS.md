@@ -1,6 +1,6 @@
 # rovr - Agent Guidelines
 
-A post-modern terminal file explorer built with Python and Textual.
+a stylish, batteries-included terminal file manager built with Python and Textual.
 
 ## Build/Lint Commands
 

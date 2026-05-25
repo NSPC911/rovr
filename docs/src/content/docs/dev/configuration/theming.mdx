@@ -74,7 +74,7 @@ Application class="-dark-mode"
 
 you may notice that class inheritance is not shown, `FileListContainer` inherits `VerticalGroup` while `FileList` inherits `SelectionList`. I will soon add support, but not just yet.
 
-rovr includes some extra classes that can be used to narrow down the elements.
+rovr includes some extra classes that can be used to narrow down the elements, or style them based on certain scenarios.
 
 #### FileList
 
@@ -120,3 +120,22 @@ This is the base screen for other screens like ripgrep, fd and zoxide.
 | Class | Description                                                 | Example                              |
 | ----- | ----------------------------------------------------------- | ------------------------------------ |
 | empty | applied on the OptionList when there are no options to show | `ModalSearchScreen OptionList.empty` |
+
+#### Root Container
+
+This is the root container that holds everything. This is not to be confused with the `Application` container, which is the app itself.
+
+| Class | Description                                      | Example              |
+| ----- | ------------------------------------------------ | -------------------- |
+| compact-buttons | applied when the `interface.compact_mode.buttons` is enabled in config | `#root.compact-buttons` |
+| compact-panels  | applied when the `interface.compact_mode.panels` is enabled in config  | `#root.compact-panels`  |
+
+Root class also adds an extra class to itself to signify the current theme
+
+Example:
+```css
+#root.theme-<theme-name> { ... }
+/* like */
+#root.theme-nord { ... }
+#root.theme-textual-dark { ... }
+```

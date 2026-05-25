@@ -155,29 +155,6 @@ is_dark = true
 default = ["#88c0d0", "#5e81ac"]
 error = ["#bf616a", "#d08770"]
 
-[[custom_theme]]
-name = "Dark Pink"
-primary = "#FD7AFF"
-secondary = "#000F85"
-success = "#FF007B"
-warning = "#250069"
-error = "#300025"
-accent = "#000000"
-foreground = "#FFFFFF"
-background = "#000000"
-surface = "#FD7AFF"
-panel = "#2b2b2b"
-is_dark = true
-
-[custom_theme.variables]
-"block-cursor-background" = "#88C0D0"
-"block-cursor-foreground" = "#2E3440"
-"block-cursor-text-style" = "none"
-"footer-key-foreground" = "#88C0D0"
-"input-selection-background" = "#81a1c1 35%"
-"button-color-foreground" = "#2E3440"
-"button-focus-text-style" = "reverse"
-
 [keybinds]
 # For keybind profiles, see keybinds/sane.toml and keybinds/vim.toml
 # The default configuration below combines both styles for maximum flexibility.

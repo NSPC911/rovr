@@ -30,6 +30,7 @@ from textual.css.stylesheet import StylesheetParseError
 from textual.dom import DOMNode
 from textual.messages import ExitApp
 from textual.screen import Screen
+from textual.theme import Theme
 from textual.types import NoActiveAppError
 from textual.widgets import Input, Label
 from textual.widgets.selection_list import Selection
@@ -208,6 +209,7 @@ class Application(Actionable, App, inherit_bindings=False):
 
         self._on_mount_done: bool = False
         self.last_available_cd = getcwd()
+        self.old_theme: str = self.theme
 
     @property
     def file_list(self) -> FileList:
@@ -272,6 +274,7 @@ class Application(Actionable, App, inherit_bindings=False):
             return
 
         # themes
+        self.theme_changed_signal.subscribe(self, self.theme_changed)
         try:
             for theme in get_custom_themes():
                 self.register_theme(theme)
@@ -288,14 +291,6 @@ class Application(Actionable, App, inherit_bindings=False):
             )
             return
         self.theme = config["theme"]["default"]
-        if self.theme == "dark-pink":
-            from rovr.functions.config import get_version
-
-            self.notify(
-                f"The 'dark-pink' theme will be removed in v0.8.0 (Current version is {get_version()}). Switch to 'rose_pine' instead.",
-                title="Deprecation",
-                severity="warning",
-            )
         self.ansi_color = config["theme"]["transparent"]
 
         # title for screenshots
@@ -348,6 +343,11 @@ class Application(Actionable, App, inherit_bindings=False):
                 label, after="PathInput"
             )
         self.file_list.update_border_subtitle()
+
+    def theme_changed(self, theme: Theme) -> None:
+        self.query_one("#root").remove_class(f"theme-{self.old_theme}")
+        self.old_theme = theme.name
+        self.query_one("#root").add_class(f"theme-{theme.name}")
 
     @work
     async def _force_crash(self) -> None:

@@ -513,6 +513,11 @@ ArchiveCreationScreen OptionList {
     background: transparent;
     color: $primary
   }
+  &:blur .option-list--option-highlighted {
+    color: $primary;
+    background: transparent;
+    text-style: bold;
+  }
   .selection-list--button {
     background: transparent;
     color: $primary;
@@ -1161,15 +1166,4 @@ Screen {
   max-width: 25vw;
   margin-right: 0;
   padding: 0 1;
-}
-
-FileList .option-list--option-highlighted,
-Clipboard .option-list--option-highlighted,
-DeleteFiles OptionList .option-list--option-highlighted,
-PasteScreen OptionList .option-list--option-highlighted,
-ArchiveCreationScreen OptionList .option-list--option-highlighted,
-PopupOptionList .option-list--option-highlighted {
-  color: $block-cursor-background;
-  background: transparent;
-  text-style: bold;
 }

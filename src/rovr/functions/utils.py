@@ -246,6 +246,9 @@ async def expand_command(app: App, command: str) -> str:
     expanded = expanded.replace("${highlighted_file}", highlighted)
     if selected_files:
         expanded = expanded.replace("${selected_files}", " ".join(selected_files))
+    expanded = expanded.replace(
+        "${highlighted_file_name}", os.path.basename(highlighted)
+    )
     return expanded
 
 

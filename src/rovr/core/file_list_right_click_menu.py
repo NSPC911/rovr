@@ -301,6 +301,7 @@ class FileListRightClickMenu(PopupOptionList, inherit_bindings=False):
                 case "shh":  # shell hide app
                     with self.app.suspend():
                         # run code, make sure to not capture any output, allow user to send input
+                        print(f"> {command}")
                         await (
                             await asyncio.create_subprocess_shell(
                                 command,

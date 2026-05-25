@@ -42,6 +42,7 @@ async def test_clipboard_keeps_broken_symlink(tmp_path: Path) -> None:
         await worker.wait()
         await pilot.pause()
         assert len(app.Clipboard.options) == 1
+        assert app.Clipboard.options[0].value.path == link_path.as_posix()
 
         worker = app.Clipboard.check_clipboard_existence()
         await worker.wait()

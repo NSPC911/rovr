@@ -108,7 +108,6 @@ class CheckboxRenderingMixin:
                 f"{part}--hovered" for part in option_component_classes
             ]
 
-        self.log(option, option_component_classes)
         style = self.get_visual_style("option-list--option", *option_component_classes)
 
         strips = self._get_option_render(option, style)

@@ -1109,6 +1109,12 @@ class PreviewContainer(Actionable, Container):
             if should_cancel():
                 return
         except Exception as exc:
+            if isinstance(exc, OSError) and "cannot be accessed by the system" in str(
+                exc.strerror
+            ):
+                self.app.call_from_thread(self.remove_children)
+                self.call_next(lambda: self.post_message(self.SetLoading(False)))
+                return
             self.notify(
                 f"{type(exc).__name__} was raised while generating the preview\n{str(exc)}",
                 severity="error",

@@ -90,16 +90,16 @@ def natural_size(
 
 def is_being_used(exc: OSError) -> bool:
     """
-    On Windows, a file being used by another process raises a PermissionError/OSError with winerror 32.
     Args:
         exc(OSError): the OSError object
 
     Returns:
         bool: whether it is due to the file being used
     """
-    # 32: Used by another process
-    # 145: Access is denied
-    return getattr(exc, "winerror", None) in (5, 13, 32, 145)
+
+    # This is genuinely pissing me off so much, I keep getting false positives, so you know what
+    # I will check whether the exception's strerror matches the full sentence
+    return "being used by another process" in str(exc.strerror)
 
 
 def should_cancel() -> bool:

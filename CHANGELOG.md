@@ -13,7 +13,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `editor`: add support for opening editor as orphan [704400e](https://github.com/NSPC911/rovr/commit/704400e623fe2d47da432a3f6b873dd75841b8f7)
 - `shell_exec`: add command substitution support [464e71c](https://github.com/NSPC911/rovr/commit/464e71c977d48c5e599a17cc1f5b3ee1131683d2)
 - `openers`: add support for opening with a specific app [#281](https://github.com/NSPC911/rovr/pull/281)
-- `new_item`!: add batch creation support
+- `new_item`!: add batch creation support [#283](https://github.com/NSPC911/rovr/pull/283)
+- `context`: add windows properties shortcut thing [7b15bc6](https://github.com/NSPC911/rovr/commit/7b15bc62189505e24d0ac7f5de2fb8c7c73e889b)
+- `filelist`: add configurable styles for specific files/folders [#284](https://github.com/NSPC911/rovr/pull/284)
+- `app`: add theme name as class to #root [ba12d0f](https://github.com/NSPC911/rovr/commit/ba12d0f908b74ff97dd6554d831ed3f6f536fd0d)
 
 ### Fixed
 
@@ -30,6 +33,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `input`: follow screen sizes [df9923d](https://github.com/NSPC911/rovr/commit/df9923d4c36ca58edff1362d56b8d79c82a2137c)
 - `showkeys`: fix offset and other stuff [757b4c3](https://github.com/NSPC911/rovr/commit/757b4c3bd492c2da5f8a37368ad22bea14f11a67)
 - `zoxide`: dont crash with \_asyncio.Future if nuitka compiled [6ad395b](https://github.com/NSPC911/rovr/commit/6ad395b4e54d86a56cd956d4e492d8536d7660b7)
+- `editors`: use shlex.split rather than shlex.quote-ing the file [7a6dae6](https://github.com/NSPC911/rovr/commit/7a6dae6542a5689d6057e8883da8a64b7cf8ca10)
+- `utils`: properly check for file being used on windows [5622571](https://github.com/NSPC911/rovr/commit/56225710d00486fdd7621a3d685c222e8e0ceb0d)
+- `preview`: fix crash on broken wsl symlink [ae50128](https://github.com/NSPC911/rovr/commit/ae50128160e9d82a3d47b9b0c02563e9410e48ab)
 
 ### Refactor
 
@@ -37,6 +43,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `preview`!: rename `mime_rules` to `preview_rules` [36d1316](https://github.com/NSPC911/rovr/commit/36d131633a734ee118bca7e4cba2411b55e74bae)
 - `editor`!: use `app` to define what to do when editor is used [8e9b7a6](https://github.com/NSPC911/rovr/commit/8e9b7a6455876751a0df19d1dc14be2566baa60a)
 - `app`: use a custom binding handler [#282](https://github.com/NSPC911/rovr/pull/282) [3aeed2f](https://github.com/NSPC911/rovr/commit/3aeed2f5ce8b51e0a5579f6eae064b09d6482515)
+- `app`: use reactive.var instead of reactive.reactive [63ffa89](https://github.com/NSPC911/rovr/commit/63ffa89861fe689a74430a371895e9d4970bcb28)
 
 ### Removed
 

@@ -208,10 +208,10 @@ class PreviewContainer(Actionable, Container):
                 Static("The symlink target is not found!", classes="special")
             )
             # also update option if necessary
-            if (
-                FileListSelectionWidget is not None
-                and highlighted_option.icon
-                != icon_utils.get_icon("general", "broken_symlink")
+            if isinstance(
+                highlighted_option, FileListSelectionWidget
+            ) and highlighted_option.icon != icon_utils.get_icon(
+                "general", "broken_symlink"
             ):
                 highlighted_option.set_icon(
                     icon_utils.get_icon("general", "broken_symlink")

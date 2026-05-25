@@ -162,7 +162,7 @@ class Clipboard(CheckboxRenderingMixin, SelectionList, inherit_bindings=False):
         """Check if the files in the clipboard still exist."""
         re_call = False
         for option in self.options:
-            if not path.exists(option.value.path):
+            if not path.lexists(option.value.path):
                 assert isinstance(option.id, str)
                 self.call_later(self.remove_option, option.id)
                 re_call = True

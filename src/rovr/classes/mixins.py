@@ -6,7 +6,7 @@ from textual.events import Key
 from textual.geometry import Region, Size
 from textual.strip import Strip
 from textual.widgets import OptionList
-from textual.widgets.option_list import OptionDoesNotExist
+from textual.widgets.option_list import Option, OptionDoesNotExist
 
 from rovr.functions import icons as icon_utils
 from rovr.functions.utils import check_key
@@ -54,6 +54,13 @@ class SingleLineOptionLayoutMixin:
 
 
 class CheckboxRenderingMixin:
+    def _get_option_component_classes(self, option: Option) -> list[str]:
+        if hasattr(option, "get_component_classes") and callable(
+            option.get_component_classes
+        ):
+            return list(option.get_component_classes())  # ty: ignore
+        return []
+
     def _get_left_gutter_width(self) -> int:
         """
         Returns the size of any left gutter that should be taken into account.
@@ -86,20 +93,22 @@ class CheckboxRenderingMixin:
             return base_line
 
         mouse_over: bool = self._mouse_hovering_over == option_index
-        component_class = ""
-        if selection_style == "selection-list--button-selected":
-            component_class = selection_style
-        elif option.disabled:
-            component_class = "option-list--option-disabled"
-        elif self.highlighted == option_index:
-            component_class = "option-list--option-highlighted"
-        elif mouse_over:
-            component_class = "option-list--option-hover"
+        option_component_classes = self._get_option_component_classes(option)
 
-        if component_class:
-            style = self.get_visual_style("option-list--option", component_class)
-        else:
-            style = self.get_visual_style("option-list--option")
+        if selection_style == "selection-list--button-selected":
+            option_component_classes.insert(0, selection_style)
+        elif option.disabled:
+            option_component_classes.insert(0, "option-list--option-disabled")
+        elif self.highlighted == option_index:
+            option_component_classes = ["option-list--option-highlighted"] + [
+                f"{part}--highlighted" for part in option_component_classes
+            ]
+        elif mouse_over:
+            option_component_classes = ["option-list--option-hover"] + [
+                f"{part}--hovered" for part in option_component_classes
+            ]
+
+        style = self.get_visual_style("option-list--option", *option_component_classes)
 
         strips = self._get_option_render(option, style)
         try:

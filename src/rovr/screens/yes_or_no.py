@@ -77,7 +77,11 @@ class YesOrNo(Actionable, ModalScreen):
     def on_click(self, event: events.Click) -> None:
         if event.widget is self:
             # ie click outside
-            self.action_no(event)
+            dismiss(
+                self,
+                {"value": False, "toggle": False} if self.with_toggle else False,
+                event,
+            )
 
     def action_yes(self, event: Message | None = None) -> None:
         dismiss(

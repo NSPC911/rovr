@@ -9,7 +9,7 @@ from textual.containers import VerticalGroup
 from textual.widgets import Input, OptionList
 from textual.worker import WorkerCancelled
 
-from rovr.classes.textual_options import ModalSearcherOption
+from rovr.classes.textual_options import OptionWithValue
 from rovr.components import DoubleClickableOptionList, ModalSearchScreen
 from rovr.functions.utils import dismiss, should_cancel
 from rovr.variables.constants import config
@@ -25,7 +25,7 @@ class ZDToDirectory(ModalSearchScreen):
                 placeholder="Enter directory name or pattern",
             )
             yield DoubleClickableOptionList(
-                ModalSearcherOption(None, "  No input provided", disabled=True),
+                OptionWithValue(None, "  No input provided", disabled=True),
                 id="zoxide_options",
                 classes="empty",
             )
@@ -99,7 +99,7 @@ class ZDToDirectory(ModalSearchScreen):
             # zoxide not installed
             self.search_options.clear_options()
             self.search_options.add_option(
-                ModalSearcherOption(
+                OptionWithValue(
                     None,
                     "  zoxide is missing on $PATH or cannot be executed"
                     if isinstance(exc, OSError)
@@ -126,10 +126,10 @@ class ZDToDirectory(ModalSearchScreen):
             if options is None:
                 return
             if len(options) == len(self.search_options.options) and all(
-                isinstance(options[i], ModalSearcherOption)
-                and isinstance(self.search_options.options[i], ModalSearcherOption)
-                and options[i].file_path
-                == cast(ModalSearcherOption, self.search_options.options[i]).file_path
+                isinstance(options[i], OptionWithValue)
+                and isinstance(self.search_options.options[i], OptionWithValue)
+                and options[i].value
+                == cast(OptionWithValue, self.search_options.options[i]).value
                 for i in range(len(options))
             ):  # ie same~ish query, resulting in same result
                 pass
@@ -148,7 +148,7 @@ class ZDToDirectory(ModalSearchScreen):
             # No Matches to the query text
             self.search_options.clear_options()
             self.search_options.add_option(
-                ModalSearcherOption(None, "  --No matches found--", disabled=True),
+                OptionWithValue(None, "  --No matches found--", disabled=True),
             )
             self.search_options.add_class("empty")
             self.search_options.border_subtitle = "0/0"
@@ -158,12 +158,12 @@ class ZDToDirectory(ModalSearchScreen):
     async def handle_zd_option_selected(self, event: OptionList.OptionSelected) -> None:
         event.stop()
         event.prevent_default()
-        if not isinstance(event.option, ModalSearcherOption):
+        if not isinstance(event.option, OptionWithValue):
             # theoretically this shouldn't happen, but precautions
             dismiss(self, None)
             return
 
-        selected_value = event.option.file_path
+        selected_value = event.option.value
         if selected_value is None:
             dismiss(self, None)
             return None
@@ -178,9 +178,9 @@ class ZDToDirectory(ModalSearchScreen):
     @work(thread=True)
     def create_options(
         self, show_scores: bool, stdout: str
-    ) -> list[ModalSearcherOption] | None:
+    ) -> list[OptionWithValue] | None:
         first_score_width = 0
-        options: list[ModalSearcherOption] = []
+        options: list[OptionWithValue] = []
         for line in stdout.splitlines():
             path, score = self._parse_zoxide_line(line, show_scores)
             if show_scores and score:
@@ -194,7 +194,7 @@ class ZDToDirectory(ModalSearchScreen):
                 display_text = f" {path}"
 
             # Use original path for ID (not display text)
-            options.append(ModalSearcherOption(None, display_text, path))
+            options.append(OptionWithValue(None, display_text, path))
             if should_cancel():
                 return
         return options

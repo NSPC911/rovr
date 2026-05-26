@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from functools import lru_cache
 from os import DirEntry, getcwd, path
 from typing import Callable, Literal, NamedTuple, TypeAlias
 
@@ -14,16 +15,12 @@ from textual_autocomplete import DropdownItem
 from rovr.functions import icons as icon_utils
 from rovr.functions.path import is_hidden_file, normalise
 
-_icon_content_cache: dict[tuple[str, str], Content] = {}
 IconFactory: TypeAlias = Callable[[], tuple[str, str]]
 
 
+@lru_cache
 def _get_cached_icon(icon: tuple[str, str]) -> Content:
-    if icon not in _icon_content_cache:
-        _icon_content_cache[icon] = Content.from_markup(
-            f" [{icon[1]}]{icon[0]}[/{icon[1]}] "
-        )
-    return _icon_content_cache[icon]
+    return Content.from_markup(f" [{icon[1]}]{icon[0]}[/{icon[1]}] ")
 
 
 @rich.repr.auto
@@ -161,10 +158,11 @@ class ArchiveFileListSelection(LazySelection):
             label: The text for the option
         """
 
-        def get_prompt() -> Content:
-            return _get_cached_icon(icon_factory()) + Content(label)
-
-        super().__init__(prompt=get_prompt, value="", disabled=True)
+        super().__init__(
+            prompt=lambda: _get_cached_icon(icon_factory()) + Content(label),
+            value="",
+            disabled=True,
+        )
         self.label = label
 
 
@@ -315,12 +313,12 @@ class KeybindOption(Option):
         self.is_layer_bind = is_layer
 
 
-class ModalSearcherOption(LazyOption):
+class OptionWithValue(LazyOption):
     def __init__(
         self,
         icon_factory: IconFactory | None,
         label: str,
-        file_path: str | None = None,
+        value: str | None = None,
         disabled: bool = False,
     ) -> None:
         """
@@ -329,7 +327,7 @@ class ModalSearcherOption(LazyOption):
         Args:
             icon_factory (IconFactor | None): The icon list from a utils function.
             label (str): The label for the option.
-            file_path (str | None): The file path
+            value (str | None): The file path
             disabled (bool) = False: The initial enabled/disabled state.
         """
 
@@ -337,7 +335,7 @@ class ModalSearcherOption(LazyOption):
 
         super().__init__(prompt=self.get_prompt, disabled=disabled)
         self.label = label
-        self.file_path = file_path
+        self.value = value
 
     def get_prompt(self) -> Content:
         if self.__icon_factory is None:

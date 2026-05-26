@@ -77,7 +77,9 @@ from rovr.navigation_widgets import (
     PathInput,
     UpButton,
 )
-from rovr.screens.typed import ShellExecReturnType
+from rovr.screens.drag_and_drop import DragAndDropScreen
+from rovr.screens.typed import DragAndDropReturnType, ShellExecReturnType
+from rovr.screens.way_too_small import TerminalTooSmall
 from rovr.state_manager import StateManager
 from rovr.variables.constants import MaxPossible, config, log_name, os_type
 from rovr.variables.maps import RovrVars
@@ -704,8 +706,6 @@ class Application(Actionable, App, inherit_bindings=False):
 
     @work(exclusive=True)
     async def on_resize(self, event: events.Resize) -> None:
-        from rovr.screens.way_too_small import TerminalTooSmall
-
         if (
             event.size.height < MaxPossible.height
             or event.size.width < MaxPossible.width
@@ -797,6 +797,27 @@ class Application(Actionable, App, inherit_bindings=False):
                 self.stylesheet.update(self)
                 for screen in self.screen_stack:
                     self.stylesheet.update(screen)
+
+    @on(events.Paste)
+    @work
+    async def on_paste(self, event: events.Paste) -> None:
+        if len(self.screen_stack) != 1:
+            return
+        response: DragAndDropReturnType = await self.push_screen_wait(
+            DragAndDropScreen(event)
+        )
+        if response is not None and response.paths:
+            process_container = self.query_one(ProcessContainer)
+            dest = getcwd()
+            match response.action:
+                case "copy":
+                    process_container.paste_items(
+                        copied=response.paths, has_cut=[], dest=dest
+                    )
+                case "move":
+                    process_container.paste_items(
+                        copied=[], has_cut=response.paths, dest=dest
+                    )
 
     def get_system_commands(self, screen: Screen) -> Iterable[SystemCommand]:
         if not self.ansi_color:

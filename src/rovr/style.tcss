@@ -689,7 +689,8 @@ FileNameConflict,
 FileInUse,
 DeleteFiles,
 ModalInput,
-TerminalTooSmall { align: center middle }
+TerminalTooSmall,
+DragAndDropScreen { align: center middle }
 
 YesOrNo #dialog,
 FileNameConflict #dialog,
@@ -973,6 +974,24 @@ ShellExec {
   }
 }
 
+DragAndDropScreen #dialog {
+  border: $border-style $border;
+  padding: 0 1;
+  grid-size: 2 2;
+  grid-gutter: 0 0;
+  grid-rows: 1fr 3;
+
+  Button {
+    margin: 0 3;
+    height: 3;
+    width: 1fr;
+  }
+  OptionList {
+    height: 1fr;
+    column-span: 2;
+  }
+}
+
 PopupOptionList { width: auto }
 
 LoadingIndicator {
@@ -1123,6 +1142,13 @@ Screen {
     &PasteScreen #dialog {
       grid-size: 1 4 !important;
       grid-rows: 0.5fr 1.5fr 3 3 !important;
+    }
+    &DragAndDropScreen #dialog {
+      grid-size: 1 3;
+      grid-rows: 1fr 3 3;
+      Button {
+        margin: 0;
+      }
     }
   }
   &.-no-preview {

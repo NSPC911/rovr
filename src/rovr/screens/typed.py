@@ -25,3 +25,8 @@ class ArchiveScreenReturnType(NamedTuple):
 class ShellExecReturnType(NamedTuple):
     command: str
     orphan: bool
+
+
+class DragAndDropReturnType(NamedTuple):
+    paths: list[str]
+    action: Literal["copy", "move"]

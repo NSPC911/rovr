@@ -144,23 +144,12 @@ class CheckboxRenderingMixin:
         if selection.disabled:
             return Strip([*self.super_render_line(y)])
 
-        # Determine checkbox style
-        component_style = "selection-list--button"
-        if selection.value in self._selected:
-            component_style += "-selected"
-        if self.highlighted == selection_index:
-            component_style += "-highlighted"
-
-        line = self.super_render_line(y, component_style)
+        line = self.super_render_line(y)
         underlying_style = next(iter(line)).style or self.rich_style
         assert underlying_style is not None
 
-        button_style = self.get_component_rich_style(component_style)
-
-        side_style = Style.from_color(button_style.bgcolor, underlying_style.bgcolor)
-
-        side_style += Style(meta={"option": selection_index})
-        button_style += Style(meta={"option": selection_index})
+        side_style = underlying_style + Style(meta={"option": selection_index})
+        button_style = underlying_style + Style(meta={"option": selection_index})
 
         # Get checkbox icons
         icons = [

@@ -508,33 +508,10 @@ ArchiveCreationScreen OptionList {
     background: $primary;
     text-style: none;
   }
-  &:blur .selection-list--button-selected-highlighted,
-  &:blur .selection-list--button-highlighted {
-    background: transparent;
-    color: $primary
-  }
   &:blur .option-list--option-highlighted {
     color: $primary;
     background: transparent;
     text-style: bold;
-  }
-  .selection-list--button {
-    background: transparent;
-    color: $primary;
-  }
-  .selection-list--button-selected {
-    background: transparent;
-    color: $primary;
-  }
-  .selection-list--button-highlighted,
-  &.-popup-shown .selection-list--button-highlighted {
-    background: $primary;
-    color: $background;
-  }
-  .selection-list--button-selected-highlighted,
-  &.-popup-shown .selection-list--button-selected-highlighted {
-    background: $primary;
-    color: $background;
   }
 }
 

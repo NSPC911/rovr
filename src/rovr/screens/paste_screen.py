@@ -1,7 +1,7 @@
 from typing import Literal
 
 from textual.app import ComposeResult
-from textual.containers import Grid, HorizontalGroup, VerticalGroup
+from textual.containers import Grid, HorizontalGroup
 from textual.widgets import Button, Label, Switch
 
 from rovr.classes.textual_options import PasteScreenOption
@@ -30,9 +30,7 @@ class PasteScreen(YesOrNo):
 
     def compose(self) -> ComposeResult:
         with Grid(id="dialog", classes="paste"):
-            with VerticalGroup(id="question_container"):
-                for message in self.message.splitlines():
-                    yield Label(message, classes="question")
+            yield Label(self.message, classes="question")
             yield SpecialOptionList(*self.options)
             yield Button(
                 f"\\[{yes_bind}] Yes",

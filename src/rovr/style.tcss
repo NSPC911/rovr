@@ -53,9 +53,7 @@ DoubleClickableOptionList,
 PopupOptionList,
 .comfy-buttons #path_switcher,
 .comfy-buttons #below_menu Button,
-PasteScreen OptionList,
-DeleteFiles OptionList,
-ArchiveCreationScreen OptionList {
+ModalScreen OptionList {
   background: transparent;
   border: $border-style $border-blurred;
   border-subtitle-color: $background;
@@ -84,7 +82,7 @@ ArchiveCreationScreen OptionList {
 #file_list_container:focus-within,
 #preview_sidebar:focus-within,
 #preview_sidebar:focus,
-ModalScreen > VerticalGroup:focus-within > DoubleClickableOptionList,
+ModalScreen > VerticalGroup:focus-within > OptionList,
 FileSearchToggles:focus,
 ContentSearchToggles:focus,
 #file_list.-maximized,
@@ -477,16 +475,13 @@ ProgressBarContainer {
 }
 
 Content.selected { color: red }
-CommandList,
 FileList, PinnedSidebar, Clipboard,
 PopupOptionList,
 FileSearchToggles,
 ContentSearchToggles,
 DoubleClickableOptionList,
 KeybindList,
-PasteScreen OptionList,
-DeleteFiles OptionList,
-ArchiveCreationScreen OptionList {
+ModalScreen OptionList {
   padding: 0 0 0 0;
   background-tint: ansi_default !important;
   scrollbar-size: 1 1;
@@ -512,6 +507,14 @@ ArchiveCreationScreen OptionList {
     color: $primary;
     background: transparent;
     text-style: bold;
+  }
+}
+
+CommandList:ansi {
+  /* just need to fix ansi issues */
+  background-tint: ansi_default !important;
+  .option-list--option-hover {
+    background: $primary-background
   }
 }
 
@@ -554,8 +557,8 @@ FileList {
 }
 
 #dialog {
-  max-width: 50vw;
-  max-height: 50vh;
+  max-width: 55vw;
+  max-height: 55vh;
   overflow-y: auto;
   border-title-align: center;
   border-subtitle-align: center;
@@ -688,46 +691,37 @@ DeleteFiles,
 ModalInput,
 TerminalTooSmall { align: center middle }
 
-YesOrNo #dialog #question_container,
-FileNameConflict #dialog #question_container,
-FileInUse #question_container {
-  column-span: 2;
-  height: 1fr;
-  width: 1fr;
-  content-align: center middle;
-  text-wrap: wrap;
+YesOrNo #dialog,
+FileNameConflict #dialog,
+FileInUse #dialog {
   .question {
     content-align: center middle;
+    column-span: 2;
     width: 1fr;
     height: 1fr;
     text-align: center;
     text-wrap: wrap;
     text-overflow: fold;
   }
-}
 
-YesOrNo #dialog #dontAskAgain,
-FileNameConflict #dialog #dontAskAgain,
-FileInUse #dontAskAgain {
-  column-span: 2;
-  content-align: center middle;
-  align: center middle;
-  Switch {
-    border: none;
-    padding: 0;
-    background: transparent;
-    margin: 0 2 0 0;
-    &:focus {
+  #dontAskAgain {
+    column-span: 2;
+    content-align: center middle;
+    align: center middle;
+    Switch {
       border: none;
-      & > .switch--slider { color: $panel-lighten-1 }
-      &.-on > .switch--slider { color: $success-lighten-1 }
+      padding: 0;
+      background: transparent;
+      margin: 0 2 0 0;
+      &:focus {
+        border: none;
+        & > .switch--slider { color: $panel-lighten-1 }
+        &.-on > .switch--slider { color: $success-lighten-1 }
+      }
     }
   }
+  Button { width: 100% }
 }
-
-YesOrNo #dialog Button,
-FileNameConflict #dialog Button,
-FileInUse Button { width: 100% }
 
 Dismissible {
   #dialog {
@@ -737,6 +731,12 @@ Dismissible {
     padding: 1 3;
     border: $border-style $border;
     column-span: 3;
+    max-height: 40vh;
+    max-width: 40vw;
+    &:ansi {
+      padding: 0 1;
+      grid-gutter: 0 1;
+    }
   }
   #message {
     height: 1fr;
@@ -751,19 +751,29 @@ Dismissible {
 YesOrNo #dialog {
   grid-size: 2;
   grid-gutter: 1 2;
-  padding: 1 3 1 3;
   border: $border-style $border;
   grid-rows: 1fr 3; /* enough space for 1fr */
+  max-height: 20;
+  max-width: 50vw;
+  padding: 1 2;
+  &:ansi {
+    padding: 0 1;
+  }
   &.with_toggle {
     grid-rows: 1fr 3 1;
-    padding: 1 3 0 3;
+    padding: 0 1 0 1;
   }
 }
 
 PasteScreen > #dialog {
   grid-size: 2 3;
+  grid-rows: 0.5fr 1.5fr 3;
   grid-gutter: 1 2;
-  grid-rows: 0.75fr 1fr 3;
+  padding: 1 3;
+  &:ansi {
+    padding: 0 1;
+    grid-gutter: 0 1;
+  }
   &.with_toggle {
     grid-rows: 0.75fr 1fr 3 1;
   }
@@ -775,21 +785,23 @@ PasteScreen > #dialog {
   Button {
     column-span: 1
   }
-  #question_container {
-    column-span: 2;
-  }
 }
 
 FileNameConflict #dialog {
   grid-size: 2;
   grid-gutter: 1 2;
-  grid-rows: 1fr 3 3 1; /* need the two lines for label */
-  padding: 1 3 0 3;
+  grid-rows: 1fr 3 3 2;
+  padding: 0 2;
   border: $border-style $border;
-  height: 60vh;
-  max-height: 60vh;
-  width: 60vw;
-  max-width: 60vw;
+  max-height: 20;
+  max-width: 50vw;
+  &:ansi {
+    grid-gutter: 0 1;
+    grid-rows: 1fr 3 3 3;
+    #dontAskAgain {
+      offset: 0 1;
+    }
+  }
 }
 
 FileNameConflict.no_overwrite #dialog Container {
@@ -805,10 +817,15 @@ FileInUse {
     grid-size: 2;
     grid-gutter: 1 2;
     grid-rows: 1fr 3 3 1; /* space for toggle row */
-    padding: 1 3;
     border: $border-style $border;
     max-height: 20;
+    max-width: 45vw;
     height: auto;
+    padding: 1 3;
+    &:ansi {
+      padding: 0 1;
+      grid-rows: 1fr 3 3 2;
+    }
   }
   Container {
     column-span: 2;
@@ -820,16 +837,19 @@ FileInUse {
 DeleteFiles {
   #dialog {
     grid-size: 2 3;
-    grid-gutter: 1 2;
-    grid-rows: 0.75fr 1fr 3 1; /* no issues for now */
-    padding: 1 3;
-    height: 60vh;
-    max-height: 60vh;
-    width: 60vw;
-    max-width: 60vw;
+    grid-rows: 0.5fr 1.5fr 3 1; /* no issues for now */
+    padding: 0 1;
     border: $border-style $border;
+    padding: 1 2;
+    grid-gutter: 1 2;
+    max-width: 55vw;
+    max-height: 55vh;
     &.with_trash {
       grid-size: 3 3;
+    }
+    &:ansi {
+      grid-gutter: 0 1;
+      padding: 0 1;
     }
   }
   #question {
@@ -1070,20 +1090,39 @@ Screen {
       width: 100vw;
       max-width: 100vw;
     }
+    Input {
+      background: red;
+    }
     Toast { width: 100vw }
     #file_search_toggles,
     #content_search_toggles { display: none }
-    #dialog.delete {
+    &DeleteFiles #dialog {
       grid-size: 1 5 !important;
       grid-rows: 0.75fr 1fr 3 3 1 !important;
       padding: 0 1;
       &.with_trash { grid-rows: 0.75fr 1fr 3 3 3 1 !important }
     }
-    #dialog.file_in_use {
-      max-height: 75vh;
+    &FileInUse #dialog {
+      max-height: 90vh;
       grid-size: 1 5 !important;
       grid-rows: 1fr 3 3 3 1 !important;
-      #cancel { width: 100% }
+    }
+    &ArchiveCreationScreen #archive_options_group {
+      width: 100vw;
+      layout: vertical;
+      OptionList {
+        height: 5;
+      }
+    }
+    &YesOrNo #dialog {
+      grid-size: 1 3 !important;
+      grid-rows: 1fr 3 3 !important;
+      max-height: 90vh;
+      padding: 0 1;
+    }
+    &PasteScreen #dialog {
+      grid-size: 1 4 !important;
+      grid-rows: 0.5fr 1.5fr 3 3 !important;
     }
   }
   &.-no-preview {
@@ -1095,13 +1134,13 @@ Screen {
     .--textual-command-palette #--container,
     #dialog,
     #modalInput_group {
-      width: 75vw;
-      max-width: 75vw;
+      width: 80vw;
+      max-width: 80vw;
     }
     Toast { width: 50vw }
     #file_search_toggles,
     #content_search_toggles { display: none }
-    #dialog.delete {
+    &DeleteFiles #dialog {
       grid-size: 2 4 !important;
       max-width: 80vw;
       width: 80vw;
@@ -1110,16 +1149,19 @@ Screen {
       &.with_trash { grid-rows: 0.75fr 1fr 3 3 3 1 !important }
       #cancel { width: 50% }
     }
-    #dialog.file_in_use {
-      max-height: 75vh;
+    &FileInUse #dialog {
+      max-height: 80vh;
       grid-size: 2 4 !important;
       grid-rows: 1fr 3 3 1 !important;
       #cancel { width: 100% }
     }
+    &ArchiveCreationScreen HorizontalGroup {
+      width: 80vw;
+    }
   }
   &.-all-vertical {
     #footer { max-height: 25vh }
-    #dialog.file_in_use #cancel { width: 50% }
+    &FileInUse #dialog #cancel { width: 50% }
   }
   &.-no-path {
     #below_menu { display: none !important }

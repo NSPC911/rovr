@@ -200,6 +200,7 @@ class Test(App):
                         title=f"CSS: {type(error).__name__}",
                         severity="error",
                         markup=False,
+                        timeout=5,
                     )
                     return
                 stylesheet.parse()
@@ -207,6 +208,7 @@ class Test(App):
                 self.notify(
                     f"Reloaded {len(css_paths)} CSS files in {elapsed:.0f} ms",
                     title="CSS",
+                    timeout=2,
                 )
             except StylesheetParseError as exc:
                 self._css_has_errors = True

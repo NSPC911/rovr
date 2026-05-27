@@ -1,6 +1,7 @@
+from rich.markup import escape
 from textual import events
 from textual.app import ComposeResult
-from textual.containers import Grid, HorizontalGroup, VerticalGroup
+from textual.containers import Grid, HorizontalGroup
 from textual.message import Message
 from textual.screen import ModalScreen
 from textual.widgets import Button, Label, Switch
@@ -45,9 +46,7 @@ class YesOrNo(Actionable, ModalScreen):
 
     def compose(self) -> ComposeResult:
         with Grid(id="dialog", classes="yes_or_no"):
-            with VerticalGroup(id="question_container"):
-                for message in self.message.splitlines():
-                    yield Label(message, classes="question")
+            yield Label(escape(self.message), classes="question")
             yield Button(
                 f"\\[{yes_bind}] Yes",
                 variant="error" if self.destructive else "success",

@@ -171,7 +171,7 @@ class ArchiveCreationScreen(ModalInput):
 
     def compose(self) -> ComposeResult:
         yield from super().compose()
-        with HorizontalGroup():
+        with HorizontalGroup(id="archive_options_group"):
             yield ArchiveTypes()
             yield ArchiveCompression()
 

@@ -1,6 +1,6 @@
 from textual import events, on
 from textual.app import ComposeResult
-from textual.containers import Container, Grid, HorizontalGroup, VerticalGroup
+from textual.containers import Container, Grid, HorizontalGroup
 from textual.message import Message
 from textual.screen import ModalScreen
 from textual.widgets import Button, Label, Switch
@@ -37,9 +37,7 @@ class FileNameConflict(ModalScreen):
 
     def compose(self) -> ComposeResult:
         with Grid(id="dialog"):
-            with VerticalGroup(id="question_container"):
-                for message in self.message.splitlines():
-                    yield Label(message, classes="question")
+            yield Label(self.message, classes="question")
             if self.allow_overwrite:
                 yield Button(
                     f"\\[{overwrite_bind}] Overwrite", variant="error", id="overwrite"

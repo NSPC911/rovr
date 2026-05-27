@@ -44,7 +44,7 @@ oO08 iIlL1 g9qCQG a@ 5sS
 """
 
 [interface.clock]
-enabled = true
+enabled = false
 align = "left"
 
 [interface.compact_mode]

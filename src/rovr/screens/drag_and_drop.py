@@ -1,4 +1,5 @@
 import shlex
+from contextlib import suppress
 from os import path
 from sys import platform
 
@@ -39,15 +40,18 @@ class DragAndDropScreen(ModalScreen[DragAndDropReturnType]):
     @on(events.Paste)
     def on_paste(self, event: events.Paste) -> None:
         # attempt to parse it
-        # first check if it is a full file path
+        # first check if it is a full filepath
         event.text = event.text.strip()
         if path.lexists(event.text):
             self.file_paths.add(event.text.strip().strip('"').strip("'"))
         # otherwise, try to parse it as a list of arguments
         else:
-            file_paths = shlex.split(event.text, posix=platform != "win32")
-            for i in range(len(file_paths)):
-                file_paths[i] = file_paths[i].strip().strip('"').strip("'")
+            file_paths: list[str] = []
+            with suppress(ValueError):
+                file_paths = [
+                    fp.strip().strip('"').strip("'")
+                    for fp in shlex.split(event.text, posix=platform != "win32")
+                ]
             for file_path in file_paths:
                 if path.lexists(file_path):
                     self.file_paths.add(file_path)
@@ -77,6 +81,8 @@ class DragAndDropScreen(ModalScreen[DragAndDropReturnType]):
 
     @on(Button.Pressed)
     def on_button_pressed(self, event: Button.Pressed) -> None:
+        if event.button.id not in ("copy", "move"):
+            return
         dismiss(
             self,
             DragAndDropReturnType(sorted(list(self.file_paths)), event.button.id),

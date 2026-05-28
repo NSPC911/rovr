@@ -17,6 +17,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `context`: add windows properties shortcut thing [7b15bc6](https://github.com/NSPC911/rovr/commit/7b15bc62189505e24d0ac7f5de2fb8c7c73e889b)
 - `filelist`: add configurable styles for specific files/folders [#284](https://github.com/NSPC911/rovr/pull/284)
 - `app`: add theme name as class to #root [ba12d0f](https://github.com/NSPC911/rovr/commit/ba12d0f908b74ff97dd6554d831ed3f6f536fd0d)
+- disable clock by default [24406d650f1d119a1a156ac71e022bc63c404cb6](https://github.com/NSPC911/rovr/commit/24406d650f1d119a1a156ac71e022bc63c404cb6)
+- `app`: allow drag and and drop from gui to terminal using bracketed paste [#285](https://github.com/NSPC911/rovr/pull/285)
 
 ### Fixed
 
@@ -36,6 +38,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `editors`: use shlex.split rather than shlex.quote-ing the file [7a6dae6](https://github.com/NSPC911/rovr/commit/7a6dae6542a5689d6057e8883da8a64b7cf8ca10)
 - `utils`: properly check for file being used on windows [5622571](https://github.com/NSPC911/rovr/commit/56225710d00486fdd7621a3d685c222e8e0ceb0d)
 - `preview`: fix crash on broken wsl symlink [ae50128](https://github.com/NSPC911/rovr/commit/ae50128160e9d82a3d47b9b0c02563e9410e48ab)
+- `lists`: make checkbox use the same color as the text [b45eeea](https://github.com/NSPC911/rovr/commit/b45eeeabd59bccc442e029634480b42811add54e)
+- `screens`: improve resized ui [a17e2cb](https://github.com/NSPC911/rovr/commit/a17e2cb3d92ececc05b931ab30a8ee3e28ea6f92) [2f34dc0](https://github.com/NSPC911/rovr/commit/2f34dc0d3efcd51d012b8628a3d7e88fb355d1ba)
+- `log`: only keep latest 50 logs [b351152](https://github.com/NSPC911/rovr/commit/b3511529736c3963b3ee25b624938591ab409aee)
 
 ### Refactor
 

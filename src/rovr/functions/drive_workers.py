@@ -1,7 +1,10 @@
 from __future__ import annotations
 
 import multiprocessing
+from fnmatch import fnmatch
 from os import path
+
+from rovr.classes.config import RovrConfig
 
 try:
     import psutil
@@ -37,7 +40,7 @@ def normalise(*location: str | bytes) -> str:
     )
 
 
-def get_mounted_drives(os_type: str) -> list[str]:
+def get_mounted_drives(os_type: str, config: "RovrConfig") -> list[str]:
     """
     Worker function to get mounted drives - isolated from config imports.
 
@@ -77,11 +80,14 @@ def get_mounted_drives(os_type: str) -> list[str]:
             ]
         else:
             drives = ["/"]  # root should definitely exist right
+    exclude_patterns: list[str] = config.get("settings", {}).get("drive_exclude", [])
+    if exclude_patterns:
+        drives = [d for d in drives if not any(fnmatch(d, p) for p in exclude_patterns)]
     return drives
 
 
 def get_mounted_drives_worker(
-    queue: "multiprocessing.Queue[list[str]]", os_type: str
+    queue: "multiprocessing.Queue[list[str]]", os_type: str, config: "RovrConfig"
 ) -> None:
     """
     Multiprocessing worker that gets mounted drives and puts result in a queue.
@@ -89,9 +95,10 @@ def get_mounted_drives_worker(
     Args:
         queue: Multiprocessing queue to put the result into
         os_type: Operating system type ("Windows", "Darwin", or other)
+        config: Application config dict
     """
     try:
-        result = get_mounted_drives(os_type)
+        result = get_mounted_drives(os_type, config)
         queue.put(result)
     except Exception:
         queue.put([])

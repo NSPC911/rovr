@@ -1100,6 +1100,7 @@ Screen {
       grid-size: 1 5 !important;
       grid-rows: 0.75fr 1fr 3 3 1 !important;
       padding: 0 1;
+      max-height: 90vh;
       &.with_trash { grid-rows: 0.75fr 1fr 3 3 3 1 !important }
     }
     &FileInUse #dialog {
@@ -1142,10 +1143,9 @@ Screen {
     #content_search_toggles { display: none }
     &DeleteFiles #dialog {
       grid-size: 2 4 !important;
-      max-width: 80vw;
-      width: 80vw;
       grid-rows: 0.75fr 1fr 3 3 1 !important;
       padding: 0 1;
+      max-height: 80vh;
       &.with_trash { grid-rows: 0.75fr 1fr 3 3 3 1 !important }
       #cancel { width: 50% }
     }

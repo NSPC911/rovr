@@ -6,6 +6,7 @@ import ctypes
 import os
 import re
 import stat
+from contextlib import suppress
 from functools import lru_cache, partial
 from os import path
 from typing import Callable, Literal, TypedDict, overload
@@ -573,6 +574,21 @@ def dump_exc(widget: DOMNode | None, exc: Exception | Traceback) -> str | None: 
         f"{log_name}.log",
     )
     os.makedirs(path.dirname(dump_path), exist_ok=True)
+
+    log_dir = path.dirname(dump_path)
+    log_files = sorted(
+        [
+            f
+            for f in os.listdir(log_dir)
+            if f.startswith(log_name) and f.endswith(".log")
+        ],
+        key=lambda f: path.getctime(path.join(log_dir, f)),
+    )
+    if len(log_files) >= 50:
+        oldest = path.join(log_dir, log_files[0])
+        with suppress(OSError):
+            os.remove(oldest)
+
     with open(dump_path, "a", encoding="utf-8") as file_log:
         # don't need to handle OS Error, Textual automatically chains errors
         error_log = Console(file=file_log, legacy_windows=True)

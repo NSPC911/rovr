@@ -1109,6 +1109,9 @@ Screen {
       width: 100vw;
       max-width: 100vw;
     }
+    &ModalScreen OptionList {
+      border: none;
+    }
     Input {
       background: red;
     }

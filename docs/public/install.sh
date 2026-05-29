@@ -120,6 +120,7 @@ case "$CURRENT_SHELL" in
 esac
 if ! grep -qF "$BIN_PATH" "$RC" 2>/dev/null; then
     echo "Adding $BIN_PATH to PATH in $RC..."
+    mkdir -p "$(dirname "$RC")"
     printf '\n%s\n' "$PATH_LINE" >> "$RC"
     echo "Restart your terminal or run 'source $RC' to apply."
 fi

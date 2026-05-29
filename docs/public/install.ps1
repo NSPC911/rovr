@@ -1,4 +1,4 @@
-if (-not $IsWindows) {
+if (-not [Environment]::OSVersion.Platform -eq 'Win32NT') {
     Write-Host "As much as I want to support the 5 people that use Powershell on non-Windows system (myself included)"
     Write-Host "It is too much of a hastle to maintain. Instead, please use the alternative install.sh"
     return

@@ -24,24 +24,28 @@ class _OpenerIf(TypedDict, total=False):
     cwd: list[str]
     r""" Only use this opener if the current working directory matches one (or more) of the glob patterns in this list (look at https://docs.python.org/3/library/fnmatch.html for more info) """
 
-    os: list["_OpenerIfOsItem"]
-    r""" Only use this opener if the operating system is one of the following (case insensitive) """
+    os: "_OsIf"
+    r""" Only use this setting if the operating system is one of the following (case insensitive) """
 
     directory: bool
     r""" Only use this opener if the selected item is a directory (set to true) or a file (set to false) (if unspecified, matches both files and directories) """
 
 
-_OpenerIfOsItem = Union["_OpenerIfOsItemAnyof0", str]
+_OsIf = list["_OsIfItem"]
+r""" Only use this setting if the operating system is one of the following (case insensitive) """
+
+
+_OsIfItem = Union["_OsIfItemAnyof0", str]
 r""" Aggregation type: anyOf """
 
 
-_OpenerIfOsItemAnyof0 = Literal["Windows"] | Literal["Linux"] | Literal["Darwin"]
-_OPENERIFOSITEMANYOF0_WINDOWS: Literal["Windows"] = "Windows"
-r"""The values for the '_OpenerIfOsItemAnyof0' enum"""
-_OPENERIFOSITEMANYOF0_LINUX: Literal["Linux"] = "Linux"
-r"""The values for the '_OpenerIfOsItemAnyof0' enum"""
-_OPENERIFOSITEMANYOF0_DARWIN: Literal["Darwin"] = "Darwin"
-r"""The values for the '_OpenerIfOsItemAnyof0' enum"""
+_OsIfItemAnyof0 = Literal["Windows"] | Literal["Linux"] | Literal["Darwin"]
+_OSIFITEMANYOF0_WINDOWS: Literal["Windows"] = "Windows"
+r"""The values for the '_OsIfItemAnyof0' enum"""
+_OSIFITEMANYOF0_LINUX: Literal["Linux"] = "Linux"
+r"""The values for the '_OsIfItemAnyof0' enum"""
+_OSIFITEMANYOF0_DARWIN: Literal["Darwin"] = "Darwin"
+r"""The values for the '_OsIfItemAnyof0' enum"""
 
 
 _ROVR_CONFIG_ICONS_FILES_DEFAULT: list[Any] = []
@@ -296,6 +300,10 @@ r""" Default value of the field path 'Rovr Config plugins zoxide show_scores' ""
 
 _ROVR_CONFIG_SETTINGS_COPY_INCLUDES_METADATA_DEFAULT = True
 r""" Default value of the field path 'Rovr Config settings copy_includes_metadata' """
+
+
+_ROVR_CONFIG_SETTINGS_DRIVE_EXCLUDE_DEFAULT: list[Any] = []
+r""" Default value of the field path 'Rovr Config settings drive_exclude' """
 
 
 _ROVR_CONFIG_SETTINGS_EDITOR_BULK_EDITOR_RENAME_SHOW_AS_MAPPING_DEFAULT = True
@@ -1458,6 +1466,14 @@ class _RovrConfigSettings(TypedDict, total=False):
     r"""
     A list of openers to open files with. These are used to open files, what were you expecting.
     Key must be a valid glob pattern, but the value has to be a list that can contain a mix of strings and objects
+    """
+
+    drive_exclude: list[str]
+    r"""
+    Glob patterns matched against mountpoint paths. Drives matching any pattern are hidden from the sidebar (e.g. '/run/media/*', 'D:/').
+
+    default:
+      []
     """
 
 

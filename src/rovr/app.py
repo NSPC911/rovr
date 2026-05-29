@@ -632,7 +632,7 @@ class Application(Actionable, App, inherit_bindings=False):
 
                         process = multiprocessing.Process(
                             target=drive_workers.get_mounted_drives_worker,
-                            args=(result_queue, os_type),
+                            args=(result_queue, os_type, config),
                         )
                         process.start()
                         process.join(timeout=2.0)
@@ -647,7 +647,7 @@ class Application(Actionable, App, inherit_bindings=False):
                             # Process completed successfully
                             new_drives = result_queue.get_nowait()
                     else:
-                        new_drives = drive_workers.get_mounted_drives(os_type)
+                        new_drives = drive_workers.get_mounted_drives(os_type, config)
                     if new_drives is not None and new_drives != drives():
                         self.query_one(PinnedSidebar).reload_pins()
                 except Exception as exc:

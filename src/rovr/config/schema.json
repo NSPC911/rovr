@@ -34,6 +34,17 @@
         }
       ]
     },
+    "os_if": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "anyOf": [
+          { "enum": ["Windows", "Linux", "Darwin"] },
+          { "type": "string" }
+        ]
+      },
+      "description": "Only use this setting if the operating system is one of the following (case insensitive)"
+    },
     "opener_if": {
       "type": "object",
       "additionalProperties": false,
@@ -44,15 +55,8 @@
           "items": { "type": "string" }
         },
         "os": {
-          "description": "Only use this opener if the operating system is one of the following (case insensitive)",
-          "type": "array",
-          "items": {
-            "type": "string",
-            "anyOf": [
-              { "enum": ["Windows", "Linux", "Darwin"] },
-              { "type": "string" }
-            ]
-          }
+          "$ref": "#/definitions/os_if",
+          "description": "Only use this opener if the operating system is one of the following (case insensitive)"
         },
         "directory": {
           "type": "boolean",
@@ -444,9 +448,7 @@
             "type": "array",
             "items": {
               "oneOf": [
-                {
-                  "type": "string"
-                },
+                { "type": "string" },
                 {
                   "type": "object",
                   "additionalProperties": false,
@@ -474,6 +476,12 @@
               ]
             }
           }
+        },
+        "drive_exclude": {
+          "type": "array",
+          "items": { "type": "string" },
+          "default": [],
+          "description": "Glob patterns matched against mountpoint paths. Drives matching any pattern are hidden from the sidebar (e.g. '/run/media/*', 'D:/')."
         }
       }
     },

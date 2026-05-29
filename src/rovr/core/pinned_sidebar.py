@@ -149,7 +149,7 @@ class PinnedSidebar(Actionable, OptionList, inherit_bindings=False):
                 result_queue: multiprocessing.Queue[list[str]] = multiprocessing.Queue()
                 process = multiprocessing.Process(
                     target=drive_utils.get_mounted_drives_worker,
-                    args=(result_queue, os_type),
+                    args=(result_queue, os_type, config),
                 )
                 process.start()
                 process.join(timeout=2.0)
@@ -166,11 +166,11 @@ class PinnedSidebar(Actionable, OptionList, inherit_bindings=False):
 
                 drives = result_queue.get_nowait()
             else:
-                drives = drive_utils.get_mounted_drives(os_type)
+                drives = drive_utils.get_mounted_drives(os_type, config)
         except Exception as exc:
             if not multiprocessing_process_error_checker(self.app, exc):
                 return
-            drives = drive_utils.get_mounted_drives(os_type)
+            drives = drive_utils.get_mounted_drives(os_type, config)
         self.DRIVES = drives
         new_options: list[PinnedSidebarOption] = []
         for drive in drives:

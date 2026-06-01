@@ -24,11 +24,22 @@ fi
 INSTALL_PATH="$HOME/.local/share/rovr"
 BIN_PATH="$HOME/.local/bin"
 
+MIN=$(printf '%s\n' "v0.9.0" "$ROVR_VERSION" | sort -V | head -1)
+if [ "$MIN" = "v0.9.0" ]; then
+    EXE_NAME="rovr"
+else
+    EXE_NAME="rovr.bin"
+fi
+
 if [ -z "${ROVR_FORCE_REINSTALL:-}" ]; then
     echo "Checking for existing installation of rovr..."
     if [ -d "$INSTALL_PATH" ]; then
-        OLD_EXE="$INSTALL_PATH/rovr.bin"
-        if [ -f "$OLD_EXE" ]; then
+        if [ -f "$INSTALL_PATH/rovr" ]; then
+            OLD_EXE="$INSTALL_PATH/rovr"
+        elif [ -f "$INSTALL_PATH/rovr.bin" ]; then
+            OLD_EXE="$INSTALL_PATH/rovr.bin"
+        fi
+        if [ -n "${OLD_EXE:-}" ]; then
             OLD_VER_NUM=$("$OLD_EXE" --version 2>/dev/null | awk 'NR==1{print $2}') || OLD_VER_NUM=""
             if [ -n "$OLD_VER_NUM" ]; then
                 OLD_VER="v$OLD_VER_NUM"
@@ -84,10 +95,10 @@ curl -fL -o "$ZIP_PATH" "$DOWNLOAD_URL"
 echo "Extracting zip..."
 unzip -q -o "$ZIP_PATH" -d "$INSTALL_PATH"
 rm "$ZIP_PATH"
-chmod +x "$INSTALL_PATH/rovr.bin"
+chmod +x "$INSTALL_PATH/$EXE_NAME"
 
 mkdir -p "$BIN_PATH"
-ln -sf "$INSTALL_PATH/rovr.bin" "$BIN_PATH/rovr"
+ln -sf "$INSTALL_PATH/$EXE_NAME" "$BIN_PATH/rovr"
 
 echo "rovr $ROVR_VERSION has been installed to $INSTALL_PATH."
 

@@ -25,7 +25,24 @@ import InlineSVG from "@/components/InlineSVG.astro";
   <br />
   only necessary if you want an autocomplete box while configuring rovr.
 
-currently, `rovr` is only on pypi.
+
+#### Installation scripts
+
+**Linux/macOS**
+With curl:
+```sh
+bash -c "$(curl -fsSL https://nspc911.github.io/rovr/install.sh)"
+```
+
+With wget:
+```sh
+bash -c "$(wget -qO- https://nspc911.github.io/rovr/install.sh)"
+```
+
+**Windows**
+```pwsh
+Invoke-Expression (Invoke-WebRequest https://nspc911.github.io/rovr/install.ps1)
+```
 
 #### uv (test run)
 
@@ -51,10 +68,29 @@ I also recommend installing with `--python 3.13t` (the free threaded build) beca
 pipx install rovr
 ```
 
-#### pip (not recommended)
+#### Arch Linux (install)
+
+Python version
+```sh
+yay -S rovr
+```
+Compiled version
+```sh
+yay -S rovr-bin
+```
+
+#### Pixi (install)
 
 ```sh
-pip install rovr
+pixi global install rovr
+```
+
+#### Homebrew (install)
+
+Proceed with precaution, I don't own this tap!
+```sh
+brew tap chenrui333/homebrew-tap
+brew install rovr
 ```
 
 if successful, you can run

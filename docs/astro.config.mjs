@@ -101,7 +101,7 @@ export default defineConfig({
             { label: "image previews", slug: "features/image-previews" },
             { label: "cd on quit", slug: "features/cd-on-quit" },
             { label: "context menu", slug: "features/context-menu", badge: { text: "new", variant: "tip" } },
-            { label: "custom openers", slug: "features/custom-openers", badge: { text: "master", variant: "note" } },
+            { label: "custom openers", slug: "features/custom-openers", badge: { text: "new", variant: "new" } },
             { label: "shell execution", slug: "features/shell-exec" },
             { label: "plugins", slug: "features/plugins" },
           ],

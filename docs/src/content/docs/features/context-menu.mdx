@@ -7,99 +7,143 @@ import InlineSVG from "@/components/InlineSVG.astro";
 
 rovr provides a convenient right-click context menu that gives you quick access to common file operations.
 
-## accessing the context menu
+<InlineSVG src="/rovr/screenshots/right-click-better.svg" alt="context menu" />
 
-<InlineSVG src="/rovr/screenshots/right-click.svg" alt="context menu" />
+## accessing the context menu
 
 you can open the context menu by:
 
 - **right-clicking** on any file or folder in the file list
+- pressing **shift+f10** (or your configured keybind)
 - the menu appears at your cursor position with relevant actions
 
 ## available actions
 
-the context menu includes the following operations:
+the context menu includes the following built-in operations:
 
-### copy
+### rovr actions
 
-copy the selected file(s) to rovr's clipboard.
+these actions operate within rovr's clipboard and are defined in `rovr/core/file_list_right_click_menu.py`:
 
-- equivalent to pressing `y` or `ctrl+c`
-- works with multiple selections
+| action        | description                                                |
+| ------------- | ---------------------------------------------------------- |
+| `rovr:copy`   | copy the selected file(s) to rovr's clipboard              |
+| `rovr:cut`    | cut the selected file(s) to rovr's clipboard for moving    |
+| `rovr:paste`  | paste files from rovr's clipboard to the current directory |
+| `rovr:new`    | create a new file or folder                                |
+| `rovr:rename` | rename the selected item                                   |
+| `rovr:delete` | delete the selected file(s)                                |
+| `rovr:zip`    | compress the selected file(s) into an archive              |
+| `rovr:unzip`  | extract the contents of a compressed file                  |
 
-### cut
+### system actions
 
-cut the selected file(s) to rovr's clipboard for moving.
+these actions interact with your operating system clipboard:
 
-- equivalent to pressing `x` or `ctrl+x`
-- works with multiple selections
+| action                          | description                                              |
+| ------------------------------- | -------------------------------------------------------- |
+| `system:copy_highlighted`       | copy the highlighted file's path to the system clipboard |
+| `system:copy_current_directory` | copy the current directory path to the system clipboard  |
+| `system:copy_to_system_clip`    | copy rovr's clipboard contents to the system clipboard   |
 
-### paste
+## submenus
 
-paste files from rovr's clipboard to the current directory.
+you can create submenus by using the `options` field instead of `action`:
 
-- equivalent to pressing `p` or `ctrl+v`
-- handles conflicts with duplicate file names
+```toml
+right_click = [
+  { label = "Open With", options = [
+    { label = "VSCode", action = "sh:code \"${selected_files}\"" },
+    { label = "Helix", action = 'shh:hx "${selected_files}"' },
+  ] },
+]
+```
 
-### rename
+<InlineSVG src="/rovr/screenshots/context-menu-submenu.svg" alt="context menu with submenu" />
 
-rename the selected item.
+## shell commands
 
-- equivalent to pressing `r` or `f2`
-- only available for single file/folder selection
+you can execute shell commands directly from the context menu using special action prefixes. the prefix format is `sh[X]:` where `X` determines the execution mode.
 
-### delete
+### execution modes
 
-delete the selected file(s).
+| prefix | module       | description                                                           |
+| ------ | ------------ | --------------------------------------------------------------------- |
+| `sh:`  | normal shell | runs the command without capturing output, rovr remains responsive    |
+| `shh:` | hide app     | suspends rovr while the command runs, useful for interactive commands |
+| `sho:` | show output  | captures stdout/stderr and displays as a notification                 |
 
-- equivalent to pressing `d` or `delete`
-- works with multiple selections
+the command follows the prefix after a colon. for example:
 
-### zip
+- `sh:code "${selected_files}"` — opens vscode normally
+- `shh:hx "${highlighted_file}"` — opens helix while hiding rovr
+- `sho:pwsh -nop -c "(Get-FileHash -Algorithm SHA256 \"${highlighted_file}\").Hash"` — shows hash output
 
-compress the selected file(s) into an archive.
+### command expansions
 
-- equivalent to pressing `shift+e`
-- supports multiple archive formats
-- works with multiple selections
+shell actions support variable expansions via `rovr/functions/utils.py::expand_command`:
 
-### extract archive
+| variable                       | description                                                    |
+| ------------------------------ | -------------------------------------------------------------- |
+| `${highlighted_file}`          | path to the currently highlighted file                         |
+| `${selected_files}`            | space-separated list of all selected file paths (shell-quoted) |
+| `${current_working_directory}` | the current directory path                                     |
+| `${highlighted_file_name}`     | the name of the highlighted file (without path)                |
 
-extract the contents of a compressed file.
+## conditional display
 
-- equivalent to pressing `ctrl+e`
-- only available when an archive file is selected
+menu items can be conditionally shown or hidden based on file path, operating system, current directory, or file type. conditions are checked via `rovr/core/file_list_right_click_menu.py::ifed`.
 
-### copy path
+```toml
+right_click = [
+  { label = "Open in VSCode", action = "sh:code \"${selected_files}\"" },
+  { label = "Pixelorama", action = 'sh:pixelorama "${selected_files}"', if = { path = ["*.png", "*.jpg"] } },
+  { label = "Windows Only", action = "sh:echo hello", if = { os = ["Windows"] } },
+  { label = "Git Projects", action = "sh:git status", if = { cwd = ["C:/Projects/*"] } },
+  { label = "Folder Action", action = "sh:do something", if = { directory = true } },
+  { label = "File Action", action = "sh:do something", if = { directory = false } },
+]
+```
 
-copy the full path of the selected item to your system clipboard.
+### condition fields
 
-- equivalent to the copy path button action
-- copies the absolute path as text
+| field       | type      | description                                                                         |
+| ----------- | --------- | ----------------------------------------------------------------------------------- |
+| `path`      | list[str] | show only if the file path matches one of these glob patterns (fnmatch)             |
+| `os`        | list[str] | show only on specified operating systems (case insensitive: Windows, Linux, Darwin) |
+| `cwd`       | list[str] | show only if the current working directory matches one of these glob patterns       |
+| `directory` | bool      | show only for directories (`true`) or files (`false`)                               |
 
-## navigation with the context menu
+### keybind
 
-when the context menu is open:
+the keyboard shortcut is configured via `open_right_click_menu` in `[keybinds]`:
 
-- **move up/down**: arrow keys or `k`/`j`
-- **select action**: `enter` or click
-- **close menu**: `esc` or click outside the menu
+```toml
+[keybinds]
+open_right_click_menu = ["shift+f10"]
+```
 
-## double-click behavior
+## configuration
 
-in addition to the context menu, rovr supports double-clicking:
+the context menu is configured in your `config.toml` under `[settings]`:
 
-- **on folders**: opens the folder (same as pressing `enter`)
-- **on files**: attempts to open the file with the default application
-
-the double-click delay can be configured in your `config.toml`:
+if you want to add anything, you MUST include the default options, otherwise you will lose them.
 
 ```toml
 [settings]
-# time in seconds between clicks to register as double-click
-double_click_delay = 0.25
+right_click = [
+  { label = "\uf0c5 Copy", options = [
+    { label = "\uf07f Copy in rovr", action = "rovr:copy" },
+    { label = "\U000f0147 Copy highlighted file path", action = "system:copy_highlighted" },
+    { label = "\U000f14e5 Copy current directory path", action = "system:copy_current_directory" },
+    { label = "\U000f1265 Copy to OS clipboard", action = "system:copy_to_system_clip" },
+  ] },
+  { label = "\uf0c4 Cut", action = "rovr:cut" },
+  { label = "\uf429 Paste", action = "rovr:paste" },
+  { label = "\uea7f New", action = "rovr:new" },
+  { label = "\uf246 Rename", action = "rovr:rename" },
+  { label = "\uf014 Delete", action = "rovr:delete" },
+  { label = "\uf410 Zip", action = "rovr:zip" },
+  { label = "\uf07c Unzip", action = "rovr:unzip" },
+]
 ```
-
-## mouse scroll
-
-you can also use your mouse wheel to scroll through the file list when hovering over it.

@@ -91,36 +91,34 @@ ln -sf "$INSTALL_PATH/rovr.bin" "$BIN_PATH/rovr"
 
 echo "rovr $ROVR_VERSION has been installed to $INSTALL_PATH."
 
-CURRENT_SHELL=$(ps -p $$ -o comm= 2>/dev/null || basename "${SHELL:-bash}")
-case "$CURRENT_SHELL" in
-    *zsh)
+case "${SHELL:-}" in
+    */zsh)
         RC="$HOME/.zshrc"
         PATH_LINE="export PATH=\"$BIN_PATH:\$PATH\""
         ;;
-    *fish)
+    */fish)
         RC="${XDG_CONFIG_HOME:-$HOME/.config}/fish/config.fish"
         PATH_LINE="fish_add_path \"$BIN_PATH\""
         ;;
-    *xonsh)
+    */xonsh)
         RC="$HOME/.xonshrc"
         PATH_LINE="\$PATH.insert(0, '$BIN_PATH')"
         ;;
-    *tcsh)
+    */tcsh)
         RC="$HOME/.tcshrc"
         PATH_LINE="setenv PATH \"$BIN_PATH:\$PATH\""
         ;;
-    *csh)
+    */csh)
         RC="$HOME/.cshrc"
         PATH_LINE="setenv PATH \"$BIN_PATH:\$PATH\""
         ;;
-    *bash|*)
+    */bash|*)
         RC="$HOME/.bashrc"
         PATH_LINE="export PATH=\"$BIN_PATH:\$PATH\""
         ;;
 esac
 if ! grep -qF "$BIN_PATH" "$RC" 2>/dev/null; then
     echo "Adding $BIN_PATH to PATH in $RC..."
-    mkdir -p "$(dirname "$RC")"
     printf '\n%s\n' "$PATH_LINE" >> "$RC"
     echo "Restart your terminal or run 'source $RC' to apply."
 fi

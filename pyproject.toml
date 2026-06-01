@@ -162,7 +162,7 @@ tokei.cmd = "tokei --sort lines --exclude '*.svg' --exclude 'src/rovr/classes/co
 help = "Run tests"
 sequence = [
   "_test_setup",
-  { cmd = "pytest -n ${workers} ${FILES}" }
+  { cmd = "pytest -n ${workers} ${FILES} $POE_EXTRA_ARGS" }
 ]
 args = [
   { name = "FILES", help = "Specific test files or directories to run (optional)", type = "string", positional = true, required = false, multiple = true },

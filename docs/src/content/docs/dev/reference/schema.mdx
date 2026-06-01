@@ -1720,11 +1720,11 @@ Must be one of:
 
 ### <a name="metadata_fields"></a>3.1. Property `Rovr Config > metadata > fields`
 
-|              |                                                                                |
-| ------------ | ------------------------------------------------------------------------------ |
-| **Type**     | `array of enum (of string)`                                                    |
-| **Required** | No                                                                             |
-| **Default**  | `["type", "permissions", "size", "modified", "accessed", "created", "hidden"]` |
+|              |                                                                                        |
+| ------------ | -------------------------------------------------------------------------------------- |
+| **Type**     | `array of enum (of string)`                                                            |
+| **Required** | No                                                                                     |
+| **Default**  | `["type", "permissions", "size", "modified", "accessed", "created", "hidden", "mime"]` |
 
 **Description:** The order of the metadata tags that you want to see in the Metadata section.
 
@@ -1756,6 +1756,7 @@ Must be one of:
 - "accessed"
 - "created"
 - "hidden"
+- "mime"
 
 ### <a name="metadata_datetime_format"></a>3.2. Property `Rovr Config > metadata > datetime_format`
 

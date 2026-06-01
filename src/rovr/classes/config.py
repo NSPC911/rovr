@@ -170,6 +170,7 @@ _ROVR_CONFIG_METADATA_FIELDS_DEFAULT = [
     "accessed",
     "created",
     "hidden",
+    "mime",
 ]
 r""" Default value of the field path 'Rovr Config metadata fields' """
 
@@ -1091,6 +1092,7 @@ class _RovrConfigMetadata(TypedDict, total=False):
       - accessed
       - created
       - hidden
+      - mime
     uniqueItems: True
     """
 
@@ -1128,6 +1130,7 @@ _RovrConfigMetadataFieldsItem = (
     | Literal["accessed"]
     | Literal["created"]
     | Literal["hidden"]
+    | Literal["mime"]
 )
 _ROVRCONFIGMETADATAFIELDSITEM_TYPE: Literal["type"] = "type"
 r"""The values for the '_RovrConfigMetadataFieldsItem' enum"""
@@ -1142,6 +1145,8 @@ r"""The values for the '_RovrConfigMetadataFieldsItem' enum"""
 _ROVRCONFIGMETADATAFIELDSITEM_CREATED: Literal["created"] = "created"
 r"""The values for the '_RovrConfigMetadataFieldsItem' enum"""
 _ROVRCONFIGMETADATAFIELDSITEM_HIDDEN: Literal["hidden"] = "hidden"
+r"""The values for the '_RovrConfigMetadataFieldsItem' enum"""
+_ROVRCONFIGMETADATAFIELDSITEM_MIME: Literal["mime"] = "mime"
 r"""The values for the '_RovrConfigMetadataFieldsItem' enum"""
 
 

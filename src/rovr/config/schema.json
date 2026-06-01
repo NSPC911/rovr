@@ -500,7 +500,8 @@
               "modified",
               "accessed",
               "created",
-              "hidden"
+              "hidden",
+              "mime"
             ]
           },
           "default": [
@@ -510,7 +511,8 @@
             "modified",
             "accessed",
             "created",
-            "hidden"
+            "hidden",
+            "mime"
           ],
           "uniqueItems": true,
           "description": "The order of the metadata tags that you want to see in the Metadata section."

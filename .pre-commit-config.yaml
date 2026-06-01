@@ -1,6 +1,6 @@
 repos:
   - repo: https://github.com/astral-sh/ruff-pre-commit
-    rev: v0.15.0
+    rev: v0.15.15
     hooks:
       - id: ruff
         args: [--fix]
@@ -9,6 +9,6 @@ repos:
     hooks:
       - id: ty
         name: ty check
-        entry: uvx ty==0.0.32 check . --ignore unresolved-import
+        entry: uvx ty==0.0.40 check . --ignore unresolved-import
         language: python
         types_or: [python, pyi, jupyter]

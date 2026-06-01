@@ -211,7 +211,10 @@ class FileListRightClickMenu(PopupOptionList, inherit_bindings=False):
             self.longest_prompt = max(self.longest_prompt, len(str(new_option.prompt)))
         for option in options:
             if option.id.startswith("group"):
-                if len(option.prompt) < self.longest_prompt - 2:
+                if (
+                    getattr(option.prompt, "__len__", lambda: 0)()
+                    < self.longest_prompt - 2
+                ):
                     option._set_prompt(f"{option.prompt:<{self.longest_prompt}} ")
                 else:
                     option._set_prompt(f"{option.prompt} ")

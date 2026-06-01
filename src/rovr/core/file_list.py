@@ -21,7 +21,7 @@ from rovr.classes.mixins import (
     ScrollOffMixin,
     SingleLineOptionLayoutMixin,
 )
-from rovr.classes.session_manager import SessionManager
+from rovr.classes.session_manager import SessionManager, SessionOptionDict
 from rovr.classes.textual_options import FileListSelectionWidget, LazySelection
 from rovr.functions import path as path_utils
 from rovr.functions import pins as pin_utils
@@ -347,13 +347,11 @@ class FileList(
                 self.highlighted = to_highlight_index
             except (OptionDoesNotExist, KeyError):
                 self.highlighted = 0
-            if self.highlighted_option and isinstance(
-                self.highlighted_option, FileListSelectionWidget
-            ):
-                session.lastHighlighted[cwd] = {
+            if isinstance(self.highlighted_option, FileListSelectionWidget):
+                session.lastHighlighted[cwd] = SessionOptionDict({
                     "name": self.highlighted_option.dir_entry.name,
-                    "index": self.highlighted,
-                }
+                    "index": self.highlighted or 0,  # weird ty behaviour on 0.0.33
+                })
 
             self.scroll_to_highlight()
             self.app.tabWidget.active_tab.label = (

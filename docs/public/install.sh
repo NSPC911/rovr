@@ -51,7 +51,7 @@ if [ -z "${ROVR_FORCE_REINSTALL:-}" ]; then
                 NEWER=$(printf '%s\n' "$OLD_VER" "$ROVR_VERSION" | sort -V | tail -1)
                 if [ "$NEWER" = "$OLD_VER" ]; then
                     echo "A newer version $OLD_VER is already installed at $INSTALL_PATH."
-                    read -r -p "Are you sure you want to downgrade to $ROVR_VERSION? [y/N] " choice
+                    read -r -p "Are you sure you want to downgrade to $ROVR_VERSION? [y/N] " choice </dev/tty
                     case "$choice" in
                         [yY]) ;;
                         *)

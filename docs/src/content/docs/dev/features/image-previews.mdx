@@ -5,7 +5,7 @@ description: how rovr displays images in the terminal.
 
 import { Code } from "@astrojs/starlight/components";
 
-`rovr` uses the [`textual-image`](https://github.com/lnqs/textual-image) package to render images directly in the terminal. this allows for a rich file preview experience.
+`rovr` uses the [`textual-image`](https://github.com/lnqs/textual-image) package to render images directly in the terminal.
 
 however, image support depends on the capabilities of your terminal emulator. different terminals support different image protocols.
 
@@ -60,4 +60,3 @@ you can choose to disable this by setting either value to `0`, which means the i
 ### known issues
 
 - some low-resolution images will look horrible, I'm not really sure why that happens, but it might be due to an unnecessary up-scaling attempt by `textual-image`
-- transparent images do not get shown with a transparent background. this _used_ to work, but textual-image is just really scuffed (beggars cant be choosers). I may take a look some day, but the internals is too advanced.

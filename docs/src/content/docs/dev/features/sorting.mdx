@@ -21,47 +21,14 @@ You can access the sort menu by:
 
 rovr supports the following sort options:
 
-### sort by name
-
-Sorts files alphabetically by their name. This is the default sorting method.
-
-- **keybinding**: `a` (when sort menu is open)
-- **order**: can be ascending (A-Z) or descending (Z-A)
-
-### sort by extension
-
-Groups files by their file extension, making it easy to find files of the same type together.
-
-- **keybinding**: `e` (when sort menu is open)
-- **order**: can be ascending or descending
-
-### sort by natural order
-
-Uses natural sorting, which handles numbers in file names more intuitively (e.g., "file2" comes before "file10").
-
-- **keybinding**: `n` (when sort menu is open)
-- **order**: can be ascending or descending
-
-### sort by size
-
-Sorts files by their size, useful for finding large or small files quickly.
-
-- **keybinding**: `s` (when sort menu is open)
-- **order**: can be ascending (smallest first) or descending (largest first)
-
-### sort by created time
-
-Sorts files by their creation time.
-
-- **keybinding**: `c` (when sort menu is open)
-- **order**: can be ascending (oldest first) or descending (newest first)
-
-### sort by modified time
-
-Sorts files by their last modification time.
-
-- **keybinding**: `m` (when sort menu is open)
-- **order**: can be ascending (oldest first) or descending (newest first)
+| type      | keybind | description                                                                                                      |
+| --------- | ------- | ---------------------------------------------------------------------------------------------------------------- |
+| name      | `a`     | sorts files alphabetically by their name                                                                         |
+| extension | `e`     | groups files by their file extension                                                                             |
+| natural   | `n`     | uses natural sorting, which handles numbers in file names more intuitively (e.g., "file2" comes before "file10") |
+| size      | `s`     | sorts files by their size                                                                                        |
+| created   | `c`     | sorts files by their creation time                                                                               |
+| modified  | `m`     | sorts files by their last modification time                                                                      |
 
 ## toggling sort direction
 
@@ -80,3 +47,17 @@ Your sort preferences are automatically saved and persist between sessions. When
 - your sort direction (ascending or descending)
 
 Optionally, you can enable `This path only` in the sort menu to apply to only the current directory.
+
+## config
+
+```toml
+[keybinds.change_sort_order]
+open_popup = [","]
+name = ["a"]
+extension = ["e"]
+natural = ["n"]
+size = ["s"]
+created = ["c"]
+modified = ["m"]
+descending = ["d"]
+```

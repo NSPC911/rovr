@@ -24,7 +24,7 @@
 
 /* Dark mode colors. */
 :root {
-  --sl-color-accent: #8fbcbb;
+  --sl-color-accent: #88c0d0;
   --sl-color-white: #ffffff;
   --sl-color-gray-1: #e5e9f0;
   --sl-color-gray-2: #c0c8d8;
@@ -51,7 +51,7 @@
   --sl-color-text-invert: var(--sl-color-black);
   --sl-color-bg-sidebar: hsl(from var(--sl-color-gray-5) h s l / 50%);
   --sl-color-bg-nav: hsl(from var(--sl-color-gray-5) h s l / 50%);
-  --table-border-color: color-mix(in oklab, var(--sl-color-accent) 75%, var(--sl-color-black));
+  --table-border-color: color-mix(in oklab, var(--sl-color-accent) 87.5%, var(--sl-color-black));
 }
 /* Light mode colors. */
 :root[data-theme="light"] {
@@ -117,6 +117,9 @@ html * {
       calc(var(--sl-transition-duration) / 2) color ease-in-out,
       var(--sl-transition-duration) border-inline-start ease-in-out,
       var(--sl-transition-duration) scrollbar-color ease-in-out;
+    &.no-lower {
+      text-transform: none !important;
+    }
   }
 }
 html svg,

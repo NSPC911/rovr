@@ -12,8 +12,8 @@ you can define your custom openers in the `settings.openers` section of your con
 ```toml
 [settings.openers]
 "*.py" = [
-    { run = "$EDITOR", app = "suspend" },
-    { run = "code", app = "orphan" }
+    { run = "$EDITOR", orphan = true },
+    { run = "code", orphan = true }
 ]
 "*.png" = [
     "imv"
@@ -33,10 +33,7 @@ an opener can be defined simply as a string representing the command, or as an o
 when using an object, the following properties are available:
 
 - `run` (string): the command to execute.
-- `app` (string): how rovr should handle the execution. valid options are:
-  - `suspend`: suspends rovr until the command finishes (ideal for terminal editors).
-  - `block`: blocks rovr in the background until the command finishes.
-  - `orphan`: launches the command independently so it remains running even if rovr is closed (ideal for gui apps).
+- `orphan` (bool): whether to run the command in a new process detached from rovr.
 - `if` (object): criteria that must be met for this opener to be available.
 
 ### conditional openers (`if`)
@@ -45,11 +42,10 @@ the `if` property allows you to restrict when an opener is used based on specifi
 
 - `os` (array of strings): the operating system(s) where this opener is valid (e.g., `["Windows"]`, `["Linux"]`, `["Darwin"]`).
 - `cwd` (array of strings): glob patterns that must match the current working directory.
-- `directory` (boolean): set to `true` to only apply this opener to directories, or `false` for files only.
 
 ```toml
 [settings.openers]
 ".*\\.py" = [
-    { run = "python", app = "block", if = { os = ["Linux", "Darwin"], directory = false } }
+    { run = "python", orphan = false, if = { os = ["Linux", "Darwin"] } }
 ]
 ```

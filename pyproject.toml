@@ -49,9 +49,12 @@ Documentation = "https://nspc911.github.io/rovr"
 rovr = "rovr:main"
 
 [project.optional-dependencies]
-libuv = [
+uv = [
   "uvloop>=0.22.1; sys_platform != 'win32'",
   "winloop>=0.5.0; sys_platform == 'win32'",
+]
+speedup = [
+  "textual-speedups>=0.2.1",
 ]
 
 [dependency-groups]
@@ -74,9 +77,6 @@ docscripts = [
   "jsonschema-gentypes>=2.13.0",
   "poethepoet>=0.41.0",
   "ruff>=0.15.0",
-]
-speedup = [
-    "textual-speedups>=0.2.1",
 ]
 test = [
   "pytest>=9.0.2",

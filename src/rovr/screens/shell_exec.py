@@ -31,7 +31,7 @@ class ShellExec(ModalInput):
 
     def on_mount(self) -> None:
         super().on_mount()
-        self.horizontal_group.add_class(f"orphan--{str(self.in_bg).lower()}")
+        self.horizontal_group.add_class(f"in-bg--{str(self.in_bg).lower()}")
 
     def on_click(self, event: events.Click) -> None:
         if event.widget is self:
@@ -51,9 +51,9 @@ class ShellExec(ModalInput):
         )
 
     def action_cycle_mode(self) -> None:
-        self.horizontal_group.remove_class(f"orphan--{str(self.in_bg).lower()}")
+        self.horizontal_group.remove_class(f"in-bg--{str(self.in_bg).lower()}")
         self.in_bg = not self.in_bg
         self.horizontal_group.border_subtitle = (
             "Run in background" if self.in_bg else "Run in foreground"
         )
-        self.horizontal_group.add_class(f"orphan--{str(self.in_bg).lower()}")
+        self.horizontal_group.add_class(f"in-bg--{str(self.in_bg).lower()}")

@@ -965,11 +965,11 @@ ArchiveCreationScreen {
 
 ShellExec {
   #modalInput_group {
-    &.orphan--true { border: $border-style $success-lighten-3 }
-    &.orphan--false { border: $border-style $error-lighten-3 }
+    &.in-bg--true { border: $border-style $success-lighten-3 }
+    &.in-bg--false { border: $border-style $error-lighten-3 }
     &:light {
-      &.orphan--true { border: $border-style $success-darken-1 }
-      &.orphan--false { border: $border-style $error-darken-1 }
+      &.in-bg--true { border: $border-style $success-darken-1 }
+      &.in-bg--false { border: $border-style $error-darken-1 }
     }
   }
 }

@@ -161,13 +161,13 @@ def run_command(
     run_type: Literal["suspend", "background", "orphan"],
     shell: bool = True,
     on_error: Callable[[str, str], None] | None = None,
-) -> subprocess.CompletedProcess | None:
+) -> subprocess.CompletedProcess | subprocess.Popen:
     match run_type:
         case "orphan":
             import sys
 
             if sys.platform == "win32":
-                subprocess.Popen(
+                return subprocess.Popen(
                     command,
                     stdin=subprocess.DEVNULL,
                     stdout=subprocess.DEVNULL,
@@ -177,7 +177,7 @@ def run_command(
                     shell=shell,
                 )
             else:
-                subprocess.Popen(
+                return subprocess.Popen(
                     command,
                     stdin=subprocess.DEVNULL,
                     stdout=subprocess.DEVNULL,
@@ -186,14 +186,14 @@ def run_command(
                     shell=shell,
                 )
         case "background":
-            subprocess.Popen(
+            return subprocess.Popen(
                 command,
                 stdin=subprocess.DEVNULL,
                 stdout=subprocess.DEVNULL,
                 stderr=subprocess.DEVNULL,
                 shell=shell,
             )
-        case _:
+        case "suspend":
             with app.suspend():
                 if globals().get("is_dev", False):
                     print(command)
@@ -201,6 +201,10 @@ def run_command(
             if process.returncode != 0 and on_error:
                 on_error(f"Error Code {process.returncode}", "Editor Error")
             return process
+        case _:
+            from typing import assert_never
+
+            assert_never(run_type)
 
 
 def dismiss(

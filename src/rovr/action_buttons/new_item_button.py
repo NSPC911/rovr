@@ -148,7 +148,7 @@ class NewItemButton(Button):
             run_command(
                 self.app,
                 shlex.split(bulk_editor["run"]) + [temp_path],
-                orphan=False,
+                run_type="suspend",
                 shell=False,
                 on_error=on_error,
             )

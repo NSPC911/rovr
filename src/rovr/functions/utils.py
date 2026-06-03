@@ -158,40 +158,49 @@ def get_shortest_bind(binds: list[str]) -> str:
 def run_command(
     app: App,
     command: str | list[str],
-    orphan: bool,
+    run_type: Literal["suspend", "background", "orphan"],
     shell: bool = True,
     on_error: Callable[[str, str], None] | None = None,
 ) -> subprocess.CompletedProcess | None:
-    if orphan:
-        import sys
+    match run_type:
+        case "orphan":
+            import sys
 
-        if sys.platform == "win32":
+            if sys.platform == "win32":
+                subprocess.Popen(
+                    command,
+                    stdin=subprocess.DEVNULL,
+                    stdout=subprocess.DEVNULL,
+                    stderr=subprocess.DEVNULL,
+                    creationflags=subprocess.CREATE_NEW_PROCESS_GROUP
+                    | subprocess.DETACHED_PROCESS,
+                    shell=shell,
+                )
+            else:
+                subprocess.Popen(
+                    command,
+                    stdin=subprocess.DEVNULL,
+                    stdout=subprocess.DEVNULL,
+                    stderr=subprocess.DEVNULL,
+                    start_new_session=True,
+                    shell=shell,
+                )
+        case "background":
             subprocess.Popen(
                 command,
                 stdin=subprocess.DEVNULL,
                 stdout=subprocess.DEVNULL,
                 stderr=subprocess.DEVNULL,
-                creationflags=subprocess.CREATE_NEW_PROCESS_GROUP
-                | subprocess.DETACHED_PROCESS,
                 shell=shell,
             )
-        else:
-            subprocess.Popen(
-                command,
-                stdin=subprocess.DEVNULL,
-                stdout=subprocess.DEVNULL,
-                stderr=subprocess.DEVNULL,
-                start_new_session=True,
-                shell=shell,
-            )
-    else:
-        with app.suspend():
-            if globals().get("is_dev", False):
-                print(command)
-            process = subprocess.run(command, shell=shell)
-        if process.returncode != 0 and on_error:
-            on_error(f"Error Code {process.returncode}", "Editor Error")
-        return process
+        case _:
+            with app.suspend():
+                if globals().get("is_dev", False):
+                    print(command)
+                process = subprocess.run(command, shell=shell)
+            if process.returncode != 0 and on_error:
+                on_error(f"Error Code {process.returncode}", "Editor Error")
+            return process
 
 
 def dismiss(

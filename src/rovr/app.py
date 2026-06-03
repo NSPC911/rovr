@@ -412,7 +412,7 @@ class Application(Actionable, App, inherit_bindings=False):
         if response is None or response.command == "":
             return
 
-        run_command(self, response.command, orphan=response.orphan)
+        run_command(self, response.command, run_type=response.run_type)
 
     def on_app_blur(self, event: events.AppBlur) -> None:
         self.app_blurred = True

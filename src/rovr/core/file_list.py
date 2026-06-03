@@ -403,7 +403,9 @@ class FileList(
                 utils.run_command(
                     self.app,
                     shlex.split(editor_config["run"]) + [target_path],
-                    orphan=editor_config.get("orphan", True),
+                    run_type="orphan"
+                    if editor_config.get("orphan", True)
+                    else "suspend",
                     on_error=on_error,
                 )
             except Exception as exc:
@@ -432,9 +434,13 @@ class FileList(
                             utils.run_command(
                                 self.app,
                                 runner,
-                                opener.get("orphan", True)
+                                run_type=(
+                                    "orphan"
+                                    if opener.get("orphan", True)
+                                    else "suspend"
+                                )
                                 if isinstance(opener, dict)
-                                else True,
+                                else "orphan",
                             )
                             opened = True
                             break
@@ -934,7 +940,9 @@ class FileList(
                 utils.run_command(
                     self.app,
                     shlex.split(editor_config["run"]) + [target_path],
-                    orphan=editor_config.get("orphan", True),
+                    run_type="orphan"
+                    if editor_config.get("orphan", True)
+                    else "suspend",
                     on_error=lambda message, title: self.notify(
                         message=message, title=title, severity="error", markup=False
                     ),

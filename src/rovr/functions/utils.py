@@ -162,6 +162,11 @@ def run_command(
     shell: bool = True,
     on_error: Callable[[str, str], None] | None = None,
 ) -> subprocess.CompletedProcess | subprocess.Popen:
+    if shell and isinstance(command, list):
+        from shlex import join
+
+        command = join(command)
+
     match run_type:
         case "orphan":
             import sys

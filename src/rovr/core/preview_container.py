@@ -1115,6 +1115,9 @@ class PreviewContainer(Actionable, Container):
                 self.app.call_from_thread(self.remove_children)
                 self.call_next(lambda: self.post_message(self.SetLoading(False)))
                 return
+            elif isinstance(exc, FileNotFoundError):
+                self.app.call_from_thread(self.file_not_found, file_path)
+                return
             self.notify(
                 f"{type(exc).__name__} was raised while generating the preview\n{str(exc)}",
                 severity="error",

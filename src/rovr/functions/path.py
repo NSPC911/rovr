@@ -289,7 +289,7 @@ def sync_get_cwd_object(
             return_nothing_if_this_returns_true is not None
             and return_nothing_if_this_returns_true()
         ):
-            if globals().get("is_dev", True):
+            if globals().get("is_dev", False):
                 print("Cut off early after scandir")
             return None, None
 

@@ -200,7 +200,7 @@ def run_command(
             )
         case "suspend":
             with app.suspend():
-                if globals().get("is_dev", True):
+                if globals().get("is_dev", False):
                     print(command)
                 process = subprocess.run(command, shell=shell)
             if process.returncode != 0 and on_error:

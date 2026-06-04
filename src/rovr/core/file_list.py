@@ -946,6 +946,7 @@ class FileList(
                     on_error=lambda message, title: self.notify(
                         message=message, title=title, severity="error", markup=False
                     ),
+                    shell=False,
                 )
             except Exception as exc:
                 path_utils.dump_exc(self, exc)

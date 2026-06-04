@@ -289,7 +289,7 @@ def sync_get_cwd_object(
             return_nothing_if_this_returns_true is not None
             and return_nothing_if_this_returns_true()
         ):
-            if globals().get("is_dev", False):
+            if globals().get("is_dev", True):
                 print("Cut off early after scandir")
             return None, None
 
@@ -320,8 +320,7 @@ def sync_get_cwd_object(
                 return_nothing_if_this_returns_true is not None
                 and return_nothing_if_this_returns_true()
             ):
-                if globals().get("is_dev", False):
-                    dom_node.log("Cut off early during dictionary building")
+                dom_node.log("Cut off early during dictionary building")
                 return None, None
 
     dom_node.log(f"Collected {len(folders)} folders and {len(files)} files in {cwd}")
@@ -362,15 +361,13 @@ def sync_get_cwd_object(
         return_nothing_if_this_returns_true is not None
         and return_nothing_if_this_returns_true()
     ):
-        if globals().get("is_dev", False):
-            dom_node.log("Cut off early before reversing results")
+        dom_node.log("Cut off early before reversing results")
         return None, None
     if reverse:
         files.reverse()
         folders.reverse()
 
-    if globals().get("is_dev", False):
-        dom_node.log(f"Found {len(folders)} folders and {len(files)} files in {cwd}")
+    dom_node.log(f"Found {len(folders)} folders and {len(files)} files in {cwd}")
     return folders, files
 
 

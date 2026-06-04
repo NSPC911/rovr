@@ -67,7 +67,7 @@ def get_mounted_drives(os_type: str, config: "RovrConfig") -> list[str]:
                 normalise(p.mountpoint) for p in partitions if path.isdir(p.mountpoint)
             ]
     except Exception as exc:
-        if globals().get("is_dev", False):
+        if globals().get("is_dev", True):
             print(f"Error getting mounted drives: {exc}\nReturning nothing...")
         # Fallback to home directory on error
         if os_type == "Windows":

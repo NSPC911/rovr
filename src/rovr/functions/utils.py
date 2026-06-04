@@ -166,6 +166,10 @@ def run_command(
         from shlex import join
 
         command = join(command)
+    elif not shell and isinstance(command, str):
+        from shlex import split
+
+        command = split(command)
 
     match run_type:
         case "orphan":
@@ -175,8 +179,8 @@ def run_command(
                 return subprocess.Popen(
                     command,
                     stdin=subprocess.DEVNULL,
-                    stdout=subprocess.DEVNULL,
-                    stderr=subprocess.DEVNULL,
+                    stdout=subprocess.PIPE,
+                    stderr=subprocess.PIPE,
                     creationflags=subprocess.CREATE_NEW_PROCESS_GROUP
                     | subprocess.DETACHED_PROCESS,
                     shell=shell,
@@ -185,8 +189,8 @@ def run_command(
                 return subprocess.Popen(
                     command,
                     stdin=subprocess.DEVNULL,
-                    stdout=subprocess.DEVNULL,
-                    stderr=subprocess.DEVNULL,
+                    stdout=subprocess.PIPE,
+                    stderr=subprocess.PIPE,
                     start_new_session=True,
                     shell=shell,
                 )
@@ -194,15 +198,22 @@ def run_command(
             return subprocess.Popen(
                 command,
                 stdin=subprocess.DEVNULL,
-                stdout=subprocess.DEVNULL,
-                stderr=subprocess.DEVNULL,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
                 shell=shell,
             )
         case "suspend":
-            with app.suspend():
-                if globals().get("is_dev", False):
-                    print(command)
-                process = subprocess.run(command, shell=shell)
+
+            def func() -> subprocess.CompletedProcess:
+                with app.suspend():
+                    if globals().get("is_dev", False):
+                        print(command)
+                    return subprocess.run(command, shell=shell)
+
+            try:
+                process = app.call_from_thread(func)
+            except RuntimeError:
+                process = func()
             if process.returncode != 0 and on_error:
                 on_error(f"Error Code {process.returncode}", "Editor Error")
             return process

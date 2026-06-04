@@ -53,8 +53,8 @@ you can create submenus by using the `options` field instead of `action`:
 ```toml
 right_click = [
   { label = "Open With", options = [
-    { label = "VSCode", action = "sh:code \"${selected_files}\"" },
-    { label = "Helix", action = 'shh:hx "${selected_files}"' },
+    { label = "VSCode", action = { run = 'code "${selected_files}"', run_type = "background" } },
+    { label = "Helix", action = { run = 'hx "${selected_files}"', run_type = "suspend" } },
   ] },
 ]
 ```
@@ -63,21 +63,35 @@ right_click = [
 
 ## shell commands
 
-you can execute shell commands directly from the context menu using special action prefixes. the prefix format is `sh[X]:` where `X` determines the execution mode.
+you can execute shell commands directly from the context menu using a structured action object format.
 
 ### execution modes
 
-| prefix | module       | description                                                           |
-| ------ | ------------ | --------------------------------------------------------------------- |
-| `sh:`  | normal shell | runs the command without capturing output, rovr remains responsive    |
-| `shh:` | hide app     | suspends rovr while the command runs, useful for interactive commands |
-| `sho:` | show output  | captures stdout/stderr and displays as a notification                 |
+shell actions are configured as objects with the following properties:
 
-the command follows the prefix after a colon. for example:
+| property   | type                                           | description                                                                                                              |
+| ---------- | ---------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------ |
+| `run`      | string                                         | the command to execute. command expansions are supported.                                                                |
+| `run_type` | enum (`"suspend"`, `"background"`, `"orphan"`) | how to run the command: `suspend` waits for completion, `background` runs without waiting, `orphan` detaches completely. |
+| `shell`    | boolean (default: false)                       | whether to run in a shell (required for piping, redirection, etc.)                                                       |
 
-- `sh:code "${selected_files}"` — opens vscode normally
-- `shh:hx "${highlighted_file}"` — opens helix while hiding rovr
-- `sho:pwsh -nop -c "(Get-FileHash -Algorithm SHA256 \"${highlighted_file}\").Hash"` — shows hash output
+### examples
+
+```toml
+right_click = [
+  # basic command (background execution)
+  { label = "Open in VSCode", action = { run = 'code "${selected_files}"', run_type = "background" } },
+
+  # suspend rovr for interactive commands
+  { label = "Edit with Helix", action = { run = 'hx "${selected_files}"', run_type = "suspend" } },
+
+  # show command output as notification
+  { label = "Get SHA256", action = { run = 'pwsh -nop -c "(Get-FileHash -Algorithm SHA256 \"${highlighted_file}\").Hash"', run_type = "background" } },
+
+  # shell mode for complex commands (piping, etc.)
+  { label = "Count lines", action = { run = 'cat "${highlighted_file}" | wc -l', run_type = "background", shell = true } },
+]
+```
 
 ### command expansions
 
@@ -96,12 +110,12 @@ menu items can be conditionally shown or hidden based on file path, operating sy
 
 ```toml
 right_click = [
-  { label = "Open in VSCode", action = "sh:code \"${selected_files}\"" },
-  { label = "Pixelorama", action = 'sh:pixelorama "${selected_files}"', if = { path = ["*.png", "*.jpg"] } },
-  { label = "Windows Only", action = "sh:echo hello", if = { os = ["Windows"] } },
-  { label = "Git Projects", action = "sh:git status", if = { cwd = ["C:/Projects/*"] } },
-  { label = "Folder Action", action = "sh:do something", if = { directory = true } },
-  { label = "File Action", action = "sh:do something", if = { directory = false } },
+  { label = "Open in VSCode", action = { run = 'code "${selected_files}"', run_type = "background" } },
+  { label = "Pixelorama", action = { run = 'pixelorama "${selected_files}"', run_type = "suspend" }, if = { path = ["*.png", "*.jpg"] } },
+  { label = "Windows Only", action = { run = 'echo hello', run_type = "background" }, if = { os = ["Windows"] } },
+  { label = "Git Projects", action = { run = 'git status', run_type = "background" }, if = { cwd = ["C:/Projects/*"] } },
+  { label = "Folder Action", action = { run = 'do something', run_type = "background" }, if = { directory = true } },
+  { label = "File Action", action = { run = 'do something', run_type = "background" }, if = { directory = false } },
 ]
 ```
 
@@ -145,5 +159,7 @@ right_click = [
   { label = "\uf014 Delete", action = "rovr:delete" },
   { label = "\uf410 Zip", action = "rovr:zip" },
   { label = "\uf07c Unzip", action = "rovr:unzip" },
+  { label = "\uea74 Properties", action = { run = "powershell -nop -c \"(New-Object -ComObject Shell.Application).NameSpace('${current_working_directory}'.replace('/', '\\\\')).ParseName('${highlighted_file_name}').InvokeVerb('Properties'); Start-Sleep -m 500; do { Start-Sleep -m500 } while ((Get-Process | Where-Object { $_.MainWindowTitle -match '${highlighted_file_name} Properties' }))\"", run_type = "suspend" }, if = { os = ["Windows"] } },
+  { label = " Get SHA256", action = { run = 'pwsh -nop -c "(Get-FileHash -Algorithm SHA256 \"${highlighted_file}\").Hash"', run_type = "background" }, if = { directory = false }},
 ]
 ```

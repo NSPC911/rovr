@@ -42,6 +42,9 @@ r"""The values for the '_OsIfItemAnyof0' enum"""
 _OSIFITEMANYOF0_DARWIN: Literal["Darwin"] = "Darwin"
 r"""The values for the '_OsIfItemAnyof0' enum"""
 
+_RIGHT_CLICK_ACTION_ONEOF1_SHELL_DEFAULT = False
+r""" Default value of the field path 'right_click_action oneof1 shell' """
+
 _ROVR_CONFIG_ICONS_FILES_DEFAULT: list[Any] = []
 r""" Default value of the field path 'Rovr Config icons files' """
 
@@ -245,11 +248,17 @@ r""" Default value of the field path 'Rovr Config settings editor bulk_editor re
 _ROVR_CONFIG_SETTINGS_EDITOR_BULK_EDITOR_RUN_DEFAULT = "$EDITOR"
 r""" Default value of the field path 'Rovr Config settings editor bulk_editor run' """
 
+_ROVR_CONFIG_SETTINGS_EDITOR_BULK_EDITOR_SHELL_DEFAULT = False
+r""" Default value of the field path 'Rovr Config settings editor bulk_editor shell' """
+
 _ROVR_CONFIG_SETTINGS_EDITOR_FILE_ORPHAN_DEFAULT = True
 r""" Default value of the field path 'Rovr Config settings editor file orphan' """
 
 _ROVR_CONFIG_SETTINGS_EDITOR_FILE_RUN_DEFAULT = "$EDITOR"
 r""" Default value of the field path 'Rovr Config settings editor file run' """
+
+_ROVR_CONFIG_SETTINGS_EDITOR_FILE_SHELL_DEFAULT = False
+r""" Default value of the field path 'Rovr Config settings editor file shell' """
 
 _ROVR_CONFIG_SETTINGS_EDITOR_FOLDER_ORPHAN_DEFAULT = True
 r""" Default value of the field path 'Rovr Config settings editor folder orphan' """
@@ -257,8 +266,14 @@ r""" Default value of the field path 'Rovr Config settings editor folder orphan'
 _ROVR_CONFIG_SETTINGS_EDITOR_FOLDER_RUN_DEFAULT = "$EDITOR"
 r""" Default value of the field path 'Rovr Config settings editor folder run' """
 
+_ROVR_CONFIG_SETTINGS_EDITOR_FOLDER_SHELL_DEFAULT = False
+r""" Default value of the field path 'Rovr Config settings editor folder shell' """
+
 _ROVR_CONFIG_SETTINGS_OPENERS_ADDITIONALPROPERTIES_ITEM_ONEOF1_ORPHAN_DEFAULT = True
 r""" Default value of the field path 'Rovr Config settings openers additionalProperties item oneof1 orphan' """
+
+_ROVR_CONFIG_SETTINGS_OPENERS_ADDITIONALPROPERTIES_ITEM_ONEOF1_SHELL_DEFAULT = True
+r""" Default value of the field path 'Rovr Config settings openers additionalProperties item oneof1 shell' """
 
 _ROVR_CONFIG_SETTINGS_PREVIEW_RULES_DEFAULT = {
     "text/.*": "text",
@@ -340,8 +355,38 @@ _RIGHTCLICKACTIONONEOF0_SYSTEM_COLON_COPY_TO_SYSTEM_CLIP: Literal[
 ] = "system:copy_to_system_clip"
 r"""The values for the '_RightClickActionOneof0' enum"""
 
-_RightClickActionOneof1 = str
-r""" pattern: ^sh[ho]?:.+$ """
+class _RightClickActionOneof1(TypedDict, total=False):
+    run: Required[str]
+    r"""
+    The command to run when this action is selected. Command expansions are supported.
+
+    Required property
+    """
+
+    run_type: Required["_RightClickActionOneof1RunType"]
+    r"""
+    The way to run the command. `suspend` will suspend rovr until the command is finished, `background` will run the command in the background without suspending rovr, and `orphan` will run the command as an orphan process detached from rovr.
+
+    Required property
+    """
+
+    shell: bool
+    r"""
+    Whether the command to run is a shell command that needs to be run in a shell (required if you want to do piping)
+
+    default: False
+    """
+
+_RightClickActionOneof1RunType = (
+    Literal["suspend"] | Literal["background"] | Literal["orphan"]
+)
+r""" The way to run the command. `suspend` will suspend rovr until the command is finished, `background` will run the command in the background without suspending rovr, and `orphan` will run the command as an orphan process detached from rovr. """
+_RIGHTCLICKACTIONONEOF1RUNTYPE_SUSPEND: Literal["suspend"] = "suspend"
+r"""The values for the 'The way to run the command. `suspend` will suspend rovr until the command is finished, `background` will run the command in the background without suspending rovr, and `orphan` will run the command as an orphan process detached from rovr' enum"""
+_RIGHTCLICKACTIONONEOF1RUNTYPE_BACKGROUND: Literal["background"] = "background"
+r"""The values for the 'The way to run the command. `suspend` will suspend rovr until the command is finished, `background` will run the command in the background without suspending rovr, and `orphan` will run the command as an orphan process detached from rovr' enum"""
+_RIGHTCLICKACTIONONEOF1RUNTYPE_ORPHAN: Literal["orphan"] = "orphan"
+r"""The values for the 'The way to run the command. `suspend` will suspend rovr until the command is finished, `background` will run the command in the background without suspending rovr, and `orphan` will run the command as an orphan process detached from rovr' enum"""
 
 class _RightClickIf(TypedDict, total=False):
     path: list[str]
@@ -1384,9 +1429,16 @@ class _RovrConfigSettingsEditorBulkEditor(TypedDict, total=False):
 
     rename_show_as_mapping: bool
     r"""
-    When doing a bulk rename, show as a mapping of `<old> ➔ <new>` instead of just showing only the new names
+    When doing a bulk rename, show as a mapping of `&lt;old&gt; ➔ &lt;new&gt;` instead of just showing only the new names
 
     default: True
+    """
+
+    shell: bool
+    r"""
+    Whether the command to run is a shell command that needs to be run in a shell (required if you want to do complicated things like piping in your editor command)
+
+    default: False
     """
 
 class _RovrConfigSettingsEditorFile(TypedDict, total=False):
@@ -1410,6 +1462,13 @@ class _RovrConfigSettingsEditorFile(TypedDict, total=False):
     Required property
     """
 
+    shell: bool
+    r"""
+    Whether the command to run is a shell command that needs to be run in a shell (required if you want to do complicated things like piping in your editor command)
+
+    default: False
+    """
+
 class _RovrConfigSettingsEditorFolder(TypedDict, total=False):
     r"""Editor to use when opening a folder"""
 
@@ -1431,6 +1490,13 @@ class _RovrConfigSettingsEditorFolder(TypedDict, total=False):
     Required property
     """
 
+    shell: bool
+    r"""
+    Whether the command to run is a shell command that needs to be run in a shell (required if you want to do complicated things like piping in your editor command)
+
+    default: False
+    """
+
 _RovrConfigSettingsOpenersAdditionalpropertiesItem = Union[
     str, "_RovrConfigSettingsOpenersAdditionalpropertiesItemOneof1"
 ]
@@ -1450,6 +1516,10 @@ _RovrConfigSettingsOpenersAdditionalpropertiesItemOneof1 = TypedDict(
         "orphan": bool,
         # | The name of the opener to show in the menu (currently unused)
         "name": str,
+        # | Whether the command to run is a shell command that needs to be run in a shell (required if you want to do piping)
+        # |
+        # | default: True
+        "shell": bool,
     },
     total=False,
 )

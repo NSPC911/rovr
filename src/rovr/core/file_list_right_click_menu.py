@@ -1,6 +1,6 @@
-import asyncio
 from functools import partial
-from typing import Awaitable, Callable, ClassVar, Literal
+from subprocess import Popen
+from typing import ClassVar, Literal
 
 from textual import events, work
 from textual.app import App
@@ -19,7 +19,7 @@ from rovr.classes.config import (
 from rovr.classes.textual_options import RightClickMenuOption
 from rovr.classes.type_aliases import DirEntryType
 from rovr.components import PopupOptionList
-from rovr.functions.utils import check_key, expand_command, is_archive
+from rovr.functions.utils import check_key, expand_command, is_archive, run_command
 from rovr.variables.constants import bindings, config, os_type
 
 
@@ -84,9 +84,9 @@ async def get_shell_option(
 
     Returns:
         The option widget, False (if the object shouldn't be added) or None (if action isn't a shell action)"""
-    if not option["action"].startswith(("sh:", "shh:", "sho:")):
+    if isinstance(option["action"], str):
         return None
-    action = option["action"][3:]
+    action = option["action"]["run"]
     disabled = False
     dir_entry: DirEntryType | None = getattr(
         app.file_list.highlighted_option, "dir_entry", None
@@ -262,7 +262,7 @@ class FileListRightClickMenu(PopupOptionList, inherit_bindings=False):
             except NoMatches:
                 pass
 
-    @work(exclusive=True)
+    @work(thread=True)
     async def on_option_list_option_selected(
         self, event: OptionList.OptionSelected
     ) -> None:
@@ -278,68 +278,31 @@ class FileListRightClickMenu(PopupOptionList, inherit_bindings=False):
         if event.option.id.startswith("copy_") and hasattr(
             self.app.query_one("CopyButton"), f"{event.option.id}"
         ):
-            func: Callable[[], Awaitable | None] = getattr(
-                self.app.query_one("CopyButton"), f"{event.option.id}"
+            self.call_next(
+                getattr, self.app.query_one("CopyButton"), f"{event.option.id}"
             )
-            if asyncio.iscoroutinefunction(func):
-                await func()
-            else:
-                func()
         elif hasattr(self.app.file_list, f"action_{event.option.id}"):
-            func: Callable[[], Awaitable | None] = getattr(
-                self.app.file_list, f"action_{event.option.id}"
-            )
-            if asyncio.iscoroutinefunction(func):
-                await func()
-            else:
-                func()
+            self.call_next(getattr, self.app.file_list, f"action_{event.option.id}")
         elif event.option.id.startswith("shell_"):
-            command: str = ":".join(event.option.action.split(":", 1)[1:])
-            # need to do some expansions, lemme make a function rq
-            command = await expand_command(self.app, command)
-            match event.option.action.split(":", 1)[0]:
-                case "shh":  # shell hide app
-                    with self.app.suspend():
-                        # run code, make sure to not capture any output, allow user to send input
-                        print(f"> {command}")
-                        await (
-                            await asyncio.create_subprocess_shell(
-                                command,
-                                stdin=None,
-                                stdout=None,
-                                stderr=None,
-                            )
-                        ).communicate()
-                case "sho":  # shell capture output and show as toast
-                    proc = await asyncio.create_subprocess_shell(
-                        command,
-                        stdout=asyncio.subprocess.PIPE,
-                        stderr=asyncio.subprocess.PIPE,
-                        stdin=asyncio.subprocess.DEVNULL,
-                    )
-                    stdout, stderr = await proc.communicate()
-                    if proc.returncode == 0:
-                        if stderr:
-                            self.notify(
-                                f"stdout: {stdout.decode().strip()}\nstderr: {stderr.decode().strip()}"
-                            )
-                        elif stdout:
-                            self.notify(f"{stdout.decode().strip()}")
-                    else:
-                        self.notify(
-                            f"stdout: {stdout.decode().strip()}\nstderr: {stderr.decode().strip()}",
-                            severity="error",
-                            title=f"Command exited with code {proc.returncode}",
-                        )
-                case "sh":  # normal shell, dont return output, just run
-                    await (
-                        await asyncio.create_subprocess_shell(
-                            command,
-                            stdin=asyncio.subprocess.DEVNULL,
-                            stdout=asyncio.subprocess.DEVNULL,
-                            stderr=asyncio.subprocess.DEVNULL,
-                        )
-                    ).communicate()
+            command: str = await expand_command(self.app, event.option.action["run"])
+            proc = run_command(
+                self.app,
+                command,
+                event.option.action["run_type"],
+                shell=event.option.action["shell"],
+            )
+            if isinstance(proc, Popen):
+                proc.wait()
+                msg = ""
+                if stdout := proc.stdout.read().decode().strip():
+                    msg += f"stdout = {stdout}\n"
+                if stderr := proc.stderr.read().decode().strip():
+                    msg += f"stderr = {stderr}\n"
+                self.notify(
+                    msg.strip(),
+                    title="Context Menu",
+                    severity="information" if proc.returncode == 0 else "error",
+                )
 
     def on_blur(self, event: events.Blur) -> None:  # ty: ignore[invalid-method-override]
         event.prevent_default().stop()

@@ -149,7 +149,7 @@ class NewItemButton(Button):
                 self.app,
                 shlex.split(bulk_editor["run"]) + [temp_path],
                 run_type="suspend",
-                shell=False,
+                shell=bulk_editor["shell"],
                 on_error=on_error,
             )
         except FileNotFoundError:

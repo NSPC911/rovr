@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from functools import lru_cache
 from os import DirEntry, getcwd, path
-from typing import Callable, Literal, NamedTuple, TypeAlias
+from typing import Callable, Literal, Mapping, NamedTuple, TypeAlias
 
 import rich.repr
 from textual.content import Content, ContentText
@@ -390,7 +390,7 @@ class RightClickMenuOption(Option):
     def __init__(
         self,
         prompt: VisualType,
-        action: str | None,
+        action: str | Mapping | None,
         id: str | None = None,
         disabled: bool = False,
     ) -> None:

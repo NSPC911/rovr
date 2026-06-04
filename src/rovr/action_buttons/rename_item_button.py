@@ -125,6 +125,7 @@ class RenameItemButton(Button):
                         shlex.split(bulk_editor["run"]) + [temp_path],
                         run_type="suspend",
                         on_error=on_error,
+                        shell=bulk_editor["shell"],
                     )
                 except FileNotFoundError:
                     self.notify(

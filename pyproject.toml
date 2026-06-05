@@ -106,7 +106,7 @@ no-sync = true
 [tool.poe.tasks]
 _hash_dump.shell = "git rev-parse HEAD > src/rovr/COMMIT_HASH"
 _warn_dump.shell = "echo \"If you need to change any config, don't change them here!! Look at https://nspc911.github.io/rovr/configuration/configuration/ for more info\" > src/rovr/DO_NOT_EDIT_THESE_FILES"
-_dump_clean.shell = "python -c \"import os; os.path.exists('src/rovr/COMMIT_HASH') and os.remove('src/rovr/COMMIT_HASH')\"; os.path.exists('src/rovr/DO_NOT_EDIT_THESE_FILES') and os.remove('src/rovr/DO_NOT_EDIT_THESE_FILES')"
+_dump_clean.shell = "python -c \"import os; os.path.exists('src/rovr/COMMIT_HASH') and os.remove('src/rovr/COMMIT_HASH'); os.path.exists('src/rovr/DO_NOT_EDIT_THESE_FILES') and os.remove('src/rovr/DO_NOT_EDIT_THESE_FILES')\""
 
 _docscripts_setup.cmd = "uv sync --group docscripts"
 _test_setup.cmd = "uv sync --group test"

@@ -965,9 +965,18 @@ class PreviewContainer(Actionable, Container):
             or "-filelist-only" in self.screen.classes
         ):
             self._pending_preview_args = (file_path, mtime)
+            self._compute_and_sync_mime(file_path, mtime)
             return
         self._pending_preview_args = None
         self.perform_show_preview(file_path, mtime)
+
+    def _compute_and_sync_mime(self, file_path: str, mtime: int | float) -> None:
+        self._sync_mime(
+            file_path,
+            preview_utils.MimeResult("basic", "inode/directory")
+            if path.isdir(file_path)
+            else preview_utils.get_mime_type(file_path, mtime),
+        )
 
     @work(exclusive=True, thread=True)
     def perform_show_preview(self, file_path: str, mtime: int) -> None:

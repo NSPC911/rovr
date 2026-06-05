@@ -272,7 +272,6 @@ def match_mime_to_preview_type(
     """
     for pattern, preview_type in config["settings"]["preview_rules"].items():
         if recache(pattern).fullmatch(mime_type):
-            print("Matched MIME Type")
             return preview_type
     return None
 

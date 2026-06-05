@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import asyncio
+import contextlib
 import subprocess
 from dataclasses import dataclass
 from functools import partial
@@ -964,9 +965,18 @@ class PreviewContainer(Actionable, Container):
             or "-filelist-only" in self.screen.classes
         ):
             self._pending_preview_args = (file_path, mtime)
+            self._compute_and_sync_mime(file_path, mtime)
             return
         self._pending_preview_args = None
         self.perform_show_preview(file_path, mtime)
+
+    def _compute_and_sync_mime(self, file_path: str, mtime: int | float) -> None:
+        self._sync_mime(
+            file_path,
+            preview_utils.MimeResult("basic", "inode/directory")
+            if path.isdir(file_path)
+            else preview_utils.get_mime_type(file_path, mtime),
+        )
 
     @work(exclusive=True, thread=True)
     def perform_show_preview(self, file_path: str, mtime: int) -> None:
@@ -1132,15 +1142,14 @@ class PreviewContainer(Actionable, Container):
         content: str | list[str] | None = None,
         mime_type: preview_utils.MimeResult | None = None,
     ) -> None:
-        """
-        Update the preview UI. Runs in a thread, uses call_from_thread for UI ops.
-        """
         self._current_file_path = file_path
         self._current_content = content
         self._mime_type = mime_type
         self._file_mtime = path.getmtime(file_path)
-
         self._file_type = file_type
+
+        self.call_after_refresh(self._sync_mime, file_path, mime_type)
+
         self.app.call_from_thread(self.remove_class, "pdf")
         if file_type == "folder":
             self.log("Showing folder preview")
@@ -1305,3 +1314,20 @@ class PreviewContainer(Actionable, Container):
             filelist := self.get_child(FileList)
         ):
             filelist.scroll_end(animate=False)
+
+    def _sync_mime(
+        self, file_path: str, mime_type: preview_utils.MimeResult | None = None
+    ) -> None:
+        mime_str = mime_type.mime_type if mime_type else "--"
+        with contextlib.suppress(NoMatches):
+            metadata_container = self.app.query_one("MetadataContainer")
+            option = metadata_container._current_option
+            if (
+                isinstance(option, FileListSelectionWidget)
+                and option.dir_entry.path == file_path
+            ):
+                option.mime_type = mime_str
+                with contextlib.suppress(NoMatches):
+                    metadata_container.query_one("#metadata-mime", Static).update(
+                        mime_str or "--"
+                    )

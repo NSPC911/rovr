@@ -11,6 +11,7 @@ from textual.widget import MountError
 from textual.widgets import Static
 from textual.worker import WorkerState
 
+from rovr.classes.textual_options import FileListSelectionWidget
 from rovr.functions import utils
 from rovr.functions.path import get_direntry_for, is_hidden_file
 from rovr.variables.constants import config, scroll_bindings
@@ -27,6 +28,7 @@ class MetadataContainer(VerticalScroll, inherit_bindings=False):
         self._update_task = None
         self._queued_task = None
         self._queued_task_args: None | DirEntry = None
+        self._current_option: FileListSelectionWidget | None = None
 
     def info_of_dir_entry(self, dir_entry: DirEntry, type_string: str) -> str:
         """Get the permission line from a given DirEntry object
@@ -77,12 +79,16 @@ class MetadataContainer(VerticalScroll, inherit_bindings=False):
             return True
         return False
 
-    def update_metadata(self, dir_entry: DirEntry) -> None:
+    def update_metadata(
+        self, dir_entry: DirEntry, option: FileListSelectionWidget | None = None
+    ) -> None:
         """
         Debounce the update, because some people can be speed travellers
         Args:
             dir_entry (DirEntry): The nt.DirEntry object
+            option (FileListSelectionWidget | None): The highlighted option, if available
         """
+        self._current_option = option
         if any(
             worker.is_running
             and worker.node is self
@@ -184,6 +190,16 @@ class MetadataContainer(VerticalScroll, inherit_bindings=False):
                                 )
                             )
                         )
+                    case "mime":
+                        option = self._current_option
+                        mime_str = (
+                            option.mime_type
+                            if isinstance(option, FileListSelectionWidget)
+                            and option.dir_entry.path == dir_entry.path
+                            and option.mime_type is not None
+                            else "--"
+                        )
+                        values_list.append(Static(mime_str, id="metadata-mime"))
             except OSError as exc:
                 # can appear here because of stupid nt epoch stuff
                 if exc.errno in (22, 23, 123):
@@ -220,6 +236,8 @@ class MetadataContainer(VerticalScroll, inherit_bindings=False):
                         keys_list.append(Static("Accessed"))
                     case "created":
                         keys_list.append(Static("Created"))
+                    case "mime":
+                        keys_list.append(Static("MIME"))
             keys = VerticalGroup(*keys_list, id="metadata-keys")
             try:
                 self.app.call_from_thread(self.mount, keys, values)

@@ -541,7 +541,9 @@ class FileList(
         else:
             setattr(self.app, "_highlighted_file_mtime", None)
         # preview
-        self.app.query_one("MetadataContainer").update_metadata(event.option.dir_entry)
+        self.app.query_one("MetadataContainer").update_metadata(
+            event.option.dir_entry, event.option
+        )
         try:
             self.app.query_one("PreviewContainer").show_preview(
                 highlighted_option.dir_entry.path,

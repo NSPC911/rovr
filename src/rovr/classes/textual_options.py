@@ -185,6 +185,7 @@ class FileListSelectionWidget(LazySelection):
             disabled: The initial enabled/disabled state. Enabled by default.
         """
         self.dir_entry = dir_entry
+        self.mime_type: str | None = None
         this_id = str(id(self))
         self.__icon_factory = icon_factory
         self.__label = label

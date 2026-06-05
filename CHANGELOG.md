@@ -5,6 +5,19 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.9.1]
+
+### Added
+
+- `app`: add libuv as optional asyncio loop (used in nuitka) [#294](https://github.com/NSPC911/rovr/pull/294)
+- `metadata`: show mimetypes as a metadata section [#293](https://github.com/NSPC911/rovr/pull/293)
+
+### Fixed
+
+- `config`: actually cache schema validator [155e458](https://github.com/NSPC911/rovr/commit/155e458e3d1e0232efe693d817ae9e5144d2fa60)
+- `shell`: use separate bg implementation instead of orphans [#295](https://github.com/NSPC911/rovr/pull/295) [1ec3556](https://github.com/NSPC911/rovr/commit/1ec3556a6d0bdac57d429ee6689f1b77cfdc3154) [9f57978](https://github.com/NSPC911/rovr/commit/9f57978d82d74da4d378b880c2ca810302ee9acd)
+
+
 ## [0.9.0]
 
 ### Added

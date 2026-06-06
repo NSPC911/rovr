@@ -46,14 +46,14 @@ class ClipboardCommandError(ClipboardError):
 
 async def copy_files_to_system_clipboard(
     paths: list[str],
-) -> bool | ClipboardError | TimeoutError:
+) -> bool | Exception:
     """Copy file paths to the system clipboard.
 
     Args:
         paths: List of file paths to copy.
 
     Returns:
-        True if successful, or a ClipboardError if something went wrong.
+        True if successful, or an Exception if something went wrong.
     """
     system = platform.system()
     try:
@@ -73,12 +73,8 @@ async def copy_files_to_system_clipboard(
         else:
             tool = output.args[0] if output.args else "unknown"
             return ClipboardCommandError(tool, output.return_code, output.stderr)
-    except ClipboardError as exc:
-        return exc
-    except TimeoutError as exc:
-        return exc
     except Exception as exc:
-        return ClipboardError(f"Unexpected error: {exc}")
+        return exc
 
 
 async def _copy_windows(paths: list[str]) -> ProcessResult | None:
@@ -295,7 +291,7 @@ async def _copy_linux(paths: list[str]) -> ProcessResult | None:
         exc.add_note(f"{using} timed out")
         raise exc from None
     return ProcessResult(
-        return_code=process.return_code or 0,
+        return_code=process.returncode or 0,
         args=command,
         stdout="" if stdout is None else stdout.decode().strip(),
         stderr="" if stderr is None else stderr.decode().strip(),

@@ -11,7 +11,6 @@ from rovr.components.popup_option_list import PopupOptionList
 from rovr.functions.icons import get_icon
 from rovr.functions.path import dump_exc, normalise
 from rovr.functions.system_clipboard import (
-    ClipboardError,
     ClipboardToolNotFoundError,
     copy_files_to_system_clipboard,
 )
@@ -136,7 +135,7 @@ class CopyButton(Button):
                 markup=False,
             )
             dump_exc(self, output)
-        elif isinstance(output, ClipboardError):
+        else:
             self.notify(
                 str(output),
                 title="Clipboard Error",

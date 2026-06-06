@@ -374,12 +374,9 @@ class FileList(
             if callback:
                 callback()
 
-    @work(thread=True)
     def update_from_session(
         self, session: SessionManager, name_to_index: dict[str, int]
     ) -> None:
-        # so far dont seem to have any issues when running this in a thread
-        # but if it does, remove the decorator
         self.log("Restoring selected items from session...")
         self.log(session.selectedItems)
         with self.prevent(SelectionList.SelectedChanged):

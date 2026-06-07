@@ -130,7 +130,6 @@ This project uses the new `prek` tool for pre-commit hooks. To run the check
 
 ```bash
 prek # if available in system PATH
-uv run prek # if installed as a dev dependency
 ```
 
 - Runs ruff format and check

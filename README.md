@@ -125,7 +125,7 @@ For more info on Textual's console, refer to https://textual.textualize.io/guide
 
 - **How do I contribute?**
   - You need [uv](https://docs.astral.sh/uv) at minimum. [prek](https://github.com/j178/prek), [ruff](https://docs.astral.sh/ruff) and [ty](https://docs.astral.sh/ty) are automatically installed.
-  - Clone the repo, and inside it, run `uv sync` and `uv run prek install`.
+  - Clone the repo, and inside it, run `uv sync`.
   - Make your changes, ensure that your changes are properly formatted, before pushing to a **custom** branch on your fork.
   - For more info, check the [how to contribute](https://nspc911.github.io/rovr/contributing/how-to-contribute) page.
 

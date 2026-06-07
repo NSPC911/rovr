@@ -99,8 +99,8 @@ Running in dev mode to see debug outputs and logs
 
 ```pwsh
 uv run rovr --dev
-# or with poethepoet
-poe dev
+# or with just
+just dev
 ```
 
 the Textual console must also be active to see debug outputs
@@ -110,7 +110,7 @@ uv run textual console
 # or uvx if not running from source
 uvx --from textual-dev textual console
 # or just capture print statements
-poe log
+just log
 ```
 
 For more info on Textual's console, refer to https://textual.textualize.io/guide/devtools/#console

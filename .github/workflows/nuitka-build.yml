@@ -77,12 +77,14 @@ jobs:
           restore-keys: |
             nuitka-${{ matrix.name }}
 
+      - name: Setup just
+        uses: taiki-e/install-action@just
+
       - name: Build with Nuitka
         shell: pwsh
         run: |
           Remove-Item -Recurse -Force rovr.dist -ErrorAction SilentlyContinue
-          uv sync --no-dev --group build
-          uv run --no-sync poe build standalone
+          just build standalone
 
       - name: Upload Executable
         uses: actions/upload-artifact@v7

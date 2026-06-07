@@ -56,22 +56,20 @@ speedup = [
 [dependency-groups]
 build = [
   "zstandard>=0.25.0",
-  "poethepoet>=0.45.0",
   "nuitka>=4.0.0",
 ]
 dev = [
-  "poethepoet>=0.41.0",
   "prek>=0.2.25",
   "ruff>=0.15.0",
   "textual-dev>=1.8.0",
   "ty==0.0.40",
   "pyinstrument>=5.1.2",
   "commitizen>=4.13.0",
+  "rust-just>=1.51.0",
 ]
 docscripts = [
   "json-schema-for-humans>=1.5.1",
   "jsonschema-gentypes>=2.13.0",
-  "poethepoet>=0.41.0",
   "ruff>=0.15.0",
 ]
 test = [
@@ -94,108 +92,6 @@ version_scheme = "pep440"
 version_provider = "uv"
 update_changelog_on_bump = true
 major_version_zero = true
-
-[tool.poe.executor]
-type = "uv"
-no-sync = true
-
-[tool.poe.tasks]
-_hash_dump.shell = "git rev-parse HEAD > src/rovr/COMMIT_HASH"
-_warn_dump.shell = "echo \"If you need to change any config, don't change them here!! Look at https://nspc911.github.io/rovr/configuration/configuration/ for more info\" > src/rovr/DO_NOT_EDIT_THESE_FILES"
-_dump_clean.shell = "python -c \"import os; os.path.exists('src/rovr/COMMIT_HASH') and os.remove('src/rovr/COMMIT_HASH'); os.path.exists('src/rovr/DO_NOT_EDIT_THESE_FILES') and os.remove('src/rovr/DO_NOT_EDIT_THESE_FILES')\""
-
-_docscripts_setup.cmd = "uv sync --group docscripts"
-_test_setup.cmd = "uv sync --group test"
-
-run.help = "Run rovr"
-run.cmd = "rovr"
-dev.help = "Run rovr in development mode with textual-dev"
-dev.cmd = "textual run --dev rovr.__main__:cli --"
-log.help = "Launch textual's console (need rovr to be launched as dev)"
-log.cmd = "textual console -x WORKER -x SYSTEM -x DEBUG -x EVENT"
-
-gen-schema.help = "Generate the JSON schema for rovr's config"
-gen-schema.sequence = [
-  "_docscripts_setup",
-  { cmd = "docs/scripts/generate_schema.py" },
-]
-icon-test.help = "Print all available icons to the terminal for testing"
-icon-test.cmd = "docs/scripts/icon_test.py"
-gen-keys.help = "Generate the keybinds documentation"
-gen-keys.cmd = "docs/scripts/generate_keybinds.py"
-typed.help = ""
-typed.ref = "schema-to-dict"
-schema-to-dict.help = "Convert the JSON schema into a Python TypedDict for internal use"
-schema-to-dict.sequence = [
-  "_docscripts_setup",
-  { cmd = "jsonschema-gentypes --json-schema ./src/rovr/config/schema.json --python ./src/rovr/classes/config.py" },
-  "format"
-]
-
-check.help = "Run all checks (type checking and linting)"
-check.sequence = [ { cmd = "ty check" },{ cmd = "ruff check" } ]
-
-fmt.help = ""
-fmt.ref = "format"
-format.help = "Run ruff related formatters"
-format.sequence = [ { cmd = "ruff check --unsafe-fixes --fix"}, { cmd = "ruff format"} ]
-
-svg-fmt.help = ""
-svg-fmt.ref = "screenshot-format"
-screenshot-format.help = "Format all SVG screenshots in the docs"
-screenshot-format.cmd = 'pnpx prettier --write "docs/public/screenshots/*.svg" --parser html --bracket-same-line --print-width 160'
-
-flame.help = "Start rovr with pyinstrument for flamegraph profiling"
-flame.cmd = "pyinstrument --renderer=html --timeline --use-timing-thread --show-all -m rovr"
-
-snap.help = ""
-snap.ref = "snip"
-snip.help = "Take a screenshot of the app after a certain delay, before saving to the docs screenshots folder"
-snip.cmd = "textual run --screenshot ${delay} rovr.__main__:cli --screenshot-path docs/public/screenshots --screenshot-filename ${filename} -- --without theme.transparent"
-snip.args = [
-  { name = "filename", help = "Filename of the screenshot", type = "string", positional = true, required = true },
-  { name = "delay", help = "Delay in seconds before taking the screenshot", default = 10, type = "integer" },
-]
-
-tokei.help = "Run tokei"
-tokei.cmd = "tokei --sort lines --exclude '*.svg' --exclude 'src/rovr/classes/config.py' --exclude '*lock*' --hidden"
-
-[tool.poe.tasks.test]
-help = "Run tests"
-sequence = [
-  "_test_setup",
-  { cmd = "pytest -n ${workers} ${FILES} $POE_EXTRA_ARGS" }
-]
-args = [
-  { name = "FILES", help = "Specific test files or directories to run (optional)", type = "string", positional = true, required = false, multiple = true },
-  { name = "workers", help = "Number of parallel workers for test execution (optional)", default = 4, type = "integer", options = ["-n"] },
-]
-
-[tool.poe.tasks.build]
-help = "Build rovr into an executable using Nuitka"
-sequence = [
-  { cmd = "uv sync --group build --extra speedup --extra uv --no-dev" },  # no dev because for some reason, stuff gets included
-  "_warn_dump",
-  "_hash_dump",
-  # --python-flag=-m
-  # "nuitka $POE_EXTRA_ARGS",
-  { cmd = 'nuitka --lto=${lto} --mode=${mode} --report=${report} --user-package-configuration-file=nuitka.config.yml src/rovr --onefile-tempdir-spec="{TEMP}/rovr_onefile_0.9.1" $POE_EXTRA_ARGS' },
-  "_dump_clean",
-]
-args = [
-  { name = "mode", help = "Build mode: onefile (default) or standalone", default = "onefile", positional = true, choices = ["standalone", "onefile"] },
-  { name = "lto", help = "Enable LTO (doesn't work with zig)", default = "yes", choices = ["yes", "no"], options = ["--lto"] },
-  { name = "report", help = "Where to output the Nuitka report", default = "report.xml", options = ["--report"] },
-]
-
-[tool.poe.tasks.uv-build]
-help = "Build rovr distributions using uv and include commit hash"
-sequence = [
-  "_hash_dump",
-  "_warn_dump",
-  { cmd = "uv build" },
-  "_dump_clean",
-]
 
 [tool.pytest]
 testpaths = ["tests"]

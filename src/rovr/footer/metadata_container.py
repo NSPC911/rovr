@@ -30,11 +30,11 @@ class MetadataContainer(VerticalScroll, inherit_bindings=False):
         self._queued_task_args: None | DirEntry = None
         self._current_option: FileListSelectionWidget | None = None
 
-    def info_of_dir_entry(self, dir_entry: DirEntry, type_string: str) -> str:
+    def info_of_dir_entry(self, dir_entry: DirEntry) -> str:
         """Get the permission line from a given DirEntry object
         Args:
             dir_entry (DirEntry): The nt.DirEntry class
-            type_string (str): The type of file. It should already be handled.
+
         Returns:
             str: A permission string.
         """
@@ -45,17 +45,6 @@ class MetadataContainer(VerticalScroll, inherit_bindings=False):
         mode = file_stat.st_mode
 
         permission_string = ""
-        match type_string:
-            case "Symlink":
-                permission_string = "l"
-            case "Directory":
-                permission_string = "d"
-            case "Junction":
-                permission_string = "j"
-            case "File":
-                permission_string = "-"
-            case "Unknown":
-                return "???????"
 
         permission_string += "r" if mode & stat.S_IRUSR else "-"
         permission_string += "w" if mode & stat.S_IWUSR else "-"
@@ -130,15 +119,35 @@ class MetadataContainer(VerticalScroll, inherit_bindings=False):
                 raise
 
         type_str = "Unknown"
-        if dir_entry.is_junction():
-            type_str = "Junction"
-        elif dir_entry.is_symlink():
+        file_info = ""
+        if dir_entry.is_symlink():
             type_str = "Symlink"
+            file_info = "l"
+        elif dir_entry.is_junction():
+            type_str = "Junction"
+            file_info = "j"
         elif dir_entry.is_dir():
             type_str = "Directory"
+            file_info = "d"
         elif dir_entry.is_file():
             type_str = "File"
-        file_info = self.info_of_dir_entry(dir_entry, type_str)
+            file_info = "-"
+        elif stat.S_ISSOCK(dir_entry.stat().st_mode):
+            type_str = "Socket"
+            file_info = "s"
+        elif stat.S_ISBLK(dir_entry.stat().st_mode):
+            type_str = "Block"
+            file_info = "b"
+        elif stat.S_ISCHR(dir_entry.stat().st_mode):
+            type_str = "Character"
+            file_info = "c"
+        elif stat.S_ISFIFO(dir_entry.stat().st_mode):
+            type_str = "FIFO"
+            file_info = "p"
+        if file_info == "":  # noqa: SIM108
+            file_info += "????????"
+        else:
+            file_info += self.info_of_dir_entry(dir_entry)
         # got the type, now we follow
         file_stat = dir_entry.stat()
         is_hidden = is_hidden_file(dir_entry.path)
@@ -248,7 +257,7 @@ class MetadataContainer(VerticalScroll, inherit_bindings=False):
                 # just a defensive raise
                 raise
         self.current_path = dir_entry.path
-        if type_str == "Directory" and self.has_focus:
+        if file_info.startswith("d") and self.has_focus:
             self._size_worker = self.calculate_folder_size(dir_entry.path)
         if self.any_in_queue():
             return

@@ -474,7 +474,6 @@ ProgressBarContainer {
   .bar--bar { color: $warning }
 }
 
-Content.selected { color: red }
 FileList, PinnedSidebar, Clipboard,
 PopupOptionList,
 FileSearchToggles,
@@ -1111,9 +1110,6 @@ Screen {
     }
     &ModalScreen OptionList {
       border: none;
-    }
-    Input {
-      background: red;
     }
     Toast { width: 100vw }
     #file_search_toggles,

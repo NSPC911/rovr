@@ -942,15 +942,6 @@ dependencies = [
     { name = "tomli" },
 ]
 
-[package.optional-dependencies]
-speedup = [
-    { name = "textual-speedups" },
-]
-uv = [
-    { name = "uvloop", marker = "sys_platform != 'win32'" },
-    { name = "winloop", marker = "sys_platform == 'win32'" },
-]
-
 [package.dev-dependencies]
 build = [
     { name = "nuitka" },
@@ -967,6 +958,9 @@ docscripts = [
     { name = "json-schema-for-humans" },
     { name = "jsonschema-gentypes" },
     { name = "ruff" },
+]
+speedup = [
+    { name = "textual-speedups" },
 ]
 test = [
     { name = "pytest" },
@@ -992,12 +986,8 @@ requires-dist = [
     { name = "textual", specifier = "~=8.0" },
     { name = "textual-autocomplete", specifier = ">=4.0.6" },
     { name = "textual-image", extras = ["textual"], specifier = "<0.10.0" },
-    { name = "textual-speedups", marker = "extra == 'speedup'", specifier = ">=0.2.1" },
     { name = "tomli", specifier = ">=2.4.0" },
-    { name = "uvloop", marker = "sys_platform != 'win32' and extra == 'uv'", specifier = ">=0.22.1" },
-    { name = "winloop", marker = "sys_platform == 'win32' and extra == 'uv'", specifier = ">=0.5.0" },
 ]
-provides-extras = ["uv", "speedup"]
 
 [package.metadata.requires-dev]
 build = [
@@ -1016,6 +1006,7 @@ docscripts = [
     { name = "jsonschema-gentypes", specifier = ">=2.13.0" },
     { name = "ruff", specifier = ">=0.15.0" },
 ]
+speedup = [{ name = "textual-speedups", specifier = ">=0.2.1" }]
 test = [
     { name = "pytest", specifier = ">=9.0.2" },
     { name = "pytest-asyncio", specifier = ">=1.3.0" },
@@ -1305,37 +1296,12 @@ wheels = [
 ]
 
 [[package]]
-name = "uvloop"
-version = "0.22.1"
-source = { registry = "https://pypi.org/simple" }
-sdist = { url = "https://files.pythonhosted.org/packages/06/f0/18d39dbd1971d6d62c4629cc7fa67f74821b0dc1f5a77af43719de7936a7/uvloop-0.22.1.tar.gz", hash = "sha256:6c84bae345b9147082b17371e3dd5d42775bddce91f885499017f4607fdaf39f", size = 2443250, upload-time = "2025-10-16T22:17:19.342Z" }
-wheels = [
-    { url = "https://files.pythonhosted.org/packages/89/8c/182a2a593195bfd39842ea68ebc084e20c850806117213f5a299dfc513d9/uvloop-0.22.1-cp313-cp313-macosx_10_13_universal2.whl", hash = "sha256:561577354eb94200d75aca23fbde86ee11be36b00e52a4eaf8f50fb0c86b7705", size = 1358611, upload-time = "2025-10-16T22:16:36.833Z" },
-    { url = "https://files.pythonhosted.org/packages/d2/14/e301ee96a6dc95224b6f1162cd3312f6d1217be3907b79173b06785f2fe7/uvloop-0.22.1-cp313-cp313-macosx_10_13_x86_64.whl", hash = "sha256:1cdf5192ab3e674ca26da2eada35b288d2fa49fdd0f357a19f0e7c4e7d5077c8", size = 751811, upload-time = "2025-10-16T22:16:38.275Z" },
-    { url = "https://files.pythonhosted.org/packages/b7/02/654426ce265ac19e2980bfd9ea6590ca96a56f10c76e63801a2df01c0486/uvloop-0.22.1-cp313-cp313-manylinux2014_aarch64.manylinux_2_17_aarch64.manylinux_2_28_aarch64.whl", hash = "sha256:6e2ea3d6190a2968f4a14a23019d3b16870dd2190cd69c8180f7c632d21de68d", size = 4288562, upload-time = "2025-10-16T22:16:39.375Z" },
-    { url = "https://files.pythonhosted.org/packages/15/c0/0be24758891ef825f2065cd5db8741aaddabe3e248ee6acc5e8a80f04005/uvloop-0.22.1-cp313-cp313-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl", hash = "sha256:0530a5fbad9c9e4ee3f2b33b148c6a64d47bbad8000ea63704fa8260f4cf728e", size = 4366890, upload-time = "2025-10-16T22:16:40.547Z" },
-    { url = "https://files.pythonhosted.org/packages/d2/53/8369e5219a5855869bcee5f4d317f6da0e2c669aecf0ef7d371e3d084449/uvloop-0.22.1-cp313-cp313-musllinux_1_2_aarch64.whl", hash = "sha256:bc5ef13bbc10b5335792360623cc378d52d7e62c2de64660616478c32cd0598e", size = 4119472, upload-time = "2025-10-16T22:16:41.694Z" },
-    { url = "https://files.pythonhosted.org/packages/f8/ba/d69adbe699b768f6b29a5eec7b47dd610bd17a69de51b251126a801369ea/uvloop-0.22.1-cp313-cp313-musllinux_1_2_x86_64.whl", hash = "sha256:1f38ec5e3f18c8a10ded09742f7fb8de0108796eb673f30ce7762ce1b8550cad", size = 4239051, upload-time = "2025-10-16T22:16:43.224Z" },
-]
-
-[[package]]
 name = "wcwidth"
 version = "0.7.0"
 source = { registry = "https://pypi.org/simple" }
 sdist = { url = "https://files.pythonhosted.org/packages/2c/ee/afaf0f85a9a18fe47a67f1e4422ed6cf1fe642f0ae0a2f81166231303c52/wcwidth-0.7.0.tar.gz", hash = "sha256:90e3a7ea092341c44b99562e75d09e4d5160fe7a3974c6fb842a101a95e7eed0", size = 182132, upload-time = "2026-05-02T16:04:12.653Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/41/52/e465037f5375f43533d1a80b6923955201596a99142ed524d77b571a1418/wcwidth-0.7.0-py3-none-any.whl", hash = "sha256:5d69154c429a82910e241c738cd0e2976fac8a2dd47a1a805f4afed1c0f136f2", size = 110825, upload-time = "2026-05-02T16:04:11.033Z" },
-]
-
-[[package]]
-name = "winloop"
-version = "0.5.0"
-source = { registry = "https://pypi.org/simple" }
-sdist = { url = "https://files.pythonhosted.org/packages/8d/eb/d6058bed9170c365f88a87aa433e6e08458a405a7b91f9c7e6dd6c10039e/winloop-0.5.0.tar.gz", hash = "sha256:4b3b6737172e144e87ecbf123474e54ddf750084d42f04e476bcd746fd138ff5", size = 2602624, upload-time = "2026-01-20T23:45:43.703Z" }
-wheels = [
-    { url = "https://files.pythonhosted.org/packages/dc/27/1235b7eb8cdacf01e1597cf40d0cbcdd0ce7f59222e620dd78f1685e90d8/winloop-0.5.0-cp313-cp313-win32.whl", hash = "sha256:d2ffb21a272e0c10df9e9aa5be8ad65e6a974f6f00765ff25b181684258f7c87", size = 556407, upload-time = "2026-01-20T23:45:28.669Z" },
-    { url = "https://files.pythonhosted.org/packages/43/10/84e7858a715e16f5307962f0ad8dd39be4ddb8f328777c06d3f72377abe5/winloop-0.5.0-cp313-cp313-win_amd64.whl", hash = "sha256:f5678af6b7613a786236280c1d82b05d7c1db959c005eb01b04810747635ac67", size = 671022, upload-time = "2026-01-20T23:45:30.22Z" },
-    { url = "https://files.pythonhosted.org/packages/38/a7/552f483a007d7404e484dd9cc52fe6d8c10d8b08bc4d2823348f44908153/winloop-0.5.0-cp313-cp313-win_arm64.whl", hash = "sha256:db35ad28b74b96c9ec6c9a40cb1eac1e4525c4b6c671de624495ba734683a896", size = 551731, upload-time = "2026-01-20T23:45:31.367Z" },
 ]
 
 [[package]]

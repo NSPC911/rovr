@@ -88,7 +88,7 @@ test workers="4" *files:
 
 # Build rovr into an executable using Nuitka
 build mode="onefile" lto="yes" report="report.xml":
-    uv sync --group build --extra speedup --extra uv --no-dev
+    uv sync --group build --extra speedup --no-dev
     just _warn_dump
     just _hash_dump
     uv run nuitka --lto={{lto}} --mode={{mode}} --report={{report}} src/rovr "--onefile-tempdir-spec={TEMP}/rovr_onefile_0.9.1"

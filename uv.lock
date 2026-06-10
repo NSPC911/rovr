@@ -942,6 +942,11 @@ dependencies = [
     { name = "tomli" },
 ]
 
+[package.optional-dependencies]
+speedup = [
+    { name = "textual-speedups" },
+]
+
 [package.dev-dependencies]
 build = [
     { name = "nuitka" },
@@ -986,8 +991,10 @@ requires-dist = [
     { name = "textual", specifier = "~=8.0" },
     { name = "textual-autocomplete", specifier = ">=4.0.6" },
     { name = "textual-image", extras = ["textual"], specifier = "<0.10.0" },
+    { name = "textual-speedups", marker = "extra == 'speedup'", specifier = ">=0.2.1" },
     { name = "tomli", specifier = ">=2.4.0" },
 ]
+provides-extras = ["speedup"]
 
 [package.metadata.requires-dev]
 build = [

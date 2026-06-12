@@ -32,6 +32,7 @@ from textual.messages import ExitApp
 from textual.screen import Screen
 from textual.theme import Theme
 from textual.types import NoActiveAppError
+from textual.widget import Widget
 from textual.widgets import Input, Label
 from textual.widgets.selection_list import Selection
 from textual.worker import Worker, WorkerFailed
@@ -419,6 +420,16 @@ class Application(Actionable, App, inherit_bindings=False):
 
     def on_app_focus(self, event: events.AppFocus) -> None:
         self.app_blurred = False
+
+    def _set_mouse_over(
+        self, widget: Widget | None, hover_widget: Widget | None
+    ) -> None:
+        # Textual re-applies hover styles twice per MouseMove even when the
+        # hovered widget hasn't changed, which floods the message queue when a
+        # custom stylesheet marks large containers as hover-styled
+        if widget is self.mouse_over and hover_widget is self.hover_over:
+            return
+        super()._set_mouse_over(widget, hover_widget)
 
     @work
     async def action_quit(self) -> None:

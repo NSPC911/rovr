@@ -5,10 +5,8 @@ repos:
       - id: ruff
         args: [--fix]
       - id: ruff-format
-  - repo: local
+  - repo: https://github.com/astral-sh/ty-pre-commit
+    # ty version.
+    rev: v0.0.40
     hooks:
       - id: ty
-        name: ty check
-        entry: uvx ty==0.0.40 check . --ignore unresolved-import
-        language: python
-        types_or: [python, pyi, jupyter]

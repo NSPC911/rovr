@@ -7,6 +7,6 @@ repos:
       - id: ruff-format
   - repo: https://github.com/astral-sh/ty-pre-commit
     # ty version.
-    rev: v0.0.40
+    rev: v0.0.49
     hooks:
       - id: ty

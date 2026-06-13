@@ -57,7 +57,7 @@ build = [
 dev = [
   "ruff>=0.15.0",
   "textual-dev>=1.8.0",
-  "ty==0.0.40",
+  "ty==0.0.49",
   "pyinstrument>=5.1.2",
   "commitizen>=4.13.0",
 ]

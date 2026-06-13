@@ -122,7 +122,7 @@ async def open_file(app: App, filepath: str) -> None:
             case _:  # Linux and other Unix-like
                 process = await create_proc("xdg-open", filepath)
         _, stderr = await process.communicate()
-        if stderr:
+        if process.returncode != 0:
             if system == "windows":
                 # try with powershell
                 _, stderr = await (
@@ -134,20 +134,20 @@ async def open_file(app: App, filepath: str) -> None:
                         filepath,
                     )
                 ).communicate()
-                if stderr:
+                if process.returncode and process.returncode != 0:
                     # honestly cant do anything about this, i dont want to risk
                     # stdout corruption (stares at pixelorama) by trying os.startfile
                     # so just raise it and let the user deal with it
                     app.notify(
                         str(stderr.decode().strip()),
-                        title="Open File",
+                        title=f"Open File (exited with code {process.returncode})",
                         severity="error",
                         markup=False,
                     )
             else:
                 app.notify(
-                    str(stderr.decode().strip()),
-                    title="Open File",
+                    f"stderr: {stderr.decode().strip()}",
+                    title=f"Open File (exited with code {process.returncode})",
                     severity="error",
                     markup=False,
                 )

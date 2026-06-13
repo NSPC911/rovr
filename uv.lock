@@ -955,6 +955,9 @@ build = [
 dev = [
     { name = "commitizen" },
     { name = "pyinstrument" },
+    { name = "pytest" },
+    { name = "pytest-asyncio" },
+    { name = "pytest-xdist" },
     { name = "ruff" },
     { name = "textual-dev" },
     { name = "ty" },
@@ -966,11 +969,6 @@ docscripts = [
 ]
 speedup = [
     { name = "textual-speedups" },
-]
-test = [
-    { name = "pytest" },
-    { name = "pytest-asyncio" },
-    { name = "pytest-xdist" },
 ]
 
 [package.metadata]
@@ -1004,6 +1002,9 @@ build = [
 dev = [
     { name = "commitizen", specifier = ">=4.13.0" },
     { name = "pyinstrument", specifier = ">=5.1.2" },
+    { name = "pytest", specifier = ">=9.0.2" },
+    { name = "pytest-asyncio", specifier = ">=1.3.0" },
+    { name = "pytest-xdist", specifier = ">=3.8.0" },
     { name = "ruff", specifier = ">=0.15.0" },
     { name = "textual-dev", specifier = ">=1.8.0" },
     { name = "ty", specifier = "==0.0.49" },
@@ -1014,11 +1015,6 @@ docscripts = [
     { name = "ruff", specifier = ">=0.15.0" },
 ]
 speedup = [{ name = "textual-speedups", specifier = ">=0.2.1" }]
-test = [
-    { name = "pytest", specifier = ">=9.0.2" },
-    { name = "pytest-asyncio", specifier = ">=1.3.0" },
-    { name = "pytest-xdist", specifier = ">=3.8.0" },
-]
 
 [[package]]
 name = "rpds-py"

@@ -13,9 +13,6 @@ _dump_clean:
 _docscripts_setup:
     uv sync --group docscripts
 
-_test_setup:
-    uv sync --group test
-
 # Run rovr
 run *args:
     uv run rovr {{args}}
@@ -83,7 +80,6 @@ tokei *args:
 
 # Run tests; optionally pass specific files and worker count
 test workers="4" *files:
-    just _test_setup
     uv run pytest -n {{workers}} {{files}}
 
 # Build rovr into an executable using Nuitka

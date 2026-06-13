@@ -1,4 +1,5 @@
 import asyncio
+from contextlib import suppress
 from os import path
 from typing import ClassVar, Self, Sequence
 
@@ -100,13 +101,14 @@ class Clipboard(CheckboxRenderingMixin, SelectionList, inherit_bindings=False):
         """
         # Check for duplicate ID
         if selection.id is not None and selection.id in self._id_to_option:
-            self.remove_option(selection.id)
+            self.safe_remove_option(selection.id)
         # check for duplicate path
         if any(selection.value.path == option.value.path for option in self.options):
             # find the option with the same path
             for option in self.options:
                 if selection.value.path == option.value.path:
-                    self._remove_option(option)
+                    with suppress(KeyError, OptionDoesNotExist):
+                        self._remove_option(option)
                     break
 
         # insert
@@ -157,6 +159,13 @@ class Clipboard(CheckboxRenderingMixin, SelectionList, inherit_bindings=False):
         # go through each option, check if they are both selected and are the cut type, update filelist with that list
         self.app.file_list.update_dimmed_items()
 
+    def safe_remove_option(self, option_id: str) -> None:
+        """Safely remove an option by its ID, handling exceptions."""
+        try:
+            self.remove_option(option_id)
+        except (KeyError, OptionDoesNotExist):
+            return
+
     @work(thread=True)
     def check_clipboard_existence(self) -> None:
         """Check if the files in the clipboard still exist."""
@@ -164,7 +173,7 @@ class Clipboard(CheckboxRenderingMixin, SelectionList, inherit_bindings=False):
         for option in self.options:
             if not path.lexists(option.value.path):
                 assert isinstance(option.id, str)
-                self.call_later(self.remove_option, option.id)
+                self.call_later(self.safe_remove_option, option.id)
                 re_call = True
         if re_call:
             self.call_next(self.check_clipboard_existence)

@@ -43,9 +43,6 @@ jobs:
         with:
           activate-environment: true
 
-      - name: Setup just
-        uses: taiki-e/install-action@just
-
       - name: Install dependencies
         run: uv sync
 
@@ -60,7 +57,7 @@ jobs:
           while ($retryCount -lt $maxRetries) {
             Write-Host "Attempt $($retryCount + 1) of $maxRetries"
             try {
-              just test 8
+              uv run poe test -n 8
               if ($LASTEXITCODE -ne 0) {
                 throw "Tests failed with exit code $LASTEXITCODE"
               }

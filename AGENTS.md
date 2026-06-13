@@ -11,34 +11,34 @@ prek install                       # Install pre-commit hooks (optional)
 
 # Running
 uv run rovr                        # Run the application
-just run                           # Alias for uv run rovr
-just dev                           # Run in dev mode with textual-dev console
-just log                           # Launch textual console for debug output
+poe run                            # Alias for uv run rovr
+poe dev                            # Run in dev mode with textual-dev console
+poe log                            # Launch textual console for debug output
 
 # Code Quality
-just check                         # Run all checks (ty + ruff)
+poe check                          # Run all checks (ty + ruff)
   ty check                         # Type checking with ty
   ruff check                       # Linting
 
-just format                        # Format code
-just fmt                           # Alias for just format
+poe format                         # Format code
+poe fmt                            # Alias for poe format
   ruff check --unsafe-fixes --fix
   ruff format
 
 # Testing
-just test                          # Run tests with pytest
-  just test tests/                 # Run all tests
-  just test tests/test_clipboard.py # Run specific test file
-  just test 4                      # Run with 4 parallel workers
+poe test                           # Run tests with pytest
+  poe test tests/                  # Run all tests
+  poe test tests/test_clipboard.py # Run specific test file
+  poe test -n 4                    # Run with 4 parallel workers
 
 # Building
-just build                         # Build executable with Nuitka (onefile but can be customised)
-just uv-build                      # Build wheel/sdist with uv
+poe build                          # Build executable with Nuitka (onefile but can be customised)
+poe uv-build                       # Build wheel/sdist with uv
 
 # Docs/Scripts
-just gen-schema                    # Generate JSON schema for config
-just gen-keys                      # Generate keybinds documentation
-just typed                         # Convert schema to TypedDict
+poe gen-schema                     # Generate JSON schema for config
+poe gen-keys                       # Generate keybinds documentation
+poe typed                          # Convert schema to TypedDict
 ```
 
 ## Code Style Guidelines
@@ -68,7 +68,7 @@ from rovr.classes.mixins import CheckboxRenderingMixin
 ```
 
 - As for grouping or formatting, you can leave it to ruff.
-  However, do not just invoke `ruff check`, but rather run either `just format` or `just fmt` to apply fixes. Saves some tokens.
+  However, do not just invoke `ruff check`, but rather run either `poe format` or `poe fmt` to apply fixes. Saves some tokens.
 
 ### Type Annotations
 
@@ -146,10 +146,10 @@ Types: `feat`, `fix`, `docs`, `style`, `refactor`, `test`, `chore`
 - **Refactors discouraged**: The project prefers features over refactors
 - **Formatting excludes**: `src/rovr/monkey_patches/sys_stdout.py`
 - Use `uv` commands; do not use `pip` or `python -m`
-- Always run `just check` before committing. Ruff may mention that certain errors are fixable; if so, run `just fmt` to apply fixes.
+- Always run `poe check` before committing. Ruff may mention that certain errors are fixable; if so, run `poe fmt` to apply fixes.
 
 #### Tests
-- Make sure to also run `just test` to ensure no tests are broken before committing.
+- Make sure to also run `poe test` to ensure no tests are broken before committing.
 - Keep in mind that the tests can be quite flaky at times. If an error occurs, just try again until it passes or 5 tries have been made. If it still fails after 5 tries, then there may be an actual issue that needs to be looked into.
 
 #### multiprocessing.ProcessPoolExecutor and multiprocessing.Process notices

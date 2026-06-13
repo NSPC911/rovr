@@ -31,34 +31,38 @@ source .venv/bin/activate
 ```
 (On Windows, you might need to run `.venv\Scripts\activate`)
 
-[just](https://just.systems) is used for task management. Install it with your system package manager or via `cargo install just`.
+[poe-the-poet](https://poethepoet.natn.io) is used for task management. i highly recommend installing poe globally via uv
+
+```bash
+uv tool install poethepoet
+```
 
 ### Code Style and Linting
 
 We use `ruff` for formatting and linting. Before committing, please run:
 ```bash
-just format
+ruff format
 ```
 
 We also use `ty` for type checking.
 ```bash
-just check
+ty check
 ```
 
 ### Testing
 
 We use `pytest` for testing. To run the tests, execute:
 ```bash
-just test
+poe test
 ```
 
 ### Generating templates and stuff
 
 If you created a new feature that directly affects the config and schema, ensure you run the following commands to update the generated files:
 ```bash
-just gen-schema # to update documentation schema
-just gen-keys   # to update keybind documentation
-just typed      # to update type hints
+poe gen-schema # to update documentation schema
+poe gen-keys   # to update keybind documentation
+poe typed      # to update type hints
 ```
 
 ### Committing your changes
@@ -79,11 +83,11 @@ When you're ready to make a pull request, please ensure you add the following te
 
 by submitting this pull request, i agree that
 
-- [ ] i have run `just check` to check for any style issues and fixed them
-- [ ] i have tested rovr (and also ran `just test` if applicable) to make sure my changes do not break anything
+- [ ] i have run `poe check` to check for any style issues and fixed them
+- [ ] i have tested rovr (and also ran `poe test` if applicable) to make sure my changes do not break anything
 - [ ] cache, logs, dotfiles and/or others were not accidentally added to git's tracking history
 - [ ] my commits (or at least the pr title) follow the conventional commits format as much as possible
-- [ ] the documentation has been updated wherever necessary (run `just gen-schema` and `just gen-keys` if applicable)
+- [ ] the documentation has been updated wherever necessary (run `poe gen-schema` and `poe gen-keys` if applicable)
 ```
 If your PR is addressing an issue, please link it in the PR description (e.g., "Fixes #123").
 

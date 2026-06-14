@@ -5,6 +5,29 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.9.1.post2]
+
+### Fixed
+
+- `opener`: check returncode, not stderr [feb6afb](https://github.com/NSPC911/rovr/commit/feb6afbe22cb50ea1b5edb5804cf80f3275868bb)
+- `firstlaunch`: remove `open_all_in_editor` [b7b97ab](https://github.com/NSPC911/rovr/commit/b7b97abea837b6f30ab62973e09b654e0f1a2714)
+
+## [0.9.1.post1]
+
+### Fixed
+
+- `metadata`: show pipe/fifo/other weird unix files [bd2ab73](https://github.com/NSPC911/rovr/commit/bd2ab73878d33d5463d58a02f4c42e5522b4e710)
+- `style`: remove `background: red` [2ca8bf1](https://github.com/NSPC911/rovr/commit/2ca8bf122f7c0382a56bfc7304b503df1fc7fc01)
+- `clipboard`: safely remove options [4100119](https://github.com/NSPC911/rovr/commit/41001197b249a0a739e92f9a122665657c09fead)
+
+### Removed
+
+- revert libuv support [b0d84cf](https://github.com/NSPC911/rovr/commit/b0d84cf2e57e452a74bd2718702902e4208251d3) [f1a42b6](https://github.com/NSPC911/rovr/commit/f1a42b69e5ec8e98fb3f4ad3aeef4a54aa5cd3b6)
+
+### Performance
+
+- `app`: fix insane movement lag [1c29683](https://github.com/NSPC911/rovr/commit/1c296837f58f23992f43e75b72db54f193d76696)
+
 ## [0.9.1]
 
 ### Added
@@ -16,7 +39,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - `config`: actually cache schema validator [155e458](https://github.com/NSPC911/rovr/commit/155e458e3d1e0232efe693d817ae9e5144d2fa60)
 - `shell`: use separate bg implementation instead of orphans [#295](https://github.com/NSPC911/rovr/pull/295) [1ec3556](https://github.com/NSPC911/rovr/commit/1ec3556a6d0bdac57d429ee6689f1b77cfdc3154) [9f57978](https://github.com/NSPC911/rovr/commit/9f57978d82d74da4d378b880c2ca810302ee9acd)
-
 
 ## [0.9.0]
 
@@ -512,7 +534,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `sort_order`: fix icon setting and tooltips
 - `style`: fix image and option padding/styling
 
-[Unreleased]: https://github.com/NSPC911/rovr/compare/v0.9.0...HEAD
+[Unreleased]: https://github.com/NSPC911/rovr/compare/v0.9.1.post2...HEAD
+[0.9.1.post2]: https://github.com/NSPC911/rovr/compare/v0.9.1.post1...v0.9.1.post2
+[0.9.1.post1]: https://github.com/NSPC911/rovr/compare/v0.9.1...v0.9.1.post1
+[0.9.1]: https://github.com/NSPC911/rovr/compare/v0.9.0...v0.9.1
 [0.9.0]: https://github.com/NSPC911/rovr/compare/v0.8.2.post1...v0.9.0
 [0.8.2]: https://github.com/NSPC911/rovr/compare/v0.8.1...v0.8.2.post1
 [0.8.1]: https://github.com/NSPC911/rovr/compare/v0.8.0...v0.8.1

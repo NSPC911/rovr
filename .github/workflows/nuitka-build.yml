@@ -1,9 +1,8 @@
 name: Build with Nuitka
 
 on:
-  # run every 3 days
   schedule:
-    - cron: "0 0 */3 * *"
+    - cron: "0 0 * * *"
   workflow_dispatch:
   push:
     branches:
@@ -31,7 +30,6 @@ jobs:
           noprefix: true
 
   build-nuitka:
-    needs: starting-build
     strategy:
       fail-fast: false
       matrix:
@@ -115,6 +113,50 @@ jobs:
           nodetail: true
           notimestamp: true
           noprefix: true
+
+  create-nightly-release:
+    needs: build-nuitka
+    if: github.event_name == 'schedule'
+    runs-on: ubuntu-slim
+    name: Create Nightly Release
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - name: Download artifacts
+        run: |
+          @(
+            "windows-x64"
+            "windows-arm"
+            "linux-x64"
+            "linux-arm64"
+            "macos-arm64"
+            "macos-x64"
+          ) | ForEach-Object {
+            Invoke-WebRequest -Uri "https://nightly.link/NSPC911/rovr/actions/runs/${{ github.run_id }}/rovr-$_-nuitka.zip" -OutFile "rovr-$_-nuitka.zip"
+          }
+
+      - name: Get Previous Day Commits
+        id: commits
+        shell: pwsh
+        run: |
+          $commits = git log --since="24 hours ago" --pretty=format:"- %h %s" --no-merges
+          if (!$commits) { $commits = "No commits in the last 24 hours." }
+          $commits | Out-File -FilePath commits.txt -Encoding utf8
+
+      - name: Create Nightly Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: nightly
+          name: Nightly Build
+          body_path: commits.txt
+          files: "*.zip"
+          prerelease: true
+          make_latest: false
+          token: ${{ secrets.BOT_TOKEN }}
 
   notify-nuitka-completion:
     needs: build-nuitka

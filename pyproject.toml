@@ -127,7 +127,7 @@ typed.ref = "schema-to-dict"
 schema-to-dict.help = "Convert the JSON schema into a Python TypedDict for internal use"
 schema-to-dict.sequence = [
   "_docscripts_setup",
-  { cmd = "jsonschema-gentypes --json-schema ./src/rovr/config/schema.json --python ./src/rovr/classes/config.py" },
+  { cmd = "jsonschema-gentypes --json-schema ./src/rovr/config/schema.json --python ./src/rovr/classes/config.pyi" },
   "format"
 ]
 

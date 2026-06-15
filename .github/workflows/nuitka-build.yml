@@ -127,6 +127,7 @@ jobs:
           fetch-depth: 0
 
       - name: Download artifacts
+        shell: pwsh
         run: |
           @(
             "windows-x64"

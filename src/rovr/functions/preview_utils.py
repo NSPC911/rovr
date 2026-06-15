@@ -131,7 +131,7 @@ def resample_batch(images: list[PILImage]) -> list[PILImage]:
             image.mode,
             image.size,
             MAX_IMAGE_SIZE,
-            int(RESAMPLING_METHOD),
+            RESAMPLING_METHOD(),
         ))
     executor = ProcessPoolExecutor(max_workers=_get_resample_pool_size(len(payloads)))
     try:
@@ -162,7 +162,7 @@ def resample(image: Image.Image) -> Image.Image:
             image.mode,
             image.size,
             MAX_IMAGE_SIZE,
-            int(RESAMPLING_METHOD),
+            RESAMPLING_METHOD(),
         ),
     )
     proc.start()
@@ -187,7 +187,7 @@ def resample_file(file_path: str) -> Image.Image | None:
     parent_conn, child_conn = multiprocessing.Pipe()
     proc = multiprocessing.Process(
         target=resample_file_worker,
-        args=(child_conn, file_path, MAX_IMAGE_SIZE, int(RESAMPLING_METHOD)),
+        args=(child_conn, file_path, MAX_IMAGE_SIZE, RESAMPLING_METHOD()),
     )
     proc.start()
     child_conn.close()
@@ -239,17 +239,18 @@ def load_svg_sync(file_path: str) -> bytes | None:
 def resample_file_sync(file_path: str) -> Image.Image | None:
     image = Image.open(file_path)
     image = _depalette(image)
-    return image.resize(MAX_IMAGE_SIZE, RESAMPLING_METHOD)
+    return image.resize(MAX_IMAGE_SIZE, RESAMPLING_METHOD())
 
 
 def resample_sync(image: Image.Image) -> Image.Image:
     image = _depalette(image)
-    return image.resize(MAX_IMAGE_SIZE, RESAMPLING_METHOD)
+    return image.resize(MAX_IMAGE_SIZE, RESAMPLING_METHOD())
 
 
 def resample_batch_sync(images: list[PILImage]) -> list[PILImage]:
     return [
-        _depalette(image).resize(MAX_IMAGE_SIZE, RESAMPLING_METHOD) for image in images
+        _depalette(image).resize(MAX_IMAGE_SIZE, RESAMPLING_METHOD())
+        for image in images
     ]
 
 

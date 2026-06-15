@@ -6,18 +6,6 @@ from os import path
 
 from rovr.classes.config import RovrConfig
 
-try:
-    import psutil
-    import psutil._ntuples
-except ModuleNotFoundError:
-    from typing import Callable
-
-    class _Psutil:
-        def __getatt__(self) -> Callable[[], list]:
-            return lambda: []
-
-    psutil = _Psutil()  # ty: ignore[invalid-assignment]
-
 
 def normalise(*location: str | bytes) -> str:
     """'Normalise' the path
@@ -52,6 +40,8 @@ def get_mounted_drives(os_type: str, config: "RovrConfig") -> list[str]:
     """
     drives = []
     try:
+        import psutil
+
         # get all partitions
         partitions = psutil.disk_partitions(all=False)
 

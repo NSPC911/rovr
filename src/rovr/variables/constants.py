@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import sys
 from dataclasses import dataclass
 from datetime import datetime
@@ -6,7 +8,6 @@ from os import environ
 from shutil import which
 from typing import Any, Callable, Literal, cast
 
-from PIL import Image
 from textual.binding import Binding
 
 from rovr.classes.config import RovrConfig
@@ -161,11 +162,16 @@ os_type = (
     else sys.platform.capitalize()
 )
 
-RESAMPLING_METHOD = {
-    "nearest": Image.Resampling.NEAREST,
-    "lanczos": Image.Resampling.LANCZOS,
-    "bilinear": Image.Resampling.BILINEAR,
-    "bicubic": Image.Resampling.BICUBIC,
-    "box": Image.Resampling.BOX,
-    "hamming": Image.Resampling.HAMMING,
-}.get(config["interface"]["image_viewer"]["resampling"], Image.Resampling.NEAREST)
+
+@cache
+def RESAMPLING_METHOD() -> int:  # noqa: N802
+    from PIL import Image
+
+    return {
+        "nearest": Image.Resampling.NEAREST,
+        "lanczos": Image.Resampling.LANCZOS,
+        "bilinear": Image.Resampling.BILINEAR,
+        "bicubic": Image.Resampling.BICUBIC,
+        "box": Image.Resampling.BOX,
+        "hamming": Image.Resampling.HAMMING,
+    }.get(config["interface"]["image_viewer"]["resampling"], Image.Resampling.NEAREST)

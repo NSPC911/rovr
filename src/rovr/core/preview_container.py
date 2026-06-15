@@ -12,7 +12,6 @@ from typing import cast
 
 import textual_image.renderable
 import textual_image.widget
-from multiarchive._archive import Archive, BadArchiveError
 from PIL import Image, UnidentifiedImageError
 from PIL.Image import Image as PILImage
 from textual import events, on, work
@@ -1083,6 +1082,8 @@ class PreviewContainer(Actionable, Container):
                 self.log(f"Previewing as {file_type} (MIME: {mime_result.mime_type})")
 
                 if file_type == "archive":
+                    from multiarchive._archive import Archive, BadArchiveError
+
                     try:
                         with Archive(file_path, mode="r") as archive:
                             all_files = []

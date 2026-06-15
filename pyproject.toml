@@ -144,10 +144,6 @@ svg-fmt.ref = "screenshot-format"
 screenshot-format.help = "Format all SVG screenshots in the docs"
 screenshot-format.cmd = 'pnpx prettier --write "docs/public/screenshots/*.svg" --parser html --bracket-same-line --print-width 160'
 
-flame.help = "Start rovr with pyinstrument for flamegraph profiling"
-flame.cmd = "pyinstrument --renderer=html --timeline --use-timing-thread --show-all -m rovr"
-flame.use_exec = true
-
 snap.help = ""
 snap.cmd = "poe snip"
 snap.use_exec = true
@@ -195,6 +191,14 @@ sequence = [
   "_warn_dump",
   { cmd = "uv build" },
   "_dump_clean",
+]
+
+[tool.poe.tasks.flame]
+help = "Start rovr with pyinstrument for flamegraph profiling"
+cmd = "pyinstrument --renderer=${renderer} --timeline --use-timing-thread --show-all -m rovr $POE_EXTRA_ARGS"
+use_exec = true
+args = [
+  { name = "renderer", help = "Output format for the flamegraph (default: html)", default = "html", positional = true },
 ]
 
 [tool.pytest]

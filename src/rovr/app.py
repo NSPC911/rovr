@@ -32,7 +32,6 @@ from textual.messages import ExitApp
 from textual.screen import Screen
 from textual.theme import Theme
 from textual.types import NoActiveAppError
-from textual.widget import Widget
 from textual.widgets import Input, Label
 from textual.widgets.selection_list import Selection
 from textual.worker import Worker, WorkerFailed
@@ -214,6 +213,24 @@ class Application(Actionable, App, inherit_bindings=False):
         self.last_available_cd = getcwd()
         self.old_theme: str = self.theme
 
+        try:
+            for theme in get_custom_themes():
+                self.register_theme(theme)
+            parse_failed = False
+        except ColorParseError as exc:
+            parse_failed = True
+            exception = exc
+        if parse_failed:
+            self.exit(
+                return_code=1,
+                message=Content.from_markup(
+                    f"[underline ansi_red]Config Error[/]\n[bold ansi_cyan]custom_themes.bar_gradient[/]: {exception}"
+                ),
+            )
+            return
+        self.theme = config["theme"]["default"]
+        self.ansi_color = config["theme"]["transparent"]
+
     @property
     def file_list(self) -> FileList:
         if not self._file_list_container.filelist.is_mounted:
@@ -231,7 +248,7 @@ class Application(Actionable, App, inherit_bindings=False):
             if config["interface"]["compact_mode"]["panels"]
             else " comfy-panels"
         )
-        root_classes = root_classes.strip()
+        root_classes = root_classes.strip() + f"theme-{self.get_theme(self.theme).name}"
         with Vertical(id="root", classes=root_classes):
             header = HeaderArea()
             self.tabWidget = header.tabline
@@ -276,26 +293,7 @@ class Application(Actionable, App, inherit_bindings=False):
                 self.exit()
             return
 
-        # themes
         self.theme_changed_signal.subscribe(self, self.theme_changed)
-        try:
-            for theme in get_custom_themes():
-                self.register_theme(theme)
-            parse_failed = False
-        except ColorParseError as exc:
-            parse_failed = True
-            exception = exc
-        if parse_failed:
-            self.exit(
-                return_code=1,
-                message=Content.from_markup(
-                    f"[underline ansi_red]Config Error[/]\n[bold ansi_cyan]custom_themes.bar_gradient[/]: {exception}"
-                ),
-            )
-            return
-        self.theme = config["theme"]["default"]
-        self.ansi_color = config["theme"]["transparent"]
-
         # title for screenshots
         self.title = ""
 
@@ -346,11 +344,15 @@ class Application(Actionable, App, inherit_bindings=False):
                 label, after="PathInput"
             )
         self.file_list.update_border_subtitle()
+        # self.call_after_refresh(sleep, 1)
 
+    @work(thread=True)
     def theme_changed(self, theme: Theme) -> None:
-        self.query_one("#root").remove_class(f"theme-{self.old_theme}")
+        self.query_one("#root").update_classes({
+            f"theme-{self.old_theme}": True,
+            f"theme-{theme.name}": False,
+        })
         self.old_theme = theme.name
-        self.query_one("#root").add_class(f"theme-{theme.name}")
 
     @work
     async def _force_crash(self) -> None:
@@ -420,16 +422,6 @@ class Application(Actionable, App, inherit_bindings=False):
 
     def on_app_focus(self, event: events.AppFocus) -> None:
         self.app_blurred = False
-
-    def _set_mouse_over(
-        self, widget: Widget | None, hover_widget: Widget | None
-    ) -> None:
-        # Textual re-applies hover styles twice per MouseMove even when the
-        # hovered widget hasn't changed, which floods the message queue when a
-        # custom stylesheet marks large containers as hover-styled
-        if widget is self.mouse_over and hover_widget is self.hover_over:
-            return
-        super()._set_mouse_over(widget, hover_widget)
 
     @work
     async def action_quit(self) -> None:
@@ -927,7 +919,7 @@ class Application(Actionable, App, inherit_bindings=False):
     async def _toggle_transparency(self) -> None:
         self.ansi_color = not self.ansi_color
         self.refresh()
-        self.refresh_css()
+        self.call_after_refresh(self.refresh_css)
         self.file_list.update_border_subtitle()
 
     @on(events.Click)

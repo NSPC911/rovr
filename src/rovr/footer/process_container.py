@@ -6,7 +6,6 @@ import zipfile
 from os import path
 from typing import Callable, Literal, cast
 
-from multiarchive import Archive
 from send2trash import send2trash
 from textual import work
 from textual.color import Gradient
@@ -553,6 +552,8 @@ class ProcessContainer(Actionable, VerticalScroll):
             base_path = path.commonpath(files)
 
         try:
+            from multiarchive import Archive
+
             with Archive(archive_name, algo, "w", level) as archive:
                 assert archive._archive is not None
                 last_update_time = time.monotonic()
@@ -633,6 +634,8 @@ class ProcessContainer(Actionable, VerticalScroll):
 
         do_what_on_existence = "ask"
         try:
+            from multiarchive import Archive
+
             if not path.exists(destination_path):
                 os.makedirs(destination_path)
 

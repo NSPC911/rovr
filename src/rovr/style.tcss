@@ -43,14 +43,11 @@ Screen.-all-horizontal #root.compact-buttons {
 
 /* border styling for main widgets */
 #menu_wrapper,
-#pinned_sidebar_container,
-#file_list_container,
-#preview_sidebar,
-FileSearchToggles,
-ContentSearchToggles,
+#pinned_sidebar_container, #file_list_container, #preview_sidebar,
+FileSearchToggles, ContentSearchToggles,
 DoubleClickableOptionList,
-#footer > *,
 PopupOptionList,
+Clipboard, ProcessContainer, MetadataContainer,
 .comfy-buttons #path_switcher,
 .comfy-buttons #below_menu Button,
 ModalScreen OptionList {
@@ -78,18 +75,12 @@ ModalScreen OptionList {
 }
 
 #menu_wrapper:focus-within,
-#pinned_sidebar_container:focus-within,
-#file_list_container:focus-within,
-#preview_sidebar:focus-within,
-#preview_sidebar:focus,
+#pinned_sidebar_container:focus-within, #file_list_container:focus-within, #preview_sidebar:focus-within, #preview_sidebar:focus,
 ModalScreen > VerticalGroup:focus-within > OptionList,
-FileSearchToggles:focus,
-ContentSearchToggles:focus,
-#file_list.-maximized,
-#pinned_sidebar.-maximized,
-#preview_sidebar .inner_preview.-maximized,
-#footer > *:focus,
+FileSearchToggles:focus, ContentSearchToggles:focus,
 PopupOptionList:focus,
+#file_list.-maximized, #pinned_sidebar.-maximized, #preview_sidebar .inner.-maximized,
+Clipboard:focus, ProcessContainer:focus, MetadataContainer:focus,
 .comfy-buttons #path_switcher:focus-within,
 .comfy-buttons #below_menu Button:focus,
 .comfy-buttons #below_menu Button:hover,
@@ -386,7 +377,7 @@ Tooltip {
       text-wrap: wrap;
     }
   }
-  & > * {
+  & > Widget {
     /* scrollbars are useless, reminder */
     background: transparent;
     border: none;
@@ -427,17 +418,17 @@ Tooltip {
 #footer {
   height: $footer_unfocus_height;
 
-  & > * {
+  Clipboard,
+  ProcessContainer,
+  MetadataContainer {
     height: 1fr;
     background: transparent;
+    scrollbar-size: 1 1;
   }
 
   &:focus-within {
     height: $footer_focus_height;
     max-height: 40vh;
-  }
-  * {
-    scrollbar-size: 1 1;
   }
 }
 

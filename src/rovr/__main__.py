@@ -34,6 +34,7 @@ import os
 import sys
 import warnings
 from io import TextIOWrapper
+from time import sleep
 from typing import cast
 
 from rovr import main, pprint
@@ -386,14 +387,16 @@ example_function(10)"""
         cwd_file = backup_stderr
 
     if args.ignore_missing_tty or sys.stdout.isatty():
-        Application(
+        app = Application(
             startup_path=args.path,
             cwd_file=cwd_file if cwd_file else None,
             chooser_file=chooser_file if chooser_file else None,
             show_keys=args.show_keys,
             tree_dom=args.tree_dom,
             force_crash_in=args.force_crash_in,
-        ).run()
+        )
+        # sleep(1)
+        app.run()
     elif args.force_tty:
         open_stdout = "CONOUT$" if os.name == "nt" else "/dev/tty"
         open_stdin = "CONIN$" if os.name == "nt" else "/dev/tty"
@@ -414,14 +417,16 @@ example_function(10)"""
                     from textual import constants
 
                     constants.COLOR_SYSTEM = "truecolor"
-                Application(
+                app = Application(
                     startup_path=args.path,
                     cwd_file=cwd_file if cwd_file else None,
                     chooser_file=chooser_file if chooser_file else None,
                     show_keys=args.show_keys,
                     tree_dom=args.tree_dom,
                     force_crash_in=args.force_crash_in,
-                ).run()
+                )
+                sleep(1)
+                app.run()
         finally:
             sys.__stdout__ = sys.stdout = backup_stdout
             sys.__stderr__ = sys.stderr = backup_stderr

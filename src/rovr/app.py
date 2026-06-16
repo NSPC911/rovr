@@ -8,6 +8,7 @@ from contextlib import suppress
 from importlib import resources
 from io import TextIOWrapper
 from os import chdir, getcwd, path
+from subprocess import Popen
 from time import perf_counter
 from typing import Callable, Iterable
 
@@ -415,7 +416,28 @@ class Application(Actionable, App, inherit_bindings=False):
         if response is None or response.command == "":
             return
 
-        run_command(self, response.command, run_type=response.run_type)
+        proc = run_command(self, response.command, run_type=response.run_type)
+        if response.run_type == "background":
+            self.shell_thread(proc)
+
+    @work(thread=True)
+    def shell_thread(self, proc: Popen) -> None:
+        proc.wait()
+        stdout = proc.stdout.read().decode().strip()
+        stderr = proc.stderr.read().decode().strip()
+        if stdout and stderr:
+            msg = f"stdout = {stdout}\nstderr = {stderr}\n"
+        elif stdout and not stderr:
+            msg = str(stdout)
+        elif not stdout and stderr:
+            msg = str(stderr)
+        else:
+            msg = f"Process completed with code {proc.returncode}"
+        self.notify(
+            msg.strip(),
+            title="Shell Exec",
+            severity="information" if proc.returncode == 0 else "error",
+        )
 
     def on_app_blur(self, event: events.AppBlur) -> None:
         self.app_blurred = True

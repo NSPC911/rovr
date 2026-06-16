@@ -418,10 +418,10 @@ class Application(Actionable, App, inherit_bindings=False):
 
         proc = run_command(self, response.command, run_type=response.run_type)
         if response.run_type == "background":
-            self.shell_thread(proc)
+            self.shell_thread(proc, "Shell Exec")
 
     @work(thread=True)
-    def shell_thread(self, proc: Popen) -> None:
+    def shell_thread(self, proc: Popen, title: str = "") -> None:
         proc.wait()
         stdout = proc.stdout.read().decode().strip()
         stderr = proc.stderr.read().decode().strip()
@@ -435,7 +435,7 @@ class Application(Actionable, App, inherit_bindings=False):
             msg = f"Process completed with code {proc.returncode}"
         self.notify(
             msg.strip(),
-            title="Shell Exec",
+            title=title,
             severity="information" if proc.returncode == 0 else "error",
         )
 

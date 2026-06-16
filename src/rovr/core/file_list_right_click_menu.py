@@ -262,7 +262,7 @@ class FileListRightClickMenu(PopupOptionList, inherit_bindings=False):
             except NoMatches:
                 pass
 
-    @work(thread=True)
+    @work
     async def on_option_list_option_selected(
         self, event: OptionList.OptionSelected
     ) -> None:
@@ -270,8 +270,10 @@ class FileListRightClickMenu(PopupOptionList, inherit_bindings=False):
         if event.option.id.startswith("group"):
             # need to handle the submenu options here soon
             child_menu = self.app.query_one(FileListRightClickChildMenu)
+            # thread safe somehow (because it internally calls `call_later`)
             child_menu.focus()
             if child_menu.highlighted is None:
+                # also thread safe since reactive properties are posted to queue
                 child_menu.highlighted = 0
             return
         self.app.hide_popups()
@@ -279,10 +281,18 @@ class FileListRightClickMenu(PopupOptionList, inherit_bindings=False):
             self.app.query_one("CopyButton"), f"{event.option.id}"
         ):
             self.call_next(
-                getattr, self.app.query_one("CopyButton"), f"{event.option.id}"
+                getattr(
+                    self.app.query_one("CopyButton"),
+                    f"{event.option.id}",
+                )
             )
         elif hasattr(self.app.file_list, f"action_{event.option.id}"):
-            self.call_next(getattr, self.app.file_list, f"action_{event.option.id}")
+            self.call_next(
+                getattr(
+                    self.app.file_list,
+                    f"action_{event.option.id}",
+                )
+            )
         elif event.option.id.startswith("shell_"):
             command: str = await expand_command(self.app, event.option.action["run"])
             proc = run_command(
@@ -292,17 +302,7 @@ class FileListRightClickMenu(PopupOptionList, inherit_bindings=False):
                 shell=event.option.action["shell"],
             )
             if isinstance(proc, Popen):
-                proc.wait()
-                msg = ""
-                if stdout := proc.stdout.read().decode().strip():
-                    msg += f"stdout = {stdout}\n"
-                if stderr := proc.stderr.read().decode().strip():
-                    msg += f"stderr = {stderr}\n"
-                self.notify(
-                    msg.strip(),
-                    title="Context Menu",
-                    severity="information" if proc.returncode == 0 else "error",
-                )
+                self.app.shell_thread(proc, "Context Menu")
 
     def on_blur(self, event: events.Blur) -> None:  # ty: ignore[invalid-method-override]
         event.prevent_default().stop()

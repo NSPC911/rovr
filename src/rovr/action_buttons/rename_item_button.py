@@ -120,9 +120,13 @@ class RenameItemButton(Button):
                     self.notify(message, title=title, severity="error", markup=False)
 
                 try:
+                    if bulk_editor["shell"]:
+                        command = bulk_editor["run"] + " " + shlex.quote(temp_path)
+                    else:
+                        command = shlex.split(bulk_editor["run"]) + [temp_path]
                     run_command(
                         self.app,
-                        shlex.split(bulk_editor["run"]) + [temp_path],
+                        command,
                         run_type="suspend",
                         on_error=on_error,
                         shell=bulk_editor["shell"],

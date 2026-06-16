@@ -397,13 +397,18 @@ class FileList(
                 self.notify(message, title=title, severity="error", markup=False)
 
             try:
+                if editor_config["shell"]:
+                    command = editor_config["run"] + " " + shlex.quote(target_path)
+                else:
+                    command = shlex.split(editor_config["run"]) + [target_path]
                 utils.run_command(
                     self.app,
-                    shlex.split(editor_config["run"]) + [target_path],
+                    command,
                     run_type="orphan"
                     if editor_config.get("orphan", True)
                     else "suspend",
                     on_error=on_error,
+                    shell=editor_config["shell"],
                 )
             except Exception as exc:
                 path_utils.dump_exc(self, exc)
@@ -936,9 +941,13 @@ class FileList(
                 editor_config = config["settings"]["editor"]["file"]
 
             try:
+                if editor_config["shell"]:
+                    shell_exec = editor_config["run"] + " " + shlex.quote(target_path)
+                else:
+                    shell_exec = shlex.split(editor_config["run"]) + [target_path]
                 utils.run_command(
                     self.app,
-                    shlex.split(editor_config["run"]) + [target_path],
+                    shell_exec,
                     run_type="orphan"
                     if editor_config.get("orphan", True)
                     else "suspend",

@@ -5,6 +5,18 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.9.2]
+
+### Fixed
+
+- `opener`: actually include the path [61540aa](https://github.com/NSPC911/rovr/commit/61540aa2366e14407da4af5aaa46c8c3ed82dcd1)
+
+### Performance
+
+- startup timing improvements [a88889a](https://github.com/NSPC911/rovr/commit/a88889a2703505ee20df4fb86d4124c6a8f7926a)
+- lazyload everything [f18531e](https://github.com/NSPC911/rovr/commit/f18531ea70a61dd38e6d9b1b58a852091f65df78)
+- move classes.config into a pyi file [a316aee](https://github.com/NSPC911/rovr/commit/a316aeed6ad6182cd1807ae16455c3500d17a79c)
+
 ## [0.9.1.post2]
 
 ### Fixed

@@ -984,6 +984,7 @@ dependencies = [
     { name = "send2trash" },
     { name = "textual" },
     { name = "textual-autocomplete" },
+    { name = "textual-drivers" },
     { name = "textual-image", extra = ["textual"] },
     { name = "tomli" },
 ]
@@ -1038,6 +1039,7 @@ requires-dist = [
     { name = "send2trash", specifier = ">=2.1.0" },
     { name = "textual", specifier = "~=8.0" },
     { name = "textual-autocomplete", specifier = ">=4.0.6" },
+    { name = "textual-drivers", specifier = ">=0.3.0" },
     { name = "textual-image", extras = ["textual"], specifier = "<0.10.0" },
     { name = "textual-speedups", marker = "extra == 'speedup'", specifier = ">=0.2.1" },
     { name = "tomli", specifier = ">=2.4.0" },
@@ -1195,6 +1197,19 @@ dependencies = [
 sdist = { url = "https://files.pythonhosted.org/packages/38/fd/fd5ad9527b536c306a5a860a33a45e13983a59804b48b91ea52b42ba030a/textual_dev-1.8.0.tar.gz", hash = "sha256:7e56867b0341405a95e938cac0647e6d2763d38d0df08710469ad6b6a8db76df", size = 25026, upload-time = "2025-10-11T09:47:01.824Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/45/c6/1dc08ceee6d0bdf219c500cb2fbd605b681b63507c4ff27a6477f12f8245/textual_dev-1.8.0-py3-none-any.whl", hash = "sha256:227b6d24a485fbbc77e302aa21f4fdf3083beb57eb45cd95bae082c81cbeddeb", size = 27541, upload-time = "2025-10-11T09:47:00.531Z" },
+]
+
+[[package]]
+name = "textual-drivers"
+version = "0.3.0.post2"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "textual" },
+    { name = "wrapt" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/0b/51/3275d3bf9b060e514644aa59dacde5306b043aeecafa3e4877cb391f10e0/textual_drivers-0.3.0.post2.tar.gz", hash = "sha256:3ceb2809bc8334ef491f5cd772cf864170f3a5558d5aaab89b269c2f8c7541ad", size = 18048, upload-time = "2026-06-15T10:41:53.544Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/d9/d2/f01cd83d1fcdabeb491e3b723830e68a26dc0dc104ee70d8621ab0ac8c73/textual_drivers-0.3.0.post2-py3-none-any.whl", hash = "sha256:b31ff778038d46f94c10a104a11840450bea043f3daa655ca5a0df0c667dc6f2", size = 25669, upload-time = "2026-06-15T10:41:52.592Z" },
 ]
 
 [[package]]

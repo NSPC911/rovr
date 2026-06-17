@@ -15,7 +15,7 @@ from typing import Callable, Iterable
 from rich.console import RenderableType
 from rich.protocol import is_renderable
 from textual import constants, events, on, work
-from textual.app import WINDOWS, App, ComposeResult, ScreenStackError, SystemCommand
+from textual.app import WINDOWS, ComposeResult, ScreenStackError, SystemCommand
 from textual.binding import Binding
 from textual.color import ColorParseError
 from textual.containers import (
@@ -29,6 +29,7 @@ from textual.css.errors import StylesheetError
 from textual.css.query import NoMatches
 from textual.css.stylesheet import StylesheetParseError
 from textual.dom import DOMNode
+from textual.geometry import Offset
 from textual.messages import ExitApp
 from textual.screen import Screen
 from textual.theme import Theme
@@ -37,6 +38,7 @@ from textual.widget import Widget
 from textual.widgets import Input, Label
 from textual.widgets.selection_list import Selection
 from textual.worker import Worker, WorkerFailed
+from textual_drivers.dnd import DNDApp, DNDDragOutOperation, Drop, DropData
 
 from rovr import console
 from rovr.action_buttons import (
@@ -90,7 +92,7 @@ if constants.SCREENSHOT_LOCATION:
     constants.SCREENSHOT_LOCATION = normalise(getcwd(), constants.SCREENSHOT_LOCATION)
 
 
-class Application(Actionable, App, inherit_bindings=False):
+class Application(Actionable, DNDApp, inherit_bindings=False):
     # our own form of BINDINGS that utilises check_key
     # key: str the action to use
     # value: bool or callable that returns bool,
@@ -865,6 +867,75 @@ class Application(Actionable, App, inherit_bindings=False):
                     process_container.paste_items(
                         copied=[], has_cut=response.paths, dest=dest
                     )
+
+    async def dnd_drag_out_operation(self, pos: Offset) -> DNDDragOutOperation | None:
+        if pos not in self.file_list.content_region:
+            return
+
+        from pathlib import Path
+
+        selected = await self.file_list.get_selected_objects()
+        if not selected:
+            return None
+        else:
+            return DNDDragOutOperation(
+                [Path(p).as_uri() for p in selected],
+                "move",
+                f"{len(selected)} item{'s' if len(selected) != 1 else ''}",
+            )
+
+    async def on_drop(self, event: Drop) -> None:
+        if "text/uri-list" in event.mimes:
+            idx = event.mimes.index("text/uri-list")
+        elif "text/plain" in event.mimes:
+            idx = event.mimes.index("text/plain")
+        else:
+            self.notify(
+                f"No supported mime type offered (available: {event.mimes})",
+                title="Drop (NotImplemented)",
+                severity="warning",
+                markup=False,
+            )
+            return
+        self.request_data(event, idx, close=False)
+
+    @work
+    async def on_drop_data(self, event: DropData) -> None:
+        from pathlib import Path
+        from urllib.parse import urlparse
+
+        if event.mime == "text/plain":
+            event.data = (
+                event.data.decode("utf-8", errors="ignore").strip().splitlines()
+            )
+        elif event.mime != "text/uri-list":
+            self.notify(
+                f"Unsupported received mime type (possible interception): {event.mime}",
+                title="Drop (NotImplemented)",
+                severity="warning",
+                markup=False,
+            )
+        if isinstance(event.data, list):
+            files = [
+                Path.from_uri(uri).as_posix()
+                for uri in event.data
+                if urlparse(uri).scheme == "file"
+            ]
+            etc = [
+                Path.from_uri(uri).as_posix()
+                for uri in event.data
+                if urlparse(uri).scheme != "file"
+            ]
+            if etc:
+                self.notify(
+                    f"Received {len(etc)} non-file URI(s) which aren't currently supported.",
+                    title="DropData (NotImplemented)",
+                    severity="warning",
+                    markup=False,
+                )
+            if files:
+                # pass it to on_paste
+                self.on_paste(events.Paste("\n".join(files)))
 
     def get_system_commands(self, screen: Screen) -> Iterable[SystemCommand]:
         if not self.ansi_color:

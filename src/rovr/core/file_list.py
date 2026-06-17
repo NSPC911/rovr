@@ -432,8 +432,7 @@ class FileList(
                             continue
                         runner = shlex.split(
                             opener if isinstance(opener, str) else opener["run"]
-                        )
-                        runner += target_path
+                        ) + [target_path]
                         if which(runner[0]):
                             utils.run_command(
                                 self.app,

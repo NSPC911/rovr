@@ -1,7 +1,6 @@
 import shlex
 from contextlib import suppress
 from os import getcwd, path
-from shlex import split as shplit
 from shutil import which
 from typing import Callable, ClassVar, Iterable, Self, Sequence
 
@@ -397,13 +396,13 @@ class FileList(
                 self.notify(message, title=title, severity="error", markup=False)
 
             try:
-                if editor_config["shell"]:
-                    command = editor_config["run"] + " " + shlex.quote(target_path)
-                else:
-                    command = shlex.split(editor_config["run"]) + [target_path]
                 utils.run_command(
                     self.app,
-                    command,
+                    utils.command(
+                        editor_config["run"],
+                        target_path,
+                        editor_config["shell"],
+                    ),
                     run_type="orphan"
                     if editor_config.get("orphan", True)
                     else "suspend",
@@ -431,9 +430,11 @@ class FileList(
                             self.app, opener.get("if", {})
                         ):
                             continue
-                        runner = opener if isinstance(opener, str) else opener["run"]
-                        runner += " " + shlex.quote(target_path)
-                        if which(shplit(runner)[0]):
+                        runner = shlex.split(
+                            opener if isinstance(opener, str) else opener["run"]
+                        )
+                        runner += target_path
+                        if which(runner[0]):
                             utils.run_command(
                                 self.app,
                                 runner,
@@ -942,13 +943,13 @@ class FileList(
                 editor_config = config["settings"]["editor"]["file"]
 
             try:
-                if editor_config["shell"]:
-                    shell_exec = editor_config["run"] + " " + shlex.quote(target_path)
-                else:
-                    shell_exec = shlex.split(editor_config["run"]) + [target_path]
                 utils.run_command(
                     self.app,
-                    shell_exec,
+                    utils.command(
+                        editor_config["run"],
+                        target_path,
+                        editor_config["shell"],
+                    ),
                     run_type="orphan"
                     if editor_config.get("orphan", True)
                     else "suspend",

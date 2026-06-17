@@ -284,3 +284,12 @@ async def expand_command(app: App, command: str) -> str:
 @lru_cache(maxsize=512)
 def recache(pattern: str) -> re.Pattern:
     return re.compile(pattern)
+
+
+def command(initial_command: str, path_str: str, is_shell: bool) -> str | list[str]:
+    import shlex
+
+    if is_shell:
+        return initial_command + " " + shlex.quote(path_str)
+    else:
+        return shlex.split(initial_command) + [path_str]

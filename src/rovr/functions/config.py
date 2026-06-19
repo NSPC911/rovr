@@ -372,12 +372,14 @@ def schema_dump(
                 error_msg = f"Value for [bright_cyan]{exception.name}[/] does not match any of the allowed schemas"
                 # check specific paths because im too lazy to make it automatic
                 # also it would be quite hard to ensure that either ways, so this is much easier
+                print(repr(exception))
                 if exception.name.startswith("settings.right_click"):
                     error_msg += "\nHint: This only supports one of the following:"
                     if exception.name.endswith("action"):
                         error_msg += f"""
-    - one of {schema["properties"]["settings"]["properties"]["right_click"]["items"]["properties"]["action"]["oneOf"][0]["enum"]}
-    - matches regex [dodger_blue1]{schema["properties"]["settings"]["properties"]["right_click"]["items"]["properties"]["action"]["oneOf"][1]["pattern"]}[/]"""
+    - one of {[item for item in schema["definitions"]["right_click_action"]["oneOf"][0]["enum"] if item.startswith("rovr:")]}
+    - one of {[item for item in schema["definitions"]["right_click_action"]["oneOf"][0]["enum"] if item.startswith("system:")]}
+    - a dictionary of {{"run" = str, "run_type" = "<one of {schema["definitions"]["right_click_action"]["oneOf"][1]["properties"]["run_type"]["enum"]}>", shell = bool}}"""
                     else:
                         error_msg += """
     - has [bright_cyan]"label"[/] and [bright_cyan]"action"[/] fields

@@ -1,7 +1,6 @@
 import shlex
 from contextlib import suppress
 from os import getcwd, path
-from shlex import split as shplit
 from shutil import which
 from typing import Callable, ClassVar, Iterable, Self, Sequence
 
@@ -399,11 +398,16 @@ class FileList(
             try:
                 utils.run_command(
                     self.app,
-                    shlex.split(editor_config["run"]) + [target_path],
+                    utils.command(
+                        editor_config["run"],
+                        target_path,
+                        editor_config["shell"],
+                    ),
                     run_type="orphan"
                     if editor_config.get("orphan", True)
                     else "suspend",
                     on_error=on_error,
+                    shell=editor_config["shell"],
                 )
             except Exception as exc:
                 path_utils.dump_exc(self, exc)
@@ -426,9 +430,10 @@ class FileList(
                             self.app, opener.get("if", {})
                         ):
                             continue
-                        runner = opener if isinstance(opener, str) else opener["run"]
-                        runner += " " + shlex.quote(target_path)
-                        if which(shplit(runner)[0]):
+                        runner = shlex.split(
+                            opener if isinstance(opener, str) else opener["run"]
+                        ) + [target_path]
+                        if which(runner[0]):
                             utils.run_command(
                                 self.app,
                                 runner,
@@ -939,14 +944,18 @@ class FileList(
             try:
                 utils.run_command(
                     self.app,
-                    shlex.split(editor_config["run"]) + [target_path],
+                    utils.command(
+                        editor_config["run"],
+                        target_path,
+                        editor_config["shell"],
+                    ),
                     run_type="orphan"
                     if editor_config.get("orphan", True)
                     else "suspend",
                     on_error=lambda message, title: self.notify(
                         message=message, title=title, severity="error", markup=False
                     ),
-                    shell=False,
+                    shell=editor_config["shell"],
                 )
             except Exception as exc:
                 path_utils.dump_exc(self, exc)

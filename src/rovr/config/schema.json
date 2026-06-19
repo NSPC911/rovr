@@ -29,8 +29,25 @@
           ]
         },
         {
-          "type": "string",
-          "pattern": "^sh[ho]?:.+$"
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "run": {
+              "type": "string",
+              "description": "The command to run when this action is selected. Command expansions are supported."
+            },
+            "run_type": {
+              "type": "string",
+              "enum": ["suspend", "background", "orphan"],
+              "description": "The way to run the command. `suspend` will suspend rovr until the command is finished, `background` will run the command in the background without suspending rovr, and `orphan` will run the command as an orphan process detached from rovr."
+            },
+            "shell": {
+              "type": "boolean",
+              "default": false,
+              "description": "Whether the command to run is a shell command that needs to be run in a shell (required if you want to do piping)"
+            }
+          },
+          "required": ["run", "run_type"]
         }
       ]
     },
@@ -361,6 +378,11 @@
                   "type": "boolean",
                   "default": true,
                   "description": "Whether to open the editor as an orphan process."
+                },
+                "shell": {
+                  "type": "boolean",
+                  "default": false,
+                  "description": "Whether the command to run is a shell command that needs to be run in a shell (required if you want to do complicated things like piping in your editor command)"
                 }
               },
               "description": "Editor to use when opening a file",
@@ -379,6 +401,11 @@
                   "type": "boolean",
                   "default": true,
                   "description": "Whether to open the editor as an orphan process."
+                },
+                "shell": {
+                  "type": "boolean",
+                  "default": false,
+                  "description": "Whether the command to run is a shell command that needs to be run in a shell (required if you want to do complicated things like piping in your editor command)"
                 }
               },
               "description": "Editor to use when opening a folder",
@@ -396,7 +423,12 @@
                 "rename_show_as_mapping": {
                   "type": "boolean",
                   "default": true,
-                  "description": "When doing a bulk rename, show as a mapping of `<old> ➔ <new>` instead of just showing only the new names"
+                  "description": "When doing a bulk rename, show as a mapping of `&lt;old&gt; ➔ &lt;new&gt;` instead of just showing only the new names"
+                },
+                "shell": {
+                  "type": "boolean",
+                  "default": false,
+                  "description": "Whether the command to run is a shell command that needs to be run in a shell (required if you want to do complicated things like piping in your editor command)"
                 }
               },
               "description": "Editor to use for bulk editing"
@@ -469,6 +501,11 @@
                     "name": {
                       "type": "string",
                       "description": "The name of the opener to show in the menu (currently unused)"
+                    },
+                    "shell": {
+                      "type": "boolean",
+                      "default": true,
+                      "description": "Whether the command to run is a shell command that needs to be run in a shell (required if you want to do piping)"
                     }
                   },
                   "required": ["run"]

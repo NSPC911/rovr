@@ -48,6 +48,9 @@ description: config schema humanified
       - [2.2.1.4. Property `Rovr Config > settings > right_click > right_click items > action`](#settings_right_click_items_action)
         - [2.2.1.4.1. Property `Rovr Config > settings > right_click > right_click items > action > oneOf > item 0`](#settings_right_click_items_action_oneOf_i0)
         - [2.2.1.4.2. Property `Rovr Config > settings > right_click > right_click items > action > oneOf > item 1`](#settings_right_click_items_action_oneOf_i1)
+          - [2.2.1.4.2.1. Property `Rovr Config > settings > right_click > right_click items > action > oneOf > item 1 > run`](#settings_right_click_items_action_oneOf_i1_run)
+          - [2.2.1.4.2.2. Property `Rovr Config > settings > right_click > right_click items > action > oneOf > item 1 > run_type`](#settings_right_click_items_action_oneOf_i1_run_type)
+          - [2.2.1.4.2.3. Property `Rovr Config > settings > right_click > right_click items > action > oneOf > item 1 > shell`](#settings_right_click_items_action_oneOf_i1_shell)
       - [2.2.1.5. Property `Rovr Config > settings > right_click > right_click items > if`](#settings_right_click_items_if)
         - [2.2.1.5.1. Property `Rovr Config > settings > right_click > right_click items > if > path`](#settings_right_click_items_if_path)
           - [2.2.1.5.1.1. Rovr Config > settings > right_click > right_click items > if > path > path items](#settings_right_click_items_if_path_items)
@@ -77,12 +80,15 @@ description: config schema humanified
     - [2.4.1. Property `Rovr Config > settings > editor > file`](#settings_editor_file)
       - [2.4.1.1. Property `Rovr Config > settings > editor > file > run`](#settings_editor_file_run)
       - [2.4.1.2. Property `Rovr Config > settings > editor > file > orphan`](#settings_editor_file_orphan)
+      - [2.4.1.3. Property `Rovr Config > settings > editor > file > shell`](#settings_editor_file_shell)
     - [2.4.2. Property `Rovr Config > settings > editor > folder`](#settings_editor_folder)
       - [2.4.2.1. Property `Rovr Config > settings > editor > folder > run`](#settings_editor_folder_run)
       - [2.4.2.2. Property `Rovr Config > settings > editor > folder > orphan`](#settings_editor_folder_orphan)
+      - [2.4.2.3. Property `Rovr Config > settings > editor > folder > shell`](#settings_editor_folder_shell)
     - [2.4.3. Property `Rovr Config > settings > editor > bulk_editor`](#settings_editor_bulk_editor)
       - [2.4.3.1. Property `Rovr Config > settings > editor > bulk_editor > run`](#settings_editor_bulk_editor_run)
       - [2.4.3.2. Property `Rovr Config > settings > editor > bulk_editor > rename_show_as_mapping`](#settings_editor_bulk_editor_rename_show_as_mapping)
+      - [2.4.3.3. Property `Rovr Config > settings > editor > bulk_editor > shell`](#settings_editor_bulk_editor_shell)
   - [2.5. Property `Rovr Config > settings > preview_rules`](#settings_preview_rules)
     - [2.5.1. Property `Rovr Config > settings > preview_rules > additionalProperties`](#settings_preview_rules_additionalProperties)
   - [2.6. Property `Rovr Config > settings > openers`](#settings_openers)
@@ -101,6 +107,7 @@ description: config schema humanified
             - [2.6.1.1.2.2.3. Property `Rovr Config > settings > openers > additionalProperties > additionalProperties items > oneOf > item 1 > if > directory`](#settings_openers_additionalProperties_items_oneOf_i1_if_directory)
           - [2.6.1.1.2.3. Property `Rovr Config > settings > openers > additionalProperties > additionalProperties items > oneOf > item 1 > orphan`](#settings_openers_additionalProperties_items_oneOf_i1_orphan)
           - [2.6.1.1.2.4. Property `Rovr Config > settings > openers > additionalProperties > additionalProperties items > oneOf > item 1 > name`](#settings_openers_additionalProperties_items_oneOf_i1_name)
+          - [2.6.1.1.2.5. Property `Rovr Config > settings > openers > additionalProperties > additionalProperties items > oneOf > item 1 > shell`](#settings_openers_additionalProperties_items_oneOf_i1_shell)
   - [2.7. Property `Rovr Config > settings > drive_exclude`](#settings_drive_exclude)
     - [2.7.1. Rovr Config > settings > drive_exclude > drive_exclude items](#settings_drive_exclude_items)
 - [3. Property `Rovr Config > metadata`](#metadata)
@@ -968,14 +975,51 @@ Must be one of:
 
 ###### <a name="settings_right_click_items_action_oneOf_i1"></a>2.2.1.4.2. Property `Rovr Config > settings > right_click > right_click items > action > oneOf > item 1`
 
+|                           |             |
+| ------------------------- | ----------- |
+| **Type**                  | `object`    |
+| **Required**              | No          |
+| **Additional properties** | Not allowed |
+
+| Property                                                         | Type             | Title/Description                                                                                                                                                                                                                                    |
+| ---------------------------------------------------------------- | ---------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| [run](#settings_right_click_items_action_oneOf_i1_run)           | string           | The command to run when this action is selected. Command expansions are supported.                                                                                                                                                                   |
+| [run_type](#settings_right_click_items_action_oneOf_i1_run_type) | enum (of string) | The way to run the command. \`suspend\` will suspend rovr until the command is finished, \`background\` will run the command in the background without suspending rovr, and \`orphan\` will run the command as an orphan process detached from rovr. |
+| [shell](#settings_right_click_items_action_oneOf_i1_shell)       | boolean          | Whether the command to run is a shell command that needs to be run in a shell (required if you want to do piping)                                                                                                                                    |
+
+###### <a name="settings_right_click_items_action_oneOf_i1_run"></a>2.2.1.4.2.1. Property `Rovr Config > settings > right_click > right_click items > action > oneOf > item 1 > run`
+
 |              |          |
 | ------------ | -------- |
 | **Type**     | `string` |
-| **Required** | No       |
+| **Required** | Yes      |
 
-| Restrictions                      |                                                                               |
-| --------------------------------- | ----------------------------------------------------------------------------- |
-| **Must match regular expression** | `^sh[ho]?:.+$` [Test](https://regex101.com/?regex=%5Esh%5Bho%5D%3F%3A.%2B%24) |
+**Description:** The command to run when this action is selected. Command expansions are supported.
+
+###### <a name="settings_right_click_items_action_oneOf_i1_run_type"></a>2.2.1.4.2.2. Property `Rovr Config > settings > right_click > right_click items > action > oneOf > item 1 > run_type`
+
+|              |                    |
+| ------------ | ------------------ |
+| **Type**     | `enum (of string)` |
+| **Required** | Yes                |
+
+**Description:** The way to run the command. `suspend` will suspend rovr until the command is finished, `background` will run the command in the background without suspending rovr, and `orphan` will run the command as an orphan process detached from rovr.
+
+Must be one of:
+
+- "suspend"
+- "background"
+- "orphan"
+
+###### <a name="settings_right_click_items_action_oneOf_i1_shell"></a>2.2.1.4.2.3. Property `Rovr Config > settings > right_click > right_click items > action > oneOf > item 1 > shell`
+
+|              |           |
+| ------------ | --------- |
+| **Type**     | `boolean` |
+| **Required** | No        |
+| **Default**  | `false`   |
+
+**Description:** Whether the command to run is a shell command that needs to be run in a shell (required if you want to do piping)
 
 ##### <a name="settings_right_click_items_if"></a>2.2.1.5. Property `Rovr Config > settings > right_click > right_click items > if`
 
@@ -1340,10 +1384,11 @@ Must be one of:
 
 **Description:** Editor to use when opening a file
 
-| Property                               | Type    | Title/Description                                |
-| -------------------------------------- | ------- | ------------------------------------------------ |
-| [run](#settings_editor_file_run)       | string  | Editor to use when opening a file                |
-| [orphan](#settings_editor_file_orphan) | boolean | Whether to open the editor as an orphan process. |
+| Property                               | Type    | Title/Description                                                                                                                                                |
+| -------------------------------------- | ------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| [run](#settings_editor_file_run)       | string  | Editor to use when opening a file                                                                                                                                |
+| [orphan](#settings_editor_file_orphan) | boolean | Whether to open the editor as an orphan process.                                                                                                                 |
+| [shell](#settings_editor_file_shell)   | boolean | Whether the command to run is a shell command that needs to be run in a shell (required if you want to do complicated things like piping in your editor command) |
 
 ##### <a name="settings_editor_file_run"></a>2.4.1.1. Property `Rovr Config > settings > editor > file > run`
 
@@ -1365,6 +1410,16 @@ Must be one of:
 
 **Description:** Whether to open the editor as an orphan process.
 
+##### <a name="settings_editor_file_shell"></a>2.4.1.3. Property `Rovr Config > settings > editor > file > shell`
+
+|              |           |
+| ------------ | --------- |
+| **Type**     | `boolean` |
+| **Required** | No        |
+| **Default**  | `false`   |
+
+**Description:** Whether the command to run is a shell command that needs to be run in a shell (required if you want to do complicated things like piping in your editor command)
+
 #### <a name="settings_editor_folder"></a>2.4.2. Property `Rovr Config > settings > editor > folder`
 
 |                           |             |
@@ -1375,10 +1430,11 @@ Must be one of:
 
 **Description:** Editor to use when opening a folder
 
-| Property                                 | Type    | Title/Description                                |
-| ---------------------------------------- | ------- | ------------------------------------------------ |
-| [run](#settings_editor_folder_run)       | string  | Editor to use when opening a folder              |
-| [orphan](#settings_editor_folder_orphan) | boolean | Whether to open the editor as an orphan process. |
+| Property                                 | Type    | Title/Description                                                                                                                                                |
+| ---------------------------------------- | ------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| [run](#settings_editor_folder_run)       | string  | Editor to use when opening a folder                                                                                                                              |
+| [orphan](#settings_editor_folder_orphan) | boolean | Whether to open the editor as an orphan process.                                                                                                                 |
+| [shell](#settings_editor_folder_shell)   | boolean | Whether the command to run is a shell command that needs to be run in a shell (required if you want to do complicated things like piping in your editor command) |
 
 ##### <a name="settings_editor_folder_run"></a>2.4.2.1. Property `Rovr Config > settings > editor > folder > run`
 
@@ -1400,6 +1456,16 @@ Must be one of:
 
 **Description:** Whether to open the editor as an orphan process.
 
+##### <a name="settings_editor_folder_shell"></a>2.4.2.3. Property `Rovr Config > settings > editor > folder > shell`
+
+|              |           |
+| ------------ | --------- |
+| **Type**     | `boolean` |
+| **Required** | No        |
+| **Default**  | `false`   |
+
+**Description:** Whether the command to run is a shell command that needs to be run in a shell (required if you want to do complicated things like piping in your editor command)
+
 #### <a name="settings_editor_bulk_editor"></a>2.4.3. Property `Rovr Config > settings > editor > bulk_editor`
 
 |                           |             |
@@ -1410,10 +1476,11 @@ Must be one of:
 
 **Description:** Editor to use for bulk editing
 
-| Property                                                                      | Type    | Title/Description                                                                                                       |
-| ----------------------------------------------------------------------------- | ------- | ----------------------------------------------------------------------------------------------------------------------- |
-| [run](#settings_editor_bulk_editor_run)                                       | string  | Editor to use for bulk editing                                                                                          |
-| [rename_show_as_mapping](#settings_editor_bulk_editor_rename_show_as_mapping) | boolean | When doing a bulk rename, show as a mapping of \`&lt;old&gt; ➔ &lt;new&gt;\` instead of just showing only the new names |
+| Property                                                                      | Type    | Title/Description                                                                                                                                                |
+| ----------------------------------------------------------------------------- | ------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| [run](#settings_editor_bulk_editor_run)                                       | string  | Editor to use for bulk editing                                                                                                                                   |
+| [rename_show_as_mapping](#settings_editor_bulk_editor_rename_show_as_mapping) | boolean | When doing a bulk rename, show as a mapping of \`&lt;old&gt; ➔ &lt;new&gt;\` instead of just showing only the new names                                          |
+| [shell](#settings_editor_bulk_editor_shell)                                   | boolean | Whether the command to run is a shell command that needs to be run in a shell (required if you want to do complicated things like piping in your editor command) |
 
 ##### <a name="settings_editor_bulk_editor_run"></a>2.4.3.1. Property `Rovr Config > settings > editor > bulk_editor > run`
 
@@ -1434,6 +1501,16 @@ Must be one of:
 | **Default**  | `true`    |
 
 **Description:** When doing a bulk rename, show as a mapping of `&lt;old&gt; ➔ &lt;new&gt;` instead of just showing only the new names
+
+##### <a name="settings_editor_bulk_editor_shell"></a>2.4.3.3. Property `Rovr Config > settings > editor > bulk_editor > shell`
+
+|              |           |
+| ------------ | --------- |
+| **Type**     | `boolean` |
+| **Required** | No        |
+| **Default**  | `false`   |
+
+**Description:** Whether the command to run is a shell command that needs to be run in a shell (required if you want to do complicated things like piping in your editor command)
 
 ### <a name="settings_preview_rules"></a>2.5. Property `Rovr Config > settings > preview_rules`
 
@@ -1531,12 +1608,13 @@ Key must be a valid glob pattern, but the value has to be a list that can contai
 | **Required**              | No          |
 | **Additional properties** | Not allowed |
 
-| Property                                                               | Type    | Title/Description                                                      |
-| ---------------------------------------------------------------------- | ------- | ---------------------------------------------------------------------- |
-| [run](#settings_openers_additionalProperties_items_oneOf_i1_run)       | string  | The command to run to open the file. Command expansions are supported. |
-| [if](#settings_openers_additionalProperties_items_oneOf_i1_if)         | object  | Only use this opener if a set criteria matches                         |
-| [orphan](#settings_openers_additionalProperties_items_oneOf_i1_orphan) | boolean | Whether to open the opener as an orphan process.                       |
-| [name](#settings_openers_additionalProperties_items_oneOf_i1_name)     | string  | The name of the opener to show in the menu (currently unused)          |
+| Property                                                               | Type    | Title/Description                                                                                                 |
+| ---------------------------------------------------------------------- | ------- | ----------------------------------------------------------------------------------------------------------------- |
+| [run](#settings_openers_additionalProperties_items_oneOf_i1_run)       | string  | The command to run to open the file. Command expansions are supported.                                            |
+| [if](#settings_openers_additionalProperties_items_oneOf_i1_if)         | object  | Only use this opener if a set criteria matches                                                                    |
+| [orphan](#settings_openers_additionalProperties_items_oneOf_i1_orphan) | boolean | Whether to open the opener as an orphan process.                                                                  |
+| [name](#settings_openers_additionalProperties_items_oneOf_i1_name)     | string  | The name of the opener to show in the menu (currently unused)                                                     |
+| [shell](#settings_openers_additionalProperties_items_oneOf_i1_shell)   | boolean | Whether the command to run is a shell command that needs to be run in a shell (required if you want to do piping) |
 
 ###### <a name="settings_openers_additionalProperties_items_oneOf_i1_run"></a>2.6.1.1.2.1. Property `Rovr Config > settings > openers > additionalProperties > additionalProperties items > oneOf > item 1 > run`
 
@@ -1673,6 +1751,16 @@ Must be one of:
 | **Required** | No       |
 
 **Description:** The name of the opener to show in the menu (currently unused)
+
+###### <a name="settings_openers_additionalProperties_items_oneOf_i1_shell"></a>2.6.1.1.2.5. Property `Rovr Config > settings > openers > additionalProperties > additionalProperties items > oneOf > item 1 > shell`
+
+|              |           |
+| ------------ | --------- |
+| **Type**     | `boolean` |
+| **Required** | No        |
+| **Default**  | `true`    |
+
+**Description:** Whether the command to run is a shell command that needs to be run in a shell (required if you want to do piping)
 
 ### <a name="settings_drive_exclude"></a>2.7. Property `Rovr Config > settings > drive_exclude`
 

@@ -1,5 +1,4 @@
 import contextlib
-import shlex
 from os import getcwd, makedirs, path
 from tempfile import NamedTemporaryFile
 from typing import cast
@@ -12,7 +11,7 @@ from textual.worker import Worker, WorkerError
 from rovr.classes.textual_validators import IsValidFilePath, PathNoLongerExists
 from rovr.functions.icons import get_icon
 from rovr.functions.path import dump_exc, normalise
-from rovr.functions.utils import run_command
+from rovr.functions.utils import command, run_command
 from rovr.screens import ModalInput
 from rovr.variables.constants import config
 
@@ -147,9 +146,13 @@ class NewItemButton(Button):
         try:
             run_command(
                 self.app,
-                shlex.split(bulk_editor["run"]) + [temp_path],
+                command(
+                    bulk_editor["run"],
+                    temp_path,
+                    bulk_editor["shell"],
+                ),
                 run_type="suspend",
-                shell=False,
+                shell=bulk_editor["shell"],
                 on_error=on_error,
             )
         except FileNotFoundError:

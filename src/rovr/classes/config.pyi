@@ -412,6 +412,43 @@ r"""The values for the '_RightClickIfOsItemAnyof0' enum"""
 _RIGHTCLICKIFOSITEMANYOF0_DARWIN: Literal["Darwin"] = "Darwin"
 r"""The values for the '_RightClickIfOsItemAnyof0' enum"""
 
+# | oneOf:
+# |   - required:
+# |     - label
+# |     - action
+# |   - required:
+# |     - label
+# |     - options
+_RightClickItem = TypedDict(
+    "_RightClickItem",
+    {
+        # | Label to show in the context menu for this item
+        "label": str,
+        # | Aggregation type: oneOf
+        "action": "_RightClickAction",
+        "if": "_RightClickIf",
+        # | Submenu items (only supported at the top level)
+        "options": list["_RightClickItemOptionsItem"],
+    },
+    total=False,
+)
+
+_RightClickItemOptionsItem = TypedDict(
+    "_RightClickItemOptionsItem",
+    {
+        # | Label to show in the context menu for this submenu item
+        # |
+        # | Required property
+        "label": Required[str],
+        # | Aggregation type: oneOf
+        # |
+        # | Required property
+        "action": Required["_RightClickAction"],
+        "if": "_RightClickIf",
+    },
+    total=False,
+)
+
 class _RovrConfigCustomThemeItem(TypedDict, total=False):
     name: Required[str]
     r"""
@@ -1351,8 +1388,8 @@ class _RovrConfigSettings(TypedDict, total=False):
     default: True
     """
 
-    right_click: list["_RovrConfigSettingsRightClickItem"]
-    r""" Configuration for the right-click context menu """
+    right_click: list["_RightClickItem"]
+    r""" Configuration for the right-click context menu. Fully replaces the default list. """
 
     copy_includes_metadata: bool
     r"""
@@ -1552,43 +1589,6 @@ _ROVRCONFIGSETTINGSPREVIEWRULESADDITIONALPROPERTIES_RESVG: Literal["resvg"] = "r
 r"""The values for the '_RovrConfigSettingsPreviewRulesAdditionalproperties' enum"""
 _ROVRCONFIGSETTINGSPREVIEWRULESADDITIONALPROPERTIES_FONT: Literal["font"] = "font"
 r"""The values for the '_RovrConfigSettingsPreviewRulesAdditionalproperties' enum"""
-
-# | oneOf:
-# |   - required:
-# |     - label
-# |     - action
-# |   - required:
-# |     - label
-# |     - options
-_RovrConfigSettingsRightClickItem = TypedDict(
-    "_RovrConfigSettingsRightClickItem",
-    {
-        # | Label to show in the context menu for this item
-        "label": str,
-        # | Aggregation type: oneOf
-        "action": "_RightClickAction",
-        "if": "_RightClickIf",
-        # | Submenu items (only supported at the top level)
-        "options": list["_RovrConfigSettingsRightClickItemOptionsItem"],
-    },
-    total=False,
-)
-
-_RovrConfigSettingsRightClickItemOptionsItem = TypedDict(
-    "_RovrConfigSettingsRightClickItemOptionsItem",
-    {
-        # | Label to show in the context menu for this submenu item
-        # |
-        # | Required property
-        "label": Required[str],
-        # | Aggregation type: oneOf
-        # |
-        # | Required property
-        "action": Required["_RightClickAction"],
-        "if": "_RightClickIf",
-    },
-    total=False,
-)
 
 class _RovrConfigTheme(TypedDict, total=False):
     default: str

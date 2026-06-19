@@ -172,6 +172,12 @@ class CheckboxRenderingMixin:
             *line,
         ])
 
+    def render_lines(self, crop: Region) -> list[Strip]:
+        try:
+            return super(OptionList, self).render_lines(crop)  # ty: ignore[invalid-super-argument]
+        except KeyError:
+            return []
+
 
 class ScrollOffMixin:
     def scroll_to_highlight(

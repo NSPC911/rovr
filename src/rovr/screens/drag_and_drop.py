@@ -9,14 +9,20 @@ from textual.containers import Grid, HorizontalGroup
 from textual.screen import ModalScreen
 from textual.widgets import Button, OptionList
 
+from rovr.classes.mixins import Action, Actionable
 from rovr.classes.textual_options import OptionWithValue
 from rovr.functions.icons import get_icon_smart
-from rovr.functions.utils import dismiss
+from rovr.functions.utils import dismiss, get_shortest_bind
+from rovr.variables.constants import config
 
 from .typed import DragAndDropReturnType
 
+copy_bind = get_shortest_bind(config["keybinds"]["drag_and_drop"]["copy"])
+move_bind = get_shortest_bind(config["keybinds"]["drag_and_drop"]["move"])
+cancel_bind = get_shortest_bind(config["keybinds"]["drag_and_drop"]["cancel"])
 
-class DragAndDropScreen(ModalScreen[DragAndDropReturnType]):
+
+class DragAndDropScreen(Actionable, ModalScreen[DragAndDropReturnType]):
     def __init__(
         self,
         initial_paste_event: events.Paste,
@@ -27,6 +33,20 @@ class DragAndDropScreen(ModalScreen[DragAndDropReturnType]):
         super().__init__(name, id, classes)
         self.file_paths: set[str] = set()
         self.call_after_refresh(self.post_message, initial_paste_event)
+        self.ACTIONS = [
+            Action(
+                lambda: self.query_one("#copy", Button).press,
+                config["keybinds"]["drag_and_drop"]["copy"],
+            ),
+            Action(
+                lambda: self.query_one("#move", Button).press,
+                config["keybinds"]["drag_and_drop"]["move"],
+            ),
+            Action(
+                lambda: self.query_one("#cancel", Button).press,
+                config["keybinds"]["drag_and_drop"]["cancel"],
+            ),
+        ]
 
     def compose(self) -> ComposeResult:
         with Grid(id="dialog"):
@@ -67,12 +87,6 @@ class DragAndDropScreen(ModalScreen[DragAndDropReturnType]):
                 )
             )
         self.query_one(OptionList).set_options(options)
-
-    def on_key(self, event: events.Key) -> None:
-        """Handle escape key to dismiss the dialog."""
-        if event.key == "escape":
-            event.stop()
-            dismiss(self, None, event)
 
     def on_click(self, event: events.Click) -> None:
         if event.widget is self:

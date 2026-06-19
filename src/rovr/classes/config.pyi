@@ -990,6 +990,9 @@ class _RovrConfigKeybinds(TypedDict, total=False):
     yes_or_no: "_RovrConfigKeybindsYesOrNo"
     r""" Keybinds related to yes/no confirmation modals """
 
+    drag_and_drop: "_RovrConfigKeybindsDragAndDrop"
+    r""" Keybinds related to the screen that appears after dropping a file """
+
 class _RovrConfigKeybindsChangeSortOrder(TypedDict, total=False):
     r"""Keybinds related to changing the sort order"""
 
@@ -1007,6 +1010,13 @@ class _RovrConfigKeybindsDeleteFiles(TypedDict, total=False):
 
     trash: list[str]
     delete: list[str]
+    cancel: list[str]
+
+class _RovrConfigKeybindsDragAndDrop(TypedDict, total=False):
+    r"""Keybinds related to the screen that appears after dropping a file"""
+
+    move: list[str]
+    copy: list[str]
     cancel: list[str]
 
 class _RovrConfigKeybindsExtraCopy(TypedDict, total=False):

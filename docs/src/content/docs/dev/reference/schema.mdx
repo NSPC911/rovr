@@ -340,6 +340,13 @@ description: config schema humanified
       - [7.66.2.1. Rovr Config > keybinds > toggle_pin > toggle_pin items](#keybinds_toggle_pin_items)
     - [7.66.3. Property `Rovr Config > keybinds > yes_or_no > dont_ask_again`](#keybinds_yes_or_no_dont_ask_again)
       - [7.66.3.1. Rovr Config > keybinds > toggle_pin > toggle_pin items](#keybinds_toggle_pin_items)
+  - [7.67. Property `Rovr Config > keybinds > drag_and_drop`](#keybinds_drag_and_drop)
+    - [7.67.1. Property `Rovr Config > keybinds > drag_and_drop > move`](#keybinds_drag_and_drop_move)
+      - [7.67.1.1. Rovr Config > keybinds > toggle_pin > toggle_pin items](#keybinds_toggle_pin_items)
+    - [7.67.2. Property `Rovr Config > keybinds > drag_and_drop > copy`](#keybinds_drag_and_drop_copy)
+      - [7.67.2.1. Rovr Config > keybinds > toggle_pin > toggle_pin items](#keybinds_toggle_pin_items)
+    - [7.67.3. Property `Rovr Config > keybinds > drag_and_drop > cancel`](#keybinds_drag_and_drop_cancel)
+      - [7.67.3.1. Rovr Config > keybinds > toggle_pin > toggle_pin items](#keybinds_toggle_pin_items)
 - [8. Property `Rovr Config > plugins`](#plugins)
   - [8.1. Property `Rovr Config > plugins > zoxide`](#plugins_zoxide)
     - [8.1.1. Property `Rovr Config > plugins > zoxide > enabled`](#plugins_zoxide_enabled)
@@ -2421,6 +2428,7 @@ Refer to https://textual.textualize.io/guide/design/#additional-variables for mo
 | [file_in_use](#keybinds_file_in_use)                                   | object          | Keybinds related to handling a file that is in use by another process                                                                        |
 | [filter_modal](#keybinds_filter_modal)                                 | object          | Keybinds related to selecting options in a modal screen (like FileSearch or ZDToDirectory)                                                   |
 | [yes_or_no](#keybinds_yes_or_no)                                       | object          | Keybinds related to yes/no confirmation modals                                                                                               |
+| [drag_and_drop](#keybinds_drag_and_drop)                               | object          | Keybinds related to the screen that appears after dropping a file                                                                            |
 
 ### <a name="keybinds_toggle_pin"></a>7.1. Property `Rovr Config > keybinds > toggle_pin`
 
@@ -5188,6 +5196,109 @@ Refer to https://textual.textualize.io/guide/design/#additional-variables for mo
 | [toggle_pin items](#keybinds_toggle_pin_items) |             |
 
 ##### <a name="keybinds_toggle_pin_items"></a>7.66.3.1. Rovr Config > keybinds > toggle_pin > toggle_pin items
+
+|              |          |
+| ------------ | -------- |
+| **Type**     | `string` |
+| **Required** | No       |
+
+### <a name="keybinds_drag_and_drop"></a>7.67. Property `Rovr Config > keybinds > drag_and_drop`
+
+|                           |                  |
+| ------------------------- | ---------------- |
+| **Type**                  | `object`         |
+| **Required**              | No               |
+| **Additional properties** | Any type allowed |
+
+**Description:** Keybinds related to the screen that appears after dropping a file
+
+| Property                                 | Type            | Title/Description                               |
+| ---------------------------------------- | --------------- | ----------------------------------------------- |
+| [move](#keybinds_drag_and_drop_move)     | array of string | Move the dropped file to the current directory. |
+| [copy](#keybinds_drag_and_drop_copy)     | array of string | Copy the dropped file to the current directory. |
+| [cancel](#keybinds_drag_and_drop_cancel) | array of string | Cancel the drag and drop operation.             |
+
+#### <a name="keybinds_drag_and_drop_move"></a>7.67.1. Property `Rovr Config > keybinds > drag_and_drop > move`
+
+|                |                       |
+| -------------- | --------------------- |
+| **Type**       | `array of string`     |
+| **Required**   | No                    |
+| **Defined in** | #/definitions/keybind |
+
+**Description:** Move the dropped file to the current directory.
+
+|                      | Array restrictions |
+| -------------------- | ------------------ |
+| **Min items**        | N/A                |
+| **Max items**        | N/A                |
+| **Items unicity**    | False              |
+| **Additional items** | False              |
+| **Tuple validation** | See below          |
+
+| Each item of this array must be                | Description |
+| ---------------------------------------------- | ----------- |
+| [toggle_pin items](#keybinds_toggle_pin_items) |             |
+
+##### <a name="keybinds_toggle_pin_items"></a>7.67.1.1. Rovr Config > keybinds > toggle_pin > toggle_pin items
+
+|              |          |
+| ------------ | -------- |
+| **Type**     | `string` |
+| **Required** | No       |
+
+#### <a name="keybinds_drag_and_drop_copy"></a>7.67.2. Property `Rovr Config > keybinds > drag_and_drop > copy`
+
+|                |                       |
+| -------------- | --------------------- |
+| **Type**       | `array of string`     |
+| **Required**   | No                    |
+| **Defined in** | #/definitions/keybind |
+
+**Description:** Copy the dropped file to the current directory.
+
+|                      | Array restrictions |
+| -------------------- | ------------------ |
+| **Min items**        | N/A                |
+| **Max items**        | N/A                |
+| **Items unicity**    | False              |
+| **Additional items** | False              |
+| **Tuple validation** | See below          |
+
+| Each item of this array must be                | Description |
+| ---------------------------------------------- | ----------- |
+| [toggle_pin items](#keybinds_toggle_pin_items) |             |
+
+##### <a name="keybinds_toggle_pin_items"></a>7.67.2.1. Rovr Config > keybinds > toggle_pin > toggle_pin items
+
+|              |          |
+| ------------ | -------- |
+| **Type**     | `string` |
+| **Required** | No       |
+
+#### <a name="keybinds_drag_and_drop_cancel"></a>7.67.3. Property `Rovr Config > keybinds > drag_and_drop > cancel`
+
+|                |                       |
+| -------------- | --------------------- |
+| **Type**       | `array of string`     |
+| **Required**   | No                    |
+| **Defined in** | #/definitions/keybind |
+
+**Description:** Cancel the drag and drop operation.
+
+|                      | Array restrictions |
+| -------------------- | ------------------ |
+| **Min items**        | N/A                |
+| **Max items**        | N/A                |
+| **Items unicity**    | False              |
+| **Additional items** | False              |
+| **Tuple validation** | See below          |
+
+| Each item of this array must be                | Description |
+| ---------------------------------------------- | ----------- |
+| [toggle_pin items](#keybinds_toggle_pin_items) |             |
+
+##### <a name="keybinds_toggle_pin_items"></a>7.67.3.1. Rovr Config > keybinds > toggle_pin > toggle_pin items
 
 |              |          |
 | ------------ | -------- |

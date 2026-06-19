@@ -100,7 +100,14 @@ def deep_merge(old: dict, new: dict) -> dict:
     """
     try:
         result: dict = {}
+        modifiers: list[tuple[str, str, list]] = []
         for key, value in new.items():
+            if isinstance(value, list) and (
+                key.startswith("prepend_") or key.startswith("append_")
+            ):
+                prefix, base = key.split("_", 1)
+                modifiers.append((prefix, base, value))
+                continue
             if isinstance(value, dict):
                 existing = old.get(key, {})
                 result[key] = deep_merge(
@@ -115,6 +122,12 @@ def deep_merge(old: dict, new: dict) -> dict:
                     result[key] = deep_merge(existing, value)
                 else:
                     result[key] = value
+        for prefix, base, values in modifiers:
+            target = result.get(base, old.get(base))
+            if isinstance(target, list):
+                result[base] = (
+                    values + target if prefix == "prepend" else target + values
+                )
     except TypeError as exc:
         if locals().get("key") is None and locals().get("value") is None:
             pprint(

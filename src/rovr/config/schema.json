@@ -81,6 +81,53 @@
         }
       }
     },
+    "right_click_item": {
+      "type": "object",
+      "properties": {
+        "label": {
+          "type": "string",
+          "description": "Label to show in the context menu for this item"
+        },
+        "action": {
+          "$ref": "#/definitions/right_click_action",
+          "description": "Action to perform when the item is selected.\nShell commands must start with `sh` followed by an optional type (`h` hides the app, `o` shows the output on run) followed by a colon `:` then the command right after.\n Command expansions are supported."
+        },
+        "if": {
+          "type": "object",
+          "description": "Only show this menu item if a set criteria matches (ignored for rovr/system actions)",
+          "$ref": "#/definitions/right_click_if"
+        },
+        "options": {
+          "type": "array",
+          "description": "Submenu items (only supported at the top level)",
+          "items": {
+            "type": "object",
+            "properties": {
+              "label": {
+                "type": "string",
+                "description": "Label to show in the context menu for this submenu item"
+              },
+              "action": {
+                "$ref": "#/definitions/right_click_action",
+                "description": "Action to perform when the submenu item is selected"
+              },
+              "if": {
+                "type": "object",
+                "description": "Only show this menu item if a set criteria matches (ignored for rovr/system actions)",
+                "$ref": "#/definitions/right_click_if"
+              }
+            },
+            "required": ["label", "action"],
+            "additionalProperties": false
+          }
+        }
+      },
+      "oneOf": [
+        { "required": ["label", "action"] },
+        { "required": ["label", "options"] }
+      ],
+      "additionalProperties": false
+    },
     "right_click_if": {
       "type": "object",
       "additionalProperties": false,
@@ -306,54 +353,8 @@
         },
         "right_click": {
           "type": "array",
-          "description": "Configuration for the right-click context menu",
-          "items": {
-            "type": "object",
-            "properties": {
-              "label": {
-                "type": "string",
-                "description": "Label to show in the context menu for this item"
-              },
-              "action": {
-                "$ref": "#/definitions/right_click_action",
-                "description": "Action to perform when the item is selected.\nShell commands must start with `sh` followed by an optional type (`h` hides the app, `o` shows the output on run) followed by a colon `:` then the command right after.\n Command expansions are supported."
-              },
-              "if": {
-                "type": "object",
-                "description": "Only show this menu item if a set criteria matches (ignored for rovr/system actions)",
-                "$ref": "#/definitions/right_click_if"
-              },
-              "options": {
-                "type": "array",
-                "description": "Submenu items (only supported at the top level)",
-                "items": {
-                  "type": "object",
-                  "properties": {
-                    "label": {
-                      "type": "string",
-                      "description": "Label to show in the context menu for this submenu item"
-                    },
-                    "action": {
-                      "$ref": "#/definitions/right_click_action",
-                      "description": "Action to perform when the submenu item is selected"
-                    },
-                    "if": {
-                      "type": "object",
-                      "description": "Only show this menu item if a set criteria matches (ignored for rovr/system actions)",
-                      "$ref": "#/definitions/right_click_if"
-                    }
-                  },
-                  "required": ["label", "action"],
-                  "additionalProperties": false
-                }
-              }
-            },
-            "oneOf": [
-              { "required": ["label", "action"] },
-              { "required": ["label", "options"] }
-            ],
-            "additionalProperties": false
-          }
+          "description": "Configuration for the right-click context menu. Fully replaces the default list.",
+          "items": { "$ref": "#/definitions/right_click_item" }
         },
         "copy_includes_metadata": {
           "type": "boolean",

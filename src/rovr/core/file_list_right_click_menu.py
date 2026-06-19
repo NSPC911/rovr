@@ -13,8 +13,8 @@ from textual.widgets import OptionList
 from rovr.classes.config import (
     _OpenerIf,
     _RightClickIf,
-    _RovrConfigSettingsRightClickItem,
-    _RovrConfigSettingsRightClickItemOptionsItem,
+    _RightClickItem,
+    _RightClickItemOptionsItem,
 )
 from rovr.classes.textual_options import RightClickMenuOption
 from rovr.classes.type_aliases import DirEntryType
@@ -71,8 +71,7 @@ def ifed(app: App, conditions: _RightClickIf | _OpenerIf) -> bool:
 
 async def get_shell_option(
     app: App,
-    option: _RovrConfigSettingsRightClickItemOptionsItem
-    | _RovrConfigSettingsRightClickItem,
+    option: _RightClickItemOptionsItem | _RightClickItem,
     index: int,
 ) -> RightClickMenuOption | Literal[False] | None:
     """Provides a shell option based on the action, if it is a built in shell action, otherwise returns None
@@ -108,8 +107,7 @@ async def get_shell_option(
 
 def give_me_an_option(
     app: App,
-    option: _RovrConfigSettingsRightClickItemOptionsItem
-    | _RovrConfigSettingsRightClickItem,
+    option: _RightClickItemOptionsItem | _RightClickItem,
 ) -> RightClickMenuOption | None:
     """Provides an option based on the action, if it is a built in action, otherwise returns None
 

@@ -14,31 +14,6 @@ from textual.message import Message
 from textual.screen import Screen, ScreenResultType
 from textual.worker import NoActiveWorker, WorkerCancelled, get_current_worker
 
-from rovr import pprint
-
-
-def deep_merge(old: dict, new: dict) -> dict:
-    """Mini lodash merge
-    Args:
-        old (dict): old dictionary
-        new (dict): new dictionary, to merge on top of old
-
-    Returns:
-        dict: Merged dictionary
-    """
-    try:
-        for key, value in new.items():
-            if isinstance(value, dict):
-                old[key] = deep_merge(old.get(key, {}), value)
-            else:
-                old[key] = value
-    except Exception as exc:
-        pprint(
-            f"While deep merging the default config with the userconfig, {type(exc).__name__} was raised.\n    {exc}\nSince the conflict cannot be resolved, rovr will not be launching."
-        )
-        exit(1)
-    return old
-
 
 def set_scuffed_subtitle(element: DOMNode, *sections: str) -> None:
     """The most scuffed way to display a custom subtitle

@@ -53,24 +53,13 @@ Clipboard, ProcessContainer, MetadataContainer,
 ModalScreen OptionList {
   background: transparent;
   border: $border-style $border-blurred;
-  border-subtitle-color: $background;
-  border-subtitle-background: $border-blurred;
   opacity: 1 !important;
   background-tint: transparent !important;
   text-opacity: 1 !important;
   tint: transparent !important;
   &:disabled { border: $border-style $border-disabled }
-  &:ansi {
-    border-subtitle-background: transparent;
-    border-subtitle-color: $border-blurred;
-    &:light {
-      border-subtitle-background: transparent;
-      border-subtitle-color: $border-blurred-light;
-    }
-  }
   &:light {
     border: $border-style $border-blurred-light;
-    border-subtitle-background: $border-blurred-light;
   }
 }
 
@@ -88,19 +77,6 @@ PasteScreen OptionList,
 DeleteFiles OptionList,
 ArchiveCreationScreen OptionList:focus {
   border: $border-style $border;
-  border-subtitle-background: $border;
-  &:ansi {
-    border-subtitle-background: transparent;
-    border-subtitle-color: $border;
-    &:light {
-      border-subtitle-background: transparent;
-      border-subtitle-color: $border;
-    }
-  }
-  &:light {
-    border-subtitle-background: $border;
-    border-subtitle-color: $background;
-  }
 }
 
 .hide, .hidden { display: none }

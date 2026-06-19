@@ -34,11 +34,7 @@ def set_scuffed_subtitle(element: DOMNode, *sections: str) -> None:
     for index, section in enumerate(sections):
         subtitle += section
         if index + 1 != len(sections):
-            subtitle += " "
-            subtitle += (
-                border_bottom if element.app.ansi_color else f"[r]{border_bottom}[/]"
-            )
-            subtitle += " "
+            subtitle += f" {border_bottom} "
 
     element.border_subtitle = subtitle
 

@@ -86,7 +86,9 @@ class DragAndDropScreen(ModalScreen[DragAndDropReturnType]):
             case "copy" | "move":
                 dismiss(
                     self,
-                    DragAndDropReturnType(sorted(list(self.file_paths)), event.button.id),
+                    DragAndDropReturnType(
+                        sorted(list(self.file_paths)), event.button.id
+                    ),
                     event,
                 )
             case "cancel":

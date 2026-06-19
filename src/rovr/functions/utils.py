@@ -100,8 +100,12 @@ def check_key(event: events.Key, key_list: list[str] | str) -> bool:
         # check aliases
         or any(key in key_list for key in event.aliases)
         # check character
-        or event.is_printable
-        and event.character in key_list
+        or (
+            event.is_printable
+            and event.character in key_list
+            # specifically check for space
+            and event.character != " "
+        )
     )
 
 
@@ -123,6 +127,11 @@ def get_shortest_bind(binds: list[str]) -> str:
     for bind in binds:
         if least_len[0] is None or least_len[0] > len(bind):
             least_len = (len(bind), bind)
+
+    match least_len[1]:
+        case "escape":
+            least_len = (least_len[0], "esc")
+
     return least_len[1]
 
 

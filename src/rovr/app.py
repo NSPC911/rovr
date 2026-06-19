@@ -372,20 +372,31 @@ class Application(Actionable, App, inherit_bindings=False):
         if config["interface"]["allow_tab_nav"]:
             super().action_focus_previous()
 
-    async def on_key(self, event: events.Key) -> None:
-        # show key
+    def show_key(self, event: events.Key) -> None:
         if self._show_keys:
             with suppress(NoMatches):
                 using = event.character
                 if not event.is_printable:
                     using = event.key
-                self.query_one("#showKeys").update(using)
-                self.query_one("#showKeys").tooltip = (
+                if using == " ":
+                    using = "space"
+                wid = self.query_one("#showKeys", Label)
+                if using is None:
+                    wid.update("None")
+                else:
+                    if wid.content != using:
+                        wid.update(using)
+                wid.tooltip = (
                     f"Key = '{event.key}'"
                     f"\nCharacter = '{event.character}'"
                     f"\nAliases = {event.aliases}"
                     f"\nUsing: {using}"
                 )
+
+    async def on_key(self, event: events.Key) -> None:
+        # show key
+        if self._show_keys:
+            self.show_key(event)
 
         # if current screen isn't the app screen
         if len(self.screen_stack) != 1:

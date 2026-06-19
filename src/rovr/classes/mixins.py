@@ -241,8 +241,11 @@ class Actionable:
     async def on_key(self, event: Key) -> None:
         from inspect import isawaitable
 
-        if not hasattr(self, "ACTIONS"):
+        try:
+            iter(self.ACTIONS)
+        except AttributeError:
             return
+
         for action in self.ACTIONS:
             if check_key(event, action.match_keys) and (
                 action.only_if() if callable(action.only_if) else action.only_if
@@ -258,5 +261,7 @@ class Actionable:
                 result: Any | Awaitable = func()
                 if isawaitable(result):
                     await result
+                if self.app._show_keys:
+                    self.app.show_key(event)
                 event.prevent_default().stop()
                 return

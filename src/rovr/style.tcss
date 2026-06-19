@@ -306,6 +306,14 @@ Tooltip {
   width: $file_list_width;
 }
 
+.drag-out-active #file_list_container {
+  border: $border-style $accent
+}
+
+.drag-in-active #file_list_container {
+  border: $border-style $success
+}
+
 #file_list, #file_list_visual { height: 1fr }
 
 #pinned_sidebar_container,
@@ -895,6 +903,7 @@ CommandPalette {
     width: 50vw;
     height: 50vh;
     margin-top: 0;
+    min-width: 26;
   }
   #--input { border: $border-style $border }
   #--input.--list-visible { border-bottom: none }
@@ -943,14 +952,19 @@ ShellExec {
 DragAndDropScreen #dialog {
   border: $border-style $border;
   padding: 0 1;
-  grid-size: 2 2;
-  grid-gutter: 0 0;
-  grid-rows: 1fr 3;
+  grid-size: 2 3;
+  grid-gutter: 0 1;
+  grid-rows: 1fr 3 3;
 
   Button {
-    margin: 0 3;
+    margin: 0 0;
     height: 3;
     width: 1fr;
+  }
+  HorizontalGroup {
+    column-span: 2;
+    align: center middle;
+    Button#cancel { width: 50% }
   }
   OptionList {
     height: 1fr;
@@ -1069,7 +1083,7 @@ Screen {
     #file_search_group,
     #content_search_group,
     #keybinds_group,
-    .--textual-command-palette #--container,
+    #--container,
     #dialog,
     #modalInput_group {
       width: 100vw;
@@ -1111,11 +1125,10 @@ Screen {
       grid-rows: 0.5fr 1.5fr 3 3 !important;
     }
     &DragAndDropScreen #dialog {
-      grid-size: 1 3;
-      grid-rows: 1fr 3 3;
-      Button {
-        margin: 0;
-      }
+      grid-size: 1 4;
+      grid-rows: 1fr 3 3 3;
+      Button { margin: 0 }
+      Button#cancel { width: 100% }
     }
   }
   &.-no-preview {

@@ -38,7 +38,7 @@ from textual.widget import Widget
 from textual.widgets import Input, Label
 from textual.widgets.selection_list import Selection
 from textual.worker import Worker, WorkerFailed
-from textual_drivers.dnd import DNDApp, DNDDragOutOperation, Drop, DropData
+from textual_drivers.dnd import DNDApp, DNDDragIn, DNDDragOutOperation, Drop, DropData
 
 from rovr import console
 from rovr.action_buttons import (
@@ -883,6 +883,9 @@ class Application(Actionable, DNDApp, inherit_bindings=False):
                 "move",
                 f"{len(selected)} item{'s' if len(selected) != 1 else ''}",
             )
+
+    async def dnd_drag_in_operation(self, event: DNDDragIn) -> bool:
+        return (not self.is_dragging_out) and event.pos in self.file_list.content_region
 
     async def on_drop(self, event: Drop) -> None:
         if "text/uri-list" in event.mimes:

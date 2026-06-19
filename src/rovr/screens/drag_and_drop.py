@@ -5,7 +5,7 @@ from sys import platform
 
 from textual import events, on
 from textual.app import ComposeResult
-from textual.containers import Grid
+from textual.containers import Grid, HorizontalGroup
 from textual.screen import ModalScreen
 from textual.widgets import Button, OptionList
 
@@ -33,6 +33,8 @@ class DragAndDropScreen(ModalScreen[DragAndDropReturnType]):
             yield OptionList(id="drag_and_drop_list")
             yield Button("Copy", id="copy", variant="success")
             yield Button("Move", id="move", variant="warning")
+            with HorizontalGroup():
+                yield Button("Cancel", id="cancel", variant="error")
 
     def on_mount(self) -> None:
         self.query_one(Grid).border_title = "Drag and Drop"
@@ -46,7 +48,6 @@ class DragAndDropScreen(ModalScreen[DragAndDropReturnType]):
             self.file_paths.add(event.text.strip().strip('"').strip("'"))
         # otherwise, try to parse it as a list of arguments
         else:
-            file_paths: list[str] = []
             with suppress(ValueError):
                 file_paths = [
                     fp.strip().strip('"').strip("'")
@@ -81,10 +82,12 @@ class DragAndDropScreen(ModalScreen[DragAndDropReturnType]):
 
     @on(Button.Pressed)
     def on_button_pressed(self, event: Button.Pressed) -> None:
-        if event.button.id not in ("copy", "move"):
-            return
-        dismiss(
-            self,
-            DragAndDropReturnType(sorted(list(self.file_paths)), event.button.id),
-            event,
-        )
+        match event.button.id:
+            case "copy" | "move":
+                dismiss(
+                    self,
+                    DragAndDropReturnType(sorted(list(self.file_paths)), event.button.id),
+                    event,
+                )
+            case "cancel":
+                dismiss(self, None, event)

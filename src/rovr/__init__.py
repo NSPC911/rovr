@@ -20,5 +20,5 @@ def main() -> None:
             )
         else:
             Console(stderr=True).print_exception(
-                width=None, extra_lines=2, show_locals=True
+                width=None, extra_lines=2, show_locals=False
             )

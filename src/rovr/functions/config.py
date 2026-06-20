@@ -102,9 +102,7 @@ def deep_merge(old: dict, new: dict) -> dict:
         result: dict = {}
         modifiers: list[tuple[str, str, list]] = []
         for key, value in new.items():
-            if isinstance(value, list) and (
-                key.startswith("prepend_") or key.startswith("append_")
-            ):
+            if isinstance(value, list) and key.startswith(("prepend_", "append_")):
                 prefix, base = key.split("_", 1)
                 modifiers.append((prefix, base, value))
                 continue

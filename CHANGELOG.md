@@ -5,6 +5,23 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Added
+
+- `contextmenu`: use proper objects instead of strings [#296](https://github.com/NSPC911/rovr/pull/296)
+- `config`: add `prepend_` and `append_` support [#298](https://github.com/NSPC911/rovr/pull/298)
+
+### Fixed
+
+- `mixin`: prevent a crash from occurring on specific circumstances [6bcddb2](https://github.com/NSPC911/rovr/commit/6bcddb24610609356a2ed38342a49834a8a8d09c)
+- `app`: make showkeys show all keys properly [5a6356b](https://github.com/NSPC911/rovr/commit/5a6356b7c54b97f977280816f8bf971ed22fcf93)
+- `contextmenu`: dont notify for orphans [2828c43](https://github.com/NSPC911/rovr/commit/2828c43493e836fd541bd61a7537a8a60b2fff78)
+
+### Removed
+
+- `lists`: remove block border subtitles [af3df76](https://github.com/NSPC911/rovr/commit/af3df763aa0c3efed40c7685059e4c4a241b80ab)
+
 ## [0.9.2]
 
 ### Fixed
@@ -546,7 +563,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `sort_order`: fix icon setting and tooltips
 - `style`: fix image and option padding/styling
 
-[Unreleased]: https://github.com/NSPC911/rovr/compare/v0.9.1.post2...HEAD
+[Unreleased]: https://github.com/NSPC911/rovr/compare/v0.9.2...HEAD
+[0.9.2]: https://github.com/NSPC911/rovr/compare/v0.9.1.post2...v0.9.2
 [0.9.1.post2]: https://github.com/NSPC911/rovr/compare/v0.9.1.post1...v0.9.1.post2
 [0.9.1.post1]: https://github.com/NSPC911/rovr/compare/v0.9.1...v0.9.1.post1
 [0.9.1]: https://github.com/NSPC911/rovr/compare/v0.9.0...v0.9.1

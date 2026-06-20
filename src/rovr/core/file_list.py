@@ -1,5 +1,6 @@
 from contextlib import suppress
 from os import getcwd, path
+from shlex import join as shjoin
 from typing import Callable, ClassVar, Iterable, Self, Sequence
 
 from textual import events, work
@@ -31,7 +32,7 @@ from rovr.variables.constants import (
     config,
 )
 
-from .file_list_right_click_menu import FileListRightClickMenu, ifed
+from .file_list_right_click_menu import FileListRightClickMenu
 
 
 class FileList(
@@ -382,7 +383,7 @@ class FileList(
                 if item["name"] in name_to_index:
                     self.select(self.list_of_options[name_to_index[item["name"]]])
 
-    async def file_selected_handler(self, target_path: str) -> None:
+    async def file_selected_handler(self, paths: list[str]) -> None:
         if self.app._chooser_file:
             self.call_next(self.app.action_quit)
             return
@@ -396,7 +397,7 @@ class FileList(
             try:
                 utils.run_command(
                     self.app,
-                    utils.command(editor_config["run"], target_path),
+                    utils.command(editor_config["run"], shjoin(paths)),
                     run_type="orphan"
                     if editor_config.get("orphan", True)
                     else "suspend",
@@ -413,46 +414,8 @@ class FileList(
                 )
             return
 
-        opened = False
-        if config["settings"].get("openers"):
-            from fnmatch import fnmatch
-
-            for pattern, openers in config["settings"]["openers"].items():
-                if fnmatch(target_path, pattern):
-                    for opener in openers:
-                        if not isinstance(opener, str) and not ifed(
-                            self.app, opener.get("if", {})
-                        ):
-                            continue
-                        runner = opener if isinstance(opener, str) else opener["run"]
-                        run_type = (
-                            ("orphan" if opener.get("orphan", True) else "suspend")
-                            if isinstance(opener, dict)
-                            else "orphan"
-                        )
-                        shell = (
-                            opener.get("shell", True)
-                            if isinstance(opener, dict)
-                            else True
-                        )
-                        try:
-                            proc = utils.run_command(
-                                self.app,
-                                utils.command(runner, target_path),
-                                run_type,
-                                shell=shell,
-                            )
-                        except Exception:
-                            continue
-                        if run_type == "suspend" and proc.returncode != 0:
-                            continue
-                        opened = True
-                        break
-                    if opened:
-                        break
-
-        if not opened:
-            path_utils.open_file(self.app, target_path)
+        for target in paths:
+            path_utils.run_opener(self.app, target)
 
     @work
     async def on_selection_list_selected_changed(
@@ -480,7 +443,7 @@ class FileList(
                 self.app.tabWidget.active_tab.selectedItems = []
                 self.app.file_list.focus()
             else:
-                await self.file_selected_handler(target_path)
+                await self.file_selected_handler([target_path])
                 if self.highlighted is None:
                     self.highlighted = 0
                 self.app.tabWidget.active_tab.selectedItems = []
@@ -489,7 +452,7 @@ class FileList(
             if path.isdir(full_path):
                 self.app.cd(full_path, clear_search=True)
             else:
-                await self.file_selected_handler(full_path)
+                await self.file_selected_handler([full_path])
             if self.highlighted is None:
                 self.highlighted = 0
             self.app.tabWidget.active_tab.selectedItems = []

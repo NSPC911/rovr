@@ -424,14 +424,22 @@ _RightClickItem = TypedDict(
     {
         # | Label to show in the context menu for this item
         "label": str,
+        # | Action to perform when the item is selected.
+        # | Shell commands must start with `sh` followed by an optional type (`h` hides the app, `o` shows the output on run) followed by a colon `:` then the command right after.
+        # |  Command expansions are supported.
+        # |
         # | Aggregation type: oneOf
-        "action": "_RightClickAction",
+        "action": Union["_RightClickAction", "_RightClickItemActionOneof1"],
         "if": "_RightClickIf",
         # | Submenu items (only supported at the top level)
         "options": list["_RightClickItemOptionsItem"],
     },
     total=False,
 )
+
+_RightClickItemActionOneof1 = Literal["rovr:open"]
+_RIGHTCLICKITEMACTIONONEOF1_ROVR_COLON_OPEN: Literal["rovr:open"] = "rovr:open"
+r"""The values for the '_RightClickItemActionOneof1' enum"""
 
 _RightClickItemOptionsItem = TypedDict(
     "_RightClickItemOptionsItem",

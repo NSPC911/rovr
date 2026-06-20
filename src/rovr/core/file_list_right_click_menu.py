@@ -1,3 +1,4 @@
+import contextlib
 from functools import partial
 from subprocess import Popen
 from typing import ClassVar, Literal
@@ -11,62 +12,15 @@ from textual.reactive import var
 from textual.widgets import OptionList
 
 from rovr.classes.config import (
-    _OpenerIf,
-    _RightClickIf,
     _RightClickItem,
     _RightClickItemOptionsItem,
 )
 from rovr.classes.textual_options import RightClickMenuOption
 from rovr.classes.type_aliases import DirEntryType
 from rovr.components import PopupOptionList
+from rovr.functions.path import ifed
 from rovr.functions.utils import check_key, expand_command, is_archive, run_command
-from rovr.variables.constants import bindings, config, os_type
-
-
-def ifed(app: App, conditions: _RightClickIf | _OpenerIf) -> bool:
-    """Checks if the conditions for an option are met, used to determine if an option should be disabled
-
-    Args:
-        app: The app, needed to check the conditions
-        conditions: The conditions to check, can be based on the highlighted file, current directory, os, or if the highlighted file is a directory
-
-    Returns:
-        Whether the option should be disabled based on the conditions
-    """
-    from fnmatch import fnmatch
-
-    dir_entry: DirEntryType | None = getattr(
-        app.file_list.highlighted_option, "dir_entry", None
-    )
-    disabled = False
-    for thing in conditions:
-        match thing:
-            case "path":
-                disabled = not (
-                    any(
-                        dir_entry and fnmatch(dir_entry.path, pattern)
-                        for pattern in conditions.get("path", [])
-                    )
-                )
-            case "os":
-                disabled = not any(
-                    os.lower() == os_type.lower() for os in conditions["os"]
-                )
-            case "cwd":
-                disabled = not (
-                    any(
-                        fnmatch(app.file_list.current_directory, pattern)
-                        for pattern in conditions["cwd"]
-                    )
-                )
-            case "directory":
-                if conditions["directory"]:
-                    disabled = not (dir_entry and dir_entry.is_dir())
-                else:
-                    disabled = not (dir_entry and not dir_entry.is_dir())
-        if disabled:
-            break
-    return disabled
+from rovr.variables.constants import bindings, config
 
 
 async def get_shell_option(
@@ -127,20 +81,18 @@ def give_me_an_option(
     PartialOption = partial(
         RightClickMenuOption, f" {option['label'].strip()} ", action=option["action"]
     )
+    try:
+        assert isinstance(option["action"], str)
+    except AssertionError:
+        return
 
     match option["action"]:
-        case "rovr:copy":
-            return PartialOption(id="copy", disabled=no_items)
-        case "rovr:cut":
-            return PartialOption(id="cut", disabled=no_items)
+        case "rovr:copy" | "rovr:cut" | "rovr:rename" | "rovr:delete":
+            return PartialOption(id=option["action"][4:], disabled=no_items)
         case "rovr:paste":
             return PartialOption(id="paste", disabled=no_clip or cannot_write)
         case "rovr:new":
             return PartialOption(id="new", disabled=cannot_write)
-        case "rovr:rename":
-            return PartialOption(id="rename", disabled=no_items)
-        case "rovr:delete":
-            return PartialOption(id="delete", disabled=no_items)
         case "rovr:zip":
             return PartialOption(id="zip", disabled=no_items)
         case "rovr:unzip":
@@ -151,8 +103,8 @@ def give_me_an_option(
                     and is_archive(app.file_list.highlighted_option.dir_entry.path)
                 ),
             )
-        case "system:copy_highlighted":
-            return PartialOption(id="copy_highlighted", disabled=no_items)
+        case "system:copy_highlighted" | "system:copy_to_system_clip":
+            return PartialOption(id=option["action"][6:], disabled=no_items)
         case "system:copy_current_directory":
             try:
                 from os import getcwd
@@ -161,8 +113,6 @@ def give_me_an_option(
                 return PartialOption(id="copy_current_directory", disabled=False)
             except FileNotFoundError:
                 return PartialOption(id="copy_current_directory", disabled=True)
-        case "system:copy_to_system_clip":
-            return PartialOption(id="copy_to_system_clip", disabled=no_items)
 
 
 class FileListRightClickMenu(PopupOptionList, inherit_bindings=False):
@@ -228,12 +178,17 @@ class FileListRightClickMenu(PopupOptionList, inherit_bindings=False):
         # Get the highlighted option
         if event.option.id.startswith("group"):
             assert isinstance(event.option, RightClickMenuOption)
+            with contextlib.suppress(NoMatches):
+                self.app.query_one(OpenersMenu).display = False
             try:
                 child_menu = self.app.query_one(FileListRightClickChildMenu)
                 child_menu.target_option = event.option
             except NoMatches:
-                child_menu = FileListRightClickChildMenu(event.option, id="child_menu")
-                await self.app.mount(child_menu)
+                await self.app.mount(
+                    child_menu := FileListRightClickChildMenu(
+                        event.option, id="child_menu"
+                    )
+                )
             try:
                 visible_region = self.screen.find_widget(self).visible_region
             except NoWidget:
@@ -254,10 +209,38 @@ class FileListRightClickMenu(PopupOptionList, inherit_bindings=False):
             child_menu.display = True
             self.focus()
             self.display = True
+        elif event.option.id == "rovr:open":
+            assert isinstance(event.option, RightClickMenuOption)
+            with contextlib.suppress(NoMatches):
+                self.app.query_one(FileListRightClickChildMenu).display = False
+            try:
+                child_menu = self.app.query_one(OpenersMenu)
+            except NoMatches:
+                await self.app.mount(
+                    child_menu := OpenersMenu(
+                        self.app.file_list.highlighted_option.dir_entry.path
+                    )
+                )
+            try:
+                visible_region = self.screen.find_widget(self).visible_region
+            except NoWidget:
+                return
+
+            # same thing as above, textual really is on something
+            child_menu.offset = visible_region.top_right - (
+                0,
+                self.size.height
+                + (1 if self.styles.border_top else 0)
+                + (1 if self.styles.border_bottom else 0),
+            )
+            await child_menu.pre_show()
+            child_menu.display = True
+            self.focus()
+            self.display = True
         else:
             try:
-                child_menu = self.app.query_one(FileListRightClickChildMenu)
-                child_menu.display = False
+                self.app.query_one(FileListRightClickChildMenu).display = False
+                self.app.query_one(OpenersMenu).display = False
             except NoMatches:
                 pass
 
@@ -378,5 +361,16 @@ class FileListRightClickChildMenu(PopupOptionList, inherit_bindings=False):
     def on_key(self, event: events.Key) -> None:
         if check_key(event, config["keybinds"]["up_tree"]):
             event.prevent_default().stop()
-            option_list = self.app.query_one(FileListRightClickMenu)
-            option_list.focus()
+            self.app.query_one(FileListRightClickMenu).focus()
+
+
+class OpenersMenu(PopupOptionList, inherit_bindings=False):
+    BINDINGS: ClassVar[list[BindingType]] = list(bindings)
+
+    file_path: var[str] = var("")
+
+    def __init__(self, file_path: str) -> None:
+        self.file_path = file_path
+
+    def watch_file_path(self, new_path: str) -> None:
+        config["settings"]["openers"]

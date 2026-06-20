@@ -57,11 +57,7 @@ use_recycle_bin = true
 # comments are just how shell config would look like, it will never be
 # set as default options in the menu, it can be used as reference
 right_click = [
-  # { label = "\uf0b0 Open With", if = { directory = false }, options = [
-  #   { label = "\ue8da VSCode", action = { run = 'code "${selected_files}"', run_type = "orphan" } },
-  #   { label = "\ue272 Helix", action = { run = 'hx "${selected_files}"', run_type = "suspend" }, if = { path = ["C:/Users/notso/Git/*"] } },
-  #   { label = "\ue0c6 Pixelorama", action = { run = 'pixelorama "${selected_files}"', run_type = "suspend" }, if = { path = ["*.png"] } },
-  # ] },
+  { label = "\uf0b0 Open with", action = "rovr:openers" },
   { label = "\uf0c5 Copy", options = [
     { label = "\uf07f Copy in rovr", action = "rovr:copy" },
     { label = "\U000f0147 Copy highlighted file path", action = "system:copy_highlighted" },
@@ -77,7 +73,7 @@ right_click = [
   { label = "\uf410 Zip", action = "rovr:zip" },
   { label = "\uf07c Unzip", action = "rovr:unzip" },
   { label = "\uea74 Properties", action = { run = "powershell -nop -c \"(New-Object -ComObject Shell.Application).NameSpace('${current_working_directory}'.replace('/', '\\')).ParseName('${highlighted_file_name}').InvokeVerb('Properties'); Start-Sleep -m 500; do { Start-Sleep -m 500 } while ((Get-Process | Where-Object { $_.MainWindowTitle -match '${highlighted_file_name} Properties' }))\"", run_type = "background" }, if = { os = ["Windows"] } },
-  { label = " Get SHA256", action = { run = 'pwsh -nop -c "(Get-FileHash -Algorithm SHA256 \"${highlighted_file}\").Hash"', run_type = "background" }, if = { directory = false }}
+  # { label = " Get SHA256", action = { run = 'pwsh -nop -c "(Get-FileHash -Algorithm SHA256 \"${highlighted_file}\").Hash"', run_type = "background" }, if = { directory = false }}
 ]
 drive_exclude = ["/var/*"]
 

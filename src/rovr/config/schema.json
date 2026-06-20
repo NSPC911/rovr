@@ -97,7 +97,10 @@
           "description": "Label to show in the context menu for this item"
         },
         "action": {
-          "$ref": "#/definitions/right_click_action",
+          "oneOf": [
+            { "$ref": "#/definitions/right_click_action" },
+            { "type": "string", "enum": ["rovr:open"] }
+          ],
           "description": "Action to perform when the item is selected.\nShell commands must start with `sh` followed by an optional type (`h` hides the app, `o` shows the output on run) followed by a colon `:` then the command right after.\n Command expansions are supported."
         },
         "if": {

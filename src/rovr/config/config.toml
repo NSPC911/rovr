@@ -57,7 +57,7 @@ use_recycle_bin = true
 # comments are just how shell config would look like, it will never be
 # set as default options in the menu, it can be used as reference
 right_click = [
-  { label = "\uf0b0 Open with", action = "rovr:openers" },
+  { label = "\uf0b0 Open with", action = "rovr:open" },
   { label = "\uf0c5 Copy", options = [
     { label = "\uf07f Copy in rovr", action = "rovr:copy" },
     { label = "\U000f0147 Copy highlighted file path", action = "system:copy_highlighted" },
@@ -101,7 +101,9 @@ drive_exclude = ["/var/*"]
 "font/.*" = "font"
 
 [settings.openers]
-# unset for the end user
+"*.png" = [
+  { if = { os = ["Windows"] }, run = ["C:/Program Files/WindowsApps/Microsoft.Windows.Photos_2026.11050.1001.0_x64__8wekyb3d8bbwe/Photos.exe"] }
+]
 
 [settings.editor.file]
 run = "$EDITOR"

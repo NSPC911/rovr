@@ -76,7 +76,7 @@ right_click = [
   { label = "\uf014 Delete", action = "rovr:delete" },
   { label = "\uf410 Zip", action = "rovr:zip" },
   { label = "\uf07c Unzip", action = "rovr:unzip" },
-  { label = "\uea74 Properties", action = { run = "powershell -nop -c \"(New-Object -ComObject Shell.Application).NameSpace('${current_working_directory}'.replace('/', '\\')).ParseName('${highlighted_file_name}').InvokeVerb('Properties'); Start-Sleep -m 500; do { Start-Sleep -m 500 } while ((Get-Process | Where-Object { $_.MainWindowTitle -match '${highlighted_file_name} Properties' }))\"", run_type = "suspend" }, if = { os = ["Windows"] } },
+  { label = "\uea74 Properties", action = { run = "powershell -nop -c \"(New-Object -ComObject Shell.Application).NameSpace('${current_working_directory}'.replace('/', '\\')).ParseName('${highlighted_file_name}').InvokeVerb('Properties'); Start-Sleep -m 500; do { Start-Sleep -m 500 } while ((Get-Process | Where-Object { $_.MainWindowTitle -match '${highlighted_file_name} Properties' }))\"", run_type = "background" }, if = { os = ["Windows"] } },
   { label = " Get SHA256", action = { run = 'pwsh -nop -c "(Get-FileHash -Algorithm SHA256 \"${highlighted_file}\").Hash"', run_type = "background" }, if = { directory = false }}
 ]
 drive_exclude = ["/var/*"]

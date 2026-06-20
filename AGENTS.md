@@ -161,7 +161,7 @@ Types: `feat`, `fix`, `docs`, `style`, `refactor`, `test`, `chore`
 - Avoid `if TYPE_CHECKING` blocks for imports; it looks bad
 - Avoid adding unnecessary comments, aim for self-documenting code instead
 - Commit with `NSPBot911 <176916861+NSPBot911@users.noreply.github.com>` to better distinguish between human and bot commits in the history.
-  NEVER co-author with your provider (like `NSPBot911 <176916861+NSPBot911@users.noreply.github.com>` or `Claude Opus 4.6 <noreply@anthropic.com>`)
+  NEVER co-author with your provider (do not `Claude Opus 4.6 <noreply@anthropic.com>`)
   You can, however, mention the provider used in the commit message, but you must use a syntax of `Used [Provider Name]: [Model Name]`
 
 ### Interesting Textual Patterns

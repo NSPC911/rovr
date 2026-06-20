@@ -299,7 +299,7 @@ class FileListRightClickMenu(PopupOptionList, inherit_bindings=False):
                 event.option.action["run_type"],
                 shell=event.option.action["shell"],
             )
-            if isinstance(proc, Popen):
+            if isinstance(proc, Popen) and event.option.action["run"] != "orphan":
                 self.app.shell_thread(proc, "Context Menu")
 
     def on_blur(self, event: events.Blur) -> None:  # ty: ignore[invalid-method-override]

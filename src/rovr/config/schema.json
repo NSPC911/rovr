@@ -8,6 +8,17 @@
       "type": "array",
       "items": { "type": "string" }
     },
+    "run": {
+      "oneOf": [
+        { "type": "string" },
+        {
+          "type": "array",
+          "items": [
+            { "type": "string" }
+          ]
+        }
+      ]
+    },
     "right_click_action": {
       "oneOf": [
         {
@@ -31,7 +42,7 @@
           "additionalProperties": false,
           "properties": {
             "run": {
-              "type": "string",
+              "$ref": "#/definitions/run",
               "description": "The command to run when this action is selected. Command expansions are supported."
             },
             "run_type": {
@@ -376,8 +387,8 @@
               "additionalProperties": false,
               "properties": {
                 "run": {
-                  "type": "string",
                   "default": "$EDITOR",
+                  "$ref": "#/definitions/run",
                   "description": "Editor to use when opening a file"
                 },
                 "orphan": {
@@ -399,7 +410,7 @@
               "additionalProperties": false,
               "properties": {
                 "run": {
-                  "type": "string",
+                  "$ref": "#/definitions/run",
                   "default": "$EDITOR",
                   "description": "Editor to use when opening a folder"
                 },
@@ -422,7 +433,7 @@
               "additionalProperties": false,
               "properties": {
                 "run": {
-                  "type": "string",
+                  "$ref": "#/definitions/run",
                   "default": "$EDITOR",
                   "description": "Editor to use for bulk editing"
                 },
@@ -492,7 +503,7 @@
                   "additionalProperties": false,
                   "properties": {
                     "run": {
-                      "type": "string",
+                      "$ref": "#/definitions/run",
                       "description": "The command to run to open the file. Command expansions are supported."
                     },
                     "if": {

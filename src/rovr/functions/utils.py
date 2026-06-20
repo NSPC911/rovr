@@ -142,11 +142,7 @@ def run_command(
     shell: bool = True,
     on_error: Callable[[str, str], None] | None = None,
 ) -> subprocess.CompletedProcess | subprocess.Popen:
-    if shell and isinstance(command, list):
-        from shlex import join
-
-        command = join(command)
-    elif not shell and isinstance(command, str):
+    if not shell and isinstance(command, str):
         from shlex import split
 
         command = split(command)
@@ -266,10 +262,14 @@ def recache(pattern: str) -> re.Pattern:
     return re.compile(pattern)
 
 
-def command(initial_command: str, path_str: str, is_shell: bool) -> str | list[str]:
+def command(
+    initial_command: str | list[str] | tuple[str], path_str: str
+) -> str | list[str]:
     import shlex
 
-    if is_shell:
-        return initial_command + " " + shlex.quote(path_str)
+    if isinstance(initial_command, tuple):
+        initial_command = list(initial_command)
+    if isinstance(initial_command, list):
+        return initial_command + [path_str]
     else:
-        return shlex.split(initial_command) + [path_str]
+        return initial_command + " " + shlex.quote(path_str)

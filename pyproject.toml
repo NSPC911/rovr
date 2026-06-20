@@ -128,6 +128,7 @@ schema-to-dict.help = "Convert the JSON schema into a Python TypedDict for inter
 schema-to-dict.sequence = [
   "_docscripts_setup",
   { cmd = "jsonschema-gentypes --json-schema ./src/rovr/config/schema.json --python ./src/rovr/classes/config.pyi" },
+  { cmd = 'python -c "c = (x := open(\"./src/rovr/classes/config.pyi\", \"r\")).read().replace(\"tuple[str]\", \"list[str]\");x.close();(x := open(\"./src/rovr/classes/config.pyi\", \"w\")).write(c)"' },
   "format"
 ]
 

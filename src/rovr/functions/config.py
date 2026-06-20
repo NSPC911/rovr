@@ -127,6 +127,8 @@ def deep_merge(old: dict, new: dict) -> dict:
                     values + target if prefix == "prepend" else target + values
                 )
     except TypeError as exc:
+        from rich.traceback import Traceback
+
         if locals().get("key") is None and locals().get("value") is None:
             pprint(
                 f"Type conflict: cannot merge {type(new).__name__} into {type(old).__name__}"
@@ -138,6 +140,7 @@ def deep_merge(old: dict, new: dict) -> dict:
         pprint(
             f"    {exc}\nPlease check your config for type errors. rovr will not be launching until this is resolved."
         )
+        pprint(Traceback(show_locals=True))
         exit(1)
     except Exception as exc:
         pprint(

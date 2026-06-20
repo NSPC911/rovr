@@ -1,4 +1,3 @@
-import shlex
 from contextlib import suppress
 from os import getcwd, path
 from shutil import which
@@ -398,11 +397,7 @@ class FileList(
             try:
                 utils.run_command(
                     self.app,
-                    utils.command(
-                        editor_config["run"],
-                        target_path,
-                        editor_config["shell"],
-                    ),
+                    utils.command(editor_config["run"], target_path),
                     run_type="orphan"
                     if editor_config.get("orphan", True)
                     else "suspend",
@@ -430,9 +425,9 @@ class FileList(
                             self.app, opener.get("if", {})
                         ):
                             continue
-                        runner = shlex.split(
-                            opener if isinstance(opener, str) else opener["run"]
-                        ) + [target_path]
+                        runner = (
+                            opener if isinstance(opener, str) else list(opener["run"])
+                        )
                         if which(runner[0]):
                             utils.run_command(
                                 self.app,
@@ -944,11 +939,7 @@ class FileList(
             try:
                 utils.run_command(
                     self.app,
-                    utils.command(
-                        editor_config["run"],
-                        target_path,
-                        editor_config["shell"],
-                    ),
+                    utils.command(editor_config["run"], target_path),
                     run_type="orphan"
                     if editor_config.get("orphan", True)
                     else "suspend",

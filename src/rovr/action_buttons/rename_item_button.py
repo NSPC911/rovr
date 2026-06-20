@@ -121,11 +121,7 @@ class RenameItemButton(Button):
                 try:
                     run_command(
                         self.app,
-                        command(
-                            bulk_editor["run"],
-                            temp_path,
-                            bulk_editor["shell"],
-                        ),
+                        command(bulk_editor["run"], temp_path),
                         run_type="suspend",
                         on_error=on_error,
                         shell=bulk_editor["shell"],

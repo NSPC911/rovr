@@ -81,8 +81,8 @@ from rovr.navigation_widgets import (
     PathInput,
     UpButton,
 )
-from rovr.screens.drag_and_drop import DragAndDropScreen
-from rovr.screens.typed import DragAndDropReturnType, ShellExecReturnType
+from rovr.screens import PasteDropScreen
+from rovr.screens.typed import PasteDropReturnType, ShellExecReturnType
 from rovr.screens.way_too_small import TerminalTooSmall
 from rovr.state_manager import StateManager
 from rovr.variables.constants import MaxPossible, config, log_name, os_type
@@ -852,8 +852,8 @@ class Application(Actionable, DNDApp, inherit_bindings=False):
     async def on_paste(self, event: events.Paste) -> None:
         if len(self.screen_stack) != 1:
             return
-        response: DragAndDropReturnType = await self.push_screen_wait(
-            DragAndDropScreen(event)
+        response: PasteDropReturnType = await self.push_screen_wait(
+            PasteDropScreen(event)
         )
         if response is not None and response.paths:
             process_container = self.query_one(ProcessContainer)
@@ -873,6 +873,23 @@ class Application(Actionable, DNDApp, inherit_bindings=False):
             return
 
         from pathlib import Path
+
+        if not self.file_list.select_mode_enabled:
+            await self.file_list._on_click(
+                events.Click(
+                    widget=self.file_list,
+                    x=pos.x,
+                    y=pos.y,
+                    delta_x=0,
+                    delta_y=0,
+                    button=1,
+                    shift=False,
+                    meta=False,
+                    ctrl=False,
+                    style=self.screen.get_style_at(pos.x, pos.y),
+                )
+            )
+            self.file_list._ignore_next_click = True
 
         selected = await self.file_list.get_selected_objects()
         if not selected:
@@ -900,7 +917,7 @@ class Application(Actionable, DNDApp, inherit_bindings=False):
                 markup=False,
             )
             return
-        self.request_data(event, idx, close=False)
+        self.request_data(event, idx, close=True)
 
     @work
     async def on_drop_data(self, event: DropData) -> None:
@@ -918,27 +935,28 @@ class Application(Actionable, DNDApp, inherit_bindings=False):
                 severity="warning",
                 markup=False,
             )
+            return
         if isinstance(event.data, list):
             files = [
                 Path.from_uri(uri).as_posix()
                 for uri in event.data
                 if urlparse(uri).scheme == "file"
             ]
-            etc = [
-                Path.from_uri(uri).as_posix()
-                for uri in event.data
-                if urlparse(uri).scheme != "file"
-            ]
-            if etc:
-                self.notify(
-                    f"Received {len(etc)} non-file URI(s) which aren't currently supported.",
-                    title="DropData (NotImplemented)",
-                    severity="warning",
-                    markup=False,
-                )
+            etc = [uri for uri in event.data if urlparse(uri).scheme != "file"]
             if files:
                 # pass it to on_paste
                 self.on_paste(events.Paste("\n".join(files)))
+            if etc:
+                # check if it is a PasteDropScreen, if so, reject
+                if isinstance(self.screen, PasteDropScreen):
+                    self.notify(
+                        f"Received {len(etc)} non-file URI(s) which aren't supported on this screen",
+                        title="DropData (NotImplemented)",
+                        severity="warning",
+                        markup=False,
+                    )
+                else:
+                    ...
 
     def get_system_commands(self, screen: Screen) -> Iterable[SystemCommand]:
         if not self.ansi_color:

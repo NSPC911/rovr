@@ -15,22 +15,19 @@ from rovr.functions.icons import get_icon_smart
 from rovr.functions.utils import dismiss, get_shortest_bind
 from rovr.variables.constants import config
 
-from .typed import DragAndDropReturnType
+from .typed import PasteDropReturnType
 
 copy_bind = get_shortest_bind(config["keybinds"]["drag_and_drop"]["copy"])
 move_bind = get_shortest_bind(config["keybinds"]["drag_and_drop"]["move"])
 cancel_bind = get_shortest_bind(config["keybinds"]["drag_and_drop"]["cancel"])
 
 
-class DragAndDropScreen(Actionable, ModalScreen[DragAndDropReturnType]):
+class PasteDropScreen(Actionable, ModalScreen[PasteDropReturnType]):
     def __init__(
         self,
         initial_paste_event: events.Paste,
-        name: str | None = None,
-        id: str | None = None,
-        classes: str | None = None,
     ) -> None:
-        super().__init__(name, id, classes)
+        super().__init__()
         self.file_paths: set[str] = set()
         self.call_after_refresh(self.post_message, initial_paste_event)
         self.ACTIONS = [
@@ -100,9 +97,7 @@ class DragAndDropScreen(Actionable, ModalScreen[DragAndDropReturnType]):
             case "copy" | "move":
                 dismiss(
                     self,
-                    DragAndDropReturnType(
-                        sorted(list(self.file_paths)), event.button.id
-                    ),
+                    PasteDropReturnType(sorted(list(self.file_paths)), event.button.id),
                     event,
                 )
             case "cancel":

@@ -3,7 +3,7 @@ $border-style: round;
 $border-blurred: $primary-background-lighten-3;
 $border-blurred-light: $primary-background;
 $border: $primary-lighten-3;
-$border-disabled: $panel;
+$border-disabled: $secondary-background;
 
 /* Layout Dimensions */
 $pinned_sidebar_width: 17;
@@ -50,7 +50,8 @@ PopupOptionList,
 Clipboard, ProcessContainer, MetadataContainer,
 .comfy-buttons #path_switcher,
 .comfy-buttons #below_menu Button,
-ModalScreen OptionList {
+ModalScreen OptionList,
+KittyDND Input {
   background: transparent;
   border: $border-style $border-blurred;
   opacity: 1 !important;
@@ -75,7 +76,8 @@ Clipboard:focus, ProcessContainer:focus, MetadataContainer:focus,
 .comfy-buttons #below_menu Button:hover,
 PasteScreen OptionList,
 DeleteFiles OptionList,
-ArchiveCreationScreen OptionList:focus {
+ArchiveCreationScreen OptionList:focus,
+KittyDND Input:focus {
   border: $border-style $border;
 }
 
@@ -85,6 +87,8 @@ Input {
   scrollbar-size: 0 0;
   scrollbar-visibility: hidden;
   overflow: hidden hidden;
+  background: transparent;
+
   .input--placeholder,
   .text-area--placeholder { color: $foreground-darken-1 }
   .text-area--cursor-gutter {
@@ -307,7 +311,9 @@ Tooltip {
 }
 
 .drag-out-active #file_list_container {
-  border: $border-style $accent
+  border: $border-style $accent;
+  FileList {
+    }
 }
 
 .drag-in-active #file_list_container {
@@ -469,7 +475,7 @@ ModalScreen OptionList {
   }
   .option-list--option-hover {
     color: $primary;
-    background: transparent
+    background: transparent;
   }
   &:focus .option-list--option-highlighted,
   &.-popup-shown .option-list--option-highlighted {
@@ -657,14 +663,7 @@ Keybinds {
 }
 
 /* Modal Dialog Shared Styles */
-Dismissible,
-YesOrNo,
-FileNameConflict,
-FileInUse,
-DeleteFiles,
-ModalInput,
-TerminalTooSmall,
-DragAndDropScreen { align: center middle }
+ModalScreen { align: center middle }
 
 YesOrNo #dialog,
 FileNameConflict #dialog,
@@ -949,7 +948,7 @@ ShellExec {
   }
 }
 
-DragAndDropScreen #dialog {
+PasteDropScreen #dialog {
   border: $border-style $border;
   padding: 0 1;
   grid-size: 2 3;
@@ -969,6 +968,28 @@ DragAndDropScreen #dialog {
   OptionList {
     height: 1fr;
     column-span: 2;
+  }
+}
+
+KittyDND #dialog {
+  border: $border-style $border;
+  padding: 1 2;
+  grid-size: 2 3;
+  grid-gutter: 0 1;
+  grid-rows: 1fr 4 3;
+  &:ansi {
+    grid-rows: 1fr 3 3;
+  }
+  Button {
+    width: 1fr;
+  }
+  OptionList {
+    height: 1fr;
+    column-span: 2;
+  }
+  Input {
+    column-span: 2;
+    &.invalid { border: $border-style $error-lighten-3 }
   }
 }
 
@@ -1089,9 +1110,6 @@ Screen {
       width: 100vw;
       max-width: 100vw;
     }
-    &ModalScreen OptionList {
-      border: none;
-    }
     Toast { width: 100vw }
     #file_search_toggles,
     #content_search_toggles { display: none }
@@ -1120,11 +1138,19 @@ Screen {
       max-height: 90vh;
       padding: 0 1;
     }
+    &KittyDND #dialog {
+      grid-size: 1 4 !important;
+      grid-rows: 1fr 4 3 3;
+      padding: 0 1;
+      &:ansi {
+        grid-rows: 1fr 3 3 3;
+      }
+    }
     &PasteScreen #dialog {
       grid-size: 1 4 !important;
       grid-rows: 0.5fr 1.5fr 3 3 !important;
     }
-    &DragAndDropScreen #dialog {
+    &PasteDropScreen #dialog {
       grid-size: 1 4;
       grid-rows: 1fr 3 3 3;
       Button { margin: 0 }

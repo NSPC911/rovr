@@ -2,11 +2,12 @@ from .archive_creator import ArchiveCreationScreen
 from .common_file_name_do_what import FileNameConflict
 from .delete_files import DeleteFiles
 from .dismissible import Dismissible
-from .drag_and_drop import DragAndDropScreen
 from .fd_search import FileSearch
 from .file_in_use import FileInUse
 from .input import ModalInput
 from .keybinds import Keybinds
+from .kitty_dnd import KittyDND
+from .paste_drop import PasteDropScreen
 from .paste_screen import PasteScreen
 from .rg_search import ContentSearch
 from .shell_exec import ShellExec
@@ -19,12 +20,13 @@ __all__ = [
     "ContentSearch",
     "DeleteFiles",
     "Dismissible",
-    "DragAndDropScreen",
     "FileInUse",
     "FileNameConflict",
     "FileSearch",
     "Keybinds",
+    "KittyDND",
     "ModalInput",
+    "PasteDropScreen",
     "PasteScreen",
     "ShellExec",
     "TerminalTooSmall",

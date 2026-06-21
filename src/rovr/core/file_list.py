@@ -1,6 +1,5 @@
 from contextlib import suppress
 from os import getcwd, path
-from shutil import which
 from typing import Callable, ClassVar, Iterable, Self, Sequence
 
 from textual import events, work
@@ -425,23 +424,17 @@ class FileList(
                             self.app, opener.get("if", {})
                         ):
                             continue
-                        runner = (
-                            opener if isinstance(opener, str) else list(opener["run"])
+                        runner = opener if isinstance(opener, str) else opener["run"]
+                        run_type = (
+                            ("orphan" if opener.get("orphan", True) else "suspend")
+                            if isinstance(opener, dict)
+                            else "orphan"
                         )
-                        if which(runner[0]):
-                            utils.run_command(
-                                self.app,
-                                runner,
-                                run_type=(
-                                    "orphan"
-                                    if opener.get("orphan", True)
-                                    else "suspend"
-                                )
-                                if isinstance(opener, dict)
-                                else "orphan",
-                            )
-                            opened = True
-                            break
+                        proc = utils.run_command(self.app, runner, run_type)
+                        if run_type == "suspend" and proc.returncode != 0:
+                            continue
+                        opened = True
+                        break
                     if opened:
                         break
 

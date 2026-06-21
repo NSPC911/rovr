@@ -155,8 +155,8 @@ def run_command(
                 return subprocess.Popen(
                     command,
                     stdin=subprocess.DEVNULL,
-                    stdout=subprocess.PIPE,
-                    stderr=subprocess.PIPE,
+                    stdout=subprocess.DEVNULL,
+                    stderr=subprocess.DEVNULL,
                     creationflags=subprocess.CREATE_NEW_PROCESS_GROUP
                     | subprocess.DETACHED_PROCESS,
                     shell=shell,
@@ -165,8 +165,8 @@ def run_command(
                 return subprocess.Popen(
                     command,
                     stdin=subprocess.DEVNULL,
-                    stdout=subprocess.PIPE,
-                    stderr=subprocess.PIPE,
+                    stdout=subprocess.DEVNULL,
+                    stderr=subprocess.DEVNULL,
                     start_new_session=True,
                     shell=shell,
                 )

@@ -639,9 +639,11 @@ def load_config() -> tuple[dict, RovrConfig]:
                 token in raw_run for token in ("$EDITOR", "${EDITOR}", "%EDITOR%")
             ):
                 expanded_run = ""
-            if not expanded_run:
-                expanded_run = editor()
-        config_dict["settings"]["editor"][key]["run"] = expanded_run
+            unresolved_editor = any(
+                part in ("$EDITOR", "${EDITOR}", "%EDITOR%") for part in expanded_run
+            )
+            if not expanded_run or unresolved_editor or not expanded_run[0]:
+                config_dict["settings"]["editor"][key]["run"] = expanded_run
 
     # pdf fixer
     if config_dict["plugins"]["poppler"]["enabled"] and config_dict["plugins"][

@@ -1761,5 +1761,8 @@ r"""The values for the 'The theme to use when previewing files in the preview si
 _ROVRCONFIGTHEMEPREVIEW_ZENBURN: Literal["zenburn"] = "zenburn"
 r"""The values for the 'The theme to use when previewing files in the preview sidebar' enum"""
 
-_Run = str | list[str]
+_Run = Union[str, "_RunOneof1"]
 r""" Aggregation type: oneOf """
+
+_RunOneof1 = list[str]
+r""" minItems: 1 """

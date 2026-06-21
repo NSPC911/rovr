@@ -319,7 +319,7 @@ def find_path_line(lines: list[str], path: list) -> int | None:
                 best_match_line = temp_best_match
         elif "=" in stripped:
             key = stripped.split("=")[0].strip().strip('"').strip("'")
-            full_path = current_section + [key]
+            full_path = current_section + key.split(".")
             if full_path == path_filtered:
                 # exact match
                 best_match_line = (i, len(full_path))

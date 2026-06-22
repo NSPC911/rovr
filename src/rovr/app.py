@@ -53,6 +53,7 @@ from rovr.action_buttons import (
 )
 from rovr.action_buttons.sort_order import SortOrderButton
 from rovr.classes.mixins import Action, Actionable
+from rovr.classes.textual_validators import IsValidFilePath, PathNoLongerExists
 from rovr.classes.type_aliases import DirEntryType
 from rovr.components.popup_option_list import PopupOptionList
 from rovr.core import (
@@ -81,7 +82,7 @@ from rovr.navigation_widgets import (
     PathInput,
     UpButton,
 )
-from rovr.screens import PasteDropScreen
+from rovr.screens import ModalInput, PasteDropScreen
 from rovr.screens.typed import PasteDropReturnType, ShellExecReturnType
 from rovr.screens.way_too_small import TerminalTooSmall
 from rovr.state_manager import StateManager
@@ -937,26 +938,51 @@ class Application(Actionable, DNDApp, inherit_bindings=False):
             )
             return
         if isinstance(event.data, list):
-            files = [
+            sdata = set(event.data)
+            files = set(
                 Path.from_uri(uri).as_posix()
                 for uri in event.data
                 if urlparse(uri).scheme == "file"
-            ]
-            etc = [uri for uri in event.data if urlparse(uri).scheme != "file"]
+            )
+            online = set(
+                uri for uri in event.data if urlparse(uri).scheme in ("http", "https")
+            )
+            etc = sdata - (files | online)
+            etc_schemes = set(urlparse(uri).scheme for uri in etc)
             if files:
                 # pass it to on_paste
-                self.on_paste(events.Paste("\n".join(files)))
+                self.on_paste(events.Paste("\n".join(sorted(list(files)))))
             if etc:
+                self.notify(
+                    f"Received {len(etc)} URI(s) which aren't supported\n{etc_schemes}",
+                    title="DropData (NotImplemented)",
+                    severity="warning",
+                    markup=False,
+                )
+            if online:  # noqa: SIM102
+                online = sorted(list(online))
                 # check if it is a PasteDropScreen, if so, reject
                 if isinstance(self.screen, PasteDropScreen):
                     self.notify(
-                        f"Received {len(etc)} non-file URI(s) which aren't supported on this screen",
+                        f"Received {len(online)} http(s) URI(s) which aren't supported on this screen",
                         title="DropData (NotImplemented)",
                         severity="warning",
                         markup=False,
                     )
                 else:
-                    ...
+                    # this is under heavy assumption that you cannot drag multiple http
+                    # links, please prove me wrong and open a bug report
+                    assert len(online) == 1
+                    resp: str | None = await self.push_screen_wait(
+                        ModalInput(
+                            "Save file as",
+                            initial_value=path.basename(urlparse(online[0]).path),
+                            validators=[IsValidFilePath(), PathNoLongerExists()],
+                            is_path=True,
+                        )
+                    )
+                    if resp:
+                        self.query_one(ProcessContainer).remote_download(online, [resp])
 
     def get_system_commands(self, screen: Screen) -> Iterable[SystemCommand]:
         if not self.ansi_color:

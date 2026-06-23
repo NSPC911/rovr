@@ -86,13 +86,14 @@ async def get_shell_option(
     if isinstance(option["action"], str):
         return None
     action = option["action"]["run"]
+    action_parts = action if isinstance(action, list) else [action]
     disabled = False
     dir_entry: DirEntryType | None = getattr(
         app.file_list.highlighted_option, "dir_entry", None
     )
-    if "${highlighted_file}" in action:
+    if any("${highlighted_file}" in part for part in action_parts):
         disabled = not dir_entry
-    if not disabled and "${selected_files}" in action:
+    if not disabled and any("${selected_files}" in part for part in action_parts):
         disabled = await app.file_list.get_selected_objects() == []
     if "if" in option and ifed(app, option["if"]):
         return False

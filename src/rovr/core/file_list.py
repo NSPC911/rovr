@@ -430,7 +430,17 @@ class FileList(
                             if isinstance(opener, dict)
                             else "orphan"
                         )
-                        proc = utils.run_command(self.app, runner, run_type)
+                        shell = (
+                            opener.get("shell", True)
+                            if isinstance(opener, dict)
+                            else True
+                        )
+                        proc = utils.run_command(
+                            self.app,
+                            utils.command(runner, target_path),
+                            run_type,
+                            shell=shell,
+                        )
                         if run_type == "suspend" and proc.returncode != 0:
                             continue
                         opened = True

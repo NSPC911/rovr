@@ -239,7 +239,7 @@ def multiprocessing_process_error_checker(app: App, exc: Exception) -> bool:
     return False
 
 
-async def expand_command(app: App, command: str) -> str:
+async def expand_command(app: App, command: str | list[str]) -> str | list[str]:
     from rovr.functions.path import normalise
 
     cwd = normalise(os.getcwd())
@@ -251,14 +251,20 @@ async def expand_command(app: App, command: str) -> str:
 
     selected_files = await app.file_list.get_selected_objects() or []
 
-    expanded = command.replace("${current_working_directory}", cwd)
-    expanded = expanded.replace("${highlighted_file}", highlighted)
-    if selected_files:
-        expanded = expanded.replace("${selected_files}", " ".join(selected_files))
-    expanded = expanded.replace(
-        "${highlighted_file_name}", os.path.basename(highlighted)
-    )
-    return expanded
+    def _expand(cmd: str) -> str:
+        expanded = cmd.replace("${current_working_directory}", cwd)
+        expanded = expanded.replace("${highlighted_file}", highlighted)
+        if selected_files:
+            expanded = expanded.replace("${selected_files}", " ".join(selected_files))
+        expanded = expanded.replace(
+            "${highlighted_file_name}", os.path.basename(highlighted)
+        )
+        return expanded
+
+    if isinstance(command, list):
+        return [_expand(cmd) for cmd in command]
+    else:
+        return _expand(command)
 
 
 @lru_cache(maxsize=512)

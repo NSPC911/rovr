@@ -292,14 +292,16 @@ class FileListRightClickMenu(PopupOptionList, inherit_bindings=False):
                 )
             )
         elif event.option.id.startswith("shell_"):
-            command: str = await expand_command(self.app, event.option.action["run"])
+            command: str | list[str] = await expand_command(
+                self.app, event.option.action["run"]
+            )
             proc = run_command(
                 self.app,
                 command,
                 event.option.action["run_type"],
                 shell=event.option.action["shell"],
             )
-            if isinstance(proc, Popen) and event.option.action["run"] != "orphan":
+            if isinstance(proc, Popen) and event.option.action["run_type"] != "orphan":
                 self.app.shell_thread(proc, "Context Menu")
 
     def on_blur(self, event: events.Blur) -> None:  # ty: ignore[invalid-method-override]

@@ -6,7 +6,7 @@ from typing import cast
 from textual import events, work
 from textual.content import Content
 from textual.widgets import Button
-from textual.worker import Worker, WorkerError, WorkerFailed
+from textual.worker import Worker, WorkerError
 
 from rovr.classes.textual_validators import IsValidFilePath, PathNoLongerExists
 from rovr.functions.icons import get_icon
@@ -54,10 +54,11 @@ class NewItemButton(Button):
         if location.endswith("/"):
             # recursive directory creation
             try:
-                worker = self.run_worker(lambda: makedirs(location), thread=True)
+                worker = self.app.run_in_thread(makedirs, location)
                 await worker.wait()
-            except WorkerFailed as exc:
-                exc = exc.error
+                if isinstance(worker.result, Exception):
+                    raise worker.result
+            except Exception as exc:
                 self.notify(
                     # i had to force a cast, i didn't have any other choice
                     # notify supports non-string objects, but ty wasn't taking
@@ -77,28 +78,33 @@ class NewItemButton(Button):
             location_parts = location.split("/")
             dir_path = "/".join(location_parts[:-1])
             try:
-                worker = self.run_worker(lambda: makedirs(dir_path), thread=True)
+                worker = self.app.run_in_thread(makedirs, dir_path)
                 await worker.wait()
+                if isinstance(worker.result, Exception):
+                    raise worker.result
                 # performance wise shouldn't be that bad, unless
                 # the file is being created in a directory with a very long path
                 # or some weird voodoo stuff happens, idk
                 with open(location, "w") as f:
                     f.write("")  # Create an empty file
-            except WorkerError as exc:
-                if isinstance(exc.error, FileExistsError):
-                    with open(location, "w") as f:
-                        f.write("")
-                else:
-                    # i had to force a cast, i didn't have any other choice
-                    # notify supports non-string objects, but ty wasn't taking
-                    # any of it, so i had to cast it
-                    exc = exc.error
-                    self.notify(
-                        message=f"Error creating file '{response}'\n{type(exc).__name__}: {exc}",
-                        title="New Item",
-                        severity="error",
-                        markup=False,
-                    )
+            except FileExistsError:
+                with open(location, "w") as f:
+                    f.write("")
+            except Exception as exc:
+                # i had to force a cast, i didn't have any other choice
+                # notify supports non-string objects, but ty wasn't taking
+                # any of it, so i had to cast it
+                self.notify(
+                    message=cast(
+                        str,
+                        Content(
+                            f"Error creating file '{response}'\n{type(exc).__name__}: {exc}"
+                        ),
+                    ),
+                    title="New Item",
+                    severity="error",
+                    markup=False,
+                )
         else:
             # normal file creation I hope
             try:

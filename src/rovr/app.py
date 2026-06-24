@@ -977,6 +977,24 @@ class Application(Actionable, App, inherit_bindings=False):
             for popup in self.query(PopupOptionList):
                 popup.display = False
 
+    @work(thread=True)
+    def run_in_thread(self, function: Callable, *args, **kwargs) -> Worker | Exception:
+        """
+        Run a function in a thread and return a worker for it.
+        Args:
+            function(callable): the function to run
+            *args: positional arguments for the function
+            **kwargs: keyword arguments for the function
+
+        Returns:
+            Worker: the worker for the function
+            Exception: if something fails
+        """
+        try:
+            return function(*args, **kwargs)
+        except Exception as exc:
+            return exc
+
     @on(ExitApp)
     def on_exit_app(self) -> None:
         import rovr.monkey_patches._spam  # noqa: F401

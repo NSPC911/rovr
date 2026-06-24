@@ -268,10 +268,8 @@ class FileListRightClickMenu(PopupOptionList, inherit_bindings=False):
         if event.option.id.startswith("group"):
             # need to handle the submenu options here soon
             child_menu = self.app.query_one(FileListRightClickChildMenu)
-            # thread safe somehow (because it internally calls `call_later`)
             child_menu.focus()
             if child_menu.highlighted is None:
-                # also thread safe since reactive properties are posted to queue
                 child_menu.highlighted = 0
             return
         self.app.hide_popups()

@@ -348,7 +348,6 @@ class Application(Actionable, App, inherit_bindings=False):
         self.file_list.update_border_subtitle()
         # self.call_after_refresh(sleep, 1)
 
-    @work(thread=True)
     def theme_changed(self, theme: Theme) -> None:
         self.query_one("#root").update_classes({
             f"theme-{self.old_theme}": True,
@@ -977,24 +976,6 @@ class Application(Actionable, App, inherit_bindings=False):
         with suppress(NoMatches):
             for popup in self.query(PopupOptionList):
                 popup.display = False
-
-    @work(thread=True)
-    def run_in_thread(self, function: Callable, *args, **kwargs) -> Worker | Exception:
-        """
-        Run a function in a thread and return a worker for it.
-        Args:
-            function(callable): the function to run
-            *args: positional arguments for the function
-            **kwargs: keyword arguments for the function
-
-        Returns:
-            Worker: the worker for the function
-            Exception: if something fails
-        """
-        try:
-            return function(*args, **kwargs)
-        except Exception as exc:
-            return exc
 
     @on(ExitApp)
     def on_exit_app(self) -> None:

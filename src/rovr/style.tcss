@@ -320,6 +320,10 @@ Tooltip {
   border: $border-style $success
 }
 
+.drag-in-failed #file_list_container {
+  border: $border-style $error
+}
+
 #file_list, #file_list_visual { height: 1fr }
 
 #pinned_sidebar_container,

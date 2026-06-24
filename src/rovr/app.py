@@ -33,6 +33,7 @@ from textual.geometry import Offset
 from textual.messages import ExitApp
 from textual.screen import Screen
 from textual.theme import Theme
+from textual.timer import Timer
 from textual.types import NoActiveAppError
 from textual.widget import Widget
 from textual.widgets import Input, Label
@@ -213,6 +214,8 @@ class Application(Actionable, DNDApp, inherit_bindings=False):
         self.Clipboard = Clipboard()
         if startup_path:
             chdir(ensure_existing_directory(startup_path))
+
+        self._p_timer: Timer | None = None
 
         self._on_mount_done: bool = False
         self.last_available_cd = getcwd()
@@ -852,7 +855,17 @@ class Application(Actionable, DNDApp, inherit_bindings=False):
     @work
     async def on_paste(self, event: events.Paste) -> None:
         if len(self.screen_stack) != 1:
+            if self._p_timer and self._p_timer._active:
+                self._p_timer.stop()
+            self._p_timer = self.set_timer(
+                0.1,
+                lambda: self.notify(
+                    "Bracketed Paste will only work in the main screen.",
+                    severity="warning",
+                ),
+            )
             return
+
         response: PasteDropReturnType = await self.push_screen_wait(
             PasteDropScreen(event)
         )
@@ -903,7 +916,17 @@ class Application(Actionable, DNDApp, inherit_bindings=False):
             )
 
     async def dnd_drag_in_operation(self, event: DNDDragIn) -> bool:
-        return (not self.is_dragging_out) and event.pos in self.file_list.content_region
+        self.update_classes({
+            "drag-in-failed": (event.pos not in self.file_list.content_region)
+        })
+        return (
+            (not self.is_dragging_out)
+            and (event.pos in self.file_list.content_region)
+            and (
+                (len(self.screen_stack) == 1)
+                or (isinstance(self.screen, PasteDropScreen))
+            )
+        )
 
     async def on_drop(self, event: Drop) -> None:
         if "text/uri-list" in event.mimes:

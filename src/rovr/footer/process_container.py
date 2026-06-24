@@ -1346,7 +1346,8 @@ class ProcessContainer(Actionable, VerticalScroll):
 
         for i, uri in enumerate(uris):
             try:
-                with request.urlopen(uri, timeout=5) as response:
+                req = request.Request(uri, headers={"User-Agent": "Mozilla/5.0"})
+                with request.urlopen(req, timeout=5) as response:
                     if response.getcode() == 200:
                         with open(path.join(dest, paths[i]), "wb") as file:
                             file.write(response.read())

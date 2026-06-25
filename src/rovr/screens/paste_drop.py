@@ -22,7 +22,7 @@ move_bind = get_shortest_bind(config["keybinds"]["drag_and_drop"]["move"])
 cancel_bind = get_shortest_bind(config["keybinds"]["drag_and_drop"]["cancel"])
 
 
-class PasteDropScreen(Actionable, ModalScreen[PasteDropReturnType]):
+class PasteDropScreen(Actionable, ModalScreen[PasteDropReturnType | None]):
     def __init__(
         self,
         initial_paste_event: events.Paste,
@@ -83,7 +83,10 @@ class PasteDropScreen(Actionable, ModalScreen[PasteDropReturnType]):
                     file_path,
                 )
             )
-        self.query_one(OptionList).set_options(options)
+        if len(options):
+            self.query_one(OptionList).set_options(options)
+        else:
+            dismiss(self, None, event)
 
     def on_click(self, event: events.Click) -> None:
         if event.widget is self:

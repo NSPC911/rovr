@@ -84,7 +84,7 @@ from rovr.navigation_widgets import (
     UpButton,
 )
 from rovr.screens import ModalInput, PasteDropScreen
-from rovr.screens.typed import PasteDropReturnType, ShellExecReturnType
+from rovr.screens.typed import ShellExecReturnType
 from rovr.screens.way_too_small import TerminalTooSmall
 from rovr.state_manager import StateManager
 from rovr.variables.constants import MaxPossible, config, log_name, os_type
@@ -866,9 +866,7 @@ class Application(Actionable, DNDApp, inherit_bindings=False):
             )
             return
 
-        response: PasteDropReturnType = await self.push_screen_wait(
-            PasteDropScreen(event)
-        )
+        response = await self.push_screen_wait(PasteDropScreen(event))
         if response is not None and response.paths:
             process_container = self.query_one(ProcessContainer)
             dest = getcwd()

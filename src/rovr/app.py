@@ -960,11 +960,7 @@ class Application(Actionable, DNDApp, inherit_bindings=False):
             return
         if isinstance(event.data, list):
             sdata = set(event.data)
-            files = set(
-                Path.from_uri(uri).as_posix()
-                for uri in event.data
-                if urlparse(uri).scheme == "file"
-            )
+            files = set(uri for uri in event.data if urlparse(uri).scheme == "file")
             online = set(
                 uri for uri in event.data if urlparse(uri).scheme in ("http", "https")
             )
@@ -972,7 +968,13 @@ class Application(Actionable, DNDApp, inherit_bindings=False):
             etc_schemes = set(urlparse(uri).scheme for uri in etc)
             if files:
                 # pass it to on_paste
-                self.on_paste(events.Paste("\n".join(sorted(list(files)))))
+                self.on_paste(
+                    events.Paste(
+                        "\n".join(
+                            sorted(Path.from_uri(uri).as_posix() for uri in files)
+                        )
+                    )
+                )
             if etc:
                 self.notify(
                     f"Received {len(etc)} URI(s) which aren't supported\n{etc_schemes}",

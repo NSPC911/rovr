@@ -956,6 +956,9 @@ PasteDropScreen #dialog {
   grid-size: 2 3;
   grid-gutter: 0 1;
   grid-rows: 1fr 3 3;
+  max-height: 100vh;
+  height: 60vh;
+  min-height: 11;
 
   Button {
     margin: 0 0;

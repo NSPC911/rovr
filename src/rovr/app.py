@@ -883,7 +883,7 @@ class Application(Actionable, DNDApp, inherit_bindings=False):
                     )
 
     async def dnd_drag_out_operation(self, pos: Offset) -> DNDDragOutOperation | None:
-        if pos not in self.file_list.content_region:
+        if (pos not in self.file_list.content_region) or (len(self.screen_stack) != 1):
             return
 
         from pathlib import Path

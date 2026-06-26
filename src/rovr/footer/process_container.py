@@ -997,15 +997,20 @@ class ProcessContainer(Actionable, VerticalScroll):
                     if path.lexists(destination_item):
                         # check if overwrite
                         if action_on_existence == "ask":
+                            same_file = path_utils.normalise(
+                                destination_item
+                            ) == path_utils.normalise(item_dict["path"])
                             response = self.helper_push_and_get_filenameconflict(
                                 FileNameConflict(
-                                    "The destination already has file of that name.\nWhat do you want to do now?",
+                                    (
+                                        "The target and destination files are the same"
+                                        if same_file
+                                        else "The destination already has file of that name."
+                                    )
+                                    + "\nWhat do you want to do now?",
                                     border_title=item_dict["relative_loc"],
                                     border_subtitle=f"Copying to {dest}",
-                                    allow_overwrite=path_utils.normalise(
-                                        destination_item
-                                    )
-                                    != path_utils.normalise(item_dict["path"]),
+                                    allow_overwrite=not same_file,
                                 ),
                             )
                             if response["same_for_next"]:
@@ -1347,6 +1352,7 @@ class ProcessContainer(Actionable, VerticalScroll):
                                 "title": "",
                             }
                         )
+                        return
             except error.URLError as exc:
                 bar.panic(
                     notify={
@@ -1354,6 +1360,7 @@ class ProcessContainer(Actionable, VerticalScroll):
                         "title": "URLError",
                     }
                 )
+                return
         bar.ok()
 
     def action_delete(self) -> None:

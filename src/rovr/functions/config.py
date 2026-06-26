@@ -102,9 +102,7 @@ def deep_merge(old: dict, new: dict) -> dict:
         result: dict = {}
         modifiers: list[tuple[str, str, list]] = []
         for key, value in new.items():
-            if isinstance(value, list) and (
-                key.startswith("prepend_") or key.startswith("append_")
-            ):
+            if isinstance(value, list) and key.startswith(("prepend_", "append_")):
                 prefix, base = key.split("_", 1)
                 modifiers.append((prefix, base, value))
                 continue
@@ -321,7 +319,7 @@ def find_path_line(lines: list[str], path: list) -> int | None:
                 best_match_line = temp_best_match
         elif "=" in stripped:
             key = stripped.split("=")[0].strip().strip('"').strip("'")
-            full_path = current_section + [key]
+            full_path = current_section + key.split(".")
             if full_path == path_filtered:
                 # exact match
                 best_match_line = (i, len(full_path))

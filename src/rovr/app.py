@@ -354,7 +354,6 @@ class Application(Actionable, DNDApp, inherit_bindings=False):
         self.file_list.update_border_subtitle()
         # self.call_after_refresh(sleep, 1)
 
-    @work(thread=True)
     def theme_changed(self, theme: Theme) -> None:
         self.query_one("#root").update_classes({
             f"theme-{self.old_theme}": True,

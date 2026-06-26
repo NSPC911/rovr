@@ -498,7 +498,7 @@ class PreviewContainer(Actionable, Container):
             "border_subtitle",
             f"Page {self.pdf.current_page + 1}/{self.pdf.total_pages}",
         )
-        self._trigger_pdf_update()
+        self.run_worker(self.show_pdf_preview, thread=True, exclusive=True)
 
     def load_pdf_pages(self, first_page: int, last_page: int) -> list[PILImage]:
         """
@@ -1235,12 +1235,6 @@ class PreviewContainer(Actionable, Container):
             event.stop()
             self.update_current_pdf_page_by_diff(1)
 
-    # not sure if exclusive does anything, but whatever
-    @work(thread=True, exclusive=True)
-    def _trigger_pdf_update(self) -> None:
-        """Trigger PDF preview update from a thread."""
-        self.show_pdf_preview()
-
     @property
     def region(self) -> Region:
         if self.loading:
@@ -1248,11 +1242,16 @@ class PreviewContainer(Actionable, Container):
         return super().region
 
     @work(thread=True)
+    @on(events.Resize)
     def _trigger_resize_update(self) -> None:
         """Trigger resize update from a thread."""
-        if config["plugins"]["bat"]["enabled"] and self.show_bat_file_preview():
-            return
-        self.show_normal_file_preview()
+        if self.border_title in (
+            PreviewContainerTitles.file,
+            PreviewContainerTitles.bat,
+        ):
+            if config["plugins"]["bat"]["enabled"] and self.show_bat_file_preview():
+                return
+            self.show_normal_file_preview()
 
     @on(events.Show)
     def when_become_visible(self) -> None:

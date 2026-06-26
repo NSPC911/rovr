@@ -3,7 +3,6 @@ from os import path
 from typing import Literal, TypedDict, cast
 
 import tomli
-from textual import work
 from textual.css.query import NoMatches
 from textual.reactive import var
 from textual.widget import Widget
@@ -243,7 +242,6 @@ sort_descending = {str(self.sort_descending).lower()}
     def toggle_menu_wrapper(self) -> None:
         self.menu_wrapper_visible = not self.menu_wrapper_visible
 
-    @work(thread=True)
     def restore_state(self) -> None:
         # just for safe measure, set it to false
         self._is_loading = False

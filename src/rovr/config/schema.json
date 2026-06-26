@@ -6,9 +6,7 @@
   "definitions": {
     "keybind": {
       "type": "array",
-      "items": {
-        "type": "string"
-      }
+      "items": { "type": "string" }
     },
     "right_click_action": {
       "oneOf": [
@@ -238,7 +236,14 @@
               "type": "string",
               "default": "nearest",
               "description": "The resampling method to use when resizing images. This is only applicable when the image exceeds the maximum size specified in `max_size`.",
-              "enum": ["nearest", "lanczos", "bilinear", "bicubic", "box", "hamming"]
+              "enum": [
+                "nearest",
+                "lanczos",
+                "bilinear",
+                "bicubic",
+                "box",
+                "hamming"
+              ]
             }
           }
         },
@@ -608,7 +613,7 @@
             "type": "object",
             "additionalProperties": false,
             "properties": {
-                  "pattern": {
+              "pattern": {
                 "type": "string",
                 "description": "The glob pattern to match against the folder name (e.g., 'src', '.*').\nBoth the folder name and glob will be forced to lowercase!"
               },
@@ -641,25 +646,56 @@
         "preview": {
           "type": "string",
           "default": "nord",
-          "description":"The theme to use when previewing files in the preview sidebar.",
+          "description": "The theme to use when previewing files in the preview sidebar.",
           "enum": [
-            "abap", "algol", "algol_nu", "arduino", "autumn",
-            "bw", "borland",
-            "coffee", "colorful",
-            "default", "dracula",
+            "abap",
+            "algol",
+            "algol_nu",
+            "arduino",
+            "autumn",
+            "bw",
+            "borland",
+            "coffee",
+            "colorful",
+            "default",
+            "dracula",
             "emacs",
-            "friendly_grayscale", "friendly", "fruity",
-            "github-dark", "gruvbox-dark", "gruvbox-light",
-            "igor", "inkpot",
-            "lightbulb", "lilypond", "lovelace",
-            "manni", "material", "monokai", "murphy",
-            "native", "nord-darker", "nord",
+            "friendly_grayscale",
+            "friendly",
+            "fruity",
+            "github-dark",
+            "gruvbox-dark",
+            "gruvbox-light",
+            "igor",
+            "inkpot",
+            "lightbulb",
+            "lilypond",
+            "lovelace",
+            "manni",
+            "material",
+            "monokai",
+            "murphy",
+            "native",
+            "nord-darker",
+            "nord",
             "one-dark",
-            "paraiso-dark", "paraiso-light", "pastie", "perldoc",
-            "rainbow_dash", "rrt",
-            "sas", "solarized-dark", "solarized-light", "staroffice", "stata-dark", "stata-light",
-            "tango", "trac",
-            "vim", "vs", "xcode",
+            "paraiso-dark",
+            "paraiso-light",
+            "pastie",
+            "perldoc",
+            "rainbow_dash",
+            "rrt",
+            "sas",
+            "solarized-dark",
+            "solarized-light",
+            "staroffice",
+            "stata-dark",
+            "stata-light",
+            "tango",
+            "trac",
+            "vim",
+            "vs",
+            "xcode",
             "zenburn"
           ]
         },

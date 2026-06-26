@@ -49,3 +49,9 @@ the `if` property allows you to restrict when an opener is used based on specifi
     { run = "python", orphan = false, if = { os = ["Linux", "Darwin"] } }
 ]
 ```
+
+### adding more openers
+currently rovr doesn't set up any default openers, which means it will use whatever your system has set, which is
+- `cmd /c start` on Windows
+- `open` on MacOS
+- `xdg-open` on Linux

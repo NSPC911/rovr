@@ -29,7 +29,7 @@ from rovr.screens import (
 from rovr.variables.constants import config, os_type, scroll_bindings
 
 if sys.version_info.major == 3 and sys.version_info.minor <= 13:
-    from backports.zstd import tarfile
+    from backports.zstd import tarfile  # ty: ignore[unresolved-import]
 else:
     import tarfile
 
@@ -144,6 +144,24 @@ class ProgressBarContainer(VerticalGroup, inherit_bindings=False):
             self.notify(
                 message=notify["message"], severity="error", title=notify["title"]
             )
+        self.app.Clipboard.checker_wrapper()
+
+    def ok(self, text: str = "") -> None:
+        """Do something when the process is successful.
+        Args:
+            text(str): The new text to update the label
+        """
+        if text:
+            self.app.call_from_thread(self.update_text, text, False)
+        if self.progress_bar.total is None:
+            self.progress_bar.update(total=1, progress=0)
+        else:
+            self.progress_bar.advance()
+        self.add_class("done")
+        assert isinstance(self.icon_label.content, str)
+        self.update_icon(
+            self.icon_label.content + " " + icon_utils.get_icon("general", "check")[0]
+        )
         self.app.Clipboard.checker_wrapper()
 
 
@@ -496,16 +514,7 @@ class ProcessContainer(Actionable, VerticalScroll):
             self.app.call_from_thread(
                 bar.update_text, "Successfully deleted nothing!", False
             )
-        # finished successfully
-        self.app.call_from_thread(
-            bar.update_icon,
-            str(bar.icon_label.content)
-            + " "
-            + icon_utils.get_icon("general", "check")[0],
-        )
-        self.app.call_from_thread(bar.progress_bar.advance)
-        self.app.call_from_thread(bar.add_class, "done")
-        self.app.Clipboard.checker_wrapper()
+        bar.ok()
 
     @work(thread=True)
     def create_archive(
@@ -599,14 +608,7 @@ class ProcessContainer(Actionable, VerticalScroll):
             )
             return
 
-        self.app.call_from_thread(
-            bar.update_icon,
-            str(bar.icon_label.content)
-            + " "
-            + icon_utils.get_icon("general", "check")[0],
-        )
-        self.app.call_from_thread(bar.progress_bar.advance)
-        self.app.call_from_thread(bar.add_class, "done")
+        bar.ok()
 
     @work(thread=True)
     def extract_archive(self, archive_path: str, destination_path: str) -> None:
@@ -794,12 +796,7 @@ class ProcessContainer(Actionable, VerticalScroll):
             )
             return
 
-        self.app.call_from_thread(
-            bar.update_icon,
-            icon_utils.get_icon("general", "check")[0],
-        )
-        self.app.call_from_thread(bar.progress_bar.advance)
-        self.app.call_from_thread(bar.add_class, "done")
+        bar.ok()
 
     @work(thread=True)
     def paste_items(
@@ -1315,17 +1312,7 @@ class ProcessContainer(Actionable, VerticalScroll):
                 bar_text=path.basename(has_cut[-1]),
             )
             return
-        self.app.Clipboard.checker_wrapper()
-        self.app.call_from_thread(
-            bar.update_icon,
-            icon_utils.get_icon("general", "cut" if len(has_cut) else "copy")[0],
-        )
-        self.app.call_from_thread(
-            bar.update_icon,
-            icon_utils.get_icon("general", "check")[0],
-        )
-        self.app.call_from_thread(bar.progress_bar.advance)
-        self.app.call_from_thread(bar.add_class, "done")
+        bar.ok()
 
     @work(thread=True)
     def remote_download(self, uris: list[str], paths: list[str]) -> None:

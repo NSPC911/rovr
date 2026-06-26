@@ -18,22 +18,17 @@ jobs:
     strategy:
       fail-fast: true
       matrix:
-        include:
-          - os: windows-latest
-            name: windows-x64
-          - os: windows-11-arm
-            name: windows-arm
-          - os: ubuntu-latest
-            name: linux-x64
-          - os: ubuntu-24.04-arm
-            name: linux-arm64
-          - os: macos-latest
-            name: macos-arm64
-          - os: macos-15
-            name: macos-x64
+        python-version: ['3.13', '3.14', '3.14t']
+        runner:
+          - {os: windows-latest, name: windows-x64}
+          - {os: windows-11-arm, name: windows-arm}
+          - {os: ubuntu-latest, name: linux-x64}
+          - {os: ubuntu-24.04-arm, name: linux-arm64}
+          - {os: macos-latest, name: macos-arm64}
+          - {os: macos-15, name: macos-x64}
 
-    runs-on: ${{ matrix.os }}
-    name: Test on (${{ matrix.name }})
+    runs-on: ${{ matrix.runner.os }}
+    name: Test on (${{ matrix.runner.name }}, Python ${{ matrix.python-version }})
     steps:
       - name: Checkout code
         uses: actions/checkout@v6
@@ -41,6 +36,7 @@ jobs:
       - name: Setup uv
         uses: astral-sh/setup-uv@cec208311dfd045dd5311c1add060b2062131d57
         with:
+          python-version: ${{ matrix.python-version }}
           activate-environment: true
 
       - name: Install dependencies
@@ -85,14 +81,14 @@ jobs:
           $retryCount = "${{ steps.test.outputs.retry_count }}"
           if ([int]$retryCount -gt 0) {
             New-Item -ItemType Directory -Force -Path retry-info | Out-Null
-            Set-Content -Path "retry-info/${{ matrix.name }}.txt" -Value "${{ matrix.name }} ($retryCount retries)"
+            Set-Content -Path "retry-info/${{ matrix.runner.name }}-py${{ matrix.python-version }}.txt" -Value "${{ matrix.runner.name }} (Python ${{ matrix.python-version }}, $retryCount retries)"
           }
 
       - name: Upload retry artifact
         if: success()
         uses: actions/upload-artifact@v7
         with:
-          name: retry-info-${{ matrix.name }}
+          name: retry-info-${{ matrix.runner.name }}-py${{ matrix.python-version }}
           path: retry-info/
           if-no-files-found: ignore
           retention-days: 1
@@ -102,7 +98,7 @@ jobs:
         uses: sarisia/actions-status-discord@v1.16.0
         with:
           webhook: ${{ secrets.LOG_HOOK }}
-          title: rovr tests failed on ${{ matrix.name }}!
+          title: rovr tests failed on ${{ matrix.runner.name }} (Python ${{ matrix.python-version }})!
           status: failure
           description: |
             <:wazowski:1308074746772062248> Check the workflow [details](https://github.com/NSPC911/rovr/actions/runs/${{ github.run_id }}) for more info.

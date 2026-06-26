@@ -3,7 +3,7 @@ name = "rovr"
 version = "0.9.2"
 description = "a stylish, batteries-included terminal file manager."
 readme = "README.md"
-requires-python = ">=3.13,<3.14"
+requires-python = ">=3.13,<3.15"
 license = "MIT"
 license-files = [ "LICENSE" ]
 authors = [{ name = "NSPC911" }]
@@ -242,10 +242,9 @@ line-ending = "auto"
 preview = true
 
 [tool.ty.rules]
-# possibly-missing-import = "ignore"
 unresolved-reference = "ignore" # handled by ruff
 unresolved-attribute = "ignore"
 no-matching-overload = "ignore" # not that accurate
-possibly-missing-attribute = "ignore" # no it is not missing
+# possibly-missing-attribute = "ignore" # no it is not missing
 invalid-assignment = "warn" # probably already but warn for future
 unused-ignore-comment = "ignore"

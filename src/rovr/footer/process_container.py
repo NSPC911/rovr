@@ -28,7 +28,7 @@ from rovr.screens import (
 from rovr.variables.constants import config, os_type, scroll_bindings
 
 if sys.version_info.major == 3 and sys.version_info.minor <= 13:
-    from backports.zstd import tarfile
+    from backports.zstd import tarfile  # ty: ignore[unresolved-import]
 else:
     import tarfile
 

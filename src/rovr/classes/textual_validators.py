@@ -34,8 +34,6 @@ class PathNoLongerExists(Validator):
         if path.exists(item_path):
             # check for acceptance
             if os_type == "Windows" and self.accept is not None:
-                print(self.accept)
-                print(item_path)
                 # check
                 lower_val = value.lower()
                 if any(
@@ -50,5 +48,20 @@ class PathNoLongerExists(Validator):
                 return self.failure(
                     f"A {'folder' if path.isdir(item_path) else 'file'} with that name already exists."
                 )
+        else:
+            return self.success()
+
+
+class AllowsExistingFiles(Validator):
+    def __init__(self) -> None:
+        super().__init__(failure_description="Path does not exist.")
+
+    def validate(self, value: str) -> ValidationResult:
+        item_path = str(normalise(str(getcwd()) + "/" + value))
+        if path.exists(item_path):
+            if path.isfile(item_path):
+                return self.success()
+            else:
+                return self.failure("Path is not a file.")
         else:
             return self.success()

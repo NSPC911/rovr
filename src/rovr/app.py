@@ -54,7 +54,10 @@ from rovr.action_buttons import (
 )
 from rovr.action_buttons.sort_order import SortOrderButton
 from rovr.classes.mixins import Action, Actionable
-from rovr.classes.textual_validators import IsValidFilePath, PathNoLongerExists
+from rovr.classes.textual_validators import (
+    AllowsExistingFiles,
+    IsValidFilePath,
+)
 from rovr.classes.type_aliases import DirEntryType
 from rovr.components.popup_option_list import PopupOptionList
 from rovr.core import (
@@ -913,11 +916,8 @@ class Application(Actionable, DNDApp, inherit_bindings=False):
             )
 
     async def dnd_drag_in_operation(self, event: DNDDragIn) -> bool:
-        self.update_classes({
-            "drag-in-failed": (event.pos not in self.file_list.content_region)
-        })
         return (
-            (not self.is_dragging_out)
+            (self.drag_state != "out")
             and (event.pos in self.file_list.content_region)
             and (
                 (len(self.screen_stack) == 1)
@@ -999,7 +999,7 @@ class Application(Actionable, DNDApp, inherit_bindings=False):
                         ModalInput(
                             "Save file as",
                             initial_value=path.basename(urlparse(online[0]).path),
-                            validators=[IsValidFilePath(), PathNoLongerExists()],
+                            validators=[IsValidFilePath(), AllowsExistingFiles()],
                             is_path=True,
                         )
                     )

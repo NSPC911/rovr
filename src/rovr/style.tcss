@@ -310,17 +310,15 @@ Tooltip {
   width: $file_list_width;
 }
 
-.drag-out-active #file_list_container {
+.drag-out #file_list_container {
   border: $border-style $accent;
-  FileList {
-    }
 }
 
-.drag-in-active #file_list_container {
+.drag-in #file_list_container {
   border: $border-style $success
 }
 
-.drag-in-failed #file_list_container {
+.drag-in-rej #file_list_container {
   border: $border-style $error
 }
 

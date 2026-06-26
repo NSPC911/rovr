@@ -1324,7 +1324,7 @@ class ProcessContainer(Actionable, VerticalScroll):
         from urllib import error, request
 
         dest = os.getcwd()
-        bar = self.threaded_new_process_bar(max=len(uris), classes="active")
+        bar = self.threaded_new_process_bar(max=len(uris) + 1, classes="active")
         self.app.call_from_thread(
             bar.update_icon,
             icon_utils.get_icon("general", "down")[0],
@@ -1338,6 +1338,8 @@ class ProcessContainer(Actionable, VerticalScroll):
                     if response.getcode() == 200:
                         with open(path.join(dest, paths[i]), "wb") as file:
                             file.write(response.read())
+                        self.app.call_from_thread(bar.update_progress, progress=i + 1)
+                        self.app.call_from_thread(bar.update_text, paths[i])
                     else:
                         bar.panic(
                             notify={
@@ -1352,6 +1354,7 @@ class ProcessContainer(Actionable, VerticalScroll):
                         "title": "URLError",
                     }
                 )
+        bar.ok()
 
     def action_delete(self) -> None:
         self.remove_children(".done")

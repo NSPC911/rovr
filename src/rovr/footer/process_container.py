@@ -6,6 +6,7 @@ import zipfile
 from os import path
 from typing import Callable, Literal, cast
 
+from rich.markup import escape
 from send2trash import send2trash
 from textual import work
 from textual.color import Gradient
@@ -1342,7 +1343,7 @@ class ProcessContainer(Actionable, VerticalScroll):
                 with request.urlopen(req, timeout=5) as response:
                     if response.getcode() == 200:
                         with open(path.join(dest, paths[i]), "wb") as file:
-                            file.write(response.read())
+                            shutil.copyfileobj(response, file)
                         self.app.call_from_thread(bar.update_progress, progress=i + 1)
                         self.app.call_from_thread(bar.update_text, paths[i])
                     else:
@@ -1356,7 +1357,7 @@ class ProcessContainer(Actionable, VerticalScroll):
             except error.URLError as exc:
                 bar.panic(
                     notify={
-                        "message": f"Failed to download {uri} due to {str(exc)}",
+                        "message": f"Failed to download {uri} due to {escape(str(exc))}",
                         "title": "URLError",
                     }
                 )

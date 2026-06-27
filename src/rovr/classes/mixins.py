@@ -261,7 +261,7 @@ class Actionable:
                 result: Any | Awaitable = func()
                 if isawaitable(result):
                     await result
-                if getattr(self.app, "show_keys", False):
+                if getattr(self.app, "_show_keys", False):
                     self.app.show_key(event)
                 event.prevent_default().stop()
                 return

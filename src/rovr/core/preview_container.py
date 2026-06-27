@@ -661,7 +661,7 @@ class PreviewContainer(Actionable, Container):
             if config["interface"]["show_line_numbers"]
             else "--style=plain",
         ]
-        max_lines = self.region.height
+        max_lines = self.app.call_from_thread(lambda: self.region.height)
         if max_lines > 0:
             command.append(f"--line-range=:{max_lines}")
         assert self._current_file_path is not None
@@ -740,6 +740,7 @@ class PreviewContainer(Actionable, Container):
         self.app.call_from_thread(setattr, self, "border_title", titles.file)
 
         lines: list[str] | None = None
+        height = self.app.call_from_thread(lambda: self.region.height) or 50
         # force read by brute-forcing encoding methods
         encodings_to_try = [
             "utf8",
@@ -754,7 +755,6 @@ class PreviewContainer(Actionable, Container):
         for encoding in encodings_to_try:
             try:
                 lines: list[str] | None = []
-                height = self.region.height or 50  # bums
                 with open(self._current_file_path, "r", encoding=encoding) as f:
                     for _ in range(height):
                         line = f.readline()

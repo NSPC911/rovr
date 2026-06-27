@@ -1245,13 +1245,16 @@ class PreviewContainer(Actionable, Container):
     @on(events.Resize)
     def _trigger_resize_update(self) -> None:
         """Trigger resize update from a thread."""
-        if self.border_title in (
-            PreviewContainerTitles.file,
-            PreviewContainerTitles.bat,
-        ):
-            if config["plugins"]["bat"]["enabled"] and self.show_bat_file_preview():
-                return
-            self.show_normal_file_preview()
+        try:
+            if self.border_title in (
+                PreviewContainerTitles.file,
+                PreviewContainerTitles.bat,
+            ):
+                if config["plugins"]["bat"]["enabled"] and self.show_bat_file_preview():
+                    return
+                self.show_normal_file_preview()
+        except Exception:
+            pass
 
     @on(events.Show)
     def when_become_visible(self) -> None:

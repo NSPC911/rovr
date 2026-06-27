@@ -240,7 +240,13 @@ async def test_rename_button(tmp_path: Path) -> None:
             "enter",
         )
         await iter_until(pilot, lambda: not isinstance(app.screen, ModalInput))
-        await iter_until(pilot, lambda: app.file_list.get_option_at_index(0).dir_entry.name == "renamed_file.txt")
+        await iter_until(
+            pilot,
+            lambda: (
+                app.file_list.get_option_at_index(0).dir_entry.name
+                == "renamed_file.txt"
+            ),
+        )
         assert app.file_list.get_option_at_index(0).dir_entry.name == "renamed_file.txt"
 
 

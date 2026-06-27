@@ -6,7 +6,6 @@ from .fd_search import FileSearch
 from .file_in_use import FileInUse
 from .input import ModalInput
 from .keybinds import Keybinds
-from .kitty_dnd import KittyDND
 from .paste_drop import PasteDropScreen
 from .paste_screen import PasteScreen
 from .rg_search import ContentSearch
@@ -24,7 +23,6 @@ __all__ = [
     "FileNameConflict",
     "FileSearch",
     "Keybinds",
-    "KittyDND",
     "ModalInput",
     "PasteDropScreen",
     "PasteScreen",

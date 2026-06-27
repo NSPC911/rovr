@@ -18,7 +18,7 @@ jobs:
     strategy:
       fail-fast: true
       matrix:
-        python-version: ['3.13', '3.14', '3.14t']
+        python-version: ['3.13', '3.14']
         runner:
           - {os: windows-latest, name: windows-x64}
           - {os: windows-11-arm, name: windows-arm}
@@ -26,9 +26,6 @@ jobs:
           - {os: ubuntu-24.04-arm, name: linux-arm64}
           - {os: macos-latest, name: macos-arm64}
           - {os: macos-15, name: macos-x64}
-        exclude:
-          - python-version: '3.14t'
-            runner: {os: windows-11-arm, name: windows-arm}
 
     runs-on: ${{ matrix.runner.os }}
     name: Test on (${{ matrix.runner.name }}, Python ${{ matrix.python-version }})

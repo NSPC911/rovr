@@ -14,8 +14,13 @@ class IsValidFilePath(Validator):
     def validate(self, value: str) -> ValidationResult:
         from pathvalidate import sanitize_filepath
 
-        value = str(normalise(str(getcwd()) + "/" + value))
-        if value == normalise(sanitize_filepath(value)):
+        # Handle absolute paths correctly
+        if path.isabs(value):
+            normalized_value = normalise(value)
+        else:
+            normalized_value = normalise(str(getcwd()) + "/" + value)
+
+        if normalized_value == normalise(sanitize_filepath(normalized_value)):
             return self.success()
         else:
             return self.failure()
@@ -30,7 +35,12 @@ class PathNoLongerExists(Validator):
         self.accept_equal = accept_equal
 
     def validate(self, value: str) -> ValidationResult:
-        item_path = str(normalise(str(getcwd()) + "/" + value))
+        # Handle absolute paths correctly
+        if path.isabs(value):
+            item_path = normalise(value)
+        else:
+            item_path = normalise(str(getcwd()) + "/" + value)
+
         if path.exists(item_path):
             # check for acceptance
             if os_type == "Windows" and self.accept is not None:

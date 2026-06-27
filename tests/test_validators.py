@@ -40,7 +40,9 @@ def test_is_valid_file_path_absolute_paths() -> None:
 
     # Test invalid absolute paths
     if os.name == "nt":
-        assert not validator.validate("C:\\Users\\test\\invalid" + chr(0) + "file.txt").is_valid
+        assert not validator.validate(
+            "C:\\Users\\test\\invalid" + chr(0) + "file.txt"
+        ).is_valid
     else:
         assert not validator.validate("/tmp/invalid" + chr(0) + "file.txt").is_valid
 
@@ -66,7 +68,9 @@ def test_path_no_longer_exists_absolute_paths(tmp_path: Path) -> None:
     assert not validator.validate(str(test_dir)).is_valid
 
 
-def test_mixed_relative_and_absolute_paths(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+def test_mixed_relative_and_absolute_paths(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
     """Test both validators handle mixed relative and absolute paths correctly."""
     monkeypatch.chdir(tmp_path)
 
@@ -82,6 +86,12 @@ def test_mixed_relative_and_absolute_paths(tmp_path: Path, monkeypatch: pytest.M
     # Test PathNoLongerExists
     exists_validator = PathNoLongerExists()
     assert not exists_validator.validate("existing.txt").is_valid  # relative, exists
-    assert not exists_validator.validate(str(existing_file)).is_valid  # absolute, exists
-    assert exists_validator.validate("non_existent.txt").is_valid  # relative, doesn't exist
-    assert exists_validator.validate(str(tmp_path / "non_existent.txt")).is_valid  # absolute, doesn't exist
+    assert not exists_validator.validate(
+        str(existing_file)
+    ).is_valid  # absolute, exists
+    assert exists_validator.validate(
+        "non_existent.txt"
+    ).is_valid  # relative, doesn't exist
+    assert exists_validator.validate(
+        str(tmp_path / "non_existent.txt")
+    ).is_valid  # absolute, doesn't exist

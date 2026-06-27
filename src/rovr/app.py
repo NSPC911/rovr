@@ -917,7 +917,7 @@ class Application(Actionable, DNDApp, inherit_bindings=False):
 
     async def dnd_drag_in_operation(self, event: DNDDragIn) -> bool:
         return (
-            (self._drag_active)
+            (not self.is_dragging_out)
             and (event.pos in self.file_list.content_region)
             and (
                 (len(self.screen_stack) == 1)

@@ -65,6 +65,7 @@ class PasteDropScreen(Actionable, ModalScreen[PasteDropReturnType | None]):
             self.file_paths.add(event.text.strip().strip('"').strip("'"))
         # otherwise, try to parse it as a list of arguments
         else:
+            file_paths: list[str] = []
             with suppress(ValueError):
                 file_paths = [
                     fp.strip().strip('"').strip("'")

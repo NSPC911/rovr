@@ -998,6 +998,7 @@ class Application(Actionable, DNDApp, inherit_bindings=False):
                     resp: str | None = await self.push_screen_wait(
                         ModalInput(
                             "Save file as",
+                            "existing file will be overwritten",
                             initial_value=path.basename(urlparse(online[0]).path),
                             validators=[IsValidFilePath(), AllowsExistingFiles()],
                             is_path=True,

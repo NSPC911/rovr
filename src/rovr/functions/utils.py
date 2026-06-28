@@ -4,7 +4,7 @@ import re
 import subprocess
 from contextlib import suppress
 from functools import lru_cache
-from typing import Callable, Literal
+from typing import Callable, Literal, overload
 
 from humanize import naturalsize
 from textual import events
@@ -237,6 +237,14 @@ def multiprocessing_process_error_checker(app: App, exc: Exception) -> bool:
                 app.MULTIPROCESSING_PROCESS_ALLOWED = False
         return True
     return False
+
+
+@overload
+async def expand_command(app: App, command: str) -> str: ...
+
+
+@overload
+async def expand_command(app: App, command: list[str]) -> list[str]: ...
 
 
 async def expand_command(app: App, command: str | list[str]) -> str | list[str]:

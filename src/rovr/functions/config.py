@@ -97,6 +97,9 @@ def deep_merge(old: dict, new: dict) -> dict:
 
     Returns:
         dict: Merged dictionary with new's keys taking priority
+
+    Raises:
+        TypeError: If there is a type conflict between old and new types
     """
     try:
         result: dict = {}
@@ -138,7 +141,7 @@ def deep_merge(old: dict, new: dict) -> dict:
         pprint(
             f"    {exc}\nPlease check your config for type errors. rovr will not be launching until this is resolved."
         )
-        exit(1)
+        raise
     except Exception as exc:
         pprint(
             f"While deep merging the default config with the userconfig, {type(exc).__name__} was raised.\n    {exc}\nSince the conflict cannot be resolved, rovr will not be launching."
@@ -626,14 +629,23 @@ def load_config() -> tuple[dict, RovrConfig]:
 
     for key in ["file", "folder", "bulk_editor"]:
         raw_run = config_dict["settings"]["editor"][key]["run"]
-        expanded_run = os.path.expandvars(raw_run)
-        if expanded_run == raw_run and any(
-            token in raw_run for token in ("$EDITOR", "${EDITOR}", "%EDITOR%")
-        ):
-            expanded_run = ""
-        if not expanded_run:
-            expanded_run = editor()
-        config_dict["settings"]["editor"][key]["run"] = expanded_run
+        if isinstance(raw_run, list):
+            expanded_run = [os.path.expandvars(part) for part in raw_run]
+            if not expanded_run:
+                expanded_run = [editor()]
+            config_dict["settings"]["editor"][key]["run"] = expanded_run
+        else:
+            expanded_run = os.path.expandvars(raw_run)
+            if expanded_run == raw_run and any(
+                token in raw_run for token in ("$EDITOR", "${EDITOR}", "%EDITOR%")
+            ):
+                expanded_run = ""
+            unresolved_editor = any(
+                part in ("$EDITOR", "${EDITOR}", "%EDITOR%") for part in expanded_run
+            )
+            if not expanded_run or unresolved_editor or not expanded_run[0]:
+                expanded_run = editor()
+            config_dict["settings"]["editor"][key]["run"] = expanded_run
 
     # pdf fixer
     if config_dict["plugins"]["poppler"]["enabled"] and config_dict["plugins"][

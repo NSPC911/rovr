@@ -1,7 +1,5 @@
-import shlex
 from contextlib import suppress
 from os import getcwd, path
-from shutil import which
 from typing import Callable, ClassVar, Iterable, Self, Sequence
 
 from textual import events, work
@@ -398,11 +396,7 @@ class FileList(
             try:
                 utils.run_command(
                     self.app,
-                    utils.command(
-                        editor_config["run"],
-                        target_path,
-                        editor_config["shell"],
-                    ),
+                    utils.command(editor_config["run"], target_path),
                     run_type="orphan"
                     if editor_config.get("orphan", True)
                     else "suspend",
@@ -430,23 +424,30 @@ class FileList(
                             self.app, opener.get("if", {})
                         ):
                             continue
-                        runner = shlex.split(
-                            opener if isinstance(opener, str) else opener["run"]
-                        ) + [target_path]
-                        if which(runner[0]):
-                            utils.run_command(
+                        runner = opener if isinstance(opener, str) else opener["run"]
+                        run_type = (
+                            ("orphan" if opener.get("orphan", True) else "suspend")
+                            if isinstance(opener, dict)
+                            else "orphan"
+                        )
+                        shell = (
+                            opener.get("shell", True)
+                            if isinstance(opener, dict)
+                            else True
+                        )
+                        try:
+                            proc = utils.run_command(
                                 self.app,
-                                runner,
-                                run_type=(
-                                    "orphan"
-                                    if opener.get("orphan", True)
-                                    else "suspend"
-                                )
-                                if isinstance(opener, dict)
-                                else "orphan",
+                                utils.command(runner, target_path),
+                                run_type,
+                                shell=shell,
                             )
-                            opened = True
-                            break
+                        except Exception:
+                            continue
+                        if run_type == "suspend" and proc.returncode != 0:
+                            continue
+                        opened = True
+                        break
                     if opened:
                         break
 
@@ -944,11 +945,7 @@ class FileList(
             try:
                 utils.run_command(
                     self.app,
-                    utils.command(
-                        editor_config["run"],
-                        target_path,
-                        editor_config["shell"],
-                    ),
+                    utils.command(editor_config["run"], target_path),
                     run_type="orphan"
                     if editor_config.get("orphan", True)
                     else "suspend",

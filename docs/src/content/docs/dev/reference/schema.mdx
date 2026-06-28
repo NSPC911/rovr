@@ -49,6 +49,9 @@ description: config schema humanified
         - [2.2.1.4.1. Property `Rovr Config > settings > right_click > right_click items > action > oneOf > item 0`](#settings_right_click_items_action_oneOf_i0)
         - [2.2.1.4.2. Property `Rovr Config > settings > right_click > right_click items > action > oneOf > item 1`](#settings_right_click_items_action_oneOf_i1)
           - [2.2.1.4.2.1. Property `Rovr Config > settings > right_click > right_click items > action > oneOf > item 1 > run`](#settings_right_click_items_action_oneOf_i1_run)
+            - [2.2.1.4.2.1.1. Property `Rovr Config > settings > right_click > right_click items > action > oneOf > item 1 > run > oneOf > item 0`](#settings_right_click_items_action_oneOf_i1_run_oneOf_i0)
+            - [2.2.1.4.2.1.2. Property `Rovr Config > settings > right_click > right_click items > action > oneOf > item 1 > run > oneOf > item 1`](#settings_right_click_items_action_oneOf_i1_run_oneOf_i1)
+              - [2.2.1.4.2.1.2.1. Rovr Config > settings > right_click > right_click items > action > oneOf > item 1 > run > oneOf > item 1 > item 1 items](#settings_right_click_items_action_oneOf_i1_run_oneOf_i1_items)
           - [2.2.1.4.2.2. Property `Rovr Config > settings > right_click > right_click items > action > oneOf > item 1 > run_type`](#settings_right_click_items_action_oneOf_i1_run_type)
           - [2.2.1.4.2.3. Property `Rovr Config > settings > right_click > right_click items > action > oneOf > item 1 > shell`](#settings_right_click_items_action_oneOf_i1_shell)
       - [2.2.1.5. Property `Rovr Config > settings > right_click > right_click items > if`](#settings_right_click_items_if)
@@ -79,14 +82,23 @@ description: config schema humanified
   - [2.4. Property `Rovr Config > settings > editor`](#settings_editor)
     - [2.4.1. Property `Rovr Config > settings > editor > file`](#settings_editor_file)
       - [2.4.1.1. Property `Rovr Config > settings > editor > file > run`](#settings_editor_file_run)
+        - [2.4.1.1.1. Property `Rovr Config > settings > right_click > right_click items > action > oneOf > item 1 > run > oneOf > item 0`](#settings_right_click_items_action_oneOf_i1_run_oneOf_i0)
+        - [2.4.1.1.2. Property `Rovr Config > settings > right_click > right_click items > action > oneOf > item 1 > run > oneOf > item 1`](#settings_right_click_items_action_oneOf_i1_run_oneOf_i1)
+          - [2.4.1.1.2.1. Rovr Config > settings > right_click > right_click items > action > oneOf > item 1 > run > oneOf > item 1 > item 1 items](#settings_right_click_items_action_oneOf_i1_run_oneOf_i1_items)
       - [2.4.1.2. Property `Rovr Config > settings > editor > file > orphan`](#settings_editor_file_orphan)
       - [2.4.1.3. Property `Rovr Config > settings > editor > file > shell`](#settings_editor_file_shell)
     - [2.4.2. Property `Rovr Config > settings > editor > folder`](#settings_editor_folder)
       - [2.4.2.1. Property `Rovr Config > settings > editor > folder > run`](#settings_editor_folder_run)
+        - [2.4.2.1.1. Property `Rovr Config > settings > right_click > right_click items > action > oneOf > item 1 > run > oneOf > item 0`](#settings_right_click_items_action_oneOf_i1_run_oneOf_i0)
+        - [2.4.2.1.2. Property `Rovr Config > settings > right_click > right_click items > action > oneOf > item 1 > run > oneOf > item 1`](#settings_right_click_items_action_oneOf_i1_run_oneOf_i1)
+          - [2.4.2.1.2.1. Rovr Config > settings > right_click > right_click items > action > oneOf > item 1 > run > oneOf > item 1 > item 1 items](#settings_right_click_items_action_oneOf_i1_run_oneOf_i1_items)
       - [2.4.2.2. Property `Rovr Config > settings > editor > folder > orphan`](#settings_editor_folder_orphan)
       - [2.4.2.3. Property `Rovr Config > settings > editor > folder > shell`](#settings_editor_folder_shell)
     - [2.4.3. Property `Rovr Config > settings > editor > bulk_editor`](#settings_editor_bulk_editor)
       - [2.4.3.1. Property `Rovr Config > settings > editor > bulk_editor > run`](#settings_editor_bulk_editor_run)
+        - [2.4.3.1.1. Property `Rovr Config > settings > right_click > right_click items > action > oneOf > item 1 > run > oneOf > item 0`](#settings_right_click_items_action_oneOf_i1_run_oneOf_i0)
+        - [2.4.3.1.2. Property `Rovr Config > settings > right_click > right_click items > action > oneOf > item 1 > run > oneOf > item 1`](#settings_right_click_items_action_oneOf_i1_run_oneOf_i1)
+          - [2.4.3.1.2.1. Rovr Config > settings > right_click > right_click items > action > oneOf > item 1 > run > oneOf > item 1 > item 1 items](#settings_right_click_items_action_oneOf_i1_run_oneOf_i1_items)
       - [2.4.3.2. Property `Rovr Config > settings > editor > bulk_editor > rename_show_as_mapping`](#settings_editor_bulk_editor_rename_show_as_mapping)
       - [2.4.3.3. Property `Rovr Config > settings > editor > bulk_editor > shell`](#settings_editor_bulk_editor_shell)
   - [2.5. Property `Rovr Config > settings > preview_rules`](#settings_preview_rules)
@@ -984,18 +996,58 @@ Must be one of:
 
 | Property                                                         | Type             | Title/Description                                                                                                                                                                                                                                    |
 | ---------------------------------------------------------------- | ---------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| [run](#settings_right_click_items_action_oneOf_i1_run)           | string           | The command to run when this action is selected. Command expansions are supported.                                                                                                                                                                   |
+| [run](#settings_right_click_items_action_oneOf_i1_run)           | object           | The command to run when this action is selected. Command expansions are supported.                                                                                                                                                                   |
 | [run_type](#settings_right_click_items_action_oneOf_i1_run_type) | enum (of string) | The way to run the command. \`suspend\` will suspend rovr until the command is finished, \`background\` will run the command in the background without suspending rovr, and \`orphan\` will run the command as an orphan process detached from rovr. |
 | [shell](#settings_right_click_items_action_oneOf_i1_shell)       | boolean          | Whether the command to run is a shell command that needs to be run in a shell (required if you want to do piping)                                                                                                                                    |
 
 ###### <a name="settings_right_click_items_action_oneOf_i1_run"></a>2.2.1.4.2.1. Property `Rovr Config > settings > right_click > right_click items > action > oneOf > item 1 > run`
 
+|                           |                   |
+| ------------------------- | ----------------- |
+| **Type**                  | `combining`       |
+| **Required**              | Yes               |
+| **Additional properties** | Any type allowed  |
+| **Defined in**            | #/definitions/run |
+
+**Description:** The command to run when this action is selected. Command expansions are supported.
+
+| One of(Option)                                                     |
+| ------------------------------------------------------------------ |
+| [item 0](#settings_right_click_items_action_oneOf_i1_run_oneOf_i0) |
+| [item 1](#settings_right_click_items_action_oneOf_i1_run_oneOf_i1) |
+
+###### <a name="settings_right_click_items_action_oneOf_i1_run_oneOf_i0"></a>2.2.1.4.2.1.1. Property `Rovr Config > settings > right_click > right_click items > action > oneOf > item 1 > run > oneOf > item 0`
+
 |              |          |
 | ------------ | -------- |
 | **Type**     | `string` |
-| **Required** | Yes      |
+| **Required** | No       |
 
-**Description:** The command to run when this action is selected. Command expansions are supported.
+###### <a name="settings_right_click_items_action_oneOf_i1_run_oneOf_i1"></a>2.2.1.4.2.1.2. Property `Rovr Config > settings > right_click > right_click items > action > oneOf > item 1 > run > oneOf > item 1`
+
+|              |                   |
+| ------------ | ----------------- |
+| **Type**     | `array of string` |
+| **Required** | No                |
+
+|                      | Array restrictions |
+| -------------------- | ------------------ |
+| **Min items**        | 1                  |
+| **Max items**        | N/A                |
+| **Items unicity**    | False              |
+| **Additional items** | False              |
+| **Tuple validation** | See below          |
+
+| Each item of this array must be                                                | Description |
+| ------------------------------------------------------------------------------ | ----------- |
+| [item 1 items](#settings_right_click_items_action_oneOf_i1_run_oneOf_i1_items) |             |
+
+###### <a name="settings_right_click_items_action_oneOf_i1_run_oneOf_i1_items"></a>2.2.1.4.2.1.2.1. Rovr Config > settings > right_click > right_click items > action > oneOf > item 1 > run > oneOf > item 1 > item 1 items
+
+|              |          |
+| ------------ | -------- |
+| **Type**     | `string` |
+| **Required** | No       |
 
 ###### <a name="settings_right_click_items_action_oneOf_i1_run_type"></a>2.2.1.4.2.2. Property `Rovr Config > settings > right_click > right_click items > action > oneOf > item 1 > run_type`
 
@@ -1387,19 +1439,59 @@ Must be one of:
 
 | Property                               | Type    | Title/Description                                                                                                                                                |
 | -------------------------------------- | ------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| [run](#settings_editor_file_run)       | string  | Editor to use when opening a file                                                                                                                                |
+| [run](#settings_editor_file_run)       | object  | Editor to use when opening a file                                                                                                                                |
 | [orphan](#settings_editor_file_orphan) | boolean | Whether to open the editor as an orphan process.                                                                                                                 |
 | [shell](#settings_editor_file_shell)   | boolean | Whether the command to run is a shell command that needs to be run in a shell (required if you want to do complicated things like piping in your editor command) |
 
 ##### <a name="settings_editor_file_run"></a>2.4.1.1. Property `Rovr Config > settings > editor > file > run`
 
-|              |             |
-| ------------ | ----------- |
-| **Type**     | `string`    |
-| **Required** | Yes         |
-| **Default**  | `"$EDITOR"` |
+|                           |                   |
+| ------------------------- | ----------------- |
+| **Type**                  | `combining`       |
+| **Required**              | Yes               |
+| **Additional properties** | Any type allowed  |
+| **Default**               | `"$EDITOR"`       |
+| **Defined in**            | #/definitions/run |
 
 **Description:** Editor to use when opening a file
+
+| One of(Option)                                                     |
+| ------------------------------------------------------------------ |
+| [item 0](#settings_right_click_items_action_oneOf_i1_run_oneOf_i0) |
+| [item 1](#settings_right_click_items_action_oneOf_i1_run_oneOf_i1) |
+
+###### <a name="settings_right_click_items_action_oneOf_i1_run_oneOf_i0"></a>2.4.1.1.1. Property `Rovr Config > settings > right_click > right_click items > action > oneOf > item 1 > run > oneOf > item 0`
+
+|              |          |
+| ------------ | -------- |
+| **Type**     | `string` |
+| **Required** | No       |
+
+###### <a name="settings_right_click_items_action_oneOf_i1_run_oneOf_i1"></a>2.4.1.1.2. Property `Rovr Config > settings > right_click > right_click items > action > oneOf > item 1 > run > oneOf > item 1`
+
+|              |                   |
+| ------------ | ----------------- |
+| **Type**     | `array of string` |
+| **Required** | No                |
+
+|                      | Array restrictions |
+| -------------------- | ------------------ |
+| **Min items**        | 1                  |
+| **Max items**        | N/A                |
+| **Items unicity**    | False              |
+| **Additional items** | False              |
+| **Tuple validation** | See below          |
+
+| Each item of this array must be                                                | Description |
+| ------------------------------------------------------------------------------ | ----------- |
+| [item 1 items](#settings_right_click_items_action_oneOf_i1_run_oneOf_i1_items) |             |
+
+###### <a name="settings_right_click_items_action_oneOf_i1_run_oneOf_i1_items"></a>2.4.1.1.2.1. Rovr Config > settings > right_click > right_click items > action > oneOf > item 1 > run > oneOf > item 1 > item 1 items
+
+|              |          |
+| ------------ | -------- |
+| **Type**     | `string` |
+| **Required** | No       |
 
 ##### <a name="settings_editor_file_orphan"></a>2.4.1.2. Property `Rovr Config > settings > editor > file > orphan`
 
@@ -1433,19 +1525,59 @@ Must be one of:
 
 | Property                                 | Type    | Title/Description                                                                                                                                                |
 | ---------------------------------------- | ------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| [run](#settings_editor_folder_run)       | string  | Editor to use when opening a folder                                                                                                                              |
+| [run](#settings_editor_folder_run)       | object  | Editor to use when opening a folder                                                                                                                              |
 | [orphan](#settings_editor_folder_orphan) | boolean | Whether to open the editor as an orphan process.                                                                                                                 |
 | [shell](#settings_editor_folder_shell)   | boolean | Whether the command to run is a shell command that needs to be run in a shell (required if you want to do complicated things like piping in your editor command) |
 
 ##### <a name="settings_editor_folder_run"></a>2.4.2.1. Property `Rovr Config > settings > editor > folder > run`
 
-|              |             |
-| ------------ | ----------- |
-| **Type**     | `string`    |
-| **Required** | Yes         |
-| **Default**  | `"$EDITOR"` |
+|                           |                   |
+| ------------------------- | ----------------- |
+| **Type**                  | `combining`       |
+| **Required**              | Yes               |
+| **Additional properties** | Any type allowed  |
+| **Default**               | `"$EDITOR"`       |
+| **Defined in**            | #/definitions/run |
 
 **Description:** Editor to use when opening a folder
+
+| One of(Option)                                                     |
+| ------------------------------------------------------------------ |
+| [item 0](#settings_right_click_items_action_oneOf_i1_run_oneOf_i0) |
+| [item 1](#settings_right_click_items_action_oneOf_i1_run_oneOf_i1) |
+
+###### <a name="settings_right_click_items_action_oneOf_i1_run_oneOf_i0"></a>2.4.2.1.1. Property `Rovr Config > settings > right_click > right_click items > action > oneOf > item 1 > run > oneOf > item 0`
+
+|              |          |
+| ------------ | -------- |
+| **Type**     | `string` |
+| **Required** | No       |
+
+###### <a name="settings_right_click_items_action_oneOf_i1_run_oneOf_i1"></a>2.4.2.1.2. Property `Rovr Config > settings > right_click > right_click items > action > oneOf > item 1 > run > oneOf > item 1`
+
+|              |                   |
+| ------------ | ----------------- |
+| **Type**     | `array of string` |
+| **Required** | No                |
+
+|                      | Array restrictions |
+| -------------------- | ------------------ |
+| **Min items**        | 1                  |
+| **Max items**        | N/A                |
+| **Items unicity**    | False              |
+| **Additional items** | False              |
+| **Tuple validation** | See below          |
+
+| Each item of this array must be                                                | Description |
+| ------------------------------------------------------------------------------ | ----------- |
+| [item 1 items](#settings_right_click_items_action_oneOf_i1_run_oneOf_i1_items) |             |
+
+###### <a name="settings_right_click_items_action_oneOf_i1_run_oneOf_i1_items"></a>2.4.2.1.2.1. Rovr Config > settings > right_click > right_click items > action > oneOf > item 1 > run > oneOf > item 1 > item 1 items
+
+|              |          |
+| ------------ | -------- |
+| **Type**     | `string` |
+| **Required** | No       |
 
 ##### <a name="settings_editor_folder_orphan"></a>2.4.2.2. Property `Rovr Config > settings > editor > folder > orphan`
 
@@ -1479,19 +1611,59 @@ Must be one of:
 
 | Property                                                                      | Type    | Title/Description                                                                                                                                                |
 | ----------------------------------------------------------------------------- | ------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| [run](#settings_editor_bulk_editor_run)                                       | string  | Editor to use for bulk editing                                                                                                                                   |
+| [run](#settings_editor_bulk_editor_run)                                       | object  | Editor to use for bulk editing                                                                                                                                   |
 | [rename_show_as_mapping](#settings_editor_bulk_editor_rename_show_as_mapping) | boolean | When doing a bulk rename, show as a mapping of \`&lt;old&gt; ➔ &lt;new&gt;\` instead of just showing only the new names                                          |
 | [shell](#settings_editor_bulk_editor_shell)                                   | boolean | Whether the command to run is a shell command that needs to be run in a shell (required if you want to do complicated things like piping in your editor command) |
 
 ##### <a name="settings_editor_bulk_editor_run"></a>2.4.3.1. Property `Rovr Config > settings > editor > bulk_editor > run`
 
-|              |             |
-| ------------ | ----------- |
-| **Type**     | `string`    |
-| **Required** | No          |
-| **Default**  | `"$EDITOR"` |
+|                           |                   |
+| ------------------------- | ----------------- |
+| **Type**                  | `combining`       |
+| **Required**              | No                |
+| **Additional properties** | Any type allowed  |
+| **Default**               | `"$EDITOR"`       |
+| **Defined in**            | #/definitions/run |
 
 **Description:** Editor to use for bulk editing
+
+| One of(Option)                                                     |
+| ------------------------------------------------------------------ |
+| [item 0](#settings_right_click_items_action_oneOf_i1_run_oneOf_i0) |
+| [item 1](#settings_right_click_items_action_oneOf_i1_run_oneOf_i1) |
+
+###### <a name="settings_right_click_items_action_oneOf_i1_run_oneOf_i0"></a>2.4.3.1.1. Property `Rovr Config > settings > right_click > right_click items > action > oneOf > item 1 > run > oneOf > item 0`
+
+|              |          |
+| ------------ | -------- |
+| **Type**     | `string` |
+| **Required** | No       |
+
+###### <a name="settings_right_click_items_action_oneOf_i1_run_oneOf_i1"></a>2.4.3.1.2. Property `Rovr Config > settings > right_click > right_click items > action > oneOf > item 1 > run > oneOf > item 1`
+
+|              |                   |
+| ------------ | ----------------- |
+| **Type**     | `array of string` |
+| **Required** | No                |
+
+|                      | Array restrictions |
+| -------------------- | ------------------ |
+| **Min items**        | 1                  |
+| **Max items**        | N/A                |
+| **Items unicity**    | False              |
+| **Additional items** | False              |
+| **Tuple validation** | See below          |
+
+| Each item of this array must be                                                | Description |
+| ------------------------------------------------------------------------------ | ----------- |
+| [item 1 items](#settings_right_click_items_action_oneOf_i1_run_oneOf_i1_items) |             |
+
+###### <a name="settings_right_click_items_action_oneOf_i1_run_oneOf_i1_items"></a>2.4.3.1.2.1. Rovr Config > settings > right_click > right_click items > action > oneOf > item 1 > run > oneOf > item 1 > item 1 items
+
+|              |          |
+| ------------ | -------- |
+| **Type**     | `string` |
+| **Required** | No       |
 
 ##### <a name="settings_editor_bulk_editor_rename_show_as_mapping"></a>2.4.3.2. Property `Rovr Config > settings > editor > bulk_editor > rename_show_as_mapping`
 
@@ -1611,7 +1783,7 @@ Key must be a valid glob pattern, but the value has to be a list that can contai
 
 | Property                                                               | Type    | Title/Description                                                                                                 |
 | ---------------------------------------------------------------------- | ------- | ----------------------------------------------------------------------------------------------------------------- |
-| [run](#settings_openers_additionalProperties_items_oneOf_i1_run)       | string  | The command to run to open the file. Command expansions are supported.                                            |
+| [run](#settings_openers_additionalProperties_items_oneOf_i1_run)       | object  | The command to run to open the file. Command expansions are supported.                                            |
 | [if](#settings_openers_additionalProperties_items_oneOf_i1_if)         | object  | Only use this opener if a set criteria matches                                                                    |
 | [orphan](#settings_openers_additionalProperties_items_oneOf_i1_orphan) | boolean | Whether to open the opener as an orphan process.                                                                  |
 | [name](#settings_openers_additionalProperties_items_oneOf_i1_name)     | string  | The name of the opener to show in the menu (currently unused)                                                     |
@@ -1619,10 +1791,12 @@ Key must be a valid glob pattern, but the value has to be a list that can contai
 
 ###### <a name="settings_openers_additionalProperties_items_oneOf_i1_run"></a>2.6.1.1.2.1. Property `Rovr Config > settings > openers > additionalProperties > additionalProperties items > oneOf > item 1 > run`
 
-|              |          |
-| ------------ | -------- |
-| **Type**     | `string` |
-| **Required** | Yes      |
+|                           |                                                        |
+| ------------------------- | ------------------------------------------------------ |
+| **Type**                  | `combining`                                            |
+| **Required**              | Yes                                                    |
+| **Additional properties** | Any type allowed                                       |
+| **Same definition as**    | [run](#settings_right_click_items_action_oneOf_i1_run) |
 
 **Description:** The command to run to open the file. Command expansions are supported.
 

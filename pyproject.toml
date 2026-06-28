@@ -157,7 +157,7 @@ snip.args = [
 snip.use_exec = true
 
 tokei.help = "Run tokei"
-tokei.cmd = "tokei --sort lines --exclude '*.svg' --exclude 'src/rovr/classes/config.py' --exclude '*lock*' --hidden"
+tokei.cmd = " tokei --sort lines --exclude '*.svg' --exclude 'schema.mdx' --exclude 'src/rovr/classes/config.pyi' --exclude '*lock' --hidden"
 
 [tool.poe.tasks.test]
 help = "Run tests"

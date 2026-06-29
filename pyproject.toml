@@ -232,7 +232,16 @@ select = [
   "TD",
   "W",
 ]
-ignore = ["W505", "E501", "ANN002", "ANN003", "TD002", "TD003", "ANN401"]
+ignore = [
+  "ANN002",
+  "ANN003",
+  "ANN401",
+  "E501",
+  "E731",
+  "TD002",
+  "TD003",
+  "W505",
+]
 preview = true
 
 [tool.ruff.format]

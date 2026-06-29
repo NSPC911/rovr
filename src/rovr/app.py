@@ -587,14 +587,14 @@ class Application(Actionable, App, inherit_bindings=False):
         state_mtime = None
         with suppress(OSError):
             state_mtime = path.getmtime(state_path)
-        drives = lambda: self.app.query_one(PinnedSidebar).DRIVES  # noqa: E731
+        drives = lambda: self.app.query_one(PinnedSidebar).DRIVES
         drive_update_every = int(config["interface"]["drive_watcher_frequency"])
         count: int = -2
         style_available: bool = self.CUSTOM_STYLE_AVAILABLE
         custom_style_path = path.join(RovrVars.ROVRCONFIG, "style.tcss")
         new_drives: list[str] | None = None
 
-        i_should_shut_down = lambda: (  # noqa: E731
+        i_should_shut_down = lambda: (
             self._shutdown_event.is_set() or self.return_code is not None
         )
 

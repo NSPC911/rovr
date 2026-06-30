@@ -102,7 +102,7 @@ drive_exclude = ["/var/*"]
 
 [settings.openers]
 "*.png" = [
-  { if = { os = ["Windows"] }, run = ["powershell", "-NoProfile", "-Command", "$file = Get-Item ${path}; $path = $file.FullName; Start-Process \"ms-photos:viewer?fileName=$path\""], orphan = false, shell = false }
+  { if = { os = ["Windows"] }, run = 'start ms-photos:viewer?fileName="${path}"', orphan = true, shell = true }
 ]
 
 [settings.editor.file]

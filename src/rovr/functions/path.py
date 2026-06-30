@@ -664,13 +664,17 @@ def run_opener(app: App, target_path: str) -> None:
                     runner = opener["run"]
                 else:
                     return
+                tp = shlex.quote(target_path)
+                rtp = shlex.quote(path.realpath(target_path))
+
                 if isinstance(runner, str):
-                    to_run = runner.replace("${path}", shlex.quote(target_path))
+                    to_run = runner.replace("${path}", tp).replace("${real_path}", rtp)
                 else:
                     to_run = [
-                        part.replace("${path}", shlex.quote(target_path))
+                        part.replace("${path}", tp).replace("${real_path}", rtp)
                         for part in runner
                     ]
+
                 if to_run == runner:
                     if isinstance(runner, str):
                         to_run = runner + " " + shlex.quote(target_path)

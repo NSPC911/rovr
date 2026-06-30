@@ -102,7 +102,7 @@ drive_exclude = ["/var/*"]
 
 [settings.openers]
 "*.png" = [
-  { if = { os = ["Windows"] }, run = 'start ms-photos:viewer?fileName="${path}"', orphan = true, shell = true }
+  { if = { os = ["Windows"] }, run = 'start ms-photos:viewer?fileName="${real_path}"', orphan = true, shell = true }
 ]
 
 [settings.editor.file]

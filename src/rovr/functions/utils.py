@@ -260,12 +260,26 @@ async def expand_command(app: App, command: str | list[str]) -> str | list[str]:
     selected_files = await app.file_list.get_selected_objects() or []
 
     def _expand(cmd: str) -> str:
-        expanded = cmd.replace("${current_working_directory}", cwd)
-        expanded = expanded.replace("${highlighted_file}", highlighted)
+        expanded = cmd.replace("${current_working_directory}", cwd).replace(
+            "${real_current_working_directory", os.path.realpath(cwd)
+        )
+        expanded = expanded.replace("${highlighted_file}", highlighted).replace(
+            "${real_highlighted_file}", os.path.realpath(highlighted)
+        )
         if selected_files:
-            expanded = expanded.replace("${selected_files}", " ".join(selected_files))
+            from shlex import join as shjoin
+
+            expanded = expanded.replace(
+                "${selected_files}", shjoin(selected_files)
+            ).replace(
+                "${real_selected_files}",
+                shjoin([os.path.realpath(f) for f in selected_files]),
+            )
         expanded = expanded.replace(
             "${highlighted_file_name}", os.path.basename(highlighted)
+        ).replace(
+            "${real_highlighted_file_name}",
+            os.path.basename(os.path.realpath(highlighted)),
         )
         return expanded
 

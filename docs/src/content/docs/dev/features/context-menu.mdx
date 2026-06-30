@@ -104,6 +104,8 @@ shell actions support variable expansions via `rovr/functions/utils.py::expand_c
 | `${current_working_directory}` | the current directory path                                     |
 | `${highlighted_file_name}`     | the name of the highlighted file (without path)                |
 
+each variable also has an alternative `real_` version that properly converts the file path to the OS-specific format (which means Windows will use backslash as separator)
+
 ## conditional display
 
 menu items can be conditionally shown or hidden based on file path, operating system, current directory, or file type. conditions are checked via `rovr/core/file_list_right_click_menu.py::ifed`.

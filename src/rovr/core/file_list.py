@@ -415,7 +415,7 @@ class FileList(
             return
 
         for target in paths:
-            path_utils.run_opener(self.app, target)
+            path_utils.run_opener(self.app, path_utils.normalise(target))
 
     @work
     async def on_selection_list_selected_changed(

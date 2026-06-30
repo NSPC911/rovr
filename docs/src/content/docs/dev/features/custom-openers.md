@@ -50,8 +50,11 @@ the `if` property allows you to restrict when an opener is used based on specifi
 ]
 ```
 
-### adding more openers
-currently rovr doesn't set up any default openers, which means it will use whatever your system has set, which is
-- `cmd /c start` on Windows
-- `open` on MacOS
-- `xdg-open` on Linux
+### placing the file path in the command
+you can use the placeholder `${path}` in the `run` command to insert the file path being opened. if you don't include this placeholder, rovr will append the file path to the command automatically.
+
+```toml
+[settings.openers]
+"*.md" = [
+    { run = "code ${path} --wait", orphan = true }
+]

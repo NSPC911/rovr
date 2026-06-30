@@ -10,7 +10,7 @@ import stat
 from contextlib import suppress
 from functools import lru_cache, partial
 from os import path
-from subprocess import CompletedProcess, Popen
+from subprocess import CompletedProcess
 from typing import Callable, Literal, TypedDict, overload
 
 from rich.console import Console
@@ -655,29 +655,45 @@ def run_opener(app: App, target_path: str) -> None:
     for pattern, openers in config["settings"].get("openers", {}).items():
         if fnmatch(target_path, pattern):
             for opener in openers:
-                if not isinstance(opener, str) and not ifed(app, opener.get("if", {})):
+                if ifed(app, opener.get("if", {})):
                     continue
                 runner: str | list[str]
                 if isinstance(opener, str):
                     runner = opener
-                elif isinstance(opener["run"], list):
-                    runner = opener["run"] + [target_path]
+                elif isinstance(opener["run"], (list, str)):
+                    runner = opener["run"]
                 else:
-                    runner = opener["run"] + " " + shlex.quote(target_path)
+                    return
+                if isinstance(runner, str):
+                    to_run = runner.replace("${path}", shlex.quote(target_path))
+                else:
+                    to_run = [
+                        part.replace("${path}", shlex.quote(target_path))
+                        for part in runner
+                    ]
+                if to_run == runner:
+                    if isinstance(runner, str):
+                        to_run = runner + " " + shlex.quote(target_path)
+                    else:
+                        to_run = runner + [target_path]
+
+                app.copy_to_clipboard(repr(to_run))
+
                 proc = utils.run_command(
                     app,
-                    runner,
+                    to_run,
                     run_type=("orphan" if opener.get("orphan", True) else "suspend")
                     if isinstance(opener, dict)
                     else "orphan",
+                    shell=opener.get("shell", True)
+                    if isinstance(opener, dict)
+                    else True,
                 )
                 if isinstance(proc, CompletedProcess):
+                    app.notify(str(proc.returncode))
                     if proc.returncode == 0:
                         return
                 else:
-                    assert isinstance(proc, Popen)
-                    proc.wait()
-                    if proc.returncode == 0:
-                        return
+                    return
     # means we still havent opened it because user is stupid yay (-Syu)
     open_file(app, target_path)

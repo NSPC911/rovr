@@ -356,9 +356,9 @@ _RIGHTCLICKACTIONONEOF0_SYSTEM_COLON_COPY_TO_SYSTEM_CLIP: Literal[
 r"""The values for the '_RightClickActionOneof0' enum"""
 
 class _RightClickActionOneof1(TypedDict, total=False):
-    run: Required[str]
+    run: Required["_Run"]
     r"""
-    The command to run when this action is selected. Command expansions are supported.
+    Aggregation type: oneOf
 
     Required property
     """
@@ -976,6 +976,7 @@ class _RovrConfigKeybinds(TypedDict, total=False):
     """
 
     suspend_process: list[str]
+    open: list[str]
     open_editor: list[str]
     show_shell_screen: list[str]
     filename_conflict: "_RovrConfigKeybindsFilenameConflict"
@@ -1467,12 +1468,8 @@ class _RovrConfigSettingsEditor(TypedDict, total=False):
 class _RovrConfigSettingsEditorBulkEditor(TypedDict, total=False):
     r"""Editor to use for bulk editing"""
 
-    run: str
-    r"""
-    Editor to use for bulk editing
-
-    default: $EDITOR
-    """
+    run: "_Run"
+    r""" Aggregation type: oneOf """
 
     rename_show_as_mapping: bool
     r"""
@@ -1491,11 +1488,9 @@ class _RovrConfigSettingsEditorBulkEditor(TypedDict, total=False):
 class _RovrConfigSettingsEditorFile(TypedDict, total=False):
     r"""Editor to use when opening a file"""
 
-    run: Required[str]
+    run: Required["_Run"]
     r"""
-    Editor to use when opening a file
-
-    default: $EDITOR
+    Aggregation type: oneOf
 
     Required property
     """
@@ -1519,11 +1514,9 @@ class _RovrConfigSettingsEditorFile(TypedDict, total=False):
 class _RovrConfigSettingsEditorFolder(TypedDict, total=False):
     r"""Editor to use when opening a folder"""
 
-    run: Required[str]
+    run: Required["_Run"]
     r"""
-    Editor to use when opening a folder
-
-    default: $EDITOR
+    Aggregation type: oneOf
 
     Required property
     """
@@ -1552,10 +1545,10 @@ r""" Aggregation type: oneOf """
 _RovrConfigSettingsOpenersAdditionalpropertiesItemOneof1 = TypedDict(
     "_RovrConfigSettingsOpenersAdditionalpropertiesItemOneof1",
     {
-        # | The command to run to open the file. Command expansions are supported.
+        # | Aggregation type: oneOf
         # |
         # | Required property
-        "run": Required[str],
+        "run": Required["_Run"],
         "if": "_OpenerIf",
         # | Whether to open the opener as an orphan process.
         # |
@@ -1778,3 +1771,9 @@ _ROVRCONFIGTHEMEPREVIEW_XCODE: Literal["xcode"] = "xcode"
 r"""The values for the 'The theme to use when previewing files in the preview sidebar' enum"""
 _ROVRCONFIGTHEMEPREVIEW_ZENBURN: Literal["zenburn"] = "zenburn"
 r"""The values for the 'The theme to use when previewing files in the preview sidebar' enum"""
+
+_Run = Union[str, "_RunOneof1"]
+r""" Aggregation type: oneOf """
+
+_RunOneof1 = list[str]
+r""" minItems: 1 """

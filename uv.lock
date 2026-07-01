@@ -1248,7 +1248,7 @@ wheels = [
 
 [[package]]
 name = "rovr"
-version = "0.9.2"
+version = "0.10.0"
 source = { editable = "." }
 dependencies = [
     { name = "backports-zstd", marker = "python_full_version < '3.14'" },

@@ -11,62 +11,15 @@ from textual.reactive import var
 from textual.widgets import OptionList
 
 from rovr.classes.config import (
-    _OpenerIf,
-    _RightClickIf,
     _RightClickItem,
     _RightClickItemOptionsItem,
 )
 from rovr.classes.textual_options import RightClickMenuOption
 from rovr.classes.type_aliases import DirEntryType
 from rovr.components import PopupOptionList
+from rovr.functions.path import ifed
 from rovr.functions.utils import check_key, expand_command, is_archive, run_command
-from rovr.variables.constants import bindings, config, os_type
-
-
-def ifed(app: App, conditions: _RightClickIf | _OpenerIf) -> bool:
-    """Checks if the conditions for an option are met, used to determine if an option should be disabled
-
-    Args:
-        app: The app, needed to check the conditions
-        conditions: The conditions to check, can be based on the highlighted file, current directory, os, or if the highlighted file is a directory
-
-    Returns:
-        Whether the option should be disabled based on the conditions
-    """
-    from fnmatch import fnmatch
-
-    dir_entry: DirEntryType | None = getattr(
-        app.file_list.highlighted_option, "dir_entry", None
-    )
-    disabled = False
-    for thing in conditions:
-        match thing:
-            case "path":
-                disabled = not (
-                    any(
-                        dir_entry and fnmatch(dir_entry.path, pattern)
-                        for pattern in conditions.get("path", [])
-                    )
-                )
-            case "os":
-                disabled = not any(
-                    os.lower() == os_type.lower() for os in conditions["os"]
-                )
-            case "cwd":
-                disabled = not (
-                    any(
-                        fnmatch(app.file_list.current_directory, pattern)
-                        for pattern in conditions["cwd"]
-                    )
-                )
-            case "directory":
-                if conditions["directory"]:
-                    disabled = not (dir_entry and dir_entry.is_dir())
-                else:
-                    disabled = not (dir_entry and not dir_entry.is_dir())
-        if disabled:
-            break
-    return disabled
+from rovr.variables.constants import bindings, config
 
 
 async def get_shell_option(
@@ -86,13 +39,14 @@ async def get_shell_option(
     if isinstance(option["action"], str):
         return None
     action = option["action"]["run"]
+    action_parts = action if isinstance(action, list) else [action]
     disabled = False
     dir_entry: DirEntryType | None = getattr(
         app.file_list.highlighted_option, "dir_entry", None
     )
-    if "${highlighted_file}" in action:
+    if any("${highlighted_file}" in part for part in action_parts):
         disabled = not dir_entry
-    if not disabled and "${selected_files}" in action:
+    if not disabled and any("${selected_files}" in part for part in action_parts):
         disabled = await app.file_list.get_selected_objects() == []
     if "if" in option and ifed(app, option["if"]):
         return False
@@ -290,14 +244,16 @@ class FileListRightClickMenu(PopupOptionList, inherit_bindings=False):
                 )
             )
         elif event.option.id.startswith("shell_"):
-            command: str = await expand_command(self.app, event.option.action["run"])
+            command: str | list[str] = await expand_command(
+                self.app, event.option.action["run"]
+            )
             proc = run_command(
                 self.app,
                 command,
                 event.option.action["run_type"],
                 shell=event.option.action["shell"],
             )
-            if isinstance(proc, Popen) and event.option.action["run"] != "orphan":
+            if isinstance(proc, Popen) and event.option.action["run_type"] != "orphan":
                 self.app.shell_thread(proc, "Context Menu")
 
     def on_blur(self, event: events.Blur) -> None:  # ty: ignore[invalid-method-override]

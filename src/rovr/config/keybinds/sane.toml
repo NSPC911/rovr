@@ -67,6 +67,7 @@ show_keybinds = ["f1"]
 quit_app = ["ctrl+q"]
 command_palette = "ctrl+p"
 suspend_process = ["ctrl+z"]
+open = ["o"]
 open_editor = ["ctrl+o"]
 
 [keybinds.extra_copy]

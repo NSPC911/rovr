@@ -334,7 +334,7 @@ def get_mime_type(
 
         try:
             puremagic_result: list[puremagic.PureMagicWithConfidence] = (
-                puremagic.magic_string(file_bytes)
+                puremagic.magic_file(file_path)
             )
             if puremagic_result:
                 # If multiple matches exist, prefer one matching the file extension

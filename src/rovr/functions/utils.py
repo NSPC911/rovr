@@ -4,7 +4,7 @@ import re
 import subprocess
 from contextlib import suppress
 from functools import lru_cache
-from typing import Callable, Literal
+from typing import Callable, Literal, overload
 
 from humanize import naturalsize
 from textual import events
@@ -142,14 +142,14 @@ def run_command(
     shell: bool = True,
     on_error: Callable[[str, str], None] | None = None,
 ) -> subprocess.CompletedProcess | subprocess.Popen:
-    if shell and isinstance(command, list):
-        from shlex import join
+    if not shell and isinstance(command, str):
+        from shlex import split as shplit
 
-        command = join(command)
-    elif not shell and isinstance(command, str):
-        from shlex import split
+        command = shplit(command)
+    elif shell and isinstance(command, list):
+        from shlex import join as shjoin
 
-        command = split(command)
+        command = shjoin(command)
 
     match run_type:
         case "orphan":
@@ -159,8 +159,8 @@ def run_command(
                 return subprocess.Popen(
                     command,
                     stdin=subprocess.DEVNULL,
-                    stdout=subprocess.PIPE,
-                    stderr=subprocess.PIPE,
+                    stdout=subprocess.DEVNULL,
+                    stderr=subprocess.DEVNULL,
                     creationflags=subprocess.CREATE_NEW_PROCESS_GROUP
                     | subprocess.DETACHED_PROCESS,
                     shell=shell,
@@ -169,8 +169,8 @@ def run_command(
                 return subprocess.Popen(
                     command,
                     stdin=subprocess.DEVNULL,
-                    stdout=subprocess.PIPE,
-                    stderr=subprocess.PIPE,
+                    stdout=subprocess.DEVNULL,
+                    stderr=subprocess.DEVNULL,
                     start_new_session=True,
                     shell=shell,
                 )
@@ -239,7 +239,15 @@ def multiprocessing_process_error_checker(app: App, exc: Exception) -> bool:
     return False
 
 
-async def expand_command(app: App, command: str) -> str:
+@overload
+async def expand_command(app: App, command: str) -> str: ...
+
+
+@overload
+async def expand_command(app: App, command: list[str]) -> list[str]: ...
+
+
+async def expand_command(app: App, command: str | list[str]) -> str | list[str]:
     from rovr.functions.path import normalise
 
     cwd = normalise(os.getcwd())
@@ -251,14 +259,34 @@ async def expand_command(app: App, command: str) -> str:
 
     selected_files = await app.file_list.get_selected_objects() or []
 
-    expanded = command.replace("${current_working_directory}", cwd)
-    expanded = expanded.replace("${highlighted_file}", highlighted)
-    if selected_files:
-        expanded = expanded.replace("${selected_files}", " ".join(selected_files))
-    expanded = expanded.replace(
-        "${highlighted_file_name}", os.path.basename(highlighted)
-    )
-    return expanded
+    def _expand(cmd: str) -> str:
+        expanded = cmd.replace("${current_working_directory}", cwd).replace(
+            "${real_current_working_directory", os.path.realpath(cwd)
+        )
+        expanded = expanded.replace("${highlighted_file}", highlighted).replace(
+            "${real_highlighted_file}", os.path.realpath(highlighted)
+        )
+        if selected_files:
+            from shlex import join as shjoin
+
+            expanded = expanded.replace(
+                "${selected_files}", shjoin(selected_files)
+            ).replace(
+                "${real_selected_files}",
+                shjoin([os.path.realpath(f) for f in selected_files]),
+            )
+        expanded = expanded.replace(
+            "${highlighted_file_name}", os.path.basename(highlighted)
+        ).replace(
+            "${real_highlighted_file_name}",
+            os.path.basename(os.path.realpath(highlighted)),
+        )
+        return expanded
+
+    if isinstance(command, list):
+        return [_expand(cmd) for cmd in command]
+    else:
+        return _expand(command)
 
 
 @lru_cache(maxsize=512)
@@ -266,10 +294,14 @@ def recache(pattern: str) -> re.Pattern:
     return re.compile(pattern)
 
 
-def command(initial_command: str, path_str: str, is_shell: bool) -> str | list[str]:
+def command(
+    initial_command: str | list[str] | tuple[str], path_str: str
+) -> str | list[str]:
     import shlex
 
-    if is_shell:
-        return initial_command + " " + shlex.quote(path_str)
+    if isinstance(initial_command, tuple):
+        initial_command = list(initial_command)
+    if isinstance(initial_command, list):
+        return initial_command + [path_str]
     else:
-        return shlex.split(initial_command) + [path_str]
+        return initial_command + " " + shlex.quote(path_str)

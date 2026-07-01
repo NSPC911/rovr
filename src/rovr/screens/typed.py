@@ -23,7 +23,7 @@ class ArchiveScreenReturnType(NamedTuple):
 
 
 class ShellExecReturnType(NamedTuple):
-    command: str
+    command: str | list[str]
     run_type: Literal["suspend", "background"]
 
 

@@ -378,7 +378,7 @@ def get_mime_type(
                             else (guessed_lexer.name if guessed_lexer else "plain")
                         )
                     else:
-                        final_lexer = "plain"
+                        final_lexer = "text"
                     return MimeResult("basic", f"text/{final_lexer}")
                 except UnicodeDecodeError:
                     pass

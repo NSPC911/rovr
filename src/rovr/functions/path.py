@@ -5,10 +5,12 @@ import base64
 import ctypes
 import os
 import re
+import shlex
 import stat
 from contextlib import suppress
 from functools import lru_cache, partial
 from os import path
+from subprocess import CompletedProcess
 from typing import Callable, Literal, TypedDict, overload
 
 from rich.console import Console
@@ -17,6 +19,7 @@ from textual.app import App
 from textual.dom import DOMNode
 
 from rovr import pprint
+from rovr.classes.config import _OpenerIf, _RightClickIf
 from rovr.classes.type_aliases import (
     DirEntryType,
     DirEntryTypes,
@@ -594,3 +597,98 @@ def dump_exc(widget: DOMNode | None, exc: Exception | Traceback) -> str | None: 
             Panel(rich_traceback, title=f"Exception dumped on {str(datetime.now())}")
         )
     return dump_path
+
+
+def ifed(app: App, conditions: _RightClickIf | _OpenerIf) -> bool:
+    """Checks if the conditions for an option are met, used to determine if an option should be disabled
+
+    Args:
+        app: The app, needed to check the conditions
+        conditions: The conditions to check, can be based on the highlighted file, current directory, os, or if the highlighted file is a directory
+
+    Returns:
+        Whether the option should be disabled based on the conditions
+    """
+    from fnmatch import fnmatch
+
+    dir_entry: DirEntryType | None = getattr(
+        app.file_list.highlighted_option, "dir_entry", None
+    )
+    disabled = False
+    for thing in conditions:
+        match thing:
+            case "path":
+                disabled = not (
+                    any(
+                        dir_entry and fnmatch(dir_entry.path, pattern)
+                        for pattern in conditions.get("path", [])
+                    )
+                )
+            case "os":
+                disabled = not any(
+                    os.lower() == os_type.lower() for os in conditions["os"]
+                )
+            case "cwd":
+                disabled = not (
+                    any(
+                        fnmatch(app.file_list.current_directory, pattern)
+                        for pattern in conditions["cwd"]
+                    )
+                )
+            case "directory":
+                if conditions["directory"]:
+                    disabled = not (dir_entry and dir_entry.is_dir())
+                else:
+                    disabled = not (dir_entry and not dir_entry.is_dir())
+        if disabled:
+            break
+    return disabled
+
+
+def run_opener(app: App, target_path: str) -> None:
+    from fnmatch import fnmatch
+
+    from rovr.variables.constants import config
+
+    from . import utils
+
+    for pattern, openers in config["settings"].get("openers", {}).items():
+        if fnmatch(target_path, pattern):
+            for opener in openers:
+                if isinstance(opener, str):
+                    runner = opener
+                elif ifed(app, opener.get("if", {})):
+                    continue
+                elif isinstance(opener["run"], (list, str)):
+                    runner = opener["run"]
+                else:
+                    return
+                if isinstance(runner, str):
+                    to_run = runner.replace("${path}", shlex.quote(target_path))
+                else:
+                    to_run = [part.replace("${path}", target_path) for part in runner]
+                if to_run == runner:
+                    if isinstance(runner, str):
+                        to_run = runner + " " + shlex.quote(target_path)
+                    else:
+                        to_run = runner + [target_path]
+
+                try:
+                    proc = utils.run_command(
+                        app,
+                        to_run,
+                        run_type=("orphan" if opener.get("orphan", True) else "suspend")
+                        if isinstance(opener, dict)
+                        else "orphan",
+                        shell=opener.get("shell", True)
+                        if isinstance(opener, dict)
+                        else True,
+                    )
+                except Exception:
+                    continue
+                if isinstance(proc, CompletedProcess):
+                    if proc.returncode == 0:
+                        return
+                else:
+                    return
+    open_file(app, target_path)

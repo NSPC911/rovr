@@ -18,6 +18,7 @@ from rovr.screens import (
     Dismissible,
     FileInUse,
     FileNameConflict,
+    KittyDND,
     PasteScreen,
     YesOrNo,
 )
@@ -50,6 +51,7 @@ class Test(App):
         yield Button("Dismissible", id="Dismissible")
         yield Button("File In Use", id="FileInUse")
         yield Button("File Name Conflict", id="FileNameConflict")
+        yield Button("Kitty DND", id="KittyDND")
         yield Button("Paste Screen", id="PasteScreen")
         yield Button("Yes Or No", id="YesOrNo")
         yield Button("Zip Up Screen", id="ArchiveCreationScreen")
@@ -130,6 +132,18 @@ class Test(App):
             ArchiveCreationScreen(
                 initial_value="archive.zip",
                 is_path=True,
+            ),
+            callback=lambda result: self.notify(str(result), markup=False),
+        )
+
+    @on(Button.Pressed, "#KittyDND")
+    def kitty_dnd(self) -> None:
+        self.push_screen(
+            KittyDND(
+                mimes=[
+                    "text/plain",
+                    "image/png",
+                ][: random.randint(0, 2)]
             ),
             callback=lambda result: self.notify(str(result), markup=False),
         )

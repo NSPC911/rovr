@@ -30,3 +30,8 @@ class ShellExecReturnType(NamedTuple):
 class PasteDropReturnType(NamedTuple):
     paths: list[str]
     action: Literal["copy", "move"]
+
+
+class KittyDNDReturnType(NamedTuple):
+    mime_index: int | None
+    filename: str

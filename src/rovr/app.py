@@ -39,7 +39,14 @@ from textual.widget import Widget
 from textual.widgets import Input, Label
 from textual.widgets.selection_list import Selection
 from textual.worker import Worker, WorkerFailed
-from textual_drivers.dnd import DNDApp, DNDDragIn, DNDDragOutOperation, Drop, DropData
+from textual_drivers.dnd import (
+    DNDApp,
+    DNDDragIn,
+    DNDDragInOperation,
+    DNDDragOutOperation,
+    Drop,
+    DropData,
+)
 
 from rovr import console
 from rovr.action_buttons import (
@@ -915,14 +922,16 @@ class Application(Actionable, DNDApp, inherit_bindings=False):
                 f"{len(selected)} item{'s' if len(selected) != 1 else ''}",
             )
 
-    async def dnd_drag_in_operation(self, event: DNDDragIn) -> bool:
-        return (
+    async def dnd_drag_in_operation(self, event: DNDDragIn) -> DNDDragInOperation:
+        return DNDDragInOperation(
             (not self.is_dragging_out)
             and (event.pos in self.file_list.content_region)
             and (
                 (len(self.screen_stack) == 1)
                 or (isinstance(self.screen, PasteDropScreen))
-            )
+            ),
+            "either",
+            ["text/uri-list", "text/plain"],
         )
 
     async def on_drop(self, event: Drop) -> None:

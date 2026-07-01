@@ -976,6 +976,7 @@ class _RovrConfigKeybinds(TypedDict, total=False):
     """
 
     suspend_process: list[str]
+    open: list[str]
     open_editor: list[str]
     show_shell_screen: list[str]
     filename_conflict: "_RovrConfigKeybindsFilenameConflict"

@@ -1195,6 +1195,11 @@
           "description": "Suspend the app's process, bringing you back to the terminal (*nix only)",
           "display_name": "Suspend app"
         },
+        "open": {
+          "$ref": "#/definitions/keybind",
+          "description": "Open the selected files or folders. In normal mode, opens the highlighted file. In select mode, opens all selected files.",
+          "display_name": "Open"
+        },
         "open_editor": {
           "$ref": "#/definitions/keybind",
           "description": "Open the selected file or folder in the configured editor.",

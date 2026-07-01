@@ -90,6 +90,7 @@ class FileList(
             "select_page_down",
             "select_home",
             "select_end",
+            "open",
             "open_editor",
             "open_right_click_menu",
         )
@@ -903,6 +904,46 @@ class FileList(
             and (not self.get_option_at_index(0).disabled)
         ):
             self.action_select()
+
+    async def action_open(self) -> None:
+        if self.highlighted is None:
+            return
+        if (
+            self.highlighted_option
+            and self.highlighted_option.disabled
+            and not self.select_mode_enabled
+        ):
+            return
+        cwd = path_utils.normalise(getcwd())
+        if self.select_mode_enabled:
+            selected_ids = self.selected.copy()
+            session = self.app.tabWidget.active_tab.session
+            session.selectedItems = []
+            paths_to_open = []
+            for selected_id in selected_ids:
+                option = self.get_option(selected_id)
+                if not isinstance(option, FileListSelectionWidget):
+                    continue
+                session.selectedItems.append({
+                    "name": option.dir_entry.name,
+                    "index": self.options.index(option),
+                })
+                full_path = path.join(cwd, option.dir_entry.name)
+                if path.isdir(full_path):
+                    self.app.cd(full_path, clear_search=True)
+                else:
+                    paths_to_open.append(full_path)
+            if paths_to_open:
+                await self.file_selected_handler(paths_to_open)
+        else:
+            option = self.highlighted_option
+            if not isinstance(option, FileListSelectionWidget):
+                return
+            full_path = path.join(cwd, option.dir_entry.name)
+            if path.isdir(full_path):
+                self.app.cd(full_path, clear_search=True)
+            else:
+                await self.file_selected_handler([full_path])
 
     def action_open_editor(self) -> None:
         if (self.highlighted is not None) and not (

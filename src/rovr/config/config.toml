@@ -179,9 +179,10 @@ paste = ["p", "ctrl+v"]
 cut = ["x", "ctrl+x"]
 delete = ["d", "delete"]
 rename = ["r", "f2"]
-new = ["ctrl+n", "o"]
-# shift+n or shift+o, it isnt literally NO
-bulk_create = ["N", "O"]
+new = ["ctrl+n", "a"]
+# cannot use ctrl+shift+n even with kitty, because
+# it is used by the terminal to open a new window
+bulk_create = ["N", "A"]
 zip = ["E"]
 unzip = ["ctrl+e"]
 # id love to use ctrl+shift+c
@@ -218,6 +219,7 @@ show_keybinds = ["?"]
 quit_app = ["q", "ctrl+q"]
 command_palette = "ctrl+p"
 suspend_process = ["ctrl+z"]
+open = ["o"]
 open_editor = ["e"]
 show_shell_screen = [">"]
 open_right_click_menu = ["shift+f10"]

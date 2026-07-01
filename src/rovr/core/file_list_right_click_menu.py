@@ -1,5 +1,7 @@
 import contextlib
+from fnmatch import fnmatch
 from functools import partial
+from shlex import split as shplit
 from subprocess import Popen
 from typing import ClassVar, Literal
 
@@ -14,6 +16,7 @@ from textual.widgets import OptionList
 from rovr.classes.config import (
     _RightClickItem,
     _RightClickItemOptionsItem,
+    _RovrConfigSettingsOpenersAdditionalpropertiesItem,
 )
 from rovr.classes.textual_options import RightClickMenuOption
 from rovr.classes.type_aliases import DirEntryType
@@ -368,9 +371,33 @@ class OpenersMenu(PopupOptionList, inherit_bindings=False):
     BINDINGS: ClassVar[list[BindingType]] = list(bindings)
 
     file_path: var[str] = var("")
+    openers: var[list[_RovrConfigSettingsOpenersAdditionalpropertiesItem]] = var([])
 
     def __init__(self, file_path: str) -> None:
         self.file_path = file_path
 
-    def watch_file_path(self, new_path: str) -> None:
-        config["settings"]["openers"]
+    def compute_openers(
+        self,
+    ) -> list[_RovrConfigSettingsOpenersAdditionalpropertiesItem]:
+        list_openers: list[_RovrConfigSettingsOpenersAdditionalpropertiesItem] = []
+        for pattern, openers in config["settings"].get("openers", {}).items():
+            if fnmatch(self.file_path, pattern):
+                for opener in openers:
+                    if ifed(self.app, opener.get("if", {})):
+                        continue
+                    else:
+                        list_openers.append(opener)
+        return list_openers
+
+    async def pre_show(self) -> None:
+        options = []
+        for i, opener in enumerate(self.openers):
+            if isinstance(opener, str):
+                options.append(
+                    RightClickMenuOption(
+                        f" {shplit(opener)} ",
+                        action={"run": opener, "run_type": "orphan", "shell": True},
+                        id=f"opener_{i}",
+                    )
+                )
+        self.set_options(options)

@@ -1551,8 +1551,8 @@ _RovrConfigSettingsOpenersAdditionalpropertiesItemOneof1 = TypedDict(
         # |
         # | default: True
         "orphan": bool,
-        # | The name of the opener to show in the menu (currently unused)
-        "name": str,
+        # | The name of the opener to show in the menu
+        "label": str,
         # | Whether the command to run is a shell command that needs to be run in a shell (required if you want to do piping)
         # |
         # | default: True

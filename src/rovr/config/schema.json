@@ -517,9 +517,9 @@
                       "default": true,
                       "description": "Whether to open the opener as an orphan process."
                     },
-                    "name": {
+                    "label": {
                       "type": "string",
-                      "description": "The name of the opener to show in the menu (currently unused)"
+                      "description": "The name of the opener to show in the menu"
                     },
                     "shell": {
                       "type": "boolean",

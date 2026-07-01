@@ -120,7 +120,7 @@ description: config schema humanified
                 - [2.6.1.1.2.2.2.1.2. Property `Rovr Config > settings > openers > additionalProperties > additionalProperties items > oneOf > item 1 > if > os > os items > anyOf > item 1`](#settings_openers_additionalProperties_items_oneOf_i1_if_os_items_anyOf_i1)
             - [2.6.1.1.2.2.3. Property `Rovr Config > settings > openers > additionalProperties > additionalProperties items > oneOf > item 1 > if > directory`](#settings_openers_additionalProperties_items_oneOf_i1_if_directory)
           - [2.6.1.1.2.3. Property `Rovr Config > settings > openers > additionalProperties > additionalProperties items > oneOf > item 1 > orphan`](#settings_openers_additionalProperties_items_oneOf_i1_orphan)
-          - [2.6.1.1.2.4. Property `Rovr Config > settings > openers > additionalProperties > additionalProperties items > oneOf > item 1 > name`](#settings_openers_additionalProperties_items_oneOf_i1_name)
+          - [2.6.1.1.2.4. Property `Rovr Config > settings > openers > additionalProperties > additionalProperties items > oneOf > item 1 > label`](#settings_openers_additionalProperties_items_oneOf_i1_label)
           - [2.6.1.1.2.5. Property `Rovr Config > settings > openers > additionalProperties > additionalProperties items > oneOf > item 1 > shell`](#settings_openers_additionalProperties_items_oneOf_i1_shell)
   - [2.7. Property `Rovr Config > settings > drive_exclude`](#settings_drive_exclude)
     - [2.7.1. Rovr Config > settings > drive_exclude > drive_exclude items](#settings_drive_exclude_items)
@@ -1812,7 +1812,7 @@ Key must be a valid glob pattern, but the value has to be a list that can contai
 | [run](#settings_openers_additionalProperties_items_oneOf_i1_run)       | object  | The command to run to open the file. Command expansions are supported.                                            |
 | [if](#settings_openers_additionalProperties_items_oneOf_i1_if)         | object  | Only use this opener if a set criteria matches                                                                    |
 | [orphan](#settings_openers_additionalProperties_items_oneOf_i1_orphan) | boolean | Whether to open the opener as an orphan process.                                                                  |
-| [name](#settings_openers_additionalProperties_items_oneOf_i1_name)     | string  | The name of the opener to show in the menu (currently unused)                                                     |
+| [label](#settings_openers_additionalProperties_items_oneOf_i1_label)   | string  | The name of the opener to show in the menu                                                                        |
 | [shell](#settings_openers_additionalProperties_items_oneOf_i1_shell)   | boolean | Whether the command to run is a shell command that needs to be run in a shell (required if you want to do piping) |
 
 ###### <a name="settings_openers_additionalProperties_items_oneOf_i1_run"></a>2.6.1.1.2.1. Property `Rovr Config > settings > openers > additionalProperties > additionalProperties items > oneOf > item 1 > run`
@@ -1944,14 +1944,14 @@ Must be one of:
 
 **Description:** Whether to open the opener as an orphan process.
 
-###### <a name="settings_openers_additionalProperties_items_oneOf_i1_name"></a>2.6.1.1.2.4. Property `Rovr Config > settings > openers > additionalProperties > additionalProperties items > oneOf > item 1 > name`
+###### <a name="settings_openers_additionalProperties_items_oneOf_i1_label"></a>2.6.1.1.2.4. Property `Rovr Config > settings > openers > additionalProperties > additionalProperties items > oneOf > item 1 > label`
 
 |              |          |
 | ------------ | -------- |
 | **Type**     | `string` |
 | **Required** | No       |
 
-**Description:** The name of the opener to show in the menu (currently unused)
+**Description:** The name of the opener to show in the menu
 
 ###### <a name="settings_openers_additionalProperties_items_oneOf_i1_shell"></a>2.6.1.1.2.5. Property `Rovr Config > settings > openers > additionalProperties > additionalProperties items > oneOf > item 1 > shell`
 

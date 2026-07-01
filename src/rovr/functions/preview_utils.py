@@ -320,14 +320,6 @@ def get_mime_type(
     elif stat.S_ISSOCK(mode):
         return MimeResult("basic", "inode/socket")
 
-    # Read file bytes once, reuse for both puremagic and basic detection
-    try:
-        with open(file_path, "rb") as f:
-            file_bytes = f.read(1024)  # Read first 1KiB
-    except OSError:
-        # Cannot open file at all
-        return None
-
     # Step 1: Try puremagic (magic byte detection) first
     if "puremagic" not in ignore:
         import puremagic
@@ -352,25 +344,47 @@ def get_mime_type(
     # Step 2: Try decoding as text, checking all encodings in order of most likely
     # If puremagic didn't recognise it, it might perhaps be a plain text file
     if "basic" not in ignore:
-        from textual.highlight import guess_language
+        from pygments.lexers import guess_lexer, guess_lexer_for_filename
+        from pygments.util import ClassNotFound
 
-        encodings_to_try = [
-            "utf8",
-            "utf16",
-            "utf32",
-            "latin1",
-            "iso8859-1",
-            "mbcs",
-            "ascii",
-            "us-ascii",
-        ]
-
-        for encoding in encodings_to_try:
-            try:
-                content = file_bytes.decode(encoding)
-                return MimeResult("basic", f"text/{guess_language(content, file_path)}")
-            except UnicodeDecodeError:
-                pass
+        # Read file bytes once
+        try:
+            with open(file_path, "rb") as f:
+                file_bytes = f.read(4096)  # Read first 4KiB
+            for encoding in ("utf-8", "utf-16", "utf-32", "latin-1"):
+                try:
+                    content = file_bytes.decode(encoding)
+                    try:
+                        guessed_lexer = (
+                            guess_lexer(content) if encoding != "latin-1" else None
+                        )
+                    except ClassNotFound:
+                        guessed_lexer = None
+                    try:
+                        filename_lexer = guess_lexer_for_filename(file_path, content)
+                    except ClassNotFound:
+                        filename_lexer = None
+                    if not guessed_lexer and filename_lexer:
+                        final_lexer = (
+                            filename_lexer.aliases[0]
+                            if filename_lexer.aliases
+                            else filename_lexer.name
+                        )
+                    elif guessed_lexer:
+                        # i don't trust filename lexer guesser as much
+                        final_lexer = (
+                            guessed_lexer.aliases[0]
+                            if guessed_lexer.aliases
+                            else (guessed_lexer.name if guessed_lexer else "plain")
+                        )
+                    else:
+                        final_lexer = "text"
+                    return MimeResult("basic", f"text/{final_lexer}")
+                except UnicodeDecodeError:
+                    pass
+        except OSError:
+            # Cannot open file at all
+            pass
 
     # Step 3: Fall back to file(1) command if available
     if "file1" not in ignore:

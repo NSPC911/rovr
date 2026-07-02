@@ -6,6 +6,7 @@ import zipfile
 from os import path
 from typing import Callable, Literal, cast
 
+from rich.markup import escape
 from send2trash import send2trash
 from textual import work
 from textual.color import Gradient
@@ -15,6 +16,7 @@ from textual.types import UnusedParameter
 from textual.widgets import Label, ProgressBar
 
 from rovr.classes.mixins import Action, Actionable
+from rovr.classes.type_aliases import BarPanicDismissible, BarPanicNotify
 from rovr.functions import icons as icon_utils
 from rovr.functions import path as path_utils
 from rovr.functions.utils import is_being_used
@@ -108,8 +110,8 @@ class ProgressBarContainer(VerticalGroup, inherit_bindings=False):
 
     def panic(
         self,
-        dismiss_with: dict | None = None,
-        notify: dict | None = None,
+        dismiss_with: BarPanicDismissible | None = None,
+        notify: BarPanicNotify | None = None,
         bar_text: str = "",
     ) -> None:
         """Do something when an error occurs.
@@ -131,8 +133,6 @@ class ProgressBarContainer(VerticalGroup, inherit_bindings=False):
         self.update_icon(
             self.icon_label.content + " " + icon_utils.get_icon("general", "close")[0]
         )
-        dismiss_with = dismiss_with or {}
-        notify = notify or {}
 
         if dismiss_with:
             self.app.call_from_thread(
@@ -768,28 +768,26 @@ class ProcessContainer(Actionable, VerticalScroll):
                                 bar_text="Permission Error",
                             )
                             return
-        except (zipfile.BadZipFile, tarfile.TarError, ValueError) as exc:
-            dismiss_with = {"subtitle": ""}
-            if isinstance(exc, ValueError) and "Password" in exc.__str__():
+        except (zipfile.BadZipFile, tarfile.TarError, ValueError, RuntimeError) as exc:
+            dismiss_with: BarPanicDismissible
+            if isinstance(exc, NotImplementedError):
                 if "ZIP" in exc.__str__():
-                    dismiss_with["message"] = (
-                        "Password-protected ZIP files cannot be unzipped"
-                    )
+                    message = "Password-protected ZIP files cannot be unzipped"
                 elif "RAR" in exc.__str__():
-                    dismiss_with["message"] = (
-                        "Password-protected RAR files cannot be unzipped"
-                    )
+                    message = "Password-protected RAR files cannot be unzipped"
                 else:
-                    dismiss_with["message"] = (
-                        "Password-protected archive files cannot be unzipped"
-                    )
+                    message = "Password-protected archive files cannot be unzipped"
+                dismiss_with = {"subtitle": "", "message": message}
             else:
                 path_utils.dump_exc(self, exc)
                 dismiss_with = {
                     "message": f"Unzipping failed due to {type(exc).__name__}\n{exc}\nProcess Aborted.",
                     "subtitle": "If this is a bug, file an issue!",
                 }
-            bar.panic(dismiss_with=dismiss_with, bar_text="Error extracting archive")
+            bar.panic(
+                dismiss_with=dismiss_with,
+                bar_text="Error extracting archive",
+            )
             return
         except Exception as exc:
             path_utils.dump_exc(self, exc)
@@ -1003,15 +1001,20 @@ class ProcessContainer(Actionable, VerticalScroll):
                     if path.lexists(destination_item):
                         # check if overwrite
                         if action_on_existence == "ask":
+                            same_file = path_utils.normalise(
+                                destination_item
+                            ) == path_utils.normalise(item_dict["path"])
                             response = self.helper_push_and_get_filenameconflict(
                                 FileNameConflict(
-                                    "The destination already has file of that name.\nWhat do you want to do now?",
+                                    (
+                                        "The target and destination files are the same"
+                                        if same_file
+                                        else "The destination already has file of that name."
+                                    )
+                                    + "\nWhat do you want to do now?",
                                     border_title=item_dict["relative_loc"],
                                     border_subtitle=f"Copying to {dest}",
-                                    allow_overwrite=path_utils.normalise(
-                                        destination_item
-                                    )
-                                    != path_utils.normalise(item_dict["path"]),
+                                    allow_overwrite=not same_file,
                                 ),
                             )
                             if response["same_for_next"]:
@@ -1318,6 +1321,50 @@ class ProcessContainer(Actionable, VerticalScroll):
                 bar_text=path.basename(has_cut[-1]),
             )
             return
+        bar.ok()
+
+    @work(thread=True)
+    def remote_download(self, uris: list[str], paths: list[str]) -> None:
+        """Pull from remote uris
+
+        Args:
+            uris (list[str]): A list of uris to download from
+        """
+        from urllib import error, request
+
+        dest = os.getcwd()
+        bar = self.threaded_new_process_bar(max=len(uris) + 1, classes="active")
+        self.app.call_from_thread(
+            bar.update_icon,
+            icon_utils.get_icon("general", "down")[0],
+        )
+        self.app.call_from_thread(bar.update_text, "Downloading items...")
+
+        for i, uri in enumerate(uris):
+            try:
+                req = request.Request(uri, headers={"User-Agent": "Mozilla/5.0"})
+                with request.urlopen(req, timeout=5) as response:
+                    if response.getcode() == 200:
+                        with open(path.join(dest, paths[i]), "wb") as file:
+                            shutil.copyfileobj(response, file)
+                        self.app.call_from_thread(bar.update_progress, progress=i + 1)
+                        self.app.call_from_thread(bar.update_text, paths[i])
+                    else:
+                        bar.panic(
+                            notify={
+                                "message": f"Received code {response.getcode()} for link {escape(uri)}",
+                                "title": "",
+                            }
+                        )
+                        return
+            except error.URLError as exc:
+                bar.panic(
+                    notify={
+                        "message": f"Failed to download {uri} due to {escape(str(exc))}",
+                        "title": "URLError",
+                    }
+                )
+                return
         bar.ok()
 
     def action_delete(self) -> None:

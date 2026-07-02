@@ -1318,6 +1318,27 @@
               "display_name": "Don't ask me again"
             }
           }
+        },
+        "drag_and_drop": {
+          "type": "object",
+          "description": "Keybinds related to the screen that appears after dropping a file",
+          "properties": {
+            "move": {
+              "$ref": "#/definitions/keybind",
+              "description": "Move the dropped file to the current directory.",
+              "display_name": "Move file here"
+            },
+            "copy": {
+              "$ref": "#/definitions/keybind",
+              "description": "Copy the dropped file to the current directory.",
+              "display_name": "Copy file here"
+            },
+            "cancel": {
+              "$ref": "#/definitions/keybind",
+              "description": "Cancel the drag and drop operation.",
+              "display_name": "Cancel"
+            }
+          }
         }
       }
     },

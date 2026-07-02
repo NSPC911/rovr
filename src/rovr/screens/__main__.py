@@ -46,10 +46,10 @@ class Test(App):
         super().__init__(watch_css=True)
 
     def compose(self) -> ComposeResult:
-        yield Button("File Name Conflict", id="FileNameConflict")
         yield Button("Delete Files", id="DeleteFiles")
         yield Button("Dismissible", id="Dismissible")
         yield Button("File In Use", id="FileInUse")
+        yield Button("File Name Conflict", id="FileNameConflict")
         yield Button("Paste Screen", id="PasteScreen")
         yield Button("Yes Or No", id="YesOrNo")
         yield Button("Zip Up Screen", id="ArchiveCreationScreen")

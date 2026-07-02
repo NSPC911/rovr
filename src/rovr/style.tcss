@@ -3,7 +3,7 @@ $border-style: round;
 $border-blurred: $primary-background-lighten-3;
 $border-blurred-light: $primary-background;
 $border: $primary-lighten-3;
-$border-disabled: $panel;
+$border-disabled: $secondary-background;
 
 /* Layout Dimensions */
 $pinned_sidebar_width: 17;
@@ -85,6 +85,8 @@ Input {
   scrollbar-size: 0 0;
   scrollbar-visibility: hidden;
   overflow: hidden hidden;
+  background: transparent;
+
   .input--placeholder,
   .text-area--placeholder { color: $foreground-darken-1 }
   .text-area--cursor-gutter {
@@ -306,6 +308,18 @@ Tooltip {
   width: $file_list_width;
 }
 
+.drag-out-active #file_list_container {
+  border: $border-style $accent;
+}
+
+.drag-in-active #file_list_container {
+  border: $border-style $success
+}
+
+.drag-in-rejected #file_list_container {
+  border: $border-style $error
+}
+
 #file_list, #file_list_visual { height: 1fr }
 
 #pinned_sidebar_container,
@@ -461,7 +475,7 @@ ModalScreen OptionList {
   }
   .option-list--option-hover {
     color: $primary;
-    background: transparent
+    background: transparent;
   }
   &:focus .option-list--option-highlighted,
   &.-popup-shown .option-list--option-highlighted {
@@ -649,14 +663,7 @@ Keybinds {
 }
 
 /* Modal Dialog Shared Styles */
-Dismissible,
-YesOrNo,
-FileNameConflict,
-FileInUse,
-DeleteFiles,
-ModalInput,
-TerminalTooSmall,
-DragAndDropScreen { align: center middle }
+ModalScreen { align: center middle }
 
 YesOrNo #dialog,
 FileNameConflict #dialog,
@@ -895,6 +902,7 @@ CommandPalette {
     width: 50vw;
     height: 50vh;
     margin-top: 0;
+    min-width: 26;
   }
   #--input { border: $border-style $border }
   #--input.--list-visible { border-bottom: none }
@@ -940,17 +948,25 @@ ShellExec {
   }
 }
 
-DragAndDropScreen #dialog {
+PasteDropScreen #dialog {
   border: $border-style $border;
   padding: 0 1;
-  grid-size: 2 2;
-  grid-gutter: 0 0;
-  grid-rows: 1fr 3;
+  grid-size: 2 3;
+  grid-gutter: 0 1;
+  grid-rows: 1fr 3 3;
+  max-height: 100vh;
+  height: 60vh;
+  min-height: 11;
 
   Button {
-    margin: 0 3;
+    margin: 0 0;
     height: 3;
     width: 1fr;
+  }
+  HorizontalGroup {
+    column-span: 2;
+    align: center middle;
+    Button#cancel { width: 50% }
   }
   OptionList {
     height: 1fr;
@@ -1069,14 +1085,11 @@ Screen {
     #file_search_group,
     #content_search_group,
     #keybinds_group,
-    .--textual-command-palette #--container,
+    #--container,
     #dialog,
     #modalInput_group {
       width: 100vw;
       max-width: 100vw;
-    }
-    &ModalScreen OptionList {
-      border: none;
     }
     Toast { width: 100vw }
     #file_search_toggles,
@@ -1110,12 +1123,11 @@ Screen {
       grid-size: 1 4 !important;
       grid-rows: 0.5fr 1.5fr 3 3 !important;
     }
-    &DragAndDropScreen #dialog {
-      grid-size: 1 3;
-      grid-rows: 1fr 3 3;
-      Button {
-        margin: 0;
-      }
+    &PasteDropScreen #dialog {
+      grid-size: 1 4;
+      grid-rows: 1fr 3 3 3;
+      Button { margin: 0 }
+      Button#cancel { width: 100% }
     }
   }
   &.-no-preview {

@@ -1,3 +1,4 @@
+from inspect import isawaitable
 from typing import Any, Awaitable, Callable, NamedTuple
 
 from rich.segment import Segment
@@ -239,8 +240,6 @@ class Actionable:
     ACTIONS: list[Action]
 
     async def on_key(self, event: Key) -> None:
-        from inspect import isawaitable
-
         try:
             iter(self.ACTIONS)
         except AttributeError:

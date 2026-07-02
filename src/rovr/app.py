@@ -593,6 +593,7 @@ class Application(Actionable, App, inherit_bindings=False):
         style_available: bool = self.CUSTOM_STYLE_AVAILABLE
         custom_style_path = path.join(RovrVars.ROVRCONFIG, "style.tcss")
         new_drives: list[str] | None = None
+        cwd_mtime: float | None = None
 
         i_should_shut_down = lambda: (
             self._shutdown_event.is_set() or self.return_code is not None
@@ -613,15 +614,24 @@ class Application(Actionable, App, inherit_bindings=False):
                         file_list.update_file_list(add_to_session=False)
                     elif cwd != new_cwd:
                         cwd = new_cwd
+                        cwd_mtime = None
                         continue
                     else:
+                        # only rescan when the directory mtime changed;
+                        # renames/creates/deletes always bump it
+                        new_cwd_mtime = None
                         with suppress(OSError):
-                            items = get_filtered_dir_names(
-                                cwd,
-                                config["interface"]["show_hidden_files"],
-                            )
-                        if items is not None and items != file_list.items_in_cwd:
-                            self.cd(cwd)
+                            new_cwd_mtime = path.getmtime(cwd)
+                        if new_cwd_mtime != cwd_mtime:
+                            cwd_mtime = new_cwd_mtime
+                            items = None
+                            with suppress(OSError):
+                                items = get_filtered_dir_names(
+                                    cwd,
+                                    config["interface"]["show_hidden_files"],
+                                )
+                            if items is not None and items != file_list.items_in_cwd:
+                                self.cd(cwd)
             except FileNotFoundError:
                 self.file_list.set_options([
                     Selection(

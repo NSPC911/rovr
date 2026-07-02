@@ -217,7 +217,7 @@ class FileListSelectionWidget(LazySelection):
             else:
                 classes.append("filelist--broken-link")
 
-        if is_hidden_file(file_path):
+        if is_hidden_file(self.dir_entry):
             classes.append("filelist--hidden")
 
         if any(

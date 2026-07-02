@@ -1,4 +1,5 @@
 import fnmatch
+from functools import lru_cache
 from os import path
 
 from rovr.variables.constants import config
@@ -13,29 +14,8 @@ from rovr.variables.maps import (
 )
 
 
-def get_icon_for_file(location: str) -> tuple[str, str]:
-    """
-    Get the icon and color for a file based on its name or extension.
-
-    Args:
-        location (str): The name or path of the file.
-
-    Returns:
-        tuple: The icon and color for the file.
-    """
-    if not config["interface"]["nerd_font"]:
-        return ASCII_ICONS["file"]["default"]
-
-    # 0. check symlink
-    if path.islink(location):
-        # 0.1. Check if symlink target exists
-        if path.exists(location):
-            return ICONS["general"]["symlink"]
-        else:
-            return ICONS["general"]["broken_symlink"]
-
-    file_name = path.basename(location).lower()
-
+@lru_cache(maxsize=4096)
+def _icon_for_file_name(file_name: str) -> tuple[str, str]:
     # 1. Check for custom icons if configured
     if "icons" in config and "files" in config["icons"]:
         for custom_icon in config["icons"]["files"]:
@@ -60,28 +40,34 @@ def get_icon_for_file(location: str) -> tuple[str, str]:
     return ICONS["file"]["default"]
 
 
-def get_icon_for_folder(location: str) -> tuple[str, str]:
-    """Get the icon and color for a folder based on its name.
+def get_icon_for_file(location: str, is_symlink: bool | None = None) -> tuple[str, str]:
+    """
+    Get the icon and color for a file based on its name or extension.
 
     Args:
-        location (str): The name or path of the folder.
+        location (str): The name or path of the file.
+        is_symlink (bool | None): Symlink status if the caller already knows it
+            (e.g. from a cached DirEntry), avoiding an extra syscall.
 
     Returns:
-        tuple: The icon and color for the folder.
+        tuple: The icon and color for the file.
     """
     if not config["interface"]["nerd_font"]:
-        return ASCII_ICONS["folder"]["default"]
+        return ASCII_ICONS["file"]["default"]
 
-    # 0. check junction/symlink
-    if path.islink(location) or path.isjunction(location):
-        # 0.1. Check if junction/symlink target exists
+    # 0. check symlink
+    if path.islink(location) if is_symlink is None else is_symlink:
+        # 0.1. Check if symlink target exists
         if path.exists(location):
             return ICONS["general"]["symlink"]
         else:
             return ICONS["general"]["broken_symlink"]
 
-    folder_name = path.basename(location).lower()
+    return _icon_for_file_name(path.basename(location).lower())
 
+
+@lru_cache(maxsize=1024)
+def _icon_for_folder_name(folder_name: str) -> tuple[str, str]:
     # 1. Check for custom icons if configured
     if "icons" in config and "folders" in config["icons"]:
         for custom_icon in config["icons"]["folders"]:
@@ -96,6 +82,37 @@ def get_icon_for_folder(location: str) -> tuple[str, str]:
 
     # 3. Default icon
     return ICONS["folder"]["default"]
+
+
+def get_icon_for_folder(
+    location: str, is_symlink: bool | None = None
+) -> tuple[str, str]:
+    """Get the icon and color for a folder based on its name.
+
+    Args:
+        location (str): The name or path of the folder.
+        is_symlink (bool | None): Symlink/junction status if the caller already
+            knows it (e.g. from a cached DirEntry), avoiding extra syscalls.
+
+    Returns:
+        tuple: The icon and color for the folder.
+    """
+    if not config["interface"]["nerd_font"]:
+        return ASCII_ICONS["folder"]["default"]
+
+    # 0. check junction/symlink
+    if (
+        (path.islink(location) or path.isjunction(location))
+        if is_symlink is None
+        else is_symlink
+    ):
+        # 0.1. Check if junction/symlink target exists
+        if path.exists(location):
+            return ICONS["general"]["symlink"]
+        else:
+            return ICONS["general"]["broken_symlink"]
+
+    return _icon_for_folder_name(path.basename(location).lower())
 
 
 def get_icon_smart(location: str) -> tuple[str, str]:

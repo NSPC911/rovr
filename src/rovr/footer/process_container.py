@@ -274,14 +274,17 @@ class ProcessContainer(Actionable, VerticalScroll):
         elif isinstance(exc, (OSError, PermissionError)) and is_being_used(exc):
             # cannot do anything
             self.has_in_use_error = True
+        elif isinstance(exc, PermissionError):
+            self.has_perm_error = True
         elif (
             isinstance(exc, OSError)
             and "symbolic" in exc.__str__()
             or path_utils.force_obtain_write_permission(item_path)
         ):
-            os.remove(item_path)
-        elif isinstance(exc, PermissionError):
-            self.has_perm_error = True
+            try:
+                os.remove(item_path)
+            except IsADirectoryError:
+                shutil.rmtree(item_path, ignore_errors=True)
         else:
             raise
 

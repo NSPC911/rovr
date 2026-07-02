@@ -47,13 +47,44 @@ def natsort_cacheless(key: str) -> list:
     return _natsort(key)
 
 
-def is_hidden_file(filepath: str) -> bool:
+if os_type == "Windows":
+    _GetFileAttributesW = ctypes.windll.kernel32.GetFileAttributesW
+    _GetFileAttributesW.argtypes = [ctypes.c_wchar_p]
+    _GetFileAttributesW.restype = ctypes.c_uint32
+
+
+@overload
+def is_hidden_file(filepath: str) -> bool: ...
+
+
+@overload
+def is_hidden_file(filepath: DirEntryType) -> bool: ...
+
+
+def is_hidden_file(filepath: str | DirEntryType) -> bool:
+    if not isinstance(filepath, str):
+        if os_type == "Windows":
+            try:
+                return bool(
+                    filepath.stat(follow_symlinks=False).st_file_attributes
+                    & stat.FILE_ATTRIBUTE_HIDDEN
+                )
+            except OSError:
+                return False
+        if filepath.name.startswith("."):
+            return True
+        if os_type == "Darwin":
+            try:
+                return bool(
+                    getattr(filepath.stat(follow_symlinks=False), "st_flags", 0)
+                    & getattr(stat, "UF_HIDDEN", 0)
+                )
+            except OSError:
+                return False
+        return False
     if os_type == "Windows":
         try:
-            GetFileAttributesW = ctypes.windll.kernel32.GetFileAttributesW
-            GetFileAttributesW.argtypes = [ctypes.c_wchar_p]
-            GetFileAttributesW.restype = ctypes.c_uint32
-            attrs = GetFileAttributesW(filepath)
+            attrs = _GetFileAttributesW(filepath)
             if attrs == 0xFFFFFFFF:  # INVALID_FILE_ATTRIBUTES
                 return False
             return bool(attrs & 0x02)  # FILE_ATTRIBUTE_HIDDEN
@@ -187,7 +218,7 @@ def get_filtered_dir_names(cwd: str | bytes, show_hidden: bool = False) -> set[s
 
     names = set()
     for item in listed_dir:
-        if not show_hidden and is_hidden_file(item.path):
+        if not show_hidden and is_hidden_file(item):
             continue
         names.add(item.name)
 
@@ -302,21 +333,23 @@ def sync_get_cwd_object(
         for item in entries:
             if not isinstance(item, DirEntryTypes):
                 raise TypeError(f"Expected a DirEntry object but got {type(item)}")
-            if not show_hidden and is_hidden_file(item.path):
+            if not show_hidden and is_hidden_file(item):
                 continue
 
             if item.is_dir():
-                item_name = item.name
                 folders.append({
-                    "name": item_name,
-                    "icon": lambda item_name=item_name: get_icon_for_folder(item_name),
+                    "name": item.name,
+                    "icon": lambda item=item: get_icon_for_folder(
+                        item.path, is_symlink=item.is_symlink() or item.is_junction()
+                    ),
                     "dir_entry": item,
                 })
             else:
-                item_name = item.name
                 files.append({
-                    "name": item_name,
-                    "icon": lambda item_name=item_name: get_icon_for_file(item_name),
+                    "name": item.name,
+                    "icon": lambda item=item: get_icon_for_file(
+                        item.path, is_symlink=item.is_symlink()
+                    ),
                     "dir_entry": item,
                 })
             if (
@@ -334,11 +367,11 @@ def sync_get_cwd_object(
             folders.sort(key=lambda x: x["name"].lower())
             files.sort(key=lambda x: x["name"].lower())
         case "natural":
-            if len(folders) > 1024:
+            if len(folders) < 1024:
                 folders.sort(key=lambda x: natsort(x["name"]))
             else:
                 folders.sort(key=lambda x: natsort_cacheless(x["name"]))
-            if len(files) > 1024:
+            if len(files) < 1024:
                 files.sort(key=lambda x: natsort(x["name"]))
             else:
                 files.sort(key=lambda x: natsort_cacheless(x["name"]))
@@ -526,9 +559,9 @@ def get_direntry_for(file_path: str) -> DirEntryType | None:
     base_name = path.basename(file_path)
     try:
         with os.scandir(parent_dir) as it:
-            for entry in it:
-                if entry.name == base_name:
-                    return entry
+            for filepath in it:
+                if filepath.name == base_name:
+                    return filepath
     except (PermissionError, FileNotFoundError, OSError):
         return None
     return None

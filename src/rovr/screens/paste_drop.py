@@ -32,15 +32,15 @@ class PasteDropScreen(Actionable, ModalScreen[PasteDropReturnType | None]):
         self.call_after_refresh(self.post_message, initial_paste_event)
         self.ACTIONS = [
             Action(
-                lambda: self.query_one("#copy", Button).press,
+                self.query_one("#copy", Button).press,
                 config["keybinds"]["drag_and_drop"]["copy"],
             ),
             Action(
-                lambda: self.query_one("#move", Button).press,
+                self.query_one("#move", Button).press,
                 config["keybinds"]["drag_and_drop"]["move"],
             ),
             Action(
-                lambda: self.query_one("#cancel", Button).press,
+                self.query_one("#cancel", Button).press,
                 config["keybinds"]["drag_and_drop"]["cancel"],
             ),
         ]

@@ -765,9 +765,9 @@ class ProcessContainer(Actionable, VerticalScroll):
                                 bar_text="Permission Error",
                             )
                             return
-        except (zipfile.BadZipFile, tarfile.TarError, ValueError) as exc:
+        except (zipfile.BadZipFile, tarfile.TarError, ValueError, RuntimeError) as exc:
             dismiss_with: BarPanicDismissible
-            if isinstance(exc, ValueError) and "Password" in exc.__str__():
+            if isinstance(exc, NotImplementedError):
                 if "ZIP" in exc.__str__():
                     message = "Password-protected ZIP files cannot be unzipped"
                 elif "RAR" in exc.__str__():
@@ -1349,7 +1349,7 @@ class ProcessContainer(Actionable, VerticalScroll):
                     else:
                         bar.panic(
                             notify={
-                                "message": f"Received code {response.getcode()} for link {uri}",
+                                "message": f"Received code {response.getcode()} for link {escape(uri)}",
                                 "title": "",
                             }
                         )

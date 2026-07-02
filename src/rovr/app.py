@@ -864,7 +864,7 @@ class Application(Actionable, DNDApp, inherit_bindings=False):
     @work
     async def on_paste(self, event: events.Paste) -> None:
         if len(self.screen_stack) != 1:
-            if self._p_timer and self._p_timer._active:
+            if self._p_timer:
                 self._p_timer.stop()
             self._p_timer = self.set_timer(
                 0.1,
@@ -991,7 +991,7 @@ class Application(Actionable, DNDApp, inherit_bindings=False):
                     markup=False,
                 )
             if online:  # noqa: SIM102
-                online = sorted(list(online))
+                online = sorted(online)
                 # check if it is a PasteDropScreen, if so, reject
                 if isinstance(self.screen, PasteDropScreen):
                     self.notify(

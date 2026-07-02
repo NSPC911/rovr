@@ -633,11 +633,11 @@ wheels = [
 
 [[package]]
 name = "multiarchive"
-version = "0.1.1"
+version = "0.1.2"
 source = { registry = "https://pypi.org/simple" }
-sdist = { url = "https://files.pythonhosted.org/packages/b1/79/6f54c4ba9a9161937de2441698f2a98c9cc8ff1e85c2bb60b143db79e11b/multiarchive-0.1.1.tar.gz", hash = "sha256:a662edbde0375d698baadeccfc88bbfbfd1a5c2e8364dc31a2b2cb9666c3523d", size = 8645, upload-time = "2026-05-13T13:31:33.501Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/02/33/0cb82a9ef8ae7d6eb09ae734f82c5f38a594e2e85c01e14641e589e085b7/multiarchive-0.1.2.tar.gz", hash = "sha256:f923c5c9d6cf6e01ec65416cdbbe617a66a7d4f9feaa0e07413d768d147e3e7f", size = 8726, upload-time = "2026-07-02T03:48:45.288Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/c4/55/df2c3b9f27b60222de29a04a390be388075094a816a70ecaa866b34c6e59/multiarchive-0.1.1-py3-none-any.whl", hash = "sha256:7816df7c3c4dd0adf0adb67f3a51b035308e5efb349a37777b20b4cd43bdf329", size = 8874, upload-time = "2026-05-13T13:31:31.949Z" },
+    { url = "https://files.pythonhosted.org/packages/af/aa/1c2628b2073e9a159ec69f31e93e17c7c4f51d0b2ce2b044afeb09921c0d/multiarchive-0.1.2-py3-none-any.whl", hash = "sha256:3904217dd3fd2f42277a41f6949712615c789090c4750af03b937d60a8a9d37b", size = 8926, upload-time = "2026-07-02T03:48:43.85Z" },
 ]
 
 [[package]]
@@ -1309,7 +1309,7 @@ requires-dist = [
     { name = "backports-zstd", marker = "python_full_version < '3.14'", specifier = ">=1.3.0" },
     { name = "fastjsonschema", specifier = ">=2.21.2" },
     { name = "humanize", specifier = ">=4.15.0" },
-    { name = "multiarchive", specifier = ">=0.1.1" },
+    { name = "multiarchive", specifier = ">=0.1.2" },
     { name = "pathvalidate", specifier = ">=3.3.1" },
     { name = "pillow", specifier = ">=12.2.0" },
     { name = "platformdirs", specifier = ">=4.9.0" },

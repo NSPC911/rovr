@@ -129,6 +129,7 @@ class FileList(
         if not self.dummy:
             self.items_in_cwd: set[str] = set()
         self.file_list_pause_check = False
+        self._ignore_next_click: bool = False
 
     def on_mount(self) -> None:
         if not self.dummy and self.parent:
@@ -156,7 +157,7 @@ class FileList(
             event: The click event.
         """
         event.prevent_default()
-        if getattr(self, "_ignore_next_click", False):
+        if self._ignore_next_click:
             self._ignore_next_click = False
             return
         clicked_option: int | None = event.style.meta.get("option")

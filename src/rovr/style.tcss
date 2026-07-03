@@ -322,6 +322,12 @@ Tooltip {
 
 #file_list, #file_list_visual { height: 1fr }
 
+#file_list_details_header {
+  height: 1;
+  color: $text-muted;
+  text-style: bold;
+}
+
 #pinned_sidebar_container,
 #file_list_container,
 #keybinds_group {

@@ -17,6 +17,10 @@ drive_watcher_frequency = 3.0
 # yazi style is 5
 # but it has more space
 scrolloff = 3
+details_list = [
+  { type = "size" },
+  { type = "mtime" },
+]
 
 [interface.image_viewer]
 protocol = "Auto"

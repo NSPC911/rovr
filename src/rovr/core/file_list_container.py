@@ -30,10 +30,13 @@ class FileListContainer(VerticalGroup):
             yield self.details_header
         yield self.filelist
 
-    def on_resize(self, event: events.Resize) -> None:
-        self.filelist.scroll_to_highlight()
+    def update_details_header(self) -> None:
         if detail_utils.get_detail_columns():
             self.details_header.update(self.filelist.details_header_text())
+
+    def on_resize(self, event: events.Resize) -> None:
+        self.filelist.scroll_to_highlight()
+        self.update_details_header()
 
     def remount_filelist(self) -> None:
         """Remount the file list to reset its state"""

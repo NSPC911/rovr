@@ -1,4 +1,9 @@
-from rovr.functions.details import DetailColumn, _pad, fit_column_count
+from rovr.functions.details import (
+    DetailColumn,
+    _pad,
+    fit_column_count,
+    parse_git_porcelain,
+)
 
 SIZE = DetailColumn("size", "Size", 7, "")
 MTIME = DetailColumn("mtime", "Modified", 16, "")
@@ -16,6 +21,37 @@ def test_pad_truncates_with_ellipsis() -> None:
 def test_pad_handles_wide_chars() -> None:
     assert _pad("日本語", 6) == "日本語"
     assert _pad("日本語", 5) == "日本…"
+
+
+def test_parse_git_porcelain_keeps_staged_and_unstaged_positions() -> None:
+    output = b" M unstaged.py\x00M  staged.py\x00MM both.py\x00?? untracked.txt\x00"
+    assert parse_git_porcelain(output, "") == {
+        "unstaged.py": " M",
+        "staged.py": "M ",
+        "both.py": "MM",
+        "untracked.txt": "??",
+    }
+
+
+def test_parse_git_porcelain_folder_aggregates_each_position() -> None:
+    output = b"?? pkg/new.py\x00 M pkg/old.py\x00A  pkg/added.py\x00"
+    assert parse_git_porcelain(output, "") == {"pkg": "AM"}
+
+
+def test_parse_git_porcelain_respects_prefix() -> None:
+    output = b" M sub/dir/file.py\x00 M elsewhere.py\x00?? sub/dir/nested/thing\x00"
+    assert parse_git_porcelain(output, "sub/dir/") == {
+        "file.py": " M",
+        "nested": "??",
+    }
+
+
+def test_parse_git_porcelain_skips_rename_source() -> None:
+    output = b"R  new_name.py\x00old_name.py\x00 M other.py\x00"
+    assert parse_git_porcelain(output, "") == {
+        "new_name.py": "R ",
+        "other.py": " M",
+    }
 
 
 def test_fit_drops_trailing_columns_first() -> None:

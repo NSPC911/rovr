@@ -19,7 +19,8 @@ drive_watcher_frequency = 3.0
 scrolloff = 3
 details_list = [
   { type = "size" },
-  { type = "mtime" },
+  { type = "mtime", label = "mtime" },
+  { type = "git" }
 ]
 
 [interface.image_viewer]

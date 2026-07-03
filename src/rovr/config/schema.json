@@ -231,8 +231,8 @@
             "properties": {
               "type": {
                 "type": "string",
-                "enum": ["size", "mtime", "atime", "ctime", "permissions", "owner", "group"],
-                "description": "What metadata to show. size shows the item count for folders."
+                "enum": ["size", "mtime", "atime", "ctime", "permissions", "owner", "group", "git"],
+                "description": "What metadata to show. size shows the item count for folders.\ngit shows the two-char XY status like git status --short (first char staged, second unstaged)\nand hides itself outside a git work tree."
               },
               "label": {
                 "type": "string",

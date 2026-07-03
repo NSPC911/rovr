@@ -785,6 +785,7 @@ class _RovrConfigInterfaceDetailsListItem(TypedDict, total=False):
     type: Required["_RovrConfigInterfaceDetailsListItemType"]
     r"""
     What metadata to show. size shows the item count for folders.
+    git shows the most severe git status char (UDMRCA?) per entry and hides itself outside a git work tree.
 
     Required property
     """
@@ -814,8 +815,12 @@ _RovrConfigInterfaceDetailsListItemType = (
     | Literal["permissions"]
     | Literal["owner"]
     | Literal["group"]
+    | Literal["git"]
 )
-r""" What metadata to show. size shows the item count for folders. """
+r"""
+What metadata to show. size shows the item count for folders.
+git shows the most severe git status char (UDMRCA?) per entry and hides itself outside a git work tree.
+"""
 _ROVRCONFIGINTERFACEDETAILSLISTITEMTYPE_SIZE: Literal["size"] = "size"
 r"""The values for the 'What metadata to show. size shows the item count for folders' enum"""
 _ROVRCONFIGINTERFACEDETAILSLISTITEMTYPE_MTIME: Literal["mtime"] = "mtime"
@@ -831,6 +836,8 @@ r"""The values for the 'What metadata to show. size shows the item count for fol
 _ROVRCONFIGINTERFACEDETAILSLISTITEMTYPE_OWNER: Literal["owner"] = "owner"
 r"""The values for the 'What metadata to show. size shows the item count for folders' enum"""
 _ROVRCONFIGINTERFACEDETAILSLISTITEMTYPE_GROUP: Literal["group"] = "group"
+r"""The values for the 'What metadata to show. size shows the item count for folders' enum"""
+_ROVRCONFIGINTERFACEDETAILSLISTITEMTYPE_GIT: Literal["git"] = "git"
 r"""The values for the 'What metadata to show. size shows the item count for folders' enum"""
 
 class _RovrConfigInterfaceFontPreview(TypedDict, total=False):

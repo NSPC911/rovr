@@ -587,12 +587,12 @@ later entries are dropped first. Set to [] to disable.
 | **Required**              | No          |
 | **Additional properties** | Not allowed |
 
-| Property                                               | Type             | Title/Description                                                                                                   |
-| ------------------------------------------------------ | ---------------- | ------------------------------------------------------------------------------------------------------------------- |
-| [type](#interface_details_list_items_type)             | enum (of string) | What metadata to show. size shows the item count for folders.                                                       |
-| [label](#interface_details_list_items_label)           | string           | Column header label. Defaults to a built-in label for the type.                                                     |
-| [max_length](#interface_details_list_items_max_length) | integer          | Column width cap in cells. Defaults to the natural width of the type.<br />The label's width acts as a lower bound. |
-| [format](#interface_details_list_items_format)         | string           | strftime format for mtime/atime/ctime columns.<br />Defaults to metadata.datetime_format.                           |
+| Property                                               | Type             | Title/Description                                                                                                                                                                                               |
+| ------------------------------------------------------ | ---------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| [type](#interface_details_list_items_type)             | enum (of string) | What metadata to show. size shows the item count for folders.<br />git shows the two-char XY status like git status --short (first char staged, second unstaged)<br />and hides itself outside a git work tree. |
+| [label](#interface_details_list_items_label)           | string           | Column header label. Defaults to a built-in label for the type.                                                                                                                                                 |
+| [max_length](#interface_details_list_items_max_length) | integer          | Column width cap in cells. Defaults to the natural width of the type.<br />The label's width acts as a lower bound.                                                                                             |
+| [format](#interface_details_list_items_format)         | string           | strftime format for mtime/atime/ctime columns.<br />Defaults to metadata.datetime_format.                                                                                                                       |
 
 ##### <a name="interface_details_list_items_type"></a>1.10.1.1. Property `Rovr Config > interface > details_list > details_list items > type`
 
@@ -602,6 +602,8 @@ later entries are dropped first. Set to [] to disable.
 | **Required** | Yes                |
 
 **Description:** What metadata to show. size shows the item count for folders.
+git shows the two-char XY status like git status --short (first char staged, second unstaged)
+and hides itself outside a git work tree.
 
 Must be one of:
 
@@ -612,6 +614,7 @@ Must be one of:
 - "permissions"
 - "owner"
 - "group"
+- "git"
 
 ##### <a name="interface_details_list_items_label"></a>1.10.1.2. Property `Rovr Config > interface > details_list > details_list items > label`
 

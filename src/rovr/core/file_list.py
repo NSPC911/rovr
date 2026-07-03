@@ -135,6 +135,7 @@ class FileList(
             self.items_in_cwd: set[str] = set()
         self.file_list_pause_check = False
         self._ignore_next_click: bool = False
+        self._in_git_repo: bool = False
 
     def on_mount(self) -> None:
         if not self.dummy and self.parent:
@@ -153,11 +154,22 @@ class FileList(
         else:
             return None
 
+    def _detail_columns(self) -> tuple[detail_utils.DetailColumn, ...]:
+        """The configured columns, with the git column hidden outside a work tree.
+
+        Returns:
+            tuple[DetailColumn, ...]: The columns to render.
+        """
+        columns = detail_utils.get_detail_columns()
+        if not self._in_git_repo:
+            columns = tuple(column for column in columns if column.type != "git")
+        return columns
+
     def render_line(self, y: int) -> Strip:
         line = super().render_line(y)
         if self.dummy:
             return line
-        columns = detail_utils.get_detail_columns()
+        columns = self._detail_columns()
         if not columns:
             return line
         width = self.scrollable_content_region.width
@@ -171,7 +183,7 @@ class FileList(
             return line
         if not isinstance(option, FileListSelectionWidget):
             return line
-        details = "  ".join(option.detail_cells()[:fitted]) + " "
+        details = "  ".join(option.detail_cells(columns)[:fitted]) + " "
         segments = list(line)
         style = segments[-1].style if segments else self.rich_style
         return Strip([
@@ -185,7 +197,7 @@ class FileList(
         Returns:
             str: The full-width header text.
         """
-        columns = detail_utils.get_detail_columns()
+        columns = self._detail_columns()
         width = self.scrollable_content_region.width
         fitted = detail_utils.fit_column_count(width, columns)
         gutter = self._get_left_gutter_width()
@@ -198,27 +210,50 @@ class FileList(
         pad = max(1, width - cell_len(left) - cell_len(labels))
         return left + " " * pad + labels
 
-    @work(thread=True, exclusive=True, group="folder_counts")
-    def fill_folder_item_counts(self) -> None:
-        if self.dummy or not any(
-            column.type == "size" for column in detail_utils.get_detail_columns()
-        ):
+    @work(thread=True, exclusive=True, group="detail_fill")
+    def fill_async_details(self) -> None:
+        column_types = {column.type for column in detail_utils.get_detail_columns()} & {
+            "size",
+            "git",
+        }
+        if self.dummy or not column_types:
             return
         worker = get_current_worker()
         options = self._options
+        file_options = [
+            option for option in options if isinstance(option, FileListSelectionWidget)
+        ]
+        if not file_options:
+            return
         dirty = False
-        for option in options:
-            if worker.is_cancelled or options is not self._options:
-                return
-            if not isinstance(option, FileListSelectionWidget):
-                continue
-            with suppress(OSError):
-                if option.dir_entry.is_dir():
-                    with scandir(option.dir_entry.path) as entries:
-                        option.set_folder_item_count(sum(1 for _ in entries))
+        if "git" in column_types:
+            cwd = path.dirname(file_options[0].dir_entry.path)
+            statuses = detail_utils.git_statuses(cwd)
+            in_git_repo = statuses is not None
+            if in_git_repo != self._in_git_repo:
+                self._in_git_repo = in_git_repo
+                dirty = True
+            for option in file_options:
+                if worker.is_cancelled or options is not self._options:
+                    return
+                status = (statuses or {}).get(option.dir_entry.name, "")
+                if status != option.git_status:
+                    option.set_git_status(status)
                     dirty = True
+        if "size" in column_types:
+            for option in file_options:
+                if worker.is_cancelled or options is not self._options:
+                    return
+                with suppress(OSError):
+                    if option.dir_entry.is_dir():
+                        with scandir(option.dir_entry.path) as entries:
+                            option.set_folder_item_count(sum(1 for _ in entries))
+                        dirty = True
         if dirty and not worker.is_cancelled:
             self.app.call_from_thread(self.refresh)
+            update_header = getattr(self.parent, "update_details_header", None)
+            if callable(update_header):
+                self.app.call_from_thread(update_header)
 
     # ignore single clicks
     async def _on_click(self, event: events.Click) -> None:
@@ -386,7 +421,7 @@ class FileList(
             self.app.query_one("#up").disabled = cwd == path.dirname(cwd)
 
             self.set_options(self.list_of_options)
-            self.fill_folder_item_counts()
+            self.fill_async_details()
             update_header = getattr(self.parent, "update_details_header", None)
             if callable(update_header):
                 self.call_after_refresh(update_header)

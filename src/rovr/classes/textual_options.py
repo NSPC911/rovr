@@ -188,7 +188,9 @@ class FileListSelectionWidget(LazySelection):
         self.dir_entry = dir_entry
         self.mime_type: str | None = None
         self.folder_item_count: int | None = None
+        self.git_status: str = ""
         self._detail_cells: tuple[str, ...] | None = None
+        self._detail_cells_key: tuple[detail_utils.DetailColumn, ...] | None = None
         this_id = str(id(self))
         self.__icon_factory = icon_factory
         self.__label = label
@@ -209,15 +211,22 @@ class FileListSelectionWidget(LazySelection):
     def get_prompt(self) -> Content:
         return _get_cached_icon(self.__icon_factory()) + Content(self.__label)
 
-    def detail_cells(self) -> tuple[str, ...]:
-        if self._detail_cells is None:
+    def detail_cells(
+        self, columns: tuple[detail_utils.DetailColumn, ...]
+    ) -> tuple[str, ...]:
+        if self._detail_cells is None or self._detail_cells_key != columns:
             self._detail_cells = detail_utils.detail_cells(
-                self.dir_entry, self, detail_utils.get_detail_columns()
+                self.dir_entry, self, columns
             )
+            self._detail_cells_key = columns
         return self._detail_cells
 
     def set_folder_item_count(self, count: int) -> None:
         self.folder_item_count = count
+        self._detail_cells = None
+
+    def set_git_status(self, status: str) -> None:
+        self.git_status = status
         self._detail_cells = None
 
     def _invalidate_prompt_cache(self) -> None:

@@ -2,6 +2,7 @@ import stat
 from datetime import datetime
 from functools import lru_cache
 from os import DirEntry, lstat
+from subprocess import TimeoutExpired, run
 from typing import NamedTuple
 
 from rich.cells import cell_len
@@ -27,7 +28,11 @@ DEFAULT_LABELS = {
     "permissions": "Permissions",
     "owner": "Owner",
     "group": "Group",
+    "git": "Git",
 }
+
+# most severe first; a folder shows the most severe status found beneath it
+_GIT_SEVERITY = "UDMRCA?"
 
 
 class DetailColumn(NamedTuple):
@@ -65,6 +70,8 @@ def get_detail_columns() -> tuple[DetailColumn, ...]:
         match column_type:
             case "size":
                 natural_width = 7
+            case "git":
+                natural_width = 2
             case "mtime" | "atime" | "ctime":
                 natural_width = cell_len(datetime.now().strftime(time_format))
             case "permissions":
@@ -91,6 +98,81 @@ def fit_column_count(width: int, columns: tuple[DetailColumn, ...]) -> int:
             break
         count += 1
     return count
+
+
+def _worst_git_char(*candidates: str) -> str:
+    worst = ""
+    for candidate in candidates:
+        for char in candidate:
+            if char in _GIT_SEVERITY and (
+                not worst or _GIT_SEVERITY.index(char) < _GIT_SEVERITY.index(worst)
+            ):
+                worst = char
+    return worst
+
+
+def parse_git_porcelain(output: bytes, prefix: str) -> dict[str, str]:
+    """Map each top-level name under ``prefix`` to its git XY status pair.
+
+    Like ``git status --short``: the first char is the staged (index) status,
+    the second the unstaged (work tree) status. Folders aggregate each
+    position independently to the most severe char found beneath them.
+
+    Args:
+        output: Raw ``git status --porcelain -z`` output.
+        prefix: The cwd relative to the repository root (``git rev-parse --show-prefix``).
+
+    Returns:
+        dict[str, str]: Name in cwd -> two chars of UDMRCA? (space = clean).
+    """
+    statuses: dict[str, str] = {}
+    entries = output.decode(errors="replace").split("\0")
+    index = 0
+    while index < len(entries):
+        entry = entries[index]
+        index += 1
+        if len(entry) < 4:
+            continue
+        xy, rel_path = entry[:2], entry[3:]
+        if xy[0] in "RC":
+            index += 1  # skip the rename/copy source path
+        if not rel_path.startswith(prefix):
+            continue
+        name = rel_path[len(prefix) :].split("/", 1)[0]
+        if name:
+            existing = statuses.get(name, "  ")
+            statuses[name] = (_worst_git_char(xy[0], existing[0]) or " ") + (
+                _worst_git_char(xy[1], existing[1]) or " "
+            )
+    return statuses
+
+
+def git_statuses(cwd: str) -> dict[str, str] | None:
+    """Git status chars for every changed entry directly inside ``cwd``.
+
+    Returns:
+        dict[str, str] | None: Name -> status char, or None when ``cwd`` is not
+            inside a git work tree (or git is unavailable).
+    """
+    try:
+        prefix_proc = run(
+            ["git", "-C", cwd, "rev-parse", "--show-prefix"],
+            capture_output=True,
+            timeout=5,
+        )
+        if prefix_proc.returncode != 0:
+            return None
+        status_proc = run(
+            ["git", "-C", cwd, "status", "--porcelain", "-z", "."],
+            capture_output=True,
+            timeout=10,
+        )
+        if status_proc.returncode != 0:
+            return None
+    except (OSError, TimeoutExpired):
+        return None
+    prefix = prefix_proc.stdout.decode(errors="replace").strip()
+    return parse_git_porcelain(status_proc.stdout, prefix)
 
 
 @lru_cache(maxsize=512)
@@ -154,6 +236,8 @@ def detail_cells(
                     value = _user_name(file_stat.st_uid)
                 case "group":
                     value = _group_name(file_stat.st_gid)
+                case "git":
+                    value = getattr(option, "git_status", "")
                 case _:
                     value = "--"
         except (OSError, ValueError):

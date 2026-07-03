@@ -5,8 +5,10 @@ from typing import Callable, ClassVar, Iterable, Self, Sequence
 
 from rich.cells import cell_len
 from rich.segment import Segment
+from rich.style import Style
 from textual import events, work
 from textual.binding import BindingType
+from textual.color import Color
 from textual.content import ContentText
 from textual.css.query import NoMatches
 from textual.errors import NoWidget
@@ -65,6 +67,16 @@ class FileList(
         "filelist--hidden",
         "filelist--hidden--highlighted",
         "filelist--hidden--hovered",
+        "filelist--detail-size",
+        "filelist--detail-mtime",
+        "filelist--detail-atime",
+        "filelist--detail-ctime",
+        "filelist--detail-permissions",
+        "filelist--detail-owner",
+        "filelist--detail-group",
+        "filelist--git-staged",
+        "filelist--git-unstaged",
+        "filelist--git-untracked",
     }
 
     ACTIONS: list[Action] = [
@@ -183,13 +195,77 @@ class FileList(
             return line
         if not isinstance(option, FileListSelectionWidget):
             return line
-        details = "  ".join(option.detail_cells(columns)[:fitted]) + " "
+        cells = option.detail_cells(columns)[:fitted]
         segments = list(line)
-        style = segments[-1].style if segments else self.rich_style
+        style = (segments[-1].style if segments else None) or self.rich_style
+        detail_segments: list[Segment] = []
+        details_width = 1
+        for column, cell in zip(columns[:fitted], cells):
+            details_width += column.width + 2
+            detail_segments.append(Segment("  ", style))
+            if column.type == "git":
+                pad, pair = cell[:-2], cell[-2:]
+                if pad:
+                    detail_segments.append(Segment(pad, style))
+                if pair == "??":
+                    detail_segments.append(
+                        Segment(
+                            pair,
+                            self._detail_rich_style("filelist--git-untracked", style),
+                        )
+                    )
+                elif pair.strip():
+                    detail_segments.append(
+                        Segment(
+                            pair[0],
+                            self._detail_rich_style("filelist--git-staged", style),
+                        )
+                    )
+                    detail_segments.append(
+                        Segment(
+                            pair[1],
+                            self._detail_rich_style("filelist--git-unstaged", style),
+                        )
+                    )
+                else:
+                    detail_segments.append(Segment(pair, style))
+            else:
+                detail_segments.append(
+                    Segment(
+                        cell,
+                        self._detail_rich_style(
+                            f"filelist--detail-{column.type}", style
+                        ),
+                    )
+                )
+        detail_segments.append(Segment(" ", style))
         return Strip([
-            *line.adjust_cell_length(width - cell_len(details), style),
-            Segment(details, style=style),
+            *line.adjust_cell_length(width - details_width, style),
+            *detail_segments,
         ])
+
+    def _detail_rich_style(self, component_class: str, base: Style) -> Style:
+        """The row style with the component class's foreground and text style on top.
+
+        Returns:
+            Style: The merged rich style.
+        """
+        visual = self.get_visual_style("option-list--option", component_class)
+        foreground = visual.foreground
+        if foreground is None:
+            return base
+        if foreground.a < 1 and base.bgcolor is not None:
+            foreground = Color.from_rich_color(base.bgcolor).blend(
+                foreground, foreground.a
+            )
+        return base + Style(
+            color=foreground.rich_color,
+            bold=visual.bold,
+            dim=visual.dim,
+            italic=visual.italic,
+            underline=visual.underline,
+            strike=visual.strike,
+        )
 
     def details_header_text(self) -> str:
         """The header line aligned with the name and detail columns.

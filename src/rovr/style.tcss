@@ -540,6 +540,25 @@ FileList {
     background: $error-lighten-3;
     color: $background;
   }
+
+  .filelist--detail-size,
+  .filelist--detail-mtime,
+  .filelist--detail-atime,
+  .filelist--detail-ctime,
+  .filelist--detail-permissions,
+  .filelist--detail-owner,
+  .filelist--detail-group {
+    color: $text-muted;
+  }
+  .filelist--git-staged {
+    color: $success;
+  }
+  .filelist--git-unstaged {
+    color: $warning;
+  }
+  .filelist--git-untracked {
+    color: $text-muted;
+  }
 }
 
 #dialog {

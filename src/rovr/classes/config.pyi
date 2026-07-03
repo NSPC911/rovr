@@ -785,7 +785,8 @@ class _RovrConfigInterfaceDetailsListItem(TypedDict, total=False):
     type: Required["_RovrConfigInterfaceDetailsListItemType"]
     r"""
     What metadata to show. size shows the item count for folders.
-    git shows the most severe git status char (UDMRCA?) per entry and hides itself outside a git work tree.
+    git shows the two-char XY status like git status --short (first char staged, second unstaged)
+    and hides itself outside a git work tree.
 
     Required property
     """
@@ -819,7 +820,8 @@ _RovrConfigInterfaceDetailsListItemType = (
 )
 r"""
 What metadata to show. size shows the item count for folders.
-git shows the most severe git status char (UDMRCA?) per entry and hides itself outside a git work tree.
+git shows the two-char XY status like git status --short (first char staged, second unstaged)
+and hides itself outside a git work tree.
 """
 _ROVRCONFIGINTERFACEDETAILSLISTITEMTYPE_SIZE: Literal["size"] = "size"
 r"""The values for the 'What metadata to show. size shows the item count for folders' enum"""

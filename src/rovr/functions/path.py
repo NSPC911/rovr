@@ -686,8 +686,14 @@ def run_opener(app: App, target_path: str) -> None:
 
     from . import utils
 
-    for pattern, openers in config["settings"].get("openers", {}).items():
-        if fnmatch(target_path, pattern):
+    groups = config["settings"].get("openers", {}).get("groups", {})
+    matches = config["settings"].get("openers", {}).get("match", {})
+
+    for pattern, group_names in matches.items():
+        if not fnmatch(target_path, pattern):
+            continue
+        for group_name in group_names:
+            openers = groups.get(group_name, [])
             for opener in openers:
                 if isinstance(opener, str):
                     runner = opener

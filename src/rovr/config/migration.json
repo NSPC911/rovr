@@ -1,5 +1,15 @@
 [
   {
+    "keys": ["settings.openers.*"],
+    "message": [
+      "[bright_blue]settings.openers[/] has been restructured to support interactively choosing an opener.",
+      "Openers are now declared as named groups, and file patterns map to one or more group names instead of directly to an opener list.",
+      "- Move your existing pattern -> opener list entries into [bright_cyan]settings.openers.groups.<name>[/] (pick any name, e.g. `text`)",
+      "- Then map the glob pattern to that group name in [bright_cyan]settings.openers.match[/], e.g. `\"*.py\" = [\"text\"]`"
+    ],
+    "extra": "Restructured in v0.10.0"
+  },
+  {
     "keys": ["settings.editor.bulk_rename"],
     "message": [
       "The [bright_cyan]settings.editor.bulk_rename[/] has been renamed to [bright_cyan]settings.editor.bulk_[b]editor[/][/] to give way for a bulk creator"

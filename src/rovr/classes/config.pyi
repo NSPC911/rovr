@@ -18,6 +18,15 @@ class RovrConfig(TypedDict, total=False):
     keybinds: "_RovrConfigKeybinds"
     plugins: "_RovrConfigPlugins"
 
+_OPENER_ONEOF1_ORPHAN_DEFAULT = True
+r""" Default value of the field path 'opener oneof1 orphan' """
+
+_OPENER_ONEOF1_SHELL_DEFAULT = True
+r""" Default value of the field path 'opener oneof1 shell' """
+
+_Opener = Union[str, "_OpenerOneof1"]
+r""" Aggregation type: oneOf """
+
 class _OpenerIf(TypedDict, total=False):
     cwd: list[str]
     r""" Only use this opener if the current working directory matches one (or more) of the glob patterns in this list (look at https://docs.python.org/3/library/fnmatch.html for more info) """
@@ -27,6 +36,28 @@ class _OpenerIf(TypedDict, total=False):
 
     directory: bool
     r""" Only use this opener if the selected item is a directory (set to true) or a file (set to false) (if unspecified, matches both files and directories) """
+
+_OpenerOneof1 = TypedDict(
+    "_OpenerOneof1",
+    {
+        # | Aggregation type: oneOf
+        # |
+        # | Required property
+        "run": Required["_Run"],
+        "if": "_OpenerIf",
+        # | Whether to open the opener as an orphan process.
+        # |
+        # | default: True
+        "orphan": bool,
+        # | The name of the opener to show in the menu (currently unused)
+        "name": str,
+        # | Whether the command to run is a shell command that needs to be run in a shell (required if you want to do piping)
+        # |
+        # | default: True
+        "shell": bool,
+    },
+    total=False,
+)
 
 _OsIf = list["_OsIfItem"]
 r""" Only use this setting if the operating system is one of the following (case insensitive) """
@@ -268,12 +299,6 @@ r""" Default value of the field path 'Rovr Config settings editor folder run' ""
 
 _ROVR_CONFIG_SETTINGS_EDITOR_FOLDER_SHELL_DEFAULT = False
 r""" Default value of the field path 'Rovr Config settings editor folder shell' """
-
-_ROVR_CONFIG_SETTINGS_OPENERS_ADDITIONALPROPERTIES_ITEM_ONEOF1_ORPHAN_DEFAULT = True
-r""" Default value of the field path 'Rovr Config settings openers additionalProperties item oneof1 orphan' """
-
-_ROVR_CONFIG_SETTINGS_OPENERS_ADDITIONALPROPERTIES_ITEM_ONEOF1_SHELL_DEFAULT = True
-r""" Default value of the field path 'Rovr Config settings openers additionalProperties item oneof1 shell' """
 
 _ROVR_CONFIG_SETTINGS_PREVIEW_RULES_DEFAULT = {
     "text/.*": "text",
@@ -1439,11 +1464,8 @@ class _RovrConfigSettings(TypedDict, total=False):
       text/.*: text
     """
 
-    openers: dict[str, list["_RovrConfigSettingsOpenersAdditionalpropertiesItem"]]
-    r"""
-    A list of openers to open files with. These are used to open files, what were you expecting.
-    Key must be a valid glob pattern, but the value has to be a list that can contain a mix of strings and objects
-    """
+    openers: "_RovrConfigSettingsOpeners"
+    r""" Openers to open files with, grouped by name and matched against file paths by glob pattern. """
 
     drive_exclude: list[str]
     r"""
@@ -1537,32 +1559,14 @@ class _RovrConfigSettingsEditorFolder(TypedDict, total=False):
     default: False
     """
 
-_RovrConfigSettingsOpenersAdditionalpropertiesItem = Union[
-    str, "_RovrConfigSettingsOpenersAdditionalpropertiesItemOneof1"
-]
-r""" Aggregation type: oneOf """
+class _RovrConfigSettingsOpeners(TypedDict, total=False):
+    r"""Openers to open files with, grouped by name and matched against file paths by glob pattern."""
 
-_RovrConfigSettingsOpenersAdditionalpropertiesItemOneof1 = TypedDict(
-    "_RovrConfigSettingsOpenersAdditionalpropertiesItemOneof1",
-    {
-        # | Aggregation type: oneOf
-        # |
-        # | Required property
-        "run": Required["_Run"],
-        "if": "_OpenerIf",
-        # | Whether to open the opener as an orphan process.
-        # |
-        # | default: True
-        "orphan": bool,
-        # | The name of the opener to show in the menu (currently unused)
-        "name": str,
-        # | Whether the command to run is a shell command that needs to be run in a shell (required if you want to do piping)
-        # |
-        # | default: True
-        "shell": bool,
-    },
-    total=False,
-)
+    groups: dict[str, list["_Opener"]]
+    r""" Named groups of openers. Each group is a list that can contain a mix of strings and objects, tried in order until one succeeds. Referenced by name from `match`. """
+
+    match: dict[str, list[str]]
+    r""" Map glob patterns (matched against the file's path) to one or more group names defined in `groups`. If multiple groups match, they are tried in order. """
 
 _RovrConfigSettingsPreviewRulesAdditionalproperties = (
     Literal["text"]

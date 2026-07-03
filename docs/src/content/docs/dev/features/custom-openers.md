@@ -7,24 +7,29 @@ rovr allows you to configure custom commands to open files based on their MIME t
 
 ## configuration
 
-you can define your custom openers in the `settings.openers` section of your configuration file. the keys are glob patterns that match against the file's MIME type or path, and the values are lists of opener definitions.
+openers are declared as named groups in `settings.openers.groups`, then glob patterns are mapped to one or more of those group names in `settings.openers.match`.
 
 ```toml
-[settings.openers]
-"*.py" = [
+[settings.openers.groups]
+text = [
     { run = "$EDITOR", orphan = true },
     { run = "code", orphan = true }
 ]
-"*.png" = [
+image = [
     "imv"
 ]
-"*" = [
+fallback = [
     { run = "explorer.exe", if = { os = ["Windows"] } },
     { run = "xdg-open", if = { os = ["Linux"] } }
 ]
+
+[settings.openers.match]
+"*.py" = ["text"]
+"*.png" = ["image"]
+"*" = ["fallback"]
 ```
 
-if a `*` key is provided, it acts as a fallback for any unmatched file. if no custom opener matches, rovr will fall back to the operating system's default opener.
+if a `*` key is provided in `match`, it acts as a fallback for any unmatched file. if no custom opener matches, rovr will fall back to the operating system's default opener.
 
 ## opener definitions
 
@@ -44,10 +49,13 @@ the `if` property allows you to restrict when an opener is used based on specifi
 - `cwd` (array of strings): glob patterns that must match the current working directory.
 
 ```toml
-[settings.openers]
-".*\\.py" = [
+[settings.openers.groups]
+py = [
     { run = "python", orphan = false, if = { os = ["Linux", "Darwin"] } }
 ]
+
+[settings.openers.match]
+".*\\.py" = ["py"]
 ```
 
 ### adding more openers

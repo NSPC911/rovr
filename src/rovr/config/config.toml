@@ -104,7 +104,10 @@ drive_exclude = ["/var/*"]
 "text/.*" = "text"
 "font/.*" = "font"
 
-[settings.openers]
+[settings.openers.groups]
+# unset for the end user
+
+[settings.openers.match]
 # unset for the end user
 
 [settings.editor.file]

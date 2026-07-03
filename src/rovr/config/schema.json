@@ -89,6 +89,40 @@
         }
       }
     },
+    "opener": {
+      "oneOf": [
+        { "type": "string" },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "run": {
+              "$ref": "#/definitions/run",
+              "description": "The command to run to open the file. Command expansions are supported."
+            },
+            "if": {
+              "$ref": "#/definitions/opener_if",
+              "description": "Only use this opener if a set criteria matches"
+            },
+            "orphan": {
+              "type": "boolean",
+              "default": true,
+              "description": "Whether to open the opener as an orphan process."
+            },
+            "name": {
+              "type": "string",
+              "description": "The name of the opener to show in the menu (currently unused)"
+            },
+            "shell": {
+              "type": "boolean",
+              "default": true,
+              "description": "Whether the command to run is a shell command that needs to be run in a shell (required if you want to do piping)"
+            }
+          },
+          "required": ["run"]
+        }
+      ]
+    },
     "right_click_item": {
       "type": "object",
       "properties": {
@@ -491,42 +525,24 @@
         },
         "openers": {
           "type": "object",
-          "description": "A list of openers to open files with. These are used to open files, what were you expecting.\nKey must be a valid glob pattern, but the value has to be a list that can contain a mix of strings and objects",
-          "additionalProperties": {
-            "type": "array",
-            "items": {
-              "oneOf": [
-                { "type": "string" },
-                {
-                  "type": "object",
-                  "additionalProperties": false,
-                  "properties": {
-                    "run": {
-                      "$ref": "#/definitions/run",
-                      "description": "The command to run to open the file. Command expansions are supported."
-                    },
-                    "if": {
-                      "$ref": "#/definitions/opener_if",
-                      "description": "Only use this opener if a set criteria matches"
-                    },
-                    "orphan": {
-                      "type": "boolean",
-                      "default": true,
-                      "description": "Whether to open the opener as an orphan process."
-                    },
-                    "name": {
-                      "type": "string",
-                      "description": "The name of the opener to show in the menu (currently unused)"
-                    },
-                    "shell": {
-                      "type": "boolean",
-                      "default": true,
-                      "description": "Whether the command to run is a shell command that needs to be run in a shell (required if you want to do piping)"
-                    }
-                  },
-                  "required": ["run"]
-                }
-              ]
+          "additionalProperties": false,
+          "description": "Openers to open files with, grouped by name and matched against file paths by glob pattern.",
+          "properties": {
+            "groups": {
+              "type": "object",
+              "description": "Named groups of openers. Each group is a list that can contain a mix of strings and objects, tried in order until one succeeds. Referenced by name from `match`.",
+              "additionalProperties": {
+                "type": "array",
+                "items": { "$ref": "#/definitions/opener" }
+              }
+            },
+            "match": {
+              "type": "object",
+              "description": "Map glob patterns (matched against the file's path) to one or more group names defined in `groups`. If multiple groups match, they are tried in order.",
+              "additionalProperties": {
+                "type": "array",
+                "items": { "type": "string" }
+              }
             }
           }
         },

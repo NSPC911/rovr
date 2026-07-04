@@ -8,6 +8,7 @@
 # nuitka-project: --include-data-dir=src/rovr=_rovr
 # nuitka-project: --nofollow-import-to="tkinter"
 # nuitka-project: --nofollow-import-to=aiohttp
+# nuitka-project: --noinclude-custom-mode=pygments:bytecode
 # nuitka-project: --onefile-cache-mode=cached
 # nuitka-project: --onefile-child-grace-time=1
 # nuitka-project: --python-flag=no_asserts

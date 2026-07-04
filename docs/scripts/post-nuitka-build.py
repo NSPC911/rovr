@@ -1,10 +1,6 @@
-import sys
-
-if sys.platform == "win32":
-    raise SystemExit(0)
-
 import os
 import subprocess
+import sys
 
 
 def get_dir_size(folder_path: str) -> int:
@@ -20,7 +16,12 @@ def get_dir_size(folder_path: str) -> int:
 
 
 dist_size = get_dir_size("rovr.dist")
-subprocess.run(["find", "rovr.dist", "-name", "*.so*", "-exec", "strip", "{}", "+"])
-new_dist_size = get_dir_size("rovr.dist")
 
-print(f"{dist_size / (1024 * 1024):.2f} MB -> {new_dist_size / (1024 * 1024):.2f} MB")
+if sys.platform == "linux":
+    subprocess.run(["find", "rovr.dist", "-name", "*.so*", "-exec", "strip", "{}", "+"])
+    new_dist_size = get_dir_size("rovr.dist")
+    print(
+        f"{dist_size / (1024 * 1024):.2f} MB -> {new_dist_size / (1024 * 1024):.2f} MB"
+    )
+else:
+    print(f"{dist_size / (1024 * 1024):.2f} MB (no options to strip on {sys.platform})")

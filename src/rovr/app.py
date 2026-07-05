@@ -44,6 +44,7 @@ from textual_drivers.dnd import (
     DNDDragIn,
     DNDDragInOperation,
     DNDDragOutOperation,
+    DragOutFinished,
     Drop,
     DropData,
 )
@@ -86,6 +87,7 @@ from rovr.functions.path import (
 from rovr.functions.themes import get_custom_themes
 from rovr.functions.utils import multiprocessing_process_error_checker, run_command
 from rovr.header import HeaderArea
+from rovr.header.tabs import TablineTab
 from rovr.navigation_widgets import (
     BackButton,
     ForwardButton,
@@ -226,6 +228,8 @@ class Application(Actionable, DNDApp, inherit_bindings=False):
             chdir(ensure_existing_directory(startup_path))
 
         self._p_timer: Timer | None = None
+        self._dnd_invoked_tab: str | None = None
+        self._dnd_timer: tuple[Timer, DNDDragIn] | None = None
 
         self._on_mount_done: bool = False
         self.last_available_cd = getcwd()
@@ -926,25 +930,63 @@ class Application(Actionable, DNDApp, inherit_bindings=False):
         if not selected:
             return None
         else:
+            self._dnd_invoked_tab = self.tabWidget.active
             return DNDDragOutOperation(
                 [Path(p).as_uri() for p in selected],
-                "move",
+                "either",
                 f"{len(selected)} item{'s' if len(selected) != 1 else ''}",
             )
 
+    def _tab_under_pos(self, pos: Offset) -> TablineTab | None:
+        for tab in self.tabWidget.query(TablineTab):
+            if pos in tab.region:
+                return tab
+        return None
+
+    def on_drag_out_finished(self, event: DragOutFinished) -> None:
+        self._dnd_invoked_tab = None
+
     async def dnd_drag_in_operation(self, event: DNDDragIn) -> DNDDragInOperation:
+        reset = True
+        if self._dnd_timer:
+            if self._dnd_timer[1].pos == event.pos:
+                reset = False
+            else:
+                self._dnd_timer[0].stop()
+
+        if reset:
+            self._dnd_timer = (
+                self.set_timer(
+                    0.7,
+                    lambda event=event: (
+                        setattr(self.tabWidget, "active", new_tab.id)
+                        if (new_tab := self._tab_under_pos(event.pos))
+                        else None
+                    ),
+                ),
+                event,
+            )
+
+        # need to organise the accepted section because it is getting very messy
+        accepted = True
+        # check if dragging out, and dropping on the same tab
+        if self.is_dragging_out and self._dnd_invoked_tab == self.tabWidget.active:
+            accepted = False
+        # check if drop is within file list
+        if event.pos not in self.file_list.content_region:
+            accepted = False
+        # check if screen is PasteDropScreen and not the only screen
+        if len(self.screen_stack) > 1 and not isinstance(self.screen, PasteDropScreen):
+            accepted = False
+
         return DNDDragInOperation(
-            (not self.is_dragging_out)
-            and (event.pos in self.file_list.content_region)
-            and (
-                (len(self.screen_stack) == 1)
-                or (isinstance(self.screen, PasteDropScreen))
-            ),
+            accepted,
             "either",
             ["text/uri-list", "text/plain"],
         )
 
     async def on_drop(self, event: Drop) -> None:
+        self.file_list._ignore_next_click = False
         if "text/uri-list" in event.mimes:
             idx = event.mimes.index("text/uri-list")
         elif "text/plain" in event.mimes:

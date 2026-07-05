@@ -11,7 +11,7 @@ from contextlib import suppress
 from functools import lru_cache, partial
 from os import path
 from subprocess import CompletedProcess
-from typing import Callable, Literal, TypedDict, overload
+from typing import Any, Callable, Literal, TypedDict, overload
 
 from rich.console import Console
 from textual import work
@@ -109,7 +109,8 @@ def is_hidden_file(filepath: str | DirEntryType) -> bool:
 # to Textual's strict limitation for ids to consist of
 # letters, numbers, underscores, or hyphens, and must
 # not begin with a number
-def compress(text: str) -> str:
+def compress(text: Any) -> str:
+    text = str(text)
     return "u_" + base64.urlsafe_b64encode(text.encode("utf-8")).decode(
         "ascii"
     ).replace("=", "_")

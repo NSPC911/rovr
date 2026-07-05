@@ -30,6 +30,17 @@ class PasteDropScreen(Actionable, ModalScreen[PasteDropReturnType | None]):
         super().__init__()
         self.file_paths: set[str] = set()
         self.call_after_refresh(self.post_message, initial_paste_event)
+
+    def compose(self) -> ComposeResult:
+        with Grid(id="dialog"):
+            yield OptionList(id="drag_and_drop_list")
+            yield Button("Copy", id="copy", variant="success")
+            yield Button("Move", id="move", variant="warning")
+            with HorizontalGroup():
+                yield Button("Cancel", id="cancel", variant="error")
+
+    def on_mount(self) -> None:
+        self.query_one(Grid).border_title = "Drag and Drop"
         self.ACTIONS = [
             Action(
                 self.query_one("#copy", Button).press,
@@ -44,17 +55,6 @@ class PasteDropScreen(Actionable, ModalScreen[PasteDropReturnType | None]):
                 config["keybinds"]["drag_and_drop"]["cancel"],
             ),
         ]
-
-    def compose(self) -> ComposeResult:
-        with Grid(id="dialog"):
-            yield OptionList(id="drag_and_drop_list")
-            yield Button("Copy", id="copy", variant="success")
-            yield Button("Move", id="move", variant="warning")
-            with HorizontalGroup():
-                yield Button("Cancel", id="cancel", variant="error")
-
-    def on_mount(self) -> None:
-        self.query_one(Grid).border_title = "Drag and Drop"
 
     @on(events.Paste)
     def on_paste(self, event: events.Paste) -> None:

@@ -11,16 +11,27 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - `contextmenu`: use proper objects instead of strings [#296](https://github.com/NSPC911/rovr/pull/296)
 - `config`: add `prepend_` and `append_` support [#298](https://github.com/NSPC911/rovr/pull/298)
+- `expansions`: support `real_` alternatives [dbf11f4](https://github.com/NSPC911/rovr/commit/dbf11f49dd0d2c1f91d5f4eac1dbc0ba461efe96)
+- `filelist`: add open keybind [a6aed4d](https://github.com/NSPC911/rovr/commit/a6aed4d453108bf447018650c0e352ff97d07846)
+- `app`: add kitty drag and drop support!! [#300](https://github.com/NSPC911/rovr/pull/300)
 
 ### Fixed
 
 - `mixin`: prevent a crash from occurring on specific circumstances [6bcddb2](https://github.com/NSPC911/rovr/commit/6bcddb24610609356a2ed38342a49834a8a8d09c)
 - `app`: make showkeys show all keys properly [5a6356b](https://github.com/NSPC911/rovr/commit/5a6356b7c54b97f977280816f8bf971ed22fcf93)
 - `contextmenu`: dont notify for orphans [2828c43](https://github.com/NSPC911/rovr/commit/2828c43493e836fd541bd61a7537a8a60b2fff78)
+- `config`: split key to get proper line number [27411d7](https://github.com/NSPC911/rovr/commit/27411d7da3d35e33a15be944ad84460adda62dbd)
+- `input`: validate if path [7228b93](https://github.com/NSPC911/rovr/commit/7228b93d9b438df4215f17ee71403fcb2dc4cfed)
+- `input`: support absolute paths [c847695](https://github.com/NSPC911/rovr/commit/c84769582f1dbd142b58c7bee5e998e6f8f5e9da)
 
 ### Removed
 
 - `lists`: remove block border subtitles [af3df76](https://github.com/NSPC911/rovr/commit/af3df763aa0c3efed40c7685059e4c4a241b80ab)
+
+### Performance
+
+- `preview`: read file bytes later, use magic_file [809f7e3](https://github.com/NSPC911/rovr/commit/809f7e35e9d708f3195b0c2cd9cd0231f258649b) [0c6e42f6213077f64231c61492796e236745e43c](https://github.com/NSPC911/rovr/commit/0c6e42f6213077f64231c61492796e236745e43c)
+- `app`: check mtime of folder to refresh [07b8664](https://github.com/NSPC911/rovr/commit/07b8664c024c08eea11d4f735dc998bf36079ef5)
 
 ## [0.9.2]
 

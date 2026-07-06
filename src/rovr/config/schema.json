@@ -222,7 +222,7 @@
         },
         "details_list": {
           "type": "array",
-          "default": [{ "type": "size" }, { "type": "mtime" }],
+          "default": [],
           "description": "Metadata columns shown right-aligned in the file list, ordered by priority.\nEarlier entries are dropped last when the panel becomes too narrow;\nlater entries are dropped first. Set to [] to disable.",
           "items": {
             "type": "object",

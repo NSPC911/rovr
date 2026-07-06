@@ -69,7 +69,7 @@ r""" Default value of the field path 'Rovr Config interface compact_mode buttons
 _ROVR_CONFIG_INTERFACE_COMPACT_MODE_PANELS_DEFAULT = False
 r""" Default value of the field path 'Rovr Config interface compact_mode panels' """
 
-_ROVR_CONFIG_INTERFACE_DETAILS_LIST_DEFAULT = [{"type": "size"}, {"type": "mtime"}]
+_ROVR_CONFIG_INTERFACE_DETAILS_LIST_DEFAULT: list[Any] = []
 r""" Default value of the field path 'Rovr Config interface details_list' """
 
 _ROVR_CONFIG_INTERFACE_DOUBLE_CLICK_DELAY_DEFAULT = 0.25
@@ -696,8 +696,7 @@ class _RovrConfigInterface(TypedDict, total=False):
     later entries are dropped first. Set to [] to disable.
 
     default:
-      - type: size
-      - type: mtime
+      []
     """
 
     image_viewer: "_RovrConfigInterfaceImageViewer"

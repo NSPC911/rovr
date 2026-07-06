@@ -40,7 +40,7 @@ elif path.exists(jsonpath := path.join(cache, "uname.json")):
     )
     _platform.processor = _processor  # type: ignore  # noqa
     # then monkey patch
-    platform.uname = lambda: _platform  # type: ignore  # noqa
+    platform.uname = lambda: _platform  # type: ignore
 else:
     # get platform info
     start = perf_counter()

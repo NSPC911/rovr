@@ -14,8 +14,13 @@ class IsValidFilePath(Validator):
     def validate(self, value: str) -> ValidationResult:
         from pathvalidate import sanitize_filepath
 
-        value = str(normalise(str(getcwd()) + "/" + value))
-        if value == normalise(sanitize_filepath(value)):
+        # Handle absolute paths correctly
+        if path.isabs(value):
+            normalized_value = normalise(value)
+        else:
+            normalized_value = normalise(str(getcwd()) + "/" + value)
+
+        if normalized_value == normalise(sanitize_filepath(normalized_value)):
             return self.success()
         else:
             return self.failure()
@@ -30,12 +35,15 @@ class PathNoLongerExists(Validator):
         self.accept_equal = accept_equal
 
     def validate(self, value: str) -> ValidationResult:
-        item_path = str(normalise(str(getcwd()) + "/" + value))
+        # Handle absolute paths correctly
+        if path.isabs(value):
+            item_path = normalise(value)
+        else:
+            item_path = normalise(str(getcwd()) + "/" + value)
+
         if path.exists(item_path):
             # check for acceptance
             if os_type == "Windows" and self.accept is not None:
-                print(self.accept)
-                print(item_path)
                 # check
                 lower_val = value.lower()
                 if any(
@@ -50,5 +58,20 @@ class PathNoLongerExists(Validator):
                 return self.failure(
                     f"A {'folder' if path.isdir(item_path) else 'file'} with that name already exists."
                 )
+        else:
+            return self.success()
+
+
+class AllowsExistingFiles(Validator):
+    def __init__(self) -> None:
+        super().__init__(failure_description="Path does not exist.")
+
+    def validate(self, value: str) -> ValidationResult:
+        item_path = str(normalise(str(getcwd()) + "/" + value))
+        if path.exists(item_path):
+            if path.isfile(item_path):
+                return self.success()
+            else:
+                return self.failure("Path is not a file.")
         else:
             return self.success()

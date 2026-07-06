@@ -5,10 +5,13 @@ import base64
 import ctypes
 import os
 import re
+import shlex
 import stat
+from contextlib import suppress
 from functools import lru_cache, partial
 from os import path
-from typing import Callable, Literal, TypedDict, overload
+from subprocess import CompletedProcess
+from typing import Any, Callable, Literal, TypedDict, overload
 
 from rich.console import Console
 from textual import work
@@ -16,6 +19,7 @@ from textual.app import App
 from textual.dom import DOMNode
 
 from rovr import pprint
+from rovr.classes.config import _OpenerIf, _RightClickIf
 from rovr.classes.type_aliases import (
     DirEntryType,
     DirEntryTypes,
@@ -43,13 +47,44 @@ def natsort_cacheless(key: str) -> list:
     return _natsort(key)
 
 
-def is_hidden_file(filepath: str) -> bool:
+if os_type == "Windows":
+    _GetFileAttributesW = ctypes.windll.kernel32.GetFileAttributesW
+    _GetFileAttributesW.argtypes = [ctypes.c_wchar_p]
+    _GetFileAttributesW.restype = ctypes.c_uint32
+
+
+@overload
+def is_hidden_file(filepath: str) -> bool: ...
+
+
+@overload
+def is_hidden_file(filepath: DirEntryType) -> bool: ...
+
+
+def is_hidden_file(filepath: str | DirEntryType) -> bool:
+    if not isinstance(filepath, str):
+        if os_type == "Windows":
+            try:
+                return bool(
+                    filepath.stat(follow_symlinks=False).st_file_attributes
+                    & stat.FILE_ATTRIBUTE_HIDDEN
+                )
+            except OSError:
+                return False
+        if filepath.name.startswith("."):
+            return True
+        if os_type == "Darwin":
+            try:
+                return bool(
+                    getattr(filepath.stat(follow_symlinks=False), "st_flags", 0)
+                    & getattr(stat, "UF_HIDDEN", 0)
+                )
+            except OSError:
+                return False
+        return False
     if os_type == "Windows":
         try:
-            GetFileAttributesW = ctypes.windll.kernel32.GetFileAttributesW
-            GetFileAttributesW.argtypes = [ctypes.c_wchar_p]
-            GetFileAttributesW.restype = ctypes.c_uint32
-            attrs = GetFileAttributesW(filepath)
+            attrs = _GetFileAttributesW(filepath)
             if attrs == 0xFFFFFFFF:  # INVALID_FILE_ATTRIBUTES
                 return False
             return bool(attrs & 0x02)  # FILE_ATTRIBUTE_HIDDEN
@@ -74,7 +109,8 @@ def is_hidden_file(filepath: str) -> bool:
 # to Textual's strict limitation for ids to consist of
 # letters, numbers, underscores, or hyphens, and must
 # not begin with a number
-def compress(text: str) -> str:
+def compress(text: Any) -> str:
+    text = str(text)
     return "u_" + base64.urlsafe_b64encode(text.encode("utf-8")).decode(
         "ascii"
     ).replace("=", "_")
@@ -121,7 +157,7 @@ async def open_file(app: App, filepath: str) -> None:
             case _:  # Linux and other Unix-like
                 process = await create_proc("xdg-open", filepath)
         _, stderr = await process.communicate()
-        if stderr:
+        if process.returncode != 0:
             if system == "windows":
                 # try with powershell
                 _, stderr = await (
@@ -133,20 +169,20 @@ async def open_file(app: App, filepath: str) -> None:
                         filepath,
                     )
                 ).communicate()
-                if stderr:
+                if process.returncode and process.returncode != 0:
                     # honestly cant do anything about this, i dont want to risk
                     # stdout corruption (stares at pixelorama) by trying os.startfile
                     # so just raise it and let the user deal with it
                     app.notify(
                         str(stderr.decode().strip()),
-                        title="Open File",
+                        title=f"Open File (exited with code {process.returncode})",
                         severity="error",
                         markup=False,
                     )
             else:
                 app.notify(
-                    str(stderr.decode().strip()),
-                    title="Open File",
+                    f"stderr: {stderr.decode().strip()}",
+                    title=f"Open File (exited with code {process.returncode})",
                     severity="error",
                     markup=False,
                 )
@@ -183,7 +219,7 @@ def get_filtered_dir_names(cwd: str | bytes, show_hidden: bool = False) -> set[s
 
     names = set()
     for item in listed_dir:
-        if not show_hidden and is_hidden_file(item.path):
+        if not show_hidden and is_hidden_file(item):
             continue
         names.add(item.name)
 
@@ -298,29 +334,30 @@ def sync_get_cwd_object(
         for item in entries:
             if not isinstance(item, DirEntryTypes):
                 raise TypeError(f"Expected a DirEntry object but got {type(item)}")
-            if not show_hidden and is_hidden_file(item.path):
+            if not show_hidden and is_hidden_file(item):
                 continue
 
             if item.is_dir():
-                item_name = item.name
                 folders.append({
-                    "name": item_name,
-                    "icon": lambda item_name=item_name: get_icon_for_folder(item_name),
+                    "name": item.name,
+                    "icon": lambda item=item: get_icon_for_folder(
+                        item.path, is_symlink=item.is_symlink() or item.is_junction()
+                    ),
                     "dir_entry": item,
                 })
             else:
-                item_name = item.name
                 files.append({
-                    "name": item_name,
-                    "icon": lambda item_name=item_name: get_icon_for_file(item_name),
+                    "name": item.name,
+                    "icon": lambda item=item: get_icon_for_file(
+                        item.path, is_symlink=item.is_symlink()
+                    ),
                     "dir_entry": item,
                 })
             if (
                 return_nothing_if_this_returns_true is not None
                 and return_nothing_if_this_returns_true()
             ):
-                if globals().get("is_dev", False):
-                    dom_node.log("Cut off early during dictionary building")
+                dom_node.log("Cut off early during dictionary building")
                 return None, None
 
     dom_node.log(f"Collected {len(folders)} folders and {len(files)} files in {cwd}")
@@ -331,11 +368,11 @@ def sync_get_cwd_object(
             folders.sort(key=lambda x: x["name"].lower())
             files.sort(key=lambda x: x["name"].lower())
         case "natural":
-            if len(folders) > 1024:
+            if len(folders) < 1024:
                 folders.sort(key=lambda x: natsort(x["name"]))
             else:
                 folders.sort(key=lambda x: natsort_cacheless(x["name"]))
-            if len(files) > 1024:
+            if len(files) < 1024:
                 files.sort(key=lambda x: natsort(x["name"]))
             else:
                 files.sort(key=lambda x: natsort_cacheless(x["name"]))
@@ -361,15 +398,13 @@ def sync_get_cwd_object(
         return_nothing_if_this_returns_true is not None
         and return_nothing_if_this_returns_true()
     ):
-        if globals().get("is_dev", False):
-            dom_node.log("Cut off early before reversing results")
+        dom_node.log("Cut off early before reversing results")
         return None, None
     if reverse:
         files.reverse()
         folders.reverse()
 
-    if globals().get("is_dev", False):
-        dom_node.log(f"Found {len(folders)} folders and {len(files)} files in {cwd}")
+    dom_node.log(f"Found {len(folders)} folders and {len(files)} files in {cwd}")
     return folders, files
 
 
@@ -525,9 +560,9 @@ def get_direntry_for(file_path: str) -> DirEntryType | None:
     base_name = path.basename(file_path)
     try:
         with os.scandir(parent_dir) as it:
-            for entry in it:
-                if entry.name == base_name:
-                    return entry
+            for filepath in it:
+                if filepath.name == base_name:
+                    return filepath
     except (PermissionError, FileNotFoundError, OSError):
         return None
     return None
@@ -573,6 +608,21 @@ def dump_exc(widget: DOMNode | None, exc: Exception | Traceback) -> str | None: 
         f"{log_name}.log",
     )
     os.makedirs(path.dirname(dump_path), exist_ok=True)
+
+    log_dir = path.dirname(dump_path)
+    log_files = sorted(
+        [
+            f
+            for f in os.listdir(log_dir)
+            if f.startswith(log_name) and f.endswith(".log")
+        ],
+        key=lambda f: path.getctime(path.join(log_dir, f)),
+    )
+    if len(log_files) >= 50:
+        oldest = path.join(log_dir, log_files[0])
+        with suppress(OSError):
+            os.remove(oldest)
+
     with open(dump_path, "a", encoding="utf-8") as file_log:
         # don't need to handle OS Error, Textual automatically chains errors
         error_log = Console(file=file_log, legacy_windows=True)
@@ -581,3 +631,111 @@ def dump_exc(widget: DOMNode | None, exc: Exception | Traceback) -> str | None: 
             Panel(rich_traceback, title=f"Exception dumped on {str(datetime.now())}")
         )
     return dump_path
+
+
+def ifed(app: App, conditions: _RightClickIf | _OpenerIf) -> bool:
+    """Checks if the conditions for an option are met, used to determine if an option should be disabled
+
+    Args:
+        app: The app, needed to check the conditions
+        conditions: The conditions to check, can be based on the highlighted file, current directory, os, or if the highlighted file is a directory
+
+    Returns:
+        Whether the option should be disabled based on the conditions
+    """
+    from fnmatch import fnmatch
+
+    dir_entry: DirEntryType | None = getattr(
+        app.file_list.highlighted_option, "dir_entry", None
+    )
+    disabled = False
+    for thing in conditions:
+        match thing:
+            case "path":
+                disabled = not (
+                    any(
+                        dir_entry and fnmatch(dir_entry.path, pattern)
+                        for pattern in conditions.get("path", [])
+                    )
+                )
+            case "os":
+                disabled = not any(
+                    os.lower() == os_type.lower() for os in conditions["os"]
+                )
+            case "cwd":
+                disabled = not (
+                    any(
+                        fnmatch(app.file_list.current_directory, pattern)
+                        for pattern in conditions["cwd"]
+                    )
+                )
+            case "directory":
+                if conditions["directory"]:
+                    disabled = not (dir_entry and dir_entry.is_dir())
+                else:
+                    disabled = not (dir_entry and not dir_entry.is_dir())
+        if disabled:
+            break
+    return disabled
+
+
+def run_opener(app: App, target_path: str) -> None:
+    from fnmatch import fnmatch
+
+    from rovr.variables.constants import config
+
+    from . import utils
+
+    groups = config["settings"].get("openers", {}).get("groups", {})
+    matches = config["settings"].get("openers", {}).get("match", {})
+
+    for pattern, group_names in matches.items():
+        if not fnmatch(target_path, pattern):
+            continue
+        for group_name in group_names:
+            if group_name not in groups:
+                app.notify(
+                    f"Opener group '{group_name}' not found in configuration.",
+                    title="Opener Error",
+                    severity="warning",
+                    markup=False,
+                )
+                continue
+            for opener in groups[group_name]:
+                if isinstance(opener, str):
+                    runner = opener
+                elif ifed(app, opener.get("if", {})):
+                    continue
+                elif isinstance(opener["run"], (list, str)):
+                    runner = opener["run"]
+                else:
+                    return
+                if isinstance(runner, str):
+                    to_run = runner.replace("${path}", shlex.quote(target_path))
+                else:
+                    to_run = [part.replace("${path}", target_path) for part in runner]
+                if to_run == runner:
+                    if isinstance(runner, str):
+                        to_run = runner + " " + shlex.quote(target_path)
+                    else:
+                        to_run = runner + [target_path]
+
+                try:
+                    proc = utils.run_command(
+                        app,
+                        to_run,
+                        run_type=("orphan" if opener.get("orphan", True) else "suspend")
+                        if isinstance(opener, dict)
+                        else "orphan",
+                        shell=opener.get("shell", True)
+                        if isinstance(opener, dict)
+                        else True,
+                    )
+                except Exception:
+                    continue
+                if isinstance(proc, CompletedProcess):
+                    if proc.returncode == 0:
+                        return
+                else:
+                    return
+    open_file(app, target_path)

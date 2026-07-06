@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import asyncio
+import contextlib
 import subprocess
 from dataclasses import dataclass
 from functools import partial
@@ -11,7 +12,6 @@ from typing import cast
 
 import textual_image.renderable
 import textual_image.widget
-from multiarchive._archive import Archive, BadArchiveError
 from PIL import Image, UnidentifiedImageError
 from PIL.Image import Image as PILImage
 from textual import events, on, work
@@ -208,10 +208,10 @@ class PreviewContainer(Actionable, Container):
                 Static("The symlink target is not found!", classes="special")
             )
             # also update option if necessary
-            if (
-                FileListSelectionWidget is not None
-                and highlighted_option.icon
-                != icon_utils.get_icon("general", "broken_symlink")
+            if isinstance(
+                highlighted_option, FileListSelectionWidget
+            ) and highlighted_option.icon != icon_utils.get_icon(
+                "general", "broken_symlink"
             ):
                 highlighted_option.set_icon(
                     icon_utils.get_icon("general", "broken_symlink")
@@ -498,7 +498,7 @@ class PreviewContainer(Actionable, Container):
             "border_subtitle",
             f"Page {self.pdf.current_page + 1}/{self.pdf.total_pages}",
         )
-        self._trigger_pdf_update()
+        self.run_worker(self.show_pdf_preview, thread=True, exclusive=True)
 
     def load_pdf_pages(self, first_page: int, last_page: int) -> list[PILImage]:
         """
@@ -661,7 +661,7 @@ class PreviewContainer(Actionable, Container):
             if config["interface"]["show_line_numbers"]
             else "--style=plain",
         ]
-        max_lines = self.region.height
+        max_lines = self.app.call_from_thread(lambda: self.region.height)
         if max_lines > 0:
             command.append(f"--line-range=:{max_lines}")
         assert self._current_file_path is not None
@@ -740,6 +740,7 @@ class PreviewContainer(Actionable, Container):
         self.app.call_from_thread(setattr, self, "border_title", titles.file)
 
         lines: list[str] | None = None
+        height = self.app.call_from_thread(lambda: self.region.height) or 50
         # force read by brute-forcing encoding methods
         encodings_to_try = [
             "utf8",
@@ -754,7 +755,6 @@ class PreviewContainer(Actionable, Container):
         for encoding in encodings_to_try:
             try:
                 lines: list[str] | None = []
-                height = self.region.height or 50  # bums
                 with open(self._current_file_path, "r", encoding=encoding) as f:
                     for _ in range(height):
                         line = f.readline()
@@ -964,9 +964,18 @@ class PreviewContainer(Actionable, Container):
             or "-filelist-only" in self.screen.classes
         ):
             self._pending_preview_args = (file_path, mtime)
+            self._compute_and_sync_mime(file_path, mtime)
             return
         self._pending_preview_args = None
         self.perform_show_preview(file_path, mtime)
+
+    def _compute_and_sync_mime(self, file_path: str, mtime: int | float) -> None:
+        self._sync_mime(
+            file_path,
+            preview_utils.MimeResult("basic", "inode/directory")
+            if path.isdir(file_path)
+            else preview_utils.get_mime_type(file_path, mtime),
+        )
 
     @work(exclusive=True, thread=True)
     def perform_show_preview(self, file_path: str, mtime: int) -> None:
@@ -1073,6 +1082,8 @@ class PreviewContainer(Actionable, Container):
                 self.log(f"Previewing as {file_type} (MIME: {mime_result.mime_type})")
 
                 if file_type == "archive":
+                    from multiarchive._archive import Archive, BadArchiveError
+
                     try:
                         with Archive(file_path, mode="r") as archive:
                             all_files = []
@@ -1109,6 +1120,15 @@ class PreviewContainer(Actionable, Container):
             if should_cancel():
                 return
         except Exception as exc:
+            if isinstance(exc, OSError) and "cannot be accessed by the system" in str(
+                exc.strerror
+            ):
+                self.app.call_from_thread(self.remove_children)
+                self.call_next(lambda: self.post_message(self.SetLoading(False)))
+                return
+            elif isinstance(exc, FileNotFoundError):
+                self.app.call_from_thread(self.file_not_found, file_path)
+                return
             self.notify(
                 f"{type(exc).__name__} was raised while generating the preview\n{str(exc)}",
                 severity="error",
@@ -1123,15 +1143,14 @@ class PreviewContainer(Actionable, Container):
         content: str | list[str] | None = None,
         mime_type: preview_utils.MimeResult | None = None,
     ) -> None:
-        """
-        Update the preview UI. Runs in a thread, uses call_from_thread for UI ops.
-        """
         self._current_file_path = file_path
         self._current_content = content
         self._mime_type = mime_type
         self._file_mtime = path.getmtime(file_path)
-
         self._file_type = file_type
+
+        self.call_after_refresh(self._sync_mime, file_path, mime_type)
+
         self.app.call_from_thread(self.remove_class, "pdf")
         if file_type == "folder":
             self.log("Showing folder preview")
@@ -1216,12 +1235,6 @@ class PreviewContainer(Actionable, Container):
             event.stop()
             self.update_current_pdf_page_by_diff(1)
 
-    # not sure if exclusive does anything, but whatever
-    @work(thread=True, exclusive=True)
-    def _trigger_pdf_update(self) -> None:
-        """Trigger PDF preview update from a thread."""
-        self.show_pdf_preview()
-
     @property
     def region(self) -> Region:
         if self.loading:
@@ -1229,11 +1242,19 @@ class PreviewContainer(Actionable, Container):
         return super().region
 
     @work(thread=True)
+    @on(events.Resize)
     def _trigger_resize_update(self) -> None:
         """Trigger resize update from a thread."""
-        if config["plugins"]["bat"]["enabled"] and self.show_bat_file_preview():
-            return
-        self.show_normal_file_preview()
+        try:
+            if self.border_title in (
+                PreviewContainerTitles.file,
+                PreviewContainerTitles.bat,
+            ):
+                if config["plugins"]["bat"]["enabled"] and self.show_bat_file_preview():
+                    return
+                self.show_normal_file_preview()
+        except Exception:
+            pass
 
     @on(events.Show)
     def when_become_visible(self) -> None:
@@ -1296,3 +1317,20 @@ class PreviewContainer(Actionable, Container):
             filelist := self.get_child(FileList)
         ):
             filelist.scroll_end(animate=False)
+
+    def _sync_mime(
+        self, file_path: str, mime_type: preview_utils.MimeResult | None = None
+    ) -> None:
+        mime_str = mime_type.mime_type if mime_type else "--"
+        with contextlib.suppress(NoMatches):
+            metadata_container = self.app.query_one("MetadataContainer")
+            option = metadata_container._current_option
+            if (
+                isinstance(option, FileListSelectionWidget)
+                and option.dir_entry.path == file_path
+            ):
+                option.mime_type = mime_str
+                with contextlib.suppress(NoMatches):
+                    metadata_container.query_one("#metadata-mime", Static).update(
+                        mime_str or "--"
+                    )

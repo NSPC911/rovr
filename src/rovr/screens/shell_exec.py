@@ -27,11 +27,11 @@ class ShellExec(ModalInput):
         super().__init__(
             border_title="Execute Shell Command", border_subtitle="Run in background"
         )
-        self.orphan: bool = True
+        self.in_bg: bool = True
 
     def on_mount(self) -> None:
         super().on_mount()
-        self.horizontal_group.add_class(f"orphan--{str(self.orphan).lower()}")
+        self.horizontal_group.add_class(f"in-bg--{str(self.in_bg).lower()}")
 
     def on_click(self, event: events.Click) -> None:
         if event.widget is self:
@@ -45,15 +45,15 @@ class ShellExec(ModalInput):
             self,
             ShellExecReturnType(
                 command=await expand_command(self.app, event.input.value),
-                orphan=self.orphan,
+                run_type="background" if self.in_bg else "suspend",
             ),
             event,
         )
 
     def action_cycle_mode(self) -> None:
-        self.horizontal_group.remove_class(f"orphan--{str(self.orphan).lower()}")
-        self.orphan = not self.orphan
+        self.horizontal_group.remove_class(f"in-bg--{str(self.in_bg).lower()}")
+        self.in_bg = not self.in_bg
         self.horizontal_group.border_subtitle = (
-            "Run in background" if self.orphan else "Run in foreground"
+            "Run in background" if self.in_bg else "Run in foreground"
         )
-        self.horizontal_group.add_class(f"orphan--{str(self.orphan).lower()}")
+        self.horizontal_group.add_class(f"in-bg--{str(self.in_bg).lower()}")

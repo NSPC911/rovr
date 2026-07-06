@@ -4,7 +4,7 @@ import re
 import subprocess
 from contextlib import suppress
 from functools import lru_cache
-from typing import Callable, Literal
+from typing import Callable, Literal, overload
 
 from humanize import naturalsize
 from textual import events
@@ -13,31 +13,6 @@ from textual.dom import DOMNode
 from textual.message import Message
 from textual.screen import Screen, ScreenResultType
 from textual.worker import NoActiveWorker, WorkerCancelled, get_current_worker
-
-from rovr import pprint
-
-
-def deep_merge(old: dict, new: dict) -> dict:
-    """Mini lodash merge
-    Args:
-        old (dict): old dictionary
-        new (dict): new dictionary, to merge on top of old
-
-    Returns:
-        dict: Merged dictionary
-    """
-    try:
-        for key, value in new.items():
-            if isinstance(value, dict):
-                old[key] = deep_merge(old.get(key, {}), value)
-            else:
-                old[key] = value
-    except Exception as exc:
-        pprint(
-            f"While deep merging the default config with the userconfig, {type(exc).__name__} was raised.\n    {exc}\nSince the conflict cannot be resolved, rovr will not be launching."
-        )
-        exit(1)
-    return old
 
 
 def set_scuffed_subtitle(element: DOMNode, *sections: str) -> None:
@@ -59,11 +34,7 @@ def set_scuffed_subtitle(element: DOMNode, *sections: str) -> None:
     for index, section in enumerate(sections):
         subtitle += section
         if index + 1 != len(sections):
-            subtitle += " "
-            subtitle += (
-                border_bottom if element.app.ansi_color else f"[r]{border_bottom}[/]"
-            )
-            subtitle += " "
+            subtitle += f" {border_bottom} "
 
     element.border_subtitle = subtitle
 
@@ -90,16 +61,16 @@ def natural_size(
 
 def is_being_used(exc: OSError) -> bool:
     """
-    On Windows, a file being used by another process raises a PermissionError/OSError with winerror 32.
     Args:
         exc(OSError): the OSError object
 
     Returns:
         bool: whether it is due to the file being used
     """
-    # 32: Used by another process
-    # 145: Access is denied
-    return getattr(exc, "winerror", None) in (5, 13, 32, 145)
+
+    # This is genuinely pissing me off so much, I keep getting false positives, so you know what
+    # I will check whether the exception's strerror matches the full sentence
+    return "being used by another process" in str(exc.strerror)
 
 
 def should_cancel() -> bool:
@@ -129,8 +100,12 @@ def check_key(event: events.Key, key_list: list[str] | str) -> bool:
         # check aliases
         or any(key in key_list for key in event.aliases)
         # check character
-        or event.is_printable
-        and event.character in key_list
+        or (
+            event.is_printable
+            and event.character in key_list
+            # specifically check for space
+            and event.character != " "
+        )
     )
 
 
@@ -152,44 +127,80 @@ def get_shortest_bind(binds: list[str]) -> str:
     for bind in binds:
         if least_len[0] is None or least_len[0] > len(bind):
             least_len = (len(bind), bind)
+
+    match least_len[1]:
+        case "escape":
+            least_len = (least_len[0], "esc")
+
     return least_len[1]
 
 
 def run_command(
     app: App,
     command: str | list[str],
-    orphan: bool,
+    run_type: Literal["suspend", "background", "orphan"],
     shell: bool = True,
     on_error: Callable[[str, str], None] | None = None,
-) -> subprocess.CompletedProcess | None:
-    if orphan:
-        import sys
+) -> subprocess.CompletedProcess | subprocess.Popen:
+    if not shell and isinstance(command, str):
+        from shlex import split as shplit
 
-        if sys.platform == "win32":
-            subprocess.Popen(
+        command = shplit(command)
+    elif shell and isinstance(command, list):
+        from shlex import join as shjoin
+
+        command = shjoin(command)
+
+    match run_type:
+        case "orphan":
+            import sys
+
+            if sys.platform == "win32":
+                return subprocess.Popen(
+                    command,
+                    stdin=subprocess.DEVNULL,
+                    stdout=subprocess.DEVNULL,
+                    stderr=subprocess.DEVNULL,
+                    creationflags=subprocess.CREATE_NEW_PROCESS_GROUP
+                    | subprocess.DETACHED_PROCESS,
+                    shell=shell,
+                )
+            else:
+                return subprocess.Popen(
+                    command,
+                    stdin=subprocess.DEVNULL,
+                    stdout=subprocess.DEVNULL,
+                    stderr=subprocess.DEVNULL,
+                    start_new_session=True,
+                    shell=shell,
+                )
+        case "background":
+            return subprocess.Popen(
                 command,
                 stdin=subprocess.DEVNULL,
-                stdout=subprocess.DEVNULL,
-                stderr=subprocess.DEVNULL,
-                creationflags=subprocess.CREATE_NEW_PROCESS_GROUP
-                | subprocess.DETACHED_PROCESS,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
                 shell=shell,
             )
-        else:
-            subprocess.Popen(
-                command,
-                stdin=subprocess.DEVNULL,
-                stdout=subprocess.DEVNULL,
-                stderr=subprocess.DEVNULL,
-                start_new_session=True,
-                shell=shell,
-            )
-    else:
-        with app.suspend():
-            process = subprocess.run(command, shell=shell)
-        if process.returncode != 0 and on_error:
-            on_error(f"Error Code {process.returncode}", "Editor Error")
-        return process
+        case "suspend":
+
+            def func() -> subprocess.CompletedProcess:
+                with app.suspend():
+                    if globals().get("is_dev", False):
+                        print(command)
+                    return subprocess.run(command, shell=shell)
+
+            try:
+                process = app.call_from_thread(func)
+            except RuntimeError:
+                process = func()
+            if process.returncode != 0 and on_error:
+                on_error(f"Error Code {process.returncode}", "Editor Error")
+            return process
+        case _:
+            from typing import assert_never
+
+            assert_never(run_type)
 
 
 def dismiss(
@@ -228,7 +239,15 @@ def multiprocessing_process_error_checker(app: App, exc: Exception) -> bool:
     return False
 
 
-async def expand_command(app: App, command: str) -> str:
+@overload
+async def expand_command(app: App, command: str) -> str: ...
+
+
+@overload
+async def expand_command(app: App, command: list[str]) -> list[str]: ...
+
+
+async def expand_command(app: App, command: str | list[str]) -> str | list[str]:
     from rovr.functions.path import normalise
 
     cwd = normalise(os.getcwd())
@@ -240,13 +259,49 @@ async def expand_command(app: App, command: str) -> str:
 
     selected_files = await app.file_list.get_selected_objects() or []
 
-    expanded = command.replace("${current_working_directory}", cwd)
-    expanded = expanded.replace("${highlighted_file}", highlighted)
-    if selected_files:
-        expanded = expanded.replace("${selected_files}", " ".join(selected_files))
-    return expanded
+    def _expand(cmd: str) -> str:
+        expanded = cmd.replace("${current_working_directory}", cwd).replace(
+            "${real_current_working_directory", os.path.realpath(cwd)
+        )
+        expanded = expanded.replace("${highlighted_file}", highlighted).replace(
+            "${real_highlighted_file}", os.path.realpath(highlighted)
+        )
+        if selected_files:
+            from shlex import join as shjoin
+
+            expanded = expanded.replace(
+                "${selected_files}", shjoin(selected_files)
+            ).replace(
+                "${real_selected_files}",
+                shjoin([os.path.realpath(f) for f in selected_files]),
+            )
+        expanded = expanded.replace(
+            "${highlighted_file_name}", os.path.basename(highlighted)
+        ).replace(
+            "${real_highlighted_file_name}",
+            os.path.basename(os.path.realpath(highlighted)),
+        )
+        return expanded
+
+    if isinstance(command, list):
+        return [_expand(cmd) for cmd in command]
+    else:
+        return _expand(command)
 
 
 @lru_cache(maxsize=512)
 def recache(pattern: str) -> re.Pattern:
     return re.compile(pattern)
+
+
+def command(
+    initial_command: str | list[str] | tuple[str], path_str: str
+) -> str | list[str]:
+    import shlex
+
+    if isinstance(initial_command, tuple):
+        initial_command = list(initial_command)
+    if isinstance(initial_command, list):
+        return initial_command + [path_str]
+    else:
+        return initial_command + " " + shlex.quote(path_str)

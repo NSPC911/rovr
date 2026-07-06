@@ -9,7 +9,7 @@ from textual.style import Style
 from textual.widgets import Input
 from textual_autocomplete.fuzzy_search import Matcher
 
-from rovr.classes.textual_options import ModalSearcherOption
+from rovr.classes.textual_options import OptionWithValue
 from rovr.components import ModalSearchScreen
 from rovr.components.special_option_lists import DoubleClickableOptionList
 from rovr.variables.maps import RovrVars
@@ -30,7 +30,7 @@ class ThemeChooser(ModalSearchScreen):
                 id="theme_chooser_input",
             )
             yield DoubleClickableOptionList(
-                ModalSearcherOption(None, "Getting themes...", None, disabled=True),
+                OptionWithValue(None, "Getting themes...", None, disabled=True),
                 id="theme_chooser_options",
                 classes="empty",
             )
@@ -49,13 +49,13 @@ class ThemeChooser(ModalSearchScreen):
                     # move it there
                     shutil.copy(theme, custom_theme_path / theme.name)
         # now get theme names
-        self.themes: list[ModalSearcherOption] = sorted(
+        self.themes: list[OptionWithValue] = sorted(
             [
-                ModalSearcherOption(lambda: (" ", ""), theme.stem, theme.as_posix())
+                OptionWithValue(lambda: (" ", ""), theme.stem, theme.as_posix())
                 for theme in custom_theme_path.iterdir()
                 if theme.is_file() and theme.suffix == ".tcss"
             ],
-            key=lambda option: option.file_path,
+            key=lambda option: option.value,
         )
         self.post_message(Input.Changed(self.search_input, self.search_input.value))
 
@@ -68,14 +68,14 @@ class ThemeChooser(ModalSearchScreen):
             self.search_options.highlighted = 0
             return
         matcher = Matcher(event.value, match_style=Style(underline=True, bold=True))
-        options: list[ModalSearcherOption] = []
+        options: list[OptionWithValue] = []
         for theme in self.themes:
             if matcher.match(theme.label) > 0:
                 theme._set_prompt(matcher.highlight(theme.label))
                 options.append(theme)
         if len(options) == 0:
             self.search_options.set_options([
-                ModalSearcherOption(
+                OptionWithValue(
                     None,
                     " No themes found",
                     None,

@@ -23,5 +23,10 @@ class ArchiveScreenReturnType(NamedTuple):
 
 
 class ShellExecReturnType(NamedTuple):
-    command: str
-    orphan: bool
+    command: str | list[str]
+    run_type: Literal["suspend", "background"]
+
+
+class PasteDropReturnType(NamedTuple):
+    paths: list[str]
+    action: Literal["copy", "move"]

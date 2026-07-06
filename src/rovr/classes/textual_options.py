@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from functools import lru_cache
 from os import DirEntry, getcwd, path
-from typing import Callable, Literal, NamedTuple, TypeAlias
+from typing import Callable, Literal, Mapping, NamedTuple, TypeAlias
 
 import rich.repr
 from textual.content import Content, ContentText
@@ -18,7 +18,7 @@ from rovr.functions.path import is_hidden_file, normalise
 IconFactory: TypeAlias = Callable[[], tuple[str, str]]
 
 
-@lru_cache(maxsize=1024)
+@lru_cache
 def _get_cached_icon(icon: tuple[str, str]) -> Content:
     if icon[1] == "":
         # if there is no style, ignore it
@@ -161,10 +161,11 @@ class ArchiveFileListSelection(LazySelection):
             label: The text for the option
         """
 
-        def get_prompt() -> Content:
-            return _get_cached_icon(icon_factory()) + Content(label)
-
-        super().__init__(prompt=get_prompt, value="", disabled=True)
+        super().__init__(
+            prompt=lambda: _get_cached_icon(icon_factory()) + Content(label),
+            value="",
+            disabled=True,
+        )
         self.label = label
 
 
@@ -187,6 +188,7 @@ class FileListSelectionWidget(LazySelection):
             disabled: The initial enabled/disabled state. Enabled by default.
         """
         self.dir_entry = dir_entry
+        self.mime_type: str | None = None
         this_id = str(id(self))
         self.__icon_factory = icon_factory
         self.__label = label
@@ -218,7 +220,7 @@ class FileListSelectionWidget(LazySelection):
             else:
                 classes.append("filelist--broken-link")
 
-        if is_hidden_file(file_path):
+        if is_hidden_file(self.dir_entry):
             classes.append("filelist--hidden")
 
         if any(
@@ -315,12 +317,12 @@ class KeybindOption(Option):
         self.is_layer_bind = is_layer
 
 
-class ModalSearcherOption(LazyOption):
+class OptionWithValue(LazyOption):
     def __init__(
         self,
         icon_factory: IconFactory | None,
         label: str,
-        file_path: str | None = None,
+        value: str | None = None,
         disabled: bool = False,
     ) -> None:
         """
@@ -329,7 +331,7 @@ class ModalSearcherOption(LazyOption):
         Args:
             icon_factory (IconFactor | None): The icon list from a utils function.
             label (str): The label for the option.
-            file_path (str | None): The file path
+            value (str | None): The file path
             disabled (bool) = False: The initial enabled/disabled state.
         """
 
@@ -337,7 +339,7 @@ class ModalSearcherOption(LazyOption):
 
         super().__init__(prompt=self.get_prompt, disabled=disabled)
         self.label = label
-        self.file_path = file_path
+        self.value = value
 
     def get_prompt(self) -> Content:
         if self.__icon_factory is None:
@@ -406,7 +408,7 @@ class RightClickMenuOption(Option):
     def __init__(
         self,
         prompt: VisualType,
-        action: str | None,
+        action: str | Mapping | None,
         id: str | None = None,
         disabled: bool = False,
     ) -> None:

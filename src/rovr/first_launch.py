@@ -410,18 +410,17 @@ protocol = "{prot_to_schema[str(self.query_one("#image_protocol_select", Select)
 buttons = {str(self.query_one("#compact_buttons", Switch).value).lower()}
 panels = {str(self.query_one("#compact_panels", Switch).value).lower()}
 
-[settings.editor]
-open_all_in_editor = false
-
 [settings.editor.file]
 run = "{_escape_toml_string(self.query_one("#editor_input", Input).value)}"
-block = false
-suspend = true
+orphan = false
 
 [settings.editor.folder]
 run = "{_escape_toml_string(self.query_one("#editor_folders_input", Input).value)}"
-block = false
-suspend = true
+orphan = false
+
+[settings.editor.bulk_editor]
+run = "{_escape_toml_string(self.query_one("#editor_input", Input).value)}"
+rename_show_as_mapping = {str(bool(self.query_one("#keybinds", RadioSet).pressed_button.id == "sane")).lower()}
 
 [theme]
 default = "{theme}"

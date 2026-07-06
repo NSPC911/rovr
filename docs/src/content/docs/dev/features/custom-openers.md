@@ -7,24 +7,29 @@ rovr allows you to configure custom commands to open files based on their MIME t
 
 ## configuration
 
-you can define your custom openers in the `settings.openers` section of your configuration file. the keys are glob patterns that match against the file's MIME type or path, and the values are lists of opener definitions.
+openers are declared as named groups in `settings.openers.groups`, then glob patterns are mapped to one or more of those group names in `settings.openers.match`.
 
 ```toml
-[settings.openers]
-"*.py" = [
-    { run = "$EDITOR", app = "suspend" },
-    { run = "code", app = "orphan" }
+[settings.openers.groups]
+text = [
+    { run = "$EDITOR", orphan = true },
+    { run = "code", orphan = true }
 ]
-"*.png" = [
+image = [
     "imv"
 ]
-"*" = [
+fallback = [
     { run = "explorer.exe", if = { os = ["Windows"] } },
     { run = "xdg-open", if = { os = ["Linux"] } }
 ]
+
+[settings.openers.match]
+"*.py" = ["text"]
+"*.png" = ["image"]
+"*" = ["fallback"]
 ```
 
-if a `*` key is provided, it acts as a fallback for any unmatched file. if no custom opener matches, rovr will fall back to the operating system's default opener.
+the matching is done in order of declaration. this means if `"*"` is defined before `"*.py"`, the fallback opener will be used for python files instead of the text opener.
 
 ## opener definitions
 
@@ -33,10 +38,7 @@ an opener can be defined simply as a string representing the command, or as an o
 when using an object, the following properties are available:
 
 - `run` (string): the command to execute.
-- `app` (string): how rovr should handle the execution. valid options are:
-  - `suspend`: suspends rovr until the command finishes (ideal for terminal editors).
-  - `block`: blocks rovr in the background until the command finishes.
-  - `orphan`: launches the command independently so it remains running even if rovr is closed (ideal for gui apps).
+- `orphan` (bool): whether to run the command in a new process detached from rovr.
 - `if` (object): criteria that must be met for this opener to be available.
 
 ### conditional openers (`if`)
@@ -45,11 +47,19 @@ the `if` property allows you to restrict when an opener is used based on specifi
 
 - `os` (array of strings): the operating system(s) where this opener is valid (e.g., `["Windows"]`, `["Linux"]`, `["Darwin"]`).
 - `cwd` (array of strings): glob patterns that must match the current working directory.
-- `directory` (boolean): set to `true` to only apply this opener to directories, or `false` for files only.
 
 ```toml
-[settings.openers]
-".*\\.py" = [
-    { run = "python", app = "block", if = { os = ["Linux", "Darwin"], directory = false } }
+[settings.openers.groups]
+py = [
+    { run = "python", orphan = false, if = { os = ["Linux", "Darwin"] } }
 ]
+
+[settings.openers.match]
+".*\\.py" = ["py"]
 ```
+
+### adding more openers
+currently rovr doesn't set up any default openers, which means it will use whatever your system has set, which is
+- `cmd /c start` on Windows
+- `open` on MacOS
+- `xdg-open` on Linux

@@ -1,8 +1,5 @@
 # vim stuff
 
-[settings.bulk_rename]
-show_as_mapping = false
-
 [keybinds]
 toggle_pin = ["P"]
 toggle_pinned_sidebar = ["S"]
@@ -22,7 +19,8 @@ paste = ["p"]
 cut = ["x"]
 delete = ["d"]
 rename = ["r"]
-new = ["o"]
+new = ["a"]
+bulk_create = ["A"]
 zip = ["E"]
 unzip = ["ctrl+e"]
 up = ["k", "up"]
@@ -59,6 +57,7 @@ show_keybinds = ["?"]
 quit_app = ["q", "ctrl+q"]
 command_palette = "ctrl+p"
 suspend_process = ["ctrl+z"]
+open = ["o"]
 open_editor = ["e"]
 
 [keybinds.extra_copy]

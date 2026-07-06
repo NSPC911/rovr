@@ -21,11 +21,13 @@ class ModalInput(ModalScreen, inherit_bindings=False):
         validators: list | None = None,
         is_path: bool = False,
         is_folder: bool = False,
+        allow_initial: bool = True,
     ) -> None:
         super().__init__()
         self.border_title = border_title
         self.border_subtitle = border_subtitle
         self.initial_value = initial_value
+        self.allow_initial = allow_initial
         length_checker = Length(minimum=1, failure_description="A value is required.")
         length_checker.strict = True
         if validators is None:
@@ -60,33 +62,31 @@ class ModalInput(ModalScreen, inherit_bindings=False):
 
     @work(exclusive=True)
     async def on_input_changed(self, event: Input.Changed) -> None:
-        if self.is_path:
-            if (
-                event.value == self.initial_value and event.value != ""
-            ) or self.query_one(Input).is_valid:
-                self.icon_widget.classes = "valid"
-                self.horizontal_group.classes = "valid"
-                self.horizontal_group.border_subtitle = self.border_subtitle
-            else:
-                self.icon_widget.classes = "invalid"
-                self.horizontal_group.classes = "invalid"
-                if event.validation_result:
-                    try:
-                        self.horizontal_group.border_subtitle = str(
-                            event.validation_result.failure_descriptions[0]
-                        )
-                    except IndexError:
-                        # fuck it, just post a new message
-                        inp = self.query_one(Input)
-                        self.post_message(
-                            Input.Changed(inp, inp.value, inp.validate(inp.value))
-                        )
-                        return
-                else:
-                    # valid_empty = False
-                    self.horizontal_group.border_subtitle = (
-                        "The value must not be empty!"
+        if (event.value == self.initial_value and event.value != "") or self.query_one(
+            Input
+        ).is_valid:
+            self.icon_widget.classes = "valid"
+            self.horizontal_group.classes = "valid"
+            self.horizontal_group.border_subtitle = self.border_subtitle
+        else:
+            self.icon_widget.classes = "invalid"
+            self.horizontal_group.classes = "invalid"
+            if event.validation_result:
+                try:
+                    self.horizontal_group.border_subtitle = str(
+                        event.validation_result.failure_descriptions[0]
                     )
+                except IndexError:
+                    # fuck it, just post a new message
+                    inp = self.query_one(Input)
+                    self.post_message(
+                        Input.Changed(inp, inp.value, inp.validate(inp.value))
+                    )
+                    return
+            else:
+                # valid_empty = False
+                self.horizontal_group.border_subtitle = "The value must not be empty!"
+        if self.is_path:
             if event.value.replace("\\", "/").endswith("/"):
                 # dir
                 icon = icon_utils.get_icon_for_folder(event.value[:-1])
@@ -113,6 +113,10 @@ class ModalInput(ModalScreen, inherit_bindings=False):
     @work
     async def on_input_submitted(self, event: Input.Submitted) -> None:
         """Handle input submission."""
+        if event.input.value == self.initial_value and self.allow_initial:
+            dismiss(self, event.input.value, event)
+            return
+
         from pathvalidate import sanitize_filepath
 
         if (

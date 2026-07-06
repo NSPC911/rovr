@@ -9,10 +9,91 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- `contextmenu`: use proper objects instead of strings [#296](https://github.com/NSPC911/rovr/pull/296)
+- `config`: add `prepend_` and `append_` support [#298](https://github.com/NSPC911/rovr/pull/298)
+- `expansions`: support `real_` alternatives [dbf11f4](https://github.com/NSPC911/rovr/commit/dbf11f49dd0d2c1f91d5f4eac1dbc0ba461efe96)
+- `filelist`: add open keybind [a6aed4d](https://github.com/NSPC911/rovr/commit/a6aed4d453108bf447018650c0e352ff97d07846)
+- `app`: add kitty drag and drop support!! [#300](https://github.com/NSPC911/rovr/pull/300)
+
+### Fixed
+
+- `mixin`: prevent a crash from occurring on specific circumstances [6bcddb2](https://github.com/NSPC911/rovr/commit/6bcddb24610609356a2ed38342a49834a8a8d09c)
+- `app`: make showkeys show all keys properly [5a6356b](https://github.com/NSPC911/rovr/commit/5a6356b7c54b97f977280816f8bf971ed22fcf93)
+- `contextmenu`: dont notify for orphans [2828c43](https://github.com/NSPC911/rovr/commit/2828c43493e836fd541bd61a7537a8a60b2fff78)
+- `config`: split key to get proper line number [27411d7](https://github.com/NSPC911/rovr/commit/27411d7da3d35e33a15be944ad84460adda62dbd)
+- `input`: validate if path [7228b93](https://github.com/NSPC911/rovr/commit/7228b93d9b438df4215f17ee71403fcb2dc4cfed)
+- `input`: support absolute paths [c847695](https://github.com/NSPC911/rovr/commit/c84769582f1dbd142b58c7bee5e998e6f8f5e9da)
+
+### Removed
+
+- `lists`: remove block border subtitles [af3df76](https://github.com/NSPC911/rovr/commit/af3df763aa0c3efed40c7685059e4c4a241b80ab)
+
+### Performance
+
+- `preview`: read file bytes later, use magic_file [809f7e3](https://github.com/NSPC911/rovr/commit/809f7e35e9d708f3195b0c2cd9cd0231f258649b) [0c6e42f6213077f64231c61492796e236745e43c](https://github.com/NSPC911/rovr/commit/0c6e42f6213077f64231c61492796e236745e43c)
+- `app`: check mtime of folder to refresh [07b8664](https://github.com/NSPC911/rovr/commit/07b8664c024c08eea11d4f735dc998bf36079ef5)
+
+## [0.9.2]
+
+### Fixed
+
+- `opener`: actually include the path [61540aa](https://github.com/NSPC911/rovr/commit/61540aa2366e14407da4af5aaa46c8c3ed82dcd1)
+
+### Performance
+
+- startup timing improvements [a88889a](https://github.com/NSPC911/rovr/commit/a88889a2703505ee20df4fb86d4124c6a8f7926a)
+- lazyload everything [f18531e](https://github.com/NSPC911/rovr/commit/f18531ea70a61dd38e6d9b1b58a852091f65df78)
+- move classes.config into a pyi file [a316aee](https://github.com/NSPC911/rovr/commit/a316aeed6ad6182cd1807ae16455c3500d17a79c)
+
+## [0.9.1.post2]
+
+### Fixed
+
+- `opener`: check returncode, not stderr [feb6afb](https://github.com/NSPC911/rovr/commit/feb6afbe22cb50ea1b5edb5804cf80f3275868bb)
+- `firstlaunch`: remove `open_all_in_editor` [b7b97ab](https://github.com/NSPC911/rovr/commit/b7b97abea837b6f30ab62973e09b654e0f1a2714)
+
+## [0.9.1.post1]
+
+### Fixed
+
+- `metadata`: show pipe/fifo/other weird unix files [bd2ab73](https://github.com/NSPC911/rovr/commit/bd2ab73878d33d5463d58a02f4c42e5522b4e710)
+- `style`: remove `background: red` [2ca8bf1](https://github.com/NSPC911/rovr/commit/2ca8bf122f7c0382a56bfc7304b503df1fc7fc01)
+- `clipboard`: safely remove options [4100119](https://github.com/NSPC911/rovr/commit/41001197b249a0a739e92f9a122665657c09fead)
+
+### Removed
+
+- revert libuv support [b0d84cf](https://github.com/NSPC911/rovr/commit/b0d84cf2e57e452a74bd2718702902e4208251d3) [f1a42b6](https://github.com/NSPC911/rovr/commit/f1a42b69e5ec8e98fb3f4ad3aeef4a54aa5cd3b6)
+
+### Performance
+
+- `app`: fix insane movement lag [1c29683](https://github.com/NSPC911/rovr/commit/1c296837f58f23992f43e75b72db54f193d76696)
+
+## [0.9.1]
+
+### Added
+
+- `app`: add libuv as optional asyncio loop (used in nuitka) [#294](https://github.com/NSPC911/rovr/pull/294)
+- `metadata`: show mimetypes as a metadata section [#293](https://github.com/NSPC911/rovr/pull/293)
+
+### Fixed
+
+- `config`: actually cache schema validator [155e458](https://github.com/NSPC911/rovr/commit/155e458e3d1e0232efe693d817ae9e5144d2fa60)
+- `shell`: use separate bg implementation instead of orphans [#295](https://github.com/NSPC911/rovr/pull/295) [1ec3556](https://github.com/NSPC911/rovr/commit/1ec3556a6d0bdac57d429ee6689f1b77cfdc3154) [9f57978](https://github.com/NSPC911/rovr/commit/9f57978d82d74da4d378b880c2ca810302ee9acd)
+
+## [0.9.0]
+
+### Added
+
 - `context`: add right click menu options [#279](https://github.com/NSPC911/rovr/pull/279)
 - `editor`: add support for opening editor as orphan [704400e](https://github.com/NSPC911/rovr/commit/704400e623fe2d47da432a3f6b873dd75841b8f7)
 - `shell_exec`: add command substitution support [464e71c](https://github.com/NSPC911/rovr/commit/464e71c977d48c5e599a17cc1f5b3ee1131683d2)
 - `openers`: add support for opening with a specific app [#281](https://github.com/NSPC911/rovr/pull/281)
+- `new_item`!: add batch creation support [#283](https://github.com/NSPC911/rovr/pull/283)
+- `context`: add windows properties shortcut thing [7b15bc6](https://github.com/NSPC911/rovr/commit/7b15bc62189505e24d0ac7f5de2fb8c7c73e889b)
+- `filelist`: add configurable styles for specific files/folders [#284](https://github.com/NSPC911/rovr/pull/284)
+- `app`: add theme name as class to #root [ba12d0f](https://github.com/NSPC911/rovr/commit/ba12d0f908b74ff97dd6554d831ed3f6f536fd0d)
+- disable clock by default [24406d650f1d119a1a156ac71e022bc63c404cb6](https://github.com/NSPC911/rovr/commit/24406d650f1d119a1a156ac71e022bc63c404cb6)
+- `app`: allow drag and and drop from gui to terminal using bracketed paste [#285](https://github.com/NSPC911/rovr/pull/285)
 
 ### Fixed
 
@@ -29,6 +110,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `input`: follow screen sizes [df9923d](https://github.com/NSPC911/rovr/commit/df9923d4c36ca58edff1362d56b8d79c82a2137c)
 - `showkeys`: fix offset and other stuff [757b4c3](https://github.com/NSPC911/rovr/commit/757b4c3bd492c2da5f8a37368ad22bea14f11a67)
 - `zoxide`: dont crash with \_asyncio.Future if nuitka compiled [6ad395b](https://github.com/NSPC911/rovr/commit/6ad395b4e54d86a56cd956d4e492d8536d7660b7)
+- `editors`: use shlex.split rather than shlex.quote-ing the file [7a6dae6](https://github.com/NSPC911/rovr/commit/7a6dae6542a5689d6057e8883da8a64b7cf8ca10)
+- `utils`: properly check for file being used on windows [5622571](https://github.com/NSPC911/rovr/commit/56225710d00486fdd7621a3d685c222e8e0ceb0d)
+- `preview`: fix crash on broken wsl symlink [ae50128](https://github.com/NSPC911/rovr/commit/ae50128160e9d82a3d47b9b0c02563e9410e48ab)
+- `lists`: make checkbox use the same color as the text [b45eeea](https://github.com/NSPC911/rovr/commit/b45eeeabd59bccc442e029634480b42811add54e)
+- `screens`: improve resized ui [a17e2cb](https://github.com/NSPC911/rovr/commit/a17e2cb3d92ececc05b931ab30a8ee3e28ea6f92) [2f34dc0](https://github.com/NSPC911/rovr/commit/2f34dc0d3efcd51d012b8628a3d7e88fb355d1ba)
+- `log`: only keep latest 50 logs [b351152](https://github.com/NSPC911/rovr/commit/b3511529736c3963b3ee25b624938591ab409aee)
 
 ### Refactor
 
@@ -36,6 +123,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `preview`!: rename `mime_rules` to `preview_rules` [36d1316](https://github.com/NSPC911/rovr/commit/36d131633a734ee118bca7e4cba2411b55e74bae)
 - `editor`!: use `app` to define what to do when editor is used [8e9b7a6](https://github.com/NSPC911/rovr/commit/8e9b7a6455876751a0df19d1dc14be2566baa60a)
 - `app`: use a custom binding handler [#282](https://github.com/NSPC911/rovr/pull/282) [3aeed2f](https://github.com/NSPC911/rovr/commit/3aeed2f5ce8b51e0a5579f6eae064b09d6482515)
+- `app`: use reactive.var instead of reactive.reactive [63ffa89](https://github.com/NSPC911/rovr/commit/63ffa89861fe689a74430a371895e9d4970bcb28)
 
 ### Removed
 
@@ -486,8 +574,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `sort_order`: fix icon setting and tooltips
 - `style`: fix image and option padding/styling
 
-[Unreleased]: https://github.com/NSPC911/rovr/compare/v0.8.2...HEAD
-[0.8.2]: https://github.com/NSPC911/rovr/compare/v0.8.1...v0.8.2
+[Unreleased]: https://github.com/NSPC911/rovr/compare/v0.9.2...HEAD
+[0.9.2]: https://github.com/NSPC911/rovr/compare/v0.9.1.post2...v0.9.2
+[0.9.1.post2]: https://github.com/NSPC911/rovr/compare/v0.9.1.post1...v0.9.1.post2
+[0.9.1.post1]: https://github.com/NSPC911/rovr/compare/v0.9.1...v0.9.1.post1
+[0.9.1]: https://github.com/NSPC911/rovr/compare/v0.9.0...v0.9.1
+[0.9.0]: https://github.com/NSPC911/rovr/compare/v0.8.2.post1...v0.9.0
+[0.8.2]: https://github.com/NSPC911/rovr/compare/v0.8.1...v0.8.2.post1
 [0.8.1]: https://github.com/NSPC911/rovr/compare/v0.8.0...v0.8.1
 [0.8.0]: https://github.com/NSPC911/rovr/compare/v0.8.0rc1...v0.8.0
 [0.8.0rc1]: https://github.com/NSPC911/rovr/compare/v0.8.0.dev3...v0.8.0rc1

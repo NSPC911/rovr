@@ -1,9 +1,9 @@
 [project]
 name = "rovr"
-version = "0.9.0.dev2"
-description = "A post-modern terminal file explorer"
+version = "0.10.0"
+description = "a stylish, batteries-included terminal file manager."
 readme = "README.md"
-requires-python = "==3.13.*"
+requires-python = ">=3.13,<3.15"
 license = "MIT"
 license-files = [ "LICENSE" ]
 authors = [{ name = "NSPC911" }]
@@ -20,7 +20,7 @@ dependencies = [
   "backports-zstd>=1.3.0; python_version < '3.14'",
   "fastjsonschema>=2.21.2",
   "humanize>=4.15.0",
-  "multiarchive>=0.1.1",
+  "multiarchive>=0.1.2",
   "pathvalidate>=3.3.1",
   "pillow>=12.2.0",
   "platformdirs>=4.9.0",
@@ -28,14 +28,11 @@ dependencies = [
   "puremagic>=2.2.0",
   "rarfile>=4.2",
   "resvg-py>=0.3.1",
-  # https://github.com/Textualize/rich/commit/69cee6e1be30071c3ee994608590004eddce1501 causes a regression
-  # in the way it handles CRLF endings (it splits by `\n`, but ignores the `r` part), which results in
-  # empty lines because `\r` is a carriage return and not a newline on Windows.
-  # Appropriate issue: https://github.com/Textualize/rich/issues/4090
-  "rich>=14.3.1",
+  "rich==14.2.0",
   "send2trash>=2.1.0",
   "textual~=8.0",
   "textual-autocomplete>=4.0.6",
+  "textual-drivers>=0.6.1",
   "textual-image[textual]<0.10.0",
   "tomli>=2.4.0",
 ]
@@ -48,6 +45,11 @@ Documentation = "https://nspc911.github.io/rovr"
 [project.scripts]
 rovr = "rovr:main"
 
+[project.optional-dependencies]
+speedup = [
+  "textual-speedups>=0.2.1",
+]
+
 [dependency-groups]
 build = [
   "zstandard>=0.25.0",
@@ -59,9 +61,12 @@ dev = [
   "prek>=0.2.25",
   "ruff>=0.15.0",
   "textual-dev>=1.8.0",
-  "ty==0.0.32",
+  "ty==0.0.49",
   "pyinstrument>=5.1.2",
   "commitizen>=4.13.0",
+  "pytest>=9.0.2",
+  "pytest-asyncio>=1.3.0",
+  "pytest-xdist>=3.8.0",
 ]
 docscripts = [
   "json-schema-for-humans>=1.5.1",
@@ -71,11 +76,6 @@ docscripts = [
 ]
 speedup = [
     "textual-speedups>=0.2.1",
-]
-test = [
-  "pytest>=9.0.2",
-  "pytest-asyncio>=1.3.0",
-  "pytest-xdist>=3.8.0",
 ]
 
 [build-system]
@@ -99,18 +99,20 @@ no-sync = true
 
 [tool.poe.tasks]
 _hash_dump.shell = "git rev-parse HEAD > src/rovr/COMMIT_HASH"
-_hash_clean.shell = "python -c \"import os; os.path.exists('src/rovr/COMMIT_HASH') and os.remove('src/rovr/COMMIT_HASH')\""
 _warn_dump.shell = "echo \"If you need to change any config, don't change them here!! Look at https://nspc911.github.io/rovr/configuration/configuration/ for more info\" > src/rovr/DO_NOT_EDIT_THESE_FILES"
+_dump_clean.shell = "python -c \"import os; os.path.exists('src/rovr/COMMIT_HASH') and os.remove('src/rovr/COMMIT_HASH'); os.path.exists('src/rovr/DO_NOT_EDIT_THESE_FILES') and os.remove('src/rovr/DO_NOT_EDIT_THESE_FILES')\""
 
 _docscripts_setup.cmd = "uv sync --group docscripts"
-_test_setup.cmd = "uv sync --group test"
 
 run.help = "Run rovr"
 run.cmd = "rovr"
+run.use_exec = true
 dev.help = "Run rovr in development mode with textual-dev"
 dev.cmd = "textual run --dev rovr.__main__:cli --"
+dev.use_exec = true
 log.help = "Launch textual's console (need rovr to be launched as dev)"
 log.cmd = "textual console -x WORKER -x SYSTEM -x DEBUG -x EVENT"
+log.use_exec = true
 
 gen-schema.help = "Generate the JSON schema for rovr's config"
 gen-schema.sequence = [
@@ -126,7 +128,7 @@ typed.ref = "schema-to-dict"
 schema-to-dict.help = "Convert the JSON schema into a Python TypedDict for internal use"
 schema-to-dict.sequence = [
   "_docscripts_setup",
-  { cmd = "jsonschema-gentypes --json-schema ./src/rovr/config/schema.json --python ./src/rovr/classes/config.py" },
+  { cmd = "jsonschema-gentypes --json-schema ./src/rovr/config/schema.json --python ./src/rovr/classes/config.pyi" },
   "format"
 ]
 
@@ -143,27 +145,24 @@ svg-fmt.ref = "screenshot-format"
 screenshot-format.help = "Format all SVG screenshots in the docs"
 screenshot-format.cmd = 'pnpx prettier --write "docs/public/screenshots/*.svg" --parser html --bracket-same-line --print-width 160'
 
-flame.help = "Start rovr with pyinstrument for flamegraph profiling"
-flame.cmd = "pyinstrument --renderer=html --timeline --use-timing-thread --show-all -m rovr"
-
 snap.help = ""
-snap.ref = "snip"
+snap.cmd = "poe snip"
+snap.use_exec = true
+
 snip.help = "Take a screenshot of the app after a certain delay, before saving to the docs screenshots folder"
 snip.cmd = "textual run --screenshot ${delay} rovr.__main__:cli --screenshot-path docs/public/screenshots --screenshot-filename ${filename} -- --without theme.transparent"
 snip.args = [
   { name = "filename", help = "Filename of the screenshot", type = "string", positional = true, required = true },
   { name = "delay", help = "Delay in seconds before taking the screenshot", default = 10, type = "integer" },
 ]
+snip.use_exec = true
 
 tokei.help = "Run tokei"
-tokei.cmd = "tokei --sort lines --exclude '*.svg' --exclude 'src/rovr/classes/config.py' --exclude '*lock*' --hidden"
+tokei.cmd = " tokei --sort lines --exclude '*.svg' --exclude 'schema.mdx' --exclude 'src/rovr/classes/config.pyi' --exclude '*lock' --hidden"
 
 [tool.poe.tasks.test]
 help = "Run tests"
-sequence = [
-  "_test_setup",
-  { cmd = "pytest -n ${workers} ${FILES}" }
-]
+cmd = "pytest -n ${workers} ${FILES} $POE_EXTRA_ARGS"
 args = [
   { name = "FILES", help = "Specific test files or directories to run (optional)", type = "string", positional = true, required = false, multiple = true },
   { name = "workers", help = "Number of parallel workers for test execution (optional)", default = 4, type = "integer", options = ["-n"] },
@@ -172,13 +171,14 @@ args = [
 [tool.poe.tasks.build]
 help = "Build rovr into an executable using Nuitka"
 sequence = [
-  { cmd = "uv sync --group build --group speedup --no-dev" },  # no dev because for some reason, stuff gets included
+  { cmd = "uv sync --group build --extra speedup --no-dev" },  # no dev because for some reason, stuff gets included
   "_warn_dump",
   "_hash_dump",
   # --python-flag=-m
   # "nuitka $POE_EXTRA_ARGS",
-  { cmd = 'nuitka --lto=${lto} --mode=${mode} --report=${report} --user-package-configuration-file=nuitka.config.yml src/rovr --onefile-tempdir-spec="{TEMP}/rovr_onefile_0.9.0.dev2" $POE_EXTRA_ARGS' },
-  "_hash_clean",
+  { cmd = 'nuitka --lto=${lto} --mode=${mode} --report=${report} --user-package-configuration-file=nuitka.config.yml src/rovr --onefile-tempdir-spec="{TEMP}/rovr_onefile_0.9.2" $POE_EXTRA_ARGS' },
+  { cmd = "docs/scripts/post-nuitka-build.py" },
+  "_dump_clean",
 ]
 args = [
   { name = "mode", help = "Build mode: onefile (default) or standalone", default = "onefile", positional = true, choices = ["standalone", "onefile"] },
@@ -192,7 +192,15 @@ sequence = [
   "_hash_dump",
   "_warn_dump",
   { cmd = "uv build" },
-  "_hash_clean",
+  "_dump_clean",
+]
+
+[tool.poe.tasks.flame]
+help = "Start rovr with pyinstrument for flamegraph profiling"
+cmd = "pyinstrument --renderer=${renderer} --timeline --use-timing-thread --show-all -m rovr $POE_EXTRA_ARGS"
+use_exec = true
+args = [
+  { name = "renderer", help = "Output format for the flamegraph (default: html)", default = "html", positional = true },
 ]
 
 [tool.pytest]
@@ -226,7 +234,16 @@ select = [
   "TD",
   "W",
 ]
-ignore = ["W505", "E501", "ANN002", "ANN003", "TD002", "TD003", "ANN401"]
+ignore = [
+  "ANN002",
+  "ANN003",
+  "ANN401",
+  "E501",
+  "E731",
+  "TD002",
+  "TD003",
+  "W505",
+]
 preview = true
 
 [tool.ruff.format]
@@ -236,10 +253,9 @@ line-ending = "auto"
 preview = true
 
 [tool.ty.rules]
-# possibly-missing-import = "ignore"
 unresolved-reference = "ignore" # handled by ruff
 unresolved-attribute = "ignore"
 no-matching-overload = "ignore" # not that accurate
-possibly-missing-attribute = "ignore" # no it is not missing
+# possibly-missing-attribute = "ignore" # no it is not missing
 invalid-assignment = "warn" # probably already but warn for future
 unused-ignore-comment = "ignore"

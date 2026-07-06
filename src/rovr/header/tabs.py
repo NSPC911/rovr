@@ -1,7 +1,5 @@
-from asyncio import sleep
 from contextlib import suppress
 from os import getcwd, path
-from typing import Callable
 
 from rich.style import Style
 from textual import on, work
@@ -56,7 +54,7 @@ class TablineTab(Tab):
                 if path.basename(directory) != ""
                 else directory.strip("/")
             )
-        super().__init__(label=label)
+        super().__init__(label=label, id=f"id_{id(self)}")
         self.directory = directory
         self.session = SessionManager()
 
@@ -214,23 +212,12 @@ class Tabline(Tabs):
                         underline.highlight_end = end
 
             if animate and self.app.animation_level != "none":
-                self.run_after_time(
+                self.set_timer(
                     0.02,
                     lambda: self.call_after_refresh(move_underline, True),
                 )
             else:
                 self.call_after_refresh(move_underline, False)
-
-    @work
-    async def run_after_time(self, delay: float, callback: Callable[[], None]) -> None:
-        """Run a callback after a delay.
-
-        Args:
-            delay: The delay to wait before running the callback.
-            callback: The callback to run after the delay.
-        """
-        await sleep(delay)
-        callback()
 
 
 class NewTabButton(Button):

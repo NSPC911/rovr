@@ -1,6 +1,6 @@
 from os import getcwd
 
-from textual import events, work
+from textual import events
 from textual.app import ComposeResult
 from textual.containers import HorizontalGroup
 from textual.css.query import NoMatches
@@ -33,7 +33,6 @@ class HeaderArea(HorizontalGroup):
         ):
             yield HeaderClock()
 
-    @work(thread=True)
     def on_resize(self, event: events.Resize | None = None) -> None:
         try:
             tab_line = self.query_exactly_one(Tabline)

@@ -1,6 +1,5 @@
 import contextlib
 import os
-import shlex
 from os import getcwd, path
 from shutil import move
 from tempfile import NamedTemporaryFile
@@ -12,7 +11,7 @@ from textual.worker import Worker, WorkerError
 from rovr.classes.textual_validators import IsValidFilePath, PathNoLongerExists
 from rovr.functions.icons import get_icon
 from rovr.functions.path import dump_exc, normalise
-from rovr.functions.utils import run_command
+from rovr.functions.utils import command, run_command
 from rovr.screens import ModalInput
 from rovr.variables.constants import config
 
@@ -93,10 +92,9 @@ class RenameItemButton(Button):
             # if, IF a human got this exception, please virtually slap me.
             highlighted_file = self.app.file_list.highlighted_option.dir_entry.name
 
+            bulk_editor = config["settings"]["editor"]["bulk_editor"]
             # create file
-            show_as_mapping: bool = config["settings"]["editor"]["bulk_rename"][
-                "show_as_mapping"
-            ]
+            show_as_mapping: bool = bulk_editor["rename_show_as_mapping"]
 
             temp = NamedTemporaryFile(  # noqa: SIM115
                 "w", encoding="utf-8", delete=False
@@ -117,18 +115,16 @@ class RenameItemButton(Button):
                 temp.flush()
                 temp.close()
 
-                # spawn editor
-                bulk_editor = config["settings"]["editor"]["bulk_rename"]
-
                 def on_error(message: str, title: str) -> None:
                     self.notify(message, title=title, severity="error", markup=False)
 
                 try:
                     run_command(
                         self.app,
-                        shlex.split(bulk_editor["run"]) + [temp_path],
-                        orphan=False,
+                        command(bulk_editor["run"], temp_path),
+                        run_type="suspend",
                         on_error=on_error,
+                        shell=bulk_editor["shell"],
                     )
                 except FileNotFoundError:
                     self.notify(

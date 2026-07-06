@@ -10,41 +10,31 @@ options:
 ```toml
 [settings.editor.file]
 run = "$EDITOR"
-block = false
-suspend = true
+orphan = true
 ```
 - run: the command to open files. `$EDITOR` will use your system's default editor.
-- block: whether to block rovr until the editor is closed (recommended for GUI editors, like `code --wait`)
-- suspend: whether to suspend rovr. ignores blocking (because it is already blocking execution). recommended for TUI editors, like `nvim`.
+- orphan: whether to detach the editor process from rovr. recommended for GUI editors, like `code`.
 
-### configure file editor
+### configure folder editor
 options:
 ```toml
 [settings.editor.folder]
 run = "$EDITOR"
-block = false
-suspend = true
+orphan = true
 ```
 - run: the command to open files. `$EDITOR` will use your system's default editor.
-- block: whether to block rovr until the editor is closed (recommended for GUI editors, like `code --wait`)
-- suspend: whether to suspend rovr. ignores blocking (because it is already blocking execution). recommended for TUI editors, like `nvim`.
+- orphan: whether to detach the editor process from rovr. recommended for GUI editors, like `code`.
 
-### configure bulk renaming editor
+### configure bulk editor
+used for things like bulk renaming and creating files
+
 options:
 ```toml
-[settings.editor.bulk_rename]
+[settings.editor.bulk_editor]
 run = "$EDITOR"
-suspend = true
+rename_show_as_mapping = true
 ```
 - run: the command to open files. `$EDITOR` will use your system's default editor.
-- suspend: whether to suspend rovr. ignores blocking (because it is already blocking execution). recommended for TUI editors, like `nvim`.
+- rename_show_as_mapping: whether to show the bulk rename file as a mapping of old name to new name. if false, the bulk rename file will only show the new names. this is not used for bulk file creation.
 
-blocking is automatically enabled when bulk renaming files, as rovr needs to wait for the renaming to be completed before proceeding.
-
-### additional notes
-there is an additional option
-```toml
-[settings.editor]
-open_all_in_editor = false
-```
-- open_all_in_editor: if enabled, rather than using your system's default opener, it opens them in the relevant editor configured
+orphan is automatically disabled for bulk editor, since it needs to wait for the editor process to finish before it can read the changes.

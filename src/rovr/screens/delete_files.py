@@ -25,8 +25,7 @@ class DeleteFiles(ModalScreen):
     def compose(self) -> ComposeResult:
         with Grid(
             id="dialog",
-            classes=("with_trash" if config["settings"]["use_recycle_bin"] else "")
-            + " delete",
+            classes=("with_trash" if config["settings"]["use_recycle_bin"] else ""),
         ):
             yield Label(self.message, id="question")
             yield SpecialOptionList(

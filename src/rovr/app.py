@@ -8,13 +8,14 @@ from contextlib import suppress
 from importlib import resources
 from io import TextIOWrapper
 from os import chdir, getcwd, path
+from subprocess import Popen
 from time import perf_counter
 from typing import Callable, Iterable
 
 from rich.console import RenderableType
 from rich.protocol import is_renderable
 from textual import constants, events, on, work
-from textual.app import WINDOWS, App, ComposeResult, ScreenStackError, SystemCommand
+from textual.app import WINDOWS, ComposeResult, ScreenStackError, SystemCommand
 from textual.binding import Binding
 from textual.containers import (
     HorizontalGroup,
@@ -26,12 +27,25 @@ from textual.css.errors import StylesheetError
 from textual.css.query import NoMatches
 from textual.css.stylesheet import StylesheetParseError
 from textual.dom import DOMNode
+from textual.geometry import Offset
 from textual.messages import ExitApp
 from textual.screen import Screen
+from textual.theme import Theme
+from textual.timer import Timer
 from textual.types import NoActiveAppError
+from textual.widget import Widget
 from textual.widgets import Input, Label
 from textual.widgets.selection_list import Selection
 from textual.worker import Worker, WorkerFailed
+from textual_drivers.dnd import (
+    DNDApp,
+    DNDDragIn,
+    DNDDragInOperation,
+    DNDDragOutOperation,
+    DragOutFinished,
+    Drop,
+    DropData,
+)
 
 from rovr import console
 from rovr.action_buttons import (
@@ -46,6 +60,10 @@ from rovr.action_buttons import (
 )
 from rovr.action_buttons.sort_order import SortOrderButton
 from rovr.classes.mixins import Action, Actionable
+from rovr.classes.textual_validators import (
+    AllowsExistingFiles,
+    IsValidFilePath,
+)
 from rovr.classes.type_aliases import DirEntryType
 from rovr.components.popup_option_list import PopupOptionList
 from rovr.core import (
@@ -66,6 +84,7 @@ from rovr.functions.path import (
 )
 from rovr.functions.utils import multiprocessing_process_error_checker, run_command
 from rovr.header import HeaderArea
+from rovr.header.tabs import TablineTab
 from rovr.navigation_widgets import (
     BackButton,
     ForwardButton,
@@ -73,7 +92,9 @@ from rovr.navigation_widgets import (
     PathInput,
     UpButton,
 )
+from rovr.screens import ModalInput, PasteDropScreen
 from rovr.screens.typed import ShellExecReturnType
+from rovr.screens.way_too_small import TerminalTooSmall
 from rovr.state_manager import StateManager
 from rovr.variables.constants import MaxPossible, config, log_name, os_type
 from rovr.variables.maps import RovrVars
@@ -82,7 +103,7 @@ if constants.SCREENSHOT_LOCATION:
     constants.SCREENSHOT_LOCATION = normalise(getcwd(), constants.SCREENSHOT_LOCATION)
 
 
-class Application(Actionable, App, inherit_bindings=False, inherit_css=False):
+class Application(Actionable, DNDApp, inherit_bindings=False, inherit_css=False):
     # our own form of BINDINGS that utilises check_key
     # key: str the action to use
     # value: bool or callable that returns bool,
@@ -216,8 +237,16 @@ class Application(Actionable, App, inherit_bindings=False, inherit_css=False):
         if startup_path:
             chdir(ensure_existing_directory(startup_path))
 
+        self._p_timer: Timer | None = None
+        self._dnd_invoked_tab: str | None = None
+        self._dnd_timer: tuple[Timer, DNDDragIn] | None = None
+
         self._on_mount_done: bool = False
         self.last_available_cd = getcwd()
+        self.old_theme: str = self.theme
+
+        # self.theme = config["theme"]["default"]
+        self.ansi_color = config["theme"]["transparent"]
 
     @property
     def file_list(self) -> FileList:
@@ -236,7 +265,7 @@ class Application(Actionable, App, inherit_bindings=False, inherit_css=False):
             if config["interface"]["compact_mode"]["panels"]
             else " comfy-panels"
         )
-        root_classes = root_classes.strip()
+        root_classes = root_classes.strip() + f"theme-{self.get_theme(self.theme).name}"
         with Vertical(id="root", classes=root_classes):
             header = HeaderArea()
             self.tabWidget = header.tabline
@@ -281,9 +310,7 @@ class Application(Actionable, App, inherit_bindings=False, inherit_css=False):
                 self.exit()
             return
 
-        # self.theme = config["theme"]["default"]
-        self.ansi_color = config["theme"]["transparent"]
-
+        self.theme_changed_signal.subscribe(self, self.theme_changed)
         # title for screenshots
         self.title = ""
 
@@ -334,6 +361,14 @@ class Application(Actionable, App, inherit_bindings=False, inherit_css=False):
                 label, after="PathInput"
             )
         self.file_list.update_border_subtitle()
+        # self.call_after_refresh(sleep, 1)
+
+    def theme_changed(self, theme: Theme) -> None:
+        self.query_one("#root").update_classes({
+            f"theme-{self.old_theme}": True,
+            f"theme-{theme.name}": False,
+        })
+        self.old_theme = theme.name
 
     @work
     async def _force_crash(self) -> None:
@@ -351,20 +386,31 @@ class Application(Actionable, App, inherit_bindings=False, inherit_css=False):
         if config["interface"]["allow_tab_nav"]:
             super().action_focus_previous()
 
-    async def on_key(self, event: events.Key) -> None:
-        # show key
+    def show_key(self, event: events.Key) -> None:
         if self._show_keys:
             with suppress(NoMatches):
                 using = event.character
                 if not event.is_printable:
                     using = event.key
-                self.query_one("#showKeys").update(using)
-                self.query_one("#showKeys").tooltip = (
+                if using == " ":
+                    using = "space"
+                wid = self.query_one("#showKeys", Label)
+                if using is None:
+                    wid.update("None")
+                else:
+                    if wid.content != using:
+                        wid.update(using)
+                wid.tooltip = (
                     f"Key = '{event.key}'"
                     f"\nCharacter = '{event.character}'"
                     f"\nAliases = {event.aliases}"
                     f"\nUsing: {using}"
                 )
+
+    async def on_key(self, event: events.Key) -> None:
+        # show key
+        if self._show_keys:
+            self.show_key(event)
 
         # if current screen isn't the app screen
         if len(self.screen_stack) != 1:
@@ -396,13 +442,44 @@ class Application(Actionable, App, inherit_bindings=False, inherit_css=False):
         if response is None or response.command == "":
             return
 
-        run_command(self, response.command, orphan=response.orphan)
+        proc = run_command(self, response.command, run_type=response.run_type)
+        if response.run_type == "background":
+            self.shell_thread(proc, "Shell Exec")
+
+    @work(thread=True)
+    def shell_thread(self, proc: Popen, title: str = "") -> None:
+        proc.wait()
+        stdout = proc.stdout.read().decode().strip()
+        stderr = proc.stderr.read().decode().strip()
+        if stdout and stderr:
+            msg = f"stdout = {stdout}\nstderr = {stderr}\n"
+        elif stdout and not stderr:
+            msg = str(stdout)
+        elif not stdout and stderr:
+            msg = str(stderr)
+        else:
+            msg = f"Process completed with code {proc.returncode}"
+        self.notify(
+            msg.strip(),
+            title=title,
+            severity="information" if proc.returncode == 0 else "error",
+        )
 
     def on_app_blur(self, event: events.AppBlur) -> None:
         self.app_blurred = True
 
     def on_app_focus(self, event: events.AppFocus) -> None:
         self.app_blurred = False
+
+    def _set_mouse_over(
+        self, widget: Widget | None, hover_widget: Widget | None
+    ) -> None:
+        # Textual re-applies hover styles twice per MouseMove even when the
+        # hovered widget hasn't changed, which floods the message queue when a
+        # custom stylesheet marks large containers as hover-styled
+        if widget is self.mouse_over and hover_widget is self.hover_over:
+            return
+        super()._set_mouse_over(widget, hover_widget)
 
     @work
     async def action_quit(self) -> None:
@@ -525,14 +602,15 @@ class Application(Actionable, App, inherit_bindings=False, inherit_css=False):
         state_mtime = None
         with suppress(OSError):
             state_mtime = path.getmtime(state_path)
-        drives = lambda: self.app.query_one(PinnedSidebar).DRIVES  # noqa: E731
+        drives = lambda: self.app.query_one(PinnedSidebar).DRIVES
         drive_update_every = int(config["interface"]["drive_watcher_frequency"])
         count: int = -2
         style_available: bool = self.CUSTOM_STYLE_AVAILABLE
         custom_style_path = path.join(RovrVars.ROVRCONFIG, "style.tcss")
         new_drives: list[str] | None = None
+        cwd_mtime: float | None = None
 
-        i_should_shut_down = lambda: (  # noqa: E731
+        i_should_shut_down = lambda: (
             self._shutdown_event.is_set() or self.return_code is not None
         )
 
@@ -551,15 +629,24 @@ class Application(Actionable, App, inherit_bindings=False, inherit_css=False):
                         file_list.update_file_list(add_to_session=False)
                     elif cwd != new_cwd:
                         cwd = new_cwd
+                        cwd_mtime = None
                         continue
                     else:
+                        # only rescan when the directory mtime changed;
+                        # renames/creates/deletes always bump it
+                        new_cwd_mtime = None
                         with suppress(OSError):
-                            items = get_filtered_dir_names(
-                                cwd,
-                                config["interface"]["show_hidden_files"],
-                            )
-                        if items is not None and items != file_list.items_in_cwd:
-                            self.cd(cwd)
+                            new_cwd_mtime = path.getmtime(cwd)
+                        if new_cwd_mtime != cwd_mtime:
+                            cwd_mtime = new_cwd_mtime
+                            items = None
+                            with suppress(OSError):
+                                items = get_filtered_dir_names(
+                                    cwd,
+                                    config["interface"]["show_hidden_files"],
+                                )
+                            if items is not None and items != file_list.items_in_cwd:
+                                self.cd(cwd)
             except FileNotFoundError:
                 self.file_list.set_options([
                     Selection(
@@ -616,7 +703,7 @@ class Application(Actionable, App, inherit_bindings=False, inherit_css=False):
 
                         process = multiprocessing.Process(
                             target=drive_workers.get_mounted_drives_worker,
-                            args=(result_queue, os_type),
+                            args=(result_queue, os_type, config),
                         )
                         process.start()
                         process.join(timeout=2.0)
@@ -631,7 +718,7 @@ class Application(Actionable, App, inherit_bindings=False, inherit_css=False):
                             # Process completed successfully
                             new_drives = result_queue.get_nowait()
                     else:
-                        new_drives = drive_workers.get_mounted_drives(os_type)
+                        new_drives = drive_workers.get_mounted_drives(os_type, config)
                     if new_drives is not None and new_drives != drives():
                         self.query_one(PinnedSidebar).reload_pins()
                 except Exception as exc:
@@ -690,8 +777,6 @@ class Application(Actionable, App, inherit_bindings=False, inherit_css=False):
 
     @work(exclusive=True)
     async def on_resize(self, event: events.Resize) -> None:
-        from rovr.screens.way_too_small import TerminalTooSmall
-
         if (
             event.size.height < MaxPossible.height
             or event.size.width < MaxPossible.width
@@ -783,6 +868,200 @@ class Application(Actionable, App, inherit_bindings=False, inherit_css=False):
                 self.stylesheet.update(self)
                 for screen in self.screen_stack:
                     self.stylesheet.update(screen)
+
+    @on(events.Paste)
+    @work
+    async def on_paste(self, event: events.Paste) -> None:
+        if len(self.screen_stack) != 1:
+            if self._p_timer:
+                self._p_timer.stop()
+            self._p_timer = self.set_timer(
+                0.1,
+                lambda: self.notify(
+                    "Bracketed Paste will only work in the main screen.",
+                    severity="warning",
+                ),
+            )
+            return
+
+        response = await self.push_screen_wait(PasteDropScreen(event))
+        if response is not None and response.paths:
+            process_container = self.query_one(ProcessContainer)
+            dest = getcwd()
+            match response.action:
+                case "copy":
+                    process_container.paste_items(
+                        copied=response.paths, has_cut=[], dest=dest
+                    )
+                case "move":
+                    process_container.paste_items(
+                        copied=[], has_cut=response.paths, dest=dest
+                    )
+
+    async def dnd_drag_out_operation(self, pos: Offset) -> DNDDragOutOperation | None:
+        if (pos not in self.file_list.content_region) or (len(self.screen_stack) != 1):
+            return
+
+        from pathlib import Path
+
+        if not self.file_list.select_mode_enabled:
+            await self.file_list._on_click(
+                events.Click(
+                    widget=self.file_list,
+                    x=pos.x,
+                    y=pos.y,
+                    delta_x=0,
+                    delta_y=0,
+                    button=1,
+                    shift=False,
+                    meta=False,
+                    ctrl=False,
+                    style=self.screen.get_style_at(pos.x, pos.y),
+                )
+            )
+            self.file_list._ignore_next_click = True
+
+        selected = await self.file_list.get_selected_objects()
+        if not selected:
+            return None
+        else:
+            self._dnd_invoked_tab = self.tabWidget.active
+            return DNDDragOutOperation(
+                [Path(p).as_uri() for p in selected],
+                "either",
+                f"{len(selected)} item{'s' if len(selected) != 1 else ''}",
+            )
+
+    def _tab_under_pos(self, pos: Offset) -> TablineTab | None:
+        for tab in self.tabWidget.query(TablineTab):
+            if pos in tab.region:
+                return tab
+        return None
+
+    def on_drag_out_finished(self, event: DragOutFinished) -> None:
+        self._dnd_invoked_tab = None
+
+    async def dnd_drag_in_operation(self, event: DNDDragIn) -> DNDDragInOperation:
+        reset = True
+        if self._dnd_timer:
+            if self._dnd_timer[1].pos == event.pos:
+                reset = False
+            else:
+                self._dnd_timer[0].stop()
+
+        if reset:
+            self._dnd_timer = (
+                self.set_timer(
+                    0.7,
+                    lambda event=event: (
+                        setattr(self.tabWidget, "active", new_tab.id)
+                        if (new_tab := self._tab_under_pos(event.pos))
+                        else None
+                    ),
+                ),
+                event,
+            )
+
+        # need to organise the accepted section because it is getting very messy
+        accepted = True
+        # check if dragging out, and dropping on the same tab
+        if self.is_dragging_out and self._dnd_invoked_tab == self.tabWidget.active:
+            accepted = False
+        # check if drop is within file list
+        if event.pos not in self.file_list.content_region:
+            accepted = False
+        # check if screen is PasteDropScreen and not the only screen
+        if len(self.screen_stack) > 1 and not isinstance(self.screen, PasteDropScreen):
+            accepted = False
+
+        return DNDDragInOperation(
+            accepted,
+            "either",
+            ["text/uri-list", "text/plain"],
+        )
+
+    async def on_drop(self, event: Drop) -> None:
+        self.file_list._ignore_next_click = False
+        if "text/uri-list" in event.mimes:
+            idx = event.mimes.index("text/uri-list")
+        elif "text/plain" in event.mimes:
+            idx = event.mimes.index("text/plain")
+        else:
+            self.notify(
+                f"No supported mime type offered (available: {event.mimes})",
+                title="Drop (NotImplemented)",
+                severity="warning",
+                markup=False,
+            )
+            return
+        self.request_data(event, idx, close=True)
+
+    @work
+    async def on_drop_data(self, event: DropData) -> None:
+        from pathlib import Path
+        from urllib.parse import urlparse
+
+        if event.mime == "text/plain":
+            event.data = (
+                event.data.decode("utf-8", errors="ignore").strip().splitlines()
+            )
+        elif event.mime != "text/uri-list":
+            self.notify(
+                f"Unsupported received mime type (possible interception): {event.mime}",
+                title="Drop (NotImplemented)",
+                severity="warning",
+                markup=False,
+            )
+            return
+        if isinstance(event.data, list):
+            sdata = set(event.data)
+            files = set(uri for uri in event.data if urlparse(uri).scheme == "file")
+            online = set(
+                uri for uri in event.data if urlparse(uri).scheme in ("http", "https")
+            )
+            etc = sdata - (files | online)
+            etc_schemes = set(urlparse(uri).scheme for uri in etc)
+            if files:
+                # pass it to on_paste
+                self.on_paste(
+                    events.Paste(
+                        "\n".join(
+                            sorted(Path.from_uri(uri).as_posix() for uri in files)
+                        )
+                    )
+                )
+            if etc:
+                self.notify(
+                    f"Received {len(etc)} URI(s) which aren't supported\n{etc_schemes}",
+                    title="DropData (NotImplemented)",
+                    severity="warning",
+                    markup=False,
+                )
+            if online:  # noqa: SIM102
+                online = sorted(online)
+                # check if it is a PasteDropScreen, if so, reject
+                if isinstance(self.screen, PasteDropScreen):
+                    self.notify(
+                        f"Received {len(online)} http(s) URI(s) which aren't supported on this screen",
+                        title="DropData (NotImplemented)",
+                        severity="warning",
+                        markup=False,
+                    )
+                else:
+                    # this is under heavy assumption that you cannot drag multiple http
+                    # links, please prove me wrong and open a bug report
+                    assert len(online) == 1
+                    resp: str | None = await self.push_screen_wait(
+                        ModalInput(
+                            "Save file as",
+                            "existing file will be overwritten",
+                            initial_value=path.basename(urlparse(online[0]).path),
+                            validators=[IsValidFilePath(), AllowsExistingFiles()],
+                            is_path=True,
+                        )
+                    )
+                    if resp:
+                        self.query_one(ProcessContainer).remote_download(online, [resp])
 
     def get_system_commands(self, screen: Screen) -> Iterable[SystemCommand]:
         if not self.ansi_color:
@@ -881,7 +1160,7 @@ class Application(Actionable, App, inherit_bindings=False, inherit_css=False):
     async def _toggle_transparency(self) -> None:
         self.ansi_color = not self.ansi_color
         self.refresh()
-        self.refresh_css()
+        self.call_after_refresh(self.refresh_css)
         self.file_list.update_border_subtitle()
 
     @on(events.Click)

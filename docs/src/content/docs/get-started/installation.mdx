@@ -25,7 +25,24 @@ import InlineSVG from "@/components/InlineSVG.astro";
   <br />
   only necessary if you want an autocomplete box while configuring rovr.
 
-currently, `rovr` is only on pypi.
+
+#### Installation scripts
+
+**Linux/macOS**
+With curl:
+```sh
+curl -fsSL https://nspc911.github.io/rovr/install.sh | bash
+```
+
+With wget:
+```sh
+wget -qO- https://nspc911.github.io/rovr/install.sh | bash
+```
+
+**Windows**
+```pwsh
+Invoke-Expression (Invoke-WebRequest https://nspc911.github.io/rovr/install.ps1)
+```
 
 #### uv (test run)
 
@@ -42,7 +59,7 @@ uv tool install --compile-bytecode rovr
 <Aside type="note">
 I highly recommend installing with `--compile-bytecode`, as startup times will be slower (albeit by not that much) if not cached.
 
-Although not recommended, you can test out `--python 3.13t` if you want to try with free threading. Based on my own tests, it seems much faster, but it may be more buggy since rovr doesn't account for the lack of the GIL
+I also recommend installing with `--python 3.14t` (the free threaded build) because proper concurrency is supported aside from spawning new `Processes` (which tanks system resources)
 </Aside>
 
 #### pipx (install)
@@ -51,10 +68,29 @@ Although not recommended, you can test out `--python 3.13t` if you want to try w
 pipx install rovr
 ```
 
-#### pip (not recommended)
+#### Arch Linux (install)
+
+Python version
+```sh
+yay -S rovr
+```
+Compiled version
+```sh
+yay -S rovr-bin
+```
+
+#### Pixi (install)
 
 ```sh
-pip install rovr
+pixi global install rovr
+```
+
+#### Homebrew (install)
+
+Proceed with precaution, I don't own this tap!
+```sh
+brew tap chenrui333/homebrew-tap
+brew install rovr
 ```
 
 if successful, you can run

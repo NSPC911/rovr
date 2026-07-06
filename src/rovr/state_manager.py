@@ -3,9 +3,8 @@ from os import path
 from typing import Literal, TypedDict, cast
 
 import tomli
-from textual import work
 from textual.css.query import NoMatches
-from textual.reactive import reactive
+from textual.reactive import var
 from textual.widget import Widget
 
 from rovr.classes.type_aliases import SortByOptions
@@ -47,13 +46,13 @@ class StateManager(Widget):
     }
     """
 
-    pinned_sidebar_visible: reactive[bool] = reactive(True, init=False)
-    preview_sidebar_visible: reactive[bool] = reactive(True, init=False)
-    footer_visible: reactive[bool] = reactive(True, init=False)
-    menu_wrapper_visible: reactive[bool] = reactive(True, init=False)
-    sort_by: reactive[SortByOptions] = reactive("name", init=False)
-    sort_descending: reactive[bool] = reactive(False, init=False)
-    custom_sort_enabled: reactive[bool] = reactive(False, init=False)
+    pinned_sidebar_visible: var[bool] = var(True, init=False)
+    preview_sidebar_visible: var[bool] = var(True, init=False)
+    footer_visible: var[bool] = var(True, init=False)
+    menu_wrapper_visible: var[bool] = var(True, init=False)
+    sort_by: var[SortByOptions] = var("name", init=False)
+    sort_descending: var[bool] = var(False, init=False)
+    custom_sort_enabled: var[bool] = var(False, init=False)
 
     def __init__(self) -> None:
         super().__init__(id="state_manager")
@@ -243,7 +242,6 @@ sort_descending = {str(self.sort_descending).lower()}
     def toggle_menu_wrapper(self) -> None:
         self.menu_wrapper_visible = not self.menu_wrapper_visible
 
-    @work(thread=True)
     def restore_state(self) -> None:
         # just for safe measure, set it to false
         self._is_loading = False

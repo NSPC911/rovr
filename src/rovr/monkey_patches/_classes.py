@@ -8,7 +8,7 @@ from rovr.variables.constants import RESAMPLING_METHOD
 
 
 def scaled(self: _pixeldata.PixelData, width: int, height: int) -> _pixeldata.PixelData:
-    scaled_image = self._image.resize((width, height), resample=RESAMPLING_METHOD)
+    scaled_image = self._image.resize((width, height), resample=RESAMPLING_METHOD())
     return _pixeldata.PixelData(scaled_image)
 
 

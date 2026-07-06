@@ -8,7 +8,7 @@ from textual.widgets import Input, OptionList
 from textual.worker import Worker
 
 from rovr.classes.mixins import Action, Actionable
-from rovr.classes.textual_options import ModalSearcherOption
+from rovr.classes.textual_options import OptionWithValue
 from rovr.components.special_option_lists import DoubleClickableOptionList
 from rovr.functions.utils import dismiss
 from rovr.variables.constants import config
@@ -97,10 +97,10 @@ class ModalSearchScreen(Actionable, ModalScreen, inherit_bindings=False):
 
     @on(OptionList.OptionSelected)
     async def handle_option_selected(self, event: OptionList.OptionSelected) -> None:
-        if not isinstance(event.option, ModalSearcherOption):
+        if not isinstance(event.option, OptionWithValue):
             dismiss(self, None)
             return
-        selected_value: str | None = event.option.file_path
+        selected_value: str | None = event.option.value
         if isinstance(selected_value, str) and not event.option.disabled:
             dismiss(self, selected_value)
         else:

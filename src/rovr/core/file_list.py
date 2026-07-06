@@ -1,8 +1,6 @@
 import shlex
 from contextlib import suppress
 from os import getcwd, path
-from shlex import split as shplit
-from shutil import which
 from typing import Callable, ClassVar, Iterable, Self, Sequence
 
 from textual import events, work
@@ -21,7 +19,7 @@ from rovr.classes.mixins import (
     ScrollOffMixin,
     SingleLineOptionLayoutMixin,
 )
-from rovr.classes.session_manager import SessionManager
+from rovr.classes.session_manager import SessionManager, SessionOptionDict
 from rovr.classes.textual_options import FileListSelectionWidget, LazySelection
 from rovr.functions import path as path_utils
 from rovr.functions import pins as pin_utils
@@ -34,7 +32,7 @@ from rovr.variables.constants import (
     config,
 )
 
-from .file_list_right_click_menu import FileListRightClickMenu, ifed
+from .file_list_right_click_menu import FileListRightClickMenu
 
 
 class FileList(
@@ -50,9 +48,6 @@ class FileList(
     """
 
     COMPONENT_CLASSES: ClassVar[set[str]] = {
-        "filelist--cut",
-        "filelist--cut--highlighted",
-        "filelist--cut--hovered",
         "filelist--cut",
         "filelist--cut--highlighted",
         "filelist--cut--hovered",
@@ -80,6 +75,7 @@ class FileList(
             "cut",
             "paste",
             "new",
+            "bulk_create",
             "rename",
             "delete",
             "zip",
@@ -94,6 +90,7 @@ class FileList(
             "select_page_down",
             "select_home",
             "select_end",
+            "open",
             "open_editor",
             "open_right_click_menu",
         )
@@ -132,6 +129,7 @@ class FileList(
         if not self.dummy:
             self.items_in_cwd: set[str] = set()
         self.file_list_pause_check = False
+        self._ignore_next_click: bool = False
 
     def on_mount(self) -> None:
         if not self.dummy and self.parent:
@@ -159,6 +157,9 @@ class FileList(
             event: The click event.
         """
         event.prevent_default()
+        if self._ignore_next_click:
+            self._ignore_next_click = False
+            return
         clicked_option: int | None = event.style.meta.get("option")
         if clicked_option is not None and not self._options[clicked_option].disabled:
             # in future, if anything was changed, you just need to add the lines below
@@ -349,13 +350,11 @@ class FileList(
                 self.highlighted = to_highlight_index
             except (OptionDoesNotExist, KeyError):
                 self.highlighted = 0
-            if self.highlighted_option and isinstance(
-                self.highlighted_option, FileListSelectionWidget
-            ):
-                session.lastHighlighted[cwd] = {
+            if isinstance(self.highlighted_option, FileListSelectionWidget):
+                session.lastHighlighted[cwd] = SessionOptionDict({
                     "name": self.highlighted_option.dir_entry.name,
-                    "index": self.highlighted,
-                }
+                    "index": self.highlighted or 0,  # weird ty behaviour on 0.0.33
+                })
 
             self.scroll_to_highlight()
             self.app.tabWidget.active_tab.label = (
@@ -378,12 +377,9 @@ class FileList(
             if callback:
                 callback()
 
-    @work(thread=True)
     def update_from_session(
         self, session: SessionManager, name_to_index: dict[str, int]
     ) -> None:
-        # so far dont seem to have any issues when running this in a thread
-        # but if it does, remove the decorator
         self.log("Restoring selected items from session...")
         self.log(session.selectedItems)
         with self.prevent(SelectionList.SelectedChanged):
@@ -392,7 +388,7 @@ class FileList(
                 if item["name"] in name_to_index:
                     self.select(self.list_of_options[name_to_index[item["name"]]])
 
-    async def file_selected_handler(self, target_path: str) -> None:
+    async def file_selected_handler(self, paths: list[str]) -> None:
         if self.app._chooser_file:
             self.call_next(self.app.action_quit)
             return
@@ -404,11 +400,22 @@ class FileList(
                 self.notify(message, title=title, severity="error", markup=False)
 
             try:
+                if isinstance(editor_config["run"], str):
+                    cmd = (
+                        editor_config["run"]
+                        + " "
+                        + " ".join(shlex.quote(p) for p in paths)
+                    )
+                else:
+                    cmd = editor_config["run"] + paths
                 utils.run_command(
                     self.app,
-                    shlex.split(editor_config["run"]) + [target_path],
-                    orphan=editor_config.get("orphan", True),
+                    cmd,
+                    run_type="orphan"
+                    if editor_config.get("orphan", True)
+                    else "suspend",
                     on_error=on_error,
+                    shell=editor_config["shell"],
                 )
             except Exception as exc:
                 path_utils.dump_exc(self, exc)
@@ -420,33 +427,8 @@ class FileList(
                 )
             return
 
-        opened = False
-        if config["settings"].get("openers"):
-            from fnmatch import fnmatch
-
-            for pattern, openers in config["settings"]["openers"].items():
-                if fnmatch(target_path, pattern):
-                    for opener in openers:
-                        if not isinstance(opener, str) and not ifed(
-                            self.app, opener.get("if", {})
-                        ):
-                            continue
-                        runner = opener if isinstance(opener, str) else opener["run"]
-                        if which(shplit(runner)[0]):
-                            utils.run_command(
-                                self.app,
-                                runner,
-                                opener.get("orphan", True)
-                                if isinstance(opener, dict)
-                                else True,
-                            )
-                            opened = True
-                            break
-                    if opened:
-                        break
-
-        if not opened:
-            path_utils.open_file(self.app, target_path)
+        for target in paths:
+            path_utils.run_opener(self.app, path_utils.normalise(target))
 
     @work
     async def on_selection_list_selected_changed(
@@ -474,7 +456,7 @@ class FileList(
                 self.app.tabWidget.active_tab.selectedItems = []
                 self.app.file_list.focus()
             else:
-                await self.file_selected_handler(target_path)
+                await self.file_selected_handler([target_path])
                 if self.highlighted is None:
                     self.highlighted = 0
                 self.app.tabWidget.active_tab.selectedItems = []
@@ -483,17 +465,18 @@ class FileList(
             if path.isdir(full_path):
                 self.app.cd(full_path, clear_search=True)
             else:
-                await self.file_selected_handler(full_path)
+                await self.file_selected_handler([full_path])
             if self.highlighted is None:
                 self.highlighted = 0
             self.app.tabWidget.active_tab.selectedItems = []
         else:
-            # self.app.tabWidget.active_tab.session.selectedItems = self.selected.copy()
             selected_ids = self.selected.copy()
             session: SessionManager = self.app.tabWidget.active_tab.session
             session.selectedItems = []
             for selected_id in selected_ids:
                 option = self.get_option(selected_id)
+                if not isinstance(option, FileListSelectionWidget):
+                    continue
                 session.selectedItems.append({
                     "name": option.dir_entry.name,
                     "index": self.options.index(option),
@@ -539,7 +522,9 @@ class FileList(
         else:
             setattr(self.app, "_highlighted_file_mtime", None)
         # preview
-        self.app.query_one("MetadataContainer").update_metadata(event.option.dir_entry)
+        self.app.query_one("MetadataContainer").update_metadata(
+            event.option.dir_entry, event.option
+        )
         try:
             self.app.query_one("PreviewContainer").show_preview(
                 highlighted_option.dir_entry.path,
@@ -769,6 +754,9 @@ class FileList(
     def action_new(self) -> None:
         self.app.query_one("#new").action_press()
 
+    async def action_bulk_create(self) -> None:
+        self.app.query_one("#new").action_bulk_create()
+
     def action_rename(self) -> None:
         self.app.query_one("#rename").action_press()
 
@@ -921,6 +909,46 @@ class FileList(
         ):
             self.action_select()
 
+    async def action_open(self) -> None:
+        if self.highlighted is None:
+            return
+        if (
+            self.highlighted_option
+            and self.highlighted_option.disabled
+            and not self.select_mode_enabled
+        ):
+            return
+        cwd = path_utils.normalise(getcwd())
+        if self.select_mode_enabled:
+            selected_ids = self.selected.copy()
+            session = self.app.tabWidget.active_tab.session
+            session.selectedItems = []
+            paths_to_open = []
+            for selected_id in selected_ids:
+                option = self.get_option(selected_id)
+                if not isinstance(option, FileListSelectionWidget):
+                    continue
+                session.selectedItems.append({
+                    "name": option.dir_entry.name,
+                    "index": self.options.index(option),
+                })
+                full_path = path.join(cwd, option.dir_entry.name)
+                if path.isdir(full_path):
+                    self.app.cd(full_path, clear_search=True)
+                else:
+                    paths_to_open.append(full_path)
+            if paths_to_open:
+                await self.file_selected_handler(paths_to_open)
+        else:
+            option = self.highlighted_option
+            if not isinstance(option, FileListSelectionWidget):
+                return
+            full_path = path.join(cwd, option.dir_entry.name)
+            if path.isdir(full_path):
+                self.app.cd(full_path, clear_search=True)
+            else:
+                await self.file_selected_handler([full_path])
+
     def action_open_editor(self) -> None:
         if (self.highlighted is not None) and not (
             self.highlighted_option and self.highlighted_option.disabled
@@ -934,11 +962,14 @@ class FileList(
             try:
                 utils.run_command(
                     self.app,
-                    shlex.split(editor_config["run"]) + [target_path],
-                    orphan=editor_config.get("orphan", True),
+                    utils.command(editor_config["run"], target_path),
+                    run_type="orphan"
+                    if editor_config.get("orphan", True)
+                    else "suspend",
                     on_error=lambda message, title: self.notify(
                         message=message, title=title, severity="error", markup=False
                     ),
+                    shell=editor_config["shell"],
                 )
             except Exception as exc:
                 path_utils.dump_exc(self, exc)

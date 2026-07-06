@@ -87,10 +87,8 @@ def load_pins() -> PinsDict:
     if "pins" not in _pins or not isinstance(_pins["pins"], list):
         _pins["pins"] = []
 
-    for section_key in ["default", "pins"]:
-        # again, screw you ty, `section_key` can never be unknown
-        # but i dont know how to assert that to you
-        for item in _pins[section_key]:  # ty: ignore[invalid-key]
+    for section_key in ("default", "pins"):
+        for item in _pins[section_key]:
             # no i will not use isinstance, ty screams at me
             # because of the replace code a few lines below
             if type(item) is dict and "path" in item and type(item["path"]) is str:
@@ -135,7 +133,7 @@ def add_pin(pin_name: str, pin_path: str | bytes) -> None:
         "path": pin_path_normalized,
     })
 
-    for section_key in ["default", "pins"]:
+    for section_key in ("default", "pins"):
         if section_key in pins_to_write:
             for item in pins_to_write[section_key]:
                 if (
@@ -181,7 +179,7 @@ def remove_pin(pin_path: str | bytes) -> None:
             if not (isinstance(pin, dict) and pin.get("path") == pin_path_normalized)
         ]
 
-    for section_key in ["default", "pins"]:
+    for section_key in ("default", "pins"):
         if section_key in pins_to_write:
             for item in pins_to_write[section_key]:
                 if (

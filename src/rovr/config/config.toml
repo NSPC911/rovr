@@ -44,7 +44,7 @@ oO08 iIlL1 g9qCQG a@ 5sS
 """
 
 [interface.clock]
-enabled = true
+enabled = false
 align = "left"
 
 [interface.compact_mode]
@@ -58,16 +58,16 @@ use_recycle_bin = true
 # set as default options in the menu, it can be used as reference
 right_click = [
   # { label = "\uf0b0 Open With", if = { directory = false }, options = [
-  #   { label = "\ue8da VSCode", action = 'sh:code "${selected_files}"' },
-  #   { label = "\ue272 Helix", action = "shh:hx ${selected_files}", if = { path = ["C:/Users/notso/Git/*"] } },
-  #   { label = "\ue0c6 Pixelorama", action = 'sh:pixelorama "${selected_files}"', if = { path = ["*.png"] } },
+  #   { label = "\ue8da VSCode", action = { run = 'code "${selected_files}"', run_type = "orphan" } },
+  #   { label = "\ue272 Helix", action = { run = 'hx "${selected_files}"', run_type = "suspend" }, if = { path = ["C:/Users/notso/Git/*"] } },
+  #   { label = "\ue0c6 Pixelorama", action = { run = 'pixelorama "${selected_files}"', run_type = "suspend" }, if = { path = ["*.png"] } },
   # ] },
   { label = "\uf0c5 Copy", options = [
     { label = "\uf07f Copy in rovr", action = "rovr:copy" },
     { label = "\U000f0147 Copy highlighted file path", action = "system:copy_highlighted" },
     { label = "\U000f14e5 Copy current directory path", action = "system:copy_current_directory" },
     { label = "\U000f1265 Copy to OS clipboard", action = "system:copy_to_system_clip" },
-    # { label = " Copy SHA256", action = 'sho:pwsh -nop -c "(Get-FileHash -Algorithm SHA256 \"${highlighted_file}\").Hash | Set-Clipboard"', if = { directory = false } }
+    # { label = " Copy SHA256", action = { run = 'pwsh -nop -c "(Get-FileHash -Algorithm SHA256 \"${highlighted_file}\").Hash | Set-Clipboard"', run_type = "background" }, if = { directory = false } }
   ] },
   { label = "\uf0c4 Cut", action = "rovr:cut" },
   { label = "\uf429 Paste", action = "rovr:paste" },
@@ -76,8 +76,10 @@ right_click = [
   { label = "\uf014 Delete", action = "rovr:delete" },
   { label = "\uf410 Zip", action = "rovr:zip" },
   { label = "\uf07c Unzip", action = "rovr:unzip" },
-  # { label = " Get SHA256", action = 'sho:pwsh -nop -c "(Get-FileHash -Algorithm SHA256 \"${highlighted_file}\").Hash', if = { directory = false }}
+  { label = "\uea74 Properties", action = { run = "powershell -nop -c \"(New-Object -ComObject Shell.Application).NameSpace('${current_working_directory}'.replace('/', '\\')).ParseName('${highlighted_file_name}').InvokeVerb('Properties'); Start-Sleep -m 500; do { Start-Sleep -m 500 } while ((Get-Process | Where-Object { $_.MainWindowTitle -match '${highlighted_file_name} Properties' }))\"", run_type = "background" }, if = { os = ["Windows"] } },
+  { label = " Get SHA256", action = { run = 'pwsh -nop -c "(Get-FileHash -Algorithm SHA256 \"${highlighted_file}\").Hash"', run_type = "background" }, if = { directory = false }}
 ]
+drive_exclude = ["/var/*"]
 
 [settings.preview_rules]
 "application/(debian.*-package|redhat-package-manager|rpm|android\\.package-archive)" = "archive"
@@ -102,7 +104,10 @@ right_click = [
 "text/.*" = "text"
 "font/.*" = "font"
 
-[settings.openers]
+[settings.openers.groups]
+# unset for the end user
+
+[settings.openers.match]
 # unset for the end user
 
 [settings.editor.file]
@@ -113,8 +118,8 @@ orphan = false
 run = "$EDITOR"
 orphan = false
 
-[settings.editor.bulk_rename]
-show_as_mapping = true
+[settings.editor.bulk_editor]
+rename_show_as_mapping = true
 run = "$EDITOR"
 
 [metadata]
@@ -126,6 +131,7 @@ fields = [
   "accessed",
   "created",
   "hidden",
+  "mime",
 ]
 datetime_format = "%Y-%m-%d %H:%M"
 filesize_decimals = 1
@@ -158,7 +164,10 @@ paste = ["p", "ctrl+v"]
 cut = ["x", "ctrl+x"]
 delete = ["d", "delete"]
 rename = ["r", "f2"]
-new = ["ctrl+n", "o"]
+new = ["ctrl+n", "a"]
+# cannot use ctrl+shift+n even with kitty, because
+# it is used by the terminal to open a new window
+bulk_create = ["N", "A"]
 zip = ["E"]
 unzip = ["ctrl+e"]
 # id love to use ctrl+shift+c
@@ -195,6 +204,7 @@ show_keybinds = ["?"]
 quit_app = ["q", "ctrl+q"]
 command_palette = "ctrl+p"
 suspend_process = ["ctrl+z"]
+open = ["o"]
 open_editor = ["e"]
 show_shell_screen = [">"]
 open_right_click_menu = ["shift+f10"]
@@ -243,6 +253,10 @@ page_down = ["pagedown", "ctrl+f"]
 yes = ["y"]
 no = ["n", "escape"]
 dont_ask_again = ["a"]
+[keybinds.drag_and_drop]
+copy = ["c"]
+move = ["m"]
+cancel = ["escape"]
 
 [plugins.zoxide]
 enabled = true

@@ -15,7 +15,7 @@ from textual.widgets.selection_list import Selection
 from textual.worker import get_current_worker
 
 from rovr.classes.mixins import CheckboxRenderingMixin
-from rovr.classes.textual_options import ModalSearcherOption
+from rovr.classes.textual_options import OptionWithValue
 from rovr.components import ModalSearchScreen
 from rovr.components.special_option_lists import DoubleClickableScrollOffOptionList
 from rovr.functions import icons as icon_utils
@@ -155,7 +155,7 @@ class FileSearch(ModalSearchScreen):
             if fd_process.stderr is not None:
                 stderr_task = asyncio.create_task(fd_process.stderr.read())
 
-            pending_options: list[ModalSearcherOption] = []
+            pending_options: list[OptionWithValue] = []
             is_empty = True
             last_flush = time()
 
@@ -267,7 +267,7 @@ class FileSearch(ModalSearchScreen):
             Input.Changed(self.search_input, value=self.search_input.value)
         )
 
-    def create_option(self, raw_line: str) -> ModalSearcherOption | None:
+    def create_option(self, raw_line: str) -> OptionWithValue | None:
         file_path = path_utils.normalise(raw_line.strip())
         file_path_str = str(file_path)
         if not file_path_str:
@@ -277,7 +277,7 @@ class FileSearch(ModalSearchScreen):
             icon_factory = partial(get_icon_for_folder, file_path_str)
         else:
             icon_factory = partial(get_icon_for_file, file_path_str)
-        return ModalSearcherOption(
+        return OptionWithValue(
             icon_factory,
             display_text,
             file_path_str,

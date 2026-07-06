@@ -1,78 +1,30 @@
-import asyncio
 from functools import partial
-from typing import Awaitable, Callable, ClassVar, Literal
+from subprocess import Popen
+from typing import ClassVar, Literal
 
 from textual import events, work
 from textual.app import App
 from textual.binding import BindingType
 from textual.css.query import NoMatches
 from textual.errors import NoWidget
-from textual.reactive import reactive
+from textual.reactive import var
 from textual.widgets import OptionList
 
 from rovr.classes.config import (
-    _OpenerIf,
-    _RightClickIf,
-    _RovrConfigSettingsRightClickItem,
-    _RovrConfigSettingsRightClickItemOptionsItem,
+    _RightClickItem,
+    _RightClickItemOptionsItem,
 )
 from rovr.classes.textual_options import RightClickMenuOption
 from rovr.classes.type_aliases import DirEntryType
 from rovr.components import PopupOptionList
-from rovr.functions.utils import check_key, expand_command, is_archive
-from rovr.variables.constants import bindings, config, os_type
-
-
-def ifed(app: App, conditions: _RightClickIf | _OpenerIf) -> bool:
-    """Checks if the conditions for an option are met, used to determine if an option should be disabled
-
-    Args:
-        app: The app, needed to check the conditions
-        conditions: The conditions to check, can be based on the highlighted file, current directory, os, or if the highlighted file is a directory
-
-    Returns:
-        Whether the option should be disabled based on the conditions
-    """
-    from fnmatch import fnmatch
-
-    dir_entry: DirEntryType | None = getattr(
-        app.file_list.highlighted_option, "dir_entry", None
-    )
-    disabled = False
-    for thing in conditions:
-        match thing:
-            case "path":
-                disabled = not (
-                    any(
-                        dir_entry and fnmatch(dir_entry.path, pattern)
-                        for pattern in conditions.get("path", [])
-                    )
-                )
-            case "os":
-                disabled = not any(
-                    os.lower() == os_type.lower() for os in conditions["os"]
-                )
-            case "cwd":
-                disabled = not (
-                    any(
-                        fnmatch(app.file_list.current_directory, pattern)
-                        for pattern in conditions["cwd"]
-                    )
-                )
-            case "directory":
-                if conditions["directory"]:
-                    disabled = not (dir_entry and dir_entry.is_dir())
-                else:
-                    disabled = not (dir_entry and not dir_entry.is_dir())
-        if disabled:
-            break
-    return disabled
+from rovr.functions.path import ifed
+from rovr.functions.utils import check_key, expand_command, is_archive, run_command
+from rovr.variables.constants import bindings, config
 
 
 async def get_shell_option(
     app: App,
-    option: _RovrConfigSettingsRightClickItemOptionsItem
-    | _RovrConfigSettingsRightClickItem,
+    option: _RightClickItemOptionsItem | _RightClickItem,
     index: int,
 ) -> RightClickMenuOption | Literal[False] | None:
     """Provides a shell option based on the action, if it is a built in shell action, otherwise returns None
@@ -84,16 +36,17 @@ async def get_shell_option(
 
     Returns:
         The option widget, False (if the object shouldn't be added) or None (if action isn't a shell action)"""
-    if not option["action"].startswith(("sh:", "shh:", "sho:")):
+    if isinstance(option["action"], str):
         return None
-    action = option["action"][3:]
+    action = option["action"]["run"]
+    action_parts = action if isinstance(action, list) else [action]
     disabled = False
     dir_entry: DirEntryType | None = getattr(
         app.file_list.highlighted_option, "dir_entry", None
     )
-    if "${highlighted_file}" in action:
+    if any("${highlighted_file}" in part for part in action_parts):
         disabled = not dir_entry
-    if not disabled and "${selected_files}" in action:
+    if not disabled and any("${selected_files}" in part for part in action_parts):
         disabled = await app.file_list.get_selected_objects() == []
     if "if" in option and ifed(app, option["if"]):
         return False
@@ -108,8 +61,7 @@ async def get_shell_option(
 
 def give_me_an_option(
     app: App,
-    option: _RovrConfigSettingsRightClickItemOptionsItem
-    | _RovrConfigSettingsRightClickItem,
+    option: _RightClickItemOptionsItem | _RightClickItem,
 ) -> RightClickMenuOption | None:
     """Provides an option based on the action, if it is a built in action, otherwise returns None
 
@@ -211,7 +163,7 @@ class FileListRightClickMenu(PopupOptionList, inherit_bindings=False):
             self.longest_prompt = max(self.longest_prompt, len(str(new_option.prompt)))
         for option in options:
             if option.id.startswith("group"):
-                if len(option.prompt) < self.longest_prompt - 2:
+                if getattr(option.prompt, "__len__", lambda: 0)() < self.longest_prompt:
                     option._set_prompt(f"{option.prompt:<{self.longest_prompt}} ")
                 else:
                     option._set_prompt(f"{option.prompt} ")
@@ -262,7 +214,7 @@ class FileListRightClickMenu(PopupOptionList, inherit_bindings=False):
             except NoMatches:
                 pass
 
-    @work(exclusive=True)
+    @work
     async def on_option_list_option_selected(
         self, event: OptionList.OptionSelected
     ) -> None:
@@ -278,67 +230,31 @@ class FileListRightClickMenu(PopupOptionList, inherit_bindings=False):
         if event.option.id.startswith("copy_") and hasattr(
             self.app.query_one("CopyButton"), f"{event.option.id}"
         ):
-            func: Callable[[], Awaitable | None] = getattr(
-                self.app.query_one("CopyButton"), f"{event.option.id}"
+            self.call_next(
+                getattr(
+                    self.app.query_one("CopyButton"),
+                    f"{event.option.id}",
+                )
             )
-            if asyncio.iscoroutinefunction(func):
-                await func()
-            else:
-                func()
         elif hasattr(self.app.file_list, f"action_{event.option.id}"):
-            func: Callable[[], Awaitable | None] = getattr(
-                self.app.file_list, f"action_{event.option.id}"
+            self.call_next(
+                getattr(
+                    self.app.file_list,
+                    f"action_{event.option.id}",
+                )
             )
-            if asyncio.iscoroutinefunction(func):
-                await func()
-            else:
-                func()
         elif event.option.id.startswith("shell_"):
-            command: str = ":".join(event.option.action.split(":", 1)[1:])
-            # need to do some expansions, lemme make a function rq
-            command = await expand_command(self.app, command)
-            match event.option.action.split(":", 1)[0]:
-                case "shh":  # shell hide app
-                    with self.app.suspend():
-                        # run code, make sure to not capture any output, allow user to send input
-                        await (
-                            await asyncio.create_subprocess_shell(
-                                command,
-                                stdin=None,
-                                stdout=None,
-                                stderr=None,
-                            )
-                        ).communicate()
-                case "sho":  # shell capture output and show as toast
-                    proc = await asyncio.create_subprocess_shell(
-                        command,
-                        stdout=asyncio.subprocess.PIPE,
-                        stderr=asyncio.subprocess.PIPE,
-                        stdin=asyncio.subprocess.DEVNULL,
-                    )
-                    stdout, stderr = await proc.communicate()
-                    if proc.returncode == 0:
-                        if stderr:
-                            self.notify(
-                                f"stdout: {stdout.decode().strip()}\nstderr: {stderr.decode().strip()}"
-                            )
-                        elif stdout:
-                            self.notify(f"{stdout.decode().strip()}")
-                    else:
-                        self.notify(
-                            f"stdout: {stdout.decode().strip()}\nstderr: {stderr.decode().strip()}",
-                            severity="error",
-                            title=f"Command exited with code {proc.returncode}",
-                        )
-                case "sh":  # normal shell, dont return output, just run
-                    await (
-                        await asyncio.create_subprocess_shell(
-                            command,
-                            stdin=asyncio.subprocess.DEVNULL,
-                            stdout=asyncio.subprocess.DEVNULL,
-                            stderr=asyncio.subprocess.DEVNULL,
-                        )
-                    ).communicate()
+            command: str | list[str] = await expand_command(
+                self.app, event.option.action["run"]
+            )
+            proc = run_command(
+                self.app,
+                command,
+                event.option.action["run_type"],
+                shell=event.option.action["shell"],
+            )
+            if isinstance(proc, Popen) and event.option.action["run_type"] != "orphan":
+                self.app.shell_thread(proc, "Context Menu")
 
     def on_blur(self, event: events.Blur) -> None:  # ty: ignore[invalid-method-override]
         event.prevent_default().stop()
@@ -355,7 +271,7 @@ class FileListRightClickMenu(PopupOptionList, inherit_bindings=False):
 class FileListRightClickChildMenu(PopupOptionList, inherit_bindings=False):
     BINDINGS: ClassVar[list[BindingType]] = list(bindings)
 
-    target_option: reactive[RightClickMenuOption] = reactive(
+    target_option: var[RightClickMenuOption] = var(
         RightClickMenuOption("", action=None)
     )
 

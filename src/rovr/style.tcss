@@ -2,8 +2,8 @@
 $border-style: round;
 $border-blurred: $primary-background-lighten-3;
 $border-blurred-light: $primary-background;
-$border: $primary-lighten-3;
-$border-disabled: $panel;
+$border-focused: $primary-lighten-3;
+$border-disabled: $secondary-background;
 
 /* Layout Dimensions */
 $pinned_sidebar_width: 17;
@@ -33,7 +33,7 @@ Screen.-all-horizontal #root.compact-buttons {
     padding-left: 1;
   }
   #menu_wrapper:focus-within #below_menu #path_switcher {
-    border-left: $border-style $border;
+    border-left: $border-style $border-focused;
   }
   #menu_wrapper:focus-within #below_menu #path_switcher.hide_border_bottom {
     border-left: $border-style $accent;
@@ -43,75 +43,40 @@ Screen.-all-horizontal #root.compact-buttons {
 
 /* border styling for main widgets */
 #menu_wrapper,
-#pinned_sidebar_container,
-#file_list_container,
-#preview_sidebar,
-FileSearchToggles,
-ContentSearchToggles,
+#pinned_sidebar_container, #file_list_container, #preview_sidebar,
+FileSearchToggles, ContentSearchToggles,
 DoubleClickableOptionList,
-#footer > *,
 PopupOptionList,
+Clipboard, ProcessContainer, MetadataContainer,
 .comfy-buttons #path_switcher,
 .comfy-buttons #below_menu Button,
-PasteScreen OptionList,
-DeleteFiles OptionList,
-ArchiveCreationScreen OptionList {
+ModalScreen OptionList {
   background: transparent;
   border: $border-style $border-blurred;
-  border-subtitle-color: $background;
-  border-subtitle-background: $border-blurred;
   opacity: 1 !important;
   background-tint: transparent !important;
   text-opacity: 1 !important;
   tint: transparent !important;
   &:disabled { border: $border-style $border-disabled }
-  &:ansi {
-    border-subtitle-background: transparent;
-    border-subtitle-color: $border-blurred;
-    &:light {
-      border-subtitle-background: transparent;
-      border-subtitle-color: $border-blurred-light;
-    }
-  }
   &:light {
     border: $border-style $border-blurred-light;
-    border-subtitle-background: $border-blurred-light;
   }
 }
 
 #menu_wrapper:focus-within,
-#pinned_sidebar_container:focus-within,
-#file_list_container:focus-within,
-#preview_sidebar:focus-within,
-#preview_sidebar:focus,
-ModalScreen > VerticalGroup:focus-within > DoubleClickableOptionList,
-FileSearchToggles:focus,
-ContentSearchToggles:focus,
-#file_list.-maximized,
-#pinned_sidebar.-maximized,
-#preview_sidebar .inner_preview.-maximized,
-#footer > *:focus,
+#pinned_sidebar_container:focus-within, #file_list_container:focus-within, #preview_sidebar:focus-within, #preview_sidebar:focus,
+ModalScreen > VerticalGroup:focus-within > OptionList,
+FileSearchToggles:focus, ContentSearchToggles:focus,
 PopupOptionList:focus,
+#file_list.-maximized, #pinned_sidebar.-maximized, #preview_sidebar .inner.-maximized,
+Clipboard:focus, ProcessContainer:focus, MetadataContainer:focus,
 .comfy-buttons #path_switcher:focus-within,
 .comfy-buttons #below_menu Button:focus,
 .comfy-buttons #below_menu Button:hover,
 PasteScreen OptionList,
 DeleteFiles OptionList,
 ArchiveCreationScreen OptionList:focus {
-  border: $border-style $border;
-  border-subtitle-background: $border;
-  &:ansi {
-    border-subtitle-background: transparent;
-    border-subtitle-color: $border;
-    &:light {
-      border-subtitle-background: transparent;
-      border-subtitle-color: $border;
-    }
-  }
-  &:light {
-    border-subtitle-background: $border;
-    border-subtitle-color: $background;
-  }
+  border: $border-style $border-focused;
 }
 
 .hide, .hidden { display: none }
@@ -120,6 +85,8 @@ Input {
   scrollbar-size: 0 0;
   scrollbar-visibility: hidden;
   overflow: hidden hidden;
+  background: transparent;
+
   .input--placeholder,
   .text-area--placeholder { color: $foreground-darken-1 }
   .text-area--cursor-gutter {
@@ -264,7 +231,7 @@ Tooltip {
 
 #menu_wrapper {
   #below_menu { border-top: $border-style $border-blurred }
-  &:focus-within #below_menu { border-top: $border-style $border }
+  &:focus-within #below_menu { border-top: $border-style $border-focused }
 }
 
 #menu {
@@ -341,7 +308,25 @@ Tooltip {
   width: $file_list_width;
 }
 
+.drag-out-active #file_list_container {
+  border: $border-style $accent;
+}
+
+.drag-in-active #file_list_container {
+  border: $border-style $success
+}
+
+.drag-in-rejected #file_list_container {
+  border: $border-style $error
+}
+
 #file_list, #file_list_visual { height: 1fr }
+
+#file_list_details_header {
+  height: 1;
+  color: $text-muted;
+  text-style: bold;
+}
 
 #pinned_sidebar_container,
 #file_list_container,
@@ -388,14 +373,14 @@ Tooltip {
       text-wrap: wrap;
     }
   }
-  & > * {
+  & > Widget {
     /* scrollbars are useless, reminder */
     background: transparent;
     border: none;
     padding: 0;
     margin: 0;
     &.-maximized {
-      border: $border-style $border
+      border: $border-style $border-focused
     }
     &Static {
       padding: 0 1;
@@ -429,17 +414,17 @@ Tooltip {
 #footer {
   height: $footer_unfocus_height;
 
-  & > * {
+  Clipboard,
+  ProcessContainer,
+  MetadataContainer {
     height: 1fr;
     background: transparent;
+    scrollbar-size: 1 1;
   }
 
   &:focus-within {
     height: $footer_focus_height;
     max-height: 40vh;
-  }
-  * {
-    scrollbar-size: 1 1;
   }
 }
 
@@ -476,17 +461,13 @@ ProgressBarContainer {
   .bar--bar { color: $warning }
 }
 
-Content.selected { color: red }
-CommandList,
 FileList, PinnedSidebar, Clipboard,
 PopupOptionList,
 FileSearchToggles,
 ContentSearchToggles,
 DoubleClickableOptionList,
 KeybindList,
-PasteScreen OptionList,
-DeleteFiles OptionList,
-ArchiveCreationScreen OptionList {
+ModalScreen OptionList {
   padding: 0 0 0 0;
   background-tint: ansi_default !important;
   scrollbar-size: 1 1;
@@ -500,7 +481,7 @@ ArchiveCreationScreen OptionList {
   }
   .option-list--option-hover {
     color: $primary;
-    background: transparent
+    background: transparent;
   }
   &:focus .option-list--option-highlighted,
   &.-popup-shown .option-list--option-highlighted {
@@ -508,28 +489,18 @@ ArchiveCreationScreen OptionList {
     background: $primary;
     text-style: none;
   }
-  &:blur .selection-list--button-selected-highlighted,
-  &:blur .selection-list--button-highlighted {
-    background: transparent;
-    color: $primary
-  }
-  .selection-list--button {
-    background: transparent;
+  &:blur .option-list--option-highlighted {
     color: $primary;
-  }
-  .selection-list--button-selected {
     background: transparent;
-    color: $primary;
+    text-style: bold;
   }
-  .selection-list--button-highlighted,
-  &.-popup-shown .selection-list--button-highlighted {
-    background: $primary;
-    color: $background;
-  }
-  .selection-list--button-selected-highlighted,
-  &.-popup-shown .selection-list--button-selected-highlighted {
-    background: $primary;
-    color: $background;
+}
+
+CommandList:ansi {
+  /* just need to fix ansi issues */
+  background-tint: ansi_default !important;
+  .option-list--option-hover {
+    background: $primary-background
   }
 }
 
@@ -555,8 +526,8 @@ FileList {
   }
   .filelist--link--hover,
   .filelist--link--highlighted {
-    color: $primary;
-    background: transparent;
+    color: $primary-lighten-3;
+    background: $secondary-darken-3;
   }
 
   .filelist--broken-link {
@@ -569,11 +540,30 @@ FileList {
     background: $error-lighten-3;
     color: $background;
   }
+
+  .filelist--detail-size,
+  .filelist--detail-mtime,
+  .filelist--detail-atime,
+  .filelist--detail-ctime,
+  .filelist--detail-permissions,
+  .filelist--detail-owner,
+  .filelist--detail-group {
+    color: $text-muted;
+  }
+  .filelist--git-staged {
+    color: $success;
+  }
+  .filelist--git-unstaged {
+    color: $warning;
+  }
+  .filelist--git-untracked {
+    color: $text-muted;
+  }
 }
 
 #dialog {
-  max-width: 50vw;
-  max-height: 50vh;
+  max-width: 55vw;
+  max-height: 55vh;
   overflow-y: auto;
   border-title-align: center;
   border-subtitle-align: center;
@@ -645,7 +635,7 @@ ThemeChooser {
     &:focus-within {
       OptionList,
       RadioList {
-        border: $border-style $border;
+        border: $border-style $border-focused;
         background: transparent !important;
         .option-list--option-highlighted {
           background: $primary;
@@ -657,7 +647,7 @@ ThemeChooser {
         }
       }
       Input {
-        border: $border-style $border;
+        border: $border-style $border-focused;
       }
     }
   }
@@ -694,59 +684,44 @@ Keybinds {
   #keybinds_group {
     max-width: 60vw;
     max-height: 80vh;
-    border: $border-style $border;
+    border: $border-style $border-focused;
   }
 }
 
 /* Modal Dialog Shared Styles */
-Dismissible,
-YesOrNo,
-FileNameConflict,
-FileInUse,
-DeleteFiles,
-ModalInput,
-TerminalTooSmall { align: center middle }
+ModalScreen { align: center middle }
 
-YesOrNo #dialog #question_container,
-FileNameConflict #dialog #question_container,
-FileInUse #question_container {
-  column-span: 2;
-  height: 1fr;
-  width: 1fr;
-  content-align: center middle;
-  text-wrap: wrap;
+YesOrNo #dialog,
+FileNameConflict #dialog,
+FileInUse #dialog {
   .question {
     content-align: center middle;
+    column-span: 2;
     width: 1fr;
     height: 1fr;
     text-align: center;
     text-wrap: wrap;
     text-overflow: fold;
   }
-}
 
-YesOrNo #dialog #dontAskAgain,
-FileNameConflict #dialog #dontAskAgain,
-FileInUse #dontAskAgain {
-  column-span: 2;
-  content-align: center middle;
-  align: center middle;
-  Switch {
-    border: none;
-    padding: 0;
-    background: transparent;
-    margin: 0 2 0 0;
-    &:focus {
+  #dontAskAgain {
+    column-span: 2;
+    content-align: center middle;
+    align: center middle;
+    Switch {
       border: none;
-      & > .switch--slider { color: $panel-lighten-1 }
-      &.-on > .switch--slider { color: $success-lighten-1 }
+      padding: 0;
+      background: transparent;
+      margin: 0 2 0 0;
+      &:focus {
+        border: none;
+        & > .switch--slider { color: $panel-lighten-1 }
+        &.-on > .switch--slider { color: $success-lighten-1 }
+      }
     }
   }
+  Button { width: 100% }
 }
-
-YesOrNo #dialog Button,
-FileNameConflict #dialog Button,
-FileInUse Button { width: 100% }
 
 Dismissible {
   #dialog {
@@ -754,8 +729,14 @@ Dismissible {
     grid-gutter: 1 2;
     grid-rows: 1fr 3; /* take up all the space available */
     padding: 1 3;
-    border: $border-style $border;
+    border: $border-style $border-focused;
     column-span: 3;
+    max-height: 40vh;
+    max-width: 40vw;
+    &:ansi {
+      padding: 0 1;
+      grid-gutter: 0 1;
+    }
   }
   #message {
     height: 1fr;
@@ -770,19 +751,29 @@ Dismissible {
 YesOrNo #dialog {
   grid-size: 2;
   grid-gutter: 1 2;
-  padding: 1 3 1 3;
-  border: $border-style $border;
+  border: $border-style $border-focused;
   grid-rows: 1fr 3; /* enough space for 1fr */
+  max-height: 20;
+  max-width: 50vw;
+  padding: 1 2;
+  &:ansi {
+    padding: 0 1;
+  }
   &.with_toggle {
     grid-rows: 1fr 3 1;
-    padding: 1 3 0 3;
+    padding: 0 1 0 1;
   }
 }
 
 PasteScreen > #dialog {
   grid-size: 2 3;
+  grid-rows: 0.5fr 1.5fr 3;
   grid-gutter: 1 2;
-  grid-rows: 0.75fr 1fr 3;
+  padding: 1 3;
+  &:ansi {
+    padding: 0 1;
+    grid-gutter: 0 1;
+  }
   &.with_toggle {
     grid-rows: 0.75fr 1fr 3 1;
   }
@@ -794,21 +785,23 @@ PasteScreen > #dialog {
   Button {
     column-span: 1
   }
-  #question_container {
-    column-span: 2;
-  }
 }
 
 FileNameConflict #dialog {
   grid-size: 2;
   grid-gutter: 1 2;
-  grid-rows: 1fr 3 3 1; /* need the two lines for label */
-  padding: 1 3 0 3;
-  border: $border-style $border;
-  height: 60vh;
-  max-height: 60vh;
-  width: 60vw;
-  max-width: 60vw;
+  grid-rows: 1fr 3 3 2;
+  padding: 0 2;
+  border: $border-style $border-focused;
+  max-height: 20;
+  max-width: 50vw;
+  &:ansi {
+    grid-gutter: 0 1;
+    grid-rows: 1fr 3 3 3;
+    #dontAskAgain {
+      offset: 0 1;
+    }
+  }
 }
 
 FileNameConflict.no_overwrite #dialog Container {
@@ -824,10 +817,15 @@ FileInUse {
     grid-size: 2;
     grid-gutter: 1 2;
     grid-rows: 1fr 3 3 1; /* space for toggle row */
-    padding: 1 3;
-    border: $border-style $border;
+    border: $border-style $border-focused;
     max-height: 20;
+    max-width: 45vw;
     height: auto;
+    padding: 1 3;
+    &:ansi {
+      padding: 0 1;
+      grid-rows: 1fr 3 3 2;
+    }
   }
   Container {
     column-span: 2;
@@ -839,16 +837,19 @@ FileInUse {
 DeleteFiles {
   #dialog {
     grid-size: 2 3;
+    grid-rows: 0.5fr 1.5fr 3 1; /* no issues for now */
+    padding: 0 1;
+    border: $border-style $border-focused;
+    padding: 1 2;
     grid-gutter: 1 2;
-    grid-rows: 0.75fr 1fr 3 1; /* no issues for now */
-    padding: 1 3;
-    height: 60vh;
-    max-height: 60vh;
-    width: 60vw;
-    max-width: 60vw;
-    border: $border-style $border;
+    max-width: 55vw;
+    max-height: 55vh;
     &.with_trash {
       grid-size: 3 3;
+    }
+    &:ansi {
+      grid-gutter: 0 1;
+      padding: 0 1;
     }
   }
   #question {
@@ -871,7 +872,7 @@ DeleteFiles {
 
 ModalInput {
   #modalInput_group {
-    border: $border-style $border;
+    border: $border-style $border-focused;
     width: 50vw;
     max-height: 3;
     background: transparent !important;
@@ -886,7 +887,7 @@ ModalInput {
     width: 1fr;
   }
   Label { height: 1 }
-  Label.arrow { color: $border }
+  Label.arrow { color: $border-focused }
 }
 
 TerminalTooSmall {
@@ -914,7 +915,7 @@ TerminalTooSmall {
 CommandPalette {
   align: center middle;
   CommandList {
-    border: $border-style $border;
+    border: $border-style $border-focused;
     border-top: none;
     max-height: 60vh;
   }
@@ -927,10 +928,11 @@ CommandPalette {
     width: 50vw;
     height: 50vh;
     margin-top: 0;
+    min-width: 26;
   }
-  #--input { border: $border-style $border }
+  #--input { border: $border-style $border-focused }
   #--input.--list-visible { border-bottom: none }
-  LoadingIndicator { border-bottom: $border-style $border }
+  LoadingIndicator { border-bottom: $border-style $border-focused }
 }
 
 ArchiveCreationScreen {
@@ -947,7 +949,7 @@ ArchiveCreationScreen {
     column-span: 2;
     &.invalid { border: $border-style $error }
     &:light { border: $border-style $error }
-    &:focus-within { border: $border-style $border }
+    &:focus-within { border: $border-style $border-focused }
     &.invalid:focus-within { border: $border-style $error-lighten-3 }
   }
   HorizontalGroup {
@@ -963,12 +965,38 @@ ArchiveCreationScreen {
 
 ShellExec {
   #modalInput_group {
-    &.orphan--true { border: $border-style $success-lighten-3 }
-    &.orphan--false { border: $border-style $error-lighten-3 }
+    &.in-bg--true { border: $border-style $success-lighten-3 }
+    &.in-bg--false { border: $border-style $error-lighten-3 }
     &:light {
-      &.orphan--true { border: $border-style $success-darken-1 }
-      &.orphan--false { border: $border-style $error-darken-1 }
+      &.in-bg--true { border: $border-style $success-darken-1 }
+      &.in-bg--false { border: $border-style $error-darken-1 }
     }
+  }
+}
+
+PasteDropScreen #dialog {
+  border: $border-style $border-focused;
+  padding: 0 1;
+  grid-size: 2 3;
+  grid-gutter: 0 1;
+  grid-rows: 1fr 3 3;
+  max-height: 100vh;
+  height: 60vh;
+  min-height: 11;
+
+  Button {
+    margin: 0 0;
+    height: 3;
+    width: 1fr;
+  }
+  HorizontalGroup {
+    column-span: 2;
+    align: center middle;
+    Button#cancel { width: 50% }
+  }
+  OptionList {
+    height: 1fr;
+    column-span: 2;
   }
 }
 
@@ -1083,7 +1111,7 @@ Screen {
     #file_search_group,
     #content_search_group,
     #keybinds_group,
-    .--textual-command-palette #--container,
+    #--container,
     #dialog,
     #modalInput_group {
       width: 100vw;
@@ -1092,17 +1120,40 @@ Screen {
     Toast { width: 100vw }
     #file_search_toggles,
     #content_search_toggles { display: none }
-    #dialog.delete {
+    &DeleteFiles #dialog {
       grid-size: 1 5 !important;
       grid-rows: 0.75fr 1fr 3 3 1 !important;
       padding: 0 1;
+      max-height: 90vh;
       &.with_trash { grid-rows: 0.75fr 1fr 3 3 3 1 !important }
     }
-    #dialog.file_in_use {
-      max-height: 75vh;
+    &FileInUse #dialog {
+      max-height: 90vh;
       grid-size: 1 5 !important;
       grid-rows: 1fr 3 3 3 1 !important;
-      #cancel { width: 100% }
+    }
+    &ArchiveCreationScreen #archive_options_group {
+      width: 100vw;
+      layout: vertical;
+      OptionList {
+        height: 5;
+      }
+    }
+    &YesOrNo #dialog {
+      grid-size: 1 3 !important;
+      grid-rows: 1fr 3 3 !important;
+      max-height: 90vh;
+      padding: 0 1;
+    }
+    &PasteScreen #dialog {
+      grid-size: 1 4 !important;
+      grid-rows: 0.5fr 1.5fr 3 3 !important;
+    }
+    &PasteDropScreen #dialog {
+      grid-size: 1 4;
+      grid-rows: 1fr 3 3 3;
+      Button { margin: 0 }
+      Button#cancel { width: 100% }
     }
   }
   &.-no-preview {
@@ -1114,31 +1165,33 @@ Screen {
     .--textual-command-palette #--container,
     #dialog,
     #modalInput_group {
-      width: 75vw;
-      max-width: 75vw;
+      width: 80vw;
+      max-width: 80vw;
     }
     Toast { width: 50vw }
     #file_search_toggles,
     #content_search_toggles { display: none }
-    #dialog.delete {
+    &DeleteFiles #dialog {
       grid-size: 2 4 !important;
-      max-width: 80vw;
-      width: 80vw;
       grid-rows: 0.75fr 1fr 3 3 1 !important;
       padding: 0 1;
+      max-height: 80vh;
       &.with_trash { grid-rows: 0.75fr 1fr 3 3 3 1 !important }
       #cancel { width: 50% }
     }
-    #dialog.file_in_use {
-      max-height: 75vh;
+    &FileInUse #dialog {
+      max-height: 80vh;
       grid-size: 2 4 !important;
       grid-rows: 1fr 3 3 1 !important;
       #cancel { width: 100% }
     }
+    &ArchiveCreationScreen HorizontalGroup {
+      width: 80vw;
+    }
   }
   &.-all-vertical {
     #footer { max-height: 25vh }
-    #dialog.file_in_use #cancel { width: 50% }
+    &FileInUse #dialog #cancel { width: 50% }
   }
   &.-no-path {
     #below_menu { display: none !important }

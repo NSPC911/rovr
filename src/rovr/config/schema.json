@@ -6,9 +6,17 @@
   "definitions": {
     "keybind": {
       "type": "array",
-      "items": {
-        "type": "string"
-      }
+      "items": { "type": "string" }
+    },
+    "run": {
+      "oneOf": [
+        { "type": "string" },
+        {
+          "type": "array",
+          "items": { "type": "string" },
+          "minItems": 1
+        }
+      ]
     },
     "right_click_action": {
       "oneOf": [
@@ -29,10 +37,38 @@
           ]
         },
         {
-          "type": "string",
-          "pattern": "^sh[ho]?:.+$"
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "run": {
+              "$ref": "#/definitions/run",
+              "description": "The command to run when this action is selected. Command expansions are supported."
+            },
+            "run_type": {
+              "type": "string",
+              "enum": ["suspend", "background", "orphan"],
+              "description": "The way to run the command. `suspend` will suspend rovr until the command is finished, `background` will run the command in the background without suspending rovr, and `orphan` will run the command as an orphan process detached from rovr."
+            },
+            "shell": {
+              "type": "boolean",
+              "default": false,
+              "description": "Whether the command to run is a shell command that needs to be run in a shell (required if you want to do piping)"
+            }
+          },
+          "required": ["run", "run_type"]
         }
       ]
+    },
+    "os_if": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "anyOf": [
+          { "enum": ["Windows", "Linux", "Darwin"] },
+          { "type": "string" }
+        ]
+      },
+      "description": "Only use this setting if the operating system is one of the following (case insensitive)"
     },
     "opener_if": {
       "type": "object",
@@ -44,21 +80,95 @@
           "items": { "type": "string" }
         },
         "os": {
-          "description": "Only use this opener if the operating system is one of the following (case insensitive)",
-          "type": "array",
-          "items": {
-            "type": "string",
-            "anyOf": [
-              { "enum": ["Windows", "Linux", "Darwin"] },
-              { "type": "string" }
-            ]
-          }
+          "$ref": "#/definitions/os_if",
+          "description": "Only use this opener if the operating system is one of the following (case insensitive)"
         },
         "directory": {
           "type": "boolean",
           "description": "Only use this opener if the selected item is a directory (set to true) or a file (set to false) (if unspecified, matches both files and directories)"
         }
       }
+    },
+    "opener": {
+      "oneOf": [
+        { "type": "string" },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "run": {
+              "$ref": "#/definitions/run",
+              "description": "The command to run to open the file. Command expansions are supported."
+            },
+            "if": {
+              "$ref": "#/definitions/opener_if",
+              "description": "Only use this opener if a set criteria matches"
+            },
+            "orphan": {
+              "type": "boolean",
+              "default": true,
+              "description": "Whether to open the opener as an orphan process."
+            },
+            "name": {
+              "type": "string",
+              "description": "The name of the opener to show in the menu (currently unused)"
+            },
+            "shell": {
+              "type": "boolean",
+              "default": true,
+              "description": "Whether the command to run is a shell command that needs to be run in a shell (required if you want to do piping)"
+            }
+          },
+          "required": ["run"]
+        }
+      ]
+    },
+    "right_click_item": {
+      "type": "object",
+      "properties": {
+        "label": {
+          "type": "string",
+          "description": "Label to show in the context menu for this item"
+        },
+        "action": {
+          "$ref": "#/definitions/right_click_action",
+          "description": "Action to perform when the item is selected.\nShell commands must start with `sh` followed by an optional type (`h` hides the app, `o` shows the output on run) followed by a colon `:` then the command right after.\n Command expansions are supported."
+        },
+        "if": {
+          "type": "object",
+          "description": "Only show this menu item if a set criteria matches (ignored for rovr/system actions)",
+          "$ref": "#/definitions/right_click_if"
+        },
+        "options": {
+          "type": "array",
+          "description": "Submenu items (only supported at the top level)",
+          "items": {
+            "type": "object",
+            "properties": {
+              "label": {
+                "type": "string",
+                "description": "Label to show in the context menu for this submenu item"
+              },
+              "action": {
+                "$ref": "#/definitions/right_click_action",
+                "description": "Action to perform when the submenu item is selected"
+              },
+              "if": {
+                "type": "object",
+                "description": "Only show this menu item if a set criteria matches (ignored for rovr/system actions)",
+                "$ref": "#/definitions/right_click_if"
+              }
+            },
+            "required": ["label", "action"],
+            "additionalProperties": false
+          }
+        }
+      },
+      "oneOf": [
+        { "required": ["label", "action"] },
+        { "required": ["label", "options"] }
+      ],
+      "additionalProperties": false
     },
     "right_click_if": {
       "type": "object",
@@ -170,7 +280,14 @@
               "type": "string",
               "default": "nearest",
               "description": "The resampling method to use when resizing images. This is only applicable when the image exceeds the maximum size specified in `max_size`.",
-              "enum": ["nearest", "lanczos", "bilinear", "bicubic", "box", "hamming"]
+              "enum": [
+                "nearest",
+                "lanczos",
+                "bilinear",
+                "bicubic",
+                "box",
+                "hamming"
+              ]
             }
           }
         },
@@ -285,54 +402,8 @@
         },
         "right_click": {
           "type": "array",
-          "description": "Configuration for the right-click context menu",
-          "items": {
-            "type": "object",
-            "properties": {
-              "label": {
-                "type": "string",
-                "description": "Label to show in the context menu for this item"
-              },
-              "action": {
-                "$ref": "#/definitions/right_click_action",
-                "description": "Action to perform when the item is selected.\nShell commands must start with `sh` followed by an optional type (`h` hides the app, `o` shows the output on run) followed by a colon `:` then the command right after.\n Command expansions are supported."
-              },
-              "if": {
-                "type": "object",
-                "description": "Only show this menu item if a set criteria matches (ignored for rovr/system actions)",
-                "$ref": "#/definitions/right_click_if"
-              },
-              "options": {
-                "type": "array",
-                "description": "Submenu items (only supported at the top level)",
-                "items": {
-                  "type": "object",
-                  "properties": {
-                    "label": {
-                      "type": "string",
-                      "description": "Label to show in the context menu for this submenu item"
-                    },
-                    "action": {
-                      "$ref": "#/definitions/right_click_action",
-                      "description": "Action to perform when the submenu item is selected"
-                    },
-                    "if": {
-                      "type": "object",
-                      "description": "Only show this menu item if a set criteria matches (ignored for rovr/system actions)",
-                      "$ref": "#/definitions/right_click_if"
-                    }
-                  },
-                  "required": ["label", "action"],
-                  "additionalProperties": false
-                }
-              }
-            },
-            "oneOf": [
-              { "required": ["label", "action"] },
-              { "required": ["label", "options"] }
-            ],
-            "additionalProperties": false
-          }
+          "description": "Configuration for the right-click context menu. Fully replaces the default list.",
+          "items": { "$ref": "#/definitions/right_click_item" }
         },
         "copy_includes_metadata": {
           "type": "boolean",
@@ -349,14 +420,19 @@
               "additionalProperties": false,
               "properties": {
                 "run": {
-                  "type": "string",
                   "default": "$EDITOR",
+                  "$ref": "#/definitions/run",
                   "description": "Editor to use when opening a file"
                 },
                 "orphan": {
                   "type": "boolean",
                   "default": true,
                   "description": "Whether to open the editor as an orphan process."
+                },
+                "shell": {
+                  "type": "boolean",
+                  "default": false,
+                  "description": "Whether the command to run is a shell command that needs to be run in a shell (required if you want to do complicated things like piping in your editor command)"
                 }
               },
               "description": "Editor to use when opening a file",
@@ -367,7 +443,7 @@
               "additionalProperties": false,
               "properties": {
                 "run": {
-                  "type": "string",
+                  "$ref": "#/definitions/run",
                   "default": "$EDITOR",
                   "description": "Editor to use when opening a folder"
                 },
@@ -375,27 +451,37 @@
                   "type": "boolean",
                   "default": true,
                   "description": "Whether to open the editor as an orphan process."
+                },
+                "shell": {
+                  "type": "boolean",
+                  "default": false,
+                  "description": "Whether the command to run is a shell command that needs to be run in a shell (required if you want to do complicated things like piping in your editor command)"
                 }
               },
               "description": "Editor to use when opening a folder",
               "required": ["run", "orphan"]
             },
-            "bulk_rename": {
+            "bulk_editor": {
               "type": "object",
               "additionalProperties": false,
               "properties": {
                 "run": {
-                  "type": "string",
+                  "$ref": "#/definitions/run",
                   "default": "$EDITOR",
-                  "description": "Editor to use for bulk renaming"
+                  "description": "Editor to use for bulk editing"
                 },
-                "show_as_mapping": {
+                "rename_show_as_mapping": {
                   "type": "boolean",
                   "default": true,
-                  "description": "Show as a mapping of `<old> ➔ <new>` instead of just `<old>`"
+                  "description": "When doing a bulk rename, show as a mapping of `&lt;old&gt; ➔ &lt;new&gt;` instead of just showing only the new names"
+                },
+                "shell": {
+                  "type": "boolean",
+                  "default": false,
+                  "description": "Whether the command to run is a shell command that needs to be run in a shell (required if you want to do complicated things like piping in your editor command)"
                 }
               },
-              "description": "Editor to use for bulk renaming"
+              "description": "Editor to use for bulk editing"
             }
           }
         },
@@ -439,41 +525,32 @@
         },
         "openers": {
           "type": "object",
-          "description": "A list of openers to open files with. These are used to open files, what were you expecting.\nKey must be a valid glob pattern, but the value has to be a list that can contain a mix of strings and objects",
-          "additionalProperties": {
-            "type": "array",
-            "items": {
-              "oneOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "object",
-                  "additionalProperties": false,
-                  "properties": {
-                    "run": {
-                      "type": "string",
-                      "description": "The command to run to open the file. Command expansions are supported."
-                    },
-                    "if": {
-                      "$ref": "#/definitions/opener_if",
-                      "description": "Only use this opener if a set criteria matches"
-                    },
-                    "orphan": {
-                      "type": "boolean",
-                      "default": true,
-                      "description": "Whether to open the opener as an orphan process."
-                    },
-                    "name": {
-                      "type": "string",
-                      "description": "The name of the opener to show in the menu (currently unused)"
-                    }
-                  },
-                  "required": ["run"]
-                }
-              ]
+          "additionalProperties": false,
+          "description": "Openers to open files with, grouped by name and matched against file paths by glob pattern.",
+          "properties": {
+            "groups": {
+              "type": "object",
+              "description": "Named groups of openers. Each group is a list that can contain a mix of strings and objects, tried in order until one succeeds. Referenced by name from `match`.",
+              "additionalProperties": {
+                "type": "array",
+                "items": { "$ref": "#/definitions/opener" }
+              }
+            },
+            "match": {
+              "type": "object",
+              "description": "Map glob patterns (matched against the file's path) to one or more group names defined in `groups`. If multiple groups match, they are tried in order.",
+              "additionalProperties": {
+                "type": "array",
+                "items": { "type": "string" }
+              }
             }
           }
+        },
+        "drive_exclude": {
+          "type": "array",
+          "items": { "type": "string" },
+          "default": [],
+          "description": "Glob patterns matched against mountpoint paths. Drives matching any pattern are hidden from the sidebar (e.g. '/run/media/*', 'D:/')."
         }
       }
     },
@@ -492,7 +569,8 @@
               "modified",
               "accessed",
               "created",
-              "hidden"
+              "hidden",
+              "mime"
             ]
           },
           "default": [
@@ -502,7 +580,8 @@
             "modified",
             "accessed",
             "created",
-            "hidden"
+            "hidden",
+            "mime"
           ],
           "uniqueItems": true,
           "description": "The order of the metadata tags that you want to see in the Metadata section."
@@ -560,7 +639,7 @@
             "type": "object",
             "additionalProperties": false,
             "properties": {
-                  "pattern": {
+              "pattern": {
                 "type": "string",
                 "description": "The glob pattern to match against the folder name (e.g., 'src', '.*').\nBoth the folder name and glob will be forced to lowercase!"
               },
@@ -593,25 +672,56 @@
         "preview": {
           "type": "string",
           "default": "nord",
-          "description":"The theme to use when previewing files in the preview sidebar.",
+          "description": "The theme to use when previewing files in the preview sidebar.",
           "enum": [
-            "abap", "algol", "algol_nu", "arduino", "autumn",
-            "bw", "borland",
-            "coffee", "colorful",
-            "default", "dracula",
+            "abap",
+            "algol",
+            "algol_nu",
+            "arduino",
+            "autumn",
+            "bw",
+            "borland",
+            "coffee",
+            "colorful",
+            "default",
+            "dracula",
             "emacs",
-            "friendly_grayscale", "friendly", "fruity",
-            "github-dark", "gruvbox-dark", "gruvbox-light",
-            "igor", "inkpot",
-            "lightbulb", "lilypond", "lovelace",
-            "manni", "material", "monokai", "murphy",
-            "native", "nord-darker", "nord",
+            "friendly_grayscale",
+            "friendly",
+            "fruity",
+            "github-dark",
+            "gruvbox-dark",
+            "gruvbox-light",
+            "igor",
+            "inkpot",
+            "lightbulb",
+            "lilypond",
+            "lovelace",
+            "manni",
+            "material",
+            "monokai",
+            "murphy",
+            "native",
+            "nord-darker",
+            "nord",
             "one-dark",
-            "paraiso-dark", "paraiso-light", "pastie", "perldoc",
-            "rainbow_dash", "rrt",
-            "sas", "solarized-dark", "solarized-light", "staroffice", "stata-dark", "stata-light",
-            "tango", "trac",
-            "vim", "vs", "xcode",
+            "paraiso-dark",
+            "paraiso-light",
+            "pastie",
+            "perldoc",
+            "rainbow_dash",
+            "rrt",
+            "sas",
+            "solarized-dark",
+            "solarized-light",
+            "staroffice",
+            "stata-dark",
+            "stata-light",
+            "tango",
+            "trac",
+            "vim",
+            "vs",
+            "xcode",
             "zenburn"
           ]
         },
@@ -741,6 +851,11 @@
           "$ref": "#/definitions/keybind",
           "description": "Create a new item in the current directory.",
           "display_name": "New"
+        },
+        "bulk_create": {
+          "$ref": "#/definitions/keybind",
+          "description": "Bulk create files or folders using an editor list.",
+          "display_name": "Bulk create"
         },
         "toggle_all": {
           "$ref": "#/definitions/keybind",
@@ -1005,6 +1120,11 @@
           "description": "Suspend the app's process, bringing you back to the terminal (*nix only)",
           "display_name": "Suspend app"
         },
+        "open": {
+          "$ref": "#/definitions/keybind",
+          "description": "Open the selected files or folders. In normal mode, opens the highlighted file. In select mode, opens all selected files.",
+          "display_name": "Open"
+        },
         "open_editor": {
           "$ref": "#/definitions/keybind",
           "description": "Open the selected file or folder in the configured editor.",
@@ -1121,6 +1241,27 @@
               "$ref": "#/definitions/keybind",
               "description": "Apply the selected action to all future confirmations without asking again.",
               "display_name": "Don't ask me again"
+            }
+          }
+        },
+        "drag_and_drop": {
+          "type": "object",
+          "description": "Keybinds related to the screen that appears after dropping a file",
+          "properties": {
+            "move": {
+              "$ref": "#/definitions/keybind",
+              "description": "Move the dropped file to the current directory.",
+              "display_name": "Move file here"
+            },
+            "copy": {
+              "$ref": "#/definitions/keybind",
+              "description": "Copy the dropped file to the current directory.",
+              "display_name": "Copy file here"
+            },
+            "cancel": {
+              "$ref": "#/definitions/keybind",
+              "description": "Cancel the drag and drop operation.",
+              "display_name": "Cancel"
             }
           }
         }

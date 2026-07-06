@@ -6,6 +6,7 @@ from .fd_search import FileSearch
 from .file_in_use import FileInUse
 from .input import ModalInput
 from .keybinds import Keybinds
+from .paste_drop import PasteDropScreen
 from .paste_screen import PasteScreen
 from .rg_search import ContentSearch
 from .shell_exec import ShellExec
@@ -24,6 +25,7 @@ __all__ = [
     "FileSearch",
     "Keybinds",
     "ModalInput",
+    "PasteDropScreen",
     "PasteScreen",
     "ShellExec",
     "TerminalTooSmall",

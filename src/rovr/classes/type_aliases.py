@@ -1,6 +1,6 @@
 import os
 import platform
-from typing import Literal, TypeAlias
+from typing import Literal, TypeAlias, TypedDict
 
 PreviewTypes: TypeAlias = Literal[
     "text", "image", "pdf", "archive", "folder", "remime", "resvg", "font"
@@ -22,3 +22,13 @@ if os_type == "Windows":
 else:
     DirEntryType: TypeAlias = os.DirEntry
     DirEntryTypes = os.DirEntry
+
+
+class BarPanicDismissible(TypedDict):
+    message: str
+    subtitle: str
+
+
+class BarPanicNotify(TypedDict):
+    message: str
+    title: str

@@ -1,3 +1,4 @@
+from inspect import isawaitable
 from typing import Any, Awaitable, Callable, NamedTuple
 
 from rich.segment import Segment
@@ -108,7 +109,6 @@ class CheckboxRenderingMixin:
                 f"{part}--hovered" for part in option_component_classes
             ]
 
-        self.log(option, option_component_classes)
         style = self.get_visual_style("option-list--option", *option_component_classes)
 
         strips = self._get_option_render(option, style)
@@ -145,23 +145,12 @@ class CheckboxRenderingMixin:
         if selection.disabled:
             return Strip([*self.super_render_line(y)])
 
-        # Determine checkbox style
-        component_style = "selection-list--button"
-        if selection.value in self._selected:
-            component_style += "-selected"
-        if self.highlighted == selection_index:
-            component_style += "-highlighted"
-
-        line = self.super_render_line(y, component_style)
+        line = self.super_render_line(y)
         underlying_style = next(iter(line)).style or self.rich_style
         assert underlying_style is not None
 
-        button_style = self.get_component_rich_style(component_style)
-
-        side_style = Style.from_color(button_style.bgcolor, underlying_style.bgcolor)
-
-        side_style += Style(meta={"option": selection_index})
-        button_style += Style(meta={"option": selection_index})
+        side_style = underlying_style + Style(meta={"option": selection_index})
+        button_style = underlying_style + Style(meta={"option": selection_index})
 
         # Get checkbox icons
         icons = [
@@ -183,6 +172,12 @@ class CheckboxRenderingMixin:
             Segment(icons[3], style=underlying_style),
             *line,
         ])
+
+    def render_lines(self, crop: Region) -> list[Strip]:
+        try:
+            return super(OptionList, self).render_lines(crop)  # ty: ignore[invalid-super-argument]
+        except KeyError:
+            return []
 
 
 class ScrollOffMixin:
@@ -245,10 +240,11 @@ class Actionable:
     ACTIONS: list[Action]
 
     async def on_key(self, event: Key) -> None:
-        from inspect import isawaitable
-
-        if not hasattr(self, "ACTIONS"):
+        try:
+            iter(self.ACTIONS)
+        except AttributeError:
             return
+
         for action in self.ACTIONS:
             if check_key(event, action.match_keys) and (
                 action.only_if() if callable(action.only_if) else action.only_if
@@ -264,5 +260,7 @@ class Actionable:
                 result: Any | Awaitable = func()
                 if isawaitable(result):
                     await result
+                if getattr(self.app, "_show_keys", False):
+                    self.app.show_key(event)
                 event.prevent_default().stop()
                 return

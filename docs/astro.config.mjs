@@ -96,6 +96,7 @@ export default defineConfig({
           label: "features",
           items: [
             { label: "sorting", slug: "features/sorting" },
+            { label: "detail columns", slug: "features/detail-columns", badge: { text: "new", variant: "tip" } },
             { label: "editors", slug: "features/editor" },
             { label: "previewing files", slug: "features/previewing-files" },
             { label: "image previews", slug: "features/image-previews" },

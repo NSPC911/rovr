@@ -98,6 +98,21 @@ These component classes also come with their own sub classes due to textual limi
 | \*--hovered       | used when the option is currently hovered     | `FileList > .filelist--cut--hovered`      |
 | \*--highlighted   | used when the option is currently highlighted | `FileList > .filelist--link--highlighted` |
 
+[detail columns](/rovr/features/detail-columns) get their own component classes. these do not have `--hovered` or `--highlighted` sub classes; only the foreground color and text style apply, on top of the row's background.
+
+| Component Classes            | Description                                         | Example                                    |
+| ---------------------------- | --------------------------------------------------- | ------------------------------------------ |
+| filelist--detail-size        | applied on the size column                          | `FileList > .filelist--detail-size`        |
+| filelist--detail-mtime       | applied on the modified time column                 | `FileList > .filelist--detail-mtime`       |
+| filelist--detail-atime       | applied on the accessed time column                 | `FileList > .filelist--detail-atime`       |
+| filelist--detail-ctime       | applied on the created time column                  | `FileList > .filelist--detail-ctime`       |
+| filelist--detail-permissions | applied on the permissions column                   | `FileList > .filelist--detail-permissions` |
+| filelist--detail-owner       | applied on the owner column                         | `FileList > .filelist--detail-owner`       |
+| filelist--detail-group       | applied on the group column                         | `FileList > .filelist--detail-group`       |
+| filelist--git-staged         | applied on the staged character of the git column   | `FileList > .filelist--git-staged`         |
+| filelist--git-unstaged       | applied on the unstaged character of the git column | `FileList > .filelist--git-unstaged`       |
+| filelist--git-untracked      | applied on the git column for untracked entries     | `FileList > .filelist--git-untracked`      |
+
 <h4 class="no-lower">ProgressBarContainer</h4>
 
 This is the wrapper container for progress bars seen at the bottom left part of the UI.
@@ -125,14 +140,15 @@ This is the base screen for other screens like ripgrep, fd and zoxide.
 
 This is the root container that holds everything. This is not to be confused with the `Application` container, which is the app itself.
 
-| Class | Description                                      | Example              |
-| ----- | ------------------------------------------------ | -------------------- |
+| Class           | Description                                                            | Example                 |
+| --------------- | ---------------------------------------------------------------------- | ----------------------- |
 | compact-buttons | applied when the `interface.compact_mode.buttons` is enabled in config | `#root.compact-buttons` |
 | compact-panels  | applied when the `interface.compact_mode.panels` is enabled in config  | `#root.compact-panels`  |
 
 Root class also adds an extra class to itself to signify the current theme
 
 Example:
+
 ```css
 #root.theme-<theme-name> { ... }
 /* like */

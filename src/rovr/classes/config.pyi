@@ -14,7 +14,6 @@ class RovrConfig(TypedDict, total=False):
     r""" Custom icon configurations for files and folders """
 
     theme: "_RovrConfigTheme"
-    custom_theme: list["_RovrConfigCustomThemeItem"]
     keybinds: "_RovrConfigKeybinds"
     plugins: "_RovrConfigPlugins"
 
@@ -473,109 +472,6 @@ _RightClickItemOptionsItem = TypedDict(
     },
     total=False,
 )
-
-class _RovrConfigCustomThemeItem(TypedDict, total=False):
-    name: Required[str]
-    r"""
-    A name for the theme. However, when the theme is available in the theme picker, it shows up as a hyphenated, lowercase version.
-
-    Required property
-    """
-
-    primary: Required[str]
-    r"""
-    A hex code or named color to use as the primary color. Refer to https://textual.textualize.io/css_types/color/#named-colors for the named colors.
-
-    Required property
-    """
-
-    secondary: Required[str]
-    r"""
-    A hex code or named color to use as the secondary color. Refer to https://textual.textualize.io/css_types/color/#named-colors for the named colors.
-
-    Required property
-    """
-
-    warning: Required[str]
-    r"""
-    A hex code or named color to use as the warning color. Refer to https://textual.textualize.io/css_types/color/#named-colors for the named colors.
-
-    Required property
-    """
-
-    error: Required[str]
-    r"""
-    A hex code or named color to use as the error color. Refer to https://textual.textualize.io/css_types/color/#named-colors for the named colors.
-
-    Required property
-    """
-
-    success: Required[str]
-    r"""
-    A hex code or named color to use as the success color. Refer to https://textual.textualize.io/css_types/color/#named-colors for the named colors.
-
-    Required property
-    """
-
-    accent: Required[str]
-    r"""
-    A hex code or named color to use as the accent color. Refer to https://textual.textualize.io/css_types/color/#named-colors for the named colors.
-
-    Required property
-    """
-
-    foreground: Required[str]
-    r"""
-    A hex code or named color to use as the foreground color. Refer to https://textual.textualize.io/css_types/color/#named-colors for the named colors.
-
-    Required property
-    """
-
-    background: Required[str]
-    r"""
-    A hex code or named color to use as the background color. Refer to https://textual.textualize.io/css_types/color/#named-colors for the named colors.
-
-    Required property
-    """
-
-    surface: Required[str]
-    r"""
-    A hex code or named color to use as the surface color. Refer to https://textual.textualize.io/css_types/color/#named-colors for the named colors.
-
-    Required property
-    """
-
-    panel: Required[str]
-    r"""
-    A hex code or named color to use as the panel color. Refer to https://textual.textualize.io/css_types/color/#named-colors for the named colors.
-
-    Required property
-    """
-
-    bar_gradient: "_RovrConfigCustomThemeItemBarGradient"
-    r""" The gradient colors for the progress bar. """
-
-    is_dark: Required[bool]
-    r"""
-    Whether or not this theme is a dark type theme.
-
-    Required property
-    """
-
-    variables: dict[str, Any]
-    r"""
-    Extra variables to set unique to the theme.
-    Refer to https://textual.textualize.io/guide/design/#additional-variables for more information.
-    """
-
-class _RovrConfigCustomThemeItemBarGradient(TypedDict, total=False):
-    r"""The gradient colors for the progress bar."""
-
-    default: list[Any]
-    r""" A list of hex codes, or named colors to use as the progress bar's gradient colors. Refer to https://textual.textualize.io/css_types/color/#named-colors for the named colors. """
-
-    error: list[Any]
-    r""" A list of hex codes, or named colors to use as the progress bar's gradient colors **when it encountered an error**. Refer to https://textual.textualize.io/css_types/color/#named-colors for the named colors. """
 
 class _RovrConfigIcons(TypedDict, total=False):
     r"""Custom icon configurations for files and folders"""

@@ -1,7 +1,7 @@
 import stat
 from datetime import datetime
 from functools import lru_cache
-from os import DirEntry, lstat
+from os import DirEntry, lstat, stat_result
 from subprocess import TimeoutExpired, run
 from typing import NamedTuple
 
@@ -151,8 +151,8 @@ def git_statuses(cwd: str) -> dict[str, str] | None:
     """Git status chars for every changed entry directly inside ``cwd``.
 
     Returns:
-        dict[str, str] | None: Name -> status char, or None when ``cwd`` is not
-            inside a git work tree (or git is unavailable).
+        dict[str, str]: Name in cwd -> two chars of UDMRCA? (space = clean).
+        None if cwd is not a git repository or git is unavailable.
     """
     try:
         prefix_proc = run(
@@ -204,9 +204,10 @@ def detail_cells(
         tuple[str, ...]: One padded cell per column.
     """
     cells: list[str] = []
+    file_stat = dir_entry.stat()
+    lstats: stat_result | None = None
     for column in columns:
         try:
-            file_stat = dir_entry.stat()
             match column.type:
                 case "size":
                     if dir_entry.is_dir():
@@ -231,7 +232,9 @@ def detail_cells(
                         column.format
                     )
                 case "permissions":
-                    value = stat.filemode(lstat(dir_entry.path).st_mode)
+                    if not lstats:
+                        lstats = lstat(dir_entry.path)
+                    value = stat.filemode(lstats.st_mode)
                 case "owner":
                     value = _user_name(file_stat.st_uid)
                 case "group":

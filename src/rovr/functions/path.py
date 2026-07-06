@@ -693,8 +693,15 @@ def run_opener(app: App, target_path: str) -> None:
         if not fnmatch(target_path, pattern):
             continue
         for group_name in group_names:
-            openers = groups.get(group_name, [])
-            for opener in openers:
+            if group_name not in groups:
+                app.notify(
+                    f"Opener group '{group_name}' not found in configuration.",
+                    title="Opener Error",
+                    severity="warning",
+                    markup=False,
+                )
+                continue
+            for opener in groups[group_name]:
                 if isinstance(opener, str):
                     runner = opener
                 elif ifed(app, opener.get("if", {})):

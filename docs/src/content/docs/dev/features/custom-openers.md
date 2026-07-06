@@ -29,7 +29,7 @@ fallback = [
 "*" = ["fallback"]
 ```
 
-if a `*` key is provided in `match`, it acts as a fallback for any unmatched file. if no custom opener matches, rovr will fall back to the operating system's default opener.
+the matching is done in order of declaration. this means if `"*"` is defined before `"*.py"`, the fallback opener will be used for python files instead of the text opener.
 
 ## opener definitions
 

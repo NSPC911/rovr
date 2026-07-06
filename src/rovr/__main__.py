@@ -35,7 +35,6 @@ import os
 import sys
 import warnings
 from io import TextIOWrapper
-from time import sleep
 from typing import cast
 
 from rovr import main, pprint
@@ -396,7 +395,6 @@ example_function(10)"""
             tree_dom=args.tree_dom,
             force_crash_in=args.force_crash_in,
         )
-        # sleep(1)
         app.run()
     elif args.force_tty:
         open_stdout = "CONOUT$" if os.name == "nt" else "/dev/tty"
@@ -426,7 +424,6 @@ example_function(10)"""
                     tree_dom=args.tree_dom,
                     force_crash_in=args.force_crash_in,
                 )
-                sleep(1)
                 app.run()
         finally:
             sys.__stdout__ = sys.stdout = backup_stdout

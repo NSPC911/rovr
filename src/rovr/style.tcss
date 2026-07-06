@@ -2,7 +2,7 @@
 $border-style: round;
 $border-blurred: $primary-background-lighten-3;
 $border-blurred-light: $primary-background;
-$border: $primary-lighten-3;
+$border-focused: $primary-lighten-3;
 $border-disabled: $secondary-background;
 
 /* Layout Dimensions */
@@ -33,7 +33,7 @@ Screen.-all-horizontal #root.compact-buttons {
     padding-left: 1;
   }
   #menu_wrapper:focus-within #below_menu #path_switcher {
-    border-left: $border-style $border;
+    border-left: $border-style $border-focused;
   }
   #menu_wrapper:focus-within #below_menu #path_switcher.hide_border_bottom {
     border-left: $border-style $accent;
@@ -76,7 +76,7 @@ Clipboard:focus, ProcessContainer:focus, MetadataContainer:focus,
 PasteScreen OptionList,
 DeleteFiles OptionList,
 ArchiveCreationScreen OptionList:focus {
-  border: $border-style $border;
+  border: $border-style $border-focused;
 }
 
 .hide, .hidden { display: none }
@@ -231,7 +231,7 @@ Tooltip {
 
 #menu_wrapper {
   #below_menu { border-top: $border-style $border-blurred }
-  &:focus-within #below_menu { border-top: $border-style $border }
+  &:focus-within #below_menu { border-top: $border-style $border-focused }
 }
 
 #menu {
@@ -322,6 +322,12 @@ Tooltip {
 
 #file_list, #file_list_visual { height: 1fr }
 
+#file_list_details_header {
+  height: 1;
+  color: $text-muted;
+  text-style: bold;
+}
+
 #pinned_sidebar_container,
 #file_list_container,
 #keybinds_group {
@@ -374,7 +380,7 @@ Tooltip {
     padding: 0;
     margin: 0;
     &.-maximized {
-      border: $border-style $border
+      border: $border-style $border-focused
     }
     &Static {
       padding: 0 1;
@@ -534,6 +540,25 @@ FileList {
     background: $error-lighten-3;
     color: $background;
   }
+
+  .filelist--detail-size,
+  .filelist--detail-mtime,
+  .filelist--detail-atime,
+  .filelist--detail-ctime,
+  .filelist--detail-permissions,
+  .filelist--detail-owner,
+  .filelist--detail-group {
+    color: $text-muted;
+  }
+  .filelist--git-staged {
+    color: $success;
+  }
+  .filelist--git-unstaged {
+    color: $warning;
+  }
+  .filelist--git-untracked {
+    color: $text-muted;
+  }
 }
 
 #dialog {
@@ -609,7 +634,7 @@ ArchiveCreationScreen {
     &:focus-within {
       OptionList,
       RadioList {
-        border: $border-style $border;
+        border: $border-style $border-focused;
         background: transparent !important;
         .option-list--option-highlighted {
           background: $primary;
@@ -621,7 +646,7 @@ ArchiveCreationScreen {
         }
       }
       Input {
-        border: $border-style $border;
+        border: $border-style $border-focused;
       }
     }
   }
@@ -658,7 +683,7 @@ Keybinds {
   #keybinds_group {
     max-width: 60vw;
     max-height: 80vh;
-    border: $border-style $border;
+    border: $border-style $border-focused;
   }
 }
 
@@ -703,7 +728,7 @@ Dismissible {
     grid-gutter: 1 2;
     grid-rows: 1fr 3; /* take up all the space available */
     padding: 1 3;
-    border: $border-style $border;
+    border: $border-style $border-focused;
     column-span: 3;
     max-height: 40vh;
     max-width: 40vw;
@@ -725,7 +750,7 @@ Dismissible {
 YesOrNo #dialog {
   grid-size: 2;
   grid-gutter: 1 2;
-  border: $border-style $border;
+  border: $border-style $border-focused;
   grid-rows: 1fr 3; /* enough space for 1fr */
   max-height: 20;
   max-width: 50vw;
@@ -766,7 +791,7 @@ FileNameConflict #dialog {
   grid-gutter: 1 2;
   grid-rows: 1fr 3 3 2;
   padding: 0 2;
-  border: $border-style $border;
+  border: $border-style $border-focused;
   max-height: 20;
   max-width: 50vw;
   &:ansi {
@@ -791,7 +816,7 @@ FileInUse {
     grid-size: 2;
     grid-gutter: 1 2;
     grid-rows: 1fr 3 3 1; /* space for toggle row */
-    border: $border-style $border;
+    border: $border-style $border-focused;
     max-height: 20;
     max-width: 45vw;
     height: auto;
@@ -813,7 +838,7 @@ DeleteFiles {
     grid-size: 2 3;
     grid-rows: 0.5fr 1.5fr 3 1; /* no issues for now */
     padding: 0 1;
-    border: $border-style $border;
+    border: $border-style $border-focused;
     padding: 1 2;
     grid-gutter: 1 2;
     max-width: 55vw;
@@ -846,7 +871,7 @@ DeleteFiles {
 
 ModalInput {
   #modalInput_group {
-    border: $border-style $border;
+    border: $border-style $border-focused;
     width: 50vw;
     max-height: 3;
     background: transparent !important;
@@ -861,7 +886,7 @@ ModalInput {
     width: 1fr;
   }
   Label { height: 1 }
-  Label.arrow { color: $border }
+  Label.arrow { color: $border-focused }
 }
 
 TerminalTooSmall {
@@ -889,7 +914,7 @@ TerminalTooSmall {
 CommandPalette {
   align: center middle;
   CommandList {
-    border: $border-style $border;
+    border: $border-style $border-focused;
     border-top: none;
     max-height: 60vh;
   }
@@ -904,9 +929,9 @@ CommandPalette {
     margin-top: 0;
     min-width: 26;
   }
-  #--input { border: $border-style $border }
+  #--input { border: $border-style $border-focused }
   #--input.--list-visible { border-bottom: none }
-  LoadingIndicator { border-bottom: $border-style $border }
+  LoadingIndicator { border-bottom: $border-style $border-focused }
 }
 
 ArchiveCreationScreen {
@@ -923,7 +948,7 @@ ArchiveCreationScreen {
     column-span: 2;
     &.invalid { border: $border-style $error }
     &:light { border: $border-style $error }
-    &:focus-within { border: $border-style $border }
+    &:focus-within { border: $border-style $border-focused }
     &.invalid:focus-within { border: $border-style $error-lighten-3 }
   }
   HorizontalGroup {
@@ -949,7 +974,7 @@ ShellExec {
 }
 
 PasteDropScreen #dialog {
-  border: $border-style $border;
+  border: $border-style $border-focused;
   padding: 0 1;
   grid-size: 2 3;
   grid-gutter: 0 1;

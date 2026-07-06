@@ -25,7 +25,7 @@ from textual.containers import (
 )
 from textual.css.errors import StylesheetError
 from textual.css.query import NoMatches
-from textual.css.stylesheet import StylesheetParseError
+from textual.css.stylesheet import CssSource, Stylesheet, StylesheetParseError
 from textual.dom import DOMNode
 from textual.geometry import Offset
 from textual.messages import ExitApp
@@ -82,6 +82,7 @@ from rovr.functions.path import (
     get_filtered_dir_names,
     normalise,
 )
+from rovr.functions.themes import register_all_themes
 from rovr.functions.utils import multiprocessing_process_error_checker, run_command
 from rovr.header import HeaderArea
 from rovr.header.tabs import TablineTab
@@ -152,30 +153,17 @@ class Application(Actionable, DNDApp, inherit_bindings=False, inherit_css=False)
         for key in config["keybinds"]["quit_app"]
     ]
     # higher index = higher priority
-    CSS_PATH = (
-        [
-            (
-                resources.files("_rovr")
-                if globals().get("__compiled__")
-                else resources.files("rovr")
-            )
-            / "config"
-            / "themes"
-            / "nord.tcss"
-        ]
-        + [
-            (
-                resources.files("_rovr")
-                if globals().get("__compiled__")
-                else resources.files("rovr")
-            )
-            / "style.tcss"
-        ]
-        + (
-            [path.join(RovrVars.ROVRCONFIG, "style.tcss")]
-            if path.exists(path.join(RovrVars.ROVRCONFIG, "style.tcss"))
-            else []
+    CSS_PATH = [
+        (
+            resources.files("_rovr")
+            if globals().get("__compiled__")
+            else resources.files("rovr")
         )
+        / "style.tcss"
+    ] + (
+        [path.join(RovrVars.ROVRCONFIG, "style.tcss")]
+        if path.exists(path.join(RovrVars.ROVRCONFIG, "style.tcss"))
+        else []
     )
 
     CUSTOM_STYLE_AVAILABLE: bool = path.exists(
@@ -243,9 +231,15 @@ class Application(Actionable, DNDApp, inherit_bindings=False, inherit_css=False)
 
         self._on_mount_done: bool = False
         self.last_available_cd = getcwd()
+        self._theme_rules, self._theme_errors = register_all_themes(self)
+        default_theme: str = config["theme"]["default"]
+        if default_theme in self.available_themes:
+            self.theme = default_theme
+        else:
+            self._theme_errors.append(
+                f"Default theme '{default_theme}' is not available; using '{self.theme}'."
+            )
         self.old_theme: str = self.theme
-
-        # self.theme = config["theme"]["default"]
         self.ansi_color = config["theme"]["transparent"]
 
     @property
@@ -265,7 +259,9 @@ class Application(Actionable, DNDApp, inherit_bindings=False, inherit_css=False)
             if config["interface"]["compact_mode"]["panels"]
             else " comfy-panels"
         )
-        root_classes = root_classes.strip() + f"theme-{self.get_theme(self.theme).name}"
+        root_classes = (
+            root_classes.strip() + f" theme-{self.get_theme(self.theme).name}"
+        )
         with Vertical(id="root", classes=root_classes):
             header = HeaderArea()
             self.tabWidget = header.tabline
@@ -311,6 +307,11 @@ class Application(Actionable, DNDApp, inherit_bindings=False, inherit_css=False)
             return
 
         self.theme_changed_signal.subscribe(self, self.theme_changed)
+        self._sync_theme_stylesheet()
+        for theme_error in self._theme_errors:
+            self.notify(
+                theme_error, title="Theme Error", severity="warning", markup=False
+            )
         # title for screenshots
         self.title = ""
 
@@ -365,10 +366,59 @@ class Application(Actionable, DNDApp, inherit_bindings=False, inherit_css=False)
 
     def theme_changed(self, theme: Theme) -> None:
         self.query_one("#root").update_classes({
-            f"theme-{self.old_theme}": True,
-            f"theme-{theme.name}": False,
+            f"theme-{self.old_theme}": False,
+            f"theme-{theme.name}": True,
         })
         self.old_theme = theme.name
+
+    def _sync_theme_stylesheet(self, stylesheet: Stylesheet | None = None) -> None:
+        """Layer theme rule CSS and the custom stylesheet into the sources.
+
+        Sources tie-break by their tie_breaker on equal selector specificity,
+        so the layering is: bundled style.tcss (0) < active theme rules (1) <
+        custom style.tcss (2).
+        """
+        if stylesheet is None:
+            stylesheet = self.stylesheet
+        theme_rules = self._theme_rules.get(self.theme)
+        active_key = (theme_rules[0], "theme") if theme_rules else None
+        for key in [
+            key for key in stylesheet.source if key[1] == "theme" and key != active_key
+        ]:
+            del stylesheet.source[key]
+            stylesheet._require_parse = True
+        if theme_rules is not None and active_key is not None:
+            stylesheet.add_source(theme_rules[1], read_from=active_key, tie_breaker=1)
+        if self.CUSTOM_STYLE_AVAILABLE:
+            custom_key = (
+                path.abspath(path.join(RovrVars.ROVRCONFIG, "style.tcss")),
+                "",
+            )
+            custom_source = stylesheet.source.get(custom_key)
+            if custom_source is not None and custom_source.tie_breaker != 2:
+                stylesheet.source[custom_key] = CssSource(
+                    custom_source.content,
+                    custom_source.is_defaults,
+                    2,
+                    custom_source.scope,
+                )
+                stylesheet._require_parse = True
+
+    def refresh_css(self, animate: bool = True) -> None:
+        self._sync_theme_stylesheet()
+        super().refresh_css(animate)
+
+    def action_change_theme(self) -> None:
+        from rovr.screens import ThemeChooser
+
+        original_theme = self.theme
+
+        def apply_theme(result: str | None) -> None:
+            self.theme = (
+                result if result and result in self.available_themes else original_theme
+            )
+
+        self.push_screen(ThemeChooser(), callback=apply_theme)
 
     @work
     async def _force_crash(self) -> None:
@@ -838,6 +888,7 @@ class Application(Actionable, DNDApp, inherit_bindings=False, inherit_css=False)
                                 markup=False,
                             )
                     return
+                self._sync_theme_stylesheet(stylesheet)
                 stylesheet.parse()
                 elapsed = (perf_counter() - time) * 1000
                 self.notify(

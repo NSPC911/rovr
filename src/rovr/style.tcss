@@ -1266,7 +1266,7 @@ App {
   /* When a widget is maximized */
   Screen.-maximized-view {
     layout: vertical !important;
-    hatch: right #4c566a;
+    hatch: right $panel;
     overflow-y: auto !important;
     align: center middle;
     .-maximized {

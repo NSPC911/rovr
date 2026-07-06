@@ -43,11 +43,13 @@ class DetailColumn(NamedTuple):
 
 
 def _pad(value: str, width: int) -> str:
-    """Right-align ``value`` into exactly ``width`` cells, truncating with an ellipsis.
+    """Right-align `value` into exactly `width` cells, truncating with an ellipsis.
 
     Returns:
         str: The padded (or truncated) value.
     """
+    if width <= 0:
+        return ""
     length = cell_len(value)
     if length > width:
         while value and cell_len(value) > width - 1:
@@ -112,15 +114,15 @@ def _worst_git_char(*candidates: str) -> str:
 
 
 def parse_git_porcelain(output: bytes, prefix: str) -> dict[str, str]:
-    """Map each top-level name under ``prefix`` to its git XY status pair.
+    """Map each top-level name under `prefix` to its git XY status pair.
 
-    Like ``git status --short``: the first char is the staged (index) status,
+    Like `git status --short`: the first char is the staged (index) status,
     the second the unstaged (work tree) status. Folders aggregate each
     position independently to the most severe char found beneath them.
 
     Args:
-        output: Raw ``git status --porcelain -z`` output.
-        prefix: The cwd relative to the repository root (``git rev-parse --show-prefix``).
+        output: Raw `git status --porcelain -z` output.
+        prefix: The cwd relative to the repository root (`git rev-parse --show-prefix`).
 
     Returns:
         dict[str, str]: Name in cwd -> two chars of UDMRCA? (space = clean).
@@ -148,7 +150,7 @@ def parse_git_porcelain(output: bytes, prefix: str) -> dict[str, str]:
 
 
 def git_statuses(cwd: str) -> dict[str, str] | None:
-    """Git status chars for every changed entry directly inside ``cwd``.
+    """Git status chars for every changed entry directly inside `cwd`.
 
     Returns:
         dict[str, str]: Name in cwd -> two chars of UDMRCA? (space = clean).
@@ -216,7 +218,7 @@ def detail_cells(
                     else:
                         value = natural_size(
                             file_stat.st_size,
-                            "gnu",
+                            config["metadata"]["filesize_suffix"],
                             config["metadata"]["filesize_decimals"],
                         )
                 case "mtime":

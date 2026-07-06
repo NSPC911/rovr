@@ -9,6 +9,7 @@ show_progress_eta = false
 show_progress_percentage = true
 truncate_progress_file_path = false
 show_line_numbers = true
+auto_select_mode = false
 show_hidden_files = false
 allow_tab_nav = true
 append_new_tabs = true

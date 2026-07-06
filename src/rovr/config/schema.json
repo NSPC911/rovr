@@ -243,6 +243,11 @@
           "default": false,
           "description": "Add line numbers to the left gutter if you are viewing a text file."
         },
+        "auto_select_mode": {
+          "type": "boolean",
+          "default": false,
+          "description": "Start new file-list sessions in select mode."
+        },
         "scrolloff": {
           "type": "integer",
           "minimum": 0,

@@ -7,6 +7,7 @@ from textual import events
 from rovr.app import Application
 from rovr.components import SearchInput
 from rovr.navigation_widgets import BackButton
+from rovr.variables.constants import config
 
 from .conftest import iter_until, workers_finished
 
@@ -197,6 +198,32 @@ async def test_tab_multiselection(tmp_path: Path) -> None:
         for selected_id in app.file_list.selected:
             assert app.file_list.get_option_index(selected_id) in indexes
             indexes.remove(app.file_list.get_option_index(selected_id))
+
+
+@pytest.mark.asyncio
+async def test_auto_select_mode_starts_file_lists_in_select_mode(
+    tmp_path: Path,
+) -> None:
+    for i in range(3):
+        open(tmp_path / f"file{i}", "w").close()
+
+    original_auto_select_mode = config["interface"]["auto_select_mode"]
+    config["interface"]["auto_select_mode"] = True
+    try:
+        app = Application(startup_path=tmp_path.as_posix())
+        async with app.run_test(size=(143, 37)) as pilot:
+            await iter_until(pilot, lambda: bool(app.file_list.options))
+
+            assert app.file_list.select_mode_enabled
+            assert app.tabWidget.active_tab.session.selectMode
+
+            await app.tabWidget.add_tab("")
+            await workers_finished(pilot, app.file_list)
+
+            assert app.file_list.select_mode_enabled
+            assert app.tabWidget.active_tab.session.selectMode
+    finally:
+        config["interface"]["auto_select_mode"] = original_auto_select_mode
 
 
 @pytest.mark.asyncio

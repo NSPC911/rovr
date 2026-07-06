@@ -1,5 +1,7 @@
 from typing import TypedDict
 
+from rovr.variables.constants import config
+
 
 class SessionOptionDict(TypedDict):
     name: str
@@ -32,6 +34,6 @@ class SessionManager:
         self.directories: list[str] = []
         self.historyIndex: int = 0
         self.lastHighlighted: dict[str, SessionOptionDict] = {}
-        self.selectMode: bool = False
+        self.selectMode: bool = config["interface"]["auto_select_mode"]
         self.selectedItems: list[SessionOptionDict] = []
         self.search: str = ""

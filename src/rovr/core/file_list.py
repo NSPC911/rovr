@@ -125,11 +125,15 @@ class FileList(
         self._options: list[FileListSelectionWidget] = []
         self.dummy = dummy
         self.enter_into = enter_into
-        self.select_mode_enabled = select
+        self.select_mode_enabled = select or (
+            not dummy and config["interface"]["auto_select_mode"]
+        )
         if not self.dummy:
             self.items_in_cwd: set[str] = set()
         self.file_list_pause_check = False
         self._ignore_next_click: bool = False
+        if self.select_mode_enabled:
+            self.add_class("select-mode")
 
     def on_mount(self) -> None:
         if not self.dummy and self.parent:

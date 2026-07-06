@@ -138,6 +138,9 @@ r""" Default value of the field path 'Rovr Config interface preview_text start' 
 _ROVR_CONFIG_INTERFACE_SCROLLOFF_DEFAULT = 3
 r""" Default value of the field path 'Rovr Config interface scrolloff' """
 
+_ROVR_CONFIG_INTERFACE_AUTO_SELECT_MODE_DEFAULT = False
+r""" Default value of the field path 'Rovr Config interface auto_select_mode' """
+
 _ROVR_CONFIG_INTERFACE_SHOW_HIDDEN_FILES_DEFAULT = False
 r""" Default value of the field path 'Rovr Config interface show_hidden_files' """
 
@@ -692,6 +695,13 @@ class _RovrConfigInterface(TypedDict, total=False):
     show_line_numbers: bool
     r"""
     Add line numbers to the left gutter if you are viewing a text file.
+
+    default: False
+    """
+
+    auto_select_mode: bool
+    r"""
+    Start new file-list sessions in select mode.
 
     default: False
     """

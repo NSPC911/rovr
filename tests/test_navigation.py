@@ -203,27 +203,29 @@ async def test_tab_multiselection(tmp_path: Path) -> None:
 @pytest.mark.asyncio
 async def test_auto_select_mode_starts_file_lists_in_select_mode(
     tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     for i in range(3):
         open(tmp_path / f"file{i}", "w").close()
 
-    original_auto_select_mode = config["interface"]["auto_select_mode"]
-    config["interface"]["auto_select_mode"] = True
-    try:
-        app = Application(startup_path=tmp_path.as_posix())
-        async with app.run_test(size=(143, 37)) as pilot:
-            await iter_until(pilot, lambda: bool(app.file_list.options))
+    monkeypatch.setitem(config["interface"], "auto_select_mode", True)
+    app = Application(startup_path=tmp_path.as_posix())
+    async with app.run_test(size=(143, 37)) as pilot:
+        await iter_until(pilot, lambda: bool(app.file_list.options))
 
-            assert app.file_list.select_mode_enabled
-            assert app.tabWidget.active_tab.session.selectMode
+        assert app.file_list.select_mode_enabled
+        assert app.file_list.has_class("select-mode")
+        assert app.tabWidget.active_tab.session.selectMode
 
-            await app.tabWidget.add_tab("")
-            await workers_finished(pilot, app.file_list)
+        await app.tabWidget.add_tab("")
+        await workers_finished(pilot, app.file_list)
 
-            assert app.file_list.select_mode_enabled
-            assert app.tabWidget.active_tab.session.selectMode
-    finally:
-        config["interface"]["auto_select_mode"] = original_auto_select_mode
+        assert app.file_list.select_mode_enabled
+        assert app.file_list.has_class("select-mode")
+        assert app.tabWidget.active_tab.session.selectMode
+
+        app.file_list.select_mode_enabled = False
+        assert not app.file_list.has_class("select-mode")
 
 
 @pytest.mark.asyncio

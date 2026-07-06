@@ -125,6 +125,7 @@ class FileList(
         self._options: list[FileListSelectionWidget] = []
         self.dummy = dummy
         self.enter_into = enter_into
+        self._select_mode_enabled = False
         self.select_mode_enabled = select or (
             not dummy and config["interface"]["auto_select_mode"]
         )
@@ -132,13 +133,23 @@ class FileList(
             self.items_in_cwd: set[str] = set()
         self.file_list_pause_check = False
         self._ignore_next_click: bool = False
-        if self.select_mode_enabled:
-            self.add_class("select-mode")
 
     def on_mount(self) -> None:
         if not self.dummy and self.parent:
             self.input: Input = self.parent.query_one(Input)
             self.focus()
+
+    @property
+    def select_mode_enabled(self) -> bool:
+        return self._select_mode_enabled
+
+    @select_mode_enabled.setter
+    def select_mode_enabled(self, enabled: bool) -> None:
+        self._select_mode_enabled = enabled
+        if enabled:
+            self.add_class("select-mode")
+        else:
+            self.remove_class("select-mode")
 
     @property
     def highlighted_option(self) -> FileListSelectionWidget | None:
@@ -564,10 +575,6 @@ class FileList(
         with self.prevent(SelectionList.SelectedChanged):
             self.deselect_all()
         self.update_border_subtitle()
-        if self.select_mode_enabled:
-            self.add_class("select-mode")
-        else:
-            self.remove_class("select-mode")
 
     async def get_selected_objects(self) -> list[str] | None:
         """Get the selected objects in the file list.

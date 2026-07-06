@@ -686,9 +686,22 @@ def run_opener(app: App, target_path: str) -> None:
 
     from . import utils
 
-    for pattern, openers in config["settings"].get("openers", {}).items():
-        if fnmatch(target_path, pattern):
-            for opener in openers:
+    groups = config["settings"].get("openers", {}).get("groups", {})
+    matches = config["settings"].get("openers", {}).get("match", {})
+
+    for pattern, group_names in matches.items():
+        if not fnmatch(target_path, pattern):
+            continue
+        for group_name in group_names:
+            if group_name not in groups:
+                app.notify(
+                    f"Opener group '{group_name}' not found in configuration.",
+                    title="Opener Error",
+                    severity="warning",
+                    markup=False,
+                )
+                continue
+            for opener in groups[group_name]:
                 if isinstance(opener, str):
                     runner = opener
                 elif ifed(app, opener.get("if", {})):

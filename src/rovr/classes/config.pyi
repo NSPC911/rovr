@@ -100,6 +100,9 @@ r""" Default value of the field path 'Rovr Config interface compact_mode buttons
 _ROVR_CONFIG_INTERFACE_COMPACT_MODE_PANELS_DEFAULT = False
 r""" Default value of the field path 'Rovr Config interface compact_mode panels' """
 
+_ROVR_CONFIG_INTERFACE_DETAILS_LIST_DEFAULT: list[Any] = []
+r""" Default value of the field path 'Rovr Config interface details_list' """
+
 _ROVR_CONFIG_INTERFACE_DOUBLE_CLICK_DELAY_DEFAULT = 0.25
 r""" Default value of the field path 'Rovr Config interface double_click_delay' """
 
@@ -711,6 +714,16 @@ class _RovrConfigInterface(TypedDict, total=False):
     default: False
     """
 
+    details_list: list["_RovrConfigInterfaceDetailsListItem"]
+    r"""
+    Metadata columns shown right-aligned in the file list, ordered by priority.
+    Earlier entries are dropped last when the panel becomes too narrow;
+    later entries are dropped first. Set to [] to disable.
+
+    default:
+      []
+    """
+
     image_viewer: "_RovrConfigInterfaceImageViewer"
     r""" Settings related to the image viewer used in the preview sidebar """
 
@@ -791,6 +804,67 @@ class _RovrConfigInterfaceCompactMode(TypedDict, total=False):
 
     default: False
     """
+
+class _RovrConfigInterfaceDetailsListItem(TypedDict, total=False):
+    type: Required["_RovrConfigInterfaceDetailsListItemType"]
+    r"""
+    What metadata to show. size shows the item count for folders.
+    git shows the two-char XY status like git status --short (first char staged, second unstaged)
+    and hides itself outside a git work tree.
+
+    Required property
+    """
+
+    label: str
+    r""" Column header label. Defaults to a built-in label for the type. """
+
+    max_length: int
+    r"""
+    Column width cap in cells. Defaults to the natural width of the type.
+    The label's width acts as a lower bound.
+
+    minimum: 1
+    """
+
+    format: str
+    r"""
+    strftime format for mtime/atime/ctime columns.
+    Defaults to metadata.datetime_format.
+    """
+
+_RovrConfigInterfaceDetailsListItemType = (
+    Literal["size"]
+    | Literal["mtime"]
+    | Literal["atime"]
+    | Literal["ctime"]
+    | Literal["permissions"]
+    | Literal["owner"]
+    | Literal["group"]
+    | Literal["git"]
+)
+r"""
+What metadata to show. size shows the item count for folders.
+git shows the two-char XY status like git status --short (first char staged, second unstaged)
+and hides itself outside a git work tree.
+"""
+_ROVRCONFIGINTERFACEDETAILSLISTITEMTYPE_SIZE: Literal["size"] = "size"
+r"""The values for the 'What metadata to show. size shows the item count for folders' enum"""
+_ROVRCONFIGINTERFACEDETAILSLISTITEMTYPE_MTIME: Literal["mtime"] = "mtime"
+r"""The values for the 'What metadata to show. size shows the item count for folders' enum"""
+_ROVRCONFIGINTERFACEDETAILSLISTITEMTYPE_ATIME: Literal["atime"] = "atime"
+r"""The values for the 'What metadata to show. size shows the item count for folders' enum"""
+_ROVRCONFIGINTERFACEDETAILSLISTITEMTYPE_CTIME: Literal["ctime"] = "ctime"
+r"""The values for the 'What metadata to show. size shows the item count for folders' enum"""
+_ROVRCONFIGINTERFACEDETAILSLISTITEMTYPE_PERMISSIONS: Literal["permissions"] = (
+    "permissions"
+)
+r"""The values for the 'What metadata to show. size shows the item count for folders' enum"""
+_ROVRCONFIGINTERFACEDETAILSLISTITEMTYPE_OWNER: Literal["owner"] = "owner"
+r"""The values for the 'What metadata to show. size shows the item count for folders' enum"""
+_ROVRCONFIGINTERFACEDETAILSLISTITEMTYPE_GROUP: Literal["group"] = "group"
+r"""The values for the 'What metadata to show. size shows the item count for folders' enum"""
+_ROVRCONFIGINTERFACEDETAILSLISTITEMTYPE_GIT: Literal["git"] = "git"
+r"""The values for the 'What metadata to show. size shows the item count for folders' enum"""
 
 class _RovrConfigInterfaceFontPreview(TypedDict, total=False):
     r"""Settings related to the font preview used in the preview sidebar"""

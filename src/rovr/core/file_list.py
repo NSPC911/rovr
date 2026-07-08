@@ -1,16 +1,22 @@
 import shlex
 from contextlib import suppress
-from os import getcwd, path
+from os import getcwd, path, scandir
 from typing import Callable, ClassVar, Iterable, Self, Sequence
 
+from rich.cells import cell_len
+from rich.segment import Segment
+from rich.style import Style
 from textual import events, work
 from textual.binding import BindingType
+from textual.color import Color
 from textual.content import ContentText
 from textual.css.query import NoMatches
 from textual.errors import NoWidget
+from textual.strip import Strip
 from textual.widgets import Button, Input, OptionList, SelectionList
 from textual.widgets.option_list import OptionDoesNotExist
 from textual.widgets.selection_list import Selection, SelectionType
+from textual.worker import get_current_worker
 
 from rovr.classes.mixins import (
     Action,
@@ -21,6 +27,7 @@ from rovr.classes.mixins import (
 )
 from rovr.classes.session_manager import SessionManager, SessionOptionDict
 from rovr.classes.textual_options import FileListSelectionWidget, LazySelection
+from rovr.functions import details as detail_utils
 from rovr.functions import path as path_utils
 from rovr.functions import pins as pin_utils
 from rovr.functions import utils
@@ -60,6 +67,16 @@ class FileList(
         "filelist--hidden",
         "filelist--hidden--highlighted",
         "filelist--hidden--hovered",
+        "filelist--detail-size",
+        "filelist--detail-mtime",
+        "filelist--detail-atime",
+        "filelist--detail-ctime",
+        "filelist--detail-permissions",
+        "filelist--detail-owner",
+        "filelist--detail-group",
+        "filelist--git-staged",
+        "filelist--git-unstaged",
+        "filelist--git-untracked",
     }
 
     ACTIONS: list[Action] = [
@@ -130,6 +147,7 @@ class FileList(
             self.items_in_cwd: set[str] = set()
         self.file_list_pause_check = False
         self._ignore_next_click: bool = False
+        self._in_git_repo: bool = False
 
     def on_mount(self) -> None:
         if not self.dummy and self.parent:
@@ -147,6 +165,171 @@ class FileList(
             return self.options[self.highlighted]
         else:
             return None
+
+    def _detail_columns(self) -> tuple[detail_utils.DetailColumn, ...]:
+        """The configured columns, with the git column hidden outside a work tree.
+
+        Returns:
+            tuple[DetailColumn, ...]: The columns to render.
+        """
+        columns = detail_utils.get_detail_columns()
+        if not self._in_git_repo:
+            columns = tuple(column for column in columns if column.type != "git")
+        return columns
+
+    def render_line(self, y: int) -> Strip:
+        line = super().render_line(y)
+        if self.dummy:
+            return line
+        columns = self._detail_columns()
+        if not columns:
+            return line
+        width = self.scrollable_content_region.width
+        fitted = detail_utils.fit_column_count(width, columns)
+        if not fitted:
+            return line
+        try:
+            option_index, _ = self._lines[self.scroll_offset.y + y]
+            option = self.options[option_index]
+        except (IndexError, KeyError):
+            return line
+        if not isinstance(option, FileListSelectionWidget):
+            return line
+        cells = option.detail_cells(columns)[:fitted]
+        segments = list(line)
+        style = (segments[-1].style if segments else None) or self.rich_style
+        detail_segments: list[Segment] = []
+        details_width = 1  # is 1 and not 0 because minor right padding
+        for column, cell in zip(columns[:fitted], cells):
+            details_width += column.width + 2
+            detail_segments.append(Segment("  ", style))
+            if column.type == "git":
+                pad, pair = cell[:-2], cell[-2:]
+                if pad:
+                    detail_segments.append(Segment(pad, style))
+                if pair == "??":
+                    detail_segments.append(
+                        Segment(
+                            pair,
+                            self._detail_rich_style("filelist--git-untracked", style),
+                        )
+                    )
+                elif pair.strip():
+                    detail_segments.append(
+                        Segment(
+                            pair[0],
+                            self._detail_rich_style("filelist--git-staged", style),
+                        )
+                    )
+                    detail_segments.append(
+                        Segment(
+                            pair[1],
+                            self._detail_rich_style("filelist--git-unstaged", style),
+                        )
+                    )
+                else:
+                    detail_segments.append(Segment(pair, style))
+            else:
+                detail_segments.append(
+                    Segment(
+                        cell,
+                        self._detail_rich_style(
+                            f"filelist--detail-{column.type}", style
+                        ),
+                    )
+                )
+        detail_segments.append(Segment(" ", style))
+        return Strip([
+            *line.adjust_cell_length(width - details_width, style),
+            *detail_segments,
+        ])
+
+    def _detail_rich_style(self, component_class: str, base: Style) -> Style:
+        """The row style with the component class's foreground and text style on top.
+
+        Returns:
+            Style: The merged rich style.
+        """
+        visual = self.get_visual_style("option-list--option", component_class)
+        foreground = visual.foreground
+        if foreground is None:
+            return base
+        if foreground.a < 1 and base.bgcolor is not None:
+            foreground = Color.from_rich_color(base.bgcolor).blend(
+                foreground, foreground.a
+            )
+        return base + Style(
+            color=foreground.rich_color,
+            bold=visual.bold,
+            dim=visual.dim,
+            italic=visual.italic,
+            underline=visual.underline,
+            strike=visual.strike,
+        )
+
+    def details_header_text(self) -> str:
+        """The header line aligned with the name and detail columns.
+
+        Returns:
+            str: The full-width header text.
+        """
+        columns = self._detail_columns()
+        width = self.scrollable_content_region.width
+        fitted = detail_utils.fit_column_count(width, columns)
+        gutter = self._get_left_gutter_width()
+        labels = "  ".join(
+            detail_utils._pad(column.label, column.width) for column in columns[:fitted]
+        )
+        left = " " * gutter + "   Name"
+        if labels:
+            labels += " "
+        pad = max(1, width - cell_len(left) - cell_len(labels))
+        return left + " " * pad + labels
+
+    @work(thread=True, exclusive=True, group="detail_fill")
+    def fill_async_details(self) -> None:
+        column_types = {column.type for column in detail_utils.get_detail_columns()} & {
+            "size",
+            "git",
+        }
+        if self.dummy or not column_types:
+            return
+        worker = get_current_worker()
+        options = self._options
+        file_options = [
+            option for option in options if isinstance(option, FileListSelectionWidget)
+        ]
+        if not file_options:
+            return
+        dirty = False
+        if "git" in column_types:
+            cwd = path.dirname(file_options[0].dir_entry.path)
+            statuses = detail_utils.git_statuses(cwd)
+            in_git_repo = statuses is not None
+            if in_git_repo != self._in_git_repo:
+                self._in_git_repo = in_git_repo
+                dirty = True
+            for option in file_options:
+                if worker.is_cancelled or options is not self._options:
+                    return
+                status = (statuses or {}).get(option.dir_entry.name, "")
+                if status != option.git_status:
+                    option.set_git_status(status)
+                    dirty = True
+        if "size" in column_types:
+            for option in file_options:
+                if worker.is_cancelled or options is not self._options:
+                    return
+                with suppress(OSError):
+                    if option.dir_entry.is_dir():
+                        with scandir(option.dir_entry.path) as entries:
+                            option.set_folder_item_count(sum(1 for _ in entries))
+                        dirty = True
+        if dirty and not worker.is_cancelled:
+            self.app.call_from_thread(self.refresh)
+            update_header = getattr(self.parent, "update_details_header", None)
+            if callable(update_header):
+                self.app.call_from_thread(update_header)
 
     # ignore single clicks
     async def _on_click(self, event: events.Click) -> None:
@@ -314,6 +497,10 @@ class FileList(
             self.app.query_one("#up").disabled = cwd == path.dirname(cwd)
 
             self.set_options(self.list_of_options)
+            self.fill_async_details()
+            update_header = getattr(self.parent, "update_details_header", None)
+            if callable(update_header):
+                self.call_after_refresh(update_header)
             # fix selected options
             if (has_selected or self.select_mode_enabled) and name_to_index:
                 self.update_from_session(session, name_to_index)
@@ -564,6 +751,9 @@ class FileList(
             self.add_class("select-mode")
         else:
             self.remove_class("select-mode")
+        update_header = getattr(self.parent, "update_details_header", None)
+        if callable(update_header):
+            update_header()
 
     async def get_selected_objects(self) -> list[str] | None:
         """Get the selected objects in the file list.

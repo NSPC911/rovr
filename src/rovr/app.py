@@ -763,6 +763,8 @@ class Application(Actionable, DNDApp, inherit_bindings=False):
                             dir_entry = get_direntry_for(highlighted_path)
                             if dir_entry is not None:
                                 highlighted_option.dir_entry = dir_entry
+                                highlighted_option._invalidate_prompt_cache()
+                                file_list.call_next(file_list.refresh)
                                 self.query_one(MetadataContainer).update_metadata(
                                     dir_entry
                                 )

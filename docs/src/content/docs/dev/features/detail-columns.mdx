@@ -1,0 +1,65 @@
+---
+title: detail columns
+description: show file metadata in table-like columns next to file names.
+---
+
+rovr can show metadata right-aligned next to each file, similar to the details view in graphical file managers. a header row above the file list labels each column.
+
+this feature is disabled by default. to enable it, add a `details_list` to the `[interface]` section of your config:
+
+```toml
+[interface]
+details_list = [
+  { type = "size" },
+  { type = "mtime", label = "Modified" },
+  { type = "git" }
+]
+```
+
+## column types
+
+| type        | default label | description                                                           |
+| ----------- | ------------- | --------------------------------------------------------------------- |
+| size        | Size          | file size in a compact format. folders show their item count instead. |
+| mtime       | Modified      | last modification time                                                |
+| atime       | Accessed      | last access time                                                      |
+| ctime       | Created       | creation time (metadata change time on linux)                         |
+| permissions | Permissions   | unix-style permission string, like `drwxr-xr-x`                       |
+| owner       | Owner         | owning user's name                                                    |
+| group       | Group         | owning group's name                                                   |
+| git         | Git           | git status of the entry, see [the git column](#the-git-column)        |
+
+:::note
+`owner` and `group` are unavailable on windows for now, and will show `--` instead.
+:::
+
+## per-column options
+
+each entry in `details_list` accepts a few optional keys:
+
+| key        | description                                                                                                      |
+| ---------- | ---------------------------------------------------------------------------------------------------------------- |
+| label      | the text shown in the header row. defaults to the built-in label for the type.                                   |
+| max_length | caps the column's width in cells. defaults to the natural width of the type. the label's width is a lower bound. |
+| format     | strftime format for `mtime`/`atime`/`ctime` columns. defaults to `metadata.datetime_format`.                     |
+
+values that are too long for their column are truncated with an ellipsis.
+
+## column priority
+
+the order of `details_list` doubles as priority. when the file panel becomes too narrow to fit every column while leaving enough room for file names, columns are dropped from the back of the list; the first entry is the last one standing. they come back automatically when the panel widens again.
+
+## the git column
+
+the git column shows a two character status pair, exactly like `git status --short`:
+
+- the **first** character is the staged (index) status
+- the **second** character is the unstaged (work tree) status
+
+for example, `M ` means the file's changes are fully staged, ` M` means they are unstaged, and `MM` means some changes are staged and some are not. `??` marks untracked files. folders aggregate the statuses beneath them, showing the most severe character for each position.
+
+when the current directory is not inside a git repository, the column hides itself entirely instead of showing an empty column.
+
+## styling
+
+each column can be styled with component classes on `FileList`; the git column additionally styles its staged and unstaged characters separately. see [theming](/rovr/dev/configuration/theming/#styletcss) for the full list. the header row is a plain widget with the id `#file_list_details_header`.

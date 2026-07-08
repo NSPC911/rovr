@@ -254,6 +254,36 @@
           "default": false,
           "description": "Show hidden files and folders (those starting with a dot on Unix, or explicitly hidden on Windows/MacOS)."
         },
+        "details_list": {
+          "type": "array",
+          "default": [],
+          "description": "Metadata columns shown right-aligned in the file list, ordered by priority.\nEarlier entries are dropped last when the panel becomes too narrow;\nlater entries are dropped first. Set to [] to disable.",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["type"],
+            "properties": {
+              "type": {
+                "type": "string",
+                "enum": ["size", "mtime", "atime", "ctime", "permissions", "owner", "group", "git"],
+                "description": "What metadata to show. size shows the item count for folders.\ngit shows the two-char XY status like git status --short (first char staged, second unstaged)\nand hides itself outside a git work tree."
+              },
+              "label": {
+                "type": "string",
+                "description": "Column header label. Defaults to a built-in label for the type."
+              },
+              "max_length": {
+                "type": "integer",
+                "minimum": 1,
+                "description": "Column width cap in cells. Defaults to the natural width of the type.\nThe label's width acts as a lower bound."
+              },
+              "format": {
+                "type": "string",
+                "description": "strftime format for mtime/atime/ctime columns.\nDefaults to metadata.datetime_format."
+              }
+            }
+          }
+        },
         "image_viewer": {
           "type": "object",
           "description": "Settings related to the image viewer used in the preview sidebar",

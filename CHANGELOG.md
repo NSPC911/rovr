@@ -13,7 +13,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `config`: add `prepend_` and `append_` support [#298](https://github.com/NSPC911/rovr/pull/298)
 - `expansions`: support `real_` alternatives [dbf11f4](https://github.com/NSPC911/rovr/commit/dbf11f49dd0d2c1f91d5f4eac1dbc0ba461efe96)
 - `filelist`: add open keybind [a6aed4d](https://github.com/NSPC911/rovr/commit/a6aed4d453108bf447018650c0e352ff97d07846)
-- `app`: add kitty drag and drop support!! [#300](https://github.com/NSPC911/rovr/pull/300)
+- `app`: add kitty drag and drop support!! [#300](https://github.com/NSPC911/rovr/pull/300) [26338ed](https://github.com/NSPC911/rovr/commit/26338edc64ee47702dd92891c2838e00b85eeb73)
+- `openers`: refactor into a grouping mechanism [#302](https://github.com/NSPC911/rovr/pull/302)
+- `filelist`: show detail columns [#301](https://github.com/NSPC911/rovr/pull/301)
 
 ### Fixed
 

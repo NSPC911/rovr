@@ -305,109 +305,116 @@ def get_mime_type(
         ╰╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┴> Ruff wants this part here, even though the function
                            handles it internally, so I'm just leaving it here
     """
-    if ignore is None:
-        ignore = ()
+    try:
+        if ignore is None:
+            ignore = ()
 
-    base = path.basename(file_path)
-    if base.startswith("."):
-        file_extension = base[1:]
-    else:
-        file_extension = "".join(base.split(".")[1:]).lower()
+        base = path.basename(file_path)
+        if base.startswith("."):
+            file_extension = base[1:]
+        else:
+            file_extension = "".join(base.split(".")[1:]).lower()
 
-    # CHECK IF IT IS A SOCKET OR FIFO
-    if stat.S_ISFIFO(mode := os_stat(file_path).st_mode):
-        return MimeResult("basic", "inode/fifo")
-    elif stat.S_ISSOCK(mode):
-        return MimeResult("basic", "inode/socket")
+        # CHECK IF IT IS A SOCKET OR FIFO
+        if stat.S_ISFIFO(mode := os_stat(file_path).st_mode):
+            return MimeResult("basic", "inode/fifo")
+        elif stat.S_ISSOCK(mode):
+            return MimeResult("basic", "inode/socket")
 
-    # Step 1: Try puremagic (magic byte detection) first
-    if "puremagic" not in ignore:
-        import puremagic
+        # Step 1: Try puremagic (magic byte detection) first
+        if "puremagic" not in ignore:
+            import puremagic
 
-        try:
-            puremagic_result: list[puremagic.PureMagicWithConfidence] = (
-                puremagic.magic_file(file_path)
-            )
-            if puremagic_result:
-                # If multiple matches exist, prefer one matching the file extension
-                for match in puremagic_result:
-                    if match.extension.lower() == file_extension and match.mime_type:
-                        return MimeResult("puremagic", match.mime_type)
-                # Otherwise, return first result with a mime type
-                for match in puremagic_result:
-                    if match.mime_type:
-                        return MimeResult("puremagic", match.mime_type)
-        except Exception:
-            # puremagic failed, continue to next method
-            pass
+            try:
+                puremagic_result: list[puremagic.PureMagicWithConfidence] = (
+                    puremagic.magic_file(file_path)
+                )
+                if puremagic_result:
+                    # If multiple matches exist, prefer one matching the file extension
+                    for match in puremagic_result:
+                        if (
+                            match.extension.lower() == file_extension
+                            and match.mime_type
+                        ):
+                            return MimeResult("puremagic", match.mime_type)
+                    # Otherwise, return first result with a mime type
+                    for match in puremagic_result:
+                        if match.mime_type:
+                            return MimeResult("puremagic", match.mime_type)
+            except Exception:
+                # puremagic failed, continue to next method
+                pass
 
-    # Step 2: Try decoding as text, checking all encodings in order of most likely
-    # If puremagic didn't recognise it, it might perhaps be a plain text file
-    if "basic" not in ignore:
-        from pygments.lexers import guess_lexer, guess_lexer_for_filename
-        from pygments.util import ClassNotFound
+        # Step 2: Try decoding as text, checking all encodings in order of most likely
+        # If puremagic didn't recognise it, it might perhaps be a plain text file
+        if "basic" not in ignore:
+            from pygments.lexers import guess_lexer, guess_lexer_for_filename
+            from pygments.util import ClassNotFound
 
-        # Read file bytes once
-        try:
-            with open(file_path, "rb") as f:
-                file_bytes = f.read(4096)  # Read first 4KiB
-            for encoding in ("utf-8", "utf-16", "utf-32", "latin-1"):
-                try:
-                    content = file_bytes.decode(encoding)
+            # Read file bytes once
+            try:
+                with open(file_path, "rb") as f:
+                    file_bytes = f.read(4096)  # Read first 4KiB
+                for encoding in ("utf-8", "utf-16", "utf-32", "latin-1"):
                     try:
-                        guessed_lexer = (
-                            guess_lexer(content) if encoding != "latin-1" else None
-                        )
-                    except ClassNotFound:
-                        guessed_lexer = None
-                    try:
-                        filename_lexer = guess_lexer_for_filename(file_path, content)
-                    except ClassNotFound:
-                        filename_lexer = None
-                    if not guessed_lexer and filename_lexer:
-                        final_lexer = (
-                            filename_lexer.aliases[0]
-                            if filename_lexer.aliases
-                            else filename_lexer.name
-                        )
-                    elif guessed_lexer:
-                        # i don't trust filename lexer guesser as much
-                        final_lexer = (
-                            guessed_lexer.aliases[0]
-                            if guessed_lexer.aliases
-                            else (guessed_lexer.name if guessed_lexer else "plain")
-                        )
-                    else:
-                        final_lexer = "text"
-                    return MimeResult("basic", f"text/{final_lexer}")
-                except UnicodeDecodeError:
-                    pass
-        except OSError:
-            # Cannot open file at all
-            pass
+                        content = file_bytes.decode(encoding)
+                        try:
+                            guessed_lexer = (
+                                guess_lexer(content) if encoding != "latin-1" else None
+                            )
+                        except ClassNotFound:
+                            guessed_lexer = None
+                        try:
+                            filename_lexer = guess_lexer_for_filename(
+                                file_path, content
+                            )
+                        except ClassNotFound:
+                            filename_lexer = None
+                        if not guessed_lexer and filename_lexer:
+                            final_lexer = (
+                                filename_lexer.aliases[0]
+                                if filename_lexer.aliases
+                                else filename_lexer.name
+                            )
+                        elif guessed_lexer:
+                            # i don't trust filename lexer guesser as much
+                            final_lexer = (
+                                guessed_lexer.aliases[0]
+                                if guessed_lexer.aliases
+                                else (guessed_lexer.name if guessed_lexer else "plain")
+                            )
+                        else:
+                            final_lexer = "text"
+                        return MimeResult("basic", f"text/{final_lexer}")
+                    except UnicodeDecodeError:
+                        pass
+            except OSError:
+                # Cannot open file at all
+                pass
 
-    # Step 3: Fall back to file(1) command if available
-    if "file1" not in ignore:
-        try:
-            file_executable = file_one()
-            if file_executable is None:
-                raise FileNotFoundError
-            process = subprocess.run(
-                [file_executable, "--mime-type", "-b", file_path],
-                capture_output=True,
-                text=True,
-                check=True,
-                timeout=1,
-            )
-            mime_type = process.stdout.strip()
-            if mime_type:
-                return MimeResult("file1", mime_type)
-        except (
-            subprocess.CalledProcessError,
-            subprocess.TimeoutExpired,
-            FileNotFoundError,
-        ):
-            # file(1) command failed or is not available
-            pass
-
+        # Step 3: Fall back to file(1) command if available
+        if "file1" not in ignore:
+            try:
+                file_executable = file_one()
+                if file_executable is None:
+                    raise FileNotFoundError
+                process = subprocess.run(
+                    [file_executable, "--mime-type", "-b", file_path],
+                    capture_output=True,
+                    text=True,
+                    check=True,
+                    timeout=1,
+                )
+                mime_type = process.stdout.strip()
+                if mime_type:
+                    return MimeResult("file1", mime_type)
+            except (
+                subprocess.CalledProcessError,
+                subprocess.TimeoutExpired,
+                FileNotFoundError,
+            ):
+                # file(1) command failed or is not available
+                pass
+    except FileNotFoundError:
+        pass
     return None

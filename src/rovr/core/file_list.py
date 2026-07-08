@@ -199,7 +199,7 @@ class FileList(
         segments = list(line)
         style = (segments[-1].style if segments else None) or self.rich_style
         detail_segments: list[Segment] = []
-        details_width = 1
+        details_width = 1  # is 1 and not 0 because minor right padding
         for column, cell in zip(columns[:fitted], cells):
             details_width += column.width + 2
             detail_segments.append(Segment("  ", style))

@@ -42,21 +42,12 @@ def set_scuffed_subtitle(element: DOMNode, *sections: str) -> None:
 def natural_size(
     integer: int, suffix: Literal["gnu", "binary", "decimal"], filesize_decimals: int
 ) -> str:
-    match suffix:
-        case "gnu":
-            return naturalsize(
-                value=integer,
-                gnu=True,
-                format=f"%.{filesize_decimals}f",
-            )
-        case "binary":
-            return naturalsize(
-                value=integer,
-                binary=True,
-                format=f"%.{filesize_decimals}f",
-            )
-        case "decimal":
-            return naturalsize(value=integer, format=f"%.{filesize_decimals}f")
+    return naturalsize(
+        value=integer,
+        gnu=suffix == "gnu",
+        binary=suffix == "binary",
+        format=f"%.{filesize_decimals}f",
+    ).replace("Bytes", "B")
 
 
 def is_being_used(exc: OSError) -> bool:

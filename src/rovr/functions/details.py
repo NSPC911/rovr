@@ -206,7 +206,10 @@ def detail_cells(
         tuple[str, ...]: One padded cell per column.
     """
     cells: list[str] = []
-    file_stat = dir_entry.stat()
+    try:
+        file_stat = dir_entry.stat()
+    except OSError:
+        file_stat = None
     lstats: stat_result | None = None
     for column in columns:
         try:
@@ -215,6 +218,8 @@ def detail_cells(
                     if dir_entry.is_dir():
                         count = getattr(option, "folder_item_count", None)
                         value = "--" if count is None else str(count)
+                    elif file_stat is None:
+                        value = "--"
                     else:
                         value = natural_size(
                             file_stat.st_size,
@@ -222,25 +227,37 @@ def detail_cells(
                             config["metadata"]["filesize_decimals"],
                         )
                 case "mtime":
-                    value = datetime.fromtimestamp(file_stat.st_mtime).strftime(
-                        column.format
+                    value = (
+                        datetime.fromtimestamp(file_stat.st_mtime).strftime(
+                            column.format
+                        )
+                        if file_stat
+                        else "--"
                     )
                 case "atime":
-                    value = datetime.fromtimestamp(file_stat.st_atime).strftime(
-                        column.format
+                    value = (
+                        datetime.fromtimestamp(file_stat.st_atime).strftime(
+                            column.format
+                        )
+                        if file_stat
+                        else "--"
                     )
                 case "ctime":
-                    value = datetime.fromtimestamp(file_stat.st_ctime).strftime(
-                        column.format
+                    value = (
+                        datetime.fromtimestamp(file_stat.st_ctime).strftime(
+                            column.format
+                        )
+                        if file_stat
+                        else "--"
                     )
                 case "permissions":
                     if not lstats:
                         lstats = lstat(dir_entry.path)
                     value = stat.filemode(lstats.st_mode)
                 case "owner":
-                    value = _user_name(file_stat.st_uid)
+                    value = _user_name(file_stat.st_uid) if file_stat else "--"
                 case "group":
-                    value = _group_name(file_stat.st_gid)
+                    value = _group_name(file_stat.st_gid) if file_stat else "--"
                 case "git":
                     value = getattr(option, "git_status", "")
                 case _:

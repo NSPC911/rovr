@@ -1,6 +1,6 @@
 [project]
 name = "rovr"
-version = "0.10.0"
+version = "0.10.0.dev1"
 description = "a stylish, batteries-included terminal file manager."
 readme = "README.md"
 requires-python = ">=3.13,<3.15"

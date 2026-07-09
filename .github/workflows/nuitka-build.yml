@@ -144,6 +144,7 @@ jobs:
         id: commits
         shell: pwsh
         run: |
+          gh release delete nightly --cleanup-tag --yes
           $commits = git log --since="24 hours ago" --pretty=format:"- %h %s" --no-merges
           if (!$commits) { $commits = "No commits in the last 24 hours." }
           $commits | Out-File -FilePath commits.txt -Encoding utf8

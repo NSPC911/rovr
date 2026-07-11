@@ -1,7 +1,12 @@
+import re
+
 from textual.color import Color
 
 from rovr.classes.theme import RovrThemeClass
 from rovr.variables.constants import config
+
+_VARIABLE_DECLARATION = re.compile(r"^\$([\w-]+)\s*:\s*(.+?)\s*;\s*$")
+_VARIABLE_REF = re.compile(r"\$[\w-]+")
 
 
 def get_custom_themes() -> list:
@@ -41,3 +46,45 @@ def get_custom_themes() -> list:
             )
         )
     return custom_themes
+
+
+def extract_variable_overrides(
+    css_text: str, resolved: dict[str, str]
+) -> dict[str, str]:
+    """
+    Extract top-level `$name: value;` declarations from a TCSS source, resolving
+    any `$other` references against already-known variables as they're encountered.
+
+    Textual only shares `$variables` within the single source they're declared in,
+    so a user's style.tcss can't override a variable used by the bundled style.tcss
+    just by being loaded as a second CSS source. Folding the user's declarations into
+    the app-wide `get_css_variables()` mapping instead makes them visible to every
+    source, since that mapping is the one variable scope Textual does share globally.
+
+    Args:
+        css_text: raw TCSS source to scan for variable declarations.
+        resolved: mapping of already-known variable name to resolved value, used to
+            resolve `$other` references found in declaration values. Not mutated.
+
+    Returns:
+        dict[str, str]: mapping of overridden variable name to resolved value.
+    """
+    resolved = dict(resolved)
+    overrides: dict[str, str] = {}
+    depth = 0
+    for line in css_text.splitlines():
+        stripped = line.strip()
+        if depth == 0:
+            match = _VARIABLE_DECLARATION.match(stripped)
+            if match is not None:
+                name, value = match.groups()
+
+                def substitute(ref_match: re.Match[str]) -> str:
+                    ref_name = ref_match.group()[1:]
+                    return resolved.get(ref_name, ref_match.group())
+
+                resolved_value = _VARIABLE_REF.sub(substitute, value)
+                overrides[name] = resolved_value
+                resolved[name] = resolved_value
+        depth += stripped.count("{") - stripped.count("}")
+    return overrides

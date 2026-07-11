@@ -84,7 +84,7 @@ from rovr.functions.path import (
     get_filtered_dir_names,
     normalise,
 )
-from rovr.functions.themes import get_custom_themes
+from rovr.functions.themes import extract_variable_overrides, get_custom_themes
 from rovr.functions.utils import multiprocessing_process_error_checker, run_command
 from rovr.header import HeaderArea
 from rovr.header.tabs import TablineTab
@@ -374,6 +374,16 @@ class Application(Actionable, DNDApp, inherit_bindings=False):
             f"theme-{theme.name}": False,
         })
         self.old_theme = theme.name
+
+    def get_css_variables(self) -> dict[str, str]:
+        variables = super().get_css_variables()
+        if self.CUSTOM_STYLE_AVAILABLE:
+            custom_style_path = path.join(RovrVars.ROVRCONFIG, "style.tcss")
+            with suppress(OSError):
+                with open(custom_style_path, "rt", encoding="utf-8") as css_file:
+                    css_text = css_file.read()
+                variables.update(extract_variable_overrides(css_text, variables))
+        return variables
 
     @work
     async def _force_crash(self) -> None:
@@ -808,6 +818,7 @@ class Application(Actionable, DNDApp, inherit_bindings=False):
             try:
                 time = perf_counter()
                 stylesheet = self.stylesheet.copy()
+                stylesheet.set_variables(self.get_css_variables())
                 try:
                     # textual issue, i don't want to fix the typing
                     stylesheet.read_all(css_paths)  # ty: ignore[invalid-argument-type]

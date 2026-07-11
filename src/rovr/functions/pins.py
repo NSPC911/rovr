@@ -3,11 +3,12 @@ from copy import deepcopy
 from os import makedirs, path
 from typing import NotRequired, TypedDict, cast
 
-from rovr.variables.maps import SORTED_VARS, RovrVars
+from rovr.variables.maps import RovrVars
 
 from .path import dump_exc, normalise
 
 pins = {}
+raw_pins = {}
 PIN_PATH = path.join(RovrVars.ROVRCONFIG, "pins.json")
 
 
@@ -35,7 +36,7 @@ def load_pins() -> PinsDict:
     # I'm not entirely sure why the pins break when
     # pins isn't set global, I can't be bothered for now
     # until an issue gets raised in the future
-    global pins
+    global pins, raw_pins
     _pins: PinsDict
 
     if not path.exists(PIN_PATH):
@@ -87,6 +88,11 @@ def load_pins() -> PinsDict:
     if "pins" not in _pins or not isinstance(_pins["pins"], list):
         _pins["pins"] = []
 
+    # Keep an unexpanded copy so that add_pin/remove_pin can write existing
+    # entries back exactly as they were, instead of re-deriving them from
+    # the expanded form.
+    raw_pins = deepcopy(_pins)
+
     for section_key in ("default", "pins"):
         for item in _pins[section_key]:
             # no i will not use isinstance, ty screams at me
@@ -123,30 +129,15 @@ def add_pin(pin_name: str, pin_path: str | bytes) -> None:
     elif not path.exists(pin_path):
         raise FileNotFoundError(f"Path does not exist: {pin_path}")
 
-    global pins
+    global raw_pins
 
-    pins_to_write = deepcopy(pins)
+    pins_to_write = deepcopy(raw_pins)
 
     pin_path_normalized = normalise(pin_path)
     pins_to_write.setdefault("pins", []).append({
         "name": pin_name,
         "path": pin_path_normalized,
     })
-
-    for section_key in ("default", "pins"):
-        if section_key in pins_to_write:
-            for item in pins_to_write[section_key]:
-                if (
-                    isinstance(item, dict)
-                    and "path" in item
-                    and isinstance(item["path"], str)
-                ):
-                    for var in vars(RovrVars):
-                        if var.startswith(("__", "ROVR")):
-                            continue
-                        item["path"] = item["path"].replace(
-                            getattr(RovrVars, var), f"${var}"
-                        )
 
     if not path.exists(PIN_PATH):
         makedirs(path.dirname(PIN_PATH), exist_ok=True)
@@ -167,28 +158,22 @@ def remove_pin(pin_path: str | bytes) -> None:
     Args:
         pin_path (str): Path of the pin to remove.
     """
-    global pins
+    global raw_pins
 
-    pins_to_write = deepcopy(pins)
+    pins_to_write = deepcopy(raw_pins)
 
     pin_path_normalized = normalise(pin_path)
-    if "pins" in pins_to_write:
+    # `pins` (expanded) and `raw_pins` (as-written) share the same order,
+    # since load_pins only mutates paths in place, never filters/reorders.
+    if "pins" in pins_to_write and "pins" in pins:
         pins_to_write["pins"] = [
-            pin
-            for pin in pins_to_write["pins"]
-            if not (isinstance(pin, dict) and pin.get("path") == pin_path_normalized)
+            raw_pin
+            for raw_pin, expanded_pin in zip(pins_to_write["pins"], pins["pins"])
+            if not (
+                isinstance(expanded_pin, dict)
+                and expanded_pin.get("path") == pin_path_normalized
+            )
         ]
-
-    for section_key in ("default", "pins"):
-        if section_key in pins_to_write:
-            for item in pins_to_write[section_key]:
-                if (
-                    isinstance(item, dict)
-                    and "path" in item
-                    and isinstance(item["path"], str)
-                ):
-                    for var, dir_path_val in SORTED_VARS.items():
-                        item["path"] = item["path"].replace(dir_path_val, f"${var}")
 
     try:
         with open(PIN_PATH, "w") as f:

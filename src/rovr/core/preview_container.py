@@ -1119,6 +1119,8 @@ class PreviewContainer(Actionable, Container):
 
             if should_cancel():
                 return
+        except (IsADirectoryError, NotADirectoryError):
+            pass
         except Exception as exc:
             if isinstance(exc, OSError) and "cannot be accessed by the system" in str(
                 exc.strerror

@@ -82,6 +82,12 @@ trash = ["d"]
 delete = ["x"]
 cancel = ["c", "escape"]
 
+[keybinds.trash]
+restore = ["r"]
+purge = ["x"]
+empty = ["E"]
+cancel = ["c", "escape"]
+
 [keybinds.filename_conflict]
 overwrite = ["o"]
 skip = ["s"]

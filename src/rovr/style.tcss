@@ -869,6 +869,32 @@ DeleteFiles {
   }
 }
 
+TrashScreen {
+  align: center middle;
+  #dialog {
+    grid-size: 4 2;
+    grid-rows: 1fr 3;
+    grid-gutter: 1 2;
+    padding: 1 2;
+    max-width: 90vw;
+    max-height: 90vh;
+    border: $border-style $border-focused;
+    border-title-align: left;
+    border-subtitle-align: right;
+    &:ansi {
+      grid-gutter: 0 1;
+      padding: 0 1;
+    }
+  }
+  SelectionList {
+    column-span: 4;
+    padding: 0;
+    height: 1fr;
+    background: transparent;
+  }
+  Button { width: 1fr }
+}
+
 ModalInput {
   #modalInput_group {
     border: $border-style $border-focused;

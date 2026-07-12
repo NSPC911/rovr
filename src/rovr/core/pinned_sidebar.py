@@ -45,6 +45,20 @@ class PinnedSidebar(Actionable, OptionList, inherit_bindings=False):
         for default_folder in default:
             if not isinstance(default_folder["path"], str):
                 continue
+            if default_folder["path"] == pin_utils.TRASH:
+                new_id = f"{path_utils.compress(pin_utils.TRASH)}-default"
+                if new_id not in id_list:
+                    self.list_of_options.append(
+                        PinnedSidebarOption(
+                            icon=icon_utils.get_icon("general", "trash"),
+                            label=default_folder["name"]
+                            if isinstance(default_folder["name"], str)
+                            else "Trash",
+                            id=new_id,
+                        )
+                    )
+                    id_list.append(new_id)
+                continue
             if not path.isdir(default_folder["path"]) and path.exists(
                 default_folder["path"]
             ):
@@ -216,6 +230,9 @@ class PinnedSidebar(Actionable, OptionList, inherit_bindings=False):
         # Get the file path from the option id
         assert selected_option.id is not None
         file_path = path_utils.decompress(selected_option.id.rsplit("-", 1)[0])
+        if file_path == pin_utils.TRASH:
+            self.app.open_recycle_bin()
+            return
         if not path.isdir(file_path):
             if path.exists(file_path):
                 raise FolderNotFileError(

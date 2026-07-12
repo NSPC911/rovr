@@ -548,6 +548,16 @@ class Application(Actionable, DNDApp, inherit_bindings=False):
                         message += f"Failed to write chooser file `{path.basename(self._chooser_file)}`"
         self.exit(message.strip() if message else None)
 
+    def open_recycle_bin(self) -> None:
+        """Open the recycle bin browser, refreshing the file list on restore."""
+        from rovr.screens import TrashScreen
+
+        async def callback(changed: bool) -> None:
+            if changed:
+                self.file_list.update_file_list(add_to_session=False)
+
+        self.push_screen(TrashScreen(), callback=callback)
+
     def cd(
         self,
         directory: str,

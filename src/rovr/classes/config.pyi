@@ -1023,6 +1023,9 @@ class _RovrConfigKeybinds(TypedDict, total=False):
     delete_files: "_RovrConfigKeybindsDeleteFiles"
     r""" Keybinds related to the delete confirmation screen """
 
+    trash: "_RovrConfigKeybindsTrash"
+    r""" Keybinds related to the recycle bin browser screen """
+
     rename: list[str]
     new: list[str]
     bulk_create: list[str]
@@ -1153,6 +1156,14 @@ class _RovrConfigKeybindsFilterModal(TypedDict, total=False):
     up: list[str]
     page_down: list[str]
     page_up: list[str]
+
+class _RovrConfigKeybindsTrash(TypedDict, total=False):
+    r"""Keybinds related to the recycle bin browser screen"""
+
+    restore: list[str]
+    purge: list[str]
+    empty: list[str]
+    cancel: list[str]
 
 class _RovrConfigKeybindsYesOrNo(TypedDict, total=False):
     r"""Keybinds related to yes/no confirmation modals"""

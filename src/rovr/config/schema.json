@@ -963,6 +963,32 @@
             }
           }
         },
+        "trash": {
+          "type": "object",
+          "description": "Keybinds related to the recycle bin browser screen",
+          "properties": {
+            "restore": {
+              "$ref": "#/definitions/keybind",
+              "description": "Restore the selected entries to their original location.",
+              "display_name": "Restore entries"
+            },
+            "purge": {
+              "$ref": "#/definitions/keybind",
+              "description": "Permanently delete the selected entries.",
+              "display_name": "Purge entries"
+            },
+            "empty": {
+              "$ref": "#/definitions/keybind",
+              "description": "Permanently empty the entire recycle bin.",
+              "display_name": "Empty recycle bin"
+            },
+            "cancel": {
+              "$ref": "#/definitions/keybind",
+              "description": "Close the recycle bin browser.",
+              "display_name": "Close"
+            }
+          }
+        },
         "rename": {
           "$ref": "#/definitions/keybind",
           "description": "Rename the selected file in the file list to something else.",

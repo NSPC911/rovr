@@ -6,8 +6,8 @@ import zipfile
 from os import path
 from typing import Callable, Literal, cast
 
+from pytrash import RecycleBin
 from rich.markup import escape
-from send2trash import send2trash
 from textual import work
 from textual.color import Gradient
 from textual.containers import HorizontalGroup, VerticalGroup, VerticalScroll
@@ -33,6 +33,8 @@ if sys.version_info.major == 3 and sys.version_info.minor <= 13:
     from backports.zstd import tarfile  # ty: ignore[unresolved-import]
 else:
     import tarfile
+
+recycle_bin = RecycleBin()
 
 
 class ThickBar(BarRenderable):
@@ -398,7 +400,7 @@ class ProcessContainer(Actionable, VerticalScroll):
                             if os_type == "Windows":
                                 # An inherent issue with long paths on windows
                                 path_to_trash = path_to_trash.replace("/", "\\")
-                            send2trash(path_to_trash)
+                            recycle_bin.recycle([path_to_trash])
                         except (PermissionError, OSError) as exc:
                             # On Windows, a file being used by another process
                             # raises a PermissionError/OSError with winerror 32.
@@ -409,7 +411,7 @@ class ProcessContainer(Actionable, VerticalScroll):
                                     self.handle_file_in_use_error(
                                         action_on_file_in_use,
                                         item_dict["relative_loc"],
-                                        lambda: send2trash(path_to_trash),
+                                        lambda: recycle_bin.recycle([path_to_trash]),
                                     )
                                 )
                                 if current_action == "cancel":

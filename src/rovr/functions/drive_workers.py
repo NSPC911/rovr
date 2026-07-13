@@ -69,7 +69,16 @@ def _get_linux_drives() -> list[str]:
 def _get_posix_drives() -> list[str]:
     # used on macOS, Android/Termux, BSD, and as a Linux fallback when procfs
     # isn't readable; -P avoids df wrapping long device paths across lines
-    result = subprocess.run(["df", "-P"], capture_output=True, text=True, check=True)
+    try:
+        result = subprocess.run(
+            ["df", "-P"], capture_output=True, text=True, check=True, timeout=2
+        )
+    except (
+        subprocess.CalledProcessError,
+        FileNotFoundError,
+        subprocess.TimeoutExpired,
+    ):
+        return ["/"]
     drives = []
     for line in result.stdout.splitlines()[1:]:
         fields = line.split()

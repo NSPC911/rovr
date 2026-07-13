@@ -14,6 +14,57 @@ def config() -> RovrConfig:
     return cast("RovrConfig", {"settings": {"drive_exclude": []}})
 
 
+def test_get_mounted_drives_filters_non_directory_posix_mounts(
+    monkeypatch: pytest.MonkeyPatch,
+    config: RovrConfig,
+) -> None:
+    """
+    Ensure get_mounted_drives filters out mountpoints that are not directories
+    on POSIX-like systems.
+    """
+    # Mix of directory and non-directory mountpoints
+    monkeypatch.setattr(
+        drive_workers,
+        "_get_posix_drives",
+        lambda: ["/", "/mnt/usb", "/not_a_directory"],
+    )
+
+    def fake_isdir(path: str) -> bool:
+        # Treat "/not_a_directory" as a non-directory mountpoint
+        return path != "/not_a_directory"
+
+    monkeypatch.setattr(drive_workers.path, "isdir", fake_isdir)
+
+    drives = drive_workers.get_mounted_drives("Darwin", config)
+
+    assert drives == ["/", "/mnt/usb"]
+
+
+def test_get_mounted_drives_filters_non_directory_linux_mounts(
+    monkeypatch: pytest.MonkeyPatch,
+    config: RovrConfig,
+) -> None:
+    """
+    Ensure get_mounted_drives filters out mountpoints that are not directories
+    on Linux.
+    """
+    monkeypatch.setattr(
+        drive_workers,
+        "_get_linux_drives",
+        lambda: ["/", "/media/usb", "/proc", "/not_a_directory"],
+    )
+
+    def fake_isdir(path: str) -> bool:
+        # Simulate "/not_a_directory" being invalid
+        return path != "/not_a_directory"
+
+    monkeypatch.setattr(drive_workers.path, "isdir", fake_isdir)
+
+    drives = drive_workers.get_mounted_drives("Linux", config)
+
+    assert drives == ["/", "/media/usb", "/proc"]
+
+
 def test_normalise_joins_and_fixes_slashes() -> None:
     assert drive_workers.normalise("/foo", "bar") == "/foo/bar"
 
@@ -121,3 +172,25 @@ def test_get_mounted_drives_linux_falls_back_to_posix_on_oserror(
     drives = drive_workers.get_mounted_drives("Linux", config)
 
     assert drives == ["/data"]
+
+
+def test_get_mounted_drives_windows_normalises_and_applies_exclusions(
+    monkeypatch: pytest.MonkeyPatch,
+    config: RovrConfig,
+) -> None:
+    monkeypatch.setattr(
+        drive_workers,
+        "_get_windows_drives",
+        lambda: ["C:/", "D:/", "E:/Data", "F:", "G:/"],
+    )
+
+    def fake_isdir(path_str: str) -> bool:
+        return any(path_str.startswith(drive) for drive in ["C:/", "D:/", "E:/"])
+
+    monkeypatch.setattr(drive_workers.path, "isdir", fake_isdir)
+
+    config["settings"]["drive_exclude"] = ["E:/*"]
+
+    drives = drive_workers.get_mounted_drives("Windows", config)
+
+    assert drives == ["C:/", "D:/"]

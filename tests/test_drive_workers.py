@@ -1,4 +1,5 @@
 import ctypes
+import sys
 from pathlib import Path
 from typing import cast
 from unittest.mock import MagicMock
@@ -178,6 +179,10 @@ def test_get_mounted_drives_windows_normalises_and_applies_exclusions(
     monkeypatch: pytest.MonkeyPatch,
     config: RovrConfig,
 ) -> None:
+    if sys.platform != "win32":
+        pytest.skip(
+            "This test is only relevant on Windows because drives are wrongly returned"
+        )
     monkeypatch.setattr(
         drive_workers,
         "_get_windows_drives",

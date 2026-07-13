@@ -12,8 +12,8 @@ from rovr.functions.utils import natural_size
 from rovr.variables.constants import config
 
 try:
-    from grp import getgrgid
-    from pwd import getpwuid
+    from grp import getgrgid  # ty: ignore[unresolved-import]
+    from pwd import getpwuid  # ty: ignore[unresolved-import]
 except ImportError:  # windows
     getpwuid = None  # ty: ignore[invalid-assignment]
     getgrgid = None  # ty: ignore[invalid-assignment]

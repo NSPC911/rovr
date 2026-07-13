@@ -12,7 +12,12 @@ from textual.screen import ModalScreen
 from textual.widgets import Button, SelectionList
 from textual.widgets.selection_list import Selection
 
-from rovr.classes.mixins import Action, Actionable, CheckboxRenderingMixin
+from rovr.classes.mixins import (
+    Action,
+    Actionable,
+    CheckboxRenderingMixin,
+    SetOptionsSelectionList,
+)
 from rovr.functions import icons as icon_utils
 from rovr.functions import path as path_utils
 from rovr.functions.utils import dismiss, get_shortest_bind, natural_size
@@ -26,7 +31,11 @@ cancel_bind = get_shortest_bind(config["keybinds"]["trash"]["cancel"])
 
 
 class TrashSelectionList(
-    Actionable, CheckboxRenderingMixin, SelectionList, inherit_bindings=False
+    Actionable,
+    CheckboxRenderingMixin,
+    SetOptionsSelectionList,
+    SelectionList,
+    inherit_bindings=False,
 ):
     BINDINGS: ClassVar[list[BindingType]] = list(bindings)
 
@@ -103,7 +112,7 @@ class TrashSelectionList(
         self._select_range_to(self.action_last)
 
     def action_toggle_all(self) -> None:
-        if self.highlighted:
+        if self.highlighted_option:
             if len(self.selected) == len(self.options):
                 self.deselect_all()
             else:
@@ -202,6 +211,7 @@ class TrashScreen(Actionable, ModalScreen):
             prompt.append(f"  {' · '.join(meta)}", style="dim")
         return prompt
 
+    @work(thread=True)
     def reload_entries(self) -> None:
         selection_list = self.query_one("#trash_entries", TrashSelectionList)
 
@@ -218,12 +228,13 @@ class TrashScreen(Actionable, ModalScreen):
             self._handle_of(entry, index): entry
             for index, entry in enumerate(self.entries)
         }
-        selection_list.clear_options()
-        if self.entries:
-            selection_list.add_options([
+        self.app.call_from_thread(
+            selection_list.set_options,
+            [
                 Selection(self._format_entry(entry), self._handle_of(entry, index))
                 for index, entry in enumerate(self.entries)
-            ])
+            ],
+        )
 
         new_index: int | None = None
         if prev_handle is not None and prev_handle in self._by_handle:
@@ -346,10 +357,10 @@ class TrashScreen(Actionable, ModalScreen):
                 case "empty":
                     self.recycle_bin.empty()
         except (OSError, FileNotFoundError, FileExistsError) as exc:
-            self.app.call_from_thread(
-                self.notify,
+            self.notify(
                 f"Failed to {operation}: {exc}",
                 title="Recycle Bin",
                 severity="error",
+                markup=False,
             )
-        self.app.call_from_thread(self.reload_entries)
+        self.reload_entries()

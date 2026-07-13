@@ -39,7 +39,7 @@ class PinnedSidebar(Actionable, OptionList, inherit_bindings=False):
         id_list = []
         self.list_of_options = []
         # get current highlight
-        prev_highlighted: int = self.highlighted if type(self.highlighted) is int else 0
+        prev_highlighted: int = 0 if self.highlighted is None else self.highlighted
         self.log(f"Reloading pins: {available_pins}")
         self.log(f"Reloading default folders: {default}")
         for default_folder in default:

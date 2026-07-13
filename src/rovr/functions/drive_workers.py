@@ -1,10 +1,14 @@
 from __future__ import annotations
 
 import multiprocessing
+import re
+import subprocess
 from fnmatch import fnmatch
 from os import path
 
 from rovr.classes.config import RovrConfig
+
+_OCTAL_ESCAPE = re.compile(r"\\([0-7]{3})")
 
 
 def normalise(*location: str | bytes) -> str:
@@ -28,6 +32,57 @@ def normalise(*location: str | bytes) -> str:
     )
 
 
+def _get_windows_drives() -> list[str]:
+    import ctypes
+
+    bitmask = ctypes.windll.kernel32.GetLogicalDrives()  # type: ignore[attr-defined]
+    return [f"{chr(ord('A') + i)}:/" for i in range(26) if bitmask & (1 << i)]
+
+
+def _get_linux_drives() -> list[str]:
+    # raises OSError if procfs isn't readable, so callers can fall back to `df`
+    physical_fstypes: set[str] = set()
+    with open("/proc/filesystems") as f:
+        for line in f:
+            fields = line.rstrip("\n").split("\t")
+            if len(fields) != 2:
+                continue
+            nodev, fstype = fields
+            if nodev != "nodev" or fstype in ("zfs", "btrfs"):
+                physical_fstypes.add(fstype)
+
+    drives = []
+    with open("/proc/mounts") as f:
+        for line in f:
+            fields = line.split()
+            if len(fields) < 3:
+                continue
+            device, mountpoint, fstype = fields[0], fields[1], fields[2]
+            if device in ("", "none") or fstype not in physical_fstypes:
+                continue
+            drives.append(
+                _OCTAL_ESCAPE.sub(lambda m: chr(int(m.group(1), 8)), mountpoint)
+            )
+    return drives
+
+
+def _get_posix_drives() -> list[str]:
+    # used on macOS, Android/Termux, BSD, and as a Linux fallback when procfs
+    # isn't readable; -P avoids df wrapping long device paths across lines
+    result = subprocess.run(["df", "-P"], capture_output=True, text=True, check=True)
+    drives = []
+    for line in result.stdout.splitlines()[1:]:
+        fields = line.split()
+        if len(fields) < 6:
+            continue
+        device = fields[0]
+        mountpoint = " ".join(fields[5:])
+        if not device.startswith("/dev/"):
+            continue
+        drives.append(mountpoint)
+    return drives
+
+
 def get_mounted_drives(os_type: str, config: "RovrConfig") -> list[str]:
     """
     Worker function to get mounted drives - isolated from config imports.
@@ -40,22 +95,16 @@ def get_mounted_drives(os_type: str, config: "RovrConfig") -> list[str]:
     """
     drives = []
     try:
-        import psutil
-
-        # get all partitions
-        partitions = psutil.disk_partitions(all=False)
-
         if os_type == "Windows":
-            # For Windows, return the drive letters
-            drives = [
-                normalise(p.mountpoint)
-                for p in partitions
-                if p.device and ":" in p.device and path.isdir(p.device)
-            ]
+            raw_drives = _get_windows_drives()
+        elif os_type == "Linux":
+            try:
+                raw_drives = _get_linux_drives()
+            except OSError:
+                raw_drives = _get_posix_drives()
         else:
-            drives = [
-                normalise(p.mountpoint) for p in partitions if path.isdir(p.mountpoint)
-            ]
+            raw_drives = _get_posix_drives()
+        drives = [normalise(d) for d in raw_drives if path.isdir(d)]
     except Exception as exc:
         if globals().get("is_dev", False):
             print(f"Error getting mounted drives: {exc}\nReturning nothing...")

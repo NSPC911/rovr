@@ -12,6 +12,7 @@ raw_pins = {}
 PIN_PATH = path.join(RovrVars.ROVRCONFIG, "pins.json")
 TRASH = "$TRASH"
 """Special pin path that opens the recycle bin browser instead of a directory."""
+cache = RovrVars.ROVRCACHE
 
 
 class PinItem(TypedDict):
@@ -33,6 +34,8 @@ def _migrate_add_trash_pin(pins_dict: dict) -> None:
     Guarded by a marker so a user who deliberately removes the Trash pin
     does not get it re-added on the next launch.
     """
+    if path.exists(path.join(cache, "trash_pin_added")):
+        return
     has_trash = any(
         isinstance(item, dict) and item.get("path") == TRASH
         for section in ("default", "pins")
@@ -49,6 +52,7 @@ def _migrate_add_trash_pin(pins_dict: dict) -> None:
     try:
         with open(PIN_PATH, "w") as f:
             json.dump(pins_dict, f, indent=2)
+        open(path.join(cache, "trash_pin_added"), "w").close()
     except IOError as exc:
         dump_exc(None, exc)
 
@@ -72,13 +76,13 @@ def load_pins() -> PinsDict:
         _pins = {
             "default": [
                 {"name": "Home", "path": "$HOME"},
+                {"name": "Trash", "path": TRASH},
                 {"name": "Downloads", "path": "$DOWNLOADS"},
                 {"name": "Documents", "path": "$DOCUMENTS"},
                 {"name": "Desktop", "path": "$DESKTOP"},
                 {"name": "Pictures", "path": "$PICTURES"},
                 {"name": "Videos", "path": "$VIDEOS"},
                 {"name": "Music", "path": "$MUSIC"},
-                {"name": "Trash", "path": TRASH},
             ],
             "pins": [],
         }

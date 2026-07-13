@@ -1,3 +1,4 @@
+import contextlib
 import json
 from copy import deepcopy
 from os import makedirs, path
@@ -49,12 +50,13 @@ def _migrate_add_trash_pin(pins_dict: dict) -> None:
                 "path": TRASH,
             },
         )
-    try:
-        with open(PIN_PATH, "w") as f:
-            json.dump(pins_dict, f, indent=2)
+        try:
+            with open(PIN_PATH, "w") as f:
+                json.dump(pins_dict, f, indent=2)
+        except IOError as exc:
+            dump_exc(None, exc)
+    with contextlib.suppress(Exception):
         open(path.join(cache, "trash_pin_added"), "w").close()
-    except IOError as exc:
-        dump_exc(None, exc)
 
 
 def load_pins() -> PinsDict:

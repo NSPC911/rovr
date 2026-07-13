@@ -25,8 +25,23 @@ empty_bind = get_shortest_bind(config["keybinds"]["trash"]["empty"])
 cancel_bind = get_shortest_bind(config["keybinds"]["trash"]["cancel"])
 
 
-class TrashSelectionList(CheckboxRenderingMixin, SelectionList, inherit_bindings=False):
+class TrashSelectionList(
+    Actionable, CheckboxRenderingMixin, SelectionList, inherit_bindings=False
+):
     BINDINGS: ClassVar[list[BindingType]] = list(bindings)
+
+    ACTIONS = [
+        Action(name, config["keybinds"][name])
+        for name in (
+            "select_up",
+            "select_down",
+            "select_page_up",
+            "select_page_down",
+            "select_home",
+            "select_end",
+            "toggle_all",
+        )
+    ]
 
     @property
     def highlighted_option(self) -> Selection | None:
@@ -38,7 +53,7 @@ class TrashSelectionList(CheckboxRenderingMixin, SelectionList, inherit_bindings
         if self.highlighted_option is not None:
             self.action_select()
 
-    def select_up(self) -> None:
+    def action_select_up(self) -> None:
         """Select the current and previous entry."""
         if self.highlighted_option is None:
             return
@@ -50,7 +65,7 @@ class TrashSelectionList(CheckboxRenderingMixin, SelectionList, inherit_bindings
             if self.highlighted_option is not None:
                 self.select(self.highlighted_option)
 
-    def select_down(self) -> None:
+    def action_select_down(self) -> None:
         """Select the current and next entry."""
         if self.highlighted_option is None:
             return
@@ -71,21 +86,28 @@ class TrashSelectionList(CheckboxRenderingMixin, SelectionList, inherit_bindings
         for index in range(min(old, new), max(old, new) + 1):
             self.select(self.get_option_at_index(index))
 
-    def select_page_up(self) -> None:
+    def action_select_page_up(self) -> None:
         """Select every entry between the current one and a page up."""
         self._select_range_to(self.action_page_up)
 
-    def select_page_down(self) -> None:
+    def action_select_page_down(self) -> None:
         """Select every entry between the current one and a page down."""
         self._select_range_to(self.action_page_down)
 
-    def select_home(self) -> None:
+    def action_select_home(self) -> None:
         """Select every entry between the current one and the first."""
         self._select_range_to(self.action_first)
 
-    def select_end(self) -> None:
+    def action_select_end(self) -> None:
         """Select every entry between the current one and the last."""
         self._select_range_to(self.action_last)
+
+    def action_toggle_all(self) -> None:
+        if self.highlighted:
+            if len(self.selected) == len(self.options):
+                self.deselect_all()
+            else:
+                self.select_all()
 
 
 class TrashScreen(Actionable, ModalScreen):
@@ -102,20 +124,6 @@ class TrashScreen(Actionable, ModalScreen):
             Action("restore", config["keybinds"]["trash"]["restore"]),
             Action("purge", config["keybinds"]["trash"]["purge"]),
             Action("empty", config["keybinds"]["trash"]["empty"]),
-        ]
-        self.ACTIONS += [
-            Action(
-                lambda name=name: getattr(self._entries_list(), name)(),
-                config["keybinds"][name],
-            )
-            for name in (
-                "select_up",
-                "select_down",
-                "select_page_up",
-                "select_page_down",
-                "select_home",
-                "select_end",
-            )
         ]
 
     def _entries_list(self) -> "TrashSelectionList":
@@ -234,8 +242,17 @@ class TrashScreen(Actionable, ModalScreen):
             f"{len(self.entries)} item{'s' if len(self.entries) != 1 else ''}"
         )
         for button_id in ("#restore", "#purge"):
-            self.query_one(button_id, Button).disabled = not self.entries
+            self.query_one(button_id, Button).disabled = not selection_list.selected
         self.query_one("#empty", Button).disabled = not self.entries
+
+    @on(SelectionList.SelectedChanged)
+    def on_selection_list_selected_changed(
+        self, event: SelectionList.SelectedChanged
+    ) -> None:
+        for button_id in ("#restore", "#purge"):
+            self.query_one(
+                button_id, Button
+            ).disabled = not event.selection_list.selected
 
     def _selected_entries(self) -> list[TrashEntry]:
         selection_list = self.query_one("#trash_entries", TrashSelectionList)

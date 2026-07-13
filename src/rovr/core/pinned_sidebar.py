@@ -229,6 +229,9 @@ class PinnedSidebar(Actionable, OptionList, inherit_bindings=False):
         selected_option = event.option
         # Get the file path from the option id
         assert selected_option.id is not None
+        # do not switch focus for mouse click events
+        if not isinstance(event._sender, PinnedSidebar):
+            self.app.file_list.focus()
         file_path = path_utils.decompress(selected_option.id.rsplit("-", 1)[0])
         if file_path == pin_utils.TRASH:
             self.app.open_recycle_bin()
@@ -241,9 +244,6 @@ class PinnedSidebar(Actionable, OptionList, inherit_bindings=False):
             else:
                 return
         self.app.cd(file_path, clear_search=True)
-        # do not switch focus for mouse click events
-        if not isinstance(event._sender, PinnedSidebar):
-            self.app.file_list.focus()
         if self.input.value != "":
             # assume that you don't need to reset the highlighted
             with self.input.prevent(Input.Changed):

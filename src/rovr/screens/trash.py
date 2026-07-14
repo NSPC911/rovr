@@ -141,9 +141,18 @@ class TrashScreen(Actionable, ModalScreen):
     def compose(self) -> ComposeResult:
         with Grid(id="dialog"):
             yield TrashSelectionList(id="trash_entries")
-            yield Button(f"\\[{restore_bind}] Restore", variant="success", id="restore")
-            yield Button(f"\\[{purge_bind}] Purge", variant="error", id="purge")
-            yield Button(f"\\[{empty_bind}] Empty", variant="error", id="empty")
+            yield Button(
+                f"\\[{restore_bind}] Restore",
+                variant="success",
+                id="restore",
+                disabled=True,
+            )
+            yield Button(
+                f"\\[{purge_bind}] Purge", variant="error", id="purge", disabled=True
+            )
+            yield Button(
+                f"\\[{empty_bind}] Empty", variant="error", id="empty", disabled=True
+            )
             yield Button(f"\\[{cancel_bind}] Close", variant="primary", id="cancel")
 
     def on_mount(self) -> None:

@@ -88,3 +88,30 @@ def extract_variable_overrides(
                 resolved[name] = resolved_value
         depth += stripped.count("{") - stripped.count("}")
     return overrides
+
+
+def strip_variable_declarations(css_text: str) -> str:
+    """
+    Remove top-level `$name: value;` declarations from a TCSS source.
+
+    Companion to `extract_variable_overrides`: once a declaration's value is
+    injected app-wide through `get_css_variables`, Textual must not see the
+    declaration again — redefining a variable appends its tokens onto the
+    existing value instead of replacing it, so `$x: 7;` in a file on top of an
+    injected `x = 7` makes every `$x` reference resolve to `7 7`.
+
+    Args:
+        css_text: raw TCSS source.
+
+    Returns:
+        str: the source with declaration lines blanked (not removed, so error
+            locations keep pointing at the right lines).
+    """
+    lines = css_text.splitlines()
+    depth = 0
+    for index, line in enumerate(lines):
+        stripped = line.strip()
+        if depth == 0 and _VARIABLE_DECLARATION.match(stripped):
+            lines[index] = ""
+        depth += stripped.count("{") - stripped.count("}")
+    return "\n".join(lines)

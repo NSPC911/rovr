@@ -1,11 +1,11 @@
 ---
-title: plugins
-description: adding extra features with plugins.
+title: integrations
+description: adding extra features with integrations.
 ---
 
 import InlineSVG from "@/components/InlineSVG.astro";
 
-there are a couple plugins to improve rovr's functionality. enable and configure them in your `config.toml` file.
+there are a couple integrations to improve rovr's functionality. enable and configure them in your `config.toml` file.
 
 ### zoxide
 
@@ -13,16 +13,24 @@ there are a couple plugins to improve rovr's functionality. enable and configure
 
 [zoxide](https://github.com/ajeetdsouza/zoxide) allows you to zip around your filesystem, and can be integrated into rovr
 
-- **enable:** `plugins.zoxide.enabled = true`
-- **keybinding:** the default keybinding to open the zoxide dialog is `z`.
+```toml
+[plugins.zoxide]
+enabled = true
+keybinds = ["z"]
+show_scores = false  # include the zoxide scores in the results
+```
 
 ### bat
 
 to allow for more file previews, [bat](https://github.com/sharkdp/bat) can be used for its syntax highlighting capabilities.
 
-- **enable:** `plugins.bat.enabled = true`
-- **executable:** specify the path to the `bat` executable if it's not in your system's `PATH`.
-- **line numbers:** toggle line numbers with `plugins.bat.show_line_numbers`.
+```toml
+[interface]
+show_line_numbers = true
+[plugins.bat]
+enabled = true
+executable = "bat"
+```
 
 ### fd
 
@@ -30,12 +38,18 @@ to allow for more file previews, [bat](https://github.com/sharkdp/bat) can be us
 
 uses [fd](https://github.com/sharkdp/fd) to search recursively in the current directory
 
-- **enable:** `plugins.fd.enabled = true`
-- **executable:** set the executable used to call `fd`
-- **relative_paths:** whether to see paths as relative or absolute
-- **follow_symlinks:** search inside symlinks as well
-- **no_ignore_parent:** do not respect ignore files from parent directories (e.g., `.gitignore`)
-- **default_filter_types:** set default item filters (like `file`, `directory`, etc.)
+```toml
+[plugins.fd]
+enabled = true
+keybinds = ["f"]
+executable = "fd"
+relative_paths = true
+follow_symlinks = false   # search inside symlinks as well
+no_ignore_parent = false  # ignore .ignore files from parent directories
+search_hidden = false
+default_filter_types = ["file", "directory"]  # set default item filters (like `file`, `directory`, etc.)
+timeout = 15  # set it to a reasonably high amount, searching without indexing takes time
+```
 
 ### rg
 
@@ -43,12 +57,17 @@ uses [fd](https://github.com/sharkdp/fd) to search recursively in the current di
 
 uses [ripgrep](https://github.com/BurntSushi/ripgrep) to search inside files
 
-- **enable:** `plugins.rg.enabled = true`
-- **executable:** set the executable used to call `rg`
-- **case_sensitive:** whether the search is case sensitive
-- **follow_symlinks:** search inside symlinks as well
-- **no_ignore_parent:** do not respect ignore files from parent directories (e.g., `.gitignore`)
-- **search_hidden:** whether to search hidden files and directories
+```toml
+[plugins.rg]
+enabled = true
+keybinds = ["\\"]
+executable = "rg"
+case_sensitive = true
+no_ignore_parent = false  # ignore .ignore files from parent directories
+follow_symlinks = false
+search_hidden = false
+timeout = 60  # set it to a much higher amount, content searching takes time
+```
 
 ### poppler
 
@@ -56,11 +75,14 @@ uses [ripgrep](https://github.com/BurntSushi/ripgrep) to search inside files
 
 uses [poppler](https://poppler.freedesktop.org) to preview PDF files
 
-- **enable:** `plugins.poppler.enabled = true`
-- **poppler_folder:** set the location where the poppler tools are installed (e.g., `/usr/bin` or `C:\Program Files\poppler\bin`).
-- **pdf_batch_size:** number of PDF pages to load in each batch
-- **use_pdftocairo:** whether to use pdftocairo instead of pdftoppm (may help performance)
-- **threads:** number of threads to use for processing PDF files (default is 1)
+```toml
+[plugins.poppler]
+enabled = true
+threads = 1
+use_pdftocairo = false  # use pdftocairo instead of pdftoppm (may help performance)
+poppler_folder = ""     # where the poppler tools are installed (auto detected).
+pdf_batch_size = 2
+```
 
 ### file(1)
 
@@ -68,8 +90,11 @@ uses the [`file`](https://darwinsys.com/file) command as an alternative to purem
 
 rovr automatically detects `file` in your `PATH`, or you can set the `YAZI_FILE_ONE` or `ROVR_FILE_ONE` (higher priority) environment variables to specify a custom path.
 
-- **enable:** `plugins.file_one.enabled = true`
-- **get_description:** whether to get extra file description from `file -b <file>` (default: `true`)
+```toml
+[plugins.file_one]
+enabled = false
+get_description = true  # whether to get extra file description from `file -b <file>` (default: `true`)
+```
 
 ### resvg
 
@@ -78,7 +103,3 @@ uses the [`resvg_py`](https://github.com/baseplate-admin/resvg-py) module to pro
 this cannot be disabled, as it doesn't depend on the resvg binary, but rather the maturin binding itself.
 
 no configuration is available for this.
-
----
-
-a plugin system is also under works, stay tuned!

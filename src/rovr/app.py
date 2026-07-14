@@ -66,6 +66,7 @@ from rovr.classes.textual_validators import (
     AllowsExistingFiles,
     IsValidFilePath,
 )
+from rovr.classes.theme import RovrStylesheet
 from rovr.classes.type_aliases import DirEntryType
 from rovr.components.popup_option_list import PopupOptionList
 from rovr.core import (
@@ -208,6 +209,10 @@ class Application(Actionable, DNDApp, inherit_bindings=False):
         force_crash_in: float = 0,
     ) -> None:
         super().__init__(watch_css=True)
+        # replace the plain Stylesheet created by App.__init__ before any CSS
+        # is read, so `$variable:` declarations are stripped from the files
+        # (their values are injected through get_css_variables instead)
+        self.stylesheet = RovrStylesheet(variables=self.get_css_variables())
         self.app_blurred: bool = False
         self.has_pushed_screen: bool = False
         # Runtime output files from CLI
@@ -377,10 +382,15 @@ class Application(Actionable, DNDApp, inherit_bindings=False):
 
     def get_css_variables(self) -> dict[str, str]:
         variables = super().get_css_variables()
+        # RovrStylesheet strips `$name:` declarations from the CSS files, so
+        # every file's declarations must be resolved here instead: bundled
+        # first, then the user's style.tcss so it wins on name clashes.
+        style_paths: list[str] = [str(self.CSS_PATH[0])]
         if self.CUSTOM_STYLE_AVAILABLE:
-            custom_style_path = path.join(RovrVars.ROVRCONFIG, "style.tcss")
+            style_paths.append(path.join(RovrVars.ROVRCONFIG, "style.tcss"))
+        for style_path in style_paths:
             with suppress(OSError):
-                with open(custom_style_path, "rt", encoding="utf-8") as css_file:
+                with open(style_path, "rt", encoding="utf-8") as css_file:
                     css_text = css_file.read()
                 variables.update(extract_variable_overrides(css_text, variables))
         return variables

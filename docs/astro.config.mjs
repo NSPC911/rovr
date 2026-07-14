@@ -105,7 +105,7 @@ export default defineConfig({
             { label: "custom openers", slug: "features/custom-openers", badge: { text: "new", variant: "tip" } },
             { label: "shell execution", slug: "features/shell-exec" },
             { label: "recycle bin", slug: "features/recycle-bin", badge: { text: "new", variant: "tip" } },
-            { label: "plugins", slug: "features/plugins" },
+            { label: "integrations", slug: "features/plugins" },
           ],
         },
         {

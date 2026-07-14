@@ -101,13 +101,13 @@ def load_pins() -> PinsDict:
             _pins = {
                 "default": [
                     {"name": "Home", "path": "$HOME"},
+                    {"name": "Trash", "path": TRASH},
                     {"name": "Downloads", "path": "$DOWNLOADS"},
                     {"name": "Documents", "path": "$DOCUMENTS"},
                     {"name": "Desktop", "path": "$DESKTOP"},
                     {"name": "Pictures", "path": "$PICTURES"},
                     {"name": "Videos", "path": "$VIDEOS"},
                     {"name": "Music", "path": "$MUSIC"},
-                    {"name": "Trash", "path": TRASH},
                 ],
                 "pins": [],
             }
@@ -116,13 +116,13 @@ def load_pins() -> PinsDict:
     if "default" not in _pins or not isinstance(_pins["default"], list):
         _pins["default"] = [
             {"name": "Home", "path": "$HOME"},
+            {"name": "Trash", "path": TRASH},
             {"name": "Downloads", "path": "$DOWNLOADS"},
             {"name": "Documents", "path": "$DOCUMENTS"},
             {"name": "Desktop", "path": "$DESKTOP"},
             {"name": "Pictures", "path": "$PICTURES"},
             {"name": "Videos", "path": "$VIDEOS"},
             {"name": "Music", "path": "$MUSIC"},
-            {"name": "Trash", "path": TRASH},
         ]
     if "pins" not in _pins or not isinstance(_pins["pins"], list):
         _pins["pins"] = []

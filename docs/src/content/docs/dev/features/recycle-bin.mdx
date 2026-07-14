@@ -1,0 +1,47 @@
+---
+title: recycle bin
+description: how to use the recycle bin in rovr.
+---
+
+rovr can send files to the OS's native recycle bin instead of deleting them outright, and comes with a built-in browser to inspect, restore, or purge what's in there.
+
+{/*<!-- insert svg later on -->*/}
+
+## sending files to the recycle bin
+
+on the delete confirmation screen, choose "trash" instead of "delete" to move the selection to the recycle bin rather than removing it permanently.
+
+- pressing `d` (or your configured keybind) trashes the selection instead of deleting it
+
+see [keybindings](/rovr/dev/reference/keybindings/#delete) for the full list of delete-related binds.
+
+## accessing the recycle bin
+
+a `"Trash"` pin is added to the pinned sidebar by default, above your other pinned folders.
+
+- click the "Trash" pin, or highlight it and press enter, to open the recycle bin browser instead of navigating into a directory
+
+## browsing the recycle bin
+
+the browser lists every trashed entry with its icon, original location, deletion time, and size. selection works the same as the file list (`space` to toggle, `v` to select a range, and so on).
+
+| action  | default        | vim            | sane     | description                                             |
+| ------- | -------------- | -------------- | -------- | ------------------------------------------------------- |
+| restore | `r`            | `r`            | `r`      | restore the selected entries to their original location |
+| purge   | `x`            | `x`            | `D`      | permanently delete the selected entries                 |
+| empty   | `E`            | `E`            | `E`      | permanently empty the entire recycle bin                |
+| cancel  | `c` / `escape` | `c` / `escape` | `escape` | close the browser                                       |
+
+## configuration
+
+customize the recycle bin browser's keybinds in your configuration file:
+
+```toml
+[keybinds.trash]
+restore = ["r"]
+purge = ["x"]
+empty = ["E"]
+cancel = ["c", "escape"]
+```
+
+these are separate from the `delete` keybinds used on the delete confirmation screen.

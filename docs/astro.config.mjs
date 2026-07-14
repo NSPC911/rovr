@@ -104,7 +104,7 @@ export default defineConfig({
             { label: "context menu", slug: "features/context-menu", badge: { text: "new", variant: "tip" } },
             { label: "custom openers", slug: "features/custom-openers", badge: { text: "new", variant: "tip" } },
             { label: "shell execution", slug: "features/shell-exec" },
-            { label: "plugins", slug: "features/plugins" },
+            { label: "integrations", slug: "features/plugins" },
           ],
         },
         {

@@ -5,6 +5,7 @@ import multiprocessing
 import sys
 import threading
 from contextlib import suppress
+from dataclasses import replace
 from importlib import resources
 from io import TextIOWrapper
 from os import chdir, getcwd, path
@@ -85,7 +86,13 @@ from rovr.functions.path import (
     get_filtered_dir_names,
     normalise,
 )
-from rovr.functions.themes import extract_variable_overrides, get_custom_themes
+from rovr.functions.themes import (
+    extract_variable_declarations,
+    get_custom_themes,
+    pop_theme_field_overrides,
+    register_all_themes,
+    resolve_variable_references,
+)
 from rovr.functions.utils import multiprocessing_process_error_checker, run_command
 from rovr.header import HeaderArea
 from rovr.header.tabs import TablineTab
@@ -240,6 +247,9 @@ class Application(Actionable, DNDApp, inherit_bindings=False):
         self.last_available_cd = getcwd()
         self.old_theme: str = self.theme
 
+        # theme files first, config custom themes second so an explicit
+        # [[custom_theme]] with the same name wins
+        self._theme_errors: list[str] = register_all_themes(self)
         try:
             for theme in get_custom_themes():
                 self.register_theme(theme)
@@ -328,6 +338,8 @@ class Application(Actionable, DNDApp, inherit_bindings=False):
             return
 
         self.theme_changed_signal.subscribe(self, self.theme_changed)
+        for error in self._theme_errors:
+            self.notify(error, title="Theme Error", severity="warning", markup=False)
         # title for screenshots
         self.title = ""
 
@@ -387,19 +399,46 @@ class Application(Actionable, DNDApp, inherit_bindings=False):
         })
         self.old_theme = theme.name
 
+    def action_change_theme(self) -> None:
+        from rovr.screens import ThemeChooser
+
+        original_theme = self.theme
+
+        def apply_theme(result: str | None) -> None:
+            self.theme = (
+                result if result and result in self.available_themes else original_theme
+            )
+
+        self.push_screen(ThemeChooser(), callback=apply_theme)
+
     def get_css_variables(self) -> dict[str, str]:
-        variables = super().get_css_variables()
         # RovrStylesheet strips `$name:` declarations from the CSS files, so
-        # every file's declarations must be resolved here instead: bundled
-        # first, then the user's style.tcss so it wins on name clashes.
+        # every file's declarations are resolved here instead: bundled first,
+        # then the user's style.tcss so it wins on name clashes.
+        declared: dict[str, str] = {}
         style_paths: list[str] = [str(self.CSS_PATH[0])]
         if self.CUSTOM_STYLE_AVAILABLE:
             style_paths.append(path.join(RovrVars.ROVRCONFIG, "style.tcss"))
         for style_path in style_paths:
-            with suppress(OSError):
-                with open(style_path, "rt", encoding="utf-8") as css_file:
-                    css_text = css_file.read()
-                variables.update(extract_variable_overrides(css_text, variables))
+            with (
+                suppress(OSError),
+                open(style_path, "rt", encoding="utf-8") as css_file,
+            ):
+                declared.update(extract_variable_declarations(css_file.read()))
+        # declarations that map onto Theme fields go through the color system,
+        # so an overridden $primary regenerates $primary-lighten-3 and friends
+        theme = self.current_theme
+        field_overrides = pop_theme_field_overrides(declared)
+        if field_overrides:
+            theme = replace(theme, **field_overrides)  # ty: ignore[invalid-argument-type]
+        variables = theme.to_color_system().generate()
+        variables.update(resolve_variable_references(theme.variables, variables))
+        variables = {**self.get_theme_variable_defaults(), **variables}
+        # everything else resolves only after all files are merged, so
+        # `$border-focused: $primary-lighten-3;` in the bundled file picks up
+        # a user or theme override of either name
+        variables.update(resolve_variable_references(declared, variables))
+        self.theme_variables = variables
         return variables
 
     @work

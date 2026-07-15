@@ -1,0 +1,22 @@
+$primary: #CA9EE6;
+$secondary: #EF9F76;
+$accent: #F4B8E4;
+$warning: #E5C890;
+$error: #E78284;
+$success: #A6D189;
+$foreground: #C6D0F5;
+$background: #303446;
+$surface: #414559;
+$panel: #51576D;
+$dark: true;
+
+/* other vars */
+$input-cursor-foreground: #232634;
+$input-cursor-background: #F2D5CF;
+$input-selection-background: #949CBB 30%;
+$border: #BABBF1;
+$border-blurred: #838BA7;
+$footer-background: #51576D;
+$block-cursor-foreground: #292C3C;
+$block-cursor-text-style: none;
+$button-color-foreground: #303446;

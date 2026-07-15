@@ -235,10 +235,10 @@ class TrashScreen(Actionable, ModalScreen):
                 selection_list.scroll_to, None, prev_scroll, animate=False
             )
 
-        self.query_one(
-            "#dialog"
-        ).border_subtitle = (
-            f"{len(self.entries)} item{'s' if len(self.entries) != 1 else ''}"
+        self.app.call_next(
+            setattr,
+            self.query_one("#dialog").border_subtitle,
+            f"{len(self.entries)} item{'s' if len(self.entries) != 1 else ''}",
         )
         for button_id in ("#restore", "#purge"):
             self.query_one(button_id, Button).disabled = not selection_list.selected

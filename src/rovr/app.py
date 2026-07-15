@@ -258,6 +258,13 @@ class Application(Actionable, DNDApp, inherit_bindings=False):
         self.theme = config["theme"]["default"]
         self.ansi_color = config["theme"]["transparent"]
 
+    def on_compose(self, event: events.Compose) -> None:
+        self.__actual_screen_update_node_styles = self.screen.update_node_styles
+        self.screen.update_node_styles = lambda animate=True: None  # ty: ignore[invalid-assignment]
+
+    def monkey_patch_screen_update_node_styles(self, animate: bool = True) -> None:
+        self.screen.update_node_styles = self.__actual_screen_update_node_styles  # ty: ignore[invalid-assignment]
+
     @property
     def file_list(self) -> FileList:
         if not self._file_list_container.filelist.is_mounted:

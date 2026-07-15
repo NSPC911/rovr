@@ -55,7 +55,7 @@ def _migrate_add_trash_pin(pins_dict: dict) -> None:
                 json.dump(pins_dict, f, indent=2)
         except IOError as exc:
             dump_exc(None, exc)
-    with contextlib.suppress(Exception):
+    with contextlib.suppress(OSError):
         open(path.join(cache, "trash_pin_added"), "w").close()
 
 

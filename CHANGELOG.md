@@ -16,6 +16,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `app`: add kitty drag and drop support!! [#300](https://github.com/NSPC911/rovr/pull/300) [26338ed](https://github.com/NSPC911/rovr/commit/26338edc64ee47702dd92891c2838e00b85eeb73)
 - `openers`: refactor into a grouping mechanism [#302](https://github.com/NSPC911/rovr/pull/302)
 - `filelist`: show detail columns [#301](https://github.com/NSPC911/rovr/pull/301)
+- `styles`: properly override variables on different files [79c394e](https://github.com/NSPC911/rovr/commit/79c394eac6f15c0a644853c92a7326415a529d79) [5628f65](https://github.com/NSPC911/rovr/commit/5628f650a20c86264bd408cf86e8efbdba4cc550)
+- `app`: add trash bin support [#304](https://github.com/NSPC911/rovr/pull/304)
 
 ### Fixed
 
@@ -25,6 +27,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `config`: split key to get proper line number [27411d7](https://github.com/NSPC911/rovr/commit/27411d7da3d35e33a15be944ad84460adda62dbd)
 - `input`: validate if path [7228b93](https://github.com/NSPC911/rovr/commit/7228b93d9b438df4215f17ee71403fcb2dc4cfed)
 - `input`: support absolute paths [c847695](https://github.com/NSPC911/rovr/commit/c84769582f1dbd142b58c7bee5e998e6f8f5e9da)
+- `preview`: ignore IsADirectoryError and NotADirectoryError [30a729c](https://github.com/NSPC911/rovr/commit/30a729ce032571136b4e419afc37fe6631301de8)
+- `pins`: dont automatically expand when saving [0280cd2](https://github.com/NSPC911/rovr/commit/0280cd2d8ddbf331e0ca1ca63d419b70be655d3e)
 
 ### Removed
 
@@ -32,8 +36,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Performance
 
-- `preview`: read file bytes later, use magic_file [809f7e3](https://github.com/NSPC911/rovr/commit/809f7e35e9d708f3195b0c2cd9cd0231f258649b) [0c6e42f6213077f64231c61492796e236745e43c](https://github.com/NSPC911/rovr/commit/0c6e42f6213077f64231c61492796e236745e43c)
+- `preview`: read file bytes later, use magic_file [809f7e3](https://github.com/NSPC911/rovr/commit/809f7e35e9d708f3195b0c2cd9cd0231f258649b) [0c6e42f](https://github.com/NSPC911/rovr/commit/0c6e42f6213077f64231c61492796e236745e43c)
 - `app`: check mtime of folder to refresh [07b8664](https://github.com/NSPC911/rovr/commit/07b8664c024c08eea11d4f735dc998bf36079ef5)
+- `app`: overwrite screen.update_node_styles temporarily [63929e5](https://github.com/NSPC911/rovr/commit/63929e579fa668fac63aeaae70eaf2ef66fe69e6)
+- `config`: cache schema validator with marshal [8c133e5](https://github.com/NSPC911/rovr/commit/8c133e5eede41748cff39cc833200b4c83233d66)
+- remove psutil dependency [#305](https://github.com/NSPC911/rovr/pull/305)
 
 ## [0.9.2]
 

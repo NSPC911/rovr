@@ -39,11 +39,25 @@ class PinnedSidebar(Actionable, OptionList, inherit_bindings=False):
         id_list = []
         self.list_of_options = []
         # get current highlight
-        prev_highlighted: int = self.highlighted if type(self.highlighted) is int else 0
+        prev_highlighted: int = 0 if self.highlighted is None else self.highlighted
         self.log(f"Reloading pins: {available_pins}")
         self.log(f"Reloading default folders: {default}")
         for default_folder in default:
             if not isinstance(default_folder["path"], str):
+                continue
+            if default_folder["path"] == pin_utils.TRASH:
+                new_id = f"{path_utils.compress(pin_utils.TRASH)}-default"
+                if new_id not in id_list:
+                    self.list_of_options.append(
+                        PinnedSidebarOption(
+                            icon=icon_utils.get_icon("general", "trash"),
+                            label=default_folder["name"]
+                            if isinstance(default_folder["name"], str)
+                            else "Trash",
+                            id=new_id,
+                        )
+                    )
+                    id_list.append(new_id)
                 continue
             if not path.isdir(default_folder["path"]) and path.exists(
                 default_folder["path"]
@@ -215,7 +229,13 @@ class PinnedSidebar(Actionable, OptionList, inherit_bindings=False):
         selected_option = event.option
         # Get the file path from the option id
         assert selected_option.id is not None
+        # do not switch focus for mouse click events
+        if not isinstance(event._sender, PinnedSidebar):
+            self.app.file_list.focus()
         file_path = path_utils.decompress(selected_option.id.rsplit("-", 1)[0])
+        if file_path == pin_utils.TRASH:
+            self.app.open_recycle_bin()
+            return
         if not path.isdir(file_path):
             if path.exists(file_path):
                 raise FolderNotFileError(
@@ -224,9 +244,6 @@ class PinnedSidebar(Actionable, OptionList, inherit_bindings=False):
             else:
                 return
         self.app.cd(file_path, clear_search=True)
-        # do not switch focus for mouse click events
-        if not isinstance(event._sender, PinnedSidebar):
-            self.app.file_list.focus()
         if self.input.value != "":
             # assume that you don't need to reset the highlighted
             with self.input.prevent(Input.Changed):

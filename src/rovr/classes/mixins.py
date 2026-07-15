@@ -1,17 +1,22 @@
 from inspect import isawaitable
-from typing import Any, Awaitable, Callable, NamedTuple
+from typing import Any, Awaitable, Callable, Iterable, NamedTuple, Self
 
 from rich.segment import Segment
 from rich.style import Style
+from textual.content import ContentText
 from textual.events import Key
 from textual.geometry import Region, Size
 from textual.strip import Strip
 from textual.widgets import OptionList
 from textual.widgets.option_list import Option, OptionDoesNotExist
+from textual.widgets.selection_list import Selection, SelectionType
 
+from rovr.classes.textual_options import LazySelection
 from rovr.functions import icons as icon_utils
 from rovr.functions.utils import check_key
-from rovr.variables.constants import config
+from rovr.variables.constants import (
+    config,
+)
 
 
 class SingleLineOptionLayoutMixin:
@@ -264,3 +269,30 @@ class Actionable:
                     self.app.show_key(event)
                 event.prevent_default().stop()
                 return
+
+
+class SetOptionsSelectionList:
+    def set_options(
+        self,
+        options: Iterable[
+            Selection[SelectionType]
+            | LazySelection[SelectionType]
+            | tuple[ContentText, SelectionType]
+            | tuple[ContentText, SelectionType, bool]
+        ],
+    ) -> Self:  # ty: ignore[invalid-method-override]
+        # Okay, lemme make myself clear here.
+        # A PR for this is already open at
+        # https://github.com/Textualize/textual/pull/6224
+        # essentially, the issue is that there isnt a set_options
+        # method for SelectionList, only for OptionList, but using
+        # OptionList's set_options doesnt clear selected or values
+        # but nothing was done, so I added it myself.
+        self._selected.clear()
+        self._values.clear()
+        # the ty ignore is important here, because options
+        # should be a Iterable["Option | VisualType | None"]
+        # but that isnt the case (based on the signature)
+        # so ty is crashing out.
+        super().set_options(options)  # ty: ignore[invalid-argument-type]
+        return self

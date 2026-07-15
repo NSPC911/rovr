@@ -1,3 +1,4 @@
+import contextlib
 import json
 from copy import deepcopy
 from os import makedirs, path
@@ -10,6 +11,9 @@ from .path import dump_exc, normalise
 pins = {}
 raw_pins = {}
 PIN_PATH = path.join(RovrVars.ROVRCONFIG, "pins.json")
+TRASH = "$TRASH"
+"""Special pin path that opens the recycle bin browser instead of a directory."""
+cache = RovrVars.ROVRCACHE
 
 
 class PinItem(TypedDict):
@@ -25,6 +29,36 @@ class PinsDict(TypedDict):
     "Other added folders"
 
 
+def _migrate_add_trash_pin(pins_dict: dict) -> None:
+    """Inject the Trash pin into an existing pins.json exactly once.
+
+    Guarded by a marker so a user who deliberately removes the Trash pin
+    does not get it re-added on the next launch.
+    """
+    if path.exists(path.join(cache, "trash_pin_added")):
+        return
+    has_trash = any(
+        isinstance(item, dict) and item.get("path") == TRASH
+        for section in ("default", "pins")
+        for item in pins_dict.get(section, [])
+    )
+    if not has_trash:
+        pins_dict.setdefault("default", []).insert(
+            1,
+            {
+                "name": "Trash",
+                "path": TRASH,
+            },
+        )
+        try:
+            with open(PIN_PATH, "w") as f:
+                json.dump(pins_dict, f, indent=2)
+        except IOError as exc:
+            dump_exc(None, exc)
+    with contextlib.suppress(OSError):
+        open(path.join(cache, "trash_pin_added"), "w").close()
+
+
 def load_pins() -> PinsDict:
     """
     Load the pinned files from a JSON file in the user's config directory.
@@ -38,11 +72,13 @@ def load_pins() -> PinsDict:
     # until an issue gets raised in the future
     global pins, raw_pins
     _pins: PinsDict
+    loaded_from_file = False
 
     if not path.exists(PIN_PATH):
         _pins = {
             "default": [
                 {"name": "Home", "path": "$HOME"},
+                {"name": "Trash", "path": TRASH},
                 {"name": "Downloads", "path": "$DOWNLOADS"},
                 {"name": "Documents", "path": "$DOCUMENTS"},
                 {"name": "Desktop", "path": "$DESKTOP"},
@@ -59,11 +95,13 @@ def load_pins() -> PinsDict:
             if not isinstance(loaded, dict):
                 raise ValueError()
             _pins = cast(PinsDict, loaded)
+            loaded_from_file = True
         except (IOError, ValueError, json.JSONDecodeError):
             # Reset pins on corrupt or something else happened
             _pins = {
                 "default": [
                     {"name": "Home", "path": "$HOME"},
+                    {"name": "Trash", "path": TRASH},
                     {"name": "Downloads", "path": "$DOWNLOADS"},
                     {"name": "Documents", "path": "$DOCUMENTS"},
                     {"name": "Desktop", "path": "$DESKTOP"},
@@ -78,6 +116,7 @@ def load_pins() -> PinsDict:
     if "default" not in _pins or not isinstance(_pins["default"], list):
         _pins["default"] = [
             {"name": "Home", "path": "$HOME"},
+            {"name": "Trash", "path": TRASH},
             {"name": "Downloads", "path": "$DOWNLOADS"},
             {"name": "Documents", "path": "$DOCUMENTS"},
             {"name": "Desktop", "path": "$DESKTOP"},
@@ -88,6 +127,9 @@ def load_pins() -> PinsDict:
     if "pins" not in _pins or not isinstance(_pins["pins"], list):
         _pins["pins"] = []
 
+    if loaded_from_file:
+        _migrate_add_trash_pin(cast(dict, _pins))
+
     # Keep an unexpanded copy so that add_pin/remove_pin can write existing
     # entries back exactly as they were, instead of re-deriving them from
     # the expanded form.
@@ -95,6 +137,9 @@ def load_pins() -> PinsDict:
 
     for section_key in ("default", "pins"):
         for item in _pins[section_key]:
+            if type(item) is dict and item.get("path") == TRASH:
+                # Keep the sentinel intact so the sidebar can special-case it
+                continue
             # no i will not use isinstance, ty screams at me
             # because of the replace code a few lines below
             if type(item) is dict and "path" in item and type(item["path"]) is str:

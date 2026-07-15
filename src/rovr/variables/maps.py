@@ -56,6 +56,7 @@ ASCII_ICONS = {
         "cut": ("X", "white"),
         "rename": ("R", "white"),
         "delete": ("D", "red"),
+        "trash": ("T", "grey"),
         "zip": ("Z", "yellow"),
     },
     "folder": {
@@ -90,6 +91,7 @@ ICONS = {
         "cut": ("\uf0c4", "white"),
         "rename": ("\uf246", "white"),
         "delete": ("\uf014", "red"),
+        "trash": ("\uf1f8", "grey"),
         "zip": ("\uf410", "yellow"),
         "link": ("\U000f0337", "cyan"),
         "symlink": ("\uf481", "cyan"),

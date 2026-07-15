@@ -10,6 +10,7 @@ from .paste_drop import PasteDropScreen
 from .paste_screen import PasteScreen
 from .rg_search import ContentSearch
 from .shell_exec import ShellExec
+from .trash import TrashScreen
 from .way_too_small import TerminalTooSmall
 from .yes_or_no import YesOrNo
 from .zd_to_directory import ZDToDirectory
@@ -28,6 +29,7 @@ __all__ = [
     "PasteScreen",
     "ShellExec",
     "TerminalTooSmall",
+    "TrashScreen",
     "YesOrNo",
     "ZDToDirectory",
 ]

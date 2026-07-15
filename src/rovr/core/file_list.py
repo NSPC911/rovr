@@ -1,7 +1,7 @@
 import shlex
 from contextlib import suppress
 from os import getcwd, path, scandir
-from typing import Callable, ClassVar, Iterable, Self, Sequence
+from typing import Callable, ClassVar, Sequence
 
 from rich.cells import cell_len
 from rich.segment import Segment
@@ -9,13 +9,12 @@ from rich.style import Style
 from textual import events, work
 from textual.binding import BindingType
 from textual.color import Color
-from textual.content import ContentText
 from textual.css.query import NoMatches
 from textual.errors import NoWidget
 from textual.strip import Strip
 from textual.widgets import Button, Input, OptionList, SelectionList
 from textual.widgets.option_list import OptionDoesNotExist
-from textual.widgets.selection_list import Selection, SelectionType
+from textual.widgets.selection_list import Selection
 from textual.worker import get_current_worker
 
 from rovr.classes.mixins import (
@@ -23,10 +22,11 @@ from rovr.classes.mixins import (
     Actionable,
     CheckboxRenderingMixin,
     ScrollOffMixin,
+    SetOptionsSelectionList,
     SingleLineOptionLayoutMixin,
 )
 from rovr.classes.session_manager import SessionManager, SessionOptionDict
-from rovr.classes.textual_options import FileListSelectionWidget, LazySelection
+from rovr.classes.textual_options import FileListSelectionWidget
 from rovr.functions import details as detail_utils
 from rovr.functions import path as path_utils
 from rovr.functions import pins as pin_utils
@@ -47,6 +47,7 @@ class FileList(
     CheckboxRenderingMixin,
     ScrollOffMixin,
     SingleLineOptionLayoutMixin,
+    SetOptionsSelectionList,
     SelectionList,
     inherit_bindings=False,
 ):
@@ -813,31 +814,6 @@ class FileList(
             utils.set_scuffed_subtitle(
                 self.parent, "SELECT", f"{len(self.selected)}/{len(self.options)}"
             )
-
-    def set_options(
-        self,
-        options: Iterable[
-            Selection[SelectionType]
-            | LazySelection[SelectionType]
-            | tuple[ContentText, SelectionType]
-            | tuple[ContentText, SelectionType, bool]
-        ],
-    ) -> Self:  # ty: ignore[invalid-method-override]
-        # Okay, lemme make myself clear here.
-        # A PR for this is already open at
-        # https://github.com/Textualize/textual/pull/6224
-        # essentially, the issue is that there isnt a set_options
-        # method for SelectionList, only for OptionList, but using
-        # OptionList's set_options doesnt clear selected or values
-        # but nothing was done, so I added it myself.
-        self._selected.clear()
-        self._values.clear()
-        # the ty ignore is important here, because options
-        # should be a Iterable["Option | VisualType | None"]
-        # but that isnt the case (based on the signature)
-        # so ty is crashing out.
-        super().set_options(options)  # ty: ignore[invalid-argument-type]
-        return self
 
     # not exactly sure, but there's this issue where if I click the
     # hist_previous keybind twice too fast, it registers it as once, so

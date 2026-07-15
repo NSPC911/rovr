@@ -1040,6 +1040,15 @@ wheels = [
 ]
 
 [[package]]
+name = "pytrash"
+version = "0.3.2"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/be/e9/6e258375d808a14ddd0fdc60b1b5532ee1b3a7083525bf125a9fb4e2d56a/pytrash-0.3.2.tar.gz", hash = "sha256:63c6a6719b578f3eae2803cb3ba23181cdb5045ee3b2c24cc841635dcf2ad4c2", size = 15749, upload-time = "2026-07-15T08:52:58.043Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/98/7a/92ab7d575a2f2d142d9e5e44a34982d9e2e3955a9f6cd2f2f8a2f3dd7d9e/pytrash-0.3.2-py3-none-any.whl", hash = "sha256:00f8c5b9abf2d636f0833044601e5f5416f3c630ab1c0d850b1a725343a05a4a", size = 20239, upload-time = "2026-07-15T08:52:57.19Z" },
+]
+
+[[package]]
 name = "pytz"
 version = "2026.1.post1"
 source = { registry = "https://pypi.org/simple" }
@@ -1208,10 +1217,10 @@ dependencies = [
     { name = "pillow" },
     { name = "platformdirs" },
     { name = "puremagic" },
+    { name = "pytrash" },
     { name = "rarfile" },
     { name = "resvg-py" },
     { name = "rich" },
-    { name = "send2trash" },
     { name = "textual" },
     { name = "textual-autocomplete" },
     { name = "textual-drivers" },
@@ -1262,10 +1271,10 @@ requires-dist = [
     { name = "pillow", specifier = ">=12.2.0" },
     { name = "platformdirs", specifier = ">=4.9.0" },
     { name = "puremagic", specifier = ">=2.2.0" },
+    { name = "pytrash", specifier = ">=0.3.2" },
     { name = "rarfile", specifier = ">=4.2" },
     { name = "resvg-py", specifier = ">=0.3.1" },
     { name = "rich", specifier = "==14.2.0" },
-    { name = "send2trash", specifier = ">=2.1.0" },
     { name = "textual", specifier = "~=8.0" },
     { name = "textual-autocomplete", specifier = ">=4.0.6" },
     { name = "textual-drivers", specifier = "~=0.7.0" },
@@ -1376,15 +1385,6 @@ wheels = [
     { url = "https://files.pythonhosted.org/packages/3a/3c/37d0ecb729a7cc2d393ea7dce316fc585680f35d93b8d62139d7d0a3700c/ruff-0.15.21-py3-none-win32.whl", hash = "sha256:01f8d5be84823c172b389e123174f781f9daf86d6c58719d603f941932195cdd", size = 10896555, upload-time = "2026-07-09T20:01:26.941Z" },
     { url = "https://files.pythonhosted.org/packages/c0/b8/e43466b2a6067ce91e669068f6e28d6c719a920f014b070d5c8731725de3/ruff-0.15.21-py3-none-win_amd64.whl", hash = "sha256:d4b8d9a2f0f12b816b50447f6eccb9f4bb01a6b82c86b50fb3b5354b458dc6d3", size = 12038772, upload-time = "2026-07-09T20:01:29.497Z" },
     { url = "https://files.pythonhosted.org/packages/dd/75/e90ab9aeece218a9fc5a5bc3ec97d0ee6bb3c4ff95869463c1de58e29a1c/ruff-0.15.21-py3-none-win_arm64.whl", hash = "sha256:6e83115d4b9377c1cbc13abf0e051f069fab0ef815ea0504a8a008cee24dd0a8", size = 11375265, upload-time = "2026-07-09T20:01:31.772Z" },
-]
-
-[[package]]
-name = "send2trash"
-version = "2.1.0"
-source = { registry = "https://pypi.org/simple" }
-sdist = { url = "https://files.pythonhosted.org/packages/c5/f0/184b4b5f8d00f2a92cf96eec8967a3d550b52cf94362dad1100df9e48d57/send2trash-2.1.0.tar.gz", hash = "sha256:1c72b39f09457db3c05ce1d19158c2cbef4c32b8bedd02c155e49282b7ea7459", size = 17255, upload-time = "2026-01-14T06:27:36.056Z" }
-wheels = [
-    { url = "https://files.pythonhosted.org/packages/1c/78/504fdd027da3b84ff1aecd9f6957e65f35134534ccc6da8628eb71e76d3f/send2trash-2.1.0-py3-none-any.whl", hash = "sha256:0da2f112e6d6bb22de6aa6daa7e144831a4febf2a87261451c4ad849fe9a873c", size = 17610, upload-time = "2026-01-14T06:27:35.218Z" },
 ]
 
 [[package]]

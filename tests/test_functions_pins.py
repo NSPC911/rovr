@@ -15,6 +15,7 @@ DEFAULT_NAMES = {
     "Pictures",
     "Videos",
     "Music",
+    "Trash",
 }
 
 

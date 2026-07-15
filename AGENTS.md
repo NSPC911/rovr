@@ -106,6 +106,7 @@ with suppress(FileNotFoundError):
 - CSS files use `.tcss` extension, variables are defined with `$`, not all web CSS features are supported
 - Widget composition in `compose()` methods
 - For any widget modifications in a thread, use `call_from_thread` to run immediately as a block, or use `call_next`/`call_later`/`call_after_refresh` to send the function into the call stack.
+  - This does not apply for reactive variables/properties, those are automatically handled by Textual.
 
 ### Project Structure
 

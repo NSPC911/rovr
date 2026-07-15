@@ -65,6 +65,8 @@ async def test_default_pinned_sidebar(
         await iter_until(pilot, lambda: bool(app.file_list.options))
         for option in sidebar.list_of_options:
             if hasattr(option, "label"):
+                if option.label == "Trash":
+                    continue
                 assert option.label in base_map
                 base_map.pop(option.label)
             elif option.prompt.strip() == "Pinned":

@@ -1,4 +1,3 @@
-import os
 from typing import Callable, ClassVar
 
 from pytrash import RecycleBin, TrashEntry
@@ -28,6 +27,8 @@ restore_bind = get_shortest_bind(config["keybinds"]["trash"]["restore"])
 purge_bind = get_shortest_bind(config["keybinds"]["trash"]["purge"])
 empty_bind = get_shortest_bind(config["keybinds"]["trash"]["empty"])
 cancel_bind = get_shortest_bind(config["keybinds"]["trash"]["cancel"])
+
+home = path_utils.normalise(RovrVars.HOME)
 
 
 class TrashSelectionList(
@@ -159,53 +160,33 @@ class TrashScreen(Actionable, ModalScreen):
         self.query_one("#dialog").border_title = "Recycle Bin"
         self.reload_entries()
 
-    def _handle_of(self, entry: TrashEntry, index: int) -> str:
+    @staticmethod
+    def _handle_of(entry: TrashEntry, index: int) -> str:
         return entry._handle or f"__idx_{index}"
 
-    def _trashed_data_path(self, entry: TrashEntry) -> str | None:
-        """Best-effort location of the trashed bytes, for icon detection.
-
-        Only the freedesktop (Linux) layout is derivable from the private
-        handle; other backends fall back to a file icon.
-
-        Returns:
-            str | None: The path to the trashed data, or None if unknown.
-        """
-        handle = entry._handle.replace("/", os.sep)
-        marker = f"{os.sep}info{os.sep}"
-        if handle.endswith(".trashinfo") and marker in handle:
-            return handle[: -len(".trashinfo")].replace(
-                marker, f"{os.sep}files{os.sep}"
-            )
-        return None
-
-    def _entry_icon(self, entry: TrashEntry) -> tuple[str, str]:
-        data_path = self._trashed_data_path(entry)
-        if data_path is not None and os.path.isdir(data_path):
+    @staticmethod
+    def _entry_icon(entry: TrashEntry) -> tuple[str, str]:
+        if entry.original_path is not None and entry.is_dir:
             return icon_utils.get_icon_for_folder(entry.name, is_symlink=False)
         return icon_utils.get_icon_for_file(entry.name, is_symlink=False)
 
-    def _shorten_path(self, location: str) -> str:
-        location = path_utils.normalise(location)
-        home = path_utils.normalise(RovrVars.HOME)
-        if location == home:
-            return "~"
-        if location.startswith(f"{home}/"):
-            return f"~{location[len(home) :]}"
-        return location
-
     def _format_entry(self, entry: TrashEntry) -> Text:
-        icon, color = self._entry_icon(entry)
-        # Lead with a neutral space so the checkbox gutter derives its colour
-        # from the base style rather than the (coloured) file icon, matching
-        # how the file list renders.
+        if entry.original_path is not None and entry.is_dir:
+            icon, color = icon_utils.get_icon_for_folder(entry.name, is_symlink=False)
+        else:
+            icon, color = icon_utils.get_icon_for_file(entry.name, is_symlink=False)
+
+        # need to start with empty so no color is used
         prompt = Text(" ")
-        prompt.append(icon, style=color or "")
-        prompt.append(" ")
-        prompt.append(entry.name)
+        prompt.append_tokens([(icon, color or ""), (" ", ""), (entry.name, "")])
         meta: list[str] = []
         if entry.original_path:
-            meta.append(self._shorten_path(entry.original_path))
+            location = path_utils.normalise(entry.original_path)
+            if location == home:
+                location = "~"
+            if location.startswith(f"{home}/"):
+                location = f"~{location[len(home) :]}"
+            meta.append(location)
         if entry.deleted_at:
             meta.append(entry.deleted_at.strftime("%Y-%m-%d %H:%M"))
         if entry.size is not None:
@@ -224,8 +205,6 @@ class TrashScreen(Actionable, ModalScreen):
     def reload_entries(self) -> None:
         selection_list = self.query_one("#trash_entries", TrashSelectionList)
 
-        # Remember the current highlight (by stable handle, then index) and
-        # scroll position so a reload after an operation is not jarring.
         prev_handle: str | None = None
         prev_index = selection_list.highlighted
         if prev_index is not None and 0 <= prev_index < selection_list.option_count:

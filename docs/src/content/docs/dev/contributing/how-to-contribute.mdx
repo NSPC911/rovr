@@ -9,23 +9,20 @@ as `rovr` is currently in its early stages, prs are greatly appreciated. these c
 
 textual's default assortment of themes is quite small, so any theme that you made for yourself can be contributed here!
 
-ensure that your theme follows the schema for a custom theme
+themes are `tcss` files in `src/rovr/config/themes/<name>.tcss`, made of variable declarations
 
-```toml
-[[custom_theme]]
-name       = "<name>"
-primary    = "<color>"
-secondary  = "<color>"
-warning    = "<color>"
-error      = "<color>"
-success    = "<color>"
-accent     = "<color>"
-foreground = "<color>"
-background = "<color>"
-surface    = "<color>"
-panel      = "<color>"
-is_dark    = true
-variables  = { "<var>" = "<key>" }
+```css
+$primary: <color>;
+$secondary: <color>;
+$warning: <color>;
+$error: <color>;
+$success: <color>;
+$accent: <color>;
+$foreground: <color>;
+$background: <color>;
+$surface: <color>;
+$panel: <color>;
+$dark: true;
 ```
 
 for more information, please refer to [theming](/rovr/configuration/theming)

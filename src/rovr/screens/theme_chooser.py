@@ -13,7 +13,6 @@ from rovr.classes.textual_options import OptionWithValue
 from rovr.components import ModalSearchScreen
 from rovr.components.special_option_lists import DoubleClickableOptionList
 from rovr.functions.path import compress
-from rovr.functions.themes import register_all_themes
 
 
 class ThemeChooser(ModalSearchScreen):
@@ -35,8 +34,10 @@ class ThemeChooser(ModalSearchScreen):
         self.call_next(
             lambda: setattr(self.search_input, "border_title", "Select a theme")
         )
-        # pick up theme files added or edited since startup
-        errors = register_all_themes(self.app)
+        # pick up theme files added or edited since the last poll
+        errors = self.app.call_from_thread(
+            self.app.reload_themes  # ty: ignore[unresolved-attribute]
+        )
         for error in errors:
             self.notify(error, title="Theme Error", severity="warning", markup=False)
         self.themes: list[OptionWithValue] = [

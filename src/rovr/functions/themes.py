@@ -1,14 +1,12 @@
 import re
+from contextlib import suppress
 from importlib import resources
 from pathlib import Path
-from shutil import copy
 
 from textual.app import App
 from textual.color import Color
 from textual.theme import Theme
 
-from rovr.classes.theme import RovrThemeClass
-from rovr.variables.constants import config
 from rovr.variables.maps import RovrVars
 
 _VARIABLE_DECLARATION = re.compile(r"^\$([\w-]+)\s*:\s*(.+?)\s*;\s*$")
@@ -37,45 +35,12 @@ THEME_COLOR_FIELDS = frozenset({
 })
 THEME_BOOL_FIELDS = frozenset({"dark", "ansi"})
 THEME_FLOAT_FIELDS = frozenset({"luminosity-spread", "text-alpha"})
-
-
-def get_custom_themes() -> list:
-    """
-    Get the custom themes defined in the config file.
-
-    Returns:
-        list: A list of custom themes.
-    """
-    custom_themes = []
-    for theme in config["custom_theme"]:
-        if bar_gradient := theme.get("bar_gradient"):
-            if "default" in bar_gradient["default"]:
-                for color in bar_gradient["default"]:
-                    Color.parse(color)
-            if "error" in bar_gradient["error"]:
-                for color in bar_gradient["error"]:
-                    Color.parse(color)
-        custom_themes.append(
-            RovrThemeClass(
-                bar_gradient=theme.get("bar_gradient", {}),
-                name=theme["name"]
-                .lower()
-                .replace(" ", "-"),  # Keep it similar to default textual behaviour
-                primary=theme["primary"],
-                secondary=theme["secondary"],
-                accent=theme["accent"],
-                foreground=theme["foreground"],
-                background=theme["background"],
-                success=theme["success"],
-                warning=theme["warning"],
-                error=theme["error"],
-                surface=theme["surface"],
-                panel=theme["panel"],
-                dark=theme["is_dark"],
-                variables=theme.get("variables", {}),
-            )
-        )
-    return custom_themes
+# rovr-specific extras, declared in theme files but consumed outside CSS:
+# `$bar-gradient-<kind>: <color> <color> ...;` colors the progress bars
+BAR_GRADIENT_FIELDS = {
+    "bar-gradient-default": "default",
+    "bar-gradient-error": "error",
+}
 
 
 def extract_variable_declarations(css_text: str) -> dict[str, str]:
@@ -206,21 +171,52 @@ def parse_theme_file(theme_file: Path) -> tuple[Theme, list[str]]:
     fields = pop_theme_field_overrides(declared)
     if "primary" not in fields:
         raise ValueError("a theme must define $primary")
+    bar_gradient: dict[str, list[str]] = {}
+    for name, kind in BAR_GRADIENT_FIELDS.items():
+        if name not in declared:
+            continue
+        colors = declared.pop(name).split()
+        for color in colors:
+            Color.parse(color)
+        bar_gradient[kind] = colors
     warnings = []
     if _COMMENT.sub("", strip_variable_declarations(css_text)).strip():
         warnings.append(
             f"{theme_file.name}: css rules in theme files aren't supported yet"
         )
-    return Theme(
+    theme = Theme(
         name=theme_file.stem,
         variables=declared,
         **fields,  # ty: ignore[invalid-argument-type]
-    ), warnings
+    )
+    if bar_gradient:
+        # consumed by ProcessContainer via getattr; not a Theme field
+        theme.bar_gradient = bar_gradient  # ty: ignore[unresolved-attribute]
+    return theme, warnings
+
+
+def theme_dirs() -> list[Path]:
+    """
+    The directories theme files are loaded from, in ascending priority.
+
+    Bundled themes are registered straight from the package (never copied),
+    so improvements to them reach users on upgrade; a file with the same
+    name in the user theme folder overrides the bundled one.
+
+    Returns:
+        list[Path]: bundled themes directory first, user theme folder last.
+    """
+    dirs: list[Path] = []
+    bundled_dir = Path(str(bundled_themes_path))
+    if bundled_dir.is_dir():
+        dirs.append(bundled_dir)
+    dirs.append(Path(RovrVars.ROVRTHEMES))
+    return dirs
 
 
 def register_all_themes(app: App) -> list[str]:
     """
-    Copy bundled themes into the user theme folder, then register every theme.
+    Register every bundled and user theme file.
 
     Args:
         app: The application to register themes on.
@@ -228,23 +224,36 @@ def register_all_themes(app: App) -> list[str]:
     Returns:
         list[str]: human-readable errors for files that failed to parse.
     """
-    custom_dir = Path(RovrVars.ROVRTHEMES)
-    custom_dir.mkdir(parents=True, exist_ok=True)
-    if bundled_themes_path.is_dir():
-        for bundled in bundled_themes_path.iterdir():
-            target = custom_dir / bundled.name
-            if not target.exists():
-                copy(str(bundled), target)
+    Path(RovrVars.ROVRTHEMES).mkdir(parents=True, exist_ok=True)
     errors: list[str] = []
-    for theme_file in sorted(custom_dir.glob("*.tcss")):
-        try:
-            theme, warnings = parse_theme_file(theme_file)
-        except Exception as exc:
-            errors.append(f"{theme_file.name}: {exc}")
-            continue
-        errors.extend(warnings)
-        app.register_theme(theme)
+    for theme_dir in theme_dirs():
+        for theme_file in sorted(theme_dir.glob("*.tcss")):
+            try:
+                theme, warnings = parse_theme_file(theme_file)
+            except Exception as exc:
+                errors.append(f"{theme_file.name}: {exc}")
+                continue
+            errors.extend(warnings)
+            app.register_theme(theme)
     return errors
+
+
+def theme_file_mtimes() -> dict[str, float]:
+    """
+    Snapshot the modification times of every theme file.
+
+    Comparing two snapshots is how the app detects that a theme file was
+    edited (or added) while it is running, without re-parsing anything.
+
+    Returns:
+        dict[str, float]: mapping of theme file path to its mtime.
+    """
+    mtimes: dict[str, float] = {}
+    for theme_dir in theme_dirs():
+        for theme_file in theme_dir.glob("*.tcss"):
+            with suppress(OSError):
+                mtimes[str(theme_file)] = theme_file.stat().st_mtime
+    return mtimes
 
 
 def strip_variable_declarations(css_text: str) -> str:

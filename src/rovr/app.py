@@ -18,14 +18,12 @@ from rich.protocol import is_renderable
 from textual import constants, events, on, work
 from textual.app import WINDOWS, ComposeResult, ScreenStackError, SystemCommand
 from textual.binding import Binding
-from textual.color import ColorParseError
 from textual.containers import (
     HorizontalGroup,
     HorizontalScroll,
     Vertical,
     VerticalGroup,
 )
-from textual.content import Content
 from textual.css.errors import StylesheetError
 from textual.css.query import NoMatches
 from textual.css.stylesheet import StylesheetParseError
@@ -88,10 +86,10 @@ from rovr.functions.path import (
 )
 from rovr.functions.themes import (
     extract_variable_declarations,
-    get_custom_themes,
     pop_theme_field_overrides,
     register_all_themes,
     resolve_variable_references,
+    theme_file_mtimes,
 )
 from rovr.functions.utils import multiprocessing_process_error_checker, run_command
 from rovr.header import HeaderArea
@@ -247,24 +245,8 @@ class Application(Actionable, DNDApp, inherit_bindings=False):
         self.last_available_cd = getcwd()
         self.old_theme: str = self.theme
 
-        # theme files first, config custom themes second so an explicit
-        # [[custom_theme]] with the same name wins
         self._theme_errors: list[str] = register_all_themes(self)
-        try:
-            for theme in get_custom_themes():
-                self.register_theme(theme)
-            parse_failed = False
-        except ColorParseError as exc:
-            parse_failed = True
-            exception = exc
-        if parse_failed:
-            self.exit(
-                return_code=1,
-                message=Content.from_markup(
-                    f"[underline ansi_red]Config Error[/]\n[bold ansi_cyan]custom_themes.bar_gradient[/]: {exception}"
-                ),
-            )
-            return
+        self._theme_file_mtimes: dict[str, float] = theme_file_mtimes()
         self.theme = config["theme"]["default"]
         self.ansi_color = config["theme"]["transparent"]
 
@@ -340,6 +322,7 @@ class Application(Actionable, DNDApp, inherit_bindings=False):
         self.theme_changed_signal.subscribe(self, self.theme_changed)
         for error in self._theme_errors:
             self.notify(error, title="Theme Error", severity="warning", markup=False)
+        self.set_interval(1, self._poll_theme_files)
         # title for screenshots
         self.title = ""
 
@@ -410,6 +393,45 @@ class Application(Actionable, DNDApp, inherit_bindings=False):
             )
 
         self.push_screen(ThemeChooser(), callback=apply_theme)
+
+    def reload_themes(self) -> list[str]:
+        """
+        Pick up theme files added or edited since the last check.
+
+        If the active theme's definition changed, re-applies it — assigning
+        `self.theme` its current value is a reactive no-op, so Textual's
+        theme application has to be invoked directly.
+
+        Returns:
+            list[str]: human-readable errors for files that failed to parse.
+        """
+        mtimes = theme_file_mtimes()
+        if mtimes == self._theme_file_mtimes:
+            return []
+        started = perf_counter()
+        changed = {
+            path.basename(theme_path)
+            for theme_path in self._theme_file_mtimes.keys() | mtimes.keys()
+            if self._theme_file_mtimes.get(theme_path) != mtimes.get(theme_path)
+        }
+        self._theme_file_mtimes = mtimes
+        active_theme = self.current_theme
+        errors = register_all_themes(self)
+        if self.current_theme != active_theme:
+            self._watch_theme(self.theme)
+        if not errors:
+            elapsed = (perf_counter() - started) * 1000
+            what = (
+                ", ".join(sorted(changed))
+                if len(changed) <= 3
+                else f"{len(changed)} theme files"
+            )
+            self.notify(f"Reloaded {what} in {elapsed:.0f} ms", title="Themes")
+        return errors
+
+    def _poll_theme_files(self) -> None:
+        for error in self.reload_themes():
+            self.notify(error, title="Theme Error", severity="warning", markup=False)
 
     def get_css_variables(self) -> dict[str, str]:
         # RovrStylesheet strips `$name:` declarations from the CSS files, so

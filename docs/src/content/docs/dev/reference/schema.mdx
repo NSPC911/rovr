@@ -153,273 +153,255 @@ description: config schema humanified
   - [5.1. Property `Rovr Config > theme > default`](#theme_default)
   - [5.2. Property `Rovr Config > theme > preview`](#theme_preview)
   - [5.3. Property `Rovr Config > theme > transparent`](#theme_transparent)
-- [6. Property `Rovr Config > custom_theme`](#custom_theme)
-  - [6.1. Rovr Config > custom_theme > custom_theme items](#custom_theme_items)
-    - [6.1.1. Property `Rovr Config > custom_theme > custom_theme items > name`](#custom_theme_items_name)
-    - [6.1.2. Property `Rovr Config > custom_theme > custom_theme items > primary`](#custom_theme_items_primary)
-    - [6.1.3. Property `Rovr Config > custom_theme > custom_theme items > secondary`](#custom_theme_items_secondary)
-    - [6.1.4. Property `Rovr Config > custom_theme > custom_theme items > warning`](#custom_theme_items_warning)
-    - [6.1.5. Property `Rovr Config > custom_theme > custom_theme items > error`](#custom_theme_items_error)
-    - [6.1.6. Property `Rovr Config > custom_theme > custom_theme items > success`](#custom_theme_items_success)
-    - [6.1.7. Property `Rovr Config > custom_theme > custom_theme items > accent`](#custom_theme_items_accent)
-    - [6.1.8. Property `Rovr Config > custom_theme > custom_theme items > foreground`](#custom_theme_items_foreground)
-    - [6.1.9. Property `Rovr Config > custom_theme > custom_theme items > background`](#custom_theme_items_background)
-    - [6.1.10. Property `Rovr Config > custom_theme > custom_theme items > surface`](#custom_theme_items_surface)
-    - [6.1.11. Property `Rovr Config > custom_theme > custom_theme items > panel`](#custom_theme_items_panel)
-    - [6.1.12. Property `Rovr Config > custom_theme > custom_theme items > bar_gradient`](#custom_theme_items_bar_gradient)
-      - [6.1.12.1. Property `Rovr Config > custom_theme > custom_theme items > bar_gradient > default`](#custom_theme_items_bar_gradient_default)
-      - [6.1.12.2. Property `Rovr Config > custom_theme > custom_theme items > bar_gradient > error`](#custom_theme_items_bar_gradient_error)
-    - [6.1.13. Property `Rovr Config > custom_theme > custom_theme items > is_dark`](#custom_theme_items_is_dark)
-    - [6.1.14. Property `Rovr Config > custom_theme > custom_theme items > variables`](#custom_theme_items_variables)
-- [7. Property `Rovr Config > keybinds`](#keybinds)
-  - [7.1. Property `Rovr Config > keybinds > toggle_pin`](#keybinds_toggle_pin)
-    - [7.1.1. Rovr Config > keybinds > toggle_pin > toggle_pin items](#keybinds_toggle_pin_items)
-  - [7.2. Property `Rovr Config > keybinds > toggle_pinned_sidebar`](#keybinds_toggle_pinned_sidebar)
-    - [7.2.1. Rovr Config > keybinds > toggle_pin > toggle_pin items](#keybinds_toggle_pin_items)
-  - [7.3. Property `Rovr Config > keybinds > toggle_preview_sidebar`](#keybinds_toggle_preview_sidebar)
-    - [7.3.1. Rovr Config > keybinds > toggle_pin > toggle_pin items](#keybinds_toggle_pin_items)
-  - [7.4. Property `Rovr Config > keybinds > toggle_footer`](#keybinds_toggle_footer)
-    - [7.4.1. Rovr Config > keybinds > toggle_pin > toggle_pin items](#keybinds_toggle_pin_items)
-  - [7.5. Property `Rovr Config > keybinds > toggle_menu_wrapper`](#keybinds_toggle_menu_wrapper)
-    - [7.5.1. Rovr Config > keybinds > toggle_pin > toggle_pin items](#keybinds_toggle_pin_items)
-  - [7.6. Property `Rovr Config > keybinds > focus_toggle_pinned_sidebar`](#keybinds_focus_toggle_pinned_sidebar)
-    - [7.6.1. Rovr Config > keybinds > toggle_pin > toggle_pin items](#keybinds_toggle_pin_items)
-  - [7.7. Property `Rovr Config > keybinds > focus_file_list`](#keybinds_focus_file_list)
-    - [7.7.1. Rovr Config > keybinds > toggle_pin > toggle_pin items](#keybinds_toggle_pin_items)
-  - [7.8. Property `Rovr Config > keybinds > focus_toggle_preview_sidebar`](#keybinds_focus_toggle_preview_sidebar)
-    - [7.8.1. Rovr Config > keybinds > toggle_pin > toggle_pin items](#keybinds_toggle_pin_items)
-  - [7.9. Property `Rovr Config > keybinds > focus_toggle_path_switcher`](#keybinds_focus_toggle_path_switcher)
-    - [7.9.1. Rovr Config > keybinds > toggle_pin > toggle_pin items](#keybinds_toggle_pin_items)
-  - [7.10. Property `Rovr Config > keybinds > focus_toggle_processes`](#keybinds_focus_toggle_processes)
-    - [7.10.1. Rovr Config > keybinds > toggle_pin > toggle_pin items](#keybinds_toggle_pin_items)
-  - [7.11. Property `Rovr Config > keybinds > focus_toggle_clipboard`](#keybinds_focus_toggle_clipboard)
-    - [7.11.1. Rovr Config > keybinds > toggle_pin > toggle_pin items](#keybinds_toggle_pin_items)
-  - [7.12. Property `Rovr Config > keybinds > focus_toggle_metadata`](#keybinds_focus_toggle_metadata)
-    - [7.12.1. Rovr Config > keybinds > toggle_pin > toggle_pin items](#keybinds_toggle_pin_items)
-  - [7.13. Property `Rovr Config > keybinds > focus_search`](#keybinds_focus_search)
-    - [7.13.1. Rovr Config > keybinds > toggle_pin > toggle_pin items](#keybinds_toggle_pin_items)
-  - [7.14. Property `Rovr Config > keybinds > copy`](#keybinds_copy)
-    - [7.14.1. Rovr Config > keybinds > toggle_pin > toggle_pin items](#keybinds_toggle_pin_items)
-  - [7.15. Property `Rovr Config > keybinds > paste`](#keybinds_paste)
-    - [7.15.1. Rovr Config > keybinds > toggle_pin > toggle_pin items](#keybinds_toggle_pin_items)
-  - [7.16. Property `Rovr Config > keybinds > cut`](#keybinds_cut)
-    - [7.16.1. Rovr Config > keybinds > toggle_pin > toggle_pin items](#keybinds_toggle_pin_items)
-  - [7.17. Property `Rovr Config > keybinds > delete`](#keybinds_delete)
-    - [7.17.1. Rovr Config > keybinds > toggle_pin > toggle_pin items](#keybinds_toggle_pin_items)
-  - [7.18. Property `Rovr Config > keybinds > delete_files`](#keybinds_delete_files)
-    - [7.18.1. Property `Rovr Config > keybinds > delete_files > trash`](#keybinds_delete_files_trash)
-      - [7.18.1.1. Rovr Config > keybinds > toggle_pin > toggle_pin items](#keybinds_toggle_pin_items)
-    - [7.18.2. Property `Rovr Config > keybinds > delete_files > delete`](#keybinds_delete_files_delete)
-      - [7.18.2.1. Rovr Config > keybinds > toggle_pin > toggle_pin items](#keybinds_toggle_pin_items)
-    - [7.18.3. Property `Rovr Config > keybinds > delete_files > cancel`](#keybinds_delete_files_cancel)
-      - [7.18.3.1. Rovr Config > keybinds > toggle_pin > toggle_pin items](#keybinds_toggle_pin_items)
-  - [7.19. Property `Rovr Config > keybinds > trash`](#keybinds_trash)
-    - [7.19.1. Property `Rovr Config > keybinds > trash > restore`](#keybinds_trash_restore)
-      - [7.19.1.1. Rovr Config > keybinds > toggle_pin > toggle_pin items](#keybinds_toggle_pin_items)
-    - [7.19.2. Property `Rovr Config > keybinds > trash > purge`](#keybinds_trash_purge)
-      - [7.19.2.1. Rovr Config > keybinds > toggle_pin > toggle_pin items](#keybinds_toggle_pin_items)
-    - [7.19.3. Property `Rovr Config > keybinds > trash > empty`](#keybinds_trash_empty)
-      - [7.19.3.1. Rovr Config > keybinds > toggle_pin > toggle_pin items](#keybinds_toggle_pin_items)
-    - [7.19.4. Property `Rovr Config > keybinds > trash > cancel`](#keybinds_trash_cancel)
-      - [7.19.4.1. Rovr Config > keybinds > toggle_pin > toggle_pin items](#keybinds_toggle_pin_items)
-  - [7.20. Property `Rovr Config > keybinds > rename`](#keybinds_rename)
-    - [7.20.1. Rovr Config > keybinds > toggle_pin > toggle_pin items](#keybinds_toggle_pin_items)
-  - [7.21. Property `Rovr Config > keybinds > new`](#keybinds_new)
-    - [7.21.1. Rovr Config > keybinds > toggle_pin > toggle_pin items](#keybinds_toggle_pin_items)
-  - [7.22. Property `Rovr Config > keybinds > bulk_create`](#keybinds_bulk_create)
-    - [7.22.1. Rovr Config > keybinds > toggle_pin > toggle_pin items](#keybinds_toggle_pin_items)
-  - [7.23. Property `Rovr Config > keybinds > toggle_all`](#keybinds_toggle_all)
-    - [7.23.1. Rovr Config > keybinds > toggle_pin > toggle_pin items](#keybinds_toggle_pin_items)
-  - [7.24. Property `Rovr Config > keybinds > zip`](#keybinds_zip)
-    - [7.24.1. Rovr Config > keybinds > toggle_pin > toggle_pin items](#keybinds_toggle_pin_items)
-  - [7.25. Property `Rovr Config > keybinds > unzip`](#keybinds_unzip)
-    - [7.25.1. Rovr Config > keybinds > toggle_pin > toggle_pin items](#keybinds_toggle_pin_items)
-  - [7.26. Property `Rovr Config > keybinds > open_right_click_menu`](#keybinds_open_right_click_menu)
-    - [7.26.1. Rovr Config > keybinds > toggle_pin > toggle_pin items](#keybinds_toggle_pin_items)
-  - [7.27. Property `Rovr Config > keybinds > extra_copy`](#keybinds_extra_copy)
-    - [7.27.1. Property `Rovr Config > keybinds > extra_copy > open_popup`](#keybinds_extra_copy_open_popup)
-      - [7.27.1.1. Rovr Config > keybinds > toggle_pin > toggle_pin items](#keybinds_toggle_pin_items)
-    - [7.27.2. Property `Rovr Config > keybinds > extra_copy > copy_to_rovr`](#keybinds_extra_copy_copy_to_rovr)
-      - [7.27.2.1. Rovr Config > keybinds > toggle_pin > toggle_pin items](#keybinds_toggle_pin_items)
-    - [7.27.3. Property `Rovr Config > keybinds > extra_copy > copy_highlighted`](#keybinds_extra_copy_copy_highlighted)
-      - [7.27.3.1. Rovr Config > keybinds > toggle_pin > toggle_pin items](#keybinds_toggle_pin_items)
-    - [7.27.4. Property `Rovr Config > keybinds > extra_copy > copy_to_system_clip`](#keybinds_extra_copy_copy_to_system_clip)
-      - [7.27.4.1. Rovr Config > keybinds > toggle_pin > toggle_pin items](#keybinds_toggle_pin_items)
-    - [7.27.5. Property `Rovr Config > keybinds > extra_copy > copy_current_directory`](#keybinds_extra_copy_copy_current_directory)
-      - [7.27.5.1. Rovr Config > keybinds > toggle_pin > toggle_pin items](#keybinds_toggle_pin_items)
-  - [7.28. Property `Rovr Config > keybinds > up`](#keybinds_up)
-    - [7.28.1. Rovr Config > keybinds > toggle_pin > toggle_pin items](#keybinds_toggle_pin_items)
-  - [7.29. Property `Rovr Config > keybinds > down`](#keybinds_down)
-    - [7.29.1. Rovr Config > keybinds > toggle_pin > toggle_pin items](#keybinds_toggle_pin_items)
-  - [7.30. Property `Rovr Config > keybinds > up_tree`](#keybinds_up_tree)
-    - [7.30.1. Rovr Config > keybinds > toggle_pin > toggle_pin items](#keybinds_toggle_pin_items)
-  - [7.31. Property `Rovr Config > keybinds > down_tree`](#keybinds_down_tree)
-    - [7.31.1. Rovr Config > keybinds > toggle_pin > toggle_pin items](#keybinds_toggle_pin_items)
-  - [7.32. Property `Rovr Config > keybinds > bypass_up_tree`](#keybinds_bypass_up_tree)
-    - [7.32.1. Rovr Config > keybinds > toggle_pin > toggle_pin items](#keybinds_toggle_pin_items)
-  - [7.33. Property `Rovr Config > keybinds > bypass_down_tree`](#keybinds_bypass_down_tree)
-    - [7.33.1. Rovr Config > keybinds > toggle_pin > toggle_pin items](#keybinds_toggle_pin_items)
-  - [7.34. Property `Rovr Config > keybinds > page_up`](#keybinds_page_up)
-    - [7.34.1. Rovr Config > keybinds > toggle_pin > toggle_pin items](#keybinds_toggle_pin_items)
-  - [7.35. Property `Rovr Config > keybinds > page_down`](#keybinds_page_down)
-    - [7.35.1. Rovr Config > keybinds > toggle_pin > toggle_pin items](#keybinds_toggle_pin_items)
-  - [7.36. Property `Rovr Config > keybinds > home`](#keybinds_home)
-    - [7.36.1. Rovr Config > keybinds > toggle_pin > toggle_pin items](#keybinds_toggle_pin_items)
-  - [7.37. Property `Rovr Config > keybinds > end`](#keybinds_end)
-    - [7.37.1. Rovr Config > keybinds > toggle_pin > toggle_pin items](#keybinds_toggle_pin_items)
-  - [7.38. Property `Rovr Config > keybinds > hist_previous`](#keybinds_hist_previous)
-    - [7.38.1. Rovr Config > keybinds > toggle_pin > toggle_pin items](#keybinds_toggle_pin_items)
-  - [7.39. Property `Rovr Config > keybinds > hist_next`](#keybinds_hist_next)
-    - [7.39.1. Rovr Config > keybinds > toggle_pin > toggle_pin items](#keybinds_toggle_pin_items)
-  - [7.40. Property `Rovr Config > keybinds > toggle_visual`](#keybinds_toggle_visual)
-    - [7.40.1. Rovr Config > keybinds > toggle_pin > toggle_pin items](#keybinds_toggle_pin_items)
-  - [7.41. Property `Rovr Config > keybinds > toggle_hidden_files`](#keybinds_toggle_hidden_files)
-    - [7.41.1. Rovr Config > keybinds > toggle_pin > toggle_pin items](#keybinds_toggle_pin_items)
-  - [7.42. Property `Rovr Config > keybinds > toggle_select_item`](#keybinds_toggle_select_item)
-    - [7.42.1. Rovr Config > keybinds > toggle_pin > toggle_pin items](#keybinds_toggle_pin_items)
-  - [7.43. Property `Rovr Config > keybinds > select_up`](#keybinds_select_up)
-    - [7.43.1. Rovr Config > keybinds > toggle_pin > toggle_pin items](#keybinds_toggle_pin_items)
-  - [7.44. Property `Rovr Config > keybinds > select_down`](#keybinds_select_down)
-    - [7.44.1. Rovr Config > keybinds > toggle_pin > toggle_pin items](#keybinds_toggle_pin_items)
-  - [7.45. Property `Rovr Config > keybinds > select_page_up`](#keybinds_select_page_up)
-    - [7.45.1. Rovr Config > keybinds > toggle_pin > toggle_pin items](#keybinds_toggle_pin_items)
-  - [7.46. Property `Rovr Config > keybinds > select_page_down`](#keybinds_select_page_down)
-    - [7.46.1. Rovr Config > keybinds > toggle_pin > toggle_pin items](#keybinds_toggle_pin_items)
-  - [7.47. Property `Rovr Config > keybinds > select_home`](#keybinds_select_home)
-    - [7.47.1. Rovr Config > keybinds > toggle_pin > toggle_pin items](#keybinds_toggle_pin_items)
-  - [7.48. Property `Rovr Config > keybinds > select_end`](#keybinds_select_end)
-    - [7.48.1. Rovr Config > keybinds > toggle_pin > toggle_pin items](#keybinds_toggle_pin_items)
-  - [7.49. Property `Rovr Config > keybinds > tab_next`](#keybinds_tab_next)
-    - [7.49.1. Rovr Config > keybinds > toggle_pin > toggle_pin items](#keybinds_toggle_pin_items)
-  - [7.50. Property `Rovr Config > keybinds > tab_previous`](#keybinds_tab_previous)
-    - [7.50.1. Rovr Config > keybinds > toggle_pin > toggle_pin items](#keybinds_toggle_pin_items)
-  - [7.51. Property `Rovr Config > keybinds > tab_new`](#keybinds_tab_new)
-    - [7.51.1. Rovr Config > keybinds > toggle_pin > toggle_pin items](#keybinds_toggle_pin_items)
-  - [7.52. Property `Rovr Config > keybinds > tab_close`](#keybinds_tab_close)
-    - [7.52.1. Rovr Config > keybinds > toggle_pin > toggle_pin items](#keybinds_toggle_pin_items)
-  - [7.53. Property `Rovr Config > keybinds > preview_scroll_left`](#keybinds_preview_scroll_left)
-    - [7.53.1. Rovr Config > keybinds > toggle_pin > toggle_pin items](#keybinds_toggle_pin_items)
-  - [7.54. Property `Rovr Config > keybinds > preview_scroll_right`](#keybinds_preview_scroll_right)
-    - [7.54.1. Rovr Config > keybinds > toggle_pin > toggle_pin items](#keybinds_toggle_pin_items)
-  - [7.55. Property `Rovr Config > keybinds > preview_select_right`](#keybinds_preview_select_right)
-    - [7.55.1. Rovr Config > keybinds > toggle_pin > toggle_pin items](#keybinds_toggle_pin_items)
-  - [7.56. Property `Rovr Config > keybinds > preview_select_left`](#keybinds_preview_select_left)
-    - [7.56.1. Rovr Config > keybinds > toggle_pin > toggle_pin items](#keybinds_toggle_pin_items)
-  - [7.57. Property `Rovr Config > keybinds > show_keybinds`](#keybinds_show_keybinds)
-    - [7.57.1. Rovr Config > keybinds > toggle_pin > toggle_pin items](#keybinds_toggle_pin_items)
-  - [7.58. Property `Rovr Config > keybinds > change_sort_order`](#keybinds_change_sort_order)
-    - [7.58.1. Property `Rovr Config > keybinds > change_sort_order > open_popup`](#keybinds_change_sort_order_open_popup)
-      - [7.58.1.1. Rovr Config > keybinds > toggle_pin > toggle_pin items](#keybinds_toggle_pin_items)
-    - [7.58.2. Property `Rovr Config > keybinds > change_sort_order > name`](#keybinds_change_sort_order_name)
-      - [7.58.2.1. Rovr Config > keybinds > toggle_pin > toggle_pin items](#keybinds_toggle_pin_items)
-    - [7.58.3. Property `Rovr Config > keybinds > change_sort_order > extension`](#keybinds_change_sort_order_extension)
-      - [7.58.3.1. Rovr Config > keybinds > toggle_pin > toggle_pin items](#keybinds_toggle_pin_items)
-    - [7.58.4. Property `Rovr Config > keybinds > change_sort_order > natural`](#keybinds_change_sort_order_natural)
-      - [7.58.4.1. Rovr Config > keybinds > toggle_pin > toggle_pin items](#keybinds_toggle_pin_items)
-    - [7.58.5. Property `Rovr Config > keybinds > change_sort_order > size`](#keybinds_change_sort_order_size)
-      - [7.58.5.1. Rovr Config > keybinds > toggle_pin > toggle_pin items](#keybinds_toggle_pin_items)
-    - [7.58.6. Property `Rovr Config > keybinds > change_sort_order > created`](#keybinds_change_sort_order_created)
-      - [7.58.6.1. Rovr Config > keybinds > toggle_pin > toggle_pin items](#keybinds_toggle_pin_items)
-    - [7.58.7. Property `Rovr Config > keybinds > change_sort_order > modified`](#keybinds_change_sort_order_modified)
-      - [7.58.7.1. Rovr Config > keybinds > toggle_pin > toggle_pin items](#keybinds_toggle_pin_items)
-    - [7.58.8. Property `Rovr Config > keybinds > change_sort_order > descending`](#keybinds_change_sort_order_descending)
-      - [7.58.8.1. Rovr Config > keybinds > toggle_pin > toggle_pin items](#keybinds_toggle_pin_items)
-  - [7.59. Property `Rovr Config > keybinds > quit_app`](#keybinds_quit_app)
-    - [7.59.1. Rovr Config > keybinds > toggle_pin > toggle_pin items](#keybinds_toggle_pin_items)
-  - [7.60. Property `Rovr Config > keybinds > command_palette`](#keybinds_command_palette)
-  - [7.61. Property `Rovr Config > keybinds > suspend_process`](#keybinds_suspend_process)
-    - [7.61.1. Rovr Config > keybinds > toggle_pin > toggle_pin items](#keybinds_toggle_pin_items)
-  - [7.62. Property `Rovr Config > keybinds > open`](#keybinds_open)
-    - [7.62.1. Rovr Config > keybinds > toggle_pin > toggle_pin items](#keybinds_toggle_pin_items)
-  - [7.63. Property `Rovr Config > keybinds > open_editor`](#keybinds_open_editor)
-    - [7.63.1. Rovr Config > keybinds > toggle_pin > toggle_pin items](#keybinds_toggle_pin_items)
-  - [7.64. Property `Rovr Config > keybinds > show_shell_screen`](#keybinds_show_shell_screen)
-    - [7.64.1. Rovr Config > keybinds > toggle_pin > toggle_pin items](#keybinds_toggle_pin_items)
-  - [7.65. Property `Rovr Config > keybinds > filename_conflict`](#keybinds_filename_conflict)
-    - [7.65.1. Property `Rovr Config > keybinds > filename_conflict > overwrite`](#keybinds_filename_conflict_overwrite)
-      - [7.65.1.1. Rovr Config > keybinds > toggle_pin > toggle_pin items](#keybinds_toggle_pin_items)
-    - [7.65.2. Property `Rovr Config > keybinds > filename_conflict > skip`](#keybinds_filename_conflict_skip)
-      - [7.65.2.1. Rovr Config > keybinds > toggle_pin > toggle_pin items](#keybinds_toggle_pin_items)
-    - [7.65.3. Property `Rovr Config > keybinds > filename_conflict > rename`](#keybinds_filename_conflict_rename)
-      - [7.65.3.1. Rovr Config > keybinds > toggle_pin > toggle_pin items](#keybinds_toggle_pin_items)
-    - [7.65.4. Property `Rovr Config > keybinds > filename_conflict > cancel`](#keybinds_filename_conflict_cancel)
-      - [7.65.4.1. Rovr Config > keybinds > toggle_pin > toggle_pin items](#keybinds_toggle_pin_items)
-    - [7.65.5. Property `Rovr Config > keybinds > filename_conflict > dont_ask_again`](#keybinds_filename_conflict_dont_ask_again)
-      - [7.65.5.1. Rovr Config > keybinds > toggle_pin > toggle_pin items](#keybinds_toggle_pin_items)
-  - [7.66. Property `Rovr Config > keybinds > file_in_use`](#keybinds_file_in_use)
-    - [7.66.1. Property `Rovr Config > keybinds > file_in_use > retry`](#keybinds_file_in_use_retry)
-      - [7.66.1.1. Rovr Config > keybinds > toggle_pin > toggle_pin items](#keybinds_toggle_pin_items)
-    - [7.66.2. Property `Rovr Config > keybinds > file_in_use > skip`](#keybinds_file_in_use_skip)
-      - [7.66.2.1. Rovr Config > keybinds > toggle_pin > toggle_pin items](#keybinds_toggle_pin_items)
-    - [7.66.3. Property `Rovr Config > keybinds > file_in_use > cancel`](#keybinds_file_in_use_cancel)
-      - [7.66.3.1. Rovr Config > keybinds > toggle_pin > toggle_pin items](#keybinds_toggle_pin_items)
-    - [7.66.4. Property `Rovr Config > keybinds > file_in_use > dont_ask_again`](#keybinds_file_in_use_dont_ask_again)
-      - [7.66.4.1. Rovr Config > keybinds > toggle_pin > toggle_pin items](#keybinds_toggle_pin_items)
-  - [7.67. Property `Rovr Config > keybinds > filter_modal`](#keybinds_filter_modal)
-    - [7.67.1. Property `Rovr Config > keybinds > filter_modal > exit`](#keybinds_filter_modal_exit)
-      - [7.67.1.1. Rovr Config > keybinds > toggle_pin > toggle_pin items](#keybinds_toggle_pin_items)
-    - [7.67.2. Property `Rovr Config > keybinds > filter_modal > down`](#keybinds_filter_modal_down)
-      - [7.67.2.1. Rovr Config > keybinds > toggle_pin > toggle_pin items](#keybinds_toggle_pin_items)
-    - [7.67.3. Property `Rovr Config > keybinds > filter_modal > up`](#keybinds_filter_modal_up)
-      - [7.67.3.1. Rovr Config > keybinds > toggle_pin > toggle_pin items](#keybinds_toggle_pin_items)
-    - [7.67.4. Property `Rovr Config > keybinds > filter_modal > page_down`](#keybinds_filter_modal_page_down)
-      - [7.67.4.1. Rovr Config > keybinds > toggle_pin > toggle_pin items](#keybinds_toggle_pin_items)
-    - [7.67.5. Property `Rovr Config > keybinds > filter_modal > page_up`](#keybinds_filter_modal_page_up)
-      - [7.67.5.1. Rovr Config > keybinds > toggle_pin > toggle_pin items](#keybinds_toggle_pin_items)
-  - [7.68. Property `Rovr Config > keybinds > yes_or_no`](#keybinds_yes_or_no)
-    - [7.68.1. Property `Rovr Config > keybinds > yes_or_no > yes`](#keybinds_yes_or_no_yes)
-      - [7.68.1.1. Rovr Config > keybinds > toggle_pin > toggle_pin items](#keybinds_toggle_pin_items)
-    - [7.68.2. Property `Rovr Config > keybinds > yes_or_no > no`](#keybinds_yes_or_no_no)
-      - [7.68.2.1. Rovr Config > keybinds > toggle_pin > toggle_pin items](#keybinds_toggle_pin_items)
-    - [7.68.3. Property `Rovr Config > keybinds > yes_or_no > dont_ask_again`](#keybinds_yes_or_no_dont_ask_again)
-      - [7.68.3.1. Rovr Config > keybinds > toggle_pin > toggle_pin items](#keybinds_toggle_pin_items)
-  - [7.69. Property `Rovr Config > keybinds > drag_and_drop`](#keybinds_drag_and_drop)
-    - [7.69.1. Property `Rovr Config > keybinds > drag_and_drop > move`](#keybinds_drag_and_drop_move)
-      - [7.69.1.1. Rovr Config > keybinds > toggle_pin > toggle_pin items](#keybinds_toggle_pin_items)
-    - [7.69.2. Property `Rovr Config > keybinds > drag_and_drop > copy`](#keybinds_drag_and_drop_copy)
-      - [7.69.2.1. Rovr Config > keybinds > toggle_pin > toggle_pin items](#keybinds_toggle_pin_items)
-    - [7.69.3. Property `Rovr Config > keybinds > drag_and_drop > cancel`](#keybinds_drag_and_drop_cancel)
-      - [7.69.3.1. Rovr Config > keybinds > toggle_pin > toggle_pin items](#keybinds_toggle_pin_items)
-- [8. Property `Rovr Config > plugins`](#plugins)
-  - [8.1. Property `Rovr Config > plugins > zoxide`](#plugins_zoxide)
-    - [8.1.1. Property `Rovr Config > plugins > zoxide > enabled`](#plugins_zoxide_enabled)
-    - [8.1.2. Property `Rovr Config > plugins > zoxide > keybinds`](#plugins_zoxide_keybinds)
-      - [8.1.2.1. Rovr Config > keybinds > toggle_pin > toggle_pin items](#keybinds_toggle_pin_items)
-    - [8.1.3. Property `Rovr Config > plugins > zoxide > show_scores`](#plugins_zoxide_show_scores)
-  - [8.2. Property `Rovr Config > plugins > bat`](#plugins_bat)
-    - [8.2.1. Property `Rovr Config > plugins > bat > enabled`](#plugins_bat_enabled)
-    - [8.2.2. Property `Rovr Config > plugins > bat > executable`](#plugins_bat_executable)
-  - [8.3. Property `Rovr Config > plugins > fd`](#plugins_fd)
-    - [8.3.1. Property `Rovr Config > plugins > fd > enabled`](#plugins_fd_enabled)
-    - [8.3.2. Property `Rovr Config > plugins > fd > keybinds`](#plugins_fd_keybinds)
-      - [8.3.2.1. Rovr Config > keybinds > toggle_pin > toggle_pin items](#keybinds_toggle_pin_items)
-    - [8.3.3. Property `Rovr Config > plugins > fd > executable`](#plugins_fd_executable)
-    - [8.3.4. Property `Rovr Config > plugins > fd > relative_paths`](#plugins_fd_relative_paths)
-    - [8.3.5. Property `Rovr Config > plugins > fd > follow_symlinks`](#plugins_fd_follow_symlinks)
-    - [8.3.6. Property `Rovr Config > plugins > fd > no_ignore_parent`](#plugins_fd_no_ignore_parent)
-    - [8.3.7. Property `Rovr Config > plugins > fd > search_hidden`](#plugins_fd_search_hidden)
-    - [8.3.8. Property `Rovr Config > plugins > fd > timeout`](#plugins_fd_timeout)
-    - [8.3.9. Property `Rovr Config > plugins > fd > default_filter_types`](#plugins_fd_default_filter_types)
-      - [8.3.9.1. Rovr Config > plugins > fd > default_filter_types > default_filter_types items](#plugins_fd_default_filter_types_items)
-  - [8.4. Property `Rovr Config > plugins > rg`](#plugins_rg)
-    - [8.4.1. Property `Rovr Config > plugins > rg > enabled`](#plugins_rg_enabled)
-    - [8.4.2. Property `Rovr Config > plugins > rg > keybinds`](#plugins_rg_keybinds)
-      - [8.4.2.1. Rovr Config > keybinds > toggle_pin > toggle_pin items](#keybinds_toggle_pin_items)
-    - [8.4.3. Property `Rovr Config > plugins > rg > executable`](#plugins_rg_executable)
-    - [8.4.4. Property `Rovr Config > plugins > rg > case_sensitive`](#plugins_rg_case_sensitive)
-    - [8.4.5. Property `Rovr Config > plugins > rg > follow_symlinks`](#plugins_rg_follow_symlinks)
-    - [8.4.6. Property `Rovr Config > plugins > rg > no_ignore_parent`](#plugins_rg_no_ignore_parent)
-    - [8.4.7. Property `Rovr Config > plugins > rg > search_hidden`](#plugins_rg_search_hidden)
-    - [8.4.8. Property `Rovr Config > plugins > rg > timeout`](#plugins_rg_timeout)
-  - [8.5. Property `Rovr Config > plugins > poppler`](#plugins_poppler)
-    - [8.5.1. Property `Rovr Config > plugins > poppler > enabled`](#plugins_poppler_enabled)
-    - [8.5.2. Property `Rovr Config > plugins > poppler > threads`](#plugins_poppler_threads)
-    - [8.5.3. Property `Rovr Config > plugins > poppler > use_pdftocairo`](#plugins_poppler_use_pdftocairo)
-    - [8.5.4. Property `Rovr Config > plugins > poppler > poppler_folder`](#plugins_poppler_poppler_folder)
-    - [8.5.5. Property `Rovr Config > plugins > poppler > pdf_batch_size`](#plugins_poppler_pdf_batch_size)
-  - [8.6. Property `Rovr Config > plugins > file_one`](#plugins_file_one)
-    - [8.6.1. Property `Rovr Config > plugins > file_one > enabled`](#plugins_file_one_enabled)
-    - [8.6.2. Property `Rovr Config > plugins > file_one > get_description`](#plugins_file_one_get_description)
+- [6. Property `Rovr Config > keybinds`](#keybinds)
+  - [6.1. Property `Rovr Config > keybinds > toggle_pin`](#keybinds_toggle_pin)
+    - [6.1.1. Rovr Config > keybinds > toggle_pin > toggle_pin items](#keybinds_toggle_pin_items)
+  - [6.2. Property `Rovr Config > keybinds > toggle_pinned_sidebar`](#keybinds_toggle_pinned_sidebar)
+    - [6.2.1. Rovr Config > keybinds > toggle_pin > toggle_pin items](#keybinds_toggle_pin_items)
+  - [6.3. Property `Rovr Config > keybinds > toggle_preview_sidebar`](#keybinds_toggle_preview_sidebar)
+    - [6.3.1. Rovr Config > keybinds > toggle_pin > toggle_pin items](#keybinds_toggle_pin_items)
+  - [6.4. Property `Rovr Config > keybinds > toggle_footer`](#keybinds_toggle_footer)
+    - [6.4.1. Rovr Config > keybinds > toggle_pin > toggle_pin items](#keybinds_toggle_pin_items)
+  - [6.5. Property `Rovr Config > keybinds > toggle_menu_wrapper`](#keybinds_toggle_menu_wrapper)
+    - [6.5.1. Rovr Config > keybinds > toggle_pin > toggle_pin items](#keybinds_toggle_pin_items)
+  - [6.6. Property `Rovr Config > keybinds > focus_toggle_pinned_sidebar`](#keybinds_focus_toggle_pinned_sidebar)
+    - [6.6.1. Rovr Config > keybinds > toggle_pin > toggle_pin items](#keybinds_toggle_pin_items)
+  - [6.7. Property `Rovr Config > keybinds > focus_file_list`](#keybinds_focus_file_list)
+    - [6.7.1. Rovr Config > keybinds > toggle_pin > toggle_pin items](#keybinds_toggle_pin_items)
+  - [6.8. Property `Rovr Config > keybinds > focus_toggle_preview_sidebar`](#keybinds_focus_toggle_preview_sidebar)
+    - [6.8.1. Rovr Config > keybinds > toggle_pin > toggle_pin items](#keybinds_toggle_pin_items)
+  - [6.9. Property `Rovr Config > keybinds > focus_toggle_path_switcher`](#keybinds_focus_toggle_path_switcher)
+    - [6.9.1. Rovr Config > keybinds > toggle_pin > toggle_pin items](#keybinds_toggle_pin_items)
+  - [6.10. Property `Rovr Config > keybinds > focus_toggle_processes`](#keybinds_focus_toggle_processes)
+    - [6.10.1. Rovr Config > keybinds > toggle_pin > toggle_pin items](#keybinds_toggle_pin_items)
+  - [6.11. Property `Rovr Config > keybinds > focus_toggle_clipboard`](#keybinds_focus_toggle_clipboard)
+    - [6.11.1. Rovr Config > keybinds > toggle_pin > toggle_pin items](#keybinds_toggle_pin_items)
+  - [6.12. Property `Rovr Config > keybinds > focus_toggle_metadata`](#keybinds_focus_toggle_metadata)
+    - [6.12.1. Rovr Config > keybinds > toggle_pin > toggle_pin items](#keybinds_toggle_pin_items)
+  - [6.13. Property `Rovr Config > keybinds > focus_search`](#keybinds_focus_search)
+    - [6.13.1. Rovr Config > keybinds > toggle_pin > toggle_pin items](#keybinds_toggle_pin_items)
+  - [6.14. Property `Rovr Config > keybinds > copy`](#keybinds_copy)
+    - [6.14.1. Rovr Config > keybinds > toggle_pin > toggle_pin items](#keybinds_toggle_pin_items)
+  - [6.15. Property `Rovr Config > keybinds > paste`](#keybinds_paste)
+    - [6.15.1. Rovr Config > keybinds > toggle_pin > toggle_pin items](#keybinds_toggle_pin_items)
+  - [6.16. Property `Rovr Config > keybinds > cut`](#keybinds_cut)
+    - [6.16.1. Rovr Config > keybinds > toggle_pin > toggle_pin items](#keybinds_toggle_pin_items)
+  - [6.17. Property `Rovr Config > keybinds > delete`](#keybinds_delete)
+    - [6.17.1. Rovr Config > keybinds > toggle_pin > toggle_pin items](#keybinds_toggle_pin_items)
+  - [6.18. Property `Rovr Config > keybinds > delete_files`](#keybinds_delete_files)
+    - [6.18.1. Property `Rovr Config > keybinds > delete_files > trash`](#keybinds_delete_files_trash)
+      - [6.18.1.1. Rovr Config > keybinds > toggle_pin > toggle_pin items](#keybinds_toggle_pin_items)
+    - [6.18.2. Property `Rovr Config > keybinds > delete_files > delete`](#keybinds_delete_files_delete)
+      - [6.18.2.1. Rovr Config > keybinds > toggle_pin > toggle_pin items](#keybinds_toggle_pin_items)
+    - [6.18.3. Property `Rovr Config > keybinds > delete_files > cancel`](#keybinds_delete_files_cancel)
+      - [6.18.3.1. Rovr Config > keybinds > toggle_pin > toggle_pin items](#keybinds_toggle_pin_items)
+  - [6.19. Property `Rovr Config > keybinds > trash`](#keybinds_trash)
+    - [6.19.1. Property `Rovr Config > keybinds > trash > restore`](#keybinds_trash_restore)
+      - [6.19.1.1. Rovr Config > keybinds > toggle_pin > toggle_pin items](#keybinds_toggle_pin_items)
+    - [6.19.2. Property `Rovr Config > keybinds > trash > purge`](#keybinds_trash_purge)
+      - [6.19.2.1. Rovr Config > keybinds > toggle_pin > toggle_pin items](#keybinds_toggle_pin_items)
+    - [6.19.3. Property `Rovr Config > keybinds > trash > empty`](#keybinds_trash_empty)
+      - [6.19.3.1. Rovr Config > keybinds > toggle_pin > toggle_pin items](#keybinds_toggle_pin_items)
+    - [6.19.4. Property `Rovr Config > keybinds > trash > cancel`](#keybinds_trash_cancel)
+      - [6.19.4.1. Rovr Config > keybinds > toggle_pin > toggle_pin items](#keybinds_toggle_pin_items)
+  - [6.20. Property `Rovr Config > keybinds > rename`](#keybinds_rename)
+    - [6.20.1. Rovr Config > keybinds > toggle_pin > toggle_pin items](#keybinds_toggle_pin_items)
+  - [6.21. Property `Rovr Config > keybinds > new`](#keybinds_new)
+    - [6.21.1. Rovr Config > keybinds > toggle_pin > toggle_pin items](#keybinds_toggle_pin_items)
+  - [6.22. Property `Rovr Config > keybinds > bulk_create`](#keybinds_bulk_create)
+    - [6.22.1. Rovr Config > keybinds > toggle_pin > toggle_pin items](#keybinds_toggle_pin_items)
+  - [6.23. Property `Rovr Config > keybinds > toggle_all`](#keybinds_toggle_all)
+    - [6.23.1. Rovr Config > keybinds > toggle_pin > toggle_pin items](#keybinds_toggle_pin_items)
+  - [6.24. Property `Rovr Config > keybinds > zip`](#keybinds_zip)
+    - [6.24.1. Rovr Config > keybinds > toggle_pin > toggle_pin items](#keybinds_toggle_pin_items)
+  - [6.25. Property `Rovr Config > keybinds > unzip`](#keybinds_unzip)
+    - [6.25.1. Rovr Config > keybinds > toggle_pin > toggle_pin items](#keybinds_toggle_pin_items)
+  - [6.26. Property `Rovr Config > keybinds > open_right_click_menu`](#keybinds_open_right_click_menu)
+    - [6.26.1. Rovr Config > keybinds > toggle_pin > toggle_pin items](#keybinds_toggle_pin_items)
+  - [6.27. Property `Rovr Config > keybinds > extra_copy`](#keybinds_extra_copy)
+    - [6.27.1. Property `Rovr Config > keybinds > extra_copy > open_popup`](#keybinds_extra_copy_open_popup)
+      - [6.27.1.1. Rovr Config > keybinds > toggle_pin > toggle_pin items](#keybinds_toggle_pin_items)
+    - [6.27.2. Property `Rovr Config > keybinds > extra_copy > copy_to_rovr`](#keybinds_extra_copy_copy_to_rovr)
+      - [6.27.2.1. Rovr Config > keybinds > toggle_pin > toggle_pin items](#keybinds_toggle_pin_items)
+    - [6.27.3. Property `Rovr Config > keybinds > extra_copy > copy_highlighted`](#keybinds_extra_copy_copy_highlighted)
+      - [6.27.3.1. Rovr Config > keybinds > toggle_pin > toggle_pin items](#keybinds_toggle_pin_items)
+    - [6.27.4. Property `Rovr Config > keybinds > extra_copy > copy_to_system_clip`](#keybinds_extra_copy_copy_to_system_clip)
+      - [6.27.4.1. Rovr Config > keybinds > toggle_pin > toggle_pin items](#keybinds_toggle_pin_items)
+    - [6.27.5. Property `Rovr Config > keybinds > extra_copy > copy_current_directory`](#keybinds_extra_copy_copy_current_directory)
+      - [6.27.5.1. Rovr Config > keybinds > toggle_pin > toggle_pin items](#keybinds_toggle_pin_items)
+  - [6.28. Property `Rovr Config > keybinds > up`](#keybinds_up)
+    - [6.28.1. Rovr Config > keybinds > toggle_pin > toggle_pin items](#keybinds_toggle_pin_items)
+  - [6.29. Property `Rovr Config > keybinds > down`](#keybinds_down)
+    - [6.29.1. Rovr Config > keybinds > toggle_pin > toggle_pin items](#keybinds_toggle_pin_items)
+  - [6.30. Property `Rovr Config > keybinds > up_tree`](#keybinds_up_tree)
+    - [6.30.1. Rovr Config > keybinds > toggle_pin > toggle_pin items](#keybinds_toggle_pin_items)
+  - [6.31. Property `Rovr Config > keybinds > down_tree`](#keybinds_down_tree)
+    - [6.31.1. Rovr Config > keybinds > toggle_pin > toggle_pin items](#keybinds_toggle_pin_items)
+  - [6.32. Property `Rovr Config > keybinds > bypass_up_tree`](#keybinds_bypass_up_tree)
+    - [6.32.1. Rovr Config > keybinds > toggle_pin > toggle_pin items](#keybinds_toggle_pin_items)
+  - [6.33. Property `Rovr Config > keybinds > bypass_down_tree`](#keybinds_bypass_down_tree)
+    - [6.33.1. Rovr Config > keybinds > toggle_pin > toggle_pin items](#keybinds_toggle_pin_items)
+  - [6.34. Property `Rovr Config > keybinds > page_up`](#keybinds_page_up)
+    - [6.34.1. Rovr Config > keybinds > toggle_pin > toggle_pin items](#keybinds_toggle_pin_items)
+  - [6.35. Property `Rovr Config > keybinds > page_down`](#keybinds_page_down)
+    - [6.35.1. Rovr Config > keybinds > toggle_pin > toggle_pin items](#keybinds_toggle_pin_items)
+  - [6.36. Property `Rovr Config > keybinds > home`](#keybinds_home)
+    - [6.36.1. Rovr Config > keybinds > toggle_pin > toggle_pin items](#keybinds_toggle_pin_items)
+  - [6.37. Property `Rovr Config > keybinds > end`](#keybinds_end)
+    - [6.37.1. Rovr Config > keybinds > toggle_pin > toggle_pin items](#keybinds_toggle_pin_items)
+  - [6.38. Property `Rovr Config > keybinds > hist_previous`](#keybinds_hist_previous)
+    - [6.38.1. Rovr Config > keybinds > toggle_pin > toggle_pin items](#keybinds_toggle_pin_items)
+  - [6.39. Property `Rovr Config > keybinds > hist_next`](#keybinds_hist_next)
+    - [6.39.1. Rovr Config > keybinds > toggle_pin > toggle_pin items](#keybinds_toggle_pin_items)
+  - [6.40. Property `Rovr Config > keybinds > toggle_visual`](#keybinds_toggle_visual)
+    - [6.40.1. Rovr Config > keybinds > toggle_pin > toggle_pin items](#keybinds_toggle_pin_items)
+  - [6.41. Property `Rovr Config > keybinds > toggle_hidden_files`](#keybinds_toggle_hidden_files)
+    - [6.41.1. Rovr Config > keybinds > toggle_pin > toggle_pin items](#keybinds_toggle_pin_items)
+  - [6.42. Property `Rovr Config > keybinds > toggle_select_item`](#keybinds_toggle_select_item)
+    - [6.42.1. Rovr Config > keybinds > toggle_pin > toggle_pin items](#keybinds_toggle_pin_items)
+  - [6.43. Property `Rovr Config > keybinds > select_up`](#keybinds_select_up)
+    - [6.43.1. Rovr Config > keybinds > toggle_pin > toggle_pin items](#keybinds_toggle_pin_items)
+  - [6.44. Property `Rovr Config > keybinds > select_down`](#keybinds_select_down)
+    - [6.44.1. Rovr Config > keybinds > toggle_pin > toggle_pin items](#keybinds_toggle_pin_items)
+  - [6.45. Property `Rovr Config > keybinds > select_page_up`](#keybinds_select_page_up)
+    - [6.45.1. Rovr Config > keybinds > toggle_pin > toggle_pin items](#keybinds_toggle_pin_items)
+  - [6.46. Property `Rovr Config > keybinds > select_page_down`](#keybinds_select_page_down)
+    - [6.46.1. Rovr Config > keybinds > toggle_pin > toggle_pin items](#keybinds_toggle_pin_items)
+  - [6.47. Property `Rovr Config > keybinds > select_home`](#keybinds_select_home)
+    - [6.47.1. Rovr Config > keybinds > toggle_pin > toggle_pin items](#keybinds_toggle_pin_items)
+  - [6.48. Property `Rovr Config > keybinds > select_end`](#keybinds_select_end)
+    - [6.48.1. Rovr Config > keybinds > toggle_pin > toggle_pin items](#keybinds_toggle_pin_items)
+  - [6.49. Property `Rovr Config > keybinds > tab_next`](#keybinds_tab_next)
+    - [6.49.1. Rovr Config > keybinds > toggle_pin > toggle_pin items](#keybinds_toggle_pin_items)
+  - [6.50. Property `Rovr Config > keybinds > tab_previous`](#keybinds_tab_previous)
+    - [6.50.1. Rovr Config > keybinds > toggle_pin > toggle_pin items](#keybinds_toggle_pin_items)
+  - [6.51. Property `Rovr Config > keybinds > tab_new`](#keybinds_tab_new)
+    - [6.51.1. Rovr Config > keybinds > toggle_pin > toggle_pin items](#keybinds_toggle_pin_items)
+  - [6.52. Property `Rovr Config > keybinds > tab_close`](#keybinds_tab_close)
+    - [6.52.1. Rovr Config > keybinds > toggle_pin > toggle_pin items](#keybinds_toggle_pin_items)
+  - [6.53. Property `Rovr Config > keybinds > preview_scroll_left`](#keybinds_preview_scroll_left)
+    - [6.53.1. Rovr Config > keybinds > toggle_pin > toggle_pin items](#keybinds_toggle_pin_items)
+  - [6.54. Property `Rovr Config > keybinds > preview_scroll_right`](#keybinds_preview_scroll_right)
+    - [6.54.1. Rovr Config > keybinds > toggle_pin > toggle_pin items](#keybinds_toggle_pin_items)
+  - [6.55. Property `Rovr Config > keybinds > preview_select_right`](#keybinds_preview_select_right)
+    - [6.55.1. Rovr Config > keybinds > toggle_pin > toggle_pin items](#keybinds_toggle_pin_items)
+  - [6.56. Property `Rovr Config > keybinds > preview_select_left`](#keybinds_preview_select_left)
+    - [6.56.1. Rovr Config > keybinds > toggle_pin > toggle_pin items](#keybinds_toggle_pin_items)
+  - [6.57. Property `Rovr Config > keybinds > show_keybinds`](#keybinds_show_keybinds)
+    - [6.57.1. Rovr Config > keybinds > toggle_pin > toggle_pin items](#keybinds_toggle_pin_items)
+  - [6.58. Property `Rovr Config > keybinds > change_sort_order`](#keybinds_change_sort_order)
+    - [6.58.1. Property `Rovr Config > keybinds > change_sort_order > open_popup`](#keybinds_change_sort_order_open_popup)
+      - [6.58.1.1. Rovr Config > keybinds > toggle_pin > toggle_pin items](#keybinds_toggle_pin_items)
+    - [6.58.2. Property `Rovr Config > keybinds > change_sort_order > name`](#keybinds_change_sort_order_name)
+      - [6.58.2.1. Rovr Config > keybinds > toggle_pin > toggle_pin items](#keybinds_toggle_pin_items)
+    - [6.58.3. Property `Rovr Config > keybinds > change_sort_order > extension`](#keybinds_change_sort_order_extension)
+      - [6.58.3.1. Rovr Config > keybinds > toggle_pin > toggle_pin items](#keybinds_toggle_pin_items)
+    - [6.58.4. Property `Rovr Config > keybinds > change_sort_order > natural`](#keybinds_change_sort_order_natural)
+      - [6.58.4.1. Rovr Config > keybinds > toggle_pin > toggle_pin items](#keybinds_toggle_pin_items)
+    - [6.58.5. Property `Rovr Config > keybinds > change_sort_order > size`](#keybinds_change_sort_order_size)
+      - [6.58.5.1. Rovr Config > keybinds > toggle_pin > toggle_pin items](#keybinds_toggle_pin_items)
+    - [6.58.6. Property `Rovr Config > keybinds > change_sort_order > created`](#keybinds_change_sort_order_created)
+      - [6.58.6.1. Rovr Config > keybinds > toggle_pin > toggle_pin items](#keybinds_toggle_pin_items)
+    - [6.58.7. Property `Rovr Config > keybinds > change_sort_order > modified`](#keybinds_change_sort_order_modified)
+      - [6.58.7.1. Rovr Config > keybinds > toggle_pin > toggle_pin items](#keybinds_toggle_pin_items)
+    - [6.58.8. Property `Rovr Config > keybinds > change_sort_order > descending`](#keybinds_change_sort_order_descending)
+      - [6.58.8.1. Rovr Config > keybinds > toggle_pin > toggle_pin items](#keybinds_toggle_pin_items)
+  - [6.59. Property `Rovr Config > keybinds > quit_app`](#keybinds_quit_app)
+    - [6.59.1. Rovr Config > keybinds > toggle_pin > toggle_pin items](#keybinds_toggle_pin_items)
+  - [6.60. Property `Rovr Config > keybinds > command_palette`](#keybinds_command_palette)
+  - [6.61. Property `Rovr Config > keybinds > suspend_process`](#keybinds_suspend_process)
+    - [6.61.1. Rovr Config > keybinds > toggle_pin > toggle_pin items](#keybinds_toggle_pin_items)
+  - [6.62. Property `Rovr Config > keybinds > open`](#keybinds_open)
+    - [6.62.1. Rovr Config > keybinds > toggle_pin > toggle_pin items](#keybinds_toggle_pin_items)
+  - [6.63. Property `Rovr Config > keybinds > open_editor`](#keybinds_open_editor)
+    - [6.63.1. Rovr Config > keybinds > toggle_pin > toggle_pin items](#keybinds_toggle_pin_items)
+  - [6.64. Property `Rovr Config > keybinds > show_shell_screen`](#keybinds_show_shell_screen)
+    - [6.64.1. Rovr Config > keybinds > toggle_pin > toggle_pin items](#keybinds_toggle_pin_items)
+  - [6.65. Property `Rovr Config > keybinds > filename_conflict`](#keybinds_filename_conflict)
+    - [6.65.1. Property `Rovr Config > keybinds > filename_conflict > overwrite`](#keybinds_filename_conflict_overwrite)
+      - [6.65.1.1. Rovr Config > keybinds > toggle_pin > toggle_pin items](#keybinds_toggle_pin_items)
+    - [6.65.2. Property `Rovr Config > keybinds > filename_conflict > skip`](#keybinds_filename_conflict_skip)
+      - [6.65.2.1. Rovr Config > keybinds > toggle_pin > toggle_pin items](#keybinds_toggle_pin_items)
+    - [6.65.3. Property `Rovr Config > keybinds > filename_conflict > rename`](#keybinds_filename_conflict_rename)
+      - [6.65.3.1. Rovr Config > keybinds > toggle_pin > toggle_pin items](#keybinds_toggle_pin_items)
+    - [6.65.4. Property `Rovr Config > keybinds > filename_conflict > cancel`](#keybinds_filename_conflict_cancel)
+      - [6.65.4.1. Rovr Config > keybinds > toggle_pin > toggle_pin items](#keybinds_toggle_pin_items)
+    - [6.65.5. Property `Rovr Config > keybinds > filename_conflict > dont_ask_again`](#keybinds_filename_conflict_dont_ask_again)
+      - [6.65.5.1. Rovr Config > keybinds > toggle_pin > toggle_pin items](#keybinds_toggle_pin_items)
+  - [6.66. Property `Rovr Config > keybinds > file_in_use`](#keybinds_file_in_use)
+    - [6.66.1. Property `Rovr Config > keybinds > file_in_use > retry`](#keybinds_file_in_use_retry)
+      - [6.66.1.1. Rovr Config > keybinds > toggle_pin > toggle_pin items](#keybinds_toggle_pin_items)
+    - [6.66.2. Property `Rovr Config > keybinds > file_in_use > skip`](#keybinds_file_in_use_skip)
+      - [6.66.2.1. Rovr Config > keybinds > toggle_pin > toggle_pin items](#keybinds_toggle_pin_items)
+    - [6.66.3. Property `Rovr Config > keybinds > file_in_use > cancel`](#keybinds_file_in_use_cancel)
+      - [6.66.3.1. Rovr Config > keybinds > toggle_pin > toggle_pin items](#keybinds_toggle_pin_items)
+    - [6.66.4. Property `Rovr Config > keybinds > file_in_use > dont_ask_again`](#keybinds_file_in_use_dont_ask_again)
+      - [6.66.4.1. Rovr Config > keybinds > toggle_pin > toggle_pin items](#keybinds_toggle_pin_items)
+  - [6.67. Property `Rovr Config > keybinds > filter_modal`](#keybinds_filter_modal)
+    - [6.67.1. Property `Rovr Config > keybinds > filter_modal > exit`](#keybinds_filter_modal_exit)
+      - [6.67.1.1. Rovr Config > keybinds > toggle_pin > toggle_pin items](#keybinds_toggle_pin_items)
+    - [6.67.2. Property `Rovr Config > keybinds > filter_modal > down`](#keybinds_filter_modal_down)
+      - [6.67.2.1. Rovr Config > keybinds > toggle_pin > toggle_pin items](#keybinds_toggle_pin_items)
+    - [6.67.3. Property `Rovr Config > keybinds > filter_modal > up`](#keybinds_filter_modal_up)
+      - [6.67.3.1. Rovr Config > keybinds > toggle_pin > toggle_pin items](#keybinds_toggle_pin_items)
+    - [6.67.4. Property `Rovr Config > keybinds > filter_modal > page_down`](#keybinds_filter_modal_page_down)
+      - [6.67.4.1. Rovr Config > keybinds > toggle_pin > toggle_pin items](#keybinds_toggle_pin_items)
+    - [6.67.5. Property `Rovr Config > keybinds > filter_modal > page_up`](#keybinds_filter_modal_page_up)
+      - [6.67.5.1. Rovr Config > keybinds > toggle_pin > toggle_pin items](#keybinds_toggle_pin_items)
+  - [6.68. Property `Rovr Config > keybinds > yes_or_no`](#keybinds_yes_or_no)
+    - [6.68.1. Property `Rovr Config > keybinds > yes_or_no > yes`](#keybinds_yes_or_no_yes)
+      - [6.68.1.1. Rovr Config > keybinds > toggle_pin > toggle_pin items](#keybinds_toggle_pin_items)
+    - [6.68.2. Property `Rovr Config > keybinds > yes_or_no > no`](#keybinds_yes_or_no_no)
+      - [6.68.2.1. Rovr Config > keybinds > toggle_pin > toggle_pin items](#keybinds_toggle_pin_items)
+    - [6.68.3. Property `Rovr Config > keybinds > yes_or_no > dont_ask_again`](#keybinds_yes_or_no_dont_ask_again)
+      - [6.68.3.1. Rovr Config > keybinds > toggle_pin > toggle_pin items](#keybinds_toggle_pin_items)
+  - [6.69. Property `Rovr Config > keybinds > drag_and_drop`](#keybinds_drag_and_drop)
+    - [6.69.1. Property `Rovr Config > keybinds > drag_and_drop > move`](#keybinds_drag_and_drop_move)
+      - [6.69.1.1. Rovr Config > keybinds > toggle_pin > toggle_pin items](#keybinds_toggle_pin_items)
+    - [6.69.2. Property `Rovr Config > keybinds > drag_and_drop > copy`](#keybinds_drag_and_drop_copy)
+      - [6.69.2.1. Rovr Config > keybinds > toggle_pin > toggle_pin items](#keybinds_toggle_pin_items)
+    - [6.69.3. Property `Rovr Config > keybinds > drag_and_drop > cancel`](#keybinds_drag_and_drop_cancel)
+      - [6.69.3.1. Rovr Config > keybinds > toggle_pin > toggle_pin items](#keybinds_toggle_pin_items)
+- [7. Property `Rovr Config > plugins`](#plugins)
+  - [7.1. Property `Rovr Config > plugins > zoxide`](#plugins_zoxide)
+    - [7.1.1. Property `Rovr Config > plugins > zoxide > enabled`](#plugins_zoxide_enabled)
+    - [7.1.2. Property `Rovr Config > plugins > zoxide > keybinds`](#plugins_zoxide_keybinds)
+      - [7.1.2.1. Rovr Config > keybinds > toggle_pin > toggle_pin items](#keybinds_toggle_pin_items)
+    - [7.1.3. Property `Rovr Config > plugins > zoxide > show_scores`](#plugins_zoxide_show_scores)
+  - [7.2. Property `Rovr Config > plugins > bat`](#plugins_bat)
+    - [7.2.1. Property `Rovr Config > plugins > bat > enabled`](#plugins_bat_enabled)
+    - [7.2.2. Property `Rovr Config > plugins > bat > executable`](#plugins_bat_executable)
+  - [7.3. Property `Rovr Config > plugins > fd`](#plugins_fd)
+    - [7.3.1. Property `Rovr Config > plugins > fd > enabled`](#plugins_fd_enabled)
+    - [7.3.2. Property `Rovr Config > plugins > fd > keybinds`](#plugins_fd_keybinds)
+      - [7.3.2.1. Rovr Config > keybinds > toggle_pin > toggle_pin items](#keybinds_toggle_pin_items)
+    - [7.3.3. Property `Rovr Config > plugins > fd > executable`](#plugins_fd_executable)
+    - [7.3.4. Property `Rovr Config > plugins > fd > relative_paths`](#plugins_fd_relative_paths)
+    - [7.3.5. Property `Rovr Config > plugins > fd > follow_symlinks`](#plugins_fd_follow_symlinks)
+    - [7.3.6. Property `Rovr Config > plugins > fd > no_ignore_parent`](#plugins_fd_no_ignore_parent)
+    - [7.3.7. Property `Rovr Config > plugins > fd > search_hidden`](#plugins_fd_search_hidden)
+    - [7.3.8. Property `Rovr Config > plugins > fd > timeout`](#plugins_fd_timeout)
+    - [7.3.9. Property `Rovr Config > plugins > fd > default_filter_types`](#plugins_fd_default_filter_types)
+      - [7.3.9.1. Rovr Config > plugins > fd > default_filter_types > default_filter_types items](#plugins_fd_default_filter_types_items)
+  - [7.4. Property `Rovr Config > plugins > rg`](#plugins_rg)
+    - [7.4.1. Property `Rovr Config > plugins > rg > enabled`](#plugins_rg_enabled)
+    - [7.4.2. Property `Rovr Config > plugins > rg > keybinds`](#plugins_rg_keybinds)
+      - [7.4.2.1. Rovr Config > keybinds > toggle_pin > toggle_pin items](#keybinds_toggle_pin_items)
+    - [7.4.3. Property `Rovr Config > plugins > rg > executable`](#plugins_rg_executable)
+    - [7.4.4. Property `Rovr Config > plugins > rg > case_sensitive`](#plugins_rg_case_sensitive)
+    - [7.4.5. Property `Rovr Config > plugins > rg > follow_symlinks`](#plugins_rg_follow_symlinks)
+    - [7.4.6. Property `Rovr Config > plugins > rg > no_ignore_parent`](#plugins_rg_no_ignore_parent)
+    - [7.4.7. Property `Rovr Config > plugins > rg > search_hidden`](#plugins_rg_search_hidden)
+    - [7.4.8. Property `Rovr Config > plugins > rg > timeout`](#plugins_rg_timeout)
+  - [7.5. Property `Rovr Config > plugins > poppler`](#plugins_poppler)
+    - [7.5.1. Property `Rovr Config > plugins > poppler > enabled`](#plugins_poppler_enabled)
+    - [7.5.2. Property `Rovr Config > plugins > poppler > threads`](#plugins_poppler_threads)
+    - [7.5.3. Property `Rovr Config > plugins > poppler > use_pdftocairo`](#plugins_poppler_use_pdftocairo)
+    - [7.5.4. Property `Rovr Config > plugins > poppler > poppler_folder`](#plugins_poppler_poppler_folder)
+    - [7.5.5. Property `Rovr Config > plugins > poppler > pdf_batch_size`](#plugins_poppler_pdf_batch_size)
+  - [7.6. Property `Rovr Config > plugins > file_one`](#plugins_file_one)
+    - [7.6.1. Property `Rovr Config > plugins > file_one > enabled`](#plugins_file_one_enabled)
+    - [7.6.2. Property `Rovr Config > plugins > file_one > get_description`](#plugins_file_one_get_description)
 
 **Title:** Rovr Config
 
@@ -429,16 +411,15 @@ description: config schema humanified
 | **Required**              | No          |
 | **Additional properties** | Not allowed |
 
-| Property                      | Type            | Title/Description                                     |
-| ----------------------------- | --------------- | ----------------------------------------------------- |
-| [interface](#interface)       | object          | Settings related to the user interface and experience |
-| [settings](#settings)         | object          | Settings related to behavior of file operations       |
-| [metadata](#metadata)         | object          |                                                       |
-| [icons](#icons)               | object          | Custom icon configurations for files and folders      |
-| [theme](#theme)               | object          |                                                       |
-| [custom_theme](#custom_theme) | array of object |                                                       |
-| [keybinds](#keybinds)         | object          |                                                       |
-| [plugins](#plugins)           | object          |                                                       |
+| Property                | Type   | Title/Description                                     |
+| ----------------------- | ------ | ----------------------------------------------------- |
+| [interface](#interface) | object | Settings related to the user interface and experience |
+| [settings](#settings)   | object | Settings related to behavior of file operations       |
+| [metadata](#metadata)   | object |                                                       |
+| [icons](#icons)         | object | Custom icon configurations for files and folders      |
+| [theme](#theme)         | object |                                                       |
+| [keybinds](#keybinds)   | object |                                                       |
+| [plugins](#plugins)     | object |                                                       |
 
 ## <a name="interface"></a>1. Property `Rovr Config > interface`
 
@@ -2481,223 +2462,7 @@ Must be one of:
 
 **Description:** Use a transparent background.
 
-## <a name="custom_theme"></a>6. Property `Rovr Config > custom_theme`
-
-|              |                   |
-| ------------ | ----------------- |
-| **Type**     | `array of object` |
-| **Required** | No                |
-
-|                      | Array restrictions |
-| -------------------- | ------------------ |
-| **Min items**        | N/A                |
-| **Max items**        | N/A                |
-| **Items unicity**    | False              |
-| **Additional items** | False              |
-| **Tuple validation** | See below          |
-
-| Each item of this array must be           | Description |
-| ----------------------------------------- | ----------- |
-| [custom_theme items](#custom_theme_items) |             |
-
-### <a name="custom_theme_items"></a>6.1. Rovr Config > custom_theme > custom_theme items
-
-|                           |             |
-| ------------------------- | ----------- |
-| **Type**                  | `object`    |
-| **Required**              | No          |
-| **Additional properties** | Not allowed |
-
-| Property                                         | Type    | Title/Description                                                                                                                                    |
-| ------------------------------------------------ | ------- | ---------------------------------------------------------------------------------------------------------------------------------------------------- |
-| [name](#custom_theme_items_name)                 | string  | A name for the theme. However, when the theme is available in the theme picker, it shows up as a hyphenated, lowercase version.                      |
-| [primary](#custom_theme_items_primary)           | string  | A hex code or named color to use as the primary color. Refer to https://textual.textualize.io/css_types/color/#named-colors for the named colors.    |
-| [secondary](#custom_theme_items_secondary)       | string  | A hex code or named color to use as the secondary color. Refer to https://textual.textualize.io/css_types/color/#named-colors for the named colors.  |
-| [warning](#custom_theme_items_warning)           | string  | A hex code or named color to use as the warning color. Refer to https://textual.textualize.io/css_types/color/#named-colors for the named colors.    |
-| [error](#custom_theme_items_error)               | string  | A hex code or named color to use as the error color. Refer to https://textual.textualize.io/css_types/color/#named-colors for the named colors.      |
-| [success](#custom_theme_items_success)           | string  | A hex code or named color to use as the success color. Refer to https://textual.textualize.io/css_types/color/#named-colors for the named colors.    |
-| [accent](#custom_theme_items_accent)             | string  | A hex code or named color to use as the accent color. Refer to https://textual.textualize.io/css_types/color/#named-colors for the named colors.     |
-| [foreground](#custom_theme_items_foreground)     | string  | A hex code or named color to use as the foreground color. Refer to https://textual.textualize.io/css_types/color/#named-colors for the named colors. |
-| [background](#custom_theme_items_background)     | string  | A hex code or named color to use as the background color. Refer to https://textual.textualize.io/css_types/color/#named-colors for the named colors. |
-| [surface](#custom_theme_items_surface)           | string  | A hex code or named color to use as the surface color. Refer to https://textual.textualize.io/css_types/color/#named-colors for the named colors.    |
-| [panel](#custom_theme_items_panel)               | string  | A hex code or named color to use as the panel color. Refer to https://textual.textualize.io/css_types/color/#named-colors for the named colors.      |
-| [bar_gradient](#custom_theme_items_bar_gradient) | object  | The gradient colors for the progress bar.                                                                                                            |
-| [is_dark](#custom_theme_items_is_dark)           | boolean | Whether or not this theme is a dark type theme.                                                                                                      |
-| [variables](#custom_theme_items_variables)       | object  | Extra variables to set unique to the theme.<br />Refer to https://textual.textualize.io/guide/design/#additional-variables for more information.     |
-
-#### <a name="custom_theme_items_name"></a>6.1.1. Property `Rovr Config > custom_theme > custom_theme items > name`
-
-|              |          |
-| ------------ | -------- |
-| **Type**     | `string` |
-| **Required** | Yes      |
-
-**Description:** A name for the theme. However, when the theme is available in the theme picker, it shows up as a hyphenated, lowercase version.
-
-#### <a name="custom_theme_items_primary"></a>6.1.2. Property `Rovr Config > custom_theme > custom_theme items > primary`
-
-|              |          |
-| ------------ | -------- |
-| **Type**     | `string` |
-| **Required** | Yes      |
-
-**Description:** A hex code or named color to use as the primary color. Refer to https://textual.textualize.io/css_types/color/#named-colors for the named colors.
-
-#### <a name="custom_theme_items_secondary"></a>6.1.3. Property `Rovr Config > custom_theme > custom_theme items > secondary`
-
-|              |          |
-| ------------ | -------- |
-| **Type**     | `string` |
-| **Required** | Yes      |
-
-**Description:** A hex code or named color to use as the secondary color. Refer to https://textual.textualize.io/css_types/color/#named-colors for the named colors.
-
-#### <a name="custom_theme_items_warning"></a>6.1.4. Property `Rovr Config > custom_theme > custom_theme items > warning`
-
-|              |          |
-| ------------ | -------- |
-| **Type**     | `string` |
-| **Required** | Yes      |
-
-**Description:** A hex code or named color to use as the warning color. Refer to https://textual.textualize.io/css_types/color/#named-colors for the named colors.
-
-#### <a name="custom_theme_items_error"></a>6.1.5. Property `Rovr Config > custom_theme > custom_theme items > error`
-
-|              |          |
-| ------------ | -------- |
-| **Type**     | `string` |
-| **Required** | Yes      |
-
-**Description:** A hex code or named color to use as the error color. Refer to https://textual.textualize.io/css_types/color/#named-colors for the named colors.
-
-#### <a name="custom_theme_items_success"></a>6.1.6. Property `Rovr Config > custom_theme > custom_theme items > success`
-
-|              |          |
-| ------------ | -------- |
-| **Type**     | `string` |
-| **Required** | Yes      |
-
-**Description:** A hex code or named color to use as the success color. Refer to https://textual.textualize.io/css_types/color/#named-colors for the named colors.
-
-#### <a name="custom_theme_items_accent"></a>6.1.7. Property `Rovr Config > custom_theme > custom_theme items > accent`
-
-|              |          |
-| ------------ | -------- |
-| **Type**     | `string` |
-| **Required** | Yes      |
-
-**Description:** A hex code or named color to use as the accent color. Refer to https://textual.textualize.io/css_types/color/#named-colors for the named colors.
-
-#### <a name="custom_theme_items_foreground"></a>6.1.8. Property `Rovr Config > custom_theme > custom_theme items > foreground`
-
-|              |          |
-| ------------ | -------- |
-| **Type**     | `string` |
-| **Required** | Yes      |
-
-**Description:** A hex code or named color to use as the foreground color. Refer to https://textual.textualize.io/css_types/color/#named-colors for the named colors.
-
-#### <a name="custom_theme_items_background"></a>6.1.9. Property `Rovr Config > custom_theme > custom_theme items > background`
-
-|              |          |
-| ------------ | -------- |
-| **Type**     | `string` |
-| **Required** | Yes      |
-
-**Description:** A hex code or named color to use as the background color. Refer to https://textual.textualize.io/css_types/color/#named-colors for the named colors.
-
-#### <a name="custom_theme_items_surface"></a>6.1.10. Property `Rovr Config > custom_theme > custom_theme items > surface`
-
-|              |          |
-| ------------ | -------- |
-| **Type**     | `string` |
-| **Required** | Yes      |
-
-**Description:** A hex code or named color to use as the surface color. Refer to https://textual.textualize.io/css_types/color/#named-colors for the named colors.
-
-#### <a name="custom_theme_items_panel"></a>6.1.11. Property `Rovr Config > custom_theme > custom_theme items > panel`
-
-|              |          |
-| ------------ | -------- |
-| **Type**     | `string` |
-| **Required** | Yes      |
-
-**Description:** A hex code or named color to use as the panel color. Refer to https://textual.textualize.io/css_types/color/#named-colors for the named colors.
-
-#### <a name="custom_theme_items_bar_gradient"></a>6.1.12. Property `Rovr Config > custom_theme > custom_theme items > bar_gradient`
-
-|                           |             |
-| ------------------------- | ----------- |
-| **Type**                  | `object`    |
-| **Required**              | No          |
-| **Additional properties** | Not allowed |
-
-**Description:** The gradient colors for the progress bar.
-
-| Property                                            | Type  | Title/Description                                                                                                                                                                                              |
-| --------------------------------------------------- | ----- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| [default](#custom_theme_items_bar_gradient_default) | array | A list of hex codes, or named colors to use as the progress bar's gradient colors. Refer to https://textual.textualize.io/css_types/color/#named-colors for the named colors.                                  |
-| [error](#custom_theme_items_bar_gradient_error)     | array | A list of hex codes, or named colors to use as the progress bar's gradient colors **when it encountered an error**. Refer to https://textual.textualize.io/css_types/color/#named-colors for the named colors. |
-
-##### <a name="custom_theme_items_bar_gradient_default"></a>6.1.12.1. Property `Rovr Config > custom_theme > custom_theme items > bar_gradient > default`
-
-|              |         |
-| ------------ | ------- |
-| **Type**     | `array` |
-| **Required** | No      |
-
-**Description:** A list of hex codes, or named colors to use as the progress bar's gradient colors. Refer to https://textual.textualize.io/css_types/color/#named-colors for the named colors.
-
-|                      | Array restrictions |
-| -------------------- | ------------------ |
-| **Min items**        | N/A                |
-| **Max items**        | N/A                |
-| **Items unicity**    | False              |
-| **Additional items** | False              |
-| **Tuple validation** | N/A                |
-
-##### <a name="custom_theme_items_bar_gradient_error"></a>6.1.12.2. Property `Rovr Config > custom_theme > custom_theme items > bar_gradient > error`
-
-|              |         |
-| ------------ | ------- |
-| **Type**     | `array` |
-| **Required** | No      |
-
-**Description:** A list of hex codes, or named colors to use as the progress bar's gradient colors **when it encountered an error**. Refer to https://textual.textualize.io/css_types/color/#named-colors for the named colors.
-
-|                      | Array restrictions |
-| -------------------- | ------------------ |
-| **Min items**        | N/A                |
-| **Max items**        | N/A                |
-| **Items unicity**    | False              |
-| **Additional items** | False              |
-| **Tuple validation** | N/A                |
-
-#### <a name="custom_theme_items_is_dark"></a>6.1.13. Property `Rovr Config > custom_theme > custom_theme items > is_dark`
-
-|              |           |
-| ------------ | --------- |
-| **Type**     | `boolean` |
-| **Required** | Yes       |
-
-**Description:** Whether or not this theme is a dark type theme.
-
-#### <a name="custom_theme_items_variables"></a>6.1.14. Property `Rovr Config > custom_theme > custom_theme items > variables`
-
-|                           |                  |
-| ------------------------- | ---------------- |
-| **Type**                  | `object`         |
-| **Required**              | No               |
-| **Additional properties** | Any type allowed |
-
-**Description:** Extra variables to set unique to the theme.
-Refer to https://textual.textualize.io/guide/design/#additional-variables for more information.
-
-| Property                                               | Type   | Title/Description |
-| ------------------------------------------------------ | ------ | ----------------- |
-| [](#custom_theme_items_variables_additionalProperties) | object |                   |
-
-## <a name="keybinds"></a>7. Property `Rovr Config > keybinds`
+## <a name="keybinds"></a>6. Property `Rovr Config > keybinds`
 
 |                           |             |
 | ------------------------- | ----------- |
@@ -2777,7 +2542,7 @@ Refer to https://textual.textualize.io/guide/design/#additional-variables for mo
 | [yes_or_no](#keybinds_yes_or_no)                                       | object          | Keybinds related to yes/no confirmation modals                                                                                               |
 | [drag_and_drop](#keybinds_drag_and_drop)                               | object          | Keybinds related to the screen that appears after dropping a file                                                                            |
 
-### <a name="keybinds_toggle_pin"></a>7.1. Property `Rovr Config > keybinds > toggle_pin`
+### <a name="keybinds_toggle_pin"></a>6.1. Property `Rovr Config > keybinds > toggle_pin`
 
 |                |                       |
 | -------------- | --------------------- |
@@ -2799,14 +2564,14 @@ Refer to https://textual.textualize.io/guide/design/#additional-variables for mo
 | ---------------------------------------------- | ----------- |
 | [toggle_pin items](#keybinds_toggle_pin_items) |             |
 
-#### <a name="keybinds_toggle_pin_items"></a>7.1.1. Rovr Config > keybinds > toggle_pin > toggle_pin items
+#### <a name="keybinds_toggle_pin_items"></a>6.1.1. Rovr Config > keybinds > toggle_pin > toggle_pin items
 
 |              |          |
 | ------------ | -------- |
 | **Type**     | `string` |
 | **Required** | No       |
 
-### <a name="keybinds_toggle_pinned_sidebar"></a>7.2. Property `Rovr Config > keybinds > toggle_pinned_sidebar`
+### <a name="keybinds_toggle_pinned_sidebar"></a>6.2. Property `Rovr Config > keybinds > toggle_pinned_sidebar`
 
 |                |                       |
 | -------------- | --------------------- |
@@ -2828,14 +2593,14 @@ Refer to https://textual.textualize.io/guide/design/#additional-variables for mo
 | ---------------------------------------------- | ----------- |
 | [toggle_pin items](#keybinds_toggle_pin_items) |             |
 
-#### <a name="keybinds_toggle_pin_items"></a>7.2.1. Rovr Config > keybinds > toggle_pin > toggle_pin items
+#### <a name="keybinds_toggle_pin_items"></a>6.2.1. Rovr Config > keybinds > toggle_pin > toggle_pin items
 
 |              |          |
 | ------------ | -------- |
 | **Type**     | `string` |
 | **Required** | No       |
 
-### <a name="keybinds_toggle_preview_sidebar"></a>7.3. Property `Rovr Config > keybinds > toggle_preview_sidebar`
+### <a name="keybinds_toggle_preview_sidebar"></a>6.3. Property `Rovr Config > keybinds > toggle_preview_sidebar`
 
 |                |                       |
 | -------------- | --------------------- |
@@ -2857,14 +2622,14 @@ Refer to https://textual.textualize.io/guide/design/#additional-variables for mo
 | ---------------------------------------------- | ----------- |
 | [toggle_pin items](#keybinds_toggle_pin_items) |             |
 
-#### <a name="keybinds_toggle_pin_items"></a>7.3.1. Rovr Config > keybinds > toggle_pin > toggle_pin items
+#### <a name="keybinds_toggle_pin_items"></a>6.3.1. Rovr Config > keybinds > toggle_pin > toggle_pin items
 
 |              |          |
 | ------------ | -------- |
 | **Type**     | `string` |
 | **Required** | No       |
 
-### <a name="keybinds_toggle_footer"></a>7.4. Property `Rovr Config > keybinds > toggle_footer`
+### <a name="keybinds_toggle_footer"></a>6.4. Property `Rovr Config > keybinds > toggle_footer`
 
 |                |                       |
 | -------------- | --------------------- |
@@ -2886,14 +2651,14 @@ Refer to https://textual.textualize.io/guide/design/#additional-variables for mo
 | ---------------------------------------------- | ----------- |
 | [toggle_pin items](#keybinds_toggle_pin_items) |             |
 
-#### <a name="keybinds_toggle_pin_items"></a>7.4.1. Rovr Config > keybinds > toggle_pin > toggle_pin items
+#### <a name="keybinds_toggle_pin_items"></a>6.4.1. Rovr Config > keybinds > toggle_pin > toggle_pin items
 
 |              |          |
 | ------------ | -------- |
 | **Type**     | `string` |
 | **Required** | No       |
 
-### <a name="keybinds_toggle_menu_wrapper"></a>7.5. Property `Rovr Config > keybinds > toggle_menu_wrapper`
+### <a name="keybinds_toggle_menu_wrapper"></a>6.5. Property `Rovr Config > keybinds > toggle_menu_wrapper`
 
 |                |                       |
 | -------------- | --------------------- |
@@ -2915,14 +2680,14 @@ Refer to https://textual.textualize.io/guide/design/#additional-variables for mo
 | ---------------------------------------------- | ----------- |
 | [toggle_pin items](#keybinds_toggle_pin_items) |             |
 
-#### <a name="keybinds_toggle_pin_items"></a>7.5.1. Rovr Config > keybinds > toggle_pin > toggle_pin items
+#### <a name="keybinds_toggle_pin_items"></a>6.5.1. Rovr Config > keybinds > toggle_pin > toggle_pin items
 
 |              |          |
 | ------------ | -------- |
 | **Type**     | `string` |
 | **Required** | No       |
 
-### <a name="keybinds_focus_toggle_pinned_sidebar"></a>7.6. Property `Rovr Config > keybinds > focus_toggle_pinned_sidebar`
+### <a name="keybinds_focus_toggle_pinned_sidebar"></a>6.6. Property `Rovr Config > keybinds > focus_toggle_pinned_sidebar`
 
 |                |                       |
 | -------------- | --------------------- |
@@ -2944,14 +2709,14 @@ Refer to https://textual.textualize.io/guide/design/#additional-variables for mo
 | ---------------------------------------------- | ----------- |
 | [toggle_pin items](#keybinds_toggle_pin_items) |             |
 
-#### <a name="keybinds_toggle_pin_items"></a>7.6.1. Rovr Config > keybinds > toggle_pin > toggle_pin items
+#### <a name="keybinds_toggle_pin_items"></a>6.6.1. Rovr Config > keybinds > toggle_pin > toggle_pin items
 
 |              |          |
 | ------------ | -------- |
 | **Type**     | `string` |
 | **Required** | No       |
 
-### <a name="keybinds_focus_file_list"></a>7.7. Property `Rovr Config > keybinds > focus_file_list`
+### <a name="keybinds_focus_file_list"></a>6.7. Property `Rovr Config > keybinds > focus_file_list`
 
 |                |                       |
 | -------------- | --------------------- |
@@ -2973,14 +2738,14 @@ Refer to https://textual.textualize.io/guide/design/#additional-variables for mo
 | ---------------------------------------------- | ----------- |
 | [toggle_pin items](#keybinds_toggle_pin_items) |             |
 
-#### <a name="keybinds_toggle_pin_items"></a>7.7.1. Rovr Config > keybinds > toggle_pin > toggle_pin items
+#### <a name="keybinds_toggle_pin_items"></a>6.7.1. Rovr Config > keybinds > toggle_pin > toggle_pin items
 
 |              |          |
 | ------------ | -------- |
 | **Type**     | `string` |
 | **Required** | No       |
 
-### <a name="keybinds_focus_toggle_preview_sidebar"></a>7.8. Property `Rovr Config > keybinds > focus_toggle_preview_sidebar`
+### <a name="keybinds_focus_toggle_preview_sidebar"></a>6.8. Property `Rovr Config > keybinds > focus_toggle_preview_sidebar`
 
 |                |                       |
 | -------------- | --------------------- |
@@ -3002,14 +2767,14 @@ Refer to https://textual.textualize.io/guide/design/#additional-variables for mo
 | ---------------------------------------------- | ----------- |
 | [toggle_pin items](#keybinds_toggle_pin_items) |             |
 
-#### <a name="keybinds_toggle_pin_items"></a>7.8.1. Rovr Config > keybinds > toggle_pin > toggle_pin items
+#### <a name="keybinds_toggle_pin_items"></a>6.8.1. Rovr Config > keybinds > toggle_pin > toggle_pin items
 
 |              |          |
 | ------------ | -------- |
 | **Type**     | `string` |
 | **Required** | No       |
 
-### <a name="keybinds_focus_toggle_path_switcher"></a>7.9. Property `Rovr Config > keybinds > focus_toggle_path_switcher`
+### <a name="keybinds_focus_toggle_path_switcher"></a>6.9. Property `Rovr Config > keybinds > focus_toggle_path_switcher`
 
 |                |                       |
 | -------------- | --------------------- |
@@ -3031,14 +2796,14 @@ Refer to https://textual.textualize.io/guide/design/#additional-variables for mo
 | ---------------------------------------------- | ----------- |
 | [toggle_pin items](#keybinds_toggle_pin_items) |             |
 
-#### <a name="keybinds_toggle_pin_items"></a>7.9.1. Rovr Config > keybinds > toggle_pin > toggle_pin items
+#### <a name="keybinds_toggle_pin_items"></a>6.9.1. Rovr Config > keybinds > toggle_pin > toggle_pin items
 
 |              |          |
 | ------------ | -------- |
 | **Type**     | `string` |
 | **Required** | No       |
 
-### <a name="keybinds_focus_toggle_processes"></a>7.10. Property `Rovr Config > keybinds > focus_toggle_processes`
+### <a name="keybinds_focus_toggle_processes"></a>6.10. Property `Rovr Config > keybinds > focus_toggle_processes`
 
 |                |                       |
 | -------------- | --------------------- |
@@ -3060,14 +2825,14 @@ Refer to https://textual.textualize.io/guide/design/#additional-variables for mo
 | ---------------------------------------------- | ----------- |
 | [toggle_pin items](#keybinds_toggle_pin_items) |             |
 
-#### <a name="keybinds_toggle_pin_items"></a>7.10.1. Rovr Config > keybinds > toggle_pin > toggle_pin items
+#### <a name="keybinds_toggle_pin_items"></a>6.10.1. Rovr Config > keybinds > toggle_pin > toggle_pin items
 
 |              |          |
 | ------------ | -------- |
 | **Type**     | `string` |
 | **Required** | No       |
 
-### <a name="keybinds_focus_toggle_clipboard"></a>7.11. Property `Rovr Config > keybinds > focus_toggle_clipboard`
+### <a name="keybinds_focus_toggle_clipboard"></a>6.11. Property `Rovr Config > keybinds > focus_toggle_clipboard`
 
 |                |                       |
 | -------------- | --------------------- |
@@ -3089,14 +2854,14 @@ Refer to https://textual.textualize.io/guide/design/#additional-variables for mo
 | ---------------------------------------------- | ----------- |
 | [toggle_pin items](#keybinds_toggle_pin_items) |             |
 
-#### <a name="keybinds_toggle_pin_items"></a>7.11.1. Rovr Config > keybinds > toggle_pin > toggle_pin items
+#### <a name="keybinds_toggle_pin_items"></a>6.11.1. Rovr Config > keybinds > toggle_pin > toggle_pin items
 
 |              |          |
 | ------------ | -------- |
 | **Type**     | `string` |
 | **Required** | No       |
 
-### <a name="keybinds_focus_toggle_metadata"></a>7.12. Property `Rovr Config > keybinds > focus_toggle_metadata`
+### <a name="keybinds_focus_toggle_metadata"></a>6.12. Property `Rovr Config > keybinds > focus_toggle_metadata`
 
 |                |                       |
 | -------------- | --------------------- |
@@ -3118,14 +2883,14 @@ Refer to https://textual.textualize.io/guide/design/#additional-variables for mo
 | ---------------------------------------------- | ----------- |
 | [toggle_pin items](#keybinds_toggle_pin_items) |             |
 
-#### <a name="keybinds_toggle_pin_items"></a>7.12.1. Rovr Config > keybinds > toggle_pin > toggle_pin items
+#### <a name="keybinds_toggle_pin_items"></a>6.12.1. Rovr Config > keybinds > toggle_pin > toggle_pin items
 
 |              |          |
 | ------------ | -------- |
 | **Type**     | `string` |
 | **Required** | No       |
 
-### <a name="keybinds_focus_search"></a>7.13. Property `Rovr Config > keybinds > focus_search`
+### <a name="keybinds_focus_search"></a>6.13. Property `Rovr Config > keybinds > focus_search`
 
 |                |                       |
 | -------------- | --------------------- |
@@ -3147,14 +2912,14 @@ Refer to https://textual.textualize.io/guide/design/#additional-variables for mo
 | ---------------------------------------------- | ----------- |
 | [toggle_pin items](#keybinds_toggle_pin_items) |             |
 
-#### <a name="keybinds_toggle_pin_items"></a>7.13.1. Rovr Config > keybinds > toggle_pin > toggle_pin items
+#### <a name="keybinds_toggle_pin_items"></a>6.13.1. Rovr Config > keybinds > toggle_pin > toggle_pin items
 
 |              |          |
 | ------------ | -------- |
 | **Type**     | `string` |
 | **Required** | No       |
 
-### <a name="keybinds_copy"></a>7.14. Property `Rovr Config > keybinds > copy`
+### <a name="keybinds_copy"></a>6.14. Property `Rovr Config > keybinds > copy`
 
 |                |                       |
 | -------------- | --------------------- |
@@ -3176,14 +2941,14 @@ Refer to https://textual.textualize.io/guide/design/#additional-variables for mo
 | ---------------------------------------------- | ----------- |
 | [toggle_pin items](#keybinds_toggle_pin_items) |             |
 
-#### <a name="keybinds_toggle_pin_items"></a>7.14.1. Rovr Config > keybinds > toggle_pin > toggle_pin items
+#### <a name="keybinds_toggle_pin_items"></a>6.14.1. Rovr Config > keybinds > toggle_pin > toggle_pin items
 
 |              |          |
 | ------------ | -------- |
 | **Type**     | `string` |
 | **Required** | No       |
 
-### <a name="keybinds_paste"></a>7.15. Property `Rovr Config > keybinds > paste`
+### <a name="keybinds_paste"></a>6.15. Property `Rovr Config > keybinds > paste`
 
 |                |                       |
 | -------------- | --------------------- |
@@ -3205,14 +2970,14 @@ Refer to https://textual.textualize.io/guide/design/#additional-variables for mo
 | ---------------------------------------------- | ----------- |
 | [toggle_pin items](#keybinds_toggle_pin_items) |             |
 
-#### <a name="keybinds_toggle_pin_items"></a>7.15.1. Rovr Config > keybinds > toggle_pin > toggle_pin items
+#### <a name="keybinds_toggle_pin_items"></a>6.15.1. Rovr Config > keybinds > toggle_pin > toggle_pin items
 
 |              |          |
 | ------------ | -------- |
 | **Type**     | `string` |
 | **Required** | No       |
 
-### <a name="keybinds_cut"></a>7.16. Property `Rovr Config > keybinds > cut`
+### <a name="keybinds_cut"></a>6.16. Property `Rovr Config > keybinds > cut`
 
 |                |                       |
 | -------------- | --------------------- |
@@ -3234,14 +2999,14 @@ Refer to https://textual.textualize.io/guide/design/#additional-variables for mo
 | ---------------------------------------------- | ----------- |
 | [toggle_pin items](#keybinds_toggle_pin_items) |             |
 
-#### <a name="keybinds_toggle_pin_items"></a>7.16.1. Rovr Config > keybinds > toggle_pin > toggle_pin items
+#### <a name="keybinds_toggle_pin_items"></a>6.16.1. Rovr Config > keybinds > toggle_pin > toggle_pin items
 
 |              |          |
 | ------------ | -------- |
 | **Type**     | `string` |
 | **Required** | No       |
 
-### <a name="keybinds_delete"></a>7.17. Property `Rovr Config > keybinds > delete`
+### <a name="keybinds_delete"></a>6.17. Property `Rovr Config > keybinds > delete`
 
 |                |                       |
 | -------------- | --------------------- |
@@ -3263,14 +3028,14 @@ Refer to https://textual.textualize.io/guide/design/#additional-variables for mo
 | ---------------------------------------------- | ----------- |
 | [toggle_pin items](#keybinds_toggle_pin_items) |             |
 
-#### <a name="keybinds_toggle_pin_items"></a>7.17.1. Rovr Config > keybinds > toggle_pin > toggle_pin items
+#### <a name="keybinds_toggle_pin_items"></a>6.17.1. Rovr Config > keybinds > toggle_pin > toggle_pin items
 
 |              |          |
 | ------------ | -------- |
 | **Type**     | `string` |
 | **Required** | No       |
 
-### <a name="keybinds_delete_files"></a>7.18. Property `Rovr Config > keybinds > delete_files`
+### <a name="keybinds_delete_files"></a>6.18. Property `Rovr Config > keybinds > delete_files`
 
 |                           |                  |
 | ------------------------- | ---------------- |
@@ -3286,7 +3051,7 @@ Refer to https://textual.textualize.io/guide/design/#additional-variables for mo
 | [delete](#keybinds_delete_files_delete) | array of string | Confirm deletion and permanently delete files.      |
 | [cancel](#keybinds_delete_files_cancel) | array of string | Cancel deletion and go back to the main screen.     |
 
-#### <a name="keybinds_delete_files_trash"></a>7.18.1. Property `Rovr Config > keybinds > delete_files > trash`
+#### <a name="keybinds_delete_files_trash"></a>6.18.1. Property `Rovr Config > keybinds > delete_files > trash`
 
 |                |                       |
 | -------------- | --------------------- |
@@ -3308,14 +3073,14 @@ Refer to https://textual.textualize.io/guide/design/#additional-variables for mo
 | ---------------------------------------------- | ----------- |
 | [toggle_pin items](#keybinds_toggle_pin_items) |             |
 
-##### <a name="keybinds_toggle_pin_items"></a>7.18.1.1. Rovr Config > keybinds > toggle_pin > toggle_pin items
+##### <a name="keybinds_toggle_pin_items"></a>6.18.1.1. Rovr Config > keybinds > toggle_pin > toggle_pin items
 
 |              |          |
 | ------------ | -------- |
 | **Type**     | `string` |
 | **Required** | No       |
 
-#### <a name="keybinds_delete_files_delete"></a>7.18.2. Property `Rovr Config > keybinds > delete_files > delete`
+#### <a name="keybinds_delete_files_delete"></a>6.18.2. Property `Rovr Config > keybinds > delete_files > delete`
 
 |                |                       |
 | -------------- | --------------------- |
@@ -3337,14 +3102,14 @@ Refer to https://textual.textualize.io/guide/design/#additional-variables for mo
 | ---------------------------------------------- | ----------- |
 | [toggle_pin items](#keybinds_toggle_pin_items) |             |
 
-##### <a name="keybinds_toggle_pin_items"></a>7.18.2.1. Rovr Config > keybinds > toggle_pin > toggle_pin items
+##### <a name="keybinds_toggle_pin_items"></a>6.18.2.1. Rovr Config > keybinds > toggle_pin > toggle_pin items
 
 |              |          |
 | ------------ | -------- |
 | **Type**     | `string` |
 | **Required** | No       |
 
-#### <a name="keybinds_delete_files_cancel"></a>7.18.3. Property `Rovr Config > keybinds > delete_files > cancel`
+#### <a name="keybinds_delete_files_cancel"></a>6.18.3. Property `Rovr Config > keybinds > delete_files > cancel`
 
 |                |                       |
 | -------------- | --------------------- |
@@ -3366,14 +3131,14 @@ Refer to https://textual.textualize.io/guide/design/#additional-variables for mo
 | ---------------------------------------------- | ----------- |
 | [toggle_pin items](#keybinds_toggle_pin_items) |             |
 
-##### <a name="keybinds_toggle_pin_items"></a>7.18.3.1. Rovr Config > keybinds > toggle_pin > toggle_pin items
+##### <a name="keybinds_toggle_pin_items"></a>6.18.3.1. Rovr Config > keybinds > toggle_pin > toggle_pin items
 
 |              |          |
 | ------------ | -------- |
 | **Type**     | `string` |
 | **Required** | No       |
 
-### <a name="keybinds_trash"></a>7.19. Property `Rovr Config > keybinds > trash`
+### <a name="keybinds_trash"></a>6.19. Property `Rovr Config > keybinds > trash`
 
 |                           |                  |
 | ------------------------- | ---------------- |
@@ -3390,7 +3155,7 @@ Refer to https://textual.textualize.io/guide/design/#additional-variables for mo
 | [empty](#keybinds_trash_empty)     | array of string | Permanently empty the entire recycle bin.                |
 | [cancel](#keybinds_trash_cancel)   | array of string | Close the recycle bin browser.                           |
 
-#### <a name="keybinds_trash_restore"></a>7.19.1. Property `Rovr Config > keybinds > trash > restore`
+#### <a name="keybinds_trash_restore"></a>6.19.1. Property `Rovr Config > keybinds > trash > restore`
 
 |                |                       |
 | -------------- | --------------------- |
@@ -3412,14 +3177,14 @@ Refer to https://textual.textualize.io/guide/design/#additional-variables for mo
 | ---------------------------------------------- | ----------- |
 | [toggle_pin items](#keybinds_toggle_pin_items) |             |
 
-##### <a name="keybinds_toggle_pin_items"></a>7.19.1.1. Rovr Config > keybinds > toggle_pin > toggle_pin items
+##### <a name="keybinds_toggle_pin_items"></a>6.19.1.1. Rovr Config > keybinds > toggle_pin > toggle_pin items
 
 |              |          |
 | ------------ | -------- |
 | **Type**     | `string` |
 | **Required** | No       |
 
-#### <a name="keybinds_trash_purge"></a>7.19.2. Property `Rovr Config > keybinds > trash > purge`
+#### <a name="keybinds_trash_purge"></a>6.19.2. Property `Rovr Config > keybinds > trash > purge`
 
 |                |                       |
 | -------------- | --------------------- |
@@ -3441,14 +3206,14 @@ Refer to https://textual.textualize.io/guide/design/#additional-variables for mo
 | ---------------------------------------------- | ----------- |
 | [toggle_pin items](#keybinds_toggle_pin_items) |             |
 
-##### <a name="keybinds_toggle_pin_items"></a>7.19.2.1. Rovr Config > keybinds > toggle_pin > toggle_pin items
+##### <a name="keybinds_toggle_pin_items"></a>6.19.2.1. Rovr Config > keybinds > toggle_pin > toggle_pin items
 
 |              |          |
 | ------------ | -------- |
 | **Type**     | `string` |
 | **Required** | No       |
 
-#### <a name="keybinds_trash_empty"></a>7.19.3. Property `Rovr Config > keybinds > trash > empty`
+#### <a name="keybinds_trash_empty"></a>6.19.3. Property `Rovr Config > keybinds > trash > empty`
 
 |                |                       |
 | -------------- | --------------------- |
@@ -3470,14 +3235,14 @@ Refer to https://textual.textualize.io/guide/design/#additional-variables for mo
 | ---------------------------------------------- | ----------- |
 | [toggle_pin items](#keybinds_toggle_pin_items) |             |
 
-##### <a name="keybinds_toggle_pin_items"></a>7.19.3.1. Rovr Config > keybinds > toggle_pin > toggle_pin items
+##### <a name="keybinds_toggle_pin_items"></a>6.19.3.1. Rovr Config > keybinds > toggle_pin > toggle_pin items
 
 |              |          |
 | ------------ | -------- |
 | **Type**     | `string` |
 | **Required** | No       |
 
-#### <a name="keybinds_trash_cancel"></a>7.19.4. Property `Rovr Config > keybinds > trash > cancel`
+#### <a name="keybinds_trash_cancel"></a>6.19.4. Property `Rovr Config > keybinds > trash > cancel`
 
 |                |                       |
 | -------------- | --------------------- |
@@ -3499,14 +3264,14 @@ Refer to https://textual.textualize.io/guide/design/#additional-variables for mo
 | ---------------------------------------------- | ----------- |
 | [toggle_pin items](#keybinds_toggle_pin_items) |             |
 
-##### <a name="keybinds_toggle_pin_items"></a>7.19.4.1. Rovr Config > keybinds > toggle_pin > toggle_pin items
+##### <a name="keybinds_toggle_pin_items"></a>6.19.4.1. Rovr Config > keybinds > toggle_pin > toggle_pin items
 
 |              |          |
 | ------------ | -------- |
 | **Type**     | `string` |
 | **Required** | No       |
 
-### <a name="keybinds_rename"></a>7.20. Property `Rovr Config > keybinds > rename`
+### <a name="keybinds_rename"></a>6.20. Property `Rovr Config > keybinds > rename`
 
 |                |                       |
 | -------------- | --------------------- |
@@ -3528,14 +3293,14 @@ Refer to https://textual.textualize.io/guide/design/#additional-variables for mo
 | ---------------------------------------------- | ----------- |
 | [toggle_pin items](#keybinds_toggle_pin_items) |             |
 
-#### <a name="keybinds_toggle_pin_items"></a>7.20.1. Rovr Config > keybinds > toggle_pin > toggle_pin items
+#### <a name="keybinds_toggle_pin_items"></a>6.20.1. Rovr Config > keybinds > toggle_pin > toggle_pin items
 
 |              |          |
 | ------------ | -------- |
 | **Type**     | `string` |
 | **Required** | No       |
 
-### <a name="keybinds_new"></a>7.21. Property `Rovr Config > keybinds > new`
+### <a name="keybinds_new"></a>6.21. Property `Rovr Config > keybinds > new`
 
 |                |                       |
 | -------------- | --------------------- |
@@ -3557,14 +3322,14 @@ Refer to https://textual.textualize.io/guide/design/#additional-variables for mo
 | ---------------------------------------------- | ----------- |
 | [toggle_pin items](#keybinds_toggle_pin_items) |             |
 
-#### <a name="keybinds_toggle_pin_items"></a>7.21.1. Rovr Config > keybinds > toggle_pin > toggle_pin items
+#### <a name="keybinds_toggle_pin_items"></a>6.21.1. Rovr Config > keybinds > toggle_pin > toggle_pin items
 
 |              |          |
 | ------------ | -------- |
 | **Type**     | `string` |
 | **Required** | No       |
 
-### <a name="keybinds_bulk_create"></a>7.22. Property `Rovr Config > keybinds > bulk_create`
+### <a name="keybinds_bulk_create"></a>6.22. Property `Rovr Config > keybinds > bulk_create`
 
 |                |                       |
 | -------------- | --------------------- |
@@ -3586,14 +3351,14 @@ Refer to https://textual.textualize.io/guide/design/#additional-variables for mo
 | ---------------------------------------------- | ----------- |
 | [toggle_pin items](#keybinds_toggle_pin_items) |             |
 
-#### <a name="keybinds_toggle_pin_items"></a>7.22.1. Rovr Config > keybinds > toggle_pin > toggle_pin items
+#### <a name="keybinds_toggle_pin_items"></a>6.22.1. Rovr Config > keybinds > toggle_pin > toggle_pin items
 
 |              |          |
 | ------------ | -------- |
 | **Type**     | `string` |
 | **Required** | No       |
 
-### <a name="keybinds_toggle_all"></a>7.23. Property `Rovr Config > keybinds > toggle_all`
+### <a name="keybinds_toggle_all"></a>6.23. Property `Rovr Config > keybinds > toggle_all`
 
 |                |                       |
 | -------------- | --------------------- |
@@ -3615,14 +3380,14 @@ Refer to https://textual.textualize.io/guide/design/#additional-variables for mo
 | ---------------------------------------------- | ----------- |
 | [toggle_pin items](#keybinds_toggle_pin_items) |             |
 
-#### <a name="keybinds_toggle_pin_items"></a>7.23.1. Rovr Config > keybinds > toggle_pin > toggle_pin items
+#### <a name="keybinds_toggle_pin_items"></a>6.23.1. Rovr Config > keybinds > toggle_pin > toggle_pin items
 
 |              |          |
 | ------------ | -------- |
 | **Type**     | `string` |
 | **Required** | No       |
 
-### <a name="keybinds_zip"></a>7.24. Property `Rovr Config > keybinds > zip`
+### <a name="keybinds_zip"></a>6.24. Property `Rovr Config > keybinds > zip`
 
 |                |                       |
 | -------------- | --------------------- |
@@ -3644,14 +3409,14 @@ Refer to https://textual.textualize.io/guide/design/#additional-variables for mo
 | ---------------------------------------------- | ----------- |
 | [toggle_pin items](#keybinds_toggle_pin_items) |             |
 
-#### <a name="keybinds_toggle_pin_items"></a>7.24.1. Rovr Config > keybinds > toggle_pin > toggle_pin items
+#### <a name="keybinds_toggle_pin_items"></a>6.24.1. Rovr Config > keybinds > toggle_pin > toggle_pin items
 
 |              |          |
 | ------------ | -------- |
 | **Type**     | `string` |
 | **Required** | No       |
 
-### <a name="keybinds_unzip"></a>7.25. Property `Rovr Config > keybinds > unzip`
+### <a name="keybinds_unzip"></a>6.25. Property `Rovr Config > keybinds > unzip`
 
 |                |                       |
 | -------------- | --------------------- |
@@ -3673,14 +3438,14 @@ Refer to https://textual.textualize.io/guide/design/#additional-variables for mo
 | ---------------------------------------------- | ----------- |
 | [toggle_pin items](#keybinds_toggle_pin_items) |             |
 
-#### <a name="keybinds_toggle_pin_items"></a>7.25.1. Rovr Config > keybinds > toggle_pin > toggle_pin items
+#### <a name="keybinds_toggle_pin_items"></a>6.25.1. Rovr Config > keybinds > toggle_pin > toggle_pin items
 
 |              |          |
 | ------------ | -------- |
 | **Type**     | `string` |
 | **Required** | No       |
 
-### <a name="keybinds_open_right_click_menu"></a>7.26. Property `Rovr Config > keybinds > open_right_click_menu`
+### <a name="keybinds_open_right_click_menu"></a>6.26. Property `Rovr Config > keybinds > open_right_click_menu`
 
 |                |                       |
 | -------------- | --------------------- |
@@ -3702,14 +3467,14 @@ Refer to https://textual.textualize.io/guide/design/#additional-variables for mo
 | ---------------------------------------------- | ----------- |
 | [toggle_pin items](#keybinds_toggle_pin_items) |             |
 
-#### <a name="keybinds_toggle_pin_items"></a>7.26.1. Rovr Config > keybinds > toggle_pin > toggle_pin items
+#### <a name="keybinds_toggle_pin_items"></a>6.26.1. Rovr Config > keybinds > toggle_pin > toggle_pin items
 
 |              |          |
 | ------------ | -------- |
 | **Type**     | `string` |
 | **Required** | No       |
 
-### <a name="keybinds_extra_copy"></a>7.27. Property `Rovr Config > keybinds > extra_copy`
+### <a name="keybinds_extra_copy"></a>6.27. Property `Rovr Config > keybinds > extra_copy`
 
 |                           |             |
 | ------------------------- | ----------- |
@@ -3727,7 +3492,7 @@ Refer to https://textual.textualize.io/guide/design/#additional-variables for mo
 | [copy_to_system_clip](#keybinds_extra_copy_copy_to_system_clip)       | array of string | Copy the selected files to the system clipboard               |
 | [copy_current_directory](#keybinds_extra_copy_copy_current_directory) | array of string | Copy the current directory's path to the system clipboard     |
 
-#### <a name="keybinds_extra_copy_open_popup"></a>7.27.1. Property `Rovr Config > keybinds > extra_copy > open_popup`
+#### <a name="keybinds_extra_copy_open_popup"></a>6.27.1. Property `Rovr Config > keybinds > extra_copy > open_popup`
 
 |                |                       |
 | -------------- | --------------------- |
@@ -3749,14 +3514,14 @@ Refer to https://textual.textualize.io/guide/design/#additional-variables for mo
 | ---------------------------------------------- | ----------- |
 | [toggle_pin items](#keybinds_toggle_pin_items) |             |
 
-##### <a name="keybinds_toggle_pin_items"></a>7.27.1.1. Rovr Config > keybinds > toggle_pin > toggle_pin items
+##### <a name="keybinds_toggle_pin_items"></a>6.27.1.1. Rovr Config > keybinds > toggle_pin > toggle_pin items
 
 |              |          |
 | ------------ | -------- |
 | **Type**     | `string` |
 | **Required** | No       |
 
-#### <a name="keybinds_extra_copy_copy_to_rovr"></a>7.27.2. Property `Rovr Config > keybinds > extra_copy > copy_to_rovr`
+#### <a name="keybinds_extra_copy_copy_to_rovr"></a>6.27.2. Property `Rovr Config > keybinds > extra_copy > copy_to_rovr`
 
 |                |                       |
 | -------------- | --------------------- |
@@ -3778,14 +3543,14 @@ Refer to https://textual.textualize.io/guide/design/#additional-variables for mo
 | ---------------------------------------------- | ----------- |
 | [toggle_pin items](#keybinds_toggle_pin_items) |             |
 
-##### <a name="keybinds_toggle_pin_items"></a>7.27.2.1. Rovr Config > keybinds > toggle_pin > toggle_pin items
+##### <a name="keybinds_toggle_pin_items"></a>6.27.2.1. Rovr Config > keybinds > toggle_pin > toggle_pin items
 
 |              |          |
 | ------------ | -------- |
 | **Type**     | `string` |
 | **Required** | No       |
 
-#### <a name="keybinds_extra_copy_copy_highlighted"></a>7.27.3. Property `Rovr Config > keybinds > extra_copy > copy_highlighted`
+#### <a name="keybinds_extra_copy_copy_highlighted"></a>6.27.3. Property `Rovr Config > keybinds > extra_copy > copy_highlighted`
 
 |                |                       |
 | -------------- | --------------------- |
@@ -3807,14 +3572,14 @@ Refer to https://textual.textualize.io/guide/design/#additional-variables for mo
 | ---------------------------------------------- | ----------- |
 | [toggle_pin items](#keybinds_toggle_pin_items) |             |
 
-##### <a name="keybinds_toggle_pin_items"></a>7.27.3.1. Rovr Config > keybinds > toggle_pin > toggle_pin items
+##### <a name="keybinds_toggle_pin_items"></a>6.27.3.1. Rovr Config > keybinds > toggle_pin > toggle_pin items
 
 |              |          |
 | ------------ | -------- |
 | **Type**     | `string` |
 | **Required** | No       |
 
-#### <a name="keybinds_extra_copy_copy_to_system_clip"></a>7.27.4. Property `Rovr Config > keybinds > extra_copy > copy_to_system_clip`
+#### <a name="keybinds_extra_copy_copy_to_system_clip"></a>6.27.4. Property `Rovr Config > keybinds > extra_copy > copy_to_system_clip`
 
 |                |                       |
 | -------------- | --------------------- |
@@ -3836,14 +3601,14 @@ Refer to https://textual.textualize.io/guide/design/#additional-variables for mo
 | ---------------------------------------------- | ----------- |
 | [toggle_pin items](#keybinds_toggle_pin_items) |             |
 
-##### <a name="keybinds_toggle_pin_items"></a>7.27.4.1. Rovr Config > keybinds > toggle_pin > toggle_pin items
+##### <a name="keybinds_toggle_pin_items"></a>6.27.4.1. Rovr Config > keybinds > toggle_pin > toggle_pin items
 
 |              |          |
 | ------------ | -------- |
 | **Type**     | `string` |
 | **Required** | No       |
 
-#### <a name="keybinds_extra_copy_copy_current_directory"></a>7.27.5. Property `Rovr Config > keybinds > extra_copy > copy_current_directory`
+#### <a name="keybinds_extra_copy_copy_current_directory"></a>6.27.5. Property `Rovr Config > keybinds > extra_copy > copy_current_directory`
 
 |                |                       |
 | -------------- | --------------------- |
@@ -3865,14 +3630,14 @@ Refer to https://textual.textualize.io/guide/design/#additional-variables for mo
 | ---------------------------------------------- | ----------- |
 | [toggle_pin items](#keybinds_toggle_pin_items) |             |
 
-##### <a name="keybinds_toggle_pin_items"></a>7.27.5.1. Rovr Config > keybinds > toggle_pin > toggle_pin items
+##### <a name="keybinds_toggle_pin_items"></a>6.27.5.1. Rovr Config > keybinds > toggle_pin > toggle_pin items
 
 |              |          |
 | ------------ | -------- |
 | **Type**     | `string` |
 | **Required** | No       |
 
-### <a name="keybinds_up"></a>7.28. Property `Rovr Config > keybinds > up`
+### <a name="keybinds_up"></a>6.28. Property `Rovr Config > keybinds > up`
 
 |                |                       |
 | -------------- | --------------------- |
@@ -3894,14 +3659,14 @@ Refer to https://textual.textualize.io/guide/design/#additional-variables for mo
 | ---------------------------------------------- | ----------- |
 | [toggle_pin items](#keybinds_toggle_pin_items) |             |
 
-#### <a name="keybinds_toggle_pin_items"></a>7.28.1. Rovr Config > keybinds > toggle_pin > toggle_pin items
+#### <a name="keybinds_toggle_pin_items"></a>6.28.1. Rovr Config > keybinds > toggle_pin > toggle_pin items
 
 |              |          |
 | ------------ | -------- |
 | **Type**     | `string` |
 | **Required** | No       |
 
-### <a name="keybinds_down"></a>7.29. Property `Rovr Config > keybinds > down`
+### <a name="keybinds_down"></a>6.29. Property `Rovr Config > keybinds > down`
 
 |                |                       |
 | -------------- | --------------------- |
@@ -3923,14 +3688,14 @@ Refer to https://textual.textualize.io/guide/design/#additional-variables for mo
 | ---------------------------------------------- | ----------- |
 | [toggle_pin items](#keybinds_toggle_pin_items) |             |
 
-#### <a name="keybinds_toggle_pin_items"></a>7.29.1. Rovr Config > keybinds > toggle_pin > toggle_pin items
+#### <a name="keybinds_toggle_pin_items"></a>6.29.1. Rovr Config > keybinds > toggle_pin > toggle_pin items
 
 |              |          |
 | ------------ | -------- |
 | **Type**     | `string` |
 | **Required** | No       |
 
-### <a name="keybinds_up_tree"></a>7.30. Property `Rovr Config > keybinds > up_tree`
+### <a name="keybinds_up_tree"></a>6.30. Property `Rovr Config > keybinds > up_tree`
 
 |                |                       |
 | -------------- | --------------------- |
@@ -3952,14 +3717,14 @@ Refer to https://textual.textualize.io/guide/design/#additional-variables for mo
 | ---------------------------------------------- | ----------- |
 | [toggle_pin items](#keybinds_toggle_pin_items) |             |
 
-#### <a name="keybinds_toggle_pin_items"></a>7.30.1. Rovr Config > keybinds > toggle_pin > toggle_pin items
+#### <a name="keybinds_toggle_pin_items"></a>6.30.1. Rovr Config > keybinds > toggle_pin > toggle_pin items
 
 |              |          |
 | ------------ | -------- |
 | **Type**     | `string` |
 | **Required** | No       |
 
-### <a name="keybinds_down_tree"></a>7.31. Property `Rovr Config > keybinds > down_tree`
+### <a name="keybinds_down_tree"></a>6.31. Property `Rovr Config > keybinds > down_tree`
 
 |                |                       |
 | -------------- | --------------------- |
@@ -3981,14 +3746,14 @@ Refer to https://textual.textualize.io/guide/design/#additional-variables for mo
 | ---------------------------------------------- | ----------- |
 | [toggle_pin items](#keybinds_toggle_pin_items) |             |
 
-#### <a name="keybinds_toggle_pin_items"></a>7.31.1. Rovr Config > keybinds > toggle_pin > toggle_pin items
+#### <a name="keybinds_toggle_pin_items"></a>6.31.1. Rovr Config > keybinds > toggle_pin > toggle_pin items
 
 |              |          |
 | ------------ | -------- |
 | **Type**     | `string` |
 | **Required** | No       |
 
-### <a name="keybinds_bypass_up_tree"></a>7.32. Property `Rovr Config > keybinds > bypass_up_tree`
+### <a name="keybinds_bypass_up_tree"></a>6.32. Property `Rovr Config > keybinds > bypass_up_tree`
 
 |                |                       |
 | -------------- | --------------------- |
@@ -4010,14 +3775,14 @@ Refer to https://textual.textualize.io/guide/design/#additional-variables for mo
 | ---------------------------------------------- | ----------- |
 | [toggle_pin items](#keybinds_toggle_pin_items) |             |
 
-#### <a name="keybinds_toggle_pin_items"></a>7.32.1. Rovr Config > keybinds > toggle_pin > toggle_pin items
+#### <a name="keybinds_toggle_pin_items"></a>6.32.1. Rovr Config > keybinds > toggle_pin > toggle_pin items
 
 |              |          |
 | ------------ | -------- |
 | **Type**     | `string` |
 | **Required** | No       |
 
-### <a name="keybinds_bypass_down_tree"></a>7.33. Property `Rovr Config > keybinds > bypass_down_tree`
+### <a name="keybinds_bypass_down_tree"></a>6.33. Property `Rovr Config > keybinds > bypass_down_tree`
 
 |                |                       |
 | -------------- | --------------------- |
@@ -4039,14 +3804,14 @@ Refer to https://textual.textualize.io/guide/design/#additional-variables for mo
 | ---------------------------------------------- | ----------- |
 | [toggle_pin items](#keybinds_toggle_pin_items) |             |
 
-#### <a name="keybinds_toggle_pin_items"></a>7.33.1. Rovr Config > keybinds > toggle_pin > toggle_pin items
+#### <a name="keybinds_toggle_pin_items"></a>6.33.1. Rovr Config > keybinds > toggle_pin > toggle_pin items
 
 |              |          |
 | ------------ | -------- |
 | **Type**     | `string` |
 | **Required** | No       |
 
-### <a name="keybinds_page_up"></a>7.34. Property `Rovr Config > keybinds > page_up`
+### <a name="keybinds_page_up"></a>6.34. Property `Rovr Config > keybinds > page_up`
 
 |                |                       |
 | -------------- | --------------------- |
@@ -4068,14 +3833,14 @@ Refer to https://textual.textualize.io/guide/design/#additional-variables for mo
 | ---------------------------------------------- | ----------- |
 | [toggle_pin items](#keybinds_toggle_pin_items) |             |
 
-#### <a name="keybinds_toggle_pin_items"></a>7.34.1. Rovr Config > keybinds > toggle_pin > toggle_pin items
+#### <a name="keybinds_toggle_pin_items"></a>6.34.1. Rovr Config > keybinds > toggle_pin > toggle_pin items
 
 |              |          |
 | ------------ | -------- |
 | **Type**     | `string` |
 | **Required** | No       |
 
-### <a name="keybinds_page_down"></a>7.35. Property `Rovr Config > keybinds > page_down`
+### <a name="keybinds_page_down"></a>6.35. Property `Rovr Config > keybinds > page_down`
 
 |                |                       |
 | -------------- | --------------------- |
@@ -4097,14 +3862,14 @@ Refer to https://textual.textualize.io/guide/design/#additional-variables for mo
 | ---------------------------------------------- | ----------- |
 | [toggle_pin items](#keybinds_toggle_pin_items) |             |
 
-#### <a name="keybinds_toggle_pin_items"></a>7.35.1. Rovr Config > keybinds > toggle_pin > toggle_pin items
+#### <a name="keybinds_toggle_pin_items"></a>6.35.1. Rovr Config > keybinds > toggle_pin > toggle_pin items
 
 |              |          |
 | ------------ | -------- |
 | **Type**     | `string` |
 | **Required** | No       |
 
-### <a name="keybinds_home"></a>7.36. Property `Rovr Config > keybinds > home`
+### <a name="keybinds_home"></a>6.36. Property `Rovr Config > keybinds > home`
 
 |                |                       |
 | -------------- | --------------------- |
@@ -4126,14 +3891,14 @@ Refer to https://textual.textualize.io/guide/design/#additional-variables for mo
 | ---------------------------------------------- | ----------- |
 | [toggle_pin items](#keybinds_toggle_pin_items) |             |
 
-#### <a name="keybinds_toggle_pin_items"></a>7.36.1. Rovr Config > keybinds > toggle_pin > toggle_pin items
+#### <a name="keybinds_toggle_pin_items"></a>6.36.1. Rovr Config > keybinds > toggle_pin > toggle_pin items
 
 |              |          |
 | ------------ | -------- |
 | **Type**     | `string` |
 | **Required** | No       |
 
-### <a name="keybinds_end"></a>7.37. Property `Rovr Config > keybinds > end`
+### <a name="keybinds_end"></a>6.37. Property `Rovr Config > keybinds > end`
 
 |                |                       |
 | -------------- | --------------------- |
@@ -4155,14 +3920,14 @@ Refer to https://textual.textualize.io/guide/design/#additional-variables for mo
 | ---------------------------------------------- | ----------- |
 | [toggle_pin items](#keybinds_toggle_pin_items) |             |
 
-#### <a name="keybinds_toggle_pin_items"></a>7.37.1. Rovr Config > keybinds > toggle_pin > toggle_pin items
+#### <a name="keybinds_toggle_pin_items"></a>6.37.1. Rovr Config > keybinds > toggle_pin > toggle_pin items
 
 |              |          |
 | ------------ | -------- |
 | **Type**     | `string` |
 | **Required** | No       |
 
-### <a name="keybinds_hist_previous"></a>7.38. Property `Rovr Config > keybinds > hist_previous`
+### <a name="keybinds_hist_previous"></a>6.38. Property `Rovr Config > keybinds > hist_previous`
 
 |                |                       |
 | -------------- | --------------------- |
@@ -4184,14 +3949,14 @@ Refer to https://textual.textualize.io/guide/design/#additional-variables for mo
 | ---------------------------------------------- | ----------- |
 | [toggle_pin items](#keybinds_toggle_pin_items) |             |
 
-#### <a name="keybinds_toggle_pin_items"></a>7.38.1. Rovr Config > keybinds > toggle_pin > toggle_pin items
+#### <a name="keybinds_toggle_pin_items"></a>6.38.1. Rovr Config > keybinds > toggle_pin > toggle_pin items
 
 |              |          |
 | ------------ | -------- |
 | **Type**     | `string` |
 | **Required** | No       |
 
-### <a name="keybinds_hist_next"></a>7.39. Property `Rovr Config > keybinds > hist_next`
+### <a name="keybinds_hist_next"></a>6.39. Property `Rovr Config > keybinds > hist_next`
 
 |                |                       |
 | -------------- | --------------------- |
@@ -4213,14 +3978,14 @@ Refer to https://textual.textualize.io/guide/design/#additional-variables for mo
 | ---------------------------------------------- | ----------- |
 | [toggle_pin items](#keybinds_toggle_pin_items) |             |
 
-#### <a name="keybinds_toggle_pin_items"></a>7.39.1. Rovr Config > keybinds > toggle_pin > toggle_pin items
+#### <a name="keybinds_toggle_pin_items"></a>6.39.1. Rovr Config > keybinds > toggle_pin > toggle_pin items
 
 |              |          |
 | ------------ | -------- |
 | **Type**     | `string` |
 | **Required** | No       |
 
-### <a name="keybinds_toggle_visual"></a>7.40. Property `Rovr Config > keybinds > toggle_visual`
+### <a name="keybinds_toggle_visual"></a>6.40. Property `Rovr Config > keybinds > toggle_visual`
 
 |                |                       |
 | -------------- | --------------------- |
@@ -4242,14 +4007,14 @@ Refer to https://textual.textualize.io/guide/design/#additional-variables for mo
 | ---------------------------------------------- | ----------- |
 | [toggle_pin items](#keybinds_toggle_pin_items) |             |
 
-#### <a name="keybinds_toggle_pin_items"></a>7.40.1. Rovr Config > keybinds > toggle_pin > toggle_pin items
+#### <a name="keybinds_toggle_pin_items"></a>6.40.1. Rovr Config > keybinds > toggle_pin > toggle_pin items
 
 |              |          |
 | ------------ | -------- |
 | **Type**     | `string` |
 | **Required** | No       |
 
-### <a name="keybinds_toggle_hidden_files"></a>7.41. Property `Rovr Config > keybinds > toggle_hidden_files`
+### <a name="keybinds_toggle_hidden_files"></a>6.41. Property `Rovr Config > keybinds > toggle_hidden_files`
 
 |                |                       |
 | -------------- | --------------------- |
@@ -4271,14 +4036,14 @@ Refer to https://textual.textualize.io/guide/design/#additional-variables for mo
 | ---------------------------------------------- | ----------- |
 | [toggle_pin items](#keybinds_toggle_pin_items) |             |
 
-#### <a name="keybinds_toggle_pin_items"></a>7.41.1. Rovr Config > keybinds > toggle_pin > toggle_pin items
+#### <a name="keybinds_toggle_pin_items"></a>6.41.1. Rovr Config > keybinds > toggle_pin > toggle_pin items
 
 |              |          |
 | ------------ | -------- |
 | **Type**     | `string` |
 | **Required** | No       |
 
-### <a name="keybinds_toggle_select_item"></a>7.42. Property `Rovr Config > keybinds > toggle_select_item`
+### <a name="keybinds_toggle_select_item"></a>6.42. Property `Rovr Config > keybinds > toggle_select_item`
 
 |                |                       |
 | -------------- | --------------------- |
@@ -4300,14 +4065,14 @@ Refer to https://textual.textualize.io/guide/design/#additional-variables for mo
 | ---------------------------------------------- | ----------- |
 | [toggle_pin items](#keybinds_toggle_pin_items) |             |
 
-#### <a name="keybinds_toggle_pin_items"></a>7.42.1. Rovr Config > keybinds > toggle_pin > toggle_pin items
+#### <a name="keybinds_toggle_pin_items"></a>6.42.1. Rovr Config > keybinds > toggle_pin > toggle_pin items
 
 |              |          |
 | ------------ | -------- |
 | **Type**     | `string` |
 | **Required** | No       |
 
-### <a name="keybinds_select_up"></a>7.43. Property `Rovr Config > keybinds > select_up`
+### <a name="keybinds_select_up"></a>6.43. Property `Rovr Config > keybinds > select_up`
 
 |                |                       |
 | -------------- | --------------------- |
@@ -4329,14 +4094,14 @@ Refer to https://textual.textualize.io/guide/design/#additional-variables for mo
 | ---------------------------------------------- | ----------- |
 | [toggle_pin items](#keybinds_toggle_pin_items) |             |
 
-#### <a name="keybinds_toggle_pin_items"></a>7.43.1. Rovr Config > keybinds > toggle_pin > toggle_pin items
+#### <a name="keybinds_toggle_pin_items"></a>6.43.1. Rovr Config > keybinds > toggle_pin > toggle_pin items
 
 |              |          |
 | ------------ | -------- |
 | **Type**     | `string` |
 | **Required** | No       |
 
-### <a name="keybinds_select_down"></a>7.44. Property `Rovr Config > keybinds > select_down`
+### <a name="keybinds_select_down"></a>6.44. Property `Rovr Config > keybinds > select_down`
 
 |                |                       |
 | -------------- | --------------------- |
@@ -4358,14 +4123,14 @@ Refer to https://textual.textualize.io/guide/design/#additional-variables for mo
 | ---------------------------------------------- | ----------- |
 | [toggle_pin items](#keybinds_toggle_pin_items) |             |
 
-#### <a name="keybinds_toggle_pin_items"></a>7.44.1. Rovr Config > keybinds > toggle_pin > toggle_pin items
+#### <a name="keybinds_toggle_pin_items"></a>6.44.1. Rovr Config > keybinds > toggle_pin > toggle_pin items
 
 |              |          |
 | ------------ | -------- |
 | **Type**     | `string` |
 | **Required** | No       |
 
-### <a name="keybinds_select_page_up"></a>7.45. Property `Rovr Config > keybinds > select_page_up`
+### <a name="keybinds_select_page_up"></a>6.45. Property `Rovr Config > keybinds > select_page_up`
 
 |                |                       |
 | -------------- | --------------------- |
@@ -4387,14 +4152,14 @@ Refer to https://textual.textualize.io/guide/design/#additional-variables for mo
 | ---------------------------------------------- | ----------- |
 | [toggle_pin items](#keybinds_toggle_pin_items) |             |
 
-#### <a name="keybinds_toggle_pin_items"></a>7.45.1. Rovr Config > keybinds > toggle_pin > toggle_pin items
+#### <a name="keybinds_toggle_pin_items"></a>6.45.1. Rovr Config > keybinds > toggle_pin > toggle_pin items
 
 |              |          |
 | ------------ | -------- |
 | **Type**     | `string` |
 | **Required** | No       |
 
-### <a name="keybinds_select_page_down"></a>7.46. Property `Rovr Config > keybinds > select_page_down`
+### <a name="keybinds_select_page_down"></a>6.46. Property `Rovr Config > keybinds > select_page_down`
 
 |                |                       |
 | -------------- | --------------------- |
@@ -4416,14 +4181,14 @@ Refer to https://textual.textualize.io/guide/design/#additional-variables for mo
 | ---------------------------------------------- | ----------- |
 | [toggle_pin items](#keybinds_toggle_pin_items) |             |
 
-#### <a name="keybinds_toggle_pin_items"></a>7.46.1. Rovr Config > keybinds > toggle_pin > toggle_pin items
+#### <a name="keybinds_toggle_pin_items"></a>6.46.1. Rovr Config > keybinds > toggle_pin > toggle_pin items
 
 |              |          |
 | ------------ | -------- |
 | **Type**     | `string` |
 | **Required** | No       |
 
-### <a name="keybinds_select_home"></a>7.47. Property `Rovr Config > keybinds > select_home`
+### <a name="keybinds_select_home"></a>6.47. Property `Rovr Config > keybinds > select_home`
 
 |                |                       |
 | -------------- | --------------------- |
@@ -4445,14 +4210,14 @@ Refer to https://textual.textualize.io/guide/design/#additional-variables for mo
 | ---------------------------------------------- | ----------- |
 | [toggle_pin items](#keybinds_toggle_pin_items) |             |
 
-#### <a name="keybinds_toggle_pin_items"></a>7.47.1. Rovr Config > keybinds > toggle_pin > toggle_pin items
+#### <a name="keybinds_toggle_pin_items"></a>6.47.1. Rovr Config > keybinds > toggle_pin > toggle_pin items
 
 |              |          |
 | ------------ | -------- |
 | **Type**     | `string` |
 | **Required** | No       |
 
-### <a name="keybinds_select_end"></a>7.48. Property `Rovr Config > keybinds > select_end`
+### <a name="keybinds_select_end"></a>6.48. Property `Rovr Config > keybinds > select_end`
 
 |                |                       |
 | -------------- | --------------------- |
@@ -4474,14 +4239,14 @@ Refer to https://textual.textualize.io/guide/design/#additional-variables for mo
 | ---------------------------------------------- | ----------- |
 | [toggle_pin items](#keybinds_toggle_pin_items) |             |
 
-#### <a name="keybinds_toggle_pin_items"></a>7.48.1. Rovr Config > keybinds > toggle_pin > toggle_pin items
+#### <a name="keybinds_toggle_pin_items"></a>6.48.1. Rovr Config > keybinds > toggle_pin > toggle_pin items
 
 |              |          |
 | ------------ | -------- |
 | **Type**     | `string` |
 | **Required** | No       |
 
-### <a name="keybinds_tab_next"></a>7.49. Property `Rovr Config > keybinds > tab_next`
+### <a name="keybinds_tab_next"></a>6.49. Property `Rovr Config > keybinds > tab_next`
 
 |                |                       |
 | -------------- | --------------------- |
@@ -4503,14 +4268,14 @@ Refer to https://textual.textualize.io/guide/design/#additional-variables for mo
 | ---------------------------------------------- | ----------- |
 | [toggle_pin items](#keybinds_toggle_pin_items) |             |
 
-#### <a name="keybinds_toggle_pin_items"></a>7.49.1. Rovr Config > keybinds > toggle_pin > toggle_pin items
+#### <a name="keybinds_toggle_pin_items"></a>6.49.1. Rovr Config > keybinds > toggle_pin > toggle_pin items
 
 |              |          |
 | ------------ | -------- |
 | **Type**     | `string` |
 | **Required** | No       |
 
-### <a name="keybinds_tab_previous"></a>7.50. Property `Rovr Config > keybinds > tab_previous`
+### <a name="keybinds_tab_previous"></a>6.50. Property `Rovr Config > keybinds > tab_previous`
 
 |                |                       |
 | -------------- | --------------------- |
@@ -4532,14 +4297,14 @@ Refer to https://textual.textualize.io/guide/design/#additional-variables for mo
 | ---------------------------------------------- | ----------- |
 | [toggle_pin items](#keybinds_toggle_pin_items) |             |
 
-#### <a name="keybinds_toggle_pin_items"></a>7.50.1. Rovr Config > keybinds > toggle_pin > toggle_pin items
+#### <a name="keybinds_toggle_pin_items"></a>6.50.1. Rovr Config > keybinds > toggle_pin > toggle_pin items
 
 |              |          |
 | ------------ | -------- |
 | **Type**     | `string` |
 | **Required** | No       |
 
-### <a name="keybinds_tab_new"></a>7.51. Property `Rovr Config > keybinds > tab_new`
+### <a name="keybinds_tab_new"></a>6.51. Property `Rovr Config > keybinds > tab_new`
 
 |                |                       |
 | -------------- | --------------------- |
@@ -4561,14 +4326,14 @@ Refer to https://textual.textualize.io/guide/design/#additional-variables for mo
 | ---------------------------------------------- | ----------- |
 | [toggle_pin items](#keybinds_toggle_pin_items) |             |
 
-#### <a name="keybinds_toggle_pin_items"></a>7.51.1. Rovr Config > keybinds > toggle_pin > toggle_pin items
+#### <a name="keybinds_toggle_pin_items"></a>6.51.1. Rovr Config > keybinds > toggle_pin > toggle_pin items
 
 |              |          |
 | ------------ | -------- |
 | **Type**     | `string` |
 | **Required** | No       |
 
-### <a name="keybinds_tab_close"></a>7.52. Property `Rovr Config > keybinds > tab_close`
+### <a name="keybinds_tab_close"></a>6.52. Property `Rovr Config > keybinds > tab_close`
 
 |                |                       |
 | -------------- | --------------------- |
@@ -4590,14 +4355,14 @@ Refer to https://textual.textualize.io/guide/design/#additional-variables for mo
 | ---------------------------------------------- | ----------- |
 | [toggle_pin items](#keybinds_toggle_pin_items) |             |
 
-#### <a name="keybinds_toggle_pin_items"></a>7.52.1. Rovr Config > keybinds > toggle_pin > toggle_pin items
+#### <a name="keybinds_toggle_pin_items"></a>6.52.1. Rovr Config > keybinds > toggle_pin > toggle_pin items
 
 |              |          |
 | ------------ | -------- |
 | **Type**     | `string` |
 | **Required** | No       |
 
-### <a name="keybinds_preview_scroll_left"></a>7.53. Property `Rovr Config > keybinds > preview_scroll_left`
+### <a name="keybinds_preview_scroll_left"></a>6.53. Property `Rovr Config > keybinds > preview_scroll_left`
 
 |                |                       |
 | -------------- | --------------------- |
@@ -4619,14 +4384,14 @@ Refer to https://textual.textualize.io/guide/design/#additional-variables for mo
 | ---------------------------------------------- | ----------- |
 | [toggle_pin items](#keybinds_toggle_pin_items) |             |
 
-#### <a name="keybinds_toggle_pin_items"></a>7.53.1. Rovr Config > keybinds > toggle_pin > toggle_pin items
+#### <a name="keybinds_toggle_pin_items"></a>6.53.1. Rovr Config > keybinds > toggle_pin > toggle_pin items
 
 |              |          |
 | ------------ | -------- |
 | **Type**     | `string` |
 | **Required** | No       |
 
-### <a name="keybinds_preview_scroll_right"></a>7.54. Property `Rovr Config > keybinds > preview_scroll_right`
+### <a name="keybinds_preview_scroll_right"></a>6.54. Property `Rovr Config > keybinds > preview_scroll_right`
 
 |                |                       |
 | -------------- | --------------------- |
@@ -4648,14 +4413,14 @@ Refer to https://textual.textualize.io/guide/design/#additional-variables for mo
 | ---------------------------------------------- | ----------- |
 | [toggle_pin items](#keybinds_toggle_pin_items) |             |
 
-#### <a name="keybinds_toggle_pin_items"></a>7.54.1. Rovr Config > keybinds > toggle_pin > toggle_pin items
+#### <a name="keybinds_toggle_pin_items"></a>6.54.1. Rovr Config > keybinds > toggle_pin > toggle_pin items
 
 |              |          |
 | ------------ | -------- |
 | **Type**     | `string` |
 | **Required** | No       |
 
-### <a name="keybinds_preview_select_right"></a>7.55. Property `Rovr Config > keybinds > preview_select_right`
+### <a name="keybinds_preview_select_right"></a>6.55. Property `Rovr Config > keybinds > preview_select_right`
 
 |                |                       |
 | -------------- | --------------------- |
@@ -4677,14 +4442,14 @@ Refer to https://textual.textualize.io/guide/design/#additional-variables for mo
 | ---------------------------------------------- | ----------- |
 | [toggle_pin items](#keybinds_toggle_pin_items) |             |
 
-#### <a name="keybinds_toggle_pin_items"></a>7.55.1. Rovr Config > keybinds > toggle_pin > toggle_pin items
+#### <a name="keybinds_toggle_pin_items"></a>6.55.1. Rovr Config > keybinds > toggle_pin > toggle_pin items
 
 |              |          |
 | ------------ | -------- |
 | **Type**     | `string` |
 | **Required** | No       |
 
-### <a name="keybinds_preview_select_left"></a>7.56. Property `Rovr Config > keybinds > preview_select_left`
+### <a name="keybinds_preview_select_left"></a>6.56. Property `Rovr Config > keybinds > preview_select_left`
 
 |                |                       |
 | -------------- | --------------------- |
@@ -4706,14 +4471,14 @@ Refer to https://textual.textualize.io/guide/design/#additional-variables for mo
 | ---------------------------------------------- | ----------- |
 | [toggle_pin items](#keybinds_toggle_pin_items) |             |
 
-#### <a name="keybinds_toggle_pin_items"></a>7.56.1. Rovr Config > keybinds > toggle_pin > toggle_pin items
+#### <a name="keybinds_toggle_pin_items"></a>6.56.1. Rovr Config > keybinds > toggle_pin > toggle_pin items
 
 |              |          |
 | ------------ | -------- |
 | **Type**     | `string` |
 | **Required** | No       |
 
-### <a name="keybinds_show_keybinds"></a>7.57. Property `Rovr Config > keybinds > show_keybinds`
+### <a name="keybinds_show_keybinds"></a>6.57. Property `Rovr Config > keybinds > show_keybinds`
 
 |                |                       |
 | -------------- | --------------------- |
@@ -4735,14 +4500,14 @@ Refer to https://textual.textualize.io/guide/design/#additional-variables for mo
 | ---------------------------------------------- | ----------- |
 | [toggle_pin items](#keybinds_toggle_pin_items) |             |
 
-#### <a name="keybinds_toggle_pin_items"></a>7.57.1. Rovr Config > keybinds > toggle_pin > toggle_pin items
+#### <a name="keybinds_toggle_pin_items"></a>6.57.1. Rovr Config > keybinds > toggle_pin > toggle_pin items
 
 |              |          |
 | ------------ | -------- |
 | **Type**     | `string` |
 | **Required** | No       |
 
-### <a name="keybinds_change_sort_order"></a>7.58. Property `Rovr Config > keybinds > change_sort_order`
+### <a name="keybinds_change_sort_order"></a>6.58. Property `Rovr Config > keybinds > change_sort_order`
 
 |                           |                  |
 | ------------------------- | ---------------- |
@@ -4763,7 +4528,7 @@ Refer to https://textual.textualize.io/guide/design/#additional-variables for mo
 | [modified](#keybinds_change_sort_order_modified)     | array of string | Sort by modification time.        |
 | [descending](#keybinds_change_sort_order_descending) | array of string | Toggle descending sort order.     |
 
-#### <a name="keybinds_change_sort_order_open_popup"></a>7.58.1. Property `Rovr Config > keybinds > change_sort_order > open_popup`
+#### <a name="keybinds_change_sort_order_open_popup"></a>6.58.1. Property `Rovr Config > keybinds > change_sort_order > open_popup`
 
 |                |                       |
 | -------------- | --------------------- |
@@ -4785,14 +4550,14 @@ Refer to https://textual.textualize.io/guide/design/#additional-variables for mo
 | ---------------------------------------------- | ----------- |
 | [toggle_pin items](#keybinds_toggle_pin_items) |             |
 
-##### <a name="keybinds_toggle_pin_items"></a>7.58.1.1. Rovr Config > keybinds > toggle_pin > toggle_pin items
+##### <a name="keybinds_toggle_pin_items"></a>6.58.1.1. Rovr Config > keybinds > toggle_pin > toggle_pin items
 
 |              |          |
 | ------------ | -------- |
 | **Type**     | `string` |
 | **Required** | No       |
 
-#### <a name="keybinds_change_sort_order_name"></a>7.58.2. Property `Rovr Config > keybinds > change_sort_order > name`
+#### <a name="keybinds_change_sort_order_name"></a>6.58.2. Property `Rovr Config > keybinds > change_sort_order > name`
 
 |                |                       |
 | -------------- | --------------------- |
@@ -4814,14 +4579,14 @@ Refer to https://textual.textualize.io/guide/design/#additional-variables for mo
 | ---------------------------------------------- | ----------- |
 | [toggle_pin items](#keybinds_toggle_pin_items) |             |
 
-##### <a name="keybinds_toggle_pin_items"></a>7.58.2.1. Rovr Config > keybinds > toggle_pin > toggle_pin items
+##### <a name="keybinds_toggle_pin_items"></a>6.58.2.1. Rovr Config > keybinds > toggle_pin > toggle_pin items
 
 |              |          |
 | ------------ | -------- |
 | **Type**     | `string` |
 | **Required** | No       |
 
-#### <a name="keybinds_change_sort_order_extension"></a>7.58.3. Property `Rovr Config > keybinds > change_sort_order > extension`
+#### <a name="keybinds_change_sort_order_extension"></a>6.58.3. Property `Rovr Config > keybinds > change_sort_order > extension`
 
 |                |                       |
 | -------------- | --------------------- |
@@ -4843,14 +4608,14 @@ Refer to https://textual.textualize.io/guide/design/#additional-variables for mo
 | ---------------------------------------------- | ----------- |
 | [toggle_pin items](#keybinds_toggle_pin_items) |             |
 
-##### <a name="keybinds_toggle_pin_items"></a>7.58.3.1. Rovr Config > keybinds > toggle_pin > toggle_pin items
+##### <a name="keybinds_toggle_pin_items"></a>6.58.3.1. Rovr Config > keybinds > toggle_pin > toggle_pin items
 
 |              |          |
 | ------------ | -------- |
 | **Type**     | `string` |
 | **Required** | No       |
 
-#### <a name="keybinds_change_sort_order_natural"></a>7.58.4. Property `Rovr Config > keybinds > change_sort_order > natural`
+#### <a name="keybinds_change_sort_order_natural"></a>6.58.4. Property `Rovr Config > keybinds > change_sort_order > natural`
 
 |                |                       |
 | -------------- | --------------------- |
@@ -4872,14 +4637,14 @@ Refer to https://textual.textualize.io/guide/design/#additional-variables for mo
 | ---------------------------------------------- | ----------- |
 | [toggle_pin items](#keybinds_toggle_pin_items) |             |
 
-##### <a name="keybinds_toggle_pin_items"></a>7.58.4.1. Rovr Config > keybinds > toggle_pin > toggle_pin items
+##### <a name="keybinds_toggle_pin_items"></a>6.58.4.1. Rovr Config > keybinds > toggle_pin > toggle_pin items
 
 |              |          |
 | ------------ | -------- |
 | **Type**     | `string` |
 | **Required** | No       |
 
-#### <a name="keybinds_change_sort_order_size"></a>7.58.5. Property `Rovr Config > keybinds > change_sort_order > size`
+#### <a name="keybinds_change_sort_order_size"></a>6.58.5. Property `Rovr Config > keybinds > change_sort_order > size`
 
 |                |                       |
 | -------------- | --------------------- |
@@ -4901,14 +4666,14 @@ Refer to https://textual.textualize.io/guide/design/#additional-variables for mo
 | ---------------------------------------------- | ----------- |
 | [toggle_pin items](#keybinds_toggle_pin_items) |             |
 
-##### <a name="keybinds_toggle_pin_items"></a>7.58.5.1. Rovr Config > keybinds > toggle_pin > toggle_pin items
+##### <a name="keybinds_toggle_pin_items"></a>6.58.5.1. Rovr Config > keybinds > toggle_pin > toggle_pin items
 
 |              |          |
 | ------------ | -------- |
 | **Type**     | `string` |
 | **Required** | No       |
 
-#### <a name="keybinds_change_sort_order_created"></a>7.58.6. Property `Rovr Config > keybinds > change_sort_order > created`
+#### <a name="keybinds_change_sort_order_created"></a>6.58.6. Property `Rovr Config > keybinds > change_sort_order > created`
 
 |                |                       |
 | -------------- | --------------------- |
@@ -4930,14 +4695,14 @@ Refer to https://textual.textualize.io/guide/design/#additional-variables for mo
 | ---------------------------------------------- | ----------- |
 | [toggle_pin items](#keybinds_toggle_pin_items) |             |
 
-##### <a name="keybinds_toggle_pin_items"></a>7.58.6.1. Rovr Config > keybinds > toggle_pin > toggle_pin items
+##### <a name="keybinds_toggle_pin_items"></a>6.58.6.1. Rovr Config > keybinds > toggle_pin > toggle_pin items
 
 |              |          |
 | ------------ | -------- |
 | **Type**     | `string` |
 | **Required** | No       |
 
-#### <a name="keybinds_change_sort_order_modified"></a>7.58.7. Property `Rovr Config > keybinds > change_sort_order > modified`
+#### <a name="keybinds_change_sort_order_modified"></a>6.58.7. Property `Rovr Config > keybinds > change_sort_order > modified`
 
 |                |                       |
 | -------------- | --------------------- |
@@ -4959,14 +4724,14 @@ Refer to https://textual.textualize.io/guide/design/#additional-variables for mo
 | ---------------------------------------------- | ----------- |
 | [toggle_pin items](#keybinds_toggle_pin_items) |             |
 
-##### <a name="keybinds_toggle_pin_items"></a>7.58.7.1. Rovr Config > keybinds > toggle_pin > toggle_pin items
+##### <a name="keybinds_toggle_pin_items"></a>6.58.7.1. Rovr Config > keybinds > toggle_pin > toggle_pin items
 
 |              |          |
 | ------------ | -------- |
 | **Type**     | `string` |
 | **Required** | No       |
 
-#### <a name="keybinds_change_sort_order_descending"></a>7.58.8. Property `Rovr Config > keybinds > change_sort_order > descending`
+#### <a name="keybinds_change_sort_order_descending"></a>6.58.8. Property `Rovr Config > keybinds > change_sort_order > descending`
 
 |                |                       |
 | -------------- | --------------------- |
@@ -4988,14 +4753,14 @@ Refer to https://textual.textualize.io/guide/design/#additional-variables for mo
 | ---------------------------------------------- | ----------- |
 | [toggle_pin items](#keybinds_toggle_pin_items) |             |
 
-##### <a name="keybinds_toggle_pin_items"></a>7.58.8.1. Rovr Config > keybinds > toggle_pin > toggle_pin items
+##### <a name="keybinds_toggle_pin_items"></a>6.58.8.1. Rovr Config > keybinds > toggle_pin > toggle_pin items
 
 |              |          |
 | ------------ | -------- |
 | **Type**     | `string` |
 | **Required** | No       |
 
-### <a name="keybinds_quit_app"></a>7.59. Property `Rovr Config > keybinds > quit_app`
+### <a name="keybinds_quit_app"></a>6.59. Property `Rovr Config > keybinds > quit_app`
 
 |                |                       |
 | -------------- | --------------------- |
@@ -5017,14 +4782,14 @@ Refer to https://textual.textualize.io/guide/design/#additional-variables for mo
 | ---------------------------------------------- | ----------- |
 | [toggle_pin items](#keybinds_toggle_pin_items) |             |
 
-#### <a name="keybinds_toggle_pin_items"></a>7.59.1. Rovr Config > keybinds > toggle_pin > toggle_pin items
+#### <a name="keybinds_toggle_pin_items"></a>6.59.1. Rovr Config > keybinds > toggle_pin > toggle_pin items
 
 |              |          |
 | ------------ | -------- |
 | **Type**     | `string` |
 | **Required** | No       |
 
-### <a name="keybinds_command_palette"></a>7.60. Property `Rovr Config > keybinds > command_palette`
+### <a name="keybinds_command_palette"></a>6.60. Property `Rovr Config > keybinds > command_palette`
 
 |              |          |
 | ------------ | -------- |
@@ -5033,7 +4798,7 @@ Refer to https://textual.textualize.io/guide/design/#additional-variables for mo
 
 **Description:** Launch Textual's mildly useful command palette (only one keybind is allowed!)
 
-### <a name="keybinds_suspend_process"></a>7.61. Property `Rovr Config > keybinds > suspend_process`
+### <a name="keybinds_suspend_process"></a>6.61. Property `Rovr Config > keybinds > suspend_process`
 
 |                |                       |
 | -------------- | --------------------- |
@@ -5055,14 +4820,14 @@ Refer to https://textual.textualize.io/guide/design/#additional-variables for mo
 | ---------------------------------------------- | ----------- |
 | [toggle_pin items](#keybinds_toggle_pin_items) |             |
 
-#### <a name="keybinds_toggle_pin_items"></a>7.61.1. Rovr Config > keybinds > toggle_pin > toggle_pin items
+#### <a name="keybinds_toggle_pin_items"></a>6.61.1. Rovr Config > keybinds > toggle_pin > toggle_pin items
 
 |              |          |
 | ------------ | -------- |
 | **Type**     | `string` |
 | **Required** | No       |
 
-### <a name="keybinds_open"></a>7.62. Property `Rovr Config > keybinds > open`
+### <a name="keybinds_open"></a>6.62. Property `Rovr Config > keybinds > open`
 
 |                |                       |
 | -------------- | --------------------- |
@@ -5084,14 +4849,14 @@ Refer to https://textual.textualize.io/guide/design/#additional-variables for mo
 | ---------------------------------------------- | ----------- |
 | [toggle_pin items](#keybinds_toggle_pin_items) |             |
 
-#### <a name="keybinds_toggle_pin_items"></a>7.62.1. Rovr Config > keybinds > toggle_pin > toggle_pin items
+#### <a name="keybinds_toggle_pin_items"></a>6.62.1. Rovr Config > keybinds > toggle_pin > toggle_pin items
 
 |              |          |
 | ------------ | -------- |
 | **Type**     | `string` |
 | **Required** | No       |
 
-### <a name="keybinds_open_editor"></a>7.63. Property `Rovr Config > keybinds > open_editor`
+### <a name="keybinds_open_editor"></a>6.63. Property `Rovr Config > keybinds > open_editor`
 
 |                |                       |
 | -------------- | --------------------- |
@@ -5113,14 +4878,14 @@ Refer to https://textual.textualize.io/guide/design/#additional-variables for mo
 | ---------------------------------------------- | ----------- |
 | [toggle_pin items](#keybinds_toggle_pin_items) |             |
 
-#### <a name="keybinds_toggle_pin_items"></a>7.63.1. Rovr Config > keybinds > toggle_pin > toggle_pin items
+#### <a name="keybinds_toggle_pin_items"></a>6.63.1. Rovr Config > keybinds > toggle_pin > toggle_pin items
 
 |              |          |
 | ------------ | -------- |
 | **Type**     | `string` |
 | **Required** | No       |
 
-### <a name="keybinds_show_shell_screen"></a>7.64. Property `Rovr Config > keybinds > show_shell_screen`
+### <a name="keybinds_show_shell_screen"></a>6.64. Property `Rovr Config > keybinds > show_shell_screen`
 
 |                |                       |
 | -------------- | --------------------- |
@@ -5142,14 +4907,14 @@ Refer to https://textual.textualize.io/guide/design/#additional-variables for mo
 | ---------------------------------------------- | ----------- |
 | [toggle_pin items](#keybinds_toggle_pin_items) |             |
 
-#### <a name="keybinds_toggle_pin_items"></a>7.64.1. Rovr Config > keybinds > toggle_pin > toggle_pin items
+#### <a name="keybinds_toggle_pin_items"></a>6.64.1. Rovr Config > keybinds > toggle_pin > toggle_pin items
 
 |              |          |
 | ------------ | -------- |
 | **Type**     | `string` |
 | **Required** | No       |
 
-### <a name="keybinds_filename_conflict"></a>7.65. Property `Rovr Config > keybinds > filename_conflict`
+### <a name="keybinds_filename_conflict"></a>6.65. Property `Rovr Config > keybinds > filename_conflict`
 
 |                           |                  |
 | ------------------------- | ---------------- |
@@ -5167,7 +4932,7 @@ Refer to https://textual.textualize.io/guide/design/#additional-variables for mo
 | [cancel](#keybinds_filename_conflict_cancel)                 | array of string | Cancel the entire copy/move operation.                                  |
 | [dont_ask_again](#keybinds_filename_conflict_dont_ask_again) | array of string | Apply the selected action to all future conflicts without asking again. |
 
-#### <a name="keybinds_filename_conflict_overwrite"></a>7.65.1. Property `Rovr Config > keybinds > filename_conflict > overwrite`
+#### <a name="keybinds_filename_conflict_overwrite"></a>6.65.1. Property `Rovr Config > keybinds > filename_conflict > overwrite`
 
 |                |                       |
 | -------------- | --------------------- |
@@ -5189,14 +4954,14 @@ Refer to https://textual.textualize.io/guide/design/#additional-variables for mo
 | ---------------------------------------------- | ----------- |
 | [toggle_pin items](#keybinds_toggle_pin_items) |             |
 
-##### <a name="keybinds_toggle_pin_items"></a>7.65.1.1. Rovr Config > keybinds > toggle_pin > toggle_pin items
+##### <a name="keybinds_toggle_pin_items"></a>6.65.1.1. Rovr Config > keybinds > toggle_pin > toggle_pin items
 
 |              |          |
 | ------------ | -------- |
 | **Type**     | `string` |
 | **Required** | No       |
 
-#### <a name="keybinds_filename_conflict_skip"></a>7.65.2. Property `Rovr Config > keybinds > filename_conflict > skip`
+#### <a name="keybinds_filename_conflict_skip"></a>6.65.2. Property `Rovr Config > keybinds > filename_conflict > skip`
 
 |                |                       |
 | -------------- | --------------------- |
@@ -5218,14 +4983,14 @@ Refer to https://textual.textualize.io/guide/design/#additional-variables for mo
 | ---------------------------------------------- | ----------- |
 | [toggle_pin items](#keybinds_toggle_pin_items) |             |
 
-##### <a name="keybinds_toggle_pin_items"></a>7.65.2.1. Rovr Config > keybinds > toggle_pin > toggle_pin items
+##### <a name="keybinds_toggle_pin_items"></a>6.65.2.1. Rovr Config > keybinds > toggle_pin > toggle_pin items
 
 |              |          |
 | ------------ | -------- |
 | **Type**     | `string` |
 | **Required** | No       |
 
-#### <a name="keybinds_filename_conflict_rename"></a>7.65.3. Property `Rovr Config > keybinds > filename_conflict > rename`
+#### <a name="keybinds_filename_conflict_rename"></a>6.65.3. Property `Rovr Config > keybinds > filename_conflict > rename`
 
 |                |                       |
 | -------------- | --------------------- |
@@ -5247,14 +5012,14 @@ Refer to https://textual.textualize.io/guide/design/#additional-variables for mo
 | ---------------------------------------------- | ----------- |
 | [toggle_pin items](#keybinds_toggle_pin_items) |             |
 
-##### <a name="keybinds_toggle_pin_items"></a>7.65.3.1. Rovr Config > keybinds > toggle_pin > toggle_pin items
+##### <a name="keybinds_toggle_pin_items"></a>6.65.3.1. Rovr Config > keybinds > toggle_pin > toggle_pin items
 
 |              |          |
 | ------------ | -------- |
 | **Type**     | `string` |
 | **Required** | No       |
 
-#### <a name="keybinds_filename_conflict_cancel"></a>7.65.4. Property `Rovr Config > keybinds > filename_conflict > cancel`
+#### <a name="keybinds_filename_conflict_cancel"></a>6.65.4. Property `Rovr Config > keybinds > filename_conflict > cancel`
 
 |                |                       |
 | -------------- | --------------------- |
@@ -5276,14 +5041,14 @@ Refer to https://textual.textualize.io/guide/design/#additional-variables for mo
 | ---------------------------------------------- | ----------- |
 | [toggle_pin items](#keybinds_toggle_pin_items) |             |
 
-##### <a name="keybinds_toggle_pin_items"></a>7.65.4.1. Rovr Config > keybinds > toggle_pin > toggle_pin items
+##### <a name="keybinds_toggle_pin_items"></a>6.65.4.1. Rovr Config > keybinds > toggle_pin > toggle_pin items
 
 |              |          |
 | ------------ | -------- |
 | **Type**     | `string` |
 | **Required** | No       |
 
-#### <a name="keybinds_filename_conflict_dont_ask_again"></a>7.65.5. Property `Rovr Config > keybinds > filename_conflict > dont_ask_again`
+#### <a name="keybinds_filename_conflict_dont_ask_again"></a>6.65.5. Property `Rovr Config > keybinds > filename_conflict > dont_ask_again`
 
 |                |                       |
 | -------------- | --------------------- |
@@ -5305,14 +5070,14 @@ Refer to https://textual.textualize.io/guide/design/#additional-variables for mo
 | ---------------------------------------------- | ----------- |
 | [toggle_pin items](#keybinds_toggle_pin_items) |             |
 
-##### <a name="keybinds_toggle_pin_items"></a>7.65.5.1. Rovr Config > keybinds > toggle_pin > toggle_pin items
+##### <a name="keybinds_toggle_pin_items"></a>6.65.5.1. Rovr Config > keybinds > toggle_pin > toggle_pin items
 
 |              |          |
 | ------------ | -------- |
 | **Type**     | `string` |
 | **Required** | No       |
 
-### <a name="keybinds_file_in_use"></a>7.66. Property `Rovr Config > keybinds > file_in_use`
+### <a name="keybinds_file_in_use"></a>6.66. Property `Rovr Config > keybinds > file_in_use`
 
 |                           |                  |
 | ------------------------- | ---------------- |
@@ -5329,7 +5094,7 @@ Refer to https://textual.textualize.io/guide/design/#additional-variables for mo
 | [cancel](#keybinds_file_in_use_cancel)                 | array of string | Cancel the entire copy/move operation.                                             |
 | [dont_ask_again](#keybinds_file_in_use_dont_ask_again) | array of string | Apply the selected action to all future 'file in use' errors without asking again. |
 
-#### <a name="keybinds_file_in_use_retry"></a>7.66.1. Property `Rovr Config > keybinds > file_in_use > retry`
+#### <a name="keybinds_file_in_use_retry"></a>6.66.1. Property `Rovr Config > keybinds > file_in_use > retry`
 
 |                |                       |
 | -------------- | --------------------- |
@@ -5351,14 +5116,14 @@ Refer to https://textual.textualize.io/guide/design/#additional-variables for mo
 | ---------------------------------------------- | ----------- |
 | [toggle_pin items](#keybinds_toggle_pin_items) |             |
 
-##### <a name="keybinds_toggle_pin_items"></a>7.66.1.1. Rovr Config > keybinds > toggle_pin > toggle_pin items
+##### <a name="keybinds_toggle_pin_items"></a>6.66.1.1. Rovr Config > keybinds > toggle_pin > toggle_pin items
 
 |              |          |
 | ------------ | -------- |
 | **Type**     | `string` |
 | **Required** | No       |
 
-#### <a name="keybinds_file_in_use_skip"></a>7.66.2. Property `Rovr Config > keybinds > file_in_use > skip`
+#### <a name="keybinds_file_in_use_skip"></a>6.66.2. Property `Rovr Config > keybinds > file_in_use > skip`
 
 |                |                       |
 | -------------- | --------------------- |
@@ -5380,14 +5145,14 @@ Refer to https://textual.textualize.io/guide/design/#additional-variables for mo
 | ---------------------------------------------- | ----------- |
 | [toggle_pin items](#keybinds_toggle_pin_items) |             |
 
-##### <a name="keybinds_toggle_pin_items"></a>7.66.2.1. Rovr Config > keybinds > toggle_pin > toggle_pin items
+##### <a name="keybinds_toggle_pin_items"></a>6.66.2.1. Rovr Config > keybinds > toggle_pin > toggle_pin items
 
 |              |          |
 | ------------ | -------- |
 | **Type**     | `string` |
 | **Required** | No       |
 
-#### <a name="keybinds_file_in_use_cancel"></a>7.66.3. Property `Rovr Config > keybinds > file_in_use > cancel`
+#### <a name="keybinds_file_in_use_cancel"></a>6.66.3. Property `Rovr Config > keybinds > file_in_use > cancel`
 
 |                |                       |
 | -------------- | --------------------- |
@@ -5409,14 +5174,14 @@ Refer to https://textual.textualize.io/guide/design/#additional-variables for mo
 | ---------------------------------------------- | ----------- |
 | [toggle_pin items](#keybinds_toggle_pin_items) |             |
 
-##### <a name="keybinds_toggle_pin_items"></a>7.66.3.1. Rovr Config > keybinds > toggle_pin > toggle_pin items
+##### <a name="keybinds_toggle_pin_items"></a>6.66.3.1. Rovr Config > keybinds > toggle_pin > toggle_pin items
 
 |              |          |
 | ------------ | -------- |
 | **Type**     | `string` |
 | **Required** | No       |
 
-#### <a name="keybinds_file_in_use_dont_ask_again"></a>7.66.4. Property `Rovr Config > keybinds > file_in_use > dont_ask_again`
+#### <a name="keybinds_file_in_use_dont_ask_again"></a>6.66.4. Property `Rovr Config > keybinds > file_in_use > dont_ask_again`
 
 |                |                       |
 | -------------- | --------------------- |
@@ -5438,14 +5203,14 @@ Refer to https://textual.textualize.io/guide/design/#additional-variables for mo
 | ---------------------------------------------- | ----------- |
 | [toggle_pin items](#keybinds_toggle_pin_items) |             |
 
-##### <a name="keybinds_toggle_pin_items"></a>7.66.4.1. Rovr Config > keybinds > toggle_pin > toggle_pin items
+##### <a name="keybinds_toggle_pin_items"></a>6.66.4.1. Rovr Config > keybinds > toggle_pin > toggle_pin items
 
 |              |          |
 | ------------ | -------- |
 | **Type**     | `string` |
 | **Required** | No       |
 
-### <a name="keybinds_filter_modal"></a>7.67. Property `Rovr Config > keybinds > filter_modal`
+### <a name="keybinds_filter_modal"></a>6.67. Property `Rovr Config > keybinds > filter_modal`
 
 |                           |                  |
 | ------------------------- | ---------------- |
@@ -5463,7 +5228,7 @@ Refer to https://textual.textualize.io/guide/design/#additional-variables for mo
 | [page_down](#keybinds_filter_modal_page_down) | array of string | Move the selection down by a page in the modal list. |
 | [page_up](#keybinds_filter_modal_page_up)     | array of string | Move the selection up by a page in the modal list.   |
 
-#### <a name="keybinds_filter_modal_exit"></a>7.67.1. Property `Rovr Config > keybinds > filter_modal > exit`
+#### <a name="keybinds_filter_modal_exit"></a>6.67.1. Property `Rovr Config > keybinds > filter_modal > exit`
 
 |                |                       |
 | -------------- | --------------------- |
@@ -5485,14 +5250,14 @@ Refer to https://textual.textualize.io/guide/design/#additional-variables for mo
 | ---------------------------------------------- | ----------- |
 | [toggle_pin items](#keybinds_toggle_pin_items) |             |
 
-##### <a name="keybinds_toggle_pin_items"></a>7.67.1.1. Rovr Config > keybinds > toggle_pin > toggle_pin items
+##### <a name="keybinds_toggle_pin_items"></a>6.67.1.1. Rovr Config > keybinds > toggle_pin > toggle_pin items
 
 |              |          |
 | ------------ | -------- |
 | **Type**     | `string` |
 | **Required** | No       |
 
-#### <a name="keybinds_filter_modal_down"></a>7.67.2. Property `Rovr Config > keybinds > filter_modal > down`
+#### <a name="keybinds_filter_modal_down"></a>6.67.2. Property `Rovr Config > keybinds > filter_modal > down`
 
 |                |                       |
 | -------------- | --------------------- |
@@ -5514,14 +5279,14 @@ Refer to https://textual.textualize.io/guide/design/#additional-variables for mo
 | ---------------------------------------------- | ----------- |
 | [toggle_pin items](#keybinds_toggle_pin_items) |             |
 
-##### <a name="keybinds_toggle_pin_items"></a>7.67.2.1. Rovr Config > keybinds > toggle_pin > toggle_pin items
+##### <a name="keybinds_toggle_pin_items"></a>6.67.2.1. Rovr Config > keybinds > toggle_pin > toggle_pin items
 
 |              |          |
 | ------------ | -------- |
 | **Type**     | `string` |
 | **Required** | No       |
 
-#### <a name="keybinds_filter_modal_up"></a>7.67.3. Property `Rovr Config > keybinds > filter_modal > up`
+#### <a name="keybinds_filter_modal_up"></a>6.67.3. Property `Rovr Config > keybinds > filter_modal > up`
 
 |                |                       |
 | -------------- | --------------------- |
@@ -5543,14 +5308,14 @@ Refer to https://textual.textualize.io/guide/design/#additional-variables for mo
 | ---------------------------------------------- | ----------- |
 | [toggle_pin items](#keybinds_toggle_pin_items) |             |
 
-##### <a name="keybinds_toggle_pin_items"></a>7.67.3.1. Rovr Config > keybinds > toggle_pin > toggle_pin items
+##### <a name="keybinds_toggle_pin_items"></a>6.67.3.1. Rovr Config > keybinds > toggle_pin > toggle_pin items
 
 |              |          |
 | ------------ | -------- |
 | **Type**     | `string` |
 | **Required** | No       |
 
-#### <a name="keybinds_filter_modal_page_down"></a>7.67.4. Property `Rovr Config > keybinds > filter_modal > page_down`
+#### <a name="keybinds_filter_modal_page_down"></a>6.67.4. Property `Rovr Config > keybinds > filter_modal > page_down`
 
 |                |                       |
 | -------------- | --------------------- |
@@ -5572,14 +5337,14 @@ Refer to https://textual.textualize.io/guide/design/#additional-variables for mo
 | ---------------------------------------------- | ----------- |
 | [toggle_pin items](#keybinds_toggle_pin_items) |             |
 
-##### <a name="keybinds_toggle_pin_items"></a>7.67.4.1. Rovr Config > keybinds > toggle_pin > toggle_pin items
+##### <a name="keybinds_toggle_pin_items"></a>6.67.4.1. Rovr Config > keybinds > toggle_pin > toggle_pin items
 
 |              |          |
 | ------------ | -------- |
 | **Type**     | `string` |
 | **Required** | No       |
 
-#### <a name="keybinds_filter_modal_page_up"></a>7.67.5. Property `Rovr Config > keybinds > filter_modal > page_up`
+#### <a name="keybinds_filter_modal_page_up"></a>6.67.5. Property `Rovr Config > keybinds > filter_modal > page_up`
 
 |                |                       |
 | -------------- | --------------------- |
@@ -5601,14 +5366,14 @@ Refer to https://textual.textualize.io/guide/design/#additional-variables for mo
 | ---------------------------------------------- | ----------- |
 | [toggle_pin items](#keybinds_toggle_pin_items) |             |
 
-##### <a name="keybinds_toggle_pin_items"></a>7.67.5.1. Rovr Config > keybinds > toggle_pin > toggle_pin items
+##### <a name="keybinds_toggle_pin_items"></a>6.67.5.1. Rovr Config > keybinds > toggle_pin > toggle_pin items
 
 |              |          |
 | ------------ | -------- |
 | **Type**     | `string` |
 | **Required** | No       |
 
-### <a name="keybinds_yes_or_no"></a>7.68. Property `Rovr Config > keybinds > yes_or_no`
+### <a name="keybinds_yes_or_no"></a>6.68. Property `Rovr Config > keybinds > yes_or_no`
 
 |                           |                  |
 | ------------------------- | ---------------- |
@@ -5624,7 +5389,7 @@ Refer to https://textual.textualize.io/guide/design/#additional-variables for mo
 | [no](#keybinds_yes_or_no_no)                         | array of string | Decline with 'no'.                                                          |
 | [dont_ask_again](#keybinds_yes_or_no_dont_ask_again) | array of string | Apply the selected action to all future confirmations without asking again. |
 
-#### <a name="keybinds_yes_or_no_yes"></a>7.68.1. Property `Rovr Config > keybinds > yes_or_no > yes`
+#### <a name="keybinds_yes_or_no_yes"></a>6.68.1. Property `Rovr Config > keybinds > yes_or_no > yes`
 
 |                |                       |
 | -------------- | --------------------- |
@@ -5646,14 +5411,14 @@ Refer to https://textual.textualize.io/guide/design/#additional-variables for mo
 | ---------------------------------------------- | ----------- |
 | [toggle_pin items](#keybinds_toggle_pin_items) |             |
 
-##### <a name="keybinds_toggle_pin_items"></a>7.68.1.1. Rovr Config > keybinds > toggle_pin > toggle_pin items
+##### <a name="keybinds_toggle_pin_items"></a>6.68.1.1. Rovr Config > keybinds > toggle_pin > toggle_pin items
 
 |              |          |
 | ------------ | -------- |
 | **Type**     | `string` |
 | **Required** | No       |
 
-#### <a name="keybinds_yes_or_no_no"></a>7.68.2. Property `Rovr Config > keybinds > yes_or_no > no`
+#### <a name="keybinds_yes_or_no_no"></a>6.68.2. Property `Rovr Config > keybinds > yes_or_no > no`
 
 |                |                       |
 | -------------- | --------------------- |
@@ -5675,14 +5440,14 @@ Refer to https://textual.textualize.io/guide/design/#additional-variables for mo
 | ---------------------------------------------- | ----------- |
 | [toggle_pin items](#keybinds_toggle_pin_items) |             |
 
-##### <a name="keybinds_toggle_pin_items"></a>7.68.2.1. Rovr Config > keybinds > toggle_pin > toggle_pin items
+##### <a name="keybinds_toggle_pin_items"></a>6.68.2.1. Rovr Config > keybinds > toggle_pin > toggle_pin items
 
 |              |          |
 | ------------ | -------- |
 | **Type**     | `string` |
 | **Required** | No       |
 
-#### <a name="keybinds_yes_or_no_dont_ask_again"></a>7.68.3. Property `Rovr Config > keybinds > yes_or_no > dont_ask_again`
+#### <a name="keybinds_yes_or_no_dont_ask_again"></a>6.68.3. Property `Rovr Config > keybinds > yes_or_no > dont_ask_again`
 
 |                |                       |
 | -------------- | --------------------- |
@@ -5704,14 +5469,14 @@ Refer to https://textual.textualize.io/guide/design/#additional-variables for mo
 | ---------------------------------------------- | ----------- |
 | [toggle_pin items](#keybinds_toggle_pin_items) |             |
 
-##### <a name="keybinds_toggle_pin_items"></a>7.68.3.1. Rovr Config > keybinds > toggle_pin > toggle_pin items
+##### <a name="keybinds_toggle_pin_items"></a>6.68.3.1. Rovr Config > keybinds > toggle_pin > toggle_pin items
 
 |              |          |
 | ------------ | -------- |
 | **Type**     | `string` |
 | **Required** | No       |
 
-### <a name="keybinds_drag_and_drop"></a>7.69. Property `Rovr Config > keybinds > drag_and_drop`
+### <a name="keybinds_drag_and_drop"></a>6.69. Property `Rovr Config > keybinds > drag_and_drop`
 
 |                           |                  |
 | ------------------------- | ---------------- |
@@ -5727,7 +5492,7 @@ Refer to https://textual.textualize.io/guide/design/#additional-variables for mo
 | [copy](#keybinds_drag_and_drop_copy)     | array of string | Copy the dropped file to the current directory. |
 | [cancel](#keybinds_drag_and_drop_cancel) | array of string | Cancel the drag and drop operation.             |
 
-#### <a name="keybinds_drag_and_drop_move"></a>7.69.1. Property `Rovr Config > keybinds > drag_and_drop > move`
+#### <a name="keybinds_drag_and_drop_move"></a>6.69.1. Property `Rovr Config > keybinds > drag_and_drop > move`
 
 |                |                       |
 | -------------- | --------------------- |
@@ -5749,14 +5514,14 @@ Refer to https://textual.textualize.io/guide/design/#additional-variables for mo
 | ---------------------------------------------- | ----------- |
 | [toggle_pin items](#keybinds_toggle_pin_items) |             |
 
-##### <a name="keybinds_toggle_pin_items"></a>7.69.1.1. Rovr Config > keybinds > toggle_pin > toggle_pin items
+##### <a name="keybinds_toggle_pin_items"></a>6.69.1.1. Rovr Config > keybinds > toggle_pin > toggle_pin items
 
 |              |          |
 | ------------ | -------- |
 | **Type**     | `string` |
 | **Required** | No       |
 
-#### <a name="keybinds_drag_and_drop_copy"></a>7.69.2. Property `Rovr Config > keybinds > drag_and_drop > copy`
+#### <a name="keybinds_drag_and_drop_copy"></a>6.69.2. Property `Rovr Config > keybinds > drag_and_drop > copy`
 
 |                |                       |
 | -------------- | --------------------- |
@@ -5778,14 +5543,14 @@ Refer to https://textual.textualize.io/guide/design/#additional-variables for mo
 | ---------------------------------------------- | ----------- |
 | [toggle_pin items](#keybinds_toggle_pin_items) |             |
 
-##### <a name="keybinds_toggle_pin_items"></a>7.69.2.1. Rovr Config > keybinds > toggle_pin > toggle_pin items
+##### <a name="keybinds_toggle_pin_items"></a>6.69.2.1. Rovr Config > keybinds > toggle_pin > toggle_pin items
 
 |              |          |
 | ------------ | -------- |
 | **Type**     | `string` |
 | **Required** | No       |
 
-#### <a name="keybinds_drag_and_drop_cancel"></a>7.69.3. Property `Rovr Config > keybinds > drag_and_drop > cancel`
+#### <a name="keybinds_drag_and_drop_cancel"></a>6.69.3. Property `Rovr Config > keybinds > drag_and_drop > cancel`
 
 |                |                       |
 | -------------- | --------------------- |
@@ -5807,14 +5572,14 @@ Refer to https://textual.textualize.io/guide/design/#additional-variables for mo
 | ---------------------------------------------- | ----------- |
 | [toggle_pin items](#keybinds_toggle_pin_items) |             |
 
-##### <a name="keybinds_toggle_pin_items"></a>7.69.3.1. Rovr Config > keybinds > toggle_pin > toggle_pin items
+##### <a name="keybinds_toggle_pin_items"></a>6.69.3.1. Rovr Config > keybinds > toggle_pin > toggle_pin items
 
 |              |          |
 | ------------ | -------- |
 | **Type**     | `string` |
 | **Required** | No       |
 
-## <a name="plugins"></a>8. Property `Rovr Config > plugins`
+## <a name="plugins"></a>7. Property `Rovr Config > plugins`
 
 |                           |             |
 | ------------------------- | ----------- |
@@ -5831,7 +5596,7 @@ Refer to https://textual.textualize.io/guide/design/#additional-variables for mo
 | [poppler](#plugins_poppler)   | object |                   |
 | [file_one](#plugins_file_one) | object |                   |
 
-### <a name="plugins_zoxide"></a>8.1. Property `Rovr Config > plugins > zoxide`
+### <a name="plugins_zoxide"></a>7.1. Property `Rovr Config > plugins > zoxide`
 
 |                           |             |
 | ------------------------- | ----------- |
@@ -5845,7 +5610,7 @@ Refer to https://textual.textualize.io/guide/design/#additional-variables for mo
 | [keybinds](#plugins_zoxide_keybinds)       | array of string | The keybind to open the zoxide modal.                      |
 | [show_scores](#plugins_zoxide_show_scores) | boolean         | Display zoxide frequency scores alongside directory paths. |
 
-#### <a name="plugins_zoxide_enabled"></a>8.1.1. Property `Rovr Config > plugins > zoxide > enabled`
+#### <a name="plugins_zoxide_enabled"></a>7.1.1. Property `Rovr Config > plugins > zoxide > enabled`
 
 |              |           |
 | ------------ | --------- |
@@ -5855,7 +5620,7 @@ Refer to https://textual.textualize.io/guide/design/#additional-variables for mo
 
 **Description:** Enable or disable zoxide travelling.
 
-#### <a name="plugins_zoxide_keybinds"></a>8.1.2. Property `Rovr Config > plugins > zoxide > keybinds`
+#### <a name="plugins_zoxide_keybinds"></a>7.1.2. Property `Rovr Config > plugins > zoxide > keybinds`
 
 |                |                       |
 | -------------- | --------------------- |
@@ -5878,14 +5643,14 @@ Refer to https://textual.textualize.io/guide/design/#additional-variables for mo
 | ---------------------------------------------- | ----------- |
 | [toggle_pin items](#keybinds_toggle_pin_items) |             |
 
-##### <a name="keybinds_toggle_pin_items"></a>8.1.2.1. Rovr Config > keybinds > toggle_pin > toggle_pin items
+##### <a name="keybinds_toggle_pin_items"></a>7.1.2.1. Rovr Config > keybinds > toggle_pin > toggle_pin items
 
 |              |          |
 | ------------ | -------- |
 | **Type**     | `string` |
 | **Required** | No       |
 
-#### <a name="plugins_zoxide_show_scores"></a>8.1.3. Property `Rovr Config > plugins > zoxide > show_scores`
+#### <a name="plugins_zoxide_show_scores"></a>7.1.3. Property `Rovr Config > plugins > zoxide > show_scores`
 
 |              |           |
 | ------------ | --------- |
@@ -5895,7 +5660,7 @@ Refer to https://textual.textualize.io/guide/design/#additional-variables for mo
 
 **Description:** Display zoxide frequency scores alongside directory paths.
 
-### <a name="plugins_bat"></a>8.2. Property `Rovr Config > plugins > bat`
+### <a name="plugins_bat"></a>7.2. Property `Rovr Config > plugins > bat`
 
 |                           |             |
 | ------------------------- | ----------- |
@@ -5908,7 +5673,7 @@ Refer to https://textual.textualize.io/guide/design/#additional-variables for mo
 | [enabled](#plugins_bat_enabled)       | boolean | Enable or disable bat for previewing files. |
 | [executable](#plugins_bat_executable) | string  | The executable for bat.                     |
 
-#### <a name="plugins_bat_enabled"></a>8.2.1. Property `Rovr Config > plugins > bat > enabled`
+#### <a name="plugins_bat_enabled"></a>7.2.1. Property `Rovr Config > plugins > bat > enabled`
 
 |              |           |
 | ------------ | --------- |
@@ -5918,7 +5683,7 @@ Refer to https://textual.textualize.io/guide/design/#additional-variables for mo
 
 **Description:** Enable or disable bat for previewing files.
 
-#### <a name="plugins_bat_executable"></a>8.2.2. Property `Rovr Config > plugins > bat > executable`
+#### <a name="plugins_bat_executable"></a>7.2.2. Property `Rovr Config > plugins > bat > executable`
 
 |              |          |
 | ------------ | -------- |
@@ -5928,7 +5693,7 @@ Refer to https://textual.textualize.io/guide/design/#additional-variables for mo
 
 **Description:** The executable for bat.
 
-### <a name="plugins_fd"></a>8.3. Property `Rovr Config > plugins > fd`
+### <a name="plugins_fd"></a>7.3. Property `Rovr Config > plugins > fd`
 
 |                           |             |
 | ------------------------- | ----------- |
@@ -5948,7 +5713,7 @@ Refer to https://textual.textualize.io/guide/design/#additional-variables for mo
 | [timeout](#plugins_fd_timeout)                           | integer                   | The maximum time (in seconds) to wait for fd to return results before giving up. |
 | [default_filter_types](#plugins_fd_default_filter_types) | array of enum (of string) | The default file types to show when using fd.                                    |
 
-#### <a name="plugins_fd_enabled"></a>8.3.1. Property `Rovr Config > plugins > fd > enabled`
+#### <a name="plugins_fd_enabled"></a>7.3.1. Property `Rovr Config > plugins > fd > enabled`
 
 |              |           |
 | ------------ | --------- |
@@ -5958,7 +5723,7 @@ Refer to https://textual.textualize.io/guide/design/#additional-variables for mo
 
 **Description:** Enable recursive file search using fd.
 
-#### <a name="plugins_fd_keybinds"></a>8.3.2. Property `Rovr Config > plugins > fd > keybinds`
+#### <a name="plugins_fd_keybinds"></a>7.3.2. Property `Rovr Config > plugins > fd > keybinds`
 
 |                |                       |
 | -------------- | --------------------- |
@@ -5981,14 +5746,14 @@ Refer to https://textual.textualize.io/guide/design/#additional-variables for mo
 | ---------------------------------------------- | ----------- |
 | [toggle_pin items](#keybinds_toggle_pin_items) |             |
 
-##### <a name="keybinds_toggle_pin_items"></a>8.3.2.1. Rovr Config > keybinds > toggle_pin > toggle_pin items
+##### <a name="keybinds_toggle_pin_items"></a>7.3.2.1. Rovr Config > keybinds > toggle_pin > toggle_pin items
 
 |              |          |
 | ------------ | -------- |
 | **Type**     | `string` |
 | **Required** | No       |
 
-#### <a name="plugins_fd_executable"></a>8.3.3. Property `Rovr Config > plugins > fd > executable`
+#### <a name="plugins_fd_executable"></a>7.3.3. Property `Rovr Config > plugins > fd > executable`
 
 |              |          |
 | ------------ | -------- |
@@ -5998,7 +5763,7 @@ Refer to https://textual.textualize.io/guide/design/#additional-variables for mo
 
 **Description:** fd executable name or path.
 
-#### <a name="plugins_fd_relative_paths"></a>8.3.4. Property `Rovr Config > plugins > fd > relative_paths`
+#### <a name="plugins_fd_relative_paths"></a>7.3.4. Property `Rovr Config > plugins > fd > relative_paths`
 
 |              |           |
 | ------------ | --------- |
@@ -6008,7 +5773,7 @@ Refer to https://textual.textualize.io/guide/design/#additional-variables for mo
 
 **Description:** Whether to show fd results as relative path or absolute path.
 
-#### <a name="plugins_fd_follow_symlinks"></a>8.3.5. Property `Rovr Config > plugins > fd > follow_symlinks`
+#### <a name="plugins_fd_follow_symlinks"></a>7.3.5. Property `Rovr Config > plugins > fd > follow_symlinks`
 
 |              |           |
 | ------------ | --------- |
@@ -6018,7 +5783,7 @@ Refer to https://textual.textualize.io/guide/design/#additional-variables for mo
 
 **Description:** Whether fd should follow symlinks when searching.
 
-#### <a name="plugins_fd_no_ignore_parent"></a>8.3.6. Property `Rovr Config > plugins > fd > no_ignore_parent`
+#### <a name="plugins_fd_no_ignore_parent"></a>7.3.6. Property `Rovr Config > plugins > fd > no_ignore_parent`
 
 |              |           |
 | ------------ | --------- |
@@ -6028,7 +5793,7 @@ Refer to https://textual.textualize.io/guide/design/#additional-variables for mo
 
 **Description:** Don't use \*ignore files from parent folders when searching.
 
-#### <a name="plugins_fd_search_hidden"></a>8.3.7. Property `Rovr Config > plugins > fd > search_hidden`
+#### <a name="plugins_fd_search_hidden"></a>7.3.7. Property `Rovr Config > plugins > fd > search_hidden`
 
 |              |           |
 | ------------ | --------- |
@@ -6038,7 +5803,7 @@ Refer to https://textual.textualize.io/guide/design/#additional-variables for mo
 
 **Description:** Whether to include hidden files in fd results by default.
 
-#### <a name="plugins_fd_timeout"></a>8.3.8. Property `Rovr Config > plugins > fd > timeout`
+#### <a name="plugins_fd_timeout"></a>7.3.8. Property `Rovr Config > plugins > fd > timeout`
 
 |              |           |
 | ------------ | --------- |
@@ -6048,7 +5813,7 @@ Refer to https://textual.textualize.io/guide/design/#additional-variables for mo
 
 **Description:** The maximum time (in seconds) to wait for fd to return results before giving up.
 
-#### <a name="plugins_fd_default_filter_types"></a>8.3.9. Property `Rovr Config > plugins > fd > default_filter_types`
+#### <a name="plugins_fd_default_filter_types"></a>7.3.9. Property `Rovr Config > plugins > fd > default_filter_types`
 
 |              |                             |
 | ------------ | --------------------------- |
@@ -6070,7 +5835,7 @@ Refer to https://textual.textualize.io/guide/design/#additional-variables for mo
 | -------------------------------------------------------------------- | ----------- |
 | [default_filter_types items](#plugins_fd_default_filter_types_items) |             |
 
-##### <a name="plugins_fd_default_filter_types_items"></a>8.3.9.1. Rovr Config > plugins > fd > default_filter_types > default_filter_types items
+##### <a name="plugins_fd_default_filter_types_items"></a>7.3.9.1. Rovr Config > plugins > fd > default_filter_types > default_filter_types items
 
 |              |                    |
 | ------------ | ------------------ |
@@ -6089,7 +5854,7 @@ Must be one of:
 - "char-device"
 - "block-device"
 
-### <a name="plugins_rg"></a>8.4. Property `Rovr Config > plugins > rg`
+### <a name="plugins_rg"></a>7.4. Property `Rovr Config > plugins > rg`
 
 |                           |             |
 | ------------------------- | ----------- |
@@ -6108,7 +5873,7 @@ Must be one of:
 | [search_hidden](#plugins_rg_search_hidden)       | boolean         | Whether to search hidden files by default.                                       |
 | [timeout](#plugins_rg_timeout)                   | integer         | The maximum time (in seconds) to wait for rg to return results before giving up. |
 
-#### <a name="plugins_rg_enabled"></a>8.4.1. Property `Rovr Config > plugins > rg > enabled`
+#### <a name="plugins_rg_enabled"></a>7.4.1. Property `Rovr Config > plugins > rg > enabled`
 
 |              |           |
 | ------------ | --------- |
@@ -6118,7 +5883,7 @@ Must be one of:
 
 **Description:** Enable content searching using rg.
 
-#### <a name="plugins_rg_keybinds"></a>8.4.2. Property `Rovr Config > plugins > rg > keybinds`
+#### <a name="plugins_rg_keybinds"></a>7.4.2. Property `Rovr Config > plugins > rg > keybinds`
 
 |                |                       |
 | -------------- | --------------------- |
@@ -6141,14 +5906,14 @@ Must be one of:
 | ---------------------------------------------- | ----------- |
 | [toggle_pin items](#keybinds_toggle_pin_items) |             |
 
-##### <a name="keybinds_toggle_pin_items"></a>8.4.2.1. Rovr Config > keybinds > toggle_pin > toggle_pin items
+##### <a name="keybinds_toggle_pin_items"></a>7.4.2.1. Rovr Config > keybinds > toggle_pin > toggle_pin items
 
 |              |          |
 | ------------ | -------- |
 | **Type**     | `string` |
 | **Required** | No       |
 
-#### <a name="plugins_rg_executable"></a>8.4.3. Property `Rovr Config > plugins > rg > executable`
+#### <a name="plugins_rg_executable"></a>7.4.3. Property `Rovr Config > plugins > rg > executable`
 
 |              |          |
 | ------------ | -------- |
@@ -6158,7 +5923,7 @@ Must be one of:
 
 **Description:** rg executable name or path.
 
-#### <a name="plugins_rg_case_sensitive"></a>8.4.4. Property `Rovr Config > plugins > rg > case_sensitive`
+#### <a name="plugins_rg_case_sensitive"></a>7.4.4. Property `Rovr Config > plugins > rg > case_sensitive`
 
 |              |           |
 | ------------ | --------- |
@@ -6168,7 +5933,7 @@ Must be one of:
 
 **Description:** Whether the search should be case sensitive by default.
 
-#### <a name="plugins_rg_follow_symlinks"></a>8.4.5. Property `Rovr Config > plugins > rg > follow_symlinks`
+#### <a name="plugins_rg_follow_symlinks"></a>7.4.5. Property `Rovr Config > plugins > rg > follow_symlinks`
 
 |              |           |
 | ------------ | --------- |
@@ -6178,7 +5943,7 @@ Must be one of:
 
 **Description:** Whether rg should follow symlinks when searching.
 
-#### <a name="plugins_rg_no_ignore_parent"></a>8.4.6. Property `Rovr Config > plugins > rg > no_ignore_parent`
+#### <a name="plugins_rg_no_ignore_parent"></a>7.4.6. Property `Rovr Config > plugins > rg > no_ignore_parent`
 
 |              |           |
 | ------------ | --------- |
@@ -6188,7 +5953,7 @@ Must be one of:
 
 **Description:** Don't use \*ignore files from parent folders when searching.
 
-#### <a name="plugins_rg_search_hidden"></a>8.4.7. Property `Rovr Config > plugins > rg > search_hidden`
+#### <a name="plugins_rg_search_hidden"></a>7.4.7. Property `Rovr Config > plugins > rg > search_hidden`
 
 |              |           |
 | ------------ | --------- |
@@ -6198,7 +5963,7 @@ Must be one of:
 
 **Description:** Whether to search hidden files by default.
 
-#### <a name="plugins_rg_timeout"></a>8.4.8. Property `Rovr Config > plugins > rg > timeout`
+#### <a name="plugins_rg_timeout"></a>7.4.8. Property `Rovr Config > plugins > rg > timeout`
 
 |              |           |
 | ------------ | --------- |
@@ -6208,7 +5973,7 @@ Must be one of:
 
 **Description:** The maximum time (in seconds) to wait for rg to return results before giving up.
 
-### <a name="plugins_poppler"></a>8.5. Property `Rovr Config > plugins > poppler`
+### <a name="plugins_poppler"></a>7.5. Property `Rovr Config > plugins > poppler`
 
 |                           |             |
 | ------------------------- | ----------- |
@@ -6224,7 +5989,7 @@ Must be one of:
 | [poppler_folder](#plugins_poppler_poppler_folder) | string  | Path to the folder where Poppler-related binaries are located. Leave empty to use the system PATH. |
 | [pdf_batch_size](#plugins_poppler_pdf_batch_size) | integer | Number of PDF pages to load in each batch.                                                         |
 
-#### <a name="plugins_poppler_enabled"></a>8.5.1. Property `Rovr Config > plugins > poppler > enabled`
+#### <a name="plugins_poppler_enabled"></a>7.5.1. Property `Rovr Config > plugins > poppler > enabled`
 
 |              |           |
 | ------------ | --------- |
@@ -6234,7 +5999,7 @@ Must be one of:
 
 **Description:** Enable poppler for PDF previews.
 
-#### <a name="plugins_poppler_threads"></a>8.5.2. Property `Rovr Config > plugins > poppler > threads`
+#### <a name="plugins_poppler_threads"></a>7.5.2. Property `Rovr Config > plugins > poppler > threads`
 
 |              |           |
 | ------------ | --------- |
@@ -6248,7 +6013,7 @@ Must be one of:
 | ------------ | ------ |
 | **Minimum**  | &ge; 1 |
 
-#### <a name="plugins_poppler_use_pdftocairo"></a>8.5.3. Property `Rovr Config > plugins > poppler > use_pdftocairo`
+#### <a name="plugins_poppler_use_pdftocairo"></a>7.5.3. Property `Rovr Config > plugins > poppler > use_pdftocairo`
 
 |              |           |
 | ------------ | --------- |
@@ -6258,7 +6023,7 @@ Must be one of:
 
 **Description:** Use pdftocairo instead of pdftoppm, may help performance
 
-#### <a name="plugins_poppler_poppler_folder"></a>8.5.4. Property `Rovr Config > plugins > poppler > poppler_folder`
+#### <a name="plugins_poppler_poppler_folder"></a>7.5.4. Property `Rovr Config > plugins > poppler > poppler_folder`
 
 |              |          |
 | ------------ | -------- |
@@ -6268,7 +6033,7 @@ Must be one of:
 
 **Description:** Path to the folder where Poppler-related binaries are located. Leave empty to use the system PATH.
 
-#### <a name="plugins_poppler_pdf_batch_size"></a>8.5.5. Property `Rovr Config > plugins > poppler > pdf_batch_size`
+#### <a name="plugins_poppler_pdf_batch_size"></a>7.5.5. Property `Rovr Config > plugins > poppler > pdf_batch_size`
 
 |              |           |
 | ------------ | --------- |
@@ -6282,7 +6047,7 @@ Must be one of:
 | ------------ | ------ |
 | **Minimum**  | &ge; 1 |
 
-### <a name="plugins_file_one"></a>8.6. Property `Rovr Config > plugins > file_one`
+### <a name="plugins_file_one"></a>7.6. Property `Rovr Config > plugins > file_one`
 
 |                           |             |
 | ------------------------- | ----------- |
@@ -6295,7 +6060,7 @@ Must be one of:
 | [enabled](#plugins_file_one_enabled)                 | boolean | Enable secondary file(1) type detection if both puremagic and plaintext detection fails. |
 | [get_description](#plugins_file_one_get_description) | boolean | Use file(1) to get additional information of the file type.                              |
 
-#### <a name="plugins_file_one_enabled"></a>8.6.1. Property `Rovr Config > plugins > file_one > enabled`
+#### <a name="plugins_file_one_enabled"></a>7.6.1. Property `Rovr Config > plugins > file_one > enabled`
 
 |              |           |
 | ------------ | --------- |
@@ -6305,7 +6070,7 @@ Must be one of:
 
 **Description:** Enable secondary file(1) type detection if both puremagic and plaintext detection fails.
 
-#### <a name="plugins_file_one_get_description"></a>8.6.2. Property `Rovr Config > plugins > file_one > get_description`
+#### <a name="plugins_file_one_get_description"></a>7.6.2. Property `Rovr Config > plugins > file_one > get_description`
 
 |              |           |
 | ------------ | --------- |

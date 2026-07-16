@@ -347,6 +347,7 @@ class OptionWithValue(LazyOption):
         icon_factory: IconFactory | None,
         label: str,
         value: str | None = None,
+        id: str | None = None,
         disabled: bool = False,
     ) -> None:
         """
@@ -356,12 +357,13 @@ class OptionWithValue(LazyOption):
             icon_factory (IconFactor | None): The icon list from a utils function.
             label (str): The label for the option.
             value (str | None): The file path
+            id (str | None): An option ID for the option.
             disabled (bool) = False: The initial enabled/disabled state.
         """
 
         self.__icon_factory = icon_factory
 
-        super().__init__(prompt=self.get_prompt, disabled=disabled)
+        super().__init__(prompt=self.get_prompt, disabled=disabled, id=id)
         self.label = label
         self.value = value
 

@@ -4,13 +4,15 @@ from textual import on, work
 from textual.app import ComposeResult, InvalidThemeError
 from textual.containers import VerticalGroup
 from textual.style import Style
-from textual.timer import Timer
+from textual.types import OptionDoesNotExist
 from textual.widgets import Input, OptionList
 from textual_autocomplete.fuzzy_search import Matcher
+from textual_drivers._utils import throttle
 
 from rovr.classes.textual_options import OptionWithValue
 from rovr.components import ModalSearchScreen
 from rovr.components.special_option_lists import DoubleClickableOptionList
+from rovr.functions.path import compress
 from rovr.functions.themes import register_all_themes
 
 
@@ -29,6 +31,7 @@ class ThemeChooser(ModalSearchScreen):
 
     @work(thread=True)
     def on_mount(self) -> None:
+        self.last_highlighted_option: str = compress(self.app.theme)
         self.call_next(
             lambda: setattr(self.search_input, "border_title", "Select a theme")
         )
@@ -37,17 +40,18 @@ class ThemeChooser(ModalSearchScreen):
         for error in errors:
             self.notify(error, title="Theme Error", severity="warning", markup=False)
         self.themes: list[OptionWithValue] = [
-            OptionWithValue(None, f" {name}", name)
+            OptionWithValue(None, f" {name}", name, id=compress(name))
             for name in sorted(self.app.available_themes)
         ]
+        self.app.call_from_thread(self.search_options.set_options, self.themes)
         self.post_message(Input.Changed(self.search_input, self.search_input.value))
-        self.theme_setter_timer: Timer | None = None
 
     def set_theme(self, theme_name: str) -> None:
         with suppress(InvalidThemeError):
             self.app.theme = theme_name
 
     @on(OptionList.OptionHighlighted)
+    @throttle(1)
     def preview_theme(self, event: OptionList.OptionHighlighted) -> None:
         option = event.option
         if (
@@ -55,21 +59,23 @@ class ThemeChooser(ModalSearchScreen):
             and option.value is not None
             and not option.disabled
         ):
-            if self.theme_setter_timer:
-                self.theme_setter_timer.stop()
-            self.theme_setter_timer = self.set_interval(
-                0.2,
-                lambda option=option: self.set_theme(option.value),  # ty: ignore[invalid-argument-type]
-                name="theme_setter",
-            )
+            self.set_theme(option.value)  # ty: ignore[invalid-argument-type]
 
     def on_input_changed(self, event: Input.Changed) -> None:
+        self.last_highlighted_option = getattr(
+            self.search_options.highlighted_option, "value", compress(self.app.theme)
+        )
         if not event.value:
             for opt in self.themes:
                 opt._set_prompt(opt.label)
             self.search_options.set_options(self.themes)
             self.search_options.remove_class("empty")
-            self.search_options.highlighted = 0
+            try:
+                self.search_options.highlighted = self.search_options.get_option_index(
+                    self.last_highlighted_option
+                )
+            except OptionDoesNotExist:
+                self.search_options.highlighted = 0
             return
         matcher = Matcher(event.value, match_style=Style(underline=True, bold=True))
         options: list[OptionWithValue] = []
@@ -90,4 +96,9 @@ class ThemeChooser(ModalSearchScreen):
             return
         self.search_options.set_options(options)
         self.search_options.remove_class("empty")
-        self.search_options.highlighted = 0
+        try:
+            self.search_options.highlighted = self.search_options.get_option_index(
+                self.last_highlighted_option
+            )
+        except OptionDoesNotExist:
+            self.search_options.highlighted = 0

@@ -194,6 +194,8 @@ class PreviewContainer(Actionable, Container):
         self, location: str, highlighted_option: FileListSelectionWidget | None = None
     ) -> None:
         # prevent short circuit from occurring later on
+        if should_cancel():
+            return
         self._current_file_path = None
         self._file_mtime = None
         self._file_type = "none"

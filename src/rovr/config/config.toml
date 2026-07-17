@@ -54,6 +54,8 @@ panels = false
 [settings]
 copy_includes_metadata = true
 use_recycle_bin = true
+history_size = 100
+last_highlighted_size = 200
 # comments are just how shell config would look like, it will never be
 # set as default options in the menu, it can be used as reference
 right_click = [

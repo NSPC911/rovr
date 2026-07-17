@@ -237,7 +237,8 @@ class TrashScreen(Actionable, ModalScreen):
 
         self.app.call_next(
             setattr,
-            self.query_one("#dialog").border_subtitle,
+            self.query_one("#dialog"),
+            "border_subtitle",
             f"{len(self.entries)} item{'s' if len(self.entries) != 1 else ''}",
         )
         for button_id in ("#restore", "#purge"):

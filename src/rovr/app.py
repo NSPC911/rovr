@@ -644,13 +644,13 @@ class Application(Actionable, DNDApp, inherit_bindings=False):
         state_mtime = None
         with suppress(OSError):
             state_mtime = path.getmtime(state_path)
-        drives = lambda: self.app.query_one(PinnedSidebar).DRIVES
         drive_update_every = int(config["interface"]["drive_watcher_frequency"])
         count: int = -2
         style_available: bool = self.CUSTOM_STYLE_AVAILABLE
         custom_style_path = path.join(RovrVars.ROVRCONFIG, "style.tcss")
         new_drives: list[str] | None = None
         cwd_mtime: float | None = None
+        pin_sidebar = self.query_one(PinnedSidebar)
 
         i_should_shut_down = lambda: (
             self._shutdown_event.is_set() or self.return_code is not None
@@ -715,7 +715,7 @@ class Application(Actionable, DNDApp, inherit_bindings=False):
                     # and workers run separate from a thread, so there
                     # really is no issue here, thanks to any AI
                     # models raising false issues on thread safety
-                    self.query_one(PinnedSidebar).reload_pins()
+                    pin_sidebar.reload_pins()
                     reload_called = True
             if i_should_shut_down():
                 return
@@ -761,8 +761,8 @@ class Application(Actionable, DNDApp, inherit_bindings=False):
                             new_drives = result_queue.get_nowait()
                     else:
                         new_drives = drive_workers.get_mounted_drives(os_type, config)
-                    if new_drives is not None and new_drives != drives():
-                        self.query_one(PinnedSidebar).reload_pins()
+                    if new_drives is not None and new_drives != pin_sidebar.DRIVES:
+                        pin_sidebar.reload_pins()
                 except Exception as exc:
                     if multiprocessing_process_error_checker(self, exc):
                         count = -1  # try again immediately on next loop

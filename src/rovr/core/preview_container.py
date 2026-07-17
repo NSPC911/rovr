@@ -35,12 +35,6 @@ from rovr.functions import icons as icon_utils
 from rovr.functions import path as path_utils
 from rovr.functions import preview_utils
 from rovr.functions.pdf import get_pdf_images, get_pdf_info
-from rovr.functions.preview_utils import (
-    load_svg_sync,
-    resample_batch_sync,
-    resample_file_sync,
-    resample_sync,
-)
 from rovr.functions.utils import multiprocessing_process_error_checker, should_cancel
 from rovr.variables.constants import PreviewContainerTitles, config, file_one
 
@@ -199,6 +193,12 @@ class PreviewContainer(Actionable, Container):
     async def file_not_found(
         self, location: str, highlighted_option: FileListSelectionWidget | None = None
     ) -> None:
+        # prevent short circuit from occurring later on
+        self._current_file_path = None
+        self._file_mtime = None
+        self._file_type = "none"
+        self._mime_type = None
+
         await self.remove_children()
         self.border_title = ""
         self.border_subtitle = ""
@@ -341,11 +341,11 @@ class PreviewContainer(Actionable, Container):
                     png_bytes = preview_utils.load_svg(self._current_file_path)
                 except ValueError as exc:
                     if multiprocessing_process_error_checker(self.app, exc):
-                        png_bytes = load_svg_sync(self._current_file_path)
+                        png_bytes = preview_utils.load_svg_sync(self._current_file_path)
                     else:
                         raise
             else:
-                png_bytes = load_svg_sync(self._current_file_path)
+                png_bytes = preview_utils.load_svg_sync(self._current_file_path)
             if png_bytes is None:
                 self.notify(
                     "Failed to load SVG. The file may be corrupted or not an SVG file.",
@@ -368,11 +368,13 @@ class PreviewContainer(Actionable, Container):
                     pil_object = preview_utils.resample(Image.open(BytesIO(png_bytes)))
                 except ValueError as exc:
                     if multiprocessing_process_error_checker(self.app, exc):
-                        pil_object = resample_sync(Image.open(BytesIO(png_bytes)))
+                        pil_object = preview_utils.resample_sync(
+                            Image.open(BytesIO(png_bytes))
+                        )
                     else:
                         raise
             else:
-                pil_object = resample_sync(Image.open(BytesIO(png_bytes)))
+                pil_object = preview_utils.resample_sync(Image.open(BytesIO(png_bytes)))
 
             if should_cancel():
                 return
@@ -429,11 +431,13 @@ class PreviewContainer(Actionable, Container):
                     pil_object = preview_utils.resample_file(self._current_file_path)
                 except ValueError as exc:
                     if multiprocessing_process_error_checker(self.app, exc):
-                        pil_object = resample_file_sync(self._current_file_path)
+                        pil_object = preview_utils.resample_file_sync(
+                            self._current_file_path
+                        )
                     else:
                         raise
             else:
-                pil_object = resample_file_sync(self._current_file_path)
+                pil_object = preview_utils.resample_file_sync(self._current_file_path)
             if pil_object is None:
                 return
         except UnidentifiedImageError:
@@ -531,9 +535,9 @@ class PreviewContainer(Actionable, Container):
                 return preview_utils.resample_batch(result)
             except ValueError as exc:
                 if multiprocessing_process_error_checker(self.app, exc):
-                    return resample_batch_sync(result)
+                    return preview_utils.resample_batch_sync(result)
                 raise
-        return resample_batch_sync(result)
+        return preview_utils.resample_batch_sync(result)
 
     def show_pdf_preview(self) -> None:
         """
@@ -1126,7 +1130,6 @@ class PreviewContainer(Actionable, Container):
                 exc.strerror
             ):
                 self.app.call_from_thread(self.remove_children)
-                self.call_next(lambda: self.post_message(self.SetLoading(False)))
                 return
             elif isinstance(exc, FileNotFoundError):
                 self.app.call_from_thread(self.file_not_found, file_path)
@@ -1137,6 +1140,8 @@ class PreviewContainer(Actionable, Container):
                 markup=False,
             )
             path_utils.dump_exc(self, exc)
+        finally:
+            self.call_next(lambda: self.post_message(self.SetLoading(False)))
 
     def update_ui(
         self,

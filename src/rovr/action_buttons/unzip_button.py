@@ -4,6 +4,7 @@ from textual import work
 from textual.widgets import Button
 
 from rovr.classes.textual_validators import IsValidFilePath
+from rovr.functions import utils
 from rovr.functions.icons import get_icon
 from rovr.functions.path import normalise
 from rovr.screens import ModalInput
@@ -17,6 +18,18 @@ class UnzipButton(Button):
         super().__init__(get_icon("general", "open")[0], classes="option", id="unzip")
         if config["interface"]["tooltips"]:
             self.tooltip = "Extract selected archive"
+
+    @work(thread=True, exclusive=True, group="unzip_check")
+    def update_state(self, file_path: str) -> None:
+        """Determine whether the highlighted file is an archive, off the main thread.
+
+        Args:
+            file_path (str): The path of the highlighted file.
+        """
+        is_archive = utils.is_archive(file_path)
+        if utils.should_cancel():
+            return
+        self.app.call_from_thread(setattr, self, "disabled", not is_archive)
 
     @work
     async def on_button_pressed(self, event: Button.Pressed) -> None:

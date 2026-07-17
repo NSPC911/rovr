@@ -731,23 +731,9 @@ class FileList(
                 highlighted_option.dir_entry.path, highlighted_option
             )
             return
-        self.update_unzip_state(highlighted_option.dir_entry.path)
-
-    @work(thread=True, exclusive=True, group="unzip_check")
-    def update_unzip_state(self, file_path: str) -> None:
-        """Determine whether the highlighted file is an archive, off the main thread.
-
-        Args:
-            file_path (str): The path of the highlighted file.
-        """
-        is_archive = utils.is_archive(file_path)
-        if utils.should_cancel():
-            return
-        try:
-            button = self.app.query_one("#unzip", Button)
-        except NoMatches:
-            return
-        self.app.call_from_thread(setattr, button, "disabled", not is_archive)
+        self.app.query_one("#unzip").update_unzip_state(
+            highlighted_option.dir_entry.path
+        )
 
     @property
     def options(self) -> Sequence[FileListSelectionWidget]:

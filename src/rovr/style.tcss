@@ -507,7 +507,7 @@ CommandList:ansi {
 
 FileList {
   .filelist--hidden,
-  .filelist--hidden--hover,
+  .filelist--hidden--hovered,
   .filelist--hidden--highlighted {
     text-style: dim;
   }
@@ -517,7 +517,7 @@ FileList {
     color: $block-cursor-foreground;
     text-style: dim
   }
-  .filelist--cut--hover,
+  .filelist--cut--hovered,
   .filelist--cut--highlighted {
     background: $primary-background;
   }
@@ -525,7 +525,7 @@ FileList {
   .filelist--link {
     color: $primary;
   }
-  .filelist--link--hover,
+  .filelist--link--hovered,
   .filelist--link--highlighted {
     color: $primary-lighten-3;
     background: $secondary-darken-3;
@@ -536,7 +536,7 @@ FileList {
     color: $background;
   }
 
-  .filelist--broken-link--hover,
+  .filelist--broken-link--hovered,
   .filelist--broken-link--highlighted {
     background: $error-lighten-3;
     color: $background;

@@ -399,7 +399,7 @@ def get_mime_type(
                 if file_executable is None:
                     raise FileNotFoundError
                 process = subprocess.run(
-                    [file_executable, "--mime-type", "-b", file_path],
+                    [file_executable, "--mime-type", "--brief", "--", file_path],
                     capture_output=True,
                     text=True,
                     check=True,

@@ -401,7 +401,8 @@ class FileList(
         name_to_index: dict[str, int] = {}
         if add_to_session:
             if session.historyIndex != len(session.directories) - 1:
-                session.directories = session.directories[: session.historyIndex + 1]
+                while len(session.directories) > session.historyIndex + 1:
+                    session.directories.pop()
             session.directories.append(cwd)
             session.historyIndex = len(session.directories) - 1
         try:
@@ -514,12 +515,15 @@ class FileList(
                     self.list_of_options[0], FileListSelectionWidget
                 ):
                     # Hard coding is my passion (referring to the id)
-                    session.lastHighlighted[cwd] = {
-                        "name": self.list_of_options[0].dir_entry.name,
-                        "index": 0,
-                    }
-            elif session.directories == []:
-                session.directories = [path_utils.normalise(getcwd())]
+                    session.remember_highlight(
+                        cwd,
+                        {
+                            "name": self.list_of_options[0].dir_entry.name,
+                            "index": 0,
+                        },
+                    )
+            elif not session.directories:
+                session.directories.append(path_utils.normalise(getcwd()))
             self.app.query_one("Button#back").disabled = session.historyIndex <= 0
             self.app.query_one("Button#forward").disabled = (
                 session.historyIndex == len(session.directories) - 1
@@ -539,10 +543,13 @@ class FileList(
             except (OptionDoesNotExist, KeyError):
                 self.highlighted = 0
             if isinstance(self.highlighted_option, FileListSelectionWidget):
-                session.lastHighlighted[cwd] = SessionOptionDict({
-                    "name": self.highlighted_option.dir_entry.name,
-                    "index": self.highlighted or 0,  # weird ty behaviour on 0.0.33
-                })
+                session.remember_highlight(
+                    cwd,
+                    SessionOptionDict({
+                        "name": self.highlighted_option.dir_entry.name,
+                        "index": self.highlighted or 0,  # weird ty behaviour on 0.0.33
+                    }),
+                )
 
             self.scroll_to_highlight()
             self.app.tabWidget.active_tab.label = (
@@ -689,26 +696,26 @@ class FileList(
             self.call_after_refresh(self.update_border_subtitle)
         # Get the highlighted option
         highlighted_option = event.option
-        self.app.tabWidget.active_tab.session.lastHighlighted[
-            path_utils.normalise(getcwd())
-        ] = {"name": highlighted_option.dir_entry.name, "index": self.highlighted}
+        self.app.tabWidget.active_tab.session.remember_highlight(
+            path_utils.normalise(getcwd()),
+            {"name": highlighted_option.dir_entry.name, "index": self.highlighted},
+        )
         # Get the filename from the option id
         # total files as footer
         if self.highlighted is None:
             self.highlighted = 0
         # update tracked mtime for the watcher
-        highlighted_path = highlighted_option.dir_entry.path
-        if path.exists(highlighted_path) and not path.isdir(highlighted_path):
-            from contextlib import suppress
-
+        try:
+            is_file = highlighted_option.dir_entry.is_file()
+        except OSError:
+            is_file = False
+        if is_file:
             with suppress(OSError):
-                setattr(
-                    self.app,
-                    "_highlighted_file_mtime",
-                    highlighted_option.dir_entry.stat().st_mtime,
+                self.app._highlighted_file_mtime = (
+                    highlighted_option.dir_entry.stat().st_mtime
                 )
         else:
-            setattr(self.app, "_highlighted_file_mtime", None)
+            self.app._highlighted_file_mtime = None
         # preview
         self.app.query_one("MetadataContainer").update_metadata(
             event.option.dir_entry, event.option
@@ -724,9 +731,23 @@ class FileList(
                 highlighted_option.dir_entry.path, highlighted_option
             )
             return
-        self.app.query_one("#unzip").disabled = not utils.is_archive(
-            highlighted_option.dir_entry.path
-        )
+        self.update_unzip_state(highlighted_option.dir_entry.path)
+
+    @work(thread=True, exclusive=True, group="unzip_check")
+    def update_unzip_state(self, file_path: str) -> None:
+        """Determine whether the highlighted file is an archive, off the main thread.
+
+        Args:
+            file_path (str): The path of the highlighted file.
+        """
+        is_archive = utils.is_archive(file_path)
+        if utils.should_cancel():
+            return
+        try:
+            button = self.app.query_one("#unzip", Button)
+        except NoMatches:
+            return
+        self.app.call_from_thread(setattr, button, "disabled", not is_archive)
 
     @property
     def options(self) -> Sequence[FileListSelectionWidget]:

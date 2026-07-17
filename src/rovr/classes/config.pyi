@@ -303,6 +303,12 @@ r""" Default value of the field path 'Rovr Config settings editor folder run' ""
 _ROVR_CONFIG_SETTINGS_EDITOR_FOLDER_SHELL_DEFAULT = False
 r""" Default value of the field path 'Rovr Config settings editor folder shell' """
 
+_ROVR_CONFIG_SETTINGS_HISTORY_SIZE_DEFAULT = 100
+r""" Default value of the field path 'Rovr Config settings history_size' """
+
+_ROVR_CONFIG_SETTINGS_LAST_HIGHLIGHTED_SIZE_DEFAULT = 200
+r""" Default value of the field path 'Rovr Config settings last_highlighted_size' """
+
 _ROVR_CONFIG_SETTINGS_PREVIEW_RULES_DEFAULT = {
     "text/.*": "text",
     "application/(json|javascript|xml|raml\\+yaml)": "text",
@@ -1517,6 +1523,22 @@ class _RovrConfigSettings(TypedDict, total=False):
     When copying over a file, preserve metadata from the original file, such as creation and modification times.
 
     default: True
+    """
+
+    history_size: int
+    r"""
+    The maximum number of directories to keep in the back/forward navigation history, per tab. Oldest entries are evicted once this is exceeded.
+
+    minimum: 1
+    default: 100
+    """
+
+    last_highlighted_size: int
+    r"""
+    The maximum number of directories to remember the last-highlighted item for, per tab. Least-recently-used entries are evicted once this is exceeded.
+
+    minimum: 1
+    default: 200
     """
 
     editor: "_RovrConfigSettingsEditor"

@@ -35,7 +35,7 @@ def normalise(*location: str | bytes) -> str:
 def _get_windows_drives() -> list[str]:
     import ctypes
 
-    bitmask = ctypes.windll.kernel32.GetLogicalDrives()  # type: ignore[attr-defined]
+    bitmask = ctypes.windll.kernel32.GetLogicalDrives()
     return [f"{chr(ord('A') + i)}:/" for i in range(26) if bitmask & (1 << i)]
 
 

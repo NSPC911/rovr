@@ -18,6 +18,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `filelist`: show detail columns [#301](https://github.com/NSPC911/rovr/pull/301)
 - `styles`: properly override variables on different files [79c394e](https://github.com/NSPC911/rovr/commit/79c394eac6f15c0a644853c92a7326415a529d79) [5628f65](https://github.com/NSPC911/rovr/commit/5628f650a20c86264bd408cf86e8efbdba4cc550)
 - `app`: add trash bin support [#304](https://github.com/NSPC911/rovr/pull/304)
+- `history`: evicy after hitting limit [#306](https://github.com/NSPC911/rovr/pull/306) [b0d971a](https://github.com/NSPC911/rovr/commit/b0d971accd755e855a8e8d4e7f03c3f9163a935f)
 
 ### Fixed
 
@@ -29,6 +30,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `input`: support absolute paths [c847695](https://github.com/NSPC911/rovr/commit/c84769582f1dbd142b58c7bee5e998e6f8f5e9da)
 - `preview`: ignore IsADirectoryError and NotADirectoryError [30a729c](https://github.com/NSPC911/rovr/commit/30a729ce032571136b4e419afc37fe6631301de8)
 - `pins`: dont automatically expand when saving [0280cd2](https://github.com/NSPC911/rovr/commit/0280cd2d8ddbf331e0ca1ca63d419b70be655d3e)
+- `style`: properly use `--hovered` [6b8f1dd](https://github.com/NSPC911/rovr/commit/6b8f1ddc9c676135cb45ddf168f81cce04bad815)
 
 ### Removed
 

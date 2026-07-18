@@ -66,10 +66,6 @@ class ModalSearchScreen(Actionable, ModalScreen, inherit_bindings=False):
         )
 
     def on_input_submitted(self, event: Input.Submitted) -> None:
-        if any(
-            worker.is_running and worker.node is self for worker in self.app.workers
-        ):
-            return
         if self.search_options.highlighted is None:
             self.search_options.highlighted = 0
         if self.search_options.option_count == 0 or (

@@ -153,7 +153,7 @@ def pop_theme_field_overrides(
     return fields
 
 
-def parse_theme_file(theme_file: Path) -> tuple[Theme, list[str]]:
+def parse_theme_file(theme_file: Path) -> Theme:
     """
     Parse a theme TCSS file into a Theme named after the file.
 
@@ -161,7 +161,7 @@ def parse_theme_file(theme_file: Path) -> tuple[Theme, list[str]]:
         theme_file: Path to the theme file.
 
     Returns:
-        A tuple of (Theme to register, human-readable warnings).
+        The Theme to register.
 
     Raises:
         ValueError: If the theme does not define $primary.
@@ -179,11 +179,6 @@ def parse_theme_file(theme_file: Path) -> tuple[Theme, list[str]]:
         for color in colors:
             Color.parse(color)
         bar_gradient[kind] = colors
-    warnings = []
-    if _COMMENT.sub("", strip_variable_declarations(css_text)).strip():
-        warnings.append(
-            f"{theme_file.name}: css rules in theme files aren't supported yet"
-        )
     theme = Theme(
         name=theme_file.stem,
         variables=declared,
@@ -192,7 +187,12 @@ def parse_theme_file(theme_file: Path) -> tuple[Theme, list[str]]:
     if bar_gradient:
         # consumed by ProcessContainer via getattr; not a Theme field
         theme.bar_gradient = bar_gradient  # ty: ignore[unresolved-attribute]
-    return theme, warnings
+    css_rules = strip_variable_declarations(css_text)
+    if _COMMENT.sub("", css_rules).strip():
+        # css rules applied only while the theme is active; injected as a
+        # stylesheet source by Application._load_theme_css via getattr
+        theme.css = css_rules  # ty: ignore[unresolved-attribute]
+    return theme
 
 
 def theme_dirs() -> list[Path]:
@@ -229,11 +229,10 @@ def register_all_themes(app: App) -> list[str]:
     for theme_dir in theme_dirs():
         for theme_file in sorted(theme_dir.glob("*.tcss")):
             try:
-                theme, warnings = parse_theme_file(theme_file)
+                theme = parse_theme_file(theme_file)
             except Exception as exc:
                 errors.append(f"{theme_file.name}: {exc}")
                 continue
-            errors.extend(warnings)
             app.register_theme(theme)
     return errors
 

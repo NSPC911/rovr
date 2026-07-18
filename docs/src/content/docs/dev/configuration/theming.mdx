@@ -34,6 +34,21 @@ $block-cursor-background: <color>;
 
 `$primary` is the only required variable. every color you don't define is generated from the ones you do — including shades like `$primary-lighten-3`, which regenerate automatically when you change `$primary`.
 
+theme files can also contain regular tcss rules below the variable declarations:
+
+```css
+$primary: #88C0D0;
+
+FileList {
+    text-style: italic;
+}
+#file_list_container {
+    border: double $primary;
+}
+```
+
+these rules only apply while the theme is active, so there is no need to scope selectors to the theme. when two rules with the same specificity conflict, the theme's rule wins over `style.tcss`; a more specific selector in `style.tcss` still wins as usual.
+
 you can take a look at the reference in [textual](https://textual.textualize.io/guide/design), or the table below
 
 | Variables  | Description                                                                                                                                  |

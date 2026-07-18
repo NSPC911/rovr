@@ -11,7 +11,7 @@ from io import TextIOWrapper
 from os import chdir, getcwd, path
 from subprocess import Popen
 from time import perf_counter
-from typing import Callable, Iterable
+from typing import Callable, ClassVar, Iterable
 
 from rich.console import RenderableType
 from rich.protocol import is_renderable
@@ -31,7 +31,6 @@ from textual.dom import DOMNode
 from textual.geometry import Offset
 from textual.messages import ExitApp
 from textual.screen import Screen
-from textual.theme import Theme
 from textual.timer import Timer
 from textual.types import NoActiveAppError
 from textual.widget import Widget
@@ -243,11 +242,14 @@ class Application(Actionable, DNDApp, inherit_bindings=False):
 
         self._on_mount_done: bool = False
         self.last_available_cd = getcwd()
-        self.old_theme: str = self.theme
 
         self._theme_errors: list[str] = register_all_themes(self)
         self._theme_file_mtimes: dict[str, float] = theme_file_mtimes()
         self.theme = config["theme"]["default"]
+        # ensure the theme css source exists (possibly empty) before Textual
+        # reads the style.tcss files, so its position in the source order is
+        # the same no matter which theme the app started with
+        self._load_theme_css()
         self.ansi_color = config["theme"]["transparent"]
 
     def on_compose(self, event: events.Compose) -> None:
@@ -274,8 +276,7 @@ class Application(Actionable, DNDApp, inherit_bindings=False):
             if config["interface"]["compact_mode"]["panels"]
             else " comfy-panels"
         )
-        root_classes = root_classes.strip() + f"theme-{self.get_theme(self.theme).name}"
-        with Vertical(id="root", classes=root_classes):
+        with Vertical(id="root", classes=root_classes.strip()):
             header = HeaderArea()
             self.tabWidget = header.tabline
             yield header
@@ -319,7 +320,6 @@ class Application(Actionable, DNDApp, inherit_bindings=False):
                 self.exit()
             return
 
-        self.theme_changed_signal.subscribe(self, self.theme_changed)
         for error in self._theme_errors:
             self.notify(error, title="Theme Error", severity="warning", markup=False)
         self.set_interval(1, self._poll_theme_files)
@@ -375,13 +375,6 @@ class Application(Actionable, DNDApp, inherit_bindings=False):
         self.file_list.update_border_subtitle()
         # self.call_after_refresh(sleep, 1)
 
-    def theme_changed(self, theme: Theme) -> None:
-        self.query_one("#root").update_classes({
-            f"theme-{self.old_theme}": True,
-            f"theme-{theme.name}": False,
-        })
-        self.old_theme = theme.name
-
     def action_change_theme(self) -> None:
         from rovr.screens import ThemeChooser
 
@@ -393,6 +386,43 @@ class Application(Actionable, DNDApp, inherit_bindings=False):
             )
 
         self.push_screen(ThemeChooser(), callback=apply_theme)
+
+    # the stylesheet source holding the active theme's css rules
+    THEME_CSS_SOURCE: ClassVar[tuple[str, str]] = ("<active theme>", "")
+
+    def _watch_theme(self, theme_name: str) -> None:
+        self._load_theme_css()
+        super()._watch_theme(theme_name)
+
+    def _load_theme_css(self) -> None:
+        """
+        Swap the active theme's css rules into the stylesheet.
+
+        Only the active theme's rules are ever loaded (as the single
+        `THEME_CSS_SOURCE` source), so theme files don't need to scope their
+        selectors. The swap happens before `refresh_css` reparses the
+        stylesheet, from `_watch_theme` and `reload_themes`. The tie breaker
+        lets a theme rule beat a style.tcss rule of equal specificity, which
+        it would otherwise lose to purely on source order.
+        """
+        css = getattr(self.current_theme, "css", "")
+        existing = self.stylesheet.source.get(self.THEME_CSS_SOURCE)
+        if existing is not None and existing.content == css:
+            return
+        trial = self.stylesheet.copy()
+        trial.set_variables(self.get_css_variables())
+        trial.add_source(css, read_from=self.THEME_CSS_SOURCE, tie_breaker=1)
+        try:
+            trial.parse()
+        except Exception as error:
+            self.notify(
+                f"css rules in the '{self.theme}' theme failed to parse: {error}",
+                title="Theme Error",
+                severity="warning",
+                markup=False,
+            )
+            return
+        self.stylesheet.add_source(css, read_from=self.THEME_CSS_SOURCE, tie_breaker=1)
 
     def reload_themes(self) -> list[str]:
         """
@@ -417,7 +447,11 @@ class Application(Actionable, DNDApp, inherit_bindings=False):
         self._theme_file_mtimes = mtimes
         active_theme = self.current_theme
         errors = register_all_themes(self)
-        if self.current_theme != active_theme:
+        # Theme's dataclass __eq__ ignores the injected css attribute, so a
+        # rules-only edit needs its own comparison
+        if self.current_theme != active_theme or getattr(
+            self.current_theme, "css", ""
+        ) != getattr(active_theme, "css", ""):
             self._watch_theme(self.theme)
         if not errors:
             elapsed = (perf_counter() - started) * 1000

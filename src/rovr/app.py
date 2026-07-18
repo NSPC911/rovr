@@ -15,6 +15,7 @@ from typing import Callable, ClassVar, Iterable
 
 from rich.console import RenderableType
 from rich.protocol import is_renderable
+from rich.text import Text
 from textual import constants, events, on, work
 from textual.app import WINDOWS, ComposeResult, ScreenStackError, SystemCommand
 from textual.binding import Binding
@@ -414,6 +415,24 @@ class Application(Actionable, DNDApp, inherit_bindings=False):
         trial.add_source(css, read_from=self.THEME_CSS_SOURCE, tie_breaker=1)
         try:
             trial.parse()
+        except StylesheetParseError as error:
+            # str(StylesheetParseError) is just the object repr; the useful
+            # detail lives in the (token, message) pairs of each failed rule
+            problems = dict.fromkeys(
+                problem for rule in error.errors.rules for problem in rule.errors
+            )
+            details = "\n".join(
+                f"line {(token.referenced_by or token).location[0] + 1}: "
+                + Text.from_markup(str(getattr(message, "summary", message))).plain
+                for token, message in problems
+            )
+            self.notify(
+                f"css rules in the '{self.theme}' theme failed to parse\n{details}",
+                title="Theme Error",
+                severity="warning",
+                markup=False,
+            )
+            return
         except Exception as error:
             self.notify(
                 f"css rules in the '{self.theme}' theme failed to parse: {error}",

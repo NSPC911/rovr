@@ -1041,11 +1041,11 @@ wheels = [
 
 [[package]]
 name = "pytrash"
-version = "0.3.2"
+version = "0.3.3"
 source = { registry = "https://pypi.org/simple" }
-sdist = { url = "https://files.pythonhosted.org/packages/be/e9/6e258375d808a14ddd0fdc60b1b5532ee1b3a7083525bf125a9fb4e2d56a/pytrash-0.3.2.tar.gz", hash = "sha256:63c6a6719b578f3eae2803cb3ba23181cdb5045ee3b2c24cc841635dcf2ad4c2", size = 15749, upload-time = "2026-07-15T08:52:58.043Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/2c/39/b93932b218db68fdc7e07ca3ab3c64448555044f98a935bdbb5277d64dc3/pytrash-0.3.3.tar.gz", hash = "sha256:2f7f812ca62b626503907a6658879a71baf4eb27844f778ecf252d6dd23305f5", size = 15748, upload-time = "2026-07-19T00:57:49.565Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/98/7a/92ab7d575a2f2d142d9e5e44a34982d9e2e3955a9f6cd2f2f8a2f3dd7d9e/pytrash-0.3.2-py3-none-any.whl", hash = "sha256:00f8c5b9abf2d636f0833044601e5f5416f3c630ab1c0d850b1a725343a05a4a", size = 20239, upload-time = "2026-07-15T08:52:57.19Z" },
+    { url = "https://files.pythonhosted.org/packages/3a/62/fd51eb9e590fe9a7875ab67e1e21177e43d412b981c549b2dda7ffc0608a/pytrash-0.3.3-py3-none-any.whl", hash = "sha256:75a56708da343b8fe4d8b5627f7505252759bc7ce0119bf4ffddae4d6af4010f", size = 20242, upload-time = "2026-07-19T00:57:48.615Z" },
 ]
 
 [[package]]

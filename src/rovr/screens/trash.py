@@ -211,7 +211,17 @@ class TrashScreen(Actionable, ModalScreen):
             prev_handle = selection_list.get_option_at_index(prev_index).value
         prev_scroll = selection_list.scroll_offset.y
 
-        self.entries = self.recycle_bin.entries()
+        try:
+            self.entries = self.recycle_bin.entries()
+        except PermissionError as exc:
+            # happens for macos when the user has not granted access to the trash folder
+            self.notify(
+                str(exc),
+                title="Recycle Bin",
+                severity="error",
+                markup=False,
+            )
+            return
         self._by_handle = {
             self._handle_of(entry, index): entry
             for index, entry in enumerate(self.entries)

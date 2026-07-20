@@ -892,6 +892,9 @@ TrashScreen {
     padding: 0;
     height: 1fr;
     background: transparent;
+
+    .trash--detail-size,
+    .trash--detail-mtime { color: $text-muted }
   }
   Button { width: 1fr }
 }

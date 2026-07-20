@@ -1,8 +1,10 @@
 from inspect import isawaitable
 from typing import Any, Awaitable, Callable, Iterable, NamedTuple, Self
 
+from rich.cells import cell_len
 from rich.segment import Segment
 from rich.style import Style
+from textual.color import Color
 from textual.content import ContentText
 from textual.events import Key
 from textual.geometry import Region, Size
@@ -12,11 +14,100 @@ from textual.widgets.option_list import Option, OptionDoesNotExist
 from textual.widgets.selection_list import Selection, SelectionType
 
 from rovr.classes.textual_options import LazySelection
+from rovr.functions import details as detail_utils
 from rovr.functions import icons as icon_utils
 from rovr.functions.utils import check_key
 from rovr.variables.constants import (
     config,
 )
+
+
+class DetailColumnRenderingMixin:
+    """Right-aligned, fixed-width stat columns painted onto rendered option rows."""
+
+    DETAIL_COMPONENT_PREFIX: str = ""
+
+    def _detail_rich_style(self, component_class: str, base: Style) -> Style:
+        """The row style with the component class's foreground and text style on top.
+
+        Returns:
+            Style: The merged rich style.
+        """
+        visual = self.get_visual_style("option-list--option", component_class)
+        foreground = visual.foreground
+        if foreground is None:
+            return base
+        if foreground.a < 1 and base.bgcolor is not None:
+            foreground = Color.from_rich_color(base.bgcolor).blend(
+                foreground, foreground.a
+            )
+        return base + Style(
+            color=foreground.rich_color,
+            bold=visual.bold,
+            dim=visual.dim,
+            italic=visual.italic,
+            underline=visual.underline,
+            strike=visual.strike,
+        )
+
+    def render_detail_columns(
+        self, line: Strip, y: int, columns: tuple[Any, ...]
+    ) -> Strip:
+        """Truncate `line` and append a cell for each column that fits.
+
+        Returns:
+            Strip: The row with its detail columns, or `line` untouched.
+        """
+        width = self.scrollable_content_region.width
+        fitted = detail_utils.fit_column_count(width, columns)
+        if not fitted:
+            return line
+        try:
+            option_index, _ = self._lines[self.scroll_offset.y + y]
+            option = self.options[option_index]
+        except (IndexError, KeyError):
+            return line
+        cells = getattr(option, "detail_cells", None)
+        if not callable(cells):
+            return line
+        segments = list(line)
+        style = (segments[-1].style if segments else None) or self.rich_style
+        detail_segments: list[Segment] = []
+        details_width = 1  # is 1 and not 0 because minor right padding
+        for column, cell in zip(columns[:fitted], cells(columns)[:fitted]):
+            details_width += column.width + 2
+            detail_segments.append(Segment("  ", style))
+            detail_segments.append(
+                Segment(
+                    cell,
+                    self._detail_rich_style(
+                        f"{self.DETAIL_COMPONENT_PREFIX}{column.type}", style
+                    ),
+                )
+            )
+        detail_segments.append(Segment(" ", style))
+        return Strip([
+            *line.adjust_cell_length(width - details_width, style),
+            *detail_segments,
+        ])
+
+    def detail_columns_header_text(self, columns: tuple[Any, ...]) -> str:
+        """The header line aligned with the name and detail columns.
+
+        Returns:
+            str: The full-width header text.
+        """
+        width = self.scrollable_content_region.width
+        fitted = detail_utils.fit_column_count(width, columns)
+        gutter = self._get_left_gutter_width()
+        labels = "  ".join(
+            detail_utils._pad(column.label, column.width) for column in columns[:fitted]
+        )
+        left = " " * gutter + "   Name"
+        if labels:
+            labels += " "
+        pad = max(1, width - cell_len(left) - cell_len(labels))
+        return left + " " * pad + labels
 
 
 class SingleLineOptionLayoutMixin:

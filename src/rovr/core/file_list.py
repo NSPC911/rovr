@@ -3,12 +3,9 @@ from contextlib import suppress
 from os import getcwd, path, scandir
 from typing import Callable, ClassVar, Sequence
 
-from rich.cells import cell_len
 from rich.segment import Segment
-from rich.style import Style
 from textual import events, work
 from textual.binding import BindingType
-from textual.color import Color
 from textual.css.query import NoMatches
 from textual.errors import NoWidget
 from textual.strip import Strip
@@ -21,6 +18,7 @@ from rovr.classes.mixins import (
     Action,
     Actionable,
     CheckboxRenderingMixin,
+    DetailColumnRenderingMixin,
     ScrollOffMixin,
     SetOptionsSelectionList,
     SingleLineOptionLayoutMixin,
@@ -45,6 +43,7 @@ from .file_list_right_click_menu import FileListRightClickMenu
 class FileList(
     Actionable,
     CheckboxRenderingMixin,
+    DetailColumnRenderingMixin,
     ScrollOffMixin,
     SingleLineOptionLayoutMixin,
     SetOptionsSelectionList,
@@ -245,47 +244,13 @@ class FileList(
             *detail_segments,
         ])
 
-    def _detail_rich_style(self, component_class: str, base: Style) -> Style:
-        """The row style with the component class's foreground and text style on top.
-
-        Returns:
-            Style: The merged rich style.
-        """
-        visual = self.get_visual_style("option-list--option", component_class)
-        foreground = visual.foreground
-        if foreground is None:
-            return base
-        if foreground.a < 1 and base.bgcolor is not None:
-            foreground = Color.from_rich_color(base.bgcolor).blend(
-                foreground, foreground.a
-            )
-        return base + Style(
-            color=foreground.rich_color,
-            bold=visual.bold,
-            dim=visual.dim,
-            italic=visual.italic,
-            underline=visual.underline,
-            strike=visual.strike,
-        )
-
     def details_header_text(self) -> str:
         """The header line aligned with the name and detail columns.
 
         Returns:
             str: The full-width header text.
         """
-        columns = self._detail_columns()
-        width = self.scrollable_content_region.width
-        fitted = detail_utils.fit_column_count(width, columns)
-        gutter = self._get_left_gutter_width()
-        labels = "  ".join(
-            detail_utils._pad(column.label, column.width) for column in columns[:fitted]
-        )
-        left = " " * gutter + "   Name"
-        if labels:
-            labels += " "
-        pad = max(1, width - cell_len(left) - cell_len(labels))
-        return left + " " * pad + labels
+        return self.detail_columns_header_text(self._detail_columns())
 
     @work(thread=True, exclusive=True, group="detail_fill")
     def fill_async_details(self) -> None:

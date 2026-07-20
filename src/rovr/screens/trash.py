@@ -1,6 +1,8 @@
+from datetime import datetime
 from typing import Callable, ClassVar
 
 from pytrash import RecycleBin, TrashEntry
+from rich.cells import cell_len
 from rich.text import Text
 from textual import events, on, work
 from textual.app import ComposeResult
@@ -8,6 +10,7 @@ from textual.binding import BindingType
 from textual.containers import Grid
 from textual.message import Message
 from textual.screen import ModalScreen
+from textual.strip import Strip
 from textual.widgets import Button, SelectionList
 from textual.widgets.selection_list import Selection
 
@@ -15,8 +18,11 @@ from rovr.classes.mixins import (
     Action,
     Actionable,
     CheckboxRenderingMixin,
+    DetailColumnRenderingMixin,
     SetOptionsSelectionList,
+    SingleLineOptionLayoutMixin,
 )
+from rovr.functions import details as detail_utils
 from rovr.functions import icons as icon_utils
 from rovr.functions import path as path_utils
 from rovr.functions.utils import dismiss, get_shortest_bind, natural_size
@@ -30,15 +36,68 @@ cancel_bind = get_shortest_bind(config["keybinds"]["trash"]["cancel"])
 
 home = path_utils.normalise(RovrVars.HOME)
 
+_datetime_format = config["metadata"]["datetime_format"]
+TRASH_COLUMNS: tuple[detail_utils.DetailColumn, ...] = (
+    detail_utils.DetailColumn(
+        "mtime",
+        "Deleted",
+        max(7, cell_len(datetime.now().strftime(_datetime_format))),
+        _datetime_format,
+    ),
+    detail_utils.DetailColumn("size", "Size", 9, ""),
+)
+
+
+class TrashSelection(Selection):
+    """A recycle bin entry that can render its stats as detail columns."""
+
+    def __init__(self, prompt: Text, value: str, entry: TrashEntry) -> None:
+        super().__init__(prompt, value)
+        self.entry = entry
+
+    def detail_cells(
+        self, columns: tuple[detail_utils.DetailColumn, ...]
+    ) -> tuple[str, ...]:
+        """Format one fixed-width cell per column for this entry.
+
+        Returns:
+            tuple[str, ...]: One padded cell per column.
+        """
+        cells: list[str] = []
+        for column in columns:
+            if column.type == "mtime":
+                value = (
+                    self.entry.deleted_at.strftime(column.format)
+                    if self.entry.deleted_at
+                    else "--"
+                )
+            elif self.entry.size is None:
+                value = "--"
+            else:
+                value = natural_size(
+                    self.entry.size,
+                    config["metadata"]["filesize_suffix"],
+                    config["metadata"]["filesize_decimals"],
+                )
+            cells.append(detail_utils._pad(value, column.width))
+        return tuple(cells)
+
 
 class TrashSelectionList(
     Actionable,
     CheckboxRenderingMixin,
+    DetailColumnRenderingMixin,
+    SingleLineOptionLayoutMixin,
     SetOptionsSelectionList,
     SelectionList,
     inherit_bindings=False,
 ):
     BINDINGS: ClassVar[list[BindingType]] = list(bindings)
+
+    COMPONENT_CLASSES: ClassVar[set[str]] = {
+        "trash--detail-size",
+        "trash--detail-mtime",
+    }
 
     ACTIONS = [
         Action(name, config["keybinds"][name])
@@ -53,11 +112,16 @@ class TrashSelectionList(
         )
     ]
 
+    DETAIL_COMPONENT_PREFIX = "trash--detail-"
+
     @property
     def highlighted_option(self) -> Selection | None:
         if self.highlighted is not None and 0 <= self.highlighted < self.option_count:
             return self.get_option_at_index(self.highlighted)
         return None
+
+    def render_line(self, y: int) -> Strip:
+        return self.render_detail_columns(super().render_line(y), y, TRASH_COLUMNS)
 
     def action_toggle_select_item(self) -> None:
         if self.highlighted_option is not None:
@@ -171,6 +235,8 @@ class TrashScreen(Actionable, ModalScreen):
         return icon_utils.get_icon_for_file(entry.name, is_symlink=False)
 
     def _format_entry(self, entry: TrashEntry) -> Text:
+        from os import path
+
         if entry.original_path is not None and entry.is_dir:
             icon, color = icon_utils.get_icon_for_folder(entry.name, is_symlink=False)
         else:
@@ -178,27 +244,17 @@ class TrashScreen(Actionable, ModalScreen):
 
         # need to start with empty so no color is used
         prompt = Text(" ")
-        prompt.append_tokens([(icon, color or ""), (" ", ""), (entry.name, "")])
-        meta: list[str] = []
+        prompt.append_tokens([(icon, color or ""), (" ", "")])
         if entry.original_path:
             location = path_utils.normalise(entry.original_path)
             if location == home:
                 location = "~"
             if location.startswith(f"{home}/"):
                 location = f"~{location[len(home) :]}"
-            meta.append(location)
-        if entry.deleted_at:
-            meta.append(entry.deleted_at.strftime("%Y-%m-%d %H:%M"))
-        if entry.size is not None:
-            meta.append(
-                natural_size(
-                    entry.size,
-                    config["metadata"]["filesize_suffix"],
-                    config["metadata"]["filesize_decimals"],
-                )
-            )
-        if meta:
-            prompt.append(f"  {' · '.join(meta)}", style="dim")
+            prompt.append_tokens([
+                (f"{path.dirname(location)}/", "dim"),
+                (entry.name, ""),
+            ])
         return prompt
 
     @work(thread=True)
@@ -229,7 +285,9 @@ class TrashScreen(Actionable, ModalScreen):
         self.app.call_from_thread(
             selection_list.set_options,
             [
-                Selection(self._format_entry(entry), self._handle_of(entry, index))
+                TrashSelection(
+                    self._format_entry(entry), self._handle_of(entry, index), entry
+                )
                 for index, entry in enumerate(self.entries)
             ],
         )

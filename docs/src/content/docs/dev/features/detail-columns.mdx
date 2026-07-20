@@ -3,6 +3,8 @@ title: detail columns
 description: show file metadata in table-like columns next to file names.
 ---
 
+import InlineSVG from "@/components/InlineSVG.astro";
+
 rovr can show metadata right-aligned next to each file, similar to the details view in graphical file managers. a header row above the file list labels each column.
 
 this feature is disabled by default. to enable it, add a `details_list` to the `[interface]` section of your config:
@@ -10,11 +12,13 @@ this feature is disabled by default. to enable it, add a `details_list` to the `
 ```toml
 [interface]
 details_list = [
-  { type = "size" },
+  { type = "size", max_length = 9 },
   { type = "mtime", label = "Modified" },
   { type = "git" }
 ]
 ```
+
+<InlineSVG src="/rovr/screenshots/details-list-example.svg" alt="details list example" />
 
 ## column types
 
@@ -63,3 +67,13 @@ when the current directory is not inside a git repository, the column hides itse
 ## styling
 
 each column can be styled with component classes on `FileList`; the git column additionally styles its staged and unstaged characters separately. see [theming](/rovr/dev/configuration/theming/#styletcss) for the full list. the header row is a plain widget with the id `#file_list_details_header`.
+
+## Hiding the header row
+
+if you don't like the header row, easy, just add this to your style.tcss:
+
+```css
+#file_list_details_header {
+  display: none;
+}
+```

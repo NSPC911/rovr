@@ -61,7 +61,6 @@ def _pad(value: str, width: int) -> str:
 
 @lru_cache(maxsize=1)
 def get_detail_columns() -> tuple[DetailColumn, ...]:
-    # ponytail: cached once at first use; details_list is not hot-reloaded
     columns: list[DetailColumn] = []
     for entry in config["interface"]["details_list"]:
         column_type = entry["type"]

@@ -341,17 +341,12 @@ class ProcessContainer(Actionable, VerticalScroll):
                 )
 
     @work(thread=True)
-    def delete_files(self, files: list[str], ignore_trash: bool = False) -> None:
+    def delete_files(self, files: list[str]) -> None:
         """
-        Remove files from the filesystem.
+        Permanently remove files from the filesystem, bypassing the recycle bin.
 
         Args:
             files (list[str]): List of file paths to remove.
-            ignore_trash (bool): If True, files will be permanently deleted instead of sent to the recycle bin. Defaults to False.
-
-        Raises:
-            OSError: re-raises if the file usage handler fails
-            PermissionError: re-raises if the file usage handler fails
         """
         # Create progress/process bar (why have I set names as such...)
         bar = self.threaded_new_process_bar(classes="active")
@@ -394,61 +389,7 @@ class ProcessContainer(Actionable, VerticalScroll):
                 # I know that it `path.exists` prevents issues, but on the
                 # off chance that anything happens, this should help
                 try:
-                    if config["settings"]["use_recycle_bin"] and not ignore_trash:
-                        try:
-                            path_to_trash = item_dict["path"]
-                            if os_type == "Windows":
-                                # An inherent issue with long paths on windows
-                                path_to_trash = path_to_trash.replace("/", "\\")
-                            recycle_bin.recycle([path_to_trash])
-                        except (PermissionError, OSError) as exc:
-                            # On Windows, a file being used by another process
-                            # raises a PermissionError/OSError with winerror 32.
-                            if (
-                                is_file_in_use := is_being_used(exc)
-                            ) and os_type == "Windows":
-                                current_action, action_on_file_in_use = (
-                                    self.handle_file_in_use_error(
-                                        action_on_file_in_use,
-                                        item_dict["relative_loc"],
-                                        lambda: recycle_bin.recycle([path_to_trash]),
-                                    )
-                                )
-                                if current_action == "cancel":
-                                    bar.panic()
-                                    return
-                                elif current_action == "skip":
-                                    pass  # Skip this file, continue to next
-                                continue
-                            elif is_file_in_use:
-                                # need to ensure unix users see an
-                                # error so they create an issue
-                                raise
-                            # fallback for regular permission issues
-                            if path_utils.force_obtain_write_permission(
-                                item_dict["path"]
-                            ):
-                                os.remove(item_dict["path"])
-                        except Exception as exc:
-                            path_utils.dump_exc(self, exc)
-                            do_what = self.app.call_from_thread(
-                                self.app.push_screen_wait,
-                                YesOrNo(
-                                    f"Trashing failed due to\n{exc}\nDo Permanent Deletion?",
-                                    with_toggle=True,
-                                    border_subtitle="If this is a bug, please file an issue!",
-                                    destructive=True,
-                                ),
-                            )
-                            do_what = cast(typed.YesOrNo, do_what)
-                            if do_what["toggle"]:
-                                ignore_trash = do_what["value"]
-                            if do_what["value"]:
-                                os.remove(item_dict["path"])
-                            else:
-                                continue
-                    else:
-                        os.remove(item_dict["path"])
+                    os.remove(item_dict["path"])
                 except FileNotFoundError:
                     # it's deleted, so why care?
                     pass
@@ -517,6 +458,171 @@ class ProcessContainer(Actionable, VerticalScroll):
             )
         elif files_to_delete == folders_to_delete == []:
             # this cannot happen, but just as an easter egg
+            self.app.call_from_thread(
+                bar.update_text, "Successfully deleted nothing!", False
+            )
+        bar.ok()
+
+    def permanently_delete_item(self, item_path: str) -> None:
+        """
+        Permanently delete a single top-level item, whether it's a file or
+        a directory.
+        Args:
+            item_path (str): The path to delete.
+        """
+        if path_utils.file_is_type(item_path) == "directory":
+            shutil.rmtree(item_path, onexc=self.rmtree_fixer)
+        else:
+            os.remove(item_path)
+
+    @work(thread=True)
+    def trash_files(self, files: list[str]) -> None:
+        """
+        Send files to the recycle bin.
+
+        Top-level items are recycled as whole units, so that a selected
+        folder becomes a single trash entry instead of one entry per file
+        it contains.
+
+        Args:
+            files (list[str]): List of top-level file/folder paths to trash.
+
+        Raises:
+            OSError: re-raises if the file usage handler fails
+            PermissionError: re-raises if the file usage handler fails
+        """
+        if not config["settings"]["use_recycle_bin"]:
+            # recycle bin disabled; fall back to permanent deletion
+            self.delete_files(files)
+            return
+        bar = self.threaded_new_process_bar(classes="active")
+        self.app.call_from_thread(
+            bar.update_icon,
+            icon_utils.get_icon("general", "delete")[0],
+        )
+        self.app.call_from_thread(
+            bar.update_text,
+            "Getting files to trash...",
+        )
+        self.app.call_from_thread(bar.update_progress, total=len(files) + 1)
+        action_on_file_in_use = "ask"
+        skip_trash = False
+        self.has_perm_error = False
+        self.has_in_use_error = False
+        last_update_time = time.monotonic()
+        for i, item_path in enumerate(files):
+            current_time = time.monotonic()
+            if current_time - last_update_time > 0.25 or i == len(files) - 1 or i == 0:
+                self.app.call_from_thread(bar.update_text, item_path)
+                self.app.call_from_thread(bar.update_progress, progress=i + 1)
+                last_update_time = current_time
+            if not path.exists(item_path):
+                continue
+            try:
+                if not skip_trash:
+                    try:
+                        path_to_trash = item_path
+                        if os_type == "Windows":
+                            # An inherent issue with long paths on windows
+                            path_to_trash = path_to_trash.replace("/", "\\")
+                        recycle_bin.recycle([path_to_trash])
+                        continue
+                    except (PermissionError, OSError) as exc:
+                        # On Windows, a file being used by another process
+                        # raises a PermissionError/OSError with winerror 32.
+                        if (
+                            is_file_in_use := is_being_used(exc)
+                        ) and os_type == "Windows":
+                            current_action, action_on_file_in_use = (
+                                self.handle_file_in_use_error(
+                                    action_on_file_in_use,
+                                    item_path,
+                                    lambda: recycle_bin.recycle([path_to_trash]),
+                                )
+                            )
+                            if current_action == "cancel":
+                                bar.panic()
+                                return
+                            continue
+                        elif is_file_in_use:
+                            # need to ensure unix users see an
+                            # error so they create an issue
+                            raise
+                        # fallback for regular permission issues
+                        if path_utils.force_obtain_write_permission(item_path):
+                            self.permanently_delete_item(item_path)
+                    except Exception as exc:
+                        path_utils.dump_exc(self, exc)
+                        do_what = self.app.call_from_thread(
+                            self.app.push_screen_wait,
+                            YesOrNo(
+                                f"Trashing failed due to\n{exc}\nDo Permanent Deletion?",
+                                with_toggle=True,
+                                border_subtitle="If this is a bug, please file an issue!",
+                                destructive=True,
+                            ),
+                        )
+                        do_what = cast(typed.YesOrNo, do_what)
+                        if do_what["toggle"]:
+                            skip_trash = do_what["value"]
+                        if do_what["value"]:
+                            self.permanently_delete_item(item_path)
+                        else:
+                            continue
+                else:
+                    self.permanently_delete_item(item_path)
+            except FileNotFoundError:
+                # it's deleted, so why care?
+                pass
+            except (PermissionError, OSError) as exc:
+                # Try to detect if file is in use on Windows
+                if (is_file_in_use := is_being_used(exc)) and os_type == "Windows":
+                    current_action, action_on_file_in_use = (
+                        self.handle_file_in_use_error(
+                            action_on_file_in_use,
+                            item_path,
+                            lambda: self.permanently_delete_item(item_path),
+                        )
+                    )
+                    if current_action == "cancel":
+                        bar.panic()
+                        return
+                    continue
+                elif is_file_in_use:
+                    # need to ensure unix users see an
+                    # error so they create an issue
+                    self.app.panic()
+                # fallback for regular permission issues
+                if path_utils.force_obtain_write_permission(item_path):
+                    self.permanently_delete_item(item_path)
+            except Exception as exc:
+                # TODO: should probably let it continue, then have a summary
+                path_utils.dump_exc(self, exc)
+                bar.panic(
+                    dismiss_with={
+                        "message": f"Deleting failed due to\n{exc}\nProcess Aborted.",
+                        "subtitle": "If this is a bug, please file an issue!",
+                    },
+                    bar_text="Unhandled Error",
+                )
+                return
+        if self.has_in_use_error:
+            bar.panic(
+                notify={
+                    "message": "Certain files could not be deleted as they are currently being used",
+                    "title": "Delete Files",
+                },
+            )
+            return
+        if self.has_perm_error:
+            bar.panic(
+                notify={
+                    "message": "Certain files could not be deleted due to PermissionError.",
+                    "title": "Delete Files",
+                },
+            )
+            return
+        if not files:
             self.app.call_from_thread(
                 bar.update_text, "Successfully deleted nothing!", False
             )

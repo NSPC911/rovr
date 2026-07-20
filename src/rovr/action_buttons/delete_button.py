@@ -27,14 +27,9 @@ class DeleteButton(Button):
             async def callback(response: str) -> None:
                 """Callback to remove files after confirmation"""
                 if response == "delete":
-                    self.app.query_one("ProcessContainer").delete_files(
-                        selected_files, ignore_trash=True
-                    )
+                    self.app.query_one("ProcessContainer").delete_files(selected_files)
                 elif response == "trash":
-                    self.app.query_one("ProcessContainer").delete_files(
-                        selected_files,
-                        ignore_trash=False,
-                    )
+                    self.app.query_one("ProcessContainer").trash_files(selected_files)
 
             self.app.push_screen(
                 DeleteFiles(

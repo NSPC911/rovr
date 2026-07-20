@@ -2,6 +2,7 @@ from pathlib import Path
 
 import pytest
 from textual.app import App
+from textual.color import ColorParseError
 from textual.theme import Theme
 
 from rovr.functions import themes as theme_utils
@@ -175,7 +176,7 @@ def test_parse_theme_file_bar_gradient(tmp_path: Path) -> None:
 def test_parse_theme_file_invalid_bar_gradient_color_raises(tmp_path: Path) -> None:
     theme_file = tmp_path / "bad-gradient.tcss"
     theme_file.write_text("$primary: #88C0D0;\n$bar-gradient-default: not-a-color;\n")
-    with pytest.raises(Exception):  # noqa: B017 - Color.parse's own error type
+    with pytest.raises(ColorParseError):
         theme_utils.parse_theme_file(theme_file)
 
 
@@ -184,9 +185,10 @@ def test_theme_dirs_includes_user_theme_folder(
 ) -> None:
     from rovr.variables.maps import RovrVars
 
-    monkeypatch.setattr(RovrVars, "ROVRTHEMES", (tmp_path / "themes").as_posix())
+    themes_dir = tmp_path / "themes"
+    monkeypatch.setattr(RovrVars, "ROVRTHEMES", themes_dir.as_posix())
     dirs = theme_utils.theme_dirs()
-    assert Path((tmp_path / "themes").as_posix()) in dirs
+    assert themes_dir in dirs
 
 
 def test_theme_file_mtimes_snapshot_reflects_edits(
@@ -223,7 +225,7 @@ def test_register_all_themes_registers_valid_and_reports_broken(
         theme_utils, "bundled_themes_path", tmp_path / "no-bundled-here"
     )
 
-    (user_themes).mkdir(parents=True, exist_ok=True)
+    user_themes.mkdir(parents=True, exist_ok=True)
     (user_themes / "good.tcss").write_text("$primary: #88C0D0;\n")
     (user_themes / "broken.tcss").write_text("$secondary: #ffffff;\n")
 

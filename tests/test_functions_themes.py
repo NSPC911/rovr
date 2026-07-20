@@ -24,6 +24,52 @@ def test_extract_variable_declarations_ignores_nested_and_keeps_refs() -> None:
     }
 
 
+def test_extract_variable_declarations_ignores_commented_out_declarations() -> None:
+    css_text = """
+    $primary: #88C0D0;
+    /*
+    $primary: red;
+    $secondary: also-ignored;
+    */
+    /* $accent: inline red; */
+    """
+    declared = theme_utils.extract_variable_declarations(css_text)
+    assert declared == {"primary": "#88C0D0"}
+
+
+def test_extract_variable_declarations_comment_brace_does_not_skew_depth() -> None:
+    css_text = """
+    /* a stray { in a comment */
+    $primary: #88C0D0;
+    """
+    declared = theme_utils.extract_variable_declarations(css_text)
+    assert declared == {"primary": "#88C0D0"}
+
+
+def test_strip_variable_declarations_leaves_commented_declaration_untouched() -> None:
+    css_text = (
+        "$primary: #88C0D0;\n"
+        "/*\n"
+        "$primary: red;\n"
+        "*/\n"
+        "Widget {\n"
+        "    color: $primary;\n"
+        "}\n"
+    )
+    stripped = theme_utils.strip_variable_declarations(css_text)
+    lines = stripped.splitlines()
+    assert lines[0] == ""
+    assert "$primary: red;" in stripped
+    assert "Widget" in stripped
+
+
+def test_parse_theme_file_ignores_commented_out_primary(tmp_path: Path) -> None:
+    theme_file = tmp_path / "commented.tcss"
+    theme_file.write_text("$primary: #88C0D0;\n/*\n$primary: #ff0000;\n*/\n")
+    theme = theme_utils.parse_theme_file(theme_file)
+    assert theme.primary == "#88C0D0"
+
+
 def test_resolve_variable_references_chains_and_order_independence() -> None:
     declared = {"a": "$b", "b": "$c", "c": "final"}
     resolved = theme_utils.resolve_variable_references(declared, base={})

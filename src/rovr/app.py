@@ -447,10 +447,6 @@ class Application(Actionable, DNDApp, inherit_bindings=False):
         """
         Pick up theme files added or edited since the last check.
 
-        If the active theme's definition changed, re-applies it — assigning
-        `self.theme` its current value is a reactive no-op, so Textual's
-        theme application has to be invoked directly.
-
         Returns:
             list[str]: human-readable errors for files that failed to parse.
         """

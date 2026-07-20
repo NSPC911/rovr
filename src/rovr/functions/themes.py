@@ -13,6 +13,20 @@ _VARIABLE_DECLARATION = re.compile(r"^\$([\w-]+)\s*:\s*(.+?)\s*;\s*$")
 _VARIABLE_REF = re.compile(r"\$[\w-]+")
 _COMMENT = re.compile(r"/\*.*?\*/", re.DOTALL)
 
+
+def _strip_comments(css_text: str) -> str:
+    """
+    Blank the contents of `/* ... */` comments, keeping every newline.
+
+    Args:
+        css_text: raw TCSS source.
+
+    Returns:
+        str: `css_text` with comment interiors replaced by blank lines.
+    """
+    return _COMMENT.sub(lambda match: "\n" * match.group().count("\n"), css_text)
+
+
 bundled_themes_path = (
     resources.files("_rovr.config")
     if globals().get("__compiled__")
@@ -47,14 +61,8 @@ def extract_variable_declarations(css_text: str) -> dict[str, str]:
     """
     Extract top-level `$name: value;` declarations from a TCSS source, unresolved.
 
-    Textual only shares `$variables` within the single source they're declared in,
-    so a user's style.tcss can't override a variable used by the bundled style.tcss
-    just by being loaded as a second CSS source. Folding the user's declarations into
-    the app-wide `get_css_variables()` mapping instead makes them visible to every
-    source, since that mapping is the one variable scope Textual does share globally.
-
     Values are kept as written (`$other` references untouched) so that all files'
-    declarations can be merged before any reference is resolved — resolving at
+    declarations can be merged before any reference is resolved. Resolving at
     extraction time would freeze e.g. `$border-focused: $primary-lighten-3;` to
     whatever `$primary-lighten-3` was in an earlier file.
 
@@ -66,7 +74,7 @@ def extract_variable_declarations(css_text: str) -> dict[str, str]:
     """
     declared: dict[str, str] = {}
     depth = 0
-    for line in css_text.splitlines():
+    for line in _strip_comments(css_text).splitlines():
         stripped = line.strip()
         if depth == 0:
             match = _VARIABLE_DECLARATION.match(stripped)
@@ -241,9 +249,6 @@ def theme_file_mtimes() -> dict[str, float]:
     """
     Snapshot the modification times of every theme file.
 
-    Comparing two snapshots is how the app detects that a theme file was
-    edited (or added) while it is running, without re-parsing anything.
-
     Returns:
         dict[str, float]: mapping of theme file path to its mtime.
     """
@@ -259,9 +264,9 @@ def strip_variable_declarations(css_text: str) -> str:
     """
     Remove top-level `$name: value;` declarations from a TCSS source.
 
-    Companion to `extract_variable_overrides`: once a declaration's value is
+    Once a declaration's value is
     injected app-wide through `get_css_variables`, Textual must not see the
-    declaration again — redefining a variable appends its tokens onto the
+    declaration again. Redefining a variable appends its tokens onto the
     existing value instead of replacing it, so `$x: 7;` in a file on top of an
     injected `x = 7` makes every `$x` reference resolve to `7 7`.
 
@@ -273,9 +278,13 @@ def strip_variable_declarations(css_text: str) -> str:
             locations keep pointing at the right lines).
     """
     lines = css_text.splitlines()
+    # scanned separately from `lines` so a commented-out `$name: value;` is
+    # neither mistaken for a real declaration nor left to skew brace depth,
+    # while the original comment text is still preserved in the output
+    scan_lines = _strip_comments(css_text).splitlines()
     depth = 0
-    for index, line in enumerate(lines):
-        stripped = line.strip()
+    for index, scan_line in enumerate(scan_lines):
+        stripped = scan_line.strip()
         if depth == 0 and _VARIABLE_DECLARATION.match(stripped):
             lines[index] = ""
         depth += stripped.count("{") - stripped.count("}")

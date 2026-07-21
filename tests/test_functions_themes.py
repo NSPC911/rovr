@@ -7,10 +7,25 @@ from textual.theme import Theme
 
 from rovr.functions import themes as theme_utils
 
+NORD_PLACEHOLDER = """
+$primary: #88C0D0;
+$secondary: #81A1C1;
+$accent: #B48EAD;
+$foreground: #D8DEE9;
+$background: #2E3440;
+$success: #A3BE8C;
+$warning: #EBCB8B;
+$error: #BF616A;
+$surface: #3B4252;
+$panel: #434C5E;
+$dark: true;
+"""
+
 
 def test_extract_variable_declarations_ignores_nested_and_keeps_refs() -> None:
-    css_text = """
-    $primary: #88C0D0;
+    css_text = (
+        NORD_PLACEHOLDER
+        + """
     $border-focused: $primary-lighten-3;
 
     Widget {
@@ -18,33 +33,55 @@ def test_extract_variable_declarations_ignores_nested_and_keeps_refs() -> None:
         color: $primary;
     }
     """
+    )
     declared = theme_utils.extract_variable_declarations(css_text)
+    print(declared)
     assert declared == {
         "primary": "#88C0D0",
+        "secondary": "#81A1C1",
+        "accent": "#B48EAD",
+        "foreground": "#D8DEE9",
+        "background": "#2E3440",
+        "success": "#A3BE8C",
+        "warning": "#EBCB8B",
+        "error": "#BF616A",
+        "surface": "#3B4252",
+        "panel": "#434C5E",
+        "dark": "true",
         "border-focused": "$primary-lighten-3",
     }
 
 
 def test_extract_variable_declarations_ignores_commented_out_declarations() -> None:
-    css_text = """
-    $primary: #88C0D0;
+    css_text = (
+        NORD_PLACEHOLDER
+        + """
+    $primary: #88C0D1;
     /*
     $primary: red;
     $secondary: also-ignored;
     */
     /* $accent: inline red; */
     """
+    )
     declared = theme_utils.extract_variable_declarations(css_text)
-    assert declared == {"primary": "#88C0D0"}
+    assert (
+        declared["primary"] == "#88C0D1"
+        and declared["secondary"] == "#81A1C1"
+        and declared["accent"] == "#B48EAD"
+    )
 
 
 def test_extract_variable_declarations_comment_brace_does_not_skew_depth() -> None:
-    css_text = """
+    css_text = (
+        NORD_PLACEHOLDER
+        + """
     /* a stray { in a comment */
-    $primary: #88C0D0;
+    $primary: #88C0D1;
     """
+    )
     declared = theme_utils.extract_variable_declarations(css_text)
-    assert declared == {"primary": "#88C0D0"}
+    assert declared["primary"] == "#88C0D1"
 
 
 def test_strip_variable_declarations_leaves_commented_declaration_untouched() -> None:
@@ -66,7 +103,7 @@ def test_strip_variable_declarations_leaves_commented_declaration_untouched() ->
 
 def test_parse_theme_file_ignores_commented_out_primary(tmp_path: Path) -> None:
     theme_file = tmp_path / "commented.tcss"
-    theme_file.write_text("$primary: #88C0D0;\n/*\n$primary: #ff0000;\n*/\n")
+    theme_file.write_text(NORD_PLACEHOLDER + "\n/*\n$primary: #ff0000;\n*/\n")
     theme = theme_utils.parse_theme_file(theme_file)
     assert theme.primary == "#88C0D0"
 
@@ -131,9 +168,7 @@ def test_parse_theme_file_requires_primary(tmp_path: Path) -> None:
 def test_parse_theme_file_builds_theme_with_variables_and_css(tmp_path: Path) -> None:
     theme_file = tmp_path / "my-theme.tcss"
     theme_file.write_text(
-        "$primary: #88C0D0;\n"
-        "$dark: true;\n"
-        "$accent-custom: #ff0000;\n"
+        NORD_PLACEHOLDER + "$accent-custom: #ff0000;\n"
         "\n"
         "Widget {\n"
         "    color: $accent-custom;\n"
@@ -152,7 +187,7 @@ def test_parse_theme_file_builds_theme_with_variables_and_css(tmp_path: Path) ->
 
 def test_parse_theme_file_no_css_block_leaves_css_unset(tmp_path: Path) -> None:
     theme_file = tmp_path / "plain.tcss"
-    theme_file.write_text("$primary: #88C0D0;\n")
+    theme_file.write_text(NORD_PLACEHOLDER + "\n$accent-custom: #ff0000;\n")
     theme = theme_utils.parse_theme_file(theme_file)
     assert getattr(theme, "css", "") == ""
 
@@ -160,7 +195,7 @@ def test_parse_theme_file_no_css_block_leaves_css_unset(tmp_path: Path) -> None:
 def test_parse_theme_file_bar_gradient(tmp_path: Path) -> None:
     theme_file = tmp_path / "gradients.tcss"
     theme_file.write_text(
-        "$primary: #88C0D0;\n"
+        NORD_PLACEHOLDER + "\n"
         "$bar-gradient-default: #111111 #222222;\n"
         "$bar-gradient-error: #ff0000 #990000;\n"
     )
@@ -175,7 +210,7 @@ def test_parse_theme_file_bar_gradient(tmp_path: Path) -> None:
 
 def test_parse_theme_file_invalid_bar_gradient_color_raises(tmp_path: Path) -> None:
     theme_file = tmp_path / "bad-gradient.tcss"
-    theme_file.write_text("$primary: #88C0D0;\n$bar-gradient-default: not-a-color;\n")
+    theme_file.write_text(NORD_PLACEHOLDER + "\n$bar-gradient-default: not-a-color;\n")
     with pytest.raises(ColorParseError):
         theme_utils.parse_theme_file(theme_file)
 
@@ -226,7 +261,7 @@ def test_register_all_themes_registers_valid_and_reports_broken(
     )
 
     user_themes.mkdir(parents=True, exist_ok=True)
-    (user_themes / "good.tcss").write_text("$primary: #88C0D0;\n")
+    (user_themes / "good.tcss").write_text(NORD_PLACEHOLDER)
     (user_themes / "broken.tcss").write_text("$secondary: #ffffff;\n")
 
     app = App()
@@ -239,7 +274,7 @@ def test_register_all_themes_registers_valid_and_reports_broken(
 
 
 def test_strip_variable_declarations_blanks_lines_but_keeps_line_count() -> None:
-    css_text = "$primary: #88C0D0;\nWidget {\n    color: $primary;\n}\n"
+    css_text = NORD_PLACEHOLDER + "\nWidget {\n    color: $primary;\n}\n"
     stripped = theme_utils.strip_variable_declarations(css_text)
     stripped_lines = stripped.splitlines()
     original_lines = css_text.splitlines()
@@ -252,6 +287,6 @@ def test_strip_variable_declarations_blanks_lines_but_keeps_line_count() -> None
 
 def test_parse_theme_file_produces_a_real_theme_instance(tmp_path: Path) -> None:
     theme_file = tmp_path / "check.tcss"
-    theme_file.write_text("$primary: #88C0D0;\n")
+    theme_file.write_text(NORD_PLACEHOLDER)
     theme = theme_utils.parse_theme_file(theme_file)
     assert isinstance(theme, Theme)

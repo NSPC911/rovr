@@ -1,8 +1,11 @@
 $primary: #0178D4;
+$background: #000000;
 $secondary: #004578;
 $accent: #ffa62b;
 $warning: #ffa62b;
 $error: #ba3c5b;
 $success: #4EBF71;
+$panel: #1b1b1b;
+$surface: #1b1b1b;
 $foreground: #e0e0e0;
 $dark: true;

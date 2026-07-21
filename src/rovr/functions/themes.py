@@ -177,8 +177,13 @@ def parse_theme_file(theme_file: Path) -> Theme:
     css_text = theme_file.read_text(encoding="utf-8")
     declared = extract_variable_declarations(css_text)
     fields = pop_theme_field_overrides(declared)
-    if "primary" not in fields:
-        raise ValueError("a theme must define $primary")
+
+    not_exist = THEME_COLOR_FIELDS - set(["boost"]) - set(fields)
+    if not_exist:
+        raise ValueError(
+            f"missing required color fields: {', '.join(sorted(not_exist))}"
+        )
+
     bar_gradient: dict[str, list[str]] = {}
     for name, kind in BAR_GRADIENT_FIELDS.items():
         if name not in declared:

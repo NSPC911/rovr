@@ -64,7 +64,7 @@ class ThemeChooser(ModalSearchScreen):
 
     def on_input_changed(self, event: Input.Changed) -> None:
         self.last_highlighted_option = getattr(
-            self.search_options.highlighted_option, "id"
+            self.search_options.highlighted_option, "id", None
         ) or compress(self.app.theme)
         if not event.value:
             for opt in self.themes:

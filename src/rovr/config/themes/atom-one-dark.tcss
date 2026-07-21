@@ -1,0 +1,13 @@
+$primary: #61AFEF;
+$secondary: #C678DD;
+$accent: #A378C2;
+$warning: #DEB25B;
+$error: #F06262;
+$success: #62F062;
+$foreground: #ABB2BF;
+$background: #282C34;
+$surface: #3B414D;
+$panel: #4F5666;
+$dark: true;
+$luminosity-spread: 0.15;
+$text-alpha: 0.95;

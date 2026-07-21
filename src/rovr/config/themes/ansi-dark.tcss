@@ -1,0 +1,26 @@
+$primary: ansi_blue;
+$secondary: ansi_cyan;
+$accent: ansi_green;
+$warning: ansi_yellow;
+$error: ansi_red;
+$success: ansi_green;
+$foreground: ansi_default;
+$background: ansi_default;
+$surface: ansi_default;
+$panel: ansi_default;
+$dark: true;
+$ansi: true;
+
+/* other vars */
+$ansi-background: ansi_black;
+$ansi-foreground: ansi_white;
+$border-blurred: ansi_black;
+$block-cursor-foreground: ansi_black;
+$block-cursor-background: ansi_white;
+$input-cursor-background: ansi_black;
+$input-cursor-foreground: ansi_bright_white;
+$input-cursor-text-style: none;
+$input-selection-background: ansi_bright_blue;
+$input-selection-foreground: ansi_black;
+$screen-selection-background: ansi_bright_blue;
+$screen-selection-foreground: ansi_black;

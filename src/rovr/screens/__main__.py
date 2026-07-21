@@ -19,6 +19,7 @@ from rovr.screens import (
     FileInUse,
     FileNameConflict,
     PasteScreen,
+    ThemeChooser,
     YesOrNo,
 )
 
@@ -51,6 +52,7 @@ class Test(App):
         yield Button("File In Use", id="FileInUse")
         yield Button("File Name Conflict", id="FileNameConflict")
         yield Button("Paste Screen", id="PasteScreen")
+        yield Button("Theme Chooser", id="ThemeChooser")
         yield Button("Yes Or No", id="YesOrNo")
         yield Button("Zip Up Screen", id="ArchiveCreationScreen")
 
@@ -114,6 +116,13 @@ class Test(App):
                 + "?",
                 paths={"copy": to_copy, "cut": to_cut},
             ),
+            callback=lambda result: self.notify(str(result), markup=False),
+        )
+
+    @on(Button.Pressed, "#ThemeChooser")
+    def theme_chooser(self) -> None:
+        self.push_screen(
+            ThemeChooser(),
             callback=lambda result: self.notify(str(result), markup=False),
         )
 

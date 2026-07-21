@@ -1,0 +1,14 @@
+$primary: #BD93F9;
+$secondary: #6272A4;
+$accent: #FF79C6;
+$warning: #FFB86C;
+$error: #FF5555;
+$success: #50FA7B;
+$background: #282A36;
+$surface: #2B2E3B;
+$panel: #313442;
+$foreground: #F8F8F2;
+$dark: true;
+
+/* other vars */
+$button-color-foreground: #282A36;

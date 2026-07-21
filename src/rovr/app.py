@@ -5,26 +5,26 @@ import multiprocessing
 import sys
 import threading
 from contextlib import suppress
+from dataclasses import replace
 from importlib import resources
 from io import TextIOWrapper
 from os import chdir, getcwd, path
 from subprocess import Popen
 from time import perf_counter
-from typing import Callable, Iterable
+from typing import Callable, ClassVar, Iterable
 
 from rich.console import RenderableType
 from rich.protocol import is_renderable
+from rich.text import Text
 from textual import constants, events, on, work
 from textual.app import WINDOWS, ComposeResult, ScreenStackError, SystemCommand
 from textual.binding import Binding
-from textual.color import ColorParseError
 from textual.containers import (
     HorizontalGroup,
     HorizontalScroll,
     Vertical,
     VerticalGroup,
 )
-from textual.content import Content
 from textual.css.errors import StylesheetError
 from textual.css.query import NoMatches
 from textual.css.stylesheet import StylesheetParseError
@@ -32,7 +32,6 @@ from textual.dom import DOMNode
 from textual.geometry import Offset
 from textual.messages import ExitApp
 from textual.screen import Screen
-from textual.theme import Theme
 from textual.timer import Timer
 from textual.types import NoActiveAppError
 from textual.widget import Widget
@@ -85,7 +84,13 @@ from rovr.functions.path import (
     get_filtered_dir_names,
     normalise,
 )
-from rovr.functions.themes import extract_variable_overrides, get_custom_themes
+from rovr.functions.themes import (
+    extract_variable_declarations,
+    pop_theme_field_overrides,
+    register_all_themes,
+    resolve_variable_references,
+    theme_file_mtimes,
+)
 from rovr.functions.utils import multiprocessing_process_error_checker, run_command
 from rovr.header import HeaderArea
 from rovr.header.tabs import TablineTab
@@ -238,24 +243,14 @@ class Application(Actionable, DNDApp, inherit_bindings=False):
 
         self._on_mount_done: bool = False
         self.last_available_cd = getcwd()
-        self.old_theme: str = self.theme
 
-        try:
-            for theme in get_custom_themes():
-                self.register_theme(theme)
-            parse_failed = False
-        except ColorParseError as exc:
-            parse_failed = True
-            exception = exc
-        if parse_failed:
-            self.exit(
-                return_code=1,
-                message=Content.from_markup(
-                    f"[underline ansi_red]Config Error[/]\n[bold ansi_cyan]custom_themes.bar_gradient[/]: {exception}"
-                ),
-            )
-            return
+        self._theme_errors: list[str] = register_all_themes(self)
+        self._theme_file_mtimes: dict[str, float] = theme_file_mtimes()
         self.theme = config["theme"]["default"]
+        # ensure the theme css source exists (possibly empty) before Textual
+        # reads the style.tcss files, so its position in the source order is
+        # the same no matter which theme the app started with
+        self._load_theme_css()
         self.ansi_color = config["theme"]["transparent"]
 
     def on_compose(self, event: events.Compose) -> None:
@@ -282,8 +277,7 @@ class Application(Actionable, DNDApp, inherit_bindings=False):
             if config["interface"]["compact_mode"]["panels"]
             else " comfy-panels"
         )
-        root_classes = root_classes.strip() + f"theme-{self.get_theme(self.theme).name}"
-        with Vertical(id="root", classes=root_classes):
+        with Vertical(id="root", classes=root_classes.strip()):
             header = HeaderArea()
             self.tabWidget = header.tabline
             yield header
@@ -327,7 +321,9 @@ class Application(Actionable, DNDApp, inherit_bindings=False):
                 self.exit()
             return
 
-        self.theme_changed_signal.subscribe(self, self.theme_changed)
+        for error in self._theme_errors:
+            self.notify(error, title="Theme Error", severity="warning", markup=False)
+        self.set_interval(1, self._poll_theme_files)
         # title for screenshots
         self.title = ""
 
@@ -380,26 +376,140 @@ class Application(Actionable, DNDApp, inherit_bindings=False):
         self.file_list.update_border_subtitle()
         # self.call_after_refresh(sleep, 1)
 
-    def theme_changed(self, theme: Theme) -> None:
-        self.query_one("#root").update_classes({
-            f"theme-{self.old_theme}": True,
-            f"theme-{theme.name}": False,
-        })
-        self.old_theme = theme.name
+    def action_change_theme(self) -> None:
+        from rovr.screens import ThemeChooser
+
+        original_theme = self.theme
+
+        def apply_theme(result: str | None) -> None:
+            self.theme = (
+                result if result and result in self.available_themes else original_theme
+            )
+
+        self.push_screen(ThemeChooser(), callback=apply_theme)
+
+    # the stylesheet source holding the active theme's css rules
+    THEME_CSS_SOURCE: ClassVar[tuple[str, str]] = ("<active theme>", "")
+
+    def _watch_theme(self, theme_name: str) -> None:
+        self._load_theme_css()
+        super()._watch_theme(theme_name)
+
+    def _load_theme_css(self) -> None:
+        """
+        Swap the active theme's css rules into the stylesheet.
+
+        Only the active theme's rules are ever loaded (as the single
+        `THEME_CSS_SOURCE` source), so theme files don't need to scope their
+        selectors. The swap happens before `refresh_css` reparses the
+        stylesheet, from `_watch_theme` and `reload_themes`. The tie breaker
+        lets a theme rule beat a style.tcss rule of equal specificity, which
+        it would otherwise lose to purely on source order.
+        """
+        css = getattr(self.current_theme, "css", "")
+        existing = self.stylesheet.source.get(self.THEME_CSS_SOURCE)
+        if existing is not None and existing.content == css:
+            return
+        trial = self.stylesheet.copy()
+        trial.set_variables(self.get_css_variables())
+        trial.add_source(css, read_from=self.THEME_CSS_SOURCE, tie_breaker=1)
+        try:
+            trial.parse()
+        except StylesheetParseError as error:
+            # str(StylesheetParseError) is just the object repr; the useful
+            # detail lives in the (token, message) pairs of each failed rule
+            problems = dict.fromkeys(
+                problem for rule in error.errors.rules for problem in rule.errors
+            )
+            details = "\n".join(
+                f"line {(token.referenced_by or token).location[0] + 1}: "
+                + Text.from_markup(str(getattr(message, "summary", message))).plain
+                for token, message in problems
+            )
+            self.notify(
+                f"css rules in the '{self.theme}' theme failed to parse\n{details}",
+                title="Theme Error",
+                severity="warning",
+                markup=False,
+            )
+            return
+        except Exception as error:
+            self.notify(
+                f"css rules in the '{self.theme}' theme failed to parse: {error}",
+                title="Theme Error",
+                severity="warning",
+                markup=False,
+            )
+            return
+        self.stylesheet.add_source(css, read_from=self.THEME_CSS_SOURCE, tie_breaker=1)
+
+    def reload_themes(self) -> list[str]:
+        """
+        Pick up theme files added or edited since the last check.
+
+        Returns:
+            list[str]: human-readable errors for files that failed to parse.
+        """
+        mtimes = theme_file_mtimes()
+        if mtimes == self._theme_file_mtimes:
+            return []
+        started = perf_counter()
+        changed = {
+            path.basename(theme_path)
+            for theme_path in self._theme_file_mtimes.keys() | mtimes.keys()
+            if self._theme_file_mtimes.get(theme_path) != mtimes.get(theme_path)
+        }
+        self._theme_file_mtimes = mtimes
+        active_theme = self.current_theme
+        errors = register_all_themes(self)
+        # Theme's dataclass __eq__ ignores the injected css attribute, so a
+        # rules-only edit needs its own comparison
+        if self.current_theme != active_theme or getattr(
+            self.current_theme, "css", ""
+        ) != getattr(active_theme, "css", ""):
+            self._watch_theme(self.theme)
+        if not errors:
+            elapsed = (perf_counter() - started) * 1000
+            what = (
+                ", ".join(sorted(changed))
+                if len(changed) <= 3
+                else f"{len(changed)} theme files"
+            )
+            self.notify(f"Reloaded {what} in {elapsed:.0f} ms", title="Themes")
+        return errors
+
+    def _poll_theme_files(self) -> None:
+        for error in self.reload_themes():
+            self.notify(error, title="Theme Error", severity="warning", markup=False)
 
     def get_css_variables(self) -> dict[str, str]:
-        variables = super().get_css_variables()
         # RovrStylesheet strips `$name:` declarations from the CSS files, so
-        # every file's declarations must be resolved here instead: bundled
-        # first, then the user's style.tcss so it wins on name clashes.
+        # every file's declarations are resolved here instead: bundled first,
+        # then the user's style.tcss so it wins on name clashes.
+        declared: dict[str, str] = {}
         style_paths: list[str] = [str(self.CSS_PATH[0])]
         if self.CUSTOM_STYLE_AVAILABLE:
             style_paths.append(path.join(RovrVars.ROVRCONFIG, "style.tcss"))
         for style_path in style_paths:
-            with suppress(OSError):
-                with open(style_path, "rt", encoding="utf-8") as css_file:
-                    css_text = css_file.read()
-                variables.update(extract_variable_overrides(css_text, variables))
+            with (
+                suppress(OSError),
+                open(style_path, "rt", encoding="utf-8") as css_file,
+            ):
+                declared.update(extract_variable_declarations(css_file.read()))
+        # declarations that map onto Theme fields go through the color system,
+        # so an overridden $primary regenerates $primary-lighten-3 and friends
+        theme = self.current_theme
+        field_overrides = pop_theme_field_overrides(declared)
+        if field_overrides:
+            theme = replace(theme, **field_overrides)  # ty: ignore[invalid-argument-type]
+        variables = theme.to_color_system().generate()
+        variables.update(resolve_variable_references(theme.variables, variables))
+        variables = {**self.get_theme_variable_defaults(), **variables}
+        # everything else resolves only after all files are merged, so
+        # `$border-focused: $primary-lighten-3;` in the bundled file picks up
+        # a user or theme override of either name
+        variables.update(resolve_variable_references(declared, variables))
+        self.theme_variables = variables
         return variables
 
     @work

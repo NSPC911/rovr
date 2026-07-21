@@ -13,6 +13,7 @@ class RovrVars:
     ROVRCONFIG = (environ.get("ROVR_CONFIG_FOLDER") or dirs.user_config_dir).replace(
         "\\", "/"
     )
+    ROVRTHEMES = ROVRCONFIG + "/themes"
     ROVRCACHE = dirs.user_cache_dir.replace("\\", "/")
     ROVRTEMP = dirs.user_runtime_dir.replace("\\", "/")
     DOCUMENTS = general.user_documents_dir.replace("\\", "/")

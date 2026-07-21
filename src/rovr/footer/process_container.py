@@ -54,12 +54,10 @@ class ProgressBarContainer(VerticalGroup, inherit_bindings=False):
         **kwargs,
     ) -> None:
         super().__init__(*args, **kwargs)
-        if hasattr(self.app.get_theme(self.app.theme), "bar_gradient"):
-            gradient = Gradient.from_colors(
-                *self.app.get_theme(self.app.theme).bar_gradient["default"]
-            )
-        else:
-            gradient = None
+        gradient_colors = getattr(
+            self.app.get_theme(self.app.theme), "bar_gradient", {}
+        ).get("default")
+        gradient = Gradient.from_colors(*gradient_colors) if gradient_colors else None
         self.progress_bar = ProgressBar(
             total=total,
             show_percentage=config["interface"]["show_progress_percentage"],
@@ -127,10 +125,11 @@ class ProgressBarContainer(VerticalGroup, inherit_bindings=False):
         if self.progress_bar.total is None:
             self.progress_bar.update(total=1, progress=0)
         self.add_class("error")
-        if hasattr(self.app.get_theme(self.app.theme), "bar_gradient"):
-            self.progress_bar.gradient = Gradient.from_colors(
-                *self.app.get_theme(self.app.theme).bar_gradient["error"]
-            )
+        gradient_colors = getattr(
+            self.app.get_theme(self.app.theme), "bar_gradient", {}
+        ).get("error")
+        if gradient_colors:
+            self.progress_bar.gradient = Gradient.from_colors(*gradient_colors)
         assert isinstance(self.icon_label.content, str)
         self.update_icon(
             self.icon_label.content + " " + icon_utils.get_icon("general", "close")[0]

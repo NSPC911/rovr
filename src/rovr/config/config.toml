@@ -144,24 +144,6 @@ default = "nord"
 preview = "nord"
 transparent = false
 
-[[custom_theme]]
-name = "nord"
-primary = "#88C0D0"
-secondary = "#81A1C1"
-accent = "#B48EAD"
-foreground = "#D8DEE9"
-background = "#2E3440"
-success = "#A3BE8C"
-warning = "#EBCB8B"
-error = "#BF616A"
-surface = "#3B4252"
-panel = "#434C5E"
-is_dark = true
-
-[custom_theme.bar_gradient]
-default = ["#88c0d0", "#5e81ac"]
-error = ["#bf616a", "#d08770"]
-
 [keybinds]
 # For keybind profiles, see keybinds/sane.toml and keybinds/vim.toml
 # The default configuration below combines both styles for maximum flexibility.

@@ -3,28 +3,51 @@ title: theming
 description: how to theme rovr
 ---
 
-rovr can be themed in two ways, via the `config.toml` file and `style.tcss` file.
+rovr can be themed in two ways, via theme files in the `themes` folder and the `style.tcss` file.
 
-### config.toml
+### theme files
 
-the config has a way to define themes using variables
+themes live as `tcss` files in `<config folder>/themes/<name>.tcss`. the file name becomes the theme name in the theme picker. a file with the same name as a bundled theme overrides it. theme files are hot-reloaded while rovr is running, so you can tweak colors and watch them apply live.
 
-```toml
-[[custom_theme]]
-name       = "<name>"
-primary    = "<color>"
-secondary  = "<color>"
-warning    = "<color>"
-error      = "<color>"
-success    = "<color>"
-accent     = "<color>"
-foreground = "<color>"
-background = "<color>"
-surface    = "<color>"
-panel      = "<color>"
-is_dark    = true
-variables  = { "<var>" = "<key>" }
+a theme file is a list of variable declarations:
+
+```css
+$primary: <color>;
+$secondary: <color>;
+$warning: <color>;
+$error: <color>;
+$success: <color>;
+$accent: <color>;
+$foreground: <color>;
+$background: <color>;
+$surface: <color>;
+$panel: <color>;
+$dark: true;
+
+/* progress bar gradients (optional) */
+$bar-gradient-default: <color> <color>;
+$bar-gradient-error: <color> <color>;
+
+/* any other variable used by textual or rovr's css */
+$block-cursor-background: <color>;
 ```
+
+`$primary` is the only required variable. every color you don't define is generated from the ones you do — including shades like `$primary-lighten-3`, which regenerate automatically when you change `$primary`.
+
+theme files can also contain regular tcss rules below the variable declarations:
+
+```css
+$primary: #88C0D0;
+
+FileList {
+    text-style: italic;
+}
+#file_list_container {
+    border: double $primary;
+}
+```
+
+these rules only apply while the theme is active, so there is no need to scope selectors to the theme. when two rules with the same specificity conflict, the theme's rule wins over `style.tcss`; a more specific selector in `style.tcss` still wins as usual.
 
 you can take a look at the reference in [textual](https://textual.textualize.io/guide/design), or the table below
 
@@ -41,8 +64,9 @@ you can take a look at the reference in [textual](https://textual.textualize.io/
 | error      | Indicates an error. Typically used as a background color. `text-error` can be used for foreground.                                           |
 | success    | Used to indicate success. Typically used as a background color. `text-success` can be used for foreground.                                   |
 | accent     | Used sparingly to draw attention. Typically contrasts with `primary` and `secondary`.                                                        |
-| is_dark    | A boolean indicating whether the theme is dark or light.                                                                                     |
-| variables  | custom variables that are used by textual. [variables](https://textual.textualize.io/guide/design/#additional-variables)                     |
+| dark       | A boolean indicating whether the theme is dark or light.                                                                                     |
+
+any other declaration becomes a custom variable, usable by [textual's additional variables](https://textual.textualize.io/guide/design/#additional-variables) and rovr's own css.
 
 ### style.tcss
 

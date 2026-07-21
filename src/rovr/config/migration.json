@@ -1,5 +1,18 @@
 [
   {
+    "keys": ["custom_theme", "custom_theme*"],
+    "message": [
+      "[bright_blue]custom_theme[/] has been removed in favour of theme files.",
+      "Themes now live as tcss files in [bright_cyan]<config folder>/themes/<name>.tcss[/], and are hot-reloaded while rovr is running.",
+      "- Each color becomes a variable declaration, e.g. [bright_cyan]$primary: #88C0D0;[/]",
+      "- [bright_cyan]is_dark[/] becomes [bright_cyan]$dark: true;[/]",
+      "- [bright_cyan]variables[/] entries become plain [bright_cyan]$name: value;[/] declarations",
+      "- [bright_cyan]bar_gradient[/] becomes [bright_cyan]$bar-gradient-default: <color> <color>;[/] and [bright_cyan]$bar-gradient-error: <color> <color>;[/]",
+      "See the bundled themes in the folder above for reference."
+    ],
+    "extra": "Removed in v0.10.0"
+  },
+  {
     "keys": ["settings.openers.*"],
     "message": [
       "[bright_blue]settings.openers[/] has been restructured to support interactively choosing an opener.",

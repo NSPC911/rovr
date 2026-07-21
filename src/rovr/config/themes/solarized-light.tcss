@@ -1,0 +1,17 @@
+$primary: #268bd2;
+$secondary: #2aa198;
+$accent: #6c71c4;
+$warning: #cb4b16;
+$error: #dc322f;
+$success: #859900;
+$foreground: #586e75;
+$background: #fdf6e3;
+$surface: #eee8d5;
+$panel: #eee8d5;
+$dark: false;
+
+/* other vars */
+$button-color-foreground: #fdf6e3;
+$footer-background: #268bd2;
+$footer-key-foreground: #fdf6e3;
+$footer-description-foreground: #fdf6e3;

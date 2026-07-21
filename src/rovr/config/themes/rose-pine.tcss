@@ -1,0 +1,21 @@
+$primary: #c4a7e7;
+$secondary: #31748f;
+$accent: #ebbcba;
+$warning: #f6c177;
+$error: #eb6f92;
+$success: #9ccfd8;
+$foreground: #e0def4;
+$background: #191724;
+$surface: #1f1d2e;
+$panel: #26233a;
+$dark: true;
+
+/* other vars */
+$input-cursor-background: #f4ede8;
+$input-selection-background: #403d52;
+$border: #524f67;
+$border-blurred: #6e6a86;
+$footer-background: #26233a;
+$block-cursor-foreground: #191724;
+$block-cursor-text-style: none;
+$block-cursor-background: #c4a7e7;

@@ -41,8 +41,17 @@ jobs:
           uv run ruff format .
           uv run ruff check --fix --unsafe-fixes
 
+      - name: Fail if formatting changes exist (non-main branches)
+        if: github.repository == env.MAIN_REPO && github.ref_name != 'master' && (github.event_name != 'pull_request' || github.event.pull_request.head.repo.fork == false)
+        run: |
+          if ! git diff --quiet; then
+            echo "::error::Formatting changes detected. Please run 'ruff format .' and commit the changes."
+            git diff
+            exit 1
+          fi
+
       - name: Commit and push changes if needed (main repo)
-        if: github.repository == env.MAIN_REPO && (github.event_name != 'pull_request' || github.event.pull_request.head.repo.fork == false)
+        if: github.repository == env.MAIN_REPO && github.ref_name == 'master' && (github.event_name != 'pull_request' || github.event.pull_request.head.repo.fork == false)
         run: |
           git config --global user.name "${GITHUB_ACTOR_NAME:-NSPBot911}"
           git config --global user.email "${GITHUB_ACTOR_EMAIL:-176916861+NSPBot911@users.noreply.github.com}"
@@ -64,8 +73,17 @@ jobs:
           uv run ruff format .
           uv run ruff check --fix --unsafe-fixes
 
+      - name: Fail if docs changes exist (non-main branches)
+        if: github.repository == env.MAIN_REPO && github.ref_name != 'master' && (github.event_name != 'pull_request' || github.event.pull_request.head.repo.fork == false)
+        run: |
+          if ! git diff --quiet; then
+            echo "::error::Docs generation changes detected. Please run 'poe gen-schema', 'poe gen-keys', 'poe typed' and commit the changes."
+            git diff
+            exit 1
+          fi
+
       - name: Commit and push changes if needed (main repo)
-        if: github.repository == env.MAIN_REPO && (github.event_name != 'pull_request' || github.event.pull_request.head.repo.fork == false)
+        if: github.repository == env.MAIN_REPO && github.ref_name == 'master' && (github.event_name != 'pull_request' || github.event.pull_request.head.repo.fork == false)
         run: |
           git config --global user.name "${GITHUB_ACTOR_NAME:-NSPBot911}"
           git config --global user.email "${GITHUB_ACTOR_EMAIL:-176916861+NSPBot911@users.noreply.github.com}"

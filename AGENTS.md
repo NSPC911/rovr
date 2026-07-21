@@ -36,6 +36,7 @@ poe build                          # Build executable with Nuitka (onefile but c
 poe uv-build                       # Build wheel/sdist with uv
 
 # Docs/Scripts
+# YOU DO NOT NEED TO RUN THIS.
 poe gen-schema                     # Generate JSON schema for config
 poe gen-keys                       # Generate keybinds documentation
 poe typed                          # Convert schema to TypedDict

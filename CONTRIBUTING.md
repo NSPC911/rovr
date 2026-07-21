@@ -56,15 +56,6 @@ We use `pytest` for testing. To run the tests, execute:
 poe test
 ```
 
-### Generating templates and stuff
-
-If you created a new feature that directly affects the config and schema, ensure you run the following commands to update the generated files:
-```bash
-poe gen-schema # to update documentation schema
-poe gen-keys   # to update keybind documentation
-poe typed      # to update type hints
-```
-
 ### Committing your changes
 
 We follow the [Conventional Commits](https://www.conventionalcommits.org) specification.
@@ -87,7 +78,6 @@ by submitting this pull request, i agree that
 - [ ] i have tested rovr (and also ran `poe test` if applicable) to make sure my changes do not break anything
 - [ ] cache, logs, dotfiles and/or others were not accidentally added to git's tracking history
 - [ ] my commits (or at least the pr title) follow the conventional commits format as much as possible
-- [ ] the documentation has been updated wherever necessary (run `poe gen-schema` and `poe gen-keys` if applicable)
 ```
 If your PR is addressing an issue, please link it in the PR description (e.g., "Fixes #123").
 

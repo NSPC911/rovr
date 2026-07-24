@@ -38,6 +38,7 @@ from textual.widgets import (
     Switch,
 )
 
+from rovr.functions.utils import should_cancel
 from rovr.variables.maps import RovrVars
 
 if globals().get("__compiled__"):
@@ -319,7 +320,12 @@ class FirstLaunchApp(App, inherit_bindings=False):
                 timeout=5,
             ) as response:
                 if response.getcode() == 200:
-                    data = response.read()
+                    chunks: list[bytes] = []
+                    while chunk := response.read(64 * 1024):
+                        if should_cancel():
+                            return None
+                        chunks.append(chunk)
+                    data = b"".join(chunks)
                     return PILImage.open(BytesIO(data))
                 else:
                     self.notify(

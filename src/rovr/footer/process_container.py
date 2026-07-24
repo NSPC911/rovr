@@ -20,7 +20,7 @@ from rovr.classes.mixins import Action, Actionable
 from rovr.classes.type_aliases import BarPanicDismissible, BarPanicNotify
 from rovr.functions import icons as icon_utils
 from rovr.functions import path as path_utils
-from rovr.functions.utils import is_being_used
+from rovr.functions.utils import is_being_used, should_cancel
 from rovr.screens import (
     Dismissible,
     FileInUse,
@@ -1437,7 +1437,11 @@ class ProcessContainer(Actionable, VerticalScroll):
                 with request.urlopen(req, timeout=5) as response:
                     if response.getcode() == 200:
                         with open(path.join(dest, paths[i]), "wb") as file:
-                            shutil.copyfileobj(response, file)
+                            while chunk := response.read(64 * 1024):
+                                if should_cancel():
+                                    bar.panic(bar_text="Download cancelled.")
+                                    return
+                                file.write(chunk)
                         self.app.call_from_thread(bar.update_progress, progress=i + 1)
                         self.app.call_from_thread(bar.update_text, paths[i])
                     else:

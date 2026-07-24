@@ -7,7 +7,7 @@ from dataclasses import dataclass
 from functools import partial
 from io import BytesIO
 from os import path
-from time import time
+from time import monotonic, time
 from typing import cast
 
 import textual_image.renderable
@@ -657,6 +657,9 @@ class PreviewContainer(Actionable, Container):
 
         Returns:
             bool: True if successful, False otherwise.
+
+        Raises:
+            subprocess.TimeoutExpired: If bat does not finish within five seconds.
         """
         bat_executable = config["plugins"]["bat"]["executable"]
         command = [
@@ -681,18 +684,29 @@ class PreviewContainer(Actionable, Container):
         self.app.call_from_thread(setattr, self, "border_title", titles.bat)
 
         try:
-            # Use synchronous subprocess since we're already in a thread
-            result = subprocess.run(
+            process = subprocess.Popen(
                 command,
-                capture_output=True,
-                text=False,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
             )
+            deadline = monotonic() + 5
+            while True:
+                try:
+                    stdout, stderr = process.communicate(timeout=0.2)
+                    break
+                except subprocess.TimeoutExpired:
+                    if should_cancel() or monotonic() >= deadline:
+                        process.kill()
+                        stdout, stderr = process.communicate()
+                        if should_cancel():
+                            return False
+                        raise subprocess.TimeoutExpired(command, 5, stdout, stderr)
 
             if should_cancel():
                 return False
 
-            if result.returncode == 0:
-                bat_output = result.stdout.decode("utf-8", errors="ignore")
+            if process.returncode == 0:
+                bat_output = stdout.decode("utf-8", errors="ignore")
                 new_content = Text.from_ansi(bat_output)
 
                 if should_cancel():
@@ -716,7 +730,7 @@ class PreviewContainer(Actionable, Container):
                     static_widget.can_focus = True
                 return True
             else:
-                error_message = result.stderr.decode("utf-8", errors="ignore")
+                error_message = stderr.decode("utf-8", errors="ignore")
                 if should_cancel():
                     return False
                 self.app.call_from_thread(self.remove_children)

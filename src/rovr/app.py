@@ -9,7 +9,7 @@ from dataclasses import replace
 from importlib import resources
 from io import TextIOWrapper
 from os import chdir, getcwd, path
-from subprocess import Popen
+from subprocess import Popen, TimeoutExpired
 from time import perf_counter
 from typing import Callable, ClassVar, Iterable
 
@@ -91,7 +91,11 @@ from rovr.functions.themes import (
     resolve_variable_references,
     theme_file_mtimes,
 )
-from rovr.functions.utils import multiprocessing_process_error_checker, run_command
+from rovr.functions.utils import (
+    multiprocessing_process_error_checker,
+    run_command,
+    should_cancel,
+)
 from rovr.header import HeaderArea
 from rovr.header.tabs import TablineTab
 from rovr.navigation_widgets import (
@@ -232,6 +236,7 @@ class Application(Actionable, DNDApp, inherit_bindings=False):
         self._file_list_container = FileListContainer()
         # shutdown event for bg thread
         self._shutdown_event = threading.Event()
+        self._background_processes: set[Popen] = set()
         # cannot use self.clipboard, reserved for Textual's clipboard
         self.Clipboard = Clipboard()
         if startup_path:
@@ -519,6 +524,18 @@ class Application(Actionable, DNDApp, inherit_bindings=False):
 
     def on_unmount(self) -> None:
         self._shutdown_event.set()
+        for proc in tuple(self._background_processes):
+            self._stop_background_process(proc)
+
+    @staticmethod
+    def _stop_background_process(proc: Popen) -> None:
+        if proc.poll() is not None:
+            return
+        proc.terminate()
+        try:
+            proc.wait(timeout=0.5)
+        except TimeoutExpired:
+            proc.kill()
 
     def action_focus_next(self) -> None:
         if config["interface"]["allow_tab_nav"]:
@@ -590,9 +607,22 @@ class Application(Actionable, DNDApp, inherit_bindings=False):
 
     @work(thread=True)
     def shell_thread(self, proc: Popen, title: str = "") -> None:
-        proc.wait()
-        stdout = proc.stdout.read().decode().strip()
-        stderr = proc.stderr.read().decode().strip()
+        self._background_processes.add(proc)
+        try:
+            while True:
+                try:
+                    stdout_bytes, stderr_bytes = proc.communicate(timeout=0.2)
+                    break
+                except TimeoutExpired:
+                    if should_cancel() or self._shutdown_event.is_set():
+                        self._stop_background_process(proc)
+                        return
+        finally:
+            self._background_processes.discard(proc)
+        if should_cancel() or self._shutdown_event.is_set():
+            return
+        stdout = stdout_bytes.decode().strip()
+        stderr = stderr_bytes.decode().strip()
         if stdout and stderr:
             msg = f"stdout = {stdout}\nstderr = {stderr}\n"
         elif stdout and not stderr:
@@ -601,7 +631,8 @@ class Application(Actionable, DNDApp, inherit_bindings=False):
             msg = str(stderr)
         else:
             msg = f"Process completed with code {proc.returncode}"
-        self.notify(
+        self.call_from_thread(
+            self.notify,
             msg.strip(),
             title=title,
             severity="information" if proc.returncode == 0 else "error",

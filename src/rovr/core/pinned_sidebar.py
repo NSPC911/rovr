@@ -148,10 +148,10 @@ class PinnedSidebar(Actionable, OptionList, inherit_bindings=False):
             return
         self.app.call_from_thread(self.set_options, self.list_of_options)
         if prev_highlighted < len(self.list_of_options):
-            self.highlighted = prev_highlighted
-            self.refresh_drives(id_list, None)
+            self.app.call_from_thread(setattr, self, "highlighted", prev_highlighted)
+            self.app.call_from_thread(self.refresh_drives, id_list, None)
             return
-        self.refresh_drives(id_list, prev_highlighted)
+        self.app.call_from_thread(self.refresh_drives, id_list, prev_highlighted)
 
     @work(thread=True)
     def refresh_drives(
@@ -207,7 +207,7 @@ class PinnedSidebar(Actionable, OptionList, inherit_bindings=False):
         if prev_highlighted is not None and prev_highlighted < len(
             self.list_of_options
         ):
-            self.highlighted = prev_highlighted
+            self.app.call_from_thread(setattr, self, "highlighted", prev_highlighted)
 
     def on_mount(self) -> None:
         """Reload the pinned files from the config."""

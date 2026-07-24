@@ -166,17 +166,16 @@ class Clipboard(CheckboxRenderingMixin, SelectionList, inherit_bindings=False):
         except (KeyError, OptionDoesNotExist):
             return
 
-    @work(thread=True)
-    def check_clipboard_existence(self) -> None:
+    @work(exclusive=True)
+    async def check_clipboard_existence(self) -> None:
         """Check if the files in the clipboard still exist."""
-        re_call = False
-        for option in self.options:
+        missing_option_ids: list[str] = []
+        for option in list(self.options):
             if not path.lexists(option.value.path):
                 assert isinstance(option.id, str)
-                self.call_later(self.safe_remove_option, option.id)
-                re_call = True
-        if re_call:
-            self.call_next(self.check_clipboard_existence)
+                missing_option_ids.append(option.id)
+        for option_id in missing_option_ids:
+            self.safe_remove_option(option_id)
 
     def checker_wrapper(self) -> None:
         if self._checker_worker is None or not self._checker_worker.is_running:

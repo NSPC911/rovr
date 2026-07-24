@@ -3,6 +3,7 @@ import shutil
 import sys
 import time
 import zipfile
+from contextlib import suppress
 from os import path
 from typing import Callable, Literal, cast
 
@@ -277,11 +278,7 @@ class ProcessContainer(Actionable, VerticalScroll):
             self.has_in_use_error = True
         elif isinstance(exc, PermissionError):
             self.has_perm_error = True
-        elif (
-            isinstance(exc, OSError)
-            and "symbolic" in exc.__str__()
-            or path_utils.force_obtain_write_permission(item_path)
-        ):
+        elif isinstance(exc, OSError) and "symbolic" in str(exc):
             try:
                 os.remove(item_path)
             except IsADirectoryError:
@@ -293,6 +290,20 @@ class ProcessContainer(Actionable, VerticalScroll):
     def is_path_within_directory(parent_path: str, child_path: str) -> bool:
         parent = path.normcase(path.abspath(parent_path))
         child = path.normcase(path.abspath(child_path))
+        try:
+            return path.commonpath([parent, child]) == parent
+        except ValueError:
+            return False
+
+    @staticmethod
+    def is_resolved_path_within_directory(parent_path: str, child_path: str) -> bool:
+        """Return whether a path remains inside a directory after symlink resolution.
+
+        Returns:
+            Whether the resolved child path is contained by the resolved parent path.
+        """
+        parent = path.normcase(path.realpath(parent_path))
+        child = path.normcase(path.realpath(child_path))
         try:
             return path.commonpath([parent, child]) == parent
         except ValueError:
@@ -785,6 +796,12 @@ class ProcessContainer(Actionable, VerticalScroll):
                         raise ValueError(
                             f"Unsafe archive member path '{filename}' escapes destination directory."
                         )
+                    if not self.is_resolved_path_within_directory(
+                        destination_path, final_path
+                    ):
+                        raise ValueError(
+                            f"Unsafe archive member path '{filename}' escapes destination through a symbolic link."
+                        )
                     final_path = path_utils.normalise(final_path)
                     member_is_dir = self.is_archive_member_directory(file)
                     if path.lexists(final_path):
@@ -1210,7 +1227,6 @@ class ProcessContainer(Actionable, VerticalScroll):
                     path_utils.dump_exc(self, exc)
                     return
 
-        cut_ignore = []
         last_update_time = time.monotonic()
         if files_to_cut or cut_folders_to_create:
             self.app.call_from_thread(
@@ -1299,12 +1315,10 @@ class ProcessContainer(Actionable, VerticalScroll):
                 self.is_relative_path_within(item_dict["relative_loc"], root)
                 for root in cut_skipped_roots
             ):
-                cut_ignore.append(item_dict["path"])
                 continue
             if path.exists(item_dict["path"]):
                 # again checks just in case something goes wrong
                 destination_item = path.join(dest, item_dict["relative_loc"])
-                moved = False
                 try:
                     os.makedirs(
                         path_utils.normalise(path.dirname(destination_item)),
@@ -1319,7 +1333,6 @@ class ProcessContainer(Actionable, VerticalScroll):
                         if path_utils.normalise(
                             destination_item
                         ) == path_utils.normalise(item_dict["path"]):
-                            cut_ignore.append(item_dict["path"])
                             continue
                         is_type_mismatch = path.isdir(destination_item)
                         effective_action = action_on_existence
@@ -1347,7 +1360,6 @@ class ProcessContainer(Actionable, VerticalScroll):
                             case "overwrite":
                                 pass
                             case "skip":
-                                cut_ignore.append(item_dict["path"])
                                 continue
                             case "rename":
                                 new_relative_loc = path_utils.normalise(
@@ -1369,7 +1381,6 @@ class ProcessContainer(Actionable, VerticalScroll):
                         item_dict["path"],
                         destination_item,
                     )
-                    moved = True
                 except (OSError, PermissionError):
                     # OSError from shutil: The destination location must be writable;
                     # otherwise, an OSError exception will be raised
@@ -1381,7 +1392,6 @@ class ProcessContainer(Actionable, VerticalScroll):
                             item_dict["path"],
                             destination_item,
                         )
-                        moved = True
                 except FileNotFoundError:
                     # the only way this can happen is if the file is deleted
                     # midway through the process, which means the user is
@@ -1398,36 +1408,10 @@ class ProcessContainer(Actionable, VerticalScroll):
                         bar_text="Unhandled Error",
                     )
                     return
-                if not moved and path.exists(item_dict["path"]):
-                    cut_ignore.append(item_dict["path"])
-        # delete the folders
-        self.has_perm_error = False
-        self.has_in_use_error = False
+        # Remove only source folders that are empty after moving their contents.
         for folder in cut_files__folders:
-            skip = any(
-                self.is_path_within_directory(folder, ignored_file)
-                for ignored_file in cut_ignore
-            )
-            if not skip and path.exists(folder):
-                shutil.rmtree(folder, onexc=self.rmtree_fixer)
-        if self.has_in_use_error:
-            bar.panic(
-                notify={
-                    "message": "Certain files could not be deleted as they are currently being used",
-                    "title": "Delete Files",
-                },
-                bar_text=path.basename(has_cut[-1]),
-            )
-            return
-        if self.has_perm_error:
-            bar.panic(
-                notify={
-                    "message": "Certain files could not be deleted due to PermissionError.",
-                    "title": "Delete Files",
-                },
-                bar_text=path.basename(has_cut[-1]),
-            )
-            return
+            with suppress(OSError):
+                os.rmdir(folder)
         bar.ok()
 
     @work(thread=True)

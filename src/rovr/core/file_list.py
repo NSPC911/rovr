@@ -148,6 +148,7 @@ class FileList(
         self.file_list_pause_check = False
         self._ignore_next_click: bool = False
         self._in_git_repo: bool = False
+        self._folder_item_counts: dict[str, tuple[int, int]] = {}
 
     def on_mount(self) -> None:
         if not self.dummy and self.parent:
@@ -288,9 +289,20 @@ class FileList(
                     return
                 with suppress(OSError):
                     if option.dir_entry.is_dir():
-                        with scandir(option.dir_entry.path) as entries:
-                            option.set_folder_item_count(sum(1 for _ in entries))
-                        dirty = True
+                        folder_path = option.dir_entry.path
+                        mtime = option.dir_entry.stat().st_mtime_ns
+                        cached = self._folder_item_counts.get(folder_path)
+                        if cached is None or cached[0] != mtime:
+                            with scandir(folder_path) as entries:
+                                count = sum(1 for _ in entries)
+                            if len(self._folder_item_counts) >= 2048:
+                                self._folder_item_counts.clear()
+                            self._folder_item_counts[folder_path] = (mtime, count)
+                        else:
+                            count = cached[1]
+                        if option.folder_item_count != count:
+                            option.set_folder_item_count(count)
+                            dirty = True
         if dirty and not worker.is_cancelled:
             self.app.call_from_thread(self.refresh)
             update_header = getattr(self.parent, "update_details_header", None)

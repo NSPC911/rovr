@@ -122,3 +122,23 @@ def test_get_recursive_files(tmp_path: Path) -> None:
         tmp_path.as_posix(), with_folders=True
     )
     assert len(folders) == 2 and len(files) == 15
+
+
+def test_resolved_path_is_not_allowed_to_escape_destination(tmp_path: Path) -> None:
+    from rovr.footer.process_container import ProcessContainer
+
+    destination = tmp_path / "destination"
+    outside = tmp_path / "outside"
+    destination.mkdir()
+    outside.mkdir()
+    try:
+        os.symlink(outside, destination / "link")
+    except (OSError, NotImplementedError):
+        pytest.skip("Symlink creation failed")
+
+    assert ProcessContainer.is_path_within_directory(
+        destination.as_posix(), (destination / "link" / "file.txt").as_posix()
+    )
+    assert not ProcessContainer.is_resolved_path_within_directory(
+        destination.as_posix(), (destination / "link" / "file.txt").as_posix()
+    )

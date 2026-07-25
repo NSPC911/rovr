@@ -512,14 +512,22 @@ FileList {
     text-style: dim;
   }
 
+  &:light {
+    .filelist--cut {
+      color: $foreground-lighten-2;
+    }
+    .filelist--cut--hovered,
+    .filelist--cut--highlighted {
+      background: $primary-background-darken-2;
+    }
+  }
   .filelist--cut {
-    background: $primary-background-darken-2;
-    color: $block-cursor-foreground;
+    color: $foreground-darken-2;
     text-style: dim
   }
   .filelist--cut--hovered,
   .filelist--cut--highlighted {
-    background: $primary-background;
+    background: $primary-background-lighten-2;
   }
 
   .filelist--link {
@@ -563,12 +571,16 @@ FileList {
 }
 
 #dialog {
-  max-width: 55vw;
-  max-height: 55vh;
   overflow-y: auto;
   border-title-align: center;
   border-subtitle-align: center;
   Label { min-height: 1 }
+}
+ModalSearchScreen > VerticalGroup, #dialog {
+  width: 60vw;
+  height: 60vh;
+  max-height: 30;
+  max-width: 90;
 }
 
 ModalScreen Button:ansi {
@@ -614,8 +626,6 @@ ThemeChooser {
   align: center middle;
   layout: horizontal;
   & > VerticalGroup {
-    max-width: 60vw;
-    max-height: 60vh;
     OptionList {
       width: 100%;
       max-width: 100%;
@@ -754,8 +764,6 @@ YesOrNo #dialog {
   grid-gutter: 1 2;
   border: $border-style $border-focused;
   grid-rows: 1fr 3; /* enough space for 1fr */
-  max-height: 20;
-  max-width: 50vw;
   padding: 1 2;
   &:ansi {
     padding: 0 1;

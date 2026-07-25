@@ -1300,6 +1300,10 @@ class PreviewContainer(Actionable, Container):
             filelist := self.get_child(FileList)
         ):
             filelist.scroll_up(animate=False)
+        elif self.border_title == titles.folder and (
+            filelist := self.get_child(FileList)
+        ):
+            filelist.action_cursor_up()
 
     def action_down(self) -> None:
         if self._is_pdf() and self.pdf.images is not None:
@@ -1308,6 +1312,10 @@ class PreviewContainer(Actionable, Container):
             filelist := self.get_child(FileList)
         ):
             filelist.scroll_down(animate=False)
+        elif self.border_title == titles.folder and (
+            filelist := self.get_child(FileList)
+        ):
+            filelist.action_cursor_down()
 
     def action_page_up(self) -> None:
         if self._is_pdf() and self.pdf.images is not None:
@@ -1316,6 +1324,10 @@ class PreviewContainer(Actionable, Container):
             filelist := self.get_child(FileList)
         ):
             filelist.scroll_page_up(animate=False)
+        elif self.border_title == titles.folder and (
+            filelist := self.get_child(FileList)
+        ):
+            filelist.action_page_up()
 
     def action_page_down(self) -> None:
         if self._is_pdf() and self.pdf.images is not None:
@@ -1324,6 +1336,10 @@ class PreviewContainer(Actionable, Container):
             filelist := self.get_child(FileList)
         ):
             filelist.scroll_page_down(animate=False)
+        elif self.border_title == titles.folder and (
+            filelist := self.get_child(FileList)
+        ):
+            filelist.action_page_down()
 
     def action_home(self) -> None:
         if self._is_pdf() and self.pdf.images is not None:
@@ -1332,6 +1348,10 @@ class PreviewContainer(Actionable, Container):
             filelist := self.get_child(FileList)
         ):
             filelist.scroll_home(animate=False)
+        elif self.border_title == titles.folder and (
+            filelist := self.get_child(FileList)
+        ):
+            filelist.action_home()
 
     def action_end(self) -> None:
         if self._is_pdf() and self.pdf.images is not None:
@@ -1340,6 +1360,10 @@ class PreviewContainer(Actionable, Container):
             filelist := self.get_child(FileList)
         ):
             filelist.scroll_end(animate=False)
+        elif self.border_title == titles.folder and (
+            filelist := self.get_child(FileList)
+        ):
+            filelist.action_end()
 
     def _sync_mime(
         self, file_path: str, mime_type: preview_utils.MimeResult | None = None

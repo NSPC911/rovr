@@ -88,6 +88,7 @@ from rovr.functions.themes import (
     extract_variable_declarations,
     pop_theme_field_overrides,
     register_all_themes,
+    resolve_theme_ansi,
     resolve_variable_references,
     theme_file_mtimes,
 )
@@ -251,12 +252,12 @@ class Application(Actionable, DNDApp, inherit_bindings=False):
 
         self._theme_errors: list[str] = register_all_themes(self)
         self._theme_file_mtimes: dict[str, float] = theme_file_mtimes()
+        self.ansi_color = config["theme"]["transparent"]
         self.theme = config["theme"]["default"]
         # ensure the theme css source exists (possibly empty) before Textual
         # reads the style.tcss files, so its position in the source order is
         # the same no matter which theme the app started with
         self._load_theme_css()
-        self.ansi_color = config["theme"]["transparent"]
 
     def on_compose(self, event: events.Compose) -> None:
         self.__actual_screen_update_node_styles = self.screen.update_node_styles
@@ -397,6 +398,12 @@ class Application(Actionable, DNDApp, inherit_bindings=False):
     THEME_CSS_SOURCE: ClassVar[tuple[str, str]] = ("<active theme>", "")
 
     def _watch_theme(self, theme_name: str) -> None:
+        theme = self.get_theme(theme_name)
+        self.ansi_color = (
+            resolve_theme_ansi(theme, config["theme"]["transparent"])[0]
+            if theme is not None
+            else config["theme"]["transparent"]
+        )
         self._load_theme_css()
         super()._watch_theme(theme_name)
 
@@ -1250,12 +1257,11 @@ class Application(Actionable, DNDApp, inherit_bindings=False):
                         self.query_one(ProcessContainer).remote_download(online, [resp])
 
     def get_system_commands(self, screen: Screen) -> Iterable[SystemCommand]:
-        if not self.ansi_color:
-            yield SystemCommand(
-                "Change theme",
-                "Change the current theme",
-                self.action_change_theme,
-            )
+        yield SystemCommand(
+            "Change theme",
+            "Change the current theme",
+            self.action_change_theme,
+        )
         yield SystemCommand(
             "Quit the application",
             "Quit the application as soon as possible",
@@ -1286,18 +1292,22 @@ class Application(Actionable, DNDApp, inherit_bindings=False):
             lambda: self.set_timer(0.1, self.deliver_screenshot),
         )
 
-        if self.ansi_color:
-            yield SystemCommand(
-                "Disable Transparent Theme",
-                "Go back to an opaque background.",
-                lambda: self.call_later(self._toggle_transparency),
-            )
-        else:
-            yield SystemCommand(
-                "Enable Transparent Theme",
-                "Have a transparent background.",
-                lambda: self.call_later(self._toggle_transparency),
-            )
+        _, ansi_is_fixed = resolve_theme_ansi(
+            self.current_theme, config["theme"]["transparent"]
+        )
+        if not ansi_is_fixed:
+            if self.ansi_color:
+                yield SystemCommand(
+                    "Disable Transparent Theme",
+                    "Go back to an opaque background.",
+                    lambda: self.call_later(self._toggle_transparency),
+                )
+            else:
+                yield SystemCommand(
+                    "Enable Transparent Theme",
+                    "Have a transparent background.",
+                    lambda: self.call_later(self._toggle_transparency),
+                )
 
         if (
             config["plugins"]["fd"]["enabled"]
@@ -1348,6 +1358,7 @@ class Application(Actionable, DNDApp, inherit_bindings=False):
         self.refresh()
         self.call_after_refresh(self.refresh_css)
         self.file_list.update_border_subtitle()
+        config["theme"]["transparent"] = self.ansi_color
 
     @on(events.Click)
     def when_got_click(self, event: events.Click) -> None:

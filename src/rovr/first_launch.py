@@ -27,7 +27,6 @@ from textual.containers import (
 )
 from textual.css.query import NoMatches
 from textual.screen import ModalScreen
-from textual.theme import BUILTIN_THEMES
 from textual.widgets import (
     Button,
     Input,
@@ -38,6 +37,7 @@ from textual.widgets import (
     Switch,
 )
 
+from rovr.functions.themes import register_all_themes, resolve_theme_ansi
 from rovr.functions.utils import should_cancel
 from rovr.variables.maps import RovrVars
 
@@ -174,6 +174,9 @@ class FirstLaunchApp(App, inherit_bindings=False):
 
     def __init__(self, can_exit: bool = False) -> None:
         super().__init__(watch_css=True)
+        self._theme_errors = register_all_themes(self)
+        self.ansi_color = False
+        self.theme = "textual-dark"
         self.preview_image: Image | None = None
         self._wants_to_quit: bool = False
         self.can_exit: bool = can_exit
@@ -190,8 +193,8 @@ class FirstLaunchApp(App, inherit_bindings=False):
         yield Static(classes="padding")
         with Center(), RadioSet(id="theme"):
             yield from [
-                RadioButton(theme, value=True, id=theme)
-                for theme in BUILTIN_THEMES
+                RadioButton(theme, value=theme == self.theme, id=theme)
+                for theme in sorted(self.available_themes)
                 if theme != "textual-ansi"
             ]
         yield Static(classes="padding")
@@ -279,8 +282,13 @@ class FirstLaunchApp(App, inherit_bindings=False):
 
     @work
     async def on_mount(self) -> None:
+        for theme_error in self._theme_errors:
+            self.notify(
+                theme_error, title="Theme Error", severity="warning", markup=False
+            )
+        self._sync_theme_ansi()
         self.query_one("#theme", RadioSet).border_title = "Choose a theme!"
-        self.query_one("#theme", RadioSet).border_subtitle = "More coming soon…"
+        self.query_one("#theme", RadioSet).border_subtitle = "Select a theme"
         self.query_one("#keybinds", RadioSet).border_title = "Choose a Preset Keybind"
         self.query_one(".plugins", Center).border_title = "Plugins/Integrations"
         self.query_one("SelectCurrent").border_title = "Image Protocol"
@@ -352,6 +360,14 @@ class FirstLaunchApp(App, inherit_bindings=False):
     @on(RadioSet.Changed, "#theme")
     def on_radio_set_changed(self, event: RadioSet.Changed) -> None:
         self.theme = event.pressed.id
+        self._sync_theme_ansi()
+
+    def _sync_theme_ansi(self) -> None:
+        transparent_mode = self.query_one("#transparent_mode", Switch)
+        self.ansi_color, ansi_is_fixed = resolve_theme_ansi(
+            self.current_theme, transparent_mode.value
+        )
+        self.query_one("#transparent", HorizontalGroup).display = not ansi_is_fixed
 
     def on_click(self, event: events.Click) -> None:
         try:
@@ -362,11 +378,7 @@ class FirstLaunchApp(App, inherit_bindings=False):
 
     @on(Switch.Changed, "#transparent_mode")
     def on_transparent_mode_changed(self, event: Switch.Changed) -> None:
-        self.ansi_color = event.value
-        self.query_one("#theme", RadioSet).disabled = event.value
-        self.query_one("#theme", RadioSet).tooltip = (
-            "Disabled when transparent mode is enabled" if event.value else None
-        )
+        self._sync_theme_ansi()
         self.refresh_css()
         self.refresh()
 

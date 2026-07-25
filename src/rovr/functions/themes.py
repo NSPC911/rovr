@@ -161,6 +161,21 @@ def pop_theme_field_overrides(
     return fields
 
 
+def resolve_theme_ansi(theme: Theme, transparent: bool) -> tuple[bool, bool]:
+    """
+    Determine the ANSI mode and whether a theme explicitly controls it.
+
+    Args:
+        theme: The active Textual theme.
+        transparent: The configured transparent-mode value.
+
+    Returns:
+        The ANSI mode followed by whether it is fixed by the theme.
+    """
+    explicit = getattr(theme, "ansi_explicit", False)
+    return (theme.ansi if explicit else transparent, explicit)
+
+
 def parse_theme_file(theme_file: Path) -> Theme:
     """
     Parse a theme TCSS file into a Theme named after the file.
@@ -197,6 +212,9 @@ def parse_theme_file(theme_file: Path) -> Theme:
         variables=declared,
         **fields,  # ty: ignore[invalid-argument-type]
     )
+    # Theme.ansi defaults to false, so retain whether a file actually declared
+    # it. Undeclared themes must defer to the user's transparent-mode setting.
+    theme.ansi_explicit = "ansi" in fields  # ty: ignore[unresolved-attribute]
     if bar_gradient:
         # consumed by ProcessContainer via getattr; not a Theme field
         theme.bar_gradient = bar_gradient  # ty: ignore[unresolved-attribute]

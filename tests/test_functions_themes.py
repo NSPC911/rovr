@@ -185,6 +185,21 @@ def test_parse_theme_file_builds_theme_with_variables_and_css(tmp_path: Path) ->
     assert "$primary: #88C0D0;" not in theme.css
 
 
+def test_resolve_theme_ansi_uses_the_theme_only_when_explicit(tmp_path: Path) -> None:
+    unspecified_file = tmp_path / "unspecified.tcss"
+    unspecified_file.write_text(NORD_PLACEHOLDER)
+    unspecified = theme_utils.parse_theme_file(unspecified_file)
+    assert theme_utils.resolve_theme_ansi(unspecified, transparent=True) == (
+        True,
+        False,
+    )
+
+    fixed_file = tmp_path / "fixed.tcss"
+    fixed_file.write_text(NORD_PLACEHOLDER + "$ansi: false;\n")
+    fixed = theme_utils.parse_theme_file(fixed_file)
+    assert theme_utils.resolve_theme_ansi(fixed, transparent=True) == (False, True)
+
+
 def test_parse_theme_file_no_css_block_leaves_css_unset(tmp_path: Path) -> None:
     theme_file = tmp_path / "plain.tcss"
     theme_file.write_text(NORD_PLACEHOLDER + "\n$accent-custom: #ff0000;\n")

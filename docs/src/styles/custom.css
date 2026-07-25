@@ -1,3 +1,4 @@
+@import url('https://fonts.googleapis.com/css2?family=Fira+Sans:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap');
 @view-transition {
   navigation: none;
 }
@@ -109,17 +110,14 @@ html {
   }
 }
 html * {
-  font-family: "CaskaydiaCove NFP";
-  & {
-    text-transform: lowercase;
-    transition:
-      var(--sl-transition-duration) background ease-in-out,
-      calc(var(--sl-transition-duration) / 2) color ease-in-out,
-      var(--sl-transition-duration) border-inline-start ease-in-out,
-      var(--sl-transition-duration) scrollbar-color ease-in-out;
-    &.no-lower {
-      text-transform: none !important;
-    }
+  font-family: "CaskaydiaCoveNFM";
+  transition:
+    var(--sl-transition-duration) background ease-in-out,
+    calc(var(--sl-transition-duration) / 2) color ease-in-out,
+    var(--sl-transition-duration) border-inline-start ease-in-out,
+    var(--sl-transition-duration) scrollbar-color ease-in-out;
+  &.no-lower {
+    text-transform: none !important;
   }
 }
 html svg,
@@ -146,7 +144,9 @@ table {
   width: fit-content;
   border-radius: 5px;
 }
-svg.rich-terminal * {
+svg.rich-terminal *,
+.header, h1, h2, h3,
+.sidebar-content {
   font-family: "CaskaydiaCoveNFM" !important;
 }
 code {
@@ -315,17 +315,24 @@ main {
 .title-wrapper {
   max-width: calc(var(--sl-sidebar-width) - 1rem);
 }
-select > option:hover {
-  -webkit-appearance: none;
-  -moz-appearance: none;
-  appearance: none;
+:is(starlight-lang-select, starlight-theme-select) select {
+  border-radius: 6px;
+  --sl-inline-padding: 0.6rem;
+  > option:hover {
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+    color: color-contrast(color-mix(in oklab, var(--sl-color-accent), var(--sl-color-gray-6)));
+    background: color-mix(in oklab, var(--sl-color-accent), var(--sl-color-gray-5) 25%);
+  }
 }
-[data-theme="dark"] select:focus {
-  background: hsl(from var(--sl-color-gray-6) h s l / 1%) !important;
+[data-theme="dark"] :is(starlight-lang-select, starlight-theme-select) select:focus {
+  background: color-mix(in oklab, var(--sl-color-accent), var(--sl-color-gray-6) 75%) !important;
 }
-[data-theme="light"] select:focus {
-  background: hsl(from var(--sl-color-gray-7) h s l / 1%) !important;
+[data-theme="light"] :is(starlight-lang-select, starlight-theme-select) select:focus {
+  background: color-mix(in oklab, var(--sl-color-accent), var(--sl-color-gray-7) 75%) !important;
 }
+
 .header {
   border-bottom: none;
 }
@@ -567,14 +574,18 @@ starlight-file-tree {
 starlight-file-tree ul:has(> li.file) {
   border-inline-start: 2px solid var(--sl-color-gray-4);
 }
-starlight-lang-select label {
-  &::before {
+starlight-lang-select {
+  select {
+    margin-inline-start: calc(var(--sl-inline-padding) * -1 + 0.75ch);
+  }
+  label::before {
     content: "";
     display: block;
     position: absolute;
-    left: -0.1ch;
+    left: 0.1ch;
+    font-family: "CaskaydiaCove NFP";
   }
-  svg.icon:first-of-type > path {
+  label svg.icon:first-of-type > path {
     display: none
   }
 }

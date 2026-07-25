@@ -17,8 +17,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `openers`: refactor into a grouping mechanism [#302](https://github.com/NSPC911/rovr/pull/302)
 - `filelist`: show detail columns [#301](https://github.com/NSPC911/rovr/pull/301)
 - `styles`: properly override variables on different files [79c394e](https://github.com/NSPC911/rovr/commit/79c394eac6f15c0a644853c92a7326415a529d79) [5628f65](https://github.com/NSPC911/rovr/commit/5628f650a20c86264bd408cf86e8efbdba4cc550)
-- `app`: add trash bin support [#304](https://github.com/NSPC911/rovr/pull/304)
+- `app`: add trash bin support [#304](https://github.com/NSPC911/rovr/pull/304) [61f8148](https://github.com/NSPC911/rovr/commit/61f8148021c158043d606b3f234b09ac9bcb2544) [aa6be91](https://github.com/NSPC911/rovr/commit/aa6be9173d0705025f7aa3fee958430e085eedf5) [89c9c45](https://github.com/NSPC911/rovr/commit/89c9c45629cb445f20230c02cb0ebebb483c282f)
 - `history`: evicy after hitting limit [#306](https://github.com/NSPC911/rovr/pull/306) [b0d971a](https://github.com/NSPC911/rovr/commit/b0d971accd755e855a8e8d4e7f03c3f9163a935f)
+- `themes`: better theme handler [#308](https://github.com/NSPC911/rovr/pull/308) [50200f5](https://github.com/NSPC911/rovr/commit/50200f59f4492efd5025a3bad462671e721887ca)
 
 ### Fixed
 
@@ -31,6 +32,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `preview`: ignore IsADirectoryError and NotADirectoryError [30a729c](https://github.com/NSPC911/rovr/commit/30a729ce032571136b4e419afc37fe6631301de8)
 - `pins`: dont automatically expand when saving [0280cd2](https://github.com/NSPC911/rovr/commit/0280cd2d8ddbf331e0ca1ca63d419b70be655d3e)
 - `style`: properly use `--hovered` [6b8f1dd](https://github.com/NSPC911/rovr/commit/6b8f1ddc9c676135cb45ddf168f81cce04bad815)
+- `modal`: fix modal shortcircuit on running commands [040dda2](https://github.com/NSPC911/rovr/commit/040dda26553f167864ccf3a089db994a74351ba4)
+- `pins`: prevent a possible `ContextError` [f0975a9](https://github.com/NSPC911/rovr/commit/f0975a954f122935a3438bd82fff5cfa0912c40c)
+- `app`: make background work cancellable on shutdown [f0ae2dc](https://github.com/NSPC911/rovr/commit/f0ae2dcfdd126bdaf081bbf8bb9f2ae10ef90f7a)
 
 ### Removed
 

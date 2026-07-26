@@ -1,6 +1,7 @@
 ---
-import { readFile } from "node:fs/promises";
 import { join, basename } from "node:path";
+
+import { getOptimizedSvg } from "@/functions/optimizeSvg";
 
 interface Props {
   src: string;
@@ -17,7 +18,7 @@ console.log(`\n[InlineSVG] Loading: ${basename(svgPath)}`);
 
 let svgContent = "";
 try {
-  svgContent = await readFile(svgPath, "utf-8");
+  svgContent = await getOptimizedSvg(svgPath);
 } catch (e) {
   console.error(`Failed to read SVG file: ${svgPath}`, e);
 }

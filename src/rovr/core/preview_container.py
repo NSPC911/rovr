@@ -692,7 +692,7 @@ class PreviewContainer(Actionable, Container):
             deadline = monotonic() + 5
             while True:
                 try:
-                    stdout, stderr = process.communicate(timeout=0.2)
+                    stdout, stderr = process.communicate(timeout=1)
                     break
                 except subprocess.TimeoutExpired:
                     if should_cancel() or monotonic() >= deadline:
@@ -745,7 +745,11 @@ class PreviewContainer(Actionable, Container):
             if should_cancel():
                 return False
             self.app.call_from_thread(
-                self.notify, str(exc), title="Plugins: Bat", severity="error"
+                self.notify,
+                str(exc),
+                title="Plugins: Bat",
+                severity="error",
+                markup=False,
             )
             path_utils.dump_exc(self, exc)
             return False
@@ -1231,6 +1235,8 @@ class PreviewContainer(Actionable, Container):
                             timeout=1,
                         )
                         display_content += f"\n{process.stdout.strip()}"
+                except subprocess.TimeoutExpired:
+                    pass
                 except (subprocess.SubprocessError, FileNotFoundError) as exc:
                     path_utils.dump_exc(self, exc)
 

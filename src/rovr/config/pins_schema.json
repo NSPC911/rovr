@@ -1,0 +1,61 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema",
+  "title": "Rovr Pins",
+  "type": "object",
+  "additionalProperties": false,
+  "definitions": {
+    "pin": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "The display label for this pin"
+        },
+        "path": {
+          "description": "The filesystem path for this pin. Supports variable expansion with: $DOCUMENTS (user documents directory), $DOWNLOADS (user downloads directory), $MUSIC (user music directory), $PICTURES (user pictures directory), $DESKTOP (user desktop directory), $HOME (user home directory, ~), $VIDEOS (user videos directory), $CONFIG (user config directory). Do not combine variables, it will not work properly. (Follows XDG Base Directory Specification)",
+          "anyOf": [
+            {
+              "enum": [
+                "$DOCUMENTS",
+                "$DOWNLOADS",
+                "$PICTURES",
+                "$DESKTOP",
+                "$VIDEOS",
+                "$CONFIG",
+                "$CACHE",
+                "$MUSIC",
+                "$HOME"
+              ]
+            },
+            { "type": "string" }
+          ]
+        },
+        "icon": {
+          "type": "array",
+          "items": [
+            { "type": "string", "description": "The icon name" },
+            { "type": "string", "description": "The icon color" }
+          ],
+          "minItems": 2,
+          "maxItems": 2,
+          "description": "Optional icon specification as [icon_name, color]"
+        }
+      },
+      "required": ["name", "path"]
+    }
+  },
+  "properties": {
+    "default": {
+      "type": "array",
+      "items": { "$ref": "#/definitions/pin" },
+      "description": "Default pinned folders that appear in the pinned sidebar"
+    },
+    "pins": {
+      "type": "array",
+      "items": { "$ref": "#/definitions/pin" },
+      "description": "Custom pinned folders that appear in the pinned sidebar"
+    }
+  },
+  "required": ["default", "pins"]
+}

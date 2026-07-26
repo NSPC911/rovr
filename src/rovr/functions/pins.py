@@ -22,11 +22,16 @@ class PinItem(TypedDict):
     icon: NotRequired[tuple[str, str]]
 
 
-class PinsDict(TypedDict):
-    default: list[PinItem]
-    "The files to show in the default location"
-    pins: list[PinItem]
-    "Other added folders"
+PinsDict = TypedDict(
+    "PinsDict",
+    {
+        "$schema": str,
+        # The files to show in the default location
+        "default": list[PinItem],
+        # Other added folders
+        "pins": list[PinItem],
+    },
+)
 
 
 def _migrate_add_trash_pin(pins_dict: dict) -> None:
@@ -76,6 +81,7 @@ def load_pins() -> PinsDict:
 
     if not path.exists(PIN_PATH):
         _pins = {
+            "$schema": "https://raw.githubusercontent.com/NSPC911/rovr/master/src/rovr/config/pins_schema.json",
             "default": [
                 {"name": "Home", "path": "$HOME"},
                 {"name": "Trash", "path": TRASH},
@@ -99,6 +105,7 @@ def load_pins() -> PinsDict:
         except (IOError, ValueError, json.JSONDecodeError):
             # Reset pins on corrupt or something else happened
             _pins = {
+                "$schema": "https://raw.githubusercontent.com/NSPC911/rovr/master/src/rovr/config/pins_schema.json",
                 "default": [
                     {"name": "Home", "path": "$HOME"},
                     {"name": "Trash", "path": TRASH},

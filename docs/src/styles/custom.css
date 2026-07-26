@@ -230,6 +230,9 @@ article.card {
 .sidebar-content {
   padding: 1rem 1rem 0 0.5rem
 }
+.content-panel {
+  margin: 0 2ch;
+}
 @media (min-width: 72rem) {
   .main-pane {
     margin: auto;
@@ -246,12 +249,9 @@ article.card {
   .main-frame:not(:has(> div > aside[class*="print:hidden"])) {
     --sl-content-inline-start: 20vw;
   }
-  .content-panel > .sl-container {
-    max-width: unset !important;
-    margin-inline: 0 !important;
-  }
   .content-panel {
     max-width: calc(100vw - 300px);
+    margin: unset;
   }
   html[data-has-sidebar][data-has-toc] .content-panel {
     max-width: calc(100vw - 500px);

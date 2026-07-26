@@ -8,17 +8,55 @@ hero:
   tagline: a stylish, batteries-included terminal file explorer
   actions:
     - text: install rovr
-      link: /rovr/dev/get-started/installation
+      link: /rovr/get-started/installation
       icon: right-arrow
     - text: explore the docs
-      link: /rovr/dev/overview
+      link: /rovr/overview
       icon: open-book
 ---
 
 import { Card, CardGrid } from "@astrojs/starlight/components";
-import InlineSVG from "@/components/InlineSVG.astro";
+import FeatureCarousel from "@/components/FeatureCarousel.astro";
 
-<InlineSVG src="/rovr/screenshots/main.svg" alt="rovr browsing a directory with file details and a preview" />
+<FeatureCarousel
+  features={[
+    {
+      title: "browse at a glance",
+      description: "Keep files, details, and rich previews together in one focused interface.",
+      image: "/rovr/screenshots/main.svg",
+      alt: "rovr browsing a directory with file details and a preview",
+      href: "/rovr/guides/user-interface",
+    },
+    {
+      title: "preview before opening",
+      description: "Inspect source code, images, PDFs, archives, fonts, and folders instantly.",
+      image: "/rovr/screenshots/preview-file.svg",
+      alt: "rovr showing a rich file preview",
+      href: "/rovr/features/previewing-files",
+    },
+    {
+      title: "work across tabs",
+      description: "Keep multiple locations close and switch between them without losing context.",
+      image: "/rovr/screenshots/tabs.svg",
+      alt: "multiple directory tabs open in rovr",
+      href: "/rovr/guides/user-interface",
+    },
+    {
+      title: "find anything quickly",
+      description: "Search through directories while staying inside your terminal workflow.",
+      image: "/rovr/screenshots/search-files.svg",
+      alt: "rovr searching for files in a directory",
+      href: "/rovr/guides/user-interface",
+    },
+    {
+      title: "run commands in place",
+      description: "Bring shell commands into the file manager when you need more control.",
+      image: "/rovr/screenshots/shell-exec.svg",
+      alt: "a shell command running from within rovr",
+      href: "/rovr/features/shell-exec",
+    },
+  ]}
+/>
 
 ## everything you need, without leaving the terminal
 

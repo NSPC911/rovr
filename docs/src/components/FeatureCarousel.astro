@@ -1,0 +1,250 @@
+---
+import InlineSVG from "@/components/InlineSVG.astro";
+
+const base = import.meta.env.BASE_URL;
+
+interface Feature {
+  title: string;
+  description: string;
+  image: string;
+  alt: string;
+  href: string;
+}
+
+interface Props {
+  features: Feature[];
+}
+
+const { features } = Astro.props;
+const basePath = base.replace(/\/$/, "");
+const withBase = (path: string): string =>
+  path === basePath || path.startsWith(`${basePath}/`) ? path : `${base}${path.replace(/^\/+/, "")}`;
+---
+
+<section class="feature-carousel" aria-roledescription="carousel" aria-label="rovr features" data-carousel>
+  <div class="viewport">
+    <div class="slides" data-slides>
+      {
+        features.map((feature, index) => (
+          <article
+            class="slide"
+            aria-roledescription="slide"
+            aria-label={`${index + 1} of ${features.length}`}
+            aria-hidden={index === 0 ? "false" : "true"}
+            data-slide
+          >
+            <InlineSVG src={withBase(feature.image)} alt={feature.alt} class="screenshot" />
+            <div class="caption">
+              <div>
+                <u>{feature.title}</u>
+                <p>{feature.description}</p>
+              </div>
+              <a href={withBase(feature.href)} tabindex={index === 0 ? undefined : -1}>learn more <span aria-hidden="true">→</span></a>
+            </div>
+          </article>
+        ))
+      }
+    </div>
+  </div>
+
+  <div class="controls">
+    <button type="button" class="arrow" data-previous aria-label="Previous feature">←</button>
+    <div class="dots" aria-label="Choose a feature">
+      {
+        features.map((feature, index) => (
+          <button
+            type="button"
+            class:list={["dot", { active: index === 0 }]}
+            aria-label={`Show ${feature.title}`}
+            aria-current={index === 0 ? "true" : undefined}
+            data-dot
+          />
+        ))
+      }
+    </div>
+    <button type="button" class="arrow" data-next aria-label="Next feature">→</button>
+  </div>
+</section>
+
+<script>
+  function initializeCarousels(): void {
+    document.querySelectorAll<HTMLElement>("[data-carousel]").forEach((carousel) => {
+      if (carousel.dataset.initialized) return;
+      carousel.dataset.initialized = "true";
+
+      const slides = [...carousel.querySelectorAll<HTMLElement>("[data-slide]")];
+      const dots = [...carousel.querySelectorAll<HTMLButtonElement>("[data-dot]")];
+      const track = carousel.querySelector<HTMLElement>("[data-slides]");
+      let current = 0;
+
+      const show = (index: number): void => {
+        current = (index + slides.length) % slides.length;
+        track?.style.setProperty("transform", `translateX(-${current * 100}%)`);
+        slides.forEach((slide, slideIndex) => {
+          slide.setAttribute("aria-hidden", String(slideIndex !== current));
+          slide.querySelector("a")?.setAttribute("tabindex", slideIndex === current ? "0" : "-1");
+        });
+        dots.forEach((dot, dotIndex) => {
+          dot.classList.toggle("active", dotIndex === current);
+          if (dotIndex === current) dot.setAttribute("aria-current", "true");
+          else dot.removeAttribute("aria-current");
+        });
+      };
+
+      carousel.querySelector("[data-previous]")?.addEventListener("click", () => show(current - 1));
+      carousel.querySelector("[data-next]")?.addEventListener("click", () => show(current + 1));
+      dots.forEach((dot, index) => dot.addEventListener("click", () => show(index)));
+      carousel.addEventListener("keydown", (event) => {
+        if (event.key === "ArrowLeft") show(current - 1);
+        if (event.key === "ArrowRight") show(current + 1);
+      });
+    });
+  }
+
+  document.addEventListener("astro:page-load", initializeCarousels);
+  initializeCarousels();
+</script>
+
+<style>
+  .feature-carousel {
+    margin-block: 1.5rem 2.5rem;
+  }
+
+  .viewport {
+    overflow: hidden;
+    border: 1px solid var(--sl-color-gray-5);
+    border-radius: 8px;
+    background: var(--sl-color-gray-7);
+    box-shadow: var(--sl-shadow-md);
+  }
+
+  img {
+    border: none;
+    border-radius: 8px;
+  }
+
+  .slides {
+    display: flex;
+    transition: transform 400ms ease;
+  }
+
+  .slide {
+    flex: 0 0 100%;
+    min-width: 0;
+    margin: 0 !important;
+  }
+
+  .slide :global(.screenshot) {
+    display: block;
+    width: 100%;
+    overflow: hidden;
+    background: #0c0c0c;
+  }
+
+  .slide :global(.screenshot svg) {
+    width: 100%;
+    height: auto;
+    object-fit: cover;
+    object-position: top;
+  }
+
+  .caption {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1.5rem;
+    padding: 1rem 1.25rem;
+    margin-top: 0;
+  }
+
+  .caption h3,
+  .caption p {
+    margin: 0;
+  }
+
+  .caption h3 {
+    font-size: 1rem;
+  }
+
+  .caption p {
+    color: var(--sl-color-gray-2);
+    font-size: 0.9rem;
+  }
+
+  .caption a {
+    flex: none;
+    font-size: 0.9rem;
+    font-weight: 400;
+    text-style: bold;
+    margin-right: 1rem;
+  }
+
+  .controls,
+  .dots {
+    display: flex;
+    align-items: center;
+  }
+
+  .controls {
+    justify-content: center;
+    gap: 0.8rem;
+    margin-top: 0.9rem;
+  }
+
+  .dots {
+    gap: 0.45rem;
+    margin-top: 0;
+  }
+
+  .arrow,
+  .dot {
+    margin: 0;
+    border: 0;
+    color: var(--sl-color-text);
+    background: transparent;
+    cursor: pointer;
+  }
+
+  .arrow {
+    width: 2rem;
+    height: 2rem;
+    border-radius: 50%;
+    font-size: 1.1rem;
+  }
+
+  .arrow:hover {
+    background: var(--sl-color-gray-6);
+  }
+
+  .dot {
+    width: 0.6rem;
+    height: 0.6rem;
+    padding: 0;
+    border-radius: 50%;
+    background: var(--sl-color-gray-4);
+  }
+
+  .dot.active {
+    background: var(--sl-color-accent);
+  }
+
+  .arrow:focus-visible,
+  .dot:focus-visible {
+    outline: 2px solid var(--sl-color-accent-high);
+    outline-offset: 2px;
+  }
+
+  @media (max-width: 40rem) {
+    .caption {
+      align-items: flex-start;
+      flex-direction: column;
+      gap: 0.6rem;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .slides {
+      transition: none;
+    }
+  }
+</style>

@@ -1,33 +1,66 @@
 ---
 title: rovr
-description: A modern, customizable, and aesthetically pleasing terminal file explorer.
+description: a stylish, batteries-included terminal file explorer
 template: splash
 lastUpdated: false
 editUrl: false
 hero:
-  tagline: a modern, customizable, and aesthetically pleasing terminal file explorer.
+  tagline: a stylish, batteries-included terminal file explorer
   actions:
-    - text: get started
-      link: /rovr/overview
+    - text: install rovr
+      link: /rovr/get-started/installation
       icon: right-arrow
-    - text: view on github
-      link: https://github.com/NSPC911/rovr
-      icon: external
+    - text: explore the docs
+      link: /rovr/overview
+      icon: open-book
 ---
 
 import { Card, CardGrid } from "@astrojs/starlight/components";
 
-<CardGrid stagger>
-  <Card title="modern tui" icon="laptop">
-    `rovr` provides a modern and intuitive terminal user interface powered by Textual.
+## everything you need, without leaving the terminal
+
+rovr brings file management, rich previews, tabs, archives, and configurable
+workflows together in one polished interface.
+
+## built around the way you work
+
+<CardGrid>
+  <Card title="browse with confidence" icon="laptop">
+    navigate, search, sort, and manage files from a responsive interface that
+    keeps useful details close at hand.
+
+    [learn the interface →](/rovr/guides/user-interface)
   </Card>
-  <Card title="customizable" icon="setting">
-    tailor the appearance, keybindings, and features to your liking through simple configuration files.
+  <Card title="preview instantly" icon="open-book">
+    inspect images, PDFs, archives, source code, fonts, and folders before
+    opening them.
+
+    [explore previews →](/rovr/features/previewing-files)
   </Card>
-  <Card title="feature-rich" icon="rocket">
-    enjoy tabs, file previews, plugins, and other features you thought you didn't need.
+  <Card title="make it yours" icon="setting">
+    tailor themes, keybindings, layouts, openers, and behavior through readable
+    configuration files.
+
+    [configure rovr →](/rovr/configuration/configuration)
   </Card>
-  <Card title="cross-platform" icon="open-book">
-  works on windows, macos and linux out of the box, without any issues
+  <Card title="bring your workflow" icon="rocket">
+    use tabs, shell commands, custom openers, plugins, and recycle-bin support
+    without jumping between tools.
+
+    [discover the features →](/rovr/features/plugins)
   </Card>
 </CardGrid>
+
+## visual where it helps, fast where it matters
+
+rovr is built with Python and Textual for Windows, macOS, and Linux. It is
+designed for people who want the speed of a terminal workflow without giving up
+discoverability or a good-looking interface.
+
+## ready to take it for a spin?
+
+Try rovr without installing it permanently:
+
+```sh
+uvx rovr
+```

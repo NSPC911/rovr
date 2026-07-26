@@ -221,6 +221,12 @@ img {
   border: 2.5px solid var(--sl-color-accent);
   border-radius: 5px;
 }
+article.card {
+  transition: scale var(--sl-transition-duration) ease;
+  &:hover {
+    scale: 1.025
+  }
+}
 .sidebar-content {
   padding: 1rem 1rem 0 0.5rem
 }
@@ -231,10 +237,10 @@ img {
   }
   [class^="right-sidebar"] {
     min-width: 20vw;
-    max-width: 300px;
+    max-width: 250px;
     > .sl-container {
-      width: calc(25vw - (2 * var(--sidebar-pad-x)));
-      max-width: calc(300px - (2 * var(--sidebar-pad-x)));
+      width: 25vw;
+      max-width: 250px;
     }
   }
   .main-frame:not(:has(> div > aside[class*="print:hidden"])) {
@@ -245,7 +251,10 @@ img {
     margin-inline: 0 !important;
   }
   .content-panel {
-    max-width: calc(100vw - 525px);
+    max-width: calc(100vw - 300px);
+  }
+  html[data-has-sidebar][data-has-toc] .content-panel {
+    max-width: calc(100vw - 500px);
   }
   table {
     max-width: calc(80vw - 300px) !important;
@@ -305,9 +314,6 @@ img {
     background: transparent;
     backdrop-filter: blur(10px);
   }
-}
-.main-frame {
-  background: transparent;
 }
 main {
   background: transparent;
@@ -425,32 +431,36 @@ button {
   );
   border: none;
 }
-body > div:not(:has(> nav)) > div.main-frame > div {
-  height: 100vh;
+div.main-frame {
+  background: transparent;
+  overflow-y: auto;
+  overflow-x: hidden;
 }
 body > div:not(:has(> nav)) > div.main-frame {
   margin-top: var(--sl-nav-height);
-  overflow: auto;
   max-height: calc(
     100vh - (var(--sl-nav-height) + var(--sl-mobile-toc-height))
   );
   scrollbar-color: var(--sl-color-bg-accent) transparent;
+  > div {
+    height: 100vh;
+  }
 }
 body > div:has(> nav) > div {
-  overflow: auto;
   max-height: calc(
     100vh - (var(--sl-nav-height) + var(--sl-mobile-toc-height))
   );
   scrollbar-color: var(--sl-color-bg-accent) transparent;
-}
-body > div:has(> nav) > div {
   margin-left: clamp(220px, var(--sl-content-inline-start), 300px);
   &.main-frame {
-    overflow: auto;
     scrollbar-color: var(--sl-color-bg-accent) transparent;
     margin-top: calc(var(--sl-nav-height) + var(--sl-mobile-toc-height));
     padding-top: 0;
   }
+}
+a[aria-current="page"] :is(a, span) {
+  font-weight: 400;
+  font-size: inherit;
 }
 figure.frame {
   &:has(> figcaption > span)
@@ -459,16 +469,19 @@ figure.frame {
     border-top-right-radius: 0;
   }
   &:not(:has(> figcaption > span))
-    > pre[data-language]:not([data-language="plaintext"]) {
-    padding-top: 1em;
-    &::before {
+    > pre[data-language]:not([data-language="plaintext"])::before {
       position: absolute;
       display: block;
       content: attr(data-language);
-      left: 1em;
+      right: 0.5em;
       top: 6px;
       transition: color calc(var(--sl-transition-duration) / 2) linear;
-    }
+      border: 1px solid hsl(from var(--sl-color-text) h s l / 0.4);
+      border-radius: 0.2rem;
+      padding: 0.125em 0.5em;
+  }
+  &:hover > pre[data-language]::before {
+    display: none !important;
   }
 
   > pre[data-language]:not([data-language="plaintext"]) {
@@ -590,14 +603,7 @@ starlight-lang-select {
   }
 }
 
-.hero {
-  margin-bottom: calc(var(--sl-nav-height) * 2);
-  > img {
-    display: none;
-  }
-}
 .main-pane > main > .content-panel:has(> div > .hero) {
-  margin: 0 min(10vw, 5rem);
   padding: 0;
   .card {
     background: transparent;

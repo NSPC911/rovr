@@ -32,7 +32,7 @@ $bar-gradient-error: <color> <color>;
 $block-cursor-background: <color>;
 ```
 
-`$primary` is the only required variable. every color you don't define is generated from the ones you do — including shades like `$primary-lighten-3`, which regenerate automatically when you change `$primary`.
+Every default variable is required to be declared, but you can add any other variable that is used by textual or rovr's css.
 
 theme files can also contain regular tcss rules below the variable declarations:
 
@@ -65,6 +65,7 @@ you can take a look at the reference in [textual](https://textual.textualize.io/
 | success    | Used to indicate success. Typically used as a background color. `text-success` can be used for foreground.                                   |
 | accent     | Used sparingly to draw attention. Typically contrasts with `primary` and `secondary`.                                                        |
 | dark       | A boolean indicating whether the theme is dark or light.                                                                                     |
+| ansi       | Whether it is an ansi theme (which automatically disables the background color).                                                             |
 
 any other declaration becomes a custom variable, usable by [textual's additional variables](https://textual.textualize.io/guide/design/#additional-variables) and rovr's own css.
 
@@ -169,13 +170,3 @@ This is the root container that holds everything. This is not to be confused wit
 | compact-buttons | applied when the `interface.compact_mode.buttons` is enabled in config | `#root.compact-buttons` |
 | compact-panels  | applied when the `interface.compact_mode.panels` is enabled in config  | `#root.compact-panels`  |
 
-Root class also adds an extra class to itself to signify the current theme
-
-Example:
-
-```css
-#root.theme-<theme-name> { ... }
-/* like */
-#root.theme-nord { ... }
-#root.theme-textual-dark { ... }
-```

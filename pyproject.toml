@@ -159,6 +159,9 @@ snip.use_exec = true
 tokei.help = "Run tokei"
 tokei.cmd = " tokei --sort lines --exclude '*.svg' --exclude 'schema.mdx' --exclude 'src/rovr/classes/config.pyi' --exclude '*lock' --hidden"
 
+pnpm.help = "Run pnpm in the docs folder"
+pnpm.cmd = "pnpm --dir docs"
+
 [tool.poe.tasks.test]
 help = "Run tests"
 cmd = "pytest -n ${workers} ${FILES} $POE_EXTRA_ARGS"

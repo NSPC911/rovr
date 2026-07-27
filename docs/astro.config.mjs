@@ -51,7 +51,10 @@ export default defineConfig({
           },
         },
       ],
-      customCss: ["./src/styles/custom.css"],
+      customCss: [
+        "./src/fonts/font-face.css",
+        "./src/styles/custom.css"
+      ],
       editLink: {
         baseUrl: "https://github.com/NSPC911/rovr/tree/docs/docs",
       },

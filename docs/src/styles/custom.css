@@ -2,14 +2,6 @@
 @view-transition {
   navigation: none;
 }
-@font-face {
-  font-family: "CaskaydiaCove NFP";
-  src: url("./caskaydiacovenfp.ttf") format("truetype");
-}
-@font-face {
-  font-family: "CaskaydiaCoveNFM";
-  src: url("./caskaydiacovenfm.ttf") format("truetype");
-}
 
 :root {
   --sl-sidebar-width: 20vw;
@@ -110,7 +102,7 @@ html {
   }
 }
 html * {
-  font-family: "CaskaydiaCoveNFM";
+  font-family: "CaskaydiaCove NFM";
   transition:
     var(--sl-transition-duration) background ease-in-out,
     calc(var(--sl-transition-duration) / 2) color ease-in-out,
@@ -147,7 +139,7 @@ table {
 svg.rich-terminal *,
 .header, h1, h2, h3,
 .sidebar-content {
-  font-family: "CaskaydiaCoveNFM" !important;
+  font-family: "CaskaydiaCove NFM" !important;
 }
 code {
   text-transform: none;

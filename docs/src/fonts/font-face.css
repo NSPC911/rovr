@@ -1,0 +1,26 @@
+@font-face {
+  font-family: 'CaskaydiaCove NFM';
+  /* Use a relative path to the local font file in `url()`. */
+  src: url('./caskaydiacovenfm.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'CaskaydiaCove NFP Bold';
+  /* Use a relative path to the local font file in `url()`. */
+  src: url('./caskaydiacovenfp-bold.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'CaskaydiaCove NFP';
+  /* Use a relative path to the local font file in `url()`. */
+  src: url('./caskaydiacovenfp.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}

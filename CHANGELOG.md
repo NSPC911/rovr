@@ -36,10 +36,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `pins`: prevent a possible `ContextError` [f0975a9](https://github.com/NSPC911/rovr/commit/f0975a954f122935a3438bd82fff5cfa0912c40c)
 - `app`: make background work cancellable on shutdown [f0ae2dc](https://github.com/NSPC911/rovr/commit/f0ae2dcfdd126bdaf081bbf8bb9f2ae10ef90f7a)
 
-### Removed
-
-- `lists`: remove block border subtitles [af3df76](https://github.com/NSPC911/rovr/commit/af3df763aa0c3efed40c7685059e4c4a241b80ab)
-
 ### Performance
 
 - `preview`: read file bytes later, use magic_file [809f7e3](https://github.com/NSPC911/rovr/commit/809f7e35e9d708f3195b0c2cd9cd0231f258649b) [0c6e42f](https://github.com/NSPC911/rovr/commit/0c6e42f6213077f64231c61492796e236745e43c)

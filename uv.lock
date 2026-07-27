@@ -1041,11 +1041,11 @@ wheels = [
 
 [[package]]
 name = "pytrash"
-version = "0.3.3"
+version = "0.4.0"
 source = { registry = "https://pypi.org/simple" }
-sdist = { url = "https://files.pythonhosted.org/packages/2c/39/b93932b218db68fdc7e07ca3ab3c64448555044f98a935bdbb5277d64dc3/pytrash-0.3.3.tar.gz", hash = "sha256:2f7f812ca62b626503907a6658879a71baf4eb27844f778ecf252d6dd23305f5", size = 15748, upload-time = "2026-07-19T00:57:49.565Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/ea/0a/f4eb4cef6b1a81bf733f6735a2aed653573fce1255e3d2187eddb3cf104b/pytrash-0.4.0.tar.gz", hash = "sha256:74557aa6f021e8ed11aea46b6489320cc8113a04a91fcbaaaf70f0473c524682", size = 16239, upload-time = "2026-07-25T13:07:35.599Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/3a/62/fd51eb9e590fe9a7875ab67e1e21177e43d412b981c549b2dda7ffc0608a/pytrash-0.3.3-py3-none-any.whl", hash = "sha256:75a56708da343b8fe4d8b5627f7505252759bc7ce0119bf4ffddae4d6af4010f", size = 20242, upload-time = "2026-07-19T00:57:48.615Z" },
+    { url = "https://files.pythonhosted.org/packages/53/b4/9ba255785cd8fd4b87c03c4d7f5cbd2863f059bc32e77b7d5a5a6f0b8b2d/pytrash-0.4.0-py3-none-any.whl", hash = "sha256:110ecdca262f2019b775bffdf7fd4d89c4975886f17c633ffb00f00c5623298f", size = 20848, upload-time = "2026-07-25T13:07:34.506Z" },
 ]
 
 [[package]]
@@ -1271,7 +1271,7 @@ requires-dist = [
     { name = "pillow", specifier = ">=12.2.0" },
     { name = "platformdirs", specifier = ">=4.9.0" },
     { name = "puremagic", specifier = ">=2.2.0" },
-    { name = "pytrash", specifier = ">=0.3.2" },
+    { name = "pytrash", specifier = ">=0.4.0" },
     { name = "rarfile", specifier = ">=4.2" },
     { name = "resvg-py", specifier = ">=0.3.1" },
     { name = "rich", specifier = "==14.2.0" },

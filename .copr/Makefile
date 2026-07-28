@@ -6,4 +6,4 @@ TARBALL := $(NAME)-$(VERSION).tar.gz
 .PHONY: srpm
 srpm:
 	git archive --format=tar.gz --prefix=$(NAME)-$(VERSION)/ HEAD > $(TARBALL)
-	rpmbuild -bs --define "_sourcedir $(PWD)" --define "_specdir $(PWD)/.copr" $(SPECFILE)
+	rpmbuild -bs --define "_sourcedir $(PWD)" --define "_specdir $(PWD)/.copr" --define "_srcrpmdir $(outdir)" $(SPECFILE)

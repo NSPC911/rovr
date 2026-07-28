@@ -205,23 +205,27 @@ class PreviewContainer(Actionable, Container):
         self.border_title = ""
         self.border_subtitle = ""
         dir_entry = path_utils.get_direntry_for(location)
-        if dir_entry.is_symlink():
-            await self.mount(
-                Static("The symlink target is not found!", classes="special")
-            )
-            # also update option if necessary
-            if isinstance(
-                highlighted_option, FileListSelectionWidget
-            ) and highlighted_option.icon != icon_utils.get_icon(
-                "general", "broken_symlink"
-            ):
-                highlighted_option.set_icon(
-                    icon_utils.get_icon("general", "broken_symlink")
+        try:
+            if dir_entry.is_symlink():
+                await self.mount(
+                    Static("The symlink target is not found!", classes="special")
                 )
-        else:
-            await self.app.query_one("PreviewContainer").mount(
-                Static("This file no longer exists...", classes="special")
-            )
+                # also update option if necessary
+                if isinstance(
+                    highlighted_option, FileListSelectionWidget
+                ) and highlighted_option.icon != icon_utils.get_icon(
+                    "general", "broken_symlink"
+                ):
+                    highlighted_option.set_icon(
+                        icon_utils.get_icon("general", "broken_symlink")
+                    )
+            else:
+                await self.app.query_one("PreviewContainer").mount(
+                    Static("This file no longer exists...", classes="special")
+                )
+        except FileNotFoundError:
+            # if the thing itself is gone basically
+            await self.mount(Static("This file no longer exists...", classes="special"))
 
     def show_font_preview(self) -> None:
         """Show font preview with PIL.ImageFont and a custom PIL.ImageDraw"""

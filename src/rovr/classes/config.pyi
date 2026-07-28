@@ -826,6 +826,7 @@ r""" minimum: 1 """
 _RovrConfigInterfaceImageViewerProtocol = (
     Literal["Auto"]
     | Literal["TGP"]
+    | Literal["ITerm2"]
     | Literal["Sixel"]
     | Literal["Halfcell"]
     | Literal["Unicode"]
@@ -838,6 +839,8 @@ default: Auto
 _ROVRCONFIGINTERFACEIMAGEVIEWERPROTOCOL_AUTO: Literal["Auto"] = "Auto"
 r"""The values for the 'The image protocol to use when displaying an image' enum"""
 _ROVRCONFIGINTERFACEIMAGEVIEWERPROTOCOL_TGP: Literal["TGP"] = "TGP"
+r"""The values for the 'The image protocol to use when displaying an image' enum"""
+_ROVRCONFIGINTERFACEIMAGEVIEWERPROTOCOL_ITERM2: Literal["ITerm2"] = "ITerm2"
 r"""The values for the 'The image protocol to use when displaying an image' enum"""
 _ROVRCONFIGINTERFACEIMAGEVIEWERPROTOCOL_SIXEL: Literal["Sixel"] = "Sixel"
 r"""The values for the 'The image protocol to use when displaying an image' enum"""

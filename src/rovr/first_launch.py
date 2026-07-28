@@ -37,6 +37,8 @@ from textual.widgets import (
     Switch,
 )
 
+from rovr.components.iterm2_image import ITerm2Image
+from rovr.components.iterm2_image import is_supported as iterm2_supported
 from rovr.functions.themes import register_all_themes, resolve_theme_ansi
 from rovr.functions.utils import should_cancel
 from rovr.variables.maps import RovrVars
@@ -47,8 +49,9 @@ else:
     resource = resources.files("rovr")
 
 prot_to_timg: dict[str, Callable] = {
-    "auto": timg.Image,
+    "auto": ITerm2Image if iterm2_supported() else timg.Image,
     "tgp": timg.TGPImage,
+    "iterm2": ITerm2Image,
     "sixel": timg.SixelImage,
     "halfcell": timg.HalfcellImage,
     "unicode": timg.UnicodeImage,
@@ -58,6 +61,7 @@ prot_to_timg: dict[str, Callable] = {
 prot_to_schema: dict[str, str] = {
     "auto": "Auto",
     "tgp": "TGP",
+    "iterm2": "ITerm2",
     "sixel": "Sixel",
     "halfcell": "Halfcell",
     "unicode": "Unicode",
@@ -267,6 +271,7 @@ class FirstLaunchApp(App, inherit_bindings=False):
                 (
                     ("Auto", "auto"),
                     ("TGP/Kitty (might be broken)", "tgp"),
+                    ("iTerm2", "iterm2"),
                     ("Sixel", "sixel"),
                     ("HalfCell", "halfcell"),
                     ("Unicode (not recommended)", "unicode"),

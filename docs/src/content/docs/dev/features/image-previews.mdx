@@ -29,7 +29,7 @@ here is a summary of terminals and their support for the image protocols used by
 | Windows Terminal   |     ❌      |      ✅       |
 | Xterm              |     ❌      |      ✅       |
 
-> the `iterm2 inline images` protocol is not supported. see [lnqs/textual-image #68](https://github.com/lnqs/textual-image/issues/68) for more details.
+> rovr includes its own iTerm2 Inline Image Protocol widget. With `"Auto"`, it is selected automatically in a TTY when `TERM_PROGRAM` is `iTerm2` or `WezTerm`.
 
 ### configuring the image protocol
 
@@ -38,12 +38,12 @@ if you are using a terminal that doesn't support the default image protocol, `te
 if images do not appear correctly, you can manually override the image protocol in your `config.toml` file.
 
 <Code
-  code={`[settings]\nimage_protocol = "Sixel"`}
+  code={`[interface.image_viewer]\nprotocol = "ITerm2"`}
   lang="toml"
   title="config.toml"
 />
 
-available `image_protocol` values are: `"Auto"`, `"TGP"`, `"Sixel"`, `"Halfcell"`, and `"Unicode"`.
+available `protocol` values are: `"Auto"`, `"TGP"`, `"ITerm2"`, `"Sixel"`, `"Halfcell"`, and `"Unicode"`.
 
 ### configuring the image size
 

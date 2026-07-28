@@ -293,7 +293,7 @@
               "type": "string",
               "default": "Auto",
               "description": "The image protocol to use when displaying an image",
-              "enum": ["Auto", "TGP", "Sixel", "Halfcell", "Unicode"]
+              "enum": ["Auto", "TGP", "ITerm2", "Sixel", "Halfcell", "Unicode"]
             },
             "max_size": {
               "type": "array",

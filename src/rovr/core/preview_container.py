@@ -30,6 +30,8 @@ from rovr.classes.textual_options import (
     ArchiveFileListSelection,
     FileListSelectionWidget,
 )
+from rovr.components.iterm2_image import ITerm2Image
+from rovr.components.iterm2_image import is_supported as iterm2_supported
 from rovr.core import FileList
 from rovr.functions import icons as icon_utils
 from rovr.functions import path as path_utils
@@ -45,11 +47,14 @@ titles = PreviewContainerTitles()
 # yes i know this is a hidden module, and yes, i will
 # continue using it, because i cant use a variable
 # (the variable being textual_image.widget.Image)
+image_protocol = config["interface"]["image_viewer"]["protocol"]
+image_widget = (
+    ITerm2Image
+    if image_protocol == "ITerm2" or (not image_protocol and iterm2_supported())
+    else textual_image.widget.__dict__[image_protocol + "Image"]
+)
 NewImage: partial[textual_image.widget._base.Image] = partial(
-    textual_image.widget.__dict__[
-        config["interface"]["image_viewer"]["protocol"] + "Image"
-    ],
-    classes="image_preview",
+    image_widget, classes="image_preview"
 )
 
 

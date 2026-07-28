@@ -395,8 +395,12 @@ example_function(10)"""
             show_keys=args.show_keys,
             tree_dom=args.tree_dom,
             force_crash_in=args.force_crash_in,
+            force_exit_on_shutdown=True,
         )
-        app.run()
+        try:
+            app.run()
+        finally:
+            app.cancel_force_exit_timer()
     elif args.force_tty:
         open_stdout = "CONOUT$" if os.name == "nt" else "/dev/tty"
         open_stdin = "CONIN$" if os.name == "nt" else "/dev/tty"
@@ -424,8 +428,12 @@ example_function(10)"""
                     show_keys=args.show_keys,
                     tree_dom=args.tree_dom,
                     force_crash_in=args.force_crash_in,
+                    force_exit_on_shutdown=True,
                 )
-                app.run()
+                try:
+                    app.run()
+                finally:
+                    app.cancel_force_exit_timer()
         finally:
             sys.__stdout__ = sys.stdout = backup_stdout
             sys.__stderr__ = sys.stderr = backup_stderr

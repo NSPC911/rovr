@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import asyncio
 import multiprocessing
+import os
 import sys
 import threading
 from contextlib import suppress
@@ -217,6 +218,7 @@ class Application(Actionable, DNDApp, inherit_bindings=False):
         show_keys: bool = False,
         tree_dom: bool = False,
         force_crash_in: float = 0,
+        force_exit_on_shutdown: bool = False,
     ) -> None:
         super().__init__(watch_css=True)
         # replace the plain Stylesheet created by App.__init__ before any CSS
@@ -231,6 +233,8 @@ class Application(Actionable, DNDApp, inherit_bindings=False):
         self._show_keys: bool = show_keys
         self._exit_with_tree: bool = tree_dom
         self._force_crash_in: float = force_crash_in
+        self._force_exit_on_shutdown = force_exit_on_shutdown
+        self._force_exit_timer: threading.Timer | None = None
         self._pins_mtime: float | None = None
         self._highlighted_file_mtime: float | None = None
 
@@ -710,7 +714,24 @@ class Application(Actionable, DNDApp, inherit_bindings=False):
                     except OSError:
                         # Any failure writing chooser file should not block exit
                         message += f"Failed to write chooser file `{path.basename(self._chooser_file)}`"
+        self._arm_force_exit_timer()
         self.exit(message.strip() if message else None)
+
+    def _arm_force_exit_timer(self) -> None:
+        if not self._force_exit_on_shutdown or self._force_exit_timer is not None:
+            return
+        self._force_exit_timer = threading.Timer(
+            0.1,
+            os._exit,
+            args=(0,),
+        )
+        self._force_exit_timer.daemon = True
+        self._force_exit_timer.start()
+
+    def cancel_force_exit_timer(self) -> None:
+        if self._force_exit_timer is not None:
+            self._force_exit_timer.cancel()
+            self._force_exit_timer = None
 
     def open_recycle_bin(self) -> None:
         """Open the recycle bin browser, refreshing the file list on restore."""

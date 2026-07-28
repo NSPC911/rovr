@@ -1,5 +1,4 @@
 from functools import partial
-from subprocess import Popen
 from typing import ClassVar, Literal
 
 from textual import events, work
@@ -247,14 +246,19 @@ class FileListRightClickMenu(PopupOptionList, inherit_bindings=False):
             command: str | list[str] = await expand_command(
                 self.app, event.option.action["run"]
             )
-            proc = run_command(
-                self.app,
-                command,
-                event.option.action["run_type"],
-                shell=event.option.action["shell"],
-            )
-            if isinstance(proc, Popen) and event.option.action["run_type"] != "orphan":
-                self.app.shell_thread(proc, "Context Menu")
+            if event.option.action["run_type"] == "background":
+                self.app.shell_command(
+                    command,
+                    "Context Menu",
+                    shell=event.option.action["shell"],
+                )
+            else:
+                run_command(
+                    self.app,
+                    command,
+                    event.option.action["run_type"],
+                    shell=event.option.action["shell"],
+                )
 
     def on_blur(self, event: events.Blur) -> None:  # ty: ignore[invalid-method-override]
         event.prevent_default().stop()

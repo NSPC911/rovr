@@ -2,12 +2,11 @@ from __future__ import annotations
 
 import asyncio
 import contextlib
-import subprocess
 from dataclasses import dataclass
 from functools import partial
 from io import BytesIO
 from os import path
-from time import monotonic, time
+from time import time
 from typing import cast
 
 import textual_image.renderable
@@ -34,6 +33,7 @@ from rovr.core import FileList
 from rovr.functions import icons as icon_utils
 from rovr.functions import path as path_utils
 from rovr.functions import preview_utils
+from rovr.functions.command import run_command_async
 from rovr.functions.pdf import get_pdf_images, get_pdf_info
 from rovr.functions.utils import multiprocessing_process_error_checker, should_cancel
 from rovr.variables.constants import PreviewContainerTitles, config, file_one
@@ -508,9 +508,9 @@ class PreviewContainer(Actionable, Container):
             "border_subtitle",
             f"Page {self.pdf.current_page + 1}/{self.pdf.total_pages}",
         )
-        self.run_worker(self.show_pdf_preview, thread=True, exclusive=True)
+        self.show_pdf_preview()
 
-    def load_pdf_pages(self, first_page: int, last_page: int) -> list[PILImage]:
+    async def load_pdf_pages(self, first_page: int, last_page: int) -> list[PILImage]:
         """
         Returns:
             List of images, one per pages fetched
@@ -523,7 +523,7 @@ class PreviewContainer(Actionable, Container):
                 f"Invalid args, first_page={first_page} > last_page={last_page}"
             )
 
-        result = get_pdf_images(
+        result = await get_pdf_images(
             str(self._current_file_path),
             first_page=first_page,
             last_page=last_page,
@@ -541,17 +541,20 @@ class PreviewContainer(Actionable, Container):
                 return preview_utils.resample_batch(result)
             except ValueError as exc:
                 if multiprocessing_process_error_checker(self.app, exc):
-                    return preview_utils.resample_batch_sync(result)
+                    return await asyncio.to_thread(
+                        preview_utils.resample_batch_sync, result
+                    )
                 raise
-        return preview_utils.resample_batch_sync(result)
+        return await asyncio.to_thread(preview_utils.resample_batch_sync, result)
 
-    def show_pdf_preview(self) -> None:
+    @work(exclusive=True, group="pdf_preview")
+    async def show_pdf_preview(self) -> None:
         """
-        Show PDF preview. Runs in a thread.
+        Show a PDF preview.
         The job of this function is to load the pdf file for the first time.
         Or ensure the batched loading
         """
-        self.app.call_from_thread(setattr, self, "border_title", titles.pdf)
+        self.border_title = titles.pdf
 
         if should_cancel() or self._current_file_path is None:
             return
@@ -559,21 +562,19 @@ class PreviewContainer(Actionable, Container):
         # Convert PDF to images if not already done
         if self.pdf.images is None:
             try:
-                self.pdf.total_pages = int(
-                    get_pdf_info(
-                        str(self._current_file_path),
-                        poppler_path=PDFHandler.get_poppler_folder(),
-                    )["Pages"]
+                pdf_info = await get_pdf_info(
+                    str(self._current_file_path),
+                    poppler_path=PDFHandler.get_poppler_folder(),
                 )
-                result = self.load_pdf_pages(
+                self.pdf.total_pages = int(pdf_info["Pages"])
+                result = await self.load_pdf_pages(
                     first_page=1, last_page=self.pdf.get_last_page_to_load()
                 )
             except Exception as exc:
                 if should_cancel():
                     return
-                self.app.call_from_thread(self.remove_children)
-                self.app.call_from_thread(
-                    self.mount,
+                await self.remove_children()
+                await self.mount(
                     Static(f"{type(exc).__name__}: {str(exc)}", classes="special"),
                 )
                 return
@@ -582,23 +583,20 @@ class PreviewContainer(Actionable, Container):
             # The only one case when current page and border subtitles
             # should be manually adjusted. Not the best design though.
             self.pdf.current_page = 0
-            self.app.call_from_thread(
-                setattr,
-                self,
-                "border_subtitle",
-                f"Page {self.pdf.current_page + 1}/{self.pdf.total_pages}",
+            self.border_subtitle = (
+                f"Page {self.pdf.current_page + 1}/{self.pdf.total_pages}"
             )
 
         elif self.pdf.should_load_next_batch():
-            # Saving the value per thread instead of recalculating after the load
-            # Even if something changes in between, we want the threads that set the status to
+            # Save the value instead of recalculating after the load.
+            # Even if something changes in between, workers that set the status to
             # loading, to always unset it
             toggle_loading = self.pdf.must_load_next_batch()
 
             if toggle_loading:
                 self.post_message(self.SetLoading(True))
             try:
-                result = self.load_pdf_pages(
+                result = await self.load_pdf_pages(
                     first_page=self.pdf.count_loaded() + 1,
                     last_page=self.pdf.get_last_page_to_load(),
                 )
@@ -607,27 +605,25 @@ class PreviewContainer(Actionable, Container):
                     return
                 if toggle_loading:
                     self.call_later(lambda: self.post_message(self.SetLoading(False)))
-                self.app.call_from_thread(self.remove_children)
-                self.app.call_from_thread(
-                    self.mount,
+                await self.remove_children()
+                await self.mount(
                     Static(f"{type(exc).__name__}: {str(exc)}", classes="special"),
                 )
                 return
             if toggle_loading:
                 self.call_later(lambda: self.post_message(self.SetLoading(False)))
             # Note - This should_cancel must be kept here, not before the `load_pdf_pages` call
-            # That, somehow doesn't prevents multiple threads executing the load
-            # even though, we successful prevent multiple threads
+            # That prevents multiple workers executing the load
             # appending the results via this one
             # Also we must ensure to cancel only after you reset the SetLoading(false)
             # We don't want threads to Set the screen in Loading state, and never turn it back
             if should_cancel():
                 return
 
-            # This mutation on the `images` object should be done by one one thread
+            # This mutation on the `images` object should be done by one worker
             # and the entire flow of checking `should_load_next_batch` to loading
             # to appending the pages should be atomic.
-            # At this point, we are using `should_cancel` to allow only one thread
+            # At this point, we are using `should_cancel` to allow only one worker
             # to reach here
             self.pdf.images += result
 
@@ -639,32 +635,26 @@ class PreviewContainer(Actionable, Container):
         if image_widget := self.get_child(".image_preview"):
             if should_cancel():
                 return
-            self.app.call_from_thread(setattr, image_widget, "image", current_image)
+            setattr(image_widget, "image", current_image)
         else:
-            self.app.call_from_thread(self.remove_children)
-            self.app.call_from_thread(self.remove_class, "bat", "full", "clip")
+            await self.remove_children()
+            self.remove_class("bat", "full", "clip")
 
             if should_cancel():
                 return
 
             image_widget = NewImage(current_image)
             image_widget.can_focus = True
-            self.app.call_from_thread(self.mount, image_widget)
+            await self.mount(image_widget)
 
         if should_cancel():
             return
 
     # ------------ PDF related functions end ------------
 
-    def show_bat_file_preview(self) -> bool:
-        """Show bat file preview. Runs in a thread.
-
-        Returns:
-            bool: True if successful, False otherwise.
-
-        Raises:
-            subprocess.TimeoutExpired: If bat does not finish within five seconds.
-        """
+    @work(exclusive=True, group="bat_preview")
+    async def show_bat_file_preview(self) -> None:
+        """Show a bat-powered file preview."""
         bat_executable = config["plugins"]["bat"]["executable"]
         command = [
             bat_executable,
@@ -674,89 +664,71 @@ class PreviewContainer(Actionable, Container):
             if config["interface"]["show_line_numbers"]
             else "--style=plain",
         ]
-        max_lines = self.app.call_from_thread(lambda: self.region.height)
+        max_lines = self.region.height
         if max_lines > 0:
             command.append(f"--line-range=:{max_lines}")
         assert self._current_file_path is not None
         command.extend(["--", self._current_file_path])
 
         if should_cancel():
-            return False
+            return
 
         from rich.text import Text
 
-        self.app.call_from_thread(setattr, self, "border_title", titles.bat)
+        self.border_title = titles.bat
 
         try:
-            process = subprocess.Popen(
-                command,
-                stdout=subprocess.PIPE,
-                stderr=subprocess.PIPE,
-            )
-            deadline = monotonic() + 5
-            while True:
-                try:
-                    stdout, stderr = process.communicate(timeout=1)
-                    break
-                except subprocess.TimeoutExpired:
-                    if should_cancel() or monotonic() >= deadline:
-                        process.kill()
-                        stdout, stderr = process.communicate()
-                        if should_cancel():
-                            return False
-                        raise subprocess.TimeoutExpired(command, 5, stdout, stderr)
+            completed = await run_command_async(command, timeout=5)
+            stdout, stderr = completed.stdout, completed.stderr
 
             if should_cancel():
-                return False
+                return
 
-            if process.returncode == 0:
+            if completed.returncode == 0:
                 bat_output = stdout.decode("utf-8", errors="ignore")
                 new_content = Text.from_ansi(bat_output)
 
                 if should_cancel():
-                    return False
+                    return
 
                 if static_widget := self.get_child("Static"):
                     self.log("Using existing Static")
-                    self.app.call_from_thread(static_widget.update, new_content)
-                    self.app.call_from_thread(static_widget.set_classes, "bat_preview")
+                    static_widget.update(new_content)
+                    static_widget.set_classes("bat_preview")
                 else:
                     self.log("Mounting new Static")
-                    self.app.call_from_thread(self.remove_children)
+                    await self.remove_children()
 
                     if should_cancel():
-                        return False
+                        return
 
                     static_widget = Static(new_content, classes="bat_preview")
-                    self.app.call_from_thread(self.mount, static_widget)
+                    await self.mount(static_widget)
                     if should_cancel():
-                        return False
+                        return
                     static_widget.can_focus = True
-                return True
+                return
             else:
                 error_message = stderr.decode("utf-8", errors="ignore")
                 if should_cancel():
-                    return False
-                self.app.call_from_thread(self.remove_children)
-                self.app.call_from_thread(
-                    self.notify,
+                    return
+                await self.remove_children()
+                self.notify(
                     error_message,
                     title="Plugins: Bat",
                     severity="warning",
                 )
-                return False
-        except Exception as exc:
+        except (OSError, TimeoutError) as exc:
             if should_cancel():
-                return False
-            self.app.call_from_thread(
-                self.notify,
+                return
+            self.notify(
                 str(exc),
                 title="Plugins: Bat",
                 severity="error",
                 markup=False,
             )
             path_utils.dump_exc(self, exc)
-            return False
+        self.run_worker(self.show_normal_file_preview, thread=True, exclusive=True)
 
     def show_normal_file_preview(self) -> None:
         """Show normal file preview with syntax highlighting. Runs in a thread."""
@@ -1195,7 +1167,7 @@ class PreviewContainer(Actionable, Container):
         elif file_type == "pdf":
             self.log("Showing pdf preview")
             self.app.call_from_thread(self.add_class, "pdf")
-            self.show_pdf_preview()
+            self.app.call_from_thread(self.show_pdf_preview)
         elif file_type == "resvg":
             self.log("Showing resvg preview")
             self.show_resvg_preview()
@@ -1209,9 +1181,9 @@ class PreviewContainer(Actionable, Container):
             else:
                 if config["plugins"]["bat"]["enabled"]:
                     self.log("Showing bat preview")
-                    if self.show_bat_file_preview():
-                        return
-                self.show_normal_file_preview()
+                    self.app.call_from_thread(self.show_bat_file_preview)
+                else:
+                    self.show_normal_file_preview()
 
     def mount_special_messages(self) -> None:
         """Mount special messages. Runs in a thread."""
@@ -1228,21 +1200,11 @@ class PreviewContainer(Actionable, Container):
                 config["plugins"]["file_one"]["enabled"]
                 and config["plugins"]["file_one"]["get_description"]
             ):
-                try:
-                    executable = file_one()
-                    if executable:
-                        process = subprocess.run(
-                            [executable, "--brief", "--", self._current_file_path],
-                            capture_output=True,
-                            text=True,
-                            check=True,
-                            timeout=1,
-                        )
-                        display_content += f"\n{process.stdout.strip()}"
-                except subprocess.TimeoutExpired:
-                    pass
-                except (subprocess.SubprocessError, FileNotFoundError) as exc:
-                    path_utils.dump_exc(self, exc)
+                self.app.call_from_thread(
+                    self.show_file_description,
+                    self._current_file_path,
+                    display_content,
+                )
 
         if static_widget := self.get_child("Static"):
             self.app.call_from_thread(static_widget.update, display_content)
@@ -1255,6 +1217,27 @@ class PreviewContainer(Actionable, Container):
             self.app.call_from_thread(self.mount, static_widget)
         # not wasting an isinstance on this
         cast(Static, static_widget).can_focus = True
+
+    @work(exclusive=True, group="file_description")
+    async def show_file_description(self, file_path: str, display_content: str) -> None:
+        executable = file_one()
+        if not executable:
+            return
+        try:
+            completed = await run_command_async(
+                [executable, "--brief", "--", file_path],
+                timeout=1,
+            )
+        except (OSError, TimeoutError) as exc:
+            path_utils.dump_exc(self, exc)
+            return
+        if (
+            completed.returncode == 0
+            and self._current_file_path == file_path
+            and (static_widget := self.get_child("Static"))
+        ):
+            description = completed.stdout.decode(errors="ignore").strip()
+            static_widget.update(f"{display_content}\n{description}")
 
     def on_mouse_scroll_up(self, event: events.MouseScrollUp) -> None:
         """Handle mouse scroll up for PDF navigation."""
@@ -1274,18 +1257,23 @@ class PreviewContainer(Actionable, Container):
             return self._render_widget.region
         return super().region
 
-    @work(thread=True)
+    @work(exclusive=True, group="preview_resize")
     @on(events.Resize)
-    def _trigger_resize_update(self) -> None:
-        """Trigger resize update from a thread."""
+    async def _trigger_resize_update(self) -> None:
+        """Update command-backed previews after a resize."""
         try:
             if self.border_title in (
                 PreviewContainerTitles.file,
                 PreviewContainerTitles.bat,
             ):
-                if config["plugins"]["bat"]["enabled"] and self.show_bat_file_preview():
-                    return
-                self.show_normal_file_preview()
+                if config["plugins"]["bat"]["enabled"]:
+                    self.show_bat_file_preview()
+                else:
+                    self.run_worker(
+                        self.show_normal_file_preview,
+                        thread=True,
+                        exclusive=True,
+                    )
         except Exception:
             pass
 

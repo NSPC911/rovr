@@ -1,4 +1,3 @@
-import asyncio
 import contextlib
 import subprocess
 from typing import cast
@@ -11,6 +10,7 @@ from textual.worker import WorkerCancelled
 
 from rovr.classes.textual_options import OptionWithValue
 from rovr.components import DoubleClickableOptionList, ModalSearchScreen
+from rovr.functions.command import run_command_async
 from rovr.functions.utils import dismiss, should_cancel
 from rovr.variables.constants import config
 
@@ -64,19 +64,6 @@ class ZDToDirectory(ModalSearchScreen):
             self.log(f"Problems while parsing zoxide line - '{line}'")
             return line, None
 
-    async def _run_subprocess(
-        self, command: list[str], timeout: float
-    ) -> subprocess.CompletedProcess[bytes]:
-        result = await asyncio.to_thread(
-            subprocess.run,
-            command,
-            stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE,
-            timeout=timeout,
-            check=False,
-        )
-        return cast(subprocess.CompletedProcess[bytes], result)
-
     @work(exclusive=True)
     async def zoxide_updater(self, event: Input.Changed) -> None:
         """Update the list"""
@@ -93,9 +80,9 @@ class ZDToDirectory(ModalSearchScreen):
 
         zoxide_cmd += search_term.split()
         try:
-            result = await self._run_subprocess(zoxide_cmd, 3)
+            result = await run_command_async(zoxide_cmd, timeout=3)
             stdout = result.stdout
-        except (OSError, subprocess.TimeoutExpired) as exc:
+        except (OSError, TimeoutError) as exc:
             # zoxide not installed
             self.search_options.clear_options()
             self.search_options.add_option(

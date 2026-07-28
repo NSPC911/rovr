@@ -1,18 +1,41 @@
 from __future__ import annotations
 
+import asyncio
 import os
 import platform
 import shutil
 import subprocess
 import tempfile
 from io import BytesIO
-from subprocess import PIPE, Popen, TimeoutExpired
 
 from PIL import Image
 from PIL.Image import Image as PILImage
 
+from rovr.functions.command import run_command_async
+
 # Keys whose values should be parsed as integers from pdfinfo output
 pdfinfo_turn_to_int = {"Pages"}
+
+
+async def _run_commands(
+    commands: list[list[str]],
+    env: dict[str, str],
+    startupinfo: subprocess.STARTUPINFO | None,
+) -> list[subprocess.CompletedProcess[bytes]]:
+    tasks: list[asyncio.Task[subprocess.CompletedProcess[bytes]]] = []
+    async with asyncio.TaskGroup() as group:
+        tasks.extend(
+            group.create_task(
+                run_command_async(
+                    command,
+                    env=env,
+                    startupinfo=startupinfo,
+                    timeout=15,
+                )
+            )
+            for command in commands
+        )
+    return [task.result() for task in tasks]
 
 
 def _get_command_path(command: str, poppler_path: str | None = None) -> str:
@@ -117,7 +140,7 @@ def _load_images_from_folder(
     return images
 
 
-def get_pdf_info(
+async def get_pdf_info(
     pdf_path: str,
     poppler_path: str | None = None,
 ) -> dict[str, str | int]:
@@ -131,27 +154,20 @@ def get_pdf_info(
 
     Raises:
         ValueError: Page count cannot be determined from output.
-        TimeoutExpired: If the pdfinfo command takes too long to execute.
     """
     command = [_get_command_path("pdfinfo", poppler_path), pdf_path]
 
-    proc = Popen(
+    completed = await run_command_async(
         command,
         env=_get_env(poppler_path),
-        stdout=PIPE,
-        stderr=PIPE,
         startupinfo=_get_startupinfo(),
+        timeout=5,
     )
-    try:
-        out, err = proc.communicate(timeout=5)
-    except TimeoutExpired:
-        proc.kill()
-        proc.communicate()
-        raise
+    out, err = completed.stdout, completed.stderr
 
-    if proc.returncode != 0:
+    if completed.returncode != 0:
         raise ValueError(
-            f"pdfinfo failed with error code {proc.returncode}.\n{err.decode('utf8', 'ignore')}"
+            f"pdfinfo failed with error code {completed.returncode}.\n{err.decode('utf8', 'ignore')}"
         )
 
     result: dict[str, str | int] = {}
@@ -170,7 +186,7 @@ def get_pdf_info(
     return result
 
 
-def get_pdf_images(
+async def get_pdf_images(
     pdf_path: str,
     first_page: int = 1,
     last_page: int | None = None,
@@ -206,7 +222,7 @@ def get_pdf_images(
     startupinfo = _get_startupinfo()
 
     if use_pdftocairo:
-        return _render_with_pdftocairo(
+        return await _render_with_pdftocairo(
             pdf_path=pdf_path,
             first_page=first_page,
             last_page=last_page,
@@ -217,7 +233,7 @@ def get_pdf_images(
             startupinfo=startupinfo,
         )
     else:
-        return _render_with_pdftoppm(
+        return await _render_with_pdftoppm(
             pdf_path=pdf_path,
             first_page=first_page,
             last_page=last_page,
@@ -229,7 +245,7 @@ def get_pdf_images(
         )
 
 
-def _render_with_pdftoppm(
+async def _render_with_pdftoppm(
     pdf_path: str,
     first_page: int,
     last_page: int | None,
@@ -254,8 +270,6 @@ def _render_with_pdftoppm(
     Returns:
         List of PIL images
 
-    Raises:
-        TimeoutExpired: If any pdftoppm command takes too long to execute
     """
     command_base = _get_command_path("pdftoppm", poppler_path)
 
@@ -267,21 +281,15 @@ def _render_with_pdftoppm(
             args.extend(["-l", str(last_page)])
         args.append(pdf_path)
 
-        try:
-            proc = Popen(
-                args, env=env, stdout=PIPE, stderr=PIPE, startupinfo=startupinfo
-            )
-            data, _ = proc.communicate(timeout=15)
-        except TimeoutExpired:
-            proc.kill()
-            proc.communicate()
-            raise
-        return _parse_ppm_buffer(data)
+        completed = await run_command_async(
+            args, env=env, startupinfo=startupinfo, timeout=15
+        )
+        return await asyncio.to_thread(_parse_ppm_buffer, completed.stdout)
 
     # Multi-process: split page ranges across subprocesses
     remainder = page_count % thread_count
     current_page = first_page
-    processes: list[Popen] = []
+    commands: list[list[str]] = []
 
     for _ in range(thread_count):
         chunk = page_count // thread_count + int(remainder > 0)
@@ -292,36 +300,22 @@ def _render_with_pdftoppm(
         args.extend(["-l", str(chunk_last)])
         args.append(pdf_path)
 
-        processes.append(
-            Popen(args, env=env, stdout=PIPE, stderr=PIPE, startupinfo=startupinfo)
-        )
+        commands.append(args)
 
         current_page += chunk
         remainder -= int(remainder > 0)
 
-    images: list[PILImage] = []
-    saved_exception: TimeoutExpired | None = None
-    for proc in processes:
-        if saved_exception is not None:
-            proc.kill()
-            proc.communicate()
-            continue
-        try:
-            data, _ = proc.communicate(timeout=15)
-        except TimeoutExpired as exc:
-            proc.kill()
-            proc.communicate()
-            if not saved_exception:
-                saved_exception = exc
-                continue
-        images += _parse_ppm_buffer(data)
-    if saved_exception is not None:
-        raise saved_exception
-
-    return images
+    completed_commands = await _run_commands(commands, env, startupinfo)
+    chunks = await asyncio.gather(
+        *(
+            asyncio.to_thread(_parse_ppm_buffer, completed.stdout)
+            for completed in completed_commands
+        )
+    )
+    return [image for chunk in chunks for image in chunk]
 
 
-def _render_with_pdftocairo(
+async def _render_with_pdftocairo(
     pdf_path: str,
     first_page: int,
     last_page: int | None,
@@ -346,8 +340,6 @@ def _render_with_pdftocairo(
     Returns:
         List of PIL images
 
-    Raises:
-        TimeoutExpired: If any pdftocairo command takes too long to execute
     """
     command_base = _get_command_path("pdftocairo", poppler_path)
     output_folder = tempfile.mkdtemp()
@@ -361,21 +353,15 @@ def _render_with_pdftocairo(
                 args.extend(["-l", str(last_page)])
             args.extend([pdf_path, os.path.join(output_folder, prefix)])
 
-            proc = Popen(
-                args, env=env, stdout=PIPE, stderr=PIPE, startupinfo=startupinfo
+            await run_command_async(args, env=env, startupinfo=startupinfo, timeout=15)
+            return await asyncio.to_thread(
+                _load_images_from_folder, output_folder, prefix, "png"
             )
-            try:
-                proc.communicate(timeout=15)
-            except TimeoutExpired:
-                proc.kill()
-                proc.communicate()
-                raise
-            return _load_images_from_folder(output_folder, prefix, "png")
 
         # multi proc stuff
         remainder = page_count % thread_count
         current_page = first_page
-        processes: list[tuple[str, Popen]] = []
+        commands: list[tuple[str, list[str]]] = []
 
         for i in range(thread_count):
             chunk = page_count // thread_count + int(remainder > 0)
@@ -387,33 +373,20 @@ def _render_with_pdftocairo(
             args.extend(["-l", str(chunk_last)])
             args.extend([pdf_path, os.path.join(output_folder, prefix)])
 
-            processes.append((
-                prefix,
-                Popen(args, env=env, stdout=PIPE, stderr=PIPE, startupinfo=startupinfo),
-            ))
+            commands.append((prefix, args))
 
             current_page += chunk
             remainder -= int(remainder > 0)
 
-        images: list[PILImage] = []
-        saved_exception: TimeoutExpired | None = None
-        for prefix, proc in processes:
-            if saved_exception is not None:
-                proc.kill()
-                proc.communicate()
-                continue
-            try:
-                proc.communicate(timeout=15)
-            except TimeoutExpired as exc:
-                proc.kill()
-                proc.communicate()
-                if not saved_exception:
-                    saved_exception = exc
-                    continue
-            images += _load_images_from_folder(output_folder, prefix, "png")
-        if saved_exception is not None:
-            raise saved_exception
-
-        return images
+        await _run_commands([args for _, args in commands], env, startupinfo)
+        chunks = await asyncio.gather(
+            *(
+                asyncio.to_thread(
+                    _load_images_from_folder, output_folder, prefix, "png"
+                )
+                for prefix, _ in commands
+            )
+        )
+        return [image for chunk in chunks for image in chunk]
     finally:
         shutil.rmtree(output_folder, ignore_errors=True)

@@ -34,7 +34,10 @@ def is_supported() -> bool:
     return bool(
         sys.__stdout__
         and sys.__stdout__.isatty()
-        and os.environ.get("TERM_PROGRAM") in ("iTerm2", "WezTerm")
+        and (
+            os.environ.get("TERM_PROGRAM").lower() == "wezterm"
+            or os.environ.get("TERM_PROGRAM").lower().startswith("iterm")
+        )
     )
 
 
@@ -97,6 +100,9 @@ class ITerm2Image(BaseImage, Renderable=_NoopRenderable):
     @override
     @BaseImage.image.setter
     def image(self, value: StrOrBytesPath | IO[bytes] | PILImage.Image | None) -> None:
+        # I'm not really sure on the context behind this line of code
+        # However, I will be keeping it since Sixel renderer also does
+        # this, and this is more similar to Sixel and TGP
         super(__class__, type(self)).image.fset(self, value)
         self.refresh(recompose=True)
 

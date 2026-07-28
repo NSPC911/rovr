@@ -312,11 +312,11 @@
               "description": "The resampling method to use when resizing images. This is only applicable when the image exceeds the maximum size specified in `max_size`.",
               "enum": [
                 "nearest",
-                "lanczos",
-                "bilinear",
-                "bicubic",
                 "box",
-                "hamming"
+                "bilinear",
+                "hamming",
+                "bicubic",
+                "lanczos"
               ]
             }
           }

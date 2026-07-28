@@ -14,7 +14,7 @@ const { src, alt, class: className } = Astro.props;
 const cleanPath = src.replace(/^\/rovr\//, "/");
 const svgPath = join(process.cwd(), "public", cleanPath.replace(/^\//, ""));
 
-console.log(`\n[InlineSVG] Loading: ${basename(svgPath)}`);
+Astro.logger.info(`[InlineSVG] Loading: ${basename(svgPath)}`);
 
 let svgContent = "";
 try {

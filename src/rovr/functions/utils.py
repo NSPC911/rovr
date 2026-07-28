@@ -210,23 +210,28 @@ def dismiss(
 
 
 def multiprocessing_process_error_checker(app: App, exc: Exception) -> bool:
+    is_dev = globals().get("is_dev", False)
     if isinstance(exc, ValueError) and "fds_to_keep" in str(exc):
         match multiprocessing.get_start_method(allow_none=True):
             case None:
                 # try forkserver
                 try:
                     multiprocessing.set_start_method("forkserver", force=True)
-                    app.notify("multiprocessing is now using forkserver")
+                    if is_dev:
+                        app.notify("multiprocessing is now using forkserver")
                 except ValueError as val_exc:
                     if "cannot find context" in str(val_exc):
                         multiprocessing.set_start_method("spawn", force=True)
-                        app.notify("multiprocessing is now using spawn")
+                        if is_dev:
+                            app.notify("multiprocessing is now using spawn")
             case "fork":  # theoretically this shouldn't happen
                 multiprocessing.set_start_method("forkserver", force=True)
-                app.notify("multiprocessing is now using forkserver")
+                if is_dev:
+                    app.notify("multiprocessing is now using forkserver")
             case "forkserver":
                 multiprocessing.set_start_method("spawn", force=True)
-                app.notify("multiprocessing is now using spawn")
+                if is_dev:
+                    app.notify("multiprocessing is now using spawn")
             case "spawn":
                 # nothing else we can do, except forcefully stop using Process
                 app.MULTIPROCESSING_PROCESS_ALLOWED = False

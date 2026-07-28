@@ -34,3 +34,11 @@ def test_render_single_transparent_halfcell_without_background() -> None:
     assert segments[0].text == "▄"
     assert segments[0].style is not None
     assert segments[0].style.bgcolor is None
+
+
+def test_render_single_transparent_halfcell_with_background() -> None:
+    segments = _render_pixels([(255, 0, 0, 255), (0, 0, 0, 0)])
+
+    assert segments[0].text == "▀"
+    assert segments[0].style is not None
+    assert segments[0].style.bgcolor is None

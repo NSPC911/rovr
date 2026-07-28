@@ -610,16 +610,10 @@ def dump_exc(widget: DOMNode | None, exc: Exception | Traceback) -> str | None: 
     os.makedirs(path.dirname(dump_path), exist_ok=True)
 
     log_dir = path.dirname(dump_path)
-    log_files = sorted(
-        [
-            f
-            for f in os.listdir(log_dir)
-            if f.startswith(log_name) and f.endswith(".log")
-        ],
-        key=lambda f: path.getctime(path.join(log_dir, f)),
-    )
-    if len(log_files) >= 50:
-        oldest = path.join(log_dir, log_files[0])
+    log_files = sorted(f for f in os.listdir(log_dir) if f.endswith(".log"))
+    available_slots = 50 if path.basename(dump_path) in log_files else 49
+    for log_file in log_files[: max(0, len(log_files) - available_slots)]:
+        oldest = path.join(log_dir, log_file)
         with suppress(OSError):
             os.remove(oldest)
 

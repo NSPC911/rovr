@@ -851,11 +851,11 @@ r"""The values for the 'The image protocol to use when displaying an image' enum
 
 _RovrConfigInterfaceImageViewerResampling = (
     Literal["nearest"]
-    | Literal["lanczos"]
-    | Literal["bilinear"]
-    | Literal["bicubic"]
     | Literal["box"]
+    | Literal["bilinear"]
     | Literal["hamming"]
+    | Literal["bicubic"]
+    | Literal["lanczos"]
 )
 r"""
 The resampling method to use when resizing images. This is only applicable when the image exceeds the maximum size specified in `max_size`.
@@ -864,15 +864,15 @@ default: nearest
 """
 _ROVRCONFIGINTERFACEIMAGEVIEWERRESAMPLING_NEAREST: Literal["nearest"] = "nearest"
 r"""The values for the 'The resampling method to use when resizing images. This is only applicable when the image exceeds the maximum size specified in `max_size`' enum"""
-_ROVRCONFIGINTERFACEIMAGEVIEWERRESAMPLING_LANCZOS: Literal["lanczos"] = "lanczos"
+_ROVRCONFIGINTERFACEIMAGEVIEWERRESAMPLING_BOX: Literal["box"] = "box"
 r"""The values for the 'The resampling method to use when resizing images. This is only applicable when the image exceeds the maximum size specified in `max_size`' enum"""
 _ROVRCONFIGINTERFACEIMAGEVIEWERRESAMPLING_BILINEAR: Literal["bilinear"] = "bilinear"
 r"""The values for the 'The resampling method to use when resizing images. This is only applicable when the image exceeds the maximum size specified in `max_size`' enum"""
+_ROVRCONFIGINTERFACEIMAGEVIEWERRESAMPLING_HAMMING: Literal["hamming"] = "hamming"
+r"""The values for the 'The resampling method to use when resizing images. This is only applicable when the image exceeds the maximum size specified in `max_size`' enum"""
 _ROVRCONFIGINTERFACEIMAGEVIEWERRESAMPLING_BICUBIC: Literal["bicubic"] = "bicubic"
 r"""The values for the 'The resampling method to use when resizing images. This is only applicable when the image exceeds the maximum size specified in `max_size`' enum"""
-_ROVRCONFIGINTERFACEIMAGEVIEWERRESAMPLING_BOX: Literal["box"] = "box"
-r"""The values for the 'The resampling method to use when resizing images. This is only applicable when the image exceeds the maximum size specified in `max_size`' enum"""
-_ROVRCONFIGINTERFACEIMAGEVIEWERRESAMPLING_HAMMING: Literal["hamming"] = "hamming"
+_ROVRCONFIGINTERFACEIMAGEVIEWERRESAMPLING_LANCZOS: Literal["lanczos"] = "lanczos"
 r"""The values for the 'The resampling method to use when resizing images. This is only applicable when the image exceeds the maximum size specified in `max_size`' enum"""
 
 class _RovrConfigInterfacePreviewText(TypedDict, total=False):

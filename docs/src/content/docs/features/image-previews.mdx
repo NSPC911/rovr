@@ -37,11 +37,10 @@ if you are using a terminal that doesn't support the default image protocol, `te
 
 if images do not appear correctly, you can manually override the image protocol in your `config.toml` file.
 
-<Code
-  code={`[settings]\nimage_protocol = "Sixel"`}
-  lang="toml"
-  title="config.toml"
-/>
+```toml title="config.toml"
+[interface.image_viewer]
+protocol = "Auto"
+```
 
 available `image_protocol` values are: `"Auto"`, `"TGP"`, `"Sixel"`, `"Halfcell"`, and `"Unicode"`.
 
@@ -49,14 +48,27 @@ available `image_protocol` values are: `"Auto"`, `"TGP"`, `"Sixel"`, `"Halfcell"
 
 this lets you configure the maximum width and height of image previews in pixels. by default, `rovr` sets these values to `1920` (width) and `1080` (height).
 
-<Code
-  code={`[interface]\nmax_preview_image_width = 1920\nmax_preview_image_height = 1080`}
-  lang="toml"
-  title="config.toml"
-/>
+```toml title="config.toml"
+[interface.image_viewer]
+# used for all images
+max_size = [4000, 4000]
 
-you can choose to disable this by setting either value to `0`, which means the image preview will use the image as-is.
+[interface.font_preview]
+# used for previewing fonts
+max_size = [1000, 1000]
+font_size = 50
+```
 
-### known issues
+### image resampling
 
-- some low-resolution images will look horrible, I'm not really sure why that happens, but it might be due to an unnecessary up-scaling attempt by `textual-image`
+when resampling, sometimes the image can appear pixelated. to solve this, you can set the image resampling to a higher type
+
+```toml title="config.toml"
+[interface.image_viewer]
+resampling = "nearest"  # lowest quality, you see pixels
+resampling = "box"      # similar to nearest
+resampling = "bilinear" # recommended usually
+resampling = "hamming"
+resampling = "bicubic"
+resampling = "lanczos" # best quality, but most time
+```

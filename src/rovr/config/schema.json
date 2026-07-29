@@ -293,7 +293,7 @@
               "type": "string",
               "default": "Auto",
               "description": "The image protocol to use when displaying an image",
-              "enum": ["Auto", "TGP", "Sixel", "Halfcell", "Unicode"]
+              "enum": ["Auto", "TGP", "ITerm2", "Sixel", "Halfcell", "Unicode"]
             },
             "max_size": {
               "type": "array",
@@ -312,11 +312,11 @@
               "description": "The resampling method to use when resizing images. This is only applicable when the image exceeds the maximum size specified in `max_size`.",
               "enum": [
                 "nearest",
-                "lanczos",
-                "bilinear",
-                "bicubic",
                 "box",
-                "hamming"
+                "bilinear",
+                "hamming",
+                "bicubic",
+                "lanczos"
               ]
             }
           }

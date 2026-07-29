@@ -714,14 +714,14 @@ class Application(Actionable, DNDApp, inherit_bindings=False):
                     except OSError:
                         # Any failure writing chooser file should not block exit
                         message += f"Failed to write chooser file `{path.basename(self._chooser_file)}`"
-        self._arm_force_exit_timer()
         self.exit(message.strip() if message else None)
 
+    @on(ExitApp)
     def _arm_force_exit_timer(self) -> None:
         if not self._force_exit_on_shutdown or self._force_exit_timer is not None:
             return
         self._force_exit_timer = threading.Timer(
-            0.1,
+            0.5,
             os._exit,
             args=(0,),
         )
@@ -1434,6 +1434,7 @@ class Application(Actionable, DNDApp, inherit_bindings=False):
         )
         # hardcode to not pre-render please
         self._exit_renderables.append(traceback)
+        self.post_message(ExitApp())
         self._close_messages_no_wait()
 
     def _print_error_renderables(self) -> None:

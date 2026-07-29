@@ -5,10 +5,6 @@ import re
 from collections.abc import Sequence
 from typing import Any, Never
 
-from rich.markup import escape
-from rich.panel import Panel
-from rich.table import Table
-
 from rovr import pprint
 
 
@@ -16,6 +12,9 @@ class RichArgumentParser(argparse.ArgumentParser):
     """Custom ArgumentParser that uses rich for error reporting."""
 
     def error(self, message: str) -> Never:
+        from rich.markup import escape
+        from rich.panel import Panel
+
         # custom error rendering to match rich-click style
         pretty_message = escape(self._format_error_message(message))
         panel = Panel(
@@ -96,6 +95,9 @@ def _iter_visible_actions(group: Any) -> list[argparse.Action]:
 def _render_panel(
     title: str, actions: list[argparse.Action], subtitle: str = ""
 ) -> None:
+    from rich.panel import Panel
+    from rich.table import Table
+
     if not actions:
         return
 

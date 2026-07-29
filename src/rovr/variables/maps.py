@@ -27,16 +27,6 @@ class RovrVars:
     HOME = path.expanduser("~").replace("\\", "/")
 
 
-SORTED_VARS = dict(
-    sorted(
-        {
-            key: value
-            for key, value in vars(RovrVars).items()
-            if not key.startswith(("__", "ROVR"))
-        }.items()
-    )
-)
-
 ASCII_ICONS = {
     "general": {
         "new": ("+", "green"),

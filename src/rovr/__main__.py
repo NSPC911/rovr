@@ -415,9 +415,9 @@ example_function(10)"""
 
                 from rich.color import ColorSystem
 
-                from rovr import console
+                from rovr import get_console
 
-                if console._detect_color_system() == ColorSystem.WINDOWS:
+                if get_console()._detect_color_system() == ColorSystem.WINDOWS:
                     from textual import constants
 
                     constants.COLOR_SYSTEM = "truecolor"

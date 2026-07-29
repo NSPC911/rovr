@@ -17,7 +17,6 @@ from textual.worker import get_current_worker
 from rovr.classes.mixins import CheckboxRenderingMixin, ScrollOffMixin
 from rovr.classes.textual_options import OptionWithValue
 from rovr.components import DoubleClickableOptionList, ModalSearchScreen
-from rovr.functions import icons as icon_utils
 from rovr.functions import path as path_utils
 from rovr.functions.icons import get_icon_for_file, get_icon_for_folder
 from rovr.variables.constants import bindings, config
@@ -53,22 +52,6 @@ class ContentSearchToggles(ScrollOffMixin, CheckboxRenderingMixin, SelectionList
 
     def on_mount(self) -> None:
         self.border_title = "rg options"
-
-    def _get_checkbox_icon_set(self) -> list[str]:
-        """
-        Get the set of icons to use for checkbox rendering.
-
-        ContentSearchToggles uses a different icon set (missing right icon).
-
-        Returns:
-            List of icon strings for left, inner, right, and spacing.
-        """
-        return [
-            icon_utils.get_toggle_button_icon("left"),
-            icon_utils.get_toggle_button_icon("inner"),
-            "",  # No right icon for ContentSearchToggles
-            " ",
-        ]
 
 
 class ContentSearch(ModalSearchScreen):

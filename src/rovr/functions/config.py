@@ -27,8 +27,6 @@ EDITOR_CANDIDATES = [
     "msedit",
 ]
 
-DEFAULT_CONFIG = '#:schema {schema_url}\n[theme]\ndefault = "nord"'
-
 
 @cache
 def editor() -> str:
@@ -554,20 +552,6 @@ def load_config() -> tuple[dict, RovrConfig]:
 
     schema_dict, schema = get_schema_validator()
 
-    # ensure that template config works
-    try:
-        schema(template_config)
-    except JsonSchemaValueException as exception:
-        schema_dump(
-            path.join(path.dirname(__file__), "../config/config.toml"),
-            exception,
-            traverser.joinpath("config.toml").read_text("utf-8"),
-            schema_dict,
-        )
-        pprint(
-            "        [red]I will refuse to launch as long as the template config is invalid.[/]"
-        )
-        exit(1)
     user_config = {}
     user_config_content = ""
     if path.exists(user_config_path):

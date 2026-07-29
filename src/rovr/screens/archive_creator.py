@@ -1,16 +1,14 @@
 from asyncio import sleep
-from typing import ClassVar, Iterable, Literal, Self
+from typing import ClassVar, Literal
 
 from textual import events, on, work
 from textual.app import ComposeResult
 from textual.binding import Binding, BindingType
 from textual.containers import HorizontalGroup
-from textual.content import ContentText
 from textual.widgets import Input, SelectionList
-from textual.widgets.selection_list import Selection, SelectionType
+from textual.widgets.selection_list import Selection
 
-from rovr.classes.mixins import CheckboxRenderingMixin
-from rovr.functions import icons as icon_utils
+from rovr.classes.mixins import CheckboxRenderingMixin, SetOptionsSelectionList
 from rovr.functions.utils import dismiss
 from rovr.variables.constants import bindings
 
@@ -36,22 +34,6 @@ class ArchiveTypes(CheckboxRenderingMixin, SelectionList, inherit_bindings=False
         self.border_title = "Archive Formats"
         self.select(self.get_option_at_index(0))
 
-    def _get_checkbox_icon_set(self) -> list[str]:
-        """
-        Get the set of icons to use for checkbox rendering.
-
-        ArchiveTypes uses a different icon set (missing right icon).
-
-        Returns:
-            List of icon strings for left, inner, right, and spacing.
-        """
-        return [
-            icon_utils.get_toggle_button_icon("left"),
-            icon_utils.get_toggle_button_icon("inner"),
-            "",  # No right icon for ContentSearchToggles
-            " ",
-        ]
-
     def on_selection_list_selection_toggled(
         self, event: SelectionList.SelectionToggled
     ) -> None:
@@ -65,7 +47,12 @@ class ArchiveTypes(CheckboxRenderingMixin, SelectionList, inherit_bindings=False
         )
 
 
-class ArchiveCompression(CheckboxRenderingMixin, SelectionList, inherit_bindings=False):
+class ArchiveCompression(
+    CheckboxRenderingMixin,
+    SetOptionsSelectionList,
+    SelectionList,
+    inherit_bindings=False,
+):
     BINDINGS: ClassVar[list[BindingType]] = list(bindings)
 
     def __init__(self) -> None:
@@ -78,22 +65,6 @@ class ArchiveCompression(CheckboxRenderingMixin, SelectionList, inherit_bindings
     def on_mount(self) -> None:
         self.border_title = "Compression Levels"
         self.select(self.get_option_at_index(0))
-
-    def _get_checkbox_icon_set(self) -> list[str]:
-        """
-        Get the set of icons to use for checkbox rendering.
-
-        ArchiveCompression uses a different icon set (missing right icon).
-
-        Returns:
-            List of icon strings for left, inner, right, and spacing.
-        """
-        return [
-            icon_utils.get_toggle_button_icon("left"),
-            icon_utils.get_toggle_button_icon("inner"),
-            "",  # No right icon for ContentSearchToggles
-            " ",
-        ]
 
     def on_selection_list_selection_toggled(
         self, event: SelectionList.SelectionToggled
@@ -126,30 +97,6 @@ class ArchiveCompression(CheckboxRenderingMixin, SelectionList, inherit_bindings
         self.refresh()
         if self.options:
             self.select(self.get_option_at_index(0))
-
-    def set_options(
-        self,
-        options: Iterable[
-            Selection[SelectionType]
-            | tuple[ContentText, SelectionType]
-            | tuple[ContentText, SelectionType, bool]
-        ],
-    ) -> Self:  # ty: ignore[invalid-method-override]
-        # Okay, lemme make myself clear here.
-        # A PR for this is already open at
-        # https://github.com/Textualize/textual/pull/6224
-        # essentially, the issue is that there isnt a set_options
-        # method for SelectionList, only for OptionList, but using
-        # OptionList's set_options doesn't clear selected or values
-        # but nothing was done, so I added it myself.
-        self._selected.clear()
-        self._values.clear()
-        # the ty ignore is important here, because options
-        # should be a Iterable["Option | VisualType | None"]
-        # but that isnt the case (based on the signature)
-        # so ty is crashing out.
-        super().set_options(options)  # ty: ignore[invalid-argument-type]
-        return self
 
 
 class ArchiveCreationScreen(ModalInput):

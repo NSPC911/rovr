@@ -49,7 +49,7 @@ from textual_drivers.dnd import (
     DropData,
 )
 
-from rovr import console
+from rovr import get_console
 from rovr.action_buttons import (
     CopyButton,
     CutButton,
@@ -113,6 +113,8 @@ from rovr.screens.way_too_small import TerminalTooSmall
 from rovr.state_manager import StateManager
 from rovr.variables.constants import MaxPossible, config, log_name, os_type
 from rovr.variables.maps import RovrVars
+
+console = get_console
 
 if constants.SCREENSHOT_LOCATION:
     constants.SCREENSHOT_LOCATION = normalise(getcwd(), constants.SCREENSHOT_LOCATION)
@@ -326,7 +328,7 @@ class Application(Actionable, DNDApp, inherit_bindings=False):
         # exit for tree print
         if self._exit_with_tree:
             with self.suspend():
-                console.print(self.tree)
+                console().print(self.tree)
                 self.exit()
             return
 
@@ -1060,9 +1062,9 @@ class Application(Actionable, DNDApp, inherit_bindings=False):
             except StylesheetParseError as exc:
                 self._css_has_errors = True
                 with self.suspend():
-                    console.print(exc.errors)
+                    console().print(exc.errors)
                     try:
-                        console.input(" [bright_blue]Continue? [/]")
+                        console().input(" [bright_blue]Continue? [/]")
                     except EOFError:
                         self.exit(return_code=1)
             except Exception as error:

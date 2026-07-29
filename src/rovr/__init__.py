@@ -1,7 +1,16 @@
-from rich.console import Console
+from functools import cache
+from typing import Any
 
-console = Console()
-pprint = console.print
+
+@cache
+def get_console() -> Any:
+    from rich.console import Console
+
+    return Console()
+
+
+def pprint(*objects: Any, **kwargs: Any) -> None:
+    get_console().print(*objects, **kwargs)
 
 
 def main() -> None:

@@ -2,9 +2,6 @@ import os
 import platform
 from typing import Literal, TypeAlias, TypedDict
 
-PreviewTypes: TypeAlias = Literal[
-    "text", "image", "pdf", "archive", "folder", "remime", "resvg", "font"
-]
 SortByOptions: TypeAlias = Literal[
     "name", "size", "modified", "created", "extension", "natural"
 ]

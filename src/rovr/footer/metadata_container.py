@@ -3,17 +3,18 @@ import time
 from contextlib import suppress
 from datetime import datetime
 from os import DirEntry, lstat, path, walk
+from typing import Any
 
 from textual import events, on, work
 from textual.containers import VerticalGroup, VerticalScroll
 from textual.css.query import NoMatches
 from textual.widget import MountError
 from textual.widgets import Static
-from textual.worker import WorkerState
+from textual.worker import Worker, WorkerState, get_current_worker
 
 from rovr.classes.textual_options import FileListSelectionWidget
 from rovr.functions import utils
-from rovr.functions.path import get_direntry_for, is_hidden_file
+from rovr.functions.path import is_hidden_file
 from rovr.variables.constants import config, scroll_bindings
 from rovr.variables.maps import SPINNER, SPINNER_LENGTH
 
@@ -24,7 +25,7 @@ class MetadataContainer(VerticalScroll, inherit_bindings=False):
     def __init__(self) -> None:
         super().__init__(id="metadata")
         self.current_path: str | None = None
-        self._size_worker = None
+        self._size_worker: Worker[Any] | None = None
         self._update_task = None
         self._queued_task = None
         self._queued_task_args: None | DirEntry = None
@@ -101,10 +102,6 @@ class MetadataContainer(VerticalScroll, inherit_bindings=False):
         """
         if self.any_in_queue():
             return
-        # just sanity check
-        updated_dir_entry = get_direntry_for(dir_entry.path)
-        if updated_dir_entry is not None:
-            dir_entry = updated_dir_entry
         if not path.exists(dir_entry.path):
             try:
                 self.app.call_from_thread(self.remove_children)
@@ -264,9 +261,10 @@ class MetadataContainer(VerticalScroll, inherit_bindings=False):
         else:
             self._queued_task = None
 
-    @work(thread=True)
+    @work(thread=True, exclusive=True, group="folder-size")
     async def calculate_folder_size(self, folder_path: str) -> None:
         """Calculate the size of a folder and update the metadata."""
+        worker = get_current_worker()
         try:
             size_widget = self.query_one("#metadata-size", Static)
         except NoMatches:
@@ -280,7 +278,7 @@ class MetadataContainer(VerticalScroll, inherit_bindings=False):
         try:
             for dirpath, _, filenames in walk(folder_path):
                 for f in filenames:
-                    if self._size_worker is None or self._size_worker.is_cancelled:
+                    if worker.is_cancelled:
                         return
                     fp = path.join(dirpath, f)
                     if not path.islink(fp):
@@ -297,7 +295,7 @@ class MetadataContainer(VerticalScroll, inherit_bindings=False):
             self.app.call_from_thread(size_widget.update, "Error")
             return
 
-        if self._size_worker and self._size_worker.is_running:
+        if not worker.is_cancelled and self.current_path == folder_path:
             self.app.call_from_thread(
                 size_widget.update,
                 utils.natural_size(
@@ -310,7 +308,7 @@ class MetadataContainer(VerticalScroll, inherit_bindings=False):
     @on(events.Focus)
     def on_focus(self) -> None:
         if self.current_path and path.isdir(self.current_path):
-            if self._size_worker:
+            if self._size_worker and self._size_worker.is_running:
                 return
             self._size_worker = self.calculate_folder_size(self.current_path)
 

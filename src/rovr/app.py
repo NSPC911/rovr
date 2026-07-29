@@ -77,7 +77,7 @@ from rovr.core import (
     PreviewContainer,
 )
 from rovr.footer import Clipboard, MetadataContainer, ProcessContainer
-from rovr.functions import drive_workers
+from rovr.functions import drive_workers, multiprocessing_utils
 from rovr.functions.path import (
     dump_exc,
     ensure_existing_directory,
@@ -915,7 +915,7 @@ class Application(Actionable, DNDApp, inherit_bindings=False):
                             target=drive_workers.get_mounted_drives_worker,
                             args=(result_queue, os_type, config),
                         )
-                        process.start()
+                        multiprocessing_utils.start_process(process)
                         process.join(timeout=2.0)
 
                         if process.is_alive():

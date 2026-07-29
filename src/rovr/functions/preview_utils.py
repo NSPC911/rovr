@@ -2,7 +2,7 @@ import multiprocessing
 import multiprocessing.connection
 import stat
 import subprocess
-from concurrent.futures import FIRST_COMPLETED, Future, ProcessPoolExecutor, wait
+from concurrent.futures import FIRST_COMPLETED, Future, wait
 from functools import lru_cache
 from os import path
 from os import stat as os_stat
@@ -11,6 +11,10 @@ from typing import Literal, NamedTuple, TypeAlias
 from PIL import Image
 from PIL.Image import Image as PILImage
 
+from rovr.functions.multiprocessing_utils import (
+    SafePathProcessPoolExecutor,
+    start_process,
+)
 from rovr.functions.preview_workers import (
     _depalette,
     resample_bytes_worker,
@@ -83,7 +87,7 @@ def _get_resample_pool_size(batch_size: int) -> int:
 
 
 def _await_resample_futures(
-    executor: ProcessPoolExecutor,
+    executor: SafePathProcessPoolExecutor,
     futures: dict[Future[tuple[bytes, str, tuple[int, int]]], int],
 ) -> list[tuple[bytes, str, tuple[int, int]]]:
     pending: set[Future[tuple[bytes, str, tuple[int, int]]]] = set(futures)
@@ -133,7 +137,9 @@ def resample_batch(images: list[PILImage]) -> list[PILImage]:
             MAX_IMAGE_SIZE,
             RESAMPLING_METHOD(),
         ))
-    executor = ProcessPoolExecutor(max_workers=_get_resample_pool_size(len(payloads)))
+    executor = SafePathProcessPoolExecutor(
+        max_workers=_get_resample_pool_size(len(payloads))
+    )
     try:
         futures = {
             executor.submit(resample_worker, payload): index
@@ -165,7 +171,7 @@ def resample(image: Image.Image) -> Image.Image:
             RESAMPLING_METHOD(),
         ),
     )
-    proc.start()
+    start_process(proc)
     child_conn.close()
 
     result = _await_resample_process(proc, parent_conn)
@@ -189,7 +195,7 @@ def resample_file(file_path: str) -> Image.Image | None:
         target=resample_file_worker,
         args=(child_conn, file_path, MAX_IMAGE_SIZE, RESAMPLING_METHOD()),
     )
-    proc.start()
+    start_process(proc)
     child_conn.close()
 
     result = _await_resample_process(proc, parent_conn)
@@ -204,7 +210,7 @@ def load_svg(file_path: str) -> bytes | None:
     proc = multiprocessing.Process(
         target=svg_image_worker, args=(child_conn, file_path)
     )
-    proc.start()
+    start_process(proc)
     child_conn.close()
 
     # wait for it to complete

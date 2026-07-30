@@ -12,6 +12,7 @@ from rovr.classes.mixins import Action, Actionable
 from rovr.classes.textual_options import PinnedSidebarOption
 from rovr.functions import drive_workers as drive_utils
 from rovr.functions import icons as icon_utils
+from rovr.functions import multiprocessing_utils
 from rovr.functions import path as path_utils
 from rovr.functions import pins as pin_utils
 from rovr.functions.utils import multiprocessing_process_error_checker
@@ -165,7 +166,7 @@ class PinnedSidebar(Actionable, OptionList, inherit_bindings=False):
                     target=drive_utils.get_mounted_drives_worker,
                     args=(result_queue, os_type, config),
                 )
-                process.start()
+                multiprocessing_utils.start_process(process)
                 process.join(timeout=2.0)
 
                 if process.is_alive():

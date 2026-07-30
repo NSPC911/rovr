@@ -6,6 +6,7 @@ from importlib import resources
 from importlib.metadata import PackageNotFoundError, version
 from os import path
 from shutil import which
+from sys import exit
 from typing import Callable, cast
 
 import fastjsonschema
@@ -590,7 +591,19 @@ def load_config() -> tuple[dict, RovrConfig]:
     try:
         schema(config_dict)
     except JsonSchemaValueException as exception:
-        schema_dump(user_config_path, exception, user_config_content, schema_dict)
+        # check template if it is wrong as well
+        try:
+            schema(template_config)
+        except JsonSchemaValueException as template_exception:
+            schema_dump(
+                path.join(path.dirname(__file__), "../config/config.toml"),
+                template_exception,
+                traverser.joinpath("config.toml").read_text("utf-8"),
+                schema_dict,
+            )
+        else:
+            schema_dump(user_config_path, exception, user_config_content, schema_dict)
+        exit(1)
 
     # slight config fixes
     # image protocol because "AutoImage" doesn't work with Sixel

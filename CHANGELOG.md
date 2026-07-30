@@ -20,6 +20,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `app`: add trash bin support [#304](https://github.com/NSPC911/rovr/pull/304) [61f8148](https://github.com/NSPC911/rovr/commit/61f8148021c158043d606b3f234b09ac9bcb2544) [aa6be91](https://github.com/NSPC911/rovr/commit/aa6be9173d0705025f7aa3fee958430e085eedf5) [89c9c45](https://github.com/NSPC911/rovr/commit/89c9c45629cb445f20230c02cb0ebebb483c282f)
 - `history`: evicy after hitting limit [#306](https://github.com/NSPC911/rovr/pull/306) [b0d971a](https://github.com/NSPC911/rovr/commit/b0d971accd755e855a8e8d4e7f03c3f9163a935f)
 - `themes`: better theme handler [#308](https://github.com/NSPC911/rovr/pull/308) [50200f5](https://github.com/NSPC911/rovr/commit/50200f59f4492efd5025a3bad462671e721887ca)
+- `preview`: add transparent halfcell support [#311](https://github.com/NSPC911/rovr/pull/311)
+- `preview`: add iterm2 image support [#310](https://github.com/NSPC911/rovr/pull/310)
 
 ### Fixed
 
@@ -35,6 +37,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `modal`: fix modal shortcircuit on running commands [040dda2](https://github.com/NSPC911/rovr/commit/040dda26553f167864ccf3a089db994a74351ba4)
 - `pins`: prevent a possible `ContextError` [f0975a9](https://github.com/NSPC911/rovr/commit/f0975a954f122935a3438bd82fff5cfa0912c40c)
 - `app`: make background work cancellable on shutdown [f0ae2dc](https://github.com/NSPC911/rovr/commit/f0ae2dcfdd126bdaf081bbf8bb9f2ae10ef90f7a)
+- `preview`: properly resize images [bdfcfbd](https://github.com/NSPC911/rovr/commit/bdfcfbd24c4c05076d333e0c93a0333aebd9071c)
+- `app`: kill all threads on exit [8541404](https://github.com/NSPC911/rovr/commit/85414040b659b1c7dd45522dbc33e04e4fce7f94) [e800285](https://github.com/NSPC911/rovr/commit/e800285910913db9a3afc2bc53a846fa64b0c747)
+- `app`: create new processes with safe path [#312](https://github.com/NSPC911/rovr/pull/312)
 
 ### Performance
 

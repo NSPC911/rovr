@@ -2,7 +2,9 @@ from __future__ import annotations
 
 import os
 import threading
+from collections.abc import Iterator
 from concurrent.futures import ProcessPoolExecutor
+from contextlib import contextmanager
 from multiprocessing.process import BaseProcess
 
 _safe_path_lock = threading.Lock()
@@ -67,3 +69,15 @@ class SafePathProcessPoolExecutor(ProcessPoolExecutor):
             super().shutdown(wait=wait, cancel_futures=cancel_futures)
         finally:
             self._disable_safe_path()
+
+
+@contextmanager
+def safe_path_process_pool(max_workers: int) -> Iterator[SafePathProcessPoolExecutor]:
+    executor = SafePathProcessPoolExecutor(max_workers=max_workers)
+    try:
+        yield executor
+    except BaseException:
+        executor.shutdown(wait=False, cancel_futures=True)
+        raise
+    else:
+        executor.shutdown(wait=True)

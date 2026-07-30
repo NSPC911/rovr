@@ -12,7 +12,7 @@ from PIL import Image
 from PIL.Image import Image as PILImage
 
 from rovr.functions.multiprocessing_utils import (
-    SafePathProcessPoolExecutor,
+    safe_path_process_pool,
     start_process,
 )
 from rovr.functions.preview_workers import (
@@ -87,7 +87,6 @@ def _get_resample_pool_size(batch_size: int) -> int:
 
 
 def _await_resample_futures(
-    executor: SafePathProcessPoolExecutor,
     futures: dict[Future[tuple[bytes, str, tuple[int, int]]], int],
 ) -> list[tuple[bytes, str, tuple[int, int]]]:
     pending: set[Future[tuple[bytes, str, tuple[int, int]]]] = set(futures)
@@ -109,10 +108,8 @@ def _await_resample_futures(
     except Exception:
         for future in pending:
             future.cancel()
-        executor.shutdown(wait=False, cancel_futures=True)
         raise
 
-    executor.shutdown(wait=True)
     results: list[tuple[bytes, str, tuple[int, int]]] = []
     for result in ordered_results:
         if result is None:
@@ -137,18 +134,14 @@ def resample_batch(images: list[PILImage]) -> list[PILImage]:
             MAX_IMAGE_SIZE,
             RESAMPLING_METHOD(),
         ))
-    executor = SafePathProcessPoolExecutor(
+    with safe_path_process_pool(
         max_workers=_get_resample_pool_size(len(payloads))
-    )
-    try:
+    ) as executor:
         futures = {
             executor.submit(resample_worker, payload): index
             for index, payload in enumerate(payloads)
         }
-    except Exception:
-        executor.shutdown(wait=False, cancel_futures=True)
-        raise
-    results = _await_resample_futures(executor, futures)
+        results = _await_resample_futures(futures)
     return [Image.frombytes(mode, size, data) for data, mode, size in results]
 
 

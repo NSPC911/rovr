@@ -96,6 +96,7 @@ from rovr.functions.themes import (
 from rovr.functions.utils import (
     multiprocessing_process_error_checker,
     run_command,
+    s,
     should_cancel,
 )
 from rovr.header import HeaderArea
@@ -1144,7 +1145,8 @@ class Application(Actionable, DNDApp, inherit_bindings=False):
             return DNDDragOutOperation(
                 [Path(p).as_uri() for p in selected],
                 "either",
-                f"{len(selected)} item{'s' if len(selected) != 1 else ''}",
+                f"  {len(selected)} item{s(selected)}",
+                popup_size=2,
             )
 
     def _tab_under_pos(self, pos: Offset) -> TablineTab | None:

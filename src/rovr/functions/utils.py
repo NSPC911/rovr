@@ -4,7 +4,7 @@ import re
 import subprocess
 from contextlib import suppress
 from functools import lru_cache
-from typing import Callable, Literal, overload
+from typing import Any, Callable, Literal, overload
 
 from humanize import naturalsize
 from textual import events
@@ -305,3 +305,7 @@ def command(
         return initial_command + [path_str]
     else:
         return initial_command + " " + shlex.quote(path_str)
+
+
+def s(item: Any, notone: str = "s", isone: str = "") -> str:
+    return isone if len(item) == 1 else notone

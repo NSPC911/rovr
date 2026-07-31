@@ -2,6 +2,7 @@ from textual.widgets import Button
 
 from rovr.classes.textual_options import ClipboardSelectionValue
 from rovr.functions.icons import get_icon
+from rovr.functions.utils import s
 from rovr.screens.paste_screen import PasteScreen
 from rovr.variables.constants import config
 
@@ -45,15 +46,11 @@ class PasteButton(Button):
                 PasteScreen(
                     message="Are you sure you want to "
                     + (
-                        f"copy {len(to_copy)} item{'s' if len(to_copy) != 1 else ''}{' and ' if len(to_cut) != 0 else ''}"
+                        f"copy {len(to_copy)} item{s(to_copy)}{s(to_cut, ' and ')}"
                         if len(to_copy) > 0
                         else ""
                     )
-                    + (
-                        f"cut {len(to_cut)} item{'s' if len(to_cut) != 1 else ''}"
-                        if len(to_cut) > 0
-                        else ""
-                    )
+                    + (f"cut {len(to_cut)} item{s(to_cut)}" if len(to_cut) > 0 else "")
                     + "?",
                     paths={"copy": to_copy, "cut": to_cut},
                     destructive=True,

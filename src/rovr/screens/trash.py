@@ -25,7 +25,7 @@ from rovr.classes.mixins import (
 from rovr.functions import details as detail_utils
 from rovr.functions import icons as icon_utils
 from rovr.functions import path as path_utils
-from rovr.functions.utils import dismiss, get_shortest_bind, natural_size
+from rovr.functions.utils import dismiss, get_shortest_bind, natural_size, s
 from rovr.variables.constants import bindings, config
 from rovr.variables.maps import RovrVars
 
@@ -307,7 +307,7 @@ class TrashScreen(Actionable, ModalScreen):
             setattr,
             self.query_one("#dialog"),
             "border_subtitle",
-            f"{len(self.entries)} item{'s' if len(self.entries) != 1 else ''}",
+            f"{len(self.entries)} item{s(self.entries)}",
         )
         for button_id in ("#restore", "#purge"):
             self.query_one(button_id, Button).disabled = not selection_list.selected
@@ -382,7 +382,7 @@ class TrashScreen(Actionable, ModalScreen):
         confirmed = await self.app.push_screen_wait(
             YesOrNo(
                 f"Permanently delete {len(entries)} entr"
-                f"{'ies' if len(entries) != 1 else 'y'}? This cannot be undone.",
+                f"{s(entries, 'ies', 'y')}? This cannot be undone.",
                 destructive=True,
             )
         )

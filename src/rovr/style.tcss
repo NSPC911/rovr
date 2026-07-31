@@ -530,6 +530,18 @@ CommandList:ansi {
 }
 
 FileList {
+  .selection-list--option-checked,
+  .selection-list--option-checked--hovered {
+    color: $primary;
+  }
+  &:focus .selection-list--option-checked--highlighted,
+  &.-popup-shown .selection-list--option-checked--highlighted {
+    color: $block-cursor-foreground;
+  }
+  &:blur .selection-list--option-checked--highlighted {
+    color: $primary;
+  }
+
   .filelist--hidden,
   .filelist--hidden--hovered,
   .filelist--hidden--highlighted {

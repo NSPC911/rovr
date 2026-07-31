@@ -101,6 +101,16 @@ you may notice that class inheritance is not shown, `FileListContainer` inherits
 
 rovr includes some extra classes that can be used to narrow down the elements, or style them based on certain scenarios.
 
+<h4 class="no-lower">Checkbox selection lists</h4>
+
+Lists using rovr's checkbox renderer, including `FileList` and `Clipboard`, expose a component class for styling the entire checked option.
+
+| Component Classes              | Description                                 | Example                                                   |
+| ------------------------------ | ------------------------------------------- | --------------------------------------------------------- |
+| selection-list--option-checked | applied on options that are checked         | `Clipboard > .selection-list--option-checked`             |
+| \*--hovered                    | used when the checked option is hovered     | `FileList > .selection-list--option-checked--hovered`     |
+| \*--highlighted                | used when the checked option is highlighted | `FileList > .selection-list--option-checked--highlighted` |
+
 <h4 class="no-lower">FileList</h4>
 
 This is the main file list that you will be navigating
@@ -117,6 +127,7 @@ This is the main file list that you will be navigating
 | filelist--hidden      | applied on files/folders that are hidden       | `FileList > .filelist--hidden`      |
 
 These component classes also come with their own sub classes due to textual limitations.
+When multiple classes apply, checked styling is used as the base and file-specific styling takes precedence for properties it defines.
 
 | Component Classes | Description                                   | Example                                   |
 | ----------------- | --------------------------------------------- | ----------------------------------------- |

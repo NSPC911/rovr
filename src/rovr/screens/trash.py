@@ -94,7 +94,7 @@ class TrashSelectionList(
 ):
     BINDINGS: ClassVar[list[BindingType]] = list(bindings)
 
-    COMPONENT_CLASSES: ClassVar[set[str]] = {
+    COMPONENT_CLASSES: ClassVar[set[str]] = CheckboxRenderingMixin.COMPONENT_CLASSES | {
         "trash--detail-size",
         "trash--detail-mtime",
     }

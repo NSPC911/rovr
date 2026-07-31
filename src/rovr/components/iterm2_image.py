@@ -35,8 +35,8 @@ def is_supported() -> bool:
         sys.__stdout__
         and sys.__stdout__.isatty()
         and (
-            os.environ.get("TERM_PROGRAM").lower() == "wezterm"
-            or os.environ.get("TERM_PROGRAM").lower().startswith("iterm")
+            os.environ.get("TERM_PROGRAM", "").lower() == "wezterm"
+            or os.environ.get("TERM_PROGRAM", "").lower().startswith("iterm")
         )
     )
 

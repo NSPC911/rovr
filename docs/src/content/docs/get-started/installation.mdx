@@ -31,12 +31,12 @@ import InlineSVG from "@/components/InlineSVG.astro";
 <u>Linux/macOS</u><br />
 With curl:
 ```sh
-curl -fsSL https://nspc911.github.io/rovr/install.sh | bash
+bash -c "$(curl -fsSL https://nspc911.github.io/rovr/install.sh)"
 ```
 
 With wget:
 ```sh
-wget -qO- https://nspc911.github.io/rovr/install.sh | bash
+bash -c "$(wget -qO- https://nspc911.github.io/rovr/install.sh)"
 ```
 
 <u>Windows</u>
@@ -78,6 +78,13 @@ Compiled version
 ```sh
 yay -S rovr-bin
 ```
+
+{/*#### Fedora (install)
+
+```sh
+sudo dnf copr enable NSPC911/rovr
+sudo dnf install rovr
+```*/}
 
 #### Pixi (install)
 

@@ -16,7 +16,6 @@
 # nuitka-project: --python-flag=no_site
 # nuitka-project: --python-flag=safe_path
 # nuitka-project: --python-flag=static_hashes
-# nuitka-project: --report-diffable
 # nuitka-project: --warn-unusual-code
 
 # nuitka-project-if: {OS} in ("MACOS"):

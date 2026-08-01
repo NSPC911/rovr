@@ -33,5 +33,5 @@ rovr is a stylish terminal file manager built with Textual.
 %doc README.md
 
 %changelog
-* Sat Jul 25 2026 NSPBot911 <176916861+NSPBot911@users.noreply.github.com> - 0.10.0rc1-1
+* Sat Jul 31 2026 NSPC911 <87571998+NSPC911@users.noreply.github.com> - 0.10.0-1
 - Initial COPR packaging setup

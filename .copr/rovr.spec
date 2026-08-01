@@ -1,5 +1,5 @@
 Name:           rovr
-Version:        0.10.0rc1
+Version:        0.10.0
 Release:        1%{?dist}
 Summary:        Stylish, batteries-included terminal file manager
 
@@ -33,5 +33,5 @@ rovr is a stylish terminal file manager built with Textual.
 %doc README.md
 
 %changelog
-* Sat Jul 31 2026 NSPC911 <87571998+NSPC911@users.noreply.github.com> - 0.10.0-1
+* Sat Aug 1 2026 NSPC911 <87571998+NSPC911@users.noreply.github.com> - 0.10.0-1
 - Initial COPR packaging setup

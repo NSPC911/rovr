@@ -80,7 +80,7 @@ jobs:
         run: |
           Remove-Item -Recurse -Force rovr.dist -ErrorAction SilentlyContinue
           uv sync --no-dev --group build
-          uv run --no-sync poe build standalone
+          uv run --no-sync poe build standalone --lto yes -- --noinclude-custom-mode=rich:bytecode --noinclude-custom-mode=textual:bytecode
 
       - name: Upload Executable
         uses: actions/upload-artifact@v7

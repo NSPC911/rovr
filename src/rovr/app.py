@@ -266,12 +266,6 @@ class Application(Actionable, DNDApp, inherit_bindings=False):
         # the same no matter which theme the app started with
         self._load_theme_css()
 
-    def on_compose(self, event: events.Compose) -> None:
-        self.screen.update_node_styles = lambda animate=True: None  # ty: ignore[invalid-assignment]
-
-    def monkey_patch_screen_update_node_styles(self, animate: bool = True) -> None:
-        self.screen.update_node_styles = Screen.update_node_styles
-
     @property
     def file_list(self) -> FileList:
         if not self._file_list_container.filelist.is_mounted:

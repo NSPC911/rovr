@@ -38,12 +38,18 @@ class BetterUnderline(Underline):
 class TablineTab(Tab):
     ALLOW_SELECT = False
 
-    def __init__(self, directory: str | bytes = "", label: str = "") -> None:
+    def __init__(
+        self,
+        directory: str | bytes = "",
+        label: str = "",
+        focus_on: str | None = None,
+    ) -> None:
         """Initialise a Tab.
 
         Args:
             directory (str): The directory to set the tab as.
             label (ContentText): The label to use in the tab.
+            focus_on: The item to highlight when the tab is first loaded.
         """
         if directory == "":
             directory = getcwd()
@@ -56,6 +62,7 @@ class TablineTab(Tab):
             )
         super().__init__(label=label, id=f"id_{id(self)}")
         self.directory = directory
+        self.focus_on = focus_on
         self.session = SessionManager()
 
 
@@ -152,10 +159,12 @@ class Tabline(Tabs):
         worker = self.app.cd(
             event.tab.directory,
             add_to_history=False,
+            focus_on=event.tab.focus_on,
             has_selected=event.tab.session.selectMode,
             callback=callback,
             clear_search=False,
         )
+        event.tab.focus_on = None
         if worker is not None:
             with suppress(WorkerCancelled):
                 await worker.wait()

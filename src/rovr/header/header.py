@@ -1,5 +1,3 @@
-from os import getcwd
-
 from textual import events
 from textual.app import ComposeResult
 from textual.containers import HorizontalGroup
@@ -13,9 +11,14 @@ from .tabs import NewTabButton, Tabline, TablineTab
 
 
 class HeaderArea(HorizontalGroup):
-    def __init__(self) -> None:
+    def __init__(self, startup_locations: list[tuple[str, str | None]]) -> None:
         super().__init__(id="headerArea")
-        self.tabline = Tabline(TablineTab(directory=getcwd()))
+        self.tabline = Tabline(
+            *(
+                TablineTab(directory=directory, focus_on=focus_on)
+                for directory, focus_on in startup_locations
+            )
+        )
 
     def compose(self) -> ComposeResult:
         if (

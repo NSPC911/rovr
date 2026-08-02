@@ -58,7 +58,7 @@ def _build_parser() -> argparse.ArgumentParser:
     parser = RichArgumentParser(
         prog="rovr",
         description="a stylish, batteries-included terminal file manager.",
-        usage="rovr [OPTIONS] [PATH]",
+        usage="rovr [OPTIONS] [PATH ...]",
         formatter_class=formatter_class,
         add_help=False,
     )
@@ -205,7 +205,7 @@ def _build_parser() -> argparse.ArgumentParser:
         else argparse.SUPPRESS,
     )
 
-    parser.add_argument("path", nargs="?", default="", type=str, metavar="PATH")
+    parser.add_argument("paths", nargs="*", default=[], type=str, metavar="PATH")
 
     return parser
 
@@ -388,7 +388,7 @@ example_function(10)"""
 
     if args.ignore_missing_tty or sys.stdout.isatty():
         app = Application(
-            startup_path=args.path,
+            startup_path=args.paths,
             cwd_file=cwd_file if cwd_file else None,
             chooser_file=chooser_file if chooser_file else None,
             show_keys=args.show_keys,
@@ -421,7 +421,7 @@ example_function(10)"""
 
                     constants.COLOR_SYSTEM = "truecolor"
                 app = Application(
-                    startup_path=args.path,
+                    startup_path=args.paths,
                     cwd_file=cwd_file if cwd_file else None,
                     chooser_file=chooser_file if chooser_file else None,
                     show_keys=args.show_keys,

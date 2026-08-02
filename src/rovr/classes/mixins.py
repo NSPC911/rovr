@@ -160,7 +160,11 @@ class CheckboxRenderingMixin:
 
     def _get_option_component_classes(self, option: Option) -> list[str]:
         classes: list[str] = []
-        if isinstance(option, Selection) and option.value in self._selected:
+        if (
+            isinstance(option, Selection)
+            and option.value in self._selected
+            and not option.disabled
+        ):
             classes.append(self.CHECKED_COMPONENT_CLASS)
         if hasattr(option, "get_component_classes") and callable(
             option.get_component_classes

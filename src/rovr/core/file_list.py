@@ -561,6 +561,9 @@ class FileList(
 
     async def file_selected_handler(self, paths: list[str]) -> None:
         if self.app._chooser_file:
+            self.app._chooser_paths = [
+                str(path_utils.normalise(item)) for item in paths
+            ]
             self.call_next(self.app.action_quit)
             return
 
@@ -1058,6 +1061,13 @@ class FileList(
             return
         cwd = path_utils.normalise(getcwd())
         if self.select_mode:
+            if self.app._chooser_file:
+                selected = await self.get_selected_objects()
+                if not selected and self.highlighted_option:
+                    selected = [str(self.highlighted_option.dir_entry.path)]
+                if selected:
+                    await self.file_selected_handler(selected)
+                return
             session = self.app.tabWidget.active_tab.session
             session.selectedItems = []
             paths_to_open = []

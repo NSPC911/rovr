@@ -237,6 +237,7 @@ class Application(Actionable, DNDApp, inherit_bindings=False):
         # Runtime output files from CLI
         self._cwd_file: str | TextIOWrapper | None = cwd_file
         self._chooser_file: str | TextIOWrapper | None = chooser_file
+        self._chooser_paths: list[str] | None = None
         self._show_keys: bool = show_keys
         self._exit_with_tree: bool = tree_dom
         self._force_crash_in: float = force_crash_in
@@ -735,23 +736,22 @@ class Application(Actionable, DNDApp, inherit_bindings=False):
                     message += (
                         f"Failed to write cwd file `{path.basename(self._cwd_file)}`!\n"
                     )
-        # Write selected/active item(s) to --chooser-file, if provided
-        if self._chooser_file:
-            selected = await self.file_list.get_selected_objects()
-            if selected:
-                if isinstance(self._chooser_file, TextIOWrapper):
-                    try:
-                        self._chooser_file.write("\n".join(selected))
-                        self._chooser_file.flush()
-                    except OSError:
-                        message += "Failed to write chooser to stdout!\n"
-                else:
-                    try:
-                        with open(self._chooser_file, "w", encoding="utf-8") as f:
-                            f.write("\n".join(selected))
-                    except OSError:
-                        # Any failure writing chooser file should not block exit
-                        message += f"Failed to write chooser file `{path.basename(self._chooser_file)}`"
+        # Only an explicit open action confirms a chooser selection.
+        if self._chooser_file and self._chooser_paths:
+            selected = self._chooser_paths
+            if isinstance(self._chooser_file, TextIOWrapper):
+                try:
+                    self._chooser_file.write("\n".join(selected))
+                    self._chooser_file.flush()
+                except OSError:
+                    message += "Failed to write chooser to stdout!\n"
+            else:
+                try:
+                    with open(self._chooser_file, "w", encoding="utf-8") as f:
+                        f.write("\n".join(selected))
+                except OSError:
+                    # Any failure writing chooser file should not block exit
+                    message += f"Failed to write chooser file `{path.basename(self._chooser_file)}`"
         self.exit(message.strip() if message else None)
 
     @on(ExitApp)

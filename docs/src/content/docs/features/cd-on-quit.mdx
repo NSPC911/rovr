@@ -77,7 +77,9 @@ rovr also supports other Yazi-style CLI options for direct integration with scri
 
 #### `--chooser-file`
 
-Write selected files to a specified file when rovr exits:
+Write opened files to a specified file when rovr exits. Opening a file accepts
+the highlighted file, or every selected file in visual mode. Quitting without
+opening a file cancels the selection and leaves the chooser file unchanged:
 
 ```bash
 # Using a temporary file

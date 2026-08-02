@@ -1,5 +1,5 @@
 from inspect import isawaitable
-from typing import Any, Awaitable, Callable, Iterable, NamedTuple, Self
+from typing import Any, Awaitable, Callable, ClassVar, Iterable, NamedTuple, Self
 
 from rich.cells import cell_len
 from rich.segment import Segment
@@ -9,7 +9,7 @@ from textual.content import ContentText
 from textual.events import Key
 from textual.geometry import Region, Size
 from textual.strip import Strip
-from textual.widgets import OptionList
+from textual.widgets import OptionList, SelectionList
 from textual.widgets.option_list import Option, OptionDoesNotExist
 from textual.widgets.selection_list import Selection, SelectionType
 
@@ -151,12 +151,26 @@ class SingleLineOptionLayoutMixin:
 
 
 class CheckboxRenderingMixin:
+    CHECKED_COMPONENT_CLASS: ClassVar[str] = "selection-list--option-checked"
+    COMPONENT_CLASSES: ClassVar[set[str]] = SelectionList.COMPONENT_CLASSES | {
+        CHECKED_COMPONENT_CLASS,
+        f"{CHECKED_COMPONENT_CLASS}--highlighted",
+        f"{CHECKED_COMPONENT_CLASS}--hovered",
+    }
+
     def _get_option_component_classes(self, option: Option) -> list[str]:
+        classes: list[str] = []
+        if (
+            isinstance(option, Selection)
+            and option.value in self._selected
+            and not option.disabled
+        ):
+            classes.append(self.CHECKED_COMPONENT_CLASS)
         if hasattr(option, "get_component_classes") and callable(
             option.get_component_classes
         ):
-            return list(option.get_component_classes())  # ty: ignore
-        return []
+            classes.extend(option.get_component_classes())  # ty: ignore
+        return classes
 
     def _get_left_gutter_width(self) -> int:
         """

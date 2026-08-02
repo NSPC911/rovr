@@ -214,7 +214,7 @@ class Application(Actionable, DNDApp, inherit_bindings=False):
 
     def __init__(
         self,
-        startup_path: str | Iterable[str] = "",
+        startup_path: str | Iterable[str] | None = None,
         *,
         cwd_file: str | TextIOWrapper | None = None,
         chooser_file: str | TextIOWrapper | None = None,
@@ -247,9 +247,12 @@ class Application(Actionable, DNDApp, inherit_bindings=False):
         self._background_processes: set[Popen] = set()
         # cannot use self.clipboard, reserved for Textual's clipboard
         self.Clipboard = Clipboard()
-        startup_paths = (
-            [startup_path] if isinstance(startup_path, str) else startup_path
-        )
+        if startup_path is None:
+            startup_paths = []
+        elif isinstance(startup_path, str):
+            startup_paths = [startup_path]
+        else:
+            startup_paths = list(startup_path)
         self._startup_locations: list[tuple[str, str | None]] = []
         for startup_item in startup_paths:
             resolved_path = path.abspath(path.expanduser(startup_item))

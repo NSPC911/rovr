@@ -6,6 +6,7 @@ from textual import events
 
 from rovr.app import Application
 from rovr.components import SearchInput
+from rovr.header.tabs import TablineTab
 from rovr.navigation_widgets import BackButton
 
 from .conftest import iter_until, workers_finished
@@ -33,6 +34,42 @@ async def test_nav(tmp_path: Path) -> None:
         await iter_until(
             pilot, lambda: app.file_list.get_option_at_index(0).dir_entry.is_dir()
         )
+
+
+@pytest.mark.asyncio
+async def test_multiple_startup_paths_open_tabs(tmp_path: Path) -> None:
+    first = tmp_path / "first"
+    second = tmp_path / "second"
+    first.mkdir()
+    second.mkdir()
+
+    app = Application(startup_path=[first.as_posix(), second.as_posix()])
+    async with app.run_test(size=(143, 37)) as pilot:
+        await iter_until(pilot, lambda: app.tabWidget.active_tab is not None)
+
+        assert len(app.tabWidget.query(TablineTab)) == 2
+        assert isinstance(app.tabWidget.active_tab, TablineTab)
+        assert app.tabWidget.active_tab.directory == first.as_posix()
+        assert Path.cwd() == first
+
+
+@pytest.mark.asyncio
+async def test_startup_file_is_highlighted(tmp_path: Path) -> None:
+    target = tmp_path / "target.txt"
+    target.touch()
+    (tmp_path / "another.txt").touch()
+
+    app = Application(startup_path=target.as_posix())
+    async with app.run_test(size=(143, 37)) as pilot:
+        await iter_until(
+            pilot,
+            lambda: (
+                app.file_list.highlighted_option is not None
+                and app.file_list.highlighted_option.dir_entry.name == target.name
+            ),
+        )
+
+        assert Path.cwd() == tmp_path
 
 
 @pytest.mark.asyncio

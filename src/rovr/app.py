@@ -214,7 +214,7 @@ class Application(Actionable, DNDApp, inherit_bindings=False):
 
     def __init__(
         self,
-        startup_path: str = "",
+        startup_path: str | Iterable[str] | None = None,
         *,
         cwd_file: str | TextIOWrapper | None = None,
         chooser_file: str | TextIOWrapper | None = None,
@@ -247,8 +247,23 @@ class Application(Actionable, DNDApp, inherit_bindings=False):
         self._background_processes: set[Popen] = set()
         # cannot use self.clipboard, reserved for Textual's clipboard
         self.Clipboard = Clipboard()
-        if startup_path:
-            chdir(ensure_existing_directory(startup_path))
+        if startup_path is None:
+            startup_paths = []
+        elif isinstance(startup_path, str):
+            startup_paths = [startup_path]
+        else:
+            startup_paths = list(startup_path)
+        self._startup_locations: list[tuple[str, str | None]] = []
+        for startup_item in startup_paths:
+            resolved_path = path.abspath(path.expanduser(startup_item))
+            directory = normalise(ensure_existing_directory(resolved_path))
+            focus_on = (
+                path.basename(resolved_path) if path.isfile(resolved_path) else None
+            )
+            self._startup_locations.append((directory, focus_on))
+        if not self._startup_locations:
+            self._startup_locations.append((normalise(getcwd()), None))
+        chdir(self._startup_locations[0][0])
 
         self._p_timer: Timer | None = None
         self._dnd_invoked_tab: str | None = None
@@ -284,7 +299,7 @@ class Application(Actionable, DNDApp, inherit_bindings=False):
             else " comfy-panels"
         )
         with Vertical(id="root", classes=root_classes.strip()):
-            header = HeaderArea()
+            header = HeaderArea(self._startup_locations)
             self.tabWidget = header.tabline
             yield header
             with VerticalGroup(id="menu_wrapper"):

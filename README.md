@@ -166,12 +166,12 @@ This project is licensed under the MIT License. See the [LICENSE](LICENSE) file 
 ### Stargazers
 
 Thank you so much for starring this repo! Each star pushes me more to make even more amazing features for you!
-<a href="https://www.star-history.com/#nspc911/rovr&Date">
-<picture>
 
-   <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/svg?repos=nspc911/rovr&type=Date&theme=dark" />
-   <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/svg?repos=nspc911/rovr&type=Date" />
-   <img alt="" src="https://api.star-history.com/svg?repos=nspc911/rovr&type=Date" />
+<a href="https://www.star-history.com/?repos=NSPC911%2Frovr&type=date&legend=top-left">
+ <picture>
+   <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/chart?repos=NSPC911/rovr&type=date&theme=dark&legend=top-left&sealed_token=EiL-X1USo-Fr6ZIocrTocGE5XqLKjqDr26fSi8qcCgF2rpWGr0rK5YSP_tZgcQmCOHOU2DGATlGkFVFj_PGXihWKwdJPopENKJQEjqjwdmFAYyNbOB7k0g" />
+   <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/chart?repos=NSPC911/rovr&type=date&legend=top-left&sealed_token=EiL-X1USo-Fr6ZIocrTocGE5XqLKjqDr26fSi8qcCgF2rpWGr0rK5YSP_tZgcQmCOHOU2DGATlGkFVFj_PGXihWKwdJPopENKJQEjqjwdmFAYyNbOB7k0g" />
+   <img alt="Star History Chart" src="https://api.star-history.com/chart?repos=NSPC911/rovr&type=date&legend=top-left&sealed_token=EiL-X1USo-Fr6ZIocrTocGE5XqLKjqDr26fSi8qcCgF2rpWGr0rK5YSP_tZgcQmCOHOU2DGATlGkFVFj_PGXihWKwdJPopENKJQEjqjwdmFAYyNbOB7k0g" />
  </picture>
 </a>
 

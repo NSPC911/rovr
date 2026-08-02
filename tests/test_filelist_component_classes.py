@@ -5,10 +5,11 @@ from pathlib import Path
 from typing import Any, cast
 
 import pytest
+from textual.content import Content
 from textual.worker import Worker
 
 from rovr.app import Application
-from rovr.classes.textual_options import FileListSelectionWidget
+from rovr.classes.textual_options import ClipboardSelection, FileListSelectionWidget
 from rovr.footer.clipboard_container import Clipboard
 from rovr.variables.constants import config, os_type
 
@@ -124,3 +125,26 @@ async def test_checked_component_style_preserves_file_style(tmp_path: Path) -> N
         )
         assert combined_style.foreground == checked_style.foreground
         assert combined_style.background == file_style.background
+
+
+@pytest.mark.asyncio
+async def test_checked_clipboard_option_renders(tmp_path: Path) -> None:
+    file_path = tmp_path / "checked.txt"
+    file_path.touch()
+
+    app = Application(tmp_path.as_posix())
+    async with app.run_test(size=(143, 37)) as pilot:
+        await pilot.pause()
+        option = ClipboardSelection(
+            prompt=Content(str(file_path)),
+            text=str(file_path),
+            type_of_selection="copy",
+        )
+        app.Clipboard.insert_selection_at_beginning(option)
+        app.Clipboard.select(option)
+        await pilot.pause()
+
+        assert app.Clipboard._get_option_component_classes(option) == [
+            "selection-list--option-checked"
+        ]
+        assert app.Clipboard.render_line(0).text.strip()

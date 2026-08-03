@@ -9,6 +9,12 @@
 # nuitka-project: --nofollow-import-to="tkinter"
 # nuitka-project: --nofollow-import-to=aiohttp
 # nuitka-project: --noinclude-custom-mode=pygments:bytecode
+# nuitka-project: --noinclude-custom-mode=pygments.lexers:bytecode
+# nuitka-project: --noinclude-custom-mode=rich:bytecode
+# nuitka-project: --noinclude-custom-mode=textual:bytecode
+# nuitka-project: --noinclude-custom-mode=rarfile:bytecode
+# nuitka-project: --noinclude-custom-mode=backports-zstd:bytecode
+# nuitka-project: --noinclude-custom-mode=pillow:bytecode
 # nuitka-project: --onefile-cache-mode=cached
 # nuitka-project: --onefile-child-grace-time=1
 # nuitka-project: --python-flag=no_asserts

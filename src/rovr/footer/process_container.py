@@ -372,7 +372,7 @@ class ProcessContainer(Actionable, VerticalScroll):
         files_to_delete = []
         folders_to_delete = []
         for file in files:
-            if path_utils.file_is_type(file) == "directory":
+            if path.isdir(file):
                 folders_to_delete.append(file)
             files_to_add, folders_to_add = path_utils.get_recursive_files(
                 file, with_folders=True
@@ -480,7 +480,7 @@ class ProcessContainer(Actionable, VerticalScroll):
         Args:
             item_path (str): The path to delete.
         """
-        if path_utils.file_is_type(item_path) == "directory":
+        if path.isdir(item_path):
             shutil.rmtree(item_path, onexc=self.rmtree_fixer)
         else:
             os.remove(item_path)

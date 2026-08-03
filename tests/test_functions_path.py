@@ -51,54 +51,6 @@ def test_filtered_dir_names(tmp_path: Path) -> None:
     assert filtered == dir_names
 
 
-def test_file_type(tmp_path: Path) -> None:
-    import sys
-
-    # file
-    open(tmp_path / "file.txt", "w").close()
-    assert path_utils.file_is_type(tmp_path.joinpath("file.txt").as_posix()) == "file"
-
-    # directory
-    os.makedirs(tmp_path / "folder")
-    assert (
-        path_utils.file_is_type(tmp_path.joinpath("folder").as_posix()) == "directory"
-    )
-
-    # symlink
-    try:
-        os.symlink(tmp_path / "file.txt", tmp_path / "link")
-        assert (
-            path_utils.file_is_type(tmp_path.joinpath("link").as_posix()) == "symlink"
-        )
-    except (OSError, NotImplementedError):
-        if sys.platform != "win32":
-            pytest.skip("Symlink creation failed, skipping test")
-
-    # junction (if windows)
-    if sys.platform == "win32":
-        # use the folder from before
-        import subprocess
-
-        output = subprocess.run(
-            [
-                "mklink",
-                "/J",
-                (tmp_path / "junction").as_posix().replace("/", "\\"),
-                (tmp_path / "folder").as_posix().replace("/", "\\"),
-            ],
-            shell=True,
-            capture_output=True,
-            text=True,
-        )
-        if output.returncode != 0:
-            pytest.skip("Junction creation failed, skipping test")
-        else:
-            assert (
-                path_utils.file_is_type(tmp_path.joinpath("junction").as_posix())
-                == "junction"
-            )
-
-
 def test_ensure_existing_directory(tmp_path: Path) -> None:
     # basically check the directory it goes to if the target directory doesn't exist or isn't a directory
     target_dir = tmp_path / "nonexistent" / "subdir" / "target" / "dir"

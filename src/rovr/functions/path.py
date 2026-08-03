@@ -30,20 +30,21 @@ from rovr.variables.constants import log_name, os_type
 from .drive_workers import normalise
 from .icons import get_icon_for_file, get_icon_for_folder
 
+natsort_compiled = re.compile(r"(\d+)")
 
-def _natsort(key: str) -> list:
-    return [
-        int(text) if text.isdigit() else text.lower()
-        for text in re.split(r"(\d+)", key)
-    ]
+
+def _natsort(key: str) -> tuple[str | int, ...]:
+    return tuple(
+        int(text) if text.isdigit() else text for text in natsort_compiled.split(key)
+    )
 
 
 @lru_cache(maxsize=2048)
-def natsort(key: str) -> list:
+def natsort(key: str) -> tuple[str | int, ...]:
     return _natsort(key)
 
 
-def natsort_cacheless(key: str) -> list:
+def natsort_cacheless(key: str) -> tuple[str | int, ...]:
     return _natsort(key)
 
 
@@ -365,32 +366,34 @@ def sync_get_cwd_object(
     # sort order
     match sort_by:
         case "name":
-            folders.sort(key=lambda x: x["name"].lower())
-            files.sort(key=lambda x: x["name"].lower())
+            folders.sort(key=lambda x: x["name"].lower(), reverse=reverse)
+            files.sort(key=lambda x: x["name"].lower(), reverse=reverse)
         case "natural":
             if len(folders) < 1024:
-                folders.sort(key=lambda x: natsort(x["name"]))
+                folders.sort(key=lambda x: natsort(x["name"]), reverse=reverse)
             else:
-                folders.sort(key=lambda x: natsort_cacheless(x["name"]))
+                folders.sort(
+                    key=lambda x: natsort_cacheless(x["name"]), reverse=reverse
+                )
             if len(files) < 1024:
-                files.sort(key=lambda x: natsort(x["name"]))
+                files.sort(key=lambda x: natsort(x["name"]), reverse=reverse)
             else:
-                files.sort(key=lambda x: natsort_cacheless(x["name"]))
+                files.sort(key=lambda x: natsort_cacheless(x["name"]), reverse=reverse)
         case "created":
-            folders.sort(key=lambda x: sorter(x, "ctime"))
-            files.sort(key=lambda x: sorter(x, "ctime"))
+            folders.sort(key=lambda x: sorter(x, "ctime"), reverse=reverse)
+            files.sort(key=lambda x: sorter(x, "ctime"), reverse=reverse)
         case "modified":
-            folders.sort(key=lambda x: sorter(x, "mtime"))
-            files.sort(key=lambda x: sorter(x, "mtime"))
+            folders.sort(key=lambda x: sorter(x, "mtime"), reverse=reverse)
+            files.sort(key=lambda x: sorter(x, "mtime"), reverse=reverse)
         case "size":
             # no we will not be calculating the folder size
-            folders.sort(key=lambda x: x["name"].lower())
-            files.sort(key=lambda x: sorter(x, "size"))
+            folders.sort(key=lambda x: x["name"].lower(), reverse=reverse)
+            files.sort(key=lambda x: sorter(x, "size"), reverse=reverse)
         case "extension":
             # folders dont have extensions btw
             # and i will not count dot prepended folders
-            folders.sort(key=lambda x: x["name"].lower())
-            files.sort(key=get_extension_sort_key)
+            folders.sort(key=lambda x: x["name"].lower(), reverse=reverse)
+            files.sort(key=get_extension_sort_key, reverse=reverse)
         case None:
             pass
 
@@ -400,9 +403,6 @@ def sync_get_cwd_object(
     ):
         dom_node.log("Cut off early before reversing results")
         return None, None
-    if reverse:
-        files.reverse()
-        folders.reverse()
 
     dom_node.log(f"Found {len(folders)} folders and {len(files)} files in {cwd}")
     return folders, files

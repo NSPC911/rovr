@@ -126,36 +126,44 @@ class Application(Actionable, DNDApp, inherit_bindings=False):
     # key: str the action to use
     # value: bool or callable that returns bool,
     #        whether the keybind can be used or not
-    ACTIONS: list[Action] = [
-        Action(action, config["keybinds"][action])
-        for action in (
-            "focus_toggle_pinned_sidebar",
-            "focus_file_list",
-            "focus_toggle_preview_sidebar",
-            "focus_toggle_path_switcher",
-            "focus_toggle_processes",
-            "focus_toggle_metadata",
-            "focus_toggle_clipboard",
-            "toggle_pinned_sidebar",
-            "toggle_preview_sidebar",
-            "toggle_footer",
-            "toggle_menu_wrapper",
-            "tab_next",
-            "tab_previous",
-            "tab_new",
-            "tab_close",
-            "show_keybinds",
-            "show_shell_screen",
-            "suspend_process",
-        )
-    ] + [
-        Action(action, config["plugins"][plugin]["keybinds"])
-        for action, plugin in (
-            ("plugin_zoxide", "zoxide"),
-            ("plugin_fd", "fd"),
-            ("plugin_rg", "rg"),
-        )
-    ]
+    ACTIONS: list[Action] = (
+        [
+            Action(action, config["keybinds"][action])
+            for action in (
+                "focus_toggle_pinned_sidebar",
+                "focus_file_list",
+                "focus_toggle_preview_sidebar",
+                "focus_toggle_path_switcher",
+                "focus_toggle_processes",
+                "focus_toggle_metadata",
+                "focus_toggle_clipboard",
+                "toggle_pinned_sidebar",
+                "toggle_preview_sidebar",
+                "toggle_footer",
+                "toggle_menu_wrapper",
+                "tab_new",
+                "tab_close",
+                "show_keybinds",
+                "show_shell_screen",
+                "suspend_process",
+            )
+        ]
+        + [
+            Action(method, config["keybinds"][action])
+            for action, method in (
+                ("tab_next", "tab_relfocus(+1)"),
+                ("tab_previous", "tab_relfocus(-1)"),
+            )
+        ]
+        + [
+            Action(action, config["plugins"][plugin]["keybinds"])
+            for action, plugin in (
+                ("plugin_zoxide", "zoxide"),
+                ("plugin_fd", "fd"),
+                ("plugin_rg", "rg"),
+            )
+        ]
+    )
 
     # dont need ctrl+c
     BINDINGS = [
@@ -1558,20 +1566,24 @@ class Application(Actionable, DNDApp, inherit_bindings=False):
         self.file_list.focus()
         self.query_one(StateManager).toggle_menu_wrapper()
 
-    def action_tab_next(self) -> None:
-        if self.tabWidget.active_tab is not None:
-            self.tabWidget.action_next_tab()
-
-    def action_tab_previous(self) -> None:
-        if self.tabWidget.active_tab is not None:
-            self.tabWidget.action_previous_tab()
+    def action_tab_relfocus(self, tab: str | int) -> None:
+        if isinstance(tab, str):
+            if tab.startswith(("+", "-")):
+                if tab[1:].isdigit():
+                    tab = int(tab)
+            elif tab.isdigit():
+                tab = int(tab)
+        if not isinstance(tab, int):
+            return
+        # yes it is in face, _move_tab, not _focus_tab
+        # i dont know why
+        self.tabWidget._move_tab(int(tab))
 
     async def action_tab_new(self) -> None:
-        await self.query_one("NewTabButton").on_button_pressed()
+        await self.tabWidget.action_new()
 
     async def action_tab_close(self) -> None:
-        if self.tabWidget.tab_count > 1:
-            await self.tabWidget.remove_tab(self.tabWidget.active_tab)
+        await self.tabWidget.action_close()
 
     def action_plugin_zoxide(self) -> None:
         import shutil

@@ -1,0 +1,5 @@
+[keys]
+q = "app.quit"
+"ctrl+q" = "quit"
+"n" = "tab_new"
+"w" = "tab_close"

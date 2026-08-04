@@ -4,10 +4,11 @@ from typing import Any, Awaitable, Callable, ClassVar, Iterable, NamedTuple, Sel
 from rich.cells import cell_len
 from rich.segment import Segment
 from rich.style import Style
+from textual.actions import parse
 from textual.color import Color
 from textual.content import ContentText
 from textual.events import Key
-from textual.geometry import Region, Size
+from textual.geometry import Region, Size, clamp
 from textual.strip import Strip
 from textual.widgets import OptionList, SelectionList
 from textual.widgets.option_list import Option, OptionDoesNotExist
@@ -17,9 +18,7 @@ from rovr.classes.textual_options import LazySelection
 from rovr.functions import details as detail_utils
 from rovr.functions import icons as icon_utils
 from rovr.functions.utils import check_key
-from rovr.variables.constants import (
-    config,
-)
+from rovr.variables.constants import config
 
 
 class DetailColumnRenderingMixin:
@@ -368,13 +367,17 @@ class Actionable:
             ):
                 if not isinstance(action.action, str):
                     func: Callable[[], Any] = action.action
+                    args: tuple[Any, ...] = ()
                 else:
+                    parsed = parse(action.action)
+                    # we ignoring the first one btw
                     func: Callable[[], Any] | None = getattr(
-                        self, f"action_{action.action}"
+                        self, f"action_{parsed[1]}", None
                     )
                     if not callable(func):
                         continue
-                result: Any | Awaitable = func()
+                    args = parsed[2]
+                result: Any | Awaitable = func(*args)
                 if isawaitable(result):
                     await result
                 if getattr(self.app, "_show_keys", False):
@@ -384,6 +387,17 @@ class Actionable:
 
 
 class SetOptionsSelectionList:
+    def action_relfocus(self, option: str | int) -> None:
+        if isinstance(option, str):
+            if option.startswith(("+", "-")):
+                if option[1:].isdigit():
+                    option = int(option)
+            elif option.isdigit():
+                option = int(option)
+        if not isinstance(option, int):
+            return
+        self.highlighted = clamp(option, 0, len(self.options) - 1)
+
     def set_options(
         self,
         options: Iterable[

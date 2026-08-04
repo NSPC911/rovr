@@ -228,6 +228,30 @@ class Tabline(Tabs):
             else:
                 self.call_after_refresh(move_underline, False)
 
+    async def action_new(self, cwd: str | None = None) -> None:
+        await self.add_tab(cwd or self.app.last_available_cd)
+
+    async def action_close(self, tab: str | int | None = None) -> None:
+        if self.tabWidget.tab_count < 2:
+            return
+        if tab is None:
+            tab = self.active
+        elif isinstance(tab, int):
+            try:
+                tab = self._tabs[tab].id
+            except IndexError:
+                tab = None
+        elif isinstance(tab, str):
+            tab = (
+                self._tabs[int(tab)].id
+                if tab.isdigit()
+                else getattr(self.get_tab(tab), "id", None)
+            )
+        else:
+            return
+        if tab is not None:
+            await self.remove_tab(tab)
+
 
 class NewTabButton(Button):
     def __init__(self) -> None:
@@ -235,4 +259,6 @@ class NewTabButton(Button):
 
     async def on_button_pressed(self) -> None:
         assert self.parent and self.parent.parent
-        await self.parent.parent.query_one(Tabline).add_tab(self.app.last_available_cd)
+        await self.parent.parent.query_one(Tabline).action_new(
+            self.app.last_available_cd
+        )

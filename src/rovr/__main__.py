@@ -40,7 +40,7 @@ import os
 import sys
 import warnings
 from io import TextIOWrapper
-from typing import cast
+from typing import Callable, cast
 
 from rovr import main, pprint
 from rovr.functions.cli import (
@@ -214,6 +214,32 @@ def _build_parser() -> argparse.ArgumentParser:
     parser.add_argument("paths", nargs="*", default=[], type=str, metavar="PATH")
 
     return parser
+
+
+def _redirect_windows_standard_input(tty_in: TextIOWrapper) -> Callable[[], None]:
+    import ctypes
+    import msvcrt
+    from ctypes import wintypes
+
+    std_input_handle = wintypes.DWORD(-10)
+    kernel32 = ctypes.WinDLL("kernel32", use_last_error=True)
+    get_std_handle = kernel32.GetStdHandle
+    get_std_handle.argtypes = [wintypes.DWORD]
+    get_std_handle.restype = wintypes.HANDLE
+    set_std_handle = kernel32.SetStdHandle
+    set_std_handle.argtypes = [wintypes.DWORD, wintypes.HANDLE]
+    set_std_handle.restype = wintypes.BOOL
+
+    original_handle = get_std_handle(std_input_handle)
+    tty_handle = msvcrt.get_osfhandle(tty_in.fileno())
+    if not set_std_handle(std_input_handle, tty_handle):
+        raise ctypes.WinError(ctypes.get_last_error())
+
+    def restore() -> None:
+        if not set_std_handle(std_input_handle, original_handle):
+            raise ctypes.WinError(ctypes.get_last_error())
+
+    return restore
 
 
 def cli(argv: list[str] | None = None) -> None:
@@ -414,31 +440,40 @@ example_function(10)"""
                 open(open_stdout, "w") as tty_out,
                 open(open_stdin, "r") as tty_in,
             ):
-                sys.__stdout__ = sys.stdout = tty_out
-                sys.__stderr__ = sys.stderr = tty_out
-                sys.__stdin__ = sys.stdin = tty_in
-
-                from rich.color import ColorSystem
-
-                from rovr import get_console
-
-                if get_console()._detect_color_system() == ColorSystem.WINDOWS:
-                    from textual import constants
-
-                    constants.COLOR_SYSTEM = "truecolor"
-                app = Application(
-                    startup_path=args.paths,
-                    cwd_file=cwd_file if cwd_file else None,
-                    chooser_file=chooser_file if chooser_file else None,
-                    show_keys=args.show_keys,
-                    tree_dom=args.tree_dom,
-                    force_crash_in=args.force_crash_in,
-                    force_exit_on_shutdown=True,
+                restore_standard_input = (
+                    _redirect_windows_standard_input(tty_in)
+                    if os.name == "nt"
+                    else None
                 )
                 try:
-                    app.run()
+                    sys.__stdout__ = sys.stdout = tty_out
+                    sys.__stderr__ = sys.stderr = tty_out
+                    sys.__stdin__ = sys.stdin = tty_in
+
+                    from rich.color import ColorSystem
+
+                    from rovr import get_console
+
+                    if get_console()._detect_color_system() == ColorSystem.WINDOWS:
+                        from textual import constants
+
+                        constants.COLOR_SYSTEM = "truecolor"
+                    app = Application(
+                        startup_path=args.paths,
+                        cwd_file=cwd_file if cwd_file else None,
+                        chooser_file=chooser_file if chooser_file else None,
+                        show_keys=args.show_keys,
+                        tree_dom=args.tree_dom,
+                        force_crash_in=args.force_crash_in,
+                        force_exit_on_shutdown=True,
+                    )
+                    try:
+                        app.run()
+                    finally:
+                        app.cancel_force_exit_timer()
                 finally:
-                    app.cancel_force_exit_timer()
+                    if restore_standard_input is not None:
+                        restore_standard_input()
         finally:
             sys.__stdout__ = sys.stdout = backup_stdout
             sys.__stderr__ = sys.stderr = backup_stderr

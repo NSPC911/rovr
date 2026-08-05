@@ -1277,7 +1277,7 @@ requires-dist = [
     { name = "rich", specifier = "==14.2.0" },
     { name = "textual", specifier = "~=8.0" },
     { name = "textual-autocomplete", specifier = ">=4.0.6" },
-    { name = "textual-drivers", specifier = "~=0.7.0" },
+    { name = "textual-drivers", specifier = "~=0.8.0" },
     { name = "textual-image", extras = ["textual"], specifier = "~=0.13.0" },
     { name = "textual-speedups", marker = "extra == 'speedup'", specifier = ">=0.2.1" },
     { name = "tomli", specifier = ">=2.4.0" },
@@ -1445,14 +1445,14 @@ wheels = [
 
 [[package]]
 name = "textual-drivers"
-version = "0.7.0"
+version = "0.8.0"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "textual" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/a9/ac/4cc80a90baa0af9f157da13eb373c2dda3df48eae43777f99432a7f1e05e/textual_drivers-0.7.0.tar.gz", hash = "sha256:7da131edc0a5d5a116aad721140179c2da90193ed4b8fbc2c802e8a726984208", size = 20757, upload-time = "2026-07-10T15:17:47.55Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/40/cd/0baaf2939770f5044b5501a7d6d4c26f6c4a2820e51d249c82c02c84b25f/textual_drivers-0.8.0.tar.gz", hash = "sha256:3ea8edb54a7c0b4473220d122b28d8ee56ff4a0315a514820638248a24dea5e4", size = 23412, upload-time = "2026-08-05T14:01:31.826Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/e8/77/67ceed1bf0fa3c5a1cc4724ec7db8f3bfc04950b99ca1bc7e219b43d29b8/textual_drivers-0.7.0-py3-none-any.whl", hash = "sha256:f7d2efea60f32ee202df039b8e41ba4736c5e0d87c948f6dacd38cbc5b3bcab0", size = 27756, upload-time = "2026-07-10T15:17:46.742Z" },
+    { url = "https://files.pythonhosted.org/packages/63/67/258b57f439322d590d84d7d7f57b19a2a8a75332e61765698f03418e85ec/textual_drivers-0.8.0-py3-none-any.whl", hash = "sha256:a2e16f6c2cb97af4a08d8ee263b6d7e719143c6ff60f431a9e3fb1a04f75a73b", size = 30448, upload-time = "2026-08-05T14:01:30.768Z" },
 ]
 
 [[package]]

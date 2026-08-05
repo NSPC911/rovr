@@ -199,19 +199,28 @@ def parse_theme_file(theme_file: Path) -> Theme:
             f"missing required color fields: {', '.join(sorted(not_exist))}"
         )
 
-    bar_gradient: dict[str, list[str]] = {}
-    for name, kind in BAR_GRADIENT_FIELDS.items():
+    gradient_declarations: dict[str, str] = {}
+    for name in BAR_GRADIENT_FIELDS:
         if name not in declared:
             continue
-        colors = declared.pop(name).split()
-        for color in colors:
-            Color.parse(color)
-        bar_gradient[kind] = colors
+        gradient_declarations[name] = declared.pop(name)
     theme = Theme(
         name=theme_file.stem,
         variables=declared,
         **fields,  # ty: ignore[invalid-argument-type]
     )
+    resolved = resolve_variable_references(
+        {**declared, **gradient_declarations},
+        theme.to_color_system().generate(),
+    )
+    bar_gradient: dict[str, list[str]] = {}
+    for name, kind in BAR_GRADIENT_FIELDS.items():
+        if name not in gradient_declarations:
+            continue
+        colors = resolved[name].split()
+        for color in colors:
+            Color.parse(color)
+        bar_gradient[kind] = colors
     # Theme.ansi defaults to false, so retain whether a file actually declared
     # it. Undeclared themes must defer to the user's transparent-mode setting.
     theme.ansi_explicit = "ansi" in fields  # ty: ignore[unresolved-attribute]

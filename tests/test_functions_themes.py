@@ -251,13 +251,14 @@ def test_parse_theme_file_bar_gradient(tmp_path: Path) -> None:
     theme_file = tmp_path / "gradients.tcss"
     theme_file.write_text(
         NORD_PLACEHOLDER + "\n"
-        "$bar-gradient-default: #111111 #222222;\n"
-        "$bar-gradient-error: #ff0000 #990000;\n"
+        "$bar-gradient-default: $secondary $primary;\n"
+        "$bar-gradient-error: $warning $error;\n"
     )
     theme = theme_utils.parse_theme_file(theme_file)
+    variables = theme.to_color_system().generate()
     assert theme.bar_gradient == {
-        "default": ["#111111", "#222222"],
-        "error": ["#ff0000", "#990000"],
+        "default": [variables["secondary"], variables["primary"]],
+        "error": [variables["warning"], variables["error"]],
     }
     # bar-gradient declarations don't leak into the theme's plain variables
     assert "bar-gradient-default" not in theme.variables

@@ -1448,8 +1448,6 @@ class Application(Actionable, DNDApp, inherit_bindings=False):
         import rich
         from rich.traceback import Traceback
 
-        self.on_exit_app()
-
         self.bell()
         traceback = Traceback(
             show_locals=True, width=None, locals_max_length=5, suppress=[rich]

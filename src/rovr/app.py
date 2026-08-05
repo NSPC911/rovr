@@ -108,8 +108,7 @@ from rovr.navigation_widgets import (
     PathInput,
     UpButton,
 )
-from rovr.screens import ModalInput, PasteDropScreen
-from rovr.screens.typed import ShellExecReturnType
+from rovr.screens import ModalInput, PasteDropScreen, ShellExec
 from rovr.screens.way_too_small import TerminalTooSmall
 from rovr.state_manager import StateManager
 from rovr.variables.constants import MaxPossible, config, log_name, os_type
@@ -619,7 +618,7 @@ class Application(Actionable, DNDApp, inherit_bindings=False):
             event.prevent_default()
             await self._on_key(event)
 
-    def on_shell_exec_response(self, response: ShellExecReturnType | None) -> None:
+    def on_shell_exec_response(self, response: ShellExec.ReturnType | None) -> None:
         if response is None or response.command == "":
             return
 
@@ -1391,7 +1390,7 @@ class Application(Actionable, DNDApp, inherit_bindings=False):
         self.refresh()
         self.call_after_refresh(self.refresh_css)
         self.file_list.update_border_subtitle()
-        config["theme"]["transparent"] = self.ansi_color
+        config["theme"]["transparent"] = bool(self.ansi_color)
 
     @on(events.Click)
     def when_got_click(self, event: events.Click) -> None:
@@ -1689,8 +1688,6 @@ class Application(Actionable, DNDApp, inherit_bindings=False):
             super().action_suspend_process()
 
     def action_show_shell_screen(self) -> None:
-        from rovr.screens import ShellExec
-
         self.push_screen(
             ShellExec(),
             callback=lambda response: self.on_shell_exec_response(response),

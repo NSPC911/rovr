@@ -1,5 +1,5 @@
 from asyncio import sleep
-from typing import ClassVar, Literal
+from typing import ClassVar, Literal, NamedTuple
 
 from textual import events, on, work
 from textual.app import ComposeResult
@@ -13,7 +13,6 @@ from rovr.functions.utils import dismiss
 from rovr.variables.constants import bindings
 
 from .input import ModalInput
-from .typed import ArchiveScreenReturnType
 
 
 class ArchiveTypes(CheckboxRenderingMixin, SelectionList, inherit_bindings=False):
@@ -100,6 +99,11 @@ class ArchiveCompression(
 
 
 class ArchiveCreationScreen(ModalInput):
+    class ReturnType(NamedTuple):
+        path: str
+        algo: Literal["zip", "tar", "tar.gz", "tar.bz2", "tar.xz", "tar.zst"]
+        level: int
+
     BINDINGS = [
         Binding("tab", "app.focus_next", "Focus Next", show=False),
         Binding("shift+tab", "app.focus_previous", "Focus Previous", show=False),
@@ -152,7 +156,7 @@ class ArchiveCreationScreen(ModalInput):
         compression_selection = self.query_one(ArchiveCompression).selected
         dismiss(
             self,
-            ArchiveScreenReturnType(
+            ArchiveCreationScreen.ReturnType(
                 return_path,
                 self.query_one(ArchiveTypes).selected[0],
                 int(compression_selection[0] if compression_selection else 0),

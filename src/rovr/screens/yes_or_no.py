@@ -1,3 +1,5 @@
+from typing import TypedDict
+
 from rich.markup import escape
 from textual import events
 from textual.app import ComposeResult
@@ -17,6 +19,10 @@ dont_ask_bind = get_shortest_bind(config["keybinds"]["yes_or_no"]["dont_ask_agai
 
 class YesOrNo(Actionable, ModalScreen):
     """Screen with a dialog that asks whether you accept or deny"""
+
+    class ReturnType(TypedDict):
+        value: bool
+        toggle: bool
 
     def __init__(
         self,
@@ -78,14 +84,16 @@ class YesOrNo(Actionable, ModalScreen):
             # ie click outside
             dismiss(
                 self,
-                {"value": False, "toggle": False} if self.with_toggle else False,
+                YesOrNo.ReturnType(value=False, toggle=False)
+                if self.with_toggle
+                else False,
                 event,
             )
 
     def action_yes(self, event: Message | None = None) -> None:
         dismiss(
             self,
-            {"value": True, "toggle": self.query_one(Switch).value}
+            YesOrNo.ReturnType(value=True, toggle=self.query_one(Switch).value)
             if self.with_toggle
             else True,
             event,
@@ -94,7 +102,7 @@ class YesOrNo(Actionable, ModalScreen):
     def action_no(self, event: Message | None = None) -> None:
         dismiss(
             self,
-            {"value": False, "toggle": self.query_one(Switch).value}
+            YesOrNo.ReturnType(value=False, toggle=self.query_one(Switch).value)
             if self.with_toggle
             else False,
             event,

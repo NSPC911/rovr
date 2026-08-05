@@ -2,6 +2,7 @@ import shlex
 from contextlib import suppress
 from os import path
 from sys import platform
+from typing import Literal, NamedTuple
 
 from textual import events, on
 from textual.app import ComposeResult
@@ -15,14 +16,16 @@ from rovr.functions.icons import get_icon_smart
 from rovr.functions.utils import dismiss, get_shortest_bind
 from rovr.variables.constants import config
 
-from .typed import PasteDropReturnType
-
 copy_bind = get_shortest_bind(config["keybinds"]["drag_and_drop"]["copy"])
 move_bind = get_shortest_bind(config["keybinds"]["drag_and_drop"]["move"])
 cancel_bind = get_shortest_bind(config["keybinds"]["drag_and_drop"]["cancel"])
 
 
-class PasteDropScreen(Actionable, ModalScreen[PasteDropReturnType | None]):
+class PasteDropScreen(Actionable, ModalScreen["PasteDropScreen.ReturnType | None"]):
+    class ReturnType(NamedTuple):
+        paths: list[str]
+        action: Literal["copy", "move"]
+
     def __init__(
         self,
         initial_paste_event: events.Paste,
@@ -101,7 +104,9 @@ class PasteDropScreen(Actionable, ModalScreen[PasteDropReturnType | None]):
             case "copy" | "move":
                 dismiss(
                     self,
-                    PasteDropReturnType(sorted(list(self.file_paths)), event.button.id),
+                    PasteDropScreen.ReturnType(
+                        sorted(list(self.file_paths)), event.button.id
+                    ),
                     event,
                 )
             case "cancel":

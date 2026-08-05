@@ -26,7 +26,6 @@ from rovr.screens import (
     FileInUse,
     FileNameConflict,
     YesOrNo,
-    typed,
 )
 from rovr.variables.constants import config, os_type, scroll_bindings
 
@@ -240,7 +239,7 @@ class ProcessContainer(Actionable, VerticalScroll):
                     f"The file appears to be open elsewhere.\nHence, I cannot take any action on it.\nPath: {item_display_name}",
                 ),
             )
-            response = cast(typed.FileInUse, response)
+            response = cast(FileInUse.ReturnType, response)
             # Handle toggle: remember the action for future file-in-use scenarios
             updated_action = persisted_default
             if response["toggle"]:
@@ -572,7 +571,7 @@ class ProcessContainer(Actionable, VerticalScroll):
                                 destructive=True,
                             ),
                         )
-                        do_what = cast(typed.YesOrNo, do_what)
+                        do_what = cast(YesOrNo.ReturnType, do_what)
                         if do_what["toggle"]:
                             skip_trash = do_what["value"]
                         if do_what["value"]:
@@ -1474,9 +1473,9 @@ class ProcessContainer(Actionable, VerticalScroll):
 
     def helper_push_and_get_filenameconflict(
         self, screen: FileNameConflict
-    ) -> typed.FileNameConflict:
+    ) -> FileNameConflict.ReturnType:
         response = self.app.call_from_thread(self.app.push_screen_wait, screen)
-        return cast(typed.FileNameConflict, response)
+        return cast(FileNameConflict.ReturnType, response)
 
     @staticmethod
     def helper_rename(target: str) -> str:

@@ -10,7 +10,6 @@ from rovr.classes.textual_validators import (
 from rovr.functions.icons import get_icon
 from rovr.functions.path import normalise
 from rovr.screens import ArchiveCreationScreen
-from rovr.screens.typed import ArchiveScreenReturnType
 from rovr.variables.constants import config
 
 
@@ -52,7 +51,7 @@ class ZipButton(Button):
         if not response:
             return
 
-        response = cast(ArchiveScreenReturnType, response)
+        response = cast(ArchiveCreationScreen.ReturnType, response)
 
         archive_name = normalise(path.join(getcwd(), response.path))
 

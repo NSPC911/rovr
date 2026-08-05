@@ -1,3 +1,5 @@
+from typing import Literal, TypedDict
+
 from textual import events, on
 from textual.app import ComposeResult
 from textual.containers import Container, Grid, HorizontalGroup
@@ -19,6 +21,10 @@ dont_ask_bind = get_shortest_bind(
 
 class FileNameConflict(ModalScreen):
     """Screen with a dialog to confirm whether to overwrite, rename, skip or cancel."""
+
+    class ReturnType(TypedDict):
+        value: Literal["overwrite", "rename", "skip", "cancel"]
+        same_for_next: bool
 
     def __init__(
         self,
@@ -90,10 +96,10 @@ class FileNameConflict(ModalScreen):
     def action_overwrite(self, event: Message | None = None) -> None:
         dismiss(
             self,
-            {
-                "value": "overwrite",
-                "same_for_next": self.query_one(Switch).value,
-            },
+            FileNameConflict.ReturnType(
+                value="overwrite",
+                same_for_next=self.query_one(Switch).value,
+            ),
             event,
         )
 
@@ -101,10 +107,10 @@ class FileNameConflict(ModalScreen):
     def action_rename(self, event: Message | None = None) -> None:
         dismiss(
             self,
-            {
-                "value": "rename",
-                "same_for_next": self.query_one(Switch).value,
-            },
+            FileNameConflict.ReturnType(
+                value="rename",
+                same_for_next=self.query_one(Switch).value,
+            ),
             event,
         )
 
@@ -112,10 +118,10 @@ class FileNameConflict(ModalScreen):
     def action_skip(self, event: Message | None = None) -> None:
         dismiss(
             self,
-            {
-                "value": "skip",
-                "same_for_next": self.query_one(Switch).value,
-            },
+            FileNameConflict.ReturnType(
+                value="skip",
+                same_for_next=self.query_one(Switch).value,
+            ),
             event,
         )
 
@@ -123,10 +129,10 @@ class FileNameConflict(ModalScreen):
     def action_cancel(self, event: Message | None = None) -> None:
         dismiss(
             self,
-            {
-                "value": "cancel",
-                "same_for_next": self.query_one(Switch).value,
-            },
+            FileNameConflict.ReturnType(
+                value="cancel",
+                same_for_next=self.query_one(Switch).value,
+            ),
             event,
         )
 

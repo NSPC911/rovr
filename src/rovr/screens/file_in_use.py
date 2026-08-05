@@ -1,3 +1,5 @@
+from typing import Literal, TypedDict
+
 from rich.markup import escape
 from textual import events, on
 from textual.app import ComposeResult
@@ -17,6 +19,10 @@ dont_ask_bind = get_shortest_bind(config["keybinds"]["file_in_use"]["dont_ask_ag
 
 class FileInUse(ModalScreen):
     """Screen to show when a file is in use by another process on Windows."""
+
+    class ReturnType(TypedDict):
+        value: Literal["try_again", "cancel", "skip"]
+        toggle: bool
 
     def __init__(self, message: str) -> None:
         super().__init__()
@@ -59,10 +65,10 @@ class FileInUse(ModalScreen):
     def action_retry(self, event: Message | None = None) -> None:
         dismiss(
             self,
-            {
-                "value": "try_again",
-                "toggle": self.query_one(Switch).value,
-            },
+            FileInUse.ReturnType(
+                value="try_again",
+                toggle=self.query_one(Switch).value,
+            ),
             event,
         )
 
@@ -70,10 +76,10 @@ class FileInUse(ModalScreen):
     def action_cancel(self, event: Message | None = None) -> None:
         dismiss(
             self,
-            {
-                "value": "cancel",
-                "toggle": self.query_one(Switch).value,
-            },
+            FileInUse.ReturnType(
+                value="cancel",
+                toggle=self.query_one(Switch).value,
+            ),
             event,
         )
 
@@ -81,7 +87,7 @@ class FileInUse(ModalScreen):
     def action_skip(self, event: Message | None = None) -> None:
         dismiss(
             self,
-            {"value": "skip", "toggle": self.query_one(Switch).value},
+            FileInUse.ReturnType(value="skip", toggle=self.query_one(Switch).value),
             event,
         )
 

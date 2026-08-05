@@ -80,7 +80,7 @@ class ModalSearchScreen(Actionable, ModalScreen, inherit_bindings=False):
         self.search_options.action_select()
 
     @on(OptionList.OptionHighlighted)
-    def handle_highlighted(self) -> None:
+    def update_subtitle(self) -> None:
         if (
             self.search_options.option_count == 0
             or self.search_options.get_option_at_index(0).disabled

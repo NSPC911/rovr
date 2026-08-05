@@ -134,11 +134,6 @@ class ZDToDirectory(ModalSearchScreen):
             ):  # ie same~ish query, resulting in same result
                 pass
             else:
-                # unline normally, I'm using an add_option**s** function
-                # using it without has a likelihood of DuplicateID being
-                # raised, or just nothing showing up. By having the clear
-                # options and add options functions nearby, it hopefully
-                # reduces the likelihood of an empty option list
                 self.search_options.set_options(options)
                 self.search_options.remove_class("empty")
                 self.search_options.highlighted = 0

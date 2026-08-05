@@ -105,10 +105,7 @@ class FileSearch(ModalSearchScreen):
         fd_exec = config["plugins"]["fd"]["executable"]
 
         fd_cmd = [fd_exec]
-        if (
-            config["interface"]["show_hidden_files"]
-            or config["plugins"]["fd"]["search_hidden"]
-        ):
+        if config["plugins"]["fd"]["search_hidden"]:
             fd_cmd.append("--hidden")
         if not config["plugins"]["fd"]["relative_paths"]:
             fd_cmd.append("--absolute-path")
@@ -133,8 +130,6 @@ class FileSearch(ModalSearchScreen):
         try:
             fd_process = await self.create_proc(*fd_cmd)
             timeout = float(config["plugins"]["fd"]["timeout"])
-            loop = asyncio.get_running_loop()
-            deadline = loop.time() + timeout
 
             if fd_process.stderr is not None:
                 stderr_task = asyncio.create_task(fd_process.stderr.read())
@@ -142,6 +137,7 @@ class FileSearch(ModalSearchScreen):
             pending_options: list[OptionWithValue] = []
             is_empty = True
             last_flush = time()
+            self.is_loading = True
 
             while True:
                 if self._active_worker is not get_current_worker():
@@ -153,13 +149,7 @@ class FileSearch(ModalSearchScreen):
                 if fd_process.stdout is None:
                     break
 
-                remaining = deadline - loop.time()
-                if remaining <= 0:
-                    raise asyncio.exceptions.TimeoutError
-
-                line = await asyncio.wait_for(
-                    fd_process.stdout.readline(), timeout=remaining
-                )
+                line = await asyncio.wait_for(fd_process.stdout.readline(), timeout)
                 if not line:
                     break
 
@@ -183,18 +173,17 @@ class FileSearch(ModalSearchScreen):
                 pending_options.clear()
                 if self.search_options.highlighted is None:
                     self.search_options.highlighted = 0
-                self.handle_highlighted()
+                self.update_subtitle()
 
             if pending_options:
                 if is_empty:
                     self.search_options.clear_options()
                     self.search_options.remove_class("empty")
                 self.search_options.add_options(pending_options)
+            self.is_loading = False
+            self.update_subtitle()
 
-            remaining = deadline - loop.time()
-            if remaining <= 0:
-                raise asyncio.exceptions.TimeoutError
-            await asyncio.wait_for(fd_process.wait(), timeout=remaining)
+            await asyncio.wait_for(fd_process.wait(), timeout)
 
             if stderr_task is not None:
                 with contextlib.suppress(asyncio.CancelledError):

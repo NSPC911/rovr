@@ -1,4 +1,6 @@
 from pathlib import Path
+from types import SimpleNamespace
+from typing import cast
 
 import pytest
 from textual.app import App
@@ -127,6 +129,40 @@ def test_resolve_variable_references_cycle_leaves_refs_in_place() -> None:
     # a cycle can never settle; it must not raise or infinite-loop
     assert resolved["a"].startswith("$")
     assert resolved["b"].startswith("$")
+
+
+def test_get_css_variables_uses_theme_before_custom_style_precedence(
+    monkeypatch: pytest.MonkeyPatch, tmp_path: Path
+) -> None:
+    from rovr.app import Application
+    from rovr.variables.maps import RovrVars
+
+    bundled_style = tmp_path / "bundled.tcss"
+    bundled_style.write_text(
+        "$border-blurred: $primary-background-lighten-3;\n$override-order: $primary;\n"
+    )
+    config_dir = tmp_path / "config"
+    config_dir.mkdir()
+    (config_dir / "style.tcss").write_text("$override-order: $accent;\n")
+    monkeypatch.setattr(RovrVars, "ROVRCONFIG", config_dir.as_posix())
+
+    theme_file = tmp_path / "test.tcss"
+    theme_file.write_text(
+        NORD_PLACEHOLDER
+        + "$border-blurred: $primary;\n"
+        + "$override-order: $secondary;\n"
+    )
+    app = SimpleNamespace(
+        CSS_PATH=[bundled_style],
+        CUSTOM_STYLE_AVAILABLE=True,
+        current_theme=theme_utils.parse_theme_file(theme_file),
+        get_theme_variable_defaults=lambda: {},
+    )
+
+    variables = Application.get_css_variables(cast(Application, app))
+
+    assert variables["border-blurred"] == variables["primary"]
+    assert variables["override-order"] == variables["accent"]
 
 
 def test_pop_theme_field_overrides_extracts_known_fields() -> None:

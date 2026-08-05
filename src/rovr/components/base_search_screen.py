@@ -21,9 +21,13 @@ def can_do_keybind(self: DOMNode) -> bool:
 class ModalSearchScreen(Actionable, ModalScreen, inherit_bindings=False):
     """Base class for search-as-you-type modal screens."""
 
+    border_subtitle_index: int = 0
+    is_loading: bool = False
+
     def create_proc(
         self, program: str, *args: str
     ) -> Coroutine[None, None, asyncio.subprocess.Process]:
+        self.log(f"Creating process: {program} {' '.join(args)}")
         return asyncio.create_subprocess_exec(
             program,
             *args,
@@ -81,15 +85,19 @@ class ModalSearchScreen(Actionable, ModalScreen, inherit_bindings=False):
             self.search_options.option_count == 0
             or self.search_options.get_option_at_index(0).disabled
         ):
-            self.search_options.border_subtitle = "0/0"
+            border_subtitle = "0/0"
         else:
             if self.search_options.highlighted is None:
                 highlighted = 0
             else:
                 highlighted = self.search_options.highlighted + 1
-            self.search_options.border_subtitle = (
-                f"{highlighted}/{self.search_options.option_count}"
+            border_subtitle = f"{highlighted}/{self.search_options.option_count}"
+        if self.is_loading:
+            self.border_subtitle_index = (self.border_subtitle_index + 1) % len(
+                config["interface"]["spinner"]
             )
+            border_subtitle = f"{config['interface']['spinner'][self.border_subtitle_index]} {border_subtitle}"
+        self.search_options.border_subtitle = border_subtitle
 
     @on(OptionList.OptionSelected)
     async def handle_option_selected(self, event: OptionList.OptionSelected) -> None:

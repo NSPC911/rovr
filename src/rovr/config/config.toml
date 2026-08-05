@@ -14,6 +14,7 @@ allow_tab_nav = true
 append_new_tabs = true
 double_click_delay = 0.25
 drive_watcher_frequency = 3.0
+spinner = "⣾⣽⣻⢿⡿⣟⣯⣷"
 # yazi style is 5
 # but it has more space
 scrolloff = 3

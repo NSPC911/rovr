@@ -254,6 +254,18 @@
           "default": false,
           "description": "Show hidden files and folders (those starting with a dot on Unix, or explicitly hidden on Windows/MacOS)."
         },
+        "spinner": {
+          "oneOf": [
+            { "type": "string" },
+            {
+              "type": "array",
+              "items": { "type": "string" },
+              "minItems": 1
+            }
+          ],
+          "description": "The spinner to use when loading files. Can be a string or an array of strings for a custom spinner.",
+          "default": "⣾⣽⣻⢿⡿⣟⣯⣷"
+        },
         "details_list": {
           "type": "array",
           "default": [],

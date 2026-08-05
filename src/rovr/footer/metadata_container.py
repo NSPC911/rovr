@@ -16,7 +16,9 @@ from rovr.classes.textual_options import FileListSelectionWidget
 from rovr.functions import utils
 from rovr.functions.path import is_hidden_file
 from rovr.variables.constants import config, scroll_bindings
-from rovr.variables.maps import SPINNER, SPINNER_LENGTH
+
+SPINNER = config["interface"]["spinner"]
+SPINNER_LENGTH = len(SPINNER)
 
 
 class MetadataContainer(VerticalScroll, inherit_bindings=False):

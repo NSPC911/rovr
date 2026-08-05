@@ -139,7 +139,9 @@ def test_get_css_variables_uses_theme_before_custom_style_precedence(
 
     bundled_style = tmp_path / "bundled.tcss"
     bundled_style.write_text(
-        "$border-blurred: $primary-background-lighten-3;\n$override-order: $primary;\n"
+        "$primary: #ff0000;\n"
+        "$border-blurred: $primary-background-lighten-3;\n"
+        "$override-order: $primary;\n"
     )
     config_dir = tmp_path / "config"
     config_dir.mkdir()
@@ -152,15 +154,17 @@ def test_get_css_variables_uses_theme_before_custom_style_precedence(
         + "$border-blurred: $primary;\n"
         + "$override-order: $secondary;\n"
     )
+    active_theme = theme_utils.parse_theme_file(theme_file)
     app = SimpleNamespace(
         CSS_PATH=[bundled_style],
         CUSTOM_STYLE_AVAILABLE=True,
-        current_theme=theme_utils.parse_theme_file(theme_file),
+        current_theme=active_theme,
         get_theme_variable_defaults=lambda: {},
     )
 
     variables = Application.get_css_variables(cast(Application, app))
 
+    assert variables["primary"] == active_theme.to_color_system().generate()["primary"]
     assert variables["border-blurred"] == variables["primary"]
     assert variables["override-order"] == variables["accent"]
 

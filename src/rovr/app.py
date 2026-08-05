@@ -532,8 +532,8 @@ class Application(Actionable, DNDApp, inherit_bindings=False):
         # declarations that map onto Theme fields go through the color system,
         # so an overridden $primary regenerates $primary-lighten-3 and friends
         theme = self.current_theme
-        style_declarations = {**bundled_declarations, **custom_declarations}
-        field_overrides = pop_theme_field_overrides(style_declarations)
+        pop_theme_field_overrides(bundled_declarations)
+        field_overrides = pop_theme_field_overrides(custom_declarations)
         if field_overrides:
             theme = replace(theme, **field_overrides)  # ty: ignore[invalid-argument-type]
         variables = theme.to_color_system().generate()

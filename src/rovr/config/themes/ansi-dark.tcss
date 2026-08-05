@@ -11,10 +11,15 @@ $panel: ansi_default;
 $dark: true;
 $ansi: true;
 
+/* progress bar gradients */
+$bar-gradient-default: $secondary $primary;
+$bar-gradient-error: $warning $error;
+
 /* other vars */
+$border-blurred: ansi_white;
+
 $ansi-background: ansi_black;
 $ansi-foreground: ansi_white;
-$border-blurred: ansi_black;
 $block-cursor-foreground: ansi_black;
 $block-cursor-background: ansi_white;
 $input-cursor-background: ansi_black;

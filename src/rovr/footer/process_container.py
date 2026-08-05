@@ -12,6 +12,7 @@ from rich.markup import escape
 from textual import work
 from textual.color import Gradient
 from textual.containers import HorizontalGroup, VerticalGroup, VerticalScroll
+from textual.reactive import reactive
 from textual.renderables.bar import Bar as BarRenderable
 from textual.types import UnusedParameter
 from textual.widgets import Label, ProgressBar
@@ -172,11 +173,22 @@ class ProgressBarContainer(VerticalGroup, inherit_bindings=False):
 
 
 class ProcessContainer(Actionable, VerticalScroll):
+    theme: reactive[str] = reactive("textual-dark")
+
     def __init__(self) -> None:
         super().__init__(id="processes")
         self.has_perm_error: bool = False
         self.has_in_use_error: bool = False
         self.ACTIONS: list[Action] = [Action("delete", config["keybinds"]["delete"])]
+
+    def watch_theme(self, theme: str) -> None:
+        gradient_colors = getattr(self.app.get_theme(theme), "bar_gradient", {}).get(
+            "default"
+        )
+        if gradient_colors:
+            gradient = Gradient.from_colors(*reversed(gradient_colors))
+            for bar in self.query(ProgressBarContainer):
+                bar.progress_bar.gradient = gradient
 
     async def new_process_bar(
         self, max: int | None = None, id: str | None = None, classes: str | None = None

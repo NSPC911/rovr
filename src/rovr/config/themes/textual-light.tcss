@@ -10,5 +10,9 @@ $background: #E0E0E0;
 $foreground: #000000;
 $dark: false;
 
+/* progress bar gradients */
+$bar-gradient-default: $secondary $primary;
+$bar-gradient-error: $warning $error;
+
 /* other vars */
 $footer-key-foreground: #0178D4;

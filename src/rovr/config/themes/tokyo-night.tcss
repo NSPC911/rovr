@@ -10,5 +10,9 @@ $surface: #24283B;
 $panel: #414868;
 $dark: true;
 
+/* progress bar gradients */
+$bar-gradient-default: $secondary $primary;
+$bar-gradient-error: $warning $error;
+
 /* other vars */
 $button-color-foreground: #24283B;

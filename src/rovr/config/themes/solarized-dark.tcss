@@ -10,6 +10,10 @@ $panel: #073642;
 $foreground: #839496;
 $dark: true;
 
+/* progress bar gradients */
+$bar-gradient-default: $secondary $primary;
+$bar-gradient-error: $warning $error;
+
 /* other vars */
 $button-color-foreground: #fdf6e3;
 $footer-key-foreground: #fdf6e3;

@@ -52,7 +52,7 @@ class ThemeChooser(ModalSearchScreen):
             self.app.theme = theme_name
 
     @on(OptionList.OptionHighlighted)
-    @throttle(1)
+    @throttle(0.75)
     def preview_theme(self, event: OptionList.OptionHighlighted) -> None:
         option = event.option
         if (

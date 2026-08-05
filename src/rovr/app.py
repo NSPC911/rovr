@@ -328,7 +328,7 @@ class Application(Actionable, DNDApp, inherit_bindings=False):
                 yield self._file_list_container
                 yield PreviewContainer()
             with HorizontalGroup(id="footer"):
-                yield ProcessContainer()
+                yield ProcessContainer().data_bind(Application.theme)
                 yield MetadataContainer()
                 yield self.Clipboard
             yield StateManager()
@@ -502,6 +502,7 @@ class Application(Actionable, DNDApp, inherit_bindings=False):
                 else f"{len(changed)} theme files"
             )
             self.notify(f"Reloaded {what} in {elapsed:.0f} ms", title="Themes")
+        self.query_one(ProcessContainer).watch_theme(self.theme)
         return errors
 
     def _poll_theme_files(self) -> None:

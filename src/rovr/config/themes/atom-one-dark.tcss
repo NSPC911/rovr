@@ -11,3 +11,8 @@ $panel: #4F5666;
 $dark: true;
 $luminosity-spread: 0.15;
 $text-alpha: 0.95;
+
+/* progress bar gradients */
+$bar-gradient-default: $secondary $primary;
+$bar-gradient-error: $warning $error;
+

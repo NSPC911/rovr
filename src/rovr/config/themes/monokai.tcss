@@ -10,6 +10,10 @@ $surface: #2e2e2e;
 $panel: #3E3D32;
 $dark: true;
 
+/* progress bar gradients */
+$bar-gradient-default: $secondary $primary;
+$bar-gradient-error: $warning $error;
+
 /* other vars */
 $foreground-muted: #797979;
 $input-selection-background: #575b6190;

@@ -10,5 +10,9 @@ $surface: #E6E9EF;
 $panel: #CCD0DA;
 $dark: false;
 
+/* progress bar gradients */
+$bar-gradient-default: $secondary $primary;
+$bar-gradient-error: $warning $error;
+
 /* other vars */
 $button-color-foreground: #EFF1F5;

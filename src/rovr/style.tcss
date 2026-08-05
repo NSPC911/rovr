@@ -88,18 +88,18 @@ PasteScreen OptionList,
 DeleteFiles OptionList,
 ArchiveCreationScreen OptionList:focus,
 TrashScreen SelectionList:focus {
-  border: $border-style $border;
-  border-subtitle-background: $border;
+  border: $border-style $border-focused;
+  border-subtitle-background: $border-focused;
   &:ansi {
     border-subtitle-background: transparent;
-    border-subtitle-color: $border;
+    border-subtitle-color: $border-focused;
     &:light {
       border-subtitle-background: transparent;
-      border-subtitle-color: $border;
+      border-subtitle-color: $border-focused;
     }
   }
   &:light {
-    border-subtitle-background: $border;
+    border-subtitle-background: $border-focused;
     border-subtitle-color: $background;
   }
 }

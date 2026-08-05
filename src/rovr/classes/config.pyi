@@ -152,6 +152,15 @@ r""" Default value of the field path 'Rovr Config interface show_progress_eta' "
 _ROVR_CONFIG_INTERFACE_SHOW_PROGRESS_PERCENTAGE_DEFAULT = False
 r""" Default value of the field path 'Rovr Config interface show_progress_percentage' """
 
+_ROVR_CONFIG_INTERFACE_SPINNER_DEFAULT = "⣾⣽⣻⢿⡿⣟⣯⣷"
+r""" Default value of the field path 'Rovr Config interface spinner' """
+
+_ROVR_CONFIG_INTERFACE_SPINNER_ONEOF0_DEFAULT = "⣾⣽⣻⢿⡿⣟⣯⣷"
+r""" Default value of the field path 'Rovr Config interface spinner oneof0' """
+
+_ROVR_CONFIG_INTERFACE_SPINNER_ONEOF1_DEFAULT = "⣾⣽⣻⢿⡿⣟⣯⣷"
+r""" Default value of the field path 'Rovr Config interface spinner oneof1' """
+
 _ROVR_CONFIG_INTERFACE_TOOLTIPS_DEFAULT = True
 r""" Default value of the field path 'Rovr Config interface tooltips' """
 
@@ -616,6 +625,17 @@ class _RovrConfigInterface(TypedDict, total=False):
     default: False
     """
 
+    spinner: Union[
+        "_RovrConfigInterfaceSpinnerOneof0", "_RovrConfigInterfaceSpinnerOneof1"
+    ]
+    r"""
+    The spinner to use when loading files. Can be a string or an array of strings for a custom spinner.
+
+    default: ⣾⣽⣻⢿⡿⣟⣯⣷
+
+    Aggregation type: oneOf
+    """
+
     details_list: list["_RovrConfigInterfaceDetailsListItem"]
     r"""
     Metadata columns shown right-aligned in the file list, ordered by priority.
@@ -906,6 +926,15 @@ oO08 iIlL1 g9qCQG a@ 5sS
 {} [==>  ] (*) <> ~-+ /\
 
     """
+
+_RovrConfigInterfaceSpinnerOneof0 = str
+r""" default: ⣾⣽⣻⢿⡿⣟⣯⣷ """
+
+_RovrConfigInterfaceSpinnerOneof1 = list[str]
+r"""
+default: ⣾⣽⣻⢿⡿⣟⣯⣷
+minItems: 1
+"""
 
 class _RovrConfigKeybinds(TypedDict, total=False):
     toggle_pin: list[str]

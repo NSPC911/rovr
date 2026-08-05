@@ -510,30 +510,40 @@ class Application(Actionable, DNDApp, inherit_bindings=False):
 
     def get_css_variables(self) -> dict[str, str]:
         # RovrStylesheet strips `$name:` declarations from the CSS files, so
-        # every file's declarations are resolved here instead: bundled first,
-        # then the user's style.tcss so it wins on name clashes.
-        declared: dict[str, str] = {}
-        style_paths: list[str] = [str(self.CSS_PATH[0])]
+        # every source's declarations are resolved here instead: bundled style,
+        # active theme, then the user's style.tcss in ascending priority.
+        bundled_declarations: dict[str, str] = {}
+        custom_declarations: dict[str, str] = {}
+        with (
+            suppress(OSError),
+            open(self.CSS_PATH[0], "rt", encoding="utf-8") as css_file,
+        ):
+            bundled_declarations = extract_variable_declarations(css_file.read())
         if self.CUSTOM_STYLE_AVAILABLE:
-            style_paths.append(path.join(RovrVars.ROVRCONFIG, "style.tcss"))
-        for style_path in style_paths:
             with (
                 suppress(OSError),
-                open(style_path, "rt", encoding="utf-8") as css_file,
+                open(
+                    path.join(RovrVars.ROVRCONFIG, "style.tcss"),
+                    "rt",
+                    encoding="utf-8",
+                ) as css_file,
             ):
-                declared.update(extract_variable_declarations(css_file.read()))
+                custom_declarations = extract_variable_declarations(css_file.read())
         # declarations that map onto Theme fields go through the color system,
         # so an overridden $primary regenerates $primary-lighten-3 and friends
         theme = self.current_theme
-        field_overrides = pop_theme_field_overrides(declared)
+        pop_theme_field_overrides(bundled_declarations)
+        field_overrides = pop_theme_field_overrides(custom_declarations)
         if field_overrides:
             theme = replace(theme, **field_overrides)  # ty: ignore[invalid-argument-type]
         variables = theme.to_color_system().generate()
-        variables.update(resolve_variable_references(theme.variables, variables))
         variables = {**self.get_theme_variable_defaults(), **variables}
-        # everything else resolves only after all files are merged, so
+        declared = {**bundled_declarations, **theme.variables, **custom_declarations}
+        for field_name in field_overrides:
+            declared.pop(field_name.replace("_", "-"), None)
+        # Everything else resolves only after all sources are merged, so
         # `$border-focused: $primary-lighten-3;` in the bundled file picks up
-        # a user or theme override of either name
+        # a theme or user override of either name.
         variables.update(resolve_variable_references(declared, variables))
         self.theme_variables = variables
         return variables

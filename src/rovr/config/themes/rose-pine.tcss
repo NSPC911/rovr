@@ -15,7 +15,6 @@ $input-cursor-background: #f4ede8;
 $input-selection-background: #403d52;
 $border: #524f67;
 $border-blurred: #6e6a86;
-$footer-background: #26233a;
 $block-cursor-foreground: #191724;
 $block-cursor-text-style: none;
 $block-cursor-background: #c4a7e7;

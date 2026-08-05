@@ -12,6 +12,5 @@ $dark: false;
 
 /* other vars */
 $button-color-foreground: #fdf6e3;
-$footer-background: #268bd2;
 $footer-key-foreground: #fdf6e3;
 $footer-description-foreground: #fdf6e3;

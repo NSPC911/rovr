@@ -11,8 +11,8 @@ $panel: #434C5E;
 $dark: true;
 
 /* progress bar gradients */
-$bar-gradient-default: #88c0d0 #5e81ac;
-$bar-gradient-error: #bf616a #d08770;
+$bar-gradient-default: $secondary $primary;
+$bar-gradient-error: $warning $error;
 
 /* other vars */
 $block-cursor-background: #88C0D0;

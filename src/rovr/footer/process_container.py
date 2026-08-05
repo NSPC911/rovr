@@ -57,7 +57,11 @@ class ProgressBarContainer(VerticalGroup, inherit_bindings=False):
         gradient_colors = getattr(
             self.app.get_theme(self.app.theme), "bar_gradient", {}
         ).get("default")
-        gradient = Gradient.from_colors(*gradient_colors) if gradient_colors else None
+        gradient = (
+            Gradient.from_colors(*reversed(gradient_colors))
+            if gradient_colors
+            else None
+        )
         self.progress_bar = ProgressBar(
             total=total,
             show_percentage=config["interface"]["show_progress_percentage"],

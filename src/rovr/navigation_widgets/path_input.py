@@ -68,7 +68,6 @@ def should_exclude_hidden(path_str: str) -> bool:
     The special component ``..`` always results in filtering because it
     represents navigation rather than prefix matching.  Single ``.`` does
     **not** filter — it acts as an explicit invitation to see dotfiles.
-    Double-dot prefixes such as ``..`` also yield ``False`` (unfiltered).
 
     Args:
         path_str: The raw value inside the path input widget.

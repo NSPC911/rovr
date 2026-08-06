@@ -278,6 +278,9 @@ r""" Default value of the field path 'Rovr Config plugins zoxide keybinds' """
 _ROVR_CONFIG_PLUGINS_ZOXIDE_SHOW_SCORES_DEFAULT = False
 r""" Default value of the field path 'Rovr Config plugins zoxide show_scores' """
 
+_ROVR_CONFIG_SETTINGS_AUTO_CALCULATE_FOLDER_SIZE_DEFAULT = False
+r""" Default value of the field path 'Rovr Config settings auto_calculate_folder_size' """
+
 _ROVR_CONFIG_SETTINGS_COPY_INCLUDES_METADATA_DEFAULT = True
 r""" Default value of the field path 'Rovr Config settings copy_includes_metadata' """
 
@@ -1467,6 +1470,13 @@ class _RovrConfigSettings(TypedDict, total=False):
 
     minimum: 1
     default: 200
+    """
+
+    auto_calculate_folder_size: bool
+    r"""
+    Automatically calculate the folder sizes when a folder is highlighted
+
+    default: False
     """
 
     editor: "_RovrConfigSettingsEditor"

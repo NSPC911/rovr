@@ -256,7 +256,9 @@ class MetadataContainer(VerticalScroll, inherit_bindings=False):
                 # just a defensive raise
                 raise
         self.current_path = dir_entry.path
-        if file_info.startswith("d") and self.has_focus:
+        if file_info.startswith("d") and (
+            self.has_focus or config["settings"]["auto_calculate_folder_size"]
+        ):
             self._size_worker = self.calculate_folder_size(dir_entry.path)
         if self.any_in_queue():
             return

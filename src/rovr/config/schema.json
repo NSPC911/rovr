@@ -464,6 +464,11 @@
           "default": 200,
           "description": "The maximum number of directories to remember the last-highlighted item for, per tab. Least-recently-used entries are evicted once this is exceeded."
         },
+        "auto_calculate_folder_size": {
+          "type": "boolean",
+          "default": false,
+          "description": "Automatically calculate the folder sizes when a folder is highlighted"
+        },
         "editor": {
           "type": "object",
           "description": "Settings related to the editor used for different operations",

@@ -24,7 +24,7 @@ class SessionManager:
             inclusive.
         lastHighlighted (OrderedDict[str, SessionOptionDict]): A mapping of directory
                                  paths to the index of the last highlighted item, capped at
-                                 `settings.last_highlighted_size` entries (least-recently-used
+                                 `settings.history_size` entries (least-recently-used
                                  eviction). If a directory is not in the dictionary, the
                                  default is 0. Use `remember_highlight` to write to it.
         selectMode (bool): Whether select mode is enabled for that directory.
@@ -43,7 +43,7 @@ class SessionManager:
 
     def remember_highlight(self, cwd: str, value: SessionOptionDict) -> None:
         """Record the last-highlighted item for a directory, evicting the
-        least-recently-used entry once `settings.last_highlighted_size` is exceeded.
+        least-recently-used entry once `settings.history_size` is exceeded.
 
         Args:
             cwd (str): The directory the highlight belongs to.
@@ -51,6 +51,6 @@ class SessionManager:
         """
         self.lastHighlighted[cwd] = value
         self.lastHighlighted.move_to_end(cwd)
-        max_size = config["settings"]["last_highlighted_size"]
+        max_size = config["settings"]["history_size"]
         while len(self.lastHighlighted) > max_size:
             self.lastHighlighted.popitem(last=False)

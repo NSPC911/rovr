@@ -1,5 +1,10 @@
 [
   {
+    "keys": ["settings.last_highlighted_size"],
+    "message": ["[bright_cyan]settings.last_highlighted_size[/] has been removed as it serves a similar purpose as [bright_blue]settings.history_size[/]. Use that instead."],
+    "extra": "Removed in v0.10.1 (yes a patch version)"
+  },
+  {
     "keys": ["custom_theme", "custom_theme*"],
     "message": [
       "[bright_blue]custom_theme[/] has been removed in favour of theme files.",

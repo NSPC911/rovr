@@ -455,14 +455,8 @@
         "history_size": {
           "type": "integer",
           "minimum": 1,
-          "default": 100,
-          "description": "The maximum number of directories to keep in the back/forward navigation history, per tab. Oldest entries are evicted once this is exceeded."
-        },
-        "last_highlighted_size": {
-          "type": "integer",
-          "minimum": 1,
           "default": 200,
-          "description": "The maximum number of directories to remember the last-highlighted item for, per tab. Least-recently-used entries are evicted once this is exceeded."
+          "description": "The maximum number of directories to keep in the back/forward navigation history, per tab. Oldest entries are evicted once this is exceeded."
         },
         "auto_calculate_folder_size": {
           "type": "boolean",

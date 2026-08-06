@@ -108,7 +108,9 @@ class LoadingPreview(Static):
     """Make the preview look empty"""
 
     def __init__(self) -> None:
-        super().__init__("Loading...")
+        self.status = "Loading..."
+        self.spinner_index = -1
+        super().__init__()
         self.timer_enabled = False
 
     def on_mount(self) -> None:
@@ -119,9 +121,18 @@ class LoadingPreview(Static):
         self.styles.border = self.parent.styles.border
         self.styles.background = self.parent.styles.background
         self.can_focus = True
+        spinner = config["interface"]["spinner"]
+        self.spinner_index = (self.spinner_index + 1) % len(spinner)
+        self.update(f"{spinner[self.spinner_index]} {self.status}")
         if not self.timer_enabled:
             self.timer_enabled = True
             self.set_interval(0.25, self.on_mount)
+
+    def set_status(self, status: str) -> None:
+        self.status = status
+        spinner = config["interface"]["spinner"]
+        spinner_index = max(self.spinner_index, 0)
+        self.update(f"{spinner[spinner_index]} {self.status}")
 
     async def on_event(self, event: events.Event) -> None:
         self.on_mount()
@@ -353,7 +364,7 @@ class PreviewContainer(Actionable, Container):
 
         # load svg as bytes
         try:
-            self.call_next(self.LOADER_WIDGET.update, "loading svg...")
+            self.call_next(self.LOADER_WIDGET.set_status, "loading svg...")
             if self.app.MULTIPROCESSING_PROCESS_ALLOWED:
                 try:
                     png_bytes = preview_utils.load_svg(self._current_file_path)
@@ -379,7 +390,7 @@ class PreviewContainer(Actionable, Container):
             if should_cancel():
                 return
 
-            self.call_next(self.LOADER_WIDGET.update, "resampling svg...")
+            self.call_next(self.LOADER_WIDGET.set_status, "resampling svg...")
 
             if self.app.MULTIPROCESSING_PROCESS_ALLOWED:
                 try:

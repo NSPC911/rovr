@@ -35,6 +35,7 @@ from rovr.core import FileList
 from rovr.functions import icons as icon_utils
 from rovr.functions import path as path_utils
 from rovr.functions import preview_utils
+from rovr.functions.ansi import ansi_to_rich_text
 from rovr.functions.pdf import get_pdf_images, get_pdf_info
 from rovr.functions.utils import multiprocessing_process_error_checker, should_cancel
 from rovr.variables.constants import PreviewContainerTitles, config, file_one
@@ -700,8 +701,6 @@ class PreviewContainer(Actionable, Container):
         if should_cancel():
             return False
 
-        from rich.text import Text
-
         self.app.call_from_thread(setattr, self, "border_title", titles.bat)
 
         try:
@@ -728,7 +727,7 @@ class PreviewContainer(Actionable, Container):
 
             if process.returncode == 0:
                 bat_output = stdout.decode("utf-8", errors="ignore")
-                new_content = Text.from_ansi(bat_output)
+                new_content = ansi_to_rich_text(bat_output)
 
                 if should_cancel():
                     return False

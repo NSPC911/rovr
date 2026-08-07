@@ -184,8 +184,8 @@ def _win_get_candidates(path_str: str) -> list[DropdownItem]:
         return [PathDropdownItem(f"{ppath.name}{os.path.sep}", str(ppath))]
 
     # Case 4: list contents of parent
-    # - Path ends with "/" → show subdirectories
-    # - Partial path like "C:\Users\Admin\Doc" → parent is "C:\Users\Admin"
+    # - Path ends with "/" -> show subdirectories
+    # - Partial path like "C:\Users\Admin\Doc" -> parent is "C:\Users\Admin"
     parent = ppath if ppath.exists() else ppath.parent
     items: list[DropdownItem] = []
     should_filter = should_exclude_hidden(path_str)

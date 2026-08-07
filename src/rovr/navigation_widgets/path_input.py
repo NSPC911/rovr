@@ -1,5 +1,8 @@
-from os import getcwd, listdir, path
-from typing import ClassVar, cast
+import os
+import stat
+from os import getcwd, path
+from pathlib import Path
+from typing import ClassVar, Generator, cast
 
 from rich.text import Text
 from textual import events
@@ -16,18 +19,73 @@ from rovr.functions.utils import check_key
 from rovr.variables.constants import config, os_type
 
 
-def listdir_or(path: str | None = None) -> list[str]:
-    """Wrapper around os.listdir that returns an empty list if the path doesn't exist.
+def get_subdirectories(parent: str | os.PathLike) -> Generator[os.DirEntry, None, None]:
+    try:
+        with os.scandir(parent) as it:
+            for entry in it:
+                if entry.is_dir():
+                    yield entry
+    except (FileNotFoundError, OSError):
+        return
+
+
+def is_dir_entry_hidden(entry: os.DirEntry) -> bool:
+    """Check whether a ``DirEntry`` represents a hidden item.
+
     Args:
-        path: The path to list. If None, lists the current directory.
+        entry: A ``DirEntry`` from ``os.scandir``.
 
     Returns:
-        A list of directory entries in the given path, or an empty list if the path doesn't exist.
+        ``True`` if the entry is hidden, ``False`` otherwise.
     """
+    if entry.name.startswith(".") and os_type != "Windows":
+        return True
     try:
-        return listdir(path)
+        file_stat = entry.stat(follow_symlinks=False)
     except OSError:
-        return []
+        return False
+
+    if os_type == "Darwin":
+        return file_stat.st_flags & stat.UF_HIDDEN
+    if os_type == "Windows":
+        return file_stat.st_file_attributes & stat.FILE_ATTRIBUTE_HIDDEN
+    return False
+
+
+def should_exclude_hidden(path_str: str) -> bool:
+    """Decide whether hidden entries must be excluded from autocomplete results.
+
+    When the user explicitly types something that starts with ``.`` we let
+    the dropdown show hidden entries so they can reach ``.config``, ``.local``,
+    etc.  Otherwise hidden entries are filtered out.
+
+    The special component ``..`` always results in filtering because it
+    represents navigation rather than prefix matching.  Single ``.`` does
+    **not** filter — it acts as an explicit invitation to see dotfiles.
+
+    Args:
+        path_str: The raw value inside the path input widget.
+
+    Returns:
+        ``True`` when hidden entries should be filtered, ``False`` when they
+        should be listed.
+    """
+    # Never filter when the raw input is empty
+    if not path_str:
+        return False
+
+    # Navigation tokens never reveal hidden files.
+    if path_str.endswith(".."):
+        return True
+
+    if config["interface"]["show_hidden_files"]:
+        return False
+
+    # User typed something that starts with a dot -> show hidden files.
+    head, tail = os.path.split(path_str)
+    if not tail:
+        return True
+    return not tail.startswith(".")
 
 
 def _unix_get_candidates(path_str: str) -> list[DropdownItem]:
@@ -39,26 +97,54 @@ def _unix_get_candidates(path_str: str) -> list[DropdownItem]:
     if not path.isabs(path_str):
         return []
 
-    # Case 2: list directories
-    if (not path_str.endswith("/")) and path.exists(path_str) and path.isdir(path_str):
-        # Case 3: exact directory match
-        target = path.realpath(path.expanduser(path_str))
-        return [PathDropdownItem(path.basename(target) + "/", target)]
+    # User is going up, no need to provide autocomplete.
+    if path_str.endswith(".."):
+        return []
+
+    # We treat differently for "/path/to/folder" and "/path/to/folder/",
+    # but `Path.resolve` will strip the trailing "/",
+    # so sometimes we have to check against the original `path_str`.
+    ppath = Path(path_str).expanduser().resolve()
+
+    # Case 2: exact directory match
+    # User typed path of a particular folder already (but without the trailing "/")
+    if (
+        not path_str.endswith(".")
+        and not path_str.endswith("/")
+        and ppath.exists()
+        and ppath.is_dir()
+    ):
+        return [PathDropdownItem(f"{ppath.name}/", str(ppath))]
 
     # Case 3: list contents of parent
-    parent = path.dirname(path_str)
-    if path.exists(parent) and path.isdir(parent):
-        items = []
-        for item in listdir_or(parent):
-            full_item_path = path.join(parent, item)
-            if path.isdir(full_item_path):
-                items.append(PathDropdownItem(item + "/", full_item_path))
-        items.sort(key=lambda x: x.path.lower())
-        return items
-    return []
+    # - User typed a directory path with trailing "/" -> show subdirectories
+    # - User typed a partial directory path (like "/home/user/.local/sh")
+    #   -> we determine the parent ("~/.local") then show subdirectories ("share")
+    parent = ppath if ppath.is_dir() else ppath.parent
+    items: list[DropdownItem] = []
+    should_filter = should_exclude_hidden(path_str)
+    for entry in get_subdirectories(parent):
+        if should_filter and is_dir_entry_hidden(entry):
+            continue
+        items.append(PathDropdownItem(f"{entry.name}/", entry.path))
+    items.sort(key=lambda x: x.path.lower())
+    return items
 
 
 def _win_get_candidates(path_str: str) -> list[DropdownItem]:
+    """Windows-specific path autocomplete using ``scandir`` and ``DirEntry``.
+
+    Handles drive-letter discovery, bare/drive inputs (``C``, ``C:``), and
+    directory traversal on Windows.  Hidden directories are filtered unless
+    the terminal component starts with a dot.
+
+    Args:
+        path_str: The raw value inside the Windows path input widget.
+
+    Returns:
+        A list of ``DropdownItem`` suggestions, or an empty list when no
+        candidates are available.
+    """
     # Case 1: Empty string - return available drives
     if not path_str:
         drives = []
@@ -82,28 +168,32 @@ def _win_get_candidates(path_str: str) -> list[DropdownItem]:
     if not path.isabs(path_str):
         return []
 
-    # Case 3: Check if it's an exact directory match
-    # Skip this case if the path ends with "." or ".." to avoid returning "./" or "../"
-    if (
-        (not path_str.endswith(("/", "\\")))
-        and (path.split(path_str)[-1] not in (".", ".."))
-        and path.exists(path_str)
-        and path.isdir(path_str)
-    ):
-        target = path.realpath(path_str)
-        return [PathDropdownItem(path.basename(target) + "/", target)]
+    ppath = Path(path_str).expanduser().resolve()
+    if path_str.endswith(".."):
+        return []
 
-    parent = path.dirname(path_str)
-    if path.exists(parent) and path.isdir(parent):
-        # Case 4: Path ends with "/" - list contents of that directory (directories only)
-        items = []
-        for item in listdir_or(parent):
-            full_item_path = path.join(parent, item)
-            if path.isdir(full_item_path):
-                items.append(PathDropdownItem(item + "/", full_item_path))
-        items.sort(key=lambda x: x.path.lower())
-        return items
-    return []
+    # Case 3: exact directory match
+    # User typed path of a particular folder already (but without the trailing "\")
+    if (
+        not path_str.endswith(".")
+        and not path_str.endswith(("\\", "/"))
+        and ppath.exists()
+        and ppath.is_dir()
+    ):
+        return [PathDropdownItem(f"{ppath.name}{os.path.sep}", str(ppath))]
+
+    # Case 4: list contents of parent
+    # - Path ends with "/" -> show subdirectories
+    # - Partial path like "C:\Users\Admin\Doc" -> parent is "C:\Users\Admin"
+    parent = ppath if ppath.exists() else ppath.parent
+    items: list[DropdownItem] = []
+    should_filter = should_exclude_hidden(path_str)
+    for entry in get_subdirectories(parent):
+        if should_filter and is_dir_entry_hidden(entry):
+            continue
+        items.append(PathDropdownItem(f"{entry.name}\\", entry.path))
+    items.sort(key=lambda x: x.path.lower())
+    return items
 
 
 class PathAutoCompleteInput(PathAutoComplete):

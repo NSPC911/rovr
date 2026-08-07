@@ -129,6 +129,15 @@ def _theme_color(
 
 
 def _parse_color(value: str, fallback: tuple[int, int, int]) -> tuple[int, int, int]:
+    """Convert a color string into an RGB Tuple
+
+    Args:
+        value (str): The color string to parse.
+        fallback (tuple[int, int, int]): The fallback RGB value if parsing fails.
+
+    Returns:
+        tuple[int, int, int]: The parsed RGB value, or the fallback if parsing fails
+    """
     try:
         color = Color.parse(value)
     except ColorParseError:
@@ -140,7 +149,14 @@ def _parse_color(value: str, fallback: tuple[int, int, int]) -> tuple[int, int, 
 
 @lru_cache(maxsize=128)
 def _resolve_font_path(character: str = "") -> str | None:
-    # Fontconfig can select a font known to contain a particular glyph.
+    """Resolve a font path for the given character, or for Kitty's configured font family.
+
+    Args:
+        character (str): The character to find a font for. If empty, will use Kitty's configured font family.
+
+    Returns:
+        str | None: The path to the font file, or None if no suitable font could
+    """
     if character:
         matched = _fontconfig_match(f":charset={ord(character):x}")
         if matched is not None:
@@ -165,6 +181,14 @@ def _resolve_font_path(character: str = "") -> str | None:
 
 
 def _fontconfig_match(pattern: str) -> str | None:
+    """Check a pattern against the system fontconfig database and return the path to the first matching font file, if any.
+
+    Args:
+        pattern (str): The fontconfig pattern to match.
+
+    Returns:
+        str | None: The path to the matching font file, or None if no match was
+    """
     try:
         result = subprocess.run(
             ["fc-match", "-f", "%{file}\n", pattern],
@@ -196,6 +220,10 @@ def _system_font_for_family(family: str) -> str | None:
 
 @lru_cache(maxsize=1)
 def _system_nerd_font() -> str | None:
+    """Find literally any reasonable Nerd Font installed on system
+
+    Returns:
+        str | None: The path to the first matching Nerd Font file, or None if no"""
     for font_path in _system_font_files():
         try:
             name = ImageFont.truetype(font_path, 12).getname()[0].casefold()
@@ -210,6 +238,8 @@ def _system_nerd_font() -> str | None:
 def _system_font_files() -> tuple[str, ...]:
     # Fontconfig is not normally available on macOS or Windows, so scan their
     # standard font directories as a portable fallback.
+    # TODO: make sure to make it OS Independent when WezTerm adds support
+    # for DND on Windows (cant wait)
     roots = (
         Path.home() / ".local" / "share" / "fonts",
         Path.home() / "Library" / "Fonts",
@@ -228,6 +258,11 @@ def _system_font_files() -> tuple[str, ...]:
 
 @lru_cache(maxsize=1)
 def _kitty_font_family() -> str | None:
+    """Return the font family configured in Kitty, if any.
+
+    Returns:
+        str | None: The font family if found, otherwise None
+    """
     candidates: list[Path] = []
     if config_directory := os.environ.get("KITTY_CONFIG_DIRECTORY"):
         candidates.append(Path(config_directory) / "kitty.conf")
@@ -242,6 +277,19 @@ def _kitty_font_family() -> str | None:
 
 
 def _read_font_family(config_path: Path, seen: set[Path], depth: int) -> str | None:
+    """Manual kitty config parsing
+
+    We are looking specifically for phrases like `font_family FOO`
+    ╰─> If `include` is found, we  will recursively do the same to it
+
+    Args:
+        config_path (Path): Path to the kitty config file
+        seen (set[Path]): Set of already seen config paths to avoid infinite recursion
+        depth (int): Current recursion depth
+
+    Returns:
+        str | None: The font family if found, otherwise None
+    """
     if depth > 8:
         return None
     try:
@@ -284,3 +332,6 @@ def _family_name(values: list[str]) -> str | None:
         return " ".join(values)
     key, _, value = first.partition("=")
     return value if key in {"family", "postscript_name", "system"} else None
+
+
+__all__ = ["render_drag_image"]

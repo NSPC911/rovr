@@ -13,3 +13,7 @@ rovr.onefile-build
 rovr.exe
 rovr.bin
 /rovr
+
+# Code editors
+.helix
+.zed

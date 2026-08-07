@@ -78,7 +78,10 @@ def should_exclude_hidden(path_str: str) -> bool:
     if path_str.endswith(".."):
         return True
 
-    # User typed something that starts with a dot → show hidden files.
+    if config["interface"]["show_hidden_files"]:
+        return False
+
+    # User typed something that starts with a dot -> show hidden files.
     head, tail = os.path.split(path_str)
     if not tail:
         return True
@@ -106,7 +109,8 @@ def _unix_get_candidates(path_str: str) -> list[DropdownItem]:
     # Case 2: exact directory match
     # User typed path of a particular folder already (but without the trailing "/")
     if (
-        not path_str.endswith(".") and not path_str.endswith(os.path.sep)
+        not path_str.endswith(".")
+        and not path_str.endswith("/")
         and ppath.exists()
         and ppath.is_dir()
     ):
@@ -169,9 +173,10 @@ def _win_get_candidates(path_str: str) -> list[DropdownItem]:
         return []
 
     # Case 3: exact directory match
-    # User typed path of a particular folder already (but without the trailing "/")
+    # User typed path of a particular folder already (but without the trailing "\")
     if (
-        not path_str.endswith(".") and not path_str.endswith(os.path.sep)
+        not path_str.endswith(".")
+        and not path_str.endswith(("\\", "/"))
         and ppath.exists()
         and ppath.is_dir()
     ):

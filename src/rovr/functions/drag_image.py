@@ -22,7 +22,7 @@ PADDING_X = 18
 ICON_TEXT_GAP = 12
 CORNER_RADIUS = 13
 MAX_TEXT_CHARS = 30
-_SCALE = 2
+SCALE = 2
 
 
 def render_drag_image(
@@ -36,14 +36,16 @@ def render_drag_image(
     Returns:
         The rendered PNG label, or None when no suitable font can be loaded.
     """
+    # Nerd Font icons may come from a different fallback than Kitty's primary
+    # text font, so resolve the two independently.
     text_font_path = _resolve_font_path()
     icon_font_path = _resolve_font_path(icon[0]) if icon else text_font_path
     if text_font_path is None or icon_font_path is None:
         return None
 
     try:
-        text_font = ImageFont.truetype(text_font_path, TEXT_SIZE * _SCALE)
-        icon_font = ImageFont.truetype(icon_font_path, ICON_SIZE * _SCALE)
+        text_font = ImageFont.truetype(text_font_path, TEXT_SIZE * SCALE)
+        icon_font = ImageFont.truetype(icon_font_path, ICON_SIZE * SCALE)
     except OSError:
         return None
 
@@ -54,24 +56,25 @@ def render_drag_image(
     measure = ImageDraw.Draw(Image.new("RGBA", (1, 1)))
     max_text_width = (
         MAX_WIDTH - PADDING_X * 2 - ICON_SLOT_WIDTH - ICON_TEXT_GAP
-    ) * _SCALE
+    ) * SCALE
     text = _fit_text(measure, _sanitize_text(text), text_font, max_text_width)
-    text_width = round(measure.textlength(text, font=text_font) / _SCALE)
+    text_width = round(measure.textlength(text, font=text_font) / SCALE)
     width = min(
         MAX_WIDTH,
         PADDING_X * 2 + ICON_SLOT_WIDTH + ICON_TEXT_GAP + text_width,
     )
 
-    image = Image.new("RGBA", (width * _SCALE, HEIGHT * _SCALE), (0, 0, 0, 0))
+    # Draw at 2x and downsample for smoother corners and glyph edges.
+    image = Image.new("RGBA", (width * SCALE, HEIGHT * SCALE), (0, 0, 0, 0))
     draw = ImageDraw.Draw(image)
     draw.rounded_rectangle(
-        (0, 0, width * _SCALE - 1, HEIGHT * _SCALE - 1),
-        radius=CORNER_RADIUS * _SCALE,
+        (0, 0, width * SCALE - 1, HEIGHT * SCALE - 1),
+        radius=CORNER_RADIUS * SCALE,
         fill=(*background, 232),
     )
 
-    icon_center = (PADDING_X + ICON_SLOT_WIDTH / 2) * _SCALE
-    center_y = HEIGHT * _SCALE / 2
+    icon_center = (PADDING_X + ICON_SLOT_WIDTH / 2) * SCALE
+    center_y = HEIGHT * SCALE / 2
     draw.text(
         (icon_center, center_y),
         icon,
@@ -80,7 +83,7 @@ def render_drag_image(
         anchor="mm",
     )
     draw.text(
-        ((PADDING_X + ICON_SLOT_WIDTH + ICON_TEXT_GAP) * _SCALE, center_y),
+        ((PADDING_X + ICON_SLOT_WIDTH + ICON_TEXT_GAP) * SCALE, center_y),
         text,
         font=text_font,
         fill=(*foreground, 255),
@@ -119,6 +122,7 @@ def _theme_color(
 ) -> tuple[int, int, int]:
     value = theme_variables.get(key, "")
     if value == "ansi_default":
+        # ANSI default has no concrete RGB value outside the terminal.
         ansi_key = "ansi-foreground" if key == "foreground" else "ansi-background"
         value = theme_variables.get(ansi_key, "")
     return _parse_color(value, fallback)
@@ -136,6 +140,7 @@ def _parse_color(value: str, fallback: tuple[int, int, int]) -> tuple[int, int, 
 
 @lru_cache(maxsize=128)
 def _resolve_font_path(character: str = "") -> str | None:
+    # Fontconfig can select a font known to contain a particular glyph.
     if character:
         matched = _fontconfig_match(f":charset={ord(character):x}")
         if matched is not None:
@@ -150,25 +155,13 @@ def _resolve_font_path(character: str = "") -> str | None:
 
     if character and (matched := _system_nerd_font()) is not None:
         return matched
-
-    for candidate in ("monospace", "DejaVu Sans Mono"):
-        if (matched := _fontconfig_match(candidate)) is not None:
-            return matched
-
-    for candidate in (
-        family,
-        "DejaVuSansMono.ttf",
-        "/System/Library/Fonts/Menlo.ttc",
-        "/System/Library/Fonts/Monaco.ttf",
-    ):
-        if not candidate:
-            continue
-        try:
-            font = ImageFont.truetype(candidate, 12)
-        except OSError:
-            continue
+    try:
+        if family:
+            font = ImageFont.truetype(family, 12)
+    except OSError:
+        return
+    else:
         return str(font.path)
-    return None
 
 
 def _fontconfig_match(pattern: str) -> str | None:
@@ -215,6 +208,8 @@ def _system_nerd_font() -> str | None:
 
 @lru_cache(maxsize=1)
 def _system_font_files() -> tuple[str, ...]:
+    # Fontconfig is not normally available on macOS or Windows, so scan their
+    # standard font directories as a portable fallback.
     roots = (
         Path.home() / ".local" / "share" / "fonts",
         Path.home() / "Library" / "Fonts",
@@ -241,13 +236,9 @@ def _kitty_font_family() -> str | None:
     candidates.append(user_config_path("kitty") / "kitty.conf")
 
     for candidate in dict.fromkeys(candidates):
-        if family := _font_family_from_config(candidate):
+        if family := _read_font_family(candidate, set(), 0):
             return family
     return None
-
-
-def _font_family_from_config(config_path: Path) -> str | None:
-    return _read_font_family(config_path, set(), 0)
 
 
 def _read_font_family(config_path: Path, seen: set[Path], depth: int) -> str | None:
@@ -272,6 +263,7 @@ def _read_font_family(config_path: Path, seen: set[Path], depth: int) -> str | N
             continue
         key, values = parts[0], parts[1:]
         if key == "include":
+            # Relative includes are resolved from the file containing them.
             value = " ".join(values)
             pattern = Path(value).expanduser()
             if not pattern.is_absolute():

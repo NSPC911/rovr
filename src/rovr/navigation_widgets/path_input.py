@@ -14,13 +14,12 @@ from textual_autocomplete import DropdownItem, PathAutoComplete, TargetState
 
 from rovr.classes.mixins import Action, Actionable
 from rovr.classes.textual_options import PathDropdownItem
-from rovr.classes.type_aliases import DirEntryType
 from rovr.functions.icons import get_icon
 from rovr.functions.utils import check_key
 from rovr.variables.constants import config, os_type
 
 
-def get_subdirectories(parent: str | os.PathLike) -> Generator[DirEntryType, None, None]:
+def get_subdirectories(parent: str | os.PathLike) -> Generator[os.DirEntry, None, None]:
     try:
         with os.scandir(parent) as it:
             for entry in it:
@@ -33,17 +32,13 @@ def get_subdirectories(parent: str | os.PathLike) -> Generator[DirEntryType, Non
 def is_dir_entry_hidden(entry: os.DirEntry) -> bool:
     """Check whether a ``DirEntry`` represents a hidden item.
 
-    Apart from normal rule, we also treat dot prefix as hidden on all OSes,
-    because many cross-platform apps only use dot prefix for they internal folder,
-    like ".git", ".helix".
-
     Args:
         entry: A ``DirEntry`` from ``os.scandir``.
 
     Returns:
         ``True`` if the entry is hidden, ``False`` otherwise.
     """
-    if entry.name.startswith("."):
+    if entry.name.startswith(".") and os_type != "Windows":
         return True
     try:
         file_stat = entry.stat(follow_symlinks=False)
@@ -52,7 +47,6 @@ def is_dir_entry_hidden(entry: os.DirEntry) -> bool:
 
     if os_type == "Darwin":
         return file_stat.st_flags & stat.UF_HIDDEN
-    # Windows
     if os_type == "Windows":
         return file_stat.st_file_attributes & stat.FILE_ATTRIBUTE_HIDDEN
     return False

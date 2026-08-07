@@ -1,6 +1,13 @@
+from functools import lru_cache
+
 from rich.color import Color
 from rich.style import Style
 from rich.text import Span, Text
+
+
+@lru_cache(maxsize=256)  # obviously 256 because of the 256-color palette
+def get_ansi_color(number: int) -> Color:
+    return Color.from_ansi(number)
 
 
 def ansi_to_rich_text(terminal_text: str) -> Text:
@@ -9,9 +16,10 @@ def ansi_to_rich_text(terminal_text: str) -> Text:
     Returns:
         Text with ANSI escape sequences represented as Rich spans.
     """
-    terminal_text = "\n".join(
-        line.rsplit("\r", 1)[-1] for line in terminal_text.splitlines()
-    )
+    if "\r" in terminal_text:
+        terminal_text = "\n".join(
+            line.rsplit("\r", 1)[-1] for line in terminal_text.splitlines()
+        )
 
     parts: list[str] = []
     spans: list[Span] = []
@@ -164,7 +172,7 @@ def ansi_to_rich_text(terminal_text: str) -> Text:
                         case 29:
                             strike = False
                         case code if 30 <= code <= 37:
-                            foreground = Color.from_ansi(code - 30)
+                            foreground = get_ansi_color(code - 30)
                         case 39:
                             foreground = Color.default()
                         case code if 40 <= code <= 47:
@@ -182,16 +190,16 @@ def ansi_to_rich_text(terminal_text: str) -> Text:
                         case 55:
                             overline = False
                         case code if 90 <= code <= 97:
-                            foreground = Color.from_ansi(code - 82)
+                            foreground = get_ansi_color(code - 82)
                         case code if 100 <= code <= 107:
-                            background = Color.from_ansi(code - 92)
+                            background = get_ansi_color(code - 92)
                         case code if code in (38, 48) and code_index + 1 < len(codes):
                             code_index += 1
                             color_type = codes[code_index]
                             color: Color | None = None
                             if color_type == 5 and code_index + 1 < len(codes):
                                 code_index += 1
-                                color = Color.from_ansi(codes[code_index])
+                                color = get_ansi_color(codes[code_index])
                             elif color_type == 2 and code_index + 3 < len(codes):
                                 rgb = (
                                     codes[code_index + 1],
@@ -229,3 +237,6 @@ def ansi_to_rich_text(terminal_text: str) -> Text:
         position = escape + 2
 
     return Text("".join(parts), spans=spans)
+
+
+__all__ = ["ansi_to_rich_text"]

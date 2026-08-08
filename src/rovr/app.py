@@ -273,8 +273,11 @@ class Application(Actionable, DNDApp, inherit_bindings=False):
         chdir(self._startup_locations[0][0])
 
         self._p_timer: Timer | None = None
-        self._dnd_invoked_tab: str | None = None
-        self._dnd_timer: tuple[Timer, DNDDragIn] | None = None
+        self._dnd_timer: tuple[Timer, TablineTab | UpButton | str, DNDDragIn] | None = (
+            None
+        )
+        self._dnd_dragged_paths: list[str] = []
+        self._dnd_drop_destination: str | None = None
 
         self._on_mount_done: bool = False
         self.last_available_cd = getcwd()
@@ -403,6 +406,7 @@ class Application(Actionable, DNDApp, inherit_bindings=False):
             )
         self.file_list.update_border_subtitle()
         # self.call_after_refresh(sleep, 1)
+        self.add_dnd_class_target(self._file_list_container)
 
     def action_change_theme(self) -> None:
         from rovr.screens import ThemeChooser
@@ -1127,18 +1131,20 @@ class Application(Actionable, DNDApp, inherit_bindings=False):
             )
             return
 
+        await self._show_paste_drop(event, normalise(getcwd()))
+
+    async def _show_paste_drop(self, event: events.Paste, destination: str) -> None:
         response = await self.push_screen_wait(PasteDropScreen(event))
         if response is not None and response.paths:
             process_container = self.query_one(ProcessContainer)
-            dest = getcwd()
             match response.action:
                 case "copy":
                     process_container.paste_items(
-                        copied=response.paths, has_cut=[], dest=dest
+                        copied=response.paths, has_cut=[], dest=destination
                     )
                 case "move":
                     process_container.paste_items(
-                        copied=[], has_cut=response.paths, dest=dest
+                        copied=[], has_cut=response.paths, dest=destination
                     )
 
     async def dnd_drag_out_operation(self, pos: Offset) -> DNDDragOutOperation | None:
@@ -1170,7 +1176,7 @@ class Application(Actionable, DNDApp, inherit_bindings=False):
             self._mouse_down_widget = (
                 None  # necessary so events.Click doesn't get sent to FileList
             )
-            self._dnd_invoked_tab = self.tabWidget.active
+            self._dnd_dragged_paths = selected
             if len(selected) == 1:
                 icon, icon_color = icons.get_icon_smart(selected[0])
                 label_text = path.basename(selected[0])
@@ -1204,47 +1210,100 @@ class Application(Actionable, DNDApp, inherit_bindings=False):
                 [Path(p).as_uri() for p in selected], "either", label=label
             )
 
-    def _tab_under_pos(self, pos: Offset) -> TablineTab | None:
-        for tab in self.tabWidget.query(TablineTab):
-            if pos in tab.region:
-                return tab
+    def _directory_under_pos(self, pos: Offset) -> str | None:
+        option_index = self.screen.get_style_at(pos.x, pos.y).meta.get("option")
+        if (
+            isinstance(option_index, int)
+            and 0 <= option_index < self.file_list.option_count
+        ):
+            option = self.file_list.get_option_at_index(option_index)
+            dir_entry = getattr(option, "dir_entry", None)
+            if dir_entry is not None and dir_entry.is_dir():
+                return normalise(dir_entry.path)
         return None
 
+    def _drop_destination(self, pos: Offset) -> str:
+        return self._directory_under_pos(pos) or normalise(getcwd())
+
+    @staticmethod
+    def _drop_conflicts(sources: Iterable[str], destination: str) -> bool:
+        destination = path.normcase(path.realpath(destination))
+        for source in sources:
+            source_path = path.normcase(path.realpath(source))
+            if path.isdir(source):
+                try:
+                    if path.commonpath([source_path, destination]) == source_path:
+                        return True
+                except ValueError:
+                    pass
+            elif path.dirname(source_path) == destination and getcwd() == destination:
+                return True
+        return False
+
     def on_drag_out_finished(self, event: DragOutFinished) -> None:
-        self._dnd_invoked_tab = None
+        self._dnd_dragged_paths = []
+        if self._dnd_timer:
+            self._dnd_timer[0].stop()
+            self._dnd_timer = None
 
     async def dnd_drag_in_operation(self, event: DNDDragIn) -> DNDDragInOperation:
-        reset = True
-        if self._dnd_timer:
-            if self._dnd_timer[1].pos == event.pos:
-                reset = False
-            else:
-                self._dnd_timer[0].stop()
+        hover_target: TablineTab | UpButton | str | None = None
+        if event.pos in self.tabWidget.region:
+            for tab in self.tabWidget.query(TablineTab):
+                if event.pos in tab.region:
+                    if tab.id != self.tabWidget.active:
+                        hover_target = tab
+                    break
+        elif event.pos in self.file_list.content_region:
+            directory = self._directory_under_pos(event.pos)
+            if directory != normalise(getcwd()):
+                hover_target = directory
+        else:
+            up_button = self.query_one(UpButton)
+            if event.pos in up_button.region and not up_button.disabled:
+                hover_target = up_button
 
-        if reset:
+        if self._dnd_timer and (
+            self._dnd_timer[1] != hover_target
+            or (
+                isinstance(self._dnd_timer[1], str)
+                and self._dnd_timer[2].pos != event.pos
+            )  # check whether it is in filelist, and if so, whether the pos is same
+            # real pos will change if the mouse isnt stable, but pos should be okay
+        ):
+            self._dnd_timer[0].stop()
+            self._dnd_timer = None
+        if hover_target is not None and self._dnd_timer is None:
+
+            def open_hover_target(
+                target: TablineTab | UpButton | str = hover_target,
+            ) -> None:
+                if isinstance(target, TablineTab):
+                    self.tabWidget.active = target.id
+                elif isinstance(target, UpButton):
+                    target.press()
+                    self._dnd_timer = (
+                        self.set_timer(0.7, open_hover_target),
+                        hover_target,
+                        event,
+                    )
+                elif path.isdir(target):
+                    self.cd(target)
+
             self._dnd_timer = (
-                self.set_timer(
-                    0.7,
-                    lambda event=event: (
-                        setattr(self.tabWidget, "active", new_tab.id)
-                        if (new_tab := self._tab_under_pos(event.pos))
-                        else None
-                    ),
-                ),
+                self.set_timer(0.7, open_hover_target),
+                hover_target,
                 event,
             )
 
-        # need to organise the accepted section because it is getting very messy
-        accepted = True
-        # check if dragging out, and dropping on the same tab
-        if self.is_dragging_out and self._dnd_invoked_tab == self.tabWidget.active:
-            accepted = False
-        # check if drop is within file list
-        if event.pos not in self.file_list.content_region:
-            accepted = False
-        # check if screen is PasteDropScreen and not the only screen
-        if len(self.screen_stack) > 1 and not isinstance(self.screen, PasteDropScreen):
-            accepted = False
+        accepted = event.pos in self.file_list.content_region and (
+            len(self.screen_stack) == 1 or isinstance(self.screen, PasteDropScreen)
+        )
+        if accepted and self.state == "drag-out":
+            accepted = not self._drop_conflicts(
+                self._dnd_dragged_paths,
+                self._drop_destination(event.pos),
+            )
 
         return DNDDragInOperation(
             accepted,
@@ -1253,6 +1312,9 @@ class Application(Actionable, DNDApp, inherit_bindings=False):
         )
 
     async def on_drop(self, event: Drop) -> None:
+        if self._dnd_timer:
+            self._dnd_timer[0].stop()
+            self._dnd_timer = None
         if "text/uri-list" in event.mimes:
             idx = event.mimes.index("text/uri-list")
         elif "text/plain" in event.mimes:
@@ -1265,6 +1327,7 @@ class Application(Actionable, DNDApp, inherit_bindings=False):
                 markup=False,
             )
             return
+        self._dnd_drop_destination = self._drop_destination(event.pos)
         self.request_data(event, idx, close=True)
 
     @work
@@ -1272,6 +1335,8 @@ class Application(Actionable, DNDApp, inherit_bindings=False):
         from pathlib import Path
         from urllib.parse import urlparse
 
+        destination = self._dnd_drop_destination or normalise(getcwd())
+        self._dnd_drop_destination = None
         if event.mime == "text/plain":
             event.data = (
                 event.data.decode("utf-8", errors="ignore").strip().splitlines()
@@ -1293,13 +1358,17 @@ class Application(Actionable, DNDApp, inherit_bindings=False):
             etc = sdata - (files | online)
             etc_schemes = set(urlparse(uri).scheme for uri in etc)
             if files:
-                # pass it to on_paste
-                self.on_paste(
-                    events.Paste(
-                        "\n".join(
-                            sorted(Path.from_uri(uri).as_posix() for uri in files)
-                        )
+                dropped_paths = sorted(Path.from_uri(uri).as_posix() for uri in files)
+                if self._drop_conflicts(dropped_paths, destination):
+                    self.notify(
+                        "One or more items conflict with the drop destination.",
+                        title="Drop Rejected",
+                        severity="warning",
                     )
+                    return
+                await self._show_paste_drop(
+                    events.Paste("\n".join(dropped_paths)),
+                    destination,
                 )
             if etc:
                 self.notify(

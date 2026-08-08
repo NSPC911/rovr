@@ -1,6 +1,6 @@
 import contextlib
 import os
-from os import getcwd, path
+from os import path
 from shutil import move
 from tempfile import NamedTemporaryFile
 
@@ -9,6 +9,7 @@ from textual.widgets import Button
 from textual.worker import Worker, WorkerError
 
 from rovr.classes.textual_validators import IsValidFilePath, PathNoLongerExists
+from rovr.functions.cwd import getcwd
 from rovr.functions.icons import get_icon
 from rovr.functions.path import dump_exc, normalise
 from rovr.functions.utils import command, run_command

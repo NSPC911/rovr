@@ -1,6 +1,6 @@
 import os
 import stat
-from os import getcwd, path
+from os import path
 from pathlib import Path
 from typing import ClassVar, Generator, cast
 
@@ -14,6 +14,7 @@ from textual_autocomplete import DropdownItem, PathAutoComplete, TargetState
 
 from rovr.classes.mixins import Action, Actionable
 from rovr.classes.textual_options import PathDropdownItem
+from rovr.functions.cwd import getcwd
 from rovr.functions.icons import get_icon
 from rovr.functions.utils import check_key
 from rovr.variables.constants import config, os_type

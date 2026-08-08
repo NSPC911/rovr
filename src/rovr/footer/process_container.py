@@ -21,6 +21,7 @@ from rovr.classes.mixins import Action, Actionable
 from rovr.classes.type_aliases import BarPanicDismissible, BarPanicNotify
 from rovr.functions import icons as icon_utils
 from rovr.functions import path as path_utils
+from rovr.functions.cwd import getcwd
 from rovr.functions.utils import is_being_used, should_cancel
 from rovr.screens import (
     Dismissible,
@@ -953,7 +954,7 @@ class ProcessContainer(Actionable, VerticalScroll):
             dest (str): The directory to copy to.
         """
         if dest == "":
-            dest = os.getcwd()
+            dest = getcwd()
         bar = self.threaded_new_process_bar(classes="active")
         self.app.call_from_thread(
             bar.update_icon,
@@ -1438,7 +1439,7 @@ class ProcessContainer(Actionable, VerticalScroll):
         """
         from urllib import error, request
 
-        dest = os.getcwd()
+        dest = getcwd()
         bar = self.threaded_new_process_bar(max=len(uris) + 1, classes="active")
         self.app.call_from_thread(
             bar.update_icon,

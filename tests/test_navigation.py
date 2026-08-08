@@ -6,10 +6,30 @@ from textual import events
 
 from rovr.app import Application
 from rovr.components import SearchInput
+from rovr.functions.cwd import getcwd
 from rovr.header.tabs import TablineTab
 from rovr.navigation_widgets import BackButton
 
 from .conftest import iter_until, workers_finished
+
+
+@pytest.mark.asyncio
+@pytest.mark.skipif(os.name == "nt", reason="Creating symlinks may require privileges")
+async def test_navigation_preserves_directory_symlink(tmp_path: Path) -> None:
+    target = tmp_path / "target"
+    target.mkdir()
+    link = tmp_path / "link"
+    link.symlink_to(target, target_is_directory=True)
+
+    app = Application(startup_path=link.as_posix())
+    async with app.run_test(size=(143, 37)) as pilot:
+        await iter_until(pilot, lambda: app.tabWidget.active_tab is not None)
+
+        assert getcwd() == link.as_posix()
+        assert app.tabWidget.active_tab.directory == link.as_posix()
+
+        await pilot.click("UpButton")
+        await iter_until(pilot, lambda: getcwd() == tmp_path.as_posix())
 
 
 @pytest.mark.asyncio

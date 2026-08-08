@@ -1,7 +1,8 @@
-from os import getcwd, path
+from os import path
 
 from textual.validation import ValidationResult, Validator
 
+from rovr.functions.cwd import getcwd
 from rovr.functions.path import normalise
 from rovr.variables.constants import os_type
 

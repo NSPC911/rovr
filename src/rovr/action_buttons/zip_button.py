@@ -1,4 +1,4 @@
-from os import getcwd, path
+from os import path
 from typing import cast
 
 from textual import work
@@ -7,6 +7,7 @@ from textual.widgets import Button
 from rovr.classes.textual_validators import (
     IsValidFilePath,
 )
+from rovr.functions.cwd import getcwd
 from rovr.functions.icons import get_icon
 from rovr.functions.path import normalise
 from rovr.screens import ArchiveCreationScreen

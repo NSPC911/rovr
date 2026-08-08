@@ -1,6 +1,6 @@
 import shlex
 from contextlib import suppress
-from os import getcwd, path, scandir
+from os import path, scandir
 from typing import Callable, ClassVar, Sequence
 
 from rich.segment import Segment
@@ -29,6 +29,7 @@ from rovr.functions import details as detail_utils
 from rovr.functions import path as path_utils
 from rovr.functions import pins as pin_utils
 from rovr.functions import utils
+from rovr.functions.cwd import getcwd
 from rovr.navigation_widgets import PathInput
 from rovr.state_manager import StateManager
 from rovr.variables.constants import (

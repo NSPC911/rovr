@@ -1,8 +1,9 @@
-from os import getcwd, path
+from os import path
 
 from textual.widgets import Button
 
 from rovr.classes.session_manager import SessionManager
+from rovr.functions.cwd import getcwd
 from rovr.functions.icons import get_icon
 
 

@@ -80,8 +80,10 @@ from rovr.core import (
 )
 from rovr.footer import Clipboard, MetadataContainer, ProcessContainer
 from rovr.functions import drag_image, drive_workers, icons, multiprocessing_utils
+from rovr.functions import pins as pin_utils
 from rovr.functions.cwd import chdir, getcwd
 from rovr.functions.path import (
+    decompress,
     dump_exc,
     ensure_existing_directory,
     get_direntry_for,
@@ -244,6 +246,7 @@ class Application(Actionable, DNDApp, inherit_bindings=False):
         self._highlighted_file_mtime: float | None = None
 
         self._file_list_container = FileListContainer()
+        self._pinned_sidebar_container = PinnedSidebarContainer()
         # shutdown event for bg thread
         self._shutdown_event = threading.Event()
         self._background_processes: set[Popen] = set()
@@ -278,6 +281,7 @@ class Application(Actionable, DNDApp, inherit_bindings=False):
         )
         self._dnd_dragged_paths: list[str] = []
         self._dnd_drop_destination: str | None = None
+        self._dnd_drop_to_pins: bool = False
 
         self._on_mount_done: bool = False
         self.last_available_cd = getcwd()
@@ -335,7 +339,7 @@ class Application(Actionable, DNDApp, inherit_bindings=False):
                         target=path_switcher,
                     )
             with HorizontalGroup(id="main"):
-                yield PinnedSidebarContainer()
+                yield self._pinned_sidebar_container
                 yield self._file_list_container
                 yield PreviewContainer()
             with HorizontalGroup(id="footer"):
@@ -407,6 +411,7 @@ class Application(Actionable, DNDApp, inherit_bindings=False):
         self.file_list.update_border_subtitle()
         # self.call_after_refresh(sleep, 1)
         self.add_dnd_class_target(self._file_list_container)
+        self.add_dnd_class_target(self._pinned_sidebar_container)
 
     def action_change_theme(self) -> None:
         from rovr.screens import ThemeChooser
@@ -1200,7 +1205,15 @@ class Application(Actionable, DNDApp, inherit_bindings=False):
             )
 
             return DNDDragOutOperation(
-                [Path(p).as_uri() for p in selected], "either", label=label
+                [Path(p).as_uri() for p in selected],
+                "either",
+                label=label,
+                extra_mimes={
+                    # this is the most off-spec way to handle this
+                    f"rovr/cwd-{getcwd()}": b"look at mime",
+                    f"rovr/count-{len(selected)}": b"look at mime",
+                    f"rovr/type-{'folder' if all(path.isdir(p) for p in selected) else 'file'}": b"look at mime",
+                },
             )
 
     def _directory_under_pos(self, pos: Offset) -> str | None:
@@ -1213,6 +1226,19 @@ class Application(Actionable, DNDApp, inherit_bindings=False):
             dir_entry = getattr(option, "dir_entry", None)
             if dir_entry is not None and dir_entry.is_dir():
                 return normalise(dir_entry.path)
+        return None
+
+    def _pinned_directory_under_pos(self, pos: Offset) -> str | None:
+        sidebar = self._pinned_sidebar_container.pinned_sidebar
+        if pos not in sidebar.content_region:
+            return None
+        option_index = self.screen.get_style_at(pos.x, pos.y).meta.get("option")
+        if isinstance(option_index, int) and 0 <= option_index < sidebar.option_count:
+            option = sidebar.get_option_at_index(option_index)
+            if not option.disabled and option.id is not None:
+                directory = decompress(option.id.rsplit("-", 1)[0])
+                if path.isdir(directory):
+                    return normalise(directory)
         return None
 
     def _drop_destination(self, pos: Offset) -> str:
@@ -1241,6 +1267,13 @@ class Application(Actionable, DNDApp, inherit_bindings=False):
 
     async def dnd_drag_in_operation(self, event: DNDDragIn) -> DNDDragInOperation:
         hover_target: TablineTab | UpButton | str | None = None
+        pinned_sidebar = self.query_one(PinnedSidebar)
+        self._file_list_container.set_class(
+            event.pos in self.file_list.content_region, "dnd-hover"
+        )
+        self.query_one(PinnedSidebarContainer).set_class(
+            event.pos in pinned_sidebar.region, "dnd-hover"
+        )
         if event.pos in self.tabWidget.region:
             for tab in self.tabWidget.query(TablineTab):
                 if event.pos in tab.region:
@@ -1249,6 +1282,10 @@ class Application(Actionable, DNDApp, inherit_bindings=False):
                     break
         elif event.pos in self.file_list.content_region:
             directory = self._directory_under_pos(event.pos)
+            if directory != normalise(getcwd()):
+                hover_target = directory
+        elif event.pos in pinned_sidebar.content_region:
+            directory = self._pinned_directory_under_pos(event.pos)
             if directory != normalise(getcwd()):
                 hover_target = directory
         else:
@@ -1289,14 +1326,37 @@ class Application(Actionable, DNDApp, inherit_bindings=False):
                 event,
             )
 
-        accepted = event.pos in self.file_list.content_region and (
-            len(self.screen_stack) == 1 or isinstance(self.screen, PasteDropScreen)
+        dropping_to_pins = (
+            len(self.screen_stack) == 1
+            and event.pos in pinned_sidebar.region
+            and "rovr/type-folder" in event.mimes
         )
-        if accepted and self.state == "drag-out":
+        accepted = dropping_to_pins or (
+            event.pos in self.file_list.content_region
+            and (
+                len(self.screen_stack) == 1 or isinstance(self.screen, PasteDropScreen)
+            )
+        )
+        if accepted and not dropping_to_pins and self.state == "drag-out":
             accepted = not self._drop_conflicts(
                 self._dnd_dragged_paths,
                 self._drop_destination(event.pos),
             )
+        if (
+            accepted
+            and not dropping_to_pins
+            and any(mime.startswith("rovr/cwd-") for mime in event.mimes)
+        ):
+            # get cwd
+            for mime in event.mimes:
+                if mime.startswith("rovr/cwd-"):
+                    cwd = mime[9:]
+                    break
+            if (
+                path.samefile(cwd, getcwd())
+                and self._directory_under_pos(event.pos) is None
+            ):
+                accepted = False
 
         return DNDDragInOperation(
             accepted,
@@ -1320,7 +1380,13 @@ class Application(Actionable, DNDApp, inherit_bindings=False):
                 markup=False,
             )
             return
-        self._dnd_drop_destination = self._drop_destination(event.pos)
+        self._dnd_drop_to_pins = (
+            event.pos in self.query_one(PinnedSidebar).region
+            and "rovr/type-folder" in event.mimes
+        )
+        self._dnd_drop_destination = (
+            None if self._dnd_drop_to_pins else self._drop_destination(event.pos)
+        )
         self.request_data(event, idx, close=True)
 
     @work
@@ -1330,6 +1396,8 @@ class Application(Actionable, DNDApp, inherit_bindings=False):
 
         destination = self._dnd_drop_destination or normalise(getcwd())
         self._dnd_drop_destination = None
+        drop_to_pins = self._dnd_drop_to_pins
+        self._dnd_drop_to_pins = False
         if event.mime == "text/plain":
             event.data = (
                 event.data.decode("utf-8", errors="ignore").strip().splitlines()
@@ -1352,6 +1420,28 @@ class Application(Actionable, DNDApp, inherit_bindings=False):
             etc_schemes = set(urlparse(uri).scheme for uri in etc)
             if files:
                 dropped_paths = sorted(Path.from_uri(uri).as_posix() for uri in files)
+                if drop_to_pins:
+                    available_pins = pin_utils.pins or pin_utils.load_pins()
+                    existing_pins = {
+                        normalise(pin["path"])
+                        for pin in available_pins.get("pins", [])
+                        if isinstance(pin, dict) and isinstance(pin.get("path"), str)
+                    }
+                    added = False
+                    for dropped_path in dropped_paths:
+                        normalized = normalise(dropped_path)
+                        if path.isdir(normalized) and normalized not in existing_pins:
+                            pin_utils.add_pin(
+                                path.basename(path.normpath(normalized)) or normalized,
+                                normalized,
+                            )
+                            existing_pins.add(normalized)
+                            added = True
+                    if added:
+                        with suppress(OSError):
+                            self._pins_mtime = path.getmtime(pin_utils.PIN_PATH)
+                        self.query_one(PinnedSidebar).reload_pins()
+                    return
                 if self._drop_conflicts(dropped_paths, destination):
                     self.notify(
                         "One or more items conflict with the drop destination.",

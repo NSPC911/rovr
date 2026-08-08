@@ -333,25 +333,28 @@ Tooltip {
   width: $file_list_width;
 }
 
-#file_list_container.drag-out-active {
+#file_list_container.dnd-hover.drag-out-active,
+#pinned_sidebar_container.dnd-hover.drag-out-active {
   border: $border-style $accent;
 }
 
-#file_list_container.drag-in-active {
-  border: dashed $success
+#file_list_container.dnd-hover.drag-in-active,
+#pinned_sidebar_container.dnd-hover.drag-in-active {
+  border: dashed $success;
 }
 
-#file_list_container.drag-in-rejected {
-  border: dashed $error
+#file_list_container.dnd-hover.drag-in-rejected,
+#pinned_sidebar_container.dnd-hover.drag-in-rejected {
+  border: dashed $error;
 }
 
-#file_list_container.drag-in-active FileList .option-list--option-hover {
+#file_list_container.dnd-hover.drag-in-active FileList .option-list--option-hover {
   color: $block-cursor-foreground;
   background: $success;
   text-style: bold;
 }
 
-#file_list_container.drag-in-rejected FileList .option-list--option-hover {
+#file_list_container.dnd-hover.drag-in-rejected FileList .option-list--option-hover {
   color: $block-cursor-foreground;
   background: $error;
   text-style: bold;

@@ -1445,14 +1445,14 @@ wheels = [
 
 [[package]]
 name = "textual-drivers"
-version = "0.9.0"
+version = "0.9.2"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "textual" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/92/cb/fc26013d080a9a5b2480e411c5e708b3a6a15dfacd50e4b6a211fe84ce59/textual_drivers-0.9.0.tar.gz", hash = "sha256:7b8f654c51f2cfa156a4f5873f36767f6dbb49f5b025c846e4e05a617787263d", size = 23482, upload-time = "2026-08-08T08:18:26.075Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/26/9e/a5ab5721bc94d1359fb2791087b84083c6185babb4938c17c858c8a17965/textual_drivers-0.9.2.tar.gz", hash = "sha256:becd81c46f004ef0590eda40ca9cf4df16ce69a1f949da4fa2b2547d0e3648ce", size = 23565, upload-time = "2026-08-08T16:05:35.528Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/1e/c6/9438e50b5ff27eb5b03505d2ea6f816a64282e8e0b7cf59da5f1027a283a/textual_drivers-0.9.0-py3-none-any.whl", hash = "sha256:3896fc3b966e2f8a439bafbcd6d551460012733a936f33fa016d7a4c33535f0a", size = 30570, upload-time = "2026-08-08T08:18:24.998Z" },
+    { url = "https://files.pythonhosted.org/packages/0e/fa/29c10b709c3fb2b55bbd1f705feef0a957a5e3420b354ade7f606a3f165d/textual_drivers-0.9.2-py3-none-any.whl", hash = "sha256:d9c7669b3cdec91761e4c11fe51b9fcd7bbf7e66ea485d4b9fda60e85f822b3d", size = 30649, upload-time = "2026-08-08T16:05:34.688Z" },
 ]
 
 [[package]]

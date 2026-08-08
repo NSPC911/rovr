@@ -1,5 +1,5 @@
 from contextlib import suppress
-from os import getcwd, path
+from os import path
 
 from rich.style import Style
 from textual import on, work
@@ -13,6 +13,7 @@ from textual.widgets._tabs import Tab, Underline
 from textual.worker import WorkerCancelled
 
 from rovr.classes.session_manager import SessionManager
+from rovr.functions.cwd import getcwd
 from rovr.functions.path import normalise
 
 

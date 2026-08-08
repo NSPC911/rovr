@@ -1,6 +1,5 @@
 # modal tester, use when necessary
 import random
-from os import getcwd
 from time import perf_counter
 from typing import Iterable
 
@@ -12,6 +11,7 @@ from textual.css.stylesheet import StylesheetParseError
 from textual.screen import Screen
 from textual.widgets import Button
 
+from rovr.functions.cwd import getcwd
 from rovr.screens import (
     ArchiveCreationScreen,
     DeleteFiles,

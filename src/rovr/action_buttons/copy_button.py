@@ -1,4 +1,3 @@
-from os import getcwd
 from pathlib import Path
 
 from textual import events, work
@@ -8,6 +7,7 @@ from textual.widgets.option_list import Option
 
 from rovr.classes.textual_options import FileListSelectionWidget
 from rovr.components.popup_option_list import PopupOptionList
+from rovr.functions.cwd import getcwd
 from rovr.functions.icons import get_icon
 from rovr.functions.path import dump_exc, normalise
 from rovr.functions.system_clipboard import (

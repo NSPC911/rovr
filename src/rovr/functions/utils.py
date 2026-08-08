@@ -14,6 +14,8 @@ from textual.message import Message
 from textual.screen import Screen, ScreenResultType
 from textual.worker import NoActiveWorker, WorkerCancelled, get_current_worker
 
+from rovr.functions.cwd import getcwd
+
 
 def set_scuffed_subtitle(element: DOMNode, *sections: str) -> None:
     """The most scuffed way to display a custom subtitle
@@ -250,7 +252,7 @@ async def expand_command(app: App, command: list[str]) -> list[str]: ...
 async def expand_command(app: App, command: str | list[str]) -> str | list[str]:
     from rovr.functions.path import normalise
 
-    cwd = normalise(os.getcwd())
+    cwd = normalise(getcwd())
     highlighted = ""
     if app.file_list.highlighted_option is not None and hasattr(
         app.file_list.highlighted_option, "dir_entry"

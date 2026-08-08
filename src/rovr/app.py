@@ -9,7 +9,7 @@ from contextlib import suppress
 from dataclasses import replace
 from importlib import resources
 from io import TextIOWrapper
-from os import chdir, getcwd, path
+from os import path
 from subprocess import Popen, TimeoutExpired
 from time import perf_counter
 from typing import Callable, ClassVar, Iterable
@@ -78,6 +78,7 @@ from rovr.core import (
 )
 from rovr.footer import Clipboard, MetadataContainer, ProcessContainer
 from rovr.functions import drive_workers, multiprocessing_utils
+from rovr.functions.cwd import chdir, getcwd
 from rovr.functions.path import (
     dump_exc,
     ensure_existing_directory,
@@ -254,7 +255,9 @@ class Application(Actionable, DNDApp, inherit_bindings=False):
             startup_paths = list(startup_path)
         self._startup_locations: list[tuple[str, str | None]] = []
         for startup_item in startup_paths:
-            resolved_path = path.abspath(path.expanduser(startup_item))
+            resolved_path = path.normpath(
+                path.join(getcwd(), path.expanduser(startup_item))
+            )
             directory = normalise(ensure_existing_directory(resolved_path))
             focus_on = (
                 path.basename(resolved_path) if path.isfile(resolved_path) else None

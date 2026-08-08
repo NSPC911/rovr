@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from functools import lru_cache
-from os import DirEntry, getcwd, path
+from os import DirEntry, path
 from typing import Callable, Literal, Mapping, NamedTuple, TypeAlias
 
 import rich.repr
@@ -14,6 +14,7 @@ from textual_autocomplete import DropdownItem
 
 from rovr.functions import details as detail_utils
 from rovr.functions import icons as icon_utils
+from rovr.functions.cwd import getcwd
 from rovr.functions.path import is_hidden_file, normalise
 
 IconFactory: TypeAlias = Callable[[], tuple[str, str]]

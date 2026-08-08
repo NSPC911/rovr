@@ -17,6 +17,7 @@ from rovr.classes.config import (
 from rovr.classes.textual_options import RightClickMenuOption
 from rovr.classes.type_aliases import DirEntryType
 from rovr.components import PopupOptionList
+from rovr.functions.cwd import getcwd
 from rovr.functions.path import ifed
 from rovr.functions.utils import check_key, expand_command, is_archive, run_command
 from rovr.variables.constants import bindings, config
@@ -108,8 +109,6 @@ def give_me_an_option(
             return PartialOption(id="copy_highlighted", disabled=no_items)
         case "system:copy_current_directory":
             try:
-                from os import getcwd
-
                 getcwd()
                 return PartialOption(id="copy_current_directory", disabled=False)
             except FileNotFoundError:

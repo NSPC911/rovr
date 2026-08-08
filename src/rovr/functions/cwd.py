@@ -56,7 +56,7 @@ class _WorkingDirectory:
                 if path.isabs(directory)
                 else path.normpath(path.join(self.getcwd(), directory))
             )
-            os.chdir(directory)
+            os.chdir(logical_directory)
             self._physical_cwd = os.getcwd()
             self._logical_cwd = logical_directory
             os.environ["PWD"] = logical_directory

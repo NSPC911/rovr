@@ -255,8 +255,11 @@ class Application(Actionable, DNDApp, inherit_bindings=False):
             startup_paths = list(startup_path)
         self._startup_locations: list[tuple[str, str | None]] = []
         for startup_item in startup_paths:
+            expanded_path = path.expanduser(startup_item)
             resolved_path = path.normpath(
-                path.join(getcwd(), path.expanduser(startup_item))
+                expanded_path
+                if path.isabs(expanded_path)
+                else path.join(getcwd(), expanded_path)
             )
             directory = normalise(ensure_existing_directory(resolved_path))
             focus_on = (

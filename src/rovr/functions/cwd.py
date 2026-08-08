@@ -1,72 +1,86 @@
 import os
 from os import path
+from threading import RLock
 
 
-def _initial_cwd() -> str:
-    """Choose a valid logical cwd when the module is imported.
+class _WorkingDirectory:
+    """Synchronize Rovr's logical cwd with the process cwd."""
 
-    The inherited ``PWD`` is retained only when it is absolute and points to
-    the process's physical working directory. This preserves a symlink path
-    supplied by the launching shell without trusting a stale environment value.
+    def __init__(self) -> None:
+        """Initialize the context from the process cwd and inherited ``PWD``."""
+        self._lock = RLock()
+        self._physical_cwd = os.getcwd()
+        self._logical_cwd = self._initial_cwd()
 
-    Returns:
-        The validated logical cwd, or the physical cwd as a fallback.
-    """
-    physical_cwd = os.getcwd()
-    pwd = os.environ.get("PWD")
-    if pwd is not None and path.isabs(pwd):
+    def _initial_cwd(self) -> str:
+        """Choose a valid logical cwd from the inherited ``PWD``.
+
+        Returns:
+            The validated logical cwd, or the physical cwd as a fallback.
+        """
+        pwd = os.environ.get("PWD")
+        if pwd is None or not path.isabs(pwd):
+            return self._physical_cwd
         try:
-            if path.samefile(pwd, physical_cwd):
+            if path.samefile(pwd, self._physical_cwd):
                 return path.normpath(pwd)
         except OSError:
             pass
-    return physical_cwd
+        return self._physical_cwd
+
+    def getcwd(self) -> str:
+        """Return the logical cwd, resynchronizing after external changes.
+
+        Returns:
+            The logical current working directory.
+        """
+        with self._lock:
+            physical_cwd = os.getcwd()
+            if physical_cwd == self._physical_cwd:
+                return self._logical_cwd
+
+            self._physical_cwd = physical_cwd
+            self._logical_cwd = physical_cwd
+            os.environ["PWD"] = physical_cwd
+            return physical_cwd
+
+    def chdir(self, directory: str) -> None:
+        """Change directory while retaining the logical path used to reach it.
+
+        Args:
+            directory: An absolute path or a path relative to the logical cwd.
+        """
+        with self._lock:
+            logical_directory = (
+                path.normpath(directory)
+                if path.isabs(directory)
+                else path.normpath(path.join(self.getcwd(), directory))
+            )
+            os.chdir(directory)
+            self._physical_cwd = os.getcwd()
+            self._logical_cwd = logical_directory
+            os.environ["PWD"] = logical_directory
 
 
-_logical_cwd = _initial_cwd()
+_working_directory = _WorkingDirectory()
 
 
 def getcwd() -> str:
-    """Return the logical cwd, preserving traversed directory symlinks.
-
-    The tracked path is checked against the process's physical cwd on every
-    call. If another caller changed directories or the logical path disappeared,
-    the physical cwd becomes the new logical cwd.
+    """Return the logical current working directory.
 
     Returns:
         The logical current working directory.
     """
-    global _logical_cwd
-
-    physical_cwd = os.getcwd()
-    try:
-        if path.samefile(_logical_cwd, physical_cwd):
-            return _logical_cwd
-    except OSError:
-        pass
-
-    _logical_cwd = physical_cwd
-    os.environ["PWD"] = physical_cwd
-    return physical_cwd
+    return _working_directory.getcwd()
 
 
 def chdir(directory: str) -> None:
-    """Change directory while retaining the logical path used to reach it.
+    """Change the process and logical working directories.
 
     Args:
         directory: An absolute path or a path relative to the logical cwd.
     """
-    global _logical_cwd
-
-    logical_cwd = getcwd()
-    logical_directory = (
-        path.normpath(directory)
-        if path.isabs(directory)
-        else path.normpath(path.join(logical_cwd, directory))
-    )
-    os.chdir(directory)
-    _logical_cwd = logical_directory
-    os.environ["PWD"] = logical_directory
+    _working_directory.chdir(directory)
 
 
 __all__ = ["getcwd", "chdir"]

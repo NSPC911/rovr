@@ -229,6 +229,9 @@ class PreviewContainer(Actionable, Container):
         self.border_title = ""
         self.border_subtitle = ""
         dir_entry = path_utils.get_direntry_for(location)
+        if not dir_entry:
+            # lowk just skip
+            return
         try:
             if dir_entry.is_symlink():
                 await self.mount(

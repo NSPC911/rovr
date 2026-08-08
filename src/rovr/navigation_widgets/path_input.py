@@ -46,9 +46,9 @@ def is_dir_entry_hidden(entry: os.DirEntry) -> bool:
         return False
 
     if os_type == "Darwin":
-        return file_stat.st_flags & stat.UF_HIDDEN
+        return bool(file_stat.st_flags & stat.UF_HIDDEN)
     if os_type == "Windows":
-        return file_stat.st_file_attributes & stat.FILE_ATTRIBUTE_HIDDEN
+        return bool(file_stat.st_file_attributes & stat.FILE_ATTRIBUTE_HIDDEN)
     return False
 
 

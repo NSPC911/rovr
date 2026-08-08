@@ -1,11 +1,14 @@
 import multiprocessing
 from os import R_OK, access, path
+from threading import Lock
 from typing import ClassVar, cast
 
 from textual import work
 from textual.binding import BindingType
+from textual.types import DuplicateID
 from textual.widgets import Input, OptionList
 from textual.widgets.option_list import Option
+from textual.worker import get_current_worker
 
 from rovr.classes.exceptions import FolderNotFileError
 from rovr.classes.mixins import Action, Actionable
@@ -32,6 +35,7 @@ class PinnedSidebar(Actionable, OptionList, inherit_bindings=False):
         Raises:
             FolderNotFileError: If the pin location is a file, and not a folder.
         """
+        self.tlock.acquire()
         available_pins = cast(
             pin_utils.PinsDict, globals().get("pins", pin_utils.load_pins())
         )
@@ -150,9 +154,9 @@ class PinnedSidebar(Actionable, OptionList, inherit_bindings=False):
         self.app.call_from_thread(self.set_options, self.list_of_options)
         if prev_highlighted < len(self.list_of_options):
             self.app.call_from_thread(setattr, self, "highlighted", prev_highlighted)
-            self.app.call_from_thread(self.refresh_drives, id_list, None)
-            return
-        self.app.call_from_thread(self.refresh_drives, id_list, prev_highlighted)
+            self.app.call_next(self.refresh_drives, id_list, None)
+        else:
+            self.app.call_next(self.refresh_drives, id_list, prev_highlighted)
 
     @work(thread=True)
     def refresh_drives(
@@ -200,18 +204,31 @@ class PinnedSidebar(Actionable, OptionList, inherit_bindings=False):
                         )
                     )
                     id_list.append(new_id)
-        self.app.call_from_thread(
-            self.add_options,
-            new_options,
-        )
         self.list_of_options.extend(new_options)
-        if prev_highlighted is not None and prev_highlighted < len(
-            self.list_of_options
-        ):
-            self.app.call_from_thread(setattr, self, "highlighted", prev_highlighted)
+        try:
+            self.app.call_from_thread(self.set_options, self.list_of_options)
+            if prev_highlighted is not None and prev_highlighted < len(
+                self.list_of_options
+            ):
+                self.app.call_from_thread(
+                    setattr, self, "highlighted", prev_highlighted
+                )
+        except DuplicateID:
+            # definitely a race condition, still unsure how this can happen
+            # check for running workers first
+            if not any(
+                worker.is_running and worker is not get_current_worker()
+                for worker in self.workers
+            ):
+                # schedule a new run
+                self.app.call_after_refresh(self.reload_pins)
+                return
+        finally:
+            self.tlock.release()
 
     def on_mount(self) -> None:
         """Reload the pinned files from the config."""
+        self.tlock = Lock()
         assert self.parent
         self.input: Input = self.parent.query_one(Input)
         # peak scheduling

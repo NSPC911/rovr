@@ -1,15 +1,11 @@
 from __future__ import annotations
 
-import glob
-import os
-import shlex
 import subprocess
 from functools import lru_cache
 from io import BytesIO
 from pathlib import Path
 
 from PIL import Image, ImageDraw, ImageFont
-from platformdirs import user_config_path
 from textual.color import Color, ColorParseError
 from textual_drivers.dnd import ImageLabel
 
@@ -149,35 +145,8 @@ def _parse_color(value: str, fallback: tuple[int, int, int]) -> tuple[int, int, 
 
 @lru_cache(maxsize=128)
 def _resolve_font_path(character: str = "") -> str | None:
-    """Resolve a font path for the given character, or for Kitty's configured font family.
-
-    Args:
-        character (str): The character to find a font for. If empty, will use Kitty's configured font family.
-
-    Returns:
-        str | None: The path to the font file, or None if no suitable font could
-    """
-    if character:
-        matched = _fontconfig_match(f":charset={ord(character):x}")
-        if matched is not None:
-            return matched
-
-    family = _kitty_font_family()
-    if family:
-        if (matched := _fontconfig_match(family)) is not None:
-            return matched
-        if (matched := _system_font_for_family(family)) is not None:
-            return matched
-
-    if character and (matched := _system_nerd_font()) is not None:
-        return matched
-    try:
-        if family:
-            font = ImageFont.truetype(family, 12)
-    except OSError:
-        return
-    else:
-        return str(font.path)
+    pattern = f":charset={ord(character):x}" if character else "monospace"
+    return _fontconfig_match(pattern)
 
 
 def _fontconfig_match(pattern: str) -> str | None:
@@ -203,135 +172,6 @@ def _fontconfig_match(pattern: str) -> str | None:
         return None
     font_path = result.stdout.splitlines()[0] if result.stdout else ""
     return font_path if Path(font_path).is_file() else None
-
-
-@lru_cache(maxsize=16)
-def _system_font_for_family(family: str) -> str | None:
-    family = family.casefold()
-    for font_path in _system_font_files():
-        try:
-            name = ImageFont.truetype(font_path, 12).getname()[0]
-        except OSError:
-            continue
-        if family in name.casefold() or name.casefold() in family:
-            return font_path
-    return None
-
-
-@lru_cache(maxsize=1)
-def _system_nerd_font() -> str | None:
-    """Find literally any reasonable Nerd Font installed on system
-
-    Returns:
-        str | None: The path to the first matching Nerd Font file, or None if no"""
-    for font_path in _system_font_files():
-        try:
-            name = ImageFont.truetype(font_path, 12).getname()[0].casefold()
-        except OSError:
-            continue
-        if "nerd font" in name or "symbols nerd" in name:
-            return font_path
-    return None
-
-
-@lru_cache(maxsize=1)
-def _system_font_files() -> tuple[str, ...]:
-    # Fontconfig is not normally available on macOS or Windows, so scan their
-    # standard font directories as a portable fallback.
-    # TODO: make sure to make it OS Independent when WezTerm adds support
-    # for DND on Windows (cant wait)
-    roots = (
-        Path.home() / ".local" / "share" / "fonts",
-        Path.home() / "Library" / "Fonts",
-        Path("/Library/Fonts"),
-        Path("/System/Library/Fonts"),
-        Path(os.environ.get("WINDIR", "C:/Windows")) / "Fonts",
-    )
-    return tuple(
-        str(font_path)
-        for root in roots
-        if root.is_dir()
-        for font_path in root.rglob("*")
-        if font_path.suffix.casefold() in {".otf", ".ttc", ".ttf"}
-    )
-
-
-@lru_cache(maxsize=1)
-def _kitty_font_family() -> str | None:
-    """Return the font family configured in Kitty, if any.
-
-    Returns:
-        str | None: The font family if found, otherwise None
-    """
-    candidates: list[Path] = []
-    if config_directory := os.environ.get("KITTY_CONFIG_DIRECTORY"):
-        candidates.append(Path(config_directory) / "kitty.conf")
-    if xdg_config_home := os.environ.get("XDG_CONFIG_HOME"):
-        candidates.append(Path(xdg_config_home) / "kitty" / "kitty.conf")
-    candidates.append(user_config_path("kitty") / "kitty.conf")
-
-    for candidate in dict.fromkeys(candidates):
-        if family := _read_font_family(candidate, set(), 0):
-            return family
-    return None
-
-
-def _read_font_family(config_path: Path, seen: set[Path], depth: int) -> str | None:
-    """Manual kitty config parsing
-
-    We are looking specifically for phrases like `font_family FOO`
-    ╰─> If `include` is found, we  will recursively do the same to it
-
-    Args:
-        config_path (Path): Path to the kitty config file
-        seen (set[Path]): Set of already seen config paths to avoid infinite recursion
-        depth (int): Current recursion depth
-
-    Returns:
-        str | None: The font family if found, otherwise None
-    """
-    if depth > 8:
-        return None
-    try:
-        config_path = config_path.expanduser().resolve()
-        if config_path in seen:
-            return None
-        seen.add(config_path)
-        lines = config_path.read_text(encoding="utf-8").splitlines()
-    except OSError:
-        return None
-
-    family: str | None = None
-    for line in lines:
-        try:
-            parts = shlex.split(line, comments=True)
-        except ValueError:
-            continue
-        if len(parts) < 2:
-            continue
-        key, values = parts[0], parts[1:]
-        if key == "include":
-            # Relative includes are resolved from the file containing them.
-            value = " ".join(values)
-            pattern = Path(value).expanduser()
-            if not pattern.is_absolute():
-                pattern = config_path.parent / pattern
-            for included in sorted(glob.glob(str(pattern))):
-                if included_family := _read_font_family(
-                    Path(included), seen, depth + 1
-                ):
-                    family = included_family
-        elif key == "font_family" and values != ["auto"]:
-            family = _family_name(values)
-    return family
-
-
-def _family_name(values: list[str]) -> str | None:
-    first = values[0]
-    if "=" not in first:
-        return " ".join(values)
-    key, _, value = first.partition("=")
-    return value if key in {"family", "postscript_name", "system"} else None
 
 
 __all__ = ["render_drag_image"]

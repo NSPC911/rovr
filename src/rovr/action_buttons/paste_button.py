@@ -1,6 +1,8 @@
+from textual import work
 from textual.widgets import Button
 
 from rovr.classes.textual_options import ClipboardSelectionValue
+from rovr.functions.cwd import getcwd
 from rovr.functions.icons import get_icon
 from rovr.functions.utils import s
 from rovr.screens.paste_screen import PasteScreen
@@ -15,6 +17,7 @@ class PasteButton(Button):
         if config["interface"]["tooltips"]:
             self.tooltip = "Paste files from clipboard"
 
+    @work
     async def on_button_pressed(self) -> None:
         """Paste files from clipboard"""
         if self.disabled:
@@ -37,12 +40,7 @@ class PasteButton(Button):
                 ],
             )
 
-            async def callback(response: str) -> None:
-                """Callback to paste files after confirmation"""
-                if response:
-                    self.app.query_one("ProcessContainer").paste_items(to_copy, to_cut)
-
-            self.app.push_screen(
+            result = await self.app.push_screen_wait(
                 PasteScreen(
                     message="Are you sure you want to "
                     + (
@@ -54,6 +52,10 @@ class PasteButton(Button):
                     + "?",
                     paths={"copy": to_copy, "cut": to_cut},
                     destructive=True,
-                ),
-                callback=callback,
+                )
             )
+
+            if result:
+                self.app.query_one("ProcessContainer").paste_items(
+                    to_copy, to_cut, getcwd()
+                )

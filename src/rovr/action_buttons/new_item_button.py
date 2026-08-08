@@ -1,7 +1,7 @@
 import contextlib
 from os import makedirs, path
 from tempfile import NamedTemporaryFile
-from typing import cast
+from typing import Callable, cast
 
 from textual import events, work
 from textual.content import Content
@@ -55,7 +55,7 @@ class NewItemButton(Button):
         if location.endswith("/"):
             # recursive directory creation
             try:
-                worker = self.app.run_in_thread(makedirs, location)
+                worker = self.run_in_thread(makedirs, location)
                 await worker.wait()
                 if isinstance(worker.result, Exception):
                     raise worker.result
@@ -79,7 +79,7 @@ class NewItemButton(Button):
             location_parts = location.split("/")
             dir_path = "/".join(location_parts[:-1])
             try:
-                worker = self.app.run_in_thread(makedirs, dir_path)
+                worker = self.run_in_thread(makedirs, dir_path)
                 await worker.wait()
                 if isinstance(worker.result, Exception):
                     raise worker.result
@@ -245,3 +245,21 @@ class NewItemButton(Button):
             )
         with contextlib.suppress(OSError):
             path.unlink(temp_path)
+
+    @work(thread=True)
+    def run_in_thread(self, function: Callable, *args, **kwargs) -> Worker | Exception:
+        """
+        Run a function in a thread and return a worker for it.
+        Args:
+            function(callable): the function to run
+            *args: positional arguments for the function
+            **kwargs: keyword arguments for the function
+
+        Returns:
+            Worker: the worker for the function
+            Exception: if something fails
+        """
+        try:
+            return function(*args, **kwargs)
+        except Exception as exc:
+            return exc

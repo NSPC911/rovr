@@ -2,6 +2,7 @@ import contextlib
 from typing import Self
 
 from textual import events, on
+from textual.geometry import Offset
 from textual.widgets import OptionList
 
 
@@ -28,7 +29,7 @@ class PopupOptionList(OptionList):
         self.go_hide()
 
     def reset_focus(self) -> None:
-        for optionlist in self.app.query("PopupOptionList"):
+        for optionlist in self.app.query(PopupOptionList):
             optionlist.has_focus = False
         self.has_focus = True
 
@@ -45,7 +46,8 @@ class PopupOptionList(OptionList):
         # no choice here, i want something similar to focus on hover
         # so that it feels better rather than a focus instantly followed
         # by a hide (looks bad, which was why #264 pr was made for pins bar)
-        self.reset_focus()
+        if event.delta != Offset(0, 0):
+            self.reset_focus()
 
     def focus(self, scroll_visible: bool = True) -> Self:
         # might be weird, but this is really necessary

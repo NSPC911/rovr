@@ -85,7 +85,6 @@ async def test_add_pins(tmp_path: Path) -> None:
     app = Application(tmp_path.as_posix())
 
     async with app.run_test(size=(143, 37)) as pilot:
-        await pilot.pause()
         sidebar = app.query_one(PinnedSidebar)
         test = tmp_path / "TestFolder"
         test.mkdir()

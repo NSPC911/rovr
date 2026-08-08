@@ -122,3 +122,63 @@ async def test_pin_no_exist(tmp_path: Path) -> None:
         open(tmp_path / "TestFile.txt", "w").close()
         with pytest.raises(ValueError):
             pins.add_pin("TestFile", (tmp_path / "TestFile.txt").as_posix())
+
+
+@pytest.mark.asyncio
+async def test_drop_folders_adds_all_to_pins(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    from textual_drivers.dnd import Drop, DropData
+
+    from rovr.app import Application
+    from rovr.functions import pins
+
+    monkeypatch.setattr(pins, "PIN_PATH", (tmp_path / "pins.json").as_posix())
+    monkeypatch.setattr(pins, "pins", {})
+    monkeypatch.setattr(pins, "raw_pins", {})
+    pins.load_pins()
+    folders = [tmp_path / "first", tmp_path / "second"]
+    for folder in folders:
+        folder.mkdir()
+
+    app = Application(tmp_path.as_posix())
+    async with app.run_test(size=(143, 37)):
+        app._dnd_drop_to_pins = True
+        drop = Drop("t=M:x=0:y=0:X=0:Y=0:o=1;text/uri-list rovr/type-folder")
+        worker = app.on_drop_data(
+            DropData(drop, [folder.as_uri() for folder in folders], "text/uri-list")
+        )
+        await worker.wait()
+
+        assert {pin["path"] for pin in pins.pins["pins"]} == {
+            folder.as_posix() for folder in folders
+        }
+
+
+@pytest.mark.asyncio
+async def test_drag_hover_class_follows_drop_region(tmp_path: Path) -> None:
+    from textual_drivers.dnd import DNDDragIn
+
+    from rovr.app import Application
+    from rovr.core import PinnedSidebar, PinnedSidebarContainer
+
+    app = Application(tmp_path.as_posix())
+    async with app.run_test(size=(143, 37)):
+        sidebar = app.query_one(PinnedSidebar)
+        sidebar_container = app.query_one(PinnedSidebarContainer)
+        pos = sidebar.region.offset
+        await app.dnd_drag_in_operation(
+            DNDDragIn(
+                f"t=m:x={pos.x}:y={pos.y}:X={pos.x}:Y={pos.y}:o=1;"
+                "text/uri-list rovr/type-folder"
+            )
+        )
+        assert sidebar_container.has_class("dnd-hover")
+        assert not app._file_list_container.has_class("dnd-hover")
+
+        pos = app.file_list.content_region.offset
+        await app.dnd_drag_in_operation(
+            DNDDragIn(f"t=m:x={pos.x}:y={pos.y}:X={pos.x}:Y={pos.y}:o=1;text/uri-list")
+        )
+        assert app._file_list_container.has_class("dnd-hover")
+        assert not sidebar_container.has_class("dnd-hover")

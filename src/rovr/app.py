@@ -1194,6 +1194,7 @@ class Application(Actionable, DNDApp, inherit_bindings=False):
                 label_text,
                 icon_color,
                 self.theme_variables,
+                selected[0] if len(selected) == 1 else None,
             ) or TextLabel(
                 f" {icon}  {label_text}",
                 size=2,

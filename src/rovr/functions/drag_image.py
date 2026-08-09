@@ -1,11 +1,11 @@
 from __future__ import annotations
 
+import os
 import subprocess
 from functools import lru_cache
 from io import BytesIO
-from pathlib import Path
 
-from PIL import Image, ImageDraw, ImageFont
+from PIL import Image, ImageDraw, ImageFont, ImageOps
 from textual.color import Color, ColorParseError
 from textual_drivers.dnd import ImageLabel
 
@@ -19,6 +19,12 @@ ICON_TEXT_GAP = 12
 CORNER_RADIUS = 13
 MAX_TEXT_CHARS = 30
 SCALE = 2
+IMAGE_LABEL_SIZE = 350
+IMAGE_PADDING = 12
+IMAGE_PREVIEW_SIZE = (
+    IMAGE_LABEL_SIZE - (IMAGE_PADDING * 2),
+    IMAGE_LABEL_SIZE - HEIGHT - IMAGE_PADDING,
+)
 
 
 def render_drag_image(
@@ -26,6 +32,7 @@ def render_drag_image(
     text: str,
     icon_color: str,
     theme_variables: dict[str, str],
+    image_path: str | None = None,
 ) -> ImageLabel | None:
     """Render an icon and label into a compact Kitty drag image.
 
@@ -35,8 +42,58 @@ def render_drag_image(
     # Nerd Font icons may come from a different fallback than Kitty's primary
     # text font, so resolve the two independently.
     text_font_path = _resolve_font_path()
+    if text_font_path is None:
+        return None
+
+    foreground = _theme_color(theme_variables, "foreground", (231, 237, 245))
+    background = _theme_color(theme_variables, "surface", (21, 32, 54))
+
+    if image_path is not None:
+        try:
+            preview = _load_image_preview(
+                image_path,
+                os.stat(image_path).st_mtime_ns,
+            )
+            text_font = ImageFont.truetype(text_font_path, TEXT_SIZE)
+        except (OSError, ValueError):
+            pass
+        else:
+            measure = ImageDraw.Draw(Image.new("RGBA", (1, 1)))
+            text = _fit_text(
+                measure,
+                _sanitize_text(text),
+                text_font,
+                (IMAGE_LABEL_SIZE - PADDING_X * 2),
+            )
+            text_width = round(measure.textlength(text, font=text_font))
+            width = min(
+                IMAGE_LABEL_SIZE,
+                max(preview.width + IMAGE_PADDING * 2, text_width + PADDING_X * 2),
+            )
+            height = preview.height + HEIGHT + IMAGE_PADDING
+            image = Image.new("RGBA", (width, height), (0, 0, 0, 0))
+            draw = ImageDraw.Draw(image)
+            draw.rounded_rectangle(
+                (0, 0, width - 1, height - 1),
+                radius=CORNER_RADIUS,
+                fill=(*background, 232),
+            )
+            image.alpha_composite(
+                preview, ((width - preview.width) // 2, IMAGE_PADDING)
+            )
+            draw.text(
+                (width / 2, IMAGE_PADDING + preview.height + HEIGHT / 2),
+                text,
+                font=text_font,
+                fill=(*foreground, 255),
+                anchor="mm",
+            )
+            output = BytesIO()
+            image.save(output, format="PNG", compress_level=1)
+            return ImageLabel(output.getvalue(), width, height)
+
     icon_font_path = _resolve_font_path(icon[0]) if icon else text_font_path
-    if text_font_path is None or icon_font_path is None:
+    if icon_font_path is None:
         return None
 
     try:
@@ -45,8 +102,6 @@ def render_drag_image(
     except OSError:
         return None
 
-    foreground = _theme_color(theme_variables, "foreground", (231, 237, 245))
-    background = _theme_color(theme_variables, "surface", (21, 32, 54))
     resolved_icon_color = _parse_color(icon_color, foreground)
 
     measure = ImageDraw.Draw(Image.new("RGBA", (1, 1)))
@@ -90,6 +145,33 @@ def render_drag_image(
     output = BytesIO()
     image.save(output, format="PNG")
     return ImageLabel(output.getvalue(), width, HEIGHT)
+
+
+@lru_cache(maxsize=16)
+def _load_image_preview(image_path: str, _modified_ns: int) -> Image.Image:
+    with Image.open(image_path) as source:
+        max_dimension = max(IMAGE_PREVIEW_SIZE)
+        source.draft(None, (max_dimension, max_dimension))
+        source.thumbnail(
+            (max_dimension, max_dimension),
+            Image.Resampling.NEAREST,
+            reducing_gap=1.0,
+        )
+        preview = ImageOps.exif_transpose(source)
+        preview.thumbnail(
+            IMAGE_PREVIEW_SIZE,
+            Image.Resampling.NEAREST,
+            reducing_gap=1.0,
+        )
+        mask = Image.new("L", preview.size, 0)
+        draw = ImageDraw.Draw(mask)
+        draw.rounded_rectangle(
+            (0, 0, preview.width - 1, preview.height - 1),
+            radius=CORNER_RADIUS,
+            fill=255,
+        )
+        preview.putalpha(mask)
+        return preview.convert("RGBA")
 
 
 def _fit_text(
@@ -171,7 +253,7 @@ def _fontconfig_match(pattern: str) -> str | None:
     if result.returncode != 0:
         return None
     font_path = result.stdout.splitlines()[0] if result.stdout else ""
-    return font_path if Path(font_path).is_file() else None
+    return font_path if os.path.isfile(font_path) else None
 
 
 __all__ = ["render_drag_image"]

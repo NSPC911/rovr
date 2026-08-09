@@ -136,8 +136,9 @@ For more info on Textual's console, refer to https://textual.textualize.io/guide
 
 1. There isn't X theme/Why isn't Y theme available?
    - Textual's currently available themes are limited. However, extra themes can be added via the config file.
-   - You can take a look at what each color represents in https://textual.textualize.io/guide/design/#base-colors<br>Inheriting themes will **not** be added.
+   - You can take a look at what each color represents in https://textual.textualize.io/guide/design/#base-colors
    - More info on styling can be found in https://nspc911.github.io/rovr/configuration/theming ([dev version](https://nspc911.github.io/rovr/dev/configuration/theming))
+   - Theme inheritance (that is one theme inheriting from another) will not be supported
 
 2. Why not ratatui (rust) or bubbletea (go), why python, why??? <sub><i>sad, angry, weird compiled noises</i></sub>
    - I like Python, feel free to leave if you hate it.

@@ -37,10 +37,10 @@ class PasteDropScreen(Actionable, ModalScreen["PasteDropScreen.ReturnType | None
     def compose(self) -> ComposeResult:
         with Grid(id="dialog"):
             yield OptionList(id="drag_and_drop_list")
-            yield Button("Copy", id="copy", variant="success")
-            yield Button("Move", id="move", variant="warning")
+            yield Button(f"\\[{copy_bind}] Copy", id="copy", variant="success")
+            yield Button(f"\\[{move_bind}] Move", id="move", variant="warning")
             with HorizontalGroup():
-                yield Button("Cancel", id="cancel", variant="error")
+                yield Button(f"\\[{cancel_bind}] Cancel", id="cancel", variant="error")
 
     def on_mount(self) -> None:
         self.query_one(Grid).border_title = "Drag and Drop"

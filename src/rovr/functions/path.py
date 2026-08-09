@@ -123,6 +123,22 @@ def decompress(text: str) -> str:
     )
 
 
+def samefile(path1: str, path2: str) -> bool:
+    """Check if two paths refer to the same file.
+
+    Args:
+        path1 (str): The first file path.
+        path2 (str): The second file path.
+
+    Returns:
+        bool: True if both paths refer to the same file, False otherwise.
+    """
+    try:
+        return os.path.samefile(path1, path2)
+    except (OSError, FileNotFoundError):
+        return False
+
+
 create_proc = partial(
     asyncio.create_subprocess_exec,
     stdout=asyncio.subprocess.PIPE,

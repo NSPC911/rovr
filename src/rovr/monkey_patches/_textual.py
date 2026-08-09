@@ -89,3 +89,13 @@ def render_border_label(
 
     segments = text_label.render_segments(base_style)
     yield from segments
+
+
+border.render_border_label = render_border_label  # ty: ignore
+
+# make it less bold
+border.BORDER_CHARS["dashed"] = (
+    ("┌", "╌", "┐"),
+    ("┆", " ", "┆"),
+    ("└", "╌", "┘"),
+)

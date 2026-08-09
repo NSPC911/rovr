@@ -57,6 +57,10 @@ def render_drag_image(
             text_font = ImageFont.truetype(text_font_path, TEXT_SIZE)
         except (OSError, ValueError):
             pass
+        except (Image.DecompressionBombError, Image.DecompressionBombWarning):
+            print(
+                "Warning: Image is too large to render as a drag image. Skipping preview."
+            )
         else:
             measure = ImageDraw.Draw(Image.new("RGBA", (1, 1)))
             text = _fit_text(

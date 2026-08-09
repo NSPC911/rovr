@@ -1178,7 +1178,13 @@ class Application(Actionable, DNDApp, inherit_bindings=False):
                 icon, icon_color = icons.get_icon("folder", "default")
                 label_text = f"{len(selected)} folder{s(selected)}"
             else:
-                icon, icon_color = icons.get_icon("file", "default")
+                # instead of doing a catch-all for files, preferrably we should check whether all items
+                # are the same icon, and if so, use the same icon
+                icos = {icons.get_icon_smart(p) for p in selected}
+                if len(icos) == 1:
+                    icon, icon_color = icos.pop()
+                else:
+                    icon, icon_color = icons.get_icon("file", "default")
                 kind = "file" if all(path.isfile(p) for p in selected) else "item"
                 label_text = f"{len(selected)} {kind}{s(selected)}"
 

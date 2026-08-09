@@ -122,3 +122,34 @@ async def test_pin_no_exist(tmp_path: Path) -> None:
         open(tmp_path / "TestFile.txt", "w").close()
         with pytest.raises(ValueError):
             pins.add_pin("TestFile", (tmp_path / "TestFile.txt").as_posix())
+
+
+@pytest.mark.asyncio
+async def test_drop_data_consumes_matching_drop_metadata(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    from textual_drivers.dnd import Drop, DropData
+
+    from rovr.app import Application
+
+    app = Application(tmp_path.as_posix())
+    metadata_was_stored: list[bool] = []
+
+    def request_data(event: Drop, index: int, close: bool = True) -> None:
+        metadata_was_stored.append(event in app._dnd_drop_metadata)
+
+    async with app.run_test(size=(143, 37)):
+        monkeypatch.setattr(app, "request_data", request_data)
+        drops = [
+            Drop(f"t=M:x=0:y=0:X=0:Y=0:o=1;text/uri-list rovr/request-{index}")
+            for index in range(2)
+        ]
+        for drop in drops:
+            await app.on_drop(drop)
+
+        worker = app.on_drop_data(DropData(drops[1], b"", "unsupported"))
+        await worker.wait()
+
+        assert metadata_was_stored == [True, True]
+        assert drops[0] in app._dnd_drop_metadata
+        assert drops[1] not in app._dnd_drop_metadata

@@ -89,6 +89,7 @@ from rovr.functions.path import (
     get_direntry_for,
     get_filtered_dir_names,
     normalise,
+    samefile,
 )
 from rovr.functions.themes import (
     extract_variable_declarations,
@@ -280,8 +281,7 @@ class Application(Actionable, DNDApp, inherit_bindings=False):
             None
         )
         self._dnd_dragged_paths: list[str] = []
-        self._dnd_drop_destination: str | None = None
-        self._dnd_drop_to_pins: bool = False
+        self._dnd_drop_metadata: dict[Drop, tuple[str, bool]] = {}
 
         self._on_mount_done: bool = False
         self.last_available_cd = getcwd()
@@ -1224,6 +1224,8 @@ class Application(Actionable, DNDApp, inherit_bindings=False):
             )
 
     def _directory_under_pos(self, pos: Offset) -> str | None:
+        if pos not in self.file_list.content_region:
+            return None
         option_index = self.screen.get_style_at(pos.x, pos.y).meta.get("option")
         if (
             isinstance(option_index, int)
@@ -1262,7 +1264,9 @@ class Application(Actionable, DNDApp, inherit_bindings=False):
                         return True
                 except ValueError:
                     pass
-            elif path.dirname(source_path) == destination and getcwd() == destination:
+            elif path.dirname(source_path) == destination and samefile(
+                getcwd(), destination
+            ):
                 return True
         return False
 
@@ -1359,10 +1363,7 @@ class Application(Actionable, DNDApp, inherit_bindings=False):
                 if mime.startswith("rovr/cwd-"):
                     cwd = mime[9:]
                     break
-            if (
-                path.samefile(cwd, getcwd())
-                and self._directory_under_pos(event.pos) is None
-            ):
+            if samefile(cwd, getcwd()) and self._directory_under_pos(event.pos) is None:
                 accepted = False
 
         return DNDDragInOperation(
@@ -1387,12 +1388,13 @@ class Application(Actionable, DNDApp, inherit_bindings=False):
                 markup=False,
             )
             return
-        self._dnd_drop_to_pins = (
+        drop_to_pins = (
             event.pos in self.query_one(PinnedSidebar).region
             and "rovr/type-folder" in event.mimes
         )
-        self._dnd_drop_destination = (
-            None if self._dnd_drop_to_pins else self._drop_destination(event.pos)
+        self._dnd_drop_metadata[event] = (
+            self._drop_destination(event.pos),
+            drop_to_pins,
         )
         self.request_data(event, idx, close=True)
 
@@ -1401,10 +1403,10 @@ class Application(Actionable, DNDApp, inherit_bindings=False):
         from pathlib import Path
         from urllib.parse import urlparse
 
-        destination = self._dnd_drop_destination or normalise(getcwd())
-        self._dnd_drop_destination = None
-        drop_to_pins = self._dnd_drop_to_pins
-        self._dnd_drop_to_pins = False
+        destination, drop_to_pins = self._dnd_drop_metadata.pop(
+            event.drop_event,
+            (normalise(getcwd()), False),
+        )
         if event.mime == "text/plain":
             event.data = (
                 event.data.decode("utf-8", errors="ignore").strip().splitlines()

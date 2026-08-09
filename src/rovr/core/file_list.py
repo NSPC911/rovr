@@ -4,11 +4,10 @@ from os import path, scandir
 from typing import Callable, ClassVar, Sequence
 
 from rich.segment import Segment
-from textual import events, on, work
+from textual import events, work
 from textual.binding import BindingType
 from textual.css.query import NoMatches
 from textual.errors import NoWidget
-from textual.messages import Update
 from textual.strip import Strip
 from textual.widgets import Button, Input, OptionList, SelectionList
 from textual.widgets.option_list import OptionDoesNotExist
@@ -780,7 +779,6 @@ class FileList(
         if self.dummy:
             event.prevent_default()
 
-    @on(Update)
     def update_border_subtitle(self) -> None:
         if self.dummy or type(self.highlighted) is not int or not self.parent:
             return

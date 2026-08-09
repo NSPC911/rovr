@@ -149,7 +149,7 @@ class MetadataContainer(VerticalScroll, inherit_bindings=False):
             file_info += self.info_of_dir_entry(dir_entry)
         # got the type, now we follow
         file_stat = dir_entry.stat()
-        is_hidden = is_hidden_file(dir_entry.path)
+        is_hidden = is_hidden_file(dir_entry)
 
         values_list = []
         for field in config["metadata"]["fields"]:

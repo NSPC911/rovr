@@ -2,7 +2,6 @@ from __future__ import annotations
 
 import asyncio
 import base64
-import ctypes
 import os
 import re
 import shlex
@@ -22,8 +21,6 @@ from textual.dom import DOMNode
 from rovr import pprint
 from rovr.classes.config import _OpenerIf, _RightClickIf
 from rovr.classes.type_aliases import (
-    DirEntryType,
-    DirEntryTypes,
     SortByOptions,
 )
 from rovr.variables.constants import log_name
@@ -49,62 +46,27 @@ def natsort_cacheless(key: str) -> tuple[str | int, ...]:
     return _natsort(key)
 
 
-if sys.platform == "win32":
-    _GetFileAttributesW = ctypes.windll.kernel32.GetFileAttributesW
-    _GetFileAttributesW.argtypes = [ctypes.c_wchar_p]
-    _GetFileAttributesW.restype = ctypes.c_uint32
+def is_hidden_file(entry: os.DirEntry) -> bool:
+    """Check whether a ``DirEntry`` represents a hidden item.
 
+    Args:
+        entry: A ``DirEntry`` from ``os.scandir``.
 
-@overload
-def is_hidden_file(filepath: str) -> bool: ...
-
-
-@overload
-def is_hidden_file(filepath: DirEntryType) -> bool: ...
-
-
-def is_hidden_file(filepath: str | DirEntryType) -> bool:
-    if not isinstance(filepath, str):
-        if sys.platform == "win32":
-            try:
-                return bool(
-                    filepath.stat(follow_symlinks=False).st_file_attributes
-                    & stat.FILE_ATTRIBUTE_HIDDEN
-                )
-            except OSError:
-                return False
-        if filepath.name.startswith("."):
-            return True
-        if sys.platform == "darwin":
-            try:
-                return bool(
-                    getattr(filepath.stat(follow_symlinks=False), "st_flags", 0)
-                    & getattr(stat, "UF_HIDDEN", 0)
-                )
-            except OSError:
-                return False
+    Returns:
+        ``True`` if the entry is hidden, ``False`` otherwise.
+    """
+    if entry.name.startswith(".") and sys.platform != "win32":
+        return True
+    try:
+        file_stat = entry.stat(follow_symlinks=False)
+    except OSError:
         return False
+
+    if sys.platform == "darwin":
+        return bool(file_stat.st_flags & stat.UF_HIDDEN)
     if sys.platform == "win32":
-        try:
-            attrs = _GetFileAttributesW(filepath)
-            if attrs == 0xFFFFFFFF:  # INVALID_FILE_ATTRIBUTES
-                return False
-            return bool(attrs & 0x02)  # FILE_ATTRIBUTE_HIDDEN
-        except (OSError, AttributeError):
-            return False
-    elif sys.platform == "darwin":
-        # dotfiles should always be hidden, and so should UF_HIDDEN-flagged files
-        name_hidden = path.basename(filepath).startswith(".")
-        try:
-            st = os.stat(filepath, follow_symlinks=False)
-            flag_hidden = bool(
-                getattr(st, "st_flags", 0) & getattr(stat, "UF_HIDDEN", 0)
-            )
-        except OSError:
-            flag_hidden = False
-        return name_hidden or flag_hidden
-    else:
-        return path.basename(filepath).startswith(".")
+        return bool(file_stat.st_file_attributes & stat.FILE_ATTRIBUTE_HIDDEN)
+    return False
 
 
 # insanely scuffed implementation, but it's required due
@@ -247,7 +209,7 @@ def get_filtered_dir_names(cwd: str | bytes, show_hidden: bool = False) -> set[s
 class CWDObjectReturnDict(TypedDict):
     name: str
     icon: Callable[[], tuple[str, str]]
-    dir_entry: DirEntryType
+    dir_entry: os.DirEntry
 
 
 def get_extension_sort_key(file_dict: dict) -> tuple[int, str]:
@@ -350,7 +312,7 @@ def sync_get_cwd_object(
         files: list[CWDObjectReturnDict] = []
 
         for item in entries:
-            if not isinstance(item, DirEntryTypes):
+            if not isinstance(item, os.DirEntry):
                 raise TypeError(f"Expected a DirEntry object but got {type(item)}")
             if not show_hidden and is_hidden_file(item):
                 continue
@@ -535,7 +497,7 @@ def ensure_existing_directory(directory: str) -> str:
     return directory
 
 
-def get_direntry_for(file_path: str) -> DirEntryType | None:
+def get_direntry_for(file_path: str) -> os.DirEntry | None:
     """Get the DirEntry object for a given file path.
 
     Args:
@@ -627,7 +589,7 @@ def ifed(app: App, conditions: _RightClickIf | _OpenerIf) -> bool:
     """
     from fnmatch import fnmatch
 
-    dir_entry: DirEntryType | None = getattr(
+    dir_entry: os.DirEntry | None = getattr(
         app.file_list.highlighted_option, "dir_entry", None
     )
     disabled = False

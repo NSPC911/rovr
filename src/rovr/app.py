@@ -967,7 +967,9 @@ class Application(Actionable, DNDApp, inherit_bindings=False):
                             # Process completed successfully
                             new_drives = result_queue.get_nowait()
                     else:
-                        new_drives = drive_workers.get_mounted_drives(sys.platform, config)
+                        new_drives = drive_workers.get_mounted_drives(
+                            sys.platform, config
+                        )
                     if new_drives is not None and new_drives != pin_sidebar.DRIVES:
                         pin_sidebar.reload_pins()
                 except Exception as exc:

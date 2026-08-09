@@ -421,7 +421,9 @@ class ProcessContainer(Actionable, VerticalScroll):
                     pass
                 except (PermissionError, OSError) as exc:
                     # Try to detect if file is in use on Windows
-                    if (is_file_in_use := is_being_used(exc)) and sys.platform == "win32":
+                    if (
+                        is_file_in_use := is_being_used(exc)
+                    ) and sys.platform == "win32":
                         current_action, action_on_file_in_use = (
                             self.handle_file_in_use_error(
                                 action_on_file_in_use,

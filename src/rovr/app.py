@@ -47,6 +47,8 @@ from textual_drivers.dnd import (
     DragOutFinished,
     Drop,
     DropData,
+    ImageLabel,
+    TextLabel,
 )
 
 from rovr import get_console
@@ -77,7 +79,7 @@ from rovr.core import (
     PreviewContainer,
 )
 from rovr.footer import Clipboard, MetadataContainer, ProcessContainer
-from rovr.functions import drive_workers, multiprocessing_utils
+from rovr.functions import drag_image, drive_workers, icons, multiprocessing_utils
 from rovr.functions.cwd import chdir, getcwd
 from rovr.functions.path import (
     dump_exc,
@@ -1160,18 +1162,46 @@ class Application(Actionable, DNDApp, inherit_bindings=False):
                     style=self.screen.get_style_at(pos.x, pos.y),
                 )
             )
-            self.file_list._ignore_next_click = True
 
         selected = await self.file_list.get_selected_objects()
         if not selected:
             return None
         else:
+            self._mouse_down_widget = (
+                None  # necessary so events.Click doesn't get sent to FileList
+            )
             self._dnd_invoked_tab = self.tabWidget.active
+            if len(selected) == 1:
+                icon, icon_color = icons.get_icon_smart(selected[0])
+                label_text = path.basename(selected[0])
+            elif all(path.isdir(p) for p in selected):
+                icon, icon_color = icons.get_icon("folder", "default")
+                label_text = f"{len(selected)} folder{s(selected)}"
+            else:
+                # instead of doing a catch-all for files, preferrably we should check whether all items
+                # are the same icon, and if so, use the same icon
+                icos = {icons.get_icon_smart(p) for p in selected}
+                if len(icos) == 1:
+                    icon, icon_color = icos.pop()
+                else:
+                    icon, icon_color = icons.get_icon("file", "default")
+                kind = "file" if all(path.isfile(p) for p in selected) else "item"
+                label_text = f"{len(selected)} {kind}{s(selected)}"
+
+            label: ImageLabel | TextLabel = await asyncio.to_thread(
+                drag_image.render_drag_image,
+                icon,
+                label_text,
+                icon_color,
+                self.theme_variables,
+                selected[0] if len(selected) == 1 else None,
+            ) or TextLabel(
+                f" {icon}  {label_text}",
+                size=2,
+            )
+
             return DNDDragOutOperation(
-                [Path(p).as_uri() for p in selected],
-                "either",
-                f"  {len(selected)} item{s(selected)}",
-                popup_size=2,
+                [Path(p).as_uri() for p in selected], "either", label=label
             )
 
     def _tab_under_pos(self, pos: Offset) -> TablineTab | None:
@@ -1223,7 +1253,6 @@ class Application(Actionable, DNDApp, inherit_bindings=False):
         )
 
     async def on_drop(self, event: Drop) -> None:
-        self.file_list._ignore_next_click = False
         if "text/uri-list" in event.mimes:
             idx = event.mimes.index("text/uri-list")
         elif "text/plain" in event.mimes:

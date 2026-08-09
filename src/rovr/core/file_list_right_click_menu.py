@@ -1,3 +1,4 @@
+import os
 from functools import partial
 from subprocess import Popen
 from typing import ClassVar, Literal
@@ -15,7 +16,6 @@ from rovr.classes.config import (
     _RightClickItemOptionsItem,
 )
 from rovr.classes.textual_options import RightClickMenuOption
-from rovr.classes.type_aliases import DirEntryType
 from rovr.components import PopupOptionList
 from rovr.functions.cwd import getcwd
 from rovr.functions.path import ifed
@@ -42,7 +42,7 @@ async def get_shell_option(
     action = option["action"]["run"]
     action_parts = action if isinstance(action, list) else [action]
     disabled = False
-    dir_entry: DirEntryType | None = getattr(
+    dir_entry: os.DirEntry | None = getattr(
         app.file_list.highlighted_option, "dir_entry", None
     )
     if any("${highlighted_file}" in part for part in action_parts):

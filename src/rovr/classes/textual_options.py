@@ -183,7 +183,7 @@ class FileListSelectionWidget(LazySelection):
         Args:
             icon_factory: The icon list from a utils function or a lazy icon resolver.
             label: The label for the option.
-            dir_entry: The nt.DirEntry class
+            dir_entry: The os.DirEntry class
             disabled: The initial enabled/disabled state. Enabled by default.
         """
         self.dir_entry = dir_entry

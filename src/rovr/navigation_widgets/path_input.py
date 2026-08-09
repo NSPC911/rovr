@@ -1,5 +1,4 @@
 import os
-import stat
 import sys
 from os import path
 from pathlib import Path
@@ -17,6 +16,7 @@ from rovr.classes.mixins import Action, Actionable
 from rovr.classes.textual_options import PathDropdownItem
 from rovr.functions.cwd import getcwd
 from rovr.functions.icons import get_icon
+from rovr.functions.path import is_hidden_file
 from rovr.functions.utils import check_key
 from rovr.variables.constants import config
 
@@ -29,29 +29,6 @@ def get_subdirectories(parent: str | os.PathLike) -> Generator[os.DirEntry, None
                     yield entry
     except (FileNotFoundError, OSError):
         return
-
-
-def is_dir_entry_hidden(entry: os.DirEntry) -> bool:
-    """Check whether a ``DirEntry`` represents a hidden item.
-
-    Args:
-        entry: A ``DirEntry`` from ``os.scandir``.
-
-    Returns:
-        ``True`` if the entry is hidden, ``False`` otherwise.
-    """
-    if entry.name.startswith(".") and sys.platform != "win32":
-        return True
-    try:
-        file_stat = entry.stat(follow_symlinks=False)
-    except OSError:
-        return False
-
-    if sys.platform == "darwin":
-        return bool(file_stat.st_flags & stat.UF_HIDDEN)
-    if sys.platform == "win32":
-        return bool(file_stat.st_file_attributes & stat.FILE_ATTRIBUTE_HIDDEN)
-    return False
 
 
 def should_exclude_hidden(path_str: str) -> bool:
@@ -126,7 +103,7 @@ def _unix_get_candidates(path_str: str) -> list[DropdownItem]:
     items: list[DropdownItem] = []
     should_filter = should_exclude_hidden(path_str)
     for entry in get_subdirectories(parent):
-        if should_filter and is_dir_entry_hidden(entry):
+        if should_filter and is_hidden_file(entry):
             continue
         items.append(PathDropdownItem(f"{entry.name}/", entry.path))
     items.sort(key=lambda x: x.path.lower())
@@ -191,7 +168,7 @@ def _win_get_candidates(path_str: str) -> list[DropdownItem]:
     items: list[DropdownItem] = []
     should_filter = should_exclude_hidden(path_str)
     for entry in get_subdirectories(parent):
-        if should_filter and is_dir_entry_hidden(entry):
+        if should_filter and is_hidden_file(entry):
             continue
         items.append(PathDropdownItem(f"{entry.name}\\", entry.path))
     items.sort(key=lambda x: x.path.lower())

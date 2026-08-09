@@ -69,7 +69,6 @@ from rovr.classes.textual_validators import (
     IsValidFilePath,
 )
 from rovr.classes.theme import RovrStylesheet
-from rovr.classes.type_aliases import DirEntryType
 from rovr.components.popup_option_list import PopupOptionList
 from rovr.core import (
     FileList,
@@ -989,11 +988,16 @@ class Application(Actionable, DNDApp, inherit_bindings=False):
             # check highlighted file mtime
             if not self.file_list.file_list_pause_check:
                 highlighted_option = file_list.highlighted_option
+                # TODO: The `file_list.highlighted_option` is modified at runtime
+                # and does not match the type checking.
+                # In `test_new_button` case, it becomes a `textual.widgets._selection_list.Selection` object
+                # instead of `FileListSelectionWidget`.
+                # It should be fixed to avoid surpising bug.
                 if highlighted_option is not None and isinstance(
-                    getattr(highlighted_option, "dir_entry", None), DirEntryType
+                    getattr(highlighted_option, "dir_entry", None), os.DirEntry
                 ):
                     highlighted_path = highlighted_option.dir_entry.path
-                    if not path.isdir(highlighted_path):
+                    if not highlighted_option.dir_entry.is_dir():
                         new_highlighted_mtime = None
                         with suppress(OSError):
                             new_highlighted_mtime = path.getmtime(highlighted_path)

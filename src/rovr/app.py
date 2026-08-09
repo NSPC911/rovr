@@ -117,7 +117,7 @@ from rovr.navigation_widgets import (
 from rovr.screens import ModalInput, PasteDropScreen, ShellExec
 from rovr.screens.way_too_small import TerminalTooSmall
 from rovr.state_manager import StateManager
-from rovr.variables.constants import MaxPossible, config, log_name, os_type
+from rovr.variables.constants import MaxPossible, config, log_name
 from rovr.variables.maps import RovrVars
 
 console = get_console
@@ -368,7 +368,7 @@ class Application(Actionable, DNDApp, inherit_bindings=False):
         self.call_later(self.call_later, self.post_mount)
         self._on_mount_done = True
         if self.is_headless:
-            if os_type == "Windows":
+            if sys.platform == "win32":
                 self._original_stderr = open(  # noqa: SIM115
                     "CONOUT$", "w", encoding="utf-8", errors="ignore"
                 )
@@ -952,7 +952,7 @@ class Application(Actionable, DNDApp, inherit_bindings=False):
 
                         process = multiprocessing.Process(
                             target=drive_workers.get_mounted_drives_worker,
-                            args=(result_queue, os_type, config),
+                            args=(result_queue, sys.platform, config),
                         )
                         multiprocessing_utils.start_process(process)
                         process.join(timeout=2.0)
@@ -967,7 +967,7 @@ class Application(Actionable, DNDApp, inherit_bindings=False):
                             # Process completed successfully
                             new_drives = result_queue.get_nowait()
                     else:
-                        new_drives = drive_workers.get_mounted_drives(os_type, config)
+                        new_drives = drive_workers.get_mounted_drives(sys.platform, config)
                     if new_drives is not None and new_drives != pin_sidebar.DRIVES:
                         pin_sidebar.reload_pins()
                 except Exception as exc:

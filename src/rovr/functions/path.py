@@ -7,6 +7,7 @@ import os
 import re
 import shlex
 import stat
+import sys
 from contextlib import suppress
 from functools import lru_cache, partial
 from os import path
@@ -25,7 +26,7 @@ from rovr.classes.type_aliases import (
     DirEntryTypes,
     SortByOptions,
 )
-from rovr.variables.constants import log_name, os_type
+from rovr.variables.constants import log_name
 
 from .drive_workers import normalise
 from .icons import get_icon_for_file, get_icon_for_folder
@@ -48,7 +49,7 @@ def natsort_cacheless(key: str) -> tuple[str | int, ...]:
     return _natsort(key)
 
 
-if os_type == "Windows":
+if sys.platform == "win32":
     _GetFileAttributesW = ctypes.windll.kernel32.GetFileAttributesW
     _GetFileAttributesW.argtypes = [ctypes.c_wchar_p]
     _GetFileAttributesW.restype = ctypes.c_uint32
@@ -64,7 +65,7 @@ def is_hidden_file(filepath: DirEntryType) -> bool: ...
 
 def is_hidden_file(filepath: str | DirEntryType) -> bool:
     if not isinstance(filepath, str):
-        if os_type == "Windows":
+        if sys.platform == "win32":
             try:
                 return bool(
                     filepath.stat(follow_symlinks=False).st_file_attributes
@@ -74,7 +75,7 @@ def is_hidden_file(filepath: str | DirEntryType) -> bool:
                 return False
         if filepath.name.startswith("."):
             return True
-        if os_type == "Darwin":
+        if sys.platform == "darwin":
             try:
                 return bool(
                     getattr(filepath.stat(follow_symlinks=False), "st_flags", 0)
@@ -83,7 +84,7 @@ def is_hidden_file(filepath: str | DirEntryType) -> bool:
             except OSError:
                 return False
         return False
-    if os_type == "Windows":
+    if sys.platform == "win32":
         try:
             attrs = _GetFileAttributesW(filepath)
             if attrs == 0xFFFFFFFF:  # INVALID_FILE_ATTRIBUTES
@@ -91,7 +92,7 @@ def is_hidden_file(filepath: str | DirEntryType) -> bool:
             return bool(attrs & 0x02)  # FILE_ATTRIBUTE_HIDDEN
         except (OSError, AttributeError):
             return False
-    elif os_type == "Darwin":
+    elif sys.platform == "darwin":
         # dotfiles should always be hidden, and so should UF_HIDDEN-flagged files
         name_hidden = path.basename(filepath).startswith(".")
         try:
@@ -154,7 +155,7 @@ async def open_file(app: App, filepath: str) -> None:
         app (App): The Textuall application instance
         filepath (str): Path to the file to open
     """
-    system = os_type.lower()
+    system = sys.platform
     # check if it is available first
     if not path.exists(filepath):
         app.notify(
@@ -167,7 +168,7 @@ async def open_file(app: App, filepath: str) -> None:
 
     try:
         match system:
-            case "windows":
+            case "win32":
                 process = await create_proc("cmd", "/c", "start", "", filepath)
             case "darwin":  # macOS
                 process = await create_proc("open", filepath)
@@ -175,7 +176,7 @@ async def open_file(app: App, filepath: str) -> None:
                 process = await create_proc("xdg-open", filepath)
         _, stderr = await process.communicate()
         if process.returncode != 0:
-            if system == "windows":
+            if system == "win32":
                 # try with powershell
                 _, stderr = await (
                     process := await create_proc(
@@ -641,7 +642,7 @@ def ifed(app: App, conditions: _RightClickIf | _OpenerIf) -> bool:
                 )
             case "os":
                 disabled = not any(
-                    os.lower() == os_type.lower() for os in conditions["os"]
+                    os.lower() == sys.platform for os in conditions["os"]
                 )
             case "cwd":
                 disabled = not (

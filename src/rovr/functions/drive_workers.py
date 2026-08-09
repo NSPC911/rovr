@@ -92,21 +92,21 @@ def _get_posix_drives() -> list[str]:
     return drives
 
 
-def get_mounted_drives(os_type: str, config: "RovrConfig") -> list[str]:
+def get_mounted_drives(platform: str, config: "RovrConfig") -> list[str]:
     """
     Worker function to get mounted drives - isolated from config imports.
 
     Args:
-        os_type: Operating system type ("Windows", "Darwin", or other)
+        platform: System platform ("win32", "darwin", "linux", etc.)
 
     Returns:
         list[str]: List of mounted drives.
     """
     drives = []
     try:
-        if os_type == "Windows":
+        if platform == "win32":
             raw_drives = _get_windows_drives()
-        elif os_type == "Linux":
+        elif platform == "linux":
             try:
                 raw_drives = _get_linux_drives()
             except OSError:
@@ -118,7 +118,7 @@ def get_mounted_drives(os_type: str, config: "RovrConfig") -> list[str]:
         if globals().get("is_dev", False):
             print(f"Error getting mounted drives: {exc}\nReturning nothing...")
         # Fallback to home directory on error
-        if os_type == "Windows":
+        if platform == "win32":
             from string import ascii_uppercase
 
             drives: list[str] = [
@@ -135,18 +135,18 @@ def get_mounted_drives(os_type: str, config: "RovrConfig") -> list[str]:
 
 
 def get_mounted_drives_worker(
-    queue: "multiprocessing.Queue[list[str]]", os_type: str, config: "RovrConfig"
+    queue: "multiprocessing.Queue[list[str]]", platform: str, config: "RovrConfig"
 ) -> None:
     """
     Multiprocessing worker that gets mounted drives and puts result in a queue.
 
     Args:
         queue: Multiprocessing queue to put the result into
-        os_type: Operating system type ("Windows", "Darwin", or other)
+        platform: System platform ("win32", "darwin", "linux", etc.)
         config: Application config dict
     """
     try:
-        result = get_mounted_drives(os_type, config)
+        result = get_mounted_drives(platform, config)
         queue.put(result)
     except Exception:
         queue.put([])

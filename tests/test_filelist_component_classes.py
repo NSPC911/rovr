@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import ctypes
+import sys
 from pathlib import Path
 from typing import Any, cast
 
@@ -11,11 +12,11 @@ from textual.worker import Worker
 from rovr.app import Application
 from rovr.classes.textual_options import ClipboardSelection, FileListSelectionWidget
 from rovr.footer.clipboard_container import Clipboard
-from rovr.variables.constants import config, os_type
+from rovr.variables.constants import config
 
 
 def _set_hidden_attribute(file_path: Path) -> bool:
-    if os_type != "Windows":
+    if sys.platform != "win32":
         return True
     try:
         SetFileAttributesW = ctypes.windll.kernel32.SetFileAttributesW
@@ -28,7 +29,7 @@ def _set_hidden_attribute(file_path: Path) -> bool:
 
 @pytest.mark.asyncio
 async def test_hidden_file_adds_component_class(tmp_path: Path) -> None:
-    if os_type == "Windows":
+    if sys.platform == "win32":
         hidden_file = tmp_path / "hidden.txt"
         hidden_file.touch()
         if not _set_hidden_attribute(hidden_file):

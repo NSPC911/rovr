@@ -1,10 +1,10 @@
+import sys
 from os import path
 
 from textual.validation import ValidationResult, Validator
 
 from rovr.functions.cwd import getcwd
 from rovr.functions.path import normalise
-from rovr.variables.constants import os_type
 
 
 class IsValidFilePath(Validator):
@@ -44,7 +44,7 @@ class PathNoLongerExists(Validator):
 
         if path.exists(item_path):
             # check for acceptance
-            if os_type == "Windows" and self.accept is not None:
+            if sys.platform == "win32" and self.accept is not None:
                 # check
                 lower_val = value.lower()
                 if any(

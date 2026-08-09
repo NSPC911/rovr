@@ -36,7 +36,7 @@ def test_get_mounted_drives_filters_non_directory_posix_mounts(
 
     monkeypatch.setattr(drive_workers.path, "isdir", fake_isdir)
 
-    drives = drive_workers.get_mounted_drives("Darwin", config)
+    drives = drive_workers.get_mounted_drives("darwin", config)
 
     assert drives == ["/", "/mnt/usb"]
 
@@ -61,7 +61,7 @@ def test_get_mounted_drives_filters_non_directory_linux_mounts(
 
     monkeypatch.setattr(drive_workers.path, "isdir", fake_isdir)
 
-    drives = drive_workers.get_mounted_drives("Linux", config)
+    drives = drive_workers.get_mounted_drives("linux", config)
 
     assert drives == ["/", "/media/usb", "/proc"]
 
@@ -141,7 +141,7 @@ def test_get_mounted_drives_applies_exclude_patterns(
     monkeypatch.setattr(drive_workers.path, "isdir", lambda p: True)
 
     config = cast("RovrConfig", {"settings": {"drive_exclude": ["/mnt/*"]}})
-    drives = drive_workers.get_mounted_drives("Darwin", config)
+    drives = drive_workers.get_mounted_drives("darwin", config)
 
     assert drives == ["/"]
 
@@ -154,7 +154,7 @@ def test_get_mounted_drives_falls_back_on_exception(
 
     monkeypatch.setattr(drive_workers, "_get_posix_drives", boom)
 
-    drives = drive_workers.get_mounted_drives("Darwin", config)
+    drives = drive_workers.get_mounted_drives("darwin", config)
 
     assert drives == ["/"]
 
@@ -170,7 +170,7 @@ def test_get_mounted_drives_linux_falls_back_to_posix_on_oserror(
     monkeypatch.setattr(drive_workers, "_get_posix_drives", lambda: ["/data"])
     monkeypatch.setattr(drive_workers.path, "isdir", lambda p: True)
 
-    drives = drive_workers.get_mounted_drives("Linux", config)
+    drives = drive_workers.get_mounted_drives("linux", config)
 
     assert drives == ["/data"]
 
@@ -196,6 +196,6 @@ def test_get_mounted_drives_windows_normalises_and_applies_exclusions(
 
     config["settings"]["drive_exclude"] = ["E:/*"]
 
-    drives = drive_workers.get_mounted_drives("Windows", config)
+    drives = drive_workers.get_mounted_drives("win32", config)
 
     assert drives == ["C:/", "D:/"]

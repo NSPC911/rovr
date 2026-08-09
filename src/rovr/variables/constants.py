@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-import sys
 from dataclasses import dataclass
 from datetime import datetime
 from functools import cache
@@ -152,14 +151,6 @@ bindings = (
         Binding(bind, "toggle_select_item", "Toggle Selection", show=False)
         for bind in config["keybinds"].get("toggle_select_item", [])
     ]
-)
-
-os_type = (
-    "Windows"
-    if sys.platform == "win32"
-    else "Darwin"
-    if sys.platform == "darwin"
-    else sys.platform.capitalize()
 )
 
 

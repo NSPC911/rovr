@@ -1,5 +1,6 @@
 import os
 import stat
+import sys
 from os import path
 from pathlib import Path
 from typing import ClassVar, Generator, cast
@@ -17,7 +18,7 @@ from rovr.classes.textual_options import PathDropdownItem
 from rovr.functions.cwd import getcwd
 from rovr.functions.icons import get_icon
 from rovr.functions.utils import check_key
-from rovr.variables.constants import config, os_type
+from rovr.variables.constants import config
 
 
 def get_subdirectories(parent: str | os.PathLike) -> Generator[os.DirEntry, None, None]:
@@ -39,16 +40,16 @@ def is_dir_entry_hidden(entry: os.DirEntry) -> bool:
     Returns:
         ``True`` if the entry is hidden, ``False`` otherwise.
     """
-    if entry.name.startswith(".") and os_type != "Windows":
+    if entry.name.startswith(".") and sys.platform != "win32":
         return True
     try:
         file_stat = entry.stat(follow_symlinks=False)
     except OSError:
         return False
 
-    if os_type == "Darwin":
+    if sys.platform == "darwin":
         return bool(file_stat.st_flags & stat.UF_HIDDEN)
-    if os_type == "Windows":
+    if sys.platform == "win32":
         return bool(file_stat.st_file_attributes & stat.FILE_ATTRIBUTE_HIDDEN)
     return False
 
@@ -347,7 +348,7 @@ class PathAutoCompleteInput(PathAutoComplete):
             super()._listen_to_messages(event)
 
     def get_candidates(self, target_state: TargetState) -> list[DropdownItem]:
-        if os_type == "Windows":
+        if sys.platform == "win32":
             return _win_get_candidates(target_state.text)
         return _unix_get_candidates(target_state.text)
 

@@ -29,7 +29,7 @@ from rovr.screens import (
     FileNameConflict,
     YesOrNo,
 )
-from rovr.variables.constants import config, os_type, scroll_bindings
+from rovr.variables.constants import config, scroll_bindings
 
 if sys.version_info.major == 3 and sys.version_info.minor <= 13:
     from backports.zstd import tarfile  # ty: ignore[unresolved-import]
@@ -421,7 +421,7 @@ class ProcessContainer(Actionable, VerticalScroll):
                     pass
                 except (PermissionError, OSError) as exc:
                     # Try to detect if file is in use on Windows
-                    if (is_file_in_use := is_being_used(exc)) and os_type == "Windows":
+                    if (is_file_in_use := is_being_used(exc)) and sys.platform == "win32":
                         current_action, action_on_file_in_use = (
                             self.handle_file_in_use_error(
                                 action_on_file_in_use,
@@ -548,7 +548,7 @@ class ProcessContainer(Actionable, VerticalScroll):
                 if not skip_trash:
                     try:
                         path_to_trash = item_path
-                        if os_type == "Windows":
+                        if sys.platform == "win32":
                             # An inherent issue with long paths on windows
                             path_to_trash = path_to_trash.replace("/", "\\")
                         recycle_bin.recycle([path_to_trash])
@@ -558,7 +558,7 @@ class ProcessContainer(Actionable, VerticalScroll):
                         # raises a PermissionError/OSError with winerror 32.
                         if (
                             is_file_in_use := is_being_used(exc)
-                        ) and os_type == "Windows":
+                        ) and sys.platform == "win32":
                             current_action, action_on_file_in_use = (
                                 self.handle_file_in_use_error(
                                     action_on_file_in_use,
@@ -602,7 +602,7 @@ class ProcessContainer(Actionable, VerticalScroll):
                 pass
             except (PermissionError, OSError) as exc:
                 # Try to detect if file is in use on Windows
-                if (is_file_in_use := is_being_used(exc)) and os_type == "Windows":
+                if (is_file_in_use := is_being_used(exc)) and sys.platform == "win32":
                     current_action, action_on_file_in_use = (
                         self.handle_file_in_use_error(
                             action_on_file_in_use,

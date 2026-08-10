@@ -5,6 +5,46 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.10.1]
+
+### Added
+
+- `app`: allow multiple paths in cli [#317](https://github.com/NSPC911/rovr/pull/317)
+- `app`: allow opt-in auto folder size calculation [#322](https://github.com/NSPC911/rovr/issues/322)
+- `app`: keep a virtual path of current directory [#325](https://github.com/NSPC911/rovr/pull/325)
+- `app`: allow variable substitution for gradients [#319](https://github.com/NSPC911/rovr/pull/319)
+- `app`: allow themeing checked options [#316](https://github.com/NSPC911/rovr/pull/316)
+- `path_input`: exclude hidden subfolders by default in autocomplete [#323](https://github.com/NSPC911/rovr/pull/323)
+- `drag_and_drop`: use images in drag and drop [#326](https://github.com/NSPC911/rovr/pull/326)
+- `drag_and_drop`: make drop more interactive [#327](https://github.com/NSPC911/rovr/pull/327)
+- `app`: add customisable spinner [2dcd36a](https://github.com/NSPC911/rovr/commit/2dcd36af837434688812562664309312f1697565) [0383ee9](https://github.com/NSPC911/rovr/commit/0383ee93d034d537f0429f93e47e09814594e52d)
+
+### Changed
+
+- change keybind for opening sorting popup from 'o' to ',' [#331](https://github.com/NSPC911/rovr/pull/331)
+
+### Fixed
+
+- `app`: follow a better variable resolution order [#318](https://github.com/NSPC911/rovr/pull/318)
+- `preview`: check dir_entry before continuing [5c48322](https://github.com/NSPC911/rovr/commit/5c48322e1134409014927355801420832157d581)
+- `pinned_sidebar`: use threading.lock [8b2dc37](https://github.com/NSPC911/rovr/commit/8b2dc370d0941098b40341154417845087366325)
+- `styles`: update border colors [1680261](https://github.com/NSPC911/rovr/commit/1680261651486799e987018a75d530635e63d883)
+- `z+rg+fd`: refresh border subtitle [0c2b46f](https://github.com/NSPC911/rovr/commit/0c2b46f6d52294602f025641976666125e110f82)
+- `app`: fix opening CONIN$ on windows with force-tty [20ae016](https://github.com/NSPC911/rovr/commit/20ae0165903399713574168913d8e2173f54c2d0)
+- `app`: update progress bars when theme changes [6ca4a88](https://github.com/NSPC911/rovr/commit/6ca4a88d5a9b009420030139b045f96c685f8508)
+
+### Performance
+
+- `preview`: include a custom ansi decoder [ac4a219](https://github.com/NSPC911/rovr/commit/ac4a21908e8c24177635e410078481910974283b) [667a802](https://github.com/NSPC911/rovr/commit/667a80213589876845117825752411855579379c)
+- `preview`: make loading indicator more reliable, refactor [5f52df5](https://github.com/NSPC911/rovr/commit/5f52df52e8a68852d820646713506255682e8809)
+- `path`: compile natsort + reverse in sort [d254bd6](https://github.com/NSPC911/rovr/commit/d254bd61193911e96465a9c1d3843768f3085023)
+- `path`: remove path.file_is_type [cda86a7](https://github.com/NSPC911/rovr/commit/cda86a741907a99044d181071e49297758754098)
+- `popup`: set focus if delta changed [2866eb5](https://github.com/NSPC911/rovr/commit/2866eb51e92785543f6283348060a02d6091669a)
+
+### Removed
+
+- `config`: remove last_highlighted_size [96ccd2d](https://github.com/NSPC911/rovr/commit/96ccd2d98d59306605180101d5589609c634f8c6)
+
 ## [0.10.0]
 
 ### Added
@@ -590,7 +630,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `sort_order`: fix icon setting and tooltips
 - `style`: fix image and option padding/styling
 
-[Unreleased]: https://github.com/NSPC911/rovr/compare/v0.10.0...HEAD
+[Unreleased]: https://github.com/NSPC911/rovr/compare/v0.10.1...HEAD
+[0.10.1]: https://github.com/NSPC911/rovr/compare/v0.10.0...v0.10.1
 [0.10.0]: https://github.com/NSPC911/rovr/compare/v0.9.2...v0.10.0
 [0.9.2]: https://github.com/NSPC911/rovr/compare/v0.9.1.post2...v0.9.2
 [0.9.1.post2]: https://github.com/NSPC911/rovr/compare/v0.9.1.post1...v0.9.1.post2

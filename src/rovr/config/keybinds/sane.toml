@@ -78,7 +78,7 @@ copy_to_system_clip = ["s"]
 copy_current_directory = ["u"]
 
 [keybinds.change_sort_order]
-open_popup = ["o"]
+open_popup = [","]
 name = ["a"]
 extension = ["e"]
 natural = ["n"]

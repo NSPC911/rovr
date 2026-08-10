@@ -1282,6 +1282,12 @@ class Application(Actionable, DNDApp, inherit_bindings=False):
             self._dnd_timer[0].stop()
             self._dnd_timer = None
 
+    @on(events.AppBlur)
+    def watch_state(self, state: str = "idle") -> None:
+        if state == "idle" and self._dnd_timer:
+            self._dnd_timer[0].stop()
+            self._dnd_timer = None
+
     async def dnd_drag_in_operation(self, event: DNDDragIn) -> DNDDragInOperation:
         hover_target: TablineTab | UpButton | str | None = None
         pinned_sidebar = self.query_one(PinnedSidebar)
@@ -1325,6 +1331,9 @@ class Application(Actionable, DNDApp, inherit_bindings=False):
             def open_hover_target(
                 target: TablineTab | UpButton | str = hover_target,
             ) -> None:
+                if self.state == "idle":
+                    self._dnd_timer.cancel()
+                    self._dnd_timer = None
                 if isinstance(target, TablineTab):
                     self.tabWidget.active = target.id
                 elif isinstance(target, UpButton):

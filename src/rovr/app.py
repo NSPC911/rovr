@@ -1164,7 +1164,7 @@ class Application(Actionable, DNDApp, inherit_bindings=False):
 
         from pathlib import Path
 
-        if not self.file_list.select_mode_enabled:
+        if not self.file_list.select_mode:
             await self.file_list._on_click(
                 events.Click(
                     widget=self.file_list,

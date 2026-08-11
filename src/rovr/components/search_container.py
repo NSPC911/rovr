@@ -57,7 +57,7 @@ class SearchInput(Input):
             if self.item_list_type == "Selection":
                 for option_id in self.selected:
                     with contextlib.suppress(OptionDoesNotExist):
-                        if not self.items_list.select_mode_enabled:
+                        if not self.items_list.select_mode:
                             with self.items_list.prevent(
                                 self.items_list.SelectedChanged
                             ):
@@ -114,7 +114,7 @@ class SearchInput(Input):
                 assert self.items_list.parent is not None
                 set_scuffed_subtitle(
                     self.items_list.parent,
-                    "SELECT" if self.items_list.select_mode_enabled else "NORMAL",
+                    "SELECT" if self.items_list.select_mode else "NORMAL",
                     "0/0",
                 )
         if self.items_list.highlighted is None:
@@ -130,7 +130,7 @@ class SearchInput(Input):
         if self.item_list_type == "Selection":
             for option_id in self.selected:
                 with contextlib.suppress(OptionDoesNotExist):
-                    if not self.items_list.select_mode_enabled:
+                    if not self.items_list.select_mode:
                         with self.items_list.prevent(self.items_list.SelectedChanged):
                             self.items_list.select(
                                 self.items_list.get_option(option_id)

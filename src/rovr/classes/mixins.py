@@ -179,9 +179,7 @@ class CheckboxRenderingMixin:
         Returns:
             The width of the left gutter.
         """
-        if getattr(self, "dummy", False) or not getattr(
-            self, "select_mode_enabled", True
-        ):
+        if getattr(self, "dummy", False) or not getattr(self, "select_mode", True):
             return 0
 
         icons = [
@@ -246,9 +244,7 @@ class CheckboxRenderingMixin:
             A Strip that is the line to render.
         """
         # Check if we should render checkboxes
-        if getattr(self, "dummy", False) or not getattr(
-            self, "select_mode_enabled", True
-        ):
+        if getattr(self, "dummy", False) or not getattr(self, "select_mode", True):
             return self.super_render_line(y)
 
         # Base line rendering

@@ -31,7 +31,7 @@ dependencies = [
   "rich==14.2.0",
   "textual~=8.0",
   "textual-autocomplete>=4.0.6",
-  "textual-drivers~=0.9.3",
+  "textual-drivers~=0.10.0",
   "textual-image[textual]~=0.13.0",
   "tomli>=2.4.0",
 ]
@@ -78,7 +78,7 @@ speedup = [
 ]
 
 [build-system]
-requires = ["uv_build==0.11.*"]
+requires = ["uv_build==0.12.*"]
 build-backend = "uv_build"
 
 [tool.uv]

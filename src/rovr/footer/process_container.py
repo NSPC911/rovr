@@ -411,9 +411,7 @@ class ProcessContainer(Actionable, VerticalScroll):
                 )
                 self.app.call_from_thread(bar.update_progress, progress=i + 1)
                 last_update_time = current_time
-            if path.exists(item_dict["path"]):
-                # I know that it `path.exists` prevents issues, but on the
-                # off chance that anything happens, this should help
+            if path.lexists(item_dict["path"]):
                 try:
                     os.remove(item_dict["path"])
                 except FileNotFoundError:
@@ -544,7 +542,7 @@ class ProcessContainer(Actionable, VerticalScroll):
                 self.app.call_from_thread(bar.update_text, item_path)
                 self.app.call_from_thread(bar.update_progress, progress=i + 1)
                 last_update_time = current_time
-            if not path.exists(item_path):
+            if not path.lexists(item_path):
                 continue
             try:
                 if not skip_trash:
@@ -1334,7 +1332,7 @@ class ProcessContainer(Actionable, VerticalScroll):
                 for root in cut_skipped_roots
             ):
                 continue
-            if path.exists(item_dict["path"]):
+            if path.lexists(item_dict["path"]):
                 # again checks just in case something goes wrong
                 destination_item = path.join(dest, item_dict["relative_loc"])
                 try:
@@ -1342,7 +1340,7 @@ class ProcessContainer(Actionable, VerticalScroll):
                         path_utils.normalise(path.dirname(destination_item)),
                         exist_ok=True,
                     )
-                    if path.exists(destination_item):
+                    if path.lexists(destination_item):
                         self.log(
                             path_utils.normalise(destination_item),
                             path_utils.normalise(item_dict["path"]),

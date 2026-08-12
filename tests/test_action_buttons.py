@@ -187,6 +187,39 @@ async def test_delete_button(tmp_path: Path) -> None:
 
 
 @pytest.mark.asyncio
+async def test_move_and_delete_broken_symlink(tmp_path: Path) -> None:
+    from os import path
+
+    from rovr.footer.process_container import ProcessContainer
+
+    source = tmp_path / "source"
+    destination = tmp_path / "destination"
+    source.mkdir()
+    destination.mkdir()
+    link = source / "broken-link"
+    try:
+        link.symlink_to(source / "missing")
+    except (OSError, NotImplementedError) as exc:
+        pytest.skip(f"Symlink not supported: {exc}")
+
+    app = Application(startup_path=source.as_posix())
+    async with app.run_test(size=(143, 37)):
+        process_container = app.query_one(ProcessContainer)
+        worker = process_container.paste_items(
+            copied=[], has_cut=[link.as_posix()], dest=destination.as_posix()
+        )
+        await worker.wait()
+
+        moved_link = destination / link.name
+        assert not path.lexists(link)
+        assert path.lexists(moved_link)
+
+        worker = process_container.delete_files([moved_link.as_posix()])
+        await worker.wait()
+        assert not path.lexists(moved_link)
+
+
+@pytest.mark.asyncio
 async def test_new_button(tmp_path: Path) -> None:
     from rovr.screens import ModalInput
 

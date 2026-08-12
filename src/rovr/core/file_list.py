@@ -641,17 +641,14 @@ class FileList(
                 self.highlighted = 0
             self.app.tabWidget.active_tab.selectedItems = []
         else:
-            selected_ids = self.selected.copy()
             session: SessionManager = self.app.tabWidget.active_tab.session
+            selected_ids = set(self.selected)
+            session.selectedItems = [
+                {"name": option.dir_entry.name, "index": index}
+                for index, option in enumerate(self.options)
+                if option.value in selected_ids
+            ]
             session.selectedItems = []
-            for selected_id in selected_ids:
-                option = self.get_option(selected_id)
-                if not isinstance(option, FileListSelectionWidget):
-                    continue
-                session.selectedItems.append({
-                    "name": option.dir_entry.name,
-                    "index": self.options.index(option),
-                })
 
     # No clue why I'm using an OptionList method for SelectionList
     async def on_option_list_option_highlighted(
@@ -667,7 +664,7 @@ class FileList(
         if not isinstance(event.option, FileListSelectionWidget):
             return
         if self.app._on_mount_done:
-            self.update_border_subtitle()
+            self.call_next(self.update_border_subtitle)
         else:
             self.call_after_refresh(self.update_border_subtitle)
         # Get the highlighted option
@@ -960,6 +957,15 @@ class FileList(
             else:
                 self.select_all()
 
+    async def select_range(self, start: int, end: int) -> None:
+        """Select a range of options from start to end."""
+        if self.get_option_at_index(0).disabled:
+            return
+        first, last = sorted((start, end))
+        for index in range(first, last + 1):
+            self._selected[self._options[index].value] = None
+        self._message_changed()
+
     async def implicit_selector(self, ver: Literal["pre", "post"]) -> None:
         """Select the current item in implicit mode."""
         if config["interface"]["allow_auto_select_mode"] and (
@@ -985,66 +991,49 @@ class FileList(
 
     async def action_select_down(self) -> None:
         """Select the current and next file."""
-        if self.highlighted_option and (not self.get_option_at_index(0).disabled):
+        if self.highlighted and (not self.get_option_at_index(0).disabled):
             await self.implicit_selector("pre")
             if self.highlighted == len(self.options) - 1:
                 self.select(self.get_option_at_index(self.option_count - 1))
             else:
-                self.select(self.highlighted_option)
+                await self.select_range(self.highlighted, self.highlighted + 1)
                 self.action_cursor_down()
-                self.select(self.highlighted_option)
 
     async def action_select_page_up(self) -> None:
         """Select the options between the current and the previous 'page'."""
         if self.highlighted_option and (not self.get_option_at_index(0).disabled):
             await self.implicit_selector("pre")
-            old = self.highlighted
+            old = self.highlighted or 0
             self.action_page_up()
-            new = self.highlighted
-            old = 0 if old is None else old
-            new = 0 if new is None else new
-            assert isinstance(old, int) and isinstance(new, int)
-            for index in range(new, old + 1):
-                self.select(self.get_option_at_index(index))
+            new = self.highlighted or 0
+            await self.select_range(new, old)
 
     async def action_select_page_down(self) -> None:
         """Select the options between the current and the next 'page'."""
         if self.highlighted_option and (not self.get_option_at_index(0).disabled):
             await self.implicit_selector("pre")
-            old = self.highlighted
+            old = self.highlighted or 0
             self.action_page_down()
-            new = self.highlighted
-            old = 0 if old is None else old
-            new = 0 if new is None else new
-            assert isinstance(old, int) and isinstance(new, int)
-            for index in range(old, new + 1):
-                self.select(self.get_option_at_index(index))
+            new = self.highlighted or 0
+            await self.select_range(old, new)
 
     async def action_select_home(self) -> None:
         """Select the options between the current and the first option"""
         if self.highlighted_option and (not self.get_option_at_index(0).disabled):
             await self.implicit_selector("pre")
-            old = self.highlighted
+            old = self.highlighted or 0
             self.action_first()
-            new = self.highlighted
-            old = 0 if old is None else old
-            new = 0 if new is None else new
-            assert isinstance(old, int) and isinstance(new, int)
-            for index in range(new, old + 1):
-                self.select(self.get_option_at_index(index))
+            new = self.highlighted or 0
+            await self.select_range(new, old)
 
     async def action_select_end(self) -> None:
         """Select the options between the current and the last option"""
         if self.highlighted_option and (not self.get_option_at_index(0).disabled):
             await self.implicit_selector("pre")
-            old = self.highlighted
+            old = self.highlighted or 0
             self.action_last()
-            new = self.highlighted
-            old = 0 if old is None else old
-            new = 0 if new is None else new
-            assert isinstance(old, int) and isinstance(new, int)
-            for index in range(old, new + 1):
-                self.select(self.get_option_at_index(index))
+            new = self.highlighted or 0
+            await self.select_range(old, new)
 
     def action_select(self) -> None:
         super().action_select()
@@ -1066,19 +1055,20 @@ class FileList(
             return
         cwd = path_utils.normalise(getcwd())
         if self.select_mode:
-            selected_ids = self.selected.copy()
             session = self.app.tabWidget.active_tab.session
             session.selectedItems = []
             paths_to_open = []
+            selected_ids = set(self.selected)
+            session.selectedItems = [
+                {"name": option.dir_entry.name, "index": index}
+                for index, option in enumerate(self.options)
+                if option.value in selected_ids
+            ]
             for selected_id in selected_ids:
                 option = self.get_option(selected_id)
+                full_path = path.join(cwd, option.dir_entry.name)
                 if not isinstance(option, FileListSelectionWidget):
                     continue
-                session.selectedItems.append({
-                    "name": option.dir_entry.name,
-                    "index": self.options.index(option),
-                })
-                full_path = path.join(cwd, option.dir_entry.name)
                 if path.isdir(full_path):
                     self.app.cd(full_path, clear_search=True)
                 else:

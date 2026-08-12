@@ -1,5 +1,5 @@
 from collections import OrderedDict, deque
-from typing import TypedDict
+from typing import Literal, TypedDict
 
 from rovr.variables.constants import config
 
@@ -37,7 +37,7 @@ class SessionManager:
         self.directories: deque[str] = deque(maxlen=config["settings"]["history_size"])
         self.historyIndex: int = 0
         self.lastHighlighted: OrderedDict[str, SessionOptionDict] = OrderedDict()
-        self.selectMode: bool = False
+        self.selectMode: Literal[False, "implicit", "explicit"] = False
         self.selectedItems: list[SessionOptionDict] = []
         self.search: str = ""
 

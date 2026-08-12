@@ -648,7 +648,6 @@ class FileList(
                 for index, option in enumerate(self.options)
                 if option.value in selected_ids
             ]
-            session.selectedItems = []
 
     # No clue why I'm using an OptionList method for SelectionList
     async def on_option_list_option_highlighted(
@@ -711,7 +710,7 @@ class FileList(
         return self._options
 
     async def toggle_mode(
-        self, type: Literal["implicit", "explicit"] = "explicit"
+        self, type: Literal["implicit", "explicit"] | None = "explicit"
     ) -> None:
         """Toggle the selection mode between select and normal."""
         if (
@@ -720,10 +719,11 @@ class FileList(
             and not self.select_mode
         ):
             return
-        if self.select_mode:
-            self.select_mode = False
-        else:
-            self.select_mode = type
+        if type is not None:
+            if self.select_mode:
+                self.select_mode = False
+            else:
+                self.select_mode = type
         self._line_cache.clear()
         self._option_render_cache.clear()
         self.refresh(layout=True, repaint=True)
@@ -1040,7 +1040,11 @@ class FileList(
 
     async def action_toggle_select_item(self) -> None:
         """Toggle selection of the currently highlighted item in visual mode."""
-        if self.highlighted_option and (not self.get_option_at_index(0).disabled):
+        if (
+            self.select_mode
+            and self.highlighted_option
+            and (not self.get_option_at_index(0).disabled)
+        ):
             self.action_select()
 
     async def action_open(self) -> None:

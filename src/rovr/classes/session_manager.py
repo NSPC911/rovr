@@ -27,7 +27,7 @@ class SessionManager:
                                  `settings.history_size` entries (least-recently-used
                                  eviction). If a directory is not in the dictionary, the
                                  default is 0. Use `remember_highlight` to write to it.
-        selectMode (bool): Whether select mode is enabled for that directory.
+        selectMode (False | "implicit" | "explicit"): Whether select mode is enabled for that directory.
         selectedItems (list[SessionOptionDict]): A list of selected items within the
                                                                       current directory
         search (str): The current search string.

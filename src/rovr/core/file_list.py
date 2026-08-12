@@ -678,17 +678,7 @@ class FileList(
         if self.highlighted is None:
             self.highlighted = 0
         # update tracked mtime for the watcher
-        try:
-            is_file = highlighted_option.dir_entry.is_file()
-        except OSError:
-            is_file = False
-        if is_file:
-            with suppress(OSError):
-                self.app._highlighted_file_mtime = (
-                    highlighted_option.dir_entry.stat().st_mtime
-                )
-        else:
-            self.app._highlighted_file_mtime = None
+        self.call_after_refresh(self.set_mtime, highlighted_option)
         # preview
         self.app.query_one("MetadataContainer").update_metadata(
             event.option.dir_entry, event.option
@@ -705,6 +695,16 @@ class FileList(
             )
             return
         self.app.query_one("#unzip").update_state(highlighted_option.dir_entry.path)
+
+    @work(thread=True)
+    def set_mtime(self, option: FileListSelectionWidget) -> None:
+        """Set the mtime of the highlighted option for watcher purposes."""
+        if self.dummy:
+            return
+        with suppress(OSError):
+            mtime = option.dir_entry.stat().st_mtime
+            if option == self.highlighted_option:
+                self.call_next(setattr, self.app, "_highlighted_file_mtime", mtime)
 
     @property
     def options(self) -> Sequence[FileListSelectionWidget]:
@@ -980,18 +980,17 @@ class FileList(
 
     async def action_select_up(self) -> None:
         """Select the current and previous file."""
-        if self.highlighted_option and (not self.get_option_at_index(0).disabled):
+        if self.highlighted is not None and (not self.get_option_at_index(0).disabled):
             await self.implicit_selector("pre")
             if self.highlighted == 0:
                 self.select(self.get_option_at_index(0))
             else:
-                self.select(self.highlighted_option)
+                await self.select_range(self.highlighted - 1, self.highlighted)
                 self.action_cursor_up()
-                self.select(self.highlighted_option)
 
     async def action_select_down(self) -> None:
         """Select the current and next file."""
-        if self.highlighted and (not self.get_option_at_index(0).disabled):
+        if self.highlighted is not None and (not self.get_option_at_index(0).disabled):
             await self.implicit_selector("pre")
             if self.highlighted == len(self.options) - 1:
                 self.select(self.get_option_at_index(self.option_count - 1))

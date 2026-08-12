@@ -20,6 +20,7 @@ from textual.css.query import NoMatches
 from textual.dom import DOMNode
 from textual.geometry import Region
 from textual.highlight import guess_language
+from textual.timer import Timer
 from textual.widgets import Static
 from textual.widgets.selection_list import Selection
 from textual.worker import Worker
@@ -149,6 +150,7 @@ class PreviewContainer(Actionable, Container):
 
     def __init__(self) -> None:
         super().__init__(id="preview_sidebar")
+        self._loading_timer: Timer | None = None
         self._pending_preview_args: tuple[str, int | float] | None = None
         self._current_content: str | list[str] | None = None
         self._current_file_path: str | None = None
@@ -198,11 +200,14 @@ class PreviewContainer(Actionable, Container):
         if loading_state and self.loading:
             return
         elif loading_state and not self.loading:
-            self.set_timer(
+            if self._loading_timer is not None:
+                self._loading_timer.stop()
+            self._loading_timer = self.set_timer(
                 0.25,
                 lambda self=self: (
                     self.set_loading(True)
-                    if any(
+                    if not self.loading
+                    and any(
                         worker.node is self
                         and worker.group == PREVIEWER_GROUP
                         and worker.is_running
@@ -212,6 +217,9 @@ class PreviewContainer(Actionable, Container):
                 ),
             )
         else:
+            if self._loading_timer is not None:
+                self._loading_timer.stop()
+                self._loading_timer = None
             self.set_loading(False)
 
     async def file_not_found(

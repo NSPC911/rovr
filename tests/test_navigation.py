@@ -181,8 +181,8 @@ async def test_tab_search(tmp_path: Path) -> None:
         await iter_until(pilot, lambda: bool(app.tabWidget.active_tab))
         await workers_finished(pilot, app.file_list)
 
-        # this also helps to find issues with the watcher, don't ignore
-        # errors related to this please!
+        # this also helps to find issues with the watcher/session manager
+        # don't ignore errors related to this please!
         await iter_until(pilot, lambda: bool(app.file_list.input.value == "file"))
         assert app.file_list.input.value == "file"
         assert app.tabWidget.active_tab.session.search == "file"

@@ -227,21 +227,17 @@ def get_extension_sort_key(file_dict: dict) -> tuple[int, str]:
 
 def sorter(
     thing: CWDObjectReturnDict, sort_st: Literal["ctime", "mtime", "size"]
-) -> int | float | str:
+) -> int | float:
     try:
         match sort_st:
             case "ctime":
-                return thing["dir_entry"].stat().st_ctime_ns
+                return thing["dir_entry"].stat(follow_symlinks=False).st_ctime_ns
             case "mtime":
-                return thing["dir_entry"].stat().st_mtime_ns
+                return thing["dir_entry"].stat(follow_symlinks=False).st_mtime_ns
             case "size":
-                try:
-                    return thing["dir_entry"].stat().st_size
-                except FileNotFoundError:
-                    return 0  # only for this, since it makes sense
+                return thing["dir_entry"].stat(follow_symlinks=False).st_size
     except FileNotFoundError:
-        # if  we cant access it, sort with name
-        return thing["name"].lower()
+        return 0
 
 
 @overload

@@ -1,7 +1,7 @@
 import shlex
 from contextlib import suppress
 from os import path, scandir
-from typing import Callable, ClassVar, Sequence
+from typing import Callable, ClassVar, Literal, Sequence
 
 from rich.segment import Segment
 from textual import events, work
@@ -126,7 +126,6 @@ class FileList(
         self,
         dummy: bool = False,
         enter_into: str = "",
-        select: bool = False,
         name: str | None = None,
         id: str | None = None,
         classes: str | None = None,
@@ -137,13 +136,12 @@ class FileList(
         Args:
             dummy (bool): Whether this is a dummy file list.
             enter_into (str): The path to enter into when a folder is selected.
-            select (bool): Whether the selection is select or normal.
         """
         super().__init__(name=name, id=id, classes=classes, disabled=disabled)
         self._options: list[FileListSelectionWidget] = []
         self.dummy = dummy
         self.enter_into = enter_into
-        self.select_mode_enabled = select
+        self.select_mode: Literal[False, "implicit", "explicit"] = False
         if not self.dummy:
             self.items_in_cwd: set[str] = set()
         self.file_list_pause_check = False
@@ -331,7 +329,7 @@ class FileList(
                 and event.button != 3
             ):
                 self.action_select()
-            elif self.select_mode_enabled and event.button != 3:
+            elif self.select_mode and event.button != 3:
                 self.highlighted = clicked_option
                 self.action_select()
             else:
@@ -482,7 +480,7 @@ class FileList(
             if callable(update_header):
                 self.call_after_refresh(update_header)
             # fix selected options
-            if (has_selected or self.select_mode_enabled) and name_to_index:
+            if (has_selected or self.select_mode) and name_to_index:
                 self.update_from_session(session, name_to_index)
             # session handler
             self.app.query_one("#path_switcher", PathInput).value = cwd + (
@@ -542,7 +540,7 @@ class FileList(
             if not add_to_session:
                 self.input.clear_selected()
             if self.list_of_options[0].disabled:  # special option
-                if self.select_mode_enabled:
+                if self.select_mode:
                     await self.toggle_mode()
                 self.update_border_subtitle()
         finally:
@@ -633,7 +631,7 @@ class FileList(
                 if self.highlighted is None:
                     self.highlighted = 0
                 self.app.tabWidget.active_tab.selectedItems = []
-        elif not self.select_mode_enabled:
+        elif not self.select_mode:
             full_path = path.join(cwd, file_name)
             if path.isdir(full_path):
                 self.app.cd(full_path, clear_search=True)
@@ -643,17 +641,13 @@ class FileList(
                 self.highlighted = 0
             self.app.tabWidget.active_tab.selectedItems = []
         else:
-            selected_ids = self.selected.copy()
             session: SessionManager = self.app.tabWidget.active_tab.session
-            session.selectedItems = []
-            for selected_id in selected_ids:
-                option = self.get_option(selected_id)
-                if not isinstance(option, FileListSelectionWidget):
-                    continue
-                session.selectedItems.append({
-                    "name": option.dir_entry.name,
-                    "index": self.options.index(option),
-                })
+            selected_ids = set(self.selected)
+            session.selectedItems = [
+                {"name": option.dir_entry.name, "index": index}
+                for index, option in enumerate(self.options)
+                if option.value in selected_ids
+            ]
 
     # No clue why I'm using an OptionList method for SelectionList
     async def on_option_list_option_highlighted(
@@ -669,7 +663,7 @@ class FileList(
         if not isinstance(event.option, FileListSelectionWidget):
             return
         if self.app._on_mount_done:
-            self.update_border_subtitle()
+            self.call_next(self.update_border_subtitle)
         else:
             self.call_after_refresh(self.update_border_subtitle)
         # Get the highlighted option
@@ -683,17 +677,7 @@ class FileList(
         if self.highlighted is None:
             self.highlighted = 0
         # update tracked mtime for the watcher
-        try:
-            is_file = highlighted_option.dir_entry.is_file()
-        except OSError:
-            is_file = False
-        if is_file:
-            with suppress(OSError):
-                self.app._highlighted_file_mtime = (
-                    highlighted_option.dir_entry.stat().st_mtime
-                )
-        else:
-            self.app._highlighted_file_mtime = None
+        self.call_after_refresh(self.set_mtime, highlighted_option)
         # preview
         self.app.query_one("MetadataContainer").update_metadata(
             event.option.dir_entry, event.option
@@ -711,27 +695,43 @@ class FileList(
             return
         self.app.query_one("#unzip").update_state(highlighted_option.dir_entry.path)
 
+    @work(thread=True)
+    def set_mtime(self, option: FileListSelectionWidget) -> None:
+        """Set the mtime of the highlighted option for watcher purposes."""
+        if self.dummy:
+            return
+        with suppress(OSError):
+            mtime = option.dir_entry.stat().st_mtime
+            if option == self.highlighted_option:
+                self.call_next(setattr, self.app, "_highlighted_file_mtime", mtime)
+
     @property
     def options(self) -> Sequence[FileListSelectionWidget]:
         return self._options
 
-    async def toggle_mode(self) -> None:
+    async def toggle_mode(
+        self, type: Literal["implicit", "explicit"] | None = "explicit"
+    ) -> None:
         """Toggle the selection mode between select and normal."""
         if (
             self.highlighted_option
             and self.highlighted_option.disabled
-            and not self.select_mode_enabled
+            and not self.select_mode
         ):
             return
-        self.select_mode_enabled = not self.select_mode_enabled
+        if type is not None:
+            if self.select_mode:
+                self.select_mode = False
+            else:
+                self.select_mode = type
         self._line_cache.clear()
         self._option_render_cache.clear()
         self.refresh(layout=True, repaint=True)
-        self.app.tabWidget.active_tab.session.selectMode = self.select_mode_enabled
+        self.app.tabWidget.active_tab.session.selectMode = self.select_mode
         with self.prevent(SelectionList.SelectedChanged):
             self.deselect_all()
         self.update_border_subtitle()
-        if self.select_mode_enabled:
+        if self.select_mode:
             self.add_class("select-mode")
         else:
             self.remove_class("select-mode")
@@ -750,7 +750,7 @@ class FileList(
             and not hasattr(self.get_option_at_index(0), "dir_entry")
         ):
             return
-        if not self.select_mode_enabled:
+        if not self.select_mode:
             return [str(path_utils.normalise(self.highlighted_option.dir_entry.path))]
         else:
             values = self.selected
@@ -786,7 +786,7 @@ class FileList(
             utils.set_scuffed_subtitle(self.parent, "NORMAL", "0/0")
             # tell metadata to die
             self.app.query_one("MetadataContainer").remove_children()
-        elif (not self.select_mode_enabled) or (self.selected is None):
+        elif (not self.select_mode) or (self.selected is None):
             utils.set_scuffed_subtitle(
                 self.parent,
                 "NORMAL",
@@ -802,22 +802,22 @@ class FileList(
     # hist_previous keybind twice too fast, it registers it as once, so
     # there really is no choice, aside from using on_button_pressed :/
     def action_hist_previous(self) -> None:
-        if not self.select_mode_enabled:
+        if not self.select_mode:
             if self.app.query_one("#back").disabled:
                 self.app.query_one("UpButton").on_button_pressed()
             else:
                 self.app.query_one("BackButton").on_button_pressed()
 
     def action_hist_next(self) -> None:
-        if not self.select_mode_enabled and not self.app.query_one("#forward").disabled:
+        if not self.select_mode and not self.app.query_one("#forward").disabled:
             self.app.query_one("ForwardButton").on_button_pressed()
 
     def action_up_tree(self) -> None:
-        if not self.select_mode_enabled:
+        if not self.select_mode:
             self.app.query_one("UpButton").on_button_pressed()
 
     def action_bypass_up_tree(self) -> None:
-        if not self.select_mode_enabled:
+        if not self.select_mode:
             # get parent directory, go up until theres a folder with more than one item
             to_dir = path.dirname(getcwd())
             prev_to_dir = getcwd()
@@ -845,7 +845,7 @@ class FileList(
                 self.app.cd(prev_to_dir, clear_search=True)
 
     def action_bypass_down_tree(self) -> None:
-        if not self.select_mode_enabled:
+        if not self.select_mode:
             highlighted_option = self.highlighted_option
             if highlighted_option is not None:
                 if highlighted_option.dir_entry.is_file():
@@ -950,110 +950,99 @@ class FileList(
         if self.highlighted_option:
             if self.get_option_at_index(0).disabled:
                 return
-            if not self.select_mode_enabled:
+            if not self.select_mode:
                 await self.toggle_mode()
             if len(self.selected) == len(self.options):
                 self.deselect_all()
             else:
                 self.select_all()
 
-    def action_select_up(self) -> None:
-        """Select the current and previous file."""
-        if (
-            self.highlighted_option
-            and self.select_mode_enabled
-            and (not self.get_option_at_index(0).disabled)
+    async def select_range(self, start: int, end: int) -> None:
+        """Select a range of options from start to end."""
+        if self.get_option_at_index(0).disabled:
+            return
+        first, last = sorted((start, end))
+        for index in range(first, last + 1):
+            self._selected[self._options[index].value] = None
+        self._message_changed()
+
+    async def implicit_selector(self, ver: Literal["pre", "post"]) -> None:
+        """Select the current item in implicit mode."""
+        if config["interface"]["allow_auto_select_mode"] and (
+            (ver == "pre" and not self.select_mode)
+            or (
+                ver == "post"
+                and self.select_mode == "implicit"
+                and len(self.selected) <= 0
+            )
         ):
+            await self.toggle_mode("implicit")
+
+    async def action_select_up(self) -> None:
+        """Select the current and previous file."""
+        if self.highlighted is not None and (not self.get_option_at_index(0).disabled):
+            await self.implicit_selector("pre")
             if self.highlighted == 0:
                 self.select(self.get_option_at_index(0))
             else:
-                self.select(self.highlighted_option)
+                await self.select_range(self.highlighted - 1, self.highlighted)
                 self.action_cursor_up()
-                self.select(self.highlighted_option)
 
-    def action_select_down(self) -> None:
+    async def action_select_down(self) -> None:
         """Select the current and next file."""
-        if (
-            self.highlighted_option
-            and self.select_mode_enabled
-            and (not self.get_option_at_index(0).disabled)
-        ):
+        if self.highlighted is not None and (not self.get_option_at_index(0).disabled):
+            await self.implicit_selector("pre")
             if self.highlighted == len(self.options) - 1:
                 self.select(self.get_option_at_index(self.option_count - 1))
             else:
-                self.select(self.highlighted_option)
+                await self.select_range(self.highlighted, self.highlighted + 1)
                 self.action_cursor_down()
-                self.select(self.highlighted_option)
 
-    def action_select_page_up(self) -> None:
+    async def action_select_page_up(self) -> None:
         """Select the options between the current and the previous 'page'."""
-        if (
-            self.highlighted_option
-            and self.select_mode_enabled
-            and (not self.get_option_at_index(0).disabled)
-        ):
-            old = self.highlighted
+        if self.highlighted_option and (not self.get_option_at_index(0).disabled):
+            await self.implicit_selector("pre")
+            old = self.highlighted or 0
             self.action_page_up()
-            new = self.highlighted
-            old = 0 if old is None else old
-            new = 0 if new is None else new
-            assert isinstance(old, int) and isinstance(new, int)
-            for index in range(new, old + 1):
-                self.select(self.get_option_at_index(index))
+            new = self.highlighted or 0
+            await self.select_range(new, old)
 
-    def action_select_page_down(self) -> None:
+    async def action_select_page_down(self) -> None:
         """Select the options between the current and the next 'page'."""
-        if (
-            self.highlighted_option
-            and self.select_mode_enabled
-            and (not self.get_option_at_index(0).disabled)
-        ):
-            old = self.highlighted
+        if self.highlighted_option and (not self.get_option_at_index(0).disabled):
+            await self.implicit_selector("pre")
+            old = self.highlighted or 0
             self.action_page_down()
-            new = self.highlighted
-            old = 0 if old is None else old
-            new = 0 if new is None else new
-            assert isinstance(old, int) and isinstance(new, int)
-            for index in range(old, new + 1):
-                self.select(self.get_option_at_index(index))
+            new = self.highlighted or 0
+            await self.select_range(old, new)
 
-    def action_select_home(self) -> None:
+    async def action_select_home(self) -> None:
         """Select the options between the current and the first option"""
-        if (
-            self.highlighted_option
-            and self.select_mode_enabled
-            and (not self.get_option_at_index(0).disabled)
-        ):
-            old = self.highlighted
+        if self.highlighted_option and (not self.get_option_at_index(0).disabled):
+            await self.implicit_selector("pre")
+            old = self.highlighted or 0
             self.action_first()
-            new = self.highlighted
-            old = 0 if old is None else old
-            new = 0 if new is None else new
-            assert isinstance(old, int) and isinstance(new, int)
-            for index in range(new, old + 1):
-                self.select(self.get_option_at_index(index))
+            new = self.highlighted or 0
+            await self.select_range(new, old)
 
-    def action_select_end(self) -> None:
+    async def action_select_end(self) -> None:
         """Select the options between the current and the last option"""
-        if (
-            self.highlighted_option
-            and self.select_mode_enabled
-            and (not self.get_option_at_index(0).disabled)
-        ):
-            old = self.highlighted
+        if self.highlighted_option and (not self.get_option_at_index(0).disabled):
+            await self.implicit_selector("pre")
+            old = self.highlighted or 0
             self.action_last()
-            new = self.highlighted
-            old = 0 if old is None else old
-            new = 0 if new is None else new
-            assert isinstance(old, int) and isinstance(new, int)
-            for index in range(old, new + 1):
-                self.select(self.get_option_at_index(index))
+            new = self.highlighted or 0
+            await self.select_range(old, new)
 
-    def action_toggle_select_item(self) -> None:
+    def action_select(self) -> None:
+        super().action_select()
+        self.call_later(self.call_later, self.implicit_selector, "post")
+
+    async def action_toggle_select_item(self) -> None:
         """Toggle selection of the currently highlighted item in visual mode."""
         if (
-            self.highlighted_option
-            and self.select_mode_enabled
+            self.select_mode
+            and self.highlighted_option
             and (not self.get_option_at_index(0).disabled)
         ):
             self.action_select()
@@ -1064,24 +1053,25 @@ class FileList(
         if (
             self.highlighted_option
             and self.highlighted_option.disabled
-            and not self.select_mode_enabled
+            and not self.select_mode
         ):
             return
         cwd = path_utils.normalise(getcwd())
-        if self.select_mode_enabled:
-            selected_ids = self.selected.copy()
+        if self.select_mode:
             session = self.app.tabWidget.active_tab.session
             session.selectedItems = []
             paths_to_open = []
+            selected_ids = set(self.selected)
+            session.selectedItems = [
+                {"name": option.dir_entry.name, "index": index}
+                for index, option in enumerate(self.options)
+                if option.value in selected_ids
+            ]
             for selected_id in selected_ids:
                 option = self.get_option(selected_id)
+                full_path = path.join(cwd, option.dir_entry.name)
                 if not isinstance(option, FileListSelectionWidget):
                     continue
-                session.selectedItems.append({
-                    "name": option.dir_entry.name,
-                    "index": self.options.index(option),
-                })
-                full_path = path.join(cwd, option.dir_entry.name)
                 if path.isdir(full_path):
                     self.app.cd(full_path, clear_search=True)
                 else:

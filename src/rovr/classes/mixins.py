@@ -179,9 +179,7 @@ class CheckboxRenderingMixin:
         Returns:
             The width of the left gutter.
         """
-        if getattr(self, "dummy", False) or not getattr(
-            self, "select_mode_enabled", True
-        ):
+        if getattr(self, "dummy", False) or not getattr(self, "select_mode", True):
             return 0
 
         icons = [
@@ -246,9 +244,7 @@ class CheckboxRenderingMixin:
             A Strip that is the line to render.
         """
         # Check if we should render checkboxes
-        if getattr(self, "dummy", False) or not getattr(
-            self, "select_mode_enabled", True
-        ):
+        if getattr(self, "dummy", False) or not getattr(self, "select_mode", True):
             return self.super_render_line(y)
 
         # Base line rendering
@@ -299,7 +295,10 @@ class CheckboxRenderingMixin:
 
 class ScrollOffMixin:
     def scroll_to_highlight(
-        self, top: bool = False, scrolloff: int = config["interface"]["scrolloff"]
+        self,
+        top: bool = False,
+        scrolloff: int = config["interface"]["scrolloff"],
+        immediate: bool = True,
     ) -> None:
         """Scroll to the highlighted option.
 
@@ -307,6 +306,7 @@ class ScrollOffMixin:
             top: Ensure highlighted option is at the top of the widget.
             scrolloff: Minimum number of lines to keep visible above/below the highlighted option.
                 If scrolloff is larger than half the screen height, the cursor will be centered.
+            immediate: If True, scroll immediately without animation.
         """
         highlighted = self.highlighted
         if type(highlighted) is not int or not self.is_mounted:
@@ -330,7 +330,7 @@ class ScrollOffMixin:
                 force=True,
                 animate=False,
                 center=True,
-                immediate=True,
+                immediate=immediate,
             )
         else:
             adjusted_y = max(0, y - scrolloff)
@@ -343,7 +343,7 @@ class ScrollOffMixin:
                 force=True,
                 animate=False,
                 top=top,
-                immediate=True,
+                immediate=immediate,
             )
 
 

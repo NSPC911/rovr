@@ -81,6 +81,9 @@ r""" Default value of the field path 'Rovr Config icons files' """
 _ROVR_CONFIG_ICONS_FOLDERS_DEFAULT: list[Any] = []
 r""" Default value of the field path 'Rovr Config icons folders' """
 
+_ROVR_CONFIG_INTERFACE_ALLOW_AUTO_SELECT_MODE_DEFAULT = True
+r""" Default value of the field path 'Rovr Config interface allow_auto_select_mode' """
+
 _ROVR_CONFIG_INTERFACE_ALLOW_TAB_NAV_DEFAULT = False
 r""" Default value of the field path 'Rovr Config interface allow_tab_nav' """
 
@@ -634,6 +637,13 @@ class _RovrConfigInterface(TypedDict, total=False):
     default: ⣾⣽⣻⢿⡿⣟⣯⣷
 
     Aggregation type: oneOf
+    """
+
+    allow_auto_select_mode: bool
+    r"""
+    Automatically enter select mode if you use shift+arrow keys to extend selection, and disable when there is only one selected left.
+
+    default: True
     """
 
     details_list: list["_RovrConfigInterfaceDetailsListItem"]

@@ -249,7 +249,7 @@ async def test_tab_multiselection(tmp_path: Path) -> None:
         app.tabWidget.action_next_tab()
         await workers_finished(pilot, app.file_list)
 
-        assert app.file_list.select_mode_enabled
+        assert app.file_list.select_mode == "explicit"
         indexes = [0, 2, 4, 7]
         for selected_id in app.file_list.selected:
             assert app.file_list.get_option_index(selected_id) in indexes

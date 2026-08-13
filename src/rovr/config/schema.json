@@ -266,6 +266,11 @@
           "description": "The spinner to use when loading files. Can be a string or an array of strings for a custom spinner.",
           "default": "⣾⣽⣻⢿⡿⣟⣯⣷"
         },
+        "allow_auto_select_mode": {
+          "type": "boolean",
+          "default": true,
+          "description": "Automatically enter select mode if you use shift+arrow keys to extend selection, and disable when there is only one selected left."
+        },
         "details_list": {
           "type": "array",
           "default": [],

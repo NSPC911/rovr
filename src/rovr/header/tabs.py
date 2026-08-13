@@ -153,7 +153,8 @@ class Tabline(Tabs):
         def callback() -> None:
             assert isinstance(event.tab, TablineTab)
             assert isinstance(self.app.file_list.input, Input)
-            self.app.file_list.select_mode_enabled = event.tab.session.selectMode
+            self.app.file_list.select_mode = event.tab.session.selectMode
+            self.call_next(self.app.file_list.toggle_mode, None)
             if event.tab.session.search != "":
                 self.app.file_list.input.value = event.tab.session.search
 

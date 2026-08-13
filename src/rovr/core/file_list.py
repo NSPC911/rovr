@@ -973,7 +973,7 @@ class FileList(
             or (
                 ver == "post"
                 and self.select_mode == "implicit"
-                and len(self.selected) <= 1
+                and len(self.selected) <= 0
             )
         ):
             await self.toggle_mode("implicit")

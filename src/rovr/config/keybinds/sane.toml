@@ -39,6 +39,7 @@ end = ["end"]
 # from explorer.exe
 hist_previous = ["backspace", "alt+left"]
 hist_next = ["alt+right"]
+invert_selections = ["ctrl+r"]
 toggle_all = ["ctrl+a"]
 toggle_visual = ["ctrl+space"]
 # reasonable enough, unless `h` is preferred by others

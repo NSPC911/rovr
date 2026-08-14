@@ -984,6 +984,7 @@ class _RovrConfigKeybinds(TypedDict, total=False):
     new: list[str]
     bulk_create: list[str]
     toggle_all: list[str]
+    invert_selections: list[str]
     zip: list[str]
     unzip: list[str]
     open_right_click_menu: list[str]

@@ -951,6 +951,11 @@
           "description": "Enter into select mode and select/unselect everything.",
           "display_name": "Select all"
         },
+        "invert_selections": {
+          "$ref": "#/definitions/keybind",
+          "description": "Invert the current selections in select mode (will enter select mode if not already in it)",
+          "display_name": "Invert selections"
+        },
         "zip": {
           "$ref": "#/definitions/keybind",
           "description": "Create a zip archive from selected files.",

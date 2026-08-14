@@ -104,6 +104,7 @@ class FileList(
             "toggle_hidden_files",
             "toggle_visual",
             "toggle_all",
+            "invert_selections",
             "select_up",
             "select_down",
             "select_page_up",
@@ -970,6 +971,19 @@ class FileList(
                 self.deselect_all()
             else:
                 self.select_all()
+
+    async def action_invert_selections(self) -> None:
+        if self.highlighted_option:
+            if self.get_option_at_index(0).disabled:
+                return
+            if not self.select_mode:
+                await self.toggle_mode()
+            for option in self.options:
+                if option.value in self._selected:
+                    del self._selected[option.value]
+                else:
+                    self._selected[option.value] = None
+            self._message_changed()
 
     async def select_range(self, start: int, end: int) -> None:
         """Select a range of options from start to end."""

@@ -155,7 +155,7 @@ r""" Default value of the field path 'Rovr Config interface show_progress_eta' "
 _ROVR_CONFIG_INTERFACE_SHOW_PROGRESS_PERCENTAGE_DEFAULT = False
 r""" Default value of the field path 'Rovr Config interface show_progress_percentage' """
 
-_ROVR_CONFIG_INTERFACE_SHOW_TAB_CLOSE_BUTTON_DEFAULT = True
+_ROVR_CONFIG_INTERFACE_SHOW_TAB_CLOSE_BUTTON_DEFAULT = False
 r""" Default value of the field path 'Rovr Config interface show_tab_close_button' """
 
 _ROVR_CONFIG_INTERFACE_SPINNER_DEFAULT = "⣾⣽⣻⢿⡿⣟⣯⣷"
@@ -653,7 +653,7 @@ class _RovrConfigInterface(TypedDict, total=False):
     r"""
     Show a close button on each tab in the tabs bar.
 
-    default: True
+    default: False
     """
 
     details_list: list["_RovrConfigInterfaceDetailsListItem"]

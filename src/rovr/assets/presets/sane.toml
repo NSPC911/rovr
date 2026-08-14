@@ -54,6 +54,7 @@
 "mouse5" = "hist_next"
 "ctrl+space" = { action = "toggle_visual", desc = "Toggle visual selection" }
 "ctrl+a" = { action = "toggle_all", desc = "Toggle selection of all files" }
+"ctrl+r" = { action = "invert_selections", desc = "Invert selections" }
 "." = { action = "toggle_hidden_files", desc = "Toggle hidden files" }
 "insert" = { action = "toggle_select_item", desc = "Toggle the current selection" }
 "space" = "toggle_select_item"

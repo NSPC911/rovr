@@ -331,6 +331,14 @@ Tooltip {
 #file_list_container {
   height: 1fr;
   width: $file_list_width;
+  &:focus-within.select-mode {
+    border: $border-style $secondary-lighten-2;
+    border-subtitle-background: $secondary-lighten-2;
+    &:ansi {
+      border-subtitle-color: $secondary-lighten-2;
+      border-subtitle-background: transparent;
+    }
+  }
 }
 
 #file_list_container.dnd-hover.drag-out-active,
@@ -547,14 +555,14 @@ CommandList:ansi {
 FileList {
   .selection-list--option-checked,
   .selection-list--option-checked--hovered {
-    color: $primary;
+    color: $accent;
   }
   &:focus .selection-list--option-checked--highlighted,
   &.-popup-shown .selection-list--option-checked--highlighted {
     color: $block-cursor-foreground;
   }
   &:blur .selection-list--option-checked--highlighted {
-    color: $primary;
+    color: $accent;
   }
 
   .filelist--hidden,

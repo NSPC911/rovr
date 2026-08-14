@@ -55,6 +55,8 @@ class FileList(
     OptionList but can multi-select files and folders.
     """
 
+    RENDER_ON_BORDER = True
+
     COMPONENT_CLASSES: ClassVar[set[str]] = CheckboxRenderingMixin.COMPONENT_CLASSES | {
         "filelist--cut",
         "filelist--cut--highlighted",
@@ -153,6 +155,15 @@ class FileList(
         if not self.dummy and self.parent:
             self.input: Input = self.parent.query_one(Input)
             self.focus()
+
+    def _refresh_selection_border(self) -> None:
+        if self.RENDER_ON_BORDER and self.parent:
+            self.parent.refresh()
+
+    def watch_scroll_y(self, old_value: float, new_value: float) -> None:
+        super().watch_scroll_y(old_value, new_value)
+        if round(old_value) != round(new_value):
+            self._refresh_selection_border()
 
     @property
     def highlighted_option(self) -> FileListSelectionWidget | None:
@@ -558,6 +569,7 @@ class FileList(
             for item in session.selectedItems:
                 if item["name"] in name_to_index:
                     self.select(self.list_of_options[name_to_index[item["name"]]])
+        self._refresh_selection_border()
 
     async def file_selected_handler(self, paths: list[str]) -> None:
         if self.app._chooser_file:
@@ -607,6 +619,7 @@ class FileList(
     ) -> None:
         # Get the filename from the option id
         event.prevent_default()
+        self._refresh_selection_border()
         cwd = path_utils.normalise(getcwd())
         # Get the selected option
         selected_option = self.highlighted_option
@@ -732,12 +745,13 @@ class FileList(
             self.deselect_all()
         self.update_border_subtitle()
         if self.select_mode:
-            self.add_class("select-mode")
+            self.parent.add_class("select-mode")
         else:
-            self.remove_class("select-mode")
+            self.parent.remove_class("select-mode")
         update_header = getattr(self.parent, "update_details_header", None)
         if callable(update_header):
             update_header()
+        self._refresh_selection_border()
 
     async def get_selected_objects(self) -> list[str] | None:
         """Get the selected objects in the file list.

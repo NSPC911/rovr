@@ -529,7 +529,6 @@ class Application(Actionable, DNDApp, inherit_bindings=False):
         # RovrStylesheet strips `$name:` declarations from the CSS files, so
         # every source's declarations are resolved here instead: bundled style,
         # active theme, then the user's style.tcss in ascending priority.
-        bundled_declarations: dict[str, str] = {}
         custom_declarations: dict[str, str] = {}
         with (
             suppress(OSError),

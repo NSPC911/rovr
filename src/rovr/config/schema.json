@@ -271,6 +271,11 @@
           "default": true,
           "description": "Automatically enter select mode if you use shift+arrow keys to extend selection, and disable when there is only one selected left."
         },
+        "show_tab_close_button": {
+          "type": "boolean",
+          "default": false,
+          "description": "Show a close button on each tab in the tabs bar."
+        },
         "details_list": {
           "type": "array",
           "default": [],

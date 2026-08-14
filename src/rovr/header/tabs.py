@@ -2,10 +2,11 @@ from contextlib import suppress
 from os import path
 
 from rich.style import Style
-from textual import on, work
+from textual import events, on, work
 from textual.app import ComposeResult, RenderResult
 from textual.await_complete import AwaitComplete
 from textual.containers import Container, Horizontal, Vertical
+from textual.content import Content, ContentText
 from textual.css.query import NoMatches
 from textual.renderables.bar import Bar as BarRenderable
 from textual.widgets import Button, Input, Tabs
@@ -15,6 +16,7 @@ from textual.worker import WorkerCancelled
 from rovr.classes.session_manager import SessionManager
 from rovr.functions.cwd import getcwd
 from rovr.functions.path import normalise
+from rovr.variables.constants import config
 
 
 class BetterBarRenderable(BarRenderable):
@@ -65,6 +67,28 @@ class TablineTab(Tab):
         self.directory = directory
         self.focus_on = focus_on
         self.session = SessionManager()
+
+    @property
+    def label(self) -> Content:
+        """The label for the tab."""
+        return self._label
+
+    @label.setter
+    def label(self, label: ContentText) -> None:
+        self._label = Content.from_text(label) + (
+            " x" if config["interface"]["show_tab_close_button"] else ""
+        )
+        self.update(self._label)
+
+    async def on_click(self, event: events.Click) -> None:
+        # specifically handle clicking on x button
+        if (
+            config["interface"]["show_tab_close_button"]
+            and len(self.parent.children) > 1
+            and event.x == (self.region.width - 2)
+        ):
+            self.app.tabWidget.remove_tab(self)
+            event.stop().prevent_default()
 
 
 class Tabline(Tabs):

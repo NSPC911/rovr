@@ -155,6 +155,9 @@ r""" Default value of the field path 'Rovr Config interface show_progress_eta' "
 _ROVR_CONFIG_INTERFACE_SHOW_PROGRESS_PERCENTAGE_DEFAULT = False
 r""" Default value of the field path 'Rovr Config interface show_progress_percentage' """
 
+_ROVR_CONFIG_INTERFACE_SHOW_TAB_CLOSE_BUTTON_DEFAULT = True
+r""" Default value of the field path 'Rovr Config interface show_tab_close_button' """
+
 _ROVR_CONFIG_INTERFACE_SPINNER_DEFAULT = "⣾⣽⣻⢿⡿⣟⣯⣷"
 r""" Default value of the field path 'Rovr Config interface spinner' """
 
@@ -642,6 +645,13 @@ class _RovrConfigInterface(TypedDict, total=False):
     allow_auto_select_mode: bool
     r"""
     Automatically enter select mode if you use shift+arrow keys to extend selection, and disable when there is only one selected left.
+
+    default: True
+    """
+
+    show_tab_close_button: bool
+    r"""
+    Show a close button on each tab in the tabs bar.
 
     default: True
     """

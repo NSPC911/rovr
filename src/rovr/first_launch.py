@@ -425,6 +425,7 @@ class FirstLaunchApp(App, inherit_bindings=False):
 [interface]
 use_reactive_layout = {str(self.query_one("#use_reactive_layout", Switch).value).lower()}
 show_hidden_files = {str(self.query_one("#show_hidden_files", Switch).value).lower()}
+show_tab_close_button = {"true" if self.query_one("#keybinds", RadioSet).pressed_button.id == "sane" else "false"}
 
 [interface.image_viewer]
 protocol = "{prot_to_schema[str(self.query_one("#image_protocol_select", Select).value)]}"

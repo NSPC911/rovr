@@ -18,6 +18,7 @@ from rovr.classes.mixins import (
     Action,
     Actionable,
     CheckboxRenderingMixin,
+    CursorNavigationMixin,
     DetailColumnRenderingMixin,
     ScrollOffMixin,
     SetOptionsSelectionList,
@@ -44,6 +45,7 @@ from .file_list_right_click_menu import FileListRightClickMenu
 class FileList(
     Actionable,
     CheckboxRenderingMixin,
+    CursorNavigationMixin,
     DetailColumnRenderingMixin,
     ScrollOffMixin,
     SingleLineOptionLayoutMixin,

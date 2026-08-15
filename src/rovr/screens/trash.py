@@ -18,6 +18,7 @@ from rovr.classes.mixins import (
     Action,
     Actionable,
     CheckboxRenderingMixin,
+    CursorNavigationMixin,
     DetailColumnRenderingMixin,
     SetOptionsSelectionList,
     SingleLineOptionLayoutMixin,
@@ -86,6 +87,7 @@ class TrashSelection(Selection):
 class TrashSelectionList(
     Actionable,
     CheckboxRenderingMixin,
+    CursorNavigationMixin,
     DetailColumnRenderingMixin,
     SingleLineOptionLayoutMixin,
     SetOptionsSelectionList,
@@ -200,7 +202,7 @@ class TrashScreen(Actionable, ModalScreen):
             Action("empty", config["keybinds"]["trash"]["empty"]),
         ]
 
-    def _entries_list(self) -> "TrashSelectionList":
+    def _entries_list(self) -> TrashSelectionList:
         return self.query_one("#trash_entries", TrashSelectionList)
 
     def compose(self) -> ComposeResult:

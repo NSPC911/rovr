@@ -1,3 +1,4 @@
+from bisect import bisect_left, bisect_right
 from inspect import isawaitable
 from typing import Any, Awaitable, Callable, ClassVar, Iterable, NamedTuple, Self
 
@@ -7,7 +8,7 @@ from rich.style import Style
 from textual.color import Color
 from textual.content import ContentText
 from textual.events import Key
-from textual.geometry import Region, Size
+from textual.geometry import Region, Size, clamp
 from textual.strip import Strip
 from textual.widgets import OptionList, SelectionList
 from textual.widgets.option_list import Option, OptionDoesNotExist
@@ -293,6 +294,67 @@ class CheckboxRenderingMixin:
             return []
 
 
+class CursorNavigationMixin:
+    def action_cursor(self, offset: int) -> None:
+        """Move the cursor by a number of enabled options."""
+        if not offset:
+            return
+
+        enabled = [
+            index for index, option in enumerate(self._options) if not option.disabled
+        ]
+        if not enabled:
+            return
+
+        if offset > 0:
+            start = (
+                0
+                if self.highlighted is None
+                else bisect_right(enabled, self.highlighted) % len(enabled)
+            )
+            destination = start + offset - 1
+        else:
+            start = (
+                len(enabled) - 1
+                if self.highlighted is None
+                else bisect_left(enabled, self.highlighted) - 1
+            )
+            destination = start + offset + 1
+        self.highlighted = enabled[destination % len(enabled)]
+
+    def action_cursor_page(self, pages: float) -> None:
+        """Move the cursor by a number of visible pages."""
+        if not pages or not self._options:
+            return
+        if self.highlighted is None:
+            enabled = [
+                index
+                for index, option in enumerate(self._options)
+                if not option.disabled
+            ]
+            if enabled:
+                self.highlighted = enabled[-1 if pages > 0 else 0]
+            return
+
+        direction = 1 if pages > 0 else -1
+        y = clamp(
+            self._index_to_line[self.highlighted]
+            + round(pages * self.scrollable_content_region.height),
+            0,
+            len(self._lines) - 1,
+        )
+        option_index = self._lines[y][0]
+        stop = len(self._options) if direction > 0 else -1
+        self.highlighted = next(
+            (
+                index
+                for index in range(option_index, stop, direction)
+                if not self._options[index].disabled
+            ),
+            None,
+        )
+
+
 class ScrollOffMixin:
     def scroll_to_highlight(
         self,
@@ -392,7 +454,7 @@ class SetOptionsSelectionList:
             | tuple[ContentText, SelectionType]
             | tuple[ContentText, SelectionType, bool]
         ],
-    ) -> Self:  # ty: ignore[invalid-method-override]
+    ) -> Self:
         # Okay, lemme make myself clear here.
         # A PR for this is already open at
         # https://github.com/Textualize/textual/pull/6224
@@ -406,5 +468,5 @@ class SetOptionsSelectionList:
         # should be a Iterable["Option | VisualType | None"]
         # but that isnt the case (based on the signature)
         # so ty is crashing out.
-        super().set_options(options)  # ty: ignore[invalid-argument-type]
+        super().set_options(options)
         return self

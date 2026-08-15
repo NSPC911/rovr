@@ -14,7 +14,7 @@ from textual.widgets.option_list import Option
 from textual.widgets.selection_list import Selection
 from textual.worker import get_current_worker
 
-from rovr.classes.mixins import CheckboxRenderingMixin
+from rovr.classes.mixins import CheckboxRenderingMixin, CursorNavigationMixin
 from rovr.classes.textual_options import OptionWithValue
 from rovr.components import ModalSearchScreen
 from rovr.components.special_option_lists import DoubleClickableScrollOffOptionList
@@ -29,7 +29,12 @@ FILTER_TYPES: dict[str, bool] = {
 }
 
 
-class FileSearchToggles(CheckboxRenderingMixin, SelectionList, inherit_bindings=False):
+class FileSearchToggles(
+    CheckboxRenderingMixin,
+    CursorNavigationMixin,
+    SelectionList,
+    inherit_bindings=False,
+):
     BINDINGS: ClassVar[list[BindingType]] = list(bindings)
 
     def __init__(self) -> None:

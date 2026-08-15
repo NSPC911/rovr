@@ -12,7 +12,7 @@ from textual.widgets.option_list import Option
 from textual.worker import get_current_worker
 
 from rovr.classes.exceptions import FolderNotFileError
-from rovr.classes.mixins import Action, Actionable
+from rovr.classes.mixins import Action, Actionable, CursorNavigationMixin
 from rovr.classes.textual_options import PinnedSidebarOption
 from rovr.functions import drive_workers as drive_utils
 from rovr.functions import icons as icon_utils
@@ -23,7 +23,9 @@ from rovr.functions.utils import multiprocessing_process_error_checker
 from rovr.variables.constants import bindings, config
 
 
-class PinnedSidebar(Actionable, OptionList, inherit_bindings=False):
+class PinnedSidebar(
+    Actionable, CursorNavigationMixin, OptionList, inherit_bindings=False
+):
     # Just so that I can disable space
     BINDINGS: ClassVar[list[BindingType]] = list(bindings)
     DRIVES: list[str] = []

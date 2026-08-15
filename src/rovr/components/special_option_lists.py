@@ -1,12 +1,18 @@
 from textual import events
 from textual.widgets import OptionList
 
-from rovr.classes.mixins import ScrollOffMixin, SingleLineOptionLayoutMixin
+from rovr.classes.mixins import (
+    CursorNavigationMixin,
+    ScrollOffMixin,
+    SingleLineOptionLayoutMixin,
+)
 from rovr.classes.textual_options import PaddedOption
 from rovr.variables.constants import bindings
 
 
-class DoubleClickableOptionList(SingleLineOptionLayoutMixin, OptionList):
+class DoubleClickableOptionList(
+    SingleLineOptionLayoutMixin, CursorNavigationMixin, OptionList
+):
     async def _on_click(self, event: events.Click) -> None:
         """React to the mouse being clicked on an item.
 
@@ -29,7 +35,7 @@ class DoubleClickableOptionList(SingleLineOptionLayoutMixin, OptionList):
 class DoubleClickableScrollOffOptionList(ScrollOffMixin, DoubleClickableOptionList): ...
 
 
-class SpecialOptionList(OptionList):
+class SpecialOptionList(CursorNavigationMixin, OptionList):
     BINDINGS = list(bindings)
 
 

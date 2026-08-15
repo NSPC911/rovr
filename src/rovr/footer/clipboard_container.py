@@ -10,14 +10,19 @@ from textual.widgets import Button, SelectionList
 from textual.widgets.option_list import OptionDoesNotExist
 from textual.worker import Worker
 
-from rovr.classes.mixins import CheckboxRenderingMixin
+from rovr.classes.mixins import CheckboxRenderingMixin, CursorNavigationMixin
 from rovr.classes.textual_options import ClipboardSelection, ClipboardSelectionValue
 from rovr.functions import icons as icon_utils
 from rovr.functions.path import dump_exc
 from rovr.variables.constants import bindings, config
 
 
-class Clipboard(CheckboxRenderingMixin, SelectionList, inherit_bindings=False):
+class Clipboard(
+    CheckboxRenderingMixin,
+    CursorNavigationMixin,
+    SelectionList,
+    inherit_bindings=False,
+):
     """A selection list that displays the clipboard contents."""
 
     BINDINGS: ClassVar[list[BindingType]] = list(bindings)

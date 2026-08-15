@@ -10,7 +10,7 @@ from textual.containers import Grid, HorizontalGroup
 from textual.screen import ModalScreen
 from textual.widgets import Button, OptionList
 
-from rovr.classes.mixins import Action, Actionable
+from rovr.classes.mixins import Action, Actionable, CursorNavigationMixin
 from rovr.classes.textual_options import OptionWithValue
 from rovr.functions.icons import get_icon_smart
 from rovr.functions.utils import dismiss, get_shortest_bind
@@ -19,6 +19,9 @@ from rovr.variables.constants import config
 copy_bind = get_shortest_bind(config["keybinds"]["drag_and_drop"]["copy"])
 move_bind = get_shortest_bind(config["keybinds"]["drag_and_drop"]["move"])
 cancel_bind = get_shortest_bind(config["keybinds"]["drag_and_drop"]["cancel"])
+
+
+class PasteDropOptionList(CursorNavigationMixin, OptionList): ...
 
 
 class PasteDropScreen(Actionable, ModalScreen["PasteDropScreen.ReturnType | None"]):
@@ -36,7 +39,7 @@ class PasteDropScreen(Actionable, ModalScreen["PasteDropScreen.ReturnType | None
 
     def compose(self) -> ComposeResult:
         with Grid(id="dialog"):
-            yield OptionList(id="drag_and_drop_list")
+            yield PasteDropOptionList(id="drag_and_drop_list")
             yield Button(f"\\[{copy_bind}] Copy", id="copy", variant="success")
             yield Button(f"\\[{move_bind}] Move", id="move", variant="warning")
             with HorizontalGroup():

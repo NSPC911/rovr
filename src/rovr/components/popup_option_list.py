@@ -5,8 +5,10 @@ from textual import events, on
 from textual.geometry import Offset
 from textual.widgets import OptionList
 
+from rovr.classes.mixins import CursorNavigationMixin
 
-class PopupOptionList(OptionList):
+
+class PopupOptionList(CursorNavigationMixin, OptionList):
     def __init__(
         self,
         id: str | None = None,

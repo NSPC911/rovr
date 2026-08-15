@@ -7,6 +7,7 @@ from textual.containers import VerticalGroup
 from textual.screen import ModalScreen
 from textual.widgets import OptionList
 
+from rovr.classes.mixins import CursorNavigationMixin
 from rovr.classes.textual_options import KeybindOption
 from rovr.components import SearchInput
 from rovr.functions import icons
@@ -14,7 +15,7 @@ from rovr.functions.utils import check_key, dismiss
 from rovr.variables.constants import bindings, config, schema
 
 
-class KeybindList(OptionList, inherit_bindings=False):
+class KeybindList(CursorNavigationMixin, OptionList, inherit_bindings=False):
     BINDINGS: ClassVar[list[BindingType]] = list(bindings)
 
     def __init__(self) -> None:

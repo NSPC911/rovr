@@ -1760,12 +1760,13 @@ class Application(Actionable, DNDApp, inherit_bindings=False):
         self.query_one(StateManager).toggle_menu_wrapper()
 
     def action_tab_next(self) -> None:
-        if self.tabWidget.active_tab is not None:
-            self.tabWidget.action_next_tab()
+        self.action_activate_tab(1)
 
     def action_tab_previous(self) -> None:
-        if self.tabWidget.active_tab is not None:
-            self.tabWidget.action_previous_tab()
+        self.action_activate_tab(-1)
+
+    def action_activate_tab(self, offset: int) -> None:
+        self.tabWidget.action_activate_tab(offset)
 
     async def action_tab_new(self) -> None:
         await self.query_one("NewTabButton").on_button_pressed()

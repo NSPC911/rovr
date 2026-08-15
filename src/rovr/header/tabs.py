@@ -92,6 +92,17 @@ class TablineTab(Tab):
 
 
 class Tabline(Tabs):
+    def action_activate_tab(self, offset: int) -> None:
+        """Activate a tab at an offset from the current tab."""
+        if not offset or not (tabs := self._potentially_active_tabs):
+            return
+
+        if self.active_tab is None:
+            destination = offset - 1 if offset > 0 else offset
+        else:
+            destination = tabs.index(self.active_tab) + offset
+        self.active = tabs[destination % len(tabs)].id or ""
+
     def compose(self) -> ComposeResult:
         with Container(id="tabs-scroll"), Vertical(id="tabs-list-bar"):
             with Horizontal(id="tabs-list"):

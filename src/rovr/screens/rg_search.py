@@ -16,8 +16,8 @@ from textual.worker import get_current_worker
 
 from rovr.classes.mixins import (
     CheckboxRenderingMixin,
-    CursorNavigationMixin,
     ScrollOffMixin,
+    SelectionNavigationMixin,
 )
 from rovr.classes.textual_options import OptionWithValue
 from rovr.components import DoubleClickableOptionList, ModalSearchScreen
@@ -27,7 +27,7 @@ from rovr.variables.constants import bindings, config
 
 
 class ContentSearchToggles(
-    ScrollOffMixin, CheckboxRenderingMixin, CursorNavigationMixin, SelectionList
+    ScrollOffMixin, CheckboxRenderingMixin, SelectionNavigationMixin, SelectionList
 ):
     BINDINGS: ClassVar[list[BindingType]] = list(bindings)
 

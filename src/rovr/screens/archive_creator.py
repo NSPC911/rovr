@@ -10,7 +10,7 @@ from textual.widgets.selection_list import Selection
 
 from rovr.classes.mixins import (
     CheckboxRenderingMixin,
-    CursorNavigationMixin,
+    SelectionNavigationMixin,
     SetOptionsSelectionList,
 )
 from rovr.functions.utils import dismiss
@@ -21,7 +21,7 @@ from .input import ModalInput
 
 class ArchiveTypes(
     CheckboxRenderingMixin,
-    CursorNavigationMixin,
+    SelectionNavigationMixin,
     SelectionList,
     inherit_bindings=False,
 ):
@@ -57,7 +57,7 @@ class ArchiveTypes(
 
 class ArchiveCompression(
     CheckboxRenderingMixin,
-    CursorNavigationMixin,
+    SelectionNavigationMixin,
     SetOptionsSelectionList,
     SelectionList,
     inherit_bindings=False,

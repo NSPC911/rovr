@@ -1,6 +1,6 @@
 from bisect import bisect_left, bisect_right
 from inspect import isawaitable
-from typing import Any, Awaitable, Callable, ClassVar, Iterable, NamedTuple, Self
+from typing import Any, Awaitable, Callable, ClassVar, Iterable, NamedTuple, Self, cast
 
 from rich.cells import cell_len
 from rich.segment import Segment
@@ -295,16 +295,12 @@ class CheckboxRenderingMixin:
 
 
 class CursorNavigationMixin:
-    def action_cursor(self, offset: int) -> None:
-        """Move the cursor by a number of enabled options."""
-        if not offset:
-            return
-
+    def _cursor_destination(self, offset: int, wrap: bool = True) -> int | None:
         enabled = [
             index for index, option in enumerate(self._options) if not option.disabled
         ]
         if not enabled:
-            return
+            return self.highlighted
 
         if offset > 0:
             start = (
@@ -320,21 +316,25 @@ class CursorNavigationMixin:
                 else bisect_left(enabled, self.highlighted) - 1
             )
             destination = start + offset + 1
-        self.highlighted = enabled[destination % len(enabled)]
+        if wrap:
+            destination %= len(enabled)
+        else:
+            destination = clamp(destination, 0, len(enabled) - 1)
+        return enabled[destination]
 
-    def action_cursor_page(self, pages: float) -> None:
-        """Move the cursor by a number of visible pages."""
-        if not pages or not self._options:
-            return
+    def action_cursor(self, offset: int) -> None:
+        """Move the cursor by a number of enabled options."""
+        if offset:
+            self.highlighted = self._cursor_destination(offset)
+
+    def _cursor_page_destination(self, pages: float) -> int | None:
         if self.highlighted is None:
             enabled = [
                 index
                 for index, option in enumerate(self._options)
                 if not option.disabled
             ]
-            if enabled:
-                self.highlighted = enabled[-1 if pages > 0 else 0]
-            return
+            return enabled[-1 if pages > 0 else 0] if enabled else None
 
         direction = 1 if pages > 0 else -1
         y = clamp(
@@ -345,7 +345,7 @@ class CursorNavigationMixin:
         )
         option_index = self._lines[y][0]
         stop = len(self._options) if direction > 0 else -1
-        self.highlighted = next(
+        return next(
             (
                 index
                 for index in range(option_index, stop, direction)
@@ -353,6 +353,39 @@ class CursorNavigationMixin:
             ),
             None,
         )
+
+    def action_cursor_page(self, pages: float) -> None:
+        """Move the cursor by a number of visible pages."""
+        if pages and self._options:
+            self.highlighted = self._cursor_page_destination(pages)
+
+
+class SelectionNavigationMixin(CursorNavigationMixin):
+    def _select_to(self, destination: int | None) -> None:
+        if destination is None:
+            return
+
+        start = self.highlighted if self.highlighted is not None else destination
+        changed = False
+        with self.prevent(self.SelectedChanged):
+            for index in range(min(start, destination), max(start, destination) + 1):
+                selection = cast(Selection, self._options[index])
+                changed = self._select(selection.value) or changed
+
+        self.highlighted = destination
+        if changed:
+            self._message_changed()
+            self.refresh()
+
+    def action_select_cursor(self, offset: int) -> Awaitable[None] | None:
+        """Select through an offset from the cursor without wrapping."""
+        if offset:
+            self._select_to(self._cursor_destination(offset, wrap=False))
+
+    def action_select_cursor_page(self, pages: float) -> Awaitable[None] | None:
+        """Select through a number of visible pages."""
+        if pages and self._options:
+            self._select_to(self._cursor_page_destination(pages))
 
 
 class ScrollOffMixin:

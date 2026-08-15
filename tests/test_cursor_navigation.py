@@ -1,13 +1,17 @@
 import pytest
 from textual import on
 from textual.app import App, ComposeResult
-from textual.widgets import OptionList
+from textual.widgets import OptionList, SelectionList
 from textual.widgets.option_list import Option
+from textual.widgets.selection_list import Selection
 
-from rovr.classes.mixins import CursorNavigationMixin
+from rovr.classes.mixins import CursorNavigationMixin, SelectionNavigationMixin
 
 
 class CursorList(CursorNavigationMixin, OptionList): ...
+
+
+class SelectionCursorList(SelectionNavigationMixin, SelectionList): ...
 
 
 class CursorApp(App[None]):
@@ -24,6 +28,24 @@ class CursorApp(App[None]):
     @on(OptionList.OptionHighlighted)
     def count_highlights(self) -> None:
         self.highlighted_messages += 1
+
+
+class SelectionCursorApp(App[None]):
+    def __init__(self) -> None:
+        super().__init__()
+        self.highlighted_messages = 0
+        self.selected_messages = 0
+
+    def compose(self) -> ComposeResult:
+        yield SelectionCursorList(*(Selection(str(index), index) for index in range(8)))
+
+    @on(SelectionList.SelectionHighlighted)
+    def count_highlights(self) -> None:
+        self.highlighted_messages += 1
+
+    @on(SelectionList.SelectedChanged)
+    def count_selected(self) -> None:
+        self.selected_messages += 1
 
 
 @pytest.mark.asyncio
@@ -61,3 +83,21 @@ async def test_cursor_page_supports_fractional_pages() -> None:
 
         assert option_list.highlighted == expected
         assert app.highlighted_messages == 1
+
+
+@pytest.mark.asyncio
+async def test_select_cursor_batches_selection_and_highlight_messages() -> None:
+    app = SelectionCursorApp()
+
+    async with app.run_test() as pilot:
+        await pilot.pause()
+        option_list = app.query_one(SelectionCursorList)
+        app.highlighted_messages = 0
+
+        option_list.action_select_cursor(4)
+        await pilot.pause()
+
+        assert option_list.highlighted == 4
+        assert option_list.selected == [0, 1, 2, 3, 4]
+        assert app.highlighted_messages == 1
+        assert app.selected_messages == 1

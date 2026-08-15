@@ -18,9 +18,9 @@ from rovr.classes.mixins import (
     Action,
     Actionable,
     CheckboxRenderingMixin,
-    CursorNavigationMixin,
     DetailColumnRenderingMixin,
     ScrollOffMixin,
+    SelectionNavigationMixin,
     SetOptionsSelectionList,
     SingleLineOptionLayoutMixin,
 )
@@ -45,9 +45,9 @@ from .file_list_right_click_menu import FileListRightClickMenu
 class FileList(
     Actionable,
     CheckboxRenderingMixin,
-    CursorNavigationMixin,
     DetailColumnRenderingMixin,
     ScrollOffMixin,
+    SelectionNavigationMixin,
     SingleLineOptionLayoutMixin,
     SetOptionsSelectionList,
     SelectionList,
@@ -982,41 +982,31 @@ class FileList(
 
     async def action_select_up(self) -> None:
         """Select the current and previous file."""
-        if self.highlighted is not None and (not self.get_option_at_index(0).disabled):
-            await self.implicit_selector("pre")
-            if self.highlighted == 0:
-                self.select(self.get_option_at_index(0))
-            else:
-                await self.select_range(self.highlighted - 1, self.highlighted)
-                self.action_cursor_up()
+        await self.action_select_cursor(-1)
 
     async def action_select_down(self) -> None:
         """Select the current and next file."""
-        if self.highlighted is not None and (not self.get_option_at_index(0).disabled):
-            await self.implicit_selector("pre")
-            if self.highlighted == len(self.options) - 1:
-                self.select(self.get_option_at_index(self.option_count - 1))
-            else:
-                await self.select_range(self.highlighted, self.highlighted + 1)
-                self.action_cursor_down()
+        await self.action_select_cursor(1)
 
     async def action_select_page_up(self) -> None:
         """Select the options between the current and the previous 'page'."""
-        if self.highlighted_option and (not self.get_option_at_index(0).disabled):
-            await self.implicit_selector("pre")
-            old = self.highlighted or 0
-            self.action_page_up()
-            new = self.highlighted or 0
-            await self.select_range(new, old)
+        await self.action_select_cursor_page(-1)
 
     async def action_select_page_down(self) -> None:
         """Select the options between the current and the next 'page'."""
+        await self.action_select_cursor_page(1)
+
+    async def action_select_cursor(self, offset: int) -> None:
+        """Select files through a cursor offset."""
         if self.highlighted_option and (not self.get_option_at_index(0).disabled):
             await self.implicit_selector("pre")
-            old = self.highlighted or 0
-            self.action_page_down()
-            new = self.highlighted or 0
-            await self.select_range(old, new)
+            super().action_select_cursor(offset)
+
+    async def action_select_cursor_page(self, pages: float) -> None:
+        """Select files through a number of visible pages."""
+        if self.highlighted_option and (not self.get_option_at_index(0).disabled):
+            await self.implicit_selector("pre")
+            super().action_select_cursor_page(pages)
 
     async def action_select_home(self) -> None:
         """Select the options between the current and the first option"""

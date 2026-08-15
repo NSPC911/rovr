@@ -18,8 +18,8 @@ from rovr.classes.mixins import (
     Action,
     Actionable,
     CheckboxRenderingMixin,
-    CursorNavigationMixin,
     DetailColumnRenderingMixin,
+    SelectionNavigationMixin,
     SetOptionsSelectionList,
     SingleLineOptionLayoutMixin,
 )
@@ -87,8 +87,8 @@ class TrashSelection(Selection):
 class TrashSelectionList(
     Actionable,
     CheckboxRenderingMixin,
-    CursorNavigationMixin,
     DetailColumnRenderingMixin,
+    SelectionNavigationMixin,
     SingleLineOptionLayoutMixin,
     SetOptionsSelectionList,
     SelectionList,
@@ -131,27 +131,11 @@ class TrashSelectionList(
 
     def action_select_up(self) -> None:
         """Select the current and previous entry."""
-        if self.highlighted_option is None:
-            return
-        if self.highlighted == 0:
-            self.select(self.get_option_at_index(0))
-        else:
-            self.select(self.highlighted_option)
-            self.action_cursor_up()
-            if self.highlighted_option is not None:
-                self.select(self.highlighted_option)
+        self.action_select_cursor(-1)
 
     def action_select_down(self) -> None:
         """Select the current and next entry."""
-        if self.highlighted_option is None:
-            return
-        if self.highlighted == self.option_count - 1:
-            self.select(self.get_option_at_index(self.option_count - 1))
-        else:
-            self.select(self.highlighted_option)
-            self.action_cursor_down()
-            if self.highlighted_option is not None:
-                self.select(self.highlighted_option)
+        self.action_select_cursor(1)
 
     def _select_range_to(self, mover: Callable[[], None]) -> None:
         if self.highlighted_option is None:
@@ -164,11 +148,11 @@ class TrashSelectionList(
 
     def action_select_page_up(self) -> None:
         """Select every entry between the current one and a page up."""
-        self._select_range_to(self.action_page_up)
+        self.action_select_cursor_page(-1)
 
     def action_select_page_down(self) -> None:
         """Select every entry between the current one and a page down."""
-        self._select_range_to(self.action_page_down)
+        self.action_select_cursor_page(1)
 
     def action_select_home(self) -> None:
         """Select every entry between the current one and the first."""

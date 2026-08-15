@@ -1,13 +1,13 @@
 # Example of the keybind configuration proposed in issue #234.
 # Printable keys use their character; other keys use Textual's key names.
 
-[keys.global]
+[global]
 "q" = "app.quit"
 "ctrl+q" = "app.quit"
 "ctrl+p" = "app.command_palette"
 "ctrl+z" = "app.suspend_process"
 
-[keys.main]
+[main]
 "P" = "toggle_pin"
 "S" = "app.toggle_pinned_sidebar"
 "I" = "app.toggle_preview_sidebar"
@@ -90,13 +90,13 @@
 # preview_select_left, preview_select_right, preview_scroll_left, and
 # preview_scroll_right are omitted because the default key lists are empty.
 
-[keys.extra_copy]
+[extra_copy]
 "y" = "copy_to_rovr"
 "p" = "copy_highlighted"
 "s" = "copy_to_system_clip"
 "d" = "copy_current_directory"
 
-[keys.change_sort_order]
+[change_sort_order]
 "a" = "change_sort_order_name"
 "e" = "change_sort_order_extension"
 "n" = "change_sort_order_natural"
@@ -105,20 +105,20 @@
 "m" = "change_sort_order_modified"
 "d" = "change_sort_order_descending"
 
-[keys.delete_files]
+[delete_files]
 "d" = "trash"
 "x" = "delete"
 "c" = "cancel"
 "escape" = "cancel"
 
-[keys.trash]
+[trash]
 "r" = "restore"
 "x" = "purge"
 "E" = "empty"
 "c" = "cancel"
 "escape" = "cancel"
 
-[keys.filename_conflict]
+[filename_conflict]
 "o" = "overwrite"
 "s" = "skip"
 "r" = "rename"
@@ -126,14 +126,14 @@
 "escape" = "cancel"
 "a" = "dont_ask_again"
 
-[keys.file_in_use]
+[file_in_use]
 "r" = "retry"
 "s" = "skip"
 "c" = "cancel"
 "escape" = "cancel"
 "a" = "toggle_dont_ask_again"
 
-[keys.filter_modal]
+[filter_modal]
 "escape" = "exit"
 "down" = "down"
 "ctrl+j" = "down"
@@ -144,13 +144,13 @@
 "pagedown" = "page_down"
 "ctrl+f" = "page_down"
 
-[keys.yes_or_no]
+[yes_or_no]
 "y" = "yes"
 "n" = "no"
 "escape" = "no"
 "a" = "dont_ask_again"
 
-[keys.drag_and_drop]
+[drag_and_drop]
 "c" = "copy"
 "m" = "move"
 "escape" = "cancel"

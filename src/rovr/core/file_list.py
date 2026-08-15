@@ -969,8 +969,7 @@ class FileList(
             self._selected[self._options[index].value] = None
         self._message_changed()
 
-    async def implicit_selector(self, ver: Literal["pre", "post"]) -> None:
-        """Select the current item in implicit mode."""
+    async def implicit_selector(self, ver: Literal["pre", "post"]) -> bool:
         if config["interface"]["allow_auto_select_mode"] and (
             (ver == "pre" and not self.select_mode)
             or (
@@ -980,11 +979,15 @@ class FileList(
             )
         ):
             await self.toggle_mode("implicit")
+        return bool(self.select_mode)
 
     async def action_select_up(self) -> None:
         """Select the current and previous file."""
-        if self.highlighted is not None and (not self.get_option_at_index(0).disabled):
-            await self.implicit_selector("pre")
+        if (
+            self.highlighted is not None
+            and (not self.get_option_at_index(0).disabled)
+            and await self.implicit_selector("pre")
+        ):
             if self.highlighted == 0:
                 self.select(self.get_option_at_index(0))
             else:
@@ -993,8 +996,11 @@ class FileList(
 
     async def action_select_down(self) -> None:
         """Select the current and next file."""
-        if self.highlighted is not None and (not self.get_option_at_index(0).disabled):
-            await self.implicit_selector("pre")
+        if (
+            self.highlighted is not None
+            and (not self.get_option_at_index(0).disabled)
+            and await self.implicit_selector("pre")
+        ):
             if self.highlighted == len(self.options) - 1:
                 self.select(self.get_option_at_index(self.option_count - 1))
             else:
@@ -1003,8 +1009,11 @@ class FileList(
 
     async def action_select_page_up(self) -> None:
         """Select the options between the current and the previous 'page'."""
-        if self.highlighted_option and (not self.get_option_at_index(0).disabled):
-            await self.implicit_selector("pre")
+        if (
+            self.highlighted_option
+            and (not self.get_option_at_index(0).disabled)
+            and await self.implicit_selector("pre")
+        ):
             old = self.highlighted or 0
             self.action_page_up()
             new = self.highlighted or 0
@@ -1012,8 +1021,11 @@ class FileList(
 
     async def action_select_page_down(self) -> None:
         """Select the options between the current and the next 'page'."""
-        if self.highlighted_option and (not self.get_option_at_index(0).disabled):
-            await self.implicit_selector("pre")
+        if (
+            self.highlighted_option
+            and (not self.get_option_at_index(0).disabled)
+            and await self.implicit_selector("pre")
+        ):
             old = self.highlighted or 0
             self.action_page_down()
             new = self.highlighted or 0
@@ -1021,8 +1033,11 @@ class FileList(
 
     async def action_select_home(self) -> None:
         """Select the options between the current and the first option"""
-        if self.highlighted_option and (not self.get_option_at_index(0).disabled):
-            await self.implicit_selector("pre")
+        if (
+            self.highlighted_option
+            and (not self.get_option_at_index(0).disabled)
+            and await self.implicit_selector("pre")
+        ):
             old = self.highlighted or 0
             self.action_first()
             new = self.highlighted or 0
@@ -1030,8 +1045,11 @@ class FileList(
 
     async def action_select_end(self) -> None:
         """Select the options between the current and the last option"""
-        if self.highlighted_option and (not self.get_option_at_index(0).disabled):
-            await self.implicit_selector("pre")
+        if (
+            self.highlighted_option
+            and (not self.get_option_at_index(0).disabled)
+            and await self.implicit_selector("pre")
+        ):
             old = self.highlighted or 0
             self.action_last()
             new = self.highlighted or 0
@@ -1059,7 +1077,6 @@ class FileList(
             and not self.select_mode
         ):
             return
-        cwd = path_utils.normalise(getcwd())
         if self.select_mode:
             if self.app._chooser_file:
                 selected = await self.get_selected_objects()
@@ -1068,35 +1085,18 @@ class FileList(
                 if selected:
                     await self.file_selected_handler(selected)
                 return
-            session = self.app.tabWidget.active_tab.session
-            session.selectedItems = []
-            paths_to_open = []
-            selected_ids = set(self.selected)
-            session.selectedItems = [
-                {"name": option.dir_entry.name, "index": index}
-                for index, option in enumerate(self.options)
-                if option.value in selected_ids
-            ]
-            for selected_id in selected_ids:
-                option = self.get_option(selected_id)
-                full_path = path.join(cwd, option.dir_entry.name)
-                if not isinstance(option, FileListSelectionWidget):
-                    continue
-                if path.isdir(full_path):
-                    self.app.cd(full_path, clear_search=True)
-                else:
-                    paths_to_open.append(full_path)
-            if paths_to_open:
-                await self.file_selected_handler(paths_to_open)
+            # In select mode without chooser file, toggle selection instead of opening
+            self.action_select()
+            return
+        option = self.highlighted_option
+        if not isinstance(option, FileListSelectionWidget):
+            return
+        cwd = path_utils.normalise(getcwd())
+        full_path = path.join(cwd, option.dir_entry.name)
+        if path.isdir(full_path):
+            self.app.cd(full_path, clear_search=True)
         else:
-            option = self.highlighted_option
-            if not isinstance(option, FileListSelectionWidget):
-                return
-            full_path = path.join(cwd, option.dir_entry.name)
-            if path.isdir(full_path):
-                self.app.cd(full_path, clear_search=True)
-            else:
-                await self.file_selected_handler([full_path])
+            await self.file_selected_handler([full_path])
 
     def action_open_editor(self) -> None:
         if (self.highlighted is not None) and not (

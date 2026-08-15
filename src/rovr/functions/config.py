@@ -648,3 +648,75 @@ def load_config() -> tuple[dict, RovrConfig]:
         # resolved from PATH, so we suppress the type error
         config_dict["plugins"]["poppler"]["poppler_folder"] = pdfinfo_path
     return schema_dict, cast(RovrConfig, config_dict)
+
+
+def load_keys() -> dict[str, dict[str, str]]:
+    """
+    Load the keybindings from the keys.toml file
+
+    Returns:
+        dict: the keybindings
+    """
+    config_dir = os.environ.get("ROVR_CONFIG_FOLDER")
+    if not config_dir:
+        from rovr.variables.maps import RovrVars
+
+        config_dir: str = vars(RovrVars).get("ROVRCONFIG", None) or user_config_dir(
+            "rovr", "."
+        ).replace("\\", "/")
+    user_keys_path = path.join(config_dir, "keys.toml")
+    # if it doesnt exist, use default config keybinds thing
+    if not path.exists(user_keys_path):
+        return {}
+
+    try:
+        template_keys = tomli.loads(traverser.joinpath("keys.toml").read_text("utf-8"))
+    except tomli.TOMLDecodeError as exc:
+        toml_dump(path.join(path.dirname(__file__), "../config/keys.toml"), exc)
+
+    user_keys = {}
+    if path.exists(user_keys_path):
+        with open(user_keys_path, "r", encoding="utf-8") as f:
+            user_keys_content = f.read()
+            if user_keys_content:
+                try:
+                    user_keys = tomli.loads(user_keys_content)
+                except tomli.TOMLDecodeError as exc:
+                    toml_dump(user_keys_path, exc)
+    keys_dict: dict[str, dict[str, str]] = deep_merge(template_keys, user_keys)
+
+    # check it manually
+    try:
+        fastjsonschema.validate(
+            {
+                "type": "object",
+                "patternProperties": {
+                    "^.*$": {
+                        "type": "object",
+                        "patternProperties": {
+                            "^.*$": {"type": "string"},
+                        },
+                    },
+                },
+            },
+            keys_dict,
+        )
+    except JsonSchemaValueException as exception:
+        schema_dump(
+            user_keys_path,
+            exception,
+            user_keys_content,
+            {
+                "type": "object",
+                "patternProperties": {
+                    "^.*$": {
+                        "type": "object",
+                        "patternProperties": {
+                            "^.*$": {"type": "string"},
+                        },
+                    },
+                },
+            },
+        )
+
+    return keys_dict

@@ -19,7 +19,10 @@ from textual.app import App
 from textual.dom import DOMNode
 
 from rovr import pprint
-from rovr.classes.config import _OpenerIf, _RightClickIf
+from rovr.classes.config import (
+    _RightClickIf,
+    _RovrConfigSettingsOpenersGroupsAdditionalpropertiesItemOneof1If,
+)
 from rovr.classes.type_aliases import (
     SortByOptions,
 )
@@ -573,7 +576,11 @@ def dump_exc(widget: DOMNode | None, exc: Exception | Traceback) -> str | None: 
     return dump_path
 
 
-def ifed(app: App, conditions: _RightClickIf | _OpenerIf) -> bool:
+def ifed(
+    app: App,
+    conditions: _RightClickIf
+    | _RovrConfigSettingsOpenersGroupsAdditionalpropertiesItemOneof1If,
+) -> bool:
     """Checks if the conditions for an option are met, used to determine if an option should be disabled
 
     Args:

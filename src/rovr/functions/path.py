@@ -583,14 +583,8 @@ def is_os(allowed: list[str]) -> bool:
         accepted = {"windows", "win32", "win64", "win", "ms-windows"}
     elif sys.platform == "darwin":
         accepted = {"macos", "darwin", "osx", "mac"}
-    elif sys.platform == "android":
-        accepted = {"android"}
     elif sys.platform.startswith("linux"):
         accepted = {"linux"}
-    elif sys.platform.startswith("freebsd") or sys.platform.startswith("openbsd"):
-        accepted = {"freebsd", "openbsd"}
-    elif sys.platform == "ios":
-        accepted = {"ios"}
     else:
         accepted = {sys.platform.lower()}
     return any(os_name.lower() in accepted for os_name in allowed)

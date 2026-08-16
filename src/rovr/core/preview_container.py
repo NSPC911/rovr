@@ -212,22 +212,21 @@ class PreviewContainer(Actionable, Container):
         if loading_state and self.loading:
             return
         elif loading_state and not self.loading:
-            if self._loading_timer is not None:
-                self._loading_timer.stop()
-            self._loading_timer = self.set_timer(
-                0.25,
-                lambda self=self: (
-                    self.set_loading(True)
-                    if not self.loading
-                    and any(
-                        worker.node is self
-                        and worker.group == PREVIEWER_GROUP
-                        and worker.is_running
-                        for worker in self.workers
-                    )
-                    else None
-                ),
-            )
+            if self._loading_timer is None:
+                self._loading_timer = self.set_timer(
+                    0.25,
+                    lambda self=self: (
+                        self.set_loading(True)
+                        if not self.loading
+                        and any(
+                            worker.node is self
+                            and worker.group == PREVIEWER_GROUP
+                            and worker.is_running
+                            for worker in self.workers
+                        )
+                        else None
+                    ),
+                )
         else:
             if self._loading_timer is not None:
                 self._loading_timer.stop()

@@ -50,7 +50,7 @@ async def test_chooser_open_writes_visual_selection(tmp_path: Path) -> None:
         await app.file_list.toggle_mode()
         app.file_list.select(app.file_list.get_option_at_index(0))
         app.file_list.select(app.file_list.get_option_at_index(2))
-        await pilot.press("enter")
+        await app.file_list.action_open()
         await pilot.pause()
 
     assert chooser_file.read_text(encoding="utf-8").splitlines() == [

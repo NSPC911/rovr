@@ -144,7 +144,7 @@ bindings = (
         for bind in config["keybinds"]["page_up"]
     ]
     + [
-        Binding(bind, "open", "Open", show=False)
+        Binding(bind, "select", "Select", show=False)
         for bind in config["keybinds"]["down_tree"]
     ]
     + [

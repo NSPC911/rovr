@@ -360,7 +360,6 @@ class Application(Actionable, DNDApp, inherit_bindings=False):
             self.notify(error, title="Theme Error", severity="warning", markup=False)
         self.set_interval(1, self._poll_theme_files)
         # title for screenshots
-        self.title = ""
 
         if self._force_crash_in > 0:
             self.call_later(self._force_crash)
@@ -791,6 +790,7 @@ class Application(Actionable, DNDApp, inherit_bindings=False):
         clear_search: bool = True,
     ) -> Worker | None:
         # Makes sure `directory` is a directory, or chdir will fail with exception
+        self.title = f"rovr @ {path.basename(directory)}"
         if self.return_code is not None:
             return
         directory = ensure_existing_directory(directory)
@@ -1509,6 +1509,14 @@ class Application(Actionable, DNDApp, inherit_bindings=False):
                     )
                     if resp:
                         self.query_one(ProcessContainer).remote_download(online, [resp])
+
+    def watch_title(self, title: str) -> None:
+        try:
+            self._driver.write(f"\x1b]0;{title}\x07")
+            self._driver.flush()
+        except AttributeError:
+            # driver not yet initialised
+            pass
 
     def get_system_commands(self, screen: Screen) -> Iterable[SystemCommand]:
         yield SystemCommand(

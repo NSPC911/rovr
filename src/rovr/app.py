@@ -1518,6 +1518,36 @@ class Application(Actionable, DNDApp, inherit_bindings=False):
             # driver not yet initialised
             pass
 
+    def export_screenshot(
+        self,
+        *,
+        title: str | None = None,
+        simplify: bool = False,
+    ) -> str:
+        """super version but without title because i hate the title"""  # noqa: DOC201
+        import io
+
+        from rich.console import Console
+
+        assert self._driver is not None, "App must be running"
+        width, height = self.size
+
+        console = Console(
+            width=width,
+            height=height,
+            file=io.StringIO(),
+            force_terminal=True,
+            color_system="truecolor",
+            record=True,
+            legacy_windows=False,
+            safe_box=False,
+        )
+        screen_render = self.screen._compositor.render_update(
+            full=True, screen_stack=self.app._background_screens, simplify=simplify
+        )
+        console.print(screen_render)
+        return console.export_svg(title="")
+
     def get_system_commands(self, screen: Screen) -> Iterable[SystemCommand]:
         yield SystemCommand(
             "Change theme",

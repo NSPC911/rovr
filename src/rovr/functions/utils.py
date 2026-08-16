@@ -185,8 +185,6 @@ def run_command(
 
             def func() -> subprocess.CompletedProcess:
                 with app.suspend():
-                    if globals().get("is_dev", False):
-                        print(command)
                     return subprocess.run(command, shell=shell)
 
             try:
@@ -348,9 +346,11 @@ async def expand_command(app: App, command: str | list[str]) -> str | list[str]:
         return expanded
 
     if isinstance(command, list):
-        print(to_return := [_expand(cmd) for cmd in command])
+        to_return = [_expand(cmd) for cmd in command]
     else:
-        print(to_return := _expand(command))
+        to_return = _expand(command)
+    if globals().get("is_dev", False):
+        print(f"{command}\n-> {to_return}")
     return to_return
 
 

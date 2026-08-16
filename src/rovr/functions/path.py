@@ -580,11 +580,20 @@ def is_os(allowed: list[str]) -> bool:
     import sys
 
     if sys.platform == "win32":
-        return any(os_name.lower() in ("windows", "win32") for os_name in allowed)
+        accepted = {"windows", "win32", "win64", "win", "ms-windows"}
     elif sys.platform == "darwin":
-        return any(os_name.lower() in ("macos", "darwin") for os_name in allowed)
+        accepted = {"macos", "darwin", "osx", "mac"}
+    elif sys.platform == "android":
+        accepted = {"android"}
+    elif sys.platform.startswith("linux"):
+        accepted = {"linux"}
+    elif sys.platform.startswith("freebsd") or sys.platform.startswith("openbsd"):
+        accepted = {"freebsd", "openbsd"}
+    elif sys.platform == "ios":
+        accepted = {"ios"}
     else:
-        return sys.platform.capitalize() in allowed
+        accepted = {sys.platform.lower()}
+    return any(os_name.lower() in accepted for os_name in allowed)
 
 
 def ifed(

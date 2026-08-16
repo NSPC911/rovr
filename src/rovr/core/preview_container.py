@@ -31,8 +31,7 @@ from rovr.classes.textual_options import (
     ArchiveFileListSelection,
     FileListSelectionWidget,
 )
-from rovr.components.iterm2_image import ITerm2Image
-from rovr.components.iterm2_image import is_supported as iterm2_supported
+from rovr.components import iterm2_image
 from rovr.core import FileList
 from rovr.functions import icons as icon_utils
 from rovr.functions import path as path_utils
@@ -58,9 +57,14 @@ class ExitNow(RuntimeError): ...
 # (the variable being textual_image.widget.Image)
 image_protocol = config["interface"]["image_viewer"]["protocol"]
 image_widget = (
-    ITerm2Image
-    if image_protocol == "ITerm2" or (not image_protocol and iterm2_supported())
-    else textual_image.widget.__dict__[image_protocol + "Image"]
+    iterm2_image.ITerm2Image
+    if (
+        image_protocol == "ITerm2"
+        or (image_protocol == "Auto" and iterm2_image.is_supported())
+    )
+    else textual_image.widget.__dict__[
+        ("" if image_protocol == "Auto" else image_protocol) + "Image"
+    ]
 )
 NewImage: partial[textual_image.widget._base.Image] = partial(
     image_widget, classes="image_preview"
@@ -290,12 +294,10 @@ class PreviewContainer(Actionable, Container):
         # so just check whether auto renderer is sixel, and config configured
         # to use auto (empty string) or sixel (explicitly)
         if (
-            textual_image.renderable.Image is textual_image.renderable.sixel.Image
+            NewImage.func is textual_image.renderable.sixel.Image
             # image_viewer.protocol shouldn't be "Auto" because it is replaced early on
             # when loading the config, but just for the sake of shutting AI
             # up, I'm going to leave this here.
-        ) and (
-            config["interface"]["image_viewer"]["protocol"] in ("Sixel", "Auto", "")
         ):
             bg_color = Color.parse(self.app.theme_variables["background"])
             img = Image.new(

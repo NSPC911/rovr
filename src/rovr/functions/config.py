@@ -605,14 +605,6 @@ def load_config() -> tuple[dict, RovrConfig]:
             schema_dump(user_config_path, exception, user_config_content, schema_dict)
         exit(1)
 
-    # slight config fixes
-    # image protocol because "AutoImage" doesn't work with Sixel
-    if config_dict["interface"]["image_viewer"]["protocol"] == "Auto":
-        # another no choice fix, because if Auto then
-        # AutoImage is grabbed, which sucks in rendering
-        # sixel for some weird unknown reason
-        config_dict["interface"]["image_viewer"]["protocol"] = ""
-
     for key in ["file", "folder", "bulk_editor"]:
         raw_run = config_dict["settings"]["editor"][key]["run"]
         if isinstance(raw_run, list):

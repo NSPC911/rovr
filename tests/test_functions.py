@@ -1,4 +1,11 @@
+from pathlib import Path
+from types import SimpleNamespace
+from typing import Any, cast
+
+import pytest
+
 from rovr.functions import config, utils
+from rovr.functions.path import normalise
 
 
 def test_deep_merge() -> None:
@@ -61,3 +68,46 @@ def test_natural_size() -> None:
     assert utils.natural_size(123456789, "binary", 2) == "117.74 MiB"
     assert utils.natural_size(123456789, "decimal", 2) == "123.46 MB"
     assert utils.natural_size(123456789, "gnu", 2) == "117.74M"
+
+
+@pytest.mark.asyncio
+async def test_expand_command_tab_highlights(tmp_path: Path) -> None:
+    directories = [
+        normalise(str(tmp_path / name)) for name in ("first", "focused", "last")
+    ]
+    tabs = [
+        SimpleNamespace(
+            directory=directory,
+            focus_on=None,
+            session=SimpleNamespace(
+                lastHighlighted={directory: {"name": f"file-{index}", "index": 0}}
+            ),
+        )
+        for index, directory in enumerate(directories)
+    ]
+    highlighted = normalise(str(tmp_path / "focused" / "file-1"))
+    app = SimpleNamespace(
+        file_list=SimpleNamespace(
+            highlighted_option=SimpleNamespace(
+                dir_entry=SimpleNamespace(path=highlighted)
+            ),
+            get_selected_objects=_empty_selection,
+        ),
+        tabWidget=SimpleNamespace(active_tab=tabs[1], query=lambda _tab_type: tabs),
+        query_one=lambda _selector: SimpleNamespace(selected=[]),
+        notify=lambda *_args, **_kwargs: None,
+    )
+
+    result = await utils.expand_command(cast(Any, app), "%Th %T2h %th %t2h %trash")
+
+    assert result == " ".join([
+        normalise(str(tmp_path / "first" / "file-0")),
+        normalise(str(tmp_path / "last" / "file-2")),
+        normalise(str(tmp_path / "last" / "file-2")),
+        normalise(str(tmp_path / "first" / "file-0")),
+        "%trash",
+    ])
+
+
+async def _empty_selection() -> list[str]:
+    return []

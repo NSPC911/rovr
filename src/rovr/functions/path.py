@@ -576,6 +576,17 @@ def dump_exc(widget: DOMNode | None, exc: Exception | Traceback) -> str | None: 
     return dump_path
 
 
+def is_os(allowed: list[str]) -> bool:
+    import sys
+
+    if sys.platform == "win32":
+        return any(os_name.lower() in ("windows", "win32") for os_name in allowed)
+    elif sys.platform == "darwin":
+        return any(os_name.lower() in ("macos", "darwin") for os_name in allowed)
+    else:
+        return sys.platform.capitalize() in allowed
+
+
 def ifed(
     app: App,
     conditions: _RightClickIf
@@ -606,9 +617,7 @@ def ifed(
                     )
                 )
             case "os":
-                disabled = not any(
-                    os.lower() == sys.platform for os in conditions["os"]
-                )
+                disabled = not is_os(conditions["os"])
             case "cwd":
                 disabled = not (
                     any(

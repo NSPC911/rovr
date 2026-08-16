@@ -298,13 +298,12 @@ async def expand_command(app: App, command: str | list[str]) -> str | list[str]:
         expanded = expanded.replace("${highlighted_file}", highlighted).replace(
             "${real_highlighted_file}", os.path.realpath(highlighted)
         )
-        if selected_files:
-            expanded = expanded.replace(
-                "${selected_files}", shjoin(selected_files)
-            ).replace(
-                "${real_selected_files}",
-                shjoin([os.path.realpath(f) for f in selected_files]),
-            )
+        expanded = expanded.replace(
+            "${selected_files}", shjoin(selected_files)
+        ).replace(
+            "${real_selected_files}",
+            shjoin([os.path.realpath(f) for f in selected_files]),
+        )
         expanded = expanded.replace(
             "${highlighted_file_name}", os.path.basename(highlighted)
         ).replace(

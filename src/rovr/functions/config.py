@@ -42,9 +42,9 @@ def editor() -> str:
 
 
 if globals().get("__compiled__"):
-    traverser = resources.files("_rovr.config")
+    traverser = resources.files("_rovr.assets")
 else:
-    traverser = resources.files("rovr.config")
+    traverser = resources.files("rovr.assets")
 
 
 @cache
@@ -560,7 +560,7 @@ def load_config() -> tuple[dict, RovrConfig]:
             user_config_content = f.read()
             if user_config_content:
                 try:
-                    schema_url = f"https://raw.githubusercontent.com/NSPC911/rovr/{schema_ref}/src/rovr/config/schema.json"
+                    schema_url = f"https://raw.githubusercontent.com/NSPC911/rovr/{schema_ref}/src/rovr/assets/schema.json"
                     user_config = tomli.loads(user_config_content)
 
                     # check version

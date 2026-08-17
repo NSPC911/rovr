@@ -28,9 +28,9 @@ def _strip_comments(css_text: str) -> str:
 
 
 bundled_themes_path = (
-    resources.files("_rovr.config")
+    resources.files("_rovr.assets")
     if globals().get("__compiled__")
-    else resources.files("rovr.config")
+    else resources.files("rovr.assets")
 ) / "themes"
 
 # Theme dataclass fields, keyed by the $variable name that maps onto them.

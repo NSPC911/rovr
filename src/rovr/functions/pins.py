@@ -81,7 +81,7 @@ def load_pins() -> PinsDict:
 
     if not path.exists(PIN_PATH):
         _pins = {
-            "$schema": "https://raw.githubusercontent.com/NSPC911/rovr/master/src/rovr/config/pins_schema.json",
+            "$schema": "https://raw.githubusercontent.com/NSPC911/rovr/master/src/rovr/assets/pins_schema.json",
             "default": [
                 {"name": "Home", "path": "$HOME"},
                 {"name": "Trash", "path": TRASH},
@@ -105,7 +105,7 @@ def load_pins() -> PinsDict:
         except (IOError, ValueError, json.JSONDecodeError):
             # Reset pins on corrupt or something else happened
             _pins = {
-                "$schema": "https://raw.githubusercontent.com/NSPC911/rovr/master/src/rovr/config/pins_schema.json",
+                "$schema": "https://raw.githubusercontent.com/NSPC911/rovr/master/src/rovr/assets/pins_schema.json",
                 "default": [
                     {"name": "Home", "path": "$HOME"},
                     {"name": "Trash", "path": TRASH},

@@ -421,7 +421,7 @@ class FirstLaunchApp(App, inherit_bindings=False):
             ])
         # manually create toml file yipee (imagine using tomliw (one extra dependency smh))
         theme = self.query_one("#theme", RadioSet).pressed_button.id
-        config_toml = f"""#:schema https://raw.githubusercontent.com/NSPC911/rovr/{schema_ref}/src/rovr/config/schema.json
+        config_toml = f"""#:schema https://raw.githubusercontent.com/NSPC911/rovr/{schema_ref}/src/rovr/assets/schema.json
 [interface]
 use_reactive_layout = {str(self.query_one("#use_reactive_layout", Switch).value).lower()}
 show_hidden_files = {str(self.query_one("#show_hidden_files", Switch).value).lower()}

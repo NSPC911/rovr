@@ -52,10 +52,10 @@ this page provides a comprehensive list of the default keybindings in `rovr`. yo
 rovr provides two pre-configured keybind profiles that you can use as a starting point:
 
 ### sane profile
-find this profile at `src/rovr/config/keybinds/sane.toml` in the repository.<br/>the **sane** profile is designed for users who prefer more traditional keybindings
+find this profile at `src/rovr/assets/keybinds/sane.toml` in the repository.<br/>the **sane** profile is designed for users who prefer more traditional keybindings
 
 ### vim profile
-find this profile at `src/rovr/config/keybinds/vim.toml` in the repository.<br/>the **vim** profile is tailored for users familiar with vim-style keybindings
+find this profile at `src/rovr/assets/keybinds/vim.toml` in the repository.<br/>the **vim** profile is tailored for users familiar with vim-style keybindings
 
 ### using a profile
 just copy over the contents of the desired profile into your `config.toml` file located at:
@@ -67,13 +67,13 @@ just copy over the contents of the desired profile into your `config.toml` file 
 | action | description | default | vim | sane |
 | ------ | ----------- | ------- | --- | ---- |"""
 try:
-    with open("src/rovr/config/config.toml", "rb") as file:
+    with open("src/rovr/assets/config.toml", "rb") as file:
         binds: dict = tomli.load(file)["keybinds"]
-    with open("src/rovr/config/keybinds/vim.toml", "rb") as file:
+    with open("src/rovr/assets/keybinds/vim.toml", "rb") as file:
         vim_binds: dict = tomli.load(file)["keybinds"]
-    with open("src/rovr/config/keybinds/sane.toml", "rb") as file:
+    with open("src/rovr/assets/keybinds/sane.toml", "rb") as file:
         sane_binds: dict = tomli.load(file)["keybinds"]
-    with open("src/rovr/config/schema.json", "r", encoding="utf-8") as file:
+    with open("src/rovr/assets/schema.json", "r", encoding="utf-8") as file:
         sub_schema: dict = json.load(file)["properties"]["keybinds"]["properties"]
     sub_schemas: dict[str, dict] = {}
     sub_keys: dict[str, dict] = {}

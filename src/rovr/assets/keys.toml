@@ -8,6 +8,9 @@
 "ctrl+z" = "app.suspend_process"
 
 [main]
+"z" = "plugin_zoxide"
+"f" = "plugin_fd"
+"\\" = "plugin_rg"
 "S" = "app.toggle_pinned_sidebar"
 "I" = "app.toggle_preview_sidebar"
 "F" = "app.toggle_footer"
@@ -25,15 +28,12 @@
 "w" = "app.tab_close"
 "?" = "app.show_keybinds"
 ">" = "app.show_shell_screen"
-"z" = "app.plugin_zoxide"
-"f" = "app.plugin_fd"
-"\\" = "app.plugin_rg"
 
 [file_list]
 "P" = "toggle_pin"
 "/" = "focus_search"
-"y" = "copy"
-"ctrl+c" = "copy"
+"y" = "copy.to_rovr"
+"ctrl+c" = "copy.to_rovr"
 "p" = "paste"
 "ctrl+v" = "paste"
 "x" = "cut"
@@ -71,8 +71,8 @@
 "o" = "open"
 "e" = "open_editor"
 "shift+f10" = "open_right_click_menu"
-"Y" = "extra_copy_open_popup"
-"," = "change_sort_order_open_popup"
+"Y" = "copy.open_popup"
+"," = "sort_order.open_popup"
 
 [pinned_sidebar]
 "/" = "focus_search"
@@ -94,23 +94,20 @@
 "end" = "last"
 "G" = "last"
 
-# preview_select_left, preview_select_right, preview_scroll_left, and
-# preview_scroll_right are omitted because the default key lists are empty.
-
 [copy_menu]
-"y" = "copy_to_rovr"
-"p" = "copy_highlighted"
-"s" = "copy_to_system_clip"
-"d" = "copy_current_directory"
+"y" = "copy.to_rovr"
+"p" = "copy.highlighted"
+"s" = "copy.to_system_clip"
+"d" = "copy.current_directory"
 
 [sort_menu]
-"a" = "change_sort_order_name"
-"e" = "change_sort_order_extension"
-"n" = "change_sort_order_natural"
-"s" = "change_sort_order_size"
-"c" = "change_sort_order_created"
-"m" = "change_sort_order_modified"
-"d" = "change_sort_order_descending"
+"a" = "sort_order.name"
+"e" = "sort_order.extension"
+"n" = "sort_order.natural"
+"s" = "sort_order.size"
+"c" = "sort_order.created"
+"m" = "sort_order.modified"
+"d" = "sort_order.descending"
 
 [delete_files]
 "d" = "trash"

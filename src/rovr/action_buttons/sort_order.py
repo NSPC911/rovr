@@ -1,3 +1,4 @@
+from contextlib import suppress
 from typing import cast
 
 from textual import events
@@ -40,6 +41,8 @@ class SortOrderPopupOptions(Option):
 
 
 class SortOrderButton(Button):
+    key_contexts = ("sort_order",)
+
     def __init__(self) -> None:
         super().__init__(
             get_icon("sorting", "alpha_asc")[0],  # default
@@ -95,6 +98,40 @@ class SortOrderButton(Button):
         popup_widget.pre_show()
         popup_widget.display = True
         popup_widget.focus()
+
+    def action_set(
+        self, sort_by: SortByOptions, descending: bool | None = None
+    ) -> None:
+        state_manager = self.app.query_one(StateManager)
+        state_manager.set_sort_preference(sort_by, descending)
+        self.app.file_list.update_file_list(add_to_session=False)
+        self.update_icon()
+        with suppress(NoMatches):
+            self.app.query_one(SortOrderPopup).go_hide()
+
+    def action_name(self, descending: bool | None = None) -> None:
+        self.action_set("name", descending)
+
+    def action_extension(self, descending: bool | None = None) -> None:
+        self.action_set("extension", descending)
+
+    def action_natural(self, descending: bool | None = None) -> None:
+        self.action_set("natural", descending)
+
+    def action_size(self, descending: bool | None = None) -> None:
+        self.action_set("size", descending)
+
+    def action_created(self, descending: bool | None = None) -> None:
+        self.action_set("created", descending)
+
+    def action_modified(self, descending: bool | None = None) -> None:
+        self.action_set("modified", descending)
+
+    def action_descending(self, descending: bool | None = None) -> None:
+        state_manager = self.app.query_one(StateManager)
+        if descending is None:
+            descending = not state_manager.get_sort_prefs()[1]
+        self.action_set(state_manager.get_sort_prefs()[0], descending)
 
 
 class SortOrderPopup(PopupOptionList):
@@ -197,26 +234,20 @@ class SortOrderPopup(PopupOptionList):
         state_manager: StateManager = self.app.query_one(StateManager)
 
         if event.option.id == "descending":
-            # Toggle descending
-            _, current_descending = state_manager.get_sort_prefs()
-            state_manager.set_sort_preference(sort_descending=not current_descending)
+            self.button.action_descending()
         elif event.option.id == "custom_sort":
             # Toggle custom sort for this folder
             state_manager.toggle_custom_sort()
+            self.app.file_list.update_file_list(add_to_session=False)
+            self.button.update_icon()
         else:
-            state_manager.set_sort_preference(
-                sort_by=cast(SortByOptions, event.option.id)
-            )
-
-        # Refresh file list to apply the change
-        self.app.file_list.update_file_list(add_to_session=False)
+            self.button.action_set(cast(SortByOptions, event.option.id))
 
         if event.option.id != "custom_sort":
             self.go_hide()
         else:
             self.pre_show()
             self.highlighted = self.get_option_index("custom_sort")
-        self.button.update_icon()
 
     async def on_key(self, event: events.Key) -> None:
         if getattr(self.app, "keys", ()):
@@ -238,27 +269,6 @@ class SortOrderPopup(PopupOptionList):
     def select(self, id: str) -> None:
         self.highlighted = self.get_option_index(id)
         self.action_select()
-
-    def action_change_sort_order_name(self) -> None:
-        self.select("name")
-
-    def action_change_sort_order_extension(self) -> None:
-        self.select("extension")
-
-    def action_change_sort_order_natural(self) -> None:
-        self.select("natural")
-
-    def action_change_sort_order_size(self) -> None:
-        self.select("size")
-
-    def action_change_sort_order_created(self) -> None:
-        self.select("created")
-
-    def action_change_sort_order_modified(self) -> None:
-        self.select("modified")
-
-    def action_change_sort_order_descending(self) -> None:
-        self.select("descending")
 
     def action_toggle_custom_sort(self) -> None:
         self.select("custom_sort")

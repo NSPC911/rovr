@@ -2,8 +2,11 @@ from pathlib import Path
 
 import pytest
 
+from rovr.action_buttons import CopyButton
+from rovr.action_buttons.sort_order import SortOrderButton
 from rovr.app import Application
 from rovr.screens import Dismissible
+from rovr.state_manager import StateManager
 
 from .conftest import iter_until
 
@@ -27,6 +30,8 @@ async def test_contextual_key_dispatch(tmp_path: Path) -> None:
         ]
         assert app._active_key_contexts()[-1] == ("main", app.screen)
         assert app._key_namespaces()["file_list"] is app.file_list
+        assert app._key_namespaces()["copy"] is app.query_one(CopyButton)
+        assert app._key_namespaces()["sort_order"] is app.query_one(SortOrderButton)
 
         await pilot.press("j")
         assert app.file_list.highlighted == 1
@@ -34,6 +39,10 @@ async def test_contextual_key_dispatch(tmp_path: Path) -> None:
         app.keys["lists"]["j"] = "noop"
         await pilot.press("j")
         assert app.file_list.highlighted == 1
+
+        app.keys["file_list"] = {"s": "sort_order.extension(True)"}
+        await pilot.press("s")
+        assert app.query_one(StateManager).get_sort_prefs() == ("extension", True)
 
         app.push_screen(Dismissible("Modal"))
         await pilot.pause()

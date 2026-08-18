@@ -8,9 +8,6 @@
 "ctrl+z" = "app.suspend_process"
 
 [main]
-"z" = "plugin_zoxide"
-"f" = "plugin_fd"
-"\\" = "plugin_rg"
 "S" = "app.toggle_pinned_sidebar"
 "I" = "app.toggle_preview_sidebar"
 "F" = "app.toggle_footer"
@@ -28,6 +25,9 @@
 "w" = "app.tab_close"
 "?" = "app.show_keybinds"
 ">" = "app.show_shell_screen"
+"z" = "app.cd_zoxide"
+"f" = "app.search_fd"
+"\\" = "app.search_rg"
 
 [file_list]
 "P" = "toggle_pin"

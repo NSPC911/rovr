@@ -156,9 +156,9 @@ class Application(Actionable, DNDApp, inherit_bindings=False):
     ] + [
         Action(action, config["plugins"][plugin]["keybinds"])
         for action, plugin in (
-            ("plugin_zoxide", "zoxide"),
-            ("plugin_fd", "fd"),
-            ("plugin_rg", "rg"),
+            ("cd_zoxide", "zoxide"),
+            ("search_fd", "fd"),
+            ("search_rg", "rg"),
         )
     ]
 
@@ -1870,7 +1870,7 @@ class Application(Actionable, DNDApp, inherit_bindings=False):
         if self.tabWidget.tab_count > 1:
             await self.tabWidget.remove_tab(self.tabWidget.active_tab)
 
-    def action_plugin_zoxide(self) -> None:
+    def action_cd_zoxide(self) -> None:
         import shutil
 
         if not config["plugins"]["zoxide"]["enabled"]:
@@ -1901,7 +1901,7 @@ class Application(Actionable, DNDApp, inherit_bindings=False):
 
         self.push_screen(Keybinds())
 
-    def action_plugin_fd(self) -> None:
+    def action_search_fd(self) -> None:
         import shutil
 
         if not config["plugins"]["fd"]["enabled"]:
@@ -1939,7 +1939,7 @@ class Application(Actionable, DNDApp, inherit_bindings=False):
                 markup=False,
             )
 
-    def action_plugin_rg(self) -> None:
+    def action_search_rg(self) -> None:
         import shutil
 
         if not config["plugins"]["rg"]["enabled"]:

@@ -31,6 +31,10 @@ async def test_contextual_key_dispatch(tmp_path: Path) -> None:
         await pilot.press("j")
         assert app.file_list.highlighted == 1
 
+        app.keys["lists"]["j"] = "noop"
+        await pilot.press("j")
+        assert app.file_list.highlighted == 1
+
         app.push_screen(Dismissible("Modal"))
         await pilot.pause()
         assert "main" not in {context for context, _ in app._active_key_contexts()}

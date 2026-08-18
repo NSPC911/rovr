@@ -1564,6 +1564,8 @@ class Application(Actionable, DNDApp, inherit_bindings=False):
         contexts = [("global", self)] if priority else self._active_key_contexts()
         for context, namespace in contexts:
             action = self.keys.get(context, {}).get(key)
+            if action == "noop":
+                return True
             if action is not None and await self.run_action(
                 action,
                 default_namespace=namespace,

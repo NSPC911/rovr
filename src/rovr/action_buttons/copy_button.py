@@ -146,6 +146,8 @@ class CopyButton(Button):
 
 
 class CopyPanelOptions(PopupOptionList):
+    key_contexts = ("copy_menu", "popup_list", "lists")
+
     def on_mount(self) -> None:
         self.do_adjust: bool = False
         self.button: CopyButton = self.app.query_one(CopyButton)

@@ -98,6 +98,8 @@ class SortOrderButton(Button):
 
 
 class SortOrderPopup(PopupOptionList):
+    key_contexts = ("sort_menu", "popup_list", "lists")
+
     def on_mount(self) -> None:
         self.do_adjust: bool = False
         self.button: SortOrderButton = self.app.query_one(SortOrderButton)

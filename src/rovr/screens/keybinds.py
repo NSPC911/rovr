@@ -16,6 +16,7 @@ from rovr.variables.constants import bindings, config, schema
 
 
 class KeybindList(CursorNavigationMixin, OptionList, inherit_bindings=False):
+    key_contexts = ("keybind_list", "lists")
     BINDINGS: ClassVar[list[BindingType]] = list(bindings)
 
     def __init__(self) -> None:
@@ -129,6 +130,8 @@ class KeybindList(CursorNavigationMixin, OptionList, inherit_bindings=False):
 
 
 class Keybinds(ModalScreen):
+    key_contexts = ("keybinds", "filter_modal")
+
     def compose(self) -> ComposeResult:
         with VerticalGroup(id="keybinds_group"):
             yield SearchInput(

@@ -20,7 +20,7 @@ from rovr.classes.mixins import (
     SelectionNavigationMixin,
 )
 from rovr.classes.textual_options import OptionWithValue
-from rovr.components import DoubleClickableOptionList, ModalSearchScreen
+from rovr.components import DoubleClickableOptionList, FilterInput, ModalSearchScreen
 from rovr.functions import path as path_utils
 from rovr.functions.icons import get_icon_for_file, get_icon_for_folder
 from rovr.variables.constants import bindings, config
@@ -29,6 +29,8 @@ from rovr.variables.constants import bindings, config
 class ContentSearchToggles(
     ScrollOffMixin, CheckboxRenderingMixin, SelectionNavigationMixin, SelectionList
 ):
+    key_contexts = ("content_search_filters", "lists")
+
     BINDINGS: ClassVar[list[BindingType]] = list(bindings)
 
     def __init__(self) -> None:
@@ -63,11 +65,13 @@ class ContentSearchToggles(
 class ContentSearch(ModalSearchScreen):
     """Search file contents recursively using rg."""
 
+    key_contexts = ("content_search", "filter_modal")
+
     STREAM_BATCH_TIME: float = 0.25
 
     def compose(self) -> ComposeResult:
         with VerticalGroup(id="content_search_group"):
-            yield Input(
+            yield FilterInput(
                 id="content_search_input",
                 placeholder="Type to search files (rg)",
             )

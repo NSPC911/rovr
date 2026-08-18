@@ -22,6 +22,8 @@ dont_ask_bind = get_shortest_bind(
 class FileNameConflict(ModalScreen):
     """Screen with a dialog to confirm whether to overwrite, rename, skip or cancel."""
 
+    key_contexts = ("filename_conflict",)
+
     class ReturnType(TypedDict):
         value: Literal["overwrite", "rename", "skip", "cancel"]
         same_for_next: bool

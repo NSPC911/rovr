@@ -25,6 +25,7 @@ class ArchiveTypes(
     SelectionList,
     inherit_bindings=False,
 ):
+    key_contexts = ("archive_types", "lists")
     BINDINGS: ClassVar[list[BindingType]] = list(bindings)
 
     def __init__(self) -> None:
@@ -62,6 +63,7 @@ class ArchiveCompression(
     SelectionList,
     inherit_bindings=False,
 ):
+    key_contexts = ("archive_compression", "lists")
     BINDINGS: ClassVar[list[BindingType]] = list(bindings)
 
     def __init__(self) -> None:
@@ -109,6 +111,8 @@ class ArchiveCompression(
 
 
 class ArchiveCreationScreen(ModalInput):
+    key_contexts = ("archive_creation", "modal_input")
+
     class ReturnType(NamedTuple):
         path: str
         algo: Literal["zip", "tar", "tar.gz", "tar.bz2", "tar.xz", "tar.zst"]

@@ -20,6 +20,8 @@ dont_ask_bind = get_shortest_bind(config["keybinds"]["file_in_use"]["dont_ask_ag
 class FileInUse(ModalScreen):
     """Screen to show when a file is in use by another process on Windows."""
 
+    key_contexts = ("file_in_use",)
+
     class ReturnType(TypedDict):
         value: Literal["try_again", "cancel", "skip"]
         toggle: bool

@@ -26,6 +26,8 @@ from rovr.variables.constants import bindings, config
 class PinnedSidebar(
     Actionable, CursorNavigationMixin, OptionList, inherit_bindings=False
 ):
+    key_contexts = ("pinned_sidebar", "lists")
+
     # Just so that I can disable space
     BINDINGS: ClassVar[list[BindingType]] = list(bindings)
     DRIVES: list[str] = []

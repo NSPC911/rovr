@@ -20,6 +20,8 @@ dont_ask_bind = get_shortest_bind(config["keybinds"]["yes_or_no"]["dont_ask_agai
 class YesOrNo(Actionable, ModalScreen):
     """Screen with a dialog that asks whether you accept or deny"""
 
+    key_contexts = ("yes_or_no",)
+
     class ReturnType(TypedDict):
         value: bool
         toggle: bool

@@ -94,6 +94,7 @@ class TrashSelectionList(
     SelectionList,
     inherit_bindings=False,
 ):
+    key_contexts = ("trash_list", "lists")
     BINDINGS: ClassVar[list[BindingType]] = list(bindings)
 
     COMPONENT_CLASSES: ClassVar[set[str]] = CheckboxRenderingMixin.COMPONENT_CLASSES | {
@@ -172,6 +173,8 @@ class TrashSelectionList(
 
 class TrashScreen(Actionable, ModalScreen):
     """Screen with a dialog to browse, restore and purge recycle bin entries."""
+
+    key_contexts = ("trash",)
 
     def __init__(self) -> None:
         super().__init__()

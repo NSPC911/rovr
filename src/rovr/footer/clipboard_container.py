@@ -25,6 +25,8 @@ class Clipboard(
 ):
     """A selection list that displays the clipboard contents."""
 
+    key_contexts = ("clipboard", "lists")
+
     BINDINGS: ClassVar[list[BindingType]] = list(bindings)
 
     def __init__(self) -> None:

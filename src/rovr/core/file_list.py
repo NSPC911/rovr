@@ -57,6 +57,8 @@ class FileList(
     OptionList but can multi-select files and folders.
     """
 
+    key_contexts = ("file_list", "lists")
+
     COMPONENT_CLASSES: ClassVar[set[str]] = CheckboxRenderingMixin.COMPONENT_CLASSES | {
         "filelist--cut",
         "filelist--cut--highlighted",

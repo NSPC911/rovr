@@ -10,15 +10,17 @@ from textual_autocomplete.fuzzy_search import Matcher
 from textual_drivers._utils import throttle
 
 from rovr.classes.textual_options import OptionWithValue
-from rovr.components import ModalSearchScreen
+from rovr.components import FilterInput, ModalSearchScreen
 from rovr.components.special_option_lists import DoubleClickableOptionList
 from rovr.functions.path import compress
 
 
 class ThemeChooser(ModalSearchScreen):
+    key_contexts = ("theme_chooser", "filter_modal")
+
     def compose(self) -> ComposeResult:
         with VerticalGroup(id="theme_chooser_group"):
-            yield Input(
+            yield FilterInput(
                 placeholder="Type to filter themes...",
                 id="theme_chooser_input",
             )

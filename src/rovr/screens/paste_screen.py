@@ -11,6 +11,8 @@ from .yes_or_no import YesOrNo, dont_ask_bind, no_bind, yes_bind
 
 
 class PasteScreen(YesOrNo):
+    key_contexts = ("paste_screen", "yes_or_no")
+
     def __init__(
         self,
         message: str,

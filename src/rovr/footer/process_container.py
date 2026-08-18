@@ -174,6 +174,7 @@ class ProgressBarContainer(VerticalGroup, inherit_bindings=False):
 
 
 class ProcessContainer(Actionable, VerticalScroll):
+    key_contexts = ("processes", "scroll")
     theme: reactive[str] = reactive("textual-dark")
 
     def __init__(self) -> None:

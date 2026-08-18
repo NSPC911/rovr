@@ -16,7 +16,7 @@ from textual.worker import get_current_worker
 
 from rovr.classes.mixins import CheckboxRenderingMixin, SelectionNavigationMixin
 from rovr.classes.textual_options import OptionWithValue
-from rovr.components import ModalSearchScreen
+from rovr.components import FilterInput, ModalSearchScreen
 from rovr.components.special_option_lists import DoubleClickableScrollOffOptionList
 from rovr.functions import path as path_utils
 from rovr.functions.icons import get_icon_for_file, get_icon_for_folder
@@ -35,6 +35,8 @@ class FileSearchToggles(
     SelectionList,
     inherit_bindings=False,
 ):
+    key_contexts = ("file_search_filters", "lists")
+
     BINDINGS: ClassVar[list[BindingType]] = list(bindings)
 
     def __init__(self) -> None:
@@ -79,11 +81,12 @@ class FileSearchToggles(
 class FileSearch(ModalSearchScreen):
     """Search for files recursively using fd."""
 
+    key_contexts = ("file_search", "filter_modal")
     STREAM_BATCH_TIME: float = 0.25
 
     def compose(self) -> ComposeResult:
         with VerticalGroup(id="file_search_group", classes="file_search_group"):
-            yield Input(
+            yield FilterInput(
                 id="file_search_input",
                 placeholder="Type to search files (fd)",
             )

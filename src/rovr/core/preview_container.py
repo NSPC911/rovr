@@ -152,6 +152,7 @@ class LoadingPreview(Static):
 
 
 class PreviewContainer(Actionable, Container):
+    key_contexts = ("preview", "scroll")
     LOADER_WIDGET = LoadingPreview()
 
     ACTIONS: list[Action] = [

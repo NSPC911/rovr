@@ -21,10 +21,13 @@ move_bind = get_shortest_bind(config["keybinds"]["drag_and_drop"]["move"])
 cancel_bind = get_shortest_bind(config["keybinds"]["drag_and_drop"]["cancel"])
 
 
-class PasteDropOptionList(CursorNavigationMixin, OptionList): ...
+class PasteDropOptionList(CursorNavigationMixin, OptionList):
+    key_contexts = ("paste_drop_list", "lists")
 
 
 class PasteDropScreen(Actionable, ModalScreen["PasteDropScreen.ReturnType | None"]):
+    key_contexts = ("paste_drop",)
+
     class ReturnType(NamedTuple):
         paths: list[str]
         action: Literal["copy", "move"]

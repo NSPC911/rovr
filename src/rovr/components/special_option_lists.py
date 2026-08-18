@@ -13,6 +13,8 @@ from rovr.variables.constants import bindings
 class DoubleClickableOptionList(
     SingleLineOptionLayoutMixin, CursorNavigationMixin, OptionList
 ):
+    key_contexts = ("search_results", "lists")
+
     async def _on_click(self, event: events.Click) -> None:
         """React to the mouse being clicked on an item.
 
@@ -36,6 +38,7 @@ class DoubleClickableScrollOffOptionList(ScrollOffMixin, DoubleClickableOptionLi
 
 
 class SpecialOptionList(CursorNavigationMixin, OptionList):
+    key_contexts = ("special_option_list", "lists")
     BINDINGS = list(bindings)
 
 

@@ -10,6 +10,8 @@ from .input import ModalInput
 
 
 class ShellExec(ModalInput):
+    key_contexts = ("shell_exec", "modal_input")
+
     class ReturnType(NamedTuple):
         command: str | list[str]
         run_type: Literal["suspend", "background"]

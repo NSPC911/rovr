@@ -9,6 +9,8 @@ from rovr.classes.mixins import CursorNavigationMixin
 
 
 class PopupOptionList(CursorNavigationMixin, OptionList):
+    key_contexts = ("popup_list", "lists")
+
     def __init__(
         self,
         id: str | None = None,

@@ -10,6 +10,8 @@ from rovr.functions.utils import dismiss
 class Dismissible(ModalScreen):
     """Super simple screen that can be dismissed."""
 
+    key_contexts = ("dismissible",)
+
     def __init__(
         self, message: str, border_subtitle: str = "", additional_classes: str = ""
     ) -> None:

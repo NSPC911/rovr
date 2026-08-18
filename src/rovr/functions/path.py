@@ -19,7 +19,10 @@ from textual.app import App
 from textual.dom import DOMNode
 
 from rovr import pprint
-from rovr.classes.config import _OpenerIf, _RightClickIf
+from rovr.classes.config import (
+    _RightClickIf,
+    _RovrConfigSettingsOpenersGroupsAdditionalpropertiesItemOneof1If,
+)
 from rovr.classes.type_aliases import (
     SortByOptions,
 )
@@ -573,7 +576,25 @@ def dump_exc(widget: DOMNode | None, exc: Exception | Traceback) -> str | None: 
     return dump_path
 
 
-def ifed(app: App, conditions: _RightClickIf | _OpenerIf) -> bool:
+def is_os(allowed: list[str]) -> bool:
+    import sys
+
+    if sys.platform == "win32":
+        accepted = {"windows", "win32", "win64", "win", "ms-windows"}
+    elif sys.platform == "darwin":
+        accepted = {"macos", "darwin", "osx", "mac"}
+    elif sys.platform.startswith("linux"):
+        accepted = {"linux"}
+    else:
+        accepted = {sys.platform.lower()}
+    return any(os_name.lower() in accepted for os_name in allowed)
+
+
+def ifed(
+    app: App,
+    conditions: _RightClickIf
+    | _RovrConfigSettingsOpenersGroupsAdditionalpropertiesItemOneof1If,
+) -> bool:
     """Checks if the conditions for an option are met, used to determine if an option should be disabled
 
     Args:
@@ -599,9 +620,7 @@ def ifed(app: App, conditions: _RightClickIf | _OpenerIf) -> bool:
                     )
                 )
             case "os":
-                disabled = not any(
-                    os.lower() == sys.platform for os in conditions["os"]
-                )
+                disabled = not is_os(conditions["os"])
             case "cwd":
                 disabled = not (
                     any(

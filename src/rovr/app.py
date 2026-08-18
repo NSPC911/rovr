@@ -237,6 +237,7 @@ class Application(Actionable, DNDApp, inherit_bindings=False):
         # Runtime output files from CLI
         self._cwd_file: str | TextIOWrapper | None = cwd_file
         self._chooser_file: str | TextIOWrapper | None = chooser_file
+        self._chooser_paths: list[str] | None = None
         self._show_keys: bool = show_keys
         self._exit_with_tree: bool = tree_dom
         self._force_crash_in: float = force_crash_in
@@ -359,7 +360,6 @@ class Application(Actionable, DNDApp, inherit_bindings=False):
             self.notify(error, title="Theme Error", severity="warning", markup=False)
         self.set_interval(1, self._poll_theme_files)
         # title for screenshots
-        self.title = ""
 
         if self._force_crash_in > 0:
             self.call_later(self._force_crash)
@@ -735,23 +735,22 @@ class Application(Actionable, DNDApp, inherit_bindings=False):
                     message += (
                         f"Failed to write cwd file `{path.basename(self._cwd_file)}`!\n"
                     )
-        # Write selected/active item(s) to --chooser-file, if provided
-        if self._chooser_file:
-            selected = await self.file_list.get_selected_objects()
-            if selected:
-                if isinstance(self._chooser_file, TextIOWrapper):
-                    try:
-                        self._chooser_file.write("\n".join(selected))
-                        self._chooser_file.flush()
-                    except OSError:
-                        message += "Failed to write chooser to stdout!\n"
-                else:
-                    try:
-                        with open(self._chooser_file, "w", encoding="utf-8") as f:
-                            f.write("\n".join(selected))
-                    except OSError:
-                        # Any failure writing chooser file should not block exit
-                        message += f"Failed to write chooser file `{path.basename(self._chooser_file)}`"
+        # Only an explicit open action confirms a chooser selection.
+        if self._chooser_file and self._chooser_paths:
+            selected = self._chooser_paths
+            if isinstance(self._chooser_file, TextIOWrapper):
+                try:
+                    self._chooser_file.write("\n".join(selected))
+                    self._chooser_file.flush()
+                except OSError:
+                    message += "Failed to write chooser to stdout!\n"
+            else:
+                try:
+                    with open(self._chooser_file, "w", encoding="utf-8") as f:
+                        f.write("\n".join(selected))
+                except OSError:
+                    # Any failure writing chooser file should not block exit
+                    message += f"Failed to write chooser file `{path.basename(self._chooser_file)}`"
         self.exit(message.strip() if message else None)
 
     @on(ExitApp)
@@ -791,6 +790,7 @@ class Application(Actionable, DNDApp, inherit_bindings=False):
         clear_search: bool = True,
     ) -> Worker | None:
         # Makes sure `directory` is a directory, or chdir will fail with exception
+        self.title = f"rovr @ {path.basename(directory)}"
         if self.return_code is not None:
             return
         directory = ensure_existing_directory(directory)
@@ -1509,6 +1509,44 @@ class Application(Actionable, DNDApp, inherit_bindings=False):
                     )
                     if resp:
                         self.query_one(ProcessContainer).remote_download(online, [resp])
+
+    def watch_title(self, title: str) -> None:
+        try:
+            self._driver.write(f"\x1b]0;{title}\x07")
+            self._driver.flush()
+        except AttributeError:
+            # driver not yet initialised
+            pass
+
+    def export_screenshot(
+        self,
+        *,
+        title: str | None = None,
+        simplify: bool = False,
+    ) -> str:
+        """super version but without title because i hate the title"""  # noqa: DOC201
+        import io
+
+        from rich.console import Console
+
+        assert self._driver is not None, "App must be running"
+        width, height = self.size
+
+        console = Console(
+            width=width,
+            height=height,
+            file=io.StringIO(),
+            force_terminal=True,
+            color_system="truecolor",
+            record=True,
+            legacy_windows=False,
+            safe_box=False,
+        )
+        screen_render = self.screen._compositor.render_update(
+            full=True, screen_stack=self.app._background_screens, simplify=simplify
+        )
+        console.print(screen_render)
+        return console.export_svg(title="")
 
     def get_system_commands(self, screen: Screen) -> Iterable[SystemCommand]:
         yield SystemCommand(

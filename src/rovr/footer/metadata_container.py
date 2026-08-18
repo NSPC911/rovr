@@ -2,7 +2,7 @@ import stat
 import time
 from contextlib import suppress
 from datetime import datetime
-from os import DirEntry, lstat, path, walk
+from os import DirEntry, lstat, path, stat_result, walk
 from typing import Any
 
 from textual import events, on, work
@@ -33,7 +33,7 @@ class MetadataContainer(VerticalScroll, inherit_bindings=False):
         self._queued_task_args: None | DirEntry = None
         self._current_option: FileListSelectionWidget | None = None
 
-    def info_of_dir_entry(self, dir_entry: DirEntry) -> str:
+    def info_of_dir_entry(self, dir_entry: DirEntry) -> tuple[str, stat_result | None]:
         """Get the permission line from a given DirEntry object
         Args:
             dir_entry (DirEntry): The nt.DirEntry class
@@ -44,7 +44,7 @@ class MetadataContainer(VerticalScroll, inherit_bindings=False):
         try:
             file_stat = lstat(dir_entry.path)
         except (OSError, FileNotFoundError):
-            return "?????????"
+            return "?????????", None
         mode = file_stat.st_mode
 
         permission_string = ""
@@ -60,7 +60,7 @@ class MetadataContainer(VerticalScroll, inherit_bindings=False):
         permission_string += "r" if mode & stat.S_IROTH else "-"
         permission_string += "w" if mode & stat.S_IWOTH else "-"
         permission_string += "x" if mode & stat.S_IXOTH else "-"
-        return permission_string
+        return permission_string, file_stat
 
     def any_in_queue(self) -> bool:
         if utils.should_cancel():
@@ -143,12 +143,14 @@ class MetadataContainer(VerticalScroll, inherit_bindings=False):
         elif stat.S_ISFIFO(dir_entry.stat().st_mode):
             type_str = "FIFO"
             file_info = "p"
-        if file_info == "":  # noqa: SIM108
+        if file_info == "":
             file_info += "????????"
         else:
-            file_info += self.info_of_dir_entry(dir_entry)
+            extra, file_stat = self.info_of_dir_entry(dir_entry)
+            file_info += extra
+            if file_stat is None:
+                file_stat = dir_entry.stat()
         # got the type, now we follow
-        file_stat = dir_entry.stat()
         is_hidden = is_hidden_file(dir_entry)
 
         values_list = []

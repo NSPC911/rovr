@@ -119,7 +119,7 @@ def _build_parser() -> argparse.ArgumentParser:
         dest="chooser_file",
         default="",
         type=str,
-        help="Write chosen file(s) (\\n-separated) to this file on exit.",
+        help="Write opened file(s) (\\n-separated) to this file on exit.",
     )
     paths_group.add_argument(
         "--cwd-file",

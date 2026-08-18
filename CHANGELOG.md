@@ -2,26 +2,27 @@
 
 All notable changes to this project will be documented in this file.
 
-The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
-and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+The format is sort-of based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
+and this project sort-of adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [0.10.1]
+## [0.10.1] - 2026-08-17
 
 ### Added
 
-- `app`: allow multiple paths in cli [#317](https://github.com/NSPC911/rovr/pull/317)
-- `app`: allow opt-in auto folder size calculation [#322](https://github.com/NSPC911/rovr/issues/322)
+- `cli`: allow multiple paths in cli [#317](https://github.com/NSPC911/rovr/pull/317)
+- `metadata`: allow opt-in auto folder size calculation [#322](https://github.com/NSPC911/rovr/issues/322)
 - `app`: keep a virtual path of current directory [#325](https://github.com/NSPC911/rovr/pull/325)
-- `app`: allow variable substitution for gradients [#319](https://github.com/NSPC911/rovr/pull/319)
-- `app`: allow themeing checked options [#316](https://github.com/NSPC911/rovr/pull/316)
+- `styles`: allow variable substitution for gradients [#319](https://github.com/NSPC911/rovr/pull/319)
+- `lists`: allow themeing checked options [#316](https://github.com/NSPC911/rovr/pull/316)
 - `path_input`: exclude hidden subfolders by default in autocomplete [#323](https://github.com/NSPC911/rovr/pull/323)
 - `drag_and_drop`: use images in drag and drop [#326](https://github.com/NSPC911/rovr/pull/326)
 - `drag_and_drop`: make drop more interactive [#327](https://github.com/NSPC911/rovr/pull/327)
 - `app`: add customisable spinner [2dcd36a](https://github.com/NSPC911/rovr/commit/2dcd36af837434688812562664309312f1697565) [0383ee9](https://github.com/NSPC911/rovr/commit/0383ee93d034d537f0429f93e47e09814594e52d)
-
-### Changed
-
-- change keybind for opening sorting popup from 'o' to ',' [#331](https://github.com/NSPC911/rovr/pull/331)
+- `filelist`: auto-enter and exit select mode [#332](https://github.com/NSPC911/rovr/pull/332) [d07f598](https://github.com/NSPC911/rovr/commit/d07f598269ca3337b9aba25481ab14480e42bb12)
+- `tabs`: opt-in tab close button [a431172](https://github.com/NSPC911/rovr/commit/a431172e662f1eecfb871dd62cac0151babc9ea1)
+- `app`: better support chooser file [#333](https://github.com/NSPC911/rovr/pull/333) [d07f598](https://github.com/NSPC911/rovr/commit/d07f598269ca3337b9aba25481ab14480e42bb12) [1968b4f](https://github.com/NSPC911/rovr/commit/1968b4f0a5ba3bd5bddec85020eb5155710a4de9)
+- `app`: set terminal title [9bb49a0](https://github.com/NSPC911/rovr/commit/9bb49a09937597daa7816a63f493898eb8b49194) [9b8d08a](https://github.com/NSPC911/rovr/commit/9b8d08a1c82fee30bf78a63c0fcc63fa073556bc)
+- all: add `%` expansions [#335](https://github.com/NSPC911/rovr/pull/335)
 
 ### Fixed
 
@@ -32,6 +33,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `z+rg+fd`: refresh border subtitle [0c2b46f](https://github.com/NSPC911/rovr/commit/0c2b46f6d52294602f025641976666125e110f82)
 - `app`: fix opening CONIN$ on windows with force-tty [20ae016](https://github.com/NSPC911/rovr/commit/20ae0165903399713574168913d8e2173f54c2d0)
 - `app`: update progress bars when theme changes [6ca4a88](https://github.com/NSPC911/rovr/commit/6ca4a88d5a9b009420030139b045f96c685f8508)
+- `drag_and_drop`: watch state and stop timers from auto triggering [399905e](https://github.com/NSPC911/rovr/commit/399905ea74230188ecbfa3cee2afa2c124f9e8e0)
+- `process`: handle symlinks properly [dbec04c](https://github.com/NSPC911/rovr/commit/dbec04cf7033a3e65ed9ab33ad13ae6c38f6df1e)
+- `app`: disable following symlinks [efb5b27](https://github.com/NSPC911/rovr/commit/efb5b27f4f2ce37c4003af92cb4e047e1d4d0a30)
+- `metadata`: use obtained stat than cached stat [5503ed7](https://github.com/NSPC911/rovr/commit/5503ed7eb56aa143c53cda10547e7cf99cc60adf)
+- `preview`: use iterm2 if auto image is set [8f75e68](https://github.com/NSPC911/rovr/commit/8f75e6806935d168f3685878987e742983d36fdc)
+- change sane keybind for opening sorting popup from 'o' to ',' [#331](https://github.com/NSPC911/rovr/pull/331)
 
 ### Performance
 
@@ -40,12 +47,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `path`: compile natsort + reverse in sort [d254bd6](https://github.com/NSPC911/rovr/commit/d254bd61193911e96465a9c1d3843768f3085023)
 - `path`: remove path.file_is_type [cda86a7](https://github.com/NSPC911/rovr/commit/cda86a741907a99044d181071e49297758754098)
 - `popup`: set focus if delta changed [2866eb5](https://github.com/NSPC911/rovr/commit/2866eb51e92785543f6283348060a02d6091669a)
+- `preview`: avoid setting loading when already loading [dbec04c](https://github.com/NSPC911/rovr/commit/dbec04cf7033a3e65ed9ab33ad13ae6c38f6df1e) [91a9e8e](https://github.com/NSPC911/rovr/commit/91a9e8eb217786eb316e3db1019fdc1448ce0771)
+- `preview`: eager cancel with contextvar [5503ed7e](https://github.com/NSPC911/rovr/commit/5503ed7eb56aa143c53cda10547e7cf99cc60adf)
 
 ### Removed
 
 - `config`: remove last_highlighted_size [96ccd2d](https://github.com/NSPC911/rovr/commit/96ccd2d98d59306605180101d5589609c634f8c6)
 
-## [0.10.0]
+## [0.10.0] - 2026-08-01
 
 ### Added
 
@@ -89,7 +98,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `config`: cache schema validator with marshal [8c133e5](https://github.com/NSPC911/rovr/commit/8c133e5eede41748cff39cc833200b4c83233d66)
 - remove psutil dependency [#305](https://github.com/NSPC911/rovr/pull/305)
 
-## [0.9.2]
+## [0.9.2] - 2026-06-19
 
 ### Fixed
 
@@ -101,14 +110,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - lazyload everything [f18531e](https://github.com/NSPC911/rovr/commit/f18531ea70a61dd38e6d9b1b58a852091f65df78)
 - move classes.config into a pyi file [a316aee](https://github.com/NSPC911/rovr/commit/a316aeed6ad6182cd1807ae16455c3500d17a79c)
 
-## [0.9.1.post2]
+## [0.9.1.post2] - 2026-06-14
 
 ### Fixed
 
 - `opener`: check returncode, not stderr [feb6afb](https://github.com/NSPC911/rovr/commit/feb6afbe22cb50ea1b5edb5804cf80f3275868bb)
 - `firstlaunch`: remove `open_all_in_editor` [b7b97ab](https://github.com/NSPC911/rovr/commit/b7b97abea837b6f30ab62973e09b654e0f1a2714)
 
-## [0.9.1.post1]
+## [0.9.1.post1] - 2026-06-13
 
 ### Fixed
 
@@ -124,7 +133,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - `app`: fix insane movement lag [1c29683](https://github.com/NSPC911/rovr/commit/1c296837f58f23992f43e75b72db54f193d76696)
 
-## [0.9.1]
+## [0.9.1] - 2026-06-08
 
 ### Added
 
@@ -136,7 +145,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `config`: actually cache schema validator [155e458](https://github.com/NSPC911/rovr/commit/155e458e3d1e0232efe693d817ae9e5144d2fa60)
 - `shell`: use separate bg implementation instead of orphans [#295](https://github.com/NSPC911/rovr/pull/295) [1ec3556](https://github.com/NSPC911/rovr/commit/1ec3556a6d0bdac57d429ee6689f1b77cfdc3154) [9f57978](https://github.com/NSPC911/rovr/commit/9f57978d82d74da4d378b880c2ca810302ee9acd)
 
-## [0.9.0]
+## [0.9.0] - 2026-06-01
 
 ### Added
 

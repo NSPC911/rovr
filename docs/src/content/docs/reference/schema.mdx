@@ -13,35 +13,41 @@ description: config schema humanified
   - [1.7. Property `Rovr Config > interface > show_line_numbers`](#interface_show_line_numbers)
   - [1.8. Property `Rovr Config > interface > scrolloff`](#interface_scrolloff)
   - [1.9. Property `Rovr Config > interface > show_hidden_files`](#interface_show_hidden_files)
-  - [1.10. Property `Rovr Config > interface > details_list`](#interface_details_list)
-    - [1.10.1. Rovr Config > interface > details_list > details_list items](#interface_details_list_items)
-      - [1.10.1.1. Property `Rovr Config > interface > details_list > details_list items > type`](#interface_details_list_items_type)
-      - [1.10.1.2. Property `Rovr Config > interface > details_list > details_list items > label`](#interface_details_list_items_label)
-      - [1.10.1.3. Property `Rovr Config > interface > details_list > details_list items > max_length`](#interface_details_list_items_max_length)
-      - [1.10.1.4. Property `Rovr Config > interface > details_list > details_list items > format`](#interface_details_list_items_format)
-  - [1.11. Property `Rovr Config > interface > image_viewer`](#interface_image_viewer)
-    - [1.11.1. Property `Rovr Config > interface > image_viewer > protocol`](#interface_image_viewer_protocol)
-    - [1.11.2. Property `Rovr Config > interface > image_viewer > max_size`](#interface_image_viewer_max_size)
-      - [1.11.2.1. Rovr Config > interface > image_viewer > max_size > max_size items](#interface_image_viewer_max_size_items)
-    - [1.11.3. Property `Rovr Config > interface > image_viewer > resampling`](#interface_image_viewer_resampling)
-  - [1.12. Property `Rovr Config > interface > font_preview`](#interface_font_preview)
-    - [1.12.1. Property `Rovr Config > interface > font_preview > max_size`](#interface_font_preview_max_size)
-      - [1.12.1.1. Rovr Config > interface > font_preview > max_size > max_size items](#interface_font_preview_max_size_items)
-    - [1.12.2. Property `Rovr Config > interface > font_preview > font_size`](#interface_font_preview_font_size)
-  - [1.13. Property `Rovr Config > interface > allow_tab_nav`](#interface_allow_tab_nav)
-  - [1.14. Property `Rovr Config > interface > append_new_tabs`](#interface_append_new_tabs)
-  - [1.15. Property `Rovr Config > interface > double_click_delay`](#interface_double_click_delay)
-  - [1.16. Property `Rovr Config > interface > drive_watcher_frequency`](#interface_drive_watcher_frequency)
-  - [1.17. Property `Rovr Config > interface > clock`](#interface_clock)
-    - [1.17.1. Property `Rovr Config > interface > clock > enabled`](#interface_clock_enabled)
-    - [1.17.2. Property `Rovr Config > interface > clock > align`](#interface_clock_align)
-  - [1.18. Property `Rovr Config > interface > preview_text`](#interface_preview_text)
-    - [1.18.1. Property `Rovr Config > interface > preview_text > error`](#interface_preview_text_error)
-    - [1.18.2. Property `Rovr Config > interface > preview_text > start`](#interface_preview_text_start)
-    - [1.18.3. Property `Rovr Config > interface > preview_text > font_text`](#interface_preview_text_font_text)
-  - [1.19. Property `Rovr Config > interface > compact_mode`](#interface_compact_mode)
-    - [1.19.1. Property `Rovr Config > interface > compact_mode > buttons`](#interface_compact_mode_buttons)
-    - [1.19.2. Property `Rovr Config > interface > compact_mode > panels`](#interface_compact_mode_panels)
+  - [1.10. Property `Rovr Config > interface > spinner`](#interface_spinner)
+    - [1.10.1. Property `Rovr Config > interface > spinner > oneOf > item 0`](#interface_spinner_oneOf_i0)
+    - [1.10.2. Property `Rovr Config > interface > spinner > oneOf > item 1`](#interface_spinner_oneOf_i1)
+      - [1.10.2.1. Rovr Config > interface > spinner > oneOf > item 1 > item 1 items](#interface_spinner_oneOf_i1_items)
+  - [1.11. Property `Rovr Config > interface > allow_auto_select_mode`](#interface_allow_auto_select_mode)
+  - [1.12. Property `Rovr Config > interface > show_tab_close_button`](#interface_show_tab_close_button)
+  - [1.13. Property `Rovr Config > interface > details_list`](#interface_details_list)
+    - [1.13.1. Rovr Config > interface > details_list > details_list items](#interface_details_list_items)
+      - [1.13.1.1. Property `Rovr Config > interface > details_list > details_list items > type`](#interface_details_list_items_type)
+      - [1.13.1.2. Property `Rovr Config > interface > details_list > details_list items > label`](#interface_details_list_items_label)
+      - [1.13.1.3. Property `Rovr Config > interface > details_list > details_list items > max_length`](#interface_details_list_items_max_length)
+      - [1.13.1.4. Property `Rovr Config > interface > details_list > details_list items > format`](#interface_details_list_items_format)
+  - [1.14. Property `Rovr Config > interface > image_viewer`](#interface_image_viewer)
+    - [1.14.1. Property `Rovr Config > interface > image_viewer > protocol`](#interface_image_viewer_protocol)
+    - [1.14.2. Property `Rovr Config > interface > image_viewer > max_size`](#interface_image_viewer_max_size)
+      - [1.14.2.1. Rovr Config > interface > image_viewer > max_size > max_size items](#interface_image_viewer_max_size_items)
+    - [1.14.3. Property `Rovr Config > interface > image_viewer > resampling`](#interface_image_viewer_resampling)
+  - [1.15. Property `Rovr Config > interface > font_preview`](#interface_font_preview)
+    - [1.15.1. Property `Rovr Config > interface > font_preview > max_size`](#interface_font_preview_max_size)
+      - [1.15.1.1. Rovr Config > interface > font_preview > max_size > max_size items](#interface_font_preview_max_size_items)
+    - [1.15.2. Property `Rovr Config > interface > font_preview > font_size`](#interface_font_preview_font_size)
+  - [1.16. Property `Rovr Config > interface > allow_tab_nav`](#interface_allow_tab_nav)
+  - [1.17. Property `Rovr Config > interface > append_new_tabs`](#interface_append_new_tabs)
+  - [1.18. Property `Rovr Config > interface > double_click_delay`](#interface_double_click_delay)
+  - [1.19. Property `Rovr Config > interface > drive_watcher_frequency`](#interface_drive_watcher_frequency)
+  - [1.20. Property `Rovr Config > interface > clock`](#interface_clock)
+    - [1.20.1. Property `Rovr Config > interface > clock > enabled`](#interface_clock_enabled)
+    - [1.20.2. Property `Rovr Config > interface > clock > align`](#interface_clock_align)
+  - [1.21. Property `Rovr Config > interface > preview_text`](#interface_preview_text)
+    - [1.21.1. Property `Rovr Config > interface > preview_text > error`](#interface_preview_text_error)
+    - [1.21.2. Property `Rovr Config > interface > preview_text > start`](#interface_preview_text_start)
+    - [1.21.3. Property `Rovr Config > interface > preview_text > font_text`](#interface_preview_text_font_text)
+  - [1.22. Property `Rovr Config > interface > compact_mode`](#interface_compact_mode)
+    - [1.22.1. Property `Rovr Config > interface > compact_mode > buttons`](#interface_compact_mode_buttons)
+    - [1.22.2. Property `Rovr Config > interface > compact_mode > panels`](#interface_compact_mode_panels)
 - [2. Property `Rovr Config > settings`](#settings)
   - [2.1. Property `Rovr Config > settings > use_recycle_bin`](#settings_use_recycle_bin)
   - [2.2. Property `Rovr Config > settings > right_click`](#settings_right_click)
@@ -86,7 +92,7 @@ description: config schema humanified
             - [2.2.1.6.1.3.4. Property `Rovr Config > settings > right_click > right_click items > if > directory`](#settings_right_click_items_if_directory)
   - [2.3. Property `Rovr Config > settings > copy_includes_metadata`](#settings_copy_includes_metadata)
   - [2.4. Property `Rovr Config > settings > history_size`](#settings_history_size)
-  - [2.5. Property `Rovr Config > settings > last_highlighted_size`](#settings_last_highlighted_size)
+  - [2.5. Property `Rovr Config > settings > auto_calculate_folder_size`](#settings_auto_calculate_folder_size)
   - [2.6. Property `Rovr Config > settings > editor`](#settings_editor)
     - [2.6.1. Property `Rovr Config > settings > editor > file`](#settings_editor_file)
       - [2.6.1.1. Property `Rovr Config > settings > editor > file > run`](#settings_editor_file_run)
@@ -114,7 +120,7 @@ description: config schema humanified
   - [2.8. Property `Rovr Config > settings > openers`](#settings_openers)
     - [2.8.1. Property `Rovr Config > settings > openers > groups`](#settings_openers_groups)
       - [2.8.1.1. Property `Rovr Config > settings > openers > groups > additionalProperties`](#settings_openers_groups_additionalProperties)
-        - [2.8.1.1.1. Rovr Config > settings > openers > groups > additionalProperties > opener](#settings_openers_groups_additionalProperties_items)
+        - [2.8.1.1.1. Rovr Config > settings > openers > groups > additionalProperties > additionalProperties items](#settings_openers_groups_additionalProperties_items)
           - [2.8.1.1.1.1. Property `Rovr Config > settings > openers > groups > additionalProperties > additionalProperties items > oneOf > item 0`](#settings_openers_groups_additionalProperties_items_oneOf_i0)
           - [2.8.1.1.1.2. Property `Rovr Config > settings > openers > groups > additionalProperties > additionalProperties items > oneOf > item 1`](#settings_openers_groups_additionalProperties_items_oneOf_i1)
             - [2.8.1.1.1.2.1. Property `Rovr Config > settings > openers > groups > additionalProperties > additionalProperties items > oneOf > item 1 > run`](#settings_openers_groups_additionalProperties_items_oneOf_i1_run)
@@ -122,9 +128,6 @@ description: config schema humanified
               - [2.8.1.1.1.2.2.1. Property `Rovr Config > settings > openers > groups > additionalProperties > additionalProperties items > oneOf > item 1 > if > cwd`](#settings_openers_groups_additionalProperties_items_oneOf_i1_if_cwd)
                 - [2.8.1.1.1.2.2.1.1. Rovr Config > settings > openers > groups > additionalProperties > additionalProperties items > oneOf > item 1 > if > cwd > cwd items](#settings_openers_groups_additionalProperties_items_oneOf_i1_if_cwd_items)
               - [2.8.1.1.1.2.2.2. Property `Rovr Config > settings > openers > groups > additionalProperties > additionalProperties items > oneOf > item 1 > if > os`](#settings_openers_groups_additionalProperties_items_oneOf_i1_if_os)
-                - [2.8.1.1.1.2.2.2.1. Rovr Config > settings > openers > groups > additionalProperties > additionalProperties items > oneOf > item 1 > if > os > os items](#settings_openers_groups_additionalProperties_items_oneOf_i1_if_os_items)
-                  - [2.8.1.1.1.2.2.2.1.1. Property `Rovr Config > settings > openers > groups > additionalProperties > additionalProperties items > oneOf > item 1 > if > os > os items > anyOf > item 0`](#settings_openers_groups_additionalProperties_items_oneOf_i1_if_os_items_anyOf_i0)
-                  - [2.8.1.1.1.2.2.2.1.2. Property `Rovr Config > settings > openers > groups > additionalProperties > additionalProperties items > oneOf > item 1 > if > os > os items > anyOf > item 1`](#settings_openers_groups_additionalProperties_items_oneOf_i1_if_os_items_anyOf_i1)
               - [2.8.1.1.1.2.2.3. Property `Rovr Config > settings > openers > groups > additionalProperties > additionalProperties items > oneOf > item 1 > if > directory`](#settings_openers_groups_additionalProperties_items_oneOf_i1_if_directory)
             - [2.8.1.1.1.2.3. Property `Rovr Config > settings > openers > groups > additionalProperties > additionalProperties items > oneOf > item 1 > orphan`](#settings_openers_groups_additionalProperties_items_oneOf_i1_orphan)
             - [2.8.1.1.1.2.4. Property `Rovr Config > settings > openers > groups > additionalProperties > additionalProperties items > oneOf > item 1 > name`](#settings_openers_groups_additionalProperties_items_oneOf_i1_name)
@@ -444,6 +447,9 @@ description: config schema humanified
 | [show_line_numbers](#interface_show_line_numbers)                     | boolean         | Add line numbers to the left gutter if you are viewing a text file.                                                                                                                                              |
 | [scrolloff](#interface_scrolloff)                                     | integer         | The number of files to keep above and below the cursor when moving through the file list.                                                                                                                        |
 | [show_hidden_files](#interface_show_hidden_files)                     | boolean         | Show hidden files and folders (those starting with a dot on Unix, or explicitly hidden on Windows/MacOS).                                                                                                        |
+| [spinner](#interface_spinner)                                         | Combination     | The spinner to use when loading files. Can be a string or an array of strings for a custom spinner.                                                                                                              |
+| [allow_auto_select_mode](#interface_allow_auto_select_mode)           | boolean         | Automatically enter select mode if you use shift+arrow keys to extend selection, and disable when there is only one selected left.                                                                               |
+| [show_tab_close_button](#interface_show_tab_close_button)             | boolean         | Show a close button on each tab in the tabs bar.                                                                                                                                                                 |
 | [details_list](#interface_details_list)                               | array of object | Metadata columns shown right-aligned in the file list, ordered by priority.<br />Earlier entries are dropped last when the panel becomes too narrow;<br />later entries are dropped first. Set to [] to disable. |
 | [image_viewer](#interface_image_viewer)                               | object          | Settings related to the image viewer used in the preview sidebar                                                                                                                                                 |
 | [font_preview](#interface_font_preview)                               | object          | Settings related to the font preview used in the preview sidebar                                                                                                                                                 |
@@ -551,7 +557,76 @@ Not properly hot-reloaded.
 
 **Description:** Show hidden files and folders (those starting with a dot on Unix, or explicitly hidden on Windows/MacOS).
 
-### <a name="interface_details_list"></a>1.10. Property `Rovr Config > interface > details_list`
+### <a name="interface_spinner"></a>1.10. Property `Rovr Config > interface > spinner`
+
+|                           |                  |
+| ------------------------- | ---------------- |
+| **Type**                  | `combining`      |
+| **Required**              | No               |
+| **Additional properties** | Any type allowed |
+| **Default**               | `"⣾⣽⣻⢿⡿⣟⣯⣷"`     |
+
+**Description:** The spinner to use when loading files. Can be a string or an array of strings for a custom spinner.
+
+| One of(Option)                        |
+| ------------------------------------- |
+| [item 0](#interface_spinner_oneOf_i0) |
+| [item 1](#interface_spinner_oneOf_i1) |
+
+#### <a name="interface_spinner_oneOf_i0"></a>1.10.1. Property `Rovr Config > interface > spinner > oneOf > item 0`
+
+|              |          |
+| ------------ | -------- |
+| **Type**     | `string` |
+| **Required** | No       |
+
+#### <a name="interface_spinner_oneOf_i1"></a>1.10.2. Property `Rovr Config > interface > spinner > oneOf > item 1`
+
+|              |                   |
+| ------------ | ----------------- |
+| **Type**     | `array of string` |
+| **Required** | No                |
+
+|                      | Array restrictions |
+| -------------------- | ------------------ |
+| **Min items**        | 1                  |
+| **Max items**        | N/A                |
+| **Items unicity**    | False              |
+| **Additional items** | False              |
+| **Tuple validation** | See below          |
+
+| Each item of this array must be                   | Description |
+| ------------------------------------------------- | ----------- |
+| [item 1 items](#interface_spinner_oneOf_i1_items) |             |
+
+##### <a name="interface_spinner_oneOf_i1_items"></a>1.10.2.1. Rovr Config > interface > spinner > oneOf > item 1 > item 1 items
+
+|              |          |
+| ------------ | -------- |
+| **Type**     | `string` |
+| **Required** | No       |
+
+### <a name="interface_allow_auto_select_mode"></a>1.11. Property `Rovr Config > interface > allow_auto_select_mode`
+
+|              |           |
+| ------------ | --------- |
+| **Type**     | `boolean` |
+| **Required** | No        |
+| **Default**  | `true`    |
+
+**Description:** Automatically enter select mode if you use shift+arrow keys to extend selection, and disable when there is only one selected left.
+
+### <a name="interface_show_tab_close_button"></a>1.12. Property `Rovr Config > interface > show_tab_close_button`
+
+|              |           |
+| ------------ | --------- |
+| **Type**     | `boolean` |
+| **Required** | No        |
+| **Default**  | `false`   |
+
+**Description:** Show a close button on each tab in the tabs bar.
+
+### <a name="interface_details_list"></a>1.13. Property `Rovr Config > interface > details_list`
 
 |              |                   |
 | ------------ | ----------------- |
@@ -575,7 +650,7 @@ later entries are dropped first. Set to [] to disable.
 | --------------------------------------------------- | ----------- |
 | [details_list items](#interface_details_list_items) |             |
 
-#### <a name="interface_details_list_items"></a>1.10.1. Rovr Config > interface > details_list > details_list items
+#### <a name="interface_details_list_items"></a>1.13.1. Rovr Config > interface > details_list > details_list items
 
 |                           |             |
 | ------------------------- | ----------- |
@@ -590,7 +665,7 @@ later entries are dropped first. Set to [] to disable.
 | [max_length](#interface_details_list_items_max_length) | integer          | Column width cap in cells. Defaults to the natural width of the type.<br />The label's width acts as a lower bound.                                                                                             |
 | [format](#interface_details_list_items_format)         | string           | strftime format for mtime/atime/ctime columns.<br />Defaults to metadata.datetime_format.                                                                                                                       |
 
-##### <a name="interface_details_list_items_type"></a>1.10.1.1. Property `Rovr Config > interface > details_list > details_list items > type`
+##### <a name="interface_details_list_items_type"></a>1.13.1.1. Property `Rovr Config > interface > details_list > details_list items > type`
 
 |              |                    |
 | ------------ | ------------------ |
@@ -612,7 +687,7 @@ Must be one of:
 - "group"
 - "git"
 
-##### <a name="interface_details_list_items_label"></a>1.10.1.2. Property `Rovr Config > interface > details_list > details_list items > label`
+##### <a name="interface_details_list_items_label"></a>1.13.1.2. Property `Rovr Config > interface > details_list > details_list items > label`
 
 |              |          |
 | ------------ | -------- |
@@ -621,7 +696,7 @@ Must be one of:
 
 **Description:** Column header label. Defaults to a built-in label for the type.
 
-##### <a name="interface_details_list_items_max_length"></a>1.10.1.3. Property `Rovr Config > interface > details_list > details_list items > max_length`
+##### <a name="interface_details_list_items_max_length"></a>1.13.1.3. Property `Rovr Config > interface > details_list > details_list items > max_length`
 
 |              |           |
 | ------------ | --------- |
@@ -635,7 +710,7 @@ The label's width acts as a lower bound.
 | ------------ | ------ |
 | **Minimum**  | &ge; 1 |
 
-##### <a name="interface_details_list_items_format"></a>1.10.1.4. Property `Rovr Config > interface > details_list > details_list items > format`
+##### <a name="interface_details_list_items_format"></a>1.13.1.4. Property `Rovr Config > interface > details_list > details_list items > format`
 
 |              |          |
 | ------------ | -------- |
@@ -645,7 +720,7 @@ The label's width acts as a lower bound.
 **Description:** strftime format for mtime/atime/ctime columns.
 Defaults to metadata.datetime_format.
 
-### <a name="interface_image_viewer"></a>1.11. Property `Rovr Config > interface > image_viewer`
+### <a name="interface_image_viewer"></a>1.14. Property `Rovr Config > interface > image_viewer`
 
 |                           |             |
 | ------------------------- | ----------- |
@@ -661,7 +736,7 @@ Defaults to metadata.datetime_format.
 | [max_size](#interface_image_viewer_max_size)     | array of integer | The maximum size for the image viewer. If the image exceeds this size, it will be scaled down to fit within these dimensions while maintaining its aspect ratio. |
 | [resampling](#interface_image_viewer_resampling) | enum (of string) | The resampling method to use when resizing images. This is only applicable when the image exceeds the maximum size specified in \`max_size\`.                    |
 
-#### <a name="interface_image_viewer_protocol"></a>1.11.1. Property `Rovr Config > interface > image_viewer > protocol`
+#### <a name="interface_image_viewer_protocol"></a>1.14.1. Property `Rovr Config > interface > image_viewer > protocol`
 
 |              |                    |
 | ------------ | ------------------ |
@@ -680,7 +755,7 @@ Must be one of:
 - "Halfcell"
 - "Unicode"
 
-#### <a name="interface_image_viewer_max_size"></a>1.11.2. Property `Rovr Config > interface > image_viewer > max_size`
+#### <a name="interface_image_viewer_max_size"></a>1.14.2. Property `Rovr Config > interface > image_viewer > max_size`
 
 |              |                    |
 | ------------ | ------------------ |
@@ -702,7 +777,7 @@ Must be one of:
 | -------------------------------------------------------- | ----------- |
 | [max_size items](#interface_image_viewer_max_size_items) |             |
 
-##### <a name="interface_image_viewer_max_size_items"></a>1.11.2.1. Rovr Config > interface > image_viewer > max_size > max_size items
+##### <a name="interface_image_viewer_max_size_items"></a>1.14.2.1. Rovr Config > interface > image_viewer > max_size > max_size items
 
 |              |           |
 | ------------ | --------- |
@@ -713,7 +788,7 @@ Must be one of:
 | ------------ | ------ |
 | **Minimum**  | &ge; 1 |
 
-#### <a name="interface_image_viewer_resampling"></a>1.11.3. Property `Rovr Config > interface > image_viewer > resampling`
+#### <a name="interface_image_viewer_resampling"></a>1.14.3. Property `Rovr Config > interface > image_viewer > resampling`
 
 |              |                    |
 | ------------ | ------------------ |
@@ -732,7 +807,7 @@ Must be one of:
 - "bicubic"
 - "lanczos"
 
-### <a name="interface_font_preview"></a>1.12. Property `Rovr Config > interface > font_preview`
+### <a name="interface_font_preview"></a>1.15. Property `Rovr Config > interface > font_preview`
 
 |                           |             |
 | ------------------------- | ----------- |
@@ -747,7 +822,7 @@ Must be one of:
 | [max_size](#interface_font_preview_max_size)   | array of integer | The maximum size for the font preview. If the rendered font preview exceeds this size, it will be scaled down to fit within these dimensions while maintaining its aspect ratio. |
 | [font_size](#interface_font_preview_font_size) | integer          | The font size to use when rendering font previews. This is only applicable when the font preview exceeds the maximum size specified in \`max_size\`.                             |
 
-#### <a name="interface_font_preview_max_size"></a>1.12.1. Property `Rovr Config > interface > font_preview > max_size`
+#### <a name="interface_font_preview_max_size"></a>1.15.1. Property `Rovr Config > interface > font_preview > max_size`
 
 |              |                    |
 | ------------ | ------------------ |
@@ -769,7 +844,7 @@ Must be one of:
 | -------------------------------------------------------- | ----------- |
 | [max_size items](#interface_font_preview_max_size_items) |             |
 
-##### <a name="interface_font_preview_max_size_items"></a>1.12.1.1. Rovr Config > interface > font_preview > max_size > max_size items
+##### <a name="interface_font_preview_max_size_items"></a>1.15.1.1. Rovr Config > interface > font_preview > max_size > max_size items
 
 |              |           |
 | ------------ | --------- |
@@ -780,7 +855,7 @@ Must be one of:
 | ------------ | ------ |
 | **Minimum**  | &ge; 1 |
 
-#### <a name="interface_font_preview_font_size"></a>1.12.2. Property `Rovr Config > interface > font_preview > font_size`
+#### <a name="interface_font_preview_font_size"></a>1.15.2. Property `Rovr Config > interface > font_preview > font_size`
 
 |              |           |
 | ------------ | --------- |
@@ -790,7 +865,7 @@ Must be one of:
 
 **Description:** The font size to use when rendering font previews. This is only applicable when the font preview exceeds the maximum size specified in `max_size`.
 
-### <a name="interface_allow_tab_nav"></a>1.13. Property `Rovr Config > interface > allow_tab_nav`
+### <a name="interface_allow_tab_nav"></a>1.16. Property `Rovr Config > interface > allow_tab_nav`
 
 |              |           |
 | ------------ | --------- |
@@ -800,7 +875,7 @@ Must be one of:
 
 **Description:** Allow navigating the main app screen with `tab` and `shift+tab`
 
-### <a name="interface_append_new_tabs"></a>1.14. Property `Rovr Config > interface > append_new_tabs`
+### <a name="interface_append_new_tabs"></a>1.17. Property `Rovr Config > interface > append_new_tabs`
 
 |              |           |
 | ------------ | --------- |
@@ -812,7 +887,7 @@ Must be one of:
 `true` =&gt; Append to the end of the tab list.
 `false` =&gt; Insert after the active tab.
 
-### <a name="interface_double_click_delay"></a>1.15. Property `Rovr Config > interface > double_click_delay`
+### <a name="interface_double_click_delay"></a>1.18. Property `Rovr Config > interface > double_click_delay`
 
 |              |          |
 | ------------ | -------- |
@@ -822,7 +897,7 @@ Must be one of:
 
 **Description:** The delay between two consecutive clicks to enter into a directory, or open a file.
 
-### <a name="interface_drive_watcher_frequency"></a>1.16. Property `Rovr Config > interface > drive_watcher_frequency`
+### <a name="interface_drive_watcher_frequency"></a>1.19. Property `Rovr Config > interface > drive_watcher_frequency`
 
 |              |          |
 | ------------ | -------- |
@@ -832,7 +907,7 @@ Must be one of:
 
 **Description:** How often (in seconds) to check for changes in mounted drives in the sidebar.
 
-### <a name="interface_clock"></a>1.17. Property `Rovr Config > interface > clock`
+### <a name="interface_clock"></a>1.20. Property `Rovr Config > interface > clock`
 
 |                           |             |
 | ------------------------- | ----------- |
@@ -845,7 +920,7 @@ Must be one of:
 | [enabled](#interface_clock_enabled) | boolean          | Show a clock in the tabs bar.                                    |
 | [align](#interface_clock_align)     | enum (of string) | Align the clock to either the 'right' or 'left' of the tabs bar. |
 
-#### <a name="interface_clock_enabled"></a>1.17.1. Property `Rovr Config > interface > clock > enabled`
+#### <a name="interface_clock_enabled"></a>1.20.1. Property `Rovr Config > interface > clock > enabled`
 
 |              |           |
 | ------------ | --------- |
@@ -855,7 +930,7 @@ Must be one of:
 
 **Description:** Show a clock in the tabs bar.
 
-#### <a name="interface_clock_align"></a>1.17.2. Property `Rovr Config > interface > clock > align`
+#### <a name="interface_clock_align"></a>1.20.2. Property `Rovr Config > interface > clock > align`
 
 |              |                    |
 | ------------ | ------------------ |
@@ -870,7 +945,7 @@ Must be one of:
 - "left"
 - "right"
 
-### <a name="interface_preview_text"></a>1.18. Property `Rovr Config > interface > preview_text`
+### <a name="interface_preview_text"></a>1.21. Property `Rovr Config > interface > preview_text`
 
 |                           |             |
 | ------------------------- | ----------- |
@@ -884,7 +959,7 @@ Must be one of:
 | [start](#interface_preview_text_start)         | string | This is shown when the rovr starts up. You may see it for a split second, but it will never appear afterwards. You cannot view this properly in this docs. |
 | [font_text](#interface_preview_text_font_text) | string | When a font file is previewed, this text will be rendered in the font if possible.                                                                         |
 
-#### <a name="interface_preview_text_error"></a>1.18.1. Property `Rovr Config > interface > preview_text > error`
+#### <a name="interface_preview_text_error"></a>1.21.1. Property `Rovr Config > interface > preview_text > error`
 
 |              |                                     |
 | ------------ | ----------------------------------- |
@@ -894,7 +969,7 @@ Must be one of:
 
 **Description:** If for any reason the file preview refused to show, this appears.
 
-#### <a name="interface_preview_text_start"></a>1.18.2. Property `Rovr Config > interface > preview_text > start`
+#### <a name="interface_preview_text_start"></a>1.21.2. Property `Rovr Config > interface > preview_text > start`
 
 |              |                                                                                                                                      |
 | ------------ | ------------------------------------------------------------------------------------------------------------------------------------ |
@@ -904,7 +979,7 @@ Must be one of:
 
 **Description:** This is shown when the rovr starts up. You may see it for a split second, but it will never appear afterwards. You cannot view this properly in this docs.
 
-#### <a name="interface_preview_text_font_text"></a>1.18.3. Property `Rovr Config > interface > preview_text > font_text`
+#### <a name="interface_preview_text_font_text"></a>1.21.3. Property `Rovr Config > interface > preview_text > font_text`
 
 |              |                                                                                                                            |
 | ------------ | -------------------------------------------------------------------------------------------------------------------------- |
@@ -914,7 +989,7 @@ Must be one of:
 
 **Description:** When a font file is previewed, this text will be rendered in the font if possible.
 
-### <a name="interface_compact_mode"></a>1.19. Property `Rovr Config > interface > compact_mode`
+### <a name="interface_compact_mode"></a>1.22. Property `Rovr Config > interface > compact_mode`
 
 |                           |             |
 | ------------------------- | ----------- |
@@ -927,7 +1002,7 @@ Must be one of:
 | [buttons](#interface_compact_mode_buttons) | boolean | Whether to compact the buttons and path input to one line instead of three.  |
 | [panels](#interface_compact_mode_panels)   | boolean | Whether to make the panels smaller to add more room for the file list itself |
 
-#### <a name="interface_compact_mode_buttons"></a>1.19.1. Property `Rovr Config > interface > compact_mode > buttons`
+#### <a name="interface_compact_mode_buttons"></a>1.22.1. Property `Rovr Config > interface > compact_mode > buttons`
 
 |              |           |
 | ------------ | --------- |
@@ -937,7 +1012,7 @@ Must be one of:
 
 **Description:** Whether to compact the buttons and path input to one line instead of three.
 
-#### <a name="interface_compact_mode_panels"></a>1.19.2. Property `Rovr Config > interface > compact_mode > panels`
+#### <a name="interface_compact_mode_panels"></a>1.22.2. Property `Rovr Config > interface > compact_mode > panels`
 
 |              |           |
 | ------------ | --------- |
@@ -957,17 +1032,17 @@ Must be one of:
 
 **Description:** Settings related to behavior of file operations
 
-| Property                                                   | Type            | Title/Description                                                                                                                                                                                                       |
-| ---------------------------------------------------------- | --------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| [use_recycle_bin](#settings_use_recycle_bin)               | boolean         | When deleting a file, allow moving the file to the recycle bin.                                                                                                                                                         |
-| [right_click](#settings_right_click)                       | array           | Configuration for the right-click context menu. Fully replaces the default list.                                                                                                                                        |
-| [copy_includes_metadata](#settings_copy_includes_metadata) | boolean         | When copying over a file, preserve metadata from the original file, such as creation and modification times.                                                                                                            |
-| [history_size](#settings_history_size)                     | integer         | The maximum number of directories to keep in the back/forward navigation history, per tab. Oldest entries are evicted once this is exceeded.                                                                            |
-| [last_highlighted_size](#settings_last_highlighted_size)   | integer         | The maximum number of directories to remember the last-highlighted item for, per tab. Least-recently-used entries are evicted once this is exceeded.                                                                    |
-| [editor](#settings_editor)                                 | object          | Settings related to the editor used for different operations                                                                                                                                                            |
-| [preview_rules](#settings_preview_rules)                   | object          | Map MIME type patterns to preview types. Uses regex patterns. Valid preview types: text, image, pdf, archive, folder, resvg, font, remime.<br />-&gt; Use 'remime' if you want a more accurate description from file(1) |
-| [openers](#settings_openers)                               | object          | Openers to open files with, grouped by name and matched against file paths by glob pattern.                                                                                                                             |
-| [drive_exclude](#settings_drive_exclude)                   | array of string | Glob patterns matched against mountpoint paths. Drives matching any pattern are hidden from the sidebar (e.g. '/run/media/\*', 'D:/').                                                                                  |
+| Property                                                           | Type            | Title/Description                                                                                                                                                                                                       |
+| ------------------------------------------------------------------ | --------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| [use_recycle_bin](#settings_use_recycle_bin)                       | boolean         | When deleting a file, allow moving the file to the recycle bin.                                                                                                                                                         |
+| [right_click](#settings_right_click)                               | array           | Configuration for the right-click context menu. Fully replaces the default list.                                                                                                                                        |
+| [copy_includes_metadata](#settings_copy_includes_metadata)         | boolean         | When copying over a file, preserve metadata from the original file, such as creation and modification times.                                                                                                            |
+| [history_size](#settings_history_size)                             | integer         | The maximum number of directories to keep in the back/forward navigation history, per tab. Oldest entries are evicted once this is exceeded.                                                                            |
+| [auto_calculate_folder_size](#settings_auto_calculate_folder_size) | boolean         | Automatically calculate the folder sizes when a folder is highlighted                                                                                                                                                   |
+| [editor](#settings_editor)                                         | object          | Settings related to the editor used for different operations                                                                                                                                                            |
+| [preview_rules](#settings_preview_rules)                           | object          | Map MIME type patterns to preview types. Uses regex patterns. Valid preview types: text, image, pdf, archive, folder, resvg, font, remime.<br />-&gt; Use 'remime' if you want a more accurate description from file(1) |
+| [openers](#settings_openers)                                       | object          | Openers to open files with, grouped by name and matched against file paths by glob pattern.                                                                                                                             |
+| [drive_exclude](#settings_drive_exclude)                           | array of string | Glob patterns matched against mountpoint paths. Drives matching any pattern are hidden from the sidebar (e.g. '/run/media/\*', 'D:/').                                                                                  |
 
 ### <a name="settings_use_recycle_bin"></a>2.1. Property `Rovr Config > settings > use_recycle_bin`
 
@@ -1231,10 +1306,11 @@ Must be one of:
 
 ###### <a name="settings_right_click_items_if_os"></a>2.2.1.5.2. Property `Rovr Config > settings > right_click > right_click items > if > os`
 
-|              |                   |
-| ------------ | ----------------- |
-| **Type**     | `array of string` |
-| **Required** | No                |
+|                |                     |
+| -------------- | ------------------- |
+| **Type**       | `array of string`   |
+| **Required**   | No                  |
+| **Defined in** | #/definitions/os_if |
 
 **Description:** Only enable this menu item if the operating system is one of the following (case insensitive)
 
@@ -1422,10 +1498,11 @@ Must be one of:
 
 ###### <a name="settings_right_click_items_if_os"></a>2.2.1.6.1.3.2. Property `Rovr Config > settings > right_click > right_click items > if > os`
 
-|              |                   |
-| ------------ | ----------------- |
-| **Type**     | `array of string` |
-| **Required** | No                |
+|                |                     |
+| -------------- | ------------------- |
+| **Type**       | `array of string`   |
+| **Required**   | No                  |
+| **Defined in** | #/definitions/os_if |
 
 **Description:** Only enable this menu item if the operating system is one of the following (case insensitive)
 
@@ -1526,7 +1603,7 @@ Must be one of:
 | ------------ | --------- |
 | **Type**     | `integer` |
 | **Required** | No        |
-| **Default**  | `100`     |
+| **Default**  | `200`     |
 
 **Description:** The maximum number of directories to keep in the back/forward navigation history, per tab. Oldest entries are evicted once this is exceeded.
 
@@ -1534,19 +1611,15 @@ Must be one of:
 | ------------ | ------ |
 | **Minimum**  | &ge; 1 |
 
-### <a name="settings_last_highlighted_size"></a>2.5. Property `Rovr Config > settings > last_highlighted_size`
+### <a name="settings_auto_calculate_folder_size"></a>2.5. Property `Rovr Config > settings > auto_calculate_folder_size`
 
 |              |           |
 | ------------ | --------- |
-| **Type**     | `integer` |
+| **Type**     | `boolean` |
 | **Required** | No        |
-| **Default**  | `200`     |
+| **Default**  | `false`   |
 
-**Description:** The maximum number of directories to remember the last-highlighted item for, per tab. Least-recently-used entries are evicted once this is exceeded.
-
-| Restrictions |        |
-| ------------ | ------ |
-| **Minimum**  | &ge; 1 |
+**Description:** Automatically calculate the folder sizes when a folder is highlighted
 
 ### <a name="settings_editor"></a>2.6. Property `Rovr Config > settings > editor`
 
@@ -1900,18 +1973,17 @@ Must be one of:
 | **Additional items** | False              |
 | **Tuple validation** | See below          |
 
-| Each item of this array must be                               | Description |
-| ------------------------------------------------------------- | ----------- |
-| [opener](#settings_openers_groups_additionalProperties_items) |             |
+| Each item of this array must be                                                   | Description |
+| --------------------------------------------------------------------------------- | ----------- |
+| [additionalProperties items](#settings_openers_groups_additionalProperties_items) |             |
 
-###### <a name="settings_openers_groups_additionalProperties_items"></a>2.8.1.1.1. Rovr Config > settings > openers > groups > additionalProperties > opener
+###### <a name="settings_openers_groups_additionalProperties_items"></a>2.8.1.1.1. Rovr Config > settings > openers > groups > additionalProperties > additionalProperties items
 
-|                           |                      |
-| ------------------------- | -------------------- |
-| **Type**                  | `combining`          |
-| **Required**              | No                   |
-| **Additional properties** | Any type allowed     |
-| **Defined in**            | #/definitions/opener |
+|                           |                  |
+| ------------------------- | ---------------- |
+| **Type**                  | `combining`      |
+| **Required**              | No               |
+| **Additional properties** | Any type allowed |
 
 | One of(Option)                                                         |
 | ---------------------------------------------------------------------- |
@@ -1954,12 +2026,11 @@ Must be one of:
 
 ###### <a name="settings_openers_groups_additionalProperties_items_oneOf_i1_if"></a>2.8.1.1.1.2.2. Property `Rovr Config > settings > openers > groups > additionalProperties > additionalProperties items > oneOf > item 1 > if`
 
-|                           |                         |
-| ------------------------- | ----------------------- |
-| **Type**                  | `object`                |
-| **Required**              | No                      |
-| **Additional properties** | Not allowed             |
-| **Defined in**            | #/definitions/opener_if |
+|                           |             |
+| ------------------------- | ----------- |
+| **Type**                  | `object`    |
+| **Required**              | No          |
+| **Additional properties** | Not allowed |
 
 **Description:** Only use this opener if a set criteria matches
 
@@ -1999,57 +2070,13 @@ Must be one of:
 
 ###### <a name="settings_openers_groups_additionalProperties_items_oneOf_i1_if_os"></a>2.8.1.1.1.2.2.2. Property `Rovr Config > settings > openers > groups > additionalProperties > additionalProperties items > oneOf > item 1 > if > os`
 
-|                |                     |
-| -------------- | ------------------- |
-| **Type**       | `array of string`   |
-| **Required**   | No                  |
-| **Defined in** | #/definitions/os_if |
+|                        |                                         |
+| ---------------------- | --------------------------------------- |
+| **Type**               | `array of string`                       |
+| **Required**           | No                                      |
+| **Same definition as** | [os](#settings_right_click_items_if_os) |
 
 **Description:** Only use this opener if the operating system is one of the following (case insensitive)
-
-|                      | Array restrictions |
-| -------------------- | ------------------ |
-| **Min items**        | N/A                |
-| **Max items**        | N/A                |
-| **Items unicity**    | False              |
-| **Additional items** | False              |
-| **Tuple validation** | See below          |
-
-| Each item of this array must be                                                      | Description |
-| ------------------------------------------------------------------------------------ | ----------- |
-| [os items](#settings_openers_groups_additionalProperties_items_oneOf_i1_if_os_items) |             |
-
-###### <a name="settings_openers_groups_additionalProperties_items_oneOf_i1_if_os_items"></a>2.8.1.1.1.2.2.2.1. Rovr Config > settings > openers > groups > additionalProperties > additionalProperties items > oneOf > item 1 > if > os > os items
-
-|              |             |
-| ------------ | ----------- |
-| **Type**     | `combining` |
-| **Required** | No          |
-
-| Any of(Option)                                                                              |
-| ------------------------------------------------------------------------------------------- |
-| [item 0](#settings_openers_groups_additionalProperties_items_oneOf_i1_if_os_items_anyOf_i0) |
-| [item 1](#settings_openers_groups_additionalProperties_items_oneOf_i1_if_os_items_anyOf_i1) |
-
-###### <a name="settings_openers_groups_additionalProperties_items_oneOf_i1_if_os_items_anyOf_i0"></a>2.8.1.1.1.2.2.2.1.1. Property `Rovr Config > settings > openers > groups > additionalProperties > additionalProperties items > oneOf > item 1 > if > os > os items > anyOf > item 0`
-
-|              |                    |
-| ------------ | ------------------ |
-| **Type**     | `enum (of string)` |
-| **Required** | No                 |
-
-Must be one of:
-
-- "Windows"
-- "Linux"
-- "Darwin"
-
-###### <a name="settings_openers_groups_additionalProperties_items_oneOf_i1_if_os_items_anyOf_i1"></a>2.8.1.1.1.2.2.2.1.2. Property `Rovr Config > settings > openers > groups > additionalProperties > additionalProperties items > oneOf > item 1 > if > os > os items > anyOf > item 1`
-
-|              |          |
-| ------------ | -------- |
-| **Type**     | `string` |
-| **Required** | No       |
 
 ###### <a name="settings_openers_groups_additionalProperties_items_oneOf_i1_if_directory"></a>2.8.1.1.1.2.2.3. Property `Rovr Config > settings > openers > groups > additionalProperties > additionalProperties items > oneOf > item 1 > if > directory`
 

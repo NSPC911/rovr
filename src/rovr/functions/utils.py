@@ -147,6 +147,8 @@ def run_command(
         from shlex import join as shjoin
 
         command = shjoin(command)
+    if globals().get("is_dev", False):
+        print(command)
 
     match run_type:
         case "orphan":
@@ -183,8 +185,6 @@ def run_command(
 
             def func() -> subprocess.CompletedProcess:
                 with app.suspend():
-                    if globals().get("is_dev", False):
-                        print(command)
                     return subprocess.run(command, shell=shell)
 
             try:
@@ -241,6 +241,9 @@ def multiprocessing_process_error_checker(app: App, exc: Exception) -> bool:
     return False
 
 
+percent_expand = re.compile(r"%([tT])(\d*)h(?![a-zA-Z0-9_])|%[a-zA-Z_]+")
+
+
 @overload
 async def expand_command(app: App, command: str) -> str: ...
 
@@ -250,7 +253,10 @@ async def expand_command(app: App, command: list[str]) -> list[str]: ...
 
 
 async def expand_command(app: App, command: str | list[str]) -> str | list[str]:
+    from shlex import join as shjoin
+
     from rovr.functions.path import normalise
+    from rovr.header.tabs import TablineTab
 
     cwd = normalise(getcwd())
     highlighted = ""
@@ -258,37 +264,93 @@ async def expand_command(app: App, command: str | list[str]) -> str | list[str]:
         app.file_list.highlighted_option, "dir_entry"
     ):
         highlighted = normalise(app.file_list.highlighted_option.dir_entry.path)
+    selected = app.query_one("Clipboard").selected
+    copy, cut = (
+        [item.path for item in selected if item.type_of_selection == "copy"],
+        [item.path for item in selected if item.type_of_selection == "cut"],
+    )
 
     selected_files = await app.file_list.get_selected_objects() or []
+    tabs = list(app.tabWidget.query(TablineTab))
+
+    def _expand_tab(match: re.Match[str]) -> str:
+        direction, distance = match.group(1), match.group(2)
+        if not tabs or app.tabWidget.active_tab not in tabs:
+            return match.group(0)
+        target = tabs[
+            (
+                tabs.index(app.tabWidget.active_tab)
+                + (int(distance or 1) * (1 if direction == "t" else -1))
+            )
+            % len(tabs)
+        ]
+        if target is app.tabWidget.active_tab:
+            return highlighted
+        last_highlight = target.session.lastHighlighted.get(target.directory)
+        name = last_highlight["name"] if last_highlight else target.focus_on
+        return normalise(os.path.join(target.directory, name)) if name else ""
 
     def _expand(cmd: str) -> str:
+        # deprecated stuff
         expanded = cmd.replace("${current_working_directory}", cwd).replace(
             "${real_current_working_directory", os.path.realpath(cwd)
         )
         expanded = expanded.replace("${highlighted_file}", highlighted).replace(
             "${real_highlighted_file}", os.path.realpath(highlighted)
         )
-        if selected_files:
-            from shlex import join as shjoin
-
-            expanded = expanded.replace(
-                "${selected_files}", shjoin(selected_files)
-            ).replace(
-                "${real_selected_files}",
-                shjoin([os.path.realpath(f) for f in selected_files]),
-            )
+        expanded = expanded.replace(
+            "${selected_files}", shjoin(selected_files)
+        ).replace(
+            "${real_selected_files}",
+            shjoin([os.path.realpath(f) for f in selected_files]),
+        )
         expanded = expanded.replace(
             "${highlighted_file_name}", os.path.basename(highlighted)
         ).replace(
             "${real_highlighted_file_name}",
             os.path.basename(os.path.realpath(highlighted)),
         )
+        if cmd != expanded:
+            app.notify(
+                "Expansion syntax [primary]${thing}[/] is deprecated, please use [primary]%thing[/] instead",
+                timeout=5,
+                severity="warning",
+            )
+        # we will start using %<thing> from now on
+        # scan for %<thing>
+        if percent_expand.search(expanded):
+            expanded = percent_expand.sub(
+                # have i told you how frigtening my brain is
+                lambda match: (
+                    _expand_tab(match)
+                    if match.group(1) is not None
+                    else {
+                        "%cwd": lambda: cwd,
+                        "%rcwd": lambda: os.path.realpath(cwd),
+                        "%h": lambda: highlighted,
+                        "%rh": lambda: os.path.realpath(highlighted),
+                        "%nh": lambda: os.path.basename(highlighted),
+                        "%rnh": lambda: os.path.basename(os.path.realpath(highlighted)),
+                        "%s": lambda: shjoin(selected_files),
+                        "%rs": lambda: shjoin([
+                            os.path.realpath(f) for f in selected_files
+                        ]),
+                        "%cut": lambda: shjoin(cut),
+                        "%copy": lambda: shjoin(copy),
+                    }.get(match.group(0), lambda: match.group(0))()
+                ),
+                expanded,
+            )
+
         return expanded
 
     if isinstance(command, list):
-        return [_expand(cmd) for cmd in command]
+        to_return = [_expand(cmd) for cmd in command]
     else:
-        return _expand(command)
+        to_return = _expand(command)
+    if globals().get("is_dev", False):
+        print(f"{command}\n-> {to_return}")
+    return to_return
 
 
 @lru_cache(maxsize=512)

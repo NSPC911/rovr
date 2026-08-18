@@ -120,7 +120,7 @@ description: config schema humanified
   - [2.8. Property `Rovr Config > settings > openers`](#settings_openers)
     - [2.8.1. Property `Rovr Config > settings > openers > groups`](#settings_openers_groups)
       - [2.8.1.1. Property `Rovr Config > settings > openers > groups > additionalProperties`](#settings_openers_groups_additionalProperties)
-        - [2.8.1.1.1. Rovr Config > settings > openers > groups > additionalProperties > opener](#settings_openers_groups_additionalProperties_items)
+        - [2.8.1.1.1. Rovr Config > settings > openers > groups > additionalProperties > additionalProperties items](#settings_openers_groups_additionalProperties_items)
           - [2.8.1.1.1.1. Property `Rovr Config > settings > openers > groups > additionalProperties > additionalProperties items > oneOf > item 0`](#settings_openers_groups_additionalProperties_items_oneOf_i0)
           - [2.8.1.1.1.2. Property `Rovr Config > settings > openers > groups > additionalProperties > additionalProperties items > oneOf > item 1`](#settings_openers_groups_additionalProperties_items_oneOf_i1)
             - [2.8.1.1.1.2.1. Property `Rovr Config > settings > openers > groups > additionalProperties > additionalProperties items > oneOf > item 1 > run`](#settings_openers_groups_additionalProperties_items_oneOf_i1_run)
@@ -128,9 +128,6 @@ description: config schema humanified
               - [2.8.1.1.1.2.2.1. Property `Rovr Config > settings > openers > groups > additionalProperties > additionalProperties items > oneOf > item 1 > if > cwd`](#settings_openers_groups_additionalProperties_items_oneOf_i1_if_cwd)
                 - [2.8.1.1.1.2.2.1.1. Rovr Config > settings > openers > groups > additionalProperties > additionalProperties items > oneOf > item 1 > if > cwd > cwd items](#settings_openers_groups_additionalProperties_items_oneOf_i1_if_cwd_items)
               - [2.8.1.1.1.2.2.2. Property `Rovr Config > settings > openers > groups > additionalProperties > additionalProperties items > oneOf > item 1 > if > os`](#settings_openers_groups_additionalProperties_items_oneOf_i1_if_os)
-                - [2.8.1.1.1.2.2.2.1. Rovr Config > settings > openers > groups > additionalProperties > additionalProperties items > oneOf > item 1 > if > os > os items](#settings_openers_groups_additionalProperties_items_oneOf_i1_if_os_items)
-                  - [2.8.1.1.1.2.2.2.1.1. Property `Rovr Config > settings > openers > groups > additionalProperties > additionalProperties items > oneOf > item 1 > if > os > os items > anyOf > item 0`](#settings_openers_groups_additionalProperties_items_oneOf_i1_if_os_items_anyOf_i0)
-                  - [2.8.1.1.1.2.2.2.1.2. Property `Rovr Config > settings > openers > groups > additionalProperties > additionalProperties items > oneOf > item 1 > if > os > os items > anyOf > item 1`](#settings_openers_groups_additionalProperties_items_oneOf_i1_if_os_items_anyOf_i1)
               - [2.8.1.1.1.2.2.3. Property `Rovr Config > settings > openers > groups > additionalProperties > additionalProperties items > oneOf > item 1 > if > directory`](#settings_openers_groups_additionalProperties_items_oneOf_i1_if_directory)
             - [2.8.1.1.1.2.3. Property `Rovr Config > settings > openers > groups > additionalProperties > additionalProperties items > oneOf > item 1 > orphan`](#settings_openers_groups_additionalProperties_items_oneOf_i1_orphan)
             - [2.8.1.1.1.2.4. Property `Rovr Config > settings > openers > groups > additionalProperties > additionalProperties items > oneOf > item 1 > name`](#settings_openers_groups_additionalProperties_items_oneOf_i1_name)
@@ -1309,10 +1306,11 @@ Must be one of:
 
 ###### <a name="settings_right_click_items_if_os"></a>2.2.1.5.2. Property `Rovr Config > settings > right_click > right_click items > if > os`
 
-|              |                   |
-| ------------ | ----------------- |
-| **Type**     | `array of string` |
-| **Required** | No                |
+|                |                     |
+| -------------- | ------------------- |
+| **Type**       | `array of string`   |
+| **Required**   | No                  |
+| **Defined in** | #/definitions/os_if |
 
 **Description:** Only enable this menu item if the operating system is one of the following (case insensitive)
 
@@ -1500,10 +1498,11 @@ Must be one of:
 
 ###### <a name="settings_right_click_items_if_os"></a>2.2.1.6.1.3.2. Property `Rovr Config > settings > right_click > right_click items > if > os`
 
-|              |                   |
-| ------------ | ----------------- |
-| **Type**     | `array of string` |
-| **Required** | No                |
+|                |                     |
+| -------------- | ------------------- |
+| **Type**       | `array of string`   |
+| **Required**   | No                  |
+| **Defined in** | #/definitions/os_if |
 
 **Description:** Only enable this menu item if the operating system is one of the following (case insensitive)
 
@@ -1974,18 +1973,17 @@ Must be one of:
 | **Additional items** | False              |
 | **Tuple validation** | See below          |
 
-| Each item of this array must be                               | Description |
-| ------------------------------------------------------------- | ----------- |
-| [opener](#settings_openers_groups_additionalProperties_items) |             |
+| Each item of this array must be                                                   | Description |
+| --------------------------------------------------------------------------------- | ----------- |
+| [additionalProperties items](#settings_openers_groups_additionalProperties_items) |             |
 
-###### <a name="settings_openers_groups_additionalProperties_items"></a>2.8.1.1.1. Rovr Config > settings > openers > groups > additionalProperties > opener
+###### <a name="settings_openers_groups_additionalProperties_items"></a>2.8.1.1.1. Rovr Config > settings > openers > groups > additionalProperties > additionalProperties items
 
-|                           |                      |
-| ------------------------- | -------------------- |
-| **Type**                  | `combining`          |
-| **Required**              | No                   |
-| **Additional properties** | Any type allowed     |
-| **Defined in**            | #/definitions/opener |
+|                           |                  |
+| ------------------------- | ---------------- |
+| **Type**                  | `combining`      |
+| **Required**              | No               |
+| **Additional properties** | Any type allowed |
 
 | One of(Option)                                                         |
 | ---------------------------------------------------------------------- |
@@ -2028,12 +2026,11 @@ Must be one of:
 
 ###### <a name="settings_openers_groups_additionalProperties_items_oneOf_i1_if"></a>2.8.1.1.1.2.2. Property `Rovr Config > settings > openers > groups > additionalProperties > additionalProperties items > oneOf > item 1 > if`
 
-|                           |                         |
-| ------------------------- | ----------------------- |
-| **Type**                  | `object`                |
-| **Required**              | No                      |
-| **Additional properties** | Not allowed             |
-| **Defined in**            | #/definitions/opener_if |
+|                           |             |
+| ------------------------- | ----------- |
+| **Type**                  | `object`    |
+| **Required**              | No          |
+| **Additional properties** | Not allowed |
 
 **Description:** Only use this opener if a set criteria matches
 
@@ -2073,57 +2070,13 @@ Must be one of:
 
 ###### <a name="settings_openers_groups_additionalProperties_items_oneOf_i1_if_os"></a>2.8.1.1.1.2.2.2. Property `Rovr Config > settings > openers > groups > additionalProperties > additionalProperties items > oneOf > item 1 > if > os`
 
-|                |                     |
-| -------------- | ------------------- |
-| **Type**       | `array of string`   |
-| **Required**   | No                  |
-| **Defined in** | #/definitions/os_if |
+|                        |                                         |
+| ---------------------- | --------------------------------------- |
+| **Type**               | `array of string`                       |
+| **Required**           | No                                      |
+| **Same definition as** | [os](#settings_right_click_items_if_os) |
 
 **Description:** Only use this opener if the operating system is one of the following (case insensitive)
-
-|                      | Array restrictions |
-| -------------------- | ------------------ |
-| **Min items**        | N/A                |
-| **Max items**        | N/A                |
-| **Items unicity**    | False              |
-| **Additional items** | False              |
-| **Tuple validation** | See below          |
-
-| Each item of this array must be                                                      | Description |
-| ------------------------------------------------------------------------------------ | ----------- |
-| [os items](#settings_openers_groups_additionalProperties_items_oneOf_i1_if_os_items) |             |
-
-###### <a name="settings_openers_groups_additionalProperties_items_oneOf_i1_if_os_items"></a>2.8.1.1.1.2.2.2.1. Rovr Config > settings > openers > groups > additionalProperties > additionalProperties items > oneOf > item 1 > if > os > os items
-
-|              |             |
-| ------------ | ----------- |
-| **Type**     | `combining` |
-| **Required** | No          |
-
-| Any of(Option)                                                                              |
-| ------------------------------------------------------------------------------------------- |
-| [item 0](#settings_openers_groups_additionalProperties_items_oneOf_i1_if_os_items_anyOf_i0) |
-| [item 1](#settings_openers_groups_additionalProperties_items_oneOf_i1_if_os_items_anyOf_i1) |
-
-###### <a name="settings_openers_groups_additionalProperties_items_oneOf_i1_if_os_items_anyOf_i0"></a>2.8.1.1.1.2.2.2.1.1. Property `Rovr Config > settings > openers > groups > additionalProperties > additionalProperties items > oneOf > item 1 > if > os > os items > anyOf > item 0`
-
-|              |                    |
-| ------------ | ------------------ |
-| **Type**     | `enum (of string)` |
-| **Required** | No                 |
-
-Must be one of:
-
-- "Windows"
-- "Linux"
-- "Darwin"
-
-###### <a name="settings_openers_groups_additionalProperties_items_oneOf_i1_if_os_items_anyOf_i1"></a>2.8.1.1.1.2.2.2.1.2. Property `Rovr Config > settings > openers > groups > additionalProperties > additionalProperties items > oneOf > item 1 > if > os > os items > anyOf > item 1`
-
-|              |          |
-| ------------ | -------- |
-| **Type**     | `string` |
-| **Required** | No       |
 
 ###### <a name="settings_openers_groups_additionalProperties_items_oneOf_i1_if_directory"></a>2.8.1.1.1.2.2.3. Property `Rovr Config > settings > openers > groups > additionalProperties > additionalProperties items > oneOf > item 1 > if > directory`
 

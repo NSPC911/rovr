@@ -30,9 +30,9 @@ try:
     config.template_name = "md"
     config.with_footer = False
     # do some temporary fixes to the schema
-    with open("src/rovr/config/schema.json", "r", encoding="utf-8") as f:
+    with open("src/rovr/assets/schema.json", "r", encoding="utf-8") as f:
         schema_content = f.read()
-    with open("src/rovr/config/schema.json", "w", encoding="utf-8") as f:
+    with open("src/rovr/assets/schema.json", "w", encoding="utf-8") as f:
         f.write(
             schema_content
             .replace("|", "&#124;")
@@ -40,7 +40,7 @@ try:
             .replace("<", "&lt;")
         )
     generate_from_filename(
-        "src/rovr/config/schema.json",
+        "src/rovr/assets/schema.json",
         "docs/src/content/docs/dev/reference/schema.mdx",
         config=config,
     )
@@ -94,5 +94,5 @@ except Exception:
 finally:
     # rewrite schema file
     if schema_content is not None:
-        with open("src/rovr/config/schema.json", "w", encoding="utf-8") as f:
+        with open("src/rovr/assets/schema.json", "w", encoding="utf-8") as f:
             f.write(schema_content)

@@ -3,6 +3,7 @@ from __future__ import annotations
 import os
 import subprocess
 from functools import lru_cache
+from importlib import resources
 from io import BytesIO
 
 from PIL import Image, ImageDraw, ImageFont, ImageOps
@@ -25,6 +26,11 @@ IMAGE_PREVIEW_SIZE = (
     IMAGE_LABEL_SIZE - (IMAGE_PADDING * 2),
     IMAGE_LABEL_SIZE - HEIGHT - IMAGE_PADDING,
 )
+ICON_FONT_PATH = (
+    resources.files("_rovr.assets")
+    if globals().get("__compiled__")
+    else resources.files("rovr.assets")
+) / "fonts/SymbolsNerdFont-Regular.ttf"
 
 
 def render_drag_image(
@@ -54,7 +60,7 @@ def render_drag_image(
                 image_path,
                 os.stat(image_path).st_mtime_ns,
             )
-            text_font = ImageFont.truetype(text_font_path, TEXT_SIZE)
+            text_font = _load_font(text_font_path, TEXT_SIZE)
         except (OSError, ValueError):
             pass
         except (Image.DecompressionBombError, Image.DecompressionBombWarning):
@@ -96,13 +102,12 @@ def render_drag_image(
             image.save(output, format="PNG", compress_level=1)
             return ImageLabel(output.getvalue(), width, height)
 
-    icon_font_path = _resolve_font_path(icon[0]) if icon else text_font_path
-    if icon_font_path is None:
-        return None
-
     try:
-        text_font = ImageFont.truetype(text_font_path, TEXT_SIZE * SCALE)
-        icon_font = ImageFont.truetype(icon_font_path, ICON_SIZE * SCALE)
+        text_font = _load_font(text_font_path, TEXT_SIZE * SCALE)
+        icon_font = _load_font(
+            str(ICON_FONT_PATH) if icon else text_font_path,
+            ICON_SIZE * SCALE,
+        )
     except OSError:
         return None
 
@@ -229,10 +234,14 @@ def _parse_color(value: str, fallback: tuple[int, int, int]) -> tuple[int, int, 
     return color.r, color.g, color.b
 
 
-@lru_cache(maxsize=128)
-def _resolve_font_path(character: str = "") -> str | None:
-    pattern = f":charset={ord(character):x}" if character else "monospace"
-    return _fontconfig_match(pattern)
+@lru_cache(maxsize=1)
+def _resolve_font_path() -> str | None:
+    return _fontconfig_match("monospace")
+
+
+@lru_cache(maxsize=4)
+def _load_font(font_path: str, size: int) -> ImageFont.FreeTypeFont:
+    return ImageFont.truetype(font_path, size)
 
 
 def _fontconfig_match(pattern: str) -> str | None:

@@ -56,6 +56,8 @@ class DeleteFiles(ModalScreen):
 
     def on_key(self, event: events.Key) -> None:
         """Handle key presses."""
+        if getattr(self.app, "keys", ()):
+            return
         if check_key(event, config["keybinds"]["delete_files"]["delete"]):
             self.action_delete(event)
         elif check_key(event, config["keybinds"]["delete_files"]["cancel"]):
@@ -67,13 +69,13 @@ class DeleteFiles(ModalScreen):
             self.action_trash(event)
 
     @on(Button.Pressed, "#delete")
-    def action_delete(self, event: Message) -> None:
+    def action_delete(self, event: Message | None = None) -> None:
         dismiss(self, "delete", event)
 
     @on(Button.Pressed, "#cancel")
-    def action_cancel(self, event: Message) -> None:
+    def action_cancel(self, event: Message | None = None) -> None:
         dismiss(self, "cancel", event)
 
     @on(Button.Pressed, "#trash")
-    def action_trash(self, event: Message) -> None:
+    def action_trash(self, event: Message | None = None) -> None:
         dismiss(self, "trash", event)

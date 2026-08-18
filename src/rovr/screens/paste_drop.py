@@ -65,6 +65,24 @@ class PasteDropScreen(Actionable, ModalScreen["PasteDropScreen.ReturnType | None
             ),
         ]
 
+    @on(Button.Pressed, "#copy")
+    def action_copy(self) -> None:
+        dismiss(
+            self,
+            PasteDropScreen.ReturnType(sorted(list(self.file_paths)), "copy"),
+        )
+
+    @on(Button.Pressed, "#move")
+    def action_move(self) -> None:
+        dismiss(
+            self,
+            PasteDropScreen.ReturnType(sorted(list(self.file_paths)), "move"),
+        )
+
+    @on(Button.Pressed, "#cancel")
+    def action_cancel(self) -> None:
+        dismiss(self, None)
+
     @on(events.Paste)
     def on_paste(self, event: events.Paste) -> None:
         # attempt to parse it
@@ -103,17 +121,3 @@ class PasteDropScreen(Actionable, ModalScreen["PasteDropScreen.ReturnType | None
             # ie click outside
             event.stop()
             dismiss(self, None, event)
-
-    @on(Button.Pressed)
-    def on_button_pressed(self, event: Button.Pressed) -> None:
-        match event.button.id:
-            case "copy" | "move":
-                dismiss(
-                    self,
-                    PasteDropScreen.ReturnType(
-                        sorted(list(self.file_paths)), event.button.id
-                    ),
-                    event,
-                )
-            case "cancel":
-                dismiss(self, None, event)

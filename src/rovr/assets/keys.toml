@@ -8,7 +8,6 @@
 "ctrl+z" = "app.suspend_process"
 
 [main]
-"P" = "toggle_pin"
 "S" = "app.toggle_pinned_sidebar"
 "I" = "app.toggle_preview_sidebar"
 "F" = "app.toggle_footer"
@@ -17,10 +16,22 @@
 "escape" = "app.focus_file_list"
 "i" = "app.focus_toggle_preview_sidebar"
 "ctrl+l" = "app.focus_toggle_path_switcher"
-"/" = "focus_search"
 "#" = "app.focus_toggle_processes"
 "c" = "app.focus_toggle_clipboard"
 "m" = "app.focus_toggle_metadata"
+"ctrl+j" = "app.cycle_tab(1)"
+"ctrl+k" = "app.cycle_tab(-1)"
+"n" = "app.tab_new"
+"w" = "app.tab_close"
+"?" = "app.show_keybinds"
+">" = "app.show_shell_screen"
+"z" = "app.plugin_zoxide"
+"f" = "app.plugin_fd"
+"\\" = "app.plugin_rg"
+
+[file_list]
+"P" = "toggle_pin"
+"/" = "focus_search"
 "y" = "copy"
 "ctrl+c" = "copy"
 "p" = "paste"
@@ -37,25 +48,10 @@
 "A" = "bulk_create"
 "E" = "zip"
 "ctrl+e" = "unzip"
-"up" = "cursor(-1)"
-"k" = "cursor(-1)"
-"down" = "cursor(1)"
-"j" = "cursor(1)"
 "left" = "up_tree"
 "h" = "up_tree"
-"right" = "select"
-"l" = "select"
-"enter" = "select"
 "H" = "bypass_up_tree"
 "L" = "bypass_down_tree"
-"pageup" = "cursor_page(-1)"
-"ctrl+b" = "cursor_page(-1)"
-"pagedown" = "cursor_page(1)"
-"ctrl+f" = "cursor_page(1)"
-"home" = "first"
-"g" = "first"
-"end" = "last"
-"G" = "last"
 "backspace" = "hist_previous"
 "u" = "hist_previous"
 "space" = "hist_next"
@@ -72,31 +68,42 @@
 "shift+pagedown" = "select_cursor_page(1)"
 "shift+home" = "select_home"
 "shift+end" = "select_end"
-"ctrl+j" = "app.cycle_tab(1)"
-"ctrl+k" = "app.cycle_tab(-1)"
-"n" = "app.tab_new"
-"w" = "app.tab_close"
-"?" = "app.show_keybinds"
 "o" = "open"
 "e" = "open_editor"
-">" = "app.show_shell_screen"
 "shift+f10" = "open_right_click_menu"
 "Y" = "extra_copy_open_popup"
 "," = "change_sort_order_open_popup"
-"z" = "app.plugin_zoxide"
-"f" = "app.plugin_fd"
-"\\" = "app.plugin_rg"
+
+[pinned_sidebar]
+"/" = "focus_search"
+
+[lists]
+"up" = "cursor(-1)"
+"k" = "cursor(-1)"
+"down" = "cursor(1)"
+"j" = "cursor(1)"
+"right" = "select"
+"l" = "select"
+"enter" = "select"
+"pageup" = "cursor_page(-1)"
+"ctrl+b" = "cursor_page(-1)"
+"pagedown" = "cursor_page(1)"
+"ctrl+f" = "cursor_page(1)"
+"home" = "first"
+"g" = "first"
+"end" = "last"
+"G" = "last"
 
 # preview_select_left, preview_select_right, preview_scroll_left, and
 # preview_scroll_right are omitted because the default key lists are empty.
 
-[extra_copy]
+[copy_menu]
 "y" = "copy_to_rovr"
 "p" = "copy_highlighted"
 "s" = "copy_to_system_clip"
 "d" = "copy_current_directory"
 
-[change_sort_order]
+[sort_menu]
 "a" = "change_sort_order_name"
 "e" = "change_sort_order_extension"
 "n" = "change_sort_order_natural"
@@ -135,14 +142,18 @@
 
 [filter_modal]
 "escape" = "exit"
-"down" = "down"
-"ctrl+j" = "down"
-"up" = "up"
-"ctrl+k" = "up"
-"pageup" = "page_up"
-"ctrl+b" = "page_up"
-"pagedown" = "page_down"
-"ctrl+f" = "page_down"
+"down" = "cursor(1)"
+"ctrl+j" = "cursor(1)"
+"up" = "cursor(-1)"
+"ctrl+k" = "cursor(-1)"
+"pageup" = "cursor_page(-1)"
+"ctrl+b" = "cursor_page(-1)"
+"pagedown" = "cursor_page(1)"
+"ctrl+f" = "cursor_page(1)"
+
+[keybinds]
+"/" = "focus_search"
+"?" = "exit"
 
 [yes_or_no]
 "y" = "yes"
@@ -150,7 +161,7 @@
 "escape" = "no"
 "a" = "dont_ask_again"
 
-[drag_and_drop]
+[paste_drop]
 "c" = "copy"
 "m" = "move"
 "escape" = "cancel"

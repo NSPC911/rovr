@@ -199,7 +199,25 @@ class CopyPanelOptions(PopupOptionList):
                 (self.app.size.height - height) // 2,
             )
 
+    def action_copy_to_rovr(self) -> None:
+        self.button.action_press()
+        self.go_hide()
+
+    def action_copy_highlighted(self) -> None:
+        self.button.copy_highlighted()
+        self.go_hide()
+
+    def action_copy_to_system_clip(self) -> None:
+        self.button.copy_to_system_clip()
+        self.go_hide()
+
+    def action_copy_current_directory(self) -> None:
+        self.button.copy_current_directory()
+        self.go_hide()
+
     async def on_key(self, event: events.Key) -> None:
+        if getattr(self.app, "keys", ()):
+            return
         if check_key(event, config["keybinds"]["extra_copy"]["copy_to_rovr"]):
             self.button.action_press()
         elif check_key(event, config["keybinds"]["extra_copy"]["copy_highlighted"]):

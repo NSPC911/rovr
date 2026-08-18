@@ -219,6 +219,8 @@ class SortOrderPopup(PopupOptionList):
         self.button.update_icon()
 
     async def on_key(self, event: events.Key) -> None:
+        if getattr(self.app, "keys", ()):
+            return
         for option, keys in config["keybinds"]["change_sort_order"].items():
             if option == "open_popup":
                 continue

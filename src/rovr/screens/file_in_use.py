@@ -48,6 +48,8 @@ class FileInUse(ModalScreen):
         # Optionally add padding or styling here if needed for consistency
 
     def on_key(self, event: events.Key) -> None:
+        if getattr(self.app, "keys", ()):
+            return
         if check_key(event, config["keybinds"]["file_in_use"]["retry"]):
             self.action_retry(event)
         elif check_key(event, config["keybinds"]["file_in_use"]["cancel"]):

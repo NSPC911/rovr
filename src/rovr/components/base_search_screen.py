@@ -30,6 +30,15 @@ class ModalSearchScreen(Actionable, ModalScreen, inherit_bindings=False):
     border_subtitle_index: int = 0
     is_loading: bool = False
 
+    def action_exit(self) -> None:
+        dismiss(self, None)
+
+    def action_cursor(self, offset: int) -> None:
+        self.search_options.action_cursor(offset)
+
+    def action_cursor_page(self, pages: float) -> None:
+        self.search_options.action_cursor_page(pages)
+
     def create_proc(
         self, program: str, *args: str
     ) -> Coroutine[None, None, asyncio.subprocess.Process]:

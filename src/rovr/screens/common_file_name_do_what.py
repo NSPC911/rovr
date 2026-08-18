@@ -71,6 +71,8 @@ class FileNameConflict(ModalScreen):
 
     def on_key(self, event: events.Key) -> None:
         """Handle key presses."""
+        if getattr(self.app, "keys", ()):
+            return
         if self.allow_overwrite and check_key(
             event, config["keybinds"]["filename_conflict"]["overwrite"]
         ):

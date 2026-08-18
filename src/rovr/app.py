@@ -633,7 +633,12 @@ class Application(Actionable, DNDApp, inherit_bindings=False):
             return
         # Make sure that key binds don't break
         # placeholder, not yet existing
-        if event.key == "escape" and self.focused.id and "search" in self.focused.id:
+        if (
+            not self.keys
+            and event.key == "escape"
+            and self.focused.id
+            and "search" in self.focused.id
+        ):
             if self._focused_id == "search_file_list":
                 self.file_list.focus()
             elif self._focused_id == "search_pinned_sidebar":
@@ -1550,6 +1555,50 @@ class Application(Actionable, DNDApp, inherit_bindings=False):
         )
         console.print(screen_render)
         return console.export_svg(title="")
+
+    async def _check_bindings(self, key: str, priority: bool = False) -> bool:
+        if not self.keys:
+            return await super()._check_bindings(key, priority)
+
+        namespaces = self._key_namespaces()
+        contexts = [("global", self)] if priority else self._active_key_contexts()
+        for context, namespace in contexts:
+            action = self.keys.get(context, {}).get(key)
+            if action is not None and await self.run_action(
+                action,
+                default_namespace=namespace,
+                namespaces=namespaces,
+            ):
+                return True
+        return await super()._check_bindings(key, priority)
+
+    def _active_key_contexts(self) -> list[tuple[str, DOMNode]]:
+        contexts: list[tuple[str, DOMNode]] = []
+        focused = self.focused
+        nodes = focused.ancestors_with_self if focused is not None else [self.screen]
+        for node in nodes:
+            contexts.extend(
+                (context, node) for context in getattr(node, "key_contexts", ())
+            )
+            if node is self.screen:
+                break
+        if len(self.screen_stack) == 1:
+            contexts.append(("main", self.screen))
+        return contexts
+
+    def _key_namespaces(self) -> dict[str, DOMNode]:
+        namespaces: dict[str, DOMNode] = {"app": self, "screen": self.screen}
+        for node in self.screen.walk_children(with_self=True):
+            contexts = getattr(node, "key_contexts", ())
+            if contexts:
+                namespaces.setdefault(contexts[0], node)
+
+        if self.focused is not None:
+            for node in reversed(self.focused.ancestors_with_self):
+                contexts = getattr(node, "key_contexts", ())
+                if contexts:
+                    namespaces[contexts[0]] = node
+        return namespaces
 
     def get_system_commands(self, screen: Screen) -> Iterable[SystemCommand]:
         yield SystemCommand(

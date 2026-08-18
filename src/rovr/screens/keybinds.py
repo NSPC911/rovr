@@ -132,6 +132,18 @@ class KeybindList(CursorNavigationMixin, OptionList, inherit_bindings=False):
 class Keybinds(ModalScreen):
     key_contexts = ("keybinds", "filter_modal")
 
+    def action_exit(self) -> None:
+        dismiss(self, None)
+
+    def action_focus_search(self) -> None:
+        self.input.focus()
+
+    def action_cursor(self, offset: int) -> None:
+        self.query_one(KeybindList).action_cursor(offset)
+
+    def action_cursor_page(self, pages: float) -> None:
+        self.query_one(KeybindList).action_cursor_page(pages)
+
     def compose(self) -> ComposeResult:
         with VerticalGroup(id="keybinds_group"):
             yield SearchInput(
@@ -158,6 +170,8 @@ class Keybinds(ModalScreen):
         self.container.border_subtitle = f"Press Esc {additional_key_string}to close"
 
     def on_key(self, event: events.Key) -> None:
+        if getattr(self.app, "keys", ()):
+            return
         # same thing here, ty will scream at me if not
         config_keybinds = cast(dict[str, Any], config["keybinds"])
         if check_key(event, config_keybinds["focus_search"]):

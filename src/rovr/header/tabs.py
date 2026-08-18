@@ -104,10 +104,10 @@ class Tabline(Tabs):
         self.active = tabs[destination % len(tabs)].id or ""
 
     def action_activate_tab(self, index: int) -> None:
-        """Activate a tab by index."""
+        """Activate a tab by 0-base index."""
         if not (tabs := self._potentially_active_tabs):
             return
-        if index < 0 or index >= len(tabs):
+        if index < 0 or index > len(tabs) - 1:
             return
         self.active = tabs[index].id or ""
 
@@ -123,6 +123,7 @@ class Tabline(Tabs):
         label: str = "",
         before: Tab | str | None = None,
         after: Tab | str | None = None,
+        focus: bool = True,
     ) -> None:
         """Add a new tab to the end of the tab list.
 
@@ -131,6 +132,7 @@ class Tabline(Tabs):
             label (ContentText): The label to use in the tab.
             before: Optional tab or tab ID to add the tab before.
             after: Optional tab or tab ID to add the tab after.
+            focus: Whether to focus the new tab after adding it.
 
         Note:
             Only one of `before` or `after` can be provided. If both are
@@ -146,7 +148,8 @@ class Tabline(Tabs):
 
         tab = TablineTab(directory=directory, label=label)
         await super().add_tab(tab, before=before, after=after)
-        self._activate_tab(tab)
+        if focus:
+            self._activate_tab(tab)
         # redo max-width
         self.parent.on_resize()
 

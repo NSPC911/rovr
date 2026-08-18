@@ -181,13 +181,38 @@ async def test_activate_tab_offset_emits_once(tmp_path: Path) -> None:
         await app.tabWidget.add_tab("")
         await app.tabWidget.add_tab("")
         await pilot.pause()
+        tabs = lambda: app.tabWidget._potentially_active_tabs
+        active = app.tabWidget.active_tab
+        assert active is not None
+        app.tab_activations = 0
+
+        app.action_cycle_tab(2)
+        await pilot.pause()
+
+        assert app.tabWidget.active_tab is tabs()[1]
+        assert app.tab_activations == 1
+        await app.tabWidget.add_tab("", focus=False)
+        app.action_cycle_tab(-2)
+        assert app.tabWidget.active_tab is tabs()[3]
+
+
+@pytest.mark.asyncio
+async def test_activate_tab_absolute_emits_once(tmp_path: Path) -> None:
+    app = TabNavigationApp(tmp_path.as_posix())
+
+    async with app.run_test(size=(143, 37)) as pilot:
+        await pilot.pause()
+        await app.tabWidget.add_tab("")
+        await app.tabWidget.add_tab("")
+        await app.tabWidget.add_tab("", focus=False)
+        await pilot.pause()
         tabs = app.tabWidget._potentially_active_tabs
         active = app.tabWidget.active_tab
         assert active is not None
-        expected = tabs[(tabs.index(active) + 2) % len(tabs)]
+        expected = tabs[1]
         app.tab_activations = 0
 
-        app.action_activate_tab(2)
+        app.action_activate_tab(1)
         await pilot.pause()
 
         assert app.tabWidget.active_tab is expected

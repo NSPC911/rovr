@@ -1801,10 +1801,10 @@ class Application(Actionable, DNDApp, inherit_bindings=False):
         self.query_one(StateManager).toggle_menu_wrapper()
 
     def action_tab_next(self) -> None:
-        self.action_activate_tab(1)
+        self.action_cycle_tab(1)
 
     def action_tab_previous(self) -> None:
-        self.action_activate_tab(-1)
+        self.action_cycle_tab(-1)
 
     def action_cycle_tab(self, offset: int) -> None:
         self.tabWidget.action_cycle_tab(offset)

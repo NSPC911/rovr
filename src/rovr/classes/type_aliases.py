@@ -4,6 +4,8 @@ SortByOptions: TypeAlias = Literal[
     "name", "size", "modified", "created", "extension", "natural"
 ]
 
+KeysConfig: TypeAlias = dict[str, dict[str, str | list[str]]]
+
 
 class BarPanicDismissible(TypedDict):
     message: str

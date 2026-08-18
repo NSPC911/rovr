@@ -16,6 +16,7 @@ from platformdirs import user_config_dir
 
 from rovr import pprint
 from rovr.classes.config import RovrConfig
+from rovr.classes.type_aliases import KeysConfig
 from rovr.variables.maps import RovrVars
 
 EDITOR_CANDIDATES = [
@@ -642,7 +643,7 @@ def load_config() -> tuple[dict, RovrConfig]:
     return schema_dict, cast(RovrConfig, config_dict)
 
 
-def load_keys() -> dict[str, dict[str, str]]:
+def load_keys() -> KeysConfig:
     """
     Load the keybindings from the keys.toml file
 
@@ -675,7 +676,7 @@ def load_keys() -> dict[str, dict[str, str]]:
                     user_keys = tomli.loads(user_keys_content)
                 except tomli.TOMLDecodeError as exc:
                     toml_dump(user_keys_path, exc)
-    keys_dict: dict[str, dict[str, str]] = deep_merge(template_keys, user_keys)
+    keys_dict: KeysConfig = deep_merge(template_keys, user_keys)
 
     # check it manually
     try:

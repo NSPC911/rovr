@@ -10,7 +10,7 @@ from typing import Any, Callable, Literal, cast
 from textual.binding import Binding
 
 from rovr.classes.config import RovrConfig
-from rovr.functions.config import load_config
+from rovr.functions.config import load_config, load_keys
 
 # Initialize the config once at import time
 if "config" not in globals():
@@ -45,6 +45,12 @@ if "log_name" not in globals():
     log_name = str(datetime.now()).replace(" ", "_").replace(":", "")
 else:
     log_name = globals()["log_name"]
+
+if "keys" not in globals():
+    global keys
+    keys = load_keys()
+else:
+    keys = globals()["keys"]
 
 
 @dataclass

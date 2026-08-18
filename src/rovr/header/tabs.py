@@ -92,8 +92,8 @@ class TablineTab(Tab):
 
 
 class Tabline(Tabs):
-    def action_activate_tab(self, offset: int) -> None:
-        """Activate a tab at an offset from the current tab."""
+    def action_cycle_tab(self, offset: int) -> None:
+        """Cycle and activate a tab at an offset relative from the current tab."""
         if not offset or not (tabs := self._potentially_active_tabs):
             return
 
@@ -102,6 +102,14 @@ class Tabline(Tabs):
         else:
             destination = tabs.index(self.active_tab) + offset
         self.active = tabs[destination % len(tabs)].id or ""
+
+    def action_activate_tab(self, index: int) -> None:
+        """Activate a tab by index."""
+        if not (tabs := self._potentially_active_tabs):
+            return
+        if index < 0 or index >= len(tabs):
+            return
+        self.active = tabs[index].id or ""
 
     def compose(self) -> ComposeResult:
         with Container(id="tabs-scroll"), Vertical(id="tabs-list-bar"):

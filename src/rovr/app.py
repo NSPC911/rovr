@@ -69,6 +69,7 @@ from rovr.classes.textual_validators import (
     IsValidFilePath,
 )
 from rovr.classes.theme import RovrStylesheet
+from rovr.classes.type_aliases import KeysConfig
 from rovr.components.popup_option_list import PopupOptionList
 from rovr.core import (
     FileList,
@@ -116,7 +117,7 @@ from rovr.navigation_widgets import (
 from rovr.screens import ModalInput, PasteDropScreen, ShellExec
 from rovr.screens.way_too_small import TerminalTooSmall
 from rovr.state_manager import StateManager
-from rovr.variables.constants import MaxPossible, config, log_name
+from rovr.variables.constants import MaxPossible, config, keys, log_name
 from rovr.variables.maps import RovrVars
 
 console = get_console
@@ -215,6 +216,8 @@ class Application(Actionable, DNDApp, inherit_bindings=False):
     MULTIPROCESSING_PROCESS_ALLOWED: bool = getattr(
         sys, "_is_gil_enabled", lambda: True
     )()
+
+    keys: KeysConfig = keys
 
     def __init__(
         self,
@@ -1803,8 +1806,11 @@ class Application(Actionable, DNDApp, inherit_bindings=False):
     def action_tab_previous(self) -> None:
         self.action_activate_tab(-1)
 
-    def action_activate_tab(self, offset: int) -> None:
-        self.tabWidget.action_activate_tab(offset)
+    def action_cycle_tab(self, offset: int) -> None:
+        self.tabWidget.action_cycle_tab(offset)
+
+    def action_activate_tab(self, index: int) -> None:
+        self.tabWidget.action_activate_tab(index)
 
     async def action_tab_new(self) -> None:
         await self.query_one("NewTabButton").on_button_pressed()

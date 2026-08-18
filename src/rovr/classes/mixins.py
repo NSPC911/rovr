@@ -442,42 +442,6 @@ class ScrollOffMixin:
             )
 
 
-class Action(NamedTuple):
-    action: str | Callable[[], Any]
-    match_keys: str | list[str]
-    only_if: bool | Callable[[], bool] = True
-
-
-class Actionable:
-    ACTIONS: list[Action]
-
-    async def on_key(self, event: Key) -> None:
-        try:
-            iter(self.ACTIONS)
-        except AttributeError:
-            return
-
-        for action in self.ACTIONS:
-            if check_key(event, action.match_keys) and (
-                action.only_if() if callable(action.only_if) else action.only_if
-            ):
-                if not isinstance(action.action, str):
-                    func: Callable[[], Any] = action.action
-                else:
-                    func: Callable[[], Any] | None = getattr(
-                        self, f"action_{action.action}"
-                    )
-                    if not callable(func):
-                        continue
-                result: Any | Awaitable = func()
-                if isawaitable(result):
-                    await result
-                if getattr(self.app, "_show_keys", False):
-                    self.app.show_key(event)
-                event.prevent_default().stop()
-                return
-
-
 class SetOptionsSelectionList:
     def set_options(
         self,
@@ -503,3 +467,47 @@ class SetOptionsSelectionList:
         # so ty is crashing out.
         super().set_options(options)
         return self
+
+
+class Action(NamedTuple):
+    action: str | Callable[[], Any]
+    match_keys: str | list[str]
+    only_if: bool | Callable[[], bool] = True
+
+
+class Actionable:
+    ACTIONS: list[Action]
+
+    async def on_key(self, event: Key) -> None:
+        if getattr(self.app, "keys", []):
+            await self.new_handler(event)
+        else:
+            await self.deprecated_handler(event)
+
+    async def new_handler(self, event: Key) -> None: ...
+
+    async def deprecated_handler(self, event: Key) -> None:
+        try:
+            iter(self.ACTIONS)
+        except AttributeError:
+            return
+
+        for action in self.ACTIONS:
+            if check_key(event, action.match_keys) and (
+                action.only_if() if callable(action.only_if) else action.only_if
+            ):
+                if not isinstance(action.action, str):
+                    func: Callable[[], Any] = action.action
+                else:
+                    func: Callable[[], Any] | None = getattr(
+                        self, f"action_{action.action}"
+                    )
+                    if not callable(func):
+                        continue
+                result: Any | Awaitable = func()
+                if isawaitable(result):
+                    await result
+                if getattr(self.app, "_show_keys", False):
+                    self.app.show_key(event)
+                event.prevent_default().stop()
+                return

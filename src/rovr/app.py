@@ -1585,7 +1585,7 @@ class Application(Actionable, DNDApp, inherit_bindings=False):
             if node is self.screen:
                 break
         if len(self.screen_stack) == 1:
-            contexts.append(("main", self.screen))
+            contexts.append(("main", self))
         return contexts
 
     def _key_namespaces(self) -> dict[str, DOMNode]:

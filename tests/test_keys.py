@@ -28,7 +28,7 @@ async def test_contextual_key_dispatch(tmp_path: Path) -> None:
             "lists",
             "main",
         ]
-        assert app._active_key_contexts()[-1] == ("main", app.screen)
+        assert app._active_key_contexts()[-1] == ("main", app)
         assert app._key_namespaces()["file_list"] is app.file_list
         assert app._key_namespaces()["copy"] is app.query_one(CopyButton)
         assert app._key_namespaces()["sort_order"] is app.query_one(SortOrderButton)
@@ -43,6 +43,12 @@ async def test_contextual_key_dispatch(tmp_path: Path) -> None:
         app.keys["file_list"] = {"s": "sort_order.extension(True)"}
         await pilot.press("s")
         assert app.query_one(StateManager).get_sort_prefs() == ("extension", True)
+
+        state_manager = app.query_one(StateManager)
+        pinned_sidebar_visible = state_manager.pinned_sidebar_visible
+        app.keys = {"main": {"S": "toggle_pinned_sidebar"}}
+        await pilot.press("S")
+        assert state_manager.pinned_sidebar_visible is not pinned_sidebar_visible
 
         app.push_screen(Dismissible("Modal"))
         await pilot.pause()

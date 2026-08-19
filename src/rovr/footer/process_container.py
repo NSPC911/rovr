@@ -740,7 +740,7 @@ class ProcessContainer(Actionable, VerticalScroll):
             path_utils.dump_exc(self, exc)
             bar.panic(
                 dismiss_with={
-                    "message": f"Archiving failed due to\n{exc}\nProcess Aborted.",
+                    "message": f"Archiving failed due to {type(exc).__name__}\n{exc}\nProcess Aborted.",
                     "subtitle": "File an issue if this is a bug!",
                 }
             )

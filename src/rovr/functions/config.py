@@ -1,6 +1,7 @@
 import json
 import marshal
 import os
+from contextlib import suppress
 from functools import cache
 from importlib import resources
 from importlib.metadata import PackageNotFoundError, version
@@ -331,6 +332,7 @@ def schema_dump(
     exception: JsonSchemaValueException,
     config_content: str,
     schema: dict,
+    use_migration: bool = True,
 ) -> None:
     """
     Dump an error message for schema validation errors
@@ -475,48 +477,51 @@ def schema_dump(
                 error_msg += f"\n{(rjust + 5) * ' '}{part}"
 
         pprint(f"[bright_red]╰─{'─' * rjust}─❯[/] {error_msg}")
-    # check path for custom message from migration.json
-    migration_docs = json.loads(traverser.joinpath("migration.json").read_text("utf-8"))
+    if use_migration:
+        # check path for custom message from migration.json
+        migration_docs = json.loads(
+            traverser.joinpath("migration.json").read_text("utf-8")
+        )
 
-    for item in migration_docs:
-        if any(fnmatch.fnmatch(path_str, path) for path in item["keys"]):
-            message = "\n".join(item["message"])
-            to_print = Table(
-                box=box.ROUNDED,
-                border_style="bright_blue",
-                show_header=False,
-                expand=True,
-                show_lines=True,
-            )
-            to_print.add_column()
-            to_print.add_row(message)
-            to_print.add_row(f"[dim]> {item['extra']}[/]")
-            if "regex" in item and doc_path != path.join(
-                path.dirname(__file__), "../config/config.toml"
-            ):
-                # bird migration
-                import re
+        for item in migration_docs:
+            if any(fnmatch.fnmatch(path_str, path) for path in item["keys"]):
+                message = "\n".join(item["message"])
+                to_print = Table(
+                    box=box.ROUNDED,
+                    border_style="bright_blue",
+                    show_header=False,
+                    expand=True,
+                    show_lines=True,
+                )
+                to_print.add_column()
+                to_print.add_row(message)
+                to_print.add_row(f"[dim]> {item['extra']}[/]")
+                if "regex" in item and doc_path != path.join(
+                    path.dirname(__file__), "../config/config.toml"
+                ):
+                    # bird migration
+                    import re
 
-                fixed_content = config_content
-                for rule in item["regex"]:
-                    fixed_content = re.sub(
-                        re.escape(rule["find"]), rule["replace"], fixed_content
-                    )
-                if fixed_content != config_content:
-                    with open(doc_path, "w", encoding="utf-8") as _f:
-                        _f.write(fixed_content)
-                    to_print.add_row(
-                        "[bright_green]Auto-fix applied! Please re-run rovr.[/]"
-                    )
-                else:
-                    to_print.add_row(
-                        "[bright_yellow]I couldn't fix it for you. Please update your config manually.[/]"
-                    )
-            pprint(Padding(to_print, (0, rjust + 4, 0, rjust + 3)))
-            break
+                    fixed_content = config_content
+                    for rule in item["regex"]:
+                        fixed_content = re.sub(
+                            re.escape(rule["find"]), rule["replace"], fixed_content
+                        )
+                    if fixed_content != config_content:
+                        with open(doc_path, "w", encoding="utf-8") as _f:
+                            _f.write(fixed_content)
+                        to_print.add_row(
+                            "[bright_green]Auto-fix applied! Please re-run rovr.[/]"
+                        )
+                    else:
+                        to_print.add_row(
+                            "[bright_yellow]I couldn't fix it for you. Please update your config manually.[/]"
+                        )
+                pprint(Padding(to_print, (0, rjust + 4, 0, rjust + 3)))
+                break
 
-    if exception.rule != "additionalProperties":
-        exit(1)
+        if exception.rule != "additionalProperties":
+            exit(1)
 
 
 def load_config() -> tuple[dict, RovrConfig]:
@@ -711,37 +716,49 @@ def load_keys() -> KeysConfig:
     keys_dict = cast(KeysConfig, deep_merge(base_keys, user_keys))
 
     # check it manually
-    try:
-        fastjsonschema.validate(
-            {
+    schema = {
+        "type": "object",
+        "patternProperties": {
+            "^.*$": {
                 "type": "object",
                 "patternProperties": {
-                    "^.*$": {
-                        "type": "object",
-                        "patternProperties": {
-                            "^.*$": {"type": "string"},
-                        },
-                    },
+                    "^.*$": {"type": "string"},
                 },
             },
+        },
+    }
+    try:
+        fastjsonschema.validate(
+            schema,
             keys_dict,
         )
     except JsonSchemaValueException as exception:
-        schema_dump(
-            user_keys_path,
-            exception,
-            user_keys_content,
-            {
-                "type": "object",
-                "patternProperties": {
-                    "^.*$": {
-                        "type": "object",
-                        "patternProperties": {
-                            "^.*$": {"type": "string"},
-                        },
-                    },
-                },
-            },
-        )
+        # check if 'inherits' is used, if so, alert
+        with suppress(SystemExit):
+            schema_dump(
+                user_keys_path,
+                exception,
+                user_keys_content,
+                schema,
+                use_migration=False,
+            )
+        if exception.path == ["inherits"]:
+            from rich import box
+            from rich.padding import Padding
+            from rich.table import Table
+
+            to_print = Table(
+                box=box.ROUNDED,
+                border_style="bright_blue",
+                show_header=False,
+                expand=True,
+                show_lines=True,
+            )
+            to_print.add_column()
+            to_print.add_row(
+                "[bright_red]Config Error:[/] 'inherits' is not a valid key in keys.toml. Please use 'inherit' instead."
+            )
+            pprint(Padding(to_print, (0, 4, 0, 3), expand=False))
+        exit(1)
 
     return keys_dict

@@ -1572,7 +1572,7 @@ class Application(Actionable, DNDApp, inherit_bindings=False):
                 namespaces=namespaces,
             ):
                 return True
-        return await super()._check_bindings(key, priority)
+        return False
 
     def _active_key_contexts(self) -> list[tuple[str, DOMNode]]:
         contexts: list[tuple[str, DOMNode]] = []

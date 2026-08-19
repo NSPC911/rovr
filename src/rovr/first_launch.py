@@ -8,7 +8,6 @@ from typing import Callable
 from urllib import error, request
 
 import textual_image.widget as timg
-import tomli
 from PIL import Image as PILImage
 from PIL.Image import Image
 from pygments.styles import get_all_styles
@@ -409,10 +408,6 @@ class FirstLaunchApp(App, inherit_bindings=False):
         preset_button = self.query_one("#keybinds", RadioSet).pressed_button
         assert preset_button is not None and preset_button.id is not None
         preset = preset_button.id
-        preset_config = resource.joinpath("assets", "keybinds", preset, "config.toml")
-        with preset_config.open("r", encoding="utf-8") as f:
-            _, _, plugins_content = f.read().partition("\n# plugins\n")
-            plugins = tomli.loads(plugins_content)
         keys_toml = f'inherit = "{preset}"\n'
         # manually create toml file yipee (imagine using tomliw (one extra dependency smh))
         theme_button = self.query_one("#theme", RadioSet).pressed_button
@@ -450,18 +445,15 @@ transparent = {str(self.query_one("#transparent_mode", Switch).value).lower()}
 
 [plugins.rg]
 enabled = {str(self.query_one("#plugins-rg Switch", Switch).value).lower()}
-keybinds = {plugins["plugins"]["rg"]["keybinds"]}
 
 [plugins.fd]
 enabled = {str(self.query_one("#plugins-fd Switch", Switch).value).lower()}
-keybinds = {plugins["plugins"]["fd"]["keybinds"]}
 
 [plugins.bat]
 enabled = {str(self.query_one("#plugins-bat Switch", Switch).value).lower()}
 
 [plugins.zoxide]
 enabled = {str(self.query_one("#plugins-zoxide Switch", Switch).value).lower()}
-keybinds = {plugins["plugins"]["zoxide"]["keybinds"]}
 
 [plugins.poppler]
 enabled = {str(self.query_one("#plugins-poppler Switch", Switch).value).lower()}

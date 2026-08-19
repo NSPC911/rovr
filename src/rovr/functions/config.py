@@ -660,14 +660,16 @@ def load_keys() -> KeysConfig:
     user_keys_path = path.join(config_dir, "keys.toml")
     presets = {
         "default": traverser.joinpath("keys.toml"),
-        "sane": traverser.joinpath("keybinds", "sane", "keys.toml"),
-        "vim": traverser.joinpath("keybinds", "vim", "keys.toml"),
+        "sane": traverser.joinpath("presets", "sane.toml"),
+        "vim": traverser.joinpath("presets", "vim.toml"),
     }
 
     if not path.exists(user_keys_path):
-        return cast(
-            KeysConfig, tomli.loads(presets["default"].read_text(encoding="utf-8"))
-        )
+        return {}
+        # TODO: for v0.11.0: force keys.toml
+        # return cast(
+        #     KeysConfig, tomli.loads(presets["default"].read_text(encoding="utf-8"))
+        # )
 
     user_keys = {}
     user_keys_content = ""
@@ -681,10 +683,25 @@ def load_keys() -> KeysConfig:
                     toml_dump(user_keys_path, exc)
     inherit = user_keys.pop("inherit", None)
     if inherit is not None and (not isinstance(inherit, str) or inherit not in presets):
-        pprint(
-            f"[red]Invalid keys preset {inherit!r}. Expected one of: default, sane, vim.[/]"
+        # find inherit in config
+        lines = user_keys_content.splitlines()
+        index = 0
+        for i, line in enumerate(lines):
+            try:
+                part = tomli.loads(line)
+                if "inherit" in part:
+                    index = i
+                    break
+            except tomli.TOMLDecodeError:
+                continue
+        toml_dump(
+            user_keys_path,
+            tomli.TOMLDecodeError(
+                f"Invalid inherit value '{inherit}'. Must be one of {list(presets.keys())}.",
+                doc=user_keys_content,
+                pos=index,
+            ),
         )
-        exit(1)
 
     base_keys = (
         tomli.loads(presets[inherit].read_text(encoding="utf-8"))

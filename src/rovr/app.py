@@ -223,7 +223,6 @@ class Application(Actionable, DNDApp, inherit_bindings=False):
         cwd_file: str | TextIOWrapper | None = None,
         chooser_file: str | TextIOWrapper | None = None,
         show_keys: bool = False,
-        tree_dom: bool = False,
         force_crash_in: float = 0,
         force_exit_on_shutdown: bool = False,
     ) -> None:
@@ -239,7 +238,6 @@ class Application(Actionable, DNDApp, inherit_bindings=False):
         self._chooser_file: str | TextIOWrapper | None = chooser_file
         self._chooser_paths: list[str] | None = None
         self._show_keys: bool = show_keys
-        self._exit_with_tree: bool = tree_dom
         self._force_crash_in: float = force_crash_in
         self._force_exit_on_shutdown = force_exit_on_shutdown
         self._force_exit_timer: threading.Timer | None = None
@@ -349,13 +347,6 @@ class Application(Actionable, DNDApp, inherit_bindings=False):
             yield StateManager()
 
     def on_mount(self) -> None:
-        # exit for tree print
-        if self._exit_with_tree:
-            with self.suspend():
-                console().print(self.tree)
-                self.exit()
-            return
-
         for error in self._theme_errors:
             self.notify(error, title="Theme Error", severity="warning", markup=False)
         self.set_interval(1, self._poll_theme_files)

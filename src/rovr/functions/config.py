@@ -659,7 +659,7 @@ def load_keys() -> KeysConfig:
         ).replace("\\", "/")
     user_keys_path = path.join(config_dir, "keys.toml")
     presets = {
-        "default": traverser.joinpath("keys.toml"),
+        "base": traverser.joinpath("keys.toml"),
         "sane": traverser.joinpath("presets", "sane.toml"),
         "vim": traverser.joinpath("presets", "vim.toml"),
     }

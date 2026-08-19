@@ -61,14 +61,14 @@ def test_deep_merge_append_bool_key_untouched() -> None:
     assert result == {"append_new_tabs": False}
 
 
-def test_load_keys_uses_default_without_user_file(
+def test_load_keys_uses_nothing_without_user_file(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
     monkeypatch.setenv("ROVR_CONFIG_FOLDER", str(tmp_path))
 
     keys = config.load_keys()
 
-    assert keys["global"]["q"] == "app.quit"
+    assert keys == {}
 
 
 def test_load_keys_user_file_is_standalone(

@@ -1,4 +1,4 @@
-# vim stuff
+# Vim legacy config keybinds
 
 [keybinds]
 toggle_pin = ["P"]

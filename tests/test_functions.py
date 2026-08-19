@@ -61,6 +61,41 @@ def test_deep_merge_append_bool_key_untouched() -> None:
     assert result == {"append_new_tabs": False}
 
 
+def test_load_keys_uses_default_without_user_file(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    monkeypatch.setenv("ROVR_CONFIG_FOLDER", str(tmp_path))
+
+    keys = config.load_keys()
+
+    assert keys["global"]["q"] == "app.quit"
+
+
+def test_load_keys_user_file_is_standalone(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    monkeypatch.setenv("ROVR_CONFIG_FOLDER", str(tmp_path))
+    (tmp_path / "keys.toml").write_text('[global]\n"x" = "app.quit"\n')
+
+    keys = config.load_keys()
+
+    assert keys == {"global": {"x": "app.quit"}}
+
+
+def test_load_keys_can_inherit_preset(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    monkeypatch.setenv("ROVR_CONFIG_FOLDER", str(tmp_path))
+    (tmp_path / "keys.toml").write_text(
+        'inherit = "sane"\n\n[global]\n"x" = "app.quit"\n'
+    )
+
+    keys = config.load_keys()
+
+    assert keys["global"]["x"] == "app.quit"
+    assert keys["lists"]["up"] == "cursor(-1)"
+
+
 def test_natural_size() -> None:
     assert utils.natural_size(1024, "binary", 2) == "1.00 KiB"
     assert utils.natural_size(1024, "decimal", 2) == "1.02 kB"

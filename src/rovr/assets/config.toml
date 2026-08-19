@@ -153,7 +153,7 @@ preview = "nord"
 transparent = false
 
 [keybinds]
-# For keybind profiles, see keybinds/sane.toml and keybinds/vim.toml
+# For legacy keybind profiles, see keybinds/sane/config.toml and keybinds/vim/config.toml
 # The default configuration below combines both styles for maximum flexibility.
 # Users can copy their preferred profile to their config directory.
 toggle_pin = ["P"]

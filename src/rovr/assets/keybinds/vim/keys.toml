@@ -1,5 +1,4 @@
-# Default keybindings. A user keys.toml may inherit "default", "sane", or "vim".
-# Printable keys use their character; other keys use Textual's key names.
+# Vim-style keybindings
 
 [global]
 "q" = "app.quit"
@@ -33,18 +32,11 @@
 "P" = "toggle_pin"
 "/" = "focus_search"
 "y" = "copy.to_rovr"
-"ctrl+c" = "copy.to_rovr"
 "p" = "paste"
-"ctrl+v" = "paste"
 "x" = "cut"
-"ctrl+x" = "cut"
 "d" = "delete"
-"delete" = "delete"
 "r" = "rename"
-"f2" = "rename"
-"ctrl+n" = "new"
 "a" = "new"
-"N" = "bulk_create"
 "A" = "bulk_create"
 "E" = "zip"
 "ctrl+e" = "unzip"
@@ -54,12 +46,12 @@
 "L" = "bypass_down_tree"
 "backspace" = "hist_previous"
 "u" = "hist_previous"
+"ctrl+r" = "hist_next"
 "space" = "hist_next"
 "v" = "toggle_visual"
 "%" = "toggle_all"
 "ctrl+a" = "toggle_all"
 "." = "toggle_hidden_files"
-"insert" = "toggle_select_item"
 "shift+up" = "select_cursor(-1)"
 "K" = "select_cursor(-1)"
 "shift+down" = "select_cursor(1)"
@@ -96,7 +88,7 @@
 
 [copy_menu]
 "y" = "copy.to_rovr"
-"p" = "copy.highlighted"
+"c" = "copy.highlighted"
 "s" = "copy.to_system_clip"
 "d" = "copy.current_directory"
 

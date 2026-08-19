@@ -658,16 +658,19 @@ def load_keys() -> KeysConfig:
             "rovr", "."
         ).replace("\\", "/")
     user_keys_path = path.join(config_dir, "keys.toml")
-    # if it doesnt exist, use default config keybinds thing
-    if not path.exists(user_keys_path):
-        return {}
+    presets = {
+        "default": traverser.joinpath("keys.toml"),
+        "sane": traverser.joinpath("keybinds", "sane", "keys.toml"),
+        "vim": traverser.joinpath("keybinds", "vim", "keys.toml"),
+    }
 
-    try:
-        template_keys = tomli.loads(traverser.joinpath("keys.toml").read_text("utf-8"))
-    except tomli.TOMLDecodeError as exc:
-        toml_dump(path.join(path.dirname(__file__), "../config/keys.toml"), exc)
+    if not path.exists(user_keys_path):
+        return cast(
+            KeysConfig, tomli.loads(presets["default"].read_text(encoding="utf-8"))
+        )
 
     user_keys = {}
+    user_keys_content = ""
     if path.exists(user_keys_path):
         with open(user_keys_path, "r", encoding="utf-8") as f:
             user_keys_content = f.read()
@@ -676,7 +679,19 @@ def load_keys() -> KeysConfig:
                     user_keys = tomli.loads(user_keys_content)
                 except tomli.TOMLDecodeError as exc:
                     toml_dump(user_keys_path, exc)
-    keys_dict: KeysConfig = deep_merge(template_keys, user_keys)
+    inherit = user_keys.pop("inherit", None)
+    if inherit is not None and (not isinstance(inherit, str) or inherit not in presets):
+        pprint(
+            f"[red]Invalid keys preset {inherit!r}. Expected one of: default, sane, vim.[/]"
+        )
+        exit(1)
+
+    base_keys = (
+        tomli.loads(presets[inherit].read_text(encoding="utf-8"))
+        if isinstance(inherit, str)
+        else {}
+    )
+    keys_dict = cast(KeysConfig, deep_merge(base_keys, user_keys))
 
     # check it manually
     try:

@@ -42,7 +42,7 @@ description: A reference for all default keybindings in rovr.
 
 import { Aside } from "@astrojs/starlight/components"
 
-this page provides a comprehensive list of the default keybindings in `rovr`. you can customize these keybindings in your `config.toml` file.
+this page provides a comprehensive list of the default keybindings in `rovr`. you can customize these keybindings in your `keys.toml` file.
 
 <Aside type="tip">
   you can make use of the cli arg `--show-keys` to view the key that you just pressed to help you in configuring your keybinds!
@@ -52,15 +52,15 @@ this page provides a comprehensive list of the default keybindings in `rovr`. yo
 rovr provides two pre-configured keybind profiles that you can use as a starting point:
 
 ### sane profile
-find this profile at `src/rovr/assets/keybinds/sane.toml` in the repository.<br/>the **sane** profile is designed for users who prefer more traditional keybindings
+find the legacy config and new keys variants under `src/rovr/assets/keybinds/sane/` in the repository.<br/>the **sane** profile is designed for users who prefer more traditional keybindings
 
 ### vim profile
-find this profile at `src/rovr/assets/keybinds/vim.toml` in the repository.<br/>the **vim** profile is tailored for users familiar with vim-style keybindings
+find the legacy config and new keys variants under `src/rovr/assets/keybinds/vim/` in the repository.<br/>the **vim** profile is tailored for users familiar with vim-style keybindings
 
 ### using a profile
-just copy over the contents of the desired profile into your `config.toml` file located at:
-- linux/macos: `~/.config/rovr/config.toml`
-- windows: `%APPDATA%/rovr/config.toml`
+set `inherit = "sane"` or `inherit = "vim"` in your `keys.toml` file located at:
+- linux/macos: `~/.config/rovr/keys.toml`
+- windows: `%APPDATA%/rovr/keys.toml`
 
 ## main bindings
 
@@ -69,9 +69,9 @@ just copy over the contents of the desired profile into your `config.toml` file 
 try:
     with open("src/rovr/assets/config.toml", "rb") as file:
         binds: dict = tomli.load(file)["keybinds"]
-    with open("src/rovr/assets/keybinds/vim.toml", "rb") as file:
+    with open("src/rovr/assets/keybinds/vim/config.toml", "rb") as file:
         vim_binds: dict = tomli.load(file)["keybinds"]
-    with open("src/rovr/assets/keybinds/sane.toml", "rb") as file:
+    with open("src/rovr/assets/keybinds/sane/config.toml", "rb") as file:
         sane_binds: dict = tomli.load(file)["keybinds"]
     with open("src/rovr/assets/schema.json", "r", encoding="utf-8") as file:
         sub_schema: dict = json.load(file)["properties"]["keybinds"]["properties"]

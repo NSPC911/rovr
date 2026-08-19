@@ -1,4 +1,4 @@
-# Sane stuff
+# Sane legacy config keybinds
 
 [keybinds]
 toggle_pin = ["P"]

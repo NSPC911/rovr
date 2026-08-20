@@ -1,206 +1,286 @@
 ---
-title: Keybindings
-description: A reference for all default keybindings in rovr.
+title: Key actions
+description: Supported actions and contexts for custom rovr keybindings.
 ---
-
-{/* do not directly modify this file, modify the template in docs/scripts/generate_keybinds.py */}
 
 import { Aside } from "@astrojs/starlight/components";
 
-this page provides a comprehensive list of the default keybindings in `rovr`. you can customize these keybindings in your `config.toml` file.
-
-<Aside type="tip">
-  you can make use of the cli arg `--show-keys` to view the key that you just pressed to help you in
-  configuring your keybinds!
+<Aside type="note">
+  This is an intentionally curated list of user-facing actions. Internal and inherited Textual
+  actions are not considered part of rovr's configuration API.
 </Aside>
 
-## keybind profiles
+## Action syntax
 
-rovr provides two pre-configured keybind profiles that you can use as a starting point:
+Assign an action to a key under a context in `keys.toml`:
 
-### sane profile
+```toml
+[main]
+"ctrl+t" = "tab_new"
+# yes function-like syntax is supported, for supported literal values
+"1" = "activate_tab(0)"
+# check https://docs.python.org/3/library/ast.html#ast.literal_eval
+# obviously dont pass anything stupid
 
-find this profile at `src/rovr/assets/keybinds/sane.toml` in the repository.<br/>the **sane** profile is designed for users who prefer more traditional keybindings
+[file_list]
+"ctrl+c" = "copy.to_rovr"
+```
 
-### vim profile
+The name of a Python method such as `action_tab_new` becomes `tab_new` in `keys.toml`.
+Arguments use Textual's action syntax: `cycle_tab(-1)`, `cursor(1)`, or `sort_order.set("modified", True)`.
 
-find this profile at `src/rovr/assets/keybinds/vim.toml` in the repository.<br/>the **vim** profile is tailored for users familiar with vim-style keybindings
+Actions without a prefix run on the owner of the active context. The following namespaces can target another object explicitly:
 
-### using a profile
+| Namespace       | Target                            | Example        |
+| --------------- | --------------------------------- | -------------- |
+| `app`           | The rovr application              | `app.quit`     |
+| `screen`        | The currently active screen       | `screen.exit`  |
+| Primary context | The mounted owner of that context | `copy.to_rovr` |
 
-just copy over the contents of the desired profile into your `config.toml` file located at:
+Primary context namespaces include `copy` and `sort_order`. Prefer an unqualified action when
+the action belongs to the context containing the binding.
 
-- linux/macos: `~/.config/rovr/config.toml`
-- windows: `%APPDATA%/rovr/config.toml`
+## Context resolution
 
-## main bindings
+rovr checks contexts from the focused widget outward. The first matching action wins. Specific
+contexts are checked before reusable contexts, such as `file_list` before `lists` and
+`search_input` before `inputs`.
 
-| action                       | description                    | default                                        | vim                                            | sane                                     |
-| ---------------------------- | ------------------------------ | ---------------------------------------------- | ---------------------------------------------- | ---------------------------------------- |
-| toggle_pin                   | Pin folder                     | <kbd>P</kbd>                                   | <kbd>P</kbd>                                   | <kbd>P</kbd>                             |
-| toggle_pinned_sidebar        | Toggle sidebar                 | <kbd>S</kbd>                                   | <kbd>S</kbd>                                   | <kbd>S</kbd>                             |
-| toggle_preview_sidebar       | Toggle preview                 | <kbd>I</kbd>                                   | <kbd>I</kbd>                                   | <kbd>I</kbd>                             |
-| toggle_footer                | Toggle footer                  | <kbd>F</kbd>                                   | <kbd>F</kbd>                                   | <kbd>F</kbd>                             |
-| toggle_menu_wrapper          | Toggle menu wrapper            | <kbd>M</kbd>                                   | <kbd>M</kbd>                                   | <kbd>M</kbd>                             |
-| focus_toggle_pinned_sidebar  | Focus sidebar                  | <kbd>s</kbd>                                   | <kbd>s</kbd>                                   | <kbd>s</kbd>                             |
-| focus_file_list              | Focus file list                | <kbd>escape</kbd>                              | <kbd>escape</kbd>                              | <kbd>escape</kbd>                        |
-| focus_toggle_preview_sidebar | Focus preview                  | <kbd>i</kbd>                                   | <kbd>i</kbd>                                   | <kbd>i</kbd>                             |
-| focus_toggle_path_switcher   | Focus path switcher            | <kbd>ctrl+l</kbd>                              | <kbd>ctrl+l</kbd>                              | <kbd>ctrl+l</kbd>                        |
-| focus_toggle_processes       | Focus processes                | <kbd>#</kbd>                                   | <kbd>#</kbd>                                   | <kbd>p</kbd>                             |
-| focus_toggle_clipboard       | Focus clipboard                | <kbd>c</kbd>                                   | <kbd>c</kbd>                                   | <kbd>c</kbd>                             |
-| focus_toggle_metadata        | Focus metadata                 | <kbd>m</kbd>                                   | <kbd>m</kbd>                                   | <kbd>m</kbd>                             |
-| focus_search                 | Search                         | <kbd>slash</kbd>                               | <kbd>slash</kbd>                               | <kbd>ctrl+f</kbd>                        |
-| copy                         | Copy                           | <kbd>y</kbd> <kbd>ctrl+c</kbd>                 | <kbd>y</kbd>                                   | <kbd>ctrl+c</kbd>                        |
-| paste                        | Paste                          | <kbd>p</kbd> <kbd>ctrl+v</kbd>                 | <kbd>p</kbd>                                   | <kbd>ctrl+v</kbd>                        |
-| cut                          | Cut                            | <kbd>x</kbd> <kbd>ctrl+x</kbd>                 | <kbd>x</kbd>                                   | <kbd>ctrl+x</kbd>                        |
-| delete                       | Delete                         | <kbd>d</kbd> <kbd>delete</kbd>                 | <kbd>d</kbd>                                   | <kbd>delete</kbd>                        |
-| rename                       | Rename                         | <kbd>r</kbd> <kbd>f2</kbd>                     | <kbd>r</kbd>                                   | <kbd>f2</kbd>                            |
-| new                          | New                            | <kbd>ctrl+n</kbd> <kbd>a</kbd>                 | <kbd>a</kbd>                                   | <kbd>ctrl+n</kbd>                        |
-| bulk_create                  | Bulk create                    | <kbd>N</kbd> <kbd>A</kbd>                      | <kbd>A</kbd>                                   | <kbd>ctrl+shift+n</kbd>                  |
-| toggle_all                   | Select all                     | <kbd>%</kbd> <kbd>ctrl+a</kbd>                 | <kbd>%</kbd> <kbd>ctrl+a</kbd>                 | <kbd>ctrl+a</kbd>                        |
-| zip                          | Zip                            | <kbd>E</kbd>                                   | <kbd>E</kbd>                                   | <kbd>E</kbd>                             |
-| unzip                        | Unzip                          | <kbd>ctrl+e</kbd>                              | <kbd>ctrl+e</kbd>                              | <kbd>ctrl+e</kbd>                        |
-| open_right_click_menu        | Context menu                   | <kbd>shift+f10</kbd>                           | _none_                                         | _none_                                   |
-| up                           | Up                             | <kbd>up</kbd> <kbd>k</kbd>                     | <kbd>k</kbd> <kbd>up</kbd>                     | <kbd>up</kbd>                            |
-| down                         | Down                           | <kbd>down</kbd> <kbd>j</kbd>                   | <kbd>j</kbd> <kbd>down</kbd>                   | <kbd>down</kbd>                          |
-| up_tree                      | Go up directory                | <kbd>left</kbd> <kbd>h</kbd>                   | <kbd>h</kbd> <kbd>left</kbd>                   | <kbd>left</kbd> <kbd>alt+up</kbd>        |
-| down_tree                    | Enter/Select                   | <kbd>right</kbd> <kbd>l</kbd> <kbd>enter</kbd> | <kbd>l</kbd> <kbd>right</kbd> <kbd>enter</kbd> | <kbd>right</kbd> <kbd>enter</kbd>        |
-| bypass_up_tree               | Bypass up directory            | <kbd>H</kbd>                                   | <kbd>H</kbd>                                   | <kbd>shift+left</kbd>                    |
-| bypass_down_tree             | Bypass down directory          | <kbd>L</kbd>                                   | <kbd>L</kbd>                                   | <kbd>shift+right</kbd>                   |
-| page_up                      | Page Up                        | <kbd>pageup</kbd> <kbd>ctrl+b</kbd>            | <kbd>ctrl+b</kbd> <kbd>pageup</kbd>            | <kbd>pageup</kbd>                        |
-| page_down                    | Page Down                      | <kbd>pagedown</kbd> <kbd>ctrl+f</kbd>          | <kbd>ctrl+f</kbd> <kbd>pagedown</kbd>          | <kbd>pagedown</kbd>                      |
-| home                         | First                          | <kbd>home</kbd> <kbd>g</kbd>                   | <kbd>g</kbd>                                   | <kbd>home</kbd>                          |
-| end                          | Last                           | <kbd>end</kbd> <kbd>G</kbd>                    | <kbd>G</kbd>                                   | <kbd>end</kbd>                           |
-| hist_previous                | History back                   | <kbd>backspace</kbd> <kbd>u</kbd>              | <kbd>u</kbd> <kbd>backspace</kbd>              | <kbd>backspace</kbd> <kbd>alt+left</kbd> |
-| hist_next                    | History forward                | <kbd>space</kbd>                               | <kbd>ctrl+r</kbd> <kbd>space</kbd>             | <kbd>alt+right</kbd>                     |
-| toggle_visual                | Visual mode                    | <kbd>v</kbd>                                   | <kbd>v</kbd>                                   | <kbd>ctrl+space</kbd>                    |
-| toggle_hidden_files          | Toggle hidden files            | <kbd>full_stop</kbd>                           | <kbd>full_stop</kbd>                           | <kbd>.</kbd>                             |
-| toggle_select_item           | Toggle selection (visual mode) | <kbd>insert</kbd>                              | _none_                                         | <kbd>insert</kbd> <kbd>space</kbd>       |
-| select_up                    | Select up                      | <kbd>shift+up</kbd> <kbd>K</kbd>               | <kbd>K</kbd> <kbd>shift+up</kbd>               | <kbd>shift+up</kbd>                      |
-| select_down                  | Select down                    | <kbd>shift+down</kbd> <kbd>J</kbd>             | <kbd>J</kbd> <kbd>shift+down</kbd>             | <kbd>shift+down</kbd>                    |
-| select_page_up               | Select page up                 | <kbd>shift+pageup</kbd>                        | <kbd>shift+pageup</kbd>                        | <kbd>shift+pageup</kbd>                  |
-| select_page_down             | Select page down               | <kbd>shift+pagedown</kbd>                      | <kbd>shift+pagedown</kbd>                      | <kbd>shift+pagedown</kbd>                |
-| select_home                  | Select to top                  | <kbd>shift+home</kbd>                          | <kbd>shift+home</kbd>                          | <kbd>shift+home</kbd>                    |
-| select_end                   | Select to end                  | <kbd>shift+end</kbd>                           | <kbd>shift+end</kbd>                           | <kbd>shift+end</kbd>                     |
-| tab_next                     | Next tab                       | <kbd>ctrl+j</kbd>                              | <kbd>ctrl+j</kbd>                              | <kbd>ctrl+left_square_brace</kbd>        |
-| tab_previous                 | Previous tab                   | <kbd>ctrl+k</kbd>                              | <kbd>ctrl+k</kbd>                              | <kbd>ctrl+right_square_brace</kbd>       |
-| tab_new                      | New tab                        | <kbd>n</kbd>                                   | <kbd>n</kbd>                                   | <kbd>ctrl+t</kbd>                        |
-| tab_close                    | Close tab                      | <kbd>w</kbd>                                   | <kbd>w</kbd>                                   | <kbd>ctrl+w</kbd>                        |
-| preview_scroll_left          | Scroll left                    | _none_                                         | <kbd>h</kbd> <kbd>left</kbd>                   | <kbd>left</kbd>                          |
-| preview_scroll_right         | Scroll right                   | _none_                                         | <kbd>l</kbd> <kbd>right</kbd>                  | <kbd>right</kbd>                         |
-| preview_select_right         | Select right                   | _none_                                         | <kbd>L</kbd> <kbd>shift+right</kbd>            | _none_                                   |
-| preview_select_left          | Select left                    | _none_                                         | <kbd>H</kbd> <kbd>shift+left</kbd>             | _none_                                   |
-| show_keybinds                | Show keybinds                  | <kbd>?</kbd>                                   | <kbd>?</kbd>                                   | <kbd>f1</kbd>                            |
-| quit_app                     | Quit app                       | <kbd>q</kbd> <kbd>ctrl+q</kbd>                 | <kbd>q</kbd> <kbd>ctrl+q</kbd>                 | <kbd>ctrl+q</kbd>                        |
-| command_palette              | Launch command palette         | <kbd>ctrl+p</kbd>                              | <kbd>ctrl+p</kbd>                              | <kbd>ctrl+p</kbd>                        |
-| suspend_process              | Suspend app                    | <kbd>ctrl+z</kbd>                              | <kbd>ctrl+z</kbd>                              | <kbd>ctrl+z</kbd>                        |
-| open                         | Open                           | <kbd>o</kbd>                                   | <kbd>o</kbd>                                   | <kbd>o</kbd>                             |
-| open_editor                  | Open in editor                 | <kbd>e</kbd>                                   | <kbd>e</kbd>                                   | <kbd>ctrl+o</kbd>                        |
-| show_shell_screen            | Open shell screen              | <kbd>></kbd>                                   | _none_                                         | _none_                                   |
+`main` is available only while the main screen is unobstructed. `global` is checked separately
+for application-wide bindings, including while a modal is open. Set an inherited key to `noop`
+to consume it without running an action.
 
-## alternate layers
+```toml
+inherit = "vim"
 
-keybinds related to the alternate screens and popups in rovr.
+[file_list]
+"q" = "noop"
 
-### `delete_files`
+[global]
+"ctrl+q" = "app.quit"
+```
 
-Keybinds related to the delete confirmation screen
+## Application contexts
 
-| action | default                        | vim                            | sane              | description           |
-| ------ | ------------------------------ | ------------------------------ | ----------------- | --------------------- |
-| trash  | <kbd>d</kbd>                   | <kbd>d</kbd>                   | <kbd>d</kbd>      | Delete to recycle bin |
-| delete | <kbd>x</kbd>                   | <kbd>x</kbd>                   | <kbd>D</kbd>      | Permanently delete    |
-| cancel | <kbd>c</kbd> <kbd>escape</kbd> | <kbd>c</kbd> <kbd>escape</kbd> | <kbd>escape</kbd> | Cancel deletion       |
+### `global`
 
-### `trash`
+Use `global` sparingly for actions that must work regardless of the active screen.
 
-Keybinds related to the recycle bin browser screen
+| Action                | Description                        | Example                            |
+| --------------------- | ---------------------------------- | ---------------------------------- |
+| `app.quit`            | Quit rovr.                         | `"ctrl+q" = "app.quit"`            |
+| `app.command_palette` | Open Textual's command palette.    | `"ctrl+p" = "app.command_palette"` |
+| `app.suspend_process` | Suspend rovr on supported systems. | `"ctrl+z" = "app.suspend_process"` |
 
-| action  | default                        | vim                            | sane              | description       |
-| ------- | ------------------------------ | ------------------------------ | ----------------- | ----------------- |
-| restore | <kbd>r</kbd>                   | <kbd>r</kbd>                   | <kbd>r</kbd>      | Restore entries   |
-| purge   | <kbd>x</kbd>                   | <kbd>x</kbd>                   | <kbd>D</kbd>      | Purge entries     |
-| empty   | <kbd>E</kbd>                   | <kbd>E</kbd>                   | <kbd>E</kbd>      | Empty recycle bin |
-| cancel  | <kbd>c</kbd> <kbd>escape</kbd> | <kbd>c</kbd> <kbd>escape</kbd> | <kbd>escape</kbd> | Close             |
+### `main`
 
-### `extra_copy`
+The application context used while the main screen is active and no modal screen is overlaying
+it. The `app.` prefix is optional here.
 
-Keybinds related to extra copy options
+| Action                         | Description                                      | Example                                   |
+| ------------------------------ | ------------------------------------------------ | ----------------------------------------- |
+| `activate_tab(index)`          | Activate a tab by zero-based index.              | `"1" = "activate_tab(0)"`                 |
+| `cycle_tab(offset)`            | Move relative to the current tab.                | `"ctrl+j" = "cycle_tab(1)"`               |
+| `tab_next`                     | Activate the next tab.                           | `"ctrl+j" = "tab_next"`                   |
+| `tab_previous`                 | Activate the previous tab.                       | `"ctrl+k" = "tab_previous"`               |
+| `tab_new`                      | Create a tab.                                    | `"ctrl+t" = "tab_new"`                    |
+| `tab_close`                    | Close the current tab.                           | `"ctrl+w" = "tab_close"`                  |
+| `focus_file_list`              | Focus the active file list.                      | `"escape" = "focus_file_list"`            |
+| `focus_next`                   | Focus the next focusable widget.                 | `"tab" = "focus_next"`                    |
+| `focus_previous`               | Focus the previous focusable widget.             | `"shift+tab" = "focus_previous"`          |
+| `focus_toggle_pinned_sidebar`  | Switch between the pinned sidebar and file list. | `"s" = "focus_toggle_pinned_sidebar"`     |
+| `focus_toggle_preview_sidebar` | Switch between the preview and file list.        | `"i" = "focus_toggle_preview_sidebar"`    |
+| `focus_toggle_path_switcher`   | Switch between the path input and file list.     | `"ctrl+l" = "focus_toggle_path_switcher"` |
+| `focus_toggle_processes`       | Switch between processes and file list.          | `"p" = "focus_toggle_processes"`          |
+| `focus_toggle_clipboard`       | Switch between the clipboard and file list.      | `"c" = "focus_toggle_clipboard"`          |
+| `focus_toggle_metadata`        | Switch between metadata and file list.           | `"m" = "focus_toggle_metadata"`           |
+| `toggle_pinned_sidebar`        | Show or hide the pinned sidebar.                 | `"S" = "toggle_pinned_sidebar"`           |
+| `toggle_preview_sidebar`       | Show or hide the preview.                        | `"I" = "toggle_preview_sidebar"`          |
+| `toggle_footer`                | Show or hide the footer.                         | `"F" = "toggle_footer"`                   |
+| `toggle_menu_wrapper`          | Show or hide the menu bar.                       | `"M" = "toggle_menu_wrapper"`             |
+| `change_theme`                 | Open the theme chooser.                          | `"T" = "change_theme"`                    |
+| `show_keybinds`                | Open the active keybindings screen.              | `"?" = "show_keybinds"`                   |
+| `show_shell_screen`            | Open a shell command screen in this directory.   | `">" = "show_shell_screen"`               |
+| `cd_zoxide`                    | Open the zoxide directory chooser.               | `"z" = "cd_zoxide"`                       |
+| `search_fd`                    | Open recursive file search.                      | `"f" = "search_fd"`                       |
+| `search_rg`                    | Open file-content search.                        | `"\\" = "search_rg"`                      |
 
-| action                 | default      | vim          | sane         | description                 |
-| ---------------------- | ------------ | ------------ | ------------ | --------------------------- |
-| open_popup             | <kbd>Y</kbd> | <kbd>Y</kbd> | <kbd>C</kbd> | Copy options                |
-| copy_to_rovr           | <kbd>y</kbd> | <kbd>y</kbd> | <kbd>r</kbd> | Copy to rovr's clipboard    |
-| copy_highlighted       | <kbd>p</kbd> | <kbd>c</kbd> | <kbd>p</kbd> | Copy highlighted file path  |
-| copy_to_system_clip    | <kbd>s</kbd> | <kbd>s</kbd> | <kbd>s</kbd> | Copy to system clipboard    |
-| copy_current_directory | <kbd>d</kbd> | <kbd>d</kbd> | <kbd>u</kbd> | Copy current directory path |
+## File and panel contexts
 
-### `change_sort_order`
+### `file_list`
 
-Keybinds related to changing the sort order
+Actions specific to the focused file list. Generic list actions from [`lists`](#lists) also
+work here.
 
-| action     | default      | vim          | sane         | description           |
-| ---------- | ------------ | ------------ | ------------ | --------------------- |
-| open_popup | <kbd>,</kbd> | <kbd>,</kbd> | <kbd>,</kbd> | Open sort order popup |
-| name       | <kbd>a</kbd> | <kbd>a</kbd> | <kbd>a</kbd> | Sort by name          |
-| extension  | <kbd>e</kbd> | <kbd>e</kbd> | <kbd>e</kbd> | Sort by extension     |
-| natural    | <kbd>n</kbd> | <kbd>n</kbd> | <kbd>n</kbd> | Sort naturally        |
-| size       | <kbd>s</kbd> | <kbd>s</kbd> | <kbd>s</kbd> | Sort by size          |
-| created    | <kbd>c</kbd> | <kbd>c</kbd> | <kbd>c</kbd> | Sort by created       |
-| modified   | <kbd>m</kbd> | <kbd>m</kbd> | <kbd>m</kbd> | Sort by modified      |
-| descending | <kbd>d</kbd> | <kbd>d</kbd> | <kbd>d</kbd> | Toggle descending     |
+| Action                      | Description                              | Example                                      |
+| --------------------------- | ---------------------------------------- | -------------------------------------------- |
+| `open`                      | Open the highlighted or selected items.  | `"enter" = "open"`                           |
+| `open_editor`               | Open items in the configured editor.     | `"e" = "open_editor"`                        |
+| `open_right_click_menu`     | Open the context menu.                   | `"shift+f10" = "open_right_click_menu"`      |
+| `up_tree`                   | Go to the parent directory.              | `"left" = "up_tree"`                         |
+| `bypass_up_tree`            | Leave single-child directory chains.     | `"H" = "bypass_up_tree"`                     |
+| `bypass_down_tree`          | Enter single-child directory chains.     | `"L" = "bypass_down_tree"`                   |
+| `hist_previous`             | Go backward in directory history.        | `"backspace" = "hist_previous"`              |
+| `hist_next`                 | Go forward in directory history.         | `"space" = "hist_next"`                      |
+| `toggle_pin`                | Pin or unpin the current directory.      | `"P" = "toggle_pin"`                         |
+| `copy`                      | Copy selected items to rovr's clipboard. | `"y" = "copy"`                               |
+| `cut`                       | Cut selected items.                      | `"x" = "cut"`                                |
+| `paste`                     | Paste items into the current directory.  | `"p" = "paste"`                              |
+| `new`                       | Create a file or directory.              | `"a" = "new"`                                |
+| `bulk_create`               | Create multiple items using the editor.  | `"A" = "bulk_create"`                        |
+| `rename`                    | Rename selected items.                   | `"r" = "rename"`                             |
+| `delete`                    | Open the deletion confirmation.          | `"d" = "delete"`                             |
+| `zip`                       | Create an archive from selected items.   | `"E" = "zip"`                                |
+| `unzip`                     | Extract the highlighted archive.         | `"ctrl+e" = "unzip"`                         |
+| `focus_search`              | Focus the file-list search input.        | `"/" = "focus_search"`                       |
+| `toggle_hidden_files`       | Show or hide hidden files.               | `"." = "toggle_hidden_files"`                |
+| `toggle_visual`             | Enter or leave visual selection mode.    | `"v" = "toggle_visual"`                      |
+| `toggle_all`                | Select or clear every item.              | `"%" = "toggle_all"`                         |
+| `toggle_select_item`        | Toggle the highlighted item.             | `"insert" = "toggle_select_item"`            |
+| `select_cursor(offset)`     | Extend selection by an item offset.      | `"shift+down" = "select_cursor(1)"`          |
+| `select_cursor_page(pages)` | Extend selection by visible pages.       | `"shift+pagedown" = "select_cursor_page(1)"` |
+| `select_home`               | Extend selection to the first item.      | `"shift+home" = "select_home"`               |
+| `select_end`                | Extend selection to the last item.       | `"shift+end" = "select_end"`                 |
+| `copy.open_popup`           | Open the extra copy actions menu.        | `"Y" = "copy.open_popup"`                    |
+| `sort_order.open_popup`     | Open the sort menu.                      | `"," = "sort_order.open_popup"`              |
 
-### `filename_conflict`
+### `pinned_sidebar`
 
-Keybinds related to handling a conflict with two files of the same name
+Uses all [`lists`](#lists) actions and adds `focus_search`, which focuses the pinned-folder
+search input.
 
-| action         | default                        | vim                            | sane              | description        |
-| -------------- | ------------------------------ | ------------------------------ | ----------------- | ------------------ |
-| overwrite      | <kbd>o</kbd>                   | <kbd>o</kbd>                   | <kbd>o</kbd>      | Overwrite file     |
-| skip           | <kbd>s</kbd>                   | <kbd>s</kbd>                   | <kbd>s</kbd>      | Skip file          |
-| rename         | <kbd>r</kbd>                   | <kbd>r</kbd>                   | <kbd>r</kbd>      | Rename file        |
-| cancel         | <kbd>c</kbd> <kbd>escape</kbd> | <kbd>c</kbd> <kbd>escape</kbd> | <kbd>escape</kbd> | Cancel operation   |
-| dont_ask_again | <kbd>a</kbd>                   | <kbd>a</kbd>                   | <kbd>a</kbd>      | Don't ask me again |
+### `clipboard`
 
-### `file_in_use`
+Uses all [`lists`](#lists) actions. It also supports `delete` to remove the highlighted
+clipboard entry, `toggle_all` to select or clear all entries, and the range-selection actions
+described below.
 
-Keybinds related to handling a file that is in use by another process
+### `processes`
 
-| action         | default                        | vim                            | sane              | description        |
-| -------------- | ------------------------------ | ------------------------------ | ----------------- | ------------------ |
-| retry          | <kbd>r</kbd>                   | <kbd>r</kbd>                   | <kbd>r</kbd>      | Retry operation    |
-| skip           | <kbd>s</kbd>                   | <kbd>s</kbd>                   | <kbd>s</kbd>      | Skip file          |
-| cancel         | <kbd>c</kbd> <kbd>escape</kbd> | <kbd>c</kbd> <kbd>escape</kbd> | <kbd>escape</kbd> | Cancel operation   |
-| dont_ask_again | <kbd>a</kbd>                   | <kbd>a</kbd>                   | <kbd>a</kbd>      | Don't ask me again |
+Uses all [`scroll`](#scroll) actions. `delete` clears completed and failed processes.
+
+### `preview` and `metadata`
+
+Both support the [`scroll`](#scroll) actions. `preview` additionally provides `up`, `down`,
+`page_up`, `page_down`, `home`, and `end` for navigating rendered content.
+
+## Reusable widget contexts
+
+### `lists`
+
+The fallback context for option and selection lists. It is shared by file lists, popup menus,
+search results, archive options, trash entries, and other selectable lists.
+
+| Action               | Description                              | Example                         |
+| -------------------- | ---------------------------------------- | ------------------------------- |
+| `cursor(offset)`     | Move by a number of enabled items.       | `"j" = "cursor(1)"`             |
+| `cursor_page(pages)` | Move by a number of visible pages.       | `"pagedown" = "cursor_page(1)"` |
+| `first`              | Move to the first item.                  | `"home" = "first"`              |
+| `last`               | Move to the last item.                   | `"end" = "last"`                |
+| `select`             | Activate or toggle the highlighted item. | `"enter" = "select"`            |
+
+Selection-list contexts also provide `select_cursor(offset)` and `select_cursor_page(pages)`
+for extending a selection. These include `file_list`, `clipboard`, `file_search_filters`,
+`content_search_filters`, `archive_types`, `archive_compression`, and `trash_list`.
+
+The following primary contexts inherit `lists`: `file_list`, `pinned_sidebar`, `clipboard`,
+`popup_list`, `file_list_menu`, `file_list_submenu`, `search_results`, `special_option_list`,
+`file_search_filters`, `content_search_filters`, `keybind_list`, `archive_types`,
+`archive_compression`, `paste_drop_list`, and `trash_list`.
+
+### `inputs`
+
+The fallback context for text inputs, including `path_input`, `search_input`, `filter_input`,
+and `modal_input_field`.
+
+| Action              | Description                        | Example                                 |
+| ------------------- | ---------------------------------- | --------------------------------------- |
+| `cursor_left`       | Move left by one character.        | `"left" = "cursor_left"`                |
+| `cursor_right`      | Move right by one character.       | `"right" = "cursor_right"`              |
+| `cursor_left_word`  | Move left by one word.             | `"ctrl+left" = "cursor_left_word"`      |
+| `cursor_right_word` | Move right by one word.            | `"ctrl+right" = "cursor_right_word"`    |
+| `home`              | Move to the start of the input.    | `"home" = "home"`                       |
+| `end`               | Move to the end of the input.      | `"end" = "end"`                         |
+| `delete_left`       | Delete the character to the left.  | `"backspace" = "delete_left"`           |
+| `delete_right`      | Delete the character to the right. | `"delete" = "delete_right"`             |
+| `delete_left_word`  | Delete the word to the left.       | `"ctrl+backspace" = "delete_left_word"` |
+| `delete_right_word` | Delete the word to the right.      | `"ctrl+delete" = "delete_right_word"`   |
+| `delete_left_all`   | Delete everything to the left.     | `"ctrl+u" = "delete_left_all"`          |
+| `delete_right_all`  | Delete everything to the right.    | `"ctrl+k" = "delete_right_all"`         |
+| `select_all`        | Select the entire value.           | `"ctrl+a" = "select_all"`               |
+| `copy`              | Copy selected text.                | `"ctrl+c" = "copy"`                     |
+| `cut`               | Cut selected text.                 | `"ctrl+x" = "cut"`                      |
+| `paste`             | Paste text.                        | `"ctrl+v" = "paste"`                    |
+| `submit`            | Submit the current value.          | `"enter" = "submit"`                    |
+
+### `scroll`
+
+The fallback context for scrollable panels, including `preview`, `metadata`, and `processes`.
+
+| Action         | Description              | Example                           |
+| -------------- | ------------------------ | --------------------------------- |
+| `scroll_up`    | Scroll up one step.      | `"up" = "scroll_up"`              |
+| `scroll_down`  | Scroll down one step.    | `"down" = "scroll_down"`          |
+| `scroll_left`  | Scroll left one step.    | `"left" = "scroll_left"`          |
+| `scroll_right` | Scroll right one step.   | `"right" = "scroll_right"`        |
+| `page_up`      | Scroll up one page.      | `"pageup" = "page_up"`            |
+| `page_down`    | Scroll down one page.    | `"pagedown" = "page_down"`        |
+| `page_left`    | Scroll left one page.    | `"shift+pageup" = "page_left"`    |
+| `page_right`   | Scroll right one page.   | `"shift+pagedown" = "page_right"` |
+| `scroll_home`  | Scroll to the beginning. | `"home" = "scroll_home"`          |
+| `scroll_end`   | Scroll to the end.       | `"end" = "scroll_end"`            |
+
+## Menu contexts
+
+### `copy_menu`
+
+| Action                   | Description                                  |
+| ------------------------ | -------------------------------------------- |
+| `copy.to_rovr`           | Copy selected files to rovr's clipboard.     |
+| `copy.highlighted`       | Copy the highlighted path.                   |
+| `copy.to_system_clip`    | Copy selected paths to the system clipboard. |
+| `copy.current_directory` | Copy the current directory path.             |
+
+### `sort_menu`
+
+The actions `sort_order.name`, `sort_order.extension`, `sort_order.natural`,
+`sort_order.size`, `sort_order.created`, and `sort_order.modified` select a sort method.
+`sort_order.descending` toggles descending order.
+
+The lower-level action `sort_order.set(method, descending)` accepts a method name and a Boolean:
+
+```toml
+[file_list]
+"alt+m" = "sort_order.set('modified', True)"
+```
+
+## Search and modal contexts
 
 ### `filter_modal`
 
-Keybinds related to selecting options in a modal screen (like FileSearch or ZDToDirectory)
+Shared by `file_search`, `content_search`, `directory_jump`, `theme_chooser`, and `keybinds`.
 
-| action    | default                               | vim                                   | sane                | description      |
-| --------- | ------------------------------------- | ------------------------------------- | ------------------- | ---------------- |
-| exit      | <kbd>escape</kbd>                     | <kbd>escape</kbd>                     | <kbd>escape</kbd>   | Exit modal       |
-| down      | <kbd>down</kbd> <kbd>ctrl+j</kbd>     | <kbd>ctrl+j</kbd> <kbd>down</kbd>     | <kbd>down</kbd>     | Select down      |
-| up        | <kbd>up</kbd> <kbd>ctrl+k</kbd>       | <kbd>ctrl+k</kbd> <kbd>up</kbd>       | <kbd>up</kbd>       | Select up        |
-| page_down | <kbd>pagedown</kbd> <kbd>ctrl+f</kbd> | <kbd>ctrl+f</kbd> <kbd>pagedown</kbd> | <kbd>pagedown</kbd> | Select page down |
-| page_up   | <kbd>pageup</kbd> <kbd>ctrl+b</kbd>   | <kbd>ctrl+b</kbd> <kbd>pageup</kbd>   | <kbd>pageup</kbd>   | Select page up   |
+| Action               | Description                    | Example                         |
+| -------------------- | ------------------------------ | ------------------------------- |
+| `exit`               | Close the modal.               | `"escape" = "exit"`             |
+| `cursor(offset)`     | Move through results.          | `"down" = "cursor(1)"`          |
+| `cursor_page(pages)` | Move through results by pages. | `"pagedown" = "cursor_page(1)"` |
 
-### `yes_or_no`
+The `keybinds` context also supports `focus_search`. `shell_exec` supports `cycle_mode`.
 
-Keybinds related to yes/no confirmation modals
+### Confirmation contexts
 
-| action         | default                        | vim                            | sane                           | description        |
-| -------------- | ------------------------------ | ------------------------------ | ------------------------------ | ------------------ |
-| yes            | <kbd>y</kbd>                   | <kbd>y</kbd>                   | <kbd>y</kbd> <kbd>enter</kbd>  | Yes                |
-| no             | <kbd>n</kbd> <kbd>escape</kbd> | <kbd>n</kbd> <kbd>escape</kbd> | <kbd>n</kbd> <kbd>escape</kbd> | No                 |
-| dont_ask_again | <kbd>a</kbd>                   | <kbd>a</kbd>                   | <kbd>a</kbd>                   | Don't ask me again |
+| Context             | Actions                                                   |
+| ------------------- | --------------------------------------------------------- |
+| `delete_files`      | `trash`, `delete`, `cancel`                               |
+| `trash`             | `restore`, `purge`, `empty`, `cancel`                     |
+| `filename_conflict` | `overwrite`, `rename`, `skip`, `cancel`, `dont_ask_again` |
+| `file_in_use`       | `retry`, `skip`, `cancel`, `toggle_dont_ask_again`        |
+| `yes_or_no`         | `yes`, `no`, `dont_ask_again`                             |
+| `paste_drop`        | `copy`, `move`, `cancel`                                  |
 
-### `drag_and_drop`
+These actions apply only while their corresponding modal is open.
 
-Keybinds related to the screen that appears after dropping a file
+## Finding the key names
 
-| action | default           | vim    | sane   | description    |
-| ------ | ----------------- | ------ | ------ | -------------- |
-| move   | <kbd>m</kbd>      | _none_ | _none_ | Move file here |
-| copy   | <kbd>c</kbd>      | _none_ | _none_ | Copy file here |
-| cancel | <kbd>escape</kbd> | _none_ | _none_ | Cancel         |
+Run `rovr --show-keys` to display the key name that will be used.

@@ -407,7 +407,7 @@ class FirstLaunchApp(App, inherit_bindings=False):
         # get appropriate keybind
         with open(
             resource
-            / "config"
+            / "assets"
             / "keybinds"
             / f"{self.query_one('#keybinds', RadioSet).pressed_button.id}.toml",
             "r",

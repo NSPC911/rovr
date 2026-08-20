@@ -100,6 +100,7 @@ from rovr.functions.themes import (
     theme_file_mtimes,
 )
 from rovr.functions.utils import (
+    literal_key,
     multiprocessing_process_error_checker,
     run_command,
     s,
@@ -599,23 +600,10 @@ class Application(Actionable, DNDApp, inherit_bindings=False):
     def show_key(self, event: events.Key) -> None:
         if self._show_keys:
             with suppress(NoMatches):
-                using = event.character
-                if not event.is_printable:
-                    using = event.key
-                if using == " ":
-                    using = "space"
+                using = literal_key(event.key)
                 wid = self.query_one("#showKeys", Label)
-                if using is None:
-                    wid.update("None")
-                else:
-                    if wid.content != using:
-                        wid.update(using)
-                wid.tooltip = (
-                    f"Key = '{event.key}'"
-                    f"\nCharacter = '{event.character}'"
-                    f"\nAliases = {event.aliases}"
-                    f"\nUsing: {using}"
-                )
+                if wid.content != using:
+                    wid.update(using)
 
     async def on_key(self, event: events.Key) -> None:
         # show key

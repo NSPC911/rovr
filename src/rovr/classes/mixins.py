@@ -361,7 +361,10 @@ class CursorNavigationMixin:
 
 
 class SelectionNavigationMixin(CursorNavigationMixin):
-    def _select_to(self, destination: int | None) -> None:
+    async def _select_to(self, destination: int | None) -> None:
+        func = getattr(self, "implicit_selector", lambda x: None)("pre")
+        if isinstance(func, Awaitable):
+            await func
         if destination is None:
             return
 
@@ -377,15 +380,15 @@ class SelectionNavigationMixin(CursorNavigationMixin):
             self._message_changed()
             self.refresh()
 
-    def action_select_cursor(self, offset: int) -> Awaitable[None] | None:
+    async def action_select_cursor(self, offset: int) -> Awaitable[None] | None:
         """Select through an offset from the cursor without wrapping."""
         if offset:
-            self._select_to(self._cursor_destination(offset, wrap=False))
+            await self._select_to(self._cursor_destination(offset, wrap=False))
 
-    def action_select_cursor_page(self, pages: float) -> Awaitable[None] | None:
+    async def action_select_cursor_page(self, pages: float) -> Awaitable[None] | None:
         """Select through a number of visible pages."""
         if pages and self._options:
-            self._select_to(self._cursor_page_destination(pages))
+            await self._select_to(self._cursor_page_destination(pages))
 
 
 class ScrollOffMixin:

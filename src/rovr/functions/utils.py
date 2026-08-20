@@ -88,18 +88,6 @@ def should_cancel() -> bool:
     return bool(worker and not worker.is_running)
 
 
-def literal_key(key: str) -> str:
-    from textual.keys import format_key
-
-    parts = key.split("+")
-    modifiers = []
-
-    while parts and parts[0] in {"ctrl", "alt", "shift", "meta", "super"}:
-        modifiers.append(parts.pop(0))
-
-    return "+".join((*modifiers, format_key("+".join(parts))))
-
-
 def check_key(event: events.Key, key_list: list[str] | str) -> bool:
     if isinstance(key_list, str):
         key_list = [key_list]

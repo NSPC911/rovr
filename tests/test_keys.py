@@ -5,6 +5,7 @@ import pytest
 from rovr.action_buttons import CopyButton
 from rovr.action_buttons.sort_order import SortOrderButton
 from rovr.app import Application
+from rovr.navigation_widgets import PathInput
 from rovr.screens import Dismissible
 from rovr.state_manager import StateManager
 
@@ -53,3 +54,27 @@ async def test_contextual_key_dispatch(tmp_path: Path) -> None:
         app.push_screen(Dismissible("Modal"))
         await pilot.pause()
         assert "main" not in {context for context, _ in app._active_key_contexts()}
+
+
+@pytest.mark.asyncio
+async def test_input_consumes_printable_globals_and_uses_input_context(
+    tmp_path: Path,
+) -> None:
+    app = Application(startup_path=tmp_path.as_posix())
+    app.keys = {
+        "global": {"q": "app.quit"},
+        "inputs": {"backspace": "delete_left"},
+    }
+
+    async with app.run_test(size=(143, 37)) as pilot:
+        path_input = app.query_one(PathInput)
+        path_input.value = "a"
+        path_input.cursor_position = 1
+        path_input.focus()
+
+        await pilot.press("q")
+        assert path_input.value == "aq"
+        assert app.return_code is None
+
+        await pilot.press("backspace")
+        assert path_input.value == "a"

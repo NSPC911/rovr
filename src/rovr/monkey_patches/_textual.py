@@ -7,6 +7,7 @@ from textual import _border as border
 from textual.content import Content
 from textual.css.types import EdgeType
 from textual.style import Style
+from textual.widgets import Input
 
 
 def render_border_label(
@@ -99,3 +100,7 @@ border.BORDER_CHARS["dashed"] = (
     ("┆", " ", "┆"),
     ("└", "╌", "┘"),
 )
+
+Input.check_consume_key = lambda self, key, character: (
+    len(character) == 1 and not key.startswith(("ctrl", "shift", "alt", "super"))
+)  # type: ignore[invalid-assignment]

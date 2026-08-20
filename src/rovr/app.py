@@ -100,7 +100,6 @@ from rovr.functions.themes import (
     theme_file_mtimes,
 )
 from rovr.functions.utils import (
-    literal_key,
     multiprocessing_process_error_checker,
     run_command,
     s,
@@ -600,7 +599,7 @@ class Application(Actionable, DNDApp, inherit_bindings=False):
     def show_key(self, event: events.Key) -> None:
         if self._show_keys:
             with suppress(NoMatches):
-                using = literal_key(event.key)
+                using = self.shorten_key(event.key)
                 wid = self.query_one("#showKeys", Label)
                 if wid.content != using:
                     wid.update(using)
@@ -1544,9 +1543,28 @@ class Application(Actionable, DNDApp, inherit_bindings=False):
         console.print(screen_render)
         return console.export_svg(title="")
 
+    @staticmethod
+    def shorten_key(key: str) -> str:
+        from textual.keys import key_to_character
+
+        *modifiers, name = key.split("+")
+        character = key_to_character(name)
+
+        if character is not None and character.isprintable() and character != " ":
+            name = character
+
+        return "+".join((*modifiers, name))
+
     async def _check_bindings(self, key: str, priority: bool = False) -> bool:
         if not self.keys:
             return await super()._check_bindings(key, priority)
+        self.notify(str(self.focused.check_consume_key(key, self.shorten_key(key))))
+        if (
+            priority
+            and self.focused is not None
+            and self.focused.check_consume_key(key, self.shorten_key(key))
+        ):
+            return False
 
         namespaces = self._key_namespaces()
         contexts = [("global", self)] if priority else self._active_key_contexts()

@@ -5,8 +5,9 @@ import pytest
 from rovr.action_buttons import CopyButton
 from rovr.action_buttons.sort_order import SortOrderButton
 from rovr.app import Application
+from rovr.classes.textual_options import KeybindOption
 from rovr.navigation_widgets import PathInput
-from rovr.screens import Dismissible
+from rovr.screens import Dismissible, ScopedKeybinds
 from rovr.state_manager import StateManager
 
 from .conftest import iter_until
@@ -78,3 +79,18 @@ async def test_input_consumes_printable_globals_and_uses_input_context(
 
         await pilot.press("backspace")
         assert path_input.value == "a"
+
+
+@pytest.mark.asyncio
+async def test_scoped_keybinds_screen(tmp_path: Path) -> None:
+    app = Application(startup_path=tmp_path.as_posix())
+    app.keys = {"main": {"?": {"action": "show_keybinds", "desc": "Show keybindings"}}}
+
+    async with app.run_test(size=(143, 37)) as pilot:
+        app.action_show_keybinds()
+        await pilot.pause()
+
+        assert isinstance(app.screen, ScopedKeybinds)
+        option = app.screen.keybinds_list.options[1]
+        assert isinstance(option, KeybindOption)
+        assert "Show keybindings" in option.label

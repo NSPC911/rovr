@@ -1569,7 +1569,8 @@ class Application(Actionable, DNDApp, inherit_bindings=False):
         namespaces = self._key_namespaces()
         contexts = [("global", self)] if priority else self._active_key_contexts()
         for context, namespace in contexts:
-            action = self.keys.get(context, {}).get(key)
+            binding = self.keys.get(context, {}).get(key)
+            action = binding["action"] if binding is not None else None
             if action == "noop":
                 return True
             if action is not None and await self.run_action(
@@ -1903,9 +1904,9 @@ class Application(Actionable, DNDApp, inherit_bindings=False):
         self.push_screen(ZDToDirectory(), on_response)
 
     def action_show_keybinds(self) -> None:
-        from rovr.screens import Keybinds
+        from rovr.screens import Keybinds, ScopedKeybinds
 
-        self.push_screen(Keybinds())
+        self.push_screen(ScopedKeybinds() if self.keys else Keybinds())
 
     def action_search_fd(self) -> None:
         import shutil

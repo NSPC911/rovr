@@ -1196,11 +1196,7 @@ class PreviewContainer(Actionable, Container):
                                 if not member.is_dir:
                                     all_files.append(member.name)
                         content = all_files
-                    except (
-                        BadArchiveError,
-                        ValueError,
-                        FileNotFoundError,
-                    ):
+                    except (BadArchiveError, ValueError, FileNotFoundError, EOFError):
                         content = [self._preview_texts["error"]]
 
                 self.update_ui(

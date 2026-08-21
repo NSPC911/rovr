@@ -5,6 +5,17 @@ All notable changes to this project will be documented in this file.
 The format is sort-of based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project sort-of adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.10.1.post1] - 2026-08-20
+
+### Fixed
+
+- `preview`: catch EOF error when reading archives [f5b836f24dc403b4664972bd89dfecce8c13f2cb](https://github.com/NSPC911/rovr/commit/f5b836f24dc403b4664972bd89dfecce8c13f2cb)
+- `firstlaunch`: use assets, not config when reading config [df111f6e5e245ff58603c99493cdec07875c8904](https://github.com/NSPC911/rovr/commit/df111f6e5e245ff58603c99493cdec07875c8904)
+
+### Refactor
+
+- `app`: print tree without alternate terminal buffer [ee612ff7b21c6575775405d54bc421a352263cf5](https://github.com/NSPC911/rovr/commit/ee612ff7b21c6575775405d54bc421a352263cf5)
+
 ## [0.10.1] - 2026-08-17
 
 ### Added
@@ -639,7 +650,8 @@ and this project sort-of adheres to [Semantic Versioning](https://semver.org/spe
 - `sort_order`: fix icon setting and tooltips
 - `style`: fix image and option padding/styling
 
-[Unreleased]: https://github.com/NSPC911/rovr/compare/v0.10.1...HEAD
+[Unreleased]: https://github.com/NSPC911/rovr/compare/v0.10.1.post1...HEAD
+[0.10.1.post1]: https://github.com/NSPC911/rovr/compare/v0.10.1...v0.10.1.post1
 [0.10.1]: https://github.com/NSPC911/rovr/compare/v0.10.0...v0.10.1
 [0.10.0]: https://github.com/NSPC911/rovr/compare/v0.9.2...v0.10.0
 [0.9.2]: https://github.com/NSPC911/rovr/compare/v0.9.1.post2...v0.9.2

@@ -418,17 +418,27 @@ example_function(10)"""
     elif cwd_file == "__stderr__":
         cwd_file = backup_stderr
 
-    if args.ignore_missing_tty or sys.stdout.isatty():
-        app = Application(
-            startup_path=args.paths,
-            cwd_file=cwd_file if cwd_file else None,
-            chooser_file=chooser_file if chooser_file else None,
-            show_keys=args.show_keys,
-            tree_dom=args.tree_dom,
-            force_crash_in=args.force_crash_in,
-            force_exit_on_shutdown=True,
-        )
+    new_app = lambda: Application(
+        startup_path=args.paths,
+        cwd_file=cwd_file if cwd_file else None,
+        chooser_file=chooser_file if chooser_file else None,
+        show_keys=args.show_keys,
+        force_crash_in=args.force_crash_in,
+        force_exit_on_shutdown=True,
+    )
+
+    if args.tree_dom:
+        import asyncio
+
+        async def print_dom(app: Application) -> None:
+            async with app.run_test() as pilot:
+                await pilot.pause(0.1)
+                pprint(app.tree)
+
+        asyncio.run(print_dom(new_app()))
+    elif args.ignore_missing_tty or sys.stdout.isatty():
         try:
+            app = new_app()
             app.run()
         finally:
             app.cancel_force_exit_timer()
@@ -458,15 +468,7 @@ example_function(10)"""
                         from textual import constants
 
                         constants.COLOR_SYSTEM = "truecolor"
-                    app = Application(
-                        startup_path=args.paths,
-                        cwd_file=cwd_file if cwd_file else None,
-                        chooser_file=chooser_file if chooser_file else None,
-                        show_keys=args.show_keys,
-                        tree_dom=args.tree_dom,
-                        force_crash_in=args.force_crash_in,
-                        force_exit_on_shutdown=True,
-                    )
+                    app = new_app()
                     try:
                         app.run()
                     finally:

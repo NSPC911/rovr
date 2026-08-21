@@ -1,89 +1,89 @@
 # Vim-style keybindings
 
 [global]
-"q" = "app.quit"
+"q" = { action = "app.quit", desc = "Quit rovr" }
 "ctrl+q" = "app.quit"
-"ctrl+p" = "app.command_palette"
-"ctrl+z" = "app.suspend_process"
+"ctrl+p" = { action = "app.command_palette", desc = "Open the command palette" }
+"ctrl+z" = { action = "app.suspend_process", desc = "Suspend rovr" }
 
 [main]
-"S" = "toggle_pinned_sidebar"
-"I" = "toggle_preview_sidebar"
-"F" = "toggle_footer"
-"M" = "toggle_menu_wrapper"
-"s" = "focus_toggle_pinned_sidebar"
-"escape" = "focus_file_list"
-"i" = "focus_toggle_preview_sidebar"
-"ctrl+l" = "focus_toggle_path_switcher"
-"#" = "focus_toggle_processes"
-"c" = "focus_toggle_clipboard"
-"m" = "focus_toggle_metadata"
-"ctrl+j" = "cycle_tab(1)"
-"ctrl+k" = "cycle_tab(-1)"
-"n" = "tab_new"
-"w" = "tab_close"
-"?" = "show_keybinds"
-">" = "show_shell_screen"
-"z" = "cd_zoxide"
-"f" = "search_fd"
-"\\" = "search_rg"
+"S" = { action = "toggle_pinned_sidebar", desc = "Toggle the pinned sidebar" }
+"I" = { action = "toggle_preview_sidebar", desc = "Toggle the preview sidebar" }
+"F" = { action = "toggle_footer", desc = "Toggle the footer" }
+"M" = { action = "toggle_menu_wrapper", desc = "Toggle the menu" }
+"s" = { action = "focus_toggle_pinned_sidebar", desc = "Focus the pinned sidebar" }
+"escape" = { action = "focus_file_list", desc = "Focus the file list" }
+"i" = { action = "focus_toggle_preview_sidebar", desc = "Focus the preview sidebar" }
+"ctrl+l" = { action = "focus_toggle_path_switcher", desc = "Focus the path switcher" }
+"#" = { action = "focus_toggle_processes", desc = "Focus the processes panel" }
+"c" = { action = "focus_toggle_clipboard", desc = "Focus the clipboard panel" }
+"m" = { action = "focus_toggle_metadata", desc = "Focus the metadata panel" }
+"ctrl+j" = { action = "cycle_tab(1)", desc = "Go to the next tab" }
+"ctrl+k" = { action = "cycle_tab(-1)", desc = "Go to the previous tab" }
+"n" = { action = "tab_new", desc = "Open a new tab" }
+"w" = { action = "tab_close", desc = "Close the current tab" }
+"?" = { action = "show_keybinds", desc = "Show keybindings" }
+">" = { action = "show_shell_screen", desc = "Open the shell" }
+"z" = { action = "cd_zoxide", desc = "Jump to a directory" }
+"f" = { action = "search_fd", desc = "Search for files" }
+"\\" = { action = "search_rg", desc = "Search file contents" }
 
 [file_list]
-"P" = "toggle_pin"
-"/" = "focus_search"
-"y" = "copy.to_rovr"
-"p" = "paste"
-"x" = "cut"
-"d" = "delete"
-"r" = "rename"
-"a" = "new"
-"A" = "bulk_create"
-"E" = "zip"
-"ctrl+e" = "unzip"
-"left" = "up_tree"
+"P" = { action = "toggle_pin", desc = "Toggle the current pin" }
+"/" = { action = "focus_search", desc = "Search the file list" }
+"y" = { action = "copy.to_rovr", desc = "Copy selected files" }
+"p" = { action = "paste", desc = "Paste copied files" }
+"x" = { action = "cut", desc = "Cut selected files" }
+"d" = { action = "delete", desc = "Delete selected files" }
+"r" = { action = "rename", desc = "Rename the current file" }
+"a" = { action = "new", desc = "Create a file or directory" }
+"A" = { action = "bulk_create", desc = "Create multiple files or directories" }
+"E" = { action = "zip", desc = "Create an archive" }
+"ctrl+e" = { action = "unzip", desc = "Extract an archive" }
+"left" = { action = "up_tree", desc = "Go to the parent directory" }
 "h" = "up_tree"
-"H" = "bypass_up_tree"
-"L" = "bypass_down_tree"
-"backspace" = "hist_previous"
+"H" = { action = "bypass_up_tree", desc = "Go up without changing history" }
+"L" = { action = "bypass_down_tree", desc = "Go down without changing history" }
+"backspace" = { action = "hist_previous", desc = "Go to the previous directory" }
 "u" = "hist_previous"
-"ctrl+r" = "hist_next"
+"ctrl+r" = { action = "hist_next", desc = "Go to the next directory" }
 "space" = "hist_next"
-"v" = "toggle_visual"
-"%" = "toggle_all"
+"v" = { action = "toggle_visual", desc = "Toggle visual selection" }
+"%" = { action = "toggle_all", desc = "Toggle selection of all files" }
 "ctrl+a" = "toggle_all"
-"." = "toggle_hidden_files"
-"shift+up" = "select_cursor(-1)"
+"." = { action = "toggle_hidden_files", desc = "Toggle hidden files" }
+"shift+up" = { action = "select_cursor(-1)", desc = "Extend selection upward" }
 "K" = "select_cursor(-1)"
-"shift+down" = "select_cursor(1)"
+"shift+down" = { action = "select_cursor(1)", desc = "Extend selection downward" }
 "J" = "select_cursor(1)"
-"shift+pageup" = "select_cursor_page(-1)"
-"shift+pagedown" = "select_cursor_page(1)"
-"shift+home" = "select_home"
-"shift+end" = "select_end"
-"o" = "open"
-"e" = "open_editor"
-"shift+f10" = "open_right_click_menu"
-"Y" = "copy.open_popup"
-"," = "sort_order.open_popup"
+"shift+pageup" = { action = "select_cursor_page(-1)", desc = "Extend selection up one page" }
+"shift+pagedown" = { action = "select_cursor_page(1)", desc = "Extend selection down one page" }
+"shift+home" = { action = "select_home", desc = "Extend selection to the first file" }
+"shift+end" = { action = "select_end", desc = "Extend selection to the last file" }
+"o" = { action = "open", desc = "Open selected files" }
+"e" = { action = "open_editor", desc = "Open the current file in an editor" }
+"shift+f10" = { action = "open_right_click_menu", desc = "Open the context menu" }
+"Y" = { action = "copy.open_popup", desc = "Open the copy menu" }
+"," = { action = "sort_order.open_popup", desc = "Open the sort menu" }
 
 [pinned_sidebar]
-"/" = "focus_search"
+"/" = { action = "focus_search", desc = "Search pinned directories" }
 
 [lists]
-"up" = "cursor(-1)"
+"up" = { action = "cursor(-1)", desc = "Move up" }
 "k" = "cursor(-1)"
-"down" = "cursor(1)"
+"down" = { action = "cursor(1)", desc = "Move down" }
 "j" = "cursor(1)"
-"right" = "select"
+"right" = { action = "select", desc = "Select" }
 "l" = "select"
 "enter" = "select"
-"pageup" = "cursor_page(-1)"
+"pageup" = { action = "cursor_page(-1)", desc = "Move up one page" }
 "ctrl+b" = "cursor_page(-1)"
-"pagedown" = "cursor_page(1)"
+"pagedown" = { action = "cursor_page(1)", desc = "Move down one page" }
 "ctrl+f" = "cursor_page(1)"
-"home" = "first"
+"home" = { action = "first", desc = "Move to the first item" }
 "g" = "first"
-"end" = "last"
+"end" = { action = "last", desc = "Move to the last item" }
 "G" = "last"
 
 [copy_menu]

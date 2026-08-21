@@ -79,7 +79,7 @@ def test_load_keys_user_file_is_standalone(
 
     keys = config.load_keys()
 
-    assert keys == {"global": {"x": "app.quit"}}
+    assert keys == {"global": {"x": {"action": "app.quit"}}}
 
 
 def test_load_keys_can_inherit_preset(
@@ -92,8 +92,34 @@ def test_load_keys_can_inherit_preset(
 
     keys = config.load_keys()
 
-    assert keys["global"]["x"] == "app.quit"
-    assert keys["lists"]["up"] == "cursor(-1)"
+    assert keys["global"]["x"] == {"action": "app.quit"}
+    assert keys["lists"]["up"]["action"] == "cursor(-1)"
+
+
+def test_load_keys_accepts_descriptions(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    monkeypatch.setenv("ROVR_CONFIG_FOLDER", str(tmp_path))
+    (tmp_path / "keys.toml").write_text(
+        '[global]\n"x" = { action = "app.quit", desc = "Quit" }\n'
+    )
+
+    keys = config.load_keys()
+
+    assert keys == {"global": {"x": {"action": "app.quit", "desc": "Quit"}}}
+
+
+def test_load_keys_replaces_inherited_binding_table(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    monkeypatch.setenv("ROVR_CONFIG_FOLDER", str(tmp_path))
+    (tmp_path / "keys.toml").write_text(
+        'inherit = "sane"\n\n[global]\n"ctrl+q" = { action = "custom_quit" }\n'
+    )
+
+    keys = config.load_keys()
+
+    assert keys["global"]["ctrl+q"] == {"action": "custom_quit"}
 
 
 def test_natural_size() -> None:

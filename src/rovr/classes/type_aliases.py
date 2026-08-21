@@ -1,10 +1,16 @@
-from typing import Literal, TypeAlias, TypedDict
+from typing import Literal, NotRequired, TypeAlias, TypedDict
 
 SortByOptions: TypeAlias = Literal[
     "name", "size", "modified", "created", "extension", "natural"
 ]
 
-KeysConfig: TypeAlias = dict[str, dict[str, str]]
+
+class KeyBinding(TypedDict):
+    action: str
+    desc: NotRequired[str]
+
+
+KeysConfig: TypeAlias = dict[str, dict[str, KeyBinding]]
 
 
 class BarPanicDismissible(TypedDict):

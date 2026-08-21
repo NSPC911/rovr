@@ -12,11 +12,13 @@ import { Aside } from "@astrojs/starlight/components";
 
 ## Action syntax
 
-Assign an action to a key under a context in `keys.toml`:
+Assign an action to a key under a context in `keys.toml`. A binding may be an action string or
+an inline table with a required `action` and optional `desc`:
 
 ```toml
 [main]
 "ctrl+t" = "tab_new"
+"?" = { action = "show_keybinds", desc = "Show keybindings" }
 # yes function-like syntax is supported, for supported literal values
 "1" = "activate_tab(0)"
 # check https://docs.python.org/3/library/ast.html#ast.literal_eval
@@ -24,6 +26,16 @@ Assign an action to a key under a context in `keys.toml`:
 
 [file_list]
 "ctrl+c" = "copy.to_rovr"
+```
+
+Both forms dispatch actions identically. `desc` is shown in the keybindings screen; when it is
+omitted, the action string is shown instead. Bindings for the same action in one context are
+grouped together, so only one of them needs a description:
+
+```toml
+[global]
+"q" = { action = "app.quit", desc = "Quit rovr" }
+"ctrl+q" = "app.quit"
 ```
 
 The name of a Python method such as `action_tab_new` becomes `tab_new` in `keys.toml`.

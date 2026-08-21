@@ -76,6 +76,14 @@
 "home" = { action = "first", desc = "Move to the first item" }
 "end" = { action = "last", desc = "Move to the last item" }
 
+[scroll]
+"up" = "scroll_up"
+"down" = "scroll_down"
+"pageup" = "scroll_page_up"
+"pagedown" = "scroll_page_down"
+"home" = "scroll_home"
+"end" = "scroll_end"
+
 [copy_menu]
 "r" = "copy.to_rovr"
 "p" = "copy.highlighted"

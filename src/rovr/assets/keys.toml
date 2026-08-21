@@ -1,4 +1,4 @@
-# Default keybindings. A user keys.toml may inherit "default", "sane", or "vim".
+# Default keybindings. A user keys.toml may inherit "base", "sane", or "vim".
 # Printable keys use their character; other keys use Textual's key names.
 
 [global]
@@ -93,6 +93,20 @@
 "g" = "first"
 "end" = { action = "last", desc = "Move to the last item" }
 "G" = "last"
+
+[scroll]
+"up" = "scroll_up"
+"k" = "scroll_up"
+"down" = "scroll_down"
+"j" = "scroll_down"
+"pageup" = "scroll_page_up"
+"ctrl+b" = "scroll_page_up"
+"pagedown" = "scroll_page_down"
+"ctrl+f" = "scroll_page_down"
+"home" = "scroll_home"
+"g" = "scroll_home"
+"end" = "scroll_end"
+"G" = "scroll_end"
 
 [copy_menu]
 "y" = "copy.to_rovr"

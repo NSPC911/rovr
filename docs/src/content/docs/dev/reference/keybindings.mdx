@@ -10,6 +10,12 @@ import { Aside } from "@astrojs/starlight/components";
   actions are not considered part of rovr's configuration API.
 </Aside>
 
+## Quick start
+
+rovr lets you inherit from one of three built-in keybinding sets: `base`, `vim`, or `sane`.
+{/* remove this part later*/}
+If `keys.toml` is empty or does not exist, rovr will use the older, unsupported keybindings (not the `base` set, the one defined in `config.toml`)
+
 ## Action syntax
 
 Assign an action to a key under a context in `keys.toml`. A binding may be an action string or

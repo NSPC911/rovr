@@ -948,7 +948,7 @@ class Application(
             yield SystemCommand(
                 "Open fd",
                 "Start searching the current directory using `fd`",
-                self.action_plugin_fd,
+                self.action_search_fd,
             )
         if (
             config["plugins"]["zoxide"]["enabled"]
@@ -957,13 +957,13 @@ class Application(
             yield SystemCommand(
                 "Open zoxide",
                 "Start searching for a directory to `z` to",
-                self.action_plugin_zoxide,
+                self.action_cd_zoxide,
             )
         if config["plugins"]["rg"]["enabled"] and config["plugins"]["rg"]["keybinds"]:
             yield SystemCommand(
                 "Open ripgrep",
                 "Start searching the current directory for a string using `rg`",
-                self.action_plugin_rg,
+                self.action_search_rg,
             )
         if config["keybinds"]["toggle_hidden_files"]:
             if config["interface"]["show_hidden_files"]:

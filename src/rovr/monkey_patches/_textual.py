@@ -102,5 +102,7 @@ border.BORDER_CHARS["dashed"] = (
 )
 
 Input.check_consume_key = lambda self, key, character: (  # ty: ignore[invalid-assignment]
-    len(character) == 1 and not key.startswith(("ctrl", "shift", "alt", "super"))
+    character
+    and len(character) == 1
+    and not key.startswith(("ctrl", "shift", "alt", "super"))
 )

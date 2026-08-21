@@ -723,7 +723,7 @@ class KeyHandler:
         return "+".join((*modifiers, name))
 
     async def _check_bindings(self: App, key: str, priority: bool = False) -> bool:
-        if not self.keys:
+        if not self.keys or self.screen.id == "--command-palette":
             return await App._check_bindings(self, key, priority)
         if (
             priority

@@ -38,7 +38,6 @@ from textual_drivers.dnd import (
     Drop,
 )
 
-from rovr import get_console
 from rovr.action_buttons import (
     CopyButton,
     CutButton,
@@ -96,8 +95,6 @@ from rovr.screens.way_too_small import TerminalTooSmall
 from rovr.state_manager import StateManager
 from rovr.variables.constants import MaxPossible, config, keys, log_name
 from rovr.variables.maps import RovrVars
-
-console = get_console
 
 if constants.SCREENSHOT_LOCATION:
     constants.SCREENSHOT_LOCATION = normalise(getcwd(), constants.SCREENSHOT_LOCATION)
@@ -1271,3 +1268,10 @@ class Application(
             ShellExec(),
             callback=lambda response: self.on_shell_exec_response(response),
         )
+
+    def action_print_dom(self) -> None:
+        # basically --tree-dom but without instant exit
+        from rovr import get_console
+
+        with self.suspend():
+            get_console().print(self.tree)

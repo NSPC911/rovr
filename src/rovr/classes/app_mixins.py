@@ -725,7 +725,6 @@ class KeyHandler:
     async def _check_bindings(self: App, key: str, priority: bool = False) -> bool:
         if not self.keys:
             return await App._check_bindings(self, key, priority)
-        self.notify(str(self.focused.check_consume_key(key, self.shorten_key(key))))
         if (
             priority
             and self.focused is not None

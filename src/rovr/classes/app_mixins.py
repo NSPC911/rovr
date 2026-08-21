@@ -13,6 +13,7 @@ from textual import events, on, work
 from textual.app import App
 from textual.css.errors import StylesheetError
 from textual.css.stylesheet import StylesheetParseError
+from textual.dom import DOMNode
 from textual.geometry import Offset
 from textual_drivers.dnd import (
     DNDDragIn,
@@ -706,3 +707,77 @@ class DragAndDrop:
                     process_container.paste_items(
                         copied=[], has_cut=response.paths, dest=destination
                     )
+
+
+class KeyHandler:
+    @staticmethod
+    def shorten_key(key: str) -> str:
+        from textual.keys import key_to_character
+
+        *modifiers, name = key.split("+")
+        character = key_to_character(name)
+
+        if character is not None and character.isprintable() and character != " ":
+            name = character
+
+        return "+".join((*modifiers, name))
+
+    async def _check_bindings(self: App, key: str, priority: bool = False) -> bool:
+        if not self.keys:
+            return await App._check_bindings(self, key, priority)
+        self.notify(str(self.focused.check_consume_key(key, self.shorten_key(key))))
+        if (
+            priority
+            and self.focused is not None
+            and self.focused.check_consume_key(key, self.shorten_key(key))
+        ):
+            return False
+
+        namespaces = self._key_namespaces()
+        contexts = [("global", self)] if priority else self._active_key_contexts()
+        for context, namespace in contexts:
+            context = self.keys.get(context, {})
+            binding = context.get(key)
+            if isinstance(binding, dict):
+                action = binding["action"]
+            elif isinstance(binding, str):
+                action = binding
+            else:
+                action = None
+            if action == "noop":
+                return True
+            if action is not None and await self.run_action(
+                action,
+                default_namespace=namespace,
+                namespaces=namespaces,
+            ):
+                return True
+        return False
+
+    def _active_key_contexts(self: App) -> list[tuple[str, DOMNode]]:
+        contexts: list[tuple[str, DOMNode]] = []
+        focused = self.focused
+        nodes = focused.ancestors_with_self if focused is not None else [self.screen]
+        for node in nodes:
+            contexts.extend(
+                (context, node) for context in getattr(node, "key_contexts", ())
+            )
+            if node is self.screen:
+                break
+        if len(self.screen_stack) == 1:
+            contexts.append(("main", self))
+        return contexts
+
+    def _key_namespaces(self: App) -> dict[str, DOMNode]:
+        namespaces: dict[str, DOMNode] = {"app": self, "screen": self.screen}
+        for node in self.screen.walk_children(with_self=True):
+            contexts = getattr(node, "key_contexts", ())
+            if contexts:
+                namespaces.setdefault(contexts[0], node)
+
+        if self.focused is not None:
+            for node in reversed(self.focused.ancestors_with_self):
+                contexts = getattr(node, "key_contexts", ())
+                if contexts:
+                    namespaces[contexts[0]] = node
+        return namespaces

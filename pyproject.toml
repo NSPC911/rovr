@@ -220,6 +220,7 @@ select = [
   "ASYNC221",
   "ASYNC251",
   "ANN",
+  "B019",
   "COM819",
   "C400",
   "DOC",

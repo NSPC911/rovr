@@ -63,8 +63,8 @@ async def test_input_consumes_printable_globals_and_uses_input_context(
 ) -> None:
     app = Application(startup_path=tmp_path.as_posix())
     app.keys = {
-        "global": {"q": "app.quit"},
-        "inputs": {"backspace": "delete_left"},
+        "global": {"q": {"action": "app.quit"}},
+        "inputs": {"backspace": {"action": "delete_left"}},
     }
 
     async with app.run_test(size=(143, 37)) as pilot:

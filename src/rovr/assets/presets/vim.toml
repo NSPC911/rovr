@@ -180,7 +180,7 @@
 "super+c" = "copy"
 "ctrl+v" = "paste"
 
-[keybinds]
+[keybind_list]
 "/" = "focus_search"
 "?" = "exit"
 
@@ -194,3 +194,7 @@
 "c" = "copy"
 "m" = "move"
 "escape" = "cancel"
+
+[shell_exec]
+"tab" = "cycle_mode"
+"shift+tab" = "cycle_mode"

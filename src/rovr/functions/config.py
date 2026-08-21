@@ -17,7 +17,7 @@ from platformdirs import user_config_dir
 
 from rovr import pprint
 from rovr.classes.config import RovrConfig
-from rovr.classes.type_aliases import KeyBinding, KeysConfig
+from rovr.classes.type_aliases import KeysConfig
 from rovr.variables.maps import RovrVars
 
 EDITOR_CANDIDATES = [
@@ -678,14 +678,13 @@ def load_keys() -> KeysConfig:
 
     user_keys = {}
     user_keys_content = ""
-    if path.exists(user_keys_path):
-        with open(user_keys_path, "r", encoding="utf-8") as f:
-            user_keys_content = f.read()
-            if user_keys_content:
-                try:
-                    user_keys = tomli.loads(user_keys_content)
-                except tomli.TOMLDecodeError as exc:
-                    toml_dump(user_keys_path, exc)
+    with open(user_keys_path, "r", encoding="utf-8") as f:
+        user_keys_content = f.read()
+        if user_keys_content:
+            try:
+                user_keys = tomli.loads(user_keys_content)
+            except tomli.TOMLDecodeError as exc:
+                toml_dump(user_keys_path, exc)
     inherit = user_keys.pop("inherit", None)
     if inherit is not None and (not isinstance(inherit, str) or inherit not in presets):
         # find inherit in config
@@ -714,12 +713,6 @@ def load_keys() -> KeysConfig:
         else {}
     )
     keys_dict = cast(KeysConfig, deep_merge(base_keys, user_keys))
-    for context, context_keys in user_keys.items():
-        if isinstance(context_keys, dict):
-            for key, binding in context_keys.items():
-                if isinstance(binding, dict):
-                    keys_dict[context][key] = cast(KeyBinding, binding)
-
     # check it manually
     schema = {
         "type": "object",

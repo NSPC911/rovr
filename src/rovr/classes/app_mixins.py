@@ -3,6 +3,7 @@ from __future__ import annotations
 import asyncio
 from contextlib import suppress
 from dataclasses import replace
+from functools import lru_cache
 from importlib import resources
 from os import path
 from time import perf_counter
@@ -710,6 +711,7 @@ class DragAndDrop:
 
 
 class KeyHandler:
+    @lru_cache(maxsize=128)
     @staticmethod
     def shorten_key(key: str) -> str:
         from textual.keys import key_to_character
@@ -728,7 +730,7 @@ class KeyHandler:
         if (
             priority
             and self.focused is not None
-            and self.focused.check_consume_key(key, self.shorten_key(key))
+            and self.focused.check_consume_key(key, KeyHandler.shorten_key(key))
         ):
             return False
 
@@ -736,7 +738,7 @@ class KeyHandler:
         contexts = [("global", self)] if priority else self._active_key_contexts()
         for context, namespace in contexts:
             context = self.keys.get(context, {})
-            binding = context.get(key)
+            binding = context.get(KeyHandler.shorten_key(key))
             if isinstance(binding, dict):
                 action = binding["action"]
             elif isinstance(binding, str):

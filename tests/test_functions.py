@@ -93,6 +93,7 @@ def test_load_keys_can_inherit_preset(
     keys = config.load_keys()
 
     assert keys["global"]["x"] == {"action": "app.quit"}
+    assert isinstance(keys["lists"]["up"], dict)
     assert keys["lists"]["up"]["action"] == "cursor(-1)"
 
 

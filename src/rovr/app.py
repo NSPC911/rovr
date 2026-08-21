@@ -911,8 +911,14 @@ class Application(
         namespaces = self._key_namespaces()
         contexts = [("global", self)] if priority else self._active_key_contexts()
         for context, namespace in contexts:
-            binding = self.keys.get(context, {}).get(key)
-            action = binding["action"] if binding is not None else None
+            context = self.keys.get(context, {})
+            binding = context.get(key)
+            if isinstance(binding, dict):
+                action = binding["action"]
+            elif isinstance(binding, str):
+                action = binding
+            else:
+                action = None
             if action == "noop":
                 return True
             if action is not None and await self.run_action(

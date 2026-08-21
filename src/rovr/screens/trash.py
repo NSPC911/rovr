@@ -130,13 +130,13 @@ class TrashSelectionList(
         if self.highlighted_option is not None:
             self.action_select()
 
-    def action_select_up(self) -> None:
+    async def action_select_up(self) -> None:
         """Select the current and previous entry."""
-        self.action_select_cursor(-1)
+        await self.action_select_cursor(-1)
 
-    def action_select_down(self) -> None:
+    async def action_select_down(self) -> None:
         """Select the current and next entry."""
-        self.action_select_cursor(1)
+        await self.action_select_cursor(1)
 
     def _select_range_to(self, mover: Callable[[], None]) -> None:
         if self.highlighted_option is None:
@@ -147,13 +147,13 @@ class TrashSelectionList(
         for index in range(min(old, new), max(old, new) + 1):
             self.select(self.get_option_at_index(index))
 
-    def action_select_page_up(self) -> None:
+    async def action_select_page_up(self) -> None:
         """Select every entry between the current one and a page up."""
-        self.action_select_cursor_page(-1)
+        await self.action_select_cursor_page(-1)
 
-    def action_select_page_down(self) -> None:
+    async def action_select_page_down(self) -> None:
         """Select every entry between the current one and a page down."""
-        self.action_select_cursor_page(1)
+        await self.action_select_cursor_page(1)
 
     def action_select_home(self) -> None:
         """Select every entry between the current one and the first."""

@@ -74,10 +74,12 @@ async def test_input_consumes_printable_globals_and_uses_input_context(
         path_input.focus()
 
         await pilot.press("q")
+        await pilot.pause()
         assert path_input.value == "aq"
         assert app.return_code is None
 
         await pilot.press("backspace")
+        await pilot.pause()
         assert path_input.value == "a"
 
 

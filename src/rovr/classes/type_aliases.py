@@ -10,7 +10,7 @@ class KeyBinding(TypedDict):
     desc: NotRequired[str]
 
 
-KeysConfig: TypeAlias = dict[str, dict[str, KeyBinding]]
+KeysConfig: TypeAlias = dict[str, dict[str, KeyBinding | str]]
 
 
 class BarPanicDismissible(TypedDict):

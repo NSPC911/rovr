@@ -94,7 +94,7 @@ async def test_select_cursor_batches_selection_and_highlight_messages() -> None:
         option_list = app.query_one(SelectionCursorList)
         app.highlighted_messages = 0
 
-        option_list.action_select_cursor(4)
+        await option_list.action_select_cursor(4)
         await pilot.pause()
 
         assert option_list.highlighted == 4

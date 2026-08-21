@@ -13,12 +13,8 @@ from textual.widgets import Button, OptionList
 from rovr.classes.mixins import Action, Actionable, CursorNavigationMixin
 from rovr.classes.textual_options import OptionWithValue
 from rovr.functions.icons import get_icon_smart
-from rovr.functions.utils import dismiss, get_shortest_bind
+from rovr.functions.utils import dismiss, get_shortcut
 from rovr.variables.constants import config
-
-copy_bind = get_shortest_bind(config["keybinds"]["drag_and_drop"]["copy"])
-move_bind = get_shortest_bind(config["keybinds"]["drag_and_drop"]["move"])
-cancel_bind = get_shortest_bind(config["keybinds"]["drag_and_drop"]["cancel"])
 
 
 class PasteDropOptionList(CursorNavigationMixin, OptionList):
@@ -41,6 +37,9 @@ class PasteDropScreen(Actionable, ModalScreen["PasteDropScreen.ReturnType | None
         self.call_after_refresh(self.post_message, initial_paste_event)
 
     def compose(self) -> ComposeResult:
+        copy_bind = get_shortcut("paste_drop", "copy", "drag_and_drop")
+        move_bind = get_shortcut("paste_drop", "move", "drag_and_drop")
+        cancel_bind = get_shortcut("paste_drop", "cancel", "drag_and_drop")
         with Grid(id="dialog"):
             yield PasteDropOptionList(id="drag_and_drop_list")
             yield Button(f"\\[{copy_bind}] Copy", id="copy", variant="success")

@@ -15,15 +15,8 @@ from rovr.functions.system_clipboard import (
     ClipboardToolNotFoundError,
     copy_files_to_system_clipboard,
 )
-from rovr.functions.utils import check_key, get_shortest_bind
+from rovr.functions.utils import check_key, get_shortcut
 from rovr.variables.constants import config
-
-rovr_bind = get_shortest_bind(config["keybinds"]["extra_copy"]["copy_to_rovr"])
-path_bind = get_shortest_bind(config["keybinds"]["extra_copy"]["copy_highlighted"])
-system_bind = get_shortest_bind(config["keybinds"]["extra_copy"]["copy_to_system_clip"])
-copy_parent_bind = get_shortest_bind(
-    config["keybinds"]["extra_copy"]["copy_current_directory"]
-)
 
 
 class CopyPanelOption(Option):
@@ -181,19 +174,36 @@ class CopyPanelOptions(PopupOptionList):
         ) or self.app.file_list.options[0].disabled
         self.set_options([
             CopyPanelOption(
-                rovr_bind,
+                get_shortcut("copy_menu", "copy.to_rovr", "extra_copy", "copy_to_rovr"),
                 "Copy files to rovr clipboard ",
                 "rovr",
                 disabled=should_disable,
             ),
             CopyPanelOption(
-                path_bind, "Copy single file path ", "path", disabled=should_disable
+                get_shortcut(
+                    "copy_menu", "copy.highlighted", "extra_copy", "copy_highlighted"
+                ),
+                "Copy single file path ",
+                "path",
+                disabled=should_disable,
             ),
             CopyPanelOption(
-                copy_parent_bind, "Copy current directory path ", "parent_path"
+                get_shortcut(
+                    "copy_menu",
+                    "copy.current_directory",
+                    "extra_copy",
+                    "copy_current_directory",
+                ),
+                "Copy current directory path ",
+                "parent_path",
             ),
             CopyPanelOption(
-                system_bind,
+                get_shortcut(
+                    "copy_menu",
+                    "copy.to_system_clip",
+                    "extra_copy",
+                    "copy_to_system_clip",
+                ),
                 "Copy to system clipboard ",
                 "system",
                 disabled=should_disable,

@@ -9,20 +9,9 @@ from textual.widgets.option_list import Option, OptionDoesNotExist
 from rovr.classes.type_aliases import SortByOptions
 from rovr.components import PopupOptionList
 from rovr.functions.icons import get_icon, get_toggle_button_icon
-from rovr.functions.utils import check_key, get_shortest_bind
+from rovr.functions.utils import check_key, get_shortcut
 from rovr.state_manager import StateManager
 from rovr.variables.constants import config
-
-# Get the shortest keybind for each sort option
-name_bind = get_shortest_bind(config["keybinds"]["change_sort_order"]["name"])
-extension_bind = get_shortest_bind(config["keybinds"]["change_sort_order"]["extension"])
-natural_bind = get_shortest_bind(config["keybinds"]["change_sort_order"]["natural"])
-size_bind = get_shortest_bind(config["keybinds"]["change_sort_order"]["size"])
-created_bind = get_shortest_bind(config["keybinds"]["change_sort_order"]["created"])
-modified_bind = get_shortest_bind(config["keybinds"]["change_sort_order"]["modified"])
-descending_bind = get_shortest_bind(
-    config["keybinds"]["change_sort_order"]["descending"]
-)
 
 
 class SortOrderPopupOptions(Option):
@@ -144,48 +133,54 @@ class SortOrderPopup(PopupOptionList):
 
     def pre_show(self) -> None:
         state_manager: StateManager = self.app.query_one(StateManager)
+
+        def shortcut(action: str) -> str:
+            return get_shortcut(
+                "sort_menu", f"sort_order.{action}", "change_sort_order", action
+            )
+
         # Get current sort preferences from StateManager
         sort_by, sort_descending = state_manager.get_sort_prefs()
         self.set_options([
             SortOrderPopupOptions(
-                name_bind,
+                shortcut("name"),
                 "Name",
                 sort_by == "name",
                 id="name",
             ),
             SortOrderPopupOptions(
-                extension_bind,
+                shortcut("extension"),
                 "Extension",
                 sort_by == "extension",
                 id="extension",
             ),
             SortOrderPopupOptions(
-                natural_bind,
+                shortcut("natural"),
                 "Natural",
                 sort_by == "natural",
                 id="natural",
             ),
             SortOrderPopupOptions(
-                size_bind,
+                shortcut("size"),
                 "Size",
                 sort_by == "size",
                 id="size",
             ),
             SortOrderPopupOptions(
-                created_bind,
+                shortcut("created"),
                 "Created",
                 sort_by == "created",
                 id="created",
             ),
             SortOrderPopupOptions(
-                modified_bind,
+                shortcut("modified"),
                 "Modified",
                 sort_by == "modified",
                 id="modified",
             ),
             Option("", id="separator", disabled=True),
             SortOrderPopupOptions(
-                descending_bind,
+                shortcut("descending"),
                 "Descending",
                 sort_descending,
                 id="descending",

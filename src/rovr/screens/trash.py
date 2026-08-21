@@ -26,14 +26,9 @@ from rovr.classes.mixins import (
 from rovr.functions import details as detail_utils
 from rovr.functions import icons as icon_utils
 from rovr.functions import path as path_utils
-from rovr.functions.utils import dismiss, get_shortest_bind, natural_size, s
+from rovr.functions.utils import dismiss, get_shortcut, natural_size, s
 from rovr.variables.constants import bindings, config
 from rovr.variables.maps import RovrVars
-
-restore_bind = get_shortest_bind(config["keybinds"]["trash"]["restore"])
-purge_bind = get_shortest_bind(config["keybinds"]["trash"]["purge"])
-empty_bind = get_shortest_bind(config["keybinds"]["trash"]["empty"])
-cancel_bind = get_shortest_bind(config["keybinds"]["trash"]["cancel"])
 
 home = path_utils.normalise(RovrVars.HOME)
 
@@ -193,6 +188,10 @@ class TrashScreen(Actionable, ModalScreen):
         return self.query_one("#trash_entries", TrashSelectionList)
 
     def compose(self) -> ComposeResult:
+        restore_bind = get_shortcut("trash", "restore")
+        purge_bind = get_shortcut("trash", "purge")
+        empty_bind = get_shortcut("trash", "empty")
+        cancel_bind = get_shortcut("trash", "cancel")
         with Grid(id="dialog"):
             yield TrashSelectionList(id="trash_entries")
             yield Button(

@@ -7,16 +7,8 @@ from textual.message import Message
 from textual.screen import ModalScreen
 from textual.widgets import Button, Label, Switch
 
-from rovr.functions.utils import check_key, dismiss, get_shortest_bind
+from rovr.functions.utils import check_key, dismiss, get_shortcut
 from rovr.variables.constants import config
-
-overwrite_bind = get_shortest_bind(config["keybinds"]["filename_conflict"]["overwrite"])
-rename_bind = get_shortest_bind(config["keybinds"]["filename_conflict"]["rename"])
-skip_bind = get_shortest_bind(config["keybinds"]["filename_conflict"]["skip"])
-cancel_bind = get_shortest_bind(config["keybinds"]["filename_conflict"]["cancel"])
-dont_ask_bind = get_shortest_bind(
-    config["keybinds"]["filename_conflict"]["dont_ask_again"]
-)
 
 
 class FileNameConflict(ModalScreen):
@@ -44,6 +36,11 @@ class FileNameConflict(ModalScreen):
             self.add_class("no_overwrite")
 
     def compose(self) -> ComposeResult:
+        overwrite_bind = get_shortcut("filename_conflict", "overwrite")
+        rename_bind = get_shortcut("filename_conflict", "rename")
+        skip_bind = get_shortcut("filename_conflict", "skip")
+        cancel_bind = get_shortcut("filename_conflict", "cancel")
+        dont_ask_bind = get_shortcut("filename_conflict", "dont_ask_again")
         with Grid(id="dialog"):
             yield Label(self.message, classes="question")
             if self.allow_overwrite:

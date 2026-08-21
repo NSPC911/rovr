@@ -8,13 +8,8 @@ from textual.message import Message
 from textual.screen import ModalScreen
 from textual.widgets import Button, Label, Switch
 
-from rovr.functions.utils import check_key, dismiss, get_shortest_bind
+from rovr.functions.utils import check_key, dismiss, get_shortcut
 from rovr.variables.constants import config
-
-retry_bind = get_shortest_bind(config["keybinds"]["file_in_use"]["retry"])
-cancel_bind = get_shortest_bind(config["keybinds"]["file_in_use"]["cancel"])
-skip_bind = get_shortest_bind(config["keybinds"]["file_in_use"]["skip"])
-dont_ask_bind = get_shortest_bind(config["keybinds"]["file_in_use"]["dont_ask_again"])
 
 
 class FileInUse(ModalScreen):
@@ -31,6 +26,12 @@ class FileInUse(ModalScreen):
         self.message = message
 
     def compose(self) -> ComposeResult:
+        retry_bind = get_shortcut("file_in_use", "retry")
+        cancel_bind = get_shortcut("file_in_use", "cancel")
+        skip_bind = get_shortcut("file_in_use", "skip")
+        dont_ask_bind = get_shortcut(
+            "file_in_use", "toggle_dont_ask_again", legacy_action="dont_ask_again"
+        )
         with Grid(id="dialog"):
             yield Label(escape(self.message), classes="question")
             yield Button(f"\\[{retry_bind}] Retry", variant="primary", id="try_again")

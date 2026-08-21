@@ -4,7 +4,7 @@ import re
 import subprocess
 from contextlib import suppress
 from functools import lru_cache
-from typing import Any, Callable, Literal, overload
+from typing import Any, Callable, Literal, cast, overload
 
 from humanize import naturalsize
 from textual import events
@@ -130,6 +130,26 @@ def get_shortest_bind(binds: list[str]) -> str:
             least_len = (least_len[0], "esc")
 
     return least_len[1]
+
+
+def get_shortcut(
+    context: str,
+    action: str,
+    legacy_context: str | None = None,
+    legacy_action: str | None = None,
+) -> str:
+    from rovr.variables.constants import config, keys
+
+    if keys:
+        binds = [
+            key
+            for key, binding in keys.get(context, {}).items()
+            if (binding["action"] if isinstance(binding, dict) else binding) == action
+        ]
+    else:
+        legacy = cast(Any, config)["keybinds"]
+        binds = legacy[legacy_context or context][legacy_action or action]
+    return get_shortest_bind(binds)
 
 
 def run_command(

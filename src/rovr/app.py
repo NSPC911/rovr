@@ -52,7 +52,7 @@ from rovr.action_buttons.sort_order import SortOrderButton
 from rovr.classes.app_mixins import DragAndDrop, KeyHandler, ThemeHandler
 from rovr.classes.mixins import Action, Actionable
 from rovr.classes.theme import RovrStylesheet
-from rovr.classes.type_aliases import KeysConfig
+from rovr.classes.type_aliases import KeysConfig, ShellRunTypes
 from rovr.components.popup_option_list import PopupOptionList
 from rovr.core import (
     FileList,
@@ -445,11 +445,15 @@ class Application(
             event.prevent_default()
             await self._on_key(event)
 
-    def on_shell_exec_response(self, response: ShellExec.ReturnType | None) -> None:
+    def on_shell_exec_response(
+        self, response: ShellExec.ReturnType | None, shell: bool = True
+    ) -> None:
         if response is None or response.command == "":
             return
 
-        proc = run_command(self, response.command, run_type=response.run_type)
+        proc = run_command(
+            self, response.command, run_type=response.run_type, shell=shell
+        )
         if response.run_type == "background":
             self.shell_thread(proc, "Shell Exec")
 
@@ -1275,3 +1279,29 @@ class Application(
 
         with self.suspend():
             get_console().print(self.tree)
+
+    def action_run_command(self, command: list[str], run_type: ShellRunTypes) -> None:
+        if not isinstance(command, list) or not all(
+            isinstance(c, str) for c in command
+        ):
+            self.notify(
+                "Invalid command provided. Command must be a list of strings."
+                + "\nUse `run_shell` if you want to run a string command instead",
+                title="Run Command",
+                severity="error",
+            )
+        self.on_shell_exec_response(
+            ShellExec.ReturnType(command=command, run_type=run_type), shell=False
+        )
+
+    def action_run_shell(self, command: str, run_type: ShellRunTypes) -> None:
+        if not isinstance(command, str):
+            self.notify(
+                "Invalid command provided. Command must be a string."
+                + "\nUse `run_command` if you want to run a list of strings instead",
+                title="Run Shell",
+                severity="error",
+            )
+        self.on_shell_exec_response(
+            ShellExec.ReturnType(command=command, run_type=run_type), shell=True
+        )

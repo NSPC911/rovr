@@ -14,6 +14,7 @@ from textual.message import Message
 from textual.screen import Screen, ScreenResultType
 from textual.worker import NoActiveWorker, WorkerCancelled, get_current_worker
 
+from rovr.classes.type_aliases import ShellRunTypes
 from rovr.functions.cwd import getcwd
 
 
@@ -155,7 +156,7 @@ def get_shortcut(
 def run_command(
     app: App,
     command: str | list[str],
-    run_type: Literal["suspend", "background", "orphan"],
+    run_type: ShellRunTypes,
     shell: bool = True,
     on_error: Callable[[str, str], None] | None = None,
 ) -> subprocess.CompletedProcess | subprocess.Popen:

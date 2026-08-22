@@ -1,10 +1,10 @@
-from typing import Literal, NamedTuple
+from typing import NamedTuple
 
 from textual import events, work
 from textual.binding import Binding
 from textual.widgets import Input
 
-from rovr.functions.utils import dismiss, expand_command
+from rovr.functions.utils import ShellRunTypes, dismiss, expand_command
 
 from .input import ModalInput
 
@@ -14,7 +14,7 @@ class ShellExec(ModalInput):
 
     class ReturnType(NamedTuple):
         command: str | list[str]
-        run_type: Literal["suspend", "background"]
+        run_type: ShellRunTypes
 
     BINDINGS = [
         Binding("escape", "dismiss"),

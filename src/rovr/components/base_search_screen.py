@@ -14,6 +14,10 @@ from rovr.functions.utils import dismiss
 from rovr.variables.constants import config
 
 
+class FilterInput(Input):
+    key_contexts = ("filter_input", "inputs")
+
+
 def can_do_keybind(self: DOMNode) -> bool:
     return bool(isinstance(self.focused, Input) and self.search_options.options)
 
@@ -21,8 +25,19 @@ def can_do_keybind(self: DOMNode) -> bool:
 class ModalSearchScreen(Actionable, ModalScreen, inherit_bindings=False):
     """Base class for search-as-you-type modal screens."""
 
+    key_contexts = ("filter_modal",)
+
     border_subtitle_index: int = 0
     is_loading: bool = False
+
+    def action_exit(self) -> None:
+        dismiss(self, None)
+
+    def action_cursor(self, offset: int) -> None:
+        self.search_options.action_cursor(offset)
+
+    def action_cursor_page(self, pages: float) -> None:
+        self.search_options.action_cursor_page(pages)
 
     def create_proc(
         self, program: str, *args: str

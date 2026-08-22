@@ -12,7 +12,13 @@ from rovr.functions import icons as icon_utils
 from rovr.functions.utils import dismiss
 
 
+class ModalInputField(Input):
+    key_contexts = ("modal_input_field", "inputs")
+
+
 class ModalInput(ModalScreen, inherit_bindings=False):
+    key_contexts = ("modal_input",)
+
     def __init__(
         self,
         border_title: str,
@@ -50,7 +56,7 @@ class ModalInput(ModalScreen, inherit_bindings=False):
     def compose(self) -> ComposeResult:
         with HorizontalGroup(id="modalInput_group"):
             yield self.icon_widget
-            yield Input(
+            yield ModalInputField(
                 id="input",
                 compact=True,
                 value=self.initial_value,

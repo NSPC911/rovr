@@ -1,0 +1,213 @@
+# Default keybindings. A user keys.toml may inherit "base", "sane", or "vim".
+# Printable keys use their character; other keys use Textual's key names.
+
+[global]
+"q" = { action = "app.quit", desc = "Quit rovr" }
+"ctrl+q" = "app.quit"
+"ctrl+p" = { action = "app.command_palette", desc = "Open the command palette" }
+"ctrl+z" = { action = "app.suspend_process", desc = "Suspend rovr" }
+
+[main]
+"S" = { action = "toggle_pinned_sidebar", desc = "Toggle the pinned sidebar" }
+"I" = { action = "toggle_preview_sidebar", desc = "Toggle the preview sidebar" }
+"F" = { action = "toggle_footer", desc = "Toggle the footer" }
+"M" = { action = "toggle_menu_wrapper", desc = "Toggle the menu" }
+"s" = { action = "focus_toggle_pinned_sidebar", desc = "Focus the pinned sidebar" }
+"escape" = { action = "focus_file_list", desc = "Focus the file list" }
+"i" = { action = "focus_toggle_preview_sidebar", desc = "Focus the preview sidebar" }
+"ctrl+l" = { action = "focus_toggle_path_switcher", desc = "Focus the path switcher" }
+"#" = { action = "focus_toggle_processes", desc = "Focus the processes panel" }
+"c" = { action = "focus_toggle_clipboard", desc = "Focus the clipboard panel" }
+"m" = { action = "focus_toggle_metadata", desc = "Focus the metadata panel" }
+"ctrl+j" = { action = "cycle_tab(1)", desc = "Go to the next tab" }
+"ctrl+k" = { action = "cycle_tab(-1)", desc = "Go to the previous tab" }
+"ctrl+[" = { action = "cycle_tab(1)", desc = "Go to the next tab" }
+"ctrl+]" = { action = "cycle_tab(-1)", desc = "Go to the previous tab" }
+"n" = { action = "tab_new", desc = "Open a new tab" }
+"w" = { action = "tab_close", desc = "Close the current tab" }
+"?" = { action = "show_keybinds", desc = "Show keybindings" }
+">" = { action = "show_shell_screen", desc = "Open the shell" }
+"z" = { action = "cd_zoxide", desc = "Jump to a directory" }
+"f" = { action = "search_fd", desc = "Search for files" }
+"\\" = { action = "search_rg", desc = "Search file contents" }
+
+[file_list]
+"P" = { action = "toggle_pin", desc = "Toggle the current pin" }
+"/" = { action = "focus_search", desc = "Search the file list" }
+"y" = { action = "copy.to_rovr", desc = "Copy selected files" }
+"ctrl+c" = "copy.to_rovr"
+"p" = { action = "paste", desc = "Paste copied files" }
+"ctrl+v" = "paste"
+"x" = { action = "cut", desc = "Cut selected files" }
+"ctrl+x" = "cut"
+"d" = { action = "delete", desc = "Delete selected files" }
+"delete" = "delete"
+"r" = { action = "rename", desc = "Rename the current file" }
+"f2" = "rename"
+"ctrl+n" = { action = "new", desc = "Create a file or directory" }
+"a" = "new"
+"N" = { action = "bulk_create", desc = "Create multiple files or directories" }
+"A" = "bulk_create"
+"E" = { action = "zip", desc = "Create an archive" }
+"ctrl+e" = { action = "unzip", desc = "Extract an archive" }
+"left" = { action = "up_tree", desc = "Go to the parent directory" }
+"h" = "up_tree"
+"H" = { action = "bypass_up_tree", desc = "Go up without changing history" }
+"L" = { action = "bypass_down_tree", desc = "Go down without changing history" }
+"backspace" = { action = "hist_previous", desc = "Go to the previous directory" }
+"u" = "hist_previous"
+"space" = { action = "hist_next", desc = "Go to the next directory" }
+"v" = { action = "toggle_visual", desc = "Toggle visual selection" }
+"%" = { action = "toggle_all", desc = "Toggle selection of all files" }
+"ctrl+a" = "toggle_all"
+"." = { action = "toggle_hidden_files", desc = "Toggle hidden files" }
+"insert" = { action = "toggle_select_item", desc = "Toggle the current selection" }
+"shift+up" = { action = "select_cursor(-1)", desc = "Extend selection upward" }
+"K" = "select_cursor(-1)"
+"shift+down" = { action = "select_cursor(1)", desc = "Extend selection downward" }
+"J" = "select_cursor(1)"
+"shift+pageup" = { action = "select_cursor_page(-1)", desc = "Extend selection up one page" }
+"shift+pagedown" = { action = "select_cursor_page(1)", desc = "Extend selection down one page" }
+"shift+home" = { action = "select_home", desc = "Extend selection to the first file" }
+"shift+end" = { action = "select_end", desc = "Extend selection to the last file" }
+"o" = { action = "open", desc = "Open selected files" }
+"e" = { action = "open_editor", desc = "Open the current file in an editor" }
+"shift+f10" = { action = "open_right_click_menu", desc = "Open the context menu" }
+"Y" = { action = "copy.open_popup", desc = "Open the copy menu" }
+"," = { action = "sort_order.open_popup", desc = "Open the sort menu" }
+
+[pinned_sidebar]
+"/" = { action = "focus_search", desc = "Search pinned directories" }
+
+[lists]
+"up" = { action = "cursor(-1)", desc = "Move up" }
+"k" = "cursor(-1)"
+"down" = { action = "cursor(1)", desc = "Move down" }
+"j" = "cursor(1)"
+"right" = { action = "select", desc = "Select" }
+"l" = "select"
+"enter" = "select"
+"pageup" = { action = "cursor_page(-1)", desc = "Move up one page" }
+"ctrl+b" = "cursor_page(-1)"
+"pagedown" = { action = "cursor_page(1)", desc = "Move down one page" }
+"ctrl+f" = "cursor_page(1)"
+"home" = { action = "first", desc = "Move to the first item" }
+"g" = "first"
+"end" = { action = "last", desc = "Move to the last item" }
+"G" = "last"
+
+[scroll]
+"up" = "scroll_up"
+"k" = "scroll_up"
+"down" = "scroll_down"
+"j" = "scroll_down"
+"pageup" = "scroll_page_up"
+"ctrl+b" = "scroll_page_up"
+"pagedown" = "scroll_page_down"
+"ctrl+f" = "scroll_page_down"
+"home" = "scroll_home"
+"g" = "scroll_home"
+"end" = "scroll_end"
+"G" = "scroll_end"
+
+[copy_menu]
+"y" = "copy.to_rovr"
+"p" = "copy.highlighted"
+"s" = "copy.to_system_clip"
+"d" = "copy.current_directory"
+
+[sort_menu]
+"a" = "sort_order.name"
+"e" = "sort_order.extension"
+"n" = "sort_order.natural"
+"s" = "sort_order.size"
+"c" = "sort_order.created"
+"m" = "sort_order.modified"
+"d" = "sort_order.descending"
+
+[delete_files]
+"d" = "trash"
+"x" = "delete"
+"c" = "cancel"
+"escape" = "cancel"
+
+[trash]
+"r" = "restore"
+"x" = "purge"
+"E" = "empty"
+"c" = "cancel"
+"escape" = "cancel"
+
+[filename_conflict]
+"o" = "overwrite"
+"s" = "skip"
+"r" = "rename"
+"c" = "cancel"
+"escape" = "cancel"
+"a" = "dont_ask_again"
+
+[file_in_use]
+"r" = "retry"
+"s" = "skip"
+"c" = "cancel"
+"escape" = "cancel"
+"a" = "toggle_dont_ask_again"
+
+[filter_modal]
+"escape" = "exit"
+"down" = "cursor(1)"
+"ctrl+j" = "cursor(1)"
+"up" = "cursor(-1)"
+"ctrl+k" = "cursor(-1)"
+"pageup" = "cursor_page(-1)"
+"ctrl+b" = "cursor_page(-1)"
+"pagedown" = "cursor_page(1)"
+"ctrl+f" = "cursor_page(1)"
+
+[inputs]
+"left" = "cursor_left"
+"shift+left" = "cursor_left(True)"
+"ctrl+left" = "cursor_left_word"
+"ctrl+shift+left" = "cursor_left_word(True)"
+"right" = "cursor_right"
+"shift+right" = "cursor_right(True)"
+"ctrl+right" = "cursor_right_word"
+"ctrl+shift+right" = "cursor_right_word(True)"
+"backspace" = "delete_left"
+"ctrl+shift+a" = "select_all"
+"home" = "home"
+"ctrl+a" = "home"
+"end" = "end"
+"ctrl+e" = "end"
+"shift+home" = "home(True)"
+"shift+end" = "end(True)"
+"delete" = "delete_right"
+"ctrl+d" = "delete_right"
+"enter" = "submit"
+"ctrl+w" = "delete_left_word"
+"ctrl+u" = "delete_left_all"
+"ctrl+backspace" = "delete_left_word"
+"ctrl+delete" = "delete_right_word"
+"ctrl+x" = "cut"
+"ctrl+c" = "copy"
+"super+c" = "copy"
+"ctrl+v" = "paste"
+
+[keybinds]
+"/" = "focus_search"
+"?" = "exit"
+
+[yes_or_no]
+"y" = "yes"
+"n" = "no"
+"escape" = "no"
+"a" = "dont_ask_again"
+
+[paste_drop]
+"c" = "copy"
+"m" = "move"
+"escape" = "cancel"
+
+[shell_exec]
+"tab" = "cycle_mode"
+"shift+tab" = "cycle_mode"

@@ -22,6 +22,7 @@ SPINNER_LENGTH = len(SPINNER)
 
 
 class MetadataContainer(VerticalScroll, inherit_bindings=False):
+    key_contexts = ("metadata", "scroll")
     BINDINGS = scroll_bindings
 
     def __init__(self) -> None:

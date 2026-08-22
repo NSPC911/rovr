@@ -6,11 +6,14 @@ from textual.widgets import Button, Label, Switch
 
 from rovr.classes.textual_options import PasteScreenOption
 from rovr.components import SpecialOptionList
+from rovr.functions.utils import get_shortcut
 
-from .yes_or_no import YesOrNo, dont_ask_bind, no_bind, yes_bind
+from .yes_or_no import YesOrNo
 
 
 class PasteScreen(YesOrNo):
+    key_contexts = ("paste_screen", "yes_or_no")
+
     def __init__(
         self,
         message: str,
@@ -29,6 +32,9 @@ class PasteScreen(YesOrNo):
         ] + [PasteScreenOption(path, "cut") for path in self.paths["cut"]]
 
     def compose(self) -> ComposeResult:
+        yes_bind = get_shortcut("yes_or_no", "yes")
+        no_bind = get_shortcut("yes_or_no", "no")
+        dont_ask_bind = get_shortcut("yes_or_no", "dont_ask_again")
         with Grid(id="dialog", classes="paste"):
             yield Label(self.message, classes="question")
             yield SpecialOptionList(*self.options)

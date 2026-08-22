@@ -6,6 +6,7 @@ import pytest
 
 from rovr.functions import config, utils
 from rovr.functions.path import normalise
+from rovr.variables import constants
 
 
 def test_deep_merge() -> None:
@@ -59,6 +60,93 @@ def test_deep_merge_append_bool_key_untouched() -> None:
     new = {"append_new_tabs": False}
     result = config.deep_merge(old, new)
     assert result == {"append_new_tabs": False}
+
+
+def test_load_keys_uses_nothing_without_user_file(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    monkeypatch.setenv("ROVR_CONFIG_FOLDER", str(tmp_path))
+
+    keys = config.load_keys()
+
+    assert keys == {}
+
+
+def test_load_keys_user_file_is_standalone(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    monkeypatch.setenv("ROVR_CONFIG_FOLDER", str(tmp_path))
+    (tmp_path / "keys.toml").write_text('[global]\n"x" = "app.quit"\n')
+
+    keys = config.load_keys()
+
+    assert keys == {"global": {"x": {"action": "app.quit"}}}
+
+
+def test_load_keys_can_inherit_preset(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    monkeypatch.setenv("ROVR_CONFIG_FOLDER", str(tmp_path))
+    (tmp_path / "keys.toml").write_text(
+        'inherit = "sane"\n\n[global]\n"x" = "app.quit"\n'
+    )
+
+    keys = config.load_keys()
+
+    assert keys["global"]["x"] == {"action": "app.quit"}
+    assert isinstance(keys["lists"]["up"], dict)
+    assert keys["lists"]["up"]["action"] == "cursor(-1)"
+
+
+def test_load_keys_accepts_descriptions(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    monkeypatch.setenv("ROVR_CONFIG_FOLDER", str(tmp_path))
+    (tmp_path / "keys.toml").write_text(
+        '[global]\n"x" = { action = "app.quit", desc = "Quit" }\n'
+    )
+
+    keys = config.load_keys()
+
+    assert keys == {"global": {"x": {"action": "app.quit", "desc": "Quit"}}}
+
+
+def test_load_keys_replaces_inherited_binding_table(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    monkeypatch.setenv("ROVR_CONFIG_FOLDER", str(tmp_path))
+    (tmp_path / "keys.toml").write_text(
+        'inherit = "sane"\n\n[global]\n"ctrl+q" = { action = "custom_quit" }\n'
+    )
+
+    keys = config.load_keys()
+
+    assert keys["global"]["ctrl+q"] == {"action": "custom_quit"}
+
+
+def test_get_shortcut_uses_active_keys(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setattr(
+        constants,
+        "keys",
+        {
+            "delete_files": {
+                "ctrl+d": {"action": "delete"},
+                "D": {"action": "delete"},
+                "x": {"action": "noop"},
+            }
+        },
+    )
+
+    assert utils.get_shortcut("delete_files", "delete") == "D"
+    assert utils.get_shortcut("delete_files", "cancel") == ""
+
+
+def test_get_shortcut_falls_back_to_legacy_keys(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.setattr(constants, "keys", {})
+
+    assert utils.get_shortcut("paste_drop", "copy", "drag_and_drop") == "c"
 
 
 def test_natural_size() -> None:

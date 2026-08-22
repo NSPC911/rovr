@@ -4,7 +4,7 @@ import re
 import subprocess
 from contextlib import suppress
 from functools import lru_cache
-from typing import Any, Callable, Literal, overload
+from typing import Any, Callable, Literal, cast, overload
 
 from humanize import naturalsize
 from textual import events
@@ -14,6 +14,7 @@ from textual.message import Message
 from textual.screen import Screen, ScreenResultType
 from textual.worker import NoActiveWorker, WorkerCancelled, get_current_worker
 
+from rovr.classes.type_aliases import ShellRunTypes
 from rovr.functions.cwd import getcwd
 
 
@@ -132,10 +133,30 @@ def get_shortest_bind(binds: list[str]) -> str:
     return least_len[1]
 
 
+def get_shortcut(
+    context: str,
+    action: str,
+    legacy_context: str | None = None,
+    legacy_action: str | None = None,
+) -> str:
+    from rovr.variables.constants import config, keys
+
+    if keys:
+        binds = [
+            key
+            for key, binding in keys.get(context, {}).items()
+            if binding["action"] == action
+        ]
+    else:
+        legacy = cast(Any, config)["keybinds"]
+        binds = legacy[legacy_context or context][legacy_action or action]
+    return get_shortest_bind(binds)
+
+
 def run_command(
     app: App,
     command: str | list[str],
-    run_type: Literal["suspend", "background", "orphan"],
+    run_type: ShellRunTypes,
     shell: bool = True,
     on_error: Callable[[str, str], None] | None = None,
 ) -> subprocess.CompletedProcess | subprocess.Popen:

@@ -369,6 +369,7 @@ class PathAutoCompleteInput(PathAutoComplete):
 
 
 class PathInput(Actionable, Input, inherit_bindings=False):
+    key_contexts = ("path_input", "inputs")
     ALLOW_MAXIMIZE = False
     BINDINGS: ClassVar[list[BindingType]] = [
         Binding("left", "cursor_left", "Move cursor left", show=False),

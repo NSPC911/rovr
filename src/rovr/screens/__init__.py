@@ -5,7 +5,7 @@ from .dismissible import Dismissible
 from .fd_search import FileSearch
 from .file_in_use import FileInUse
 from .input import ModalInput
-from .keybinds import Keybinds
+from .keybinds import Keybinds, ScopedKeybinds
 from .paste_drop import PasteDropScreen
 from .paste_screen import PasteScreen
 from .rg_search import ContentSearch
@@ -25,6 +25,7 @@ __all__ = [
     "FileNameConflict",
     "FileSearch",
     "Keybinds",
+    "ScopedKeybinds",
     "ModalInput",
     "PasteDropScreen",
     "PasteScreen",

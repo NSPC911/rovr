@@ -10,18 +10,20 @@ from textual.containers import Grid, HorizontalGroup
 from textual.screen import ModalScreen
 from textual.widgets import Button, OptionList
 
-from rovr.classes.mixins import Action, Actionable
+from rovr.classes.mixins import Action, Actionable, CursorNavigationMixin
 from rovr.classes.textual_options import OptionWithValue
 from rovr.functions.icons import get_icon_smart
-from rovr.functions.utils import dismiss, get_shortest_bind
+from rovr.functions.utils import dismiss, get_shortcut
 from rovr.variables.constants import config
 
-copy_bind = get_shortest_bind(config["keybinds"]["drag_and_drop"]["copy"])
-move_bind = get_shortest_bind(config["keybinds"]["drag_and_drop"]["move"])
-cancel_bind = get_shortest_bind(config["keybinds"]["drag_and_drop"]["cancel"])
+
+class PasteDropOptionList(CursorNavigationMixin, OptionList):
+    key_contexts = ("paste_drop_list", "lists")
 
 
 class PasteDropScreen(Actionable, ModalScreen["PasteDropScreen.ReturnType | None"]):
+    key_contexts = ("paste_drop",)
+
     class ReturnType(NamedTuple):
         paths: list[str]
         action: Literal["copy", "move"]
@@ -35,8 +37,11 @@ class PasteDropScreen(Actionable, ModalScreen["PasteDropScreen.ReturnType | None
         self.call_after_refresh(self.post_message, initial_paste_event)
 
     def compose(self) -> ComposeResult:
+        copy_bind = get_shortcut("paste_drop", "copy", "drag_and_drop")
+        move_bind = get_shortcut("paste_drop", "move", "drag_and_drop")
+        cancel_bind = get_shortcut("paste_drop", "cancel", "drag_and_drop")
         with Grid(id="dialog"):
-            yield OptionList(id="drag_and_drop_list")
+            yield PasteDropOptionList(id="drag_and_drop_list")
             yield Button(f"\\[{copy_bind}] Copy", id="copy", variant="success")
             yield Button(f"\\[{move_bind}] Move", id="move", variant="warning")
             with HorizontalGroup():
@@ -58,6 +63,24 @@ class PasteDropScreen(Actionable, ModalScreen["PasteDropScreen.ReturnType | None
                 config["keybinds"]["drag_and_drop"]["cancel"],
             ),
         ]
+
+    @on(Button.Pressed, "#copy")
+    def action_copy(self) -> None:
+        dismiss(
+            self,
+            PasteDropScreen.ReturnType(sorted(list(self.file_paths)), "copy"),
+        )
+
+    @on(Button.Pressed, "#move")
+    def action_move(self) -> None:
+        dismiss(
+            self,
+            PasteDropScreen.ReturnType(sorted(list(self.file_paths)), "move"),
+        )
+
+    @on(Button.Pressed, "#cancel")
+    def action_cancel(self) -> None:
+        dismiss(self, None)
 
     @on(events.Paste)
     def on_paste(self, event: events.Paste) -> None:
@@ -97,17 +120,3 @@ class PasteDropScreen(Actionable, ModalScreen["PasteDropScreen.ReturnType | None
             # ie click outside
             event.stop()
             dismiss(self, None, event)
-
-    @on(Button.Pressed)
-    def on_button_pressed(self, event: Button.Pressed) -> None:
-        match event.button.id:
-            case "copy" | "move":
-                dismiss(
-                    self,
-                    PasteDropScreen.ReturnType(
-                        sorted(list(self.file_paths)), event.button.id
-                    ),
-                    event,
-                )
-            case "cancel":
-                dismiss(self, None, event)

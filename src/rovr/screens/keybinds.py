@@ -7,14 +7,17 @@ from textual.containers import VerticalGroup
 from textual.screen import ModalScreen
 from textual.widgets import OptionList
 
+from rovr.classes.mixins import CursorNavigationMixin
 from rovr.classes.textual_options import KeybindOption
+from rovr.classes.type_aliases import KeysConfig
 from rovr.components import SearchInput
 from rovr.functions import icons
 from rovr.functions.utils import check_key, dismiss
 from rovr.variables.constants import bindings, config, schema
 
 
-class KeybindList(OptionList, inherit_bindings=False):
+class KeybindList(CursorNavigationMixin, OptionList, inherit_bindings=False):
+    key_contexts = ("keybind_list", "lists")
     BINDINGS: ClassVar[list[BindingType]] = list(bindings)
 
     def __init__(self) -> None:
@@ -128,6 +131,20 @@ class KeybindList(OptionList, inherit_bindings=False):
 
 
 class Keybinds(ModalScreen):
+    key_contexts = ("keybinds", "filter_modal")
+
+    def action_exit(self) -> None:
+        dismiss(self, None)
+
+    def action_focus_search(self) -> None:
+        self.input.focus()
+
+    def action_cursor(self, offset: int) -> None:
+        self.query_one(KeybindList).action_cursor(offset)
+
+    def action_cursor_page(self, pages: float) -> None:
+        self.query_one(KeybindList).action_cursor_page(pages)
+
     def compose(self) -> ComposeResult:
         with VerticalGroup(id="keybinds_group"):
             yield SearchInput(
@@ -154,6 +171,8 @@ class Keybinds(ModalScreen):
         self.container.border_subtitle = f"Press Esc {additional_key_string}to close"
 
     def on_key(self, event: events.Key) -> None:
+        if getattr(self.app, "keys", ()):
+            return
         # same thing here, ty will scream at me if not
         config_keybinds = cast(dict[str, Any], config["keybinds"])
         if check_key(event, config_keybinds["focus_search"]):
@@ -196,3 +215,65 @@ class Keybinds(ModalScreen):
             # ie click outside
             event.stop()
             dismiss(self)
+
+
+class ScopedKeybindList(KeybindList):
+    def __init__(self, keys: KeysConfig) -> None:
+        self.keys = keys
+        super().__init__()
+
+    def get_keybind_data(self) -> tuple[list[tuple[str, str]], list[str]]:
+        keybind_data: list[tuple[str, str]] = []
+        primary_keys: list[str] = []
+        for context, context_bindings in self.keys.items():
+            grouped: dict[str, tuple[list[str], str]] = {}
+            for key, binding in context_bindings.items():
+                action = binding["action"]
+                if action == "noop":
+                    continue
+                keys, description = grouped.setdefault(action, ([], action))
+                keys.append(key)
+                description = binding.get("desc") or description
+                grouped[action] = (keys, description)
+
+            if not grouped:
+                continue
+            keybind_data.append(("--section--", context.replace("_", " ").title()))
+            primary_keys.append("")
+            for keys, description in grouped.values():
+                keybind_data.append((" ".join(f"<{key}>" for key in keys), description))
+                primary_keys.append(keys[0])
+
+        if not keybind_data:
+            keybind_data.append(("<disabled>", "No keybindings"))
+            primary_keys.append("")
+        return keybind_data, primary_keys
+
+
+class ScopedKeybinds(Keybinds):
+    def compose(self) -> ComposeResult:
+        with VerticalGroup(id="keybinds_group"):
+            yield SearchInput(
+                always_add_disabled=True,
+                placeholder=f"{icons.get_icon('general', 'search')[0]} Search keybinds...",
+            )
+            yield ScopedKeybindList(cast(Any, self.app).keys)
+
+    def on_mount(self) -> None:
+        self.input = self.query_one(SearchInput)
+        self.container = cast(VerticalGroup, self.query_one("#keybinds_group"))
+        self.keybinds_list = self.query_one(ScopedKeybindList)
+        self.input.focus()
+        self.container.border_title = "Keybinds"
+
+        exit_keys = [
+            key
+            for context in ("keybinds", "filter_modal")
+            for key, binding in cast(Any, self.app).keys.get(context, {}).items()
+            if binding["action"] == "exit"
+        ]
+        close_with = " or ".join(exit_keys) if exit_keys else "outside"
+        self.container.border_subtitle = f"Press {close_with} to close"
+
+    def on_option_list_option_selected(self, event: OptionList.OptionSelected) -> None:
+        event.stop()

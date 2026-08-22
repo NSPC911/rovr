@@ -401,6 +401,23 @@ async def test_switch_to_extension(tmp_path: Path) -> None:
 
 
 @pytest.mark.asyncio
+async def test_sort_actions_accept_direction(tmp_path: Path) -> None:
+    app = Application(tmp_path.as_posix())
+    async with app.run_test(size=(143, 37)):
+        button = app.query_one(SortOrderButton)
+        state_manager = app.query_one(StateManager)
+
+        button.action_extension(True)
+        assert state_manager.get_sort_prefs() == ("extension", True)
+
+        button.action_name()
+        assert state_manager.get_sort_prefs() == ("name", True)
+
+        button.action_size(False)
+        assert state_manager.get_sort_prefs() == ("size", False)
+
+
+@pytest.mark.asyncio
 async def test_toggles(tmp_path: Path) -> None:
     app = Application(tmp_path.as_posix())
     open(tmp_path / "test_file.txt", "w").close()

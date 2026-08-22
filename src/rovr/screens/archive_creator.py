@@ -8,14 +8,24 @@ from textual.containers import HorizontalGroup
 from textual.widgets import Input, SelectionList
 from textual.widgets.selection_list import Selection
 
-from rovr.classes.mixins import CheckboxRenderingMixin, SetOptionsSelectionList
+from rovr.classes.mixins import (
+    CheckboxRenderingMixin,
+    SelectionNavigationMixin,
+    SetOptionsSelectionList,
+)
 from rovr.functions.utils import dismiss
 from rovr.variables.constants import bindings
 
 from .input import ModalInput
 
 
-class ArchiveTypes(CheckboxRenderingMixin, SelectionList, inherit_bindings=False):
+class ArchiveTypes(
+    CheckboxRenderingMixin,
+    SelectionNavigationMixin,
+    SelectionList,
+    inherit_bindings=False,
+):
+    key_contexts = ("archive_types", "lists")
     BINDINGS: ClassVar[list[BindingType]] = list(bindings)
 
     def __init__(self) -> None:
@@ -48,10 +58,12 @@ class ArchiveTypes(CheckboxRenderingMixin, SelectionList, inherit_bindings=False
 
 class ArchiveCompression(
     CheckboxRenderingMixin,
+    SelectionNavigationMixin,
     SetOptionsSelectionList,
     SelectionList,
     inherit_bindings=False,
 ):
+    key_contexts = ("archive_compression", "lists")
     BINDINGS: ClassVar[list[BindingType]] = list(bindings)
 
     def __init__(self) -> None:
@@ -99,6 +111,8 @@ class ArchiveCompression(
 
 
 class ArchiveCreationScreen(ModalInput):
+    key_contexts = ("archive_creation", "modal_input")
+
     class ReturnType(NamedTuple):
         path: str
         algo: Literal["zip", "tar", "tar.gz", "tar.bz2", "tar.xz", "tar.zst"]

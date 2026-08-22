@@ -38,7 +38,6 @@ from textual_drivers.dnd import (
     Drop,
 )
 
-from rovr import get_console
 from rovr.action_buttons import (
     CopyButton,
     CutButton,
@@ -50,9 +49,10 @@ from rovr.action_buttons import (
     ZipButton,
 )
 from rovr.action_buttons.sort_order import SortOrderButton
-from rovr.classes.app_mixins import DragAndDrop, ThemeHandler
+from rovr.classes.app_mixins import DragAndDrop, KeyHandler, ThemeHandler
 from rovr.classes.mixins import Action, Actionable
 from rovr.classes.theme import RovrStylesheet
+from rovr.classes.type_aliases import KeysConfig, ShellRunTypes
 from rovr.components.popup_option_list import PopupOptionList
 from rovr.core import (
     FileList,
@@ -93,17 +93,20 @@ from rovr.navigation_widgets import (
 from rovr.screens import ShellExec
 from rovr.screens.way_too_small import TerminalTooSmall
 from rovr.state_manager import StateManager
-from rovr.variables.constants import MaxPossible, config, log_name
+from rovr.variables.constants import MaxPossible, config, keys, log_name
 from rovr.variables.maps import RovrVars
-
-console = get_console
 
 if constants.SCREENSHOT_LOCATION:
     constants.SCREENSHOT_LOCATION = normalise(getcwd(), constants.SCREENSHOT_LOCATION)
 
 
 class Application(
-    Actionable, ThemeHandler, DragAndDrop, DNDApp, inherit_bindings=False
+    Actionable,
+    ThemeHandler,
+    DragAndDrop,
+    KeyHandler,
+    DNDApp,
+    inherit_bindings=False,
 ):
     # our own form of BINDINGS that utilises check_key
     # key: str the action to use
@@ -134,9 +137,9 @@ class Application(
     ] + [
         Action(action, config["plugins"][plugin]["keybinds"])
         for action, plugin in (
-            ("plugin_zoxide", "zoxide"),
-            ("plugin_fd", "fd"),
-            ("plugin_rg", "rg"),
+            ("cd_zoxide", "zoxide"),
+            ("search_fd", "fd"),
+            ("search_rg", "rg"),
         )
     ]
 
@@ -180,6 +183,8 @@ class Application(
     MULTIPROCESSING_PROCESS_ALLOWED: bool = getattr(
         sys, "_is_gil_enabled", lambda: True
     )()
+
+    keys: KeysConfig = keys
 
     def __init__(
         self,
@@ -399,23 +404,10 @@ class Application(
     def show_key(self, event: events.Key) -> None:
         if self._show_keys:
             with suppress(NoMatches):
-                using = event.character
-                if not event.is_printable:
-                    using = event.key
-                if using == " ":
-                    using = "space"
+                using = KeyHandler.shorten_key(event.key)
                 wid = self.query_one("#showKeys", Label)
-                if using is None:
-                    wid.update("None")
-                else:
-                    if wid.content != using:
-                        wid.update(using)
-                wid.tooltip = (
-                    f"Key = '{event.key}'"
-                    f"\nCharacter = '{event.character}'"
-                    f"\nAliases = {event.aliases}"
-                    f"\nUsing: {using}"
-                )
+                if wid.content != using:
+                    wid.update(using)
 
     async def on_key(self, event: events.Key) -> None:
         # show key
@@ -433,7 +425,12 @@ class Application(
             return
         # Make sure that key binds don't break
         # placeholder, not yet existing
-        if event.key == "escape" and self.focused.id and "search" in self.focused.id:
+        if (
+            not self.keys
+            and event.key == "escape"
+            and self.focused.id
+            and "search" in self.focused.id
+        ):
             if self._focused_id == "search_file_list":
                 self.file_list.focus()
             elif self._focused_id == "search_pinned_sidebar":
@@ -448,11 +445,15 @@ class Application(
             event.prevent_default()
             await self._on_key(event)
 
-    def on_shell_exec_response(self, response: ShellExec.ReturnType | None) -> None:
+    def on_shell_exec_response(
+        self, response: ShellExec.ReturnType | None, shell: bool = True
+    ) -> None:
         if response is None or response.command == "":
             return
 
-        proc = run_command(self, response.command, run_type=response.run_type)
+        proc = run_command(
+            self, response.command, run_type=response.run_type, shell=shell
+        )
         if response.run_type == "background":
             self.shell_thread(proc, "Shell Exec")
 
@@ -891,6 +892,7 @@ class Application(
         return console.export_svg(title="")
 
     def get_system_commands(self, screen: Screen) -> Iterable[SystemCommand]:
+        # TODO: remove command palette for a custom version some day
         yield SystemCommand(
             "Change theme",
             "Change the current theme",
@@ -950,7 +952,7 @@ class Application(
             yield SystemCommand(
                 "Open fd",
                 "Start searching the current directory using `fd`",
-                self.action_plugin_fd,
+                self.action_search_fd,
             )
         if (
             config["plugins"]["zoxide"]["enabled"]
@@ -959,13 +961,13 @@ class Application(
             yield SystemCommand(
                 "Open zoxide",
                 "Start searching for a directory to `z` to",
-                self.action_plugin_zoxide,
+                self.action_cd_zoxide,
             )
         if config["plugins"]["rg"]["enabled"] and config["plugins"]["rg"]["keybinds"]:
             yield SystemCommand(
                 "Open ripgrep",
                 "Start searching the current directory for a string using `rg`",
-                self.action_plugin_rg,
+                self.action_search_rg,
             )
         if config["keybinds"]["toggle_hidden_files"]:
             if config["interface"]["show_hidden_files"]:
@@ -1132,12 +1134,16 @@ class Application(
         self.query_one(StateManager).toggle_menu_wrapper()
 
     def action_tab_next(self) -> None:
-        if self.tabWidget.active_tab is not None:
-            self.tabWidget.action_next_tab()
+        self.action_cycle_tab(1)
 
     def action_tab_previous(self) -> None:
-        if self.tabWidget.active_tab is not None:
-            self.tabWidget.action_previous_tab()
+        self.action_cycle_tab(-1)
+
+    def action_cycle_tab(self, offset: int) -> None:
+        self.tabWidget.action_cycle_tab(offset)
+
+    def action_activate_tab(self, index: int) -> None:
+        self.tabWidget.action_activate_tab(index)
 
     async def action_tab_new(self) -> None:
         await self.query_one("NewTabButton").on_button_pressed()
@@ -1146,7 +1152,7 @@ class Application(
         if self.tabWidget.tab_count > 1:
             await self.tabWidget.remove_tab(self.tabWidget.active_tab)
 
-    def action_plugin_zoxide(self) -> None:
+    def action_cd_zoxide(self) -> None:
         import shutil
 
         if not config["plugins"]["zoxide"]["enabled"]:
@@ -1173,11 +1179,11 @@ class Application(
         self.push_screen(ZDToDirectory(), on_response)
 
     def action_show_keybinds(self) -> None:
-        from rovr.screens import Keybinds
+        from rovr.screens import Keybinds, ScopedKeybinds
 
-        self.push_screen(Keybinds())
+        self.push_screen(ScopedKeybinds() if self.keys else Keybinds())
 
-    def action_plugin_fd(self) -> None:
+    def action_search_fd(self) -> None:
         import shutil
 
         if not config["plugins"]["fd"]["enabled"]:
@@ -1215,7 +1221,7 @@ class Application(
                 markup=False,
             )
 
-    def action_plugin_rg(self) -> None:
+    def action_search_rg(self) -> None:
         import shutil
 
         if not config["plugins"]["rg"]["enabled"]:
@@ -1266,3 +1272,50 @@ class Application(
             ShellExec(),
             callback=lambda response: self.on_shell_exec_response(response),
         )
+
+    def action_print_dom(self) -> None:
+        # basically --tree-dom but without instant exit
+        from rovr import get_console
+
+        with self.suspend():
+            get_console().print(self.tree)
+
+    def action_run_command(self, command: list[str], run_type: ShellRunTypes) -> None:
+        if not isinstance(command, list) or not all(
+            isinstance(c, str) for c in command
+        ):
+            self.notify(
+                "Invalid command provided. Command must be a list of strings."
+                + "\nUse `run_shell` if you want to run a string command instead",
+                title="Run Command",
+                severity="error",
+            )
+        elif run_type not in ShellRunTypes.__args__:
+            self.notify(
+                f"Invalid run type provided. Must be one of {ShellRunTypes.__args__} (but got {run_type})",
+                title="Run Shell",
+                severity="error",
+            )
+        else:
+            self.on_shell_exec_response(
+                ShellExec.ReturnType(command=command, run_type=run_type), shell=False
+            )
+
+    def action_run_shell(self, command: str, run_type: ShellRunTypes) -> None:
+        if not isinstance(command, str):
+            self.notify(
+                "Invalid command provided. Command must be a string."
+                + "\nUse `run_command` if you want to run a list of strings instead",
+                title="Run Shell",
+                severity="error",
+            )
+        elif run_type not in ShellRunTypes.__args__:
+            self.notify(
+                f"Invalid run type provided. Must be one of {ShellRunTypes.__args__} (but got {run_type})",
+                title="Run Shell",
+                severity="error",
+            )
+        else:
+            self.on_shell_exec_response(
+                ShellExec.ReturnType(command=command, run_type=run_type), shell=True
+            )

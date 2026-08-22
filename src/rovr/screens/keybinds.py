@@ -228,11 +228,7 @@ class ScopedKeybindList(KeybindList):
         for context, context_bindings in self.keys.items():
             grouped: dict[str, tuple[list[str], str]] = {}
             for key, binding in context_bindings.items():
-                action = "noop"
-                if isinstance(binding, dict):
-                    action = binding["action"]
-                elif isinstance(binding, str):
-                    action: str = binding
+                action = binding["action"]
                 if action == "noop":
                     continue
                 keys, description = grouped.setdefault(action, ([], action))

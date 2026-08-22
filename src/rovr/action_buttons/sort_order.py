@@ -141,58 +141,40 @@ class SortOrderPopup(PopupOptionList):
 
         # Get current sort preferences from StateManager
         sort_by, sort_descending = state_manager.get_sort_prefs()
-        self.set_options([
-            SortOrderPopupOptions(
-                shortcut("name"),
-                "Name",
-                sort_by == "name",
-                id="name",
-            ),
-            SortOrderPopupOptions(
-                shortcut("extension"),
-                "Extension",
-                sort_by == "extension",
-                id="extension",
-            ),
-            SortOrderPopupOptions(
-                shortcut("natural"),
-                "Natural",
-                sort_by == "natural",
-                id="natural",
-            ),
-            SortOrderPopupOptions(
-                shortcut("size"),
-                "Size",
-                sort_by == "size",
-                id="size",
-            ),
-            SortOrderPopupOptions(
-                shortcut("created"),
-                "Created",
-                sort_by == "created",
-                id="created",
-            ),
-            SortOrderPopupOptions(
-                shortcut("modified"),
-                "Modified",
-                sort_by == "modified",
-                id="modified",
-            ),
-            Option("", id="separator", disabled=True),
-            SortOrderPopupOptions(
-                shortcut("descending"),
-                "Descending",
-                sort_descending,
-                id="descending",
-            ),
-            Option("", id="separator2", disabled=True),
-            SortOrderPopupOptions(
-                "",  # No keybind for this option
-                "This path only",
-                state_manager.custom_sort_enabled,
-                id="custom_sort",
-            ),
-        ])
+        self.set_options(
+            [
+                SortOrderPopupOptions(
+                    shortcut(item),
+                    item.capitalize(),
+                    sort_by == item,
+                    id=item,
+                )
+                for item in (
+                    "name",
+                    "extension",
+                    "natural",
+                    "size",
+                    "created",
+                    "modified",
+                )
+            ]
+            + [
+                Option("", id="separator", disabled=True),
+                SortOrderPopupOptions(
+                    shortcut("descending"),
+                    "Descending",
+                    sort_descending,
+                    id="descending",
+                ),
+                Option("", id="separator2", disabled=True),
+                SortOrderPopupOptions(
+                    "",  # No keybind for this option
+                    "This path only",
+                    state_manager.custom_sort_enabled,
+                    id="custom_sort",
+                ),
+            ]
+        )
         # just do a quick width check
         width = 0
         for option in self.options:

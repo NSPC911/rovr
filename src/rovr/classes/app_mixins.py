@@ -739,12 +739,9 @@ class KeyHandler:
         for context, namespace in contexts:
             context = self.keys.get(context, {})
             binding = context.get(KeyHandler.shorten_key(key))
-            if isinstance(binding, dict):
-                action = binding["action"]
-            elif isinstance(binding, str):
-                action = binding
-            else:
-                action = None
+            if not isinstance(binding, dict):
+                continue
+            action = binding["action"]
             if action == "noop":
                 return True
             if action is not None and await self.run_action(

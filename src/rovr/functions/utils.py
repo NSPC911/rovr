@@ -144,7 +144,7 @@ def get_shortcut(
         binds = [
             key
             for key, binding in keys.get(context, {}).items()
-            if (binding["action"] if isinstance(binding, dict) else binding) == action
+            if binding["action"] == action
         ]
     else:
         legacy = cast(Any, config)["keybinds"]

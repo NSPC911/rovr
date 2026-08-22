@@ -534,8 +534,6 @@ def load_config() -> tuple[dict, RovrConfig]:
 
     config_dir = os.environ.get("ROVR_CONFIG_FOLDER")
     if not config_dir:
-        from rovr.variables.maps import RovrVars
-
         config_dir: str = vars(RovrVars).get("ROVRCONFIG", None) or user_config_dir(
             "rovr", "."
         ).replace("\\", "/")

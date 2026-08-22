@@ -648,6 +648,18 @@ def load_config() -> tuple[dict, RovrConfig]:
     return schema_dict, cast(RovrConfig, config_dict)
 
 
+def keys_merge(old: dict, new: dict) -> dict:
+    result = old | new
+    for key, value in new.items():
+        if (
+            isinstance(value, dict)
+            and "action" not in value
+            and isinstance(old.get(key), dict)
+        ):
+            result[key] = keys_merge(old[key], value)
+    return result
+
+
 def load_keys() -> KeysConfig:
     """
     Load the keybindings from the keys.toml file
@@ -712,7 +724,7 @@ def load_keys() -> KeysConfig:
         if isinstance(inherit, str)
         else {}
     )
-    keys_dict = cast(KeysConfig, deep_merge(base_keys, user_keys))
+    keys_dict = cast(KeysConfig, keys_merge(base_keys, user_keys))
     # check it manually
     schema = {
         "type": "object",

@@ -1,6 +1,7 @@
 import logging
 import os
 import tempfile
+from hashlib import blake2b
 from pathlib import Path
 from typing import Callable
 from unittest.mock import patch
@@ -81,9 +82,13 @@ _stdin_patch = patch("sys.__stdin__", None)
 _stdin_patch.start()
 
 
+def get_blake(string: str) -> str:
+    return blake2b(string.encode(), digest_size=8).hexdigest()
+
+
 @pytest.fixture(autouse=True)
 def isolate_test_state(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
-    config_dir = tmp_path / "../config"
+    config_dir = tmp_path / ("../config" + get_blake(tmp_path.as_posix()))
     # ensure cd
     monkeypatch.chdir(tmp_path)
     # reset

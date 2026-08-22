@@ -77,4 +77,5 @@ class DeleteFiles(ModalScreen):
 
     @on(Button.Pressed, "#trash")
     def action_trash(self, event: Message | None = None) -> None:
-        dismiss(self, "trash", event)
+        if config["settings"]["use_recycle_bin"]:
+            dismiss(self, "trash", event)

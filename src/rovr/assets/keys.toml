@@ -193,7 +193,7 @@
 "super+c" = "copy"
 "ctrl+v" = "paste"
 
-[keybind_list]
+[keybinds]
 "/" = "focus_search"
 "?" = "exit"
 

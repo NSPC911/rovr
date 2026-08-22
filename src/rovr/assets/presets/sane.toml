@@ -161,7 +161,7 @@
 "super+c" = "copy"
 "ctrl+v" = "paste"
 
-[keybind_list]
+[keybinds]
 "ctrl+f" = "focus_search"
 "f1" = "exit"
 

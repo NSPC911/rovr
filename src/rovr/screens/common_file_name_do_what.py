@@ -95,14 +95,15 @@ class FileNameConflict(ModalScreen):
 
     @on(Button.Pressed, "#overwrite")
     def action_overwrite(self, event: Message | None = None) -> None:
-        dismiss(
-            self,
-            FileNameConflict.ReturnType(
-                value="overwrite",
-                same_for_next=self.query_one(Switch).value,
-            ),
-            event,
-        )
+        if self.allow_overwrite:
+            dismiss(
+                self,
+                FileNameConflict.ReturnType(
+                    value="overwrite",
+                    same_for_next=self.query_one(Switch).value,
+                ),
+                event,
+            )
 
     @on(Button.Pressed, "#rename")
     def action_rename(self, event: Message | None = None) -> None:

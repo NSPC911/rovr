@@ -23,8 +23,8 @@
 "ctrl+w" = { action = "tab_close", desc = "Close the current tab" }
 "f1" = { action = "show_keybinds", desc = "Show keybindings" }
 ">" = { action = "show_shell_screen", desc = "Open the shell" }
-"ctrl+d" = { action = "cd_zoxide", desc = "Jump to a directory" }
-"ctrl+g" = { action = "search_fd", desc = "Search for files" }
+"z" = { action = "cd_zoxide", desc = "Jump to a directory" }
+"f" = { action = "search_fd", desc = "Search for files" }
 "\\" = { action = "search_rg", desc = "Search file contents" }
 
 [file_list]

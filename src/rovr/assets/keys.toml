@@ -21,6 +21,8 @@
 "m" = { action = "focus_toggle_metadata", desc = "Focus the metadata panel" }
 "ctrl+j" = { action = "cycle_tab(1)", desc = "Go to the next tab" }
 "ctrl+k" = { action = "cycle_tab(-1)", desc = "Go to the previous tab" }
+"ctrl+[" = { action = "cycle_tab(1)", desc = "Go to the next tab" }
+"ctrl+]" = { action = "cycle_tab(-1)", desc = "Go to the previous tab" }
 "n" = { action = "tab_new", desc = "Open a new tab" }
 "w" = { action = "tab_close", desc = "Close the current tab" }
 "?" = { action = "show_keybinds", desc = "Show keybindings" }

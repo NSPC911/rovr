@@ -404,7 +404,7 @@ class Application(
     def show_key(self, event: events.Key) -> None:
         if self._show_keys:
             with suppress(NoMatches):
-                using = self.shorten_key(event.key)
+                using = KeyHandler.shorten_key(event.key)
                 wid = self.query_one("#showKeys", Label)
                 if wid.content != using:
                     wid.update(using)

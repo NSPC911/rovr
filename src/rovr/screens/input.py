@@ -28,12 +28,14 @@ class ModalInput(ModalScreen, inherit_bindings=False):
         is_path: bool = False,
         is_folder: bool = False,
         allow_initial: bool = True,
+        show_validation_message: bool = True,
     ) -> None:
         super().__init__()
         self.border_title = border_title
         self.border_subtitle = border_subtitle
         self.initial_value = initial_value
         self.allow_initial = allow_initial
+        self.show_validation_message = show_validation_message
         length_checker = Length(minimum=1, failure_description="A value is required.")
         length_checker.strict = True
         if validators is None:
@@ -72,12 +74,16 @@ class ModalInput(ModalScreen, inherit_bindings=False):
             Input
         ).is_valid:
             self.icon_widget.classes = "valid"
-            self.horizontal_group.classes = "valid"
+            self.horizontal_group.remove_class("invalid")
+            self.horizontal_group.add_class("valid")
             self.horizontal_group.border_subtitle = self.border_subtitle
         else:
             self.icon_widget.classes = "invalid"
-            self.horizontal_group.classes = "invalid"
-            if event.validation_result:
+            self.horizontal_group.remove_class("valid")
+            self.horizontal_group.add_class("invalid")
+            if not self.show_validation_message:
+                self.horizontal_group.border_subtitle = self.border_subtitle
+            elif event.validation_result:
                 try:
                     self.horizontal_group.border_subtitle = str(
                         event.validation_result.failure_descriptions[0]

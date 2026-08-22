@@ -1060,6 +1060,8 @@ ShellExec {
       &.in-bg--true { border: $border-style $success-darken-1 }
       &.in-bg--false { border: $border-style $error-darken-1 }
     }
+    &.invalid { border: $border-style $error-lighten-3 }
+    &.invalid:light { border: $border-style $error }
   }
 }
 

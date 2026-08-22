@@ -32,7 +32,9 @@ class ShellExec(ModalInput):
 
     def __init__(self) -> None:
         super().__init__(
-            border_title="Execute Shell Command", border_subtitle="Run in background"
+            border_title="Execute Shell Command",
+            border_subtitle="Run in background",
+            show_validation_message=False,
         )
         self.in_bg: bool = True
 
@@ -60,7 +62,8 @@ class ShellExec(ModalInput):
     def action_cycle_mode(self) -> None:
         self.horizontal_group.remove_class(f"in-bg--{str(self.in_bg).lower()}")
         self.in_bg = not self.in_bg
-        self.horizontal_group.border_subtitle = (
+        self.border_subtitle = (
             "Run in background" if self.in_bg else "Run in foreground"
         )
+        self.horizontal_group.border_subtitle = self.border_subtitle
         self.horizontal_group.add_class(f"in-bg--{str(self.in_bg).lower()}")

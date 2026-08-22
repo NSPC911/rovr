@@ -1290,9 +1290,16 @@ class Application(
                 title="Run Command",
                 severity="error",
             )
-        self.on_shell_exec_response(
-            ShellExec.ReturnType(command=command, run_type=run_type), shell=False
-        )
+        elif run_type not in ShellRunTypes.__args__:
+            self.notify(
+                f"Invalid run type provided. Must be one of {ShellRunTypes.__args__} (but got {run_type})",
+                title="Run Shell",
+                severity="error",
+            )
+        else:
+            self.on_shell_exec_response(
+                ShellExec.ReturnType(command=command, run_type=run_type), shell=False
+            )
 
     def action_run_shell(self, command: str, run_type: ShellRunTypes) -> None:
         if not isinstance(command, str):
@@ -1302,6 +1309,13 @@ class Application(
                 title="Run Shell",
                 severity="error",
             )
-        self.on_shell_exec_response(
-            ShellExec.ReturnType(command=command, run_type=run_type), shell=True
-        )
+        elif run_type not in ShellRunTypes.__args__:
+            self.notify(
+                f"Invalid run type provided. Must be one of {ShellRunTypes.__args__} (but got {run_type})",
+                title="Run Shell",
+                severity="error",
+            )
+        else:
+            self.on_shell_exec_response(
+                ShellExec.ReturnType(command=command, run_type=run_type), shell=True
+            )

@@ -134,10 +134,10 @@ that can be one of ("suspend", "background", "orphan")
 - background: runs the command in the background, returning to rovr immediately. it will stop process when exiting
 - orphan: runs the command detached, rovr cannot read stdout/stderr/exit code, and will not stop the process on exit
 
-| Action        | Description                                    | Example                                                  |
-| ------------- | ---------------------------------------------- | -------------------------------------------------------- |
-| `run_command` | Run an argv command in the current directory.  | `"@" = 'run_command(["echo", "hello world"], "orphan")'` |
-| `run_shell`   | Run a shell command in the current directory.  | `"ctrl+@" = 'run_shell("echo hello world", "orphan")'`   |
+| Action                                   | Description                                   | Example                                                  |
+| ---------------------------------------- | --------------------------------------------- | -------------------------------------------------------- |
+| `run_command(list[str], <command-type>)` | Run an argv command in the current directory. | `"@" = 'run_command(["echo", "hello world"], "orphan")'` |
+| `run_shell(str, <command-type>)`         | Run a shell command in the current directory. | `"ctrl+@" = 'run_shell("echo hello world", "orphan")'`   |
 
 ## File and panel contexts
 
@@ -277,9 +277,16 @@ The fallback context for scrollable panels, including `preview`, `metadata`, and
 
 ### `sort_menu`
 
-The actions `sort_order.name`, `sort_order.extension`, `sort_order.natural`,
-`sort_order.size`, `sort_order.created`, and `sort_order.modified` select a sort method.
-`sort_order.descending` toggles descending order.
+| Action                       | Description             |
+| ---------------------------- | ----------------------- |
+| `sort_order.name(bool)`      | Sort by name            |
+| `sort_order.extension(bool)` | Sort by file extension  |
+| `sort_order.natural(bool)`   | Sort by natural numbers |
+| `sort_order.size(bool)`      | Sort by size            |
+| `sort_order.created(bool)`   | Sort by created time    |
+| `sort_order.modified(bool)`  | Sort by modified time   |
+
+all of the above actions accept a boolean argument to indicate ascending (False) or descending (True) order.
 
 The lower-level action `sort_order.set(method, descending)` accepts a method name and a Boolean:
 
@@ -318,3 +325,24 @@ These actions apply only while their corresponding modal is open.
 ## Finding the key names
 
 Run `rovr --show-keys` to display the key name that will be used.
+
+### Known key conflicts:
+
+these conflicts are from terminal emulators themselves, existing due to backwards compatibility.
+if your terminal emulator supports kitty keyboard protocol, it should not cause issues.
+
+| original key      | sent as               |
+| ----------------- | --------------------- |
+| <kbd>ctrl+m</kbd> | <kbd>enter</kbd>      |
+| <kbd>ctrl+i</kbd> | <kbd>tab</kbd>        |
+| <kbd>ctrl+h</kbd> | <kbd>backspace</kbd>  |
+| <kbd>ctrl+[</kbd> | <kbd>escape</kbd>     |
+| <kbd>alt+b</kbd>  | <kbd>ctrl+left</kbd>  |
+| <kbd>alt+f</kbd>  | <kbd>ctrl+right</kbd> |
+
+alt keybinds are also handled a bit weirdly, there is an internal timer that checks for the escape key,
+and if another printable key is sent within 0.25 seconds, it will be counted as a `alt+` keybind, obviously dont push it
+
+but it exists if you want it
+
+obviously please use kitty keyboard protocol.

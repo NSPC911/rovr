@@ -726,7 +726,7 @@ def load_keys() -> KeysConfig:
     inherit = user_keys.pop("inherit", None)
     if inherit is not None and (not isinstance(inherit, str) or inherit not in presets):
         # find inherit in config
-        index = find_path_line(user_keys_content.splitlines(), ["inherits"]) or 0
+        index = find_path_line(user_keys_content.splitlines(), ["inherit"]) or 0
         toml_dump(
             user_keys_path,
             tomli.TOMLDecodeError(

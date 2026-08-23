@@ -41,10 +41,12 @@
 "ctrl+e" = { action = "unzip", desc = "Extract an archive" }
 "left" = { action = "up_tree", desc = "Go to the parent directory" }
 "alt+up" = "up_tree"
-"shift+left" = { action = "bypass_up_tree", desc = "Go up without changing history" }
-"shift+right" = { action = "bypass_down_tree", desc = "Go down without changing history" }
-"backspace" = { action = "hist_previous", desc = "Go to the previous directory" }
-"alt+left" = "hist_previous"
+"H" = { action = "bypass_up_tree", desc = "Go up through single folders" }
+"shift+left" = "bypass_up_tree"
+"L" = { action = "bypass_down_tree", desc = "Go down through single folders" }
+"shift+right" = "bypass_down_tree"
+"alt+left" = { action = "hist_previous", desc = "Go to the previous directory" }
+"backspace" = "hist_previous"
 "alt+right" = { action = "hist_next", desc = "Go to the next directory" }
 "ctrl+space" = { action = "toggle_visual", desc = "Toggle visual selection" }
 "ctrl+a" = { action = "toggle_all", desc = "Toggle selection of all files" }
@@ -79,8 +81,8 @@
 [scroll]
 "up" = "scroll_up"
 "down" = "scroll_down"
-"pageup" = "page_up"
-"pagedown" = "page_down"
+"pageup" = "scroll_page_up"
+"pagedown" = "scroll_page_down"
 "home" = "scroll_home"
 "end" = "scroll_end"
 

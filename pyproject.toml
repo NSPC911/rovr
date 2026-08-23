@@ -128,9 +128,16 @@ schema-to-dict.sequence = [
   { cmd = "jsonschema-gentypes --json-schema ./src/rovr/assets/schema.json --python ./src/rovr/classes/config.pyi" },
   "format"
 ]
+gen-ctx.help = ""
+gen-ctx.ref = "update-contexts"
+update-contexts.help = "Update set of key contexts in src/rovr/variables/maps.py"
+update-contexts.sequence = [
+  { cmd = "docs/scripts/contexts.py" },
+  "format"
+]
 
 check.help = "Run all checks (type checking and linting)"
-check.sequence = [ { cmd = "ty check" },{ cmd = "ruff check" } ]
+check.sequence = [ { cmd = "ty check" }, { cmd = "ruff check" } ]
 
 fmt.help = ""
 fmt.ref = "format"

@@ -6,11 +6,31 @@ from rovr.action_buttons import CopyButton
 from rovr.action_buttons.sort_order import SortOrderButton
 from rovr.app import Application
 from rovr.classes.textual_options import KeybindOption
+from rovr.functions.config import validate_keys
 from rovr.navigation_widgets import PathInput
 from rovr.screens import Dismissible, ScopedKeybinds
 from rovr.state_manager import StateManager
 
 from .conftest import iter_until
+
+
+def test_validate_keys() -> None:
+    assert not validate_keys({
+        "main": {
+            "+": {"action": "noop"},
+            "ctrl+[": {"action": "cycle_tab(1)"},
+            "shift+up": {"action": "noop"},
+        },
+        "path_input": {"A": {"action": "noop"}},
+    })
+    assert validate_keys({
+        "unknown": {"ctrl+no_such_key": {"action": "noop"}},
+        "main": {"shift+ctrl+a": {"action": "noop"}},
+    }) == [
+        "Unknown context [unknown]",
+        'Invalid key "ctrl+no_such_key" in [unknown]',
+        'Invalid key "shift+ctrl+a" in [main]',
+    ]
 
 
 @pytest.mark.asyncio

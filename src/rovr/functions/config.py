@@ -14,11 +14,12 @@ import fastjsonschema
 import tomli
 from fastjsonschema import JsonSchemaValueException
 from platformdirs import user_config_dir
+from textual.keys import Keys
 
 from rovr import pprint
 from rovr.classes.config import RovrConfig
 from rovr.classes.type_aliases import KeysConfig
-from rovr.variables.maps import RovrVars
+from rovr.variables.maps import VALID_KEY_CONTEXTS, RovrVars
 
 EDITOR_CANDIDATES = [
     "hx",
@@ -656,6 +657,34 @@ def keys_merge(old: dict, new: dict) -> dict:
         ):
             result[key] = keys_merge(old[key], value)
     return result
+
+
+def validate_keys(keys: KeysConfig) -> list[str]:
+    valid_key_names = {
+        member.value.rsplit("+", 1)[-1]
+        for member in Keys
+        if not member.value.startswith("<")
+    }
+    valid_modifiers = {"alt", "ctrl", "hyper", "meta", "shift", "super"}
+    errors = []
+
+    for context, bindings in keys.items():
+        if context not in VALID_KEY_CONTEXTS:
+            errors.append(f"Unknown context [{context}]")
+
+        for key in bindings:
+            *modifiers, name = [key] if len(key) == 1 else key.split("+")
+            valid_name = (len(name) == 1 and name.isprintable() and name != " ") or (
+                name in valid_key_names
+            )
+            valid_modifier_list = (
+                modifiers == sorted(set(modifiers))
+                and set(modifiers) <= valid_modifiers
+            )
+            if not valid_name or not valid_modifier_list:
+                errors.append(f'Invalid key "{key}" in [{context}]')
+
+    return errors
 
 
 def load_keys() -> KeysConfig:

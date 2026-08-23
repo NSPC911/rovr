@@ -525,7 +525,6 @@ def schema_dump(
             exit(1)
 
 
-@cache
 def _config_dir() -> str:
     config_dir = os.environ.get("ROVR_CONFIG_FOLDER")
     if not config_dir:

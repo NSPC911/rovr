@@ -134,10 +134,10 @@ that can be one of ("suspend", "background", "orphan")
 - background: runs the command in the background, returning to rovr immediately. it will stop process when exiting
 - orphan: runs the command detached, rovr cannot read stdout/stderr/exit code, and will not stop the process on exit
 
-| Action        | Description                                   | Example                                                  |
-| ------------- | --------------------------------------------- | -------------------------------------------------------- |
-| `run_command` | Run a argv command in the current directory.  | `"@" = 'run_command(["echo", "hello world"], "orphan")'` |
-| `run_shell`   | Run a shell command in the current directory. | `"ctrl+@" = 'run_shell("echo hello world", "orphan")'`   |
+| Action        | Description                                    | Example                                                  |
+| ------------- | ---------------------------------------------- | -------------------------------------------------------- |
+| `run_command` | Run an argv command in the current directory.  | `"@" = 'run_command(["echo", "hello world"], "orphan")'` |
+| `run_shell`   | Run a shell command in the current directory.  | `"ctrl+@" = 'run_shell("echo hello world", "orphan")'`   |
 
 ## File and panel contexts
 

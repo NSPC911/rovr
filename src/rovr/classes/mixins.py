@@ -307,7 +307,7 @@ class CursorNavigationMixin:
             start = (
                 0
                 if self.highlighted is None
-                else bisect_right(enabled, self.highlighted) % len(enabled)
+                else bisect_right(enabled, self.highlighted)
             )
             destination = start + offset - 1
         else:
@@ -357,8 +357,9 @@ class CursorNavigationMixin:
 
     def action_cursor_page(self, pages: float) -> None:
         """Move the cursor by a number of visible pages."""
-        if pages and self._options:
-            self.highlighted = self._cursor_page_destination(pages)
+        if pages and self._options:  # ruff:ignore[collapsible-if]
+            if (dest := self._cursor_page_destination(pages)) is not None:
+                self.highlighted = dest
 
 
 class SelectionNavigationMixin(CursorNavigationMixin):

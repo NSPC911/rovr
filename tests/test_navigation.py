@@ -191,9 +191,14 @@ async def test_activate_tab_offset_emits_once(tmp_path: Path) -> None:
 
         assert app.tabWidget.active_tab is tabs()[1]
         assert app.tab_activations == 1
+        # it is reachable btw, ignore pyright
+        await pilot.pause()
+        app.tab_activations = 0
         await app.tabWidget.add_tab("", focus=False)
         app.action_cycle_tab(-2)
+        await pilot.pause()
         assert app.tabWidget.active_tab is tabs()[3]
+        assert app.tab_activations == 1
 
 
 @pytest.mark.asyncio

@@ -108,4 +108,5 @@ Input.check_consume_key = lambda self, key, character: (  # ty: ignore[invalid-a
     character
     and len(character) == 1
     and not key.startswith(("ctrl", "shift", "alt", "super"))
+    and character.isprintable()
 )

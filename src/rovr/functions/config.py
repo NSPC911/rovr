@@ -525,6 +525,18 @@ def schema_dump(
             exit(1)
 
 
+@cache
+def _config_dir() -> str:
+    config_dir = os.environ.get("ROVR_CONFIG_FOLDER")
+    if not config_dir:
+        from rovr.variables.maps import RovrVars
+
+        config_dir: str = vars(RovrVars).get("ROVRCONFIG", None) or user_config_dir(
+            "rovr", "."
+        ).replace("\\", "/")
+    return config_dir
+
+
 def load_config() -> tuple[dict, RovrConfig]:
     """
     Load both the template config and the user config
@@ -533,12 +545,7 @@ def load_config() -> tuple[dict, RovrConfig]:
         dict: the config
     """
 
-    config_dir = os.environ.get("ROVR_CONFIG_FOLDER")
-    if not config_dir:
-        config_dir: str = vars(RovrVars).get("ROVRCONFIG", None) or user_config_dir(
-            "rovr", "."
-        ).replace("\\", "/")
-    user_config_path = path.join(config_dir, "config.toml")
+    user_config_path = path.join(_config_dir(), "config.toml")
     current_version = get_version()
     if current_version == "master":
         schema_ref = "refs/heads/master"
@@ -694,14 +701,7 @@ def load_keys() -> KeysConfig:
     Returns:
         dict: the keybindings
     """
-    config_dir = os.environ.get("ROVR_CONFIG_FOLDER")
-    if not config_dir:
-        from rovr.variables.maps import RovrVars
-
-        config_dir: str = vars(RovrVars).get("ROVRCONFIG", None) or user_config_dir(
-            "rovr", "."
-        ).replace("\\", "/")
-    user_keys_path = path.join(config_dir, "keys.toml")
+    user_keys_path = path.join(_config_dir(), "keys.toml")
     presets = {
         "base": traverser.joinpath("keys.toml"),
         "sane": traverser.joinpath("presets", "sane.toml"),
@@ -727,16 +727,7 @@ def load_keys() -> KeysConfig:
     inherit = user_keys.pop("inherit", None)
     if inherit is not None and (not isinstance(inherit, str) or inherit not in presets):
         # find inherit in config
-        lines = user_keys_content.splitlines()
-        index = 0
-        for i, line in enumerate(lines):
-            try:
-                part = tomli.loads(line)
-                if "inherit" in part:
-                    index = i
-                    break
-            except tomli.TOMLDecodeError:
-                continue
+        index = find_path_line(user_keys_content.splitlines(), ["inherits"]) or 0
         toml_dump(
             user_keys_path,
             tomli.TOMLDecodeError(

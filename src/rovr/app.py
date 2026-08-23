@@ -1293,7 +1293,7 @@ class Application(
         elif run_type not in ShellRunTypes.__args__:
             self.notify(
                 f"Invalid run type provided. Must be one of {ShellRunTypes.__args__} (but got {run_type})",
-                title="Run Shell",
+                title="Run Command",
                 severity="error",
             )
         else:

@@ -17,8 +17,8 @@
 "p" = { action = "focus_toggle_processes", desc = "Focus the processes panel" }
 "c" = { action = "focus_toggle_clipboard", desc = "Focus the clipboard panel" }
 "m" = { action = "focus_toggle_metadata", desc = "Focus the metadata panel" }
-"ctrl+[" = { action = "cycle_tab(1)", desc = "Go to the next tab" }
-"ctrl+]" = { action = "cycle_tab(-1)", desc = "Go to the previous tab" }
+"[" = { action = "cycle_tab(1)", desc = "Go to the next tab" }
+"]" = { action = "cycle_tab(-1)", desc = "Go to the previous tab" }
 "ctrl+t" = { action = "tab_new", desc = "Open a new tab" }
 "ctrl+w" = { action = "tab_close", desc = "Close the current tab" }
 "f1" = { action = "show_keybinds", desc = "Show keybindings" }
@@ -36,7 +36,7 @@
 "delete" = { action = "delete", desc = "Delete selected files" }
 "f2" = { action = "rename", desc = "Rename the current file" }
 "ctrl+n" = { action = "new", desc = "Create a file or directory" }
-"ctrl+shift+n" = { action = "bulk_create", desc = "Create multiple files or directories" }
+"alt+n" = { action = "bulk_create", desc = "Create multiple files or directories" }
 "E" = { action = "zip", desc = "Create an archive" }
 "ctrl+e" = { action = "unzip", desc = "Extract an archive" }
 "left" = { action = "up_tree", desc = "Go to the parent directory" }
@@ -79,8 +79,8 @@
 [scroll]
 "up" = "scroll_up"
 "down" = "scroll_down"
-"pageup" = "scroll_page_up"
-"pagedown" = "scroll_page_down"
+"pageup" = "page_up"
+"pagedown" = "page_down"
 "home" = "scroll_home"
 "end" = "scroll_end"
 
@@ -153,8 +153,8 @@
 "ctrl+w" = "delete_left_word"
 "ctrl+u" = "delete_left_all"
 "super+backspace" = "delete_left_all"
-"ctrl+backspace" = "delete_right_word"
-"alt+backspace" = "delete_right_word"
+"ctrl+backspace" = "delete_left_word"
+"alt+backspace" = "delete_left_word"
 "ctrl+k" = "delete_right_all"
 "ctrl+x" = "cut"
 "ctrl+c" = "copy"

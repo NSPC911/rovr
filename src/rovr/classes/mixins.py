@@ -5,6 +5,7 @@ from typing import Any, Awaitable, Callable, ClassVar, Iterable, NamedTuple, Sel
 from rich.cells import cell_len
 from rich.segment import Segment
 from rich.style import Style
+from textual.actions import SkipAction
 from textual.color import Color
 from textual.content import ContentText
 from textual.events import Key
@@ -495,14 +496,19 @@ class Actionable:
                     if not isinstance(action.action, str):
                         func: Callable[[], Any] = action.action
                     else:
+                        if not self.check_action(action.action, ()):
+                            continue
                         func: Callable[[], Any] | None = getattr(
                             self, f"action_{action.action}"
                         )
                         if not callable(func):
                             continue
-                    result: Any | Awaitable = func()
-                    if isawaitable(result):
-                        await result
+                    try:
+                        result: Any | Awaitable = func()
+                        if isawaitable(result):
+                            await result
+                    except SkipAction:
+                        pass
                     if getattr(self.app, "_show_keys", False):
                         self.app.show_key(event)
                     event.prevent_default().stop()

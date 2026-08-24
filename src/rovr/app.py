@@ -24,7 +24,7 @@ from textual.containers import (
 )
 from textual.css.query import NoMatches
 from textual.dom import DOMNode
-from textual.messages import ExitApp
+from textual.messages import ExitApp, Update
 from textual.screen import Screen
 from textual.timer import Timer
 from textual.types import NoActiveAppError
@@ -77,6 +77,7 @@ from rovr.functions.themes import (
     theme_file_mtimes,
 )
 from rovr.functions.utils import (
+    expand_command,
     multiprocessing_process_error_checker,
     run_command,
     should_cancel,
@@ -100,6 +101,13 @@ console = get_console
 
 if constants.SCREENSHOT_LOCATION:
     constants.SCREENSHOT_LOCATION = normalise(getcwd(), constants.SCREENSHOT_LOCATION)
+
+
+class RovrScreen(Screen):
+    @work
+    async def _on_update(self, message: Update) -> None:
+        await super()._on_update(message)
+        self.app.title = await expand_command(self.app, config["interface"]["title"])
 
 
 class Application(
@@ -263,6 +271,9 @@ class Application(
         if not self._file_list_container.filelist.is_mounted:
             self._file_list_container.remount_filelist()
         return self._file_list_container.filelist
+
+    def get_default_screen(self) -> Screen:
+        return RovrScreen(id="_default")
 
     def compose(self) -> ComposeResult:
         self.log("Starting Rovr...")
@@ -593,7 +604,6 @@ class Application(
         clear_search: bool = True,
     ) -> Worker | None:
         # Makes sure `directory` is a directory, or chdir will fail with exception
-        self.title = f"rovr @ {path.basename(directory)}"
         if self.return_code is not None:
             return
         directory = ensure_existing_directory(directory)
@@ -853,12 +863,9 @@ class Application(
         self.hide_popups()
 
     def watch_title(self, title: str) -> None:
-        try:
+        if self._driver is not None:
             self._driver.write(f"\x1b]0;{title}\x07")
             self._driver.flush()
-        except AttributeError:
-            # driver not yet initialised
-            pass
 
     def export_screenshot(
         self,

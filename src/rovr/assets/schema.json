@@ -216,6 +216,10 @@
           "default": false,
           "description": "Show a close button on each tab in the tabs bar."
         },
+        "title": {
+          "type": "string",
+          "default": "rovr @ %ncwd"
+        },
         "details_list": {
           "type": "array",
           "default": [],

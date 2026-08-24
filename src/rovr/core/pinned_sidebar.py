@@ -257,7 +257,7 @@ class PinnedSidebar(
             self.app.file_list.focus()
         file_path = path_utils.decompress(selected_option.id.rsplit("-", 1)[0])
         if file_path == pin_utils.TRASH:
-            self.app.open_recycle_bin()
+            self.app.action_open_recycle_bin()
             return
         if not path.isdir(file_path):
             if path.exists(file_path):

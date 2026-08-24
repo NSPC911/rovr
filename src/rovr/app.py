@@ -574,16 +574,6 @@ class Application(
             self._force_exit_timer.cancel()
             self._force_exit_timer = None
 
-    def open_recycle_bin(self) -> None:
-        """Open the recycle bin browser, refreshing the file list on restore."""
-        from rovr.screens import TrashScreen
-
-        async def callback(changed: bool) -> None:
-            if changed:
-                self.file_list.update_file_list(add_to_session=False)
-
-        self.push_screen(TrashScreen(), callback=callback)
-
     def cd(
         self,
         directory: str,
@@ -1323,3 +1313,13 @@ class Application(
             self.on_shell_exec_response(
                 ShellExec.ReturnType(command=command, run_type=run_type), shell=True
             )
+
+    def action_open_recycle_bin(self) -> None:
+        """Open the recycle bin browser, refreshing the file list on restore."""
+        from rovr.screens import TrashScreen
+
+        async def callback(changed: bool) -> None:
+            if changed:
+                self.file_list.update_file_list(add_to_session=False)
+
+        self.push_screen(TrashScreen(), callback=callback)

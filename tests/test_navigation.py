@@ -2,7 +2,8 @@ import os
 from pathlib import Path
 
 import pytest
-from textual import events
+from textual import events, on
+from textual.widgets import Tabs
 
 from rovr.app import Application
 from rovr.components import SearchInput
@@ -11,6 +12,16 @@ from rovr.header.tabs import TablineTab
 from rovr.navigation_widgets import BackButton
 
 from .conftest import iter_until, workers_finished
+
+
+class TabNavigationApp(Application):
+    def __init__(self, startup_path: str) -> None:
+        super().__init__(startup_path)
+        self.tab_activations = 0
+
+    @on(Tabs.TabActivated)
+    def count_tab_activations(self) -> None:
+        self.tab_activations += 1
 
 
 @pytest.mark.asyncio
@@ -159,6 +170,58 @@ async def test_tab_highlight(tmp_path: Path) -> None:
                 and app.file_list.highlighted == index
             ),
         )
+
+
+@pytest.mark.asyncio
+async def test_activate_tab_offset_emits_once(tmp_path: Path) -> None:
+    app = TabNavigationApp(tmp_path.as_posix())
+
+    async with app.run_test(size=(143, 37)) as pilot:
+        await pilot.pause()
+        await app.tabWidget.add_tab("")
+        await app.tabWidget.add_tab("")
+        await pilot.pause()
+        tabs = lambda: app.tabWidget._potentially_active_tabs
+        active = app.tabWidget.active_tab
+        assert active is not None
+        app.tab_activations = 0
+
+        app.action_cycle_tab(2)
+        await pilot.pause()
+
+        assert app.tabWidget.active_tab is tabs()[1]
+        assert app.tab_activations == 1
+        # it is reachable btw, ignore pyright
+        await pilot.pause()
+        app.tab_activations = 0
+        await app.tabWidget.add_tab("", focus=False)
+        app.action_cycle_tab(-2)
+        await pilot.pause()
+        assert app.tabWidget.active_tab is tabs()[3]
+        assert app.tab_activations == 1
+
+
+@pytest.mark.asyncio
+async def test_activate_tab_absolute_emits_once(tmp_path: Path) -> None:
+    app = TabNavigationApp(tmp_path.as_posix())
+
+    async with app.run_test(size=(143, 37)) as pilot:
+        await pilot.pause()
+        await app.tabWidget.add_tab("")
+        await app.tabWidget.add_tab("")
+        await app.tabWidget.add_tab("", focus=False)
+        await pilot.pause()
+        tabs = app.tabWidget._potentially_active_tabs
+        active = app.tabWidget.active_tab
+        assert active is not None
+        expected = tabs[1]
+        app.tab_activations = 0
+
+        app.action_activate_tab(1)
+        await pilot.pause()
+
+        assert app.tabWidget.active_tab is expected
+        assert app.tab_activations == 1
 
 
 @pytest.mark.asyncio

@@ -12,6 +12,8 @@ from rovr.functions.utils import set_scuffed_subtitle
 
 
 class SearchInput(Input):
+    key_contexts = ("search_input", "inputs")
+
     def __init__(self, always_add_disabled: bool = True, placeholder: str = "") -> None:
         super().__init__(
             password=False, compact=True, select_on_focus=False, placeholder=placeholder

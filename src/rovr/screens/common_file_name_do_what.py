@@ -7,20 +7,14 @@ from textual.message import Message
 from textual.screen import ModalScreen
 from textual.widgets import Button, Label, Switch
 
-from rovr.functions.utils import check_key, dismiss, get_shortest_bind
+from rovr.functions.utils import check_key, dismiss, get_shortcut
 from rovr.variables.constants import config
-
-overwrite_bind = get_shortest_bind(config["keybinds"]["filename_conflict"]["overwrite"])
-rename_bind = get_shortest_bind(config["keybinds"]["filename_conflict"]["rename"])
-skip_bind = get_shortest_bind(config["keybinds"]["filename_conflict"]["skip"])
-cancel_bind = get_shortest_bind(config["keybinds"]["filename_conflict"]["cancel"])
-dont_ask_bind = get_shortest_bind(
-    config["keybinds"]["filename_conflict"]["dont_ask_again"]
-)
 
 
 class FileNameConflict(ModalScreen):
     """Screen with a dialog to confirm whether to overwrite, rename, skip or cancel."""
+
+    key_contexts = ("filename_conflict",)
 
     class ReturnType(TypedDict):
         value: Literal["overwrite", "rename", "skip", "cancel"]
@@ -42,6 +36,11 @@ class FileNameConflict(ModalScreen):
             self.add_class("no_overwrite")
 
     def compose(self) -> ComposeResult:
+        overwrite_bind = get_shortcut("filename_conflict", "overwrite")
+        rename_bind = get_shortcut("filename_conflict", "rename")
+        skip_bind = get_shortcut("filename_conflict", "skip")
+        cancel_bind = get_shortcut("filename_conflict", "cancel")
+        dont_ask_bind = get_shortcut("filename_conflict", "dont_ask_again")
         with Grid(id="dialog"):
             yield Label(self.message, classes="question")
             if self.allow_overwrite:
@@ -69,6 +68,8 @@ class FileNameConflict(ModalScreen):
 
     def on_key(self, event: events.Key) -> None:
         """Handle key presses."""
+        if getattr(self.app, "keys", ()):
+            return
         if self.allow_overwrite and check_key(
             event, config["keybinds"]["filename_conflict"]["overwrite"]
         ):
@@ -94,14 +95,15 @@ class FileNameConflict(ModalScreen):
 
     @on(Button.Pressed, "#overwrite")
     def action_overwrite(self, event: Message | None = None) -> None:
-        dismiss(
-            self,
-            FileNameConflict.ReturnType(
-                value="overwrite",
-                same_for_next=self.query_one(Switch).value,
-            ),
-            event,
-        )
+        if self.allow_overwrite:
+            dismiss(
+                self,
+                FileNameConflict.ReturnType(
+                    value="overwrite",
+                    same_for_next=self.query_one(Switch).value,
+                ),
+                event,
+            )
 
     @on(Button.Pressed, "#rename")
     def action_rename(self, event: Message | None = None) -> None:

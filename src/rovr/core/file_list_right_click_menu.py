@@ -118,6 +118,7 @@ def give_me_an_option(
 
 
 class FileListRightClickMenu(PopupOptionList, inherit_bindings=False):
+    key_contexts = ("file_list_menu", "popup_list", "lists")
     BINDINGS: ClassVar[list[BindingType]] = list(bindings)
 
     def __init__(self, classes: str | None = None, id: str | None = None) -> None:
@@ -268,6 +269,7 @@ class FileListRightClickMenu(PopupOptionList, inherit_bindings=False):
 
 
 class FileListRightClickChildMenu(PopupOptionList, inherit_bindings=False):
+    key_contexts = ("file_list_submenu", "popup_list", "lists")
     BINDINGS: ClassVar[list[BindingType]] = list(bindings)
 
     target_option: var[RightClickMenuOption] = var(

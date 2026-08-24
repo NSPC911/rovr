@@ -8,7 +8,6 @@ from typing import Callable
 from urllib import error, request
 
 import textual_image.widget as timg
-import tomli
 from PIL import Image as PILImage
 from PIL.Image import Image
 from pygments.styles import get_all_styles
@@ -129,10 +128,10 @@ class FinalStuff(ModalScreen[None]):
 
 
 class AskWrite(ModalScreen[bool]):
-    def __init__(self, content: str) -> None:
+    def __init__(self, config_content: str, keys_content: str) -> None:
         super().__init__()
         self.content = Syntax(
-            content,
+            f"# config.toml\n{config_content}\n\n# keys.toml\n{keys_content}",
             "toml",
             theme="native",
             background_color="default",
@@ -141,9 +140,11 @@ class AskWrite(ModalScreen[bool]):
 
     def compose(self) -> ComposeResult:
         with Container(classes="modal-wrapper"):
-            yield Static("Write config to disk?")
+            yield Static("Write config and keys to disk?")
             yield Static(
-                f"The following content will be written to [u]{os.path.realpath(f'{RovrVars.ROVRCONFIG}/config.toml')}[/]:"
+                "The following content will be written to "
+                f"[u]{os.path.realpath(f'{RovrVars.ROVRCONFIG}/config.toml')}[/] and "
+                f"[u]{os.path.realpath(f'{RovrVars.ROVRCONFIG}/keys.toml')}[/]:"
             )
             yield Static(classes="padding")
             with ScrollableContainer():
@@ -404,28 +405,19 @@ class FirstLaunchApp(App, inherit_bindings=False):
     @work
     @on(Button.Pressed, "#finish_setup")
     async def on_finish_setup_pressed(self, event: Button.Pressed) -> None:
-        # get appropriate keybind
-        with open(
-            resource
-            / "assets"
-            / "keybinds"
-            / f"{self.query_one('#keybinds', RadioSet).pressed_button.id}.toml",
-            "r",
-        ) as f:
-            # hardcoding is my passion
-            keybinds_sections: list[str] = f.read().split("\n# plugins\n")
-            plugins = tomli.loads(keybinds_sections[1])
-            keybinds: str = keybinds_sections[0]
-            keybinds = "\n".join([
-                line for line in keybinds.splitlines() if not line.startswith("#")
-            ])
+        preset_button = self.query_one("#keybinds", RadioSet).pressed_button
+        assert preset_button is not None and preset_button.id is not None
+        preset = preset_button.id
+        keys_toml = f'inherit = "{preset}"\n'
         # manually create toml file yipee (imagine using tomliw (one extra dependency smh))
-        theme = self.query_one("#theme", RadioSet).pressed_button.id
+        theme_button = self.query_one("#theme", RadioSet).pressed_button
+        assert theme_button is not None and theme_button.id is not None
+        theme = theme_button.id
         config_toml = f"""#:schema https://raw.githubusercontent.com/NSPC911/rovr/{schema_ref}/src/rovr/assets/schema.json
 [interface]
 use_reactive_layout = {str(self.query_one("#use_reactive_layout", Switch).value).lower()}
 show_hidden_files = {str(self.query_one("#show_hidden_files", Switch).value).lower()}
-show_tab_close_button = {"true" if self.query_one("#keybinds", RadioSet).pressed_button.id == "sane" else "false"}
+show_tab_close_button = {"true" if preset == "sane" else "false"}
 
 [interface.image_viewer]
 protocol = "{prot_to_schema[str(self.query_one("#image_protocol_select", Select).value)]}"
@@ -444,28 +436,24 @@ orphan = false
 
 [settings.editor.bulk_editor]
 run = "{_escape_toml_string(self.query_one("#editor_input", Input).value)}"
-rename_show_as_mapping = {str(bool(self.query_one("#keybinds", RadioSet).pressed_button.id == "sane")).lower()}
+rename_show_as_mapping = {str(preset == "sane").lower()}
 
 [theme]
 default = "{theme}"
 {f'preview = "{theme}"' if theme in list(get_all_styles()) else ""}
 transparent = {str(self.query_one("#transparent_mode", Switch).value).lower()}
-{keybinds}
 
 [plugins.rg]
 enabled = {str(self.query_one("#plugins-rg Switch", Switch).value).lower()}
-keybinds = {plugins["plugins"]["rg"]["keybinds"]}
 
 [plugins.fd]
 enabled = {str(self.query_one("#plugins-fd Switch", Switch).value).lower()}
-keybinds = {plugins["plugins"]["fd"]["keybinds"]}
 
 [plugins.bat]
 enabled = {str(self.query_one("#plugins-bat Switch", Switch).value).lower()}
 
 [plugins.zoxide]
 enabled = {str(self.query_one("#plugins-zoxide Switch", Switch).value).lower()}
-keybinds = {plugins["plugins"]["zoxide"]["keybinds"]}
 
 [plugins.poppler]
 enabled = {str(self.query_one("#plugins-poppler Switch", Switch).value).lower()}
@@ -473,10 +461,12 @@ enabled = {str(self.query_one("#plugins-poppler Switch", Switch).value).lower()}
 [plugins.file_one]
 enabled = {str(self.query_one("#plugins-file Switch", Switch).value).lower()}"""
         # trust me it loads properly
-        if await self.push_screen_wait(AskWrite(config_toml)):
+        if await self.push_screen_wait(AskWrite(config_toml, keys_toml)):
             os.makedirs(RovrVars.ROVRCONFIG, exist_ok=True)
-            with open(f"{RovrVars.ROVRCONFIG}/config.toml", "w") as f:
+            with open(f"{RovrVars.ROVRCONFIG}/config.toml", "w", encoding="utf-8") as f:
                 f.write(config_toml)
+            with open(f"{RovrVars.ROVRCONFIG}/keys.toml", "w", encoding="utf-8") as f:
+                f.write(keys_toml)
             await self.push_screen_wait(FinalStuff())
 
     @work(exclusive=True)

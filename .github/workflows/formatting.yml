@@ -35,7 +35,6 @@ jobs:
       - name: Run docs scripts
         run: |
           uv run poe gen-schema
-          uv run poe gen-keys
           uv run poe typed
           # need to do ruff because type hints use scuffed configs
           uv run ruff format .

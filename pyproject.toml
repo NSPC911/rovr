@@ -120,8 +120,6 @@ gen-schema.sequence = [
 ]
 icon-test.help = "Print all available icons to the terminal for testing"
 icon-test.cmd = "docs/scripts/icon_test.py"
-gen-keys.help = "Generate the keybinds documentation"
-gen-keys.cmd = "docs/scripts/generate_keybinds.py"
 typed.help = ""
 typed.ref = "schema-to-dict"
 schema-to-dict.help = "Convert the JSON schema into a Python TypedDict for internal use"
@@ -130,9 +128,16 @@ schema-to-dict.sequence = [
   { cmd = "jsonschema-gentypes --json-schema ./src/rovr/assets/schema.json --python ./src/rovr/classes/config.pyi" },
   "format"
 ]
+gen-ctx.help = ""
+gen-ctx.ref = "update-contexts"
+update-contexts.help = "Update set of key contexts in src/rovr/variables/maps.py"
+update-contexts.sequence = [
+  { cmd = "docs/scripts/contexts.py" },
+  "format"
+]
 
 check.help = "Run all checks (type checking and linting)"
-check.sequence = [ { cmd = "ty check" },{ cmd = "ruff check" } ]
+check.sequence = [ { cmd = "ty check" }, { cmd = "ruff check" } ]
 
 fmt.help = ""
 fmt.ref = "format"
@@ -222,6 +227,7 @@ select = [
   "ASYNC221",
   "ASYNC251",
   "ANN",
+  "B019",
   "COM819",
   "C400",
   "DOC",

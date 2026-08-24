@@ -7,6 +7,7 @@ from textual import _border as border
 from textual.content import Content
 from textual.css.types import EdgeType
 from textual.style import Style
+from textual.widgets import Input
 
 
 def render_border_label(
@@ -98,4 +99,14 @@ border.BORDER_CHARS["dashed"] = (
     ("┌", "╌", "┐"),
     ("┆", " ", "┆"),
     ("└", "╌", "┘"),
+)
+
+# with the current implementation it just checks if the character is printable
+# problem is that kitty kp sends ctrl+a as a, which is printable, but we don't want
+# to consume it, so we need to check if the key is just that key
+Input.check_consume_key = lambda self, key, character: (  # ty: ignore[invalid-assignment]
+    character
+    and len(character) == 1
+    and not key.startswith(("ctrl", "shift", "alt", "super"))
+    and character.isprintable()
 )

@@ -1,3 +1,4 @@
+from contextlib import suppress
 from typing import cast
 
 from textual import events
@@ -8,20 +9,9 @@ from textual.widgets.option_list import Option, OptionDoesNotExist
 from rovr.classes.type_aliases import SortByOptions
 from rovr.components import PopupOptionList
 from rovr.functions.icons import get_icon, get_toggle_button_icon
-from rovr.functions.utils import check_key, get_shortest_bind
+from rovr.functions.utils import check_key, get_shortcut
 from rovr.state_manager import StateManager
 from rovr.variables.constants import config
-
-# Get the shortest keybind for each sort option
-name_bind = get_shortest_bind(config["keybinds"]["change_sort_order"]["name"])
-extension_bind = get_shortest_bind(config["keybinds"]["change_sort_order"]["extension"])
-natural_bind = get_shortest_bind(config["keybinds"]["change_sort_order"]["natural"])
-size_bind = get_shortest_bind(config["keybinds"]["change_sort_order"]["size"])
-created_bind = get_shortest_bind(config["keybinds"]["change_sort_order"]["created"])
-modified_bind = get_shortest_bind(config["keybinds"]["change_sort_order"]["modified"])
-descending_bind = get_shortest_bind(
-    config["keybinds"]["change_sort_order"]["descending"]
-)
 
 
 class SortOrderPopupOptions(Option):
@@ -40,6 +30,8 @@ class SortOrderPopupOptions(Option):
 
 
 class SortOrderButton(Button):
+    key_contexts = ("sort_order",)
+
     def __init__(self) -> None:
         super().__init__(
             get_icon("sorting", "alpha_asc")[0],  # default
@@ -96,8 +88,44 @@ class SortOrderButton(Button):
         popup_widget.display = True
         popup_widget.focus()
 
+    def action_set(
+        self, sort_by: SortByOptions, descending: bool | None = None
+    ) -> None:
+        state_manager = self.app.query_one(StateManager)
+        state_manager.set_sort_preference(sort_by, descending)
+        self.app.file_list.update_file_list(add_to_session=False)
+        self.update_icon()
+        with suppress(NoMatches):
+            self.app.query_one(SortOrderPopup).go_hide()
+
+    def action_name(self, descending: bool | None = None) -> None:
+        self.action_set("name", descending)
+
+    def action_extension(self, descending: bool | None = None) -> None:
+        self.action_set("extension", descending)
+
+    def action_natural(self, descending: bool | None = None) -> None:
+        self.action_set("natural", descending)
+
+    def action_size(self, descending: bool | None = None) -> None:
+        self.action_set("size", descending)
+
+    def action_created(self, descending: bool | None = None) -> None:
+        self.action_set("created", descending)
+
+    def action_modified(self, descending: bool | None = None) -> None:
+        self.action_set("modified", descending)
+
+    def action_descending(self, descending: bool | None = None) -> None:
+        state_manager = self.app.query_one(StateManager)
+        if descending is None:
+            descending = not state_manager.get_sort_prefs()[1]
+        self.action_set(state_manager.get_sort_prefs()[0], descending)
+
 
 class SortOrderPopup(PopupOptionList):
+    key_contexts = ("sort_menu", "popup_list", "lists")
+
     def on_mount(self) -> None:
         self.do_adjust: bool = False
         self.button: SortOrderButton = self.app.query_one(SortOrderButton)
@@ -105,60 +133,48 @@ class SortOrderPopup(PopupOptionList):
 
     def pre_show(self) -> None:
         state_manager: StateManager = self.app.query_one(StateManager)
+
+        def shortcut(action: str) -> str:
+            return get_shortcut(
+                "sort_menu", f"sort_order.{action}", "change_sort_order", action
+            )
+
         # Get current sort preferences from StateManager
         sort_by, sort_descending = state_manager.get_sort_prefs()
-        self.set_options([
-            SortOrderPopupOptions(
-                name_bind,
-                "Name",
-                sort_by == "name",
-                id="name",
-            ),
-            SortOrderPopupOptions(
-                extension_bind,
-                "Extension",
-                sort_by == "extension",
-                id="extension",
-            ),
-            SortOrderPopupOptions(
-                natural_bind,
-                "Natural",
-                sort_by == "natural",
-                id="natural",
-            ),
-            SortOrderPopupOptions(
-                size_bind,
-                "Size",
-                sort_by == "size",
-                id="size",
-            ),
-            SortOrderPopupOptions(
-                created_bind,
-                "Created",
-                sort_by == "created",
-                id="created",
-            ),
-            SortOrderPopupOptions(
-                modified_bind,
-                "Modified",
-                sort_by == "modified",
-                id="modified",
-            ),
-            Option("", id="separator", disabled=True),
-            SortOrderPopupOptions(
-                descending_bind,
-                "Descending",
-                sort_descending,
-                id="descending",
-            ),
-            Option("", id="separator2", disabled=True),
-            SortOrderPopupOptions(
-                "",  # No keybind for this option
-                "This path only",
-                state_manager.custom_sort_enabled,
-                id="custom_sort",
-            ),
-        ])
+        self.set_options(
+            [
+                SortOrderPopupOptions(
+                    shortcut(item),
+                    item.capitalize(),
+                    sort_by == item,
+                    id=item,
+                )
+                for item in (
+                    "name",
+                    "extension",
+                    "natural",
+                    "size",
+                    "created",
+                    "modified",
+                )
+            ]
+            + [
+                Option("", id="separator", disabled=True),
+                SortOrderPopupOptions(
+                    shortcut("descending"),
+                    "Descending",
+                    sort_descending,
+                    id="descending",
+                ),
+                Option("", id="separator2", disabled=True),
+                SortOrderPopupOptions(
+                    "",  # No keybind for this option
+                    "This path only",
+                    state_manager.custom_sort_enabled,
+                    id="custom_sort",
+                ),
+            ]
+        )
         # just do a quick width check
         width = 0
         for option in self.options:
@@ -195,28 +211,24 @@ class SortOrderPopup(PopupOptionList):
         state_manager: StateManager = self.app.query_one(StateManager)
 
         if event.option.id == "descending":
-            # Toggle descending
-            _, current_descending = state_manager.get_sort_prefs()
-            state_manager.set_sort_preference(sort_descending=not current_descending)
+            self.button.action_descending()
         elif event.option.id == "custom_sort":
             # Toggle custom sort for this folder
             state_manager.toggle_custom_sort()
+            self.app.file_list.update_file_list(add_to_session=False)
+            self.button.update_icon()
         else:
-            state_manager.set_sort_preference(
-                sort_by=cast(SortByOptions, event.option.id)
-            )
-
-        # Refresh file list to apply the change
-        self.app.file_list.update_file_list(add_to_session=False)
+            self.button.action_set(cast(SortByOptions, event.option.id))
 
         if event.option.id != "custom_sort":
             self.go_hide()
         else:
             self.pre_show()
             self.highlighted = self.get_option_index("custom_sort")
-        self.button.update_icon()
 
     async def on_key(self, event: events.Key) -> None:
+        if getattr(self.app, "keys", ()):
+            return
         for option, keys in config["keybinds"]["change_sort_order"].items():
             if option == "open_popup":
                 continue
@@ -234,27 +246,6 @@ class SortOrderPopup(PopupOptionList):
     def select(self, id: str) -> None:
         self.highlighted = self.get_option_index(id)
         self.action_select()
-
-    def action_change_sort_order_name(self) -> None:
-        self.select("name")
-
-    def action_change_sort_order_extension(self) -> None:
-        self.select("extension")
-
-    def action_change_sort_order_natural(self) -> None:
-        self.select("natural")
-
-    def action_change_sort_order_size(self) -> None:
-        self.select("size")
-
-    def action_change_sort_order_created(self) -> None:
-        self.select("created")
-
-    def action_change_sort_order_modified(self) -> None:
-        self.select("modified")
-
-    def action_change_sort_order_descending(self) -> None:
-        self.select("descending")
 
     def action_toggle_custom_sort(self) -> None:
         self.select("custom_sort")

@@ -1,3 +1,4 @@
+from contextlib import suppress
 from pathlib import Path
 
 from textual import events, work
@@ -14,15 +15,8 @@ from rovr.functions.system_clipboard import (
     ClipboardToolNotFoundError,
     copy_files_to_system_clipboard,
 )
-from rovr.functions.utils import check_key, get_shortest_bind
+from rovr.functions.utils import check_key, get_shortcut
 from rovr.variables.constants import config
-
-rovr_bind = get_shortest_bind(config["keybinds"]["extra_copy"]["copy_to_rovr"])
-path_bind = get_shortest_bind(config["keybinds"]["extra_copy"]["copy_highlighted"])
-system_bind = get_shortest_bind(config["keybinds"]["extra_copy"]["copy_to_system_clip"])
-copy_parent_bind = get_shortest_bind(
-    config["keybinds"]["extra_copy"]["copy_current_directory"]
-)
 
 
 class CopyPanelOption(Option):
@@ -31,6 +25,7 @@ class CopyPanelOption(Option):
 
 
 class CopyButton(Button):
+    key_contexts = ("copy",)
     ALLOW_MAXIMIZE = False
 
     def __init__(self) -> None:
@@ -67,6 +62,26 @@ class CopyButton(Button):
         popup_widget.pre_show()
         popup_widget.display = True
         popup_widget.focus()
+
+    def action_to_rovr(self) -> None:
+        self.action_press()
+        self._hide_popup()
+
+    def action_highlighted(self) -> None:
+        self.copy_highlighted()
+        self._hide_popup()
+
+    def action_to_system_clip(self) -> None:
+        self.copy_to_system_clip()
+        self._hide_popup()
+
+    def action_current_directory(self) -> None:
+        self.copy_current_directory()
+        self._hide_popup()
+
+    def _hide_popup(self) -> None:
+        with suppress(NoMatches):
+            self.app.query_one(CopyPanelOptions).go_hide()
 
     @work
     async def on_button_pressed(self) -> None:
@@ -146,6 +161,8 @@ class CopyButton(Button):
 
 
 class CopyPanelOptions(PopupOptionList):
+    key_contexts = ("copy_menu", "popup_list", "lists")
+
     def on_mount(self) -> None:
         self.do_adjust: bool = False
         self.button: CopyButton = self.app.query_one(CopyButton)
@@ -157,19 +174,36 @@ class CopyPanelOptions(PopupOptionList):
         ) or self.app.file_list.options[0].disabled
         self.set_options([
             CopyPanelOption(
-                rovr_bind,
+                get_shortcut("copy_menu", "copy.to_rovr", "extra_copy", "copy_to_rovr"),
                 "Copy files to rovr clipboard ",
                 "rovr",
                 disabled=should_disable,
             ),
             CopyPanelOption(
-                path_bind, "Copy single file path ", "path", disabled=should_disable
+                get_shortcut(
+                    "copy_menu", "copy.highlighted", "extra_copy", "copy_highlighted"
+                ),
+                "Copy single file path ",
+                "path",
+                disabled=should_disable,
             ),
             CopyPanelOption(
-                copy_parent_bind, "Copy current directory path ", "parent_path"
+                get_shortcut(
+                    "copy_menu",
+                    "copy.current_directory",
+                    "extra_copy",
+                    "copy_current_directory",
+                ),
+                "Copy current directory path ",
+                "parent_path",
             ),
             CopyPanelOption(
-                system_bind,
+                get_shortcut(
+                    "copy_menu",
+                    "copy.to_system_clip",
+                    "extra_copy",
+                    "copy_to_system_clip",
+                ),
                 "Copy to system clipboard ",
                 "system",
                 disabled=should_disable,
@@ -198,6 +232,8 @@ class CopyPanelOptions(PopupOptionList):
             )
 
     async def on_key(self, event: events.Key) -> None:
+        if getattr(self.app, "keys", ()):
+            return
         if check_key(event, config["keybinds"]["extra_copy"]["copy_to_rovr"]):
             self.button.action_press()
         elif check_key(event, config["keybinds"]["extra_copy"]["copy_highlighted"]):

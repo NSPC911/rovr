@@ -10,7 +10,7 @@ from textual.widgets import Input, OptionList
 from textual.worker import WorkerCancelled
 
 from rovr.classes.textual_options import OptionWithValue
-from rovr.components import DoubleClickableOptionList, ModalSearchScreen
+from rovr.components import DoubleClickableOptionList, FilterInput, ModalSearchScreen
 from rovr.functions.utils import dismiss, should_cancel
 from rovr.variables.constants import config
 
@@ -18,9 +18,11 @@ from rovr.variables.constants import config
 class ZDToDirectory(ModalSearchScreen):
     """Screen with a dialog to z to a directory, using zoxide"""
 
+    key_contexts = ("directory_jump", "filter_modal")
+
     def compose(self) -> ComposeResult:
         with VerticalGroup(id="zoxide_group", classes="zoxide_group"):
-            yield Input(
+            yield FilterInput(
                 id="zoxide_input",
                 placeholder="Enter directory name or pattern",
             )

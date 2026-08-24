@@ -153,9 +153,7 @@ preview = "nord"
 transparent = false
 
 [keybinds]
-# For keybind profiles, see keybinds/sane.toml and keybinds/vim.toml
-# The default configuration below combines both styles for maximum flexibility.
-# Users can copy their preferred profile to their config directory.
+# legacy version, vim and sane are not available.
 toggle_pin = ["P"]
 toggle_pinned_sidebar = ["S"]
 toggle_preview_sidebar = ["I"]

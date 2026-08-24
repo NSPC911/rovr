@@ -5,6 +5,7 @@ from typing import Callable, ClassVar, Literal, Sequence
 
 from rich.segment import Segment
 from textual import events, work
+from textual.actions import SkipAction
 from textual.binding import BindingType
 from textual.css.query import NoMatches
 from textual.errors import NoWidget
@@ -20,6 +21,7 @@ from rovr.classes.mixins import (
     CheckboxRenderingMixin,
     DetailColumnRenderingMixin,
     ScrollOffMixin,
+    SelectionNavigationMixin,
     SetOptionsSelectionList,
     SingleLineOptionLayoutMixin,
 )
@@ -46,6 +48,7 @@ class FileList(
     CheckboxRenderingMixin,
     DetailColumnRenderingMixin,
     ScrollOffMixin,
+    SelectionNavigationMixin,
     SingleLineOptionLayoutMixin,
     SetOptionsSelectionList,
     SelectionList,
@@ -54,6 +57,8 @@ class FileList(
     """
     OptionList but can multi-select files and folders.
     """
+
+    key_contexts = ("file_list", "lists")
 
     COMPONENT_CLASSES: ClassVar[set[str]] = CheckboxRenderingMixin.COMPONENT_CLASSES | {
         "filelist--cut",
@@ -153,6 +158,11 @@ class FileList(
         if not self.dummy and self.parent:
             self.input: Input = self.parent.query_one(Input)
             self.focus()
+
+    def check_action(self, action: str, parameters: tuple[object, ...]) -> bool | None:
+        if self.dummy:
+            return False
+        return super().check_action(action, parameters)
 
     @property
     def highlighted_option(self) -> FileListSelectionWidget | None:
@@ -781,6 +791,10 @@ class FileList(
         """Handle key events for the file list."""
         if self.dummy:
             event.prevent_default()
+
+    def dummy_raise(self) -> None:
+        if self.dummy:
+            raise SkipAction()
 
     def update_border_subtitle(self) -> None:
         if self.dummy or type(self.highlighted) is not int or not self.parent:

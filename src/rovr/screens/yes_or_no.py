@@ -9,16 +9,14 @@ from textual.screen import ModalScreen
 from textual.widgets import Button, Label, Switch
 
 from rovr.classes.mixins import Action, Actionable
-from rovr.functions.utils import dismiss, get_shortest_bind
+from rovr.functions.utils import dismiss, get_shortcut
 from rovr.variables.constants import config
-
-yes_bind = get_shortest_bind(config["keybinds"]["yes_or_no"]["yes"])
-no_bind = get_shortest_bind(config["keybinds"]["yes_or_no"]["no"])
-dont_ask_bind = get_shortest_bind(config["keybinds"]["yes_or_no"]["dont_ask_again"])
 
 
 class YesOrNo(Actionable, ModalScreen):
     """Screen with a dialog that asks whether you accept or deny"""
+
+    key_contexts = ("yes_or_no",)
 
     class ReturnType(TypedDict):
         value: bool
@@ -51,6 +49,9 @@ class YesOrNo(Actionable, ModalScreen):
         )
 
     def compose(self) -> ComposeResult:
+        yes_bind = get_shortcut("yes_or_no", "yes")
+        no_bind = get_shortcut("yes_or_no", "no")
+        dont_ask_bind = get_shortcut("yes_or_no", "dont_ask_again")
         with Grid(id="dialog", classes="yes_or_no"):
             yield Label(escape(self.message), classes="question")
             yield Button(

@@ -1,6 +1,7 @@
 import json
 import marshal
 import os
+from contextlib import suppress
 from functools import cache
 from importlib import resources
 from importlib.metadata import PackageNotFoundError, version
@@ -13,10 +14,12 @@ import fastjsonschema
 import tomli
 from fastjsonschema import JsonSchemaValueException
 from platformdirs import user_config_dir
+from textual.keys import Keys
 
 from rovr import pprint
 from rovr.classes.config import RovrConfig
-from rovr.variables.maps import RovrVars
+from rovr.classes.type_aliases import KeysConfig
+from rovr.variables.maps import VALID_KEY_CONTEXTS, RovrVars
 
 EDITOR_CANDIDATES = [
     "hx",
@@ -330,6 +333,7 @@ def schema_dump(
     exception: JsonSchemaValueException,
     config_content: str,
     schema: dict,
+    use_migration: bool = True,
 ) -> None:
     """
     Dump an error message for schema validation errors
@@ -474,48 +478,62 @@ def schema_dump(
                 error_msg += f"\n{(rjust + 5) * ' '}{part}"
 
         pprint(f"[bright_red]╰─{'─' * rjust}─❯[/] {error_msg}")
-    # check path for custom message from migration.json
-    migration_docs = json.loads(traverser.joinpath("migration.json").read_text("utf-8"))
+    if use_migration:
+        # check path for custom message from migration.json
+        migration_docs = json.loads(
+            traverser.joinpath("migration.json").read_text("utf-8")
+        )
 
-    for item in migration_docs:
-        if any(fnmatch.fnmatch(path_str, path) for path in item["keys"]):
-            message = "\n".join(item["message"])
-            to_print = Table(
-                box=box.ROUNDED,
-                border_style="bright_blue",
-                show_header=False,
-                expand=True,
-                show_lines=True,
-            )
-            to_print.add_column()
-            to_print.add_row(message)
-            to_print.add_row(f"[dim]> {item['extra']}[/]")
-            if "regex" in item and doc_path != path.join(
-                path.dirname(__file__), "../config/config.toml"
-            ):
-                # bird migration
-                import re
+        for item in migration_docs:
+            if any(fnmatch.fnmatch(path_str, path) for path in item["keys"]):
+                message = "\n".join(item["message"])
+                to_print = Table(
+                    box=box.ROUNDED,
+                    border_style="bright_blue",
+                    show_header=False,
+                    expand=True,
+                    show_lines=True,
+                )
+                to_print.add_column()
+                to_print.add_row(message)
+                to_print.add_row(f"[dim]> {item['extra']}[/]")
+                if "regex" in item and doc_path != path.join(
+                    path.dirname(__file__), "../config/config.toml"
+                ):
+                    # bird migration
+                    import re
 
-                fixed_content = config_content
-                for rule in item["regex"]:
-                    fixed_content = re.sub(
-                        re.escape(rule["find"]), rule["replace"], fixed_content
-                    )
-                if fixed_content != config_content:
-                    with open(doc_path, "w", encoding="utf-8") as _f:
-                        _f.write(fixed_content)
-                    to_print.add_row(
-                        "[bright_green]Auto-fix applied! Please re-run rovr.[/]"
-                    )
-                else:
-                    to_print.add_row(
-                        "[bright_yellow]I couldn't fix it for you. Please update your config manually.[/]"
-                    )
-            pprint(Padding(to_print, (0, rjust + 4, 0, rjust + 3)))
-            break
+                    fixed_content = config_content
+                    for rule in item["regex"]:
+                        fixed_content = re.sub(
+                            re.escape(rule["find"]), rule["replace"], fixed_content
+                        )
+                    if fixed_content != config_content:
+                        with open(doc_path, "w", encoding="utf-8") as _f:
+                            _f.write(fixed_content)
+                        to_print.add_row(
+                            "[bright_green]Auto-fix applied! Please re-run rovr.[/]"
+                        )
+                    else:
+                        to_print.add_row(
+                            "[bright_yellow]I couldn't fix it for you. Please update your config manually.[/]"
+                        )
+                pprint(Padding(to_print, (0, rjust + 4, 0, rjust + 3)))
+                break
 
-    if exception.rule != "additionalProperties":
-        exit(1)
+        if exception.rule != "additionalProperties":
+            exit(1)
+
+
+def _config_dir() -> str:
+    config_dir = os.environ.get("ROVR_CONFIG_FOLDER")
+    if not config_dir:
+        from rovr.variables.maps import RovrVars
+
+        config_dir: str = vars(RovrVars).get("ROVRCONFIG", None) or user_config_dir(
+            "rovr", "."
+        ).replace("\\", "/")
+    return config_dir
 
 
 def load_config() -> tuple[dict, RovrConfig]:
@@ -526,14 +544,7 @@ def load_config() -> tuple[dict, RovrConfig]:
         dict: the config
     """
 
-    config_dir = os.environ.get("ROVR_CONFIG_FOLDER")
-    if not config_dir:
-        from rovr.variables.maps import RovrVars
-
-        config_dir: str = vars(RovrVars).get("ROVRCONFIG", None) or user_config_dir(
-            "rovr", "."
-        ).replace("\\", "/")
-    user_config_path = path.join(config_dir, "config.toml")
+    user_config_path = path.join(_config_dir(), "config.toml")
     current_version = get_version()
     if current_version == "master":
         schema_ref = "refs/heads/master"
@@ -640,3 +651,160 @@ def load_config() -> tuple[dict, RovrConfig]:
         # resolved from PATH, so we suppress the type error
         config_dict["plugins"]["poppler"]["poppler_folder"] = pdfinfo_path
     return schema_dict, cast(RovrConfig, config_dict)
+
+
+def keys_merge(old: dict, new: dict) -> dict:
+    result = old | new
+    for key, value in new.items():
+        if (
+            isinstance(value, dict)
+            and "action" not in value
+            and isinstance(old.get(key), dict)
+        ):
+            result[key] = keys_merge(old[key], value)
+    return result
+
+
+def validate_keys(keys: KeysConfig) -> list[str]:
+    valid_key_names = {
+        member.value.rsplit("+", 1)[-1]
+        for member in Keys
+        if not member.value.startswith("<")
+    }
+    valid_modifiers = {"alt", "ctrl", "hyper", "meta", "shift", "super"}
+    errors = []
+
+    for context, bindings in keys.items():
+        if context not in VALID_KEY_CONTEXTS:
+            errors.append(f"Unknown context [{context}]")
+
+        for key in bindings:
+            *modifiers, name = [key] if len(key) == 1 else key.split("+")
+            valid_name = (len(name) == 1 and name.isprintable() and name != " ") or (
+                name in valid_key_names
+            )
+            valid_modifier_list = (
+                modifiers == sorted(set(modifiers))
+                and set(modifiers) <= valid_modifiers
+            )
+            if not valid_name or not valid_modifier_list:
+                errors.append(f'Invalid key "{key}" in [{context}]')
+
+    return errors
+
+
+def load_keys() -> KeysConfig:
+    """
+    Load the keybindings from the keys.toml file
+
+    Returns:
+        dict: the keybindings
+    """
+    user_keys_path = path.join(_config_dir(), "keys.toml")
+    presets = {
+        "base": traverser.joinpath("keys.toml"),
+        "sane": traverser.joinpath("presets", "sane.toml"),
+        "vim": traverser.joinpath("presets", "vim.toml"),
+    }
+
+    if not path.exists(user_keys_path):
+        return {}
+        # TODO: for v0.11.0: force keys.toml
+        # return cast(
+        #     KeysConfig, tomli.loads(presets["default"].read_text(encoding="utf-8"))
+        # )
+
+    user_keys = {}
+    user_keys_content = ""
+    with open(user_keys_path, "r", encoding="utf-8") as f:
+        user_keys_content = f.read()
+        if user_keys_content:
+            try:
+                user_keys = tomli.loads(user_keys_content)
+            except tomli.TOMLDecodeError as exc:
+                toml_dump(user_keys_path, exc)
+    inherit = user_keys.pop("inherit", None)
+    if inherit is not None and (not isinstance(inherit, str) or inherit not in presets):
+        # find inherit in config
+        index = find_path_line(user_keys_content.splitlines(), ["inherit"]) or 0
+        toml_dump(
+            user_keys_path,
+            tomli.TOMLDecodeError(
+                f"Invalid inherit value '{inherit}'. Must be one of {list(presets.keys())}.",
+                doc=user_keys_content,
+                pos=index,
+            ),
+        )
+
+    base_keys = (
+        tomli.loads(presets[inherit].read_text(encoding="utf-8"))
+        if isinstance(inherit, str)
+        else {}
+    )
+    keys_dict = cast(KeysConfig, keys_merge(base_keys, user_keys))
+    # check it manually
+    schema = {
+        "type": "object",
+        "patternProperties": {
+            "^.*$": {
+                "type": "object",
+                "patternProperties": {
+                    "^.*$": {
+                        "oneOf": [
+                            {"type": "string"},
+                            {
+                                "type": "object",
+                                "properties": {
+                                    "action": {"type": "string"},
+                                    "desc": {"type": "string"},
+                                },
+                                "required": ["action"],
+                                "additionalProperties": False,
+                            },
+                        ]
+                    },
+                },
+            },
+        },
+    }
+    try:
+        fastjsonschema.validate(
+            schema,
+            keys_dict,
+        )
+    except JsonSchemaValueException as exception:
+        # check if 'inherits' is used, if so, alert
+        with suppress(SystemExit):
+            schema_dump(
+                user_keys_path,
+                exception,
+                user_keys_content,
+                schema,
+                use_migration=False,
+            )
+        if exception.path == ["inherits"]:
+            from rich import box
+            from rich.padding import Padding
+            from rich.table import Table
+
+            to_print = Table(
+                box=box.ROUNDED,
+                border_style="bright_blue",
+                show_header=False,
+                expand=True,
+                show_lines=True,
+            )
+            to_print.add_column()
+            to_print.add_row(
+                "[bright_red]Config Error:[/] 'inherits' is not a valid key in keys.toml. Please use 'inherit' instead."
+            )
+            pprint(Padding(to_print, (0, 4, 0, 3), expand=False))
+        exit(1)
+
+    return {
+        context: {
+            key: {"action": binding} if isinstance(binding, str) else binding
+            for key, binding in context_keys.items()
+        }
+        for context, context_keys in keys_dict.items()
+    }

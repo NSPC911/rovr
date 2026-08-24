@@ -111,6 +111,11 @@ def _build_parser() -> argparse.ArgumentParser:
         type=existing_dir,
         help="Change the config folder location.",
     )
+    config_group.add_argument(
+        "--check-keys",
+        action="store_true",
+        help="Validate keys.toml and exit.",
+    )
 
     paths_group = parser.add_argument_group("Paths")
     paths_group.description = with_context_help
@@ -247,6 +252,17 @@ def cli(argv: list[str] | None = None) -> None:
     args = parser.parse_args(argv)
 
     eager_set_folder(args.config_folder)
+
+    if args.check_keys:
+        from rovr.functions.config import load_keys, validate_keys
+
+        errors = validate_keys(load_keys())
+        if errors:
+            for error in errors:
+                print(f"Error: {error}", file=sys.stderr)
+            raise SystemExit(1)
+        print("keys.toml is valid.")
+        return
 
     global is_dev
     if args.dev or is_dev:

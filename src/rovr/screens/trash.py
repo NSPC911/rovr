@@ -19,20 +19,16 @@ from rovr.classes.mixins import (
     Actionable,
     CheckboxRenderingMixin,
     DetailColumnRenderingMixin,
+    SelectionNavigationMixin,
     SetOptionsSelectionList,
     SingleLineOptionLayoutMixin,
 )
 from rovr.functions import details as detail_utils
 from rovr.functions import icons as icon_utils
 from rovr.functions import path as path_utils
-from rovr.functions.utils import dismiss, get_shortest_bind, natural_size, s
+from rovr.functions.utils import dismiss, get_shortcut, natural_size, s
 from rovr.variables.constants import bindings, config
 from rovr.variables.maps import RovrVars
-
-restore_bind = get_shortest_bind(config["keybinds"]["trash"]["restore"])
-purge_bind = get_shortest_bind(config["keybinds"]["trash"]["purge"])
-empty_bind = get_shortest_bind(config["keybinds"]["trash"]["empty"])
-cancel_bind = get_shortest_bind(config["keybinds"]["trash"]["cancel"])
 
 home = path_utils.normalise(RovrVars.HOME)
 
@@ -87,11 +83,13 @@ class TrashSelectionList(
     Actionable,
     CheckboxRenderingMixin,
     DetailColumnRenderingMixin,
+    SelectionNavigationMixin,
     SingleLineOptionLayoutMixin,
     SetOptionsSelectionList,
     SelectionList,
     inherit_bindings=False,
 ):
+    key_contexts = ("trash_list", "lists")
     BINDINGS: ClassVar[list[BindingType]] = list(bindings)
 
     COMPONENT_CLASSES: ClassVar[set[str]] = CheckboxRenderingMixin.COMPONENT_CLASSES | {
@@ -127,29 +125,13 @@ class TrashSelectionList(
         if self.highlighted_option is not None:
             self.action_select()
 
-    def action_select_up(self) -> None:
+    async def action_select_up(self) -> None:
         """Select the current and previous entry."""
-        if self.highlighted_option is None:
-            return
-        if self.highlighted == 0:
-            self.select(self.get_option_at_index(0))
-        else:
-            self.select(self.highlighted_option)
-            self.action_cursor_up()
-            if self.highlighted_option is not None:
-                self.select(self.highlighted_option)
+        await self.action_select_cursor(-1)
 
-    def action_select_down(self) -> None:
+    async def action_select_down(self) -> None:
         """Select the current and next entry."""
-        if self.highlighted_option is None:
-            return
-        if self.highlighted == self.option_count - 1:
-            self.select(self.get_option_at_index(self.option_count - 1))
-        else:
-            self.select(self.highlighted_option)
-            self.action_cursor_down()
-            if self.highlighted_option is not None:
-                self.select(self.highlighted_option)
+        await self.action_select_cursor(1)
 
     def _select_range_to(self, mover: Callable[[], None]) -> None:
         if self.highlighted_option is None:
@@ -160,13 +142,13 @@ class TrashSelectionList(
         for index in range(min(old, new), max(old, new) + 1):
             self.select(self.get_option_at_index(index))
 
-    def action_select_page_up(self) -> None:
+    async def action_select_page_up(self) -> None:
         """Select every entry between the current one and a page up."""
-        self._select_range_to(self.action_page_up)
+        await self.action_select_cursor_page(-1)
 
-    def action_select_page_down(self) -> None:
+    async def action_select_page_down(self) -> None:
         """Select every entry between the current one and a page down."""
-        self._select_range_to(self.action_page_down)
+        await self.action_select_cursor_page(1)
 
     def action_select_home(self) -> None:
         """Select every entry between the current one and the first."""
@@ -187,6 +169,8 @@ class TrashSelectionList(
 class TrashScreen(Actionable, ModalScreen):
     """Screen with a dialog to browse, restore and purge recycle bin entries."""
 
+    key_contexts = ("trash",)
+
     def __init__(self) -> None:
         super().__init__()
         self.recycle_bin = RecycleBin()
@@ -200,10 +184,14 @@ class TrashScreen(Actionable, ModalScreen):
             Action("empty", config["keybinds"]["trash"]["empty"]),
         ]
 
-    def _entries_list(self) -> "TrashSelectionList":
+    def _entries_list(self) -> TrashSelectionList:
         return self.query_one("#trash_entries", TrashSelectionList)
 
     def compose(self) -> ComposeResult:
+        restore_bind = get_shortcut("trash", "restore")
+        purge_bind = get_shortcut("trash", "purge")
+        empty_bind = get_shortcut("trash", "empty")
+        cancel_bind = get_shortcut("trash", "cancel")
         with Grid(id="dialog"):
             yield TrashSelectionList(id="trash_entries")
             yield Button(

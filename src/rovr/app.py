@@ -1280,7 +1280,9 @@ class Application(
         with self.suspend():
             get_console().print(self.tree)
 
-    def action_run_command(self, command: list[str], run_type: ShellRunTypes) -> None:
+    def action_run_command(
+        self, command: list[str], run_type: ShellRunTypes = "background"
+    ) -> None:
         if not isinstance(command, list) or not all(
             isinstance(c, str) for c in command
         ):
@@ -1301,7 +1303,9 @@ class Application(
                 ShellExec.ReturnType(command=command, run_type=run_type), shell=False
             )
 
-    def action_run_shell(self, command: str, run_type: ShellRunTypes) -> None:
+    def action_run_shell(
+        self, command: str, run_type: ShellRunTypes = "background"
+    ) -> None:
         if not isinstance(command, str):
             self.notify(
                 "Invalid command provided. Command must be a string."

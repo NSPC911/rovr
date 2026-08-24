@@ -128,7 +128,7 @@ it. The `app.` prefix is optional here.
 
 You can run shell/argv commands using the app context. The `run_command` action runs a command as an argv list,
 while `run_shell` runs a command through the shell. Both actions accept an optional `run_type` arg (not kwarg)
-that can be one of ("suspend", "background", "orphan")
+that can be one of ("suspend", "background", "orphan") (uses "background" by default.)
 
 - suspend: hides rovr's ui and runs the command in the foreground, returning to rovr when it exits
 - background: runs the command in the background, returning to rovr immediately. it will stop process when exiting

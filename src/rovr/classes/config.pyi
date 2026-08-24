@@ -126,7 +126,7 @@ r""" Default value of the field path 'Rovr Config interface spinner oneof0' """
 _ROVR_CONFIG_INTERFACE_SPINNER_ONEOF1_DEFAULT = "⣾⣽⣻⢿⡿⣟⣯⣷"
 r""" Default value of the field path 'Rovr Config interface spinner oneof1' """
 
-_ROVR_CONFIG_INTERFACE_TITLE_DEFAULT = "rovr @ %nh"
+_ROVR_CONFIG_INTERFACE_TITLE_DEFAULT = "rovr @ %ncwd"
 r""" Default value of the field path 'Rovr Config interface title' """
 
 _ROVR_CONFIG_INTERFACE_TOOLTIPS_DEFAULT = True
@@ -618,7 +618,7 @@ class _RovrConfigInterface(TypedDict, total=False):
     """
 
     title: str
-    r""" default: rovr @ %nh """
+    r""" default: rovr @ %ncwd """
 
     details_list: list["_RovrConfigInterfaceDetailsListItem"]
     r"""

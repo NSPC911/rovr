@@ -734,7 +734,7 @@ class _RovrConfigInterfaceDetailsListItem(TypedDict, total=False):
 
     format: str
     r"""
-    strftime format for mtime/atime/ctime columns.
+    strftime format for mtime/atime/ctime/birthtime columns.
     Defaults to metadata.datetime_format.
     """
 
@@ -743,6 +743,7 @@ _RovrConfigInterfaceDetailsListItemType = (
     | Literal["mtime"]
     | Literal["atime"]
     | Literal["ctime"]
+    | Literal["birthtime"]
     | Literal["permissions"]
     | Literal["owner"]
     | Literal["group"]
@@ -760,6 +761,8 @@ r"""The values for the 'What metadata to show. size shows the item count for fol
 _ROVRCONFIGINTERFACEDETAILSLISTITEMTYPE_ATIME: Literal["atime"] = "atime"
 r"""The values for the 'What metadata to show. size shows the item count for folders' enum"""
 _ROVRCONFIGINTERFACEDETAILSLISTITEMTYPE_CTIME: Literal["ctime"] = "ctime"
+r"""The values for the 'What metadata to show. size shows the item count for folders' enum"""
+_ROVRCONFIGINTERFACEDETAILSLISTITEMTYPE_BIRTHTIME: Literal["birthtime"] = "birthtime"
 r"""The values for the 'What metadata to show. size shows the item count for folders' enum"""
 _ROVRCONFIGINTERFACEDETAILSLISTITEMTYPE_PERMISSIONS: Literal["permissions"] = (
     "permissions"

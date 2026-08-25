@@ -14,7 +14,7 @@ from textual.worker import Worker, WorkerState, get_current_worker
 
 from rovr.classes.textual_options import FileListSelectionWidget
 from rovr.functions import utils
-from rovr.functions.path import is_hidden_file
+from rovr.functions.path import get_birthtime, is_hidden_file
 from rovr.variables.constants import config, scroll_bindings
 
 SPINNER = config["interface"]["spinner"]
@@ -194,11 +194,14 @@ class MetadataContainer(VerticalScroll, inherit_bindings=False):
                             )
                         )
                     case "created":
+                        birthtime = get_birthtime(file_stat)
                         values_list.append(
                             Static(
-                                datetime.fromtimestamp(file_stat.st_ctime).strftime(
+                                datetime.fromtimestamp(birthtime).strftime(
                                     config["metadata"]["datetime_format"]
                                 )
+                                if birthtime is not None
+                                else "--"
                             )
                         )
                     case "mime":

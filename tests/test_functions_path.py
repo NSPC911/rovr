@@ -1,5 +1,7 @@
 import os
 from pathlib import Path
+from types import SimpleNamespace
+from typing import Any, cast
 
 import pytest
 
@@ -40,6 +42,26 @@ def test_extension_sort_key() -> None:
         {"name": "archive.zip"},
     ]
     assert sorted_files == expected_order
+
+
+def test_birthtime_sorting_uses_birthtime_and_handles_unavailable() -> None:
+    class Entry:
+        def __init__(self, birthtime: float | None) -> None:
+            self.birthtime = birthtime
+
+        def stat(self, *, follow_symlinks: bool) -> SimpleNamespace:
+            assert not follow_symlinks
+            return (
+                SimpleNamespace(st_birthtime=self.birthtime)
+                if self.birthtime is not None
+                else SimpleNamespace(st_ctime=999)
+            )
+
+    with_birthtime = cast(Any, {"dir_entry": Entry(123)})
+    without_birthtime = cast(Any, {"dir_entry": Entry(None)})
+
+    assert path_utils.sorter(with_birthtime, "birthtime") == 123
+    assert path_utils.sorter(without_birthtime, "birthtime") == 0
 
 
 def test_filtered_dir_names(tmp_path: Path) -> None:

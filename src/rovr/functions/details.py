@@ -11,6 +11,8 @@ from textual.widgets.option_list import Option
 from rovr.functions.utils import natural_size
 from rovr.variables.constants import config
 
+from .path import get_birthtime
+
 try:
     from grp import getgrgid  # ty: ignore[unresolved-import]
     from pwd import getpwuid  # ty: ignore[unresolved-import]
@@ -24,7 +26,8 @@ DEFAULT_LABELS = {
     "size": "Size",
     "mtime": "Modified",
     "atime": "Accessed",
-    "ctime": "Created",
+    "ctime": "Changed",
+    "birthtime": "Created",
     "permissions": "Permissions",
     "owner": "Owner",
     "group": "Group",
@@ -73,7 +76,7 @@ def get_detail_columns() -> tuple[DetailColumn, ...]:
                 natural_width = 7
             case "git":
                 natural_width = 2
-            case "mtime" | "atime" | "ctime":
+            case "mtime" | "atime" | "ctime" | "birthtime":
                 natural_width = cell_len(datetime.now().strftime(time_format))
             case "permissions":
                 natural_width = 10
@@ -247,6 +250,13 @@ def detail_cells(
                             column.format
                         )
                         if file_stat
+                        else "--"
+                    )
+                case "birthtime":
+                    birthtime = get_birthtime(file_stat) if file_stat else None
+                    value = (
+                        datetime.fromtimestamp(birthtime).strftime(column.format)
+                        if birthtime is not None
                         else "--"
                     )
                 case "permissions":

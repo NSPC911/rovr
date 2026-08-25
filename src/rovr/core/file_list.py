@@ -77,6 +77,7 @@ class FileList(
         "filelist--detail-mtime",
         "filelist--detail-atime",
         "filelist--detail-ctime",
+        "filelist--detail-birthtime",
         "filelist--detail-permissions",
         "filelist--detail-owner",
         "filelist--detail-group",

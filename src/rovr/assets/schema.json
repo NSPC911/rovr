@@ -236,6 +236,7 @@
                   "mtime",
                   "atime",
                   "ctime",
+                  "birthtime",
                   "permissions",
                   "owner",
                   "group",
@@ -254,7 +255,7 @@
               },
               "format": {
                 "type": "string",
-                "description": "strftime format for mtime/atime/ctime columns.\nDefaults to metadata.datetime_format."
+                "description": "strftime format for mtime/atime/ctime/birthtime columns.\nDefaults to metadata.datetime_format."
               }
             }
           }

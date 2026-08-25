@@ -9,7 +9,7 @@ import stat
 import sys
 from contextlib import suppress
 from functools import lru_cache, partial
-from os import path
+from os import path, stat_result
 from subprocess import CompletedProcess
 from typing import Any, Callable, Literal, TypedDict, overload
 
@@ -228,13 +228,19 @@ def get_extension_sort_key(file_dict: dict) -> tuple[int, str]:
         return (3, name.split(".")[-1].lower())
 
 
+def get_birthtime(file_stat: stat_result) -> float | None:
+    return getattr(file_stat, "st_birthtime", None)
+
+
 def sorter(
-    thing: CWDObjectReturnDict, sort_st: Literal["ctime", "mtime", "size"]
+    thing: CWDObjectReturnDict, sort_st: Literal["birthtime", "mtime", "size"]
 ) -> int | float:
     try:
         match sort_st:
-            case "ctime":
-                return thing["dir_entry"].stat(follow_symlinks=False).st_ctime_ns
+            case "birthtime":
+                return (
+                    get_birthtime(thing["dir_entry"].stat(follow_symlinks=False)) or 0
+                )
             case "mtime":
                 return thing["dir_entry"].stat(follow_symlinks=False).st_mtime_ns
             case "size":
@@ -358,8 +364,8 @@ def sync_get_cwd_object(
             else:
                 files.sort(key=lambda x: natsort_cacheless(x["name"]), reverse=reverse)
         case "created":
-            folders.sort(key=lambda x: sorter(x, "ctime"), reverse=reverse)
-            files.sort(key=lambda x: sorter(x, "ctime"), reverse=reverse)
+            folders.sort(key=lambda x: sorter(x, "birthtime"), reverse=reverse)
+            files.sort(key=lambda x: sorter(x, "birthtime"), reverse=reverse)
         case "modified":
             folders.sort(key=lambda x: sorter(x, "mtime"), reverse=reverse)
             files.sort(key=lambda x: sorter(x, "mtime"), reverse=reverse)

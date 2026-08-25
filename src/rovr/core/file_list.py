@@ -937,7 +937,6 @@ class FileList(
         self.app.query_one("#unzip").action_press()
 
     def action_focus_search(self) -> None:
-        self.notify("wha")
         self.input.focus()
 
     async def action_toggle_hidden_files(self) -> None:

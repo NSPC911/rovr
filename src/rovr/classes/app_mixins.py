@@ -717,7 +717,14 @@ class KeyHandler:
         from textual.keys import key_to_character
 
         *modifiers, name = key.split("+")
-        character = key_to_character(name)
+        character = {
+            "slash": "/",
+            "backslash": "\\",
+            "at": "@",
+            "underscore": "_",
+            "minus": "-",
+            "plus": "+",
+        }.get(name) or key_to_character(name)
 
         if character is not None and character.isprintable() and character != " ":
             name = character

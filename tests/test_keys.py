@@ -5,6 +5,7 @@ import pytest
 from rovr.action_buttons import CopyButton
 from rovr.action_buttons.sort_order import SortOrderButton
 from rovr.app import Application
+from rovr.classes.app_mixins import KeyHandler
 from rovr.classes.textual_options import KeybindOption
 from rovr.functions.config import validate_keys
 from rovr.navigation_widgets import PathInput
@@ -12,6 +13,13 @@ from rovr.screens import Dismissible, ScopedKeybinds
 from rovr.state_manager import StateManager
 
 from .conftest import iter_until
+
+
+def test_shorten_symbol_keys() -> None:
+    assert {
+        KeyHandler.shorten_key(key)
+        for key in ("slash", "backslash", "at", "underscore", "minus", "plus")
+    } == {"/", "\\", "@", "_", "-", "+"}
 
 
 def test_validate_keys() -> None:

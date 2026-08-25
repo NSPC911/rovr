@@ -11,6 +11,7 @@ from .input import ModalInput
 
 class ShellExec(ModalInput):
     key_contexts = ("shell_exec", "modal_input")
+    last_input: str = ""
 
     class ReturnType(NamedTuple):
         command: str | list[str]
@@ -35,6 +36,7 @@ class ShellExec(ModalInput):
             border_title="Execute Shell Command",
             border_subtitle="Run in background",
             show_validation_message=False,
+            initial_value=ShellExec.last_input,
         )
         self.in_bg: bool = True
 
@@ -50,10 +52,11 @@ class ShellExec(ModalInput):
 
     @work
     async def on_input_submitted(self, event: Input.Submitted) -> None:
+        ShellExec.last_input = event.input.value
         dismiss(
             self,
             ShellExec.ReturnType(
-                command=await expand_command(self.app, event.input.value),
+                await expand_command(self.app, event.input.value),
                 run_type="background" if self.in_bg else "suspend",
             ),
             event,

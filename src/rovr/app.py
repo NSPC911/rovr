@@ -518,7 +518,7 @@ class Application(
         super()._set_mouse_over(widget, hover_widget)
 
     @work
-    async def action_quit(self) -> None:
+    async def action_quit(self, can_cd: bool = True) -> None:
         from rovr.screens import YesOrNo
 
         process_container = self.query_one(ProcessContainer)
@@ -535,7 +535,7 @@ class Application(
             return
         # Write cwd to explicit --cwd-file if provided
         message = ""
-        if self._cwd_file:
+        if self._cwd_file and not can_cd:
             if isinstance(self._cwd_file, TextIOWrapper):
                 try:
                     self._cwd_file.write(getcwd())

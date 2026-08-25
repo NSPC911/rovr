@@ -3,6 +3,7 @@
 
 [global]
 "q" = { action = "app.quit", desc = "Quit rovr" }
+"Q" = { action = "app.quit(False)", desc = "Quit rovr without cd-ing to current directory" }
 "ctrl+q" = "app.quit"
 "ctrl+p" = { action = "app.command_palette", desc = "Open the command palette" }
 "ctrl+z" = { action = "app.suspend_process", desc = "Suspend rovr" }

@@ -84,11 +84,11 @@ inherit = "vim"
 
 Use `global` sparingly for actions that must work regardless of the active screen.
 
-| Action                | Description                        | Example                            |
-| --------------------- | ---------------------------------- | ---------------------------------- |
-| `app.quit`            | Quit rovr.                         | `"ctrl+q" = "app.quit"`            |
-| `app.command_palette` | Open Textual's command palette.    | `"ctrl+p" = "app.command_palette"` |
-| `app.suspend_process` | Suspend rovr on supported systems. | `"ctrl+z" = "app.suspend_process"` |
+| Action                | Description                                                                                                                  | Example                            |
+| --------------------- | ---------------------------------------------------------------------------------------------------------------------------- | ---------------------------------- |
+| `app.quit(bool)`      | Quit rovr. Default True. If True and using [cd-on-quit](/rovr/dev/features/cd-on-quit), will switch to the focused directory | `"ctrl+q" = "app.quit"`            |
+| `app.command_palette` | Open Textual's command palette.                                                                                              | `"ctrl+p" = "app.command_palette"` |
+| `app.suspend_process` | Suspend rovr on supported systems.                                                                                           | `"ctrl+z" = "app.suspend_process"` |
 
 ### `main`
 

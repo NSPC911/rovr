@@ -378,7 +378,6 @@ def schema_dump(
                 error_msg = f"Value for [bright_cyan]{exception.name}[/] does not match any of the allowed schemas"
                 # check specific paths because im too lazy to make it automatic
                 # also it would be quite hard to ensure that either ways, so this is much easier
-                print(repr(exception))
                 if exception.name.startswith("settings.right_click"):
                     error_msg += "\nHint: This only supports one of the following:"
                     if exception.name.endswith("action"):

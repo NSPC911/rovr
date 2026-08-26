@@ -1,4 +1,3 @@
-import multiprocessing
 import os
 import re
 import subprocess
@@ -16,6 +15,7 @@ from textual.worker import NoActiveWorker, WorkerCancelled, get_current_worker
 
 from rovr.classes.type_aliases import ShellRunTypes
 from rovr.functions.cwd import getcwd
+from rovr.variables.maps import RovrVars
 
 
 def set_scuffed_subtitle(element: DOMNode, *sections: str) -> None:
@@ -233,6 +233,8 @@ def dismiss(
 
 
 def multiprocessing_process_error_checker(app: App, exc: Exception) -> bool:
+    import multiprocessing
+
     is_dev = globals().get("is_dev", False)
     if isinstance(exc, ValueError) and "fds_to_keep" in str(exc):
         match multiprocessing.get_start_method(allow_none=True):
@@ -396,3 +398,67 @@ def command(
 
 def s(item: Any, notone: str = "s", isone: str = "") -> str:
     return isone if len(item) == 1 else notone
+
+
+preview_loc = os.path.join(RovrVars.ROVRTEMP, "previews")
+
+
+def load_from_cache(
+    realpath: str,
+    preview_type: str,
+    stat_res: os.stat_result,
+    sig: tuple[str, str],
+    extra: Any = None,
+    pass_as: type[Any] = bytes,
+) -> Any | None:
+    from hashlib import blake2b
+
+    hash = blake2b(
+        f"{realpath}:{preview_type}:{stat_res.st_mtime_ns}:{stat_res.st_size}:{sig[0]}:{sig[1]}:{extra}".encode(),
+        digest_size=16,
+    ).hexdigest()
+    cache_path = os.path.join(preview_loc, hash)
+    try:
+        with open(cache_path, "rb") as f:
+            content = f.read()
+        if pass_as is list or pass_as is dict:
+            import json
+
+            return json.loads(content.decode())
+        elif pass_as is str:
+            return content.decode()
+        return content
+    except Exception:
+        pass
+
+
+def save_to_cache(
+    realpath: str,
+    preview_type: str,
+    stat_res: os.stat_result,
+    sig: tuple[str, str],
+    data: Any,
+    extra: Any = None,
+) -> None:
+    from hashlib import blake2b
+
+    hash = blake2b(
+        f"{realpath}:{preview_type}:{stat_res.st_mtime_ns}:{stat_res.st_size}:{sig[0]}:{sig[1]}:{extra}".encode(),
+        digest_size=16,
+    ).hexdigest()
+    try:
+        os.makedirs(preview_loc, exist_ok=True)
+        if isinstance(data, (dict, list)):
+            import json
+
+            data = json.dumps(
+                data, ensure_ascii=False, check_circular=False, separators=(",", ":")
+            ).encode()
+        elif isinstance(data, str):
+            data = data.encode()
+        elif not isinstance(data, bytes):
+            data = str(data).encode()
+        with open(os.path.join(preview_loc, hash), "wb") as f:
+            f.write(data)
+    except OSError:
+        pass

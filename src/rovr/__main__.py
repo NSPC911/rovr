@@ -275,14 +275,17 @@ def cli(argv: list[str] | None = None) -> None:
 
         from rovr.variables.maps import RovrVars
 
-        rmtree(os.path.join(RovrVars.ROVRTEMP, "previews"), ignore_errors=True)
+        rmtree(
+            (prevpath := os.path.join(RovrVars.ROVRTEMP, "previews")),
+            ignore_errors=True,
+        )
         # check if cache is fully cleaned
-        if not os.path.exists(RovrVars.ROVRTEMP) or not os.listdir(RovrVars.ROVRTEMP):
+        if not os.path.exists(prevpath) or not (items := os.listdir(prevpath)):
             pprint("[bold green]Cache cleared successfully![/]")
             exit(0)
         else:
             pprint("[bold red]Failed to clear cache![/]")
-            pprint(f"[red]{os.listdir(RovrVars.ROVRTEMP)} items still exist.[/]")
+            pprint(f"[red]{len(items)} items still exist.[/]")
             exit(1)
 
     global is_dev

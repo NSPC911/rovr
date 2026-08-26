@@ -1380,12 +1380,13 @@ class PreviewContainer(Actionable, Container):
                         stat_result,
                         ("json", "utf-8"),
                     )
+                    content: list[str] | None = None
                     if cached is not None:
                         try:
-                            content: list[str] = json.loads(cached.decode("utf-8"))
+                            content = json.loads(cached.decode("utf-8"))
                         except json.JSONDecodeError:
-                            content = [self._preview_texts["error"]]
-                    else:
+                            content = None
+                    if content is None:
                         try:
                             with Archive(file_path, mode="r") as archive:
                                 all_files = []

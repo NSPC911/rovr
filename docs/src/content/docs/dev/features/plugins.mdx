@@ -4,6 +4,7 @@ description: adding extra features with integrations.
 ---
 
 import InlineSVG from "@/components/InlineSVG.astro";
+import { Tabs, TabItem, Code, Aside } from "@astrojs/starlight/components";
 
 there are a couple integrations to improve rovr's functionality. enable and configure them in your `config.toml` file.
 
@@ -13,18 +14,28 @@ there are a couple integrations to improve rovr's functionality. enable and conf
 
 [zoxide](https://github.com/ajeetdsouza/zoxide) allows you to zip around your filesystem, and can be integrated into rovr
 
-```toml
-[plugins.zoxide]
-enabled = true
-keybinds = ["z"]
-show_scores = false  # include the zoxide scores in the results
-```
+<Tabs>
+  <TabItem label="config.toml">
+    <Code
+      code={`[plugins.zoxide]\nenabled = true\nshow_scores = false  # include the zoxide scores in the results`}
+      lang="toml"
+      frame="code"
+    />
+  </TabItem>
+  <TabItem label="keys.toml">
+    <Code
+      code={`[main]\n"z" = { action = "cd_zoxide", desc = "Jump to a directory" }`}
+      lang="toml"
+      frame="code"
+    />
+  </TabItem>
+</Tabs>
 
 ### bat
 
 to allow for more file previews, [bat](https://github.com/sharkdp/bat) can be used for its syntax highlighting capabilities.
 
-```toml
+```toml title="config.toml"
 [interface]
 show_line_numbers = true
 [plugins.bat]
@@ -38,18 +49,22 @@ executable = "bat"
 
 uses [fd](https://github.com/sharkdp/fd) to search recursively in the current directory
 
-```toml
-[plugins.fd]
-enabled = true
-keybinds = ["f"]
-executable = "fd"
-relative_paths = true
-follow_symlinks = false   # search inside symlinks as well
-no_ignore_parent = false  # ignore .ignore files from parent directories
-search_hidden = false
-default_filter_types = ["file", "directory"]  # set default item filters (like `file`, `directory`, etc.)
-timeout = 15  # set it to a reasonably high amount, searching without indexing takes time
-```
+<Tabs>
+  <TabItem label="config.toml">
+    <Code
+      code={`[plugins.fd]\nenabled = true\nexecutable = "fd"\nrelative_paths = true\nfollow_symlinks = false   # search inside symlinks as well\nno_ignore_parent = false  # ignore .ignore files from parent directories\nsearch_hidden = false\ndefault_filter_types = ["file", "directory"]  # set default item filters (like \`file\`, \`directory\`, etc.)\ntimeout = 15  # set it to a reasonably high amount, searching without indexing takes time`}
+      lang="toml"
+      frame="code"
+    />
+  </TabItem>
+  <TabItem label="keys.toml">
+    <Code
+      code={`[main]\n"f" = { action = "search_fd", desc = "Search for files" }`}
+      lang="toml"
+      frame="code"
+    />
+  </TabItem>
+</Tabs>
 
 ### rg
 
@@ -57,17 +72,23 @@ timeout = 15  # set it to a reasonably high amount, searching without indexing t
 
 uses [ripgrep](https://github.com/BurntSushi/ripgrep) to search inside files
 
-```toml
-[plugins.rg]
-enabled = true
-keybinds = ["\\"]
-executable = "rg"
-case_sensitive = true
-no_ignore_parent = false  # ignore .ignore files from parent directories
-follow_symlinks = false
-search_hidden = false
-timeout = 60  # set it to a much higher amount, content searching takes time
-```
+<Tabs>
+  <TabItem label="config.toml">
+    <Code
+      code={`[plugins.rg]\nenabled = true\nexecutable = "rg"\ncase_sensitive = true\nno_ignore_parent = false  # ignore .ignore files from parent directories\nfollow_symlinks = false\nsearch_hidden = false\ntimeout = 60  # set it to a much higher amount, content searching takes time`}
+      lang="toml"
+      frame="code"
+    />
+  </TabItem>
+  <TabItem label="keys.toml">
+    <Code
+      code={`[main]\n"\\" = { action = "search_rg", desc = "Search file contents" }`}
+      lang="toml"
+      frame="code"
+    />
+  </TabItem>
+</Tabs>
+
 
 ### poppler
 
@@ -75,7 +96,7 @@ timeout = 60  # set it to a much higher amount, content searching takes time
 
 uses [poppler](https://poppler.freedesktop.org) to preview PDF files
 
-```toml
+```toml title="config.toml"
 [plugins.poppler]
 enabled = true
 threads = 1
@@ -90,7 +111,7 @@ uses the [`file`](https://darwinsys.com/file) command as an alternative to purem
 
 rovr automatically detects `file` in your `PATH`, or you can set the `YAZI_FILE_ONE` or `ROVR_FILE_ONE` (higher priority) environment variables to specify a custom path.
 
-```toml
+```toml title="config.toml"
 [plugins.file_one]
 enabled = false
 get_description = true  # whether to get extra file description from `file -b <file>` (default: `true`)

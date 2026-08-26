@@ -36,14 +36,15 @@ the browser lists every trashed entry with its icon, original location, deletion
 
 ## configuration
 
-customize the recycle bin browser's keybinds in your configuration file:
+customize the recycle bin browser's keybinds in `keys.toml`:
 
 ```toml
-[keybinds.trash]
-restore = ["r"]
-purge = ["x"]
-empty = ["E"]
-cancel = ["c", "escape"]
+[trash]
+"r" = "restore"
+"x" = "purge"
+"E" = "empty"
+"c" = "cancel"
+"escape" = "cancel"
 ```
 
 these are separate from the `delete` keybinds used on the delete confirmation screen.

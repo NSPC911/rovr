@@ -1,5 +1,4 @@
 import json
-import marshal
 import os
 from contextlib import suppress
 from functools import cache
@@ -19,7 +18,7 @@ from textual.keys import Keys
 from rovr import pprint
 from rovr.classes.config import RovrConfig
 from rovr.classes.type_aliases import KeysConfig
-from rovr.variables.maps import VALID_KEY_CONTEXTS, RovrVars
+from rovr.variables.maps import VALID_KEY_CONTEXTS
 
 EDITOR_CANDIDATES = [
     "hx",
@@ -53,30 +52,9 @@ else:
 @cache
 def get_schema_validator() -> tuple[dict, Callable[[dict], None]]:
     schema_file = traverser.joinpath("schema.json")
-    mtime = path.getmtime(schema_file.as_posix())
-    schema_bin = path.join(RovrVars.ROVRTEMP, "schema.marshal")
-    if path.isfile(schema_bin):
-        try:
-            with open(schema_bin, "rb") as f:
-                cached_mtime, schema_dict, code = marshal.load(f)
-            if cached_mtime == mtime:
-                namespace: dict = {}
-                exec(code, namespace)
-                return schema_dict, namespace["validate"]
-        except Exception:
-            pass
     schema_dict = json.loads(schema_file.read_text("utf-8"))
-    try:
-        code = compile(fastjsonschema.compile_to_code(schema_dict), "<schema>", "exec")
-        os.makedirs(RovrVars.ROVRTEMP, exist_ok=True)
-        with open(schema_bin, "wb") as f:
-            marshal.dump((mtime, schema_dict, code), f)
-        namespace: dict = {}
-        exec(code, namespace)
-        return schema_dict, namespace["validate"]
-    except Exception:
-        # compile directly and pass
-        return schema_dict, fastjsonschema.compile(schema_dict)
+    validator = fastjsonschema.compile(schema_dict)
+    return schema_dict, validator
 
 
 def deep_merge(old: dict, new: dict) -> dict:

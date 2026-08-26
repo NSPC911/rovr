@@ -17,31 +17,34 @@ rovr --config-path
 │ type             │ path                                           │
 ├──────────────────┼────────────────────────────────────────────────┤
 │ custom config    │ C:/Users/<user>/AppData/Local/rovr/config.toml │
-│ custom styles    │ C:/Users/<user>/AppData/Local/rovr/style.tcss  │
+│ global styles    │ C:/Users/<user>/AppData/Local/rovr/style.tcss  │
+│ themes           │ C:/Users/<user>/AppData/Local/rovr/themes/     │
 │ pinned folders   │ C:/Users/<user>/AppData/Local/rovr/pins.json   │
-│ persistent state │ C:/Users/<user>/AppData/Local/rovr/state.toml  │
-│ logs             │ C:/Users/<user>/AppData/Local/rovr/logs/       │
+│ persistent state │ C:/Users/<user>/.local/state/rovr/state.toml   │
+│ logs             │ C:/Users/<user>/AppData/Local/Temp/rovr/logs/  │
 ╰──────────────────┴────────────────────────────────────────────────╯
 # on macos
 ╭──────────────────┬────────────────────────────────────────────────────────────╮
 │ type             │ path                                                       │
 ├──────────────────┼────────────────────────────────────────────────────────────┤
 │ custom config    │ /Users/<user>/Library/Application Support/rovr/config.toml │
+│ global styles    │ /Users/<user>/Library/Application Support/rovr/style.tcss  │
+│ themes           │ /Users/<user>/Library/Application Support/rovr/themes/     │
 │ pinned folders   │ /Users/<user>/Library/Application Support/rovr/pins.json   │
-│ custom styles    │ /Users/<user>/Library/Application Support/rovr/style.tcss  │
-│ persistent state │ /Users/<user>/Library/Application Support/rovr/state.toml  │
-│ logs             │ /Users/<user>/Library/Application Support/rovr/state.toml  │
+│ persistent state │ /Users/<user>/.local/state/rovr/state.toml                 │
+│ logs             │ /Users/<user>/Library/Caches/TemporaryItems/rovr/logs/     │
 ╰──────────────────┴────────────────────────────────────────────────────────────╯
 # on linux
-╭──────────────────┬───────────────────────────────────────╮
-│ type             │ path                                  │
-├──────────────────┼───────────────────────────────────────┤
-│ custom config    │ /home/<user>/.config/rovr/config.toml │
-│ custom styles    │ /home/<user>/.config/rovr/style.tcss  │
-│ pinned folders   │ /home/<user>/.config/rovr/pins.json   │
-│ persistent state │ /home/<user>/.config/rovr/state.toml  │
-│ logs             │ /home/<user>/.config/rovr/logs/       │
-╰──────────────────┴───────────────────────────────────────╯
+╭──────────────────┬───────────────────────────────────────────╮
+│ type             │ path                                      │
+├──────────────────┼───────────────────────────────────────────┤
+│ custom config    │ /home/<user>/.config/rovr/config.toml     │
+│ global styles    │ /home/<user>/.config/rovr/style.tcss      │
+│ themes           │ /home/<user>/.config/rovr/themes/         │
+│ pinned folders   │ /home/<user>/.config/rovr/pins.json       │
+│ persistent state │ /home/<user>/.local/state/rovr/state.toml │
+│ logs             │ /run/user/<int>/rovr/logs/                │
+╰──────────────────┴───────────────────────────────────────────╯
 ```
 
 inside it, you can see 4 files if you previously launched rovr
@@ -71,7 +74,7 @@ default = "nord"
   [`taplo`](https://github.com/tamasfe/taplo), you can see an autocompletion popup.
 </Aside>
 
-for the full schema, refer to the [`JSON Schema for Humans`](/rovr/reference/schema) page
+for the full schema, refer to the [`JSON Schema for Humans`](/rovr/dev/reference/schema) page
 
 ### style.tcss
 
@@ -98,7 +101,7 @@ $footer_unfocus_height: 8;
 /* the footer when something inside it is focused */
 $footer_focus_height: 10;
 ```
-For more advanced styling, refer to [`configuration/theming`](/rovr/configuration/theming)
+For more advanced styling, refer to [`configuration/theming`](/rovr/dev/configuration/theming)
 
 ### pins.json
 

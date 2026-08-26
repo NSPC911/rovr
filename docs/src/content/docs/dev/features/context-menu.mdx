@@ -142,11 +142,11 @@ right_click = [
 
 ### keybind
 
-the keyboard shortcut is configured via `open_right_click_menu` in `[keybinds]`:
+the keyboard shortcut is configured via setting `file_list` in your `config.toml`:
 
 ```toml
-[keybinds]
-open_right_click_menu = ["shift+f10"]
+[file_list]
+"shift+f10" = { action = "open_right_click_menu", desc = "Open the context menu" }
 ```
 
 ## configuration

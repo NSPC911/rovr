@@ -558,7 +558,7 @@ def dump_exc(widget: DOMNode | None, exc: Exception | Traceback) -> str | None: 
         widget.log(rich_traceback)
 
     dump_path = path.join(
-        path.realpath(RovrVars.ROVRCONFIG),
+        path.realpath(RovrVars.ROVRTEMP),
         "logs",
         f"{log_name}.log",
     )

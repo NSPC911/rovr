@@ -13,7 +13,7 @@ raw_pins = {}
 PIN_PATH = path.join(RovrVars.ROVRCONFIG, "pins.json")
 TRASH = "$TRASH"
 """Special pin path that opens the recycle bin browser instead of a directory."""
-cache = RovrVars.ROVRCACHE
+cache = RovrVars.ROVRSTATE
 
 
 class PinItem(TypedDict):

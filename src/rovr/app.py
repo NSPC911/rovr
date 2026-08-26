@@ -568,7 +568,6 @@ class Application(
                     message += f"Failed to write chooser file `{path.basename(self._chooser_file)}`"
         self.exit(message.strip() if message else None)
 
-    @on(ExitApp)
     def _arm_force_exit_timer(self) -> None:
         if not self._force_exit_on_shutdown or self._force_exit_timer is not None:
             return
@@ -650,7 +649,7 @@ class Application(
         pins_path = path.join(RovrVars.ROVRCONFIG, "pins.json")
         with suppress(OSError):
             self._pins_mtime = path.getmtime(pins_path)
-        state_path = path.join(RovrVars.ROVRCONFIG, "state.toml")
+        state_path = path.join(RovrVars.ROVRSTATE, "state.toml")
         state_mtime = None
         with suppress(OSError):
             state_mtime = path.getmtime(state_path)
@@ -1041,7 +1040,7 @@ class Application(
                 )
             if error_count != 0:
                 dump_path = path.join(
-                    path.realpath(RovrVars.ROVRCONFIG), "logs", f"{log_name}.log"
+                    path.realpath(RovrVars.ROVRTEMP), "logs", f"{log_name}.log"
                 )
                 self.error_console.print(
                     Panel(
@@ -1053,6 +1052,7 @@ class Application(
                     style="bold red",
                 )
         self._exit_renderables.clear()
+        self._arm_force_exit_timer()
         self.workers.cancel_all()
 
     @property

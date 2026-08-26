@@ -21,13 +21,16 @@ class UnzipButton(Button):
             self.tooltip = "Extract selected archive"
 
     @work(thread=True, exclusive=True, group="unzip_check")
-    def update_state(self, file_path: str) -> None:
+    def update_state(self, paths: list[str]) -> None:
         """Determine whether the highlighted file is an archive, off the main thread.
 
         Args:
-            file_path (str): The path of the highlighted file.
+            paths (list[str]): The paths of the selected files.
         """
-        is_archive = utils.is_archive(file_path)
+        if len(paths) != 1:
+            self.app.call_from_thread(setattr, self, "disabled", True)
+            return
+        is_archive = utils.is_archive(paths[0])
         if utils.should_cancel():
             return
         self.app.call_from_thread(setattr, self, "disabled", not is_archive)

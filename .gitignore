@@ -6,6 +6,7 @@ log.txt
 dist
 /src/rovr/COMMIT_HASH
 /src/rovr/DO_NOT_EDIT_THESE_FILES
+/src/rovr/_schema_validator.py
 report.xml
 rovr.dist
 rovr.build

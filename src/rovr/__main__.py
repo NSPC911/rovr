@@ -11,6 +11,7 @@
 # nuitka-project: --noinclude-custom-mode=pygments:bytecode
 # nuitka-project: --noinclude-custom-mode=pygments.lexers:bytecode
 # nuitka-project: --noinclude-custom-mode=rich:bytecode
+# nuitka-project: --noinclude-custom-mode=rovr._schema_validator:bytecode
 # nuitka-project: --noinclude-custom-mode=textual:bytecode
 # nuitka-project: --noinclude-custom-mode=rarfile:bytecode
 # nuitka-project: --noinclude-custom-mode=backports-zstd:bytecode

@@ -2,7 +2,7 @@ import json
 import os
 from contextlib import suppress
 from functools import cache
-from importlib import resources
+from importlib import import_module, resources
 from importlib.metadata import PackageNotFoundError, version
 from os import path
 from shutil import which
@@ -19,6 +19,15 @@ from rovr import pprint
 from rovr.classes.config import RovrConfig
 from rovr.classes.type_aliases import KeysConfig
 from rovr.variables.maps import VALID_KEY_CONTEXTS
+
+try:
+    compiled_schema_validator = cast(
+        Callable[[dict], None], import_module("rovr._schema_validator").validate
+    )
+except ModuleNotFoundError as exc:
+    if exc.name != "rovr._schema_validator":
+        raise
+    compiled_schema_validator = None
 
 EDITOR_CANDIDATES = [
     "hx",
@@ -53,7 +62,10 @@ else:
 def get_schema_validator() -> tuple[dict, Callable[[dict], None]]:
     schema_file = traverser.joinpath("schema.json")
     schema_dict = json.loads(schema_file.read_text("utf-8"))
-    validator = fastjsonschema.compile(schema_dict)
+    validator = cast(
+        Callable[[dict], None],
+        compiled_schema_validator or fastjsonschema.compile(schema_dict),
+    )
     return schema_dict, validator
 
 

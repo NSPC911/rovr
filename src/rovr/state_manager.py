@@ -56,7 +56,18 @@ class StateManager(Widget):
 
     def __init__(self) -> None:
         super().__init__(id="state_manager")
-        self.state_file: str = path.join(RovrVars.ROVRCONFIG, "state.toml")
+        self.state_file: str = path.join(RovrVars.ROVRSTATE, "state.toml")
+        if path.exists(path.join(RovrVars.ROVRCONFIG, "state.toml")):
+            # move it to the new location if it exists in the old one
+            try:
+                from os import replace
+
+                replace(path.join(RovrVars.ROVRCONFIG, "state.toml"), self.state_file)
+            except OSError:
+                self.notify(
+                    "Failed to move state.toml to new location. Please check permissions.",
+                    severity="error",
+                )
         self.current_version: str = get_version()
         self.previous_version: str | None = None
         self._skip_save = True

@@ -10,7 +10,7 @@ from time import perf_counter
 
 from rovr.variables.maps import RovrVars
 
-cache = RovrVars.ROVRCACHE
+cache = RovrVars.ROVRSTATE
 
 # check for cache first
 if path.exists(path.join(cache, "no_cache_uname")):

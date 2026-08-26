@@ -707,7 +707,9 @@ class FileList(
                 highlighted_option.dir_entry.path, highlighted_option
             )
             return
-        self.app.query_one("#unzip").update_state(highlighted_option.dir_entry.path)
+        self.app.query_one("#unzip").update_state(
+            await self.get_selected_objects() or []
+        )
 
     @work(thread=True)
     def set_mtime(self, option: FileListSelectionWidget) -> None:

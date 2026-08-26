@@ -185,7 +185,7 @@ sequence = [
   "_hash_dump",
   # --python-flag=-m
   # "nuitka $POE_EXTRA_ARGS",
-  { cmd = 'nuitka --lto=${lto} --mode=${mode} --report=${report} --include-module=rovr._schema_validator --user-package-configuration-file=nuitka.config.yml src/rovr --onefile-tempdir-spec="{TEMP}/rovr_onefile_0.10.1" $POE_EXTRA_ARGS' },
+  { cmd = 'nuitka --lto=${lto} --mode=${mode} --report=${report} --include-module=rovr._schema_validator --user-package-configuration-file=nuitka.config.yml --user-plugin=docs/scripts/nuitka_bytecode_plugin.py src/rovr --onefile-tempdir-spec="{TEMP}/rovr_onefile_0.10.1" $POE_EXTRA_ARGS' },
   { cmd = "docs/scripts/post-nuitka-build.py" },
   "_dump_clean",
 ]

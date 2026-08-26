@@ -36,16 +36,14 @@ from textual.widgets import (
     Switch,
 )
 
+from rovr import RESOURCE_PACKAGE
 from rovr.components.iterm2_image import ITerm2Image
 from rovr.components.iterm2_image import is_supported as iterm2_supported
 from rovr.functions.themes import register_all_themes, resolve_theme_ansi
 from rovr.functions.utils import should_cancel
 from rovr.variables.maps import RovrVars
 
-if globals().get("__compiled__"):
-    resource = resources.files("_rovr")
-else:
-    resource = resources.files("rovr")
+resource = resources.files(RESOURCE_PACKAGE)
 
 prot_to_timg: dict[str, Callable] = {
     "auto": ITerm2Image if iterm2_supported() else timg.Image,

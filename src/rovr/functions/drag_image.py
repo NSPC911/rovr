@@ -10,6 +10,7 @@ from PIL import Image, ImageDraw, ImageFont, ImageOps
 from textual.color import Color, ColorParseError
 from textual_drivers.dnd import ImageLabel
 
+from rovr import RESOURCE_PACKAGE
 from rovr.functions.utils import load_from_cache, save_to_cache
 
 HEIGHT = 48
@@ -29,9 +30,7 @@ IMAGE_PREVIEW_SIZE = (
     IMAGE_LABEL_SIZE - HEIGHT - IMAGE_PADDING,
 )
 ICON_FONT_PATH = (
-    resources.files("_rovr.assets")
-    if globals().get("__compiled__")
-    else resources.files("rovr.assets")
+    resources.files(f"{RESOURCE_PACKAGE}.assets")
 ) / "fonts/SymbolsNerdFont-Regular.ttf"
 
 

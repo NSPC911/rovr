@@ -6,16 +6,9 @@
 # nuitka-project: --enable-plugin=options-nanny
 # nuitka-project: --enable-plugins=no-qt
 # nuitka-project: --include-data-dir=src/rovr=_rovr
+# nuitka-project: --include-distribution-metadata=rovr
 # nuitka-project: --nofollow-import-to="tkinter"
 # nuitka-project: --nofollow-import-to=aiohttp
-# nuitka-project: --noinclude-custom-mode=pygments:bytecode
-# nuitka-project: --noinclude-custom-mode=pygments.lexers:bytecode
-# nuitka-project: --noinclude-custom-mode=rich:bytecode
-# nuitka-project: --noinclude-custom-mode=rovr._schema_validator:bytecode
-# nuitka-project: --noinclude-custom-mode=textual:bytecode
-# nuitka-project: --noinclude-custom-mode=rarfile:bytecode
-# nuitka-project: --noinclude-custom-mode=backports-zstd:bytecode
-# nuitka-project: --noinclude-custom-mode=pillow:bytecode
 # nuitka-project: --onefile-cache-mode=cached
 # nuitka-project: --onefile-child-grace-time=1
 # nuitka-project: --python-flag=no_asserts
@@ -43,7 +36,7 @@ import warnings
 from io import TextIOWrapper
 from typing import Callable, cast
 
-from rovr import main, pprint
+from rovr import RESOURCE_PACKAGE, main, pprint
 from rovr.functions.cli import (
     RichArgumentParser,
     RichPanelHelpAction,
@@ -382,10 +375,7 @@ example_function(10)"""
             try:
                 from importlib import resources
 
-                if globals().get("__compiled__"):
-                    commit_hash_file = resources.files("_rovr") / "COMMIT_HASH"
-                else:
-                    commit_hash_file = resources.files("rovr") / "COMMIT_HASH"
+                commit_hash_file = resources.files(RESOURCE_PACKAGE) / "COMMIT_HASH"
                 commit_hash = commit_hash_file.read_text(encoding="utf-8").strip()
                 if commit_hash:
                     return [ver, commit_hash]

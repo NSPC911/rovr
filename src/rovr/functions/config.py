@@ -15,7 +15,7 @@ from fastjsonschema import JsonSchemaValueException
 from platformdirs import user_config_dir
 from textual.keys import Keys
 
-from rovr import pprint
+from rovr import RESOURCE_PACKAGE, pprint
 from rovr.classes.config import RovrConfig
 from rovr.classes.type_aliases import KeysConfig
 from rovr.variables.maps import VALID_KEY_CONTEXTS
@@ -52,10 +52,7 @@ def editor() -> str:
     return ""
 
 
-if globals().get("__compiled__"):
-    traverser = resources.files("_rovr.assets")
-else:
-    traverser = resources.files("rovr.assets")
+traverser = resources.files(f"{RESOURCE_PACKAGE}.assets")
 
 
 @cache

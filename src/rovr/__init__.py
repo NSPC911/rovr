@@ -1,5 +1,8 @@
 from functools import cache
+from importlib.util import find_spec
 from typing import Any
+
+RESOURCE_PACKAGE = "_rovr" if find_spec("_rovr") else "rovr"
 
 
 @cache

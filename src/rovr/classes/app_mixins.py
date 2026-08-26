@@ -27,7 +27,7 @@ from textual_drivers.dnd import (
     TextLabel,
 )
 
-from rovr import get_console
+from rovr import RESOURCE_PACKAGE, get_console
 from rovr.classes.textual_validators import (
     AllowsExistingFiles,
     IsValidFilePath,
@@ -69,14 +69,7 @@ console = get_console
 
 class ThemeHandler:
     # higher index = higher priority
-    CSS_PATH = [
-        (
-            resources.files("_rovr")
-            if globals().get("__compiled__")
-            else resources.files("rovr")
-        )
-        / "style.tcss"
-    ] + (
+    CSS_PATH = [(resources.files(RESOURCE_PACKAGE)) / "style.tcss"] + (
         [path.join(RovrVars.ROVRCONFIG, "style.tcss")]
         if path.exists(path.join(RovrVars.ROVRCONFIG, "style.tcss"))
         else []

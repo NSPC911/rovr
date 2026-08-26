@@ -7,6 +7,7 @@ from textual.app import App
 from textual.color import Color
 from textual.theme import Theme
 
+from rovr import RESOURCE_PACKAGE
 from rovr.variables.maps import RovrVars
 
 _VARIABLE_DECLARATION = re.compile(r"^\$([\w-]+)\s*:\s*(.+?)\s*;\s*$")
@@ -27,11 +28,7 @@ def _strip_comments(css_text: str) -> str:
     return _COMMENT.sub(lambda match: "\n" * match.group().count("\n"), css_text)
 
 
-bundled_themes_path = (
-    resources.files("_rovr.assets")
-    if globals().get("__compiled__")
-    else resources.files("rovr.assets")
-) / "themes"
+bundled_themes_path = (resources.files(f"{RESOURCE_PACKAGE}.assets")) / "themes"
 
 # Theme dataclass fields, keyed by the $variable name that maps onto them.
 THEME_COLOR_FIELDS = frozenset({

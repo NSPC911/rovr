@@ -400,7 +400,7 @@ def s(item: Any, notone: str = "s", isone: str = "") -> str:
     return isone if len(item) == 1 else notone
 
 
-preview_loc = os.path.join(RovrVars.ROVRCACHE, "previews")
+preview_loc = os.path.join(RovrVars.ROVRTEMP, "previews")
 
 
 def load_from_cache(

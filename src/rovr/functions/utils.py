@@ -404,14 +404,14 @@ def load_from_cache(
     preview_type: str,
     stat_res: os.stat_result,
     sig: tuple[str, str],
-    index: int | None = None,
+    extra: Any = None,
 ) -> bytes | None:
     from hashlib import blake2b
 
     from rovr.variables.maps import RovrVars
 
     blk2b = blake2b(
-        f"{realpath}:{preview_type}:{stat_res.st_mtime_ns}:{stat_res.st_size}:{sig[0]}:{sig[1]}:{index}".encode(),
+        f"{realpath}:{preview_type}:{stat_res.st_mtime_ns}:{stat_res.st_size}:{sig[0]}:{sig[1]}:{extra}".encode(),
         digest_size=16,
     )
     cache_path = os.path.join(RovrVars.ROVRCACHE, blk2b.hexdigest())

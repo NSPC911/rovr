@@ -207,6 +207,12 @@ def _build_parser() -> argparse.ArgumentParser:
         help="List available preview themes.",
     )
     dev_group.add_argument(
+        "--clear-cache",
+        dest="clear_cache",
+        action="store_true",
+        help="Clear the cache folder.",
+    )
+    dev_group.add_argument(
         "--force-crash-in",
         dest="force_crash_in",
         type=float,
@@ -263,6 +269,21 @@ def cli(argv: list[str] | None = None) -> None:
             raise SystemExit(1)
         print("keys.toml is valid.")
         return
+    if args.clear_cache:
+        from os import _exit as exit
+        from shutil import rmtree
+
+        from rovr.variables.maps import RovrVars
+
+        rmtree(RovrVars.ROVRTEMP, ignore_errors=True)
+        # check if cache is fully cleaned
+        if not os.path.exists(RovrVars.ROVRTEMP) or not os.listdir(RovrVars.ROVRTEMP):
+            pprint("[bold green]Cache cleared successfully![/]")
+            exit(0)
+        else:
+            pprint("[bold red]Failed to clear cache![/]")
+            pprint(f"[red]{os.listdir(RovrVars.ROVRTEMP)} items still exist.[/]")
+            exit(1)
 
     global is_dev
     if args.dev or is_dev:

@@ -9,7 +9,7 @@ from functools import partial
 from io import BytesIO
 from os import path
 from time import monotonic, time
-from typing import Awaitable, Callable, TypeVar, cast, overload
+from typing import Any, Awaitable, Callable, TypeVar, cast, overload
 
 import textual_image.renderable
 import textual_image.widget
@@ -74,9 +74,9 @@ def _load_cached_image(
     preview_type: str,
     stat_result: os.stat_result,
     signature: tuple[str, str] = IMAGE_CACHE_SIGNATURE,
-    index: int | None = None,
+    extra: Any = None,
 ) -> PILImage | None:
-    data = load_from_cache(file_path, preview_type, stat_result, signature, index)
+    data = load_from_cache(file_path, preview_type, stat_result, signature, extra)
     if data is None:
         return None
     try:
@@ -366,7 +366,20 @@ class PreviewContainer(Actionable, Container):
         fg_color = Color.parse(self.app.theme_variables["foreground"])
         bg_color = Color.parse(self.app.theme_variables["background"])
         realpath = path.realpath(self._current_file_path)
-        stat_result = os.stat(realpath)
+        try:
+            stat_result = os.stat(realpath)
+        except FileNotFoundError:
+            if should_cancel():
+                return
+            self.call_from_thread(self.remove_children)
+            self.call_from_thread(
+                self.mount,
+                Static(
+                    self._preview_texts["error"],
+                    classes="special",
+                ),
+            )
+            return
         signature = (
             f"{preview_utils.MAX_FONT_SIZE}:{config['interface']['font_preview']['font_size']}",
             f"{self._preview_texts['font_text']}:{fg_color.hex}:{bg_color.hex}:{NewImage.func.__name__}",
@@ -708,7 +721,15 @@ class PreviewContainer(Actionable, Container):
         realpath = path.realpath(self._current_file_path)
         stat_result = os.stat(realpath)
         cached = [
-            _load_cached_image(realpath, "pdf", stat_result, index=page)
+            _load_cached_image(
+                realpath,
+                "pdf",
+                stat_result,
+                extra=str(page)
+                + (
+                    "cairo" if config["plugins"]["poppler"]["use_pdftocairo"] else "ppm"
+                ),
+            )
             for page in range(first_page, last_page + 1)
         ]
         if all(image is not None for image in cached):
@@ -1347,6 +1368,8 @@ class PreviewContainer(Actionable, Container):
                 self.log(f"Previewing as {file_type} (MIME: {mime_result.mime_type})")
 
                 if file_type == "archive":
+                    import json
+
                     from multiarchive._archive import Archive, BadArchiveError
 
                     realpath = path.realpath(file_path)
@@ -1355,10 +1378,13 @@ class PreviewContainer(Actionable, Container):
                         realpath,
                         "archive",
                         stat_result,
-                        ("newline", "utf-8"),
+                        ("json", "utf-8"),
                     )
                     if cached is not None:
-                        content = cached.decode(errors="replace").splitlines()
+                        try:
+                            content: list[str] = json.loads(cached.decode("utf-8"))
+                        except json.JSONDecodeError:
+                            content = [self._preview_texts["error"]]
                     else:
                         try:
                             with Archive(file_path, mode="r") as archive:
@@ -1374,8 +1400,13 @@ class PreviewContainer(Actionable, Container):
                                 realpath,
                                 "archive",
                                 stat_result,
-                                ("newline", "utf-8"),
-                                "\n".join(all_files).encode(),
+                                ("json", "utf-8"),
+                                json.dumps(
+                                    all_files,
+                                    ensure_ascii=False,
+                                    check_circular=False,
+                                    separators=(",", ":"),
+                                ).encode("utf-8"),
                             )
                         except (
                             BadArchiveError,

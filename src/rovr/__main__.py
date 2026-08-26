@@ -275,7 +275,7 @@ def cli(argv: list[str] | None = None) -> None:
 
         from rovr.variables.maps import RovrVars
 
-        rmtree(RovrVars.ROVRTEMP, ignore_errors=True)
+        rmtree(os.path.join(RovrVars.ROVRTEMP, "previews"), ignore_errors=True)
         # check if cache is fully cleaned
         if not os.path.exists(RovrVars.ROVRTEMP) or not os.listdir(RovrVars.ROVRTEMP):
             pprint("[bold green]Cache cleared successfully![/]")

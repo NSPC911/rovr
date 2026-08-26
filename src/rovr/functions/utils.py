@@ -15,6 +15,7 @@ from textual.worker import NoActiveWorker, WorkerCancelled, get_current_worker
 
 from rovr.classes.type_aliases import ShellRunTypes
 from rovr.functions.cwd import getcwd
+from rovr.variables.maps import RovrVars
 
 
 def set_scuffed_subtitle(element: DOMNode, *sections: str) -> None:
@@ -399,6 +400,9 @@ def s(item: Any, notone: str = "s", isone: str = "") -> str:
     return isone if len(item) == 1 else notone
 
 
+preview_loc = os.path.join(RovrVars.ROVRCACHE, "previews")
+
+
 def load_from_cache(
     realpath: str,
     preview_type: str,
@@ -408,18 +412,16 @@ def load_from_cache(
 ) -> bytes | None:
     from hashlib import blake2b
 
-    from rovr.variables.maps import RovrVars
-
-    blk2b = blake2b(
+    hash = blake2b(
         f"{realpath}:{preview_type}:{stat_res.st_mtime_ns}:{stat_res.st_size}:{sig[0]}:{sig[1]}:{extra}".encode(),
         digest_size=16,
-    )
-    cache_path = os.path.join(RovrVars.ROVRCACHE, blk2b.hexdigest())
+    ).hexdigest()
+    cache_path = os.path.join(preview_loc, hash)
     try:
         with open(cache_path, "rb") as f:
             return f.read()
     except OSError:
-        return None
+        pass
 
 
 def save_to_cache(
@@ -428,19 +430,17 @@ def save_to_cache(
     stat_res: os.stat_result,
     sig: tuple[str, str],
     data: bytes,
-    index: int | None = None,
+    extra: Any = None,
 ) -> None:
     from hashlib import blake2b
 
-    from rovr.variables.maps import RovrVars
-
-    blk2b = blake2b(
-        f"{realpath}:{preview_type}:{stat_res.st_mtime_ns}:{stat_res.st_size}:{sig[0]}:{sig[1]}:{index}".encode(),
+    hash = blake2b(
+        f"{realpath}:{preview_type}:{stat_res.st_mtime_ns}:{stat_res.st_size}:{sig[0]}:{sig[1]}:{extra}".encode(),
         digest_size=16,
-    )
+    ).hexdigest()
     try:
-        os.makedirs(RovrVars.ROVRCACHE, exist_ok=True)
-        with open(os.path.join(RovrVars.ROVRCACHE, blk2b.hexdigest()), "wb") as f:
+        os.makedirs(preview_loc, exist_ok=True)
+        with open(os.path.join(preview_loc, hash), "wb") as f:
             f.write(data)
     except OSError:
         pass

@@ -662,6 +662,9 @@ class FileList(
                 for index, option in enumerate(self.options)
                 if option.value in selected_ids
             ]
+            self.app.query_one("#unzip").update_state(
+                await self.get_selected_objects() or []
+            )
 
     # No clue why I'm using an OptionList method for SelectionList
     async def on_option_list_option_highlighted(
@@ -707,9 +710,10 @@ class FileList(
                 highlighted_option.dir_entry.path, highlighted_option
             )
             return
-        self.app.query_one("#unzip").update_state(
-            await self.get_selected_objects() or []
-        )
+        if self.select_mode:
+            self.app.query_one("#unzip").update_state(
+                await self.get_selected_objects() or []
+            )
 
     @work(thread=True)
     def set_mtime(self, option: FileListSelectionWidget) -> None:

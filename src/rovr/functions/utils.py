@@ -409,7 +409,8 @@ def load_from_cache(
     stat_res: os.stat_result,
     sig: tuple[str, str],
     extra: Any = None,
-) -> bytes | None:
+    pass_as: type[Any] = bytes,
+) -> Any | None:
     from hashlib import blake2b
 
     hash = blake2b(
@@ -419,7 +420,14 @@ def load_from_cache(
     cache_path = os.path.join(preview_loc, hash)
     try:
         with open(cache_path, "rb") as f:
-            return f.read()
+            content = f.read()
+        if pass_as is list or pass_as is dict:
+            import json
+
+            return json.loads(content.decode())
+        elif pass_as is str:
+            return content.decode()
+        return content
     except OSError:
         pass
 
@@ -429,7 +437,7 @@ def save_to_cache(
     preview_type: str,
     stat_res: os.stat_result,
     sig: tuple[str, str],
-    data: bytes,
+    data: Any,
     extra: Any = None,
 ) -> None:
     from hashlib import blake2b
@@ -440,6 +448,16 @@ def save_to_cache(
     ).hexdigest()
     try:
         os.makedirs(preview_loc, exist_ok=True)
+        if isinstance(data, (dict, list)):
+            import json
+
+            data = json.dumps(
+                data, ensure_ascii=False, check_circular=False, separators=(",", ":")
+            ).encode()
+        elif isinstance(data, str):
+            data = data.encode()
+        elif not isinstance(data, bytes):
+            data = str(data).encode()
         with open(os.path.join(preview_loc, hash), "wb") as f:
             f.write(data)
     except OSError:

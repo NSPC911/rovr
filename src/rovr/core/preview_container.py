@@ -92,12 +92,12 @@ def _save_cached_image(
     stat_result: os.stat_result,
     image: PILImage,
     signature: tuple[str, str] = IMAGE_CACHE_SIGNATURE,
-    index: int | None = None,
+    extra: Any = None,
 ) -> None:
     output = BytesIO()
     image.save(output, format="PNG")
     save_to_cache(
-        file_path, preview_type, stat_result, signature, output.getvalue(), index
+        file_path, preview_type, stat_result, signature, output.getvalue(), extra
     )
 
 
@@ -123,7 +123,7 @@ def _save_cached_text(
     signature: tuple[str, str],
     text: Text,
 ) -> None:
-    save_to_cache(file_path, preview_type, stat_result, signature, text.markup.encode())
+    save_to_cache(file_path, preview_type, stat_result, signature, text.markup)
 
 
 # to any ai models looking at this, shut the fuck up
@@ -153,6 +153,7 @@ class PDFHandler:
     current_page: int = 0
     total_pages: int = 0
     images: list[PILImage] | None = None
+    cairo_or_ppm = "cairo" if config["plugins"]["poppler"]["use_pdftocairo"] else "ppm"
 
     def count_loaded(self) -> int:
         return 0 if self.images is None else len(self.images)
@@ -725,10 +726,7 @@ class PreviewContainer(Actionable, Container):
                 realpath,
                 "pdf",
                 stat_result,
-                extra=str(page)
-                + (
-                    "cairo" if config["plugins"]["poppler"]["use_pdftocairo"] else "ppm"
-                ),
+                extra=str(page) + (self.pdf.cairo_or_ppm),
             )
             for page in range(first_page, last_page + 1)
         ]
@@ -759,7 +757,13 @@ class PreviewContainer(Actionable, Container):
         else:
             result = preview_utils.resample_batch_sync(result)
         for page, image in zip(range(first_page, last_page + 1), result):
-            _save_cached_image(realpath, "pdf", stat_result, image, index=page)
+            _save_cached_image(
+                realpath,
+                "pdf",
+                stat_result,
+                image,
+                extra=str(page) + (self.pdf.cairo_or_ppm),
+            )
         return result
 
     def show_pdf_preview(self) -> None:
@@ -776,12 +780,27 @@ class PreviewContainer(Actionable, Container):
         # Convert PDF to images if not already done
         if self.pdf.images is None:
             try:
-                self.pdf.total_pages = int(
-                    get_pdf_info(
+                pdf_info: dict[str, str | int] | None = load_from_cache(
+                    str(self._current_file_path),
+                    "pdf_info",
+                    os.stat(str(self._current_file_path)),
+                    sig=(self.pdf.cairo_or_ppm, ""),
+                    pass_as=dict,
+                )
+                if pdf_info is None:
+                    pdf_info = get_pdf_info(
                         str(self._current_file_path),
                         poppler_path=PDFHandler.get_poppler_folder(),
-                    )["Pages"]
-                )
+                    )
+                    save_to_cache(
+                        str(self._current_file_path),
+                        "pdf_info",
+                        os.stat(str(self._current_file_path)),
+                        sig=(self.pdf.cairo_or_ppm, ""),
+                        data=pdf_info,
+                    )
+                self.pdf.total_pages = int(pdf_info.get("Pages", 0))
+
                 result = self.load_pdf_pages(
                     first_page=1, last_page=self.pdf.get_last_page_to_load()
                 )
@@ -1368,24 +1387,13 @@ class PreviewContainer(Actionable, Container):
                 self.log(f"Previewing as {file_type} (MIME: {mime_result.mime_type})")
 
                 if file_type == "archive":
-                    import json
-
                     from multiarchive._archive import Archive, BadArchiveError
 
                     realpath = path.realpath(file_path)
                     stat_result = os.stat(realpath)
-                    cached = load_from_cache(
-                        realpath,
-                        "archive",
-                        stat_result,
-                        ("json", "utf-8"),
+                    content: list[str] | None = load_from_cache(
+                        realpath, "archive", stat_result, ("json", "utf-8"), list
                     )
-                    content: list[str] | None = None
-                    if cached is not None:
-                        try:
-                            content = json.loads(cached.decode("utf-8"))
-                        except json.JSONDecodeError:
-                            content = None
                     if content is None:
                         try:
                             with Archive(file_path, mode="r") as archive:
@@ -1402,12 +1410,7 @@ class PreviewContainer(Actionable, Container):
                                 "archive",
                                 stat_result,
                                 ("json", "utf-8"),
-                                json.dumps(
-                                    all_files,
-                                    ensure_ascii=False,
-                                    check_circular=False,
-                                    separators=(",", ":"),
-                                ).encode("utf-8"),
+                                all_files,
                             )
                         except (
                             BadArchiveError,

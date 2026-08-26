@@ -1,6 +1,6 @@
 from typing import override
 
-from nuitka.plugins.PluginBase import NuitkaPluginBase
+from nuitka.plugins.PluginBase import NuitkaPluginBase  # ty: ignore[unresolved-import]
 
 
 class NuitkaPluginBytecodeAll(NuitkaPluginBase):

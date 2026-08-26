@@ -96,6 +96,20 @@
 "end" = { action = "last", desc = "Move to the last item" }
 "G" = "last"
 
+[preview]
+"up" = "up"
+"k" = "up"
+"down" = "down"
+"j" = "down"
+"pageup" = "page_up"
+"ctrl+b" = "page_up"
+"pagedown" = "page_down"
+"ctrl+f" = "page_down"
+"home" = "home"
+"g" = "home"
+"end" = "end"
+"G" = "end"
+
 [scroll]
 "up" = "scroll_up"
 "k" = "scroll_up"

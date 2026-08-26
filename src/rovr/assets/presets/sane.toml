@@ -78,6 +78,14 @@
 "home" = { action = "first", desc = "Move to the first item" }
 "end" = { action = "last", desc = "Move to the last item" }
 
+[preview]
+"up" = "up"
+"down" = "down"
+"pageup" = "page_up"
+"pagedown" = "page_down"
+"home" = "home"
+"end" = "end"
+
 [scroll]
 "up" = "scroll_up"
 "down" = "scroll_down"

@@ -428,7 +428,7 @@ def load_from_cache(
         elif pass_as is str:
             return content.decode()
         return content
-    except OSError:
+    except Exception:
         pass
 
 

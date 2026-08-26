@@ -1392,7 +1392,11 @@ class PreviewContainer(Actionable, Container):
                     realpath = path.realpath(file_path)
                     stat_result = os.stat(realpath)
                     content: list[str] | None = load_from_cache(
-                        realpath, "archive", stat_result, ("json", "utf-8"), list
+                        realpath,
+                        "archive",
+                        stat_result,
+                        ("json", "utf-8"),
+                        pass_as=list,
                     )
                     if content is None:
                         try:

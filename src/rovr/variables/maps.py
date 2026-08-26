@@ -62,12 +62,10 @@ VALID_KEY_CONTEXTS = frozenset({
 
 @dataclass
 class RovrVars:
-    ROVRCONFIG = (environ.get("ROVR_CONFIG_FOLDER") or dirs.user_config_dir).replace(
-        "\\", "/"
-    )
+    ROVRCONFIG = environ.get("ROVR_CONFIG_FOLDER") or dirs.user_config_dir
     ROVRTHEMES = ROVRCONFIG + "/themes"
-    ROVRCACHE = dirs.user_cache_dir.replace("\\", "/")
-    ROVRTEMP = dirs.user_runtime_dir.replace("\\", "/")
+    ROVRCACHE = dirs.user_cache_dir
+    ROVRTEMP = dirs.user_runtime_dir
     DOCUMENTS = general.user_documents_dir.replace("\\", "/")
     DOWNLOADS = general.user_downloads_dir.replace("\\", "/")
     PICTURES = general.user_pictures_dir.replace("\\", "/")

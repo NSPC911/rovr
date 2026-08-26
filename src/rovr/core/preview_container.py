@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import contextlib
+import os
 import subprocess
 from contextvars import ContextVar
 from dataclasses import dataclass
@@ -14,6 +15,9 @@ import textual_image.renderable
 import textual_image.widget
 from PIL import Image, UnidentifiedImageError
 from PIL.Image import Image as PILImage
+from rich.console import Console
+from rich.errors import MarkupError
+from rich.text import Text
 from textual import events, on, work
 from textual.app import ComposeResult
 from textual.containers import Container
@@ -38,17 +42,88 @@ from rovr.functions import path as path_utils
 from rovr.functions import preview_utils
 from rovr.functions.ansi import ansi_to_rich_text
 from rovr.functions.pdf import get_pdf_images, get_pdf_info
-from rovr.functions.utils import multiprocessing_process_error_checker, should_cancel
-from rovr.variables.constants import PreviewContainerTitles, config, file_one
+from rovr.functions.utils import (
+    load_from_cache,
+    multiprocessing_process_error_checker,
+    save_to_cache,
+    should_cancel,
+)
+from rovr.variables.constants import (
+    RESAMPLING_METHOD,
+    PreviewContainerTitles,
+    config,
+    file_one,
+)
 
 titles = PreviewContainerTitles()
 
 PREVIEWER_GROUP = "previewers"
 T = TypeVar("T")
 preview_token: ContextVar[object] = ContextVar("preview_token")
+IMAGE_CACHE_SIGNATURE = (
+    f"{preview_utils.MAX_IMAGE_SIZE[0]}x{preview_utils.MAX_IMAGE_SIZE[1]}",
+    str(RESAMPLING_METHOD()),
+)
 
 
 class ExitNow(RuntimeError): ...
+
+
+def _load_cached_image(
+    file_path: str,
+    preview_type: str,
+    stat_result: os.stat_result,
+    signature: tuple[str, str] = IMAGE_CACHE_SIGNATURE,
+    index: int | None = None,
+) -> PILImage | None:
+    data = load_from_cache(file_path, preview_type, stat_result, signature, index)
+    if data is None:
+        return None
+    try:
+        with Image.open(BytesIO(data)) as image:
+            return image.copy()
+    except (OSError, ValueError):
+        return None
+
+
+def _save_cached_image(
+    file_path: str,
+    preview_type: str,
+    stat_result: os.stat_result,
+    image: PILImage,
+    signature: tuple[str, str] = IMAGE_CACHE_SIGNATURE,
+    index: int | None = None,
+) -> None:
+    output = BytesIO()
+    image.save(output, format="PNG")
+    save_to_cache(
+        file_path, preview_type, stat_result, signature, output.getvalue(), index
+    )
+
+
+def _load_cached_text(
+    file_path: str,
+    preview_type: str,
+    stat_result: os.stat_result,
+    signature: tuple[str, str],
+) -> Text | None:
+    data = load_from_cache(file_path, preview_type, stat_result, signature)
+    if data is None:
+        return None
+    try:
+        return Text.from_markup(data.decode(), emoji=False)
+    except (UnicodeDecodeError, MarkupError):
+        return None
+
+
+def _save_cached_text(
+    file_path: str,
+    preview_type: str,
+    stat_result: os.stat_result,
+    signature: tuple[str, str],
+    text: Text,
+) -> None:
+    save_to_cache(file_path, preview_type, stat_result, signature, text.markup.encode())
 
 
 # to any ai models looking at this, shut the fuck up
@@ -289,6 +364,24 @@ class PreviewContainer(Actionable, Container):
         self.call_from_thread(setattr, self, "border_title", titles.font)
 
         fg_color = Color.parse(self.app.theme_variables["foreground"])
+        bg_color = Color.parse(self.app.theme_variables["background"])
+        realpath = path.realpath(self._current_file_path)
+        stat_result = os.stat(realpath)
+        signature = (
+            f"{preview_utils.MAX_FONT_SIZE}:{config['interface']['font_preview']['font_size']}",
+            f"{self._preview_texts['font_text']}:{fg_color.hex}:{bg_color.hex}:{NewImage.func.__name__}",
+        )
+        img = _load_cached_image(realpath, "font", stat_result, signature)
+        if img is not None:
+            if image_widget := self.get_child(".image_preview"):
+                self.call_from_thread(setattr, image_widget, "image", img)
+            else:
+                self.call_from_thread(self.remove_children)
+                image_widget = NewImage(img)
+                image_widget.can_focus = True
+                self.call_from_thread(self.mount, image_widget)
+            return
+
         text_fill: tuple[int, ...]
         # need to do this weird check because sixel doesn't support transparency
         # so just check whether auto renderer is sixel, and config configured
@@ -299,7 +392,6 @@ class PreviewContainer(Actionable, Container):
             # when loading the config, but just for the sake of shutting AI
             # up, I'm going to leave this here.
         ):
-            bg_color = Color.parse(self.app.theme_variables["background"])
             img = Image.new(
                 "RGB",
                 (preview_utils.MAX_FONT_SIZE[0], preview_utils.MAX_FONT_SIZE[1]),
@@ -349,6 +441,7 @@ class PreviewContainer(Actionable, Container):
             font=font,
             fill=text_fill,
         )
+        _save_cached_image(realpath, "font", stat_result, img, signature)
         if should_cancel():
             return
 
@@ -393,46 +486,57 @@ class PreviewContainer(Actionable, Container):
 
         # load svg as bytes
         try:
-            self.call_next(self.LOADER_WIDGET.set_status, "loading svg...")
-            if self.app.MULTIPROCESSING_PROCESS_ALLOWED:
-                try:
-                    png_bytes = preview_utils.load_svg(self._current_file_path)
-                except ValueError as exc:
-                    if multiprocessing_process_error_checker(self.app, exc):
-                        png_bytes = preview_utils.load_svg_sync(self._current_file_path)
-                    else:
-                        raise
-            else:
-                png_bytes = preview_utils.load_svg_sync(self._current_file_path)
-            if png_bytes is None:
-                self.notify(
-                    "Failed to load SVG. The file may be corrupted or not an SVG file.",
-                    title="SVG Preview",
-                    severity="error",
-                )
-                self.call_from_thread(self.remove_children)
-                self.border_title = ""
-                return
-            elif png_bytes == b"cancelled":
-                return
+            realpath = path.realpath(self._current_file_path)
+            stat_result = os.stat(realpath)
+            pil_object = _load_cached_image(realpath, "svg", stat_result)
+            if pil_object is None:
+                self.call_next(self.LOADER_WIDGET.set_status, "loading svg...")
+                if self.app.MULTIPROCESSING_PROCESS_ALLOWED:
+                    try:
+                        png_bytes = preview_utils.load_svg(self._current_file_path)
+                    except ValueError as exc:
+                        if multiprocessing_process_error_checker(self.app, exc):
+                            png_bytes = preview_utils.load_svg_sync(
+                                self._current_file_path
+                            )
+                        else:
+                            raise
+                else:
+                    png_bytes = preview_utils.load_svg_sync(self._current_file_path)
+                if png_bytes is None:
+                    self.notify(
+                        "Failed to load SVG. The file may be corrupted or not an SVG file.",
+                        title="SVG Preview",
+                        severity="error",
+                    )
+                    self.call_from_thread(self.remove_children)
+                    self.border_title = ""
+                    return
+                elif png_bytes == b"cancelled":
+                    return
 
-            if should_cancel():
-                return
+                if should_cancel():
+                    return
 
-            self.call_next(self.LOADER_WIDGET.set_status, "resampling svg...")
+                self.call_next(self.LOADER_WIDGET.set_status, "resampling svg...")
 
-            if self.app.MULTIPROCESSING_PROCESS_ALLOWED:
-                try:
-                    pil_object = preview_utils.resample(Image.open(BytesIO(png_bytes)))
-                except ValueError as exc:
-                    if multiprocessing_process_error_checker(self.app, exc):
-                        pil_object = preview_utils.resample_sync(
+                if self.app.MULTIPROCESSING_PROCESS_ALLOWED:
+                    try:
+                        pil_object = preview_utils.resample(
                             Image.open(BytesIO(png_bytes))
                         )
-                    else:
-                        raise
-            else:
-                pil_object = preview_utils.resample_sync(Image.open(BytesIO(png_bytes)))
+                    except ValueError as exc:
+                        if multiprocessing_process_error_checker(self.app, exc):
+                            pil_object = preview_utils.resample_sync(
+                                Image.open(BytesIO(png_bytes))
+                            )
+                        else:
+                            raise
+                else:
+                    pil_object = preview_utils.resample_sync(
+                        Image.open(BytesIO(png_bytes))
+                    )
+                _save_cached_image(realpath, "svg", stat_result, pil_object)
 
             if should_cancel():
                 return
@@ -486,20 +590,29 @@ class PreviewContainer(Actionable, Container):
         self.call_from_thread(setattr, self, "border_title", titles.image)
 
         try:
-            if self.app.MULTIPROCESSING_PROCESS_ALLOWED:
-                try:
-                    pil_object = preview_utils.resample_file(self._current_file_path)
-                except ValueError as exc:
-                    if multiprocessing_process_error_checker(self.app, exc):
-                        pil_object = preview_utils.resample_file_sync(
+            realpath = path.realpath(self._current_file_path)
+            stat_result = os.stat(realpath)
+            pil_object = _load_cached_image(realpath, "image", stat_result)
+            if pil_object is None:
+                if self.app.MULTIPROCESSING_PROCESS_ALLOWED:
+                    try:
+                        pil_object = preview_utils.resample_file(
                             self._current_file_path
                         )
-                    else:
-                        raise
-            else:
-                pil_object = preview_utils.resample_file_sync(self._current_file_path)
-            if pil_object is None:
-                return
+                    except ValueError as exc:
+                        if multiprocessing_process_error_checker(self.app, exc):
+                            pil_object = preview_utils.resample_file_sync(
+                                self._current_file_path
+                            )
+                        else:
+                            raise
+                else:
+                    pil_object = preview_utils.resample_file_sync(
+                        self._current_file_path
+                    )
+                if pil_object is None:
+                    return
+                _save_cached_image(realpath, "image", stat_result, pil_object)
         except UnidentifiedImageError:
             if should_cancel():
                 return
@@ -591,6 +704,16 @@ class PreviewContainer(Actionable, Container):
                 f"Invalid args, first_page={first_page} > last_page={last_page}"
             )
 
+        assert self._current_file_path is not None
+        realpath = path.realpath(self._current_file_path)
+        stat_result = os.stat(realpath)
+        cached = [
+            _load_cached_image(realpath, "pdf", stat_result, index=page)
+            for page in range(first_page, last_page + 1)
+        ]
+        if all(image is not None for image in cached):
+            return cast(list[PILImage], cached)
+
         result = get_pdf_images(
             str(self._current_file_path),
             first_page=first_page,
@@ -606,12 +729,17 @@ class PreviewContainer(Actionable, Container):
         # Resample images once when loaded for better performance
         if self.app.MULTIPROCESSING_PROCESS_ALLOWED:
             try:
-                return preview_utils.resample_batch(result)
+                result = preview_utils.resample_batch(result)
             except ValueError as exc:
                 if multiprocessing_process_error_checker(self.app, exc):
-                    return preview_utils.resample_batch_sync(result)
-                raise
-        return preview_utils.resample_batch_sync(result)
+                    result = preview_utils.resample_batch_sync(result)
+                else:
+                    raise
+        else:
+            result = preview_utils.resample_batch_sync(result)
+        for page, image in zip(range(first_page, last_page + 1), result):
+            _save_cached_image(realpath, "pdf", stat_result, image, index=page)
+        return result
 
     def show_pdf_preview(self) -> None:
         """
@@ -740,6 +868,12 @@ class PreviewContainer(Actionable, Container):
             command.append(f"--line-range=:{max_lines}")
         assert self._current_file_path is not None
         command.extend(["--", self._current_file_path])
+        realpath = path.realpath(self._current_file_path)
+        stat_result = os.stat(realpath)
+        signature = (
+            f"{max_lines}:{config['interface']['show_line_numbers']}",
+            bat_executable,
+        )
 
         if should_cancel():
             return False
@@ -747,62 +881,65 @@ class PreviewContainer(Actionable, Container):
         self.call_from_thread(setattr, self, "border_title", titles.bat)
 
         try:
-            process = subprocess.Popen(
-                command,
-                stdout=subprocess.PIPE,
-                stderr=subprocess.PIPE,
-            )
-            deadline = monotonic() + 5
-            while True:
-                try:
-                    stdout, stderr = process.communicate(timeout=1)
-                    break
-                except subprocess.TimeoutExpired:
-                    if should_cancel() or monotonic() >= deadline:
-                        process.kill()
-                        stdout, stderr = process.communicate()
-                        if should_cancel():
-                            return False
-                        raise subprocess.TimeoutExpired(command, 5, stdout, stderr)
+            new_content = _load_cached_text(realpath, "bat", stat_result, signature)
+            if new_content is None:
+                process = subprocess.Popen(
+                    command,
+                    stdout=subprocess.PIPE,
+                    stderr=subprocess.PIPE,
+                )
+                deadline = monotonic() + 5
+                while True:
+                    try:
+                        stdout, stderr = process.communicate(timeout=1)
+                        break
+                    except subprocess.TimeoutExpired:
+                        if should_cancel() or monotonic() >= deadline:
+                            process.kill()
+                            stdout, stderr = process.communicate()
+                            if should_cancel():
+                                return False
+                            raise subprocess.TimeoutExpired(command, 5, stdout, stderr)
+
+                if should_cancel():
+                    return False
+
+                if process.returncode != 0:
+                    error_message = stderr.decode("utf-8", errors="ignore")
+                    if should_cancel():
+                        return False
+                    self.call_from_thread(self.remove_children)
+                    self.notify(
+                        error_message,
+                        title="Plugins: Bat",
+                        severity="warning",
+                    )
+                    return False
+
+                bat_output = stdout.decode("utf-8", errors="ignore")
+                new_content = ansi_to_rich_text(bat_output)
+                _save_cached_text(realpath, "bat", stat_result, signature, new_content)
 
             if should_cancel():
                 return False
 
-            if process.returncode == 0:
-                bat_output = stdout.decode("utf-8", errors="ignore")
-                new_content = ansi_to_rich_text(bat_output)
-
-                if should_cancel():
-                    return False
-
-                if static_widget := self.get_child("Static"):
-                    self.log("Using existing Static")
-                    self.call_from_thread(static_widget.update, new_content)
-                    self.call_from_thread(static_widget.set_classes, "bat_preview")
-                else:
-                    self.log("Mounting new Static")
-                    self.call_from_thread(self.remove_children)
-
-                    if should_cancel():
-                        return False
-
-                    static_widget = Static(new_content, classes="bat_preview")
-                    self.call_from_thread(self.mount, static_widget)
-                    if should_cancel():
-                        return False
-                    static_widget.can_focus = True
-                return True
+            if static_widget := self.get_child("Static"):
+                self.log("Using existing Static")
+                self.call_from_thread(static_widget.update, new_content)
+                self.call_from_thread(static_widget.set_classes, "bat_preview")
             else:
-                error_message = stderr.decode("utf-8", errors="ignore")
+                self.log("Mounting new Static")
+                self.call_from_thread(self.remove_children)
+
                 if should_cancel():
                     return False
-                self.call_from_thread(self.remove_children)
-                self.notify(
-                    error_message,
-                    title="Plugins: Bat",
-                    severity="warning",
-                )
-                return False
+
+                static_widget = Static(new_content, classes="bat_preview")
+                self.call_from_thread(self.mount, static_widget)
+                if should_cancel():
+                    return False
+                static_widget.can_focus = True
+            return True
         except ExitNow:
             raise
         except Exception as exc:
@@ -828,6 +965,23 @@ class PreviewContainer(Actionable, Container):
 
         lines: list[str] | None = None
         height = self.call_from_thread(lambda: self.region.height)
+        width = self.call_from_thread(lambda: self.region.width)
+        assert self._current_file_path is not None
+        realpath = path.realpath(self._current_file_path)
+        stat_result = os.stat(realpath)
+        signature = (
+            f"{width}x{height}:{config['interface']['show_line_numbers']}",
+            f"{config['theme']['preview']}:{config['theme']['transparent']}",
+        )
+        new_content = _load_cached_text(realpath, "text", stat_result, signature)
+        if new_content is not None:
+            if static_widget := self.get_child("Static"):
+                self.call_from_thread(static_widget.update, new_content)
+            else:
+                self.call_from_thread(self.remove_children)
+                self.call_from_thread(self.mount, Static(new_content))
+            return
+
         # force read by brute-forcing encoding methods
         encodings_to_try = [
             "utf8",
@@ -872,19 +1026,28 @@ class PreviewContainer(Actionable, Container):
             theme=config["theme"]["preview"],
             background_color="default" if config["theme"]["transparent"] else None,
         )
+        console = Console(width=max(width, 1), color_system="truecolor")
+        new_content = Text.assemble(
+            *(
+                (segment.text, segment.style or "")
+                for segment in console.render(syntax)
+                if not segment.control
+            )
+        )
+        _save_cached_text(realpath, "text", stat_result, signature, new_content)
 
         if should_cancel():
             return
 
         if static_widget := self.get_child("Static"):
-            self.call_from_thread(static_widget.update, syntax)
+            self.call_from_thread(static_widget.update, new_content)
         else:
             self.call_from_thread(self.remove_children)
 
             if should_cancel():
                 return
 
-            self.call_from_thread(self.mount, Static(syntax))
+            self.call_from_thread(self.mount, Static(new_content))
 
         if should_cancel():
             return
@@ -1186,18 +1349,41 @@ class PreviewContainer(Actionable, Container):
                 if file_type == "archive":
                     from multiarchive._archive import Archive, BadArchiveError
 
-                    try:
-                        with Archive(file_path, mode="r") as archive:
-                            all_files = []
-                            for member in archive.infolist():
-                                if should_cancel():
-                                    return
+                    realpath = path.realpath(file_path)
+                    stat_result = os.stat(realpath)
+                    cached = load_from_cache(
+                        realpath,
+                        "archive",
+                        stat_result,
+                        ("newline", "utf-8"),
+                    )
+                    if cached is not None:
+                        content = cached.decode(errors="replace").splitlines()
+                    else:
+                        try:
+                            with Archive(file_path, mode="r") as archive:
+                                all_files = []
+                                for member in archive.infolist():
+                                    if should_cancel():
+                                        return
 
-                                if not member.is_dir:
-                                    all_files.append(member.name)
-                        content = all_files
-                    except (BadArchiveError, ValueError, FileNotFoundError, EOFError):
-                        content = [self._preview_texts["error"]]
+                                    if not member.is_dir:
+                                        all_files.append(member.name)
+                            content = all_files
+                            save_to_cache(
+                                realpath,
+                                "archive",
+                                stat_result,
+                                ("newline", "utf-8"),
+                                "\n".join(all_files).encode(),
+                            )
+                        except (
+                            BadArchiveError,
+                            ValueError,
+                            FileNotFoundError,
+                            EOFError,
+                        ):
+                            content = [self._preview_texts["error"]]
 
                 self.update_ui(
                     file_path,

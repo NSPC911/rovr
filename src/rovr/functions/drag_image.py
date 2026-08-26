@@ -10,6 +10,8 @@ from PIL import Image, ImageDraw, ImageFont, ImageOps
 from textual.color import Color, ColorParseError
 from textual_drivers.dnd import ImageLabel
 
+from rovr.functions.utils import load_from_cache, save_to_cache
+
 HEIGHT = 48
 MAX_WIDTH = 480
 TEXT_SIZE = 28
@@ -158,6 +160,16 @@ def render_drag_image(
 
 @lru_cache(maxsize=16)
 def _load_image_preview(image_path: str, _modified_ns: int) -> Image.Image:
+    realpath = os.path.realpath(image_path)
+    stat_result = os.stat(realpath)
+    signature = (f"{IMAGE_PREVIEW_SIZE[0]}x{IMAGE_PREVIEW_SIZE[1]}", "nearest")
+    if data := load_from_cache(realpath, "drag-image", stat_result, signature):
+        try:
+            with Image.open(BytesIO(data)) as image:
+                return image.copy()
+        except (OSError, ValueError):
+            pass
+
     with Image.open(image_path) as source:
         max_dimension = max(IMAGE_PREVIEW_SIZE)
         source.draft(None, (max_dimension, max_dimension))
@@ -180,7 +192,11 @@ def _load_image_preview(image_path: str, _modified_ns: int) -> Image.Image:
             fill=255,
         )
         preview.putalpha(mask)
-        return preview.convert("RGBA")
+        preview = preview.convert("RGBA")
+        output = BytesIO()
+        preview.save(output, format="PNG")
+        save_to_cache(realpath, "drag-image", stat_result, signature, output.getvalue())
+        return preview
 
 
 def _fit_text(

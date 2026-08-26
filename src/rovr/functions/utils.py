@@ -1,4 +1,3 @@
-import multiprocessing
 import os
 import re
 import subprocess
@@ -233,6 +232,8 @@ def dismiss(
 
 
 def multiprocessing_process_error_checker(app: App, exc: Exception) -> bool:
+    import multiprocessing
+
     is_dev = globals().get("is_dev", False)
     if isinstance(exc, ValueError) and "fds_to_keep" in str(exc):
         match multiprocessing.get_start_method(allow_none=True):
@@ -396,3 +397,50 @@ def command(
 
 def s(item: Any, notone: str = "s", isone: str = "") -> str:
     return isone if len(item) == 1 else notone
+
+
+def load_from_cache(
+    realpath: str,
+    preview_type: str,
+    stat_res: os.stat_result,
+    sig: tuple[str, str],
+    index: int | None = None,
+) -> bytes | None:
+    from hashlib import blake2b
+
+    from rovr.variables.maps import RovrVars
+
+    blk2b = blake2b(
+        f"{realpath}:{preview_type}:{stat_res.st_mtime_ns}:{stat_res.st_size}:{sig[0]}:{sig[1]}:{index}".encode(),
+        digest_size=16,
+    )
+    cache_path = os.path.join(RovrVars.ROVRCACHE, blk2b.hexdigest())
+    try:
+        with open(cache_path, "rb") as f:
+            return f.read()
+    except OSError:
+        return None
+
+
+def save_to_cache(
+    realpath: str,
+    preview_type: str,
+    stat_res: os.stat_result,
+    sig: tuple[str, str],
+    data: bytes,
+    index: int | None = None,
+) -> None:
+    from hashlib import blake2b
+
+    from rovr.variables.maps import RovrVars
+
+    blk2b = blake2b(
+        f"{realpath}:{preview_type}:{stat_res.st_mtime_ns}:{stat_res.st_size}:{sig[0]}:{sig[1]}:{index}".encode(),
+        digest_size=16,
+    )
+    try:
+        os.makedirs(RovrVars.ROVRCACHE, exist_ok=True)
+        with open(os.path.join(RovrVars.ROVRCACHE, blk2b.hexdigest()), "wb") as f:
+            f.write(data)
+    except OSError:
+        pass

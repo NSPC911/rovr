@@ -568,7 +568,6 @@ class Application(
                     message += f"Failed to write chooser file `{path.basename(self._chooser_file)}`"
         self.exit(message.strip() if message else None)
 
-    @on(ExitApp)
     def _arm_force_exit_timer(self) -> None:
         if not self._force_exit_on_shutdown or self._force_exit_timer is not None:
             return
@@ -1053,6 +1052,7 @@ class Application(
                     style="bold red",
                 )
         self._exit_renderables.clear()
+        self._arm_force_exit_timer()
         self.workers.cancel_all()
 
     @property

@@ -1010,7 +1010,7 @@ class PreviewContainer(Actionable, Container):
 
         from rich.syntax import Syntax
 
-        self.set_border("title", titles.text)
+        self.set_border("title", titles.file)
 
         lines: list[str] | None = None
         height = self.call_from_thread(lambda: self.region.height)

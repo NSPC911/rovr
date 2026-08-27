@@ -283,7 +283,11 @@ class PreviewContainer(Actionable, Container):
             title: "title" or "subtitle"
             to: The string to set the title/subtitle to.
         """
-        self.app.call_from_thread(setattr, self, title, to)
+        func = lambda: setattr(self, title, to)
+        try:
+            self.call_from_thread(func)
+        except (RuntimeError, LookupError):
+            func()
 
     @on(Worker.StateChanged)
     async def on_worker_state_changed(self, event: Worker.StateChanged) -> None:

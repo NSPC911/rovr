@@ -35,12 +35,15 @@ class PinnedSidebar(
 
     @work(exclusive=True, thread=True)
     def reload_pins(self) -> None:
+        with self.tlock:
+            self._reload_pins()
+
+    def _reload_pins(self) -> None:
         """Reload pins shown
 
         Raises:
             FolderNotFileError: If the pin location is a file, and not a folder.
         """
-        self.tlock.acquire()
         available_pins = cast(
             pin_utils.PinsDict, globals().get("pins", pin_utils.load_pins())
         )
@@ -159,11 +162,10 @@ class PinnedSidebar(
         self.app.call_from_thread(self.set_options, self.list_of_options)
         if prev_highlighted < len(self.list_of_options):
             self.app.call_from_thread(setattr, self, "highlighted", prev_highlighted)
-            self.app.call_next(self.refresh_drives, id_list, None)
+            self.refresh_drives(id_list, None)
         else:
-            self.app.call_next(self.refresh_drives, id_list, prev_highlighted)
+            self.refresh_drives(id_list, prev_highlighted)
 
-    @work(thread=True)
     def refresh_drives(
         self, id_list: list[str], prev_highlighted: int | None = None
     ) -> None:
@@ -228,8 +230,6 @@ class PinnedSidebar(
                 # schedule a new run
                 self.app.call_after_refresh(self.reload_pins)
                 return
-        finally:
-            self.tlock.release()
 
     def on_mount(self) -> None:
         """Reload the pinned files from the config."""

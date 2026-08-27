@@ -699,14 +699,17 @@ class Application(
                             if items is not None and items != file_list.items_in_cwd:
                                 self.cd(cwd)
             except FileNotFoundError:
-                self.file_list.set_options([
-                    Selection(
-                        " FileNotFoundError: Directory was removed while inside it.",
-                        value="",
-                        id="perm",
-                        disabled=True,
-                    )
-                ])
+                self.call_next(
+                    self.file_list.set_options,
+                    [
+                        Selection(
+                            " FileNotFoundError: Directory was removed while inside it.",
+                            value="",
+                            id="perm",
+                            disabled=True,
+                        )
+                    ],
+                )
 
             if i_should_shut_down():
                 return

@@ -9,7 +9,7 @@ from functools import partial
 from io import BytesIO
 from os import path
 from time import monotonic, time
-from typing import Any, Awaitable, Callable, TypeVar, cast, overload
+from typing import Any, Awaitable, Callable, Literal, TypeVar, cast, overload
 
 import textual_image.renderable
 import textual_image.widget
@@ -276,6 +276,15 @@ class PreviewContainer(Actionable, Container):
         except NoMatches:
             return None
 
+    def set_border(self, title: Literal["title", "subtitle"], to: str) -> None:
+        """Set the border title or subtitle of this widget.
+
+        Args:
+            title: "title" or "subtitle"
+            to: The string to set the title/subtitle to.
+        """
+        self.app.call_from_thread(setattr, self, title, to)
+
     @on(Worker.StateChanged)
     async def on_worker_state_changed(self, event: Worker.StateChanged) -> None:
         if event.worker.group != PREVIEWER_GROUP:
@@ -322,8 +331,8 @@ class PreviewContainer(Actionable, Container):
         self._mime_type = None
 
         await self.remove_children()
-        self.border_title = ""
-        self.border_subtitle = ""
+        self.set_border("title", "")
+        self.set_border("subtitle", "")
         dir_entry = path_utils.get_direntry_for(location)
         if not dir_entry:
             # lowk just skip
@@ -362,7 +371,7 @@ class PreviewContainer(Actionable, Container):
         if should_cancel() or self._current_file_path is None:
             return
 
-        self.call_from_thread(setattr, self, "border_title", titles.font)
+        self.set_border("title", titles.font)
 
         fg_color = Color.parse(self.app.theme_variables["foreground"])
         bg_color = Color.parse(self.app.theme_variables["background"])
@@ -496,7 +505,7 @@ class PreviewContainer(Actionable, Container):
         """
         if should_cancel() or self._current_file_path is None:
             return
-        self.call_from_thread(setattr, self, "border_title", titles.svg)
+        self.set_border("title", titles.svg)
 
         # load svg as bytes
         try:
@@ -524,7 +533,7 @@ class PreviewContainer(Actionable, Container):
                         severity="error",
                     )
                     self.call_from_thread(self.remove_children)
-                    self.border_title = ""
+                    self.set_border("title", "")
                     return
                 elif png_bytes == b"cancelled":
                     return
@@ -601,7 +610,7 @@ class PreviewContainer(Actionable, Container):
         """
         if should_cancel() or self._current_file_path is None:
             return
-        self.call_from_thread(setattr, self, "border_title", titles.image)
+        self.set_border("title", titles.image)
 
         try:
             realpath = path.realpath(self._current_file_path)
@@ -684,9 +693,8 @@ class PreviewContainer(Actionable, Container):
             return
 
         self.pdf.current_page = current_page
-        setattr(
-            self,
-            "border_subtitle",
+        self.set_border(
+            "subtitle",
             f"Page {self.pdf.current_page + 1}/{self.pdf.total_pages}",
         )
         self.run_worker(
@@ -772,7 +780,7 @@ class PreviewContainer(Actionable, Container):
         The job of this function is to load the pdf file for the first time.
         Or ensure the batched loading
         """
-        self.call_from_thread(setattr, self, "border_title", titles.pdf)
+        self.set_border("title", titles.pdf)
 
         if should_cancel() or self._current_file_path is None:
             return
@@ -818,11 +826,8 @@ class PreviewContainer(Actionable, Container):
             # The only one case when current page and border subtitles
             # should be manually adjusted. Not the best design though.
             self.pdf.current_page = 0
-            self.call_from_thread(
-                setattr,
-                self,
-                "border_subtitle",
-                f"Page {self.pdf.current_page + 1}/{self.pdf.total_pages}",
+            self.set_border(
+                "subtitle", f"Page {self.pdf.current_page + 1}/{self.pdf.total_pages}"
             )
 
         elif self.pdf.should_load_next_batch():
@@ -918,7 +923,7 @@ class PreviewContainer(Actionable, Container):
         if should_cancel():
             return False
 
-        self.call_from_thread(setattr, self, "border_title", titles.bat)
+        self.set_border("title", titles.bat)
 
         try:
             new_content = _load_cached_text(realpath, "bat", stat_result, signature)
@@ -1001,7 +1006,7 @@ class PreviewContainer(Actionable, Container):
 
         from rich.syntax import Syntax
 
-        self.call_from_thread(setattr, self, "border_title", titles.file)
+        self.set_border("title", titles.text)
 
         lines: list[str] | None = None
         height = self.call_from_thread(lambda: self.region.height)
@@ -1096,7 +1101,8 @@ class PreviewContainer(Actionable, Container):
         """Show folder preview."""
         if should_cancel():
             return
-        self.call_from_thread(setattr, self, "border_title", titles.folder)
+
+        self.set_border("title", titles.folder)
 
         if not (this_list := self.get_child("FileList")):
             self.call_from_thread(self.remove_children)
@@ -1161,11 +1167,8 @@ class PreviewContainer(Actionable, Container):
                         )
                     )
                     if start_time + 0.25 < time():
-                        self.call_from_thread(
-                            setattr,
-                            self,
-                            "border_subtitle",
-                            f"{index + 1} / {file_list_option_length}",
+                        self.set_border(
+                            "subtitle", f"{index + 1} / {file_list_option_length}"
                         )
                         start_time = time()
                         if should_cancel():
@@ -1183,14 +1186,14 @@ class PreviewContainer(Actionable, Container):
         loading_timer.stop()
         if should_cancel():
             return
-        self.call_next(setattr, self, "border_subtitle", "")
+        self.set_border("subtitle", "")
         self.call_from_thread(this_list.set_options, options)
 
     def show_archive_preview(self) -> None:
         """Show archive preview."""
         if should_cancel():
             return
-        self.call_from_thread(setattr, self, "border_title", titles.archive)
+        self.set_border("title", titles.archive)
 
         if not (file_list := self.get_child("FileList")):
             self.call_from_thread(self.remove_children)
@@ -1231,12 +1234,7 @@ class PreviewContainer(Actionable, Container):
                     )
                 )
                 if start_time + 0.25 < time():
-                    self.call_from_thread(
-                        setattr,
-                        self,
-                        "border_subtitle",
-                        f"{index + 1} / {file_list_length}",
-                    )
+                    self.set_border("subtitle", f"{index + 1} / {file_list_length}")
                     start_time = time()
                     if should_cancel():
                         return
@@ -1244,7 +1242,7 @@ class PreviewContainer(Actionable, Container):
         if should_cancel():
             return
         self.call_from_thread(file_list.set_options, options)
-        self.call_from_thread(setattr, self, "border_subtitle", "")
+        self.set_border("subtitle", "")
 
     def show_preview(self, file_path: str, mtime: int | float) -> None:
         """Public method to show preview."""
@@ -1309,7 +1307,7 @@ class PreviewContainer(Actionable, Container):
                 if self._file_mtime == new_mtime:
                     return
 
-            self.call_from_thread(setattr, self, "border_subtitle", "")
+            self.set_border("subtitle", "")
             if should_cancel():
                 return
 
@@ -1510,7 +1508,7 @@ class PreviewContainer(Actionable, Container):
             return
         self.log(self._mime_type)
         assert isinstance(self._current_content, str)
-        self.call_from_thread(setattr, self, "border_title", "")
+        self.set_border("title", "")
 
         display_content: str = self._current_content
         if self._mime_type:

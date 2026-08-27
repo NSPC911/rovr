@@ -247,16 +247,8 @@ class TrashScreen(Actionable, ModalScreen):
 
     @work(thread=True)
     def reload_entries(self) -> None:
-        selection_list = self.query_one("#trash_entries", TrashSelectionList)
-
-        prev_handle: str | None = None
-        prev_index = selection_list.highlighted
-        if prev_index is not None and 0 <= prev_index < selection_list.option_count:
-            prev_handle = selection_list.get_option_at_index(prev_index).value
-        prev_scroll = selection_list.scroll_offset.y
-
         try:
-            self.entries = self.recycle_bin.entries()
+            entries = self.recycle_bin.entries()
         except PermissionError as exc:
             # happens for macos when the user has not granted access to the trash folder
             self.notify(
@@ -266,19 +258,32 @@ class TrashScreen(Actionable, ModalScreen):
                 markup=False,
             )
             return
-        self._by_handle = {
-            self._handle_of(entry, index): entry
-            for index, entry in enumerate(self.entries)
-        }
         self.app.call_from_thread(
-            selection_list.set_options,
+            self._apply_entries,
+            entries,
             [
                 TrashSelection(
                     self._format_entry(entry), self._handle_of(entry, index), entry
                 )
-                for index, entry in enumerate(self.entries)
+                for index, entry in enumerate(entries)
             ],
         )
+
+    def _apply_entries(
+        self, entries: list[TrashEntry], options: list[TrashSelection]
+    ) -> None:
+        selection_list = self._entries_list()
+        prev_handle: str | None = None
+        prev_index = selection_list.highlighted
+        if prev_index is not None and 0 <= prev_index < selection_list.option_count:
+            prev_handle = selection_list.get_option_at_index(prev_index).value
+        prev_scroll = selection_list.scroll_offset.y
+
+        self.entries = entries
+        self._by_handle = {
+            self._handle_of(entry, index): entry for index, entry in enumerate(entries)
+        }
+        selection_list.set_options(options)
 
         new_index: int | None = None
         if prev_handle is not None and prev_handle in self._by_handle:
@@ -291,12 +296,9 @@ class TrashScreen(Actionable, ModalScreen):
                 selection_list.scroll_to, None, prev_scroll, animate=False
             )
 
-        self.app.call_next(
-            setattr,
-            self.query_one("#dialog"),
-            "border_subtitle",
-            f"{len(self.entries)} item{s(self.entries)}",
-        )
+        self.query_one(
+            "#dialog"
+        ).border_subtitle = f"{len(self.entries)} item{s(self.entries)}"
         for button_id in ("#restore", "#purge"):
             self.query_one(button_id, Button).disabled = not selection_list.selected
         self.query_one("#empty", Button).disabled = not self.entries

@@ -228,7 +228,7 @@ class MetadataContainer(VerticalScroll, inherit_bindings=False):
                     child_widget.update, values_list[index].content
                 )
         except NoMatches:
-            if self.any_in_queue():
+            if self.any_in_queue() or not self.is_attached:
                 return
             # if an error occurs here and you are looking at this
             self.app.call_from_thread(self.remove_children)

@@ -5,6 +5,7 @@ import time
 import zipfile
 from contextlib import suppress
 from os import path
+from threading import get_ident
 from typing import Callable, Literal, cast
 
 from pytrash import RecycleBin
@@ -126,6 +127,21 @@ class ProgressBarContainer(VerticalGroup, inherit_bindings=False):
             notify(dict): The notify message (must contain `message` and `title`)
             bar_text(str): The new text to update the label
         """
+        if self.app._thread_id != get_ident():
+            self.app.call_from_thread(self._set_panic_state, bar_text, notify)
+        else:
+            self._set_panic_state(bar_text, notify)
+
+        if dismiss_with:
+            dismissible = Dismissible(
+                dismiss_with["message"], border_subtitle=dismiss_with["subtitle"]
+            )
+            if self.app._thread_id != get_ident():
+                self.app.call_from_thread(self.app.push_screen_wait, dismissible)
+            else:
+                self.app.push_screen(dismissible)
+
+    def _set_panic_state(self, bar_text: str, notify: BarPanicNotify | None) -> None:
         if bar_text:
             self.update_text(bar_text, False)
         if self.progress_bar.total is None:
@@ -141,13 +157,6 @@ class ProgressBarContainer(VerticalGroup, inherit_bindings=False):
             self.icon_label.content + " " + icon_utils.get_icon("general", "close")[0]
         )
 
-        if dismiss_with:
-            self.app.call_from_thread(
-                self.app.push_screen_wait,
-                Dismissible(
-                    dismiss_with["message"], border_subtitle=dismiss_with["subtitle"]
-                ),
-            )
         if notify:
             self.notify(
                 message=notify["message"], severity="error", title=notify["title"]
@@ -159,8 +168,11 @@ class ProgressBarContainer(VerticalGroup, inherit_bindings=False):
         Args:
             text(str): The new text to update the label
         """
+        if self.app._thread_id != get_ident():
+            self.app.call_from_thread(self.ok, text)
+            return
         if text:
-            self.app.call_from_thread(self.update_text, text, False)
+            self.update_text(text, False)
         if self.progress_bar.total is None:
             self.progress_bar.update(total=1, progress=0)
         else:

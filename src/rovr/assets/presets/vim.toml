@@ -63,8 +63,23 @@
 "o" = { action = "open", desc = "Open selected files" }
 "e" = { action = "open_editor", desc = "Open the current file in an editor" }
 "shift+f10" = { action = "open_right_click_menu", desc = "Open the context menu" }
-"Y" = { action = "copy.open_popup", desc = "Open the copy menu" }
-"," = { action = "sort_order.open_popup", desc = "Open the sort menu" }
+
+[file_list.Y]
+desc = "Copy"
+"y" = { action = "copy.to_rovr", desc = "Copy files to the rovr clipboard" }
+"c" = { action = "copy.highlighted", desc = "Copy the highlighted file path" }
+"s" = { action = "copy.to_system_clip", desc = "Copy files to the system clipboard" }
+"d" = { action = "copy.current_directory", desc = "Copy the current directory path" }
+
+[file_list.","]
+desc = "Sort order"
+"a" = { action = "sort_order.name", desc = "Sort by name" }
+"e" = { action = "sort_order.extension", desc = "Sort by extension" }
+"n" = { action = "sort_order.natural", desc = "Sort naturally" }
+"s" = { action = "sort_order.size", desc = "Sort by size" }
+"c" = { action = "sort_order.created", desc = "Sort by creation time" }
+"m" = { action = "sort_order.modified", desc = "Sort by modification time" }
+"d" = { action = "sort_order.descending", desc = "Toggle descending order" }
 
 [pinned_sidebar]
 "/" = { action = "focus_search", desc = "Search pinned directories" }

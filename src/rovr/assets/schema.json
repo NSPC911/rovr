@@ -361,6 +361,12 @@
           "type": "object",
           "additionalProperties": false,
           "properties": {
+            "max_file_size": {
+              "type": "integer",
+              "minimum": 1,
+              "default": 2097152,
+              "description": "Maximum number of bytes loaded for a text preview. Larger files are truncated and report the ignored line and byte counts."
+            },
             "error": {
               "type": "string",
               "default": "couldn't read this file! (\u00ac_\u00ac )",

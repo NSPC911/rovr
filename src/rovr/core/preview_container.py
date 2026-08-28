@@ -15,16 +15,19 @@ import textual_image.renderable
 import textual_image.widget
 from PIL import Image, UnidentifiedImageError
 from PIL.Image import Image as PILImage
-from rich.console import Console
+from rich.cells import cell_len
 from rich.errors import MarkupError
+from rich.syntax import Syntax
 from rich.text import Text
 from textual import events, on, work
 from textual.app import ComposeResult
 from textual.containers import Container
 from textual.css.query import NoMatches
 from textual.dom import DOMNode
-from textual.geometry import Region
+from textual.geometry import Region, Size
 from textual.highlight import guess_language
+from textual.scroll_view import ScrollView
+from textual.strip import Strip
 from textual.timer import Timer
 from textual.widgets import Static
 from textual.widgets.selection_list import Selection
@@ -58,6 +61,17 @@ from rovr.variables.constants import (
 titles = PreviewContainerTitles()
 
 PREVIEWER_GROUP = "previewers"
+TEXT_PREVIEW_CACHE_VERSION = "windowed-v2"
+TEXT_ENCODINGS = (
+    "utf8",
+    "utf16",
+    "utf32",
+    "latin1",
+    "iso8859-1",
+    "mbcs",
+    "ascii",
+    "us-ascii",
+)
 T = TypeVar("T")
 preview_token: ContextVar[object] = ContextVar("preview_token")
 IMAGE_CACHE_SIGNATURE = (
@@ -67,6 +81,124 @@ IMAGE_CACHE_SIGNATURE = (
 
 
 class ExitNow(RuntimeError): ...
+
+
+def _decode_text_preview(data: bytes, truncated: bool) -> tuple[str, int] | None:
+    for encoding in TEXT_ENCODINGS:
+        try:
+            return data.decode(encoding), 0
+        except UnicodeDecodeError as exc:
+            if truncated and exc.end == len(data):
+                try:
+                    return data[: exc.start].decode(encoding), len(data) - exc.start
+                except UnicodeDecodeError:
+                    pass
+    return None
+
+
+class WindowedTextPreview(ScrollView):
+    """Render only the visible portion of a text preview."""
+
+    DEFAULT_CSS = """
+    WindowedTextPreview {
+        width: 1fr;
+        height: 1fr;
+        padding: 0;
+        scrollbar-size: 1 1;
+    }
+    """
+
+    def __init__(
+        self,
+        lines: list[str] | list[Text],
+        *,
+        language: str | None = None,
+        line_numbers: bool = False,
+        classes: str | None = None,
+    ) -> None:
+        super().__init__(classes=classes, can_focus=True)
+        self._lines: list[str] | list[Text] = []
+        self._language = language
+        self._line_numbers = line_numbers
+        self._gutter_width = 0
+        self._rendered_window: tuple[int, int, int, int, list[Strip]] | None = None
+        self.update_preview(lines, language=language, line_numbers=line_numbers)
+
+    def update_preview(
+        self,
+        lines: list[str] | list[Text],
+        *,
+        language: str | None = None,
+        line_numbers: bool = False,
+    ) -> None:
+        self._lines = lines or [""]
+        self._language = language
+        self._line_numbers = line_numbers
+        self._gutter_width = len(str(len(self._lines))) + 3 if line_numbers else 0
+        width = max(
+            cell_len((line.plain if isinstance(line, Text) else line).expandtabs(4))
+            for line in self._lines[:256]
+        )
+        self.virtual_size = Size(width + self._gutter_width, len(self._lines))
+        self._rendered_window = None
+        self.scroll_home(animate=False)
+        self.refresh(layout=True)
+
+    def _render_window(self, start: int, width: int, x: int) -> list[Strip]:
+        end = min(
+            start + max(self.scrollable_content_region.height, 1), len(self._lines)
+        )
+        selected = self._lines[start:end]
+        window_width = max(
+            cell_len((line.plain if isinstance(line, Text) else line).expandtabs(4))
+            for line in selected
+        )
+        if window_width + self._gutter_width > self.virtual_size.width:
+            self.virtual_size = Size(
+                window_width + self._gutter_width, self.virtual_size.height
+            )
+            self._scroll_update(self.virtual_size)
+        if self._language is not None:
+            renderable: Text | Syntax = Syntax(
+                "\n".join(cast(list[str], selected)),
+                lexer=self._language,
+                line_numbers=self._line_numbers,
+                start_line=start + 1,
+                word_wrap=False,
+                tab_size=4,
+                theme=config["theme"]["preview"],
+                background_color=(
+                    "default" if config["theme"]["transparent"] else None
+                ),
+                padding=0,
+            )
+        else:
+            renderable = Text("\n", no_wrap=True, overflow="crop").join(
+                cast(list[Text], selected)
+            )
+
+        options = self.app.console.options.update(width=max(x + width, 1))
+        background = self.visual_style.rich_style
+        return [
+            Strip(segments).crop(x, x + width).adjust_cell_length(width, background)
+            for segments in self.app.console.render_lines(
+                renderable, options, pad=False, new_lines=False
+            )
+        ]
+
+    def render_line(self, y: int) -> Strip:
+        width = self.scrollable_content_region.width
+        height = self.scrollable_content_region.height
+        start = int(self.scroll_offset.y)
+        x = int(self.scroll_offset.x)
+        cache = self._rendered_window
+        if cache is None or cache[:4] != (start, width, height, x):
+            lines = self._render_window(start, width, x)
+            cache = self._rendered_window = (start, width, height, x, lines)
+        try:
+            return cache[4][y]
+        except IndexError:
+            return Strip.blank(width, self.visual_style.rich_style)
 
 
 def _load_cached_image(
@@ -912,16 +1044,19 @@ class PreviewContainer(Actionable, Container):
             if config["interface"]["show_line_numbers"]
             else "--style=plain",
         ]
-        max_lines = self.call_from_thread(lambda: self.region.height)
-        if max_lines > 0:
-            command.append(f"--line-range=:{max_lines}")
+        # max_lines = self.call_from_thread(lambda: self.region.height)
+        # if max_lines > 0:
+        #     command.append(f"--line-range=:{max_lines}")
         assert self._current_file_path is not None
         command.extend(["--", self._current_file_path])
         realpath = path.realpath(self._current_file_path)
         stat_result = os.stat(realpath)
+        max_text_size = config["interface"]["preview_text"]["max_file_size"]
+        if stat_result.st_size > max_text_size:
+            return False
         signature = (
-            f"{max_lines}:{config['interface']['show_line_numbers']}",
-            bat_executable,
+            f"{config['interface']['show_line_numbers']}",
+            "",
         )
 
         if should_cancel():
@@ -972,22 +1107,30 @@ class PreviewContainer(Actionable, Container):
             if should_cancel():
                 return False
 
-            if static_widget := self.get_child("Static"):
-                self.log("Using existing Static")
-                self.call_from_thread(static_widget.update, new_content)
-                self.call_from_thread(static_widget.set_classes, "bat_preview")
+            lines = list(new_content.split("\n", allow_blank=True))
+            if text_preview := self.get_child(WindowedTextPreview):
+                self.call_from_thread(
+                    text_preview.update_preview,
+                    lines,
+                    language=None,
+                    line_numbers=False,
+                )
+                self.call_from_thread(
+                    text_preview.set_classes, "text_preview bat_preview"
+                )
             else:
-                self.log("Mounting new Static")
                 self.call_from_thread(self.remove_children)
 
                 if should_cancel():
                     return False
 
-                static_widget = Static(new_content, classes="bat_preview")
-                self.call_from_thread(self.mount, static_widget)
+                self.call_from_thread(
+                    lambda: self.mount(
+                        WindowedTextPreview(lines, classes="text_preview bat_preview")
+                    )
+                )
                 if should_cancel():
                     return False
-                static_widget.can_focus = True
             return True
         except ExitNow:
             raise
@@ -1008,95 +1151,94 @@ class PreviewContainer(Actionable, Container):
         if should_cancel():
             return
 
-        from rich.syntax import Syntax
-
         self.set_border("title", titles.file)
 
-        lines: list[str] | None = None
-        height = self.call_from_thread(lambda: self.region.height)
-        width = self.call_from_thread(lambda: self.region.width)
         assert self._current_file_path is not None
         realpath = path.realpath(self._current_file_path)
         stat_result = os.stat(realpath)
-        signature = (
-            f"{width}x{height}:{config['interface']['show_line_numbers']}",
-            f"{config['theme']['preview']}:{config['theme']['transparent']}",
+        max_file_size = config["interface"]["preview_text"]["max_file_size"]
+        signature = (str(max_file_size), TEXT_PREVIEW_CACHE_VERSION)
+        content: str | None = load_from_cache(
+            realpath, "windowed_text", stat_result, signature, pass_as=str
         )
-        new_content = _load_cached_text(realpath, "text", stat_result, signature)
-        if new_content is not None:
-            if static_widget := self.get_child("Static"):
-                self.call_from_thread(static_widget.update, new_content)
-            else:
-                self.call_from_thread(self.remove_children)
-                self.call_from_thread(self.mount, Static(new_content))
-            return
-
-        # force read by brute-forcing encoding methods
-        encodings_to_try = [
-            "utf8",
-            "utf16",
-            "utf32",
-            "latin1",
-            "iso8859-1",
-            "mbcs",
-            "ascii",
-            "us-ascii",
-        ]
-        for encoding in encodings_to_try:
+        if content is None:
             try:
-                lines: list[str] | None = []
-                with open(self._current_file_path, "r", encoding=encoding) as f:
-                    for _ in range(height):
-                        line = f.readline()
-                        if not line:
-                            break
-                        lines.append(line.strip("\n\r"))
+                with open(realpath, "rb") as file:
+                    raw_content = file.read(max_file_size)
+                    ignored_bytes = stat_result.st_size - len(raw_content)
+                    ignored_lines = 0
+                    last_byte = b""
+                    while chunk := file.read(1024 * 1024):
+                        ignored_lines += chunk.count(b"\n")
+                        last_byte = chunk[-1:]
                         if should_cancel():
                             return
-                break
-            except (UnicodeDecodeError, FileNotFoundError):
-                continue
-        if lines is None:
+            except FileNotFoundError:
+                return
+
+            decoded = _decode_text_preview(raw_content, ignored_bytes > 0)
+            if decoded is None:
+                content = None
+            else:
+                content, incomplete_bytes = decoded
+                ignored_bytes += incomplete_bytes
+                if ignored_bytes:
+                    if last_byte != b"\n":
+                        ignored_lines += 1
+                    if raw_content and not raw_content.endswith(b"\n"):
+                        ignored_lines = max(0, ignored_lines - 1)
+                    if not content.endswith("\n"):
+                        content += "\n"
+                    content += (
+                        f"({ignored_lines:,} lines/{ignored_bytes:,} bytes ignored)"
+                    )
+                save_to_cache(
+                    realpath, "windowed_text", stat_result, signature, content
+                )
+
+        if content is None:
             self._current_content = self._preview_texts["error"]
             self.mount_special_messages()
             return
 
-        text_to_display = "\n".join(lines)
-        # add syntax highlighting
-        language: str = (
-            guess_language(text_to_display, path=self._current_file_path) or "text"
-        )
-        syntax = Syntax(
-            text_to_display,
-            lexer=language,
-            line_numbers=config["interface"]["show_line_numbers"],
-            word_wrap=False,
-            tab_size=4,
-            theme=config["theme"]["preview"],
-            background_color="default" if config["theme"]["transparent"] else None,
-        )
-        console = Console(width=max(width, 1), color_system="truecolor")
-        new_content = Text.assemble(
-            *(
-                (segment.text, segment.style or "")
-                for segment in console.render(syntax)
-                if not segment.control
-            )
-        )
-        _save_cached_text(realpath, "text", stat_result, signature, new_content)
-
+        lines = content.splitlines() or [""]
+        sample_parts: list[str] = []
+        sample_length = 0
+        for line in lines:
+            remaining = 4096 - sample_length
+            if remaining <= 0:
+                break
+            sample_parts.append(line[:remaining])
+            sample_length += len(sample_parts[-1])
+        sample = "".join(sample_parts)
+        language: str = guess_language(sample, path=self._current_file_path) or "text"
         if should_cancel():
             return
 
-        if static_widget := self.get_child("Static"):
-            self.call_from_thread(static_widget.update, new_content)
+        if text_preview := self.get_child(WindowedTextPreview):
+            self.call_from_thread(
+                text_preview.update_preview,
+                lines,
+                language=language,
+                line_numbers=config["interface"]["show_line_numbers"],
+            )
+            self.call_from_thread(text_preview.set_classes, "text_preview")
         else:
             self.call_from_thread(self.remove_children)
 
             if should_cancel():
                 return
 
-            self.call_from_thread(self.mount, Static(new_content))
+            self.call_from_thread(
+                lambda: self.mount(
+                    WindowedTextPreview(
+                        lines,
+                        language=language,
+                        line_numbers=config["interface"]["show_line_numbers"],
+                        classes="text_preview",
+                    )
+                )
+            )
 
         if should_cancel():
             return
@@ -1573,6 +1715,8 @@ class PreviewContainer(Actionable, Container):
         """Trigger resize update from a thread."""
         context_token = preview_token.set(self._active_preview_token)
         try:
+            if self.get_child(WindowedTextPreview):
+                return
             if self.border_title in (
                 PreviewContainerTitles.file,
                 PreviewContainerTitles.bat,
@@ -1604,6 +1748,8 @@ class PreviewContainer(Actionable, Container):
     def action_up(self) -> None:
         if self._is_pdf() and self.pdf.images is not None:
             self.update_current_pdf_page_by_diff(-1)
+        elif text_preview := self.get_child(WindowedTextPreview):
+            text_preview.scroll_up(animate=False)
         elif self.border_title == titles.archive and (
             filelist := self.get_child(FileList)
         ):
@@ -1616,6 +1762,8 @@ class PreviewContainer(Actionable, Container):
     def action_down(self) -> None:
         if self._is_pdf() and self.pdf.images is not None:
             self.update_current_pdf_page_by_diff(1)
+        elif text_preview := self.get_child(WindowedTextPreview):
+            text_preview.scroll_down(animate=False)
         elif self.border_title == titles.archive and (
             filelist := self.get_child(FileList)
         ):
@@ -1628,6 +1776,8 @@ class PreviewContainer(Actionable, Container):
     def action_page_up(self) -> None:
         if self._is_pdf() and self.pdf.images is not None:
             self.update_current_pdf_page_by_diff(-1)
+        elif text_preview := self.get_child(WindowedTextPreview):
+            text_preview.scroll_page_up(animate=False)
         elif self.border_title == titles.archive and (
             filelist := self.get_child(FileList)
         ):
@@ -1640,6 +1790,8 @@ class PreviewContainer(Actionable, Container):
     def action_page_down(self) -> None:
         if self._is_pdf() and self.pdf.images is not None:
             self.update_current_pdf_page_by_diff(1)
+        elif text_preview := self.get_child(WindowedTextPreview):
+            text_preview.scroll_page_down(animate=False)
         elif self.border_title == titles.archive and (
             filelist := self.get_child(FileList)
         ):
@@ -1652,6 +1804,8 @@ class PreviewContainer(Actionable, Container):
     def action_home(self) -> None:
         if self._is_pdf() and self.pdf.images is not None:
             self.update_current_pdf_page(0)
+        elif text_preview := self.get_child(WindowedTextPreview):
+            text_preview.scroll_home(animate=False)
         elif self.border_title == titles.archive and (
             filelist := self.get_child(FileList)
         ):
@@ -1664,6 +1818,8 @@ class PreviewContainer(Actionable, Container):
     def action_end(self) -> None:
         if self._is_pdf() and self.pdf.images is not None:
             self.update_current_pdf_page(self.pdf.total_pages - 1)
+        elif text_preview := self.get_child(WindowedTextPreview):
+            text_preview.scroll_end(animate=False)
         elif self.border_title == titles.archive and (
             filelist := self.get_child(FileList)
         ):

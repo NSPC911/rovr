@@ -94,6 +94,9 @@ r""" Default value of the field path 'Rovr Config interface preview_text error' 
 _ROVR_CONFIG_INTERFACE_PREVIEW_TEXT_FONT_TEXT_DEFAULT = "abcdefghijklmnopqrstuvwxyz\nABCDEFGHIJKLMNOPQRSTUVWXYZ\noO08 iIlL1 g9qCQG a@ 5sS\n{} [==>  ] (*) <> ~-+ /\\\n"
 r""" Default value of the field path 'Rovr Config interface preview_text font_text' """
 
+_ROVR_CONFIG_INTERFACE_PREVIEW_TEXT_MAX_FILE_SIZE_DEFAULT = 1048576
+r""" Default value of the field path 'Rovr Config interface preview_text max_file_size' """
+
 _ROVR_CONFIG_INTERFACE_PREVIEW_TEXT_START_DEFAULT = (
     " ___ ___\n|  _| . |\n|_| |___|\n _ _ ___\n| | |  _|\n \\_/|_|\n"
 )
@@ -883,6 +886,14 @@ _ROVRCONFIGINTERFACEIMAGEVIEWERRESAMPLING_LANCZOS: Literal["lanczos"] = "lanczos
 r"""The values for the 'The resampling method to use when resizing images. This is only applicable when the image exceeds the maximum size specified in `max_size`' enum"""
 
 class _RovrConfigInterfacePreviewText(TypedDict, total=False):
+    max_file_size: int
+    r"""
+    Maximum number of bytes loaded for a text preview. Larger files are truncated and report the ignored line and byte counts.
+
+    minimum: 1
+    default: 1048576
+    """
+
     error: str
     r"""
     If for any reason the file preview refused to show, this appears.

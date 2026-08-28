@@ -53,7 +53,7 @@ speedup = [
 build = [
   "zstandard>=0.25.0",
   "poethepoet>=0.45.0",
-  "nuitka>=4.0.0",
+  "nuitka>=4.0.0,<4.2.0",
 ]
 dev = [
   "poethepoet>=0.41.0",

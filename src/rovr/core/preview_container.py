@@ -283,7 +283,7 @@ class PreviewContainer(Actionable, Container):
             title: "title" or "subtitle"
             to: The string to set the title/subtitle to.
         """
-        func = lambda: setattr(self, title, to)
+        func = lambda: setattr(self, "border_" + title, to)
         try:
             self.call_from_thread(func)
         except (RuntimeError, LookupError):

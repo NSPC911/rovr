@@ -49,7 +49,7 @@ from rovr.action_buttons import (
     ZipButton,
 )
 from rovr.action_buttons.sort_order import SortOrderButton
-from rovr.classes.app_mixins import DragAndDrop, KeyHandler, ThemeHandler
+from rovr.classes.app_mixins import DragAndDrop, KeyChordPopup, KeyHandler, ThemeHandler
 from rovr.classes.mixins import Action, Actionable
 from rovr.classes.theme import RovrStylesheet
 from rovr.classes.type_aliases import KeysConfig, ShellRunTypes
@@ -325,6 +325,7 @@ class Application(
                 yield ProcessContainer().data_bind(Application.theme)
                 yield MetadataContainer()
                 yield self.Clipboard
+            yield KeyChordPopup()
             yield StateManager()
 
     def on_mount(self) -> None:

@@ -88,9 +88,12 @@ async def test_normal_preview_mounts_windowed_content(tmp_path: Path) -> None:
             finally:
                 preview_token.reset(context_token)
 
-        await asyncio.to_thread(show_preview)
+        with (
+            patch("rovr.core.preview_container.load_from_cache", return_value=None),
+            patch("rovr.core.preview_container.save_to_cache"),
+        ):
+            await asyncio.to_thread(show_preview)
         await pilot.pause()
-
         text_preview = preview.query_one(WindowedTextPreview)
         assert "value" in text_preview.render_line(0).text
 

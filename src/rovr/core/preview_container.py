@@ -1056,7 +1056,7 @@ class PreviewContainer(Actionable, Container):
             return False
         signature = (
             f"{config['interface']['show_line_numbers']}",
-            "",
+            bat_executable,
         )
 
         if should_cancel():

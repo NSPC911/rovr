@@ -94,7 +94,7 @@ r""" Default value of the field path 'Rovr Config interface preview_text error' 
 _ROVR_CONFIG_INTERFACE_PREVIEW_TEXT_FONT_TEXT_DEFAULT = "abcdefghijklmnopqrstuvwxyz\nABCDEFGHIJKLMNOPQRSTUVWXYZ\noO08 iIlL1 g9qCQG a@ 5sS\n{} [==>  ] (*) <> ~-+ /\\\n"
 r""" Default value of the field path 'Rovr Config interface preview_text font_text' """
 
-_ROVR_CONFIG_INTERFACE_PREVIEW_TEXT_MAX_FILE_SIZE_DEFAULT = 1048576
+_ROVR_CONFIG_INTERFACE_PREVIEW_TEXT_MAX_FILE_SIZE_DEFAULT = 2097152
 r""" Default value of the field path 'Rovr Config interface preview_text max_file_size' """
 
 _ROVR_CONFIG_INTERFACE_PREVIEW_TEXT_START_DEFAULT = (
@@ -891,7 +891,7 @@ class _RovrConfigInterfacePreviewText(TypedDict, total=False):
     Maximum number of bytes loaded for a text preview. Larger files are truncated and report the ignored line and byte counts.
 
     minimum: 1
-    default: 1048576
+    default: 2097152
     """
 
     error: str

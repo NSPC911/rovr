@@ -397,7 +397,12 @@ def command(
 
 
 def s(item: Any, notone: str = "s", isone: str = "") -> str:
-    return isone if len(item) == 1 else notone
+    return (
+        isone
+        if (isinstance(item, list) and len(item) == 1)
+        or (type(item) is int and item == 1)
+        else notone
+    )
 
 
 preview_loc = os.path.join(RovrVars.ROVRTEMP, "previews")

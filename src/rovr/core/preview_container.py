@@ -48,6 +48,7 @@ from rovr.functions.pdf import get_pdf_images, get_pdf_info
 from rovr.functions.utils import (
     load_from_cache,
     multiprocessing_process_error_checker,
+    s,
     save_to_cache,
     should_cancel,
 )
@@ -1188,7 +1189,7 @@ class PreviewContainer(Actionable, Container):
                         ignored_lines = max(0, ignored_lines - 1)
                     if not content.endswith("\n"):
                         content += "\n"
-                    content += f"---\n~({ignored_lines:,} lines/{ignored_bytes:,} bytes ignored)"
+                    content += f"---\n(~{ignored_lines:,} line{s(ignored_lines)}/{ignored_bytes:,} byte{s(ignored_bytes)} ignored)"
                 save_to_cache(
                     realpath, "windowed_text", stat_result, signature, content
                 )

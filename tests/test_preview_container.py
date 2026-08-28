@@ -130,7 +130,7 @@ async def test_truncated_preview_is_cached(
         await pilot.pause()
 
         cached_content = save.call_args.args[4]
-        assert cached_content == "first\n(1+ lines/13 bytes ignored)"
+        assert cached_content == "first\n---\n(~0 lines/13 bytes ignored)"
 
         with (
             patch(

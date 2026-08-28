@@ -729,7 +729,14 @@ class KeyChordPopup(Static):
                 continue
             display_key = f"<{key}>" if "+" in key else key
             description = cast(str, binding.get("desc") or binding.get("action") or key)
-            cells.append(Text.assemble((display_key, "bold"), f"  {description}"))
+            cells.append(
+                Text.assemble(
+                    (display_key, "bold"),
+                    f"  {description}",
+                    overflow="ellipsis",
+                    no_wrap=True,
+                )
+            )
         for index in range(0, len(cells), columns):
             table.add_row(*cells[index : index + columns])
 
@@ -792,6 +799,7 @@ class KeyHandler:
                     namespaces=namespaces,
                 )
             self._cancel_key_chord()
+            return True
 
         if (
             priority

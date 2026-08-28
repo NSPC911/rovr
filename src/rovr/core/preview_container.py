@@ -1167,10 +1167,11 @@ class PreviewContainer(Actionable, Container):
                     raw_content = file.read(max_file_size)
                     ignored_bytes = stat_result.st_size - len(raw_content)
                     ignored_lines = 0
-                    last_byte = b""
-                    while chunk := file.read(1024 * 1024):
+                    remaining_bytes = stat_result.st_size - len(raw_content)
+                    scan_limit = min(remaining_bytes, max_file_size)
+                    if scan_limit > 0:
+                        chunk = file.read(scan_limit)
                         ignored_lines += chunk.count(b"\n")
-                        last_byte = chunk[-1:]
                         if should_cancel():
                             return
             except FileNotFoundError:
@@ -1183,15 +1184,11 @@ class PreviewContainer(Actionable, Container):
                 content, incomplete_bytes = decoded
                 ignored_bytes += incomplete_bytes
                 if ignored_bytes:
-                    if last_byte != b"\n":
-                        ignored_lines += 1
                     if raw_content and not raw_content.endswith(b"\n"):
                         ignored_lines = max(0, ignored_lines - 1)
                     if not content.endswith("\n"):
                         content += "\n"
-                    content += (
-                        f"({ignored_lines:,} lines/{ignored_bytes:,} bytes ignored)"
-                    )
+                    content += f"---\n~({ignored_lines:,} lines/{ignored_bytes:,} bytes ignored)"
                 save_to_cache(
                     realpath, "windowed_text", stat_result, signature, content
                 )

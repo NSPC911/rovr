@@ -103,7 +103,12 @@ async def test_contextual_key_dispatch(
 
         app.keys["file_list"] = {
             "s": {"action": "sort_order.extension(True)"},
-            ",": {"p": {"action": "sort_order.toggle_custom_sort"}},
+            ",": {
+                "p": {
+                    "action": "sort_order.toggle_custom_sort",
+                    "desc": "Toggle custom sort (%stated)",
+                }
+            },
         }
         await pilot.press("s")
         state_manager = app.query_one(StateManager)

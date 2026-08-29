@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import asyncio
+import re
 from contextlib import suppress
 from dataclasses import replace
 from functools import lru_cache
@@ -68,6 +69,7 @@ from rovr.variables.constants import config
 from rovr.variables.maps import RovrVars
 
 console = get_console
+is_mod = re.compile(r"(left|right)_(control|alt|super|shift)")
 
 
 class ThemeHandler:
@@ -827,6 +829,9 @@ class KeyHandler:
         return "+".join((*modifiers, name))
 
     async def _check_bindings(self: App, key: str, priority: bool = False) -> bool:
+        if is_mod.match(key):
+            # because these keybinds do absolutely nothing to help us
+            return True
         if self._show_keys:
             self.show_key(key)
         if not self.keys or self.screen.id == "--command-palette":

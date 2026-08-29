@@ -227,7 +227,7 @@ desc = "Sort order"
 "?" = "exit"
 
 [yes_or_no]
-"y" = "yes"
+y.y = "yes"
 "n" = "no"
 "escape" = "no"
 "a" = "dont_ask_again"

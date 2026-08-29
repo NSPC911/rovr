@@ -7,7 +7,7 @@ from functools import lru_cache
 from importlib import resources
 from os import path
 from time import perf_counter
-from typing import ClassVar, Iterable, cast
+from typing import Any, ClassVar, Iterable, cast
 
 from rich.table import Table
 from rich.text import Text
@@ -752,6 +752,18 @@ class KeyChordPopup(Static):
 class KeyHandler:
     _key_chord: KeyMap | None = None
     _key_chord_namespace: DOMNode | None = None
+    _key_chord_popup: KeyChordPopup | None = None
+
+    def push_screen(
+        self: App,
+        screen: Any,
+        callback: Any = None,
+        wait_for_dismiss: bool = False,
+        *,
+        mode: str | None = None,
+    ) -> Any:
+        self._cancel_key_chord()
+        return App.push_screen(self, screen, callback, wait_for_dismiss, mode=mode)
 
     @lru_cache(maxsize=128)
     @staticmethod
@@ -786,7 +798,7 @@ class KeyHandler:
             if isinstance(binding, dict):
                 if "action" not in binding:
                     self._key_chord = cast(KeyMap, binding)
-                    self.query_one(KeyChordPopup).show_chord(self._key_chord)
+                    self._key_chord_popup.show_chord(self._key_chord)
                     return True
                 namespace = self._key_chord_namespace
                 action = cast(KeyBinding, binding)["action"]
@@ -817,7 +829,9 @@ class KeyHandler:
             if "action" not in binding:
                 self._key_chord = cast(KeyMap, binding)
                 self._key_chord_namespace = namespace
-                self.query_one(KeyChordPopup).show_chord(self._key_chord)
+                self._key_chord_popup = KeyChordPopup()
+                await self.screen.mount(self._key_chord_popup)
+                self._key_chord_popup.show_chord(self._key_chord)
                 return True
             action = cast(KeyBinding, binding)["action"]
             if action == "noop":
@@ -833,7 +847,10 @@ class KeyHandler:
     def _cancel_key_chord(self: App) -> None:
         self._key_chord = None
         self._key_chord_namespace = None
-        self.query_one(KeyChordPopup).hide_chord()
+        if self._key_chord_popup is not None:
+            self._key_chord_popup.hide_chord()
+            self._key_chord_popup.remove()
+            self._key_chord_popup = None
 
     def _active_key_contexts(self: App) -> list[tuple[str, DOMNode]]:
         contexts: list[tuple[str, DOMNode]] = []

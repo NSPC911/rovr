@@ -5,7 +5,7 @@ import pytest
 from rovr.action_buttons import CopyButton
 from rovr.action_buttons.sort_order import SortOrderButton
 from rovr.app import Application
-from rovr.classes.app_mixins import KeyHandler
+from rovr.classes.app_mixins import KeyChordPopup, KeyHandler
 from rovr.classes.textual_options import KeybindOption
 from rovr.functions.config import load_keys, validate_keys
 from rovr.navigation_widgets import PathInput
@@ -184,7 +184,8 @@ async def test_key_chords(tmp_path: Path) -> None:
                 "ctrl+x": {"action": "cursor(1)"},
                 "n": {"action": "noop"},
             },
-        }
+        },
+        "dismissible": {"c": {"x": {"action": "screen.dismiss"}}},
     }
 
     async with app.run_test(size=(143, 37)) as pilot:
@@ -216,6 +217,20 @@ async def test_key_chords(tmp_path: Path) -> None:
         await pilot.press("a", "j")
         assert app.file_list.highlighted == 0
         assert not popup.display
+
+        await pilot.press("a")
+        app.push_screen(Dismissible("Modal"))
+        assert app._key_chord is None
+        assert not popup.display
+        await pilot.pause()
+        await pilot.press("x")
+        assert isinstance(app.screen, Dismissible)
+
+        await pilot.press("c")
+        popup = app.screen.query_one(KeyChordPopup)
+        assert popup.parent is app.screen
+        await pilot.press("x")
+        assert not isinstance(app.screen, Dismissible)
 
 
 def test_key_chord_display() -> None:

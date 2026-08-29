@@ -71,7 +71,9 @@ def test_load_key_chords(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> Non
 
 
 @pytest.mark.asyncio
-async def test_contextual_key_dispatch(tmp_path: Path) -> None:
+async def test_contextual_key_dispatch(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
     (tmp_path / "a").touch()
     (tmp_path / "b").touch()
     app = Application(startup_path=tmp_path.as_posix())
@@ -99,11 +101,33 @@ async def test_contextual_key_dispatch(tmp_path: Path) -> None:
         await pilot.press("j")
         assert app.file_list.highlighted == 1
 
-        app.keys["file_list"] = {"s": {"action": "sort_order.extension(True)"}}
+        app.keys["file_list"] = {
+            "s": {"action": "sort_order.extension(True)"},
+            ",": {"p": {"action": "sort_order.toggle_custom_sort"}},
+        }
         await pilot.press("s")
-        assert app.query_one(StateManager).get_sort_prefs() == ("extension", True)
-
         state_manager = app.query_one(StateManager)
+        assert state_manager.get_sort_prefs() == ("extension", True)
+        button = app.query_one(SortOrderButton)
+        descriptions = []
+        describe = button.describe_key_chord_action
+        monkeypatch.setattr(
+            button,
+            "describe_key_chord_action",
+            lambda action, description: (
+                descriptions.append(describe(action, description)) or descriptions[-1]
+            ),
+        )
+
+        assert not state_manager.custom_sort_enabled
+        await pilot.press(",")
+        assert descriptions[-1].endswith("(disabled)")
+        await pilot.press("p")
+        assert state_manager.custom_sort_enabled
+        await pilot.press(",")
+        assert descriptions[-1].endswith("(enabled)")
+        await pilot.press("escape")
+
         pinned_sidebar_visible = state_manager.pinned_sidebar_visible
         app.keys = {"main": {"S": {"action": "toggle_pinned_sidebar"}}}
         await pilot.press("S")

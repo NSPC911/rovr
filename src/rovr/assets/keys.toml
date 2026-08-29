@@ -90,6 +90,7 @@ desc = "Sort order"
 "c" = { action = "sort_order.created", desc = "Sort by creation time" }
 "m" = { action = "sort_order.modified", desc = "Sort by modification time" }
 "d" = { action = "sort_order.descending", desc = "Toggle descending order" }
+"p" = { action = "sort_order.toggle_custom_sort", desc = "%Nextstate sorting for this path only" }
 
 [pinned_sidebar]
 "/" = { action = "focus_search", desc = "Search pinned directories" }

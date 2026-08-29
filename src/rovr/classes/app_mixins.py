@@ -711,7 +711,12 @@ class KeyChordPopup(Static):
         super().__init__(id="key_chord")
         self.display = False
 
-    def show_chord(self, bindings: KeyMap) -> None:
+    def show_chord(
+        self,
+        bindings: KeyMap,
+        default_namespace: DOMNode,
+        namespaces: dict[str, DOMNode],
+    ) -> None:
         columns = (
             1
             if "-filelist-only" in self.screen.classes
@@ -729,6 +734,15 @@ class KeyChordPopup(Static):
                 continue
             display_key = f"<{key}>" if "+" in key else key
             description = cast(str, binding.get("desc") or binding.get("action") or key)
+            action = binding.get("action")
+            namespace = (
+                namespaces.get(action.partition(".")[0], default_namespace)
+                if action is not None
+                else default_namespace
+            )
+            describe = getattr(namespace, "describe_key_chord_action", None)
+            if callable(describe) and action is not None:
+                description = describe(action, description)
             cells.append(
                 Text.assemble(
                     (display_key, "bold"),
@@ -798,7 +812,9 @@ class KeyHandler:
             if isinstance(binding, dict):
                 if "action" not in binding:
                     self._key_chord = cast(KeyMap, binding)
-                    self._key_chord_popup.show_chord(self._key_chord)
+                    self._key_chord_popup.show_chord(
+                        self._key_chord, self._key_chord_namespace, namespaces
+                    )
                     return True
                 namespace = self._key_chord_namespace
                 action = cast(KeyBinding, binding)["action"]
@@ -831,7 +847,7 @@ class KeyHandler:
                 self._key_chord_namespace = namespace
                 self._key_chord_popup = KeyChordPopup()
                 await self.screen.mount(self._key_chord_popup)
-                self._key_chord_popup.show_chord(self._key_chord)
+                self._key_chord_popup.show_chord(self._key_chord, namespace, namespaces)
                 return True
             action = cast(KeyBinding, binding)["action"]
             if action == "noop":

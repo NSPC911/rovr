@@ -671,9 +671,10 @@ class DragAndDrop:
                     if resp:
                         self.query_one(ProcessContainer).remote_download(online, [resp])
 
-    @on(events.Paste)
     @work
-    async def on_paste(self, event: events.Paste) -> None:
+    async def on_paste(self: App, event: events.Paste) -> None:
+        from urllib.parse import urlparse
+
         if len(self.screen_stack) != 1:
             if self._p_timer:
                 self._p_timer.stop()
@@ -685,10 +686,36 @@ class DragAndDrop:
                 ),
             )
             return
+        if any(
+            urlparse(line).scheme in ("http", "https")
+            for line in event.text.splitlines()
+        ):
+            if len(event.text.splitlines()) > 1:
+                self.notify(
+                    "Multiple http(s) links are not supported.",
+                    title="Paste (NotImplemented)",
+                    severity="warning",
+                )
+                return
+            # no multi files, dont want to ask multiple times
+            resp: str | None = await self.push_screen_wait(
+                ModalInput(
+                    "Save file as",
+                    "existing file will be overwritten",
+                    initial_value=path.basename(urlparse(event.text).path),
+                    validators=[IsValidFilePath(), AllowsExistingFiles()],
+                    is_path=True,
+                )
+            )
+            if resp:
+                self.query_one(ProcessContainer).remote_download([event.text], [resp])
+            return
 
         await self._show_paste_drop(event, normalise(getcwd()))
 
-    async def _show_paste_drop(self, event: events.Paste, destination: str) -> None:
+    async def _show_paste_drop(
+        self: App, event: events.Paste, destination: str
+    ) -> None:
         response = await self.push_screen_wait(PasteDropScreen(event))
         if response is not None and response.paths:
             process_container = self.query_one(ProcessContainer)

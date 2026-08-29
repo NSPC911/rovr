@@ -214,7 +214,7 @@ async def test_key_chords(tmp_path: Path) -> None:
         assert not popup.display
 
         await pilot.press("a", "j")
-        assert app.file_list.highlighted == 1
+        assert app.file_list.highlighted == 0
         assert not popup.display
 
 

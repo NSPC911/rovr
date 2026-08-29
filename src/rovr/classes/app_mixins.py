@@ -827,6 +827,8 @@ class KeyHandler:
         return "+".join((*modifiers, name))
 
     async def _check_bindings(self: App, key: str, priority: bool = False) -> bool:
+        if self._show_keys:
+            self.show_key(key)
         if not self.keys or self.screen.id == "--command-palette":
             return await App._check_bindings(self, key, priority)
         key = KeyHandler.shorten_key(key)

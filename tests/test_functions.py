@@ -133,11 +133,13 @@ def test_get_shortcut_uses_active_keys(monkeypatch: pytest.MonkeyPatch) -> None:
                 "ctrl+d": {"action": "delete"},
                 "D": {"action": "delete"},
                 "x": {"action": "noop"},
+                "y": {"y": {"action": "confirm"}},
             }
         },
     )
 
     assert utils.get_shortcut("delete_files", "delete") == "D"
+    assert utils.get_shortcut("delete_files", "confirm") == "yy"
     assert utils.get_shortcut("delete_files", "cancel") == ""
 
 

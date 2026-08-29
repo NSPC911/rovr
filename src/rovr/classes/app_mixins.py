@@ -7,8 +7,9 @@ from functools import lru_cache
 from importlib import resources
 from os import path
 from time import perf_counter
-from typing import ClassVar, Iterable
+from typing import Any, ClassVar, Iterable, cast
 
+from rich.table import Table
 from rich.text import Text
 from textual import events, on, work
 from textual.app import App
@@ -16,6 +17,7 @@ from textual.css.errors import StylesheetError
 from textual.css.stylesheet import StylesheetParseError
 from textual.dom import DOMNode
 from textual.geometry import Offset
+from textual.widgets import Static
 from textual_drivers.dnd import (
     DNDDragIn,
     DNDDragInOperation,
@@ -32,6 +34,7 @@ from rovr.classes.textual_validators import (
     AllowsExistingFiles,
     IsValidFilePath,
 )
+from rovr.classes.type_aliases import KeyBinding, KeyMap
 from rovr.core import (
     PinnedSidebar,
     PinnedSidebarContainer,
@@ -730,7 +733,79 @@ class DragAndDrop:
                     )
 
 
+class KeyChordPopup(Static):
+    def __init__(self) -> None:
+        super().__init__(id="key_chord")
+        self.display = False
+
+    def show_chord(
+        self,
+        bindings: KeyMap,
+        default_namespace: DOMNode,
+        namespaces: dict[str, DOMNode],
+    ) -> None:
+        columns = (
+            1
+            if "-filelist-only" in self.screen.classes
+            else 2
+            if "-no-preview" in self.screen.classes
+            else 3
+        )
+        table = Table.grid(expand=True, padding=(0, 1))
+        for _ in range(columns):
+            table.add_column(ratio=1)
+
+        cells = []
+        for key, binding in bindings.items():
+            if key == "desc" or not isinstance(binding, dict):
+                continue
+            display_key = f"<{key}>" if "+" in key else key
+            description = cast(str, binding.get("desc") or binding.get("action") or key)
+            action = binding.get("action")
+            namespace = (
+                namespaces.get(action.partition(".")[0], default_namespace)
+                if action is not None
+                else default_namespace
+            )
+            describe = getattr(namespace, "describe_key_chord_action", None)
+            if callable(describe) and action is not None:
+                description = describe(action, description)
+            cells.append(
+                Text.assemble(
+                    (display_key, "bold"),
+                    f"  {description}",
+                    overflow="ellipsis",
+                    no_wrap=True,
+                )
+            )
+        for index in range(0, len(cells), columns):
+            table.add_row(*cells[index : index + columns])
+
+        title = bindings.get("desc")
+        self.border_title = title if isinstance(title, str) else "Key chord"
+        self.update(table)
+        self.display = True
+
+    def hide_chord(self) -> None:
+        self.display = False
+
+
 class KeyHandler:
+    _key_chord: KeyMap | None = None
+    _key_chord_namespace: DOMNode | None = None
+    _key_chord_popup: KeyChordPopup | None = None
+
+    def push_screen(
+        self: App,
+        screen: Any,
+        callback: Any = None,
+        wait_for_dismiss: bool = False,
+        *,
+        mode: str | None = None,
+    ) -> Any:
+        self._cancel_key_chord()
+        return App.push_screen(self, screen, callback, wait_for_dismiss, mode=mode)
+
     @lru_cache(maxsize=128)
     @staticmethod
     def shorten_key(key: str) -> str:
@@ -754,21 +829,54 @@ class KeyHandler:
     async def _check_bindings(self: App, key: str, priority: bool = False) -> bool:
         if not self.keys or self.screen.id == "--command-palette":
             return await App._check_bindings(self, key, priority)
+        key = KeyHandler.shorten_key(key)
+        namespaces = self._key_namespaces()
+        if priority and self._key_chord is not None:
+            if key == "escape":
+                self._cancel_key_chord()
+                return True
+            binding = self._key_chord.get(key)
+            if isinstance(binding, dict):
+                if "action" not in binding:
+                    self._key_chord = cast(KeyMap, binding)
+                    self._key_chord_popup.show_chord(
+                        self._key_chord, self._key_chord_namespace, namespaces
+                    )
+                    return True
+                namespace = self._key_chord_namespace
+                action = cast(KeyBinding, binding)["action"]
+                self._cancel_key_chord()
+                if action == "noop":
+                    return True
+                return namespace is not None and await self.run_action(
+                    action,
+                    default_namespace=namespace,
+                    namespaces=namespaces,
+                )
+            self._cancel_key_chord()
+            return True
+
         if (
             priority
             and self.focused is not None
-            and self.focused.check_consume_key(key, KeyHandler.shorten_key(key))
+            and self.focused.check_consume_key(key, key)
         ):
             return False
 
-        namespaces = self._key_namespaces()
         contexts = [("global", self)] if priority else self._active_key_contexts()
         for context, namespace in contexts:
             context = self.keys.get(context, {})
-            binding = context.get(KeyHandler.shorten_key(key))
+            binding = context.get(key)
             if not isinstance(binding, dict):
                 continue
-            action = binding["action"]
+            if "action" not in binding:
+                self._key_chord = cast(KeyMap, binding)
+                self._key_chord_namespace = namespace
+                self._key_chord_popup = KeyChordPopup()
+                await self.screen.mount(self._key_chord_popup)
+                self._key_chord_popup.show_chord(self._key_chord, namespace, namespaces)
+                return True
+            action = cast(KeyBinding, binding)["action"]
             if action == "noop":
                 return True
             if action is not None and await self.run_action(
@@ -778,6 +886,14 @@ class KeyHandler:
             ):
                 return True
         return False
+
+    def _cancel_key_chord(self: App) -> None:
+        self._key_chord = None
+        self._key_chord_namespace = None
+        if self._key_chord_popup is not None:
+            self._key_chord_popup.hide_chord()
+            self._key_chord_popup.remove()
+            self._key_chord_popup = None
 
     def _active_key_contexts(self: App) -> list[tuple[str, DOMNode]]:
         contexts: list[tuple[str, DOMNode]] = []

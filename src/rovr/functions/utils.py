@@ -142,10 +142,26 @@ def get_shortcut(
     from rovr.variables.constants import config, keys
 
     if keys:
+
+        def find_bindings(
+            bindings: dict[str, Any], prefix: tuple[str, ...] = ()
+        ) -> list[tuple[str, ...]]:
+            matches = []
+            for key, binding in bindings.items():
+                if not isinstance(binding, dict):
+                    continue
+                sequence = prefix + (key,)
+                if binding.get("action") == action:
+                    matches.append(sequence)
+                elif "action" not in binding:
+                    matches.extend(find_bindings(binding, sequence))
+            return matches
+
         binds = [
-            key
-            for key, binding in keys.get(context, {}).items()
-            if binding["action"] == action
+            sequence[0]
+            if len(sequence) == 1
+            else "".join(f"<{key}>" if "+" in key else key for key in sequence)
+            for sequence in find_bindings(keys.get(context, {}))
         ]
     else:
         legacy = cast(Any, config)["keybinds"]

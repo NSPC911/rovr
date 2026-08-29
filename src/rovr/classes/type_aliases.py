@@ -16,10 +16,13 @@ class KeyBinding(TypedDict):
     desc: NotRequired[str]
 
 
+KeyMap: TypeAlias = "dict[str, KeyBinding | KeyMap | str]"
+
+
 SortByOptions: TypeAlias = Literal[
     "name", "size", "modified", "created", "extension", "natural"
 ]
 
 ShellRunTypes: TypeAlias = Literal["suspend", "background", "orphan"]
 
-KeysConfig: TypeAlias = dict[str, dict[str, KeyBinding]]
+KeysConfig: TypeAlias = dict[str, KeyMap]

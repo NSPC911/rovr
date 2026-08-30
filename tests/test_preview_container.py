@@ -6,13 +6,8 @@ from unittest.mock import patch
 import pytest
 from textual.app import App, ComposeResult
 
-from rovr.core.preview_container import (
-    ExitNow,
-    PreviewContainer,
-    WindowedTextPreview,
-    _decode_text_preview,
-    preview_token,
-)
+from rovr.components.text_preview import WindowedTextPreview, _decode_text_preview
+from rovr.core.preview_container import ExitNow, PreviewContainer, preview_token
 from rovr.variables.constants import config
 
 

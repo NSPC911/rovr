@@ -8,6 +8,7 @@ from dataclasses import dataclass
 from functools import partial
 from io import BytesIO
 from os import path
+from tempfile import SpooledTemporaryFile
 from time import monotonic, time
 from typing import Any, Awaitable, Callable, Literal, TypeVar, cast, overload
 
@@ -43,7 +44,7 @@ from rovr.core import FileList
 from rovr.functions import icons as icon_utils
 from rovr.functions import path as path_utils
 from rovr.functions import preview_utils
-from rovr.functions.ansi import ansi_to_rich_text
+from rovr.functions.ansi import ansi_to_rich_text, ansi_to_rich_text_parallel
 from rovr.functions.pdf import get_pdf_images, get_pdf_info
 from rovr.functions.utils import (
     load_from_cache,
@@ -1034,6 +1035,7 @@ class PreviewContainer(Actionable, Container):
 
         Raises:
             ExitNow: If this preview request is no longer active.
+            ValueError: If process-pool startup fails for known multiprocessing issues.
             subprocess.TimeoutExpired: If bat does not finish within five seconds.
         """
         bat_executable = config["plugins"]["bat"]["executable"]
@@ -1068,41 +1070,65 @@ class PreviewContainer(Actionable, Container):
         try:
             new_content = _load_cached_text(realpath, "bat", stat_result, signature)
             if new_content is None:
-                process = subprocess.Popen(
-                    command,
-                    stdout=subprocess.PIPE,
-                    stderr=subprocess.PIPE,
-                )
-                deadline = monotonic() + 5
-                while True:
-                    try:
-                        stdout, stderr = process.communicate(timeout=1)
-                        break
-                    except subprocess.TimeoutExpired:
-                        if should_cancel() or monotonic() >= deadline:
-                            process.kill()
-                            stdout, stderr = process.communicate()
-                            if should_cancel():
-                                return False
-                            raise subprocess.TimeoutExpired(command, 5, stdout, stderr)
+                with (
+                    SpooledTemporaryFile(max_size=max_text_size) as stdout_file,
+                    SpooledTemporaryFile(max_size=1024 * 1024) as stderr_file,
+                ):
+                    process = subprocess.Popen(
+                        command,
+                        stdout=stdout_file,
+                        stderr=stderr_file,
+                    )
+                    deadline = monotonic() + 5
+                    while True:
+                        try:
+                            process.wait(timeout=1)
+                            break
+                        except subprocess.TimeoutExpired:
+                            if should_cancel() or monotonic() >= deadline:
+                                process.kill()
+                                process.wait()
+                                if should_cancel():
+                                    return False
+                                stdout_file.seek(0)
+                                stderr_file.seek(0)
+                                raise subprocess.TimeoutExpired(
+                                    command,
+                                    5,
+                                    stdout_file.read(),
+                                    stderr_file.read(),
+                                )
 
-                if should_cancel():
-                    return False
-
-                if process.returncode != 0:
-                    error_message = stderr.decode("utf-8", errors="ignore")
                     if should_cancel():
                         return False
-                    self.call_from_thread(self.remove_children)
-                    self.notify(
-                        error_message,
-                        title="Plugins: Bat",
-                        severity="warning",
-                    )
-                    return False
 
-                bat_output = stdout.decode("utf-8", errors="ignore")
-                new_content = ansi_to_rich_text(bat_output)
+                    if process.returncode != 0:
+                        stderr_file.seek(0)
+                        error_message = stderr_file.read().decode(
+                            "utf-8", errors="ignore"
+                        )
+                        if should_cancel():
+                            return False
+                        self.call_from_thread(self.remove_children)
+                        self.notify(
+                            error_message,
+                            title="Plugins: Bat",
+                            severity="warning",
+                        )
+                        return False
+
+                    stdout_file.seek(0)
+                    bat_output = stdout_file.read().decode("utf-8", errors="ignore")
+                if self.app.MULTIPROCESSING_PROCESS_ALLOWED:
+                    try:
+                        new_content = ansi_to_rich_text_parallel(bat_output)
+                    except ValueError as exc:
+                        if multiprocessing_process_error_checker(self.app, exc):
+                            new_content = ansi_to_rich_text(bat_output)
+                        else:
+                            raise
+                else:
+                    new_content = ansi_to_rich_text(bat_output)
                 _save_cached_text(realpath, "bat", stat_result, signature, new_content)
 
             if should_cancel():

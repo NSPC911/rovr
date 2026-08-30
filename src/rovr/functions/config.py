@@ -17,7 +17,7 @@ from textual.keys import Keys
 
 from rovr import RESOURCE_PACKAGE, pprint
 from rovr.classes.config import RovrConfig
-from rovr.classes.type_aliases import KeysConfig
+from rovr.classes.type_aliases import KeyMap, KeysConfig
 from rovr.variables.maps import VALID_KEY_CONTEXTS
 
 try:
@@ -660,11 +660,10 @@ def validate_keys(keys: KeysConfig) -> list[str]:
     valid_modifiers = {"alt", "ctrl", "hyper", "meta", "shift", "super"}
     errors = []
 
-    for context, bindings in keys.items():
-        if context not in VALID_KEY_CONTEXTS:
-            errors.append(f"Unknown context [{context}]")
-
-        for key in bindings:
+    def validate_bindings(bindings: KeyMap, section: str) -> None:
+        for key, binding in bindings.items():
+            if key == "desc":
+                continue
             *modifiers, name = [key] if len(key) == 1 else key.split("+")
             valid_name = (len(name) == 1 and name.isprintable() and name != " ") or (
                 name in valid_key_names
@@ -674,7 +673,14 @@ def validate_keys(keys: KeysConfig) -> list[str]:
                 and set(modifiers) <= valid_modifiers
             )
             if not valid_name or not valid_modifier_list:
-                errors.append(f'Invalid key "{key}" in [{context}]')
+                errors.append(f'Invalid key "{key}" in [{section}]')
+            if isinstance(binding, dict) and "action" not in binding:
+                validate_bindings(binding, f"{section}.{key}")
+
+    for context, bindings in keys.items():
+        if context not in VALID_KEY_CONTEXTS:
+            errors.append(f"Unknown context [{context}]")
+        validate_bindings(bindings, context)
 
     return errors
 
@@ -731,26 +737,38 @@ def load_keys() -> KeysConfig:
     # check it manually
     schema = {
         "type": "object",
-        "patternProperties": {
-            "^.*$": {
-                "type": "object",
-                "patternProperties": {
-                    "^.*$": {
-                        "oneOf": [
-                            {"type": "string"},
-                            {
-                                "type": "object",
-                                "properties": {
-                                    "action": {"type": "string"},
-                                    "desc": {"type": "string"},
-                                },
-                                "required": ["action"],
-                                "additionalProperties": False,
-                            },
-                        ]
+        "definitions": {
+            "binding": {
+                "oneOf": [
+                    {"type": "string"},
+                    {
+                        "type": "object",
+                        "properties": {
+                            "action": {"type": "string"},
+                            "desc": {"type": "string"},
+                        },
+                        "required": ["action"],
+                        "additionalProperties": False,
                     },
-                },
+                ]
             },
+            "chord": {
+                "type": "object",
+                "properties": {"desc": {"type": "string"}},
+                "patternProperties": {
+                    "^(?!desc$).+$": {
+                        "anyOf": [
+                            {"$ref": "#/definitions/binding"},
+                            {"$ref": "#/definitions/chord"},
+                        ]
+                    }
+                },
+                "additionalProperties": False,
+                "not": {"required": ["action"]},
+            },
+        },
+        "patternProperties": {
+            "^.*$": {"$ref": "#/definitions/chord"},
         },
     }
     try:
@@ -787,10 +805,20 @@ def load_keys() -> KeysConfig:
             pprint(Padding(to_print, (0, 4, 0, 3), expand=False))
         exit(1)
 
-    return {
-        context: {
-            key: {"action": binding} if isinstance(binding, str) else binding
-            for key, binding in context_keys.items()
+    def normalize(bindings: KeyMap) -> KeyMap:
+        return {
+            key: (
+                binding
+                if key == "desc"
+                else {"action": binding}
+                if isinstance(binding, str)
+                else binding
+                if "action" in binding
+                else normalize(binding)
+            )
+            for key, binding in bindings.items()
         }
-        for context, context_keys in keys_dict.items()
+
+    return {
+        context: normalize(context_keys) for context, context_keys in keys_dict.items()
     }

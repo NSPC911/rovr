@@ -412,18 +412,22 @@ class Application(
         if config["interface"]["allow_tab_nav"]:
             super().action_focus_previous()
 
-    def show_key(self, event: events.Key) -> None:
+    # keeping events.Key if i need it in future
+    def show_key(self, event: events.Key | str) -> None:
+        if isinstance(event, events.Key):
+            using = KeyHandler.shorten_key(event.key)
+        else:
+            using = event
         if self._show_keys:
             with suppress(NoMatches):
-                using = KeyHandler.shorten_key(event.key)
                 wid = self.query_one("#showKeys", Label)
                 if wid.content != using:
                     wid.update(using)
 
     async def on_key(self, event: events.Key) -> None:
         # show key
-        if self._show_keys:
-            self.show_key(event)
+        # if self._show_keys:
+        #     self.show_key(event)
 
         # if current screen isn't the app screen
         if len(self.screen_stack) != 1:

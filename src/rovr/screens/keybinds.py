@@ -1,4 +1,4 @@
-from typing import Any, ClassVar, cast
+from typing import Any, ClassVar, Iterable, cast
 
 from textual import events
 from textual.app import ComposeResult
@@ -9,7 +9,7 @@ from textual.widgets import OptionList
 
 from rovr.classes.mixins import CursorNavigationMixin
 from rovr.classes.textual_options import KeybindOption
-from rovr.classes.type_aliases import KeysConfig
+from rovr.classes.type_aliases import KeyBinding, KeyMap, KeysConfig
 from rovr.components import SearchInput
 from rovr.functions import icons
 from rovr.functions.utils import check_key, dismiss
@@ -226,28 +226,47 @@ class ScopedKeybindList(KeybindList):
         keybind_data: list[tuple[str, str]] = []
         primary_keys: list[str] = []
         for context, context_bindings in self.keys.items():
-            grouped: dict[str, tuple[list[str], str]] = {}
-            for key, binding in context_bindings.items():
+            grouped: dict[tuple[str, str], list[tuple[str, ...]]] = {}
+            for sequence, binding in self._walk_bindings(context_bindings):
                 action = binding["action"]
                 if action == "noop":
                     continue
-                keys, description = grouped.setdefault(action, ([], action))
-                keys.append(key)
-                description = binding.get("desc") or description
-                grouped[action] = (keys, description)
+                description = binding.get("desc") or action
+                grouped.setdefault((action, description), []).append(sequence)
 
             if not grouped:
                 continue
             keybind_data.append(("--section--", context.replace("_", " ").title()))
             primary_keys.append("")
-            for keys, description in grouped.values():
-                keybind_data.append((" ".join(f"<{key}>" for key in keys), description))
-                primary_keys.append(keys[0])
+            for (_, description), sequences in grouped.items():
+                formatted = " ".join(
+                    self._format_sequence(sequence) for sequence in sequences
+                )
+                keybind_data.append((formatted, description))
+                primary_keys.append(sequences[0][0])
 
         if not keybind_data:
             keybind_data.append(("<disabled>", "No keybindings"))
             primary_keys.append("")
         return keybind_data, primary_keys
+
+    @classmethod
+    def _walk_bindings(
+        cls, bindings: KeyMap, prefix: tuple[str, ...] = ()
+    ) -> Iterable[tuple[tuple[str, ...], KeyBinding]]:
+        for key, binding in bindings.items():
+            if key == "desc" or not isinstance(binding, dict):
+                continue
+            if "action" in binding:
+                yield prefix + (key,), cast(KeyBinding, binding)
+            else:
+                yield from cls._walk_bindings(cast(KeyMap, binding), prefix + (key,))
+
+    @staticmethod
+    def _format_sequence(sequence: tuple[str, ...]) -> str:
+        if len(sequence) == 1:
+            return f"<{sequence[0]}>"
+        return "".join(f"<{key}>" if "+" in key else key for key in sequence)
 
 
 class ScopedKeybinds(Keybinds):
@@ -270,7 +289,7 @@ class ScopedKeybinds(Keybinds):
             key
             for context in ("keybinds", "filter_modal")
             for key, binding in cast(Any, self.app).keys.get(context, {}).items()
-            if binding["action"] == "exit"
+            if isinstance(binding, dict) and binding.get("action") == "exit"
         ]
         close_with = " or ".join(exit_keys) if exit_keys else "outside"
         self.container.border_subtitle = f"Press {close_with} to close"

@@ -468,6 +468,21 @@ PreviewContainer > LoadingPreview {
   }
 }
 
+KeyChordPopup {
+  layer: toastLayer;
+  dock: bottom;
+  width: 80%;
+  height: auto;
+  offset: 10% 0;
+  padding: 0 1;
+  margin-bottom: 5;
+  background: $panel;
+  border: $border-style $accent;
+  &:ansi {
+    background: transparent;
+  }
+}
+
 #processes { padding: 0 0 0 1 }
 
 #metadata {
@@ -1192,6 +1207,14 @@ Screen.-filelist-only,
 Screen.-no-preview {
   #preview_sidebar,
   #below_menu Button { display: none !important }
+}
+Screen.-no-preview KeyChordPopup {
+  width: 90%;
+  offset: 5% 0;
+}
+Screen.-filelist-only KeyChordPopup {
+  width: 100%;
+  offset: 0 0;
 }
 Screen.-no-menu-at-all #menu_wrapper,
 Screen.-middle-only #menu_wrapper { display: none }

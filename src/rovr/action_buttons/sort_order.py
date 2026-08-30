@@ -122,6 +122,29 @@ class SortOrderButton(Button):
             descending = not state_manager.get_sort_prefs()[1]
         self.action_set(state_manager.get_sort_prefs()[0], descending)
 
+    def action_toggle_custom_sort(self) -> None:
+        self.app.query_one(StateManager).toggle_custom_sort()
+        self.app.file_list.update_file_list(add_to_session=False)
+        self.update_icon()
+
+    def describe_key_chord_action(self, action: str, description: str) -> str:
+        if action == "sort_order.toggle_custom_sort":
+            enabled = self.app.query_one(StateManager).custom_sort_enabled
+            old_desc = description
+            state = "enable" if enabled else "disable"
+            nstate = "disable" if enabled else "enable"
+            description = (
+                description
+                .replace("%state", state)
+                .replace("%nextstate", nstate)
+                .replace("%State", state.capitalize())
+                .replace("%Nextstate", nstate.capitalize())
+            )
+            return f"{description}" + (
+                " (currently enabled)" if enabled and old_desc == description else ""
+            )
+        return description
+
 
 class SortOrderPopup(PopupOptionList):
     key_contexts = ("sort_menu", "popup_list", "lists")
@@ -208,15 +231,10 @@ class SortOrderPopup(PopupOptionList):
         )
 
     def on_option_list_option_selected(self, event: OptionList.OptionSelected) -> None:
-        state_manager: StateManager = self.app.query_one(StateManager)
-
         if event.option.id == "descending":
             self.button.action_descending()
         elif event.option.id == "custom_sort":
-            # Toggle custom sort for this folder
-            state_manager.toggle_custom_sort()
-            self.app.file_list.update_file_list(add_to_session=False)
-            self.button.update_icon()
+            self.button.action_toggle_custom_sort()
         else:
             self.button.action_set(cast(SortByOptions, event.option.id))
 

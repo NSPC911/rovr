@@ -323,6 +323,15 @@ The `keybinds` context also supports `focus_search`. `shell_exec` supports `cycl
 
 These actions apply only while their corresponding modal is open.
 
+## Description substitution
+
+Certain actions support expansions based on their state.
+
+#### `sort_order.toggle_custom_sort`
+- `%state`: returns "enable" if the sort order set is for that folder only. "disable" otherwise
+- `%nextstate`: opposite of `%state`
+- `%State` and `%Nextstate`: same as above, but capitalized
+
 ## Finding the key names
 
 Run `rovr --show-keys` to display the key name that will be used.

@@ -1,0 +1,62 @@
+/**********************************************************
+                 █    █  █ █▄  █ ▄▀▀▄ █▀▀▄
+                 █    █  █ █ ▀▄█ █▀▀█ █▀▀▄
+                 ▀▀▀▀  ▀▀  ▀   ▀ ▀  ▀ ▀  ▀
+*****************************************************2608*/
+
+
+$background: #0A0A0C;
+$surface: #16161A;
+$panel: #1E1E23;
+$foreground: #D8D8DC;
+$primary: #A8ADB8;
+$secondary: #71767F;
+$accent: #8FB3D1;
+$warning: #D3A95C;
+$error: #E06C6C;
+$success: #52BF70;
+$dark: true;
+$boost: #FFFFFF08;
+
+$bar-gradient-default: #71767F #D8D8DC;
+$bar-gradient-error: #8A4444 #E06C6C;
+
+
+#below_menu #path_switcher {
+    border-left: $border-style $border-blurred;
+}
+#menu_wrapper:focus-within #below_menu #path_switcher {
+    border-left: $border-style $border-focused !important;
+}
+#below_menu PathAutoCompleteInput {
+    border: $border-style $border-focused;
+    border-top: none;
+}
+#below_menu PathAutoCompleteInput AutoCompleteList .option-list--option-highlighted {
+    background: $primary;
+}
+
+
+FileList > .filelist--hidden {
+    color: $secondary;
+}
+FileList > .filelist--cut {
+    color: $error;
+    text-style: italic;
+}
+FileList > .filelist--broken-link {
+    background: $secondary 25%;
+    color: $error;
+    text-style: dim
+}
+FileList > .filelist--link {
+    color: $accent;
+}
+FileList > .filelist--link--hovered {
+    background: transparent;
+    color: $accent-lighten-3;
+}
+FileList > .filelist--link--highlighted {
+    background: $primary;
+    color: $background;
+}

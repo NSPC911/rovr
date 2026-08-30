@@ -1,0 +1,87 @@
+/**********************************************************
+       █▄  █ █▀▀▀ █▀▀▄ ▀▀█▀▀ █  █ █▄  █ █ ▄▀▀▄ █▄  █
+       █ ▀▄█ █▀▀  █▀▀    █   █  █ █ ▀▄█ █ █▀▀█ █ ▀▄█
+       ▀   ▀ ▀▀▀▀ ▀      ▀    ▀▀  ▀   ▀ ▀ ▀  ▀ ▀   ▀
+*****************************************************2608*/
+
+
+$background: #0A0C2C;
+$surface: #1A237E;
+$panel: #121836;
+$foreground: #E8EAF6;
+$primary: #3C64FF;
+$secondary: #9A63E6;
+$accent: #39C7B5;
+$warning: #FFB74D;
+$error: #FF5252;
+$success: #69F0AE;
+$dark: true;
+
+$bar-gradient-default: #1A237E #3C64FF;
+$bar-gradient-error: #B71C1C #FF5252;
+
+$input-cursor-background: #39C7B5;
+$input-selection-background: #1A237E;
+$input-selection-foreground: #E8EAF6;
+
+
+FileList > .filelist--broken-link {
+    background: $error 15%;
+    color: $error 80%;
+    text-style: dim;
+}
+FileList > .filelist--broken-link--hovered {
+    background: $error 25%;
+    color: $error;
+}
+FileList > .filelist--broken-link--highlighted {
+    background: $error;
+    color: $background;
+}
+FileList > .filelist--link {
+    color: $accent;
+}
+FileList > .filelist--link--hovered {
+    background: transparent;
+    color: $accent-lighten-3;
+}
+FileList > .filelist--link--highlighted {
+    background: $accent;
+    color: $background;
+}
+FileList > .filelist--cut {
+    color: $foreground-darken-3;
+    text-style: dim;
+}
+FileList > .filelist--cut--hovered {
+    color: $secondary-darken-2;
+}
+FileList > .filelist--cut--highlighted {
+    background: $primary-darken-2;
+    color: $foreground;
+}
+FileList > .filelist--hidden {
+    color: $secondary-darken-2;
+    text-style: dim;
+}
+FileList > .filelist--hidden--hovered {
+    color: $secondary;
+}
+FileList > .filelist--hidden--highlighted {
+    background: $secondary-darken-3;
+    color: $foreground;
+}
+
+
+Switch:blur > .switch--slider {
+    color: $panel-lighten-2;
+}
+Switch.-on:blur > .switch--slider {
+    color: $success;
+}
+Switch:focus > .switch--slider {
+    color: $panel-lighten-3 !important;
+}
+Switch.-on:focus > .switch--slider {
+    color: $success-lighten-1 !important;
+}

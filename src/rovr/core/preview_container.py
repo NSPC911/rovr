@@ -1683,6 +1683,18 @@ class PreviewContainer(Actionable, Container):
         ):
             filelist.action_cursor_down()
 
+    def action_left(self) -> None:
+        if self._is_pdf() and self.pdf.images is not None:
+            self.update_current_pdf_page_by_diff(-1)
+        elif text_preview := self.get_child(WindowedTextPreview):
+            text_preview.scroll_left(animate=False)
+
+    def action_right(self) -> None:
+        if self._is_pdf() and self.pdf.images is not None:
+            self.update_current_pdf_page_by_diff(1)
+        elif text_preview := self.get_child(WindowedTextPreview):
+            text_preview.scroll_right(animate=False)
+
     def action_page_up(self) -> None:
         if self._is_pdf() and self.pdf.images is not None:
             self.update_current_pdf_page_by_diff(-1)
@@ -1710,6 +1722,18 @@ class PreviewContainer(Actionable, Container):
             filelist := self.get_child(FileList)
         ):
             filelist.action_page_down()
+
+    def action_page_left(self) -> None:
+        if self._is_pdf() and self.pdf.images is not None:
+            self.update_current_pdf_page_by_diff(-1)
+        elif text_preview := self.get_child(WindowedTextPreview):
+            text_preview.scroll_page_left(animate=False)
+
+    def action_page_right(self) -> None:
+        if self._is_pdf() and self.pdf.images is not None:
+            self.update_current_pdf_page_by_diff(1)
+        elif text_preview := self.get_child(WindowedTextPreview):
+            text_preview.scroll_page_right(animate=False)
 
     def action_home(self) -> None:
         if self._is_pdf() and self.pdf.images is not None:

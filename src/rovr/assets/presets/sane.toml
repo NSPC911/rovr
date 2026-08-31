@@ -96,6 +96,8 @@ desc = "Sort order"
 [preview]
 "up" = "up"
 "down" = "down"
+"left" = "left"
+"right" = "right"
 "pageup" = "page_up"
 "pagedown" = "page_down"
 "home" = "home"

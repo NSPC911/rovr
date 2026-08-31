@@ -4,9 +4,14 @@ from typing import Iterable
 
 from rich.segment import Segment
 from textual import _border as border
+from textual._compositor import Compositor
 from textual.content import Content
 from textual.css.types import EdgeType
+from textual.geometry import Region, Size
+from textual.map_geometry import MapGeometry
+from textual.scrollbar import ScrollBar
 from textual.style import Style
+from textual.widget import Widget
 from textual.widgets import Input
 
 
@@ -100,6 +105,66 @@ border.BORDER_CHARS["dashed"] = (
     ("┆", " ", "┆"),
     ("└", "╌", "┘"),
 )
+
+
+_arrange_scrollbars = Widget._arrange_scrollbars
+
+
+def arrange_scrollbars(self: Widget, region: Region) -> Iterable[tuple[Widget, Region]]:
+    scrollbars = list(_arrange_scrollbars(self, region))
+    parent = self.parent
+    border_bottom = bool(
+        self.styles.border_bottom[0]
+        or isinstance(parent, Widget)
+        and parent.styles.border_bottom[0]
+    )
+    border_right = bool(
+        self.styles.border_right[0]
+        or isinstance(parent, Widget)
+        and parent.styles.border_right[0]
+    )
+    both_on_border = border_bottom and border_right and len(scrollbars) == 3
+
+    for scrollbar, scrollbar_region in scrollbars:
+        if both_on_border and not hasattr(scrollbar, "vertical"):
+            continue
+        if getattr(scrollbar, "vertical", False) and border_right:
+            scrollbar_region = Region(
+                scrollbar_region.x + 1,
+                scrollbar_region.y,
+                scrollbar_region.width,
+                scrollbar_region.height + both_on_border,
+            )
+        elif not getattr(scrollbar, "vertical", True) and border_bottom:
+            scrollbar_region = Region(
+                scrollbar_region.x,
+                scrollbar_region.y + 1,
+                scrollbar_region.width + both_on_border,
+                scrollbar_region.height,
+            )
+        yield scrollbar, scrollbar_region
+
+
+Widget._arrange_scrollbars = arrange_scrollbars  # ty: ignore[invalid-assignment]
+
+_arrange_root = Compositor._arrange_root
+
+
+def arrange_root(
+    self: Compositor, root: Widget, size: Size, visible_only: bool = True
+) -> tuple[dict[Widget, MapGeometry], set[Widget]]:
+    widget_map, widgets = _arrange_root(self, root, size, visible_only)
+    for widget, geometry in widget_map.items():
+        if isinstance(widget, ScrollBar) and not geometry.clip.contains_region(
+            geometry.region
+        ):
+            widget_map[widget] = geometry._replace(
+                clip=geometry.clip.union(geometry.region)
+            )
+    return widget_map, widgets
+
+
+Compositor._arrange_root = arrange_root  # ty: ignore[invalid-assignment]
 
 # with the current implementation it just checks if the character is printable
 # problem is that kitty kp sends ctrl+a as a, which is printable, but we don't want

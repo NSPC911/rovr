@@ -113,6 +113,8 @@ _arrange_scrollbars = Widget._arrange_scrollbars
 def arrange_scrollbars(self: Widget, region: Region) -> Iterable[tuple[Widget, Region]]:
     scrollbars = list(_arrange_scrollbars(self, region))
     parent = self.parent
+    # fun fact: setting border: none still provides  ("", Color(0,0,0,255))
+    # as a border, so theres no point in checking for none
     border_bottom = bool(
         self.styles.border_bottom[0]
         or isinstance(parent, Widget)

@@ -1,6 +1,8 @@
 from __future__ import annotations
 
-from typing import cast
+from collections import OrderedDict
+from collections.abc import Callable, Sequence
+from typing import cast, overload
 
 from rich.cells import cell_len
 from rich.syntax import Syntax
@@ -36,6 +38,60 @@ def _decode_text_preview(data: bytes, truncated: bool) -> tuple[str, int] | None
     return None
 
 
+class LazyTextLines(Sequence[Text]):
+    def __init__(
+        self,
+        line_count: int,
+        page_size: int,
+        request_page: Callable[[int], None],
+        *,
+        max_pages: int = 8,
+    ) -> None:
+        self._line_count = max(line_count, 1)
+        self.page_size = page_size
+        self._request_page = request_page
+        self._max_pages = max_pages
+        self._pages: OrderedDict[int, list[Text]] = OrderedDict()
+        self._requested: set[int] = set()
+
+    def __len__(self) -> int:
+        return self._line_count
+
+    @overload
+    def __getitem__(self, index: int) -> Text: ...
+
+    @overload
+    def __getitem__(self, index: slice) -> list[Text]: ...
+
+    def __getitem__(self, index: int | slice) -> Text | list[Text]:
+        if isinstance(index, slice):
+            start, stop, step = index.indices(len(self))
+            return [self[line] for line in range(start, stop, step)]
+        if index < 0:
+            index += len(self)
+        if not 0 <= index < len(self):
+            raise IndexError(index)
+
+        page = index // self.page_size
+        lines = self._pages.get(page)
+        if lines is None:
+            if page not in self._requested:
+                self._requested.add(page)
+                self._request_page(page)
+            return Text()
+        self._pages.move_to_end(page)
+        return lines[index % self.page_size]
+
+    def set_page(self, page: int, lines: list[Text]) -> None:
+        page_start = page * self.page_size
+        expected = min(self.page_size, len(self) - page_start)
+        self._pages[page] = lines[:expected] + [Text()] * max(0, expected - len(lines))
+        self._pages.move_to_end(page)
+        self._requested.discard(page)
+        while len(self._pages) > self._max_pages:
+            self._pages.popitem(last=False)
+
+
 class WindowedTextPreview(ScrollView):
     """Render only the visible portion of a text preview."""
 
@@ -50,14 +106,14 @@ class WindowedTextPreview(ScrollView):
 
     def __init__(
         self,
-        lines: list[str] | list[Text],
+        lines: Sequence[str] | Sequence[Text],
         *,
         language: str | None = None,
         line_numbers: bool = False,
         classes: str | None = None,
     ) -> None:
         super().__init__(classes=classes, can_focus=True)
-        self._lines: list[str] | list[Text] = []
+        self._lines: Sequence[str] | Sequence[Text] = []
         self._language = language
         self._line_numbers = line_numbers
         self._gutter_width = 0
@@ -66,7 +122,7 @@ class WindowedTextPreview(ScrollView):
 
     def update_preview(
         self,
-        lines: list[str] | list[Text],
+        lines: Sequence[str] | Sequence[Text],
         *,
         language: str | None = None,
         line_numbers: bool = False,
@@ -126,6 +182,15 @@ class WindowedTextPreview(ScrollView):
             )
         ]
 
+    def set_lazy_page(
+        self, source: LazyTextLines, page: int, lines: list[Text]
+    ) -> None:
+        if self._lines is not source:
+            return
+        source.set_page(page, lines)
+        self._rendered_window = None
+        self.refresh()
+
     def render_line(self, y: int) -> Strip:
         width = self.scrollable_content_region.width
         height = self.scrollable_content_region.height
@@ -141,4 +206,4 @@ class WindowedTextPreview(ScrollView):
             return Strip.blank(width, self.visual_style.rich_style)
 
 
-__all__ = ["WindowedTextPreview", "_decode_text_preview"]
+__all__ = ["LazyTextLines", "WindowedTextPreview", "_decode_text_preview"]

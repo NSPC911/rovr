@@ -4,9 +4,14 @@ from typing import Any, cast
 from unittest.mock import patch
 
 import pytest
+from rich.text import Text
 from textual.app import App, ComposeResult
 
-from rovr.components.text_preview import WindowedTextPreview, _decode_text_preview
+from rovr.components.text_preview import (
+    LazyTextLines,
+    WindowedTextPreview,
+    _decode_text_preview,
+)
 from rovr.core.preview_container import ExitNow, PreviewContainer, preview_token
 from rovr.variables.constants import config
 
@@ -64,6 +69,21 @@ async def test_windowed_preview_only_renders_visible_lines() -> None:
         assert preview.scroll_offset.y > 9_000
         assert f"line {int(preview.scroll_offset.y)}" in preview.render_line(0).text
         assert preview.virtual_size.width > initial_width
+
+
+def test_lazy_text_lines_requests_and_caches_pages() -> None:
+    requested: list[int] = []
+    lines = LazyTextLines(600, 256, requested.append)
+    lines.set_page(0, [Text(f"line {line}") for line in range(256)])
+
+    assert len(lines) == 600
+    assert lines[10].plain == "line 10"
+    assert lines[300].plain == ""
+    assert lines[300].plain == ""
+    assert requested == [1]
+
+    lines.set_page(1, [Text(f"line {line}") for line in range(256, 512)])
+    assert lines[300].plain == "line 300"
 
 
 async def test_normal_preview_mounts_windowed_content(tmp_path: Path) -> None:

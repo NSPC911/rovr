@@ -7,10 +7,8 @@ from contextvars import ContextVar
 from dataclasses import dataclass
 from functools import partial
 from io import BytesIO
-from itertools import batched
 from os import path
-from tempfile import SpooledTemporaryFile
-from time import monotonic, time
+from time import time
 from typing import Any, Awaitable, Callable, Literal, TypeVar, cast, overload
 
 import textual_image.renderable
@@ -37,12 +35,16 @@ from rovr.classes.textual_options import (
     FileListSelectionWidget,
 )
 from rovr.components import iterm2_image
-from rovr.components.text_preview import WindowedTextPreview, _decode_text_preview
+from rovr.components.text_preview import (
+    LazyTextLines,
+    WindowedTextPreview,
+    _decode_text_preview,
+)
 from rovr.core import FileList
 from rovr.functions import icons as icon_utils
 from rovr.functions import path as path_utils
 from rovr.functions import preview_utils
-from rovr.functions.ansi import ansi_to_rich_text, ansi_to_rich_text_parallel
+from rovr.functions.ansi import ansi_to_rich_text
 from rovr.functions.pdf import get_pdf_images, get_pdf_info
 from rovr.functions.utils import (
     load_from_cache,
@@ -62,6 +64,9 @@ titles = PreviewContainerTitles()
 
 PREVIEWER_GROUP = "previewers"
 TEXT_PREVIEW_CACHE_VERSION = "windowed-v2"
+BAT_PREVIEW_CACHE_VERSION = "paged-v1"
+BAT_PREVIEW_PAGE_SIZE = 256
+BAT_PREVIEWER_GROUP = "bat-pages"
 T = TypeVar("T")
 preview_token: ContextVar[object] = ContextVar("preview_token")
 IMAGE_CACHE_SIGNATURE = (
@@ -110,28 +115,13 @@ def _load_cached_text(
     preview_type: str,
     stat_result: os.stat_result,
     signature: tuple[str, str],
+    extra: Any = None,
 ) -> Text | None:
-    data = load_from_cache(file_path, preview_type, stat_result, signature)
+    data = load_from_cache(file_path, preview_type, stat_result, signature, extra)
     if data is None:
         return None
     try:
-        batch: list[str] = [
-            "\n".join(part) for part in batched(data.decode().splitlines(), 4000)
-        ]
-        if len(batch) == 1:
-            return Text.from_markup(batch[0])
-
-        from concurrent.futures import ProcessPoolExecutor
-
-        with ProcessPoolExecutor((os.cpu_count() or 2) // 2) as executor:
-            results = executor.map(
-                Text.from_markup,
-                batch,
-            )
-        first = next(results)
-        for result in results:
-            first.append_text(result)
-        return first
+        return Text.from_markup(data.decode())
     except (UnicodeDecodeError, MarkupError):
         return None
 
@@ -142,8 +132,9 @@ def _save_cached_text(
     stat_result: os.stat_result,
     signature: tuple[str, str],
     text: Text,
+    extra: Any = None,
 ) -> None:
-    save_to_cache(file_path, preview_type, stat_result, signature, text.markup)
+    save_to_cache(file_path, preview_type, stat_result, signature, text.markup, extra)
 
 
 # to any ai models looking at this, shut the fuck up
@@ -913,6 +904,77 @@ class PreviewContainer(Actionable, Container):
 
     # ------------ PDF related functions end ------------
 
+    @staticmethod
+    def _split_bat_page(content: Text) -> list[Text]:
+        lines = list(content.split("\n", allow_blank=True))
+        if lines and not lines[-1].plain:
+            lines.pop()
+        return lines
+
+    def _get_bat_page(
+        self,
+        command: list[str],
+        realpath: str,
+        stat_result: os.stat_result,
+        signature: tuple[str, str],
+        line_count: int,
+        page: int,
+    ) -> list[Text]:
+        start = page * BAT_PREVIEW_PAGE_SIZE + 1
+        end = min(start + BAT_PREVIEW_PAGE_SIZE - 1, line_count)
+        cache_range = f"{start}:{end}"
+        content = _load_cached_text(
+            realpath, "bat-page", stat_result, signature, cache_range
+        )
+        if content is None:
+            process = subprocess.run(
+                [*command, f"--line-range={cache_range}", "--", realpath],
+                capture_output=True,
+                timeout=5,
+            )
+            if process.returncode != 0:
+                raise subprocess.CalledProcessError(
+                    process.returncode,
+                    process.args,
+                    process.stdout,
+                    process.stderr,
+                )
+            content = ansi_to_rich_text(process.stdout.decode("utf-8", errors="ignore"))
+            _save_cached_text(
+                realpath,
+                "bat-page",
+                stat_result,
+                signature,
+                content,
+                cache_range,
+            )
+        return self._split_bat_page(content)
+
+    def _load_bat_page(
+        self,
+        token: object,
+        text_preview: WindowedTextPreview,
+        source: LazyTextLines,
+        command: list[str],
+        realpath: str,
+        stat_result: os.stat_result,
+        signature: tuple[str, str],
+        line_count: int,
+        page: int,
+    ) -> None:
+        context_token = preview_token.set(token)
+        try:
+            if token is not self._active_preview_token:
+                return
+            lines = self._get_bat_page(
+                command, realpath, stat_result, signature, line_count, page
+            )
+            self.call_from_thread(text_preview.set_lazy_page, source, page, lines)
+        except (ExitNow, subprocess.SubprocessError):
+            return
+        finally:
+            preview_token.reset(context_token)
+
     def show_bat_file_preview(self) -> bool:
         """Show bat file preview. Runs in a thread.
 
@@ -921,30 +983,22 @@ class PreviewContainer(Actionable, Container):
 
         Raises:
             ExitNow: If this preview request is no longer active.
-            ValueError: If process-pool startup fails for known multiprocessing issues.
-            subprocess.TimeoutExpired: If bat does not finish within five seconds.
         """
         bat_executable = config["plugins"]["bat"]["executable"]
         command = [
             bat_executable,
             "--force-colorization",
             "--paging=never",
+            "--wrap=never",
             "--style=numbers"
             if config["interface"]["show_line_numbers"]
             else "--style=plain",
         ]
-        # max_lines = self.call_from_thread(lambda: self.region.height)
-        # if max_lines > 0:
-        #     command.append(f"--line-range=:{max_lines}")
         assert self._current_file_path is not None
-        command.extend(["--", self._current_file_path])
         realpath = path.realpath(self._current_file_path)
         stat_result = os.stat(realpath)
-        max_text_size = config["interface"]["preview_text"]["max_file_size"]
-        if stat_result.st_size > max_text_size:
-            return False
         signature = (
-            f"{config['interface']['show_line_numbers']}",
+            f"{BAT_PREVIEW_CACHE_VERSION}:{config['interface']['show_line_numbers']}",
             bat_executable,
         )
 
@@ -954,77 +1008,55 @@ class PreviewContainer(Actionable, Container):
         self.set_border("title", titles.bat)
 
         try:
-            new_content = _load_cached_text(realpath, "bat", stat_result, signature)
-            if new_content is None:
-                with (
-                    SpooledTemporaryFile(max_size=max_text_size) as stdout_file,
-                    SpooledTemporaryFile(max_size=1024 * 1024) as stderr_file,
-                ):
-                    process = subprocess.Popen(
-                        command,
-                        stdout=stdout_file,
-                        stderr=stderr_file,
-                    )
-                    deadline = monotonic() + 5
-                    while True:
-                        try:
-                            process.wait(timeout=1)
-                            break
-                        except subprocess.TimeoutExpired:
-                            if should_cancel() or monotonic() >= deadline:
-                                process.kill()
-                                process.wait()
-                                if should_cancel():
-                                    return False
-                                stdout_file.seek(0)
-                                stderr_file.seek(0)
-                                raise subprocess.TimeoutExpired(
-                                    command,
-                                    5,
-                                    stdout_file.read(),
-                                    stderr_file.read(),
-                                )
+            cached_line_count = load_from_cache(
+                realpath, "bat-lines", stat_result, signature, pass_as=str
+            )
+            if cached_line_count is None:
+                with open(realpath, "rb") as file:
+                    line_count = sum(1 for _ in file)
+                save_to_cache(
+                    realpath, "bat-lines", stat_result, signature, str(line_count)
+                )
+            else:
+                line_count = int(cached_line_count)
+            line_count = max(line_count, 1)
 
-                    if should_cancel():
-                        return False
-
-                    if process.returncode != 0:
-                        stderr_file.seek(0)
-                        error_message = stderr_file.read().decode(
-                            "utf-8", errors="ignore"
-                        )
-                        if should_cancel():
-                            return False
-                        self.call_from_thread(self.remove_children)
-                        self.notify(
-                            error_message,
-                            title="Plugins: Bat",
-                            severity="warning",
-                        )
-                        return False
-
-                    stdout_file.seek(0)
-                    bat_output = stdout_file.read().decode("utf-8", errors="ignore")
-                if self.app.MULTIPROCESSING_PROCESS_ALLOWED:
-                    try:
-                        new_content = ansi_to_rich_text_parallel(bat_output)
-                    except ValueError as exc:
-                        if multiprocessing_process_error_checker(self.app, exc):
-                            new_content = ansi_to_rich_text(bat_output)
-                        else:
-                            raise
-                else:
-                    new_content = ansi_to_rich_text(bat_output)
-                _save_cached_text(realpath, "bat", stat_result, signature, new_content)
+            first_page = self._get_bat_page(
+                command, realpath, stat_result, signature, line_count, 0
+            )
 
             if should_cancel():
                 return False
 
-            lines = list(new_content.split("\n", allow_blank=True))
-            if text_preview := self.get_child(WindowedTextPreview):
+            token = self._active_preview_token
+            text_preview: WindowedTextPreview
+
+            def request_page(page: int) -> None:
+                self.run_worker(
+                    partial(
+                        self._load_bat_page,
+                        token,
+                        text_preview,
+                        source,
+                        command,
+                        realpath,
+                        stat_result,
+                        signature,
+                        line_count,
+                        page,
+                    ),
+                    thread=True,
+                    group=BAT_PREVIEWER_GROUP,
+                )
+
+            source = LazyTextLines(line_count, BAT_PREVIEW_PAGE_SIZE, request_page)
+            source.set_page(0, first_page)
+            existing_preview = self.get_child(WindowedTextPreview)
+            if isinstance(existing_preview, WindowedTextPreview):
+                text_preview = existing_preview
                 self.call_from_thread(
                     text_preview.update_preview,
-                    lines,
+                    source,
                     language=None,
                     line_numbers=False,
                 )
@@ -1037,14 +1069,24 @@ class PreviewContainer(Actionable, Container):
                 if should_cancel():
                     return False
 
-                self.call_from_thread(
-                    lambda: self.mount(
-                        WindowedTextPreview(lines, classes="text_preview bat_preview")
-                    )
+                text_preview = self.call_from_thread(
+                    WindowedTextPreview,
+                    source,
+                    classes="text_preview bat_preview",
                 )
+                self.call_from_thread(self.mount, text_preview)
                 if should_cancel():
                     return False
             return True
+        except subprocess.CalledProcessError as exc:
+            if should_cancel():
+                return False
+            self.notify(
+                exc.stderr.decode("utf-8", errors="ignore"),
+                title="Plugins: Bat",
+                severity="warning",
+            )
+            return False
         except ExitNow:
             raise
         except Exception as exc:

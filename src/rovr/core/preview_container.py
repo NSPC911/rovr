@@ -121,7 +121,7 @@ def _load_cached_text(
     if data is None:
         return None
     try:
-        return Text.from_markup(data.decode())
+        return Text.from_markup(data.decode(), emoji=False)
     except (UnicodeDecodeError, MarkupError):
         return None
 

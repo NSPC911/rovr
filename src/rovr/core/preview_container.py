@@ -126,7 +126,7 @@ def _load_cached_text(
         with ProcessPoolExecutor((os.cpu_count() or 2) // 2) as executor:
             results = executor.map(
                 Text.from_markup,
-                ("\n".join(part) for part in batched(data.decode().splitlines(), 4000)),
+                batch,
             )
         first = next(results)
         for result in results:

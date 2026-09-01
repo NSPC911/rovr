@@ -1,4 +1,3 @@
-from dataclasses import dataclass
 from os import environ, path
 
 from platformdirs import PlatformDirs
@@ -60,7 +59,6 @@ VALID_KEY_CONTEXTS = frozenset({
 })
 
 
-@dataclass
 class RovrVars:
     ROVRCONFIG = environ.get("ROVR_CONFIG_FOLDER") or dirs.user_config_dir
     ROVRTHEMES = ROVRCONFIG + "/themes"

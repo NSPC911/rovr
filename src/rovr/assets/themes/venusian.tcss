@@ -1,0 +1,81 @@
+/**********************************************************
+          █   █ █▀▀▀ █▄  █ █  █ ▄▀▀▀ █ ▄▀▀▄ █▄  █
+           █ █  █▀▀  █ ▀▄█ █  █  ▀▀▄ █ █▀▀█ █ ▀▄█
+            ▀   ▀▀▀▀ ▀   ▀  ▀▀  ▀▀▀  ▀ ▀  ▀ ▀   ▀
+*****************************************************2608*/
+
+
+$background: #0E120B;
+$surface: #D6D39A;
+$panel: #171C13;
+$foreground: #F1F0D7;
+$primary: #8E9738;
+$secondary: #B3B85A;
+$accent: #646C24;
+$warning: #C9A64A;
+$error: #A95B3C;
+$success: #739848;
+$dark: true;
+
+$bar-gradient-default: #5A6422 #AEB555;
+$bar-gradient-error: #70463A #B97A5A;
+
+$input-cursor-background: $surface;
+$input-selection-background: #4A5120;
+$input-selection-foreground: #FFFDEB;
+
+
+FileList > .filelist--broken-link {
+    background: $error 15%;
+    color: $error 80%;
+    text-style: dim;
+}
+FileList > .filelist--broken-link--hovered {
+    background: $error 25%;
+    color: $error;
+}
+FileList > .filelist--broken-link--highlighted {
+    background: $error;
+    color: $background;
+}
+FileList > .filelist--link {
+    color: $secondary;
+}
+FileList > .filelist--link--hovered {
+    background: transparent;
+    color: $primary;
+}
+FileList > .filelist--link--highlighted {
+    background: $primary;
+    color: $background;
+}
+FileList > .filelist--cut {
+    color: $foreground-darken-3;
+    text-style: dim;
+}
+FileList > .filelist--cut--hovered {
+    color: $secondary-darken-2;
+}
+FileList > .filelist--cut--highlighted {
+    background: $primary-darken-2;
+    color: $foreground;
+}
+FileList > .filelist--hidden {
+    color: $secondary-darken-2;
+    text-style: dim;
+}
+FileList > .filelist--hidden--hovered {
+    color: $secondary;
+}
+FileList > .filelist--hidden--highlighted {
+    background: $secondary-darken-3;
+    color: $foreground;
+}
+
+
+Switch > .switch--slider {
+    color: $panel-lighten-2 !important;
+}
+Switch.-on > .switch--slider {
+    color: $success !important;
+}

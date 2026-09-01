@@ -73,9 +73,6 @@ docscripts = [
   "poethepoet>=0.41.0",
   "ruff>=0.15.0",
 ]
-speedup = [
-    "textual-speedups>=0.2.1",
-]
 
 [build-system]
 requires = ["uv_build==0.12.*"]

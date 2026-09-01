@@ -94,7 +94,7 @@ from rovr.navigation_widgets import (
 from rovr.screens import ShellExec
 from rovr.screens.way_too_small import TerminalTooSmall
 from rovr.state_manager import StateManager
-from rovr.variables.constants import MaxPossible, config, keys, log_name
+from rovr.variables.constants import MAX_HEIGHT, MAX_WIDTH, config, keys, log_name
 from rovr.variables.maps import RovrVars
 
 if constants.SCREENSHOT_LOCATION:
@@ -845,8 +845,7 @@ class Application(
     @work(exclusive=True)
     async def on_resize(self, event: events.Resize) -> None:
         if (
-            event.size.height < MaxPossible.height
-            or event.size.width < MaxPossible.width
+            event.size.height < MAX_HEIGHT or event.size.width < MAX_WIDTH
         ) and not self.has_pushed_screen:
             self.has_pushed_screen = True
             await self.push_screen(TerminalTooSmall())
@@ -868,7 +867,7 @@ class Application(
         self,
         *,
         title: str | None = None,
-        simplify: bool = False,
+        simplify: bool = True,
     ) -> str:
         """super version but without title because i hate the title"""  # noqa: DOC201
         import io

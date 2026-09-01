@@ -80,6 +80,10 @@ class ProgressBarContainer(VerticalGroup, inherit_bindings=False):
     async def on_mount(self) -> None:
         await self.mount_all([self.label_container, self.progress_bar])
 
+    @property
+    def in_thread(self) -> bool:
+        return self.app._thread_id != get_ident()
+
     def update_text(self, label: str, is_path: bool = True) -> None:
         """
         Updates the text label
@@ -127,7 +131,7 @@ class ProgressBarContainer(VerticalGroup, inherit_bindings=False):
             notify(dict): The notify message (must contain `message` and `title`)
             bar_text(str): The new text to update the label
         """
-        if self.app._thread_id != get_ident():
+        if self.in_thread:
             self.app.call_from_thread(self._set_panic_state, bar_text, notify)
         else:
             self._set_panic_state(bar_text, notify)
@@ -168,7 +172,7 @@ class ProgressBarContainer(VerticalGroup, inherit_bindings=False):
         Args:
             text(str): The new text to update the label
         """
-        if self.app._thread_id != get_ident():
+        if self.in_thread:
             self.app.call_from_thread(self.ok, text)
             return
         if text:
@@ -196,13 +200,14 @@ class ProcessContainer(Actionable, VerticalScroll):
         self.ACTIONS: list[Action] = [Action("delete", config["keybinds"]["delete"])]
 
     def watch_theme(self, theme: str) -> None:
-        gradient_colors = getattr(self.app.get_theme(theme), "bar_gradient", {}).get(
-            "default"
-        )
-        if gradient_colors:
-            gradient = Gradient.from_colors(*reversed(gradient_colors))
-            for bar in self.query(ProgressBarContainer):
-                bar.progress_bar.gradient = gradient
+        gradients = getattr(self.app.get_theme(theme), "bar_gradient", {})
+        default_colors = gradients.get("default")
+        error_colors = gradients.get("error")
+        for bar in self.query(ProgressBarContainer):
+            if bar.has_class("error") and error_colors:
+                bar.progress_bar.gradient = Gradient.from_colors(*error_colors)
+            elif default_colors:
+                bar.progress_bar.gradient = Gradient.from_colors(*default_colors)
 
     async def new_process_bar(
         self, max: int | None = None, id: str | None = None, classes: str | None = None

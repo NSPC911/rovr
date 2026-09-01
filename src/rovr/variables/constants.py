@@ -1,11 +1,10 @@
 from __future__ import annotations
 
-from dataclasses import dataclass
 from datetime import datetime
 from functools import cache
 from os import environ
 from shutil import which
-from typing import Any, Callable, Literal, cast
+from typing import cast
 
 from textual.binding import Binding
 
@@ -53,7 +52,6 @@ else:
     keys = globals()["keys"]
 
 
-@dataclass
 class PreviewContainerTitles:
     image = "Image Preview"
     bat = "File Preview (bat)"
@@ -80,22 +78,8 @@ ascii_logo = r"""
 ╰─╯  ╰───╯ ╰──╯ ╰─╯"""
 
 
-class classproperty:  # noqa: N801
-    def __init__(self, func: Callable) -> None:
-        self.func = func
-
-    def __get__(self, instance: Any, owner: Any) -> Any:  # noqa: ANN401
-        return self.func(owner)
-
-
-class MaxPossible:
-    @classproperty
-    def height(self) -> Literal[13, 24]:
-        return 13 if config["interface"]["use_reactive_layout"] else 24
-
-    @classproperty
-    def width(self) -> Literal[26, 70]:
-        return 26 if config["interface"]["use_reactive_layout"] else 70
+MAX_HEIGHT = 13 if config["interface"]["use_reactive_layout"] else 24
+MAX_WIDTH = 26 if config["interface"]["use_reactive_layout"] else 70
 
 
 scroll_bindings = (

@@ -6,16 +6,8 @@ import ctypes
 import ctypes.util
 import platform
 import shutil
-from dataclasses import dataclass
 from pathlib import Path
-
-
-@dataclass
-class ProcessResult:
-    return_code: int
-    args: list[str]
-    stdout: str
-    stderr: str
+from subprocess import CompletedProcess
 
 
 class ClipboardError(Exception):
@@ -66,18 +58,16 @@ async def copy_files_to_system_clipboard(
         else:
             return ClipboardError(f"Unsupported platform: {system}")
 
-        if output is None:
-            return True  # No operation needed for empty output
-        elif output.return_code == 0:
+        if output is None or output.returncode == 0:
             return True
         else:
             tool = output.args[0] if output.args else "unknown"
-            return ClipboardCommandError(tool, output.return_code, output.stderr)
+            return ClipboardCommandError(tool, output.returncode, output.stderr)
     except Exception as exc:
         return exc
 
 
-async def _copy_windows(paths: list[str]) -> ProcessResult | None:
+async def _copy_windows(paths: list[str]) -> CompletedProcess | None:
     if not paths:
         return None
 
@@ -116,15 +106,15 @@ async def _copy_windows(paths: list[str]) -> ProcessResult | None:
         await process.wait()
         exc.add_note("powershell clipboard command timed out")
         raise exc from None
-    return ProcessResult(
-        return_code=process.returncode or 0,
+    return CompletedProcess(
         args=command,
+        returncode=process.returncode or 0,
         stdout=stdout.decode().strip(),
         stderr=stderr.decode().strip(),
     )
 
 
-async def _copy_macos(paths: list[str]) -> ProcessResult | None:
+async def _copy_macos(paths: list[str]) -> CompletedProcess | None:
     if not paths:
         return None
 
@@ -136,8 +126,8 @@ async def _copy_macos(paths: list[str]) -> ProcessResult | None:
         raise ClipboardError(f"Failed to load macOS frameworks: {exc}")
     except Exception as exc:
         raise ClipboardError(f"macOS clipboard error: \\[{type(exc).__name__}]\n{exc}")
-    return ProcessResult(
-        return_code=0, args=["ctypes:NSPasteboard"], stdout="", stderr=""
+    return CompletedProcess(
+        returncode=0, args=["ctypes:NSPasteboard"], stdout="", stderr=""
     )
 
 
@@ -232,12 +222,14 @@ def _copy_macos_ctypes(paths: list[str]) -> None:
         msg0(pool, sel("drain"))
 
 
-async def _copy_linux(paths: list[str]) -> ProcessResult | None:
+async def _copy_linux(paths: list[str]) -> CompletedProcess | None:
+    from os import environ
+
     if not paths:
         return None
 
     # Try wl-copy first (Wayland)
-    if shutil.which("wl-copy"):
+    if environ.get("XDG_SESSION_TYPE") == "wayland" and shutil.which("wl-copy"):
         command = ["wl-copy", "--type", "text/uri-list", "--"] + [
             f"{Path(path).resolve().as_uri()}\n" for path in paths
         ]
@@ -253,7 +245,7 @@ async def _copy_linux(paths: list[str]) -> ProcessResult | None:
         stdin = None
         using = "wl-copy"
     # Fall back to xclip (X11)
-    elif shutil.which("xclip"):
+    elif environ.get("XDG_SESSION_TYPE") == "x11" and shutil.which("xclip"):
         command = [
             "xclip",
             "-i",
@@ -290,8 +282,8 @@ async def _copy_linux(paths: list[str]) -> ProcessResult | None:
         await process.wait()
         exc.add_note(f"{using} timed out")
         raise exc from None
-    return ProcessResult(
-        return_code=process.returncode or 0,
+    return CompletedProcess(
+        returncode=process.returncode or 0,
         args=command,
         stdout="" if stdout is None else stdout.decode().strip(),
         stderr="" if stderr is None else stderr.decode().strip(),

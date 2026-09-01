@@ -57,15 +57,15 @@ try:
         )
     invoker = []
     executor = ""
-    if executor := which("oxfmt"):
+    if executor := which("prettier"):
         invoker = [executor]
     elif executor := which("npx"):
-        invoker = [executor, "oxfmt"]
+        invoker = [executor, "prettier"]
     elif executor := which("npm"):
-        invoker = [executor, "exec", "oxfmt"]
+        invoker = [executor, "exec", "prettier"]
     else:
         pprint(
-            "[red][blue]oxfmt[/] and [blue]npx[/] are not available on PATH, and hence the generated files cannot be formatted."
+            "[red][blue]prettier[/] and [blue]npx[/] are not available on PATH, and hence the generated files cannot be formatted."
         )
         exit(1)
     # attempt to format it

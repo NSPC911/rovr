@@ -1257,9 +1257,6 @@ docscripts = [
     { name = "poethepoet" },
     { name = "ruff" },
 ]
-speedup = [
-    { name = "textual-speedups" },
-]
 
 [package.metadata]
 requires-dist = [
@@ -1308,7 +1305,6 @@ docscripts = [
     { name = "poethepoet", specifier = ">=0.41.0" },
     { name = "ruff", specifier = ">=0.15.0" },
 ]
-speedup = [{ name = "textual-speedups", specifier = ">=0.2.1" }]
 
 [[package]]
 name = "rpds-py"

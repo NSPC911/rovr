@@ -2,13 +2,11 @@
 import { defineConfig } from "astro/config";
 import starlight from "@astrojs/starlight";
 import sitemap from "@astrojs/sitemap";
-import mermaid from "astro-mermaid";
 
 export default defineConfig({
   site: "https://nspc911.github.io",
   base: "/rovr",
   integrations: [
-    mermaid({}),
     starlight({
       title: "rovr",
       components: {
@@ -51,10 +49,7 @@ export default defineConfig({
           },
         },
       ],
-      customCss: [
-        "./src/fonts/font-face.css",
-        "./src/styles/custom.css"
-      ],
+      customCss: ["./src/fonts/font-face.css", "./src/styles/custom.css"],
       editLink: {
         baseUrl: "https://github.com/NSPC911/rovr/tree/docs/docs",
       },
@@ -98,23 +93,41 @@ export default defineConfig({
           label: "features",
           items: [
             { label: "sorting", slug: "features/sorting" },
-            { label: "detail columns", slug: "features/detail-columns", badge: { text: "new", variant: "tip" } },
+            {
+              label: "detail columns",
+              slug: "features/detail-columns",
+              badge: { text: "new", variant: "tip" },
+            },
             { label: "editors", slug: "features/editor" },
             { label: "previewing files", slug: "features/previewing-files" },
             { label: "image previews", slug: "features/image-previews" },
             { label: "cd on quit", slug: "features/cd-on-quit" },
             { label: "context menu", slug: "features/context-menu" },
-            { label: "custom openers", slug: "features/custom-openers", badge: { text: "new", variant: "tip" } },
+            {
+              label: "custom openers",
+              slug: "features/custom-openers",
+              badge: { text: "new", variant: "tip" },
+            },
             { label: "shell execution", slug: "features/shell-exec" },
-            { label: "recycle bin", slug: "features/recycle-bin", badge: { text: "new", variant: "tip" } },
+            {
+              label: "recycle bin",
+              slug: "features/recycle-bin",
+              badge: { text: "new", variant: "tip" },
+            },
             { label: "integrations", slug: "features/plugins" },
           ],
         },
         {
           label: "contributing",
           items: [
-            { label: "how to contribute", slug: "contributing/how-to-contribute" },
-            { label: "project structure", slug: "contributing/project-structure" },
+            {
+              label: "how to contribute",
+              slug: "contributing/how-to-contribute",
+            },
+            {
+              label: "project structure",
+              slug: "contributing/project-structure",
+            },
           ],
         },
         {
@@ -125,7 +138,7 @@ export default defineConfig({
           ],
         },
       ],
-      plugins: []
+      plugins: [],
     }),
     sitemap(),
   ],

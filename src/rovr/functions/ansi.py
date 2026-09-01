@@ -1,4 +1,7 @@
+import os
+from collections.abc import Iterator
 from functools import lru_cache
+from itertools import batched
 
 from rich.color import Color
 from rich.style import Style
@@ -8,6 +11,39 @@ from rich.text import Span, Text
 @lru_cache(maxsize=256)  # obviously 256 because of the 256-color palette
 def get_ansi_color(number: int) -> Color:
     return Color.from_ansi(number)
+
+
+def _bat_preview_chunks(lines: list[str], chunk_line_count: int) -> Iterator[str]:
+    return ("".join(chunk) for chunk in batched(lines, chunk_line_count))
+
+
+def ansi_to_rich_text_parallel(
+    terminal_text: str,
+    *,
+    chunk_line_count: int = 5000,
+) -> Text:
+    """Convert ANSI output to Rich text in process-parallel line chunks.
+
+    Returns:
+        Text with ANSI escape sequences represented as Rich spans.
+    """
+    lines = terminal_text.splitlines(keepends=True)
+    chunk_count = (len(lines) + chunk_line_count - 1) // chunk_line_count
+    if chunk_count <= 1:
+        return ansi_to_rich_text(terminal_text)
+
+    from rovr.functions.multiprocessing_utils import safe_path_process_pool
+
+    max_workers = min(chunk_count, os.cpu_count() or 1)
+    if max_workers <= 1:
+        return ansi_to_rich_text(terminal_text)
+
+    chunks = _bat_preview_chunks(lines, chunk_line_count)
+    combined = Text()
+    with safe_path_process_pool(max_workers=max_workers) as executor:
+        for text in executor.map(ansi_to_rich_text, chunks):
+            combined.append_text(text)
+    return combined
 
 
 def ansi_to_rich_text(terminal_text: str) -> Text:
@@ -239,4 +275,4 @@ def ansi_to_rich_text(terminal_text: str) -> Text:
     return Text("".join(parts), spans=spans)
 
 
-__all__ = ["ansi_to_rich_text"]
+__all__ = ["ansi_to_rich_text", "ansi_to_rich_text_parallel"]

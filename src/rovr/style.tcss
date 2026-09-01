@@ -396,21 +396,34 @@ Tooltip {
   height: 1fr;
   padding: 0
 }
-
+PreviewContainer > LoadingPreview {
+  margin-left: 1
+}
 #preview_sidebar {
   margin: 0;
   padding: 0;
   width: $preview_sidebar_width;
   layout: horizontal;
   height: 1fr;
-  & > Static {
-    text-overflow: ellipsis;
-    text-wrap: nowrap;
+  overflow: auto;
+  scrollbar-size: 1 1;
+  & > .text_preview {
     width: 1fr;
-    overflow-x: hidden;
+    height: 1fr;
+    scrollbar-size: 1 1;
+  }
+  & > Static {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    text-wrap: wrap;
+    width: auto;
+    padding: 0 1;
     &.special {
-      text-overflow: fold;
-      text-wrap: wrap;
+      padding: 0 1;
+      width: 1fr;
+    }
+    &#bat_preview {
+      padding: 0
     }
   }
   & > Widget {
@@ -421,19 +434,6 @@ Tooltip {
     margin: 0;
     &.-maximized {
       border: $border-style $border-focused
-    }
-    &Static {
-      padding: 0 1;
-      scrollbar-size: 0 0;
-      overflow: hidden;
-      &#bat_preview {
-        padding: 0
-      }
-      &#special {
-        text-wrap: wrap;
-        text-overflow: fold;
-        padding: 0 1;
-      }
     }
     &FileList { height: 1fr }
   }

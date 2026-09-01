@@ -28,6 +28,7 @@ max_size = [1000, 1000]
 font_size = 50
 
 [interface.preview_text]
+max_file_size = 2097152
 error = "couldn't read this file! (\u00AC_\u00AC)" # ¬_¬
 start = """
   ___ ___

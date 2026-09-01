@@ -361,6 +361,12 @@
           "type": "object",
           "additionalProperties": false,
           "properties": {
+            "max_file_size": {
+              "type": "integer",
+              "minimum": 1,
+              "default": 2097152,
+              "description": "Maximum file size (in bytes) to preview without bat(1). Files larger than this will be truncated to this size."
+            },
             "error": {
               "type": "string",
               "default": "couldn't read this file! (\u00ac_\u00ac )",

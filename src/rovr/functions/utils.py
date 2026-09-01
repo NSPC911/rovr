@@ -2,7 +2,6 @@ import os
 import re
 import subprocess
 from contextlib import suppress
-from functools import lru_cache
 from typing import Any, Callable, Literal, cast, overload
 
 from humanize import naturalsize
@@ -120,19 +119,6 @@ def is_archive(path_str: str) -> bool:
         return False
 
 
-def get_shortest_bind(binds: list[str]) -> str:
-    least_len: tuple[int | None, str] = (None, "")
-    for bind in binds:
-        if least_len[0] is None or least_len[0] > len(bind):
-            least_len = (len(bind), bind)
-
-    match least_len[1]:
-        case "escape":
-            least_len = (least_len[0], "esc")
-
-    return least_len[1]
-
-
 def get_shortcut(
     context: str,
     action: str,
@@ -166,7 +152,18 @@ def get_shortcut(
     else:
         legacy = cast(Any, config)["keybinds"]
         binds = legacy[legacy_context or context][legacy_action or action]
-    return get_shortest_bind(binds)
+
+    # get_shortest_bind
+    least_len: tuple[int | None, str] = (None, "")
+    for bind in binds:
+        if least_len[0] is None or least_len[0] > len(bind):
+            least_len = (len(bind), bind)
+
+    match least_len[1]:
+        case "escape":
+            least_len = (least_len[0], "esc")
+
+    return least_len[1]
 
 
 def run_command(
@@ -392,11 +389,6 @@ async def expand_command(app: App, command: str | list[str]) -> str | list[str]:
     if globals().get("is_dev", False):
         print(f"{command}\n-> {to_return}")
     return to_return
-
-
-@lru_cache(maxsize=512)
-def recache(pattern: str) -> re.Pattern:
-    return re.compile(pattern)
 
 
 def command(

@@ -154,6 +154,7 @@ class PDFHandler:
     total_pages: int = 0
     images: list[PILImage] | None = None
     cairo_or_ppm = "cairo" if config["plugins"]["poppler"]["use_pdftocairo"] else "ppm"
+    pdf_batch_size = config["plugins"]["poppler"]["pdf_batch_size"]
 
     def count_loaded(self) -> int:
         return 0 if self.images is None else len(self.images)
@@ -168,7 +169,7 @@ class PDFHandler:
         # If going further down half the batch will cross currently loaded pages
         # then its better to preload in advance
         return (
-            self.current_page + PDFHandler.pdf_batch_size() // 2
+            self.current_page + PDFHandler.pdf_batch_size // 2
         ) >= self.count_loaded()
 
     def get_last_page_to_load(self) -> int:
@@ -176,14 +177,9 @@ class PDFHandler:
         # beyond the batch before our load. This can happen on slow loads, and smaller batch sizes
         last_page = max(
             self.current_page + 1,
-            self.count_loaded() + PDFHandler.pdf_batch_size(),
+            self.count_loaded() + PDFHandler.pdf_batch_size,
         )
         return min(last_page, self.total_pages)
-
-    @staticmethod
-    def pdf_batch_size() -> int:
-        # Lesser typing, more readable calculations
-        return config["plugins"]["poppler"]["pdf_batch_size"]
 
     @staticmethod
     def get_poppler_folder() -> str | None:

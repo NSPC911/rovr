@@ -22,7 +22,7 @@ from rovr.functions.preview_workers import (
     resample_worker,
     svg_image_worker,
 )
-from rovr.functions.utils import recache, should_cancel
+from rovr.functions.utils import should_cancel
 from rovr.variables.constants import RESAMPLING_METHOD, config, file_one
 
 MAX_IMAGE_SIZE: tuple[int, int] = tuple(config["interface"]["image_viewer"]["max_size"])  # ty: ignore
@@ -269,8 +269,10 @@ def match_mime_to_preview_type(
         str : The preview type ("text", "image", "pdf", "archive", "folder")
         None: None if no rule matches
     """
+    import re
+
     for pattern, preview_type in config["settings"]["preview_rules"].items():
-        if recache(pattern).fullmatch(mime_type):
+        if re.compile(pattern).fullmatch(mime_type):
             return preview_type
     return None
 

@@ -96,3 +96,20 @@ New features are welcome!
 If you've created a cool theme for rovr, we'd love to see it! Please make a pull request with your theme, following the `custom_theme` schema. Don't forget to include screenshots as described in the documentation.
 
 Thank you for your contribution!
+
+<!-- Notes for maintainers:
+To update screenshots, ensure the following commands are ran if a major UI change is made.
+Run this only before a stable release is made:
+
+<code>
+ls docs/public/screenshots/*.svg | % {
+    Write-Host $_.Name is next
+    $delay = Read-Host "Delay?"
+    if ($delay -ne "") {
+       poe snip --delay $delay $_.FullName
+       Read-Host "Ok?"
+    }
+}
+</code>
+
+Use appropriate versions for zsh, NSPC911 uses powershell -->

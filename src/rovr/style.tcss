@@ -559,6 +559,10 @@ CommandList:ansi {
   }
 }
 
+CommandList {
+  scrollbar-size: 1 1;
+}
+
 FileList {
   .selection-list--option-checked,
   .selection-list--option-checked--hovered {
@@ -1022,7 +1026,7 @@ CommandPalette {
   CommandList {
     border: $border-style $border-focused;
     border-top: none;
-    max-height: 60vh;
+    max-height: 50vh;
   }
   SearchIcon {
     margin-left: 2;

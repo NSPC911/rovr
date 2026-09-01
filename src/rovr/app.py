@@ -868,7 +868,7 @@ class Application(
         self,
         *,
         title: str | None = None,
-        simplify: bool = False,
+        simplify: bool = True,
     ) -> str:
         """super version but without title because i hate the title"""  # noqa: DOC201
         import io

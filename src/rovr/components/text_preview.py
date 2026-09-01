@@ -91,6 +91,9 @@ class LazyTextLines(Sequence[Text]):
         while len(self._pages) > self._max_pages:
             self._pages.popitem(last=False)
 
+    def set_line_count(self, line_count: int) -> None:
+        self._line_count = max(line_count, 1)
+
 
 class WindowedTextPreview(ScrollView):
     """Render only the visible portion of a text preview."""
@@ -127,8 +130,20 @@ class WindowedTextPreview(ScrollView):
         language: str | None = None,
         line_numbers: bool = False,
     ) -> None:
-        self._lines = lines or [""]
-        self._language = language
+        lines = lines or [""]
+        if language is not None:
+            highlighted = Syntax(
+                "",
+                lexer=language,
+                theme=config["theme"]["preview"],
+                background_color=(
+                    "default" if config["theme"]["transparent"] else None
+                ),
+            ).highlight("\n".join(cast(Sequence[str], lines)))
+            self._lines = list(highlighted.split("\n", allow_blank=True))[: len(lines)]
+        else:
+            self._lines = lines
+        self._language = None
         self._line_numbers = line_numbers
         self._gutter_width = len(str(len(self._lines))) + 3 if line_numbers else 0
         width = max(
@@ -154,24 +169,16 @@ class WindowedTextPreview(ScrollView):
                 window_width + self._gutter_width, self.virtual_size.height
             )
             self._scroll_update(self.virtual_size)
-        if self._language is not None:
-            renderable: Text | Syntax = Syntax(
-                "\n".join(cast(list[str], selected)),
-                lexer=self._language,
-                line_numbers=self._line_numbers,
-                start_line=start + 1,
-                word_wrap=False,
-                tab_size=4,
-                theme=config["theme"]["preview"],
-                background_color=(
-                    "default" if config["theme"]["transparent"] else None
-                ),
-                padding=0,
-            )
-        else:
-            renderable = Text("\n", no_wrap=True, overflow="crop").join(
-                cast(list[Text], selected)
-            )
+        text_lines = [
+            line.copy() if isinstance(line, Text) else Text(line) for line in selected
+        ]
+        if self._line_numbers:
+            for offset, line in enumerate(text_lines):
+                number = start + offset + 1
+                text_lines[offset] = Text.assemble(
+                    (f"{number:>{self._gutter_width - 1}} ", "dim"), line
+                )
+        renderable = Text("\n", no_wrap=True, overflow="crop").join(text_lines)
 
         options = self.app.console.options.update(width=max(x + width, 1))
         background = self.visual_style.rich_style
@@ -188,8 +195,17 @@ class WindowedTextPreview(ScrollView):
         if self._lines is not source:
             return
         source.set_page(page, lines)
+        self.virtual_size = Size(self.virtual_size.width, len(source))
         self._rendered_window = None
-        self.refresh()
+        self.refresh(layout=True)
+
+    def set_lazy_line_count(self, source: LazyTextLines, line_count: int) -> None:
+        if self._lines is not source:
+            return
+        source.set_line_count(line_count)
+        self.virtual_size = Size(self.virtual_size.width, len(source))
+        self._rendered_window = None
+        self.refresh(layout=True)
 
     def render_line(self, y: int) -> Strip:
         width = self.scrollable_content_region.width

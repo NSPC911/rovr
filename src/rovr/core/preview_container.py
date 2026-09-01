@@ -913,11 +913,10 @@ class PreviewContainer(Actionable, Container):
         realpath: str,
         stat_result: os.stat_result,
         signature: tuple[str, str],
-        line_count: int,
         page: int,
     ) -> list[Text]:
         start = page * BAT_PREVIEW_PAGE_SIZE + 1
-        end = min(start + BAT_PREVIEW_PAGE_SIZE - 1, line_count)
+        end = start + BAT_PREVIEW_PAGE_SIZE - 1
         cache_range = f"{start}:{end}"
         content = _load_cached_text(
             realpath, "bat-page", stat_result, signature, cache_range
@@ -955,18 +954,54 @@ class PreviewContainer(Actionable, Container):
         realpath: str,
         stat_result: os.stat_result,
         signature: tuple[str, str],
-        line_count: int,
         page: int,
     ) -> None:
         context_token = preview_token.set(token)
         try:
             if token is not self._active_preview_token:
                 return
-            lines = self._get_bat_page(
-                command, realpath, stat_result, signature, line_count, page
-            )
+            lines = self._get_bat_page(command, realpath, stat_result, signature, page)
             self.call_from_thread(text_preview.set_lazy_page, source, page, lines)
-        except (ExitNow, subprocess.SubprocessError):
+        except ExitNow:
+            return
+        except subprocess.SubprocessError as exc:
+            self.call_from_thread(
+                text_preview.set_lazy_page,
+                source,
+                page,
+                [Text(f"bat: {exc}", style="red")]
+                + [Text()] * (BAT_PREVIEW_PAGE_SIZE - 1),
+            )
+        finally:
+            preview_token.reset(context_token)
+
+    def _count_bat_lines(
+        self,
+        token: object,
+        text_preview: WindowedTextPreview,
+        source: LazyTextLines,
+        realpath: str,
+        stat_result: os.stat_result,
+        signature: tuple[str, str],
+    ) -> None:
+        context_token = preview_token.set(token)
+        try:
+            cached_line_count = load_from_cache(
+                realpath, "bat-lines", stat_result, signature, pass_as=str
+            )
+            if cached_line_count is None:
+                line_count = 0
+                with open(realpath, "rb") as file:
+                    for line_count, _ in enumerate(file, 1):
+                        if line_count % 8192 == 0 and should_cancel():
+                            return
+                save_to_cache(
+                    realpath, "bat-lines", stat_result, signature, str(line_count)
+                )
+            else:
+                line_count = int(cached_line_count)
+            self.call_from_thread(text_preview.set_lazy_line_count, source, line_count)
+        except (ExitNow, OSError, ValueError):
             return
         finally:
             preview_token.reset(context_token)
@@ -1004,21 +1039,8 @@ class PreviewContainer(Actionable, Container):
         self.set_border("title", titles.bat)
 
         try:
-            cached_line_count = load_from_cache(
-                realpath, "bat-lines", stat_result, signature, pass_as=str
-            )
-            if cached_line_count is None:
-                with open(realpath, "rb") as file:
-                    line_count = sum(1 for _ in file)
-                save_to_cache(
-                    realpath, "bat-lines", stat_result, signature, str(line_count)
-                )
-            else:
-                line_count = int(cached_line_count)
-            line_count = max(line_count, 1)
-
             first_page = self._get_bat_page(
-                command, realpath, stat_result, signature, line_count, 0
+                command, realpath, stat_result, signature, 0
             )
 
             if should_cancel():
@@ -1038,14 +1060,18 @@ class PreviewContainer(Actionable, Container):
                         realpath,
                         stat_result,
                         signature,
-                        line_count,
                         page,
                     ),
                     thread=True,
                     group=BAT_PREVIEWER_GROUP,
                 )
 
-            source = LazyTextLines(line_count, BAT_PREVIEW_PAGE_SIZE, request_page)
+            first_page_is_complete = len(first_page) < BAT_PREVIEW_PAGE_SIZE
+            source = LazyTextLines(
+                len(first_page) if first_page_is_complete else BAT_PREVIEW_PAGE_SIZE,
+                BAT_PREVIEW_PAGE_SIZE,
+                request_page,
+            )
             source.set_page(0, first_page)
             existing_preview = self.get_child(WindowedTextPreview)
             if isinstance(existing_preview, WindowedTextPreview):
@@ -1073,6 +1099,20 @@ class PreviewContainer(Actionable, Container):
                 self.call_from_thread(self.mount, text_preview)
                 if should_cancel():
                     return False
+            if not first_page_is_complete:
+                self.run_worker(
+                    partial(
+                        self._count_bat_lines,
+                        token,
+                        text_preview,
+                        source,
+                        realpath,
+                        stat_result,
+                        signature,
+                    ),
+                    thread=True,
+                    group=BAT_PREVIEWER_GROUP,
+                )
             return True
         except subprocess.CalledProcessError as exc:
             if should_cancel():
@@ -1117,14 +1157,6 @@ class PreviewContainer(Actionable, Container):
                 with open(realpath, "rb") as file:
                     raw_content = file.read(max_file_size)
                     ignored_bytes = stat_result.st_size - len(raw_content)
-                    ignored_lines = 0
-                    remaining_bytes = stat_result.st_size - len(raw_content)
-                    scan_limit = min(remaining_bytes, max_file_size)
-                    if scan_limit > 0:
-                        chunk = file.read(scan_limit)
-                        ignored_lines += chunk.count(b"\n")
-                        if should_cancel():
-                            return
             except FileNotFoundError:
                 return
 
@@ -1135,11 +1167,11 @@ class PreviewContainer(Actionable, Container):
                 content, incomplete_bytes = decoded
                 ignored_bytes += incomplete_bytes
                 if ignored_bytes:
-                    if raw_content and not raw_content.endswith(b"\n"):
-                        ignored_lines = max(0, ignored_lines - 1)
                     if not content.endswith("\n"):
                         content += "\n"
-                    content += f"---\n(~{ignored_lines:,} line{s(ignored_lines)}/{ignored_bytes:,} byte{s(ignored_bytes)} ignored)"
+                    content += (
+                        f"---\n({ignored_bytes:,} byte{s(ignored_bytes)} ignored)"
+                    )
                 save_to_cache(
                     realpath, "windowed_text", stat_result, signature, content
                 )

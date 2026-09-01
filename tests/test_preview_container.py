@@ -4,6 +4,7 @@ from typing import Any, cast
 from unittest.mock import patch
 
 import pytest
+from rich.console import Console
 from rich.text import Text
 from textual.app import App, ComposeResult
 
@@ -86,6 +87,59 @@ def test_lazy_text_lines_requests_and_caches_pages() -> None:
     assert lines[300].plain == "line 300"
 
 
+def test_lazy_text_lines_updates_line_count() -> None:
+    lines = LazyTextLines(256, 256, lambda page: None)
+
+    lines.set_line_count(600)
+
+    assert len(lines) == 600
+
+
+async def test_bat_line_count_updates_lazy_source(tmp_path: Path) -> None:
+    file = tmp_path / "large.txt"
+    file.write_text("line\n" * 600, encoding="utf-8")
+    app = PreviewTestApp()
+
+    async with app.run_test():
+        preview = app.query_one(PreviewContainer)
+        token = preview._active_preview_token
+        source = LazyTextLines(256, 256, lambda page: None)
+        text_preview = WindowedTextPreview(source)
+
+        with (
+            patch("rovr.core.preview_container.load_from_cache", return_value=None),
+            patch("rovr.core.preview_container.save_to_cache") as save,
+        ):
+            await asyncio.to_thread(
+                preview._count_bat_lines,
+                token,
+                text_preview,
+                source,
+                str(file),
+                file.stat(),
+                ("test", "bat"),
+            )
+
+        assert len(source) == 600
+        assert save.call_args.args[4] == "600"
+
+
+async def test_windowed_preview_preserves_multiline_highlighting() -> None:
+    app = App()
+
+    async with app.run_test():
+        preview = WindowedTextPreview(
+            ["value = '''start", "inside", "end'''", "other = 1"],
+            language="python",
+        )
+        lines = cast(list[Text], preview._lines)
+        console = Console()
+
+        string_style = lines[0].get_style_at_offset(console, len(lines[0]) - 1)
+        assert lines[1].get_style_at_offset(console, 0) == string_style
+        assert lines[3].get_style_at_offset(console, 0) != string_style
+
+
 async def test_normal_preview_mounts_windowed_content(tmp_path: Path) -> None:
     source = tmp_path / "large.py"
     source.write_text("value = 1\nvalue = 2\n", encoding="utf-8")
@@ -145,7 +199,7 @@ async def test_truncated_preview_is_cached(
         await pilot.pause()
 
         cached_content = save.call_args.args[4]
-        assert cached_content == "first\n---\n(~0 lines/13 bytes ignored)"
+        assert cached_content == "first\n---\n(13 bytes ignored)"
 
         with (
             patch(

@@ -967,7 +967,7 @@ Must be one of:
 
 | Property                                               | Type    | Title/Description                                                                                                                                          |
 | ------------------------------------------------------ | ------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| [max_file_size](#interface_preview_text_max_file_size) | integer | Maximum number of bytes loaded for a text preview. Larger files are truncated and report the ignored line and byte counts.                                 |
+| [max_file_size](#interface_preview_text_max_file_size) | integer | Maximum file size (in bytes) to preview without bat(1). Files larger than this will be truncated to this size.                                             |
 | [error](#interface_preview_text_error)                 | string  | If for any reason the file preview refused to show, this appears.                                                                                          |
 | [start](#interface_preview_text_start)                 | string  | This is shown when the rovr starts up. You may see it for a split second, but it will never appear afterwards. You cannot view this properly in this docs. |
 | [font_text](#interface_preview_text_font_text)         | string  | When a font file is previewed, this text will be rendered in the font if possible.                                                                         |
@@ -980,7 +980,7 @@ Must be one of:
 | **Required** | No        |
 | **Default**  | `2097152` |
 
-**Description:** Maximum number of bytes loaded for a text preview. Larger files are truncated and report the ignored line and byte counts.
+**Description:** Maximum file size (in bytes) to preview without bat(1). Files larger than this will be truncated to this size.
 
 | Restrictions |        |
 | ------------ | ------ |

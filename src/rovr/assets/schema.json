@@ -365,7 +365,7 @@
               "type": "integer",
               "minimum": 1,
               "default": 2097152,
-              "description": "Maximum number of bytes loaded for a text preview. Larger files are truncated and report the ignored line and byte counts."
+              "description": "Maximum file size (in bytes) to preview without bat(1). Files larger than this will be truncated to this size."
             },
             "error": {
               "type": "string",

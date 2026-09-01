@@ -124,6 +124,33 @@ async def test_bat_line_count_updates_lazy_source(tmp_path: Path) -> None:
         assert save.call_args.args[4] == "600"
 
 
+async def test_stale_bat_line_count_stops_before_cache_access(tmp_path: Path) -> None:
+    file = tmp_path / "large.txt"
+    file.write_text("line\n" * 600, encoding="utf-8")
+    app = PreviewTestApp()
+
+    async with app.run_test():
+        preview = app.query_one(PreviewContainer)
+        stale_token = preview._active_preview_token
+        preview._active_preview_token = object()
+        source = LazyTextLines(256, 256, lambda page: None)
+        text_preview = WindowedTextPreview(source)
+
+        with patch("rovr.core.preview_container.load_from_cache") as load:
+            await asyncio.to_thread(
+                preview._count_bat_lines,
+                stale_token,
+                text_preview,
+                source,
+                str(file),
+                file.stat(),
+                ("test", "bat"),
+            )
+
+        assert not load.called
+        assert len(source) == 256
+
+
 async def test_windowed_preview_preserves_multiline_highlighting() -> None:
     app = App()
 

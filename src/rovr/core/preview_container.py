@@ -986,6 +986,8 @@ class PreviewContainer(Actionable, Container):
     ) -> None:
         context_token = preview_token.set(token)
         try:
+            if token is not self._active_preview_token:
+                return
             cached_line_count = load_from_cache(
                 realpath, "bat-lines", stat_result, signature, pass_as=str
             )
@@ -993,13 +995,20 @@ class PreviewContainer(Actionable, Container):
                 line_count = 0
                 with open(realpath, "rb") as file:
                     for line_count, _ in enumerate(file, 1):
-                        if line_count % 8192 == 0 and should_cancel():
+                        if (
+                            line_count % 8192 == 0
+                            and token is not self._active_preview_token
+                        ):
                             return
+                if token is not self._active_preview_token:
+                    return
                 save_to_cache(
                     realpath, "bat-lines", stat_result, signature, str(line_count)
                 )
             else:
                 line_count = int(cached_line_count)
+            if token is not self._active_preview_token:
+                return
             self.call_from_thread(text_preview.set_lazy_line_count, source, line_count)
         except (ExitNow, OSError, ValueError):
             return

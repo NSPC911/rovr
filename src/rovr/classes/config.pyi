@@ -888,7 +888,7 @@ r"""The values for the 'The resampling method to use when resizing images. This 
 class _RovrConfigInterfacePreviewText(TypedDict, total=False):
     max_file_size: int
     r"""
-    Maximum number of bytes loaded for a text preview. Larger files are truncated and report the ignored line and byte counts.
+    Maximum file size (in bytes) to preview without bat(1). Files larger than this will be truncated to this size.
 
     minimum: 1
     default: 2097152

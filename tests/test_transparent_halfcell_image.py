@@ -5,7 +5,7 @@ from rich.console import Console
 from rich.segment import Segment
 from textual_image.renderable.halfcell import Image as HalfcellImage
 
-import rovr.monkey_patches._classes  # noqa: F401
+import rovr.monkey_patches._textual  # noqa: F401
 
 
 def _render_pixels(pixels: list[tuple[int, int, int, int]]) -> list[Segment]:

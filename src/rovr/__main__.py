@@ -423,8 +423,7 @@ example_function(10)"""
     if args.force_first_launch:
         return
 
-    import rovr.monkey_patches._classes  # noqa: F401, I001
-    import rovr.monkey_patches._platform  # noqa: F401
+    import rovr.monkey_patches._platform  # noqa: F401, I001
     import rovr.monkey_patches._textual  # noqa: F401
 
     from rovr.functions.config import set_nested_value

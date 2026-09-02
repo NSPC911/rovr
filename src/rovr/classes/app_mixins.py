@@ -405,7 +405,7 @@ class DragAndDrop:
         ):
             option = self.file_list.get_option_at_index(option_index)
             dir_entry = getattr(option, "dir_entry", None)
-            if dir_entry is not None and dir_entry.is_dir():
+            if dir_entry is not None and path.isdir(dir_entry.path):
                 return normalise(dir_entry.path)
         return None
 

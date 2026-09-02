@@ -807,7 +807,7 @@ class Application(
                     getattr(highlighted_option, "dir_entry", None), os.DirEntry
                 ):
                     highlighted_path = highlighted_option.dir_entry.path
-                    if not highlighted_option.dir_entry.is_dir():
+                    if not path.isdir(highlighted_path):
                         new_highlighted_mtime = None
                         with suppress(OSError):
                             new_highlighted_mtime = path.getmtime(highlighted_path)

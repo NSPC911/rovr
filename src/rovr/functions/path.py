@@ -322,7 +322,7 @@ def sync_get_cwd_object(
             if not show_hidden and is_hidden_file(item):
                 continue
 
-            if item.is_dir():
+            if path.isdir(item.path):
                 folders.append({
                     "name": item.name,
                     "icon": lambda item=item: get_icon_for_folder(
@@ -636,9 +636,9 @@ def ifed(
                 )
             case "directory":
                 if conditions["directory"]:
-                    disabled = not (dir_entry and dir_entry.is_dir())
+                    disabled = not (dir_entry and path.isdir(dir_entry.path))
                 else:
-                    disabled = not (dir_entry and not dir_entry.is_dir())
+                    disabled = not (dir_entry and not path.isdir(dir_entry.path))
         if disabled:
             break
     return disabled

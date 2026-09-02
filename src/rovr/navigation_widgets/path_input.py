@@ -25,7 +25,7 @@ def get_subdirectories(parent: str | os.PathLike) -> Generator[os.DirEntry, None
     try:
         with os.scandir(parent) as it:
             for entry in it:
-                if entry.is_dir():
+                if path.isdir(entry.path):
                     yield entry
     except (FileNotFoundError, OSError):
         return

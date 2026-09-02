@@ -73,6 +73,21 @@ def test_filtered_dir_names(tmp_path: Path) -> None:
     assert filtered == dir_names
 
 
+def test_cwd_object_handles_symlink_loop(tmp_path: Path) -> None:
+    link = tmp_path / "loop"
+    try:
+        link.symlink_to(link)
+    except (OSError, NotImplementedError) as exc:
+        pytest.skip(f"Symlink not supported: {exc}")
+
+    folders, files = path_utils.sync_get_cwd_object(
+        cast(Any, SimpleNamespace(log=lambda _: None)), tmp_path.as_posix()
+    )
+
+    assert not folders
+    assert [item["name"] for item in files] == ["loop"]
+
+
 def test_ensure_existing_directory(tmp_path: Path) -> None:
     # basically check the directory it goes to if the target directory doesn't exist or isn't a directory
     target_dir = tmp_path / "nonexistent" / "subdir" / "target" / "dir"

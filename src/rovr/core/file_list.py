@@ -154,6 +154,7 @@ class FileList(
         self._ignore_next_click: bool = False
         self._in_git_repo: bool = False
         self._folder_item_counts: dict[str, tuple[int, int]] = {}
+        self._follow_links_next: bool = False
 
     def on_mount(self) -> None:
         if not self.dummy and self.parent:
@@ -1076,7 +1077,8 @@ class FileList(
             new = self.highlighted or 0
             await self.select_range(old, new)
 
-    def action_select(self) -> None:
+    def action_select(self, follow_symlinks: bool = False) -> None:
+        self._follow_links_next = follow_symlinks
         super().action_select()
         self.call_later(self.call_later, self.implicit_selector, "post")
 

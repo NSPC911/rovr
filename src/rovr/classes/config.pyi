@@ -345,6 +345,7 @@ _RightClickActionOneof0 = (
     | Literal["rovr:delete"]
     | Literal["rovr:zip"]
     | Literal["rovr:unzip"]
+    | Literal["rovr:follow_symlinks"]
     | Literal["system:copy_highlighted"]
     | Literal["system:copy_current_directory"]
     | Literal["system:copy_to_system_clip"]
@@ -364,6 +365,10 @@ r"""The values for the '_RightClickActionOneof0' enum"""
 _RIGHTCLICKACTIONONEOF0_ROVR_COLON_ZIP: Literal["rovr:zip"] = "rovr:zip"
 r"""The values for the '_RightClickActionOneof0' enum"""
 _RIGHTCLICKACTIONONEOF0_ROVR_COLON_UNZIP: Literal["rovr:unzip"] = "rovr:unzip"
+r"""The values for the '_RightClickActionOneof0' enum"""
+_RIGHTCLICKACTIONONEOF0_ROVR_COLON_FOLLOW_SYMLINKS: Literal["rovr:follow_symlinks"] = (
+    "rovr:follow_symlinks"
+)
 r"""The values for the '_RightClickActionOneof0' enum"""
 _RIGHTCLICKACTIONONEOF0_SYSTEM_COLON_COPY_HIGHLIGHTED: Literal[
     "system:copy_highlighted"

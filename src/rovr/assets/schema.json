@@ -31,6 +31,7 @@
             "rovr:delete",
             "rovr:zip",
             "rovr:unzip",
+            "rovr:follow_symlinks",
             "system:copy_highlighted",
             "system:copy_current_directory",
             "system:copy_to_system_clip"

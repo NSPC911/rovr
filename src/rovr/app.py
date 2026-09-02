@@ -606,7 +606,7 @@ class Application(
             if normalise(getcwd()) == normalise(directory) or directory == "":
                 add_to_history = False
             else:
-                chdir(directory)
+                chdir(directory, self.file_list._follow_links_next)
                 self.last_available_cd = directory
         except PermissionError as exc:
             self.notify(

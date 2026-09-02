@@ -108,7 +108,10 @@ def give_me_an_option(
         case "rovr:follow_symlinks":
             return PartialOption(
                 id="follow_symlinks",
-                disabled=app.file_list.highlighted_option is None or no_items,
+                disabled=not (
+                        hasattr(app.file_list.highlighted_option, "dir_entry")
+                        and app.file_list.highlighted_option.dir_entry.is_symlink()
+                ),
             )
         case "system:copy_highlighted":
             return PartialOption(id="copy_highlighted", disabled=no_items)

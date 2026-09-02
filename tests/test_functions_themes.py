@@ -250,6 +250,27 @@ def test_parse_theme_file_no_css_block_leaves_css_unset(tmp_path: Path) -> None:
     assert getattr(theme, "css", "") == ""
 
 
+def test_load_theme_css_updates_variables_with_rules() -> None:
+    from rovr.app import Application
+    from rovr.classes.theme import RovrStylesheet
+
+    stylesheet = RovrStylesheet(variables={})
+    stylesheet.add_source("", read_from=Application.THEME_CSS_SOURCE, tie_breaker=1)
+    stylesheet.parse()
+    app = SimpleNamespace(
+        THEME_CSS_SOURCE=Application.THEME_CSS_SOURCE,
+        current_theme=SimpleNamespace(css="Widget { color: $link; }"),
+        stylesheet=stylesheet,
+        get_css_variables=lambda: {"link": "#ffffff"},
+        theme="martian",
+        notify=lambda *args, **kwargs: None,
+    )
+
+    Application._load_theme_css(cast(Application, app))
+
+    stylesheet.reparse()
+
+
 def test_parse_theme_file_bar_gradient(tmp_path: Path) -> None:
     theme_file = tmp_path / "gradients.tcss"
     theme_file.write_text(

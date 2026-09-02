@@ -122,7 +122,8 @@ class ThemeHandler:
         if existing is not None and existing.content == css:
             return
         trial = self.stylesheet.copy()
-        trial.set_variables(self.get_css_variables())
+        variables = self.get_css_variables()
+        trial.set_variables(variables)
         trial.add_source(css, read_from=self.THEME_CSS_SOURCE, tie_breaker=1)
         try:
             trial.parse()
@@ -152,6 +153,7 @@ class ThemeHandler:
                 markup=False,
             )
             return
+        self.stylesheet.set_variables(variables)
         self.stylesheet.add_source(css, read_from=self.THEME_CSS_SOURCE, tie_breaker=1)
 
     def reload_themes(self: App) -> list[str]:

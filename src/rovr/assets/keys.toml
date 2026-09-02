@@ -77,9 +77,9 @@
 [file_list.Y]
 desc = "Copy"
 "y" = { action = "copy.to_rovr", desc = "Copy files to the rovr clipboard" }
-"p" = { action = "copy.highlighted", desc = "Copy the highlighted file path" }
+"p" = { action = 'copy.text("%h")', desc = "Copy the highlighted file path" }
 "s" = { action = "copy.to_system_clip", desc = "Copy files to the system clipboard" }
-"d" = { action = "copy.current_directory", desc = "Copy the current directory path" }
+"d" = { action = 'copy.text("%cwd")', desc = "Copy the current directory path" }
 
 [file_list.","]
 desc = "Sort order"

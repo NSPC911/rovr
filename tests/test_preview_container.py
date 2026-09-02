@@ -1,4 +1,5 @@
 import asyncio
+import pickle
 from pathlib import Path
 from typing import Any, cast
 from unittest.mock import patch
@@ -13,7 +14,13 @@ from rovr.components.text_preview import (
     WindowedTextPreview,
     _decode_text_preview,
 )
-from rovr.core.preview_container import ExitNow, PreviewContainer, preview_token
+from rovr.core.preview_container import (
+    ExitNow,
+    PreviewContainer,
+    _load_cached_text,
+    _save_cached_text,
+    preview_token,
+)
 from rovr.variables.constants import config
 
 
@@ -28,6 +35,21 @@ class WindowedPreviewTestApp(App[None]):
     def compose(self) -> ComposeResult:
         yield WindowedTextPreview(
             [f"line {line}" for line in range(10_000)], language="python"
+        )
+
+
+def test_cached_text_uses_pickle() -> None:
+    text = Text.from_markup("[bold red]cached[/]")
+
+    with patch("rovr.core.preview_container.save_to_cache") as save:
+        _save_cached_text("file", "bat-page", cast(Any, None), ("v2", "bat"), text)
+
+    data = save.call_args.args[4]
+    assert pickle.loads(data) == text
+    with patch("rovr.core.preview_container.load_from_cache", return_value=data):
+        assert (
+            _load_cached_text("file", "bat-page", cast(Any, None), ("v2", "bat"))
+            == text
         )
 
 

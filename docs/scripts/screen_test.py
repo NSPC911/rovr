@@ -1,5 +1,6 @@
 # modal tester, use when necessary
 import random
+from importlib import resources
 from time import perf_counter
 from typing import Iterable
 
@@ -19,7 +20,6 @@ from rovr.screens import (
     FileInUse,
     FileNameConflict,
     PasteScreen,
-    ThemeChooser,
     YesOrNo,
 )
 
@@ -29,7 +29,7 @@ console = Console()
 
 
 class Test(App):
-    CSS_PATH = "../style.tcss"
+    CSS_PATH = resources.files("rovr") / "style.tcss"
 
     HORIZONTAL_BREAKPOINTS = [
         (0, "-filelist-only"),
@@ -52,9 +52,7 @@ class Test(App):
         yield Button("File In Use", id="FileInUse")
         yield Button("File Name Conflict", id="FileNameConflict")
         yield Button("Paste Screen", id="PasteScreen")
-        yield Button("Theme Chooser", id="ThemeChooser")
         yield Button("Yes Or No", id="YesOrNo")
-        yield Button("Zip Up Screen", id="ArchiveCreationScreen")
 
     @on(Button.Pressed, "#FileNameConflict")
     def common_file_name_do_what(self) -> None:
@@ -116,13 +114,6 @@ class Test(App):
                 + "?",
                 paths={"copy": to_copy, "cut": to_cut},
             ),
-            callback=lambda result: self.notify(str(result), markup=False),
-        )
-
-    @on(Button.Pressed, "#ThemeChooser")
-    def theme_chooser(self) -> None:
-        self.push_screen(
-            ThemeChooser(),
             callback=lambda result: self.notify(str(result), markup=False),
         )
 

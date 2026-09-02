@@ -165,3 +165,7 @@ class ModalInput(ModalScreen, inherit_bindings=False):
             # ie click outside
             event.stop()
             dismiss(self, None, event)
+        elif event.widget.id in ("modalInput_group", "icon"):
+            # click on input because its hitbox is quite small
+            event.stop()
+            self.query_one(Input).focus()

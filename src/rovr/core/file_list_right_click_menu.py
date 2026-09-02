@@ -1,6 +1,5 @@
 import os
 from functools import partial
-from os.path import realpath
 from subprocess import Popen
 from typing import ClassVar, Literal
 
@@ -246,7 +245,13 @@ class FileListRightClickMenu(PopupOptionList, inherit_bindings=False):
             highlighted = self.app.file_list.highlighted_option
             if highlighted is None:
                 return
-            resolved_path = realpath(highlighted.dir_entry.path)
+            resolved_path = os.path.realpath(highlighted.dir_entry.path)
+            if not os.path.exists(resolved_path):
+                self.notify(
+                    f"Path {resolved_path} does not exist\nTaking you to the closest parent directory",
+                    severity="warning",
+                )
+
             self.call_next(
                 self.app.cd,
                 resolved_path
@@ -256,7 +261,6 @@ class FileListRightClickMenu(PopupOptionList, inherit_bindings=False):
                 if highlighted.dir_entry.is_dir()
                 else os.path.basename(resolved_path),
             )
-            self._resolve_symlinks = False
         elif hasattr(self.app.file_list, f"action_{event.option.id}"):
             self.call_next(
                 getattr(

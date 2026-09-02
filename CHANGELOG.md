@@ -5,6 +5,55 @@ All notable changes to this project will be documented in this file.
 The format is sort-of based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project sort-of adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Added
+
+- `preview`: add scrollable text previews [#344](https://github.com/NSPC911/rovr/pull/344) [16bf04d](https://github.com/NSPC911/rovr/commit/16bf04d8a6fdeeebb1c8c05a9d14d1946c7d9123)
+- `preview`: add cached previews [#339](https://github.com/NSPC911/rovr/pull/339) [3e48e47](https://github.com/NSPC911/rovr/commit/3e48e472c8093f3f7c7a321531391e0694bae4da)
+- `keys`: add chord keys [#341](https://github.com/NSPC911/rovr/pull/341) [4c9ae02](https://github.com/NSPC911/rovr/commit/4c9ae028381a8d6917a13f3311241c04d76ab038)
+- `themes`: add extraterrestrial themes [#343](https://github.com/NSPC911/rovr/pull/343) [39f596c](https://github.com/NSPC911/rovr/commit/39f596c4bdf00f6bd00060d3409cf31518659659)
+- `copy`: allow copying general text [de8eb5d](https://github.com/NSPC911/rovr/commit/de8eb5d0cc5ec6b56e3946b4da24789e92c2c8ee)
+- `keys`: add `cd-no-quit` [b6cbd37](https://github.com/NSPC911/rovr/commit/b6cbd375502880e3060579f0951a5805db821278)
+- `metadata`: add birthtime [ea358a2](https://github.com/NSPC911/rovr/commit/ea358a2855da244868b3f5e7e606a28480006ab7)
+- `shellexec`: store the last command run [940485a](https://github.com/NSPC911/rovr/commit/940485a0f90d73905eff9925ed34a439e58e5e89)
+- `app`: make the app title configurable [912bb30](https://github.com/NSPC911/rovr/commit/912bb30761d68b7bec156d7592798c6d110adacd)
+
+### Changed
+
+- `ui`: arrange scrollbars on container borders [#345](https://github.com/NSPC911/rovr/pull/345) [532cda1](https://github.com/NSPC911/rovr/commit/532cda16ee6edd500cee46c76e71fec3ecfe86e3)
+
+### Fixed
+
+- `input`: increase the hit size of modal input groups [53fe05b](https://github.com/NSPC911/rovr/commit/53fe05b5965ab66a02f097b19a55f6a8fce69a3c)
+- `themes`: resolve variables properly and update variable contexts [34bc91a](https://github.com/NSPC911/rovr/commit/34bc91a02f68bd7d8196d0db3807c571d25c72b5) [e27e7e0](https://github.com/NSPC911/rovr/commit/e27e7e0efd3504110291d3265097674229bde23f)
+- `filelist`: handle recursive links [f5e5ca9](https://github.com/NSPC911/rovr/commit/f5e5ca97f10af8bb3c70f8e7755c05ece6d7852a)
+- `process`: refresh error state properly [4438c06](https://github.com/NSPC911/rovr/commit/4438c06cd0017386e6643ff082cfcb0ec72d7be4)
+- `app`: handle paste and show-key checks properly [1a430b3](https://github.com/NSPC911/rovr/commit/1a430b31cb1f33b10307ffa799f561b08ec910b2) [839741b](https://github.com/NSPC911/rovr/commit/839741b7fd5b5b82d6b4c24f93f620e171a213fd)
+- `app`: reject Kitty modifier-only keys [eb4ffd2](https://github.com/NSPC911/rovr/commit/eb4ffd26ca78dac1ee171ae4808b7900d1154ab1)
+- `preview`: fix scrolling, borders, missing border titles, and crashes [c34c59e](https://github.com/NSPC911/rovr/commit/c34c59e700beb1a066a5d6c4ef2688182d20cfc8) [17eeb44](https://github.com/NSPC911/rovr/commit/17eeb4451d5f173e9f6b80eed62b98118eedff9a) [76f522f](https://github.com/NSPC911/rovr/commit/76f522fce2228184005f7ff777553c2e1202c068) [a3a87de](https://github.com/NSPC911/rovr/commit/a3a87defeb3cd85fba4deb82ce8e6ae8fe912412)
+- `pins`: handle a deadlock [0c730fb](https://github.com/NSPC911/rovr/commit/0c730fb40ca4943ebb614917a54c154778acffd3)
+- `process`: address a possible thread-safety issue [db29a3c](https://github.com/NSPC911/rovr/commit/db29a3c03f79d5600c52a64e3770fb72b96196d2) [f6485c9](https://github.com/NSPC911/rovr/commit/f6485c9b6298c21ab4aa17a4556b76877ec4cc4c)
+- `keys`: handle certain keys properly in new handler [e7b7c4a](https://github.com/NSPC911/rovr/commit/e7b7c4aae80459bcef1a64e6b751a67f16323fa3)
+- `shellexec`: do not color an empty border [f8d1653](https://github.com/NSPC911/rovr/commit/f8d165323e4db986da227d4a463ea235b31e8e94)
+- `app`: arm the timer after logs are done [17c3dcb](https://github.com/NSPC911/rovr/commit/17c3dcb7b228d6f735d208693ed23d439ed90cf5)
+
+### Performance
+
+- `preview`: use pickle instead of markup [e46e03d](https://github.com/NSPC911/rovr/commit/e46e03d3af446f1c4130499f5aa7d34e6b157aef)
+- `config`: store the schema validator in binary form [ba33239](https://github.com/NSPC911/rovr/commit/ba33239001493a4a37c7a6088fecc2c2fc6e8c94)
+
+### Build
+
+- `nuitka`: improve compiled resource handling [9ae9cf9](https://github.com/NSPC911/rovr/commit/9ae9cf9968fb97a637c36ef75522e51e5878dd7c) [823d95f](https://github.com/NSPC911/rovr/commit/823d95f84f0e2e7f80e0108bb70981064c2ff092)
+
+### Refactor
+
+- `keys`: replace the keybind handler [#338](https://github.com/NSPC911/rovr/pull/338) [0d3fae3](https://github.com/NSPC911/rovr/commit/0d3fae319b8f26ea7725b28c49c16cbf2b3007ae)
+  - Not a BREAKING change yet, but it will be.
+- rename rovr variables to match their usage [8e822c2](https://github.com/NSPC911/rovr/commit/8e822c24dddd2e4f3e96a83d9a9955eda5a13e5d)
+  - Internal breaking change, you might want to clean up state files
+
 ## [0.10.1.post1] - 2026-08-20
 
 ### Fixed

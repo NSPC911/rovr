@@ -64,6 +64,7 @@ titles = PreviewContainerTitles()
 
 PREVIEWER_GROUP = "previewers"
 TEXT_PREVIEW_CACHE_VERSION = "windowed-v2"
+FONT_PREVIEW_CACHE_VERSION = "font-v2"
 BAT_PREVIEW_CACHE_VERSION = "paged-v2"
 BAT_PREVIEW_PAGE_SIZE = 256
 BAT_PREVIEWER_GROUP = "bat-pages"
@@ -410,7 +411,7 @@ class PreviewContainer(Actionable, Container):
             )
             return
         signature = (
-            f"{preview_utils.MAX_FONT_SIZE}:{config['interface']['font_preview']['font_size']}",
+            f"{FONT_PREVIEW_CACHE_VERSION}:{preview_utils.MAX_FONT_SIZE}:{config['interface']['font_preview']['font_size']}",
             f"{self._preview_texts['font_text']}:{fg_color.hex}:{bg_color.hex}:{NewImage.func.__name__}",
         )
         img = _load_cached_image(realpath, "font", stat_result, signature)
@@ -1651,7 +1652,8 @@ class PreviewContainer(Actionable, Container):
             return
         self.log(self._mime_type)
         assert isinstance(self._current_content, str)
-        self.set_border("title", "")
+        title = self._mime_type.method if self._mime_type else "Preview"
+        self.set_border("title", title)
 
         display_content: str = self._current_content
         if self._mime_type:

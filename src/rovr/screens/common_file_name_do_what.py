@@ -47,8 +47,8 @@ class FileNameConflict(ModalScreen):
                 yield Button(
                     f"\\[{overwrite_bind}] Overwrite", variant="error", id="overwrite"
                 )
-            yield Button(f"\\[{rename_bind}] Rename", variant="warning", id="rename")
-            yield Button(f"\\[{skip_bind}] Skip", variant="success", id="skip")
+            yield Button(f"\\[{rename_bind}] Rename", variant="success", id="rename")
+            yield Button(f"\\[{skip_bind}] Skip", variant="warning", id="skip")
             if not self.allow_overwrite:
                 with Container():
                     yield Button(

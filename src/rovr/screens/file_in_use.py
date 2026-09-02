@@ -34,10 +34,10 @@ class FileInUse(ModalScreen):
         )
         with Grid(id="dialog"):
             yield Label(escape(self.message), classes="question")
-            yield Button(f"\\[{retry_bind}] Retry", variant="primary", id="try_again")
+            yield Button(f"\\[{retry_bind}] Retry", variant="success", id="try_again")
             yield Button(f"\\[{skip_bind}] Skip", variant="warning", id="skip")
             with Container():
-                yield Button(f"\\[{cancel_bind}] Cancel", variant="error", id="cancel")
+                yield Button(f"\\[{cancel_bind}] Cancel", variant="primary", id="cancel")
             with HorizontalGroup(id="dontAskAgain"):
                 yield Switch()
                 yield Label(f"\\[{dont_ask_bind}] Don't ask again")

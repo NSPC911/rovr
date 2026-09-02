@@ -37,12 +37,12 @@ class DeleteFiles(ModalScreen):
                 yield Button(f"\\[{delete_bind}] Delete", variant="error", id="delete")
                 with Container():
                     yield Button(
-                        f"\\[{cancel_bind}] Cancel", variant="success", id="cancel"
+                        f"\\[{cancel_bind}] Cancel", variant="primary", id="cancel"
                     )
             else:
                 yield Button(f"\\[{delete_bind}] Delete", variant="error", id="delete")
                 yield Button(
-                    f"\\[{cancel_bind}] Cancel", variant="success", id="cancel"
+                    f"\\[{cancel_bind}] Cancel", variant="primary", id="cancel"
                 )
 
     def on_mount(self) -> None:

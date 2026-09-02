@@ -208,7 +208,7 @@ def test_parse_theme_file_requires_primary(tmp_path: Path) -> None:
 def test_parse_theme_file_builds_theme_with_variables_and_css(tmp_path: Path) -> None:
     theme_file = tmp_path / "my-theme.tcss"
     theme_file.write_text(
-        NORD_PLACEHOLDER + "$accent-custom: #ff0000;\n"
+        NORD_PLACEHOLDER + "$accent-custom: #ff0000;\n" + "$cursor-custom: $surface;\n"
         "\n"
         "Widget {\n"
         "    color: $accent-custom;\n"
@@ -218,7 +218,10 @@ def test_parse_theme_file_builds_theme_with_variables_and_css(tmp_path: Path) ->
     assert theme.name == "my-theme"
     assert theme.primary == "#88C0D0"
     assert theme.dark is True
-    assert theme.variables == {"accent-custom": "#ff0000"}
+    assert theme.variables == {
+        "accent-custom": "#ff0000",
+        "cursor-custom": theme.to_color_system().generate()["surface"],
+    }
     assert "Widget" in theme.css
     assert "color: $accent-custom;" in theme.css
     assert "$accent-custom: #ff0000;" not in theme.css

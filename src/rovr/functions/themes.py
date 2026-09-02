@@ -210,6 +210,7 @@ def parse_theme_file(theme_file: Path) -> Theme:
         {**declared, **gradient_declarations},
         theme.to_color_system().generate(),
     )
+    theme.variables.update({name: resolved[name] for name in declared})
     bar_gradient: dict[str, list[str]] = {}
     for name, kind in BAR_GRADIENT_FIELDS.items():
         if name not in gradient_declarations:

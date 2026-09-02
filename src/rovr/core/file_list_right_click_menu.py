@@ -245,8 +245,8 @@ class FileListRightClickMenu(PopupOptionList, inherit_bindings=False):
             highlighted = self.app.file_list.highlighted_option
             if highlighted is None:
                 return
-            resolved_path = os.path.realpath(highlighted.dir_entry.path)
-            if not os.path.exists(resolved_path):
+            resolved_path = os.readlink(highlighted.dir_entry.path)
+            if not os.path.lexists(resolved_path):
                 self.notify(
                     f"Path {resolved_path} does not exist\nTaking you to the closest parent directory",
                     severity="warning",

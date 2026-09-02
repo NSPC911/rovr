@@ -88,6 +88,7 @@ right_click = [
     "%rcwd",
     "%rnh",
   ], run_type = "background", shell = false }, if = { os = ["Windows"] } },
+  { label = "\uf481 follow link", action = "rovr:follow_symlinks" }
   # { label = " Get SHA256", action = { run = 'pwsh -nop -c "(Get-FileHash -Algorithm SHA256 \"${highlighted_file}\").Hash"', run_type = "background" }, if = { directory = false }}
 ]
 drive_exclude = ["/var/*"]

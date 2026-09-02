@@ -1,5 +1,6 @@
 import os
 from functools import partial
+from os.path import realpath
 from subprocess import Popen
 from typing import ClassVar, Literal
 
@@ -104,6 +105,11 @@ def give_me_an_option(
                     hasattr(app.file_list.highlighted_option, "dir_entry")
                     and is_archive(app.file_list.highlighted_option.dir_entry.path)
                 ),
+            )
+        case "rovr:follow_symlinks":
+            return PartialOption(
+                id="follow_symlinks",
+                disabled=app.file_list.highlighted_option is None or no_items,
             )
         case "system:copy_highlighted":
             return PartialOption(id="copy_highlighted", disabled=no_items)
@@ -236,6 +242,21 @@ class FileListRightClickMenu(PopupOptionList, inherit_bindings=False):
                     f"{event.option.id}",
                 )
             )
+        elif event.option.id == "follow_symlinks":
+            highlighted = self.app.file_list.highlighted_option
+            if highlighted is None:
+                return
+            resolved_path = realpath(highlighted.dir_entry.path)
+            self.call_next(
+                self.app.cd,
+                resolved_path
+                if highlighted.dir_entry.is_dir()
+                else os.path.dirname(resolved_path),
+                focus_on=None
+                if highlighted.dir_entry.is_dir()
+                else os.path.basename(resolved_path),
+            )
+            self._resolve_symlinks = False
         elif hasattr(self.app.file_list, f"action_{event.option.id}"):
             self.call_next(
                 getattr(

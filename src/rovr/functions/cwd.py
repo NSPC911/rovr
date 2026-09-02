@@ -65,21 +65,30 @@ class _WorkingDirectory:
 _working_directory = _WorkingDirectory()
 
 
-def getcwd() -> str:
+def getcwd(follow_symlinks: bool = False) -> str:
     """Return the logical current working directory.
+
+    Args:
+        follow_symlinks: If True, resolve symlinks in the path before returning.
 
     Returns:
         The logical current working directory.
     """
-    return _working_directory.getcwd()
+    cwd = _working_directory.getcwd()
+    if follow_symlinks:
+        cwd = path.realpath(cwd)
+    return cwd
 
 
-def chdir(directory: str) -> None:
+def chdir(directory: str, follow_symlinks: bool = False) -> None:
     """Change the process and logical working directories.
 
     Args:
         directory: An absolute path or a path relative to the logical cwd.
+        follow_symlinks: If True, resolve symlinks in the path before changing
     """
+    if follow_symlinks:
+        directory = path.realpath(directory)
     _working_directory.chdir(directory)
 
 

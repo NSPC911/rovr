@@ -254,14 +254,15 @@ class FileListRightClickMenu(PopupOptionList, inherit_bindings=False):
                     f"Path {resolved_path} does not exist\nTaking you to the closest parent directory",
                     severity="warning",
                 )
+            is_real_dir = os.path.isdir(resolved_path) and not os.path.islink(resolved_path)
 
             self.call_next(
                 self.app.cd,
                 resolved_path
-                if highlighted.dir_entry.is_dir()
+                if is_real_dir
                 else os.path.dirname(resolved_path),
                 focus_on=None
-                if highlighted.dir_entry.is_dir()
+                if is_real_dir
                 else os.path.basename(resolved_path),
             )
         elif hasattr(self.app.file_list, f"action_{event.option.id}"):

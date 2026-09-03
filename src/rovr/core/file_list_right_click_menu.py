@@ -108,7 +108,10 @@ def give_me_an_option(
         case "rovr:follow_symlinks":
             return PartialOption(
                 id="follow_symlinks",
-                disabled=app.file_list.highlighted_option is None or no_items,
+                disabled=not (
+                        hasattr(app.file_list.highlighted_option, "dir_entry")
+                        and app.file_list.highlighted_option.dir_entry.is_symlink()
+                ),
             )
         case "system:copy_highlighted":
             return PartialOption(id="copy_highlighted", disabled=no_items)
@@ -245,20 +248,24 @@ class FileListRightClickMenu(PopupOptionList, inherit_bindings=False):
             highlighted = self.app.file_list.highlighted_option
             if highlighted is None:
                 return
-            resolved_path = os.path.realpath(highlighted.dir_entry.path)
-            if not os.path.exists(resolved_path):
+            try:
+                resolved_path = os.readlink(highlighted.dir_entry.path)
+            except OSError:
+                return
+            if not os.path.lexists(resolved_path):
                 self.notify(
                     f"Path {resolved_path} does not exist\nTaking you to the closest parent directory",
                     severity="warning",
                 )
+            is_real_dir = os.path.isdir(resolved_path) and not os.path.islink(resolved_path)
 
             self.call_next(
                 self.app.cd,
                 resolved_path
-                if highlighted.dir_entry.is_dir()
+                if is_real_dir
                 else os.path.dirname(resolved_path),
                 focus_on=None
-                if highlighted.dir_entry.is_dir()
+                if is_real_dir
                 else os.path.basename(resolved_path),
             )
         elif hasattr(self.app.file_list, f"action_{event.option.id}"):

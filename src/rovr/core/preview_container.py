@@ -1662,7 +1662,9 @@ class PreviewContainer(Actionable, Container):
             return
         self.log(self._mime_type)
         assert isinstance(self._current_content, str)
-        self.set_border("title", self._mime_type.method if self._mime_type else "Preview")
+        self.set_border(
+            "title", self._mime_type.method if self._mime_type else "Preview"
+        )
 
         display_content: str = self._current_content
         if self._mime_type:

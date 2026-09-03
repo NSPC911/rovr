@@ -134,6 +134,28 @@ orphan = false
 rename_show_as_mapping = true
 run = "$EDITOR"
 
+[settings.ipc]
+enabled = false
+
+[settings.ipc.permissions]
+cd = "allow"
+cursor = "allow"
+
+"clipboard.copy" = "allow"
+"clipboard.cut" = "allow"
+"clipboard.list" = "allow"
+"clipboard.paste" = "prompt"
+
+"tab.list" = "allow"
+"tab.create" = "allow"
+"tab.switch" = "allow"
+"tab.close" = "prompt"
+
+quit = "prompt"
+suspend = "allow"
+
+"history.list" = "allow"
+
 [metadata]
 fields = [
   "type",

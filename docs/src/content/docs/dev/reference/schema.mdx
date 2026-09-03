@@ -139,6 +139,22 @@ description: config schema humanified
         - [2.8.2.1.1. Rovr Config > settings > openers > match > additionalProperties > additionalProperties items](#settings_openers_match_additionalProperties_items)
   - [2.9. Property `Rovr Config > settings > drive_exclude`](#settings_drive_exclude)
     - [2.9.1. Rovr Config > settings > drive_exclude > drive_exclude items](#settings_drive_exclude_items)
+  - [2.10. Property `Rovr Config > settings > ipc`](#settings_ipc)
+    - [2.10.1. Property `Rovr Config > settings > ipc > enabled`](#settings_ipc_enabled)
+    - [2.10.2. Property `Rovr Config > settings > ipc > permissions`](#settings_ipc_permissions)
+      - [2.10.2.1. Property `Rovr Config > settings > ipc > permissions > cd`](#settings_ipc_permissions_cd)
+      - [2.10.2.2. Property `Rovr Config > settings > ipc > permissions > cursor`](#settings_ipc_permissions_cursor)
+      - [2.10.2.3. Property `Rovr Config > settings > ipc > permissions > clipboard.copy`](#settings_ipc_permissions_clipboardcopy)
+      - [2.10.2.4. Property `Rovr Config > settings > ipc > permissions > clipboard.cut`](#settings_ipc_permissions_clipboardcut)
+      - [2.10.2.5. Property `Rovr Config > settings > ipc > permissions > clipboard.list`](#settings_ipc_permissions_clipboardlist)
+      - [2.10.2.6. Property `Rovr Config > settings > ipc > permissions > clipboard.paste`](#settings_ipc_permissions_clipboardpaste)
+      - [2.10.2.7. Property `Rovr Config > settings > ipc > permissions > tab.list`](#settings_ipc_permissions_tablist)
+      - [2.10.2.8. Property `Rovr Config > settings > ipc > permissions > tab.create`](#settings_ipc_permissions_tabcreate)
+      - [2.10.2.9. Property `Rovr Config > settings > ipc > permissions > tab.switch`](#settings_ipc_permissions_tabswitch)
+      - [2.10.2.10. Property `Rovr Config > settings > ipc > permissions > tab.close`](#settings_ipc_permissions_tabclose)
+      - [2.10.2.11. Property `Rovr Config > settings > ipc > permissions > quit`](#settings_ipc_permissions_quit)
+      - [2.10.2.12. Property `Rovr Config > settings > ipc > permissions > suspend`](#settings_ipc_permissions_suspend)
+      - [2.10.2.13. Property `Rovr Config > settings > ipc > permissions > history.list`](#settings_ipc_permissions_historylist)
 - [3. Property `Rovr Config > metadata`](#metadata)
   - [3.1. Property `Rovr Config > metadata > fields`](#metadata_fields)
     - [3.1.1. Rovr Config > metadata > fields > fields items](#metadata_fields_items)
@@ -1070,6 +1086,7 @@ Must be one of:
 | [preview_rules](#settings_preview_rules)                           | object          | Map MIME type patterns to preview types. Uses regex patterns. Valid preview types: text, image, pdf, archive, folder, resvg, font, remime.<br />-&gt; Use 'remime' if you want a more accurate description from file(1) |
 | [openers](#settings_openers)                                       | object          | Openers to open files with, grouped by name and matched against file paths by glob pattern.                                                                                                                             |
 | [drive_exclude](#settings_drive_exclude)                           | array of string | Glob patterns matched against mountpoint paths. Drives matching any pattern are hidden from the sidebar (e.g. '/run/media/\*', 'D:/').                                                                                  |
+| [ipc](#settings_ipc)                                               | object          | Settings related to the IPC server that allows external programs to control rovr                                                                                                                                        |
 
 ### <a name="settings_use_recycle_bin"></a>2.1. Property `Rovr Config > settings > use_recycle_bin`
 
@@ -2212,6 +2229,278 @@ Must be one of:
 | ------------ | -------- |
 | **Type**     | `string` |
 | **Required** | No       |
+
+### <a name="settings_ipc"></a>2.10. Property `Rovr Config > settings > ipc`
+
+|                           |             |
+| ------------------------- | ----------- |
+| **Type**                  | `object`    |
+| **Required**              | No          |
+| **Additional properties** | Not allowed |
+
+**Description:** Settings related to the IPC server that allows external programs to control rovr
+
+| Property                                 | Type    | Title/Description                |
+| ---------------------------------------- | ------- | -------------------------------- |
+| [enabled](#settings_ipc_enabled)         | boolean | Whether to enable the IPC server |
+| [permissions](#settings_ipc_permissions) | object  | Permissions for the IPC server   |
+
+#### <a name="settings_ipc_enabled"></a>2.10.1. Property `Rovr Config > settings > ipc > enabled`
+
+|              |           |
+| ------------ | --------- |
+| **Type**     | `boolean` |
+| **Required** | No        |
+| **Default**  | `false`   |
+
+**Description:** Whether to enable the IPC server
+
+#### <a name="settings_ipc_permissions"></a>2.10.2. Property `Rovr Config > settings > ipc > permissions`
+
+|                           |             |
+| ------------------------- | ----------- |
+| **Type**                  | `object`    |
+| **Required**              | No          |
+| **Additional properties** | Not allowed |
+
+**Description:** Permissions for the IPC server
+
+| Property                                                    | Type             | Title/Description                                            |
+| ----------------------------------------------------------- | ---------------- | ------------------------------------------------------------ |
+| [cd](#settings_ipc_permissions_cd)                          | enum (of string) | Should the IPC allow changing the current working directory? |
+| [cursor](#settings_ipc_permissions_cursor)                  | enum (of string) | Control the cursor in the filelist                           |
+| [clipboard.copy](#settings_ipc_permissions_clipboardcopy)   | enum (of string) | Control copying to the clipboard                             |
+| [clipboard.cut](#settings_ipc_permissions_clipboardcut)     | enum (of string) | Control cutting to the clipboard                             |
+| [clipboard.list](#settings_ipc_permissions_clipboardlist)   | enum (of string) | Control listing the clipboard                                |
+| [clipboard.paste](#settings_ipc_permissions_clipboardpaste) | enum (of string) | Control pasting from the clipboard                           |
+| [tab.list](#settings_ipc_permissions_tablist)               | enum (of string) | Control listing the tabs                                     |
+| [tab.create](#settings_ipc_permissions_tabcreate)           | enum (of string) | Control creating new tabs                                    |
+| [tab.switch](#settings_ipc_permissions_tabswitch)           | enum (of string) | Control switching between tabs                               |
+| [tab.close](#settings_ipc_permissions_tabclose)             | enum (of string) | Control closing tabs                                         |
+| [quit](#settings_ipc_permissions_quit)                      | enum (of string) | Control quitting rovr                                        |
+| [suspend](#settings_ipc_permissions_suspend)                | enum (of string) | Control suspending rovr                                      |
+| [history.list](#settings_ipc_permissions_historylist)       | enum (of string) | Control listing the history                                  |
+
+##### <a name="settings_ipc_permissions_cd"></a>2.10.2.1. Property `Rovr Config > settings > ipc > permissions > cd`
+
+|                |                         |
+| -------------- | ----------------------- |
+| **Type**       | `enum (of string)`      |
+| **Required**   | No                      |
+| **Default**    | `"allow"`               |
+| **Defined in** | #/definitions/ipc_perms |
+
+**Description:** Should the IPC allow changing the current working directory?
+
+Must be one of:
+
+- "allow"
+- "prompt"
+- "deny"
+
+##### <a name="settings_ipc_permissions_cursor"></a>2.10.2.2. Property `Rovr Config > settings > ipc > permissions > cursor`
+
+|                |                         |
+| -------------- | ----------------------- |
+| **Type**       | `enum (of string)`      |
+| **Required**   | No                      |
+| **Default**    | `"allow"`               |
+| **Defined in** | #/definitions/ipc_perms |
+
+**Description:** Control the cursor in the filelist
+
+Must be one of:
+
+- "allow"
+- "prompt"
+- "deny"
+
+##### <a name="settings_ipc_permissions_clipboardcopy"></a>2.10.2.3. Property `Rovr Config > settings > ipc > permissions > clipboard.copy`
+
+|                |                         |
+| -------------- | ----------------------- |
+| **Type**       | `enum (of string)`      |
+| **Required**   | No                      |
+| **Default**    | `"allow"`               |
+| **Defined in** | #/definitions/ipc_perms |
+
+**Description:** Control copying to the clipboard
+
+Must be one of:
+
+- "allow"
+- "prompt"
+- "deny"
+
+##### <a name="settings_ipc_permissions_clipboardcut"></a>2.10.2.4. Property `Rovr Config > settings > ipc > permissions > clipboard.cut`
+
+|                |                         |
+| -------------- | ----------------------- |
+| **Type**       | `enum (of string)`      |
+| **Required**   | No                      |
+| **Default**    | `"allow"`               |
+| **Defined in** | #/definitions/ipc_perms |
+
+**Description:** Control cutting to the clipboard
+
+Must be one of:
+
+- "allow"
+- "prompt"
+- "deny"
+
+##### <a name="settings_ipc_permissions_clipboardlist"></a>2.10.2.5. Property `Rovr Config > settings > ipc > permissions > clipboard.list`
+
+|                |                         |
+| -------------- | ----------------------- |
+| **Type**       | `enum (of string)`      |
+| **Required**   | No                      |
+| **Default**    | `"allow"`               |
+| **Defined in** | #/definitions/ipc_perms |
+
+**Description:** Control listing the clipboard
+
+Must be one of:
+
+- "allow"
+- "prompt"
+- "deny"
+
+##### <a name="settings_ipc_permissions_clipboardpaste"></a>2.10.2.6. Property `Rovr Config > settings > ipc > permissions > clipboard.paste`
+
+|                |                         |
+| -------------- | ----------------------- |
+| **Type**       | `enum (of string)`      |
+| **Required**   | No                      |
+| **Default**    | `"prompt"`              |
+| **Defined in** | #/definitions/ipc_perms |
+
+**Description:** Control pasting from the clipboard
+
+Must be one of:
+
+- "allow"
+- "prompt"
+- "deny"
+
+##### <a name="settings_ipc_permissions_tablist"></a>2.10.2.7. Property `Rovr Config > settings > ipc > permissions > tab.list`
+
+|                |                         |
+| -------------- | ----------------------- |
+| **Type**       | `enum (of string)`      |
+| **Required**   | No                      |
+| **Default**    | `"allow"`               |
+| **Defined in** | #/definitions/ipc_perms |
+
+**Description:** Control listing the tabs
+
+Must be one of:
+
+- "allow"
+- "prompt"
+- "deny"
+
+##### <a name="settings_ipc_permissions_tabcreate"></a>2.10.2.8. Property `Rovr Config > settings > ipc > permissions > tab.create`
+
+|                |                         |
+| -------------- | ----------------------- |
+| **Type**       | `enum (of string)`      |
+| **Required**   | No                      |
+| **Default**    | `"allow"`               |
+| **Defined in** | #/definitions/ipc_perms |
+
+**Description:** Control creating new tabs
+
+Must be one of:
+
+- "allow"
+- "prompt"
+- "deny"
+
+##### <a name="settings_ipc_permissions_tabswitch"></a>2.10.2.9. Property `Rovr Config > settings > ipc > permissions > tab.switch`
+
+|                |                         |
+| -------------- | ----------------------- |
+| **Type**       | `enum (of string)`      |
+| **Required**   | No                      |
+| **Default**    | `"allow"`               |
+| **Defined in** | #/definitions/ipc_perms |
+
+**Description:** Control switching between tabs
+
+Must be one of:
+
+- "allow"
+- "prompt"
+- "deny"
+
+##### <a name="settings_ipc_permissions_tabclose"></a>2.10.2.10. Property `Rovr Config > settings > ipc > permissions > tab.close`
+
+|                |                         |
+| -------------- | ----------------------- |
+| **Type**       | `enum (of string)`      |
+| **Required**   | No                      |
+| **Default**    | `"prompt"`              |
+| **Defined in** | #/definitions/ipc_perms |
+
+**Description:** Control closing tabs
+
+Must be one of:
+
+- "allow"
+- "prompt"
+- "deny"
+
+##### <a name="settings_ipc_permissions_quit"></a>2.10.2.11. Property `Rovr Config > settings > ipc > permissions > quit`
+
+|                |                         |
+| -------------- | ----------------------- |
+| **Type**       | `enum (of string)`      |
+| **Required**   | No                      |
+| **Default**    | `"prompt"`              |
+| **Defined in** | #/definitions/ipc_perms |
+
+**Description:** Control quitting rovr
+
+Must be one of:
+
+- "allow"
+- "prompt"
+- "deny"
+
+##### <a name="settings_ipc_permissions_suspend"></a>2.10.2.12. Property `Rovr Config > settings > ipc > permissions > suspend`
+
+|                |                         |
+| -------------- | ----------------------- |
+| **Type**       | `enum (of string)`      |
+| **Required**   | No                      |
+| **Default**    | `"allow"`               |
+| **Defined in** | #/definitions/ipc_perms |
+
+**Description:** Control suspending rovr
+
+Must be one of:
+
+- "allow"
+- "prompt"
+- "deny"
+
+##### <a name="settings_ipc_permissions_historylist"></a>2.10.2.13. Property `Rovr Config > settings > ipc > permissions > history.list`
+
+|                |                         |
+| -------------- | ----------------------- |
+| **Type**       | `enum (of string)`      |
+| **Required**   | No                      |
+| **Default**    | `"allow"`               |
+| **Defined in** | #/definitions/ipc_perms |
+
+**Description:** Control listing the history
+
+Must be one of:
+
+- "allow"
+- "prompt"
+- "deny"
 
 ## <a name="metadata"></a>3. Property `Rovr Config > metadata`
 

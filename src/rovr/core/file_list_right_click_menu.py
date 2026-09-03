@@ -109,8 +109,8 @@ def give_me_an_option(
             return PartialOption(
                 id="follow_symlinks",
                 disabled=not (
-                        hasattr(app.file_list.highlighted_option, "dir_entry")
-                        and app.file_list.highlighted_option.dir_entry.is_symlink()
+                    hasattr(app.file_list.highlighted_option, "dir_entry")
+                    and app.file_list.highlighted_option.dir_entry.is_symlink()
                 ),
             )
         case "system:copy_highlighted":
@@ -257,16 +257,14 @@ class FileListRightClickMenu(PopupOptionList, inherit_bindings=False):
                     f"Path {resolved_path} does not exist\nTaking you to the closest parent directory",
                     severity="warning",
                 )
-            is_real_dir = os.path.isdir(resolved_path) and not os.path.islink(resolved_path)
+            is_real_dir = os.path.isdir(resolved_path) and not os.path.islink(
+                resolved_path
+            )
 
             self.call_next(
                 self.app.cd,
-                resolved_path
-                if is_real_dir
-                else os.path.dirname(resolved_path),
-                focus_on=None
-                if is_real_dir
-                else os.path.basename(resolved_path),
+                resolved_path if is_real_dir else os.path.dirname(resolved_path),
+                focus_on=None if is_real_dir else os.path.basename(resolved_path),
             )
         elif hasattr(self.app.file_list, f"action_{event.option.id}"):
             self.call_next(

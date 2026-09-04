@@ -32,6 +32,7 @@ from textual.widget import Widget
 from textual.widgets import Input, Label
 from textual.widgets.selection_list import Selection
 from textual.worker import Worker, WorkerFailed
+from textual_drivers import BoundedPattern
 from textual_drivers.dnd import (
     DNDApp,
     DNDDragIn,
@@ -328,6 +329,13 @@ class Application(
             yield StateManager()
 
     def on_mount(self) -> None:
+        # necessary for zellij related nonsense
+        if os.environ.get("ZELLIJ") == "0":
+            self._driver.register_event_handler(
+                BoundedPattern(start="\x1b_G", end="\x1b\\"),
+                lambda response: self.log(f"TGP response: {response!r}"),
+                priority=True,
+            )
         for error in self._theme_errors:
             self.notify(error, title="Theme Error", severity="warning", markup=False)
         self.set_interval(1, self._poll_theme_files)

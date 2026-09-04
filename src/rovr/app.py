@@ -105,7 +105,8 @@ class RovrScreen(Screen):
     @work
     async def _on_update(self, message: Update) -> None:
         await super()._on_update(message)
-        self.app.title = await expand_command(self.app, config["interface"]["title"])
+        if self.app._on_mount_done:
+            self.app.title = await expand_command(self.app, config["interface"]["title"])
 
 
 class Application(
@@ -383,6 +384,10 @@ class Application(
         # self.call_after_refresh(sleep, 1)
         self.add_dnd_class_target(self._file_list_container)
         self.add_dnd_class_target(self._pinned_sidebar_container)
+
+        from rovr.functions.ipc_receiver import start_server
+
+        start_server(self)
 
     @work
     async def _force_crash(self) -> None:

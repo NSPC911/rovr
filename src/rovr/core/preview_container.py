@@ -1165,12 +1165,7 @@ class PreviewContainer(Actionable, Container):
         if should_cancel():
             return
 
-        self.set_border(
-            "title",
-            f"{titles.file} ({self._mime_type.method})"
-            if self._mime_type
-            else titles.file,
-        )
+        self.set_border("title", titles.file)
 
         assert self._current_file_path is not None
         realpath = path.realpath(self._current_file_path)
@@ -1663,7 +1658,8 @@ class PreviewContainer(Actionable, Container):
         self.log(self._mime_type)
         assert isinstance(self._current_content, str)
         self.set_border(
-            "title", self._mime_type.method if self._mime_type else "Preview"
+            "title",
+            "Preview" + (f" ({self._mime_type.method})" if self._mime_type else ""),
         )
 
         display_content: str = self._current_content

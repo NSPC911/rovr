@@ -5,6 +5,8 @@
 "Q" = { action = "app.quit(False)", desc = "Quit rovr without cd-ing to current directory" }
 ":" = { action = "app.command_palette", desc = "Open the command palette" }
 "ctrl+z" = { action = "app.suspend_process", desc = "Suspend rovr" }
+"tab" = { action = "app.focus_next", desc = "Focus the next widget" }
+"shift+tab" = { action = "app.focus_previous", desc = "Focus the previous widget" }
 
 [main]
 "S" = { action = "toggle_pinned_sidebar", desc = "Toggle the pinned sidebar" }

@@ -1,5 +1,14 @@
 [
   {
+    "keys": ["interface.allow_tab_nav"],
+    "message": ["[bright_cyan]interface.allow_tab_nav[/] has been removed as the new keybind system allows disabli[bright_cyanng it by default.",
+    "To disable it, you can add the following to your [bright_cyan]`keys.toml`[/] file:",
+    "[red]\\[[yellow]global[/]][/] ",
+    "[bright_blue]\"tab\"[/] = [green]\"noop\"[/]",
+    "[bright_blue]\"shift+tab\" = [green]\"noop\"[/]"],
+    "extra": "Removed in v0.10.2 (yes a patch version)"
+  },
+  {
     "keys": ["settings.last_highlighted_size"],
     "message": ["[bright_cyan]settings.last_highlighted_size[/] has been removed as it serves a similar purpose as [bright_blue]settings.history_size[/]. Use that instead."],
     "extra": "Removed in v0.10.1 (yes a patch version)"
@@ -10,9 +19,9 @@
       "[bright_blue]custom_theme[/] has been removed in favour of theme files.",
       "Themes now live as tcss files in [bright_cyan]<config folder>/themes/<name>.tcss[/], and are hot-reloaded while rovr is running.",
       "- Each color becomes a variable declaration, e.g. [bright_cyan]$primary: #88C0D0;[/]",
-      "- [bright_cyan]is_dark[/] becomes [bright_cyan]$dark: true;[/]",
-      "- [bright_cyan]variables[/] entries become plain [bright_cyan]$name: value;[/] declarations",
-      "- [bright_cyan]bar_gradient[/] becomes [bright_cyan]$bar-gradient-default: <color> <color>;[/] and [bright_cyan]$bar-gradient-error: <color> <color>;[/]",
+      "- [bright_blue]is_dark[/] becomes [bright_cyan]$dark: true;[/]",
+      "- [bright_blue]variables[/] entries become plain [bright_cyan]$name: value;[/] declarations",
+      "- [bright_blue]bar_gradient[/] becomes [bright_cyan]$bar-gradient-default: <color> <color>;[/] and [bright_cyan]$bar-gradient-error: <color> <color>;[/]",
       "See the bundled themes in the folder above for reference."
     ],
     "extra": "Removed in v0.10.0"

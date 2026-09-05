@@ -43,9 +43,6 @@ r""" Default value of the field path 'Rovr Config icons folders' """
 _ROVR_CONFIG_INTERFACE_ALLOW_AUTO_SELECT_MODE_DEFAULT = True
 r""" Default value of the field path 'Rovr Config interface allow_auto_select_mode' """
 
-_ROVR_CONFIG_INTERFACE_ALLOW_TAB_NAV_DEFAULT = False
-r""" Default value of the field path 'Rovr Config interface allow_tab_nav' """
-
 _ROVR_CONFIG_INTERFACE_APPEND_NEW_TABS_DEFAULT = True
 r""" Default value of the field path 'Rovr Config interface append_new_tabs' """
 
@@ -643,13 +640,6 @@ class _RovrConfigInterface(TypedDict, total=False):
 
     font_preview: "_RovrConfigInterfaceFontPreview"
     r""" Settings related to the font preview used in the preview sidebar """
-
-    allow_tab_nav: bool
-    r"""
-    Allow navigating the main app screen with `tab` and `shift+tab`
-
-    default: False
-    """
 
     append_new_tabs: bool
     r"""

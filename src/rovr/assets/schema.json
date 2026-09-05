@@ -321,11 +321,6 @@
             }
           }
         },
-        "allow_tab_nav": {
-          "type": "boolean",
-          "default": false,
-          "description": "Allow navigating the main app screen with `tab` and `shift+tab`"
-        },
         "append_new_tabs": {
           "type": "boolean",
           "default": true,

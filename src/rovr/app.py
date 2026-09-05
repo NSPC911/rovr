@@ -412,14 +412,6 @@ class Application(
         except TimeoutExpired:
             proc.kill()
 
-    def action_focus_next(self) -> None:
-        if config["interface"]["allow_tab_nav"]:
-            super().action_focus_next()
-
-    def action_focus_previous(self) -> None:
-        if config["interface"]["allow_tab_nav"]:
-            super().action_focus_previous()
-
     # keeping events.Key if i need it in future
     def show_key(self, event: events.Key | str) -> None:
         if isinstance(event, events.Key):

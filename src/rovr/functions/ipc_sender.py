@@ -46,6 +46,12 @@ def _build_parser() -> argparse.ArgumentParser:
 IPC_PARSER = _build_parser()
 
 
+def _print_error(message: str) -> None:
+    from rovr.functions.cli import print_rich_error
+
+    print_rich_error(message)
+
+
 def _validate_message(action: str, args: tuple[str, ...]) -> None:
     parsed = IPC_PARSER.parse_args([action, *args])
     if parsed.action == "cd" and parsed.exact and not os.path.exists(parsed.path):
@@ -56,23 +62,18 @@ async def send_message(port: int | None, action: str, *args: str) -> None:
     if port is None:
         sport = os.environ.get("ROVR_IPC_PORT")
         if sport is None:
-            print(
-                json.dumps({
-                    "ok": False,
-                    "output": "No port specified and ROVR_IPC_PORT not set",
-                })
-            )
+            _print_error("No port specified and ROVR_IPC_PORT not set")
             return
         try:
             port = int(sport)
         except ValueError:
-            print(json.dumps({"ok": False, "output": "Invalid ROVR_IPC_PORT"}))
+            _print_error("Invalid ROVR_IPC_PORT")
             return
 
     try:
         _validate_message(action, args)
     except ValueError as error:
-        print(json.dumps({"ok": False, "output": str(error)}))
+        _print_error(str(error))
         return
 
     json_message = json.dumps({"action": action, "args": args})
@@ -86,9 +87,4 @@ async def send_message(port: int | None, action: str, *args: str) -> None:
         writer.close()
         await writer.wait_closed()
     except ConnectionRefusedError:
-        print(
-            json.dumps({
-                "ok": False,
-                "output": "Could not connect to rovr's ipc. Is it running?",
-            })
-        )
+        _print_error("Could not connect to rovr's ipc. Is it running?")

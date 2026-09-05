@@ -8,23 +8,26 @@ from typing import Any, Never
 from rovr import pprint
 
 
-class RichArgumentParser(argparse.ArgumentParser):
-    """Custom ArgumentParser that uses rich for error reporting."""
+def print_rich_error(message: str) -> None:
+    from rich.markup import escape
+    from rich.panel import Panel
 
-    def error(self, message: str) -> Never:
-        from rich.markup import escape
-        from rich.panel import Panel
-
-        # custom error rendering to match rich-click style
-        pretty_message = escape(self._format_error_message(message))
-        panel = Panel(
-            pretty_message,
+    pprint(
+        Panel(
+            escape(message),
             title="Error",
             border_style="red bold",
             title_align="left",
             width=80,
         )
-        pprint(panel)
+    )
+
+
+class RichArgumentParser(argparse.ArgumentParser):
+    """Custom ArgumentParser that uses rich for error reporting."""
+
+    def error(self, message: str) -> Never:
+        print_rich_error(self._format_error_message(message))
         raise SystemExit(2)
 
     @staticmethod

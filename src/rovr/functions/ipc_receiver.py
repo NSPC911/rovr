@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import asyncio
 import json
+import os
 from functools import partial
 from typing import TypedDict
 
@@ -20,13 +21,34 @@ async def conn(
 ) -> None:
     data = await reader.read(1024)
     parsed: IPCReceiver = json.loads(data.decode())
+    out, err, ok = None, None, True
     match parsed["action"]:
         case "cd":
-            ...
+            from rovr.functions.path import ensure_existing_directory
+
+            if "--exact" in parsed["args"] and len(parsed["args"]) == 1:
+                ok = False
+                err = "directory not provided"
+            elif ("--exact" in parsed["args"] and len(parsed["args"]) > 2) or ("--exact" not in parsed["args"] and len(parsed["args"]) > 1):
+                ok = False
+                err = "too many paths given"
+            path = parsed["args"][0] if parsed["args"][0] != "--exact" else parsed["args"][0]
+            if not os.path.samefile(out := ensure_existing_directory(path), path) and len(parsed["args"]) == 2:
+                ok = False
+                err = "directory does not exist"
+            else:
+                self.cd(out)
+
+    msg: dict[str, bool | str] = {"ok": ok}
+    if ok and out is not None:
+        msg["out"] = out
+    elif err is not None:
+        msg["err"] = err
+    writer.write(json.dumps(msg).encode())
+
     # addr = writer.get_extra_info("peername")
     # self.log(f"Received {message!r} from {addr!r}")
 
-    writer.write("{'ok': true, 'output': 'Message received'}".encode())
     await writer.drain()
     writer.close()
     await writer.wait_closed()

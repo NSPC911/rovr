@@ -102,7 +102,7 @@ IPC_PARSER = _build_parser()
 def _validate_message(action: str, args: tuple[str, ...]) -> None:
     parsed = IPC_PARSER.parse_args([action, *args])
     if parsed.action == "cd" and parsed.exact and not os.path.exists(parsed.path):
-        raise ValueError(f"Path '{parsed.path}' does not exist")
+        raise ValueError("does not exist.")
 
 
 async def send_message(port: int | None, action: str, *args: str) -> None:
@@ -120,7 +120,7 @@ async def send_message(port: int | None, action: str, *args: str) -> None:
     try:
         _validate_message(action, args)
     except ValueError as error:
-        _print_error(str(error))
+        print(f'{{"ok": false, "err": "{str(error)}"}}')
         return
 
     json_message = json.dumps({"action": action, "args": args})

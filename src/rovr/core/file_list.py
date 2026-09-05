@@ -721,9 +721,9 @@ class FileList(
             )
             return
         if not self.select_mode:
-            self.app.query_one("#unzip").update_state(
-                path_utils.normalise(highlighted_option.dir_entry.path) or []
-            )
+            self.app.query_one("#unzip").update_state([
+                path_utils.normalise(highlighted_option.dir_entry.path)
+            ])
 
     @work(thread=True)
     def set_mtime(self, option: FileListSelectionWidget) -> None:

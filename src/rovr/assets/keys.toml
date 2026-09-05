@@ -247,3 +247,6 @@ desc = "Sort order"
 [shell_exec]
 "tab" = "cycle_mode"
 "shift+tab" = "cycle_mode"
+
+[button]
+"enter" = "press"

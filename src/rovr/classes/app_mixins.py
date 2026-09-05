@@ -18,7 +18,7 @@ from textual.css.errors import StylesheetError
 from textual.css.stylesheet import StylesheetParseError
 from textual.dom import DOMNode
 from textual.geometry import Offset
-from textual.widgets import Static
+from textual.widgets import Button, Static
 from textual_drivers.dnd import (
     DNDDragIn,
     DNDDragInOperation,
@@ -912,6 +912,9 @@ class KeyHandler:
             contexts.extend(
                 (context, node) for context in getattr(node, "key_contexts", ())
             )
+            if isinstance(node, Button):
+                # special case obv
+                contexts.append(("button", node))
             if node is self.screen:
                 break
         if len(self.screen_stack) == 1:

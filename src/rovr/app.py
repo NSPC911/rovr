@@ -498,11 +498,11 @@ class Application(
             msg = str(stderr)
         else:
             msg = f"Process completed with code {proc.returncode}"
-        self.call_from_thread(
-            self.notify,
+        self.notify(
             msg.strip(),
             title=title,
             severity="information" if proc.returncode == 0 else "error",
+            markup=False,
         )
 
     def on_app_blur(self, event: events.AppBlur) -> None:

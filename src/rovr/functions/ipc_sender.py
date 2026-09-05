@@ -11,7 +11,9 @@ class IPCArgumentParser(argparse.ArgumentParser):
 
 
 def _build_parser() -> argparse.ArgumentParser:
-    parser = IPCArgumentParser(add_help=False)
+    parser = IPCArgumentParser(
+        prog="rovr --ipc", description="Send a command to a running rovr instance."
+    )
     commands = parser.add_subparsers(dest="action", required=True)
 
     cd = commands.add_parser("cd", add_help=False)

@@ -272,10 +272,17 @@ def cli(argv: list[str] | None = None) -> None:
     if args.ipc_to is not None:
         if not args.ipc_to:
             parser.error("--ipc-to requires a port and a command")
-        if "--help" in args.ipc_to:
+        if {"-h", "--help"} & set(args.ipc_to):
             from rovr.functions.ipc_sender import IPC_PARSER
 
-            IPC_PARSER.print_help()
+            ipc_args = (
+                args.ipc
+                if args.ipc is not None
+                else args.ipc_to[1:]
+                if args.ipc_to[0].isdigit()
+                else args.ipc_to
+            )
+            IPC_PARSER.parse_args(ipc_args)
             return
         if not args.ipc_to[0].isdigit():
             parser.error("--ipc-to requires a port number as the first argument")

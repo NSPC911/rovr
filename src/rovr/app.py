@@ -106,7 +106,9 @@ class RovrScreen(Screen):
     async def _on_update(self, message: Update) -> None:
         await super()._on_update(message)
         if self.app._on_mount_done:
-            self.app.title = await expand_command(self.app, config["interface"]["title"])
+            self.app.title = await expand_command(
+                self.app, config["interface"]["title"]
+            )
 
 
 class Application(

@@ -1038,7 +1038,19 @@ class PreviewContainer(Actionable, Container):
         Raises:
             ExitNow: If this preview request is no longer active.
         """
-        bat_executable = config["plugins"]["bat"]["executable"]
+        from shutil import which
+
+        # luckily shutil.which handles absolute path for us, thanks
+        if not which(bat_executable := config["plugins"]["bat"]["executable"]):
+            config["plugins"]["bat"]["enabled"] = False
+            self.notify(
+                f"Bat executable not found: {bat_executable}.\nDisabling bat plugin.",
+                title="Plugins: Bat",
+                severity="warning",
+                markup=False,
+            )
+            return False
+
         command = [
             bat_executable,
             "--force-colorization",
@@ -1115,9 +1127,9 @@ class PreviewContainer(Actionable, Container):
                     return False
 
                 text_preview = self.call_from_thread(
-                    WindowedTextPreview,
-                    source,
-                    classes="text_preview bat_preview",
+                    lambda: WindowedTextPreview(
+                        source, classes="text_preview bat_preview"
+                    ).data_bind(type(self.app).ansi_color)
                 )
                 self.call_from_thread(self.mount, text_preview)
                 if should_cancel():
@@ -1173,7 +1185,11 @@ class PreviewContainer(Actionable, Container):
         max_file_size = config["interface"]["preview_text"]["max_file_size"]
         signature = (str(max_file_size), TEXT_PREVIEW_CACHE_VERSION)
         content: str | None = load_from_cache(
-            realpath, "windowed_text", stat_result, signature, pass_as=str
+            realpath,
+            "windowed_text",
+            stat_result,
+            signature,
+            pass_as=str,
         )
         if content is None:
             try:
@@ -1239,7 +1255,7 @@ class PreviewContainer(Actionable, Container):
                         language=language,
                         line_numbers=config["interface"]["show_line_numbers"],
                         classes="text_preview",
-                    )
+                    ).data_bind(type(self.app).ansi_color)
                 )
             )
 

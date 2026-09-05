@@ -37,13 +37,6 @@ def _build_parser() -> IPCArgumentParser:
     )
     cd.add_argument("path")
 
-    cursor = commands.add_parser("cursor", help="Move the cursor in the current view.")
-    cursor.add_argument(
-        "offset",
-        type=int,
-        help="The number of lines to move the cursor. Positive values move the cursor down, negative values move it up.",
-    )
-
     clipboard = commands.add_parser("clipboard", help="Perform clipboard operations.")
     clipboard_commands = clipboard.add_subparsers(dest="operation", required=True)
     for operation in ("copy", "cut"):
@@ -81,6 +74,19 @@ def _build_parser() -> IPCArgumentParser:
                 type=int,
                 help="The index of the tab to switch to or close. If unspecified, uses focused tab.",
             )
+
+    lists = commands.add_parser("list", help="Perform filelist operations.")
+    subparser = lists.add_subparsers(dest="operation", required=True)
+    subparser.add_parser(
+        "highlighted", help="Get details of the highlighted filelist item."
+    )
+    subparser.add_parser("selected", help="Get details of the selected filelist items.")
+    sub = subparser.add_parser("cursor", help="Control the cursor of the filelist.")
+    # rovr --ipc list cursor +1 to go down one item
+    sub.add_argument(
+        "movement",
+        help="The movement of the cursor relative to its current position. Must be a number (+1/-1)",
+    )
 
     history = commands.add_parser("history", help="Perform command history operations.")
     history.add_argument(

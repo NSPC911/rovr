@@ -648,11 +648,6 @@
                   "default": "allow",
                   "description": "Should the IPC allow changing the current working directory?"
                 },
-                "cursor": {
-                  "$ref": "#/definitions/ipc_perms",
-                  "default": "allow",
-                  "description": "Control the cursor in the filelist"
-                },
                 "clipboard.copy": {
                   "$ref": "#/definitions/ipc_perms",
                   "default": "allow",
@@ -666,7 +661,7 @@
                 "clipboard.list": {
                   "$ref": "#/definitions/ipc_perms",
                   "default": "allow",
-                  "description": "Control listing the clipboard"
+                  "description": "Get the list of items in clipboard, along with their states"
                 },
                 "clipboard.paste": {
                   "$ref": "#/definitions/ipc_perms",
@@ -676,7 +671,7 @@
                 "tab.list": {
                   "$ref": "#/definitions/ipc_perms",
                   "default": "allow",
-                  "description": "Control listing the tabs"
+                  "description": "Get the list of tabs"
                 },
                 "tab.create": {
                   "$ref": "#/definitions/ipc_perms",
@@ -693,6 +688,21 @@
                   "default": "prompt",
                   "description": "Control closing tabs"
                 },
+                "list.highlighted": {
+                  "$ref": "#/definitions/ipc_perms",
+                  "default": "allow",
+                  "description": "Get the highlighted item in the file list"
+                },
+                "list.selected": {
+                  "$ref": "#/definitions/ipc_perms",
+                  "default": "allow",
+                  "description": "Get the selected items in the file list"
+                },
+                "list.cursor": {
+                  "$ref": "#/definitions/ipc_perms",
+                  "default": "allow",
+                  "description": "Control moving the cursor in the file list"
+                },
                 "quit": {
                   "$ref": "#/definitions/ipc_perms",
                   "default": "prompt",
@@ -706,7 +716,7 @@
                 "history.list": {
                   "$ref": "#/definitions/ipc_perms",
                   "default": "allow",
-                  "description": "Control listing the history"
+                  "description": "Get the back/forward history of the current tab"
                 }
               }
             }

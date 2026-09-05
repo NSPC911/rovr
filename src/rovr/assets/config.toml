@@ -138,17 +138,20 @@ enabled = true
 
 [settings.ipc.permissions]
 cd = "allow"
-cursor = "allow"
 
 "clipboard.copy" = "allow"
 "clipboard.cut" = "allow"
-"clipboard.list" = "allow"
+"clipboard.list" = "prompt"
 "clipboard.paste" = "prompt"
 
 "tab.list" = "allow"
 "tab.create" = "allow"
 "tab.switch" = "allow"
 "tab.close" = "prompt"
+
+"list.highlighted" = "allow"
+"list.selected" = "allow"
+"list.cursor" = "allow"
 
 quit = "prompt"
 suspend = "allow"

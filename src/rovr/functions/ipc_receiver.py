@@ -25,6 +25,7 @@ async def check_permission(self: Application, action: str, args: list[str]) -> b
     permission_key = action
     if permission_key not in permissions and args:
         permission_key += f".{args[0]}"
+        args = args[1:]
     permission = permissions.get(permission_key, "deny")
 
     if permission != "prompt":
@@ -46,30 +47,52 @@ async def conn(
 ) -> None:
     data = await reader.read(1024)
     parsed: IPCReceiver = json.loads(data.decode())
+    action, args = parsed["action"], parsed["args"]
     out, err = None, None
     ok: bool | str = True
-    match parsed["action"]:
+    match action:
         case "cd":
             from rovr.functions.path import ensure_existing_directory
 
-            exact = "--exact" in parsed["args"]
-            paths = [arg for arg in parsed["args"] if arg != "--exact"]
+            exact = "--exact" in args
+            paths = [arg for arg in args if arg != "--exact"]
             if not paths:
                 ok = False
                 err = "directory not provided"
-            elif len(paths) > 1 or len(parsed["args"]) != len(paths) + exact:
+            elif len(paths) > 1 or len(args) != len(paths) + exact:
                 ok = False
                 err = "too many paths given"
             elif exact and not os.path.isdir(paths[0]):
                 ok = False
                 err = "directory does not exist"
-            elif not await check_permission(self, parsed["action"], parsed["args"]):
-                ok = "false"
+            elif not await check_permission(self, action, args):
+                ok = False
                 err = "denied"
             else:
                 self.cd(out := ensure_existing_directory(paths[0]))
+        case "clipboard":
+            if len(args) == 0:
+                ok = False
+                err = "clipboard action not provided"
+            match args[0]:
+                case "list":
+                    if not await check_permission(self, action, args):
+                        ok = False
+                        err = "denied"
+                    else:
+                        options = self.Clipboard.options
+                        selected = self.Clipboard.selected
+                        # we need to parse this as well yay
+                        out = [
+                            {
+                                "path": option.value.path,
+                                "type": option.value.type_of_selection,
+                                "selected": option.value in selected,
+                            }
+                            for option in options
+                        ]
 
-    msg: dict[str, bool | str] = {"ok": ok}
+    msg: dict[str, bool | str | list] = {"ok": ok}
     if ok and out is not None:
         msg["out"] = out
     elif err is not None:

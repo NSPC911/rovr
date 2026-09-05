@@ -207,6 +207,12 @@ def _build_parser() -> argparse.ArgumentParser:
         help="Clear the cache folder.",
     )
     dev_group.add_argument(
+        "--ipc",
+        nargs=argparse.REMAINDER,
+        metavar="COMMAND",
+        help="Use rovr's IPC to send commands to a running instance",
+    )
+    dev_group.add_argument(
         "--force-crash-in",
         dest="force_crash_in",
         type=float,
@@ -252,7 +258,16 @@ def cli(argv: list[str] | None = None) -> None:
     args = parser.parse_args(argv)
 
     eager_set_folder(args.config_folder)
+    if args.ipc is not None:
+        if not args.ipc:
+            parser.error("--ipc requires a command")
 
+        import asyncio
+
+        from rovr.functions.ipc_sender import send_message
+
+        asyncio.run(send_message(None, args.ipc[0], *args.ipc[1:]))
+        return
     if args.check_keys:
         from rovr.functions.config import load_keys, validate_keys
 

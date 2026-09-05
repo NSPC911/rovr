@@ -3,13 +3,11 @@ from __future__ import annotations
 import asyncio
 import json
 from functools import partial
-from os import environ
 from typing import TypedDict
 
 from textual import work
 
 from rovr.app import Application
-from rovr.functions.ipc_sender import ALLOWED_IPCS
 
 
 class IPCReceiver(TypedDict):
@@ -17,7 +15,9 @@ class IPCReceiver(TypedDict):
     args: list[str]
 
 
-async def conn(self: Application, reader: asyncio.StreamReader, writer: asyncio.StreamWriter) -> None:
+async def conn(
+    self: Application, reader: asyncio.StreamReader, writer: asyncio.StreamWriter
+) -> None:
     data = await reader.read(1024)
     parsed: IPCReceiver = json.loads(data.decode())
     match parsed["action"]:

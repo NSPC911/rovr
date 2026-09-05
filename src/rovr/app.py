@@ -387,9 +387,10 @@ class Application(
         self.add_dnd_class_target(self._file_list_container)
         self.add_dnd_class_target(self._pinned_sidebar_container)
 
-        from rovr.functions.ipc_receiver import start_server
+        if config["settings"]["ipc"]["enabled"]:
+            from rovr.functions.ipc_receiver import start_server
 
-        start_server(self)
+            start_server(self)
 
     @work
     async def _force_crash(self) -> None:

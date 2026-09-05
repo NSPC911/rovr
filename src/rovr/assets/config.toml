@@ -135,7 +135,7 @@ rename_show_as_mapping = true
 run = "$EDITOR"
 
 [settings.ipc]
-enabled = false
+enabled = true
 
 [settings.ipc.permissions]
 cd = "allow"

@@ -89,5 +89,6 @@ async def start_server(self: Application) -> None:
     server = await asyncio.start_server(partial(conn, self), "127.0.0.1", 0)
     addr = server.sockets[0].getsockname()
     self.call_after_refresh(self.notify, f"Serving on {addr}")
+    os.environ["ROVR_IPC_PORT"] = str(addr[1])
     async with server:
         await server.serve_forever()

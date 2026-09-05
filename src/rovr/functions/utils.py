@@ -306,7 +306,17 @@ async def expand_command(app: App, command: str | list[str]) -> str | list[str]:
         [item.path for item in selected if item.type_of_selection == "cut"],
     )
 
-    selected_files = await app.file_list.get_selected_objects() or []
+    commands = [command] if isinstance(command, str) else command
+    selected_files = (
+        (await app.file_list.get_selected_objects() or [])
+        # get it only if the command actually needs it, it is slightly expensive
+        if any(
+            token in cmd
+            for cmd in commands
+            for token in ("${selected_files}", "${real_selected_files}", "%s", "%rs")
+        )
+        else []
+    )
     tabs = list(app.tabWidget.query(TablineTab))
 
     def _expand_tab(match: re.Match[str]) -> str:
@@ -328,24 +338,32 @@ async def expand_command(app: App, command: str | list[str]) -> str | list[str]:
 
     def _expand(cmd: str) -> str:
         # deprecated stuff
-        expanded = cmd.replace("${current_working_directory}", cwd).replace(
-            "${real_current_working_directory", os.path.realpath(cwd)
+        expanded = (
+            cmd
+            .replace("${current_working_directory}", cwd)
+            .replace("${highlighted_file}", highlighted)
+            .replace("${selected_files}", shjoin(selected_files))
+            .replace("${highlighted_file_name}", os.path.basename(highlighted))
         )
-        expanded = expanded.replace("${highlighted_file}", highlighted).replace(
-            "${real_highlighted_file}", os.path.realpath(highlighted)
-        )
-        expanded = expanded.replace(
-            "${selected_files}", shjoin(selected_files)
-        ).replace(
-            "${real_selected_files}",
-            shjoin([os.path.realpath(f) for f in selected_files]),
-        )
-        expanded = expanded.replace(
-            "${highlighted_file_name}", os.path.basename(highlighted)
-        ).replace(
-            "${real_highlighted_file_name}",
-            os.path.basename(os.path.realpath(highlighted)),
-        )
+        # real is really expensive, so expand only when necessary
+        if "${real_current_working_directory" in expanded:
+            expanded = expanded.replace(
+                "${real_current_working_directory", os.path.realpath(cwd)
+            )
+        if "${real_highlighted_file}" in expanded:
+            expanded = expanded.replace(
+                "${real_highlighted_file}", os.path.realpath(highlighted)
+            )
+        if "${real_selected_files}" in expanded:
+            expanded = expanded.replace(
+                "${real_selected_files}",
+                shjoin([os.path.realpath(f) for f in selected_files]),
+            )
+        if "${real_highlighted_file_name}" in expanded:
+            expanded = expanded.replace(
+                "${real_highlighted_file_name}",
+                os.path.basename(os.path.realpath(highlighted)),
+            )
         if cmd != expanded:
             app.notify(
                 "Expansion syntax [primary]${thing}[/] is deprecated, please use [primary]%thing[/] instead",

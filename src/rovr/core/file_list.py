@@ -555,6 +555,7 @@ class FileList(
                 if self.select_mode:
                     await self.toggle_mode()
                 self.update_border_subtitle()
+            self.app.update_terminal_title()
         finally:
             self.file_list_pause_check = False
             if callback:
@@ -666,6 +667,7 @@ class FileList(
             self.app.query_one("#unzip").update_state(
                 await self.get_selected_objects() or []
             )
+            self.app.update_terminal_title()
 
     # No clue why I'm using an OptionList method for SelectionList
     async def on_option_list_option_highlighted(
@@ -690,6 +692,7 @@ class FileList(
             path_utils.normalise(getcwd()),
             {"name": highlighted_option.dir_entry.name, "index": self.highlighted},
         )
+        self.app.update_terminal_title()
         # Get the filename from the option id
         # total files as footer
         if self.highlighted is None:
@@ -751,6 +754,7 @@ class FileList(
         self.app.tabWidget.active_tab.session.selectMode = self.select_mode
         with self.prevent(SelectionList.SelectedChanged):
             self.deselect_all()
+        self.app.update_terminal_title()
         self.update_border_subtitle()
         if self.select_mode:
             self.add_class("select-mode")

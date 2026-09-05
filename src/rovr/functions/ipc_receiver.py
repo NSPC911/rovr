@@ -4,7 +4,7 @@ import asyncio
 import json
 import os
 from functools import partial
-from typing import Any, TypedDict, cast
+from typing import Any, Callable, Literal, TypedDict, cast
 
 from textual import work
 
@@ -91,6 +91,39 @@ async def conn(
                             }
                             for option in options
                         ]
+                case "copy" | "cut":
+                    if not await check_permission(self, action, args):
+                        ok = False
+                        err = "denied"
+                    else:
+                        # what we want to do is check for flags (because we allow `--select` and `--reselect`)
+                        # as well as existance of those paths (return paths that dont exist at all)
+                        # for paths already in clipboard, ignore, unless either flag is included
+                        flags = {arg for arg in args if arg.startswith("--")}
+                        avail = [path for path in args[1:] if os.path.exists(path)]
+                        out: list[str] = [
+                            path for path in args[1:] if path not in avail
+                        ]
+                        if not avail:
+                            ok = False
+                            err = "no paths provided"
+                        if "--reselect" in flags and "--select" in flags:
+                            ok = False
+                            err = "cannot use both --select and --reselect"
+                        if avail:
+                            func: Callable[
+                                [list[str], Literal["reselect", "select", "no"]], None
+                            ] = (
+                                self.Clipboard.copy_to_clipboard
+                                if args[0] == "copy"
+                                else self.Clipboard.cut_to_clipboard
+                            )
+                            func(
+                                avail,
+                                "select"
+                                if "--select" in flags
+                                else ("reselect" if "--reselect" in flags else "no"),
+                            )
 
     msg: dict[str, bool | str | list] = {"ok": ok}
     if ok and out is not None:

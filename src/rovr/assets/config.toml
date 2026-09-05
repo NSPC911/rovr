@@ -141,7 +141,7 @@ cd = "allow"
 
 "clipboard.copy" = "allow"
 "clipboard.cut" = "allow"
-"clipboard.list" = "prompt"
+"clipboard.list" = "allow"
 "clipboard.paste" = "prompt"
 
 "tab.list" = "allow"

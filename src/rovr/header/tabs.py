@@ -152,6 +152,7 @@ class Tabline(Tabs):
             self._activate_tab(tab)
         # redo max-width
         self.parent.on_resize()
+        self.app.update_terminal_title()
 
     def remove_tab(self, tab_or_id: Tab | str | None) -> AwaitComplete:
         """Remove a tab.
@@ -178,6 +179,7 @@ class Tabline(Tabs):
         async def do_remove() -> None:
             """Perform the remove after refresh so the underline bar gets new positions."""
             await remove_tab.remove()
+            self.app.update_terminal_title()
             if not self.query("#tabs-list > Tab"):
                 self.active = ""
             elif next_tab is not None:

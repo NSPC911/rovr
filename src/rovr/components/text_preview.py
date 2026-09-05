@@ -8,6 +8,7 @@ from rich.cells import cell_len
 from rich.syntax import Syntax
 from rich.text import Text
 from textual.geometry import Size
+from textual.reactive import reactive
 from textual.scroll_view import ScrollView
 from textual.strip import Strip
 
@@ -107,6 +108,8 @@ class WindowedTextPreview(ScrollView):
     }
     """
 
+    ansi_color: reactive[bool | None] = reactive(None, init=False)
+
     def __init__(
         self,
         lines: Sequence[str] | Sequence[Text],
@@ -122,6 +125,13 @@ class WindowedTextPreview(ScrollView):
         self._gutter_width = 0
         self._rendered_window: tuple[int, int, int, int, list[Strip]] | None = None
         self.update_preview(lines, language=language, line_numbers=line_numbers)
+
+    def watch_ansi_color(self, ansi_color: bool | None) -> None:
+        # just re-render window because bg can be weird
+        self._rendered_window = None
+        self.update_preview(
+            self._lines, language=self._language, line_numbers=self._line_numbers
+        )
 
     def update_preview(
         self,

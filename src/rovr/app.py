@@ -24,7 +24,7 @@ from textual.containers import (
 )
 from textual.css.query import NoMatches
 from textual.dom import DOMNode
-from textual.messages import ExitApp, Update
+from textual.messages import ExitApp
 from textual.screen import Screen
 from textual.timer import Timer
 from textual.types import NoActiveAppError
@@ -32,6 +32,7 @@ from textual.widget import Widget
 from textual.widgets import Input, Label
 from textual.widgets.selection_list import Selection
 from textual.worker import Worker, WorkerFailed
+from textual_drivers import BoundedPattern
 from textual_drivers.dnd import (
     DNDApp,
     DNDDragIn,
@@ -99,16 +100,6 @@ from rovr.variables.maps import RovrVars
 
 if constants.SCREENSHOT_LOCATION:
     constants.SCREENSHOT_LOCATION = normalise(getcwd(), constants.SCREENSHOT_LOCATION)
-
-
-class RovrScreen(Screen):
-    @work
-    async def _on_update(self, message: Update) -> None:
-        await super()._on_update(message)
-        if self.app._on_mount_done:
-            self.app.title = await expand_command(
-                self.app, config["interface"]["title"]
-            )
 
 
 class Application(
@@ -281,7 +272,7 @@ class Application(
         return self._file_list_container.filelist
 
     def get_default_screen(self) -> Screen:
-        return RovrScreen(id="_default")
+        return Screen(id="_default")
 
     def compose(self) -> ComposeResult:
         self.log("Starting Rovr...")
@@ -331,6 +322,13 @@ class Application(
             yield StateManager()
 
     def on_mount(self) -> None:
+        # necessary for zellij related nonsense
+        if os.environ.get("ZELLIJ") == "0":
+            self._driver.register_event_handler(
+                BoundedPattern(start="\x1b_G", end="\x1b\\"),
+                lambda response: self.log(f"TGP response: {response!r}"),
+                priority=True,
+            )
         for error in self._theme_errors:
             self.notify(error, title="Theme Error", severity="warning", markup=False)
         self.set_interval(1, self._poll_theme_files)
@@ -383,6 +381,7 @@ class Application(
                 label, after="PathInput"
             )
         self.file_list.update_border_subtitle()
+        self.update_terminal_title()
         # self.call_after_refresh(sleep, 1)
         self.add_dnd_class_target(self._file_list_container)
         self.add_dnd_class_target(self._pinned_sidebar_container)
@@ -411,14 +410,6 @@ class Application(
             proc.wait(timeout=0.5)
         except TimeoutExpired:
             proc.kill()
-
-    def action_focus_next(self) -> None:
-        if config["interface"]["allow_tab_nav"]:
-            super().action_focus_next()
-
-    def action_focus_previous(self) -> None:
-        if config["interface"]["allow_tab_nav"]:
-            super().action_focus_previous()
 
     # keeping events.Key if i need it in future
     def show_key(self, event: events.Key | str) -> None:
@@ -506,11 +497,11 @@ class Application(
             msg = str(stderr)
         else:
             msg = f"Process completed with code {proc.returncode}"
-        self.call_from_thread(
-            self.notify,
+        self.notify(
             msg.strip(),
             title=title,
             severity="information" if proc.returncode == 0 else "error",
+            markup=False,
         )
 
     def on_app_blur(self, event: events.AppBlur) -> None:
@@ -870,6 +861,14 @@ class Application(
         if self._driver is not None:
             self._driver.write(f"\x1b]0;{title}\x07")
             self._driver.flush()
+
+    @work(exclusive=True, group="terminal_title")
+    async def update_terminal_title(self) -> None:
+        # we used to be using a `_on_update` on a custom screen
+        # but the problem is that it runs, on ANY update, you can't choose
+        # which ones you want to react to. this is a more explicit, but not
+        # automatic way to handle it.
+        self.title = await expand_command(self, config["interface"]["title"])
 
     def export_screenshot(
         self,

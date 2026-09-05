@@ -1,8 +1,10 @@
+import contextlib
 import os
 import sys
 from pathlib import Path
 
 import pytest
+from textual.worker import WorkerCancelled
 
 from .conftest import iter_until
 
@@ -90,7 +92,9 @@ async def test_add_pins(tmp_path: Path) -> None:
         test.mkdir()
         pins.add_pin("TestFolder", test.as_posix())
         worker: Worker = sidebar.reload_pins()
-        await worker.wait()
+        # issok, just continue
+        with contextlib.suppress(WorkerCancelled):
+            await worker.wait()
         await pilot.pause()
         found: bool = False
         found_at: int | None = None

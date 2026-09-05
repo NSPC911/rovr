@@ -165,6 +165,7 @@ class Clipboard(
         self.paste_button.disabled = len(self.selected) == 0
         # go through each option, check if they are both selected and are the cut type, update filelist with that list
         self.app.file_list.update_dimmed_items()
+        self.app.update_terminal_title()
 
     def safe_remove_option(self, option_id: str) -> None:
         """Safely remove an option by its ID, handling exceptions."""

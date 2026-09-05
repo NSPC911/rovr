@@ -10,7 +10,6 @@ show_progress_percentage = true
 truncate_progress_file_path = false
 show_line_numbers = true
 show_hidden_files = false
-allow_tab_nav = true
 append_new_tabs = true
 double_click_delay = 0.25
 drive_watcher_frequency = 3.0
@@ -28,7 +27,7 @@ max_size = [1000, 1000]
 font_size = 50
 
 [interface.preview_text]
-max_file_size = 2097152
+max_file_size = 262144
 error = "couldn't read this file! (\u00AC_\u00AC)" # ¬_¬
 start = """
   ___ ___

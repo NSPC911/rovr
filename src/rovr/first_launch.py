@@ -226,7 +226,11 @@ class FirstLaunchApp(App, inherit_bindings=False):
                 yield Switch(which("fd") is not None)
                 yield Static("[u]fd[/] integration")
             with HorizontalGroup(id="plugins-bat"):
-                yield Switch(which("bat") is not None)
+                yield Switch(
+                    (which("bat") is not None)
+                    # issue #356
+                    or (which("batcat") is not None)
+                )
                 yield Static("[u]bat[/] integration")
             with HorizontalGroup(id="plugins-poppler"):
                 yield Switch(which("pdftoppm") is not None)
@@ -449,6 +453,7 @@ enabled = {str(self.query_one("#plugins-fd Switch", Switch).value).lower()}
 
 [plugins.bat]
 enabled = {str(self.query_one("#plugins-bat Switch", Switch).value).lower()}
+{f'"executable" = {"batcat" if which("batcat") is not None else "bat"}' if self.query_one("#plugins-bat Switch", Switch).value else ""}
 
 [plugins.zoxide]
 enabled = {str(self.query_one("#plugins-zoxide Switch", Switch).value).lower()}

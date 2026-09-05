@@ -149,7 +149,13 @@ def _render_panel(
 def print_rich_help(parser: argparse.ArgumentParser) -> None:
     """Print the complete help interface using rich panels."""
     pprint(" ")
-    usage = parser.format_usage().removeprefix("usage: ").strip()
+    # in cases where usage includes ansi sequnces, remove those as well
+    usage = (
+        re
+        .sub(r"\x1B\[[^m]+m", "", parser.format_usage())
+        .strip()
+        .removeprefix("usage: ")
+    )
     pprint(f" [bold]Usage:[/] {usage}")
     pprint(" ")
     if parser.description:

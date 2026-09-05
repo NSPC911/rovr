@@ -155,6 +155,7 @@ class FileList(
         self._in_git_repo: bool = False
         self._folder_item_counts: dict[str, tuple[int, int]] = {}
         self._follow_links_next: bool = False
+        self._using_session: SessionManager | None = None
 
     def on_mount(self) -> None:
         if not self.dummy and self.parent:
@@ -486,7 +487,16 @@ class FileList(
             # special check for up tree
             self.app.query_one("#up").disabled = cwd == path.dirname(cwd)
 
+            if self._using_session is not None:
+                self._using_session.selectedItems = [
+                    SessionOptionDict({
+                        "name": self.get_option(option_id).dir_entry.name,
+                        "index": self.get_option_index(option_id),
+                    })
+                    for option_id in self._selected
+                ]
             self.set_options(self.list_of_options)
+            self._using_session = session
             self.fill_async_details()
             update_header = getattr(self.parent, "update_details_header", None)
             if callable(update_header):
@@ -657,15 +667,10 @@ class FileList(
                 self.highlighted = 0
             self.app.tabWidget.active_tab.selectedItems = []
         else:
-            session: SessionManager = self.app.tabWidget.active_tab.session
-            selected_ids = set(self.selected)
-            session.selectedItems = [
-                {"name": option.dir_entry.name, "index": index}
-                for index, option in enumerate(self.options)
-                if option.value in selected_ids
-            ]
             self.app.query_one("#unzip").update_state(
                 await self.get_selected_objects() or []
+                if len(self._selected) == 1
+                else []
             )
             self.app.update_terminal_title()
 
@@ -682,10 +687,11 @@ class FileList(
             return
         if not isinstance(event.option, FileListSelectionWidget):
             return
-        if self.app._on_mount_done:
-            self.call_next(self.update_border_subtitle)
-        else:
-            self.call_after_refresh(self.update_border_subtitle)
+        if not self.select_mode:
+            if self.app._on_mount_done:
+                self.call_next(self.update_border_subtitle)
+            else:
+                self.call_after_refresh(self.update_border_subtitle)
         # Get the highlighted option
         highlighted_option = event.option
         self.app.tabWidget.active_tab.session.remember_highlight(
@@ -714,9 +720,9 @@ class FileList(
                 highlighted_option.dir_entry.path, highlighted_option
             )
             return
-        if self.select_mode:
+        if not self.select_mode:
             self.app.query_one("#unzip").update_state(
-                await self.get_selected_objects() or []
+                path_utils.normalise(highlighted_option.dir_entry.path) or []
             )
 
     @work(thread=True)
@@ -815,7 +821,7 @@ class FileList(
             utils.set_scuffed_subtitle(self.parent, "NORMAL", "0/0")
             # tell metadata to die
             self.app.query_one("MetadataContainer").remove_children()
-        elif (not self.select_mode) or (self.selected is None):
+        elif not self.select_mode:
             utils.set_scuffed_subtitle(
                 self.parent,
                 "NORMAL",
@@ -824,7 +830,7 @@ class FileList(
             self.app.tabWidget.active_tab.selectedItems = []
         else:
             utils.set_scuffed_subtitle(
-                self.parent, "SELECT", f"{len(self.selected)}/{len(self.options)}"
+                self.parent, "SELECT", f"{len(self._selected)}/{len(self.options)}"
             )
 
     # not exactly sure, but there's this issue where if I click the
@@ -991,9 +997,14 @@ class FileList(
         if self.get_option_at_index(0).disabled:
             return
         first, last = sorted((start, end))
+        changed = False
         for index in range(first, last + 1):
-            self._selected[self._options[index].value] = None
-        self._message_changed()
+            value = self._options[index].value
+            if value not in self._selected:
+                self._selected[value] = None
+                changed = True
+        if changed:
+            self._message_changed()
 
     async def implicit_selector(self, ver: Literal["pre", "post"]) -> bool:
         if config["interface"]["allow_auto_select_mode"] and (

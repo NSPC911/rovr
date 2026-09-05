@@ -273,14 +273,15 @@ def cli(argv: list[str] | None = None) -> None:
             (prevpath := os.path.join(RovrVars.ROVRTEMP, "previews")),
             ignore_errors=True,
         )
+        out = sys.stdout
+        sys.stdout = sys.stderr
         # check if cache is fully cleaned
         if not os.path.exists(prevpath) or not (items := os.listdir(prevpath)):
             pprint("[bold green]Cache cleared successfully![/]")
-            exit(0)
         else:
             pprint("[bold red]Failed to clear cache![/]")
             pprint(f"[red]{len(items)} items still exist.[/]")
-            exit(1)
+        sys.stdout = out
 
     global is_dev
     if args.dev or is_dev:

@@ -416,6 +416,13 @@ def s(item: Any, notone: str = "s", isone: str = "") -> str:
 preview_loc = os.path.join(RovrVars.ROVRTEMP, "previews")
 
 
+def in_preview_loc(path_str: str) -> bool:
+    return (
+        os.path.commonpath([os.path.realpath(path_str), os.path.realpath(preview_loc)])
+        == preview_loc
+    )
+
+
 def load_from_cache(
     realpath: str,
     preview_type: str,
@@ -425,6 +432,10 @@ def load_from_cache(
     pass_as: type[Any] = bytes,
 ) -> Any | None:
     from hashlib import blake2b
+
+    # before we hash, check if file in the cache folder, if not, return None
+    if in_preview_loc(realpath):
+        return None
 
     hash = blake2b(
         f"{realpath}:{preview_type}:{stat_res.st_mtime_ns}:{stat_res.st_size}:{sig[0]}:{sig[1]}:{extra}".encode(),
@@ -454,6 +465,10 @@ def save_to_cache(
     extra: Any = None,
 ) -> None:
     from hashlib import blake2b
+
+    # same as before
+    if in_preview_loc(realpath):
+        return
 
     hash = blake2b(
         f"{realpath}:{preview_type}:{stat_res.st_mtime_ns}:{stat_res.st_size}:{sig[0]}:{sig[1]}:{extra}".encode(),

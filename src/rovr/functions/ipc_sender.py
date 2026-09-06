@@ -207,10 +207,10 @@ async def send_message(pid: int | None, action: str, *args: str) -> None:
     json_message = json.dumps({"token": token, "action": action, "args": args})
     try:
         reader, writer = await asyncio.open_connection("127.0.0.1", port)
-        writer.write(json_message.encode())
+        writer.write(json_message.encode() + b"\n")
         await writer.drain()
 
-        data = await reader.read(1024)
+        data = await reader.readline()
         print(data.decode())
         writer.close()
         await writer.wait_closed()

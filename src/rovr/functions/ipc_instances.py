@@ -11,7 +11,6 @@ from typing import Literal, TypedDict
 from rovr.variables.maps import RovrVars
 
 IPC_DIRECTORY = Path(RovrVars.ROVRTEMP) / "ipc"
-PROBE_TIMEOUT = 0.25
 
 
 class Instance(TypedDict):
@@ -106,7 +105,7 @@ async def _probe_instance(path: Path, descriptor: Instance) -> InstanceInfo | No
     })
     try:
         reader, writer = await asyncio.wait_for(
-            asyncio.open_connection("127.0.0.1", descriptor["port"]), PROBE_TIMEOUT
+            asyncio.open_connection("127.0.0.1", descriptor["port"]), 1
         )
     except TimeoutError:
         return info
@@ -121,9 +120,10 @@ async def _probe_instance(path: Path, descriptor: Instance) -> InstanceInfo | No
                 "action": "_show_urself",
                 "args": [],
             }).encode()
+            + b"\n"
         )
         await writer.drain()
-        data = await asyncio.wait_for(reader.read(1024), PROBE_TIMEOUT)
+        data = await asyncio.wait_for(reader.readline(), 1)
         response = json.loads(data.decode())
         if (
             isinstance(response, dict)

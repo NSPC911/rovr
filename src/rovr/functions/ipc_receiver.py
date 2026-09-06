@@ -46,16 +46,30 @@ async def check_permission(self: Application, action: str, args: list[str]) -> b
     return await response
 
 
+def assemble_and_write(
+    writer: asyncio.StreamWriter,
+    ok: bool | str,
+    out: Any = None,
+    err: str | None = None,
+) -> None:
+    msg: dict[str, Any] = {"ok": ok}
+    if ok and out is not None:
+        msg["out"] = out
+    elif err is not None:
+        msg["err"] = err
+    writer.write(json.dumps(msg).encode() + b"\n")
+
+
 async def conn(
     self: Application,
     reader: asyncio.StreamReader,
     writer: asyncio.StreamWriter,
     token: str,
 ) -> None:
-    data = await reader.read(1024)
+    data = await reader.readline()
     parsed: IPCReceiver = json.loads(data.decode())
     if parsed.get("token") != token:
-        writer.write(json.dumps({"ok": False, "err": "unauthorized"}).encode())
+        assemble_and_write(writer, False, err="unauthorized")
         return
     action, args = parsed["action"], parsed["args"]
     if action == "_show_urself":
@@ -65,6 +79,7 @@ async def conn(
                 "ok": True,
                 "out": {"pid": os.getpid(), "port": addr[1]},
             }).encode()
+            + b"\n"
         )
         return
     out, err = None, None
@@ -75,8 +90,7 @@ async def conn(
                 ok = False
                 err = "directory not provided"
             elif len(args) > 1:
-                ok = False
-                err = "too many arguments"
+                return assemble_and_write(writer, False, err="too many arguments")
             elif not await check_permission(self, action, args):
                 ok = False
                 err = "denied"
@@ -86,8 +100,9 @@ async def conn(
                 out = getcwd()
         case "clipboard":
             if len(args) == 0:
-                ok = False
-                err = "clipboard action not provided"
+                return assemble_and_write(
+                    writer, False, None, "clipboard action not provided"
+                )
             match args[0]:
                 case "list":
                     if not await check_permission(self, action, args):
@@ -174,8 +189,9 @@ async def conn(
                     err = "clipboard action is not valid"
         case "tab":
             if len(args) == 0:
-                ok = False
-                err = "tab action not provided"
+                return assemble_and_write(
+                    writer, False, None, "tab action not provided"
+                )
             match args[0]:
                 case "list":
                     if not await check_permission(self, action, args):
@@ -192,8 +208,9 @@ async def conn(
                                 out["focused"] = i
                 case "new":
                     if len(args) > 3:
-                        ok = False
-                        err = "too many arguments"
+                        return assemble_and_write(
+                            writer, False, None, "too many arguments"
+                        )
                     elif not await check_permission(self, action, args):
                         ok = False
                         err = "denied"
@@ -219,11 +236,15 @@ async def conn(
                         out = {"index": index, "path": tab.directory}
                 case "focus":
                     if len(args) != 2:
-                        ok = False
-                        err = (
-                            "too many arguments"
-                            if len(args) > 2
-                            else "tab index not provided"
+                        return assemble_and_write(
+                            writer,
+                            False,
+                            None,
+                            (
+                                "too many arguments"
+                                if len(args) > 2
+                                else "tab index not provided"
+                            ),
                         )
                     elif not await check_permission(self, action, args):
                         ok = False
@@ -242,11 +263,15 @@ async def conn(
                                 self.tabWidget.action_activate_tab(index)
                 case "close":
                     if len(args) != 2:
-                        ok = False
-                        err = (
-                            "too many arguments"
-                            if len(args) > 2
-                            else "tab index not provided"
+                        return assemble_and_write(
+                            writer,
+                            False,
+                            None,
+                            (
+                                "too many arguments"
+                                if len(args) > 2
+                                else "tab index not provided"
+                            ),
                         )
                     elif not await check_permission(self, action, args):
                         ok = False
@@ -275,9 +300,7 @@ async def conn(
             from rovr.functions.ipc_sender import IPC_PARSER
 
             if not await check_permission(self, action, args):
-                ok = False
-                err = "denied"
-
+                return assemble_and_write(writer, False, None, "denied")
             try:
                 notification = IPC_PARSER.parse_args([action, *args])
             except SystemExit:
@@ -317,9 +340,12 @@ async def conn(
             if not await check_permission(self, action, args):
                 ok = False
                 err = "denied"
-            if len(args) != 1:
-                ok = False
-                err = "too many arguments" if len(args) > 1 else "question not provided"
+            elif len(args) != 1:
+                return assemble_and_write(
+                    writer,
+                    False,
+                    err="too many arguments" if args else "question not provided",
+                )
             else:
                 from rovr.screens import YesOrNo
 
@@ -327,13 +353,7 @@ async def conn(
         case _:
             ok = False
             err = "action is not valid"
-
-    msg: dict[str, Any] = {"ok": ok}
-    if ok and out is not None:
-        msg["out"] = out
-    elif err is not None:
-        msg["err"] = err
-    writer.write(json.dumps(msg).encode())
+    assemble_and_write(writer, ok, out, err)
 
 
 async def wrapper(
@@ -353,6 +373,7 @@ async def wrapper(
                 "ok": False,
                 "err": f"internal exception ({type(exc).__name__}): {exc}",
             }).encode()
+            + b"\n"
         )
     finally:
         await writer.drain()

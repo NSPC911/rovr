@@ -250,7 +250,9 @@ async def conn(
                                 await self.tabWidget.remove_tab(
                                     self.tabWidget.tabs[index]
                                 )
-
+                case _:
+                    ok = False
+                    err = "tab action is not valid"
     msg: dict[str, Any] = {"ok": ok}
     if ok and out is not None:
         msg["out"] = out

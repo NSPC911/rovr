@@ -538,7 +538,7 @@ class Application(
             return
         # Write cwd to explicit --cwd-file if provided
         message = ""
-        if self._cwd_file and not can_cd:
+        if self._cwd_file and can_cd:
             if isinstance(self._cwd_file, TextIOWrapper):
                 try:
                     self._cwd_file.write(getcwd())

@@ -215,8 +215,8 @@ def _build_parser() -> argparse.ArgumentParser:
     dev_group.add_argument(
         "--ipc-to",
         nargs=argparse.REMAINDER,
-        metavar="COMMAND",
-        help="Send a command to a specific rovr instance",
+        metavar="PID COMMAND",
+        help="Send a command to a specific rovr instance by PID",
     )
     dev_group.add_argument(
         "--force-crash-in",
@@ -267,11 +267,32 @@ def cli(argv: list[str] | None = None) -> None:
     if args.ipc is not None:
         if not args.ipc:
             parser.error("--ipc requires a command")
-        args.ipc_to = (os.environ.get("ROVR_IPC_PORT", "x"), *args.ipc)
+        if args.ipc[0] == "list-instances":
+            import asyncio
+            import json
+
+            from rovr.functions.ipc_instances import discover_instances
+            from rovr.functions.ipc_sender import IPC_PARSER
+
+            IPC_PARSER.parse_args(args.ipc)
+            print(json.dumps({"ok": True, "out": asyncio.run(discover_instances())}))
+            return
+        if {"-h", "--help"} & set(args.ipc):
+            from rovr.functions.ipc_sender import IPC_PARSER
+
+            IPC_PARSER.parse_args(args.ipc)
+            return
+
+        import asyncio
+
+        from rovr.functions.ipc_sender import send_message
+
+        asyncio.run(send_message(None, args.ipc[0], *args.ipc[1:]))
+        return
 
     if args.ipc_to is not None:
         if not args.ipc_to:
-            parser.error("--ipc-to requires a port and a command")
+            parser.error("--ipc-to requires a PID and a command")
         if {"-h", "--help"} & set(args.ipc_to):
             from rovr.functions.ipc_sender import IPC_PARSER
 
@@ -284,17 +305,18 @@ def cli(argv: list[str] | None = None) -> None:
             )
             IPC_PARSER.parse_args(ipc_args)
             return
-        if not args.ipc_to[0].isdigit():
-            parser.error("--ipc-to requires a port number as the first argument")
+        if not args.ipc_to[0].isdigit() or int(args.ipc_to[0]) <= 0:
+            parser.error("--ipc-to requires a PID as the first argument")
         if not args.ipc_to[1:]:
-            parser.error("--ipc-to requires a command after the port number")
-        args.ipc_to = (int(args.ipc_to[0]), *args.ipc_to[1:])
+            parser.error("--ipc-to requires a command after the PID")
+        pid = int(args.ipc_to[0])
+        action, *ipc_args = args.ipc_to[1:]
 
         import asyncio
 
         from rovr.functions.ipc_sender import send_message
 
-        asyncio.run(send_message(args.ipc_to[0], args.ipc_to[1], *args.ipc_to[2:]))
+        asyncio.run(send_message(pid, action, *ipc_args))
         return
     if args.check_keys:
         from rovr.functions.config import load_keys, validate_keys

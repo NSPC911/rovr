@@ -3,6 +3,7 @@ from __future__ import annotations
 import asyncio
 import json
 import os
+import secrets
 from functools import partial
 from typing import Any, Callable, Literal, TypedDict, cast
 
@@ -15,6 +16,7 @@ from rovr.variables.constants import config
 
 
 class IPCReceiver(TypedDict):
+    token: str
     action: str
     args: list[str]
 
@@ -44,11 +46,26 @@ async def check_permission(self: Application, action: str, args: list[str]) -> b
 
 
 async def conn(
-    self: Application, reader: asyncio.StreamReader, writer: asyncio.StreamWriter
+    self: Application,
+    reader: asyncio.StreamReader,
+    writer: asyncio.StreamWriter,
+    token: str,
 ) -> None:
     data = await reader.read(1024)
     parsed: IPCReceiver = json.loads(data.decode())
+    if parsed.get("token") != token:
+        writer.write(json.dumps({"ok": False, "err": "unauthorized"}).encode())
+        return
     action, args = parsed["action"], parsed["args"]
+    if action == "_show_urself":
+        addr = writer.get_extra_info("sockname")
+        writer.write(
+            json.dumps({
+                "ok": True,
+                "out": {"pid": os.getpid(), "port": addr[1]},
+            }).encode()
+        )
+        return
     out, err = None, None
     ok: bool | str = True
     match action:
@@ -275,6 +292,9 @@ async def conn(
                     err = "suspend is not available on Windows"
                 else:
                     self.action_suspend_process()
+        case _:
+            ok = False
+            err = "action is not valid"
 
     msg: dict[str, Any] = {"ok": ok}
     if ok and out is not None:
@@ -285,13 +305,16 @@ async def conn(
 
 
 async def wrapper(
-    self: Application, reader: asyncio.StreamReader, writer: asyncio.StreamWriter
+    self: Application,
+    token: str,
+    reader: asyncio.StreamReader,
+    writer: asyncio.StreamWriter,
 ) -> None:
     # addr = writer.get_extra_info("peername")
     # self.log(f"Received {message!r} from {addr!r}")
 
     try:
-        await conn(self, reader, writer)
+        await conn(self, reader, writer, token)
     except Exception as exc:
         writer.write(
             json.dumps({
@@ -307,9 +330,24 @@ async def wrapper(
 
 @work
 async def start_server(self: Application) -> None:
-    server = await asyncio.start_server(partial(wrapper, self), "127.0.0.1", 0)
+    from rovr.functions.ipc_instances import publish_instance, unpublish_instance
+
+    token = secrets.token_urlsafe(32)
+    server = await asyncio.start_server(partial(wrapper, self, token), "127.0.0.1", 0)
     addr = server.sockets[0].getsockname()
-    self.call_after_refresh(self.notify, f"Serving on {addr}")
-    os.environ["ROVR_IPC_PORT"] = str(addr[1])
     async with server:
-        await server.serve_forever()
+        descriptor = publish_instance(addr[1], token)
+        # quite weird that globals().get("is_dev", False) is not working here
+        if {"debug", "devtools"}.issubset(
+            set(os.environ.get("TEXTUAL", "").split(","))
+        ):
+            self.call_after_refresh(self.notify, f"Serving on {addr}")
+        os.environ["ROVR_IPC_PORT"] = str(addr[1])
+        os.environ["ROVR_IPC_TOKEN"] = token
+        try:
+            await server.serve_forever()
+        finally:
+            unpublish_instance(descriptor, token)
+            if os.environ.get("ROVR_IPC_TOKEN") == token:
+                os.environ.pop("ROVR_IPC_PORT", None)
+                os.environ.pop("ROVR_IPC_TOKEN", None)

@@ -1,3 +1,4 @@
+import argparse
 import asyncio
 import json
 import os
@@ -112,6 +113,8 @@ def _build_parser() -> IPCArgumentParser:
     commands.add_parser(
         "suspend", help="Suspend the rovr instance (Unavailable on Windows)."
     )
+    commands.add_parser("list-instances", help="List running rovr instances.")
+    commands.add_parser("_show_urself", help=argparse.SUPPRESS)
     return parser
 
 
@@ -120,29 +123,40 @@ IPC_PARSER = _build_parser()
 
 def _validate_message(action: str, args: tuple[str, ...]) -> None:
     parsed = IPC_PARSER.parse_args([action, *args])
-    if parsed.action == "cd" and parsed.exact and not os.path.exists(parsed.path):
+    if parsed.action == "list-instances":
+        raise ValueError("list-instances does not target a specific instance")
+    if parsed.action == "cd" and not os.path.exists(parsed.path):
         raise ValueError("does not exist.")
 
 
-async def send_message(port: int | None, action: str, *args: str) -> None:
-    if port is None:
-        sport = os.environ.get("ROVR_IPC_PORT")
-        if sport is None:
-            _print_error("No port specified and ROVR_IPC_PORT not set")
-            return
-        try:
-            port = int(sport)
-        except ValueError:
-            _print_error("Invalid ROVR_IPC_PORT")
-            return
-
+async def send_message(pid: int | None, action: str, *args: str) -> None:
     try:
         _validate_message(action, args)
     except ValueError as error:
         print(f'{{"ok": false, "err": "{str(error)}"}}')
         return
 
-    json_message = json.dumps({"action": action, "args": args})
+    if pid is None:
+        sport = os.environ.get("ROVR_IPC_PORT")
+        token = os.environ.get("ROVR_IPC_TOKEN")
+        if sport is None or token is None:
+            _print_error("ROVR_IPC_PORT and ROVR_IPC_TOKEN are not set")
+            return
+        try:
+            port = int(sport)
+        except ValueError:
+            _print_error("Invalid ROVR_IPC_PORT")
+            return
+    else:
+        from rovr.functions.ipc_instances import instance_for_pid
+
+        instance = instance_for_pid(pid)
+        if instance is None:
+            _print_error(f"Could not find rovr instance with PID {pid}")
+            return
+        port, token = instance["port"], instance["token"]
+
+    json_message = json.dumps({"token": token, "action": action, "args": args})
     try:
         reader, writer = await asyncio.open_connection("127.0.0.1", port)
         writer.write(json_message.encode())

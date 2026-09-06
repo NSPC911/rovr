@@ -264,7 +264,6 @@ def cli(argv: list[str] | None = None) -> None:
         print("keys.toml is valid.")
         return
     if args.clear_cache:
-        from os import _exit as exit
         from shutil import rmtree
 
         from rovr.variables.maps import RovrVars
@@ -519,7 +518,7 @@ example_function(10)"""
             sys.__stdin__ = sys.stdin = backup_stdin
     else:
         print("Error: rovr needs a TTY to run in application.")
-        exit(1)
+        sys.exit(1)
 
 
 if __name__ == "__main__":

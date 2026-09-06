@@ -76,6 +76,12 @@ def _build_parser() -> IPCArgumentParser:
                 nargs="?",
                 help="The path to open in the new tab. If unspecified, opens the current working directory.",
             )
+            # --focus optional
+            command.add_argument(
+                "--focus",
+                action="store_true",
+                help="Focus the new tab after creating it.",
+            )
 
     lists = commands.add_parser("list", help="Perform filelist operations.")
     subparser = lists.add_subparsers(dest="operation", required=True)

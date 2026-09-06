@@ -10,7 +10,6 @@ from textual import work
 
 from rovr.app import Application
 from rovr.functions.cwd import getcwd
-from rovr.header.tabs import TablineTab
 from rovr.screens.yes_or_no import YesOrNo
 from rovr.variables.constants import config
 
@@ -169,10 +168,37 @@ async def conn(
                         tabs: list[str] = []
                         out: dict[str, int | list[str]] = {"focused": 0, "tabs": tabs}
 
-                        for i, tab in enumerate(self.tabWidget.query(TablineTab)):
+                        for i, tab in enumerate(self.tabWidget.tabs):
                             tabs.append(tab.directory)
                             if tab is active:
                                 out["focused"] = i
+                case "new":
+                    if len(args) > 3:
+                        ok = False
+                        err = "too many arguments"
+                    elif not await check_permission(self, action, args):
+                        ok = False
+                        err = "denied"
+                    else:
+                        # optional path argument, if not provided, use cwd
+                        # also may contain --focus flag, if not provided, do not focus
+                        focus = "--focus" in args
+                        if len(args) == 2 and focus:
+                            # use cwd
+                            path = getcwd()
+                        elif len(args) == 2 and not focus:
+                            # use provided path
+                            path = os.path.abspath(args[1])
+                        elif len(args) == 3 and focus:
+                            path = os.path.abspath(
+                                args[1] if args[1] != "--focus" else args[2]
+                            )
+                        else:
+                            path = getcwd()
+                        tab = await self.tabWidget.add_tab(path, focus=focus)
+                        # get index
+                        index = self.tabWidget.tabs.nodes.index(tab)
+                        out = {"index": index, "path": tab.directory}
 
     msg: dict[str, Any] = {"ok": ok}
     if ok and out is not None:

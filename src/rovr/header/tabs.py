@@ -7,7 +7,7 @@ from textual.app import ComposeResult, RenderResult
 from textual.await_complete import AwaitComplete
 from textual.containers import Container, Horizontal, Vertical
 from textual.content import Content, ContentText
-from textual.css.query import NoMatches
+from textual.css.query import DOMQuery, NoMatches
 from textual.renderables.bar import Bar as BarRenderable
 from textual.widgets import Button, Input, Tabs
 from textual.widgets._tabs import Tab, Underline
@@ -92,6 +92,11 @@ class TablineTab(Tab):
 
 
 class Tabline(Tabs):
+    @property
+    def tabs(self) -> DOMQuery[TablineTab]:
+        """Get the tabs in the tabline."""
+        return self.query(TablineTab)
+
     def action_cycle_tab(self, offset: int) -> None:
         """Cycle and activate a tab at an offset relative from the current tab."""
         if not offset or not (tabs := self._potentially_active_tabs):
@@ -124,7 +129,7 @@ class Tabline(Tabs):
         before: Tab | str | None = None,
         after: Tab | str | None = None,
         focus: bool = True,
-    ) -> None:
+    ) -> TablineTab:
         """Add a new tab to the end of the tab list.
 
         Args:
@@ -137,22 +142,26 @@ class Tabline(Tabs):
         Note:
             Only one of `before` or `after` can be provided. If both are
             provided a `Tabs.TabError` will be raised.
-        """
-        """
+
         Returns:
             An optionally awaitable object that waits for the tab to be mounted and
                 internal state to be fully updated to reflect the new tab.
+
         Raises:
             Tabs.TabError: If there is a problem with the addition request.
         """
 
         tab = TablineTab(directory=directory, label=label)
-        await super().add_tab(tab, before=before, after=after)
+        try:
+            await super().add_tab(tab, before=before, after=after)
+        except Tabs.TabError:
+            raise
         if focus:
             self._activate_tab(tab)
         # redo max-width
         self.parent.on_resize()
         self.app.update_terminal_title()
+        return tab
 
     def remove_tab(self, tab_or_id: Tab | str | None) -> AwaitComplete:
         """Remove a tab.

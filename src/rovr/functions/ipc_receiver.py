@@ -281,6 +281,22 @@ async def conn(
                 case _:
                     ok = False
                     err = "tab action is not valid"
+        case "notify":
+            from rovr.functions.ipc_sender import IPC_PARSER
+
+            try:
+                notification = IPC_PARSER.parse_args([action, *args])
+            except SystemExit:
+                ok = False
+                err = "invalid notification arguments"
+            else:
+                self.notify(
+                    notification.message,
+                    title=notification.title or "",
+                    severity=notification.severity or "information",
+                    timeout=notification.timeout,
+                    markup=notification.markup,
+                )
         case "quit":
             if not await check_permission(self, action, args):
                 ok = False

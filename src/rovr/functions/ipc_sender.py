@@ -110,14 +110,35 @@ def _build_parser() -> IPCArgumentParser:
         action="store_true",
         help="If using --cwd-file, do not write cwd before quitting",
     )
+
     commands.add_parser(
         "suspend", help="Suspend the rovr instance (Unavailable on Windows)."
     )
+
     commands.add_parser("list-instances", help="List running rovr instances.")
+
     choice = commands.add_parser(
         "choice", help="Ask a yes or no question in the rovr instance."
     )
     choice.add_argument("question", help="The question to ask.")
+
+    notify = commands.add_parser(
+        "notify", help="Send a notification to the rovr instance."
+    )
+    notify.add_argument("message", help="The message to send.")
+    notify.add_argument("--title", help="The title of the notification.")
+    notify.add_argument(
+        "--severity",
+        choices=("information", "warning", "error"),
+        help="Severity of notification",
+    )
+    notify.add_argument("--markup", action="store_true", help="Render with rich markup")
+    notify.add_argument(
+        "--timeout",
+        type=float,
+        help="Hide notification after this time passed (default 5s)",
+    )
+
     commands.add_parser("_show_urself", help=argparse.SUPPRESS)
     return parser
 

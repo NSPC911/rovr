@@ -21,6 +21,17 @@ class IPCReceiver(TypedDict):
     args: list[str]
 
 
+def p(path: str) -> str:
+    """Return the expanded absolute path of the given path.
+
+    Args:
+        path (str): The path to expand.
+
+    Returns:
+        str: The expanded absolute path."""
+    return os.path.abspath(os.path.expandvars(os.path.expanduser(path)))
+
+
 async def check_permission(self: Application, action: str, args: list[str]) -> bool:
     permissions = cast(
         dict[str, str], cast(dict[str, Any], config)["settings"]["ipc"]["permissions"]
@@ -70,8 +81,6 @@ async def conn(
     ok: bool | str = True
     match action:
         case "cd":
-            from rovr.functions.path import ensure_existing_directory
-
             if not args:
                 ok = False
                 err = "directory not provided"
@@ -82,7 +91,9 @@ async def conn(
                 ok = False
                 err = "denied"
             else:
-                self.cd(out := ensure_existing_directory(args[0]))
+                worker = self.cd(p(args[0]))
+                await worker.wait()
+                out = getcwd()
         case "clipboard":
             if len(args) == 0:
                 ok = False
@@ -142,7 +153,7 @@ async def conn(
                         # as well as existance of those paths (return paths that dont exist at all)
                         # for paths already in clipboard, ignore, unless either flag is included
                         flags = {arg for arg in args if arg.startswith("--")}
-                        avail = [path for path in args[1:] if os.path.exists(path)]
+                        avail = [p(path) for path in args[1:] if os.path.exists(path)]
                         out: list[str] = [
                             path
                             for path in args[1:]

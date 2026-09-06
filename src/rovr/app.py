@@ -1312,3 +1312,12 @@ class Application(
                 self.file_list.update_file_list(add_to_session=False)
 
         self.push_screen(TrashScreen(), callback=callback)
+
+    @on(events.MouseDown)
+    async def on_mouse_down_extra_buttons(self, event: events.MouseDown) -> None:
+        """Route mouse buttons 4-7 to keybinding system."""
+        if event.button in (4, 5, 6, 7):
+            key_name = f"mouse{event.button}"
+            await self._check_bindings(key_name, priority=True)
+            event.prevent_default()
+            event.stop()

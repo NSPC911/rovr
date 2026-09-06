@@ -657,6 +657,7 @@ def validate_keys(keys: KeysConfig) -> list[str]:
         for member in Keys
         if not member.value.startswith("<")
     }
+    valid_key_names.update({"mouse4", "mouse5", "mouse6", "mouse7"})
     valid_modifiers = {"alt", "ctrl", "hyper", "meta", "shift", "super"}
     errors = []
 

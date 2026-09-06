@@ -56,22 +56,17 @@ async def conn(
         case "cd":
             from rovr.functions.path import ensure_existing_directory
 
-            exact = "--exact" in args
-            paths = [arg for arg in args if arg != "--exact"]
-            if not paths:
+            if not args:
                 ok = False
                 err = "directory not provided"
-            elif len(paths) > 1 or len(args) != len(paths) + exact:
+            elif len(args) > 1:
                 ok = False
-                err = "too many paths given"
-            elif exact and not os.path.isdir(paths[0]):
-                ok = False
-                err = "directory does not exist"
+                err = "too many arguments"
             elif not await check_permission(self, action, args):
                 ok = False
                 err = "denied"
             else:
-                self.cd(out := ensure_existing_directory(paths[0]))
+                self.cd(out := ensure_existing_directory(args[0]))
         case "clipboard":
             if len(args) == 0:
                 ok = False

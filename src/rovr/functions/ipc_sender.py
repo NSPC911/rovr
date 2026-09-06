@@ -30,11 +30,6 @@ def _build_parser() -> IPCArgumentParser:
     cd = commands.add_parser(
         "cd", help="Change the current working directory of the rovr instance."
     )
-    cd.add_argument(
-        "--exact",
-        action="store_true",
-        help="Do not attempt to go to nearest existing parent directory if the specified path does not exist.",
-    )
     cd.add_argument("path")
 
     clipboard = commands.add_parser("clipboard", help="Perform clipboard operations.")

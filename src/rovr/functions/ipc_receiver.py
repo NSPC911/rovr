@@ -9,6 +9,7 @@ from typing import Any, Callable, Literal, TypedDict, cast
 from textual import work
 
 from rovr.app import Application
+from rovr.functions.cwd import getcwd
 from rovr.screens.yes_or_no import YesOrNo
 from rovr.variables.constants import config
 
@@ -91,6 +92,35 @@ async def conn(
                             }
                             for option in options
                         ]
+                case "paste":
+                    if not await check_permission(self, action, args):
+                        ok = False
+                        err = "denied"
+                    else:
+                        selected_items = (
+                            self.Clipboard.selected
+                        )  # dont include highlighted
+                        to_copy, to_cut = (
+                            [
+                                item.path
+                                for item in selected_items
+                                if item.type_of_selection == "copy"
+                            ],
+                            [
+                                item.path
+                                for item in selected_items
+                                if item.type_of_selection == "cut"
+                            ],
+                        )
+                        # we will be ignoring the prompt that PasteButton
+                        # does because we are assuming that ipc paste is
+                        # a prompt (default) else the person kniws what
+                        # they want from rovr
+                        worker = self.app.query_one("ProcessContainer").paste_items(
+                            to_copy, to_cut, getcwd()
+                        )
+                        await worker.wait()
+                        out = {"copy": len(to_copy), "cut": len(to_cut)}
                 case "copy" | "cut":
                     if not await check_permission(self, action, args):
                         ok = False

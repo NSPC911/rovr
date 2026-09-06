@@ -103,7 +103,12 @@ def _build_parser() -> IPCArgumentParser:
         help="List the command history of the rovr instance.",
     )
 
-    commands.add_parser("quit", help="Quit the rovr instance.")
+    quit = commands.add_parser("quit", help="Quit the rovr instance.")
+    quit.add_argument(
+        "--no-cd",
+        action="store_true",
+        help="If using --cwd-file, do not write cwd before quitting",
+    )
     commands.add_parser(
         "suspend", help="Suspend the rovr instance (Unavailable on Windows)."
     )

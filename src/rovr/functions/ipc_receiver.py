@@ -253,6 +253,29 @@ async def conn(
                 case _:
                     ok = False
                     err = "tab action is not valid"
+        case "quit":
+            if not await check_permission(self, action, args):
+                ok = False
+                err = "denied"
+            else:
+                worker = self.action_quit("--no-cd" not in args)
+                await worker.wait()
+                if self.return_code is None:
+                    ok = False
+                    err = "processes still running, denied"
+        case "suspend":
+            if not await check_permission(self, action, args):
+                ok = False
+                err = "denied"
+            else:
+                from textual.app import WINDOWS
+
+                if WINDOWS:
+                    ok = False
+                    err = "suspend is not available on Windows"
+                else:
+                    self.action_suspend_process()
+
     msg: dict[str, Any] = {"ok": ok}
     if ok and out is not None:
         msg["out"] = out

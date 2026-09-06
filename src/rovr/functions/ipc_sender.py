@@ -146,17 +146,40 @@ def _build_parser() -> IPCArgumentParser:
 IPC_PARSER = _build_parser()
 
 
-def _validate_message(action: str, args: tuple[str, ...]) -> None:
+def p(path: str) -> str:
+    return os.path.abspath(os.path.expandvars(os.path.expanduser(path)))
+
+
+def _prepare_message(action: str, args: tuple[str, ...]) -> tuple[str, ...]:
     parsed = IPC_PARSER.parse_args([action, *args])
     if parsed.action == "list-instances":
         raise ValueError("list-instances does not target a specific instance")
-    if parsed.action == "cd" and not os.path.exists(parsed.path):
-        raise ValueError("does not exist.")
+    if parsed.action == "cd":
+        path = p(parsed.path)
+        if not os.path.exists(path):
+            raise ValueError("does not exist.")
+        return (path,)
+    if parsed.action == "clipboard" and parsed.operation in ("copy", "cut"):
+        flag = (
+            "--select" if parsed.select else "--reselect" if parsed.reselect else None
+        )
+        return (
+            parsed.operation,
+            *((flag,) if flag else ()),
+            *map(p, parsed.paths),
+        )
+    if parsed.action == "tab" and parsed.operation == "new" and parsed.path:
+        return (
+            parsed.operation,
+            p(parsed.path),
+            *(("--focus",) if parsed.focus else ()),
+        )
+    return args
 
 
 async def send_message(pid: int | None, action: str, *args: str) -> None:
     try:
-        _validate_message(action, args)
+        args = _prepare_message(action, args)
     except ValueError as error:
         print(f'{{"ok": false, "err": "{str(error)}"}}')
         return

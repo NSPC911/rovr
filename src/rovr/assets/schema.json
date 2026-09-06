@@ -149,6 +149,13 @@
         "prompt",
         "deny"
       ]
+    },
+    "ipc_no_prompt": {
+      "type": "string",
+      "enum": [
+        "allow",
+        "deny"
+      ]
     }
   },
   "properties": {
@@ -717,6 +724,16 @@
                   "$ref": "#/definitions/ipc_perms",
                   "default": "allow",
                   "description": "Get the back/forward history of the current tab"
+                },
+                "notify": {
+                  "$ref": "#/definitions/ipc_no_prompt",
+                  "default": "allow",
+                  "description": "Control sending notifications via ipc to the user"
+                },
+                "choice": {
+                  "$ref": "#/definitions/ipc_no_prompt",
+                  "default": "allow",
+                  "description": "Allow the ipc to prompt a yes/no choice to the user."
                 }
               }
             }

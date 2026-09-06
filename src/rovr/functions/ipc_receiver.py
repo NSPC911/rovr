@@ -11,6 +11,7 @@ from textual import work
 
 from rovr.app import Application
 from rovr.functions.cwd import getcwd
+from rovr.functions.ipc_sender import p  # used just in case when needing to resolve
 from rovr.screens.yes_or_no import YesOrNo
 from rovr.variables.constants import config
 
@@ -19,17 +20,6 @@ class IPCReceiver(TypedDict):
     token: str
     action: str
     args: list[str]
-
-
-def p(path: str) -> str:
-    """Return the expanded absolute path of the given path.
-
-    Args:
-        path (str): The path to expand.
-
-    Returns:
-        str: The expanded absolute path."""
-    return os.path.abspath(os.path.expandvars(os.path.expanduser(path)))
 
 
 async def check_permission(self: Application, action: str, args: list[str]) -> bool:
@@ -284,6 +274,10 @@ async def conn(
         case "notify":
             from rovr.functions.ipc_sender import IPC_PARSER
 
+            if not await check_permission(self, action, args):
+                ok = False
+                err = "denied"
+
             try:
                 notification = IPC_PARSER.parse_args([action, *args])
             except SystemExit:
@@ -320,6 +314,9 @@ async def conn(
                 else:
                     self.action_suspend_process()
         case "choice":
+            if not await check_permission(self, action, args):
+                ok = False
+                err = "denied"
             if len(args) != 1:
                 ok = False
                 err = "too many arguments" if len(args) > 1 else "question not provided"

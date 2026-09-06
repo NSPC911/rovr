@@ -10,6 +10,7 @@ from textual import work
 
 from rovr.app import Application
 from rovr.functions.cwd import getcwd
+from rovr.header.tabs import TablineTab
 from rovr.screens.yes_or_no import YesOrNo
 from rovr.variables.constants import config
 
@@ -156,8 +157,29 @@ async def conn(
                                 if "--select" in flags
                                 else ("reselect" if "--reselect" in flags else "no"),
                             )
+                case _:
+                    ok = False
+                    err = "clipboard action is not valid"
+        case "tab":
+            if len(args) == 0:
+                ok = False
+                err = "tab action not provided"
+            match args[0]:
+                case "list":
+                    if not await check_permission(self, action, args):
+                        ok = False
+                        err = "denied"
+                    else:
+                        active = self.tabWidget.active_tab
+                        tabs: list[str] = []
+                        out: dict[str, int | list[str]] = {"focused": 0, "tabs": tabs}
 
-    msg: dict[str, bool | str | list] = {"ok": ok}
+                        for i, tab in enumerate(self.tabWidget.query(TablineTab)):
+                            tabs.append(tab.directory)
+                            if tab is active:
+                                out["focused"] = i
+
+    msg: dict[str, Any] = {"ok": ok}
     if ok and out is not None:
         msg["out"] = out
     elif err is not None:
@@ -175,7 +197,10 @@ async def wrapper(
         await conn(self, reader, writer)
     except Exception as exc:
         writer.write(
-            f'{{"ok": false, err: "internal exception ({type(exc).__name__}): {str(exc)}"}}'.encode()
+            json.dumps({
+                "ok": False,
+                "err": f"internal exception ({type(exc).__name__}): {exc}",
+            }).encode()
         )
     finally:
         await writer.drain()

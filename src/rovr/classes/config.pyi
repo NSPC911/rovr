@@ -17,6 +17,12 @@ class RovrConfig(TypedDict, total=False):
     keybinds: "_RovrConfigKeybinds"
     plugins: "_RovrConfigPlugins"
 
+_IpcNoPrompt = Literal["allow"] | Literal["deny"]
+_IPCNOPROMPT_ALLOW: Literal["allow"] = "allow"
+r"""The values for the '_IpcNoPrompt' enum"""
+_IPCNOPROMPT_DENY: Literal["deny"] = "deny"
+r"""The values for the '_IpcNoPrompt' enum"""
+
 _IpcPerms = Literal["allow"] | Literal["prompt"] | Literal["deny"]
 _IPCPERMS_ALLOW: Literal["allow"] = "allow"
 r"""The values for the '_IpcPerms' enum"""
@@ -299,6 +305,9 @@ r""" Default value of the field path 'Rovr Config settings ipc enabled' """
 _ROVR_CONFIG_SETTINGS_IPC_PERMISSIONS_CD_DEFAULT = "allow"
 r""" Default value of the field path 'Rovr Config settings ipc permissions cd' """
 
+_ROVR_CONFIG_SETTINGS_IPC_PERMISSIONS_CHOICE_DEFAULT = "allow"
+r""" Default value of the field path 'Rovr Config settings ipc permissions choice' """
+
 _ROVR_CONFIG_SETTINGS_IPC_PERMISSIONS_CLIPBOARD_FULL_STOP_COPY_DEFAULT = "allow"
 r""" Default value of the field path 'Rovr Config settings ipc permissions clipboard.copy' """
 
@@ -322,6 +331,9 @@ r""" Default value of the field path 'Rovr Config settings ipc permissions list.
 
 _ROVR_CONFIG_SETTINGS_IPC_PERMISSIONS_LIST_FULL_STOP_SELECTED_DEFAULT = "allow"
 r""" Default value of the field path 'Rovr Config settings ipc permissions list.selected' """
+
+_ROVR_CONFIG_SETTINGS_IPC_PERMISSIONS_NOTIFY_DEFAULT = "allow"
+r""" Default value of the field path 'Rovr Config settings ipc permissions notify' """
 
 _ROVR_CONFIG_SETTINGS_IPC_PERMISSIONS_QUIT_DEFAULT = "prompt"
 r""" Default value of the field path 'Rovr Config settings ipc permissions quit' """
@@ -1677,6 +1689,8 @@ _RovrConfigSettingsIpcPermissions = TypedDict(
         "quit": "_IpcPerms",
         "suspend": "_IpcPerms",
         "history.list": "_IpcPerms",
+        "notify": "_IpcNoPrompt",
+        "choice": "_IpcNoPrompt",
     },
     total=False,
 )

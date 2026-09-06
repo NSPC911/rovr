@@ -156,6 +156,8 @@ description: config schema humanified
       - [2.10.2.13. Property `Rovr Config > settings > ipc > permissions > quit`](#settings_ipc_permissions_quit)
       - [2.10.2.14. Property `Rovr Config > settings > ipc > permissions > suspend`](#settings_ipc_permissions_suspend)
       - [2.10.2.15. Property `Rovr Config > settings > ipc > permissions > history.list`](#settings_ipc_permissions_historylist)
+      - [2.10.2.16. Property `Rovr Config > settings > ipc > permissions > notify`](#settings_ipc_permissions_notify)
+      - [2.10.2.17. Property `Rovr Config > settings > ipc > permissions > choice`](#settings_ipc_permissions_choice)
 - [3. Property `Rovr Config > metadata`](#metadata)
   - [3.1. Property `Rovr Config > metadata > fields`](#metadata_fields)
     - [3.1.1. Rovr Config > metadata > fields > fields items](#metadata_fields_items)
@@ -2272,6 +2274,8 @@ Must be one of:
 | [quit](#settings_ipc_permissions_quit)                        | enum (of string) | Control quitting rovr                                        |
 | [suspend](#settings_ipc_permissions_suspend)                  | enum (of string) | Control suspending rovr                                      |
 | [history.list](#settings_ipc_permissions_historylist)         | enum (of string) | Get the back/forward history of the current tab              |
+| [notify](#settings_ipc_permissions_notify)                    | enum (of string) | Control sending notifications via ipc to the user            |
+| [choice](#settings_ipc_permissions_choice)                    | enum (of string) | Allow the ipc to prompt a yes/no choice to the user.         |
 
 ##### <a name="settings_ipc_permissions_cd"></a>2.10.2.1. Property `Rovr Config > settings > ipc > permissions > cd`
 
@@ -2526,6 +2530,38 @@ Must be one of:
 
 - "allow"
 - "prompt"
+- "deny"
+
+##### <a name="settings_ipc_permissions_notify"></a>2.10.2.16. Property `Rovr Config > settings > ipc > permissions > notify`
+
+|                |                             |
+| -------------- | --------------------------- |
+| **Type**       | `enum (of string)`          |
+| **Required**   | No                          |
+| **Default**    | `"allow"`                   |
+| **Defined in** | #/definitions/ipc_no_prompt |
+
+**Description:** Control sending notifications via ipc to the user
+
+Must be one of:
+
+- "allow"
+- "deny"
+
+##### <a name="settings_ipc_permissions_choice"></a>2.10.2.17. Property `Rovr Config > settings > ipc > permissions > choice`
+
+|                |                             |
+| -------------- | --------------------------- |
+| **Type**       | `enum (of string)`          |
+| **Required**   | No                          |
+| **Default**    | `"allow"`                   |
+| **Defined in** | #/definitions/ipc_no_prompt |
+
+**Description:** Allow the ipc to prompt a yes/no choice to the user.
+
+Must be one of:
+
+- "allow"
 - "deny"
 
 ## <a name="metadata"></a>3. Property `Rovr Config > metadata`

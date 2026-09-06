@@ -102,7 +102,9 @@ async def conn(
                         flags = {arg for arg in args if arg.startswith("--")}
                         avail = [path for path in args[1:] if os.path.exists(path)]
                         out: list[str] = [
-                            path for path in args[1:] if path not in avail
+                            path
+                            for path in args[1:]
+                            if not (path in avail or path.startswith("--"))
                         ]
                         if not avail:
                             ok = False
@@ -132,17 +134,28 @@ async def conn(
         msg["err"] = err
     writer.write(json.dumps(msg).encode())
 
+
+async def wrapper(
+    self: Application, reader: asyncio.StreamReader, writer: asyncio.StreamWriter
+) -> None:
     # addr = writer.get_extra_info("peername")
     # self.log(f"Received {message!r} from {addr!r}")
 
-    await writer.drain()
-    writer.close()
-    await writer.wait_closed()
+    try:
+        await conn(self, reader, writer)
+    except Exception as exc:
+        writer.write(
+            f'{{"ok": false, err: "internal exception ({type(exc).__name__}): {str(exc)}"}}'.encode()
+        )
+    finally:
+        await writer.drain()
+        writer.close()
+        await writer.wait_closed()
 
 
 @work
 async def start_server(self: Application) -> None:
-    server = await asyncio.start_server(partial(conn, self), "127.0.0.1", 0)
+    server = await asyncio.start_server(partial(wrapper, self), "127.0.0.1", 0)
     addr = server.sockets[0].getsockname()
     self.call_after_refresh(self.notify, f"Serving on {addr}")
     os.environ["ROVR_IPC_PORT"] = str(addr[1])

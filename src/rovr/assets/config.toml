@@ -145,7 +145,7 @@ cd = "allow"
 "clipboard.paste" = "prompt"
 
 "tab.list" = "allow"
-"tab.create" = "allow"
+"tab.new" = "allow"
 "tab.switch" = "allow"
 "tab.close" = "prompt"
 

@@ -59,7 +59,7 @@ def _build_parser() -> IPCArgumentParser:
     tab = commands.add_parser("tab", help="Perform tab operations.")
     subparser = tab.add_subparsers(dest="operation", required=True)
     for op, desc in zip(
-        ("list", "create", "switch", "close"),
+        ("list", "new", "switch", "close"),
         ("List all tabs", "Create a new tab", "Switch to a tab", "Close a tab"),
     ):
         command = subparser.add_parser(op, help=desc)
@@ -68,6 +68,13 @@ def _build_parser() -> IPCArgumentParser:
                 "tab_index",
                 type=int,
                 help="The index of the tab to switch to or close. If unspecified, uses focused tab.",
+            )
+        elif op == "new":
+            command.add_argument(
+                "path",
+                type=str,
+                nargs="?",
+                help="The path to open in the new tab. If unspecified, opens the current working directory.",
             )
 
     lists = commands.add_parser("list", help="Perform filelist operations.")

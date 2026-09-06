@@ -673,7 +673,7 @@
                   "default": "allow",
                   "description": "Get the list of tabs"
                 },
-                "tab.create": {
+                "tab.new": {
                   "$ref": "#/definitions/ipc_perms",
                   "default": "allow",
                   "description": "Control creating new tabs"

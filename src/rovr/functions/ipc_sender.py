@@ -114,6 +114,10 @@ def _build_parser() -> IPCArgumentParser:
         "suspend", help="Suspend the rovr instance (Unavailable on Windows)."
     )
     commands.add_parser("list-instances", help="List running rovr instances.")
+    choice = commands.add_parser(
+        "choice", help="Ask a yes or no question in the rovr instance."
+    )
+    choice.add_argument("question", help="The question to ask.")
     commands.add_parser("_show_urself", help=argparse.SUPPRESS)
     return parser
 

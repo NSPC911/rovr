@@ -1,4 +1,3 @@
-import argparse
 import asyncio
 import json
 import os
@@ -28,10 +27,9 @@ def _build_parser() -> IPCArgumentParser:
         dest="action", required=True, title="commands", metavar="COMMAND"
     )
 
-    cd = commands.add_parser(
+    commands.add_parser(
         "cd", help="Change the current working directory of the rovr instance."
-    )
-    cd.add_argument("path")
+    ).add_argument("path")
 
     clipboard = commands.add_parser("clipboard", help="Perform clipboard operations.")
     clipboard_commands = clipboard.add_subparsers(dest="operation", required=True)
@@ -84,28 +82,28 @@ def _build_parser() -> IPCArgumentParser:
                 help="Focus the new tab after creating it.",
             )
 
-    lists = commands.add_parser("list", help="Perform filelist operations.")
-    subparser = lists.add_subparsers(dest="operation", required=True)
+    filelist = commands.add_parser("list", help="Perform filelist operations.")
+    subparser = filelist.add_subparsers(dest="operation", required=True)
     subparser.add_parser(
         "highlighted", help="Get details of the highlighted filelist item."
     )
     subparser.add_parser("selected", help="Get details of the selected filelist items.")
-    sub = subparser.add_parser("cursor", help="Control the cursor of the filelist.")
-    # rovr --ipc list cursor +1 to go down one item
-    sub.add_argument(
+    subparser.add_parser(
+        "cursor", help="Control the cursor of the filelist."
+    ).add_argument(
         "movement",
         help="The movement of the cursor relative to its current position. Must be a number (+1/-1)",
     )
 
-    history = commands.add_parser("history", help="Perform command history operations.")
-    history.add_argument(
+    commands.add_parser(
+        "history", help="Perform command history operations."
+    ).add_argument(
         "operation",
         choices=("list",),
         help="List the command history of the rovr instance.",
     )
 
-    quit = commands.add_parser("quit", help="Quit the rovr instance.")
-    quit.add_argument(
+    commands.add_parser("quit", help="Quit the rovr instance.").add_argument(
         "--no-cd",
         action="store_true",
         help="If using --cwd-file, do not write cwd before quitting",
@@ -117,10 +115,9 @@ def _build_parser() -> IPCArgumentParser:
 
     commands.add_parser("list-instances", help="List running rovr instances.")
 
-    choice = commands.add_parser(
+    commands.add_parser(
         "choice", help="Ask a yes or no question in the rovr instance."
-    )
-    choice.add_argument("question", help="The question to ask.")
+    ).add_argument("question", help="The question to ask.")
 
     notify = commands.add_parser(
         "notify", help="Send a notification to the rovr instance."
@@ -138,8 +135,6 @@ def _build_parser() -> IPCArgumentParser:
         type=float,
         help="Hide notification after this time passed (default 5s)",
     )
-
-    commands.add_parser("_show_urself", help=argparse.SUPPRESS)
     return parser
 
 

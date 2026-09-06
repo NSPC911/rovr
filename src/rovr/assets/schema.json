@@ -678,10 +678,10 @@
                   "default": "allow",
                   "description": "Control creating new tabs"
                 },
-                "tab.switch": {
+                "tab.focus": {
                   "$ref": "#/definitions/ipc_perms",
                   "default": "allow",
-                  "description": "Control switching between tabs"
+                  "description": "Focus a specified tab index"
                 },
                 "tab.close": {
                   "$ref": "#/definitions/ipc_perms",

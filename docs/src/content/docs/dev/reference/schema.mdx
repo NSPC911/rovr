@@ -148,7 +148,7 @@ description: config schema humanified
       - [2.10.2.5. Property `Rovr Config > settings > ipc > permissions > clipboard.paste`](#settings_ipc_permissions_clipboardpaste)
       - [2.10.2.6. Property `Rovr Config > settings > ipc > permissions > tab.list`](#settings_ipc_permissions_tablist)
       - [2.10.2.7. Property `Rovr Config > settings > ipc > permissions > tab.new`](#settings_ipc_permissions_tabnew)
-      - [2.10.2.8. Property `Rovr Config > settings > ipc > permissions > tab.switch`](#settings_ipc_permissions_tabswitch)
+      - [2.10.2.8. Property `Rovr Config > settings > ipc > permissions > tab.focus`](#settings_ipc_permissions_tabfocus)
       - [2.10.2.9. Property `Rovr Config > settings > ipc > permissions > tab.close`](#settings_ipc_permissions_tabclose)
       - [2.10.2.10. Property `Rovr Config > settings > ipc > permissions > list.highlighted`](#settings_ipc_permissions_listhighlighted)
       - [2.10.2.11. Property `Rovr Config > settings > ipc > permissions > list.selected`](#settings_ipc_permissions_listselected)
@@ -2264,7 +2264,7 @@ Must be one of:
 | [clipboard.paste](#settings_ipc_permissions_clipboardpaste)   | enum (of string) | Control pasting from the clipboard                           |
 | [tab.list](#settings_ipc_permissions_tablist)                 | enum (of string) | Get the list of tabs                                         |
 | [tab.new](#settings_ipc_permissions_tabnew)                   | enum (of string) | Control creating new tabs                                    |
-| [tab.switch](#settings_ipc_permissions_tabswitch)             | enum (of string) | Control switching between tabs                               |
+| [tab.focus](#settings_ipc_permissions_tabfocus)               | enum (of string) | Focus a specified tab index                                  |
 | [tab.close](#settings_ipc_permissions_tabclose)               | enum (of string) | Control closing tabs                                         |
 | [list.highlighted](#settings_ipc_permissions_listhighlighted) | enum (of string) | Get the highlighted item in the file list                    |
 | [list.selected](#settings_ipc_permissions_listselected)       | enum (of string) | Get the selected items in the file list                      |
@@ -2392,7 +2392,7 @@ Must be one of:
 - "prompt"
 - "deny"
 
-##### <a name="settings_ipc_permissions_tabswitch"></a>2.10.2.8. Property `Rovr Config > settings > ipc > permissions > tab.switch`
+##### <a name="settings_ipc_permissions_tabfocus"></a>2.10.2.8. Property `Rovr Config > settings > ipc > permissions > tab.focus`
 
 |                |                         |
 | -------------- | ----------------------- |
@@ -2401,7 +2401,7 @@ Must be one of:
 | **Default**    | `"allow"`               |
 | **Defined in** | #/definitions/ipc_perms |
 
-**Description:** Control switching between tabs
+**Description:** Focus a specified tab index
 
 Must be one of:
 

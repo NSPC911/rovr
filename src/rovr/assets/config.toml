@@ -146,7 +146,7 @@ cd = "allow"
 
 "tab.list" = "allow"
 "tab.new" = "allow"
-"tab.switch" = "allow"
+"tab.focus" = "allow"
 "tab.close" = "prompt"
 
 "list.highlighted" = "allow"

@@ -59,15 +59,15 @@ def _build_parser() -> IPCArgumentParser:
     tab = commands.add_parser("tab", help="Perform tab operations.")
     subparser = tab.add_subparsers(dest="operation", required=True)
     for op, desc in zip(
-        ("list", "new", "switch", "close"),
+        ("list", "new", "focus", "close"),
         ("List all tabs", "Create a new tab", "Switch to a tab", "Close a tab"),
     ):
         command = subparser.add_parser(op, help=desc)
-        if op in ("switch", "close"):
+        if op in ("focus", "close"):
             command.add_argument(
                 "tab_index",
                 type=int,
-                help="The index of the tab to switch to or close. If unspecified, uses focused tab.",
+                help=f"The index of the tab to {'focus' if op == 'focus' else 'close. If unspecified, uses focused tab.'}",
             )
         elif op == "new":
             command.add_argument(

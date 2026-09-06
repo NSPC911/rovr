@@ -332,14 +332,14 @@ r""" Default value of the field path 'Rovr Config settings ipc permissions suspe
 _ROVR_CONFIG_SETTINGS_IPC_PERMISSIONS_TAB_FULL_STOP_CLOSE_DEFAULT = "prompt"
 r""" Default value of the field path 'Rovr Config settings ipc permissions tab.close' """
 
+_ROVR_CONFIG_SETTINGS_IPC_PERMISSIONS_TAB_FULL_STOP_FOCUS_DEFAULT = "allow"
+r""" Default value of the field path 'Rovr Config settings ipc permissions tab.focus' """
+
 _ROVR_CONFIG_SETTINGS_IPC_PERMISSIONS_TAB_FULL_STOP_LIST_DEFAULT = "allow"
 r""" Default value of the field path 'Rovr Config settings ipc permissions tab.list' """
 
 _ROVR_CONFIG_SETTINGS_IPC_PERMISSIONS_TAB_FULL_STOP_NEW_DEFAULT = "allow"
 r""" Default value of the field path 'Rovr Config settings ipc permissions tab.new' """
-
-_ROVR_CONFIG_SETTINGS_IPC_PERMISSIONS_TAB_FULL_STOP_SWITCH_DEFAULT = "allow"
-r""" Default value of the field path 'Rovr Config settings ipc permissions tab.switch' """
 
 _ROVR_CONFIG_SETTINGS_OPENERS_GROUPS_ADDITIONALPROPERTIES_ITEM_ONEOF1_ORPHAN_DEFAULT = (
     True
@@ -1669,7 +1669,7 @@ _RovrConfigSettingsIpcPermissions = TypedDict(
         "clipboard.paste": "_IpcPerms",
         "tab.list": "_IpcPerms",
         "tab.new": "_IpcPerms",
-        "tab.switch": "_IpcPerms",
+        "tab.focus": "_IpcPerms",
         "tab.close": "_IpcPerms",
         "list.highlighted": "_IpcPerms",
         "list.selected": "_IpcPerms",

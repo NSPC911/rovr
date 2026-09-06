@@ -199,6 +199,57 @@ async def conn(
                         # get index
                         index = self.tabWidget.tabs.nodes.index(tab)
                         out = {"index": index, "path": tab.directory}
+                case "focus":
+                    if len(args) != 2:
+                        ok = False
+                        err = (
+                            "too many arguments"
+                            if len(args) > 2
+                            else "tab index not provided"
+                        )
+                    elif not await check_permission(self, action, args):
+                        ok = False
+                        err = "denied"
+                    else:
+                        try:
+                            index = int(args[1])
+                        except ValueError:
+                            ok = False
+                            err = "tab index must be an integer"
+                        else:
+                            if index < 0 or index >= len(self.tabWidget.tabs):
+                                ok = False
+                                err = "tab index out of range"
+                            else:
+                                self.tabWidget.action_activate_tab(index)
+                case "close":
+                    if len(args) != 2:
+                        ok = False
+                        err = (
+                            "too many arguments"
+                            if len(args) > 2
+                            else "tab index not provided"
+                        )
+                    elif not await check_permission(self, action, args):
+                        ok = False
+                        err = "denied"
+                    else:
+                        try:
+                            index = int(args[1])
+                        except ValueError:
+                            ok = False
+                            err = "tab index must be an integer"
+                        else:
+                            if index < 0 or index >= len(self.tabWidget.tabs):
+                                ok = False
+                                err = "tab index out of range"
+                            elif index == 0 and len(self.tabWidget.tabs) == 1:
+                                ok = False
+                                err = "cannot close the only tab"
+                            else:
+                                await self.tabWidget.remove_tab(
+                                    self.tabWidget.tabs[index]
+                                )
 
     msg: dict[str, Any] = {"ok": ok}
     if ok and out is not None:

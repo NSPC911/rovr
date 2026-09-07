@@ -1,5 +1,3 @@
-import multiprocessing
-import sys
 from os import R_OK, access, path
 from threading import Lock
 from typing import ClassVar, cast
@@ -13,12 +11,9 @@ from textual.worker import get_current_worker
 
 from rovr.classes.mixins import Action, Actionable, CursorNavigationMixin
 from rovr.classes.textual_options import PinnedSidebarOption
-from rovr.functions import drive_workers as drive_utils
 from rovr.functions import icons as icon_utils
-from rovr.functions import multiprocessing_utils
 from rovr.functions import path as path_utils
 from rovr.functions import pins as pin_utils
-from rovr.functions.utils import multiprocessing_process_error_checker
 from rovr.variables.constants import bindings, config
 
 
@@ -36,11 +31,11 @@ class PinnedSidebar(
     ACTIONS: list[Action] = [Action("focus_search", config["keybinds"]["focus_search"])]
 
     @work(exclusive=True, thread=True)
-    def reload_pins(self) -> None:
+    def reload_pins(self, drives: list[str] | None = None) -> None:
         with self.tlock:
-            self._reload_pins()
+            self._reload_pins(drives)
 
-    def _reload_pins(self) -> None:
+    def _reload_pins(self, drives: list[str] | None = None) -> None:
         """Reload pins shown
 
         Raises:
@@ -161,44 +156,16 @@ class PinnedSidebar(
         )
         if self.app.return_code is not None:
             return
-        self.app.call_from_thread(self.set_options, self.list_of_options)
-        if prev_highlighted < len(self.list_of_options):
-            self.app.call_from_thread(setattr, self, "highlighted", prev_highlighted)
-            self.refresh_drives(id_list, None)
-        else:
-            self.refresh_drives(id_list, prev_highlighted)
+        self.refresh_drives(id_list, prev_highlighted, drives)
 
     def refresh_drives(
-        self, id_list: list[str], prev_highlighted: int | None = None
+        self,
+        id_list: list[str],
+        prev_highlighted: int | None = None,
+        drives: list[str] | None = None,
     ) -> None:
-        # force refresh
-        try:
-            if self.app.MULTIPROCESSING_PROCESS_ALLOWED:
-                result_queue: multiprocessing.Queue[list[str]] = multiprocessing.Queue()
-                process = multiprocessing.Process(
-                    target=drive_utils.get_mounted_drives_worker,
-                    args=(result_queue, sys.platform, config),
-                )
-                multiprocessing_utils.start_process(process)
-                process.join(timeout=2.0)
-
-                if process.is_alive():
-                    process.terminate()
-                    process.join(timeout=0.5)
-                    if process.is_alive():
-                        process.kill()
-                    return
-
-                if result_queue.empty():
-                    return
-
-                drives = result_queue.get_nowait()
-            else:
-                drives = drive_utils.get_mounted_drives(sys.platform, config)
-        except Exception as exc:
-            if not multiprocessing_process_error_checker(self.app, exc):
-                return
-            drives = drive_utils.get_mounted_drives(sys.platform, config)
+        if drives is None:
+            drives = self.DRIVES
         self.DRIVES = drives
         new_options: list[PinnedSidebarOption] = []
         for drive in drives:

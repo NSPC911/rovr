@@ -201,8 +201,10 @@ async def conn(
                             select = "select"
                         elif selection == "replace":
                             select = "reselect"
-                        worker = func(avail, select)
-                        await worker.wait()
+                        func(avail, select)
+                        # confusingly i see func to return a None type, not a worker
+                        # so im not sure whether I can even await it
+                        # await worker.wait()
                 case _:
                     ok = False
                     err = "clipboard action is not valid"

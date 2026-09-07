@@ -87,6 +87,7 @@ def get_detail_columns() -> tuple[DetailColumn, ...]:
     return tuple(columns)
 
 
+@lru_cache(maxsize=128)
 def fit_column_count(width: int, columns: tuple[DetailColumn, ...]) -> int:
     """How many leading columns fit, leaving the name at least MIN_NAME_WIDTH cells.
 

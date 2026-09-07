@@ -1,4 +1,4 @@
-from bisect import bisect_left, bisect_right
+from functools import lru_cache
 from inspect import isawaitable
 from typing import Any, Awaitable, Callable, ClassVar, Iterable, NamedTuple, Self, cast
 
@@ -11,6 +11,7 @@ from textual.content import ContentText
 from textual.events import Key
 from textual.geometry import Region, Size, clamp
 from textual.strip import Strip
+from textual.style import Style as VisualStyle
 from textual.widgets import OptionList, SelectionList
 from textual.widgets.option_list import Option, OptionDoesNotExist
 from textual.widgets.selection_list import Selection, SelectionType
@@ -22,6 +23,23 @@ from rovr.functions.utils import check_key
 from rovr.variables.constants import (
     config,
 )
+
+
+@lru_cache(maxsize=2048)
+def _merge_detail_style(visual: VisualStyle, base: Style) -> Style:
+    foreground = visual.foreground
+    if foreground is None:
+        return base
+    if foreground.a < 1 and base.bgcolor is not None:
+        foreground = Color.from_rich_color(base.bgcolor).blend(foreground, foreground.a)
+    return base + Style(
+        color=foreground.rich_color,
+        bold=visual.bold,
+        dim=visual.dim,
+        italic=visual.italic,
+        underline=visual.underline,
+        strike=visual.strike,
+    )
 
 
 class DetailColumnRenderingMixin:
@@ -36,21 +54,7 @@ class DetailColumnRenderingMixin:
             Style: The merged rich style.
         """
         visual = self.get_visual_style("option-list--option", component_class)
-        foreground = visual.foreground
-        if foreground is None:
-            return base
-        if foreground.a < 1 and base.bgcolor is not None:
-            foreground = Color.from_rich_color(base.bgcolor).blend(
-                foreground, foreground.a
-            )
-        return base + Style(
-            color=foreground.rich_color,
-            bold=visual.bold,
-            dim=visual.dim,
-            italic=visual.italic,
-            underline=visual.underline,
-            strike=visual.strike,
-        )
+        return _merge_detail_style(visual, base)
 
     def render_detail_columns(
         self, line: Strip, y: int, columns: tuple[Any, ...]
@@ -76,7 +80,7 @@ class DetailColumnRenderingMixin:
         style = (segments[-1].style if segments else None) or self.rich_style
         detail_segments: list[Segment] = []
         details_width = 1  # is 1 and not 0 because minor right padding
-        for column, cell in zip(columns[:fitted], cells(columns)[:fitted]):
+        for column, cell in zip(columns[:fitted], cells(columns[:fitted])):
             details_width += column.width + 2
             detail_segments.append(Segment("  ", style))
             detail_segments.append(
@@ -194,14 +198,15 @@ class CheckboxRenderingMixin:
         return len("".join(icons))
 
     def super_render_line(self, y: int, selection_style: str = "") -> Strip:
-        base_line = OptionList.render_line(self, y)  # ty: ignore[invalid-argument-type]
-
         line_number = self.scroll_offset.y + y
         try:
             option_index, line_offset = self._lines[line_number]
             option = self.options[option_index]
         except (IndexError, AttributeError):
-            return base_line
+            return Strip.blank(
+                self.scrollable_content_region.width,
+                self.get_visual_style("option-list--option").rich_style,
+            )
 
         mouse_over: bool = self._mouse_hovering_over == option_index
         option_component_classes = self._get_option_component_classes(option)
@@ -232,7 +237,10 @@ class CheckboxRenderingMixin:
         try:
             strip = strips[line_offset]
         except IndexError:
-            return base_line
+            return Strip.blank(
+                self.scrollable_content_region.width,
+                self.get_visual_style("option-list--option").rich_style,
+            )
         return strip
 
     def render_line(self, y: int) -> Strip:
@@ -297,31 +305,19 @@ class CheckboxRenderingMixin:
 
 class CursorNavigationMixin:
     def _cursor_destination(self, offset: int, wrap: bool = True) -> int | None:
-        enabled = [
-            index for index, option in enumerate(self._options) if not option.disabled
-        ]
-        if not enabled:
-            return self.highlighted
-
-        if offset > 0:
-            start = (
-                0
-                if self.highlighted is None
-                else bisect_right(enabled, self.highlighted)
-            )
-            destination = start + offset - 1
-        else:
-            start = (
-                len(enabled) - 1
-                if self.highlighted is None
-                else bisect_left(enabled, self.highlighted) - 1
-            )
-            destination = start + offset + 1
-        if wrap:
-            destination %= len(enabled)
-        else:
-            destination = clamp(destination, 0, len(enabled) - 1)
-        return enabled[destination]
+        direction = 1 if offset > 0 else -1
+        start = (
+            (0 if direction > 0 else len(self._options) - 1)
+            if self.highlighted is None
+            else self.highlighted + direction
+        )
+        stop = len(self._options) if direction > 0 else -1
+        remaining = abs(offset)
+        for index in range(start, stop, direction):
+            if not self._options[index].disabled:
+                remaining -= 1
+                if not remaining:
+                    return index
 
     def action_cursor(self, offset: int) -> None:
         """Move the cursor by a number of enabled options."""
@@ -357,9 +353,12 @@ class CursorNavigationMixin:
 
     def action_cursor_page(self, pages: float) -> None:
         """Move the cursor by a number of visible pages."""
-        if pages and self._options:  # ruff:ignore[collapsible-if]
-            if (dest := self._cursor_page_destination(pages)) is not None:
-                self.highlighted = dest
+        if (
+            pages
+            and self._options
+            and (dest := self._cursor_page_destination(pages)) is not None
+        ):
+            self.highlighted = dest
 
 
 class SelectionNavigationMixin(CursorNavigationMixin):

@@ -21,7 +21,6 @@ class Instance(TypedDict):
 
 class InstanceInfo(TypedDict):
     pid: int
-    port: int
     status: Literal["running", "unresponsive"]
 
 
@@ -100,7 +99,6 @@ def instance_for_pid(pid: int) -> Instance | None:
 async def _probe_instance(path: Path, descriptor: Instance) -> InstanceInfo | None:
     info = InstanceInfo({
         "pid": descriptor["pid"],
-        "port": descriptor["port"],
         "status": "unresponsive",
     })
     try:

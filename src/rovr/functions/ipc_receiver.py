@@ -155,23 +155,31 @@ async def conn(
                         ok = False
                         err = "denied"
                     else:
-                        # what we want to do is check for flags (because we allow `--select` and `--reselect`)
-                        # as well as existance of those paths (return paths that dont exist at all)
-                        # for paths already in clipboard, ignore, unless either flag is included
-                        flags = {arg for arg in args if arg.startswith("--")}
-                        avail = [p(path) for path in args[1:] if os.path.exists(path)]
+                        selection = next(
+                            (
+                                arg.removeprefix("--selection=")
+                                for arg in args[1:]
+                                if arg.startswith("--selection=")
+                            ),
+                            "keep",
+                        )
+                        if selection not in ("keep", "add", "replace"):
+                            ok = False
+                            err = "selection must be keep, add, or replace"
+                        avail = [
+                            p(path)
+                            for path in args[1:]
+                            if not path.startswith("--") and os.path.exists(path)
+                        ]
                         out: list[str] = [
                             path
                             for path in args[1:]
                             if not (path in avail or path.startswith("--"))
                         ]
-                        if not avail:
+                        if not avail and ok:
                             ok = False
                             err = "no paths provided"
-                        if "--reselect" in flags and "--select" in flags:
-                            ok = False
-                            err = "cannot use both --select and --reselect"
-                        if avail:
+                        if avail and ok:
                             func: Callable[
                                 [list[str], Literal["reselect", "select", "no"]], None
                             ] = (
@@ -179,12 +187,12 @@ async def conn(
                                 if args[0] == "copy"
                                 else self.Clipboard.cut_to_clipboard
                             )
-                            func(
-                                avail,
-                                "select"
-                                if "--select" in flags
-                                else ("reselect" if "--reselect" in flags else "no"),
-                            )
+                            select: Literal["reselect", "select", "no"] = "no"
+                            if selection == "add":
+                                select = "select"
+                            elif selection == "replace":
+                                select = "reselect"
+                            func(avail, select)
                 case _:
                     ok = False
                     err = "clipboard action is not valid"

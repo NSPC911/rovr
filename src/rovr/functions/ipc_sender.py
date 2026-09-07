@@ -42,16 +42,11 @@ def _build_parser() -> IPCArgumentParser:
             operation,
             help=f"{operation.capitalize()} the passed items to rovr's clipboard",
         )
-        selection = command.add_mutually_exclusive_group()
-        selection.add_argument(
-            "--select",
-            action="store_true",
-            help="Select the added items in the clipboard",
-        )
-        selection.add_argument(
-            "--reselect",
-            action="store_true",
-            help="Unselect all items in the clipboard and select the added items",
+        command.add_argument(
+            "--selection",
+            choices=("keep", "add", "replace"),
+            default="keep",
+            help="Whether to keep, add, or replace the clipboard selection (default: keep)",
         )
         command.add_argument("paths", nargs="+")
     clipboard_commands.add_parser(
@@ -165,12 +160,9 @@ def _prepare_message(action: str, args: tuple[str, ...]) -> tuple[str, ...]:
             raise ValueError("does not exist.")
         return (path,)
     if parsed.action == "clipboard" and parsed.operation in ("copy", "cut"):
-        flag = (
-            "--select" if parsed.select else "--reselect" if parsed.reselect else None
-        )
         return (
             parsed.operation,
-            *((flag,) if flag else ()),
+            f"--selection={parsed.selection}",
             *map(p, parsed.paths),
         )
     if parsed.action == "tab" and parsed.operation == "new" and parsed.path:

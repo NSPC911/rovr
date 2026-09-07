@@ -121,7 +121,7 @@ def _build_parser() -> IPCArgumentParser:
     commands.add_parser("list-instances", help="List running rovr instances.")
 
     commands.add_parser(
-        "choice", help="Ask a yes or no question in the rovr instance."
+        "ask", help="Ask a yes or no question in the rovr instance."
     ).add_argument("question", help="The question to ask.")
 
     notify = commands.add_parser(

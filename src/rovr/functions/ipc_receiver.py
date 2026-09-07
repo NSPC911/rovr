@@ -365,7 +365,7 @@ async def conn(
                     err = "suspend is not available on Windows"
                 else:
                     self.action_suspend_process()
-        case "choice":
+        case "ask":
             if not await check_permission(self, action, args):
                 ok = False
                 err = "denied"

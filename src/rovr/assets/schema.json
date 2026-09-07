@@ -715,7 +715,7 @@
                   "default": "allow",
                   "description": "Control sending notifications via ipc to the user"
                 },
-                "choice": {
+                "ask": {
                   "$ref": "#/definitions/ipc_no_prompt",
                   "default": "allow",
                   "description": "Allow the ipc to prompt a yes/no choice to the user."

@@ -302,11 +302,11 @@ r""" Default value of the field path 'Rovr Config settings history_size' """
 _ROVR_CONFIG_SETTINGS_IPC_ENABLED_DEFAULT = False
 r""" Default value of the field path 'Rovr Config settings ipc enabled' """
 
+_ROVR_CONFIG_SETTINGS_IPC_PERMISSIONS_ASK_DEFAULT = "allow"
+r""" Default value of the field path 'Rovr Config settings ipc permissions ask' """
+
 _ROVR_CONFIG_SETTINGS_IPC_PERMISSIONS_CD_DEFAULT = "allow"
 r""" Default value of the field path 'Rovr Config settings ipc permissions cd' """
-
-_ROVR_CONFIG_SETTINGS_IPC_PERMISSIONS_CHOICE_DEFAULT = "allow"
-r""" Default value of the field path 'Rovr Config settings ipc permissions choice' """
 
 _ROVR_CONFIG_SETTINGS_IPC_PERMISSIONS_CLIPBOARD_FULL_STOP_COPY_DEFAULT = "allow"
 r""" Default value of the field path 'Rovr Config settings ipc permissions clipboard.copy' """
@@ -1678,7 +1678,7 @@ _RovrConfigSettingsIpcPermissions = TypedDict(
         "quit": "_IpcPerms",
         "suspend": "_IpcPerms",
         "notify": "_IpcNoPrompt",
-        "choice": "_IpcNoPrompt",
+        "ask": "_IpcNoPrompt",
     },
     total=False,
 )

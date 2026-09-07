@@ -67,6 +67,7 @@ def _build_parser() -> IPCArgumentParser:
                 "tab_index",
                 type=int,
                 help=f"The index of the tab to {'focus' if op == 'focus' else 'close. If unspecified, uses focused tab.'}",
+                nargs="?",
             )
         elif op == "new":
             command.add_argument(
@@ -82,25 +83,13 @@ def _build_parser() -> IPCArgumentParser:
                 help="Focus the new tab after creating it.",
             )
 
-    filelist = commands.add_parser("list", help="Perform filelist operations.")
-    subparser = filelist.add_subparsers(dest="operation", required=True)
-    subparser.add_parser(
-        "highlighted", help="Get details of the highlighted filelist item."
-    )
-    subparser.add_parser("selected", help="Get details of the selected filelist items.")
-    subparser.add_parser(
-        "cursor", help="Control the cursor of the filelist."
-    ).add_argument(
-        "movement",
-        help="The movement of the cursor relative to its current position. Must be a number (+1/-1)",
-    )
-
     commands.add_parser(
-        "history", help="Perform command history operations."
+        "history", help="Get the navigation history of a tab in the rovr instance."
     ).add_argument(
-        "operation",
-        choices=("list",),
-        help="List the command history of the rovr instance.",
+        "index",
+        type=int,
+        help="The tab index to get the navigation history for. If unspecified, uses the focused tab.",
+        nargs="?",
     )
 
     commands.add_parser("quit", help="Quit the rovr instance.").add_argument(

@@ -653,7 +653,7 @@
                 "cd": {
                   "$ref": "#/definitions/ipc_perms",
                   "default": "allow",
-                  "description": "Should the IPC allow changing the current working directory?"
+                  "description": "Control changing the current working directory of rovr"
                 },
                 "clipboard.copy": {
                   "$ref": "#/definitions/ipc_perms",
@@ -668,7 +668,7 @@
                 "clipboard.list": {
                   "$ref": "#/definitions/ipc_perms",
                   "default": "allow",
-                  "description": "Get the list of items in clipboard, along with their states"
+                  "description": "Control getting the list of items in clipboard, along with their states"
                 },
                 "clipboard.paste": {
                   "$ref": "#/definitions/ipc_perms",
@@ -678,7 +678,7 @@
                 "tab.list": {
                   "$ref": "#/definitions/ipc_perms",
                   "default": "allow",
-                  "description": "Get the list of tabs"
+                  "description": "Control get the list of tabs"
                 },
                 "tab.new": {
                   "$ref": "#/definitions/ipc_perms",
@@ -688,27 +688,12 @@
                 "tab.focus": {
                   "$ref": "#/definitions/ipc_perms",
                   "default": "allow",
-                  "description": "Focus a specified tab index"
+                  "description": "Control focusing a specified tab index"
                 },
                 "tab.close": {
                   "$ref": "#/definitions/ipc_perms",
                   "default": "prompt",
                   "description": "Control closing tabs"
-                },
-                "list.highlighted": {
-                  "$ref": "#/definitions/ipc_perms",
-                  "default": "allow",
-                  "description": "Get the highlighted item in the file list"
-                },
-                "list.selected": {
-                  "$ref": "#/definitions/ipc_perms",
-                  "default": "allow",
-                  "description": "Get the selected items in the file list"
-                },
-                "list.cursor": {
-                  "$ref": "#/definitions/ipc_perms",
-                  "default": "allow",
-                  "description": "Control moving the cursor in the file list"
                 },
                 "quit": {
                   "$ref": "#/definitions/ipc_perms",
@@ -720,10 +705,10 @@
                   "default": "allow",
                   "description": "Control suspending rovr"
                 },
-                "history.list": {
+                "history": {
                   "$ref": "#/definitions/ipc_perms",
                   "default": "allow",
-                  "description": "Get the back/forward history of the current tab"
+                  "description": "Control getting the navigation history of a tab in the rovr instance."
                 },
                 "notify": {
                   "$ref": "#/definitions/ipc_no_prompt",

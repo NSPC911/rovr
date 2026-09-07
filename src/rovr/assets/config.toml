@@ -149,14 +149,10 @@ cd = "allow"
 "tab.focus" = "allow"
 "tab.close" = "prompt"
 
-"list.highlighted" = "allow"
-"list.selected" = "allow"
-"list.cursor" = "allow"
-
 quit = "prompt"
 suspend = "allow"
 
-"history.list" = "allow"
+"history" = "allow"
 
 [metadata]
 fields = [

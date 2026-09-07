@@ -50,7 +50,7 @@ def assemble_and_write(
     writer: asyncio.StreamWriter,
     ok: bool | str,
     out: Any = None,
-    err: str | None = None,
+    err: Any = None,
 ) -> None:
     msg: dict[str, Any] = {"ok": ok}
     if ok and out is not None:
@@ -90,7 +90,8 @@ async def conn(
                 ok = False
                 err = "directory not provided"
             elif len(args) > 1:
-                return assemble_and_write(writer, False, err="too many arguments")
+                ok = False
+                err = "too many arguments"
             elif not await check_permission(self, action, args):
                 ok = False
                 err = "denied"
@@ -208,9 +209,8 @@ async def conn(
                                 out["focused"] = i
                 case "new":
                     if len(args) > 3:
-                        return assemble_and_write(
-                            writer, False, None, "too many arguments"
-                        )
+                        ok = False
+                        err = "too many arguments"
                     elif not await check_permission(self, action, args):
                         ok = False
                         err = "denied"
@@ -232,19 +232,15 @@ async def conn(
                             path = getcwd()
                         tab = await self.tabWidget.add_tab(path, focus=focus)
                         # get index
-                        index = self.tabWidget.tabs.nodes.index(tab)
+                        index = self.tabWidget.tabs.index(tab)
                         out = {"index": index, "path": tab.directory}
                 case "focus":
                     if len(args) != 2:
-                        return assemble_and_write(
-                            writer,
-                            False,
-                            None,
-                            (
-                                "too many arguments"
-                                if len(args) > 2
-                                else "tab index not provided"
-                            ),
+                        ok = False
+                        err = (
+                            "too many arguments"
+                            if len(args) > 2
+                            else "tab index not provided"
                         )
                     elif not await check_permission(self, action, args):
                         ok = False
@@ -262,23 +258,24 @@ async def conn(
                             else:
                                 self.tabWidget.action_activate_tab(index)
                 case "close":
-                    if len(args) != 2:
-                        return assemble_and_write(
-                            writer,
-                            False,
-                            None,
-                            (
-                                "too many arguments"
-                                if len(args) > 2
-                                else "tab index not provided"
-                            ),
-                        )
+                    if len(args) > 2:
+                        ok = False
+                        err = "too many arguments"
                     elif not await check_permission(self, action, args):
                         ok = False
                         err = "denied"
+                    elif self.tabWidget.active_tab is None:
+                        ok = False
+                        err = "no active tab somehow"
                     else:
                         try:
-                            index = int(args[1])
+                            index = (
+                                int(args[1])
+                                if len(args) == 2
+                                else self.tabWidget.tabs.index(
+                                    self.tabWidget.active_tab
+                                )
+                            )
                         except ValueError:
                             ok = False
                             err = "tab index must be an integer"
@@ -296,6 +293,36 @@ async def conn(
                 case _:
                     ok = False
                     err = "tab action is not valid"
+        case "history":
+            if len(args) > 1:
+                ok = False
+                err = "too many arguments for history"
+            elif not await check_permission(self, action, args):
+                ok = False
+                err = "denied"
+            elif self.tabWidget.active_tab is None:
+                ok = False
+                err = "no active tab somehow"
+            else:
+                try:
+                    index = (
+                        int(args[0])
+                        if args
+                        else self.tabWidget.tabs.index(self.tabWidget.active_tab)
+                    )
+                except ValueError:
+                    ok = False
+                    err = "tab index must be an integer"
+                else:
+                    if index < 0 or index >= len(self.tabWidget.tabs):
+                        ok = False
+                        err = "tab index out of range"
+                    else:
+                        tab = self.tabWidget.tabs[index]
+                        out = {
+                            "directories": list(tab.session.directories),
+                            "historyIndex": tab.session.historyIndex,
+                        }
         case "notify":
             from rovr.functions.ipc_sender import IPC_PARSER
 
@@ -341,11 +368,8 @@ async def conn(
                 ok = False
                 err = "denied"
             elif len(args) != 1:
-                return assemble_and_write(
-                    writer,
-                    False,
-                    err="too many arguments" if args else "question not provided",
-                )
+                ok = False
+                err = ("too many arguments" if args else "question not provided",)
             else:
                 from rovr.screens import YesOrNo
 

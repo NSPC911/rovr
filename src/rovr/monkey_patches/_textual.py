@@ -229,11 +229,24 @@ Compositor._arrange_root = arrange_root  # ty: ignore
 # problem is that kitty kp sends ctrl+a as a, which is printable, but we don't want
 # to consume it, so we need to check if the key is just that key
 Input.check_consume_key = lambda self, key, character: (  # ty: ignore
-    character
-    and len(character) == 1
-    and not key.startswith(("ctrl", "shift", "alt", "super"))
-    and character.isprintable()
+    bool(
+        character
+        and len(character) == 1
+        and not key.startswith(("ctrl", "shift", "alt", "super"))
+        and character.isprintable()
+    )
 )
+
+_input_on_key = Input._on_key
+
+
+async def input_on_key(self: Input, event: events.Key) -> None:
+    if event.is_printable and not self.check_consume_key(event.key, event.character):
+        return
+    await _input_on_key(self, event)
+
+
+Input._on_key = input_on_key  # ty: ignore
 
 
 # another problem with kitty: Textualize/Textual #6663 - Alt modifier dropped for non-kitty terminals

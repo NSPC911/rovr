@@ -1,9 +1,26 @@
 import pytest
+from textual import events
 from textual.app import App, ComposeResult
 from textual.containers import ScrollableContainer, VerticalGroup
-from textual.widgets import Static
+from textual.widgets import Input, Static
 
 import rovr.monkey_patches._textual  # noqa: F401
+
+
+class InputApp(App):
+    def compose(self) -> ComposeResult:
+        yield Input()
+
+
+@pytest.mark.asyncio
+async def test_input_does_not_consume_modified_printable_key() -> None:
+    async with InputApp().run_test() as pilot:
+        input = pilot.app.query_one(Input)
+
+        await input._on_key(events.Key("ctrl+j", "j"))
+        await input._on_key(events.Key("j", "j"))
+
+        assert input.value == "j"
 
 
 class ScrollbarApp(App):

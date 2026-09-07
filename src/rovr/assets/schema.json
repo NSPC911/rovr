@@ -719,6 +719,11 @@
                   "$ref": "#/definitions/ipc_no_prompt",
                   "default": "allow",
                   "description": "Allow the ipc to prompt a yes/no choice to the user."
+                },
+                "input": {
+                  "$ref": "#/definitions/ipc_no_prompt",
+                  "default": "allow",
+                  "description": "Allow the ipc to prompt for text input from the user."
                 }
               }
             }

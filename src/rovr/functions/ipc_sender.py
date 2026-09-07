@@ -123,6 +123,11 @@ def _build_parser() -> IPCArgumentParser:
     commands.add_parser(
         "ask", help="Ask a yes or no question in the rovr instance."
     ).add_argument("question", help="The question to ask.")
+    inp = commands.add_parser("input", help="Ask for input in the rovr instance.")
+    inp.add_argument("prompt", help="The prompt to display.")
+    inp.add_argument(
+        "--is-path", action="store_true", help="Whether the input is a path."
+    )
 
     notify = commands.add_parser(
         "notify", help="Send a notification to the rovr instance."

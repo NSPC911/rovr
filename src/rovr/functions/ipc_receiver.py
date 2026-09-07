@@ -376,6 +376,17 @@ async def conn(
                 from rovr.screens import YesOrNo
 
                 out: bool = await self.push_screen_wait(YesOrNo(args[0]))
+        case "input":
+            if not await check_permission(self, action, args):
+                ok = False
+                err = "denied"
+            elif len(args) != 1:
+                ok = False
+                err = ("too many arguments" if args else "prompt not provided",)
+            else:
+                from rovr.screens import ModalInput
+
+                out: str = await self.push_screen_wait(ModalInput(args[0]))
         case _:
             ok = False
             err = "action is not valid"

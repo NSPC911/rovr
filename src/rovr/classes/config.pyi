@@ -320,6 +320,9 @@ r""" Default value of the field path 'Rovr Config settings ipc permissions clipb
 _ROVR_CONFIG_SETTINGS_IPC_PERMISSIONS_CLIPBOARD_FULL_STOP_PASTE_DEFAULT = "prompt"
 r""" Default value of the field path 'Rovr Config settings ipc permissions clipboard.paste' """
 
+_ROVR_CONFIG_SETTINGS_IPC_PERMISSIONS_INPUT_DEFAULT = "allow"
+r""" Default value of the field path 'Rovr Config settings ipc permissions input' """
+
 _ROVR_CONFIG_SETTINGS_IPC_PERMISSIONS_NOTIFY_DEFAULT = "allow"
 r""" Default value of the field path 'Rovr Config settings ipc permissions notify' """
 
@@ -1679,6 +1682,7 @@ _RovrConfigSettingsIpcPermissions = TypedDict(
         "suspend": "_IpcPerms",
         "notify": "_IpcNoPrompt",
         "ask": "_IpcNoPrompt",
+        "input": "_IpcNoPrompt",
     },
     total=False,
 )

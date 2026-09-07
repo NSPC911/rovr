@@ -46,7 +46,7 @@ def publish_instance(port: int, token: str) -> Path:
         os.replace(temporary, destination)
         # safety first
         destination.chmod(0o600)
-    except BaseException:
+    except Exception:
         temporary.unlink(missing_ok=True)
         raise
     return destination
@@ -107,9 +107,11 @@ async def _probe_instance(path: Path, descriptor: Instance) -> InstanceInfo | No
         )
     except TimeoutError:
         return info
-    except OSError:
+    except ConnectionRefusedError:
         path.unlink(missing_ok=True)
         return
+    except OSError:
+        return info
 
     try:
         writer.write(

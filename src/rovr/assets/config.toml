@@ -153,6 +153,9 @@ cd = "allow"
 quit = "prompt"
 suspend = "allow"
 
+ask = "allow"
+input = "allow"
+notify = "allow"
 
 [metadata]
 fields = [

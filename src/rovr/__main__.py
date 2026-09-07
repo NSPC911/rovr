@@ -300,7 +300,7 @@ def cli(argv: list[str] | None = None) -> None:
                 args.ipc
                 if args.ipc is not None
                 else args.ipc_to[1:]
-                if args.ipc_to[0].isdigit()
+                if args.ipc_to[0].isdecimal()
                 else args.ipc_to
             )
             IPC_PARSER.parse_args(ipc_args)

@@ -44,6 +44,8 @@ Every command prints one JSON object. Successful commands return `"ok": true` an
 IPC only listens on `127.0.0.1`, and each rovr instance generates a private token. The target instance still checks `settings.ipc.permissions` for every action.<br/>
 Permissions can be `allow`, `deny`, or `prompt`; unconfigured actions are denied. Subcommands use keys such as `clipboard.paste` and `tab.close`.
 
+`prompt` is unavailable for `notify`, `ask`, and `input` commands, which always require user interaction.
+
 ## Commands
 
 ### `cd`
@@ -84,6 +86,8 @@ rovr --ipc clipboard list
   }
 }
 ```
+
+if the user intervenes due to errors, returns with `"ok": false`
 
 `list` returns every clipboard entry with its type and whether it is selected:
 

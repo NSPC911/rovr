@@ -8,6 +8,7 @@ from functools import partial
 from typing import Any, Callable, Literal, TypedDict, cast
 
 from textual import work
+from textual.worker import Worker
 
 from rovr.app import Application
 from rovr.functions.cwd import getcwd
@@ -149,11 +150,14 @@ async def conn(
                         # does because we are assuming that ipc paste is
                         # a prompt (default) else the person kniws what
                         # they want from rovr
-                        worker = self.app.query_one("ProcessContainer").paste_items(
-                            to_copy, to_cut, getcwd()
-                        )
+                        worker: Worker[None | Literal[True]] = self.app.query_one(
+                            "ProcessContainer"
+                        ).paste_items(to_copy, to_cut, getcwd())
                         await worker.wait()
-                        out = {"copy": len(to_copy), "cut": len(to_cut)}
+                        if ok := bool(worker.result):
+                            out = {"copy": len(to_copy), "cut": len(to_cut)}
+                        else:
+                            err = "user intervened"
                 case "copy" | "cut":
                     if not await check_permission(self, action, args):
                         ok = False
@@ -168,8 +172,12 @@ async def conn(
                             "keep",
                         )
                         if selection not in ("keep", "add", "replace"):
-                            ok = False
-                            err = "selection must be keep, add, or replace"
+                            return assemble_and_write(
+                                writer,
+                                False,
+                                None,
+                                "invalid selection argument, must be one of keep, add, replace",
+                            )
                         avail = [
                             p(path)
                             for path in args[1:]
@@ -181,7 +189,8 @@ async def conn(
                             if not (path in avail or path.startswith("--"))
                         ]
                         func: Callable[
-                            [list[str], Literal["reselect", "select", "no"]], None
+                            [list[str], Literal["reselect", "select", "no"]],
+                            Worker[None],
                         ] = (
                             self.Clipboard.copy_to_clipboard
                             if args[0] == "copy"
@@ -192,7 +201,8 @@ async def conn(
                             select = "select"
                         elif selection == "replace":
                             select = "reselect"
-                        func(avail, select)
+                        worker = func(avail, select)
+                        await worker.wait()
                 case _:
                     ok = False
                     err = "clipboard action is not valid"
@@ -344,6 +354,16 @@ async def conn(
                 ok = False
                 err = "invalid notification arguments"
             else:
+                if notification.markup:
+                    from textual.content import Content
+
+                    try:
+                        Content.from_markup(notification.message)
+                    except Exception as exc:
+                        return assemble_and_write(
+                            writer, False, None, f"invalid markup: {exc}"
+                        )
+
                 self.notify(
                     notification.message,
                     title=notification.title or "",
@@ -374,23 +394,26 @@ async def conn(
                 else:
                     self.action_suspend_process()
         case "ask":
-            if not await check_permission(self, action, args):
-                ok = False
-                err = "denied"
-            elif len(args) != 1:
+            if len(args) != 1:
                 ok = False
                 err = "too many arguments" if args else "question not provided"
+            elif not await check_permission(self, action, args):
+                ok = False
+                err = "denied"
             else:
                 from rovr.screens import YesOrNo
 
                 out: bool = await self.push_screen_wait(YesOrNo(args[0]))
         case "input":
-            if not await check_permission(self, action, args):
+            if len(args) > 2 or len(args) == 0:
+                ok = False
+                err = "too many arguments" if len(args) > 2 else "prompt not provided"
+            elif len(args) == 1 and args[0] == "--is-path":
+                ok = False
+                err = "prompt not provided"
+            elif not await check_permission(self, action, args):
                 ok = False
                 err = "denied"
-            elif len(args) != 1:
-                ok = False
-                err = "too many arguments" if args else "prompt not provided"
             else:
                 from rovr.screens import ModalInput
 

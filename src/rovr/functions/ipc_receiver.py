@@ -379,7 +379,7 @@ async def conn(
                 err = "denied"
             elif len(args) != 1:
                 ok = False
-                err = ("too many arguments" if args else "question not provided",)
+                err = "too many arguments" if args else "question not provided"
             else:
                 from rovr.screens import YesOrNo
 
@@ -390,11 +390,13 @@ async def conn(
                 err = "denied"
             elif len(args) != 1:
                 ok = False
-                err = ("too many arguments" if args else "prompt not provided",)
+                err = "too many arguments" if args else "prompt not provided"
             else:
                 from rovr.screens import ModalInput
 
-                out: str = await self.push_screen_wait(ModalInput(args[0]))
+                out: str = await self.push_screen_wait(
+                    ModalInput(args[0], is_path="--is-path" in args)
+                )
         case _:
             ok = False
             err = "action is not valid"

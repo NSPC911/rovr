@@ -165,8 +165,7 @@ class Tabline(Tabs):
             provided a `Tabs.TabError` will be raised.
 
         Returns:
-            An optionally awaitable object that waits for the tab to be mounted and
-                internal state to be fully updated to reflect the new tab.
+            The newly created TablineTab.
 
         Raises:
             Tabs.TabError: If there is a problem with the addition request.

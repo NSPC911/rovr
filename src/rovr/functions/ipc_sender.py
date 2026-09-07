@@ -78,7 +78,7 @@ def _build_parser() -> IPCArgumentParser:
                     else ("close" if op == "close" else "get the history of")
                     + ". If unspecified, uses focused tab."
                 ),
-                nargs="?" if op != "close" else 1,
+                nargs=1 if op == "focus" else "?",
             )
         elif op == "new":
             command.add_argument(

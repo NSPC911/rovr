@@ -695,6 +695,11 @@
                   "default": "prompt",
                   "description": "Control closing tabs"
                 },
+                "tab.history": {
+                  "$ref": "#/definitions/ipc_perms",
+                  "default": "allow",
+                  "description": "Control getting the navigation history of a specified tab index"
+                },
                 "quit": {
                   "$ref": "#/definitions/ipc_perms",
                   "default": "prompt",
@@ -704,11 +709,6 @@
                   "$ref": "#/definitions/ipc_perms",
                   "default": "allow",
                   "description": "Control suspending rovr"
-                },
-                "history": {
-                  "$ref": "#/definitions/ipc_perms",
-                  "default": "allow",
-                  "description": "Control getting the navigation history of a tab in the rovr instance."
                 },
                 "notify": {
                   "$ref": "#/definitions/ipc_no_prompt",

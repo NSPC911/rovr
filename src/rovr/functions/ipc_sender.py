@@ -31,8 +31,8 @@ def _build_parser() -> IPCArgumentParser:
         "cd", help="Change the current working directory of the rovr instance."
     ).add_argument(
         "path",
-        help="The path to change the current working directory to. If empty, returns the current working directory.",
-        nargs="?",
+        help="The path to change the current working directory to.",
+        nargs=1,
     )
 
     clipboard = commands.add_parser("clipboard", help="Perform clipboard operations.")
@@ -62,16 +62,28 @@ def _build_parser() -> IPCArgumentParser:
     tab = commands.add_parser("tab", help="Perform tab operations.")
     subparser = tab.add_subparsers(dest="operation", required=True)
     for op, desc in zip(
-        ("list", "new", "focus", "close"),
-        ("List all tabs", "Create a new tab", "Switch to a tab", "Close a tab"),
+        ("list", "new", "focus", "close", "history"),
+        (
+            "List all tabs",
+            "Create a new tab",
+            "Switch to a tab",
+            "Close a tab",
+            "Get the navigation history of a tab",
+        ),
     ):
         command = subparser.add_parser(op, help=desc)
-        if op in ("focus", "close"):
+        if op in ("focus", "close", "history"):
             command.add_argument(
                 "tab_index",
                 type=int,
-                help=f"The index of the tab to {'focus' if op == 'focus' else 'close. If unspecified, uses focused tab.'}",
-                nargs="?",
+                help="The index of the tab to "
+                + (
+                    "focus"
+                    if op == "focus"
+                    else ("close" if op == "close" else "get the history of")
+                    + ". If unspecified, uses focused tab."
+                ),
+                nargs="?" if op != "close" else 1,
             )
         elif op == "new":
             command.add_argument(

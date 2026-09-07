@@ -150,9 +150,9 @@ description: config schema humanified
       - [2.10.2.7. Property `Rovr Config > settings > ipc > permissions > tab.new`](#settings_ipc_permissions_tabnew)
       - [2.10.2.8. Property `Rovr Config > settings > ipc > permissions > tab.focus`](#settings_ipc_permissions_tabfocus)
       - [2.10.2.9. Property `Rovr Config > settings > ipc > permissions > tab.close`](#settings_ipc_permissions_tabclose)
-      - [2.10.2.10. Property `Rovr Config > settings > ipc > permissions > quit`](#settings_ipc_permissions_quit)
-      - [2.10.2.11. Property `Rovr Config > settings > ipc > permissions > suspend`](#settings_ipc_permissions_suspend)
-      - [2.10.2.12. Property `Rovr Config > settings > ipc > permissions > history`](#settings_ipc_permissions_history)
+      - [2.10.2.10. Property `Rovr Config > settings > ipc > permissions > tab.history`](#settings_ipc_permissions_tabhistory)
+      - [2.10.2.11. Property `Rovr Config > settings > ipc > permissions > quit`](#settings_ipc_permissions_quit)
+      - [2.10.2.12. Property `Rovr Config > settings > ipc > permissions > suspend`](#settings_ipc_permissions_suspend)
       - [2.10.2.13. Property `Rovr Config > settings > ipc > permissions > notify`](#settings_ipc_permissions_notify)
       - [2.10.2.14. Property `Rovr Config > settings > ipc > permissions > choice`](#settings_ipc_permissions_choice)
 - [3. Property `Rovr Config > metadata`](#metadata)
@@ -2265,9 +2265,9 @@ Must be one of:
 | [tab.new](#settings_ipc_permissions_tabnew)                 | enum (of string) | Control creating new tabs                                               |
 | [tab.focus](#settings_ipc_permissions_tabfocus)             | enum (of string) | Control focusing a specified tab index                                  |
 | [tab.close](#settings_ipc_permissions_tabclose)             | enum (of string) | Control closing tabs                                                    |
+| [tab.history](#settings_ipc_permissions_tabhistory)         | enum (of string) | Control getting the navigation history of a specified tab index         |
 | [quit](#settings_ipc_permissions_quit)                      | enum (of string) | Control quitting rovr                                                   |
 | [suspend](#settings_ipc_permissions_suspend)                | enum (of string) | Control suspending rovr                                                 |
-| [history](#settings_ipc_permissions_history)                | enum (of string) | Control getting the navigation history of a tab in the rovr instance.   |
 | [notify](#settings_ipc_permissions_notify)                  | enum (of string) | Control sending notifications via ipc to the user                       |
 | [choice](#settings_ipc_permissions_choice)                  | enum (of string) | Allow the ipc to prompt a yes/no choice to the user.                    |
 
@@ -2424,7 +2424,24 @@ Must be one of:
 - "prompt"
 - "deny"
 
-##### <a name="settings_ipc_permissions_quit"></a>2.10.2.10. Property `Rovr Config > settings > ipc > permissions > quit`
+##### <a name="settings_ipc_permissions_tabhistory"></a>2.10.2.10. Property `Rovr Config > settings > ipc > permissions > tab.history`
+
+|                |                         |
+| -------------- | ----------------------- |
+| **Type**       | `enum (of string)`      |
+| **Required**   | No                      |
+| **Default**    | `"allow"`               |
+| **Defined in** | #/definitions/ipc_perms |
+
+**Description:** Control getting the navigation history of a specified tab index
+
+Must be one of:
+
+- "allow"
+- "prompt"
+- "deny"
+
+##### <a name="settings_ipc_permissions_quit"></a>2.10.2.11. Property `Rovr Config > settings > ipc > permissions > quit`
 
 |                |                         |
 | -------------- | ----------------------- |
@@ -2441,7 +2458,7 @@ Must be one of:
 - "prompt"
 - "deny"
 
-##### <a name="settings_ipc_permissions_suspend"></a>2.10.2.11. Property `Rovr Config > settings > ipc > permissions > suspend`
+##### <a name="settings_ipc_permissions_suspend"></a>2.10.2.12. Property `Rovr Config > settings > ipc > permissions > suspend`
 
 |                |                         |
 | -------------- | ----------------------- |
@@ -2451,23 +2468,6 @@ Must be one of:
 | **Defined in** | #/definitions/ipc_perms |
 
 **Description:** Control suspending rovr
-
-Must be one of:
-
-- "allow"
-- "prompt"
-- "deny"
-
-##### <a name="settings_ipc_permissions_history"></a>2.10.2.12. Property `Rovr Config > settings > ipc > permissions > history`
-
-|                |                         |
-| -------------- | ----------------------- |
-| **Type**       | `enum (of string)`      |
-| **Required**   | No                      |
-| **Default**    | `"allow"`               |
-| **Defined in** | #/definitions/ipc_perms |
-
-**Description:** Control getting the navigation history of a tab in the rovr instance.
 
 Must be one of:
 

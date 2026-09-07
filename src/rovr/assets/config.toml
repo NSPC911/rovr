@@ -148,11 +148,11 @@ cd = "allow"
 "tab.new" = "allow"
 "tab.focus" = "allow"
 "tab.close" = "prompt"
+"tab.history" = "allow"
 
 quit = "prompt"
 suspend = "allow"
 
-"history" = "allow"
 
 [metadata]
 fields = [

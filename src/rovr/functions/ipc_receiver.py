@@ -86,12 +86,9 @@ async def conn(
     ok: bool | str = True
     match action:
         case "cd":
-            if not args:
-                # return cwd ig
-                out = getcwd()
-            elif len(args) > 1:
+            if len(args) != 1:
                 ok = False
-                err = "too many arguments"
+                err = "too many arguments" if len(args) > 1 else "path not provided"
             elif not await check_permission(self, action, args):
                 ok = False
                 err = "denied"
@@ -293,39 +290,41 @@ async def conn(
                                 await self.tabWidget.remove_tab(
                                     self.tabWidget.tabs[index]
                                 )
+                case "history":
+                    if len(args) > 2:
+                        ok = False
+                        err = "too many arguments for history"
+                    elif not await check_permission(self, action, args):
+                        ok = False
+                        err = "denied"
+                    elif self.tabWidget.active_tab is None:
+                        ok = False
+                        err = "no active tab somehow"
+                    else:
+                        try:
+                            index = (
+                                int(args[1])
+                                if len(args) == 2
+                                else self.tabWidget.tabs.index(
+                                    self.tabWidget.active_tab
+                                )
+                            )
+                        except ValueError:
+                            ok = False
+                            err = "tab index must be an integer"
+                        else:
+                            if index < 0 or index >= len(self.tabWidget.tabs):
+                                ok = False
+                                err = "tab index out of range"
+                            else:
+                                tab = self.tabWidget.tabs[index]
+                                out = {
+                                    "directories": list(tab.session.directories),
+                                    "historyIndex": tab.session.historyIndex,
+                                }
                 case _:
                     ok = False
                     err = "tab action is not valid"
-        case "history":
-            if len(args) > 1:
-                ok = False
-                err = "too many arguments for history"
-            elif not await check_permission(self, action, args):
-                ok = False
-                err = "denied"
-            elif self.tabWidget.active_tab is None:
-                ok = False
-                err = "no active tab somehow"
-            else:
-                try:
-                    index = (
-                        int(args[0])
-                        if args
-                        else self.tabWidget.tabs.index(self.tabWidget.active_tab)
-                    )
-                except ValueError:
-                    ok = False
-                    err = "tab index must be an integer"
-                else:
-                    if index < 0 or index >= len(self.tabWidget.tabs):
-                        ok = False
-                        err = "tab index out of range"
-                    else:
-                        tab = self.tabWidget.tabs[index]
-                        out = {
-                            "directories": list(tab.session.directories),
-                            "historyIndex": tab.session.historyIndex,
-                        }
         case "notify":
             from rovr.functions.ipc_sender import IPC_PARSER
 

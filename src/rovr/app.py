@@ -645,6 +645,7 @@ class Application(
         with suppress(OSError):
             self._pins_mtime = path.getmtime(pins_path)
         state_path = path.join(RovrVars.ROVRSTATE, "state.toml")
+        state_mtime = None
         with suppress(OSError):
             state_mtime = path.getmtime(state_path)
         drive_update_every = max(1.0, config["interface"]["drive_watcher_frequency"])
@@ -680,10 +681,12 @@ class Application(
                     else:
                         # only rescan when the directory mtime changed;
                         # renames/creates/deletes always bump it
+                        new_cwd_mtime = None
                         with suppress(OSError):
                             new_cwd_mtime = path.getmtime(cwd)
                         if new_cwd_mtime != cwd_mtime:
                             cwd_mtime = new_cwd_mtime
+                            items = None
                             with suppress(OSError):
                                 items = get_filtered_dir_names(
                                     cwd,
@@ -708,6 +711,7 @@ class Application(
                 break
 
             # check pins.json
+            new_mtime = None
             with suppress(OSError):
                 new_mtime = path.getmtime(pins_path)
             if new_mtime != self._pins_mtime:
@@ -723,6 +727,7 @@ class Application(
                 break
 
             # check state.toml
+            new_state_mtime = None
             with suppress(OSError):
                 new_state_mtime = path.getmtime(state_path)
             if new_state_mtime != state_mtime:

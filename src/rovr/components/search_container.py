@@ -109,10 +109,12 @@ class SearchInput(Input):
                 self.items_list.add_option(
                     Option("   --no-matches--", id="", disabled=True)
                 )
+                self.call_next(self.app.query_one("PreviewContainer").remove_children)
             else:
                 self.items_list.add_option(
                     Selection("   --no-matches--", value="", id="", disabled=True)
                 )
+                self.call_next(self.app.query_one("PreviewContainer").remove_children)
                 assert self.items_list.parent is not None
                 set_scuffed_subtitle(
                     self.items_list.parent,

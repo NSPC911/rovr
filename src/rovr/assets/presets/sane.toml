@@ -48,7 +48,7 @@
 "L" = { action = "bypass_down_tree", desc = "Go down through single folders" }
 "shift+right" = "bypass_down_tree"
 "alt+left" = { action = "hist_previous", desc = "Go to the previous directory" }
-"backspace" = "hist_previous"
+"backspace" = "hist_previous(True)"
 "alt+right" = { action = "hist_next", desc = "Go to the next directory" }
 "ctrl+space" = { action = "toggle_visual", desc = "Toggle visual selection" }
 "ctrl+a" = { action = "toggle_all", desc = "Toggle selection of all files" }

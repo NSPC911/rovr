@@ -7,7 +7,7 @@ from textual.app import ComposeResult, RenderResult
 from textual.await_complete import AwaitComplete
 from textual.containers import Container, Horizontal, Vertical
 from textual.content import Content, ContentText
-from textual.css.query import DOMQuery, NoMatches
+from textual.css.query import NoMatches
 from textual.renderables.bar import Bar as BarRenderable
 from textual.widgets import Button, Input, Tabs
 from textual.widgets._tabs import Tab, Underline
@@ -93,13 +93,34 @@ class TablineTab(Tab):
 
 class Tabline(Tabs):
     @property
-    def tabs(self) -> DOMQuery[TablineTab]:
-        """Get the tabs in the tabline."""
-        return self.query(TablineTab)
+    def _potentially_active_tabs(self) -> list[TablineTab]:
+        """List of all tabs that could be active.
+
+        This list is comprised of all tabs that are shown and enabled,
+        plus the active tab in case it is disabled.
+        """
+        return [
+            tab
+            for tab in self.query("#tabs-list > TablineTab").results(TablineTab)
+            if ((not tab.disabled or tab is self.active_tab) and tab.display)
+        ]
+
+    @property
+    def active_tab(self) -> TablineTab | None:
+        """The currently active tab, or None if there are no active tabs."""
+        try:
+            return self.query_one("#tabs-list Tab.-active", TablineTab)
+        except NoMatches:
+            return None
+
+    @property
+    def tabs(self) -> list[TablineTab]:
+        # better ergonomics i guess
+        return self._potentially_active_tabs
 
     def action_cycle_tab(self, offset: int) -> None:
         """Cycle and activate a tab at an offset relative from the current tab."""
-        if not offset or not (tabs := self._potentially_active_tabs):
+        if not offset or not (tabs := self.tabs):
             return
 
         if self.active_tab is None:
@@ -110,7 +131,7 @@ class Tabline(Tabs):
 
     def action_activate_tab(self, index: int) -> None:
         """Activate a tab by 0-base index."""
-        if not (tabs := self._potentially_active_tabs):
+        if not (tabs := self.tabs):
             return
         if index < 0 or index > len(tabs) - 1:
             return

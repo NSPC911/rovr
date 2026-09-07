@@ -155,7 +155,7 @@ def _prepare_message(action: str, args: tuple[str, ...]) -> tuple[str, ...]:
     if parsed.action == "list-instances":
         raise ValueError("list-instances does not target a specific instance")
     if parsed.action == "cd" and parsed.path:
-        path = p(parsed.path)
+        path = p(parsed.path[0])
         if not os.path.exists(path):
             raise ValueError("does not exist.")
         return (path,)

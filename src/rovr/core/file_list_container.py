@@ -18,6 +18,7 @@ class FileListContainer(VerticalGroup):
             classes="file-list",
         )
         self.details_header = Static(id="file_list_details_header")
+        self._remounting = False
         super().__init__(
             id="file_list_container",
         )
@@ -34,19 +35,38 @@ class FileListContainer(VerticalGroup):
         if detail_utils.get_detail_columns():
             self.details_header.update(self.filelist.details_header_text())
 
-    def on_resize(self, event: events.Resize) -> None:
+    def on_mount(self) -> None:
+        self.set_interval(1, self.remount_filelist)
+
+    def on_resize(self) -> None:
         self.filelist.scroll_to_highlight()
         self.update_details_header()
 
-    def remount_filelist(self) -> None:
-        """Remount the file list to reset its state"""
-        self.filelist.remove()
-        self.filelist = FileList(
-            id="file_list",
-            name="File List",
-            classes="file-list",
-        )
-        self.call_later(self.mount, self.filelist)
+    async def remount_filelist(self) -> None:
+        """Replace a detached file list and reconnect its search input."""
+        if (
+            self._remounting
+            or not self.filelist.is_mounted
+            or self.filelist.parent is not None
+        ):
+            return
+        self._remounting = True
+        search_input = self.query_one(SearchInput)
+        search = search_input.value
+        try:
+            self.filelist = FileList(
+                id="file_list",
+                name="File List",
+                classes="file-list",
+            )
+            await self.mount(self.filelist)
+            await self.filelist.update_file_list(
+                add_to_session=False, clear_search=False
+            ).wait()
+            search_input.items_list = self.filelist
+            search_input.value = search
+        finally:
+            self._remounting = False
 
     def on_click(self, event: events.Click) -> None:
         if event.widget is self:

@@ -678,6 +678,15 @@ class FileList(
     async def on_option_list_option_highlighted(
         self, event: OptionList.OptionHighlighted
     ) -> None:
+        index = event.option_index
+        if (
+            event.option_list is not self
+            or not 0 <= index < self.option_count
+            or self.get_option_at_index(index) is not event.option
+            or self.highlighted != index
+        ):
+            event.prevent_default().stop()
+            return
         if self.dummy:
             return
         if isinstance(event.option, Selection) and not isinstance(

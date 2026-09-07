@@ -267,8 +267,6 @@ class Application(
 
     @property
     def file_list(self) -> FileList:
-        if not self._file_list_container.filelist.is_mounted:
-            self._file_list_container.remount_filelist()
         return self._file_list_container.filelist
 
     def get_default_screen(self) -> Screen:
@@ -668,6 +666,8 @@ class Application(
                 return
             if i_should_shut_down():
                 return
+            if (file_list := self.file_list).parent is None or not file_list.is_running:
+                continue
             count += 1
             if count >= drive_update_every:
                 count = 0

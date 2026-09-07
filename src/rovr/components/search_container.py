@@ -36,6 +36,10 @@ class SearchInput(Input):
     # exclusive when too many options, and not enough time to mount
     @work(exclusive=True)
     async def on_input_changed(self, event: Input.Changed) -> None:
+        if self.items_list.parent is None or not self.items_list.is_running:
+            # schedule a refresh
+            self.call_after_refresh(self.on_input_changed, event)
+            return
         if self.item_list_type == "Selection":
             assert isinstance(self.items_list, SelectionList)
             self.selected.update({*self.items_list.selected})

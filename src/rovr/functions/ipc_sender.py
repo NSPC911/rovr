@@ -29,7 +29,11 @@ def _build_parser() -> IPCArgumentParser:
 
     commands.add_parser(
         "cd", help="Change the current working directory of the rovr instance."
-    ).add_argument("path")
+    ).add_argument(
+        "path",
+        help="The path to change the current working directory to. If empty, returns the current working directory.",
+        nargs="?",
+    )
 
     clipboard = commands.add_parser("clipboard", help="Perform clipboard operations.")
     clipboard_commands = clipboard.add_subparsers(dest="operation", required=True)
@@ -138,7 +142,7 @@ def _prepare_message(action: str, args: tuple[str, ...]) -> tuple[str, ...]:
     parsed = IPC_PARSER.parse_args([action, *args])
     if parsed.action == "list-instances":
         raise ValueError("list-instances does not target a specific instance")
-    if parsed.action == "cd":
+    if parsed.action == "cd" and parsed.path:
         path = p(parsed.path)
         if not os.path.exists(path):
             raise ValueError("does not exist.")

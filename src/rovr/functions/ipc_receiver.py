@@ -87,8 +87,8 @@ async def conn(
     match action:
         case "cd":
             if not args:
-                ok = False
-                err = "directory not provided"
+                # return cwd ig
+                out = getcwd()
             elif len(args) > 1:
                 ok = False
                 err = "too many arguments"
@@ -96,9 +96,12 @@ async def conn(
                 ok = False
                 err = "denied"
             else:
-                worker = self.cd(p(args[0]))
-                await worker.wait()
-                out = getcwd()
+                if os.path.samefile(getcwd(), p(args[0])):
+                    out = getcwd()
+                else:
+                    worker = self.cd(p(args[0]))
+                    await worker.wait()
+                    out = getcwd()
         case "clipboard":
             if len(args) == 0:
                 return assemble_and_write(

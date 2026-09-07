@@ -473,11 +473,7 @@ example_function(10)"""
 
         asyncio.run(print_dom(new_app()))
     elif args.ignore_missing_tty or sys.stdout.isatty():
-        try:
-            app = new_app()
-            app.run()
-        finally:
-            app.cancel_force_exit_timer()
+        new_app().run()
     elif args.force_tty:
         open_stdout = "CONOUT$" if os.name == "nt" else "/dev/tty"
         open_stdin = "CONIN$" if os.name == "nt" else "/dev/tty"
@@ -504,11 +500,7 @@ example_function(10)"""
                         from textual import constants
 
                         constants.COLOR_SYSTEM = "truecolor"
-                    app = new_app()
-                    try:
-                        app.run()
-                    finally:
-                        app.cancel_force_exit_timer()
+                    new_app().run()
                 finally:
                     if restore_standard_input is not None:
                         restore_standard_input()

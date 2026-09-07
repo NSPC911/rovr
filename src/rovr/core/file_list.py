@@ -836,9 +836,9 @@ class FileList(
     # not exactly sure, but there's this issue where if I click the
     # hist_previous keybind twice too fast, it registers it as once, so
     # there really is no choice, aside from using on_button_pressed :/
-    def action_hist_previous(self) -> None:
+    def action_hist_previous(self, allow_up: bool = False) -> None:
         if not self.select_mode:
-            if self.app.query_one("#back").disabled:
+            if allow_up and self.app.query_one("#back").disabled:
                 self.app.query_one("UpButton").on_button_pressed()
             else:
                 self.app.query_one("BackButton").on_button_pressed()

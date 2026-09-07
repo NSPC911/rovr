@@ -147,37 +147,37 @@ that can be one of ("suspend", "background", "orphan") (uses "background" by def
 Actions specific to the focused file list. Generic list actions from [`lists`](#lists) also
 work here.
 
-| Action                      | Description                              | Example                                      |
-| --------------------------- | ---------------------------------------- | -------------------------------------------- |
-| `open`                      | Open the highlighted or selected items.  | `"enter" = "open"`                           |
-| `open_editor`               | Open items in the configured editor.     | `"e" = "open_editor"`                        |
-| `open_right_click_menu`     | Open the context menu.                   | `"shift+f10" = "open_right_click_menu"`      |
-| `up_tree`                   | Go to the parent directory.              | `"left" = "up_tree"`                         |
-| `bypass_up_tree`            | Leave single-child directory chains.     | `"H" = "bypass_up_tree"`                     |
-| `bypass_down_tree`          | Enter single-child directory chains.     | `"L" = "bypass_down_tree"`                   |
-| `hist_previous`             | Go backward in directory history.        | `"backspace" = "hist_previous"`              |
-| `hist_next`                 | Go forward in directory history.         | `"space" = "hist_next"`                      |
-| `toggle_pin`                | Pin or unpin the current directory.      | `"P" = "toggle_pin"`                         |
-| `copy`                      | Copy selected items to rovr's clipboard. | `"y" = "copy"`                               |
-| `cut`                       | Cut selected items.                      | `"x" = "cut"`                                |
-| `paste`                     | Paste items into the current directory.  | `"p" = "paste"`                              |
-| `new`                       | Create a file or directory.              | `"a" = "new"`                                |
-| `bulk_create`               | Create multiple items using the editor.  | `"A" = "bulk_create"`                        |
-| `rename`                    | Rename selected items.                   | `"r" = "rename"`                             |
-| `delete`                    | Open the deletion confirmation.          | `"d" = "delete"`                             |
-| `zip`                       | Create an archive from selected items.   | `"E" = "zip"`                                |
-| `unzip`                     | Extract the highlighted archive.         | `"ctrl+e" = "unzip"`                         |
-| `focus_search`              | Focus the file-list search input.        | `"/" = "focus_search"`                       |
-| `toggle_hidden_files`       | Show or hide hidden files.               | `"." = "toggle_hidden_files"`                |
-| `toggle_visual`             | Enter or leave visual selection mode.    | `"v" = "toggle_visual"`                      |
-| `toggle_all`                | Select or clear every item.              | `"%" = "toggle_all"`                         |
-| `toggle_select_item`        | Toggle the highlighted item.             | `"insert" = "toggle_select_item"`            |
-| `select_cursor(offset)`     | Extend selection by an item offset.      | `"shift+down" = "select_cursor(1)"`          |
-| `select_cursor_page(pages)` | Extend selection by visible pages.       | `"shift+pagedown" = "select_cursor_page(1)"` |
-| `select_home`               | Extend selection to the first item.      | `"shift+home" = "select_home"`               |
-| `select_end`                | Extend selection to the last item.       | `"shift+end" = "select_end"`                 |
-| `copy.open_popup`           | Open the extra copy actions menu.        | `"Y" = "copy.open_popup"`                    |
-| `sort_order.open_popup`     | Open the sort menu.                      | `"," = "sort_order.open_popup"`              |
+| Action                      | Description                                                                                        | Example                                      |
+| --------------------------- | -------------------------------------------------------------------------------------------------- | -------------------------------------------- |
+| `open`                      | Open the highlighted or selected items.                                                            | `"enter" = "open"`                           |
+| `open_editor`               | Open items in the configured editor.                                                               | `"e" = "open_editor"`                        |
+| `open_right_click_menu`     | Open the context menu.                                                                             | `"shift+f10" = "open_right_click_menu"`      |
+| `up_tree`                   | Go to the parent directory.                                                                        | `"left" = "up_tree"`                         |
+| `bypass_up_tree`            | Leave single-child directory chains.                                                               | `"H" = "bypass_up_tree"`                     |
+| `bypass_down_tree`          | Enter single-child directory chains.                                                               | `"L" = "bypass_down_tree"`                   |
+| `hist_previous(bool)`       | Go backward in directory history. If True, will go to parent directory if there is no more history | `"backspace" = "hist_previous"`              |
+| `hist_next`                 | Go forward in directory history.                                                                   | `"space" = "hist_next"`                      |
+| `toggle_pin`                | Pin or unpin the current directory.                                                                | `"P" = "toggle_pin"`                         |
+| `copy`                      | Copy selected items to rovr's clipboard.                                                           | `"y" = "copy"`                               |
+| `cut`                       | Cut selected items.                                                                                | `"x" = "cut"`                                |
+| `paste`                     | Paste items into the current directory.                                                            | `"p" = "paste"`                              |
+| `new`                       | Create a file or directory.                                                                        | `"a" = "new"`                                |
+| `bulk_create`               | Create multiple items using the editor.                                                            | `"A" = "bulk_create"`                        |
+| `rename`                    | Rename selected items.                                                                             | `"r" = "rename"`                             |
+| `delete`                    | Open the deletion confirmation.                                                                    | `"d" = "delete"`                             |
+| `zip`                       | Create an archive from selected items.                                                             | `"E" = "zip"`                                |
+| `unzip`                     | Extract the highlighted archive.                                                                   | `"ctrl+e" = "unzip"`                         |
+| `focus_search`              | Focus the file-list search input.                                                                  | `"/" = "focus_search"`                       |
+| `toggle_hidden_files`       | Show or hide hidden files.                                                                         | `"." = "toggle_hidden_files"`                |
+| `toggle_visual`             | Enter or leave visual selection mode.                                                              | `"v" = "toggle_visual"`                      |
+| `toggle_all`                | Select or clear every item.                                                                        | `"%" = "toggle_all"`                         |
+| `toggle_select_item`        | Toggle the highlighted item.                                                                       | `"insert" = "toggle_select_item"`            |
+| `select_cursor(offset)`     | Extend selection by an item offset.                                                                | `"shift+down" = "select_cursor(1)"`          |
+| `select_cursor_page(pages)` | Extend selection by visible pages.                                                                 | `"shift+pagedown" = "select_cursor_page(1)"` |
+| `select_home`               | Extend selection to the first item.                                                                | `"shift+home" = "select_home"`               |
+| `select_end`                | Extend selection to the last item.                                                                 | `"shift+end" = "select_end"`                 |
+| `copy.open_popup`           | Open the extra copy actions menu.                                                                  | `"Y" = "copy.open_popup"`                    |
+| `sort_order.open_popup`     | Open the sort menu.                                                                                | `"," = "sort_order.open_popup"`              |
 
 ### `pinned_sidebar`
 
@@ -328,6 +328,7 @@ These actions apply only while their corresponding modal is open.
 Certain actions support expansions based on their state.
 
 #### `sort_order.toggle_custom_sort`
+
 - `%state`: returns "enable" if the sort order set is for that folder only. "disable" otherwise
 - `%nextstate`: opposite of `%state`
 - `%State` and `%Nextstate`: same as above, but capitalized

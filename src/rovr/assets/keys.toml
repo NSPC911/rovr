@@ -56,7 +56,7 @@
 "H" = { action = "bypass_up_tree", desc = "Go up through single folders" }
 "L" = { action = "bypass_down_tree", desc = "Go down through single folders" }
 "alt+left" = { action = "hist_previous", desc = "Go to the previous directory" }
-"backspace" = "hist_previous"
+"backspace" = "hist_previous(True)"
 "alt+right" = { action = "hist_next", desc = "Go to the next directory" }
 "u" = "hist_previous"
 "v" = { action = "toggle_visual", desc = "Toggle visual selection" }

@@ -182,24 +182,23 @@ async def send_message(pid: int | None, action: str, *args: str) -> None:
         return
 
     if pid is None:
-        sport = os.environ.get("ROVR_IPC_PORT")
-        token = os.environ.get("ROVR_IPC_TOKEN")
-        if sport is None or token is None:
-            _print_error("ROVR_IPC_PORT and ROVR_IPC_TOKEN are not set")
+        spid = os.environ.get("ROVR_IPC_PID")
+        if spid is None:
+            _print_error("ROVR_IPC_PID is not set")
             return
         try:
-            port = int(sport)
+            pid = int(spid)
         except ValueError:
-            _print_error("Invalid ROVR_IPC_PORT")
+            _print_error("Invalid ROVR_IPC_PID")
             return
-    else:
-        from rovr.functions.ipc_instances import instance_for_pid
 
-        instance = instance_for_pid(pid)
-        if instance is None:
-            _print_error(f"Could not find rovr instance with PID {pid}")
-            return
-        port, token = instance["port"], instance["token"]
+    from rovr.functions.ipc_instances import instance_for_pid
+
+    instance = instance_for_pid(pid)
+    if instance is None:
+        _print_error(f"Could not find rovr instance with PID {pid}")
+        return
+    port, token = instance["port"], instance["token"]
 
     json_message = json.dumps({"token": token, "action": action, "args": args})
     try:

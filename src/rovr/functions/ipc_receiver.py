@@ -440,12 +440,9 @@ async def start_server(self: Application) -> None:
             set(os.environ.get("TEXTUAL", "").split(","))
         ):
             self.call_after_refresh(self.notify, f"Serving on {addr}")
-        os.environ["ROVR_IPC_PORT"] = str(addr[1])
-        os.environ["ROVR_IPC_TOKEN"] = token
+        os.environ["ROVR_IPC_PID"] = str(os.getpid())
         try:
             await server.serve_forever()
         finally:
             unpublish_instance(descriptor, token)
-            if os.environ.get("ROVR_IPC_TOKEN") == token:
-                os.environ.pop("ROVR_IPC_PORT", None)
-                os.environ.pop("ROVR_IPC_TOKEN", None)
+            os.environ.pop("ROVR_IPC_PID", None)

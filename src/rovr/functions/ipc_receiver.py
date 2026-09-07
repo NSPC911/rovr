@@ -93,12 +93,16 @@ async def conn(
                 ok = False
                 err = "denied"
             else:
-                if os.path.samefile(getcwd(), p(args[0])):
-                    out = getcwd()
-                else:
-                    worker = self.cd(p(args[0]))
-                    await worker.wait()
-                    out = getcwd()
+                try:
+                    if os.path.samefile(getcwd(), p(args[0])):
+                        out = getcwd()
+                    else:
+                        worker = self.cd(p(args[0]))
+                        await worker.wait()
+                        out = getcwd()
+                except OSError as exc:
+                    ok = False
+                    err = f"{type(exc).__name__}: {exc}"
         case "clipboard":
             if len(args) == 0:
                 return assemble_and_write(
@@ -176,23 +180,19 @@ async def conn(
                             for path in args[1:]
                             if not (path in avail or path.startswith("--"))
                         ]
-                        if not avail and ok:
-                            ok = False
-                            err = "no paths provided"
-                        if avail and ok:
-                            func: Callable[
-                                [list[str], Literal["reselect", "select", "no"]], None
-                            ] = (
-                                self.Clipboard.copy_to_clipboard
-                                if args[0] == "copy"
-                                else self.Clipboard.cut_to_clipboard
-                            )
-                            select: Literal["reselect", "select", "no"] = "no"
-                            if selection == "add":
-                                select = "select"
-                            elif selection == "replace":
-                                select = "reselect"
-                            func(avail, select)
+                        func: Callable[
+                            [list[str], Literal["reselect", "select", "no"]], None
+                        ] = (
+                            self.Clipboard.copy_to_clipboard
+                            if args[0] == "copy"
+                            else self.Clipboard.cut_to_clipboard
+                        )
+                        select: Literal["reselect", "select", "no"] = "no"
+                        if selection == "add":
+                            select = "select"
+                        elif selection == "replace":
+                            select = "reselect"
+                        func(avail, select)
                 case _:
                     ok = False
                     err = "clipboard action is not valid"
@@ -328,7 +328,7 @@ async def conn(
                                 tab = self.tabWidget.tabs[index]
                                 out = {
                                     "directories": list(tab.session.directories),
-                                    "historyIndex": tab.session.historyIndex,
+                                    "index": tab.session.historyIndex,
                                 }
                 case _:
                     ok = False

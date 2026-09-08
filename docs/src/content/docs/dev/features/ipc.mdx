@@ -27,6 +27,20 @@ List discoverable instances with:
 rovr --ipc list-instances
 ```
 
+```json title="list-instances"
+{
+  "ok": true,
+  "out": [
+    {
+      "pid": 12345,
+      "status": "running"
+    }
+  ]
+}
+```
+
+status may be `running` or `unresposive`. rovr can be unresponsive if it was crashed, or is suspended
+
 Run `rovr --ipc --help` or `rovr --ipc <command> --help` for the CLI syntax.
 
 ## Responses
@@ -56,6 +70,13 @@ rovr --ipc cd <path>
 
 Changes the active tab's directory and returns the resulting directory. The sender expands `~` and environment variables and requires the path to exist.
 
+```json title="cd"
+{
+  "ok": true,
+  "out": "/path/to/directory"
+}
+```
+
 Filesystem errors from rovr are returned as errors.
 
 ### `clipboard`
@@ -69,6 +90,13 @@ rovr --ipc clipboard list
 
 `copy` and `cut` add existing paths to rovr's clipboard. They return paths that did not exist.
 
+```json title="copy/cut"
+{
+  "ok": true,
+  "out": ["/path/to/missing/file"]
+}
+```
+
 `--selection` defaults to `keep`
 
 - `keep`: keeps current selections and do not select added items
@@ -77,7 +105,7 @@ rovr --ipc clipboard list
 
 `paste` pastes selected clipboard entries into the current directory and returns counts, not destination paths:
 
-```json
+```json title="paste"
 {
   "ok": true,
   "out": {
@@ -91,7 +119,7 @@ if the user intervenes due to errors, returns with `"ok": false`
 
 `list` returns every clipboard entry with its type and whether it is selected:
 
-```json
+```json title="list"
 {
   "ok": true,
   "out": [
@@ -114,10 +142,9 @@ rovr --ipc tab close <index>
 rovr --ipc tab history [<index>]
 ```
 
-`list` returns `focused`, the zero-based active tab index, and `tabs`, its
-directory paths.
+`list` returns `focused`, the active tab's index, and `tabs`, its directory paths.
 
-```json
+```json title="list"
 {
   "ok": true,
   "out": {
@@ -127,9 +154,9 @@ directory paths.
 }
 ```
 
-`new` returns the new tab's zero-based `index` and `path`.
+`new` returns the new tab's `index` and `path`.
 
-```json
+```json title="new"
 {
   "ok": true,
   "out": {
@@ -145,9 +172,11 @@ Without a path, it opens the current directory. `--focus` activates the new tab.
 
 `close` closes an existing tab. attempting to close the last tab returns an error.
 
+both don't return anything on success
+
 `history` defaults to the focused tab and returns the tab session's `directories` and `index` in that list.
 
-```json
+```json title="history"
 {
   "ok": true,
   "out": {
@@ -157,16 +186,13 @@ Without a path, it opens the current directory. `--focus` activates the new tab.
 }
 ```
 
-<br />
-index in that list gives the tab's current directory
+<br />index in that list gives the tab's current directory
 
 invalid tab indexes return `"tab index out of range"`.
 
-<br />
-closing a one-tab session returns `"cannot close the only tab"`.
-<br />
-if there are no focused tabs (which shouldn't happen), returns `"no active tab
-somehow"`
+<br />closing a one-tab session returns `"cannot close the only tab"`.
+
+<br />if there are no focused tabs (which shouldn't happen), returns `"no active tab somehow"`
 
 ### `notify`
 

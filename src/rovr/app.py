@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import asyncio
-import multiprocessing
 import os
 import sys
 import threading
@@ -9,6 +8,7 @@ from contextlib import suppress
 from io import TextIOWrapper
 from os import path
 from subprocess import Popen, TimeoutExpired
+from time import monotonic
 from typing import Callable, Iterable
 
 from rich.console import RenderableType
@@ -63,7 +63,7 @@ from rovr.core import (
     PreviewContainer,
 )
 from rovr.footer import Clipboard, MetadataContainer, ProcessContainer
-from rovr.functions import drive_workers, multiprocessing_utils
+from rovr.functions import drive_workers
 from rovr.functions.cwd import chdir, getcwd
 from rovr.functions.path import (
     dump_exc,
@@ -267,8 +267,6 @@ class Application(
 
     @property
     def file_list(self) -> FileList:
-        if not self._file_list_container.filelist.is_mounted:
-            self._file_list_container.remount_filelist()
         return self._file_list_container.filelist
 
     def get_default_screen(self) -> Screen:
@@ -648,7 +646,6 @@ class Application(
     @work(thread=True)
     def watch_for_changes_and_update(self) -> None:
         cwd = getcwd()
-        file_list: FileList = self.query_one(FileList)
         pins_path = path.join(RovrVars.ROVRCONFIG, "pins.json")
         with suppress(OSError):
             self._pins_mtime = path.getmtime(pins_path)
@@ -656,11 +653,13 @@ class Application(
         state_mtime = None
         with suppress(OSError):
             state_mtime = path.getmtime(state_path)
-        drive_update_every = int(config["interface"]["drive_watcher_frequency"])
-        count: int = -2
+        drive_update_every = max(1.0, config["interface"]["drive_watcher_frequency"])
+        next_drive_check = 0.0
+        drive_watcher = drive_workers.DriveWatcher(
+            sys.platform, config["settings"]["drive_exclude"], drive_update_every
+        )
         style_available: bool = self.CUSTOM_STYLE_AVAILABLE
         custom_style_path = path.join(RovrVars.ROVRCONFIG, "style.tcss")
-        new_drives: list[str] | None = None
         cwd_mtime: float | None = None
         pin_sidebar = self.query_one(PinnedSidebar)
 
@@ -670,12 +669,11 @@ class Application(
 
         while True:
             if self._shutdown_event.wait(timeout=1):
-                return
+                break
             if i_should_shut_down():
-                return
-            count += 1
-            if count >= drive_update_every:
-                count = 0
+                break
+            if (file_list := self.file_list).parent is None or not file_list.is_running:
+                continue
             try:
                 new_cwd = getcwd()
                 if not self.file_list.file_list_pause_check:
@@ -715,11 +713,10 @@ class Application(
                 )
 
             if i_should_shut_down():
-                return
+                break
 
             # check pins.json
             new_mtime = None
-            reload_called: bool = False
             with suppress(OSError):
                 new_mtime = path.getmtime(pins_path)
             if new_mtime != self._pins_mtime:
@@ -731,9 +728,8 @@ class Application(
                     # really is no issue here, thanks to any AI
                     # models raising false issues on thread safety
                     pin_sidebar.reload_pins()
-                    reload_called = True
             if i_should_shut_down():
-                return
+                break
 
             # check state.toml
             new_state_mtime = None
@@ -746,53 +742,30 @@ class Application(
                     self.app.call_from_thread(state_manager._load_state)
                     self.app.call_from_thread(state_manager.restore_state)
             if i_should_shut_down():
-                return
+                break
 
             # check drives
-            if count == 0 and not reload_called:
-                try:
-                    if self.MULTIPROCESSING_PROCESS_ALLOWED:
-                        # Run drive check in a separate process using multiprocessing.Process
-                        # Using Queue to get the result back from the process
-                        result_queue: multiprocessing.Queue[list[str]] = (
-                            multiprocessing.Queue()
-                        )
-
-                        process = multiprocessing.Process(
-                            target=drive_workers.get_mounted_drives_worker,
-                            args=(result_queue, sys.platform, config),
-                        )
-                        multiprocessing_utils.start_process(process)
-                        process.join(timeout=2.0)
-
-                        if process.is_alive():
-                            # Timeout - terminate the process
-                            process.terminate()
-                            process.join(timeout=0.5)
-                            if process.is_alive():
-                                process.kill()
-                        elif not result_queue.empty():
-                            # Process completed successfully
-                            new_drives = result_queue.get_nowait()
-                    else:
-                        new_drives = drive_workers.get_mounted_drives(
-                            sys.platform, config
-                        )
-                    if new_drives is not None and new_drives != pin_sidebar.DRIVES:
-                        pin_sidebar.reload_pins()
-                except Exception as exc:
-                    if multiprocessing_process_error_checker(self, exc):
-                        count = -1  # try again immediately on next loop
-                    else:
-                        self.notify(
-                            f"{type(exc).__name__}: {exc}",
-                            title="Drives Watcher",
-                            severity="warning",
-                            markup=False,
-                        )
-                        dump_exc(self, exc)
+            try:
+                new_drives = None
+                if self.MULTIPROCESSING_PROCESS_ALLOWED:
+                    new_drives = drive_watcher.poll()
+                elif monotonic() >= next_drive_check:
+                    drive_watcher.close()
+                    next_drive_check = monotonic() + drive_update_every
+                    new_drives = drive_workers.get_mounted_drives(sys.platform, config)
+                if new_drives is not None and new_drives != pin_sidebar.DRIVES:
+                    pin_sidebar.reload_pins(drives=new_drives)
+            except Exception as exc:
+                if not multiprocessing_process_error_checker(self, exc):
+                    self.notify(
+                        f"{type(exc).__name__}: {exc}",
+                        title="Drives Watcher",
+                        severity="warning",
+                        markup=False,
+                    )
+                    dump_exc(self, exc)
             if i_should_shut_down():
-                return
+                break
 
             # check highlighted file mtime
             if not self.file_list.file_list_pause_check:
@@ -828,7 +801,7 @@ class Application(
                                     dir_entry
                                 )
             if i_should_shut_down():
-                return
+                break
 
             if not self.CUSTOM_STYLE_AVAILABLE:
                 if not style_available and path.exists(custom_style_path):
@@ -840,8 +813,9 @@ class Application(
                     )
                 elif not path.exists(custom_style_path):
                     style_available = False
+        drive_watcher.close()
 
-    @work(exclusive=True)
+    @work(exclusive=True, group="resizer")
     async def on_resize(self, event: events.Resize) -> None:
         if (
             event.size.height < MAX_HEIGHT or event.size.width < MAX_WIDTH

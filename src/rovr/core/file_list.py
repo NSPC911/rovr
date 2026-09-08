@@ -1,5 +1,6 @@
 import shlex
 from contextlib import suppress
+from functools import lru_cache
 from os import path, scandir
 from typing import Callable, ClassVar, Literal, Sequence
 
@@ -41,6 +42,17 @@ from rovr.variables.constants import (
 )
 
 from .file_list_right_click_menu import FileListRightClickMenu
+
+
+@lru_cache(maxsize=32)
+def _file_list_columns(
+    columns: tuple[detail_utils.DetailColumn, ...], in_git_repo: bool
+) -> tuple[detail_utils.DetailColumn, ...]:
+    return (
+        columns
+        if in_git_repo
+        else tuple(column for column in columns if column.type != "git")
+    )
 
 
 class FileList(
@@ -185,10 +197,7 @@ class FileList(
         Returns:
             tuple[DetailColumn, ...]: The columns to render.
         """
-        columns = detail_utils.get_detail_columns()
-        if not self._in_git_repo:
-            columns = tuple(column for column in columns if column.type != "git")
-        return columns
+        return _file_list_columns(detail_utils.get_detail_columns(), self._in_git_repo)
 
     def render_line(self, y: int) -> Strip:
         line = super().render_line(y)
@@ -208,12 +217,13 @@ class FileList(
             return line
         if not isinstance(option, FileListSelectionWidget):
             return line
-        cells = option.detail_cells(columns)[:fitted]
+        columns = columns[:fitted]
+        cells = option.detail_cells(columns)
         segments = list(line)
         style = (segments[-1].style if segments else None) or self.rich_style
         detail_segments: list[Segment] = []
         details_width = 1  # is 1 and not 0 because minor right padding
-        for column, cell in zip(columns[:fitted], cells):
+        for column, cell in zip(columns, cells):
             details_width += column.width + 2
             detail_segments.append(Segment("  ", style))
             if column.type == "git":
@@ -265,7 +275,7 @@ class FileList(
         """
         return self.detail_columns_header_text(self._detail_columns())
 
-    @work(thread=True, exclusive=True, group="detail_fill")
+    @work(thread=True, exclusive=True, group="detail-fill")
     def fill_async_details(self) -> None:
         column_types = {column.type for column in detail_utils.get_detail_columns()} & {
             "size",
@@ -352,7 +362,7 @@ class FileList(
             await self.action_open_right_click_menu(event)
             event.stop()
 
-    @work(exclusive=True)
+    @work(exclusive=True, group="file-list-updater")
     async def update_file_list(
         self,
         add_to_session: bool = True,
@@ -678,6 +688,15 @@ class FileList(
     async def on_option_list_option_highlighted(
         self, event: OptionList.OptionHighlighted
     ) -> None:
+        index = event.option_index
+        if (
+            event.option_list is not self
+            or not 0 <= index < self.option_count
+            or self.get_option_at_index(index) is not event.option
+            or self.highlighted != index
+        ):
+            event.prevent_default().stop()
+            return
         if self.dummy:
             return
         if isinstance(event.option, Selection) and not isinstance(

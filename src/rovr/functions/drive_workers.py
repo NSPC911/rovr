@@ -4,9 +4,14 @@ import multiprocessing
 import re
 import subprocess
 from fnmatch import fnmatch
+from multiprocessing.connection import Connection
+from multiprocessing.synchronize import Event
 from os import path
+from time import monotonic
+from typing import cast
 
 from rovr.classes.config import RovrConfig
+from rovr.functions.multiprocessing_utils import start_process
 
 _OCTAL_ESCAPE = re.compile(r"\\([0-7]{3})")
 
@@ -150,3 +155,116 @@ def get_mounted_drives_worker(
         queue.put(result)
     except Exception:
         queue.put([])
+
+
+def watch_mounted_drives(
+    connection: Connection,
+    stop: Event,
+    platform: str,
+    exclude_patterns: list[str],
+    interval: float,
+) -> None:
+    config = cast(RovrConfig, {"settings": {"drive_exclude": exclude_patterns}})
+    try:
+        while not stop.is_set():
+            connection.send(("started", monotonic()))
+            connection.send(("result", get_mounted_drives(platform, config)))
+            if stop.wait(interval):
+                break
+    except (BrokenPipeError, EOFError, OSError):
+        pass
+    finally:
+        connection.close()
+
+
+class DriveWatcher:
+    """Poll a persistent drive scanner without waiting for filesystem access."""
+
+    def __init__(
+        self, platform: str, exclude_patterns: list[str], interval: float
+    ) -> None:
+        self.platform = platform
+        self.exclude_patterns = list(exclude_patterns)
+        self.interval = max(1.0, interval)
+        self.process: multiprocessing.Process | None = None
+        self.connection: Connection | None = None
+        self.stop: Event | None = None
+        self.deadline: float | None = None
+        self.restart_at = 0.0
+
+    def _start(self) -> None:
+        receiver, sender = multiprocessing.Pipe(duplex=False)
+        self.connection = receiver
+        try:
+            self.stop = multiprocessing.Event()
+            self.process = multiprocessing.Process(
+                target=watch_mounted_drives,
+                args=(
+                    sender,
+                    self.stop,
+                    self.platform,
+                    self.exclude_patterns,
+                    self.interval,
+                ),
+                daemon=True,
+            )
+            start_process(self.process)
+            self.deadline = monotonic() + 10.0
+        except BaseException:
+            self.close()
+            raise
+        finally:
+            sender.close()
+
+    def poll(self) -> list[str] | None:
+        """Poll the scanner and restart a dead or stalled worker.
+
+        Returns:
+            The latest drive list, or None if no scan has completed.
+        """
+        if self.process is None:
+            if monotonic() < self.restart_at:
+                return None
+            self._start()
+        assert self.connection is not None and self.process is not None
+        drives = None
+        disconnected = False
+        try:
+            while self.connection.poll():
+                kind, value = self.connection.recv()
+                if kind == "started":
+                    self.deadline = value + 2.0
+                elif kind == "result":
+                    drives = value
+                    self.deadline = None
+        except (EOFError, OSError):
+            disconnected = True
+        if (
+            disconnected
+            or not self.process.is_alive()
+            or (self.deadline is not None and monotonic() >= self.deadline)
+        ):
+            self.close()
+            self.restart_at = monotonic() + self.interval
+        return drives
+
+    def close(self) -> None:
+        """Stop the scanner and release its process and pipe handles."""
+        if self.stop is not None:
+            self.stop.set()
+        if self.process is not None:
+            if self.process.pid is not None:
+                self.process.join(timeout=0.1)
+                if self.process.is_alive():
+                    self.process.terminate()
+                    self.process.join(timeout=0.5)
+                if self.process.is_alive():
+                    self.process.kill()
+                    self.process.join()
+            self.process.close()
+            self.process = None
+        if self.connection is not None:
+            self.connection.close()
+            self.connection = None
+        self.stop = None
+        self.deadline = None

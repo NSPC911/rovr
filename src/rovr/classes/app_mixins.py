@@ -872,7 +872,7 @@ class KeyHandler:
         ):
             return False
 
-        contexts = [("global", self)] if priority else self._active_key_contexts()
+        contexts = self._active_key_contexts() if priority else [("global", self)]
         for context, namespace in contexts:
             context = self.keys.get(context, {})
             binding = context.get(key)

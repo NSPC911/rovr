@@ -259,6 +259,7 @@ class PreviewContainer(Actionable, Container):
         self._current_file_path: str | None = None
         self._file_type: str = "none"
         self._file_mtime: float | None = None
+        self._rendered_preview_key: tuple[str, float] | None = None
         self._mime_type: preview_utils.MimeResult | None = None
         self._preview_texts = config["interface"]["preview_text"]
         self._active_preview_token = object()
@@ -297,10 +298,15 @@ class PreviewContainer(Actionable, Container):
         Args:
             title: "title" or "subtitle"
             to: The string to set the title/subtitle to.
+
+        Raises:
+            ExitNow: If this preview request is no longer active.
         """
         func = lambda: setattr(self, "border_" + title, to)
         try:
             self.call_from_thread(func)
+        except ExitNow:
+            raise
         except (RuntimeError, LookupError):
             func()
 
@@ -345,6 +351,7 @@ class PreviewContainer(Actionable, Container):
         if should_cancel():
             return
         self._current_file_path = None
+        self._rendered_preview_key = None
         self._file_mtime = None
         self._file_type = "none"
         self._mime_type = None
@@ -1461,7 +1468,7 @@ class PreviewContainer(Actionable, Container):
             if should_cancel():
                 return
 
-            if file_path == self._current_file_path:
+            if self._rendered_preview_key is not None:
                 # check mtime as well
                 try:
                     new_mtime = path.getmtime(file_path)
@@ -1469,9 +1476,10 @@ class PreviewContainer(Actionable, Container):
                     # if file is gone/symlink target is gone
                     self.call_from_thread(self.file_not_found, file_path)
                     return
-                if self._file_mtime == new_mtime:
+                if self._rendered_preview_key == (file_path, new_mtime):
                     return
 
+            self.call_from_thread(setattr, self, "_rendered_preview_key", None)
             self.set_border("subtitle", "")
             if should_cancel():
                 return
@@ -1628,6 +1636,8 @@ class PreviewContainer(Actionable, Container):
         content: str | list[str] | None = None,
         mime_type: preview_utils.MimeResult | None = None,
     ) -> None:
+        mtime = path.getmtime(file_path)
+
         self._current_file_path = file_path
         self._current_content = content
         self._mime_type = mime_type
@@ -1661,11 +1671,15 @@ class PreviewContainer(Actionable, Container):
                 self.log("Showing special preview")
                 self.mount_special_messages()
             else:
-                if config["plugins"]["bat"]["enabled"]:
-                    self.log("Showing bat preview")
-                    if self.show_bat_file_preview():
-                        return
-                self.show_normal_file_preview()
+                if not (
+                    config["plugins"]["bat"]["enabled"] and self.show_bat_file_preview()
+                ):
+                    self.show_normal_file_preview()
+
+        if not should_cancel():
+            self.call_from_thread(
+                setattr, self, "_rendered_preview_key", (file_path, mtime)
+            )
 
     def mount_special_messages(self) -> None:
         """Mount special messages. Runs in a thread."""
@@ -1731,7 +1745,7 @@ class PreviewContainer(Actionable, Container):
             return self._render_widget.region
         return super().region
 
-    @work(thread=True, exclusive=True)
+    @work(thread=True, exclusive=True, group="preview-resizer")
     @on(events.Resize)
     def _trigger_resize_update(self) -> None:
         """Trigger resize update from a thread."""

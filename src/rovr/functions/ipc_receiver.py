@@ -39,7 +39,8 @@ async def check_permission(self: Application, action: str, args: list[str]) -> b
     response = asyncio.get_running_loop().create_future()
     self.push_screen(
         YesOrNo(
-            f"Allow IPC action '{permission_key}'?\nArguments: {json.dumps(args)}",
+            f"Allow IPC action '{permission_key}'?"
+            + (f"\nArguments: {json.dumps(args)}" if args else ""),
             border_title="IPC Permission",
         ),
         response.set_result,

@@ -47,6 +47,8 @@ grouped together, so only one of them needs a description:
 The name of a Python method such as `action_tab_new` becomes `tab_new` in `keys.toml`.
 Arguments use Textual's action syntax: `cycle_tab(-1)`, `cursor(1)`, or `sort_order.set("modified", True)`.
 
+If in this reference, angled brackets (like `<bool>`) is used, it means that the action does not require that value, but it can be passed. For example, `app.quit` can be called as `app.quit(True)` or `app.quit(False)`, but the default is True.
+
 Actions without a prefix run on the owner of the active context. The following namespaces can target another object explicitly:
 
 | Namespace       | Target                            | Example        |
@@ -84,11 +86,11 @@ inherit = "vim"
 
 Use `global` sparingly for actions that must work regardless of the active screen.
 
-| Action                | Description                                                                                                                  | Example                            |
-| --------------------- | ---------------------------------------------------------------------------------------------------------------------------- | ---------------------------------- |
-| `app.quit(bool)`      | Quit rovr. Default True. If True and using [cd-on-quit](/rovr/dev/features/cd-on-quit), will switch to the focused directory | `"ctrl+q" = "app.quit"`            |
-| `app.command_palette` | Open Textual's command palette.                                                                                              | `"ctrl+p" = "app.command_palette"` |
-| `app.suspend_process` | Suspend rovr on supported systems.                                                                                           | `"ctrl+z" = "app.suspend_process"` |
+| Action                | Description                                                                                                              | Example                            |
+| --------------------- | ------------------------------------------------------------------------------------------------------------------------ | ---------------------------------- |
+| `app.quit(<bool>)`    | Quit rovr. If True (default) and using [cd-on-quit](/rovr/dev/features/cd-on-quit), will switch to the focused directory | `"ctrl+q" = "app.quit"`            |
+| `app.command_palette` | Open Textual's command palette.                                                                                          | `"ctrl+p" = "app.command_palette"` |
+| `app.suspend_process` | Suspend rovr on supported systems.                                                                                       | `"ctrl+z" = "app.suspend_process"` |
 
 ### `main`
 
@@ -129,7 +131,7 @@ it. The `app.` prefix is optional here.
 
 You can run shell/argv commands using the app context. The `run_command` action runs a command as an argv list,
 while `run_shell` runs a command through the shell. Both actions accept an optional `run_type` arg (not kwarg)
-that can be one of ("suspend", "background", "orphan") (uses "background" by default.)
+that can be one of ("suspend", "background", "orphan") **(uses "background" by default.)**
 
 - suspend: hides rovr's ui and runs the command in the foreground, returning to rovr when it exits
 - background: runs the command in the background, returning to rovr immediately. it will stop process when exiting
@@ -147,37 +149,37 @@ that can be one of ("suspend", "background", "orphan") (uses "background" by def
 Actions specific to the focused file list. Generic list actions from [`lists`](#lists) also
 work here.
 
-| Action                      | Description                                                                                        | Example                                      |
-| --------------------------- | -------------------------------------------------------------------------------------------------- | -------------------------------------------- |
-| `open`                      | Open the highlighted or selected items.                                                            | `"enter" = "open"`                           |
-| `open_editor`               | Open items in the configured editor.                                                               | `"e" = "open_editor"`                        |
-| `open_right_click_menu`     | Open the context menu.                                                                             | `"shift+f10" = "open_right_click_menu"`      |
-| `up_tree`                   | Go to the parent directory.                                                                        | `"left" = "up_tree"`                         |
-| `bypass_up_tree`            | Leave single-child directory chains.                                                               | `"H" = "bypass_up_tree"`                     |
-| `bypass_down_tree`          | Enter single-child directory chains.                                                               | `"L" = "bypass_down_tree"`                   |
-| `hist_previous(bool)`       | Go backward in directory history. If True, will go to parent directory if there is no more history | `"backspace" = "hist_previous"`              |
-| `hist_next`                 | Go forward in directory history.                                                                   | `"space" = "hist_next"`                      |
-| `toggle_pin`                | Pin or unpin the current directory.                                                                | `"P" = "toggle_pin"`                         |
-| `copy`                      | Copy selected items to rovr's clipboard.                                                           | `"y" = "copy"`                               |
-| `cut`                       | Cut selected items.                                                                                | `"x" = "cut"`                                |
-| `paste`                     | Paste items into the current directory.                                                            | `"p" = "paste"`                              |
-| `new`                       | Create a file or directory.                                                                        | `"a" = "new"`                                |
-| `bulk_create`               | Create multiple items using the editor.                                                            | `"A" = "bulk_create"`                        |
-| `rename`                    | Rename selected items.                                                                             | `"r" = "rename"`                             |
-| `delete`                    | Open the deletion confirmation.                                                                    | `"d" = "delete"`                             |
-| `zip`                       | Create an archive from selected items.                                                             | `"E" = "zip"`                                |
-| `unzip`                     | Extract the highlighted archive.                                                                   | `"ctrl+e" = "unzip"`                         |
-| `focus_search`              | Focus the file-list search input.                                                                  | `"/" = "focus_search"`                       |
-| `toggle_hidden_files`       | Show or hide hidden files.                                                                         | `"." = "toggle_hidden_files"`                |
-| `toggle_visual`             | Enter or leave visual selection mode.                                                              | `"v" = "toggle_visual"`                      |
-| `toggle_all`                | Select or clear every item.                                                                        | `"%" = "toggle_all"`                         |
-| `toggle_select_item`        | Toggle the highlighted item.                                                                       | `"insert" = "toggle_select_item"`            |
-| `select_cursor(offset)`     | Extend selection by an item offset.                                                                | `"shift+down" = "select_cursor(1)"`          |
-| `select_cursor_page(pages)` | Extend selection by visible pages.                                                                 | `"shift+pagedown" = "select_cursor_page(1)"` |
-| `select_home`               | Extend selection to the first item.                                                                | `"shift+home" = "select_home"`               |
-| `select_end`                | Extend selection to the last item.                                                                 | `"shift+end" = "select_end"`                 |
-| `copy.open_popup`           | Open the extra copy actions menu.                                                                  | `"Y" = "copy.open_popup"`                    |
-| `sort_order.open_popup`     | Open the sort menu.                                                                                | `"," = "sort_order.open_popup"`              |
+| Action                          | Description                                                                                        | Example                                      |
+| ------------------------------- | -------------------------------------------------------------------------------------------------- | -------------------------------------------- |
+| `open`                          | Open the highlighted or selected items.                                                            | `"enter" = "open"`                           |
+| `open_editor`                   | Open items in the configured editor.                                                               | `"e" = "open_editor"`                        |
+| `open_right_click_menu`         | Open the context menu.                                                                             | `"shift+f10" = "open_right_click_menu"`      |
+| `up_tree`                       | Go to the parent directory.                                                                        | `"left" = "up_tree"`                         |
+| `bypass_up_tree`                | Leave single-child directory chains.                                                               | `"H" = "bypass_up_tree"`                     |
+| `bypass_down_tree`              | Enter single-child directory chains.                                                               | `"L" = "bypass_down_tree"`                   |
+| `hist_previous(bool)`           | Go backward in directory history. If True, will go to parent directory if there is no more history | `"backspace" = "hist_previous"`              |
+| `hist_next`                     | Go forward in directory history.                                                                   | `"space" = "hist_next"`                      |
+| `toggle_pin`                    | Pin or unpin the current directory.                                                                | `"P" = "toggle_pin"`                         |
+| `copy`                          | Copy selected items to rovr's clipboard.                                                           | `"y" = "copy"`                               |
+| `cut`                           | Cut selected items.                                                                                | `"x" = "cut"`                                |
+| `paste`                         | Paste items into the current directory.                                                            | `"p" = "paste"`                              |
+| `new`                           | Create a file or directory.                                                                        | `"a" = "new"`                                |
+| `bulk_create`                   | Create multiple items using the editor.                                                            | `"A" = "bulk_create"`                        |
+| `rename`                        | Rename selected items.                                                                             | `"r" = "rename"`                             |
+| `delete`                        | Open the deletion confirmation.                                                                    | `"d" = "delete"`                             |
+| `zip`                           | Create an archive from selected items.                                                             | `"E" = "zip"`                                |
+| `unzip`                         | Extract the highlighted archive.                                                                   | `"ctrl+e" = "unzip"`                         |
+| `focus_search`                  | Focus the file-list search input.                                                                  | `"/" = "focus_search"`                       |
+| `toggle_hidden_files`           | Show or hide hidden files.                                                                         | `"." = "toggle_hidden_files"`                |
+| `toggle_visual`                 | Enter or leave visual selection mode.                                                              | `"v" = "toggle_visual"`                      |
+| `toggle_all`                    | Select or clear every item.                                                                        | `"%" = "toggle_all"`                         |
+| `toggle_select_item`            | Toggle the highlighted item.                                                                       | `"insert" = "toggle_select_item"`            |
+| `select_cursor(offset, <bool>)` | Extend selection by an item offset. If True, will wrap on top and bottom                           | `"shift+down" = "select_cursor(1, False)"`   |
+| `select_cursor_page(pages)`     | Extend selection by visible pages.                                                                 | `"shift+pagedown" = "select_cursor_page(1)"` |
+| `select_home`                   | Extend selection to the first item.                                                                | `"shift+home" = "select_home"`               |
+| `select_end`                    | Extend selection to the last item.                                                                 | `"shift+end" = "select_end"`                 |
+| `copy.open_popup`               | Open the extra copy actions menu.                                                                  | `"Y" = "copy.open_popup"`                    |
+| `sort_order.open_popup`         | Open the sort menu.                                                                                | `"," = "sort_order.open_popup"`              |
 
 ### `pinned_sidebar`
 
@@ -206,15 +208,15 @@ Both support the [`scroll`](#scroll) actions. `preview` additionally provides `u
 The fallback context for option and selection lists. It is shared by file lists, popup menus,
 search results, archive options, trash entries, and other selectable lists.
 
-| Action               | Description                              | Example                         |
-| -------------------- | ---------------------------------------- | ------------------------------- |
-| `cursor(offset)`     | Move by a number of enabled items.       | `"j" = "cursor(1)"`             |
-| `cursor_page(pages)` | Move by a number of visible pages.       | `"pagedown" = "cursor_page(1)"` |
-| `first`              | Move to the first item.                  | `"home" = "first"`              |
-| `last`               | Move to the last item.                   | `"end" = "last"`                |
-| `select`             | Activate or toggle the highlighted item. | `"enter" = "select"`            |
+| Action                   | Description                                                                       | Example                         |
+| ------------------------ | --------------------------------------------------------------------------------- | ------------------------------- |
+| `cursor(offset, <bool>)` | Move by a number of enabled items. If True (default), will wrap on top and bottom | `"j" = "cursor(1)"`             |
+| `cursor_page(pages)`     | Move by a number of visible pages.                                                | `"pagedown" = "cursor_page(1)"` |
+| `first`                  | Move to the first item.                                                           | `"home" = "first"`              |
+| `last`                   | Move to the last item.                                                            | `"end" = "last"`                |
+| `select`                 | Activate or toggle the highlighted item.                                          | `"enter" = "select"`            |
 
-Selection-list contexts also provide `select_cursor(offset)` and `select_cursor_page(pages)`
+Selection-list contexts also provide `select_cursor(offset, bool)` and `select_cursor_page(pages)`
 for extending a selection. These include `file_list`, `clipboard`, `file_search_filters`,
 `content_search_filters`, `archive_types`, `archive_compression`, and `trash_list`.
 
@@ -278,18 +280,18 @@ The fallback context for scrollable panels, including `preview`, `metadata`, and
 
 ### `sort_menu`
 
-| Action                       | Description             |
-| ---------------------------- | ----------------------- |
-| `sort_order.name(bool)`      | Sort by name            |
-| `sort_order.extension(bool)` | Sort by file extension  |
-| `sort_order.natural(bool)`   | Sort by natural numbers |
-| `sort_order.size(bool)`      | Sort by size            |
-| `sort_order.created(bool)`   | Sort by created time    |
-| `sort_order.modified(bool)`  | Sort by modified time   |
+| Action                         | Description             |
+| ------------------------------ | ----------------------- |
+| `sort_order.name(<bool>)`      | Sort by name            |
+| `sort_order.extension(<bool>)` | Sort by file extension  |
+| `sort_order.natural(<bool>)`   | Sort by natural numbers |
+| `sort_order.size(<bool>)`      | Sort by size            |
+| `sort_order.created(<bool>)`   | Sort by created time    |
+| `sort_order.modified(<bool>)`  | Sort by modified time   |
 
-all of the above actions accept a boolean argument to indicate ascending (False) or descending (True) order.
+all of the above actions accept a boolean argument to indicate ascending (False) or descending (True) order. If unspecified or `None`, the order will remain ascending/descending as it was before.
 
-The lower-level action `sort_order.set(method, descending)` accepts a method name and a Boolean:
+The lower-level action `sort_order.set(method, <descending>)` accepts a method name and a Boolean:
 
 ```toml
 [file_list]
@@ -302,11 +304,11 @@ The lower-level action `sort_order.set(method, descending)` accepts a method nam
 
 Shared by `file_search`, `content_search`, `directory_jump`, `theme_chooser`, and `keybinds`.
 
-| Action               | Description                    | Example                         |
-| -------------------- | ------------------------------ | ------------------------------- |
-| `exit`               | Close the modal.               | `"escape" = "exit"`             |
-| `cursor(offset)`     | Move through results.          | `"down" = "cursor(1)"`          |
-| `cursor_page(pages)` | Move through results by pages. | `"pagedown" = "cursor_page(1)"` |
+| Action                   | Description                                   | Example                         |
+| ------------------------ | --------------------------------------------- | ------------------------------- |
+| `exit`                   | Close the modal.                              | `"escape" = "exit"`             |
+| `cursor(offset, <bool>)` | Move through results. Wraps if True (default) | `"down" = "cursor(1, False)"`   |
+| `cursor_page(pages)`     | Move through results by pages.                | `"pagedown" = "cursor_page(1)"` |
 
 The `keybinds` context also supports `focus_search`. `shell_exec` supports `cycle_mode`.
 

@@ -33,8 +33,8 @@ class ModalSearchScreen(Actionable, ModalScreen, inherit_bindings=False):
     def action_exit(self) -> None:
         dismiss(self, None)
 
-    def action_cursor(self, offset: int) -> None:
-        self.search_options.action_cursor(offset)
+    def action_cursor(self, offset: int, wrap: bool = True) -> None:
+        self.search_options.action_cursor(offset, wrap)
 
     def action_cursor_page(self, pages: float) -> None:
         self.search_options.action_cursor_page(pages)

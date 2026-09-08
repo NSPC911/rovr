@@ -306,23 +306,30 @@ class CheckboxRenderingMixin:
 class CursorNavigationMixin:
     def _cursor_destination(self, offset: int, wrap: bool = True) -> int | None:
         direction = 1 if offset > 0 else -1
+        option_count: int = self.option_count
         start = (
-            (0 if direction > 0 else len(self._options) - 1)
+            (0 if direction > 0 else option_count - 1)
             if self.highlighted is None
             else self.highlighted + direction
         )
-        stop = len(self._options) if direction > 0 else -1
+        stop = option_count if direction > 0 else -1
         remaining = abs(offset)
-        for index in range(start, stop, direction):
+        indices = range(start, stop, direction)
+        if wrap and option_count:
+            indices = (
+                (start + direction * step) % option_count
+                for step in range(option_count * remaining)
+            )
+        for index in indices:
             if not self._options[index].disabled:
                 remaining -= 1
                 if not remaining:
                     return index
 
-    def action_cursor(self, offset: int) -> None:
+    def action_cursor(self, offset: int, wrap: bool = True) -> None:
         """Move the cursor by a number of enabled options."""
         if offset:
-            self.highlighted = self._cursor_destination(offset)
+            self.highlighted = self._cursor_destination(offset, wrap)
 
     def _cursor_page_destination(self, pages: float) -> int | None:
         if self.highlighted is None:
@@ -381,10 +388,12 @@ class SelectionNavigationMixin(CursorNavigationMixin):
             self._message_changed()
             self.refresh()
 
-    async def action_select_cursor(self, offset: int) -> Awaitable[None] | None:
+    async def action_select_cursor(
+        self, offset: int, wrap: bool = False
+    ) -> Awaitable[None] | None:
         """Select through an offset from the cursor without wrapping."""
         if offset:
-            await self._select_to(self._cursor_destination(offset, wrap=False))
+            await self._select_to(self._cursor_destination(offset, wrap=wrap))
 
     async def action_select_cursor_page(self, pages: float) -> Awaitable[None] | None:
         """Select through a number of visible pages."""

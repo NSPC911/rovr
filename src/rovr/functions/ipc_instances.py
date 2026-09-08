@@ -46,7 +46,7 @@ def publish_instance(port: int, token: str) -> Path:
         os.replace(temporary, destination)
         # safety first
         destination.chmod(0o600)
-    except Exception:
+    except BaseException:
         temporary.unlink(missing_ok=True)
         raise
     return destination

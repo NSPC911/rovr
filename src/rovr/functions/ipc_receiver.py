@@ -67,7 +67,11 @@ async def conn(
     writer: asyncio.StreamWriter,
     token: str,
 ) -> None:
-    data = await reader.readline()
+    try:
+        data = await asyncio.wait_for(reader.readline(), timeout=1)
+    except asyncio.TimeoutError:
+        assemble_and_write(writer, False, err="no newline")
+        return
     parsed: IPCReceiver = json.loads(data.decode())
     if parsed.get("token") != token:
         assemble_and_write(writer, False, err="unauthorized")
@@ -453,7 +457,7 @@ async def wrapper(
         await writer.wait_closed()
 
 
-@work
+@work(group="ipc")
 async def start_server(self: Application) -> None:
     from rovr.functions.ipc_instances import publish_instance, unpublish_instance
 

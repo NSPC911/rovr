@@ -20,7 +20,7 @@ class UnzipButton(Button):
         if config["interface"]["tooltips"]:
             self.tooltip = "Extract selected archive"
 
-    @work(thread=True, exclusive=True, group="unzip_check")
+    @work(thread=True, exclusive=True, group="unzip-check")
     def update_state(self, paths: list[str]) -> None:
         """Determine whether the highlighted file is an archive, off the main thread.
 

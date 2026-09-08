@@ -1745,7 +1745,7 @@ class PreviewContainer(Actionable, Container):
             return self._render_widget.region
         return super().region
 
-    @work(thread=True, exclusive=True)
+    @work(thread=True, exclusive=True, group="preview-resizer")
     @on(events.Resize)
     def _trigger_resize_update(self) -> None:
         """Trigger resize update from a thread."""

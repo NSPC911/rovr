@@ -41,7 +41,7 @@ class TerminalTooSmall(ModalScreen):
         for widget in ["#width", "#height", "#filler-up", "#filler-down", "#logo"]:
             self.query_one(widget).classes = "" if self.size.height > 6 else "hidden"
 
-    @work(exclusive=True)
+    @work(exclusive=True, group="resizer")
     async def on_resize(self, event: events.Resize) -> None:
         if event.size.height >= MAX_HEIGHT and event.size.width >= MAX_WIDTH:
             dismiss(self, event=event)

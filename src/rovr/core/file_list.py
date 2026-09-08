@@ -275,7 +275,7 @@ class FileList(
         """
         return self.detail_columns_header_text(self._detail_columns())
 
-    @work(thread=True, exclusive=True, group="detail_fill")
+    @work(thread=True, exclusive=True, group="detail-fill")
     def fill_async_details(self) -> None:
         column_types = {column.type for column in detail_utils.get_detail_columns()} & {
             "size",
@@ -362,7 +362,7 @@ class FileList(
             await self.action_open_right_click_menu(event)
             event.stop()
 
-    @work(exclusive=True)
+    @work(exclusive=True, group="file-list-updater")
     async def update_file_list(
         self,
         add_to_session: bool = True,

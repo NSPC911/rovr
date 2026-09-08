@@ -810,7 +810,7 @@ class Application(
                     style_available = False
         drive_watcher.close()
 
-    @work(exclusive=True)
+    @work(exclusive=True, group="resizer")
     async def on_resize(self, event: events.Resize) -> None:
         if (
             event.size.height < MAX_HEIGHT or event.size.width < MAX_WIDTH

@@ -68,7 +68,7 @@ class ModalInput(ModalScreen, inherit_bindings=False):
                 ],
             )
 
-    @work(exclusive=True)
+    @work(exclusive=True, group="input-changed")
     async def on_input_changed(self, event: Input.Changed) -> None:
         if (event.value == self.initial_value and event.value != "") or self.query_one(
             Input

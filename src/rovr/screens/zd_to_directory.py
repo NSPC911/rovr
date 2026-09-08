@@ -79,7 +79,7 @@ class ZDToDirectory(ModalSearchScreen):
         )
         return cast(subprocess.CompletedProcess[bytes], result)
 
-    @work(exclusive=True)
+    @work(exclusive=True, group="zoxide-updater")
     async def zoxide_updater(self, event: Input.Changed) -> None:
         """Update the list"""
         search_term = event.value.strip()
@@ -150,7 +150,7 @@ class ZDToDirectory(ModalSearchScreen):
             self.search_options.add_class("empty")
             self.search_options.border_subtitle = "0/0"
 
-    @work(exclusive=True)
+    @work(exclusive=True, group="zoxide-selected")
     @on(OptionList.OptionSelected)
     async def handle_zd_option_selected(self, event: OptionList.OptionSelected) -> None:
         event.stop()

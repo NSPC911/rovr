@@ -359,3 +359,111 @@ and if another printable key is sent within 0.25 seconds, it will be counted as 
 but it exists if you want it
 
 obviously please use kitty keyboard protocol.
+
+## MIGRATION FROM < 0.11.0
+
+as of 0.10.2, this system is not forced, you can continue using the old system, but it will be removed in 0.11.0.
+
+how to migrate:
+
+old syntax will **not be migrated automatically**
+<br/>if you chose the default options in setup, you can relaunch setup with `rovr --force-first-launch` and regenerate your config and keybinds
+
+for those who customised their keybinds, you need to look carefully
+
+old keybinds are defined under `[keybinds]` in `config.toml`, and the new system is defined in `keys.toml`. old keybinds are based of a single preset, so to keep using that preset as base, add this to `keys.toml`
+
+```toml
+inherit = "base"
+```
+
+the new system uses `<key> = <action>`, not `<action> = [<key>]`, so you need to change the syntax. for example, this:
+
+```toml
+[keybinds]
+"tab_new" = ["n"]
+"tab_close" = ["w"]
+```
+
+would be
+
+```toml
+[main]
+"n" = "tab_new"
+"w" = "tab_close"
+```
+
+for navigation, you can change it from
+
+```toml
+[keybinds]
+up = ["up", "k"]
+down = ["down", "j"]
+up_tree = ["left", "h"]
+down_tree = ["right", "l", "enter"]
+bypass_up_tree = ["H"]
+bypass_down_tree = ["L"]
+page_up = ["pageup", "ctrl+b"]
+page_down = ["pagedown", "ctrl+f"]
+home = ["home", "g"]
+end = ["end", "G"]
+```
+
+to
+
+```toml
+[lists]
+# you can choose to use cursor(-1)
+"up" = { action = "cursor(-1)", desc = "Move up" }
+# or alternatively
+# "up" = { action = "cursor_down" }
+# but cursor(-1) is more consistent with the other actions
+# and recommended for flexibility
+"k" = "cursor(-1)"
+"down" = { action = "cursor(1)", desc = "Move down" }
+"j" = "cursor(1)"
+"right" = { action = "select", desc = "Select" }
+"l" = "select"
+"enter" = "select"
+"pageup" = { action = "cursor_page(-1)", desc = "Move up one page" }
+"ctrl+b" = "cursor_page(-1)"
+"pagedown" = { action = "cursor_page(1)", desc = "Move down one page" }
+"ctrl+f" = "cursor_page(1)"
+"home" = { action = "first", desc = "Move to the first item" }
+"g" = "first"
+"end" = { action = "last", desc = "Move to the last item" }
+"G" = "last"
+
+[scroll]
+"up" = "scroll_up"
+"k" = "scroll_up"
+"down" = "scroll_down"
+"j" = "scroll_down"
+"pageup" = "scroll_page_up"
+"ctrl+b" = "scroll_page_up"
+"pagedown" = "scroll_page_down"
+"ctrl+f" = "scroll_page_down"
+"home" = "scroll_home"
+"g" = "scroll_home"
+"end" = "scroll_end"
+"G" = "scroll_end"
+```
+
+for certain screens, for instance `DeleteFiles`, it is simpler
+
+```toml
+[keybinds.delete_files]
+trash = ["d"]
+delete = ["x"]
+cancel = ["c", "escape"]
+```
+to
+```toml
+[delete_files]
+"d" = "trash"
+"x" = "delete"
+"c" = "cancel"
+"escape" = "cancel"
+```
+
+this may seem overly verbose, but it allows me to add more flexible actions without needing to change much of the core

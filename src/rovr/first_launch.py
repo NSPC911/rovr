@@ -453,7 +453,7 @@ enabled = {str(self.query_one("#plugins-fd Switch", Switch).value).lower()}
 
 [plugins.bat]
 enabled = {str(self.query_one("#plugins-bat Switch", Switch).value).lower()}
-{f'"executable" = {"batcat" if which("batcat") is not None else "bat"}' if self.query_one("#plugins-bat Switch", Switch).value else ""}
+{f'executable = "{"batcat" if which("batcat") is not None else "bat"}"' if self.query_one("#plugins-bat Switch", Switch).value else ""}
 
 [plugins.zoxide]
 enabled = {str(self.query_one("#plugins-zoxide Switch", Switch).value).lower()}

@@ -1319,5 +1319,6 @@ class Application(
         if event.button in (4, 5, 6, 7):
             key_name = f"mouse{event.button}"
             await self._check_bindings(key_name, priority=True)
+            self._mouse_down_widget = None  # prevent triggering click on MouseUP
             event.prevent_default()
             event.stop()

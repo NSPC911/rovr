@@ -120,6 +120,7 @@ class WindowedTextPreview(ScrollView):
     ) -> None:
         super().__init__(classes=classes, can_focus=True)
         self._lines: Sequence[str] | Sequence[Text] = []
+        self._source_lines: Sequence[str] | Sequence[Text] = []
         self._language = language
         self._line_numbers = line_numbers
         self._gutter_width = 0
@@ -130,7 +131,9 @@ class WindowedTextPreview(ScrollView):
         # just re-render window because bg can be weird
         self._rendered_window = None
         self.update_preview(
-            self._lines, language=self._language, line_numbers=self._line_numbers
+            self._source_lines,
+            language=self._language,
+            line_numbers=self._line_numbers,
         )
 
     def update_preview(
@@ -141,19 +144,26 @@ class WindowedTextPreview(ScrollView):
         line_numbers: bool = False,
     ) -> None:
         lines = lines or [""]
+        self._source_lines = lines
         if language is not None:
             highlighted = Syntax(
                 "",
                 lexer=language,
                 theme=config["theme"]["preview"],
                 background_color=(
-                    "default" if config["theme"]["transparent"] else None
+                    "default"
+                    if (
+                        self.ansi_color
+                        if self.ansi_color is not None
+                        else config["theme"]["transparent"]
+                    )
+                    else None
                 ),
             ).highlight("\n".join(cast(Sequence[str], lines)))
             self._lines = list(highlighted.split("\n", allow_blank=True))[: len(lines)]
         else:
             self._lines = lines
-        self._language = None
+        self._language = language
         self._line_numbers = line_numbers
         self._gutter_width = len(str(len(self._lines))) + 3 if line_numbers else 0
         width = max(
@@ -185,15 +195,18 @@ class WindowedTextPreview(ScrollView):
         if self._line_numbers:
             for offset, line in enumerate(text_lines):
                 number = start + offset + 1
-                text_lines[offset] = Text.assemble(
-                    (f"{number:>{self._gutter_width - 1}} ", "dim"), line
-                )
+                gutter = Text(f"{number:>{self._gutter_width - 1}} ", style=line.style)
+                gutter.stylize("dim")
+                text_lines[offset] = Text.assemble(gutter, line)
         renderable = Text("\n", no_wrap=True, overflow="crop").join(text_lines)
 
         options = self.app.console.options.update(width=max(x + width, 1))
         background = self.visual_style.rich_style
         return [
-            Strip(segments).crop(x, x + width).adjust_cell_length(width, background)
+            Strip(segments)
+            .apply_style(background)
+            .crop(x, x + width)
+            .adjust_cell_length(width, background)
             for segments in self.app.console.render_lines(
                 renderable, options, pad=False, new_lines=False
             )

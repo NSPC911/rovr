@@ -10,14 +10,18 @@ and this project sort-of adheres to [Semantic Versioning](https://semver.org/spe
 ### Added
 
 - `preview`: add scrollable text previews [#344](https://github.com/NSPC911/rovr/pull/344) [16bf04d](https://github.com/NSPC911/rovr/commit/16bf04d8a6fdeeebb1c8c05a9d14d1946c7d9123)
-- `preview`: add cached previews [#339](https://github.com/NSPC911/rovr/pull/339) [3e48e47](https://github.com/NSPC911/rovr/commit/3e48e472c8093f3f7c7a321531391e0694bae4da)
+- `preview`: add cached previews [#339](https://github.com/NSPC911/rovr/pull/339) [3e48e47](https://github.com/NSPC911/rovr/commit/3e48e472c8093f3f7c7a321531391e0694bae4da) [e43633f](https://github.com/NSPC911/rovr/commit/e43633f22c938a31fc4f068f54d149918dc207b9)
 - `keys`: add chord keys [#341](https://github.com/NSPC911/rovr/pull/341) [4c9ae02](https://github.com/NSPC911/rovr/commit/4c9ae028381a8d6917a13f3311241c04d76ab038)
 - `themes`: add extraterrestrial themes [#343](https://github.com/NSPC911/rovr/pull/343) [39f596c](https://github.com/NSPC911/rovr/commit/39f596c4bdf00f6bd00060d3409cf31518659659)
 - `copy`: allow copying general text [de8eb5d](https://github.com/NSPC911/rovr/commit/de8eb5d0cc5ec6b56e3946b4da24789e92c2c8ee)
-- `keys`: add `cd-no-quit` [b6cbd37](https://github.com/NSPC911/rovr/commit/b6cbd375502880e3060579f0951a5805db821278)
+- `keys`: add `cd-no-quit` [b6cbd37](https://github.com/NSPC911/rovr/commit/b6cbd375502880e3060579f0951a5805db821278) [1ddbd50](https://github.com/NSPC911/rovr/commit/1ddbd50bf7cfd089c95b4e0fff96e853583fe803)
 - `metadata`: add birthtime [ea358a2](https://github.com/NSPC911/rovr/commit/ea358a2855da244868b3f5e7e606a28480006ab7)
 - `shellexec`: store the last command run [940485a](https://github.com/NSPC911/rovr/commit/940485a0f90d73905eff9925ed34a439e58e5e89)
-- `app`: make the app title configurable [912bb30](https://github.com/NSPC911/rovr/commit/912bb30761d68b7bec156d7592798c6d110adacd)
+- `app`: make the app title configurable [912bb30](https://github.com/NSPC911/rovr/commit/912bb30761d68b7bec156d7592798c6d110adacd) [4e8b758](4e8b758f24a8e0cfff56430fd76c76660e7b2537)
+- `contextmenu`: add follow link option [#351](https://github.com/NSPC911/rovr/pull/351) [#353](https://github.com/NSPC911/rovr/pull/353)
+- `keys`: have tab and shift+tab keys set by default [473e5f3](https://github.com/NSPC911/rovr/commit/473e5f30e6aafedc2c47de0dacb0029f5694a09a)
+- `keys`: add another context for buttons [17598cb](https://github.com/NSPC911/rovr/commit/17598cb7c3c5ffbb123eb67ab4897d2d56171fb5)
+- `keys`: make nav wrapping optional [bd8abdf](https://github.com/NSPC911/rovr/commit/bd8abdf925cca6511b45af5436874efe959876d4)
 
 ### Changed
 
@@ -37,11 +41,25 @@ and this project sort-of adheres to [Semantic Versioning](https://semver.org/spe
 - `keys`: handle certain keys properly in new handler [e7b7c4a](https://github.com/NSPC911/rovr/commit/e7b7c4aae80459bcef1a64e6b751a67f16323fa3)
 - `shellexec`: do not color an empty border [f8d1653](https://github.com/NSPC911/rovr/commit/f8d165323e4db986da227d4a463ea235b31e8e94)
 - `app`: arm the timer after logs are done [17c3dcb](https://github.com/NSPC911/rovr/commit/17c3dcb7b228d6f735d208693ed23d439ed90cf5)
+- `buttons`: consistent colors [#352](https://github.com/NSPC911/rovr/pull/352)
+- `preview`: add fallback title for special files [#350](https://github.com/NSPC911/rovr/pull/350) [256437e](https://github.com/NSPC911/rovr/commit/256437ed712c3509418136e5dd0ede43e6a2df7b)
+- `image`: capture tgp responses in zellij only [68e54c0](https://github.com/NSPC911/rovr/commit/68e54c07db67f14fc54167dfbda9cc93eb9e5d35)
+- `firstlaunch`: check for batcat on debian [8c47233](https://github.com/NSPC911/rovr/commit/8c4723377a42a497f500b146f93cb1fb382cec4b) [d16d09e](https://github.com/NSPC911/rovr/commit/d16d09e67ddfe1edd8a1c1a7d669d1482b4e304a)
+- `preview`: handle ansi changes properly [ebc5daa](https://github.com/NSPC911/rovr/commit/ebc5daaea51393f97e57035bd85bdfcb50e47240)
+- `filelist`: hist_previous no longer goes up tree [9b7085f](https://github.com/NSPC911/rovr/commit/9b7085f645844b5b25222aa78735ca946284d1f3)
+- `input`: properly handle kitty modifiers [9baf4d3](https://github.com/NSPC911/rovr/commit/9baf4d3687d77632958a54c7ec93d2ed243b72bf)
+- `keys`: make global be lesser priority [4d4700e](https://github.com/NSPC911/rovr/commit/4d4700ec3540d39fe047d9417af193ecedc3168c)
+- `preview`: properly update debounced preview [21c3041](https://github.com/NSPC911/rovr/commit/21c3041b796f36e7ef4c4dd28bccf7cd38d7174a)
+- `filelist`: fix race condition [f384f9a](https://github.com/NSPC911/rovr/commit/f384f9a7129f9d58f377c04c4fa5f6b54eb2fa85)
+- `workers`: add explicit groups [8f09ab3](https://github.com/NSPC911/rovr/commit/8f09ab3411840503eda9756d6fc48f6d0ec88227)
+- `archive`: disable strict timestamps [87a5334](https://github.com/NSPC911/rovr/commit/87a5334f9212d3abb46611fa6c5154a8129f56db)
 
 ### Performance
 
 - `preview`: use pickle instead of markup [e46e03d](https://github.com/NSPC911/rovr/commit/e46e03d3af446f1c4130499f5aa7d34e6b157aef)
 - `config`: store the schema validator in binary form [ba33239](https://github.com/NSPC911/rovr/commit/ba33239001493a4a37c7a6088fecc2c2fc6e8c94)
+- `filelist`: optimize scrolling? [4eeb7c7](https://github.com/NSPC911/rovr/commit/4eeb7c7157e956259bc730b9da579eede6ca87e5)
+- `app`: keep a single persistent worker for drive refresh [a46a885](https://github.com/NSPC911/rovr/commit/a46a885942902131cbb42d689f3026d0875a6c03) [e06cc5e](https://github.com/NSPC911/rovr/commit/e06cc5e014ea68ccf571a31c77b90eccefe66401)
 
 ### Build
 

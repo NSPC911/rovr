@@ -718,7 +718,9 @@ class ProcessContainer(Actionable, VerticalScroll):
         try:
             from multiarchive import Archive
 
-            with Archive(archive_name, algo, "w", level) as archive:
+            with Archive(
+                archive_name, algo, "w", level, strict_timestamps=False
+            ) as archive:
                 assert archive._archive is not None
                 last_update_time = time.monotonic()
                 for i, file_path in enumerate(files_to_archive):

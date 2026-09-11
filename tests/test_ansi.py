@@ -26,9 +26,16 @@ def test_ansi_to_rich_text_parses_bat_truecolor_output() -> None:
 
 def test_ansi_to_rich_text_parses_colors_and_attributes() -> None:
     assert_matches_rich(
-        "plain \x1b[1;31;44mbold\x1b[22;39;49m normal "
-        "\x1b[38;5;200;48;2;1;2;3mextended\x1b[0m"
+        "plain \x1b[1;31;44mbold\x1b[0m normal \x1b[38;5;200;48;2;1;2;3mextended\x1b[0m"
     )
+
+
+def test_ansi_default_colors_inherit_render_surface() -> None:
+    text = ansi_to_rich_text("\x1b[31;44mcolored\x1b[39;49mdefault")
+    style = text.get_style_at_offset(Console(), len("colored"))
+
+    assert style.color is None
+    assert style.bgcolor is None
 
 
 def test_ansi_to_rich_text_parses_hyperlinks() -> None:

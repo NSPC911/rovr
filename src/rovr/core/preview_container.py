@@ -64,7 +64,7 @@ titles = PreviewContainerTitles()
 
 PREVIEWER_GROUP = "previewers"
 TEXT_PREVIEW_CACHE_VERSION = "windowed-v2"
-BAT_PREVIEW_CACHE_VERSION = "paged-v2"
+BAT_PREVIEW_CACHE_VERSION = "paged-v3"
 BAT_PREVIEW_PAGE_SIZE = 256
 BAT_PREVIEWER_GROUP = "bat-pages"
 T = TypeVar("T")

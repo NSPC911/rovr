@@ -67,6 +67,41 @@ async def test_cursor_moves_once_and_skips_disabled_options() -> None:
 
 
 @pytest.mark.asyncio
+async def test_cursor_wraps_and_skips_disabled_options() -> None:
+    app = CursorApp([
+        Option(str(index), disabled=index in {0, 2}) for index in range(5)
+    ])
+
+    async with app.run_test() as pilot:
+        await pilot.pause()
+        option_list = app.query_one(CursorList)
+        option_list.highlighted = 4
+        await pilot.pause()
+
+        option_list.action_cursor(2)
+        await pilot.pause()
+
+        assert option_list.highlighted == 3
+
+
+@pytest.mark.asyncio
+async def test_select_cursor_does_not_wrap() -> None:
+    app = SelectionCursorApp()
+
+    async with app.run_test() as pilot:
+        await pilot.pause()
+        option_list = app.query_one(SelectionCursorList)
+        option_list.highlighted = 7
+        await pilot.pause()
+
+        await option_list.action_select_cursor(1)
+        await pilot.pause()
+
+        assert option_list.highlighted == 7
+        assert option_list.selected == []
+
+
+@pytest.mark.asyncio
 async def test_cursor_page_supports_fractional_pages() -> None:
     app = CursorApp([str(index) for index in range(30)])
 

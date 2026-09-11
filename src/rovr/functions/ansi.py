@@ -210,11 +210,11 @@ def ansi_to_rich_text(terminal_text: str) -> Text:
                         case code if 30 <= code <= 37:
                             foreground = get_ansi_color(code - 30)
                         case 39:
-                            foreground = Color.default()
+                            foreground = None
                         case code if 40 <= code <= 47:
                             background = Color.from_ansi(code - 40)
                         case 49:
-                            background = Color.default()
+                            background = None
                         case 51:
                             frame = True
                         case 52:

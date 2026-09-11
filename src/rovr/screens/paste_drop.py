@@ -45,7 +45,9 @@ class PasteDropScreen(Actionable, ModalScreen["PasteDropScreen.ReturnType | None
             yield Button(f"\\[{copy_bind}] Copy", id="copy", variant="success")
             yield Button(f"\\[{move_bind}] Move", id="move", variant="warning")
             with HorizontalGroup():
-                yield Button(f"\\[{cancel_bind}] Cancel", id="cancel", variant="error")
+                yield Button(
+                    f"\\[{cancel_bind}] Cancel", id="cancel", variant="primary"
+                )
 
     def on_mount(self) -> None:
         self.query_one(Grid).border_title = "Drag and Drop"

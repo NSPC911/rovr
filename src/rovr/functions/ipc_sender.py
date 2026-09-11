@@ -94,15 +94,6 @@ def _build_parser() -> IPCArgumentParser:
                 help="Focus the new tab after creating it.",
             )
 
-    commands.add_parser(
-        "history", help="Get the navigation history of a tab in the rovr instance."
-    ).add_argument(
-        "index",
-        type=int,
-        help="The tab index to get the navigation history for. If unspecified, uses the focused tab.",
-        nargs="?",
-    )
-
     commands.add_parser("quit", help="Quit the rovr instance.").add_argument(
         "--no-cd",
         action="store_true",

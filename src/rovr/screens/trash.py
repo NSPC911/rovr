@@ -201,7 +201,7 @@ class TrashScreen(Actionable, ModalScreen):
                 disabled=True,
             )
             yield Button(
-                f"\\[{purge_bind}] Purge", variant="error", id="purge", disabled=True
+                f"\\[{purge_bind}] Purge", variant="warning", id="purge", disabled=True
             )
             yield Button(
                 f"\\[{empty_bind}] Empty", variant="error", id="empty", disabled=True

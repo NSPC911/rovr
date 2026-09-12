@@ -1315,3 +1315,21 @@ class Application(
                 self.file_list.update_file_list(add_to_session=False)
 
         self.push_screen(TrashScreen(), callback=callback)
+
+    @on(events.MouseDown)
+    async def on_mouse_down_extra_buttons(self, event: events.MouseDown) -> None:
+        """Route mouse buttons 4-7 to keybinding system."""
+        if event.button in (4, 5, 6, 7):
+            parts = []
+            if event.ctrl:
+                parts.append("ctrl")
+            if event.shift:
+                parts.append("shift")
+            if event.meta:
+                parts.append("alt")
+            parts.append(f"mouse{event.button}")
+            key_name = "+".join(parts)
+            await self._check_bindings(key_name, priority=True)
+            self._mouse_down_widget = None  # prevent triggering click on MouseUP
+            event.prevent_default()
+            event.stop()

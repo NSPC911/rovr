@@ -49,7 +49,9 @@
 "shift+right" = "bypass_down_tree"
 "alt+left" = { action = "hist_previous", desc = "Go to the previous directory" }
 "backspace" = "hist_previous(True)"
+"mouse4" = "hist_previous"
 "alt+right" = { action = "hist_next", desc = "Go to the next directory" }
+"mouse5" = "hist_next"
 "ctrl+space" = { action = "toggle_visual", desc = "Toggle visual selection" }
 "ctrl+a" = { action = "toggle_all", desc = "Toggle selection of all files" }
 "." = { action = "toggle_hidden_files", desc = "Toggle hidden files" }

@@ -210,7 +210,9 @@ class Application(
         self._chooser_paths: list[str] | None = None
         self._show_keys: bool = show_keys
         self._force_crash_in: float = force_crash_in
-        self._force_exit_on_shutdown = force_exit_on_shutdown
+        self._force_exit_on_shutdown = (
+            force_exit_on_shutdown and os.environ.get("ROVR_DISABLE_FORCE_EXIT") != "1"
+        )
         self._force_exit_timer: threading.Timer | None = None
         self._pins_mtime: float | None = None
         self._highlighted_file_mtime: float | None = None

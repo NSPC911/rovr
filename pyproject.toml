@@ -209,6 +209,7 @@ use_exec = true
 args = [
   { name = "renderer", help = "Output format for the flamegraph (default: html)", default = "html", positional = true },
 ]
+env = { "ROVR_DISABLE_FORCE_EXIT" = "1" }
 
 [tool.pytest]
 testpaths = ["tests"]

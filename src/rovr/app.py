@@ -255,7 +255,7 @@ class Application(
         self._on_mount_done: bool = False
         self.last_available_cd = getcwd()
 
-        self._theme_errors: list[str] = register_all_themes(self)
+        self._theme_errors: list[str] = register_all_themes(self, deferred=True)
         self._theme_file_mtimes: dict[str, float] = theme_file_mtimes()
         self.ansi_color = config["theme"]["transparent"]
         self.theme = config["theme"]["default"]

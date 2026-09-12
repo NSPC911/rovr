@@ -174,12 +174,14 @@ class ThemeHandler:
         }
         self._theme_file_mtimes = mtimes
         active_theme = self.current_theme
-        errors = register_all_themes(self)
+        errors = register_all_themes(self, deferred=True)
+        current_theme = self.current_theme
+        current_css = getattr(current_theme, "css", "")
         # Theme's dataclass __eq__ ignores the injected css attribute, so a
         # rules-only edit needs its own comparison
-        if self.current_theme != active_theme or getattr(
-            self.current_theme, "css", ""
-        ) != getattr(active_theme, "css", ""):
+        if current_theme != active_theme or current_css != getattr(
+            active_theme, "css", ""
+        ):
             self._watch_theme(self.theme)
         if not errors:
             elapsed = (perf_counter() - started) * 1000

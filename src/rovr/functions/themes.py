@@ -2,6 +2,7 @@ import re
 from contextlib import suppress
 from importlib import resources
 from pathlib import Path
+from typing import Any, Callable
 
 from textual.app import App
 from textual.color import Color
@@ -252,20 +253,69 @@ def theme_dirs() -> list[Path]:
     return dirs
 
 
-def register_all_themes(app: App) -> list[str]:
+class DeferredTheme(Theme):
+    def __init__(
+        self,
+        theme_file: Path,
+        fallback: Theme | None,
+        report_error: Callable[[str], None],
+    ) -> None:
+        super().__init__(name=theme_file.stem, primary="#0178D4")
+        self._theme_file = theme_file
+        self._fallback = fallback
+        self._report_error = report_error
+
+    def __getattribute__(self, name: str) -> Any:
+        if name not in {"name", "__dict__", "__class__"} and not name.startswith("_"):
+            theme_file = object.__getattribute__(self, "_theme_file")
+            try:
+                theme = parse_theme_file(theme_file)
+            except Exception as exc:
+                object.__getattribute__(self, "_report_error")(
+                    f"{theme_file.name}: {exc}"
+                )
+                theme = object.__getattribute__(self, "_fallback")
+                if theme is None:
+                    theme = Theme(name=theme_file.stem, primary="#0178D4")
+                # Resolve a deferred bundled theme behind a broken user override.
+                theme.to_color_system
+            self.__dict__.clear()
+            self.__dict__.update(theme.__dict__)
+            self.__class__ = Theme
+        return object.__getattribute__(self, name)
+
+
+def register_all_themes(app: App, *, deferred: bool = False) -> list[str]:
     """
     Register every bundled and user theme file.
 
     Args:
         app: The application to register themes on.
+        deferred: Parse theme files when their values are first requested.
 
     Returns:
         list[str]: human-readable errors for files that failed to parse.
     """
     Path(RovrVars.ROVRTHEMES).mkdir(parents=True, exist_ok=True)
     errors: list[str] = []
+
+    def report_error(error: str) -> None:
+        if app.is_running:
+            app.notify(error, title="Theme Error", severity="warning", markup=False)
+        else:
+            errors.append(error)
+
     for theme_dir in theme_dirs():
         for theme_file in sorted(theme_dir.glob("*.tcss")):
+            if deferred:
+                app.register_theme(
+                    DeferredTheme(
+                        theme_file,
+                        app.available_themes.get(theme_file.stem),
+                        report_error,
+                    )
+                )
+                continue
             try:
                 theme = parse_theme_file(theme_file)
             except Exception as exc:

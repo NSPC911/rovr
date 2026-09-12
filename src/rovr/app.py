@@ -39,6 +39,7 @@ from textual_drivers.dnd import (
     Drop,
 )
 
+import rovr.screens as screens
 from rovr.action_buttons import (
     CopyButton,
     CutButton,
@@ -92,8 +93,6 @@ from rovr.navigation_widgets import (
     PathInput,
     UpButton,
 )
-from rovr.screens import ShellExec
-from rovr.screens.way_too_small import TerminalTooSmall
 from rovr.state_manager import StateManager
 from rovr.variables.constants import MAX_HEIGHT, MAX_WIDTH, config, keys, log_name
 from rovr.variables.maps import RovrVars
@@ -453,7 +452,7 @@ class Application(
             await self._on_key(event)
 
     def on_shell_exec_response(
-        self, response: ShellExec.ReturnType | None, shell: bool = True
+        self, response: screens.ShellExec.ReturnType | None, shell: bool = True
     ) -> None:
         if response is None or response.command == "":
             return
@@ -816,12 +815,12 @@ class Application(
             event.size.height < MAX_HEIGHT or event.size.width < MAX_WIDTH
         ) and not self.has_pushed_screen:
             self.has_pushed_screen = True
-            await self.push_screen(TerminalTooSmall())
+            await self.push_screen(screens.TerminalTooSmall())
             self.has_pushed_screen = False
         else:
             with suppress(ScreenStackError):
                 if len(self.screen_stack) > 1 and isinstance(
-                    self.screen_stack[-1], TerminalTooSmall
+                    self.screen_stack[-1], screens.TerminalTooSmall
                 ):
                     self.pop_screen()
         self.hide_popups()
@@ -1248,7 +1247,7 @@ class Application(
 
     def action_show_shell_screen(self) -> None:
         self.push_screen(
-            ShellExec(),
+            screens.ShellExec(),
             callback=lambda response: self.on_shell_exec_response(response),
         )
 
@@ -1279,7 +1278,8 @@ class Application(
             )
         else:
             self.on_shell_exec_response(
-                ShellExec.ReturnType(command=command, run_type=run_type), shell=False
+                screens.ShellExec.ReturnType(command=command, run_type=run_type),
+                shell=False,
             )
 
     def action_run_shell(
@@ -1300,7 +1300,8 @@ class Application(
             )
         else:
             self.on_shell_exec_response(
-                ShellExec.ReturnType(command=command, run_type=run_type), shell=True
+                screens.ShellExec.ReturnType(command=command, run_type=run_type),
+                shell=True,
             )
 
     def action_open_recycle_bin(self) -> None:

@@ -1,16 +1,18 @@
+from __future__ import annotations
+
 from os import path
 from typing import cast
 
 from textual import work
 from textual.widgets import Button
 
+import rovr.screens as screens
 from rovr.classes.textual_validators import (
     IsValidFilePath,
 )
 from rovr.functions.cwd import getcwd
 from rovr.functions.icons import get_icon
 from rovr.functions.path import normalise
-from rovr.screens import ArchiveCreationScreen
 from rovr.variables.constants import config
 
 
@@ -39,7 +41,7 @@ class ZipButton(Button):
         default_zip_name = f"{parent_folder_name}.zip"
 
         response = await self.app.push_screen(
-            ArchiveCreationScreen(
+            screens.ArchiveCreationScreen(
                 initial_value=default_zip_name,
                 validators=[
                     IsValidFilePath(),
@@ -52,7 +54,7 @@ class ZipButton(Button):
         if not response:
             return
 
-        response = cast(ArchiveCreationScreen.ReturnType, response)
+        response = cast(screens.ArchiveCreationScreen.ReturnType, response)
 
         archive_name = normalise(path.join(getcwd(), response.path))
 

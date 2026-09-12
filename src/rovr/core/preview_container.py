@@ -23,7 +23,6 @@ from textual.containers import Container
 from textual.css.query import NoMatches
 from textual.dom import DOMNode
 from textual.geometry import Region
-from textual.highlight import guess_language
 from textual.timer import Timer
 from textual.widgets import Static
 from textual.widgets.selection_list import Selection
@@ -1237,6 +1236,8 @@ class PreviewContainer(Actionable, Container):
             sample_parts.append(line[:remaining])
             sample_length += len(sample_parts[-1])
         sample = "".join(sample_parts)
+        from textual.highlight import guess_language
+
         language: str = guess_language(sample, path=self._current_file_path) or "text"
         if should_cancel():
             return

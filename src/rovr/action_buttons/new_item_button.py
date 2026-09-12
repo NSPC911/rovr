@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import contextlib
 from os import makedirs, path
 from tempfile import NamedTemporaryFile
@@ -8,12 +10,12 @@ from textual.content import Content
 from textual.widgets import Button
 from textual.worker import Worker, WorkerError
 
+import rovr.screens as screens
 from rovr.classes.textual_validators import IsValidFilePath, PathNoLongerExists
 from rovr.functions.cwd import getcwd
 from rovr.functions.icons import get_icon
 from rovr.functions.path import dump_exc, normalise
 from rovr.functions.utils import command, run_command
-from rovr.screens import ModalInput
 from rovr.variables.constants import config
 
 
@@ -38,7 +40,7 @@ class NewItemButton(Button):
         if self.disabled:
             return
         response = await self.app.push_screen(
-            ModalInput(
+            screens.ModalInput(
                 border_title="Create New Item",
                 border_subtitle="End with a slash (/) to create a directory",
                 is_path=True,

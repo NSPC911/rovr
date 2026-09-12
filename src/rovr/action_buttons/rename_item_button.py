@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import contextlib
 import os
 from os import path
@@ -8,12 +10,12 @@ from textual import work
 from textual.widgets import Button
 from textual.worker import Worker, WorkerError
 
+import rovr.screens as screens
 from rovr.classes.textual_validators import IsValidFilePath, PathNoLongerExists
 from rovr.functions.cwd import getcwd
 from rovr.functions.icons import get_icon
 from rovr.functions.path import dump_exc, normalise
 from rovr.functions.utils import command, run_command
-from rovr.screens import ModalInput
 from rovr.variables.constants import config
 
 
@@ -43,7 +45,7 @@ class RenameItemButton(Button):
             selected_file = selected_files[0]
             type_of_file = "Folder" if path.isdir(selected_file) else "File"
             response = await self.app.push_screen(
-                ModalInput(
+                screens.ModalInput(
                     border_title=f"Rename {type_of_file}",
                     border_subtitle=f"Current name: {path.basename(selected_file)}",
                     initial_value=path.basename(selected_file),

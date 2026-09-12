@@ -1,7 +1,9 @@
+from __future__ import annotations
+
 from textual.widgets import Button
 
+import rovr.screens as screens
 from rovr.functions.icons import get_icon
-from rovr.screens import DeleteFiles
 from rovr.variables.constants import config
 
 
@@ -32,7 +34,7 @@ class DeleteButton(Button):
                     self.app.query_one("ProcessContainer").trash_files(selected_files)
 
             self.app.push_screen(
-                DeleteFiles(
+                screens.DeleteFiles(
                     message=f"Are you sure you want to delete {len(selected_files)} file{'s' if len(selected_files) != 1 else ''}?",
                     paths=selected_files,
                 ),

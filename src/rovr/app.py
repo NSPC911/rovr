@@ -1317,7 +1317,15 @@ class Application(
     async def on_mouse_down_extra_buttons(self, event: events.MouseDown) -> None:
         """Route mouse buttons 4-7 to keybinding system."""
         if event.button in (4, 5, 6, 7):
-            key_name = f"mouse{event.button}"
+            parts = []
+            if event.ctrl:
+                parts.append("ctrl")
+            if event.shift:
+                parts.append("shift")
+            if event.meta:
+                parts.append("alt")
+            parts.append(f"mouse{event.button}")
+            key_name = "+".join(parts)
             await self._check_bindings(key_name, priority=True)
             self._mouse_down_widget = None  # prevent triggering click on MouseUP
             event.prevent_default()

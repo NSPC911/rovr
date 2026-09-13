@@ -5,26 +5,37 @@ import re
 from collections.abc import Sequence
 from typing import Any, Never
 
-from rovr import pprint
+
+def pprint(*args: Any, **kwargs: Any) -> None:
+    """Print messages to the console using rich formatting."""
+    from rovr import pprint
+
+    pprint(*args, **kwargs)
 
 
-class RichArgumentParser(argparse.ArgumentParser):
-    """Custom ArgumentParser that uses rich for error reporting."""
+def print_rich_error(message: str) -> None:
+    from rich.markup import escape
+    from rich.panel import Panel
 
-    def error(self, message: str) -> Never:
-        from rich.markup import escape
-        from rich.panel import Panel
-
-        # custom error rendering to match rich-click style
-        pretty_message = escape(self._format_error_message(message))
-        panel = Panel(
-            pretty_message,
+    pprint(
+        Panel(
+            escape(message),
             title="Error",
             border_style="red bold",
             title_align="left",
             width=80,
         )
-        pprint(panel)
+    )
+
+
+class RichArgumentParser(argparse.ArgumentParser):
+    """Custom ArgumentParser that uses rich for error reporting."""
+
+    def print_help(self, file: Any = None) -> None:
+        print_rich_help(self)
+
+    def error(self, message: str) -> Never:
+        print_rich_error(self._format_error_message(message))
         raise SystemExit(2)
 
     @staticmethod
@@ -69,6 +80,8 @@ def _format_action_type(action: argparse.Action) -> str:
         str: represents the argument type (e.g. "STRING", "INTEGER", "FLOAT")."""
     if action.nargs == 0:
         return ""
+    if action.metavar == action.dest:
+        return ""
 
     action_type = action.type
     if action_type is float:
@@ -85,15 +98,22 @@ def _iter_visible_actions(group: Any) -> list[argparse.Action]:
         group: The argparse ActionGroup to iterate over.
     Returns:
         list[argparse.Action]: actions that should be displayed in the help."""
-    return [
-        action
-        for action in group._group_actions
-        if action.help is not argparse.SUPPRESS
-    ]
+    actions = []
+    for action in group._group_actions:
+        if action.help is argparse.SUPPRESS:
+            continue
+        if isinstance(action, argparse._SubParsersAction):
+            actions.extend(action._choices_actions)
+        else:
+            actions.append(action)
+    return actions
 
 
 def _render_panel(
-    title: str, actions: list[argparse.Action], subtitle: str = ""
+    title: str,
+    actions: list[argparse.Action],
+    subtitle: str = "",
+    widths: tuple[int | None, int | None] = (None, None),
 ) -> None:
     from rich.panel import Panel
     from rich.table import Table
@@ -103,8 +123,8 @@ def _render_panel(
 
     # 3-column grid: [FLAG] [TYPE] [HELP_TEXT]
     table = Table.grid(expand=True, padding=(0, 1))
-    table.add_column(style="bold cyan", no_wrap=True, width=22)
-    table.add_column(style="bold yellow", no_wrap=True, width=8)
+    table.add_column(style="bold cyan", no_wrap=True, width=widths[0])
+    table.add_column(style="bold yellow", no_wrap=True, width=widths[1])
     table.add_column(style="default")
 
     for action in actions:
@@ -129,22 +149,61 @@ def _render_panel(
 def print_rich_help(parser: argparse.ArgumentParser) -> None:
     """Print the complete help interface using rich panels."""
     pprint(" ")
-    pprint(" [bold]Usage:[/] rovr [OPTIONS] [PATH]")
+    # in cases where usage includes ansi sequnces, remove those as well
+    usage = (
+        re
+        .sub(r"\x1B\[[^m]+m", "", parser.format_usage())
+        .strip()
+        .removeprefix("usage: ")
+    )
+    pprint(f" [bold]Usage:[/] {usage}")
     pprint(" ")
     if parser.description:
         pprint(f" [dim]{parser.description}[/]")
         pprint(" ")
 
-    ordered_titles = ("Config", "Paths", "Miscellaneous", "Dev", "Arguments")
-    for title in ordered_titles:
-        for group in parser._action_groups:
-            if group.title != title:
-                continue
-            _render_panel(
-                title,
-                _iter_visible_actions(group),
-                subtitle=(group.description or "") if title == "Paths" else "",
-            )
+    ordered_titles = ["Config", "Paths", "Miscellaneous", "Dev", "Arguments"]
+    ordered_titles.extend(
+        group.title
+        for group in parser._action_groups
+        if group.title and group.title not in ordered_titles
+    )
+    groups = [
+        group
+        for title in ordered_titles
+        for group in parser._action_groups
+        if group.title == title
+    ]
+    grouped_actions = [(group, _iter_visible_actions(group)) for group in groups]
+    typed_sizes = [
+        (
+            max(map(len, map(_format_action_name, actions))),
+            max(map(len, map(_format_action_type, actions))),
+        )
+        for _, actions in grouped_actions
+        if actions
+        and any(map(_format_action_type, actions))
+        and any(isinstance(action.help, str) and action.help for action in actions)
+    ]
+    widths = (
+        max(size[0] for size in typed_sizes)
+        if len({size[0] for size in typed_sizes}) > 1
+        else None,
+        max(size[1] for size in typed_sizes)
+        if len({size[1] for size in typed_sizes}) > 1
+        else None,
+    )
+    for group, actions in grouped_actions:
+        title = group.title or ""
+        _render_panel(
+            title,
+            actions,
+            subtitle=(group.description or "") if title == "Paths" else "",
+            widths=widths
+            if any(map(_format_action_type, actions))
+            and any(isinstance(action.help, str) and action.help for action in actions)
+            else (None, None),
+        )
 
 
 class RichPanelHelpAction(argparse.Action):

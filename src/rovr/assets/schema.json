@@ -141,6 +141,21 @@
           "description": "Only enable this menu item if the selected item is a directory (set to true) or a file (set to false) (if unspecified, matches both files and directories)"
         }
       }
+    },
+    "ipc_perms": {
+      "type": "string",
+      "enum": [
+        "allow",
+        "prompt",
+        "deny"
+      ]
+    },
+    "ipc_no_prompt": {
+      "type": "string",
+      "enum": [
+        "allow",
+        "deny"
+      ]
     }
   },
   "properties": {
@@ -619,6 +634,100 @@
           "items": { "type": "string" },
           "default": [],
           "description": "Glob patterns matched against mountpoint paths. Drives matching any pattern are hidden from the sidebar (e.g. '/run/media/*', 'D:/')."
+        },
+        "ipc": {
+          "type": "object",
+          "additionalProperties": false,
+          "description": "Settings related to the IPC server that allows external programs to control rovr",
+          "properties": {
+            "enabled": {
+              "type": "boolean",
+              "default": false,
+              "description": "Whether to enable the IPC server"
+            },
+            "permissions": {
+              "type": "object",
+              "additionalProperties": false,
+              "description": "Permissions for the IPC server",
+              "properties": {
+                "cd": {
+                  "$ref": "#/definitions/ipc_perms",
+                  "default": "allow",
+                  "description": "Control changing the current working directory of rovr"
+                },
+                "clipboard.copy": {
+                  "$ref": "#/definitions/ipc_perms",
+                  "default": "allow",
+                  "description": "Control copying to the clipboard"
+                },
+                "clipboard.cut": {
+                  "$ref": "#/definitions/ipc_perms",
+                  "default": "allow",
+                  "description": "Control cutting to the clipboard"
+                },
+                "clipboard.list": {
+                  "$ref": "#/definitions/ipc_perms",
+                  "default": "allow",
+                  "description": "Control getting the list of items in clipboard, along with their states"
+                },
+                "clipboard.paste": {
+                  "$ref": "#/definitions/ipc_perms",
+                  "default": "prompt",
+                  "description": "Control pasting from the clipboard"
+                },
+                "tab.list": {
+                  "$ref": "#/definitions/ipc_perms",
+                  "default": "allow",
+                  "description": "Control get the list of tabs"
+                },
+                "tab.new": {
+                  "$ref": "#/definitions/ipc_perms",
+                  "default": "allow",
+                  "description": "Control creating new tabs"
+                },
+                "tab.focus": {
+                  "$ref": "#/definitions/ipc_perms",
+                  "default": "allow",
+                  "description": "Control focusing a specified tab index"
+                },
+                "tab.close": {
+                  "$ref": "#/definitions/ipc_perms",
+                  "default": "prompt",
+                  "description": "Control closing tabs"
+                },
+                "tab.history": {
+                  "$ref": "#/definitions/ipc_perms",
+                  "default": "allow",
+                  "description": "Control getting the navigation history of a specified tab index"
+                },
+                "quit": {
+                  "$ref": "#/definitions/ipc_perms",
+                  "default": "prompt",
+                  "description": "Control quitting rovr"
+                },
+                "suspend": {
+                  "$ref": "#/definitions/ipc_perms",
+                  "default": "allow",
+                  "description": "Control suspending rovr"
+                },
+                "notify": {
+                  "$ref": "#/definitions/ipc_no_prompt",
+                  "default": "allow",
+                  "description": "Control sending notifications via ipc to the user"
+                },
+                "ask": {
+                  "$ref": "#/definitions/ipc_no_prompt",
+                  "default": "allow",
+                  "description": "Allow the ipc to prompt a yes/no choice to the user."
+                },
+                "input": {
+                  "$ref": "#/definitions/ipc_no_prompt",
+                  "default": "allow",
+                  "description": "Allow the ipc to prompt for text input from the user."
+                }
+              }
+            }
+          }
         }
       }
     },

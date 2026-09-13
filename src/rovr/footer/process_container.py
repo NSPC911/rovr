@@ -962,13 +962,17 @@ class ProcessContainer(Actionable, VerticalScroll):
     @work(thread=True)
     def paste_items(
         self, copied: list[str], has_cut: list[str], dest: str = ""
-    ) -> None:
+    ) -> None | Literal[True]:
         """
         Paste copied or cut files to the current directory
         Args:
             copied (list[str]): A list of items to be copied to the location
             has_cut (list[str]): A list of items to be cut to the location
             dest (str): The directory to copy to.
+
+        Returns:
+            True: If the operation was successful.
+            None: If the operation was cancelled or failed.
         """
         if dest == "":
             dest = getcwd()
@@ -1446,6 +1450,7 @@ class ProcessContainer(Actionable, VerticalScroll):
             with suppress(OSError):
                 os.rmdir(folder)
         bar.ok()
+        return True
 
     @work(thread=True)
     def remote_download(self, uris: list[str], paths: list[str]) -> None:

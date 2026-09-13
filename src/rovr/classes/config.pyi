@@ -17,6 +17,20 @@ class RovrConfig(TypedDict, total=False):
     keybinds: "_RovrConfigKeybinds"
     plugins: "_RovrConfigPlugins"
 
+_IpcNoPrompt = Literal["allow"] | Literal["deny"]
+_IPCNOPROMPT_ALLOW: Literal["allow"] = "allow"
+r"""The values for the '_IpcNoPrompt' enum"""
+_IPCNOPROMPT_DENY: Literal["deny"] = "deny"
+r"""The values for the '_IpcNoPrompt' enum"""
+
+_IpcPerms = Literal["allow"] | Literal["prompt"] | Literal["deny"]
+_IPCPERMS_ALLOW: Literal["allow"] = "allow"
+r"""The values for the '_IpcPerms' enum"""
+_IPCPERMS_PROMPT: Literal["prompt"] = "prompt"
+r"""The values for the '_IpcPerms' enum"""
+_IPCPERMS_DENY: Literal["deny"] = "deny"
+r"""The values for the '_IpcPerms' enum"""
+
 _OsIf = list["_OsIfItem"]
 r""" Only use this setting if the operating system is one of the following (case insensitive) """
 
@@ -284,6 +298,54 @@ r""" Default value of the field path 'Rovr Config settings editor folder shell' 
 
 _ROVR_CONFIG_SETTINGS_HISTORY_SIZE_DEFAULT = 200
 r""" Default value of the field path 'Rovr Config settings history_size' """
+
+_ROVR_CONFIG_SETTINGS_IPC_ENABLED_DEFAULT = False
+r""" Default value of the field path 'Rovr Config settings ipc enabled' """
+
+_ROVR_CONFIG_SETTINGS_IPC_PERMISSIONS_ASK_DEFAULT = "allow"
+r""" Default value of the field path 'Rovr Config settings ipc permissions ask' """
+
+_ROVR_CONFIG_SETTINGS_IPC_PERMISSIONS_CD_DEFAULT = "allow"
+r""" Default value of the field path 'Rovr Config settings ipc permissions cd' """
+
+_ROVR_CONFIG_SETTINGS_IPC_PERMISSIONS_CLIPBOARD_FULL_STOP_COPY_DEFAULT = "allow"
+r""" Default value of the field path 'Rovr Config settings ipc permissions clipboard.copy' """
+
+_ROVR_CONFIG_SETTINGS_IPC_PERMISSIONS_CLIPBOARD_FULL_STOP_CUT_DEFAULT = "allow"
+r""" Default value of the field path 'Rovr Config settings ipc permissions clipboard.cut' """
+
+_ROVR_CONFIG_SETTINGS_IPC_PERMISSIONS_CLIPBOARD_FULL_STOP_LIST_DEFAULT = "allow"
+r""" Default value of the field path 'Rovr Config settings ipc permissions clipboard.list' """
+
+_ROVR_CONFIG_SETTINGS_IPC_PERMISSIONS_CLIPBOARD_FULL_STOP_PASTE_DEFAULT = "prompt"
+r""" Default value of the field path 'Rovr Config settings ipc permissions clipboard.paste' """
+
+_ROVR_CONFIG_SETTINGS_IPC_PERMISSIONS_INPUT_DEFAULT = "allow"
+r""" Default value of the field path 'Rovr Config settings ipc permissions input' """
+
+_ROVR_CONFIG_SETTINGS_IPC_PERMISSIONS_NOTIFY_DEFAULT = "allow"
+r""" Default value of the field path 'Rovr Config settings ipc permissions notify' """
+
+_ROVR_CONFIG_SETTINGS_IPC_PERMISSIONS_QUIT_DEFAULT = "prompt"
+r""" Default value of the field path 'Rovr Config settings ipc permissions quit' """
+
+_ROVR_CONFIG_SETTINGS_IPC_PERMISSIONS_SUSPEND_DEFAULT = "allow"
+r""" Default value of the field path 'Rovr Config settings ipc permissions suspend' """
+
+_ROVR_CONFIG_SETTINGS_IPC_PERMISSIONS_TAB_FULL_STOP_CLOSE_DEFAULT = "prompt"
+r""" Default value of the field path 'Rovr Config settings ipc permissions tab.close' """
+
+_ROVR_CONFIG_SETTINGS_IPC_PERMISSIONS_TAB_FULL_STOP_FOCUS_DEFAULT = "allow"
+r""" Default value of the field path 'Rovr Config settings ipc permissions tab.focus' """
+
+_ROVR_CONFIG_SETTINGS_IPC_PERMISSIONS_TAB_FULL_STOP_HISTORY_DEFAULT = "allow"
+r""" Default value of the field path 'Rovr Config settings ipc permissions tab.history' """
+
+_ROVR_CONFIG_SETTINGS_IPC_PERMISSIONS_TAB_FULL_STOP_LIST_DEFAULT = "allow"
+r""" Default value of the field path 'Rovr Config settings ipc permissions tab.list' """
+
+_ROVR_CONFIG_SETTINGS_IPC_PERMISSIONS_TAB_FULL_STOP_NEW_DEFAULT = "allow"
+r""" Default value of the field path 'Rovr Config settings ipc permissions tab.new' """
 
 _ROVR_CONFIG_SETTINGS_OPENERS_GROUPS_ADDITIONALPROPERTIES_ITEM_ONEOF1_ORPHAN_DEFAULT = (
     True
@@ -1502,6 +1564,9 @@ class _RovrConfigSettings(TypedDict, total=False):
       []
     """
 
+    ipc: "_RovrConfigSettingsIpc"
+    r""" Settings related to the IPC server that allows external programs to control rovr """
+
 class _RovrConfigSettingsEditor(TypedDict, total=False):
     r"""Settings related to the editor used for different operations"""
 
@@ -1585,6 +1650,42 @@ class _RovrConfigSettingsEditorFolder(TypedDict, total=False):
 
     default: False
     """
+
+class _RovrConfigSettingsIpc(TypedDict, total=False):
+    r"""Settings related to the IPC server that allows external programs to control rovr"""
+
+    enabled: bool
+    r"""
+    Whether to enable the IPC server
+
+    default: False
+    """
+
+    permissions: "_RovrConfigSettingsIpcPermissions"
+    r""" Permissions for the IPC server """
+
+# | Permissions for the IPC server
+_RovrConfigSettingsIpcPermissions = TypedDict(
+    "_RovrConfigSettingsIpcPermissions",
+    {
+        "cd": "_IpcPerms",
+        "clipboard.copy": "_IpcPerms",
+        "clipboard.cut": "_IpcPerms",
+        "clipboard.list": "_IpcPerms",
+        "clipboard.paste": "_IpcPerms",
+        "tab.list": "_IpcPerms",
+        "tab.new": "_IpcPerms",
+        "tab.focus": "_IpcPerms",
+        "tab.close": "_IpcPerms",
+        "tab.history": "_IpcPerms",
+        "quit": "_IpcPerms",
+        "suspend": "_IpcPerms",
+        "notify": "_IpcNoPrompt",
+        "ask": "_IpcNoPrompt",
+        "input": "_IpcNoPrompt",
+    },
+    total=False,
+)
 
 class _RovrConfigSettingsOpeners(TypedDict, total=False):
     r"""Openers to open files with, grouped by name and matched against file paths by glob pattern."""

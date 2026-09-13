@@ -385,6 +385,11 @@ class Application(
         self.add_dnd_class_target(self._file_list_container)
         self.add_dnd_class_target(self._pinned_sidebar_container)
 
+        if config["settings"]["ipc"]["enabled"]:
+            from rovr.functions.ipc_receiver import start_server
+
+            start_server(self)
+
     @work
     async def _force_crash(self) -> None:
         await asyncio.sleep(self._force_crash_in)
@@ -589,7 +594,7 @@ class Application(
         has_selected: bool = False,
         callback: Callable | None = None,
         clear_search: bool = True,
-    ) -> Worker | None:
+    ) -> Worker | BaseException | None:
         # Makes sure `directory` is a directory, or chdir will fail with exception
         if self.return_code is not None:
             return
@@ -638,6 +643,8 @@ class Application(
                 # This can only happen if the app is in the process of shutting
                 # down, so we can just ignore this error
                 return
+            else:
+                return exc
 
     @work(thread=True)
     def watch_for_changes_and_update(self) -> None:

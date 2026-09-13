@@ -267,8 +267,9 @@ def cli(argv: list[str] | None = None) -> None:
     if args.ipc is not None:
         if not args.ipc:
             parser.error("--ipc requires a command")
+        import asyncio
+
         if args.ipc[0] == "list-instances":
-            import asyncio
             import json
 
             from rovr.functions.ipc_instances import discover_instances
@@ -277,13 +278,6 @@ def cli(argv: list[str] | None = None) -> None:
             IPC_PARSER.parse_args(args.ipc)
             print(json.dumps({"ok": True, "out": asyncio.run(discover_instances())}))
             return
-        if {"-h", "--help"} & set(args.ipc):
-            from rovr.functions.ipc_sender import IPC_PARSER
-
-            IPC_PARSER.parse_args(args.ipc)
-            return
-
-        import asyncio
 
         from rovr.functions.ipc_sender import send_message
 

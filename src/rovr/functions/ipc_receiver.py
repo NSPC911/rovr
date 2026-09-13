@@ -5,7 +5,7 @@ import json
 import os
 import secrets
 from functools import partial
-from typing import Any, Callable, Literal, TypedDict, cast
+from typing import Any, Literal, TypedDict, cast
 
 from textual import work
 from textual.worker import Worker
@@ -104,9 +104,15 @@ async def conn(
                         out = getcwd()
                     else:
                         worker = self.cd(p(args[0]))
-                        await worker.wait()
-                        out = getcwd()
-                except OSError as exc:
+                        if isinstance(worker, Worker):
+                            await worker.wait()
+                            out = getcwd()
+                        elif isinstance(worker, BaseException):
+                            raise worker
+                        else:
+                            ok = False
+                            err = "app possibly shutting down"
+                except Exception as exc:
                     ok = False
                     err = f"{type(exc).__name__}: {exc}"
         case "clipboard":
@@ -193,10 +199,7 @@ async def conn(
                             for path in args[1:]
                             if not (path in avail or path.startswith("--"))
                         ]
-                        func: Callable[
-                            [list[str], Literal["reselect", "select", "no"]],
-                            Worker[None],
-                        ] = (
+                        func = (
                             self.Clipboard.copy_to_clipboard
                             if args[0] == "copy"
                             else self.Clipboard.cut_to_clipboard
@@ -206,10 +209,9 @@ async def conn(
                             select = "select"
                         elif selection == "replace":
                             select = "reselect"
-                        func(avail, select)
-                        # confusingly i see func to return a None type, not a worker
-                        # so im not sure whether I can even await it
-                        # await worker.wait()
+                        w = func(avail, select)
+                        if isinstance(w, Worker):
+                            await w.wait()
                 case _:
                     ok = False
                     err = "clipboard action is not valid"

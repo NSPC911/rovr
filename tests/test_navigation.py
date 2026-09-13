@@ -254,6 +254,24 @@ async def test_tab_search(tmp_path: Path) -> None:
 
 
 @pytest.mark.asyncio
+async def test_tab_nav_keeps_selections(tmp_path: Path) -> None:
+    for i in range(10):
+        open(tmp_path / f"file{i}.txt", "w").close()
+
+    app = Application(startup_path=tmp_path.as_posix())
+    async with app.run_test(size=(143, 37)) as pilot:
+        await pilot.pause()
+        await app.file_list.toggle_mode()
+        await app.file_list.action_select_cursor(4)
+        await app.tabWidget.add_tab("", focus=True)
+        await pilot.pause()
+        app.tabWidget.action_next_tab()
+        await pilot.pause()
+        assert app.file_list.select_mode == "explicit"
+        assert app.file_list.selected
+
+
+@pytest.mark.asyncio
 async def test_tab_search_clears_on_navigation(tmp_path: Path) -> None:
     os.mkdir(tmp_path / "nested")
     open(tmp_path / "file0.txt", "w").close()

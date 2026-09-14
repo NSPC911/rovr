@@ -1347,10 +1347,10 @@ class PreviewContainer(Actionable, Container):
                         if should_cancel():
                             loading_timer.stop()
                             return
-        except PermissionError:
+        except OSError as exc:
             options = [
                 Selection(
-                    " Permission Error: Unable to access this directory.",
+                    f" {exc.strerror} (err no {exc.errno})",
                     id="",
                     value="",
                     disabled=True,

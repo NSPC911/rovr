@@ -603,7 +603,7 @@ class Application(
                 self.last_available_cd = directory
         except PermissionError as exc:
             self.notify(
-                f"You cannot enter into {directory}!\n{exc.strerror}",
+                f"{exc.strerror} (error no {exc.errno})",
                 title="App: cd",
                 severity="error",
                 markup=False,
@@ -611,7 +611,7 @@ class Application(
             return
         except FileNotFoundError:
             self.notify(
-                f"{directory}\nno longer exists!",
+                "Path no longer exists",
                 title="App: cd",
                 severity="error",
                 markup=False,

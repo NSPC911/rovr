@@ -462,10 +462,10 @@ class FileList(
                     if focus_on in name_to_index:
                         to_highlight_index = name_to_index[focus_on]
 
-            except PermissionError:
+            except OSError as exc:
                 self.list_of_options.append(
                     Selection(
-                        " Permission Error: Unable to access this directory.",
+                        f" {exc.strerror} (err no {exc.errno})",
                         value="",
                         id="perm",
                         disabled=True,

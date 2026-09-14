@@ -1,7 +1,7 @@
 import asyncio
 from contextlib import suppress
 from os import path
-from typing import ClassVar, Self, Sequence
+from typing import ClassVar, Literal, Self, Sequence
 
 from textual import events, work
 from textual.binding import BindingType
@@ -63,9 +63,11 @@ class Clipboard(
         return list(self._selected.keys())
 
     @work
-    async def copy_to_clipboard(self, items: list[str]) -> None:
+    async def copy_to_clipboard(
+        self, items: list[str], select: Literal["reselect", "select", "no"] = "reselect"
+    ) -> None:
         """Copy the selected files to the clipboard"""
-        self.deselect_all()
+        select == "reselect" and self.deselect_all()
         for item in items[::-1]:
             await asyncio.sleep(0)
             self.insert_selection_at_beginning(
@@ -77,13 +79,16 @@ class Clipboard(
                     type_of_selection="copy",
                 )
             )
-        for item_number in range(len(items)):
-            self.select(self.get_option_at_index(item_number))
+        if select != "no":
+            for item_number in range(len(items)):
+                self.select(self.get_option_at_index(item_number))
 
     @work
-    async def cut_to_clipboard(self, items: list[str]) -> None:
+    async def cut_to_clipboard(
+        self, items: list[str], select: Literal["reselect", "select", "no"] = "reselect"
+    ) -> None:
         """Cut the selected files to the clipboard."""
-        self.deselect_all()
+        select == "reselect" and self.deselect_all()
         for item in items[::-1]:
             await asyncio.sleep(0)
             if isinstance(item, str):
@@ -96,8 +101,9 @@ class Clipboard(
                         type_of_selection="cut",
                     )
                 )
-        for item_number in range(len(items)):
-            self.select(self.get_option_at_index(item_number))
+        if select != "no":
+            for item_number in range(len(items)):
+                self.select(self.get_option_at_index(item_number))
 
     # Why isnt this already a thing
     def insert_selection_at_beginning(self, selection: ClipboardSelection) -> None:

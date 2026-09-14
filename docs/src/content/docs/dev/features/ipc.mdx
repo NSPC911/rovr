@@ -1,0 +1,237 @@
+---
+title: IPC
+description: Control a running rovr instance through inter-process communication (IPC).
+---
+
+IPC lets another process send commands to a running rovr instance over a local connection. Start rovr with IPC enabled:
+
+```sh
+rovr --with settings.ipc
+```
+
+Use `--ipc` from a process launched by that instance. It reads `ROVR_IPC_PID` from the environment and loads the connection details from the instance's private descriptor:
+
+```sh
+rovr --ipc cd /path/to/directory
+```
+
+Use `--ipc-to` to target any running rovr instance by PID:
+
+```sh
+rovr --ipc-to <pid> cd /path/to/directory
+```
+
+List discoverable instances with:
+
+```sh
+rovr --ipc list-instances
+```
+
+```json title="list-instances"
+{
+  "ok": true,
+  "out": [
+    {
+      "pid": 12345,
+      "status": "running"
+    }
+  ]
+}
+```
+
+status may be `running` or `unresponsive`. rovr can be unresponsive if it was crashed, or is suspended
+
+Run `rovr --ipc --help` or `rovr --ipc <command> --help` for the CLI syntax.
+
+## Responses
+
+Every command prints one JSON object. Successful commands return `"ok": true` and may include `out`; failed commands return `"ok": false` and `err`.
+
+```json
+{ "ok": true, "out": "/path/to/directory" }
+```
+
+```json
+{ "ok": false, "err": "denied" }
+```
+
+IPC only listens on `127.0.0.1`, and each rovr instance generates a private token. The target instance still checks `settings.ipc.permissions` for every action.<br/>
+Permissions can be `allow`, `deny`, or `prompt`; unconfigured actions are denied. Subcommands use keys such as `clipboard.paste` and `tab.close`.
+
+`prompt` is unavailable for `notify`, `ask`, and `input` commands, which always require user interaction.
+
+## Commands
+
+### `cd`
+
+```sh
+rovr --ipc cd <path>
+```
+
+Changes the active tab's directory and returns the resulting directory. The sender expands `~` and environment variables and requires the path to exist.
+
+```json title="cd"
+{
+  "ok": true,
+  "out": "/path/to/directory"
+}
+```
+
+Filesystem errors from rovr are returned as errors.
+
+### `clipboard`
+
+```sh
+rovr --ipc clipboard copy [--selection keep|add|replace] <path>...
+rovr --ipc clipboard cut [--selection keep|add|replace] <path>...
+rovr --ipc clipboard paste
+rovr --ipc clipboard list
+```
+
+`copy` and `cut` add existing paths to rovr's clipboard. They return paths that did not exist.
+
+```json title="copy/cut"
+{
+  "ok": true,
+  "out": ["/path/to/missing/file"]
+}
+```
+
+`--selection` defaults to `keep`
+
+- `keep`: keeps current selections and do not select added items
+- `add`: selects the added items
+- `replace`: selects only the added items.
+
+`paste` pastes selected clipboard entries into the current directory and returns counts, not destination paths:
+
+```json title="paste"
+{
+  "ok": true,
+  "out": {
+    "copy": 2,
+    "cut": 1
+  }
+}
+```
+
+if the user intervenes due to errors, returns with `"ok": false`
+
+`list` returns every clipboard entry with its type and whether it is selected:
+
+```json title="list"
+{
+  "ok": true,
+  "out": [
+    {
+      "path": "/path/to/file",
+      "type": "copy",
+      "selected": true
+    }
+  ]
+}
+```
+
+### `tab`
+
+```sh
+rovr --ipc tab list
+rovr --ipc tab new [<path>] [--focus]
+rovr --ipc tab focus <index>
+rovr --ipc tab close <index>
+rovr --ipc tab history [<index>]
+```
+
+`list` returns `focused`, the active tab's index, and `tabs`, its directory paths.
+
+```json title="list"
+{
+  "ok": true,
+  "out": {
+    "focused": 0,
+    "tabs": ["/path/to/directory", "/path/to/other/directory"]
+  }
+}
+```
+
+`new` returns the new tab's `index` and `path`.
+
+```json title="new"
+{
+  "ok": true,
+  "out": {
+    "index": 2,
+    "path": "/path/to/directory"
+  }
+}
+```
+
+Without a path, it opens the current directory. `--focus` activates the new tab.
+
+`focus` activates an existing tab.
+
+`close` closes an existing tab. attempting to close the last tab returns an error.
+
+both don't return anything on success
+
+`history` defaults to the focused tab and returns the tab session's `directories` and `index` in that list.
+
+```json title="history"
+{
+  "ok": true,
+  "out": {
+    "directories": ["/path/to/directory", "/path/to/other/directory"],
+    "index": 1
+  }
+}
+```
+
+<br />index in that list gives the tab's current directory
+
+invalid tab indexes return `"tab index out of range"`.
+
+<br />closing a one-tab session returns `"cannot close the only tab"`.
+
+<br />if there are no focused tabs (which shouldn't happen), returns `"no active tab somehow"`
+
+### `notify`
+
+```sh
+rovr --ipc notify <message> [--title <title>] [--severity information|warning|error] [--markup] [--timeout <seconds>]
+```
+
+Displays a notification in rovr. Invalid notification options return `"invalid notification arguments"`.
+
+### `ask` and `input`
+
+```sh
+rovr --ipc ask <question>
+rovr --ipc input <prompt>
+```
+
+Both show a modal in rovr and wait for the user. `ask` returns a boolean `input` returns the entered string.
+
+```json title="ask"
+{
+  "ok": true,
+  "out": true
+}
+```
+
+```json title="input"
+{
+  "ok": true,
+  "out": "user input"
+}
+```
+
+### `quit` and `suspend`
+
+```sh
+rovr --ipc quit [--no-cd]
+rovr --ipc suspend
+```
+
+`quit` exits rovr. With `--no-cd`, rovr does not update its cwd file before quitting. It returns an error if running processes prevent the exit.
+
+`suspend` suspends rovr's process and is unavailable on Windows.

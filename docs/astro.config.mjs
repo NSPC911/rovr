@@ -115,6 +115,11 @@ export default defineConfig({
               badge: { text: "new", variant: "tip" },
             },
             { label: "integrations", slug: "features/plugins" },
+            {
+              label: "ipc",
+              slug: "features/ipc",
+              badge: { text: "new", variant: "tip" }
+            },
           ],
         },
         {

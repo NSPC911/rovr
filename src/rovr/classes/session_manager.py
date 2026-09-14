@@ -11,7 +11,6 @@ class SessionOptionDict(TypedDict):
     "Index of the option. Used as a fallback when `name` doesn't exist"
 
 
-# What is textual reactive?
 class SessionManager:
     """Manages session-related variables.
 

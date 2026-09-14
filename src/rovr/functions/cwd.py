@@ -35,7 +35,11 @@ class _WorkingDirectory:
             The logical current working directory.
         """
         with self._lock:
-            physical_cwd = os.getcwd()
+            try:
+                physical_cwd = os.getcwd()
+            except FileNotFoundError:
+                # The cwd has been deleted. Return the last known cwd
+                return self._logical_cwd
             if physical_cwd == self._physical_cwd:
                 return self._logical_cwd
 

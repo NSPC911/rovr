@@ -7,7 +7,7 @@ from textual.widgets import Tabs
 
 from rovr.app import Application
 from rovr.components import SearchInput
-from rovr.functions.cwd import getcwd
+from rovr.functions.cwd import chdir, getcwd
 from rovr.header.tabs import TablineTab
 from rovr.navigation_widgets import BackButton
 
@@ -41,6 +41,24 @@ async def test_navigation_preserves_directory_symlink(tmp_path: Path) -> None:
 
         await pilot.click("UpButton")
         await iter_until(pilot, lambda: getcwd() == tmp_path.as_posix())
+
+
+@pytest.mark.asyncio
+@pytest.mark.skipif(
+    os.name == "nt",
+    reason="Deleting directories that are in use is not allowed on Windows",
+)
+async def test_dir_returns_last_known(tmp_path: Path) -> None:
+    import shutil
+
+    target = tmp_path / "target" / "nested" / "dir"
+    target.mkdir(parents=True, exist_ok=True)
+    chdir(target.as_posix())
+    assert getcwd() == target.as_posix()
+    shutil.rmtree(tmp_path / "target")
+    assert getcwd() == target.as_posix()
+    with pytest.raises(FileNotFoundError):
+        os.getcwd()
 
 
 @pytest.mark.asyncio

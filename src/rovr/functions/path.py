@@ -296,13 +296,16 @@ def sync_get_cwd_object(
 
     Raises:
         TypeError: if the wrong type is received
-        PermissionError: When access to the directory is denied
+        FileNotFoundError: if the directory does not exist
+        PermissionError: if the directory cannot be accessed
+        OSError: if an OS-level error occurs during scanning
     """
 
     try:
         scanned_entries = os.scandir(cwd)
-    except (PermissionError, FileNotFoundError, OSError):
-        raise PermissionError(f"PermissionError: Unable to access {cwd}")
+    except (PermissionError, FileNotFoundError, OSError) as exc:
+        dom_node.log(exc)
+        raise
 
     with scanned_entries as entries:
         if (

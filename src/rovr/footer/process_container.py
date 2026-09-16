@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import os
 import shutil
 import sys
@@ -18,18 +20,13 @@ from textual.renderables.bar import Bar as BarRenderable
 from textual.types import UnusedParameter
 from textual.widgets import Label, ProgressBar
 
+import rovr.screens as screens
 from rovr.classes.mixins import Action, Actionable
 from rovr.classes.type_aliases import BarPanicDismissible, BarPanicNotify
 from rovr.functions import icons as icon_utils
 from rovr.functions import path as path_utils
 from rovr.functions.cwd import getcwd
 from rovr.functions.utils import is_being_used, should_cancel
-from rovr.screens import (
-    Dismissible,
-    FileInUse,
-    FileNameConflict,
-    YesOrNo,
-)
 from rovr.variables.constants import config, scroll_bindings
 
 if sys.version_info.major == 3 and sys.version_info.minor <= 13:
@@ -137,7 +134,7 @@ class ProgressBarContainer(VerticalGroup, inherit_bindings=False):
             self._set_panic_state(bar_text, notify)
 
         if dismiss_with:
-            dismissible = Dismissible(
+            dismissible = screens.Dismissible(
                 dismiss_with["message"], border_subtitle=dismiss_with["subtitle"]
             )
             if self.app._thread_id != get_ident():
@@ -270,11 +267,11 @@ class ProcessContainer(Actionable, VerticalScroll):
         while True:
             response = self.app.call_from_thread(
                 self.app.push_screen_wait,
-                FileInUse(
+                screens.FileInUse(
                     f"The file appears to be open elsewhere.\nHence, I cannot take any action on it.\nPath: {item_display_name}",
                 ),
             )
-            response = cast(FileInUse.ReturnType, response)
+            response = cast(screens.FileInUse.ReturnType, response)
             # Handle toggle: remember the action for future file-in-use scenarios
             updated_action = persisted_default
             if response["toggle"]:
@@ -599,14 +596,14 @@ class ProcessContainer(Actionable, VerticalScroll):
                         path_utils.dump_exc(self, exc)
                         do_what = self.app.call_from_thread(
                             self.app.push_screen_wait,
-                            YesOrNo(
+                            screens.YesOrNo(
                                 f"Trashing failed due to\n{exc}\nDo Permanent Deletion?",
                                 with_toggle=True,
                                 border_subtitle="If this is a bug, please file an issue!",
                                 destructive=True,
                             ),
                         )
-                        do_what = cast(YesOrNo.ReturnType, do_what)
+                        do_what = cast(screens.YesOrNo.ReturnType, do_what)
                         if do_what["toggle"]:
                             skip_trash = do_what["value"]
                         if do_what["value"]:
@@ -851,7 +848,7 @@ class ProcessContainer(Actionable, VerticalScroll):
                                 effective_action = "ask"
                             if effective_action == "ask":
                                 response = self.helper_push_and_get_filenameconflict(
-                                    FileNameConflict(
+                                    screens.FileNameConflict(
                                         (
                                             "Path already exists in destination\nWhat do you want to do now?"
                                             if not is_type_mismatch
@@ -1082,7 +1079,7 @@ class ProcessContainer(Actionable, VerticalScroll):
                         or action_on_existence == "overwrite"
                     ):
                         response = self.helper_push_and_get_filenameconflict(
-                            FileNameConflict(
+                            screens.FileNameConflict(
                                 "Cannot create a directory because destination is a file.\nWhat do you want to do now?",
                                 border_title=relative_loc,
                                 border_subtitle=f"Copying to {dest}",
@@ -1165,7 +1162,7 @@ class ProcessContainer(Actionable, VerticalScroll):
                                 destination_item
                             ) == path_utils.normalise(item_dict["path"])
                             response = self.helper_push_and_get_filenameconflict(
-                                FileNameConflict(
+                                screens.FileNameConflict(
                                     (
                                         "The target and destination files are the same"
                                         if same_file
@@ -1206,7 +1203,7 @@ class ProcessContainer(Actionable, VerticalScroll):
                 except shutil.SameFileError:
                     if action_on_existence == "ask":
                         response = self.helper_push_and_get_filenameconflict(
-                            FileNameConflict(
+                            screens.FileNameConflict(
                                 "Target and Destination are the same files.\nWhat do you want to do now?",
                                 border_title=item_dict["relative_loc"],
                                 border_subtitle=f"Copying to {dest}",
@@ -1284,7 +1281,7 @@ class ProcessContainer(Actionable, VerticalScroll):
                         or action_on_existence == "overwrite"
                     ):
                         response = self.helper_push_and_get_filenameconflict(
-                            FileNameConflict(
+                            screens.FileNameConflict(
                                 "Cannot create a directory because destination is a file.\nWhat do you want to do now?",
                                 border_title=relative_loc,
                                 border_subtitle=f"Moving to {dest}",
@@ -1376,7 +1373,7 @@ class ProcessContainer(Actionable, VerticalScroll):
                             effective_action = "ask"
                         if effective_action == "ask":
                             response = self.helper_push_and_get_filenameconflict(
-                                FileNameConflict(
+                                screens.FileNameConflict(
                                     (
                                         "The destination already has file of that name.\nWhat do you want to do now?"
                                         if not is_type_mismatch
@@ -1509,10 +1506,10 @@ class ProcessContainer(Actionable, VerticalScroll):
             shutil.copy(target, destination)
 
     def helper_push_and_get_filenameconflict(
-        self, screen: FileNameConflict
-    ) -> FileNameConflict.ReturnType:
+        self, screen: screens.FileNameConflict
+    ) -> screens.FileNameConflict.ReturnType:
         response = self.app.call_from_thread(self.app.push_screen_wait, screen)
-        return cast(FileNameConflict.ReturnType, response)
+        return cast(screens.FileNameConflict.ReturnType, response)
 
     @staticmethod
     def helper_rename(target: str) -> str:

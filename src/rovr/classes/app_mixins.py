@@ -30,6 +30,7 @@ from textual_drivers.dnd import (
     TextLabel,
 )
 
+import rovr.screens as screens
 from rovr import RESOURCE_PACKAGE, get_console
 from rovr.classes.textual_validators import (
     AllowsExistingFiles,
@@ -64,7 +65,6 @@ from rovr.header.tabs import TablineTab
 from rovr.navigation_widgets import (
     UpButton,
 )
-from rovr.screens import ModalInput, PasteDropScreen
 from rovr.variables.constants import config
 from rovr.variables.maps import RovrVars
 
@@ -174,12 +174,14 @@ class ThemeHandler:
         }
         self._theme_file_mtimes = mtimes
         active_theme = self.current_theme
-        errors = register_all_themes(self)
+        errors = register_all_themes(self, deferred=True)
+        current_theme = self.current_theme
+        current_css = getattr(current_theme, "css", "")
         # Theme's dataclass __eq__ ignores the injected css attribute, so a
         # rules-only edit needs its own comparison
-        if self.current_theme != active_theme or getattr(
-            self.current_theme, "css", ""
-        ) != getattr(active_theme, "css", ""):
+        if current_theme != active_theme or current_css != getattr(
+            active_theme, "css", ""
+        ):
             self._watch_theme(self.theme)
         if not errors:
             elapsed = (perf_counter() - started) * 1000
@@ -528,7 +530,8 @@ class DragAndDrop:
         accepted = dropping_to_pins or (
             event.pos in self.file_list.content_region
             and (
-                len(self.screen_stack) == 1 or isinstance(self.screen, PasteDropScreen)
+                len(self.screen_stack) == 1
+                or isinstance(self.screen, screens.PasteDropScreen)
             )
         )
         if accepted and not dropping_to_pins and self.state == "drag-out":
@@ -655,7 +658,7 @@ class DragAndDrop:
             if online:  # noqa: SIM102
                 online = sorted(online)
                 # check if it is a PasteDropScreen, if so, reject
-                if isinstance(self.screen, PasteDropScreen):
+                if isinstance(self.screen, screens.PasteDropScreen):
                     self.notify(
                         f"Received {len(online)} http(s) URI(s) which aren't supported on this screen",
                         title="DropData (NotImplemented)",
@@ -667,7 +670,7 @@ class DragAndDrop:
                     # links, please prove me wrong and open a bug report
                     assert len(online) == 1
                     resp: str | None = await self.push_screen_wait(
-                        ModalInput(
+                        screens.ModalInput(
                             "Save file as",
                             "existing file will be overwritten",
                             initial_value=path.basename(urlparse(online[0]).path),
@@ -706,7 +709,7 @@ class DragAndDrop:
                 return
             # no multi files, dont want to ask multiple times
             resp: str | None = await self.push_screen_wait(
-                ModalInput(
+                screens.ModalInput(
                     "Save file as",
                     "existing file will be overwritten",
                     initial_value=path.basename(urlparse(event.text).path),
@@ -723,7 +726,7 @@ class DragAndDrop:
     async def _show_paste_drop(
         self: App, event: events.Paste, destination: str
     ) -> None:
-        response = await self.push_screen_wait(PasteDropScreen(event))
+        response = await self.push_screen_wait(screens.PasteDropScreen(event))
         if response is not None and response.paths:
             process_container = self.query_one(ProcessContainer)
             match response.action:

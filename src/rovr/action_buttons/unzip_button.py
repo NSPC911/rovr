@@ -1,14 +1,16 @@
+from __future__ import annotations
+
 from os import path
 
 from textual import work
 from textual.widgets import Button
 
+import rovr.screens as screens
 from rovr.classes.textual_validators import IsValidFilePath
 from rovr.functions import utils
 from rovr.functions.cwd import getcwd
 from rovr.functions.icons import get_icon
 from rovr.functions.path import normalise
-from rovr.screens import ModalInput
 from rovr.variables.constants import config
 
 
@@ -54,7 +56,7 @@ class UnzipButton(Button):
         default_folder_name = archive_name.rsplit(".", 1)[0]
 
         response = await self.app.push_screen(
-            ModalInput(
+            screens.ModalInput(
                 border_title="Extract Archive",
                 border_subtitle=f"Extract '{archive_name}' to a new folder:",
                 initial_value=default_folder_name,

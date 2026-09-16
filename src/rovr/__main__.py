@@ -7,6 +7,7 @@
 # nuitka-project: --enable-plugins=no-qt
 # nuitka-project: --include-data-dir=src/rovr=_rovr
 # nuitka-project: --include-distribution-metadata=rovr
+# nuitka-project: --include-package=rovr.screens
 # nuitka-project: --nofollow-import-to="tkinter"
 # nuitka-project: --nofollow-import-to=aiohttp
 # nuitka-project: --onefile-cache-mode=cached

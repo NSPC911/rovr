@@ -5,6 +5,18 @@ All notable changes to this project will be documented in this file.
 The format is sort-of based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project sort-of adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.10.2.post1] - 2026-09-16
+
+### Fixed
+- `buttons`: more consistent colors [#363](https://github.com/NSPC911/rovr/pull/363)
+- `filelist`: deselect only if exiting select mode [b833a1b](https://github.com/NSPC911/rovr/commit/b833a1bac011f393c111dc6d0f32808f5367d0e0)
+- `cwd`: return last known cwd if cwd is nuked [8b4a36f](https://github.com/NSPC911/rovr/commit/8b4a36f8e7ba681fbedea5b46cf760dcd02ba821)
+- improve user facing errors [42b1c1b](https://github.com/NSPC911/rovr/commit/42b1c1b0f075bd23cdafff392bd0910959b29f54)
+
+### Performance
+- `screens`: defer import of screens [74cc95ce7a94517a064bd83a6c8be5611d4e139b](https://github.com/NSPC911/rovr/commit/) [2a3e3c4](https://github.com/NSPC911/rovr/commit/74cc95ce7a94517a064bd83a6c8be5611d4e139b)
+- `themes`: defer registering all themes except selected [775317d](https://github.com/NSPC911/rovr/commit/2a3e3c4355b8efedee59efc882bdfc271b0cb5b9)
+
 ## [0.10.2] - 2026-09-10
 
 ### Added
@@ -717,7 +729,8 @@ and this project sort-of adheres to [Semantic Versioning](https://semver.org/spe
 - `sort_order`: fix icon setting and tooltips
 - `style`: fix image and option padding/styling
 
-[Unreleased]: https://github.com/NSPC911/rovr/compare/v0.10.2...HEAD
+[Unreleased]: https://github.com/NSPC911/rovr/compare/v0.10.2.post1...HEAD
+[0.10.2.post1]: https://github.com/NSPC911/rovr/compare/v0.10.2...v0.10.2.post1
 [0.10.2]: https://github.com/NSPC911/rovr/compare/v0.10.1.post1...v0.10.2
 [0.10.1.post1]: https://github.com/NSPC911/rovr/compare/v0.10.1...v0.10.1.post1
 [0.10.1]: https://github.com/NSPC911/rovr/compare/v0.10.0...v0.10.1

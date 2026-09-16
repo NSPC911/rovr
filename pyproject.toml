@@ -1,6 +1,6 @@
 [project]
 name = "rovr"
-version = "0.10.2"
+version = "0.10.2.post1"
 description = "a stylish, batteries-included terminal file manager."
 readme = "README.md"
 requires-python = ">=3.13,<3.15"
@@ -124,14 +124,16 @@ schema-to-dict.help = "Convert the JSON schema into a Python TypedDict for inter
 schema-to-dict.sequence = [
   "_docscripts_setup",
   { cmd = "jsonschema-gentypes --json-schema ./src/rovr/assets/schema.json --python ./src/rovr/classes/config.pyi" },
-  "format"
+  { cmd = "ruff check --unsafe-fixes --fix ./src/rovr/classes/config.pyi" },
+  { cmd = "ruff format ./src/rovr/classes/config.pyi" },
 ]
 gen-ctx.help = ""
 gen-ctx.ref = "update-contexts"
 update-contexts.help = "Update set of key contexts in src/rovr/variables/maps.py"
 update-contexts.sequence = [
   { cmd = "docs/scripts/contexts.py" },
-  "format"
+  { cmd = "ruff check --unsafe-fixes --fix ./src/rovr/variables/maps.py" },
+  { cmd = "ruff format ./src/rovr/variables/maps.py" },
 ]
 
 check.help = "Run all checks (type checking and linting)"
@@ -209,6 +211,7 @@ use_exec = true
 args = [
   { name = "renderer", help = "Output format for the flamegraph (default: html)", default = "html", positional = true },
 ]
+env = { "ROVR_DISABLE_FORCE_EXIT" = "1" }
 
 [tool.pytest]
 testpaths = ["tests"]

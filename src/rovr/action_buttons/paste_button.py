@@ -1,11 +1,13 @@
+from __future__ import annotations
+
 from textual import work
 from textual.widgets import Button
 
+import rovr.screens as screens
 from rovr.classes.textual_options import ClipboardSelectionValue
 from rovr.functions.cwd import getcwd
 from rovr.functions.icons import get_icon
 from rovr.functions.utils import s
-from rovr.screens.paste_screen import PasteScreen
 from rovr.variables.constants import config
 
 
@@ -41,7 +43,7 @@ class PasteButton(Button):
             )
 
             result = await self.app.push_screen_wait(
-                PasteScreen(
+                screens.PasteScreen(
                     message="Are you sure you want to "
                     + (
                         f"copy {len(to_copy)} item{s(to_copy)}{s(to_cut, ' and ')}"

@@ -462,10 +462,10 @@ class FileList(
                     if focus_on in name_to_index:
                         to_highlight_index = name_to_index[focus_on]
 
-            except PermissionError:
+            except OSError as exc:
                 self.list_of_options.append(
                     Selection(
-                        " Permission Error: Unable to access this directory.",
+                        f" {exc.strerror} (err no {exc.errno})",
                         value="",
                         id="perm",
                         disabled=True,
@@ -759,7 +759,7 @@ class FileList(
         return self._options
 
     async def toggle_mode(
-        self, type: Literal["implicit", "explicit"] | None = "explicit"
+        self, mode: Literal["implicit", "explicit"] | None = "explicit"
     ) -> None:
         """Toggle the selection mode between select and normal."""
         if (
@@ -768,17 +768,18 @@ class FileList(
             and not self.select_mode
         ):
             return
-        if type is not None:
+        if mode is not None:
             if self.select_mode:
                 self.select_mode = False
             else:
-                self.select_mode = type
+                self.select_mode = mode
         self._line_cache.clear()
         self._option_render_cache.clear()
         self.refresh(layout=True, repaint=True)
         self.app.tabWidget.active_tab.session.selectMode = self.select_mode
-        with self.prevent(SelectionList.SelectedChanged):
-            self.deselect_all()
+        if mode is not None:
+            with self.prevent(SelectionList.SelectedChanged):
+                self.deselect_all()
         self.app.update_terminal_title()
         self.update_border_subtitle()
         if self.select_mode:

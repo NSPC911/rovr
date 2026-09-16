@@ -320,9 +320,9 @@ def _parse_mouse_code_extra_buttons(self: XTermParser, code: str) -> Message | N
         if x < 0 or y < 0:
             return None
         if (
-                self.mouse_pixels
-                and self.terminal_pixel_size is not None
-                and self.terminal_size is not None
+            self.mouse_pixels
+            and self.terminal_pixel_size is not None
+            and self.terminal_size is not None
         ):
             pixel_width, pixel_height = self.terminal_pixel_size
             width, height = self.terminal_size

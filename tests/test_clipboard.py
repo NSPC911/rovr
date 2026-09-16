@@ -5,7 +5,28 @@ from textual.worker import Worker
 
 from rovr.app import Application
 
-# no need to check deduplication, thats done in test_action_buttons
+
+@pytest.mark.parametrize("operation", ["copy_to_clipboard", "cut_to_clipboard"])
+@pytest.mark.asyncio
+async def test_duplicate_items_do_not_select_existing_options(
+    tmp_path: Path, operation: str
+) -> None:
+    existing = tmp_path / "existing.txt"
+    duplicate = tmp_path / "duplicate.txt"
+    app = Application(tmp_path.as_posix())
+    async with app.run_test(size=(143, 37)):
+        worker: Worker = app.Clipboard.copy_to_clipboard(
+            [existing.as_posix()], select="no"
+        )
+        await worker.wait()
+
+        worker = getattr(app.Clipboard, operation)([
+            duplicate.as_posix(),
+            duplicate.as_posix(),
+        ])
+        await worker.wait()
+
+        assert [item.path for item in app.Clipboard.selected] == [duplicate.as_posix()]
 
 
 @pytest.mark.asyncio

@@ -150,7 +150,7 @@ class Tabline(Tabs):
         before: Tab | str | None = None,
         after: Tab | str | None = None,
         focus: bool = True,
-    ) -> None:
+    ) -> TablineTab:
         """Add a new tab to the end of the tab list.
 
         Args:
@@ -163,22 +163,25 @@ class Tabline(Tabs):
         Note:
             Only one of `before` or `after` can be provided. If both are
             provided a `Tabs.TabError` will be raised.
-        """
-        """
+
         Returns:
-            An optionally awaitable object that waits for the tab to be mounted and
-                internal state to be fully updated to reflect the new tab.
+            The newly created TablineTab.
+
         Raises:
             Tabs.TabError: If there is a problem with the addition request.
         """
 
         tab = TablineTab(directory=directory, label=label)
-        await super().add_tab(tab, before=before, after=after)
+        try:
+            await super().add_tab(tab, before=before, after=after)
+        except Tabs.TabError:
+            raise
         if focus:
             self._activate_tab(tab)
         # redo max-width
         self.parent.on_resize()
         self.app.update_terminal_title()
+        return tab
 
     def remove_tab(self, tab_or_id: Tab | str | None) -> AwaitComplete:
         """Remove a tab.

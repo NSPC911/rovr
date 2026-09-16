@@ -67,6 +67,7 @@ class Clipboard(
         self, items: list[str], select: Literal["reselect", "select", "no"] = "reselect"
     ) -> None:
         """Copy the selected files to the clipboard"""
+        items = list(dict.fromkeys(items))
         select == "reselect" and self.deselect_all()
         for item in items[::-1]:
             await asyncio.sleep(0)
@@ -88,6 +89,7 @@ class Clipboard(
         self, items: list[str], select: Literal["reselect", "select", "no"] = "reselect"
     ) -> None:
         """Cut the selected files to the clipboard."""
+        items = list(dict.fromkeys(items))
         select == "reselect" and self.deselect_all()
         for item in items[::-1]:
             await asyncio.sleep(0)

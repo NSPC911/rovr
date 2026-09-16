@@ -189,11 +189,13 @@ async def conn(
                                 None,
                                 "invalid selection argument, must be one of keep, add, replace",
                             )
-                        avail = [
-                            p(path)
-                            for path in args[1:]
-                            if not path.startswith("--") and os.path.exists(path)
-                        ]
+                        avail = list(
+                            dict.fromkeys(
+                                p(path)
+                                for path in args[1:]
+                                if not path.startswith("--") and os.path.exists(path)
+                            )
+                        )
                         out: list[str] = [
                             path
                             for path in args[1:]

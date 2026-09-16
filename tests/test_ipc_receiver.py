@@ -168,7 +168,13 @@ async def test_conn_copies_existing_items(
         reader_for({
             "token": "secret",
             "action": "clipboard",
-            "args": ["copy", "--selection=replace", str(existing), "missing"],
+            "args": [
+                "copy",
+                "--selection=replace",
+                str(existing),
+                str(existing),
+                "missing",
+            ],
         }),
         cast(Any, writer),
         "secret",

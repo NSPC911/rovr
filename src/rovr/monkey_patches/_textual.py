@@ -26,6 +26,7 @@ from textual.css.types import EdgeType
 from textual.geometry import Region, Size
 from textual.keys import _character_to_key
 from textual.map_geometry import MapGeometry
+from textual.message import Message
 from textual.scrollbar import ScrollBar
 from textual.style import Style as TStyle
 from textual.widget import Widget
@@ -306,3 +307,72 @@ def _parse_extended_key(self: XTermParser, sequence: str) -> list[events.Key] | 
 
 
 XTermParser._parse_extended_key = _parse_extended_key  # ty: ignore
+
+
+# Support for additional mouse buttons (>= 128)
+def _parse_mouse_code_extra_buttons(self: XTermParser, code: str) -> Message | None:
+    sgr_match = self._re_sgr_mouse.match(code)
+    if sgr_match:
+        _buttons, _x, _y, state = sgr_match.groups()
+        buttons = int(_buttons)
+        x = float(int(_x) - 1)
+        y = float(int(_y) - 1)
+        if x < 0 or y < 0:
+            return None
+        if (
+                self.mouse_pixels
+                and self.terminal_pixel_size is not None
+                and self.terminal_size is not None
+        ):
+            pixel_width, pixel_height = self.terminal_pixel_size
+            width, height = self.terminal_size
+            x_ratio = pixel_width / width
+            y_ratio = pixel_height / height
+            x /= x_ratio
+            y /= y_ratio
+
+        delta_x = int(x) - int(self.last_x)
+        delta_y = int(y) - int(self.last_y)
+        self.last_x = x
+        self.last_y = y
+        event_class: type[events.MouseEvent]
+
+        if buttons & 64:
+            event_class = [
+                events.MouseScrollUp,
+                events.MouseScrollDown,
+                events.MouseScrollLeft,
+                events.MouseScrollRight,
+            ][buttons & 3]
+            button = 0
+        else:
+            # --- ADDED LOGIC FOR EXTRA BUTTONS ---
+            if buttons >= 128:  # noqa: SIM108
+                button = (buttons & 3) + 4
+            else:
+                button = (buttons + 1) & 3
+            # -------------------------------------
+
+            if buttons & 32 or button == 0:
+                event_class = events.MouseMove
+            else:
+                event_class = events.MouseDown if state == "M" else events.MouseUp
+
+        event = event_class(
+            None,
+            x,
+            y,
+            delta_x,
+            delta_y,
+            button,
+            bool(buttons & 4),
+            bool(buttons & 8),
+            bool(buttons & 16),
+            screen_x=x,
+            screen_y=y,
+        )
+        return event
+    return None
+
+
+XTermParser.parse_mouse_code = _parse_mouse_code_extra_buttons  # ty: ignore

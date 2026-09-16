@@ -339,6 +339,20 @@ Certain actions support expansions based on their state.
 
 Run `rovr --show-keys` to display the key name that will be used.
 
+### Mouse Buttons
+
+Mouse buttons 4-7 are supported as keys. If your mouse has extra keys and the terminal emulator supports
+SGR Extended Mouse Mode, you can bind them to actions. The key names are `mouse4`, `mouse5`,
+`mouse6`, and `mouse7`.
+
+Supported terminals based on testing:
+- kitty
+- Foot
+- XTerm
+- Tilix
+- Gnome Terminal
+- Ghostty
+
 ### Known key conflicts:
 
 these conflicts are from terminal emulators themselves, existing due to backwards compatibility.
@@ -359,6 +373,13 @@ and if another printable key is sent within 0.25 seconds, it will be counted as 
 but it exists if you want it
 
 obviously please use kitty keyboard protocol.
+
+### Extra Mouse Buttons
+
+Extra mouse buttons (`mouse4` through `mouse7`) can be used as keys in keybindings.
+Additionally, terminal emulator support for these mouse buttons is highly inconsistent.
+If these bindings do not trigger, it is a limitation of your terminal, not the application.
+Verify support in your specific terminal environment.
 
 ## MIGRATION FROM < 0.11.0
 

@@ -6,7 +6,9 @@ description: how rovr's file preview panel works.
 import { Aside } from "@astrojs/starlight/components";
 import InlineSVG from "@/components/InlineSVG.astro";
 
-`rovr` includes a powerful preview sidebar that can display the contents of various filetypes.
+## Supported preview types
+
+rovr supports a wide range of file types for previewing. the following are the main categories of files that can be previewed:
 
 ### text files
 
@@ -61,3 +63,25 @@ rovr makes use of [resvg-py](https://pypi.org/project/resvg-py) to render svg fi
 ![font preview](/rovr/screenshots/preview-font.png)
 
 for font files (like `.ttf`, `.otf`), rovr will display a preview of the font. you can customise the text used in the preview if you want to test extra things
+
+## Custom preview rules
+
+You can change the file type to preview association by modifying the `[settings.preview_rules]` section in your `config.toml`
+
+If your mime type is accurate enough (like `image/png`), you can omit the check and use the mime type only:
+
+```toml
+[settings.preview_rules]
+"image/png" = "image"
+```
+
+However, in the case of vague mime types like `application/gzip`, if you want to preview `.svgz` files as an svg instead of a failed archive file, you can use the following rule:
+
+```toml
+[settings.preview_rules."application/(x-)?gzip"]
+default = "archive"
+extensions = { svgz = "svg" }
+```
+
+In the above example, we are telling rovr that for files with mime type `application/gzip` and `application/x-gzip`, to use archive by default, except if the file ends with `.svgz`, and in that case, use the svg renderer
+

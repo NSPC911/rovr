@@ -45,6 +45,33 @@ r"""The values for the '_OsIfItemAnyof0' enum"""
 _OSIFITEMANYOF0_DARWIN: Literal["Darwin"] = "Darwin"
 r"""The values for the '_OsIfItemAnyof0' enum"""
 
+_PreviewType = (
+    Literal["text"]
+    | Literal["image"]
+    | Literal["pdf"]
+    | Literal["archive"]
+    | Literal["folder"]
+    | Literal["remime"]
+    | Literal["resvg"]
+    | Literal["font"]
+)
+_PREVIEWTYPE_TEXT: Literal["text"] = "text"
+r"""The values for the '_PreviewType' enum"""
+_PREVIEWTYPE_IMAGE: Literal["image"] = "image"
+r"""The values for the '_PreviewType' enum"""
+_PREVIEWTYPE_PDF: Literal["pdf"] = "pdf"
+r"""The values for the '_PreviewType' enum"""
+_PREVIEWTYPE_ARCHIVE: Literal["archive"] = "archive"
+r"""The values for the '_PreviewType' enum"""
+_PREVIEWTYPE_FOLDER: Literal["folder"] = "folder"
+r"""The values for the '_PreviewType' enum"""
+_PREVIEWTYPE_REMIME: Literal["remime"] = "remime"
+r"""The values for the '_PreviewType' enum"""
+_PREVIEWTYPE_RESVG: Literal["resvg"] = "resvg"
+r"""The values for the '_PreviewType' enum"""
+_PREVIEWTYPE_FONT: Literal["font"] = "font"
+r"""The values for the '_PreviewType' enum"""
+
 _RIGHT_CLICK_ACTION_ONEOF1_SHELL_DEFAULT = False
 r""" Default value of the field path 'right_click_action oneof1 shell' """
 
@@ -1528,7 +1555,7 @@ class _RovrConfigSettings(TypedDict, total=False):
 
     preview_rules: dict[str, "_RovrConfigSettingsPreviewRulesAdditionalproperties"]
     r"""
-    Map MIME type patterns to preview types. Uses regex patterns. Valid preview types: text, image, pdf, archive, folder, resvg, font, remime.
+    Map MIME type regex patterns to preview types. A rule can be a preview type string or a table with a default preview type and extension-specific refinements. Extension keys are lowercase and omit the leading dot.
     -> Use 'remime' if you want a more accurate description from file(1)
 
     default:
@@ -1738,34 +1765,21 @@ class _RovrConfigSettingsOpenersGroupsAdditionalpropertiesItemOneof1If(
     directory: bool
     r""" Only use this opener if the selected item is a directory (set to true) or a file (set to false) (if unspecified, matches both files and directories) """
 
-_RovrConfigSettingsPreviewRulesAdditionalproperties = (
-    Literal["text"]
-    | Literal["image"]
-    | Literal["pdf"]
-    | Literal["archive"]
-    | Literal["folder"]
-    | Literal["remime"]
-    | Literal["resvg"]
-    | Literal["font"]
-)
-_ROVRCONFIGSETTINGSPREVIEWRULESADDITIONALPROPERTIES_TEXT: Literal["text"] = "text"
-r"""The values for the '_RovrConfigSettingsPreviewRulesAdditionalproperties' enum"""
-_ROVRCONFIGSETTINGSPREVIEWRULESADDITIONALPROPERTIES_IMAGE: Literal["image"] = "image"
-r"""The values for the '_RovrConfigSettingsPreviewRulesAdditionalproperties' enum"""
-_ROVRCONFIGSETTINGSPREVIEWRULESADDITIONALPROPERTIES_PDF: Literal["pdf"] = "pdf"
-r"""The values for the '_RovrConfigSettingsPreviewRulesAdditionalproperties' enum"""
-_ROVRCONFIGSETTINGSPREVIEWRULESADDITIONALPROPERTIES_ARCHIVE: Literal["archive"] = (
-    "archive"
-)
-r"""The values for the '_RovrConfigSettingsPreviewRulesAdditionalproperties' enum"""
-_ROVRCONFIGSETTINGSPREVIEWRULESADDITIONALPROPERTIES_FOLDER: Literal["folder"] = "folder"
-r"""The values for the '_RovrConfigSettingsPreviewRulesAdditionalproperties' enum"""
-_ROVRCONFIGSETTINGSPREVIEWRULESADDITIONALPROPERTIES_REMIME: Literal["remime"] = "remime"
-r"""The values for the '_RovrConfigSettingsPreviewRulesAdditionalproperties' enum"""
-_ROVRCONFIGSETTINGSPREVIEWRULESADDITIONALPROPERTIES_RESVG: Literal["resvg"] = "resvg"
-r"""The values for the '_RovrConfigSettingsPreviewRulesAdditionalproperties' enum"""
-_ROVRCONFIGSETTINGSPREVIEWRULESADDITIONALPROPERTIES_FONT: Literal["font"] = "font"
-r"""The values for the '_RovrConfigSettingsPreviewRulesAdditionalproperties' enum"""
+_RovrConfigSettingsPreviewRulesAdditionalproperties = Union[
+    "_PreviewType", "_RovrConfigSettingsPreviewRulesAdditionalpropertiesOneof1"
+]
+r""" Aggregation type: oneOf """
+
+class _RovrConfigSettingsPreviewRulesAdditionalpropertiesOneof1(TypedDict, total=False):
+    default: Required["_PreviewType"]
+    r""" Required property """
+
+    extensions: Required[dict[str, "_PreviewType"]]
+    r"""
+    Map lowercase file extensions without a leading dot to preview types. These refine this MIME rule and take priority over its default.
+
+    Required property
+    """
 
 class _RovrConfigTheme(TypedDict, total=False):
     default: str

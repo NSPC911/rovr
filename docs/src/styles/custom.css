@@ -164,31 +164,6 @@ figure.frame {
     background: none;
   }
 }
-.site-title {
-  color: transparent;
-  &::before {
-    content: "   _____ ____  _   __ _____\a   / ___// __ \\| | / // ___/\a  / /   / /_/ /| |/ // /\a/_/    \\____/ |___//_/";
-    line-height: 1.25;
-    white-space: pre;
-    display: block;
-    position: absolute;
-    font-size: 0.5em;
-    color: var(--sl-color-accent);
-    transform: translateY(-0.25rem);
-    transition: color calc(var(--sl-transition-duration) / 2) linear;
-    font-weight: bolder;
-    font-variant-ligatures: none;
-    text-shadow:
-      1px 0 0 currentColor,
-      -1px 0 0 currentColor,
-      0 1px 0 currentColor,
-      0 -1px 0 currentColor,
-      1px 1px 0 currentColor,
-      -1px 1px 0 currentColor,
-      1px -1px 0 currentColor,
-      -1px -1px 0 currentColor;
-  }
-}
 starlight-lang-select {
   select {
     margin-inline-start: calc(var(--sl-inline-padding) * -1 + 0.75ch);

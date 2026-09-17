@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="none" role="img" aria-labelledby="title desc">
+  <title id="title">rovr</title>
+  <g stroke="#2E3440" stroke-width="12" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M170 88V55l18-13"/>
+    <circle cx="192" cy="39" r="9" stroke="none" fill="#2E3440"/>
+    <path d="M42 78a12 12 0 0 1 12-12h30l28 22h86a12 12 0 0 1 12 12v66a18 18 0 0 1-18 18H60a18 18 0 0 1-18-18Z" fill="#88C0D0"/>
+    <path d="m79 109 22 19-22 19m47 0h26"/>
+    <path d="M94 184v18M64 226v-24h58v24m58-42v42"/>
+    <circle cx="64" cy="226" r="15.3" fill="#2E3440" stroke="none"/>
+    <circle cx="122" cy="226" r="15.3" fill="#2E3440" stroke="none"/>
+    <circle cx="180" cy="226" r="15.3" fill="#2E3440" stroke="none"/>
+  </g>
+  <g fill="#88C0D0">
+    <circle cx="64" cy="226" r="7"/>
+    <circle cx="122" cy="226" r="7"/>
+    <circle cx="180" cy="226" r="7"/>
+    <circle cx="192" cy="39" stroke="none" fill="#88C0D0" r="6"/>
+  </g>
+</svg>
+

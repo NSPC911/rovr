@@ -227,6 +227,18 @@ r""" Default value of the field path 'Rovr Config plugins poppler threads' """
 _ROVR_CONFIG_PLUGINS_POPPLER_USE_PDFTOCAIRO_DEFAULT = False
 r""" Default value of the field path 'Rovr Config plugins poppler use_pdftocairo' """
 
+_ROVR_CONFIG_PLUGINS_RESVG_DPI_DEFAULT = 0
+r""" Default value of the field path 'Rovr Config plugins resvg dpi' """
+
+_ROVR_CONFIG_PLUGINS_RESVG_IMAGE_RENDERING_DEFAULT = "optimize_quality"
+r""" Default value of the field path 'Rovr Config plugins resvg image_rendering' """
+
+_ROVR_CONFIG_PLUGINS_RESVG_SHAPE_RENDERING_DEFAULT = "geometric_precision"
+r""" Default value of the field path 'Rovr Config plugins resvg shape_rendering' """
+
+_ROVR_CONFIG_PLUGINS_RESVG_TEXT_RENDERING_DEFAULT = "geometric_precision"
+r""" Default value of the field path 'Rovr Config plugins resvg text_rendering' """
+
 _ROVR_CONFIG_PLUGINS_RG_CASE_SENSITIVE_DEFAULT = True
 r""" Default value of the field path 'Rovr Config plugins rg case_sensitive' """
 
@@ -1255,6 +1267,7 @@ class _RovrConfigPlugins(TypedDict, total=False):
     rg: "_RovrConfigPluginsRg"
     poppler: "_RovrConfigPluginsPoppler"
     file_one: "_RovrConfigPluginsFileOne"
+    resvg: "_RovrConfigPluginsResvg"
 
 class _RovrConfigPluginsBat(TypedDict, total=False):
     enabled: bool
@@ -1420,6 +1433,96 @@ class _RovrConfigPluginsPoppler(TypedDict, total=False):
     default: 2
     minimum: 1
     """
+
+class _RovrConfigPluginsResvg(TypedDict, total=False):
+    dpi: int
+    r"""
+    The DPI to use when rendering SVGs. 0 means use the default DPI of the SVG
+
+    default: 0
+    """
+
+    shape_rendering: "_RovrConfigPluginsResvgShapeRendering"
+    r"""
+    The shape rendering option to use when rendering SVGs.
+
+    default: geometric_precision
+    """
+
+    text_rendering: "_RovrConfigPluginsResvgTextRendering"
+    r"""
+    The text rendering option to use when rendering SVGs.
+
+    default: geometric_precision
+    """
+
+    image_rendering: "_RovrConfigPluginsResvgImageRendering"
+    r"""
+    The image rendering option to use when rendering SVGs.
+
+    default: optimize_quality
+    """
+
+_RovrConfigPluginsResvgImageRendering = (
+    Literal["optimize_quality"] | Literal["optimize_speed"]
+)
+r"""
+The image rendering option to use when rendering SVGs.
+
+default: optimize_quality
+"""
+_ROVRCONFIGPLUGINSRESVGIMAGERENDERING_OPTIMIZE_QUALITY: Literal["optimize_quality"] = (
+    "optimize_quality"
+)
+r"""The values for the 'The image rendering option to use when rendering SVGs' enum"""
+_ROVRCONFIGPLUGINSRESVGIMAGERENDERING_OPTIMIZE_SPEED: Literal["optimize_speed"] = (
+    "optimize_speed"
+)
+r"""The values for the 'The image rendering option to use when rendering SVGs' enum"""
+
+_RovrConfigPluginsResvgShapeRendering = (
+    Literal["geometric_precision"] | Literal["crisp_edges"] | Literal["optimize_speed"]
+)
+r"""
+The shape rendering option to use when rendering SVGs.
+
+default: geometric_precision
+"""
+_ROVRCONFIGPLUGINSRESVGSHAPERENDERING_GEOMETRIC_PRECISION: Literal[
+    "geometric_precision"
+] = "geometric_precision"
+r"""The values for the 'The shape rendering option to use when rendering SVGs' enum"""
+_ROVRCONFIGPLUGINSRESVGSHAPERENDERING_CRISP_EDGES: Literal["crisp_edges"] = (
+    "crisp_edges"
+)
+r"""The values for the 'The shape rendering option to use when rendering SVGs' enum"""
+_ROVRCONFIGPLUGINSRESVGSHAPERENDERING_OPTIMIZE_SPEED: Literal["optimize_speed"] = (
+    "optimize_speed"
+)
+r"""The values for the 'The shape rendering option to use when rendering SVGs' enum"""
+
+_RovrConfigPluginsResvgTextRendering = (
+    Literal["geometric_precision"]
+    | Literal["optimize_legibility"]
+    | Literal["optimize_speed"]
+)
+r"""
+The text rendering option to use when rendering SVGs.
+
+default: geometric_precision
+"""
+_ROVRCONFIGPLUGINSRESVGTEXTRENDERING_GEOMETRIC_PRECISION: Literal[
+    "geometric_precision"
+] = "geometric_precision"
+r"""The values for the 'The text rendering option to use when rendering SVGs' enum"""
+_ROVRCONFIGPLUGINSRESVGTEXTRENDERING_OPTIMIZE_LEGIBILITY: Literal[
+    "optimize_legibility"
+] = "optimize_legibility"
+r"""The values for the 'The text rendering option to use when rendering SVGs' enum"""
+_ROVRCONFIGPLUGINSRESVGTEXTRENDERING_OPTIMIZE_SPEED: Literal["optimize_speed"] = (
+    "optimize_speed"
+)
+r"""The values for the 'The text rendering option to use when rendering SVGs' enum"""
 
 class _RovrConfigPluginsRg(TypedDict, total=False):
     enabled: bool

@@ -336,3 +336,10 @@ pdf_batch_size = 2
 [plugins.file_one]
 enabled = false
 get_description = true
+
+[plugins.resvg]
+# default enabled, cannot be disabled because its compiled in
+dpi = 0 # svg default
+shape_rendering = "geometric_precision"
+text_rendering = "geometric_precision"
+image_rendering = "optimize_quality"

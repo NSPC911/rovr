@@ -426,6 +426,11 @@ description: config schema humanified
   - [7.6. Property `Rovr Config > plugins > file_one`](#plugins_file_one)
     - [7.6.1. Property `Rovr Config > plugins > file_one > enabled`](#plugins_file_one_enabled)
     - [7.6.2. Property `Rovr Config > plugins > file_one > get_description`](#plugins_file_one_get_description)
+  - [7.7. Property `Rovr Config > plugins > resvg`](#plugins_resvg)
+    - [7.7.1. Property `Rovr Config > plugins > resvg > dpi`](#plugins_resvg_dpi)
+    - [7.7.2. Property `Rovr Config > plugins > resvg > shape_rendering`](#plugins_resvg_shape_rendering)
+    - [7.7.3. Property `Rovr Config > plugins > resvg > text_rendering`](#plugins_resvg_text_rendering)
+    - [7.7.4. Property `Rovr Config > plugins > resvg > image_rendering`](#plugins_resvg_image_rendering)
 
 **Title:** Rovr Config
 
@@ -5995,6 +6000,7 @@ Must be one of:
 | [rg](#plugins_rg)             | object |                   |
 | [poppler](#plugins_poppler)   | object |                   |
 | [file_one](#plugins_file_one) | object |                   |
+| [resvg](#plugins_resvg)       | object |                   |
 
 ### <a name="plugins_zoxide"></a>7.1. Property `Rovr Config > plugins > zoxide`
 
@@ -6479,5 +6485,77 @@ Must be one of:
 | **Default**  | `true`    |
 
 **Description:** Use file(1) to get additional information of the file type.
+
+### <a name="plugins_resvg"></a>7.7. Property `Rovr Config > plugins > resvg`
+
+|                           |             |
+| ------------------------- | ----------- |
+| **Type**                  | `object`    |
+| **Required**              | No          |
+| **Additional properties** | Not allowed |
+
+| Property                                          | Type             | Title/Description                                                          |
+| ------------------------------------------------- | ---------------- | -------------------------------------------------------------------------- |
+| [dpi](#plugins_resvg_dpi)                         | integer          | The DPI to use when rendering SVGs. 0 means use the default DPI of the SVG |
+| [shape_rendering](#plugins_resvg_shape_rendering) | enum (of string) | The shape rendering option to use when rendering SVGs.                     |
+| [text_rendering](#plugins_resvg_text_rendering)   | enum (of string) | The text rendering option to use when rendering SVGs.                      |
+| [image_rendering](#plugins_resvg_image_rendering) | enum (of string) | The image rendering option to use when rendering SVGs.                     |
+
+#### <a name="plugins_resvg_dpi"></a>7.7.1. Property `Rovr Config > plugins > resvg > dpi`
+
+|              |           |
+| ------------ | --------- |
+| **Type**     | `integer` |
+| **Required** | No        |
+| **Default**  | `0`       |
+
+**Description:** The DPI to use when rendering SVGs. 0 means use the default DPI of the SVG
+
+#### <a name="plugins_resvg_shape_rendering"></a>7.7.2. Property `Rovr Config > plugins > resvg > shape_rendering`
+
+|              |                         |
+| ------------ | ----------------------- |
+| **Type**     | `enum (of string)`      |
+| **Required** | No                      |
+| **Default**  | `"geometric_precision"` |
+
+**Description:** The shape rendering option to use when rendering SVGs.
+
+Must be one of:
+
+- "geometric_precision"
+- "crisp_edges"
+- "optimize_speed"
+
+#### <a name="plugins_resvg_text_rendering"></a>7.7.3. Property `Rovr Config > plugins > resvg > text_rendering`
+
+|              |                         |
+| ------------ | ----------------------- |
+| **Type**     | `enum (of string)`      |
+| **Required** | No                      |
+| **Default**  | `"geometric_precision"` |
+
+**Description:** The text rendering option to use when rendering SVGs.
+
+Must be one of:
+
+- "geometric_precision"
+- "optimize_legibility"
+- "optimize_speed"
+
+#### <a name="plugins_resvg_image_rendering"></a>7.7.4. Property `Rovr Config > plugins > resvg > image_rendering`
+
+|              |                      |
+| ------------ | -------------------- |
+| **Type**     | `enum (of string)`   |
+| **Required** | No                   |
+| **Default**  | `"optimize_quality"` |
+
+**Description:** The image rendering option to use when rendering SVGs.
+
+Must be one of:
+
+- "optimize_quality"
+- "optimize_speed"
 
 ---

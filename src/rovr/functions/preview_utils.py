@@ -201,7 +201,8 @@ def resample_file(file_path: str) -> Image.Image | None:
 def load_svg(file_path: str) -> bytes | None:
     parent_conn, child_conn = multiprocessing.Pipe()
     proc = multiprocessing.Process(
-        target=svg_image_worker, args=(child_conn, file_path)
+        target=svg_image_worker,
+        args=(child_conn, file_path, config["plugins"]["resvg"]),
     )
     start_process(proc)
     child_conn.close()
@@ -232,7 +233,7 @@ def load_svg(file_path: str) -> bytes | None:
 def load_svg_sync(file_path: str) -> bytes | None:
     from resvg_py import svg_to_bytes
 
-    return svg_to_bytes(svg_path=file_path)
+    return svg_to_bytes(svg_path=file_path, **config["plugins"]["resvg"])
 
 
 def resample_file_sync(file_path: str) -> Image.Image | None:

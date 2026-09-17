@@ -1674,6 +1674,35 @@
               "description": "Use file(1) to get additional information of the file type."
             }
           }
+        },
+        "resvg": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "dpi": {
+              "type": "integer",
+              "default": 0,
+              "description": "The DPI to use when rendering SVGs. 0 means use the default DPI of the SVG"
+            },
+            "shape_rendering": {
+              "type": "string",
+              "enum": ["geometric_precision", "crisp_edges", "optimize_speed"],
+              "default": "geometric_precision",
+              "description": "The shape rendering option to use when rendering SVGs."
+            },
+            "text_rendering": {
+              "type": "string",
+              "enum": ["geometric_precision", "optimize_legibility", "optimize_speed"],
+              "default": "geometric_precision",
+              "description": "The text rendering option to use when rendering SVGs."
+            },
+            "image_rendering": {
+              "type": "string",
+              "enum": ["optimize_quality", "optimize_speed"],
+              "default": "optimize_quality",
+              "description": "The image rendering option to use when rendering SVGs."
+            }
+          }
         }
       }
     }

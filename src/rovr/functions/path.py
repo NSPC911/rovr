@@ -50,16 +50,16 @@ def natsort_cacheless(key: str) -> tuple[str | int, ...]:
 
 
 def is_hidden_file(entry: os.DirEntry) -> bool:
-    """Check whether a ``DirEntry`` represents a hidden item.
+    """Check whether a `DirEntry` represents a hidden item.
 
     Args:
-        entry: A ``DirEntry`` from ``os.scandir``.
+        entry: A DirEntry from os.scandir.
 
     Returns:
-        ``True`` if the entry is hidden, ``False`` otherwise.
+        True if the entry is hidden, False otherwise.
     """
-    if entry.name.startswith(".") and sys.platform != "win32":
-        return True
+    if sys.platform not in ("win32", "darwin"):
+        return entry.name.startswith(".")
     try:
         file_stat = entry.stat(follow_symlinks=False)
     except OSError:

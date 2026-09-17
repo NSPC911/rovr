@@ -1426,7 +1426,7 @@ class PreviewContainer(Actionable, Container):
             or "-filelist-only" in self.screen.classes
         ):
             self._pending_preview_args = (file_path, mtime)
-            self._compute_and_sync_mime(file_path, mtime)
+            self.call_after_refresh(self._compute_and_sync_mime, file_path, mtime)
             return
         self._pending_preview_args = None
         self.perform_show_preview(file_path, mtime, token)

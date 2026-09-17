@@ -6,6 +6,8 @@ from textual.types import OptionDoesNotExist
 from textual.widgets import Input, OptionList, SelectionList
 from textual.widgets.option_list import Option
 from textual.widgets.selection_list import Selection, SelectionError
+
+# i know textual has its own Matcher, but if I use that, then Nuitka needs to compile it again, so I'm using this for consistency
 from textual_autocomplete.fuzzy_search import Matcher
 
 from rovr.functions.utils import set_scuffed_subtitle
@@ -75,10 +77,7 @@ class SearchInput(Input):
                                 self.items_list.get_option(option_id)
                             )
             return
-        self.items_list.clear_options()
-        matcher = Matcher(
-            event.value,
-        )
+        matcher = Matcher(event.value)
         assert hasattr(self.items_list, "list_of_options")
         assert isinstance(self.items_list.list_of_options, list)
         output: list[Option] = []
@@ -90,7 +89,7 @@ class SearchInput(Input):
             if (
                 self.always_add_disabled
                 and option.disabled
-                or (hasattr(option, "pseudo_disabled") and option.pseudo_disabled)
+                or getattr(option, "pseudo_disabled", False)
             ):
                 if segment:
                     segment.sort(key=lambda tup: (-tup[1], tup[2]))
@@ -107,17 +106,17 @@ class SearchInput(Input):
             output.extend(o for o, _, _ in segment)
         matches = output
         if matches:
-            self.items_list.add_options(matches)
+            self.items_list.set_options(matches)
         else:
             if self.item_list_type == "Option":
-                self.items_list.add_option(
-                    Option("   --no-matches--", id="", disabled=True)
-                )
+                self.items_list.set_options((
+                    Option("   --no-matches--", id="", disabled=True),
+                ))
                 self.call_next(self.app.query_one("PreviewContainer").remove_children)
             else:
-                self.items_list.add_option(
-                    Selection("   --no-matches--", value="", id="", disabled=True)
-                )
+                self.items_list.set_options((
+                    Selection("   --no-matches--", value="", id="", disabled=True),
+                ))
                 self.call_next(self.app.query_one("PreviewContainer").remove_children)
                 assert self.items_list.parent is not None
                 set_scuffed_subtitle(
@@ -136,8 +135,8 @@ class SearchInput(Input):
             else:
                 self.items_list.action_cursor_down()
         if self.item_list_type == "Selection":
-            for option_id in self.selected:
-                with contextlib.suppress(OptionDoesNotExist):
+            with contextlib.suppress(OptionDoesNotExist):
+                for option_id in self.selected:
                     if not self.items_list.select_mode:
                         with self.items_list.prevent(self.items_list.SelectedChanged):
                             self.items_list.select(
@@ -146,7 +145,7 @@ class SearchInput(Input):
                     else:
                         self.items_list.select(self.items_list.get_option(option_id))
 
-    def on_input_submitted(self, event: Input.Submitted) -> None:
+    def on_input_submitted(self) -> None:
         self.items_list.focus()
 
     def on_key(self, event: events.Key) -> None:

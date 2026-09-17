@@ -7,13 +7,13 @@ class _WorkingDirectory:
     """Synchronize Rovr's logical cwd with the process cwd."""
 
     def __init__(self) -> None:
-        """Initialize the context from the process cwd and inherited ``PWD``."""
+        """Initialize the context from the process cwd and inherited PWD."""
         self._lock = RLock()
         self._physical_cwd = os.getcwd()
         self._logical_cwd = self._initial_cwd()
 
     def _initial_cwd(self) -> str:
-        """Choose a valid logical cwd from the inherited ``PWD``.
+        """Choose a valid logical cwd from the inherited PWD.
 
         Returns:
             The validated logical cwd, or the physical cwd as a fallback.

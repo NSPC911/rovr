@@ -34,19 +34,19 @@ def get_subdirectories(parent: str | os.PathLike) -> Generator[os.DirEntry, None
 def should_exclude_hidden(path_str: str) -> bool:
     """Decide whether hidden entries must be excluded from autocomplete results.
 
-    When the user explicitly types something that starts with ``.`` we let
-    the dropdown show hidden entries so they can reach ``.config``, ``.local``,
+    When the user explicitly types something that starts with `.` we let
+    the dropdown show hidden entries so they can reach .config, .local,
     etc.  Otherwise hidden entries are filtered out.
 
-    The special component ``..`` always results in filtering because it
-    represents navigation rather than prefix matching.  Single ``.`` does
-    **not** filter — it acts as an explicit invitation to see dotfiles.
+    The special component `..` always results in filtering because it
+    represents navigation rather than prefix matching.  Single `.` does
+    not filter, it acts as an explicit invitation to see dotfiles.
 
     Args:
         path_str: The raw value inside the path input widget.
 
     Returns:
-        ``True`` when hidden entries should be filtered, ``False`` when they
+        True when hidden entries should be filtered, False when they
         should be listed.
     """
     # Never filter when the raw input is empty
@@ -111,9 +111,9 @@ def _unix_get_candidates(path_str: str) -> list[DropdownItem]:
 
 
 def _win_get_candidates(path_str: str) -> list[DropdownItem]:
-    """Windows-specific path autocomplete using ``scandir`` and ``DirEntry``.
+    """Windows-specific path autocomplete using scandir and DirEntry.
 
-    Handles drive-letter discovery, bare/drive inputs (``C``, ``C:``), and
+    Handles drive-letter discovery, bare/drive inputs (C, C:), and
     directory traversal on Windows.  Hidden directories are filtered unless
     the terminal component starts with a dot.
 
@@ -121,7 +121,7 @@ def _win_get_candidates(path_str: str) -> list[DropdownItem]:
         path_str: The raw value inside the Windows path input widget.
 
     Returns:
-        A list of ``DropdownItem`` suggestions, or an empty list when no
+        A list of DropdownItem suggestions, or an empty list when no
         candidates are available.
     """
     # Case 1: Empty string - return available drives

@@ -4,7 +4,7 @@ import contextlib
 import os
 from os import path
 from shutil import move
-from tempfile import NamedTemporaryFile
+from tempfile import NamedTemporaryFile, mkdtemp
 
 from textual import work
 from textual.widgets import Button
@@ -17,6 +17,82 @@ from rovr.functions.icons import get_icon
 from rovr.functions.path import dump_exc, normalise
 from rovr.functions.utils import command, run_command
 from rovr.variables.constants import config
+
+
+def multi_rename(cwd: str, renames: list[tuple[str, str]]) -> None:
+    # An unchanged file still occupies its name, so exclude it from the sources
+    # that this operation will make available.
+    renames = [(old, new) for old, new in renames if old != new]
+    sources = [path.join(cwd, old) for old, _ in renames]
+    targets = [path.join(cwd, new) for _, new in renames]
+    staging_names = [path.basename(path.normpath(source)) for source in sources]
+
+    # Validate the entire operation before moving anything to avoid partial renames.
+    if len(sources) != len(set(sources)):
+        raise ValueError("A source appears more than once.")
+    if len(targets) != len(set(targets)):
+        raise ValueError("Multiple files cannot be renamed to the same target.")
+    if not all(staging_names) or len(staging_names) != len(set(staging_names)):
+        raise ValueError("Sources must have unique file names.")
+
+    missing = [
+        old for (old, _), source in zip(renames, sources) if not path.exists(source)
+    ]
+    if missing:
+        raise FileNotFoundError(
+            f"Source don't exist: {missing[0]}"
+            + (f" (and {len(missing) - 1} more)" if len(missing) > 1 else "")
+        )
+
+    conflicts = [
+        new
+        for (_, new), target in zip(renames, targets)
+        if target not in set(sources) and path.exists(target)
+    ]
+    if conflicts:
+        raise FileExistsError(
+            f"Target already exists: {conflicts[0]}"
+            + (f" (and {len(conflicts) - 1} more)" if len(conflicts) > 1 else "")
+        )
+
+    staging_dir = mkdtemp(prefix=".rovr-rename-", dir=cwd)
+    staged: list[tuple[str, str, str]] = []
+    completed: list[tuple[str, str, str]] = []
+    try:
+        # use a temporary staging directory to avoid conflicts when renaming files in a cycle
+        # Original names also make an interrupted operation recoverable by hand.
+        for source, target, staging_name in zip(sources, targets, staging_names):
+            temporary = path.join(staging_dir, staging_name)
+            move(source, temporary)
+            staged.append((source, temporary, target))
+
+        for operation in staged:
+            move(operation[1], operation[2])
+            completed.append(operation)
+    except Exception as exc:
+        rollback_errors: list[Exception] = []
+        # Put completed targets back in staging before restoring original names;
+        # otherwise those targets may block another source in the same cycle.
+        for _, temporary, target in reversed(completed):
+            try:
+                move(target, temporary)
+            except Exception as rollback_exc:
+                rollback_errors.append(rollback_exc)
+        for source, temporary, _ in reversed(staged):
+            if path.exists(temporary):
+                try:
+                    move(temporary, source)
+                except Exception as rollback_exc:
+                    rollback_errors.append(rollback_exc)
+        if rollback_errors:
+            raise ExceptionGroup(
+                "Bulk rename failed and could not be fully rolled back",
+                [exc, *rollback_errors],
+            ) from exc
+        raise
+    finally:
+        with contextlib.suppress(OSError):
+            os.rmdir(staging_dir)
 
 
 class RenameItemButton(Button):
@@ -162,8 +238,8 @@ class RenameItemButton(Button):
                     )
                     return
                 cwd = getcwd()
-                already_exists: list[tuple[str, str]] = []
                 if show_as_mapping:
+                    renames = []
                     for line in lines:
                         if "➔" not in line:
                             # ignore
@@ -172,57 +248,28 @@ class RenameItemButton(Button):
                             old, new = map(str.strip, line.split("➔", 1))
                         except ValueError:
                             continue
-                        # do rename
-                        if path.exists(path.join(cwd, new)):
-                            already_exists.append((old, new))
-                            continue
-                        try:
-                            move(path.join(cwd, old), path.join(cwd, new))
-                            if old == highlighted_file:
-                                highlighted_file = new
-                        except Exception as exc:
-                            self.notify(
-                                f"Error renaming '{old}' to '{new}': {exc}",
-                                title="Rename",
-                                severity="error",
-                                markup=False,
-                            )
-                            dump_exc(self, exc)
+                        renames.append((old, new))
                 else:
-                    for old, new in zip(selected_files, lines):
-                        old = path.basename(old)
-                        new = new.strip()
-                        if path.exists(path.join(cwd, new)):
-                            already_exists.append((old, new))
-                            continue
-                        try:
-                            move(path.join(cwd, old), path.join(cwd, new))
-                            if old == highlighted_file:
-                                highlighted_file = new
-                        except Exception as exc:
-                            self.notify(
-                                f"Error renaming '{old}' to '{new}': {exc}",
-                                title="Rename",
-                                severity="error",
-                                markup=False,
-                            )
-                            dump_exc(self, exc)
-                # highlighting purposes
-                new_name = highlighted_file
-                if already_exists:
-                    from math import log as ln
-
-                    message_lines = [
-                        f"Could not rename '{old}' to '{new}': target already exists."
-                        for old, new in already_exists
+                    renames = [
+                        (path.basename(old), new.strip())
+                        for old, new in zip(selected_files, lines)
                     ]
+
+                try:
+                    multi_rename(cwd, renames)
+                    highlighted_file = dict(renames).get(
+                        highlighted_file, highlighted_file
+                    )
+                except Exception as exc:
                     self.notify(
-                        message="\n".join(message_lines),
+                        f"Failed due to {type(exc).__name__}:\n{exc}",
                         title="Bulk Rename",
                         severity="error",
-                        timeout=ln(len(message_lines)) + 3,
                         markup=False,
                     )
+                    dump_exc(self, exc)
+                # highlighting purposes
+                new_name = highlighted_file
             finally:
                 with contextlib.suppress(OSError):
                     os.unlink(temp_path)

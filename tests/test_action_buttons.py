@@ -1,5 +1,6 @@
 import os
 from pathlib import Path
+from shutil import move
 
 import pytest
 from textual.widgets import OptionList, SelectionList
@@ -14,6 +15,7 @@ from rovr.action_buttons import (
     UnzipButton,
     ZipButton,
 )
+from rovr.action_buttons.rename_item_button import multi_rename
 from rovr.action_buttons.sort_order import (
     SortOrderButton,
     SortOrderPopup,
@@ -281,6 +283,60 @@ async def test_rename_button(tmp_path: Path) -> None:
             ),
         )
         assert app.file_list.get_option_at_index(0).dir_entry.name == "renamed_file.txt"
+
+
+def test_bulk_rename_cycle(tmp_path: Path) -> None:
+    (tmp_path / "one.txt").write_text("one")
+    (tmp_path / "two.txt").write_text("two")
+    (tmp_path / "three.txt").write_text("three")
+
+    multi_rename(
+        tmp_path.as_posix(),
+        [
+            ("one.txt", "two.txt"),
+            ("two.txt", "three.txt"),
+            ("three.txt", "one.txt"),
+        ],
+    )
+
+    assert (tmp_path / "one.txt").read_text() == "three"
+    assert (tmp_path / "two.txt").read_text() == "one"
+    assert (tmp_path / "three.txt").read_text() == "two"
+
+
+def test_bulk_rename_keeps_original_name_if_interrupted(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    (tmp_path / "one.txt").write_text("one")
+    moves = 0
+
+    def interrupt_after_staging(source: str, target: str) -> None:
+        nonlocal moves
+        moves += 1
+        if moves == 2:
+            raise KeyboardInterrupt
+        move(source, target)
+
+    monkeypatch.setattr(
+        "rovr.action_buttons.rename_item_button.move", interrupt_after_staging
+    )
+
+    with pytest.raises(KeyboardInterrupt):
+        multi_rename(tmp_path.as_posix(), [("one.txt", "renamed.txt")])
+
+    staging_dir = next(tmp_path.glob(".rovr-rename-*"))
+    assert (staging_dir / "one.txt").read_text() == "one"
+
+
+def test_bulk_rename_rejects_existing_target_without_changes(tmp_path: Path) -> None:
+    (tmp_path / "one.txt").write_text("one")
+    (tmp_path / "existing.txt").write_text("existing")
+
+    with pytest.raises(FileExistsError, match="existing.txt"):
+        multi_rename(tmp_path.as_posix(), [("one.txt", "existing.txt")])
+
+    assert (tmp_path / "one.txt").read_text() == "one"
+    assert (tmp_path / "existing.txt").read_text() == "existing"
 
 
 @pytest.mark.asyncio

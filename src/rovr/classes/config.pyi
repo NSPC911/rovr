@@ -1555,7 +1555,7 @@ class _RovrConfigSettings(TypedDict, total=False):
 
     preview_rules: dict[str, "_RovrConfigSettingsPreviewRulesAdditionalproperties"]
     r"""
-    Map MIME type regex patterns to preview types. A rule can be a preview type string or a table with a default preview type and extension-specific refinements. Extension keys are lowercase and omit the leading dot.
+    Map MIME type regex patterns to preview types. Rules containing `.*` are evaluated after rules without it, with configuration order preserved within each group. A rule can be a preview type string or a table with a default preview type and extension-specific refinements. Extension keys are lowercase and omit the leading dot.
     -> Use 'remime' if you want a more accurate description from file(1)
 
     default:

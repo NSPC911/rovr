@@ -274,7 +274,7 @@ def match_mime_to_preview_type(
     import re
 
     rules = config["settings"]["preview_rules"]
-    for pattern, rule in rules.items():
+    for pattern, rule in sorted(rules.items(), key=lambda item: ".*" in item[0]):
         if re.compile(pattern).fullmatch(mime_type):
             if isinstance(rule, str):
                 return rule

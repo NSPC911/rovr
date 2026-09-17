@@ -568,7 +568,7 @@
             "application/font-.*": "font",
             "application/x-font-.*": "font"
           },
-          "description": "Map MIME type regex patterns to preview types. A rule can be a preview type string or a table with a default preview type and extension-specific refinements. Extension keys are lowercase and omit the leading dot.\n-> Use 'remime' if you want a more accurate description from file(1)"
+          "description": "Map MIME type regex patterns to preview types. Rules containing `.*` are evaluated after rules without it, with configuration order preserved within each group. A rule can be a preview type string or a table with a default preview type and extension-specific refinements. Extension keys are lowercase and omit the leading dot.\n-> Use 'remime' if you want a more accurate description from file(1)"
         },
         "openers": {
           "type": "object",

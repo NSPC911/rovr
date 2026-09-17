@@ -16,20 +16,29 @@ from rovr.variables.constants import config
 
 
 def _set_hidden_attribute(file_path: Path) -> bool:
-    if sys.platform != "win32":
+    if sys.platform not in ("win32", "darwin"):
         return True
-    try:
-        SetFileAttributesW = ctypes.windll.kernel32.SetFileAttributesW
-        SetFileAttributesW.argtypes = [ctypes.c_wchar_p, ctypes.c_uint32]
-        SetFileAttributesW.restype = ctypes.c_int
-        return bool(SetFileAttributesW(str(file_path), 0x02))
-    except (OSError, AttributeError):
-        return False
+    if sys.platform == "win32":
+        try:
+            SetFileAttributesW = ctypes.windll.kernel32.SetFileAttributesW
+            SetFileAttributesW.argtypes = [ctypes.c_wchar_p, ctypes.c_uint32]
+            SetFileAttributesW.restype = ctypes.c_int
+            return bool(SetFileAttributesW(str(file_path), 0x02))
+        except (OSError, AttributeError):
+            return False
+    else:
+        try:
+            import subprocess
+
+            subprocess.run(["chflags", "hidden", str(file_path)], check=True)
+            return True
+        except (OSError, subprocess.CalledProcessError):
+            return False
 
 
 @pytest.mark.asyncio
 async def test_hidden_file_adds_component_class(tmp_path: Path) -> None:
-    if sys.platform == "win32":
+    if sys.platform in ("win32", "darwin"):
         hidden_file = tmp_path / "hidden.txt"
         hidden_file.touch()
         if not _set_hidden_attribute(hidden_file):

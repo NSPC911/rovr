@@ -80,7 +80,7 @@ However, in the case of vague mime types like `application/gzip`, if you want to
 ```toml
 [settings.preview_rules."application/(x-)?gzip"]
 default = "archive"
-extensions = { svgz = "svg" }
+extensions = { svgz = "resvg" }
 ```
 
 In the above example, we are telling rovr that for files with mime type `application/gzip` and `application/x-gzip`, to use archive by default, except if the file ends with `.svgz`, and in that case, use the svg renderer

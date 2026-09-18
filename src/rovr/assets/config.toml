@@ -117,7 +117,7 @@ drive_exclude = ["/var/*"]
 
 [settings.preview_rules."application/(x-)?gzip"]
 default = "archive"
-extensions = { svgz = "resvg" }
+extensions = { "svgz" = "resvg" }
 
 [settings.openers.groups]
 # unset for the end user

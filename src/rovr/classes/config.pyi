@@ -45,6 +45,33 @@ r"""The values for the '_OsIfItemAnyof0' enum"""
 _OSIFITEMANYOF0_DARWIN: Literal["Darwin"] = "Darwin"
 r"""The values for the '_OsIfItemAnyof0' enum"""
 
+_PreviewType = (
+    Literal["text"]
+    | Literal["image"]
+    | Literal["pdf"]
+    | Literal["archive"]
+    | Literal["folder"]
+    | Literal["remime"]
+    | Literal["resvg"]
+    | Literal["font"]
+)
+_PREVIEWTYPE_TEXT: Literal["text"] = "text"
+r"""The values for the '_PreviewType' enum"""
+_PREVIEWTYPE_IMAGE: Literal["image"] = "image"
+r"""The values for the '_PreviewType' enum"""
+_PREVIEWTYPE_PDF: Literal["pdf"] = "pdf"
+r"""The values for the '_PreviewType' enum"""
+_PREVIEWTYPE_ARCHIVE: Literal["archive"] = "archive"
+r"""The values for the '_PreviewType' enum"""
+_PREVIEWTYPE_FOLDER: Literal["folder"] = "folder"
+r"""The values for the '_PreviewType' enum"""
+_PREVIEWTYPE_REMIME: Literal["remime"] = "remime"
+r"""The values for the '_PreviewType' enum"""
+_PREVIEWTYPE_RESVG: Literal["resvg"] = "resvg"
+r"""The values for the '_PreviewType' enum"""
+_PREVIEWTYPE_FONT: Literal["font"] = "font"
+r"""The values for the '_PreviewType' enum"""
+
 _RIGHT_CLICK_ACTION_ONEOF1_SHELL_DEFAULT = False
 r""" Default value of the field path 'right_click_action oneof1 shell' """
 
@@ -370,25 +397,27 @@ _ROVR_CONFIG_SETTINGS_OPENERS_GROUPS_ADDITIONALPROPERTIES_ITEM_ONEOF1_SHELL_DEFA
 r""" Default value of the field path 'Rovr Config settings openers groups additionalProperties item oneof1 shell' """
 
 _ROVR_CONFIG_SETTINGS_PREVIEW_RULES_DEFAULT = {
-    "text/.*": "text",
-    "application/(json|javascript|xml|raml\\+yaml)": "text",
-    "application/x-(yaml|script|pem-file|subrip|typescript)": "text",
-    "application/(mbox|ndjson|wine-extension-ini)": "text",
-    "image/svg\\+xml": "resvg",
-    "image/(avif|hei.|jxl)": "image",
-    "image/.*": "image",
-    "application/pdf": "pdf",
-    "application/(zip|gzip|zstd|bzip2|vnd\\.rar)": "archive",
-    "application/x-(xz|x-tar|x-gzip|x-bzip2|x-xz|x-rar|x-rar-compressed|x-7z-compressed)": "archive",
-    "application/(rar|7z.*|tar|xz|bzip.*|lzma|compress|archive|cpio|arj|xar|ms-cab.*)": "archive",
-    "application/(iso9660-image|qemu-disk|ms-wim|apple-diskimage)": "archive",
-    "application/virtualbox-(vhd|vhdx)": "archive",
     "application/(debian.*-package|redhat-package-manager|rpm|android\\.package-archive)": "archive",
-    "inode/directory": "folder",
-    "font/.*": "font",
+    "application/(iso9660-image|qemu-disk|ms-wim|apple-diskimage)": "archive",
+    "application/(rar|7z.*|tar|xz|bzip.*|lzma|compress|archive|cpio|arj|xar|ms-cab.*)": "archive",
+    "application/(zip|zstd|bzip2|vnd\\.rar)": "archive",
+    "application/java-archive": "archive",
+    "application/virtualbox-(vhd|vhdx)": "archive",
+    "application/x-(xz|tar|bzip2|xz|rar|rar-compressed|7z-compressed|zstd-compressed-tar)": "archive",
+    "application/(json|javascript|xml|raml\\+yaml)": "text",
+    "application/(mbox|ndjson|wine-extension-ini)": "text",
+    "application/x-(yaml|script|pem-file|subrip|typescript)": "text",
+    "application/vnd.openxmlformats-officedocument.wordprocessingml.document": "remime",
     "application/ms-opentype": "font",
+    "application/pdf": "pdf",
+    "image/svg\\+xml": "resvg",
+    "inode/directory": "folder",
     "application/font-.*": "font",
     "application/x-font-.*": "font",
+    "image/.*": "image",
+    "text/.*": "text",
+    "font/.*": "font",
+    "application/(x-)?gzip": {"default": "archive", "extensions": {"svgz": "resvg"}},
 }
 r""" Default value of the field path 'Rovr Config settings preview_rules' """
 
@@ -1631,7 +1660,7 @@ class _RovrConfigSettings(TypedDict, total=False):
 
     preview_rules: dict[str, "_RovrConfigSettingsPreviewRulesAdditionalproperties"]
     r"""
-    Map MIME type patterns to preview types. Uses regex patterns. Valid preview types: text, image, pdf, archive, folder, resvg, font, remime.
+    Map MIME type regex patterns to preview types. Rules containing `.*` are evaluated after rules without it, with configuration order preserved within each group. A rule can be a preview type string or a table with a default preview type and extension-specific refinements. Extension keys are lowercase and omit the leading dot.
     -> Use 'remime' if you want a more accurate description from file(1)
 
     default:
@@ -1640,16 +1669,21 @@ class _RovrConfigSettings(TypedDict, total=False):
       application/(json|javascript|xml|raml\+yaml): text
       application/(mbox|ndjson|wine-extension-ini): text
       application/(rar|7z.*|tar|xz|bzip.*|lzma|compress|archive|cpio|arj|xar|ms-cab.*): archive
-      application/(zip|gzip|zstd|bzip2|vnd\.rar): archive
+      application/(x-)?gzip:
+        default: archive
+        extensions:
+          svgz: resvg
+      application/(zip|zstd|bzip2|vnd\.rar): archive
       application/font-.*: font
+      application/java-archive: archive
       application/ms-opentype: font
       application/pdf: pdf
       application/virtualbox-(vhd|vhdx): archive
-      application/x-(xz|x-tar|x-gzip|x-bzip2|x-xz|x-rar|x-rar-compressed|x-7z-compressed): archive
+      application/vnd.openxmlformats-officedocument.wordprocessingml.document: remime
+      application/x-(xz|tar|bzip2|xz|rar|rar-compressed|7z-compressed|zstd-compressed-tar): archive
       application/x-(yaml|script|pem-file|subrip|typescript): text
       application/x-font-.*: font
       font/.*: font
-      image/(avif|hei.|jxl): image
       image/.*: image
       image/svg\+xml: resvg
       inode/directory: folder
@@ -1841,34 +1875,21 @@ class _RovrConfigSettingsOpenersGroupsAdditionalpropertiesItemOneof1If(
     directory: bool
     r""" Only use this opener if the selected item is a directory (set to true) or a file (set to false) (if unspecified, matches both files and directories) """
 
-_RovrConfigSettingsPreviewRulesAdditionalproperties = (
-    Literal["text"]
-    | Literal["image"]
-    | Literal["pdf"]
-    | Literal["archive"]
-    | Literal["folder"]
-    | Literal["remime"]
-    | Literal["resvg"]
-    | Literal["font"]
-)
-_ROVRCONFIGSETTINGSPREVIEWRULESADDITIONALPROPERTIES_TEXT: Literal["text"] = "text"
-r"""The values for the '_RovrConfigSettingsPreviewRulesAdditionalproperties' enum"""
-_ROVRCONFIGSETTINGSPREVIEWRULESADDITIONALPROPERTIES_IMAGE: Literal["image"] = "image"
-r"""The values for the '_RovrConfigSettingsPreviewRulesAdditionalproperties' enum"""
-_ROVRCONFIGSETTINGSPREVIEWRULESADDITIONALPROPERTIES_PDF: Literal["pdf"] = "pdf"
-r"""The values for the '_RovrConfigSettingsPreviewRulesAdditionalproperties' enum"""
-_ROVRCONFIGSETTINGSPREVIEWRULESADDITIONALPROPERTIES_ARCHIVE: Literal["archive"] = (
-    "archive"
-)
-r"""The values for the '_RovrConfigSettingsPreviewRulesAdditionalproperties' enum"""
-_ROVRCONFIGSETTINGSPREVIEWRULESADDITIONALPROPERTIES_FOLDER: Literal["folder"] = "folder"
-r"""The values for the '_RovrConfigSettingsPreviewRulesAdditionalproperties' enum"""
-_ROVRCONFIGSETTINGSPREVIEWRULESADDITIONALPROPERTIES_REMIME: Literal["remime"] = "remime"
-r"""The values for the '_RovrConfigSettingsPreviewRulesAdditionalproperties' enum"""
-_ROVRCONFIGSETTINGSPREVIEWRULESADDITIONALPROPERTIES_RESVG: Literal["resvg"] = "resvg"
-r"""The values for the '_RovrConfigSettingsPreviewRulesAdditionalproperties' enum"""
-_ROVRCONFIGSETTINGSPREVIEWRULESADDITIONALPROPERTIES_FONT: Literal["font"] = "font"
-r"""The values for the '_RovrConfigSettingsPreviewRulesAdditionalproperties' enum"""
+_RovrConfigSettingsPreviewRulesAdditionalproperties = Union[
+    "_PreviewType", "_RovrConfigSettingsPreviewRulesAdditionalpropertiesOneof1"
+]
+r""" Aggregation type: oneOf """
+
+class _RovrConfigSettingsPreviewRulesAdditionalpropertiesOneof1(TypedDict, total=False):
+    default: Required["_PreviewType"]
+    r""" Required property """
+
+    extensions: Required[dict[str, "_PreviewType"]]
+    r"""
+    Map lowercase file extensions without a leading dot to preview types. These refine this MIME rule and take priority over its default.
+
+    Required property
+    """
 
 class _RovrConfigTheme(TypedDict, total=False):
     default: str

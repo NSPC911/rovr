@@ -1508,6 +1508,7 @@ class PreviewContainer(Actionable, Container):
                     )
             else:
                 content = None  # for now
+                file_extension = path.splitext(file_path)[1]
                 mime_result = preview_utils.get_mime_type(file_path, mtime)
                 self.log(mime_result)
                 if mime_result is None:
@@ -1520,7 +1521,7 @@ class PreviewContainer(Actionable, Container):
                     return
 
                 file_type = preview_utils.match_mime_to_preview_type(
-                    mime_result.mime_type
+                    mime_result.mime_type, file_extension
                 )
                 if file_type is None:
                     self.log("Could not match MIME type to preview type")
@@ -1545,7 +1546,7 @@ class PreviewContainer(Actionable, Container):
                         )
                         return
                     file_type = preview_utils.match_mime_to_preview_type(
-                        mime_result.mime_type
+                        mime_result.mime_type, file_extension
                     )
                     if file_type is None:
                         self.log("Could not match MIME type to preview type")

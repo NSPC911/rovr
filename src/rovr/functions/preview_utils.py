@@ -257,6 +257,7 @@ def resample_batch_sync(images: list[PILImage]) -> list[PILImage]:
 @lru_cache(maxsize=256)
 def match_mime_to_preview_type(
     mime_type: str,
+    file_extension: str | None = None,
 ) -> (
     Literal["text", "image", "pdf", "archive", "folder", "remime", "resvg", "font"]
     | None
@@ -265,6 +266,7 @@ def match_mime_to_preview_type(
 
     Args:
         mime_type: The MIME type to match (e.g., "text/plain", "image/png")
+        file_extension: The file extension used to refine structured MIME rules
 
     Returns:
         str : The preview type ("text", "image", "pdf", "archive", "folder")
@@ -272,9 +274,15 @@ def match_mime_to_preview_type(
     """
     import re
 
-    for pattern, preview_type in config["settings"]["preview_rules"].items():
+    rules = config["settings"]["preview_rules"]
+    for pattern, rule in sorted(rules.items(), key=lambda item: ".*" in item[0]):
         if re.compile(pattern).fullmatch(mime_type):
-            return preview_type
+            if isinstance(rule, str):
+                return rule
+            extension = (
+                file_extension.casefold().removeprefix(".") if file_extension else ""
+            )
+            return rule["extensions"].get(extension, rule["default"])
     return None
 
 

@@ -76,11 +76,12 @@ def resample_file_worker(
 def svg_image_worker(
     conn: Connection,
     svg_path: str,
+    options: dict,
 ) -> None:
     from resvg_py import svg_to_bytes
 
     try:
-        conn.send(svg_to_bytes(svg_path=svg_path))
+        conn.send(svg_to_bytes(svg_path=svg_path, **options))
     except Exception as exc:
         conn.send(exc)
     finally:

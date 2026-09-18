@@ -336,3 +336,12 @@ pdf_batch_size = 2
 [plugins.file_one]
 enabled = false
 get_description = true
+
+[plugins.resvg]
+# might take in suggestions of extra options
+# but these seem the most reasonable to have configurations
+# refer to https://resvg-py.readthedocs.io/en/latest/api.html
+dpi = 0 # svg default
+shape_rendering = "geometric_precision"
+text_rendering = "geometric_precision"
+image_rendering = "optimize_quality"

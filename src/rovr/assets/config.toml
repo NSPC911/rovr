@@ -338,7 +338,9 @@ enabled = false
 get_description = true
 
 [plugins.resvg]
-# default enabled, cannot be disabled because its compiled in
+# might take in suggestions of extra options
+# but these seem the most reasonable to have configurations
+# refer to https://resvg-py.readthedocs.io/en/latest/api.html
 dpi = 0 # svg default
 shape_rendering = "geometric_precision"
 text_rendering = "geometric_precision"

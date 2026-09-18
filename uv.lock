@@ -1276,7 +1276,7 @@ requires-dist = [
     { name = "puremagic", specifier = ">=2.2.0" },
     { name = "pytrash", specifier = ">=0.4.0" },
     { name = "rarfile", specifier = ">=4.2" },
-    { name = "resvg-py", specifier = ">=0.3.1" },
+    { name = "resvg-py", specifier = ">=0.5.0" },
     { name = "rich", specifier = "==14.2.0" },
     { name = "textual", specifier = "~=8.0" },
     { name = "textual-autocomplete", specifier = ">=4.0.6" },

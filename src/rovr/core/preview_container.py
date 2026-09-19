@@ -61,17 +61,18 @@ from rovr.variables.constants import (
 
 titles = PreviewContainerTitles()
 
+T = TypeVar("T")
+preview_token: ContextVar[object] = ContextVar("preview_token")
 PREVIEWER_GROUP = "previewers"
 TEXT_PREVIEW_CACHE_VERSION = "windowed-v2"
 BAT_PREVIEW_CACHE_VERSION = "paged-v3"
 BAT_PREVIEW_PAGE_SIZE = 256
 BAT_PREVIEWER_GROUP = "bat-pages"
-T = TypeVar("T")
-preview_token: ContextVar[object] = ContextVar("preview_token")
 IMAGE_CACHE_SIGNATURE = (
     f"{preview_utils.MAX_IMAGE_SIZE[0]}x{preview_utils.MAX_IMAGE_SIZE[1]}",
     str(RESAMPLING_METHOD()),
 )
+RESVG_CACHE_SIGNATURE = (str(config["plugins"]["resvg"]), "resvg-v2")
 
 
 class ExitNow(RuntimeError): ...
@@ -542,7 +543,12 @@ class PreviewContainer(Actionable, Container):
         try:
             realpath = path.realpath(self._current_file_path)
             stat_result = os.stat(realpath)
-            pil_object = _load_cached_image(realpath, "svg", stat_result)
+            pil_object = _load_cached_image(
+                realpath,
+                "svg",
+                stat_result,
+                signature=RESVG_CACHE_SIGNATURE,
+            )
             if pil_object is None:
                 self.call_next(self.LOADER_WIDGET.set_status, "loading svg...")
                 if self.app.MULTIPROCESSING_PROCESS_ALLOWED:
@@ -590,7 +596,13 @@ class PreviewContainer(Actionable, Container):
                     pil_object = preview_utils.resample_sync(
                         Image.open(BytesIO(png_bytes))
                     )
-                _save_cached_image(realpath, "svg", stat_result, pil_object)
+                _save_cached_image(
+                    realpath,
+                    "svg",
+                    stat_result,
+                    pil_object,
+                    signature=RESVG_CACHE_SIGNATURE,
+                )
 
             if should_cancel():
                 return

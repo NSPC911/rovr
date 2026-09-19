@@ -205,6 +205,30 @@ class PathAutoCompleteInput(PathAutoComplete):
             self._target.has_focus or self.has_focus
         )
 
+    def get_search_string(self, target_state: TargetState) -> str:
+        if sys.platform != "win32":
+            return super().get_search_string(target_state)
+
+        current_input = target_state.text[: target_state.cursor_position]
+        separator_index = max(current_input.rfind("/"), current_input.rfind("\\"))
+        return current_input[separator_index + 1 :]
+
+    def apply_completion(self, value: str, state: TargetState) -> None:
+        if sys.platform != "win32":
+            super().apply_completion(value, state)
+            return
+
+        current_input = state.text[: state.cursor_position]
+        separator_index = max(current_input.rfind("/"), current_input.rfind("\\"))
+        path_prefix = current_input[: separator_index + 1]
+        with self.prevent(Input.Changed):
+            self.target.value = path_prefix + value
+            self.target.cursor_position = len(self.target.value)
+
+    def post_completion(self) -> None:
+        if not self.target.value.endswith(("/", os.sep)):
+            self.action_hide()
+
     def _compute_matches(
         self, target_state: TargetState, search_string: str
     ) -> list[DropdownItem]:

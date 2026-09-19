@@ -1,8 +1,13 @@
 import sys
 
 import pytest
+from textual.widgets import Input
+from textual_autocomplete import TargetState
 
-from rovr.navigation_widgets.path_input import should_exclude_hidden
+from rovr.navigation_widgets.path_input import (
+    PathAutoCompleteInput,
+    should_exclude_hidden,
+)
 
 
 def test_should_exclude_hidden_empty() -> None:
@@ -45,3 +50,11 @@ def test_should_exclude_hidden_trailing_slashes_no_separator() -> None:
     """Path with trailing slashes but no final component still filters
     (same behaviour as the original implementation)."""
     assert should_exclude_hidden("/home/foo///")
+
+
+@pytest.mark.skipif(sys.platform != "win32", reason="Need to be on Windows")
+def test_search_string_accepts_backslash_separator() -> None:
+    autocomplete = PathAutoCompleteInput(Input())
+    value = "C:/Users/example\\"
+
+    assert autocomplete.get_search_string(TargetState(value, len(value))) == ""

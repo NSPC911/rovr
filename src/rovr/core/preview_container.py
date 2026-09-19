@@ -683,6 +683,18 @@ class PreviewContainer(Actionable, Container):
                 ),
             )
             return
+        except NotImplementedError as exc:
+            if should_cancel():
+                return
+            self.call_from_thread(self.remove_children)
+            self.call_from_thread(
+                self.mount,
+                Static(
+                    f"Cannot render image\nContains {exc}",
+                    classes="special",
+                ),
+            )
+            return
         except FileNotFoundError:
             if should_cancel():
                 return

@@ -234,7 +234,10 @@ def _build_parser() -> argparse.ArgumentParser:
     return parser
 
 
-def _redirect_windows_standard_input(tty_in: TextIOWrapper) -> Callable[[], None]:
+def _redirect_windows_stdin(tty_in: TextIOWrapper) -> Callable[[], None]:
+    if os.name != "nt":
+        return lambda: None
+
     import ctypes
     import msvcrt
     from ctypes import wintypes
@@ -542,9 +545,7 @@ example_function(10)"""
                 open(open_stdout, "w") as tty_out,
                 open(open_stdin, "r") as tty_in,
             ):
-                restore_standard_input = (
-                    _redirect_windows_standard_input(tty_in) if os.name == "nt" else None
-                )
+                restore_standard_input = _redirect_windows_stdin(tty_in)
                 try:
                     sys.__stdout__ = sys.stdout = tty_out
                     sys.__stderr__ = sys.stderr = tty_out
@@ -560,8 +561,7 @@ example_function(10)"""
                         constants.COLOR_SYSTEM = "truecolor"
                     new_app().run()
                 finally:
-                    if restore_standard_input is not None:
-                        restore_standard_input()
+                    restore_standard_input()
         finally:
             sys.__stdout__ = sys.stdout = backup_stdout
             sys.__stderr__ = sys.stderr = backup_stderr

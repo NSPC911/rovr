@@ -339,6 +339,7 @@ class Application(
         self.call_later(self.call_later, self.post_mount)
         self._on_mount_done = True
         if self.is_headless:
+            # convenient to view logs on crashes, thats the only reason
             if sys.platform == "win32":
                 self._original_stderr = open(  # noqa: SIM115
                     "CONOUT$", "w", encoding="utf-8", errors="ignore"
@@ -363,17 +364,12 @@ class Application(
             self.query_one("#forward").tooltip = "Go forward in history"
             self.query_one("#up").tooltip = "Go up the directory tree"
 
-        # restore UI state from saved state file
         state_manager = self.query_one(StateManager)
         state_manager.restore_state()
-        # Apply folder-specific sort preferences for initial directory
         state_manager.apply_folder_sort_prefs(normalise(getcwd()))
-        # start mini watcher
         self.watch_for_changes_and_update()
-        # disable scrollbars
         self.show_horizontal_scrollbar = False
         self.show_vertical_scrollbar = False
-        # for show keys
         if self._show_keys:
             label = Label("", id="showKeys")
             self.query_one("#below_menu > HorizontalGroup").mount(
@@ -381,7 +377,8 @@ class Application(
             )
         self.file_list.update_border_subtitle()
         self.update_terminal_title()
-        # self.call_after_refresh(sleep, 1)
+        # update this in future for more widgets, but currently it is
+        # only targeting the two widgets, because performance
         self.add_dnd_class_target(self._file_list_container)
         self.add_dnd_class_target(self._pinned_sidebar_container)
 
@@ -503,10 +500,10 @@ class Application(
             markup=False,
         )
 
-    def on_app_blur(self, event: events.AppBlur) -> None:
+    def on_app_blur(self) -> None:
         self.app_blurred = True
 
-    def on_app_focus(self, event: events.AppFocus) -> None:
+    def on_app_focus(self) -> None:
         self.app_blurred = False
 
     def _set_mouse_over(self, widget: Widget | None, hover_widget: Widget | None) -> None:

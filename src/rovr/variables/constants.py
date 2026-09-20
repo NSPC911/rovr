@@ -116,14 +116,8 @@ bindings = (
         Binding(bind, "cursor_down", "Down", show=False)
         for bind in config["keybinds"]["down"]
     ]
-    + [
-        Binding(bind, "cursor_up", "Up", show=False)
-        for bind in config["keybinds"]["up"]
-    ]
-    + [
-        Binding(bind, "first", "First", show=False)
-        for bind in config["keybinds"]["home"]
-    ]
+    + [Binding(bind, "cursor_up", "Up", show=False) for bind in config["keybinds"]["up"]]
+    + [Binding(bind, "first", "First", show=False) for bind in config["keybinds"]["home"]]
     + [Binding(bind, "last", "Last", show=False) for bind in config["keybinds"]["end"]]
     + [
         Binding(bind, "page_down", "Page Down", show=False)

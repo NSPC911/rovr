@@ -32,9 +32,7 @@ def normalise(*location: str | bytes) -> str:
     # path.normalise fixes the relative references
     # replace \\ with / on windows
     # by any chance if somehow a \\\\ was to enter, fix that
-    return (
-        str(path.normpath(path.join(*location))).replace("\\", "/").replace("//", "/")
-    )
+    return str(path.normpath(path.join(*location))).replace("\\", "/").replace("//", "/")
 
 
 def _get_windows_drives() -> list[str]:
@@ -127,9 +125,7 @@ def get_mounted_drives(platform: str, config: "RovrConfig") -> list[str]:
             from string import ascii_uppercase
 
             drives: list[str] = [
-                f"{letter}:/"
-                for letter in ascii_uppercase
-                if path.isdir(f"{letter}:\\")
+                f"{letter}:/" for letter in ascii_uppercase if path.isdir(f"{letter}:\\")
             ]
         else:
             drives = ["/"]  # root should definitely exist right

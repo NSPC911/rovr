@@ -133,9 +133,7 @@ class SingleLineOptionLayoutMixin:
                 line_cache.index_to_line[index] = len(line_cache.lines)
                 line_count = 1 + int(option._divider)
                 line_cache.heights[index] = line_count
-                line_cache.lines.extend(
-                    (index, line_no) for line_no in range(line_count)
-                )
+                line_cache.lines.extend((index, line_no) for line_no in range(line_count))
 
         last_divider = self.options and self.options[-1]._divider
         width = self.scrollable_content_region.width - self._get_left_gutter_width()
@@ -334,9 +332,7 @@ class CursorNavigationMixin:
     def _cursor_page_destination(self, pages: float) -> int | None:
         if self.highlighted is None:
             enabled = [
-                index
-                for index, option in enumerate(self._options)
-                if not option.disabled
+                index for index, option in enumerate(self._options) if not option.disabled
             ]
             return enabled[-1 if pages > 0 else 0] if enabled else None
 

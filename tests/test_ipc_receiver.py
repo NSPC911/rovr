@@ -73,9 +73,7 @@ async def test_check_permission_uses_subaction_and_prompts(
 
     app = SimpleNamespace(push_screen=push_screen)
 
-    assert await ipc_receiver.check_permission(
-        cast(Any, app), "clipboard", ["copy", "a"]
-    )
+    assert await ipc_receiver.check_permission(cast(Any, app), "clipboard", ["copy", "a"])
     assert screens
 
 

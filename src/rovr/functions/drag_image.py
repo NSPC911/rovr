@@ -89,9 +89,7 @@ def render_drag_image(
                 radius=CORNER_RADIUS,
                 fill=(*background, 232),
             )
-            image.alpha_composite(
-                preview, ((width - preview.width) // 2, IMAGE_PADDING)
-            )
+            image.alpha_composite(preview, ((width - preview.width) // 2, IMAGE_PADDING))
             draw.text(
                 (width / 2, IMAGE_PADDING + preview.height + HEIGHT / 2),
                 text,
@@ -115,9 +113,7 @@ def render_drag_image(
     resolved_icon_color = _parse_color(icon_color, foreground)
 
     measure = ImageDraw.Draw(Image.new("RGBA", (1, 1)))
-    max_text_width = (
-        MAX_WIDTH - PADDING_X * 2 - ICON_SLOT_WIDTH - ICON_TEXT_GAP
-    ) * SCALE
+    max_text_width = (MAX_WIDTH - PADDING_X * 2 - ICON_SLOT_WIDTH - ICON_TEXT_GAP) * SCALE
     text = _fit_text(measure, _sanitize_text(text), text_font, max_text_width)
     text_width = round(measure.textlength(text, font=text_font) / SCALE)
     width = min(

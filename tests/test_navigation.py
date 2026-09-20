@@ -321,9 +321,7 @@ async def test_sidebar_search_does_not_override_tab_search(tmp_path: Path) -> No
         await pilot.pause()
         assert app.tabWidget.active_tab.session.search == "file"
 
-        sidebar_search = app.query_one("#pinned_sidebar_container").query_one(
-            SearchInput
-        )
+        sidebar_search = app.query_one("#pinned_sidebar_container").query_one(SearchInput)
         sidebar_search.value = "home"
         await pilot.pause()
 

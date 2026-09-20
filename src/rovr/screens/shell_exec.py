@@ -65,8 +65,6 @@ class ShellExec(ModalInput):
     def action_cycle_mode(self) -> None:
         self.horizontal_group.remove_class(f"in-bg--{str(self.in_bg).lower()}")
         self.in_bg = not self.in_bg
-        self.border_subtitle = (
-            "Run in background" if self.in_bg else "Run in foreground"
-        )
+        self.border_subtitle = "Run in background" if self.in_bg else "Run in foreground"
         self.horizontal_group.border_subtitle = self.border_subtitle
         self.horizontal_group.add_class(f"in-bg--{str(self.in_bg).lower()}")

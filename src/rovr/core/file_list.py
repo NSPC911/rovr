@@ -256,9 +256,7 @@ class FileList(
                 detail_segments.append(
                     Segment(
                         cell,
-                        self._detail_rich_style(
-                            f"filelist--detail-{column.type}", style
-                        ),
+                        self._detail_rich_style(f"filelist--detail-{column.type}", style),
                     )
                 )
         detail_segments.append(Segment(" ", style))
@@ -487,9 +485,7 @@ class FileList(
             for button in buttons:
                 button.disabled = should_disable
             if len(self.list_of_options) > 0:
-                self.app.query_one("#new").disabled = (
-                    self.list_of_options[0].id == "perm"
-                )
+                self.app.query_one("#new").disabled = self.list_of_options[0].id == "perm"
             else:
                 # this shouldn't happen, but just in case
                 self.app.query_one("#new").disabled = True
@@ -594,9 +590,7 @@ class FileList(
 
     async def file_selected_handler(self, paths: list[str]) -> None:
         if self.app._chooser_file:
-            self.app._chooser_paths = [
-                str(path_utils.normalise(item)) for item in paths
-            ]
+            self.app._chooser_paths = [str(path_utils.normalise(item)) for item in paths]
             self.call_next(self.app.action_quit)
             return
 
@@ -618,9 +612,7 @@ class FileList(
                 utils.run_command(
                     self.app,
                     cmd,
-                    run_type="orphan"
-                    if editor_config.get("orphan", True)
-                    else "suspend",
+                    run_type="orphan" if editor_config.get("orphan", True) else "suspend",
                     on_error=on_error,
                     shell=editor_config["shell"],
                 )
@@ -1170,9 +1162,7 @@ class FileList(
                 utils.run_command(
                     self.app,
                     utils.command(editor_config["run"], target_path),
-                    run_type="orphan"
-                    if editor_config.get("orphan", True)
-                    else "suspend",
+                    run_type="orphan" if editor_config.get("orphan", True) else "suspend",
                     on_error=lambda message, title: self.notify(
                         message=message, title=title, severity="error", markup=False
                     ),

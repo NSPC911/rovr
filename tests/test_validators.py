@@ -86,9 +86,7 @@ def test_mixed_relative_and_absolute_paths(
     # Test PathNoLongerExists
     exists_validator = PathNoLongerExists()
     assert not exists_validator.validate("existing.txt").is_valid  # relative, exists
-    assert not exists_validator.validate(
-        str(existing_file)
-    ).is_valid  # absolute, exists
+    assert not exists_validator.validate(str(existing_file)).is_valid  # absolute, exists
     assert exists_validator.validate(
         "non_existent.txt"
     ).is_valid  # relative, doesn't exist

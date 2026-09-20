@@ -151,10 +151,7 @@ def print_rich_help(parser: argparse.ArgumentParser) -> None:
     pprint(" ")
     # in cases where usage includes ansi sequnces, remove those as well
     usage = (
-        re
-        .sub(r"\x1B\[[^m]+m", "", parser.format_usage())
-        .strip()
-        .removeprefix("usage: ")
+        re.sub(r"\x1B\[[^m]+m", "", parser.format_usage()).strip().removeprefix("usage: ")
     )
     pprint(f" [bold]Usage:[/] {usage}")
     pprint(" ")

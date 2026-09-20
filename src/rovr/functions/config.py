@@ -104,9 +104,7 @@ def deep_merge(old: dict, new: dict) -> dict:
         for prefix, base, values in modifiers:
             target = result.get(base, old.get(base))
             if isinstance(target, list):
-                result[base] = (
-                    values + target if prefix == "prepend" else target + values
-                )
+                result[base] = values + target if prefix == "prepend" else target + values
     except TypeError as exc:
         if locals().get("key") is None and locals().get("value") is None:
             pprint(
@@ -415,9 +413,7 @@ def schema_dump(
 
     if lineno is None:
         # fallback to infoless error display
-        pprint(
-            f"[underline bright_red]Config Error[/] at path [bold cyan]{path_str}[/]:"
-        )
+        pprint(f"[underline bright_red]Config Error[/] at path [bold cyan]{path_str}[/]:")
         msg, failed = get_message(exception)
         if failed:
             pprint(f"[yellow]{msg}[/]")
@@ -623,9 +619,9 @@ def load_config() -> tuple[dict, RovrConfig]:
             config_dict["settings"]["editor"][key]["run"] = expanded_run
 
     # pdf fixer
-    if config_dict["plugins"]["poppler"]["enabled"] and config_dict["plugins"][
-        "poppler"
-    ]["poppler_folder"].lower() in ("", "path"):
+    if config_dict["plugins"]["poppler"]["enabled"] and config_dict["plugins"]["poppler"][
+        "poppler_folder"
+    ].lower() in ("", "path"):
         pdfinfo_executable = which("pdfinfo")
         pdfinfo_path: str | None = None
         if pdfinfo_executable is None:
@@ -670,8 +666,7 @@ def validate_keys(keys: KeysConfig) -> list[str]:
                 name in valid_key_names
             )
             valid_modifier_list = (
-                modifiers == sorted(set(modifiers))
-                and set(modifiers) <= valid_modifiers
+                modifiers == sorted(set(modifiers)) and set(modifiers) <= valid_modifiers
             )
             if not valid_name or not valid_modifier_list:
                 errors.append(f'Invalid key "{key}" in [{section}]')

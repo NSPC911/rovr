@@ -308,9 +308,7 @@ class TrashScreen(Actionable, ModalScreen):
         self, event: SelectionList.SelectedChanged
     ) -> None:
         for button_id in ("#restore", "#purge"):
-            self.query_one(
-                button_id, Button
-            ).disabled = not event.selection_list.selected
+            self.query_one(button_id, Button).disabled = not event.selection_list.selected
 
     def _selected_entries(self) -> list[TrashEntry]:
         selection_list = self.query_one("#trash_entries", TrashSelectionList)

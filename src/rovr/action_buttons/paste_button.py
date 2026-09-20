@@ -35,11 +35,7 @@ class PasteButton(Button):
                     for item in selected_items
                     if item.type_of_selection == "copy"
                 ],
-                [
-                    item.path
-                    for item in selected_items
-                    if item.type_of_selection == "cut"
-                ],
+                [item.path for item in selected_items if item.type_of_selection == "cut"],
             )
 
             result = await self.app.push_screen_wait(

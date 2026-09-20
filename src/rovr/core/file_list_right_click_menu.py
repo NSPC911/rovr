@@ -302,9 +302,7 @@ class FileListRightClickChildMenu(PopupOptionList, inherit_bindings=False):
     key_contexts = ("file_list_submenu", "popup_list", "lists")
     BINDINGS: ClassVar[list[BindingType]] = list(bindings)
 
-    target_option: var[RightClickMenuOption] = var(
-        RightClickMenuOption("", action=None)
-    )
+    target_option: var[RightClickMenuOption] = var(RightClickMenuOption("", action=None))
 
     def __init__(
         self,

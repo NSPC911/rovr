@@ -106,9 +106,7 @@ class PinnedSidebar(
                     )
                 )
                 id_list.append(new_id)
-        self.list_of_options.append(
-            Option(" Pinned", id="pinned-header", disabled=True)
-        )
+        self.list_of_options.append(Option(" Pinned", id="pinned-header", disabled=True))
         for pin in pins:
             try:
                 pin["path"]
@@ -124,11 +122,7 @@ class PinnedSidebar(
                     )
                 else:
                     pass
-            if (
-                "icon" in pin
-                and isinstance(pin["icon"], list)
-                and len(pin["icon"]) == 2
-            ):
+            if "icon" in pin and isinstance(pin["icon"], list) and len(pin["icon"]) == 2:
                 # statically analyzed, it is impossible, but because there
                 # is no way to tell json it is an immutable list, and type
                 # hint is tuple for pin["icon"], this will work in runtime,
@@ -151,9 +145,7 @@ class PinnedSidebar(
                     )
                 )
                 id_list.append(new_id)
-        self.list_of_options.append(
-            Option(" Drives", id="drives-header", disabled=True)
-        )
+        self.list_of_options.append(Option(" Drives", id="drives-header", disabled=True))
         if self.app.return_code is not None:
             return
         self.refresh_drives(id_list, prev_highlighted, drives)
@@ -186,9 +178,7 @@ class PinnedSidebar(
             if prev_highlighted is not None and prev_highlighted < len(
                 self.list_of_options
             ):
-                self.app.call_from_thread(
-                    setattr, self, "highlighted", prev_highlighted
-                )
+                self.app.call_from_thread(setattr, self, "highlighted", prev_highlighted)
         except DuplicateID:
             # definitely a race condition, still unsure how this can happen
             # check for running workers first
@@ -230,9 +220,7 @@ class PinnedSidebar(
             return
         if not path.isdir(file_path):
             if path.exists(file_path):
-                raise FolderNotFileError(
-                    f"Expected a folder but got a file: {file_path}"
-                )
+                raise FolderNotFileError(f"Expected a folder but got a file: {file_path}")
             else:
                 return
         self.app.cd(file_path, clear_search=True)

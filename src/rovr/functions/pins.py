@@ -154,9 +154,7 @@ def load_pins() -> PinsDict:
                 for var in vars(RovrVars):
                     if var.startswith(("__", "ROVR")):
                         continue
-                    item["path"] = item["path"].replace(
-                        f"${var}", getattr(RovrVars, var)
-                    )
+                    item["path"] = item["path"].replace(f"${var}", getattr(RovrVars, var))
                 # Normalize to forward slashes
                 item["path"] = normalise(str(item["path"]))
     pins = _pins
@@ -249,10 +247,7 @@ def toggle_pin(pin_name: str, pin_path: str) -> None:
     pin_exists = False
     if "pins" in pins:
         for pin_item in pins["pins"]:
-            if (
-                isinstance(pin_item, dict)
-                and pin_item.get("path") == pin_path_normalized
-            ):
+            if isinstance(pin_item, dict) and pin_item.get("path") == pin_path_normalized:
                 pin_exists = True
                 break
 

@@ -16,9 +16,7 @@ class PinnedSidebarContainer(VerticalGroup):
         self.pinned_sidebar = PinnedSidebar(id="pinned_sidebar")
 
     def compose(self) -> ComposeResult:
-        yield SearchInput(
-            placeholder=f"{icons.get_icon('general', 'search')[0]} Search"
-        )
+        yield SearchInput(placeholder=f"{icons.get_icon('general', 'search')[0]} Search")
         yield self.pinned_sidebar
 
     def on_click(self, event: events.Click) -> None:

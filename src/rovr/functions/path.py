@@ -78,9 +78,9 @@ def is_hidden_file(entry: os.DirEntry) -> bool:
 # not begin with a number
 def compress(text: Any) -> str:
     text = str(text)
-    return "u_" + base64.urlsafe_b64encode(text.encode("utf-8")).decode(
-        "ascii"
-    ).replace("=", "_")
+    return "u_" + base64.urlsafe_b64encode(text.encode("utf-8")).decode("ascii").replace(
+        "=", "_"
+    )
 
 
 def decompress(text: str) -> str:
@@ -238,9 +238,7 @@ def sorter(
     try:
         match sort_st:
             case "birthtime":
-                return (
-                    get_birthtime(thing["dir_entry"].stat(follow_symlinks=False)) or 0
-                )
+                return get_birthtime(thing["dir_entry"].stat(follow_symlinks=False)) or 0
             case "mtime":
                 return thing["dir_entry"].stat(follow_symlinks=False).st_mtime_ns
             case "size":
@@ -267,9 +265,7 @@ def sync_get_cwd_object(
     sort_by: SortByOptions | None = "name",
     reverse: bool = False,
     return_nothing_if_this_returns_true: Callable[[], bool] | None = None,
-) -> (
-    tuple[list[CWDObjectReturnDict], list[CWDObjectReturnDict]] | tuple[None, None]
-): ...
+) -> tuple[list[CWDObjectReturnDict], list[CWDObjectReturnDict]] | tuple[None, None]: ...
 
 
 def sync_get_cwd_object(
@@ -359,9 +355,7 @@ def sync_get_cwd_object(
             if len(folders) < 1024:
                 folders.sort(key=lambda x: natsort(x["name"]), reverse=reverse)
             else:
-                folders.sort(
-                    key=lambda x: natsort_cacheless(x["name"]), reverse=reverse
-                )
+                folders.sort(key=lambda x: natsort_cacheless(x["name"]), reverse=reverse)
             if len(files) < 1024:
                 files.sort(key=lambda x: natsort(x["name"]), reverse=reverse)
             else:

@@ -41,9 +41,7 @@ class DeleteFiles(ModalScreen):
                     )
             else:
                 yield Button(f"\\[{delete_bind}] Delete", variant="error", id="delete")
-                yield Button(
-                    f"\\[{cancel_bind}] Cancel", variant="primary", id="cancel"
-                )
+                yield Button(f"\\[{cancel_bind}] Cancel", variant="primary", id="cancel")
 
     def on_mount(self) -> None:
         self.query_one("#cancel").focus()

@@ -596,9 +596,7 @@ class DragAndDrop:
             (normalise(getcwd()), False),
         )
         if event.mime == "text/plain":
-            event.data = (
-                event.data.decode("utf-8", errors="ignore").strip().splitlines()
-            )
+            event.data = event.data.decode("utf-8", errors="ignore").strip().splitlines()
         elif event.mime != "text/uri-list":
             self.notify(
                 f"Unsupported received mime type (possible interception): {event.mime}",
@@ -699,8 +697,7 @@ class DragAndDrop:
             )
             return
         if any(
-            urlparse(line).scheme in ("http", "https")
-            for line in event.text.splitlines()
+            urlparse(line).scheme in ("http", "https") for line in event.text.splitlines()
         ):
             if len(event.text.splitlines()) > 1:
                 self.notify(
@@ -725,9 +722,7 @@ class DragAndDrop:
 
         await self._show_paste_drop(event, normalise(getcwd()))
 
-    async def _show_paste_drop(
-        self: App, event: events.Paste, destination: str
-    ) -> None:
+    async def _show_paste_drop(self: App, event: events.Paste, destination: str) -> None:
         response = await self.push_screen_wait(screens.PasteDropScreen(event))
         if response is not None and response.paths:
             process_container = self.query_one(ProcessContainer)

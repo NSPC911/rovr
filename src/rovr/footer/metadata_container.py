@@ -83,9 +83,7 @@ class MetadataContainer(VerticalScroll, inherit_bindings=False):
         """
         self._current_option = option
         if any(
-            worker.is_running
-            and worker.node is self
-            and worker.name == "_perform_update"
+            worker.is_running and worker.node is self and worker.name == "_perform_update"
             for worker in self.app.workers
         ):
             self._queued_task = self._perform_update
@@ -224,9 +222,7 @@ class MetadataContainer(VerticalScroll, inherit_bindings=False):
             for index, child_widget in enumerate(
                 self.query_one("#metadata-values").children
             ):
-                self.app.call_from_thread(
-                    child_widget.update, values_list[index].content
-                )
+                self.app.call_from_thread(child_widget.update, values_list[index].content)
         except NoMatches:
             if self.any_in_queue() or not self.is_attached:
                 return

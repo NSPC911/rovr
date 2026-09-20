@@ -176,9 +176,7 @@ class WindowedTextPreview(ScrollView):
         self.refresh(layout=True)
 
     def _render_window(self, start: int, width: int, x: int) -> list[Strip]:
-        end = min(
-            start + max(self.scrollable_content_region.height, 1), len(self._lines)
-        )
+        end = min(start + max(self.scrollable_content_region.height, 1), len(self._lines))
         selected = self._lines[start:end]
         window_width = max(
             cell_len((line.plain if isinstance(line, Text) else line).expandtabs(4))
@@ -212,9 +210,7 @@ class WindowedTextPreview(ScrollView):
             )
         ]
 
-    def set_lazy_page(
-        self, source: LazyTextLines, page: int, lines: list[Text]
-    ) -> None:
+    def set_lazy_page(self, source: LazyTextLines, page: int, lines: list[Text]) -> None:
         if self._lines is not source:
             return
         source.set_page(page, lines)

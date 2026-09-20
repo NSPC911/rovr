@@ -543,9 +543,7 @@ example_function(10)"""
                 open(open_stdin, "r") as tty_in,
             ):
                 restore_standard_input = (
-                    _redirect_windows_standard_input(tty_in)
-                    if os.name == "nt"
-                    else None
+                    _redirect_windows_standard_input(tty_in) if os.name == "nt" else None
                 )
                 try:
                     sys.__stdout__ = sys.stdout = tty_out

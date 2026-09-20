@@ -27,9 +27,7 @@ class BackButton(Button):
 
 class ForwardButton(Button):
     def __init__(self) -> None:
-        super().__init__(
-            get_icon("general", "right")[0], id="forward", classes="option"
-        )
+        super().__init__(get_icon("general", "right")[0], id="forward", classes="option")
 
     def on_button_pressed(self) -> None:
         """Go forward in the session's history"""

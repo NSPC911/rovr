@@ -278,8 +278,7 @@ async def test_rename_button(tmp_path: Path) -> None:
         await iter_until(
             pilot,
             lambda: (
-                app.file_list.get_option_at_index(0).dir_entry.name
-                == "renamed_file.txt"
+                app.file_list.get_option_at_index(0).dir_entry.name == "renamed_file.txt"
             ),
         )
         assert app.file_list.get_option_at_index(0).dir_entry.name == "renamed_file.txt"
@@ -362,9 +361,7 @@ async def test_zip_button_modal(tmp_path: Path) -> None:
         await pilot.click(ZipButton)
         await iter_until(pilot, lambda: isinstance(app.screen, ArchiveCreationScreen))
         await pilot.press("escape")
-        await iter_until(
-            pilot, lambda: not isinstance(app.screen, ArchiveCreationScreen)
-        )
+        await iter_until(pilot, lambda: not isinstance(app.screen, ArchiveCreationScreen))
 
 
 @pytest.mark.asyncio
@@ -379,9 +376,7 @@ async def test_zip_button_creates_archive(tmp_path: Path) -> None:
         await iter_until(pilot, lambda: isinstance(app.screen, ArchiveCreationScreen))
         assert isinstance(app.screen, ArchiveCreationScreen)
         await pilot.press("enter")
-        await iter_until(
-            pilot, lambda: not isinstance(app.screen, ArchiveCreationScreen)
-        )
+        await iter_until(pilot, lambda: not isinstance(app.screen, ArchiveCreationScreen))
         assert not isinstance(app.screen, ArchiveCreationScreen)
         assert any(f.endswith(".zip") for f in os.listdir(tmp_path))
 

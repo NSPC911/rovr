@@ -190,9 +190,7 @@ class FirstLaunchApp(App, inherit_bindings=False):
         yield Static("Welcome to [b][u]rovr[/][/]!")
         yield Static("Let's get you started!")
         yield Static("[dim]Press [/]tab[dim] to navigate the options below.[/]")
-        yield Static(
-            "[dim]Quit at any time with [/]Ctrl + q[dim] (not recommended).[/]"
-        )
+        yield Static("[dim]Quit at any time with [/]Ctrl + q[dim] (not recommended).[/]")
         yield Static(classes="padding")
         with Center(), RadioSet(id="theme"):
             yield from [
@@ -247,9 +245,7 @@ class FirstLaunchApp(App, inherit_bindings=False):
                 yield Input(value=os.environ.get("EDITOR", ""), id="editor_input")
                 yield Static("File editor")
             with HorizontalGroup(id="settings-editor-folders"):
-                yield Input(
-                    value=os.environ.get("EDITOR", ""), id="editor_folders_input"
-                )
+                yield Input(value=os.environ.get("EDITOR", ""), id="editor_folders_input")
                 yield Static("Folder editor")
         yield Static(classes="padding")
         with HorizontalGroup(id="hidden_files"):

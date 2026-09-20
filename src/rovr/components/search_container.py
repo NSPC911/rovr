@@ -66,16 +66,12 @@ class SearchInput(Input):
                 for option_id in self.selected:
                     with contextlib.suppress(OptionDoesNotExist):
                         if not self.items_list.select_mode:
-                            with self.items_list.prevent(
-                                self.items_list.SelectedChanged
-                            ):
+                            with self.items_list.prevent(self.items_list.SelectedChanged):
                                 self.items_list.select(
                                     self.items_list.get_option(option_id)
                                 )
                         else:
-                            self.items_list.select(
-                                self.items_list.get_option(option_id)
-                            )
+                            self.items_list.select(self.items_list.get_option(option_id))
             return
         matcher = Matcher(event.value)
         assert hasattr(self.items_list, "list_of_options")
@@ -139,9 +135,7 @@ class SearchInput(Input):
                 for option_id in self.selected:
                     if not self.items_list.select_mode:
                         with self.items_list.prevent(self.items_list.SelectedChanged):
-                            self.items_list.select(
-                                self.items_list.get_option(option_id)
-                            )
+                            self.items_list.select(self.items_list.get_option(option_id))
                     else:
                         self.items_list.select(self.items_list.get_option(option_id))
 

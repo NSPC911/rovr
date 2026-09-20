@@ -187,9 +187,7 @@ class PDFHandler:
 
         # If going further down half the batch will cross currently loaded pages
         # then its better to preload in advance
-        return (
-            self.current_page + PDFHandler.pdf_batch_size // 2
-        ) >= self.count_loaded()
+        return (self.current_page + PDFHandler.pdf_batch_size // 2) >= self.count_loaded()
 
     def get_last_page_to_load(self) -> int:
         # We should load till current page, if user scrolls too fast and reaches
@@ -315,9 +313,7 @@ class PreviewContainer(Actionable, Container):
         if event.worker.group != PREVIEWER_GROUP:
             return
         loading_state = any(
-            worker.node is self
-            and worker.group == PREVIEWER_GROUP
-            and worker.is_running
+            worker.node is self and worker.group == PREVIEWER_GROUP and worker.is_running
             for worker in self.workers
         )
         if loading_state and self.loading:
@@ -662,9 +658,7 @@ class PreviewContainer(Actionable, Container):
             if pil_object is None:
                 if self.app.MULTIPROCESSING_PROCESS_ALLOWED:
                     try:
-                        pil_object = preview_utils.resample_file(
-                            self._current_file_path
-                        )
+                        pil_object = preview_utils.resample_file(self._current_file_path)
                     except ValueError as exc:
                         if multiprocessing_process_error_checker(self.app, exc):
                             pil_object = preview_utils.resample_file_sync(
@@ -673,9 +667,7 @@ class PreviewContainer(Actionable, Container):
                         else:
                             raise
                 else:
-                    pil_object = preview_utils.resample_file_sync(
-                        self._current_file_path
-                    )
+                    pil_object = preview_utils.resample_file_sync(self._current_file_path)
                 if pil_object is None:
                     return
                 _save_cached_image(realpath, "image", stat_result, pil_object)
@@ -1092,9 +1084,7 @@ class PreviewContainer(Actionable, Container):
         self.set_border("title", titles.bat)
 
         try:
-            first_page = self._get_bat_page(
-                command, realpath, stat_result, signature, 0
-            )
+            first_page = self._get_bat_page(command, realpath, stat_result, signature, 0)
 
             if should_cancel():
                 return False
@@ -1226,12 +1216,8 @@ class PreviewContainer(Actionable, Container):
                 if ignored_bytes:
                     if not content.endswith("\n"):
                         content += "\n"
-                    content += (
-                        f"---\n({ignored_bytes:,} byte{s(ignored_bytes)} ignored)"
-                    )
-                save_to_cache(
-                    realpath, "windowed_text", stat_result, signature, content
-                )
+                    content += f"---\n({ignored_bytes:,} byte{s(ignored_bytes)} ignored)"
+                save_to_cache(realpath, "windowed_text", stat_result, signature, content)
 
         if content is None:
             self._current_content = self._preview_texts["error"]
@@ -1505,9 +1491,7 @@ class PreviewContainer(Actionable, Container):
 
             if path.isdir(file_path):
                 mime_type = preview_utils.MimeResult("basic", "inode/directory")
-                file_type = preview_utils.match_mime_to_preview_type(
-                    mime_type.mime_type
-                )
+                file_type = preview_utils.match_mime_to_preview_type(mime_type.mime_type)
                 if file_type == "folder":
                     self.update_ui(
                         file_path=file_path, mime_type=mime_type, file_type=file_type

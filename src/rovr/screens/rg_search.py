@@ -223,9 +223,7 @@ class ContentSearch(ModalSearchScreen):
             config["plugins"]["rg"][event.selection.value] = (
                 event.selection.value in event.selection_list.selected
             )
-        self.post_message(
-            Input.Changed(self.search_input, value=self.search_input.value)
-        )
+        self.post_message(Input.Changed(self.search_input, value=self.search_input.value))
 
     def create_option(self, raw_line: str) -> tuple[int, OptionWithValue] | None:
         if ":" not in raw_line:

@@ -193,9 +193,7 @@ def parse_theme_file(theme_file: Path) -> Theme:
 
     not_exist = THEME_COLOR_FIELDS - set(["boost"]) - set(fields)
     if not_exist:
-        raise ValueError(
-            f"missing required color fields: {', '.join(sorted(not_exist))}"
-        )
+        raise ValueError(f"missing required color fields: {', '.join(sorted(not_exist))}")
 
     gradient_declarations: dict[str, str] = {}
     for name in BAR_GRADIENT_FIELDS:

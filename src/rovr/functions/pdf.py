@@ -268,9 +268,7 @@ def _render_with_pdftoppm(
         args.append(pdf_path)
 
         try:
-            proc = Popen(
-                args, env=env, stdout=PIPE, stderr=PIPE, startupinfo=startupinfo
-            )
+            proc = Popen(args, env=env, stdout=PIPE, stderr=PIPE, startupinfo=startupinfo)
             data, _ = proc.communicate(timeout=15)
         except TimeoutExpired:
             proc.kill()
@@ -361,9 +359,7 @@ def _render_with_pdftocairo(
                 args.extend(["-l", str(last_page)])
             args.extend([pdf_path, os.path.join(output_folder, prefix)])
 
-            proc = Popen(
-                args, env=env, stdout=PIPE, stderr=PIPE, startupinfo=startupinfo
-            )
+            proc = Popen(args, env=env, stdout=PIPE, stderr=PIPE, startupinfo=startupinfo)
             try:
                 proc.communicate(timeout=15)
             except TimeoutExpired:

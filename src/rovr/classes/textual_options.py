@@ -132,9 +132,7 @@ class LazySelection(LazyOption, Selection[SelectionType]):
 
 
 class PinnedSidebarOption(Option):
-    def __init__(
-        self, icon: tuple[str, str], label: str, id: str | None = None
-    ) -> None:
+    def __init__(self, icon: tuple[str, str], label: str, id: str | None = None) -> None:
         """Initialise the option.
 
         Args:
@@ -216,9 +214,7 @@ class FileListSelectionWidget(LazySelection):
         self, columns: tuple[detail_utils.DetailColumn, ...]
     ) -> tuple[str, ...]:
         if self._detail_cells is None or self._detail_cells_key != columns:
-            self._detail_cells = detail_utils.detail_cells(
-                self.dir_entry, self, columns
-            )
+            self._detail_cells = detail_utils.detail_cells(self.dir_entry, self, columns)
             self._detail_cells_key = columns
         return self._detail_cells
 

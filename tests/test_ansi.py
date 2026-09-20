@@ -39,9 +39,7 @@ def test_ansi_default_colors_inherit_render_surface() -> None:
 
 
 def test_ansi_to_rich_text_parses_hyperlinks() -> None:
-    text = ansi_to_rich_text(
-        "\x1b]8;;https://example.com\x1b\\link\x1b]8;;\x1b\\ plain"
-    )
+    text = ansi_to_rich_text("\x1b]8;;https://example.com\x1b\\link\x1b]8;;\x1b\\ plain")
     console = Console()
 
     assert text.plain == "link plain"

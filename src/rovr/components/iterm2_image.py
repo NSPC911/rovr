@@ -80,14 +80,10 @@ class _NoopRenderable:
     ) -> None:
         pass
 
-    def __rich_console__(
-        self, console: Console, options: ConsoleOptions
-    ) -> RenderResult:
+    def __rich_console__(self, console: Console, options: ConsoleOptions) -> RenderResult:
         yield Segment("")
 
-    def __rich_measure__(
-        self, console: Console, options: ConsoleOptions
-    ) -> Measurement:
+    def __rich_measure__(self, console: Console, options: ConsoleOptions) -> Measurement:
         return Measurement(0, 0)
 
     def cleanup(self) -> None:
@@ -156,15 +152,12 @@ class _ImageImpl(Widget, can_focus=False, inherit_css=False):
         clear_segment = Segment(" " * crop.width, style=self._get_clear_style())
         image_segments = self._get_image_segments(data)
         lines = [
-            Strip([clear_segment], cell_length=crop.width)
-            for _ in range(crop.height - 1)
+            Strip([clear_segment], cell_length=crop.width) for _ in range(crop.height - 1)
         ]
         lines.append(Strip([clear_segment, *image_segments], cell_length=crop.width))
         return lines
 
-    def _scale_image(
-        self, image_data: PixelData, terminal_sizes: CellSize
-    ) -> PixelData:
+    def _scale_image(self, image_data: PixelData, terminal_sizes: CellSize) -> PixelData:
         assert isinstance(self.parent, ITerm2Image)
         styled_width, styled_height = self.parent._get_styled_size()
         image_size = ImageSize(
@@ -195,9 +188,7 @@ class _ImageImpl(Widget, can_focus=False, inherit_css=False):
                 Control.move_to(visible_region.x, visible_region.y).segment.text,
                 style=_NULL_STYLE,
             ),
-            Segment(
-                data, style=_NULL_STYLE, control=((ControlType.CURSOR_FORWARD, 0),)
-            ),
+            Segment(data, style=_NULL_STYLE, control=((ControlType.CURSOR_FORWARD, 0),)),
             Segment(
                 Control.move_to(
                     visible_region.right, visible_region.bottom - 2

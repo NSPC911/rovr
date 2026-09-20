@@ -246,9 +246,7 @@ class CopyPanelOptions(PopupOptionList):
             self.button.copy_text(await expand_command(self.app, "%h"))
         elif check_key(event, config["keybinds"]["extra_copy"]["copy_to_system_clip"]):
             self.button.copy_to_system_clip()
-        elif check_key(
-            event, config["keybinds"]["extra_copy"]["copy_current_directory"]
-        ):
+        elif check_key(event, config["keybinds"]["extra_copy"]["copy_current_directory"]):
             self.button.copy_text(await expand_command(self.app, "%cwd"))
         else:
             return

@@ -55,9 +55,7 @@ class FileNameConflict(ModalScreen):
                         f"\\[{cancel_bind}] Cancel", variant="primary", id="cancel"
                     )
             else:
-                yield Button(
-                    f"\\[{cancel_bind}] Cancel", variant="primary", id="cancel"
-                )
+                yield Button(f"\\[{cancel_bind}] Cancel", variant="primary", id="cancel")
             with HorizontalGroup(id="dontAskAgain"):
                 yield Switch()
                 yield Label(f"\\[{dont_ask_bind}] Don't ask again")
@@ -80,9 +78,7 @@ class FileNameConflict(ModalScreen):
             self.action_skip(event)
         elif check_key(event, config["keybinds"]["filename_conflict"]["cancel"]):
             self.action_cancel(event)
-        elif check_key(
-            event, config["keybinds"]["filename_conflict"]["dont_ask_again"]
-        ):
+        elif check_key(event, config["keybinds"]["filename_conflict"]["dont_ask_again"]):
             self.action_dont_ask_again()
         else:
             return

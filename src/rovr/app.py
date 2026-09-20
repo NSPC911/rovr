@@ -509,9 +509,7 @@ class Application(
     def on_app_focus(self, event: events.AppFocus) -> None:
         self.app_blurred = False
 
-    def _set_mouse_over(
-        self, widget: Widget | None, hover_widget: Widget | None
-    ) -> None:
+    def _set_mouse_over(self, widget: Widget | None, hover_widget: Widget | None) -> None:
         # Textual re-applies hover styles twice per MouseMove even when the
         # hovered widget hasn't changed, which floods the message queue when a
         # custom stylesheet marks large containers as hover-styled
@@ -1197,9 +1195,7 @@ class Application(
                 self.push_screen(FileSearch(), on_response)
             except Exception as exc:
                 dump_exc(self, exc)
-                self.notify(
-                    str(exc), title="Plugins: fd", severity="error", markup=False
-                )
+                self.notify(str(exc), title="Plugins: fd", severity="error", markup=False)
         else:
             self.notify(
                 f"{config['plugins']['fd']['executable']} cannot be found in PATH.",
@@ -1233,9 +1229,7 @@ class Application(
                 self.push_screen(ContentSearch(), on_response)
             except Exception as exc:
                 dump_exc(self, exc)
-                self.notify(
-                    str(exc), title="Plugins: rg", severity="error", markup=False
-                )
+                self.notify(str(exc), title="Plugins: rg", severity="error", markup=False)
         else:
             self.notify(
                 f"{config['plugins']['rg']['executable']} cannot be found in PATH.",
@@ -1270,9 +1264,7 @@ class Application(
     def action_run_command(
         self, command: list[str], run_type: ShellRunTypes = "background"
     ) -> None:
-        if not isinstance(command, list) or not all(
-            isinstance(c, str) for c in command
-        ):
+        if not isinstance(command, list) or not all(isinstance(c, str) for c in command):
             self.notify(
                 "Invalid command provided. Command must be a list of strings."
                 + "\nUse `run_shell` if you want to run a string command instead",

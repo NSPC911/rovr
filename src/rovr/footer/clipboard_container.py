@@ -73,9 +73,7 @@ class Clipboard(
             await asyncio.sleep(0)
             self.insert_selection_at_beginning(
                 ClipboardSelection(
-                    prompt=Content(
-                        f"{icon_utils.get_icon('general', 'copy')[0]} {item}"
-                    ),
+                    prompt=Content(f"{icon_utils.get_icon('general', 'copy')[0]} {item}"),
                     text=item,
                     type_of_selection="copy",
                 )

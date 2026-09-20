@@ -391,9 +391,7 @@ _ROVR_CONFIG_SETTINGS_OPENERS_GROUPS_ADDITIONALPROPERTIES_ITEM_ONEOF1_ORPHAN_DEF
 )
 r""" Default value of the field path 'Rovr Config settings openers groups additionalProperties item oneof1 orphan' """
 
-_ROVR_CONFIG_SETTINGS_OPENERS_GROUPS_ADDITIONALPROPERTIES_ITEM_ONEOF1_SHELL_DEFAULT = (
-    True
-)
+_ROVR_CONFIG_SETTINGS_OPENERS_GROUPS_ADDITIONALPROPERTIES_ITEM_ONEOF1_SHELL_DEFAULT = True
 r""" Default value of the field path 'Rovr Config settings openers groups additionalProperties item oneof1 shell' """
 
 _ROVR_CONFIG_SETTINGS_PREVIEW_RULES_DEFAULT = {
@@ -1521,9 +1519,7 @@ _ROVRCONFIGPLUGINSRESVGSHAPERENDERING_GEOMETRIC_PRECISION: Literal[
     "geometric_precision"
 ] = "geometric_precision"
 r"""The values for the 'The shape rendering option to use when rendering SVGs' enum"""
-_ROVRCONFIGPLUGINSRESVGSHAPERENDERING_CRISP_EDGES: Literal["crisp_edges"] = (
-    "crisp_edges"
-)
+_ROVRCONFIGPLUGINSRESVGSHAPERENDERING_CRISP_EDGES: Literal["crisp_edges"] = "crisp_edges"
 r"""The values for the 'The shape rendering option to use when rendering SVGs' enum"""
 _ROVRCONFIGPLUGINSRESVGSHAPERENDERING_OPTIMIZE_SPEED: Literal["optimize_speed"] = (
     "optimize_speed"

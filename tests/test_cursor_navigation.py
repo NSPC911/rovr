@@ -50,9 +50,7 @@ class SelectionCursorApp(App[None]):
 
 @pytest.mark.asyncio
 async def test_cursor_moves_once_and_skips_disabled_options() -> None:
-    app = CursorApp([
-        Option(str(index), disabled=index in {2, 3}) for index in range(8)
-    ])
+    app = CursorApp([Option(str(index), disabled=index in {2, 3}) for index in range(8)])
 
     async with app.run_test() as pilot:
         await pilot.pause()
@@ -68,9 +66,7 @@ async def test_cursor_moves_once_and_skips_disabled_options() -> None:
 
 @pytest.mark.asyncio
 async def test_cursor_wraps_and_skips_disabled_options() -> None:
-    app = CursorApp([
-        Option(str(index), disabled=index in {0, 2}) for index in range(5)
-    ])
+    app = CursorApp([Option(str(index), disabled=index in {0, 2}) for index in range(5)])
 
     async with app.run_test() as pilot:
         await pilot.pause()

@@ -88,9 +88,7 @@ class SortOrderButton(Button):
         popup_widget.display = True
         popup_widget.focus()
 
-    def action_set(
-        self, sort_by: SortByOptions, descending: bool | None = None
-    ) -> None:
+    def action_set(self, sort_by: SortByOptions, descending: bool | None = None) -> None:
         state_manager = self.app.query_one(StateManager)
         state_manager.set_sort_preference(sort_by, descending)
         self.app.file_list.update_file_list(add_to_session=False)

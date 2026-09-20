@@ -41,9 +41,7 @@ class ZDToDirectory(ModalSearchScreen):
     def on_input_changed(self, event: Input.Changed) -> None:
         self.zoxide_updater(event=event)
 
-    def _parse_zoxide_line(
-        self, line: str, show_scores: bool
-    ) -> tuple[str, str | None]:
+    def _parse_zoxide_line(self, line: str, show_scores: bool) -> tuple[str, str | None]:
         line = line.strip()
         if not show_scores:
             return line, None

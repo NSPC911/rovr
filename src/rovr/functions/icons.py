@@ -84,9 +84,7 @@ def _icon_for_folder_name(folder_name: str) -> tuple[str, str]:
     return ICONS["folder"]["default"]
 
 
-def get_icon_for_folder(
-    location: str, is_symlink: bool | None = None
-) -> tuple[str, str]:
+def get_icon_for_folder(location: str, is_symlink: bool | None = None) -> tuple[str, str]:
     """Get the icon and color for a folder based on its name.
 
     Args:

@@ -306,10 +306,7 @@ class PathAutoCompleteInput(PathAutoComplete):
                     if displayed:
                         event.prevent_default()
                         event.stop()
-                    if (
-                        option_list.highlighted is None
-                        and option_list.option_count != 1
-                    ):
+                    if option_list.highlighted is None and option_list.option_count != 1:
                         option_list.highlighted = 0
                     else:
                         highlighted: int = option_list.highlighted or 0
@@ -412,9 +409,7 @@ class PathInput(Actionable, Input, inherit_bindings=False):
         ),
         Binding("delete,ctrl+d", "delete_right", "Delete character right", show=False),
         Binding("enter", "submit", "Submit", show=False),
-        Binding(
-            "ctrl+w", "delete_left_word", "Delete left to start of word", show=False
-        ),
+        Binding("ctrl+w", "delete_left_word", "Delete left to start of word", show=False),
         Binding("ctrl+u", "delete_left_all", "Delete all to the left", show=False),
         Binding(
             "ctrl+f", "delete_right_word", "Delete right to start of word", show=False

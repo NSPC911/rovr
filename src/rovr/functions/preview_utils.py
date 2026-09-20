@@ -259,8 +259,7 @@ def match_mime_to_preview_type(
     mime_type: str,
     file_extension: str | None = None,
 ) -> (
-    Literal["text", "image", "pdf", "archive", "folder", "remime", "resvg", "font"]
-    | None
+    Literal["text", "image", "pdf", "archive", "folder", "remime", "resvg", "font"] | None
 ):
     """Match a MIME type against configured rules to determine preview type.
 
@@ -341,10 +340,7 @@ def get_mime_type(
                 if puremagic_result:
                     # If multiple matches exist, prefer one matching the file extension
                     for match in puremagic_result:
-                        if (
-                            match.extension.lower() == file_extension
-                            and match.mime_type
-                        ):
+                        if match.extension.lower() == file_extension and match.mime_type:
                             return MimeResult("puremagic", match.mime_type)
                     # Otherwise, return first result with a mime type
                     for match in puremagic_result:
@@ -374,9 +370,7 @@ def get_mime_type(
                         except ClassNotFound:
                             guessed_lexer = None
                         try:
-                            filename_lexer = guess_lexer_for_filename(
-                                file_path, content
-                            )
+                            filename_lexer = guess_lexer_for_filename(file_path, content)
                         except ClassNotFound:
                             filename_lexer = None
                         if not guessed_lexer and filename_lexer:

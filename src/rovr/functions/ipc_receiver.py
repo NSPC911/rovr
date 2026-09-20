@@ -219,9 +219,7 @@ async def conn(
                     err = "clipboard action is not valid"
         case "tab":
             if len(args) == 0:
-                return assemble_and_write(
-                    writer, False, None, "tab action not provided"
-                )
+                return assemble_and_write(writer, False, None, "tab action not provided")
             match args[0]:
                 case "list":
                     if not await check_permission(self, action, args):
@@ -301,9 +299,7 @@ async def conn(
                             index = (
                                 int(args[1])
                                 if len(args) == 2
-                                else self.tabWidget.tabs.index(
-                                    self.tabWidget.active_tab
-                                )
+                                else self.tabWidget.tabs.index(self.tabWidget.active_tab)
                             )
                         except ValueError:
                             ok = False
@@ -334,9 +330,7 @@ async def conn(
                             index = (
                                 int(args[1])
                                 if len(args) == 2
-                                else self.tabWidget.tabs.index(
-                                    self.tabWidget.active_tab
-                                )
+                                else self.tabWidget.tabs.index(self.tabWidget.active_tab)
                             )
                         except ValueError:
                             ok = False
@@ -472,9 +466,7 @@ async def start_server(self: Application) -> None:
     async with server:
         descriptor = publish_instance(addr[1], token)
         # quite weird that globals().get("is_dev", False) is not working here
-        if {"debug", "devtools"}.issubset(
-            set(os.environ.get("TEXTUAL", "").split(","))
-        ):
+        if {"debug", "devtools"}.issubset(set(os.environ.get("TEXTUAL", "").split(","))):
             self.call_after_refresh(self.notify, f"Serving on {addr}")
         os.environ["ROVR_IPC_PID"] = str(os.getpid())
         try:

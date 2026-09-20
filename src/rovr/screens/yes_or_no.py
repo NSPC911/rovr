@@ -37,8 +37,7 @@ class YesOrNo(Actionable, ModalScreen):
         self.border_title = border_title
         self.border_subtitle = border_subtitle
         self.ACTIONS: list[Action] = [
-            Action(part, config["keybinds"]["yes_or_no"][part])
-            for part in ("yes", "no")
+            Action(part, config["keybinds"]["yes_or_no"][part]) for part in ("yes", "no")
         ]
         self.ACTIONS.append(
             Action(

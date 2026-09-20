@@ -23,9 +23,7 @@ class PasteScreen(YesOrNo):
         border_title: str = "",
         border_subtitle: str = "",
     ) -> None:
-        super().__init__(
-            message, destructive, with_toggle, border_title, border_subtitle
-        )
+        super().__init__(message, destructive, with_toggle, border_title, border_subtitle)
         self.paths = paths
         self.options = [
             PasteScreenOption(path, "copy") for path in self.paths["copy"]

@@ -299,8 +299,7 @@ def _parse_extended_key(self: XTermParser, sequence: str) -> list[events.Key] | 
         key_events.append(
             events.Key(
                 "+".join(key_tokens),
-                text
-                or (None if modifiers else SPECIAL_KEY_TO_CHARACTER.get(key, None)),
+                text or (None if modifiers else SPECIAL_KEY_TO_CHARACTER.get(key, None)),
             )
         )
     return key_events

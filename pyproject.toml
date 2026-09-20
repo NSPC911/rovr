@@ -223,6 +223,7 @@ filterwarnings = [
 [tool.ruff]
 force-exclude = true
 exclude = []
+line-length = 90
 
 [tool.ruff.lint]
 select = [

@@ -88,13 +88,7 @@ def test_extract_variable_declarations_comment_brace_does_not_skew_depth() -> No
 
 def test_strip_variable_declarations_leaves_commented_declaration_untouched() -> None:
     css_text = (
-        "$primary: #88C0D0;\n"
-        "/*\n"
-        "$primary: red;\n"
-        "*/\n"
-        "Widget {\n"
-        "    color: $primary;\n"
-        "}\n"
+        "$primary: #88C0D0;\n/*\n$primary: red;\n*/\nWidget {\n    color: $primary;\n}\n"
     )
     stripped = theme_utils.strip_variable_declarations(css_text)
     lines = stripped.splitlines()
@@ -333,9 +327,7 @@ def test_theme_file_mtimes_snapshot_reflects_edits(
     user_themes = tmp_path / "themes"
     user_themes.mkdir()
     monkeypatch.setattr(RovrVars, "ROVRTHEMES", user_themes.as_posix())
-    monkeypatch.setattr(
-        theme_utils, "bundled_themes_path", tmp_path / "no-bundled-here"
-    )
+    monkeypatch.setattr(theme_utils, "bundled_themes_path", tmp_path / "no-bundled-here")
 
     theme_file = user_themes / "custom.tcss"
     theme_file.write_text("$primary: #88C0D0;\n")
@@ -355,9 +347,7 @@ def test_register_all_themes_registers_valid_and_reports_broken(
 
     user_themes = tmp_path / "themes"
     monkeypatch.setattr(RovrVars, "ROVRTHEMES", user_themes.as_posix())
-    monkeypatch.setattr(
-        theme_utils, "bundled_themes_path", tmp_path / "no-bundled-here"
-    )
+    monkeypatch.setattr(theme_utils, "bundled_themes_path", tmp_path / "no-bundled-here")
 
     user_themes.mkdir(parents=True, exist_ok=True)
     (user_themes / "good.tcss").write_text(NORD_PLACEHOLDER)

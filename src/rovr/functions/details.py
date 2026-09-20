@@ -231,25 +231,19 @@ def detail_cells(
                         )
                 case "mtime":
                     value = (
-                        datetime.fromtimestamp(file_stat.st_mtime).strftime(
-                            column.format
-                        )
+                        datetime.fromtimestamp(file_stat.st_mtime).strftime(column.format)
                         if file_stat
                         else "--"
                     )
                 case "atime":
                     value = (
-                        datetime.fromtimestamp(file_stat.st_atime).strftime(
-                            column.format
-                        )
+                        datetime.fromtimestamp(file_stat.st_atime).strftime(column.format)
                         if file_stat
                         else "--"
                     )
                 case "ctime":
                     value = (
-                        datetime.fromtimestamp(file_stat.st_ctime).strftime(
-                            column.format
-                        )
+                        datetime.fromtimestamp(file_stat.st_ctime).strftime(column.format)
                         if file_stat
                         else "--"
                     )

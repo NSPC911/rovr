@@ -48,8 +48,7 @@ def test_cached_text_uses_pickle() -> None:
     assert pickle.loads(data) == text
     with patch("rovr.core.preview_container.load_from_cache", return_value=data):
         assert (
-            _load_cached_text("file", "bat-page", cast(Any, None), ("v2", "bat"))
-            == text
+            _load_cached_text("file", "bat-page", cast(Any, None), ("v2", "bat")) == text
         )
 
 

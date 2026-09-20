@@ -58,9 +58,7 @@ class ProgressBarContainer(VerticalGroup, inherit_bindings=False):
             self.app.get_theme(self.app.theme), "bar_gradient", {}
         ).get("default")
         gradient = (
-            Gradient.from_colors(*reversed(gradient_colors))
-            if gradient_colors
-            else None
+            Gradient.from_colors(*reversed(gradient_colors)) if gradient_colors else None
         )
         self.progress_bar = ProgressBar(
             total=total,
@@ -434,9 +432,7 @@ class ProcessContainer(Actionable, VerticalScroll):
                     pass
                 except (PermissionError, OSError) as exc:
                     # Try to detect if file is in use on Windows
-                    if (
-                        is_file_in_use := is_being_used(exc)
-                    ) and sys.platform == "win32":
+                    if (is_file_in_use := is_being_used(exc)) and sys.platform == "win32":
                         current_action, action_on_file_in_use = (
                             self.handle_file_in_use_error(
                                 action_on_file_in_use,
@@ -618,12 +614,10 @@ class ProcessContainer(Actionable, VerticalScroll):
             except (PermissionError, OSError) as exc:
                 # Try to detect if file is in use on Windows
                 if (is_file_in_use := is_being_used(exc)) and sys.platform == "win32":
-                    current_action, action_on_file_in_use = (
-                        self.handle_file_in_use_error(
-                            action_on_file_in_use,
-                            item_path,
-                            lambda: self.permanently_delete_item(item_path),
-                        )
+                    current_action, action_on_file_in_use = self.handle_file_in_use_error(
+                        action_on_file_in_use,
+                        item_path,
+                        lambda: self.permanently_delete_item(item_path),
                     )
                     if current_action == "cancel":
                         bar.panic()
@@ -707,10 +701,7 @@ class ProcessContainer(Actionable, VerticalScroll):
 
         self.app.call_from_thread(bar.update_progress, total=len(files_to_archive) + 1)
 
-        if len(files) == 1:
-            base_path = path.dirname(files[0])
-        else:
-            base_path = path.commonpath(files)
+        base_path = path.dirname(files[0]) if len(files) == 1 else path.commonpath(files)
 
         try:
             from multiarchive import Archive
@@ -1075,13 +1066,8 @@ class ProcessContainer(Actionable, VerticalScroll):
             self.app.call_from_thread(bar.update_progress, progress=progress_count)
             destination_folder = path_utils.normalise(path.join(dest, relative_loc))
             try:
-                if path.exists(destination_folder) and not path.isdir(
-                    destination_folder
-                ):
-                    if (
-                        action_on_existence == "ask"
-                        or action_on_existence == "overwrite"
-                    ):
+                if path.exists(destination_folder) and not path.isdir(destination_folder):
+                    if action_on_existence == "ask" or action_on_existence == "overwrite":
                         response = self.helper_push_and_get_filenameconflict(
                             screens.FileNameConflict(
                                 "Cannot create a directory because destination is a file.\nWhat do you want to do now?",
@@ -1101,9 +1087,7 @@ class ProcessContainer(Actionable, VerticalScroll):
                             continue
                         case "rename":
                             new_relative_loc = path_utils.normalise(
-                                path.relpath(
-                                    self.helper_rename(destination_folder), dest
-                                )
+                                path.relpath(self.helper_rename(destination_folder), dest)
                             )
                             old_relative_loc = folder_dict["relative_loc"]
                             folder_dict["relative_loc"] = new_relative_loc
@@ -1277,13 +1261,8 @@ class ProcessContainer(Actionable, VerticalScroll):
             self.app.call_from_thread(bar.update_progress, progress=progress_count)
             destination_folder = path_utils.normalise(path.join(dest, relative_loc))
             try:
-                if path.exists(destination_folder) and not path.isdir(
-                    destination_folder
-                ):
-                    if (
-                        action_on_existence == "ask"
-                        or action_on_existence == "overwrite"
-                    ):
+                if path.exists(destination_folder) and not path.isdir(destination_folder):
+                    if action_on_existence == "ask" or action_on_existence == "overwrite":
                         response = self.helper_push_and_get_filenameconflict(
                             screens.FileNameConflict(
                                 "Cannot create a directory because destination is a file.\nWhat do you want to do now?",
@@ -1303,9 +1282,7 @@ class ProcessContainer(Actionable, VerticalScroll):
                             continue
                         case "rename":
                             new_relative_loc = path_utils.normalise(
-                                path.relpath(
-                                    self.helper_rename(destination_folder), dest
-                                )
+                                path.relpath(self.helper_rename(destination_folder), dest)
                             )
                             old_relative_loc = folder_dict["relative_loc"]
                             folder_dict["relative_loc"] = new_relative_loc
@@ -1367,9 +1344,9 @@ class ProcessContainer(Actionable, VerticalScroll):
                             path_utils.normalise(item_dict["path"]),
                         )
 
-                        if path_utils.normalise(
-                            destination_item
-                        ) == path_utils.normalise(item_dict["path"]):
+                        if path_utils.normalise(destination_item) == path_utils.normalise(
+                            item_dict["path"]
+                        ):
                             continue
                         is_type_mismatch = path.isdir(destination_item)
                         effective_action = action_on_existence

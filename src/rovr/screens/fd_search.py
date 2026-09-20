@@ -24,8 +24,7 @@ from rovr.variables.constants import bindings, config
 from rovr.variables.maps import FD_TYPE_TO_ALIAS
 
 FILTER_TYPES: dict[str, bool] = {
-    ft: (ft in config["plugins"]["fd"]["default_filter_types"])
-    for ft in FD_TYPE_TO_ALIAS
+    ft: (ft in config["plugins"]["fd"]["default_filter_types"]) for ft in FD_TYPE_TO_ALIAS
 }
 
 
@@ -244,9 +243,7 @@ class FileSearch(ModalSearchScreen):
             config["plugins"]["fd"][event.selection.value] = (
                 event.selection.value in event.selection_list.selected
             )
-        self.post_message(
-            Input.Changed(self.search_input, value=self.search_input.value)
-        )
+        self.post_message(Input.Changed(self.search_input, value=self.search_input.value))
 
     def create_option(self, raw_line: str) -> OptionWithValue | None:
         file_path = path_utils.normalise(raw_line.strip())

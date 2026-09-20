@@ -1291,7 +1291,7 @@ class Application(
                 shell=False,
             )
 
-    def action_run_shell(
+    async def action_run_shell(
         self, command: str, run_type: ShellRunTypes = "background"
     ) -> None:
         if not isinstance(command, str):
@@ -1303,13 +1303,16 @@ class Application(
             )
         elif run_type not in ShellRunTypes.__args__:
             self.notify(
-                f"Invalid run type provided. Must be one of {ShellRunTypes.__args__} (but got {run_type})",
+                f"Invalid run type provided. Must be one of {ShellRunTypes.__args__} (but got {run_type})\nCommand used: {command}",
                 title="Run Shell",
                 severity="error",
             )
         else:
             self.on_shell_exec_response(
-                screens.ShellExec.ReturnType(command=command, run_type=run_type),
+                screens.ShellExec.ReturnType(
+                    command=await expand_command(self, command),
+                    run_type=run_type,
+                ),
                 shell=True,
             )
 

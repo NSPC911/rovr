@@ -213,7 +213,7 @@ class FirstLaunchApp(App, inherit_bindings=False):
             yield RadioButton(
                 "Vim keybinds~ish",
                 id="vim",
-                tooltip="keybinds as close to vim as possible",
+                tooltip="keybinds as close to vim as possible (which isnt much)",
             )
         yield Static(classes="padding")
         with Center(classes="plugins"):
@@ -242,11 +242,11 @@ class FirstLaunchApp(App, inherit_bindings=False):
         yield Static(classes="padding")
         with Center(classes="settings-editor"):
             with HorizontalGroup(id="settings-editor-file"):
+                yield Static(" File editor ")
                 yield Input(value=os.environ.get("EDITOR", ""), id="editor_input")
-                yield Static("File editor")
             with HorizontalGroup(id="settings-editor-folders"):
-                yield Input(value=os.environ.get("EDITOR", ""), id="editor_folders_input")
                 yield Static("Folder editor")
+                yield Input(value=os.environ.get("EDITOR", ""), id="editor_folders_input")
         yield Static(classes="padding")
         with HorizontalGroup(id="hidden_files"):
             yield Switch(value=False, id="show_hidden_files")
@@ -257,19 +257,11 @@ class FirstLaunchApp(App, inherit_bindings=False):
                 "Use reactive layout (automatically disable certain UI elements at certain heights and widths)"
             )
         yield Static(classes="padding")
-        with Center(classes="compact-things"):
-            with HorizontalGroup(id="compact-buttons"):
-                yield Switch(value=True, id="compact_buttons")
-                yield Static("Use compact header")
-            with HorizontalGroup(id="compact-panels"):
-                yield Switch(value=False, id="compact_panels")
-                yield Static("Use compact panels")
-        yield Static(classes="padding")
         with VerticalGroup(id="image_protocol"):
             yield Select(
                 (
                     ("Auto", "auto"),
-                    ("TGP/Kitty (might be broken)", "tgp"),
+                    ("TGP/Kitty", "tgp"),
                     ("iTerm2", "iterm2"),
                     ("Sixel", "sixel"),
                     ("HalfCell", "halfcell"),
@@ -295,11 +287,13 @@ class FirstLaunchApp(App, inherit_bindings=False):
         self.query_one("#theme", RadioSet).border_subtitle = "Select a theme"
         self.query_one("#keybinds", RadioSet).border_title = "Choose a Preset Keybind"
         self.query_one(".plugins", Center).border_title = "Plugins/Integrations"
+        self.query_one(
+            ".plugins", Center
+        ).border_subtitle = "Hover over to see what it does"
         self.query_one("SelectCurrent").border_title = "Image Protocol"
         self.query_one(
             ".settings-editor", Center
         ).border_title = "Default editor when editing files"
-        self.query_one(".compact-things", Center).border_title = "Compact Mode Options"
         popups = {
             "#plugins-rg": "Uses ripgrep to search all files for content quickly",
             "#plugins-fd": "Uses fd to quickly search for files and directories (and other weird path types)",
@@ -307,8 +301,6 @@ class FirstLaunchApp(App, inherit_bindings=False):
             "#plugins-zoxide": "Uses zoxide to zip around directories quickly",
             "#plugins-poppler": "Uses poppler-utils to preview PDF files",
             "#plugins-file": "Uses the file(1) command to get better file type information",
-            "#compact-buttons": "Makes the header area a bit more compact (5 char tall instead of 7)",
-            "#compact-panels": "Makes the panels take lesser size, for more center room",
         }
         for widget, desc in popups.items():
             self.query_one(widget).tooltip = desc
@@ -421,8 +413,8 @@ show_tab_close_button = {"true" if preset == "sane" else "false"}
 protocol = "{prot_to_schema[str(self.query_one("#image_protocol_select", Select).value)]}"
 
 [interface.compact_mode]
-buttons = {str(self.query_one("#compact_buttons", Switch).value).lower()}
-panels = {str(self.query_one("#compact_panels", Switch).value).lower()}
+buttons = true
+panels = false
 
 [settings.editor.file]
 run = "{_escape_toml_string(self.query_one("#editor_input", Input).value)}"

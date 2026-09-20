@@ -1,6 +1,7 @@
 /* Border Variables */
 $border-style: round;
 $border-blurred: $primary-background-lighten-3;
+$kb-border-blurred: $accent-darken-3;
 $border-blurred-light: $primary-background;
 $border: $primary-lighten-3;
 $border-disabled: $panel;
@@ -26,20 +27,34 @@ RadioSet {
   padding: 0;
   border: $border-blurred round;
   background: transparent;
-  max-height: 10;
   width: 1fr;
   border-title-align: center;
   border-title-color: $border-blurred;
   border-subtitle-align: center;
   border-subtitle-color: $border-blurred;
+  &#theme {
+    layout: grid;
+    grid-size: 2;
+    grid-columns: 1fr 1fr;
+  }
+  &#keybinds {
+    border-title-color: $kb-border-blurred;
+    border-subtitle-color: $kb-border-blurred;
+    border: $kb-border-blurred round;
+  }
 
   &:focus,
   &:focus-within {
-    border: $border round;
-    border-title-color: $border;
-    border-top: $border round;
-    border-bottom: $border round;
-    border-subtitle-color: $border;
+    border: $border round !important;
+    border-title-color: $border !important;
+    border-subtitle-color: $border !important;
+  }
+  &:ansi RadioButton {
+    .toggle--button {
+      background: $background;
+      color: $primary-background-darken-3;
+    }
+    &.-on > .toggle--button { color: $primary-lighten-3 }
   }
 }
 
@@ -47,13 +62,11 @@ Center.plugins {
   padding: 0;
   border: $border-blurred round;
   background: transparent;
-  max-height: 11;
   width: 1fr;
   border-title-align: center;
   border-title-color: $border-blurred;
   border-subtitle-align: center;
   border-subtitle-color: $border-blurred;
-  overflow-y: scroll;
 
   &:focus,
   &:focus-within {
@@ -64,9 +77,7 @@ Center.plugins {
     border-subtitle-color: $border;
   }
 
-  Static {
-    padding: 1 0 0 3;
-  }
+  Static { padding: 1 0 0 3 }
 }
 
 Center.compact-things {
@@ -79,9 +90,7 @@ Center.compact-things {
     border: $border round;
     border-title-color: $border;
   }
-  Static {
-    margin: 1 0 0 2
-  }
+  Static { margin: 1 0 0 2 }
 }
 
 Center.settings-editor {
@@ -90,8 +99,8 @@ Center.settings-editor {
   border-title-align: center;
   border-title-color: $border-blurred;
   Static {
-    width: 1.5fr !important;
-    margin-top: 1;
+    width: auto !important;
+    margin: 1 2 1 2;
   }
   Input {
     scrollbar-size: 0 0;
@@ -100,9 +109,7 @@ Center.settings-editor {
     margin: 0 1;
     width: 1fr !important;
     padding: 0 1;
-    &:focus {
-      border: $border round;
-    }
+    &:focus { border: $border round }
   }
   &:focus,
   &:focus-within {
@@ -116,26 +123,16 @@ FinalStuff {
   .modal-wrapper {
     padding: 1 2;
     border: $border round;
-    Static {
-      margin-bottom: 1;
-    }
-    .padding {
-      height: 1fr;
-    }
-    Button {
-      width: 1fr;
-    }
+    Static { margin-bottom: 1 }
+    .padding { height: 1fr }
+    Button { width: 1fr }
   }
   HorizontalGroup {
     width: 1fr;
     Button {
       width: 0.75fr;
-      &:first-child {
-        margin-right: 3;
-      }
-      &:last-child {
-        margin-left: 3;
-      }
+      &:first-child { margin-right: 3 }
+      &:last-child { margin-left: 3 }
     }
   }
 }
@@ -162,12 +159,8 @@ AskWrite {
     width: 1fr;
     Button {
       width: 0.75fr;
-      &:first-child {
-        margin-right: 3;
-      }
-      &:last-child {
-        margin-left: 3;
-      }
+      &:first-child { margin-right: 3 }
+      &:last-child { margin-left: 3 }
     }
   }
 }
@@ -186,50 +179,32 @@ Screen {
     width: 1fr !important;
     max-width: 100vw !important;
 
-    & > * {
-      width: 1fr;
-    }
-
-    .modal-wrapper {
-      height: 1fr
-    }
-
-    #reactive_layout > Static {
-      margin: 0 2;
-    }
+    & > * { width: 1fr }
+    .modal-wrapper { height: 1fr }
+    #reactive_layout > Static { margin: 0 2 }
   }
 
   &.-seventy-five {
     width: 75vw !important;
     max-width: 75vw !important;
 
-    & > * {
-      width: 75vw;
-    }
-
+    & > * { width: 75vw }
     .modal-wrapper {
       height: 87.5vh;
       width: 87.5vw
     }
-    #reactive_layout > Static {
-      margin: 0 2;
-    }
+    #reactive_layout > Static { margin: 0 2 }
   }
 
   &.-fifty {
     width: 50vw;
 
-    & > * {
-      width: 50vw;
-    }
-
+    & > * { width: 50vw }
     .modal-wrapper {
       height: 75vh;
       width: 75vw
     }
-    #reactive_layout > Static {
-      margin: 1 2;
-    }
+    #reactive_layout > Static { margin: 1 2 }
   }
 }
 
@@ -246,25 +221,21 @@ Switch {
 }
 
 #hidden_files > Static,
-#transparent > Static {
-  margin: 1 2;
-}
+#transparent > Static
+{ margin: 1 2 }
 
-#reactive_layout > Static {
-  margin: 0 2;
-}
+#reactive_layout > Static
+{ margin: 0 2 }
 
 Select .up-arrow,
-Select .down-arrow {
-  color: $border-blurred
-}
+Select .down-arrow
+{ color: $border-blurred }
 
 Select:focus .up-arrow,
 Select:focus-within .up-arrow,
 Select:focus .down-arrow,
-Select:focus-within .down-arrow {
-  color: $border
-}
+Select:focus-within .down-arrow
+{ color: $border }
 
 SelectCurrent {
   border: $border-blurred round;

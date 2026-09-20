@@ -4,16 +4,18 @@ import asyncio
 import re
 from contextlib import suppress
 from dataclasses import replace
+from difflib import get_close_matches
 from functools import lru_cache
 from importlib import resources
 from os import path
 from time import perf_counter
 from typing import Any, ClassVar, Iterable, cast
 
+from rich.markup import escape
 from rich.table import Table
 from rich.text import Text
 from textual import actions, events, on, work
-from textual.app import App
+from textual.app import ActionError, App
 from textual.css.errors import StylesheetError
 from textual.css.stylesheet import StylesheetParseError
 from textual.dom import DOMNode
@@ -907,14 +909,21 @@ class KeyHandler:
     ) -> bool:
         parsed_action = actions.parse(action)
         destination, action_name, _ = parsed_action
-        if destination:
-            return await self.run_action(
-                parsed_action,
-                default_namespace=default_namespace,
-                namespaces=namespaces,
+        try:
+            action_namespaces = (
+                (self._parse_action(parsed_action, default_namespace, namespaces)[0],)
+                if destination
+                else (default_namespace, *default_namespace.ancestors)
             )
+        except ActionError as exc:
+            self.notify(
+                f"{escape(str(exc))}.\nAttempted to run [$error]{escape(action)}[/]",
+                title="Unknown Action/Namespace",
+                severity="error",
+            )
+            return True
 
-        for namespace in (default_namespace, *default_namespace.ancestors):
+        for namespace in action_namespaces:
             if any(
                 callable(getattr(namespace, f"{prefix}action_{action_name}", None))
                 for prefix in ("", "_")
@@ -924,7 +933,19 @@ class KeyHandler:
                     default_namespace=namespace,
                     namespaces=namespaces,
                 )
-        return False
+
+        candidates = {
+            prop.removeprefix("_action_").removeprefix("action_")
+            for namespace in action_namespaces
+            for prop in dir(namespace)
+            if prop.startswith(("action_", "_action_"))
+        }
+        suggestions = get_close_matches(action_name, candidates, n=3, cutoff=0.5)
+        message = f"Action {action_name!r} does not exist."
+        if suggestions:
+            message += f"\nDid you mean: {', '.join(suggestions)}?"
+        self.notify(message, title="Unknown Action", severity="error")
+        return True
 
     def _cancel_key_chord(self: App) -> None:
         self._key_chord = None

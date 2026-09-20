@@ -81,6 +81,10 @@ async def test_contextual_key_dispatch(
         "file_list": {
             "a": {"action": "mark_ancestor"},
             "S": {"action": "toggle_pinned_sidebar"},
+            "u": {"action": "toggle_pinned_sidebr"},
+            "U": {"action": "app.shell_exec"},
+            "f": {"action": "focused.cursor(1)"},
+            "t": {"action": "file_list.toggle_footer"},
         },
         "lists": {"j": {"action": "cursor(1)"}},
     }
@@ -116,6 +120,41 @@ async def test_contextual_key_dispatch(
             app.query_one(StateManager).pinned_sidebar_visible
             is not pinned_sidebar_visible
         )
+
+        notifications = []
+        monkeypatch.setattr(
+            app,
+            "notify",
+            lambda message, **kwargs: notifications.append((message, kwargs)),
+        )
+        await pilot.press("u")
+        assert notifications == [
+            (
+                "Action 'toggle_pinned_sidebr' does not exist."
+                "\nDid you mean: toggle_pinned_sidebar, focus_toggle_pinned_sidebar, "
+                "toggle_preview_sidebar?",
+                {"title": "Unknown Action", "severity": "error"},
+            )
+        ]
+
+        notifications.clear()
+        await pilot.press("U")
+        assert notifications == [
+            (
+                "Action 'shell_exec' does not exist."
+                "\nDid you mean: run_shell, show_shell_screen?",
+                {"title": "Unknown Action", "severity": "error"},
+            )
+        ]
+
+        notifications.clear()
+        await pilot.press("t")
+        assert len(notifications) == 1
+        assert notifications[0][0].startswith("Action 'toggle_footer' does not exist.")
+
+        await pilot.press("f")
+        assert app.file_list.highlighted == 1
+        app.file_list.highlighted = 0
 
         await pilot.press("j")
         assert app.file_list.highlighted == 1

@@ -454,6 +454,7 @@
           "type": "object",
           "description": "Settings related to the editor used for different operations",
           "additionalProperties": false,
+          "$comment": "I'm considering deprecating editor.file and editor.folder since shell execution is now an action, but I'm not sure if I should do that",
           "properties": {
             "file": {
               "type": "object",

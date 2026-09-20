@@ -1656,7 +1656,11 @@ class _RovrConfigSettings(TypedDict, total=False):
     """
 
     editor: "_RovrConfigSettingsEditor"
-    r""" Settings related to the editor used for different operations """
+    r"""
+    Settings related to the editor used for different operations
+
+    $comment: I'm considering deprecating editor.file and editor.folder since shell execution is now an action, but I'm not sure if I should do that
+    """
 
     preview_rules: dict[str, "_RovrConfigSettingsPreviewRulesAdditionalproperties"]
     r"""
@@ -1705,7 +1709,11 @@ class _RovrConfigSettings(TypedDict, total=False):
     r""" Settings related to the IPC server that allows external programs to control rovr """
 
 class _RovrConfigSettingsEditor(TypedDict, total=False):
-    r"""Settings related to the editor used for different operations"""
+    r"""
+    Settings related to the editor used for different operations
+
+    $comment: I'm considering deprecating editor.file and editor.folder since shell execution is now an action, but I'm not sure if I should do that
+    """
 
     file: "_RovrConfigSettingsEditorFile"
     r""" Editor to use when opening a file """

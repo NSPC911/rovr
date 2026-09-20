@@ -77,7 +77,13 @@ async def test_contextual_key_dispatch(
     (tmp_path / "a").touch()
     (tmp_path / "b").touch()
     app = Application(startup_path=tmp_path.as_posix())
-    app.keys = {"lists": {"j": {"action": "cursor(1)"}}}
+    app.keys = {
+        "file_list": {
+            "a": {"action": "mark_ancestor"},
+            "S": {"action": "toggle_pinned_sidebar"},
+        },
+        "lists": {"j": {"action": "cursor(1)"}},
+    }
 
     async with app.run_test(size=(143, 37)) as pilot:
         await iter_until(pilot, lambda: app.file_list.option_count == 2)
@@ -93,6 +99,23 @@ async def test_contextual_key_dispatch(
         assert app._key_namespaces()["file_list"] is app.file_list
         assert app._key_namespaces()["copy"] is app.query_one(CopyButton)
         assert app._key_namespaces()["sort_order"] is app.query_one(SortOrderButton)
+
+        ancestor_actions = []
+        monkeypatch.setattr(
+            app.file_list.parent,
+            "action_mark_ancestor",
+            lambda: ancestor_actions.append(True),
+            raising=False,
+        )
+        await pilot.press("a")
+        assert ancestor_actions == [True]
+
+        pinned_sidebar_visible = app.query_one(StateManager).pinned_sidebar_visible
+        await pilot.press("S")
+        assert (
+            app.query_one(StateManager).pinned_sidebar_visible
+            is not pinned_sidebar_visible
+        )
 
         await pilot.press("j")
         assert app.file_list.highlighted == 1

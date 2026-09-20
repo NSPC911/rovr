@@ -12,7 +12,7 @@ from typing import Any, ClassVar, Iterable, cast
 
 from rich.table import Table
 from rich.text import Text
-from textual import events, on, work
+from textual import actions, events, on, work
 from textual.app import App
 from textual.css.errors import StylesheetError
 from textual.css.stylesheet import StylesheetParseError
@@ -860,7 +860,7 @@ class KeyHandler:
                 self._cancel_key_chord()
                 if action == "noop":
                     return True
-                return namespace is not None and await self.run_action(
+                return namespace is not None and await self._run_key_action(
                     action,
                     default_namespace=namespace,
                     namespaces=namespaces,
@@ -891,12 +891,39 @@ class KeyHandler:
             action = cast(KeyBinding, binding)["action"]
             if action == "noop":
                 return True
-            if action is not None and await self.run_action(
+            if action is not None and await self._run_key_action(
                 action,
                 default_namespace=namespace,
                 namespaces=namespaces,
             ):
                 return True
+        return False
+
+    async def _run_key_action(
+        self: App,
+        action: str,
+        default_namespace: DOMNode,
+        namespaces: dict[str, DOMNode],
+    ) -> bool:
+        parsed_action = actions.parse(action)
+        destination, action_name, _ = parsed_action
+        if destination:
+            return await self.run_action(
+                parsed_action,
+                default_namespace=default_namespace,
+                namespaces=namespaces,
+            )
+
+        for namespace in (default_namespace, *default_namespace.ancestors):
+            if any(
+                callable(getattr(namespace, f"{prefix}action_{action_name}", None))
+                for prefix in ("", "_")
+            ):
+                return await self.run_action(
+                    parsed_action,
+                    default_namespace=namespace,
+                    namespaces=namespaces,
+                )
         return False
 
     def _cancel_key_chord(self: App) -> None:

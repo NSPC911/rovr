@@ -11,10 +11,6 @@ from rovr.components.popup_option_list import PopupOptionList
 from rovr.functions.cwd import getcwd
 from rovr.functions.icons import get_icon
 from rovr.functions.path import dump_exc, normalise
-from rovr.functions.system_clipboard import (
-    ClipboardToolNotFoundError,
-    copy_files_to_system_clipboard,
-)
 from rovr.functions.utils import check_key, expand_command, get_shortcut
 from rovr.variables.constants import config
 
@@ -124,6 +120,11 @@ class CopyButton(Button):
     @work
     async def copy_to_system_clip(self) -> None:
         """Copy selected files to the system clipboard."""
+        from rovr.functions.system_clipboard import (
+            ClipboardToolNotFoundError,
+            copy_files_to_system_clipboard,
+        )
+
         if self.disabled:
             return
         selected_files = await self.app.file_list.get_selected_objects()

@@ -5,7 +5,6 @@ from collections.abc import Callable, Sequence
 from typing import cast, overload
 
 from rich.cells import cell_len
-from rich.syntax import Syntax
 from rich.text import Text
 from textual.geometry import Size
 from textual.reactive import reactive
@@ -146,6 +145,8 @@ class WindowedTextPreview(ScrollView):
         lines = lines or [""]
         self._source_lines = lines
         if language is not None:
+            from rich.syntax import Syntax
+
             highlighted = Syntax(
                 "",
                 lexer=language,

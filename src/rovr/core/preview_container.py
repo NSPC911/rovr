@@ -44,7 +44,6 @@ from rovr.functions import icons as icon_utils
 from rovr.functions import path as path_utils
 from rovr.functions import preview_utils
 from rovr.functions.ansi import ansi_to_rich_text
-from rovr.functions.pdf import get_pdf_images, get_pdf_info
 from rovr.functions.utils import (
     load_from_cache,
     multiprocessing_process_error_checker,
@@ -773,6 +772,8 @@ class PreviewContainer(Actionable, Container):
                 f"Invalid args, first_page={first_page} > last_page={last_page}"
             )
 
+        from rovr.functions.pdf import get_pdf_images
+
         assert self._current_file_path is not None
         realpath = path.realpath(self._current_file_path)
         stat_result = os.stat(realpath)
@@ -831,6 +832,8 @@ class PreviewContainer(Actionable, Container):
 
         if should_cancel() or self._current_file_path is None:
             return
+
+        from rovr.functions.pdf import get_pdf_info
 
         # Convert PDF to images if not already done
         if self.pdf.images is None:

@@ -6,11 +6,12 @@ import sys
 import time
 import zipfile
 from contextlib import suppress
+from functools import cache
 from os import path
 from threading import get_ident
+from types import ModuleType
 from typing import Callable, Literal, cast
 
-from pytrash import RecycleBin
 from rich.markup import escape
 from textual import work
 from textual.color import Gradient
@@ -29,18 +30,20 @@ from rovr.functions.cwd import getcwd
 from rovr.functions.utils import is_being_used, should_cancel
 from rovr.variables.constants import config, scroll_bindings
 
-if sys.version_info.major == 3 and sys.version_info.minor <= 13:
-    from backports.zstd import tarfile  # ty: ignore[unresolved-import]
-else:
-    import tarfile
-
-recycle_bin = RecycleBin()
-
 
 class ThickBar(BarRenderable):
     HALF_BAR_LEFT = "▐"
     BAR = "█"
     HALF_BAR_RIGHT = "▌"
+
+
+@cache
+def tarfile() -> ModuleType:
+    if sys.version_info.major == 3 and sys.version_info.minor <= 13:
+        from backports.zstd import tarfile  # ty: ignore[unresolved-import]
+    else:
+        import tarfile
+    return tarfile
 
 
 class ProgressBarContainer(VerticalGroup, inherit_bindings=False):
@@ -345,7 +348,7 @@ class ProcessContainer(Actionable, VerticalScroll):
     def is_archive_member_directory(self, member: object) -> bool:
         if isinstance(member, zipfile.ZipInfo):
             return member.is_dir()
-        if isinstance(member, tarfile.TarInfo):
+        if isinstance(member, tarfile().TarInfo):
             return member.isdir()
         is_dir_attr = getattr(member, "isdir", None)
         if callable(is_dir_attr):
@@ -532,6 +535,9 @@ class ProcessContainer(Actionable, VerticalScroll):
             # recycle bin disabled; fall back to permanent deletion
             self.delete_files(files)
             return
+        from pytrash import RecycleBin
+
+        recycle_bin = RecycleBin()
         bar = self.threaded_new_process_bar(classes="active")
         self.app.call_from_thread(
             bar.update_icon,
@@ -730,7 +736,7 @@ class ProcessContainer(Actionable, VerticalScroll):
                             assert isinstance(_archive, zipfile.ZipFile)
                             _archive.write(file_path, arcname=archive_name)
                         else:
-                            assert isinstance(_archive, tarfile.TarFile)
+                            assert isinstance(_archive, tarfile().TarFile)
                             _archive.add(file_path, arcname=archive_name)
                 for p in files:
                     if path.isdir(p) and not os.listdir(p):
@@ -741,7 +747,7 @@ class ProcessContainer(Actionable, VerticalScroll):
                                 assert isinstance(_archive, zipfile.ZipFile)
                                 _archive.write(p, arcname=archive_name)
                             else:
-                                assert isinstance(_archive, tarfile.TarFile)
+                                assert isinstance(_archive, tarfile().TarFile)
                                 _archive.add(p, arcname=archive_name)
 
         except Exception as exc:
@@ -916,7 +922,7 @@ class ProcessContainer(Actionable, VerticalScroll):
                                 bar_text="Permission Error",
                             )
                             return
-        except (zipfile.BadZipFile, tarfile.TarError, ValueError, RuntimeError) as exc:
+        except (zipfile.BadZipFile, tarfile().TarError, ValueError, RuntimeError) as exc:
             dismiss_with: BarPanicDismissible
             if isinstance(exc, NotImplementedError):
                 if "ZIP" in exc.__str__():

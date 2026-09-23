@@ -1,9 +1,7 @@
 from os import path
 from pathlib import PurePath
 
-from textual.css.styles import RulesMap
 from textual.css.stylesheet import Stylesheet
-from textual.dom import DOMNode
 
 
 class RovrStylesheet(Stylesheet):
@@ -15,8 +13,6 @@ class RovrStylesheet(Stylesheet):
     onto the injected value (variable redefinition concatenates rather than
     replaces), corrupting every `$variable` reference.
     """
-
-    has_applied: bool = False
 
     def read(self, filename: str | PurePath) -> None:
         from rovr.functions.themes import strip_variable_declarations
@@ -33,15 +29,3 @@ class RovrStylesheet(Stylesheet):
         stylesheet = RovrStylesheet(variables=self._variables.copy())
         stylesheet.source = self.source.copy()
         return stylesheet
-
-    def apply(
-        self,
-        node: DOMNode,
-        *,
-        animate: bool = False,
-        cache: dict[tuple, RulesMap] | None = None,
-    ) -> None:
-        if not self.has_applied:
-            self.has_applied = True
-        else:
-            return super().apply(node, animate=animate, cache=cache)

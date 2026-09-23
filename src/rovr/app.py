@@ -101,6 +101,16 @@ if constants.SCREENSHOT_LOCATION:
     constants.SCREENSHOT_LOCATION = normalise(getcwd(), constants.SCREENSHOT_LOCATION)
 
 
+class _RovrScreen(Screen):
+    _first_resume = True
+
+    def _on_screen_resume(self, event: events.ScreenResume) -> None:
+        if self._first_resume:
+            self._first_resume = False
+            event.refresh_styles = False
+        super()._on_screen_resume(event)
+
+
 class Application(
     Actionable,
     ThemeHandler,
@@ -271,7 +281,7 @@ class Application(
         return self._file_list_container.filelist
 
     def get_default_screen(self) -> Screen:
-        screen = Screen(id="_default")
+        screen = _RovrScreen(id="_default")
         horizontal_breakpoints = self.HORIZONTAL_BREAKPOINTS or []
         vertical_breakpoints = self.VERTICAL_BREAKPOINTS or []
         breakpoints = {

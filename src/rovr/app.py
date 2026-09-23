@@ -271,7 +271,20 @@ class Application(
         return self._file_list_container.filelist
 
     def get_default_screen(self) -> Screen:
-        return Screen(id="_default")
+        screen = Screen(id="_default")
+        horizontal_breakpoints = self.HORIZONTAL_BREAKPOINTS or []
+        vertical_breakpoints = self.VERTICAL_BREAKPOINTS or []
+        breakpoints = {
+            class_name: False
+            for _, class_name in horizontal_breakpoints + vertical_breakpoints
+        }
+        width, height = self.size
+        for class_name in screen._get_breakpoint_classes(
+            width, horizontal_breakpoints
+        ) | screen._get_breakpoint_classes(height, vertical_breakpoints):
+            breakpoints[class_name] = True
+        screen.update_classes(breakpoints, update=False)
+        return screen
 
     def compose(self) -> ComposeResult:
         self.log("Starting Rovr...")

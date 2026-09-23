@@ -44,7 +44,7 @@ from rovr.core import (
     PinnedSidebarContainer,
 )
 from rovr.footer import ProcessContainer
-from rovr.functions import drag_image, icons
+from rovr.functions import icons
 from rovr.functions import pins as pin_utils
 from rovr.functions.cwd import getcwd
 from rovr.functions.path import (
@@ -336,6 +336,8 @@ class DragAndDrop:
 
         from pathlib import Path
 
+        from rovr.functions.drag_image import render_drag_image
+
         if not self.file_list.select_mode:
             await self.file_list._on_click(
                 events.Click(
@@ -378,7 +380,7 @@ class DragAndDrop:
                 label_text = f"{len(selected)} {kind}{s(selected)}"
 
             label: ImageLabel | TextLabel = await asyncio.to_thread(
-                drag_image.render_drag_image,
+                render_drag_image,
                 icon,
                 label_text,
                 icon_color,

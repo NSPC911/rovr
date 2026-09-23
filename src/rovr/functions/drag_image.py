@@ -1,17 +1,20 @@
 from __future__ import annotations
 
+import hashlib
 import os
 import subprocess
+import tempfile
 from functools import lru_cache
-from importlib import resources
 from io import BytesIO
+from pathlib import Path
+from urllib.request import urlopen
 
 from PIL import Image, ImageDraw, ImageFont, ImageOps
 from textual.color import Color, ColorParseError
 from textual_drivers.dnd import ImageLabel
 
-from rovr import RESOURCE_PACKAGE
 from rovr.functions.utils import load_from_cache, save_to_cache
+from rovr.variables.maps import RovrVars
 
 HEIGHT = 48
 MAX_WIDTH = 480
@@ -29,9 +32,34 @@ IMAGE_PREVIEW_SIZE = (
     IMAGE_LABEL_SIZE - (IMAGE_PADDING * 2),
     IMAGE_LABEL_SIZE - HEIGHT - IMAGE_PADDING,
 )
-ICON_FONT_PATH = (
-    resources.files(f"{RESOURCE_PACKAGE}.assets")
-) / "fonts/SymbolsNerdFont-Regular.ttf"
+FONT_URL = "https://raw.githubusercontent.com/ryanoasis/nerd-fonts/v3.4.0/patched-fonts/NerdFontsSymbolsOnly/SymbolsNerdFont-Regular.ttf"
+FONT_SHA256 = "71db104aa66567d0efe0b98758f9dfc1895573a453fe85fb53d1c38544a55106"
+
+
+def _icon_font_path() -> str | None:
+    font_path = Path(RovrVars.ROVRSTATE) / "SymbolsNerdFont-Regular.ttf"
+    if font_path.is_file():
+        try:
+            if hashlib.sha256(font_path.read_bytes()).hexdigest() == FONT_SHA256:
+                return str(font_path)
+        except OSError:
+            return None
+    try:
+        with urlopen(FONT_URL, timeout=5) as response:
+            data = response.read(3_000_000)
+        if hashlib.sha256(data).hexdigest() != FONT_SHA256:
+            return None
+        font_path.parent.mkdir(parents=True, exist_ok=True)
+        with tempfile.NamedTemporaryFile(dir=font_path.parent, delete=False) as temp:
+            temp.write(data)
+        try:
+            os.replace(temp.name, font_path)
+        finally:
+            if os.path.exists(temp.name):
+                os.unlink(temp.name)
+    except OSError:
+        return None
+    return str(font_path)
 
 
 def render_drag_image(
@@ -101,12 +129,12 @@ def render_drag_image(
             image.save(output, format="PNG", compress_level=1)
             return ImageLabel(output.getvalue(), width, height)
 
+    icon_font_path = _icon_font_path() if icon else text_font_path
+    if icon_font_path is None:
+        return None
     try:
         text_font = _load_font(text_font_path, TEXT_SIZE * SCALE)
-        icon_font = _load_font(
-            str(ICON_FONT_PATH) if icon else text_font_path,
-            ICON_SIZE * SCALE,
-        )
+        icon_font = _load_font(icon_font_path, ICON_SIZE * SCALE)
     except OSError:
         return None
 

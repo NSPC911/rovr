@@ -104,6 +104,16 @@ class ThemeHandler:
             else config["theme"]["transparent"]
         )
         self._load_theme_css()
+        if not self._running:
+            dark = self.current_theme.dark
+            classes = {name: False for name in self.classes if name.startswith("-theme-")}
+            classes[f"-theme-{self.current_theme.name}"] = True
+            classes["-dark-mode"] = dark
+            classes["-light-mode"] = not dark
+            self.update_classes(classes, update=False)
+            self._refresh_truecolor_filter(self.ansi_theme)
+            self.call_next(self.theme_changed_signal.publish, theme)
+            return
         # no i cannot use `super()` because super() would resolve to
         # super of App, which doesn't make sense, so ty cries
         App._watch_theme(self, theme_name)

@@ -569,7 +569,7 @@ class Application(
         if not self._force_exit_on_shutdown or self._force_exit_timer is not None:
             return
         self._force_exit_timer = threading.Timer(
-            0.5,
+            1,
             os._exit,
             args=(0,),
         )

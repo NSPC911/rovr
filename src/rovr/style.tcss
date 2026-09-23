@@ -175,6 +175,7 @@ Tooltip {
 }
 
 #headerArea {
+  height: 1;
   #newTabRight {
     width: 1fr;
     Button {
@@ -281,13 +282,16 @@ Tooltip {
 
 #below_menu {
   margin: 0;
+  height: 2;
   max-height: 11;
   Input {
     width: 1fr;
     margin: 0 1;
-    padding: 0 1;
+    padding: 0 1 0 1;
     color: $foreground;
     border: none;
+    background: transparent;
+      &.hide_border_bottom { height: 1 }
   }
   Button {
     margin: 0 1;
@@ -297,6 +301,8 @@ Tooltip {
     overlay: screen;
     width: 1fr;
     border: $border-style $accent;
+    margin: -1 -1 0 13;
+    background: transparent;
     border-top: none;
     AutoCompleteList {
       width: 1fr;
@@ -314,12 +320,29 @@ Tooltip {
     }
     Option { width: 100% }
   }
+  #showKeys {
+    height: 1;
+    border-left: $border-style $border-blurred
+  }
 }
 
 .option {
   border: none;
   padding: 0;
   margin: 0 1 0 0;
+  opacity: 1 !important;
+  background-tint: transparent !important;
+  text-opacity: 1 !important;
+  tint: transparent !important;
+  background: transparent;
+  width: 3;
+  max-width: 3;
+  height: 1;
+  &:disabled { color: $panel-lighten-3 }
+  &:light:disabled { color: $panel-darken-3 }
+  &:ansi:hover { color: $primary }
+  &:light:ansi:hover { color: $secondary }
+  &:disabled:hover { color: $panel-lighten-3 }
 }
 
 #main {
@@ -1116,101 +1139,14 @@ PopupOptionList { width: auto }
 LoadingIndicator {
   background: transparent;
 }
-/* Compact mode */
-.compact-panels {
-  #pinned_sidebar_container { width: $compact_pinned_sidebar_width }
-  #preview_sidebar { width: $compact_preview_sidebar_width }
-  HeaderArea { height: 1 }
-  HeaderClock { border-bottom: none !important }
-  #footer {
-    height: $compact_footer_unfocus_height;
-    &:focus-within { height: $compact_footer_focus_height }
-  }
-}
-.compact-buttons {
-  #headerArea {
-    height: 1;
-    HeaderClock {
-      border-bottom: none !important;
-    }
-  }
-  #below_menu {
-    height: 2;
-    Input {
-      background: transparent;
-      padding-left: 1;
-      &.hide_border_bottom {
-        height: 1;
-      }
-    }
-    PathAutoCompleteInput {
-      margin: -1 -1 0 13;
-      background: transparent;
-    }
-    #showKeys {
-      height: 1;
-      border-left: $border-style $border-blurred
-    }
-  }
-  .option {
-    opacity: 1 !important;
-    background-tint: transparent !important;
-    text-opacity: 1 !important;
-    tint: transparent !important;
-    background: transparent;
-    width: 3;
-    max-width: 3;
-    height: 1;
-    &:disabled {
-      color: $panel-lighten-3;
-    }
-    &:light:disabled { color: $panel-darken-3 }
-    &:ansi:hover { color: $primary }
-    &:light:ansi:hover { color: $secondary }
-    &:disabled:hover { color: $panel-lighten-3 }
-  }
-}
-.comfy-buttons {
-  #below_menu {
-    Input {
-      &.hide_border_bottom {
-        border: $border-style $accent !important;
-        border-bottom: none !important;
-        height: 3;
-      }
-    }
-    PathAutoCompleteInput {
-      background: $background;
-      margin: -1 1 0 25;
-      &:ansi { background: transparent }
-    }
-    .option {
-      width: 7;
-      max-width: 7;
-      height: 3;
-    }
-    #showKeys {
-      height: 3;
-      border: $border-style $border-blurred
-    }
-  }
-  .option {
-    width: 3;
-    max-width: 3;
-  }
-}
-Screen.-no-preview #root.comfy-buttons #below_menu PathAutoCompleteInput,
-Screen.-filelist-only #root.comfy-buttons #below_menu PathAutoCompleteInput {
-  margin: -1 1 0 1
-}
-Screen.-no-preview #root.compact-buttons #below_menu PathAutoCompleteInput,
-Screen.-filelist-only #root.compact-buttons #below_menu PathAutoCompleteInput {
-  margin: -1 -1 0 -1
-}
+
 Screen.-filelist-only,
 Screen.-no-preview {
   #preview_sidebar,
   #below_menu Button { display: none !important }
+  #below_menu PathAutoCompleteInput,
+  #below_menu PathAutoCompleteInput
+  { margin: -1 -1 0 -1 }
 }
 Screen.-no-preview KeyChordPopup {
   width: 90%;
@@ -1340,3 +1276,50 @@ Screen {
   margin-right: 0;
   padding: 0 1;
 }
+
+/*
+// compact panels
+#pinned_sidebar_container { width: $compact_pinned_sidebar_width }
+#preview_sidebar { width: $compact_preview_sidebar_width }
+HeaderArea { height: 1 }
+HeaderClock { border-bottom: none !important }
+#footer {
+  height: $compact_footer_unfocus_height;
+  &:focus-within { height: $compact_footer_focus_height }
+}
+
+// comfy buttons
+Screen.-no-preview #below_menu PathAutoCompleteInput,
+Screen.-filelist-only #below_menu PathAutoCompleteInput
+{ margin: -1 1 0 1 }
+
+#below_menu {
+  Input {
+    &.hide_border_bottom {
+      border: $border-style $accent !important;
+      border-bottom: none !important;
+      height: 3;
+    }
+  }
+  PathAutoCompleteInput {
+    background: $background;
+    margin: -1 1 0 25;
+    &:ansi { background: transparent }
+  }
+  .option {
+    width: 7;
+    max-width: 7;
+    height: 3;
+  }
+  #showKeys {
+    height: 3;
+    border: $border-style $border-blurred
+  }
+}
+.option {
+  width: 3;
+  max-width: 3;
+}
+// because of the way css is defined, you may need to adjust the CSS further
+// but im kinda lazy to do it, feel free to open a pr
+*/

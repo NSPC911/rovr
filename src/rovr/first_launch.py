@@ -412,10 +412,6 @@ show_tab_close_button = {"true" if preset == "sane" else "false"}
 [interface.image_viewer]
 protocol = "{prot_to_schema[str(self.query_one("#image_protocol_select", Select).value)]}"
 
-[interface.compact_mode]
-buttons = true
-panels = false
-
 [settings.editor.file]
 run = "{_escape_toml_string(self.query_one("#editor_input", Input).value)}"
 orphan = false

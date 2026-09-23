@@ -46,9 +46,6 @@ description: config schema humanified
     - [1.21.2. Property `Rovr Config > interface > preview_text > error`](#interface_preview_text_error)
     - [1.21.3. Property `Rovr Config > interface > preview_text > start`](#interface_preview_text_start)
     - [1.21.4. Property `Rovr Config > interface > preview_text > font_text`](#interface_preview_text_font_text)
-  - [1.22. Property `Rovr Config > interface > compact_mode`](#interface_compact_mode)
-    - [1.22.1. Property `Rovr Config > interface > compact_mode > buttons`](#interface_compact_mode_buttons)
-    - [1.22.2. Property `Rovr Config > interface > compact_mode > panels`](#interface_compact_mode_panels)
 - [2. Property `Rovr Config > settings`](#settings)
   - [2.1. Property `Rovr Config > settings > use_recycle_bin`](#settings_use_recycle_bin)
   - [2.2. Property `Rovr Config > settings > right_click`](#settings_right_click)
@@ -488,7 +485,6 @@ description: config schema humanified
 | [drive_watcher_frequency](#interface_drive_watcher_frequency)         | number          | How often (in seconds) to check for changes in mounted drives in the sidebar.                                                                                                                                    |
 | [clock](#interface_clock)                                             | object          |                                                                                                                                                                                                                  |
 | [preview_text](#interface_preview_text)                               | object          |                                                                                                                                                                                                                  |
-| [compact_mode](#interface_compact_mode)                               | object          |                                                                                                                                                                                                                  |
 
 ### <a name="interface_tooltips"></a>1.1. Property `Rovr Config > interface > tooltips`
 
@@ -1031,39 +1027,6 @@ Must be one of:
 | **Default**  | `"abcdefghijklmnopqrstuvwxyz\nABCDEFGHIJKLMNOPQRSTUVWXYZ\noO08 iIlL1 g9qCQG a@ 5sS\n{} [==&gt;  ] (*) &lt;&gt; ~-+ /\\\n"` |
 
 **Description:** When a font file is previewed, this text will be rendered in the font if possible.
-
-### <a name="interface_compact_mode"></a>1.22. Property `Rovr Config > interface > compact_mode`
-
-|                           |             |
-| ------------------------- | ----------- |
-| **Type**                  | `object`    |
-| **Required**              | No          |
-| **Additional properties** | Not allowed |
-
-| Property                                   | Type    | Title/Description                                                            |
-| ------------------------------------------ | ------- | ---------------------------------------------------------------------------- |
-| [buttons](#interface_compact_mode_buttons) | boolean | Whether to compact the buttons and path input to one line instead of three.  |
-| [panels](#interface_compact_mode_panels)   | boolean | Whether to make the panels smaller to add more room for the file list itself |
-
-#### <a name="interface_compact_mode_buttons"></a>1.22.1. Property `Rovr Config > interface > compact_mode > buttons`
-
-|              |           |
-| ------------ | --------- |
-| **Type**     | `boolean` |
-| **Required** | No        |
-| **Default**  | `true`    |
-
-**Description:** Whether to compact the buttons and path input to one line instead of three.
-
-#### <a name="interface_compact_mode_panels"></a>1.22.2. Property `Rovr Config > interface > compact_mode > panels`
-
-|              |           |
-| ------------ | --------- |
-| **Type**     | `boolean` |
-| **Required** | No        |
-| **Default**  | `false`   |
-
-**Description:** Whether to make the panels smaller to add more room for the file list itself
 
 ## <a name="settings"></a>2. Property `Rovr Config > settings`
 

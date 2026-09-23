@@ -1,5 +1,28 @@
 [
   {
+    "keys": ["interface.compact_mode", "interface.compact_mode.*"],
+    "message": [
+      "[bright_cyan]interface.compact_mode[/] has been removed.",
+      "If you are using the non-default options, which is",
+      "[red]\\[[yellow]interface.compact_mode[red]]",
+      "[cyan]buttons = true[/]",
+      "[cyan]panels = false[/]",
+      "you need to bring over the appropriate styles to your [bright_cyan]`style.tcss`[/] file.",
+      "check [link=https://github.com/NSPC911/rovr/blob/master/src/rovr/style.tcss]style.tcss[/]'s last few lines for the old compact/cozy styles."
+    ],
+    "extra": "Removed in v0.11.0",
+    "regex": [
+      {
+        "find": "\\[interface\\.compact_mode\\]\nbuttons[^\\n]*\npanels[^\\n]*",
+        "replace": ""
+      },
+      {
+        "find": "interface\\.compact_mode\\.(buttons|panels)[^\\n]*",
+        "replace": ""
+      }
+    ]
+  },
+  {
     "keys": ["interface.allow_tab_nav"],
     "message": ["[bright_cyan]interface.allow_tab_nav[/] has been removed as the new keybind system allows disabli[bright_cyanng it by default.",
     "To disable it, you can add the following to your [bright_cyan]`keys.toml`[/] file:",

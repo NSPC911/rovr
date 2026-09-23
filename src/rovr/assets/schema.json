@@ -400,22 +400,6 @@
               "default": "abcdefghijklmnopqrstuvwxyz\nABCDEFGHIJKLMNOPQRSTUVWXYZ\noO08 iIlL1 g9qCQG a@ 5sS\n{} [==>  ] (*) <> ~-+ /\\\n"
             }
           }
-        },
-        "compact_mode": {
-          "type": "object",
-          "additionalProperties": false,
-          "properties": {
-            "buttons": {
-              "type": "boolean",
-              "default": true,
-              "description": "Whether to compact the buttons and path input to one line instead of three."
-            },
-            "panels": {
-              "type": "boolean",
-              "default": false,
-              "description": "Whether to make the panels smaller to add more room for the file list itself"
-            }
-          }
         }
       }
     },

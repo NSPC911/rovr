@@ -288,16 +288,7 @@ class Application(
 
     def compose(self) -> ComposeResult:
         self.log("Starting Rovr...")
-        root_classes = (
-            "compact-buttons"
-            if config["interface"]["compact_mode"]["buttons"]
-            else "comfy-buttons"
-        ) + (
-            " compact-panels"
-            if config["interface"]["compact_mode"]["panels"]
-            else " comfy-panels"
-        )
-        with Vertical(id="root", classes=root_classes.strip()):
+        with Vertical(id="root"):
             header = HeaderArea(self._startup_locations)
             self.tabWidget = header.tabline
             yield header

@@ -488,7 +488,7 @@ def schema_dump(
                     fixed_content = config_content
                     for rule in item["regex"]:
                         fixed_content = re.sub(
-                            re.escape(rule["find"]), rule["replace"], fixed_content
+                            rule["find"], rule["replace"], fixed_content
                         )
                     if fixed_content != config_content:
                         with open(doc_path, "w", encoding="utf-8") as _f:

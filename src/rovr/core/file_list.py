@@ -510,6 +510,8 @@ class FileList(
             # fix selected options
             if (has_selected or self.select_mode) and name_to_index:
                 self.update_from_session(session, name_to_index)
+            if self.select_mode and not self._selected:
+                self.select_mode = False
             # session handler
             self.app.query_one("#path_switcher", PathInput).value = cwd + (
                 "" if cwd.endswith("/") else "/"

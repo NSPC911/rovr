@@ -636,6 +636,8 @@ def ifed(
                     disabled = not (dir_entry and path.isdir(dir_entry.path))
                 else:
                     disabled = not (dir_entry and not path.isdir(dir_entry.path))
+            case "ipc":
+                disabled = conditions.get("ipc", "null") != app.ipc_running
         if disabled:
             break
     return disabled

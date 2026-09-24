@@ -152,6 +152,14 @@
         "directory": {
           "type": "boolean",
           "description": "Only enable this menu item if the selected item is a directory (set to true) or a file (set to false) (if unspecified, matches both files and directories)"
+        },
+        "ipc": {
+          "oneOf": [
+            { "type": "boolean" },
+            { "type": "string", "enum": ["null"] }
+          ],
+          "description": "Only enable this menu item if the ipc server is enabled (true), disabled (false), or null (either)",
+          "default": "null"
         }
       }
     },

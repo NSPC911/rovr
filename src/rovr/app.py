@@ -400,6 +400,7 @@ class Application(
             from rovr.functions.ipc_receiver import start_server
 
             start_server(self)
+        self.ipc_running = config["settings"]["ipc"]["enabled"]
 
     @work
     async def _force_crash(self) -> None:

@@ -97,22 +97,22 @@ right_click = [
 
 shell actions support variable expansions via `rovr/functions/utils.py::expand_command`:
 
-| expansion | description                                                       |
-| --------- | ----------------------------------------------------------------- |
-| `%cwd`    | current working directory                                         |
-| `%rcwd`   | real path of the current working directory                        |
-| `%h`      | currently highlighted file                                        |
-| `%rh`     | real path of the currently highlighted file                       |
-| `%nh`     | name of the currently highlighted file, without its parent path   |
-| `%rnh`    | name of the real path of the currently highlighted file           |
-| `%s`      | shell-quoted, space-separated selected file paths                 |
-| `%rs`     | shell-quoted, space-separated real paths of selected files        |
-| `%copy`   | shell-quoted paths in rovr's copy clipboard                       |
-| `%cut`    | shell-quoted paths in rovr's cut clipboard                        |
-| `%th`     | highlighted file in the next tab                                  |
-| `%tNh`    | highlighted file `N` tabs after the focused tab, such as `%t2h`   |
-| `%Th`     | highlighted file in the previous tab                              |
-| `%TNh`    | highlighted file `N` tabs before the focused tab, such as `%T2h`  |
+| expansion | description                                                      |
+| --------- | ---------------------------------------------------------------- |
+| `%cwd`    | current working directory                                        |
+| `%rcwd`   | real path of the current working directory                       |
+| `%h`      | currently highlighted file                                       |
+| `%rh`     | real path of the currently highlighted file                      |
+| `%nh`     | name of the currently highlighted file, without its parent path  |
+| `%rnh`    | name of the real path of the currently highlighted file          |
+| `%s`      | shell-quoted, space-separated selected file paths                |
+| `%rs`     | shell-quoted, space-separated real paths of selected files       |
+| `%copy`   | shell-quoted paths in rovr's copy clipboard                      |
+| `%cut`    | shell-quoted paths in rovr's cut clipboard                       |
+| `%th`     | highlighted file in the next tab                                 |
+| `%tNh`    | highlighted file `N` tabs after the focused tab, such as `%t2h`  |
+| `%Th`     | highlighted file in the previous tab                             |
+| `%TNh`    | highlighted file `N` tabs before the focused tab, such as `%T2h` |
 
 tab-relative expansions wrap around the tab list. The old `${variable}` expansions are deprecated.
 
@@ -133,12 +133,13 @@ right_click = [
 
 ### condition fields
 
-| field       | type      | description                                                                         |
-| ----------- | --------- | ----------------------------------------------------------------------------------- |
-| `path`      | list[str] | show only if the file path matches one of these glob patterns (fnmatch)             |
-| `os`        | list[str] | show only on specified operating systems (case insensitive: Windows, Linux, Darwin) |
-| `cwd`       | list[str] | show only if the current working directory matches one of these glob patterns       |
-| `directory` | bool      | show only for directories (`true`) or files (`false`)                               |
+| field       | type           | description                                                                                 |
+| ----------- | -------------- | ------------------------------------------------------------------------------------------- |
+| `path`      | list[str]      | show only if the file path matches one of these glob patterns (fnmatch)                     |
+| `os`        | list[str]      | show only on specified operating systems (case insensitive: Windows, Linux, Darwin)         |
+| `cwd`       | list[str]      | show only if the current working directory matches one of these glob patterns               |
+| `directory` | bool           | show only for directories (`true`) or files (`false`)                                       |
+| `ipc`       | bool \| 'null' | show only if rovr's IPC server is running (`true`), not running (`false`), or both (`null`) |
 
 ### keybind
 

@@ -75,15 +75,6 @@ r"""The values for the '_PreviewType' enum"""
 _RIGHT_CLICK_ACTION_ONEOF1_SHELL_DEFAULT = False
 r""" Default value of the field path 'right_click_action oneof1 shell' """
 
-_RIGHT_CLICK_IF_IPC_DEFAULT = "null"
-r""" Default value of the field path 'right_click_if ipc' """
-
-_RIGHT_CLICK_IF_IPC_ONEOF0_DEFAULT = "null"
-r""" Default value of the field path 'right_click_if ipc oneof0' """
-
-_RIGHT_CLICK_IF_IPC_ONEOF1_DEFAULT = "null"
-r""" Default value of the field path 'right_click_if ipc oneof1' """
-
 _ROVR_CONFIG_ICONS_FILES_DEFAULT: list[Any] = []
 r""" Default value of the field path 'Rovr Config icons files' """
 
@@ -530,22 +521,19 @@ class _RightClickIf(TypedDict, total=False):
     directory: bool
     r""" Only enable this menu item if the selected item is a directory (set to true) or a file (set to false) (if unspecified, matches both files and directories) """
 
-    ipc: Union["_RightClickIfIpcOneof0", "_RightClickIfIpcOneof1"]
+    ipc: Union[bool, "_RightClickIfIpcOneof1"]
     r"""
     Only enable this menu item if the ipc server is enabled (true), disabled (false), or null (either)
-
-    default: null
 
     Aggregation type: oneOf
     """
 
-_RightClickIfIpcOneof0 = bool
-r""" default: null """
+    link: bool
+    r""" Only enable this menu item if the selected item is a symlink/junction (true) or not (false) """
 
 _RightClickIfIpcOneof1 = Literal["null"]
-r""" default: null """
 _RIGHTCLICKIFIPCONEOF1_NULL: Literal["null"] = "null"
-r"""The values for the 'default: null' enum"""
+r"""The values for the '_RightClickIfIpcOneof1' enum"""
 
 # | oneOf:
 # |   - required:

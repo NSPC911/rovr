@@ -27,7 +27,7 @@ $scrollbar-background-hover: $primary-muted;
 $scrollbar-background-active: $primary-muted;
 $scrollbar-corner-color: $primary-muted;
 
-Screen.-all-horizontal #root.compact-buttons {
+Screen.-all-horizontal {
   #menu_wrapper #below_menu PathInput {
     border-left: $border-style $border-blurred;
     padding-left: 1;

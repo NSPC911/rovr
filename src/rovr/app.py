@@ -598,7 +598,7 @@ class Application(
 
     def cd(
         self,
-        directory: str,
+        target: str,
         add_to_history: bool = True,
         focus_on: str | None = None,
         has_selected: bool = False,
@@ -608,14 +608,18 @@ class Application(
         # Makes sure `directory` is a directory, or chdir will fail with exception
         if self.return_code is not None:
             return
-        directory = ensure_existing_directory(directory)
+
+        if path.exists(target) and not path.isdir(target) and focus_on is None:
+            focus_on = path.basename(target)
+        else:
+            target = ensure_existing_directory(target)
 
         try:
-            if normalise(getcwd()) == normalise(directory) or directory == "":
+            if normalise(getcwd()) == normalise(target) or target == "":
                 add_to_history = False
             else:
-                chdir(directory, self.file_list._follow_links_next)
-                self.last_available_cd = directory
+                chdir(target, self.file_list._follow_links_next)
+                self.last_available_cd = target
         except PermissionError as exc:
             self.notify(
                 f"{exc.strerror} (error no {exc.errno})",

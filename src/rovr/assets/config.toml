@@ -83,8 +83,12 @@ right_click = [
     "%rcwd",
     "%rnh",
   ], run_type = "background", shell = false }, if = { os = ["Windows"] } },
-  { label = "\uf481 follow link", action = "rovr:follow_symlinks" },
-  { label = "\uf08e open location", action = { run = [
+  { label = "\uf481 Follow Link", action = { run = [
+    "python",
+    "-c",
+    "import sys,subprocess;subprocess.run(['rovr','--ipc','cd',sys.argv[-1]],capture_output=True); print(f'Switched to {sys.argv[-1]}')",
+    "%rh"
+  ], run_type = "background" }, if = { link = true, ipc = true } },
   { label = "\uf08e Open Location", action = { run = [
     "powershell",
     "-NoProfile",

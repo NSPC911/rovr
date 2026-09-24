@@ -181,8 +181,8 @@ def run_command(
         from shlex import join as shjoin
 
         command = shjoin(command)
-    if globals().get("is_dev", False):
-        print(command)
+    if "devtools" in app.features:
+        app.log(command)
 
     match run_type:
         case "orphan":

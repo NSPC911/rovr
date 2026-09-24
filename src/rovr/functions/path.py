@@ -638,6 +638,10 @@ def ifed(
                     disabled = not (dir_entry and not path.isdir(dir_entry.path))
             case "ipc":
                 disabled = conditions.get("ipc", "null") != app.ipc_running
+            case "link":
+                disabled = not (
+                    dir_entry and (dir_entry.is_symlink() or dir_entry.is_junction())
+                )
         if disabled:
             break
     return disabled

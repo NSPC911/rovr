@@ -158,8 +158,11 @@
             { "type": "boolean" },
             { "type": "string", "enum": ["null"] }
           ],
-          "description": "Only enable this menu item if the ipc server is enabled (true), disabled (false), or null (either)",
-          "default": "null"
+          "description": "Only enable this menu item if the ipc server is enabled (true), disabled (false), or null (either)"
+        },
+        "link": {
+          "type": "boolean",
+          "description": "Only enable this menu item if the selected item is a symlink/junction (true) or not (false)"
         }
       }
     },

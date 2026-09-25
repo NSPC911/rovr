@@ -9,6 +9,7 @@ from dataclasses import dataclass
 from functools import partial
 from io import BytesIO
 from os import path
+from tempfile import NamedTemporaryFile
 from time import time
 from typing import Any, Awaitable, Callable, Literal, TypeVar, cast, overload
 
@@ -45,6 +46,7 @@ from rovr.functions import path as path_utils
 from rovr.functions import preview_utils
 from rovr.functions.ansi import ansi_to_rich_text
 from rovr.functions.utils import (
+    expand_command,
     load_from_cache,
     multiprocessing_process_error_checker,
     s,
@@ -1679,6 +1681,9 @@ class PreviewContainer(Actionable, Container):
         elif file_type == "font":
             self.log("Showing font preview")
             self.show_font_preview()
+        elif file_type in config["settings"]["previewers"]:
+            self.log(f"Showing custom previewer for {file_type}")
+            self.show_custom_preview(file_type)
         else:
             if content in self._preview_texts.values():
                 self.log("Showing special preview")
@@ -1692,6 +1697,110 @@ class PreviewContainer(Actionable, Container):
         if not should_cancel():
             self.call_from_thread(
                 setattr, self, "_rendered_preview_key", (file_path, mtime)
+            )
+
+    def show_custom_preview(self, name: str) -> None:
+        previewer = config["settings"]["previewers"][name]
+        original_path = self._current_file_path
+        assert original_path is not None
+
+        with NamedTemporaryFile(
+            delete=False, suffix=path.splitext(original_path)[1]
+        ) as temp:
+            temp_path = temp.name
+        try:
+            realpath = path.realpath(original_path)
+            stat_result = os.stat(realpath)
+            signature = (name, repr(previewer))
+            is_text = previewer["type"] == "text"
+            output_data: Text | bytes | None = (
+                _load_cached_text(
+                    realpath, "custom-previewer-text", stat_result, signature
+                )
+                if is_text
+                else load_from_cache(realpath, "custom-previewer", stat_result, signature)
+            )
+            if output_data is None:
+                command = self.call_from_thread(
+                    expand_command,
+                    self.app,
+                    previewer["command"],
+                    ["%cut", "%copy", "%s", "%rs", "%tab"],
+                )
+                if isinstance(command, str):
+                    command = command.replace("%temp", temp_path)
+                else:
+                    command = [part.replace("%temp", temp_path) for part in command]
+
+                process = subprocess.run(
+                    command,
+                    capture_output=True,
+                    shell=isinstance(command, str),
+                    check=True,
+                )
+
+                output = previewer.get("file", "__stdout__")
+                if output == "__stdout__":
+                    output_data = process.stdout
+                elif output == "__stderr__":
+                    output_data = process.stderr
+                else:
+                    with open(temp_path if output == "%temp" else output, "rb") as file:
+                        output_data = file.read()
+
+                if is_text:
+                    output_data = ansi_to_rich_text(
+                        output_data.decode("utf-8", errors="replace")
+                    )
+                    _save_cached_text(
+                        realpath,
+                        "custom-previewer-text",
+                        stat_result,
+                        signature,
+                        output_data,
+                    )
+                else:
+                    save_to_cache(
+                        realpath,
+                        "custom-previewer",
+                        stat_result,
+                        signature,
+                        output_data,
+                    )
+
+            if should_cancel():
+                return
+            match previewer["type"]:
+                case "text":
+                    assert isinstance(output_data, Text)
+                    self.show_custom_text_preview(output_data)
+                case "image":
+                    assert isinstance(output_data, bytes)
+                    with open(temp_path, "wb") as file:
+                        file.write(output_data)
+                    self._current_file_path = temp_path
+                    self.show_image_preview()
+        finally:
+            self._current_file_path = original_path
+            with contextlib.suppress(OSError):
+                os.unlink(temp_path)
+
+    def show_custom_text_preview(self, output: Text) -> None:
+        self.set_border("title", titles.file)
+        lines = list(output.split("\n", allow_blank=True))
+        if text_preview := self.get_child(WindowedTextPreview):
+            self.call_from_thread(
+                text_preview.update_preview, lines, language=None, line_numbers=False
+            )
+            self.call_from_thread(text_preview.set_classes, "text_preview")
+        else:
+            self.call_from_thread(self.remove_children)
+            self.call_from_thread(
+                lambda: self.mount(
+                    WindowedTextPreview(lines, classes="text_preview").data_bind(
+                        type(self.app).ansi_color
+                    )
+                ),
             )
 
     def mount_special_messages(self) -> None:

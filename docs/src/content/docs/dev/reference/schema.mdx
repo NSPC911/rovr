@@ -124,48 +124,57 @@ description: config schema humanified
   - [2.7. Property `Rovr Config > settings > preview_rules`](#settings_preview_rules)
     - [2.7.1. Property `Rovr Config > settings > preview_rules > additionalProperties`](#settings_preview_rules_additionalProperties)
       - [2.7.1.1. Property `Rovr Config > settings > preview_rules > additionalProperties > oneOf > preview_type`](#settings_preview_rules_additionalProperties_oneOf_i0)
+        - [2.7.1.1.1. Property `Rovr Config > settings > preview_rules > additionalProperties > oneOf > item 0 > anyOf > item 0`](#settings_preview_rules_additionalProperties_oneOf_i0_anyOf_i0)
+        - [2.7.1.1.2. Property `Rovr Config > settings > preview_rules > additionalProperties > oneOf > item 0 > anyOf > item 1`](#settings_preview_rules_additionalProperties_oneOf_i0_anyOf_i1)
       - [2.7.1.2. Property `Rovr Config > settings > preview_rules > additionalProperties > oneOf > item 1`](#settings_preview_rules_additionalProperties_oneOf_i1)
         - [2.7.1.2.1. Property `Rovr Config > settings > preview_rules > additionalProperties > oneOf > item 1 > default`](#settings_preview_rules_additionalProperties_oneOf_i1_default)
         - [2.7.1.2.2. Property `Rovr Config > settings > preview_rules > additionalProperties > oneOf > item 1 > extensions`](#settings_preview_rules_additionalProperties_oneOf_i1_extensions)
           - [2.7.1.2.2.1. Pattern Property `Rovr Config > settings > preview_rules > additionalProperties > oneOf > item 1 > extensions > preview_type`](#settings_preview_rules_additionalProperties_oneOf_i1_extensions_pattern1)
-  - [2.8. Property `Rovr Config > settings > openers`](#settings_openers)
-    - [2.8.1. Property `Rovr Config > settings > openers > groups`](#settings_openers_groups)
-      - [2.8.1.1. Property `Rovr Config > settings > openers > groups > additionalProperties`](#settings_openers_groups_additionalProperties)
-        - [2.8.1.1.1. Rovr Config > settings > openers > groups > additionalProperties > additionalProperties items](#settings_openers_groups_additionalProperties_items)
-          - [2.8.1.1.1.1. Property `Rovr Config > settings > openers > groups > additionalProperties > additionalProperties items > oneOf > item 0`](#settings_openers_groups_additionalProperties_items_oneOf_i0)
-          - [2.8.1.1.1.2. Property `Rovr Config > settings > openers > groups > additionalProperties > additionalProperties items > oneOf > item 1`](#settings_openers_groups_additionalProperties_items_oneOf_i1)
-            - [2.8.1.1.1.2.1. Property `Rovr Config > settings > openers > groups > additionalProperties > additionalProperties items > oneOf > item 1 > run`](#settings_openers_groups_additionalProperties_items_oneOf_i1_run)
-            - [2.8.1.1.1.2.2. Property `Rovr Config > settings > openers > groups > additionalProperties > additionalProperties items > oneOf > item 1 > if`](#settings_openers_groups_additionalProperties_items_oneOf_i1_if)
-              - [2.8.1.1.1.2.2.1. Property `Rovr Config > settings > openers > groups > additionalProperties > additionalProperties items > oneOf > item 1 > if > cwd`](#settings_openers_groups_additionalProperties_items_oneOf_i1_if_cwd)
-                - [2.8.1.1.1.2.2.1.1. Rovr Config > settings > openers > groups > additionalProperties > additionalProperties items > oneOf > item 1 > if > cwd > cwd items](#settings_openers_groups_additionalProperties_items_oneOf_i1_if_cwd_items)
-              - [2.8.1.1.1.2.2.2. Property `Rovr Config > settings > openers > groups > additionalProperties > additionalProperties items > oneOf > item 1 > if > os`](#settings_openers_groups_additionalProperties_items_oneOf_i1_if_os)
-              - [2.8.1.1.1.2.2.3. Property `Rovr Config > settings > openers > groups > additionalProperties > additionalProperties items > oneOf > item 1 > if > directory`](#settings_openers_groups_additionalProperties_items_oneOf_i1_if_directory)
-            - [2.8.1.1.1.2.3. Property `Rovr Config > settings > openers > groups > additionalProperties > additionalProperties items > oneOf > item 1 > orphan`](#settings_openers_groups_additionalProperties_items_oneOf_i1_orphan)
-            - [2.8.1.1.1.2.4. Property `Rovr Config > settings > openers > groups > additionalProperties > additionalProperties items > oneOf > item 1 > name`](#settings_openers_groups_additionalProperties_items_oneOf_i1_name)
-            - [2.8.1.1.1.2.5. Property `Rovr Config > settings > openers > groups > additionalProperties > additionalProperties items > oneOf > item 1 > shell`](#settings_openers_groups_additionalProperties_items_oneOf_i1_shell)
-    - [2.8.2. Property `Rovr Config > settings > openers > match`](#settings_openers_match)
-      - [2.8.2.1. Property `Rovr Config > settings > openers > match > additionalProperties`](#settings_openers_match_additionalProperties)
-        - [2.8.2.1.1. Rovr Config > settings > openers > match > additionalProperties > additionalProperties items](#settings_openers_match_additionalProperties_items)
-  - [2.9. Property `Rovr Config > settings > drive_exclude`](#settings_drive_exclude)
-    - [2.9.1. Rovr Config > settings > drive_exclude > drive_exclude items](#settings_drive_exclude_items)
-  - [2.10. Property `Rovr Config > settings > ipc`](#settings_ipc)
-    - [2.10.1. Property `Rovr Config > settings > ipc > enabled`](#settings_ipc_enabled)
-    - [2.10.2. Property `Rovr Config > settings > ipc > permissions`](#settings_ipc_permissions)
-      - [2.10.2.1. Property `Rovr Config > settings > ipc > permissions > cd`](#settings_ipc_permissions_cd)
-      - [2.10.2.2. Property `Rovr Config > settings > ipc > permissions > clipboard.copy`](#settings_ipc_permissions_clipboardcopy)
-      - [2.10.2.3. Property `Rovr Config > settings > ipc > permissions > clipboard.cut`](#settings_ipc_permissions_clipboardcut)
-      - [2.10.2.4. Property `Rovr Config > settings > ipc > permissions > clipboard.list`](#settings_ipc_permissions_clipboardlist)
-      - [2.10.2.5. Property `Rovr Config > settings > ipc > permissions > clipboard.paste`](#settings_ipc_permissions_clipboardpaste)
-      - [2.10.2.6. Property `Rovr Config > settings > ipc > permissions > tab.list`](#settings_ipc_permissions_tablist)
-      - [2.10.2.7. Property `Rovr Config > settings > ipc > permissions > tab.new`](#settings_ipc_permissions_tabnew)
-      - [2.10.2.8. Property `Rovr Config > settings > ipc > permissions > tab.focus`](#settings_ipc_permissions_tabfocus)
-      - [2.10.2.9. Property `Rovr Config > settings > ipc > permissions > tab.close`](#settings_ipc_permissions_tabclose)
-      - [2.10.2.10. Property `Rovr Config > settings > ipc > permissions > tab.history`](#settings_ipc_permissions_tabhistory)
-      - [2.10.2.11. Property `Rovr Config > settings > ipc > permissions > quit`](#settings_ipc_permissions_quit)
-      - [2.10.2.12. Property `Rovr Config > settings > ipc > permissions > suspend`](#settings_ipc_permissions_suspend)
-      - [2.10.2.13. Property `Rovr Config > settings > ipc > permissions > notify`](#settings_ipc_permissions_notify)
-      - [2.10.2.14. Property `Rovr Config > settings > ipc > permissions > ask`](#settings_ipc_permissions_ask)
-      - [2.10.2.15. Property `Rovr Config > settings > ipc > permissions > input`](#settings_ipc_permissions_input)
+  - [2.8. Property `Rovr Config > settings > previewers`](#settings_previewers)
+    - [2.8.1. Pattern Property `Rovr Config > settings > previewers > ^(?!archive$&#124;text$&#124;remime$&#124;font$&#124;pdf$&#124;resvg$&#124;folder$&#124;file$).*`](#settings_previewers_pattern1)
+      - [2.8.1.1. Property `Rovr Config > settings > previewers > ^(?!archive$&#124;text$&#124;remime$&#124;font$&#124;pdf$&#124;resvg$&#124;folder$&#124;file$).* > type`](#settings_previewers_pattern1_type)
+      - [2.8.1.2. Property `Rovr Config > settings > previewers > ^(?!archive$&#124;text$&#124;remime$&#124;font$&#124;pdf$&#124;resvg$&#124;folder$&#124;file$).* > command`](#settings_previewers_pattern1_command)
+      - [2.8.1.3. Property `Rovr Config > settings > previewers > ^(?!archive$&#124;text$&#124;remime$&#124;font$&#124;pdf$&#124;resvg$&#124;folder$&#124;file$).* > file`](#settings_previewers_pattern1_file)
+        - [2.8.1.3.1. Property `Rovr Config > settings > previewers > ^(?!archive$&#124;text$&#124;remime$&#124;font$&#124;pdf$&#124;resvg$&#124;folder$&#124;file$).* > file > anyOf > item 0`](#settings_previewers_pattern1_file_anyOf_i0)
+        - [2.8.1.3.2. Property `Rovr Config > settings > previewers > ^(?!archive$&#124;text$&#124;remime$&#124;font$&#124;pdf$&#124;resvg$&#124;folder$&#124;file$).* > file > anyOf > item 1`](#settings_previewers_pattern1_file_anyOf_i1)
+  - [2.9. Property `Rovr Config > settings > openers`](#settings_openers)
+    - [2.9.1. Property `Rovr Config > settings > openers > groups`](#settings_openers_groups)
+      - [2.9.1.1. Property `Rovr Config > settings > openers > groups > additionalProperties`](#settings_openers_groups_additionalProperties)
+        - [2.9.1.1.1. Rovr Config > settings > openers > groups > additionalProperties > additionalProperties items](#settings_openers_groups_additionalProperties_items)
+          - [2.9.1.1.1.1. Property `Rovr Config > settings > openers > groups > additionalProperties > additionalProperties items > oneOf > item 0`](#settings_openers_groups_additionalProperties_items_oneOf_i0)
+          - [2.9.1.1.1.2. Property `Rovr Config > settings > openers > groups > additionalProperties > additionalProperties items > oneOf > item 1`](#settings_openers_groups_additionalProperties_items_oneOf_i1)
+            - [2.9.1.1.1.2.1. Property `Rovr Config > settings > openers > groups > additionalProperties > additionalProperties items > oneOf > item 1 > run`](#settings_openers_groups_additionalProperties_items_oneOf_i1_run)
+            - [2.9.1.1.1.2.2. Property `Rovr Config > settings > openers > groups > additionalProperties > additionalProperties items > oneOf > item 1 > if`](#settings_openers_groups_additionalProperties_items_oneOf_i1_if)
+              - [2.9.1.1.1.2.2.1. Property `Rovr Config > settings > openers > groups > additionalProperties > additionalProperties items > oneOf > item 1 > if > cwd`](#settings_openers_groups_additionalProperties_items_oneOf_i1_if_cwd)
+                - [2.9.1.1.1.2.2.1.1. Rovr Config > settings > openers > groups > additionalProperties > additionalProperties items > oneOf > item 1 > if > cwd > cwd items](#settings_openers_groups_additionalProperties_items_oneOf_i1_if_cwd_items)
+              - [2.9.1.1.1.2.2.2. Property `Rovr Config > settings > openers > groups > additionalProperties > additionalProperties items > oneOf > item 1 > if > os`](#settings_openers_groups_additionalProperties_items_oneOf_i1_if_os)
+              - [2.9.1.1.1.2.2.3. Property `Rovr Config > settings > openers > groups > additionalProperties > additionalProperties items > oneOf > item 1 > if > directory`](#settings_openers_groups_additionalProperties_items_oneOf_i1_if_directory)
+            - [2.9.1.1.1.2.3. Property `Rovr Config > settings > openers > groups > additionalProperties > additionalProperties items > oneOf > item 1 > orphan`](#settings_openers_groups_additionalProperties_items_oneOf_i1_orphan)
+            - [2.9.1.1.1.2.4. Property `Rovr Config > settings > openers > groups > additionalProperties > additionalProperties items > oneOf > item 1 > name`](#settings_openers_groups_additionalProperties_items_oneOf_i1_name)
+            - [2.9.1.1.1.2.5. Property `Rovr Config > settings > openers > groups > additionalProperties > additionalProperties items > oneOf > item 1 > shell`](#settings_openers_groups_additionalProperties_items_oneOf_i1_shell)
+    - [2.9.2. Property `Rovr Config > settings > openers > match`](#settings_openers_match)
+      - [2.9.2.1. Property `Rovr Config > settings > openers > match > additionalProperties`](#settings_openers_match_additionalProperties)
+        - [2.9.2.1.1. Rovr Config > settings > openers > match > additionalProperties > additionalProperties items](#settings_openers_match_additionalProperties_items)
+  - [2.10. Property `Rovr Config > settings > drive_exclude`](#settings_drive_exclude)
+    - [2.10.1. Rovr Config > settings > drive_exclude > drive_exclude items](#settings_drive_exclude_items)
+  - [2.11. Property `Rovr Config > settings > ipc`](#settings_ipc)
+    - [2.11.1. Property `Rovr Config > settings > ipc > enabled`](#settings_ipc_enabled)
+    - [2.11.2. Property `Rovr Config > settings > ipc > permissions`](#settings_ipc_permissions)
+      - [2.11.2.1. Property `Rovr Config > settings > ipc > permissions > cd`](#settings_ipc_permissions_cd)
+      - [2.11.2.2. Property `Rovr Config > settings > ipc > permissions > clipboard.copy`](#settings_ipc_permissions_clipboardcopy)
+      - [2.11.2.3. Property `Rovr Config > settings > ipc > permissions > clipboard.cut`](#settings_ipc_permissions_clipboardcut)
+      - [2.11.2.4. Property `Rovr Config > settings > ipc > permissions > clipboard.list`](#settings_ipc_permissions_clipboardlist)
+      - [2.11.2.5. Property `Rovr Config > settings > ipc > permissions > clipboard.paste`](#settings_ipc_permissions_clipboardpaste)
+      - [2.11.2.6. Property `Rovr Config > settings > ipc > permissions > tab.list`](#settings_ipc_permissions_tablist)
+      - [2.11.2.7. Property `Rovr Config > settings > ipc > permissions > tab.new`](#settings_ipc_permissions_tabnew)
+      - [2.11.2.8. Property `Rovr Config > settings > ipc > permissions > tab.focus`](#settings_ipc_permissions_tabfocus)
+      - [2.11.2.9. Property `Rovr Config > settings > ipc > permissions > tab.close`](#settings_ipc_permissions_tabclose)
+      - [2.11.2.10. Property `Rovr Config > settings > ipc > permissions > tab.history`](#settings_ipc_permissions_tabhistory)
+      - [2.11.2.11. Property `Rovr Config > settings > ipc > permissions > quit`](#settings_ipc_permissions_quit)
+      - [2.11.2.12. Property `Rovr Config > settings > ipc > permissions > suspend`](#settings_ipc_permissions_suspend)
+      - [2.11.2.13. Property `Rovr Config > settings > ipc > permissions > notify`](#settings_ipc_permissions_notify)
+      - [2.11.2.14. Property `Rovr Config > settings > ipc > permissions > ask`](#settings_ipc_permissions_ask)
+      - [2.11.2.15. Property `Rovr Config > settings > ipc > permissions > input`](#settings_ipc_permissions_input)
 - [3. Property `Rovr Config > metadata`](#metadata)
   - [3.1. Property `Rovr Config > metadata > fields`](#metadata_fields)
     - [3.1.1. Rovr Config > metadata > fields > fields items](#metadata_fields_items)
@@ -1055,6 +1064,7 @@ Must be one of:
 | [auto_calculate_folder_size](#settings_auto_calculate_folder_size) | boolean         | Automatically calculate the folder sizes when a folder is highlighted                                                                                                                                                                                                                                                                                                                                                  |
 | [editor](#settings_editor)                                         | object          | Settings related to the editor used for different operations                                                                                                                                                                                                                                                                                                                                                           |
 | [preview_rules](#settings_preview_rules)                           | object          | Map MIME type regex patterns to preview types. Rules containing \`.\*\` are evaluated after rules without it, with configuration order preserved within each group. A rule can be a preview type string or a table with a default preview type and extension-specific refinements. Extension keys are lowercase and omit the leading dot.<br />-&gt; Use 'remime' if you want a more accurate description from file(1) |
+| [previewers](#settings_previewers)                                 | object          | Define custom previewers for different file types.                                                                                                                                                                                                                                                                                                                                                                     |
 | [openers](#settings_openers)                                       | object          | Openers to open files with, grouped by name and matched against file paths by glob pattern.                                                                                                                                                                                                                                                                                                                            |
 | [drive_exclude](#settings_drive_exclude)                           | array of string | Glob patterns matched against mountpoint paths. Drives matching any pattern are hidden from the sidebar (e.g. '/run/media/\*', 'D:/').                                                                                                                                                                                                                                                                                 |
 | [ipc](#settings_ipc)                                               | object          | Settings related to the IPC server that allows external programs to control rovr                                                                                                                                                                                                                                                                                                                                       |
@@ -2030,11 +2040,31 @@ Must be one of:
 
 ##### <a name="settings_preview_rules_additionalProperties_oneOf_i0"></a>2.7.1.1. Property `Rovr Config > settings > preview_rules > additionalProperties > oneOf > preview_type`
 
-|                |                            |
-| -------------- | -------------------------- |
-| **Type**       | `enum (of string)`         |
-| **Required**   | No                         |
-| **Defined in** | #/definitions/preview_type |
+|                           |                            |
+| ------------------------- | -------------------------- |
+| **Type**                  | `combining`                |
+| **Required**              | No                         |
+| **Additional properties** | Any type allowed           |
+| **Defined in**            | #/definitions/preview_type |
+
+| Any of(Option)                                                           |
+| ------------------------------------------------------------------------ |
+| [item 0](#settings_preview_rules_additionalProperties_oneOf_i0_anyOf_i0) |
+| [item 1](#settings_preview_rules_additionalProperties_oneOf_i0_anyOf_i1) |
+
+###### <a name="settings_preview_rules_additionalProperties_oneOf_i0_anyOf_i0"></a>2.7.1.1.1. Property `Rovr Config > settings > preview_rules > additionalProperties > oneOf > item 0 > anyOf > item 0`
+
+|              |          |
+| ------------ | -------- |
+| **Type**     | `string` |
+| **Required** | No       |
+
+###### <a name="settings_preview_rules_additionalProperties_oneOf_i0_anyOf_i1"></a>2.7.1.1.2. Property `Rovr Config > settings > preview_rules > additionalProperties > oneOf > item 0 > anyOf > item 1`
+
+|              |                    |
+| ------------ | ------------------ |
+| **Type**     | `enum (of string)` |
+| **Required** | No                 |
 
 Must be one of:
 
@@ -2055,18 +2085,19 @@ Must be one of:
 | **Required**              | No          |
 | **Additional properties** | Not allowed |
 
-| Property                                                                       | Type             | Title/Description                                                                                                                     |
-| ------------------------------------------------------------------------------ | ---------------- | ------------------------------------------------------------------------------------------------------------------------------------- |
-| [default](#settings_preview_rules_additionalProperties_oneOf_i1_default)       | enum (of string) |                                                                                                                                       |
-| [extensions](#settings_preview_rules_additionalProperties_oneOf_i1_extensions) | object           | Map lowercase file extensions without a leading dot to preview types. These refine this MIME rule and take priority over its default. |
+| Property                                                                       | Type   | Title/Description                                                                                                                     |
+| ------------------------------------------------------------------------------ | ------ | ------------------------------------------------------------------------------------------------------------------------------------- |
+| [default](#settings_preview_rules_additionalProperties_oneOf_i1_default)       | object |                                                                                                                                       |
+| [extensions](#settings_preview_rules_additionalProperties_oneOf_i1_extensions) | object | Map lowercase file extensions without a leading dot to preview types. These refine this MIME rule and take priority over its default. |
 
 ###### <a name="settings_preview_rules_additionalProperties_oneOf_i1_default"></a>2.7.1.2.1. Property `Rovr Config > settings > preview_rules > additionalProperties > oneOf > item 1 > default`
 
-|                        |                                                                                                               |
-| ---------------------- | ------------------------------------------------------------------------------------------------------------- |
-| **Type**               | `enum (of string)`                                                                                            |
-| **Required**           | Yes                                                                                                           |
-| **Same definition as** | [settings_preview_rules_additionalProperties_oneOf_i0](#settings_preview_rules_additionalProperties_oneOf_i0) |
+|                           |                                                                                                               |
+| ------------------------- | ------------------------------------------------------------------------------------------------------------- |
+| **Type**                  | `combining`                                                                                                   |
+| **Required**              | Yes                                                                                                           |
+| **Additional properties** | Any type allowed                                                                                              |
+| **Same definition as**    | [settings_preview_rules_additionalProperties_oneOf_i0](#settings_preview_rules_additionalProperties_oneOf_i0) |
 
 ###### <a name="settings_preview_rules_additionalProperties_oneOf_i1_extensions"></a>2.7.1.2.2. Property `Rovr Config > settings > preview_rules > additionalProperties > oneOf > item 1 > extensions`
 
@@ -2078,9 +2109,9 @@ Must be one of:
 
 **Description:** Map lowercase file extensions without a leading dot to preview types. These refine this MIME rule and take priority over its default.
 
-| Property                                                                                 | Type             | Title/Description |
-| ---------------------------------------------------------------------------------------- | ---------------- | ----------------- |
-| [^[a-z0-9]+$](#settings_preview_rules_additionalProperties_oneOf_i1_extensions_pattern1) | enum (of string) |                   |
+| Property                                                                                 | Type   | Title/Description |
+| ---------------------------------------------------------------------------------------- | ------ | ----------------- |
+| [^[a-z0-9]+$](#settings_preview_rules_additionalProperties_oneOf_i1_extensions_pattern1) | object |                   |
 
 ###### <a name="settings_preview_rules_additionalProperties_oneOf_i1_extensions_pattern1"></a>2.7.1.2.2.1. Pattern Property `Rovr Config > settings > preview_rules > additionalProperties > oneOf > item 1 > extensions > preview_type`
 
@@ -2088,13 +2119,106 @@ Must be one of:
 > `^[a-z0-9]+$` ([Test](https://regex101.com/?regex=%5E%5Ba-z0-9%5D%2B%24))
 > must respect the following conditions
 
-|                        |                                                                                                               |
-| ---------------------- | ------------------------------------------------------------------------------------------------------------- |
-| **Type**               | `enum (of string)`                                                                                            |
-| **Required**           | No                                                                                                            |
-| **Same definition as** | [settings_preview_rules_additionalProperties_oneOf_i0](#settings_preview_rules_additionalProperties_oneOf_i0) |
+|                           |                                                                                                               |
+| ------------------------- | ------------------------------------------------------------------------------------------------------------- |
+| **Type**                  | `combining`                                                                                                   |
+| **Required**              | No                                                                                                            |
+| **Additional properties** | Any type allowed                                                                                              |
+| **Same definition as**    | [settings_preview_rules_additionalProperties_oneOf_i0](#settings_preview_rules_additionalProperties_oneOf_i0) |
 
-### <a name="settings_openers"></a>2.8. Property `Rovr Config > settings > openers`
+### <a name="settings_previewers"></a>2.8. Property `Rovr Config > settings > previewers`
+
+|                           |                  |
+| ------------------------- | ---------------- |
+| **Type**                  | `object`         |
+| **Required**              | No               |
+| **Additional properties** | Any type allowed |
+
+**Description:** Define custom previewers for different file types.
+
+| Property                                                                                                                           | Type   | Title/Description |
+| ---------------------------------------------------------------------------------------------------------------------------------- | ------ | ----------------- |
+| [^(?!archive$&#124;text$&#124;remime$&#124;font$&#124;pdf$&#124;resvg$&#124;folder$&#124;file$).\*](#settings_previewers_pattern1) | object |                   |
+
+#### <a name="settings_previewers_pattern1"></a>2.8.1. Pattern Property `Rovr Config > settings > previewers > ^(?!archive$&#124;text$&#124;remime$&#124;font$&#124;pdf$&#124;resvg$&#124;folder$&#124;file$).*`
+
+> All properties whose name matches the regular expression
+> `^(?!archive$&#124;text$&#124;remime$&#124;font$&#124;pdf$&#124;resvg$&#124;folder$&#124;file$).*` ([Test](https://regex101.com/?regex=%5E%28%3F%21archive%24%26%23124%3Btext%24%26%23124%3Bremime%24%26%23124%3Bfont%24%26%23124%3Bpdf%24%26%23124%3Bresvg%24%26%23124%3Bfolder%24%26%23124%3Bfile%24%29.%2A))
+> must respect the following conditions
+
+|                           |             |
+| ------------------------- | ----------- |
+| **Type**                  | `object`    |
+| **Required**              | No          |
+| **Additional properties** | Not allowed |
+
+| Property                                         | Type             | Title/Description                                                                                               |
+| ------------------------------------------------ | ---------------- | --------------------------------------------------------------------------------------------------------------- |
+| [type](#settings_previewers_pattern1_type)       | enum (of string) | The type of previewer. This determines how the previewer will be used.                                          |
+| [command](#settings_previewers_pattern1_command) | object           | The command to run to generate the preview.<br />Command expansions are supported except %s, %t, %cut and %copy |
+| [file](#settings_previewers_pattern1_file)       | Combination      |                                                                                                                 |
+
+##### <a name="settings_previewers_pattern1_type"></a>2.8.1.1. Property `Rovr Config > settings > previewers > ^(?!archive$&#124;text$&#124;remime$&#124;font$&#124;pdf$&#124;resvg$&#124;folder$&#124;file$).* > type`
+
+|              |                    |
+| ------------ | ------------------ |
+| **Type**     | `enum (of string)` |
+| **Required** | No                 |
+
+**Description:** The type of previewer. This determines how the previewer will be used.
+
+Must be one of:
+
+- "text"
+- "image"
+
+##### <a name="settings_previewers_pattern1_command"></a>2.8.1.2. Property `Rovr Config > settings > previewers > ^(?!archive$&#124;text$&#124;remime$&#124;font$&#124;pdf$&#124;resvg$&#124;folder$&#124;file$).* > command`
+
+|                           |                                                        |
+| ------------------------- | ------------------------------------------------------ |
+| **Type**                  | `combining`                                            |
+| **Required**              | No                                                     |
+| **Additional properties** | Any type allowed                                       |
+| **Same definition as**    | [run](#settings_right_click_items_action_oneOf_i1_run) |
+
+**Description:** The command to run to generate the preview.
+Command expansions are supported except %s, %t, %cut and %copy
+
+##### <a name="settings_previewers_pattern1_file"></a>2.8.1.3. Property `Rovr Config > settings > previewers > ^(?!archive$&#124;text$&#124;remime$&#124;font$&#124;pdf$&#124;resvg$&#124;folder$&#124;file$).* > file`
+
+|                           |                  |
+| ------------------------- | ---------------- |
+| **Type**                  | `combining`      |
+| **Required**              | No               |
+| **Additional properties** | Any type allowed |
+| **Default**               | `"__stdout__"`   |
+
+| Any of(Option)                                        |
+| ----------------------------------------------------- |
+| [item 0](#settings_previewers_pattern1_file_anyOf_i0) |
+| [item 1](#settings_previewers_pattern1_file_anyOf_i1) |
+
+###### <a name="settings_previewers_pattern1_file_anyOf_i0"></a>2.8.1.3.1. Property `Rovr Config > settings > previewers > ^(?!archive$&#124;text$&#124;remime$&#124;font$&#124;pdf$&#124;resvg$&#124;folder$&#124;file$).* > file > anyOf > item 0`
+
+|              |                    |
+| ------------ | ------------------ |
+| **Type**     | `enum (of string)` |
+| **Required** | No                 |
+
+Must be one of:
+
+- "**stdout**"
+- "**stderr**"
+- "%temp"
+
+###### <a name="settings_previewers_pattern1_file_anyOf_i1"></a>2.8.1.3.2. Property `Rovr Config > settings > previewers > ^(?!archive$&#124;text$&#124;remime$&#124;font$&#124;pdf$&#124;resvg$&#124;folder$&#124;file$).* > file > anyOf > item 1`
+
+|              |          |
+| ------------ | -------- |
+| **Type**     | `string` |
+| **Required** | No       |
+
+### <a name="settings_openers"></a>2.9. Property `Rovr Config > settings > openers`
 
 |                           |             |
 | ------------------------- | ----------- |
@@ -2109,7 +2233,7 @@ Must be one of:
 | [groups](#settings_openers_groups) | object | Named groups of openers. Each group is a list that can contain a mix of strings and objects, tried in order until one succeeds. Referenced by name from \`match\`. |
 | [match](#settings_openers_match)   | object | Map glob patterns (matched against the file's path) to one or more group names defined in \`groups\`. If multiple groups match, they are tried in order.           |
 
-#### <a name="settings_openers_groups"></a>2.8.1. Property `Rovr Config > settings > openers > groups`
+#### <a name="settings_openers_groups"></a>2.9.1. Property `Rovr Config > settings > openers > groups`
 
 |                           |                                                                                                      |
 | ------------------------- | ---------------------------------------------------------------------------------------------------- |
@@ -2123,7 +2247,7 @@ Must be one of:
 | ------------------------------------------------- | ----- | ----------------- |
 | [](#settings_openers_groups_additionalProperties) | array |                   |
 
-##### <a name="settings_openers_groups_additionalProperties"></a>2.8.1.1. Property `Rovr Config > settings > openers > groups > additionalProperties`
+##### <a name="settings_openers_groups_additionalProperties"></a>2.9.1.1. Property `Rovr Config > settings > openers > groups > additionalProperties`
 
 |              |         |
 | ------------ | ------- |
@@ -2142,7 +2266,7 @@ Must be one of:
 | --------------------------------------------------------------------------------- | ----------- |
 | [additionalProperties items](#settings_openers_groups_additionalProperties_items) |             |
 
-###### <a name="settings_openers_groups_additionalProperties_items"></a>2.8.1.1.1. Rovr Config > settings > openers > groups > additionalProperties > additionalProperties items
+###### <a name="settings_openers_groups_additionalProperties_items"></a>2.9.1.1.1. Rovr Config > settings > openers > groups > additionalProperties > additionalProperties items
 
 |                           |                  |
 | ------------------------- | ---------------- |
@@ -2155,14 +2279,14 @@ Must be one of:
 | [item 0](#settings_openers_groups_additionalProperties_items_oneOf_i0) |
 | [item 1](#settings_openers_groups_additionalProperties_items_oneOf_i1) |
 
-###### <a name="settings_openers_groups_additionalProperties_items_oneOf_i0"></a>2.8.1.1.1.1. Property `Rovr Config > settings > openers > groups > additionalProperties > additionalProperties items > oneOf > item 0`
+###### <a name="settings_openers_groups_additionalProperties_items_oneOf_i0"></a>2.9.1.1.1.1. Property `Rovr Config > settings > openers > groups > additionalProperties > additionalProperties items > oneOf > item 0`
 
 |              |          |
 | ------------ | -------- |
 | **Type**     | `string` |
 | **Required** | No       |
 
-###### <a name="settings_openers_groups_additionalProperties_items_oneOf_i1"></a>2.8.1.1.1.2. Property `Rovr Config > settings > openers > groups > additionalProperties > additionalProperties items > oneOf > item 1`
+###### <a name="settings_openers_groups_additionalProperties_items_oneOf_i1"></a>2.9.1.1.1.2. Property `Rovr Config > settings > openers > groups > additionalProperties > additionalProperties items > oneOf > item 1`
 
 |                           |             |
 | ------------------------- | ----------- |
@@ -2178,7 +2302,7 @@ Must be one of:
 | [name](#settings_openers_groups_additionalProperties_items_oneOf_i1_name)     | string  | The name of the opener to show in the menu (currently unused)                                                     |
 | [shell](#settings_openers_groups_additionalProperties_items_oneOf_i1_shell)   | boolean | Whether the command to run is a shell command that needs to be run in a shell (required if you want to do piping) |
 
-###### <a name="settings_openers_groups_additionalProperties_items_oneOf_i1_run"></a>2.8.1.1.1.2.1. Property `Rovr Config > settings > openers > groups > additionalProperties > additionalProperties items > oneOf > item 1 > run`
+###### <a name="settings_openers_groups_additionalProperties_items_oneOf_i1_run"></a>2.9.1.1.1.2.1. Property `Rovr Config > settings > openers > groups > additionalProperties > additionalProperties items > oneOf > item 1 > run`
 
 |                           |                                                        |
 | ------------------------- | ------------------------------------------------------ |
@@ -2189,7 +2313,7 @@ Must be one of:
 
 **Description:** The command to run to open the file. Command expansions are supported.
 
-###### <a name="settings_openers_groups_additionalProperties_items_oneOf_i1_if"></a>2.8.1.1.1.2.2. Property `Rovr Config > settings > openers > groups > additionalProperties > additionalProperties items > oneOf > item 1 > if`
+###### <a name="settings_openers_groups_additionalProperties_items_oneOf_i1_if"></a>2.9.1.1.1.2.2. Property `Rovr Config > settings > openers > groups > additionalProperties > additionalProperties items > oneOf > item 1 > if`
 
 |                           |             |
 | ------------------------- | ----------- |
@@ -2205,7 +2329,7 @@ Must be one of:
 | [os](#settings_openers_groups_additionalProperties_items_oneOf_i1_if_os)               | array of string | Only use this opener if the operating system is one of the following (case insensitive)                                                                                              |
 | [directory](#settings_openers_groups_additionalProperties_items_oneOf_i1_if_directory) | boolean         | Only use this opener if the selected item is a directory (set to true) or a file (set to false) (if unspecified, matches both files and directories)                                 |
 
-###### <a name="settings_openers_groups_additionalProperties_items_oneOf_i1_if_cwd"></a>2.8.1.1.1.2.2.1. Property `Rovr Config > settings > openers > groups > additionalProperties > additionalProperties items > oneOf > item 1 > if > cwd`
+###### <a name="settings_openers_groups_additionalProperties_items_oneOf_i1_if_cwd"></a>2.9.1.1.1.2.2.1. Property `Rovr Config > settings > openers > groups > additionalProperties > additionalProperties items > oneOf > item 1 > if > cwd`
 
 |              |                   |
 | ------------ | ----------------- |
@@ -2226,14 +2350,14 @@ Must be one of:
 | -------------------------------------------------------------------------------------- | ----------- |
 | [cwd items](#settings_openers_groups_additionalProperties_items_oneOf_i1_if_cwd_items) |             |
 
-###### <a name="settings_openers_groups_additionalProperties_items_oneOf_i1_if_cwd_items"></a>2.8.1.1.1.2.2.1.1. Rovr Config > settings > openers > groups > additionalProperties > additionalProperties items > oneOf > item 1 > if > cwd > cwd items
+###### <a name="settings_openers_groups_additionalProperties_items_oneOf_i1_if_cwd_items"></a>2.9.1.1.1.2.2.1.1. Rovr Config > settings > openers > groups > additionalProperties > additionalProperties items > oneOf > item 1 > if > cwd > cwd items
 
 |              |          |
 | ------------ | -------- |
 | **Type**     | `string` |
 | **Required** | No       |
 
-###### <a name="settings_openers_groups_additionalProperties_items_oneOf_i1_if_os"></a>2.8.1.1.1.2.2.2. Property `Rovr Config > settings > openers > groups > additionalProperties > additionalProperties items > oneOf > item 1 > if > os`
+###### <a name="settings_openers_groups_additionalProperties_items_oneOf_i1_if_os"></a>2.9.1.1.1.2.2.2. Property `Rovr Config > settings > openers > groups > additionalProperties > additionalProperties items > oneOf > item 1 > if > os`
 
 |                        |                                         |
 | ---------------------- | --------------------------------------- |
@@ -2243,7 +2367,7 @@ Must be one of:
 
 **Description:** Only use this opener if the operating system is one of the following (case insensitive)
 
-###### <a name="settings_openers_groups_additionalProperties_items_oneOf_i1_if_directory"></a>2.8.1.1.1.2.2.3. Property `Rovr Config > settings > openers > groups > additionalProperties > additionalProperties items > oneOf > item 1 > if > directory`
+###### <a name="settings_openers_groups_additionalProperties_items_oneOf_i1_if_directory"></a>2.9.1.1.1.2.2.3. Property `Rovr Config > settings > openers > groups > additionalProperties > additionalProperties items > oneOf > item 1 > if > directory`
 
 |              |           |
 | ------------ | --------- |
@@ -2252,7 +2376,7 @@ Must be one of:
 
 **Description:** Only use this opener if the selected item is a directory (set to true) or a file (set to false) (if unspecified, matches both files and directories)
 
-###### <a name="settings_openers_groups_additionalProperties_items_oneOf_i1_orphan"></a>2.8.1.1.1.2.3. Property `Rovr Config > settings > openers > groups > additionalProperties > additionalProperties items > oneOf > item 1 > orphan`
+###### <a name="settings_openers_groups_additionalProperties_items_oneOf_i1_orphan"></a>2.9.1.1.1.2.3. Property `Rovr Config > settings > openers > groups > additionalProperties > additionalProperties items > oneOf > item 1 > orphan`
 
 |              |           |
 | ------------ | --------- |
@@ -2262,7 +2386,7 @@ Must be one of:
 
 **Description:** Whether to open the opener as an orphan process.
 
-###### <a name="settings_openers_groups_additionalProperties_items_oneOf_i1_name"></a>2.8.1.1.1.2.4. Property `Rovr Config > settings > openers > groups > additionalProperties > additionalProperties items > oneOf > item 1 > name`
+###### <a name="settings_openers_groups_additionalProperties_items_oneOf_i1_name"></a>2.9.1.1.1.2.4. Property `Rovr Config > settings > openers > groups > additionalProperties > additionalProperties items > oneOf > item 1 > name`
 
 |              |          |
 | ------------ | -------- |
@@ -2271,7 +2395,7 @@ Must be one of:
 
 **Description:** The name of the opener to show in the menu (currently unused)
 
-###### <a name="settings_openers_groups_additionalProperties_items_oneOf_i1_shell"></a>2.8.1.1.1.2.5. Property `Rovr Config > settings > openers > groups > additionalProperties > additionalProperties items > oneOf > item 1 > shell`
+###### <a name="settings_openers_groups_additionalProperties_items_oneOf_i1_shell"></a>2.9.1.1.1.2.5. Property `Rovr Config > settings > openers > groups > additionalProperties > additionalProperties items > oneOf > item 1 > shell`
 
 |              |           |
 | ------------ | --------- |
@@ -2281,7 +2405,7 @@ Must be one of:
 
 **Description:** Whether the command to run is a shell command that needs to be run in a shell (required if you want to do piping)
 
-#### <a name="settings_openers_match"></a>2.8.2. Property `Rovr Config > settings > openers > match`
+#### <a name="settings_openers_match"></a>2.9.2. Property `Rovr Config > settings > openers > match`
 
 |                           |                                                                                                     |
 | ------------------------- | --------------------------------------------------------------------------------------------------- |
@@ -2295,7 +2419,7 @@ Must be one of:
 | ------------------------------------------------ | --------------- | ----------------- |
 | [](#settings_openers_match_additionalProperties) | array of string |                   |
 
-##### <a name="settings_openers_match_additionalProperties"></a>2.8.2.1. Property `Rovr Config > settings > openers > match > additionalProperties`
+##### <a name="settings_openers_match_additionalProperties"></a>2.9.2.1. Property `Rovr Config > settings > openers > match > additionalProperties`
 
 |              |                   |
 | ------------ | ----------------- |
@@ -2314,14 +2438,14 @@ Must be one of:
 | -------------------------------------------------------------------------------- | ----------- |
 | [additionalProperties items](#settings_openers_match_additionalProperties_items) |             |
 
-###### <a name="settings_openers_match_additionalProperties_items"></a>2.8.2.1.1. Rovr Config > settings > openers > match > additionalProperties > additionalProperties items
+###### <a name="settings_openers_match_additionalProperties_items"></a>2.9.2.1.1. Rovr Config > settings > openers > match > additionalProperties > additionalProperties items
 
 |              |          |
 | ------------ | -------- |
 | **Type**     | `string` |
 | **Required** | No       |
 
-### <a name="settings_drive_exclude"></a>2.9. Property `Rovr Config > settings > drive_exclude`
+### <a name="settings_drive_exclude"></a>2.10. Property `Rovr Config > settings > drive_exclude`
 
 |              |                   |
 | ------------ | ----------------- |
@@ -2343,14 +2467,14 @@ Must be one of:
 | ---------------------------------------------------- | ----------- |
 | [drive_exclude items](#settings_drive_exclude_items) |             |
 
-#### <a name="settings_drive_exclude_items"></a>2.9.1. Rovr Config > settings > drive_exclude > drive_exclude items
+#### <a name="settings_drive_exclude_items"></a>2.10.1. Rovr Config > settings > drive_exclude > drive_exclude items
 
 |              |          |
 | ------------ | -------- |
 | **Type**     | `string` |
 | **Required** | No       |
 
-### <a name="settings_ipc"></a>2.10. Property `Rovr Config > settings > ipc`
+### <a name="settings_ipc"></a>2.11. Property `Rovr Config > settings > ipc`
 
 |                           |             |
 | ------------------------- | ----------- |
@@ -2365,7 +2489,7 @@ Must be one of:
 | [enabled](#settings_ipc_enabled)         | boolean | Whether to enable the IPC server |
 | [permissions](#settings_ipc_permissions) | object  | Permissions for the IPC server   |
 
-#### <a name="settings_ipc_enabled"></a>2.10.1. Property `Rovr Config > settings > ipc > enabled`
+#### <a name="settings_ipc_enabled"></a>2.11.1. Property `Rovr Config > settings > ipc > enabled`
 
 |              |           |
 | ------------ | --------- |
@@ -2375,7 +2499,7 @@ Must be one of:
 
 **Description:** Whether to enable the IPC server
 
-#### <a name="settings_ipc_permissions"></a>2.10.2. Property `Rovr Config > settings > ipc > permissions`
+#### <a name="settings_ipc_permissions"></a>2.11.2. Property `Rovr Config > settings > ipc > permissions`
 
 |                           |             |
 | ------------------------- | ----------- |
@@ -2403,7 +2527,7 @@ Must be one of:
 | [ask](#settings_ipc_permissions_ask)                        | enum (of string) | Allow the ipc to prompt a yes/no choice to the user.                    |
 | [input](#settings_ipc_permissions_input)                    | enum (of string) | Allow the ipc to prompt for text input from the user.                   |
 
-##### <a name="settings_ipc_permissions_cd"></a>2.10.2.1. Property `Rovr Config > settings > ipc > permissions > cd`
+##### <a name="settings_ipc_permissions_cd"></a>2.11.2.1. Property `Rovr Config > settings > ipc > permissions > cd`
 
 |                |                         |
 | -------------- | ----------------------- |
@@ -2420,7 +2544,7 @@ Must be one of:
 - "prompt"
 - "deny"
 
-##### <a name="settings_ipc_permissions_clipboardcopy"></a>2.10.2.2. Property `Rovr Config > settings > ipc > permissions > clipboard.copy`
+##### <a name="settings_ipc_permissions_clipboardcopy"></a>2.11.2.2. Property `Rovr Config > settings > ipc > permissions > clipboard.copy`
 
 |                |                         |
 | -------------- | ----------------------- |
@@ -2437,7 +2561,7 @@ Must be one of:
 - "prompt"
 - "deny"
 
-##### <a name="settings_ipc_permissions_clipboardcut"></a>2.10.2.3. Property `Rovr Config > settings > ipc > permissions > clipboard.cut`
+##### <a name="settings_ipc_permissions_clipboardcut"></a>2.11.2.3. Property `Rovr Config > settings > ipc > permissions > clipboard.cut`
 
 |                |                         |
 | -------------- | ----------------------- |
@@ -2454,7 +2578,7 @@ Must be one of:
 - "prompt"
 - "deny"
 
-##### <a name="settings_ipc_permissions_clipboardlist"></a>2.10.2.4. Property `Rovr Config > settings > ipc > permissions > clipboard.list`
+##### <a name="settings_ipc_permissions_clipboardlist"></a>2.11.2.4. Property `Rovr Config > settings > ipc > permissions > clipboard.list`
 
 |                |                         |
 | -------------- | ----------------------- |
@@ -2471,7 +2595,7 @@ Must be one of:
 - "prompt"
 - "deny"
 
-##### <a name="settings_ipc_permissions_clipboardpaste"></a>2.10.2.5. Property `Rovr Config > settings > ipc > permissions > clipboard.paste`
+##### <a name="settings_ipc_permissions_clipboardpaste"></a>2.11.2.5. Property `Rovr Config > settings > ipc > permissions > clipboard.paste`
 
 |                |                         |
 | -------------- | ----------------------- |
@@ -2488,7 +2612,7 @@ Must be one of:
 - "prompt"
 - "deny"
 
-##### <a name="settings_ipc_permissions_tablist"></a>2.10.2.6. Property `Rovr Config > settings > ipc > permissions > tab.list`
+##### <a name="settings_ipc_permissions_tablist"></a>2.11.2.6. Property `Rovr Config > settings > ipc > permissions > tab.list`
 
 |                |                         |
 | -------------- | ----------------------- |
@@ -2505,7 +2629,7 @@ Must be one of:
 - "prompt"
 - "deny"
 
-##### <a name="settings_ipc_permissions_tabnew"></a>2.10.2.7. Property `Rovr Config > settings > ipc > permissions > tab.new`
+##### <a name="settings_ipc_permissions_tabnew"></a>2.11.2.7. Property `Rovr Config > settings > ipc > permissions > tab.new`
 
 |                |                         |
 | -------------- | ----------------------- |
@@ -2522,7 +2646,7 @@ Must be one of:
 - "prompt"
 - "deny"
 
-##### <a name="settings_ipc_permissions_tabfocus"></a>2.10.2.8. Property `Rovr Config > settings > ipc > permissions > tab.focus`
+##### <a name="settings_ipc_permissions_tabfocus"></a>2.11.2.8. Property `Rovr Config > settings > ipc > permissions > tab.focus`
 
 |                |                         |
 | -------------- | ----------------------- |
@@ -2539,7 +2663,7 @@ Must be one of:
 - "prompt"
 - "deny"
 
-##### <a name="settings_ipc_permissions_tabclose"></a>2.10.2.9. Property `Rovr Config > settings > ipc > permissions > tab.close`
+##### <a name="settings_ipc_permissions_tabclose"></a>2.11.2.9. Property `Rovr Config > settings > ipc > permissions > tab.close`
 
 |                |                         |
 | -------------- | ----------------------- |
@@ -2556,7 +2680,7 @@ Must be one of:
 - "prompt"
 - "deny"
 
-##### <a name="settings_ipc_permissions_tabhistory"></a>2.10.2.10. Property `Rovr Config > settings > ipc > permissions > tab.history`
+##### <a name="settings_ipc_permissions_tabhistory"></a>2.11.2.10. Property `Rovr Config > settings > ipc > permissions > tab.history`
 
 |                |                         |
 | -------------- | ----------------------- |
@@ -2573,7 +2697,7 @@ Must be one of:
 - "prompt"
 - "deny"
 
-##### <a name="settings_ipc_permissions_quit"></a>2.10.2.11. Property `Rovr Config > settings > ipc > permissions > quit`
+##### <a name="settings_ipc_permissions_quit"></a>2.11.2.11. Property `Rovr Config > settings > ipc > permissions > quit`
 
 |                |                         |
 | -------------- | ----------------------- |
@@ -2590,7 +2714,7 @@ Must be one of:
 - "prompt"
 - "deny"
 
-##### <a name="settings_ipc_permissions_suspend"></a>2.10.2.12. Property `Rovr Config > settings > ipc > permissions > suspend`
+##### <a name="settings_ipc_permissions_suspend"></a>2.11.2.12. Property `Rovr Config > settings > ipc > permissions > suspend`
 
 |                |                         |
 | -------------- | ----------------------- |
@@ -2607,7 +2731,7 @@ Must be one of:
 - "prompt"
 - "deny"
 
-##### <a name="settings_ipc_permissions_notify"></a>2.10.2.13. Property `Rovr Config > settings > ipc > permissions > notify`
+##### <a name="settings_ipc_permissions_notify"></a>2.11.2.13. Property `Rovr Config > settings > ipc > permissions > notify`
 
 |                |                             |
 | -------------- | --------------------------- |
@@ -2623,7 +2747,7 @@ Must be one of:
 - "allow"
 - "deny"
 
-##### <a name="settings_ipc_permissions_ask"></a>2.10.2.14. Property `Rovr Config > settings > ipc > permissions > ask`
+##### <a name="settings_ipc_permissions_ask"></a>2.11.2.14. Property `Rovr Config > settings > ipc > permissions > ask`
 
 |                |                             |
 | -------------- | --------------------------- |
@@ -2639,7 +2763,7 @@ Must be one of:
 - "allow"
 - "deny"
 
-##### <a name="settings_ipc_permissions_input"></a>2.10.2.15. Property `Rovr Config > settings > ipc > permissions > input`
+##### <a name="settings_ipc_permissions_input"></a>2.11.2.15. Property `Rovr Config > settings > ipc > permissions > input`
 
 |                |                             |
 | -------------- | --------------------------- |

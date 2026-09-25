@@ -9,16 +9,21 @@
       "items": { "type": "string" }
     },
     "preview_type": {
-      "type": "string",
-      "enum": [
-        "text",
-        "image",
-        "pdf",
-        "archive",
-        "folder",
-        "remime",
-        "resvg",
-        "font"
+      "anyOf": [
+        { "type": "string" },
+        {
+          "type": "string",
+          "enum": [
+            "text",
+            "image",
+            "pdf",
+            "archive",
+            "folder",
+            "remime",
+            "resvg",
+            "font"
+          ]
+        }
       ]
     },
     "run": {
@@ -573,6 +578,34 @@
             }
           },
           "description": "Map MIME type regex patterns to preview types. Rules containing `.*` are evaluated after rules without it, with configuration order preserved within each group. A rule can be a preview type string or a table with a default preview type and extension-specific refinements. Extension keys are lowercase and omit the leading dot.\n-> Use 'remime' if you want a more accurate description from file(1)"
+        },
+        "previewers": {
+          "type": "object",
+          "description": "Define custom previewers for different file types.",
+          "patternProperties": {
+            "^(?!archive$|text$|remime$|font$|pdf$|resvg$|folder$|file$).*": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "type": {
+                  "type": "string",
+                  "enum": ["text", "image"],
+                  "description": "The type of previewer. This determines how the previewer will be used."
+                },
+                "command": {
+                  "$ref": "#/definitions/run",
+                  "description": "The command to run to generate the preview.\nCommand expansions are supported except %s, %t, %cut and %copy"
+                },
+                "file": {
+                  "default": "__stdout__",
+                  "anyOf": [
+                    { "enum": ["__stdout__", "__stderr__", "%temp"] },
+                    { "type": "string" }
+                  ]
+                }
+              }
+            }
+          }
         },
         "openers": {
           "type": "object",

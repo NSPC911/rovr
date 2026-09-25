@@ -224,11 +224,8 @@ class FirstLaunchApp(App, inherit_bindings=False):
                 yield Switch(which("fd") is not None)
                 yield Static("[u]fd[/] integration")
             with HorizontalGroup(id="plugins-bat"):
-                yield Switch(
-                    (which("bat") is not None)
-                    # issue #356
-                    or (which("batcat") is not None)
-                )
+                # issue #356
+                yield Switch(bool(which("bat") or which("batcat")))
                 yield Static("[u]bat[/] integration")
             with HorizontalGroup(id="plugins-poppler"):
                 yield Switch(which("pdftoppm") is not None)
@@ -239,6 +236,9 @@ class FirstLaunchApp(App, inherit_bindings=False):
             with HorizontalGroup(id="plugins-file"):
                 yield Switch(which("file") is not None)
                 yield Static("[u]file(1)[/] integration")
+            with HorizontalGroup(id="plugins-magick"):
+                yield Switch(bool(which("magick") or which("convert")))
+                yield Static("[u]ImageMagick[/] integration")
         yield Static(classes="padding")
         with Center(classes="settings-editor"):
             with HorizontalGroup(id="settings-editor-file"):
@@ -301,6 +301,7 @@ class FirstLaunchApp(App, inherit_bindings=False):
             "#plugins-zoxide": "Uses zoxide to zip around directories quickly",
             "#plugins-poppler": "Uses poppler-utils to preview PDF files",
             "#plugins-file": "Uses the file(1) command to get better file type information",
+            "#plugins-magick": "Uses ImageMagick to render uncommon image formats (like .jxl)",
         }
         for widget, desc in popups.items():
             self.query_one(widget).tooltip = desc
@@ -446,7 +447,12 @@ enabled = {str(self.query_one("#plugins-zoxide Switch", Switch).value).lower()}
 enabled = {str(self.query_one("#plugins-poppler Switch", Switch).value).lower()}
 
 [plugins.file_one]
-enabled = {str(self.query_one("#plugins-file Switch", Switch).value).lower()}"""
+enabled = {str(self.query_one("#plugins-file Switch", Switch).value).lower()}
+
+[plugins.magick]
+enabled = {str(self.query_one("#plugins-magick Switch", Switch).value).lower()}
+{f'executable = "{"magick" if which("magick") is not None else "convert"}"' if self.query_one("#plugins-magick Switch", Switch).value else ""}
+"""
         # trust me it loads properly
         if await self.push_screen_wait(AskWrite(config_toml, keys_toml)):
             os.makedirs(RovrVars.ROVRCONFIG, exist_ok=True)

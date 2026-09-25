@@ -449,6 +449,29 @@ def in_preview_loc(path_str: str) -> bool:
     )
 
 
+def _cache_path(
+    realpath: str,
+    preview_type: str,
+    stat_res: os.stat_result,
+    sig: tuple[str, str],
+    extra: Any = None,
+) -> str:
+    from hashlib import blake2b
+
+    hash = blake2b(
+        (
+            f"{realpath}:{preview_type}:{stat_res.st_mtime_ns}:"
+            f"{stat_res.st_size}:{sig[0]}:{sig[1]}:{extra}"
+        ).encode(),
+        digest_size=16,
+    ).hexdigest()
+    if os.path.exists(preview_loc) and not os.path.isdir(preview_loc):
+        os.remove(preview_loc)
+    if not os.path.exists(preview_loc):
+        os.makedirs(preview_loc, exist_ok=True)
+    return os.path.join(preview_loc, hash)
+
+
 def load_from_cache(
     realpath: str,
     preview_type: str,
@@ -457,18 +480,12 @@ def load_from_cache(
     extra: Any = None,
     pass_as: type[Any] = bytes,
 ) -> Any | None:
-    from hashlib import blake2b
 
     # before we hash, check if file in the cache folder, if not, return None
     if in_preview_loc(realpath):
         return None
 
-    hash = blake2b(
-        f"{realpath}:{preview_type}:{stat_res.st_mtime_ns}:{stat_res.st_size}:{sig[0]}:{sig[1]}:{extra}".encode(),
-        digest_size=16,
-    ).hexdigest()
-    cache_path = os.path.join(preview_loc, hash)
-    print(cache_path)
+    cache_path = _cache_path(realpath, preview_type, stat_res, sig, extra)
     try:
         with open(cache_path, "rb") as f:
             content = f.read()
@@ -491,18 +508,11 @@ def save_to_cache(
     data: Any,
     extra: Any = None,
 ) -> None:
-    from hashlib import blake2b
-
     # same as before
     if in_preview_loc(realpath):
         return
 
-    hash = blake2b(
-        f"{realpath}:{preview_type}:{stat_res.st_mtime_ns}:{stat_res.st_size}:{sig[0]}:{sig[1]}:{extra}".encode(),
-        digest_size=16,
-    ).hexdigest()
     try:
-        os.makedirs(preview_loc, exist_ok=True)
         if isinstance(data, (dict, list)):
             import json
 
@@ -513,7 +523,7 @@ def save_to_cache(
             data = data.encode()
         elif not isinstance(data, bytes):
             data = str(data).encode()
-        with open(os.path.join(preview_loc, hash), "wb") as f:
+        with open(_cache_path(realpath, preview_type, stat_res, sig, extra), "wb") as f:
             f.write(data)
     except OSError:
         pass

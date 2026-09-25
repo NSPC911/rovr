@@ -1880,12 +1880,8 @@ class _RovrConfigSettingsPreviewRulesAdditionalpropertiesOneof1(TypedDict, total
     default: Required["_PreviewType"]
     r""" Required property """
 
-    extensions: Required[dict[str, "_PreviewType"]]
-    r"""
-    Map lowercase file extensions without a leading dot to preview types. These refine this MIME rule and take priority over its default.
-
-    Required property
-    """
+    extensions: dict[str, "_PreviewType"]
+    r""" Map lowercase file extensions without a leading dot to preview types. These refine this MIME rule and take priority over its default. """
 
 class _RovrConfigTheme(TypedDict, total=False):
     default: str

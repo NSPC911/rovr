@@ -529,7 +529,7 @@
               {
                 "type": "object",
                 "additionalProperties": false,
-                "required": ["default", "extensions"],
+                "required": ["default"],
                 "properties": {
                   "default": { "$ref": "#/definitions/preview_type" },
                   "extensions": {

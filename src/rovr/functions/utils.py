@@ -288,7 +288,9 @@ async def expand_command(app: App, command: str) -> str: ...
 async def expand_command(app: App, command: list[str]) -> list[str]: ...
 
 
-async def expand_command(app: App, command: str | list[str]) -> str | list[str]:
+async def expand_command(
+    app: App, command: str | list[str], banned_exp: list[str] = []
+) -> str | list[str]:
     from shlex import join as shjoin
 
     from rovr.functions.path import normalise
@@ -377,23 +379,29 @@ async def expand_command(app: App, command: str | list[str]) -> str | list[str]:
                 # have i told you how frigtening my brain is
                 lambda match: (
                     _expand_tab(match)
-                    if match.group(1) is not None
-                    else {
-                        "%cwd": lambda: cwd,
-                        "%rcwd": lambda: os.path.realpath(cwd),
-                        "%ncwd": lambda: os.path.basename(cwd),
-                        "%rncwd": lambda: os.path.realpath(os.path.realpath(cwd)),
-                        "%h": lambda: highlighted,
-                        "%rh": lambda: os.path.realpath(highlighted),
-                        "%nh": lambda: os.path.basename(highlighted),
-                        "%rnh": lambda: os.path.basename(os.path.realpath(highlighted)),
-                        "%s": lambda: shjoin(selected_files),
-                        "%rs": lambda: shjoin([
-                            os.path.realpath(f) for f in selected_files
-                        ]),
-                        "%cut": lambda: shjoin(cut),
-                        "%copy": lambda: shjoin(copy),
-                    }.get(match.group(0), lambda: match.group(0))()
+                    if match.group(1) is not None and "%tab" not in banned_exp
+                    else (
+                        {
+                            "%cwd": lambda: cwd,
+                            "%rcwd": lambda: os.path.realpath(cwd),
+                            "%ncwd": lambda: os.path.basename(cwd),
+                            "%rncwd": lambda: os.path.realpath(os.path.realpath(cwd)),
+                            "%h": lambda: highlighted,
+                            "%rh": lambda: os.path.realpath(highlighted),
+                            "%nh": lambda: os.path.basename(highlighted),
+                            "%rnh": lambda: os.path.basename(
+                                os.path.realpath(highlighted)
+                            ),
+                            "%s": lambda: shjoin(selected_files),
+                            "%rs": lambda: shjoin([
+                                os.path.realpath(f) for f in selected_files
+                            ]),
+                            "%cut": lambda: shjoin(cut),
+                            "%copy": lambda: shjoin(copy),
+                        }.get(exp, lambda: exp)()
+                        if (exp := match.group(0)) not in banned_exp
+                        else exp
+                    )
                 ),
                 expanded,
             )
@@ -460,6 +468,7 @@ def load_from_cache(
         digest_size=16,
     ).hexdigest()
     cache_path = os.path.join(preview_loc, hash)
+    print(cache_path)
     try:
         with open(cache_path, "rb") as f:
             content = f.read()

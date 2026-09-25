@@ -85,3 +85,26 @@ extensions = { svgz = "resvg" }
 
 In the above example, we are telling rovr that for files with mime type `application/gzip` and `application/x-gzip`, to use archive by default, except if the file ends with `.svgz`, and in that case, use the svg renderer
 
+## custom previewers
+
+You can also create your own previewers for any file type. For example, if you want to preview `.md` files using [`glow`](https://github.com/charmbracelet/glow), you can add the following to your `config.toml`:
+
+```toml
+[settings.previewers]
+"glow" = { command = ["glow", "--style", "dark", "%h"], file = "__stdout__", type = "text" }
+
+[settings.preview_rules."text/plain"]
+default = "text"
+extensions = { "md" = "glow" }
+```
+
+rovr will now use `glow` to preview `.md` files instead of `bat` (or rovr's built-in text highlighter). This preview is also cached, so if you have a large markdown file, it will not be re-rendered every time you open it. You can also use the `--style` option to change the theme of the preview.
+
+For images, you can have `type = "image"` for your custom previewer. For example, if you want to preview `.jxl` files using imagemagick, you can add the following to your `config.toml`:
+
+```toml
+[settings.previewers]
+"jxl" = { command = ["magick", "%h", "%temp"], file = "%temp", type = "image" }
+[settings.preview_rules]
+"image/jxl" = "jxl"
+```

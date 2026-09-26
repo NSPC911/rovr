@@ -107,6 +107,8 @@ class ContentSearch(ModalSearchScreen):
             rg_cmd.append("--no-ignore-parent")
         if not config["plugins"]["rg"]["case_sensitive"]:
             rg_cmd.append("--ignore-case")
+        if config["plugins"]["rg"]["threads"]:
+            rg_cmd.extend(("--threads", str(config["plugins"]["rg"]["threads"])))
         if search_term:
             rg_cmd.append("--")
             rg_cmd.append(search_term)

@@ -426,6 +426,7 @@ description: config schema humanified
     - [7.3.8. Property `Rovr Config > plugins > fd > timeout`](#plugins_fd_timeout)
     - [7.3.9. Property `Rovr Config > plugins > fd > default_filter_types`](#plugins_fd_default_filter_types)
       - [7.3.9.1. Rovr Config > plugins > fd > default_filter_types > default_filter_types items](#plugins_fd_default_filter_types_items)
+    - [7.3.10. Property `Rovr Config > plugins > fd > threads`](#plugins_fd_threads)
   - [7.4. Property `Rovr Config > plugins > rg`](#plugins_rg)
     - [7.4.1. Property `Rovr Config > plugins > rg > enabled`](#plugins_rg_enabled)
     - [7.4.2. Property `Rovr Config > plugins > rg > keybinds`](#plugins_rg_keybinds)
@@ -436,6 +437,7 @@ description: config schema humanified
     - [7.4.6. Property `Rovr Config > plugins > rg > no_ignore_parent`](#plugins_rg_no_ignore_parent)
     - [7.4.7. Property `Rovr Config > plugins > rg > search_hidden`](#plugins_rg_search_hidden)
     - [7.4.8. Property `Rovr Config > plugins > rg > timeout`](#plugins_rg_timeout)
+    - [7.4.9. Property `Rovr Config > plugins > rg > threads`](#plugins_rg_threads)
   - [7.5. Property `Rovr Config > plugins > poppler`](#plugins_poppler)
     - [7.5.1. Property `Rovr Config > plugins > poppler > enabled`](#plugins_poppler_enabled)
     - [7.5.2. Property `Rovr Config > plugins > poppler > threads`](#plugins_poppler_threads)
@@ -450,6 +452,9 @@ description: config schema humanified
     - [7.7.2. Property `Rovr Config > plugins > resvg > shape_rendering`](#plugins_resvg_shape_rendering)
     - [7.7.3. Property `Rovr Config > plugins > resvg > text_rendering`](#plugins_resvg_text_rendering)
     - [7.7.4. Property `Rovr Config > plugins > resvg > image_rendering`](#plugins_resvg_image_rendering)
+  - [7.8. Property `Rovr Config > plugins > magick`](#plugins_magick)
+    - [7.8.1. Property `Rovr Config > plugins > magick > enabled`](#plugins_magick_enabled)
+    - [7.8.2. Property `Rovr Config > plugins > magick > executable`](#plugins_magick_executable)
 
 **Title:** Rovr Config
 
@@ -6250,6 +6255,7 @@ Must be one of:
 | [poppler](#plugins_poppler)   | object |                   |
 | [file_one](#plugins_file_one) | object |                   |
 | [resvg](#plugins_resvg)       | object |                   |
+| [magick](#plugins_magick)     | object |                   |
 
 ### <a name="plugins_zoxide"></a>7.1. Property `Rovr Config > plugins > zoxide`
 
@@ -6367,6 +6373,7 @@ Must be one of:
 | [search_hidden](#plugins_fd_search_hidden)               | boolean                   | Whether to include hidden files in fd results by default.                        |
 | [timeout](#plugins_fd_timeout)                           | integer                   | The maximum time (in seconds) to wait for fd to return results before giving up. |
 | [default_filter_types](#plugins_fd_default_filter_types) | array of enum (of string) | The default file types to show when using fd.                                    |
+| [threads](#plugins_fd_threads)                           | integer                   | The number of threads to use for fd searches.                                    |
 
 #### <a name="plugins_fd_enabled"></a>7.3.1. Property `Rovr Config > plugins > fd > enabled`
 
@@ -6509,6 +6516,20 @@ Must be one of:
 - "char-device"
 - "block-device"
 
+#### <a name="plugins_fd_threads"></a>7.3.10. Property `Rovr Config > plugins > fd > threads`
+
+|              |           |
+| ------------ | --------- |
+| **Type**     | `integer` |
+| **Required** | No        |
+| **Default**  | `2`       |
+
+**Description:** The number of threads to use for fd searches.
+
+| Restrictions |        |
+| ------------ | ------ |
+| **Minimum**  | &ge; 1 |
+
 ### <a name="plugins_rg"></a>7.4. Property `Rovr Config > plugins > rg`
 
 |                           |             |
@@ -6527,6 +6548,7 @@ Must be one of:
 | [no_ignore_parent](#plugins_rg_no_ignore_parent) | boolean         | Don't use \*ignore files from parent folders when searching.                     |
 | [search_hidden](#plugins_rg_search_hidden)       | boolean         | Whether to search hidden files by default.                                       |
 | [timeout](#plugins_rg_timeout)                   | integer         | The maximum time (in seconds) to wait for rg to return results before giving up. |
+| [threads](#plugins_rg_threads)                   | integer         | The number of threads to use for rg searches.                                    |
 
 #### <a name="plugins_rg_enabled"></a>7.4.1. Property `Rovr Config > plugins > rg > enabled`
 
@@ -6627,6 +6649,20 @@ Must be one of:
 | **Default**  | `60`      |
 
 **Description:** The maximum time (in seconds) to wait for rg to return results before giving up.
+
+#### <a name="plugins_rg_threads"></a>7.4.9. Property `Rovr Config > plugins > rg > threads`
+
+|              |           |
+| ------------ | --------- |
+| **Type**     | `integer` |
+| **Required** | No        |
+| **Default**  | `4`       |
+
+**Description:** The number of threads to use for rg searches.
+
+| Restrictions |        |
+| ------------ | ------ |
+| **Minimum**  | &ge; 1 |
 
 ### <a name="plugins_poppler"></a>7.5. Property `Rovr Config > plugins > poppler`
 
@@ -6806,5 +6842,38 @@ Must be one of:
 
 - "optimize_quality"
 - "optimize_speed"
+
+### <a name="plugins_magick"></a>7.8. Property `Rovr Config > plugins > magick`
+
+|                           |             |
+| ------------------------- | ----------- |
+| **Type**                  | `object`    |
+| **Required**              | No          |
+| **Additional properties** | Not allowed |
+
+| Property                                 | Type    | Title/Description                                             |
+| ---------------------------------------- | ------- | ------------------------------------------------------------- |
+| [enabled](#plugins_magick_enabled)       | boolean | Enable ImageMagick for converting unsupported image previews. |
+| [executable](#plugins_magick_executable) | string  | ImageMagick executable name or path.                          |
+
+#### <a name="plugins_magick_enabled"></a>7.8.1. Property `Rovr Config > plugins > magick > enabled`
+
+|              |           |
+| ------------ | --------- |
+| **Type**     | `boolean` |
+| **Required** | No        |
+| **Default**  | `true`    |
+
+**Description:** Enable ImageMagick for converting unsupported image previews.
+
+#### <a name="plugins_magick_executable"></a>7.8.2. Property `Rovr Config > plugins > magick > executable`
+
+|              |            |
+| ------------ | ---------- |
+| **Type**     | `string`   |
+| **Required** | No         |
+| **Default**  | `"magick"` |
+
+**Description:** ImageMagick executable name or path.
 
 ---

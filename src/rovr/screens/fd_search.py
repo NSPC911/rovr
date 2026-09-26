@@ -120,6 +120,8 @@ class FileSearch(ModalSearchScreen):
             fd_cmd.append("--follow")
         if config["plugins"]["fd"]["no_ignore_parent"]:
             fd_cmd.append("--no-ignore-parent")
+        if config["plugins"]["fd"]["threads"]:
+            fd_cmd.extend(("--threads", str(config["plugins"]["fd"]["threads"])))
         for filter_type, should_use in FILTER_TYPES.items():
             if should_use:
                 fd_cmd.extend(["--type", FD_TYPE_TO_ALIAS[filter_type]])

@@ -1626,6 +1626,12 @@
                   "block-device"
                 ]
               }
+            },
+            "threads": {
+              "type": "integer",
+              "default": 2,
+              "description": "The number of threads to use for fd searches.",
+              "minimum": 1
             }
           }
         },
@@ -1673,6 +1679,12 @@
               "type": "integer",
               "default": 60,
               "description": "The maximum time (in seconds) to wait for rg to return results before giving up."
+            },
+            "threads": {
+              "type": "integer",
+              "default": 4,
+              "description": "The number of threads to use for rg searches.",
+              "minimum": 1
             }
           }
         },
@@ -1751,6 +1763,22 @@
               "enum": ["optimize_quality", "optimize_speed"],
               "default": "optimize_quality",
               "description": "The image rendering option to use when rendering SVGs."
+            }
+          }
+        },
+        "magick": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "enabled": {
+              "type": "boolean",
+              "default": true,
+              "description": "Enable ImageMagick for converting unsupported image previews."
+            },
+            "executable": {
+              "type": "string",
+              "default": "magick",
+              "description": "ImageMagick executable name or path."
             }
           }
         }

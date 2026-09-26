@@ -52,7 +52,7 @@ uses [fd](https://github.com/sharkdp/fd) to search recursively in the current di
 <Tabs>
   <TabItem label="config.toml">
     <Code
-      code={`[plugins.fd]\nenabled = true\nexecutable = "fd"\nrelative_paths = true\nfollow_symlinks = false   # search inside symlinks as well\nno_ignore_parent = false  # ignore .ignore files from parent directories\nsearch_hidden = false\ndefault_filter_types = ["file", "directory"]  # set default item filters (like \`file\`, \`directory\`, etc.)\ntimeout = 15  # set it to a reasonably high amount, searching without indexing takes time`}
+      code={`[plugins.fd]\nenabled = true\nexecutable = "fd"\nrelative_paths = true\nfollow_symlinks = false   # search inside symlinks as well\nno_ignore_parent = false  # ignore .ignore files from parent directories\nsearch_hidden = false\ndefault_filter_types = ["file", "directory"]  # set default item filters (like \`file\`, \`directory\`, etc.)\ntimeout = 15  # set it to a reasonably high amount, searching without indexing takes time\nthreads = 2   # use multiple threads for faster searching`}
       lang="toml"
       frame="code"
     />
@@ -75,7 +75,7 @@ uses [ripgrep](https://github.com/BurntSushi/ripgrep) to search inside files
 <Tabs>
   <TabItem label="config.toml">
     <Code
-      code={`[plugins.rg]\nenabled = true\nexecutable = "rg"\ncase_sensitive = true\nno_ignore_parent = false  # ignore .ignore files from parent directories\nfollow_symlinks = false\nsearch_hidden = false\ntimeout = 60  # set it to a much higher amount, content searching takes time`}
+      code={`[plugins.rg]\nenabled = true\nexecutable = "rg"\ncase_sensitive = true\nno_ignore_parent = false  # ignore .ignore files from parent directories\nfollow_symlinks = false\nsearch_hidden = false\ntimeout = 60  # set it to a much higher amount, content searching takes time\nthreads = 4   # use multiple threads for faster searching`}
       lang="toml"
       frame="code"
     />
@@ -123,4 +123,21 @@ uses the [`resvg_py`](https://github.com/baseplate-admin/resvg-py) module to pro
 
 this cannot be disabled, as it doesn't depend on the resvg binary, but rather the maturin binding itself.
 
-no configuration is available for this.
+```toml title="config.toml"
+[plugins.resvg]
+# refer to https://resvg-py.readthedocs.io/en/latest/api.html
+dpi = 0 # svg default
+shape_rendering = "geometric_precision"
+text_rendering = "geometric_precision"
+image_rendering = "optimize_quality"
+```
+
+### imagemagick
+
+uses the [`imagemagick`](https://imagemagick.org) command to provide image preview support for unsupported image formats (like jxl, heic, etc.)
+
+```toml title="config.toml"
+[plugins.magick]
+enabled = true
+executable = "magick"
+```

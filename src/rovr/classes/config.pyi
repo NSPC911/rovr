@@ -227,6 +227,9 @@ r""" Default value of the field path 'Rovr Config plugins fd relative_paths' """
 _ROVR_CONFIG_PLUGINS_FD_SEARCH_HIDDEN_DEFAULT = False
 r""" Default value of the field path 'Rovr Config plugins fd search_hidden' """
 
+_ROVR_CONFIG_PLUGINS_FD_THREADS_DEFAULT = 2
+r""" Default value of the field path 'Rovr Config plugins fd threads' """
+
 _ROVR_CONFIG_PLUGINS_FD_TIMEOUT_DEFAULT = 15
 r""" Default value of the field path 'Rovr Config plugins fd timeout' """
 
@@ -235,6 +238,12 @@ r""" Default value of the field path 'Rovr Config plugins file_one enabled' """
 
 _ROVR_CONFIG_PLUGINS_FILE_ONE_GET_DESCRIPTION_DEFAULT = True
 r""" Default value of the field path 'Rovr Config plugins file_one get_description' """
+
+_ROVR_CONFIG_PLUGINS_MAGICK_ENABLED_DEFAULT = True
+r""" Default value of the field path 'Rovr Config plugins magick enabled' """
+
+_ROVR_CONFIG_PLUGINS_MAGICK_EXECUTABLE_DEFAULT = "magick"
+r""" Default value of the field path 'Rovr Config plugins magick executable' """
 
 _ROVR_CONFIG_PLUGINS_POPPLER_ENABLED_DEFAULT = True
 r""" Default value of the field path 'Rovr Config plugins poppler enabled' """
@@ -283,6 +292,9 @@ r""" Default value of the field path 'Rovr Config plugins rg no_ignore_parent' "
 
 _ROVR_CONFIG_PLUGINS_RG_SEARCH_HIDDEN_DEFAULT = False
 r""" Default value of the field path 'Rovr Config plugins rg search_hidden' """
+
+_ROVR_CONFIG_PLUGINS_RG_THREADS_DEFAULT = 4
+r""" Default value of the field path 'Rovr Config plugins rg threads' """
 
 _ROVR_CONFIG_PLUGINS_RG_TIMEOUT_DEFAULT = 60
 r""" Default value of the field path 'Rovr Config plugins rg timeout' """
@@ -1299,6 +1311,7 @@ class _RovrConfigPlugins(TypedDict, total=False):
     poppler: "_RovrConfigPluginsPoppler"
     file_one: "_RovrConfigPluginsFileOne"
     resvg: "_RovrConfigPluginsResvg"
+    magick: "_RovrConfigPluginsMagick"
 
 class _RovrConfigPluginsBat(TypedDict, total=False):
     enabled: bool
@@ -1376,6 +1389,14 @@ class _RovrConfigPluginsFd(TypedDict, total=False):
     uniqueItems: True
     """
 
+    threads: int
+    r"""
+    The number of threads to use for fd searches.
+
+    default: 2
+    minimum: 1
+    """
+
 _RovrConfigPluginsFdDefaultFilterTypesItem = (
     Literal["file"]
     | Literal["directory"]
@@ -1425,6 +1446,21 @@ class _RovrConfigPluginsFileOne(TypedDict, total=False):
     Use file(1) to get additional information of the file type.
 
     default: True
+    """
+
+class _RovrConfigPluginsMagick(TypedDict, total=False):
+    enabled: bool
+    r"""
+    Enable ImageMagick for converting unsupported image previews.
+
+    default: True
+    """
+
+    executable: str
+    r"""
+    ImageMagick executable name or path.
+
+    default: magick
     """
 
 class _RovrConfigPluginsPoppler(TypedDict, total=False):
@@ -1602,6 +1638,14 @@ class _RovrConfigPluginsRg(TypedDict, total=False):
     The maximum time (in seconds) to wait for rg to return results before giving up.
 
     default: 60
+    """
+
+    threads: int
+    r"""
+    The number of threads to use for rg searches.
+
+    default: 4
+    minimum: 1
     """
 
 class _RovrConfigPluginsZoxide(TypedDict, total=False):

@@ -327,6 +327,7 @@ no_ignore_parent = false
 search_hidden = false
 default_filter_types = ["file", "directory"]
 timeout = 15
+threads = 2
 
 [plugins.rg]
 enabled = true
@@ -337,6 +338,7 @@ no_ignore_parent = false
 follow_symlinks = false
 search_hidden = false
 timeout = 60
+threads = 4
 
 [plugins.poppler]
 enabled = true
@@ -357,3 +359,7 @@ dpi = 0 # svg default
 shape_rendering = "geometric_precision"
 text_rendering = "geometric_precision"
 image_rendering = "optimize_quality"
+
+[plugins.magick]
+enabled = true
+executable = "magick"

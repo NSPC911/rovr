@@ -45,6 +45,7 @@ from rovr.functions import path as path_utils
 from rovr.functions import preview_utils
 from rovr.functions.ansi import ansi_to_rich_text
 from rovr.functions.utils import (
+    _cache_path,
     load_from_cache,
     multiprocessing_process_error_checker,
     s,
@@ -640,7 +641,7 @@ class PreviewContainer(Actionable, Container):
             )
             return
 
-    def show_image_preview(self) -> None:
+    def show_image_preview(self, magicked: bool = False) -> None:
         """Show image preview. Runs in a thread.
 
         Raises:
@@ -670,26 +671,54 @@ class PreviewContainer(Actionable, Container):
                 if pil_object is None:
                     return
                 _save_cached_image(realpath, "image", stat_result, pil_object)
-        except UnidentifiedImageError:
+        except (UnidentifiedImageError, NotImplementedError) as exc:
             if should_cancel():
                 return
+            from shutil import which
+
+            if (
+                not magicked
+                and config["plugins"]["magick"]["enabled"]
+                and which(config["plugins"]["magick"]["executable"])
+            ):
+                cache_path = _cache_path(
+                    realpath, "image", stat_result, IMAGE_CACHE_SIGNATURE
+                )
+                try:
+                    proc = subprocess.run(
+                        [
+                            config["plugins"]["magick"]["executable"],
+                            # TODO: multi-image heics are a thing, how to support?
+                            # refactor pdf to be more generic?
+                            realpath + "[0]",
+                            "-resize",
+                            f"{preview_utils.MAX_IMAGE_SIZE[0]}x{preview_utils.MAX_IMAGE_SIZE[1]}>",
+                            cache_path + ".png",
+                        ],
+                        capture_output=True,
+                        timeout=15,
+                    )
+                    if proc.returncode == 0:
+                        os.replace(cache_path + ".png", cache_path)
+                        self.show_image_preview(True)
+                        return
+                except subprocess.TimeoutExpired:
+                    pass
+                except FileNotFoundError:
+                    self.notify(
+                        "ImageMagick executable not found. Please check your configuration.",
+                        title="ImageMagick Error",
+                        severity="error",
+                    )
+                if os.path.exists(cache_path + ".png"):
+                    os.remove(cache_path + ".png")
             self.call_from_thread(self.remove_children)
             self.call_from_thread(
                 self.mount,
                 Static(
-                    f"Cannot render image (is the encoding wrong?)\nMIME Type: {self._mime_type}",
-                    classes="special",
-                ),
-            )
-            return
-        except NotImplementedError as exc:
-            if should_cancel():
-                return
-            self.call_from_thread(self.remove_children)
-            self.call_from_thread(
-                self.mount,
-                Static(
-                    f"Cannot render image\nContains {exc}",
+                    f"Cannot render image (is the encoding wrong?)\nMIME Type: {self._mime_type}"
+                    if isinstance(exc, UnidentifiedImageError)
+                    else f"Cannot render image\nContains {exc}",
                     classes="special",
                 ),
             )

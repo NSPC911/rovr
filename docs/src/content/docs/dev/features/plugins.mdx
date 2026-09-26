@@ -131,3 +131,13 @@ shape_rendering = "geometric_precision"
 text_rendering = "geometric_precision"
 image_rendering = "optimize_quality"
 ```
+
+### imagemagick
+
+uses the [`imagemagick`](https://imagemagick.org) command to provide image preview support for unsupported image formats (like jxl, heic, etc.)
+
+```toml title="config.toml"
+[plugins.magick]
+enabled = true
+executable = "magick"
+```

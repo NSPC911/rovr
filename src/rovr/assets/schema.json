@@ -1732,6 +1732,22 @@
               "description": "The image rendering option to use when rendering SVGs."
             }
           }
+        },
+        "magick": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "enabled": {
+              "type": "boolean",
+              "default": true,
+              "description": "Enable ImageMagick for converting unsupported image previews."
+            },
+            "executable": {
+              "type": "string",
+              "default": "magick",
+              "description": "ImageMagick executable name or path."
+            }
+          }
         }
       }
     }

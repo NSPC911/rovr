@@ -359,3 +359,7 @@ dpi = 0 # svg default
 shape_rendering = "geometric_precision"
 text_rendering = "geometric_precision"
 image_rendering = "optimize_quality"
+
+[plugins.magick]
+enabled = true
+executable = "magick"

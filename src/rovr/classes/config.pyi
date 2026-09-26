@@ -236,6 +236,12 @@ r""" Default value of the field path 'Rovr Config plugins file_one enabled' """
 _ROVR_CONFIG_PLUGINS_FILE_ONE_GET_DESCRIPTION_DEFAULT = True
 r""" Default value of the field path 'Rovr Config plugins file_one get_description' """
 
+_ROVR_CONFIG_PLUGINS_MAGICK_ENABLED_DEFAULT = True
+r""" Default value of the field path 'Rovr Config plugins magick enabled' """
+
+_ROVR_CONFIG_PLUGINS_MAGICK_EXECUTABLE_DEFAULT = "magick"
+r""" Default value of the field path 'Rovr Config plugins magick executable' """
+
 _ROVR_CONFIG_PLUGINS_POPPLER_ENABLED_DEFAULT = True
 r""" Default value of the field path 'Rovr Config plugins poppler enabled' """
 
@@ -1293,6 +1299,7 @@ class _RovrConfigPlugins(TypedDict, total=False):
     poppler: "_RovrConfigPluginsPoppler"
     file_one: "_RovrConfigPluginsFileOne"
     resvg: "_RovrConfigPluginsResvg"
+    magick: "_RovrConfigPluginsMagick"
 
 class _RovrConfigPluginsBat(TypedDict, total=False):
     enabled: bool
@@ -1427,6 +1434,21 @@ class _RovrConfigPluginsFileOne(TypedDict, total=False):
     Use file(1) to get additional information of the file type.
 
     default: True
+    """
+
+class _RovrConfigPluginsMagick(TypedDict, total=False):
+    enabled: bool
+    r"""
+    Enable ImageMagick for converting unsupported image previews.
+
+    default: True
+    """
+
+    executable: str
+    r"""
+    ImageMagick executable name or path.
+
+    default: magick
     """
 
 class _RovrConfigPluginsPoppler(TypedDict, total=False):

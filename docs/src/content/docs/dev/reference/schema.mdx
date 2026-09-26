@@ -443,6 +443,9 @@ description: config schema humanified
     - [7.7.2. Property `Rovr Config > plugins > resvg > shape_rendering`](#plugins_resvg_shape_rendering)
     - [7.7.3. Property `Rovr Config > plugins > resvg > text_rendering`](#plugins_resvg_text_rendering)
     - [7.7.4. Property `Rovr Config > plugins > resvg > image_rendering`](#plugins_resvg_image_rendering)
+  - [7.8. Property `Rovr Config > plugins > magick`](#plugins_magick)
+    - [7.8.1. Property `Rovr Config > plugins > magick > enabled`](#plugins_magick_enabled)
+    - [7.8.2. Property `Rovr Config > plugins > magick > executable`](#plugins_magick_executable)
 
 **Title:** Rovr Config
 
@@ -6128,6 +6131,7 @@ Must be one of:
 | [poppler](#plugins_poppler)   | object |                   |
 | [file_one](#plugins_file_one) | object |                   |
 | [resvg](#plugins_resvg)       | object |                   |
+| [magick](#plugins_magick)     | object |                   |
 
 ### <a name="plugins_zoxide"></a>7.1. Property `Rovr Config > plugins > zoxide`
 
@@ -6714,5 +6718,38 @@ Must be one of:
 
 - "optimize_quality"
 - "optimize_speed"
+
+### <a name="plugins_magick"></a>7.8. Property `Rovr Config > plugins > magick`
+
+|                           |             |
+| ------------------------- | ----------- |
+| **Type**                  | `object`    |
+| **Required**              | No          |
+| **Additional properties** | Not allowed |
+
+| Property                                 | Type    | Title/Description                                             |
+| ---------------------------------------- | ------- | ------------------------------------------------------------- |
+| [enabled](#plugins_magick_enabled)       | boolean | Enable ImageMagick for converting unsupported image previews. |
+| [executable](#plugins_magick_executable) | string  | ImageMagick executable name or path.                          |
+
+#### <a name="plugins_magick_enabled"></a>7.8.1. Property `Rovr Config > plugins > magick > enabled`
+
+|              |           |
+| ------------ | --------- |
+| **Type**     | `boolean` |
+| **Required** | No        |
+| **Default**  | `true`    |
+
+**Description:** Enable ImageMagick for converting unsupported image previews.
+
+#### <a name="plugins_magick_executable"></a>7.8.2. Property `Rovr Config > plugins > magick > executable`
+
+|              |            |
+| ------------ | ---------- |
+| **Type**     | `string`   |
+| **Required** | No         |
+| **Default**  | `"magick"` |
+
+**Description:** ImageMagick executable name or path.
 
 ---

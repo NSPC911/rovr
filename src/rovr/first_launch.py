@@ -87,10 +87,14 @@ def which_magick() -> str | None:
     if which("magick") is not None:
         return "magick"
     elif which("convert") is not None:
-        proc = subprocess.run(["convert", "-version"], capture_output=True, text=True)
-        if "ImageMagick" in proc.stdout:
-            return "convert"
-    return None
+        try:
+            proc = subprocess.run(
+                ["convert", "-version"], capture_output=True, text=True, timeout=2
+            )
+            if "ImageMagick" in proc.stdout:
+                return "convert"
+        except Exception:
+            pass
 
 
 class FinalStuff(ModalScreen[None]):
@@ -462,7 +466,7 @@ enabled = {str(self.query_one("#plugins-file Switch", Switch).value).lower()}
 
 [plugins.magick]
 enabled = {str(self.query_one("#plugins-magick Switch", Switch).value).lower()}
-{f'executable = "{which_magick()}"' if self.query_one("#plugins-magick Switch", Switch).value else ""}
+{f'executable = "{which_magick()}"' if self.query_one("#plugins-magick Switch", Switch).value and which_magick() else ""}
 """
         # trust me it loads properly
         if await self.push_screen_wait(AskWrite(config_toml, keys_toml)):

@@ -702,6 +702,12 @@ class PreviewContainer(Actionable, Container):
                         return
                 except subprocess.TimeoutExpired:
                     pass
+                except FileNotFoundError:
+                    self.notify(
+                        "ImageMagick executable not found. Please check your configuration.",
+                        title="ImageMagick Error",
+                        severity="error",
+                    )
                 if os.path.exists(cache_path + ".png"):
                     os.remove(cache_path + ".png")
             self.call_from_thread(self.remove_children)

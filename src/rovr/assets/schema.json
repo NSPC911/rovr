@@ -1593,6 +1593,12 @@
                   "block-device"
                 ]
               }
+            },
+            "threads": {
+              "type": "integer",
+              "default": 2,
+              "description": "The number of threads to use for fd searches.",
+              "minimum": 1
             }
           }
         },
@@ -1640,6 +1646,12 @@
               "type": "integer",
               "default": 60,
               "description": "The maximum time (in seconds) to wait for rg to return results before giving up."
+            },
+            "threads": {
+              "type": "integer",
+              "default": 4,
+              "description": "The number of threads to use for rg searches.",
+              "minimum": 1
             }
           }
         },

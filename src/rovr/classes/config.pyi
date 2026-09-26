@@ -224,6 +224,9 @@ r""" Default value of the field path 'Rovr Config plugins fd relative_paths' """
 _ROVR_CONFIG_PLUGINS_FD_SEARCH_HIDDEN_DEFAULT = False
 r""" Default value of the field path 'Rovr Config plugins fd search_hidden' """
 
+_ROVR_CONFIG_PLUGINS_FD_THREADS_DEFAULT = 2
+r""" Default value of the field path 'Rovr Config plugins fd threads' """
+
 _ROVR_CONFIG_PLUGINS_FD_TIMEOUT_DEFAULT = 15
 r""" Default value of the field path 'Rovr Config plugins fd timeout' """
 
@@ -280,6 +283,9 @@ r""" Default value of the field path 'Rovr Config plugins rg no_ignore_parent' "
 
 _ROVR_CONFIG_PLUGINS_RG_SEARCH_HIDDEN_DEFAULT = False
 r""" Default value of the field path 'Rovr Config plugins rg search_hidden' """
+
+_ROVR_CONFIG_PLUGINS_RG_THREADS_DEFAULT = 4
+r""" Default value of the field path 'Rovr Config plugins rg threads' """
 
 _ROVR_CONFIG_PLUGINS_RG_TIMEOUT_DEFAULT = 60
 r""" Default value of the field path 'Rovr Config plugins rg timeout' """
@@ -1364,6 +1370,14 @@ class _RovrConfigPluginsFd(TypedDict, total=False):
     uniqueItems: True
     """
 
+    threads: int
+    r"""
+    The number of threads to use for fd searches.
+
+    default: 2
+    minimum: 1
+    """
+
 _RovrConfigPluginsFdDefaultFilterTypesItem = (
     Literal["file"]
     | Literal["directory"]
@@ -1590,6 +1604,14 @@ class _RovrConfigPluginsRg(TypedDict, total=False):
     The maximum time (in seconds) to wait for rg to return results before giving up.
 
     default: 60
+    """
+
+    threads: int
+    r"""
+    The number of threads to use for rg searches.
+
+    default: 4
+    minimum: 1
     """
 
 class _RovrConfigPluginsZoxide(TypedDict, total=False):

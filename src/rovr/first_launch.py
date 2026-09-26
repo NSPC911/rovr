@@ -1,4 +1,5 @@
 import os
+import subprocess
 from asyncio import sleep
 from importlib import resources
 from importlib.metadata import PackageNotFoundError, version
@@ -80,6 +81,16 @@ def _escape_toml_string(value: str) -> str:
         .replace("\r", "\\r")
         .replace("\t", "\\t")
     )
+
+
+def which_magick() -> str | None:
+    if which("magick") is not None:
+        return "magick"
+    elif which("convert") is not None:
+        proc = subprocess.run(["convert", "-version"], capture_output=True, text=True)
+        if "ImageMagick" in proc.stdout:
+            return "convert"
+    return None
 
 
 class FinalStuff(ModalScreen[None]):
@@ -237,7 +248,7 @@ class FirstLaunchApp(App, inherit_bindings=False):
                 yield Switch(which("file") is not None)
                 yield Static("[u]file(1)[/] integration")
             with HorizontalGroup(id="plugins-magick"):
-                yield Switch(bool(which("magick") or which("convert")))
+                yield Switch(bool(which_magick()))
                 yield Static("[u]ImageMagick[/] integration")
         yield Static(classes="padding")
         with Center(classes="settings-editor"):
@@ -451,7 +462,7 @@ enabled = {str(self.query_one("#plugins-file Switch", Switch).value).lower()}
 
 [plugins.magick]
 enabled = {str(self.query_one("#plugins-magick Switch", Switch).value).lower()}
-{f'executable = "{"magick" if which("magick") is not None else "convert"}"' if self.query_one("#plugins-magick Switch", Switch).value else ""}
+{f'executable = "{which_magick()}"' if self.query_one("#plugins-magick Switch", Switch).value else ""}
 """
         # trust me it loads properly
         if await self.push_screen_wait(AskWrite(config_toml, keys_toml)):

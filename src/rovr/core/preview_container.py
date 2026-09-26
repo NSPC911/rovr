@@ -700,8 +700,10 @@ class PreviewContainer(Actionable, Container):
                         os.replace(cache_path + ".png", cache_path)
                         self.show_image_preview(True)
                         return
-                except TimeoutError:
+                except subprocess.TimeoutExpired:
                     pass
+                if os.path.exists(cache_path + ".png"):
+                    os.remove(cache_path + ".png")
             self.call_from_thread(self.remove_children)
             self.call_from_thread(
                 self.mount,

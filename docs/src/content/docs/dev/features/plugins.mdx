@@ -123,4 +123,11 @@ uses the [`resvg_py`](https://github.com/baseplate-admin/resvg-py) module to pro
 
 this cannot be disabled, as it doesn't depend on the resvg binary, but rather the maturin binding itself.
 
-no configuration is available for this.
+```toml title="config.toml"
+[plugins.resvg]
+# refer to https://resvg-py.readthedocs.io/en/latest/api.html
+dpi = 0 # svg default
+shape_rendering = "geometric_precision"
+text_rendering = "geometric_precision"
+image_rendering = "optimize_quality"
+```

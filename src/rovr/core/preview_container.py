@@ -688,7 +688,9 @@ class PreviewContainer(Actionable, Container):
                     proc = subprocess.run(
                         [
                             config["plugins"]["magick"]["executable"],
-                            realpath,
+                            # TODO: multi-image heics are a thing, how to support?
+                            # refactor pdf to be more generic?
+                            realpath + "[0]",
                             "-resize",
                             f"{preview_utils.MAX_IMAGE_SIZE[0]}x{preview_utils.MAX_IMAGE_SIZE[1]}>",
                             cache_path + ".png",

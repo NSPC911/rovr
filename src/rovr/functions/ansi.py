@@ -4,6 +4,7 @@ from functools import lru_cache
 from itertools import batched
 
 from rich.color import Color
+from rich.control import strip_control_codes
 from rich.style import Style
 from rich.text import Span, Text
 
@@ -82,6 +83,8 @@ def ansi_to_rich_text(terminal_text: str) -> Text:
 
     def append_plain(plain: str) -> None:
         nonlocal text_length
+
+        plain = strip_control_codes(plain)
         if not plain:
             return
 

@@ -611,6 +611,7 @@ class Application(
 
         if path.exists(target) and not path.isdir(target) and focus_on is None:
             focus_on = path.basename(target)
+            target = path.dirname(target)
         else:
             target = ensure_existing_directory(target)
 

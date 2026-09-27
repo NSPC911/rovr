@@ -9,7 +9,7 @@ import stat
 import sys
 from contextlib import suppress
 from functools import lru_cache, partial
-from os import path, stat_result
+from os import path
 from subprocess import CompletedProcess
 from typing import Any, Callable, Literal, TypedDict, overload
 
@@ -228,17 +228,13 @@ def get_extension_sort_key(file_dict: dict) -> tuple[int, str]:
         return (3, name.split(".")[-1].lower())
 
 
-def get_birthtime(file_stat: stat_result) -> float | None:
-    return getattr(file_stat, "st_birthtime", None)
-
-
 def sorter(
     thing: CWDObjectReturnDict, sort_st: Literal["birthtime", "mtime", "size"]
 ) -> int | float:
     try:
         match sort_st:
             case "birthtime":
-                return get_birthtime(thing["dir_entry"].stat(follow_symlinks=False)) or 0
+                return get_birthtime(thing["dir_entry"]) or 0
             case "mtime":
                 return thing["dir_entry"].stat(follow_symlinks=False).st_mtime_ns
             case "size":
@@ -707,3 +703,53 @@ def run_opener(app: App, target_path: str) -> None:
                 else:
                     return
     open_file(app, target_path)
+
+
+def get_birthtime(dir_entry: os.DirEntry) -> float | None:
+    """Return a directory entry's birth time when the platform provides it.
+
+    Returns:
+        The birth time in seconds, or None when unavailable.
+
+    Raises:
+        OSError: If the directory entry cannot be read.
+    """
+    birthtime: float | None = getattr(
+        dir_entry.stat(follow_symlinks=False), "st_birthtime", None
+    )
+    if (birthtime) is not None or sys.platform != "linux":
+        return birthtime
+
+    import ctypes
+
+    statx_btime = 0x00000800
+    libc = ctypes.CDLL(None, use_errno=True)
+    statx = getattr(libc, "statx", None)
+    if statx is None:
+        return None
+
+    statx.argtypes = [
+        ctypes.c_int,
+        ctypes.c_char_p,
+        ctypes.c_int,
+        ctypes.c_uint,
+        ctypes.c_void_p,
+    ]
+    statx.restype = ctypes.c_int
+    statx_buf = ctypes.create_string_buffer(256)
+    result = statx(
+        -100,
+        os.fsencode(dir_entry.path),
+        0x100,
+        statx_btime,
+        statx_buf,
+    )
+    if result != 0:
+        error_num = ctypes.get_errno()
+        raise OSError(error_num, os.strerror(error_num), dir_entry.path)
+    if not ctypes.c_uint32.from_buffer(statx_buf).value & statx_btime:
+        return None
+
+    tv_sec = ctypes.c_int64.from_buffer(statx_buf, 80).value
+    tv_nsec = ctypes.c_uint32.from_buffer(statx_buf, 88).value
+    return tv_sec + tv_nsec / 1e9

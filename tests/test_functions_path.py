@@ -1,3 +1,4 @@
+import ctypes
 import os
 from pathlib import Path
 from types import SimpleNamespace
@@ -44,7 +45,11 @@ def test_extension_sort_key() -> None:
     assert sorted_files == expected_order
 
 
-def test_birthtime_sorting_uses_birthtime_and_handles_unavailable() -> None:
+def test_birthtime_sorting_uses_birthtime_and_handles_unavailable(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.setattr(path_utils.sys, "platform", "darwin")
+
     class Entry:
         def __init__(self, birthtime: float | None) -> None:
             self.birthtime = birthtime
@@ -62,6 +67,41 @@ def test_birthtime_sorting_uses_birthtime_and_handles_unavailable() -> None:
 
     assert path_utils.sorter(with_birthtime, "birthtime") == 123
     assert path_utils.sorter(without_birthtime, "birthtime") == 0
+
+
+def test_get_birthtime_uses_linux_statx(monkeypatch: pytest.MonkeyPatch) -> None:
+    class Statx:
+        available = True
+
+        def __call__(
+            self,
+            _dirfd: Any,
+            _path: Any,
+            _flags: Any,
+            _mask: Any,
+            buffer: Any,
+        ) -> int:
+            if self.available:
+                ctypes.c_uint32.from_buffer(buffer).value = 0x00000800
+                ctypes.c_int64.from_buffer(buffer, 80).value = 123
+                ctypes.c_uint32.from_buffer(buffer, 88).value = 500_000_000
+            return 0
+
+    statx = Statx()
+    monkeypatch.setattr(path_utils.sys, "platform", "linux")
+    monkeypatch.setattr(
+        ctypes,
+        "CDLL",
+        lambda *_args, **_kwargs: SimpleNamespace(statx=statx),
+    )
+    entry = SimpleNamespace(
+        path="file", stat=lambda **_kwargs: SimpleNamespace(st_ctime=0)
+    )
+
+    assert path_utils.get_birthtime(cast(Any, entry)) == 123.5
+
+    statx.available = False
+    assert path_utils.get_birthtime(cast(Any, entry)) is None
 
 
 def test_filtered_dir_names(tmp_path: Path) -> None:

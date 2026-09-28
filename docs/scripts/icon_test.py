@@ -1,4 +1,11 @@
+import os
+
 import click
+from textual.color import Color
+
+os.environ["FORCE_COLOR"] = "1"
+
+
 from rich.console import Console
 from rich.table import Table
 
@@ -10,22 +17,25 @@ console = Console()
 
 def print_file_extensions() -> None:
     """Print all file extensions with their icons and colors"""
-    table = Table(title="File Extensions", padding=(0, 2), show_lines=False)
+    table = Table(title="File Extensions", padding=(0, 1), show_lines=False)
     table.add_column("Icon", width=4, justify="center")
-    table.add_column("Extension", width=None, justify="center")
-    table.add_column("Color", width=9, justify="center")
+    table.add_column("Extension", width=None, justify="left")
+    table.add_column("Type", width=None, justify="left")
+    table.add_column("Color", width=None, justify="center")
 
     sorted_extensions = sorted(FILE_MAP.keys())
 
     for extension in sorted_extensions:
         test_file = f"test{extension}"
-        icon, color = get_icon_for_file(test_file)
+        icon, clr = get_icon_for_file(test_file)
         icon_type = FILE_MAP[extension]
+        color = Color.parse(clr).hex
 
         table.add_row(
-            f"[{color}]{icon}[/{color}]",
-            f"{extension} ({icon_type})",
-            f"[{color}]{color}[/{color}]",
+            f"[{color}]{icon}[/]",
+            str(extension),
+            str(icon_type),
+            f"[{color} reverse]{clr}[/]",
         )
 
     console.print(table)
@@ -33,21 +43,24 @@ def print_file_extensions() -> None:
 
 def print_special_filenames() -> None:
     """Print special filenames with their icons and colors"""
-    table = Table(title="Special Filenames", padding=(0, 2), show_lines=False)
+    table = Table(title="Special Filenames", padding=(0, 1), show_lines=False)
     table.add_column("Icon", width=4, justify="center")
-    table.add_column("Filename", width=None, justify="center")
-    table.add_column("Color", width=9, justify="center")
+    table.add_column("Filename", width=None, justify="left")
+    table.add_column("Type", width=None, justify="left")
+    table.add_column("Color", width=None, justify="center")
 
     sorted_filenames = sorted(FILES_MAP.keys())
 
     for filename in sorted_filenames:
-        icon, color = get_icon_for_file(filename)
+        icon, clr = get_icon_for_file(filename)
         icon_type = FILES_MAP[filename]
+        color = Color.parse(clr).hex
 
         table.add_row(
-            f"[{color}]{icon}[/{color}]",
-            f"{filename} ({icon_type})",
-            f"[{color}]{color}[/{color}]",
+            f"[{color}]{icon}[/]",
+            str(filename),
+            str(icon_type),
+            f"[{color} reverse]{clr}[/]",
         )
 
     console.print(table)
@@ -55,21 +68,24 @@ def print_special_filenames() -> None:
 
 def print_folder_types() -> None:
     """Print folder types with their icons and colors"""
-    table = Table(title="Folder Types", padding=(0, 2), show_lines=False)
+    table = Table(title="Folder Types", padding=(0, 1), show_lines=False)
     table.add_column("Icon", width=4, justify="center")
-    table.add_column("Folder Name", width=None, justify="center")
-    table.add_column("Color", width=9, justify="center")
+    table.add_column("Folder Name", width=None, justify="left")
+    table.add_column("Type", width=None, justify="left")
+    table.add_column("Color", width=None, justify="center")
 
     sorted_folders = sorted(FOLDER_MAP.keys())
 
     for folder_name in sorted_folders:
-        icon, color = get_icon_for_folder(folder_name)
+        icon, clr = get_icon_for_folder(folder_name)
         icon_type = FOLDER_MAP[folder_name]
+        color = Color.parse(clr).hex
 
         table.add_row(
-            f"[{color}]{icon}[/{color}]",
-            f"{folder_name} ({icon_type})",
-            f"[{color}]{color}[/{color}]",
+            f"[{color}]{icon}[/]",
+            str(folder_name),
+            str(icon_type),
+            f"[{color} reverse]{clr}[/]",
         )
 
     console.print(table)
@@ -77,23 +93,25 @@ def print_folder_types() -> None:
 
 def print_default_icons() -> None:
     """Print default icons"""
-    table = Table(title="Default Icons", padding=(0, 2), show_lines=False)
+    table = Table(title="Default Icons", padding=(0, 1), show_lines=False)
     table.add_column("Icon", width=4, justify="center")
     table.add_column("Type", width=None, justify="center")
     table.add_column("Color", width=15, justify="center")
 
-    file_icon, file_color = ICONS["file"]["default"]
+    file_icon, file_clr = ICONS["file"]["default"]
+    file_color = Color.parse(file_clr).hex
     table.add_row(
-        f"[{file_color}]{file_icon}[/{file_color}]",
-        "[white]Default File[/white]",
-        f"[{file_color}]{file_color}[/{file_color}]",
+        f"[{file_color}]{file_icon}[/]",
+        "[white]Default File[/]",
+        f"[{file_color} reverse]{file_clr}[/]",
     )
 
-    folder_icon, folder_color = ICONS["folder"]["default"]
+    folder_icon, folder_clr = ICONS["folder"]["default"]
+    folder_color = Color.parse(folder_clr).hex
     table.add_row(
-        f"[{folder_color}]{folder_icon}[/{folder_color}]",
-        "[white]Default Folder[/white]",
-        f"[{folder_color}]{folder_color}[/{folder_color}]",
+        f"[{folder_color}]{folder_icon}[/]",
+        "[white]Default Folder[/]",
+        f"[{folder_color} reverse]{folder_clr}[/]",
     )
 
     console.print(table)
@@ -109,18 +127,19 @@ def main(
     default: bool, files: bool, special: bool, folder: bool, all_options: bool
 ) -> None:
     """Display all icons used in the rovr file manager"""
-    console.print("[bold magenta]Rovr Icon Display[/bold magenta]")
+    console.print("[bold magenta]Rovr Icon Display[/]")
     console.print(
-        "Displaying all possible file extensions, special filenames, and folder types with their icons\n"
+        "Displaying all possible file extensions, special filenames,"
+        "and folder types with their icons\n"
     )
 
-    if default or all_options:
+    if all_options or default:
         print_default_icons()
-    if files or all_options:
+    if all_options or files:
         print_file_extensions()
-    if special or all_options:
+    if all_options or special:
         print_special_filenames()
-    if folder or all_options:
+    if all_options or folder:
         print_folder_types()
 
 

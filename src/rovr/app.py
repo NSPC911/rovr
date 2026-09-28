@@ -418,7 +418,7 @@ class Application(
             return
         proc.terminate()
         try:
-            proc.wait(timeout=0.5)
+            proc.wait(timeout=1)
         except TimeoutExpired:
             proc.kill()
 

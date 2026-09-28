@@ -34,19 +34,18 @@ from .icons import get_icon_for_file, get_icon_for_folder
 natsort_compiled = re.compile(r"(\d+)")
 
 
+@lru_cache(maxsize=2048)
 def _natsort(key: str) -> tuple[str | int, ...]:
     return tuple(
         int(text) if text.isdigit() else text for text in natsort_compiled.split(key)
     )
 
 
-@lru_cache(maxsize=2048)
-def natsort(key: str) -> tuple[str | int, ...]:
-    return _natsort(key)
-
-
-def natsort_cacheless(key: str) -> tuple[str | int, ...]:
-    return _natsort(key)
+def natsort(key: str, cache: bool = True) -> tuple[str | int, ...]:
+    if cache:
+        return _natsort(key)
+    else:
+        return _natsort.__wrapped__(key)
 
 
 def is_hidden_file(entry: os.DirEntry) -> bool:
@@ -348,14 +347,10 @@ def sync_get_cwd_object(
             folders.sort(key=lambda x: x["name"].lower(), reverse=reverse)
             files.sort(key=lambda x: x["name"].lower(), reverse=reverse)
         case "natural":
-            if len(folders) < 1024:
-                folders.sort(key=lambda x: natsort(x["name"]), reverse=reverse)
-            else:
-                folders.sort(key=lambda x: natsort_cacheless(x["name"]), reverse=reverse)
-            if len(files) < 1024:
-                files.sort(key=lambda x: natsort(x["name"]), reverse=reverse)
-            else:
-                files.sort(key=lambda x: natsort_cacheless(x["name"]), reverse=reverse)
+            should_cache = len(folders) < 1024
+            folders.sort(key=lambda x: natsort(x["name"], should_cache), reverse=reverse)
+            should_cache = len(files) < 1024
+            files.sort(key=lambda x: natsort(x["name"], should_cache), reverse=reverse)
         case "created":
             folders.sort(key=lambda x: sorter(x, "birthtime"), reverse=reverse)
             files.sort(key=lambda x: sorter(x, "birthtime"), reverse=reverse)

@@ -93,12 +93,6 @@ r""" Default value of the field path 'Rovr Config interface clock align' """
 _ROVR_CONFIG_INTERFACE_CLOCK_ENABLED_DEFAULT = True
 r""" Default value of the field path 'Rovr Config interface clock enabled' """
 
-_ROVR_CONFIG_INTERFACE_COMPACT_MODE_BUTTONS_DEFAULT = True
-r""" Default value of the field path 'Rovr Config interface compact_mode buttons' """
-
-_ROVR_CONFIG_INTERFACE_COMPACT_MODE_PANELS_DEFAULT = False
-r""" Default value of the field path 'Rovr Config interface compact_mode panels' """
-
 _ROVR_CONFIG_INTERFACE_DETAILS_LIST_DEFAULT: list[Any] = []
 r""" Default value of the field path 'Rovr Config interface details_list' """
 
@@ -826,18 +820,10 @@ class _RovrConfigInterfaceCompactMode(TypedDict, total=False):
     r"""DEPRECATING SOON, DO NOT USE."""
 
     buttons: bool
-    r"""
-    [DEPRECATING SOON, DO NOT USE] Whether to compact the buttons and path input to one line instead of three.
-
-    default: True
-    """
+    r""" [DEPRECATING SOON, DO NOT USE] Whether to compact the buttons and path input to one line instead of three. """
 
     panels: bool
-    r"""
-    [DEPRECATING SOON, DO NOT USE] Whether to make the panels smaller to add more room for the file list itself
-
-    default: False
-    """
+    r""" [DEPRECATING SOON, DO NOT USE] Whether to make the panels smaller to add more room for the file list itself """
 
 class _RovrConfigInterfaceDetailsListItem(TypedDict, total=False):
     type: Required["_RovrConfigInterfaceDetailsListItemType"]

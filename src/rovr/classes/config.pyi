@@ -93,6 +93,12 @@ r""" Default value of the field path 'Rovr Config interface clock align' """
 _ROVR_CONFIG_INTERFACE_CLOCK_ENABLED_DEFAULT = True
 r""" Default value of the field path 'Rovr Config interface clock enabled' """
 
+_ROVR_CONFIG_INTERFACE_COMPACT_MODE_BUTTONS_DEFAULT = True
+r""" Default value of the field path 'Rovr Config interface compact_mode buttons' """
+
+_ROVR_CONFIG_INTERFACE_COMPACT_MODE_PANELS_DEFAULT = False
+r""" Default value of the field path 'Rovr Config interface compact_mode panels' """
+
 _ROVR_CONFIG_INTERFACE_DETAILS_LIST_DEFAULT: list[Any] = []
 r""" Default value of the field path 'Rovr Config interface details_list' """
 
@@ -787,6 +793,7 @@ class _RovrConfigInterface(TypedDict, total=False):
 
     clock: "_RovrConfigInterfaceClock"
     preview_text: "_RovrConfigInterfacePreviewText"
+    compact_mode: "_RovrConfigInterfaceCompactMode"
 
 class _RovrConfigInterfaceClock(TypedDict, total=False):
     enabled: bool
@@ -813,6 +820,21 @@ _ROVRCONFIGINTERFACECLOCKALIGN_LEFT: Literal["left"] = "left"
 r"""The values for the 'Align the clock to either the 'right' or 'left' of the tabs bar' enum"""
 _ROVRCONFIGINTERFACECLOCKALIGN_RIGHT: Literal["right"] = "right"
 r"""The values for the 'Align the clock to either the 'right' or 'left' of the tabs bar' enum"""
+
+class _RovrConfigInterfaceCompactMode(TypedDict, total=False):
+    buttons: bool
+    r"""
+    Whether to compact the buttons and path input to one line instead of three.
+
+    default: True
+    """
+
+    panels: bool
+    r"""
+    Whether to make the panels smaller to add more room for the file list itself
+
+    default: False
+    """
 
 class _RovrConfigInterfaceDetailsListItem(TypedDict, total=False):
     type: Required["_RovrConfigInterfaceDetailsListItemType"]

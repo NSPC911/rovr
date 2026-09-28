@@ -22,7 +22,10 @@ IconFactory: TypeAlias = Callable[[], tuple[str, str]]
 
 @lru_cache
 def _get_cached_icon(icon: tuple[str, str]) -> Content:
-    return Content.from_markup(f" [{icon[1]}]{icon[0]}[/{icon[1]}] ")
+    if icon[1]:
+        return Content.from_markup(f" [{icon[1]}]{icon[0]}[/{icon[1]}] ")
+    else:
+        return Content(f" {icon[0]} ")
 
 
 @rich.repr.auto
@@ -142,7 +145,9 @@ class PinnedSidebarOption(Option):
         """
         super().__init__(
             prompt=Content.from_markup(
-                f" [{icon[1]}]{icon[0]}[/{icon[1]}] $name", name=label
+                (f" [{icon[1]}]{icon[0]}[/{icon[1]}]" if icon[1] else f" {icon[0]}")
+                + " $name",
+                name=label,
             ),
             id=id,
         )
@@ -382,7 +387,6 @@ class PaddedOption(Option):
     def __init__(self, prompt: VisualType) -> None:
         if isinstance(prompt, str):
             icon = icon_utils.get_icon_smart(prompt)
-            icon = (icon[0], icon[1])
             # the icon is under the assumption that the user has navigated to
             # the directory with the file, which means they rendered the icon
             # for the file already, so theoretically, no need to re-render it here
@@ -394,7 +398,6 @@ class PasteScreenOption(Option):
     def __init__(self, loc: VisualType, copy_or_cut: Literal["copy", "cut"]) -> None:
         if isinstance(loc, str):
             icon = icon_utils.get_icon_smart(loc)
-            icon = (icon[0], icon[1])
 
             copy_cut_icon = icon_utils.get_icon("general", copy_or_cut)[0]
             # check existence of file, and if so, turn it red

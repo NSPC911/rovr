@@ -99,7 +99,7 @@ ASCII_ICONS = {
         "cut": ("X", ""),
         "rename": ("R", ""),
         "delete": ("D", ""),
-        "trash": ("T", ""),
+        "trash": ("T", "#8A8A8A"),
         "zip": ("Z", ""),
     },
     "folder": {
@@ -134,7 +134,7 @@ ICONS = {
         "cut": ("\uf0c4", ""),
         "rename": ("\uf246", ""),
         "delete": ("\uf014", ""),
-        "trash": ("\uf1f8", ""),
+        "trash": ("\uf1f8", "#8A8A8A"),
         "zip": ("\uf410", ""),
         "link": ("\U000f0337", ""),
         "symlink": ("\uf481", ""),

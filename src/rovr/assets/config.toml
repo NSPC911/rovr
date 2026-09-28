@@ -119,8 +119,7 @@ drive_exclude = ["/var/*"]
 
 "application/octet-stream" = "remime"
 
-"application/font-.*" = "font"
-"application/x-font-.*" = "font"
+"application/(x-)?font-.*" = "font"
 "image/.*" = "image"
 "text/.*" = "text"
 "font/.*" = "font"

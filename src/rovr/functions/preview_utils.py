@@ -347,7 +347,10 @@ def get_mime_type(
 
                     # If multiple matches exist, prefer one matching the file extension
                     for match in puremagic_result:
-                        if match.extension.lower() == file_extension and match.mime_type:
+                        if (
+                            match.extension.lower().removeprefix(".") == file_extension
+                            and match.mime_type
+                        ):
                             return MimeResult("puremagic", match.mime_type)
                     # Otherwise, return first result with a mime type
                     for match in puremagic_result:

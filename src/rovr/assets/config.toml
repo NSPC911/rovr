@@ -117,6 +117,8 @@ drive_exclude = ["/var/*"]
 "image/svg\\+xml" = "resvg"
 "inode/directory" = "folder"
 
+"application/octet-stream" = "remime"
+
 "application/font-.*" = "font"
 "application/x-font-.*" = "font"
 "image/.*" = "image"

@@ -794,6 +794,7 @@ class _RovrConfigInterface(TypedDict, total=False):
     clock: "_RovrConfigInterfaceClock"
     preview_text: "_RovrConfigInterfacePreviewText"
     compact_mode: "_RovrConfigInterfaceCompactMode"
+    r""" DEPRECATING SOON, DO NOT USE. """
 
 class _RovrConfigInterfaceClock(TypedDict, total=False):
     enabled: bool
@@ -822,16 +823,18 @@ _ROVRCONFIGINTERFACECLOCKALIGN_RIGHT: Literal["right"] = "right"
 r"""The values for the 'Align the clock to either the 'right' or 'left' of the tabs bar' enum"""
 
 class _RovrConfigInterfaceCompactMode(TypedDict, total=False):
+    r"""DEPRECATING SOON, DO NOT USE."""
+
     buttons: bool
     r"""
-    Whether to compact the buttons and path input to one line instead of three.
+    [DEPRECATING SOON, DO NOT USE] Whether to compact the buttons and path input to one line instead of three.
 
     default: True
     """
 
     panels: bool
     r"""
-    Whether to make the panels smaller to add more room for the file list itself
+    [DEPRECATING SOON, DO NOT USE] Whether to make the panels smaller to add more room for the file list itself
 
     default: False
     """

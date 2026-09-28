@@ -460,6 +460,7 @@ def schema_dump(
                 error_msg += f"\n{(rjust + 5) * ' '}{part}"
 
         pprint(f"[bright_red]╰─{'─' * rjust}─❯[/] {error_msg}")
+
     if use_migration:
         # check path for custom message from migration.json
         migration_docs = json.loads(
@@ -503,7 +504,7 @@ def schema_dump(
                 pprint(Padding(to_print, (0, rjust + 4, 0, rjust + 3)))
                 break
 
-        if exception.rule != "additionalProperties":
+        if exception.rule not in ("additionalProperties", "deprecated"):
             exit(1)
 
 
@@ -632,6 +633,21 @@ def load_config() -> tuple[dict, RovrConfig]:
         # in the config schema, but pdfinfo_path can be None when
         # resolved from PATH, so we suppress the type error
         config_dict["plugins"]["poppler"]["poppler_folder"] = pdfinfo_path
+
+    if "compact_mode" in config_dict["interface"]:
+        schema_dump(
+            user_config_path,
+            JsonSchemaValueException(
+                "[bright_cyan]compact_mode[/] is deprecated and will be removed in a future release. Please remove it from your config.",
+                name="data.interface.compact_mode",
+                value=config_dict["interface"]["compact_mode"],
+                rule="deprecated",
+            ),
+            user_config_content,
+            schema_dict,
+            use_migration=False,
+        )
+
     return schema_dict, cast(RovrConfig, config_dict)
 
 

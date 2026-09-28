@@ -503,7 +503,7 @@ description: config schema humanified
 | [drive_watcher_frequency](#interface_drive_watcher_frequency)         | number          | How often (in seconds) to check for changes in mounted drives in the sidebar.                                                                                                                                    |
 | [clock](#interface_clock)                                             | object          |                                                                                                                                                                                                                  |
 | [preview_text](#interface_preview_text)                               | object          |                                                                                                                                                                                                                  |
-| [compact_mode](#interface_compact_mode)                               | object          |                                                                                                                                                                                                                  |
+| [compact_mode](#interface_compact_mode)                               | object          | DEPRECATING SOON, DO NOT USE.                                                                                                                                                                                    |
 
 ### <a name="interface_tooltips"></a>1.1. Property `Rovr Config > interface > tooltips`
 
@@ -1055,10 +1055,12 @@ Must be one of:
 | **Required**              | No          |
 | **Additional properties** | Not allowed |
 
-| Property                                   | Type    | Title/Description                                                            |
-| ------------------------------------------ | ------- | ---------------------------------------------------------------------------- |
-| [buttons](#interface_compact_mode_buttons) | boolean | Whether to compact the buttons and path input to one line instead of three.  |
-| [panels](#interface_compact_mode_panels)   | boolean | Whether to make the panels smaller to add more room for the file list itself |
+**Description:** DEPRECATING SOON, DO NOT USE.
+
+| Property                                   | Type    | Title/Description                                                                                           |
+| ------------------------------------------ | ------- | ----------------------------------------------------------------------------------------------------------- |
+| [buttons](#interface_compact_mode_buttons) | boolean | [DEPRECATING SOON, DO NOT USE] Whether to compact the buttons and path input to one line instead of three.  |
+| [panels](#interface_compact_mode_panels)   | boolean | [DEPRECATING SOON, DO NOT USE] Whether to make the panels smaller to add more room for the file list itself |
 
 #### <a name="interface_compact_mode_buttons"></a>1.22.1. Property `Rovr Config > interface > compact_mode > buttons`
 
@@ -1068,7 +1070,7 @@ Must be one of:
 | **Required** | No        |
 | **Default**  | `true`    |
 
-**Description:** Whether to compact the buttons and path input to one line instead of three.
+**Description:** [DEPRECATING SOON, DO NOT USE] Whether to compact the buttons and path input to one line instead of three.
 
 #### <a name="interface_compact_mode_panels"></a>1.22.2. Property `Rovr Config > interface > compact_mode > panels`
 
@@ -1078,7 +1080,7 @@ Must be one of:
 | **Required** | No        |
 | **Default**  | `false`   |
 
-**Description:** Whether to make the panels smaller to add more room for the file list itself
+**Description:** [DEPRECATING SOON, DO NOT USE] Whether to make the panels smaller to add more room for the file list itself
 
 ## <a name="settings"></a>2. Property `Rovr Config > settings`
 

@@ -300,11 +300,11 @@ class Application(
         self.log("Starting Rovr...")
         root_classes = (
             "compact-buttons"
-            if config["interface"]["compact_mode"]["buttons"]
+            if config["interface"].get("compact_mode", {}).get("buttons", True)
             else "comfy-buttons"
         ) + (
             " compact-panels"
-            if config["interface"]["compact_mode"]["panels"]
+            if config["interface"].get("compact_mode", {}).get("panels", False)
             else " comfy-panels"
         )
         with Vertical(id="root", classes=root_classes.strip()):

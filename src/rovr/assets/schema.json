@@ -415,16 +415,15 @@
         "compact_mode": {
           "type": "object",
           "additionalProperties": false,
+          "description": "DEPRECATING SOON, DO NOT USE.",
           "properties": {
             "buttons": {
               "type": "boolean",
-              "default": true,
-              "description": "Whether to compact the buttons and path input to one line instead of three."
+              "description": "[DEPRECATING SOON, DO NOT USE] Whether to compact the buttons and path input to one line instead of three."
             },
             "panels": {
               "type": "boolean",
-              "default": false,
-              "description": "Whether to make the panels smaller to add more room for the file list itself"
+              "description": "[DEPRECATING SOON, DO NOT USE] Whether to make the panels smaller to add more room for the file list itself"
             }
           }
         }

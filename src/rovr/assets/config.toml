@@ -48,10 +48,6 @@ oO08 iIlL1 g9qCQG a@ 5sS
 enabled = false
 align = "left"
 
-[interface.compact_mode]
-buttons = true
-panels = false
-
 [settings]
 copy_includes_metadata = true
 use_recycle_bin = true

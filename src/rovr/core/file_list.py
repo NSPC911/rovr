@@ -395,6 +395,22 @@ class FileList(
             # the watcher function)
             self.clear_options()
             return
+        restored_scroll_target_y: float | None = None
+        if self._using_session is not session:
+            if self._using_session is not None:
+                self._using_session.scroll_target_y = self.scroll_offset.y
+            restored_scroll_target_y = session.scroll_target_y
+
+        highlighted_viewport_row: int | None = None
+        if (
+            self._using_session is session
+            and path_utils.normalise(self.app.tabWidget.active_tab.directory) == cwd
+            and self.highlighted in self._index_to_line
+        ):
+            highlighted_viewport_row = (
+                self._index_to_line[self.highlighted] - self.scroll_offset.y
+            )
+
         self.file_list_pause_check = True
         name_to_index: dict[str, int] = {}
         if add_to_session:
@@ -543,8 +559,8 @@ class FileList(
                 to_highlight_index = min(
                     len(self.list_of_options) - 1, session.lastHighlighted[cwd]["index"]
                 )
-            # temporary fix until i start using session.scroll_target_y
-            self.scroll_target_y = 0
+            if highlighted_viewport_row is None and restored_scroll_target_y is None:
+                self.scroll_target_y = 0
             try:
                 self.highlighted = to_highlight_index
             except (OptionDoesNotExist, KeyError):
@@ -558,7 +574,24 @@ class FileList(
                     }),
                 )
 
-            self.scroll_to_highlight()
+            if restored_scroll_target_y is not None:
+                self.scroll_to(
+                    y=restored_scroll_target_y,
+                    animate=False,
+                    immediate=True,
+                )
+            elif highlighted_viewport_row is not None and self.highlighted is not None:
+                self._update_lines()
+                self.scroll_to(
+                    y=max(
+                        0,
+                        self._index_to_line[self.highlighted] - highlighted_viewport_row,
+                    ),
+                    animate=False,
+                    immediate=True,
+                )
+            else:
+                self.scroll_to_highlight()
             self.app.tabWidget.active_tab.label = (
                 path.basename(cwd) if path.basename(cwd) != "" else cwd.strip("/")
             )
@@ -1224,7 +1257,7 @@ class FileList(
                     )
                     + 1
                 )
-                y = top_left.y + line_offset - int(self.scroll_target_y)
+                y = top_left.y + line_offset - self.scroll_offset.y
             else:
                 x = (
                     top_left.x
@@ -1234,8 +1267,8 @@ class FileList(
                     )
                     + 1
                 )
-                y = top_left.y + int(
-                    self.scroll_target_y
+                y = (
+                    top_left.y + self.scroll_offset.y
                 )  # why is it an addition, i have no clue
 
             event = events.Click(

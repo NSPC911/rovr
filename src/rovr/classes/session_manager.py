@@ -30,6 +30,7 @@ class SessionManager:
         selectedItems (list[SessionOptionDict]): A list of selected items within the
                                                                       current directory
         search (str): The current search string.
+        scroll_target_y (float | None): The file list scroll position for this tab.
     """
 
     def __init__(self) -> None:
@@ -39,6 +40,7 @@ class SessionManager:
         self.selectMode: Literal[False, "implicit", "explicit"] = False
         self.selectedItems: list[SessionOptionDict] = []
         self.search: str = ""
+        self.scroll_target_y: float | None = None
 
     def remember_highlight(self, cwd: str, value: SessionOptionDict) -> None:
         """Record the last-highlighted item for a directory, evicting the
@@ -50,6 +52,5 @@ class SessionManager:
         """
         self.lastHighlighted[cwd] = value
         self.lastHighlighted.move_to_end(cwd)
-        max_size = config["settings"]["history_size"]
-        while len(self.lastHighlighted) > max_size:
+        while len(self.lastHighlighted) > config["settings"]["history_size"]:
             self.lastHighlighted.popitem(last=False)

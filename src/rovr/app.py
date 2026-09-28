@@ -695,10 +695,6 @@ class Application(
         )
 
         while True:
-            if self._shutdown_event.wait(timeout=1):
-                break
-            if i_should_shut_down():
-                break
             if (file_list := self.file_list).parent is None or not file_list.is_running:
                 continue
             try:
@@ -840,6 +836,10 @@ class Application(
                     )
                 elif not path.exists(custom_style_path):
                     style_available = False
+            if self._shutdown_event.wait(timeout=1):
+                break
+            if i_should_shut_down():
+                break
         drive_watcher.close()
 
     @work(exclusive=True, group="resizer")

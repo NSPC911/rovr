@@ -496,3 +496,10 @@ class PathInput(Actionable, Input, inherit_bindings=False):
         self.app.call_after_refresh(
             self.auto_completer._listen_to_messages, Input.Changed(self, self.value)
         )
+
+    def check_consume_key(self, key: str, character: str | None) -> bool:
+        return (
+            key == "enter"
+            and self.auto_completer.display
+            and self.auto_completer.option_list.highlighted is not None
+        ) or super().check_consume_key(key, character)

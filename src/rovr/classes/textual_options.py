@@ -5,7 +5,7 @@ from os import DirEntry, path
 from typing import Callable, Literal, Mapping, NamedTuple, TypeAlias
 
 import rich.repr
-from textual.content import Content, ContentText
+from textual.content import Content
 from textual.visual import Visual, VisualType
 from textual.widgets import SelectionList
 from textual.widgets.option_list import Option
@@ -15,7 +15,7 @@ from textual_autocomplete import DropdownItem
 from rovr.functions import details as detail_utils
 from rovr.functions import icons as icon_utils
 from rovr.functions.cwd import getcwd
-from rovr.functions.path import is_hidden_file, normalise
+from rovr.functions.path import control, is_hidden_file, normalise
 
 IconFactory: TypeAlias = Callable[[], tuple[str, str]]
 
@@ -65,6 +65,8 @@ class LazyOption(Option):
         """
         if self._prompt is None:
             self._prompt = self.__prompt_factory()
+        if isinstance(self._prompt, str):
+            self._prompt = control(self._prompt)
         return self._prompt
 
     @property
@@ -143,10 +145,10 @@ class PinnedSidebarOption(Option):
             label: The text for the option
             id: An option ID for the option.
         """
+        label = control(label)
         super().__init__(
             prompt=Content.from_markup(
-                (f" [{icon[1]}]{icon[0]}[/{icon[1]}]" if icon[1] else f" {icon[0]}")
-                + " $name",
+                (f" [{icon[1]}]{icon[0]}[/]" if icon[1] else f" {icon[0]}") + " $name",
                 name=label,
             ),
             id=id,
@@ -162,9 +164,8 @@ class ArchiveFileListSelection(LazySelection):
             icon_factory: The icon for the option
             label: The text for the option
         """
-
         super().__init__(
-            prompt=lambda: _get_cached_icon(icon_factory()) + Content(label),
+            prompt=lambda: _get_cached_icon(icon_factory()) + Content(control(label)),
             value="",
             disabled=True,
         )
@@ -197,7 +198,7 @@ class FileListSelectionWidget(LazySelection):
         self._detail_cells_key: tuple[detail_utils.DetailColumn, ...] | None = None
         this_id = str(id(self))
         self.__icon_factory = icon_factory
-        self.__label = label
+        self.__label = self.label = control(label)
         self.__clipboard = clipboard
 
         super().__init__(
@@ -210,7 +211,6 @@ class FileListSelectionWidget(LazySelection):
             id=this_id,
             disabled=disabled,
         )
-        self.label = label
 
     def get_prompt(self) -> Content:
         return _get_cached_icon(self.__icon_factory()) + Content(self.__label)
@@ -275,7 +275,7 @@ class ClipboardSelectionValue(NamedTuple):
 class ClipboardSelection(Selection):
     def __init__(
         self,
-        prompt: ContentText,
+        prompt: str,
         text: str,
         type_of_selection: Literal["copy", "cut"],
     ) -> None:
@@ -290,13 +290,12 @@ class ClipboardSelection(Selection):
         Raises:
             ValueError:
         """
-
         if type_of_selection not in ["copy", "cut"]:
             raise ValueError(
                 f"type_of_selection must be either 'copy' or 'cut' and not {type_of_selection}"
             )
         super().__init__(
-            prompt=prompt,
+            prompt=control(prompt),
             value=ClipboardSelectionValue(text, type_of_selection),
             # in the future, if we want persistent clipboard,
             # we will have to switch to use path.compress
@@ -321,6 +320,7 @@ class KeybindOption(Option):
         **kwargs,
     ) -> None:
         # Should be named 'label' for searching
+        description, keys = control(description), control(keys)
         if keys == "--section--":
             self.label = f" {' ' * max_key_width} ├ {description}"
             label = f"[$accent]{self.label}[/]"
@@ -366,7 +366,7 @@ class OptionWithValue(LazyOption):
         self.__icon_factory = icon_factory
 
         super().__init__(prompt=self.get_prompt, disabled=disabled, id=id)
-        self.label = label
+        self.label = control(label)
         self.value = value
 
     def get_prompt(self) -> Content:
@@ -379,8 +379,12 @@ class PathDropdownItem(DropdownItem):
     def __init__(self, completion: str, path: str) -> None:
         icon = icon_utils.get_icon_for_folder(path)
         prefix = _get_cached_icon(icon)
-        super().__init__(completion, prefix)
-        self.path = path
+        super().__init__(control(completion), prefix)
+        self.path = completion
+
+    @property
+    def value(self) -> str:
+        return self.completion
 
 
 class PaddedOption(Option):
@@ -390,7 +394,7 @@ class PaddedOption(Option):
             # the icon is under the assumption that the user has navigated to
             # the directory with the file, which means they rendered the icon
             # for the file already, so theoretically, no need to re-render it here
-            prompt = _get_cached_icon(icon) + Content(prompt)
+            prompt = _get_cached_icon(icon) + Content(control(prompt))
         super().__init__(prompt)
 
 
@@ -410,7 +414,12 @@ class PasteScreenOption(Option):
                 icon_content = Content.from_markup(f"[$error]{copy_cut_icon}[/]")
             else:
                 icon_content = Content(copy_cut_icon)
-            loc = Content(" ") + icon_content + _get_cached_icon(icon) + Content(loc)
+            loc = (
+                Content(" ")
+                + icon_content
+                + _get_cached_icon(icon)
+                + Content(control(loc))
+            )
         super().__init__(loc)
         self.copy_or_cut = copy_or_cut
 
@@ -418,10 +427,10 @@ class PasteScreenOption(Option):
 class RightClickMenuOption(Option):
     def __init__(
         self,
-        prompt: VisualType,
+        prompt: str,
         action: str | Mapping | None,
         id: str | None = None,
         disabled: bool = False,
     ) -> None:
-        super().__init__(prompt, id=id, disabled=disabled)
+        super().__init__(control(prompt), id=id, disabled=disabled)
         self.action = action

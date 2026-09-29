@@ -1,5 +1,7 @@
 from asyncio import sleep
 
+from rich.highlighter import Highlighter
+from rich.text import Text
 from textual import events, work
 from textual.app import ComposeResult
 from textual.containers import HorizontalGroup
@@ -9,7 +11,33 @@ from textual.validation import Length
 from textual.widgets import Input, Label
 
 from rovr.functions import icons as icon_utils
+from rovr.functions.path import control
 from rovr.functions.utils import dismiss
+
+
+class ControlHighlighter(Highlighter):
+    def __call__(self, text: str | Text) -> Text:
+        """Highlight a str or Text instance.
+
+        Args:
+            text (Union[str, ~Text]): Text to highlight.
+
+        Raises:
+            TypeError: If not called with text or str.
+
+        Returns:
+            Text: A test instance with highlighting applied.
+        """
+        if isinstance(text, str):
+            highlight_text = Text(control(text), end="")
+        elif isinstance(text, Text):
+            # not markup btw, Text doesn't instantly use markup
+            highlight_text = Text(control(text.plain), end="")
+        else:
+            raise TypeError(f"str or Text instance required, not {text!r}")
+        return highlight_text
+
+    def highlight(self, text: Text) -> None: ...  # because we are doing it in __call__
 
 
 class ModalInputField(Input):
@@ -29,6 +57,7 @@ class ModalInput(ModalScreen, inherit_bindings=False):
         is_folder: bool = False,
         allow_initial: bool = True,
         show_validation_message: bool = True,
+        highlighter: Highlighter | None = ControlHighlighter(),
     ) -> None:
         super().__init__()
         self.border_title = border_title
@@ -36,6 +65,7 @@ class ModalInput(ModalScreen, inherit_bindings=False):
         self.initial_value = initial_value
         self.allow_initial = allow_initial
         self.show_validation_message = show_validation_message
+        self.highlighter = highlighter
         length_checker = Length(minimum=1, failure_description="A value is required.")
         length_checker.strict = True
         if validators is None:
@@ -66,6 +96,7 @@ class ModalInput(ModalScreen, inherit_bindings=False):
                     "changed",
                     "submitted",
                 ],
+                highlighter=self.highlighter,
             )
 
     @work(exclusive=True, group="input-changed")

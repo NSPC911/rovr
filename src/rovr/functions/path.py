@@ -27,6 +27,7 @@ from rovr.classes.type_aliases import (
     SortByOptions,
 )
 from rovr.variables.constants import log_name
+from rovr.variables.maps import CONTROL_PICTURES
 
 from .drive_workers import normalise
 from .icons import get_icon_for_file, get_icon_for_folder
@@ -748,3 +749,7 @@ def get_birthtime(dir_entry: os.DirEntry) -> float | None:
     tv_sec = ctypes.c_int64.from_buffer(statx_buf, 80).value
     tv_nsec = ctypes.c_uint32.from_buffer(statx_buf, 88).value
     return tv_sec + tv_nsec / 1e9
+
+
+def control(string: str) -> str:
+    return string.translate(CONTROL_PICTURES)

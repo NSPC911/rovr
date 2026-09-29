@@ -5,7 +5,6 @@ from typing import ClassVar, Literal, Self, Sequence
 
 from textual import events, work
 from textual.binding import BindingType
-from textual.content import Content
 from textual.widgets import Button, SelectionList
 from textual.widgets.option_list import OptionDoesNotExist
 from textual.worker import Worker
@@ -73,7 +72,7 @@ class Clipboard(
             await asyncio.sleep(0)
             self.insert_selection_at_beginning(
                 ClipboardSelection(
-                    prompt=Content(f"{icon_utils.get_icon('general', 'copy')[0]} {item}"),
+                    prompt=f"{icon_utils.get_icon('general', 'copy')[0]} {item}",
                     text=item,
                     type_of_selection="copy",
                 )
@@ -94,9 +93,7 @@ class Clipboard(
             if isinstance(item, str):
                 self.insert_selection_at_beginning(
                     ClipboardSelection(
-                        prompt=Content(
-                            f"{icon_utils.get_icon('general', 'cut')[0]} {item}"
-                        ),
+                        prompt=f"{icon_utils.get_icon('general', 'cut')[0]} {item}",
                         text=item,
                         type_of_selection="cut",
                     )

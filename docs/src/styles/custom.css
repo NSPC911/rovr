@@ -39,10 +39,6 @@
   /* --sl-color-bg-sidebar: hsl(from var(--sl-color-gray-5) h s l / 50%); */
   /* --sl-color-bg-nav: hsl(from var(--sl-color-gray-5) h s l / 50%); */
   --table-border-color: color-mix(in oklab, var(--sl-color-accent) 87.5%, var(--sl-color-black));
-  --sl-content-width: 55vw;
-  --sl-sidebar-width: 20vw;
-  --sl-sidebar-item-padding-inline: 0.45rem;
-  --sl-transition-duration: 0.375s;
 }
 /* Light mode colors. */
 :root[data-theme="light"] {
@@ -73,6 +69,16 @@
   /* --sl-color-bg-nav: hsl(from var(--sl-color-gray-6) h s l / 50%); */
   --table-border-color: color-mix(in oklab, var(--sl-color-accent) 75%, var(--sl-color-white));
 }
+/* other vars */
+:root {
+  --sl-content-width: 55vw;
+  --sl-sidebar-width: 20vw;
+  --sl-sidebar-item-padding-inline: 0.45rem;
+  --sl-transition-duration: 0.375s;
+
+  --sl-nav-gap: 0.5rem;
+}
+
 html * {
   font-family: "CaskaydiaCove NFM";
   &.no-lower,
@@ -162,31 +168,6 @@ figure.frame {
     border-top-left-radius: 5px;
     border-top-right-radius: 5px;
     background: none;
-  }
-}
-.site-title {
-  color: transparent;
-  &::before {
-    content: "   _____ ____  _   __ _____\a   / ___// __ \\| | / // ___/\a  / /   / /_/ /| |/ // /\a/_/    \\____/ |___//_/";
-    line-height: 1.25;
-    white-space: pre;
-    display: block;
-    position: absolute;
-    font-size: 0.5em;
-    color: var(--sl-color-accent);
-    transform: translateY(-0.25rem);
-    transition: color calc(var(--sl-transition-duration) / 2) linear;
-    font-weight: bolder;
-    font-variant-ligatures: none;
-    text-shadow:
-      1px 0 0 currentColor,
-      -1px 0 0 currentColor,
-      0 1px 0 currentColor,
-      0 -1px 0 currentColor,
-      1px 1px 0 currentColor,
-      -1px 1px 0 currentColor,
-      1px -1px 0 currentColor,
-      -1px -1px 0 currentColor;
   }
 }
 starlight-lang-select {

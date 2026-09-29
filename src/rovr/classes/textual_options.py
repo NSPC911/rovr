@@ -384,7 +384,7 @@ class PathDropdownItem(DropdownItem):
 
     @property
     def value(self) -> str:
-        return self.completion
+        return self.path
 
 
 class PaddedOption(Option):

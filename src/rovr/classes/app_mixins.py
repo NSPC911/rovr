@@ -42,7 +42,7 @@ from rovr.core import (
     PinnedSidebarContainer,
 )
 from rovr.footer import ProcessContainer
-from rovr.functions import drag_image, icons
+from rovr.functions import drag_image, drag_portal, icons
 from rovr.functions import pins as pin_utils
 from rovr.functions.cwd import getcwd
 from rovr.functions.path import (
@@ -387,16 +387,22 @@ class DragAndDrop:
                 size=2,
             )
 
+            extra_mimes: dict[str, bytes] = {
+                # this is the most off-spec way to handle this
+                f"rovr/cwd-{getcwd()}": b"look at mime",
+                f"rovr/count-{len(selected)}": b"look at mime",
+                f"rovr/type-{'folder' if all(path.isdir(p) for p in selected) else 'file'}": b"look at mime",
+            }
+            # sandboxed targets cannot read the file:// uris, they need the portal
+            if transfer := await asyncio.to_thread(drag_portal.export_files, selected):
+                self._dnd_portal_transfer = transfer
+                extra_mimes[drag_portal.PORTAL_MIME] = transfer.mime_data
+
             return DNDDragOutOperation(
                 [Path(p).as_uri() for p in selected],
                 "either",
                 label=label,
-                extra_mimes={
-                    # this is the most off-spec way to handle this
-                    f"rovr/cwd-{getcwd()}": b"look at mime",
-                    f"rovr/count-{len(selected)}": b"look at mime",
-                    f"rovr/type-{'folder' if all(path.isdir(p) for p in selected) else 'file'}": b"look at mime",
-                },
+                extra_mimes=extra_mimes,
             )
 
     def _directory_under_pos(self: App, pos: Offset) -> str | None:
@@ -448,6 +454,11 @@ class DragAndDrop:
 
     def on_drag_out_finished(self: App, event: DragOutFinished) -> None:
         self._dnd_dragged_paths = []
+        if event.cancelled and (transfer := self._dnd_portal_transfer):
+            # only a cancelled drag is safe to unregister: a target that did
+            # drop may still be fetching the files through the portal
+            self._dnd_portal_transfer = None
+            transfer.stop()
         if self._dnd_timer:
             self._dnd_timer[0].stop()
             self._dnd_timer = None

@@ -14,7 +14,7 @@ import rovr.screens as screens
 from rovr.classes.textual_validators import IsValidFilePath, PathNoLongerExists
 from rovr.functions.cwd import getcwd
 from rovr.functions.icons import get_icon
-from rovr.functions.path import dump_exc, normalise
+from rovr.functions.path import control, dump_exc, normalise
 from rovr.functions.utils import command, run_command
 from rovr.variables.constants import config
 
@@ -121,7 +121,7 @@ class RenameItemButton(Button):
             response = await self.app.push_screen(
                 screens.ModalInput(
                     border_title=f"Rename {type_of_file}",
-                    border_subtitle=f"Current name: {path.basename(selected_file)}",
+                    border_subtitle=f"Current name: {control(path.basename(selected_file))}",
                     initial_value=path.basename(selected_file),
                     validators=[
                         IsValidFilePath(),

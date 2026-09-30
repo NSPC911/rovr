@@ -89,6 +89,8 @@ class ProgressBarContainer(VerticalGroup, inherit_bindings=False):
             label (str): The new label
             is_path (bool) = True: Whether the text is a path or not
         """
+        if is_path:
+            label = path_utils.control(label)
         if is_path and config["interface"]["truncate_progress_file_path"]:
             new_label = label.split("/")
             if len(new_label) == 1:

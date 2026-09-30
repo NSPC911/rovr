@@ -1169,3 +1169,9 @@ FD_TYPE_TO_ALIAS = {
     "char-device": "c",
     "block-device": "b",
 }
+
+CONTROL_PICTURES = str.maketrans({
+    # i could do 33, but thats space, which will be an eyesore
+    **{i: chr(0x2400 + i) for i in range(32)},
+    127: "␡",
+})

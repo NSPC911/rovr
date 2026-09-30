@@ -8,6 +8,7 @@ from textual.screen import ModalScreen
 from textual.validation import Length
 from textual.widgets import Input, Label
 
+from rovr.classes.textual_validators import ControlHighlighter
 from rovr.functions import icons as icon_utils
 from rovr.functions.utils import dismiss
 
@@ -66,6 +67,7 @@ class ModalInput(ModalScreen, inherit_bindings=False):
                     "changed",
                     "submitted",
                 ],
+                highlighter=ControlHighlighter(),
             )
 
     @work(exclusive=True, group="input-changed")

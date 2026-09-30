@@ -923,8 +923,11 @@ class FileList(
                         break
                     prev_to_dir = to_dir
                     to_dir = path.dirname(to_dir)
-                self.app.cd(to_dir, clear_search=True)
+                self.app.cd(
+                    to_dir, focus_on=path.basename(prev_to_dir), clear_search=True
+                )
             except PermissionError:
+                # assume that the user has no permission to go up, so just stay in the current directory
                 self.app.cd(prev_to_dir, clear_search=True)
 
     def action_bypass_down_tree(self) -> None:

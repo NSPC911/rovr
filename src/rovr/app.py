@@ -64,7 +64,7 @@ from rovr.core import (
     PreviewContainer,
 )
 from rovr.footer import Clipboard, MetadataContainer, ProcessContainer
-from rovr.functions import drive_workers
+from rovr.functions import drag_portal, drive_workers
 from rovr.functions.cwd import chdir, getcwd
 from rovr.functions.path import (
     dump_exc,
@@ -262,6 +262,7 @@ class Application(
             None
         )
         self._dnd_dragged_paths: list[str] = []
+        self._dnd_portal_transfer: drag_portal.DragTransfer | None = None
         self._dnd_drop_metadata: dict[Drop, tuple[str, bool]] = {}
 
         self._on_mount_done: bool = False

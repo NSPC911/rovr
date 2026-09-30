@@ -44,7 +44,7 @@ from rovr.core import (
     PinnedSidebarContainer,
 )
 from rovr.footer import ProcessContainer
-from rovr.functions import icons
+from rovr.functions import drag_portal, icons
 from rovr.functions import pins as pin_utils
 from rovr.functions.cwd import getcwd
 from rovr.functions.path import (
@@ -379,7 +379,7 @@ class DragAndDrop:
                 icon, icon_color = icons.get_icon("folder", "default")
                 label_text = f"{len(selected)} folder{s(selected)}"
             else:
-                # instead of doing a catch-all for files, preferrably we should check whether all items
+                # instead of doing a catch-all for files, preferably we should check whether all items
                 # are the same icon, and if so, use the same icon
                 icos = {icons.get_icon_smart(p) for p in selected}
                 if len(icos) == 1:
@@ -401,16 +401,21 @@ class DragAndDrop:
                 size=2,
             )
 
+            extra_mimes = {
+                # this is the most off-spec way to handle this
+                f"rovr/cwd-{getcwd()}": b"look at mime",
+                f"rovr/count-{len(selected)}": b"look at mime",
+                f"rovr/type-{'folder' if all(path.isdir(p) for p in selected) else 'file'}": b"look at mime",
+            }
+            self._dnd_portal_transfer = await drag_portal.export_files(selected)
+            if self._dnd_portal_transfer:
+                extra_mimes[drag_portal.PORTAL_MIME] = self._dnd_portal_transfer.mime_data
+
             return DNDDragOutOperation(
                 [Path(p).as_uri() for p in selected],
                 "either",
                 label=label,
-                extra_mimes={
-                    # this is the most off-spec way to handle this
-                    f"rovr/cwd-{getcwd()}": b"look at mime",
-                    f"rovr/count-{len(selected)}": b"look at mime",
-                    f"rovr/type-{'folder' if all(path.isdir(p) for p in selected) else 'file'}": b"look at mime",
-                },
+                extra_mimes=extra_mimes,
             )
 
     def _directory_under_pos(self: App, pos: Offset) -> str | None:
@@ -462,6 +467,9 @@ class DragAndDrop:
 
     def on_drag_out_finished(self: App, event: DragOutFinished) -> None:
         self._dnd_dragged_paths = []
+        transfer, self._dnd_portal_transfer = self._dnd_portal_transfer, None
+        if event.cancelled and transfer:
+            self.run_worker(transfer.stop())
         if self._dnd_timer:
             self._dnd_timer[0].stop()
             self._dnd_timer = None

@@ -17,7 +17,10 @@
 
 ![image](https://github.com/NSPC911/rovr/blob/master/docs%2Fpublic%2Fscreenshots%2Fmain.png?raw=true)
 
-rovr is a terminal file manager built with Python's [Textual](https://textual.textualize.io) framework. It was born out of a frustration that TUI apps do not support the mouse properly, and I wanted to make a change.
+rovr is a terminal file manager built with Python's [Textual](https://textual.textualize.io) framework. It was born out of frustration that TUI apps don't support the mouse properly, and I wanted to change that.
+
+> [!NOTE]
+> rovr's development has been temporarily paused for the next 1.5 months (until 17 November) as I would like to focus more on my studies than on rovr.
 
 ### Features
 

@@ -86,11 +86,11 @@ inherit = "vim"
 
 Use `global` sparingly for actions that must work regardless of the active screen.
 
-| Action                | Description                                                                                                              | Example                            |
-| --------------------- | ------------------------------------------------------------------------------------------------------------------------ | ---------------------------------- |
+| Action                | Description                                                                                                          | Example                            |
+| --------------------- | -------------------------------------------------------------------------------------------------------------------- | ---------------------------------- |
 | `app.quit(<bool>)`    | Quit rovr. If True (default) and using [cd-on-quit](/rovr/features/cd-on-quit), will switch to the focused directory | `"ctrl+q" = "app.quit"`            |
-| `app.command_palette` | Open Textual's command palette.                                                                                          | `"ctrl+p" = "app.command_palette"` |
-| `app.suspend_process` | Suspend rovr on supported systems.                                                                                       | `"ctrl+z" = "app.suspend_process"` |
+| `app.command_palette` | Open Textual's command palette.                                                                                      | `"ctrl+p" = "app.command_palette"` |
+| `app.suspend_process` | Suspend rovr on supported systems.                                                                                   | `"ctrl+z" = "app.suspend_process"` |
 
 ### `main`
 
@@ -173,6 +173,7 @@ work here.
 | `toggle_hidden_files`           | Show or hide hidden files.                                                                         | `"." = "toggle_hidden_files"`                |
 | `toggle_visual`                 | Enter or leave visual selection mode.                                                              | `"v" = "toggle_visual"`                      |
 | `toggle_all`                    | Select or clear every item.                                                                        | `"%" = "toggle_all"`                         |
+| `invert_selections`             | Invert selections (unselects selected items, selects unselected items)                             | `"ctrl+r" = "invert_selections"`             |
 | `toggle_select_item`            | Toggle the highlighted item.                                                                       | `"insert" = "toggle_select_item"`            |
 | `select_cursor(offset, <bool>)` | Extend selection by an item offset. If True, will wrap on top and bottom                           | `"shift+down" = "select_cursor(1, False)"`   |
 | `select_cursor_page(pages)`     | Extend selection by visible pages.                                                                 | `"shift+pagedown" = "select_cursor_page(1)"` |
@@ -339,6 +340,21 @@ Certain actions support expansions based on their state.
 
 Run `rovr --show-keys` to display the key name that will be used.
 
+### Mouse Buttons
+
+Mouse buttons 4-7 are supported as keys. If your mouse has extra keys and the terminal emulator supports
+SGR Extended Mouse Mode, you can bind them to actions. The key names are `mouse4`, `mouse5`,
+`mouse6`, and `mouse7`.
+
+Supported terminals based on testing:
+
+- kitty
+- Foot
+- XTerm
+- Tilix
+- Gnome Terminal
+- Ghostty
+
 ### Known key conflicts:
 
 these conflicts are from terminal emulators themselves, existing due to backwards compatibility.
@@ -457,7 +473,9 @@ trash = ["d"]
 delete = ["x"]
 cancel = ["c", "escape"]
 ```
+
 to
+
 ```toml
 [delete_files]
 "d" = "trash"

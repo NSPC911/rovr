@@ -597,7 +597,6 @@ def load_config() -> tuple[dict, RovrConfig]:
             )
         else:
             schema_dump(user_config_path, exception, user_config_content, schema_dict)
-        exit(1)
 
     for key in ["file", "folder", "bulk_editor"]:
         raw_run = config_dict["settings"]["editor"][key]["run"]

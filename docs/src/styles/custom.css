@@ -71,7 +71,6 @@
 }
 /* other vars */
 :root {
-  --sl-content-width: 55vw;
   --sl-sidebar-width: 20vw;
   --sl-sidebar-item-padding-inline: 0.45rem;
   --sl-transition-duration: 0.375s;
@@ -322,6 +321,13 @@ header > .header > .title-wrapper + [class*="print:hidden"] {
     backdrop-filter: blur(10px);
   }
 }
+
+@media (min-width: 50rem) {
+  :root {
+    --sl-content-width: 75vw;
+  }
+}
+
 header.header {
   border-bottom: none;
   backdrop-filter: blur(10px);

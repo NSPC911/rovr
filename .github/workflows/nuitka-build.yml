@@ -11,8 +11,22 @@ on:
 jobs:
   starting-build:
     runs-on: ubuntu-slim
-    name: Notify Nuitka Starting
+    name: Check whether to start
     steps:
+      - name: Clone
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - name: Check for changes in last 24 hours
+        id: check_changes
+        shell: pwsh
+        run: |
+          $changes = git log --since="24 hours ago" --pretty=format:"%h %s" --no-merges
+          if (!$changes) {
+            gh api --method POST /repos/NSPC911/rovr/actions/runs/${{ github.run_id }}/force-cancel -H "Accept: application/vnd.github+json" -H "X-GitHub-Api-Version: 2022-11-28" -H "Authorization: Bearer ${{ secrets.BOT_TOKEN }}"
+          }
+
       - name: Notify Discord - Nuitka Build Starting
         uses: sarisia/actions-status-discord@v1.13.0
         with:

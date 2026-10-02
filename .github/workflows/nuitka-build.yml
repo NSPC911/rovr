@@ -11,8 +11,22 @@ on:
 jobs:
   starting-build:
     runs-on: ubuntu-slim
-    name: Notify Nuitka Starting
+    name: Check whether to start
     steps:
+      - name: Clone
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - name: Check for changes in last 24 hours
+        id: check_changes
+        shell: pwsh
+        run: |
+          $changes = git log --since="24 hours ago" --pretty=format:"%h %s" --no-merges
+          if (!$changes) {
+            exit 1
+          }
+
       - name: Notify Discord - Nuitka Build Starting
         uses: sarisia/actions-status-discord@v1.13.0
         with:
@@ -30,6 +44,7 @@ jobs:
           noprefix: true
 
   build-nuitka:
+    depends: starting-build
     strategy:
       fail-fast: false
       matrix:

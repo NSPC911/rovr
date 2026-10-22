@@ -3,13 +3,14 @@ from __future__ import annotations
 import contextlib
 import os
 import pickle
+import re
 import subprocess
 from contextvars import ContextVar
 from dataclasses import dataclass
 from functools import partial
 from io import BytesIO
 from os import path
-from tempfile import NamedTemporaryFile
+from tempfile import NamedTemporaryFile, TemporaryDirectory
 from time import time
 from typing import Any, Awaitable, Callable, Literal, TypeVar, cast, overload
 
@@ -21,6 +22,7 @@ from rich.text import Text
 from textual import events, on, work
 from textual.app import ComposeResult
 from textual.containers import Container
+from textual.content import Content
 from textual.css.query import NoMatches
 from textual.dom import DOMNode
 from textual.geometry import Region
@@ -1648,13 +1650,21 @@ class PreviewContainer(Actionable, Container):
 
             if should_cancel():
                 return
-
-            if should_cancel():
-                return
         except (IsADirectoryError, NotADirectoryError):
             pass
         except ExitNow:
             return
+        except subprocess.CalledProcessError as exc:
+            if should_cancel():
+                return
+            assert self._current_file_path is not None
+            self._current_content = (
+                f"CalledProcessError:\n{exc}\n"
+                f"stdout:\n{exc.stdout.decode('utf-8', errors='ignore')}\n"
+                f"stderr:\n{exc.stderr.decode('utf-8', errors='ignore')}"
+            )
+            self.mount_special_messages(mime=False)
+            path_utils.dump_exc(self, exc)
         except Exception as exc:
             if isinstance(exc, OSError) and "cannot be accessed by the system" in str(
                 exc.strerror
@@ -1737,6 +1747,20 @@ class PreviewContainer(Actionable, Container):
             delete=False, suffix=path.splitext(original_path)[1]
         ) as temp:
             temp_path = temp.name
+
+        def expand_temp(value: str) -> str:
+            return re.sub(
+                r"%temp(?:\.[a-zA-Z0-9]+)?",
+                lambda match: (
+                    path.splitext(temp_path)[0] + match.group()[5:]
+                    if match.group() != "%temp"
+                    else temp_path
+                ),
+                value,
+            )
+
+        output = previewer.get("file", "__stdout__")
+        output_path = expand_temp(output)
         try:
             realpath = path.realpath(original_path)
             stat_result = os.stat(realpath)
@@ -1756,25 +1780,40 @@ class PreviewContainer(Actionable, Container):
                     previewer["command"],
                     ["%cut", "%copy", "%s", "%rs", "%tab"],
                 )
-                if isinstance(command, str):
-                    command = command.replace("%temp", temp_path)
-                else:
-                    command = [part.replace("%temp", temp_path) for part in command]
+                if output in ("__stdout__", "__stderr__") and "%file" in str(command):
+                    raise ValueError("%file requires a previewer output path")
+                with contextlib.ExitStack() as stack:
+                    tmpdir = (
+                        stack.enter_context(TemporaryDirectory())
+                        if "%tmpdir" in str(command)
+                        else ""
+                    )
 
-                process = subprocess.run(
-                    command,
-                    capture_output=True,
-                    shell=isinstance(command, str),
-                    check=True,
-                )
+                    def expand_part(part: str) -> str:
+                        return (
+                            expand_temp(part)
+                            .replace("%file", output_path)
+                            .replace("%tmpdir", tmpdir)
+                        )
 
-                output = previewer.get("file", "__stdout__")
+                    if isinstance(command, str):
+                        command = expand_part(command)
+                    else:
+                        command = [expand_part(part) for part in command]
+
+                    process = subprocess.run(
+                        command,
+                        capture_output=True,
+                        shell=isinstance(command, str),
+                        check=True,
+                    )
+
                 if output == "__stdout__":
                     output_data = process.stdout
                 elif output == "__stderr__":
                     output_data = process.stderr
                 else:
-                    with open(temp_path if output == "%temp" else output, "rb") as file:
+                    with open(output_path, "rb") as file:
                         output_data = file.read()
 
                 if is_text:
@@ -1813,6 +1852,9 @@ class PreviewContainer(Actionable, Container):
             self._current_file_path = original_path
             with contextlib.suppress(OSError):
                 os.unlink(temp_path)
+            if output_path != temp_path and output_path != output:
+                with contextlib.suppress(OSError):
+                    os.unlink(output_path)
 
     def show_custom_text_preview(self, output: Text) -> None:
         self.set_border("title", titles.file)
@@ -1832,7 +1874,7 @@ class PreviewContainer(Actionable, Container):
                 ),
             )
 
-    def mount_special_messages(self) -> None:
+    def mount_special_messages(self, mime: bool = True) -> None:
         """Mount special messages. Runs in a thread."""
         if should_cancel():
             return
@@ -1844,7 +1886,7 @@ class PreviewContainer(Actionable, Container):
         )
 
         display_content: str = self._current_content
-        if self._mime_type:
+        if mime and self._mime_type:
             display_content = f"MIME Type: {self._mime_type.mime_type}"
             if (
                 config["plugins"]["file_one"]["enabled"]
@@ -1866,14 +1908,15 @@ class PreviewContainer(Actionable, Container):
                 except (subprocess.SubprocessError, FileNotFoundError) as exc:
                     path_utils.dump_exc(self, exc)
 
-        if static_widget := self.get_child("Static"):
-            self.call_from_thread(static_widget.update, display_content)
+        content = display_content if mime else Content(display_content)
+        if static_widget := self.get_child(Static):
+            self.call_from_thread(static_widget.update, content)
             self.call_from_thread(static_widget.set_classes, "special")
         else:
             self.call_from_thread(self.remove_children)
             if should_cancel():
                 return
-            static_widget = Static(display_content, classes="special")
+            static_widget = Static(content, classes="special")
             self.call_from_thread(self.mount, static_widget)
         # not wasting an isinstance on this
         cast(Static, static_widget).can_focus = True

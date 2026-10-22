@@ -594,10 +594,11 @@
                 },
                 "command": {
                   "$ref": "#/definitions/run",
-                  "description": "The command to run to generate the preview.\nCommand expansions are supported except %s, %t, %cut and %copy"
+                  "description": "The command to run to generate the preview.\nCommand expansions are supported except %s, %t, %cut and %copy. %file is the resolved output path from file; %tmpdir is a temporary directory removed after the command finishes."
                 },
                 "file": {
                   "default": "__stdout__",
+                  "description": "Where to read the preview from: stdout, stderr, or a path. %temp uses the source extension; %temp.png (or another extension) replaces it. The resolved path is available as %file in the command.",
                   "anyOf": [
                     { "enum": ["__stdout__", "__stderr__", "%temp"] },
                     { "type": "string" }
@@ -1754,7 +1755,11 @@
             },
             "text_rendering": {
               "type": "string",
-              "enum": ["geometric_precision", "optimize_legibility", "optimize_speed"],
+              "enum": [
+                "geometric_precision",
+                "optimize_legibility",
+                "optimize_speed"
+              ],
               "default": "geometric_precision",
               "description": "The text rendering option to use when rendering SVGs."
             },

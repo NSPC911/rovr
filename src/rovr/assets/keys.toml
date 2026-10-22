@@ -18,6 +18,7 @@
 "s" = { action = "focus_toggle_pinned_sidebar", desc = "Focus the pinned sidebar" }
 "escape" = { action = "focus_file_list", desc = "Focus the file list" }
 "i" = { action = "focus_toggle_preview_sidebar", desc = "Focus the preview sidebar" }
+"ctrl+b" = { action = "maximize_toggle_preview_sidebar", desc = "Maximize / restore the preview sidebar" }
 "ctrl+l" = { action = "focus_toggle_path_switcher", desc = "Focus the path switcher" }
 "#" = { action = "focus_toggle_processes", desc = "Focus the processes panel" }
 "c" = { action = "focus_toggle_clipboard", desc = "Focus the clipboard panel" }

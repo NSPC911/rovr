@@ -985,6 +985,11 @@
           "description": "Focus toggle between preview sidebar and file list.",
           "display_name": "Focus preview"
         },
+        "maximize_toggle_preview_sidebar": {
+          "$ref": "#/definitions/keybind",
+          "description": "Maximize toggle preview sidebar.",
+          "display_name": "Maximize preview"
+        },
         "focus_toggle_path_switcher": {
           "$ref": "#/definitions/keybind",
           "description": "Focus toggle between path switcher and file list.",

@@ -100,11 +100,23 @@ extensions = { "md" = "glow" }
 
 rovr will now use `glow` to preview `.md` files instead of `bat` (or rovr's built-in text highlighter). This preview is also cached, so if you have a large markdown file, it will not be re-rendered every time you open it. You can also use the `--style` option to change the theme of the preview.
 
-For images, you can have `type = "image"` for your custom previewer. For example, if you want to preview `.jxl` files using imagemagick, you can add the following to your `config.toml`:
+For images, you can have `type = "image"` for your custom previewer. For example, if you want to preview `.html` files using helium (or any chromium browsers), you can add the following to your `config.toml`:
 
 ```toml
-[settings.previewers]
-"jxl" = { command = ["magick", "%h", "%temp"], file = "%temp", type = "image" }
-[settings.preview_rules]
-"image/jxl" = "jxl"
+[settings.previewers.helium]
+command = ["helium", "--headless", "--disable-gpu", "--user-data-dir=%tmpdir", "--screenshot=%file", "%h"]
+file = "%temp.png"
+type = "image"
+
+[settings.preview_rules."text/html"]
+default = "text"
+extensions = { html = "helium", htm = "helium" }
+
+[settings.preview_rules."text/plain"]
+default = "text"
+extensions = { html = "helium", htm = "helium" }
 ```
+
+`%file` is the path configured by `file`, so helium writes the PNG that rovr reads. `%temp` keeps the source extension; `%temp.png` uses `.png` instead. This also works with other output extensions, provided your previewer can produce and rovr can display them. `%tmpdir` gives each run its own temporary browser profile and is removed when the command finishes.
+
+If your `helium` command is a launcher that forces a shared profile (such as the Scoop shim on Windows), use the path to the browser binary instead. For Scoop's Helium installation, that's `.../scoop/apps/helium/current/chrome.exe`. A launcher-supplied `--user-data-dir` can override the temporary profile above.

@@ -133,7 +133,6 @@ class Application(
             "focus_toggle_processes",
             "focus_toggle_metadata",
             "focus_toggle_clipboard",
-            "maximize_toggle_preview_sidebar",
             "toggle_pinned_sidebar",
             "toggle_preview_sidebar",
             "toggle_footer",
@@ -1102,15 +1101,17 @@ class Application(
         else:
             self.file_list.focus()
 
-    def action_maximize_toggle_preview_sidebar(self) -> None:
+    def action_toggle_maximize(self, selector: str) -> None:
         if self.screen.maximized is not None:
             self.screen.action_minimize()
             self.call_later(self.file_list.focus)
         else:
-            if self.query_one(PreviewContainer).display:
-                with suppress(NoMatches):
-                    self.query_one("PreviewContainer > *").focus()
-                self.call_later(self.screen.action_maximize)
+            try:
+                widget = self.query_one(selector)
+                widget.focus()
+                self.screen.maximize(widget)
+            except NoMatches:
+                self.notify(f"Widget with {selector = } cannot be found")
 
     def action_focus_toggle_path_switcher(self) -> None:
         if (path_switcher := self.query_one("#path_switcher")).has_focus:

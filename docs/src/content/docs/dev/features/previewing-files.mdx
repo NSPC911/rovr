@@ -85,6 +85,14 @@ extensions = { svgz = "resvg" }
 
 In the above example, we are telling rovr that for files with mime type `application/gzip` and `application/x-gzip`, to use archive by default, except if the file ends with `.svgz`, and in that case, use the svg renderer
 
+The full syntax for the preview rules is as follows:
+
+```toml
+[settings.preview_rules."mime/type"]
+default = "previewer_name"
+extensions = { "ext1" = "previewer_name1", "ext2" = "previewer_name2" }
+```
+
 ## custom previewers
 
 You can also create your own previewers for any file type. For example, if you want to preview `.md` files using [`glow`](https://github.com/charmbracelet/glow), you can add the following to your `config.toml`:
@@ -119,4 +127,16 @@ extensions = { html = "helium", htm = "helium" }
 
 `%file` is the path configured by `file`, so helium writes the PNG that rovr reads. `%temp` keeps the source extension; `%temp.png` uses `.png` instead. This also works with other output extensions, provided your previewer can produce and rovr can display them. `%tmpdir` gives each run its own temporary browser profile and is removed when the command finishes.
 
-If your `helium` command is a launcher that forces a shared profile (such as the Scoop shim on Windows), use the path to the browser binary instead. For Scoop's Helium installation, that's `.../scoop/apps/helium/current/chrome.exe`. A launcher-supplied `--user-data-dir` can override the temporary profile above.
+A launcher-supplied `--user-data-dir` can override the temporary profile above, so installers like `scoop` could force a single profile for all runs from a shim. To fix that, directly call the binary's path
+
+The `%h` is the path to the file being previewed. The command will be run with the file path as an argument, and the output will be displayed in the preview panel.
+<br/>The `%temp` is the path to a temporary file that will be created for the previewer to write to. You can modify the file extension by including it in the `%temp` variable, like `%temp.png`. The temporary file will be deleted after the preview is displayed.
+
+The full syntax for the custom previewers is as follows:
+
+```toml
+[settings.previewers."previewer_name"]
+command = ["command", "arg1", "arg2", "%h"]
+file = "%temp | __stdout__ | __stderr__ | /path/to/file"
+type = "text | image"
+```

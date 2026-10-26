@@ -645,7 +645,7 @@ class PreviewContainer(Actionable, Container):
             )
             return
 
-    def show_image_preview(self, magicked: bool = False) -> None:
+    def show_image_preview(self, magicked: bool = False, title: bool = True) -> None:
         """Show image preview. Runs in a thread.
 
         Raises:
@@ -653,7 +653,8 @@ class PreviewContainer(Actionable, Container):
         """
         if should_cancel() or self._current_file_path is None:
             return
-        self.set_border("title", titles.image)
+        if title:
+            self.set_border("title", titles.image)
 
         try:
             realpath = path.realpath(self._current_file_path)
@@ -1740,6 +1741,7 @@ class PreviewContainer(Actionable, Container):
 
     def show_custom_preview(self, name: str) -> None:
         previewer = config["settings"]["previewers"][name]
+        self.set_border("title", f"{name} Previewer")
         original_path = self._current_file_path
         assert original_path is not None
 
@@ -1847,7 +1849,7 @@ class PreviewContainer(Actionable, Container):
                     with open(temp_path, "wb") as file:
                         file.write(output_data)
                     self._current_file_path = temp_path
-                    self.show_image_preview()
+                    self.show_image_preview(title=False)
         finally:
             self._current_file_path = original_path
             with contextlib.suppress(OSError):
@@ -1857,7 +1859,6 @@ class PreviewContainer(Actionable, Container):
                     os.unlink(output_path)
 
     def show_custom_text_preview(self, output: Text) -> None:
-        self.set_border("title", titles.file)
         lines = list(output.split("\n", allow_blank=True))
         if text_preview := self.get_child(WindowedTextPreview):
             self.call_from_thread(

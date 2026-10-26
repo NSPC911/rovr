@@ -1721,6 +1721,9 @@ class PreviewContainer(Actionable, Container):
         elif file_type == "font":
             self.log("Showing font preview")
             self.show_font_preview()
+        elif file_type == "details":
+            self._current_content = ""
+            self.mount_special_messages()
         elif file_type in config["settings"]["previewers"]:
             self.log(f"Showing custom previewer for {file_type}")
             self.show_custom_preview(file_type)
@@ -1850,6 +1853,25 @@ class PreviewContainer(Actionable, Container):
                         file.write(output_data)
                     self._current_file_path = temp_path
                     self.show_image_preview(title=False)
+        except subprocess.CalledProcessError as exc:
+            if should_cancel():
+                return
+            msg = (
+                f"Custom previewer command failed with exit code {exc.returncode}\n"
+                f"stdout:\n{exc.stdout.decode('utf-8', errors='ignore')}\n"
+                f"stderr:\n{exc.stderr.decode('utf-8', errors='ignore')}"
+            )
+            if previewer["on_nonzero_exit"] == "details":
+                self._current_content = msg
+                self.mount_special_messages(mime=True)
+            else:
+                self.notify(
+                    msg,
+                    title=f"Custom Previewer: {name}",
+                    severity="error",
+                    markup=False,
+                )
+            path_utils.dump_exc(self, exc)
         finally:
             self._current_file_path = original_path
             with contextlib.suppress(OSError):
@@ -1886,7 +1908,7 @@ class PreviewContainer(Actionable, Container):
             "Preview" + (f" ({self._mime_type.method})" if self._mime_type else ""),
         )
 
-        display_content: str = self._current_content
+        display_content: str = self._current_content + "\n"
         if mime and self._mime_type:
             display_content = f"MIME Type: {self._mime_type.mime_type}"
             if (
@@ -1909,6 +1931,7 @@ class PreviewContainer(Actionable, Container):
                 except (subprocess.SubprocessError, FileNotFoundError) as exc:
                     path_utils.dump_exc(self, exc)
 
+        display_content = display_content.strip()
         content = display_content if mime else Content(display_content)
         if static_widget := self.get_child(Static):
             self.call_from_thread(static_widget.update, content)

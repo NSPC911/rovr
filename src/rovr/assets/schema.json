@@ -8,22 +8,14 @@
       "type": "array",
       "items": { "type": "string" }
     },
+    "default_previews": {
+      "type": "string",
+      "enum": ["text", "image", "pdf", "archive", "folder", "remime", "resvg", "font", "details"]
+    },
     "preview_type": {
       "anyOf": [
         { "type": "string" },
-        {
-          "type": "string",
-          "enum": [
-            "text",
-            "image",
-            "pdf",
-            "archive",
-            "folder",
-            "remime",
-            "resvg",
-            "font"
-          ]
-        }
+        { "$ref": "#/definitions/default_previews" }
       ]
     },
     "run": {
@@ -583,9 +575,10 @@
           "type": "object",
           "description": "Define custom previewers for different file types.",
           "patternProperties": {
-            "^(?!archive$|text$|remime$|font$|pdf$|resvg$|folder$|file$).*": {
+            "^(?!archive$|text$|remime$|font$|pdf$|resvg$|folder$|file$|details$).*": {
               "type": "object",
               "additionalProperties": false,
+              "required": ["type", "command"],
               "properties": {
                 "type": {
                   "type": "string",
@@ -603,6 +596,11 @@
                     { "enum": ["__stdout__", "__stderr__", "%temp"] },
                     { "type": "string" }
                   ]
+                },
+                "on_nonzero_exit": {
+                  "$ref": "#/definitions/preview_type",
+                  "default": "details",
+                  "description": "What to do if the command exits with a non-zero exit code. This can be a preview type string or a table with a default preview type and extension-specific refinements. Extension keys are lowercase and omit the leading dot."
                 }
               }
             }

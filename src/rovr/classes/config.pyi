@@ -17,6 +17,36 @@ class RovrConfig(TypedDict, total=False):
     keybinds: "_RovrConfigKeybinds"
     plugins: "_RovrConfigPlugins"
 
+_DefaultPreviews = (
+    Literal["text"]
+    | Literal["image"]
+    | Literal["pdf"]
+    | Literal["archive"]
+    | Literal["folder"]
+    | Literal["remime"]
+    | Literal["resvg"]
+    | Literal["font"]
+    | Literal["details"]
+)
+_DEFAULTPREVIEWS_TEXT: Literal["text"] = "text"
+r"""The values for the '_DefaultPreviews' enum"""
+_DEFAULTPREVIEWS_IMAGE: Literal["image"] = "image"
+r"""The values for the '_DefaultPreviews' enum"""
+_DEFAULTPREVIEWS_PDF: Literal["pdf"] = "pdf"
+r"""The values for the '_DefaultPreviews' enum"""
+_DEFAULTPREVIEWS_ARCHIVE: Literal["archive"] = "archive"
+r"""The values for the '_DefaultPreviews' enum"""
+_DEFAULTPREVIEWS_FOLDER: Literal["folder"] = "folder"
+r"""The values for the '_DefaultPreviews' enum"""
+_DEFAULTPREVIEWS_REMIME: Literal["remime"] = "remime"
+r"""The values for the '_DefaultPreviews' enum"""
+_DEFAULTPREVIEWS_RESVG: Literal["resvg"] = "resvg"
+r"""The values for the '_DefaultPreviews' enum"""
+_DEFAULTPREVIEWS_FONT: Literal["font"] = "font"
+r"""The values for the '_DefaultPreviews' enum"""
+_DEFAULTPREVIEWS_DETAILS: Literal["details"] = "details"
+r"""The values for the '_DefaultPreviews' enum"""
+
 _IpcNoPrompt = Literal["allow"] | Literal["deny"]
 _IPCNOPROMPT_ALLOW: Literal["allow"] = "allow"
 r"""The values for the '_IpcNoPrompt' enum"""
@@ -45,35 +75,8 @@ r"""The values for the '_OsIfItemAnyof0' enum"""
 _OSIFITEMANYOF0_DARWIN: Literal["Darwin"] = "Darwin"
 r"""The values for the '_OsIfItemAnyof0' enum"""
 
-_PreviewType = Union[str, "_PreviewTypeAnyof1"]
+_PreviewType = Union[str, "_DefaultPreviews"]
 r""" Aggregation type: anyOf """
-
-_PreviewTypeAnyof1 = (
-    Literal["text"]
-    | Literal["image"]
-    | Literal["pdf"]
-    | Literal["archive"]
-    | Literal["folder"]
-    | Literal["remime"]
-    | Literal["resvg"]
-    | Literal["font"]
-)
-_PREVIEWTYPEANYOF1_TEXT: Literal["text"] = "text"
-r"""The values for the '_PreviewTypeAnyof1' enum"""
-_PREVIEWTYPEANYOF1_IMAGE: Literal["image"] = "image"
-r"""The values for the '_PreviewTypeAnyof1' enum"""
-_PREVIEWTYPEANYOF1_PDF: Literal["pdf"] = "pdf"
-r"""The values for the '_PreviewTypeAnyof1' enum"""
-_PREVIEWTYPEANYOF1_ARCHIVE: Literal["archive"] = "archive"
-r"""The values for the '_PreviewTypeAnyof1' enum"""
-_PREVIEWTYPEANYOF1_FOLDER: Literal["folder"] = "folder"
-r"""The values for the '_PreviewTypeAnyof1' enum"""
-_PREVIEWTYPEANYOF1_REMIME: Literal["remime"] = "remime"
-r"""The values for the '_PreviewTypeAnyof1' enum"""
-_PREVIEWTYPEANYOF1_RESVG: Literal["resvg"] = "resvg"
-r"""The values for the '_PreviewTypeAnyof1' enum"""
-_PREVIEWTYPEANYOF1_FONT: Literal["font"] = "font"
-r"""The values for the '_PreviewTypeAnyof1' enum"""
 
 _RIGHT_CLICK_ACTION_ONEOF1_SHELL_DEFAULT = False
 r""" Default value of the field path 'right_click_action oneof1 shell' """
@@ -411,6 +414,9 @@ r""" Default value of the field path 'Rovr Config settings previewers Type file 
 
 _ROVR_CONFIG_SETTINGS_PREVIEWERS_TYPE_FILE_DEFAULT = "__stdout__"
 r""" Default value of the field path 'Rovr Config settings previewers Type file' """
+
+_ROVR_CONFIG_SETTINGS_PREVIEWERS_TYPE_ON_NONZERO_EXIT_DEFAULT = "details"
+r""" Default value of the field path 'Rovr Config settings previewers Type on_nonzero_exit' """
 
 _ROVR_CONFIG_SETTINGS_PREVIEW_RULES_DEFAULT = {
     "application/(debian.*-package|redhat-package-manager|rpm|android\\.package-archive)": "archive",
@@ -1947,24 +1953,39 @@ class _RovrConfigSettingsPreviewRulesAdditionalpropertiesOneof1(TypedDict, total
     r""" Map lowercase file extensions without a leading dot to preview types. These refine this MIME rule and take priority over its default. """
 
 class _RovrConfigSettingsPreviewersType(TypedDict, total=False):
-    type: "_RovrConfigSettingsPreviewersTypeType"
-    r""" The type of previewer. This determines how the previewer will be used. """
+    type: Required["_RovrConfigSettingsPreviewersTypeType"]
+    r"""
+    The type of previewer. This determines how the previewer will be used.
 
-    command: "_Run"
-    r""" Aggregation type: oneOf """
+    Required property
+    """
+
+    command: Required["_Run"]
+    r"""
+    Aggregation type: oneOf
+
+    Required property
+    """
 
     file: "_RovrConfigSettingsPreviewersTypeFile"
     r"""
+    Where to read the preview from: stdout, stderr, or a path. %temp uses the source extension; %temp.png (or another extension) replaces it. The resolved path is available as %file in the command.
+
     default: __stdout__
 
     Aggregation type: anyOf
     """
+
+    on_nonzero_exit: "_PreviewType"
+    r""" Aggregation type: anyOf """
 
 _RovrConfigSettingsPreviewersTypeFile = Union[
     "_RovrConfigSettingsPreviewersTypeFileAnyof0",
     "_RovrConfigSettingsPreviewersTypeFileAnyof1",
 ]
 r"""
+Where to read the preview from: stdout, stderr, or a path. %temp uses the source extension; %temp.png (or another extension) replaces it. The resolved path is available as %file in the command.
+
 default: __stdout__
 
 Aggregation type: anyOf

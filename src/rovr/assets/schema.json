@@ -574,8 +574,9 @@
         "previewers": {
           "type": "object",
           "description": "Define custom previewers for different file types.",
+          "additionalProperties": false,
           "patternProperties": {
-            "^(?!archive$|text$|remime$|font$|pdf$|resvg$|folder$|file$|details$).*": {
+            "^(?!archive$|text$|remime$|font$|pdf$|resvg$|folder$|file$|details$|image$).*": {
               "type": "object",
               "additionalProperties": false,
               "required": ["type", "command"],
@@ -600,7 +601,7 @@
                 "on_nonzero_exit": {
                   "$ref": "#/definitions/preview_type",
                   "default": "details",
-                  "description": "What to do if the command exits with a non-zero exit code. This can be a preview type string or a table with a default preview type and extension-specific refinements. Extension keys are lowercase and omit the leading dot."
+                  "description": "What to do if the command exits with a non-zero exit code. This can only be a string to provide a fallback to use. Defaults to `details`."
                 }
               }
             }

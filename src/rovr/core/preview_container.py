@@ -1810,15 +1810,18 @@ class PreviewContainer(Actionable, Container):
                         capture_output=True,
                         shell=isinstance(command, str),
                         check=True,
+                        timeout=60,  # very reasonable time
                     )
 
                 if output == "__stdout__":
                     output_data = process.stdout
                 elif output == "__stderr__":
                     output_data = process.stderr
-                else:
+                elif path.exists(output_path):
                     with open(output_path, "rb") as file:
                         output_data = file.read()
+                else:
+                    self.notify(f"Path = {output_path} does not exist", title="Custom Previewer", severity="error", markup=False)
 
                 if is_text:
                     output_data = ansi_to_rich_text(
@@ -1859,6 +1862,25 @@ class PreviewContainer(Actionable, Container):
                             (name, f"{repr(previewer)}:{IMAGE_CACHE_SIGNATURE}"),
                         ),
                     )
+        except FileNotFoundError:
+            if should_cancel():
+                return
+            self.notify(
+                f"Previewer Executable not found: {previewer["command"][0] if isinstance(previewer["command"], list) else previewer["command"]}",
+                title=f"Custom Previewer: {name}",
+                severity="error",
+                markup=False,
+            )
+        except subprocess.TimeoutExpired as exc:
+            if should_cancel():
+                return
+            self.notify(
+                f"Custom previewer command timed out after {exc.timeout} seconds",
+                title=f"Custom Previewer: {name}",
+                severity="error",
+                markup=False,
+            )
+            path_utils.dump_exc(self, exc)
         except subprocess.CalledProcessError as exc:
             if should_cancel():
                 return

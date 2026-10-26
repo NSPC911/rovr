@@ -131,13 +131,13 @@ description: config schema humanified
         - [2.7.1.2.2. Property `Rovr Config > settings > preview_rules > additionalProperties > oneOf > item 1 > extensions`](#settings_preview_rules_additionalProperties_oneOf_i1_extensions)
           - [2.7.1.2.2.1. Pattern Property `Rovr Config > settings > preview_rules > additionalProperties > oneOf > item 1 > extensions > preview_type`](#settings_preview_rules_additionalProperties_oneOf_i1_extensions_pattern1)
   - [2.8. Property `Rovr Config > settings > previewers`](#settings_previewers)
-    - [2.8.1. Pattern Property `Rovr Config > settings > previewers > ^(?!archive$&#124;text$&#124;remime$&#124;font$&#124;pdf$&#124;resvg$&#124;folder$&#124;file$&#124;details$).*`](#settings_previewers_pattern1)
-      - [2.8.1.1. Property `Rovr Config > settings > previewers > ^(?!archive$&#124;text$&#124;remime$&#124;font$&#124;pdf$&#124;resvg$&#124;folder$&#124;file$&#124;details$).* > type`](#settings_previewers_pattern1_type)
-      - [2.8.1.2. Property `Rovr Config > settings > previewers > ^(?!archive$&#124;text$&#124;remime$&#124;font$&#124;pdf$&#124;resvg$&#124;folder$&#124;file$&#124;details$).* > command`](#settings_previewers_pattern1_command)
-      - [2.8.1.3. Property `Rovr Config > settings > previewers > ^(?!archive$&#124;text$&#124;remime$&#124;font$&#124;pdf$&#124;resvg$&#124;folder$&#124;file$&#124;details$).* > file`](#settings_previewers_pattern1_file)
-        - [2.8.1.3.1. Property `Rovr Config > settings > previewers > ^(?!archive$&#124;text$&#124;remime$&#124;font$&#124;pdf$&#124;resvg$&#124;folder$&#124;file$&#124;details$).* > file > anyOf > item 0`](#settings_previewers_pattern1_file_anyOf_i0)
-        - [2.8.1.3.2. Property `Rovr Config > settings > previewers > ^(?!archive$&#124;text$&#124;remime$&#124;font$&#124;pdf$&#124;resvg$&#124;folder$&#124;file$&#124;details$).* > file > anyOf > item 1`](#settings_previewers_pattern1_file_anyOf_i1)
-      - [2.8.1.4. Property `Rovr Config > settings > previewers > ^(?!archive$&#124;text$&#124;remime$&#124;font$&#124;pdf$&#124;resvg$&#124;folder$&#124;file$&#124;details$).* > on_nonzero_exit`](#settings_previewers_pattern1_on_nonzero_exit)
+    - [2.8.1. Pattern Property `Rovr Config > settings > previewers > ^(?!archive$&#124;text$&#124;remime$&#124;font$&#124;pdf$&#124;resvg$&#124;folder$&#124;file$&#124;details$&#124;image$).*`](#settings_previewers_pattern1)
+      - [2.8.1.1. Property `Rovr Config > settings > previewers > ^(?!archive$&#124;text$&#124;remime$&#124;font$&#124;pdf$&#124;resvg$&#124;folder$&#124;file$&#124;details$&#124;image$).* > type`](#settings_previewers_pattern1_type)
+      - [2.8.1.2. Property `Rovr Config > settings > previewers > ^(?!archive$&#124;text$&#124;remime$&#124;font$&#124;pdf$&#124;resvg$&#124;folder$&#124;file$&#124;details$&#124;image$).* > command`](#settings_previewers_pattern1_command)
+      - [2.8.1.3. Property `Rovr Config > settings > previewers > ^(?!archive$&#124;text$&#124;remime$&#124;font$&#124;pdf$&#124;resvg$&#124;folder$&#124;file$&#124;details$&#124;image$).* > file`](#settings_previewers_pattern1_file)
+        - [2.8.1.3.1. Property `Rovr Config > settings > previewers > ^(?!archive$&#124;text$&#124;remime$&#124;font$&#124;pdf$&#124;resvg$&#124;folder$&#124;file$&#124;details$&#124;image$).* > file > anyOf > item 0`](#settings_previewers_pattern1_file_anyOf_i0)
+        - [2.8.1.3.2. Property `Rovr Config > settings > previewers > ^(?!archive$&#124;text$&#124;remime$&#124;font$&#124;pdf$&#124;resvg$&#124;folder$&#124;file$&#124;details$&#124;image$).* > file > anyOf > item 1`](#settings_previewers_pattern1_file_anyOf_i1)
+      - [2.8.1.4. Property `Rovr Config > settings > previewers > ^(?!archive$&#124;text$&#124;remime$&#124;font$&#124;pdf$&#124;resvg$&#124;folder$&#124;file$&#124;details$&#124;image$).* > on_nonzero_exit`](#settings_previewers_pattern1_on_nonzero_exit)
         - [2.8.1.4.1. Property `Rovr Config > settings > preview_rules > additionalProperties > oneOf > item 0 > anyOf > item 0`](#settings_preview_rules_additionalProperties_oneOf_i0_anyOf_i0)
         - [2.8.1.4.2. Property `Rovr Config > settings > preview_rules > additionalProperties > oneOf > item 0 > anyOf > default_previews`](#settings_preview_rules_additionalProperties_oneOf_i0_anyOf_i1)
   - [2.9. Property `Rovr Config > settings > openers`](#settings_openers)
@@ -2138,22 +2138,22 @@ Must be one of:
 
 ### <a name="settings_previewers"></a>2.8. Property `Rovr Config > settings > previewers`
 
-|                           |                  |
-| ------------------------- | ---------------- |
-| **Type**                  | `object`         |
-| **Required**              | No               |
-| **Additional properties** | Any type allowed |
+|                           |             |
+| ------------------------- | ----------- |
+| **Type**                  | `object`    |
+| **Required**              | No          |
+| **Additional properties** | Not allowed |
 
 **Description:** Define custom previewers for different file types.
 
-| Property                                                                                                                                         | Type   | Title/Description |
-| ------------------------------------------------------------------------------------------------------------------------------------------------ | ------ | ----------------- |
-| [^(?!archive$&#124;text$&#124;remime$&#124;font$&#124;pdf$&#124;resvg$&#124;folder$&#124;file$&#124;details$).\*](#settings_previewers_pattern1) | object |                   |
+| Property                                                                                                                                                     | Type   | Title/Description |
+| ------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------ | ----------------- |
+| [^(?!archive$&#124;text$&#124;remime$&#124;font$&#124;pdf$&#124;resvg$&#124;folder$&#124;file$&#124;details$&#124;image$).\*](#settings_previewers_pattern1) | object |                   |
 
-#### <a name="settings_previewers_pattern1"></a>2.8.1. Pattern Property `Rovr Config > settings > previewers > ^(?!archive$&#124;text$&#124;remime$&#124;font$&#124;pdf$&#124;resvg$&#124;folder$&#124;file$&#124;details$).*`
+#### <a name="settings_previewers_pattern1"></a>2.8.1. Pattern Property `Rovr Config > settings > previewers > ^(?!archive$&#124;text$&#124;remime$&#124;font$&#124;pdf$&#124;resvg$&#124;folder$&#124;file$&#124;details$&#124;image$).*`
 
 > All properties whose name matches the regular expression
-> `^(?!archive$&#124;text$&#124;remime$&#124;font$&#124;pdf$&#124;resvg$&#124;folder$&#124;file$&#124;details$).*` ([Test](https://regex101.com/?regex=%5E%28%3F%21archive%24%26%23124%3Btext%24%26%23124%3Bremime%24%26%23124%3Bfont%24%26%23124%3Bpdf%24%26%23124%3Bresvg%24%26%23124%3Bfolder%24%26%23124%3Bfile%24%26%23124%3Bdetails%24%29.%2A))
+> `^(?!archive$&#124;text$&#124;remime$&#124;font$&#124;pdf$&#124;resvg$&#124;folder$&#124;file$&#124;details$&#124;image$).*` ([Test](https://regex101.com/?regex=%5E%28%3F%21archive%24%26%23124%3Btext%24%26%23124%3Bremime%24%26%23124%3Bfont%24%26%23124%3Bpdf%24%26%23124%3Bresvg%24%26%23124%3Bfolder%24%26%23124%3Bfile%24%26%23124%3Bdetails%24%26%23124%3Bimage%24%29.%2A))
 > must respect the following conditions
 
 |                           |             |
@@ -2167,9 +2167,9 @@ Must be one of:
 | [type](#settings_previewers_pattern1_type)                       | enum (of string) | The type of previewer. This determines how the previewer will be used.                                                                                                                                                             |
 | [command](#settings_previewers_pattern1_command)                 | object           | The command to run to generate the preview.<br />Command expansions are supported except %s, %t, %cut and %copy. %file is the resolved output path from file; %tmpdir is a temporary directory removed after the command finishes. |
 | [file](#settings_previewers_pattern1_file)                       | Combination      | Where to read the preview from: stdout, stderr, or a path. %temp uses the source extension; %temp.png (or another extension) replaces it. The resolved path is available as %file in the command.                                  |
-| [on_nonzero_exit](#settings_previewers_pattern1_on_nonzero_exit) | object           | What to do if the command exits with a non-zero exit code. This can be a preview type string or a table with a default preview type and extension-specific refinements. Extension keys are lowercase and omit the leading dot.     |
+| [on_nonzero_exit](#settings_previewers_pattern1_on_nonzero_exit) | object           | What to do if the command exits with a non-zero exit code. This can only be a string to provide a fallback to use. Defaults to \`details\`.                                                                                        |
 
-##### <a name="settings_previewers_pattern1_type"></a>2.8.1.1. Property `Rovr Config > settings > previewers > ^(?!archive$&#124;text$&#124;remime$&#124;font$&#124;pdf$&#124;resvg$&#124;folder$&#124;file$&#124;details$).* > type`
+##### <a name="settings_previewers_pattern1_type"></a>2.8.1.1. Property `Rovr Config > settings > previewers > ^(?!archive$&#124;text$&#124;remime$&#124;font$&#124;pdf$&#124;resvg$&#124;folder$&#124;file$&#124;details$&#124;image$).* > type`
 
 |              |                    |
 | ------------ | ------------------ |
@@ -2183,7 +2183,7 @@ Must be one of:
 - "text"
 - "image"
 
-##### <a name="settings_previewers_pattern1_command"></a>2.8.1.2. Property `Rovr Config > settings > previewers > ^(?!archive$&#124;text$&#124;remime$&#124;font$&#124;pdf$&#124;resvg$&#124;folder$&#124;file$&#124;details$).* > command`
+##### <a name="settings_previewers_pattern1_command"></a>2.8.1.2. Property `Rovr Config > settings > previewers > ^(?!archive$&#124;text$&#124;remime$&#124;font$&#124;pdf$&#124;resvg$&#124;folder$&#124;file$&#124;details$&#124;image$).* > command`
 
 |                           |                                                        |
 | ------------------------- | ------------------------------------------------------ |
@@ -2195,7 +2195,7 @@ Must be one of:
 **Description:** The command to run to generate the preview.
 Command expansions are supported except %s, %t, %cut and %copy. %file is the resolved output path from file; %tmpdir is a temporary directory removed after the command finishes.
 
-##### <a name="settings_previewers_pattern1_file"></a>2.8.1.3. Property `Rovr Config > settings > previewers > ^(?!archive$&#124;text$&#124;remime$&#124;font$&#124;pdf$&#124;resvg$&#124;folder$&#124;file$&#124;details$).* > file`
+##### <a name="settings_previewers_pattern1_file"></a>2.8.1.3. Property `Rovr Config > settings > previewers > ^(?!archive$&#124;text$&#124;remime$&#124;font$&#124;pdf$&#124;resvg$&#124;folder$&#124;file$&#124;details$&#124;image$).* > file`
 
 |                           |                  |
 | ------------------------- | ---------------- |
@@ -2211,7 +2211,7 @@ Command expansions are supported except %s, %t, %cut and %copy. %file is the res
 | [item 0](#settings_previewers_pattern1_file_anyOf_i0) |
 | [item 1](#settings_previewers_pattern1_file_anyOf_i1) |
 
-###### <a name="settings_previewers_pattern1_file_anyOf_i0"></a>2.8.1.3.1. Property `Rovr Config > settings > previewers > ^(?!archive$&#124;text$&#124;remime$&#124;font$&#124;pdf$&#124;resvg$&#124;folder$&#124;file$&#124;details$).* > file > anyOf > item 0`
+###### <a name="settings_previewers_pattern1_file_anyOf_i0"></a>2.8.1.3.1. Property `Rovr Config > settings > previewers > ^(?!archive$&#124;text$&#124;remime$&#124;font$&#124;pdf$&#124;resvg$&#124;folder$&#124;file$&#124;details$&#124;image$).* > file > anyOf > item 0`
 
 |              |                    |
 | ------------ | ------------------ |
@@ -2224,14 +2224,14 @@ Must be one of:
 - "**stderr**"
 - "%temp"
 
-###### <a name="settings_previewers_pattern1_file_anyOf_i1"></a>2.8.1.3.2. Property `Rovr Config > settings > previewers > ^(?!archive$&#124;text$&#124;remime$&#124;font$&#124;pdf$&#124;resvg$&#124;folder$&#124;file$&#124;details$).* > file > anyOf > item 1`
+###### <a name="settings_previewers_pattern1_file_anyOf_i1"></a>2.8.1.3.2. Property `Rovr Config > settings > previewers > ^(?!archive$&#124;text$&#124;remime$&#124;font$&#124;pdf$&#124;resvg$&#124;folder$&#124;file$&#124;details$&#124;image$).* > file > anyOf > item 1`
 
 |              |          |
 | ------------ | -------- |
 | **Type**     | `string` |
 | **Required** | No       |
 
-##### <a name="settings_previewers_pattern1_on_nonzero_exit"></a>2.8.1.4. Property `Rovr Config > settings > previewers > ^(?!archive$&#124;text$&#124;remime$&#124;font$&#124;pdf$&#124;resvg$&#124;folder$&#124;file$&#124;details$).* > on_nonzero_exit`
+##### <a name="settings_previewers_pattern1_on_nonzero_exit"></a>2.8.1.4. Property `Rovr Config > settings > previewers > ^(?!archive$&#124;text$&#124;remime$&#124;font$&#124;pdf$&#124;resvg$&#124;folder$&#124;file$&#124;details$&#124;image$).* > on_nonzero_exit`
 
 |                           |                            |
 | ------------------------- | -------------------------- |
@@ -2241,7 +2241,7 @@ Must be one of:
 | **Default**               | `"details"`                |
 | **Defined in**            | #/definitions/preview_type |
 
-**Description:** What to do if the command exits with a non-zero exit code. This can be a preview type string or a table with a default preview type and extension-specific refinements. Extension keys are lowercase and omit the leading dot.
+**Description:** What to do if the command exits with a non-zero exit code. This can only be a string to provide a fallback to use. Defaults to `details`.
 
 | Any of(Option)                                                                     |
 | ---------------------------------------------------------------------------------- |

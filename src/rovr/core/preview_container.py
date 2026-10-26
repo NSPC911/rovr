@@ -1822,6 +1822,9 @@ class PreviewContainer(Actionable, Container):
                         output_data = file.read()
                 else:
                     self.notify(f"Path = {output_path} does not exist", title="Custom Previewer", severity="error", markup=False)
+                    self._current_content = f"Custom previewer output path does not exist: {output_path}"
+                    self.mount_special_messages(mime=True)
+                    return
 
                 if is_text:
                     output_data = ansi_to_rich_text(

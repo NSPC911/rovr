@@ -525,6 +525,5 @@ def save_to_cache(
             data = str(data).encode()
         with open(_cache_path(realpath, preview_type, stat_res, sig, extra), "wb") as f:
             f.write(data)
-            print(f.name)
     except OSError:
         pass

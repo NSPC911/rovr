@@ -88,9 +88,13 @@ async def test_custom_previewer_cleans_browser_profile(
         output.write_bytes(b"image-data")
         return subprocess.CompletedProcess(command, 0, b"", b"")
 
+    def mount(mime: bool = True) -> None:
+        raise RuntimeError("Was Called")
+
     app = PreviewTestApp()
     async with app.run_test():
         preview = app.query_one(PreviewContainer)
+        preview.mount_special_messages = mount  # ty: ignore[invalid-assignment]
         preview._current_file_path = str(source)
         token = preview._active_preview_token
 
@@ -109,7 +113,7 @@ async def test_custom_previewer_cleans_browser_profile(
             patch.object(preview, "show_image_preview"),
         ):
             if exit_code:
-                with pytest.raises(subprocess.CalledProcessError):
+                with pytest.raises(RuntimeError):
                     await asyncio.to_thread(show)
             else:
                 await asyncio.to_thread(show)

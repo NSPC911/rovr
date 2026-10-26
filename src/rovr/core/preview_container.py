@@ -1861,7 +1861,7 @@ class PreviewContainer(Actionable, Container):
                 f"stdout:\n{exc.stdout.decode('utf-8', errors='ignore')}\n"
                 f"stderr:\n{exc.stderr.decode('utf-8', errors='ignore')}"
             )
-            if previewer["on_nonzero_exit"] == "details":
+            if previewer.get("on_nonzero_exit", "details") == "details":
                 self._current_content = msg
                 self.mount_special_messages(mime=True)
             else:

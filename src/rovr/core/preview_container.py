@@ -85,11 +85,11 @@ class ExitNow(RuntimeError): ...
 def _load_cached_image(
     file_path: str,
     preview_type: str,
-    stat_result: os.stat_result,
-    signature: tuple[str, str] = IMAGE_CACHE_SIGNATURE,
+    stat_res: os.stat_res,
+    sig: tuple[str, str] = IMAGE_CACHE_SIGNATURE,
     extra: Any = None,
 ) -> PILImage | None:
-    data = load_from_cache(file_path, preview_type, stat_result, signature, extra)
+    data = load_from_cache(file_path, preview_type, stat_res, sig, extra)
     if data is None:
         return None
     try:
@@ -102,26 +102,24 @@ def _load_cached_image(
 def _save_cached_image(
     file_path: str,
     preview_type: str,
-    stat_result: os.stat_result,
+    stat_res: os.stat_res,
     image: PILImage,
-    signature: tuple[str, str] = IMAGE_CACHE_SIGNATURE,
+    sig: tuple[str, str] = IMAGE_CACHE_SIGNATURE,
     extra: Any = None,
 ) -> None:
     output = BytesIO()
     image.save(output, format="PNG")
-    save_to_cache(
-        file_path, preview_type, stat_result, signature, output.getvalue(), extra
-    )
+    save_to_cache(file_path, preview_type, stat_res, sig, output.getvalue(), extra)
 
 
 def _load_cached_text(
     file_path: str,
     preview_type: str,
-    stat_result: os.stat_result,
-    signature: tuple[str, str],
+    stat_res: os.stat_res,
+    sig: tuple[str, str],
     extra: Any = None,
 ) -> Text | None:
-    data = load_from_cache(file_path, preview_type, stat_result, signature, extra)
+    data = load_from_cache(file_path, preview_type, stat_res, sig, extra)
     if data is None:
         return None
     try:
@@ -134,16 +132,16 @@ def _load_cached_text(
 def _save_cached_text(
     file_path: str,
     preview_type: str,
-    stat_result: os.stat_result,
-    signature: tuple[str, str],
+    stat_res: os.stat_res,
+    sig: tuple[str, str],
     text: Text,
     extra: Any = None,
 ) -> None:
     save_to_cache(
         file_path,
         preview_type,
-        stat_result,
-        signature,
+        stat_res,
+        sig,
         pickle.dumps(text, protocol=5),
         extra,
     )
@@ -409,7 +407,7 @@ class PreviewContainer(Actionable, Container):
         bg_color = Color.parse(self.app.theme_variables["background"])
         realpath = path.realpath(self._current_file_path)
         try:
-            stat_result = os.stat(realpath)
+            stat_res = os.stat(realpath)
         except FileNotFoundError:
             if should_cancel():
                 return
@@ -422,11 +420,11 @@ class PreviewContainer(Actionable, Container):
                 ),
             )
             return
-        signature = (
+        sig = (
             f"{preview_utils.MAX_FONT_SIZE}:{config['interface']['font_preview']['font_size']}",
             f"{self._preview_texts['font_text']}:{fg_color.hex}:{bg_color.hex}:{NewImage.func.__name__}",
         )
-        img = _load_cached_image(realpath, "font", stat_result, signature)
+        img = _load_cached_image(realpath, "font", stat_res, sig)
         if img is not None:
             if image_widget := self.get_child(".image_preview"):
                 self.call_from_thread(setattr, image_widget, "image", img)
@@ -496,7 +494,7 @@ class PreviewContainer(Actionable, Container):
             font=font,
             fill=text_fill,
         )
-        _save_cached_image(realpath, "font", stat_result, img, signature)
+        _save_cached_image(realpath, "font", stat_res, img, sig)
         if should_cancel():
             return
 
@@ -542,12 +540,12 @@ class PreviewContainer(Actionable, Container):
         # load svg as bytes
         try:
             realpath = path.realpath(self._current_file_path)
-            stat_result = os.stat(realpath)
+            stat_res = os.stat(realpath)
             pil_object = _load_cached_image(
                 realpath,
                 "svg",
-                stat_result,
-                signature=RESVG_CACHE_SIGNATURE,
+                stat_res,
+                sig=RESVG_CACHE_SIGNATURE,
             )
             if pil_object is None:
                 self.call_next(self.LOADER_WIDGET.set_status, "loading svg...")
@@ -599,9 +597,9 @@ class PreviewContainer(Actionable, Container):
                 _save_cached_image(
                     realpath,
                     "svg",
-                    stat_result,
+                    stat_res,
                     pil_object,
-                    signature=RESVG_CACHE_SIGNATURE,
+                    sig=RESVG_CACHE_SIGNATURE,
                 )
 
             if should_cancel():
@@ -645,7 +643,12 @@ class PreviewContainer(Actionable, Container):
             )
             return
 
-    def show_image_preview(self, magicked: bool = False, title: bool = True) -> None:
+    def show_image_preview(
+        self,
+        magicked: bool = False,
+        title: bool = True,
+        cache_source: tuple[str, os.stat_result, tuple[str, str]] | None = None,
+    ) -> None:
         """Show image preview. Runs in a thread.
 
         Raises:
@@ -657,9 +660,13 @@ class PreviewContainer(Actionable, Container):
             self.set_border("title", titles.image)
 
         try:
-            realpath = path.realpath(self._current_file_path)
-            stat_result = os.stat(realpath)
-            pil_object = _load_cached_image(realpath, "image", stat_result)
+            realpath, stat_res, sig = cache_source or (
+                path.realpath(self._current_file_path),
+                os.stat(self._current_file_path),
+                IMAGE_CACHE_SIGNATURE,
+            )
+            cache_type = "custom-image" if cache_source else "image"
+            pil_object = _load_cached_image(realpath, cache_type, stat_res, sig)
             if pil_object is None:
                 if self.app.MULTIPROCESSING_PROCESS_ALLOWED:
                     try:
@@ -675,7 +682,7 @@ class PreviewContainer(Actionable, Container):
                     pil_object = preview_utils.resample_file_sync(self._current_file_path)
                 if pil_object is None:
                     return
-                _save_cached_image(realpath, "image", stat_result, pil_object)
+                _save_cached_image(realpath, cache_type, stat_res, pil_object, sig)
         except (UnidentifiedImageError, NotImplementedError) as exc:
             if should_cancel():
                 return
@@ -686,16 +693,14 @@ class PreviewContainer(Actionable, Container):
                 and config["plugins"]["magick"]["enabled"]
                 and which(config["plugins"]["magick"]["executable"])
             ):
-                cache_path = _cache_path(
-                    realpath, "image", stat_result, IMAGE_CACHE_SIGNATURE
-                )
+                cache_path = _cache_path(realpath, cache_type, stat_res, sig)
                 try:
                     proc = subprocess.run(
                         [
                             config["plugins"]["magick"]["executable"],
                             # TODO: multi-image heics are a thing, how to support?
                             # refactor pdf to be more generic?
-                            realpath + "[0]",
+                            path.realpath(self._current_file_path) + "[0]",
                             "-resize",
                             f"{preview_utils.MAX_IMAGE_SIZE[0]}x{preview_utils.MAX_IMAGE_SIZE[1]}>",
                             cache_path + ".png",
@@ -705,7 +710,7 @@ class PreviewContainer(Actionable, Container):
                     )
                     if proc.returncode == 0:
                         os.replace(cache_path + ".png", cache_path)
-                        self.show_image_preview(True)
+                        self.show_image_preview(True, title, cache_source)
                         return
                 except subprocess.TimeoutExpired:
                     pass
@@ -810,12 +815,12 @@ class PreviewContainer(Actionable, Container):
 
         assert self._current_file_path is not None
         realpath = path.realpath(self._current_file_path)
-        stat_result = os.stat(realpath)
+        stat_res = os.stat(realpath)
         cached = [
             _load_cached_image(
                 realpath,
                 "pdf",
-                stat_result,
+                stat_res,
                 extra=str(page) + (self.pdf.cairo_or_ppm),
             )
             for page in range(first_page, last_page + 1)
@@ -850,7 +855,7 @@ class PreviewContainer(Actionable, Container):
             _save_cached_image(
                 realpath,
                 "pdf",
-                stat_result,
+                stat_res,
                 image,
                 extra=str(page) + (self.pdf.cairo_or_ppm),
             )
@@ -984,16 +989,14 @@ class PreviewContainer(Actionable, Container):
         self,
         command: list[str],
         realpath: str,
-        stat_result: os.stat_result,
-        signature: tuple[str, str],
+        stat_res: os.stat_res,
+        sig: tuple[str, str],
         page: int,
     ) -> list[Text]:
         start = page * BAT_PREVIEW_PAGE_SIZE + 1
         end = start + BAT_PREVIEW_PAGE_SIZE - 1
         cache_range = f"{start}:{end}"
-        content = _load_cached_text(
-            realpath, "bat-page", stat_result, signature, cache_range
-        )
+        content = _load_cached_text(realpath, "bat-page", stat_res, sig, cache_range)
         if content is None:
             process = subprocess.run(
                 [*command, f"--line-range={cache_range}", "--", realpath],
@@ -1011,8 +1014,8 @@ class PreviewContainer(Actionable, Container):
             _save_cached_text(
                 realpath,
                 "bat-page",
-                stat_result,
-                signature,
+                stat_res,
+                sig,
                 content,
                 cache_range,
             )
@@ -1025,15 +1028,15 @@ class PreviewContainer(Actionable, Container):
         source: LazyTextLines,
         command: list[str],
         realpath: str,
-        stat_result: os.stat_result,
-        signature: tuple[str, str],
+        stat_res: os.stat_res,
+        sig: tuple[str, str],
         page: int,
     ) -> None:
         context_token = preview_token.set(token)
         try:
             if token is not self._active_preview_token:
                 return
-            lines = self._get_bat_page(command, realpath, stat_result, signature, page)
+            lines = self._get_bat_page(command, realpath, stat_res, sig, page)
             self.call_from_thread(text_preview.set_lazy_page, source, page, lines)
         except ExitNow:
             return
@@ -1054,15 +1057,15 @@ class PreviewContainer(Actionable, Container):
         text_preview: WindowedTextPreview,
         source: LazyTextLines,
         realpath: str,
-        stat_result: os.stat_result,
-        signature: tuple[str, str],
+        stat_res: os.stat_res,
+        sig: tuple[str, str],
     ) -> None:
         context_token = preview_token.set(token)
         try:
             if token is not self._active_preview_token:
                 return
             cached_line_count = load_from_cache(
-                realpath, "bat-lines", stat_result, signature, pass_as=str
+                realpath, "bat-lines", stat_res, sig, pass_as=str
             )
             if cached_line_count is None:
                 line_count = 0
@@ -1075,9 +1078,7 @@ class PreviewContainer(Actionable, Container):
                             return
                 if token is not self._active_preview_token:
                     return
-                save_to_cache(
-                    realpath, "bat-lines", stat_result, signature, str(line_count)
-                )
+                save_to_cache(realpath, "bat-lines", stat_res, sig, str(line_count))
             else:
                 line_count = int(cached_line_count)
             if token is not self._active_preview_token:
@@ -1121,8 +1122,8 @@ class PreviewContainer(Actionable, Container):
         ]
         assert self._current_file_path is not None
         realpath = path.realpath(self._current_file_path)
-        stat_result = os.stat(realpath)
-        signature = (
+        stat_res = os.stat(realpath)
+        sig = (
             f"{BAT_PREVIEW_CACHE_VERSION}:{config['interface']['show_line_numbers']}",
             bat_executable,
         )
@@ -1133,7 +1134,7 @@ class PreviewContainer(Actionable, Container):
         self.set_border("title", titles.bat)
 
         try:
-            first_page = self._get_bat_page(command, realpath, stat_result, signature, 0)
+            first_page = self._get_bat_page(command, realpath, stat_res, sig, 0)
 
             if should_cancel():
                 return False
@@ -1150,8 +1151,8 @@ class PreviewContainer(Actionable, Container):
                         source,
                         command,
                         realpath,
-                        stat_result,
-                        signature,
+                        stat_res,
+                        sig,
                         page,
                     ),
                     thread=True,
@@ -1199,8 +1200,8 @@ class PreviewContainer(Actionable, Container):
                         text_preview,
                         source,
                         realpath,
-                        stat_result,
-                        signature,
+                        stat_res,
+                        sig,
                     ),
                     thread=True,
                     group=BAT_PREVIEWER_GROUP,
@@ -1238,21 +1239,21 @@ class PreviewContainer(Actionable, Container):
 
         assert self._current_file_path is not None
         realpath = path.realpath(self._current_file_path)
-        stat_result = os.stat(realpath)
+        stat_res = os.stat(realpath)
         max_file_size = config["interface"]["preview_text"]["max_file_size"]
-        signature = (str(max_file_size), TEXT_PREVIEW_CACHE_VERSION)
+        sig = (str(max_file_size), TEXT_PREVIEW_CACHE_VERSION)
         content: str | None = load_from_cache(
             realpath,
             "windowed_text",
-            stat_result,
-            signature,
+            stat_res,
+            sig,
             pass_as=str,
         )
         if content is None:
             try:
                 with open(realpath, "rb") as file:
                     raw_content = file.read(max_file_size)
-                    ignored_bytes = stat_result.st_size - len(raw_content)
+                    ignored_bytes = stat_res.st_size - len(raw_content)
             except FileNotFoundError:
                 return
 
@@ -1266,7 +1267,7 @@ class PreviewContainer(Actionable, Container):
                     if not content.endswith("\n"):
                         content += "\n"
                     content += f"---\n({ignored_bytes:,} byte{s(ignored_bytes)} ignored)"
-                save_to_cache(realpath, "windowed_text", stat_result, signature, content)
+                save_to_cache(realpath, "windowed_text", stat_res, sig, content)
 
         if content is None:
             self._current_content = self._preview_texts["error"]
@@ -1608,11 +1609,11 @@ class PreviewContainer(Actionable, Container):
                     from multiarchive._archive import Archive, BadArchiveError
 
                     realpath = path.realpath(file_path)
-                    stat_result = os.stat(realpath)
+                    stat_res = os.stat(realpath)
                     content: list[str] | None = load_from_cache(
                         realpath,
                         "archive",
-                        stat_result,
+                        stat_res,
                         ("json", "utf-8"),
                         pass_as=list,
                     )
@@ -1630,7 +1631,7 @@ class PreviewContainer(Actionable, Container):
                             save_to_cache(
                                 realpath,
                                 "archive",
-                                stat_result,
+                                stat_res,
                                 ("json", "utf-8"),
                                 all_files,
                             )
@@ -1768,15 +1769,13 @@ class PreviewContainer(Actionable, Container):
         output_path = expand_temp(output)
         try:
             realpath = path.realpath(original_path)
-            stat_result = os.stat(realpath)
-            signature = (name, repr(previewer))
+            stat_res = os.stat(realpath)
+            sig = (name, repr(previewer))
             is_text = previewer["type"] == "text"
             output_data: Text | bytes | None = (
-                _load_cached_text(
-                    realpath, "custom-previewer-text", stat_result, signature
-                )
+                _load_cached_text(realpath, "custom-previewer-text", stat_res, sig)
                 if is_text
-                else load_from_cache(realpath, "custom-previewer", stat_result, signature)
+                else load_from_cache(realpath, "custom-previewer", stat_res, sig)
             )
             if output_data is None:
                 command = self.call_from_thread(
@@ -1828,16 +1827,16 @@ class PreviewContainer(Actionable, Container):
                     _save_cached_text(
                         realpath,
                         "custom-previewer-text",
-                        stat_result,
-                        signature,
+                        stat_res,
+                        sig,
                         output_data,
                     )
                 else:
                     save_to_cache(
                         realpath,
                         "custom-previewer",
-                        stat_result,
-                        signature,
+                        stat_res,
+                        sig,
                         output_data,
                     )
 
@@ -1852,7 +1851,14 @@ class PreviewContainer(Actionable, Container):
                     with open(temp_path, "wb") as file:
                         file.write(output_data)
                     self._current_file_path = temp_path
-                    self.show_image_preview(title=False)
+                    self.show_image_preview(
+                        title=False,
+                        cache_source=(
+                            realpath,
+                            stat_res,
+                            (name, f"{repr(previewer)}:{IMAGE_CACHE_SIGNATURE}"),
+                        ),
+                    )
         except subprocess.CalledProcessError as exc:
             if should_cancel():
                 return

@@ -10,13 +10,13 @@ import InlineSVG from "@/components/InlineSVG.astro";
 
 rovr supports a wide range of file types for previewing. the following are the main categories of files that can be previewed:
 
-### text files
+### `text` files
 
 <InlineSVG src="/rovr/screenshots/preview-file.svg" alt="file preview" />
 
 plain text files are displayed in a text area with syntax highlighting. the language is determined by the file extension. `rovr` supports a wide range of languages.
 
-### unknown/binary files
+### `details` of unknown/binary files
 
 <InlineSVG src="/rovr/screenshots/mime-type.svg" alt="mime type detection" />
 mime types are automatically obtained using [puremagic](https://pypi.org/project/puremagic) to give you a more accurate information of the file's type. If you additionally have `plugins.file_one` enabled with `plugins.file_one.get_description`, you can view extra information, like how many sections, what type, etc.
@@ -25,13 +25,13 @@ mime types are automatically obtained using [puremagic](https://pypi.org/project
 
 <InlineSVG src="/rovr/screenshots/preview-file-bat.svg" alt="file preview with bat" />
 
-if you have [`bat`](/rovr/dev/features/plugins#bat) installed and enabled in the `rovr` config, it will be used to display text files with syntax highlighting for much more languages and theming.
+if you have [`bat`](/rovr/dev/features/plugins#bat) installed and enabled in the `rovr` config, it will be used to display text files with syntax highlighting for much more languages and theming. uses the same id as `text`
 
-### images
+### `image`s
 
 `rovr` can display images directly in the terminal. refer to the [image previews](/rovr/dev/features/image-previews) guide for more details on terminal compatibility and configuration.
 
-### folders
+### `folder`s
 
 <InlineSVG src="/rovr/screenshots/preview-folder.svg" alt="folder preview" />
 
@@ -41,24 +41,24 @@ when a folder is selected, the preview panel will show a list of the files and f
   If you focus on the folder preview, you can navigate in there to open files and folders, letting you skip actually cd-ing into it!
 </Aside>
 
-### archives
+### `archive`s
 
 <InlineSVG src="/rovr/screenshots/preview-archive.svg" alt="archive preview" />
 
 for archive files (like `.zip`, `.tar.gz`, `.rar`), rovr will display a list of the files and folders contained within the archive.
 
-### pdf
+### `pdf` with poppler
 
 ![pdf preview](/rovr/screenshots/preview-pdf.png)
 
 for pdf files, rovr makes use of [poppler](https://poppler.freedesktop.org). you can also scroll through the pdf with your mouse (scrollbars are unavailable for now) or use your keyboard to navigate it.
 
-### svg
+### svg with `resvg`
 
 {/* no image for now, please TODO: find a way to reduce the size of the PIL object, it being large destroys the performance of the preview panel */}
 rovr makes use of [resvg-py](https://pypi.org/project/resvg-py) to render svg files, so you don't need resvg installed on your system -- it automatically previews the svg file for you without any setup
 
-### fonts
+### `font`s
 
 ![font preview](/rovr/screenshots/preview-font.png)
 
@@ -74,6 +74,8 @@ If your mime type is accurate enough (like `image/png`), you can omit the check 
 [settings.preview_rules]
 "image/png" = "image"
 ```
+
+the value is any of the default previewers mentioned above in an inline codeblock. Only one is allowed per mime type, but you can add fallbacks with more wildcard mime types
 
 However, in the case of vague mime types like `application/gzip`, if you want to preview `.svgz` files as an svg instead of a failed archive file, you can use the following rule:
 
@@ -137,7 +139,7 @@ The full syntax for the custom previewers is as follows:
 ```toml
 [settings.previewers."previewer_name"]
 command = ["command", "arg1", "arg2", "%h"]
-file = "%temp | __stdout__ | __stderr__ | /path/to/file"
+file = "%temp(.ext) | __stdout__ | __stderr__ | /path/to/file"
 type = "text | image"
-on_nonzero_exit = "<any default previwers>"
+on_nonzero_exit = "details"  # or any default available previewers mentioned above
 ```

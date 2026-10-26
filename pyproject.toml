@@ -77,9 +77,6 @@ docscripts = [
 requires = ["uv_build==0.12.*"]
 build-backend = "uv_build"
 
-[tool.uv]
-compile-bytecode = true
-
 [tool.commitizen]
 name = "cz_conventional_commits"
 tag_format = "$version"
@@ -95,7 +92,7 @@ no-sync = true
 [tool.poe.tasks]
 _hash_dump.shell = "git rev-parse HEAD > src/rovr/COMMIT_HASH"
 _warn_dump.shell = "echo \"If you need to change any config, don't change them here!! Look at https://nspc911.github.io/rovr/configuration/configuration/ for more info\" > src/rovr/DO_NOT_EDIT_THESE_FILES"
-_schema_compile.cmd = "docs/scripts/compile_schema.py"
+compile-schema.cmd = "docs/scripts/compile_schema.py"
 _dump_clean.shell = "python -c \"import os; [os.remove(file) for file in ('src/rovr/COMMIT_HASH', 'src/rovr/DO_NOT_EDIT_THESE_FILES', 'src/rovr/_schema_validator.py') if os.path.exists(file)]\""
 
 _docscripts_setup.cmd = "uv sync --group docscripts"
@@ -178,7 +175,7 @@ args = [
 help = "Build rovr into an executable using Nuitka"
 sequence = [
   { cmd = "uv sync --group build --extra speedup --no-dev" },  # no dev because for some reason, stuff gets included
-  "_schema_compile",
+  "compile-schema",
   "_warn_dump",
   "_hash_dump",
   # --python-flag=-m
@@ -196,7 +193,7 @@ args = [
 [tool.poe.tasks.uv-build]
 help = "Build rovr distributions using uv and include commit hash"
 sequence = [
-  "_schema_compile",
+  "compile-schema",
   "_hash_dump",
   "_warn_dump",
   { cmd = "uv build" },

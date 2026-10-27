@@ -23,7 +23,6 @@ _DefaultPreviews = (
     | Literal["pdf"]
     | Literal["archive"]
     | Literal["folder"]
-    | Literal["remime"]
     | Literal["resvg"]
     | Literal["font"]
     | Literal["details"]
@@ -37,8 +36,6 @@ r"""The values for the '_DefaultPreviews' enum"""
 _DEFAULTPREVIEWS_ARCHIVE: Literal["archive"] = "archive"
 r"""The values for the '_DefaultPreviews' enum"""
 _DEFAULTPREVIEWS_FOLDER: Literal["folder"] = "folder"
-r"""The values for the '_DefaultPreviews' enum"""
-_DEFAULTPREVIEWS_REMIME: Literal["remime"] = "remime"
 r"""The values for the '_DefaultPreviews' enum"""
 _DEFAULTPREVIEWS_RESVG: Literal["resvg"] = "resvg"
 r"""The values for the '_DefaultPreviews' enum"""
@@ -75,8 +72,12 @@ r"""The values for the '_OsIfItemAnyof0' enum"""
 _OSIFITEMANYOF0_DARWIN: Literal["Darwin"] = "Darwin"
 r"""The values for the '_OsIfItemAnyof0' enum"""
 
-_PreviewType = Union[str, "_DefaultPreviews"]
+_PreviewType = Union[str, "_DefaultPreviews", "_PreviewTypeAnyof2"]
 r""" Aggregation type: anyOf """
+
+_PreviewTypeAnyof2 = Literal["remime"]
+_PREVIEWTYPEANYOF2_REMIME: Literal["remime"] = "remime"
+r"""The values for the '_PreviewTypeAnyof2' enum"""
 
 _RIGHT_CLICK_ACTION_ONEOF1_SHELL_DEFAULT = False
 r""" Default value of the field path 'right_click_action oneof1 shell' """

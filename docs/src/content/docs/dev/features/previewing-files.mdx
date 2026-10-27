@@ -114,7 +114,7 @@ For images, you can have `type = "image"` for your custom previewer. For example
 
 ```toml
 [settings.previewers.helium]
-command = ["helium", "--headless", "--disable-gpu", "--user-data-dir=%tmpdir", "--screenshot=%file", "%h"]
+command = ["helium", "--headless", "--no-first-run", "--disable-gpu", "--user-data-dir=%tmpdir", "--screenshot=%file", "%h"]
 file = "%temp.png"
 type = "image"
 
@@ -129,10 +129,15 @@ extensions = { html = "helium", htm = "helium" }
 
 `%file` is the path configured by `file`, so helium writes the PNG that rovr reads. `%temp` keeps the source extension; `%temp.png` uses `.png` instead. This also works with other output extensions, provided your previewer can produce and rovr can display them. `%tmpdir` gives each run its own temporary browser profile and is removed when the command finishes.
 
-A launcher-supplied `--user-data-dir` can override the temporary profile above, so installers like `scoop` could force a single profile for all runs from a shim. To fix that, directly call the binary's path
+A launcher-supplied `--user-data-dir` can override the temporary profile above. On Windows with [scoop](https://scoop.sh), it will force a profile directory, you should instead direct it to the underlying `chrome.exe` path
 
 The `%h` is the path to the file being previewed. The command will be run with the file path as an argument, and the output will be displayed in the preview panel.
-<br/>The `%temp` is the path to a temporary file that will be created for the previewer to write to. You can modify the file extension by including it in the `%temp` variable, like `%temp.png`. The temporary file will be deleted after the preview is displayed.
+
+<br />
+The `%temp` is the path to a temporary file that will be created for the
+previewer to write to. You can modify the file extension by including it in the
+`%temp` variable, like `%temp.png`. The temporary file will be deleted after the
+preview is displayed.
 
 The full syntax for the custom previewers is as follows:
 

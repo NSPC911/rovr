@@ -10,12 +10,13 @@
     },
     "default_previews": {
       "type": "string",
-      "enum": ["text", "image", "pdf", "archive", "folder", "remime", "resvg", "font", "details"]
+      "enum": ["text", "image", "pdf", "archive", "folder", "resvg", "font", "details"]
     },
     "preview_type": {
       "anyOf": [
         { "type": "string" },
-        { "$ref": "#/definitions/default_previews" }
+        { "$ref": "#/definitions/default_previews" },
+        { "enum": ["remime"] }
       ]
     },
     "run": {
@@ -601,7 +602,8 @@
                 "on_nonzero_exit": {
                   "$ref": "#/definitions/default_previews",
                   "default": "details",
-                  "description": "What to do if the command exits with a non-zero exit code. This can only be a string to provide a fallback to use. Defaults to `details`."
+                  "description": "What to do if the command exits with a non-zero exit code. This can only be a string to provide a fallback to use. Defaults to `details`.",
+                  "not": { "enum": ["remime"] }
                 }
               }
             }

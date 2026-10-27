@@ -1,6 +1,9 @@
+import json
+import re
 from shutil import which
 from subprocess import CalledProcessError, run
 from time import perf_counter
+from urllib.parse import quote
 
 from humanize import precisedelta
 from rich.console import Console
@@ -29,6 +32,8 @@ try:
         ]
     config.template_name = "md"
     config.with_footer = False
+    config.show_toc = False
+    config.expand_buttons = True
     # do some temporary fixes to the schema
     with open("src/rovr/assets/schema.json", "r", encoding="utf-8") as f:
         schema_content = f.read()
@@ -48,6 +53,25 @@ try:
         "docs/src/content/docs/dev/reference/schema.mdx", "r", encoding="utf-8"
     ) as schema_file:
         content = schema_file.read()
+    previewer_pattern = next(
+        iter(
+            json.loads(schema_content)["properties"]["settings"]["properties"][
+                "previewers"
+            ]["patternProperties"]
+        )
+    )
+    escaped_pattern = previewer_pattern.replace("|", "&#124;")
+    content = (
+        content
+        .replace(f" > {escaped_pattern}", " > previewer name")
+        .replace(f"`{escaped_pattern}`", f"`{previewer_pattern}`")
+        .replace(quote(escaped_pattern), quote(previewer_pattern))
+    )
+    content = re.sub(
+        r"\[[^\]\n]+\]\(#settings_previewers_pattern1\s*\)",
+        "[previewer name](#settings_previewers_pattern1)",
+        content,
+    )
     with open(
         "docs/src/content/docs/dev/reference/schema.mdx", "w", encoding="utf-8"
     ) as schema_file:

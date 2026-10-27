@@ -1,5 +1,6 @@
 import asyncio
 import pickle
+import subprocess
 from pathlib import Path
 from typing import Any, cast
 from unittest.mock import patch
@@ -8,6 +9,8 @@ import pytest
 from rich.console import Console
 from rich.text import Text
 from textual.app import App, ComposeResult
+from textual.content import Content
+from textual.widgets import Static
 
 from rovr.components.text_preview import (
     LazyTextLines,
@@ -50,6 +53,93 @@ def test_cached_text_uses_pickle() -> None:
         assert (
             _load_cached_text("file", "bat-page", cast(Any, None), ("v2", "bat")) == text
         )
+
+
+@pytest.mark.parametrize("exit_code", [0, 21])
+async def test_custom_previewer_cleans_browser_profile(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, exit_code: int
+) -> None:
+    source = tmp_path / "page.html"
+    source.write_text("<html></html>", encoding="utf-8")
+    monkeypatch.setitem(
+        cast(dict[str, Any], config)["settings"],
+        "previewers",
+        {
+            "test-browser": {
+                "command": ["render", "--user-data-dir=%tmpdir", "--screenshot=%file"],
+                "file": "%temp.png",
+                "type": "image",
+            }
+        },
+    )
+    profiles: list[Path] = []
+
+    async def expand(app: App[Any], command: list[str], banned: list[str]) -> list[str]:
+        return command
+
+    def run(command: list[str], **kwargs: Any) -> subprocess.CompletedProcess[bytes]:
+        profile = Path(command[1].split("=", 1)[1])
+        output = Path(command[2].split("=", 1)[1])
+        assert profile.is_dir()
+        assert output.suffix == ".png"
+        profiles.append(profile)
+        if exit_code:
+            raise subprocess.CalledProcessError(exit_code, command, b"", b"")
+        output.write_bytes(b"image-data")
+        return subprocess.CompletedProcess(command, 0, b"", b"")
+
+    def mount(mime: bool = True) -> None:
+        raise RuntimeError("Was Called")
+
+    app = PreviewTestApp()
+    async with app.run_test():
+        preview = app.query_one(PreviewContainer)
+        preview.mount_special_messages = mount  # ty: ignore[invalid-assignment]
+        preview._current_file_path = str(source)
+        token = preview._active_preview_token
+
+        def show() -> None:
+            context_token = preview_token.set(token)
+            try:
+                preview.show_custom_preview("test-browser")
+            finally:
+                preview_token.reset(context_token)
+
+        with (
+            patch("rovr.core.preview_container.expand_command", expand),
+            patch("rovr.core.preview_container.subprocess.run", side_effect=run),
+            patch("rovr.core.preview_container.load_from_cache", return_value=None),
+            patch("rovr.core.preview_container.save_to_cache"),
+            patch.object(preview, "show_image_preview"),
+        ):
+            if exit_code:
+                with pytest.raises(RuntimeError):
+                    await asyncio.to_thread(show)
+            else:
+                await asyncio.to_thread(show)
+
+        assert len(profiles) == 1
+        assert not profiles[0].exists()
+
+
+async def test_subprocess_error_is_rendered_as_literal_text() -> None:
+    app = PreviewTestApp()
+    async with app.run_test():
+        preview = app.query_one(PreviewContainer)
+        preview._current_content = "Command ['helium', 'C:\\Users\\notso'] failed"
+        token = preview._active_preview_token
+
+        def show() -> None:
+            context_token = preview_token.set(token)
+            try:
+                preview.mount_special_messages(mime=False)
+            finally:
+                preview_token.reset(context_token)
+
+        await asyncio.to_thread(show)
+        content = preview.query_one(Static).content
+        assert isinstance(content, Content)
+        assert content.plain == preview._current_content
 
 
 async def test_call_from_thread_rejects_stale_preview() -> None:

@@ -10,13 +10,13 @@ import InlineSVG from "@/components/InlineSVG.astro";
 
 rovr supports a wide range of file types for previewing. the following are the main categories of files that can be previewed:
 
-### text files
+### `text` files
 
 <InlineSVG src="/rovr/screenshots/preview-file.svg" alt="file preview" />
 
 plain text files are displayed in a text area with syntax highlighting. the language is determined by the file extension. `rovr` supports a wide range of languages.
 
-### unknown/binary files
+### `details` of unknown/binary files
 
 <InlineSVG src="/rovr/screenshots/mime-type.svg" alt="mime type detection" />
 mime types are automatically obtained using [puremagic](https://pypi.org/project/puremagic) to give you a more accurate information of the file's type. If you additionally have `plugins.file_one` enabled with `plugins.file_one.get_description`, you can view extra information, like how many sections, what type, etc.
@@ -25,13 +25,13 @@ mime types are automatically obtained using [puremagic](https://pypi.org/project
 
 <InlineSVG src="/rovr/screenshots/preview-file-bat.svg" alt="file preview with bat" />
 
-if you have [`bat`](/rovr/dev/features/plugins#bat) installed and enabled in the `rovr` config, it will be used to display text files with syntax highlighting for much more languages and theming.
+if you have [`bat`](/rovr/dev/features/plugins#bat) installed and enabled in the `rovr` config, it will be used to display text files with syntax highlighting for much more languages and theming. uses the same id as `text`
 
-### images
+### `image`s
 
 `rovr` can display images directly in the terminal. refer to the [image previews](/rovr/dev/features/image-previews) guide for more details on terminal compatibility and configuration.
 
-### folders
+### `folder`s
 
 <InlineSVG src="/rovr/screenshots/preview-folder.svg" alt="folder preview" />
 
@@ -41,24 +41,24 @@ when a folder is selected, the preview panel will show a list of the files and f
   If you focus on the folder preview, you can navigate in there to open files and folders, letting you skip actually cd-ing into it!
 </Aside>
 
-### archives
+### `archive`s
 
 <InlineSVG src="/rovr/screenshots/preview-archive.svg" alt="archive preview" />
 
 for archive files (like `.zip`, `.tar.gz`, `.rar`), rovr will display a list of the files and folders contained within the archive.
 
-### pdf
+### `pdf` with poppler
 
 ![pdf preview](/rovr/screenshots/preview-pdf.png)
 
 for pdf files, rovr makes use of [poppler](https://poppler.freedesktop.org). you can also scroll through the pdf with your mouse (scrollbars are unavailable for now) or use your keyboard to navigate it.
 
-### svg
+### svg with `resvg`
 
 {/* no image for now, please TODO: find a way to reduce the size of the PIL object, it being large destroys the performance of the preview panel */}
 rovr makes use of [resvg-py](https://pypi.org/project/resvg-py) to render svg files, so you don't need resvg installed on your system -- it automatically previews the svg file for you without any setup
 
-### fonts
+### `font`s
 
 ![font preview](/rovr/screenshots/preview-font.png)
 
@@ -75,6 +75,8 @@ If your mime type is accurate enough (like `image/png`), you can omit the check 
 "image/png" = "image"
 ```
 
+the value is any of the default previewers mentioned above in an inline codeblock. Only one is allowed per mime type, but you can add fallbacks with more wildcard mime types
+
 However, in the case of vague mime types like `application/gzip`, if you want to preview `.svgz` files as an svg instead of a failed archive file, you can use the following rule:
 
 ```toml
@@ -85,3 +87,64 @@ extensions = { svgz = "resvg" }
 
 In the above example, we are telling rovr that for files with mime type `application/gzip` and `application/x-gzip`, to use archive by default, except if the file ends with `.svgz`, and in that case, use the svg renderer
 
+The full syntax for the preview rules is as follows:
+
+```toml
+[settings.preview_rules."mime/type"]
+default = "previewer_name"
+extensions = { "ext1" = "previewer_name1", "ext2" = "previewer_name2" }
+```
+
+## custom previewers
+
+You can also create your own previewers for any file type. For example, if you want to preview `.md` files using [`glow`](https://github.com/charmbracelet/glow), you can add the following to your `config.toml`:
+
+```toml
+[settings.previewers]
+"glow" = { command = ["glow", "--style", "dark", "%h"], file = "__stdout__", type = "text" }
+
+[settings.preview_rules."text/plain"]
+default = "text"
+extensions = { "md" = "glow" }
+```
+
+rovr will now use `glow` to preview `.md` files instead of `bat` (or rovr's built-in text highlighter). This preview is also cached, so if you have a large markdown file, it will not be re-rendered every time you open it. You can also use the `--style` option to change the theme of the preview.
+
+For images, you can have `type = "image"` for your custom previewer. For example, if you want to preview `.html` files using helium (or any chromium browsers), you can add the following to your `config.toml`:
+
+```toml
+[settings.previewers.helium]
+command = ["helium", "--headless", "--no-first-run", "--disable-gpu", "--user-data-dir=%tmpdir", "--screenshot=%file", "%h"]
+file = "%temp.png"
+type = "image"
+
+[settings.preview_rules."text/html"]
+default = "text"
+extensions = { html = "helium", htm = "helium" }
+
+[settings.preview_rules."text/plain"]
+default = "text"
+extensions = { html = "helium", htm = "helium" }
+```
+
+`%file` is the path configured by `file`, so helium writes the PNG that rovr reads. `%temp` keeps the source extension; `%temp.png` uses `.png` instead. This also works with other output extensions, provided your previewer can produce and rovr can display them. `%tmpdir` gives each run its own temporary browser profile and is removed when the command finishes.
+
+A launcher-supplied `--user-data-dir` can override the temporary profile above. On Windows with [scoop](https://scoop.sh), it will force a profile directory, you should instead direct it to the underlying `chrome.exe` path
+
+The `%h` is the path to the file being previewed. The command will be run with the file path as an argument, and the output will be displayed in the preview panel.
+
+<br />
+The `%temp` is the path to a temporary file that will be created for the
+previewer to write to. You can modify the file extension by including it in the
+`%temp` variable, like `%temp.png`. The temporary file will be deleted after the
+preview is displayed.
+
+The full syntax for the custom previewers is as follows:
+
+```toml
+[settings.previewers."previewer_name"]
+command = ["command", "arg1", "arg2", "%h"]
+file = "%temp(.ext) | __stdout__ | __stderr__ | /path/to/file"
+type = "text | image"
+on_nonzero_exit = "details"  # or any default available previewers mentioned above
+```

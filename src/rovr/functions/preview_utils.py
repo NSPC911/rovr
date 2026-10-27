@@ -258,9 +258,7 @@ def resample_batch_sync(images: list[PILImage]) -> list[PILImage]:
 def match_mime_to_preview_type(
     mime_type: str,
     file_extension: str | None = None,
-) -> (
-    Literal["text", "image", "pdf", "archive", "folder", "remime", "resvg", "font"] | None
-):
+) -> str | None:
     """Match a MIME type against configured rules to determine preview type.
 
     Args:
@@ -268,7 +266,7 @@ def match_mime_to_preview_type(
         file_extension: The file extension used to refine structured MIME rules
 
     Returns:
-        str : The preview type ("text", "image", "pdf", "archive", "folder")
+        str : The preview type
         None: None if no rule matches
     """
     import re

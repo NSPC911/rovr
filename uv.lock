@@ -619,11 +619,11 @@ wheels = [
 
 [[package]]
 name = "multiarchive"
-version = "0.1.4.post1"
+version = "0.2.0"
 source = { registry = "https://pypi.org/simple" }
-sdist = { url = "https://files.pythonhosted.org/packages/29/db/de6bbd33fd6e028cfb79c4cbabb27c2bcf555e85a05a5ddb4f803d4aa96c/multiarchive-0.1.4.post1.tar.gz", hash = "sha256:3c4315b7257fedba624e7ed993e934bfd294fefa86e7243e2878322c4179b32a", size = 9434, upload-time = "2026-09-09T21:47:34.07Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/42/c6/fb04bdaf4e442ff4ebc3c3def9a5167494a23850a05a032dbae64b760199/multiarchive-0.2.0.tar.gz", hash = "sha256:ef08a24c03b9066b8a5aecbb7f8c899d928c0d255588ac3b64fa12117415f58d", size = 11228, upload-time = "2026-10-27T06:10:00.577Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/49/5c/ed5b3ac3ec0a69f9dac2d908cfe12adf2e9d059d1a3fa81ce9e51a4b8ce0/multiarchive-0.1.4.post1-py3-none-any.whl", hash = "sha256:4ef5a79353c5c00232861675ab17e6bdff9a8fc1eb61b052dd24ca52b0c99ca1", size = 9474, upload-time = "2026-09-09T21:47:33.207Z" },
+    { url = "https://files.pythonhosted.org/packages/e3/d4/a6573a5fe215ca1ac0a7bd7b850db38c4b2218e7a2d0ed6dcd068a4a1675/multiarchive-0.2.0-py3-none-any.whl", hash = "sha256:f2758629e26c0c434e4f77c1a5217e7b1461048131254ce23d2727b7fd9f8398", size = 10704, upload-time = "2026-10-27T06:09:59.76Z" },
 ]
 
 [[package]]

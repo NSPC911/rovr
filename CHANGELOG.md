@@ -5,6 +5,42 @@ All notable changes to this project will be documented in this file.
 The format is sort-of based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project sort-of adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.10.3] - 2026-10-01
+
+### Added
+- `app`: extra mouse keys [#361](https://github.com/NSPC911/rovr/pull/361)
+- `app`: add optional opt-in ipc control [#358](https://github.com/NSPC911/rovr/pull/358)
+- `bulkrename`: handle circular renames nicely [32975bb](https://github.com/NSPC911/rovr/commit/32975bb81c57775230fa43d3975da56f4d3f5be1)
+- `resvg`: add configurable options [#366](https://github.com/NSPC911/rovr/pull/366)
+- `preview`: allow using extensions to narrow previewer further [#365](https://github.com/NSPC911/rovr/pull/365)
+- `keys`: resolve actions with parents [877671d](https://github.com/NSPC911/rovr/commit/877671d4f453ecfa864c588cd814215c34052152)
+- `keys`: notify if action is invalid [1ba8f23](https://github.com/NSPC911/rovr/commit/1ba8f23d2ef40a45d6470582419b541094f8c432)
+- `rg+fd`: use threads for faster searching [a2b9f96](https://github.com/NSPC911/rovr/commit/a2b9f96985758ea7c6760bc110c89a7b7a3b66e6)
+- `preview`: use imagemagick for unsupported images [#367](https://github.com/NSPC911/rovr/pull/367)
+- `filelist`: add invert selections [e6cfdea](https://github.com/NSPC911/rovr/commit/e6cfdeabd0cedbc2abf17e45c0ea3f21d282a844) [08c3a9f](https://github.com/NSPC911/rovr/commit/08c3a9f88d47748babc97629ce9e7bc4d678b573)
+- `filelist`: restore scrolled position after switch [5ac7fed](https://github.com/NSPC911/rovr/commit/5ac7fed7f2fc5ec36049bbe5fe00c7479327903a)
+- `lists`: show control images in items [#368](https://github.com/NSPC911/rovr/pull/368)
+
+### Fixed
+- `shell`: actually expand command [cb7f705](https://github.com/NSPC911/rovr/commit/cb7f705b604bbc5610fd70b78a747b317880ba34)
+- `firstlaunch`: tweak options and styles a bit [8671c9f](https://github.com/NSPC911/rovr/commit/8671c9ff0a77dea90c648eca90ac89f1b63b7cfc)
+- `pathinput`: handle backslashes on windows [5d1e1db](https://github.com/NSPC911/rovr/commit/5d1e1db2cc1e77dddca0a309f66cb5155b8b6a3b)
+- `filelist`: exit implicit select mode if no options are selected [50d7ce1](https://github.com/NSPC911/rovr/commit/50d7ce17eda9c3a779689947c82e4c3c553dc7b8)
+- `cd`: set focuson if target is a file [5352b73](https://github.com/NSPC911/rovr/commit/5352b735831d471ad27b8ed3220114beaf180bac) [0c005f7](https://github.com/NSPC911/rovr/commit/0c005f7986041533ceb93e02dcd1cb31a63e87e2)
+- `config`: make `preview_rules.*.extensions` not required [90fc9dd](https://github.com/NSPC911/rovr/commit/90fc9dd7222f40e044447f75058139e5761e61e7)
+- `path`: use custom statx to get birthtime on linux [064fd89](https://github.com/NSPC911/rovr/commit/064fd89ababdf53d86405f48fbbe132fe7b32eb0)
+- `preview`: specifically handle qoi [2227ab9](https://github.com/NSPC911/rovr/commit/2227ab982c7a7a098a0233d5d656a879fde089fc)
+- `cache`: check `in_preview_loc` properly [fa5cc76](https://github.com/NSPC911/rovr/commit/fa5cc76fe7ba01d7b28fd5aa564f7dac843894d0)
+- `path`: check consume key [5c6bb71](https://github.com/NSPC911/rovr/commit/5c6bb717494bd27d836e319180ce8c2441a3b2ea)
+
+### Performance
+- `dnd`: lazy import drag image stuff [d4bd463](https://github.com/NSPC911/rovr/commit/d4bd46382fb9a8cb8353ffbdce37a3fdf797f752)
+- `dnd`: remove nerd font from repo [89d4eca](https://github.com/NSPC911/rovr/commit/89d4eca7459e6d86eb88f78a66e5ceeaeb38731a)
+- `screens`: lazy load some modules [c478c70](https://github.com/NSPC911/rovr/commit/c478c700c333ed6f072bbbb66934454b83846594)
+- `app`: pre-setup initial breakpoint classes [b5d373f](https://github.com/NSPC911/rovr/commit/b5d373faaa2630472aa53bb4b5e18d4a1898c958)
+- `app`: suppress eager theme refresh [6033857](https://github.com/NSPC911/rovr/commit/60338570b6388e8af24f57f681dd7429fbf1117f)
+- `app`: refresh on second resume [c1794d4](https://github.com/NSPC911/rovr/commit/c1794d47529edfbac89267df953c2c58efd6c84e)
+
 ## [0.10.2.post1] - 2026-09-16
 
 ### Fixed
@@ -729,7 +765,8 @@ and this project sort-of adheres to [Semantic Versioning](https://semver.org/spe
 - `sort_order`: fix icon setting and tooltips
 - `style`: fix image and option padding/styling
 
-[Unreleased]: https://github.com/NSPC911/rovr/compare/v0.10.2.post1...HEAD
+[Unreleased]: https://github.com/NSPC911/rovr/compare/v0.10.3...HEAD
+[0.10.3]: https://github.com/NSPC911/rovr/compare/v0.10.2.post1...v0.10.3
 [0.10.2.post1]: https://github.com/NSPC911/rovr/compare/v0.10.2...v0.10.2.post1
 [0.10.2]: https://github.com/NSPC911/rovr/compare/v0.10.1.post1...v0.10.2
 [0.10.1.post1]: https://github.com/NSPC911/rovr/compare/v0.10.1...v0.10.1.post1

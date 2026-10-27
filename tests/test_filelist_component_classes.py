@@ -6,7 +6,6 @@ from pathlib import Path
 from typing import Any, cast
 
 import pytest
-from textual.content import Content
 from textual.worker import Worker
 
 from rovr.app import Application
@@ -146,7 +145,7 @@ async def test_checked_clipboard_option_renders(tmp_path: Path) -> None:
     async with app.run_test(size=(143, 37)) as pilot:
         await pilot.pause()
         option = ClipboardSelection(
-            prompt=Content(str(file_path)),
+            prompt=str(file_path),
             text=str(file_path),
             type_of_selection="copy",
         )

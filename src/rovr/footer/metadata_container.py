@@ -192,7 +192,7 @@ class MetadataContainer(VerticalScroll, inherit_bindings=False):
                             )
                         )
                     case "created":
-                        birthtime = get_birthtime(file_stat)
+                        birthtime = get_birthtime(dir_entry)
                         values_list.append(
                             Static(
                                 datetime.fromtimestamp(birthtime).strftime(

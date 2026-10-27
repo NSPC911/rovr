@@ -77,6 +77,10 @@ description: config schema humanified
         - [2.2.1.5.3. Property `Rovr Config > settings > right_click > right_click items > if > cwd`](#settings_right_click_items_if_cwd)
           - [2.2.1.5.3.1. Rovr Config > settings > right_click > right_click items > if > cwd > cwd items](#settings_right_click_items_if_cwd_items)
         - [2.2.1.5.4. Property `Rovr Config > settings > right_click > right_click items > if > directory`](#settings_right_click_items_if_directory)
+        - [2.2.1.5.5. Property `Rovr Config > settings > right_click > right_click items > if > ipc`](#settings_right_click_items_if_ipc)
+          - [2.2.1.5.5.1. Property `Rovr Config > settings > right_click > right_click items > if > ipc > oneOf > item 0`](#settings_right_click_items_if_ipc_oneOf_i0)
+          - [2.2.1.5.5.2. Property `Rovr Config > settings > right_click > right_click items > if > ipc > oneOf > item 1`](#settings_right_click_items_if_ipc_oneOf_i1)
+        - [2.2.1.5.6. Property `Rovr Config > settings > right_click > right_click items > if > link`](#settings_right_click_items_if_link)
       - [2.2.1.6. Property `Rovr Config > settings > right_click > right_click items > options`](#settings_right_click_items_options)
         - [2.2.1.6.1. Rovr Config > settings > right_click > right_click items > options > options items](#settings_right_click_items_options_items)
           - [2.2.1.6.1.1. Property `Rovr Config > settings > right_click > right_click items > options > options items > label`](#settings_right_click_items_options_items_label)
@@ -91,6 +95,10 @@ description: config schema humanified
             - [2.2.1.6.1.3.3. Property `Rovr Config > settings > right_click > right_click items > if > cwd`](#settings_right_click_items_if_cwd)
               - [2.2.1.6.1.3.3.1. Rovr Config > settings > right_click > right_click items > if > cwd > cwd items](#settings_right_click_items_if_cwd_items)
             - [2.2.1.6.1.3.4. Property `Rovr Config > settings > right_click > right_click items > if > directory`](#settings_right_click_items_if_directory)
+            - [2.2.1.6.1.3.5. Property `Rovr Config > settings > right_click > right_click items > if > ipc`](#settings_right_click_items_if_ipc)
+              - [2.2.1.6.1.3.5.1. Property `Rovr Config > settings > right_click > right_click items > if > ipc > oneOf > item 0`](#settings_right_click_items_if_ipc_oneOf_i0)
+              - [2.2.1.6.1.3.5.2. Property `Rovr Config > settings > right_click > right_click items > if > ipc > oneOf > item 1`](#settings_right_click_items_if_ipc_oneOf_i1)
+            - [2.2.1.6.1.3.6. Property `Rovr Config > settings > right_click > right_click items > if > link`](#settings_right_click_items_if_link)
   - [2.3. Property `Rovr Config > settings > copy_includes_metadata`](#settings_copy_includes_metadata)
   - [2.4. Property `Rovr Config > settings > history_size`](#settings_history_size)
   - [2.5. Property `Rovr Config > settings > auto_calculate_folder_size`](#settings_auto_calculate_folder_size)
@@ -118,6 +126,11 @@ description: config schema humanified
       - [2.6.3.3. Property `Rovr Config > settings > editor > bulk_editor > shell`](#settings_editor_bulk_editor_shell)
   - [2.7. Property `Rovr Config > settings > preview_rules`](#settings_preview_rules)
     - [2.7.1. Property `Rovr Config > settings > preview_rules > additionalProperties`](#settings_preview_rules_additionalProperties)
+      - [2.7.1.1. Property `Rovr Config > settings > preview_rules > additionalProperties > oneOf > preview_type`](#settings_preview_rules_additionalProperties_oneOf_i0)
+      - [2.7.1.2. Property `Rovr Config > settings > preview_rules > additionalProperties > oneOf > item 1`](#settings_preview_rules_additionalProperties_oneOf_i1)
+        - [2.7.1.2.1. Property `Rovr Config > settings > preview_rules > additionalProperties > oneOf > item 1 > default`](#settings_preview_rules_additionalProperties_oneOf_i1_default)
+        - [2.7.1.2.2. Property `Rovr Config > settings > preview_rules > additionalProperties > oneOf > item 1 > extensions`](#settings_preview_rules_additionalProperties_oneOf_i1_extensions)
+          - [2.7.1.2.2.1. Pattern Property `Rovr Config > settings > preview_rules > additionalProperties > oneOf > item 1 > extensions > preview_type`](#settings_preview_rules_additionalProperties_oneOf_i1_extensions_pattern1)
   - [2.8. Property `Rovr Config > settings > openers`](#settings_openers)
     - [2.8.1. Property `Rovr Config > settings > openers > groups`](#settings_openers_groups)
       - [2.8.1.1. Property `Rovr Config > settings > openers > groups > additionalProperties`](#settings_openers_groups_additionalProperties)
@@ -138,6 +151,24 @@ description: config schema humanified
         - [2.8.2.1.1. Rovr Config > settings > openers > match > additionalProperties > additionalProperties items](#settings_openers_match_additionalProperties_items)
   - [2.9. Property `Rovr Config > settings > drive_exclude`](#settings_drive_exclude)
     - [2.9.1. Rovr Config > settings > drive_exclude > drive_exclude items](#settings_drive_exclude_items)
+  - [2.10. Property `Rovr Config > settings > ipc`](#settings_ipc)
+    - [2.10.1. Property `Rovr Config > settings > ipc > enabled`](#settings_ipc_enabled)
+    - [2.10.2. Property `Rovr Config > settings > ipc > permissions`](#settings_ipc_permissions)
+      - [2.10.2.1. Property `Rovr Config > settings > ipc > permissions > cd`](#settings_ipc_permissions_cd)
+      - [2.10.2.2. Property `Rovr Config > settings > ipc > permissions > clipboard.copy`](#settings_ipc_permissions_clipboardcopy)
+      - [2.10.2.3. Property `Rovr Config > settings > ipc > permissions > clipboard.cut`](#settings_ipc_permissions_clipboardcut)
+      - [2.10.2.4. Property `Rovr Config > settings > ipc > permissions > clipboard.list`](#settings_ipc_permissions_clipboardlist)
+      - [2.10.2.5. Property `Rovr Config > settings > ipc > permissions > clipboard.paste`](#settings_ipc_permissions_clipboardpaste)
+      - [2.10.2.6. Property `Rovr Config > settings > ipc > permissions > tab.list`](#settings_ipc_permissions_tablist)
+      - [2.10.2.7. Property `Rovr Config > settings > ipc > permissions > tab.new`](#settings_ipc_permissions_tabnew)
+      - [2.10.2.8. Property `Rovr Config > settings > ipc > permissions > tab.focus`](#settings_ipc_permissions_tabfocus)
+      - [2.10.2.9. Property `Rovr Config > settings > ipc > permissions > tab.close`](#settings_ipc_permissions_tabclose)
+      - [2.10.2.10. Property `Rovr Config > settings > ipc > permissions > tab.history`](#settings_ipc_permissions_tabhistory)
+      - [2.10.2.11. Property `Rovr Config > settings > ipc > permissions > quit`](#settings_ipc_permissions_quit)
+      - [2.10.2.12. Property `Rovr Config > settings > ipc > permissions > suspend`](#settings_ipc_permissions_suspend)
+      - [2.10.2.13. Property `Rovr Config > settings > ipc > permissions > notify`](#settings_ipc_permissions_notify)
+      - [2.10.2.14. Property `Rovr Config > settings > ipc > permissions > ask`](#settings_ipc_permissions_ask)
+      - [2.10.2.15. Property `Rovr Config > settings > ipc > permissions > input`](#settings_ipc_permissions_input)
 - [3. Property `Rovr Config > metadata`](#metadata)
   - [3.1. Property `Rovr Config > metadata > fields`](#metadata_fields)
     - [3.1.1. Rovr Config > metadata > fields > fields items](#metadata_fields_items)
@@ -218,156 +249,158 @@ description: config schema humanified
     - [6.22.1. Rovr Config > keybinds > toggle_pin > toggle_pin items](#keybinds_toggle_pin_items)
   - [6.23. Property `Rovr Config > keybinds > toggle_all`](#keybinds_toggle_all)
     - [6.23.1. Rovr Config > keybinds > toggle_pin > toggle_pin items](#keybinds_toggle_pin_items)
-  - [6.24. Property `Rovr Config > keybinds > zip`](#keybinds_zip)
+  - [6.24. Property `Rovr Config > keybinds > invert_selections`](#keybinds_invert_selections)
     - [6.24.1. Rovr Config > keybinds > toggle_pin > toggle_pin items](#keybinds_toggle_pin_items)
-  - [6.25. Property `Rovr Config > keybinds > unzip`](#keybinds_unzip)
+  - [6.25. Property `Rovr Config > keybinds > zip`](#keybinds_zip)
     - [6.25.1. Rovr Config > keybinds > toggle_pin > toggle_pin items](#keybinds_toggle_pin_items)
-  - [6.26. Property `Rovr Config > keybinds > open_right_click_menu`](#keybinds_open_right_click_menu)
+  - [6.26. Property `Rovr Config > keybinds > unzip`](#keybinds_unzip)
     - [6.26.1. Rovr Config > keybinds > toggle_pin > toggle_pin items](#keybinds_toggle_pin_items)
-  - [6.27. Property `Rovr Config > keybinds > extra_copy`](#keybinds_extra_copy)
-    - [6.27.1. Property `Rovr Config > keybinds > extra_copy > open_popup`](#keybinds_extra_copy_open_popup)
-      - [6.27.1.1. Rovr Config > keybinds > toggle_pin > toggle_pin items](#keybinds_toggle_pin_items)
-    - [6.27.2. Property `Rovr Config > keybinds > extra_copy > copy_to_rovr`](#keybinds_extra_copy_copy_to_rovr)
-      - [6.27.2.1. Rovr Config > keybinds > toggle_pin > toggle_pin items](#keybinds_toggle_pin_items)
-    - [6.27.3. Property `Rovr Config > keybinds > extra_copy > copy_highlighted`](#keybinds_extra_copy_copy_highlighted)
-      - [6.27.3.1. Rovr Config > keybinds > toggle_pin > toggle_pin items](#keybinds_toggle_pin_items)
-    - [6.27.4. Property `Rovr Config > keybinds > extra_copy > copy_to_system_clip`](#keybinds_extra_copy_copy_to_system_clip)
-      - [6.27.4.1. Rovr Config > keybinds > toggle_pin > toggle_pin items](#keybinds_toggle_pin_items)
-    - [6.27.5. Property `Rovr Config > keybinds > extra_copy > copy_current_directory`](#keybinds_extra_copy_copy_current_directory)
-      - [6.27.5.1. Rovr Config > keybinds > toggle_pin > toggle_pin items](#keybinds_toggle_pin_items)
-  - [6.28. Property `Rovr Config > keybinds > up`](#keybinds_up)
-    - [6.28.1. Rovr Config > keybinds > toggle_pin > toggle_pin items](#keybinds_toggle_pin_items)
-  - [6.29. Property `Rovr Config > keybinds > down`](#keybinds_down)
+  - [6.27. Property `Rovr Config > keybinds > open_right_click_menu`](#keybinds_open_right_click_menu)
+    - [6.27.1. Rovr Config > keybinds > toggle_pin > toggle_pin items](#keybinds_toggle_pin_items)
+  - [6.28. Property `Rovr Config > keybinds > extra_copy`](#keybinds_extra_copy)
+    - [6.28.1. Property `Rovr Config > keybinds > extra_copy > open_popup`](#keybinds_extra_copy_open_popup)
+      - [6.28.1.1. Rovr Config > keybinds > toggle_pin > toggle_pin items](#keybinds_toggle_pin_items)
+    - [6.28.2. Property `Rovr Config > keybinds > extra_copy > copy_to_rovr`](#keybinds_extra_copy_copy_to_rovr)
+      - [6.28.2.1. Rovr Config > keybinds > toggle_pin > toggle_pin items](#keybinds_toggle_pin_items)
+    - [6.28.3. Property `Rovr Config > keybinds > extra_copy > copy_highlighted`](#keybinds_extra_copy_copy_highlighted)
+      - [6.28.3.1. Rovr Config > keybinds > toggle_pin > toggle_pin items](#keybinds_toggle_pin_items)
+    - [6.28.4. Property `Rovr Config > keybinds > extra_copy > copy_to_system_clip`](#keybinds_extra_copy_copy_to_system_clip)
+      - [6.28.4.1. Rovr Config > keybinds > toggle_pin > toggle_pin items](#keybinds_toggle_pin_items)
+    - [6.28.5. Property `Rovr Config > keybinds > extra_copy > copy_current_directory`](#keybinds_extra_copy_copy_current_directory)
+      - [6.28.5.1. Rovr Config > keybinds > toggle_pin > toggle_pin items](#keybinds_toggle_pin_items)
+  - [6.29. Property `Rovr Config > keybinds > up`](#keybinds_up)
     - [6.29.1. Rovr Config > keybinds > toggle_pin > toggle_pin items](#keybinds_toggle_pin_items)
-  - [6.30. Property `Rovr Config > keybinds > up_tree`](#keybinds_up_tree)
+  - [6.30. Property `Rovr Config > keybinds > down`](#keybinds_down)
     - [6.30.1. Rovr Config > keybinds > toggle_pin > toggle_pin items](#keybinds_toggle_pin_items)
-  - [6.31. Property `Rovr Config > keybinds > down_tree`](#keybinds_down_tree)
+  - [6.31. Property `Rovr Config > keybinds > up_tree`](#keybinds_up_tree)
     - [6.31.1. Rovr Config > keybinds > toggle_pin > toggle_pin items](#keybinds_toggle_pin_items)
-  - [6.32. Property `Rovr Config > keybinds > bypass_up_tree`](#keybinds_bypass_up_tree)
+  - [6.32. Property `Rovr Config > keybinds > down_tree`](#keybinds_down_tree)
     - [6.32.1. Rovr Config > keybinds > toggle_pin > toggle_pin items](#keybinds_toggle_pin_items)
-  - [6.33. Property `Rovr Config > keybinds > bypass_down_tree`](#keybinds_bypass_down_tree)
+  - [6.33. Property `Rovr Config > keybinds > bypass_up_tree`](#keybinds_bypass_up_tree)
     - [6.33.1. Rovr Config > keybinds > toggle_pin > toggle_pin items](#keybinds_toggle_pin_items)
-  - [6.34. Property `Rovr Config > keybinds > page_up`](#keybinds_page_up)
+  - [6.34. Property `Rovr Config > keybinds > bypass_down_tree`](#keybinds_bypass_down_tree)
     - [6.34.1. Rovr Config > keybinds > toggle_pin > toggle_pin items](#keybinds_toggle_pin_items)
-  - [6.35. Property `Rovr Config > keybinds > page_down`](#keybinds_page_down)
+  - [6.35. Property `Rovr Config > keybinds > page_up`](#keybinds_page_up)
     - [6.35.1. Rovr Config > keybinds > toggle_pin > toggle_pin items](#keybinds_toggle_pin_items)
-  - [6.36. Property `Rovr Config > keybinds > home`](#keybinds_home)
+  - [6.36. Property `Rovr Config > keybinds > page_down`](#keybinds_page_down)
     - [6.36.1. Rovr Config > keybinds > toggle_pin > toggle_pin items](#keybinds_toggle_pin_items)
-  - [6.37. Property `Rovr Config > keybinds > end`](#keybinds_end)
+  - [6.37. Property `Rovr Config > keybinds > home`](#keybinds_home)
     - [6.37.1. Rovr Config > keybinds > toggle_pin > toggle_pin items](#keybinds_toggle_pin_items)
-  - [6.38. Property `Rovr Config > keybinds > hist_previous`](#keybinds_hist_previous)
+  - [6.38. Property `Rovr Config > keybinds > end`](#keybinds_end)
     - [6.38.1. Rovr Config > keybinds > toggle_pin > toggle_pin items](#keybinds_toggle_pin_items)
-  - [6.39. Property `Rovr Config > keybinds > hist_next`](#keybinds_hist_next)
+  - [6.39. Property `Rovr Config > keybinds > hist_previous`](#keybinds_hist_previous)
     - [6.39.1. Rovr Config > keybinds > toggle_pin > toggle_pin items](#keybinds_toggle_pin_items)
-  - [6.40. Property `Rovr Config > keybinds > toggle_visual`](#keybinds_toggle_visual)
+  - [6.40. Property `Rovr Config > keybinds > hist_next`](#keybinds_hist_next)
     - [6.40.1. Rovr Config > keybinds > toggle_pin > toggle_pin items](#keybinds_toggle_pin_items)
-  - [6.41. Property `Rovr Config > keybinds > toggle_hidden_files`](#keybinds_toggle_hidden_files)
+  - [6.41. Property `Rovr Config > keybinds > toggle_visual`](#keybinds_toggle_visual)
     - [6.41.1. Rovr Config > keybinds > toggle_pin > toggle_pin items](#keybinds_toggle_pin_items)
-  - [6.42. Property `Rovr Config > keybinds > toggle_select_item`](#keybinds_toggle_select_item)
+  - [6.42. Property `Rovr Config > keybinds > toggle_hidden_files`](#keybinds_toggle_hidden_files)
     - [6.42.1. Rovr Config > keybinds > toggle_pin > toggle_pin items](#keybinds_toggle_pin_items)
-  - [6.43. Property `Rovr Config > keybinds > select_up`](#keybinds_select_up)
+  - [6.43. Property `Rovr Config > keybinds > toggle_select_item`](#keybinds_toggle_select_item)
     - [6.43.1. Rovr Config > keybinds > toggle_pin > toggle_pin items](#keybinds_toggle_pin_items)
-  - [6.44. Property `Rovr Config > keybinds > select_down`](#keybinds_select_down)
+  - [6.44. Property `Rovr Config > keybinds > select_up`](#keybinds_select_up)
     - [6.44.1. Rovr Config > keybinds > toggle_pin > toggle_pin items](#keybinds_toggle_pin_items)
-  - [6.45. Property `Rovr Config > keybinds > select_page_up`](#keybinds_select_page_up)
+  - [6.45. Property `Rovr Config > keybinds > select_down`](#keybinds_select_down)
     - [6.45.1. Rovr Config > keybinds > toggle_pin > toggle_pin items](#keybinds_toggle_pin_items)
-  - [6.46. Property `Rovr Config > keybinds > select_page_down`](#keybinds_select_page_down)
+  - [6.46. Property `Rovr Config > keybinds > select_page_up`](#keybinds_select_page_up)
     - [6.46.1. Rovr Config > keybinds > toggle_pin > toggle_pin items](#keybinds_toggle_pin_items)
-  - [6.47. Property `Rovr Config > keybinds > select_home`](#keybinds_select_home)
+  - [6.47. Property `Rovr Config > keybinds > select_page_down`](#keybinds_select_page_down)
     - [6.47.1. Rovr Config > keybinds > toggle_pin > toggle_pin items](#keybinds_toggle_pin_items)
-  - [6.48. Property `Rovr Config > keybinds > select_end`](#keybinds_select_end)
+  - [6.48. Property `Rovr Config > keybinds > select_home`](#keybinds_select_home)
     - [6.48.1. Rovr Config > keybinds > toggle_pin > toggle_pin items](#keybinds_toggle_pin_items)
-  - [6.49. Property `Rovr Config > keybinds > tab_next`](#keybinds_tab_next)
+  - [6.49. Property `Rovr Config > keybinds > select_end`](#keybinds_select_end)
     - [6.49.1. Rovr Config > keybinds > toggle_pin > toggle_pin items](#keybinds_toggle_pin_items)
-  - [6.50. Property `Rovr Config > keybinds > tab_previous`](#keybinds_tab_previous)
+  - [6.50. Property `Rovr Config > keybinds > tab_next`](#keybinds_tab_next)
     - [6.50.1. Rovr Config > keybinds > toggle_pin > toggle_pin items](#keybinds_toggle_pin_items)
-  - [6.51. Property `Rovr Config > keybinds > tab_new`](#keybinds_tab_new)
+  - [6.51. Property `Rovr Config > keybinds > tab_previous`](#keybinds_tab_previous)
     - [6.51.1. Rovr Config > keybinds > toggle_pin > toggle_pin items](#keybinds_toggle_pin_items)
-  - [6.52. Property `Rovr Config > keybinds > tab_close`](#keybinds_tab_close)
+  - [6.52. Property `Rovr Config > keybinds > tab_new`](#keybinds_tab_new)
     - [6.52.1. Rovr Config > keybinds > toggle_pin > toggle_pin items](#keybinds_toggle_pin_items)
-  - [6.53. Property `Rovr Config > keybinds > preview_scroll_left`](#keybinds_preview_scroll_left)
+  - [6.53. Property `Rovr Config > keybinds > tab_close`](#keybinds_tab_close)
     - [6.53.1. Rovr Config > keybinds > toggle_pin > toggle_pin items](#keybinds_toggle_pin_items)
-  - [6.54. Property `Rovr Config > keybinds > preview_scroll_right`](#keybinds_preview_scroll_right)
+  - [6.54. Property `Rovr Config > keybinds > preview_scroll_left`](#keybinds_preview_scroll_left)
     - [6.54.1. Rovr Config > keybinds > toggle_pin > toggle_pin items](#keybinds_toggle_pin_items)
-  - [6.55. Property `Rovr Config > keybinds > preview_select_right`](#keybinds_preview_select_right)
+  - [6.55. Property `Rovr Config > keybinds > preview_scroll_right`](#keybinds_preview_scroll_right)
     - [6.55.1. Rovr Config > keybinds > toggle_pin > toggle_pin items](#keybinds_toggle_pin_items)
-  - [6.56. Property `Rovr Config > keybinds > preview_select_left`](#keybinds_preview_select_left)
+  - [6.56. Property `Rovr Config > keybinds > preview_select_right`](#keybinds_preview_select_right)
     - [6.56.1. Rovr Config > keybinds > toggle_pin > toggle_pin items](#keybinds_toggle_pin_items)
-  - [6.57. Property `Rovr Config > keybinds > show_keybinds`](#keybinds_show_keybinds)
+  - [6.57. Property `Rovr Config > keybinds > preview_select_left`](#keybinds_preview_select_left)
     - [6.57.1. Rovr Config > keybinds > toggle_pin > toggle_pin items](#keybinds_toggle_pin_items)
-  - [6.58. Property `Rovr Config > keybinds > change_sort_order`](#keybinds_change_sort_order)
-    - [6.58.1. Property `Rovr Config > keybinds > change_sort_order > open_popup`](#keybinds_change_sort_order_open_popup)
-      - [6.58.1.1. Rovr Config > keybinds > toggle_pin > toggle_pin items](#keybinds_toggle_pin_items)
-    - [6.58.2. Property `Rovr Config > keybinds > change_sort_order > name`](#keybinds_change_sort_order_name)
-      - [6.58.2.1. Rovr Config > keybinds > toggle_pin > toggle_pin items](#keybinds_toggle_pin_items)
-    - [6.58.3. Property `Rovr Config > keybinds > change_sort_order > extension`](#keybinds_change_sort_order_extension)
-      - [6.58.3.1. Rovr Config > keybinds > toggle_pin > toggle_pin items](#keybinds_toggle_pin_items)
-    - [6.58.4. Property `Rovr Config > keybinds > change_sort_order > natural`](#keybinds_change_sort_order_natural)
-      - [6.58.4.1. Rovr Config > keybinds > toggle_pin > toggle_pin items](#keybinds_toggle_pin_items)
-    - [6.58.5. Property `Rovr Config > keybinds > change_sort_order > size`](#keybinds_change_sort_order_size)
-      - [6.58.5.1. Rovr Config > keybinds > toggle_pin > toggle_pin items](#keybinds_toggle_pin_items)
-    - [6.58.6. Property `Rovr Config > keybinds > change_sort_order > created`](#keybinds_change_sort_order_created)
-      - [6.58.6.1. Rovr Config > keybinds > toggle_pin > toggle_pin items](#keybinds_toggle_pin_items)
-    - [6.58.7. Property `Rovr Config > keybinds > change_sort_order > modified`](#keybinds_change_sort_order_modified)
-      - [6.58.7.1. Rovr Config > keybinds > toggle_pin > toggle_pin items](#keybinds_toggle_pin_items)
-    - [6.58.8. Property `Rovr Config > keybinds > change_sort_order > descending`](#keybinds_change_sort_order_descending)
-      - [6.58.8.1. Rovr Config > keybinds > toggle_pin > toggle_pin items](#keybinds_toggle_pin_items)
-  - [6.59. Property `Rovr Config > keybinds > quit_app`](#keybinds_quit_app)
-    - [6.59.1. Rovr Config > keybinds > toggle_pin > toggle_pin items](#keybinds_toggle_pin_items)
-  - [6.60. Property `Rovr Config > keybinds > command_palette`](#keybinds_command_palette)
-  - [6.61. Property `Rovr Config > keybinds > suspend_process`](#keybinds_suspend_process)
-    - [6.61.1. Rovr Config > keybinds > toggle_pin > toggle_pin items](#keybinds_toggle_pin_items)
-  - [6.62. Property `Rovr Config > keybinds > open`](#keybinds_open)
+  - [6.58. Property `Rovr Config > keybinds > show_keybinds`](#keybinds_show_keybinds)
+    - [6.58.1. Rovr Config > keybinds > toggle_pin > toggle_pin items](#keybinds_toggle_pin_items)
+  - [6.59. Property `Rovr Config > keybinds > change_sort_order`](#keybinds_change_sort_order)
+    - [6.59.1. Property `Rovr Config > keybinds > change_sort_order > open_popup`](#keybinds_change_sort_order_open_popup)
+      - [6.59.1.1. Rovr Config > keybinds > toggle_pin > toggle_pin items](#keybinds_toggle_pin_items)
+    - [6.59.2. Property `Rovr Config > keybinds > change_sort_order > name`](#keybinds_change_sort_order_name)
+      - [6.59.2.1. Rovr Config > keybinds > toggle_pin > toggle_pin items](#keybinds_toggle_pin_items)
+    - [6.59.3. Property `Rovr Config > keybinds > change_sort_order > extension`](#keybinds_change_sort_order_extension)
+      - [6.59.3.1. Rovr Config > keybinds > toggle_pin > toggle_pin items](#keybinds_toggle_pin_items)
+    - [6.59.4. Property `Rovr Config > keybinds > change_sort_order > natural`](#keybinds_change_sort_order_natural)
+      - [6.59.4.1. Rovr Config > keybinds > toggle_pin > toggle_pin items](#keybinds_toggle_pin_items)
+    - [6.59.5. Property `Rovr Config > keybinds > change_sort_order > size`](#keybinds_change_sort_order_size)
+      - [6.59.5.1. Rovr Config > keybinds > toggle_pin > toggle_pin items](#keybinds_toggle_pin_items)
+    - [6.59.6. Property `Rovr Config > keybinds > change_sort_order > created`](#keybinds_change_sort_order_created)
+      - [6.59.6.1. Rovr Config > keybinds > toggle_pin > toggle_pin items](#keybinds_toggle_pin_items)
+    - [6.59.7. Property `Rovr Config > keybinds > change_sort_order > modified`](#keybinds_change_sort_order_modified)
+      - [6.59.7.1. Rovr Config > keybinds > toggle_pin > toggle_pin items](#keybinds_toggle_pin_items)
+    - [6.59.8. Property `Rovr Config > keybinds > change_sort_order > descending`](#keybinds_change_sort_order_descending)
+      - [6.59.8.1. Rovr Config > keybinds > toggle_pin > toggle_pin items](#keybinds_toggle_pin_items)
+  - [6.60. Property `Rovr Config > keybinds > quit_app`](#keybinds_quit_app)
+    - [6.60.1. Rovr Config > keybinds > toggle_pin > toggle_pin items](#keybinds_toggle_pin_items)
+  - [6.61. Property `Rovr Config > keybinds > command_palette`](#keybinds_command_palette)
+  - [6.62. Property `Rovr Config > keybinds > suspend_process`](#keybinds_suspend_process)
     - [6.62.1. Rovr Config > keybinds > toggle_pin > toggle_pin items](#keybinds_toggle_pin_items)
-  - [6.63. Property `Rovr Config > keybinds > open_editor`](#keybinds_open_editor)
+  - [6.63. Property `Rovr Config > keybinds > open`](#keybinds_open)
     - [6.63.1. Rovr Config > keybinds > toggle_pin > toggle_pin items](#keybinds_toggle_pin_items)
-  - [6.64. Property `Rovr Config > keybinds > show_shell_screen`](#keybinds_show_shell_screen)
+  - [6.64. Property `Rovr Config > keybinds > open_editor`](#keybinds_open_editor)
     - [6.64.1. Rovr Config > keybinds > toggle_pin > toggle_pin items](#keybinds_toggle_pin_items)
-  - [6.65. Property `Rovr Config > keybinds > filename_conflict`](#keybinds_filename_conflict)
-    - [6.65.1. Property `Rovr Config > keybinds > filename_conflict > overwrite`](#keybinds_filename_conflict_overwrite)
-      - [6.65.1.1. Rovr Config > keybinds > toggle_pin > toggle_pin items](#keybinds_toggle_pin_items)
-    - [6.65.2. Property `Rovr Config > keybinds > filename_conflict > skip`](#keybinds_filename_conflict_skip)
-      - [6.65.2.1. Rovr Config > keybinds > toggle_pin > toggle_pin items](#keybinds_toggle_pin_items)
-    - [6.65.3. Property `Rovr Config > keybinds > filename_conflict > rename`](#keybinds_filename_conflict_rename)
-      - [6.65.3.1. Rovr Config > keybinds > toggle_pin > toggle_pin items](#keybinds_toggle_pin_items)
-    - [6.65.4. Property `Rovr Config > keybinds > filename_conflict > cancel`](#keybinds_filename_conflict_cancel)
-      - [6.65.4.1. Rovr Config > keybinds > toggle_pin > toggle_pin items](#keybinds_toggle_pin_items)
-    - [6.65.5. Property `Rovr Config > keybinds > filename_conflict > dont_ask_again`](#keybinds_filename_conflict_dont_ask_again)
-      - [6.65.5.1. Rovr Config > keybinds > toggle_pin > toggle_pin items](#keybinds_toggle_pin_items)
-  - [6.66. Property `Rovr Config > keybinds > file_in_use`](#keybinds_file_in_use)
-    - [6.66.1. Property `Rovr Config > keybinds > file_in_use > retry`](#keybinds_file_in_use_retry)
+  - [6.65. Property `Rovr Config > keybinds > show_shell_screen`](#keybinds_show_shell_screen)
+    - [6.65.1. Rovr Config > keybinds > toggle_pin > toggle_pin items](#keybinds_toggle_pin_items)
+  - [6.66. Property `Rovr Config > keybinds > filename_conflict`](#keybinds_filename_conflict)
+    - [6.66.1. Property `Rovr Config > keybinds > filename_conflict > overwrite`](#keybinds_filename_conflict_overwrite)
       - [6.66.1.1. Rovr Config > keybinds > toggle_pin > toggle_pin items](#keybinds_toggle_pin_items)
-    - [6.66.2. Property `Rovr Config > keybinds > file_in_use > skip`](#keybinds_file_in_use_skip)
+    - [6.66.2. Property `Rovr Config > keybinds > filename_conflict > skip`](#keybinds_filename_conflict_skip)
       - [6.66.2.1. Rovr Config > keybinds > toggle_pin > toggle_pin items](#keybinds_toggle_pin_items)
-    - [6.66.3. Property `Rovr Config > keybinds > file_in_use > cancel`](#keybinds_file_in_use_cancel)
+    - [6.66.3. Property `Rovr Config > keybinds > filename_conflict > rename`](#keybinds_filename_conflict_rename)
       - [6.66.3.1. Rovr Config > keybinds > toggle_pin > toggle_pin items](#keybinds_toggle_pin_items)
-    - [6.66.4. Property `Rovr Config > keybinds > file_in_use > dont_ask_again`](#keybinds_file_in_use_dont_ask_again)
+    - [6.66.4. Property `Rovr Config > keybinds > filename_conflict > cancel`](#keybinds_filename_conflict_cancel)
       - [6.66.4.1. Rovr Config > keybinds > toggle_pin > toggle_pin items](#keybinds_toggle_pin_items)
-  - [6.67. Property `Rovr Config > keybinds > filter_modal`](#keybinds_filter_modal)
-    - [6.67.1. Property `Rovr Config > keybinds > filter_modal > exit`](#keybinds_filter_modal_exit)
+    - [6.66.5. Property `Rovr Config > keybinds > filename_conflict > dont_ask_again`](#keybinds_filename_conflict_dont_ask_again)
+      - [6.66.5.1. Rovr Config > keybinds > toggle_pin > toggle_pin items](#keybinds_toggle_pin_items)
+  - [6.67. Property `Rovr Config > keybinds > file_in_use`](#keybinds_file_in_use)
+    - [6.67.1. Property `Rovr Config > keybinds > file_in_use > retry`](#keybinds_file_in_use_retry)
       - [6.67.1.1. Rovr Config > keybinds > toggle_pin > toggle_pin items](#keybinds_toggle_pin_items)
-    - [6.67.2. Property `Rovr Config > keybinds > filter_modal > down`](#keybinds_filter_modal_down)
+    - [6.67.2. Property `Rovr Config > keybinds > file_in_use > skip`](#keybinds_file_in_use_skip)
       - [6.67.2.1. Rovr Config > keybinds > toggle_pin > toggle_pin items](#keybinds_toggle_pin_items)
-    - [6.67.3. Property `Rovr Config > keybinds > filter_modal > up`](#keybinds_filter_modal_up)
+    - [6.67.3. Property `Rovr Config > keybinds > file_in_use > cancel`](#keybinds_file_in_use_cancel)
       - [6.67.3.1. Rovr Config > keybinds > toggle_pin > toggle_pin items](#keybinds_toggle_pin_items)
-    - [6.67.4. Property `Rovr Config > keybinds > filter_modal > page_down`](#keybinds_filter_modal_page_down)
+    - [6.67.4. Property `Rovr Config > keybinds > file_in_use > dont_ask_again`](#keybinds_file_in_use_dont_ask_again)
       - [6.67.4.1. Rovr Config > keybinds > toggle_pin > toggle_pin items](#keybinds_toggle_pin_items)
-    - [6.67.5. Property `Rovr Config > keybinds > filter_modal > page_up`](#keybinds_filter_modal_page_up)
-      - [6.67.5.1. Rovr Config > keybinds > toggle_pin > toggle_pin items](#keybinds_toggle_pin_items)
-  - [6.68. Property `Rovr Config > keybinds > yes_or_no`](#keybinds_yes_or_no)
-    - [6.68.1. Property `Rovr Config > keybinds > yes_or_no > yes`](#keybinds_yes_or_no_yes)
+  - [6.68. Property `Rovr Config > keybinds > filter_modal`](#keybinds_filter_modal)
+    - [6.68.1. Property `Rovr Config > keybinds > filter_modal > exit`](#keybinds_filter_modal_exit)
       - [6.68.1.1. Rovr Config > keybinds > toggle_pin > toggle_pin items](#keybinds_toggle_pin_items)
-    - [6.68.2. Property `Rovr Config > keybinds > yes_or_no > no`](#keybinds_yes_or_no_no)
+    - [6.68.2. Property `Rovr Config > keybinds > filter_modal > down`](#keybinds_filter_modal_down)
       - [6.68.2.1. Rovr Config > keybinds > toggle_pin > toggle_pin items](#keybinds_toggle_pin_items)
-    - [6.68.3. Property `Rovr Config > keybinds > yes_or_no > dont_ask_again`](#keybinds_yes_or_no_dont_ask_again)
+    - [6.68.3. Property `Rovr Config > keybinds > filter_modal > up`](#keybinds_filter_modal_up)
       - [6.68.3.1. Rovr Config > keybinds > toggle_pin > toggle_pin items](#keybinds_toggle_pin_items)
-  - [6.69. Property `Rovr Config > keybinds > drag_and_drop`](#keybinds_drag_and_drop)
-    - [6.69.1. Property `Rovr Config > keybinds > drag_and_drop > move`](#keybinds_drag_and_drop_move)
+    - [6.68.4. Property `Rovr Config > keybinds > filter_modal > page_down`](#keybinds_filter_modal_page_down)
+      - [6.68.4.1. Rovr Config > keybinds > toggle_pin > toggle_pin items](#keybinds_toggle_pin_items)
+    - [6.68.5. Property `Rovr Config > keybinds > filter_modal > page_up`](#keybinds_filter_modal_page_up)
+      - [6.68.5.1. Rovr Config > keybinds > toggle_pin > toggle_pin items](#keybinds_toggle_pin_items)
+  - [6.69. Property `Rovr Config > keybinds > yes_or_no`](#keybinds_yes_or_no)
+    - [6.69.1. Property `Rovr Config > keybinds > yes_or_no > yes`](#keybinds_yes_or_no_yes)
       - [6.69.1.1. Rovr Config > keybinds > toggle_pin > toggle_pin items](#keybinds_toggle_pin_items)
-    - [6.69.2. Property `Rovr Config > keybinds > drag_and_drop > copy`](#keybinds_drag_and_drop_copy)
+    - [6.69.2. Property `Rovr Config > keybinds > yes_or_no > no`](#keybinds_yes_or_no_no)
       - [6.69.2.1. Rovr Config > keybinds > toggle_pin > toggle_pin items](#keybinds_toggle_pin_items)
-    - [6.69.3. Property `Rovr Config > keybinds > drag_and_drop > cancel`](#keybinds_drag_and_drop_cancel)
+    - [6.69.3. Property `Rovr Config > keybinds > yes_or_no > dont_ask_again`](#keybinds_yes_or_no_dont_ask_again)
       - [6.69.3.1. Rovr Config > keybinds > toggle_pin > toggle_pin items](#keybinds_toggle_pin_items)
+  - [6.70. Property `Rovr Config > keybinds > drag_and_drop`](#keybinds_drag_and_drop)
+    - [6.70.1. Property `Rovr Config > keybinds > drag_and_drop > move`](#keybinds_drag_and_drop_move)
+      - [6.70.1.1. Rovr Config > keybinds > toggle_pin > toggle_pin items](#keybinds_toggle_pin_items)
+    - [6.70.2. Property `Rovr Config > keybinds > drag_and_drop > copy`](#keybinds_drag_and_drop_copy)
+      - [6.70.2.1. Rovr Config > keybinds > toggle_pin > toggle_pin items](#keybinds_toggle_pin_items)
+    - [6.70.3. Property `Rovr Config > keybinds > drag_and_drop > cancel`](#keybinds_drag_and_drop_cancel)
+      - [6.70.3.1. Rovr Config > keybinds > toggle_pin > toggle_pin items](#keybinds_toggle_pin_items)
 - [7. Property `Rovr Config > plugins`](#plugins)
   - [7.1. Property `Rovr Config > plugins > zoxide`](#plugins_zoxide)
     - [7.1.1. Property `Rovr Config > plugins > zoxide > enabled`](#plugins_zoxide_enabled)
@@ -389,6 +422,7 @@ description: config schema humanified
     - [7.3.8. Property `Rovr Config > plugins > fd > timeout`](#plugins_fd_timeout)
     - [7.3.9. Property `Rovr Config > plugins > fd > default_filter_types`](#plugins_fd_default_filter_types)
       - [7.3.9.1. Rovr Config > plugins > fd > default_filter_types > default_filter_types items](#plugins_fd_default_filter_types_items)
+    - [7.3.10. Property `Rovr Config > plugins > fd > threads`](#plugins_fd_threads)
   - [7.4. Property `Rovr Config > plugins > rg`](#plugins_rg)
     - [7.4.1. Property `Rovr Config > plugins > rg > enabled`](#plugins_rg_enabled)
     - [7.4.2. Property `Rovr Config > plugins > rg > keybinds`](#plugins_rg_keybinds)
@@ -399,6 +433,7 @@ description: config schema humanified
     - [7.4.6. Property `Rovr Config > plugins > rg > no_ignore_parent`](#plugins_rg_no_ignore_parent)
     - [7.4.7. Property `Rovr Config > plugins > rg > search_hidden`](#plugins_rg_search_hidden)
     - [7.4.8. Property `Rovr Config > plugins > rg > timeout`](#plugins_rg_timeout)
+    - [7.4.9. Property `Rovr Config > plugins > rg > threads`](#plugins_rg_threads)
   - [7.5. Property `Rovr Config > plugins > poppler`](#plugins_poppler)
     - [7.5.1. Property `Rovr Config > plugins > poppler > enabled`](#plugins_poppler_enabled)
     - [7.5.2. Property `Rovr Config > plugins > poppler > threads`](#plugins_poppler_threads)
@@ -408,6 +443,14 @@ description: config schema humanified
   - [7.6. Property `Rovr Config > plugins > file_one`](#plugins_file_one)
     - [7.6.1. Property `Rovr Config > plugins > file_one > enabled`](#plugins_file_one_enabled)
     - [7.6.2. Property `Rovr Config > plugins > file_one > get_description`](#plugins_file_one_get_description)
+  - [7.7. Property `Rovr Config > plugins > resvg`](#plugins_resvg)
+    - [7.7.1. Property `Rovr Config > plugins > resvg > dpi`](#plugins_resvg_dpi)
+    - [7.7.2. Property `Rovr Config > plugins > resvg > shape_rendering`](#plugins_resvg_shape_rendering)
+    - [7.7.3. Property `Rovr Config > plugins > resvg > text_rendering`](#plugins_resvg_text_rendering)
+    - [7.7.4. Property `Rovr Config > plugins > resvg > image_rendering`](#plugins_resvg_image_rendering)
+  - [7.8. Property `Rovr Config > plugins > magick`](#plugins_magick)
+    - [7.8.1. Property `Rovr Config > plugins > magick > enabled`](#plugins_magick_enabled)
+    - [7.8.2. Property `Rovr Config > plugins > magick > executable`](#plugins_magick_executable)
 
 **Title:** Rovr Config
 
@@ -460,7 +503,7 @@ description: config schema humanified
 | [drive_watcher_frequency](#interface_drive_watcher_frequency)         | number          | How often (in seconds) to check for changes in mounted drives in the sidebar.                                                                                                                                    |
 | [clock](#interface_clock)                                             | object          |                                                                                                                                                                                                                  |
 | [preview_text](#interface_preview_text)                               | object          |                                                                                                                                                                                                                  |
-| [compact_mode](#interface_compact_mode)                               | object          |                                                                                                                                                                                                                  |
+| [compact_mode](#interface_compact_mode)                               | object          | DEPRECATING SOON, DO NOT USE.                                                                                                                                                                                    |
 
 ### <a name="interface_tooltips"></a>1.1. Property `Rovr Config > interface > tooltips`
 
@@ -1012,10 +1055,12 @@ Must be one of:
 | **Required**              | No          |
 | **Additional properties** | Not allowed |
 
-| Property                                   | Type    | Title/Description                                                            |
-| ------------------------------------------ | ------- | ---------------------------------------------------------------------------- |
-| [buttons](#interface_compact_mode_buttons) | boolean | Whether to compact the buttons and path input to one line instead of three.  |
-| [panels](#interface_compact_mode_panels)   | boolean | Whether to make the panels smaller to add more room for the file list itself |
+**Description:** DEPRECATING SOON, DO NOT USE.
+
+| Property                                   | Type    | Title/Description                                                                                           |
+| ------------------------------------------ | ------- | ----------------------------------------------------------------------------------------------------------- |
+| [buttons](#interface_compact_mode_buttons) | boolean | [DEPRECATING SOON, DO NOT USE] Whether to compact the buttons and path input to one line instead of three.  |
+| [panels](#interface_compact_mode_panels)   | boolean | [DEPRECATING SOON, DO NOT USE] Whether to make the panels smaller to add more room for the file list itself |
 
 #### <a name="interface_compact_mode_buttons"></a>1.22.1. Property `Rovr Config > interface > compact_mode > buttons`
 
@@ -1023,9 +1068,8 @@ Must be one of:
 | ------------ | --------- |
 | **Type**     | `boolean` |
 | **Required** | No        |
-| **Default**  | `true`    |
 
-**Description:** Whether to compact the buttons and path input to one line instead of three.
+**Description:** [DEPRECATING SOON, DO NOT USE] Whether to compact the buttons and path input to one line instead of three.
 
 #### <a name="interface_compact_mode_panels"></a>1.22.2. Property `Rovr Config > interface > compact_mode > panels`
 
@@ -1033,9 +1077,8 @@ Must be one of:
 | ------------ | --------- |
 | **Type**     | `boolean` |
 | **Required** | No        |
-| **Default**  | `false`   |
 
-**Description:** Whether to make the panels smaller to add more room for the file list itself
+**Description:** [DEPRECATING SOON, DO NOT USE] Whether to make the panels smaller to add more room for the file list itself
 
 ## <a name="settings"></a>2. Property `Rovr Config > settings`
 
@@ -1047,17 +1090,18 @@ Must be one of:
 
 **Description:** Settings related to behavior of file operations
 
-| Property                                                           | Type            | Title/Description                                                                                                                                                                                                       |
-| ------------------------------------------------------------------ | --------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| [use_recycle_bin](#settings_use_recycle_bin)                       | boolean         | When deleting a file, allow moving the file to the recycle bin.                                                                                                                                                         |
-| [right_click](#settings_right_click)                               | array           | Configuration for the right-click context menu. Fully replaces the default list.                                                                                                                                        |
-| [copy_includes_metadata](#settings_copy_includes_metadata)         | boolean         | When copying over a file, preserve metadata from the original file, such as creation and modification times.                                                                                                            |
-| [history_size](#settings_history_size)                             | integer         | The maximum number of directories to keep in the back/forward navigation history, per tab. Oldest entries are evicted once this is exceeded.                                                                            |
-| [auto_calculate_folder_size](#settings_auto_calculate_folder_size) | boolean         | Automatically calculate the folder sizes when a folder is highlighted                                                                                                                                                   |
-| [editor](#settings_editor)                                         | object          | Settings related to the editor used for different operations                                                                                                                                                            |
-| [preview_rules](#settings_preview_rules)                           | object          | Map MIME type patterns to preview types. Uses regex patterns. Valid preview types: text, image, pdf, archive, folder, resvg, font, remime.<br />-&gt; Use 'remime' if you want a more accurate description from file(1) |
-| [openers](#settings_openers)                                       | object          | Openers to open files with, grouped by name and matched against file paths by glob pattern.                                                                                                                             |
-| [drive_exclude](#settings_drive_exclude)                           | array of string | Glob patterns matched against mountpoint paths. Drives matching any pattern are hidden from the sidebar (e.g. '/run/media/\*', 'D:/').                                                                                  |
+| Property                                                           | Type            | Title/Description                                                                                                                                                                                                                                                                                                                                                                                                      |
+| ------------------------------------------------------------------ | --------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| [use_recycle_bin](#settings_use_recycle_bin)                       | boolean         | When deleting a file, allow moving the file to the recycle bin.                                                                                                                                                                                                                                                                                                                                                        |
+| [right_click](#settings_right_click)                               | array           | Configuration for the right-click context menu. Fully replaces the default list.                                                                                                                                                                                                                                                                                                                                       |
+| [copy_includes_metadata](#settings_copy_includes_metadata)         | boolean         | When copying over a file, preserve metadata from the original file, such as creation and modification times.                                                                                                                                                                                                                                                                                                           |
+| [history_size](#settings_history_size)                             | integer         | The maximum number of directories to keep in the back/forward navigation history, per tab. Oldest entries are evicted once this is exceeded.                                                                                                                                                                                                                                                                           |
+| [auto_calculate_folder_size](#settings_auto_calculate_folder_size) | boolean         | Automatically calculate the folder sizes when a folder is highlighted                                                                                                                                                                                                                                                                                                                                                  |
+| [editor](#settings_editor)                                         | object          | Settings related to the editor used for different operations                                                                                                                                                                                                                                                                                                                                                           |
+| [preview_rules](#settings_preview_rules)                           | object          | Map MIME type regex patterns to preview types. Rules containing \`.\*\` are evaluated after rules without it, with configuration order preserved within each group. A rule can be a preview type string or a table with a default preview type and extension-specific refinements. Extension keys are lowercase and omit the leading dot.<br />-&gt; Use 'remime' if you want a more accurate description from file(1) |
+| [openers](#settings_openers)                                       | object          | Openers to open files with, grouped by name and matched against file paths by glob pattern.                                                                                                                                                                                                                                                                                                                            |
+| [drive_exclude](#settings_drive_exclude)                           | array of string | Glob patterns matched against mountpoint paths. Drives matching any pattern are hidden from the sidebar (e.g. '/run/media/\*', 'D:/').                                                                                                                                                                                                                                                                                 |
+| [ipc](#settings_ipc)                                               | object          | Settings related to the IPC server that allows external programs to control rovr                                                                                                                                                                                                                                                                                                                                       |
 
 ### <a name="settings_use_recycle_bin"></a>2.1. Property `Rovr Config > settings > use_recycle_bin`
 
@@ -1291,6 +1335,8 @@ Must be one of:
 | [os](#settings_right_click_items_if_os)               | array of string | Only enable this menu item if the operating system is one of the following (case insensitive)                                                                                              |
 | [cwd](#settings_right_click_items_if_cwd)             | array of string | Only enable this menu item if the current working directory matches one (or more) of the glob patterns in this list (look at https://docs.python.org/3/library/fnmatch.html for more info) |
 | [directory](#settings_right_click_items_if_directory) | boolean         | Only enable this menu item if the selected item is a directory (set to true) or a file (set to false) (if unspecified, matches both files and directories)                                 |
+| [ipc](#settings_right_click_items_if_ipc)             | Combination     | Only enable this menu item if the ipc server is enabled (true), disabled (false), or null (either)                                                                                         |
+| [link](#settings_right_click_items_if_link)           | boolean         | Only enable this menu item if the selected item is a symlink/junction (true) or not (false)                                                                                                |
 
 ###### <a name="settings_right_click_items_if_path"></a>2.2.1.5.1. Property `Rovr Config > settings > right_click > right_click items > if > path`
 
@@ -1411,6 +1457,48 @@ Must be one of:
 
 **Description:** Only enable this menu item if the selected item is a directory (set to true) or a file (set to false) (if unspecified, matches both files and directories)
 
+###### <a name="settings_right_click_items_if_ipc"></a>2.2.1.5.5. Property `Rovr Config > settings > right_click > right_click items > if > ipc`
+
+|                           |                  |
+| ------------------------- | ---------------- |
+| **Type**                  | `combining`      |
+| **Required**              | No               |
+| **Additional properties** | Any type allowed |
+
+**Description:** Only enable this menu item if the ipc server is enabled (true), disabled (false), or null (either)
+
+| One of(Option)                                        |
+| ----------------------------------------------------- |
+| [item 0](#settings_right_click_items_if_ipc_oneOf_i0) |
+| [item 1](#settings_right_click_items_if_ipc_oneOf_i1) |
+
+###### <a name="settings_right_click_items_if_ipc_oneOf_i0"></a>2.2.1.5.5.1. Property `Rovr Config > settings > right_click > right_click items > if > ipc > oneOf > item 0`
+
+|              |           |
+| ------------ | --------- |
+| **Type**     | `boolean` |
+| **Required** | No        |
+
+###### <a name="settings_right_click_items_if_ipc_oneOf_i1"></a>2.2.1.5.5.2. Property `Rovr Config > settings > right_click > right_click items > if > ipc > oneOf > item 1`
+
+|              |                    |
+| ------------ | ------------------ |
+| **Type**     | `enum (of string)` |
+| **Required** | No                 |
+
+Must be one of:
+
+- "null"
+
+###### <a name="settings_right_click_items_if_link"></a>2.2.1.5.6. Property `Rovr Config > settings > right_click > right_click items > if > link`
+
+|              |           |
+| ------------ | --------- |
+| **Type**     | `boolean` |
+| **Required** | No        |
+
+**Description:** Only enable this menu item if the selected item is a symlink/junction (true) or not (false)
+
 ##### <a name="settings_right_click_items_options"></a>2.2.1.6. Property `Rovr Config > settings > right_click > right_click items > options`
 
 |              |                   |
@@ -1483,6 +1571,8 @@ Must be one of:
 | [os](#settings_right_click_items_if_os)               | array of string | Only enable this menu item if the operating system is one of the following (case insensitive)                                                                                              |
 | [cwd](#settings_right_click_items_if_cwd)             | array of string | Only enable this menu item if the current working directory matches one (or more) of the glob patterns in this list (look at https://docs.python.org/3/library/fnmatch.html for more info) |
 | [directory](#settings_right_click_items_if_directory) | boolean         | Only enable this menu item if the selected item is a directory (set to true) or a file (set to false) (if unspecified, matches both files and directories)                                 |
+| [ipc](#settings_right_click_items_if_ipc)             | Combination     | Only enable this menu item if the ipc server is enabled (true), disabled (false), or null (either)                                                                                         |
+| [link](#settings_right_click_items_if_link)           | boolean         | Only enable this menu item if the selected item is a symlink/junction (true) or not (false)                                                                                                |
 
 ###### <a name="settings_right_click_items_if_path"></a>2.2.1.6.1.3.1. Property `Rovr Config > settings > right_click > right_click items > if > path`
 
@@ -1602,6 +1692,48 @@ Must be one of:
 | **Required** | No        |
 
 **Description:** Only enable this menu item if the selected item is a directory (set to true) or a file (set to false) (if unspecified, matches both files and directories)
+
+###### <a name="settings_right_click_items_if_ipc"></a>2.2.1.6.1.3.5. Property `Rovr Config > settings > right_click > right_click items > if > ipc`
+
+|                           |                  |
+| ------------------------- | ---------------- |
+| **Type**                  | `combining`      |
+| **Required**              | No               |
+| **Additional properties** | Any type allowed |
+
+**Description:** Only enable this menu item if the ipc server is enabled (true), disabled (false), or null (either)
+
+| One of(Option)                                        |
+| ----------------------------------------------------- |
+| [item 0](#settings_right_click_items_if_ipc_oneOf_i0) |
+| [item 1](#settings_right_click_items_if_ipc_oneOf_i1) |
+
+###### <a name="settings_right_click_items_if_ipc_oneOf_i0"></a>2.2.1.6.1.3.5.1. Property `Rovr Config > settings > right_click > right_click items > if > ipc > oneOf > item 0`
+
+|              |           |
+| ------------ | --------- |
+| **Type**     | `boolean` |
+| **Required** | No        |
+
+###### <a name="settings_right_click_items_if_ipc_oneOf_i1"></a>2.2.1.6.1.3.5.2. Property `Rovr Config > settings > right_click > right_click items > if > ipc > oneOf > item 1`
+
+|              |                    |
+| ------------ | ------------------ |
+| **Type**     | `enum (of string)` |
+| **Required** | No                 |
+
+Must be one of:
+
+- "null"
+
+###### <a name="settings_right_click_items_if_link"></a>2.2.1.6.1.3.6. Property `Rovr Config > settings > right_click > right_click items > if > link`
+
+|              |           |
+| ------------ | --------- |
+| **Type**     | `boolean` |
+| **Required** | No        |
+
+**Description:** Only enable this menu item if the selected item is a symlink/junction (true) or not (false)
 
 ### <a name="settings_copy_includes_metadata"></a>2.3. Property `Rovr Config > settings > copy_includes_metadata`
 
@@ -1913,26 +2045,40 @@ Must be one of:
 
 ### <a name="settings_preview_rules"></a>2.7. Property `Rovr Config > settings > preview_rules`
 
-|                           |                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          |
-| ------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| **Type**                  | `object`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
-| **Required**              | No                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       |
-| **Additional properties** | [Each additional property must conform to the schema](#settings_preview_rules_additionalProperties)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      |
-| **Default**               | `{"text/.*": "text", "application/(json&#124;javascript&#124;xml&#124;raml\\+yaml)": "text", "application/x-(yaml&#124;script&#124;pem-file&#124;subrip&#124;typescript)": "text", "application/(mbox&#124;ndjson&#124;wine-extension-ini)": "text", "image/svg\\+xml": "resvg", "image/(avif&#124;hei.&#124;jxl)": "image", "image/.*": "image", "application/pdf": "pdf", "application/(zip&#124;gzip&#124;zstd&#124;bzip2&#124;vnd\\.rar)": "archive", "application/x-(xz&#124;x-tar&#124;x-gzip&#124;x-bzip2&#124;x-xz&#124;x-rar&#124;x-rar-compressed&#124;x-7z-compressed)": "archive", "application/(rar&#124;7z.*&#124;tar&#124;xz&#124;bzip.*&#124;lzma&#124;compress&#124;archive&#124;cpio&#124;arj&#124;xar&#124;ms-cab.*)": "archive", "application/(iso9660-image&#124;qemu-disk&#124;ms-wim&#124;apple-diskimage)": "archive", "application/virtualbox-(vhd&#124;vhdx)": "archive", "application/(debian.*-package&#124;redhat-package-manager&#124;rpm&#124;android\\.package-archive)": "archive", "inode/directory": "folder", "font/.*": "font", "application/ms-opentype": "font", "application/font-.*": "font", "application/x-font-.*": "font"}` |
+|                           |                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   |
+| ------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Type**                  | `object`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          |
+| **Required**              | No                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                |
+| **Additional properties** | [Each additional property must conform to the schema](#settings_preview_rules_additionalProperties)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               |
+| **Default**               | `{"application/(debian.*-package&#124;redhat-package-manager&#124;rpm&#124;android\\.package-archive)": "archive", "application/(iso9660-image&#124;qemu-disk&#124;ms-wim&#124;apple-diskimage)": "archive", "application/(rar&#124;7z.*&#124;tar&#124;xz&#124;bzip.*&#124;lzma&#124;compress&#124;archive&#124;cpio&#124;arj&#124;xar&#124;ms-cab.*)": "archive", "application/(zip&#124;zstd&#124;bzip2&#124;vnd\\.rar)": "archive", "application/java-archive": "archive", "application/virtualbox-(vhd&#124;vhdx)": "archive", "application/x-(xz&#124;tar&#124;bzip2&#124;xz&#124;rar&#124;rar-compressed&#124;7z-compressed&#124;zstd-compressed-tar)": "archive", "application/(json&#124;javascript&#124;xml&#124;raml\\+yaml)": "text", "application/(mbox&#124;ndjson&#124;wine-extension-ini)": "text", "application/x-(yaml&#124;script&#124;pem-file&#124;subrip&#124;typescript)": "text", "application/vnd.openxmlformats-officedocument.wordprocessingml.document": "remime", "application/ms-opentype": "font", "application/pdf": "pdf", "image/svg\\+xml": "resvg", "inode/directory": "folder", "application/font-.*": "font", "application/x-font-.*": "font", "image/.*": "image", "text/.*": "text", "font/.*": "font", "application/(x-)?gzip": {"default": "archive", "extensions": {"svgz": "resvg"}}}` |
 
-**Description:** Map MIME type patterns to preview types. Uses regex patterns. Valid preview types: text, image, pdf, archive, folder, resvg, font, remime.
+**Description:** Map MIME type regex patterns to preview types. Rules containing `.*` are evaluated after rules without it, with configuration order preserved within each group. A rule can be a preview type string or a table with a default preview type and extension-specific refinements. Extension keys are lowercase and omit the leading dot.
 -&gt; Use 'remime' if you want a more accurate description from file(1)
 
-| Property                                         | Type             | Title/Description |
-| ------------------------------------------------ | ---------------- | ----------------- |
-| [](#settings_preview_rules_additionalProperties) | enum (of string) |                   |
+| Property                                         | Type        | Title/Description |
+| ------------------------------------------------ | ----------- | ----------------- |
+| [](#settings_preview_rules_additionalProperties) | Combination |                   |
 
 #### <a name="settings_preview_rules_additionalProperties"></a>2.7.1. Property `Rovr Config > settings > preview_rules > additionalProperties`
 
-|              |                    |
-| ------------ | ------------------ |
-| **Type**     | `enum (of string)` |
-| **Required** | No                 |
+|                           |                  |
+| ------------------------- | ---------------- |
+| **Type**                  | `combining`      |
+| **Required**              | No               |
+| **Additional properties** | Any type allowed |
+
+| One of(Option)                                                        |
+| --------------------------------------------------------------------- |
+| [preview_type](#settings_preview_rules_additionalProperties_oneOf_i0) |
+| [item 1](#settings_preview_rules_additionalProperties_oneOf_i1)       |
+
+##### <a name="settings_preview_rules_additionalProperties_oneOf_i0"></a>2.7.1.1. Property `Rovr Config > settings > preview_rules > additionalProperties > oneOf > preview_type`
+
+|                |                            |
+| -------------- | -------------------------- |
+| **Type**       | `enum (of string)`         |
+| **Required**   | No                         |
+| **Defined in** | #/definitions/preview_type |
 
 Must be one of:
 
@@ -1944,6 +2090,53 @@ Must be one of:
 - "remime"
 - "resvg"
 - "font"
+
+##### <a name="settings_preview_rules_additionalProperties_oneOf_i1"></a>2.7.1.2. Property `Rovr Config > settings > preview_rules > additionalProperties > oneOf > item 1`
+
+|                           |             |
+| ------------------------- | ----------- |
+| **Type**                  | `object`    |
+| **Required**              | No          |
+| **Additional properties** | Not allowed |
+
+| Property                                                                       | Type             | Title/Description                                                                                                                     |
+| ------------------------------------------------------------------------------ | ---------------- | ------------------------------------------------------------------------------------------------------------------------------------- |
+| [default](#settings_preview_rules_additionalProperties_oneOf_i1_default)       | enum (of string) |                                                                                                                                       |
+| [extensions](#settings_preview_rules_additionalProperties_oneOf_i1_extensions) | object           | Map lowercase file extensions without a leading dot to preview types. These refine this MIME rule and take priority over its default. |
+
+###### <a name="settings_preview_rules_additionalProperties_oneOf_i1_default"></a>2.7.1.2.1. Property `Rovr Config > settings > preview_rules > additionalProperties > oneOf > item 1 > default`
+
+|                        |                                                                                                               |
+| ---------------------- | ------------------------------------------------------------------------------------------------------------- |
+| **Type**               | `enum (of string)`                                                                                            |
+| **Required**           | Yes                                                                                                           |
+| **Same definition as** | [settings_preview_rules_additionalProperties_oneOf_i0](#settings_preview_rules_additionalProperties_oneOf_i0) |
+
+###### <a name="settings_preview_rules_additionalProperties_oneOf_i1_extensions"></a>2.7.1.2.2. Property `Rovr Config > settings > preview_rules > additionalProperties > oneOf > item 1 > extensions`
+
+|                           |             |
+| ------------------------- | ----------- |
+| **Type**                  | `object`    |
+| **Required**              | No          |
+| **Additional properties** | Not allowed |
+
+**Description:** Map lowercase file extensions without a leading dot to preview types. These refine this MIME rule and take priority over its default.
+
+| Property                                                                                 | Type             | Title/Description |
+| ---------------------------------------------------------------------------------------- | ---------------- | ----------------- |
+| [^[a-z0-9]+$](#settings_preview_rules_additionalProperties_oneOf_i1_extensions_pattern1) | enum (of string) |                   |
+
+###### <a name="settings_preview_rules_additionalProperties_oneOf_i1_extensions_pattern1"></a>2.7.1.2.2.1. Pattern Property `Rovr Config > settings > preview_rules > additionalProperties > oneOf > item 1 > extensions > preview_type`
+
+> All properties whose name matches the regular expression
+> `^[a-z0-9]+$` ([Test](https://regex101.com/?regex=%5E%5Ba-z0-9%5D%2B%24))
+> must respect the following conditions
+
+|                        |                                                                                                               |
+| ---------------------- | ------------------------------------------------------------------------------------------------------------- |
+| **Type**               | `enum (of string)`                                                                                            |
+| **Required**           | No                                                                                                            |
+| **Same definition as** | [settings_preview_rules_additionalProperties_oneOf_i0](#settings_preview_rules_additionalProperties_oneOf_i0) |
 
 ### <a name="settings_openers"></a>2.8. Property `Rovr Config > settings > openers`
 
@@ -2200,6 +2393,311 @@ Must be one of:
 | ------------ | -------- |
 | **Type**     | `string` |
 | **Required** | No       |
+
+### <a name="settings_ipc"></a>2.10. Property `Rovr Config > settings > ipc`
+
+|                           |             |
+| ------------------------- | ----------- |
+| **Type**                  | `object`    |
+| **Required**              | No          |
+| **Additional properties** | Not allowed |
+
+**Description:** Settings related to the IPC server that allows external programs to control rovr
+
+| Property                                 | Type    | Title/Description                |
+| ---------------------------------------- | ------- | -------------------------------- |
+| [enabled](#settings_ipc_enabled)         | boolean | Whether to enable the IPC server |
+| [permissions](#settings_ipc_permissions) | object  | Permissions for the IPC server   |
+
+#### <a name="settings_ipc_enabled"></a>2.10.1. Property `Rovr Config > settings > ipc > enabled`
+
+|              |           |
+| ------------ | --------- |
+| **Type**     | `boolean` |
+| **Required** | No        |
+| **Default**  | `false`   |
+
+**Description:** Whether to enable the IPC server
+
+#### <a name="settings_ipc_permissions"></a>2.10.2. Property `Rovr Config > settings > ipc > permissions`
+
+|                           |             |
+| ------------------------- | ----------- |
+| **Type**                  | `object`    |
+| **Required**              | No          |
+| **Additional properties** | Not allowed |
+
+**Description:** Permissions for the IPC server
+
+| Property                                                    | Type             | Title/Description                                                       |
+| ----------------------------------------------------------- | ---------------- | ----------------------------------------------------------------------- |
+| [cd](#settings_ipc_permissions_cd)                          | enum (of string) | Control changing the current working directory of rovr                  |
+| [clipboard.copy](#settings_ipc_permissions_clipboardcopy)   | enum (of string) | Control copying to the clipboard                                        |
+| [clipboard.cut](#settings_ipc_permissions_clipboardcut)     | enum (of string) | Control cutting to the clipboard                                        |
+| [clipboard.list](#settings_ipc_permissions_clipboardlist)   | enum (of string) | Control getting the list of items in clipboard, along with their states |
+| [clipboard.paste](#settings_ipc_permissions_clipboardpaste) | enum (of string) | Control pasting from the clipboard                                      |
+| [tab.list](#settings_ipc_permissions_tablist)               | enum (of string) | Control get the list of tabs                                            |
+| [tab.new](#settings_ipc_permissions_tabnew)                 | enum (of string) | Control creating new tabs                                               |
+| [tab.focus](#settings_ipc_permissions_tabfocus)             | enum (of string) | Control focusing a specified tab index                                  |
+| [tab.close](#settings_ipc_permissions_tabclose)             | enum (of string) | Control closing tabs                                                    |
+| [tab.history](#settings_ipc_permissions_tabhistory)         | enum (of string) | Control getting the navigation history of a specified tab index         |
+| [quit](#settings_ipc_permissions_quit)                      | enum (of string) | Control quitting rovr                                                   |
+| [suspend](#settings_ipc_permissions_suspend)                | enum (of string) | Control suspending rovr                                                 |
+| [notify](#settings_ipc_permissions_notify)                  | enum (of string) | Control sending notifications via ipc to the user                       |
+| [ask](#settings_ipc_permissions_ask)                        | enum (of string) | Allow the ipc to prompt a yes/no choice to the user.                    |
+| [input](#settings_ipc_permissions_input)                    | enum (of string) | Allow the ipc to prompt for text input from the user.                   |
+
+##### <a name="settings_ipc_permissions_cd"></a>2.10.2.1. Property `Rovr Config > settings > ipc > permissions > cd`
+
+|                |                         |
+| -------------- | ----------------------- |
+| **Type**       | `enum (of string)`      |
+| **Required**   | No                      |
+| **Default**    | `"allow"`               |
+| **Defined in** | #/definitions/ipc_perms |
+
+**Description:** Control changing the current working directory of rovr
+
+Must be one of:
+
+- "allow"
+- "prompt"
+- "deny"
+
+##### <a name="settings_ipc_permissions_clipboardcopy"></a>2.10.2.2. Property `Rovr Config > settings > ipc > permissions > clipboard.copy`
+
+|                |                         |
+| -------------- | ----------------------- |
+| **Type**       | `enum (of string)`      |
+| **Required**   | No                      |
+| **Default**    | `"allow"`               |
+| **Defined in** | #/definitions/ipc_perms |
+
+**Description:** Control copying to the clipboard
+
+Must be one of:
+
+- "allow"
+- "prompt"
+- "deny"
+
+##### <a name="settings_ipc_permissions_clipboardcut"></a>2.10.2.3. Property `Rovr Config > settings > ipc > permissions > clipboard.cut`
+
+|                |                         |
+| -------------- | ----------------------- |
+| **Type**       | `enum (of string)`      |
+| **Required**   | No                      |
+| **Default**    | `"allow"`               |
+| **Defined in** | #/definitions/ipc_perms |
+
+**Description:** Control cutting to the clipboard
+
+Must be one of:
+
+- "allow"
+- "prompt"
+- "deny"
+
+##### <a name="settings_ipc_permissions_clipboardlist"></a>2.10.2.4. Property `Rovr Config > settings > ipc > permissions > clipboard.list`
+
+|                |                         |
+| -------------- | ----------------------- |
+| **Type**       | `enum (of string)`      |
+| **Required**   | No                      |
+| **Default**    | `"allow"`               |
+| **Defined in** | #/definitions/ipc_perms |
+
+**Description:** Control getting the list of items in clipboard, along with their states
+
+Must be one of:
+
+- "allow"
+- "prompt"
+- "deny"
+
+##### <a name="settings_ipc_permissions_clipboardpaste"></a>2.10.2.5. Property `Rovr Config > settings > ipc > permissions > clipboard.paste`
+
+|                |                         |
+| -------------- | ----------------------- |
+| **Type**       | `enum (of string)`      |
+| **Required**   | No                      |
+| **Default**    | `"prompt"`              |
+| **Defined in** | #/definitions/ipc_perms |
+
+**Description:** Control pasting from the clipboard
+
+Must be one of:
+
+- "allow"
+- "prompt"
+- "deny"
+
+##### <a name="settings_ipc_permissions_tablist"></a>2.10.2.6. Property `Rovr Config > settings > ipc > permissions > tab.list`
+
+|                |                         |
+| -------------- | ----------------------- |
+| **Type**       | `enum (of string)`      |
+| **Required**   | No                      |
+| **Default**    | `"allow"`               |
+| **Defined in** | #/definitions/ipc_perms |
+
+**Description:** Control get the list of tabs
+
+Must be one of:
+
+- "allow"
+- "prompt"
+- "deny"
+
+##### <a name="settings_ipc_permissions_tabnew"></a>2.10.2.7. Property `Rovr Config > settings > ipc > permissions > tab.new`
+
+|                |                         |
+| -------------- | ----------------------- |
+| **Type**       | `enum (of string)`      |
+| **Required**   | No                      |
+| **Default**    | `"allow"`               |
+| **Defined in** | #/definitions/ipc_perms |
+
+**Description:** Control creating new tabs
+
+Must be one of:
+
+- "allow"
+- "prompt"
+- "deny"
+
+##### <a name="settings_ipc_permissions_tabfocus"></a>2.10.2.8. Property `Rovr Config > settings > ipc > permissions > tab.focus`
+
+|                |                         |
+| -------------- | ----------------------- |
+| **Type**       | `enum (of string)`      |
+| **Required**   | No                      |
+| **Default**    | `"allow"`               |
+| **Defined in** | #/definitions/ipc_perms |
+
+**Description:** Control focusing a specified tab index
+
+Must be one of:
+
+- "allow"
+- "prompt"
+- "deny"
+
+##### <a name="settings_ipc_permissions_tabclose"></a>2.10.2.9. Property `Rovr Config > settings > ipc > permissions > tab.close`
+
+|                |                         |
+| -------------- | ----------------------- |
+| **Type**       | `enum (of string)`      |
+| **Required**   | No                      |
+| **Default**    | `"prompt"`              |
+| **Defined in** | #/definitions/ipc_perms |
+
+**Description:** Control closing tabs
+
+Must be one of:
+
+- "allow"
+- "prompt"
+- "deny"
+
+##### <a name="settings_ipc_permissions_tabhistory"></a>2.10.2.10. Property `Rovr Config > settings > ipc > permissions > tab.history`
+
+|                |                         |
+| -------------- | ----------------------- |
+| **Type**       | `enum (of string)`      |
+| **Required**   | No                      |
+| **Default**    | `"allow"`               |
+| **Defined in** | #/definitions/ipc_perms |
+
+**Description:** Control getting the navigation history of a specified tab index
+
+Must be one of:
+
+- "allow"
+- "prompt"
+- "deny"
+
+##### <a name="settings_ipc_permissions_quit"></a>2.10.2.11. Property `Rovr Config > settings > ipc > permissions > quit`
+
+|                |                         |
+| -------------- | ----------------------- |
+| **Type**       | `enum (of string)`      |
+| **Required**   | No                      |
+| **Default**    | `"prompt"`              |
+| **Defined in** | #/definitions/ipc_perms |
+
+**Description:** Control quitting rovr
+
+Must be one of:
+
+- "allow"
+- "prompt"
+- "deny"
+
+##### <a name="settings_ipc_permissions_suspend"></a>2.10.2.12. Property `Rovr Config > settings > ipc > permissions > suspend`
+
+|                |                         |
+| -------------- | ----------------------- |
+| **Type**       | `enum (of string)`      |
+| **Required**   | No                      |
+| **Default**    | `"allow"`               |
+| **Defined in** | #/definitions/ipc_perms |
+
+**Description:** Control suspending rovr
+
+Must be one of:
+
+- "allow"
+- "prompt"
+- "deny"
+
+##### <a name="settings_ipc_permissions_notify"></a>2.10.2.13. Property `Rovr Config > settings > ipc > permissions > notify`
+
+|                |                             |
+| -------------- | --------------------------- |
+| **Type**       | `enum (of string)`          |
+| **Required**   | No                          |
+| **Default**    | `"allow"`                   |
+| **Defined in** | #/definitions/ipc_no_prompt |
+
+**Description:** Control sending notifications via ipc to the user
+
+Must be one of:
+
+- "allow"
+- "deny"
+
+##### <a name="settings_ipc_permissions_ask"></a>2.10.2.14. Property `Rovr Config > settings > ipc > permissions > ask`
+
+|                |                             |
+| -------------- | --------------------------- |
+| **Type**       | `enum (of string)`          |
+| **Required**   | No                          |
+| **Default**    | `"allow"`                   |
+| **Defined in** | #/definitions/ipc_no_prompt |
+
+**Description:** Allow the ipc to prompt a yes/no choice to the user.
+
+Must be one of:
+
+- "allow"
+- "deny"
+
+##### <a name="settings_ipc_permissions_input"></a>2.10.2.15. Property `Rovr Config > settings > ipc > permissions > input`
+
+|                |                             |
+| -------------- | --------------------------- |
+| **Type**       | `enum (of string)`          |
+| **Required**   | No                          |
+| **Default**    | `"allow"`                   |
+| **Defined in** | #/definitions/ipc_no_prompt |
+
+**Description:** Allow the ipc to prompt for text input from the user.
+
+Must be one of:
+
+- "allow"
+- "deny"
 
 ## <a name="metadata"></a>3. Property `Rovr Config > metadata`
 
@@ -2571,6 +3069,7 @@ Must be one of:
 | [new](#keybinds_new)                                                   | array of string | Create a new item in the current directory.                                                                                                  |
 | [bulk_create](#keybinds_bulk_create)                                   | array of string | Bulk create files or folders using an editor list.                                                                                           |
 | [toggle_all](#keybinds_toggle_all)                                     | array of string | Enter into select mode and select/unselect everything.                                                                                       |
+| [invert_selections](#keybinds_invert_selections)                       | array of string | Invert the current selections in select mode (will enter select mode if not already in it)                                                   |
 | [zip](#keybinds_zip)                                                   | array of string | Create a zip archive from selected files.                                                                                                    |
 | [unzip](#keybinds_unzip)                                               | array of string | Extract a selected zip archive.                                                                                                              |
 | [open_right_click_menu](#keybinds_open_right_click_menu)               | array of string | Open the right-click context menu.                                                                                                           |
@@ -3463,7 +3962,36 @@ Must be one of:
 | **Type**     | `string` |
 | **Required** | No       |
 
-### <a name="keybinds_zip"></a>6.24. Property `Rovr Config > keybinds > zip`
+### <a name="keybinds_invert_selections"></a>6.24. Property `Rovr Config > keybinds > invert_selections`
+
+|                |                       |
+| -------------- | --------------------- |
+| **Type**       | `array of string`     |
+| **Required**   | No                    |
+| **Defined in** | #/definitions/keybind |
+
+**Description:** Invert the current selections in select mode (will enter select mode if not already in it)
+
+|                      | Array restrictions |
+| -------------------- | ------------------ |
+| **Min items**        | N/A                |
+| **Max items**        | N/A                |
+| **Items unicity**    | False              |
+| **Additional items** | False              |
+| **Tuple validation** | See below          |
+
+| Each item of this array must be                | Description |
+| ---------------------------------------------- | ----------- |
+| [toggle_pin items](#keybinds_toggle_pin_items) |             |
+
+#### <a name="keybinds_toggle_pin_items"></a>6.24.1. Rovr Config > keybinds > toggle_pin > toggle_pin items
+
+|              |          |
+| ------------ | -------- |
+| **Type**     | `string` |
+| **Required** | No       |
+
+### <a name="keybinds_zip"></a>6.25. Property `Rovr Config > keybinds > zip`
 
 |                |                       |
 | -------------- | --------------------- |
@@ -3485,14 +4013,14 @@ Must be one of:
 | ---------------------------------------------- | ----------- |
 | [toggle_pin items](#keybinds_toggle_pin_items) |             |
 
-#### <a name="keybinds_toggle_pin_items"></a>6.24.1. Rovr Config > keybinds > toggle_pin > toggle_pin items
+#### <a name="keybinds_toggle_pin_items"></a>6.25.1. Rovr Config > keybinds > toggle_pin > toggle_pin items
 
 |              |          |
 | ------------ | -------- |
 | **Type**     | `string` |
 | **Required** | No       |
 
-### <a name="keybinds_unzip"></a>6.25. Property `Rovr Config > keybinds > unzip`
+### <a name="keybinds_unzip"></a>6.26. Property `Rovr Config > keybinds > unzip`
 
 |                |                       |
 | -------------- | --------------------- |
@@ -3514,14 +4042,14 @@ Must be one of:
 | ---------------------------------------------- | ----------- |
 | [toggle_pin items](#keybinds_toggle_pin_items) |             |
 
-#### <a name="keybinds_toggle_pin_items"></a>6.25.1. Rovr Config > keybinds > toggle_pin > toggle_pin items
+#### <a name="keybinds_toggle_pin_items"></a>6.26.1. Rovr Config > keybinds > toggle_pin > toggle_pin items
 
 |              |          |
 | ------------ | -------- |
 | **Type**     | `string` |
 | **Required** | No       |
 
-### <a name="keybinds_open_right_click_menu"></a>6.26. Property `Rovr Config > keybinds > open_right_click_menu`
+### <a name="keybinds_open_right_click_menu"></a>6.27. Property `Rovr Config > keybinds > open_right_click_menu`
 
 |                |                       |
 | -------------- | --------------------- |
@@ -3543,14 +4071,14 @@ Must be one of:
 | ---------------------------------------------- | ----------- |
 | [toggle_pin items](#keybinds_toggle_pin_items) |             |
 
-#### <a name="keybinds_toggle_pin_items"></a>6.26.1. Rovr Config > keybinds > toggle_pin > toggle_pin items
+#### <a name="keybinds_toggle_pin_items"></a>6.27.1. Rovr Config > keybinds > toggle_pin > toggle_pin items
 
 |              |          |
 | ------------ | -------- |
 | **Type**     | `string` |
 | **Required** | No       |
 
-### <a name="keybinds_extra_copy"></a>6.27. Property `Rovr Config > keybinds > extra_copy`
+### <a name="keybinds_extra_copy"></a>6.28. Property `Rovr Config > keybinds > extra_copy`
 
 |                           |             |
 | ------------------------- | ----------- |
@@ -3568,7 +4096,7 @@ Must be one of:
 | [copy_to_system_clip](#keybinds_extra_copy_copy_to_system_clip)       | array of string | Copy the selected files to the system clipboard               |
 | [copy_current_directory](#keybinds_extra_copy_copy_current_directory) | array of string | Copy the current directory's path to the system clipboard     |
 
-#### <a name="keybinds_extra_copy_open_popup"></a>6.27.1. Property `Rovr Config > keybinds > extra_copy > open_popup`
+#### <a name="keybinds_extra_copy_open_popup"></a>6.28.1. Property `Rovr Config > keybinds > extra_copy > open_popup`
 
 |                |                       |
 | -------------- | --------------------- |
@@ -3590,14 +4118,14 @@ Must be one of:
 | ---------------------------------------------- | ----------- |
 | [toggle_pin items](#keybinds_toggle_pin_items) |             |
 
-##### <a name="keybinds_toggle_pin_items"></a>6.27.1.1. Rovr Config > keybinds > toggle_pin > toggle_pin items
+##### <a name="keybinds_toggle_pin_items"></a>6.28.1.1. Rovr Config > keybinds > toggle_pin > toggle_pin items
 
 |              |          |
 | ------------ | -------- |
 | **Type**     | `string` |
 | **Required** | No       |
 
-#### <a name="keybinds_extra_copy_copy_to_rovr"></a>6.27.2. Property `Rovr Config > keybinds > extra_copy > copy_to_rovr`
+#### <a name="keybinds_extra_copy_copy_to_rovr"></a>6.28.2. Property `Rovr Config > keybinds > extra_copy > copy_to_rovr`
 
 |                |                       |
 | -------------- | --------------------- |
@@ -3619,14 +4147,14 @@ Must be one of:
 | ---------------------------------------------- | ----------- |
 | [toggle_pin items](#keybinds_toggle_pin_items) |             |
 
-##### <a name="keybinds_toggle_pin_items"></a>6.27.2.1. Rovr Config > keybinds > toggle_pin > toggle_pin items
+##### <a name="keybinds_toggle_pin_items"></a>6.28.2.1. Rovr Config > keybinds > toggle_pin > toggle_pin items
 
 |              |          |
 | ------------ | -------- |
 | **Type**     | `string` |
 | **Required** | No       |
 
-#### <a name="keybinds_extra_copy_copy_highlighted"></a>6.27.3. Property `Rovr Config > keybinds > extra_copy > copy_highlighted`
+#### <a name="keybinds_extra_copy_copy_highlighted"></a>6.28.3. Property `Rovr Config > keybinds > extra_copy > copy_highlighted`
 
 |                |                       |
 | -------------- | --------------------- |
@@ -3648,14 +4176,14 @@ Must be one of:
 | ---------------------------------------------- | ----------- |
 | [toggle_pin items](#keybinds_toggle_pin_items) |             |
 
-##### <a name="keybinds_toggle_pin_items"></a>6.27.3.1. Rovr Config > keybinds > toggle_pin > toggle_pin items
+##### <a name="keybinds_toggle_pin_items"></a>6.28.3.1. Rovr Config > keybinds > toggle_pin > toggle_pin items
 
 |              |          |
 | ------------ | -------- |
 | **Type**     | `string` |
 | **Required** | No       |
 
-#### <a name="keybinds_extra_copy_copy_to_system_clip"></a>6.27.4. Property `Rovr Config > keybinds > extra_copy > copy_to_system_clip`
+#### <a name="keybinds_extra_copy_copy_to_system_clip"></a>6.28.4. Property `Rovr Config > keybinds > extra_copy > copy_to_system_clip`
 
 |                |                       |
 | -------------- | --------------------- |
@@ -3677,14 +4205,14 @@ Must be one of:
 | ---------------------------------------------- | ----------- |
 | [toggle_pin items](#keybinds_toggle_pin_items) |             |
 
-##### <a name="keybinds_toggle_pin_items"></a>6.27.4.1. Rovr Config > keybinds > toggle_pin > toggle_pin items
+##### <a name="keybinds_toggle_pin_items"></a>6.28.4.1. Rovr Config > keybinds > toggle_pin > toggle_pin items
 
 |              |          |
 | ------------ | -------- |
 | **Type**     | `string` |
 | **Required** | No       |
 
-#### <a name="keybinds_extra_copy_copy_current_directory"></a>6.27.5. Property `Rovr Config > keybinds > extra_copy > copy_current_directory`
+#### <a name="keybinds_extra_copy_copy_current_directory"></a>6.28.5. Property `Rovr Config > keybinds > extra_copy > copy_current_directory`
 
 |                |                       |
 | -------------- | --------------------- |
@@ -3706,14 +4234,14 @@ Must be one of:
 | ---------------------------------------------- | ----------- |
 | [toggle_pin items](#keybinds_toggle_pin_items) |             |
 
-##### <a name="keybinds_toggle_pin_items"></a>6.27.5.1. Rovr Config > keybinds > toggle_pin > toggle_pin items
+##### <a name="keybinds_toggle_pin_items"></a>6.28.5.1. Rovr Config > keybinds > toggle_pin > toggle_pin items
 
 |              |          |
 | ------------ | -------- |
 | **Type**     | `string` |
 | **Required** | No       |
 
-### <a name="keybinds_up"></a>6.28. Property `Rovr Config > keybinds > up`
+### <a name="keybinds_up"></a>6.29. Property `Rovr Config > keybinds > up`
 
 |                |                       |
 | -------------- | --------------------- |
@@ -3735,14 +4263,14 @@ Must be one of:
 | ---------------------------------------------- | ----------- |
 | [toggle_pin items](#keybinds_toggle_pin_items) |             |
 
-#### <a name="keybinds_toggle_pin_items"></a>6.28.1. Rovr Config > keybinds > toggle_pin > toggle_pin items
+#### <a name="keybinds_toggle_pin_items"></a>6.29.1. Rovr Config > keybinds > toggle_pin > toggle_pin items
 
 |              |          |
 | ------------ | -------- |
 | **Type**     | `string` |
 | **Required** | No       |
 
-### <a name="keybinds_down"></a>6.29. Property `Rovr Config > keybinds > down`
+### <a name="keybinds_down"></a>6.30. Property `Rovr Config > keybinds > down`
 
 |                |                       |
 | -------------- | --------------------- |
@@ -3764,14 +4292,14 @@ Must be one of:
 | ---------------------------------------------- | ----------- |
 | [toggle_pin items](#keybinds_toggle_pin_items) |             |
 
-#### <a name="keybinds_toggle_pin_items"></a>6.29.1. Rovr Config > keybinds > toggle_pin > toggle_pin items
+#### <a name="keybinds_toggle_pin_items"></a>6.30.1. Rovr Config > keybinds > toggle_pin > toggle_pin items
 
 |              |          |
 | ------------ | -------- |
 | **Type**     | `string` |
 | **Required** | No       |
 
-### <a name="keybinds_up_tree"></a>6.30. Property `Rovr Config > keybinds > up_tree`
+### <a name="keybinds_up_tree"></a>6.31. Property `Rovr Config > keybinds > up_tree`
 
 |                |                       |
 | -------------- | --------------------- |
@@ -3793,14 +4321,14 @@ Must be one of:
 | ---------------------------------------------- | ----------- |
 | [toggle_pin items](#keybinds_toggle_pin_items) |             |
 
-#### <a name="keybinds_toggle_pin_items"></a>6.30.1. Rovr Config > keybinds > toggle_pin > toggle_pin items
+#### <a name="keybinds_toggle_pin_items"></a>6.31.1. Rovr Config > keybinds > toggle_pin > toggle_pin items
 
 |              |          |
 | ------------ | -------- |
 | **Type**     | `string` |
 | **Required** | No       |
 
-### <a name="keybinds_down_tree"></a>6.31. Property `Rovr Config > keybinds > down_tree`
+### <a name="keybinds_down_tree"></a>6.32. Property `Rovr Config > keybinds > down_tree`
 
 |                |                       |
 | -------------- | --------------------- |
@@ -3822,14 +4350,14 @@ Must be one of:
 | ---------------------------------------------- | ----------- |
 | [toggle_pin items](#keybinds_toggle_pin_items) |             |
 
-#### <a name="keybinds_toggle_pin_items"></a>6.31.1. Rovr Config > keybinds > toggle_pin > toggle_pin items
+#### <a name="keybinds_toggle_pin_items"></a>6.32.1. Rovr Config > keybinds > toggle_pin > toggle_pin items
 
 |              |          |
 | ------------ | -------- |
 | **Type**     | `string` |
 | **Required** | No       |
 
-### <a name="keybinds_bypass_up_tree"></a>6.32. Property `Rovr Config > keybinds > bypass_up_tree`
+### <a name="keybinds_bypass_up_tree"></a>6.33. Property `Rovr Config > keybinds > bypass_up_tree`
 
 |                |                       |
 | -------------- | --------------------- |
@@ -3851,14 +4379,14 @@ Must be one of:
 | ---------------------------------------------- | ----------- |
 | [toggle_pin items](#keybinds_toggle_pin_items) |             |
 
-#### <a name="keybinds_toggle_pin_items"></a>6.32.1. Rovr Config > keybinds > toggle_pin > toggle_pin items
+#### <a name="keybinds_toggle_pin_items"></a>6.33.1. Rovr Config > keybinds > toggle_pin > toggle_pin items
 
 |              |          |
 | ------------ | -------- |
 | **Type**     | `string` |
 | **Required** | No       |
 
-### <a name="keybinds_bypass_down_tree"></a>6.33. Property `Rovr Config > keybinds > bypass_down_tree`
+### <a name="keybinds_bypass_down_tree"></a>6.34. Property `Rovr Config > keybinds > bypass_down_tree`
 
 |                |                       |
 | -------------- | --------------------- |
@@ -3880,14 +4408,14 @@ Must be one of:
 | ---------------------------------------------- | ----------- |
 | [toggle_pin items](#keybinds_toggle_pin_items) |             |
 
-#### <a name="keybinds_toggle_pin_items"></a>6.33.1. Rovr Config > keybinds > toggle_pin > toggle_pin items
+#### <a name="keybinds_toggle_pin_items"></a>6.34.1. Rovr Config > keybinds > toggle_pin > toggle_pin items
 
 |              |          |
 | ------------ | -------- |
 | **Type**     | `string` |
 | **Required** | No       |
 
-### <a name="keybinds_page_up"></a>6.34. Property `Rovr Config > keybinds > page_up`
+### <a name="keybinds_page_up"></a>6.35. Property `Rovr Config > keybinds > page_up`
 
 |                |                       |
 | -------------- | --------------------- |
@@ -3909,14 +4437,14 @@ Must be one of:
 | ---------------------------------------------- | ----------- |
 | [toggle_pin items](#keybinds_toggle_pin_items) |             |
 
-#### <a name="keybinds_toggle_pin_items"></a>6.34.1. Rovr Config > keybinds > toggle_pin > toggle_pin items
+#### <a name="keybinds_toggle_pin_items"></a>6.35.1. Rovr Config > keybinds > toggle_pin > toggle_pin items
 
 |              |          |
 | ------------ | -------- |
 | **Type**     | `string` |
 | **Required** | No       |
 
-### <a name="keybinds_page_down"></a>6.35. Property `Rovr Config > keybinds > page_down`
+### <a name="keybinds_page_down"></a>6.36. Property `Rovr Config > keybinds > page_down`
 
 |                |                       |
 | -------------- | --------------------- |
@@ -3938,14 +4466,14 @@ Must be one of:
 | ---------------------------------------------- | ----------- |
 | [toggle_pin items](#keybinds_toggle_pin_items) |             |
 
-#### <a name="keybinds_toggle_pin_items"></a>6.35.1. Rovr Config > keybinds > toggle_pin > toggle_pin items
+#### <a name="keybinds_toggle_pin_items"></a>6.36.1. Rovr Config > keybinds > toggle_pin > toggle_pin items
 
 |              |          |
 | ------------ | -------- |
 | **Type**     | `string` |
 | **Required** | No       |
 
-### <a name="keybinds_home"></a>6.36. Property `Rovr Config > keybinds > home`
+### <a name="keybinds_home"></a>6.37. Property `Rovr Config > keybinds > home`
 
 |                |                       |
 | -------------- | --------------------- |
@@ -3967,14 +4495,14 @@ Must be one of:
 | ---------------------------------------------- | ----------- |
 | [toggle_pin items](#keybinds_toggle_pin_items) |             |
 
-#### <a name="keybinds_toggle_pin_items"></a>6.36.1. Rovr Config > keybinds > toggle_pin > toggle_pin items
+#### <a name="keybinds_toggle_pin_items"></a>6.37.1. Rovr Config > keybinds > toggle_pin > toggle_pin items
 
 |              |          |
 | ------------ | -------- |
 | **Type**     | `string` |
 | **Required** | No       |
 
-### <a name="keybinds_end"></a>6.37. Property `Rovr Config > keybinds > end`
+### <a name="keybinds_end"></a>6.38. Property `Rovr Config > keybinds > end`
 
 |                |                       |
 | -------------- | --------------------- |
@@ -3996,14 +4524,14 @@ Must be one of:
 | ---------------------------------------------- | ----------- |
 | [toggle_pin items](#keybinds_toggle_pin_items) |             |
 
-#### <a name="keybinds_toggle_pin_items"></a>6.37.1. Rovr Config > keybinds > toggle_pin > toggle_pin items
+#### <a name="keybinds_toggle_pin_items"></a>6.38.1. Rovr Config > keybinds > toggle_pin > toggle_pin items
 
 |              |          |
 | ------------ | -------- |
 | **Type**     | `string` |
 | **Required** | No       |
 
-### <a name="keybinds_hist_previous"></a>6.38. Property `Rovr Config > keybinds > hist_previous`
+### <a name="keybinds_hist_previous"></a>6.39. Property `Rovr Config > keybinds > hist_previous`
 
 |                |                       |
 | -------------- | --------------------- |
@@ -4025,14 +4553,14 @@ Must be one of:
 | ---------------------------------------------- | ----------- |
 | [toggle_pin items](#keybinds_toggle_pin_items) |             |
 
-#### <a name="keybinds_toggle_pin_items"></a>6.38.1. Rovr Config > keybinds > toggle_pin > toggle_pin items
+#### <a name="keybinds_toggle_pin_items"></a>6.39.1. Rovr Config > keybinds > toggle_pin > toggle_pin items
 
 |              |          |
 | ------------ | -------- |
 | **Type**     | `string` |
 | **Required** | No       |
 
-### <a name="keybinds_hist_next"></a>6.39. Property `Rovr Config > keybinds > hist_next`
+### <a name="keybinds_hist_next"></a>6.40. Property `Rovr Config > keybinds > hist_next`
 
 |                |                       |
 | -------------- | --------------------- |
@@ -4054,14 +4582,14 @@ Must be one of:
 | ---------------------------------------------- | ----------- |
 | [toggle_pin items](#keybinds_toggle_pin_items) |             |
 
-#### <a name="keybinds_toggle_pin_items"></a>6.39.1. Rovr Config > keybinds > toggle_pin > toggle_pin items
+#### <a name="keybinds_toggle_pin_items"></a>6.40.1. Rovr Config > keybinds > toggle_pin > toggle_pin items
 
 |              |          |
 | ------------ | -------- |
 | **Type**     | `string` |
 | **Required** | No       |
 
-### <a name="keybinds_toggle_visual"></a>6.40. Property `Rovr Config > keybinds > toggle_visual`
+### <a name="keybinds_toggle_visual"></a>6.41. Property `Rovr Config > keybinds > toggle_visual`
 
 |                |                       |
 | -------------- | --------------------- |
@@ -4083,14 +4611,14 @@ Must be one of:
 | ---------------------------------------------- | ----------- |
 | [toggle_pin items](#keybinds_toggle_pin_items) |             |
 
-#### <a name="keybinds_toggle_pin_items"></a>6.40.1. Rovr Config > keybinds > toggle_pin > toggle_pin items
+#### <a name="keybinds_toggle_pin_items"></a>6.41.1. Rovr Config > keybinds > toggle_pin > toggle_pin items
 
 |              |          |
 | ------------ | -------- |
 | **Type**     | `string` |
 | **Required** | No       |
 
-### <a name="keybinds_toggle_hidden_files"></a>6.41. Property `Rovr Config > keybinds > toggle_hidden_files`
+### <a name="keybinds_toggle_hidden_files"></a>6.42. Property `Rovr Config > keybinds > toggle_hidden_files`
 
 |                |                       |
 | -------------- | --------------------- |
@@ -4112,14 +4640,14 @@ Must be one of:
 | ---------------------------------------------- | ----------- |
 | [toggle_pin items](#keybinds_toggle_pin_items) |             |
 
-#### <a name="keybinds_toggle_pin_items"></a>6.41.1. Rovr Config > keybinds > toggle_pin > toggle_pin items
+#### <a name="keybinds_toggle_pin_items"></a>6.42.1. Rovr Config > keybinds > toggle_pin > toggle_pin items
 
 |              |          |
 | ------------ | -------- |
 | **Type**     | `string` |
 | **Required** | No       |
 
-### <a name="keybinds_toggle_select_item"></a>6.42. Property `Rovr Config > keybinds > toggle_select_item`
+### <a name="keybinds_toggle_select_item"></a>6.43. Property `Rovr Config > keybinds > toggle_select_item`
 
 |                |                       |
 | -------------- | --------------------- |
@@ -4141,14 +4669,14 @@ Must be one of:
 | ---------------------------------------------- | ----------- |
 | [toggle_pin items](#keybinds_toggle_pin_items) |             |
 
-#### <a name="keybinds_toggle_pin_items"></a>6.42.1. Rovr Config > keybinds > toggle_pin > toggle_pin items
+#### <a name="keybinds_toggle_pin_items"></a>6.43.1. Rovr Config > keybinds > toggle_pin > toggle_pin items
 
 |              |          |
 | ------------ | -------- |
 | **Type**     | `string` |
 | **Required** | No       |
 
-### <a name="keybinds_select_up"></a>6.43. Property `Rovr Config > keybinds > select_up`
+### <a name="keybinds_select_up"></a>6.44. Property `Rovr Config > keybinds > select_up`
 
 |                |                       |
 | -------------- | --------------------- |
@@ -4170,14 +4698,14 @@ Must be one of:
 | ---------------------------------------------- | ----------- |
 | [toggle_pin items](#keybinds_toggle_pin_items) |             |
 
-#### <a name="keybinds_toggle_pin_items"></a>6.43.1. Rovr Config > keybinds > toggle_pin > toggle_pin items
+#### <a name="keybinds_toggle_pin_items"></a>6.44.1. Rovr Config > keybinds > toggle_pin > toggle_pin items
 
 |              |          |
 | ------------ | -------- |
 | **Type**     | `string` |
 | **Required** | No       |
 
-### <a name="keybinds_select_down"></a>6.44. Property `Rovr Config > keybinds > select_down`
+### <a name="keybinds_select_down"></a>6.45. Property `Rovr Config > keybinds > select_down`
 
 |                |                       |
 | -------------- | --------------------- |
@@ -4199,14 +4727,14 @@ Must be one of:
 | ---------------------------------------------- | ----------- |
 | [toggle_pin items](#keybinds_toggle_pin_items) |             |
 
-#### <a name="keybinds_toggle_pin_items"></a>6.44.1. Rovr Config > keybinds > toggle_pin > toggle_pin items
+#### <a name="keybinds_toggle_pin_items"></a>6.45.1. Rovr Config > keybinds > toggle_pin > toggle_pin items
 
 |              |          |
 | ------------ | -------- |
 | **Type**     | `string` |
 | **Required** | No       |
 
-### <a name="keybinds_select_page_up"></a>6.45. Property `Rovr Config > keybinds > select_page_up`
+### <a name="keybinds_select_page_up"></a>6.46. Property `Rovr Config > keybinds > select_page_up`
 
 |                |                       |
 | -------------- | --------------------- |
@@ -4228,14 +4756,14 @@ Must be one of:
 | ---------------------------------------------- | ----------- |
 | [toggle_pin items](#keybinds_toggle_pin_items) |             |
 
-#### <a name="keybinds_toggle_pin_items"></a>6.45.1. Rovr Config > keybinds > toggle_pin > toggle_pin items
+#### <a name="keybinds_toggle_pin_items"></a>6.46.1. Rovr Config > keybinds > toggle_pin > toggle_pin items
 
 |              |          |
 | ------------ | -------- |
 | **Type**     | `string` |
 | **Required** | No       |
 
-### <a name="keybinds_select_page_down"></a>6.46. Property `Rovr Config > keybinds > select_page_down`
+### <a name="keybinds_select_page_down"></a>6.47. Property `Rovr Config > keybinds > select_page_down`
 
 |                |                       |
 | -------------- | --------------------- |
@@ -4257,14 +4785,14 @@ Must be one of:
 | ---------------------------------------------- | ----------- |
 | [toggle_pin items](#keybinds_toggle_pin_items) |             |
 
-#### <a name="keybinds_toggle_pin_items"></a>6.46.1. Rovr Config > keybinds > toggle_pin > toggle_pin items
+#### <a name="keybinds_toggle_pin_items"></a>6.47.1. Rovr Config > keybinds > toggle_pin > toggle_pin items
 
 |              |          |
 | ------------ | -------- |
 | **Type**     | `string` |
 | **Required** | No       |
 
-### <a name="keybinds_select_home"></a>6.47. Property `Rovr Config > keybinds > select_home`
+### <a name="keybinds_select_home"></a>6.48. Property `Rovr Config > keybinds > select_home`
 
 |                |                       |
 | -------------- | --------------------- |
@@ -4286,14 +4814,14 @@ Must be one of:
 | ---------------------------------------------- | ----------- |
 | [toggle_pin items](#keybinds_toggle_pin_items) |             |
 
-#### <a name="keybinds_toggle_pin_items"></a>6.47.1. Rovr Config > keybinds > toggle_pin > toggle_pin items
+#### <a name="keybinds_toggle_pin_items"></a>6.48.1. Rovr Config > keybinds > toggle_pin > toggle_pin items
 
 |              |          |
 | ------------ | -------- |
 | **Type**     | `string` |
 | **Required** | No       |
 
-### <a name="keybinds_select_end"></a>6.48. Property `Rovr Config > keybinds > select_end`
+### <a name="keybinds_select_end"></a>6.49. Property `Rovr Config > keybinds > select_end`
 
 |                |                       |
 | -------------- | --------------------- |
@@ -4315,14 +4843,14 @@ Must be one of:
 | ---------------------------------------------- | ----------- |
 | [toggle_pin items](#keybinds_toggle_pin_items) |             |
 
-#### <a name="keybinds_toggle_pin_items"></a>6.48.1. Rovr Config > keybinds > toggle_pin > toggle_pin items
+#### <a name="keybinds_toggle_pin_items"></a>6.49.1. Rovr Config > keybinds > toggle_pin > toggle_pin items
 
 |              |          |
 | ------------ | -------- |
 | **Type**     | `string` |
 | **Required** | No       |
 
-### <a name="keybinds_tab_next"></a>6.49. Property `Rovr Config > keybinds > tab_next`
+### <a name="keybinds_tab_next"></a>6.50. Property `Rovr Config > keybinds > tab_next`
 
 |                |                       |
 | -------------- | --------------------- |
@@ -4344,14 +4872,14 @@ Must be one of:
 | ---------------------------------------------- | ----------- |
 | [toggle_pin items](#keybinds_toggle_pin_items) |             |
 
-#### <a name="keybinds_toggle_pin_items"></a>6.49.1. Rovr Config > keybinds > toggle_pin > toggle_pin items
+#### <a name="keybinds_toggle_pin_items"></a>6.50.1. Rovr Config > keybinds > toggle_pin > toggle_pin items
 
 |              |          |
 | ------------ | -------- |
 | **Type**     | `string` |
 | **Required** | No       |
 
-### <a name="keybinds_tab_previous"></a>6.50. Property `Rovr Config > keybinds > tab_previous`
+### <a name="keybinds_tab_previous"></a>6.51. Property `Rovr Config > keybinds > tab_previous`
 
 |                |                       |
 | -------------- | --------------------- |
@@ -4373,14 +4901,14 @@ Must be one of:
 | ---------------------------------------------- | ----------- |
 | [toggle_pin items](#keybinds_toggle_pin_items) |             |
 
-#### <a name="keybinds_toggle_pin_items"></a>6.50.1. Rovr Config > keybinds > toggle_pin > toggle_pin items
+#### <a name="keybinds_toggle_pin_items"></a>6.51.1. Rovr Config > keybinds > toggle_pin > toggle_pin items
 
 |              |          |
 | ------------ | -------- |
 | **Type**     | `string` |
 | **Required** | No       |
 
-### <a name="keybinds_tab_new"></a>6.51. Property `Rovr Config > keybinds > tab_new`
+### <a name="keybinds_tab_new"></a>6.52. Property `Rovr Config > keybinds > tab_new`
 
 |                |                       |
 | -------------- | --------------------- |
@@ -4402,14 +4930,14 @@ Must be one of:
 | ---------------------------------------------- | ----------- |
 | [toggle_pin items](#keybinds_toggle_pin_items) |             |
 
-#### <a name="keybinds_toggle_pin_items"></a>6.51.1. Rovr Config > keybinds > toggle_pin > toggle_pin items
+#### <a name="keybinds_toggle_pin_items"></a>6.52.1. Rovr Config > keybinds > toggle_pin > toggle_pin items
 
 |              |          |
 | ------------ | -------- |
 | **Type**     | `string` |
 | **Required** | No       |
 
-### <a name="keybinds_tab_close"></a>6.52. Property `Rovr Config > keybinds > tab_close`
+### <a name="keybinds_tab_close"></a>6.53. Property `Rovr Config > keybinds > tab_close`
 
 |                |                       |
 | -------------- | --------------------- |
@@ -4431,35 +4959,6 @@ Must be one of:
 | ---------------------------------------------- | ----------- |
 | [toggle_pin items](#keybinds_toggle_pin_items) |             |
 
-#### <a name="keybinds_toggle_pin_items"></a>6.52.1. Rovr Config > keybinds > toggle_pin > toggle_pin items
-
-|              |          |
-| ------------ | -------- |
-| **Type**     | `string` |
-| **Required** | No       |
-
-### <a name="keybinds_preview_scroll_left"></a>6.53. Property `Rovr Config > keybinds > preview_scroll_left`
-
-|                |                       |
-| -------------- | --------------------- |
-| **Type**       | `array of string`     |
-| **Required**   | No                    |
-| **Defined in** | #/definitions/keybind |
-
-**Description:** Temporarily unused.
-
-|                      | Array restrictions |
-| -------------------- | ------------------ |
-| **Min items**        | N/A                |
-| **Max items**        | N/A                |
-| **Items unicity**    | False              |
-| **Additional items** | False              |
-| **Tuple validation** | See below          |
-
-| Each item of this array must be                | Description |
-| ---------------------------------------------- | ----------- |
-| [toggle_pin items](#keybinds_toggle_pin_items) |             |
-
 #### <a name="keybinds_toggle_pin_items"></a>6.53.1. Rovr Config > keybinds > toggle_pin > toggle_pin items
 
 |              |          |
@@ -4467,7 +4966,7 @@ Must be one of:
 | **Type**     | `string` |
 | **Required** | No       |
 
-### <a name="keybinds_preview_scroll_right"></a>6.54. Property `Rovr Config > keybinds > preview_scroll_right`
+### <a name="keybinds_preview_scroll_left"></a>6.54. Property `Rovr Config > keybinds > preview_scroll_left`
 
 |                |                       |
 | -------------- | --------------------- |
@@ -4496,7 +4995,7 @@ Must be one of:
 | **Type**     | `string` |
 | **Required** | No       |
 
-### <a name="keybinds_preview_select_right"></a>6.55. Property `Rovr Config > keybinds > preview_select_right`
+### <a name="keybinds_preview_scroll_right"></a>6.55. Property `Rovr Config > keybinds > preview_scroll_right`
 
 |                |                       |
 | -------------- | --------------------- |
@@ -4525,7 +5024,7 @@ Must be one of:
 | **Type**     | `string` |
 | **Required** | No       |
 
-### <a name="keybinds_preview_select_left"></a>6.56. Property `Rovr Config > keybinds > preview_select_left`
+### <a name="keybinds_preview_select_right"></a>6.56. Property `Rovr Config > keybinds > preview_select_right`
 
 |                |                       |
 | -------------- | --------------------- |
@@ -4554,7 +5053,36 @@ Must be one of:
 | **Type**     | `string` |
 | **Required** | No       |
 
-### <a name="keybinds_show_keybinds"></a>6.57. Property `Rovr Config > keybinds > show_keybinds`
+### <a name="keybinds_preview_select_left"></a>6.57. Property `Rovr Config > keybinds > preview_select_left`
+
+|                |                       |
+| -------------- | --------------------- |
+| **Type**       | `array of string`     |
+| **Required**   | No                    |
+| **Defined in** | #/definitions/keybind |
+
+**Description:** Temporarily unused.
+
+|                      | Array restrictions |
+| -------------------- | ------------------ |
+| **Min items**        | N/A                |
+| **Max items**        | N/A                |
+| **Items unicity**    | False              |
+| **Additional items** | False              |
+| **Tuple validation** | See below          |
+
+| Each item of this array must be                | Description |
+| ---------------------------------------------- | ----------- |
+| [toggle_pin items](#keybinds_toggle_pin_items) |             |
+
+#### <a name="keybinds_toggle_pin_items"></a>6.57.1. Rovr Config > keybinds > toggle_pin > toggle_pin items
+
+|              |          |
+| ------------ | -------- |
+| **Type**     | `string` |
+| **Required** | No       |
+
+### <a name="keybinds_show_keybinds"></a>6.58. Property `Rovr Config > keybinds > show_keybinds`
 
 |                |                       |
 | -------------- | --------------------- |
@@ -4576,14 +5104,14 @@ Must be one of:
 | ---------------------------------------------- | ----------- |
 | [toggle_pin items](#keybinds_toggle_pin_items) |             |
 
-#### <a name="keybinds_toggle_pin_items"></a>6.57.1. Rovr Config > keybinds > toggle_pin > toggle_pin items
+#### <a name="keybinds_toggle_pin_items"></a>6.58.1. Rovr Config > keybinds > toggle_pin > toggle_pin items
 
 |              |          |
 | ------------ | -------- |
 | **Type**     | `string` |
 | **Required** | No       |
 
-### <a name="keybinds_change_sort_order"></a>6.58. Property `Rovr Config > keybinds > change_sort_order`
+### <a name="keybinds_change_sort_order"></a>6.59. Property `Rovr Config > keybinds > change_sort_order`
 
 |                           |                  |
 | ------------------------- | ---------------- |
@@ -4604,7 +5132,7 @@ Must be one of:
 | [modified](#keybinds_change_sort_order_modified)     | array of string | Sort by modification time.        |
 | [descending](#keybinds_change_sort_order_descending) | array of string | Toggle descending sort order.     |
 
-#### <a name="keybinds_change_sort_order_open_popup"></a>6.58.1. Property `Rovr Config > keybinds > change_sort_order > open_popup`
+#### <a name="keybinds_change_sort_order_open_popup"></a>6.59.1. Property `Rovr Config > keybinds > change_sort_order > open_popup`
 
 |                |                       |
 | -------------- | --------------------- |
@@ -4626,14 +5154,14 @@ Must be one of:
 | ---------------------------------------------- | ----------- |
 | [toggle_pin items](#keybinds_toggle_pin_items) |             |
 
-##### <a name="keybinds_toggle_pin_items"></a>6.58.1.1. Rovr Config > keybinds > toggle_pin > toggle_pin items
+##### <a name="keybinds_toggle_pin_items"></a>6.59.1.1. Rovr Config > keybinds > toggle_pin > toggle_pin items
 
 |              |          |
 | ------------ | -------- |
 | **Type**     | `string` |
 | **Required** | No       |
 
-#### <a name="keybinds_change_sort_order_name"></a>6.58.2. Property `Rovr Config > keybinds > change_sort_order > name`
+#### <a name="keybinds_change_sort_order_name"></a>6.59.2. Property `Rovr Config > keybinds > change_sort_order > name`
 
 |                |                       |
 | -------------- | --------------------- |
@@ -4655,14 +5183,14 @@ Must be one of:
 | ---------------------------------------------- | ----------- |
 | [toggle_pin items](#keybinds_toggle_pin_items) |             |
 
-##### <a name="keybinds_toggle_pin_items"></a>6.58.2.1. Rovr Config > keybinds > toggle_pin > toggle_pin items
+##### <a name="keybinds_toggle_pin_items"></a>6.59.2.1. Rovr Config > keybinds > toggle_pin > toggle_pin items
 
 |              |          |
 | ------------ | -------- |
 | **Type**     | `string` |
 | **Required** | No       |
 
-#### <a name="keybinds_change_sort_order_extension"></a>6.58.3. Property `Rovr Config > keybinds > change_sort_order > extension`
+#### <a name="keybinds_change_sort_order_extension"></a>6.59.3. Property `Rovr Config > keybinds > change_sort_order > extension`
 
 |                |                       |
 | -------------- | --------------------- |
@@ -4684,14 +5212,14 @@ Must be one of:
 | ---------------------------------------------- | ----------- |
 | [toggle_pin items](#keybinds_toggle_pin_items) |             |
 
-##### <a name="keybinds_toggle_pin_items"></a>6.58.3.1. Rovr Config > keybinds > toggle_pin > toggle_pin items
+##### <a name="keybinds_toggle_pin_items"></a>6.59.3.1. Rovr Config > keybinds > toggle_pin > toggle_pin items
 
 |              |          |
 | ------------ | -------- |
 | **Type**     | `string` |
 | **Required** | No       |
 
-#### <a name="keybinds_change_sort_order_natural"></a>6.58.4. Property `Rovr Config > keybinds > change_sort_order > natural`
+#### <a name="keybinds_change_sort_order_natural"></a>6.59.4. Property `Rovr Config > keybinds > change_sort_order > natural`
 
 |                |                       |
 | -------------- | --------------------- |
@@ -4713,14 +5241,14 @@ Must be one of:
 | ---------------------------------------------- | ----------- |
 | [toggle_pin items](#keybinds_toggle_pin_items) |             |
 
-##### <a name="keybinds_toggle_pin_items"></a>6.58.4.1. Rovr Config > keybinds > toggle_pin > toggle_pin items
+##### <a name="keybinds_toggle_pin_items"></a>6.59.4.1. Rovr Config > keybinds > toggle_pin > toggle_pin items
 
 |              |          |
 | ------------ | -------- |
 | **Type**     | `string` |
 | **Required** | No       |
 
-#### <a name="keybinds_change_sort_order_size"></a>6.58.5. Property `Rovr Config > keybinds > change_sort_order > size`
+#### <a name="keybinds_change_sort_order_size"></a>6.59.5. Property `Rovr Config > keybinds > change_sort_order > size`
 
 |                |                       |
 | -------------- | --------------------- |
@@ -4742,14 +5270,14 @@ Must be one of:
 | ---------------------------------------------- | ----------- |
 | [toggle_pin items](#keybinds_toggle_pin_items) |             |
 
-##### <a name="keybinds_toggle_pin_items"></a>6.58.5.1. Rovr Config > keybinds > toggle_pin > toggle_pin items
+##### <a name="keybinds_toggle_pin_items"></a>6.59.5.1. Rovr Config > keybinds > toggle_pin > toggle_pin items
 
 |              |          |
 | ------------ | -------- |
 | **Type**     | `string` |
 | **Required** | No       |
 
-#### <a name="keybinds_change_sort_order_created"></a>6.58.6. Property `Rovr Config > keybinds > change_sort_order > created`
+#### <a name="keybinds_change_sort_order_created"></a>6.59.6. Property `Rovr Config > keybinds > change_sort_order > created`
 
 |                |                       |
 | -------------- | --------------------- |
@@ -4771,14 +5299,14 @@ Must be one of:
 | ---------------------------------------------- | ----------- |
 | [toggle_pin items](#keybinds_toggle_pin_items) |             |
 
-##### <a name="keybinds_toggle_pin_items"></a>6.58.6.1. Rovr Config > keybinds > toggle_pin > toggle_pin items
+##### <a name="keybinds_toggle_pin_items"></a>6.59.6.1. Rovr Config > keybinds > toggle_pin > toggle_pin items
 
 |              |          |
 | ------------ | -------- |
 | **Type**     | `string` |
 | **Required** | No       |
 
-#### <a name="keybinds_change_sort_order_modified"></a>6.58.7. Property `Rovr Config > keybinds > change_sort_order > modified`
+#### <a name="keybinds_change_sort_order_modified"></a>6.59.7. Property `Rovr Config > keybinds > change_sort_order > modified`
 
 |                |                       |
 | -------------- | --------------------- |
@@ -4800,14 +5328,14 @@ Must be one of:
 | ---------------------------------------------- | ----------- |
 | [toggle_pin items](#keybinds_toggle_pin_items) |             |
 
-##### <a name="keybinds_toggle_pin_items"></a>6.58.7.1. Rovr Config > keybinds > toggle_pin > toggle_pin items
+##### <a name="keybinds_toggle_pin_items"></a>6.59.7.1. Rovr Config > keybinds > toggle_pin > toggle_pin items
 
 |              |          |
 | ------------ | -------- |
 | **Type**     | `string` |
 | **Required** | No       |
 
-#### <a name="keybinds_change_sort_order_descending"></a>6.58.8. Property `Rovr Config > keybinds > change_sort_order > descending`
+#### <a name="keybinds_change_sort_order_descending"></a>6.59.8. Property `Rovr Config > keybinds > change_sort_order > descending`
 
 |                |                       |
 | -------------- | --------------------- |
@@ -4829,14 +5357,14 @@ Must be one of:
 | ---------------------------------------------- | ----------- |
 | [toggle_pin items](#keybinds_toggle_pin_items) |             |
 
-##### <a name="keybinds_toggle_pin_items"></a>6.58.8.1. Rovr Config > keybinds > toggle_pin > toggle_pin items
+##### <a name="keybinds_toggle_pin_items"></a>6.59.8.1. Rovr Config > keybinds > toggle_pin > toggle_pin items
 
 |              |          |
 | ------------ | -------- |
 | **Type**     | `string` |
 | **Required** | No       |
 
-### <a name="keybinds_quit_app"></a>6.59. Property `Rovr Config > keybinds > quit_app`
+### <a name="keybinds_quit_app"></a>6.60. Property `Rovr Config > keybinds > quit_app`
 
 |                |                       |
 | -------------- | --------------------- |
@@ -4858,14 +5386,14 @@ Must be one of:
 | ---------------------------------------------- | ----------- |
 | [toggle_pin items](#keybinds_toggle_pin_items) |             |
 
-#### <a name="keybinds_toggle_pin_items"></a>6.59.1. Rovr Config > keybinds > toggle_pin > toggle_pin items
+#### <a name="keybinds_toggle_pin_items"></a>6.60.1. Rovr Config > keybinds > toggle_pin > toggle_pin items
 
 |              |          |
 | ------------ | -------- |
 | **Type**     | `string` |
 | **Required** | No       |
 
-### <a name="keybinds_command_palette"></a>6.60. Property `Rovr Config > keybinds > command_palette`
+### <a name="keybinds_command_palette"></a>6.61. Property `Rovr Config > keybinds > command_palette`
 
 |              |          |
 | ------------ | -------- |
@@ -4874,7 +5402,7 @@ Must be one of:
 
 **Description:** Launch Textual's mildly useful command palette (only one keybind is allowed!)
 
-### <a name="keybinds_suspend_process"></a>6.61. Property `Rovr Config > keybinds > suspend_process`
+### <a name="keybinds_suspend_process"></a>6.62. Property `Rovr Config > keybinds > suspend_process`
 
 |                |                       |
 | -------------- | --------------------- |
@@ -4896,14 +5424,14 @@ Must be one of:
 | ---------------------------------------------- | ----------- |
 | [toggle_pin items](#keybinds_toggle_pin_items) |             |
 
-#### <a name="keybinds_toggle_pin_items"></a>6.61.1. Rovr Config > keybinds > toggle_pin > toggle_pin items
+#### <a name="keybinds_toggle_pin_items"></a>6.62.1. Rovr Config > keybinds > toggle_pin > toggle_pin items
 
 |              |          |
 | ------------ | -------- |
 | **Type**     | `string` |
 | **Required** | No       |
 
-### <a name="keybinds_open"></a>6.62. Property `Rovr Config > keybinds > open`
+### <a name="keybinds_open"></a>6.63. Property `Rovr Config > keybinds > open`
 
 |                |                       |
 | -------------- | --------------------- |
@@ -4925,14 +5453,14 @@ Must be one of:
 | ---------------------------------------------- | ----------- |
 | [toggle_pin items](#keybinds_toggle_pin_items) |             |
 
-#### <a name="keybinds_toggle_pin_items"></a>6.62.1. Rovr Config > keybinds > toggle_pin > toggle_pin items
+#### <a name="keybinds_toggle_pin_items"></a>6.63.1. Rovr Config > keybinds > toggle_pin > toggle_pin items
 
 |              |          |
 | ------------ | -------- |
 | **Type**     | `string` |
 | **Required** | No       |
 
-### <a name="keybinds_open_editor"></a>6.63. Property `Rovr Config > keybinds > open_editor`
+### <a name="keybinds_open_editor"></a>6.64. Property `Rovr Config > keybinds > open_editor`
 
 |                |                       |
 | -------------- | --------------------- |
@@ -4954,14 +5482,14 @@ Must be one of:
 | ---------------------------------------------- | ----------- |
 | [toggle_pin items](#keybinds_toggle_pin_items) |             |
 
-#### <a name="keybinds_toggle_pin_items"></a>6.63.1. Rovr Config > keybinds > toggle_pin > toggle_pin items
+#### <a name="keybinds_toggle_pin_items"></a>6.64.1. Rovr Config > keybinds > toggle_pin > toggle_pin items
 
 |              |          |
 | ------------ | -------- |
 | **Type**     | `string` |
 | **Required** | No       |
 
-### <a name="keybinds_show_shell_screen"></a>6.64. Property `Rovr Config > keybinds > show_shell_screen`
+### <a name="keybinds_show_shell_screen"></a>6.65. Property `Rovr Config > keybinds > show_shell_screen`
 
 |                |                       |
 | -------------- | --------------------- |
@@ -4983,14 +5511,14 @@ Must be one of:
 | ---------------------------------------------- | ----------- |
 | [toggle_pin items](#keybinds_toggle_pin_items) |             |
 
-#### <a name="keybinds_toggle_pin_items"></a>6.64.1. Rovr Config > keybinds > toggle_pin > toggle_pin items
+#### <a name="keybinds_toggle_pin_items"></a>6.65.1. Rovr Config > keybinds > toggle_pin > toggle_pin items
 
 |              |          |
 | ------------ | -------- |
 | **Type**     | `string` |
 | **Required** | No       |
 
-### <a name="keybinds_filename_conflict"></a>6.65. Property `Rovr Config > keybinds > filename_conflict`
+### <a name="keybinds_filename_conflict"></a>6.66. Property `Rovr Config > keybinds > filename_conflict`
 
 |                           |                  |
 | ------------------------- | ---------------- |
@@ -5008,7 +5536,7 @@ Must be one of:
 | [cancel](#keybinds_filename_conflict_cancel)                 | array of string | Cancel the entire copy/move operation.                                  |
 | [dont_ask_again](#keybinds_filename_conflict_dont_ask_again) | array of string | Apply the selected action to all future conflicts without asking again. |
 
-#### <a name="keybinds_filename_conflict_overwrite"></a>6.65.1. Property `Rovr Config > keybinds > filename_conflict > overwrite`
+#### <a name="keybinds_filename_conflict_overwrite"></a>6.66.1. Property `Rovr Config > keybinds > filename_conflict > overwrite`
 
 |                |                       |
 | -------------- | --------------------- |
@@ -5030,168 +5558,6 @@ Must be one of:
 | ---------------------------------------------- | ----------- |
 | [toggle_pin items](#keybinds_toggle_pin_items) |             |
 
-##### <a name="keybinds_toggle_pin_items"></a>6.65.1.1. Rovr Config > keybinds > toggle_pin > toggle_pin items
-
-|              |          |
-| ------------ | -------- |
-| **Type**     | `string` |
-| **Required** | No       |
-
-#### <a name="keybinds_filename_conflict_skip"></a>6.65.2. Property `Rovr Config > keybinds > filename_conflict > skip`
-
-|                |                       |
-| -------------- | --------------------- |
-| **Type**       | `array of string`     |
-| **Required**   | No                    |
-| **Defined in** | #/definitions/keybind |
-
-**Description:** Skip this file and do not copy/move it.
-
-|                      | Array restrictions |
-| -------------------- | ------------------ |
-| **Min items**        | N/A                |
-| **Max items**        | N/A                |
-| **Items unicity**    | False              |
-| **Additional items** | False              |
-| **Tuple validation** | See below          |
-
-| Each item of this array must be                | Description |
-| ---------------------------------------------- | ----------- |
-| [toggle_pin items](#keybinds_toggle_pin_items) |             |
-
-##### <a name="keybinds_toggle_pin_items"></a>6.65.2.1. Rovr Config > keybinds > toggle_pin > toggle_pin items
-
-|              |          |
-| ------------ | -------- |
-| **Type**     | `string` |
-| **Required** | No       |
-
-#### <a name="keybinds_filename_conflict_rename"></a>6.65.3. Property `Rovr Config > keybinds > filename_conflict > rename`
-
-|                |                       |
-| -------------- | --------------------- |
-| **Type**       | `array of string`     |
-| **Required**   | No                    |
-| **Defined in** | #/definitions/keybind |
-
-**Description:** Rename the new file being copied/moved.
-
-|                      | Array restrictions |
-| -------------------- | ------------------ |
-| **Min items**        | N/A                |
-| **Max items**        | N/A                |
-| **Items unicity**    | False              |
-| **Additional items** | False              |
-| **Tuple validation** | See below          |
-
-| Each item of this array must be                | Description |
-| ---------------------------------------------- | ----------- |
-| [toggle_pin items](#keybinds_toggle_pin_items) |             |
-
-##### <a name="keybinds_toggle_pin_items"></a>6.65.3.1. Rovr Config > keybinds > toggle_pin > toggle_pin items
-
-|              |          |
-| ------------ | -------- |
-| **Type**     | `string` |
-| **Required** | No       |
-
-#### <a name="keybinds_filename_conflict_cancel"></a>6.65.4. Property `Rovr Config > keybinds > filename_conflict > cancel`
-
-|                |                       |
-| -------------- | --------------------- |
-| **Type**       | `array of string`     |
-| **Required**   | No                    |
-| **Defined in** | #/definitions/keybind |
-
-**Description:** Cancel the entire copy/move operation.
-
-|                      | Array restrictions |
-| -------------------- | ------------------ |
-| **Min items**        | N/A                |
-| **Max items**        | N/A                |
-| **Items unicity**    | False              |
-| **Additional items** | False              |
-| **Tuple validation** | See below          |
-
-| Each item of this array must be                | Description |
-| ---------------------------------------------- | ----------- |
-| [toggle_pin items](#keybinds_toggle_pin_items) |             |
-
-##### <a name="keybinds_toggle_pin_items"></a>6.65.4.1. Rovr Config > keybinds > toggle_pin > toggle_pin items
-
-|              |          |
-| ------------ | -------- |
-| **Type**     | `string` |
-| **Required** | No       |
-
-#### <a name="keybinds_filename_conflict_dont_ask_again"></a>6.65.5. Property `Rovr Config > keybinds > filename_conflict > dont_ask_again`
-
-|                |                       |
-| -------------- | --------------------- |
-| **Type**       | `array of string`     |
-| **Required**   | No                    |
-| **Defined in** | #/definitions/keybind |
-
-**Description:** Apply the selected action to all future conflicts without asking again.
-
-|                      | Array restrictions |
-| -------------------- | ------------------ |
-| **Min items**        | N/A                |
-| **Max items**        | N/A                |
-| **Items unicity**    | False              |
-| **Additional items** | False              |
-| **Tuple validation** | See below          |
-
-| Each item of this array must be                | Description |
-| ---------------------------------------------- | ----------- |
-| [toggle_pin items](#keybinds_toggle_pin_items) |             |
-
-##### <a name="keybinds_toggle_pin_items"></a>6.65.5.1. Rovr Config > keybinds > toggle_pin > toggle_pin items
-
-|              |          |
-| ------------ | -------- |
-| **Type**     | `string` |
-| **Required** | No       |
-
-### <a name="keybinds_file_in_use"></a>6.66. Property `Rovr Config > keybinds > file_in_use`
-
-|                           |                  |
-| ------------------------- | ---------------- |
-| **Type**                  | `object`         |
-| **Required**              | No               |
-| **Additional properties** | Any type allowed |
-
-**Description:** Keybinds related to handling a file that is in use by another process
-
-| Property                                               | Type            | Title/Description                                                                  |
-| ------------------------------------------------------ | --------------- | ---------------------------------------------------------------------------------- |
-| [retry](#keybinds_file_in_use_retry)                   | array of string | Retry the operation on the file.                                                   |
-| [skip](#keybinds_file_in_use_skip)                     | array of string | Skip this file and do not copy/move it.                                            |
-| [cancel](#keybinds_file_in_use_cancel)                 | array of string | Cancel the entire copy/move operation.                                             |
-| [dont_ask_again](#keybinds_file_in_use_dont_ask_again) | array of string | Apply the selected action to all future 'file in use' errors without asking again. |
-
-#### <a name="keybinds_file_in_use_retry"></a>6.66.1. Property `Rovr Config > keybinds > file_in_use > retry`
-
-|                |                       |
-| -------------- | --------------------- |
-| **Type**       | `array of string`     |
-| **Required**   | No                    |
-| **Defined in** | #/definitions/keybind |
-
-**Description:** Retry the operation on the file.
-
-|                      | Array restrictions |
-| -------------------- | ------------------ |
-| **Min items**        | N/A                |
-| **Max items**        | N/A                |
-| **Items unicity**    | False              |
-| **Additional items** | False              |
-| **Tuple validation** | See below          |
-
-| Each item of this array must be                | Description |
-| ---------------------------------------------- | ----------- |
-| [toggle_pin items](#keybinds_toggle_pin_items) |             |
-
 ##### <a name="keybinds_toggle_pin_items"></a>6.66.1.1. Rovr Config > keybinds > toggle_pin > toggle_pin items
 
 |              |          |
@@ -5199,7 +5565,7 @@ Must be one of:
 | **Type**     | `string` |
 | **Required** | No       |
 
-#### <a name="keybinds_file_in_use_skip"></a>6.66.2. Property `Rovr Config > keybinds > file_in_use > skip`
+#### <a name="keybinds_filename_conflict_skip"></a>6.66.2. Property `Rovr Config > keybinds > filename_conflict > skip`
 
 |                |                       |
 | -------------- | --------------------- |
@@ -5228,7 +5594,36 @@ Must be one of:
 | **Type**     | `string` |
 | **Required** | No       |
 
-#### <a name="keybinds_file_in_use_cancel"></a>6.66.3. Property `Rovr Config > keybinds > file_in_use > cancel`
+#### <a name="keybinds_filename_conflict_rename"></a>6.66.3. Property `Rovr Config > keybinds > filename_conflict > rename`
+
+|                |                       |
+| -------------- | --------------------- |
+| **Type**       | `array of string`     |
+| **Required**   | No                    |
+| **Defined in** | #/definitions/keybind |
+
+**Description:** Rename the new file being copied/moved.
+
+|                      | Array restrictions |
+| -------------------- | ------------------ |
+| **Min items**        | N/A                |
+| **Max items**        | N/A                |
+| **Items unicity**    | False              |
+| **Additional items** | False              |
+| **Tuple validation** | See below          |
+
+| Each item of this array must be                | Description |
+| ---------------------------------------------- | ----------- |
+| [toggle_pin items](#keybinds_toggle_pin_items) |             |
+
+##### <a name="keybinds_toggle_pin_items"></a>6.66.3.1. Rovr Config > keybinds > toggle_pin > toggle_pin items
+
+|              |          |
+| ------------ | -------- |
+| **Type**     | `string` |
+| **Required** | No       |
+
+#### <a name="keybinds_filename_conflict_cancel"></a>6.66.4. Property `Rovr Config > keybinds > filename_conflict > cancel`
 
 |                |                       |
 | -------------- | --------------------- |
@@ -5250,14 +5645,147 @@ Must be one of:
 | ---------------------------------------------- | ----------- |
 | [toggle_pin items](#keybinds_toggle_pin_items) |             |
 
-##### <a name="keybinds_toggle_pin_items"></a>6.66.3.1. Rovr Config > keybinds > toggle_pin > toggle_pin items
+##### <a name="keybinds_toggle_pin_items"></a>6.66.4.1. Rovr Config > keybinds > toggle_pin > toggle_pin items
 
 |              |          |
 | ------------ | -------- |
 | **Type**     | `string` |
 | **Required** | No       |
 
-#### <a name="keybinds_file_in_use_dont_ask_again"></a>6.66.4. Property `Rovr Config > keybinds > file_in_use > dont_ask_again`
+#### <a name="keybinds_filename_conflict_dont_ask_again"></a>6.66.5. Property `Rovr Config > keybinds > filename_conflict > dont_ask_again`
+
+|                |                       |
+| -------------- | --------------------- |
+| **Type**       | `array of string`     |
+| **Required**   | No                    |
+| **Defined in** | #/definitions/keybind |
+
+**Description:** Apply the selected action to all future conflicts without asking again.
+
+|                      | Array restrictions |
+| -------------------- | ------------------ |
+| **Min items**        | N/A                |
+| **Max items**        | N/A                |
+| **Items unicity**    | False              |
+| **Additional items** | False              |
+| **Tuple validation** | See below          |
+
+| Each item of this array must be                | Description |
+| ---------------------------------------------- | ----------- |
+| [toggle_pin items](#keybinds_toggle_pin_items) |             |
+
+##### <a name="keybinds_toggle_pin_items"></a>6.66.5.1. Rovr Config > keybinds > toggle_pin > toggle_pin items
+
+|              |          |
+| ------------ | -------- |
+| **Type**     | `string` |
+| **Required** | No       |
+
+### <a name="keybinds_file_in_use"></a>6.67. Property `Rovr Config > keybinds > file_in_use`
+
+|                           |                  |
+| ------------------------- | ---------------- |
+| **Type**                  | `object`         |
+| **Required**              | No               |
+| **Additional properties** | Any type allowed |
+
+**Description:** Keybinds related to handling a file that is in use by another process
+
+| Property                                               | Type            | Title/Description                                                                  |
+| ------------------------------------------------------ | --------------- | ---------------------------------------------------------------------------------- |
+| [retry](#keybinds_file_in_use_retry)                   | array of string | Retry the operation on the file.                                                   |
+| [skip](#keybinds_file_in_use_skip)                     | array of string | Skip this file and do not copy/move it.                                            |
+| [cancel](#keybinds_file_in_use_cancel)                 | array of string | Cancel the entire copy/move operation.                                             |
+| [dont_ask_again](#keybinds_file_in_use_dont_ask_again) | array of string | Apply the selected action to all future 'file in use' errors without asking again. |
+
+#### <a name="keybinds_file_in_use_retry"></a>6.67.1. Property `Rovr Config > keybinds > file_in_use > retry`
+
+|                |                       |
+| -------------- | --------------------- |
+| **Type**       | `array of string`     |
+| **Required**   | No                    |
+| **Defined in** | #/definitions/keybind |
+
+**Description:** Retry the operation on the file.
+
+|                      | Array restrictions |
+| -------------------- | ------------------ |
+| **Min items**        | N/A                |
+| **Max items**        | N/A                |
+| **Items unicity**    | False              |
+| **Additional items** | False              |
+| **Tuple validation** | See below          |
+
+| Each item of this array must be                | Description |
+| ---------------------------------------------- | ----------- |
+| [toggle_pin items](#keybinds_toggle_pin_items) |             |
+
+##### <a name="keybinds_toggle_pin_items"></a>6.67.1.1. Rovr Config > keybinds > toggle_pin > toggle_pin items
+
+|              |          |
+| ------------ | -------- |
+| **Type**     | `string` |
+| **Required** | No       |
+
+#### <a name="keybinds_file_in_use_skip"></a>6.67.2. Property `Rovr Config > keybinds > file_in_use > skip`
+
+|                |                       |
+| -------------- | --------------------- |
+| **Type**       | `array of string`     |
+| **Required**   | No                    |
+| **Defined in** | #/definitions/keybind |
+
+**Description:** Skip this file and do not copy/move it.
+
+|                      | Array restrictions |
+| -------------------- | ------------------ |
+| **Min items**        | N/A                |
+| **Max items**        | N/A                |
+| **Items unicity**    | False              |
+| **Additional items** | False              |
+| **Tuple validation** | See below          |
+
+| Each item of this array must be                | Description |
+| ---------------------------------------------- | ----------- |
+| [toggle_pin items](#keybinds_toggle_pin_items) |             |
+
+##### <a name="keybinds_toggle_pin_items"></a>6.67.2.1. Rovr Config > keybinds > toggle_pin > toggle_pin items
+
+|              |          |
+| ------------ | -------- |
+| **Type**     | `string` |
+| **Required** | No       |
+
+#### <a name="keybinds_file_in_use_cancel"></a>6.67.3. Property `Rovr Config > keybinds > file_in_use > cancel`
+
+|                |                       |
+| -------------- | --------------------- |
+| **Type**       | `array of string`     |
+| **Required**   | No                    |
+| **Defined in** | #/definitions/keybind |
+
+**Description:** Cancel the entire copy/move operation.
+
+|                      | Array restrictions |
+| -------------------- | ------------------ |
+| **Min items**        | N/A                |
+| **Max items**        | N/A                |
+| **Items unicity**    | False              |
+| **Additional items** | False              |
+| **Tuple validation** | See below          |
+
+| Each item of this array must be                | Description |
+| ---------------------------------------------- | ----------- |
+| [toggle_pin items](#keybinds_toggle_pin_items) |             |
+
+##### <a name="keybinds_toggle_pin_items"></a>6.67.3.1. Rovr Config > keybinds > toggle_pin > toggle_pin items
+
+|              |          |
+| ------------ | -------- |
+| **Type**     | `string` |
+| **Required** | No       |
+
+#### <a name="keybinds_file_in_use_dont_ask_again"></a>6.67.4. Property `Rovr Config > keybinds > file_in_use > dont_ask_again`
 
 |                |                       |
 | -------------- | --------------------- |
@@ -5279,14 +5807,14 @@ Must be one of:
 | ---------------------------------------------- | ----------- |
 | [toggle_pin items](#keybinds_toggle_pin_items) |             |
 
-##### <a name="keybinds_toggle_pin_items"></a>6.66.4.1. Rovr Config > keybinds > toggle_pin > toggle_pin items
+##### <a name="keybinds_toggle_pin_items"></a>6.67.4.1. Rovr Config > keybinds > toggle_pin > toggle_pin items
 
 |              |          |
 | ------------ | -------- |
 | **Type**     | `string` |
 | **Required** | No       |
 
-### <a name="keybinds_filter_modal"></a>6.67. Property `Rovr Config > keybinds > filter_modal`
+### <a name="keybinds_filter_modal"></a>6.68. Property `Rovr Config > keybinds > filter_modal`
 
 |                           |                  |
 | ------------------------- | ---------------- |
@@ -5304,7 +5832,7 @@ Must be one of:
 | [page_down](#keybinds_filter_modal_page_down) | array of string | Move the selection down by a page in the modal list. |
 | [page_up](#keybinds_filter_modal_page_up)     | array of string | Move the selection up by a page in the modal list.   |
 
-#### <a name="keybinds_filter_modal_exit"></a>6.67.1. Property `Rovr Config > keybinds > filter_modal > exit`
+#### <a name="keybinds_filter_modal_exit"></a>6.68.1. Property `Rovr Config > keybinds > filter_modal > exit`
 
 |                |                       |
 | -------------- | --------------------- |
@@ -5326,14 +5854,14 @@ Must be one of:
 | ---------------------------------------------- | ----------- |
 | [toggle_pin items](#keybinds_toggle_pin_items) |             |
 
-##### <a name="keybinds_toggle_pin_items"></a>6.67.1.1. Rovr Config > keybinds > toggle_pin > toggle_pin items
+##### <a name="keybinds_toggle_pin_items"></a>6.68.1.1. Rovr Config > keybinds > toggle_pin > toggle_pin items
 
 |              |          |
 | ------------ | -------- |
 | **Type**     | `string` |
 | **Required** | No       |
 
-#### <a name="keybinds_filter_modal_down"></a>6.67.2. Property `Rovr Config > keybinds > filter_modal > down`
+#### <a name="keybinds_filter_modal_down"></a>6.68.2. Property `Rovr Config > keybinds > filter_modal > down`
 
 |                |                       |
 | -------------- | --------------------- |
@@ -5355,14 +5883,14 @@ Must be one of:
 | ---------------------------------------------- | ----------- |
 | [toggle_pin items](#keybinds_toggle_pin_items) |             |
 
-##### <a name="keybinds_toggle_pin_items"></a>6.67.2.1. Rovr Config > keybinds > toggle_pin > toggle_pin items
+##### <a name="keybinds_toggle_pin_items"></a>6.68.2.1. Rovr Config > keybinds > toggle_pin > toggle_pin items
 
 |              |          |
 | ------------ | -------- |
 | **Type**     | `string` |
 | **Required** | No       |
 
-#### <a name="keybinds_filter_modal_up"></a>6.67.3. Property `Rovr Config > keybinds > filter_modal > up`
+#### <a name="keybinds_filter_modal_up"></a>6.68.3. Property `Rovr Config > keybinds > filter_modal > up`
 
 |                |                       |
 | -------------- | --------------------- |
@@ -5384,14 +5912,14 @@ Must be one of:
 | ---------------------------------------------- | ----------- |
 | [toggle_pin items](#keybinds_toggle_pin_items) |             |
 
-##### <a name="keybinds_toggle_pin_items"></a>6.67.3.1. Rovr Config > keybinds > toggle_pin > toggle_pin items
+##### <a name="keybinds_toggle_pin_items"></a>6.68.3.1. Rovr Config > keybinds > toggle_pin > toggle_pin items
 
 |              |          |
 | ------------ | -------- |
 | **Type**     | `string` |
 | **Required** | No       |
 
-#### <a name="keybinds_filter_modal_page_down"></a>6.67.4. Property `Rovr Config > keybinds > filter_modal > page_down`
+#### <a name="keybinds_filter_modal_page_down"></a>6.68.4. Property `Rovr Config > keybinds > filter_modal > page_down`
 
 |                |                       |
 | -------------- | --------------------- |
@@ -5413,14 +5941,14 @@ Must be one of:
 | ---------------------------------------------- | ----------- |
 | [toggle_pin items](#keybinds_toggle_pin_items) |             |
 
-##### <a name="keybinds_toggle_pin_items"></a>6.67.4.1. Rovr Config > keybinds > toggle_pin > toggle_pin items
+##### <a name="keybinds_toggle_pin_items"></a>6.68.4.1. Rovr Config > keybinds > toggle_pin > toggle_pin items
 
 |              |          |
 | ------------ | -------- |
 | **Type**     | `string` |
 | **Required** | No       |
 
-#### <a name="keybinds_filter_modal_page_up"></a>6.67.5. Property `Rovr Config > keybinds > filter_modal > page_up`
+#### <a name="keybinds_filter_modal_page_up"></a>6.68.5. Property `Rovr Config > keybinds > filter_modal > page_up`
 
 |                |                       |
 | -------------- | --------------------- |
@@ -5442,14 +5970,14 @@ Must be one of:
 | ---------------------------------------------- | ----------- |
 | [toggle_pin items](#keybinds_toggle_pin_items) |             |
 
-##### <a name="keybinds_toggle_pin_items"></a>6.67.5.1. Rovr Config > keybinds > toggle_pin > toggle_pin items
+##### <a name="keybinds_toggle_pin_items"></a>6.68.5.1. Rovr Config > keybinds > toggle_pin > toggle_pin items
 
 |              |          |
 | ------------ | -------- |
 | **Type**     | `string` |
 | **Required** | No       |
 
-### <a name="keybinds_yes_or_no"></a>6.68. Property `Rovr Config > keybinds > yes_or_no`
+### <a name="keybinds_yes_or_no"></a>6.69. Property `Rovr Config > keybinds > yes_or_no`
 
 |                           |                  |
 | ------------------------- | ---------------- |
@@ -5465,7 +5993,7 @@ Must be one of:
 | [no](#keybinds_yes_or_no_no)                         | array of string | Decline with 'no'.                                                          |
 | [dont_ask_again](#keybinds_yes_or_no_dont_ask_again) | array of string | Apply the selected action to all future confirmations without asking again. |
 
-#### <a name="keybinds_yes_or_no_yes"></a>6.68.1. Property `Rovr Config > keybinds > yes_or_no > yes`
+#### <a name="keybinds_yes_or_no_yes"></a>6.69.1. Property `Rovr Config > keybinds > yes_or_no > yes`
 
 |                |                       |
 | -------------- | --------------------- |
@@ -5487,14 +6015,14 @@ Must be one of:
 | ---------------------------------------------- | ----------- |
 | [toggle_pin items](#keybinds_toggle_pin_items) |             |
 
-##### <a name="keybinds_toggle_pin_items"></a>6.68.1.1. Rovr Config > keybinds > toggle_pin > toggle_pin items
+##### <a name="keybinds_toggle_pin_items"></a>6.69.1.1. Rovr Config > keybinds > toggle_pin > toggle_pin items
 
 |              |          |
 | ------------ | -------- |
 | **Type**     | `string` |
 | **Required** | No       |
 
-#### <a name="keybinds_yes_or_no_no"></a>6.68.2. Property `Rovr Config > keybinds > yes_or_no > no`
+#### <a name="keybinds_yes_or_no_no"></a>6.69.2. Property `Rovr Config > keybinds > yes_or_no > no`
 
 |                |                       |
 | -------------- | --------------------- |
@@ -5516,14 +6044,14 @@ Must be one of:
 | ---------------------------------------------- | ----------- |
 | [toggle_pin items](#keybinds_toggle_pin_items) |             |
 
-##### <a name="keybinds_toggle_pin_items"></a>6.68.2.1. Rovr Config > keybinds > toggle_pin > toggle_pin items
+##### <a name="keybinds_toggle_pin_items"></a>6.69.2.1. Rovr Config > keybinds > toggle_pin > toggle_pin items
 
 |              |          |
 | ------------ | -------- |
 | **Type**     | `string` |
 | **Required** | No       |
 
-#### <a name="keybinds_yes_or_no_dont_ask_again"></a>6.68.3. Property `Rovr Config > keybinds > yes_or_no > dont_ask_again`
+#### <a name="keybinds_yes_or_no_dont_ask_again"></a>6.69.3. Property `Rovr Config > keybinds > yes_or_no > dont_ask_again`
 
 |                |                       |
 | -------------- | --------------------- |
@@ -5545,14 +6073,14 @@ Must be one of:
 | ---------------------------------------------- | ----------- |
 | [toggle_pin items](#keybinds_toggle_pin_items) |             |
 
-##### <a name="keybinds_toggle_pin_items"></a>6.68.3.1. Rovr Config > keybinds > toggle_pin > toggle_pin items
+##### <a name="keybinds_toggle_pin_items"></a>6.69.3.1. Rovr Config > keybinds > toggle_pin > toggle_pin items
 
 |              |          |
 | ------------ | -------- |
 | **Type**     | `string` |
 | **Required** | No       |
 
-### <a name="keybinds_drag_and_drop"></a>6.69. Property `Rovr Config > keybinds > drag_and_drop`
+### <a name="keybinds_drag_and_drop"></a>6.70. Property `Rovr Config > keybinds > drag_and_drop`
 
 |                           |                  |
 | ------------------------- | ---------------- |
@@ -5568,7 +6096,7 @@ Must be one of:
 | [copy](#keybinds_drag_and_drop_copy)     | array of string | Copy the dropped file to the current directory. |
 | [cancel](#keybinds_drag_and_drop_cancel) | array of string | Cancel the drag and drop operation.             |
 
-#### <a name="keybinds_drag_and_drop_move"></a>6.69.1. Property `Rovr Config > keybinds > drag_and_drop > move`
+#### <a name="keybinds_drag_and_drop_move"></a>6.70.1. Property `Rovr Config > keybinds > drag_and_drop > move`
 
 |                |                       |
 | -------------- | --------------------- |
@@ -5590,14 +6118,14 @@ Must be one of:
 | ---------------------------------------------- | ----------- |
 | [toggle_pin items](#keybinds_toggle_pin_items) |             |
 
-##### <a name="keybinds_toggle_pin_items"></a>6.69.1.1. Rovr Config > keybinds > toggle_pin > toggle_pin items
+##### <a name="keybinds_toggle_pin_items"></a>6.70.1.1. Rovr Config > keybinds > toggle_pin > toggle_pin items
 
 |              |          |
 | ------------ | -------- |
 | **Type**     | `string` |
 | **Required** | No       |
 
-#### <a name="keybinds_drag_and_drop_copy"></a>6.69.2. Property `Rovr Config > keybinds > drag_and_drop > copy`
+#### <a name="keybinds_drag_and_drop_copy"></a>6.70.2. Property `Rovr Config > keybinds > drag_and_drop > copy`
 
 |                |                       |
 | -------------- | --------------------- |
@@ -5619,14 +6147,14 @@ Must be one of:
 | ---------------------------------------------- | ----------- |
 | [toggle_pin items](#keybinds_toggle_pin_items) |             |
 
-##### <a name="keybinds_toggle_pin_items"></a>6.69.2.1. Rovr Config > keybinds > toggle_pin > toggle_pin items
+##### <a name="keybinds_toggle_pin_items"></a>6.70.2.1. Rovr Config > keybinds > toggle_pin > toggle_pin items
 
 |              |          |
 | ------------ | -------- |
 | **Type**     | `string` |
 | **Required** | No       |
 
-#### <a name="keybinds_drag_and_drop_cancel"></a>6.69.3. Property `Rovr Config > keybinds > drag_and_drop > cancel`
+#### <a name="keybinds_drag_and_drop_cancel"></a>6.70.3. Property `Rovr Config > keybinds > drag_and_drop > cancel`
 
 |                |                       |
 | -------------- | --------------------- |
@@ -5648,7 +6176,7 @@ Must be one of:
 | ---------------------------------------------- | ----------- |
 | [toggle_pin items](#keybinds_toggle_pin_items) |             |
 
-##### <a name="keybinds_toggle_pin_items"></a>6.69.3.1. Rovr Config > keybinds > toggle_pin > toggle_pin items
+##### <a name="keybinds_toggle_pin_items"></a>6.70.3.1. Rovr Config > keybinds > toggle_pin > toggle_pin items
 
 |              |          |
 | ------------ | -------- |
@@ -5671,6 +6199,8 @@ Must be one of:
 | [rg](#plugins_rg)             | object |                   |
 | [poppler](#plugins_poppler)   | object |                   |
 | [file_one](#plugins_file_one) | object |                   |
+| [resvg](#plugins_resvg)       | object |                   |
+| [magick](#plugins_magick)     | object |                   |
 
 ### <a name="plugins_zoxide"></a>7.1. Property `Rovr Config > plugins > zoxide`
 
@@ -5788,6 +6318,7 @@ Must be one of:
 | [search_hidden](#plugins_fd_search_hidden)               | boolean                   | Whether to include hidden files in fd results by default.                        |
 | [timeout](#plugins_fd_timeout)                           | integer                   | The maximum time (in seconds) to wait for fd to return results before giving up. |
 | [default_filter_types](#plugins_fd_default_filter_types) | array of enum (of string) | The default file types to show when using fd.                                    |
+| [threads](#plugins_fd_threads)                           | integer                   | The number of threads to use for fd searches.                                    |
 
 #### <a name="plugins_fd_enabled"></a>7.3.1. Property `Rovr Config > plugins > fd > enabled`
 
@@ -5930,6 +6461,20 @@ Must be one of:
 - "char-device"
 - "block-device"
 
+#### <a name="plugins_fd_threads"></a>7.3.10. Property `Rovr Config > plugins > fd > threads`
+
+|              |           |
+| ------------ | --------- |
+| **Type**     | `integer` |
+| **Required** | No        |
+| **Default**  | `2`       |
+
+**Description:** The number of threads to use for fd searches.
+
+| Restrictions |        |
+| ------------ | ------ |
+| **Minimum**  | &ge; 1 |
+
 ### <a name="plugins_rg"></a>7.4. Property `Rovr Config > plugins > rg`
 
 |                           |             |
@@ -5948,6 +6493,7 @@ Must be one of:
 | [no_ignore_parent](#plugins_rg_no_ignore_parent) | boolean         | Don't use \*ignore files from parent folders when searching.                     |
 | [search_hidden](#plugins_rg_search_hidden)       | boolean         | Whether to search hidden files by default.                                       |
 | [timeout](#plugins_rg_timeout)                   | integer         | The maximum time (in seconds) to wait for rg to return results before giving up. |
+| [threads](#plugins_rg_threads)                   | integer         | The number of threads to use for rg searches.                                    |
 
 #### <a name="plugins_rg_enabled"></a>7.4.1. Property `Rovr Config > plugins > rg > enabled`
 
@@ -6048,6 +6594,20 @@ Must be one of:
 | **Default**  | `60`      |
 
 **Description:** The maximum time (in seconds) to wait for rg to return results before giving up.
+
+#### <a name="plugins_rg_threads"></a>7.4.9. Property `Rovr Config > plugins > rg > threads`
+
+|              |           |
+| ------------ | --------- |
+| **Type**     | `integer` |
+| **Required** | No        |
+| **Default**  | `4`       |
+
+**Description:** The number of threads to use for rg searches.
+
+| Restrictions |        |
+| ------------ | ------ |
+| **Minimum**  | &ge; 1 |
 
 ### <a name="plugins_poppler"></a>7.5. Property `Rovr Config > plugins > poppler`
 
@@ -6155,5 +6715,110 @@ Must be one of:
 | **Default**  | `true`    |
 
 **Description:** Use file(1) to get additional information of the file type.
+
+### <a name="plugins_resvg"></a>7.7. Property `Rovr Config > plugins > resvg`
+
+|                           |             |
+| ------------------------- | ----------- |
+| **Type**                  | `object`    |
+| **Required**              | No          |
+| **Additional properties** | Not allowed |
+
+| Property                                          | Type             | Title/Description                                                          |
+| ------------------------------------------------- | ---------------- | -------------------------------------------------------------------------- |
+| [dpi](#plugins_resvg_dpi)                         | integer          | The DPI to use when rendering SVGs. 0 means use the default DPI of the SVG |
+| [shape_rendering](#plugins_resvg_shape_rendering) | enum (of string) | The shape rendering option to use when rendering SVGs.                     |
+| [text_rendering](#plugins_resvg_text_rendering)   | enum (of string) | The text rendering option to use when rendering SVGs.                      |
+| [image_rendering](#plugins_resvg_image_rendering) | enum (of string) | The image rendering option to use when rendering SVGs.                     |
+
+#### <a name="plugins_resvg_dpi"></a>7.7.1. Property `Rovr Config > plugins > resvg > dpi`
+
+|              |           |
+| ------------ | --------- |
+| **Type**     | `integer` |
+| **Required** | No        |
+| **Default**  | `0`       |
+
+**Description:** The DPI to use when rendering SVGs. 0 means use the default DPI of the SVG
+
+#### <a name="plugins_resvg_shape_rendering"></a>7.7.2. Property `Rovr Config > plugins > resvg > shape_rendering`
+
+|              |                         |
+| ------------ | ----------------------- |
+| **Type**     | `enum (of string)`      |
+| **Required** | No                      |
+| **Default**  | `"geometric_precision"` |
+
+**Description:** The shape rendering option to use when rendering SVGs.
+
+Must be one of:
+
+- "geometric_precision"
+- "crisp_edges"
+- "optimize_speed"
+
+#### <a name="plugins_resvg_text_rendering"></a>7.7.3. Property `Rovr Config > plugins > resvg > text_rendering`
+
+|              |                         |
+| ------------ | ----------------------- |
+| **Type**     | `enum (of string)`      |
+| **Required** | No                      |
+| **Default**  | `"geometric_precision"` |
+
+**Description:** The text rendering option to use when rendering SVGs.
+
+Must be one of:
+
+- "geometric_precision"
+- "optimize_legibility"
+- "optimize_speed"
+
+#### <a name="plugins_resvg_image_rendering"></a>7.7.4. Property `Rovr Config > plugins > resvg > image_rendering`
+
+|              |                      |
+| ------------ | -------------------- |
+| **Type**     | `enum (of string)`   |
+| **Required** | No                   |
+| **Default**  | `"optimize_quality"` |
+
+**Description:** The image rendering option to use when rendering SVGs.
+
+Must be one of:
+
+- "optimize_quality"
+- "optimize_speed"
+
+### <a name="plugins_magick"></a>7.8. Property `Rovr Config > plugins > magick`
+
+|                           |             |
+| ------------------------- | ----------- |
+| **Type**                  | `object`    |
+| **Required**              | No          |
+| **Additional properties** | Not allowed |
+
+| Property                                 | Type    | Title/Description                                             |
+| ---------------------------------------- | ------- | ------------------------------------------------------------- |
+| [enabled](#plugins_magick_enabled)       | boolean | Enable ImageMagick for converting unsupported image previews. |
+| [executable](#plugins_magick_executable) | string  | ImageMagick executable name or path.                          |
+
+#### <a name="plugins_magick_enabled"></a>7.8.1. Property `Rovr Config > plugins > magick > enabled`
+
+|              |           |
+| ------------ | --------- |
+| **Type**     | `boolean` |
+| **Required** | No        |
+| **Default**  | `true`    |
+
+**Description:** Enable ImageMagick for converting unsupported image previews.
+
+#### <a name="plugins_magick_executable"></a>7.8.2. Property `Rovr Config > plugins > magick > executable`
+
+|              |            |
+| ------------ | ---------- |
+| **Type**     | `string`   |
+| **Required** | No         |
+| **Default**  | `"magick"` |
+
+**Description:** ImageMagick executable name or path.
 
 ---

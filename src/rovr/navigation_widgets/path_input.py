@@ -14,6 +14,7 @@ from textual_autocomplete import DropdownItem, PathAutoComplete, TargetState
 
 from rovr.classes.mixins import Action, Actionable
 from rovr.classes.textual_options import PathDropdownItem
+from rovr.classes.textual_validators import ControlHighlighter
 from rovr.functions.cwd import getcwd
 from rovr.functions.icons import get_icon
 from rovr.functions.path import is_hidden_file
@@ -188,6 +189,7 @@ class PathAutoCompleteInput(PathAutoComplete):
             id="path_autocomplete",
             sort_key=lambda item: item.lower(),
         )
+        target.highlighter = ControlHighlighter()
         self.folder_prefix = " " + get_icon("folder", "default")[0] + " "
         self.file_prefix = " " + get_icon("file", "default")[0] + " "
         self._target: Input = target
@@ -496,3 +498,10 @@ class PathInput(Actionable, Input, inherit_bindings=False):
         self.app.call_after_refresh(
             self.auto_completer._listen_to_messages, Input.Changed(self, self.value)
         )
+
+    def check_consume_key(self, key: str, character: str | None) -> bool:
+        return (
+            key == "enter"
+            and self.auto_completer.display
+            and self.auto_completer.option_list.highlighted is not None
+        ) or super().check_consume_key(key, character)

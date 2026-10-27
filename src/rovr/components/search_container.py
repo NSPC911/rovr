@@ -10,6 +10,7 @@ from textual.widgets.selection_list import Selection, SelectionError
 # i know textual has its own Matcher, but if I use that, then Nuitka needs to compile it again, so I'm using this for consistency
 from textual_autocomplete.fuzzy_search import Matcher
 
+from rovr.functions.path import control
 from rovr.functions.utils import set_scuffed_subtitle
 
 
@@ -73,7 +74,7 @@ class SearchInput(Input):
                         else:
                             self.items_list.select(self.items_list.get_option(option_id))
             return
-        matcher = Matcher(event.value)
+        matcher = Matcher(control(event.value))
         assert hasattr(self.items_list, "list_of_options")
         assert isinstance(self.items_list.list_of_options, list)
         output: list[Option] = []

@@ -439,14 +439,11 @@ def s(item: Any, notone: str = "s", isone: str = "") -> str:
     )
 
 
-preview_loc = os.path.join(RovrVars.ROVRTEMP, "previews")
+preview_loc = os.path.realpath(os.path.join(RovrVars.ROVRTEMP, "previews"))
 
 
 def in_preview_loc(path_str: str) -> bool:
-    return (
-        os.path.commonpath([os.path.realpath(path_str), os.path.realpath(preview_loc)])
-        == preview_loc
-    )
+    return os.path.commonpath([os.path.realpath(path_str), preview_loc]) == preview_loc
 
 
 def _cache_path(

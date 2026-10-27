@@ -48,11 +48,11 @@
 "L" = { action = "bypass_down_tree", desc = "Go down through single folders" }
 "backspace" = { action = "hist_previous", desc = "Go to the previous directory" }
 "u" = "hist_previous"
-"ctrl+r" = { action = "hist_next", desc = "Go to the next directory" }
-"space" = "hist_next"
+"U" = { action = "hist_next", desc = "Go to the next directory" }
 "v" = { action = "toggle_visual", desc = "Toggle visual selection" }
 "%" = { action = "toggle_all", desc = "Toggle selection of all files" }
 "ctrl+a" = "toggle_all"
+"ctrl+r" = { action = "invert_selections", desc = "Invert selections" }
 "." = { action = "toggle_hidden_files", desc = "Toggle hidden files" }
 "shift+up" = { action = "select_cursor(-1)", desc = "Extend selection upward" }
 "K" = "select_cursor(-1)"

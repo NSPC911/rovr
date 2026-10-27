@@ -9,7 +9,7 @@ import stat
 import sys
 from contextlib import suppress
 from functools import lru_cache, partial
-from os import path, stat_result
+from os import path
 from subprocess import CompletedProcess
 from typing import Any, Callable, Literal, TypedDict, overload
 
@@ -27,6 +27,7 @@ from rovr.classes.type_aliases import (
     SortByOptions,
 )
 from rovr.variables.constants import log_name
+from rovr.variables.maps import CONTROL_PICTURES
 
 from .drive_workers import normalise
 from .icons import get_icon_for_file, get_icon_for_folder
@@ -34,19 +35,18 @@ from .icons import get_icon_for_file, get_icon_for_folder
 natsort_compiled = re.compile(r"(\d+)")
 
 
+@lru_cache(maxsize=2048)
 def _natsort(key: str) -> tuple[str | int, ...]:
     return tuple(
         int(text) if text.isdigit() else text for text in natsort_compiled.split(key)
     )
 
 
-@lru_cache(maxsize=2048)
-def natsort(key: str) -> tuple[str | int, ...]:
-    return _natsort(key)
-
-
-def natsort_cacheless(key: str) -> tuple[str | int, ...]:
-    return _natsort(key)
+def natsort(key: str, cache: bool = True) -> tuple[str | int, ...]:
+    if cache:
+        return _natsort(key)
+    else:
+        return _natsort.__wrapped__(key)
 
 
 def is_hidden_file(entry: os.DirEntry) -> bool:
@@ -228,17 +228,13 @@ def get_extension_sort_key(file_dict: dict) -> tuple[int, str]:
         return (3, name.split(".")[-1].lower())
 
 
-def get_birthtime(file_stat: stat_result) -> float | None:
-    return getattr(file_stat, "st_birthtime", None)
-
-
 def sorter(
     thing: CWDObjectReturnDict, sort_st: Literal["birthtime", "mtime", "size"]
 ) -> int | float:
     try:
         match sort_st:
             case "birthtime":
-                return get_birthtime(thing["dir_entry"].stat(follow_symlinks=False)) or 0
+                return get_birthtime(thing["dir_entry"]) or 0
             case "mtime":
                 return thing["dir_entry"].stat(follow_symlinks=False).st_mtime_ns
             case "size":
@@ -352,14 +348,10 @@ def sync_get_cwd_object(
             folders.sort(key=lambda x: x["name"].lower(), reverse=reverse)
             files.sort(key=lambda x: x["name"].lower(), reverse=reverse)
         case "natural":
-            if len(folders) < 1024:
-                folders.sort(key=lambda x: natsort(x["name"]), reverse=reverse)
-            else:
-                folders.sort(key=lambda x: natsort_cacheless(x["name"]), reverse=reverse)
-            if len(files) < 1024:
-                files.sort(key=lambda x: natsort(x["name"]), reverse=reverse)
-            else:
-                files.sort(key=lambda x: natsort_cacheless(x["name"]), reverse=reverse)
+            should_cache = len(folders) < 1024
+            folders.sort(key=lambda x: natsort(x["name"], should_cache), reverse=reverse)
+            should_cache = len(files) < 1024
+            files.sort(key=lambda x: natsort(x["name"], should_cache), reverse=reverse)
         case "created":
             folders.sort(key=lambda x: sorter(x, "birthtime"), reverse=reverse)
             files.sort(key=lambda x: sorter(x, "birthtime"), reverse=reverse)
@@ -707,3 +699,57 @@ def run_opener(app: App, target_path: str) -> None:
                 else:
                     return
     open_file(app, target_path)
+
+
+def get_birthtime(dir_entry: os.DirEntry) -> float | None:
+    """Return a directory entry's birth time when the platform provides it.
+
+    Returns:
+        The birth time in seconds, or None when unavailable.
+
+    Raises:
+        OSError: If the directory entry cannot be read.
+    """
+    birthtime: float | None = getattr(
+        dir_entry.stat(follow_symlinks=False), "st_birthtime", None
+    )
+    if (birthtime) is not None or sys.platform != "linux":
+        return birthtime
+
+    import ctypes
+
+    statx_btime = 0x00000800
+    libc = ctypes.CDLL(None, use_errno=True)
+    statx = getattr(libc, "statx", None)
+    if statx is None:
+        return None
+
+    statx.argtypes = [
+        ctypes.c_int,
+        ctypes.c_char_p,
+        ctypes.c_int,
+        ctypes.c_uint,
+        ctypes.c_void_p,
+    ]
+    statx.restype = ctypes.c_int
+    statx_buf = ctypes.create_string_buffer(256)
+    result = statx(
+        -100,
+        os.fsencode(dir_entry.path),
+        0x100,
+        statx_btime,
+        statx_buf,
+    )
+    if result != 0:
+        error_num = ctypes.get_errno()
+        raise OSError(error_num, os.strerror(error_num), dir_entry.path)
+    if not ctypes.c_uint32.from_buffer(statx_buf).value & statx_btime:
+        return None
+
+    tv_sec = ctypes.c_int64.from_buffer(statx_buf, 80).value
+    tv_nsec = ctypes.c_uint32.from_buffer(statx_buf, 88).value
+    return tv_sec + tv_nsec / 1e9
+
+
+def control(string: str) -> str:
+    return string.translate(CONTROL_PICTURES)

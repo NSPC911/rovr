@@ -62,6 +62,7 @@
 "v" = { action = "toggle_visual", desc = "Toggle visual selection" }
 "%" = { action = "toggle_all", desc = "Toggle selection of all files" }
 "ctrl+a" = "toggle_all"
+"ctrl+r" = { action = "invert_selections", desc = "Invert selections" }
 "." = { action = "toggle_hidden_files", desc = "Toggle hidden files" }
 "insert" = { action = "toggle_select_item", desc = "Toggle the current selection" }
 "shift+up" = { action = "select_cursor(-1)", desc = "Extend selection upward" }

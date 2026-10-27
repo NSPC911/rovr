@@ -336,9 +336,19 @@ def get_mime_type(
                     puremagic.magic_file(file_path)
                 )
                 if puremagic_result:
+                    # this is a special interference for qoi, because what the fuck
+                    if (
+                        puremagic_result[0].mime_type == ""
+                        and puremagic_result[0].extension == ".qoi"
+                    ):
+                        return MimeResult("puremagic", "image/x-qoi")
+
                     # If multiple matches exist, prefer one matching the file extension
                     for match in puremagic_result:
-                        if match.extension.lower() == file_extension and match.mime_type:
+                        if (
+                            match.extension.lower().removeprefix(".") == file_extension
+                            and match.mime_type
+                        ):
                             return MimeResult("puremagic", match.mime_type)
                     # Otherwise, return first result with a mime type
                     for match in puremagic_result:

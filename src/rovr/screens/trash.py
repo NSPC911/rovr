@@ -3,11 +3,11 @@ from typing import Callable, ClassVar
 
 from pytrash import RecycleBin, TrashEntry
 from rich.cells import cell_len
-from rich.text import Text
 from textual import events, on, work
 from textual.app import ComposeResult
 from textual.binding import BindingType
 from textual.containers import Grid
+from textual.content import Content, ContentText
 from textual.message import Message
 from textual.screen import ModalScreen
 from textual.strip import Strip
@@ -47,7 +47,7 @@ TRASH_COLUMNS: tuple[detail_utils.DetailColumn, ...] = (
 class TrashSelection(Selection):
     """A recycle bin entry that can render its stats as detail columns."""
 
-    def __init__(self, prompt: Text, value: str, entry: TrashEntry) -> None:
+    def __init__(self, prompt: ContentText, value: str, entry: TrashEntry) -> None:
         super().__init__(prompt, value)
         self.entry = entry
 
@@ -222,7 +222,7 @@ class TrashScreen(Actionable, ModalScreen):
             return icon_utils.get_icon_for_folder(entry.name, is_symlink=False)
         return icon_utils.get_icon_for_file(entry.name, is_symlink=False)
 
-    def _format_entry(self, entry: TrashEntry) -> Text:
+    def _format_entry(self, entry: TrashEntry) -> Content:
         from os import path
 
         if entry.original_path is not None and entry.is_dir:
@@ -231,18 +231,17 @@ class TrashScreen(Actionable, ModalScreen):
             icon, color = icon_utils.get_icon_for_file(entry.name, is_symlink=False)
 
         # need to start with empty so no color is used
-        prompt = Text(" ")
-        prompt.append_tokens([(icon, color or ""), (" ", "")])
+        prompt = Content(" ")
+        prompt += Content.from_markup(f"[{color}]{icon}[/] " if color else f"{icon} ")
         if entry.original_path:
             location = path_utils.normalise(entry.original_path)
             if location == home:
                 location = "~"
             if location.startswith(f"{home}/"):
                 location = f"~{location[len(home) :]}"
-            prompt.append_tokens([
-                (f"{path.dirname(location)}/", "dim"),
-                (entry.name, ""),
-            ])
+            prompt += Content.from_markup(
+                "[dim]$d/[/]$p", d=path.dirname(location), p=entry.name
+            )
         return prompt
 
     @work(thread=True)

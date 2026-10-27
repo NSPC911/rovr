@@ -806,6 +806,8 @@ class _RovrConfigInterface(TypedDict, total=False):
 
     clock: "_RovrConfigInterfaceClock"
     preview_text: "_RovrConfigInterfacePreviewText"
+    compact_mode: "_RovrConfigInterfaceCompactMode"
+    r""" DEPRECATING SOON, DO NOT USE. """
 
 class _RovrConfigInterfaceClock(TypedDict, total=False):
     enabled: bool
@@ -832,6 +834,15 @@ _ROVRCONFIGINTERFACECLOCKALIGN_LEFT: Literal["left"] = "left"
 r"""The values for the 'Align the clock to either the 'right' or 'left' of the tabs bar' enum"""
 _ROVRCONFIGINTERFACECLOCKALIGN_RIGHT: Literal["right"] = "right"
 r"""The values for the 'Align the clock to either the 'right' or 'left' of the tabs bar' enum"""
+
+class _RovrConfigInterfaceCompactMode(TypedDict, total=False):
+    r"""DEPRECATING SOON, DO NOT USE."""
+
+    buttons: bool
+    r""" [DEPRECATING SOON, DO NOT USE] Whether to compact the buttons and path input to one line instead of three. """
+
+    panels: bool
+    r""" [DEPRECATING SOON, DO NOT USE] Whether to make the panels smaller to add more room for the file list itself """
 
 class _RovrConfigInterfaceDetailsListItem(TypedDict, total=False):
     type: Required["_RovrConfigInterfaceDetailsListItemType"]
@@ -1081,6 +1092,7 @@ class _RovrConfigKeybinds(TypedDict, total=False):
     new: list[str]
     bulk_create: list[str]
     toggle_all: list[str]
+    invert_selections: list[str]
     zip: list[str]
     unzip: list[str]
     open_right_click_menu: list[str]

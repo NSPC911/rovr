@@ -9,6 +9,9 @@ export default defineConfig({
   integrations: [
     starlight({
       title: "rovr",
+      logo: {
+        src: "./src/assets/rovr-icon.svg"
+      },
       components: {
         SocialIcons: "./src/components/GithubStats.astro",
       },

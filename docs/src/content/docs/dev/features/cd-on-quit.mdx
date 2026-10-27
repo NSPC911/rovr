@@ -107,18 +107,24 @@ rm -f "$cwd_file" "$chooser_file"
 
 ### integrations
 
-as much as it might be tempting, this will not work. i use helix <sub>btw</sub> and just like superfile, it just cannot launch the app. i'm not sure why, but it might be a conflict between terminal buffer areas.
-so something like yazi's
+this is an example integration with helix
 
 ```toml
 [keys.normal]
 C-y = [
-  ':sh rm -f /tmp/unique-file',
-  ':insert-output rovr %{buffer_name} --chooser-file=/tmp/unique-file',
-  ':insert-output echo "\x1b[?1049h\x1b[?2004h" > /dev/tty',
-  ':open %sh{cat /tmp/unique-file}',
+  ':open %sh{rovr %{buffer_name} --chooser-file=__stdout__ --force-tty}',
   ':redraw',
 ]
 ```
 
 will not work
+
+### Tips
+
+Both `--chooser-file` and `--cwd-file` lets you write to `stdout` and `stderr`.
+
+To do so, wrap them with double underscores, and include `--force-tty` to ignore piping status
+
+```pwsh
+(rovr --chooser-file __stdout__ --force-tty) -split "`n" | ForEach-Object { Get-Item $_ }
+```

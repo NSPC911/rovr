@@ -248,7 +248,7 @@ def detail_cells(
                         else "--"
                     )
                 case "birthtime":
-                    birthtime = get_birthtime(file_stat) if file_stat else None
+                    birthtime = get_birthtime(dir_entry)
                     value = (
                         datetime.fromtimestamp(birthtime).strftime(column.format)
                         if birthtime is not None

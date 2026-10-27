@@ -298,7 +298,16 @@ class Application(
 
     def compose(self) -> ComposeResult:
         self.log("Starting Rovr...")
-        with Vertical(id="root"):
+        root_classes = (
+            "compact-buttons"
+            if config["interface"].get("compact_mode", {}).get("buttons", True)
+            else "comfy-buttons"
+        ) + (
+            " compact-panels"
+            if config["interface"].get("compact_mode", {}).get("panels", False)
+            else " comfy-panels"
+        )
+        with Vertical(id="root", classes=root_classes.strip()):
             header = HeaderArea(self._startup_locations)
             self.tabWidget = header.tabline
             yield header
@@ -418,7 +427,7 @@ class Application(
             return
         proc.terminate()
         try:
-            proc.wait(timeout=0.5)
+            proc.wait(timeout=1)
         except TimeoutExpired:
             proc.kill()
 
@@ -611,6 +620,7 @@ class Application(
 
         if path.exists(target) and not path.isdir(target) and focus_on is None:
             focus_on = path.basename(target)
+            target = path.dirname(target)
         else:
             target = ensure_existing_directory(target)
 
@@ -685,10 +695,6 @@ class Application(
         )
 
         while True:
-            if self._shutdown_event.wait(timeout=1):
-                break
-            if i_should_shut_down():
-                break
             if (file_list := self.file_list).parent is None or not file_list.is_running:
                 continue
             try:
@@ -830,6 +836,10 @@ class Application(
                     )
                 elif not path.exists(custom_style_path):
                     style_available = False
+            if self._shutdown_event.wait(timeout=1):
+                break
+            if i_should_shut_down():
+                break
         drive_watcher.close()
 
     @work(exclusive=True, group="resizer")

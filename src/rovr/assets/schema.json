@@ -599,7 +599,7 @@
                   ]
                 },
                 "on_nonzero_exit": {
-                  "$ref": "#/definitions/preview_type",
+                  "$ref": "#/definitions/default_previews",
                   "default": "details",
                   "description": "What to do if the command exits with a non-zero exit code. This can only be a string to provide a fallback to use. Defaults to `details`."
                 }

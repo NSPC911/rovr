@@ -1976,8 +1976,7 @@ class _RovrConfigSettingsPreviewersType(TypedDict, total=False):
     Aggregation type: anyOf
     """
 
-    on_nonzero_exit: "_PreviewType"
-    r""" Aggregation type: anyOf """
+    on_nonzero_exit: "_DefaultPreviews"
 
 _RovrConfigSettingsPreviewersTypeFile = Union[
     "_RovrConfigSettingsPreviewersTypeFileAnyof0",

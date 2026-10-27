@@ -138,8 +138,6 @@ description: config schema humanified
         - [2.8.1.3.1. Property `Rovr Config > settings > previewers > ^(?!archive$&#124;text$&#124;remime$&#124;font$&#124;pdf$&#124;resvg$&#124;folder$&#124;file$&#124;details$&#124;image$).* > file > anyOf > item 0`](#settings_previewers_pattern1_file_anyOf_i0)
         - [2.8.1.3.2. Property `Rovr Config > settings > previewers > ^(?!archive$&#124;text$&#124;remime$&#124;font$&#124;pdf$&#124;resvg$&#124;folder$&#124;file$&#124;details$&#124;image$).* > file > anyOf > item 1`](#settings_previewers_pattern1_file_anyOf_i1)
       - [2.8.1.4. Property `Rovr Config > settings > previewers > ^(?!archive$&#124;text$&#124;remime$&#124;font$&#124;pdf$&#124;resvg$&#124;folder$&#124;file$&#124;details$&#124;image$).* > on_nonzero_exit`](#settings_previewers_pattern1_on_nonzero_exit)
-        - [2.8.1.4.1. Property `Rovr Config > settings > preview_rules > additionalProperties > oneOf > item 0 > anyOf > item 0`](#settings_preview_rules_additionalProperties_oneOf_i0_anyOf_i0)
-        - [2.8.1.4.2. Property `Rovr Config > settings > preview_rules > additionalProperties > oneOf > item 0 > anyOf > default_previews`](#settings_preview_rules_additionalProperties_oneOf_i0_anyOf_i1)
   - [2.9. Property `Rovr Config > settings > openers`](#settings_openers)
     - [2.9.1. Property `Rovr Config > settings > openers > groups`](#settings_openers_groups)
       - [2.9.1.1. Property `Rovr Config > settings > openers > groups > additionalProperties`](#settings_openers_groups_additionalProperties)
@@ -2167,7 +2165,7 @@ Must be one of:
 | [type](#settings_previewers_pattern1_type)                       | enum (of string) | The type of previewer. This determines how the previewer will be used.                                                                                                                                                             |
 | [command](#settings_previewers_pattern1_command)                 | object           | The command to run to generate the preview.<br />Command expansions are supported except %s, %t, %cut and %copy. %file is the resolved output path from file; %tmpdir is a temporary directory removed after the command finishes. |
 | [file](#settings_previewers_pattern1_file)                       | Combination      | Where to read the preview from: stdout, stderr, or a path. %temp uses the source extension; %temp.png (or another extension) replaces it. The resolved path is available as %file in the command.                                  |
-| [on_nonzero_exit](#settings_previewers_pattern1_on_nonzero_exit) | object           | What to do if the command exits with a non-zero exit code. This can only be a string to provide a fallback to use. Defaults to \`details\`.                                                                                        |
+| [on_nonzero_exit](#settings_previewers_pattern1_on_nonzero_exit) | enum (of string) | What to do if the command exits with a non-zero exit code. This can only be a string to provide a fallback to use. Defaults to \`details\`.                                                                                        |
 
 ##### <a name="settings_previewers_pattern1_type"></a>2.8.1.1. Property `Rovr Config > settings > previewers > ^(?!archive$&#124;text$&#124;remime$&#124;font$&#124;pdf$&#124;resvg$&#124;folder$&#124;file$&#124;details$&#124;image$).* > type`
 
@@ -2233,35 +2231,14 @@ Must be one of:
 
 ##### <a name="settings_previewers_pattern1_on_nonzero_exit"></a>2.8.1.4. Property `Rovr Config > settings > previewers > ^(?!archive$&#124;text$&#124;remime$&#124;font$&#124;pdf$&#124;resvg$&#124;folder$&#124;file$&#124;details$&#124;image$).* > on_nonzero_exit`
 
-|                           |                            |
-| ------------------------- | -------------------------- |
-| **Type**                  | `combining`                |
-| **Required**              | No                         |
-| **Additional properties** | Any type allowed           |
-| **Default**               | `"details"`                |
-| **Defined in**            | #/definitions/preview_type |
-
-**Description:** What to do if the command exits with a non-zero exit code. This can only be a string to provide a fallback to use. Defaults to `details`.
-
-| Any of(Option)                                                                     |
-| ---------------------------------------------------------------------------------- |
-| [item 0](#settings_preview_rules_additionalProperties_oneOf_i0_anyOf_i0)           |
-| [default_previews](#settings_preview_rules_additionalProperties_oneOf_i0_anyOf_i1) |
-
-###### <a name="settings_preview_rules_additionalProperties_oneOf_i0_anyOf_i0"></a>2.8.1.4.1. Property `Rovr Config > settings > preview_rules > additionalProperties > oneOf > item 0 > anyOf > item 0`
-
-|              |          |
-| ------------ | -------- |
-| **Type**     | `string` |
-| **Required** | No       |
-
-###### <a name="settings_preview_rules_additionalProperties_oneOf_i0_anyOf_i1"></a>2.8.1.4.2. Property `Rovr Config > settings > preview_rules > additionalProperties > oneOf > item 0 > anyOf > default_previews`
-
 |                |                                |
 | -------------- | ------------------------------ |
 | **Type**       | `enum (of string)`             |
 | **Required**   | No                             |
+| **Default**    | `"details"`                    |
 | **Defined in** | #/definitions/default_previews |
+
+**Description:** What to do if the command exits with a non-zero exit code. This can only be a string to provide a fallback to use. Defaults to `details`.
 
 Must be one of:
 

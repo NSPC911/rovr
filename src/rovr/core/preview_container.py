@@ -1821,8 +1821,15 @@ class PreviewContainer(Actionable, Container):
                     with open(output_path, "rb") as file:
                         output_data = file.read()
                 else:
-                    self.notify(f"Path = {output_path} does not exist", title="Custom Previewer", severity="error", markup=False)
-                    self._current_content = f"Custom previewer output path does not exist: {output_path}"
+                    self.notify(
+                        f"Path = {output_path} does not exist",
+                        title="Custom Previewer",
+                        severity="error",
+                        markup=False,
+                    )
+                    self._current_content = (
+                        f"Custom previewer output path does not exist: {output_path}"
+                    )
                     self.mount_special_messages(mime=True)
                     return
 
@@ -1869,28 +1876,22 @@ class PreviewContainer(Actionable, Container):
             if should_cancel():
                 return
             self.notify(
-                f"Previewer Executable not found: {previewer["command"][0] if isinstance(previewer["command"], list) else previewer["command"]}",
+                f"Previewer Executable not found: {previewer['command'][0] if isinstance(previewer['command'], list) else previewer['command']}",
                 title=f"Custom Previewer: {name}",
                 severity="error",
                 markup=False,
             )
-        except subprocess.TimeoutExpired as exc:
-            if should_cancel():
-                return
-            self.notify(
-                f"Custom previewer command timed out after {exc.timeout} seconds",
-                title=f"Custom Previewer: {name}",
-                severity="error",
-                markup=False,
-            )
-            path_utils.dump_exc(self, exc)
-        except subprocess.CalledProcessError as exc:
+        except (subprocess.CalledProcessError, subprocess.TimeoutExpired) as exc:
             if should_cancel():
                 return
             msg = (
-                f"Custom previewer command failed with exit code {exc.returncode}\n"
-                f"stdout:\n{exc.stdout.decode('utf-8', errors='ignore')}\n"
-                f"stderr:\n{exc.stderr.decode('utf-8', errors='ignore')}"
+                (
+                    f"Custom previewer command failed with exit code {exc.returncode}\n"
+                    f"stdout:\n{exc.stdout.decode('utf-8', errors='ignore')}\n"
+                    f"stderr:\n{exc.stderr.decode('utf-8', errors='ignore')}"
+                )
+                if isinstance(exc, subprocess.CalledProcessError)
+                else f"Custom previewer command timed out after {exc.timeout} seconds"
             )
             if previewer.get("on_nonzero_exit", "details") == "details":
                 self._current_content = msg
@@ -1901,6 +1902,11 @@ class PreviewContainer(Actionable, Container):
                     title=f"Custom Previewer: {name}",
                     severity="error",
                     markup=False,
+                )
+                self.update_ui(
+                    original_path,
+                    file_type=previewer.get("on_nonzero_exit", "details"),
+                    mime_type=self._mime_type,
                 )
             path_utils.dump_exc(self, exc)
         finally:
@@ -1941,7 +1947,7 @@ class PreviewContainer(Actionable, Container):
 
         display_content: str = self._current_content + "\n"
         if mime and self._mime_type:
-            display_content = f"MIME Type: {self._mime_type.mime_type}"
+            display_content += f"MIME Type: {self._mime_type.mime_type}"
             if (
                 config["plugins"]["file_one"]["enabled"]
                 and config["plugins"]["file_one"]["get_description"]

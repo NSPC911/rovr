@@ -172,13 +172,9 @@ async def test_delete_button(tmp_path: Path) -> None:
         await iter_until(pilot, lambda: not isinstance(app.screen, DeleteFiles))
         await iter_until(
             pilot,
-            lambda: (
-                app
-                .query_one(ProcessContainer)
-                .query(ProgressBarContainer)
-                .first()
-                .progress_bar.percentage
-                == 1
+            lambda: any(
+                bar.progress_bar.percentage == 1
+                for bar in app.query_one(ProcessContainer).query(ProgressBarContainer)
             ),
         )
         worker = app.cd(tmp_path.as_posix(), add_to_history=False)

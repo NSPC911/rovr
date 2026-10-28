@@ -1725,18 +1725,27 @@ class PreviewContainer(Actionable, Container):
         elif file_type == "details":
             self._current_content = ""
             self.mount_special_messages()
+        elif content in self._preview_texts.values():
+            self.log("Showing special preview")
+            self.mount_special_messages()
         elif file_type in config["settings"].get("previewers", {}):
             self.log(f"Showing custom previewer for {file_type}")
             self.show_custom_preview(file_type)
-        else:
-            if content in self._preview_texts.values():
-                self.log("Showing special preview")
-                self.mount_special_messages()
-            else:
-                if not (
-                    config["plugins"]["bat"]["enabled"] and self.show_bat_file_preview()
-                ):
-                    self.show_normal_file_preview()
+        elif file_type not in ("text", "remime"):
+            # means custom previewer is not set, and it isnt the next previewer (text)
+            # im also including remime because it can happen if remime occurs twice
+            # which means it is a really short file (hence file1 cant identify) and
+            # gives it application/octet-stream twice, so yeah i guess
+            self.notify(
+                f"{file_type!r} previewer is not set",
+                title="Preview Error",
+                severity="error",
+                markup=False,
+            )
+            self._current_content = ""
+            self.mount_special_messages(mime=True)
+        elif not (config["plugins"]["bat"]["enabled"] and self.show_bat_file_preview()):
+            self.show_normal_file_preview()
 
         if not should_cancel():
             self.call_from_thread(

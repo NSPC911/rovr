@@ -1725,7 +1725,7 @@ class PreviewContainer(Actionable, Container):
         elif file_type == "details":
             self._current_content = ""
             self.mount_special_messages()
-        elif file_type in config["settings"]["previewers"]:
+        elif file_type in config["settings"].get("previewers", {}):
             self.log(f"Showing custom previewer for {file_type}")
             self.show_custom_preview(file_type)
         else:

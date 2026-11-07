@@ -697,13 +697,13 @@ class Application(
         while True:
             if i_should_shut_down():
                 break
-            if (file_list := self.file_list).parent is None or not file_list.is_running:
+            if not self.file_list.is_running:
                 continue
             try:
                 new_cwd = getcwd()
                 if not self.file_list.file_list_pause_check:
                     if not path.exists(new_cwd):
-                        file_list.update_file_list(add_to_session=False)
+                        self.file_list.update_file_list(add_to_session=False)
                     elif cwd != new_cwd:
                         cwd = new_cwd
                         cwd_mtime = None
@@ -722,7 +722,7 @@ class Application(
                                     cwd,
                                     config["interface"]["show_hidden_files"],
                                 )
-                            if items is not None and items != file_list.items_in_cwd:
+                            if items is not None and items != self.file_list.items_in_cwd:
                                 self.cd(cwd)
             except FileNotFoundError:
                 self.call_next(
@@ -794,7 +794,7 @@ class Application(
 
             # check highlighted file mtime
             if not self.file_list.file_list_pause_check:
-                highlighted_option = file_list.highlighted_option
+                highlighted_option = self.file_list.highlighted_option
                 # TODO: The `file_list.highlighted_option` is modified at runtime
                 # and does not match the type checking.
                 # In `test_new_button` case, it becomes a `textual.widgets._selection_list.Selection` object
@@ -821,7 +821,7 @@ class Application(
                             if dir_entry is not None:
                                 highlighted_option.dir_entry = dir_entry
                                 highlighted_option._invalidate_prompt_cache()
-                                file_list.call_next(file_list.refresh)
+                                self.file_list.call_next(self.file_list.refresh)
                                 self.query_one(MetadataContainer).update_metadata(
                                     dir_entry
                                 )

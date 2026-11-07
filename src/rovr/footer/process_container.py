@@ -13,11 +13,12 @@ from types import ModuleType
 from typing import Callable, Literal, cast
 
 from rich.markup import escape
-from textual import work
+from textual import events, work
 from textual.color import Gradient
 from textual.containers import HorizontalGroup, VerticalGroup, VerticalScroll
 from textual.reactive import reactive
 from textual.renderables.bar import Bar as BarRenderable
+from textual.timer import Timer
 from textual.types import UnusedParameter
 from textual.widgets import Label, ProgressBar
 
@@ -35,6 +36,24 @@ class ThickBar(BarRenderable):
     HALF_BAR_LEFT = "▐"
     BAR = "█"
     HALF_BAR_RIGHT = "▌"
+
+
+class ProcessProgressBar(ProgressBar):
+    _update_timer: Timer | None = None
+    _finished = False
+
+    def _on_mount(self, event: events.Mount) -> None:
+        event.prevent_default()
+        self.update()
+        self._clock.reset()
+        if not self._finished:
+            self._update_timer = self.set_interval(1, self.update)
+
+    def finish(self) -> None:
+        self._finished = True
+        if self._update_timer is not None:
+            self._update_timer.stop()
+            self._update_timer = None
 
 
 @cache
@@ -63,7 +82,7 @@ class ProgressBarContainer(VerticalGroup, inherit_bindings=False):
         gradient = (
             Gradient.from_colors(*reversed(gradient_colors)) if gradient_colors else None
         )
-        self.progress_bar = ProgressBar(
+        self.progress_bar = ProcessProgressBar(
             total=total,
             show_percentage=config["interface"]["show_progress_percentage"],
             show_eta=config["interface"]["show_progress_eta"],
@@ -150,6 +169,7 @@ class ProgressBarContainer(VerticalGroup, inherit_bindings=False):
             self.update_text(bar_text, False)
         if self.progress_bar.total is None:
             self.progress_bar.update(total=1, progress=0)
+        self.progress_bar.finish()
         self.add_class("error")
         gradient_colors = getattr(
             self.app.get_theme(self.app.theme), "bar_gradient", {}
@@ -181,6 +201,7 @@ class ProgressBarContainer(VerticalGroup, inherit_bindings=False):
             self.progress_bar.update(total=1, progress=0)
         else:
             self.progress_bar.advance()
+        self.progress_bar.finish()
         self.add_class("done")
         assert isinstance(self.icon_label.content, str)
         self.update_icon(

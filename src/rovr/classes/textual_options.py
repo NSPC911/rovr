@@ -249,11 +249,7 @@ class FileListSelectionWidget(LazySelection):
         if is_hidden_file(self.dir_entry):
             classes.append("filelist--hidden")
 
-        if any(
-            clipboard_val.type_of_selection == "cut"
-            and normalise(file_path) == clipboard_val.path
-            for clipboard_val in self.__clipboard.selected
-        ):
+        if (normalise(file_path), "cut") in self.__clipboard._selected:
             classes.append("filelist--cut")
 
         return classes

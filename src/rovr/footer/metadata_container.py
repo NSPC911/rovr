@@ -290,13 +290,13 @@ class MetadataContainer(VerticalScroll, inherit_bindings=False):
                     if not path.islink(fp):
                         with suppress(OSError, FileNotFoundError):
                             total_size += lstat(fp).st_size
-                if time.monotonic() - last_update_time > 0.25:
-                    spinner_index = (spinner_index + 1) % SPINNER_LENGTH
-                    self.app.call_from_thread(
-                        size_widget.update,
-                        f"{SPINNER[spinner_index]} {utils.natural_size(total_size, config['metadata']['filesize_suffix'], config['metadata']['filesize_decimals'])}",
-                    )
-                    last_update_time = time.monotonic()
+                    if time.monotonic() - last_update_time > 0.25:
+                        spinner_index = (spinner_index + 1) % SPINNER_LENGTH
+                        self.app.call_from_thread(
+                            size_widget.update,
+                            f"{SPINNER[spinner_index]} {utils.natural_size(total_size, config['metadata']['filesize_suffix'], config['metadata']['filesize_decimals'])}",
+                        )
+                        last_update_time = time.monotonic()
         except (OSError, FileNotFoundError):
             self.app.call_from_thread(size_widget.update, "Error")
             return

@@ -81,7 +81,7 @@ right_click = [
     "-Command",
     "& { param([string] $cwd, [string] $name) $shell = New-Object -ComObject Shell.Application; $shell.NameSpace($cwd).ParseName($name).InvokeVerb('Properties'); Start-Sleep -Milliseconds 500; while (Get-Process | Where-Object { $_.MainWindowTitle -match ([regex]::Escape($name) + ' Properties') }) { Start-Sleep -Milliseconds 500 } }",
     "%rcwd",
-    "%rnh",
+    "%nh",
   ], run_type = "background", shell = false }, if = { os = ["Windows"] } },
   { label = "\uf481 Follow Link", action = { run = [
     "python",

@@ -665,7 +665,7 @@ class FileList(
         for target in paths:
             path_utils.run_opener(self.app, path_utils.normalise(target))
 
-    @work
+    @work(exclusive=True, group="selectedHandler")
     async def on_selection_list_selected_changed(
         self, event: SelectionList.SelectedChanged
     ) -> None:
@@ -696,7 +696,10 @@ class FileList(
                     self.highlighted = 0
                 self.app.tabWidget.active_tab.selectedItems = []
         elif not self.select_mode:
-            full_path = path.join(cwd, file_name)
+            # before opening, check whether the basedir is cwd
+            full_path = selected_option.dir_entry.path
+            if path.dirname(full_path) != cwd:
+                return
             if path.isdir(full_path):
                 self.app.cd(full_path, clear_search=True)
             else:

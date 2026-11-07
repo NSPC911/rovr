@@ -176,7 +176,7 @@ class FileList(
             self.focus()
 
     def check_action(self, action: str, parameters: tuple[object, ...]) -> bool | None:
-        if self.dummy:
+        if self.dummy and action != "select":
             return False
         return super().check_action(action, parameters)
 

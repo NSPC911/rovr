@@ -32,6 +32,7 @@ class Clipboard(
         super().__init__(id="clipboard")
         self.clipboard_contents = []
         self._checker_worker: Worker | None = None
+        self._dimmed_update_pending = False
         self._options: list[ClipboardSelection] = []
 
     def on_mount(self) -> None:
@@ -159,15 +160,23 @@ class Clipboard(
 
     def _remove_option(self, option: ClipboardSelection) -> Self:  # ty: ignore[invalid-method-override]  # oh my god, will you please stfu
         super()._remove_option(option)
-        self.app.file_list.update_dimmed_items()
+        self._queue_dimmed_update()
         return self
+
+    def _queue_dimmed_update(self) -> None:
+        if not self._dimmed_update_pending:
+            self._dimmed_update_pending = True
+            self.call_after_refresh(self._update_dimmed_items)
+
+    def _update_dimmed_items(self) -> None:
+        self._dimmed_update_pending = False
+        self.app.file_list.update_dimmed_items()
 
     async def on_selection_list_selected_changed(
         self, event: SelectionList.SelectedChanged
     ) -> None:
         self.paste_button.disabled = len(self.selected) == 0
-        # go through each option, check if they are both selected and are the cut type, update filelist with that list
-        self.app.file_list.update_dimmed_items()
+        self._queue_dimmed_update()
         self.app.update_terminal_title()
 
     def safe_remove_option(self, option_id: str) -> None:
@@ -180,14 +189,17 @@ class Clipboard(
     @work(thread=True)
     def check_clipboard_existence(self) -> None:
         """Check if the files in the clipboard still exist."""
-        re_call = False
-        for option in self.options:
+        missing = []
+        for option in list(self.options):
             if not path.lexists(option.value.path):
                 assert isinstance(option.id, str)
-                self.call_later(self.safe_remove_option, option.id)
-                re_call = True
-        if re_call:
-            self.call_next(self.check_clipboard_existence)
+                missing.append(option.id)
+        if missing:
+            self.app.call_from_thread(self._remove_missing_options, missing)
+
+    def _remove_missing_options(self, option_ids: list[str]) -> None:
+        for option_id in option_ids:
+            self.safe_remove_option(option_id)
 
     def checker_wrapper(self) -> None:
         if self._checker_worker is None or not self._checker_worker.is_running:

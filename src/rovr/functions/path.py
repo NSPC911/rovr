@@ -317,7 +317,7 @@ def sync_get_cwd_object(
             if not show_hidden and is_hidden_file(item):
                 continue
 
-            if path.isdir(item.path):
+            if item.is_dir(follow_symlinks=False):
                 folders.append({
                     "name": item.name,
                     "icon": lambda item=item: get_icon_for_folder(
@@ -625,9 +625,9 @@ def ifed(
                 )
             case "directory":
                 if conditions["directory"]:
-                    disabled = not (dir_entry and path.isdir(dir_entry.path))
+                    disabled = not (dir_entry and dir_entry.is_dir())
                 else:
-                    disabled = not (dir_entry and not path.isdir(dir_entry.path))
+                    disabled = not (dir_entry and not dir_entry.is_dir())
             case "ipc":
                 disabled = conditions.get("ipc", "null") != app.ipc_running
             case "link":

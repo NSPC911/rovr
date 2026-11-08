@@ -708,10 +708,9 @@ class FileList(
                 self.highlighted = 0
             self.app.tabWidget.active_tab.selectedItems = []
         else:
+            selected = await self.get_selected_objects() or []
             self.app.query_one("#unzip").update_state(
-                await self.get_selected_objects() or []
-                if len(self._selected) == 1
-                else []
+                selected if len(selected) == 1 else []
             )
             self.app.update_terminal_title()
 
@@ -809,6 +808,8 @@ class FileList(
         self.refresh(layout=True, repaint=True)
         self.app.tabWidget.active_tab.session.selectMode = self.select_mode
         if mode is not None:
+            if not self.dummy:
+                self.input.clear_selected()
             with self.prevent(SelectionList.SelectedChanged):
                 self.deselect_all()
         self.app.update_terminal_title()
@@ -821,12 +822,28 @@ class FileList(
         if callable(update_header):
             update_header()
 
+    @property
+    def selected_options(self) -> list[FileListSelectionWidget]:
+        values = set(self.selected)
+        if not self.dummy:
+            values.update(self.input.selected - {option.value for option in self.options})
+        return [
+            option
+            for option in self.list_of_options
+            if isinstance(option, FileListSelectionWidget) and option.value in values
+        ]
+
     async def get_selected_objects(self) -> list[str] | None:
         """Get the selected objects in the file list.
         Returns:
             list[str]: If there are objects at that given location.
             None: If there are no objects at that given location.
         """
+        if self.select_mode:
+            return [
+                str(path_utils.normalise(option.dir_entry.path))
+                for option in self.selected_options
+            ]
         if self.highlighted_option is None or (
             len(self.options) == 1
             and not hasattr(self.get_option_at_index(0), "dir_entry")
@@ -834,17 +851,6 @@ class FileList(
             return
         if not self.select_mode:
             return [str(path_utils.normalise(self.highlighted_option.dir_entry.path))]
-        else:
-            values = self.selected
-            if not values:
-                return []
-            options = (self.get_option(value) for value in values)
-
-            return [
-                str(path_utils.normalise(option.dir_entry.path))
-                for option in options
-                if isinstance(option, FileListSelectionWidget)
-            ]
 
     def update_dimmed_items(self) -> None:
         """Update the dimmed items in the file list based on the cut items."""
@@ -866,12 +872,22 @@ class FileList(
             raise SkipAction()
 
     def update_border_subtitle(self) -> None:
-        if self.dummy or type(self.highlighted) is not int or not self.parent:
+        if self.dummy or not self.parent:
             return
-        elif self.get_option_at_index(0).disabled:
+        elif self.select_mode:
+            total = sum(
+                isinstance(option, FileListSelectionWidget)
+                for option in self.list_of_options
+            )
+            utils.set_scuffed_subtitle(
+                self.parent, "SELECT", f"{len(self.selected_options)}/{total}"
+            )
+        elif not self.option_count or self.get_option_at_index(0).disabled:
             utils.set_scuffed_subtitle(self.parent, "NORMAL", "0/0")
             # tell metadata to die
             self.app.query_one("MetadataContainer").remove_children()
+        elif type(self.highlighted) is not int:
+            return
         elif not self.select_mode:
             utils.set_scuffed_subtitle(
                 self.parent,
@@ -879,10 +895,6 @@ class FileList(
                 f"{self.highlighted + 1}/{self.option_count}",
             )
             self.app.tabWidget.active_tab.selectedItems = []
-        else:
-            utils.set_scuffed_subtitle(
-                self.parent, "SELECT", f"{len(self._selected)}/{len(self.options)}"
-            )
 
     # not exactly sure, but there's this issue where if I click the
     # hist_previous keybind twice too fast, it registers it as once, so
@@ -1079,7 +1091,7 @@ class FileList(
             or (
                 ver == "post"
                 and self.select_mode == "implicit"
-                and len(self.selected) <= 0
+                and not self.selected_options
             )
         ):
             await self.toggle_mode("implicit")
@@ -1174,6 +1186,17 @@ class FileList(
             self.action_select()
 
     async def action_open(self) -> None:
+        if self.select_mode:
+            selected = await self.get_selected_objects()
+            if (
+                not selected
+                and self.app._chooser_file
+                and isinstance(self.highlighted_option, FileListSelectionWidget)
+            ):
+                selected = [str(self.highlighted_option.dir_entry.path)]
+            if selected:
+                await self.file_selected_handler(selected)
+            return
         if self.highlighted is None:
             return
         if (
@@ -1181,17 +1204,6 @@ class FileList(
             and self.highlighted_option.disabled
             and not self.select_mode
         ):
-            return
-        if self.select_mode:
-            if self.app._chooser_file:
-                selected = await self.get_selected_objects()
-                if not selected and self.highlighted_option:
-                    selected = [str(self.highlighted_option.dir_entry.path)]
-                if selected:
-                    await self.file_selected_handler(selected)
-                return
-            # In select mode without chooser file, toggle selection instead of opening
-            self.action_select()
             return
         option = self.highlighted_option
         if not isinstance(option, FileListSelectionWidget):

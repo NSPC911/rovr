@@ -11,7 +11,6 @@ from textual.widgets.selection_list import Selection, SelectionError
 from textual_autocomplete.fuzzy_search import Matcher
 
 from rovr.functions.path import control
-from rovr.functions.utils import set_scuffed_subtitle
 
 
 class SearchInput(Input):
@@ -76,6 +75,8 @@ class SearchInput(Input):
                                 )
                         else:
                             self.items_list.select(self.items_list.get_option(option_id))
+            if self.item_list_type == "Selection":
+                self.items_list.update_border_subtitle()
             return
         matcher = Matcher(control(event.value))
         assert hasattr(self.items_list, "list_of_options")
@@ -118,12 +119,6 @@ class SearchInput(Input):
                     Selection("   --no-matches--", value="", id="", disabled=True),
                 ))
                 self.call_next(self.app.query_one("PreviewContainer").remove_children)
-                assert self.items_list.parent is not None
-                set_scuffed_subtitle(
-                    self.items_list.parent,
-                    "SELECT" if self.items_list.select_mode else "NORMAL",
-                    "0/0",
-                )
         if self.items_list.highlighted is None:
             if highlighted is not None:
                 try:
@@ -142,6 +137,8 @@ class SearchInput(Input):
                             self.items_list.select(self.items_list.get_option(option_id))
                     else:
                         self.items_list.select(self.items_list.get_option(option_id))
+
+            self.items_list.update_border_subtitle()
 
     def on_input_submitted(self) -> None:
         self.items_list.focus()

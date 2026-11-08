@@ -45,7 +45,10 @@ class SearchInput(Input):
             return
         if self.item_list_type == "Selection":
             assert isinstance(self.items_list, SelectionList)
-            self.selected.update({*self.items_list.selected})
+            self.selected.difference_update(
+                option.value for option in self.items_list.options
+            )
+            self.selected.update(self.items_list.selected)
         else:
             assert isinstance(self.items_list, OptionList)
         try:
@@ -132,8 +135,8 @@ class SearchInput(Input):
             else:
                 self.items_list.action_cursor_down()
         if self.item_list_type == "Selection":
-            with contextlib.suppress(OptionDoesNotExist):
-                for option_id in self.selected:
+            for option_id in self.selected:
+                with contextlib.suppress(OptionDoesNotExist):
                     if not self.items_list.select_mode:
                         with self.items_list.prevent(self.items_list.SelectedChanged):
                             self.items_list.select(self.items_list.get_option(option_id))

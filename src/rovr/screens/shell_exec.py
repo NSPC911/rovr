@@ -12,6 +12,7 @@ from .input import ModalInput
 class ShellExec(ModalInput):
     key_contexts = ("shell_exec", "modal_input")
     last_input: str = ""
+    last_in_bg: bool = True
 
     class ReturnType(NamedTuple):
         command: str | list[str]
@@ -38,7 +39,7 @@ class ShellExec(ModalInput):
             show_validation_message=False,
             initial_value=ShellExec.last_input,
         )
-        self.in_bg: bool = True
+        self.in_bg: bool = self.last_in_bg
 
     def on_mount(self) -> None:
         super().on_mount()
@@ -53,6 +54,7 @@ class ShellExec(ModalInput):
     @work
     async def on_input_submitted(self, event: Input.Submitted) -> None:
         ShellExec.last_input = event.input.value
+        ShellExec.last_in_bg = self.in_bg
         dismiss(
             self,
             ShellExec.ReturnType(

@@ -1,4 +1,6 @@
+import asyncio
 import os
+import subprocess
 from pathlib import Path
 from shutil import move
 
@@ -215,6 +217,52 @@ async def test_move_and_delete_broken_symlink(tmp_path: Path) -> None:
         worker = process_container.delete_files([moved_link.as_posix()])
         await worker.wait()
         assert not path.lexists(moved_link)
+
+
+@pytest.mark.parametrize("link_type", ["symlink", "junction"])
+@pytest.mark.parametrize("nested", [False, True])
+@pytest.mark.parametrize("delete_method", ["delete_files", "permanently_delete_item"])
+async def test_delete_directory_link_preserves_target(
+    tmp_path: Path, link_type: str, nested: bool, delete_method: str
+) -> None:
+    from rovr.footer.process_container import ProcessContainer
+
+    target = tmp_path / "target"
+    (target / "subdir").mkdir(parents=True)
+    target_file = target / "subdir" / "keep.txt"
+    target_file.write_text("keep me")
+    source = tmp_path / "source"
+    source.mkdir()
+    selected = source / "selected"
+    if nested:
+        selected.mkdir()
+        (selected / "delete.txt").write_text("delete me")
+    link = selected / "link" if nested else selected
+    if link_type == "junction":
+        if os.name != "nt":
+            pytest.skip("Junctions require Windows")
+        await asyncio.to_thread(
+            subprocess.run,
+            ["cmd", "/c", "mklink", "/J", str(link), str(target)],
+            check=True,
+            capture_output=True,
+        )
+    else:
+        try:
+            link.symlink_to(target, target_is_directory=True)
+        except (OSError, NotImplementedError) as exc:
+            pytest.skip(f"Symlink not supported: {exc}")
+
+    app = Application(startup_path=source.as_posix())
+    async with app.run_test(size=(143, 37)):
+        process_container = app.query_one(ProcessContainer)
+        if delete_method == "delete_files":
+            worker = process_container.delete_files([selected.as_posix()])
+            await worker.wait()
+        else:
+            process_container.permanently_delete_item(selected.as_posix())
+        assert not os.path.lexists(selected)
+        assert target_file.read_text() == "keep me"
 
 
 @pytest.mark.asyncio

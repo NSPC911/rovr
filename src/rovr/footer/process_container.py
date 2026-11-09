@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import errno
 import os
 import shutil
 import sys
@@ -337,7 +338,7 @@ class ProcessContainer(Actionable, VerticalScroll):
             try:
                 os.remove(item_path)
             except IsADirectoryError:
-                shutil.rmtree(item_path, ignore_errors=True)
+                os.rmdir(item_path)
         else:
             raise
 
@@ -423,47 +424,43 @@ class ProcessContainer(Actionable, VerticalScroll):
             bar.update_text,
             "Getting files to delete...",
         )
-        # get files to delete
-        files_to_delete = []
-        folders_to_delete = []
-        for file in files:
-            if path.isdir(file):
-                folders_to_delete.append(file)
-            files_to_add, folders_to_add = path_utils.get_recursive_files(
-                file, with_folders=True
-            )
-            files_to_delete.extend(files_to_add)
-            folders_to_delete.extend(folders_to_add)
-        self.app.call_from_thread(bar.update_progress, total=len(files_to_delete) + 1)
+        self.app.call_from_thread(bar.update_progress, total=len(files) + 1)
         action_on_file_in_use = "ask"
+        self.has_perm_error = False
+        self.has_in_use_error = False
         last_update_time = time.monotonic()
-        for i, item_dict in enumerate(files_to_delete):
+        for i, item_path in enumerate(files):
             current_time = time.monotonic()
-            if (
-                current_time - last_update_time > 0.25
-                or i == len(files_to_delete) - 1
-                or i == 0
-            ):
+            if current_time - last_update_time > 0.25 or i == len(files) - 1 or i == 0:
                 self.app.call_from_thread(
                     bar.update_text,
-                    item_dict["relative_loc"],
+                    item_path,
                 )
                 self.app.call_from_thread(bar.update_progress, progress=i + 1)
                 last_update_time = current_time
-            if path.lexists(item_dict["path"]):
+            if path.lexists(item_path):
                 try:
-                    os.remove(item_dict["path"])
+                    self.permanently_delete_item(item_path)
                 except FileNotFoundError:
                     # it's deleted, so why care?
                     pass
                 except (PermissionError, OSError) as exc:
+                    if exc.errno == errno.ENOTEMPTY:
+                        bar.panic(
+                            dismiss_with={
+                                "message": f"Deleting failed due to\n{exc}\nProcess Aborted.",
+                                "subtitle": "If this is a bug, please file an issue!",
+                            },
+                            bar_text="Unhandled Error",
+                        )
+                        return
                     # Try to detect if file is in use on Windows
                     if (is_file_in_use := is_being_used(exc)) and sys.platform == "win32":
                         current_action, action_on_file_in_use = (
                             self.handle_file_in_use_error(
                                 action_on_file_in_use,
-                                item_dict["relative_loc"],
-                                lambda: os.remove(item_dict["path"]),
+                                item_path,
+                                lambda: self.permanently_delete_item(item_path),
                             )
                         )
                         if current_action == "cancel":
@@ -477,8 +474,8 @@ class ProcessContainer(Actionable, VerticalScroll):
                         # error so they create an issue
                         self.app.panic()
                     # fallback for regular permission issues
-                    if path_utils.force_obtain_write_permission(item_dict["path"]):
-                        os.remove(item_dict["path"])
+                    if path_utils.force_obtain_write_permission(item_path):
+                        self.permanently_delete_item(item_path)
                 except Exception as exc:
                     # TODO: should probably let it continue, then have a summary
                     path_utils.dump_exc(self, exc)
@@ -490,12 +487,6 @@ class ProcessContainer(Actionable, VerticalScroll):
                         bar_text="Unhandled Error",
                     )
                     return
-        # The reason for an extra +1 in the total is for this
-        # handling folders
-        self.has_perm_error = False
-        self.has_in_use_error = False
-        for folder in folders_to_delete:
-            shutil.rmtree(folder, onexc=self.rmtree_fixer)
         if self.has_in_use_error:
             bar.panic(
                 notify={
@@ -512,14 +503,7 @@ class ProcessContainer(Actionable, VerticalScroll):
                 },
             )
             return
-        # if there weren't any files, show something useful
-        # aside from 'Getting files to delete...'
-        if files_to_delete == [] and folders_to_delete != []:
-            self.app.call_from_thread(
-                bar.update_text,
-                files[-1],
-            )
-        elif files_to_delete == folders_to_delete == []:
+        if not files:
             # this cannot happen, but just as an easter egg
             self.app.call_from_thread(
                 bar.update_text, "Successfully deleted nothing!", False
@@ -532,9 +516,20 @@ class ProcessContainer(Actionable, VerticalScroll):
         a directory.
         Args:
             item_path (str): The path to delete.
+        Raises:
+            OSError: If the directory cannot be removed after a retry.
         """
-        if path.isdir(item_path):
-            shutil.rmtree(item_path, onexc=self.rmtree_fixer)
+        if path.islink(item_path):
+            os.remove(item_path)
+        elif path.isjunction(item_path):
+            os.rmdir(item_path)
+        elif path.isdir(item_path):
+            try:
+                shutil.rmtree(item_path, onexc=self.rmtree_fixer)
+            except OSError as exc:
+                if exc.errno != errno.ENOTEMPTY:
+                    raise
+                shutil.rmtree(item_path, onexc=self.rmtree_fixer)
         else:
             os.remove(item_path)
 

@@ -372,6 +372,12 @@ class DragAndDrop:
                 None  # necessary so events.Click doesn't get sent to FileList
             )
             self._dnd_dragged_paths = selected
+            self._dnd_conflict_cache.clear()
+            self._dnd_resolved_sources = await asyncio.to_thread(
+                lambda: [
+                    (path.normcase(path.realpath(p)), path.isdir(p)) for p in selected
+                ]
+            )
             if len(selected) == 1:
                 icon, icon_color = icons.get_icon_smart(selected[0])
                 label_text = path.basename(selected[0])
@@ -445,10 +451,21 @@ class DragAndDrop:
 
     @staticmethod
     def _drop_conflicts(sources: Iterable[str], destination: str) -> bool:
+        return DragAndDrop._resolved_drop_conflicts(
+            (
+                (path.normcase(path.realpath(source)), path.isdir(source))
+                for source in sources
+            ),
+            destination,
+        )
+
+    @staticmethod
+    def _resolved_drop_conflicts(
+        sources: Iterable[tuple[str, bool]], destination: str
+    ) -> bool:
         destination = path.normcase(path.realpath(destination))
-        for source in sources:
-            source_path = path.normcase(path.realpath(source))
-            if path.isdir(source):
+        for source_path, is_directory in sources:
+            if is_directory:
                 try:
                     if path.commonpath([source_path, destination]) == source_path:
                         return True
@@ -460,8 +477,18 @@ class DragAndDrop:
                 return True
         return False
 
+    def _drag_conflicts(self: App, destination: str) -> bool:
+        key = (getcwd(), destination)
+        if key not in self._dnd_conflict_cache:
+            self._dnd_conflict_cache[key] = self._resolved_drop_conflicts(
+                self._dnd_resolved_sources, destination
+            )
+        return self._dnd_conflict_cache[key]
+
     def on_drag_out_finished(self: App, event: DragOutFinished) -> None:
         self._dnd_dragged_paths = []
+        self._dnd_resolved_sources = []
+        self._dnd_conflict_cache.clear()
         if self._dnd_timer:
             self._dnd_timer[0].stop()
             self._dnd_timer = None
@@ -549,10 +576,7 @@ class DragAndDrop:
             )
         )
         if accepted and not dropping_to_pins and self.state == "drag-out":
-            accepted = not self._drop_conflicts(
-                self._dnd_dragged_paths,
-                self._drop_destination(event.pos),
-            )
+            accepted = not self._drag_conflicts(self._drop_destination(event.pos))
         if (
             accepted
             and not dropping_to_pins

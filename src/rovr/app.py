@@ -262,6 +262,8 @@ class Application(
             None
         )
         self._dnd_dragged_paths: list[str] = []
+        self._dnd_resolved_sources: list[tuple[str, bool]] = []
+        self._dnd_conflict_cache: dict[tuple[str, str], bool] = {}
         self._dnd_drop_metadata: dict[Drop, tuple[str, bool]] = {}
 
         self._on_mount_done: bool = False

@@ -1,5 +1,5 @@
 from contextlib import suppress
-from pathlib import Path
+from os import path
 
 from textual import events, work
 from textual.css.query import NoMatches
@@ -11,7 +11,7 @@ from rovr.components.popup_option_list import PopupOptionList
 from rovr.functions.cwd import getcwd
 from rovr.functions.icons import get_icon
 from rovr.functions.path import dump_exc, normalise
-from rovr.functions.utils import check_key, expand_command, get_shortcut
+from rovr.functions.utils import check_key, expand_command, get_shortcut, s
 from rovr.variables.constants import config
 
 
@@ -38,6 +38,27 @@ class CopyButton(Button):
             else:
                 await self.action_open_popup(event)
 
+    def _hide_popup(self) -> None:
+        with suppress(NoMatches):
+            self.app.query_one(CopyPanelOptions).go_hide()
+
+    def action_to_rovr(self) -> None:
+        self.action_press()
+        self._hide_popup()
+
+    @work
+    async def on_button_pressed(self) -> None:
+        """Copy selected files to the clipboard"""
+        if self.disabled:
+            return
+        selected_files = await self.app.file_list.get_selected_objects()
+        if selected_files:
+            self.app.Clipboard.copy_to_clipboard(selected_files)
+        else:
+            self.notify(
+                "No files selected to copy.", title="Copy Files", severity="warning"
+            )
+
     async def action_open_popup(
         self, event: Button.Pressed | events.Key | events.Click = events.Key("", None)
     ) -> None:
@@ -59,46 +80,18 @@ class CopyButton(Button):
         popup_widget.display = True
         popup_widget.focus()
 
-    def action_to_rovr(self) -> None:
-        self.action_press()
+    # since this auto expands, it can replace every other action
+    # like action_text("%h") or action_text("%s") or action_text("%cwd")
+    async def action_text(self, text: str, notify: bool = True) -> None:
+        self.app.copy_to_clipboard(text := await expand_command(self.app, text))
+        if notify:
+            self.notify(f"Copied: {text}", title="Copy Text", severity="information")
         self._hide_popup()
 
     # here for backwards compatibility
-    def action_highlighted(self) -> None:
-        self.copy_highlighted()
-        self._hide_popup()
-
-    def action_to_system_clip(self) -> None:
-        self.copy_to_system_clip()
-        self._hide_popup()
-
-    def action_current_directory(self) -> None:
-        self.copy_current_directory()
-        self._hide_popup()
-
-    async def action_text(self, text: str) -> None:
-        self.app.copy_to_clipboard(text := await expand_command(self.app, text))
-        self.notify(f"Copied: {text}", title="Copy Text", severity="information")
-        self._hide_popup()
-
-    def _hide_popup(self) -> None:
-        with suppress(NoMatches):
-            self.app.query_one(CopyPanelOptions).go_hide()
-
-    @work
-    async def on_button_pressed(self) -> None:
-        """Copy selected files to the clipboard"""
-        if self.disabled:
-            return
-        selected_files = await self.app.file_list.get_selected_objects()
-        if selected_files:
-            self.app.Clipboard.copy_to_clipboard(selected_files)
-        else:
-            self.notify(
-                "No files selected to copy.", title="Copy Files", severity="warning"
-            )
-
-    def copy_highlighted(self) -> None:
+    # as mentioned above, for copying selected, use action_text
+    # i wont be expanding on the panel i think
+    async def action_highlighted(self) -> None:
         if self.disabled:
             return
         highlighted: FileListSelectionWidget | None = (
@@ -108,14 +101,24 @@ class CopyButton(Button):
             self.notify(
                 "No item was highlighted.", title="Copy Path", severity="information"
             )
+            self._hide_popup()
         else:
-            self.app.copy_to_clipboard(normalise(highlighted.dir_entry.path))
+            await self.action_text(normalise(highlighted.dir_entry.path), False)
             self.notify("Copied!", title="Copy Path", severity="information")
 
-    def copy_current_directory(self) -> None:
-        parent_path = Path(getcwd()).as_posix()
-        self.app.copy_to_clipboard(parent_path)
+    async def copy_highlighted(self) -> None:
+        await self.action_highlighted()
+
+    async def copy_current_directory(self) -> None:
+        await self.action_current_directory()
+
+    async def action_current_directory(self) -> None:
+        await self.action_text(path.dirname(getcwd()), False)
         self.notify("Copied!", title="Copy Current Directory", severity="information")
+
+    def action_to_system_clip(self) -> None:
+        self.copy_to_system_clip()
+        self._hide_popup()
 
     @work
     async def copy_to_system_clip(self) -> None:
@@ -136,8 +139,9 @@ class CopyButton(Button):
 
         output = await copy_files_to_system_clipboard(selected_files)
         if output is True:
+            f = len(selected_files)
             self.notify(
-                f"{len(selected_files)} files copied to system clipboard.",
+                f"{f} file{s(f)} copied to system clipboard.",
                 title="System Copy",
                 severity="information",
             )
@@ -181,14 +185,22 @@ class CopyPanelOptions(PopupOptionList):
         ) or self.app.file_list.options[0].disabled
         self.set_options([
             CopyPanelOption(
-                get_shortcut("copy_menu", "copy.to_rovr", "extra_copy", "copy_to_rovr"),
+                get_shortcut(
+                    "copy_menu",
+                    "copy.to_rovr",
+                    "extra_copy",
+                    "copy_to_rovr",
+                ),
                 "Copy files to rovr clipboard ",
                 "rovr",
                 disabled=should_disable,
             ),
             CopyPanelOption(
                 get_shortcut(
-                    "copy_menu", "copy.highlighted", "extra_copy", "copy_highlighted"
+                    "copy_menu",
+                    "copy.highlighted",
+                    "extra_copy",
+                    "copy_highlighted",
                 ),
                 "Copy single file path ",
                 "path",
@@ -244,11 +256,11 @@ class CopyPanelOptions(PopupOptionList):
         if check_key(event, config["keybinds"]["extra_copy"]["copy_to_rovr"]):
             self.button.action_press()
         elif check_key(event, config["keybinds"]["extra_copy"]["copy_highlighted"]):
-            self.button.copy_text(await expand_command(self.app, "%h"))
+            await self.button.action_highlighted()
         elif check_key(event, config["keybinds"]["extra_copy"]["copy_to_system_clip"]):
             self.button.copy_to_system_clip()
         elif check_key(event, config["keybinds"]["extra_copy"]["copy_current_directory"]):
-            self.button.copy_text(await expand_command(self.app, "%cwd"))
+            await self.button.action_current_directory()
         else:
             return
         event.stop()
@@ -258,13 +270,13 @@ class CopyPanelOptions(PopupOptionList):
         self, event: OptionList.OptionSelected
     ) -> None:
         if event.option.id == "rovr":
-            self.button.action_press()
+            self.button.on_button_pressed()
         elif event.option.id == "path":
-            self.button.copy_text(await expand_command(self.app, "%h"))
+            await self.button.action_highlighted()
         elif event.option.id == "parent_path":
-            self.button.copy_current_directory()
+            await self.button.action_current_directory()
         elif event.option.id == "system":
-            self.button.copy_text(await expand_command(self.app, "%cwd"))
+            self.button.copy_to_system_clip()
         else:
             return
         self.go_hide()

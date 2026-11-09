@@ -113,6 +113,9 @@ def give_me_an_option(
                     and app.file_list.highlighted_option.dir_entry.is_symlink()
                 ),
             )
+        # TODO: consider a function-like syntax for `action_text` in
+        # clipboard, not sure how it would be made, but i was hoping
+        # `system:text("%h")` or along that lines to be made
         case "system:copy_highlighted":
             return PartialOption(id="copy_highlighted", disabled=no_items)
         case "system:copy_current_directory":
@@ -281,7 +284,7 @@ class FileListRightClickMenu(PopupOptionList, inherit_bindings=False):
                 self.app,
                 command,
                 event.option.action["run_type"],
-                shell=event.option.action["shell"],
+                shell=event.option.action.get("shell", False),
             )
             if isinstance(proc, Popen) and event.option.action["run_type"] != "orphan":
                 self.app.shell_thread(proc, "Context Menu")

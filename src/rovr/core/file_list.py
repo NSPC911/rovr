@@ -1,8 +1,8 @@
 import shlex
-from contextlib import suppress
+from contextlib import contextmanager, suppress
 from functools import lru_cache
 from os import path, scandir
-from typing import Callable, ClassVar, Literal, Sequence
+from typing import Callable, ClassVar, Generator, Literal, Sequence
 
 from rich.segment import Segment
 from textual import events, work
@@ -163,12 +163,24 @@ class FileList(
         self.select_mode: Literal[False, "implicit", "explicit"] = False
         if not self.dummy:
             self.items_in_cwd: set[str] = set()
-        self.file_list_pause_check = False
         self._ignore_next_click: bool = False
         self._in_git_repo: bool = False
         self._folder_item_counts: dict[str, tuple[int, int]] = {}
         self._follow_links_next: bool = False
         self._using_session: SessionManager | None = None
+        self.__pause_checks: int = 0
+
+    @property
+    def pause_check(self) -> bool:
+        return self.__pause_checks > 0
+
+    @contextmanager
+    def pause_checks(self) -> Generator[None]:
+        self.__pause_checks += 1
+        try:
+            yield
+        finally:
+            self.__pause_checks -= 1
 
     def on_mount(self) -> None:
         if not self.dummy and self.parent:
@@ -411,7 +423,7 @@ class FileList(
                 self._index_to_line[self.highlighted] - self.scroll_offset.y
             )
 
-        self.file_list_pause_check = True
+        _, cexit = utils.enter(self.pause_checks())
         name_to_index: dict[str, int] = {}
         if add_to_session:
             if session.historyIndex != len(session.directories) - 1:
@@ -609,7 +621,7 @@ class FileList(
                 self.update_border_subtitle()
             self.app.update_terminal_title()
         finally:
-            self.file_list_pause_check = False
+            cexit()
             if callback:
                 callback()
 

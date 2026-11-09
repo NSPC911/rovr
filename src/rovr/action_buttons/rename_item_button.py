@@ -271,13 +271,10 @@ class RenameItemButton(Button):
             finally:
                 with contextlib.suppress(OSError):
                     os.unlink(temp_path)
-        try:
-            self.app.file_list.file_list_pause_check = True
+        with self.app.file_list.pause_checks():
             self.app.file_list.focus()
             worker: Worker = self.app.file_list.update_file_list(
                 add_to_session=False, focus_on=path.basename(new_name)
             )
             with contextlib.suppress(WorkerError):
                 await worker.wait()
-        finally:
-            self.app.file_list.file_list_pause_check = False

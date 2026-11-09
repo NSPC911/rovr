@@ -12,7 +12,7 @@ from textual.worker import Worker
 from rovr.classes.mixins import CheckboxRenderingMixin, SelectionNavigationMixin
 from rovr.classes.textual_options import ClipboardSelection, ClipboardSelectionValue
 from rovr.functions import icons as icon_utils
-from rovr.functions.path import dump_exc
+from rovr.functions.utils import dump_on_exc
 from rovr.variables.constants import bindings, config
 
 
@@ -214,10 +214,8 @@ class Clipboard(
                 severity="warning",
             )
             return
-        try:
+        with dump_on_exc(self, KeyError, OptionDoesNotExist):
             self.remove_option_at_index(self.highlighted)
-        except (KeyError, OptionDoesNotExist) as exc:
-            dump_exc(self, exc)
 
     def action_toggle_all(self) -> None:
         """Select all items in the clipboard."""

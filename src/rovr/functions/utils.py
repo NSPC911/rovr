@@ -1,8 +1,15 @@
 import os
 import re
 import subprocess
-from contextlib import suppress
-from typing import Any, Callable, Literal, cast, overload
+from contextlib import AbstractContextManager, contextmanager, suppress
+from typing import (
+    Any,
+    Callable,
+    Literal,
+    TypeVar,
+    cast,
+    overload,
+)
 
 from humanize import naturalsize
 from textual import events
@@ -524,3 +531,25 @@ def save_to_cache(
             f.write(data)
     except OSError:
         pass
+
+
+R = TypeVar("R")
+
+
+def enter(obj: AbstractContextManager[R]) -> tuple[R, Callable[[], None]]:
+    resource = obj.__enter__()
+
+    def closer() -> None:
+        obj.__exit__(None, None, None)
+
+    return resource, closer
+
+
+@contextmanager
+def dump_on_exc(widget: DOMNode | None, *filter: type[BaseException]) -> Any:
+    try:
+        yield
+    except filter or (BaseException,) as exc:
+        from rovr.functions.path import dump_exc
+
+        dump_exc(widget, exc)

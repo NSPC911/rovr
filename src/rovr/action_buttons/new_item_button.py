@@ -15,7 +15,7 @@ from rovr.classes.textual_validators import IsValidFilePath, PathNoLongerExists
 from rovr.functions.cwd import getcwd
 from rovr.functions.icons import get_icon
 from rovr.functions.path import dump_exc, normalise
-from rovr.functions.utils import command, run_command
+from rovr.functions.utils import command, dump_on_exc, run_command
 from rovr.variables.constants import config
 
 
@@ -120,18 +120,13 @@ class NewItemButton(Button):
                     severity="error",
                     markup=False,
                 )
-        try:
-            self.app.file_list.file_list_pause_check = True
+        with self.app.file_list.pause_checks(), dump_on_exc(self):
             self.app.file_list.focus()
             worker: Worker = self.app.file_list.update_file_list(
                 add_to_session=False, focus_on=path.basename(location.rstrip("/"))
             )
             with contextlib.suppress(WorkerError):
                 await worker.wait()
-        except Exception as exc:
-            dump_exc(self, exc)
-        finally:
-            self.app.file_list.file_list_pause_check = False
 
     @work
     async def action_bulk_create(self) -> None:
@@ -210,8 +205,7 @@ class NewItemButton(Button):
                 errors.append(f"{entry}: {type(exc).__name__}: {exc}")
 
         if created:
-            try:
-                self.app.file_list.file_list_pause_check = True
+            with self.app.file_list.pause_checks(), dump_on_exc(self):
                 self.app.file_list.focus()
                 focus_on = path.basename(created[0].rstrip("/"))
                 worker = self.app.file_list.update_file_list(
@@ -219,10 +213,6 @@ class NewItemButton(Button):
                 )
                 with contextlib.suppress(WorkerError):
                     await worker.wait()
-            except Exception as exc:
-                dump_exc(self, exc)
-            finally:
-                self.app.file_list.file_list_pause_check = False
 
         if already_exists:
             self.notify(

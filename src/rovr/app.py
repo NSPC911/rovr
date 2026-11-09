@@ -701,7 +701,7 @@ class Application(
                 continue
             try:
                 new_cwd = getcwd()
-                if not self.file_list.file_list_pause_check:
+                if not self.file_list.pause_check:
                     if not path.exists(new_cwd):
                         self.file_list.update_file_list(add_to_session=False)
                     elif cwd != new_cwd:
@@ -793,7 +793,7 @@ class Application(
                 break
 
             # check highlighted file mtime
-            if not self.file_list.file_list_pause_check:
+            if not self.file_list.pause_check:
                 highlighted_option = self.file_list.highlighted_option
                 # TODO: The `file_list.highlighted_option` is modified at runtime
                 # and does not match the type checking.

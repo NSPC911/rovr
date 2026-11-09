@@ -4,9 +4,10 @@ from copy import deepcopy
 from os import makedirs, path
 from typing import NotRequired, TypedDict, cast
 
+from rovr.functions.utils import dump_on_exc
 from rovr.variables.maps import RovrVars
 
-from .path import dump_exc, normalise
+from .path import normalise
 
 pins = {}
 raw_pins = {}
@@ -55,11 +56,8 @@ def _migrate_add_trash_pin(pins_dict: dict) -> None:
                 "path": TRASH,
             },
         )
-        try:
-            with open(PIN_PATH, "w") as f:
-                json.dump(pins_dict, f, indent=2)
-        except IOError as exc:
-            dump_exc(None, exc)
+        with dump_on_exc(None, IOError), open(PIN_PATH, "w") as f:
+            json.dump(pins_dict, f, indent=2)
     with contextlib.suppress(OSError):
         open(path.join(cache, "trash_pin_added"), "w").close()
 
@@ -192,11 +190,8 @@ def add_pin(pin_name: str, pin_path: str | bytes) -> None:
     if not path.exists(PIN_PATH):
         makedirs(path.dirname(PIN_PATH), exist_ok=True)
 
-    try:
-        with open(PIN_PATH, "w") as f:
-            json.dump(pins_to_write, f, indent=2)
-    except IOError as exc:
-        dump_exc(None, exc)
+    with dump_on_exc(None, IOError), open(PIN_PATH, "w") as f:
+        json.dump(pins_to_write, f, indent=2)
 
     load_pins()
 
@@ -225,11 +220,8 @@ def remove_pin(pin_path: str | bytes) -> None:
             )
         ]
 
-    try:
-        with open(PIN_PATH, "w") as f:
-            json.dump(pins_to_write, f, indent=2)
-    except IOError as exc:
-        dump_exc(None, exc)
+    with dump_on_exc(None, IOError), open(PIN_PATH, "w") as f:
+        json.dump(pins_to_write, f, indent=2)
 
     load_pins()  # Reload
 

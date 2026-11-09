@@ -12,7 +12,6 @@ from textual.containers import VerticalGroup
 from textual.widgets import Input, SelectionList
 from textual.widgets.option_list import Option
 from textual.widgets.selection_list import Selection
-from textual.worker import get_current_worker
 
 from rovr.classes.mixins import CheckboxRenderingMixin, SelectionNavigationMixin
 from rovr.classes.textual_options import OptionWithValue
@@ -105,9 +104,9 @@ class FileSearch(ModalSearchScreen):
     def on_input_changed(self, event: Input.Changed) -> None:
         self.fd_updater(event=event)
 
-    @work
+    @work(exclusive=True, group="search")
     async def fd_updater(self, event: Input.Changed) -> None:
-        self._active_worker = get_current_worker()
+        self.is_loading = False
         search_term = event.value.strip()
         fd_exec = config["plugins"]["fd"]["executable"]
 
@@ -133,6 +132,7 @@ class FileSearch(ModalSearchScreen):
             self.search_options.clear_options()
             self.search_options.border_subtitle = ""
             return
+        await asyncio.sleep(0.15)
         self.search_options.set_options([Option("  Searching...", disabled=True)])
         fd_process = None
         stderr_task: asyncio.Task[bytes] | None = None
@@ -149,12 +149,6 @@ class FileSearch(ModalSearchScreen):
             self.is_loading = True
 
             while True:
-                if self._active_worker is not get_current_worker():
-                    fd_process.kill()
-                    with contextlib.suppress(ProcessLookupError):
-                        await fd_process.wait()
-                    return
-
                 if fd_process.stdout is None:
                     break
 
@@ -198,9 +192,6 @@ class FileSearch(ModalSearchScreen):
                 with contextlib.suppress(asyncio.CancelledError):
                     await stderr_task
 
-            if self._active_worker is not get_current_worker():
-                return
-
             if not self.search_options.get_option_at_index(0).disabled:
                 if self.search_options.highlighted is None:
                     self.search_options.highlighted = 0
@@ -214,13 +205,6 @@ class FileSearch(ModalSearchScreen):
             if not stderr_task:
                 return
         except (OSError, asyncio.exceptions.TimeoutError) as exc:
-            if isinstance(exc, asyncio.exceptions.TimeoutError) and fd_process:
-                fd_process.kill()
-
-                with contextlib.suppress(
-                    asyncio.exceptions.TimeoutError, ProcessLookupError
-                ):
-                    await asyncio.wait_for(fd_process.wait(), timeout=1)
             msg = (
                 "  fd is missing on $PATH or cannot be executed"
                 if isinstance(exc, OSError)
@@ -232,8 +216,8 @@ class FileSearch(ModalSearchScreen):
             ])
             return
         finally:
-            if stderr_task is not None and not stderr_task.done():
-                stderr_task.cancel()
+            if fd_process is not None:
+                await asyncio.shield(self.stop_search_process(fd_process, stderr_task))
 
     @on(SelectionList.SelectionToggled)
     def toggles_toggled(self, event: SelectionList.SelectionToggled) -> None:

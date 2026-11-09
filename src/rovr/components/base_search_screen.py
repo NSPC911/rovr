@@ -1,11 +1,10 @@
 import asyncio
-from typing import Coroutine
+from contextlib import suppress
 
 from textual import events, on
 from textual.dom import DOMNode
 from textual.screen import ModalScreen
 from textual.widgets import Input, OptionList
-from textual.worker import Worker
 
 from rovr.classes.mixins import Action, Actionable
 from rovr.classes.textual_options import OptionWithValue
@@ -39,19 +38,37 @@ class ModalSearchScreen(Actionable, ModalScreen, inherit_bindings=False):
     def action_cursor_page(self, pages: float) -> None:
         self.search_options.action_cursor_page(pages)
 
-    def create_proc(
-        self, program: str, *args: str
-    ) -> Coroutine[None, None, asyncio.subprocess.Process]:
+    async def create_proc(self, program: str, *args: str) -> asyncio.subprocess.Process:
         self.log(f"Creating process: {program} {' '.join(args)}")
-        return asyncio.create_subprocess_exec(
-            program,
-            *args,
-            stdout=asyncio.subprocess.PIPE,
-            stderr=asyncio.subprocess.PIPE,
+        task = asyncio.create_task(
+            asyncio.create_subprocess_exec(
+                program,
+                *args,
+                stdout=asyncio.subprocess.PIPE,
+                stderr=asyncio.subprocess.PIPE,
+            )
         )
+        try:
+            return await asyncio.shield(task)
+        except asyncio.CancelledError:
+            process = await task
+            await asyncio.shield(self.stop_search_process(process, None))
+            raise
+
+    async def stop_search_process(
+        self,
+        process: asyncio.subprocess.Process,
+        stderr_task: asyncio.Task[bytes] | None,
+    ) -> None:
+        if process.returncode is None:
+            with suppress(ProcessLookupError):
+                process.kill()
+        if stderr_task is not None:
+            stderr_task.cancel()
+            await asyncio.gather(stderr_task, return_exceptions=True)
+        await process.communicate()
 
     def on_mount(self) -> None:
-        self._active_worker: Worker | None = None
         self.search_input: Input = self.query_one(Input)
         self.search_options: DoubleClickableOptionList = self.query_one(
             DoubleClickableOptionList

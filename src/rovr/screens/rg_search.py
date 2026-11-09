@@ -12,7 +12,6 @@ from textual.containers import VerticalGroup
 from textual.widgets import Input, SelectionList
 from textual.widgets.option_list import Option
 from textual.widgets.selection_list import Selection
-from textual.worker import get_current_worker
 
 from rovr.classes.mixins import (
     CheckboxRenderingMixin,
@@ -91,9 +90,9 @@ class ContentSearch(ModalSearchScreen):
     def on_input_changed(self, event: Input.Changed) -> None:
         self.rg_updater(event=event)
 
-    @work
+    @work(exclusive=True, group="search")
     async def rg_updater(self, event: Input.Changed) -> None:
-        self._active_worker = get_current_worker()
+        self.is_loading = False
         self.search_options.border_subtitle = ""
         search_term = event.value.strip()
         rg_exec = config["plugins"]["rg"]["executable"]
@@ -117,6 +116,7 @@ class ContentSearch(ModalSearchScreen):
             self.search_options.clear_options()
             self.search_options.border_subtitle = ""
             return
+        await asyncio.sleep(0.15)
         self.search_options.set_options([Option("  Searching...", disabled=True)])
         rg_process = None
         stderr_task: asyncio.Task[bytes] | None = None
@@ -133,12 +133,6 @@ class ContentSearch(ModalSearchScreen):
             self.is_loading = True
 
             while True:
-                if self._active_worker is not get_current_worker():
-                    rg_process.kill()
-                    with contextlib.suppress(ProcessLookupError):
-                        await rg_process.wait()
-                    return
-
                 if rg_process.stdout is None:
                     break
 
@@ -182,9 +176,6 @@ class ContentSearch(ModalSearchScreen):
                 with contextlib.suppress(asyncio.CancelledError):
                     await stderr_task
 
-            if self._active_worker is not get_current_worker():
-                return
-
             if not self.search_options.get_option_at_index(0).disabled:
                 if self.search_options.highlighted is None:
                     self.search_options.highlighted = 0
@@ -198,13 +189,6 @@ class ContentSearch(ModalSearchScreen):
             if not stderr_task:
                 return
         except (OSError, asyncio.exceptions.TimeoutError) as exc:
-            if isinstance(exc, asyncio.exceptions.TimeoutError) and rg_process:
-                rg_process.kill()
-
-                with contextlib.suppress(
-                    asyncio.exceptions.TimeoutError, ProcessLookupError
-                ):
-                    await asyncio.wait_for(rg_process.wait(), timeout=1)
             msg = (
                 "  rg took too long to respond"
                 if isinstance(exc, asyncio.exceptions.TimeoutError)
@@ -216,8 +200,8 @@ class ContentSearch(ModalSearchScreen):
             ])
             return
         finally:
-            if stderr_task is not None and not stderr_task.done():
-                stderr_task.cancel()
+            if rg_process is not None:
+                await asyncio.shield(self.stop_search_process(rg_process, stderr_task))
 
     @on(SelectionList.SelectionToggled)
     def toggles_toggled(self, event: SelectionList.SelectionToggled) -> None:

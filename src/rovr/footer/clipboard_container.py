@@ -1,5 +1,3 @@
-import asyncio
-from contextlib import suppress
 from os import path
 from typing import ClassVar, Literal, Self, Sequence
 
@@ -9,7 +7,11 @@ from textual.widgets import Button, SelectionList
 from textual.widgets.option_list import OptionDoesNotExist
 from textual.worker import Worker
 
-from rovr.classes.mixins import CheckboxRenderingMixin, SelectionNavigationMixin
+from rovr.classes.mixins import (
+    CheckboxRenderingMixin,
+    SelectionNavigationMixin,
+    SetOptionsSelectionList,
+)
 from rovr.classes.textual_options import ClipboardSelection, ClipboardSelectionValue
 from rovr.functions import icons as icon_utils
 from rovr.functions.utils import dump_on_exc
@@ -19,6 +21,7 @@ from rovr.variables.constants import bindings, config
 class Clipboard(
     CheckboxRenderingMixin,
     SelectionNavigationMixin,
+    SetOptionsSelectionList,
     SelectionList,
     inherit_bindings=False,
 ):
@@ -68,19 +71,17 @@ class Clipboard(
     ) -> None:
         """Copy the selected files to the clipboard"""
         items = list(dict.fromkeys(items))
-        select == "reselect" and self.deselect_all()
-        for item in items[::-1]:
-            await asyncio.sleep(0)
-            self.insert_selection_at_beginning(
+        self._prepend_selections(
+            [
                 ClipboardSelection(
                     prompt=f"{icon_utils.get_icon('general', 'copy')[0]} {item}",
                     text=item,
                     type_of_selection="copy",
                 )
-            )
-        if select != "no":
-            for item_number in range(len(items)):
-                self.select(self.get_option_at_index(item_number))
+                for item in items
+            ],
+            select,
+        )
 
     @work
     async def cut_to_clipboard(
@@ -88,20 +89,17 @@ class Clipboard(
     ) -> None:
         """Cut the selected files to the clipboard."""
         items = list(dict.fromkeys(items))
-        select == "reselect" and self.deselect_all()
-        for item in items[::-1]:
-            await asyncio.sleep(0)
-            if isinstance(item, str):
-                self.insert_selection_at_beginning(
-                    ClipboardSelection(
-                        prompt=f"{icon_utils.get_icon('general', 'cut')[0]} {item}",
-                        text=item,
-                        type_of_selection="cut",
-                    )
+        self._prepend_selections(
+            [
+                ClipboardSelection(
+                    prompt=f"{icon_utils.get_icon('general', 'cut')[0]} {item}",
+                    text=item,
+                    type_of_selection="cut",
                 )
-        if select != "no":
-            for item_number in range(len(items)):
-                self.select(self.get_option_at_index(item_number))
+                for item in items
+            ],
+            select,
+        )
 
     # Why isnt this already a thing
     def insert_selection_at_beginning(self, selection: ClipboardSelection) -> None:
@@ -110,44 +108,29 @@ class Clipboard(
         Args:
             selection (ClipboardSelection): A pre-created Selection object to insert.
         """
-        # Check for duplicate ID
-        if selection.id is not None and selection.id in self._id_to_option:
-            self.safe_remove_option(selection.id)
-        # check for duplicate path
-        if any(selection.value.path == option.value.path for option in self.options):
-            # find the option with the same path
-            for option in self.options:
-                if selection.value.path == option.value.path:
-                    with suppress(KeyError, OptionDoesNotExist):
-                        self._remove_option(option)
-                    break
+        self._prepend_selections([selection], "no")
 
-        # insert
-        self._options.insert(0, selection)
-
-        values = {selection.value: 0}
-
-        # update mapping
-        for option, index in list(self._option_to_index.items()):
-            self._option_to_index[option] = index + 1
-        for key, value in self._values.items():
-            values[key] = value + 1
-        self._values = values
-        self._option_to_index[selection] = 0
-
-        if selection.id is not None:
-            self._id_to_option[selection.id] = selection
-
-        # force redraw
-        self._clear_caches()
-        self._update_lines()
-
-        # since you insert at beginning, highlighted should go down
-        if self.highlighted is not None:
-            self.highlighted += 1
-
-        # redraw because may not work, but idk honestly, just a preventive measure again
-        self.refresh(layout=True)
+    def _prepend_selections(
+        self,
+        selections: list[ClipboardSelection],
+        select: Literal["reselect", "select", "no"],
+    ) -> None:
+        paths = {option.value.path for option in selections}
+        remaining = [option for option in self.options if option.value.path not in paths]
+        selected = set(self.selected) if select != "reselect" else set()
+        highlighted = self.highlighted_option
+        highlighted_path = highlighted.value.path if highlighted is not None else None
+        options = selections + remaining
+        with self.prevent(SelectionList.SelectedChanged):
+            self.set_options(options)
+            for index, option in enumerate(options):
+                if (index < len(selections) and select != "no") or (
+                    index >= len(selections) and option.value in selected
+                ):
+                    self.select(option)
+                if option.value.path == highlighted_path:
+                    self.highlighted = index
+        self._message_changed()
 
     async def on_key(self, event: events.Key) -> None:
         if self.has_focus:

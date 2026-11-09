@@ -6,6 +6,26 @@ from textual.worker import Worker
 from rovr.app import Application
 
 
+async def test_bulk_clipboard_preserves_selection_and_indices(tmp_path: Path) -> None:
+    app = Application(tmp_path.as_posix())
+    old = (tmp_path / "old.txt").as_posix()
+    items = [(tmp_path / f"file_{i}.txt").as_posix() for i in range(1000)]
+    async with app.run_test(size=(143, 37)):
+        await app.Clipboard.copy_to_clipboard([old]).wait()
+        app.Clipboard.highlighted = 0
+        await app.Clipboard.cut_to_clipboard(items, select="no").wait()
+        assert [option.value.path for option in app.Clipboard.options] == items + [old]
+        assert [value.path for value in app.Clipboard.selected] == [old]
+        assert app.Clipboard.highlighted == 1000
+        for index, option in enumerate(app.Clipboard.options):
+            assert option.id is not None
+            assert app.Clipboard.get_option_index(option.id) == index
+            assert app.Clipboard._values[option.value] == index
+        await app.Clipboard.copy_to_clipboard([items[10]], select="select").wait()
+        assert app.Clipboard.option_count == 1001
+        assert {value.path for value in app.Clipboard.selected} == {old, items[10]}
+
+
 @pytest.mark.parametrize("operation", ["copy_to_clipboard", "cut_to_clipboard"])
 @pytest.mark.asyncio
 async def test_duplicate_items_do_not_select_existing_options(

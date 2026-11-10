@@ -774,15 +774,7 @@ class DragAndDrop:
         response = await self.push_screen_wait(screens.PasteDropScreen(event))
         if response is not None and response.paths:
             process_container = self.query_one(ProcessContainer)
-            match response.action:
-                case "copy":
-                    process_container.paste_items(
-                        copied=response.paths, has_cut=[], dest=destination
-                    )
-                case "move":
-                    process_container.paste_items(
-                        copied=[], has_cut=response.paths, dest=destination
-                    )
+            process_container.paste_items(response.action, response.paths, destination)
 
 
 class KeyChordPopup(Static):

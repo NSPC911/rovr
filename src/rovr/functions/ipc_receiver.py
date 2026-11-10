@@ -151,8 +151,8 @@ async def conn(
                             worker: Worker[None | Literal[True]] = self.app.query_one(
                                 "ProcessContainer"
                             ).paste_items(
-                                paths if type_of_selection == "copy" else [],
-                                paths if type_of_selection == "cut" else [],
+                                type_of_selection,
+                                paths,
                                 getcwd(),
                             )
                             await worker.wait()

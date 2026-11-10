@@ -3,34 +3,40 @@ from __future__ import annotations
 import errno
 import os
 import shutil
+import stat
+import subprocess
 import sys
 import time
-import zipfile
-from contextlib import suppress
-from functools import cache
+from functools import partial
 from os import path
 from threading import get_ident
-from types import ModuleType
-from typing import Callable, Literal, cast
+from typing import Any, Callable, Literal, TypeVar
 
-from rich.markup import escape
 from textual import events, work
+from textual.app import ComposeResult
 from textual.color import Gradient
 from textual.containers import HorizontalGroup, VerticalGroup, VerticalScroll
+from textual.geometry import clamp
 from textual.reactive import reactive
 from textual.renderables.bar import Bar as BarRenderable
+from textual.screen import Screen, ScreenResultType
 from textual.timer import Timer
 from textual.types import UnusedParameter
+from textual.widget import Widget
 from textual.widgets import Label, ProgressBar
+from textual.widgets._progress_bar import UNUSED
 
 import rovr.screens as screens
 from rovr.classes.mixins import Action, Actionable
-from rovr.classes.type_aliases import BarPanicDismissible, BarPanicNotify
-from rovr.functions import icons as icon_utils
+from rovr.classes.type_aliases import BarPanicDismissible, BarPanicNotify, CallableNone
+from rovr.functions import icons as icons
 from rovr.functions import path as path_utils
 from rovr.functions.cwd import getcwd
-from rovr.functions.utils import is_being_used, should_cancel
-from rovr.variables.constants import config, scroll_bindings
+from rovr.functions.utils import dump_on_exc, is_being_used, should_cancel
+from rovr.variables.constants import config
+
+WIN32 = sys.platform == "win32"
+P = TypeVar("P")
 
 
 class ThickBar(BarRenderable):
@@ -39,9 +45,14 @@ class ThickBar(BarRenderable):
     HALF_BAR_RIGHT = "▌"
 
 
+class PasteCancelled(Exception):
+    pass
+
+
 class ProcessProgressBar(ProgressBar):
     _update_timer: Timer | None = None
-    _finished = False
+    _finished: bool = False
+    BAR_RENDERABLE = ThickBar
 
     def _on_mount(self, event: events.Mount) -> None:
         event.prevent_default()
@@ -56,130 +67,205 @@ class ProcessProgressBar(ProgressBar):
             self._update_timer.stop()
             self._update_timer = None
 
+    def _compute_percentage(self) -> float | None:
+        if self.total:
+            # i just didnt like how inaccurate 99.5% looks (it shows 100%, which is stupid af)
+            return clamp(int(100 * (self.progress / self.total)) / 100, 0.0, 1.0)
+        elif self.total == 0:
+            return 1.0
+        return None
 
-@cache
-def tarfile() -> ModuleType:
-    if sys.version_info.major == 3 and sys.version_info.minor <= 13:
-        from backports.zstd import tarfile  # ty: ignore[unresolved-import]
-    else:
-        import tarfile
-    return tarfile
+
+def is_path_in_directory(parent: str, child: str, resolve: bool = True) -> bool:
+    """Checks if the absolute path of a child is within the absolute path of a parent directory.
+    Args:
+        parent (str): The parent directory path.
+        child (str): The child path to check.
+        resolve (bool): Whether to resolve symbolic links and relative paths. Defaults to True.
+    Returns:
+        bool: True if the resolved child path is within the resolved parent directory, False otherwise.
+    """
+    func = path.realpath if resolve else path.abspath
+    parent = path.normcase(func(parent))
+    child = path.normcase(func(child))
+    try:
+        return path.commonpath([parent, child]) == parent
+    except ValueError:
+        return False
+
+
+def helper_rename(target: str) -> str:
+    """Helper function to rename a file or directory if it already exists.
+    Args:
+        target (str): The target file or directory path.
+    Returns:
+        str: The new name for the file or directory that does not conflict with existing names.
+    """
+    base_name, extension = path.splitext(target)
+    tested_number = 1
+    while True:
+        new_name = f"{base_name} ({tested_number}){extension}"
+        if not path.lexists(new_name):
+            return new_name
+        tested_number += 1
+
+
+copy_func = partial(
+    shutil.copy2 if config["settings"]["copy_includes_metadata"] else shutil.copy,
+    follow_symlinks=False,
+)
+
+
+def display_path(item: str, relative_to: str) -> str:
+    try:
+        return path.relpath(item, relative_to)
+    except Exception:
+        return item
+
+
+def panic_cancel(bar: ProgressBarContainer) -> bool:
+    if should_cancel():
+        bar.panic(bar_text="Worker Cancelled.")
+        return True
+    return False
 
 
 class ProgressBarContainer(VerticalGroup, inherit_bindings=False):
-    BINDINGS = scroll_bindings
-
     def __init__(
         self,
         total: int | None = None,
         label: str = "",
-        *args,
-        **kwargs,
+        text_interval: float = 0.25,
+        advance_interval: float = 0,
+        name: str | None = None,
+        id: str | None = None,
+        classes: str | None = None,
+        disabled: bool = False,
     ) -> None:
-        super().__init__(*args, **kwargs)
-        gradient_colors = getattr(
-            self.app.get_theme(self.app.theme), "bar_gradient", {}
-        ).get("default")
-        gradient = (
-            Gradient.from_colors(*reversed(gradient_colors)) if gradient_colors else None
+        super().__init__(
+            name=name,
+            id=id,
+            classes=classes,
+            disabled=disabled,
+            markup=False,
         )
         self.progress_bar = ProcessProgressBar(
             total=total,
             show_percentage=config["interface"]["show_progress_percentage"],
             show_eta=config["interface"]["show_progress_eta"],
-            gradient=gradient,
+            gradient=self.get_gradient("default"),
         )
-        self.progress_bar.BAR_RENDERABLE = ThickBar
         self.icon_label = Label(id="icon")
         self.text_label = Label(label, id="label")
         self.label_container = HorizontalGroup(self.icon_label, self.text_label)
+        self.text_interval = text_interval
+        self.advance_interval = advance_interval
+        self.__state: Literal["error", "done", "running"] = "running"
+        self._advance_by: float = 0
+        self._last_text_update: float | None = None
+        self._last_advance: float | None = None
+        self.in_thread = lambda: self.app._thread_id != get_ident()
+        self._can_set_text: bool = True
+        self._queued_text: tuple[str, bool] = ("", False)
 
-    @work
-    async def on_mount(self) -> None:
-        await self.mount_all([self.label_container, self.progress_bar])
+    def compose(self) -> ComposeResult:
+        yield self.label_container
+        yield self.progress_bar
 
-    @property
-    def in_thread(self) -> bool:
-        return self.app._thread_id != get_ident()
+    def get_gradient(self: Widget, state: str) -> Gradient | None:
+        gradient_colors = getattr(
+            self.app.get_theme(self.app.theme),
+            "bar_gradient",
+            {},
+        ).get(state)
+        if gradient_colors is not None:
+            try:
+                return Gradient.from_colors(*reversed(gradient_colors))
+            except ValueError:
+                return None
 
-    def update_text(self, label: str, is_path: bool = True) -> None:
+    def call_safe(self, func: Callable[..., P], *args: Any, **kwargs: Any) -> P:
+        if self.in_thread():
+            return self.app.call_from_thread(func, *args, **kwargs)
+        return func(*args, **kwargs)
+
+    def set_text(self, label: str, is_path: bool = True, force: bool = False) -> None:
         """
         Updates the text label
         Args:
             label (str): The new label
             is_path (bool) = True: Whether the text is a path or not
         """
+        self._queued_text = (label, is_path)
+        if not (self.__state == "running" or force):
+            return
+
+        now = time.monotonic()
+        if (
+            not force
+            and self._last_text_update is not None
+            and now - self._last_text_update < self.text_interval
+        ):
+            return
+        self._last_text_update = now
+
         if is_path:
             label = path_utils.control(label)
-        if is_path and config["interface"]["truncate_progress_file_path"]:
-            new_label = label.split("/")
-            if len(new_label) == 1:
-                self.text_label.update(label)
-                return
-            new_path = new_label[0]
-            for _ in new_label[1:-1]:
-                new_path += "/\u2026"
-            new_path += f"/{new_label[-1]}"
-            label = new_path
-        self.text_label.update(label)
+            if config["interface"]["truncate_progress_file_path"]:
+                new_label = label.split("/")
+                if len(new_label) == 1:
+                    self.text_label.update(label)
+                    return
+                new_path = new_label[0]
+                for p in new_label[1:-1]:
+                    new_path += f"/{p[0]}"
+                label = new_path + f"/{new_label[-1]}"
 
-    def update_icon(self, icon: str) -> None:
-        """
-        Updates the icon label
-        Args:
-            icon (str): The new icon
-        """
-        self.icon_label.update(icon)
+        self.call_safe(self.text_label.update, label)
 
-    def update_progress(
+    def set_icon(self, icon: str) -> None:
+        self.call_next(self.icon_label.update, icon)
+
+    def set_progress(
         self,
-        total: None | float | UnusedParameter = UnusedParameter(),
-        progress: float | UnusedParameter = UnusedParameter(),
-        advance: float | UnusedParameter = UnusedParameter(),
+        total: float | UnusedParameter = UNUSED,
+        progress: float | UnusedParameter = UNUSED,
     ) -> None:
-        self.progress_bar.update(total=total, progress=progress, advance=advance)
+        self.progress_bar.update(total=total, progress=progress)
 
-    def panic(
-        self,
-        dismiss_with: BarPanicDismissible | None = None,
-        notify: BarPanicNotify | None = None,
-        bar_text: str = "",
-    ) -> None:
-        """Do something when an error occurs.
-        Args:
-            dismiss_with(dict): The message for the Dismissible screen (must contain `message` and `subtitle`)
-            notify(dict): The notify message (must contain `message` and `title`)
-            bar_text(str): The new text to update the label
-        """
-        if self.in_thread:
-            self.app.call_from_thread(self._set_panic_state, bar_text, notify)
-        else:
-            self._set_panic_state(bar_text, notify)
+    def advance(self, amount: float = 1) -> None:
+        if self.__state != "running":
+            return
+        self._advance_by += amount
+        now = time.monotonic()
+        if (
+            self._last_advance is not None
+            and now - self._last_advance < self.advance_interval
+        ):
+            return
+        self._last_advance = now
+        self._flush_advance()
 
-        if dismiss_with:
-            dismissible = screens.Dismissible(
-                dismiss_with["message"], border_subtitle=dismiss_with["subtitle"]
-            )
-            if self.app._thread_id != get_ident():
-                self.app.call_from_thread(self.app.push_screen_wait, dismissible)
-            else:
-                self.app.push_screen(dismissible)
+    def _flush_advance(self) -> None:
+        amount, self._advance_by = self._advance_by, 0
+        if not amount:
+            return
+        self.call_safe(self.progress_bar.advance, amount)
 
     def _set_panic_state(self, bar_text: str, notify: BarPanicNotify | None) -> None:
+        self._flush_advance()
         if bar_text:
-            self.update_text(bar_text, False)
+            self.set_text(bar_text, False, force=True)
+        else:
+            self.set_text(*self._queued_text, force=True)
         if self.progress_bar.total is None:
             self.progress_bar.update(total=1, progress=0)
         self.progress_bar.finish()
         self.add_class("error")
-        gradient_colors = getattr(
-            self.app.get_theme(self.app.theme), "bar_gradient", {}
-        ).get("error")
-        if gradient_colors:
-            self.progress_bar.gradient = Gradient.from_colors(*gradient_colors)
+        self.progress_bar.gradient = self.get_gradient("error")
         assert isinstance(self.icon_label.content, str)
-        self.update_icon(
-            self.icon_label.content + " " + icon_utils.get_icon("general", "close")[0]
+        self.set_icon(
+            f"{self.icon_label.content} {icons.get_icon('general', 'close')[0]}"
         )
 
         if notify:
@@ -188,25 +274,68 @@ class ProgressBarContainer(VerticalGroup, inherit_bindings=False):
             )
         self.app.Clipboard.checker_wrapper()
 
+    def panic(
+        self,
+        dismiss_with: BarPanicDismissible | None = None,
+        notify: BarPanicNotify | None = None,
+        bar_text: str = "",
+        exceptions: list[tuple[str, Exception]] | None = None,
+        action: str = "handle",
+    ) -> None:
+        """Do something when an error occurs.
+        Args:
+            dismiss_with(dict): The message for the Dismissible screen (must contain `message` and `subtitle`)
+            notify(dict): The notify message (must contain `message` and `title`)
+            bar_text(str): The new text to update the label
+            exceptions(list): A list of tuples containing the file and the exception that occurred
+            action(str): The action that was being performed when the error occurred
+        """
+        if self.__state != "running":
+            return
+        self.__state = "error"
+        self.call_safe(self._set_panic_state, bar_text, notify)
+
+        for file, exc in exceptions or []:
+            self.notify(
+                message=f"Failed to {action} {file} due to {exc!r}",
+                severity="error",
+                markup=False,
+            )
+            path_utils.dump_exc(self, exc)
+
+        if dismiss_with:
+            self.call_safe(
+                self.app.push_screen,
+                screens.Dismissible(
+                    dismiss_with["message"], border_subtitle=dismiss_with["subtitle"]
+                ),
+            )
+
     def ok(self, text: str = "") -> None:
         """Do something when the process is successful.
         Args:
             text(str): The new text to update the label
         """
-        if self.in_thread:
+        if self.__state != "running":
+            return
+        if self.in_thread():
             self.app.call_from_thread(self.ok, text)
             return
+        self.__state = "done"
+        self._flush_advance()
         if text:
-            self.update_text(text, False)
-        if self.progress_bar.total is None:
-            self.progress_bar.update(total=1, progress=0)
+            self.set_text(text, False, force=True)
         else:
-            self.progress_bar.advance()
+            self.set_text(*self._queued_text, force=True)
+        if self.progress_bar.total is None:
+            self.progress_bar.update(total=1, progress=1)
+        else:
+            self.progress_bar.update(progress=self.progress_bar.total)
         self.progress_bar.finish()
         self.add_class("done")
         assert isinstance(self.icon_label.content, str)
-        self.update_icon(
-            self.icon_label.content + " " + icon_utils.get_icon("general", "check")[0]
+        self.set_icon(
+            f"{self.icon_label.content} {icons.get_icon('general', 'check')[0]}"
         )
         self.app.Clipboard.checker_wrapper()
 
@@ -214,37 +343,56 @@ class ProgressBarContainer(VerticalGroup, inherit_bindings=False):
 class ProcessContainer(Actionable, VerticalScroll):
     key_contexts = ("processes", "scroll")
     theme: reactive[str] = reactive("textual-dark")
+    ACTIONS = [Action("delete", config["keybinds"]["delete"])]
 
     def __init__(self) -> None:
         super().__init__(id="processes")
-        self.has_perm_error: bool = False
-        self.has_in_use_error: bool = False
-        self.ACTIONS: list[Action] = [Action("delete", config["keybinds"]["delete"])]
 
     def watch_theme(self, theme: str) -> None:
-        gradients = getattr(self.app.get_theme(theme), "bar_gradient", {})
-        default_colors = gradients.get("default")
-        error_colors = gradients.get("error")
+        error_gradient = ProgressBarContainer.get_gradient(self, "error")
+        default_gradient = ProgressBarContainer.get_gradient(self, "default")
+
         for bar in self.query(ProgressBarContainer):
-            if bar.has_class("error") and error_colors:
-                bar.progress_bar.gradient = Gradient.from_colors(*error_colors)
-            elif default_colors:
-                bar.progress_bar.gradient = Gradient.from_colors(*default_colors)
+            if bar.has_class("error") and error_gradient:
+                bar.progress_bar.gradient = error_gradient
+            elif default_gradient:
+                bar.progress_bar.gradient = default_gradient
+            else:
+                bar.progress_bar.gradient = None
 
     async def new_process_bar(
-        self, max: int | None = None, id: str | None = None, classes: str | None = None
+        self,
+        total: int | None = None,
+        text_interval: float = 0.25,
+        advance_interval: float = 0,
+        id: str | None = None,
+        classes: str | None = None,
     ) -> ProgressBarContainer:
-        new_bar: ProgressBarContainer = ProgressBarContainer(
-            total=max, id=id, classes=classes
+        new_bar = ProgressBarContainer(
+            total=total,
+            text_interval=text_interval,
+            advance_interval=advance_interval,
+            id=id,
+            classes=classes,
         )
         await self.mount(new_bar, before=0)
         return new_bar
 
     def threaded_new_process_bar(
-        self, max: int | None = None, id: str | None = None, classes: str | None = None
+        self,
+        total: int | None = None,
+        text_interval: float = 0.25,
+        advance_interval: float = 0,
+        id: str | None = None,
+        classes: str | None = None,
     ) -> ProgressBarContainer:
         bar = self.app.call_from_thread(
-            self.new_process_bar, max=max, id=id, classes=classes
+            self.new_process_bar,
+            total=total,
+            text_interval=text_interval,
+            advance_interval=advance_interval,
+            id=id,
+            classes=classes,
         )
         assert isinstance(bar, ProgressBarContainer)
         return bar
@@ -253,439 +401,280 @@ class ProcessContainer(Actionable, VerticalScroll):
         self,
         action_on_file_in_use: str,
         item_display_name: str,
-        retry_func: Callable[[], None],
+        retry_func: Callable[[], Any],
     ) -> tuple[str, str]:
-        """
-        Handle file-in-use errors with user prompts and automatic retries.
-
-        Args:
-            action_on_file_in_use (str): Current action ("ask", "try_again", "skip", "cancel")
-            item_display_name (str): Display name for the file
-            retry_func (Callable): Function to call to retry the operation
+        """Ask how to handle an item in use and retry when requested.
 
         Returns:
-            tuple[str, str]: (current_action, updated_default_action)
-                - current_action: What to do with this file ("skip", "try_again", or raises)
-                - updated_default_action: Updated default for future errors
+            The action for this item and the remembered action for later items.
 
         Raises:
-            PermissionError: If it still fails
-            OSError: If it still fails
+            PermissionError: The retry failed for a reason other than file use.
+            OSError: The retry failed for a reason other than file use.
         """
-        persisted_default = action_on_file_in_use
-        if action_on_file_in_use in ("skip", "cancel"):
-            # Persisted skip/cancel: short-circuit without retry
-            return action_on_file_in_use, action_on_file_in_use
-        if action_on_file_in_use == "try_again":
-            # Persisted try_again: attempt retry once just like interactive success path
-            prev_action = action_on_file_in_use
-            try:
-                retry_func()
-                return "try_again", prev_action
-            except (PermissionError, OSError) as e:
-                if not is_being_used(e):
-                    # Different error type; propagate upwards
-                    raise
-                # Still in use; fall back to interactive prompt loop below
-                action_on_file_in_use = "ask"
+        default_action = action_on_file_in_use
+        action = default_action
 
         while True:
-            response = self.app.call_from_thread(
-                self.app.push_screen_wait,
-                screens.FileInUse(
-                    f"The file appears to be open elsewhere.\nHence, I cannot take any action on it.\nPath: {item_display_name}",
-                ),
-            )
-            response = cast(screens.FileInUse.ReturnType, response)
-            # Handle toggle: remember the action for future file-in-use scenarios
-            updated_action = persisted_default
-            if response["toggle"]:
-                updated_action = response["value"]
-                persisted_default = updated_action
+            if action == "ask":
+                response: screens.FileInUse.ReturnType = self.app.call_from_thread(
+                    self.app.push_screen_wait,
+                    screens.FileInUse(
+                        "The file appears to be open elsewhere and cannot be changed."
+                        f"\nPath: {item_display_name}"
+                    ),
+                )
+                action = response["value"]
+                if response["toggle"]:
+                    default_action = action
 
-            if response["value"] == "cancel":
-                return "cancel", updated_action
-            elif response["value"] == "skip":
-                return "skip", updated_action
-            # Try again: check if file is still in use
+            if action != "try_again":
+                return action, default_action
+
             try:
                 retry_func()
-                return "try_again", updated_action  # Success, return updated action
-            except (PermissionError, OSError) as e:
-                if not is_being_used(e):
-                    raise  # Not a file-in-use error, re-raise
-                # Otherwise, loop again for another try/cancel
-
-    def rmtree_fixer(
-        self, function: Callable[[str], None], item_path: str, exc: BaseException
-    ) -> None:
-        """
-        Ran when shutil.rmtree faces an issue
-        Args:
-            function(Callable): the function that caused the issue
-            item_path(str): the path that caused the issue
-            exc(BaseException): the exact exception that caused the error
-        """
-        if isinstance(exc, FileNotFoundError):
-            # ig it got removed?
-            return
-        elif isinstance(exc, (OSError, PermissionError)) and is_being_used(exc):
-            # cannot do anything
-            self.has_in_use_error = True
-        elif isinstance(exc, PermissionError):
-            self.has_perm_error = True
-        elif isinstance(exc, OSError) and "symbolic" in str(exc):
-            try:
-                os.remove(item_path)
-            except IsADirectoryError:
-                os.rmdir(item_path)
-        else:
-            raise
-
-    @staticmethod
-    def is_path_within_directory(parent_path: str, child_path: str) -> bool:
-        parent = path.normcase(path.abspath(parent_path))
-        child = path.normcase(path.abspath(child_path))
-        try:
-            return path.commonpath([parent, child]) == parent
-        except ValueError:
-            return False
-
-    @staticmethod
-    def is_resolved_path_within_directory(parent_path: str, child_path: str) -> bool:
-        """Return whether a path remains inside a directory after symlink resolution.
-
-        Returns:
-            Whether the resolved child path is contained by the resolved parent path.
-        """
-        parent = path.normcase(path.realpath(parent_path))
-        child = path.normcase(path.realpath(child_path))
-        try:
-            return path.commonpath([parent, child]) == parent
-        except ValueError:
-            return False
-
-    @staticmethod
-    def get_archive_member_name(member: object) -> str:
-        return str(getattr(member, "filename", getattr(member, "name", "")))
-
-    def is_archive_member_directory(self, member: object) -> bool:
-        if isinstance(member, zipfile.ZipInfo):
-            return member.is_dir()
-        if isinstance(member, tarfile().TarInfo):
-            return member.isdir()
-        is_dir_attr = getattr(member, "isdir", None)
-        if callable(is_dir_attr):
-            return bool(is_dir_attr())
-        if isinstance(is_dir_attr, bool):
-            return is_dir_attr
-        filename = self.get_archive_member_name(member)
-        return filename.endswith(("/", "\\"))
-
-    @staticmethod
-    def is_relative_path_within(relative_path: str, relative_root: str) -> bool:
-        rel = path.normpath(relative_path)
-        root = path.normpath(relative_root)
-        return rel == root or rel.startswith(root + path.sep)
-
-    @staticmethod
-    def retarget_relative_paths(
-        items: list[path_utils.FileObj], old_root: str, new_root: str
-    ) -> None:
-        old_root_norm = path.normpath(old_root)
-        new_root_norm = path.normpath(new_root)
-        old_root_with_sep = old_root_norm + path.sep
-        for item in items:
-            rel = path.normpath(item["relative_loc"])
-            if rel == old_root_norm:
-                item["relative_loc"] = path_utils.normalise(new_root_norm)
-                continue
-            if rel.startswith(old_root_with_sep):
-                suffix = rel.removeprefix(old_root_with_sep)
-                item["relative_loc"] = path_utils.normalise(
-                    path.join(new_root_norm, suffix)
-                )
+                return action, default_action
+            except FileNotFoundError:
+                return action, default_action
+            except (PermissionError, OSError) as exc:
+                if not is_being_used(exc):
+                    raise
+                # A remembered retry gets one attempt, then asks instead of looping.
+                action = "ask"
 
     @work(thread=True)
     def delete_files(self, files: list[str]) -> None:
-        """
-        Permanently remove files from the filesystem, bypassing the recycle bin.
+        """Permanently remove files from the filesystem, bypassing the recycle bin.
 
         Args:
             files (list[str]): List of file paths to remove.
         """
-        # Create progress/process bar (why have I set names as such...)
-        bar = self.threaded_new_process_bar(classes="active")
-        self.app.call_from_thread(
-            bar.update_icon,
-            icon_utils.get_icon("general", "delete")[0],
-        )
-        self.app.call_from_thread(
-            bar.update_text,
-            "Getting files to delete...",
-        )
-        self.app.call_from_thread(bar.update_progress, total=len(files) + 1)
+
+        def work_size(item: str) -> int:
+            if path.islink(item) or path.isjunction(item) or not path.isdir(item):
+                return 1
+            size = 1
+            for root, dirs, file_names in os.walk(item, topdown=True):
+                size += len(dirs) + len(file_names)
+                dirs[:] = [
+                    name
+                    for name in dirs
+                    if not path.islink(path.join(root, name))
+                    and not path.isjunction(path.join(root, name))
+                ]
+            return size
+
+        bar = self.threaded_new_process_bar(classes="active", advance_interval=0.25)
+        bar.set_icon(icons.get_icon("general", "delete")[0])
+        bar.set_text("Getting files to delete...", False)
+        bar.set_progress(total=sum(map(work_size, files)))
+        errors: list[tuple[str, Exception]] = []
+
         action_on_file_in_use = "ask"
-        self.has_perm_error = False
-        self.has_in_use_error = False
-        last_update_time = time.monotonic()
-        for i, item_path in enumerate(files):
-            current_time = time.monotonic()
-            if current_time - last_update_time > 0.25 or i == len(files) - 1 or i == 0:
-                self.app.call_from_thread(
-                    bar.update_text,
-                    item_path,
-                )
-                self.app.call_from_thread(bar.update_progress, progress=i + 1)
-                last_update_time = current_time
-            if path.lexists(item_path):
-                try:
-                    self.permanently_delete_item(item_path)
-                except FileNotFoundError:
-                    # it's deleted, so why care?
-                    pass
-                except (PermissionError, OSError) as exc:
-                    if exc.errno == errno.ENOTEMPTY:
-                        bar.panic(
-                            dismiss_with={
-                                "message": f"Deleting failed due to\n{exc}\nProcess Aborted.",
-                                "subtitle": "If this is a bug, please file an issue!",
-                            },
-                            bar_text="Unhandled Error",
+
+        def remove_file(item: str) -> bool:
+            nonlocal action_on_file_in_use
+
+            bar.set_text(item)
+
+            def remove() -> None:
+                if path.isjunction(item):
+                    os.rmdir(item)
+                else:
+                    os.unlink(item)
+
+            try:
+                remove()
+            except PermissionError as exc:
+                if is_being_used(exc) and WIN32:
+                    try:
+                        action, action_on_file_in_use = self.handle_file_in_use_error(
+                            action_on_file_in_use, item, remove
                         )
-                        return
-                    # Try to detect if file is in use on Windows
-                    if (is_file_in_use := is_being_used(exc)) and sys.platform == "win32":
-                        current_action, action_on_file_in_use = (
-                            self.handle_file_in_use_error(
-                                action_on_file_in_use,
-                                item_path,
-                                lambda: self.permanently_delete_item(item_path),
-                            )
-                        )
-                        if current_action == "cancel":
-                            bar.panic()
-                            return
-                        elif current_action == "skip":
-                            pass  # Skip this file, continue to next
-                        continue
-                    elif is_file_in_use:
-                        # need to ensure unix users see an
-                        # error so they create an issue
-                        self.app.panic()
-                    # fallback for regular permission issues
-                    if path_utils.force_obtain_write_permission(item_path):
-                        self.permanently_delete_item(item_path)
-                except Exception as exc:
-                    # TODO: should probably let it continue, then have a summary
-                    path_utils.dump_exc(self, exc)
-                    bar.panic(
-                        dismiss_with={
-                            "message": f"Deleting failed due to\n{exc}\nProcess Aborted.",
-                            "subtitle": "If this is a bug, please file an issue!",
-                        },
-                        bar_text="Unhandled Error",
-                    )
+                    except Exception as retry_exc:
+                        errors.append((item, retry_exc))
+                        return True
+                    if action == "cancel":
+                        bar.panic(bar_text="Deletion cancelled.")
+                        return False
+                    if action == "skip":
+                        bar.advance()
+                        return True
+                elif is_being_used(exc):
+                    raise
+                elif path_utils.force_obtain_write_permission(item):
+                    try:
+                        remove()
+                    except Exception as retry_exc:
+                        errors.append((item, retry_exc))
+                        return True
+                else:
+                    errors.append((item, exc))
+                    return True
+            except FileNotFoundError:
+                pass
+            except Exception as exc:
+                errors.append((item, exc))
+                return True
+
+            bar.advance()
+            return True
+
+        for file in files:
+            if should_cancel():
+                bar.panic(bar_text="Worker Cancelled.")
+                # use break so errors can still be reported if any
+                break
+            if not path.lexists(file):
+                # ignore
+                bar.advance()
+                continue
+            elif path.islink(file) or path.isjunction(file):
+                if not remove_file(file):
                     return
-        if self.has_in_use_error:
-            bar.panic(
-                notify={
-                    "message": "Certain files could not be deleted as they are currently being used",
-                    "title": "Delete Files",
-                },
-            )
-            return
-        if self.has_perm_error:
-            bar.panic(
-                notify={
-                    "message": "Certain files could not be deleted due to PermissionError.",
-                    "title": "Delete Files",
-                },
-            )
-            return
+                continue
+            elif path.isdir(file):
+                bar.set_text(file)
+                directories: list[str] = []
+                for root, dirs, file_names in os.walk(file, topdown=True):
+                    for name in file_names:
+                        if panic_cancel(bar):
+                            return
+                        file_path = path.join(root, name)
+                        if not remove_file(file_path):
+                            return
+                    for name in list(dirs):
+                        if panic_cancel(bar):
+                            return
+                        dir_path = path.join(root, name)
+                        if path.islink(dir_path) or path.isjunction(dir_path):
+                            dirs.remove(name)
+                            if not remove_file(dir_path):
+                                return
+                        else:
+                            directories.append(dir_path)
+                for dir_path in reversed(directories):
+                    bar.set_text(dir_path)
+                    try:
+                        os.rmdir(dir_path)
+                        bar.advance()
+                    except OSError as exc:
+                        # check if it is because non-empty directory, if so, ignore
+                        # because relevant exception is from the file deletion above
+                        if exc.errno != errno.ENOTEMPTY:
+                            errors.append((dir_path, exc))
+                    except Exception as exc:
+                        errors.append((dir_path, exc))
+                if panic_cancel(bar):
+                    break
+                bar.set_text(file)
+                try:
+                    os.rmdir(file)
+                    bar.advance()
+                except FileNotFoundError:
+                    # it's gone, so why care?
+                    bar.advance()
+                except OSError as exc:
+                    if exc.errno != errno.ENOTEMPTY:
+                        errors.append((file, exc))
+            elif path.isfile(file):
+                if not remove_file(file):
+                    return
         if not files:
             # this cannot happen, but just as an easter egg
-            self.app.call_from_thread(
-                bar.update_text, "Successfully deleted nothing!", False
+            bar.ok("Successfully deleted nothing!")
+        if errors:
+            bar.panic(
+                notify={
+                    "message": f"Failed to delete {len(errors)} items.",
+                    "title": "Delete Error",
+                },
+                bar_text=f"Failed to delete {len(errors)} items",
+                exceptions=errors,
+                action="delete",
             )
-        bar.ok()
-
-    def permanently_delete_item(self, item_path: str) -> None:
-        """
-        Permanently delete a single top-level item, whether it's a file or
-        a directory.
-        Args:
-            item_path (str): The path to delete.
-        Raises:
-            OSError: If the directory cannot be removed after a retry.
-        """
-        if path.islink(item_path):
-            os.remove(item_path)
-        elif path.isjunction(item_path):
-            os.rmdir(item_path)
-        elif path.isdir(item_path):
-            try:
-                shutil.rmtree(item_path, onexc=self.rmtree_fixer)
-            except OSError as exc:
-                if exc.errno != errno.ENOTEMPTY:
-                    raise
-                shutil.rmtree(item_path, onexc=self.rmtree_fixer)
         else:
-            os.remove(item_path)
+            bar.ok()
+
+        import gc
+
+        gc.collect()
 
     @work(thread=True)
     def trash_files(self, files: list[str]) -> None:
-        """
-        Send files to the recycle bin.
+        """Send files to the recycle bin.
 
-        Top-level items are recycled as whole units, so that a selected
-        folder becomes a single trash entry instead of one entry per file
-        it contains.
+        Folders are recycled as-is, so that a selected folder becomes a single
+        trash entry instead of one entry per file it contains (recursively)
 
         Args:
             files (list[str]): List of top-level file/folder paths to trash.
-
-        Raises:
-            OSError: re-raises if the file usage handler fails
-            PermissionError: re-raises if the file usage handler fails
         """
         if not config["settings"]["use_recycle_bin"]:
-            # recycle bin disabled; fall back to permanent deletion
-            self.delete_files(files)
+            self.notify("Recycle Bin is disabled in settings.", severity="warning")
             return
         from pytrash import RecycleBin
 
         recycle_bin = RecycleBin()
         bar = self.threaded_new_process_bar(classes="active")
-        self.app.call_from_thread(
-            bar.update_icon,
-            icon_utils.get_icon("general", "delete")[0],
-        )
-        self.app.call_from_thread(
-            bar.update_text,
-            "Getting files to trash...",
-        )
-        self.app.call_from_thread(bar.update_progress, total=len(files) + 1)
+        bar.set_icon(icons.get_icon("general", "trash")[0])
+        bar.set_text("Getting files to trash...", False)
+        bar.set_progress(total=len(files) + 1, progress=0)
+        failed: list[tuple[str, Exception]] = []
         action_on_file_in_use = "ask"
-        skip_trash = False
-        self.has_perm_error = False
-        self.has_in_use_error = False
-        last_update_time = time.monotonic()
-        for i, item_path in enumerate(files):
-            current_time = time.monotonic()
-            if current_time - last_update_time > 0.25 or i == len(files) - 1 or i == 0:
-                self.app.call_from_thread(bar.update_text, item_path)
-                self.app.call_from_thread(bar.update_progress, progress=i + 1)
-                last_update_time = current_time
-            if not path.lexists(item_path):
+        for file in files:
+            if panic_cancel(bar):
+                break
+            bar.set_text(file)
+            if not path.lexists(file):
+                # ignore
+                bar.advance()
                 continue
             try:
-                if not skip_trash:
-                    try:
-                        path_to_trash = item_path
-                        if sys.platform == "win32":
-                            # An inherent issue with long paths on windows
-                            path_to_trash = path_to_trash.replace("/", "\\")
-                        recycle_bin.recycle([path_to_trash])
-                        continue
-                    except (PermissionError, OSError) as exc:
-                        # On Windows, a file being used by another process
-                        # raises a PermissionError/OSError with winerror 32.
-                        if (
-                            is_file_in_use := is_being_used(exc)
-                        ) and sys.platform == "win32":
-                            current_action, action_on_file_in_use = (
-                                self.handle_file_in_use_error(
-                                    action_on_file_in_use,
-                                    item_path,
-                                    lambda: recycle_bin.recycle([path_to_trash]),
-                                )
-                            )
-                            if current_action == "cancel":
-                                bar.panic()
-                                return
-                            continue
-                        elif is_file_in_use:
-                            # need to ensure unix users see an
-                            # error so they create an issue
-                            raise
-                        # fallback for regular permission issues
-                        if path_utils.force_obtain_write_permission(item_path):
-                            self.permanently_delete_item(item_path)
-                    except Exception as exc:
-                        path_utils.dump_exc(self, exc)
-                        do_what = self.app.call_from_thread(
-                            self.app.push_screen_wait,
-                            screens.YesOrNo(
-                                f"Trashing failed due to\n{exc}\nDo Permanent Deletion?",
-                                with_toggle=True,
-                                border_subtitle="If this is a bug, please file an issue!",
-                                destructive=True,
-                            ),
-                        )
-                        do_what = cast(screens.YesOrNo.ReturnType, do_what)
-                        if do_what["toggle"]:
-                            skip_trash = do_what["value"]
-                        if do_what["value"]:
-                            self.permanently_delete_item(item_path)
-                        else:
-                            continue
-                else:
-                    self.permanently_delete_item(item_path)
+                file = path.normpath(file)
+                recycle_bin.recycle([file])
+                bar.advance()
             except FileNotFoundError:
-                # it's deleted, so why care?
-                pass
+                # it's gone, so why care?
+                bar.advance()
             except (PermissionError, OSError) as exc:
-                # Try to detect if file is in use on Windows
-                if (is_file_in_use := is_being_used(exc)) and sys.platform == "win32":
-                    current_action, action_on_file_in_use = self.handle_file_in_use_error(
+                is_file_in_use = is_being_used(exc)
+                if is_file_in_use and WIN32:
+                    action, action_on_file_in_use = self.handle_file_in_use_error(
                         action_on_file_in_use,
-                        item_path,
-                        lambda: self.permanently_delete_item(item_path),
+                        file,
+                        lambda: recycle_bin.recycle([file]),
                     )
-                    if current_action == "cancel":
-                        bar.panic()
+                    if action == "cancel":
+                        bar.panic(bar_text="Trashing cancelled.")
                         return
-                    continue
-                elif is_file_in_use:
-                    # need to ensure unix users see an
-                    # error so they create an issue
-                    self.app.panic()
-                # fallback for regular permission issues
-                if path_utils.force_obtain_write_permission(item_path):
-                    self.permanently_delete_item(item_path)
+                    bar.advance()
+                elif path_utils.force_obtain_write_permission(file):
+                    try:
+                        recycle_bin.recycle([file])
+                        bar.advance()
+                    except Exception as e:
+                        failed.append((file, e))
+                else:
+                    failed.append((file, exc))
             except Exception as exc:
-                # TODO: should probably let it continue, then have a summary
-                path_utils.dump_exc(self, exc)
-                bar.panic(
-                    dismiss_with={
-                        "message": f"Deleting failed due to\n{exc}\nProcess Aborted.",
-                        "subtitle": "If this is a bug, please file an issue!",
-                    },
-                    bar_text="Unhandled Error",
-                )
-                return
-        if self.has_in_use_error:
+                failed.append((file, exc))
+        if failed:
             bar.panic(
                 notify={
-                    "message": "Certain files could not be deleted as they are currently being used",
-                    "title": "Delete Files",
+                    "message": f"Failed to trash {len(failed)} items.",
+                    "title": "Trash Error",
                 },
+                bar_text=f"Failed to trash {len(failed)} items",
+                exceptions=failed,
+                action="trash",
             )
-            return
-        if self.has_perm_error:
-            bar.panic(
-                notify={
-                    "message": "Certain files could not be deleted due to PermissionError.",
-                    "title": "Delete Files",
-                },
-            )
-            return
-        if not files:
-            self.app.call_from_thread(
-                bar.update_text, "Successfully deleted nothing!", False
-            )
-        bar.ok()
+        else:
+            bar.ok()
+
+        import gc
+
+        gc.collect()
 
     @work(thread=True)
     def create_archive(
@@ -694,90 +683,53 @@ class ProcessContainer(Actionable, VerticalScroll):
         archive_name: str,
         algo: Literal["zip", "tar", "tar.gz", "tar.bz2", "tar.xz", "tar.zst"],
         level: int,
+        password: str | None = None,  # soon soon trust me
     ) -> None:
-        """
-        Compress files into an archive.
+        """Compress files into an archive.
 
         Args:
             files (list[str]): List of file paths to compress.
             archive_name (str): Path for the output archive.
+            algo: Compression algorithm to use.
+            level (int): Compression level (0-9 (or 0-22 for zstd)).
+            password (str | None): Currently does nothing.
         """
-        bar = self.threaded_new_process_bar(classes="active")
-        self.app.call_from_thread(
-            bar.update_icon,
-            icon_utils.get_icon("general", "zip")[0],
-        )
-        self.app.call_from_thread(bar.update_text, "Getting files to archive...", False)
+        from multiarchive import Archive
 
-        files_to_archive = []
-        for p in files:
-            if path.isdir(p):
-                if not os.listdir(p):  # empty directory
-                    files_to_archive.append(p)
-                else:
-                    for dirpath, _, filenames in os.walk(p):
-                        for f in filenames:
-                            files_to_archive.append(path.join(dirpath, f))
-            else:
-                files_to_archive.append(p)
-
-        files_to_archive = sorted(list(set(files_to_archive)))
-
-        self.app.call_from_thread(bar.update_progress, total=len(files_to_archive) + 1)
-
-        base_path = path.dirname(files[0]) if len(files) == 1 else path.commonpath(files)
-
-        try:
-            from multiarchive import Archive
-
-            with Archive(
-                archive_name, algo, "w", level, strict_timestamps=False
-            ) as archive:
-                assert archive._archive is not None
-                last_update_time = time.monotonic()
-                for i, file_path in enumerate(files_to_archive):
-                    archive_name = path.relpath(file_path, base_path)
-                    current_time = time.monotonic()
-                    if (
-                        current_time - last_update_time > 0.25
-                        or i == len(files_to_archive) - 1
-                    ):
-                        self.app.call_from_thread(
-                            bar.update_text,
-                            archive_name,
-                        )
-                        self.app.call_from_thread(bar.update_progress, progress=i + 1)
-                        last_update_time = current_time
-                    _archive = archive._archive
-                    if _archive:
-                        if archive._archive_type == "zip":
-                            assert isinstance(_archive, zipfile.ZipFile)
-                            _archive.write(file_path, arcname=archive_name)
-                        else:
-                            assert isinstance(_archive, tarfile().TarFile)
-                            _archive.add(file_path, arcname=archive_name)
-                for p in files:
-                    if path.isdir(p) and not os.listdir(p):
-                        archive_name = path.relpath(p, base_path)
-                        _archive = archive._archive
-                        if _archive:
-                            if archive._archive_type == "zip":
-                                assert isinstance(_archive, zipfile.ZipFile)
-                                _archive.write(p, arcname=archive_name)
-                            else:
-                                assert isinstance(_archive, tarfile().TarFile)
-                                _archive.add(p, arcname=archive_name)
-
-        except Exception as exc:
-            path_utils.dump_exc(self, exc)
-            bar.panic(
-                dismiss_with={
-                    "message": f"Archiving failed due to {type(exc).__name__}\n{exc}\nProcess Aborted.",
-                    "subtitle": "File an issue if this is a bug!",
+        start, bar = getcwd(), self.threaded_new_process_bar(classes="active")
+        bar.set_icon(icons.get_icon("general", "zip")[0])
+        bar.set_text("Getting files to archive...", False)
+        files_to_archive: list[path_utils.FileObj] = []
+        for file in files:
+            objs = path_utils.get_recursive_files(file, True)
+            files_to_archive.extend(objs[0])
+            files_to_archive.extend(
+                {
+                    "path": folder,
+                    "relative_loc": (
+                        path.relpath(folder, start) if path.isabs(folder) else folder
+                    ),
                 }
+                for folder in objs[1]
+                if not os.listdir(folder)
             )
-            return
 
+        bar.set_progress(total=len(files_to_archive) + 1, progress=0)
+        onerr = lambda e: bar.panic({
+            "message": f"Failed to create archive {archive_name} due to {e!r}",
+            "subtitle": "Press any key to dismiss.",
+        })
+
+        with (
+            dump_on_exc(self, Exception, other_callers=onerr),
+            Archive(archive_name, algo, "w", level, strict_timestamps=True) as archive,
+        ):
+            for obj in files_to_archive:
+                if panic_cancel(bar):
+                    break
+                bar.set_text(display_path(obj["path"], start))
+                archive.add(obj["path"], obj["relative_loc"])
+                bar.advance()
         bar.ok()
 
     @work(thread=True)
@@ -793,663 +745,495 @@ class ProcessContainer(Actionable, VerticalScroll):
             ValueError: If the archive contains unsafe paths that could lead to path traversal vulnerabilities.
                       ╰─ this is automatically caught
         """
+        from multiarchive import Archive
+
         bar = self.threaded_new_process_bar(classes="active")
-        self.app.call_from_thread(
-            bar.update_icon,
-            icon_utils.get_icon("general", "open")[0],
-        )
-        self.app.call_from_thread(
-            bar.update_text,
-            "Preparing to extract...",
-        )
-
-        do_what_on_existence = "ask"
-        try:
-            from multiarchive import Archive
-
-            if not path.exists(destination_path):
-                os.makedirs(destination_path)
-
-            with Archive(archive_path, mode="r") as archive:
-                file_list = archive.infolist()
-                self.app.call_from_thread(bar.update_progress, total=len(file_list) + 1)
-
-                last_update_time = time.monotonic()
-                for i, file in enumerate(file_list):
-                    filename = self.get_archive_member_name(file)
-                    if filename == "":
-                        continue
-                    current_time = time.monotonic()
-                    if (
-                        current_time - last_update_time > 0.25
-                        or i == len(file_list) - 1
-                        or i == 0
-                    ):
-                        self.app.call_from_thread(
-                            bar.update_text,
-                            filename,
+        bar.set_icon(icons.get_icon("general", "open")[0])
+        bar.set_text("Preparing to extract...", False)
+        os.makedirs(destination_path, exist_ok=True)
+        archive: Archive | None = None
+        password: bytes | None = None
+        password_res: str | UnusedParameter | None = UNUSED
+        while archive is None:
+            if password_res is None:
+                bar.panic(notify={"title": "", "message": "No password provided."})
+                return
+            if isinstance(password_res, str):
+                password = password_res.encode()
+            try:
+                archive = Archive.open_archive(archive_path, "r", pwd=password)
+            except ValueError as e:
+                # check error is due to password
+                if "password required" in str(e).lower():
+                    password_res = self.push_screen(
+                        screens.ModalInput(
+                            border_title="Enter password for archive",
+                            border_subtitle="Escape to cancel",
                         )
-                        self.app.call_from_thread(bar.update_progress, progress=i + 1)
-                        last_update_time = current_time
-                    normalised_name = path.normpath(filename)
-                    member_drive, _ = path.splitdrive(normalised_name)
-                    if member_drive or path.isabs(normalised_name):
-                        raise ValueError(
-                            f"Unsafe archive member path '{filename}' is absolute and cannot be extracted."
-                        )
-                    final_path = path.abspath(
-                        path.join(destination_path, normalised_name)
                     )
-                    if not self.is_path_within_directory(destination_path, final_path):
-                        raise ValueError(
-                            f"Unsafe archive member path '{filename}' escapes destination directory."
-                        )
-                    if not self.is_resolved_path_within_directory(
-                        destination_path, final_path
-                    ):
-                        raise ValueError(
-                            f"Unsafe archive member path '{filename}' escapes destination through a symbolic link."
-                        )
-                    final_path = path_utils.normalise(final_path)
-                    member_is_dir = self.is_archive_member_directory(file)
-                    if path.lexists(final_path):
-                        existing_is_dir = path.isdir(final_path)
-                        if member_is_dir and existing_is_dir:
-                            pass
-                        else:
-                            is_type_mismatch = member_is_dir != existing_is_dir
-                            effective_action = do_what_on_existence
-                            if is_type_mismatch and effective_action == "overwrite":
-                                effective_action = "ask"
-                            if effective_action == "ask":
-                                response = self.helper_push_and_get_filenameconflict(
-                                    screens.FileNameConflict(
-                                        (
-                                            "Path already exists in destination\nWhat do you want to do now?"
-                                            if not is_type_mismatch
-                                            else "Destination path type does not match archive member.\nWhat do you want to do now?"
-                                        ),
-                                        border_title=filename,
-                                        border_subtitle=f"Extracting to {destination_path}",
-                                        allow_overwrite=not is_type_mismatch,
-                                    ),
-                                )
-                                if response["same_for_next"]:
-                                    do_what_on_existence = response["value"]
-                                val = response["value"]
-                            else:
-                                val = effective_action
-                            match val:
-                                case "overwrite":
-                                    if path.isdir(final_path):
-                                        shutil.rmtree(final_path)
-                                    else:
-                                        os.remove(final_path)
-                                case "skip":
-                                    continue
-                                case "rename":
-                                    final_path = path_utils.normalise(
-                                        self.helper_rename(final_path)
-                                    )
-                                case "cancel":
-                                    bar.panic()
-                                    return
-                    try:
-                        if member_is_dir:
-                            os.makedirs(final_path, exist_ok=True)
-                            continue
-                        os.makedirs(path.dirname(final_path), exist_ok=True)
-                        source = archive.open(file)
-                        if source:
-                            with source, open(final_path, "wb") as target:
-                                shutil.copyfileobj(source, target)
-                    except PermissionError:
-                        retry_target = (
-                            final_path
-                            if path.lexists(final_path)
-                            else path.dirname(final_path)
-                        )
-                        if not (
-                            retry_target
-                            and path_utils.force_obtain_write_permission(retry_target)
-                        ):
-                            bar.panic(
-                                dismiss_with={
-                                    "message": "Extracting failed due to\nPermission Error\nProcess Aborted.",
-                                    "subtitle": "If this is a bug, please file an issue!",
-                                },
-                                bar_text="Permission Error",
-                            )
-                            return
-                        try:
-                            if member_is_dir:
-                                os.makedirs(final_path, exist_ok=True)
-                            else:
-                                os.makedirs(path.dirname(final_path), exist_ok=True)
-                                source = archive.open(file)
-                                if source:
-                                    with source, open(final_path, "wb") as target:
-                                        shutil.copyfileobj(source, target)
-                        except PermissionError as exc:
-                            path_utils.dump_exc(self, exc)
-                            bar.panic(
-                                dismiss_with={
-                                    "message": f"Extracting failed due to\n{exc}\nProcess Aborted.",
-                                    "subtitle": "If this is a bug, please file an issue!",
-                                },
-                                bar_text="Permission Error",
-                            )
-                            return
-        except (zipfile.BadZipFile, tarfile().TarError, ValueError, RuntimeError) as exc:
-            dismiss_with: BarPanicDismissible
-            if isinstance(exc, NotImplementedError):
-                if "ZIP" in exc.__str__():
-                    message = "Password-protected ZIP files cannot be unzipped"
-                elif "RAR" in exc.__str__():
-                    message = "Password-protected RAR files cannot be unzipped"
-                else:
-                    message = "Password-protected archive files cannot be unzipped"
-                dismiss_with = {"subtitle": "", "message": message}
-            else:
-                path_utils.dump_exc(self, exc)
-                dismiss_with = {
-                    "message": f"Unzipping failed due to {type(exc).__name__}\n{exc}\nProcess Aborted.",
-                    "subtitle": "If this is a bug, file an issue!",
-                }
-            bar.panic(
-                dismiss_with=dismiss_with,
-                bar_text="Error extracting archive",
-            )
-            return
-        except Exception as exc:
-            path_utils.dump_exc(self, exc)
-            bar.panic(
-                dismiss_with={
-                    "message": f"Unzipping failed due to {type(exc).__name__}\n{exc}\nProcess Aborted.",
-                    "subtitle": "If this is a bug, please file an issue!",
-                },
-                bar_text="Unhandled Error",
-            )
-            return
+            except KeyError as e:
+                if "invalid password" in str(e).lower():
+                    password_res = self.push_screen(
+                        screens.ModalInput(
+                            border_title="Enter password for archive",
+                            border_subtitle="Escape to cancel",
+                            initial_value=password.decode() if password else "",
+                            allow_initial=False,
+                        ),
+                    )
+        del password
+        bar.set_progress(total=len(members := archive.infolist()) + 1, progress=0)
+        unsaferes: bool | None = None
+        conflictres: screens.FileNameConflict.ReturnType | None = None
+        permissionres: Literal["try_again", "cancel", "skip"] | None = None
 
-        bar.ok()
+        # -------------------- bunch of helper functions ----------------------------------------------------------------------
+
+        def confirm_unsafe_member(message: str) -> bool | None:
+            nonlocal unsaferes
+            if unsaferes is not None:
+                return unsaferes
+
+            res: screens.YesOrNo.ReturnType | None = self.push_screen(
+                screens.YesOrNo(
+                    message=message,
+                    border_subtitle="Escape to cancel",
+                    destructive=True,
+                    with_toggle=True,
+                    allow_cancel=True,
+                ),
+            )
+            if res is None:
+                return None
+            if res["toggle"]:
+                unsaferes = res["value"]
+            return res["value"]
+
+        def conflict_resolve(
+            message: str, allow_overwrite: bool
+        ) -> Literal["overwrite", "rename", "skip", "cancel"]:
+            nonlocal conflictres
+            # earlier overwrite cannot be reused when overwrite is not allowed
+            if conflictres is not None and (
+                allow_overwrite or conflictres["value"] != "overwrite"
+            ):
+                return conflictres["value"]
+            res: screens.FileNameConflict.ReturnType = self.push_screen(
+                screens.FileNameConflict(
+                    message=message,
+                    border_subtitle=f"Extracting to {destination_path}",
+                    allow_overwrite=allow_overwrite,
+                ),
+            )
+            if res["same_for_next"]:
+                conflictres = res
+            return res["value"]
+
+        def run_with_permission_prompt(func: CallableNone, path_str: str) -> bool | None:
+            nonlocal permissionres
+            use_remembered = True
+            while True:
+                try:
+                    func()
+                    return True
+                except PermissionError:
+                    action = permissionres if use_remembered else None
+                    if action is None:
+                        response: screens.FileInUse.ReturnType = self.push_screen(
+                            screens.FileInUse(
+                                f"Permission denied while extracting:\n{path_str}",
+                                border_title="Permission Error",
+                            ),
+                        )
+                        action = response["value"]
+                        if response["toggle"]:
+                            permissionres = action
+                    if action == "skip":
+                        return False
+                    if action == "cancel":
+                        return None
+
+                    retry_target = (
+                        path_str if path.lexists(path_str) else path.dirname(path_str)
+                    )
+                    if retry_target:
+                        path_utils.force_obtain_write_permission(retry_target)
+                    # Do not loop forever when a remembered retry keeps failing.
+                    use_remembered = False
+
+        # ------------------------ theres one more below btw ---------------------------------------------------------------------
+
+        for member in members:
+            bar.set_text(member.name)
+            # do some pre checks like absolute path and escaping destination
+            normalised = path.normpath(member.name)
+            res: bool | None = None
+            if path.isabs(normalised):
+                res = confirm_unsafe_member(
+                    f"{member.name!r} is an absolute path"
+                    "\nExtracting it may cause unintended consequences."
+                    "\nDo you want to extract this?"
+                )
+                if res is None:
+                    raise ValueError(
+                        f"Unsafe archive member path {member.name!r} is an absolute"
+                        " path and cannot be extracted."
+                    )
+            final_path = path.abspath(path.join(destination_path, normalised))
+            if res is None and (
+                not is_path_in_directory(destination_path, final_path, False)
+            ):
+                res = confirm_unsafe_member(
+                    f"{member.name!r} escapes the destination directory (via relative path)"
+                    "\nExtracting it may cause unintended consequences."
+                    "\nDo you want to extract this?"
+                )
+                if res is None:
+                    raise ValueError(
+                        f"Unsafe archive member path {member.name!r} escapes the"
+                        " destination directory and cannot be extracted."
+                    )
+            if res is None and (not is_path_in_directory(destination_path, final_path)):
+                res = confirm_unsafe_member(
+                    f"{member.name!r} escapes the destination directory (via symlink)"
+                    "\nExtracting it may cause unintended consequences."
+                    "\nDo you want to extract this?"
+                )
+                if res is None:
+                    raise ValueError(
+                        f"Unsafe archive member path {member.name!r} escapes"
+                        " destination via a symbolic link."
+                    )
+            if res is False:
+                bar.advance()
+                continue
+
+            if path.lexists(final_path):
+                # isdir follows links, but links are still conflicts
+                # even if they point to directories
+                existing_is_link = path.islink(final_path) or path.isjunction(final_path)
+                existing_is_dir = path.isdir(final_path) and not existing_is_link
+                if member.is_dir and existing_is_dir:
+                    pass
+                else:
+                    same_type = member.is_dir == existing_is_dir
+                    action = conflict_resolve(
+                        "Path already exists in destination.\nWhat do you want to do?",
+                        allow_overwrite=same_type,
+                    )
+                    match action:
+                        case "skip":
+                            bar.advance()
+                            continue
+                        case "cancel":
+                            bar.panic(), archive.close()
+                            return
+                        case "rename":
+                            final_path = helper_rename(final_path)
+                        case "overwrite":
+                            removed = run_with_permission_prompt(
+                                lambda: os.unlink(final_path), final_path
+                            )
+                            if removed is None:
+                                bar.panic(), archive.close()
+                                return
+                            if not removed:
+                                bar.advance()
+                                continue
+
+            def extract_member() -> None:
+                if member.is_dir:
+                    os.makedirs(final_path, exist_ok=True)
+                else:
+                    os.makedirs(path.dirname(final_path), exist_ok=True)
+                    source = archive.open(member)
+                    if source:
+                        with source, open(final_path, "wb") as target:
+                            shutil.copyfileobj(source, target)
+
+            extracted = run_with_permission_prompt(extract_member, final_path)
+            if extracted is None:
+                bar.panic(), archive.close()
+                return
+            bar.advance()
+        archive.close(), bar.ok()
 
     @work(thread=True)
     def paste_items(
-        self, copied: list[str], has_cut: list[str], dest: str = ""
+        self, type_of_selection: Literal["copy", "cut"], paths: list[str], dest: str = ""
     ) -> None | Literal[True]:
-        """
-        Paste copied or cut files to the current directory
-        Args:
-            copied (list[str]): A list of items to be copied to the location
-            has_cut (list[str]): A list of items to be cut to the location
-            dest (str): The directory to copy to.
-
-        Returns:
-            True: If the operation was successful.
-            None: If the operation was cancelled or failed.
-        """
-        if dest == "":
-            dest = getcwd()
+        dest = path.abspath(dest or getcwd())
         bar = self.threaded_new_process_bar(classes="active")
-        self.app.call_from_thread(
-            bar.update_icon,
-            icon_utils.get_icon("general", "paste")[0],
+        bar.set_icon(icons.get_icon("general", type_of_selection)[0])
+        bar.set_text(
+            f"Getting items to {'move' if type_of_selection == 'cut' else 'copy'}",
+            False,
         )
-        self.app.call_from_thread(
-            bar.update_text,
-            "Getting items to paste...",
+        sources = list(
+            {path.normcase(path.abspath(p)): path.normpath(p) for p in paths}.values()
         )
-        files_to_copy: list[path_utils.FileObj] = []
-        files_to_cut: list[path_utils.FileObj] = []
-        copy_folders_to_create: list[path_utils.FileObj] = []
-        cut_folders_to_create: list[path_utils.FileObj] = []
-        cut_files__folders: list[str] = []
-        for file in copied:
-            if path.isdir(file):
-                normalised_file = path_utils.normalise(file)
-                copy_folders_to_create.append(
-                    path_utils.FileObj(
-                        path=normalised_file,
-                        relative_loc=path.basename(path.normpath(normalised_file)),
-                    )
-                )
-                files, folders = path_utils.get_recursive_files(file, with_folders=True)
-                files_to_copy.extend(files)
-                for folder in folders:
-                    copy_folders_to_create.append(
-                        path_utils.FileObj(
-                            path=folder,
-                            relative_loc=path_utils.normalise(
-                                path.relpath(folder, file + "/..")
-                            ),
-                        )
-                    )
-            else:
-                files_to_copy.extend(path_utils.get_recursive_files(file))
-        for file in has_cut:
-            if path.isdir(file):
-                normalised_file = path_utils.normalise(file)
-                cut_files__folders.append(normalised_file)
-                cut_folders_to_create.append(
-                    path_utils.FileObj(
-                        path=normalised_file,
-                        relative_loc=path.basename(path.normpath(normalised_file)),
-                    )
-                )
-                files, folders = path_utils.get_recursive_files(file, with_folders=True)
-                files_to_cut.extend(files)
-                cut_files__folders.extend(folders)
-                for folder in folders:
-                    cut_folders_to_create.append(
-                        path_utils.FileObj(
-                            path=folder,
-                            relative_loc=path_utils.normalise(
-                                path.relpath(folder, file + "/..")
-                            ),
-                        )
-                    )
-            else:
-                files_to_cut.extend(path_utils.get_recursive_files(file))
-        files_to_copy = list({item["path"]: item for item in files_to_copy}.values())
-        files_to_cut = list({item["path"]: item for item in files_to_cut}.values())
-        copy_folders_to_create = list(
-            {item["relative_loc"]: item for item in copy_folders_to_create}.values()
-        )
-        cut_folders_to_create = list(
-            {item["relative_loc"]: item for item in cut_folders_to_create}.values()
-        )
-        cut_files__folders = sorted(
-            set(cut_files__folders), key=str.__len__, reverse=True
-        )
-        self.app.call_from_thread(
-            bar.update_progress,
-            total=int(
-                len(files_to_copy)
-                + len(files_to_cut)
-                + len(copy_folders_to_create)
-                + len(cut_folders_to_create)
+
+        def is_real_dir(item: str) -> bool:
+            return (
+                path.isdir(item) and not path.islink(item) and not path.isjunction(item)
             )
-            + 1,
-        )
-        action_on_existence = "ask"
-        copy_skipped_roots: list[str] = []
-        cut_skipped_roots: list[str] = []
-        progress_count = 0
-        last_update_time = time.monotonic()
-        if files_to_copy or copy_folders_to_create:
-            self.app.call_from_thread(
-                bar.update_icon,
-                icon_utils.get_icon("general", "copy")[0],
+
+        # A selected directory already includes any selected descendants.
+        # because of ipc allowing it to happen
+        sources = [
+            source
+            for source in sources
+            if not any(
+                source != other
+                and is_real_dir(other)
+                and is_path_in_directory(other, source, False)
+                for other in sources
             )
-        # first create folders
-        for folder_dict in copy_folders_to_create:
-            progress_count += 1
-            relative_loc = folder_dict["relative_loc"]
-            self.app.call_from_thread(bar.update_text, relative_loc)
-            self.app.call_from_thread(bar.update_progress, progress=progress_count)
-            destination_folder = path_utils.normalise(path.join(dest, relative_loc))
+        ]
+
+        work_sizes: dict[str, int] = {}
+
+        def work_size(item: str) -> int:
+            key = path.normcase(path.abspath(item))
+            if key in work_sizes:
+                return work_sizes[key]
+            if not is_real_dir(item):
+                work_sizes[key] = 1
+                return 1
             try:
-                if path.exists(destination_folder) and not path.isdir(destination_folder):
-                    if action_on_existence == "ask" or action_on_existence == "overwrite":
-                        response = self.helper_push_and_get_filenameconflict(
-                            screens.FileNameConflict(
-                                "Cannot create a directory because destination is a file.\nWhat do you want to do now?",
-                                border_title=relative_loc,
-                                border_subtitle=f"Copying to {dest}",
-                                allow_overwrite=False,
-                            )
-                        )
-                        if response["same_for_next"]:
-                            action_on_existence = response["value"]
-                        val = response["value"]
-                    else:
-                        val = action_on_existence
-                    match val:
-                        case "skip":
-                            copy_skipped_roots.append(relative_loc)
-                            continue
-                        case "rename":
-                            new_relative_loc = path_utils.normalise(
-                                path.relpath(self.helper_rename(destination_folder), dest)
-                            )
-                            old_relative_loc = folder_dict["relative_loc"]
-                            folder_dict["relative_loc"] = new_relative_loc
-                            self.retarget_relative_paths(
-                                copy_folders_to_create,
-                                old_relative_loc,
-                                new_relative_loc,
-                            )
-                            self.retarget_relative_paths(
-                                files_to_copy, old_relative_loc, new_relative_loc
-                            )
-                            destination_folder = path_utils.normalise(
-                                path.join(dest, new_relative_loc)
-                            )
-                        case "cancel":
-                            bar.panic(bar_text="Process cancelled.")
-                            return
-                os.makedirs(destination_folder, exist_ok=True)
-            except Exception as exc:
-                path_utils.dump_exc(self, exc)
-                bar.panic(
-                    dismiss_with={
-                        "message": f"Copying failed due to {type(exc).__name__}\n{exc}\nProcess Aborted.",
-                        "subtitle": "If this is a bug, please file an issue!",
-                    },
-                    bar_text="Unhandled Error",
-                )
-                return
-        for i, item_dict in enumerate(files_to_copy):
-            progress_count += 1
-            current_time = time.monotonic()
-            if (
-                current_time - last_update_time > 0.25
-                or i == len(files_to_copy) - 1
-                or i == 0
+                entries = list(os.scandir(item))
+            except OSError:
+                work_sizes[key] = 1
+                return 1
+            size = sum(work_size(entry.path) for entry in entries) or 1
+            work_sizes[key] = size
+            return size
+
+        bar.set_progress(total=sum(map(work_size, sources)) + 1, progress=0)
+
+        errors: list[tuple[str, Exception]] = []
+        if path.lexists(dest) and not path.isdir(dest):
+            self.notify(
+                f"Paste destination is not a directory: {dest}",
+                title="Paste Error",
+                severity="error",
+                markup=False,
+            )
+            bar.panic(bar_text="Invalid paste destination")
+            return
+        conflictres: screens.FileNameConflict.ReturnType | None = None
+        action_on_file_in_use = "ask"
+
+        def conflict_resolve(
+            source: str, destination: str, allow_overwrite: bool
+        ) -> Literal["overwrite", "rename", "skip", "cancel"]:
+            nonlocal conflictres
+            # Reuse the user's choice unless a remembered overwrite is unsafe here.
+            if conflictres is not None and (
+                allow_overwrite or conflictres["value"] != "overwrite"
             ):
-                self.app.call_from_thread(
-                    bar.update_text,
-                    item_dict["relative_loc"],
+                return conflictres["value"]
+            response: screens.FileNameConflict.ReturnType = self.push_screen(
+                screens.FileNameConflict(
+                    "The destination already contains an item with this name.\n"
+                    "What do you want to do?",
+                    border_title=display_path(destination, dest),
+                    border_subtitle=(
+                        f"{'Moving' if type_of_selection == 'cut' else 'Copying'} "
+                        f"from {path.dirname(source)}"
+                    ),
+                    allow_overwrite=allow_overwrite,
                 )
-                last_update_time = current_time
-            self.app.call_from_thread(bar.update_progress, progress=progress_count)
-            if any(
-                self.is_relative_path_within(item_dict["relative_loc"], root)
-                for root in copy_skipped_roots
-            ):
-                continue
-            if path.exists(item_dict["path"]):
-                # again checks just in case something goes wrong
-                try:
-                    destination_item = path.join(dest, item_dict["relative_loc"])
-                    os.makedirs(
-                        path_utils.normalise(path.dirname(destination_item)),
-                        exist_ok=True,
-                    )
-                    if path.lexists(destination_item):
-                        # check if overwrite
-                        if action_on_existence == "ask":
-                            same_file = path_utils.normalise(
-                                destination_item
-                            ) == path_utils.normalise(item_dict["path"])
-                            response = self.helper_push_and_get_filenameconflict(
-                                screens.FileNameConflict(
-                                    (
-                                        "The target and destination files are the same"
-                                        if same_file
-                                        else "The destination already has file of that name."
-                                    )
-                                    + "\nWhat do you want to do now?",
-                                    border_title=item_dict["relative_loc"],
-                                    border_subtitle=f"Copying to {dest}",
-                                    allow_overwrite=not same_file,
-                                ),
-                            )
-                            if response["same_for_next"]:
-                                action_on_existence = response["value"]
-                            val = response["value"]
-                        else:
-                            val = action_on_existence
-                        match val:
-                            case "overwrite":
-                                pass
-                            case "skip":
-                                continue
-                            case "rename":
-                                item_dict["relative_loc"] = path_utils.normalise(
-                                    path.relpath(
-                                        self.helper_rename(
-                                            path.join(dest, item_dict["relative_loc"])
-                                        ),
-                                        dest,
-                                    )
-                                )
-                            case "cancel":
-                                bar.panic(bar_text="Process cancelled.")
-                                return
-                    self.helper_copy(
-                        item_dict["path"],
-                        path.join(dest, item_dict["relative_loc"]),
-                    )
-                except shutil.SameFileError:
-                    if action_on_existence == "ask":
-                        response = self.helper_push_and_get_filenameconflict(
-                            screens.FileNameConflict(
-                                "Target and Destination are the same files.\nWhat do you want to do now?",
-                                border_title=item_dict["relative_loc"],
-                                border_subtitle=f"Copying to {dest}",
-                            )
-                        )
-                        if response["same_for_next"]:
-                            action_on_existence = response["value"]
-                        val = response["value"]
-                    else:
-                        val = action_on_existence
-                    match val:
-                        case "skip":
-                            continue
-                        case "rename":
-                            item_dict["relative_loc"] = path_utils.normalise(
-                                path.relpath(
-                                    self.helper_rename(
-                                        path.join(dest, item_dict["relative_loc"])
-                                    ),
-                                    dest,
-                                )
-                            )
-                        case "cancel":
-                            bar.panic(bar_text="Process cancelled.")
-                            return
-                    self.helper_copy(
-                        item_dict["path"], path.join(dest, item_dict["relative_loc"])
-                    )
-                except (OSError, PermissionError):
-                    # OSError from shutil: The destination location must be writable;
-                    # otherwise, an OSError exception will be raised
-                    # Permission Error just in case
-                    if path_utils.force_obtain_write_permission(
-                        path.join(dest, item_dict["relative_loc"])
-                    ):
-                        self.helper_copy(
-                            item_dict["path"],
-                            path.join(dest, item_dict["relative_loc"]),
-                        )
-                except FileNotFoundError:
-                    # the only way this can happen is if the file is deleted
-                    # midway through the process, which means the user is
-                    # literally testing the limits, so yeah uhh, pass
-                    pass
-                except Exception as exc:
-                    # TODO: should probably let it continue, then have a summary
-                    bar.panic(
-                        dismiss_with={
-                            "message": f"Copying failed due to {type(exc).__name__}\n{exc}\nProcess Aborted.",
-                            "subtitle": "If this is a bug, please file an issue!",
+            )
+            if response["same_for_next"]:
+                conflictres = response
+            return response["value"]
+
+        def transfer(source: str, destination: str) -> bool:
+            if should_cancel():
+                raise PasteCancelled
+            if not path.lexists(source):
+                bar.advance(work_size(source))
+                return True
+
+            bar.set_text(display_path(destination, dest))
+            source_is_dir = is_real_dir(source)
+            created_directory = False
+
+            def copy_link() -> None:
+                if path.isjunction(source):
+                    # luv windows
+                    target = path.realpath(source)
+                    if target.startswith("\\\\?\\UNC\\"):
+                        target = f"\\\\{target[8:]}"
+                    elif target.startswith("\\\\?\\"):
+                        target = target[4:]
+                    result = subprocess.run(
+                        'mklink /J "%ROVR_JUNCTION_DESTINATION%" "%ROVR_JUNCTION_TARGET%"',
+                        shell=True,
+                        capture_output=True,
+                        env=os.environ
+                        | {
+                            "ROVR_JUNCTION_DESTINATION": destination,
+                            "ROVR_JUNCTION_TARGET": target,
                         },
-                        bar_text="Unhandled Error",
+                        text=True,
                     )
-                    path_utils.dump_exc(self, exc)
+                    if result.returncode:
+                        raise OSError(result.stderr.strip() or result.stdout.strip())
                     return
 
-        last_update_time = time.monotonic()
-        if files_to_cut or cut_folders_to_create:
-            self.app.call_from_thread(
-                bar.update_icon,
-                icon_utils.get_icon("general", "cut")[0],
-            )
-        for folder_dict in cut_folders_to_create:
-            progress_count += 1
-            relative_loc = folder_dict["relative_loc"]
-            self.app.call_from_thread(bar.update_text, relative_loc)
-            self.app.call_from_thread(bar.update_progress, progress=progress_count)
-            destination_folder = path_utils.normalise(path.join(dest, relative_loc))
-            try:
-                if path.exists(destination_folder) and not path.isdir(destination_folder):
-                    if action_on_existence == "ask" or action_on_existence == "overwrite":
-                        response = self.helper_push_and_get_filenameconflict(
-                            screens.FileNameConflict(
-                                "Cannot create a directory because destination is a file.\nWhat do you want to do now?",
-                                border_title=relative_loc,
-                                border_subtitle=f"Moving to {dest}",
-                                allow_overwrite=False,
-                            )
-                        )
-                        if response["same_for_next"]:
-                            action_on_existence = response["value"]
-                        val = response["value"]
-                    else:
-                        val = action_on_existence
-                    match val:
-                        case "skip":
-                            cut_skipped_roots.append(relative_loc)
-                            continue
-                        case "rename":
-                            new_relative_loc = path_utils.normalise(
-                                path.relpath(self.helper_rename(destination_folder), dest)
-                            )
-                            old_relative_loc = folder_dict["relative_loc"]
-                            folder_dict["relative_loc"] = new_relative_loc
-                            self.retarget_relative_paths(
-                                cut_folders_to_create,
-                                old_relative_loc,
-                                new_relative_loc,
-                            )
-                            self.retarget_relative_paths(
-                                files_to_cut, old_relative_loc, new_relative_loc
-                            )
-                            destination_folder = path_utils.normalise(
-                                path.join(dest, new_relative_loc)
-                            )
-                        case "cancel":
-                            bar.panic(bar_text="Process cancelled.")
-                            return
-                os.makedirs(destination_folder, exist_ok=True)
-            except Exception as exc:
-                path_utils.dump_exc(self, exc)
-                bar.panic(
-                    dismiss_with={
-                        "message": f"Moving failed due to {type(exc).__name__}\n{exc}\nProcess Aborted.",
-                        "subtitle": "If this is a bug, please file an issue!",
-                    },
-                    bar_text="Unhandled Error",
+                target = os.readlink(source)
+                target_is_directory = path.isdir(source) or bool(
+                    getattr(os.lstat(source), "st_file_attributes", 0)
+                    & stat.FILE_ATTRIBUTE_DIRECTORY
                 )
-                return
-        for i, item_dict in enumerate(files_to_cut):
-            progress_count += 1
-            current_time = time.monotonic()
-            if (
-                current_time - last_update_time > 0.25
-                or i == len(files_to_cut) - 1
-                or i == 0
-            ):
-                self.app.call_from_thread(
-                    bar.update_text,
-                    item_dict["relative_loc"],
-                )
-                last_update_time = current_time
-            self.app.call_from_thread(bar.update_progress, progress=progress_count)
-            if any(
-                self.is_relative_path_within(item_dict["relative_loc"], root)
-                for root in cut_skipped_roots
-            ):
-                continue
-            if path.lexists(item_dict["path"]):
-                # again checks just in case something goes wrong
-                destination_item = path.join(dest, item_dict["relative_loc"])
                 try:
-                    os.makedirs(
-                        path_utils.normalise(path.dirname(destination_item)),
-                        exist_ok=True,
+                    os.symlink(
+                        target,
+                        destination,
+                        target_is_directory=target_is_directory,
                     )
-                    if path.lexists(destination_item):
-                        self.log(
-                            path_utils.normalise(destination_item),
-                            path_utils.normalise(item_dict["path"]),
-                        )
+                except OSError as exc:
+                    sudo = (
+                        shutil.which("sudo")
+                        if getattr(exc, "winerror", None) == 1314
+                        else None
+                    )
+                    if not sudo:
+                        raise
+                    subprocess.run(
+                        [
+                            sudo,
+                            sys.executable,
+                            "-c",
+                            "import os,sys;os.symlink(sys.argv[1],sys.argv[2],target_is_directory=sys.argv[3]=='1')",
+                            target,
+                            destination,
+                            str(int(target_is_directory)),
+                        ],
+                        check=True,
+                        capture_output=True,
+                    )
 
-                        if path_utils.normalise(destination_item) == path_utils.normalise(
-                            item_dict["path"]
-                        ):
-                            continue
-                        is_type_mismatch = path.isdir(destination_item)
-                        effective_action = action_on_existence
-                        if is_type_mismatch and effective_action == "overwrite":
-                            effective_action = "ask"
-                        if effective_action == "ask":
-                            response = self.helper_push_and_get_filenameconflict(
-                                screens.FileNameConflict(
-                                    (
-                                        "The destination already has file of that name.\nWhat do you want to do now?"
-                                        if not is_type_mismatch
-                                        else "Destination has a directory with the same name.\nWhat do you want to do now?"
-                                    ),
-                                    border_title=item_dict["relative_loc"],
-                                    border_subtitle=f"Moving to {dest}",
-                                    allow_overwrite=not is_type_mismatch,
-                                ),
-                            )
-                            if response["same_for_next"]:
-                                action_on_existence = response["value"]
-                            val = response["value"]
-                        else:
-                            val = effective_action
-                        match val:
-                            case "overwrite":
-                                pass
-                            case "skip":
-                                continue
-                            case "rename":
-                                new_relative_loc = path_utils.normalise(
-                                    path.relpath(
-                                        self.helper_rename(
-                                            path.join(dest, item_dict["relative_loc"])
-                                        ),
-                                        dest,
-                                    )
-                                )
-                                item_dict["relative_loc"] = new_relative_loc
-                                destination_item = path.join(
-                                    dest, item_dict["relative_loc"]
-                                )
-                            case "cancel":
-                                bar.panic(bar_text="Process cancelled.")
-                                return
-                    shutil.move(
-                        item_dict["path"],
-                        destination_item,
-                    )
-                except (OSError, PermissionError):
-                    # OSError from shutil: The destination location must be writable;
-                    # otherwise, an OSError exception will be raised
-                    # Permission Error just in case
-                    if path_utils.force_obtain_write_permission(
-                        destination_item
-                    ) and path_utils.force_obtain_write_permission(item_dict["path"]):
-                        shutil.move(
-                            item_dict["path"],
-                            destination_item,
+            if path.lexists(destination):
+                destination_is_dir = is_real_dir(destination)
+                try:
+                    same_path = path.samefile(source, destination)
+                except OSError:
+                    same_path = False
+
+                action = conflict_resolve(
+                    source,
+                    destination,
+                    allow_overwrite=(
+                        source_is_dir == destination_is_dir and not same_path
+                    ),
+                )
+                if action == "cancel":
+                    raise PasteCancelled
+                if action == "skip":
+                    bar.advance(work_size(source))
+                    return False
+                if action == "rename":
+                    destination = helper_rename(destination)
+                    destination_is_dir = False
+                    bar.set_text(display_path(destination, dest))
+                elif not (source_is_dir and destination_is_dir):
+                    if path.isjunction(destination):
+                        os.rmdir(destination)
+                    else:
+                        os.unlink(destination)
+
+            if not path.lexists(destination):
+                # Avoid walking whole trees when no merge or nested conflict is needed.
+                os.makedirs(path.dirname(destination), exist_ok=True)
+                if type_of_selection == "cut":
+                    shutil.move(source, destination)
+                    bar.advance(work_size(source))
+                    return True
+                elif source_is_dir:
+                    os.mkdir(destination)
+                    created_directory = True
+                else:
+                    if path.islink(source) or path.isjunction(source):
+                        copy_link()
+                    else:
+                        copy_func(source, destination)
+                    bar.advance()
+                if not source_is_dir:
+                    return True
+
+            complete = True
+            entries = list(os.scandir(source))
+            if not entries:
+                bar.advance()
+            for entry in entries:
+                if not transfer(entry.path, path.join(destination, entry.name)):
+                    complete = False
+            # A skipped child must remain at its source during a cut.
+            if type_of_selection == "cut" and complete:
+                os.rmdir(source)
+            elif created_directory and config["settings"]["copy_includes_metadata"]:
+                shutil.copystat(source, destination, follow_symlinks=False)
+            return complete
+
+        for source in sources:
+            if should_cancel():
+                bar.panic(bar_text="Worker Cancelled.")
+                return
+            if not path.lexists(source):
+                bar.advance(work_size(source))
+                continue
+            destination = path.join(dest, path.basename(path.normpath(source)))
+            # Copying into a descendant would recursively consume the new copy.
+            if is_real_dir(source) and is_path_in_directory(source, dest, False):
+                errors.append((
+                    source,
+                    ValueError("Cannot paste a directory inside itself"),
+                ))
+                bar.advance(work_size(source))
+                continue
+
+            try:
+                transfer(source, destination)
+            except PasteCancelled:
+                bar.panic(bar_text="Pasting cancelled.")
+                return
+            except (PermissionError, OSError) as exc:
+                if is_being_used(exc) and WIN32:
+                    try:
+                        action, action_on_file_in_use = self.handle_file_in_use_error(
+                            action_on_file_in_use,
+                            source,
+                            lambda: transfer(source, destination),
                         )
-                except FileNotFoundError:
-                    # the only way this can happen is if the file is deleted
-                    # midway through the process, which means the user is
-                    # literally testing the limits, so yeah uhh, pass
-                    pass
-                except Exception as exc:
-                    # TODO: should probably let it continue, then have a summary
-                    path_utils.dump_exc(self, exc)
-                    bar.panic(
-                        dismiss_with={
-                            "message": f"Moving failed due to {type(exc).__name__}\n{exc}\nProcess Aborted.",
-                            "subtitle": "If this is a bug, please file an issue!",
-                        },
-                        bar_text="Unhandled Error",
-                    )
-                    return
-        # Remove only source folders that are empty after moving their contents.
-        for folder in cut_files__folders:
-            with suppress(OSError):
-                os.rmdir(folder)
+                    except PasteCancelled:
+                        bar.panic(bar_text="Pasting cancelled.")
+                        return
+                    except Exception as retry_exc:
+                        errors.append((source, retry_exc))
+                    else:
+                        if action == "cancel":
+                            bar.panic(bar_text="Pasting cancelled.")
+                            return
+                else:
+                    errors.append((source, exc))
+            except Exception as exc:
+                errors.append((source, exc))
+
+        if errors:
+            bar.panic(
+                notify={
+                    "message": f"Failed to paste {len(errors)} items.",
+                    "title": "Paste Error",
+                },
+                bar_text=f"Failed to paste {len(errors)} items",
+                exceptions=errors,
+                action="paste",
+            )
+            return
+
         bar.ok()
         return True
 
@@ -1460,69 +1244,84 @@ class ProcessContainer(Actionable, VerticalScroll):
         Args:
             uris (list[str]): A list of uris to download from
         """
+        from contextlib import ExitStack
         from urllib import error, request
 
-        dest = getcwd()
-        bar = self.threaded_new_process_bar(max=len(uris) + 1, classes="active")
-        self.app.call_from_thread(
-            bar.update_icon,
-            icon_utils.get_icon("general", "down")[0],
-        )
-        self.app.call_from_thread(bar.update_text, "Downloading items...")
+        chunk_size = 1024 * 1024
 
-        for i, uri in enumerate(uris):
-            try:
-                req = request.Request(uri, headers={"User-Agent": "Mozilla/5.0"})
-                with request.urlopen(req, timeout=5) as response:
-                    if response.getcode() == 200:
-                        with open(path.join(dest, paths[i]), "wb") as file:
-                            while chunk := response.read(64 * 1024):
-                                if should_cancel():
-                                    bar.panic(bar_text="Download cancelled.")
-                                    return
-                                file.write(chunk)
-                        self.app.call_from_thread(bar.update_progress, progress=i + 1)
-                        self.app.call_from_thread(bar.update_text, paths[i])
-                    else:
-                        bar.panic(
-                            notify={
-                                "message": f"Received code {response.getcode()} for link {escape(uri)}",
-                                "title": "",
-                            }
+        dest = getcwd()
+        bar = self.threaded_new_process_bar(total=len(uris) + 1, classes="active")
+        bar.set_icon(icons.get_icon("general", "down")[0])
+        bar.set_text("Downloading items...")
+
+        with ExitStack() as stack:
+            reqs = (
+                request.Request(uri, headers={"User-Agent": "Mozilla/5.0"})
+                for uri in uris
+            )
+
+            opened: list[tuple[Any, str]] = []
+            failures: list[tuple[str, Exception]] = []
+            for req, filename in zip(reqs, paths):
+                full_path = (
+                    filename if path.isabs(filename) else path.join(dest, filename)
+                )
+                bar.set_text(display_path(full_path, dest))
+                try:
+                    resp: Any = stack.enter_context(request.urlopen(req, timeout=5))
+                    opened.append((resp, full_path))
+                except Exception as e:
+                    failures.append((filename, e))
+                    if isinstance(e, error.HTTPError):
+                        bar.set_text(f"HTTP Error {e.code} for {filename}. Skipping...")
+                    elif isinstance(e, error.URLError):
+                        bar.set_text(
+                            f"Network Error: {e.reason} for {filename}. Skipping..."
                         )
-                        return
-            except error.URLError as exc:
+                    else:
+                        bar.set_text(f"Failed to open {filename}: {e}. Skipping...")
+
+            # set the max of progress bar to be total size of all successfully opened files
+            bar.set_progress(sum((r.length or 0) for r, _ in opened) + len(failures) + 1)
+
+            for resp, filename in opened:
+                bar.set_text(display_path(filename, dest))
+                try:
+                    with open(filename, "wb") as file:
+                        while chunk := resp.read(chunk_size):
+                            if should_cancel():
+                                bar.panic(bar_text="Download cancelled.")
+                                return
+                            file.write(chunk)
+                            bar.advance(len(chunk))
+                except (error.URLError, error.HTTPError, OSError) as e:
+                    # Handles network drops midway through an active stream or disk write errors
+                    failures.append((filename, e))
+                    bar.set_text(f"Error reading/saving {path.basename(filename)}: {e}")
+                    continue
+            if not failures:
+                bar.ok()
+            else:
                 bar.panic(
                     notify={
-                        "message": f"Failed to download {uri} due to {escape(str(exc))}",
-                        "title": "URLError",
-                    }
+                        "message": f"Failed to download {len(failures)} items.",
+                        "title": "Download Error",
+                    },
+                    bar_text=f"Failed to download {len(failures)} items",
+                    exceptions=failures,
+                    action="download",
                 )
-                return
-        bar.ok()
 
     def action_delete(self) -> None:
-        self.remove_children(".done")
-        self.remove_children(".error")
+        self.remove_children(".done, .error")
 
-    def helper_copy(self, target: str, destination: str) -> None:
-        if config["settings"]["copy_includes_metadata"]:
-            shutil.copy2(target, destination)
-        else:
-            shutil.copy(target, destination)
+    def push_screen(self, screen: Screen) -> ScreenResultType:
+        """Push a screen onto the screen stack.
 
-    def helper_push_and_get_filenameconflict(
-        self, screen: screens.FileNameConflict
-    ) -> screens.FileNameConflict.ReturnType:
-        response = self.app.call_from_thread(self.app.push_screen_wait, screen)
-        return cast(screens.FileNameConflict.ReturnType, response)
+        Args:
+            screen (Screen): The screen to push.
 
-    @staticmethod
-    def helper_rename(target: str) -> str:
-        base_name, extension = path.splitext(target)
-        tested_number = 1
-        while True:
-            new_name = f"{base_name} ({tested_number}){extension}"
-            if not path.exists(new_name):
-                return new_name
-            tested_number += 1
+        Returns:
+            ScreenResultType: The result of the screen when it is popped off the stack.
+        """
+        return self.app.call_from_thread(self.app.push_screen_wait, screen)

@@ -1082,6 +1082,7 @@ class FileList(
                 else:
                     self._selected[option.value] = None
             self._message_changed()
+            self.refresh()
 
     async def select_range(self, start: int, end: int) -> None:
         """Select a range of options from start to end."""

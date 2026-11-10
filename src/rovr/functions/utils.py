@@ -416,7 +416,18 @@ async def expand_command(
         return expanded
 
     if isinstance(command, list):
-        to_return = [_expand(cmd) for cmd in command]
+        to_return = []
+        for cmd in command:
+            if cmd == "%s" and "%s" not in banned_exp:
+                to_return.extend(selected_files)
+            elif cmd == "%rs" and "%rs" not in banned_exp:
+                to_return.extend(os.path.realpath(f) for f in selected_files)
+            elif cmd == "%cut" and "%cut" not in banned_exp:
+                to_return.extend(cut)
+            elif cmd == "%copy" and "%copy" not in banned_exp:
+                to_return.extend(copy)
+            else:
+                to_return.append(_expand(cmd))
     else:
         to_return = _expand(command)
     app.log(f"{command}\n-> {to_return}")

@@ -1289,7 +1289,7 @@ class Application(
         with self.suspend():
             get_console().print(self.tree)
 
-    def action_run_command(
+    async def action_run_command(
         self, command: list[str], run_type: ShellRunTypes = "background"
     ) -> None:
         if not isinstance(command, list) or not all(isinstance(c, str) for c in command):
@@ -1307,7 +1307,9 @@ class Application(
             )
         else:
             self.on_shell_exec_response(
-                screens.ShellExec.ReturnType(command=command, run_type=run_type),
+                screens.ShellExec.ReturnType(
+                    command=await expand_command(self, command), run_type=run_type
+                ),
                 shell=False,
             )
 

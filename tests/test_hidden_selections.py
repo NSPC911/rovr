@@ -16,7 +16,7 @@ from .conftest import iter_until, workers_finished
 async def test_hidden_selections_are_counted_and_actionable(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
-    for name in ("apple", "banana", "cherry"):
+    for name in ("apple pie", "banana", "cherry tart"):
         (tmp_path / name).touch()
     app = Application(startup_path=tmp_path.as_posix())
     async with app.run_test(size=(143, 37)) as pilot:
@@ -33,13 +33,13 @@ async def test_hidden_selections_are_counted_and_actionable(
 
         items.deselect(items.get_option_at_index(0))
         await workers_finished(pilot, items)
-        expected = [str(normalise(str(tmp_path / name))) for name in ("apple", "cherry")]
+        expected = [
+            str(normalise(str(tmp_path / name))) for name in ("apple pie", "cherry tart")
+        ]
         assert await items.get_selected_objects() == expected
         assert "2/3" in str(items.parent.border_subtitle)
-        expanded = await expand_command(app, ["%s"])
-        assert isinstance(expanded, list)
-        assert all(filename in " ".join(expanded) for filename in expected)
-        assert "banana" not in " ".join(expanded)
+        expanded = await expand_command(app, ["hx", "%s"])
+        assert expanded == ["hx", *expected]
 
         opener = AsyncMock()
         monkeypatch.setattr(items, "file_selected_handler", opener)

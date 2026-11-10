@@ -5,7 +5,7 @@ from textual.message import Message
 from textual.screen import ModalScreen
 from textual.widgets import Button, Label
 
-from rovr.components import PaddedOption, SpecialOptionList
+from rovr.components.special_option_lists import PaddedOption, SpecialOptionList
 from rovr.functions.utils import check_key, dismiss, get_shortcut
 from rovr.variables.constants import config
 

@@ -3,7 +3,7 @@ from textual.app import ComposeResult
 from textual.containers import VerticalGroup
 from textual.widgets import Static
 
-from rovr.components import SearchInput
+from rovr.components.search_container import SearchInput
 from rovr.functions import details as detail_utils
 from rovr.functions import icons
 

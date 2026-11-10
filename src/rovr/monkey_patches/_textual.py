@@ -4,13 +4,11 @@ from functools import lru_cache
 from typing import IO, Iterable, cast
 
 from PIL import Image as PILImage
-from rich.ansi import AnsiDecoder
 from rich.color import Color
 from rich.color_triplet import ColorTriplet
 from rich.console import Console, ConsoleOptions, RenderResult
 from rich.segment import Segment
 from rich.style import Style as RStyle
-from rich.text import Text
 from textual import _border as border
 from textual import events
 from textual._compositor import Compositor
@@ -101,12 +99,15 @@ halfcell.Image.__rich_console__ = halfcell_rich_console  # ty: ignore[invalid-as
 
 
 # https://github.com/Textualize/rich/issues/4090
-def decode(self: AnsiDecoder, terminal_text: str) -> Iterable[Text]:
-    for line in terminal_text.splitlines():
-        yield self.decode_line(line)
+# we don't use this anymore, so commenting it out for forseeable future
+# from rich.ansi import AnsiDecoder
+# from rich.text import Text
+# def decode(self: AnsiDecoder, terminal_text: str) -> Iterable[Text]:
+#     for line in terminal_text.splitlines():
+#         yield self.decode_line(line)
 
 
-AnsiDecoder.decode = decode  # ty: ignore[invalid-assignment]
+# AnsiDecoder.decode = decode  # ty: ignore[invalid-assignment]
 
 _render_border_label = border.render_border_label
 

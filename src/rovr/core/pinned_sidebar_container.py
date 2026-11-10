@@ -2,7 +2,7 @@ from textual import events
 from textual.app import ComposeResult
 from textual.containers import VerticalGroup
 
-from rovr.components import SearchInput
+from rovr.components.search_container import SearchInput
 from rovr.functions import icons
 
 from .pinned_sidebar import PinnedSidebar

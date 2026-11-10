@@ -7,7 +7,7 @@ from textual.widgets import Button, OptionList
 from textual.widgets.option_list import Option, OptionDoesNotExist
 
 from rovr.classes.type_aliases import SortByOptions
-from rovr.components import PopupOptionList
+from rovr.components.popup_option_list import PopupOptionList
 from rovr.functions.icons import get_icon, get_toggle_button_icon
 from rovr.functions.utils import check_key, get_shortcut
 from rovr.state_manager import StateManager

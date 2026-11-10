@@ -6,7 +6,7 @@ from textual import events, on
 from textual.widgets import Tabs
 
 from rovr.app import Application
-from rovr.components import SearchInput
+from rovr.components.search_container import SearchInput
 from rovr.functions.cwd import chdir, getcwd
 from rovr.header.tabs import TablineTab
 from rovr.navigation_widgets import BackButton

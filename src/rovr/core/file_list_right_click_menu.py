@@ -16,7 +16,7 @@ from rovr.classes.config import (
     _RightClickItemOptionsItem,
 )
 from rovr.classes.textual_options import RightClickMenuOption
-from rovr.components import PopupOptionList
+from rovr.components.popup_option_list import PopupOptionList
 from rovr.functions.cwd import getcwd
 from rovr.functions.path import ifed
 from rovr.functions.utils import check_key, expand_command, is_archive, run_command

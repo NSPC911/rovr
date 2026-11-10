@@ -5,7 +5,7 @@ from textual.containers import Grid, HorizontalGroup
 from textual.widgets import Button, Label, Switch
 
 from rovr.classes.textual_options import PasteScreenOption
-from rovr.components import SpecialOptionList
+from rovr.components.special_option_lists import SpecialOptionList
 from rovr.functions.utils import get_shortcut
 
 from .yes_or_no import YesOrNo

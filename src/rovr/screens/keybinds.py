@@ -10,7 +10,7 @@ from textual.widgets import OptionList
 from rovr.classes.mixins import CursorNavigationMixin
 from rovr.classes.textual_options import KeybindOption
 from rovr.classes.type_aliases import KeyBinding, KeyMap, KeysConfig
-from rovr.components import SearchInput
+from rovr.components.search_container import SearchInput
 from rovr.functions import icons
 from rovr.functions.utils import check_key, dismiss
 from rovr.variables.constants import bindings, config, schema

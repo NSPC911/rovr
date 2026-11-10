@@ -15,7 +15,7 @@ from textual.widgets.selection_list import Selection
 
 from rovr.classes.mixins import CheckboxRenderingMixin, SelectionNavigationMixin
 from rovr.classes.textual_options import OptionWithValue
-from rovr.components import FilterInput, ModalSearchScreen
+from rovr.components.base_search_screen import FilterInput, ModalSearchScreen
 from rovr.components.special_option_lists import DoubleClickableScrollOffOptionList
 from rovr.functions import path as path_utils
 from rovr.functions.icons import get_icon_for_file, get_icon_for_folder

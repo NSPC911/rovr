@@ -78,15 +78,19 @@ def is_hidden_file(entry: os.DirEntry) -> bool:
 # not begin with a number
 def compress(text: Any) -> str:
     text = str(text)
-    return "u_" + base64.urlsafe_b64encode(text.encode("utf-8")).decode("ascii").replace(
-        "=", "_"
+    # Padding is stripped rather than substituted: urlsafe base64 already uses
+    # "_" as a data character, so replacing "=" with "_" makes padding
+    # indistinguishable from data and corrupts the roundtrip.
+    return (
+        "u_"
+        + base64.urlsafe_b64encode(text.encode("utf-8")).decode("ascii").rstrip("=")
     )
 
 
 def decompress(text: str) -> str:
-    return base64.urlsafe_b64decode(text[2:].replace("_", "=").encode("ascii")).decode(
-        "utf-8"
-    )
+    payload = text[2:]
+    payload += "=" * (-len(payload) % 4)
+    return base64.urlsafe_b64decode(payload.encode("ascii")).decode("utf-8")
 
 
 def samefile(path1: str, path2: str) -> bool:

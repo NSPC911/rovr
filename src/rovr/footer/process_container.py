@@ -137,23 +137,18 @@ class ProgressBarContainer(VerticalGroup, inherit_bindings=False):
         label: str = "",
         text_interval: float = 0.25,
         advance_interval: float = 0,
-        name: str | None = None,
         id: str | None = None,
         classes: str | None = None,
-        disabled: bool = False,
     ) -> None:
         super().__init__(
-            name=name,
             id=id,
             classes=classes,
-            disabled=disabled,
             markup=False,
         )
         self.progress_bar = ProcessProgressBar(
             total=total,
             show_percentage=config["interface"]["show_progress_percentage"],
             show_eta=config["interface"]["show_progress_eta"],
-            gradient=self.get_gradient("default"),
         )
         self.icon_label = Label(id="icon")
         self.text_label = Label(label, id="label")
@@ -171,6 +166,9 @@ class ProgressBarContainer(VerticalGroup, inherit_bindings=False):
     def compose(self) -> ComposeResult:
         yield self.label_container
         yield self.progress_bar
+
+    def on_mount(self) -> None:
+        self.progress_bar.gradient = self.get_gradient("default")
 
     def get_gradient(self: Widget, state: str) -> Gradient | None:
         gradient_colors = getattr(
@@ -347,6 +345,7 @@ class ProcessContainer(Actionable, VerticalScroll):
 
     def __init__(self) -> None:
         super().__init__(id="processes")
+        self.mount_bar = lambda bar: self.app.call_from_thread(self.mount, bar, before=0)
 
     def watch_theme(self, theme: str) -> None:
         error_gradient = ProgressBarContainer.get_gradient(self, "error")
@@ -359,43 +358,6 @@ class ProcessContainer(Actionable, VerticalScroll):
                 bar.progress_bar.gradient = default_gradient
             else:
                 bar.progress_bar.gradient = None
-
-    async def new_process_bar(
-        self,
-        total: int | None = None,
-        text_interval: float = 0.25,
-        advance_interval: float = 0,
-        id: str | None = None,
-        classes: str | None = None,
-    ) -> ProgressBarContainer:
-        new_bar = ProgressBarContainer(
-            total=total,
-            text_interval=text_interval,
-            advance_interval=advance_interval,
-            id=id,
-            classes=classes,
-        )
-        await self.mount(new_bar, before=0)
-        return new_bar
-
-    def threaded_new_process_bar(
-        self,
-        total: int | None = None,
-        text_interval: float = 0.25,
-        advance_interval: float = 0,
-        id: str | None = None,
-        classes: str | None = None,
-    ) -> ProgressBarContainer:
-        bar = self.app.call_from_thread(
-            self.new_process_bar,
-            total=total,
-            text_interval=text_interval,
-            advance_interval=advance_interval,
-            id=id,
-            classes=classes,
-        )
-        assert isinstance(bar, ProgressBarContainer)
-        return bar
 
     def handle_file_in_use_error(
         self,
@@ -464,9 +426,11 @@ class ProcessContainer(Actionable, VerticalScroll):
                 ]
             return size
 
-        bar = self.threaded_new_process_bar(classes="active", advance_interval=0.25)
+        bar = ProgressBarContainer(
+            label="Getting files to delete...", classes="active", advance_interval=0.25
+        )
+        self.mount_bar(bar)
         bar.set_icon(icons.get_icon("general", "delete")[0])
-        bar.set_text("Getting files to delete...", False)
         bar.set_progress(total=sum(map(work_size, files)))
         errors: list[tuple[str, Exception]] = []
 
@@ -616,10 +580,14 @@ class ProcessContainer(Actionable, VerticalScroll):
         from pytrash import RecycleBin
 
         recycle_bin = RecycleBin()
-        bar = self.threaded_new_process_bar(classes="active")
+        bar = ProgressBarContainer(
+            total=len(files) + 1,
+            label="Getting files to trash...",
+            classes="active",
+            advance_interval=0.1,
+        )
+        self.mount_bar(bar)
         bar.set_icon(icons.get_icon("general", "trash")[0])
-        bar.set_text("Getting files to trash...", False)
-        bar.set_progress(total=len(files) + 1, progress=0)
         failed: list[tuple[str, Exception]] = []
         action_on_file_in_use = "ask"
         for file in files:
@@ -696,9 +664,10 @@ class ProcessContainer(Actionable, VerticalScroll):
         """
         from multiarchive import Archive
 
-        start, bar = getcwd(), self.threaded_new_process_bar(classes="active")
+        start = getcwd()
+        bar = ProgressBarContainer(label="Getting files to archive...", classes="active")
+        self.mount_bar(bar)
         bar.set_icon(icons.get_icon("general", "zip")[0])
-        bar.set_text("Getting files to archive...", False)
         files_to_archive: list[path_utils.FileObj] = []
         for file in files:
             objs = path_utils.get_recursive_files(file, True)
@@ -747,9 +716,9 @@ class ProcessContainer(Actionable, VerticalScroll):
         """
         from multiarchive import Archive
 
-        bar = self.threaded_new_process_bar(classes="active")
+        bar = ProgressBarContainer(label="Preparing to extract...", classes="active")
+        self.mount_bar(bar)
         bar.set_icon(icons.get_icon("general", "open")[0])
-        bar.set_text("Preparing to extract...", False)
         os.makedirs(destination_path, exist_ok=True)
         archive: Archive | None = None
         password: bytes | None = None
@@ -963,12 +932,12 @@ class ProcessContainer(Actionable, VerticalScroll):
         self, type_of_selection: Literal["copy", "cut"], paths: list[str], dest: str = ""
     ) -> None | Literal[True]:
         dest = path.abspath(dest or getcwd())
-        bar = self.threaded_new_process_bar(classes="active")
-        bar.set_icon(icons.get_icon("general", type_of_selection)[0])
-        bar.set_text(
-            f"Getting items to {'move' if type_of_selection == 'cut' else 'copy'}",
-            False,
+        bar = ProgressBarContainer(
+            label=f"Getting items to {'move' if type_of_selection == 'cut' else 'copy'}",
+            classes="active",
         )
+        self.mount_bar(bar)
+        bar.set_icon(icons.get_icon("general", type_of_selection)[0])
         sources = list(
             {path.normcase(path.abspath(p)): path.normpath(p) for p in paths}.values()
         )
@@ -1250,9 +1219,11 @@ class ProcessContainer(Actionable, VerticalScroll):
         chunk_size = 1024 * 1024
 
         dest = getcwd()
-        bar = self.threaded_new_process_bar(total=len(uris) + 1, classes="active")
+        bar = ProgressBarContainer(
+            total=len(uris) + 1, label="Downloading items...", classes="active"
+        )
+        self.mount_bar(bar)
         bar.set_icon(icons.get_icon("general", "down")[0])
-        bar.set_text("Downloading items...")
 
         with ExitStack() as stack:
             reqs = (

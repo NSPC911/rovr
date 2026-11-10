@@ -176,11 +176,14 @@ class NewItemButton(Button):
             )
             return
 
-        bar = await self.app.query_one(ProcessContainer).new_process_bar(
-            total=len(entries) + 1, classes="active", advance_interval=0.25
+        bar = ProgressBarContainer(
+            total=len(entries) + 1,
+            label="Creating items...",
+            classes="active",
+            advance_interval=0.25,
         )
         bar.set_icon(get_icon("general", "new")[0])
-        bar.set_text("Creating items...", False)
+        self.app.query_one(ProcessContainer).mount(bar, before=0)
         worker = self._bulk_creator(entries, cwd, bar)
         try:
             first_created, errors = await worker.wait()

@@ -751,7 +751,11 @@ class ProcessContainer(Actionable, VerticalScroll):
                         ),
                     )
         del password
-        bar.set_progress(total=len(members := archive.infolist()) + 1, progress=0)
+        members = archive.infolist()
+        bar.set_progress(
+            total=sum(member.uncompressed_size for member in members) + 1,
+            progress=0,
+        )
         unsaferes: bool | None = None
         conflictres: screens.FileNameConflict.ReturnType | None = None
         permissionres: Literal["try_again", "cancel", "skip"] | None = None
@@ -874,7 +878,7 @@ class ProcessContainer(Actionable, VerticalScroll):
                         " destination via a symbolic link."
                     )
             if res is False:
-                bar.advance()
+                bar.advance(member.uncompressed_size)
                 continue
 
             if path.lexists(final_path):
@@ -892,7 +896,7 @@ class ProcessContainer(Actionable, VerticalScroll):
                     )
                     match action:
                         case "skip":
-                            bar.advance()
+                            bar.advance(member.uncompressed_size)
                             continue
                         case "cancel":
                             bar.panic(), archive.close()
@@ -907,10 +911,13 @@ class ProcessContainer(Actionable, VerticalScroll):
                                 bar.panic(), archive.close()
                                 return
                             if not removed:
-                                bar.advance()
+                                bar.advance(member.uncompressed_size)
                                 continue
 
+            extracted_bytes = 0
+
             def extract_member() -> None:
+                nonlocal extracted_bytes
                 if member.is_dir:
                     os.makedirs(final_path, exist_ok=True)
                 else:
@@ -918,13 +925,20 @@ class ProcessContainer(Actionable, VerticalScroll):
                     source = archive.open(member)
                     if source:
                         with source, open(final_path, "wb") as target:
-                            shutil.copyfileobj(source, target)
+                            copied = 0
+                            while chunk := source.read(1024 * 1024):
+                                target.write(chunk)
+                                copied += len(chunk)
+                                if copied > extracted_bytes:
+                                    bar.advance(copied - extracted_bytes)
+                                    extracted_bytes = copied
 
             extracted = run_with_permission_prompt(extract_member, final_path)
             if extracted is None:
                 bar.panic(), archive.close()
                 return
-            bar.advance()
+            if not extracted:
+                bar.advance(member.uncompressed_size - extracted_bytes)
         archive.close(), bar.ok()
 
     @work(thread=True)

@@ -10,6 +10,7 @@
 # nuitka-project: --include-package=rovr.screens
 # nuitka-project: --nofollow-import-to="tkinter"
 # nuitka-project: --nofollow-import-to=aiohttp
+# nuitka-project: --nofollow-import-to=PIL.AvifImagePlugin
 # nuitka-project: --onefile-cache-mode=cached
 # nuitka-project: --onefile-child-grace-time=1
 # nuitka-project: --python-flag=no_asserts

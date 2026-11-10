@@ -3,6 +3,7 @@ import os
 import subprocess
 from pathlib import Path
 from shutil import move
+from typing import Any, cast
 
 import pytest
 from textual.widgets import OptionList
@@ -246,6 +247,37 @@ async def test_new_button(tmp_path: Path) -> None:
             ),
         )
         assert app.file_list.get_option_at_index(0).dir_entry.name == "test_file.txt"
+
+
+def test_bulk_creator_uses_cwd_snapshot_and_updates_progress(tmp_path: Path) -> None:
+    class Bar:
+        def __init__(self) -> None:
+            self.progress_bar = self
+            self.labels: list[str] = []
+            self.progress = 0
+
+        def set_text(self, label: str) -> None:
+            self.labels.append(label)
+
+        def advance(self) -> None:
+            self.progress += 1
+
+    cwd = tmp_path / "snapshot"
+    cwd.mkdir()
+    absolute = tmp_path / "absolute.txt"
+    entries = ["nested/relative.txt", absolute.as_posix()]
+    bar = Bar()
+
+    first_created, errors = cast(Any, NewItemButton._bulk_creator).__wrapped__(
+        object(), entries, cwd.as_posix(), bar
+    )
+
+    assert first_created == (cwd / entries[0]).as_posix()
+    assert not errors
+    assert (cwd / entries[0]).is_file()
+    assert absolute.is_file()
+    assert bar.labels == entries
+    assert bar.progress == len(entries)
 
 
 @pytest.mark.asyncio

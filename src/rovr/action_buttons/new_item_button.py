@@ -9,10 +9,11 @@ from typing import cast
 from textual import events, work
 from textual.content import Content
 from textual.widgets import Button
-from textual.worker import Worker, WorkerError
+from textual.worker import Worker, WorkerCancelled, WorkerError
 
 import rovr.screens as screens
 from rovr.classes.textual_validators import IsValidFilePath, PathNoLongerExists
+from rovr.footer.process_container import ProcessContainer, ProgressBarContainer
 from rovr.functions.cwd import getcwd
 from rovr.functions.icons import get_icon
 from rovr.functions.path import dump_exc, normalise
@@ -125,6 +126,7 @@ class NewItemButton(Button):
 
     @work
     async def action_bulk_create(self) -> None:
+        cwd = getcwd()
         temp = NamedTemporaryFile("w", encoding="utf-8", delete=False)  # noqa: SIM115
         temp_path = temp.name
         temp.write("")
@@ -174,26 +176,34 @@ class NewItemButton(Button):
             )
             return
 
-        worker = self._bulk_creator(entries)
-        created, already_exists, errors = await worker.wait()
+        bar = await self.app.query_one(ProcessContainer).new_process_bar(
+            total=len(entries) + 1, classes="active", advance_interval=0.25
+        )
+        bar.set_icon(get_icon("general", "new")[0])
+        bar.set_text("Creating items...", False)
+        worker = self._bulk_creator(entries, cwd, bar)
+        try:
+            first_created, errors = await worker.wait()
+        except WorkerCancelled:
+            bar.panic(notify={"title": "Bulk Create", "message": "Operation cancelled"})
+            return
 
-        if created:
+        total = len(entries)
+        if errors:
+            bar.panic(bar_text=f"Created {total - len(errors)} of {total} items")
+        else:
+            bar.ok()
+
+        if first_created:
             with self.app.file_list.pause_checks(), dump_on_exc(self):
                 self.app.file_list.focus()
-                focus_on = path.basename(created[0].rstrip("/"))
-                worker = self.app.file_list.update_file_list(
+                focus_on = path.basename(first_created.rstrip("/"))
+                worker: Worker = self.app.file_list.update_file_list(
                     add_to_session=False, focus_on=focus_on
                 )
                 with contextlib.suppress(WorkerError):
                     await worker.wait()
 
-        if already_exists:
-            self.notify(
-                "Some items already exist:\n" + "\n".join(already_exists),
-                title="Bulk Create",
-                severity="warning",
-                markup=False,
-            )
         if errors:
             self.notify(
                 "Errors while creating:\n" + "\n".join(errors),
@@ -201,9 +211,9 @@ class NewItemButton(Button):
                 severity="error",
                 markup=False,
             )
-        if created:
+        if first_created:
             self.notify(
-                f"Created {len(created)} item(s).",
+                f"Created {total - len(errors)} item(s).",
                 title="Bulk Create",
                 severity="information",
                 markup=False,
@@ -212,13 +222,16 @@ class NewItemButton(Button):
             os.unlink(temp_path)
 
     @work(thread=True)
-    def _bulk_creator(self, entries: list[str]) -> tuple[list[str], list[str], list[str]]:
-        created: list[str] = []
-        already_exists: list[str] = []
+    def _bulk_creator(
+        self, entries: list[str], cwd: str, bar: ProgressBarContainer
+    ) -> tuple[str | None, list[str]]:
+        first_created: str | None = None
         errors: list[str] = []
+        flags = os.O_CREAT | os.O_EXCL | os.O_WRONLY
         for entry in entries:
+            bar.set_text(entry)
             is_dir = entry.endswith(("/", "\\"))
-            location = normalise(path.join(getcwd(), entry))
+            location = normalise(entry if path.isabs(entry) else path.join(cwd, entry))
             if is_dir:
                 location = location + "/"
             try:
@@ -228,11 +241,13 @@ class NewItemButton(Button):
                     dir_path = path.dirname(location)
                     if dir_path:
                         makedirs(dir_path, exist_ok=True)
-                    with open(location, "x") as created_file:
-                        created_file.write("")
-                created.append(location)
+                    os.close(os.open(location, flags, 0o666))
+                # because you cant touch a file with nothing as a name
+                if not first_created:
+                    first_created = location
+                bar.advance()
             except FileExistsError:
-                already_exists.append(entry)
+                bar.advance()
             except Exception as exc:
                 errors.append(f"{entry}: {type(exc).__name__}: {exc}")
-        return created, already_exists, errors
+        return first_created, errors

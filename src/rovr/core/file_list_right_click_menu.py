@@ -211,8 +211,8 @@ class FileListRightClickMenu(PopupOptionList, inherit_bindings=False):
             child_menu.offset = visible_region.top_right - (
                 0,
                 self.size.height
-                + (1 if self.styles.border_top else 0)
-                + (1 if self.styles.border_bottom else 0),
+                + (0 if self.styles.border_top[0] in ("hidden", "none") else 1)
+                + (0 if self.styles.border_bottom[0] in ("hidden", "none") else 1),
             )
             await child_menu.pre_show()
             child_menu.display = True

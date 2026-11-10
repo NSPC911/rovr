@@ -309,7 +309,7 @@ def _render_with_pdftoppm(
         except TimeoutExpired as exc:
             proc.kill()
             proc.communicate()
-            if not saved_exception:
+            if not saved_exception:  # ty: ignore[redundant-condition]
                 saved_exception = exc
                 continue
         images += _parse_ppm_buffer(data)
@@ -403,7 +403,7 @@ def _render_with_pdftocairo(
             except TimeoutExpired as exc:
                 proc.kill()
                 proc.communicate()
-                if not saved_exception:
+                if not saved_exception:  # ty: ignore[redundant-condition]
                     saved_exception = exc
                     continue
             images += _load_images_from_folder(output_folder, prefix, "png")

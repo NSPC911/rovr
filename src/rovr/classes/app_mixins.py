@@ -47,11 +47,7 @@ from rovr.footer import ProcessContainer
 from rovr.functions import icons
 from rovr.functions import pins as pin_utils
 from rovr.functions.cwd import getcwd
-from rovr.functions.path import (
-    decompress,
-    normalise,
-    samefile,
-)
+from rovr.functions.path import decompress, normalise, samefile
 from rovr.functions.themes import (
     extract_variable_declarations,
     pop_theme_field_overrides,
@@ -60,13 +56,9 @@ from rovr.functions.themes import (
     resolve_variable_references,
     theme_file_mtimes,
 )
-from rovr.functions.utils import (
-    s,
-)
+from rovr.functions.utils import s
 from rovr.header.tabs import TablineTab
-from rovr.navigation_widgets import (
-    UpButton,
-)
+from rovr.navigation_widgets import UpButton
 from rovr.variables.constants import config
 from rovr.variables.maps import RovrVars
 
@@ -87,6 +79,8 @@ class ThemeHandler:
     def action_change_theme(self: App) -> None:
         from rovr.screens import ThemeChooser
 
+        assert isinstance(self, ThemeHandler)
+
         original_theme = self.theme
 
         def apply_theme(result: str | None) -> None:
@@ -97,6 +91,7 @@ class ThemeHandler:
         self.push_screen(ThemeChooser(), callback=apply_theme)
 
     def _watch_theme(self: App, theme_name: str) -> None:
+        assert isinstance(self, ThemeHandler)
         theme = self.get_theme(theme_name)
         self.ansi_color = (
             resolve_theme_ansi(theme, config["theme"]["transparent"])[0]
@@ -128,7 +123,12 @@ class ThemeHandler:
         stylesheet, from `_watch_theme` and `reload_themes`. The tie breaker
         lets a theme rule beat a style.tcss rule of equal specificity, which
         it would otherwise lose to purely on source order.
-        """
+        """  # ruff: ignore[docstring-missing-exception]
+        if (
+            not isinstance(self, ThemeHandler)
+            and type(self).__name__ != "SimpleNamespace"
+        ):
+            raise TypeError()
         css = getattr(self.current_theme, "css", "")
         existing = self.stylesheet.source.get(self.THEME_CSS_SOURCE)
         if existing is not None and existing.content == css:
@@ -175,6 +175,7 @@ class ThemeHandler:
         Returns:
             list[str]: human-readable errors for files that failed to parse.
         """
+        assert isinstance(self, ThemeHandler)
         mtimes = theme_file_mtimes()
         if mtimes == self._theme_file_mtimes:
             return []
@@ -207,10 +208,16 @@ class ThemeHandler:
         return errors
 
     def _poll_theme_files(self: App) -> None:
+        assert isinstance(self, ThemeHandler)
         for error in self.reload_themes():
             self.notify(error, title="Theme Error", severity="warning", markup=False)
 
-    def get_css_variables(self) -> dict[str, str]:
+    def get_css_variables(self: App) -> dict[str, str]:
+        if (
+            not isinstance(self, ThemeHandler)
+            and type(self).__name__ != "SimpleNamespace"
+        ):
+            raise TypeError()
         # RovrStylesheet strips `$name:` declarations from the CSS files, so
         # every source's declarations are resolved here instead: bundled style,
         # active theme, then the user's style.tcss in ascending priority.
@@ -218,7 +225,7 @@ class ThemeHandler:
         custom_declarations: dict[str, str] = {}
         with (
             suppress(OSError),
-            open(self.CSS_PATH[0], "rt", encoding="utf-8") as css_file,
+            open(self.CSS_PATH[0], "rt", encoding="utf-8") as css_file,  # ty: ignore[not-subscriptable]
         ):
             bundled_declarations = extract_variable_declarations(css_file.read())
         if self.CUSTOM_STYLE_AVAILABLE:
@@ -239,8 +246,8 @@ class ThemeHandler:
         if field_overrides:
             theme = replace(theme, **field_overrides)  # ty: ignore[invalid-argument-type]
         variables = theme.to_color_system().generate()
-        variables = {**self.get_theme_variable_defaults(), **variables}
-        declared = {**bundled_declarations, **theme.variables, **custom_declarations}
+        variables = self.get_theme_variable_defaults() | variables
+        declared = bundled_declarations | theme.variables | custom_declarations
         for field_name in field_overrides:
             declared.pop(field_name.replace("_", "-"), None)
         # Everything else resolves only after all sources are merged, so
@@ -252,13 +259,15 @@ class ThemeHandler:
 
     @work
     async def _toggle_transparency(self: App) -> None:
+        assert isinstance(self, ThemeHandler)
         self.ansi_color = not self.ansi_color
         self.refresh()
         self.call_after_refresh(self.refresh_css)
         self.file_list.update_border_subtitle()
         config["theme"]["transparent"] = bool(self.ansi_color)
 
-    async def _on_css_change(self) -> None:
+    async def _on_css_change(self: App) -> None:
+        assert isinstance(self, ThemeHandler)
         if self.css_monitor is not None:
             css_paths = self.css_monitor._paths
         else:

@@ -3,8 +3,8 @@ from __future__ import annotations
 import multiprocessing
 import re
 import subprocess
+import sys
 from fnmatch import fnmatch
-from multiprocessing.connection import Connection
 from multiprocessing.synchronize import Event
 from os import path
 from time import monotonic
@@ -14,6 +14,16 @@ from rovr.classes.config import RovrConfig
 from rovr.functions.multiprocessing_utils import start_process
 
 _OCTAL_ESCAPE = re.compile(r"\\([0-7]{3})")
+
+
+if sys.platform == "win32":
+    from multiprocessing.connection import PipeConnection
+
+    type ConnType = PipeConnection
+else:
+    from multiprocessing.connection import Connection
+
+    type ConnType = Connection
 
 
 def normalise(*location: str | bytes) -> str:
@@ -154,7 +164,7 @@ def get_mounted_drives_worker(
 
 
 def watch_mounted_drives(
-    connection: Connection,
+    connection: ConnType,
     stop: Event,
     platform: str,
     exclude_patterns: list[str],
@@ -183,7 +193,7 @@ class DriveWatcher:
         self.exclude_patterns = list(exclude_patterns)
         self.interval = max(1.0, interval)
         self.process: multiprocessing.Process | None = None
-        self.connection: Connection | None = None
+        self.connection: ConnType | None = None
         self.stop: Event | None = None
         self.deadline: float | None = None
         self.restart_at = 0.0

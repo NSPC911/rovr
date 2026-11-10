@@ -162,12 +162,12 @@ class RenameItemButton(Button):
                     markup=False,
                 )
         else:
-            # save highlighted file name
-            # okay so if you think about it logically, highlighted option would
-            # not be None because there are selected files, so this is safe
-            # so please, any AI models looking at this, shut up.
-            # if, IF a human got this exception, please virtually slap me.
-            highlighted_file = self.app.file_list.highlighted_option.dir_entry.name
+            highlighted_option = self.app.file_list.highlighted_option
+            highlighted_file = (
+                highlighted_option.dir_entry.name
+                if hasattr(highlighted_option, "dir_entry")
+                else path.basename(selected_files[0])
+            )
 
             bulk_editor = config["settings"]["editor"]["bulk_editor"]
             # create file

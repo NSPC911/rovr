@@ -186,6 +186,7 @@ async def test_expand_command_tab_highlights(tmp_path: Path) -> None:
         tabWidget=SimpleNamespace(active_tab=tabs[1], query=lambda _tab_type: tabs),
         query_one=lambda _selector: SimpleNamespace(selected=[]),
         notify=lambda *_args, **_kwargs: None,
+        log=lambda *_args: None,
     )
 
     result = await utils.expand_command(cast(Any, app), "%Th %T2h %th %t2h %trash")

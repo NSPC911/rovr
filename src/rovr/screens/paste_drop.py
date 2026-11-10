@@ -1,9 +1,8 @@
-import shlex
 from contextlib import suppress
 from os import path
-from sys import platform
 from typing import Literal, NamedTuple
 
+import oslex
 from textual import events, on
 from textual.app import ComposeResult
 from textual.containers import Grid, HorizontalGroup
@@ -94,8 +93,7 @@ class PasteDropScreen(Actionable, ModalScreen["PasteDropScreen.ReturnType | None
             file_paths: list[str] = []
             with suppress(ValueError):
                 file_paths = [
-                    fp.strip().strip('"').strip("'")
-                    for fp in shlex.split(event.text, posix=platform != "win32")
+                    fp.strip().strip('"').strip("'") for fp in oslex.split(event.text)
                 ]
             for file_path in file_paths:
                 if path.lexists(file_path):

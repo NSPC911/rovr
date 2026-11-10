@@ -1,9 +1,9 @@
-import shlex
 from contextlib import contextmanager, suppress
 from functools import lru_cache
 from os import path, scandir
 from typing import Callable, ClassVar, Generator, Literal, Sequence
 
+import oslex
 from rich.segment import Segment
 from textual import events, work
 from textual.actions import SkipAction
@@ -653,7 +653,7 @@ class FileList(
                     cmd = (
                         editor_config["run"]
                         + " "
-                        + " ".join(shlex.quote(p) for p in paths)
+                        + " ".join(oslex.quote(p) for p in paths)
                     )
                 else:
                     cmd = editor_config["run"] + paths

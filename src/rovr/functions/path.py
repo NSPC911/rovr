@@ -4,7 +4,6 @@ import asyncio
 import base64
 import os
 import re
-import shlex
 import stat
 import sys
 from contextlib import suppress
@@ -13,6 +12,7 @@ from os import path
 from subprocess import CompletedProcess
 from typing import Any, Callable, Literal, TypedDict, overload
 
+import oslex
 from rich.console import Console
 from textual import work
 from textual.app import App
@@ -671,12 +671,12 @@ def run_opener(app: App, target_path: str) -> None:
                 else:
                     return
                 if isinstance(runner, str):
-                    to_run = runner.replace("${path}", shlex.quote(target_path))
+                    to_run = runner.replace("${path}", oslex.quote(target_path))
                 else:
                     to_run = [part.replace("${path}", target_path) for part in runner]
                 if to_run == runner:
                     if isinstance(runner, str):
-                        to_run = runner + " " + shlex.quote(target_path)
+                        to_run = runner + " " + oslex.quote(target_path)
                     else:
                         to_run = runner + [target_path]
 

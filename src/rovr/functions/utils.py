@@ -181,11 +181,11 @@ def run_command(
     on_error: Callable[[str, str], None] | None = None,
 ) -> subprocess.CompletedProcess | subprocess.Popen:
     if not shell and isinstance(command, str):
-        from shlex import split as shplit
+        from oslex import split as shplit
 
         command = shplit(command)
     elif shell and isinstance(command, list):
-        from shlex import join as shjoin
+        from oslex import join as shjoin
 
         command = shjoin(command)
     if "devtools" in app.features:
@@ -298,7 +298,7 @@ async def expand_command(app: App, command: list[str]) -> list[str]: ...
 async def expand_command(
     app: App, command: str | list[str], banned_exp: list[str] = []
 ) -> str | list[str]:
-    from shlex import join as shjoin
+    from oslex import join as shjoin
 
     from rovr.functions.path import normalise
     from rovr.header.tabs import TablineTab
@@ -419,22 +419,21 @@ async def expand_command(
         to_return = [_expand(cmd) for cmd in command]
     else:
         to_return = _expand(command)
-    if globals().get("is_dev", False):
-        print(f"{command}\n-> {to_return}")
+    app.log(f"{command}\n-> {to_return}")
     return to_return
 
 
 def command(
     initial_command: str | list[str] | tuple[str], path_str: str
 ) -> str | list[str]:
-    import shlex
+    import oslex
 
     if isinstance(initial_command, tuple):
         initial_command = list(initial_command)
     if isinstance(initial_command, list):
         return initial_command + [path_str]
     else:
-        return initial_command + " " + shlex.quote(path_str)
+        return initial_command + " " + oslex.quote(path_str)
 
 
 def s(item: Any, notone: str = "s", isone: str = "") -> str:

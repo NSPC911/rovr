@@ -1751,12 +1751,12 @@ Must be one of:
 | **Required**              | No          |
 | **Additional properties** | Not allowed |
 
-| Property                                                         | Type             | Title/Description                                                                                                                                                                                                                  |
-| ---------------------------------------------------------------- | ---------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| [type](#settings_previewers_pattern1_type)                       | enum (of string) | The type of previewer. This determines how the previewer will be used.                                                                                                                                                             |
-| [command](#settings_previewers_pattern1_command)                 | object           | The command to run to generate the preview.<br />Command expansions are supported except %s, %t, %cut and %copy. %file is the resolved output path from file; %tmpdir is a temporary directory removed after the command finishes. |
-| [file](#settings_previewers_pattern1_file)                       | Combination      | Where to read the preview from: stdout, stderr, or a path. %temp uses the source extension; %temp.png (or another extension) replaces it. The resolved path is available as %file in the command.                                  |
-| [on_nonzero_exit](#settings_previewers_pattern1_on_nonzero_exit) | Combination      | What to do if the command exits with a non-zero exit code. This can only be a string to provide a fallback to use. Defaults to \`details\`.                                                                                        |
+| Property                                                         | Type             | Title/Description                                                                                                                                                                                                         |
+| ---------------------------------------------------------------- | ---------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| [type](#settings_previewers_pattern1_type)                       | enum (of string) | The type of previewer. This determines how the previewer will be used.                                                                                                                                                    |
+| [command](#settings_previewers_pattern1_command)                 | object           | The command to run to generate the preview.<br />Command expansions are supported except %s, %t, %clip. %file is the resolved output path from file; %tmpdir is a temporary directory removed after the command finishes. |
+| [file](#settings_previewers_pattern1_file)                       | Combination      | Where to read the preview from: stdout, stderr, or a path. %temp uses the source extension; %temp.png (or another extension) replaces it. The resolved path is available as %file in the command.                         |
+| [on_nonzero_exit](#settings_previewers_pattern1_on_nonzero_exit) | Combination      | What to do if the command exits with a non-zero exit code. This can only be a string to provide a fallback to use. Defaults to \`details\`.                                                                               |
 
 ##### <a name="settings_previewers_pattern1_type"></a>2.8.1.1. Property `Rovr Config > settings > previewers > previewer name > type`
 
@@ -1783,7 +1783,7 @@ Must be one of:
 | **Same definition as**    | [run](#settings_right_click_items_action_oneOf_i1_run) |
 
 **Description:** The command to run to generate the preview.
-Command expansions are supported except %s, %t, %cut and %copy. %file is the resolved output path from file; %tmpdir is a temporary directory removed after the command finishes.
+Command expansions are supported except %s, %t, %clip. %file is the resolved output path from file; %tmpdir is a temporary directory removed after the command finishes.
 
 ##### <a name="settings_previewers_pattern1_file"></a>2.8.1.3. Property `Rovr Config > settings > previewers > previewer name > file`
 
@@ -2145,26 +2145,29 @@ Must be one of:
 
 **Description:** Permissions for the IPC server
 
-| Property                                                    | Type             | Title/Description                                                       |
-| ----------------------------------------------------------- | ---------------- | ----------------------------------------------------------------------- |
-| [cd](#settings_ipc_permissions_cd)                          | enum (of string) | Control changing the current working directory of rovr                  |
-| [clipboard.copy](#settings_ipc_permissions_clipboardcopy)   | enum (of string) | Control copying to the clipboard                                        |
-| [clipboard.cut](#settings_ipc_permissions_clipboardcut)     | enum (of string) | Control cutting to the clipboard                                        |
-| [clipboard.list](#settings_ipc_permissions_clipboardlist)   | enum (of string) | Control getting the list of items in clipboard, along with their states |
-| [clipboard.paste](#settings_ipc_permissions_clipboardpaste) | enum (of string) | Control pasting from the clipboard                                      |
-| [tab.list](#settings_ipc_permissions_tablist)               | enum (of string) | Control get the list of tabs                                            |
-| [tab.new](#settings_ipc_permissions_tabnew)                 | enum (of string) | Control creating new tabs                                               |
-| [tab.focus](#settings_ipc_permissions_tabfocus)             | enum (of string) | Control focusing a specified tab index                                  |
-| [tab.close](#settings_ipc_permissions_tabclose)             | enum (of string) | Control closing tabs                                                    |
-| [tab.history](#settings_ipc_permissions_tabhistory)         | enum (of string) | Control getting the navigation history of a specified tab index         |
-| [theme.list](#settings_ipc_permissions_themelist)           | enum (of string) | Control getting the list of available themes                            |
-| [theme.query](#settings_ipc_permissions_themequery)         | enum (of string) | Control getting the active theme and its transparent status             |
-| [theme.set](#settings_ipc_permissions_themeset)             | enum (of string) | Control switching the active theme                                      |
-| [quit](#settings_ipc_permissions_quit)                      | enum (of string) | Control quitting rovr                                                   |
-| [suspend](#settings_ipc_permissions_suspend)                | enum (of string) | Control suspending rovr                                                 |
-| [notify](#settings_ipc_permissions_notify)                  | enum (of string) | Control sending notifications via ipc to the user                       |
-| [ask](#settings_ipc_permissions_ask)                        | enum (of string) | Allow the ipc to prompt a yes/no choice to the user.                    |
-| [input](#settings_ipc_permissions_input)                    | enum (of string) | Allow the ipc to prompt for text input from the user.                   |
+| Property                                                          | Type             | Title/Description                                                       |
+| ----------------------------------------------------------------- | ---------------- | ----------------------------------------------------------------------- |
+| [cd](#settings_ipc_permissions_cd)                                | enum (of string) | Control changing the current working directory of rovr                  |
+| [clipboard.copy](#settings_ipc_permissions_clipboardcopy)         | enum (of string) | Control copying to the clipboard                                        |
+| [clipboard.cut](#settings_ipc_permissions_clipboardcut)           | enum (of string) | Control cutting to the clipboard                                        |
+| [clipboard.list](#settings_ipc_permissions_clipboardlist)         | enum (of string) | Control getting the list of items in clipboard, along with their states |
+| [clipboard.paste](#settings_ipc_permissions_clipboardpaste)       | enum (of string) | Control pasting from the clipboard                                      |
+| [clipboard.select](#settings_ipc_permissions_clipboardselect)     | enum (of string) | Control selecting an item from the clipboard                            |
+| [clipboard.unselect](#settings_ipc_permissions_clipboardunselect) | enum (of string) | Control unselecting an item from the clipboard                          |
+| [clipboard.remove](#settings_ipc_permissions_clipboardremove)     | enum (of string) | Control removing an item from the clipboard                             |
+| [tab.list](#settings_ipc_permissions_tablist)                     | enum (of string) | Control get the list of tabs                                            |
+| [tab.new](#settings_ipc_permissions_tabnew)                       | enum (of string) | Control creating new tabs                                               |
+| [tab.focus](#settings_ipc_permissions_tabfocus)                   | enum (of string) | Control focusing a specified tab index                                  |
+| [tab.close](#settings_ipc_permissions_tabclose)                   | enum (of string) | Control closing tabs                                                    |
+| [tab.history](#settings_ipc_permissions_tabhistory)               | enum (of string) | Control getting the navigation history of a specified tab index         |
+| [theme.list](#settings_ipc_permissions_themelist)                 | enum (of string) | Control getting the list of available themes                            |
+| [theme.query](#settings_ipc_permissions_themequery)               | enum (of string) | Control getting the active theme and its transparent status             |
+| [theme.set](#settings_ipc_permissions_themeset)                   | enum (of string) | Control switching the active theme                                      |
+| [quit](#settings_ipc_permissions_quit)                            | enum (of string) | Control quitting rovr                                                   |
+| [suspend](#settings_ipc_permissions_suspend)                      | enum (of string) | Control suspending rovr                                                 |
+| [notify](#settings_ipc_permissions_notify)                        | enum (of string) | Control sending notifications via ipc to the user                       |
+| [ask](#settings_ipc_permissions_ask)                              | enum (of string) | Allow the ipc to prompt a yes/no choice to the user.                    |
+| [input](#settings_ipc_permissions_input)                          | enum (of string) | Allow the ipc to prompt for text input from the user.                   |
 
 ##### <a name="settings_ipc_permissions_cd"></a>2.11.2.1. Property `Rovr Config > settings > ipc > permissions > cd`
 
@@ -2251,7 +2254,58 @@ Must be one of:
 - "prompt"
 - "deny"
 
-##### <a name="settings_ipc_permissions_tablist"></a>2.11.2.6. Property `Rovr Config > settings > ipc > permissions > tab.list`
+##### <a name="settings_ipc_permissions_clipboardselect"></a>2.11.2.6. Property `Rovr Config > settings > ipc > permissions > clipboard.select`
+
+|                |                         |
+| -------------- | ----------------------- |
+| **Type**       | `enum (of string)`      |
+| **Required**   | No                      |
+| **Default**    | `"allow"`               |
+| **Defined in** | #/definitions/ipc_perms |
+
+**Description:** Control selecting an item from the clipboard
+
+Must be one of:
+
+- "allow"
+- "prompt"
+- "deny"
+
+##### <a name="settings_ipc_permissions_clipboardunselect"></a>2.11.2.7. Property `Rovr Config > settings > ipc > permissions > clipboard.unselect`
+
+|                |                         |
+| -------------- | ----------------------- |
+| **Type**       | `enum (of string)`      |
+| **Required**   | No                      |
+| **Default**    | `"allow"`               |
+| **Defined in** | #/definitions/ipc_perms |
+
+**Description:** Control unselecting an item from the clipboard
+
+Must be one of:
+
+- "allow"
+- "prompt"
+- "deny"
+
+##### <a name="settings_ipc_permissions_clipboardremove"></a>2.11.2.8. Property `Rovr Config > settings > ipc > permissions > clipboard.remove`
+
+|                |                         |
+| -------------- | ----------------------- |
+| **Type**       | `enum (of string)`      |
+| **Required**   | No                      |
+| **Default**    | `"prompt"`              |
+| **Defined in** | #/definitions/ipc_perms |
+
+**Description:** Control removing an item from the clipboard
+
+Must be one of:
+
+- "allow"
+- "prompt"
+- "deny"
+
+##### <a name="settings_ipc_permissions_tablist"></a>2.11.2.9. Property `Rovr Config > settings > ipc > permissions > tab.list`
 
 |                |                         |
 | -------------- | ----------------------- |
@@ -2268,7 +2322,7 @@ Must be one of:
 - "prompt"
 - "deny"
 
-##### <a name="settings_ipc_permissions_tabnew"></a>2.11.2.7. Property `Rovr Config > settings > ipc > permissions > tab.new`
+##### <a name="settings_ipc_permissions_tabnew"></a>2.11.2.10. Property `Rovr Config > settings > ipc > permissions > tab.new`
 
 |                |                         |
 | -------------- | ----------------------- |
@@ -2285,7 +2339,7 @@ Must be one of:
 - "prompt"
 - "deny"
 
-##### <a name="settings_ipc_permissions_tabfocus"></a>2.11.2.8. Property `Rovr Config > settings > ipc > permissions > tab.focus`
+##### <a name="settings_ipc_permissions_tabfocus"></a>2.11.2.11. Property `Rovr Config > settings > ipc > permissions > tab.focus`
 
 |                |                         |
 | -------------- | ----------------------- |
@@ -2302,7 +2356,7 @@ Must be one of:
 - "prompt"
 - "deny"
 
-##### <a name="settings_ipc_permissions_tabclose"></a>2.11.2.9. Property `Rovr Config > settings > ipc > permissions > tab.close`
+##### <a name="settings_ipc_permissions_tabclose"></a>2.11.2.12. Property `Rovr Config > settings > ipc > permissions > tab.close`
 
 |                |                         |
 | -------------- | ----------------------- |
@@ -2319,7 +2373,7 @@ Must be one of:
 - "prompt"
 - "deny"
 
-##### <a name="settings_ipc_permissions_tabhistory"></a>2.11.2.10. Property `Rovr Config > settings > ipc > permissions > tab.history`
+##### <a name="settings_ipc_permissions_tabhistory"></a>2.11.2.13. Property `Rovr Config > settings > ipc > permissions > tab.history`
 
 |                |                         |
 | -------------- | ----------------------- |
@@ -2336,7 +2390,7 @@ Must be one of:
 - "prompt"
 - "deny"
 
-##### <a name="settings_ipc_permissions_themelist"></a>2.11.2.11. Property `Rovr Config > settings > ipc > permissions > theme.list`
+##### <a name="settings_ipc_permissions_themelist"></a>2.11.2.14. Property `Rovr Config > settings > ipc > permissions > theme.list`
 
 |                |                         |
 | -------------- | ----------------------- |
@@ -2353,7 +2407,7 @@ Must be one of:
 - "prompt"
 - "deny"
 
-##### <a name="settings_ipc_permissions_themequery"></a>2.11.2.12. Property `Rovr Config > settings > ipc > permissions > theme.query`
+##### <a name="settings_ipc_permissions_themequery"></a>2.11.2.15. Property `Rovr Config > settings > ipc > permissions > theme.query`
 
 |                |                         |
 | -------------- | ----------------------- |
@@ -2370,7 +2424,7 @@ Must be one of:
 - "prompt"
 - "deny"
 
-##### <a name="settings_ipc_permissions_themeset"></a>2.11.2.13. Property `Rovr Config > settings > ipc > permissions > theme.set`
+##### <a name="settings_ipc_permissions_themeset"></a>2.11.2.16. Property `Rovr Config > settings > ipc > permissions > theme.set`
 
 |                |                         |
 | -------------- | ----------------------- |
@@ -2387,7 +2441,7 @@ Must be one of:
 - "prompt"
 - "deny"
 
-##### <a name="settings_ipc_permissions_quit"></a>2.11.2.14. Property `Rovr Config > settings > ipc > permissions > quit`
+##### <a name="settings_ipc_permissions_quit"></a>2.11.2.17. Property `Rovr Config > settings > ipc > permissions > quit`
 
 |                |                         |
 | -------------- | ----------------------- |
@@ -2404,7 +2458,7 @@ Must be one of:
 - "prompt"
 - "deny"
 
-##### <a name="settings_ipc_permissions_suspend"></a>2.11.2.15. Property `Rovr Config > settings > ipc > permissions > suspend`
+##### <a name="settings_ipc_permissions_suspend"></a>2.11.2.18. Property `Rovr Config > settings > ipc > permissions > suspend`
 
 |                |                         |
 | -------------- | ----------------------- |
@@ -2421,7 +2475,7 @@ Must be one of:
 - "prompt"
 - "deny"
 
-##### <a name="settings_ipc_permissions_notify"></a>2.11.2.16. Property `Rovr Config > settings > ipc > permissions > notify`
+##### <a name="settings_ipc_permissions_notify"></a>2.11.2.19. Property `Rovr Config > settings > ipc > permissions > notify`
 
 |                |                             |
 | -------------- | --------------------------- |
@@ -2437,7 +2491,7 @@ Must be one of:
 - "allow"
 - "deny"
 
-##### <a name="settings_ipc_permissions_ask"></a>2.11.2.17. Property `Rovr Config > settings > ipc > permissions > ask`
+##### <a name="settings_ipc_permissions_ask"></a>2.11.2.20. Property `Rovr Config > settings > ipc > permissions > ask`
 
 |                |                             |
 | -------------- | --------------------------- |
@@ -2453,7 +2507,7 @@ Must be one of:
 - "allow"
 - "deny"
 
-##### <a name="settings_ipc_permissions_input"></a>2.11.2.18. Property `Rovr Config > settings > ipc > permissions > input`
+##### <a name="settings_ipc_permissions_input"></a>2.11.2.21. Property `Rovr Config > settings > ipc > permissions > input`
 
 |                |                             |
 | -------------- | --------------------------- |

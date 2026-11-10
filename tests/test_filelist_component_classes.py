@@ -9,8 +9,9 @@ import pytest
 from textual.worker import Worker
 
 from rovr.app import Application
-from rovr.classes.textual_options import ClipboardSelection, FileListSelectionWidget
-from rovr.footer.clipboard_container import Clipboard
+from rovr.classes.textual_options import FileListSelectionWidget
+from rovr.footer.clipboard_container import ClipboardSelectionMark
+from rovr.functions.icons import get_icon, get_toggle_button_icon
 from rovr.variables.constants import config
 
 
@@ -121,8 +122,6 @@ async def test_checked_component_style_preserves_file_style(tmp_path: Path) -> N
                 "selection-list--option-checked"
             ).get_rules()
         )
-        assert "selection-list--option-checked" in Clipboard.COMPONENT_CLASSES
-
         combined_style = app.file_list.get_visual_style(
             "option-list--option", *classes, "filelist--cut--highlighted"
         )
@@ -137,23 +136,30 @@ async def test_checked_component_style_preserves_file_style(tmp_path: Path) -> N
 
 
 @pytest.mark.asyncio
-async def test_checked_clipboard_option_renders(tmp_path: Path) -> None:
+async def test_active_clipboard_block_renders_indicator(tmp_path: Path) -> None:
     file_path = tmp_path / "checked.txt"
     file_path.touch()
 
     app = Application(tmp_path.as_posix())
     async with app.run_test(size=(143, 37)) as pilot:
         await pilot.pause()
-        option = ClipboardSelection(
-            prompt=str(file_path),
-            text=str(file_path),
-            type_of_selection="copy",
-        )
-        app.Clipboard.insert_selection_at_beginning(option)
-        app.Clipboard.select(option)
+        await app.Clipboard.copy_to_clipboard([str(file_path)]).wait()
         await pilot.pause()
 
-        assert app.Clipboard._get_option_component_classes(option) == [
-            "selection-list--option-checked"
-        ]
-        assert app.Clipboard.render_line(0).text.strip()
+        mark = app.Clipboard.query_one(ClipboardSelectionMark)
+        assert mark.selected
+        assert mark.operation_icon == get_icon("general", "copy")[0]
+
+        other_file = tmp_path / "other.txt"
+        await app.Clipboard.cut_to_clipboard([str(file_path), str(other_file)]).wait()
+        await pilot.pause()
+
+        block = app.Clipboard.options[0]
+        mark = block.query_one(ClipboardSelectionMark)
+        rows = list(block.query(".clipboard-path"))
+        assert mark.operation_icon is None
+        assert str(rows[1].render()).startswith(
+            get_toggle_button_icon("left")
+            + get_icon("general", "cut")[0]
+            + get_toggle_button_icon("right")
+        )

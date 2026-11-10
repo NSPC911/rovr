@@ -82,10 +82,13 @@ Filesystem errors from rovr are returned as errors.
 ### `clipboard`
 
 ```sh
-rovr --ipc clipboard copy [--selection keep|add|replace] <path>...
-rovr --ipc clipboard cut [--selection keep|add|replace] <path>...
+rovr --ipc clipboard copy [--select] <path>...
+rovr --ipc clipboard cut [--select] <path>...
 rovr --ipc clipboard paste
 rovr --ipc clipboard list
+rovr --ipc clipboard remove <index>
+rovr --ipc clipboard select <index>
+rovr --ipc clipboard unselect
 ```
 
 `copy` and `cut` add existing paths to rovr's clipboard. They return paths that did not exist.
@@ -97,11 +100,7 @@ rovr --ipc clipboard list
 }
 ```
 
-`--selection` defaults to `keep`
-
-- `keep`: keeps current selections and do not select added items
-- `add`: selects the added items
-- `replace`: selects only the added items.
+`--select` marks the new entry as selected. This is not the default for IPC, you must provide it explicitly. The selection is used by `paste` to determine which entries to paste.
 
 `paste` pastes selected clipboard entries into the current directory and returns counts, not destination paths:
 
@@ -117,18 +116,43 @@ rovr --ipc clipboard list
 
 if the user intervenes due to errors, returns with `"ok": false`
 
-`list` returns every clipboard entry with its type and whether it is selected:
+`list` returns the clipboard's entries, including their type, paths, and whether they are selected:
 
 ```json title="list"
 {
   "ok": true,
   "out": [
     {
-      "path": "/path/to/file",
       "type": "copy",
-      "selected": true
+      "paths": ["/path/to/file", "/path/to/other/file"],
+      "active": true
     }
   ]
+}
+```
+
+`remove` removes an entry by its index in the list. Invalid indexes return `"index out of range"`. Missing or non-integer indexes return `"index must be an integer"`.
+
+```json title="remove"
+{
+  "ok": true
+}
+```
+
+`select` selects an entry by its index in the list. Invalid indexes return `"index out of range"`. Missing or non-integer indexes return `"index must be an integer"`.
+
+```json title="select"
+{
+  "ok": true
+}
+```
+
+`unselect` clears the selected entry and returns its former index. If no entry is selected, it returns `"no selection to unselect"`.
+
+```json title="unselect"
+{
+  "ok": true,
+  "out": 0
 }
 ```
 

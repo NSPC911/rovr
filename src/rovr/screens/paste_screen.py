@@ -17,17 +17,15 @@ class PasteScreen(YesOrNo):
     def __init__(
         self,
         message: str,
-        paths: dict[Literal["copy", "cut"], list[str]],
-        destructive: bool = False,
+        paths: list[str],
+        type_of_selection: Literal["copy", "cut"],
         with_toggle: bool = False,
         border_title: str = "",
         border_subtitle: str = "",
     ) -> None:
-        super().__init__(message, destructive, with_toggle, border_title, border_subtitle)
+        super().__init__(message, True, with_toggle, border_title, border_subtitle)
         self.paths = paths
-        self.options = [
-            PasteScreenOption(path, "copy") for path in self.paths["copy"]
-        ] + [PasteScreenOption(path, "cut") for path in self.paths["cut"]]
+        self.options = [PasteScreenOption(path, type_of_selection) for path in paths]
 
     def compose(self) -> ComposeResult:
         yes_bind = get_shortcut("yes_or_no", "yes")

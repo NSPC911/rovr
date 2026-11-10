@@ -2,12 +2,11 @@ from __future__ import annotations
 
 from functools import lru_cache
 from os import DirEntry, path
-from typing import Callable, Literal, Mapping, NamedTuple, TypeAlias
+from typing import Any, Callable, Literal, Mapping, NamedTuple, TypeAlias
 
 import rich.repr
 from textual.content import Content
 from textual.visual import Visual, VisualType
-from textual.widgets import SelectionList
 from textual.widgets.option_list import Option
 from textual.widgets.selection_list import Selection, SelectionType
 from textual_autocomplete import DropdownItem
@@ -15,7 +14,7 @@ from textual_autocomplete import DropdownItem
 from rovr.functions import details as detail_utils
 from rovr.functions import icons as icon_utils
 from rovr.functions.cwd import getcwd
-from rovr.functions.path import control, is_hidden_file, normalise
+from rovr.functions.path import control, is_hidden_file
 
 IconFactory: TypeAlias = Callable[[], tuple[str, str]]
 
@@ -178,7 +177,7 @@ class FileListSelectionWidget(LazySelection):
         icon_factory: IconFactory,
         label: str,
         dir_entry: DirEntry,
-        clipboard: SelectionList,
+        clipboard: Any,
         disabled: bool = False,
     ) -> None:
         """
@@ -249,7 +248,7 @@ class FileListSelectionWidget(LazySelection):
         if is_hidden_file(self.dir_entry):
             classes.append("filelist--hidden")
 
-        if (normalise(file_path), "cut") in self.__clipboard._selected:
+        if self.__clipboard.is_cut(file_path):
             classes.append("filelist--cut")
 
         return classes
@@ -266,43 +265,6 @@ class FileListSelectionWidget(LazySelection):
 class ClipboardSelectionValue(NamedTuple):
     path: str
     type_of_selection: Literal["copy", "cut"]
-
-
-class ClipboardSelection(Selection):
-    def __init__(
-        self,
-        prompt: str,
-        text: str,
-        type_of_selection: Literal["copy", "cut"],
-    ) -> None:
-        """
-        Initialise the selection.
-
-        Args:
-            prompt: The prompt for the selection.
-            text: The value for the selection.
-            type_of_selection: The type of selection ("cut" or "copy")
-
-        Raises:
-            ValueError:
-        """
-        if type_of_selection not in ["copy", "cut"]:
-            raise ValueError(
-                f"type_of_selection must be either 'copy' or 'cut' and not {type_of_selection}"
-            )
-        super().__init__(
-            prompt=control(prompt),
-            value=ClipboardSelectionValue(text, type_of_selection),
-            # in the future, if we want persistent clipboard,
-            # we will have to switch to use path.compress
-            id=str(id(self)),
-        )
-        self.initial_prompt = prompt
-
-    @property
-    def value(self) -> ClipboardSelectionValue:
-        """The value for this selection."""
-        return self._value
 
 
 class KeybindOption(Option):

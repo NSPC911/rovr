@@ -5,7 +5,7 @@ from pathlib import Path
 from shutil import move
 
 import pytest
-from textual.widgets import OptionList, SelectionList
+from textual.widgets import OptionList
 
 from rovr.action_buttons import (
     CopyButton,
@@ -37,23 +37,11 @@ async def test_copy_button(tmp_path: Path) -> None:
         await pilot.click(CopyButton)
         await pilot.pause()
         assert len(app.Clipboard.options) == 1
-        assert (
-            app
-            .query_one("Clipboard", SelectionList)
-            .get_option_at_index(0)
-            .value.type_of_selection
-            == "copy"
-        )
+        assert app.Clipboard.options[0].type_of_selection == "copy"
         await pilot.click(CopyButton)
         await pilot.pause()
         assert len(app.Clipboard.options) == 1
-        assert (
-            app
-            .query_one("Clipboard", SelectionList)
-            .get_option_at_index(0)
-            .value.type_of_selection
-            == "copy"
-        )
+        assert app.Clipboard.options[0].type_of_selection == "copy"
 
 
 @pytest.mark.asyncio
@@ -65,23 +53,11 @@ async def test_cut_button(tmp_path: Path) -> None:
         await pilot.click(CutButton)
         await pilot.pause()
         assert len(app.Clipboard.options) == 1
-        assert (
-            app
-            .query_one("Clipboard", SelectionList)
-            .get_option_at_index(0)
-            .value.type_of_selection
-            == "cut"
-        )
+        assert app.Clipboard.options[0].type_of_selection == "cut"
         await pilot.click(CutButton)
         await pilot.pause()
         assert len(app.Clipboard.options) == 1
-        assert (
-            app
-            .query_one("Clipboard", SelectionList)
-            .get_option_at_index(0)
-            .value.type_of_selection
-            == "cut"
-        )
+        assert app.Clipboard.options[0].type_of_selection == "cut"
 
 
 @pytest.mark.asyncio
@@ -95,13 +71,7 @@ async def test_copy_to_cut(tmp_path: Path) -> None:
         await pilot.click(CutButton)
         await pilot.pause()
         assert len(app.Clipboard.options) == 1
-        assert (
-            app
-            .query_one("Clipboard", SelectionList)
-            .get_option_at_index(0)
-            .value.type_of_selection
-            == "cut"
-        )
+        assert app.Clipboard.options[0].type_of_selection == "cut"
 
 
 @pytest.mark.asyncio
@@ -115,13 +85,7 @@ async def test_cut_to_copy(tmp_path: Path) -> None:
         await pilot.click(CopyButton)
         await pilot.pause()
         assert len(app.Clipboard.options) == 1
-        assert (
-            app
-            .query_one("Clipboard", SelectionList)
-            .get_option_at_index(0)
-            .value.type_of_selection
-            == "copy"
-        )
+        assert app.Clipboard.options[0].type_of_selection == "copy"
 
 
 @pytest.mark.asyncio
@@ -206,7 +170,7 @@ async def test_move_and_delete_broken_symlink(tmp_path: Path) -> None:
     async with app.run_test(size=(143, 37)):
         process_container = app.query_one(ProcessContainer)
         worker = process_container.paste_items(
-            copied=[], has_cut=[link.as_posix()], dest=destination.as_posix()
+            "cut", [link.as_posix()], destination.as_posix()
         )
         await worker.wait()
 
@@ -221,9 +185,8 @@ async def test_move_and_delete_broken_symlink(tmp_path: Path) -> None:
 
 @pytest.mark.parametrize("link_type", ["symlink", "junction"])
 @pytest.mark.parametrize("nested", [False, True])
-@pytest.mark.parametrize("delete_method", ["delete_files", "permanently_delete_item"])
 async def test_delete_directory_link_preserves_target(
-    tmp_path: Path, link_type: str, nested: bool, delete_method: str
+    tmp_path: Path, link_type: str, nested: bool
 ) -> None:
     from rovr.footer.process_container import ProcessContainer
 
@@ -256,11 +219,8 @@ async def test_delete_directory_link_preserves_target(
     app = Application(startup_path=source.as_posix())
     async with app.run_test(size=(143, 37)):
         process_container = app.query_one(ProcessContainer)
-        if delete_method == "delete_files":
-            worker = process_container.delete_files([selected.as_posix()])
-            await worker.wait()
-        else:
-            process_container.permanently_delete_item(selected.as_posix())
+        worker = process_container.delete_files([selected.as_posix()])
+        await worker.wait()
         assert not os.path.lexists(selected)
         assert target_file.read_text() == "keep me"
 

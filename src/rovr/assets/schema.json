@@ -604,7 +604,7 @@
                 },
                 "command": {
                   "$ref": "#/definitions/run",
-                  "description": "The command to run to generate the preview.\nCommand expansions are supported except %s, %t, %cut and %copy. %file is the resolved output path from file; %tmpdir is a temporary directory removed after the command finishes."
+                  "description": "The command to run to generate the preview.\nCommand expansions are supported except %s, %t, %clip. %file is the resolved output path from file; %tmpdir is a temporary directory removed after the command finishes."
                 },
                 "file": {
                   "default": "__stdout__",
@@ -741,6 +741,21 @@
                   "$ref": "#/definitions/ipc_perms",
                   "default": "prompt",
                   "description": "Control pasting from the clipboard"
+                },
+                "clipboard.select": {
+                  "$ref": "#/definitions/ipc_perms",
+                  "default": "allow",
+                  "description": "Control selecting an item from the clipboard"
+                },
+                "clipboard.unselect": {
+                  "$ref": "#/definitions/ipc_perms",
+                  "default": "allow",
+                  "description": "Control unselecting an item from the clipboard"
+                },
+                "clipboard.remove": {
+                  "$ref": "#/definitions/ipc_perms",
+                  "default": "prompt",
+                  "description": "Control removing an item from the clipboard"
                 },
                 "tab.list": {
                   "$ref": "#/definitions/ipc_perms",

@@ -26,6 +26,20 @@ def test_compress_decompress() -> None:
     assert decompressed == the_path
 
 
+@pytest.mark.parametrize(
+    "the_path",
+    [
+        "???",
+        ">>>",
+        "a?b?c",
+        "\xff\u00fe",
+    ],
+)
+def test_compress_decompress_roundtrip(the_path: str) -> None:
+    """compress/decompress must roundtrip text whose encoding contains '_'."""
+    assert path_utils.decompress(path_utils.compress(the_path)) == the_path
+
+
 def test_extension_sort_key() -> None:
     files = [
         {"name": "file.txt"},

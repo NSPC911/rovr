@@ -309,6 +309,7 @@ class Application(
             if config["interface"].get("compact_mode", {}).get("panels", False)
             else " comfy-panels"
         )
+        yield StateManager()
         with Vertical(id="root", classes=root_classes.strip()):
             header = HeaderArea(self._startup_locations)
             self.tabWidget = header.tabline
@@ -343,7 +344,6 @@ class Application(
                 yield ProcessContainer().data_bind(Application.theme)
                 yield MetadataContainer()
                 yield self.Clipboard
-            yield StateManager()
 
     def on_mount(self) -> None:
         # necessary for zellij related nonsense

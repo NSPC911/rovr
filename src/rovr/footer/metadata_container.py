@@ -91,6 +91,12 @@ class MetadataContainer(VerticalScroll, inherit_bindings=False):
         else:
             self._perform_update(dir_entry)
 
+    @staticmethod
+    def strftime(timestamp: float) -> str:
+        return datetime.fromtimestamp(timestamp).strftime(
+            config["metadata"]["datetime_format"]
+        )
+
     @work(thread=True)
     def _perform_update(self, dir_entry: DirEntry) -> None:
         """
@@ -152,77 +158,60 @@ class MetadataContainer(VerticalScroll, inherit_bindings=False):
         # got the type, now we follow
         is_hidden = is_hidden_file(dir_entry)
 
-        values_list = []
+        values_list: list[tuple[str, str]] = []
         for field in config["metadata"]["fields"]:
             try:
                 match field:
                     case "type":
-                        values_list.append(Static(type_str))
+                        values_list.append((type_str, field))
                     case "permissions":
-                        values_list.append(Static(file_info))
+                        values_list.append((file_info, field))
                     case "hidden":
-                        values_list.append(Static("Yes" if is_hidden else "No"))
+                        values_list.append(("Yes" if is_hidden else "No", field))
                     case "size":
-                        values_list.append(
-                            Static(
-                                utils.natural_size(
-                                    file_stat.st_size,
-                                    config["metadata"]["filesize_suffix"],
-                                    config["metadata"]["filesize_decimals"],
-                                )
-                                if type_str == "File"
-                                else "--",
-                                id="metadata-size",
+                        values_list.append((
+                            utils.natural_size(
+                                file_stat.st_size,
+                                config["metadata"]["filesize_suffix"],
+                                config["metadata"]["filesize_decimals"],
                             )
-                        )
+                            if type_str == "File"
+                            else "--",
+                            "metadata-size",
+                        ))
                     case "modified":
-                        values_list.append(
-                            Static(
-                                datetime.fromtimestamp(file_stat.st_mtime).strftime(
-                                    config["metadata"]["datetime_format"]
-                                )
-                            )
-                        )
+                        values_list.append((self.strftime(file_stat.st_mtime), field))
                     case "accessed":
-                        values_list.append(
-                            Static(
-                                datetime.fromtimestamp(file_stat.st_atime).strftime(
-                                    config["metadata"]["datetime_format"]
-                                )
-                            )
-                        )
+                        values_list.append((self.strftime(file_stat.st_atime), field))
                     case "created":
                         birthtime = get_birthtime(dir_entry)
-                        values_list.append(
-                            Static(
-                                datetime.fromtimestamp(birthtime).strftime(
-                                    config["metadata"]["datetime_format"]
-                                )
-                                if birthtime is not None
-                                else "--"
-                            )
-                        )
+                        values_list.append((
+                            self.strftime(birthtime) if birthtime is not None else "--",
+                            field,
+                        ))
                     case "mime":
                         option = self._current_option
                         mime_str = (
                             option.mime_type
-                            if isinstance(option, FileListSelectionWidget)
+                            if type(option) is FileListSelectionWidget
                             and option.dir_entry.path == dir_entry.path
                             and option.mime_type is not None
                             else "--"
                         )
-                        values_list.append(Static(mime_str, id="metadata-mime"))
+                        values_list.append((mime_str, "metadata-mime"))
             except OSError as exc:
                 # can appear here because of stupid nt epoch stuff
-                if exc.errno in (22, 23, 123):
-                    values_list.append(Static("Invalid date"))
-        values = VerticalGroup(*values_list, id="metadata-values")
+                import errno
+
+                if exc.errno == errno.EINVAL:
+                    values_list.append(("Invalid date", field))
 
         try:
             for index, child_widget in enumerate(
-                self.query_one("#metadata-values").children
+                self.query_one("#metadata-values", VerticalGroup).children
             ):
-                self.app.call_from_thread(child_widget.update, values_list[index].content)
+                if child_widget.content != values_list[index][0]:
+                    self.app.call_from_thread(child_widget.update, values_list[index][0])
         except NoMatches:
             if self.any_in_queue() or not self.is_attached:
                 return
@@ -250,6 +239,10 @@ class MetadataContainer(VerticalScroll, inherit_bindings=False):
                         keys_list.append(Static("MIME"))
             keys = VerticalGroup(*keys_list, id="metadata-keys")
             try:
+                values = VerticalGroup(
+                    *(Static(c, id=d) for c, d in values_list),
+                    id="metadata-values",
+                )
                 self.app.call_from_thread(self.mount, keys, values)
             except MountError:
                 if self.app.return_code is not None:

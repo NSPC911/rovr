@@ -527,6 +527,7 @@ class FileList(
                         "index": self.get_option_index(option_id),
                     })
                     for option_id in self._selected
+                    if option_id in self._id_to_option
                 ]
             self.set_options(self.list_of_options)
             self._using_session = session
@@ -706,6 +707,8 @@ class FileList(
                     self.highlighted = 0
                 self.app.tabWidget.active_tab.selectedItems = []
         elif not self.select_mode:
+            if not self._selected:
+                return
             # before opening, check whether the basedir is cwd
             full_path = selected_option.dir_entry.path
             if path.dirname(full_path) != cwd:
@@ -808,6 +811,9 @@ class FileList(
             and not self.select_mode
         ):
             return
+        if self.get_option_at_index(0).disabled and self.select_mode:
+            self.select_mode = False
+            mode = None
         if mode is not None:
             if self.select_mode:
                 self.select_mode = False
@@ -1054,7 +1060,9 @@ class FileList(
         await self.app.query_one("SortOrderButton").action_open_popup()
 
     async def action_toggle_visual(self) -> None:
-        if self.highlighted_option:
+        # check highlighted_option (which means filelist is not empty)
+        # or select mode (if somehow user enters select mode)
+        if self.highlighted_option or self.select_mode:
             await self.toggle_mode()
 
     async def action_toggle_all(self) -> None:
@@ -1080,13 +1088,12 @@ class FileList(
             self._message_changed()
 
     async def implicit_selector(self, ver: Literal["pre", "post"]) -> bool:
-        if config["interface"]["allow_auto_select_mode"] and (
-            (ver == "pre" and not self.select_mode)
-            or (
-                ver == "post"
-                and self.select_mode == "implicit"
-                and not self.selected_options
-            )
+        if (
+            ver == "pre"
+            and config["interface"]["allow_auto_select_mode"]
+            and not self.select_mode
+        ) or (
+            ver == "post" and self.select_mode == "implicit" and not self.selected_options
         ):
             await self.toggle_mode("implicit")
         return bool(self.select_mode)

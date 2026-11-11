@@ -362,11 +362,11 @@ class CursorNavigationMixin:
 
 class SelectionNavigationMixin(CursorNavigationMixin):
     async def _select_to(self, destination: int | None) -> None:
+        if destination is None:
+            return
         func = getattr(self, "implicit_selector", lambda x: None)("pre")
         if isinstance(func, Awaitable):
             await func
-        if destination is None:
-            return
 
         start = self.highlighted if self.highlighted is not None else destination
         changed = False

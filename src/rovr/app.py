@@ -1101,6 +1101,18 @@ class Application(
         else:
             self.file_list.focus()
 
+    def action_toggle_maximize(self, selector: str) -> None:
+        if self.screen.maximized is not None:
+            self.screen.action_minimize()
+            self.file_list.focus()
+        else:
+            try:
+                widget = self.query_one(selector)
+                widget.focus()
+                self.screen.maximize(widget)
+            except NoMatches:
+                self.notify(f"Widget with {selector = } cannot be found")
+
     def action_focus_toggle_path_switcher(self) -> None:
         if (path_switcher := self.query_one("#path_switcher")).has_focus:
             self.file_list.focus()
@@ -1343,6 +1355,15 @@ class Application(
                 self.file_list.update_file_list(add_to_session=False)
 
         self.push_screen(TrashScreen(), callback=callback)
+
+    def check_action(self, action: str, parameters: tuple[object, ...]) -> bool | None:
+        if action == "toggle_maximize" and len(parameters) == 1:
+            try:
+                return self.screen.query_one(parameters[0]).allow_maximize
+            except NoMatches:
+                self.notify(f"{parameters[0]} is not available on current screen", markup=False)
+                return None
+        return super().check_action(action, parameters)
 
     @on(events.MouseDown)
     async def on_mouse_down_extra_buttons(self, event: events.MouseDown) -> None:

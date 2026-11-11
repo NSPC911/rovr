@@ -7,6 +7,7 @@ import stat
 import subprocess
 import sys
 import time
+import zipfile
 from functools import partial
 from os import path
 from threading import get_ident
@@ -665,7 +666,11 @@ class ProcessContainer(Actionable, VerticalScroll):
         from multiarchive import Archive
 
         start = getcwd()
-        bar = ProgressBarContainer(label="Getting files to archive...", classes="active")
+        bar = ProgressBarContainer(
+            label="Getting files to archive...",
+            classes="active",
+            advance_interval=0.25,
+        )
         self.mount_bar(bar)
         bar.set_icon(icons.get_icon("general", "zip")[0])
         files_to_archive: list[path_utils.FileObj] = []
@@ -683,7 +688,11 @@ class ProcessContainer(Actionable, VerticalScroll):
                 if not os.listdir(folder)
             )
 
-        bar.set_progress(total=len(files_to_archive) + 1, progress=0)
+        sizes = [
+            path.getsize(obj["path"]) if path.isfile(obj["path"]) else 0
+            for obj in files_to_archive
+        ]
+        bar.set_progress(total=sum(sizes) + 1, progress=0)
         onerr = lambda e: bar.panic({
             "message": f"Failed to create archive {archive_name} due to {e!r}",
             "subtitle": "Press any key to dismiss.",
@@ -693,12 +702,27 @@ class ProcessContainer(Actionable, VerticalScroll):
             dump_on_exc(self, Exception, other_callers=onerr),
             Archive(archive_name, algo, "w", level, strict_timestamps=True) as archive,
         ):
-            for obj in files_to_archive:
+            for obj, size in zip(files_to_archive, sizes):
                 if panic_cancel(bar):
                     break
                 bar.set_text(display_path(obj["path"], start))
-                archive.add(obj["path"], obj["relative_loc"])
-                bar.advance()
+                if algo == "zip":
+                    info = zipfile.ZipInfo.from_file(
+                        obj["path"], obj["relative_loc"], strict_timestamps=True
+                    )
+                    info.compress_type = zipfile.ZIP_DEFLATED
+                    info.compress_level = level
+                    target = archive.open(info, "w")
+                    assert target is not None
+                    with target:
+                        if not info.is_dir():
+                            with open(obj["path"], "rb") as source:
+                                while chunk := source.read(1024 * 1024):
+                                    target.write(chunk)
+                                    bar.advance(len(chunk))
+                else:
+                    archive.add(obj["path"], obj["relative_loc"])
+                    bar.advance(size)
         bar.ok()
 
     @work(thread=True)

@@ -37,15 +37,15 @@ class ZipButton(Button):
             )
             return
 
-        parent_folder_name = path.basename(getcwd())
-        default_zip_name = f"{parent_folder_name}.zip"
+        if len(selected_files) == 1:
+            default_zip_name = f"{path.basename(selected_files[0])}.zip"
+        else:
+            default_zip_name = f"{path.basename(getcwd())}.zip"
 
         response = await self.app.push_screen(
             screens.ArchiveCreationScreen(
                 initial_value=default_zip_name,
-                validators=[
-                    IsValidFilePath(),
-                ],
+                validators=[IsValidFilePath()],
                 is_path=True,
             ),
             wait_for_dismiss=True,

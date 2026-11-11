@@ -1,28 +1,24 @@
 from functools import lru_cache
 from inspect import isawaitable
-from typing import Any, Awaitable, Callable, ClassVar, Iterable, NamedTuple, Self, cast
+from typing import Any, Awaitable, Callable, ClassVar, NamedTuple, cast
 
 from rich.cells import cell_len
 from rich.segment import Segment
 from rich.style import Style
 from textual.actions import SkipAction
 from textual.color import Color
-from textual.content import ContentText
 from textual.events import Key
 from textual.geometry import Region, Size, clamp
 from textual.strip import Strip
 from textual.style import Style as VisualStyle
 from textual.widgets import OptionList, SelectionList
 from textual.widgets.option_list import Option, OptionDoesNotExist
-from textual.widgets.selection_list import Selection, SelectionType
+from textual.widgets.selection_list import Selection
 
-from rovr.classes.textual_options import LazySelection
 from rovr.functions import details as detail_utils
 from rovr.functions import icons as icon_utils
 from rovr.functions.utils import check_key
-from rovr.variables.constants import (
-    config,
-)
+from rovr.variables.constants import config
 
 
 @lru_cache(maxsize=2048)
@@ -449,33 +445,6 @@ class ScrollOffMixin:
                 top=top,
                 immediate=immediate,
             )
-
-
-class SetOptionsSelectionList:
-    def set_options(
-        self,
-        options: Iterable[
-            Selection[SelectionType]
-            | LazySelection[SelectionType]
-            | tuple[ContentText, SelectionType]
-            | tuple[ContentText, SelectionType, bool]
-        ],
-    ) -> Self:
-        # Okay, lemme make myself clear here.
-        # A PR for this is already open at
-        # https://github.com/Textualize/textual/pull/6224
-        # essentially, the issue is that there isnt a set_options
-        # method for SelectionList, only for OptionList, but using
-        # OptionList's set_options doesnt clear selected or values
-        # but nothing was done, so I added it myself.
-        self._selected.clear()
-        self._values.clear()
-        # the ty ignore is important here, because options
-        # should be a Iterable["Option | VisualType | None"]
-        # but that isnt the case (based on the signature)
-        # so ty is crashing out.
-        super().set_options(options)
-        return self
 
 
 class Action(NamedTuple):

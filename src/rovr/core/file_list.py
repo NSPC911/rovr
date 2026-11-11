@@ -23,7 +23,6 @@ from rovr.classes.mixins import (
     DetailColumnRenderingMixin,
     ScrollOffMixin,
     SelectionNavigationMixin,
-    SetOptionsSelectionList,
     SingleLineOptionLayoutMixin,
 )
 from rovr.classes.session_manager import SessionManager, SessionOptionDict
@@ -62,7 +61,6 @@ class FileList(
     ScrollOffMixin,
     SelectionNavigationMixin,
     SingleLineOptionLayoutMixin,
-    SetOptionsSelectionList,
     SelectionList,
     inherit_bindings=False,
 ):

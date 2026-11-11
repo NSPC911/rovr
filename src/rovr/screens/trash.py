@@ -20,7 +20,6 @@ from rovr.classes.mixins import (
     CheckboxRenderingMixin,
     DetailColumnRenderingMixin,
     SelectionNavigationMixin,
-    SetOptionsSelectionList,
     SingleLineOptionLayoutMixin,
 )
 from rovr.functions import details as detail_utils
@@ -85,7 +84,6 @@ class TrashSelectionList(
     DetailColumnRenderingMixin,
     SelectionNavigationMixin,
     SingleLineOptionLayoutMixin,
-    SetOptionsSelectionList,
     SelectionList,
     inherit_bindings=False,
 ):

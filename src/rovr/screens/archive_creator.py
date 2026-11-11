@@ -11,7 +11,6 @@ from textual.widgets.selection_list import Selection
 from rovr.classes.mixins import (
     CheckboxRenderingMixin,
     SelectionNavigationMixin,
-    SetOptionsSelectionList,
 )
 from rovr.functions.utils import dismiss
 from rovr.variables.constants import bindings
@@ -59,7 +58,6 @@ class ArchiveTypes(
 class ArchiveCompression(
     CheckboxRenderingMixin,
     SelectionNavigationMixin,
-    SetOptionsSelectionList,
     SelectionList,
     inherit_bindings=False,
 ):

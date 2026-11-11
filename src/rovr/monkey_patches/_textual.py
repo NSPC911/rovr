@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from functools import lru_cache
-from typing import IO, Iterable, cast
+from typing import IO, Iterable, Self, cast
 
 from PIL import Image as PILImage
 from rich.color import Color
@@ -19,7 +19,7 @@ from textual._xterm_parser import (
     XTermParser,
     _re_extended_key,
 )
-from textual.content import Content
+from textual.content import Content, ContentText
 from textual.css.types import EdgeType
 from textual.geometry import Region, Size
 from textual.keys import _character_to_key
@@ -28,13 +28,15 @@ from textual.message import Message
 from textual.scrollbar import ScrollBar
 from textual.style import Style as TStyle
 from textual.widget import Widget
-from textual.widgets import Input
+from textual.widgets import Input, SelectionList
+from textual.widgets.selection_list import Selection, SelectionType
 from textual_image import _pixeldata
 from textual_image._geometry import ImageSize
 from textual_image._terminal import get_cell_size
 from textual_image._utils import StrOrBytesPath, grouped
 from textual_image.renderable import halfcell
 
+from rovr.classes.textual_options import LazySelection
 from rovr.variables.constants import RESAMPLING_METHOD
 
 # ---------------------------- textual-image monkey patches -----------------------------
@@ -376,3 +378,34 @@ def _parse_mouse_code_extra_buttons(self: XTermParser, code: str) -> Message | N
 
 
 XTermParser.parse_mouse_code = _parse_mouse_code_extra_buttons  # ty: ignore
+
+_set_options = SelectionList.set_options
+
+
+def set_options(
+    self: SelectionList,
+    options: Iterable[
+        Selection[SelectionType]
+        | LazySelection[SelectionType]
+        | tuple[ContentText, SelectionType]
+        | tuple[ContentText, SelectionType, bool]
+    ],
+) -> Self:  # ty: ignore[invalid-type-form]
+    # Okay, lemme make myself clear here.
+    # A PR for this is already open at
+    # https://github.com/Textualize/textual/pull/6224
+    # essentially, the issue is that there isnt a set_options
+    # method for SelectionList, only for OptionList, but using
+    # OptionList's set_options doesnt clear selected or values
+    # but nothing was done, so I added it myself.
+    self._selected.clear()
+    self._values.clear()
+    # the ty ignore is important here, because options
+    # should be a Iterable["Option | VisualType | None"]
+    # but that isnt the case (based on the signature)
+    # so ty is crashing out.
+    _set_options(self, options)  # ty: ignore
+    return self
+
+
+SelectionList.set_options = set_options  # ty: ignore[invalid-assignment]

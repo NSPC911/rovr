@@ -10,7 +10,6 @@ from textual.worker import Worker
 from rovr.classes.mixins import (
     CheckboxRenderingMixin,
     SelectionNavigationMixin,
-    SetOptionsSelectionList,
 )
 from rovr.classes.textual_options import ClipboardSelection, ClipboardSelectionValue
 from rovr.functions import icons as icon_utils
@@ -21,7 +20,6 @@ from rovr.variables.constants import bindings, config
 class Clipboard(
     CheckboxRenderingMixin,
     SelectionNavigationMixin,
-    SetOptionsSelectionList,
     SelectionList,
     inherit_bindings=False,
 ):

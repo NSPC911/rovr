@@ -146,7 +146,7 @@ that can be one of ("suspend", "background", "orphan") **(uses "background" by d
 
 ### `file_list`
 
-Actions specific to the focused file list. Generic list actions from [`lists`](#lists) also
+Actions specific to the focused file list. Generic list actions from [`lists`](#`lists`) also
 work here.
 
 | Action                          | Description                                                                                        | Example                                      |
@@ -184,22 +184,22 @@ work here.
 
 ### `pinned_sidebar`
 
-Uses all [`lists`](#lists) actions and adds `focus_search`, which focuses the pinned-folder
+Uses all [`lists`](#`lists`) actions and adds `focus_search`, which focuses the pinned-folder
 search input.
 
 ### `clipboard`
 
-Uses all [`lists`](#lists) actions. It also supports `delete` to remove the highlighted
+Uses all [`lists`](#`lists`) actions. It also supports `delete` to remove the highlighted
 clipboard entry, `toggle_all` to select or clear all entries, and the range-selection actions
 described below.
 
 ### `processes`
 
-Uses all [`scroll`](#scroll) actions. `delete` clears completed and failed processes.
+Uses all [`scroll`](#`scroll`) actions. `delete` clears completed and failed processes.
 
 ### `preview` and `metadata`
 
-Both support the [`scroll`](#scroll) actions. `preview` additionally provides `up`, `down`,
+Both support the [`scroll`](#`scroll`) actions. `preview` additionally provides `up`, `down`,
 `page_up`, `page_down`, `home`, and `end` for navigating rendered content.
 
 ## Reusable widget contexts

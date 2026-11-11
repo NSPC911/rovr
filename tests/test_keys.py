@@ -96,6 +96,7 @@ async def test_contextual_key_dispatch(
 
         assert [context for context, _ in app._active_key_contexts()] == [
             "file_list",
+            "selectionlists",
             "lists",
             "main",
         ]

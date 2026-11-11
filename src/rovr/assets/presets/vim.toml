@@ -50,18 +50,7 @@
 "u" = "hist_previous"
 "U" = { action = "hist_next", desc = "Go to the next directory" }
 "v" = { action = "toggle_visual", desc = "Toggle visual selection" }
-"%" = { action = "toggle_all", desc = "Toggle selection of all files" }
-"ctrl+a" = "toggle_all"
-"ctrl+r" = { action = "invert_selections", desc = "Invert selections" }
 "." = { action = "toggle_hidden_files", desc = "Toggle hidden files" }
-"shift+up" = { action = "select_cursor(-1)", desc = "Extend selection upward" }
-"K" = "select_cursor(-1)"
-"shift+down" = { action = "select_cursor(1)", desc = "Extend selection downward" }
-"J" = "select_cursor(1)"
-"shift+pageup" = { action = "select_cursor_page(-1)", desc = "Extend selection up one page" }
-"shift+pagedown" = { action = "select_cursor_page(1)", desc = "Extend selection down one page" }
-"shift+home" = { action = "select_home", desc = "Extend selection to the first file" }
-"shift+end" = { action = "select_end", desc = "Extend selection to the last file" }
 "o" = { action = "open", desc = "Open selected files" }
 "e" = { action = "open_editor", desc = "Open the current file in an editor" }
 "shift+f10" = { action = "open_right_click_menu", desc = "Open the context menu" }
@@ -85,6 +74,19 @@ desc = "Sort order"
 
 [pinned_sidebar]
 "/" = { action = "focus_search", desc = "Search pinned directories" }
+
+[selectionlists]
+"%" = { action = "toggle_all", desc = "Toggle selection of all files" }
+"ctrl+a" = "toggle_all"
+"ctrl+r" = { action = "invert_selections", desc = "Invert selections" }
+"shift+up" = { action = "select_cursor(-1)", desc = "Extend selection upward" }
+"K" = "select_cursor(-1)"
+"shift+down" = { action = "select_cursor(1)", desc = "Extend selection downward" }
+"J" = "select_cursor(1)"
+"shift+pageup" = { action = "select_cursor_page(-1)", desc = "Extend selection up one page" }
+"shift+pagedown" = { action = "select_cursor_page(1)", desc = "Extend selection down one page" }
+"shift+home" = { action = "select_home", desc = "Extend selection to the first file" }
+"shift+end" = { action = "select_end", desc = "Extend selection to the last file" }
 
 [lists]
 "up" = { action = "cursor(-1)", desc = "Move up" }

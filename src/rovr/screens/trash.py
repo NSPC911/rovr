@@ -87,7 +87,7 @@ class TrashSelectionList(
     SelectionList,
     inherit_bindings=False,
 ):
-    key_contexts = ("trash_list", "lists")
+    key_contexts = ("trash_list", "selectionlists", "lists")
     BINDINGS: ClassVar[list[BindingType]] = list(bindings)
 
     COMPONENT_CLASSES: ClassVar[set[str]] = CheckboxRenderingMixin.COMPONENT_CLASSES | {
@@ -155,13 +155,6 @@ class TrashSelectionList(
     def action_select_end(self) -> None:
         """Select every entry between the current one and the last."""
         self._select_range_to(self.action_last)
-
-    def action_toggle_all(self) -> None:
-        if self.highlighted_option:
-            if len(self.selected) == len(self.options):
-                self.deselect_all()
-            else:
-                self.select_all()
 
 
 class TrashScreen(Actionable, ModalScreen):

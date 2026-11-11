@@ -68,7 +68,7 @@ class FileList(
     OptionList but can multi-select files and folders.
     """
 
-    key_contexts = ("file_list", "lists")
+    key_contexts = ("file_list", "selectionlists", "lists")
 
     COMPONENT_CLASSES: ClassVar[set[str]] = CheckboxRenderingMixin.COMPONENT_CLASSES | {
         "filelist--cut",
@@ -1058,29 +1058,12 @@ class FileList(
             await self.toggle_mode()
 
     async def action_toggle_all(self) -> None:
-        if self.highlighted_option:
-            if self.get_option_at_index(0).disabled:
-                return
-            if not self.select_mode:
-                await self.toggle_mode()
-            if len(self.selected) == len(self.options):
-                self.deselect_all()
-            else:
-                self.select_all()
-
-    async def action_invert_selections(self) -> None:
-        if self.highlighted_option:
-            if self.get_option_at_index(0).disabled:
-                return
-            if not self.select_mode:
-                await self.toggle_mode()
-            for option in self.options:
-                if option.value in self._selected:
-                    del self._selected[option.value]
-                else:
-                    self._selected[option.value] = None
-            self._message_changed()
-            self.refresh()
+        if self.get_option_at_index(0).disabled:
+            return
+        if not self.select_mode:
+            await self.toggle_mode("implicit")
+        await super().action_toggle_all()
+        self.call_later(self.call_later, self.implicit_selector, "post")
 
     async def select_range(self, start: int, end: int) -> None:
         """Select a range of options from start to end."""

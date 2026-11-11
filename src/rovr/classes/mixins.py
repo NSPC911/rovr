@@ -392,6 +392,28 @@ class SelectionNavigationMixin(CursorNavigationMixin):
         if pages and self._options:
             await self._select_to(self._cursor_page_destination(pages))
 
+    async def action_invert_selections(self) -> None:
+        if self.highlighted_option:
+            if self.get_option_at_index(0).disabled:
+                return
+            if not getattr(self, "select_mode", True) and getattr(
+                self, "toggle_mode", None
+            ):
+                await self.toggle_mode()
+            for option in self.options:
+                if option.value in self._selected:
+                    del self._selected[option.value]
+                else:
+                    self._selected[option.value] = None
+            self._message_changed()
+            self.refresh()
+
+    async def action_toggle_all(self) -> None:
+        if len(self.selected) == len(self.options):
+            self.deselect_all()
+        else:
+            self.select_all()
+
 
 class ScrollOffMixin:
     def scroll_to_highlight(

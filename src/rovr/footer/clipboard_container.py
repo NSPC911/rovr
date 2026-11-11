@@ -25,7 +25,7 @@ class Clipboard(
 ):
     """A selection list that displays the clipboard contents."""
 
-    key_contexts = ("clipboard", "lists")
+    key_contexts = ("clipboard", "selectionlists", "lists")
 
     BINDINGS: ClassVar[list[BindingType]] = list(bindings)
 
@@ -136,7 +136,7 @@ class Clipboard(
                 self.action_delete()
                 event.stop()
             elif event.key in config["keybinds"]["toggle_all"]:
-                self.action_toggle_all()
+                await self.action_toggle_all()
                 event.stop()
 
     def _remove_option(self, option: ClipboardSelection) -> Self:  # ty: ignore[invalid-method-override]  # oh my god, will you please stfu
@@ -197,10 +197,3 @@ class Clipboard(
             return
         with dump_on_exc(self, KeyError, OptionDoesNotExist):
             self.remove_option_at_index(self.highlighted)
-
-    def action_toggle_all(self) -> None:
-        """Select all items in the clipboard."""
-        if len(self.selected) == len(self.options):
-            self.deselect_all()
-        else:
-            self.select_all()

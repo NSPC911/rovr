@@ -1774,7 +1774,7 @@ class _RovrConfigSettings(TypedDict, total=False):
 
     drive_exclude: list[str]
     r"""
-    Glob patterns matched against mountpoint paths. Drives matching any pattern are hidden from the sidebar (e.g. '/run/media/*', 'D:/').
+    Glob patterns matched against mountpoint paths. Patterns must use the platform's path separator: '/' on POSIX and an escaped backslash such as 'D:\\' in a TOML basic string on Windows. Drives matching any pattern are hidden from the sidebar.
 
     default:
       []

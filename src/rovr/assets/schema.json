@@ -10,7 +10,16 @@
     },
     "default_previews": {
       "type": "string",
-      "enum": ["text", "image", "pdf", "archive", "folder", "resvg", "font", "details"]
+      "enum": [
+        "text",
+        "image",
+        "pdf",
+        "archive",
+        "folder",
+        "resvg",
+        "font",
+        "details"
+      ]
     },
     "preview_type": {
       "anyOf": [
@@ -700,7 +709,7 @@
           "type": "array",
           "items": { "type": "string" },
           "default": [],
-          "description": "Glob patterns matched against mountpoint paths. Drives matching any pattern are hidden from the sidebar (e.g. '/run/media/*', 'D:/')."
+          "description": "Glob patterns matched against mountpoint paths. Patterns must use the platform's path separator: '/' on POSIX and an escaped backslash such as 'D:\\\\' in a TOML basic string on Windows. Drives matching any pattern are hidden from the sidebar."
         },
         "ipc": {
           "type": "object",

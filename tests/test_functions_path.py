@@ -11,7 +11,7 @@ from rovr.functions import path as path_utils
 
 def test_normalise() -> None:
     the_path = os.getcwd()
-    assert path_utils.normalise(the_path) == Path(the_path).as_posix()
+    assert path_utils.normalise(the_path) == str(Path(the_path))
     with pytest.raises(ValueError):
         path_utils.normalise()
 
@@ -132,7 +132,7 @@ def test_ensure_existing_directory(tmp_path: Path) -> None:
     # basically check the directory it goes to if the target directory doesn't exist or isn't a directory
     target_dir = tmp_path / "nonexistent" / "subdir" / "target" / "dir"
     ensured = path_utils.ensure_existing_directory(target_dir.as_posix())
-    assert ensured == tmp_path.as_posix()
+    assert ensured == str(tmp_path)
 
 
 def test_get_recursive_files(tmp_path: Path) -> None:

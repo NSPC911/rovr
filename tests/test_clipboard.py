@@ -1,3 +1,4 @@
+import os
 from pathlib import Path
 
 import pytest
@@ -14,8 +15,10 @@ async def test_bulk_clipboard_preserves_selection_and_indices(tmp_path: Path) ->
         await app.Clipboard.copy_to_clipboard([old]).wait()
         app.Clipboard.highlighted = 0
         await app.Clipboard.cut_to_clipboard(items, select="no").wait()
-        assert [option.value.path for option in app.Clipboard.options] == items + [old]
-        assert [value.path for value in app.Clipboard.selected] == [old]
+        assert [option.value.path for option in app.Clipboard.options] == [
+            os.path.normpath(item) for item in items + [old]
+        ]
+        assert [value.path for value in app.Clipboard.selected] == [os.path.normpath(old)]
         assert app.Clipboard.highlighted == 1000
         for index, option in enumerate(app.Clipboard.options):
             assert option.id is not None
@@ -23,7 +26,10 @@ async def test_bulk_clipboard_preserves_selection_and_indices(tmp_path: Path) ->
             assert app.Clipboard._values[option.value] == index
         await app.Clipboard.copy_to_clipboard([items[10]], select="select").wait()
         assert app.Clipboard.option_count == 1001
-        assert {value.path for value in app.Clipboard.selected} == {old, items[10]}
+        assert {value.path for value in app.Clipboard.selected} == {
+            os.path.normpath(old),
+            os.path.normpath(items[10]),
+        }
 
 
 @pytest.mark.parametrize("operation", ["copy_to_clipboard", "cut_to_clipboard"])
@@ -46,7 +52,7 @@ async def test_duplicate_items_do_not_select_existing_options(
         ])
         await worker.wait()
 
-        assert [item.path for item in app.Clipboard.selected] == [duplicate.as_posix()]
+        assert [item.path for item in app.Clipboard.selected] == [str(duplicate)]
 
 
 @pytest.mark.asyncio
@@ -59,7 +65,7 @@ async def test_delete_from_clipboard(tmp_path: Path) -> None:
         worker: Worker = app.Clipboard.copy_to_clipboard([file.as_posix()])
         await worker.wait()
         await pilot.pause()
-        assert app.Clipboard.options[0].value.path == file.as_posix()
+        assert app.Clipboard.options[0].value.path == str(file)
         file.unlink()
         worker: Worker = app.Clipboard.check_clipboard_existence()
         await worker.wait()
@@ -83,7 +89,7 @@ async def test_clipboard_keeps_broken_symlink(tmp_path: Path) -> None:
         await worker.wait()
         await pilot.pause()
         assert len(app.Clipboard.options) == 1
-        assert app.Clipboard.options[0].value.path == link_path.as_posix()
+        assert app.Clipboard.options[0].value.path == str(link_path)
 
         worker = app.Clipboard.check_clipboard_existence()
         await worker.wait()

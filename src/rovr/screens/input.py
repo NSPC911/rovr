@@ -1,3 +1,5 @@
+import os
+import sys
 from asyncio import sleep
 
 from textual import events, work
@@ -11,6 +13,8 @@ from textual.widgets import Input, Label
 from rovr.classes.textual_validators import ControlHighlighter
 from rovr.functions import icons as icon_utils
 from rovr.functions.utils import dismiss
+
+sep_check = "/" if sys.platform != "win32" else ("\\", "/")
 
 
 class ModalInputField(Input):
@@ -72,6 +76,11 @@ class ModalInput(ModalScreen, inherit_bindings=False):
 
     @work(exclusive=True, group="input-changed")
     async def on_input_changed(self, event: Input.Changed) -> None:
+        if self.is_path and sys.platform == "win32" and "/" in event.value:
+            cursor_position = event.input.cursor_position
+            event.input.value = event.value.replace("/", "\\")
+            event.input.cursor_position = cursor_position
+            return
         if (event.value == self.initial_value and event.value != "") or self.query_one(
             Input
         ).is_valid:
@@ -101,7 +110,7 @@ class ModalInput(ModalScreen, inherit_bindings=False):
                 # valid_empty = False
                 self.horizontal_group.border_subtitle = "The value must not be empty!"
         if self.is_path:
-            if event.value.replace("\\", "/").endswith("/"):
+            if event.value.endswith(sep_check):
                 # dir
                 icon = icon_utils.get_icon_for_folder(event.value[:-1])
             elif self.is_folder:
@@ -148,13 +157,12 @@ class ModalInput(ModalScreen, inherit_bindings=False):
                 await sleep(0.1)
             return
         return_path = (
-            sanitize_filepath(event.input.value) if self.is_path else event.input.value
+            sanitize_filepath(event.input.value, platform=sys.platform)
+            if self.is_path
+            else event.input.value
         )
-        if event.input.value.endswith(("/", "\\")) and not return_path.endswith((
-            "/",
-            "\\",
-        )):
-            return_path += "/"
+        if event.input.value.endswith(sep_check) and not return_path.endswith(sep_check):
+            return_path += os.sep
 
         dismiss(self, return_path, event)
 

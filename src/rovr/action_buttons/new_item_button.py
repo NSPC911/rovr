@@ -3,6 +3,7 @@ from __future__ import annotations
 import contextlib
 import os
 from os import makedirs, path
+from sys import platform
 from tempfile import NamedTemporaryFile
 from typing import cast
 
@@ -18,6 +19,8 @@ from rovr.functions.icons import get_icon
 from rovr.functions.path import dump_exc, normalise
 from rovr.functions.utils import command, dump_on_exc, run_command
 from rovr.variables.constants import config
+
+sep_check = "/" if platform != "win32" else ("\\", "/")
 
 
 class NewItemButton(Button):
@@ -43,7 +46,7 @@ class NewItemButton(Button):
         response = await self.app.push_screen(
             screens.ModalInput(
                 border_title="Create New Item",
-                border_subtitle="End with a slash (/) to create a directory",
+                border_subtitle=f"End with a slash ({os.path.sep}) to create a directory",
                 is_path=True,
                 validators=[PathNoLongerExists(), IsValidFilePath()],
             ),
@@ -52,10 +55,9 @@ class NewItemButton(Button):
         if not response:
             return
         response = str(response)
-        location = normalise(path.join(getcwd(), response)) + (
-            "/" if response.endswith("/") or response.endswith("\\") else ""
-        )
-        if location.endswith("/"):
+        is_dir = response.endswith(sep_check)
+        location = normalise(path.join(getcwd(), response))
+        if is_dir:
             # recursive directory creation
             try:
                 makedirs(location)
@@ -74,10 +76,9 @@ class NewItemButton(Button):
                     severity="error",
                     markup=False,
                 )
-        elif len(location.split("/")) > 1:
+        elif path.dirname(location):
             # recursive directory until file creation
-            location_parts = location.split("/")
-            dir_path = "/".join(location_parts[:-1])
+            dir_path = path.dirname(location)
             try:
                 makedirs(dir_path)
                 # performance wise shouldn't be that bad, unless
@@ -118,7 +119,7 @@ class NewItemButton(Button):
         with self.app.file_list.pause_checks(), dump_on_exc(self):
             self.app.file_list.focus()
             worker: Worker = self.app.file_list.update_file_list(
-                add_to_session=False, focus_on=path.basename(location.rstrip("/"))
+                add_to_session=False, focus_on=path.basename(location)
             )
             with contextlib.suppress(WorkerError):
                 await worker.wait()
@@ -180,7 +181,7 @@ class NewItemButton(Button):
         if created:
             with self.app.file_list.pause_checks(), dump_on_exc(self):
                 self.app.file_list.focus()
-                focus_on = path.basename(created[0].rstrip("/"))
+                focus_on = path.basename(created[0].rstrip(os.path.sep))
                 worker = self.app.file_list.update_file_list(
                     add_to_session=False, focus_on=focus_on
                 )
@@ -217,10 +218,10 @@ class NewItemButton(Button):
         already_exists: list[str] = []
         errors: list[str] = []
         for entry in entries:
-            is_dir = entry.endswith(("/", "\\"))
+            is_dir = entry.endswith(sep_check)
             location = normalise(path.join(getcwd(), entry))
             if is_dir:
-                location = location + "/"
+                location = location + os.path.sep
             try:
                 if is_dir:
                     makedirs(location, exist_ok=False)

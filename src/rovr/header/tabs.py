@@ -61,7 +61,7 @@ class TablineTab(Tab):
             label = str(
                 path.basename(directory)
                 if path.basename(directory) != ""
-                else directory.strip("/")
+                else directory.strip(path.sep)
             )
         super().__init__(label=label, id=f"id_{id(self)}")
         self.directory = directory

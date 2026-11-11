@@ -68,7 +68,7 @@ class Clipboard(
         self, items: list[str], select: Literal["reselect", "select", "no"] = "reselect"
     ) -> None:
         """Copy the selected files to the clipboard"""
-        items = list(dict.fromkeys(items))
+        items = list(dict.fromkeys(map(path.normpath, items)))
         self._prepend_selections(
             [
                 ClipboardSelection(
@@ -86,7 +86,7 @@ class Clipboard(
         self, items: list[str], select: Literal["reselect", "select", "no"] = "reselect"
     ) -> None:
         """Cut the selected files to the clipboard."""
-        items = list(dict.fromkeys(items))
+        items = list(dict.fromkeys(map(path.normpath, items)))
         self._prepend_selections(
             [
                 ClipboardSelection(

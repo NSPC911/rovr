@@ -5,7 +5,7 @@ from rovr.state_manager import StateManager
 
 
 def test_apply_folder_sort_prefs_uses_custom_values(tmp_path: Path) -> None:
-    target_folder = (tmp_path / "custom-sort").as_posix()
+    target_folder = str(tmp_path / "custom-sort")
     set_folder_pref(target_folder, "extension", True)
 
     manager = StateManager()
@@ -18,7 +18,7 @@ def test_apply_folder_sort_prefs_uses_custom_values(tmp_path: Path) -> None:
 
 
 def test_toggle_custom_sort_adds_and_removes_folder_pref(tmp_path: Path) -> None:
-    target_folder = (tmp_path / "toggle-sort").as_posix()
+    target_folder = str(tmp_path / "toggle-sort")
     manager = StateManager()
     manager.apply_folder_sort_prefs(target_folder)
 

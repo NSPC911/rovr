@@ -395,11 +395,12 @@ example_function(10)"""
         def _normalise(location: str | bytes) -> str:
             from os import path
 
-            return str(path.normpath(location)).replace("\\", "/").replace("//", "/")
+            return str(path.normpath(location))
 
         _conf = _normalise(RovrVars.ROVRCONFIG)
         _state = _normalise(RovrVars.ROVRSTATE)
         _temp = _normalise(RovrVars.ROVRTEMP)
+        sep = os.path.sep
 
         if sys.stdout.isatty():
             from rich import box
@@ -408,24 +409,31 @@ example_function(10)"""
             table = Table(title="", border_style="blue", box=box.ROUNDED)
             table.add_column("type")
             table.add_column("path")
-            table.add_row("[cyan]main config[/]", f"{_conf}/config.toml")
-            table.add_row("[green]keys[/]", f"{_conf}/keys.toml")
-            table.add_row("[hot_pink]global styles[/]", f"{_conf}/style.tcss")
-            table.add_row("[magenta1]themes[/]", f"{_conf}/themes/")
-            table.add_row("[yellow]pinned folders[/]", f"{_conf}/pins.json")
-            table.add_row("[grey69]persistent state[/]", f"{_state}/state.toml")
-            table.add_row("[red]logs[/]", f"{_temp}/logs/")
+            table.add_row("[cyan]main config[/]", f"{_conf}{sep}config.toml")
+            table.add_row("[green]keys[/]", f"{_conf}{sep}keys.toml")
+            table.add_row("[hot_pink]global styles[/]", f"{_conf}{sep}style.tcss")
+            table.add_row("[magenta1]themes[/]", f"{_conf}{sep}themes{sep}")
+            table.add_row("[yellow]pinned folders[/]", f"{_conf}{sep}pins.json")
+            table.add_row("[grey69]persistent state[/]", f"{_state}{sep}state.toml")
+            table.add_row("[red]logs[/]", f"{_temp}{sep}logs{sep}")
             pprint(table)
         else:
-            print(f"""{{
-    "main_config": "{_conf}/config.toml",
-    "keys": "{_conf}/keys.toml",
-    "global_styles": "{_conf}/style.tcss",
-    "themes": "{_conf}/themes/",
-    "pinned_folders": "{_conf}/pins.json",
-    "persistent_state": "{_state}/state.toml",
-    "logs": "{_temp}/logs/"
-}}""")
+            import json
+
+            print(
+                json.dumps(
+                    {
+                        "main_config": f"{_conf}{sep}config.toml",
+                        "keys": f"{_conf}{sep}keys.toml",
+                        "global_styles": f"{_conf}{sep}style.tcss",
+                        "themes": f"{_conf}{sep}themes{sep}",
+                        "pinned_folders": f"{_conf}{sep}pins.json",
+                        "persistent_state": f"{_state}{sep}state.toml",
+                        "logs": f"{_temp}{sep}logs{sep}",
+                    },
+                    indent=4,
+                )
+            )
         return
     if args.show_version:
 

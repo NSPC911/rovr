@@ -1021,7 +1021,7 @@ class ProcessContainer(Actionable, VerticalScroll):
                         path_utils.FileObj(
                             path=folder,
                             relative_loc=path_utils.normalise(
-                                path.relpath(folder, file + "/..")
+                                path.relpath(folder, path.dirname(file))
                             ),
                         )
                     )
@@ -1045,7 +1045,7 @@ class ProcessContainer(Actionable, VerticalScroll):
                         path_utils.FileObj(
                             path=folder,
                             relative_loc=path_utils.normalise(
-                                path.relpath(folder, file + "/..")
+                                path.relpath(folder, path.dirname(file))
                             ),
                         )
                     )

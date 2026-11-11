@@ -129,7 +129,7 @@ def _win_get_candidates(path_str: str) -> list[DropdownItem]:
     if not path_str:
         drives = []
         for letter in "ABCDEFGHIJKLMNOPQRSTUVWXYZ":
-            drive = f"{letter}:/"
+            drive = f"{letter}:\\"
             if path.exists(drive):
                 drives.append(PathDropdownItem(drive, drive))
         return drives
@@ -139,7 +139,7 @@ def _win_get_candidates(path_str: str) -> list[DropdownItem]:
         if len(path_str) == 2 and path_str[1] != ":":
             return []  # invalid format
         drive_letter = path_str[0].upper()
-        drive = f"{drive_letter}:/"
+        drive = f"{drive_letter}:\\"
         if path.exists(drive):
             return [PathDropdownItem(drive, drive)]
         return []
@@ -222,7 +222,7 @@ class PathAutoCompleteInput(PathAutoComplete):
 
         current_input = state.text[: state.cursor_position]
         separator_index = max(current_input.rfind("/"), current_input.rfind("\\"))
-        path_prefix = current_input[: separator_index + 1]
+        path_prefix = current_input[: separator_index + 1].replace("/", "\\")
         with self.prevent(Input.Changed):
             self.target.value = path_prefix + value
             self.target.cursor_position = len(self.target.value)
@@ -473,6 +473,12 @@ class PathInput(Actionable, Input, inherit_bindings=False):
         else:
             self.notify("Path provided is not valid.", severity="error")
         self.app.file_list.focus()
+
+    def on_input_changed(self, event: Input.Changed) -> None:
+        if sys.platform == "win32" and "/" in event.value:
+            cursor_position = self.cursor_position
+            self.value = event.value.replace("/", "\\")
+            self.cursor_position = cursor_position
 
     async def on_key(self, event: events.Key) -> None:
         if len(event.key) != 1 and not event.is_printable:

@@ -1,3 +1,5 @@
+import os
+import sys
 from asyncio import sleep
 from typing import ClassVar, Literal, NamedTuple, TypeAlias
 
@@ -160,13 +162,15 @@ class ArchiveCreationScreen(ModalInput):
                 await sleep(0.1)
             return
         return_path = (
-            sanitize_filepath(event.input.value) if self.is_path else event.input.value
+            sanitize_filepath(event.input.value, platform=sys.platform)
+            if self.is_path
+            else event.input.value
         )
         if event.input.value.endswith(("/", "\\")) and not return_path.endswith((
             "/",
             "\\",
         )):
-            return_path += "/"
+            return_path += os.sep
         compression_selection = self.query_one(ArchiveCompression).selected
         dismiss(
             self,

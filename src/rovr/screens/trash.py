@@ -228,7 +228,7 @@ class TrashScreen(Actionable, ModalScreen):
             location = path_utils.normalise(entry.original_path)
             if location == home:
                 location = "~"
-            if location.startswith(f"{home}/"):
+            if location.startswith(f"{home}{path.sep}"):
                 location = f"~{location[len(home) :]}"
             prompt += Content.from_markup(
                 "[dim]$d/[/]$p", d=path.dirname(location), p=entry.name

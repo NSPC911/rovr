@@ -515,7 +515,7 @@ def _config_dir() -> str:
 
         config_dir: str = vars(RovrVars).get("ROVRCONFIG", None) or user_config_dir(
             "rovr", "."
-        ).replace("\\", "/")
+        )
     return config_dir
 
 

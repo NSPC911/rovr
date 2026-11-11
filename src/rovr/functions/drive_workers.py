@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import multiprocessing
+import os
 import re
 import subprocess
 import sys
@@ -39,17 +40,14 @@ def normalise(*location: str | bytes) -> str:
     """
     if not location:
         raise ValueError("At least one path component must be provided")
-    # path.normalise fixes the relative references
-    # replace \\ with / on windows
-    # by any chance if somehow a \\\\ was to enter, fix that
-    return str(path.normpath(path.join(*location))).replace("\\", "/").replace("//", "/")
+    return path.normpath(path.join(*(os.fsdecode(part) for part in location)))
 
 
 def _get_windows_drives() -> list[str]:
     import ctypes
 
     bitmask = ctypes.windll.kernel32.GetLogicalDrives()
-    return [f"{chr(ord('A') + i)}:/" for i in range(26) if bitmask & (1 << i)]
+    return [f"{chr(ord('A') + i)}:\\" for i in range(26) if bitmask & (1 << i)]
 
 
 def _get_linux_drives() -> list[str]:
@@ -135,7 +133,7 @@ def get_mounted_drives(platform: str, config: "RovrConfig") -> list[str]:
             from string import ascii_uppercase
 
             drives: list[str] = [
-                f"{letter}:/" for letter in ascii_uppercase if path.isdir(f"{letter}:\\")
+                f"{letter}:\\" for letter in ascii_uppercase if path.isdir(f"{letter}:\\")
             ]
         else:
             drives = ["/"]  # root should definitely exist right

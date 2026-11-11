@@ -21,9 +21,11 @@ class IsValidFilePath(Validator):
         if path.isabs(value):
             normalized_value = normalise(value)
         else:
-            normalized_value = normalise(str(getcwd()) + "/" + value)
+            normalized_value = normalise(getcwd(), value)
 
-        if normalized_value == normalise(sanitize_filepath(normalized_value)):
+        if normalized_value == normalise(
+            sanitize_filepath(normalized_value, platform=sys.platform)
+        ):
             return self.success()
         else:
             return self.failure()
@@ -39,10 +41,7 @@ class PathNoLongerExists(Validator):
 
     def validate(self, value: str) -> ValidationResult:
         # Handle absolute paths correctly
-        if path.isabs(value):
-            item_path = normalise(value)
-        else:
-            item_path = normalise(str(getcwd()) + "/" + value)
+        item_path = normalise(value) if path.isabs(value) else normalise(getcwd(), value)
 
         if path.exists(item_path):
             # check for acceptance
@@ -70,7 +69,7 @@ class AllowsExistingFiles(Validator):
         super().__init__(failure_description="Path does not exist.")
 
     def validate(self, value: str) -> ValidationResult:
-        item_path = str(normalise(str(getcwd()) + "/" + value))
+        item_path = normalise(getcwd(), value)
         if path.exists(item_path):
             if path.isfile(item_path):
                 return self.success()

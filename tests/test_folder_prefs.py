@@ -12,7 +12,7 @@ from rovr.variables.maps import RovrVars
 
 
 def test_set_and_load_folder_preferences_round_trip(tmp_path: Path) -> None:
-    target_folder = (tmp_path / "project").as_posix()
+    target_folder = str(tmp_path / "project")
     set_folder_pref(target_folder, "size", True)
 
     assert has_folder_pref(target_folder)
@@ -29,7 +29,7 @@ def test_set_and_load_folder_preferences_round_trip(tmp_path: Path) -> None:
 
 
 def test_remove_folder_preference_updates_state(tmp_path: Path) -> None:
-    target_folder = (tmp_path / "to-remove").as_posix()
+    target_folder = str(tmp_path / "to-remove")
     set_folder_pref(target_folder, "name", False)
     remove_folder_pref(target_folder)
 
@@ -54,4 +54,4 @@ def test_load_folder_prefs_expands_variable_paths() -> None:
         )
 
     loaded = load_folder_prefs()
-    assert f"{RovrVars.HOME}/fixture" in loaded
+    assert str(Path(RovrVars.HOME, "fixture")) in loaded

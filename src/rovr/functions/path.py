@@ -468,7 +468,7 @@ def get_recursive_files(
                     FileObj(
                         path=full_path,
                         relative_loc=normalise(
-                            path.relpath(full_path, object_path + "/..")
+                            path.relpath(full_path, path.dirname(object_path))
                         ),
                     )
                 )
@@ -478,6 +478,7 @@ def get_recursive_files(
 
 
 def ensure_existing_directory(directory: str) -> str:
+    directory = path.normpath(directory)
     while not (path.exists(directory) and path.isdir(directory)):
         parent = path.dirname(directory)
         # If we can't even access the root then there is a bigger problem

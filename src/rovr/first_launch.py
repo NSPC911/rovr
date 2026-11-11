@@ -471,9 +471,17 @@ enabled = {str(self.query_one("#plugins-magick Switch", Switch).value).lower()}
         # trust me it loads properly
         if await self.push_screen_wait(AskWrite(config_toml, keys_toml)):
             os.makedirs(RovrVars.ROVRCONFIG, exist_ok=True)
-            with open(f"{RovrVars.ROVRCONFIG}/config.toml", "w", encoding="utf-8") as f:
+            with open(
+                os.path.join(RovrVars.ROVRCONFIG, "config.toml"),
+                "w",
+                encoding="utf-8",
+            ) as f:
                 f.write(config_toml)
-            with open(f"{RovrVars.ROVRCONFIG}/keys.toml", "w", encoding="utf-8") as f:
+            with open(
+                os.path.join(RovrVars.ROVRCONFIG, "keys.toml"),
+                "w",
+                encoding="utf-8",
+            ) as f:
                 f.write(keys_toml)
             await self.push_screen_wait(FinalStuff())
 

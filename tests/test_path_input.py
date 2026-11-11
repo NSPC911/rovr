@@ -1,6 +1,7 @@
 import sys
 
 import pytest
+from textual.app import App, ComposeResult
 from textual.widgets import Input
 from textual_autocomplete import TargetState
 
@@ -58,3 +59,22 @@ def test_search_string_accepts_backslash_separator() -> None:
     value = "C:/Users/example\\"
 
     assert autocomplete.get_search_string(TargetState(value, len(value))) == ""
+
+
+@pytest.mark.asyncio
+@pytest.mark.skipif(sys.platform != "win32", reason="Need to be on Windows")
+async def test_completion_displays_backslash_separator() -> None:
+    class AutocompleteApp(App):
+        def compose(self) -> ComposeResult:
+            target = Input()
+            yield target
+            yield PathAutoCompleteInput(target)
+
+    app = AutocompleteApp()
+    async with app.run_test():
+        target = app.query_one(Input)
+        autocomplete = app.query_one(PathAutoCompleteInput)
+        value = "C:/Users/ex"
+        autocomplete.apply_completion("example\\", TargetState(value, len(value)))
+
+        assert target.value == "C:\\Users\\example\\"

@@ -541,8 +541,8 @@ class FileList(
             if self.select_mode and not self._selected:
                 self.select_mode = False
             # session handler
-            self.app.query_one("#path_switcher", PathInput).value = cwd + (
-                "" if cwd.endswith("/") else "/"
+            self.app.query_one("#path_switcher", PathInput).value = (
+                cwd.rstrip(path.sep) + path.sep
             )
             if add_to_session:
                 if session.lastHighlighted.get(cwd) is None and isinstance(
@@ -604,7 +604,7 @@ class FileList(
             else:
                 self.scroll_to_highlight()
             self.app.tabWidget.active_tab.label = (
-                path.basename(cwd) if path.basename(cwd) != "" else cwd.strip("/")
+                path.basename(cwd) if path.basename(cwd) != "" else cwd.strip(path.sep)
             )
             self.app.tabWidget.active_tab.directory = cwd
             self.app.tabWidget.parent.on_resize()

@@ -1,4 +1,5 @@
 import ctypes
+import os
 import sys
 from pathlib import Path
 from typing import cast
@@ -38,7 +39,7 @@ def test_get_mounted_drives_filters_non_directory_posix_mounts(
 
     drives = drive_workers.get_mounted_drives("darwin", config)
 
-    assert drives == ["/", "/mnt/usb"]
+    assert drives == [os.path.normpath("/"), os.path.normpath("/mnt/usb")]
 
 
 def test_get_mounted_drives_filters_non_directory_linux_mounts(
@@ -63,11 +64,15 @@ def test_get_mounted_drives_filters_non_directory_linux_mounts(
 
     drives = drive_workers.get_mounted_drives("linux", config)
 
-    assert drives == ["/", "/media/usb", "/proc"]
+    assert drives == [
+        os.path.normpath("/"),
+        os.path.normpath("/media/usb"),
+        os.path.normpath("/proc"),
+    ]
 
 
 def test_normalise_joins_and_fixes_slashes() -> None:
-    assert drive_workers.normalise("/foo", "bar") == "/foo/bar"
+    assert drive_workers.normalise("/foo", "bar") == os.path.normpath("/foo/bar")
 
 
 def test_normalise_no_args_raises() -> None:
@@ -131,7 +136,7 @@ def test_get_windows_drives_reads_bitmask(monkeypatch: pytest.MonkeyPatch) -> No
 
     drives = drive_workers._get_windows_drives()
 
-    assert drives == ["A:/", "C:/"]
+    assert drives == ["A:\\", "C:\\"]
 
 
 def test_get_mounted_drives_applies_exclude_patterns(
@@ -140,10 +145,13 @@ def test_get_mounted_drives_applies_exclude_patterns(
     monkeypatch.setattr(drive_workers, "_get_posix_drives", lambda: ["/", "/mnt/usb"])
     monkeypatch.setattr(drive_workers.path, "isdir", lambda p: True)
 
-    config = cast("RovrConfig", {"settings": {"drive_exclude": ["/mnt/*"]}})
+    config = cast(
+        "RovrConfig",
+        {"settings": {"drive_exclude": [os.path.normpath("/mnt/*")]}},
+    )
     drives = drive_workers.get_mounted_drives("darwin", config)
 
-    assert drives == ["/"]
+    assert drives == [os.path.normpath("/")]
 
 
 def test_get_mounted_drives_falls_back_on_exception(
@@ -172,7 +180,7 @@ def test_get_mounted_drives_linux_falls_back_to_posix_on_oserror(
 
     drives = drive_workers.get_mounted_drives("linux", config)
 
-    assert drives == ["/data"]
+    assert drives == [os.path.normpath("/data")]
 
 
 def test_get_mounted_drives_windows_normalises_and_applies_exclusions(
@@ -186,16 +194,16 @@ def test_get_mounted_drives_windows_normalises_and_applies_exclusions(
     monkeypatch.setattr(
         drive_workers,
         "_get_windows_drives",
-        lambda: ["C:/", "D:/", "E:/Data", "F:", "G:/"],
+        lambda: ["C:\\", "D:\\", "E:\\Data", "F:", "G:\\"],
     )
 
     def fake_isdir(path_str: str) -> bool:
-        return any(path_str.startswith(drive) for drive in ["C:/", "D:/", "E:/"])
+        return any(path_str.startswith(drive) for drive in ["C:\\", "D:\\", "E:\\"])
 
     monkeypatch.setattr(drive_workers.path, "isdir", fake_isdir)
 
-    config["settings"]["drive_exclude"] = ["E:/*"]
+    config["settings"]["drive_exclude"] = ["E:\\*"]
 
     drives = drive_workers.get_mounted_drives("win32", config)
 
-    assert drives == ["C:/", "D:/"]
+    assert drives == ["C:\\", "D:\\"]

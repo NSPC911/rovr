@@ -531,9 +531,16 @@ example_function(10)"""
         import asyncio
 
         async def print_dom(app: Application) -> None:
+            stdout = sys.stdout
+            from rich.console import Console
+
             async with app.run_test() as pilot:
                 await pilot.pause(0.1)
-                pprint(app.tree)
+                Console(
+                    file=stdout,
+                    force_terminal=stdout.isatty(),
+                    color_system="auto" if stdout.isatty() else None,
+                ).print(app.tree)
 
         asyncio.run(print_dom(new_app()))
     elif args.ignore_missing_tty or sys.stdout.isatty():

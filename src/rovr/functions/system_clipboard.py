@@ -1,6 +1,14 @@
-# with reference from https://gitee.com/DreamMaoMao/clipboard.yazi aside from macos
+# Copyright (c) 2026 NSPC911
+# Licensed under the MIT License.
+#
+# You are free to copy, paste, and modify this file in your own projects,
+# provided that this copyright notice and attribution remain intact.
+
+# with reference from https://gitee.com/DreamMaoMao/clipboard.yazi
+# for the powershell, wayland and x11 side
 # macos uses ctypes (yipee) (without pyobjc bridge) or any external dependencies
 # like clippy: https://github.com/neilberkman/clippy
+
 import asyncio
 import ctypes
 import ctypes.util

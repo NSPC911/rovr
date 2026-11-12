@@ -2,8 +2,9 @@ import asyncio
 import pickle
 import subprocess
 from pathlib import Path
+from threading import Event
 from typing import Any, cast
-from unittest.mock import patch
+from unittest.mock import Mock, patch
 
 import pytest
 from rich.console import Console
@@ -12,6 +13,7 @@ from textual.app import App, ComposeResult
 from textual.content import Content
 from textual.widgets import Static
 
+from rovr.app import Application
 from rovr.components.text_preview import (
     LazyTextLines,
     WindowedTextPreview,
@@ -24,6 +26,7 @@ from rovr.core.preview_container import (
     _save_cached_text,
     preview_token,
 )
+from rovr.functions.preview_utils import MimeResult
 from rovr.variables.constants import config
 
 
@@ -161,6 +164,63 @@ async def test_call_from_thread_rejects_stale_preview() -> None:
         preview._active_preview_token = object()
         with pytest.raises(ExitNow):
             await asyncio.to_thread(call_with, current_token)
+
+
+async def test_hidden_mime_does_not_replace_newer_preview(tmp_path: Path) -> None:
+    source = tmp_path / "file.txt"
+    source.write_text("hello")
+    started, release = Event(), Event()
+
+    def get_mime(*args: Any) -> MimeResult:
+        started.set()
+        release.wait(2)
+        return MimeResult("basic", "text/plain")
+
+    app = PreviewTestApp()
+    async with app.run_test():
+        preview = app.query_one(PreviewContainer)
+        preview.add_class("hide")
+        with (
+            patch("rovr.core.preview_container.preview_utils.get_mime_type", get_mime),
+            patch.object(preview, "_sync_mime") as sync_mime,
+        ):
+            preview.show_preview(str(source), source.stat().st_mtime)
+            token = preview._active_preview_token
+            try:
+                assert await asyncio.to_thread(started.wait, 2)
+                assert preview._active_preview_token is token
+                preview._active_preview_token = object()
+            finally:
+                release.set()
+            await asyncio.sleep(0.1)
+            sync_mime.assert_not_called()
+
+
+async def test_folder_preview_stops_loading_timer_on_cancellation(
+    tmp_path: Path,
+) -> None:
+    app = Application(startup_path=tmp_path.as_posix())
+    async with app.run_test(size=(143, 37)):
+        preview = app.query_one(PreviewContainer)
+        timer = Mock()
+
+        def show() -> None:
+            context_token = preview_token.set(preview._active_preview_token)
+            try:
+                preview.show_folder_preview(str(tmp_path))
+            finally:
+                preview_token.reset(context_token)
+
+        with (
+            patch.object(preview, "set_timer", return_value=timer),
+            patch(
+                "rovr.core.preview_container.path_utils.sync_get_cwd_object",
+                side_effect=ExitNow,
+            ),
+            pytest.raises(ExitNow),
+        ):
+            await asyncio.to_thread(show)
+        timer.stop.assert_called_once_with()
 
 
 async def test_windowed_preview_only_renders_visible_lines() -> None:

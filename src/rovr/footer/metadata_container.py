@@ -1,7 +1,6 @@
 import stat
 import time
 from contextlib import suppress
-from datetime import datetime
 from os import DirEntry, lstat, path, stat_result, walk
 from typing import Any
 
@@ -91,12 +90,6 @@ class MetadataContainer(VerticalScroll, inherit_bindings=False):
         else:
             self._perform_update(dir_entry)
 
-    @staticmethod
-    def strftime(timestamp: float) -> str:
-        return datetime.fromtimestamp(timestamp).strftime(
-            config["metadata"]["datetime_format"]
-        )
-
     @work(thread=True)
     def _perform_update(self, dir_entry: DirEntry) -> None:
         """
@@ -111,10 +104,17 @@ class MetadataContainer(VerticalScroll, inherit_bindings=False):
             return
         if not path.exists(dir_entry.path):
             try:
-                self.app.call_from_thread(self.remove_children)
-                self.app.call_from_thread(
-                    self.mount, Static("Item not found or inaccessible.")
-                )
+                if self.children and self.children[0].id == "metadata-error":
+                    self.app.call_from_thread(
+                        self.query_one("#metadata-error", Static).update,
+                        "Item not found or inaccessible.",
+                    )
+                else:
+                    self.app.call_from_thread(self.remove_children)
+                    self.app.call_from_thread(
+                        self.mount,
+                        Static("Item not found or inaccessible.", id="metadata-error"),
+                    )
                 return
             except MountError:
                 if self.app.return_code is not None:
@@ -180,13 +180,13 @@ class MetadataContainer(VerticalScroll, inherit_bindings=False):
                             "metadata-size",
                         ))
                     case "modified":
-                        values_list.append((self.strftime(file_stat.st_mtime), field))
+                        values_list.append((utils.strftime(file_stat.st_mtime), field))
                     case "accessed":
-                        values_list.append((self.strftime(file_stat.st_atime), field))
+                        values_list.append((utils.strftime(file_stat.st_atime), field))
                     case "created":
                         birthtime = get_birthtime(dir_entry)
                         values_list.append((
-                            self.strftime(birthtime) if birthtime is not None else "--",
+                            utils.strftime(birthtime) if birthtime is not None else "--",
                             field,
                         ))
                     case "mime":

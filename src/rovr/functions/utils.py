@@ -86,12 +86,10 @@ def should_cancel() -> bool:
     """
     try:
         worker = get_current_worker()
-    except RuntimeError:
+    except (NoActiveWorker, RuntimeError):
         return False
     except WorkerCancelled:
         return True
-    except NoActiveWorker:
-        return False
     return bool(worker and not worker.is_running)
 
 
@@ -563,3 +561,13 @@ def dump_on_exc(widget: DOMNode | None, *filter: type[BaseException]) -> Any:
         from rovr.functions.path import dump_exc
 
         dump_exc(widget, exc)
+
+
+def strftime(timestamp: float, format: str = "") -> str:
+    from datetime import datetime
+
+    from rovr.variables.constants import config
+
+    return datetime.fromtimestamp(timestamp).strftime(
+        format or config["metadata"]["datetime_format"]
+    )

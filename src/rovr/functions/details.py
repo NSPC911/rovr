@@ -8,7 +8,7 @@ from typing import NamedTuple
 from rich.cells import cell_len
 from textual.widgets.option_list import Option
 
-from rovr.functions.utils import natural_size
+from rovr.functions.utils import natural_size, strftime
 from rovr.variables.constants import config
 
 from .path import get_birthtime
@@ -229,21 +229,10 @@ def detail_cells(
                             config["metadata"]["filesize_suffix"],
                             config["metadata"]["filesize_decimals"],
                         )
-                case "mtime":
+                # I'll do anything to reduce code size even if it looks stupid
+                case "mtime" | "atime" | "ctime":
                     value = (
-                        datetime.fromtimestamp(file_stat.st_mtime).strftime(column.format)
-                        if file_stat
-                        else "--"
-                    )
-                case "atime":
-                    value = (
-                        datetime.fromtimestamp(file_stat.st_atime).strftime(column.format)
-                        if file_stat
-                        else "--"
-                    )
-                case "ctime":
-                    value = (
-                        datetime.fromtimestamp(file_stat.st_ctime).strftime(column.format)
+                        strftime(getattr(file_stat, f"st_{column.type}"), column.format)
                         if file_stat
                         else "--"
                     )

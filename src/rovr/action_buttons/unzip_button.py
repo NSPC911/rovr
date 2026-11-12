@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from os import path
+from time import sleep
 
 from textual import work
 from textual.widgets import Button
@@ -29,8 +30,13 @@ class UnzipButton(Button):
         Args:
             paths (list[str]): The paths of the selected files.
         """
+        if not self.disabled:
+            self.app.call_from_thread(setattr, self, "disabled", True)
         if len(paths) != 1:
             self.app.call_from_thread(setattr, self, "disabled", True)
+            return
+        sleep(0.25)
+        if utils.should_cancel():
             return
         is_archive = utils.is_archive(paths[0])
         if utils.should_cancel():

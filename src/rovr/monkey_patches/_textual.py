@@ -409,3 +409,10 @@ def set_options(
 
 
 SelectionList.set_options = set_options  # ty: ignore[invalid-assignment]
+
+
+def focus(self: Widget, scroll_visible: bool = True) -> Self:  # ty: ignore[invalid-type-form]
+    self.screen.set_focus(self, scroll_visible=scroll_visible)
+
+
+Widget.focus = focus  # ty: ignore[invalid-assignment]

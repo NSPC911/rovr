@@ -721,10 +721,19 @@ class FileList(
                 self.highlighted = 0
             self.app.tabWidget.active_tab.selectedItems = []
         else:
-            selected = await self.get_selected_objects() or []
-            self.app.query_one("#unzip").update_state(
-                selected if len(selected) == 1 else []
-            )
+            if self.input.value:
+                selected = await self.get_selected_objects() or []
+                unzip_paths = selected if len(selected) == 1 else []
+            elif len(self._selected) == 1:
+                option = self._id_to_option.get(next(iter(self._selected)))
+                unzip_paths = (
+                    [path_utils.normalise(option.dir_entry.path)]
+                    if isinstance(option, FileListSelectionWidget)
+                    else []
+                )
+            else:
+                unzip_paths = []
+            self.app.query_one("#unzip").update_state(unzip_paths)
             self.app.update_terminal_title()
 
     # No clue why I'm using an OptionList method for SelectionList
@@ -891,13 +900,16 @@ class FileList(
         if self.dummy or not self.parent:
             return
         elif self.select_mode:
-            total = sum(
-                isinstance(option, FileListSelectionWidget)
-                for option in self.list_of_options
+            total = (
+                len(self.list_of_options)
+                if self.list_of_options
+                and isinstance(self.list_of_options[0], FileListSelectionWidget)
+                else 0
             )
-            utils.set_scuffed_subtitle(
-                self.parent, "SELECT", f"{len(self.selected_options)}/{total}"
+            selected = (
+                len(self.selected_options) if self.input.value else len(self._selected)
             )
+            utils.set_scuffed_subtitle(self.parent, "SELECT", f"{selected}/{total}")
         elif not self.option_count or self.get_option_at_index(0).disabled:
             utils.set_scuffed_subtitle(self.parent, "NORMAL", "0/0")
             # tell metadata to die

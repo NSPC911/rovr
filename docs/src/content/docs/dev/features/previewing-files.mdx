@@ -149,12 +149,23 @@ type = "text | image | pdf"
 on_nonzero_exit = "details"  # or any default available previewers mentioned above
 ```
 
+Supported Expansions:
+- `%h` - path to the file being previewed
+- `%rh` - realpath to file being previewed
+- `%nh` - name of file being previewed
+- `%rnh` - realpath name of file being previewed
+- `%cwd` - current working directory
+- `%rcwd` - realpath to current working directory
+- `%temp` - path to a temporary file that will be created for the previewer to write to. \
+  You can include a file extension in the variable, like `%temp.png`. The temporary file will be deleted after the preview is displayed.
+- `%tmpdir` - path to a temporary directory that will be created for the previewer to write to. \
+  The temporary directory will be deleted after the preview is displayed.
+
 #### List of cool previewers
 
 Helium and Glow are mentioned above, here is a few more previewers that you can use:
 
 - [libreoffice](https://www.libreoffice.org/): for previewing office documents like `.docx`, `.xlsx`, `.pptx`
-
 Paste the following python script somewhere accessible and add it to your config.toml as a previewer:
 ```python
 import subprocess, os, sys
@@ -189,4 +200,15 @@ type = "pdf"
 "application/oasis.opendocument.*" = "libreoffice"
 "application/ms-*" = "libreoffice"
 "application/msword" = "libreoffice"
+```
+
+- [pixelorama](https://pixelorama.org): for previewing `.pxo` files, frames arent supported, its just a static image previewer
+```toml
+[settings.previewers.pixelorama]
+command = ['pixelorama', '--headless', '--quit', '--', '%h', '--export', '--output', '%file']
+file = "%temp.png"
+type = "image"
+[settings.preview_rules."application/zip"]
+default = "archive"
+extensions = { pxo = "pixelorama" }
 ```

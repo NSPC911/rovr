@@ -5,6 +5,8 @@ description: how to theme rovr
 
 rovr can be themed in two ways, via theme files in the `themes` folder and the `style.tcss` file.
 
+## main tcss files
+
 ### theme files
 
 themes live as `tcss` files in `<config folder>/themes/<name>.tcss`. the file name becomes the theme name in the theme picker. a file with the same name as a bundled theme overrides it. theme files are hot-reloaded while rovr is running, so you can tweak colors and watch them apply live.
@@ -37,13 +39,13 @@ Every default variable is required to be declared, but you can add any other var
 theme files can also contain regular tcss rules below the variable declarations:
 
 ```css
-$primary: #88C0D0;
+$primary: #88c0d0;
 
 FileList {
-    text-style: italic;
+  text-style: italic;
 }
 #file_list_container {
-    border: double $primary;
+  border: double $primary;
 }
 ```
 
@@ -71,12 +73,62 @@ any other declaration becomes a custom variable, usable by [textual's additional
 
 ### style.tcss
 
-styling in textual is handled by `tcss` files, a simplified version of the web's `css`. a reference is available in the [textual docs](https://textual.textualize.io/styles/)
+`style.tcss` is a global style file that is loaded on top of the theme. it can be used to override any theme variable, or add additional styling to widgets. it is located in `<config folder>/style.tcss`. this file is also hot-reloaded while rovr is running.
 
-you can get the full DOM list by running
+## what is tcss?
 
-```shell
+styling in textual is handled by `tcss` files, a simplified version of the web's `css`. Do look at [Textual's official CSS documentation on CSS](https://textual.textualize.io/guide/CSS) and [Styles Reference](https://textual.textualize.io/styles) for a more detailed guide on Textual CSS
+
+This guide will cover the basics of Textual CSS, including how to apply styles to rovr widgets, and themes.
+
+---
+
+Textual CSS is a powerful way to style rovr, it is a subset of CSS specifically designed for Textual applications. Let's go over the main few things you need to take note of
+
+#### DOM Tree
+
+Similar to HTML's DOM, Textual has a DOM tree that represents the ancestors/siblings/children of widgets. The DOM tree can be printed to stdout using
+
+```sh
 rovr --tree-dom
+```
+
+which will print the tree to stdout. If piped, the colors will be stripped.
+
+Alternatively, if you want to get the DOM at runtime, you can add the folllowing to your `keys.toml`:
+
+```toml
+[app]
+"alt+t" = "print_dom"
+```
+
+and press alt+t to print the DOM tree to stdout. You can even do
+
+```sh
+rovr --force-tty > dom.txt
+```
+
+and press <kbd>alt+t</kbd> to get the DOM tree in a file.
+
+an example truncated dom would look like this:
+
+```
+Application(
+    title='rovr @ rovr',
+    classes={'-dark-mode', '-theme-nord'},
+    pseudo_classes={'dark', 'focus', 'ansi'}
+)
+└── _RovrScreen(id='_default', classes='-all-vertical -all-horizontal')
+    └── Vertical(id='root', classes='comfy-panels compact-buttons')
+        └── HorizontalGroup(id='main')
+            └── FileListContainer(id='file_list_container')
+                ├── SearchInput(classes='-textual-compact')
+                ├── Static(id='file_list_details_header')
+                └── FileList(
+                        id='file_list',
+                        name='File List',
+                        classes='file-list'
+                    )
 ```
 
 `tcss` works the same as `css`, so, if you want to target the `FileList` inside the `#file_list_container` you can do
@@ -85,90 +137,126 @@ rovr --tree-dom
 #file_list_container > FileList {
   ...
 }
+/* or */
+#file_list {
+  ...
+}
 ```
 
-however, if you took a look at the dom, or a truncated dom below
+CSS nesting is also allowed, so you can do
 
-```
-Application class="-dark-mode"
-└── Vertical id="root"
-    └── HorizontalGroup id="main"
-        └── FileListContainer id="file_list_container"
-            └── FileList id="file_list" class="file-list"
+```css
+#file_list_container {
+  FileList { ... }
+}
 ```
 
-you may notice that class inheritance is not shown, `FileListContainer` inherits `VerticalGroup` while `FileList` inherits `SelectionList`. I will soon add support, but not just yet.
+however, if you took a look at the DOM tree, you may notice that class inheritance is not shown:
+for example, `FileList` inherits from `SelectionList`, which inherits from `OptionList`, `ScrollView`, `ScrollableContainer` and finally `Widget`
+
+Although this is not recommended, you can target the `FileList` using its parent classes:
+
+```css
+ScrollableContainer#file_list {
+  ...
+}
+```
 
 rovr includes some extra classes that can be used to narrow down the elements, or style them based on certain scenarios.
 
-<h4 class="no-lower">Checkbox selection lists</h4>
+#### Checkbox selection lists
 
 Lists using rovr's checkbox renderer, including `FileList`, `Clipboard` and the `TrashSelectionList`, expose a component class for styling the entire checked option.
 
-| Component Classes              | Description                                 | Example                                                   |
-| ------------------------------ | ------------------------------------------- | --------------------------------------------------------- |
-| selection-list--option-checked | applied on options that are checked         | `Clipboard > .selection-list--option-checked`             |
-| \*--hovered                    | used when the checked option is hovered     | `FileList > .selection-list--option-checked--hovered`     |
-| \*--highlighted                | used when the checked option is highlighted | `FileList > .selection-list--option-checked--highlighted` |
+| Component Classes                | Description                                 | Example                                                   |
+| -------------------------------- | ------------------------------------------- | --------------------------------------------------------- |
+| `selection-list--option-checked` | applied on options that are checked         | `Clipboard > .selection-list--option-checked`             |
+| `*--hovered`                     | used when the checked option is hovered     | `FileList > .selection-list--option-checked--hovered`     |
+| `*--highlighted`                 | used when the checked option is highlighted | `FileList > .selection-list--option-checked--highlighted` |
 
-<h4 class="no-lower">FileList</h4>
+#### FileList
 
 This is the main file list that you will be navigating
 
-| Class       | Description                                                                         | Example                |
-| ----------- | ----------------------------------------------------------------------------------- | ---------------------- |
-| select-mode | applied to the `FileList` when in select mode, where you can select multiple files. | `FileList.select-mode` |
+| Class         | Description                                                                         | Example                |
+| ------------- | ----------------------------------------------------------------------------------- | ---------------------- |
+| `select-mode` | applied to the `FileList` when in select mode, where you can select multiple files. | `FileList.select-mode` |
 
-| Component Classes     | Description                                    | Example                             |
-| --------------------- | ---------------------------------------------- | ----------------------------------- |
-| filelist--cut         | applied on files/folders that are cut          | `FileList > .filelist--cut`         |
-| filelist--broken-link | applied on files/folders that are broken links | `FileList > .filelist--broken-link` |
-| filelist--link        | applied on files/folders that are links        | `FileList > .filelist--link`        |
-| filelist--hidden      | applied on files/folders that are hidden       | `FileList > .filelist--hidden`      |
+| Component Classes       | Description                                    | Example                             |
+| ----------------------- | ---------------------------------------------- | ----------------------------------- |
+| `filelist--cut`         | applied on files/folders that are cut          | `FileList > .filelist--cut`         |
+| `filelist--broken-link` | applied on files/folders that are broken links | `FileList > .filelist--broken-link` |
+| `filelist--link`        | applied on files/folders that are links        | `FileList > .filelist--link`        |
+| `filelist--hidden`      | applied on files/folders that are hidden       | `FileList > .filelist--hidden`      |
 
 These component classes also come with their own sub classes due to textual limitations.
 When multiple classes apply, checked styling is used as the base and file-specific styling takes precedence for properties it defines.
 
 | Component Classes | Description                                   | Example                                   |
 | ----------------- | --------------------------------------------- | ----------------------------------------- |
-| \*--hovered       | used when the option is currently hovered     | `FileList > .filelist--cut--hovered`      |
-| \*--highlighted   | used when the option is currently highlighted | `FileList > .filelist--link--highlighted` |
+| `*--hovered`      | used when the option is currently hovered     | `FileList > .filelist--cut--hovered`      |
+| `*--highlighted`  | used when the option is currently highlighted | `FileList > .filelist--link--highlighted` |
 
-[detail columns](/rovr/features/detail-columns) get their own component classes. these do not have `--hovered` or `--highlighted` sub classes; only the foreground color and text style apply, on top of the row's background.
+[detail columns](/rovr/features/detail-columns) get their own component classes. <u>these do not have</u> `--hovered` <u>or</u> `--highlighted` <u>sub classes</u>; only the foreground color and text style apply, on top of the row's background.
 
-| Component Classes            | Description                                         | Example                                    |
-| ---------------------------- | --------------------------------------------------- | ------------------------------------------ |
-| filelist--detail-size        | applied on the size column                          | `FileList > .filelist--detail-size`        |
-| filelist--detail-mtime       | applied on the modified time column                 | `FileList > .filelist--detail-mtime`       |
-| filelist--detail-atime       | applied on the accessed time column                 | `FileList > .filelist--detail-atime`       |
-| filelist--detail-ctime       | applied on the created time column                  | `FileList > .filelist--detail-ctime`       |
-| filelist--detail-permissions | applied on the permissions column                   | `FileList > .filelist--detail-permissions` |
-| filelist--detail-owner       | applied on the owner column                         | `FileList > .filelist--detail-owner`       |
-| filelist--detail-group       | applied on the group column                         | `FileList > .filelist--detail-group`       |
-| filelist--git-staged         | applied on the staged character of the git column   | `FileList > .filelist--git-staged`         |
-| filelist--git-unstaged       | applied on the unstaged character of the git column | `FileList > .filelist--git-unstaged`       |
-| filelist--git-untracked      | applied on the git column for untracked entries     | `FileList > .filelist--git-untracked`      |
+| Component Classes              | Description                                         | Example                                    |
+| ------------------------------ | --------------------------------------------------- | ------------------------------------------ |
+| `filelist--detail-size`        | applied on the size column                          | `FileList > .filelist--detail-size`        |
+| `filelist--detail-mtime`       | applied on the modified time column                 | `FileList > .filelist--detail-mtime`       |
+| `filelist--detail-atime`       | applied on the accessed time column                 | `FileList > .filelist--detail-atime`       |
+| `filelist--detail-ctime`       | applied on the created time column                  | `FileList > .filelist--detail-ctime`       |
+| `filelist--detail-permissions` | applied on the permissions column                   | `FileList > .filelist--detail-permissions` |
+| `filelist--detail-owner`       | applied on the owner column                         | `FileList > .filelist--detail-owner`       |
+| `filelist--detail-group`       | applied on the group column                         | `FileList > .filelist--detail-group`       |
+| `filelist--git-staged`         | applied on the staged character of the git column   | `FileList > .filelist--git-staged`         |
+| `filelist--git-unstaged`       | applied on the unstaged character of the git column | `FileList > .filelist--git-unstaged`       |
+| `filelist--git-untracked`      | applied on the git column for untracked entries     | `FileList > .filelist--git-untracked`      |
 
-<h4 class="no-lower">ProgressBarContainer</h4>
+#### ProgressBarContainer
 
 This is the wrapper container for progress bars seen at the bottom left part of the UI.
 
-| Class | Description                                                | Example                      |
-| ----- | ---------------------------------------------------------- | ---------------------------- |
-| error | applied when an error occurred while in the process        | `ProgressBarContainer.error` |
-| done  | applied when the process is done, regardless of the result | `ProgressBarContainer.done`  |
+| Class   | Description                                                | Example                      |
+| ------- | ---------------------------------------------------------- | ---------------------------- |
+| `error` | applied when an error occurred while in the process        | `ProgressBarContainer.error` |
+| `done`  | applied when the process is done, regardless of the result | `ProgressBarContainer.done`  |
 
-| Component Classes  | Description                                                        | Example                                      |
-| ------------------ | ------------------------------------------------------------------ | -------------------------------------------- |
-| bar--bar           | The default bar, used when the process is working                  | `ProgressBarContainer > .bar--bar`           |
-| bar--indeterminate | Used when the process is still calculating and has not started yet | `ProgressBarContainer > .bar--indeterminate` |
-| bar--complete      | Used when the process is complete                                  | `ProgressBarContainer > .bar--complete`      |
+| Component Classes    | Description                                                        | Example                                      |
+| -------------------- | ------------------------------------------------------------------ | -------------------------------------------- |
+| `bar--bar`           | The default bar, used when the process is working                  | `ProgressBarContainer > .bar--bar`           |
+| `bar--indeterminate` | Used when the process is still calculating and has not started yet | `ProgressBarContainer > .bar--indeterminate` |
+| `bar--complete`      | Used when the process is complete                                  | `ProgressBarContainer > .bar--complete`      |
 
 #### Fuzzy Screens
 
 This is the base screen for other screens like ripgrep, fd and zoxide.
 
-| Class | Description                                                 | Example                              |
-| ----- | ----------------------------------------------------------- | ------------------------------------ |
-| empty | applied on the OptionList when there are no options to show | `ModalSearchScreen OptionList.empty` |
+| Class   | Description                                                 | Example                              |
+| ------- | ----------------------------------------------------------- | ------------------------------------ |
+| `empty` | applied on the OptionList when there are no options to show | `ModalSearchScreen OptionList.empty` |
 
+#### commonly asked styles:
+
+how to unseparate the header (the action buttons and the path input)
+
+```css
+#menu_wrapper {
+  layout: horizontal;
+  & > Widget {
+    width: auto;
+  }
+  #menu Button:last-child {
+    margin-right: 0;
+  }
+  #below_menu {
+    border-top: none !important;
+    height: 1;
+    Button:first-child {
+      margin-left: 0;
+    }
+  }
+}
+.compact-buttons #menu_wrapper PathAutoCompleteInput {
+  margin: -1px 1px 0 12px;
+}
+```

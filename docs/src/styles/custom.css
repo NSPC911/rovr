@@ -38,7 +38,7 @@
   --sl-color-text-invert: var(--sl-color-black);
   /* --sl-color-bg-sidebar: hsl(from var(--sl-color-gray-5) h s l / 50%); */
   /* --sl-color-bg-nav: hsl(from var(--sl-color-gray-5) h s l / 50%); */
-  --table-border-color: color-mix(in oklab, var(--sl-color-accent) 87.5%, var(--sl-color-black));
+  /* --table-border-color: color-mix(in oklab, var(--sl-color-accent) 87.5%, var(--sl-color-black)); */
 }
 /* Light mode colors. */
 :root[data-theme="light"] {
@@ -67,7 +67,7 @@
   --sl-color-text-invert: var(--sl-color-black);
   /* --sl-color-bg-sidebar: hsl(from var(--sl-color-gray-6) h s l / 50%); */
   /* --sl-color-bg-nav: hsl(from var(--sl-color-gray-6) h s l / 50%); */
-  --table-border-color: color-mix(in oklab, var(--sl-color-accent) 75%, var(--sl-color-white));
+  /* --table-border-color: color-mix(in oklab, var(--sl-color-accent) 75%, var(--sl-color-white)); */
 }
 /* other vars */
 :root {
@@ -80,11 +80,6 @@
 
 html * {
   font-family: "CaskaydiaCove NFM";
-  &.no-lower,
-  svg,
-  svg * {
-    text-transform: none !important;
-  }
 }
 svg.rich-terminal *,
 .header, h1, h2, h3,
@@ -92,10 +87,7 @@ svg.rich-terminal *,
   font-family: "CaskaydiaCove NFM" !important;
 }
 .expressive-code {
-  * {
-    transition-property: background, color;
-    text-transform: none;
-  }
+  * { transition-property: background, color }
   > figure > figcaption::before {
     border: none;
     border-bottom: var(--ec-brdWd) solid var(--ec-frm-edTabBarBrdCol);
@@ -315,6 +307,11 @@ header > .header > .title-wrapper + [class*="print:hidden"] {
     float: right;
   }
 }
+
+.sidebar-pane {
+  border-inline-end: none
+}
+
 @media (max-width: 50rem) {
   .sidebar-pane {
     background: transparent;
@@ -326,6 +323,14 @@ header > .header > .title-wrapper + [class*="print:hidden"] {
   :root {
     --sl-content-width: 75vw;
   }
+}
+@media (width >= 50em) {
+  [data-has-sidebar] #starlight__sidebar {
+    min-width: 232px
+  }
+  [data-has-sidebar] { &&&& {
+    --sl-content-inline-start: max(232px, var(--sl-sidebar-width));
+  } }
 }
 
 header.header {
@@ -345,4 +350,8 @@ sl-sidebar-state-persist > ul ul li {
   &:has(> [aria-current="page"]) {
     border-inline-start: 0.25em solid var(--sl-color-text-accent);
   }
+}
+
+:is(th, td):not(:last-child) {
+  border-inline-end: 1px solid var(--sl-color-hairline-light);
 }

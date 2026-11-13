@@ -857,7 +857,11 @@ class PreviewContainer(Actionable, Container):
             )
         return result
 
-    def show_pdf_preview(self) -> None:
+    def show_pdf_preview(
+        self,
+        title: bool = True,
+        cache_source: CacheSource | None = None,
+    ) -> None:
         """
         Show PDF preview. Runs in a thread.
         The job of this function is to load the pdf file for the first time.
@@ -866,35 +870,38 @@ class PreviewContainer(Actionable, Container):
         Raises:
             ExitNow: If this preview request is no longer active.
         """
-        self.set_border("title", titles.pdf)
-
         if check_cancel() or self._current_file_path is None:
             return
-
-        realpath = path.realpath(self._current_file_path)
+        if title:
+            self.set_border("title", titles.pdf)
 
         from rovr.functions.pdf import get_pdf_info
 
         # Convert PDF to images if not already done
         if self.pdf.images is None:
             try:
+                realpath, stat_res, sig = cache_source or (
+                    path.realpath(self._current_file_path),
+                    os.stat(self._current_file_path),
+                    (self.pdf.cairo_or_ppm, ""),
+                )
                 pdf_info: dict[str, str | int] | None = load_from_cache(
                     realpath,
                     "pdf_info",
-                    os.stat(realpath),
-                    sig=(self.pdf.cairo_or_ppm, ""),
+                    stat_res,
+                    sig,
                     pass_as=dict,
                 )
                 if pdf_info is None:
                     pdf_info = get_pdf_info(
-                        realpath,
+                        self._current_file_path,
                         poppler_path=PDFHandler.get_poppler_folder(),
                     )
                     save_to_cache(
                         realpath,
                         "pdf_info",
-                        os.stat(realpath),
-                        sig=(self.pdf.cairo_or_ppm, ""),
+                        stat_res,
+                        sig,
                         data=pdf_info,
                     )
                 self.pdf.total_pages = int(pdf_info.get("Pages", 0))
@@ -1868,9 +1875,9 @@ class PreviewContainer(Actionable, Container):
                     self.show_custom_text_preview(output_data)
                 case "image":
                     assert isinstance(output_data, bytes)
-                    with open(temp_path, "wb") as file:
-                        file.write(output_data)
-                    self._current_file_path = temp_path
+                    self._current_file_path = _cache_path(
+                        realpath, "custom-previewer", stat_res, sig
+                    )
                     self.show_image_preview(
                         title=False,
                         cache_source=(
@@ -1879,6 +1886,23 @@ class PreviewContainer(Actionable, Container):
                             (name, f"{repr(previewer)}:{IMAGE_CACHE_SIGNATURE}"),
                         ),
                     )
+                case "pdf":
+                    assert isinstance(output_data, bytes)
+                    self._current_file_path = _cache_path(
+                        realpath, "custom-previewer", stat_res, sig
+                    )
+                    self.show_pdf_preview(
+                        title=False,
+                        cache_source=(
+                            realpath,
+                            stat_res,
+                            (
+                                name,
+                                f"{repr(previewer)}:{config['plugins']['poppler']['use_pdftocairo']}",
+                            ),
+                        ),
+                    )
+
         except FileNotFoundError:
             if should_cancel():
                 return
@@ -1917,7 +1941,8 @@ class PreviewContainer(Actionable, Container):
                 )
             path_utils.dump_exc(self, exc)
         finally:
-            self._current_file_path = original_path
+            if previewer["type"] != "pdf":
+                self._current_file_path = original_path
             with contextlib.suppress(OSError):
                 os.unlink(temp_path)
             if output_path != temp_path and output_path != output:
@@ -2039,7 +2064,14 @@ class PreviewContainer(Actionable, Container):
             self.children[-1].focus()
 
     def _is_pdf(self) -> bool:
-        return self.border_title == titles.pdf and self._file_type == "pdf"
+        return (
+            self._file_type == "pdf"
+            or config["settings"]
+            .get("previewers", {})
+            .get(self._file_type, {})
+            .get("type")
+            == "pdf"
+        )
 
     def action_up(self) -> None:
         if self._is_pdf() and self.pdf.images is not None:

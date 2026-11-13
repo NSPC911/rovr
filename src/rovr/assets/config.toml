@@ -111,7 +111,6 @@ drive_exclude = ["/var/*"]
 "application/(json|javascript|xml|raml\\+yaml)" = "text"
 "application/(mbox|ndjson|wine-extension-ini)" = "text"
 "application/x-(yaml|script|pem-file|subrip|typescript)" = "text"
-"application/vnd.openxmlformats-officedocument.wordprocessingml.document" = "remime"
 "application/ms-opentype" = "font"
 "application/pdf" = "pdf"
 "image/svg\\+xml" = "resvg"

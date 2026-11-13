@@ -2021,11 +2021,15 @@ r"""The values for the 'default: __stdout__' enum"""
 _RovrConfigSettingsPreviewersTypeFileAnyof1 = str
 r""" default: __stdout__ """
 
-_RovrConfigSettingsPreviewersTypeType = Literal["text"] | Literal["image"]
+_RovrConfigSettingsPreviewersTypeType = (
+    Literal["text"] | Literal["image"] | Literal["pdf"]
+)
 r""" The type of previewer. This determines how the previewer will be used. """
 _ROVRCONFIGSETTINGSPREVIEWERSTYPETYPE_TEXT: Literal["text"] = "text"
 r"""The values for the 'The type of previewer. This determines how the previewer will be used' enum"""
 _ROVRCONFIGSETTINGSPREVIEWERSTYPETYPE_IMAGE: Literal["image"] = "image"
+r"""The values for the 'The type of previewer. This determines how the previewer will be used' enum"""
+_ROVRCONFIGSETTINGSPREVIEWERSTYPETYPE_PDF: Literal["pdf"] = "pdf"
 r"""The values for the 'The type of previewer. This determines how the previewer will be used' enum"""
 
 class _RovrConfigTheme(TypedDict, total=False):

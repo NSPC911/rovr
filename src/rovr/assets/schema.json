@@ -599,7 +599,7 @@
               "properties": {
                 "type": {
                   "type": "string",
-                  "enum": ["text", "image"],
+                  "enum": ["text", "image", "pdf"],
                   "description": "The type of previewer. This determines how the previewer will be used."
                 },
                 "command": {

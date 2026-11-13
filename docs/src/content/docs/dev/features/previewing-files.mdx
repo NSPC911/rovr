@@ -145,6 +145,48 @@ The full syntax for the custom previewers is as follows:
 [settings.previewers."previewer_name"]
 command = ["command", "arg1", "arg2", "%h"]
 file = "%temp(.ext) | __stdout__ | __stderr__ | /path/to/file"
-type = "text | image"
+type = "text | image | pdf"
 on_nonzero_exit = "details"  # or any default available previewers mentioned above
+```
+
+#### List of cool previewers
+
+Helium and Glow are mentioned above, here is a few more previewers that you can use:
+
+- [libreoffice](https://www.libreoffice.org/): for previewing office documents like `.docx`, `.xlsx`, `.pptx`
+
+Paste the following python script somewhere accessible and add it to your config.toml as a previewer:
+```python
+import subprocess, os, sys
+to_preview, outfile = sys.argv
+write_to = os.path.dirname(outfile)
+proc = subprocess.run(
+    ["libreoffice", "--headless", "--convert-to", "pdf",
+     to_preview, "--outdir", write_to],
+    capture_output=True,
+    check=False,
+)
+if proc.returncode != 0:
+    # because libreoffice prints errors to stdout
+    print(proc.stdout.decode())
+    exit(proc.returncode)
+else:
+    replace(
+        path.join(write_to, os.path.splitext(os.path.basename(to_preview))[0] + ".pdf"),
+        outfile,
+    )
+```
+Then add the following to your config.toml:
+
+```toml
+[settings.previewers.libreoffice]
+command = ["python", "/path/to/libre.py", "%h", "%file"]
+file = "%temp.pdf"
+type = "pdf"
+
+[settings.preview_rules]
+"application/(vnd\\.)?openxmlformats-officedocument.*" = "libreoffice"
+"application/oasis.opendocument.*" = "libreoffice"
+"application/ms-*" = "libreoffice"
+"application/msword" = "libreoffice"
 ```

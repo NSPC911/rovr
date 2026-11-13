@@ -125,6 +125,77 @@ async def test_custom_previewer_cleans_browser_profile(
         assert not profiles[0].exists()
 
 
+@pytest.mark.parametrize("preview_type", ["image", "pdf"])
+async def test_custom_previewer_renders_from_cached_file(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, preview_type: str
+) -> None:
+    source = tmp_path / "source.docx"
+    source.write_bytes(b"document")
+    cached = tmp_path / "cached"
+    monkeypatch.setitem(
+        cast(dict[str, Any], config)["settings"],
+        "previewers",
+        {
+            "converted": {
+                "command": ["render", "%file"],
+                "file": "%temp.pdf" if preview_type == "pdf" else "%temp.png",
+                "type": preview_type,
+            }
+        },
+    )
+
+    async def expand(app: App[Any], command: list[str], banned: list[str]) -> list[str]:
+        return command
+
+    def run(command: list[str], **kwargs: Any) -> subprocess.CompletedProcess[bytes]:
+        Path(command[1]).write_bytes(b"converted")
+        return subprocess.CompletedProcess(command, 0, b"", b"")
+
+    def save(*args: Any) -> None:
+        cached.write_bytes(args[4])
+
+    def render(*args: Any, **kwargs: Any) -> None:
+        assert preview._current_file_path == str(cached)
+        assert cached.read_bytes() == b"converted"
+
+    app = PreviewTestApp()
+    async with app.run_test():
+        preview = app.query_one(PreviewContainer)
+        token = preview._active_preview_token
+        preview._file_type = "converted"
+
+        def show() -> None:
+            preview._current_file_path = str(source)
+            context_token = preview_token.set(token)
+            try:
+                preview.show_custom_preview("converted")
+            finally:
+                preview_token.reset(context_token)
+
+        with (
+            patch("rovr.core.preview_container.expand_command", expand),
+            patch(
+                "rovr.core.preview_container.subprocess.run", side_effect=run
+            ) as process,
+            patch("rovr.core.preview_container._cache_path", return_value=str(cached)),
+            patch(
+                "rovr.core.preview_container.load_from_cache",
+                side_effect=lambda *args: (
+                    cached.read_bytes() if cached.exists() else None
+                ),
+            ),
+            patch("rovr.core.preview_container.save_to_cache", side_effect=save),
+            patch.object(preview, f"show_{preview_type}_preview", side_effect=render),
+        ):
+            await asyncio.to_thread(show)
+            assert preview._current_file_path == (
+                str(cached) if preview_type == "pdf" else str(source)
+            )
+            await asyncio.to_thread(show)
+            process.assert_called_once()
+            assert preview._is_pdf() == (preview_type == "pdf")
+
+
 async def test_subprocess_error_is_rendered_as_literal_text() -> None:
     app = PreviewTestApp()
     async with app.run_test():

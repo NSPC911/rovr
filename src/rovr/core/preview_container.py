@@ -77,6 +77,7 @@ IMAGE_CACHE_SIGNATURE = (
     str(RESAMPLING_METHOD()),
 )
 RESVG_CACHE_SIGNATURE = (str(config["plugins"]["resvg"]), "resvg-v2")
+type CacheSource = tuple[str, os.stat_result, tuple[str, str]]
 
 
 class ExitNow(RuntimeError): ...
@@ -644,7 +645,7 @@ class PreviewContainer(Actionable, Container):
         self,
         magicked: bool = False,
         title: bool = True,
-        cache_source: tuple[str, os.stat_result, tuple[str, str]] | None = None,
+        cache_source: CacheSource | None = None,
     ) -> None:
         """Show image preview. Runs in a thread.
 
@@ -667,14 +668,16 @@ class PreviewContainer(Actionable, Container):
             if pil_object is None:
                 if self.app.MULTIPROCESSING_PROCESS_ALLOWED:
                     try:
-                        pil_object = preview_utils.resample_file(realpath)
+                        pil_object = preview_utils.resample_file(self._current_file_path)
                     except ValueError as exc:
                         if multiprocessing_process_error_checker(self.app, exc):
-                            pil_object = preview_utils.resample_file_sync(realpath)
+                            pil_object = preview_utils.resample_file_sync(
+                                self._current_file_path
+                            )
                         else:
                             raise
                 else:
-                    pil_object = preview_utils.resample_file_sync(realpath)
+                    pil_object = preview_utils.resample_file_sync(self._current_file_path)
                 if pil_object is None:
                     return
                 _save_cached_image(realpath, cache_type, stat_res, pil_object, sig)
@@ -694,7 +697,7 @@ class PreviewContainer(Actionable, Container):
                             config["plugins"]["magick"]["executable"],
                             # TODO: multi-image heics are a thing, how to support?
                             # refactor pdf to be more generic?
-                            realpath + "[0]",
+                            self._current_file_path + "[0]",
                             "-resize",
                             f"{preview_utils.MAX_IMAGE_SIZE[0]}x{preview_utils.MAX_IMAGE_SIZE[1]}>",
                             cache_path + ".png",

@@ -21,7 +21,6 @@ from textual.worker import NoActiveWorker, WorkerCancelled, get_current_worker
 
 from rovr.classes.type_aliases import ShellRunTypes
 from rovr.functions.cwd import getcwd
-from rovr.variables.maps import RovrVars
 
 
 def set_scuffed_subtitle(element: DOMNode, *sections: str) -> None:
@@ -91,6 +90,17 @@ def should_cancel() -> bool:
     except WorkerCancelled:
         return True
     return bool(worker and not worker.is_running)
+
+
+class ExitNow(RuntimeError): ...
+
+
+def check_cancel(do_raise: bool = True) -> bool:
+    if should_cancel():
+        if do_raise:
+            raise ExitNow()
+        return True
+    return False
 
 
 def check_key(event: events.Key, key_list: list[str] | str) -> bool:
@@ -452,93 +462,6 @@ def s(item: Any, notone: str = "s", isone: str = "") -> str:
         or (type(item) is int and item == 1)
         else notone
     )
-
-
-preview_loc = os.path.realpath(os.path.join(RovrVars.ROVRTEMP, "previews"))
-
-
-def in_preview_loc(path_str: str) -> bool:
-    return os.path.commonpath([os.path.realpath(path_str), preview_loc]) == preview_loc
-
-
-def _cache_path(
-    realpath: str,
-    preview_type: str,
-    stat_res: os.stat_result,
-    sig: tuple[str, str],
-    extra: Any = None,
-) -> str:
-    from hashlib import blake2b
-
-    hash = blake2b(
-        (
-            f"{realpath}:{preview_type}:{stat_res.st_mtime_ns}:"
-            f"{stat_res.st_size}:{sig[0]}:{sig[1]}:{extra}"
-        ).encode(),
-        digest_size=16,
-    ).hexdigest()
-    if os.path.exists(preview_loc) and not os.path.isdir(preview_loc):
-        os.remove(preview_loc)
-    if not os.path.exists(preview_loc):
-        os.makedirs(preview_loc, exist_ok=True)
-    return os.path.join(preview_loc, hash)
-
-
-def load_from_cache(
-    realpath: str,
-    preview_type: str,
-    stat_res: os.stat_result,
-    sig: tuple[str, str],
-    extra: Any = None,
-    pass_as: type[Any] = bytes,
-) -> Any | None:
-
-    # before we hash, check if file in the cache folder, if not, return None
-    if in_preview_loc(realpath):
-        return None
-
-    cache_path = _cache_path(realpath, preview_type, stat_res, sig, extra)
-    try:
-        with open(cache_path, "rb") as f:
-            content = f.read()
-        if pass_as is list or pass_as is dict:
-            import json
-
-            return json.loads(content.decode())
-        elif pass_as is str:
-            return content.decode()
-        return content
-    except Exception:
-        pass
-
-
-def save_to_cache(
-    realpath: str,
-    preview_type: str,
-    stat_res: os.stat_result,
-    sig: tuple[str, str],
-    data: Any,
-    extra: Any = None,
-) -> None:
-    # same as before
-    if in_preview_loc(realpath):
-        return
-
-    try:
-        if isinstance(data, (dict, list)):
-            import json
-
-            data = json.dumps(
-                data, ensure_ascii=False, check_circular=False, separators=(",", ":")
-            ).encode()
-        elif isinstance(data, str):
-            data = data.encode()
-        elif not isinstance(data, bytes):
-            data = str(data).encode()
-        with open(_cache_path(realpath, preview_type, stat_res, sig, extra), "wb") as f:
-            f.write(data)
-    except OSError:
-        pass
 
 
 R = TypeVar("R")

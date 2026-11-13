@@ -19,14 +19,10 @@ from rovr.components.text_preview import (
     WindowedTextPreview,
     _decode_text_preview,
 )
-from rovr.core.preview_container import (
-    ExitNow,
-    PreviewContainer,
-    _load_cached_text,
-    _save_cached_text,
-    preview_token,
-)
+from rovr.core.preview_container import PreviewContainer
+from rovr.functions.cache import _load_text, _save_text
 from rovr.functions.preview_utils import MimeResult
+from rovr.functions.utils import ExitNow
 from rovr.variables.constants import config
 
 
@@ -47,15 +43,13 @@ class WindowedPreviewTestApp(App[None]):
 def test_cached_text_uses_pickle() -> None:
     text = Text.from_markup("[bold red]cached[/]")
 
-    with patch("rovr.core.preview_container.save_to_cache") as save:
-        _save_cached_text("file", "bat-page", cast(Any, None), ("v2", "bat"), text)
+    with patch("rovr.functions.cache.save") as save:
+        _save_text("file", "bat-page", cast(Any, None), ("v2", "bat"), text)
 
     data = save.call_args.args[4]
     assert pickle.loads(data) == text
-    with patch("rovr.core.preview_container.load_from_cache", return_value=data):
-        assert (
-            _load_cached_text("file", "bat-page", cast(Any, None), ("v2", "bat")) == text
-        )
+    with patch("rovr.functions.cache.load", return_value=data):
+        assert _load_text("file", "bat-page", cast(Any, None), ("v2", "bat")) == text
 
 
 @pytest.mark.parametrize("exit_code", [0, 21])
@@ -100,6 +94,7 @@ async def test_custom_previewer_cleans_browser_profile(
         preview.mount_special_messages = mount  # ty: ignore[invalid-assignment]
         preview._current_file_path = str(source)
         token = preview._active_preview_token
+        preview_token = preview.preview_token
 
         def show() -> None:
             context_token = preview_token.set(token)
@@ -109,10 +104,10 @@ async def test_custom_previewer_cleans_browser_profile(
                 preview_token.reset(context_token)
 
         with (
-            patch("rovr.core.preview_container.expand_command", expand),
+            patch("rovr.functions.utils.expand_command", expand),
             patch("rovr.core.preview_container.subprocess.run", side_effect=run),
-            patch("rovr.core.preview_container.load_from_cache", return_value=None),
-            patch("rovr.core.preview_container.save_to_cache"),
+            patch("rovr.functions.cache.load", return_value=None),
+            patch("rovr.functions.cache.save"),
             patch.object(preview, "show_image_preview"),
         ):
             if exit_code:
@@ -163,6 +158,7 @@ async def test_custom_previewer_renders_from_cached_file(
         preview = app.query_one(PreviewContainer)
         token = preview._active_preview_token
         preview._file_type = "converted"
+        preview_token = preview.preview_token
 
         def show() -> None:
             preview._current_file_path = str(source)
@@ -173,18 +169,18 @@ async def test_custom_previewer_renders_from_cached_file(
                 preview_token.reset(context_token)
 
         with (
-            patch("rovr.core.preview_container.expand_command", expand),
+            patch("rovr.functions.utils.expand_command", expand),
             patch(
                 "rovr.core.preview_container.subprocess.run", side_effect=run
             ) as process,
-            patch("rovr.core.preview_container._cache_path", return_value=str(cached)),
+            patch("rovr.functions.cache._cache_path", return_value=str(cached)),
             patch(
-                "rovr.core.preview_container.load_from_cache",
+                "rovr.functions.cache.load",
                 side_effect=lambda *args: (
                     cached.read_bytes() if cached.exists() else None
                 ),
             ),
-            patch("rovr.core.preview_container.save_to_cache", side_effect=save),
+            patch("rovr.functions.cache.save", side_effect=save),
             patch.object(preview, f"show_{preview_type}_preview", side_effect=render),
         ):
             await asyncio.to_thread(show)
@@ -202,6 +198,7 @@ async def test_subprocess_error_is_rendered_as_literal_text() -> None:
         preview = app.query_one(PreviewContainer)
         preview._current_content = "Command ['helium', 'C:\\Users\\notso'] failed"
         token = preview._active_preview_token
+        preview_token = preview.preview_token
 
         def show() -> None:
             context_token = preview_token.set(token)
@@ -222,6 +219,7 @@ async def test_call_from_thread_rejects_stale_preview() -> None:
     async with app.run_test():
         preview = app.query_one(PreviewContainer)
         current_token = preview._active_preview_token
+        preview_token = preview.preview_token
 
         def call_with(token: object) -> int:
             context_token = preview_token.set(token)
@@ -274,6 +272,7 @@ async def test_folder_preview_stops_loading_timer_on_cancellation(
     async with app.run_test(size=(143, 37)):
         preview = app.query_one(PreviewContainer)
         timer = Mock()
+        preview_token = preview.preview_token
 
         def show() -> None:
             context_token = preview_token.set(preview._active_preview_token)
@@ -349,8 +348,8 @@ async def test_bat_line_count_updates_lazy_source(tmp_path: Path) -> None:
         text_preview = WindowedTextPreview(source)
 
         with (
-            patch("rovr.core.preview_container.load_from_cache", return_value=None),
-            patch("rovr.core.preview_container.save_to_cache") as save,
+            patch("rovr.functions.cache.load", return_value=None),
+            patch("rovr.functions.cache.save") as save,
         ):
             await asyncio.to_thread(
                 preview._count_bat_lines,
@@ -378,7 +377,7 @@ async def test_stale_bat_line_count_stops_before_cache_access(tmp_path: Path) ->
         source = LazyTextLines(256, 256, lambda page: None)
         text_preview = WindowedTextPreview(source)
 
-        with patch("rovr.core.preview_container.load_from_cache") as load:
+        with patch("rovr.functions.cache.load") as load:
             await asyncio.to_thread(
                 preview._count_bat_lines,
                 stale_token,
@@ -418,6 +417,7 @@ async def test_normal_preview_mounts_windowed_content(tmp_path: Path) -> None:
         preview = app.query_one(PreviewContainer)
         preview._current_file_path = str(source)
         token = preview._active_preview_token
+        preview_token = preview.preview_token
 
         def show_preview() -> None:
             context_token = preview_token.set(token)
@@ -427,8 +427,8 @@ async def test_normal_preview_mounts_windowed_content(tmp_path: Path) -> None:
                 preview_token.reset(context_token)
 
         with (
-            patch("rovr.core.preview_container.load_from_cache", return_value=None),
-            patch("rovr.core.preview_container.save_to_cache"),
+            patch("rovr.functions.cache.load", return_value=None),
+            patch("rovr.functions.cache.save"),
         ):
             await asyncio.to_thread(show_preview)
         await pilot.pause()
@@ -452,6 +452,7 @@ async def test_truncated_preview_is_cached(
         preview = app.query_one(PreviewContainer)
         preview._current_file_path = str(source)
         token = preview._active_preview_token
+        preview_token = preview.preview_token
 
         def show_preview() -> None:
             context_token = preview_token.set(token)
@@ -461,8 +462,8 @@ async def test_truncated_preview_is_cached(
                 preview_token.reset(context_token)
 
         with (
-            patch("rovr.core.preview_container.load_from_cache", return_value=None),
-            patch("rovr.core.preview_container.save_to_cache") as save,
+            patch("rovr.functions.cache.load", return_value=None),
+            patch("rovr.functions.cache.save") as save,
         ):
             await asyncio.to_thread(show_preview)
         await pilot.pause()
@@ -472,10 +473,10 @@ async def test_truncated_preview_is_cached(
 
         with (
             patch(
-                "rovr.core.preview_container.load_from_cache",
+                "rovr.functions.cache.load",
                 return_value=cached_content,
             ),
-            patch("rovr.core.preview_container.save_to_cache") as save,
+            patch("rovr.functions.cache.save") as save,
         ):
             await asyncio.to_thread(show_preview)
         assert not save.called

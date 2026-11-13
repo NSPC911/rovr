@@ -2,22 +2,19 @@ from __future__ import annotations
 
 import contextlib
 import os
-import pickle
 import re
 import subprocess
 from contextvars import ContextVar
-from dataclasses import dataclass
 from functools import partial
 from io import BytesIO
 from os import path
 from tempfile import NamedTemporaryFile, TemporaryDirectory
 from time import time
-from typing import Any, Awaitable, Callable, Literal, TypeVar, cast, overload
+from typing import Awaitable, Callable, Literal, TypeVar, cast, overload
 
 import textual_image.renderable
 import textual_image.widget
 from PIL import Image, UnidentifiedImageError
-from PIL.Image import Image as PILImage
 from rich.text import Text
 from textual import events, on, work
 from textual.app import ComposeResult
@@ -32,129 +29,33 @@ from textual.widgets.selection_list import Selection
 from textual.worker import Worker
 
 from rovr.classes.mixins import Action, Actionable
+from rovr.classes.preview_mixins import BatMixin, PDFHandler, PDFMixin
 from rovr.classes.textual_options import (
     ArchiveFileListSelection,
     FileListSelectionWidget,
 )
+from rovr.classes.type_aliases import CacheSource
 from rovr.components import iterm2_image
 from rovr.components.text_preview import (
-    LazyTextLines,
     WindowedTextPreview,
     _decode_text_preview,
 )
 from rovr.core import FileList
+from rovr.functions import cache, preview_utils, utils
 from rovr.functions import icons as icon_utils
 from rovr.functions import path as path_utils
-from rovr.functions import preview_utils
 from rovr.functions.ansi import ansi_to_rich_text
-from rovr.functions.utils import (
-    _cache_path,
-    expand_command,
-    load_from_cache,
-    multiprocessing_process_error_checker,
-    s,
-    save_to_cache,
-    should_cancel,
-)
 from rovr.variables.constants import (
+    PREVIEWER_GROUP,
     RESAMPLING_METHOD,
-    PreviewContainerTitles,
+    RESVG_CACHE_SIGNATURE,
+    TEXT_PREVIEW_CACHE_VERSION,
     config,
     file_one,
+    titles,
 )
-
-titles = PreviewContainerTitles()
 
 T = TypeVar("T")
-preview_token: ContextVar[object] = ContextVar("preview_token")
-PREVIEWER_GROUP = "previewers"
-TEXT_PREVIEW_CACHE_VERSION = "windowed-v2"
-BAT_PREVIEW_CACHE_VERSION = "paged-v3"
-BAT_PREVIEW_PAGE_SIZE = 256
-BAT_PREVIEWER_GROUP = "bat-pages"
-IMAGE_CACHE_SIGNATURE = (
-    f"{preview_utils.MAX_IMAGE_SIZE[0]}x{preview_utils.MAX_IMAGE_SIZE[1]}",
-    str(RESAMPLING_METHOD()),
-)
-RESVG_CACHE_SIGNATURE = (str(config["plugins"]["resvg"]), "resvg-v2")
-type CacheSource = tuple[str, os.stat_result, tuple[str, str]]
-
-
-class ExitNow(RuntimeError): ...
-
-
-def check_cancel(do_raise: bool = True) -> bool:
-    if should_cancel():
-        if do_raise:
-            raise ExitNow()
-        return True
-    return False
-
-
-def _load_cached_image(
-    file_path: str,
-    preview_type: str,
-    stat_res: os.stat_res,
-    sig: tuple[str, str] = IMAGE_CACHE_SIGNATURE,
-    extra: Any = None,
-) -> PILImage | None:
-    data = load_from_cache(file_path, preview_type, stat_res, sig, extra)
-    if data is None:
-        return None
-    try:
-        with Image.open(BytesIO(data)) as image:
-            return image.copy()
-    except (OSError, ValueError):
-        return None
-
-
-def _save_cached_image(
-    file_path: str,
-    preview_type: str,
-    stat_res: os.stat_res,
-    image: PILImage,
-    sig: tuple[str, str] = IMAGE_CACHE_SIGNATURE,
-    extra: Any = None,
-) -> None:
-    output = BytesIO()
-    image.save(output, format="PNG")
-    save_to_cache(file_path, preview_type, stat_res, sig, output.getvalue(), extra)
-
-
-def _load_cached_text(
-    file_path: str,
-    preview_type: str,
-    stat_res: os.stat_res,
-    sig: tuple[str, str],
-    extra: Any = None,
-) -> Text | None:
-    data = load_from_cache(file_path, preview_type, stat_res, sig, extra)
-    if data is None:
-        return None
-    try:
-        text = pickle.loads(data)
-        return text if isinstance(text, Text) else None
-    except Exception:
-        return None
-
-
-def _save_cached_text(
-    file_path: str,
-    preview_type: str,
-    stat_res: os.stat_res,
-    sig: tuple[str, str],
-    text: Text,
-    extra: Any = None,
-) -> None:
-    save_to_cache(
-        file_path,
-        preview_type,
-        stat_res,
-        sig,
-        pickle.dumps(text, protocol=5),
-        extra,
-    )
-
 
 # to any ai models looking at this, shut the fuck up
 # yes i know this is a hidden module, and yes, i will
@@ -171,50 +72,6 @@ image_widget = (
         ("" if image_protocol == "Auto" else image_protocol) + "Image"
     ]
 )
-NewImage: partial[textual_image.widget._base.Image] = partial(
-    image_widget, classes="image_preview"
-)
-
-
-@dataclass
-class PDFHandler:
-    # It is 0 indexed, although most poppler functions
-    # like get_pdf_images expects 1 based indexing
-    current_page: int = 0
-    total_pages: int = 0
-    images: list[PILImage] | None = None
-    cairo_or_ppm = "cairo" if config["plugins"]["poppler"]["use_pdftocairo"] else "ppm"
-    pdf_batch_size = config["plugins"]["poppler"]["pdf_batch_size"]
-
-    def count_loaded(self) -> int:
-        return 0 if self.images is None else len(self.images)
-
-    def must_load_next_batch(self) -> bool:
-        return self.current_page >= self.count_loaded()
-
-    def should_load_next_batch(self) -> bool:
-        if self.count_loaded() >= self.total_pages:
-            return False
-
-        # If going further down half the batch will cross currently loaded pages
-        # then its better to preload in advance
-        return (self.current_page + PDFHandler.pdf_batch_size // 2) >= self.count_loaded()
-
-    def get_last_page_to_load(self) -> int:
-        # We should load till current page, if user scrolls too fast and reaches
-        # beyond the batch before our load. This can happen on slow loads, and smaller batch sizes
-        last_page = max(
-            self.current_page + 1,
-            self.count_loaded() + PDFHandler.pdf_batch_size,
-        )
-        return min(last_page, self.total_pages)
-
-    @staticmethod
-    def get_poppler_folder() -> str | None:
-        poppler_folder: str | None = config["plugins"]["poppler"]["poppler_folder"]
-        if poppler_folder == "" or poppler_folder.lower() == "path":
-            poppler_folder = None
-        return poppler_folder
 
 
 class LoadingPreview(Static):
@@ -251,7 +108,7 @@ class LoadingPreview(Static):
         self.on_mount()
 
 
-class PreviewContainer(Actionable, Container):
+class PreviewContainer(Actionable, PDFMixin, BatMixin, Container):
     key_contexts = ("preview", "scroll")
     LOADER_WIDGET = LoadingPreview()
 
@@ -259,6 +116,13 @@ class PreviewContainer(Actionable, Container):
         Action(action, config["keybinds"][action])
         for action in ("up", "down", "page_up", "page_down", "home", "end")
     ]
+
+    preview_token: ContextVar[object] = ContextVar("preview_token")
+    IMAGE_CACHE_SIGNATURE = (
+        f"{preview_utils.MAX_IMAGE_SIZE[0]}x{preview_utils.MAX_IMAGE_SIZE[1]}",
+        str(RESAMPLING_METHOD()),
+    )
+    NewImage = staticmethod(partial(image_widget, classes="image_preview"))
 
     def __init__(self) -> None:
         super().__init__(id="preview_sidebar")
@@ -314,7 +178,7 @@ class PreviewContainer(Actionable, Container):
         func = lambda: setattr(self, "border_" + title, to)
         try:
             self.call_from_thread(func)
-        except ExitNow:
+        except utils.ExitNow:
             raise
         except (RuntimeError, LookupError):
             func()
@@ -355,7 +219,7 @@ class PreviewContainer(Actionable, Container):
         self, location: str, highlighted_option: FileListSelectionWidget | None = None
     ) -> None:
         # prevent short circuit from occurring later on
-        if should_cancel():
+        if utils.should_cancel():
             return
         self._current_file_path = None
         self._rendered_preview_key = None
@@ -409,7 +273,7 @@ class PreviewContainer(Actionable, Container):
         from PIL import ImageDraw, ImageFont
         from textual.color import Color
 
-        if check_cancel() or self._current_file_path is None:
+        if utils.check_cancel() or self._current_file_path is None:
             return
 
         self.set_border("title", titles.font)
@@ -420,7 +284,7 @@ class PreviewContainer(Actionable, Container):
         try:
             stat_res = os.stat(realpath)
         except FileNotFoundError:
-            check_cancel()
+            utils.check_cancel()
             self.call_from_thread(self.remove_children)
             self.call_from_thread(
                 self.mount,
@@ -432,15 +296,15 @@ class PreviewContainer(Actionable, Container):
             return
         sig = (
             f"{preview_utils.MAX_FONT_SIZE}:{config['interface']['font_preview']['font_size']}",
-            f"{self._preview_texts['font_text']}:{fg_color.hex}:{bg_color.hex}:{NewImage.func.__name__}",
+            f"{self._preview_texts['font_text']}:{fg_color.hex}:{bg_color.hex}:{self.NewImage.func.__name__}",
         )
-        img = _load_cached_image(realpath, "font", stat_res, sig)
+        img = cache._load_image(realpath, "font", stat_res, sig)
         if img is not None:
             if image_widget := self.get_child(".image_preview"):
                 self.call_from_thread(setattr, image_widget, "image", img)
             else:
                 self.call_from_thread(self.remove_children)
-                image_widget = NewImage(img)
+                image_widget = self.NewImage(img)
                 image_widget.can_focus = True
                 self.call_from_thread(self.mount, image_widget)
             return
@@ -450,7 +314,7 @@ class PreviewContainer(Actionable, Container):
         # so just check whether auto renderer is sixel, and config configured
         # to use auto (empty string) or sixel (explicitly)
         if (
-            NewImage.func is textual_image.renderable.sixel.Image
+            self.NewImage.func is textual_image.renderable.sixel.Image
             # image_viewer.protocol shouldn't be "Auto" because it is replaced early on
             # when loading the config, but just for the sake of shutting AI
             # up, I'm going to leave this here.
@@ -475,9 +339,9 @@ class PreviewContainer(Actionable, Container):
                 self._current_file_path,
                 size=config["interface"]["font_preview"]["font_size"],
             )
-            check_cancel()
+            utils.check_cancel()
         except OSError:
-            check_cancel()
+            utils.check_cancel()
             self.call_from_thread(self.remove_children)
             self.call_from_thread(
                 self.mount,
@@ -502,8 +366,8 @@ class PreviewContainer(Actionable, Container):
             font=font,
             fill=text_fill,
         )
-        _save_cached_image(realpath, "font", stat_res, img, sig)
-        check_cancel()
+        cache._save_image(realpath, "font", stat_res, img, sig)
+        utils.check_cancel()
 
         try:
             if image_widget := self.get_child(".image_preview"):
@@ -511,16 +375,16 @@ class PreviewContainer(Actionable, Container):
             else:
                 self.call_from_thread(self.remove_children)
 
-                check_cancel()
+                utils.check_cancel()
 
-                image_widget = NewImage(img)
+                image_widget = self.NewImage(img)
                 # no need to resample, already ensured that canvas is max size
                 image_widget.can_focus = True
                 self.call_from_thread(self.mount, image_widget)
-        except ExitNow:
+        except utils.ExitNow:
             raise
         except Exception as exc:
-            check_cancel()
+            utils.check_cancel()
             self.call_from_thread(self.remove_children)
             self.call_from_thread(
                 self.mount,
@@ -538,7 +402,7 @@ class PreviewContainer(Actionable, Container):
             ExitNow: If this preview request is no longer active.
             ValueError: If SVG loading fails for non-fds_to_keep reasons.
         """
-        if check_cancel() or self._current_file_path is None:
+        if utils.check_cancel() or self._current_file_path is None:
             return
         self.set_border("title", titles.svg)
 
@@ -546,7 +410,7 @@ class PreviewContainer(Actionable, Container):
         try:
             realpath = path.realpath(self._current_file_path)
             stat_res = os.stat(realpath)
-            pil_object = _load_cached_image(
+            pil_object = cache._load_image(
                 realpath,
                 "svg",
                 stat_res,
@@ -558,7 +422,7 @@ class PreviewContainer(Actionable, Container):
                     try:
                         png_bytes = preview_utils.load_svg(realpath)
                     except ValueError as exc:
-                        if multiprocessing_process_error_checker(self.app, exc):
+                        if utils.multiprocessing_process_error_checker(self.app, exc):
                             png_bytes = preview_utils.load_svg_sync(realpath)
                         else:
                             raise
@@ -576,7 +440,7 @@ class PreviewContainer(Actionable, Container):
                 elif png_bytes == b"cancelled":
                     return
 
-                check_cancel()
+                utils.check_cancel()
 
                 self.call_next(self.LOADER_WIDGET.set_status, "resampling svg...")
 
@@ -586,7 +450,7 @@ class PreviewContainer(Actionable, Container):
                             Image.open(BytesIO(png_bytes))
                         )
                     except ValueError as exc:
-                        if multiprocessing_process_error_checker(self.app, exc):
+                        if utils.multiprocessing_process_error_checker(self.app, exc):
                             pil_object = preview_utils.resample_sync(
                                 Image.open(BytesIO(png_bytes))
                             )
@@ -596,7 +460,7 @@ class PreviewContainer(Actionable, Container):
                     pil_object = preview_utils.resample_sync(
                         Image.open(BytesIO(png_bytes))
                     )
-                _save_cached_image(
+                cache._save_image(
                     realpath,
                     "svg",
                     stat_res,
@@ -604,20 +468,20 @@ class PreviewContainer(Actionable, Container):
                     sig=RESVG_CACHE_SIGNATURE,
                 )
 
-            check_cancel()
+            utils.check_cancel()
 
             if image_widget := self.get_child(".image_preview"):
                 self.call_from_thread(setattr, image_widget, "image", pil_object)
             else:
                 self.call_from_thread(self.remove_children)
 
-                check_cancel()
+                utils.check_cancel()
 
-                image_widget = NewImage(pil_object)
+                image_widget = self.NewImage(pil_object)
                 image_widget.can_focus = True
                 self.call_from_thread(self.mount, image_widget)
         except ValueError as exc:
-            check_cancel()
+            utils.check_cancel()
             self.call_from_thread(self.remove_children)
             self.call_from_thread(
                 self.mount,
@@ -627,10 +491,10 @@ class PreviewContainer(Actionable, Container):
                 ),
             )
             return
-        except ExitNow:
+        except utils.ExitNow:
             raise
         except Exception as exc:
-            check_cancel()
+            utils.check_cancel()
             self.call_from_thread(self.remove_children)
             self.call_from_thread(
                 self.mount,
@@ -652,7 +516,7 @@ class PreviewContainer(Actionable, Container):
         Raises:
             ValueError: If image loading fails for non-fds_to_keep reasons.
         """
-        if check_cancel() or self._current_file_path is None:
+        if utils.check_cancel() or self._current_file_path is None:
             return
         if title:
             self.set_border("title", titles.image)
@@ -661,16 +525,16 @@ class PreviewContainer(Actionable, Container):
             realpath, stat_res, sig = cache_source or (
                 path.realpath(self._current_file_path),
                 os.stat(self._current_file_path),
-                IMAGE_CACHE_SIGNATURE,
+                self.IMAGE_CACHE_SIGNATURE,
             )
             cache_type = "custom-image" if cache_source else "image"
-            pil_object = _load_cached_image(realpath, cache_type, stat_res, sig)
+            pil_object = cache._load_image(realpath, cache_type, stat_res, sig)
             if pil_object is None:
                 if self.app.MULTIPROCESSING_PROCESS_ALLOWED:
                     try:
                         pil_object = preview_utils.resample_file(self._current_file_path)
                     except ValueError as exc:
-                        if multiprocessing_process_error_checker(self.app, exc):
+                        if utils.multiprocessing_process_error_checker(self.app, exc):
                             pil_object = preview_utils.resample_file_sync(
                                 self._current_file_path
                             )
@@ -680,9 +544,9 @@ class PreviewContainer(Actionable, Container):
                     pil_object = preview_utils.resample_file_sync(self._current_file_path)
                 if pil_object is None:
                     return
-                _save_cached_image(realpath, cache_type, stat_res, pil_object, sig)
+                cache._save_image(realpath, cache_type, stat_res, pil_object, sig)
         except (UnidentifiedImageError, NotImplementedError) as exc:
-            check_cancel()
+            utils.check_cancel()
             from shutil import which
 
             if (
@@ -690,7 +554,7 @@ class PreviewContainer(Actionable, Container):
                 and config["plugins"]["magick"]["enabled"]
                 and which(config["plugins"]["magick"]["executable"])
             ):
-                cache_path = _cache_path(realpath, cache_type, stat_res, sig)
+                cache_path = cache._cache_path(realpath, cache_type, stat_res, sig)
                 try:
                     proc = subprocess.run(
                         [
@@ -731,7 +595,7 @@ class PreviewContainer(Actionable, Container):
             )
             return
         except FileNotFoundError:
-            check_cancel()
+            utils.check_cancel()
             self.call_from_thread(self.remove_children)
             self.call_from_thread(
                 self.mount,
@@ -743,497 +607,18 @@ class PreviewContainer(Actionable, Container):
             return
 
         if image_widget := self.get_child(".image_preview"):
-            check_cancel()
+            utils.check_cancel()
             self.call_from_thread(setattr, image_widget, "image", pil_object)
         else:
             self.call_from_thread(self.remove_children)
 
-            check_cancel()
+            utils.check_cancel()
 
-            image_widget = NewImage(pil_object)
+            image_widget = self.NewImage(pil_object)
             image_widget.can_focus = True
             self.call_from_thread(self.mount, image_widget)
 
-            check_cancel()
-
-    # ------------ PDF related functions start ------------
-
-    def update_current_pdf_page_by_diff(self, diff: int) -> None:
-        """Updates the current pages by a diff"""
-        self.update_current_pdf_page(self.pdf.current_page + diff)
-
-    # Note : We must ensure that any update to current_page happens via this
-    def update_current_pdf_page(self, current_page: int) -> None:
-        """Updates the current pages and ensure to spawn a worker that will eventually load them"""
-        if current_page < 0 or current_page >= self.pdf.total_pages:
-            return
-        if current_page == self.pdf.current_page:
-            return
-
-        self.pdf.current_page = current_page
-        self.set_border(
-            "subtitle",
-            f"Page {self.pdf.current_page + 1}/{self.pdf.total_pages}",
-        )
-        self.run_worker(
-            partial(self._show_pdf_preview, self._active_preview_token),
-            thread=True,
-            exclusive=True,
-            group=PREVIEWER_GROUP,
-        )
-
-    def _show_pdf_preview(self, token: object) -> None:
-        context_token = preview_token.set(token)
-        try:
-            self.show_pdf_preview()
-        except ExitNow:
-            pass
-        finally:
-            preview_token.reset(context_token)
-
-    def load_pdf_pages(self, first_page: int, last_page: int) -> list[PILImage]:
-        """
-        Returns:
-            List of images, one per pages fetched
-
-        Raises:
-            ValueError: If PDF conversion returns 0 pages.
-            ExitNow: If this preview request is no longer active.
-        """
-        if first_page > last_page:
-            raise ValueError(
-                f"Invalid args, first_page={first_page} > last_page={last_page}"
-            )
-
-        from rovr.functions.pdf import get_pdf_images
-
-        if self._current_file_path is None:
-            raise ExitNow()
-
-        realpath = path.realpath(self._current_file_path)
-        stat_res = os.stat(realpath)
-        cached = [
-            _load_cached_image(
-                realpath,
-                "pdf",
-                stat_res,
-                extra=str(page) + (self.pdf.cairo_or_ppm),
-            )
-            for page in range(first_page, last_page + 1)
-        ]
-        if all(image is not None for image in cached):
-            return cast(list[PILImage], cached)
-
-        result = get_pdf_images(
-            str(realpath),
-            first_page=first_page,
-            last_page=last_page,
-            use_pdftocairo=config["plugins"]["poppler"]["use_pdftocairo"],
-            thread_count=config["plugins"]["poppler"]["threads"],
-            poppler_path=PDFHandler.get_poppler_folder(),
-        )
-        if len(result) == 0:
-            raise ValueError(
-                "Obtained 0 pages from Poppler. Something may have gone wrong..."
-            )
-        # Resample images once when loaded for better performance
-        if self.app.MULTIPROCESSING_PROCESS_ALLOWED:
-            try:
-                result = preview_utils.resample_batch(result)
-            except ValueError as exc:
-                if multiprocessing_process_error_checker(self.app, exc):
-                    result = preview_utils.resample_batch_sync(result)
-                else:
-                    raise
-        else:
-            result = preview_utils.resample_batch_sync(result)
-        for page, image in zip(range(first_page, last_page + 1), result):
-            _save_cached_image(
-                realpath,
-                "pdf",
-                stat_res,
-                image,
-                extra=str(page) + (self.pdf.cairo_or_ppm),
-            )
-        return result
-
-    def show_pdf_preview(
-        self,
-        title: bool = True,
-        cache_source: CacheSource | None = None,
-    ) -> None:
-        """
-        Show PDF preview. Runs in a thread.
-        The job of this function is to load the pdf file for the first time.
-        Or ensure the batched loading
-
-        Raises:
-            ExitNow: If this preview request is no longer active.
-        """
-        if check_cancel() or self._current_file_path is None:
-            return
-        if title:
-            self.set_border("title", titles.pdf)
-
-        from rovr.functions.pdf import get_pdf_info
-
-        # Convert PDF to images if not already done
-        if self.pdf.images is None:
-            try:
-                realpath, stat_res, sig = cache_source or (
-                    path.realpath(self._current_file_path),
-                    os.stat(self._current_file_path),
-                    (self.pdf.cairo_or_ppm, ""),
-                )
-                pdf_info: dict[str, str | int] | None = load_from_cache(
-                    realpath,
-                    "pdf_info",
-                    stat_res,
-                    sig,
-                    pass_as=dict,
-                )
-                if pdf_info is None:
-                    pdf_info = get_pdf_info(
-                        self._current_file_path,
-                        poppler_path=PDFHandler.get_poppler_folder(),
-                    )
-                    save_to_cache(
-                        realpath,
-                        "pdf_info",
-                        stat_res,
-                        sig,
-                        data=pdf_info,
-                    )
-                self.pdf.total_pages = int(pdf_info.get("Pages", 0))
-
-                result = self.load_pdf_pages(
-                    first_page=1, last_page=self.pdf.get_last_page_to_load()
-                )
-            except ExitNow:
-                raise
-            except Exception as exc:
-                check_cancel()
-                self.call_from_thread(self.remove_children)
-                self.call_from_thread(
-                    self.mount,
-                    Static(f"{type(exc).__name__}: {str(exc)}", classes="special"),
-                )
-                return
-            self.pdf.images = result
-
-            # The only one case when current page and border subtitles
-            # should be manually adjusted. Not the best design though.
-            self.pdf.current_page = 0
-            self.set_border(
-                "subtitle", f"Page {self.pdf.current_page + 1}/{self.pdf.total_pages}"
-            )
-
-        elif self.pdf.should_load_next_batch():
-            # Saving the value per thread instead of recalculating after the load
-            # Even if something changes in between, we want the threads that set the status to
-            # loading, to always unset it
-
-            try:
-                result = self.load_pdf_pages(
-                    first_page=self.pdf.count_loaded() + 1,
-                    last_page=self.pdf.get_last_page_to_load(),
-                )
-            except Exception as exc:
-                check_cancel()
-                self.call_from_thread(self.remove_children)
-                self.call_from_thread(
-                    self.mount,
-                    Static(f"{type(exc).__name__}: {str(exc)}", classes="special"),
-                )
-                return
-            # Note - This check_cancel() must be kept here, not before the `load_pdf_pages` call
-            # That, somehow doesn't prevents multiple threads executing the load
-            # even though, we successful prevent multiple threads
-            # appending the results via this one
-            # We don't want threads to Set the screen in Loading state, and never turn it back
-            check_cancel()
-
-            # This mutation on the `images` object should be done by one one thread
-            # and the entire flow of checking `should_load_next_batch` to loading
-            # to appending the pages should be atomic.
-            # At this point, we are using `check_cancel()` to allow only one thread
-            # to reach here
-            self.pdf.images += result
-
-        check_cancel()
-
-        current_image = self.pdf.images[self.pdf.current_page]
-
-        if image_widget := self.get_child(".image_preview"):
-            check_cancel()
-            self.call_from_thread(setattr, image_widget, "image", current_image)
-        else:
-            self.call_from_thread(self.remove_children)
-            self.call_from_thread(self.remove_class, "bat", "full", "clip")
-
-            check_cancel()
-
-            image_widget = NewImage(current_image)
-            image_widget.can_focus = True
-            self.call_from_thread(self.mount, image_widget)
-
-        check_cancel()
-
-    # ------------ PDF related functions end ------------
-
-    @staticmethod
-    def _split_bat_page(content: Text) -> list[Text]:
-        lines = list(content.split("\n", allow_blank=True))
-        if lines and not lines[-1].plain:
-            lines.pop()
-        return lines
-
-    def _get_bat_page(
-        self,
-        command: list[str],
-        realpath: str,
-        stat_res: os.stat_res,
-        sig: tuple[str, str],
-        page: int,
-    ) -> list[Text]:
-        start = page * BAT_PREVIEW_PAGE_SIZE + 1
-        end = start + BAT_PREVIEW_PAGE_SIZE - 1
-        cache_range = f"{start}:{end}"
-        content = _load_cached_text(realpath, "bat-page", stat_res, sig, cache_range)
-        if content is None:
-            process = subprocess.run(
-                [*command, f"--line-range={cache_range}", "--", realpath],
-                capture_output=True,
-                timeout=5,
-            )
-            if process.returncode != 0:
-                raise subprocess.CalledProcessError(
-                    process.returncode,
-                    process.args,
-                    process.stdout,
-                    process.stderr,
-                )
-            content = ansi_to_rich_text(process.stdout.decode("utf-8", errors="ignore"))
-            _save_cached_text(
-                realpath,
-                "bat-page",
-                stat_res,
-                sig,
-                content,
-                cache_range,
-            )
-        return self._split_bat_page(content)
-
-    def _load_bat_page(
-        self,
-        token: object,
-        text_preview: WindowedTextPreview,
-        source: LazyTextLines,
-        command: list[str],
-        realpath: str,
-        stat_res: os.stat_res,
-        sig: tuple[str, str],
-        page: int,
-    ) -> None:
-        context_token = preview_token.set(token)
-        try:
-            if token is not self._active_preview_token:
-                return
-            lines = self._get_bat_page(command, realpath, stat_res, sig, page)
-            self.call_from_thread(text_preview.set_lazy_page, source, page, lines)
-        except ExitNow:
-            return
-        except subprocess.SubprocessError as exc:
-            self.call_from_thread(
-                text_preview.set_lazy_page,
-                source,
-                page,
-                [Text(f"bat: {exc}", style="red")]
-                + [Text()] * (BAT_PREVIEW_PAGE_SIZE - 1),
-            )
-        finally:
-            preview_token.reset(context_token)
-
-    def _count_bat_lines(
-        self,
-        token: object,
-        text_preview: WindowedTextPreview,
-        source: LazyTextLines,
-        realpath: str,
-        stat_res: os.stat_res,
-        sig: tuple[str, str],
-    ) -> None:
-        context_token = preview_token.set(token)
-        try:
-            if token is not self._active_preview_token:
-                return
-            cached_line_count = load_from_cache(
-                realpath, "bat-lines", stat_res, sig, pass_as=str
-            )
-            if cached_line_count is None:
-                line_count = 0
-                with open(realpath, "rb") as file:
-                    for line_count, _ in enumerate(file, 1):
-                        if (
-                            line_count % 8192 == 0
-                            and token is not self._active_preview_token
-                        ):
-                            return
-                if token is not self._active_preview_token:
-                    return
-                save_to_cache(realpath, "bat-lines", stat_res, sig, str(line_count))
-            else:
-                line_count = int(cached_line_count)
-            if token is not self._active_preview_token:
-                return
-            self.call_from_thread(text_preview.set_lazy_line_count, source, line_count)
-        except (ExitNow, OSError, ValueError):
-            return
-        finally:
-            preview_token.reset(context_token)
-
-    def show_bat_file_preview(self) -> bool:
-        """Show bat file preview. Runs in a thread.
-
-        Returns:
-            bool: True if successful, False otherwise.
-
-        Raises:
-            ExitNow: If this preview request is no longer active.
-        """
-        from shutil import which
-
-        # luckily shutil.which handles absolute path for us, thanks
-        if not which(bat_executable := config["plugins"]["bat"]["executable"]):
-            config["plugins"]["bat"]["enabled"] = False
-            self.notify(
-                f"Bat executable not found: {bat_executable}.\nDisabling bat plugin.",
-                title="Plugins: Bat",
-                severity="warning",
-                markup=False,
-            )
-            return False
-
-        command = [
-            bat_executable,
-            "--force-colorization",
-            "--paging=never",
-            "--wrap=never",
-            "--style=numbers"
-            if config["interface"]["show_line_numbers"]
-            else "--style=plain",
-        ]
-        if self._current_file_path is None:
-            raise ExitNow()
-
-        realpath = path.realpath(self._current_file_path)
-        stat_res = os.stat(realpath)
-        sig = (
-            f"{BAT_PREVIEW_CACHE_VERSION}:{config['interface']['show_line_numbers']}",
-            bat_executable,
-        )
-
-        if should_cancel():
-            return False
-
-        self.set_border("title", titles.bat)
-
-        try:
-            first_page = self._get_bat_page(command, realpath, stat_res, sig, 0)
-
-            if should_cancel():
-                return False
-
-            token = self._active_preview_token
-            text_preview: WindowedTextPreview
-
-            def request_page(page: int) -> None:
-                self.run_worker(
-                    partial(
-                        self._load_bat_page,
-                        token,
-                        text_preview,
-                        source,
-                        command,
-                        realpath,
-                        stat_res,
-                        sig,
-                        page,
-                    ),
-                    thread=True,
-                    group=BAT_PREVIEWER_GROUP,
-                )
-
-            first_page_is_complete = len(first_page) < BAT_PREVIEW_PAGE_SIZE
-            source = LazyTextLines(
-                len(first_page) if first_page_is_complete else BAT_PREVIEW_PAGE_SIZE,
-                BAT_PREVIEW_PAGE_SIZE,
-                request_page,
-            )
-            source.set_page(0, first_page)
-            existing_preview = self.get_child(WindowedTextPreview)
-            if isinstance(existing_preview, WindowedTextPreview):
-                text_preview = existing_preview
-                self.call_from_thread(
-                    text_preview.update_preview,
-                    source,
-                    language=None,
-                    line_numbers=False,
-                )
-                self.call_from_thread(
-                    text_preview.set_classes, "text_preview bat_preview"
-                )
-            else:
-                self.call_from_thread(self.remove_children)
-
-                if should_cancel():
-                    return False
-
-                text_preview = self.call_from_thread(
-                    lambda: WindowedTextPreview(
-                        source, classes="text_preview bat_preview"
-                    ).data_bind(type(self.app).ansi_color)
-                )
-                self.call_from_thread(self.mount, text_preview)
-                if should_cancel():
-                    return False
-            if not first_page_is_complete:
-                self.run_worker(
-                    partial(
-                        self._count_bat_lines,
-                        token,
-                        text_preview,
-                        source,
-                        realpath,
-                        stat_res,
-                        sig,
-                    ),
-                    thread=True,
-                    group=BAT_PREVIEWER_GROUP,
-                )
-            return True
-        except subprocess.CalledProcessError as exc:
-            if should_cancel():
-                return False
-            self.notify(
-                exc.stderr.decode("utf-8", errors="ignore"),
-                title="Plugins: Bat",
-                severity="warning",
-            )
-            return False
-        except ExitNow:
-            raise
-        except Exception as exc:
-            if should_cancel():
-                return False
-            self.notify(
-                str(exc),
-                title="Plugins: Bat",
-                severity="error",
-                markup=False,
-            )
-            path_utils.dump_exc(self, exc)
-            return False
+            utils.check_cancel()
 
     def show_normal_file_preview(self) -> None:
         """Show normal file preview with syntax highlighting. Runs in a thread.
@@ -1241,17 +626,17 @@ class PreviewContainer(Actionable, Container):
         Raises:
             ExitNow: If this preview request is no longer active.
         """
-        check_cancel()
+        utils.check_cancel()
 
         self.set_border("title", titles.file)
 
         if self._current_file_path is None:
-            raise ExitNow()
+            raise utils.ExitNow()
         realpath = path.realpath(self._current_file_path)
         stat_res = os.stat(realpath)
         max_file_size = config["interface"]["preview_text"]["max_file_size"]
         sig = (str(max_file_size), TEXT_PREVIEW_CACHE_VERSION)
-        content: str | None = load_from_cache(
+        content: str | None = cache.load(
             realpath,
             "windowed_text",
             stat_res,
@@ -1275,8 +660,10 @@ class PreviewContainer(Actionable, Container):
                 if ignored_bytes:
                     if not content.endswith("\n"):
                         content += "\n"
-                    content += f"---\n({ignored_bytes:,} byte{s(ignored_bytes)} ignored)"
-                save_to_cache(realpath, "windowed_text", stat_res, sig, content)
+                    content += (
+                        f"---\n({ignored_bytes:,} byte{utils.s(ignored_bytes)} ignored)"
+                    )
+                cache.save(realpath, "windowed_text", stat_res, sig, content)
 
         if content is None:
             self._current_content = self._preview_texts["error"]
@@ -1296,7 +683,7 @@ class PreviewContainer(Actionable, Container):
         from textual.highlight import guess_language
 
         language: str = guess_language(sample, path=self._current_file_path) or "text"
-        check_cancel()
+        utils.check_cancel()
 
         if text_preview := self.get_child(WindowedTextPreview):
             self.call_from_thread(
@@ -1309,7 +696,7 @@ class PreviewContainer(Actionable, Container):
         else:
             self.call_from_thread(self.remove_children)
 
-            check_cancel()
+            utils.check_cancel()
 
             self.call_from_thread(
                 lambda: self.mount(
@@ -1322,18 +709,18 @@ class PreviewContainer(Actionable, Container):
                 )
             )
 
-        check_cancel()
+        utils.check_cancel()
 
     def show_folder_preview(self, folder_path: str) -> None:
         """Show folder preview."""
-        check_cancel()
+        utils.check_cancel()
 
         self.set_border("title", titles.folder)
 
         if not (this_list := self.get_child("FileList")):
             self.call_from_thread(self.remove_children)
 
-            check_cancel()
+            utils.check_cancel()
 
             this_list = FileList(
                 name=folder_path,
@@ -1343,7 +730,7 @@ class PreviewContainer(Actionable, Container):
             )
             self.call_from_thread(self.mount, this_list)
 
-        check_cancel()
+        utils.check_cancel()
 
         assert isinstance(this_list, FileList)
         this_list.enter_into = folder_path
@@ -1370,7 +757,7 @@ class PreviewContainer(Actionable, Container):
                 config["interface"]["show_hidden_files"],
                 sort_by=sort_by,
                 reverse=sort_descending,
-                return_nothing_if_this_returns_true=should_cancel,
+                return_nothing_if_this_returns_true=utils.should_cancel,
             )
             if files is None or folders is None:
                 return
@@ -1394,7 +781,7 @@ class PreviewContainer(Actionable, Container):
                             "subtitle", f"{index + 1} / {file_list_option_length}"
                         )
                         start_time = time()
-                        check_cancel()
+                        utils.check_cancel()
         except OSError as exc:
             options = [
                 Selection(
@@ -1406,19 +793,19 @@ class PreviewContainer(Actionable, Container):
             ]
         finally:
             loading_timer.stop()
-        check_cancel()
+        utils.check_cancel()
         self.set_border("subtitle", "")
         self.call_from_thread(this_list.set_options, options)
 
     def show_archive_preview(self) -> None:
         """Show archive preview."""
-        check_cancel()
+        utils.check_cancel()
         self.set_border("title", titles.archive)
 
         if not (file_list := self.get_child("FileList")):
             self.call_from_thread(self.remove_children)
 
-            check_cancel()
+            utils.check_cancel()
 
             file_list = FileList(
                 classes="archive-list",
@@ -1427,7 +814,7 @@ class PreviewContainer(Actionable, Container):
 
             self.call_from_thread(self.mount, file_list)
 
-        check_cancel()
+        utils.check_cancel()
 
         assert isinstance(file_list, FileList)
 
@@ -1454,9 +841,9 @@ class PreviewContainer(Actionable, Container):
                 if start_time + 0.25 < time():
                     self.set_border("subtitle", f"{index + 1} / {file_list_length}")
                     start_time = time()
-                    check_cancel()
+                    utils.check_cancel()
 
-        check_cancel()
+        utils.check_cancel()
         self.call_from_thread(file_list.set_options, options)
         self.set_border("subtitle", "")
 
@@ -1485,11 +872,11 @@ class PreviewContainer(Actionable, Container):
     def call_from_thread(
         self, func: Callable[..., T | Awaitable[T]], *args, **kwargs
     ) -> T:
-        token = preview_token.get()
+        token = self.preview_token.get()
 
         def guarded() -> T | Awaitable[T]:
             if token is not self._active_preview_token:
-                raise ExitNow()
+                raise utils.ExitNow()
             return func(*args, **kwargs)
 
         return cast(T, self.app.call_from_thread(guarded))
@@ -1498,9 +885,9 @@ class PreviewContainer(Actionable, Container):
     def _compute_and_sync_mime(
         self, file_path: str, mtime: int | float, token: object
     ) -> None:
-        context_token = preview_token.set(token)
+        context_token = self.preview_token.set(token)
         try:
-            check_cancel()
+            utils.check_cancel()
             if token is not self._active_preview_token:
                 return
             mime_type = (
@@ -1508,21 +895,21 @@ class PreviewContainer(Actionable, Container):
                 if path.isdir(file_path)
                 else preview_utils.get_mime_type(file_path, mtime)
             )
-            check_cancel()
+            utils.check_cancel()
             self.call_from_thread(self._sync_mime, file_path, mime_type)
-        except ExitNow:
+        except utils.ExitNow:
             pass
         finally:
-            preview_token.reset(context_token)
+            self.preview_token.reset(context_token)
 
     @work(exclusive=True, thread=True, group=PREVIEWER_GROUP)
     def perform_show_preview(
         self, file_path: str, mtime: int | float, token: object
     ) -> None:
         """Main preview worker. Runs in a thread."""
-        context_token = preview_token.set(token)
+        context_token = self.preview_token.set(token)
         try:
-            check_cancel()
+            utils.check_cancel()
 
             if self._rendered_preview_key is not None:
                 # check mtime as well
@@ -1537,7 +924,7 @@ class PreviewContainer(Actionable, Container):
 
             self.call_from_thread(setattr, self, "_rendered_preview_key", None)
             self.set_border("subtitle", "")
-            check_cancel()
+            utils.check_cancel()
 
             # Reset PDF state when changing files
             if file_path != self._current_file_path:
@@ -1573,7 +960,7 @@ class PreviewContainer(Actionable, Container):
                         content=self._preview_texts["error"],
                     )
                     return
-                check_cancel()
+                utils.check_cancel()
                 file_type = preview_utils.match_mime_to_preview_type(
                     mime_result.mime_type, file_extension
                 )
@@ -1618,7 +1005,7 @@ class PreviewContainer(Actionable, Container):
 
                     realpath = path.realpath(file_path)
                     stat_res = os.stat(realpath)
-                    content: list[str] | None = load_from_cache(
+                    content: list[str] | None = cache.load(
                         realpath,
                         "archive",
                         stat_res,
@@ -1630,12 +1017,12 @@ class PreviewContainer(Actionable, Container):
                             with Archive(file_path, mode="r") as archive:
                                 all_files = []
                                 for member in archive.infolist():
-                                    check_cancel()
+                                    utils.check_cancel()
 
                                     if not member.is_dir:
                                         all_files.append(member.name)
                             content = all_files
-                            save_to_cache(
+                            cache.save(
                                 realpath,
                                 "archive",
                                 stat_res,
@@ -1657,13 +1044,13 @@ class PreviewContainer(Actionable, Container):
                     mime_type=mime_result,
                 )
 
-            check_cancel()
+            utils.check_cancel()
         except (IsADirectoryError, NotADirectoryError):
             pass
-        except ExitNow:
+        except utils.ExitNow:
             return
         except subprocess.CalledProcessError as exc:
-            if should_cancel():
+            if utils.should_cancel():
                 return
             assert self._current_file_path is not None
             self._current_content = (
@@ -1689,7 +1076,7 @@ class PreviewContainer(Actionable, Container):
             )
             path_utils.dump_exc(self, exc)
         finally:
-            preview_token.reset(context_token)
+            self.preview_token.reset(context_token)
 
     def update_ui(
         self,
@@ -1753,7 +1140,7 @@ class PreviewContainer(Actionable, Container):
         elif not (config["plugins"]["bat"]["enabled"] and self.show_bat_file_preview()):
             self.show_normal_file_preview()
 
-        if not should_cancel():
+        if not utils.should_cancel():
             self.call_from_thread(
                 setattr, self, "_rendered_preview_key", (file_path, mtime)
             )
@@ -1788,13 +1175,13 @@ class PreviewContainer(Actionable, Container):
             sig = (name, repr(previewer))
             is_text = previewer["type"] == "text"
             output_data: Text | bytes | None = (
-                _load_cached_text(realpath, "custom-previewer-text", stat_res, sig)
+                cache._load_text(realpath, "custom-previewer-text", stat_res, sig)
                 if is_text
-                else load_from_cache(realpath, "custom-previewer", stat_res, sig)
+                else cache.load(realpath, "custom-previewer", stat_res, sig)
             )
             if output_data is None:
                 command = self.call_from_thread(
-                    expand_command,
+                    utils.expand_command,
                     self.app,
                     previewer["command"],
                     ["%cut", "%copy", "%s", "%rs", "%tab"],
@@ -1852,7 +1239,7 @@ class PreviewContainer(Actionable, Container):
                     output_data = ansi_to_rich_text(
                         output_data.decode("utf-8", errors="replace")
                     )
-                    _save_cached_text(
+                    cache._save_text(
                         realpath,
                         "custom-previewer-text",
                         stat_res,
@@ -1860,7 +1247,7 @@ class PreviewContainer(Actionable, Container):
                         output_data,
                     )
                 else:
-                    save_to_cache(
+                    cache.save(
                         realpath,
                         "custom-previewer",
                         stat_res,
@@ -1868,14 +1255,14 @@ class PreviewContainer(Actionable, Container):
                         output_data,
                     )
 
-            check_cancel()
+            utils.check_cancel()
             match previewer["type"]:
                 case "text":
                     assert isinstance(output_data, Text)
                     self.show_custom_text_preview(output_data)
                 case "image":
                     assert isinstance(output_data, bytes)
-                    self._current_file_path = _cache_path(
+                    self._current_file_path = cache._cache_path(
                         realpath, "custom-previewer", stat_res, sig
                     )
                     self.show_image_preview(
@@ -1883,12 +1270,12 @@ class PreviewContainer(Actionable, Container):
                         cache_source=(
                             realpath,
                             stat_res,
-                            (name, f"{repr(previewer)}:{IMAGE_CACHE_SIGNATURE}"),
+                            (name, f"{repr(previewer)}:{self.IMAGE_CACHE_SIGNATURE}"),
                         ),
                     )
                 case "pdf":
                     assert isinstance(output_data, bytes)
-                    self._current_file_path = _cache_path(
+                    self._current_file_path = cache._cache_path(
                         realpath, "custom-previewer", stat_res, sig
                     )
                     self.show_pdf_preview(
@@ -1904,7 +1291,7 @@ class PreviewContainer(Actionable, Container):
                     )
 
         except FileNotFoundError:
-            if should_cancel():
+            if utils.should_cancel():
                 return
             self.notify(
                 f"Previewer Executable not found: {previewer['command'][0] if isinstance(previewer['command'], list) else previewer['command']}",
@@ -1913,7 +1300,7 @@ class PreviewContainer(Actionable, Container):
                 markup=False,
             )
         except (subprocess.CalledProcessError, subprocess.TimeoutExpired) as exc:
-            if should_cancel():
+            if utils.should_cancel():
                 return
             msg = (
                 (
@@ -1968,7 +1355,7 @@ class PreviewContainer(Actionable, Container):
 
     def mount_special_messages(self, mime: bool = True) -> None:
         """Mount special messages. Runs in a thread."""
-        check_cancel()
+        utils.check_cancel()
         self.log(self._mime_type)
         assert isinstance(self._current_content, str)
         self.set_border(
@@ -2006,7 +1393,7 @@ class PreviewContainer(Actionable, Container):
             self.call_from_thread(static_widget.set_classes, "special")
         else:
             self.call_from_thread(self.remove_children)
-            check_cancel()
+            utils.check_cancel()
             static_widget = Static(content, classes="special")
             self.call_from_thread(self.mount, static_widget)
         # not wasting an isinstance on this
@@ -2034,23 +1421,23 @@ class PreviewContainer(Actionable, Container):
     @on(events.Resize)
     def _trigger_resize_update(self) -> None:
         """Trigger resize update from a thread."""
-        context_token = preview_token.set(self._active_preview_token)
+        context_token = self.preview_token.set(self._active_preview_token)
         try:
             if self.get_child(WindowedTextPreview):
                 return
             if self.border_title in (
-                PreviewContainerTitles.file,
-                PreviewContainerTitles.bat,
+                titles.file,
+                titles.bat,
             ):
                 if config["plugins"]["bat"]["enabled"] and self.show_bat_file_preview():
                     return
                 self.show_normal_file_preview()
-        except ExitNow:
+        except utils.ExitNow:
             pass
         except Exception:
             pass
         finally:
-            preview_token.reset(context_token)
+            self.preview_token.reset(context_token)
 
     @on(events.Show)
     def when_become_visible(self) -> None:

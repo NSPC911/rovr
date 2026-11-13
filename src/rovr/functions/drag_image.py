@@ -13,7 +13,7 @@ from PIL import Image, ImageDraw, ImageFont, ImageOps
 from textual.color import Color, ColorParseError
 from textual_drivers.dnd import ImageLabel
 
-from rovr.functions.utils import load_from_cache, save_to_cache
+from rovr.functions.cache import load, save
 from rovr.variables.maps import RovrVars
 
 HEIGHT = 48
@@ -186,7 +186,7 @@ def _load_image_preview(image_path: str, _modified_ns: int) -> Image.Image:
     realpath = os.path.realpath(image_path)
     stat_result = os.stat(realpath)
     signature = (f"{IMAGE_PREVIEW_SIZE[0]}x{IMAGE_PREVIEW_SIZE[1]}", "nearest")
-    if data := load_from_cache(realpath, "drag-image", stat_result, signature):
+    if data := load(realpath, "drag-image", stat_result, signature):
         try:
             with Image.open(BytesIO(data)) as image:
                 return image.copy()
@@ -218,7 +218,7 @@ def _load_image_preview(image_path: str, _modified_ns: int) -> Image.Image:
         preview = preview.convert("RGBA")
         output = BytesIO()
         preview.save(output, format="PNG")
-        save_to_cache(realpath, "drag-image", stat_result, signature, output.getvalue())
+        save(realpath, "drag-image", stat_result, signature, output.getvalue())
         return preview
 
 

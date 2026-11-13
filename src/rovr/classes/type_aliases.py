@@ -1,3 +1,4 @@
+import os
 from typing import Literal, NotRequired, TypeAlias, TypedDict
 
 
@@ -26,3 +27,5 @@ SortByOptions: TypeAlias = Literal[
 ShellRunTypes: TypeAlias = Literal["suspend", "background", "orphan"]
 
 KeysConfig: TypeAlias = dict[str, KeyMap]
+
+type CacheSource = tuple[str, os.stat_result, tuple[str, str]]

@@ -127,6 +127,10 @@ async def test_conn_identifies_instance(monkeypatch: pytest.MonkeyPatch) -> None
         ("clipboard", ["invalid"], "clipboard action is not valid"),
         ("tab", [], "tab action not provided"),
         ("tab", ["invalid"], "tab action is not valid"),
+        ("theme", [], "theme action not provided"),
+        ("theme", ["invalid"], "theme action is not valid"),
+        ("theme", ["set"], "theme name not provided"),
+        ("theme", ["set", "one", "two"], "too many arguments"),
         ("invalid", [], "action is not valid"),
     ],
 )

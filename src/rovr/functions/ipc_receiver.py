@@ -348,6 +348,53 @@ async def conn(
                 case _:
                     ok = False
                     err = "tab action is not valid"
+        case "theme":
+            if len(args) == 0:
+                return assemble_and_write(
+                    writer, False, None, "theme action not provided"
+                )
+            match args[0]:
+                case "list":
+                    if not await check_permission(self, action, args):
+                        ok = False
+                        err = "denied"
+                    else:
+                        out = sorted(self.available_themes)
+                case "query":
+                    if not await check_permission(self, action, args):
+                        ok = False
+                        err = "denied"
+                    else:
+                        from rovr.functions.themes import resolve_theme_ansi
+
+                        _, fixed = resolve_theme_ansi(
+                            self.current_theme, config["theme"]["transparent"]
+                        )
+                        out = {
+                            "theme": self.theme,
+                            "transparent": bool(self.ansi_color),
+                            "fixed": fixed,
+                        }
+                case "set":
+                    if len(args) != 2:
+                        ok = False
+                        err = (
+                            "too many arguments"
+                            if len(args) > 2
+                            else "theme name not provided"
+                        )
+                    elif not await check_permission(self, action, args):
+                        ok = False
+                        err = "denied"
+                    elif args[1] not in self.available_themes:
+                        ok = False
+                        err = f"unknown theme: {args[1]}"
+                    else:
+                        self.theme = args[1]
+                        out = self.theme
+                case _:
+                    ok = False
+                    err = "theme action is not valid"
         case "notify":
             from rovr.functions.ipc_sender import IPC_PARSER
 

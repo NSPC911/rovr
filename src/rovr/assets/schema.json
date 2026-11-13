@@ -767,6 +767,21 @@
                   "default": "allow",
                   "description": "Control getting the navigation history of a specified tab index"
                 },
+                "theme.list": {
+                  "$ref": "#/definitions/ipc_perms",
+                  "default": "allow",
+                  "description": "Control getting the list of available themes"
+                },
+                "theme.query": {
+                  "$ref": "#/definitions/ipc_perms",
+                  "default": "allow",
+                  "description": "Control getting the active theme and its transparent status"
+                },
+                "theme.set": {
+                  "$ref": "#/definitions/ipc_perms",
+                  "default": "allow",
+                  "description": "Control switching the active theme"
+                },
                 "quit": {
                   "$ref": "#/definitions/ipc_perms",
                   "default": "prompt",

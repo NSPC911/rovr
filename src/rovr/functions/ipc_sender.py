@@ -94,6 +94,13 @@ def _build_parser() -> IPCArgumentParser:
                 help="Focus the new tab after creating it.",
             )
 
+    theme = commands.add_parser("theme", help="Manage rovr's theme.")
+    theme_sub = theme.add_subparsers(dest="operation", required=True)
+    theme_sub.add_parser("list", help="List the available themes.")
+    theme_sub.add_parser("query", help="Show the active theme.")
+    theme_set = theme_sub.add_parser("set", help="Switch to a theme.")
+    theme_set.add_argument("name", help="The theme to switch to.")
+
     commands.add_parser("quit", help="Quit the rovr instance.").add_argument(
         "--no-cd",
         action="store_true",

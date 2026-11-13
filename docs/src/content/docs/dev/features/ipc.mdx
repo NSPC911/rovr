@@ -186,13 +186,44 @@ both don't return anything on success
 }
 ```
 
-<br />index in that list gives the tab's current directory
+<br />
+index in that list gives the tab's current directory
 
 invalid tab indexes return `"tab index out of range"`.
 
-<br />closing a one-tab session returns `"cannot close the only tab"`.
+<br />
+closing a one-tab session returns `"cannot close the only tab"`.
 
-<br />if there are no focused tabs (which shouldn't happen), returns `"no active tab somehow"`
+<br />
+if there are no focused tabs (which shouldn't happen), returns `"no active tab
+somehow"`
+
+### `theme`
+
+```sh
+rovr --ipc theme list
+rovr --ipc theme query
+rovr --ipc theme set <name>
+```
+
+`list` returns the names of all available themes, sorted.
+
+`query` returns the active theme, whether transparency is enabled, and whether the theme forces ANSI colors (`fixed`), in which case the transparency setting has no effect:
+
+```json title="query"
+{
+  "ok": true,
+  "out": {
+    "theme": "nord",
+    "transparent": false,
+    "fixed": false
+  }
+}
+```
+
+`set` switches the active theme to the given name. an unknown theme name returns `"unknown theme: <name>"`.
+
+the switch is not persistent: rovr starts on the configured `theme.default` on the next launch (or the system dark/light theme if `theme.dark`/`theme.light` is set).
 
 ### `notify`
 

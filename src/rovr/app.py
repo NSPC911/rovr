@@ -64,6 +64,7 @@ from rovr.core import (
     PreviewContainer,
 )
 from rovr.footer import Clipboard, MetadataContainer, ProcessContainer
+from rovr.footer.process_container import ProgressBarContainer
 from rovr.functions import drive_workers
 from rovr.functions.cwd import chdir, getcwd
 from rovr.functions.path import (
@@ -82,6 +83,7 @@ from rovr.functions.utils import (
     expand_command,
     multiprocessing_process_error_checker,
     run_command,
+    s,
     should_cancel,
 )
 from rovr.header import HeaderArea
@@ -544,13 +546,15 @@ class Application(
     async def action_quit(self, can_cd: bool = True) -> None:
         from rovr.screens import YesOrNo
 
-        process_container = self.query_one(ProcessContainer)
-        if len(process_container.query("ProgressBarContainer")) != len(
-            process_container.query(".done")
-        ) + len(process_container.query(".error")) and not await self.push_screen_wait(
+        running = 0
+        for proc in self.query(ProgressBarContainer):
+            if not proc.classes.intersection({"done", "error"}):
+                running += 1
+
+        if (running) and not await self.push_screen_wait(
             YesOrNo(
-                f"{len(process_container.query('ProgressBarContainer')) - len(process_container.query('.done')) - len(process_container.query('.error'))}"
-                + " processes are still running!\nAre you sure you want to quit?",
+                f"There are {running} running"
+                + f" process{s(running, 'es')}\nAre you sure you want to quit?",
                 border_title="Quit [teal]rovr[/teal]",
                 destructive=True,
             )

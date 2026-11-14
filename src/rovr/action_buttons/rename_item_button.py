@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import asyncio
 import contextlib
 import os
 from os import path
@@ -254,7 +255,7 @@ class RenameItemButton(Button):
                     ]
 
                 try:
-                    multi_rename(cwd, renames)
+                    await asyncio.to_thread(multi_rename, cwd, renames)
                     highlighted_file = dict(renames).get(
                         highlighted_file, highlighted_file
                     )

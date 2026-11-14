@@ -1,9 +1,10 @@
 from __future__ import annotations
 
 import contextlib
+import os
 from os import makedirs, path
 from tempfile import NamedTemporaryFile
-from typing import Callable, cast
+from typing import cast
 
 from textual import events, work
 from textual.content import Content
@@ -57,10 +58,7 @@ class NewItemButton(Button):
         if location.endswith("/"):
             # recursive directory creation
             try:
-                worker = self.run_in_thread(makedirs, location)
-                await worker.wait()
-                if isinstance(worker.result, Exception):
-                    raise worker.result
+                makedirs(location)
             except Exception as exc:
                 self.notify(
                     # i had to force a cast, i didn't have any other choice
@@ -81,10 +79,7 @@ class NewItemButton(Button):
             location_parts = location.split("/")
             dir_path = "/".join(location_parts[:-1])
             try:
-                worker = self.run_in_thread(makedirs, dir_path)
-                await worker.wait()
-                if isinstance(worker.result, Exception):
-                    raise worker.result
+                makedirs(dir_path)
                 # performance wise shouldn't be that bad, unless
                 # the file is being created in a directory with a very long path
                 # or some weird voodoo stuff happens, idk
@@ -168,9 +163,8 @@ class NewItemButton(Button):
             return
 
         with open(temp_path, encoding="utf-8") as file_handle:
-            lines = [line.strip() for line in file_handle.read().splitlines()]
+            entries = [stripped for line in file_handle if (stripped := line.strip())]
 
-        entries = [line for line in lines if line]
         if not entries:
             self.notify(
                 "No entries provided.",
@@ -180,29 +174,8 @@ class NewItemButton(Button):
             )
             return
 
-        created: list[str] = []
-        already_exists: list[str] = []
-        errors: list[str] = []
-
-        for entry in entries:
-            is_dir = entry.endswith(("/", "\\"))
-            location = normalise(path.join(getcwd(), entry))
-            if is_dir:
-                location = location + "/"
-            try:
-                if is_dir:
-                    makedirs(location, exist_ok=False)
-                else:
-                    dir_path = path.dirname(location)
-                    if dir_path:
-                        makedirs(dir_path, exist_ok=True)
-                    with open(location, "x") as created_file:
-                        created_file.write("")
-                created.append(location)
-            except FileExistsError:
-                already_exists.append(entry)
-            except Exception as exc:
-                errors.append(f"{entry}: {type(exc).__name__}: {exc}")
+        worker = self._bulk_creator(entries)
+        created, already_exists, errors = await worker.wait()
 
         if created:
             with self.app.file_list.pause_checks(), dump_on_exc(self):
@@ -236,22 +209,30 @@ class NewItemButton(Button):
                 markup=False,
             )
         with contextlib.suppress(OSError):
-            path.unlink(temp_path)
+            os.unlink(temp_path)
 
     @work(thread=True)
-    def run_in_thread(self, function: Callable, *args, **kwargs) -> Worker | Exception:
-        """
-        Run a function in a thread and return a worker for it.
-        Args:
-            function(callable): the function to run
-            *args: positional arguments for the function
-            **kwargs: keyword arguments for the function
-
-        Returns:
-            Worker: the worker for the function
-            Exception: if something fails
-        """
-        try:
-            return function(*args, **kwargs)
-        except Exception as exc:
-            return exc
+    def _bulk_creator(self, entries: list[str]) -> tuple[list[str], list[str], list[str]]:
+        created: list[str] = []
+        already_exists: list[str] = []
+        errors: list[str] = []
+        for entry in entries:
+            is_dir = entry.endswith(("/", "\\"))
+            location = normalise(path.join(getcwd(), entry))
+            if is_dir:
+                location = location + "/"
+            try:
+                if is_dir:
+                    makedirs(location, exist_ok=False)
+                else:
+                    dir_path = path.dirname(location)
+                    if dir_path:
+                        makedirs(dir_path, exist_ok=True)
+                    with open(location, "x") as created_file:
+                        created_file.write("")
+                created.append(location)
+            except FileExistsError:
+                already_exists.append(entry)
+            except Exception as exc:
+                errors.append(f"{entry}: {type(exc).__name__}: {exc}")
+        return created, already_exists, errors

@@ -122,10 +122,13 @@ def get_icon_smart(location: str) -> tuple[str, str]:
     Returns:
         tuple: The icon and color for the file or folder.
     """
+    if path.isjunction(location):
+        return get_icon_for_folder(location, is_symlink=True)
+    if path.islink(location):
+        return get_icon_for_file(location, is_symlink=True)
     if path.isdir(location):
         return get_icon_for_folder(location)
-    else:
-        return get_icon_for_file(location)
+    return get_icon_for_file(location)
 
 
 def get_icon(outer_key: str, inner_key: str) -> tuple[str, str]:
